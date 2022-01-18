@@ -58,7 +58,6 @@
 
 <script>
 import Popover from './Popover.vue'
-import uniq from 'lodash/uniq'
 import onOutsideClick from '../directives/onOutsideClick'
 
 export default {
@@ -104,12 +103,14 @@ export default {
       if (Array.isArray(this.groups)) {
         return this.groups
       }
-      let groupNames = uniq(
-        this.items
-          .map((d) => d.group)
-          .filter(Boolean)
-          .sort()
-      )
+      let groupNames = [
+        ...new Set(
+          this.items
+            .map((d) => d.group)
+            .filter(Boolean)
+            .sort()
+        ),
+      ]
       if (groupNames.length > 0) {
         return groupNames
       }
