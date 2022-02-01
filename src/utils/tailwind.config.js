@@ -1,5 +1,3 @@
-const plugin = require('tailwindcss/plugin')
-
 module.exports = {
   theme: {
     extend: {
@@ -88,7 +86,7 @@ module.exports = {
   plugins: [
     require('@tailwindcss/forms'),
     require('@tailwindcss/typography'),
-    plugin(function ({ addUtilities, theme }) {
+    require('tailwindcss/plugin')(function ({ addUtilities, theme }) {
       addUtilities({
         '.bg-gradient-blue': {
           'background-image': `linear-gradient(180deg,#2c9af1 0%, ${theme(
