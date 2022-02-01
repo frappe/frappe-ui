@@ -1,11 +1,19 @@
-import call from './call'
-import { onMounted, reactive, watchEffect } from 'vue'
+import { call, debounce } from 'frappe-ui'
+import { reactive, watch } from 'vue'
 
 let cached = {}
 
-function createResource(options, vm) {
-  if (options.cache && cached[options.cache]) {
-    return cached[options.cache]
+function createResource(options, vm, getResource) {
+  let cacheKey = null
+  if (options.cache) {
+    cacheKey = options.cache
+    if (typeof cacheKey === 'string') {
+      cacheKey = [cacheKey]
+    }
+    cacheKey = JSON.stringify(cacheKey)
+    if (cached[cacheKey]) {
+      return cached[cacheKey]
+    }
   }
 
   if (typeof options == 'string') {
@@ -15,44 +23,40 @@ function createResource(options, vm) {
     }
   }
 
+  let resourceFetcher = getResource || call
+  let fetchFunction = options.debounce
+    ? debounce(fetch, options.debounce)
+    : fetch
+
   let out = reactive({
     data: options.initialData || null,
+    previousData: null,
     loading: false,
     fetched: false,
     error: null,
+    auto: options.auto,
     params: null,
-    fetch,
-    submit,
+    fetch: fetchFunction,
+    submit: fetchFunction,
+    update,
   })
 
-  if (typeof options.params == 'function') {
-    watchEffect(() => {
-      out.params = options.params(vm)
-      if (options.auto) {
-        fetch()
-      }
-    })
-  } else {
-    out.params = options.params
-  }
-
-  onMounted(() => {
-    if (options.auto) {
-      fetch()
+  async function fetch(params) {
+    if (params instanceof Event) {
+      params = null
     }
-  })
-
-  async function fetch() {
+    out.params = params || options.params
     out.loading = true
-    out.data = options.initialData || null
     try {
-      let data = await call(options.method, out.params)
+      let data = await resourceFetcher(options.method, params || options.params)
+      out.previousData = out.data || null
       out.data = data
       out.fetched = true
       if (options.onSuccess) {
         options.onSuccess.call(vm, data)
       }
     } catch (error) {
+      console.error(error)
       out.error = error
       if (options.onError) {
         options.onError.call(vm, error)
@@ -61,33 +65,78 @@ function createResource(options, vm) {
     out.loading = false
   }
 
-  function submit(params) {
-    out.params = params
-    return fetch()
+  function update({ method, params, auto }) {
+    if (method && method !== options.method) {
+      options.method = method
+    }
+    if (params && params !== options.params) {
+      options.params = params
+    }
+    if (auto !== undefined && auto !== out.auto) {
+      out.auto = auto
+    }
   }
 
-  if (options.cache && !cached[options.cache]) {
-    cached[options.cache] = out
+  if (cacheKey && !cached[cacheKey]) {
+    cached[cacheKey] = out
   }
 
   return out
 }
 
-let Resources = {
+let createMixin = (mixinOptions) => ({
   created() {
     if (this.$options.resources) {
-      this._resources = {}
+      this._resources = reactive({})
       for (let key in this.$options.resources) {
-        this._resources[key] = createResource(
-          this.$options.resources[key],
-          this
-        )
+        let options = this.$options.resources[key]
+
+        if (typeof options == 'function') {
+          watch(
+            () => options.call(this),
+            (updatedOptions, oldVal) => {
+              let changed =
+                !oldVal ||
+                JSON.stringify(updatedOptions) !== JSON.stringify(oldVal)
+
+              if (!changed) return
+
+              let resource = this._resources[key]
+              if (!resource) {
+                resource = createResource(
+                  updatedOptions,
+                  this,
+                  mixinOptions.getResource
+                )
+                this._resources[key] = resource
+              } else {
+                resource.update(updatedOptions)
+              }
+              if (resource.auto) {
+                resource.fetch()
+              }
+            },
+            {
+              immediate: true,
+            }
+          )
+        } else {
+          let resource = createResource(options, this, mixinOptions.getResource)
+          this._resources[key] = resource
+          if (resource.auto) {
+            resource.fetch()
+          }
+        }
       }
     }
   },
   methods: {
-    $resource(key) {
-      return this._resources[key]
+    $refetchResource(cacheKey) {
+      let key = JSON.stringify(cacheKey)
+      if (cached[key]) {
+        let resource = cached[key]
+        resource.fetch()
+      }
     },
   },
   computed: {
@@ -95,10 +144,11 @@ let Resources = {
       return this._resources
     },
   },
-}
+})
 
 export default {
   install(app, options) {
-    app.mixin(Resources)
+    let resourceMixin = createMixin(options)
+    app.mixin(resourceMixin)
   },
 }

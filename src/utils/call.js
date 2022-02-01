@@ -1,4 +1,4 @@
-export default async function call(method, args, _headers) {
+export default async function call(method, args, options={}) {
   if (!args) {
     args = {}
   }
@@ -9,7 +9,7 @@ export default async function call(method, args, _headers) {
       'Content-Type': 'application/json; charset=utf-8',
       'X-Frappe-Site-Name': window.location.hostname,
     },
-    _headers
+    options.headers || {}
   )
 
   if (window.csrf_token && window.csrf_token !== '{{ csrf_token }}') {
@@ -49,6 +49,7 @@ export default async function call(method, args, _headers) {
     let e = new Error(errorParts.join('\n'))
     e.exc_type = error.exc_type
     e.exc = exception
+    e.status = res.status
     e.messages = error._server_messages
       ? JSON.parse(error._server_messages)
       : []
@@ -67,6 +68,16 @@ export default async function call(method, args, _headers) {
         : ['Internal Server Error']
     }
 
+    if (options.onError) {
+      options.onError({ response: res, status: res.status, error: e })
+    }
+
     throw e
+  }
+}
+
+export function createCall(options) {
+  return function customCall(method, args) {
+    return call(method, args, options)
   }
 }

@@ -25,7 +25,8 @@ export { default as SuccessMessage } from './components/SuccessMessage.vue'
 export { default as onOutsideClickDirective } from './directives/onOutsideClick.js'
 
 // utilities
-export { default as call } from './utils/call.js'
+export { default as call, createCall } from './utils/call.js'
+export { default as debounce } from './utils/debounce.js'
 
 // plugin
 export { default as FrappeUI } from './utils/plugin.js'
