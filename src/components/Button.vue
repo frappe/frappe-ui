@@ -76,13 +76,13 @@ export default {
         this.icon ? 'p-1.5' : 'px-3 py-1',
         {
           'opacity-50 cursor-not-allowed pointer-events-none': this.isDisabled,
-          'bg-gradient-blue hover:bg-gradient-none hover:bg-blue-500 text-white focus:shadow-outline-blue':
+          'bg-gradient-blue hover:bg-gradient-none hover:bg-blue-500 text-white focus:ring-2 focus:ring-offset-2 focus:ring-blue-500':
             this.type === 'primary',
-          'bg-gray-100 hover:bg-gray-200 text-gray-900 focus:shadow-outline-gray':
+          'bg-gray-100 hover:bg-gray-200 text-gray-900 focus:ring-2 focus:ring-offset-2 focus:ring-gray-500':
             this.type === 'secondary',
-          'bg-red-500 hover:bg-red-400 text-white focus:shadow-outline-red':
+          'bg-red-500 hover:bg-red-400 text-white focus:ring-2 focus:ring-offset-2 focus:ring-red-500':
             this.type === 'danger',
-          'bg-white text-gray-900 shadow focus:ring focus:ring-gray-400':
+          'bg-white text-gray-900 border hover:bg-gray-50 focus:ring-2 focus:ring-offset-2 focus:ring-gray-400':
             this.type === 'white',
         },
       ]
