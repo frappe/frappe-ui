@@ -47,6 +47,24 @@ function createResource(options, vm, getResource) {
     }
     out.params = params || options.params
     out.loading = true
+
+    if (options.validate) {
+      let invalidMessage
+      try {
+        invalidMessage = await options.validate.call(vm, out.params)
+        if (invalidMessage && typeof invalidMessage == 'string') {
+          let error = new Error(invalidMessage)
+          handleError(error)
+          out.loading = false
+          return
+        }
+      } catch (error) {
+        handleError(error)
+        out.loading = false
+        return
+      }
+    }
+
     try {
       let data = await resourceFetcher(options.method, params || options.params)
       out.previousData = out.data || null
@@ -56,11 +74,7 @@ function createResource(options, vm, getResource) {
         options.onSuccess.call(vm, data)
       }
     } catch (error) {
-      console.error(error)
-      out.error = error
-      if (options.onError) {
-        options.onError.call(vm, error)
-      }
+      handleError(error)
     }
     out.loading = false
   }
@@ -74,6 +88,14 @@ function createResource(options, vm, getResource) {
     }
     if (auto !== undefined && auto !== out.auto) {
       out.auto = auto
+    }
+  }
+
+  function handleError(error) {
+    console.error(error)
+    out.error = error
+    if (options.onError) {
+      options.onError.call(vm, error)
     }
   }
 
