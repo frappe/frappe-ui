@@ -5,6 +5,11 @@ A set of components and utilities for rapid UI development.
 Frappe UI components are built using Vue 3 and Tailwind. Along with components,
 it also ships with directives and utilities that make UI development easier.
 
+<details>
+  <summary>Show components</summary>
+  <img src="https://user-images.githubusercontent.com/9355208/152111395-a62e1599-112c-450f-a32a-5debc791eb2e.png" width="80%" />
+</details>
+
 ## Installation
 ```sh
 npm install frappe-ui
