@@ -68,11 +68,15 @@ export default {
       type: String,
       default: null,
     },
+    buttonFullWidth: {
+      type: Boolean,
+      default: false
+    },
   },
   computed: {
     buttonClasses() {
       return [
-        'inline-flex items-center justify-center text-base leading-5 rounded-md focus:outline-none',
+        'inline-flex items-center text-base leading-5 rounded-md focus:outline-none',
         this.icon ? 'p-1.5' : 'px-3 py-1',
         {
           'opacity-50 cursor-not-allowed pointer-events-none': this.isDisabled,
@@ -85,6 +89,7 @@ export default {
           'bg-white text-gray-900 border hover:bg-gray-50 focus:ring-2 focus:ring-offset-2 focus:ring-gray-400':
             this.type === 'white',
         },
+        this.buttonFullWidth ? 'w-full justify-between' : 'justify-center'
       ]
     },
     isDisabled() {
