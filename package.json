@@ -4,11 +4,16 @@
   "description": "A set of components and utilities for rapid UI development",
   "main": "./src/index.js",
   "scripts": {
+    "test": "npx prettier --check ./src",
     "prettier": "npx prettier -w ./src"
   },
   "files": [
     "src"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/frappe/frappe-ui.git"
+  },
   "author": "Frappe Technologies Pvt. Ltd.",
   "license": "MIT",
   "dependencies": {
