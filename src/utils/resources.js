@@ -46,7 +46,12 @@ function createResource(options, vm, getResource) {
       params = null
     }
     out.params = params || options.params
+    out.previousData = out.data ? JSON.parse(JSON.stringify(out.data)) : null
     out.loading = true
+
+    if (options.onFetch) {
+      options.onFetch.call(vm, out.params)
+    }
 
     if (options.validate) {
       let invalidMessage
@@ -67,7 +72,6 @@ function createResource(options, vm, getResource) {
 
     try {
       let data = await resourceFetcher(options.method, params || options.params)
-      out.previousData = out.data || null
       out.data = data
       out.fetched = true
       if (options.onSuccess) {
@@ -93,6 +97,9 @@ function createResource(options, vm, getResource) {
 
   function handleError(error) {
     console.error(error)
+    if (out.previousData) {
+      out.data = out.previousData
+    }
     out.error = error
     if (options.onError) {
       options.onError.call(vm, error)
