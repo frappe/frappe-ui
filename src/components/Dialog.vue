@@ -1,6 +1,6 @@
 <template>
   <TransitionRoot as="template" :show="open">
-    <Dialog
+    <HDialog
       as="div"
       class="fixed inset-0 z-10 overflow-y-auto"
       @close="open = false"
@@ -114,20 +114,20 @@
           </div>
         </TransitionChild>
       </div>
-    </Dialog>
+    </HDialog>
   </TransitionRoot>
 </template>
 
 <script>
 import { computed } from 'vue'
 import {
-  Dialog,
+  Dialog as HDialog,
   DialogOverlay,
   DialogTitle,
   TransitionChild,
   TransitionRoot,
 } from '@headlessui/vue'
-import { Button } from 'frappe-ui'
+import { Button, FeatherIcon } from 'frappe-ui'
 
 export default {
   name: 'Dialog',
@@ -145,12 +145,13 @@ export default {
   },
   emits: ['update:modelValue', 'close'],
   components: {
-    Dialog,
+    HDialog,
     DialogOverlay,
     DialogTitle,
     TransitionChild,
     TransitionRoot,
     Button,
+    FeatherIcon,
   },
   setup(props, { emit }) {
     let open = computed({
