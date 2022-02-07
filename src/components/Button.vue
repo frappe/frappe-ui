@@ -68,7 +68,7 @@ export default {
       type: String,
       default: null,
     },
-    fullWidth: {
+    widthFull: {
       type: Boolean,
       default: false
     },
@@ -89,7 +89,7 @@ export default {
           'bg-white text-gray-900 border hover:bg-gray-50 focus:ring-2 focus:ring-offset-2 focus:ring-gray-400':
             this.type === 'white',
         },
-        this.fullWidth ? 'w-full justify-between' : 'justify-center'
+        this.widthFull ? 'w-full justify-between' : 'justify-center'
       ]
     },
     isDisabled() {

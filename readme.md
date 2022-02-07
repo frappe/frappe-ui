@@ -102,7 +102,7 @@ app.mount("#app");
 <Button icon-left="menu">Menu</Button>
 <Button icon-right="external-link">Link</Button>
 <Button :loading="true">Loading</Button>
-<Button :full-width="true">Full Width Button</Button>
+<Button :width-full="true">Full Width Button</Button>
 ```
 
 ### Card
