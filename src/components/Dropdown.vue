@@ -22,7 +22,7 @@
     <template v-slot:content>
       <div
         class="z-10 rounded-md w-fullbg-white min-w-40"
-        :style="{ width: dropdownWidthFull ? targetWidth + 'px' : undefined }"
+        :style="{ width: widthFull ? targetWidth + 'px' : undefined }"
       >
         <div class="p-1 overflow-auto text-sm max-h-64">
           <div v-if="isLoading" class="p-2 text-gray-600">
@@ -82,7 +82,7 @@ export default {
       type: Boolean,
       default: false,
     },
-    dropdownWidthFull: {
+    widthFull: {
       type: Boolean,
       default: false,
     },
