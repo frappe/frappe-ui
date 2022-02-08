@@ -67,7 +67,7 @@
                         aria-hidden="true"
                       />
                     </div>
-                    <div class="text-center sm:text-left">
+                    <div class="flex-1 text-center sm:text-left">
                       <DialogTitle as="header">
                         <slot name="body-title">
                           <h3
@@ -99,10 +99,11 @@
                     v-bind="action"
                     @click="
                       () => {
+                        let close = () => (open = false)
                         if (action.handler && action.handler === 'cancel') {
-                          open = false
+                          close()
                         } else {
-                          action.handler()
+                          action.handler({ close })
                         }
                       }
                     "
