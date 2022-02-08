@@ -6,11 +6,7 @@ let cached = {}
 function createResource(options, vm, getResource) {
   let cacheKey = null
   if (options.cache) {
-    cacheKey = options.cache
-    if (typeof cacheKey === 'string') {
-      cacheKey = [cacheKey]
-    }
-    cacheKey = JSON.stringify(cacheKey)
+    cacheKey = getCacheKey(options.cache)
     if (cached[cacheKey]) {
       return cached[cacheKey]
     }
@@ -113,6 +109,13 @@ function createResource(options, vm, getResource) {
   return out
 }
 
+function getCacheKey(cacheKey) {
+  if (typeof cacheKey === 'string') {
+    cacheKey = [cacheKey]
+  }
+  return JSON.stringify(cacheKey)
+}
+
 let createMixin = (mixinOptions) => ({
   created() {
     if (this.$options.resources) {
@@ -160,10 +163,10 @@ let createMixin = (mixinOptions) => ({
     }
   },
   methods: {
-    $refetchResource(cacheKey) {
-      let key = JSON.stringify(cacheKey)
-      if (cached[key]) {
-        let resource = cached[key]
+    $refetchResource(cache) {
+      let cacheKey = getCacheKey(cache)
+      if (cached[cacheKey]) {
+        let resource = cached[cacheKey]
         resource.fetch()
       }
     },
