@@ -44,25 +44,25 @@
             <slot name="body">
               <slot name="body-main">
                 <div class="px-4 py-5 bg-white sm:p-6">
-                  <div>
+                  <div class="flex flex-col sm:flex-row">
                     <div
                       v-if="icon"
-                      class="flex items-center justify-center flex-shrink-0 w-12 h-12 mx-auto mb-3 rounded-full sm:mx-0 sm:h-10 sm:w-10 sm:mb-0 sm:mr-4"
+                      class="flex items-center justify-center flex-shrink-0 w-12 h-12 mx-auto mb-3 rounded-full sm:mx-0 sm:h-9 sm:w-9 sm:mb-0 sm:mr-4"
                       :class="{
-                        'bg-yellow-100': icon.type === 'warning',
-                        'bg-blue-100': icon.type === 'info',
-                        'bg-red-100': icon.type === 'danger',
-                        'bg-green-100': icon.type === 'success',
+                        'bg-yellow-100': icon.appearance === 'warning',
+                        'bg-blue-100': icon.appearance === 'info',
+                        'bg-red-100': icon.appearance === 'danger',
+                        'bg-green-100': icon.appearance === 'success',
                       }"
                     >
                       <FeatherIcon
                         :name="icon.name"
-                        class="w-6 h-6 text-red-600"
+                        class="w-6 h-6 text-red-600 sm:w-5 sm:h-5"
                         :class="{
-                          'text-yellow-600': icon.type === 'warning',
-                          'text-blue-600': icon.type === 'info',
-                          'text-red-600': icon.type === 'danger',
-                          'text-green-600': icon.type === 'success',
+                          'text-yellow-600': icon.appearance === 'warning',
+                          'text-blue-600': icon.appearance === 'info',
+                          'text-red-600': icon.appearance === 'danger',
+                          'text-green-600': icon.appearance === 'success',
                         }"
                         aria-hidden="true"
                       />
@@ -79,7 +79,7 @@
                       </DialogTitle>
 
                       <slot name="body-content">
-                        <p class="text-sm text-gray-500" v-if="options.message">
+                        <p class="text-sm text-gray-600" v-if="options.message">
                           {{ options.message }}
                         </p>
                       </slot>
@@ -93,9 +93,10 @@
               >
                 <slot name="actions" v-bind="{ close: () => (open = false) }">
                   <Button
+                    class="w-full sm:w-max"
                     v-for="action in options.actions"
                     :key="action.label"
-                    :appearance="action.appearance"
+                    v-bind="action"
                     @click="
                       () => {
                         if (action.handler && action.handler === 'cancel') {
