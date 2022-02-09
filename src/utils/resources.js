@@ -6,11 +6,7 @@ let cached = {}
 function createResource(options, vm, getResource) {
   let cacheKey = null
   if (options.cache) {
-    cacheKey = options.cache
-    if (typeof cacheKey === 'string') {
-      cacheKey = [cacheKey]
-    }
-    cacheKey = JSON.stringify(cacheKey)
+    cacheKey = getCacheKey(options.cache)
     if (cached[cacheKey]) {
       return cached[cacheKey]
     }
@@ -46,7 +42,12 @@ function createResource(options, vm, getResource) {
       params = null
     }
     out.params = params || options.params
+    out.previousData = out.data ? JSON.parse(JSON.stringify(out.data)) : null
     out.loading = true
+
+    if (options.onFetch) {
+      options.onFetch.call(vm, out.params)
+    }
 
     if (options.validate) {
       let invalidMessage
@@ -67,7 +68,6 @@ function createResource(options, vm, getResource) {
 
     try {
       let data = await resourceFetcher(options.method, params || options.params)
-      out.previousData = out.data || null
       out.data = data
       out.fetched = true
       if (options.onSuccess) {
@@ -93,6 +93,9 @@ function createResource(options, vm, getResource) {
 
   function handleError(error) {
     console.error(error)
+    if (out.previousData) {
+      out.data = out.previousData
+    }
     out.error = error
     if (options.onError) {
       options.onError.call(vm, error)
@@ -104,6 +107,13 @@ function createResource(options, vm, getResource) {
   }
 
   return out
+}
+
+function getCacheKey(cacheKey) {
+  if (typeof cacheKey === 'string') {
+    cacheKey = [cacheKey]
+  }
+  return JSON.stringify(cacheKey)
 }
 
 let createMixin = (mixinOptions) => ({
@@ -153,10 +163,10 @@ let createMixin = (mixinOptions) => ({
     }
   },
   methods: {
-    $refetchResource(cacheKey) {
-      let key = JSON.stringify(cacheKey)
-      if (cached[key]) {
-        let resource = cached[key]
+    $refetchResource(cache) {
+      let cacheKey = getCacheKey(cache)
+      if (cached[cacheKey]) {
+        let resource = cached[cacheKey]
         resource.fetch()
       }
     },

@@ -1,219 +1,112 @@
 <template>
-  <Popover
-    :show-popup="isShown"
-    :hide-arrow="true"
-    :placement="right ? 'bottom-end' : 'bottom-start'"
-    @init="updateTargetWidth"
-  >
-    <template v-slot:target>
-      <div
-        class="h-full"
-        ref="target"
-        v-on-outside-click="() => (isShown = false)"
+  <Menu as="div" class="relative inline-block text-left">
+    <MenuButton>
+      <slot v-if="$slots.default"></slot>
+      <Button v-else v-bind="button">
+        {{ button ? button?.label || null : 'Options' }}
+      </Button>
+    </MenuButton>
+
+    <transition
+      enter-active-class="transition duration-100 ease-out"
+      enter-from-class="transform scale-95 opacity-0"
+      enter-to-class="transform scale-100 opacity-100"
+      leave-active-class="transition duration-75 ease-in"
+      leave-from-class="transform scale-100 opacity-100"
+      leave-to-class="transform scale-95 opacity-0"
+    >
+      <MenuItems
+        class="absolute z-10 mt-2 bg-white divide-y divide-gray-100 rounded-md shadow-lg min-w-40 ring-1 ring-black ring-opacity-5 focus:outline-none"
+        :class="
+          placement === 'left'
+            ? 'left-0 origin-top-left'
+            : 'right-0 origin-top-right'
+        "
       >
-        <slot
-          :toggleDropdown="toggleDropdown"
-          :highlightItemUp="highlightItemUp"
-          :highlightItemDown="highlightItemDown"
-          :selectHighlightedItem="selectHighlightedItem"
-        ></slot>
-      </div>
-    </template>
-    <template v-slot:content>
-      <div
-        class="z-10 rounded-md w-fullbg-white min-w-40"
-        :style="{ width: dropdownWidthFull ? targetWidth + 'px' : undefined }"
-      >
-        <div class="p-1 overflow-auto text-sm max-h-64">
-          <div v-if="isLoading" class="p-2 text-gray-600">
-            {{ _('Loading...') }}
+        <div v-for="group in groups" :key="group.key" class="px-1 py-1">
+          <div
+            v-if="group.group && !group.hideLabel"
+            class="px-2 py-1 text-xs font-semibold tracking-wider text-gray-500 uppercase"
+          >
+            {{ group.group }}
           </div>
-          <template v-else>
-            <div v-for="d in dropdownItems" :key="d.label">
-              <div
-                v-if="d.isGroup"
-                class="px-2 pt-2 pb-1 text-xs font-semibold tracking-wider text-gray-500 uppercase"
-              >
-                {{ d.label }}
-              </div>
-              <a
-                v-else
-                :ref="setItemRef"
-                class="block p-2 truncate rounded-md cursor-pointer first:mt-0"
-                :class="d.index === highlightedIndex ? 'bg-gray-100' : ''"
-                @mouseenter="highlightedIndex = d.index"
-                @mouseleave="highlightedIndex = -1"
-                @click="selectItem(d)"
-              >
-                <component :is="d.component" v-if="d.component" />
-                <template v-else>{{ d.label }}</template>
-              </a>
-            </div>
-          </template>
+          <MenuItem
+            v-for="item in group.items"
+            :key="item.label"
+            v-slot="{ active }"
+          >
+            <button
+              :class="[
+                active ? 'bg-gray-100' : 'text-gray-900',
+                'group flex rounded-md items-center w-full px-2 py-2 text-sm',
+              ]"
+              :onClick="item.onClick"
+            >
+              <FeatherIcon
+                v-if="item.icon"
+                :name="item.icon"
+                class="flex-shrink-0 w-4 h-4 mr-2 text-gray-500"
+                aria-hidden="true"
+              />
+              <span class="whitespace-nowrap">
+                {{ item.label }}
+              </span>
+            </button>
+          </MenuItem>
         </div>
-      </div>
-    </template>
-  </Popover>
+      </MenuItems>
+    </transition>
+  </Menu>
 </template>
 
 <script>
-import Popover from './Popover.vue'
-import onOutsideClick from '../directives/onOutsideClick'
+import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
+import { FeatherIcon } from 'frappe-ui'
 
 export default {
-  name: 'Dropdown',
-  directives: {
-    onOutsideClick,
-  },
-  props: {
-    items: {
-      type: Array,
-      default: () => [],
-    },
-    groups: {
-      type: Array,
-      default: null,
-    },
-    right: {
-      type: Boolean,
-      default: false,
-    },
-    isLoading: {
-      type: Boolean,
-      default: false,
-    },
-    dropdownWidthFull: {
-      type: Boolean,
-      default: false,
-    },
-  },
+  name: 'NewDropdown',
+  props: ['button', 'options', 'placement'],
   components: {
-    Popover,
-  },
-  data() {
-    return {
-      targetWidth: undefined,
-      isShown: false,
-      itemRefs: [],
-      highlightedIndex: -1,
-    }
-  },
-  computed: {
-    sortedGroups() {
-      if (Array.isArray(this.groups)) {
-        return this.groups
-      }
-      let groupNames = [
-        ...new Set(
-          this.items
-            .map((d) => d.group)
-            .filter(Boolean)
-            .sort()
-        ),
-      ]
-      if (groupNames.length > 0) {
-        return groupNames
-      }
-      return null
-    },
-    dropdownItems() {
-      let items = this.items
-        .filter(Boolean)
-        .filter((d) => (d.condition ? d.condition() : true))
-
-      if (this.sortedGroups) {
-        let itemsByGroup = {}
-
-        for (let item of items) {
-          let group = item.group || ''
-          itemsByGroup[group] = itemsByGroup[group] || []
-          itemsByGroup[group].push(item)
-        }
-
-        let items = []
-        let i = 0
-        for (let group of this.sortedGroups) {
-          let groupItems = itemsByGroup[group]
-          groupItems = groupItems.map((d) => {
-            d.index = i
-            i++
-            return d
-          })
-          items = items.concat(
-            {
-              label: group,
-              isGroup: true,
-            },
-            groupItems
-          )
-        }
-
-        return items
-      }
-
-      return items.filter(Boolean).map((d, i) => {
-        d.index = i
-        return d
-      })
-    },
+    Menu,
+    MenuButton,
+    MenuItems,
+    MenuItem,
+    FeatherIcon,
   },
   methods: {
-    selectItem(d) {
-      if (d.action) {
-        d.action()
+    normalizeDropdownItem(option) {
+      let onClick = option.handler || null
+      if (!onClick && option.route && this.$router) {
+        onClick = () => this.$router.push(option.route)
+      }
+      return {
+        label: option.label,
+        icon: option.icon,
+        group: option.group,
+        onClick,
       }
     },
-    toggleDropdown(flag) {
-      if (flag == null) {
-        this.isShown = !this.isShown
-      } else {
-        this.isShown = Boolean(flag)
-      }
+  },
+  computed: {
+    dropdownItems() {
+      return (this.options || [])
+        .filter(Boolean)
+        .filter((option) => (option.condition ? option.condition() : true))
+        .map((option) => this.normalizeDropdownItem(option))
     },
-    selectHighlightedItem() {
-      if (![-1, this.items.length].includes(this.highlightedIndex)) {
-        // valid selection
-        let item = this.items[this.highlightedIndex]
-        this.selectItem(item)
-      }
-    },
-    highlightItemUp() {
-      this.highlightedIndex -= 1
-      if (this.highlightedIndex < 0) {
-        this.highlightedIndex = 0
-      }
-      this.$nextTick(() => {
-        let index = this.highlightedIndex
-        if (index !== 0) {
-          index -= 1
-        }
-        this.scrollToHighlighted()
-      })
-    },
-    highlightItemDown() {
-      this.highlightedIndex += 1
-      if (this.highlightedIndex > this.items.length) {
-        this.highlightedIndex = this.items.length
-      }
+    groups() {
+      let groups = this.options[0]?.group
+        ? this.options
+        : [{ group: '', items: this.options }]
 
-      this.$nextTick(() => {
-        this.scrollToHighlighted()
+      return groups.map((group, i) => {
+        return {
+          key: i,
+          group: group.group,
+          hideLabel: group.hideLabel || false,
+          items: group.items.map((item) => this.normalizeDropdownItem(item)),
+        }
       })
-    },
-    scrollToHighlighted() {
-      let highlightedElement = this.$refs.items[this.highlightedIndex]
-      highlightedElement &&
-        highlightedElement.scrollIntoView({ block: 'nearest' })
-    },
-    updateTargetWidth() {
-      this.$nextTick(() => {
-        this.targetWidth = this.$refs.target.clientWidth
-      })
-    },
-    setItemRef(el) {
-      if (el) {
-        this.itemRefs.push(el)
-      }
     },
   },
 }

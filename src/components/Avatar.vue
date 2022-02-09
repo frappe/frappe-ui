@@ -8,7 +8,7 @@
     />
     <div
       v-else
-      class="flex items-center justify-center w-full h-full text-green-800 uppercase bg-green-200"
+      class="flex items-center justify-center w-full h-full text-gray-600 uppercase bg-gray-200"
       :class="{ sm: 'text-xs', md: 'text-base', lg: 'text-lg' }[size]"
     >
       {{ label && label[0] }}

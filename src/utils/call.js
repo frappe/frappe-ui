@@ -1,4 +1,4 @@
-export default async function call(method, args, options={}) {
+export default async function call(method, args, options = {}) {
   if (!args) {
     args = {}
   }
@@ -26,6 +26,20 @@ export default async function call(method, args, options={}) {
     const data = await res.json()
     if (data.docs || method === 'login') {
       return data
+    }
+    if (data.exc) {
+      try {
+        console.groupCollapsed(method)
+        console.log(`method: ${method}`)
+        console.log(`params:`, args)
+        let warning = JSON.parse(data.exc)
+        for (let text of warning) {
+          console.log(text)
+        }
+        console.groupEnd()
+      } catch (e) {
+        console.warn('Error printing debug messages', e)
+      }
     }
     return data.message
   } else {
