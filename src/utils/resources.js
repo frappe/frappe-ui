@@ -33,15 +33,22 @@ function createResource(options, vm, getResource) {
     auto: options.auto,
     params: null,
     fetch: fetchFunction,
+    reload: fetchFunction,
     submit: fetchFunction,
+    reset,
     update,
+    setData,
   })
 
   async function fetch(params) {
     if (params instanceof Event) {
       params = null
     }
-    out.params = params || options.params
+    params = params || out.params
+    if (options.makeParams) {
+      params = options.makeParams.call(vm, params)
+    }
+    out.params = params
     out.previousData = out.data ? JSON.parse(JSON.stringify(out.data)) : null
     out.loading = true
 
@@ -91,6 +98,16 @@ function createResource(options, vm, getResource) {
     }
   }
 
+  function reset() {
+    out.data = options.initialData || null
+    out.previousData = null
+    out.loading = false
+    out.fetched = false
+    out.error = null
+    out.params = null
+    out.auto = options.auto
+  }
+
   function handleError(error) {
     console.error(error)
     if (out.previousData) {
@@ -100,6 +117,10 @@ function createResource(options, vm, getResource) {
     if (options.onError) {
       options.onError.call(vm, error)
     }
+  }
+
+  function setData(data) {
+    out.data = data
   }
 
   if (cacheKey && !cached[cacheKey]) {
