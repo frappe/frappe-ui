@@ -63,6 +63,8 @@
 </template>
 
 <script>
+import { debounce } from 'frappe-ui'
+
 export default {
   name: 'Input',
   inheritAttrs: false,
@@ -94,6 +96,9 @@ export default {
     },
     inputClass: {
       type: [String, Array, Object],
+    },
+    debounce: {
+      type: Number,
     },
     options: {
       type: Array,
@@ -132,10 +137,14 @@ export default {
       return this.modelValue
     },
     inputAttributes() {
+      let onInput = (e) => {
+        this.$emit('input', this.getInputValue(e))
+      }
+      if (this.debounce) {
+        onInput = debounce(onInput, this.debounce)
+      }
       return Object.assign({}, this.$attrs, {
-        onInput: (e) => {
-          this.$emit('input', this.getInputValue(e))
-        },
+        onInput,
         onChange: (e) => {
           this.$emit('change', this.getInputValue(e))
           this.$emit('update:modelValue', this.getInputValue(e))
