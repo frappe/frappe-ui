@@ -19,6 +19,7 @@ export { default as Modal } from './components/Modal.vue'
 export { default as Popover } from './components/Popover.vue'
 export { default as Spinner } from './components/Spinner.vue'
 export { default as SuccessMessage } from './components/SuccessMessage.vue'
+export { default as TextEditor } from './components/TextEditor'
 
 // directives
 export { default as onOutsideClickDirective } from './directives/onOutsideClick.js'
