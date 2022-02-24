@@ -24,7 +24,9 @@
       <FeatherIcon :name="icon" class="w-4 h-4" :aria-label="label" />
     </template>
     <span :class="icon ? 'sr-only' : ''">
-      <slot></slot>
+      <slot>
+        {{ label }}
+      </slot>
     </span>
     <FeatherIcon
       v-if="iconRight"
@@ -59,6 +61,10 @@ export default {
       },
     },
     disabled: {
+      type: Boolean,
+      default: false,
+    },
+    active: {
       type: Boolean,
       default: false,
     },
@@ -99,8 +105,9 @@ export default {
           'bg-red-500 hover:bg-red-400 text-white focus:ring-2 focus:ring-offset-2 focus:ring-red-500',
         white:
           'bg-white text-gray-900 border hover:bg-gray-50 focus:ring-2 focus:ring-offset-2 focus:ring-gray-400',
-        minimal:
-          'bg-transparent hover:bg-gray-200 active:bg-gray-200 text-gray-900',
+        minimal: `active:bg-gray-200 focus:bg-gray-200 text-gray-900 ${
+          this.active ? 'bg-gray-200' : 'bg-transparent hover:bg-gray-200'
+        }`,
       }
       return [
         'inline-flex items-center justify-center text-base leading-5 rounded-md transition-colors focus:outline-none',
