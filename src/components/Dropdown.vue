@@ -1,8 +1,8 @@
 <template>
-  <Menu as="div" class="relative inline-block text-left">
-    <MenuButton>
+  <Menu as="div" class="relative inline-block text-left" v-slot="{ open }">
+    <MenuButton as="template">
       <slot v-if="$slots.default"></slot>
-      <Button v-else v-bind="button">
+      <Button v-else v-bind="button" :active="open">
         {{ button ? button?.label || null : 'Options' }}
       </Button>
     </MenuButton>
