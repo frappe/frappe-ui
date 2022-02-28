@@ -1,5 +1,5 @@
 <template>
-  <div class="relative w-full pt-6" v-if="editor">
+  <div class="relative w-full" :class="{ 'pt-6': showMenu }" v-if="editor">
     <BubbleMenu
       v-if="showBubbleMenu"
       class="bubble-menu"
