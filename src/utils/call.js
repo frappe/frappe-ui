@@ -16,7 +16,8 @@ export default async function call(method, args, options = {}) {
     headers['X-Frappe-CSRF-Token'] = window.csrf_token
   }
 
-  const res = await fetch(`/api/method/${method}`, {
+  let path = method.startsWith('/') ? method : `/api/method/${method}`
+  const res = await fetch(path, {
     method: 'POST',
     headers,
     body: JSON.stringify(args),
