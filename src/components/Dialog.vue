@@ -96,17 +96,9 @@
                     class="w-full sm:w-max"
                     v-for="action in options.actions"
                     :key="action.label"
+                    :loading="action.loading"
                     v-bind="action"
-                    @click="
-                      () => {
-                        let close = () => (open = false)
-                        if (action.handler && action.handler === 'cancel') {
-                          close()
-                        } else {
-                          action.handler({ close })
-                        }
-                      }
-                    "
+                    @click="handleAction(action)"
                   >
                     {{ action.label }}
                   </Button>
@@ -168,6 +160,22 @@ export default {
     return {
       open,
     }
+  },
+  methods: {
+    handleAction(action) {
+      let close = () => (this.open = false)
+      if (action.handler && typeof action.handler === 'function') {
+        action.loading = true
+        let result = action.handler({ close })
+        if (result && result.then) {
+          result.then(() => (action.loading = false))
+        } else {
+          action.loading = false
+        }
+      } else {
+        close()
+      }
+    },
   },
   computed: {
     icon() {
