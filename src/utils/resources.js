@@ -2,8 +2,9 @@ import { call, debounce } from 'frappe-ui'
 import { reactive, watch } from 'vue'
 
 let cached = {}
+let documentCache = {}
 
-function createResource(options, vm, getResource) {
+export function createResource(options, vm, getResource) {
   let cacheKey = null
   if (options.cache) {
     cacheKey = getCacheKey(options.cache)
@@ -88,10 +89,10 @@ function createResource(options, vm, getResource) {
 
   function update({ method, params, auto }) {
     if (method && method !== options.method) {
-      options.method = method
+      out.method = method
     }
     if (params && params !== options.params) {
-      options.params = params
+      out.params = params
     }
     if (auto !== undefined && auto !== out.auto) {
       out.auto = auto
@@ -119,7 +120,13 @@ function createResource(options, vm, getResource) {
     }
   }
 
+  // usage:
+  // setData(newData) or
+  // setData(data => data.filter(d => !d.deleted))
   function setData(data) {
+    if (typeof data === 'function') {
+      data = data.call(vm, out.data)
+    }
     out.data = data
   }
 
@@ -128,6 +135,82 @@ function createResource(options, vm, getResource) {
   }
 
   return out
+}
+
+export function createDocumentResource(options, vm) {
+  let cacheKey = getCacheKey([options.doctype, options.name])
+  if (documentCache[cacheKey]) {
+    return documentCache[cacheKey]
+  }
+
+  let setValueOptions = {
+    method: 'frappe.client.set_value',
+    makeParams(values) {
+      return {
+        doctype: out.doctype,
+        name: out.name,
+        fieldname: values,
+      }
+    },
+    onSuccess(data) {
+      out.doc = data
+    },
+  }
+
+  let out = reactive({
+    doctype: options.doctype,
+    name: options.name,
+    doc: null,
+    get: createResource({
+      method: 'frappe.client.get',
+      makeParams() {
+        return {
+          doctype: out.doctype,
+          name: out.name,
+        }
+      },
+      onSuccess(data) {
+        out.doc = data
+      },
+    }),
+    setValue: createResource(setValueOptions),
+    setValueDebounced: createResource({
+      ...setValueOptions,
+      debounce: options.debounce || 500,
+    }),
+    delete: createResource({
+      method: 'frappe.client.delete',
+      makeParams() {
+        return {
+          doctype: out.doctype,
+          name: out.name,
+        }
+      },
+      onSuccess() {
+        out.doc = null
+      },
+    }),
+    update,
+  })
+
+  function update(updatedOptions) {
+    out.doctype = updatedOptions.doctype
+    out.name = updatedOptions.name
+    out.get.fetch()
+  }
+
+  // fetch the doc
+  out.get.fetch()
+  // cache
+  documentCache[cacheKey] = out
+  return out
+}
+
+function createResourceForOptions(options, vm, getResource) {
+  if (options.type === 'document') {
+    return createDocumentResource(options, vm, getResource)
+  }
+  return createResource(options, vm, getResource)
 }
 
 function getCacheKey(cacheKey) {
@@ -156,7 +239,7 @@ let createMixin = (mixinOptions) => ({
 
               let resource = this._resources[key]
               if (!resource) {
-                resource = createResource(
+                resource = createResourceForOptions(
                   updatedOptions,
                   this,
                   mixinOptions.getResource
@@ -174,7 +257,11 @@ let createMixin = (mixinOptions) => ({
             }
           )
         } else {
-          let resource = createResource(options, this, mixinOptions.getResource)
+          let resource = createResourceForOptions(
+            options,
+            this,
+            mixinOptions.getResource
+          )
           this._resources[key] = resource
           if (resource.auto) {
             resource.fetch()
@@ -184,12 +271,13 @@ let createMixin = (mixinOptions) => ({
     }
   },
   methods: {
-    $refetchResource(cache) {
+    $getResource(cache) {
       let cacheKey = getCacheKey(cache)
-      if (cached[cacheKey]) {
-        let resource = cached[cacheKey]
-        resource.fetch()
-      }
+      return cached[cacheKey] || null
+    },
+    $refetchResource(cache) {
+      let resource = this.$getResource(cache)
+      resource && resource.fetch()
     },
   },
   computed: {
