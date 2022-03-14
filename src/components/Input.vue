@@ -68,6 +68,7 @@ import { debounce } from 'frappe-ui'
 export default {
   name: 'Input',
   inheritAttrs: false,
+  expose: ['getInputValue'],
   props: {
     label: {
       type: String,
@@ -122,9 +123,10 @@ export default {
       this.$refs.input.blur()
     },
     getInputValue(e) {
-      let value = e.target.value
+      let $input = e ? e.target : this.$refs.input
+      let value = $input.value
       if (this.type == 'checkbox') {
-        value = e.target.checked
+        value = $input.checked
       }
       return value
     },
@@ -134,7 +136,7 @@ export default {
       if ('value' in this.$attrs) {
         return this.$attrs.value
       }
-      return this.modelValue
+      return this.modelValue || null
     },
     inputAttributes() {
       let onInput = (e) => {
