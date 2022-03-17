@@ -1,17 +1,29 @@
 <template>
   <div ref="reference">
-    <div class="h-full">
-      <slot name="target" :togglePopover="togglePopover"></slot>
+    <div
+      class="h-full"
+      ref="target"
+      @click="updatePosition"
+      @focusin="updatePosition"
+      @keydown="updatePosition"
+    >
+      <slot
+        name="target"
+        v-bind="{ togglePopover, updatePosition, open, close }"
+      ></slot>
     </div>
-    <teleport to="#popovers">
+    <teleport to="#frappeui-popper-root">
       <div
         ref="popover"
         :class="popoverClass"
-        class="bg-white rounded-md border shadow-md popover-container relative"
-        v-show="isOpen"
+        class="relative z-[100] popover-container"
+        :style="{ minWidth: targetWidth ? targetWidth + 'px' : null }"
       >
         <div v-if="!hideArrow" class="popover-arrow" ref="popover-arrow"></div>
-        <slot name="content" :togglePopover="togglePopover"></slot>
+        <slot
+          name="content"
+          v-bind="{ togglePopover, updatePosition, open, close }"
+        ></slot>
       </div>
     </teleport>
   </div>
@@ -25,9 +37,9 @@ export default {
   props: {
     hideArrow: {
       type: Boolean,
-      default: false,
+      default: true,
     },
-    showPopup: {
+    show: {
       default: null,
     },
     right: Boolean,
@@ -39,18 +51,28 @@ export default {
   },
   emits: ['init', 'open', 'close'],
   watch: {
-    showPopup(value) {
-      if (value === true) {
-        this.open()
-      }
-      if (value === false) {
-        this.close()
-      }
+    show: {
+      immediate: true,
+      handler(val) {
+        if (val) {
+          this.open()
+        } else {
+          this.close()
+        }
+      },
     },
   },
   data() {
     return {
       isOpen: false,
+      targetWidth: null,
+    }
+  },
+  created() {
+    if (!document.getElementById('frappeui-popper-root')) {
+      const root = document.createElement('div')
+      root.id = 'frappeui-popper-root'
+      document.body.appendChild(root)
     }
   },
   mounted() {
@@ -67,6 +89,9 @@ export default {
     if (this.show == null) {
       document.addEventListener('click', this.listener)
     }
+    this.$nextTick(() => {
+      this.targetWidth = this.$refs['target'].clientWidth
+    })
   },
   beforeDestroy() {
     this.popper && this.popper.destroy()
@@ -95,9 +120,12 @@ export default {
             : [],
         })
       } else {
-        this.popper.update()
+        this.updatePosition()
       }
       this.$emit('init')
+    },
+    updatePosition() {
+      this.popper && this.popper.update()
     },
     togglePopover(flag) {
       if (flag == null) {
@@ -115,9 +143,7 @@ export default {
         return
       }
       this.isOpen = true
-      this.$nextTick(() => {
-        this.setupPopper()
-      })
+      this.$nextTick(() => this.setupPopper())
       this.$emit('open')
     },
     close() {
