@@ -86,25 +86,25 @@ export default {
         onClick,
       }
     },
-  },
-  computed: {
-    dropdownItems() {
-      return (this.options || [])
+    filterOptions(options) {
+      return (options || [])
         .filter(Boolean)
         .filter((option) => (option.condition ? option.condition() : true))
         .map((option) => this.normalizeDropdownItem(option))
     },
+  },
+  computed: {
     groups() {
       let groups = this.options[0]?.group
         ? this.options
-        : [{ group: '', items: this.options }]
+        : [{ group: '', items: this.filterOptions(this.options) }]
 
       return groups.map((group, i) => {
         return {
           key: i,
           group: group.group,
           hideLabel: group.hideLabel || false,
-          items: group.items.map((item) => this.normalizeDropdownItem(item)),
+          items: this.filterOptions(group.items),
         }
       })
     },
