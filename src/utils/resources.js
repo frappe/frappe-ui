@@ -41,7 +41,7 @@ export function createResource(options, vm, getResource) {
     setData,
   })
 
-  async function fetch(params) {
+  async function fetch(params, tempOptions = {}) {
     if (params instanceof Event) {
       params = null
     }
@@ -57,18 +57,22 @@ export function createResource(options, vm, getResource) {
       options.onFetch.call(vm, out.params)
     }
 
-    if (options.validate) {
+    let validateFunction = tempOptions.validate || options.validate
+    let errorFunction = tempOptions.onError || options.onError
+    let successFunction = tempOptions.onSuccess || options.onSuccess
+
+    if (validateFunction) {
       let invalidMessage
       try {
-        invalidMessage = await options.validate.call(vm, out.params)
+        invalidMessage = await validateFunction.call(vm, out.params)
         if (invalidMessage && typeof invalidMessage == 'string') {
           let error = new Error(invalidMessage)
-          handleError(error)
+          handleError(error, errorFunction)
           out.loading = false
           return
         }
       } catch (error) {
-        handleError(error)
+        handleError(error, errorFunction)
         out.loading = false
         return
       }
@@ -78,11 +82,11 @@ export function createResource(options, vm, getResource) {
       let data = await resourceFetcher(options.method, params || options.params)
       out.data = data
       out.fetched = true
-      if (options.onSuccess) {
-        options.onSuccess.call(vm, data)
+      if (successFunction) {
+        successFunction.call(vm, data)
       }
     } catch (error) {
-      handleError(error)
+      handleError(error, errorFunction)
     }
     out.loading = false
   }
@@ -109,14 +113,14 @@ export function createResource(options, vm, getResource) {
     out.auto = options.auto
   }
 
-  function handleError(error) {
+  function handleError(error, errorFunction) {
     console.error(error)
     if (out.previousData) {
       out.data = out.previousData
     }
     out.error = error
-    if (options.onError) {
-      options.onError.call(vm, error)
+    if (errorFunction) {
+      errorFunction.call(vm, error)
     }
   }
 
