@@ -138,6 +138,8 @@ export function createResource(options, vm, getResource) {
 }
 
 export function createDocumentResource(options, vm) {
+  if (!(options.doctype && options.name)) return
+
   let cacheKey = getCacheKey([options.doctype, options.name])
   if (documentCache[cacheKey]) {
     return documentCache[cacheKey]
@@ -153,7 +155,7 @@ export function createDocumentResource(options, vm) {
       }
     },
     onSuccess(data) {
-      out.doc = data
+      out.doc = postprocess(data)
     },
   }
 
@@ -170,7 +172,7 @@ export function createDocumentResource(options, vm) {
         }
       },
       onSuccess(data) {
-        out.doc = data
+        out.doc = postprocess(data)
       },
     }),
     setValue: createResource(setValueOptions),
@@ -193,10 +195,45 @@ export function createDocumentResource(options, vm) {
     update,
   })
 
+  for (let method in options.whitelistedMethods) {
+    let methodName = options.whitelistedMethods[method]
+    out[method] = createResource({
+      method: 'run_doc_method',
+      makeParams(values) {
+        return {
+          dt: out.doctype,
+          dn: out.name,
+          method: methodName,
+          args: JSON.stringify(values),
+        }
+      },
+      onSuccess(data) {
+        if (data.docs) {
+          for (let doc of data.docs) {
+            if (doc.doctype === out.doctype && doc.name === out.name) {
+              out.doc = postprocess(doc)
+              break
+            }
+          }
+        }
+      },
+    })
+  }
+
   function update(updatedOptions) {
     out.doctype = updatedOptions.doctype
     out.name = updatedOptions.name
     out.get.fetch()
+  }
+
+  function postprocess(doc) {
+    if (options.postprocess) {
+      let returnValue = options.postprocess(doc)
+      if (typeof returnValue === 'object') {
+        return returnValue
+      }
+    }
+    return doc
   }
 
   // fetch the doc
@@ -248,7 +285,7 @@ let createMixin = (mixinOptions) => ({
               } else {
                 resource.update(updatedOptions)
               }
-              if (resource.auto) {
+              if (resource && resource.auto) {
                 resource.fetch()
               }
             },
