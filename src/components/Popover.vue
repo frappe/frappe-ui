@@ -16,8 +16,9 @@
       <div
         ref="popover"
         :class="popoverClass"
-        class="relative z-[100] popover-container"
+        class="popover-container relative z-[100]"
         :style="{ minWidth: targetWidth ? targetWidth + 'px' : null }"
+        v-show="isOpen"
       >
         <div v-if="!hideArrow" class="popover-arrow" ref="popover-arrow"></div>
         <slot
