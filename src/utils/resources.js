@@ -247,9 +247,63 @@ export function createDocumentResource(options, vm) {
   return out
 }
 
+function createListResource(options, vm, getResource) {
+  if (!options.doctype) return
+
+  let out = reactive({
+    doctype: options.doctype,
+    fields: options.fields,
+    filters: options.filters,
+    data: null,
+    list: createResource({
+      method: 'frappe.client.get_list',
+      makeParams() {
+        return {
+          doctype: out.doctype,
+          fields: out.fields,
+          filters: out.filters,
+        }
+      },
+      onSuccess(data) {
+        out.data = data
+      },
+    }),
+    insert: createResource({
+      method: 'frappe.client.insert',
+      makeParams(values) {
+        return {
+          doc: {
+            doctype: out.doctype,
+            ...values,
+          },
+        }
+      },
+      onSuccess() {
+        out.list.fetch()
+      },
+    }),
+    update,
+  })
+
+  function update(updatedOptions) {
+    out.doctype = updatedOptions.doctype
+    out.fields = updatedOptions.fields
+    out.filters = updatedOptions.filters
+    out.list.fetch()
+  }
+
+  // fetch list
+  out.list.fetch()
+
+  return out
+}
+
 function createResourceForOptions(options, vm, getResource) {
   if (options.type === 'document') {
     return createDocumentResource(options, vm, getResource)
+  }
+  if (options.type === 'list') {
+    return createListResource(options, vm, getResource)
   }
   return createResource(options, vm, getResource)
 }
