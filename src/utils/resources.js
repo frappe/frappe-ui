@@ -197,6 +197,7 @@ export function createDocumentResource(options, vm) {
       },
     }),
     update,
+    reload,
   })
 
   for (let method in options.whitelistedMethods) {
@@ -227,6 +228,10 @@ export function createDocumentResource(options, vm) {
   function update(updatedOptions) {
     out.doctype = updatedOptions.doctype
     out.name = updatedOptions.name
+    out.get.fetch()
+  }
+
+  function reload() {
     out.get.fetch()
   }
 
