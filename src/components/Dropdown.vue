@@ -40,7 +40,7 @@
                 active ? 'bg-gray-100' : 'text-gray-900',
                 'group flex rounded-md items-center w-full px-2 py-2 text-sm',
               ]"
-              :onClick="item.onClick"
+              @click="item.onClick"
             >
               <FeatherIcon
                 v-if="item.icon"
@@ -97,7 +97,7 @@ export default {
     groups() {
       let groups = this.options[0]?.group
         ? this.options
-        : [{ group: '', items: this.filterOptions(this.options) }]
+        : [{ group: '', items: this.options }]
 
       return groups.map((group, i) => {
         return {
