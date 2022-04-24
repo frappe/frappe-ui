@@ -167,62 +167,74 @@ export function createDocumentResource(options, vm) {
     doctype: options.doctype,
     name: options.name,
     doc: null,
-    get: createResource({
-      method: 'frappe.client.get',
-      makeParams() {
-        return {
-          doctype: out.doctype,
-          name: out.name,
-        }
+    get: createResource(
+      {
+        method: 'frappe.client.get',
+        makeParams() {
+          return {
+            doctype: out.doctype,
+            name: out.name,
+          }
+        },
+        onSuccess(data) {
+          out.doc = postprocess(data)
+        },
       },
-      onSuccess(data) {
-        out.doc = postprocess(data)
+      vm
+    ),
+    setValue: createResource(setValueOptions, vm),
+    setValueDebounced: createResource(
+      {
+        ...setValueOptions,
+        debounce: options.debounce || 500,
       },
-    }),
-    setValue: createResource(setValueOptions),
-    setValueDebounced: createResource({
-      ...setValueOptions,
-      debounce: options.debounce || 500,
-    }),
-    delete: createResource({
-      method: 'frappe.client.delete',
-      makeParams() {
-        return {
-          doctype: out.doctype,
-          name: out.name,
-        }
+      vm
+    ),
+    delete: createResource(
+      {
+        method: 'frappe.client.delete',
+        makeParams() {
+          return {
+            doctype: out.doctype,
+            name: out.name,
+          }
+        },
+        onSuccess() {
+          out.doc = null
+        },
       },
-      onSuccess() {
-        out.doc = null
-      },
-    }),
+      vm
+    ),
     update,
     reload,
   })
 
   for (let method in options.whitelistedMethods) {
     let methodName = options.whitelistedMethods[method]
-    out[method] = createResource({
-      method: 'run_doc_method',
-      makeParams(values) {
-        return {
-          dt: out.doctype,
-          dn: out.name,
-          method: methodName,
-          args: JSON.stringify(values),
-        }
-      },
-      onSuccess(data) {
-        if (data.docs) {
-          for (let doc of data.docs) {
-            if (doc.doctype === out.doctype && doc.name === out.name) {
-              out.doc = postprocess(doc)
-              break
+    out[method] = createResource(
+      {
+        method: 'run_doc_method',
+        makeParams(values) {
+          return {
+            dt: out.doctype,
+            dn: out.name,
+            method: methodName,
+            args: JSON.stringify(values),
+          }
+        },
+        onSuccess(data) {
+          if (data.docs) {
+            for (let doc of data.docs) {
+              if (doc.doctype === out.doctype && doc.name === out.name) {
+                out.doc = postprocess(doc)
+                break
+              }
             }
           }
-        }
+        },
       },
-    })
+      vm
+    )
   }
 
   function update(updatedOptions) {
@@ -237,7 +249,7 @@ export function createDocumentResource(options, vm) {
 
   function postprocess(doc) {
     if (options.postprocess) {
-      let returnValue = options.postprocess(doc)
+      let returnValue = options.postprocess.call(vm, doc)
       if (typeof returnValue === 'object') {
         return returnValue
       }
@@ -259,34 +271,46 @@ function createListResource(options, vm, getResource) {
     doctype: options.doctype,
     fields: options.fields,
     filters: options.filters,
+    order_by: options.order_by,
+    start: options.start,
+    limit: options.limit,
     data: null,
-    list: createResource({
-      method: 'frappe.client.get_list',
-      makeParams() {
-        return {
-          doctype: out.doctype,
-          fields: out.fields,
-          filters: out.filters,
-        }
-      },
-      onSuccess(data) {
-        out.data = data
-      },
-    }),
-    insert: createResource({
-      method: 'frappe.client.insert',
-      makeParams(values) {
-        return {
-          doc: {
+    list: createResource(
+      {
+        method: 'frappe.client.get_list',
+        makeParams() {
+          return {
             doctype: out.doctype,
-            ...values,
-          },
-        }
+            fields: out.fields,
+            filters: out.filters,
+            order_by: out.order_by,
+            limit_start: out.start,
+            limit_page_length: out.limit,
+          }
+        },
+        onSuccess(data) {
+          out.data = data
+        },
       },
-      onSuccess() {
-        out.list.fetch()
+      vm
+    ),
+    insert: createResource(
+      {
+        method: 'frappe.client.insert',
+        makeParams(values) {
+          return {
+            doc: {
+              doctype: out.doctype,
+              ...values,
+            },
+          }
+        },
+        onSuccess() {
+          out.list.fetch()
+        },
       },
-    }),
+      vm
+    ),
     update,
   })
 
@@ -294,6 +318,9 @@ function createListResource(options, vm, getResource) {
     out.doctype = updatedOptions.doctype
     out.fields = updatedOptions.fields
     out.filters = updatedOptions.filters
+    out.order_by = updatedOptions.order_by
+    out.start = updatedOptions.start
+    out.limit = updatedOptions.limit
     out.list.fetch()
   }
 
@@ -329,8 +356,19 @@ let createMixin = (mixinOptions) => ({
 
         if (typeof options == 'function') {
           watch(
-            () => options.call(this),
+            () => {
+              try {
+                return options.call(this)
+              } catch (error) {
+                console.warn('Failed to get resource options\n\n', error)
+                return null
+              }
+            },
             (updatedOptions, oldVal) => {
+              if (!updatedOptions) {
+                return
+              }
+
               let changed =
                 !oldVal ||
                 JSON.stringify(updatedOptions) !== JSON.stringify(oldVal)
