@@ -3,6 +3,7 @@ import { reactive, watch } from 'vue'
 
 let cached = {}
 let documentCache = {}
+let listCache = {}
 
 export function createResource(options, vm, getResource) {
   let cacheKey = null
@@ -159,7 +160,7 @@ export function createDocumentResource(options, vm) {
       }
     },
     onSuccess(data) {
-      out.doc = postprocess(data)
+      out.doc = transform(data)
     },
   }
 
@@ -177,7 +178,7 @@ export function createDocumentResource(options, vm) {
           }
         },
         onSuccess(data) {
-          out.doc = postprocess(data)
+          out.doc = transform(data)
         },
       },
       vm
@@ -226,7 +227,7 @@ export function createDocumentResource(options, vm) {
           if (data.docs) {
             for (let doc of data.docs) {
               if (doc.doctype === out.doctype && doc.name === out.name) {
-                out.doc = postprocess(doc)
+                out.doc = transform(doc)
                 break
               }
             }
@@ -244,12 +245,12 @@ export function createDocumentResource(options, vm) {
   }
 
   function reload() {
-    out.get.fetch()
+    return out.get.fetch()
   }
 
-  function postprocess(doc) {
-    if (options.postprocess) {
-      let returnValue = options.postprocess.call(vm, doc)
+  function transform(doc) {
+    if (options.transform) {
+      let returnValue = options.transform.call(vm, doc)
       if (typeof returnValue === 'object') {
         return returnValue
       }
@@ -266,6 +267,11 @@ export function createDocumentResource(options, vm) {
 
 function createListResource(options, vm, getResource) {
   if (!options.doctype) return
+
+  let cacheKey = getCacheKey(options.cache)
+  if (listCache[cacheKey]) {
+    return listCache[cacheKey]
+  }
 
   let out = reactive({
     doctype: options.doctype,
@@ -289,7 +295,8 @@ function createListResource(options, vm, getResource) {
           }
         },
         onSuccess(data) {
-          out.data = data
+          out.data = transform(data)
+          options.onSuccess && options.onSuccess.call(vm, out.data)
         },
       },
       vm
@@ -312,6 +319,7 @@ function createListResource(options, vm, getResource) {
       vm
     ),
     update,
+    reload,
   })
 
   function update(updatedOptions) {
@@ -324,8 +332,25 @@ function createListResource(options, vm, getResource) {
     out.list.fetch()
   }
 
+  function transform(data) {
+    if (options.transform) {
+      let returnValue = options.transform.call(vm, data)
+      if (typeof returnValue != null) {
+        return returnValue
+      }
+    }
+    return data
+  }
+
+  function reload() {
+    return out.list.fetch()
+  }
+
   // fetch list
   out.list.fetch()
+
+  // cache
+  listCache[cacheKey] = out
 
   return out
 }
@@ -412,6 +437,14 @@ let createMixin = (mixinOptions) => ({
     $getResource(cache) {
       let cacheKey = getCacheKey(cache)
       return cached[cacheKey] || null
+    },
+    $getDocumentResource(doctype, name) {
+      let cacheKey = getCacheKey([doctype, name])
+      return documentCache[cacheKey] || null
+    },
+    $getListResource(cache) {
+      let cacheKey = getCacheKey(cache)
+      return listCache[cacheKey] || null
     },
     $refetchResource(cache) {
       let resource = this.$getResource(cache)
