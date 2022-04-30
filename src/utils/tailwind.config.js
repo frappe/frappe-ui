@@ -14,7 +14,8 @@ module.exports = {
         '3xl': '20px',
         '4xl': '22px',
         '5xl': '24px',
-        '6xl': '28px',
+        '6xl': '26px',
+        '7xl': '28px',
       },
       width: {
         112: '28rem',
