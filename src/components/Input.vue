@@ -26,6 +26,7 @@
       :disabled="disabled"
       :placeholder="placeholder"
       :value="passedInputValue"
+      @blur="$emit('blur', $event)"
     />
     <textarea
       v-if="type === 'textarea'"
