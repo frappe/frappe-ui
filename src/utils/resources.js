@@ -2,8 +2,8 @@ import { call, debounce } from 'frappe-ui'
 import { reactive, watch } from 'vue'
 
 let cached = {}
-let documentCache = {}
-let listCache = {}
+let documentCache = reactive({})
+let listCache = reactive({})
 
 export function createResource(options, vm, getResource) {
   let cacheKey = null
@@ -59,8 +59,8 @@ export function createResource(options, vm, getResource) {
     }
 
     let validateFunction = tempOptions.validate || options.validate
-    let errorFunction = tempOptions.onError || options.onError
-    let successFunction = tempOptions.onSuccess || options.onSuccess
+    let errorFunctions = [options.onError, tempOptions.onError]
+    let successFunctions = [options.onSuccess, tempOptions.onSuccess]
 
     if (validateFunction) {
       let invalidMessage
@@ -68,12 +68,12 @@ export function createResource(options, vm, getResource) {
         invalidMessage = await validateFunction.call(vm, out.params)
         if (invalidMessage && typeof invalidMessage == 'string') {
           let error = new Error(invalidMessage)
-          handleError(error, errorFunction)
+          handleError(error, errorFunctions)
           out.loading = false
           return
         }
       } catch (error) {
-        handleError(error, errorFunction)
+        handleError(error, errorFunctions)
         out.loading = false
         return
       }
@@ -83,11 +83,13 @@ export function createResource(options, vm, getResource) {
       let data = await resourceFetcher(options.method, params || options.params)
       out.data = data
       out.fetched = true
-      if (successFunction) {
-        successFunction.call(vm, data)
+      for (let fn of successFunctions) {
+        if (fn) {
+          fn.call(vm, data)
+        }
       }
     } catch (error) {
-      handleError(error, errorFunction)
+      handleError(error, errorFunctions)
     }
     out.loading = false
   }
@@ -114,14 +116,16 @@ export function createResource(options, vm, getResource) {
     out.auto = options.auto
   }
 
-  function handleError(error, errorFunction) {
+  function handleError(error, errorFunctions) {
     console.error(error)
     if (out.previousData) {
       out.data = out.previousData
     }
     out.error = error
-    if (errorFunction) {
-      errorFunction.call(vm, error)
+    for (let fn of errorFunctions) {
+      if (fn) {
+        fn.call(vm, error)
+      }
     }
   }
 
@@ -318,8 +322,41 @@ function createListResource(options, vm, getResource) {
       },
       vm
     ),
+    setValue: createResource(
+      {
+        method: 'frappe.client.set_value',
+        makeParams(options) {
+          let { name, ...values } = options
+          return {
+            doctype: out.doctype,
+            name: name,
+            fieldname: values,
+          }
+        },
+        onSuccess() {
+          out.list.fetch()
+        },
+      },
+      vm
+    ),
+    delete: createResource(
+      {
+        method: 'frappe.client.delete',
+        makeParams(name) {
+          return {
+            doctype: out.doctype,
+            name,
+          }
+        },
+        onSuccess() {
+          out.list.fetch()
+        },
+      },
+      vm
+    ),
     update,
     reload,
+    setData,
   })
 
   function update(updatedOptions) {
@@ -344,6 +381,13 @@ function createListResource(options, vm, getResource) {
 
   function reload() {
     return out.list.fetch()
+  }
+
+  function setData(data) {
+    if (typeof data === 'function') {
+      data = data.call(vm, out.data)
+    }
+    out.data = data
   }
 
   // fetch list
