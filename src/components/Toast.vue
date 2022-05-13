@@ -10,15 +10,34 @@
         ]"
       >
         <div
-          class="px-2.5 py-2 bg-white border rounded-lg shadow-md min-w-[15rem]"
+          class="px-2.5 py-2 bg-white border rounded-lg shadow-md min-w-[15rem] max-w-[40rem]"
         >
-          <div class="flex items-center justify-between">
-            <div class="text-lg">
-              <slot> Toast Content </slot>
+          <div class="flex items-start justify-between space-x-2">
+            <div
+              class="grid flex-shrink-0 w-6 h-6 rounded-full place-items-center"
+              :class="{
+                'bg-red-100': appearance == 'danger',
+              }"
+              v-if="icon"
+            >
+              <FeatherIcon
+                :name="icon"
+                class="w-4 h-4"
+                :class="{
+                  'text-red-600': appearance == 'danger',
+                }"
+              />
+            </div>
+            <div>
+              <slot>
+                <p class="text-base">
+                  {{ text }}
+                </p>
+              </slot>
             </div>
             <div>
               <slot name="actions">
-                <Button icon="x" @click="shown = false" />
+                <Button appearance="minimal" icon="x" @click="shown = false" />
               </slot>
             </div>
           </div>
@@ -28,6 +47,7 @@
   </teleport>
 </template>
 <script>
+import { FeatherIcon } from 'frappe-ui'
 const positions = [
   'top-right',
   'top-center',
@@ -44,9 +64,22 @@ export default {
       type: String,
       default: 'top-right',
     },
+    icon: {
+      type: String,
+    },
     text: {
       type: String,
     },
+    appearance: {
+      type: String,
+    },
+    timeout: {
+      type: Number,
+      default: 5,
+    },
+  },
+  components: {
+    FeatherIcon,
   },
   created() {
     if (!document.getElementById('frappeui-toast-root')) {
@@ -64,9 +97,9 @@ export default {
   },
   mounted() {
     this.shown = true
-    // setTimeout(() => {
-    //   this.shown = false
-    // }, 3000)
+    setTimeout(() => {
+      this.shown = false
+    }, this.timeout * 1000)
   },
   data() {
     return {
@@ -103,7 +136,6 @@ export default {
         leaveFromClass: 'scale-100 translate-y-0 opacity-100',
         leaveToClass: 'scale-75 translate-y-4 opacity-0',
       }
-
       if (this.position.includes('top')) {
         props.enterFromClass += ' -translate-y-12'
       }
