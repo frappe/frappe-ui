@@ -1,5 +1,5 @@
 <template>
-  <Spinner class="w-3 h-3 mr-2 -ml-1" />
+  <Spinner class="max-w-xs" />
 </template>
 <script>
 import Spinner from './Spinner.vue'
