@@ -15,7 +15,7 @@
 
     <Menu
       v-if="fixedMenuButtons"
-      class="w-full border rounded-t-lg border-gray-50 border-b-gray-100"
+      class="w-full border border-gray-200 rounded-t-lg"
       :editor="editor"
       :buttons="fixedMenuButtons"
     />
@@ -65,6 +65,7 @@ export default {
     'content',
     'placeholder',
     'editorClass',
+    'editable',
     'fixedMenu',
     'bubbleMenu',
     'floatingMenu',
@@ -77,6 +78,17 @@ export default {
       editor: null,
     }
   },
+  watch: {
+    content(val) {
+      let currentHTML = this.editor.getHTML()
+      if (currentHTML !== val) {
+        this.editor.commands.setContent(val)
+      }
+    },
+    editable(value) {
+      this.editor.setEditable(value)
+    },
+  },
   mounted() {
     this.editor = new Editor({
       content: this.content || '<p></p>',
@@ -85,6 +97,7 @@ export default {
           class: ['prose prose-sm prose-p:my-1', this.editorClass].join(' '),
         },
       },
+      editable: this.editable,
       extensions: [
         StarterKit,
         Image,
