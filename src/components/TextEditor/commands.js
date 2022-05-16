@@ -61,6 +61,11 @@ export default {
     action: (editor) => editor.chain().focus().setHorizontalRule().run(),
     isActive: (editor) => false,
   },
+  Link: {
+    label: 'Link',
+    icon: 'link',
+    isActive: (editor) => editor.isActive('link'),
+  },
   Undo: {
     label: 'Undo',
     icon: 'corner-up-left',

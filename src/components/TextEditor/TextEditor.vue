@@ -49,6 +49,7 @@ import { Editor, EditorContent, BubbleMenu, FloatingMenu } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import Image from '@tiptap/extension-image'
+import Link from '@tiptap/extension-link'
 import Menu from './Menu.vue'
 import commands from './commands'
 
@@ -101,6 +102,7 @@ export default {
       extensions: [
         StarterKit,
         Image,
+        Link,
         Placeholder.configure({
           placeholder: this.placeholder || 'Write something...',
         }),
@@ -156,6 +158,7 @@ export default {
           'Separator',
           'Bold',
           'Italic',
+          'Link',
           'Separator',
           'Bullet List',
           'Numbered List',
