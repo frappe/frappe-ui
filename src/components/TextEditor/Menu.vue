@@ -23,10 +23,17 @@
 
     <Dialog :options="{ title: 'Set Link' }" v-model="setLinkDialog.show">
       <template #body-content>
-        <Input type="text" label="URL" v-model="setLinkDialog.url" />
+        <Input
+          type="text"
+          label="URL"
+          v-model="setLinkDialog.url"
+          @keydown.enter="(e) => setLink(e.target.value)"
+        />
       </template>
       <template #actions>
-        <Button appearance="primary" @click="setLink"> Save </Button>
+        <Button appearance="primary" @click="setLink(setLinkDialog.url)">
+          Save
+        </Button>
       </template>
     </Dialog>
   </div>
@@ -54,9 +61,9 @@ export default {
         button.action(this.editor)
       }
     },
-    setLink() {
+    setLink(url) {
       // empty
-      if (this.setLinkDialog.url === '') {
+      if (url === '') {
         this.editor.chain().focus().extendMarkRange('link').unsetLink().run()
       } else {
         // update link
@@ -64,7 +71,7 @@ export default {
           .chain()
           .focus()
           .extendMarkRange('link')
-          .setLink({ href: this.setLinkDialog.url })
+          .setLink({ href: url })
           .run()
       }
 
