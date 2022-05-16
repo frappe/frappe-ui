@@ -7,6 +7,7 @@
   >
     <LoadingIndicator
       v-if="loading"
+      class="w-3 h-3 mr-2 -ml-1"
       :class="{
         'text-white': appearance == 'primary',
         'text-gray-600': appearance == 'secondary',
@@ -119,7 +120,7 @@ export default {
           'bg-yellow-500 hover:bg-yellow-400 border-transparent text-white focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-yellow-500',
         white:
           'bg-white text-gray-900 border-gray-200 hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-gray-400',
-        minimal: `active:bg-gray-200 focus:bg-gray-200 text-gray-900 ${
+        minimal: `active:bg-gray-200 border-transparent focus:bg-gray-200 text-gray-900 ${
           this.active ? 'bg-gray-200' : 'bg-transparent hover:bg-gray-200'
         }`,
       }
