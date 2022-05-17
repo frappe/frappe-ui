@@ -13,10 +13,10 @@
           class="p-4 bg-white border rounded-lg shadow-md min-w-[15rem] max-w-[40rem]"
         >
           <div class="flex items-start">
-            <div class="grid w-5 h-5 place-items-center">
+            <div v-if="icon" class="grid w-5 h-5 mr-3 place-items-center">
               <FeatherIcon :name="icon" :class="['w-5 h-5', iconClasses]" />
             </div>
-            <div class="ml-3">
+            <div>
               <slot>
                 <p class="text-base font-medium text-gray-900">
                   {{ title }}
