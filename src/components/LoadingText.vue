@@ -1,6 +1,6 @@
 <template>
   <div class="flex items-center text-base text-gray-500">
-    <LoadingIndicator /> {{ text }}
+    <LoadingIndicator class="w-3 h-3 mr-2 -ml-1" /> {{ text }}
   </div>
 </template>
 <script>
