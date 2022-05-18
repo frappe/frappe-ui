@@ -165,7 +165,9 @@ export function createDocumentResource(options, vm) {
     },
     onSuccess(data) {
       out.doc = transform(data)
+      options.setValue?.onSuccess?.call(vm, data)
     },
+    onError: options.setValue?.onError,
   }
 
   let out = reactive({
@@ -206,7 +208,9 @@ export function createDocumentResource(options, vm) {
         },
         onSuccess() {
           out.doc = null
+          options.delete?.onSuccess?.call(vm, data)
         },
+        onError: options.delete?.onError,
       },
       vm
     ),
