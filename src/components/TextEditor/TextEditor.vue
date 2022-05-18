@@ -71,6 +71,7 @@ export default {
     'bubbleMenu',
     'floatingMenu',
     'extensions',
+    'starterkitOptions',
   ],
   emits: ['change'],
   expose: ['editor'],
@@ -92,7 +93,7 @@ export default {
   },
   mounted() {
     this.editor = new Editor({
-      content: this.content || '<p></p>',
+      content: this.content || null,
       editorProps: {
         attributes: {
           class: ['prose prose-sm prose-p:my-1', this.editorClass].join(' '),
@@ -100,7 +101,9 @@ export default {
       },
       editable: this.editable,
       extensions: [
-        StarterKit,
+        StarterKit.configure({
+          ...this.starterkitOptions,
+        }),
         Image,
         Link,
         Placeholder.configure({
