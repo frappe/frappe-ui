@@ -300,8 +300,9 @@ function createListResource(options, vm, getResource) {
         },
         onSuccess(data) {
           out.data = transform(data)
-          options.onSuccess && options.onSuccess.call(vm, out.data)
+          options.onSuccess?.call(vm, out.data)
         },
+        onError: options.onError,
       },
       vm
     ),
@@ -316,9 +317,11 @@ function createListResource(options, vm, getResource) {
             },
           }
         },
-        onSuccess() {
+        onSuccess(data) {
           out.list.fetch()
+          options.insert?.onSuccess?.call(vm, data)
         },
+        onError: options.insert?.onError,
       },
       vm
     ),
@@ -333,9 +336,11 @@ function createListResource(options, vm, getResource) {
             fieldname: values,
           }
         },
-        onSuccess() {
+        onSuccess(data) {
           out.list.fetch()
+          options.setValue?.onSuccess?.call(vm, data)
         },
+        onError: options.setValue?.onError,
       },
       vm
     ),
@@ -348,9 +353,11 @@ function createListResource(options, vm, getResource) {
             name,
           }
         },
-        onSuccess() {
+        onSuccess(data) {
           out.list.fetch()
+          options.delete?.onSuccess?.call(vm, data)
         },
+        onError: options.delete?.onError,
       },
       vm
     ),
