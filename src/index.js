@@ -28,6 +28,7 @@ export { default as onOutsideClickDirective } from './directives/onOutsideClick.
 // utilities
 export { default as call, createCall } from './utils/call.js'
 export { default as debounce } from './utils/debounce.js'
+export { createResource } from './utils/resources.js'
 
 // plugin
 export { default as FrappeUI } from './utils/plugin.js'
