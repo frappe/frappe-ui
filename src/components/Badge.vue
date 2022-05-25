@@ -13,6 +13,14 @@ export default {
   computed: {
     classes() {
       let color = this.color
+      if (typeof color === 'object') {
+        for (let key in color) {
+          if (color[key]) {
+            color = key
+            break
+          }
+        }
+      }
       if (!color && this.status) {
         color = {
           Pending: 'yellow',
