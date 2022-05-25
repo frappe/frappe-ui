@@ -35,7 +35,6 @@
       :value="passedInputValue"
       :disabled="disabled"
       :rows="rows || 3"
-      @blur="$emit('blur', $event)"
     ></textarea>
     <select
       v-bind="inputAttributes"
@@ -114,7 +113,7 @@ export default {
       type: String,
     },
   },
-  emits: ['blur', 'input', 'change', 'update:modelValue'],
+  emits: ['input', 'change', 'update:modelValue'],
   methods: {
     focus() {
       this.$refs.input.focus()
