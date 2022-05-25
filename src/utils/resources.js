@@ -81,7 +81,7 @@ export function createResource(options, vm, getResource) {
 
     try {
       let data = await resourceFetcher(options.method, params || options.params)
-      out.data = data
+      out.data = transform(data)
       out.fetched = true
       for (let fn of successFunctions) {
         if (fn) {
@@ -136,7 +136,17 @@ export function createResource(options, vm, getResource) {
     if (typeof data === 'function') {
       data = data.call(vm, out.data)
     }
-    out.data = data
+    out.data = transform(data)
+  }
+
+  function transform(data) {
+    if (options.transform) {
+      let returnValue = options.transform.call(vm, data)
+      if (typeof returnValue != null) {
+        return returnValue
+      }
+    }
+    return data
   }
 
   if (cacheKey && !cached[cacheKey]) {
