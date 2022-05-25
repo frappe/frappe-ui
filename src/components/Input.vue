@@ -13,7 +13,7 @@
         )
       "
       v-bind="inputAttributes"
-      class="placeholder-gray-500"
+      class="placeholder-gray-500 border-gray-400"
       ref="input"
       :class="[
         {
@@ -139,13 +139,17 @@ export default {
       return this.modelValue || null
     },
     inputAttributes() {
+      let attrs = {}
       let onInput = (e) => {
         this.$emit('input', this.getInputValue(e))
       }
       if (this.debounce) {
         onInput = debounce(onInput, this.debounce)
       }
-      return Object.assign({}, this.$attrs, {
+      if (this.type == 'checkbox') {
+        attrs.checked = this.passedInputValue
+      }
+      return Object.assign(attrs, this.$attrs, {
         onInput,
         onChange: (e) => {
           this.$emit('change', this.getInputValue(e))
