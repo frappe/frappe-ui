@@ -30,6 +30,8 @@
     <textarea
       v-if="type === 'textarea'"
       v-bind="inputAttributes"
+      :placeholder="placeholder"
+      class="placeholder-gray-500"
       :class="['block w-full resize-none form-textarea', inputClass]"
       ref="input"
       :value="passedInputValue"
