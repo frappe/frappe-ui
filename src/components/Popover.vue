@@ -48,6 +48,10 @@ export default {
       type: Boolean,
       default: true,
     },
+    sameWidth: {
+      type: Boolean,
+      default: false,
+    },
     show: {
       default: null,
     },
@@ -115,27 +119,41 @@ export default {
       if (!this.popper) {
         this.popper = createPopper(this.$refs.reference, this.$refs.popover, {
           placement: this.placement,
-          modifiers: !this.hideArrow
-            ? [
-                {
-                  name: 'arrow',
-                  options: {
-                    element: this.$refs['popover-arrow'],
-                  },
-                },
-                {
-                  name: 'offset',
-                  options: {
-                    offset: [0, 10],
-                  },
-                },
-              ]
-            : [],
+          modifiers: this.getModifiers(),
         })
       } else {
         this.updatePosition()
       }
       this.$emit('init')
+    },
+    getModifiers() {
+      const modifiers = []
+      if (!this.hideArrow) {
+        modifiers.push({
+          name: 'arrow',
+          options: {
+            element: this.$refs['popover-arrow'],
+          },
+        })
+        modifiers.push({
+          name: 'offset',
+          options: {
+            offset: [0, 10],
+          },
+        })
+      }
+      if (this.sameWidth) {
+        modifiers.push({
+          name: 'sameWidth',
+          enabled: true,
+          fn: ({ state }) => {
+            state.styles.popper.width = `${state.rects.reference.width}px`
+          },
+          phase: 'beforeWrite',
+          requires: ['computeStyles'],
+        })
+      }
+      return modifiers
     },
     updatePosition() {
       this.popper && this.popper.update()
