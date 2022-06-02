@@ -54,15 +54,16 @@ export default {
           limit: options.limit
         })
       },
-      updateFilters: (filters) => {
+      update: (newOptions) => {
         clearList()
-        manager.value.options.filters = filters
+        if (newOptions.filters) options.filters = newOptions.filters
+        if (newOptions.order_by) options.order_by = newOptions.order_by
         resource.value.update({
           ...options,
           start: 0,
           limit: options.limit
         })
-      }
+      },
     })
     const clearList = () => {
       manager.value.list = []
