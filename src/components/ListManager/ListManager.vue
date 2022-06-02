@@ -1,11 +1,11 @@
 <template>
   <div class="h-full flex flex-col">
-    <div class="shrink-0">
+    <div class="shrink-0" :class="manager.options?.style?.header" >
       <slot :fields="manager.options?.fields" name="header"></slot>
     </div>
     <div 
       ref="body" 
-      :class="manager.options?.classes?.body" 
+      :class="manager.options?.style?.body" 
       class="grow overflow-auto" 
       @scroll="onScroll"
     >
@@ -27,7 +27,9 @@
         </div>
       </div>
     </div>
-    <slot name="footer"></slot>
+    <div :class="manager.options?.style?.footer" >
+      <slot name="footer"></slot>
+    </div>
   </div>
 </template>
 
