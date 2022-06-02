@@ -12,14 +12,16 @@
       <div 
         ref="rows" 
         v-for="rowData in manager.list" 
-        :key="rowData.name" 
-        :set="row = {
-          data: rowData,
-        }"
+        :key="rowData.name"
       >
-        <div>
+        <div @click="handleRowClick(rowData)">
           <slot 
-            :row="row" 
+            :row="{
+              data: rowData, 
+              meta: {
+                selected: selectedItems[rowData.name]
+              }
+            }" 
             name="listItem"
           ></slot>
         </div>
@@ -41,10 +43,12 @@ export default {
     }
     const resource = ref(null)
     const newItems = ref([])
+    const selectedItems = ref({})
     const manager = ref({
       loading: false,
       resource,
       options,
+      selectedItems,
       list: [],
       loadMore: () => {
         manager.value.loading = true
@@ -68,11 +72,13 @@ export default {
     const clearList = () => {
       manager.value.list = []
       newItems.value = []
+      selectedItems.value = {}
     }
     context.expose({ manager })
     return {
       manager,
-      newItems
+      newItems,
+      selectedItems
     }
   },
   mounted() {
@@ -126,7 +132,12 @@ export default {
     }
   },
   methods: {
-    onScroll ({ target: { scrollTop, clientHeight, scrollHeight }}) {
+    handleRowClick(rowData) {
+      if (this.manager.options.handle_item_selection) {
+        this.selectedItems[rowData.name] = !this.selectedItems[rowData.name]
+      }
+    },
+    onScroll({ target: { scrollTop, clientHeight, scrollHeight }}) {
 			if (scrollTop + clientHeight >= scrollHeight) {
 				if (this.manager.options.auto_pagination) {
           this.manager.loadMore()
