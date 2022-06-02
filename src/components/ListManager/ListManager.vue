@@ -53,8 +53,21 @@ export default {
           start: manager.value.list.length,
           limit: options.limit
         })
+      },
+      updateFilters: (filters) => {
+        clearList()
+        manager.value.options.filters = filters
+        resource.value.update({
+          ...options,
+          start: 0,
+          limit: options.limit
+        })
       }
     })
+    const clearList = () => {
+      manager.value.list = []
+      newItems.value = []
+    }
     context.expose({ manager })
     return {
       manager,
