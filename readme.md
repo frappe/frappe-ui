@@ -197,6 +197,45 @@ Uses [`feather-icons`](https://github.com/feathericons/feather) under the hood.
 <SuccessMessage message="Completed successfully" />
 ```
 
+### ListManager
+```html
+<ListManager
+  ref="list"
+  :options="{
+    cache: ['Ticket', 'Desk'],
+    doctype: 'Ticket',
+    filters: {'status': 'Open'},
+    fields: ['name', 'subject', 'status'],
+    limit: 20,
+    order_by: 'modified desc',
+    classes: {
+      body: 'space-y-2'
+    },
+    auto_pagination: true,
+    handle_item_selection: true
+  }"
+  >
+  <template #header="{ fields }">
+    <div class="flex flex-row space-x-2">
+      <div>{{ fields[0] }}</div>
+      <div>{{ fields[1] }}</div>
+      ...
+    </div>
+  </template>
+  <template #listItem="{ row }">
+    <div class="flex flex-row space-x-2">
+      <Input type="checkbox" :checked="row.meta.selected" />
+      <div>{{ row.data.field_1 }}</div>
+      <div>{{ row.data.field_2 }}</div>
+      ...
+    </div>
+  </template>
+  <template #footer>
+  </template>
+</ListManager>
+```
+
+
 ## Directives
 
 ### onOutsideClick
