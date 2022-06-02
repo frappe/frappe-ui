@@ -14,7 +14,13 @@
         v-for="rowData in manager.list" 
         :key="rowData.name"
       >
-        <div @click="handleRowClick(rowData)">
+        <div 
+          :class="
+              manager.options?.style?.row?.base + 
+              (selectedItems[rowData.name] ? manager.options?.style?.row?.selected : '')
+            "
+            @click="() => { manager.select(rowData) }"
+          >
           <slot 
             :row="{
               data: rowData, 
@@ -22,6 +28,7 @@
                 selected: selectedItems[rowData.name]
               }
             }" 
+            :select="() => { selectionMode == 0 ? manager._select(rowData) : {} }"
             name="listItem"
           ></slot>
         </div>
@@ -41,11 +48,13 @@ export default {
   props: ['options'],
   setup(props, context) {
     const options = {
+      handle_row_click: () => {},
       ...props.options
     }
     const resource = ref(null)
     const newItems = ref([])
     const selectedItems = ref({})
+    const selectionMode = ref(0)
     const manager = ref({
       loading: false,
       resource,
@@ -70,6 +79,28 @@ export default {
           limit: options.limit
         })
       },
+      select: (rowData) => {
+        if (selectionMode.value == 1) {
+          selectionMode.value = 2
+        } else if (selectionMode.value == 2) {
+          manager.value._select(rowData)
+        } else {
+          manager.value.options.handle_row_click(rowData)
+        }
+      },
+      _select: (rowData) => {
+        if (selectionMode.value == 0) {
+          selectionMode.value = 1
+        }
+        if(rowData.name in selectedItems.value) {
+          delete selectedItems.value[rowData.name]
+          if (Object.keys(selectedItems.value).length == 0) {
+            selectionMode.value = 0
+          }
+        } else {
+          selectedItems.value[rowData.name] = rowData
+        }
+      },
     })
     const clearList = () => {
       manager.value.list = []
@@ -80,7 +111,8 @@ export default {
     return {
       manager,
       newItems,
-      selectedItems
+      selectedItems,
+      selectionMode
     }
   },
   mounted() {
@@ -134,11 +166,6 @@ export default {
     }
   },
   methods: {
-    handleRowClick(rowData) {
-      if (this.manager.options.handle_item_selection) {
-        this.selectedItems[rowData.name] = !this.selectedItems[rowData.name]
-      }
-    },
     onScroll({ target: { scrollTop, clientHeight, scrollHeight }}) {
 			if (scrollTop + clientHeight >= scrollHeight) {
 				if (this.manager.options.auto_pagination) {
