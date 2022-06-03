@@ -139,6 +139,9 @@ export default {
     this.manager.resource = this.$resources.list
     this.handleRealtimeUpdate()
   },
+  unmounted() {
+    this.cleanup()
+  },
   resources: {
     list() {
       return {
@@ -207,6 +210,9 @@ export default {
           })
         }
       })
+    },
+    cleanup() {
+      this.$socket.off("list_update")
     }
   }
 }
