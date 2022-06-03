@@ -1,7 +1,7 @@
 <template>
   <div class="h-full flex flex-col">
     <div class="shrink-0" :class="manager.options?.style?.header" >
-      <slot :fields="manager.options?.fields" name="header"></slot>
+      <slot :fields="manager.options?.fields" :manager="manager" name="header"></slot>
     </div>
     <div 
       ref="body" 
@@ -57,10 +57,15 @@ export default {
     const selectionMode = ref(0)
 
     const allItemsSelected = computed(() => {
-      return Object.keys(selectedItems.value).length == manager.value.list.length
+      if (manager.value.loading) {
+        return false
+      } else {
+        return Object.keys(selectedItems.value).length == manager.value.list.length
+      }
     })
+
     const manager = ref({
-      loading: false,
+      loading: true,
       resource,
       options,
       selectedItems,
