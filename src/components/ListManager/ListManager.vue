@@ -41,7 +41,7 @@
 </template>
 
 <script>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 export default {
   name: 'ListManager',
@@ -55,11 +55,16 @@ export default {
     const newItems = ref([])
     const selectedItems = ref({})
     const selectionMode = ref(0)
+
+    const allItemsSelected = computed(() => {
+      return Object.keys(selectedItems.value).length == manager.value.list.length
+    })
     const manager = ref({
       loading: false,
       resource,
       options,
       selectedItems,
+      allItemsSelected,
       list: [],
       loadMore: () => {
         manager.value.loading = true
@@ -86,6 +91,15 @@ export default {
           manager.value._select(rowData)
         } else {
           manager.value.options.handle_row_click(rowData)
+        }
+      },
+      selectAll: () => {
+        if (allItemsSelected.value) {
+          selectedItems.value = {}
+        } else {
+          for (let i = 0; i < manager.value.list.length; i++) {
+            selectedItems.value[manager.value.list[i].name] = manager.value.list[i]
+          }
         }
       },
       _select: (rowData) => {
