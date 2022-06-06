@@ -172,3 +172,8 @@ export default {
   },
 }
 </script>
+<style>
+.form-select {
+  background-image: url("data:image/svg+xml;utf8,<svg fill='none' width='8' xmlns='http://www.w3.org/2000/svg' viewBox='-4 -2 16 16'><path d='M4.5 3.636 6.136 2l1.637 1.636M4.5 8.364 6.136 10l1.637-1.636' stroke='%23333C44' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+}
+</style>
