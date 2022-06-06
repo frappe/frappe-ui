@@ -196,6 +196,7 @@ export function createDocumentResource(options, vm) {
         onSuccess(data) {
           out.doc = transform(data)
         },
+        onError: options.onError,
       },
       vm
     ),
@@ -287,8 +288,10 @@ function createListResource(options, vm, getResource) {
   if (!options.doctype) return
 
   let cacheKey = getCacheKey(options.cache)
-  if (listCache[cacheKey]) {
-    return listCache[cacheKey]
+  if (cacheKey) {
+    if (listCache[cacheKey]) {
+      return listCache[cacheKey]
+    }
   }
 
   let out = reactive({
@@ -298,6 +301,7 @@ function createListResource(options, vm, getResource) {
     order_by: options.order_by,
     start: options.start,
     limit: options.limit,
+    originalData: null,
     data: null,
     list: createResource(
       {
@@ -313,10 +317,42 @@ function createListResource(options, vm, getResource) {
           }
         },
         onSuccess(data) {
+          out.originalData = data
           out.data = transform(data)
           options.onSuccess?.call(vm, out.data)
         },
         onError: options.onError,
+      },
+      vm
+    ),
+    fetchOne: createResource(
+      {
+        method: 'frappe.client.get_list',
+        makeParams(name) {
+          return {
+            doctype: out.doctype,
+            fields: out.fields,
+            filters: { name },
+          }
+        },
+        onSuccess(data) {
+          if (data.length > 0 && out.originalData) {
+            let doc = data[0]
+            let index = out.originalData.findIndex((d) => d.name === doc.name)
+            out.originalData = out.originalData.filter(
+              (d) => d.name !== doc.name
+            )
+            out.originalData = [
+              out.originalData.slice(0, index),
+              data,
+              out.originalData.slice(index),
+            ].flat()
+          }
+
+          out.data = transform(out.originalData)
+          options.fetchOne?.onSuccess?.call(vm, out.data)
+        },
+        onError: options.fetchOne?.onError,
       },
       vm
     ),
@@ -414,8 +450,10 @@ function createListResource(options, vm, getResource) {
   // fetch list
   out.list.fetch()
 
-  // cache
-  listCache[cacheKey] = out
+  if (cacheKey) {
+    // cache
+    listCache[cacheKey] = out
+  }
 
   return out
 }
@@ -431,6 +469,9 @@ function createResourceForOptions(options, vm, getResource) {
 }
 
 function getCacheKey(cacheKey) {
+  if (!cacheKey) {
+    return null
+  }
   if (typeof cacheKey === 'string') {
     cacheKey = [cacheKey]
   }
