@@ -9,7 +9,7 @@
     >
       <slot
         name="target"
-        v-bind="{ togglePopover, updatePosition, open, close }"
+        v-bind="{ togglePopover, updatePosition, open, close, isOpen }"
       ></slot>
     </div>
     <teleport to="#frappeui-popper-root">
@@ -20,11 +20,19 @@
         :style="{ minWidth: targetWidth ? targetWidth + 'px' : null }"
         v-show="isOpen"
       >
-        <div v-if="!hideArrow" class="popover-arrow" ref="popover-arrow"></div>
-        <slot
-          name="content"
-          v-bind="{ togglePopover, updatePosition, open, close }"
-        ></slot>
+        <transition v-bind="transition">
+          <div v-show="isOpen">
+            <div
+              v-if="!hideArrow"
+              class="popover-arrow"
+              ref="popover-arrow"
+            ></div>
+            <slot
+              name="content"
+              v-bind="{ togglePopover, updatePosition, open, close, isOpen }"
+            ></slot>
+          </div>
+        </transition>
       </div>
     </teleport>
   </div>
@@ -49,6 +57,10 @@ export default {
       default: 'bottom-start',
     },
     popoverClass: [String, Object, Array],
+    transition: {
+      type: Object,
+      default: null,
+    },
   },
   emits: ['init', 'open', 'close'],
   watch: {
