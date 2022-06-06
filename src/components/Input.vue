@@ -49,6 +49,7 @@
         v-for="option in selectOptions"
         :key="option.value"
         :value="option.value"
+        :disabled="option.disabled || false"
         :selected="passedInputValue === option.value"
       >
         {{ option.label }}
@@ -159,15 +160,17 @@ export default {
       })
     },
     selectOptions() {
-      return this.options.map((option) => {
-        if (typeof option === 'string') {
-          return {
-            label: option,
-            value: option,
+      return this.options
+        .map((option) => {
+          if (typeof option === 'string') {
+            return {
+              label: option,
+              value: option,
+            }
           }
-        }
-        return option
-      })
+          return option
+        })
+        .filter(Boolean)
     },
   },
 }
