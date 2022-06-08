@@ -1,0 +1,259 @@
+<template>
+  <Popover
+    @open="selectCurrentMonthYear"
+    :transition="{
+      enterActiveClass: 'transition duration-200 ease-out',
+      enterFromClass: 'translate-y-1 opacity-0',
+      enterToClass: 'translate-y-0 opacity-100',
+      leaveActiveClass: 'transition duration-150 ease-in',
+      leaveFromClass: 'translate-y-0 opacity-100',
+      leaveToClass: 'translate-y-1 opacity-0',
+    }"
+  >
+    <template #target="{ togglePopover }">
+      <Input
+        type="text"
+        :class="inputClass"
+        :value="
+          modelValue && formatValue ? formatValue(modelValue) : modelValue || ''
+        "
+        :placeholder="placeholder"
+        @focus="!readonly ? togglePopover() : null"
+        readonly
+      />
+    </template>
+    <template #content="{ togglePopover }">
+      <div
+        class="p-3 mt-1 text-left bg-white border border-gray-100 shadow-xl select-none"
+      >
+        <div class="flex items-center justify-between">
+          <span class="text-base font-medium text-blue-500">
+            {{ formatMonth }}
+          </span>
+          <span class="flex">
+            <div
+              class="grid w-5 h-5 rounded-md cursor-pointer hover:bg-gray-100 place-items-center"
+            >
+              <FeatherIcon
+                @click="prevMonth"
+                name="chevron-left"
+                class="w-4 h-4"
+              />
+            </div>
+            <div
+              class="grid w-5 h-5 ml-2 rounded-md cursor-pointer hover:bg-gray-100 place-items-center"
+            >
+              <FeatherIcon
+                @click="nextMonth"
+                name="chevron-right"
+                class="w-4 h-4"
+              />
+            </div>
+          </span>
+        </div>
+        <div class="mt-2 text-sm">
+          <div class="grid w-full grid-cols-7 text-gray-600 place-items-center">
+            <div
+              class="grid w-6 h-6 gap-1 text-center place-items-center"
+              v-for="(d, i) in ['S', 'M', 'T', 'W', 'T', 'F', 'S']"
+              :key="i"
+            >
+              {{ d }}
+            </div>
+          </div>
+          <div v-for="(week, i) in datesAsWeeks" :key="i" class="mt-1">
+            <div class="grid w-full grid-cols-7 gap-1 place-items-center">
+              <div
+                v-for="date in week"
+                :key="toValue(date)"
+                class="grid w-6 h-6 rounded-md cursor-pointer place-items-center hover:bg-blue-100 hover:text-blue-700"
+                :class="{
+                  'text-gray-600': date.getMonth() !== currentMonth - 1,
+                  'text-blue-500': toValue(date) === toValue(today),
+                  'bg-blue-100 font-semibold text-blue-500':
+                    toValue(date) === modelValue,
+                }"
+                @click="
+                  () => {
+                    selectDate(date)
+                    togglePopover()
+                  }
+                "
+              >
+                {{ date.getDate() }}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="flex justify-end w-full mt-2">
+          <div
+            class="px-2 py-1 text-sm rounded-md cursor-pointer hover:bg-gray-100"
+            @click="
+              () => {
+                selectDate('')
+                togglePopover()
+              }
+            "
+          >
+            Clear
+          </div>
+        </div>
+      </div>
+    </template>
+  </Popover>
+</template>
+
+<script>
+import Popover from './Popover.vue'
+
+export default {
+  name: 'DatePicker',
+  props: ['modelValue', 'placeholder', 'readonly', 'formatValue', 'inputClass'],
+  emits: ['update:modelValue'],
+  components: {
+    Popover,
+  },
+  data() {
+    return {
+      currentYear: null,
+      currentMonth: null,
+    }
+  },
+  created() {
+    this.selectCurrentMonthYear()
+  },
+  computed: {
+    today() {
+      return this.getDate()
+    },
+    datesAsWeeks() {
+      let datesAsWeeks = []
+      let dates = this.dates.slice()
+      while (dates.length) {
+        let week = dates.splice(0, 7)
+        datesAsWeeks.push(week)
+      }
+      return datesAsWeeks
+    },
+    dates() {
+      if (!(this.currentYear && this.currentMonth)) {
+        return []
+      }
+      let monthIndex = this.currentMonth - 1
+      let year = this.currentYear
+
+      let firstDayOfMonth = this.getDate(year, monthIndex, 1)
+      let lastDayOfMonth = this.getDate(year, monthIndex + 1, 0)
+      let leftPaddingCount = firstDayOfMonth.getDay()
+      let rightPaddingCount = 6 - lastDayOfMonth.getDay()
+
+      let leftPadding = this.getDatesAfter(firstDayOfMonth, -leftPaddingCount)
+      let rightPadding = this.getDatesAfter(lastDayOfMonth, rightPaddingCount)
+      let daysInMonth = this.getDaysInMonth(monthIndex, year)
+      let datesInMonth = this.getDatesAfter(firstDayOfMonth, daysInMonth - 1)
+
+      let dates = [
+        ...leftPadding,
+        firstDayOfMonth,
+        ...datesInMonth,
+        ...rightPadding,
+      ]
+      if (dates.length < 42) {
+        const finalPadding = this.getDatesAfter(dates.at(-1), 42 - dates.length)
+        dates = dates.concat(...finalPadding)
+      }
+      return dates
+    },
+    formatMonth() {
+      let date = this.getDate(this.currentYear, this.currentMonth - 1, 1)
+      return date.toLocaleString('en-US', { month: 'short', year: 'numeric' })
+    },
+  },
+  methods: {
+    selectDate(date) {
+      this.$emit('update:modelValue', this.toValue(date))
+    },
+    selectCurrentMonthYear() {
+      let date = this.modelValue
+        ? this.getDate(this.modelValue)
+        : this.getDate()
+      this.currentYear = date.getFullYear()
+      this.currentMonth = date.getMonth() + 1
+    },
+    prevMonth() {
+      this.changeMonth(-1)
+    },
+    nextMonth() {
+      this.changeMonth(1)
+    },
+    changeMonth(adder) {
+      this.currentMonth = this.currentMonth + adder
+      if (this.currentMonth < 1) {
+        this.currentMonth = 12
+        this.currentYear = this.currentYear - 1
+      }
+      if (this.currentMonth > 12) {
+        this.currentMonth = 1
+        this.currentYear = this.currentYear + 1
+      }
+    },
+    getDatesAfter(date, count) {
+      let incrementer = 1
+      if (count < 0) {
+        incrementer = -1
+        count = Math.abs(count)
+      }
+      let dates = []
+      while (count) {
+        date = this.getDate(
+          date.getFullYear(),
+          date.getMonth(),
+          date.getDate() + incrementer
+        )
+        dates.push(date)
+        count--
+      }
+      if (incrementer === -1) {
+        return dates.reverse()
+      }
+      return dates
+    },
+
+    getDaysInMonth(monthIndex, year) {
+      let daysInMonthMap = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+      let daysInMonth = daysInMonthMap[monthIndex]
+      if (monthIndex === 1 && this.isLeapYear(year)) {
+        return 29
+      }
+      return daysInMonth
+    },
+
+    isLeapYear(year) {
+      if (year % 400 === 0) return true
+      if (year % 100 === 0) return false
+      if (year % 4 === 0) return true
+      return false
+    },
+
+    toValue(date) {
+      if (!date) {
+        return ''
+      }
+
+      // toISOString is buggy and reduces the day by one
+      // this is because it considers the UTC timestamp
+      // in order to circumvent that we need to use luxon/moment
+      // but that refactor could take some time, so fixing the time difference
+      // as suggested in this answer.
+      // https://stackoverflow.com/a/16084846/3541205
+      date.setHours(0, -date.getTimezoneOffset(), 0, 0)
+      return date.toISOString().slice(0, 10)
+    },
+
+    getDate(...args) {
+      let d = new Date(...args)
+      return d
+    },
+  },
+}
+</script>
