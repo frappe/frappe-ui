@@ -1,16 +1,18 @@
 <template>
   <div ref="reference">
     <div
-      class="h-full"
       ref="target"
+      class="inline-block"
       @click="updatePosition"
       @focusin="updatePosition"
       @keydown="updatePosition"
+      @mouseover="onMouseover"
+      @mouseleave="onMouseleave"
     >
       <slot
         name="target"
         v-bind="{ togglePopover, updatePosition, open, close, isOpen }"
-      ></slot>
+      />
     </div>
     <teleport to="#frappeui-popper-root">
       <div
@@ -20,17 +22,25 @@
         :style="{ minWidth: targetWidth ? targetWidth + 'px' : null }"
         v-show="isOpen"
       >
-        <transition v-bind="transition">
+        <transition v-bind="popupTransition">
           <div v-show="isOpen">
-            <div
-              v-if="!hideArrow"
-              class="popover-arrow"
-              ref="popover-arrow"
-            ></div>
             <slot
-              name="content"
+              name="body"
               v-bind="{ togglePopover, updatePosition, open, close, isOpen }"
-            ></slot>
+            >
+              <div class="bg-white border border-gray-100 rounded-lg shadow-xl">
+                <slot
+                  name="body-main"
+                  v-bind="{
+                    togglePopover,
+                    updatePosition,
+                    open,
+                    close,
+                    isOpen,
+                  }"
+                />
+              </div>
+            </slot>
           </div>
         </transition>
       </div>
@@ -44,12 +54,16 @@ import { createPopper } from '@popperjs/core'
 export default {
   name: 'Popover',
   props: {
-    hideArrow: {
-      type: Boolean,
-      default: true,
-    },
     show: {
-      default: null,
+      default: undefined,
+    },
+    trigger: {
+      type: String,
+      default: 'click', // click, hover
+    },
+    hoverDelay: {
+      type: Number,
+      default: 0,
     },
     right: Boolean,
     placement: {
@@ -58,28 +72,24 @@ export default {
     },
     popoverClass: [String, Object, Array],
     transition: {
-      type: Object,
       default: null,
     },
   },
-  emits: ['init', 'open', 'close'],
-  watch: {
-    show: {
-      immediate: true,
-      handler(val) {
-        if (val) {
-          this.open()
-        } else {
-          this.close()
-        }
-      },
-    },
-  },
+  emits: ['open', 'close', 'update:show'],
   data() {
     return {
-      isOpen: false,
+      showPopup: false,
       targetWidth: null,
     }
+  },
+  watch: {
+    show(val) {
+      if (val) {
+        this.open()
+      } else {
+        this.close()
+      }
+    },
   },
   created() {
     if (!document.getElementById('frappeui-popper-root')) {
@@ -99,7 +109,7 @@ export default {
       }
       this.close()
     }
-    if (this.show == null) {
+    if (!this.showPropPassed) {
       document.addEventListener('click', this.listener)
     }
     this.$nextTick(() => {
@@ -110,37 +120,65 @@ export default {
     this.popper && this.popper.destroy()
     document.removeEventListener('click', this.listener)
   },
+  computed: {
+    showPropPassed() {
+      return this.show != null
+    },
+    isOpen: {
+      get() {
+        if (this.showPropPassed) {
+          return this.show
+        }
+        return this.showPopup
+      },
+      set(val) {
+        val = Boolean(val)
+        if (this.showPropPassed) {
+          this.$emit('update:show', val)
+        } else {
+          this.showPopup = val
+        }
+        if (val === false) {
+          this.$emit('close')
+        } else if (val === true) {
+          this.$emit('open')
+        }
+      },
+    },
+    popupTransition() {
+      let templates = {
+        default: {
+          enterActiveClass: 'transition duration-200 ease-out',
+          enterFromClass: 'translate-y-1 opacity-0',
+          enterToClass: 'translate-y-0 opacity-100',
+          leaveActiveClass: 'transition duration-150 ease-in',
+          leaveFromClass: 'translate-y-0 opacity-100',
+          leaveToClass: 'translate-y-1 opacity-0',
+        },
+      }
+      if (typeof this.transition === 'string') {
+        return templates[this.transition]
+      }
+      return this.transition
+    },
+  },
   methods: {
     setupPopper() {
       if (!this.popper) {
         this.popper = createPopper(this.$refs.reference, this.$refs.popover, {
           placement: this.placement,
-          modifiers: !this.hideArrow
-            ? [
-                {
-                  name: 'arrow',
-                  options: {
-                    element: this.$refs['popover-arrow'],
-                  },
-                },
-                {
-                  name: 'offset',
-                  options: {
-                    offset: [0, 10],
-                  },
-                },
-              ]
-            : [],
         })
       } else {
         this.updatePosition()
       }
-      this.$emit('init')
     },
     updatePosition() {
       this.popper && this.popper.update()
     },
     togglePopover(flag) {
+      if (flag instanceof Event) {
+        flag = null
+      }
       if (flag == null) {
         flag = !this.isOpen
       }
@@ -157,49 +195,32 @@ export default {
       }
       this.isOpen = true
       this.$nextTick(() => this.setupPopper())
-      this.$emit('open')
     },
     close() {
       if (!this.isOpen) {
         return
       }
       this.isOpen = false
-      this.$emit('close')
+    },
+    onMouseover() {
+      if (this.trigger === 'hover') {
+        if (this.hoverDelay) {
+          this.hoverTimer = setTimeout(() => {
+            this.open()
+          }, Number(this.hoverDelay) * 1000)
+        } else {
+          this.open()
+        }
+      }
+    },
+    onMouseleave() {
+      if (this.hoverTimer) {
+        clearTimeout(this.hoverTimer)
+      }
+      if (this.trigger === 'hover') {
+        this.close()
+      }
     },
   },
 }
 </script>
-<style scoped>
-.popover-arrow,
-.popover-arrow::after {
-  position: absolute;
-  width: theme('spacing.4');
-  height: theme('spacing.4');
-  z-index: -1;
-}
-
-.popover-arrow::after {
-  content: '';
-  background: white;
-  transform: rotate(45deg);
-  border-top: 1px solid theme('borderColor.gray.400');
-  border-left: 1px solid theme('borderColor.gray.400');
-  border-top-left-radius: 6px;
-}
-
-.popover-container[data-popper-placement^='top'] > .popover-arrow {
-  bottom: calc(theme('spacing.2') * -1);
-}
-
-.popover-container[data-popper-placement^='bottom'] > .popover-arrow {
-  top: calc(theme('spacing.2') * -1);
-}
-
-.popover-container[data-popper-placement^='left'] > .popover-arrow {
-  right: calc(theme('spacing.2') * -1);
-}
-
-.popover-container[data-popper-placement^='right'] > .popover-arrow {
-  left: calc(theme('spacing.2') * -1);
-}
-</style>

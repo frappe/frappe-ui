@@ -1,15 +1,5 @@
 <template>
-  <Popover
-    @open="selectCurrentMonthYear"
-    :transition="{
-      enterActiveClass: 'transition duration-200 ease-out',
-      enterFromClass: 'translate-y-1 opacity-0',
-      enterToClass: 'translate-y-0 opacity-100',
-      leaveActiveClass: 'transition duration-150 ease-in',
-      leaveFromClass: 'translate-y-0 opacity-100',
-      leaveToClass: 'translate-y-1 opacity-0',
-    }"
-  >
+  <Popover @open="selectCurrentMonthYear" transition="default">
     <template #target="{ togglePopover }">
       <Input
         type="text"
@@ -22,10 +12,8 @@
         readonly
       />
     </template>
-    <template #content="{ togglePopover }">
-      <div
-        class="p-3 mt-1 text-left bg-white border border-gray-100 shadow-xl select-none"
-      >
+    <template #body-main="{ togglePopover }">
+      <div class="p-3 mt-1 text-left select-none">
         <div class="flex items-center justify-between">
           <span class="text-base font-medium text-blue-500">
             {{ formatMonth }}
