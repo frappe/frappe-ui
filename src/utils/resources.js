@@ -284,7 +284,7 @@ export function createDocumentResource(options, vm) {
   return out
 }
 
-function createListResource(options, vm, getResource) {
+export function createListResource(options, vm, getResource) {
   if (!options.doctype) return
 
   let cacheKey = getCacheKey(options.cache)
