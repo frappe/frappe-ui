@@ -1,6 +1,6 @@
 {
   "name": "frappe-ui",
-  "version": "0.0.32",
+  "version": "0.0.33",
   "description": "A set of components and utilities for rapid UI development",
   "main": "./src/index.js",
   "scripts": {
