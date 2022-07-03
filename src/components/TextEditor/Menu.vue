@@ -6,6 +6,37 @@
           class="border-l w-[2px] h-4"
           v-if="button.type === 'separator'"
         ></div>
+        <div v-else-if="button.map">
+          <Popover>
+            <template #target="{ togglePopover }">
+              <button
+                class="px-2 py-1 text-base font-medium text-gray-800 transition-colors rounded hover:bg-gray-100"
+                @click="togglePopover"
+              >
+                {{
+                  (button.find((b) => b.isActive(editor)) || button[0]).label
+                }}
+              </button>
+            </template>
+            <template #body="{ close }">
+              <ul class="p-1 bg-white border rounded shadow-md">
+                <li class="w-full" v-for="option in button">
+                  <button
+                    class="w-full px-2 py-1 text-base rounded hover:bg-gray-50"
+                    @click="
+                      () => {
+                        onClick(option)
+                        close()
+                      }
+                    "
+                  >
+                    {{ option.label }}
+                  </button>
+                </li>
+              </ul>
+            </template>
+          </Popover>
+        </div>
         <button
           v-else
           class="flex p-1 text-gray-800 transition-colors rounded"
@@ -13,7 +44,7 @@
           @click="onClick(button)"
           :title="button.label"
         >
-          <FeatherIcon v-if="button.icon" :name="button.icon" class="w-4" />
+          <component v-if="button.icon" :is="button.icon" class="w-4 h-4" />
           <span class="inline-block h-4 text-sm leading-4 min-w-[1rem]" v-else>
             {{ button.text }}
           </span>
@@ -39,11 +70,12 @@
   </div>
 </template>
 <script>
-import { FeatherIcon } from 'frappe-ui'
+import { Popover } from 'frappe-ui'
+
 export default {
   name: 'TipTapMenu',
   props: ['editor', 'buttons'],
-  components: { FeatherIcon },
+  components: { Popover },
   data() {
     return {
       setLinkDialog: { url: '', show: false },
