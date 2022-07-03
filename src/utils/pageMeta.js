@@ -18,8 +18,10 @@ function createMixin() {
             try {
               return this.$options.pageMeta.call(this)
             } catch (error) {
-              let debugInfo = `${this.$options.name} (${this.$options.__file || ''})`
-              console.warn('Failed to parse pageMeta in', debugInfo);
+              let debugInfo = `${this.$options.name} (${
+                this.$options.__file || ''
+              })`
+              console.warn('Failed to parse pageMeta in', debugInfo)
               return null
             }
           },
