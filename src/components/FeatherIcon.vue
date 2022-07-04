@@ -12,10 +12,9 @@ export default {
       validator(value) {
         const valid = validIcons.includes(value)
         if (!valid) {
-          console.warn(
-            `name property for feather-icon must be one of `,
-            validIcons
-          )
+          console.groupCollapsed('[frappe-ui] name property for feather-icon must be one of ')
+          console.dir(validIcons)
+          console.groupEnd()
         }
         return valid
       },
@@ -31,6 +30,9 @@ export default {
   },
   render() {
     let icon = feather.icons[this.name]
+    if (!icon) {
+      icon = feather.icons['circle']
+    }
     return h(
       'svg',
       mergeProps(
