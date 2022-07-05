@@ -67,14 +67,14 @@ export function createResource(options, vm, getResource) {
       try {
         invalidMessage = await validateFunction.call(vm, out.params)
         if (invalidMessage && typeof invalidMessage == 'string') {
+          out.loading = false
           let error = new Error(invalidMessage)
           handleError(error, errorFunctions)
-          out.loading = false
           return
         }
       } catch (error) {
-        handleError(error, errorFunctions)
         out.loading = false
+        handleError(error, errorFunctions)
         return
       }
     }
@@ -92,6 +92,7 @@ export function createResource(options, vm, getResource) {
       handleError(error, errorFunctions)
     }
     out.loading = false
+    return out.data
   }
 
   function update({ method, params, auto }) {
@@ -117,7 +118,6 @@ export function createResource(options, vm, getResource) {
   }
 
   function handleError(error, errorFunctions) {
-    console.error(error)
     if (out.previousData) {
       out.data = out.previousData
     }
@@ -127,6 +127,7 @@ export function createResource(options, vm, getResource) {
         fn.call(vm, error)
       }
     }
+    throw error
   }
 
   // usage:

@@ -2,7 +2,7 @@
   <div ref="reference">
     <div
       ref="target"
-      class="inline-block"
+      :class="['inline-block', $attrs.class]"
       @click="updatePosition"
       @focusin="updatePosition"
       @keydown="updatePosition"
@@ -53,6 +53,7 @@ import { createPopper } from '@popperjs/core'
 
 export default {
   name: 'Popover',
+  inheritAttrs: false,
   props: {
     show: {
       default: undefined,
