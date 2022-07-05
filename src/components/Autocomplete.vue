@@ -3,7 +3,7 @@
     <Popover class="w-full">
       <template #target="{ open: openPopover }">
         <ComboboxInput
-          :displayValue="(option) => option?.label"
+          :displayValue="displayValue"
           :class="['w-full form-input', { 'rounded-b-none': isComboBoxOpen }]"
           type="text"
           @change="
@@ -12,16 +12,24 @@
               openPopover()
             }
           "
-          @focus="openPopover"
+          @focus="
+            () => {
+              openPopover()
+              showCombobox = true
+            }
+          "
+          @keydown.enter="showCombobox = false"
           autocomplete="off"
+          v-bind="$attrs"
         />
       </template>
       <template #body>
         <ComboboxOptions
           :class="[
-            'p-1.5 bg-white rounded-md shadow-md',
-            { 'rounded-t-none': isComboBoxOpen },
+            'p-1.5 bg-white rounded-md shadow-md rounded-t-none',
+            { hidden: !showCombobox },
           ]"
+          :static="true"
         >
           <ComboboxOption
             as="template"
@@ -61,8 +69,9 @@ import Popover from './Popover.vue'
 
 export default {
   name: 'Autocomplete',
-  props: ['modelValue', 'options'],
-  emits: ['update:modelValue'],
+  inheritAttrs: false,
+  props: ['modelValue', 'options', 'value'],
+  emits: ['update:modelValue', 'change'],
   components: {
     Popover,
     Combobox,
@@ -72,16 +81,20 @@ export default {
   },
   data() {
     return {
+      showCombobox: false,
       query: '',
     }
   },
   computed: {
+    valuePropPassed() {
+      return 'value' in this.$props && this.$props.value !== undefined
+    },
     selectedValue: {
       get() {
-        return this.modelValue
+        return this.valuePropPassed ? this.value : this.modelValue
       },
       set(val) {
-        this.$emit('update:modelValue', val)
+        this.$emit(this.valuePropPassed ? 'change' : 'update:modelValue', val)
       },
     },
     filteredOptions() {
@@ -94,6 +107,14 @@ export default {
           (text || '').toLowerCase().includes(this.query.toLowerCase())
         )
       })
+    },
+  },
+  methods: {
+    displayValue(option) {
+      if (typeof option === 'string') {
+        return option
+      }
+      return option?.label
     },
   },
 }
