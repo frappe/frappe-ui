@@ -1,32 +1,43 @@
 <template>
-  <Combobox v-model="selectedValue" v-slot="{ open: isComboBoxOpen }" nullable>
+  <Combobox v-model="selectedValue" nullable>
     <Popover class="w-full">
       <template #target="{ open: openPopover }">
-        <ComboboxInput
-          :displayValue="displayValue"
-          :class="['w-full form-input', { 'rounded-b-none': isComboBoxOpen }]"
-          type="text"
-          @change="
-            (e) => {
-              query = e.target.value
-              openPopover()
-            }
-          "
-          @focus="
-            () => {
-              openPopover()
-              showCombobox = true
-            }
-          "
-          @keydown.enter="showCombobox = false"
-          autocomplete="off"
-          v-bind="$attrs"
-        />
+        <div class="relative w-full">
+          <ComboboxInput
+            :displayValue="displayValue"
+            class="w-full placeholder-gray-500 form-input"
+            type="text"
+            @change="
+              (e) => {
+                query = e.target.value
+                openPopover()
+              }
+            "
+            @focus="
+              () => {
+                openPopover()
+                toggleCombobox(true)
+              }
+            "
+            @keydown="toggleCombobox(true)"
+            autocomplete="off"
+            v-bind="$attrs"
+          />
+          <ComboboxButton
+            class="absolute inset-y-0 right-0 flex items-center pr-2"
+          >
+            <FeatherIcon
+              name="chevron-down"
+              class="w-4 h-4 text-gray-500"
+              aria-hidden="true"
+            />
+          </ComboboxButton>
+        </div>
       </template>
       <template #body>
         <ComboboxOptions
           :class="[
-            'p-1.5 bg-white rounded-md shadow-md rounded-t-none',
+            'p-1.5 bg-white rounded-md shadow-md rounded-t-none max-h-[11rem] overflow-y-auto',
             { hidden: !showCombobox },
           ]"
           :static="true"
@@ -64,13 +75,14 @@ import {
   ComboboxInput,
   ComboboxOptions,
   ComboboxOption,
+  ComboboxButton,
 } from '@headlessui/vue'
 import Popover from './Popover.vue'
 
 export default {
   name: 'Autocomplete',
   inheritAttrs: false,
-  props: ['modelValue', 'options', 'value'],
+  props: ['modelValue', 'options'],
   emits: ['update:modelValue', 'change'],
   components: {
     Popover,
@@ -78,6 +90,7 @@ export default {
     ComboboxInput,
     ComboboxOptions,
     ComboboxOption,
+    ComboboxButton,
   },
   data() {
     return {
@@ -87,13 +100,14 @@ export default {
   },
   computed: {
     valuePropPassed() {
-      return 'value' in this.$props && this.$props.value !== undefined
+      return 'value' in this.$attrs
     },
     selectedValue: {
       get() {
-        return this.valuePropPassed ? this.value : this.modelValue
+        return this.valuePropPassed ? this.$attrs.value : this.modelValue
       },
       set(val) {
+        setTimeout(() => this.toggleCombobox(false), 0)
         this.$emit(this.valuePropPassed ? 'change' : 'update:modelValue', val)
       },
     },
@@ -115,6 +129,12 @@ export default {
         return option
       }
       return option?.label
+    },
+    toggleCombobox(value) {
+      value = Boolean(value)
+      if (this.showCombobox !== value) {
+        this.showCombobox = value
+      }
     },
   },
 }
