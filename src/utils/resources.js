@@ -58,6 +58,10 @@ export function createResource(options, vm, getResource) {
       options.onFetch.call(vm, out.params)
     }
 
+    if (options.beforeSubmit) {
+      options.beforeSubmit.call(vm, out.params)
+    }
+
     let validateFunction = tempOptions.validate || options.validate
     let errorFunctions = [options.onError, tempOptions.onError]
     let successFunctions = [options.onSuccess, tempOptions.onSuccess]
@@ -174,11 +178,18 @@ export function createDocumentResource(options, vm) {
         fieldname: values,
       }
     },
+    beforeSubmit(params) {
+      out.previousDoc = JSON.stringify(out.doc)
+      Object.assign(out.doc, params.fieldname || {})
+    },
     onSuccess(data) {
       out.doc = transform(data)
       options.setValue?.onSuccess?.call(vm, data)
     },
-    onError: options.setValue?.onError,
+    onError(error) {
+      out.doc = JSON.parse(out.previousDoc)
+      options.setValue?.onError?.call(vm, error)
+    },
   }
 
   let out = reactive({
