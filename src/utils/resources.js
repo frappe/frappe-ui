@@ -4,6 +4,7 @@ import { reactive, watch } from 'vue'
 let cached = {}
 let documentCache = reactive({})
 let listCache = reactive({})
+let listResources = {}
 
 export function createResource(options, vm, getResource) {
   let cacheKey = null
@@ -181,6 +182,8 @@ export function createDocumentResource(options, vm) {
     beforeSubmit(params) {
       out.previousDoc = JSON.stringify(out.doc)
       Object.assign(out.doc, params.fieldname || {})
+      // update data in list resources
+      updateRowInListResource(out.doctype, out.doc)
     },
     onSuccess(data) {
       out.doc = transform(data)
@@ -189,6 +192,8 @@ export function createDocumentResource(options, vm) {
     onError(error) {
       out.doc = JSON.parse(out.previousDoc)
       options.setValue?.onError?.call(vm, error)
+      // revert data in list resource
+      revertRowInListResource(out.doctype, out.doc)
     },
   }
 
@@ -426,6 +431,7 @@ export function createListResource(options, vm, getResource) {
     update,
     reload,
     setData,
+    transform,
   })
 
   function update(updatedOptions) {
@@ -467,7 +473,48 @@ export function createListResource(options, vm, getResource) {
     listCache[cacheKey] = out
   }
 
+  listResources[out.doctype] = listResources[out.doctype] || []
+  listResources[out.doctype].push(out)
+
   return out
+}
+
+function updateRowInListResource(doctype, doc) {
+  let resources = listResources[doctype]
+  for (let resource of resources) {
+    if (resource.originalData) {
+      for (let row of resource.originalData) {
+        if (row.name && row.name == doc.name) {
+          let previousRowData = JSON.stringify(row)
+          for (let key in row) {
+            if (key in doc) {
+              row[key] = doc[key]
+            }
+          }
+          row._previousData = previousRowData
+        }
+      }
+      resource.data = resource.transform(resource.originalData)
+    }
+  }
+}
+
+function revertRowInListResource(doctype, doc) {
+  let resources = listResources[doctype]
+  for (let resource of resources) {
+    if (resource.originalData) {
+      for (let row of resource.originalData) {
+        if (row.name && row.name == doc.name) {
+          let previousRowData = JSON.parse(row._previousData)
+          for (let key in row) {
+            row[key] = previousRowData[key]
+          }
+          delete row._previousData
+        }
+      }
+      resource.data = resource.transform(resource.originalData)
+    }
+  }
 }
 
 function createResourceForOptions(options, vm, getResource) {
