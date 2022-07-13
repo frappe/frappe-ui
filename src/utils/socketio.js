@@ -1,9 +1,13 @@
-import io from 'socket.io-client/dist/socket.io.slim'
+import { io } from 'socket.io-client'
 
-let host = window.location.hostname
-let port = window.location.port ? ':9000' : ''
-let protocol = port ? 'http' : 'https'
-let url = `${protocol}://${host}${port}`
-let socket = io(url)
+function initSocket() {
+  let host = window.location.hostname
+  let port = window.location.port ? ':9000' : ''
+  let protocol = port ? 'http' : 'https'
+  let url = `${protocol}://${host}${port}`
+  return io(url)
+}
+
+let socket = initSocket()
 
 export default socket
