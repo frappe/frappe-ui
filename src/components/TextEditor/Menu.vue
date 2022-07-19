@@ -70,12 +70,16 @@
   </div>
 </template>
 <script>
-import { Popover } from 'frappe-ui'
-
+import { Popover, Dialog, Input, Button } from 'frappe-ui'
 export default {
   name: 'TipTapMenu',
   props: ['editor', 'buttons'],
-  components: { Popover },
+  components: {
+    Popover,
+    Dialog,
+    Input,
+    Button
+  },
   data() {
     return {
       setLinkDialog: { url: '', show: false },
