@@ -39,11 +39,16 @@
   </div>
 </template>
 <script>
-import { FeatherIcon } from 'frappe-ui'
+import { FeatherIcon, Dialog, Input, Button } from 'frappe-ui'
 export default {
   name: 'TipTapMenu',
   props: ['editor', 'buttons'],
-  components: { FeatherIcon },
+  components: {
+    FeatherIcon,
+    Dialog,
+    Input,
+    Button
+  },
   data() {
     return {
       setLinkDialog: { url: '', show: false },
