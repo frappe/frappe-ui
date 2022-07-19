@@ -2,7 +2,7 @@
   <div ref="reference">
     <div
       ref="target"
-      class="inline-block"
+      :class="['inline-block', $attrs.class]"
       @click="updatePosition"
       @focusin="updatePosition"
       @keydown="updatePosition"
@@ -53,6 +53,7 @@ import { createPopper } from '@popperjs/core'
 
 export default {
   name: 'Popover',
+  inheritAttrs: false,
   props: {
     show: {
       default: undefined,
@@ -74,8 +75,12 @@ export default {
     transition: {
       default: null,
     },
+    hideOnBlur: {
+      default: true,
+    },
   },
   emits: ['open', 'close', 'update:show'],
+  expose: ['open', 'close'],
   data() {
     return {
       showPopup: false,
@@ -109,7 +114,7 @@ export default {
       }
       this.close()
     }
-    if (!this.showPropPassed) {
+    if (this.hideOnBlur) {
       document.addEventListener('click', this.listener)
     }
     this.$nextTick(() => {
