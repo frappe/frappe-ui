@@ -41,6 +41,12 @@
       </button>
     </FloatingMenu>
     <editor-content :editor="editor" />
+    <span
+      v-if="!content"
+      class="absolute inset-y-0 text-base text-gray-500 pointer-events-none"
+    >
+      {{ placeholder }}
+    </span>
   </div>
 </template>
 
