@@ -78,7 +78,7 @@ export default {
     Popover,
     Dialog,
     Input,
-    Button
+    Button,
   },
   data() {
     return {
