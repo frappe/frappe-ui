@@ -316,10 +316,12 @@ export function createListResource(options, vm, getResource) {
     fields: options.fields,
     filters: options.filters,
     order_by: options.order_by,
-    start: options.start,
-    limit: options.limit,
+    start: options.start || 0,
+    limit: options.limit || 20,
     originalData: null,
     data: null,
+    next,
+    hasNextPage: true,
     list: createResource(
       {
         method: 'frappe.client.get_list',
@@ -334,8 +336,15 @@ export function createListResource(options, vm, getResource) {
           }
         },
         onSuccess(data) {
-          out.originalData = data
-          out.data = transform(data)
+          if (data.length < out.limit) {
+            out.hasNextPage = false
+          }
+          if (out.start == 0) {
+            out.originalData = data
+          } else if (out.start > 0) {
+            out.originalData = out.originalData.concat(data)
+          }
+          out.data = transform(out.originalData)
           options.onSuccess?.call(vm, out.data)
         },
         onError: options.onError,
@@ -455,6 +464,7 @@ export function createListResource(options, vm, getResource) {
   }
 
   function reload() {
+    out.start = 0
     return out.list.fetch()
   }
 
@@ -463,6 +473,11 @@ export function createListResource(options, vm, getResource) {
       data = data.call(vm, out.data)
     }
     out.data = data
+  }
+
+  function next() {
+    out.start = out.start + out.limit
+    out.list.fetch()
   }
 
   // fetch list
