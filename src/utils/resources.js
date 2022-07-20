@@ -339,7 +339,7 @@ export function createListResource(options, vm, getResource) {
           if (data.length < out.limit) {
             out.hasNextPage = false
           }
-          if (out.start == 0) {
+          if (!out.start || out.start == 0) {
             out.originalData = data
           } else if (out.start > 0) {
             out.originalData = out.originalData.concat(data)
