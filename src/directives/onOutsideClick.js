@@ -1,28 +1,34 @@
-let instances = []
+const instanceMap = new Map()
 
 function onDocumentClick(e, el, fn) {
   let target = e.target
   if (el !== target && !el.contains(target)) {
-    fn(e)
+    fn?.(e)
   }
 }
 
 export default {
   beforeMount(el, binding) {
-    el.dataset.outsideClickIndex = instances.length
-
     const fn = binding.value
-    const click = function (e) {
+    const clickHandler = function (e) {
       onDocumentClick(e, el, fn)
     }
 
-    document.addEventListener('click', click)
-    instances.push(click)
+    removeHandlerIfPresent(el)
+    instanceMap.set(el, clickHandler)
+    document.addEventListener('click', clickHandler)
   },
   unmounted(el) {
-    const index = el.dataset.outsideClickIndex
-    const handler = instances[index]
-    document.addEventListener('click', handler)
-    instances.splice(index, 1)
+    removeHandlerIfPresent(el)
   },
+}
+
+function removeHandlerIfPresent(el) {
+  const clickHandler = instanceMap.get(el)
+  if (!clickHandler) {
+    return
+  }
+
+  instanceMap.delete(el)
+  document.removeEventListener('click', clickHandler)
 }
