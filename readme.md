@@ -197,6 +197,111 @@ Uses [`feather-icons`](https://github.com/feathericons/feather) under the hood.
 <SuccessMessage message="Completed successfully" />
 ```
 
+### ListManager
+**ListManager handles**
+- filtering and sorting
+- pagination (auto/manual)
+- handle list item updates
+- options based style rendering
+- handle item click and selection events
+
+The component exposes `manager` which has the following methods: `loadMore`, `update`, `selectAll` and also to access `selectedItems`
+
+`manager.loadMore()` loads more list items by calling the list api using the provided options
+
+`manager.update()` can be used to change the filters and sort_by options that are applied on the list
+
+```js
+manager.update({
+  filters: { status: 'Open' },
+  order_by: 'modified desc'
+})
+```
+
+`manager.selectAll()` handles selection/de-selection of all items in `manager.list`
+
+**option based rendering?**
+class tags for each section can be passed via options, eg:
+```js
+options: {
+  style: {
+    header: 'space-x-2',
+    body: 'space-y-2',
+    row: {
+      base: 'space-x-2 hover:bg-gray-50',
+      selected: 'bg-blue-50 hover:bg-blud-100'
+    },
+    footer: ''
+  }
+}
+```
+
+**Event handling**
+- selection events should be explicityly overrided via `select` method in `<template #listItem="{ row, select }">`
+- `selectAll` can be triggered via `manager.selectAll()`
+- if an item is selected then the on_click for the row is overrided for selection based events
+- a callback can be passed to `handle_row_click` options, which gets triggered when the row is clicked
+```js
+handle_row_click: (rowData) => {
+  console.log(rowData.name)
+  console.log(rowData.field_1)
+  ...
+}
+```
+
+
+```html
+<ListManager
+  ref="list"
+  :options="{
+    doctype: 'Ticket',
+    filters: {'status': 'Open'},
+    fields: ['name', 'subject', 'status'],
+    limit: 20,
+    order_by: 'modified desc',
+    style: {
+      header: 'flex flex-row space-x-2',
+      body: 'space-y-2',
+      row: {
+        base: 'flex flex-row space-x-2',
+        selected: ''
+      }
+    },
+    auto_pagination: true,
+    handle_row_click: (rowData) => {
+      // do something...
+    }
+  }"
+  >
+  <template #header="{ fields, manager }">
+    <Input 
+      type="checkbox" 
+      :checked="manager.allItemsSelected" 
+      @click="manager.selectAll" 
+    />
+    <div>{{ fields[0] }}</div>
+    <div>{{ fields[1] }}</div>
+    ...
+  </template>
+  <template #listItem="{ row, select }">
+    <Input 
+      type="checkbox" 
+      :checked="row.meta.selected" 
+      @click="select" 
+    />
+    <div>{{ row.data.field_1 }}</div>
+    <div>{{ row.data.field_2 }}</div>
+    ...
+  </template>
+  <template #footer="{ manager }">
+    <Button @click="manager.loadMore">
+      Load more
+    </Button>
+  </template>
+</ListManager>
+```
+
+
 ## Directives
 
 ### onOutsideClick
