@@ -119,7 +119,9 @@ export default {
         TextAlign.configure({
           types: ['heading', 'paragraph'],
         }),
-        Image,
+        Image.configure({
+          allowBase64: true,
+        }),
         Link,
         Placeholder.configure({
           placeholder: this.placeholder || 'Write something...',
@@ -163,6 +165,7 @@ export default {
           'Align Center',
           'Align Right',
           'Separator',
+          'Image',
           'Blockquote',
           'Code',
           'Horizontal Rule',

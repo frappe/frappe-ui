@@ -1,5 +1,9 @@
 <template>
-  <TransitionRoot as="template" :show="open">
+  <TransitionRoot
+    as="template"
+    :show="open"
+    @after-leave="$emit('after-leave')"
+  >
     <HDialog
       as="div"
       class="fixed inset-0 z-10 overflow-y-auto"
@@ -137,7 +141,7 @@ export default {
       },
     },
   },
-  emits: ['update:modelValue', 'close'],
+  emits: ['update:modelValue', 'close', 'after-leave'],
   components: {
     HDialog,
     DialogOverlay,

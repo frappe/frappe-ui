@@ -16,6 +16,7 @@ import ListUnordered from './icons/list-unordered.vue'
 import DoubleQuotes from './icons/double-quotes-r.vue'
 import CodeView from './icons/code-view.vue'
 import Link from './icons/link.vue'
+import Image from './icons/image-add-line.vue'
 import ArrowGoBack from './icons/arrow-go-back-line.vue'
 import ArrowGoForward from './icons/arrow-go-forward-line.vue'
 import Separator from './icons/separator.vue'
@@ -145,6 +146,11 @@ export default {
     label: 'Link',
     icon: Link,
     isActive: (editor) => editor.isActive('link'),
+  },
+  Image: {
+    label: 'Image',
+    icon: Image,
+    isActive: (editor) => false,
   },
   Undo: {
     label: 'Undo',
