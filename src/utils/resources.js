@@ -212,6 +212,7 @@ export function createDocumentResource(options, vm) {
         },
         onSuccess(data) {
           out.doc = transform(data)
+          options.onSuccess?.call(vm, out.doc)
         },
         onError: options.onError,
       },
@@ -495,7 +496,7 @@ export function createListResource(options, vm, getResource) {
 }
 
 function updateRowInListResource(doctype, doc) {
-  let resources = listResources[doctype]
+  let resources = listResources[doctype] || []
   for (let resource of resources) {
     if (resource.originalData) {
       for (let row of resource.originalData) {
@@ -515,7 +516,7 @@ function updateRowInListResource(doctype, doc) {
 }
 
 function revertRowInListResource(doctype, doc) {
-  let resources = listResources[doctype]
+  let resources = listResources[doctype] || []
   for (let resource of resources) {
     if (resource.originalData) {
       for (let row of resource.originalData) {
