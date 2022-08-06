@@ -17,11 +17,11 @@
     >
       <MenuItems
         class="absolute z-10 mt-2 bg-white divide-y divide-gray-100 rounded-md shadow-lg min-w-40 ring-1 ring-black ring-opacity-5 focus:outline-none"
-        :class="
-          placement === 'left'
-            ? 'left-0 origin-top-left'
-            : 'right-0 origin-top-right'
-        "
+        :class="{
+          'left-0 origin-top-left': placement == 'left',
+          'right-0 origin-top-right': placement == 'right',
+          'inset-x-0 origin-top': placement == 'center',
+        }"
       >
         <div v-for="group in groups" :key="group.key" class="px-1 py-1">
           <div

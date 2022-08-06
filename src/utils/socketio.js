@@ -1,4 +1,4 @@
-import io from 'socket.io-client/dist/socket.io.slim'
+import { io } from 'socket.io-client'
 
 export default function initSocket(options = {}) {
   let host = window.location.hostname

@@ -34,13 +34,19 @@
         @click="() => button.action(editor)"
         :title="button.label"
       >
-        <FeatherIcon v-if="button.icon" :name="button.icon" class="w-4" />
+        <component v-if="button.icon" :is="button.icon" class="w-4 h-4" />
         <span class="inline-block h-4 text-sm leading-4 min-w-[1rem]" v-else>
           {{ button.text }}
         </span>
       </button>
     </FloatingMenu>
     <editor-content :editor="editor" />
+    <span
+      v-if="!content"
+      class="absolute inset-y-0 text-base text-gray-500 pointer-events-none"
+    >
+      {{ placeholder }}
+    </span>
   </div>
 </template>
 
@@ -48,10 +54,12 @@
 import { Editor, EditorContent, BubbleMenu, FloatingMenu } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
+import TextAlign from '@tiptap/extension-text-align'
 import Image from '@tiptap/extension-image'
 import Link from '@tiptap/extension-link'
 import Menu from './Menu.vue'
 import commands from './commands'
+import { normalizeClass } from 'vue'
 
 export default {
   name: 'TextEditor',
@@ -90,21 +98,30 @@ export default {
     editable(value) {
       this.editor.setEditable(value)
     },
+    editorProps: {
+      deep: true,
+      handler(value) {
+        this.editor.setOptions({
+          editorProps: value,
+        })
+      },
+    },
   },
   mounted() {
     this.editor = new Editor({
       content: this.content || null,
-      editorProps: {
-        attributes: {
-          class: ['prose prose-sm prose-p:my-1', this.editorClass].join(' '),
-        },
-      },
+      editorProps: this.editorProps,
       editable: this.editable,
       extensions: [
         StarterKit.configure({
           ...this.starterkitOptions,
         }),
-        Image,
+        TextAlign.configure({
+          types: ['heading', 'paragraph'],
+        }),
+        Image.configure({
+          allowBase64: true,
+        }),
         Link,
         Placeholder.configure({
           placeholder: this.placeholder || 'Write something...',
@@ -128,15 +145,27 @@ export default {
         buttons = this.fixedMenu
       } else {
         buttons = [
+          [
+            'Heading 1',
+            'Heading 2',
+            'Heading 3',
+            'Heading 4',
+            'Heading 5',
+            'Heading 6',
+          ],
           'Paragraph',
-          'Heading 2',
-          'Heading 3',
           'Separator',
           'Bold',
           'Italic',
           'Separator',
           'Bullet List',
           'Numbered List',
+          'Separator',
+          'Align Left',
+          'Align Center',
+          'Align Right',
+          'Separator',
+          'Image',
           'Blockquote',
           'Code',
           'Horizontal Rule',
@@ -191,10 +220,23 @@ export default {
       }
       return buttons.map(createEditorButton)
     },
+    editorProps() {
+      return {
+        attributes: {
+          class: normalizeClass([
+            'prose prose-p:my-1',
+            this.editorClass,
+          ]),
+        },
+      }
+    },
   },
 }
 
 function createEditorButton(option) {
+  if (option instanceof Array) {
+    return option.map(createEditorButton)
+  }
   if (typeof option == 'object') {
     return option
   }

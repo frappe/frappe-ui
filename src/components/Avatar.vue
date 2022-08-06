@@ -1,5 +1,5 @@
 <template>
-  <div class="overflow-hidden" :class="styleClasses">
+  <div class="overflow-hidden shrink-0" :class="styleClasses">
     <img
       v-if="imageURL"
       :src="imageURL"

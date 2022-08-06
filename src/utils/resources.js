@@ -4,6 +4,7 @@ import { reactive, watch } from 'vue'
 let cached = {}
 let documentCache = reactive({})
 let listCache = reactive({})
+let listResources = {}
 
 export function createResource(options, vm, getResource) {
   let cacheKey = null
@@ -58,6 +59,10 @@ export function createResource(options, vm, getResource) {
       options.onFetch.call(vm, out.params)
     }
 
+    if (options.beforeSubmit) {
+      options.beforeSubmit.call(vm, out.params)
+    }
+
     let validateFunction = tempOptions.validate || options.validate
     let errorFunctions = [options.onError, tempOptions.onError]
     let successFunctions = [options.onSuccess, tempOptions.onSuccess]
@@ -67,14 +72,14 @@ export function createResource(options, vm, getResource) {
       try {
         invalidMessage = await validateFunction.call(vm, out.params)
         if (invalidMessage && typeof invalidMessage == 'string') {
+          out.loading = false
           let error = new Error(invalidMessage)
           handleError(error, errorFunctions)
-          out.loading = false
           return
         }
       } catch (error) {
-        handleError(error, errorFunctions)
         out.loading = false
+        handleError(error, errorFunctions)
         return
       }
     }
@@ -92,6 +97,7 @@ export function createResource(options, vm, getResource) {
       handleError(error, errorFunctions)
     }
     out.loading = false
+    return out.data
   }
 
   function update({ method, params, auto }) {
@@ -117,7 +123,6 @@ export function createResource(options, vm, getResource) {
   }
 
   function handleError(error, errorFunctions) {
-    console.error(error)
     if (out.previousData) {
       out.data = out.previousData
     }
@@ -127,6 +132,7 @@ export function createResource(options, vm, getResource) {
         fn.call(vm, error)
       }
     }
+    throw error
   }
 
   // usage:
@@ -173,11 +179,22 @@ export function createDocumentResource(options, vm) {
         fieldname: values,
       }
     },
+    beforeSubmit(params) {
+      out.previousDoc = JSON.stringify(out.doc)
+      Object.assign(out.doc, params.fieldname || {})
+      // update data in list resources
+      updateRowInListResource(out.doctype, out.doc)
+    },
     onSuccess(data) {
       out.doc = transform(data)
       options.setValue?.onSuccess?.call(vm, data)
     },
-    onError: options.setValue?.onError,
+    onError(error) {
+      out.doc = JSON.parse(out.previousDoc)
+      options.setValue?.onError?.call(vm, error)
+      // revert data in list resource
+      revertRowInListResource(out.doctype, out.doc)
+    },
   }
 
   let out = reactive({
@@ -195,6 +212,7 @@ export function createDocumentResource(options, vm) {
         },
         onSuccess(data) {
           out.doc = transform(data)
+          options.onSuccess?.call(vm, out.doc)
         },
         onError: options.onError,
       },
@@ -299,10 +317,12 @@ export function createListResource(options, vm, getResource) {
     fields: options.fields,
     filters: options.filters,
     order_by: options.order_by,
-    start: options.start,
-    limit: options.limit,
+    start: options.start || 0,
+    limit: options.limit || 20,
     originalData: null,
     data: null,
+    next,
+    hasNextPage: true,
     list: createResource(
       {
         method: 'frappe.client.get_list',
@@ -317,8 +337,15 @@ export function createListResource(options, vm, getResource) {
           }
         },
         onSuccess(data) {
-          out.originalData = data
-          out.data = transform(data)
+          if (data.length < out.limit) {
+            out.hasNextPage = false
+          }
+          if (!out.start || out.start == 0) {
+            out.originalData = data
+          } else if (out.start > 0) {
+            out.originalData = out.originalData.concat(data)
+          }
+          out.data = transform(out.originalData)
           options.onSuccess?.call(vm, out.data)
         },
         onError: options.onError,
@@ -414,6 +441,7 @@ export function createListResource(options, vm, getResource) {
     update,
     reload,
     setData,
+    transform,
   })
 
   function update(updatedOptions) {
@@ -437,6 +465,7 @@ export function createListResource(options, vm, getResource) {
   }
 
   function reload() {
+    out.start = 0
     return out.list.fetch()
   }
 
@@ -447,6 +476,11 @@ export function createListResource(options, vm, getResource) {
     out.data = data
   }
 
+  function next() {
+    out.start = out.start + out.limit
+    out.list.fetch()
+  }
+
   // fetch list
   out.list.fetch()
 
@@ -455,7 +489,48 @@ export function createListResource(options, vm, getResource) {
     listCache[cacheKey] = out
   }
 
+  listResources[out.doctype] = listResources[out.doctype] || []
+  listResources[out.doctype].push(out)
+
   return out
+}
+
+function updateRowInListResource(doctype, doc) {
+  let resources = listResources[doctype] || []
+  for (let resource of resources) {
+    if (resource.originalData) {
+      for (let row of resource.originalData) {
+        if (row.name && row.name == doc.name) {
+          let previousRowData = JSON.stringify(row)
+          for (let key in row) {
+            if (key in doc) {
+              row[key] = doc[key]
+            }
+          }
+          row._previousData = previousRowData
+        }
+      }
+      resource.data = resource.transform(resource.originalData)
+    }
+  }
+}
+
+function revertRowInListResource(doctype, doc) {
+  let resources = listResources[doctype] || []
+  for (let resource of resources) {
+    if (resource.originalData) {
+      for (let row of resource.originalData) {
+        if (row.name && row.name == doc.name) {
+          let previousRowData = JSON.parse(row._previousData)
+          for (let key in row) {
+            row[key] = previousRowData[key]
+          }
+          delete row._previousData
+        }
+      }
+      resource.data = resource.transform(resource.originalData)
+    }
+  }
 }
 
 function createResourceForOptions(options, vm, getResource) {

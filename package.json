@@ -1,6 +1,6 @@
 {
   "name": "frappe-ui",
-  "version": "0.0.31",
+  "version": "0.0.44",
   "description": "A set of components and utilities for rapid UI development",
   "main": "./src/index.js",
   "scripts": {
@@ -24,12 +24,13 @@
     "@tiptap/extension-image": "^2.0.0-beta.27",
     "@tiptap/extension-link": "^2.0.0-beta.37",
     "@tiptap/extension-placeholder": "^2.0.0-beta.48",
+    "@tiptap/extension-text-align": "^2.0.0-beta.31",
     "@tiptap/starter-kit": "^2.0.0-beta.183",
     "@tiptap/vue-3": "^2.0.0-beta.90",
     "autoprefixer": "^10.4.2",
     "feather-icons": "^4.28.0",
     "postcss": "^8.4.5",
-    "socket.io-client": "^2.4.0",
+    "socket.io-client": "^4.5.1",
     "tailwindcss": "^3.0.12"
   }
 }
