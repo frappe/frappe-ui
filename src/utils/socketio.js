@@ -1,13 +1,11 @@
 import { io } from 'socket.io-client'
 
-function initSocket() {
+export default function initSocket(options = {}) {
   let host = window.location.hostname
-  let port = window.location.port ? ':9000' : ''
+  let socketio_port = options.port || 9000
+  let port = window.location.port ? `:${socketio_port}` : ''
   let protocol = port ? 'http' : 'https'
   let url = `${protocol}://${host}${port}`
-  return io(url)
+  let socket = io(url)
+  return socket
 }
-
-let socket = initSocket()
-
-export default socket
