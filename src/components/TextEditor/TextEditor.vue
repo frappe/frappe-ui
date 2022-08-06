@@ -223,10 +223,7 @@ export default {
     editorProps() {
       return {
         attributes: {
-          class: normalizeClass([
-            'prose prose-p:my-1',
-            this.editorClass,
-          ]),
+          class: normalizeClass(['prose prose-p:my-1', this.editorClass]),
         },
       }
     },
