@@ -1,31 +1,23 @@
 <template>
-  <Combobox v-model="selectedValue" nullable>
+  <Combobox v-model="selectedValue" nullable v-slot="{ open: isComboboxOpen }">
     <Popover class="w-full">
       <template #target="{ open: openPopover }">
-        <div class="relative w-full">
-          <ComboboxInput
-            :displayValue="displayValue"
-            class="w-full placeholder-gray-500 form-input"
-            type="text"
-            @change="
-              (e) => {
-                query = e.target.value
-                openPopover()
-              }
-            "
-            @focus="
+        <div class="w-full">
+          <ComboboxButton
+            class="flex items-center justify-between w-full py-1.5 pl-3 pr-2 rounded-md bg-gray-100"
+            :class="{ 'rounded-b-none': isComboboxOpen }"
+            @click="
               () => {
                 openPopover()
-                toggleCombobox(true)
               }
             "
-            @keydown="toggleCombobox(true)"
-            autocomplete="off"
-            v-bind="$attrs"
-          />
-          <ComboboxButton
-            class="absolute inset-y-0 right-0 flex items-center pr-2"
           >
+            <span class="text-base" v-if="selectedValue">
+              {{ displayValue(selectedValue) }}
+            </span>
+            <span class="text-base text-gray-500" v-else>
+              {{ placeholder || '' }}
+            </span>
             <FeatherIcon
               name="chevron-down"
               class="w-4 h-4 text-gray-500"
@@ -36,12 +28,27 @@
       </template>
       <template #body>
         <ComboboxOptions
-          :class="[
-            'p-1.5 bg-white rounded-md shadow-md rounded-t-none max-h-[11rem] overflow-y-auto',
-            { hidden: !showCombobox },
-          ]"
-          :static="true"
+          class="px-1.5 pb-1.5 bg-white rounded-md shadow-md rounded-t-none max-h-[11rem] overflow-y-auto"
+          static
+          v-show="isComboboxOpen"
         >
+          <div
+            class="flex items-st items-stretch space-x-1.5 sticky top-0 pt-1.5 mb-1.5 bg-white"
+          >
+            <ComboboxInput
+              class="w-full placeholder-gray-500 form-input"
+              type="text"
+              @change="
+                (e) => {
+                  query = e.target.value
+                }
+              "
+              :value="query"
+              autocomplete="off"
+              placeholder="Search by keyword"
+            />
+            <Button icon="x" @click="selectedValue = null" />
+          </div>
           <ComboboxOption
             as="template"
             v-for="option in filteredOptions"
@@ -81,8 +88,7 @@ import Popover from './Popover.vue'
 
 export default {
   name: 'Autocomplete',
-  inheritAttrs: false,
-  props: ['modelValue', 'options'],
+  props: ['modelValue', 'options', 'placeholder'],
   emits: ['update:modelValue', 'change'],
   components: {
     Popover,
@@ -94,7 +100,6 @@ export default {
   },
   data() {
     return {
-      showCombobox: false,
       query: '',
     }
   },
@@ -107,7 +112,7 @@ export default {
         return this.valuePropPassed ? this.$attrs.value : this.modelValue
       },
       set(val) {
-        setTimeout(() => this.toggleCombobox(false), 0)
+        this.query = ''
         this.$emit(this.valuePropPassed ? 'change' : 'update:modelValue', val)
       },
     },
@@ -129,12 +134,6 @@ export default {
         return option
       }
       return option?.label
-    },
-    toggleCombobox(value) {
-      value = Boolean(value)
-      if (this.showCombobox !== value) {
-        this.showCombobox = value
-      }
     },
   },
 }
