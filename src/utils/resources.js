@@ -201,6 +201,7 @@ export function createDocumentResource(options, vm) {
     doctype: options.doctype,
     name: options.name,
     doc: null,
+    auto: true,
     get: createResource(
       {
         method: 'frappe.client.get',
@@ -238,6 +239,8 @@ export function createDocumentResource(options, vm) {
         onSuccess() {
           out.doc = null
           options.delete?.onSuccess?.call(vm, data)
+          // delete from list resources
+          deleteRowInListResource(out.doctype, out.name)
         },
         onError: options.delete?.onError,
       },
@@ -295,8 +298,6 @@ export function createDocumentResource(options, vm) {
     return doc
   }
 
-  // fetch the doc
-  out.get.fetch()
   // cache
   documentCache[cacheKey] = out
   return out
@@ -323,6 +324,7 @@ export function createListResource(options, vm, getResource) {
     data: null,
     next,
     hasNextPage: true,
+    auto: true,
     list: createResource(
       {
         method: 'frappe.client.get_list',
@@ -451,7 +453,6 @@ export function createListResource(options, vm, getResource) {
     out.order_by = updatedOptions.order_by
     out.start = updatedOptions.start
     out.limit = updatedOptions.limit
-    out.list.fetch()
   }
 
   function transform(data) {
@@ -481,9 +482,6 @@ export function createListResource(options, vm, getResource) {
     out.list.fetch()
   }
 
-  // fetch list
-  out.list.fetch()
-
   if (cacheKey) {
     // cache
     listCache[cacheKey] = out
@@ -510,6 +508,18 @@ function updateRowInListResource(doctype, doc) {
           row._previousData = previousRowData
         }
       }
+      resource.data = resource.transform(resource.originalData)
+    }
+  }
+}
+
+function deleteRowInListResource(doctype, docname) {
+  let resources = listResources[doctype] || []
+  for (let resource of resources) {
+    if (resource.originalData) {
+      resource.originalData = resource.originalData.filter(
+        (row) => row.name !== docname
+      )
       resource.data = resource.transform(resource.originalData)
     }
   }
@@ -593,7 +603,7 @@ let createMixin = (mixinOptions) => ({
                 resource.update(updatedOptions)
               }
               if (resource && resource.auto) {
-                resource.fetch()
+                resource.reload()
               }
             },
             {
@@ -607,8 +617,8 @@ let createMixin = (mixinOptions) => ({
             mixinOptions.getResource
           )
           this._resources[key] = resource
-          if (resource.auto) {
-            resource.fetch()
+          if (resource && resource.auto) {
+            resource.reload()
           }
         }
       }
