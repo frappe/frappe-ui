@@ -208,10 +208,13 @@ export default {
       this.isOpen = false
     },
     onMouseover() {
+      this.mouseover = true
       if (this.trigger === 'hover') {
         if (this.hoverDelay) {
           this.hoverTimer = setTimeout(() => {
-            this.open()
+            if (this.mouseover) {
+              this.open()
+            }
           }, Number(this.hoverDelay) * 1000)
         } else {
           this.open()
@@ -219,6 +222,7 @@ export default {
       }
     },
     onMouseleave() {
+      this.mouseover = false
       if (this.hoverTimer) {
         clearTimeout(this.hoverTimer)
       }
