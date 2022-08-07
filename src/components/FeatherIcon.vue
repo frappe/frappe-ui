@@ -48,7 +48,7 @@ export default {
           'stroke-width': this.strokeWidth,
           width: null,
           height: null,
-          class: [icon.attrs.class],
+          class: [icon.attrs.class, 'shrink-0'],
           innerHTML: icon.contents,
         },
         this.$attrs
