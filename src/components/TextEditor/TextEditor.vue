@@ -41,12 +41,6 @@
       </button>
     </FloatingMenu>
     <editor-content :editor="editor" />
-    <span
-      v-if="!content"
-      class="absolute top-0 text-base text-gray-500 pointer-events-none"
-    >
-      {{ placeholder }}
-    </span>
   </div>
 </template>
 
@@ -57,6 +51,7 @@ import Placeholder from '@tiptap/extension-placeholder'
 import TextAlign from '@tiptap/extension-text-align'
 import Image from '@tiptap/extension-image'
 import Link from '@tiptap/extension-link'
+import configureMention from './mention'
 import Menu from './Menu.vue'
 import commands from './commands'
 import { normalizeClass } from 'vue'
@@ -70,17 +65,48 @@ export default {
     FloatingMenu,
     Menu,
   },
-  props: [
-    'content',
-    'placeholder',
-    'editorClass',
-    'editable',
-    'fixedMenu',
-    'bubbleMenu',
-    'floatingMenu',
-    'extensions',
-    'starterkitOptions',
-  ],
+  props: {
+    content: {
+      type: String,
+      default: null,
+    },
+    placeholder: {
+      type: String,
+      default: '',
+    },
+    editorClass: {
+      type: [String, Array, Object],
+      default: '',
+    },
+    editable: {
+      type: Boolean,
+      default: true,
+    },
+    bubbleMenu: {
+      type: [Boolean, Array],
+      default: false,
+    },
+    fixedMenu: {
+      type: [Boolean, Array],
+      default: false,
+    },
+    floatingMenu: {
+      type: [Boolean, Array],
+      default: false,
+    },
+    extensions: {
+      type: Array,
+      default: () => [],
+    },
+    starterkitOptions: {
+      type: Object,
+      default: () => ({}),
+    },
+    mentions: {
+      type: Array,
+      default: () => [],
+    },
+  },
   emits: ['change'],
   expose: ['editor'],
   data() {
@@ -124,8 +150,9 @@ export default {
         }),
         Link,
         Placeholder.configure({
-          placeholder: this.placeholder || 'Write something...',
+          placeholder: this.placeholder,
         }),
+        configureMention(this.mentions),
         ...(this.extensions || []),
       ],
       onUpdate: ({ editor }) => {
@@ -247,5 +274,9 @@ function createEditorButton(option) {
   color: theme('colors.gray.500');
   pointer-events: none;
   height: 0;
+}
+.mention {
+  font-weight: 600;
+  box-decoration-break: clone;
 }
 </style>
