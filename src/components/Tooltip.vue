@@ -24,7 +24,7 @@ export default {
       default: 0.5,
     },
     placement: {
-      default: 'bottom-start',
+      default: 'bottom',
     },
     text: {
       type: String,
