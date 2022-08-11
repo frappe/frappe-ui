@@ -49,7 +49,7 @@ import { Editor, EditorContent, BubbleMenu, FloatingMenu } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import TextAlign from '@tiptap/extension-text-align'
-import Image from '@tiptap/extension-image'
+import Image from './image-extension'
 import Link from '@tiptap/extension-link'
 import configureMention from './mention'
 import Menu from './Menu.vue'
@@ -145,9 +145,7 @@ export default {
         TextAlign.configure({
           types: ['heading', 'paragraph'],
         }),
-        Image.configure({
-          allowBase64: true,
-        }),
+        Image,
         Link,
         Placeholder.configure({
           placeholder: this.placeholder,
