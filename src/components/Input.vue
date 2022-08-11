@@ -77,6 +77,7 @@ export default {
     },
     type: {
       type: String,
+      default: 'text',
       validator(value) {
         let isValid = [
           'text',
