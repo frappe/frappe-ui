@@ -148,7 +148,10 @@ export default {
         Image,
         Link,
         Placeholder.configure({
-          placeholder: this.placeholder,
+          showOnlyWhenEditable: false,
+          placeholder: () => {
+            return this.placeholder
+          },
         }),
         configureMention(this.mentions),
         ...(this.extensions || []),
