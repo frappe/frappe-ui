@@ -10,7 +10,7 @@
       @close="open = false"
     >
       <div
-        class="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0"
+        class="flex flex-col items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center"
       >
         <TransitionChild
           as="template"
@@ -26,13 +26,6 @@
           />
         </TransitionChild>
 
-        <!-- This element is to trick the browser into centering the modal contents. -->
-        <span
-          class="hidden sm:inline-block sm:align-middle sm:h-screen"
-          aria-hidden="true"
-        >
-          &#8203;
-        </span>
         <TransitionChild
           as="template"
           enter="ease-out duration-300"
@@ -43,7 +36,7 @@
           leave-to="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
         >
           <div
-            class="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
+            class="inline-block w-full max-w-lg my-8 overflow-hidden text-left align-middle transition-all transform bg-white rounded-lg shadow-xl"
           >
             <slot name="body">
               <slot name="body-main">
@@ -71,7 +64,7 @@
                         aria-hidden="true"
                       />
                     </div>
-                    <div class="flex-1 text-center sm:text-left">
+                    <div class="flex-1">
                       <DialogTitle as="header">
                         <slot name="body-title">
                           <h3

@@ -6,7 +6,7 @@
           class="border-l w-[2px] h-4"
           v-if="button.type === 'separator'"
         ></div>
-        <div v-else-if="button.map">
+        <div class="shrink-0" v-else-if="button.map">
           <Popover>
             <template #target="{ togglePopover }">
               <button

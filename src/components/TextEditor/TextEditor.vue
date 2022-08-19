@@ -15,7 +15,7 @@
 
     <Menu
       v-if="fixedMenuButtons"
-      class="w-full border border-gray-200 rounded-t-lg"
+      class="w-full overflow-x-auto border border-gray-200 rounded-t-lg"
       :editor="editor"
       :buttons="fixedMenuButtons"
     />
