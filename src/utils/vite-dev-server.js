@@ -1,7 +1,7 @@
 module.exports = {
   getProxyOptions({ port }) {
     return {
-      '^/(app|api|assets|files)': {
+      '^/(app|login|api|assets|files)': {
         target: `http://localhost:${port}`,
         ws: true,
         router: function (req) {
