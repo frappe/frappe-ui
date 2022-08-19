@@ -18,10 +18,14 @@
             </div>
             <div>
               <slot>
-                <p class="text-base font-medium text-gray-900">
+                <p
+                  v-if="title"
+                  class="text-base font-medium text-gray-900"
+                  :class="{ 'mb-1': text }"
+                >
                   {{ title }}
                 </p>
-                <p class="mt-1 text-base text-gray-600">
+                <p v-if="text" class="text-base text-gray-600">
                   {{ text }}
                 </p>
               </slot>
