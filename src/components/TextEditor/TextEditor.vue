@@ -49,6 +49,10 @@ import { Editor, EditorContent, BubbleMenu, FloatingMenu } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import TextAlign from '@tiptap/extension-text-align'
+import Table from '@tiptap/extension-table'
+import TableCell from '@tiptap/extension-table-cell'
+import TableHeader from '@tiptap/extension-table-header'
+import TableRow from '@tiptap/extension-table-row'
 import Image from './image-extension'
 import Link from '@tiptap/extension-link'
 import configureMention from './mention'
@@ -142,6 +146,12 @@ export default {
         StarterKit.configure({
           ...this.starterkitOptions,
         }),
+        Table.configure({
+          resizable: true,
+        }),
+        TableRow,
+        TableHeader,
+        TableCell,
         TextAlign.configure({
           types: ['heading', 'paragraph'],
         }),
@@ -197,6 +207,21 @@ export default {
           'Blockquote',
           'Code',
           'Horizontal Rule',
+          [
+            'InsertTable',
+            'AddColumnBefore',
+            'AddColumnAfter',
+            'DeleteColumn',
+            'AddRowBefore',
+            'AddRowAfter',
+            'DeleteRow',
+            'MergeCells',
+            'SplitCell',
+            'ToggleHeaderColumn',
+            'ToggleHeaderRow',
+            'ToggleHeaderCell',
+            'DeleteTable',
+          ],
           'Separator',
           'Undo',
           'Redo',
@@ -251,7 +276,10 @@ export default {
     editorProps() {
       return {
         attributes: {
-          class: normalizeClass(['prose prose-p:my-1', this.editorClass]),
+          class: normalizeClass([
+            'prose prose-p:my-1 prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-gray-300 prose-th:border-gray-300 prose-td:relative prose-th:relative prose-th:bg-gray-100',
+            this.editorClass,
+          ]),
         },
       }
     },
@@ -269,6 +297,7 @@ function createEditorButton(option) {
 }
 </script>
 <style>
+/* Placeholder */
 .ProseMirror:not(.ProseMirror-focused) p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   float: left;
@@ -276,8 +305,43 @@ function createEditorButton(option) {
   pointer-events: none;
   height: 0;
 }
+
+/* Mentions */
 .mention {
   font-weight: 600;
   box-decoration-break: clone;
+}
+
+/* Table styles */
+.prose table p {
+  margin: 0;
+}
+
+/* Prosemirror specific table styles */
+.ProseMirror table .selectedCell:after {
+  z-index: 2;
+  position: absolute;
+  content: '';
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+  background: theme('colors.blue.200 / 30%');
+}
+
+.ProseMirror table .column-resize-handle {
+  position: absolute;
+  right: -1px;
+  top: 0;
+  bottom: -2px;
+  width: 4px;
+  background-color: theme('colors.blue.200');
+  pointer-events: none;
+}
+
+.resize-cursor {
+  cursor: ew-resize;
+  cursor: col-resize;
 }
 </style>

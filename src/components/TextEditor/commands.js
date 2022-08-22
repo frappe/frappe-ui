@@ -20,6 +20,7 @@ import Image from './icons/image-add-line.vue'
 import ArrowGoBack from './icons/arrow-go-back-line.vue'
 import ArrowGoForward from './icons/arrow-go-forward-line.vue'
 import Separator from './icons/separator.vue'
+import Table from './icons/table-2.vue'
 
 export default {
   Paragraph: {
@@ -163,6 +164,89 @@ export default {
     icon: ArrowGoForward,
     action: (editor) => editor.chain().focus().redo().run(),
     isActive: (editor) => false,
+  },
+  InsertTable: {
+    label: 'Insert Table',
+    icon: Table,
+    action: (editor) =>
+      editor
+        .chain()
+        .focus()
+        .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+        .run(),
+    isActive: (editor) => false,
+  },
+  AddColumnBefore: {
+    label: 'Add Column Before',
+    action: (editor) => editor.chain().focus().addColumnBefore().run(),
+    isActive: (editor) => false,
+    isDisabled: (editor) => !editor.can().addColumnBefore(),
+  },
+  AddColumnAfter: {
+    label: 'Add Column After',
+    action: (editor) => editor.chain().focus().addColumnAfter().run(),
+    isActive: (editor) => false,
+    isDisabled: (editor) => !editor.can().addColumnAfter(),
+  },
+  DeleteColumn: {
+    label: 'Delete Column',
+    action: (editor) => editor.chain().focus().deleteColumn().run(),
+    isActive: (editor) => false,
+    isDisabled: (editor) => !editor.can().deleteColumn(),
+  },
+  AddRowBefore: {
+    label: 'Add Row Before',
+    action: (editor) => editor.chain().focus().addRowBefore().run(),
+    isActive: (editor) => false,
+    isDisabled: (editor) => !editor.can().addRowBefore(),
+  },
+  AddRowAfter: {
+    label: 'Add Row After',
+    action: (editor) => editor.chain().focus().addRowAfter().run(),
+    isActive: (editor) => false,
+    isDisabled: (editor) => !editor.can().addRowAfter(),
+  },
+  DeleteRow: {
+    label: 'Delete Row',
+    action: (editor) => editor.chain().focus().deleteRow().run(),
+    isActive: (editor) => false,
+    isDisabled: (editor) => !editor.can().deleteRow(),
+  },
+  DeleteTable: {
+    label: 'Delete Table',
+    action: (editor) => editor.chain().focus().deleteTable().run(),
+    isActive: (editor) => false,
+    isDisabled: (editor) => !editor.can().deleteTable(),
+  },
+  MergeCells: {
+    label: 'Merge Cells',
+    action: (editor) => editor.chain().focus().mergeCells().run(),
+    isActive: (editor) => false,
+    isDisabled: (editor) => !editor.can().mergeCells(),
+  },
+  SplitCell: {
+    label: 'Split Cell',
+    action: (editor) => editor.chain().focus().splitCell().run(),
+    isActive: (editor) => false,
+    isDisabled: (editor) => !editor.can().splitCell(),
+  },
+  ToggleHeaderColumn: {
+    label: 'Toggle Header Column',
+    action: (editor) => editor.chain().focus().toggleHeaderColumn().run(),
+    isActive: (editor) => false,
+    isDisabled: (editor) => !editor.can().toggleHeaderColumn(),
+  },
+  ToggleHeaderRow: {
+    label: 'Toggle Header Row',
+    action: (editor) => editor.chain().focus().toggleHeaderRow().run(),
+    isActive: (editor) => false,
+    isDisabled: (editor) => !editor.can().toggleHeaderRow(),
+  },
+  ToggleHeaderCell: {
+    label: 'Toggle Header Cell',
+    action: (editor) => editor.chain().focus().toggleHeaderCell().run(),
+    isActive: (editor) => false,
+    isDisabled: (editor) => !editor.can().toggleHeaderCell(),
   },
   Separator: {
     type: 'separator',

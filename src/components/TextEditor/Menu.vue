@@ -12,17 +12,30 @@
               <button
                 class="px-2 py-1 text-base font-medium text-gray-800 transition-colors rounded hover:bg-gray-100"
                 @click="togglePopover"
+                :set="
+                  (activeBtn =
+                    button.find((b) => b.isActive(editor)) || button[0])
+                "
               >
-                {{
-                  (button.find((b) => b.isActive(editor)) || button[0]).label
-                }}
+                <component
+                  v-if="activeBtn.icon"
+                  :is="activeBtn.icon"
+                  class="w-4 h-4"
+                />
+                <span v-else>
+                  {{ activeBtn.label }}
+                </span>
               </button>
             </template>
             <template #body="{ close }">
               <ul class="p-1 bg-white border rounded shadow-md">
-                <li class="w-full" v-for="option in button">
+                <li
+                  class="w-full"
+                  v-for="option in button"
+                  v-show="option.isDisabled ? !option.isDisabled(editor) : true"
+                >
                   <button
-                    class="w-full px-2 py-1 text-base rounded hover:bg-gray-50"
+                    class="w-full px-2 py-1 text-base text-left rounded hover:bg-gray-50"
                     @click="
                       () => {
                         onClick(option)
