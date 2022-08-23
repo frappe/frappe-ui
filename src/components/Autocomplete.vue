@@ -12,7 +12,10 @@
               }
             "
           >
-            <span class="text-base" v-if="selectedValue">
+            <span
+              class="overflow-hidden text-base text-ellipsis"
+              v-if="selectedValue"
+            >
               {{ displayValue(selectedValue) }}
             </span>
             <span class="text-base text-gray-500" v-else>
