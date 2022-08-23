@@ -320,6 +320,8 @@ export function createListResource(options, vm, getResource) {
     order_by: options.order_by,
     start: options.start || 0,
     limit: options.limit || 20,
+    parent: options.parent,
+    debug: options.debug || 0,
     originalData: null,
     data: null,
     next,
@@ -336,6 +338,8 @@ export function createListResource(options, vm, getResource) {
             order_by: out.order_by,
             limit_start: out.start,
             limit_page_length: out.limit,
+            parent: out.parent,
+            debug: out.debug,
           }
         },
         onSuccess(data) {
