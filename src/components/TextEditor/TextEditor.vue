@@ -327,7 +327,8 @@ function createEditorButton(option) {
   top: 0;
   bottom: 0;
   pointer-events: none;
-  background: theme('colors.blue.200 / 30%');
+  background: theme('colors.blue.200');
+  opacity: 0.3;
 }
 
 .ProseMirror table .column-resize-handle {
