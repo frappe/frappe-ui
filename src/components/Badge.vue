@@ -9,39 +9,50 @@
 <script>
 export default {
   name: 'Badge',
-  props: ['color', 'status'],
+  props: ['color', 'status', 'colorMap'],
+  data: {
+    defaultColorMap: {
+      Pending: 'yellow',
+      Running: 'yellow',
+      Success: 'green',
+      Failure: 'red',
+      Active: 'green',
+      Broken: 'red',
+      Updating: 'blue',
+      Rejected: 'red',
+      Published: 'green',
+      Approved: 'green',
+    },
+  },
   computed: {
     classes() {
-      let color = this.color
-      if (typeof color === 'object') {
-        for (let key in color) {
-          if (color[key]) {
-            color = key
-            break
-          }
-        }
-      }
-      if (!color && this.status) {
-        color = {
-          Pending: 'yellow',
-          Running: 'yellow',
-          Success: 'green',
-          Failure: 'red',
-          Active: 'green',
-          Broken: 'red',
-          Updating: 'blue',
-          Rejected: 'red',
-          Published: 'green',
-          Approved: 'green',
-        }[this.status]
-      }
-      return {
+      let color = this.getBadgeColor()
+
+      let cssClasses = {
         gray: 'text-gray-700 bg-gray-50',
         green: 'text-green-700 bg-green-50',
         red: 'text-red-700 bg-red-50',
         yellow: 'text-yellow-700 bg-yellow-50',
         blue: 'text-blue-700 bg-blue-50',
-      }[color || 'gray']
+      }[color]
+
+      return cssClasses
+    },
+  },
+  methods: {
+    getBadgeColor() {
+      let color = this.color
+      if (color) {
+        return color
+      }
+
+      let statusColorMap = Object.assign(
+        this.defaultColorMap,
+        this.colorMap || {}
+      )
+      color = statusColorMap[this.status] || 'gray'
+
+      return color
     },
   },
 }
