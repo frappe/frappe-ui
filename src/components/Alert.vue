@@ -1,7 +1,7 @@
 <template>
   <div class="block w-full">
     <div
-      class="items-start px-4 md:px-5 py-3.5 text-base rounded-md flex"
+      class="flex items-start rounded-md px-4 py-3.5 text-base md:px-5"
       :class="classes"
     >
       <svg
@@ -19,8 +19,8 @@
           fill="#318AD8"
         />
       </svg>
-      <div class="w-full ml-2">
-        <div class="flex flex-col md:items-baseline md:flex-row">
+      <div class="ml-2 w-full">
+        <div class="flex flex-col md:flex-row md:items-baseline">
           <h3 class="text-lg font-medium text-gray-900" v-if="title">
             {{ title }}
           </h3>

@@ -8,14 +8,14 @@
     >
       <Menu
         :editor="editor"
-        class="border border-gray-100 rounded-md shadow-sm"
+        class="rounded-md border border-gray-100 shadow-sm"
         :buttons="bubbleMenuButtons"
       />
     </BubbleMenu>
 
     <Menu
       v-if="fixedMenuButtons"
-      class="w-full overflow-x-auto border border-gray-200 rounded-t-lg"
+      class="w-full overflow-x-auto rounded-t-lg border border-gray-200"
       :editor="editor"
       :buttons="fixedMenuButtons"
     />
@@ -29,13 +29,13 @@
       <button
         v-for="button in floatingMenuButtons"
         :key="button.label"
-        class="flex p-1 text-gray-800 transition-colors rounded"
+        class="flex rounded p-1 text-gray-800 transition-colors"
         :class="button.isActive(editor) ? 'bg-gray-100' : 'hover:bg-gray-100'"
         @click="() => button.action(editor)"
         :title="button.label"
       >
-        <component v-if="button.icon" :is="button.icon" class="w-4 h-4" />
-        <span class="inline-block h-4 text-sm leading-4 min-w-[1rem]" v-else>
+        <component v-if="button.icon" :is="button.icon" class="h-4 w-4" />
+        <span class="inline-block h-4 min-w-[1rem] text-sm leading-4" v-else>
           {{ button.text }}
         </span>
       </button>

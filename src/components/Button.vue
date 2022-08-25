@@ -7,7 +7,7 @@
   >
     <LoadingIndicator
       v-if="loading"
-      class="w-3 h-3 mr-2 -ml-1"
+      class="mr-2 -ml-1 h-3 w-3"
       :class="{
         'text-white': appearance == 'primary',
         'text-gray-600': appearance == 'secondary',
@@ -19,12 +19,12 @@
     <FeatherIcon
       v-else-if="iconLeft"
       :name="iconLeft"
-      class="w-4 h-4 mr-1.5"
+      class="mr-1.5 h-4 w-4"
       aria-hidden="true"
     />
     <template v-if="loading && loadingText">{{ loadingText }}</template>
     <template v-else-if="icon">
-      <FeatherIcon :name="icon" class="w-4 h-4" :aria-label="label" />
+      <FeatherIcon :name="icon" class="h-4 w-4" :aria-label="label" />
     </template>
     <span :class="icon ? 'sr-only' : ''">
       <slot>
@@ -34,7 +34,7 @@
     <FeatherIcon
       v-if="iconRight"
       :name="iconRight"
-      class="w-4 h-4 ml-2"
+      class="ml-2 h-4 w-4"
       aria-hidden="true"
     />
   </button>

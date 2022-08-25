@@ -1,12 +1,12 @@
 <template>
   <div
     v-if="items.length"
-    class="p-1 text-base bg-white border rounded-lg shadow-lg min-w-40"
+    class="min-w-40 rounded-lg border bg-white p-1 text-base shadow-lg"
   >
     <button
       :class="[
         index === selectedIndex ? 'bg-gray-100' : 'text-gray-900',
-        'whitespace-nowrap flex rounded-md items-center w-full px-2 py-2 text-sm',
+        'flex w-full items-center whitespace-nowrap rounded-md px-2 py-2 text-sm',
       ]"
       v-for="(item, index) in items"
       :key="index"

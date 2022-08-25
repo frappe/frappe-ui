@@ -2,7 +2,7 @@
   <label :class="[type == 'checkbox' ? 'flex' : 'block', $attrs.class]">
     <span
       v-if="label && type != 'checkbox'"
-      class="block mb-2 text-sm leading-4 text-gray-700"
+      class="mb-2 block text-sm leading-4 text-gray-700"
     >
       {{ label }}
     </span>
@@ -13,11 +13,11 @@
         )
       "
       v-bind="inputAttributes"
-      class="placeholder-gray-500 border-gray-400"
+      class="border-gray-400 placeholder-gray-500"
       ref="input"
       :class="[
         {
-          'block w-full form-input': type != 'checkbox',
+          'form-input block w-full': type != 'checkbox',
           'form-checkbox': type == 'checkbox',
         },
         inputClass,
@@ -32,7 +32,7 @@
       v-bind="inputAttributes"
       :placeholder="placeholder"
       class="placeholder-gray-500"
-      :class="['block w-full resize-none form-textarea', inputClass]"
+      :class="['form-textarea block w-full resize-none', inputClass]"
       ref="input"
       :value="passedInputValue"
       :disabled="disabled"
@@ -40,7 +40,7 @@
     ></textarea>
     <select
       v-bind="inputAttributes"
-      class="block w-full form-select"
+      class="form-select block w-full"
       ref="input"
       v-if="type === 'select'"
       :disabled="disabled"
@@ -57,7 +57,7 @@
     </select>
     <span
       v-if="label && type == 'checkbox'"
-      class="inline-block ml-2 text-base leading-4"
+      class="ml-2 inline-block text-base leading-4"
     >
       {{ label }}
     </span>

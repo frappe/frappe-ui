@@ -18,7 +18,7 @@
       <div
         ref="popover"
         :class="popoverClass"
-        class="relative z-[100] popover-container"
+        class="popover-container relative z-[100]"
         :style="{ minWidth: targetWidth ? targetWidth + 'px' : null }"
         v-show="isOpen"
       >
@@ -28,7 +28,7 @@
               name="body"
               v-bind="{ togglePopover, updatePosition, open, close, isOpen }"
             >
-              <div class="bg-white border border-gray-100 rounded-lg shadow-xl">
+              <div class="rounded-lg border border-gray-100 bg-white shadow-xl">
                 <slot
                   name="body-main"
                   v-bind="{

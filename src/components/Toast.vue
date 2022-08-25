@@ -5,16 +5,16 @@
         v-if="shown"
         :style="style"
         :class="[
-          'absolute transition duration-200 ease-out m-4 pointer-events-auto',
+          'pointer-events-auto absolute m-4 transition duration-200 ease-out',
           position.includes('center') ? '-translate-x-1/2' : '',
         ]"
       >
         <div
-          class="p-4 bg-white border rounded-lg shadow-md min-w-[15rem] max-w-[40rem]"
+          class="min-w-[15rem] max-w-[40rem] rounded-lg border bg-white p-4 shadow-md"
         >
           <div class="flex items-start">
-            <div v-if="icon" class="grid w-5 h-5 mr-3 place-items-center">
-              <FeatherIcon :name="icon" :class="['w-5 h-5', iconClasses]" />
+            <div v-if="icon" class="mr-3 grid h-5 w-5 place-items-center">
+              <FeatherIcon :name="icon" :class="['h-5 w-5', iconClasses]" />
             </div>
             <div>
               <slot>
@@ -30,13 +30,13 @@
                 </p>
               </slot>
             </div>
-            <div class="pl-2 ml-auto">
+            <div class="ml-auto pl-2">
               <slot name="actions">
                 <button
-                  class="grid w-5 h-5 rounded hover:bg-gray-100 place-items-center"
+                  class="grid h-5 w-5 place-items-center rounded hover:bg-gray-100"
                   @click="shown = false"
                 >
-                  <FeatherIcon name="x" class="w-4 h-4 text-gray-700" />
+                  <FeatherIcon name="x" class="h-4 w-4 text-gray-700" />
                 </button>
               </slot>
             </div>

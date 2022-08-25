@@ -16,7 +16,7 @@
       leave-to-class="transform scale-95 opacity-0"
     >
       <MenuItems
-        class="absolute z-10 mt-2 bg-white divide-y divide-gray-100 rounded-md shadow-lg min-w-40 ring-1 ring-black ring-opacity-5 focus:outline-none"
+        class="min-w-40 absolute z-10 mt-2 divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
         :class="{
           'left-0 origin-top-left': placement == 'left',
           'right-0 origin-top-right': placement == 'right',
@@ -26,7 +26,7 @@
         <div v-for="group in groups" :key="group.key" class="px-1 py-1">
           <div
             v-if="group.group && !group.hideLabel"
-            class="px-2 py-1 text-xs font-semibold tracking-wider text-gray-500 uppercase"
+            class="px-2 py-1 text-xs font-semibold uppercase tracking-wider text-gray-500"
           >
             {{ group.group }}
           </div>
@@ -38,14 +38,14 @@
             <button
               :class="[
                 active ? 'bg-gray-100' : 'text-gray-900',
-                'group flex rounded-md items-center w-full px-2 py-2 text-sm',
+                'group flex w-full items-center rounded-md px-2 py-2 text-sm',
               ]"
               @click="item.onClick"
             >
               <FeatherIcon
                 v-if="item.icon"
                 :name="item.icon"
-                class="flex-shrink-0 w-4 h-4 mr-2 text-gray-500"
+                class="mr-2 h-4 w-4 flex-shrink-0 text-gray-500"
                 aria-hidden="true"
               />
               <span class="whitespace-nowrap">

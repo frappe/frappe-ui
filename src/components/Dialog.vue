@@ -10,7 +10,7 @@
       @close="open = false"
     >
       <div
-        class="flex flex-col items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center"
+        class="flex min-h-screen flex-col items-center justify-center px-4 pt-4 pb-20 text-center"
       >
         <TransitionChild
           as="template"
@@ -22,7 +22,7 @@
           leave-to="opacity-0"
         >
           <DialogOverlay
-            class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"
+            class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
           />
         </TransitionChild>
 
@@ -36,15 +36,15 @@
           leave-to="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
         >
           <div
-            class="inline-block w-full max-w-lg my-8 overflow-hidden text-left align-middle transition-all transform bg-white rounded-lg shadow-xl"
+            class="my-8 inline-block w-full max-w-lg transform overflow-hidden rounded-lg bg-white text-left align-middle shadow-xl transition-all"
           >
             <slot name="body">
               <slot name="body-main">
-                <div class="px-4 py-5 bg-white sm:p-6">
+                <div class="bg-white px-4 py-5 sm:p-6">
                   <div class="flex flex-col sm:flex-row">
                     <div
                       v-if="icon"
-                      class="flex items-center justify-center flex-shrink-0 w-12 h-12 mx-auto mb-3 rounded-full sm:mx-0 sm:h-9 sm:w-9 sm:mb-0 sm:mr-4"
+                      class="mx-auto mb-3 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:mb-0 sm:mr-4 sm:h-9 sm:w-9"
                       :class="{
                         'bg-yellow-100': icon.appearance === 'warning',
                         'bg-blue-100': icon.appearance === 'info',
@@ -54,7 +54,7 @@
                     >
                       <FeatherIcon
                         :name="icon.name"
-                        class="w-6 h-6 text-red-600 sm:w-5 sm:h-5"
+                        class="h-6 w-6 text-red-600 sm:h-5 sm:w-5"
                         :class="{
                           'text-yellow-600': icon.appearance === 'warning',
                           'text-blue-600': icon.appearance === 'info',
@@ -85,7 +85,7 @@
                 </div>
               </slot>
               <div
-                class="px-4 py-3 space-y-2 sm:space-x-reverse sm:space-x-3 sm:space-y-0 bg-gray-50 sm:px-6 sm:flex sm:flex-row-reverse"
+                class="space-y-2 bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:space-x-3 sm:space-y-0 sm:space-x-reverse sm:px-6"
                 v-if="options?.actions || $slots.actions"
               >
                 <slot name="actions" v-bind="{ close: () => (open = false) }">
