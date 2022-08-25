@@ -44,7 +44,8 @@
   "devDependencies": {
     "husky": ">=6",
     "lint-staged": ">=10",
-    "prettier": "2.7.1"
+    "prettier": "2.7.1",
+    "prettier-plugin-tailwindcss": "^0.1.13"
   },
   "lint-staged": {
     "*.{js,css,md,vue}": "prettier --write"
