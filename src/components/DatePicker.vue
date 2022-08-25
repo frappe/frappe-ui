@@ -13,36 +13,36 @@
       />
     </template>
     <template #body-main="{ togglePopover }">
-      <div class="p-3 mt-1 text-left select-none">
+      <div class="mt-1 select-none p-3 text-left">
         <div class="flex items-center justify-between">
           <span class="text-base font-medium text-blue-500">
             {{ formatMonth }}
           </span>
           <span class="flex">
             <div
-              class="grid w-5 h-5 rounded-md cursor-pointer hover:bg-gray-100 place-items-center"
+              class="grid h-5 w-5 cursor-pointer place-items-center rounded-md hover:bg-gray-100"
             >
               <FeatherIcon
                 @click="prevMonth"
                 name="chevron-left"
-                class="w-4 h-4"
+                class="h-4 w-4"
               />
             </div>
             <div
-              class="grid w-5 h-5 ml-2 rounded-md cursor-pointer hover:bg-gray-100 place-items-center"
+              class="ml-2 grid h-5 w-5 cursor-pointer place-items-center rounded-md hover:bg-gray-100"
             >
               <FeatherIcon
                 @click="nextMonth"
                 name="chevron-right"
-                class="w-4 h-4"
+                class="h-4 w-4"
               />
             </div>
           </span>
         </div>
         <div class="mt-2 text-sm">
-          <div class="grid w-full grid-cols-7 text-gray-600 place-items-center">
+          <div class="grid w-full grid-cols-7 place-items-center text-gray-600">
             <div
-              class="grid w-6 h-6 gap-1 text-center place-items-center"
+              class="grid h-6 w-6 place-items-center gap-1 text-center"
               v-for="(d, i) in ['S', 'M', 'T', 'W', 'T', 'F', 'S']"
               :key="i"
             >
@@ -50,11 +50,11 @@
             </div>
           </div>
           <div v-for="(week, i) in datesAsWeeks" :key="i" class="mt-1">
-            <div class="grid w-full grid-cols-7 gap-1 place-items-center">
+            <div class="grid w-full grid-cols-7 place-items-center gap-1">
               <div
                 v-for="date in week"
                 :key="toValue(date)"
-                class="grid w-6 h-6 rounded-md cursor-pointer place-items-center hover:bg-blue-100 hover:text-blue-700"
+                class="grid h-6 w-6 cursor-pointer place-items-center rounded-md hover:bg-blue-100 hover:text-blue-700"
                 :class="{
                   'text-gray-600': date.getMonth() !== currentMonth - 1,
                   'text-blue-500': toValue(date) === toValue(today),
@@ -73,9 +73,9 @@
             </div>
           </div>
         </div>
-        <div class="flex justify-end w-full mt-2">
+        <div class="mt-2 flex w-full justify-end">
           <div
-            class="px-2 py-1 text-sm rounded-md cursor-pointer hover:bg-gray-100"
+            class="cursor-pointer rounded-md px-2 py-1 text-sm hover:bg-gray-100"
             @click="
               () => {
                 selectDate('')

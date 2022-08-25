@@ -4,7 +4,7 @@
       <template #target="{ open: openPopover }">
         <div class="w-full">
           <ComboboxButton
-            class="flex items-center justify-between w-full py-1.5 pl-3 pr-2 rounded-md bg-gray-100"
+            class="flex w-full items-center justify-between rounded-md bg-gray-100 py-1.5 pl-3 pr-2"
             :class="{ 'rounded-b-none': isComboboxOpen }"
             @click="
               () => {
@@ -13,7 +13,7 @@
             "
           >
             <span
-              class="overflow-hidden text-base text-ellipsis"
+              class="overflow-hidden text-ellipsis text-base"
               v-if="selectedValue"
             >
               {{ displayValue(selectedValue) }}
@@ -23,7 +23,7 @@
             </span>
             <FeatherIcon
               name="chevron-down"
-              class="w-4 h-4 text-gray-500"
+              class="h-4 w-4 text-gray-500"
               aria-hidden="true"
             />
           </ComboboxButton>
@@ -31,15 +31,15 @@
       </template>
       <template #body>
         <ComboboxOptions
-          class="px-1.5 pb-1.5 bg-white rounded-md shadow-md rounded-t-none max-h-[11rem] overflow-y-auto"
+          class="max-h-[11rem] overflow-y-auto rounded-md rounded-t-none bg-white px-1.5 pb-1.5 shadow-md"
           static
           v-show="isComboboxOpen"
         >
           <div
-            class="flex items-st items-stretch space-x-1.5 sticky top-0 pt-1.5 mb-1.5 bg-white"
+            class="items-st sticky top-0 mb-1.5 flex items-stretch space-x-1.5 bg-white pt-1.5"
           >
             <ComboboxInput
-              class="w-full placeholder-gray-500 form-input"
+              class="form-input w-full placeholder-gray-500"
               type="text"
               @change="
                 (e) => {
@@ -61,7 +61,7 @@
           >
             <li
               :class="[
-                'px-2.5 py-1.5 rounded-md text-base',
+                'rounded-md px-2.5 py-1.5 text-base',
                 { 'bg-gray-100': active },
               ]"
             >
@@ -70,7 +70,7 @@
           </ComboboxOption>
           <li
             v-if="filteredOptions.length == 0"
-            class="px-2.5 py-1.5 rounded-md text-base text-gray-600"
+            class="rounded-md px-2.5 py-1.5 text-base text-gray-600"
           >
             No results found
           </li>

@@ -1,5 +1,5 @@
 <template>
-  <div class="overflow-hidden shrink-0" :class="styleClasses">
+  <div class="shrink-0 overflow-hidden" :class="styleClasses">
     <img
       v-if="imageURL"
       :src="imageURL"
@@ -8,7 +8,7 @@
     />
     <div
       v-else
-      class="flex items-center justify-center w-full h-full text-gray-600 uppercase bg-gray-200"
+      class="flex h-full w-full items-center justify-center bg-gray-200 uppercase text-gray-600"
       :class="{ sm: 'text-xs', md: 'text-base', lg: 'text-lg' }[size]"
     >
       {{ label && label[0] }}

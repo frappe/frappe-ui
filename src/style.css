@@ -6,10 +6,10 @@
   .form-input,
   .form-textarea,
   .form-select {
-    @apply py-1 text-base leading-5 placeholder-gray-700 bg-gray-100 border-0 rounded-md focus:ring-0 focus:bg-gray-200 focus:shadow-none;
+    @apply rounded-md border-0 bg-gray-100 py-1 text-base leading-5 placeholder-gray-700 focus:bg-gray-200 focus:shadow-none focus:ring-0;
   }
 
   .form-checkbox {
-    @apply text-blue-500 rounded-md;
+    @apply rounded-md text-blue-500;
   }
 }

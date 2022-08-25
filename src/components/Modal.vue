@@ -14,7 +14,7 @@
 
       <div
         v-show="show"
-        class="w-full overflow-auto transition-all transform bg-white rounded-lg shadow-xl"
+        class="w-full transform overflow-auto rounded-lg bg-white shadow-xl transition-all"
         :class="!full ? 'sm:max-w-lg' : ''"
         style="max-height: 95vh"
       >

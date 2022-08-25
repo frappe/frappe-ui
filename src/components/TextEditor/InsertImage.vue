@@ -7,7 +7,7 @@
   >
     <template #body-content>
       <label
-        class="relative py-1 bg-gray-100 rounded-lg cursor-pointer focus-within:bg-gray-200 hover:bg-gray-200"
+        class="relative cursor-pointer rounded-lg bg-gray-100 py-1 focus-within:bg-gray-200 hover:bg-gray-200"
       >
         <input
           type="file"
@@ -15,14 +15,14 @@
           @change="onImageSelect"
           accept="image/*"
         />
-        <span class="absolute inset-0 px-2 py-1 text-base select-none">
+        <span class="absolute inset-0 select-none px-2 py-1 text-base">
           {{ addImageDialog.file ? 'Select another image' : 'Select an image' }}
         </span>
       </label>
       <img
         v-if="addImageDialog.url"
         :src="addImageDialog.url"
-        class="w-full mt-2 rounded-lg"
+        class="mt-2 w-full rounded-lg"
       />
     </template>
     <template #actions>

@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="message"
-    class="text-sm text-green-600 whitespace-pre-line"
+    class="whitespace-pre-line text-sm text-green-600"
     role="success"
     v-html="message"
   ></div>
