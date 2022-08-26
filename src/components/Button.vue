@@ -26,7 +26,7 @@
     <template v-else-if="icon">
       <FeatherIcon :name="icon" class="h-4 w-4" :aria-label="label" />
     </template>
-    <span :class="icon ? 'sr-only' : ''">
+    <span v-else :class="icon ? 'sr-only' : ''">
       <slot>
         {{ label }}
       </slot>
