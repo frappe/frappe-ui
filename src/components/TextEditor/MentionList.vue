@@ -1,20 +1,22 @@
 <template>
-  <div
-    v-if="items.length"
-    class="min-w-40 rounded-lg border bg-white p-1 text-base shadow-lg"
-  >
-    <button
-      :class="[
-        index === selectedIndex ? 'bg-gray-100' : 'text-gray-900',
-        'flex w-full items-center whitespace-nowrap rounded-md px-2 py-2 text-sm',
-      ]"
-      v-for="(item, index) in items"
-      :key="index"
-      @click="selectItem(index)"
-      @mouseover="selectedIndex = index"
+  <div>
+    <div
+      v-if="items.length"
+      class="min-w-40 rounded-lg border bg-white p-1 text-base shadow-lg"
     >
-      {{ item.label }}
-    </button>
+      <button
+        :class="[
+          index === selectedIndex ? 'bg-gray-100' : 'text-gray-900',
+          'flex w-full items-center whitespace-nowrap rounded-md px-2 py-2 text-sm',
+        ]"
+        v-for="(item, index) in items"
+        :key="index"
+        @click="selectItem(index)"
+        @mouseover="selectedIndex = index"
+      >
+        {{ item.label }}
+      </button>
+    </div>
   </div>
 </template>
 
