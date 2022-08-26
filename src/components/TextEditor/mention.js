@@ -25,9 +25,12 @@ function getSuggestionOptions(options) {
     render: () => {
       let component
       let popup
+      let handleMentions = true
 
       return {
         onStart: (props) => {
+          handleMentions = props.items && props.items.length
+          if (!handleMentions) return
           component = new VueRenderer(MentionList, {
             props,
             editor: props.editor,
@@ -46,6 +49,7 @@ function getSuggestionOptions(options) {
           })
         },
         onUpdate(props) {
+          if (!handleMentions) return
           component.updateProps(props)
           if (!props.clientRect) {
             return
@@ -55,6 +59,7 @@ function getSuggestionOptions(options) {
           })
         },
         onKeyDown(props) {
+          if (!handleMentions) return
           if (props.event.key === 'Escape') {
             popup[0].hide()
 
@@ -63,6 +68,7 @@ function getSuggestionOptions(options) {
           return component.ref?.onKeyDown(props)
         },
         onExit() {
+          if (!handleMentions) return
           popup[0].destroy()
           component.destroy()
         },
