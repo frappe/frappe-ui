@@ -126,7 +126,10 @@ export default {
       return this.options.filter((option) => {
         let searchTexts = [option.label, option.value]
         return searchTexts.some((text) =>
-          (text || '').toLowerCase().includes(this.query.toLowerCase())
+          (text || '')
+            .toString()
+            .toLowerCase()
+            .includes(this.query.toLowerCase())
         )
       })
     },
