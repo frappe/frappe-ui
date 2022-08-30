@@ -2,13 +2,13 @@
   <div class="relative w-full" :class="$attrs.class" v-if="editor">
     <BubbleMenu
       v-if="bubbleMenuButtons"
-      class="bubble-menu"
+      class="bubble-menu rounded-md shadow-sm"
       :tippy-options="{ duration: 100 }"
       :editor="editor"
     >
       <Menu
         :editor="editor"
-        class="rounded-md border border-gray-100 shadow-sm"
+        class="rounded-md border border-gray-100 shadow-lg"
         :buttons="bubbleMenuButtons"
       />
     </BubbleMenu>
@@ -247,8 +247,25 @@ export default {
           'Separator',
           'Bullet List',
           'Numbered List',
+          'Separator',
+          'Image',
           'Blockquote',
           'Code',
+          [
+            'InsertTable',
+            'AddColumnBefore',
+            'AddColumnAfter',
+            'DeleteColumn',
+            'AddRowBefore',
+            'AddRowAfter',
+            'DeleteRow',
+            'MergeCells',
+            'SplitCell',
+            'ToggleHeaderColumn',
+            'ToggleHeaderRow',
+            'ToggleHeaderCell',
+            'DeleteTable',
+          ],
         ]
       }
       return buttons.map(createEditorButton)
