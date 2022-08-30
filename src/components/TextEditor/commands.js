@@ -97,13 +97,13 @@ export default {
   },
   'Bullet List': {
     label: 'Bullet List',
-    icon: ListOrdered,
+    icon: ListUnordered,
     action: (editor) => editor.chain().focus().toggleBulletList().run(),
     isActive: (editor) => editor.isActive('bulletList'),
   },
   'Numbered List': {
     label: 'Numbered List',
-    icon: ListUnordered,
+    icon: ListOrdered,
     action: (editor) => editor.chain().focus().toggleOrderedList().run(),
     isActive: (editor) => editor.isActive('orderedList'),
   },
