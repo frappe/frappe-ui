@@ -7,23 +7,22 @@
   </span>
 </template>
 <script>
+const DEFAULT_COLOR_MAP = {
+  Pending: 'yellow',
+  Running: 'yellow',
+  Success: 'green',
+  Failure: 'red',
+  Active: 'green',
+  Broken: 'red',
+  Updating: 'blue',
+  Rejected: 'red',
+  Published: 'green',
+  Approved: 'green',
+}
+
 export default {
   name: 'Badge',
   props: ['color', 'status', 'colorMap'],
-  data: {
-    defaultColorMap: {
-      Pending: 'yellow',
-      Running: 'yellow',
-      Success: 'green',
-      Failure: 'red',
-      Active: 'green',
-      Broken: 'red',
-      Updating: 'blue',
-      Rejected: 'red',
-      Published: 'green',
-      Approved: 'green',
-    },
-  },
   computed: {
     classes() {
       let color = this.getBadgeColor()
@@ -46,10 +45,7 @@ export default {
         return color
       }
 
-      let statusColorMap = Object.assign(
-        this.defaultColorMap,
-        this.colorMap || {}
-      )
+      let statusColorMap = Object.assign(DEFAULT_COLOR_MAP, this.colorMap || {})
       color = statusColorMap[this.status] || 'gray'
 
       return color
