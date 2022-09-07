@@ -186,3 +186,8 @@ export function getCacheKey(cacheKey) {
   }
   return JSON.stringify(cacheKey)
 }
+
+export function getCachedResource(cacheKey) {
+  cacheKey = getCacheKey(cacheKey)
+  return cached[cacheKey] || null
+}

@@ -1,5 +1,5 @@
 import { reactive, watch } from 'vue'
-import { createResource } from './resources'
+import { createResource, getCachedResource } from './resources'
 import {
   createDocumentResource,
   getCachedDocumentResource,
@@ -68,9 +68,8 @@ let createMixin = (mixinOptions) => ({
     }
   },
   methods: {
-    $getResource(cache) {
-      let cacheKey = getCacheKey(cache)
-      return cached[cacheKey] || null
+    $getResource(cacheKey) {
+      return getCachedResource(cacheKey)
     },
     $getDocumentResource(doctype, name) {
       return getCachedDocumentResource(doctype, name)
