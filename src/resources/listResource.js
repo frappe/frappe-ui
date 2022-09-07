@@ -1,11 +1,14 @@
 import { reactive } from 'vue'
 import { getCacheKey, createResource } from './resources'
+import { saveLocal, getLocal } from './local'
 
 let listCache = reactive({})
-let listResources = {}
+let resourcesByDocType = {}
 
 export function createListResource(options, vm, getResource) {
-  if (!options.doctype) return
+  if (!options.doctype) {
+    throw new Error('List resource requires doctype')
+  }
 
   let cacheKey = getCacheKey(options.cache)
   if (cacheKey) {
@@ -30,7 +33,7 @@ export function createListResource(options, vm, getResource) {
     auto: true,
     list: createResource(
       {
-        method: 'frappe.client.get_list',
+        method: options.method || 'frappe.client.get_list',
         makeParams() {
           return {
             doctype: out.doctype,
@@ -47,12 +50,14 @@ export function createListResource(options, vm, getResource) {
           if (data.length < out.limit) {
             out.hasNextPage = false
           }
+          let pagedData
           if (!out.start || out.start == 0) {
-            out.originalData = data
+            pagedData = data
           } else if (out.start > 0) {
-            out.originalData = out.originalData.concat(data)
+            pagedData = out.originalData.concat(data)
           }
-          out.data = transform(out.originalData)
+          saveLocal(cacheKey, pagedData)
+          setData(pagedData)
           options.onSuccess?.call(vm, out.data)
         },
         onError: options.onError,
@@ -176,10 +181,11 @@ export function createListResource(options, vm, getResource) {
   }
 
   function setData(data) {
+    out.originalData = data
     if (typeof data === 'function') {
       data = data.call(vm, out.data)
     }
-    out.data = data
+    out.data = transform(data)
   }
 
   function next() {
@@ -190,10 +196,16 @@ export function createListResource(options, vm, getResource) {
   if (cacheKey) {
     // cache
     listCache[cacheKey] = out
+    // offline
+    getLocal(cacheKey).then((data) => {
+      if (out.list.loading && data) {
+        setData(data)
+      }
+    })
   }
 
-  listResources[out.doctype] = listResources[out.doctype] || []
-  listResources[out.doctype].push(out)
+  resourcesByDocType[out.doctype] = resourcesByDocType[out.doctype] || []
+  resourcesByDocType[out.doctype].push(out)
 
   return out
 }
@@ -204,7 +216,7 @@ export function getCachedListResource(cacheKey) {
 }
 
 export function updateRowInListResource(doctype, doc) {
-  let resources = listResources[doctype] || []
+  let resources = resourcesByDocType[doctype] || []
   for (let resource of resources) {
     if (resource.originalData) {
       for (let row of resource.originalData) {
@@ -224,11 +236,11 @@ export function updateRowInListResource(doctype, doc) {
 }
 
 export function deleteRowInListResource(doctype, docname) {
-  let resources = listResources[doctype] || []
+  let resources = resourcesByDocType[doctype] || []
   for (let resource of resources) {
     if (resource.originalData) {
       resource.originalData = resource.originalData.filter(
-        (row) => row.name !== docname
+        (row) => row.name.toString() !== docname
       )
       resource.data = resource.transform(resource.originalData)
     }
@@ -236,7 +248,7 @@ export function deleteRowInListResource(doctype, docname) {
 }
 
 export function revertRowInListResource(doctype, doc) {
-  let resources = listResources[doctype] || []
+  let resources = resourcesByDocType[doctype] || []
   for (let resource of resources) {
     if (resource.originalData) {
       for (let row of resource.originalData) {

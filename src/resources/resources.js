@@ -1,5 +1,6 @@
 import { call, debounce } from 'frappe-ui'
 import { reactive } from 'vue'
+import { getLocal, saveLocal } from './local'
 
 let cached = {}
 
@@ -56,13 +57,17 @@ export function createResource(options, vm, getResource) {
       options.onFetch.call(vm, out.params)
     }
 
-    if (options.beforeSubmit) {
-      options.beforeSubmit.call(vm, out.params)
+    let beforeSubmitFunctions = [options.beforeSubmit, tempOptions.beforeSubmit]
+    for (let fn of beforeSubmitFunctions) {
+      if (fn) {
+        fn.call(vm, out.params)
+      }
     }
 
     let validateFunction = tempOptions.validate || options.validate
     let errorFunctions = [options.onError, tempOptions.onError]
     let successFunctions = [options.onSuccess, tempOptions.onSuccess]
+    let dataFunctions = [options.onData, tempOptions.onData]
 
     if (validateFunction) {
       let invalidMessage
@@ -83,9 +88,15 @@ export function createResource(options, vm, getResource) {
 
     try {
       let data = await resourceFetcher(options.method, params || options.params)
+      saveLocal(cacheKey, data)
       out.data = transform(data)
       out.fetched = true
       for (let fn of successFunctions) {
+        if (fn) {
+          fn.call(vm, data)
+        }
+      }
+      for (let fn of dataFunctions) {
         if (fn) {
           fn.call(vm, data)
         }
@@ -154,6 +165,13 @@ export function createResource(options, vm, getResource) {
 
   if (cacheKey && !cached[cacheKey]) {
     cached[cacheKey] = out
+    // offline
+    getLocal(cacheKey).then((data) => {
+      if (out.loading && data) {
+        setData(data)
+        options.onData?.call(vm, data)
+      }
+    })
   }
 
   return out

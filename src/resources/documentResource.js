@@ -5,6 +5,7 @@ import {
   deleteRowInListResource,
   revertRowInListResource,
 } from './listResource'
+import { getLocal, saveLocal } from './local'
 
 let documentCache = reactive({})
 
@@ -58,6 +59,7 @@ export function createDocumentResource(options, vm) {
           }
         },
         onSuccess(data) {
+          saveLocal(cacheKey, data)
           out.doc = transform(data)
           options.onSuccess?.call(vm, out.doc)
         },
@@ -84,7 +86,7 @@ export function createDocumentResource(options, vm) {
         },
         onSuccess() {
           out.doc = null
-          options.delete?.onSuccess?.call(vm, data)
+          options.delete?.onSuccess?.call(vm)
           // delete from list resources
           deleteRowInListResource(out.doctype, out.name)
         },
@@ -94,6 +96,7 @@ export function createDocumentResource(options, vm) {
     ),
     update,
     reload,
+    setDoc,
   })
 
   for (let method in options.whitelistedMethods) {
@@ -134,6 +137,13 @@ export function createDocumentResource(options, vm) {
     return out.get.fetch()
   }
 
+  function setDoc(doc) {
+    if (typeof doc === 'function') {
+      doc = doc.call(vm, out.doc)
+    }
+    out.doc = transform(doc)
+  }
+
   function transform(doc) {
     if (options.transform) {
       let returnValue = options.transform.call(vm, doc)
@@ -146,6 +156,12 @@ export function createDocumentResource(options, vm) {
 
   // cache
   documentCache[cacheKey] = out
+  // offline
+  getLocal(cacheKey).then((data) => {
+    if (out.get.loading && data) {
+      out.doc = transform(data)
+    }
+  })
   return out
 }
 
