@@ -5,6 +5,7 @@
       :src="imageURL"
       class="object-cover"
       :class="styleClasses"
+      loading="lazy"
     />
     <div
       v-else
