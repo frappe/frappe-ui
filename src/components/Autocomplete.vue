@@ -31,7 +31,7 @@
       </template>
       <template #body>
         <ComboboxOptions
-          class="max-h-[11rem] overflow-y-auto rounded-md rounded-t-none bg-white px-1.5 pb-1.5 shadow-md"
+          class="max-h-[15rem] overflow-y-auto rounded-md rounded-t-none bg-white px-1.5 pb-1.5 shadow-md"
           static
           v-show="isComboboxOpen"
         >
@@ -52,24 +52,36 @@
             />
             <Button icon="x" @click="selectedValue = null" />
           </div>
-          <ComboboxOption
-            as="template"
-            v-for="option in filteredOptions"
-            :key="option.value"
-            :value="option"
-            v-slot="{ active, selected }"
+          <div
+            v-for="group in groups"
+            :key="group.key"
+            v-show="group.items.length > 0"
           >
-            <li
-              :class="[
-                'rounded-md px-2.5 py-1.5 text-base',
-                { 'bg-gray-100': active },
-              ]"
+            <div
+              v-if="group.group && !group.hideLabel"
+              class="px-2 py-1 text-xs font-semibold uppercase tracking-wider text-gray-500"
             >
-              {{ option.label }}
-            </li>
-          </ComboboxOption>
+              {{ group.group }}
+            </div>
+            <ComboboxOption
+              as="template"
+              v-for="option in group.items"
+              :key="option.value"
+              :value="option"
+              v-slot="{ active, selected }"
+            >
+              <li
+                :class="[
+                  'rounded-md px-2.5 py-1.5 text-base',
+                  { 'bg-gray-100': active },
+                ]"
+              >
+                {{ option.label }}
+              </li>
+            </ComboboxOption>
+          </div>
           <li
-            v-if="filteredOptions.length == 0"
+            v-if="groups.length == 0"
             class="rounded-md px-2.5 py-1.5 text-base text-gray-600"
           >
             No results found
@@ -119,11 +131,31 @@ export default {
         this.$emit(this.valuePropPassed ? 'change' : 'update:modelValue', val)
       },
     },
-    filteredOptions() {
+    groups() {
+      if (!this.options || this.options.length == 0) return []
+
+      let groups = this.options[0]?.group
+        ? this.options
+        : [{ group: '', items: this.options }]
+
+      return groups
+        .map((group, i) => {
+          return {
+            key: i,
+            group: group.group,
+            hideLabel: group.hideLabel || false,
+            items: this.filterOptions(group.items),
+          }
+        })
+        .filter((group) => group.items.length > 0)
+    },
+  },
+  methods: {
+    filterOptions(options) {
       if (!this.query) {
-        return this.options
+        return options
       }
-      return this.options.filter((option) => {
+      return options.filter((option) => {
         let searchTexts = [option.label, option.value]
         return searchTexts.some((text) =>
           (text || '')
@@ -133,8 +165,6 @@ export default {
         )
       })
     },
-  },
-  methods: {
     displayValue(option) {
       if (typeof option === 'string') {
         return option

@@ -36,7 +36,7 @@ export {
   createResource,
   createDocumentResource,
   createListResource,
-} from './utils/resources.js'
+} from './resources'
 
 // plugin
 export { default as FrappeUI } from './utils/plugin.js'

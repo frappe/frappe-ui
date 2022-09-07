@@ -1,4 +1,4 @@
-import resources from './resources'
+import resourcesPlugin from '../resources/plugin'
 import call from './call'
 import initSocket from './socketio'
 
@@ -11,7 +11,7 @@ let defaultOptions = {
 export default {
   install(app, options = {}) {
     options = Object.assign({}, defaultOptions, options)
-    options.resources && app.use(resources, options.resources)
+    options.resources && app.use(resourcesPlugin, options.resources)
 
     if (options.call) {
       let callFunction = typeof options.call == 'function' ? options.call : call

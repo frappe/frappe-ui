@@ -131,9 +131,11 @@ export default {
     editorProps: {
       deep: true,
       handler(value) {
-        this.editor.setOptions({
-          editorProps: value,
-        })
+        if (this.editor) {
+          this.editor.setOptions({
+            editorProps: value,
+          })
+        }
       },
     },
   },
