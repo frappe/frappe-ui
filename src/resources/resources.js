@@ -74,13 +74,11 @@ export function createResource(options, vm, getResource) {
       try {
         invalidMessage = await validateFunction.call(vm, out.params)
         if (invalidMessage && typeof invalidMessage == 'string') {
-          out.loading = false
           let error = new Error(invalidMessage)
           handleError(error, errorFunctions)
           return
         }
       } catch (error) {
-        out.loading = false
         handleError(error, errorFunctions)
         return
       }
@@ -131,6 +129,7 @@ export function createResource(options, vm, getResource) {
   }
 
   function handleError(error, errorFunctions) {
+    out.loading = false
     if (out.previousData) {
       out.data = out.previousData
     }
