@@ -99,29 +99,40 @@ export function createDocumentResource(options, vm) {
     setDoc,
   })
 
-  for (let method in options.whitelistedMethods) {
-    let methodName = options.whitelistedMethods[method]
-    out[method] = createResource(
+  for (let methodKey in options.whitelistedMethods) {
+    let methodOptions = options.whitelistedMethods[methodKey]
+    if (typeof methodOptions == 'string') {
+      methodOptions = {
+        method: methodOptions,
+      }
+    }
+    let { method, onSuccess, ...otherOptions } = methodOptions
+    out[methodKey] = createResource(
       {
         method: 'run_doc_method',
         makeParams(values) {
           return {
             dt: out.doctype,
             dn: out.name,
-            method: methodName,
+            method: method,
             args: JSON.stringify(values),
           }
         },
         onSuccess(data) {
           if (data.docs) {
             for (let doc of data.docs) {
-              if (doc.doctype === out.doctype && doc.name === out.name) {
+              if (
+                doc.doctype === out.doctype &&
+                doc.name.toString() === out.name.toString()
+              ) {
                 out.doc = transform(doc)
                 break
               }
             }
           }
+          onSuccess?.call(vm, out.doc)
         },
+        ...otherOptions,
       },
       vm
     )
