@@ -74,6 +74,10 @@ let createMixin = (mixinOptions) => ({
     $getDocumentResource(doctype, name) {
       return getCachedDocumentResource(doctype, name)
     },
+    $getDoc(doctype, name) {
+      let resource = this.$getDocumentResource(doctype, name)
+      return resource ? resource.doc : null
+    },
     $getListResource(cacheKey) {
       return getCachedListResource(cacheKey)
     },
