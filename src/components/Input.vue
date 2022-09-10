@@ -6,55 +6,70 @@
     >
       {{ label }}
     </span>
-    <input
-      v-if="
-        ['text', 'number', 'checkbox', 'email', 'password', 'date'].includes(
-          type
-        )
-      "
-      v-bind="inputAttributes"
-      class="border-gray-400 placeholder-gray-500"
-      ref="input"
-      :class="[
-        {
-          'form-input block w-full': type != 'checkbox',
-          'form-checkbox': type == 'checkbox',
-        },
-        inputClass,
-      ]"
-      :type="type || 'text'"
-      :disabled="disabled"
-      :placeholder="placeholder"
-      :value="passedInputValue"
-    />
-    <textarea
-      v-if="type === 'textarea'"
-      v-bind="inputAttributes"
-      :placeholder="placeholder"
-      class="placeholder-gray-500"
-      :class="['form-textarea block w-full resize-none', inputClass]"
-      ref="input"
-      :value="passedInputValue"
-      :disabled="disabled"
-      :rows="rows || 3"
-    ></textarea>
-    <select
-      v-bind="inputAttributes"
-      class="form-select block w-full"
-      ref="input"
-      v-if="type === 'select'"
-      :disabled="disabled"
+    <div
+      class="relative flex"
+      :class="{ 'items-center': isNormalInput || type == 'select' }"
     >
-      <option
-        v-for="option in selectOptions"
-        :key="option.value"
-        :value="option.value"
-        :disabled="option.disabled || false"
-        :selected="passedInputValue === option.value"
+      <FeatherIcon
+        v-if="iconLeft && type != 'checkbox'"
+        :name="iconLeft"
+        class="absolute mx-2 h-4 w-4 text-gray-600"
+        :class="{ 'mt-2': type == 'textarea' }"
+      />
+      <input
+        v-if="isNormalInput"
+        v-bind="inputAttributes"
+        class="border-gray-400 placeholder-gray-500"
+        ref="input"
+        :class="[
+          {
+            'form-input block w-full': type != 'checkbox',
+            'form-checkbox': type == 'checkbox',
+            'pl-8': iconLeft && type != 'checkbox',
+          },
+          inputClass,
+        ]"
+        :type="type || 'text'"
+        :disabled="disabled"
+        :placeholder="placeholder"
+        :value="passedInputValue"
+      />
+      <textarea
+        v-if="type === 'textarea'"
+        v-bind="inputAttributes"
+        :placeholder="placeholder"
+        class="placeholder-gray-500"
+        :class="[
+          'form-textarea block w-full resize-none',
+          inputClass,
+          {
+            'pl-8': iconLeft,
+          },
+        ]"
+        ref="input"
+        :value="passedInputValue"
+        :disabled="disabled"
+        :rows="rows || 3"
+      ></textarea>
+      <select
+        v-if="type === 'select'"
+        v-bind="inputAttributes"
+        class="form-select block w-full"
+        :class="{ 'pl-8': iconLeft }"
+        ref="input"
+        :disabled="disabled"
       >
-        {{ option.label }}
-      </option>
-    </select>
+        <option
+          v-for="option in selectOptions"
+          :key="option.value"
+          :value="option.value"
+          :disabled="option.disabled || false"
+          :selected="passedInputValue === option.value"
+        >
+          {{ option.label }}
+        </option>
+      </select>
+    </div>
     <span
       v-if="label && type == 'checkbox'"
       class="ml-2 inline-block text-base leading-4"
@@ -66,11 +81,13 @@
 
 <script>
 import { debounce } from 'frappe-ui'
+import FeatherIcon from './FeatherIcon.vue'
 
 export default {
   name: 'Input',
   inheritAttrs: false,
   expose: ['getInputValue'],
+  components: { FeatherIcon },
   props: {
     label: {
       type: String,
@@ -114,6 +131,9 @@ export default {
       type: Number,
     },
     placeholder: {
+      type: String,
+    },
+    iconLeft: {
       type: String,
     },
   },
@@ -172,6 +192,16 @@ export default {
           return option
         })
         .filter(Boolean)
+    },
+    isNormalInput() {
+      return [
+        'text',
+        'number',
+        'checkbox',
+        'email',
+        'password',
+        'date',
+      ].includes(this.type)
     },
   },
 }
