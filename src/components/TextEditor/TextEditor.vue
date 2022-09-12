@@ -206,6 +206,7 @@ export default {
           'Align Right',
           'Separator',
           'Image',
+          'Link',
           'Blockquote',
           'Code',
           'Horizontal Rule',
