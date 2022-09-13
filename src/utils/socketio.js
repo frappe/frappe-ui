@@ -6,6 +6,6 @@ export default function initSocket(options = {}) {
   let port = window.location.port ? `:${socketio_port}` : ''
   let protocol = port ? 'http' : 'https'
   let url = `${protocol}://${host}${port}`
-  let socket = io(url)
+  let socket = io(url, { withCredentials: true })
   return socket
 }
