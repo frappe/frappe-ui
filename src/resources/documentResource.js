@@ -165,6 +165,14 @@ export function createDocumentResource(options, vm) {
     return doc
   }
 
+  if (options.realtime && vm.$socket) {
+    vm.$socket.on('list_update', (data) => {
+      if (data.doctype == out.doctype && data.name == out.name) {
+        out.get.fetch()
+      }
+    })
+  }
+
   // cache
   documentCache[cacheKey] = out
   // offline

@@ -70,7 +70,7 @@ export function createListResource(options, vm, getResource) {
         makeParams(name) {
           return {
             doctype: out.doctype,
-            fields: out.fields,
+            fields: out.fields || '*',
             filters: { name },
           }
         },
@@ -191,6 +191,17 @@ export function createListResource(options, vm, getResource) {
   function next() {
     out.start = out.start + out.limit
     out.list.fetch()
+  }
+
+  if (options.realtime && vm.$socket) {
+    vm.$socket.on('list_update', (data) => {
+      if (
+        data.doctype === out.doctype &&
+        out.originalData?.find((d) => d.name === data.name)
+      ) {
+        out.fetchOne.submit(data.name)
+      }
+    })
   }
 
   if (cacheKey) {
