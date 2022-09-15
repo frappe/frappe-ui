@@ -42,14 +42,18 @@
               ]"
               @click="item.onClick"
             >
-              <FeatherIcon
-                v-if="item.icon"
-                :name="item.icon"
-                class="mr-2 h-4 w-4 flex-shrink-0 text-gray-500"
-                aria-hidden="true"
-              />
-              <span class="whitespace-nowrap">
-                {{ item.label }}
+              <component :is="item.component" v-if="item.component" />
+
+              <span v-else>
+                <FeatherIcon
+                  v-if="item.icon"
+                  :name="item.icon"
+                  class="mr-2 h-4 w-4 flex-shrink-0 text-gray-500"
+                  aria-hidden="true"
+                />
+                <span class="whitespace-nowrap">
+                  {{ item.label }}
+                </span>
               </span>
             </button>
           </MenuItem>
@@ -79,10 +83,12 @@ export default {
       if (!onClick && option.route && this.$router) {
         onClick = () => this.$router.push(option.route)
       }
+
       return {
         label: option.label,
         icon: option.icon,
         group: option.group,
+        component: option.component,
         onClick,
       }
     },
