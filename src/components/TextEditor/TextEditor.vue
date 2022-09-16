@@ -1,51 +1,21 @@
 <template>
   <div class="relative w-full" :class="$attrs.class" v-if="editor">
-    <BubbleMenu
-      v-if="bubbleMenuButtons"
-      class="bubble-menu rounded-md shadow-sm"
-      :tippy-options="{ duration: 100 }"
-      :editor="editor"
-    >
-      <Menu
-        :editor="editor"
-        class="rounded-md border border-gray-100 shadow-lg"
-        :buttons="bubbleMenuButtons"
-      />
-    </BubbleMenu>
-
-    <Menu
-      v-if="fixedMenuButtons"
+    <TextEditorBubbleMenu :buttons="bubbleMenu" />
+    <TextEditorFixedMenu
       class="w-full overflow-x-auto rounded-t-lg border border-gray-200"
-      :editor="editor"
-      :buttons="fixedMenuButtons"
+      :buttons="fixedMenu"
     />
-
-    <FloatingMenu
-      v-if="floatingMenuButtons"
-      :tippy-options="{ duration: 100 }"
-      :editor="editor"
-      class="flex"
-    >
-      <button
-        v-for="button in floatingMenuButtons"
-        :key="button.label"
-        class="flex rounded p-1 text-gray-800 transition-colors"
-        :class="button.isActive(editor) ? 'bg-gray-100' : 'hover:bg-gray-100'"
-        @click="() => button.action(editor)"
-        :title="button.label"
-      >
-        <component v-if="button.icon" :is="button.icon" class="h-4 w-4" />
-        <span class="inline-block h-4 min-w-[1rem] text-sm leading-4" v-else>
-          {{ button.text }}
-        </span>
-      </button>
-    </FloatingMenu>
+    <TextEditorFloatingMenu :buttons="floatingMenu" />
+    <slot name="top" />
     <editor-content :editor="editor" />
+    <slot name="bottom" />
   </div>
 </template>
 
 <script>
-import { Editor, EditorContent, BubbleMenu, FloatingMenu } from '@tiptap/vue-3'
+import { normalizeClass } from 'vue'
+import { computed } from '@vue/reactivity'
+import { Editor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import TextAlign from '@tiptap/extension-text-align'
@@ -56,18 +26,18 @@ import TableRow from '@tiptap/extension-table-row'
 import Image from './image-extension'
 import Link from '@tiptap/extension-link'
 import configureMention from './mention'
-import Menu from './Menu.vue'
-import commands from './commands'
-import { normalizeClass } from 'vue'
+import TextEditorFixedMenu from './TextEditorFixedMenu.vue'
+import TextEditorBubbleMenu from './TextEditorBubbleMenu.vue'
+import TextEditorFloatingMenu from './TextEditorFloatingMenu.vue'
 
 export default {
   name: 'TextEditor',
   inheritAttrs: false,
   components: {
     EditorContent,
-    BubbleMenu,
-    FloatingMenu,
-    Menu,
+    TextEditorFixedMenu,
+    TextEditorBubbleMenu,
+    TextEditorFloatingMenu,
   },
   props: {
     content: {
@@ -113,6 +83,11 @@ export default {
   },
   emits: ['change'],
   expose: ['editor'],
+  provide() {
+    return {
+      editor: computed(() => this.editor),
+    }
+  },
   data() {
     return {
       editor: null,
@@ -175,124 +150,9 @@ export default {
   },
   beforeUnmount() {
     this.editor.destroy()
+    this.editor = null
   },
   computed: {
-    fixedMenuButtons() {
-      if (!this.fixedMenu) return false
-
-      let buttons
-      if (Array.isArray(this.fixedMenu)) {
-        buttons = this.fixedMenu
-      } else {
-        buttons = [
-          [
-            'Heading 1',
-            'Heading 2',
-            'Heading 3',
-            'Heading 4',
-            'Heading 5',
-            'Heading 6',
-          ],
-          'Paragraph',
-          'Separator',
-          'Bold',
-          'Italic',
-          'Separator',
-          'Bullet List',
-          'Numbered List',
-          'Separator',
-          'Align Left',
-          'Align Center',
-          'Align Right',
-          'Separator',
-          'Image',
-          'Link',
-          'Blockquote',
-          'Code',
-          'Horizontal Rule',
-          [
-            'InsertTable',
-            'AddColumnBefore',
-            'AddColumnAfter',
-            'DeleteColumn',
-            'AddRowBefore',
-            'AddRowAfter',
-            'DeleteRow',
-            'MergeCells',
-            'SplitCell',
-            'ToggleHeaderColumn',
-            'ToggleHeaderRow',
-            'ToggleHeaderCell',
-            'DeleteTable',
-          ],
-          'Separator',
-          'Undo',
-          'Redo',
-        ]
-      }
-      return buttons.map(createEditorButton)
-    },
-    bubbleMenuButtons() {
-      if (!this.bubbleMenu) return false
-
-      let buttons
-      if (Array.isArray(this.bubbleMenu)) {
-        buttons = this.bubbleMenu
-      } else {
-        buttons = [
-          'Paragraph',
-          'Heading 2',
-          'Heading 3',
-          'Separator',
-          'Bold',
-          'Italic',
-          'Link',
-          'Separator',
-          'Bullet List',
-          'Numbered List',
-          'Separator',
-          'Image',
-          'Blockquote',
-          'Code',
-          [
-            'InsertTable',
-            'AddColumnBefore',
-            'AddColumnAfter',
-            'DeleteColumn',
-            'AddRowBefore',
-            'AddRowAfter',
-            'DeleteRow',
-            'MergeCells',
-            'SplitCell',
-            'ToggleHeaderColumn',
-            'ToggleHeaderRow',
-            'ToggleHeaderCell',
-            'DeleteTable',
-          ],
-        ]
-      }
-      return buttons.map(createEditorButton)
-    },
-    floatingMenuButtons() {
-      if (!this.floatingMenu) return false
-
-      let buttons
-      if (Array.isArray(this.floatingMenu)) {
-        buttons = this.floatingMenu
-      } else {
-        buttons = [
-          'Paragraph',
-          'Heading 2',
-          'Heading 3',
-          'Bullet List',
-          'Numbered List',
-          'Blockquote',
-          'Code',
-          'Horizontal Rule',
-        ]
-      }
-      return buttons.map(createEditorButton)
-    },
     editorProps() {
       return {
         attributes: {
@@ -305,18 +165,14 @@ export default {
     },
   },
 }
-
-function createEditorButton(option) {
-  if (option instanceof Array) {
-    return option.map(createEditorButton)
-  }
-  if (typeof option == 'object') {
-    return option
-  }
-  return commands[option]
-}
 </script>
 <style>
+.ProseMirror {
+  outline: none;
+  caret-color: theme('colors.blue.600');
+  word-break: break-word;
+}
+
 /* Placeholder */
 .ProseMirror:not(.ProseMirror-focused) p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
