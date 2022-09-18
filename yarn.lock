@@ -310,6 +310,15 @@
     "@tiptap/extension-strike" "^2.0.0-beta.29"
     "@tiptap/extension-text" "^2.0.0-beta.17"
 
+"@tiptap/suggestion@^2.0.0-beta.195":
+  version "2.0.0-beta.195"
+  resolved "https://registry.yarnpkg.com/@tiptap/suggestion/-/suggestion-2.0.0-beta.195.tgz#287aaed7bc7580094c5770c878d51e1da365f5fa"
+  integrity sha512-3ATDgy8U+mqaffLV2K2tBGzyTqcb8Ca7YVyZ2sws/j/E2rUIF3t8Ec4FGTpeRGLDVd3foRRidC1PHwV7ca4f5Q==
+  dependencies:
+    prosemirror-model "1.18.1"
+    prosemirror-state "1.4.1"
+    prosemirror-view "1.26.2"
+
 "@tiptap/suggestion@^2.0.0-beta.97":
   version "2.0.0-beta.97"
   resolved "https://registry.yarnpkg.com/@tiptap/suggestion/-/suggestion-2.0.0-beta.97.tgz#2e3dc20deebc2c37c5d39c848e61e9c837e7188a"
