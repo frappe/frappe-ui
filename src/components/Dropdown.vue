@@ -43,8 +43,7 @@
               @click="item.onClick"
             >
               <component :is="item.component" v-if="item.component" />
-
-              <span v-else>
+              <template v-else>
                 <FeatherIcon
                   v-if="item.icon"
                   :name="item.icon"
@@ -54,7 +53,7 @@
                 <span class="whitespace-nowrap">
                   {{ item.label }}
                 </span>
-              </span>
+              </template>
             </button>
           </MenuItem>
         </div>
