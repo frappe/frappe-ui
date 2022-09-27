@@ -7,7 +7,7 @@
     "test": "npx prettier --check ./src",
     "prettier": "npx prettier -w ./src",
     "prepare": "husky install",
-    "bump-and-release": "yarn version --patch && git push && git push --tags"
+    "bump-and-release": "git pull --rebase origin main && yarn version --patch && git push && git push --tags"
   },
   "files": [
     "src"
