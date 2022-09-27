@@ -173,6 +173,11 @@ export default {
   word-break: break-word;
 }
 
+/* Firefox */
+.ProseMirror-focused:focus-visible {
+  outline: none;
+}
+
 /* Placeholder */
 .ProseMirror:not(.ProseMirror-focused) p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
