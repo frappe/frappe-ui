@@ -126,6 +126,8 @@ export function createDocumentResource(options, vm) {
                 doc.name.toString() === out.name.toString()
               ) {
                 out.doc = transform(doc)
+                // update data in list resources
+                updateRowInListResource(out.doctype, out.doc)
                 break
               }
             }
