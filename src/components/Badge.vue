@@ -28,7 +28,7 @@ export default {
       let color = this.getBadgeColor()
 
       let cssClasses = {
-        gray: 'text-gray-700 bg-gray-50',
+        gray: 'text-gray-700 bg-gray-100',
         green: 'text-green-700 bg-green-50',
         red: 'text-red-700 bg-red-50',
         yellow: 'text-yellow-700 bg-yellow-50',
