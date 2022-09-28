@@ -150,6 +150,27 @@ export function createListResource(options, vm, getResource) {
       },
       vm
     ),
+    runDocMethod: createResource(
+      {
+        method: 'run_doc_method',
+        makeParams({ method, name, ...values }) {
+          return {
+            dt: out.doctype,
+            dn: name,
+            method: method,
+            args: JSON.stringify(values),
+          }
+        },
+        onSuccess(data) {
+          if (data.docs) {
+            for (let doc of data.docs) {
+              updateRowInListResource(doc.doctype, doc)
+            }
+          }
+        },
+      },
+      vm
+    ),
     update,
     reload,
     setData,
