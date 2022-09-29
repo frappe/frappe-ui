@@ -197,8 +197,16 @@ export function createListResource(options, vm, getResource) {
   }
 
   function reload() {
-    out.start = 0
-    return out.list.fetch()
+    let _start = out.start
+    let _limit = out.limit
+    if (out.start > 0) {
+      out.start = 0
+      out.limit = out.originalData.length
+    }
+    return out.list.fetch().finally(() => {
+      out.start = _start
+      out.limit = _limit
+    })
   }
 
   function setData(data) {
