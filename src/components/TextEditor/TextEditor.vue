@@ -29,6 +29,8 @@ import configureMention from './mention'
 import TextEditorFixedMenu from './TextEditorFixedMenu.vue'
 import TextEditorBubbleMenu from './TextEditorBubbleMenu.vue'
 import TextEditorFloatingMenu from './TextEditorFloatingMenu.vue'
+import { detectMarkdown, markdownToHTML } from '../../utils/markdown'
+import { DOMParser } from 'prosemirror-model'
 
 export default {
   name: 'TextEditor',
@@ -160,6 +162,26 @@ export default {
             'prose prose-p:my-1 prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-gray-300 prose-th:border-gray-300 prose-td:relative prose-th:relative prose-th:bg-gray-100',
             this.editorClass,
           ]),
+        },
+        clipboardTextParser: (text, $context) => {
+          if (!detectMarkdown(text)) return
+          if (
+            !confirm(
+              'Do you want to convert markdown content to HTML before pasting?'
+            )
+          )
+            return
+
+          let dom = document.createElement('div')
+          dom.innerHTML = markdownToHTML(text)
+          let parser =
+            this.editor.view.someProp('clipboardParser') ||
+            this.editor.view.someProp('domParser') ||
+            DOMParser.fromSchema(this.editor.schema)
+          return parser.parseSlice(dom, {
+            preserveWhitespace: true,
+            context: $context,
+          })
         },
       }
     },
