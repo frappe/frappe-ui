@@ -71,6 +71,13 @@ module.exports = {
           50: '#F8F8FC',
         },
       },
+      typography: (theme) => ({
+        gray: {
+          css: {
+            '--tw-prose-body': theme('colors.gray.900'),
+          },
+        },
+      }),
     },
     container: {
       padding: {
