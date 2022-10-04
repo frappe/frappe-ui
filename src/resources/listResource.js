@@ -40,6 +40,8 @@ export function createListResource(options, vm, getResource) {
             fields: out.fields,
             filters: out.filters,
             order_by: out.order_by,
+            start: out.start,
+            limit: out.limit,
             limit_start: out.start,
             limit_page_length: out.limit,
             parent: out.parent,
