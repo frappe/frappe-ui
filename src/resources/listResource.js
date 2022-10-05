@@ -79,18 +79,9 @@ export function createListResource(options, vm, getResource) {
         onSuccess(data) {
           if (data.length > 0 && out.originalData) {
             let doc = data[0]
-            let index = out.originalData.findIndex((d) => d.name === doc.name)
-            out.originalData = out.originalData.filter(
-              (d) => d.name !== doc.name
-            )
-            out.originalData = [
-              out.originalData.slice(0, index),
-              data,
-              out.originalData.slice(index),
-            ].flat()
+            updateRowInListResource(out.doctype, doc)
           }
 
-          out.data = transform(out.originalData)
           options.fetchOne?.onSuccess?.call(vm, out.data)
         },
         onError: options.fetchOne?.onError,
@@ -258,6 +249,7 @@ export function getCachedListResource(cacheKey) {
 }
 
 export function updateRowInListResource(doctype, doc) {
+  if (!doc.name) return
   let resources = resourcesByDocType[doctype] || []
   for (let resource of resources) {
     if (resource.originalData) {
