@@ -36,7 +36,20 @@
           leave-to="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
         >
           <div
-            class="my-8 inline-block w-full max-w-lg transform overflow-hidden rounded-lg bg-white text-left align-middle shadow-xl transition-all"
+            class="my-8 inline-block w-full transform overflow-hidden rounded-lg bg-white text-left align-middle shadow-xl transition-all"
+            :class="{
+              'max-w-7xl': options.size === '7xl',
+              'max-w-6xl': options.size === '6xl',
+              'max-w-5xl': options.size === '5xl',
+              'max-w-4xl': options.size === '4xl',
+              'max-w-3xl': options.size === '3xl',
+              'max-w-2xl': options.size === '2xl',
+              'max-w-xl': options.size === 'xl',
+              'max-w-md': options.size === 'md',
+              'max-w-lg': options.size === 'lg' || !options.size,
+              'max-w-sm': options.size === 'sm',
+              'max-w-xs': options.size === 'xs',
+            }"
           >
             <slot name="body">
               <slot name="body-main">
@@ -76,7 +89,10 @@
                       </DialogTitle>
 
                       <slot name="body-content">
-                        <p class="text-sm text-gray-600" v-if="options.message">
+                        <p
+                          class="text-base text-gray-600"
+                          v-if="options.message"
+                        >
                           {{ options.message }}
                         </p>
                       </slot>
