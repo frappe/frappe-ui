@@ -155,7 +155,7 @@ export function createResource(options, vm, getResource) {
   function transform(data) {
     if (options.transform) {
       let returnValue = options.transform.call(vm, data)
-      if (typeof returnValue != null) {
+      if (returnValue != null) {
         return returnValue
       }
     }
