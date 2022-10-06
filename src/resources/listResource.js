@@ -118,9 +118,9 @@ export function createListResource(options, vm, getResource) {
             fieldname: values,
           }
         },
-        onSuccess(data) {
-          out.list.fetch()
-          options.setValue?.onSuccess?.call(vm, data)
+        onSuccess(doc) {
+          updateRowInListResource(out.doctype, doc)
+          options.setValue?.onSuccess?.call(vm, doc)
         },
         onError: options.setValue?.onError,
       },
