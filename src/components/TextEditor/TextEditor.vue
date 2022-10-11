@@ -24,6 +24,7 @@ import TableCell from '@tiptap/extension-table-cell'
 import TableHeader from '@tiptap/extension-table-header'
 import TableRow from '@tiptap/extension-table-row'
 import Image from './image-extension'
+import Video from './video-extension'
 import Link from '@tiptap/extension-link'
 import configureMention from './mention'
 import TextEditorFixedMenu from './TextEditorFixedMenu.vue'
@@ -135,6 +136,7 @@ export default {
           types: ['heading', 'paragraph'],
         }),
         Image,
+        Video,
         Link,
         Placeholder.configure({
           showOnlyWhenEditable: false,
@@ -207,6 +209,11 @@ export default {
   color: theme('colors.gray.500');
   pointer-events: none;
   height: 0;
+}
+
+.ProseMirror-selectednode video,
+img.ProseMirror-selectednode {
+  border: 2px solid theme('colors.blue.300');
 }
 
 /* Mentions */

@@ -1,9 +1,9 @@
 <template>
-  <slot v-bind="{ openDialog, resetAddImage }"></slot>
+  <slot v-bind="{ onClick: openDialog }"></slot>
   <Dialog
     :options="{ title: 'Add Image' }"
     v-model="addImageDialog.show"
-    @after-leave="resetAddImage"
+    @after-leave="reset"
   >
     <template #body-content>
       <label
@@ -29,12 +29,14 @@
       <Button appearance="primary" @click="addImage(addImageDialog.url)">
         Insert Image
       </Button>
+      <Button @click="reset"> Cancel </Button>
     </template>
   </Dialog>
 </template>
 <script>
 import fileToBase64 from '../../utils/file-to-base64'
 import Dialog from '../Dialog.vue'
+import Button from '../Button.vue'
 
 export default {
   name: 'InsertImage',
@@ -45,7 +47,7 @@ export default {
       addImageDialog: { url: '', file: null, show: false },
     }
   },
-  components: { Dialog },
+  components: { Button, Dialog },
   methods: {
     openDialog() {
       this.addImageDialog.show = true
@@ -62,10 +64,10 @@ export default {
     },
     addImage(src) {
       this.editor.chain().focus().setImage({ src }).run()
-      this.resetAddImage()
+      this.reset()
     },
-    resetAddImage() {
-      this.addImageDialog = { show: false, url: null, file: null }
+    reset() {
+      this.addImageDialog = this.$options.data().addImageDialog
     },
   },
 }

@@ -42,6 +42,7 @@ export default {
           'Numbered List',
           'Separator',
           'Image',
+          'Video',
           'Blockquote',
           'Code',
           [

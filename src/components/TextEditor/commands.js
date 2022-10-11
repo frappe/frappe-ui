@@ -1,3 +1,4 @@
+import { defineAsyncComponent } from 'vue'
 import H1 from './icons/h-1.vue'
 import H2 from './icons/h-2.vue'
 import H3 from './icons/h-3.vue'
@@ -17,6 +18,7 @@ import DoubleQuotes from './icons/double-quotes-r.vue'
 import CodeView from './icons/code-view.vue'
 import Link from './icons/link.vue'
 import Image from './icons/image-add-line.vue'
+import Video from './icons/video-add-line.vue'
 import ArrowGoBack from './icons/arrow-go-back-line.vue'
 import ArrowGoForward from './icons/arrow-go-forward-line.vue'
 import Separator from './icons/separator.vue'
@@ -147,11 +149,19 @@ export default {
     label: 'Link',
     icon: Link,
     isActive: (editor) => editor.isActive('link'),
+    component: defineAsyncComponent(() => import('./InsertLink.vue')),
   },
   Image: {
     label: 'Image',
     icon: Image,
     isActive: (editor) => false,
+    component: defineAsyncComponent(() => import('./InsertImage.vue')),
+  },
+  Video: {
+    label: 'Video',
+    icon: Video,
+    isActive: (editor) => false,
+    component: defineAsyncComponent(() => import('./InsertVideo.vue')),
   },
   Undo: {
     label: 'Undo',
