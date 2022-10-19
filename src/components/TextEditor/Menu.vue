@@ -38,7 +38,7 @@
                     class="w-full rounded px-2 py-1 text-left text-base hover:bg-gray-50"
                     @click="
                       () => {
-                        onClick(option)
+                        onButtonClick(option)
                         close()
                       }
                     "
