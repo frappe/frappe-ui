@@ -134,7 +134,8 @@ import {
   TransitionChild,
   TransitionRoot,
 } from '@headlessui/vue'
-import { Button, FeatherIcon } from 'frappe-ui'
+import Button from './Button.vue'
+import FeatherIcon from './FeatherIcon.vue'
 
 export default {
   name: 'Dialog',

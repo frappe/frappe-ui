@@ -64,7 +64,7 @@
 
 <script>
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
-import { FeatherIcon } from 'frappe-ui'
+import FeatherIcon from './FeatherIcon.vue'
 
 export default {
   name: 'NewDropdown',

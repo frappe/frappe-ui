@@ -47,7 +47,7 @@
   </teleport>
 </template>
 <script>
-import { FeatherIcon } from 'frappe-ui'
+import FeatherIcon from './FeatherIcon.vue'
 const positions = [
   'top-right',
   'top-center',

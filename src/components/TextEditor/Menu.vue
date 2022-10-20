@@ -79,7 +79,7 @@
   </div>
 </template>
 <script>
-import { Popover } from 'frappe-ui'
+import Popover from '../Popover.vue'
 
 export default {
   name: 'TipTapMenu',
