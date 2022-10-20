@@ -10,7 +10,8 @@
       @close="open = false"
     >
       <div
-        class="flex min-h-screen flex-col items-center justify-center px-4 pt-4 pb-20 text-center"
+        class="flex min-h-screen flex-col items-center px-4 pt-4 pb-20 text-center"
+        :class="dialogPositionClasses"
       >
         <TransitionChild
           as="template"
@@ -203,6 +204,13 @@ export default {
         }
       }
       return icon
+    },
+    dialogPositionClasses() {
+      let position = this.options?.position || 'center'
+      return {
+        'justify-center': position === 'center',
+        'pt-[20vh]': position === 'top',
+      }
     },
   },
 }
