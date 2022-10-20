@@ -31,6 +31,7 @@ export function createResource(options, vm, getResource) {
     loading: false,
     fetched: false,
     error: null,
+    promise: null,
     auto: options.auto,
     params: null,
     fetch: fetchFunction,
@@ -85,7 +86,8 @@ export function createResource(options, vm, getResource) {
     }
 
     try {
-      let data = await resourceFetcher(options.method, params || options.params)
+      out.promise = resourceFetcher(options.method, params || options.params)
+      let data = await out.promise
       saveLocal(cacheKey, data)
       out.data = transform(data)
       out.fetched = true
