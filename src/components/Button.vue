@@ -4,6 +4,7 @@
     :class="buttonClasses"
     @click="handleClick"
     :disabled="isDisabled"
+    :aria-label="ariaLabel"
   >
     <LoadingIndicator
       v-if="loading"
@@ -135,6 +136,9 @@ export default {
     },
     isDisabled() {
       return this.disabled || this.loading
+    },
+    ariaLabel() {
+      return this.icon ? this.label : null
     },
   },
   methods: {
