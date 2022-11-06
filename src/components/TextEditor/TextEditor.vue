@@ -7,7 +7,9 @@
     />
     <TextEditorFloatingMenu :buttons="floatingMenu" />
     <slot name="top" />
-    <editor-content :editor="editor" />
+    <slot name="editor" :editor="editor">
+      <editor-content :editor="editor" />
+    </slot>
     <slot name="bottom" />
   </div>
 </template>
