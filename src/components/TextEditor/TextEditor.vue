@@ -139,7 +139,9 @@ export default {
         }),
         Image,
         Video,
-        Link,
+        Link.configure({
+          openOnClick: false,
+        }),
         Placeholder.configure({
           showOnlyWhenEditable: false,
           placeholder: () => {
