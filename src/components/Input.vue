@@ -80,7 +80,7 @@
 </template>
 
 <script>
-import { debounce } from 'frappe-ui'
+import { debounce } from '../index'
 import FeatherIcon from './FeatherIcon.vue'
 
 export default {

@@ -1,5 +1,5 @@
-import { call, debounce } from 'frappe-ui'
 import { reactive } from 'vue'
+import { call, debounce } from '../index'
 import { getLocal, saveLocal } from './local'
 
 let cached = {}
