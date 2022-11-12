@@ -7,7 +7,10 @@
     "test": "npx prettier --check ./src",
     "prettier": "npx prettier -w ./src",
     "prepare": "husky install",
-    "bump-and-release": "git pull --rebase origin main && yarn version --patch && git push && git push --tags"
+    "bump-and-release": "git pull --rebase origin main && yarn version --patch && git push && git push --tags",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:serve": "vitepress serve docs"
   },
   "files": [
     "src"
@@ -52,7 +55,9 @@
     "husky": ">=6",
     "lint-staged": ">=10",
     "prettier": "2.7.1",
-    "prettier-plugin-tailwindcss": "^0.1.13"
+    "prettier-plugin-tailwindcss": "^0.1.13",
+    "vitepress": "^1.0.0-alpha.28",
+    "vue": "^3.2.45"
   },
   "lint-staged": {
     "*.{js,css,md,vue}": "prettier --write"
