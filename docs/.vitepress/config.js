@@ -12,6 +12,7 @@ export default defineConfig({
       {
         text: 'Components',
         items: [
+          { text: 'Alert', link: '/components/alert' },
           { text: 'Button', link: '/components/button' },
           { text: 'FeatherIcon', link: '/components/feathericon' },
         ],

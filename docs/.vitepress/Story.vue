@@ -1,9 +1,29 @@
-<script setup></script>
+<script setup>
+import { useAttrs } from 'vue'
+import RenderToIFrame from './RenderToIFrame'
+import tailwindStyles from '../../src/style.css'
+
+const css = `
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+    html {
+        -webkit-font-smoothing: antialiased;
+    }
+    ${tailwindStyles}
+`
+const attrs = useAttrs()
+</script>
 <template>
-  <div class="flex w-full items-center justify-center rounded-lg border p-4">
-    <div>
-      <slot name="code" />
+  <RenderToIFrame class="w-full" :css="css" :disabled="false">
+    <div
+      :class="[
+        'flex w-full items-center justify-center overflow-auto rounded-lg border p-8',
+        attrs.class,
+      ]"
+    >
+      <div>
+        <slot name="code" />
+      </div>
+      <slot />
     </div>
-    <slot />
-  </div>
+  </RenderToIFrame>
 </template>
