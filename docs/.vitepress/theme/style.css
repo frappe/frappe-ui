@@ -54,3 +54,7 @@
 .vp-doc a > code {
   color: var(--blue-500);
 }
+
+#headlessui-portal-root [role='dialog'] {
+  z-index: 21;
+}

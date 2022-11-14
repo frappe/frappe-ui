@@ -19,6 +19,7 @@ export default defineConfig({
           { text: 'Button', link: '/components/button' },
           { text: 'FeatherIcon', link: '/components/feathericon' },
           { text: 'DatePicker', link: '/components/datepicker' },
+          { text: 'Dialog', link: '/components/dialog' },
         ],
       },
     ],
