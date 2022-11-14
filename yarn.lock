@@ -141,6 +141,11 @@
   resolved "https://registry.yarnpkg.com/@tiptap/extension-code/-/extension-code-2.0.0-beta.28.tgz#a22c0e873497ac0bbcd77e4a855322f8591f954e"
   integrity sha512-QPJ2Gwb1+3NgcC1ZIhvVcb+FsnWWDu5VZXTKXM4mz892i9V2x48uHg5anPiUV6pcolXsW1F5VNbXIHGTUUO6CQ==
 
+"@tiptap/extension-color@^2.0.0-beta.202":
+  version "2.0.0-beta.202"
+  resolved "https://registry.yarnpkg.com/@tiptap/extension-color/-/extension-color-2.0.0-beta.202.tgz#0fc326e6b0fbb5f43e551b6b142d67eb1ff2f0b2"
+  integrity sha512-P8rBd2V3UfE9EkmnZ7sXMJihmx+P+fBe0WKo8lSSX+808869ds8YNFGv043wqY/1BnTNqC49GDo0ceP2/9cM1A==
+
 "@tiptap/extension-document@^2.0.0-beta.17":
   version "2.0.0-beta.17"
   resolved "https://registry.yarnpkg.com/@tiptap/extension-document/-/extension-document-2.0.0-beta.17.tgz#ded4182dd860762bcf41c588f712d83908c472a3"
@@ -178,6 +183,11 @@
   version "2.0.0-beta.29"
   resolved "https://registry.yarnpkg.com/@tiptap/extension-heading/-/extension-heading-2.0.0-beta.29.tgz#d017d216c0fd1962c266f6f61a335093f9749862"
   integrity sha512-q92jYcsT5bPhvuQaB0h44Z9r+Ii22tDYo082KMVnR4+tknHT/3xx+p4JC8KHjh+/5W8Quyafqy6mS8L8VX0zsQ==
+
+"@tiptap/extension-highlight@^2.0.0-beta.202":
+  version "2.0.0-beta.202"
+  resolved "https://registry.yarnpkg.com/@tiptap/extension-highlight/-/extension-highlight-2.0.0-beta.202.tgz#cba317c934d0a37b61e6d36c9879df8f76c154bf"
+  integrity sha512-lRsXseZxOz/gATpqMZKIJk61+KeV35cr7UPoRrX4eoImSS0EJEYjjlfnBKeFxju9b1qUv3ui4oq4nvrZ/MDwnw==
 
 "@tiptap/extension-history@^2.0.0-beta.26":
   version "2.0.0-beta.26"
@@ -279,6 +289,11 @@
   version "2.0.0-beta.31"
   resolved "https://registry.yarnpkg.com/@tiptap/extension-text-align/-/extension-text-align-2.0.0-beta.31.tgz#31229ef1a16555a9b3a1dc94bf7d3a8c64639f51"
   integrity sha512-gSJqi57piiMPc2r6WEkXv7ZgQIogigsRUhmlnZC/7s3zzOvjXrexWnV0Ctt/9A7BKcM7OHMykpZyoewvk6QRTw==
+
+"@tiptap/extension-text-style@^2.0.0-beta.202":
+  version "2.0.0-beta.202"
+  resolved "https://registry.yarnpkg.com/@tiptap/extension-text-style/-/extension-text-style-2.0.0-beta.202.tgz#73706d44434787a88ddd2cbc5feb17cb48cd26cd"
+  integrity sha512-dTA3rdkSkANGXtObNEEk7h6+pEOP4iANZF8D0RiNK+c5dKpCfKswVAuddm5q2PMcgYgep5bv/sorAqOIire2rQ==
 
 "@tiptap/extension-text@^2.0.0-beta.17":
   version "2.0.0-beta.17"

@@ -55,7 +55,9 @@
             <button
               class="flex rounded p-1 text-gray-800 transition-colors"
               :class="
-                button.isActive(editor) ? 'bg-gray-100' : 'hover:bg-gray-100'
+                button.isActive(editor) || componentSlotProps?.isActive
+                  ? 'bg-gray-100'
+                  : 'hover:bg-gray-100'
               "
               @click="
                 componentSlotProps?.onClick

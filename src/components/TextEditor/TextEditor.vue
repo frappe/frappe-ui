@@ -28,6 +28,9 @@ import TableRow from '@tiptap/extension-table-row'
 import Image from './image-extension'
 import Video from './video-extension'
 import Link from '@tiptap/extension-link'
+import TextStyle from '@tiptap/extension-text-style'
+import Highlight from '@tiptap/extension-highlight'
+import { Color } from '@tiptap/extension-color'
 import configureMention from './mention'
 import TextEditorFixedMenu from './TextEditorFixedMenu.vue'
 import TextEditorBubbleMenu from './TextEditorBubbleMenu.vue'
@@ -137,6 +140,9 @@ export default {
         TextAlign.configure({
           types: ['heading', 'paragraph'],
         }),
+        TextStyle,
+        Color,
+        Highlight.configure({ multicolor: true }),
         Image,
         Video,
         Link.configure({
@@ -258,5 +264,10 @@ img.ProseMirror-selectednode {
 .resize-cursor {
   cursor: ew-resize;
   cursor: col-resize;
+}
+
+.ProseMirror mark {
+  border-radius: 3px;
+  padding: 0 2px;
 }
 </style>
