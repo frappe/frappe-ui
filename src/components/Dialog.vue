@@ -46,8 +46,8 @@
               'max-w-3xl': options.size === '3xl',
               'max-w-2xl': options.size === '2xl',
               'max-w-xl': options.size === 'xl',
-              'max-w-md': options.size === 'md',
               'max-w-lg': options.size === 'lg' || !options.size,
+              'max-w-md': options.size === 'md',
               'max-w-sm': options.size === 'sm',
               'max-w-xs': options.size === 'xs',
             }"
@@ -60,6 +60,7 @@
                       v-if="icon"
                       class="mx-auto mb-3 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:mb-0 sm:mr-4 sm:h-9 sm:w-9"
                       :class="{
+                        'bg-gray-100': !icon.appearance,
                         'bg-yellow-100': icon.appearance === 'warning',
                         'bg-blue-100': icon.appearance === 'info',
                         'bg-red-100': icon.appearance === 'danger',
@@ -68,8 +69,9 @@
                     >
                       <FeatherIcon
                         :name="icon.name"
-                        class="h-6 w-6 text-red-600 sm:h-5 sm:w-5"
+                        class="h-6 w-6 sm:h-5 sm:w-5"
                         :class="{
+                          'text-gray-600': !icon.appearance,
                           'text-yellow-600': icon.appearance === 'warning',
                           'text-blue-600': icon.appearance === 'info',
                           'text-red-600': icon.appearance === 'danger',
@@ -198,10 +200,7 @@ export default {
 
       let icon = this.options.icon
       if (typeof icon === 'string') {
-        icon = {
-          name: icon,
-          type: 'info',
-        }
+        icon = { name: icon }
       }
       return icon
     },
