@@ -6,11 +6,7 @@
           <ComboboxButton
             class="flex w-full items-center justify-between rounded-md bg-gray-100 py-1.5 pl-3 pr-2"
             :class="{ 'rounded-b-none': isComboboxOpen }"
-            @click="
-              () => {
-                openPopover()
-              }
-            "
+            @click="() => openPopover()"
           >
             <span
               class="overflow-hidden text-ellipsis text-base"
@@ -100,6 +96,8 @@ import {
   ComboboxButton,
 } from '@headlessui/vue'
 import Popover from './Popover.vue'
+import Button from './Button.vue'
+import FeatherIcon from './FeatherIcon.vue'
 
 export default {
   name: 'Autocomplete',
@@ -107,6 +105,8 @@ export default {
   emits: ['update:modelValue', 'change'],
   components: {
     Popover,
+    Button,
+    FeatherIcon,
     Combobox,
     ComboboxInput,
     ComboboxOptions,

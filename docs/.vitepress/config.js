@@ -13,8 +13,12 @@ export default defineConfig({
         text: 'Components',
         items: [
           { text: 'Alert', link: '/components/alert' },
+          { text: 'Autocomplete', link: '/components/autocomplete' },
+          { text: 'Avatar', link: '/components/avatar' },
+          { text: 'Badge', link: '/components/badge' },
           { text: 'Button', link: '/components/button' },
           { text: 'FeatherIcon', link: '/components/feathericon' },
+          { text: 'DatePicker', link: '/components/datepicker' },
         ],
       },
     ],

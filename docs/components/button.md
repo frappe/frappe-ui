@@ -1,5 +1,6 @@
 <script setup>
 import Button from '../../src/components/Button.vue'
+const alert = (text) => window.alert(text)
 </script>
 
 # Button
@@ -10,7 +11,7 @@ opening a Dialog, or canceling an action.
 ## Usage
 
 <Story class="gap-4">
-  <Button>Default</Button>
+  <Button @click="alert('Hello')">Default</Button>
   <Button appearance="primary">Primary</Button>
   <Button appearance="danger">Danger</Button>
   <Button appearance="minimal">Minimal</Button>
@@ -22,7 +23,7 @@ opening a Dialog, or canceling an action.
 
 ```vue
 <template>
-  <Button>Default</Button>
+  <Button @click="alert('Hello')">Default</Button>
   <Button appearance="primary">Primary</Button>
   <Button appearance="danger">Danger</Button>
   <Button appearance="minimal">Minimal</Button>
@@ -41,9 +42,9 @@ import { Button } from 'frappe-ui'
 
 | Name          | Default       | Value                                                                      | Description                                                                                           |
 | :------------ | :------------ | :------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------- |
-| `label`       | `null`        | `String`                                                                   |
-| `appearance`  | `'secondary'` | `primary \| secondary \| danger \| success \| warning \| white \| minimal` |
-| `disabled`    | `false`       | `true \| false`                                                            |
+| `label`       | `null`        | `String`                                                                   |                                                                                                       |
+| `appearance`  | `'secondary'` | `primary \| secondary \| danger \| success \| warning \| white \| minimal` |                                                                                                       |
+| `disabled`    | `false`       | `true \| false`                                                            |                                                                                                       |
 | `active`      | `false`       | `true \| false`                                                            | Only applicable if `appearance` is `minimal`                                                          |
 | `icon`        | `null`        | [Feather Icon](/components/feathericon) name                               | Will only display icon without label. If `label` is provided, `aria-label` will be set to that value. |
 | `iconLeft`    | `null`        | [Feather Icon](/components/feathericon) name                               |                                                                                                       |
@@ -52,3 +53,8 @@ import { Button } from 'frappe-ui'
 | `loadingText` | `null`        | `String`                                                                   | Set this to change the button text in `loading` state                                                 |
 | `route`       | `null`        | `String \| Object`                                                         | If you are using `vue-router`, you can pass a valid `route` value and click handler will be added     |
 | `link`        | `null`        | `String`                                                                   | URL to open in a new window on button click                                                           |
+
+## Events
+
+All attributes and event listeners are passed down to the underlying `button`
+element, so `@click` and other events will just work like on a normal button.
