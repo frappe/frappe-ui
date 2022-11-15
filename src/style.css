@@ -10,6 +10,6 @@
   }
 
   .form-checkbox {
-    @apply rounded-md text-blue-500;
+    @apply rounded-md bg-gray-100 text-blue-500;
   }
 }

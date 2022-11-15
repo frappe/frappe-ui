@@ -1,5 +1,5 @@
 <script setup>
-import {Avatar} from '../../src/index'
+import { Avatar } from '../../src/index'
 </script>
 
 # Avatar

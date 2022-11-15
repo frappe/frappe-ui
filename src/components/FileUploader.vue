@@ -130,7 +130,7 @@ class FileUploader {
 
 export default {
   name: 'FileUploader',
-  props: ['fileTypes', 'uploadArgs', 'type', 'validateFile'],
+  props: ['fileTypes', 'uploadArgs', 'validateFile'],
   data() {
     return {
       uploader: null,
@@ -204,11 +204,11 @@ export default {
         .catch((error) => {
           this.uploading = false
           let errorMessage = 'Error Uploading File'
-          if (error._server_messages) {
+          if (error?._server_messages) {
             errorMessage = JSON.parse(
               JSON.parse(error._server_messages)[0]
             ).message
-          } else if (error.exc) {
+          } else if (error?.exc) {
             errorMessage = JSON.parse(error.exc)[0].split('\n').slice(-2, -1)[0]
           }
           this.error = errorMessage

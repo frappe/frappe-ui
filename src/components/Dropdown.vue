@@ -64,16 +64,31 @@
 
 <script>
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
+import Button from './Button.vue'
 import FeatherIcon from './FeatherIcon.vue'
 
 export default {
   name: 'NewDropdown',
-  props: ['button', 'options', 'placement'],
+  props: {
+    button: {
+      type: Object,
+      default: null,
+    },
+    options: {
+      type: Array,
+      default: () => [],
+    },
+    placement: {
+      type: String,
+      default: 'left',
+    },
+  },
   components: {
     Menu,
     MenuButton,
     MenuItems,
     MenuItem,
+    Button,
     FeatherIcon,
   },
   methods: {
