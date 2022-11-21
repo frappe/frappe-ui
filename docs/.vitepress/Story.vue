@@ -20,7 +20,7 @@ const css = `
 const attrs = useAttrs()
 </script>
 <template>
-  <RenderToIFrame class="w-full" :css="css" :disabled="!iframe">
+  <RenderToIFrame class="w-full" :css="iframe ? css : null" :disabled="!iframe">
     <div
       :class="[
         'flex w-full items-center justify-center overflow-auto rounded-lg border p-4',
