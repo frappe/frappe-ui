@@ -20,7 +20,8 @@
         :class="popoverClass"
         class="popover-container relative z-[100]"
         :style="{ minWidth: targetWidth ? targetWidth + 'px' : null }"
-        v-show="isOpen"
+        @mouseover="pointerOverTargetOrPopup = true"
+        @mouseleave="onMouseleave"
       >
         <transition v-bind="popupTransition">
           <div v-show="isOpen">
@@ -66,7 +67,10 @@ export default {
       type: Number,
       default: 0,
     },
-    right: Boolean,
+    leaveDelay: {
+      type: Number,
+      default: 0,
+    },
     placement: {
       type: String,
       default: 'bottom-start',
@@ -85,6 +89,7 @@ export default {
     return {
       showPopup: false,
       targetWidth: null,
+      pointerOverTargetOrPopup: false,
     }
   },
   watch: {
@@ -208,11 +213,15 @@ export default {
       this.isOpen = false
     },
     onMouseover() {
-      this.mouseover = true
+      this.pointerOverTargetOrPopup = true
+      if (this.leaveTimer) {
+        clearTimeout(this.leaveTimer)
+        this.leaveTimer = null
+      }
       if (this.trigger === 'hover') {
         if (this.hoverDelay) {
           this.hoverTimer = setTimeout(() => {
-            if (this.mouseover) {
+            if (this.pointerOverTargetOrPopup) {
               this.open()
             }
           }, Number(this.hoverDelay) * 1000)
@@ -221,13 +230,27 @@ export default {
         }
       }
     },
-    onMouseleave() {
-      this.mouseover = false
+    onMouseleave(e) {
+      this.pointerOverTargetOrPopup = false
       if (this.hoverTimer) {
         clearTimeout(this.hoverTimer)
+        this.hoverTimer = null
       }
       if (this.trigger === 'hover') {
-        this.close()
+        if (this.leaveTimer) {
+          clearTimeout(this.leaveTimer)
+        }
+        if (this.leaveDelay) {
+          this.leaveTimer = setTimeout(() => {
+            if (!this.pointerOverTargetOrPopup) {
+              this.close()
+            }
+          }, Number(this.leaveDelay) * 1000)
+        } else {
+          if (!this.pointerOverTargetOrPopup) {
+            this.close()
+          }
+        }
       }
     },
   },
