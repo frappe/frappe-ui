@@ -21,6 +21,7 @@ export { default as Popover } from './components/Popover.vue'
 export { default as Resource } from './components/Resource.vue'
 export { default as TextEditor } from './components/TextEditor'
 export { default as Toast } from './components/Toast.vue'
+export { toast, Toasts } from './components/toast.js'
 export { default as Tooltip } from './components/Tooltip.vue'
 
 // directives
