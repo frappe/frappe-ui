@@ -1,5 +1,5 @@
 <script setup>
-import {Alert, Button} from '../../src/index'
+import { Alert, Button } from '../../src/index'
 </script>
 
 # Alert

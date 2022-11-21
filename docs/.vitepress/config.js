@@ -3,6 +3,7 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: 'Frappe UI',
   description: 'A set of components and utilities for rapid UI development',
+  appearance: false,
   themeConfig: {
     sidebar: [
       {
@@ -25,6 +26,12 @@ export default defineConfig({
           { text: 'FeatherIcon', link: '/components/feathericon' },
           { text: 'FileUploader', link: '/components/fileuploader' },
           { text: 'Input', link: '/components/input' },
+          { text: 'Loading Indicator', link: '/components/loading-indicator' },
+          { text: 'Popover', link: '/components/popover' },
+          { text: 'Resource', link: '/components/resource' },
+          { text: 'Text Editor', link: '/components/text-editor' },
+          { text: 'Toast', link: '/components/toast' },
+          { text: 'Tooltip', link: '/components/tooltip' },
         ],
       },
     ],

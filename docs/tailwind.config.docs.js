@@ -5,6 +5,12 @@ module.exports = {
     './docs/**/*.{md,vue,js}',
     './src/components/**/*.{vue,js,ts,jsx,tsx}',
   ],
-  theme: {},
+  theme: {
+    extend: {
+      container: {
+        padding: 0,
+      },
+    },
+  },
   plugins: [],
 }
