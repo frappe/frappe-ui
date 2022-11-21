@@ -6,6 +6,7 @@
     <template #body>
       <slot name="body">
         <div
+          v-if="text"
           class="rounded-lg border border-gray-100 bg-gray-800 px-2 py-1 text-xs text-white shadow-xl"
         >
           {{ text }}
@@ -28,7 +29,7 @@ export default {
     },
     text: {
       type: String,
-      default: '',
+      default: null,
     },
   },
 }
