@@ -17,12 +17,10 @@ export { default as Link } from './components/Link.vue'
 export { default as ListItem } from './components/ListItem.vue'
 export { default as LoadingIndicator } from './components/LoadingIndicator.vue'
 export { default as LoadingText } from './components/LoadingText.vue'
-export { default as Modal } from './components/Modal.vue'
 export { default as Popover } from './components/Popover.vue'
 export { default as Resource } from './components/Resource.vue'
-export { default as Spinner } from './components/Spinner.vue'
-export { default as SuccessMessage } from './components/SuccessMessage.vue'
 export { default as TextEditor } from './components/TextEditor'
+export { default as Toast } from './components/Toast.vue'
 export { default as Tooltip } from './components/Tooltip.vue'
 
 // directives
