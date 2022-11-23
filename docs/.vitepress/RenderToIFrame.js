@@ -12,7 +12,7 @@ export default {
       default: false,
     },
   },
-  setup(props, { slots }) {
+  setup(props, { attrs, slots }) {
     if (props.disabled) {
       return () => slots.default()
     }
@@ -30,13 +30,17 @@ export default {
       iframeStyle.value = document.createElement('style')
       iframeStyle.value.innerHTML = props.css
       iframeHead.value.appendChild(iframeStyle.value)
+      iframeRef.value.contentDocument.firstChild.classList.add('h-full')
+      iframeBody.value.classList.add('h-full')
 
       iframeApp = createApp({
         name: 'iframeRender',
         setup() {
           return () => slots.default()
         },
-      }).mount(el)
+      })
+      iframeApp.mount(el)
+      iframeApp.config.unwrapInjectedRef = true
     })
     onBeforeUpdate(() => {
       if (!iframeApp || !iframeRef.value) {
@@ -46,6 +50,6 @@ export default {
         iframeStyle.value.innerHTML = props.css
       }
     })
-    return () => h('iframe', { ref: iframeRef })
+    return () => h('iframe', { ref: iframeRef, ...attrs })
   },
 }

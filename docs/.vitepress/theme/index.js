@@ -8,5 +8,6 @@ export default {
   enhanceApp(ctx) {
     DefaultTheme.enhanceApp(ctx)
     ctx.app.component('Story', Story)
+    ctx.app.config.unwrapInjectedRef = true
   },
 }

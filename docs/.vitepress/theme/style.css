@@ -58,3 +58,7 @@
 #headlessui-portal-root [role='dialog'] {
   z-index: 21;
 }
+
+.ProseMirror p {
+  @apply !my-1;
+}
