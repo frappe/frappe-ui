@@ -300,6 +300,11 @@
   resolved "https://registry.yarnpkg.com/@tiptap/extension-text/-/extension-text-2.0.0-beta.17.tgz#4fdd1bdf62c82c1af6feef91c689906a8f5b171e"
   integrity sha512-OyKL+pqWJEtjyd9/mrsuY1kZh2b3LWpOQDWKtd4aWR4EA0efmQG+7FPwcIeAVEh7ZoqM+/ABCnPjN6IjzIrSfg==
 
+"@tiptap/extension-typography@^2.0.0-beta.202":
+  version "2.0.0-beta.202"
+  resolved "https://registry.yarnpkg.com/@tiptap/extension-typography/-/extension-typography-2.0.0-beta.202.tgz#ef55aa958683f17408c8630e778cbdc09461720b"
+  integrity sha512-aEw1BGei5tVUMw0ta2mqsSlrargZQrHb9sbUvy4SsHX/3VShZU1TPMBbdn9LYDblc6cdf4gGRPv6Lp/zgigFHQ==
+
 "@tiptap/starter-kit@^2.0.0-beta.191":
   version "2.0.0-beta.191"
   resolved "https://registry.yarnpkg.com/@tiptap/starter-kit/-/starter-kit-2.0.0-beta.191.tgz#3f549367f6dbb8cf83f63aa0941722d91d0fd8e7"

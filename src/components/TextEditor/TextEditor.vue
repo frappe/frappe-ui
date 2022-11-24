@@ -28,6 +28,7 @@ import TableRow from '@tiptap/extension-table-row'
 import Image from './image-extension'
 import Video from './video-extension'
 import Link from '@tiptap/extension-link'
+import Typography from '@tiptap/extension-typography'
 import TextStyle from '@tiptap/extension-text-style'
 import Highlight from '@tiptap/extension-highlight'
 import { Color } from '@tiptap/extension-color'
@@ -137,6 +138,7 @@ export default {
         TableRow,
         TableHeader,
         TableCell,
+        Typography,
         TextAlign.configure({
           types: ['heading', 'paragraph'],
         }),
