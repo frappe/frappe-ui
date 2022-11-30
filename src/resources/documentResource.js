@@ -179,7 +179,7 @@ export function createDocumentResource(options, vm) {
   documentCache[cacheKey] = out
   // offline
   getLocal(cacheKey).then((data) => {
-    if (out.get.loading && data) {
+    if ((out.get.loading || !out.get.fetched) && data) {
       out.doc = transform(data)
     }
   })

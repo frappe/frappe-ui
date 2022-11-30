@@ -36,11 +36,7 @@ let createMixin = (mixinOptions) => ({
 
               let resource = this._resources[key]
               if (!resource) {
-                resource = createResourceForOptions(
-                  updatedOptions,
-                  this,
-                  mixinOptions.getResource
-                )
+                resource = createResourceForOptions(updatedOptions, this)
                 this._resources[key] = resource
               } else {
                 resource.update(updatedOptions)
@@ -54,11 +50,7 @@ let createMixin = (mixinOptions) => ({
             }
           )
         } else {
-          let resource = createResourceForOptions(
-            options,
-            this,
-            mixinOptions.getResource
-          )
+          let resource = createResourceForOptions(options, this)
           this._resources[key] = resource
           if (resource && resource.auto) {
             resource.reload()
@@ -93,14 +85,14 @@ let createMixin = (mixinOptions) => ({
   },
 })
 
-function createResourceForOptions(options, vm, getResource) {
+function createResourceForOptions(options, vm) {
   if (options.type === 'document') {
-    return createDocumentResource(options, vm, getResource)
+    return createDocumentResource(options, vm)
   }
   if (options.type === 'list') {
-    return createListResource(options, vm, getResource)
+    return createListResource(options, vm)
   }
-  return createResource(options, vm, getResource)
+  return createResource(options, vm)
 }
 
 export default {
