@@ -3,8 +3,7 @@ import { ErrorMessage } from '../../src/index'
 
 let error = null
 try {
-  const x = 5
-  x = 7
+  throw new Error('An error occurred')
 } catch (e) {
   error = e
 }
@@ -43,8 +42,7 @@ import { ErrorMessage } from 'frappe-ui'
 
 let error = null
 try {
-  const x = 5
-  x = 7
+  throw new Error('An error occurred')
 } catch (e) {
   error = e
 }
