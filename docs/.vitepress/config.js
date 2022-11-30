@@ -8,7 +8,10 @@ export default defineConfig({
     sidebar: [
       {
         text: 'Guide',
-        items: [{ text: 'Getting Started', link: '/getting-started' }],
+        items: [
+          { text: 'Introduction', link: '/' },
+          { text: 'Installation', link: '/getting-started' },
+        ],
       },
       {
         text: 'Components',
@@ -32,6 +35,14 @@ export default defineConfig({
           { text: 'Text Editor', link: '/components/text-editor' },
           { text: 'Toast', link: '/components/toast' },
           { text: 'Tooltip', link: '/components/tooltip' },
+        ],
+      },
+      {
+        text: 'Data Fetching',
+        items: [
+          { text: 'Resource', link: '/resources/resource' },
+          { text: 'List Resource', link: '/resources/list-resource' },
+          { text: 'Document Resource', link: '/resources/document-resource' },
         ],
       },
       {
