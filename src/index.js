@@ -48,6 +48,7 @@ export {
 } from './resources'
 export { request } from './utils/request.js'
 export { frappeRequest } from './utils/frappeRequest.js'
+export { default as initSocket } from './utils/socketio.js'
 export { setConfig, getConfig } from './utils/config.js'
 
 // plugin
