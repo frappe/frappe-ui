@@ -49,7 +49,7 @@
         ref="input"
         :value="passedInputValue"
         :disabled="disabled"
-        :rows="rows || 3"
+        :rows="rows"
       ></textarea>
       <select
         v-if="type === 'select'"
@@ -129,6 +129,7 @@ export default {
     },
     rows: {
       type: Number,
+      default: 3,
     },
     placeholder: {
       type: String,

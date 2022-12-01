@@ -3,26 +3,14 @@
     class="inline-block cursor-default rounded-md px-3 py-1 text-xs font-medium"
     :class="classes"
   >
-    <slot>{{ status }}</slot>
+    <slot>{{ label }}</slot>
   </span>
 </template>
 <script>
-const DEFAULT_COLOR_MAP = {
-  Pending: 'yellow',
-  Running: 'yellow',
-  Success: 'green',
-  Failure: 'red',
-  Active: 'green',
-  Broken: 'red',
-  Updating: 'blue',
-  Rejected: 'red',
-  Published: 'green',
-  Approved: 'green',
-}
-
+let validColors = ['gray', 'red', 'yellow', 'green', 'blue']
 export default {
   name: 'Badge',
-  props: ['color', 'status', 'colorMap'],
+  props: ['color', 'label', 'colorMap'],
   computed: {
     classes() {
       let color = this.getBadgeColor()
@@ -41,13 +29,12 @@ export default {
   methods: {
     getBadgeColor() {
       let color = this.color
-      if (color) {
-        return color
+      if (this.colorMap) {
+        color = this.colorMap[this.label]
       }
-
-      let statusColorMap = Object.assign(DEFAULT_COLOR_MAP, this.colorMap || {})
-      color = statusColorMap[this.status] || 'gray'
-
+      if (!color || !validColors.includes(color)) {
+        color = 'gray'
+      }
       return color
     },
   },

@@ -1,10 +1,11 @@
 import { reactive } from 'vue'
-import { call, debounce } from '../index'
+import { debounce, request } from '../index'
 import { getLocal, saveLocal } from './local'
+import { getConfig } from '../utils/config'
 
 let cached = {}
 
-export function createResource(options, vm, getResource) {
+export function createResource(options, vm) {
   let cacheKey = null
   if (options.cache) {
     cacheKey = getCacheKey(options.cache)
@@ -15,17 +16,19 @@ export function createResource(options, vm, getResource) {
 
   if (typeof options == 'string') {
     options = {
-      method: options,
+      url: options,
       auto: true,
     }
   }
 
-  let resourceFetcher = getResource || call
+  let resourceFetcher = getConfig('resourceFetcher') || request
   let fetchFunction = options.debounce
     ? debounce(fetch, options.debounce)
     : fetch
 
   let out = reactive({
+    method: options.method,
+    url: options.url,
     data: options.initialData || null,
     previousData: null,
     loading: false,
@@ -86,7 +89,10 @@ export function createResource(options, vm, getResource) {
     }
 
     try {
-      out.promise = resourceFetcher(options.method, params || options.params)
+      out.promise = resourceFetcher({
+        ...options,
+        params: params || options.params,
+      })
       let data = await out.promise
       saveLocal(cacheKey, data)
       out.data = transform(data)
@@ -108,9 +114,12 @@ export function createResource(options, vm, getResource) {
     return out.data
   }
 
-  function update({ method, params, auto }) {
+  function update({ method, url, params, auto }) {
     if (method && method !== options.method) {
       out.method = method
+    }
+    if (url && url !== options.url) {
+      out.url = url
     }
     if (params && params !== options.params) {
       out.params = params
@@ -168,7 +177,7 @@ export function createResource(options, vm, getResource) {
     cached[cacheKey] = out
     // offline
     getLocal(cacheKey).then((data) => {
-      if (out.loading && data) {
+      if ((out.loading || !out.fetched) && data) {
         setData(data)
         options.onData?.call(vm, data)
       }

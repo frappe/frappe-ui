@@ -3,6 +3,7 @@
     <template #target="{ togglePopover }">
       <Input
         type="text"
+        icon-left="calendar"
         :class="inputClass"
         :value="
           modelValue && formatValue ? formatValue(modelValue) : modelValue || ''
@@ -92,6 +93,8 @@
 </template>
 
 <script>
+import Input from './Input.vue'
+import FeatherIcon from './FeatherIcon.vue'
 import Popover from './Popover.vue'
 
 export default {
@@ -99,6 +102,8 @@ export default {
   props: ['modelValue', 'placeholder', 'readonly', 'formatValue', 'inputClass'],
   emits: ['update:modelValue'],
   components: {
+    Input,
+    FeatherIcon,
     Popover,
   },
   data() {

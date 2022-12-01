@@ -5,7 +5,7 @@ import { saveLocal, getLocal } from './local'
 let listCache = reactive({})
 let resourcesByDocType = {}
 
-export function createListResource(options, vm, getResource) {
+export function createListResource(options, vm) {
   if (!options.doctype) {
     throw new Error('List resource requires doctype')
   }
@@ -231,7 +231,7 @@ export function createListResource(options, vm, getResource) {
     listCache[cacheKey] = out
     // offline
     getLocal(cacheKey).then((data) => {
-      if (out.list.loading && data) {
+      if ((out.list.loading || !out.list.fetched) && data) {
         setData(data)
       }
     })

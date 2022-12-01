@@ -1,0 +1,64 @@
+:root {
+  --gray-50: #f9fafa;
+  --gray-100: #f4f5f6;
+  --gray-200: #ebeef0;
+  --gray-300: #dce0e3;
+  --gray-400: #c0c6cc;
+  --gray-500: #98a1a9;
+  --gray-600: #687178;
+  --gray-700: #505a62;
+  --gray-800: #333c44;
+  --gray-900: #1f272e;
+
+  --blue-50: #f0f8fe;
+  --blue-100: #d3e9fc;
+  --blue-200: #a7d3f9;
+  --blue-300: #7cbcf5;
+  --blue-400: #50a6f2;
+  --blue-500: #2490ef;
+  --blue-600: #1579d0;
+  --blue-700: #1366ae;
+  --blue-800: #154875;
+  --blue-900: #1a4469;
+
+  --vp-c-text-light-1: var(--gray-900);
+  --vp-c-text-light-2: var(--gray-700);
+  --vp-c-text-light-3: var(--gray-500);
+  --vp-c-text-light-4: var(--gray-300);
+
+  --vp-c-white-soft: var(--gray-50);
+  --vp-c-white-mute: var(--gray-50);
+  --vp-c-black: var(--gray-900);
+
+  --vp-c-gray-light-1: var(--gray-500);
+  --vp-c-gray-light-2: var(--gray-400);
+  --vp-c-gray-light-3: var(--gray-300);
+  --vp-c-gray-light-4: var(--gray-200);
+  --vp-c-gray-light-5: var(--gray-100);
+
+  --vp-c-divider-light-1: var(--gray-200);
+  --vp-c-divider-light-2: var(--gray-300);
+
+  --vp-c-brand-darker: var(--blue-700);
+  --vp-c-brand-dark: var(--blue-600);
+  --vp-c-brand: var(--blue-500);
+  --vp-c-brand-light: var(--blue-400);
+  --vp-c-brand-lighter: var(--blue-200);
+}
+
+.vp-doc :not(pre) > code {
+  background-color: var(--blue-50);
+  color: var(--gray-800);
+}
+
+.vp-doc a > code {
+  color: var(--blue-500);
+}
+
+#headlessui-portal-root [role='dialog'] {
+  z-index: 21;
+}
+
+.ProseMirror p {
+  @apply !my-1;
+}
