@@ -35,9 +35,15 @@ export function request(_options) {
     if (options.transformResponse) {
       return options.transformResponse(response, options)
     }
-    if (options.responseType === 'json') {
-      return response.json()
+    if (response.status >= 200 && response.status < 300) {
+      if (options.responseType === 'json') {
+        return response.json()
+      }
+      return response
+    } else {
+      let error = new Error(response.statusText)
+      error.response = response
+      throw error
     }
-    return response
   })
 }
