@@ -23,6 +23,7 @@ export function frappeRequest(options) {
       }
       return {
         ...options,
+        method: options.method || 'POST',
         headers,
       }
     },
@@ -36,8 +37,7 @@ export function frappeRequest(options) {
         if (data.exc) {
           try {
             console.groupCollapsed(url)
-            console.log(`method: ${url}`)
-            console.log(`params:`, args)
+            console.log(options)
             let warning = JSON.parse(data.exc)
             for (let text of warning) {
               console.log(text)
