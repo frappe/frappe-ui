@@ -38,7 +38,6 @@ export { default as visibilityDirective } from './directives/visibility.js'
 export { default as call, createCall } from './utils/call.js'
 export { default as debounce } from './utils/debounce.js'
 export { default as fileToBase64 } from './utils/file-to-base64.js'
-export { default as pageMeta } from './utils/pageMeta.js'
 
 // data-fetching, resources
 export {
@@ -49,7 +48,9 @@ export {
 } from './resources'
 export { request } from './utils/request.js'
 export { frappeRequest } from './utils/frappeRequest.js'
+export { default as initSocket } from './utils/socketio.js'
 export { setConfig, getConfig } from './utils/config.js'
 
 // plugin
+export { default as pageMetaPlugin } from './utils/pageMeta.js'
 export { default as FrappeUI } from './utils/plugin.js'

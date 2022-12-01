@@ -30,10 +30,10 @@ export function createListResource(options, vm) {
     data: null,
     next,
     hasNextPage: true,
-    auto: true,
+    auto: options.auto,
     list: createResource(
       {
-        method: options.method || 'frappe.client.get_list',
+        url: options.url || 'frappe.client.get_list',
         makeParams() {
           return {
             doctype: out.doctype,
@@ -68,7 +68,7 @@ export function createListResource(options, vm) {
     ),
     fetchOne: createResource(
       {
-        method: 'frappe.client.get_list',
+        url: 'frappe.client.get_list',
         makeParams(name) {
           return {
             doctype: out.doctype,
@@ -90,7 +90,7 @@ export function createListResource(options, vm) {
     ),
     insert: createResource(
       {
-        method: 'frappe.client.insert',
+        url: 'frappe.client.insert',
         makeParams(values) {
           return {
             doc: {
@@ -109,7 +109,7 @@ export function createListResource(options, vm) {
     ),
     setValue: createResource(
       {
-        method: 'frappe.client.set_value',
+        url: 'frappe.client.set_value',
         makeParams(options) {
           let { name, ...values } = options
           return {
@@ -128,7 +128,7 @@ export function createListResource(options, vm) {
     ),
     delete: createResource(
       {
-        method: 'frappe.client.delete',
+        url: 'frappe.client.delete',
         makeParams(name) {
           return {
             doctype: out.doctype,
@@ -145,7 +145,7 @@ export function createListResource(options, vm) {
     ),
     runDocMethod: createResource(
       {
-        method: 'run_doc_method',
+        url: 'run_doc_method',
         makeParams({ method, name, ...values }) {
           return {
             dt: out.doctype,
@@ -235,6 +235,10 @@ export function createListResource(options, vm) {
         setData(data)
       }
     })
+  }
+
+  if (options.auto) {
+    out.list.fetch()
   }
 
   resourcesByDocType[out.doctype] = resourcesByDocType[out.doctype] || []

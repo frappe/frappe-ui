@@ -40,9 +40,9 @@ let createMixin = (mixinOptions) => ({
                 this._resources[key] = resource
               } else {
                 resource.update(updatedOptions)
-              }
-              if (resource && resource.auto) {
-                resource.reload()
+                if (resource.auto) {
+                  resource.reload()
+                }
               }
             },
             {
@@ -52,9 +52,6 @@ let createMixin = (mixinOptions) => ({
         } else {
           let resource = createResourceForOptions(options, this)
           this._resources[key] = resource
-          if (resource && resource.auto) {
-            resource.reload()
-          }
         }
       }
     }

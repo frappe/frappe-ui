@@ -18,7 +18,7 @@ export function createDocumentResource(options, vm) {
   }
 
   let setValueOptions = {
-    method: 'frappe.client.set_value',
+    url: 'frappe.client.set_value',
     makeParams(values) {
       return {
         doctype: out.doctype,
@@ -51,7 +51,7 @@ export function createDocumentResource(options, vm) {
     auto: true,
     get: createResource(
       {
-        method: 'frappe.client.get',
+        url: 'frappe.client.get',
         makeParams() {
           return {
             doctype: out.doctype,
@@ -77,7 +77,7 @@ export function createDocumentResource(options, vm) {
     ),
     delete: createResource(
       {
-        method: 'frappe.client.delete',
+        url: 'frappe.client.delete',
         makeParams() {
           return {
             doctype: out.doctype,
@@ -103,13 +103,13 @@ export function createDocumentResource(options, vm) {
     let methodOptions = options.whitelistedMethods[methodKey]
     if (typeof methodOptions == 'string') {
       methodOptions = {
-        method: methodOptions,
+        url: methodOptions,
       }
     }
     let { method, onSuccess, ...otherOptions } = methodOptions
     out[methodKey] = createResource(
       {
-        method: 'run_doc_method',
+        url: 'run_doc_method',
         makeParams(values) {
           return {
             dt: out.doctype,

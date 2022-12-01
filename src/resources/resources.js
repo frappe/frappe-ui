@@ -21,7 +21,6 @@ export function createResource(options, vm) {
     }
   }
 
-  let resourceFetcher = getConfig('resourceFetcher') || request
   let fetchFunction = options.debounce
     ? debounce(fetch, options.debounce)
     : fetch
@@ -46,6 +45,9 @@ export function createResource(options, vm) {
   })
 
   async function fetch(params, tempOptions = {}) {
+    let resourceFetcher =
+      options.resourceFetcher || getConfig('resourceFetcher') || request
+
     if (params instanceof Event) {
       params = null
     }
@@ -182,6 +184,10 @@ export function createResource(options, vm) {
         options.onData?.call(vm, data)
       }
     })
+  }
+
+  if (options.auto) {
+    out.fetch()
   }
 
   return out
