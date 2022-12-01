@@ -5,6 +5,8 @@ export default defineConfig({
   description: 'A set of components and utilities for rapid UI development',
   appearance: false,
   themeConfig: {
+    logo: '/frappe-ui-logo.svg',
+    siteTitle: false,
     sidebar: [
       {
         text: 'Guide',
