@@ -3,7 +3,9 @@ import { createResource, setConfig, request, Button } from '../../src'
 let post = createResource({
   url: 'https://jsonplaceholder.typicode.com/posts/1',
 })
-post.fetch()
+if (typeof window !== 'undefined') {
+    post.fetch()
+}
 
 let post2 = createResource({
   url: 'https://jsonplaceholder.typicode.com/posts/1',

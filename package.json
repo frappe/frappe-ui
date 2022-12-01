@@ -52,11 +52,12 @@
     "tippy.js": "^6.3.7"
   },
   "devDependencies": {
+    "cross-fetch": "^3.1.5",
     "husky": ">=6",
     "lint-staged": ">=10",
     "prettier": "2.7.1",
     "prettier-plugin-tailwindcss": "^0.1.13",
-    "vitepress": "^1.0.0-alpha.28",
+    "vitepress": "^1.0.0-alpha.29",
     "vue": "^3.2.45"
   },
   "lint-staged": {

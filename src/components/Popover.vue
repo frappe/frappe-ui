@@ -102,6 +102,7 @@ export default {
     },
   },
   created() {
+    if (typeof window === 'undefined') return
     if (!document.getElementById('frappeui-popper-root')) {
       const root = document.createElement('div')
       root.id = 'frappeui-popper-root'

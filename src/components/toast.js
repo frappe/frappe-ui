@@ -6,6 +6,7 @@ let toasts = ref([])
 export let Toasts = {
   name: 'Toasts',
   created() {
+    if (typeof window === 'undefined') return
     if (!document.getElementById('frappeui-toast-root')) {
       const root = document.createElement('div')
       root.id = 'frappeui-toast-root'
