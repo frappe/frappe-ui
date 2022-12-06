@@ -48,7 +48,7 @@ export function createDocumentResource(options, vm) {
     doctype: options.doctype,
     name: options.name,
     doc: null,
-    auto: true,
+    auto: options.auto || true,
     get: createResource(
       {
         url: 'frappe.client.get',
@@ -103,7 +103,7 @@ export function createDocumentResource(options, vm) {
     let methodOptions = options.whitelistedMethods[methodKey]
     if (typeof methodOptions == 'string') {
       methodOptions = {
-        url: methodOptions,
+        method: methodOptions,
       }
     }
     let { method, onSuccess, ...otherOptions } = methodOptions
@@ -183,6 +183,11 @@ export function createDocumentResource(options, vm) {
       out.doc = transform(data)
     }
   })
+
+  if (out.auto) {
+    out.get.fetch()
+  }
+
   return out
 }
 
