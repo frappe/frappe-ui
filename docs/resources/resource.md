@@ -117,8 +117,11 @@ export default {
 
 ## Caching example
 
-Caching is a first-class feature in resources. Just include a `cache` property
-in the options.
+Caching is a first-class feature in resources. To cache responses, just define a
+`cache` property in options with a unique global key. Now, the response will
+cached in memory as well as in IndexedDB. If you define another resource in a
+different part of your application with the same cache key, it will reuse the
+cached one.
 
 ```vue
 <template>
@@ -177,8 +180,16 @@ let post = createResource({
     // initial data
     initialData: []
 
-    // make the first request automatically, only works in options API
+    // make the first request automatically
     auto: true,
+
+    // cache key to cache the resource
+    // can be a string
+    cache: 'post',
+    // or an array that can be serialized
+    cache: ['post', '1'],
+    // you can also pass reactive variable here
+    cache: ['post', postId]
 
     // events
     // before making the request
