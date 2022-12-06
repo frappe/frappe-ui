@@ -69,6 +69,7 @@ export default {
         orderBy: 'creation desc',
         start: 0,
         pageLength: 5,
+        auto: true,
       }
     },
   },

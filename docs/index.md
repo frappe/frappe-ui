@@ -18,8 +18,8 @@ let todos = createResource({
   doctype: 'ToDo',
   fields: ['name', 'description'],
   cache: 'ToDos',
+  auto: true,
 })
-todos.fetch()
 </script>
 
 <template>
