@@ -21,7 +21,7 @@ function createMixin() {
               let debugInfo = `${this.$options.name} (${
                 this.$options.__file || ''
               })`
-              if (import.meta.env.DEV) {
+              if (process.env.NODE_ENV === 'development') {
                 console.warn('Failed to parse pageMeta in', debugInfo)
               }
               return null
