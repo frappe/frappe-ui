@@ -21,9 +21,9 @@ export function createListResource(options, vm) {
     doctype: options.doctype,
     fields: options.fields,
     filters: options.filters,
-    order_by: options.order_by,
+    orderBy: options.orderBy,
     start: options.start || 0,
-    limit: options.limit || 20,
+    pageLength: options.pageLength || 20,
     parent: options.parent,
     debug: options.debug || 0,
     originalData: null,
@@ -39,17 +39,17 @@ export function createListResource(options, vm) {
             doctype: out.doctype,
             fields: out.fields,
             filters: out.filters,
-            order_by: out.order_by,
+            order_by: out.orderBy,
             start: out.start,
-            limit: out.limit,
+            limit: out.pageLength,
             limit_start: out.start,
-            limit_page_length: out.limit,
+            limit_page_length: out.pageLength,
             parent: out.parent,
             debug: out.debug,
           }
         },
         onSuccess(data) {
-          if (data.length < out.limit) {
+          if (data.length < out.pageLength) {
             out.hasNextPage = false
           }
           let pagedData
@@ -160,7 +160,9 @@ export function createListResource(options, vm) {
               updateRowInListResource(doc.doctype, doc)
             }
           }
+          options.runDocMethod?.onSuccess?.call(vm, data)
         },
+        onError: options.runDocMethod?.onError,
       },
       vm
     ),
@@ -174,9 +176,11 @@ export function createListResource(options, vm) {
     out.doctype = updatedOptions.doctype
     out.fields = updatedOptions.fields
     out.filters = updatedOptions.filters
-    out.order_by = updatedOptions.order_by
+    out.orderBy = updatedOptions.orderBy
     out.start = updatedOptions.start
-    out.limit = updatedOptions.limit
+    out.pageLength = updatedOptions.pageLength
+    out.parent = updatedOptions.parent
+    out.debug = updatedOptions.debug
   }
 
   function transform(data) {
@@ -191,14 +195,14 @@ export function createListResource(options, vm) {
 
   function reload() {
     let _start = out.start
-    let _limit = out.limit
+    let _pageLength = out.pageLength
     if (out.start > 0) {
       out.start = 0
-      out.limit = out.originalData.length
+      out.pageLength = out.originalData.length
     }
     return out.list.fetch().finally(() => {
       out.start = _start
-      out.limit = _limit
+      out.pageLength = _pageLength
     })
   }
 
@@ -211,7 +215,7 @@ export function createListResource(options, vm) {
   }
 
   function next() {
-    out.start = out.start + out.limit
+    out.start = out.start + out.pageLength
     out.list.fetch()
   }
 
