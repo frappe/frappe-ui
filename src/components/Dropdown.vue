@@ -68,7 +68,7 @@ import Button from './Button.vue'
 import FeatherIcon from './FeatherIcon.vue'
 
 export default {
-  name: 'NewDropdown',
+  name: 'Dropdown',
   props: {
     button: {
       type: Object,
