@@ -201,16 +201,10 @@ export default {
       }
     },
     open() {
-      if (this.isOpen) {
-        return
-      }
       this.isOpen = true
       this.$nextTick(() => this.setupPopper())
     },
     close() {
-      if (!this.isOpen) {
-        return
-      }
       this.isOpen = false
     },
     onMouseover() {
