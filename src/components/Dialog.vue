@@ -10,7 +10,7 @@
       @close="open = false"
     >
       <div
-        class="flex min-h-screen flex-col items-center px-4 pt-4 pb-20 text-center"
+        class="flex min-h-screen flex-col items-center px-4 py-4 text-center"
         :class="dialogPositionClasses"
       >
         <TransitionChild
