@@ -8,8 +8,10 @@
   >
     <LoadingIndicator
       v-if="loading"
-      class="mr-2 -ml-1 h-3 w-3"
+      class="h-3 w-3"
       :class="{
+        'mr-2 -ml-1': !icon,
+        'm-0.5': icon,
         'text-white': appearance == 'primary',
         'text-gray-600': appearance == 'secondary',
         'text-red-200': appearance == 'danger',
@@ -24,7 +26,7 @@
       aria-hidden="true"
     />
     <template v-if="loading && loadingText">{{ loadingText }}</template>
-    <template v-else-if="icon">
+    <template v-else-if="icon && !loading">
       <FeatherIcon :name="icon" class="h-4 w-4" :aria-label="label" />
     </template>
     <span v-else :class="icon ? 'sr-only' : ''">
