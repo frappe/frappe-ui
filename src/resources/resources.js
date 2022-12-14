@@ -9,8 +9,13 @@ export function createResource(options, vm) {
   let cacheKey = null
   if (options.cache) {
     cacheKey = getCacheKey(options.cache)
-    if (cached[cacheKey]) {
-      return cached[cacheKey]
+    let cachedResource = cached[cacheKey]
+
+    if (cachedResource) {
+      if (cachedResource.auto) {
+        cachedResource.reload()
+      }
+      return cachedResource
     }
   }
 

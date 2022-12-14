@@ -13,8 +13,12 @@ export function createDocumentResource(options, vm) {
   if (!(options.doctype && options.name)) return
 
   let cacheKey = getCacheKey([options.doctype, options.name])
-  if (documentCache[cacheKey]) {
-    return documentCache[cacheKey]
+  let cachedResource = documentCache[cacheKey]
+  if (cachedResource) {
+    if (cachedResource.auto) {
+      cachedResource.reload()
+    }
+    return cachedResource
   }
 
   let setValueOptions = {

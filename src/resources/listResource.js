@@ -12,8 +12,12 @@ export function createListResource(options, vm) {
 
   let cacheKey = getCacheKey(options.cache)
   if (cacheKey) {
-    if (listCache[cacheKey]) {
-      return listCache[cacheKey]
+    let cachedResource = listCache[cacheKey]
+    if (cachedResource) {
+      if (cachedResource.auto) {
+        cachedResource.reload()
+      }
+      return cachedResource
     }
   }
 
