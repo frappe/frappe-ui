@@ -92,7 +92,7 @@ export function frappeRequest(options) {
 
         if (options.onError) {
           options.onError({
-            response: res,
+            response: errorResponse,
             status: errorResponse.status,
             error: e,
           })
