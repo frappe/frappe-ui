@@ -4,17 +4,17 @@
       <template #target="{ open: openPopover }">
         <div class="w-full">
           <ComboboxButton
-            class="flex w-full items-center justify-between rounded-md bg-gray-100 py-1.5 pl-3 pr-2"
+            class="flex w-full items-center justify-between rounded-md bg-gray-100 py-1 pl-3 pr-2"
             :class="{ 'rounded-b-none': isComboboxOpen }"
             @click="() => openPopover()"
           >
             <span
-              class="overflow-hidden text-ellipsis text-base"
+              class="overflow-hidden text-ellipsis text-base leading-5"
               v-if="selectedValue"
             >
               {{ displayValue(selectedValue) }}
             </span>
-            <span class="text-base text-gray-500" v-else>
+            <span class="text-base leading-5 text-gray-500" v-else>
               {{ placeholder || '' }}
             </span>
             <FeatherIcon
