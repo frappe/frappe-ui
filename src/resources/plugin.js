@@ -23,25 +23,30 @@ let createMixin = (mixinOptions) => ({
                 return null
               }
             },
-            (updatedOptions, oldVal) => {
-              if (!updatedOptions) {
+            (options, oldOptions) => {
+              if (!options) {
                 return
               }
 
               let changed =
-                !oldVal ||
-                JSON.stringify(updatedOptions) !== JSON.stringify(oldVal)
+                !oldOptions ||
+                JSON.stringify(options) !== JSON.stringify(oldOptions)
 
               if (!changed) return
 
-              let resource = this._resources[key]
-              if (!resource) {
-                resource = createResourceForOptions(updatedOptions, this)
+              if (options.type === 'document') {
+                let resource = createDocumentResource(options, this)
                 this._resources[key] = resource
               } else {
-                resource.update(updatedOptions)
-                if (resource.auto) {
-                  resource.reload()
+                let resource = this._resources[key]
+                if (!resource) {
+                  resource = createResourceForOptions(options, this)
+                  this._resources[key] = resource
+                } else {
+                  resource.update(options)
+                  if (resource.auto) {
+                    resource.reload()
+                  }
                 }
               }
             },

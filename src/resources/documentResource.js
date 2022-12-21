@@ -98,7 +98,6 @@ export function createDocumentResource(options, vm) {
       },
       vm
     ),
-    update,
     reload,
     setDoc,
   })
@@ -142,12 +141,6 @@ export function createDocumentResource(options, vm) {
       },
       vm
     )
-  }
-
-  function update(updatedOptions) {
-    out.doctype = updatedOptions.doctype
-    out.name = updatedOptions.name
-    out.get.fetch()
   }
 
   function reload() {
