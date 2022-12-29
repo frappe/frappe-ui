@@ -23,7 +23,6 @@ export default defineConfig({
           { text: 'Avatar', link: '/components/avatar' },
           { text: 'Badge', link: '/components/badge' },
           { text: 'Button', link: '/components/button' },
-          { text: 'FeatherIcon', link: '/components/feathericon' },
           { text: 'DatePicker', link: '/components/datepicker' },
           { text: 'Dialog', link: '/components/dialog' },
           { text: 'Dropdown', link: '/components/dropdown' },
