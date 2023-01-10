@@ -118,7 +118,7 @@ export function createDocumentResource(options, vm) {
             dt: out.doctype,
             dn: out.name,
             method: method,
-            args: JSON.stringify(values),
+            args: values,
           }
         },
         onSuccess(data) {
