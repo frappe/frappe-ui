@@ -28,6 +28,7 @@ export function createListResource(options, vm) {
     orderBy: options.orderBy,
     start: options.start || 0,
     pageLength: options.pageLength || 20,
+    groupBy: options.groupBy,
     parent: options.parent,
     debug: options.debug || 0,
     originalData: null,
@@ -48,6 +49,7 @@ export function createListResource(options, vm) {
             limit: out.pageLength,
             limit_start: out.start,
             limit_page_length: out.pageLength,
+            group_by: out.groupBy,
             parent: out.parent,
             debug: out.debug,
           }
@@ -183,6 +185,7 @@ export function createListResource(options, vm) {
     out.orderBy = updatedOptions.orderBy
     out.start = updatedOptions.start
     out.pageLength = updatedOptions.pageLength
+    out.groupBy = updatedOptions.groupBy
     out.parent = updatedOptions.parent
     out.debug = updatedOptions.debug
   }
