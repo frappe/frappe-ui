@@ -10,8 +10,8 @@
       v-if="loading"
       class="h-3 w-3"
       :class="{
-        'mr-2 -ml-1': !icon,
-        'm-0.5': icon,
+        'mr-2 -ml-1': !isIconButton,
+        'm-0.5': isIconButton,
         'text-white': appearance == 'primary',
         'text-gray-600': appearance == 'secondary',
         'text-red-200': appearance == 'danger',
@@ -19,27 +19,39 @@
         'text-yellow-200': appearance == 'warning',
       }"
     />
-    <FeatherIcon
-      v-else-if="iconLeft"
-      :name="iconLeft"
-      class="mr-1.5 h-4 w-4"
-      aria-hidden="true"
-    />
-    <template v-if="loading && loadingText">{{ loadingText }}</template>
-    <template v-else-if="icon && !loading">
-      <FeatherIcon :name="icon" class="h-4 w-4" :aria-label="label" />
+    <template v-else-if="iconLeft || $slots['icon-left']">
+      <FeatherIcon
+        v-if="iconLeft"
+        :name="iconLeft"
+        class="mr-1.5 h-4 w-4"
+        aria-hidden="true"
+      />
+      <slot name="icon-left" v-else-if="$slots['icon-left']" />
     </template>
-    <span v-else :class="icon ? 'sr-only' : ''">
+    <template v-if="loading && loadingText">{{ loadingText }}</template>
+    <template v-else-if="isIconButton && !loading">
+      <FeatherIcon
+        v-if="icon"
+        :name="icon"
+        class="h-4 w-4"
+        :aria-label="label"
+      />
+      <slot name="icon" v-else-if="$slots.icon" />
+    </template>
+    <span v-else :class="isIconButton ? 'sr-only' : ''">
       <slot>
         {{ label }}
       </slot>
     </span>
-    <FeatherIcon
-      v-if="iconRight"
-      :name="iconRight"
-      class="ml-2 h-4 w-4"
-      aria-hidden="true"
-    />
+    <template v-if="iconRight || $slots['icon-right']">
+      <FeatherIcon
+        v-if="iconRight"
+        :name="iconRight"
+        class="ml-2 h-4 w-4"
+        aria-hidden="true"
+      />
+      <slot name="icon-right" v-else-if="$slots['icon-right']" />
+    </template>
   </button>
 </template>
 <script>
@@ -129,7 +141,7 @@ export default {
       }
       return [
         'inline-flex items-center justify-center text-base leading-5 rounded-md border transition-colors focus:outline-none',
-        this.icon ? 'p-1.5' : 'px-3 py-1',
+        this.isIconButton ? 'p-1.5' : 'px-3 py-1',
         this.isDisabled
           ? 'opacity-50 cursor-not-allowed pointer-events-none'
           : '',
@@ -140,7 +152,10 @@ export default {
       return this.disabled || this.loading
     },
     ariaLabel() {
-      return this.icon ? this.label : null
+      return this.isIconButton ? this.label : null
+    },
+    isIconButton() {
+      return this.icon || this.$slots.icon
     },
   },
   methods: {
