@@ -121,6 +121,13 @@ let mentions = [
 </script>
 ```
 
+If you are on Vue version 3.2 or earlier, you need to add this line in your main.js file:
+```js
+app.config.unwrapInjectedRef = true
+```
+You can read more about it here: https://vuejs.org/guide/components/provide-inject.html#working-with-reactivity
+
+
 ## Props
 
 | Name                | Default | Value                       | Description                                                                                            |
