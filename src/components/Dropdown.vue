@@ -45,10 +45,15 @@
                 @click="item.onClick"
               >
                 <FeatherIcon
-                  v-if="item.icon"
+                  v-if="item.icon && typeof item.icon === 'string'"
                   :name="item.icon"
                   class="mr-2 h-4 w-4 flex-shrink-0 text-gray-500"
                   aria-hidden="true"
+                />
+                <component
+                  class="mr-2 h-4 w-4 flex-shrink-0 text-gray-500"
+                  v-else-if="item.icon"
+                  :is="item.icon"
                 />
                 <span class="whitespace-nowrap">
                   {{ item.label }}
