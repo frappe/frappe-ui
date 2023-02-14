@@ -2,7 +2,7 @@
   <div ref="reference">
     <div
       ref="target"
-      :class="['inline-block', $attrs.class]"
+      :class="['flex', $attrs.class]"
       @click="updatePosition"
       @focusin="updatePosition"
       @keydown="updatePosition"
