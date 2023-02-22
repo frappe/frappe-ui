@@ -81,7 +81,7 @@ export function createDocumentResource(options, vm) {
     ),
     delete: createResource(
       {
-        url: 'frappe.client.delete',
+        url: '/api/method/frappe.client.delete',
         makeParams() {
           return {
             doctype: out.doctype,
@@ -112,7 +112,7 @@ export function createDocumentResource(options, vm) {
     let { method, onSuccess, ...otherOptions } = methodOptions
     out[methodKey] = createResource(
       {
-        url: 'run_doc_method',
+        url: '/api/method/run_doc_method',
         makeParams(values) {
           return {
             dt: out.doctype,
