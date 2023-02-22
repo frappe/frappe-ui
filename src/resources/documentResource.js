@@ -22,7 +22,7 @@ export function createDocumentResource(options, vm) {
   }
 
   let setValueOptions = {
-    url: 'frappe.client.set_value',
+    url: '/api/method/frappe.client.set_value',
     makeParams(values) {
       return {
         doctype: out.doctype,
