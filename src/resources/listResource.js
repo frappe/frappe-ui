@@ -38,7 +38,7 @@ export function createListResource(options, vm) {
     auto: options.auto,
     list: createResource(
       {
-        url: options.url || 'frappe.client.get_list',
+        url: options.url || '/api/method/frappe.client.get_list',
         makeParams() {
           return {
             doctype: out.doctype,
@@ -74,7 +74,7 @@ export function createListResource(options, vm) {
     ),
     fetchOne: createResource(
       {
-        url: 'frappe.client.get_list',
+        url: '/api/method/frappe.client.get_list',
         makeParams(name) {
           return {
             doctype: out.doctype,
@@ -96,7 +96,7 @@ export function createListResource(options, vm) {
     ),
     insert: createResource(
       {
-        url: 'frappe.client.insert',
+        url: '/api/method/frappe.client.insert',
         makeParams(values) {
           return {
             doc: {
@@ -115,7 +115,7 @@ export function createListResource(options, vm) {
     ),
     setValue: createResource(
       {
-        url: 'frappe.client.set_value',
+        url: '/api/method/frappe.client.set_value',
         makeParams(options) {
           let { name, ...values } = options
           return {
@@ -134,7 +134,7 @@ export function createListResource(options, vm) {
     ),
     delete: createResource(
       {
-        url: 'frappe.client.delete',
+        url: '/api/method/frappe.client.delete',
         makeParams(name) {
           return {
             doctype: out.doctype,
@@ -151,7 +151,7 @@ export function createListResource(options, vm) {
     ),
     runDocMethod: createResource(
       {
-        url: 'run_doc_method',
+        url: '/api/method/run_doc_method',
         makeParams({ method, name, ...values }) {
           return {
             dt: out.doctype,

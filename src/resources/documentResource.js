@@ -55,7 +55,7 @@ export function createDocumentResource(options, vm) {
     auto: options.auto || true,
     get: createResource(
       {
-        url: 'frappe.client.get',
+        url: '/api/method/frappe.client.get',
         makeParams() {
           return {
             doctype: out.doctype,
