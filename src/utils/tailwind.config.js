@@ -3,6 +3,22 @@ const plugin = require('tailwindcss/plugin')
 module.exports = {
   theme: {
     extend: {
+      spacing: {
+        4.5: '1.125rem',
+        5.5: '1.375rem',
+        6.5: '1.625rem',
+        7.5: '1.875rem',
+        8.5: '2.125rem',
+        9.5: '2.375rem',
+        10.5: '2.625rem',
+        11.5: '2.875rem',
+        12.5: '3.125rem',
+        13: '3.25rem',
+        13.5: '3.375rem',
+        14.5: '3.625rem',
+        15: '3.75rem',
+        15.5: '3.875rem',
+      },
       width: {
         112: '28rem',
         wizard: '650px',

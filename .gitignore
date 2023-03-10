@@ -2,6 +2,7 @@
 node_modules
 docs/.vitepress/.temp
 docs/.vitepress/dist
+storybook-static
 
 # Logs
 logs
