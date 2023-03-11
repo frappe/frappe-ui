@@ -41,11 +41,11 @@ const props = withDefaults(defineProps<DividerProps>(), {
 const alignmentClasses = computed(() => {
   let spacerDimensionClasses = {
     horizontal: 'border-t-[1px] w-full',
-    vertical: 'border-l-[1px] h-full',
+    vertical: 'border-l-[1px]',
   }[props.orientation]
 
   // Case when divider is inside a flex container
-  let flexClasses = props.flexItem ? 'self-stretch h-auto' : ''
+  let flexClasses = props.flexItem ? 'self-stretch h-auto' : 'h-full'
 
   return [spacerDimensionClasses, flexClasses]
 })

@@ -1,4 +1,4 @@
-import { Divider } from '../index'
+import { Divider, Badge } from '../index'
 
 export default {
   component: Divider,
@@ -25,7 +25,7 @@ export default {
     orientation: 'horizontal',
     position: 'center',
     flexItem: false,
-  }
+  },
 }
 
 export const Horizontal = {
@@ -37,6 +37,26 @@ export const Horizontal = {
 export const Vertical = {
   args: {
     orientation: 'vertical',
+  },
+}
+
+export const InFlexContainer = {
+  render: (args, { argTypes }) => ({
+    props: Object.keys(argTypes),
+    components: { Divider, Badge },
+    template: `
+      <div class="flex flex-row space-x-1">
+        <Badge variant="ghost" label="One" />
+        <Divider v-bind="$props" />
+        <Badge variant="ghost" label="Two" />
+        <Divider v-bind="$props" />
+        <Badge variant="ghost" label="Three" />
+      </div>
+    `,
+  }),
+  args: {
+    orientation: 'vertical',
+    flexItem: true,
   },
 }
 
