@@ -46,15 +46,15 @@ export default {
       control: 'text',
     },
     theme: {
-      options: Object.keys(Badge.Themes),
+      options: ['gray', 'blue', 'green', 'orange', 'red'],
       control: 'select',
     },
     size: {
-      options: Object.keys(Badge.Sizes),
+      options: ['sm', 'md', 'lg'],
       control: 'select',
     },
     variant: {
-      options: Object.keys(Badge.Variants),
+      options: ['solid', 'subtle', 'outline', 'ghost'],
       control: 'select',
     },
   },
