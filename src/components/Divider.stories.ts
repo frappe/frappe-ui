@@ -60,7 +60,7 @@ export const InFlexContainer = {
   },
 }
 
-export const WithAction = {
+export const HorizontalWithAction = {
   args: {
     action: {
       label: 'Load More',
@@ -75,6 +75,36 @@ export const WithActionLoading = {
       label: 'Loading More',
       handler: () => {},
       loading: true,
+    },
+  },
+}
+
+export const WithActionAtStart = {
+  args: {
+    position: 'start',
+    action: {
+      label: 'Load More',
+      handler: () => {},
+    },
+  },
+}
+
+export const WithActionAtEnd = {
+  args: {
+    position: 'end',
+    action: {
+      label: 'Load More',
+      handler: () => {},
+    },
+  },
+}
+
+export const VerticalWithAction = {
+  args: {
+    orientation: 'vertical',
+    action: {
+      label: 'Load More',
+      handler: () => {},
     },
   },
 }
