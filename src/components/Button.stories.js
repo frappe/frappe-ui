@@ -52,15 +52,15 @@ export default {
       control: 'text',
     },
     theme: {
-      options: Object.keys(Button.Themes),
+      options: ['gray', 'blue', 'green'],
       control: 'inline-radio',
     },
     size: {
-      options: Object.keys(Button.Sizes),
+      options: ['sm', 'md', 'lg', 'xl', '2xl'],
       control: 'inline-radio',
     },
     variant: {
-      options: Object.keys(Button.Variants),
+      options: ['solid', 'subtle', 'outline', 'ghost'],
       control: 'inline-radio',
     },
   },
