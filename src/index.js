@@ -18,6 +18,7 @@ export { default as Link } from './components/Link.vue'
 export { default as ListItem } from './components/ListItem.vue'
 export { default as LoadingIndicator } from './components/LoadingIndicator.vue'
 export { default as LoadingText } from './components/LoadingText.vue'
+export { default as Progress } from './components/Progress.vue'
 export { default as Popover } from './components/Popover.vue'
 export { default as Resource } from './components/Resource.vue'
 export {
