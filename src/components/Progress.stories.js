@@ -69,3 +69,12 @@ export const WithHintAndLabel = {
     label: 'Progress',
   },
 }
+
+export const WithIntervals = {
+  args: {
+    value: 50,
+    hint: true,
+    label: 'Progress',
+    intervals: true,
+  },
+}
