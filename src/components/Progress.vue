@@ -1,6 +1,9 @@
 <template>
-  <div v-if="props.label || props.hint" class="min-w-50 space-y-[10px]">
-    <div class="flex items-baseline justify-between">
+  <div class="min-w-50 space-y-[10px]">
+    <div
+      v-if="props.label || props.hint"
+      class="flex items-baseline justify-between"
+    >
       <span v-if="props.label" class="text-base font-medium text-gray-800">{{
         props.label
       }}</span>
@@ -23,6 +26,7 @@
         class="h-full bg-gray-900"
         :style="`width: ${props.value}%`"
         aria-valuemax="100"
+        aria-valuemin="0"
         :aria-valuenow="props.value"
         role="progressbar"
       ></div>
@@ -43,6 +47,7 @@ interface ProgressProps {
 const props = withDefaults(defineProps<ProgressProps>(), {
   size: 'md',
   hint: false,
+  label: '',
 })
 
 const indicatorContainerClasses = computed(() => {
