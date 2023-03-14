@@ -55,16 +55,16 @@ import LoadingIndicator from './LoadingIndicator.vue'
 import { useRouter } from 'vue-router'
 
 interface ButtonProps {
-  theme: 'gray' | 'blue' | 'green'
-  size: 'sm' | 'md' | 'lg' | 'xl' | '2xl'
-  variant: 'solid' | 'subtle' | 'outline' | 'ghost'
+  theme?: 'gray' | 'blue' | 'green'
+  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl'
+  variant?: 'solid' | 'subtle' | 'outline' | 'ghost'
   label?: string
   icon?: string
   iconLeft?: string
   iconRight?: string
-  loading: boolean
+  loading?: boolean
   loadingText?: string
-  disabled: boolean
+  disabled?: boolean
   route?: string | object
   link?: string
 }
