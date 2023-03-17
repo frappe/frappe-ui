@@ -135,7 +135,7 @@ export function createDocumentResource(options, vm) {
               }
             }
           }
-          onSuccess?.call(vm, out.doc)
+          onSuccess?.call(vm, data.message)
         },
         ...otherOptions,
       },
