@@ -33,6 +33,8 @@ export function createListResource(options, vm) {
     debug: options.debug || 0,
     originalData: null,
     data: null,
+    previous,
+    hasPreviousPage: false,
     next,
     hasNextPage: true,
     auto: options.auto,
@@ -55,6 +57,7 @@ export function createListResource(options, vm) {
           }
         },
         onSuccess(data) {
+          out.hasPreviousPage = !!out.start
           if (data.length < out.pageLength) {
             out.hasNextPage = false
           }
@@ -219,6 +222,11 @@ export function createListResource(options, vm) {
       data = data.call(vm, out.data)
     }
     out.data = transform(data)
+  }
+
+  function previous() {
+    out.start = out.start - out.pageLength
+    out.list.fetch()
   }
 
   function next() {
