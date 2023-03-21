@@ -20,8 +20,12 @@ module.exports = {
         15.5: '3.875rem',
       },
       width: {
+        3.5: '0.875rem',
         112: '28rem',
         wizard: '650px',
+      },
+      height: {
+        3.5: '0.875rem',
       },
       minWidth: {
         40: '10rem',
