@@ -59,7 +59,7 @@ interface ProgressProps {
 }
 
 const props = withDefaults(defineProps<ProgressProps>(), {
-  size: 'md',
+  size: 'sm',
   hint: false,
   label: '',
   intervals: false,
