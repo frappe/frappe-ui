@@ -54,7 +54,7 @@ export default {
       default: null,
     },
     placeholder: {
-      type: String,
+      type: [String, Function],
       default: '',
     },
     editorClass: {
@@ -152,9 +152,10 @@ export default {
         }),
         Placeholder.configure({
           showOnlyWhenEditable: false,
-          placeholder: () => {
-            return this.placeholder
-          },
+          placeholder:
+            typeof this.placeholder === 'function'
+              ? this.placeholder
+              : () => this.placeholder,
         }),
         configureMention(this.mentions),
         ...(this.extensions || []),
