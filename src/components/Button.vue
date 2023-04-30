@@ -10,7 +10,7 @@
       v-if="loading"
       class="h-3 w-3"
       :class="{
-        'mr-2 -ml-1': !isIconButton,
+        '-ml-1 mr-2': !isIconButton,
         'm-0.5': isIconButton,
         'text-white': appearance == 'primary',
         'text-gray-600': appearance == 'secondary',
