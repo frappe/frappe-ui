@@ -23,6 +23,7 @@ export { default as Popover } from './components/Popover.vue'
 export { default as Resource } from './components/Resource.vue'
 export { default as Spinner } from './components/Spinner.vue'
 export { default as Switch } from './components/Switch.vue'
+export { default as TextInput } from './components/TextInput.vue'
 export {
   TextEditor,
   TextEditorFixedMenu,

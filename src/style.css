@@ -8,7 +8,7 @@
   .form-input,
   .form-textarea,
   .form-select {
-    @apply rounded-md border-0 bg-gray-100 py-1 text-base leading-5 placeholder-gray-700 focus:bg-gray-200 focus:shadow-none focus:ring-0;
+    @apply rounded border-0 bg-gray-100 py-1 text-base leading-5 placeholder-gray-700 focus:bg-gray-200 focus:shadow-none focus:ring-0;
   }
 
   .form-checkbox {
