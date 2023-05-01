@@ -72,7 +72,7 @@ interface ButtonProps {
 const props = withDefaults(defineProps<ButtonProps>(), {
   theme: 'gray',
   size: 'sm',
-  variant: 'solid',
+  variant: 'subtle',
   loading: false,
   disabled: false,
 })
