@@ -221,14 +221,14 @@ module.exports = {
       },
     }),
     borderRadius: {
-      none: '0px',
-      sm: '0.25rem',
-      DEFAULT: '0.5rem',
-      md: '0.625rem',
-      lg: '0.75rem',
-      xl: '1rem',
-      '2xl': '1.25rem',
-      full: '9999px',
+      none: '0px', // 0
+      sm: '0.25rem', // 4px
+      DEFAULT: '0.5rem', // 8px
+      md: '0.625rem', // 10px
+      lg: '0.75rem', // 12px
+      xl: '1rem', // 16px
+      '2xl': '1.25rem', // 20px
+      full: '9999px', // 9999px
     },
     boxShadow: {
       sm: '0px 1px 2px rgba(0, 0, 0, 0.1)',
