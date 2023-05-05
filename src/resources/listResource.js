@@ -302,7 +302,7 @@ export function deleteRowInListResource(doctype, docname) {
   for (let resource of resources) {
     if (resource.originalData) {
       resource.originalData = resource.originalData.filter(
-        (row) => row.name.toString() !== docname
+        (row) => row.name.toString() !== docname.toString()
       )
       resource.data = resource.transform(resource.originalData)
     }
