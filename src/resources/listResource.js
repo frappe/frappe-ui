@@ -176,6 +176,7 @@ export function createListResource(options, vm) {
       vm
     ),
     update,
+    fetch,
     reload,
     setData,
     transform,
@@ -214,6 +215,10 @@ export function createListResource(options, vm) {
       out.start = _start
       out.pageLength = _pageLength
     })
+  }
+
+  function fetch() {
+    reload()
   }
 
   function setData(data) {
