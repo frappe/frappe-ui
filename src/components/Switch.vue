@@ -24,7 +24,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import {
   Switch,
   SwitchDescription,
@@ -55,7 +55,14 @@ const props = withDefaults(defineProps<SwitchProps>(), {
 
 const emit = defineEmits(['change', 'update:modelValue'])
 
+// Handle the enabled state
 const enabled = ref(true)
+onMounted(() => {
+  enabled.value = props.modelValue as boolean
+})
+watch(enabled, (value) => {
+  emit('update:modelValue', value)
+})
 
 const switchType = computed(() => {
   if (props.label && props.description) {
