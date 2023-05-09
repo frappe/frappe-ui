@@ -4,6 +4,7 @@
     class="bubble-menu rounded-md shadow-sm"
     :tippy-options="{ duration: 100 }"
     :editor="editor"
+    v-bind="options"
   >
     <Menu
       class="rounded-md border border-gray-100 shadow-lg"
@@ -18,7 +19,7 @@ import Menu from './Menu.vue'
 
 export default {
   name: 'TextEditorBubbleMenu',
-  props: ['buttons'],
+  props: ['buttons', 'options'],
   components: { BubbleMenu, Menu },
   inject: ['editor'],
   computed: {

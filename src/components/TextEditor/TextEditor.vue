@@ -1,6 +1,6 @@
 <template>
   <div class="relative w-full" :class="$attrs.class" v-if="editor">
-    <TextEditorBubbleMenu :buttons="bubbleMenu" />
+    <TextEditorBubbleMenu :buttons="bubbleMenu" :options="bubbleMenuOptions" />
     <TextEditorFixedMenu
       class="w-full overflow-x-auto rounded-t-lg border border-gray-200"
       :buttons="fixedMenu"
@@ -68,6 +68,10 @@ export default {
     bubbleMenu: {
       type: [Boolean, Array],
       default: false,
+    },
+    bubbleMenuOptions: {
+      type: Object,
+      default: () => ({}),
     },
     fixedMenu: {
       type: [Boolean, Array],
