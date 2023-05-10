@@ -33,6 +33,7 @@ export function createListResource(options, vm) {
     parent: options.parent,
     debug: options.debug || 0,
     originalData: null,
+    dataMap: {},
     data: null,
     previous,
     hasPreviousPage: false,
@@ -181,6 +182,7 @@ export function createListResource(options, vm) {
     reload,
     setData,
     transform,
+    getRow,
   })
 
   function update(updatedOptions) {
@@ -228,6 +230,15 @@ export function createListResource(options, vm) {
       data = data.call(vm, out.data)
     }
     out.data = transform(data)
+
+    if (Array.isArray(out.data)) {
+      out.dataMap = {}
+      for (let row of out.data) {
+        if (!row.name) continue
+        let key = row.name.toString()
+        out.dataMap[key] = row
+      }
+    }
   }
 
   function previous() {
@@ -238,6 +249,11 @@ export function createListResource(options, vm) {
   function next() {
     out.start = out.start + out.pageLength
     out.list.fetch()
+  }
+
+  function getRow(name) {
+    let key = name.toString()
+    return out.dataMap[key]
   }
 
   if (options.realtime && vm.$socket) {
