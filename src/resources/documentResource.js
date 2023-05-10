@@ -6,6 +6,7 @@ import {
   revertRowInListResource,
 } from './listResource'
 import { getLocal, saveLocal } from './local'
+import { onDocUpdate } from './realtime'
 
 let documentCache = reactive({})
 
@@ -165,8 +166,8 @@ export function createDocumentResource(options, vm) {
   }
 
   if (options.realtime && vm.$socket) {
-    vm.$socket.on('list_update', (data) => {
-      if (data.doctype == out.doctype && data.name == out.name) {
+    onDocUpdate(vm.$socket, out.doctype, (name) => {
+      if (name == out.name) {
         out.get.fetch()
       }
     })
