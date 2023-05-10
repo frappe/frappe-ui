@@ -1,6 +1,7 @@
 import { reactive } from 'vue'
 import { getCacheKey, createResource } from './resources'
 import { saveLocal, getLocal } from './local'
+import { onDocUpdate } from './realtime'
 
 let listCache = reactive({})
 let resourcesByDocType = {}
@@ -227,12 +228,9 @@ export function createListResource(options, vm) {
   }
 
   if (options.realtime && vm.$socket) {
-    vm.$socket.on('list_update', (data) => {
-      if (
-        data.doctype === out.doctype &&
-        out.originalData?.find((d) => d.name === data.name)
-      ) {
-        out.fetchOne.submit(data.name)
+    onDocUpdate(vm.$socket, out.doctype, (name) => {
+      if (out.originalData?.find((d) => d.name === name)) {
+        out.fetchOne.submit(name)
       }
     })
   }
