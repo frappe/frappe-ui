@@ -1,6 +1,10 @@
 <template>
-  <div class="relative shrink-0" :class="[sizeClasses]">
-    <img v-if="src" :src="src" :class="[shapeClasses, 'object-cover']" />
+  <div class="relative shrink-0" :class="[sizeClasses, shapeClasses]">
+    <img
+      v-if="image"
+      :src="image"
+      :class="[shapeClasses, 'h-full w-full object-cover']"
+    />
     <div
       v-else
       class="flex h-full w-full items-center justify-center bg-gray-100 uppercase text-gray-600"
@@ -31,7 +35,7 @@
 import { computed } from 'vue'
 
 interface AvatarProps {
-  src?: string
+  image?: string
   label?: string
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl'
   shape?: 'circle' | 'square'

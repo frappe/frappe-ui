@@ -72,14 +72,14 @@ export default {
 
 export const Normal = {
   args: {
-    src: 'https://randomuser.me/api/portraits/women/1.jpg',
+    image: 'https://randomuser.me/api/portraits/women/1.jpg',
   },
 }
 
 export const SizeSmall = {
   args: {
     size: 'sm',
-    src: 'https://randomuser.me/api/portraits/women/2.jpg',
+    image: 'https://randomuser.me/api/portraits/women/2.jpg',
   },
 }
 
@@ -92,14 +92,14 @@ export const Label = {
 export const RoundedSquare = {
   args: {
     shape: 'square',
-    src: 'https://randomuser.me/api/portraits/women/3.jpg',
+    image: 'https://randomuser.me/api/portraits/women/3.jpg',
   },
 }
 
 export const WithIndicator = {
   args: {
     indicator: 'online',
-    src: 'https://randomuser.me/api/portraits/women/4.jpg',
+    image: 'https://randomuser.me/api/portraits/women/4.jpg',
   },
 }
 
