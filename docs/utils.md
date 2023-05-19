@@ -37,9 +37,9 @@ the page changes.
 Register the plugin in your `main.js` file.
 
 ```js
-import { pageMeta } from 'frappe-ui'
+import { pageMetaPlugin } from 'frappe-ui'
 // ...
-app.use(pageMeta)
+app.use(pageMetaPlugin)
 ```
 
 Now, in your page component, declare the `pageMeta` function. It must return an
