@@ -4,6 +4,19 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  html,
+  body,
+  button,
+  p,
+  span,
+  div {
+    font-variation-settings: 'opsz' 24;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
 @layer components {
   .form-input,
   .form-textarea,
