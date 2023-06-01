@@ -186,15 +186,7 @@ export function createListResource(options, vm) {
   })
 
   function update(updatedOptions) {
-    out.doctype = updatedOptions.doctype
-    out.fields = updatedOptions.fields
-    out.filters = updatedOptions.filters
-    out.orderBy = updatedOptions.orderBy
-    out.start = updatedOptions.start
-    out.pageLength = updatedOptions.pageLength
-    out.groupBy = updatedOptions.groupBy
-    out.parent = updatedOptions.parent
-    out.debug = updatedOptions.debug
+    Object.assign(out, updatedOptions)
   }
 
   function transform(data) {
