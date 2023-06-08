@@ -80,7 +80,7 @@
 </template>
 
 <script>
-import debounce from '../utils/debounce.js'
+import debounce from '../utils/debounce.ts'
 import FeatherIcon from './FeatherIcon.vue'
 
 export default {
