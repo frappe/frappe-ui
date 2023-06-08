@@ -118,6 +118,12 @@ export const Green = {
   },
 }
 
+export const Red = {
+  args: {
+    theme: 'red',
+  },
+}
+
 export const Solid = {
   args: {
     variant: 'solid',

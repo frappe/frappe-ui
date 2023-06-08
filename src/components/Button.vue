@@ -4,7 +4,7 @@
     :class="buttonClasses"
     @click="handleClick"
     :disabled="isDisabled"
-    :aria-label="ariaLabel"
+    :ariaLabel="ariaLabel"
   >
     <LoadingIndicator
       v-if="loading"
@@ -55,7 +55,7 @@ import LoadingIndicator from './LoadingIndicator.vue'
 import { useRouter } from 'vue-router'
 
 interface ButtonProps {
-  theme?: 'gray' | 'blue' | 'green'
+  theme?: 'gray' | 'blue' | 'green' | 'red'
   size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl'
   variant?: 'solid' | 'subtle' | 'outline' | 'ghost'
   label?: string
@@ -85,12 +85,14 @@ const buttonClasses = computed(() => {
     gray: 'text-white bg-gray-900 hover:bg-gray-800 active:bg-gray-700',
     blue: 'text-white bg-blue-500 hover:bg-blue-600 active:bg-blue-700',
     green: 'text-white bg-green-600 hover:bg-green-700 active:bg-green-800',
+    red: 'text-white bg-red-600 hover:bg-red-700 active:bg-red-800',
   }[props.theme]
 
   let subtleClasses = {
     gray: 'text-gray-800 bg-gray-100 hover:bg-gray-200 active:bg-gray-300',
     blue: 'text-blue-600 bg-blue-100 hover:bg-blue-200 active:bg-blue-300',
     green: 'text-green-800 bg-green-100 hover:bg-green-200 active:bg-green-300',
+    red: 'text-red-700 bg-red-100 hover:bg-red-200 active:bg-red-300',
   }[props.theme]
 
   let outlineClasses = {
@@ -98,6 +100,7 @@ const buttonClasses = computed(() => {
     blue: 'text-blue-600 bg-white border border-blue-300 hover:border-blue-400 active:border-blue-400 active:bg-blue-300',
     green:
       'text-green-800 bg-white border border-green-400 hover:border-green-500 active:border-green-500 active:bg-green-300',
+    red: 'text-red-700 bg-white border border-red-300 hover:border-red-400 active:border-red-400 active:bg-red-200',
   }[props.theme]
 
   let ghostClasses = {
@@ -105,12 +108,14 @@ const buttonClasses = computed(() => {
     blue: 'text-blue-600 bg-transparent hover:bg-blue-200 active:bg-blue-300',
     green:
       'text-green-800 bg-transparent hover:bg-green-200 active:bg-green-300',
+    red: 'text-red-700 bg-transparent hover:bg-red-200 active:bg-red-300',
   }[props.theme]
 
   let focusClasses = {
     gray: 'focus-visible:ring focus-visible:ring-gray-400',
     blue: 'focus-visible:ring focus-visible:ring-blue-400',
     green: 'focus-visible:ring focus-visible:ring-green-400',
+    red: 'focus-visible:ring focus-visible:ring-red-400',
   }[props.theme]
 
   let variantClasses = {
@@ -135,6 +140,10 @@ const buttonClasses = computed(() => {
     green: 'bg-green-100 text-green-500',
     'green-outline': 'bg-green-100 text-green-500 border border-green-400',
     'green-ghost': 'text-green-500',
+
+    red: 'bg-red-100 text-red-400',
+    'red-outline': 'bg-red-100 text-red-400 border border-red-300',
+    'red-ghost': 'text-red-400',
   }
   let disabledClasses =
     disabledClassesMap[themeVariant] || disabledClassesMap[props.theme]
