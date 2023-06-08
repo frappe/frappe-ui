@@ -38,9 +38,9 @@ module.exports = {
         DEFAULT: theme('colors.gray.200'),
       }),
       typography: (theme) => ({
-        gray: {
+        DEFAULT: {
           css: {
-            '--tw-prose-body': theme('colors.gray.900'),
+            '--tw-prose-body': theme('colors.gray.800'),
           },
         },
       }),
