@@ -1,6 +1,10 @@
 <template>
   <Menu as="div" class="relative inline-block text-left" v-slot="{ open }">
-    <Popover :transition="dropdownTransition" :show="open">
+    <Popover
+      :transition="dropdownTransition"
+      :show="open"
+      :placement="popoverPlacement"
+    >
       <template #target>
         <MenuButton as="div">
           <slot v-if="$slots.default" v-bind="{ open }" />
@@ -144,6 +148,12 @@ export default {
         leaveFromClass: 'transform scale-100 opacity-100',
         leaveToClass: 'transform scale-95 opacity-0',
       }
+    },
+    popoverPlacement() {
+      if (this.placement === 'left') return 'bottom-start'
+      if (this.placement === 'right') return 'bottom-end'
+      if (this.placement === 'center') return 'bottom-center'
+      return 'bottom'
     },
   },
 }
