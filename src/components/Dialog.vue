@@ -4,40 +4,37 @@
     :show="open"
     @after-leave="$emit('after-leave')"
   >
-    <HDialog
-      as="div"
-      class="fixed inset-0 z-10 overflow-y-auto"
-      @close="open = false"
-    >
+    <HDialog as="div" class="fixed inset-0 z-10 overflow-y-auto" @close="close">
       <div
         class="flex min-h-screen flex-col items-center px-4 py-4 text-center"
         :class="dialogPositionClasses"
       >
         <TransitionChild
           as="template"
-          enter="ease-out duration-300"
+          enter="ease-out duration-150"
           enter-from="opacity-0"
           enter-to="opacity-100"
-          leave="ease-in duration-200"
+          leave="ease-in duration-150"
           leave-from="opacity-100"
           leave-to="opacity-0"
         >
-          <DialogOverlay
-            class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+          <div
+            class="fixed inset-0 bg-black-overlay-200 transition-opacity"
+            :data-dialog="options.title"
           />
         </TransitionChild>
 
         <TransitionChild
           as="template"
-          enter="ease-out duration-300"
-          enter-from="opacity-0 translate-y-4 sm:-translate-y-12 sm:scale-95"
-          enter-to="opacity-100 translate-y-0 sm:scale-100"
-          leave="ease-in duration-200"
-          leave-from="opacity-100 translate-y-0 sm:scale-100"
-          leave-to="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+          enter="ease-out duration-150"
+          enter-from="opacity-50 translate-y-2 scale-95"
+          enter-to="opacity-100 translate-y-0 scale-100"
+          leave="ease-in duration-150"
+          leave-from="opacity-100 translate-y-0 scale-100"
+          leave-to="opacity-50 translate-y-4 translate-y-4 scale-95"
         >
-          <div
-            class="my-8 inline-block w-full transform overflow-hidden rounded-lg bg-white text-left align-middle shadow-xl transition-all"
+          <DialogPanel
+            class="my-8 inline-block w-full transform overflow-hidden rounded-[18px] bg-white text-left align-middle shadow-xl transition-all"
             :class="{
               'max-w-7xl': options.size === '7xl',
               'max-w-6xl': options.size === '6xl',
@@ -54,46 +51,69 @@
           >
             <slot name="body">
               <slot name="body-main">
-                <div class="bg-white px-4 py-5 sm:p-6">
-                  <div class="flex flex-col sm:flex-row">
-                    <div
-                      v-if="icon"
-                      class="mx-auto mb-3 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:mb-0 sm:mr-4 sm:h-9 sm:w-9"
-                      :class="{
-                        'bg-gray-100': !icon.appearance,
-                        'bg-yellow-100': icon.appearance === 'warning',
-                        'bg-blue-100': icon.appearance === 'info',
-                        'bg-red-100': icon.appearance === 'danger',
-                        'bg-green-100': icon.appearance === 'success',
-                      }"
-                    >
-                      <FeatherIcon
-                        :name="icon.name"
-                        class="h-6 w-6 sm:h-5 sm:w-5"
-                        :class="{
-                          'text-gray-600': !icon.appearance,
-                          'text-yellow-600': icon.appearance === 'warning',
-                          'text-blue-600': icon.appearance === 'info',
-                          'text-red-600': icon.appearance === 'danger',
-                          'text-green-600': icon.appearance === 'success',
-                        }"
-                        aria-hidden="true"
-                      />
-                    </div>
+                <div class="bg-white px-4 pb-6 pt-5 sm:px-6">
+                  <div class="flex">
                     <div class="flex-1">
-                      <DialogTitle as="header">
-                        <slot name="body-title">
-                          <h3
-                            class="mb-2 text-lg font-medium leading-6 text-gray-900"
+                      <div class="mb-6 flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                          <div
+                            v-if="icon"
+                            class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full"
+                            :class="{
+                              'bg-gray-100': !icon.appearance,
+                              'bg-yellow-100': icon.appearance === 'warning',
+                              'bg-blue-100': icon.appearance === 'info',
+                              'bg-red-100': icon.appearance === 'danger',
+                              'bg-green-100': icon.appearance === 'success',
+                            }"
                           >
-                            {{ options.title || 'Untitled' }}
-                          </h3>
-                        </slot>
-                      </DialogTitle>
+                            <FeatherIcon
+                              :name="icon.name"
+                              class="h-4 w-4"
+                              :class="{
+                                'text-gray-600': !icon.appearance,
+                                'text-yellow-600':
+                                  icon.appearance === 'warning',
+                                'text-blue-600': icon.appearance === 'info',
+                                'text-red-600': icon.appearance === 'danger',
+                                'text-green-600': icon.appearance === 'success',
+                              }"
+                              aria-hidden="true"
+                            />
+                          </div>
+                          <DialogTitle as="header">
+                            <slot name="body-title">
+                              <h3
+                                class="text-2xl font-semibold leading-6 text-gray-900"
+                              >
+                                {{ options.title || 'Untitled' }}
+                              </h3>
+                            </slot>
+                          </DialogTitle>
+                        </div>
+                        <Button variant="ghost" @click="close">
+                          <template #icon>
+                            <svg
+                              width="16"
+                              height="16"
+                              viewBox="0 0 16 16"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                clip-rule="evenodd"
+                                d="M12.8567 3.85355C13.052 3.65829 13.052 3.34171 12.8567 3.14645C12.6615 2.95118 12.3449 2.95118 12.1496 3.14645L8.00201 7.29405L3.85441 3.14645C3.65914 2.95118 3.34256 2.95118 3.1473 3.14645C2.95204 3.34171 2.95204 3.65829 3.1473 3.85355L7.29491 8.00116L3.14645 12.1496C2.95118 12.3449 2.95118 12.6615 3.14645 12.8567C3.34171 13.052 3.65829 13.052 3.85355 12.8567L8.00201 8.70827L12.1505 12.8567C12.3457 13.052 12.6623 13.052 12.8576 12.8567C13.0528 12.6615 13.0528 12.3449 12.8576 12.1496L8.70912 8.00116L12.8567 3.85355Z"
+                                fill="#383838"
+                              />
+                            </svg>
+                          </template>
+                        </Button>
+                      </div>
 
                       <slot name="body-content">
                         <p
-                          class="text-base text-gray-600"
+                          class="text-p-base text-gray-700"
                           v-if="options.message"
                         >
                           {{ options.message }}
@@ -104,24 +124,24 @@
                 </div>
               </slot>
               <div
-                class="space-y-2 bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:space-x-3 sm:space-y-0 sm:space-x-reverse sm:px-6"
-                v-if="options?.actions || $slots.actions"
+                class="px-4 pb-7 pt-4 sm:px-6"
+                v-if="dialogActions.length || $slots.actions"
               >
-                <slot name="actions" v-bind="{ close: () => (open = false) }">
-                  <Button
-                    class="w-full sm:w-max"
-                    v-for="action in options.actions"
-                    :key="action.label"
-                    :loading="action.loading"
-                    v-bind="action"
-                    @click="handleAction(action)"
-                  >
-                    {{ action.label }}
-                  </Button>
+                <slot name="actions" v-bind="{ close }">
+                  <div class="space-y-2">
+                    <Button
+                      class="w-full"
+                      v-for="action in dialogActions"
+                      :key="action.label"
+                      v-bind="action"
+                    >
+                      {{ action.label }}
+                    </Button>
+                  </div>
                 </slot>
               </div>
             </slot>
-          </div>
+          </DialogPanel>
         </TransitionChild>
       </div>
     </HDialog>
@@ -132,7 +152,7 @@
 import { computed } from 'vue'
 import {
   Dialog as HDialog,
-  DialogOverlay,
+  DialogPanel,
   DialogTitle,
   TransitionChild,
   TransitionRoot,
@@ -157,44 +177,67 @@ export default {
   emits: ['update:modelValue', 'close', 'after-leave'],
   components: {
     HDialog,
-    DialogOverlay,
+    DialogPanel,
     DialogTitle,
     TransitionChild,
     TransitionRoot,
     Button,
     FeatherIcon,
   },
-  setup(props, { emit }) {
-    let open = computed({
-      get: () => props.modelValue,
-      set: (val) => {
-        emit('update:modelValue', val)
-        if (!val) {
-          emit('close')
-        }
-      },
-    })
+  data() {
     return {
-      open,
+      dialogActions: [],
     }
+  },
+  watch: {
+    'options.actions': {
+      handler(actions) {
+        if (!actions) return
+        this.dialogActions = actions.map((action) => {
+          let _action = {
+            ...action,
+            loading: false,
+            _onClick: action.onClick,
+            onClick: () => this.handleAction(_action),
+          }
+          return _action
+        })
+      },
+      immediate: true,
+    },
   },
   methods: {
     handleAction(action) {
-      let close = () => (this.open = false)
-      if (action.handler && typeof action.handler === 'function') {
+      if (action._onClick && typeof action._onClick === 'function') {
         action.loading = true
-        let result = action.handler({ close })
+        let result = action._onClick({ close: this.close })
         if (result && result.then) {
-          result.then(() => (action.loading = false))
+          result
+            .then(() => (action.loading = false))
+            .catch(() => (action.loading = false))
         } else {
           action.loading = false
         }
       } else {
-        close()
+        this.close()
       }
+    },
+    close() {
+      this.open = false
     },
   },
   computed: {
+    open: {
+      get() {
+        return this.modelValue
+      },
+      set(val) {
+        this.$emit('update:modelValue', val)
+        if (!val) {
+          this.$emit('close')
+        }
+      },
+    },
     icon() {
       if (!this.options?.icon) return null
 

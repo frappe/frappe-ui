@@ -27,7 +27,7 @@
   "author": "Frappe Technologies Pvt. Ltd.",
   "license": "MIT",
   "dependencies": {
-    "@headlessui/vue": "^1.5.0",
+    "@headlessui/vue": "^1.7.14",
     "@popperjs/core": "^2.11.2",
     "@tailwindcss/forms": "^0.5.3",
     "@tailwindcss/typography": "^0.5.0",
