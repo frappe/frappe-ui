@@ -12,6 +12,7 @@ export { default as Dropdown } from './components/Dropdown.vue'
 export { default as ErrorMessage } from './components/ErrorMessage.vue'
 export { default as FeatherIcon } from './components/FeatherIcon.vue'
 export { default as FileUploader } from './components/FileUploader.vue'
+export { default as FormControl } from './components/FormControl.vue'
 export { default as GreenCheckIcon } from './components/GreenCheckIcon.vue'
 export { default as Input } from './components/Input.vue'
 export { default as Link } from './components/Link.vue'
@@ -21,9 +22,11 @@ export { default as LoadingText } from './components/LoadingText.vue'
 export { default as Progress } from './components/Progress.vue'
 export { default as Popover } from './components/Popover.vue'
 export { default as Resource } from './components/Resource.vue'
+export { default as Select } from './components/Select.vue'
 export { default as Spinner } from './components/Spinner.vue'
 export { default as Switch } from './components/Switch.vue'
 export { default as TextInput } from './components/TextInput.vue'
+export { default as Textarea } from './components/Textarea.vue'
 export {
   TextEditor,
   TextEditorFixedMenu,
@@ -41,7 +44,7 @@ export { default as visibilityDirective } from './directives/visibility.js'
 
 // utilities
 export { default as call, createCall } from './utils/call.js'
-export { default as debounce } from './utils/debounce.js'
+export { default as debounce } from './utils/debounce.ts'
 export { default as fileToBase64 } from './utils/file-to-base64.js'
 
 // data-fetching, resources

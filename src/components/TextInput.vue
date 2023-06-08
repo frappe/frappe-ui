@@ -15,6 +15,10 @@
       :placeholder="placeholder"
       :class="inputClasses"
       :disabled="disabled"
+      :id="id"
+      :value="modelValue"
+      @input="handleChange"
+      @change="handleChange"
     />
     <div
       :class="[
@@ -30,27 +34,19 @@
 </template>
 
 <script setup lang="ts">
-import { computed, useSlots } from 'vue'
+import { computed, useSlots, useAttrs } from 'vue'
+import type { TextInputTypes } from './types/TextInput'
+import debounce from '../utils/debounce'
 
 interface TextInputProps {
-  type:
-    | 'date'
-    | 'datetime-local'
-    | 'email'
-    | 'file'
-    | 'month'
-    | 'number'
-    | 'password'
-    | 'search'
-    | 'tel'
-    | 'text'
-    | 'time'
-    | 'url'
-    | 'week'
-  size: 'sm' | 'md' | 'lg' | 'xl'
-  variant: 'subtle' | 'outline'
+  type?: TextInputTypes
+  size?: 'sm' | 'md' | 'lg' | 'xl'
+  variant?: 'subtle' | 'outline'
   placeholder?: string
   disabled?: boolean
+  id?: string
+  modelValue?: string
+  debounce?: number
 }
 
 const props = withDefaults(defineProps<TextInputProps>(), {
@@ -59,7 +55,10 @@ const props = withDefaults(defineProps<TextInputProps>(), {
   variant: 'subtle',
 })
 
+const emit = defineEmits(['update:modelValue'])
+
 const slots = useSlots()
+const attrs = useAttrs()
 
 const textColor = computed(() => {
   return props.disabled ? 'text-gray-600' : 'text-gray-800'
@@ -113,7 +112,7 @@ const inputClasses = computed(() => {
     paddingClasses,
     variantClasses,
     textColor.value,
-    'transition-colors',
+    'transition-colors w-full',
   ]
 })
 
@@ -134,4 +133,15 @@ let suffixClasses = computed(() => {
     xl: 'pr-3',
   }[props.size]
 })
+
+let emitChange = (value: string) => {
+  emit('update:modelValue', value)
+}
+if (props.debounce) {
+  emitChange = debounce(emitChange, props.debounce)
+}
+
+let handleChange = (e: Event) => {
+  emitChange((e.target as HTMLInputElement).value)
+}
 </script>
