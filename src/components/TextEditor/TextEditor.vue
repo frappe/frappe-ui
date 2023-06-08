@@ -173,7 +173,7 @@ export default {
       return {
         attributes: {
           class: normalizeClass([
-            'prose prose-p:my-1 prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-gray-300 prose-th:border-gray-300 prose-td:relative prose-th:relative prose-th:bg-gray-100',
+            'prose prose-p:my-2 prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-gray-300 prose-th:border-gray-300 prose-td:relative prose-th:relative prose-th:bg-gray-100',
             this.editorClass,
           ]),
         },
@@ -205,7 +205,7 @@ export default {
 <style>
 .ProseMirror {
   outline: none;
-  caret-color: theme('colors.blue.600');
+  caret-color: theme('colors.gray.900');
   word-break: break-word;
 }
 
@@ -225,7 +225,7 @@ export default {
 
 .ProseMirror-selectednode video,
 img.ProseMirror-selectednode {
-  border: 2px solid theme('colors.blue.300');
+  outline: 2px solid theme('colors.gray.300');
 }
 
 /* Mentions */

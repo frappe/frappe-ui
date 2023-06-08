@@ -26,7 +26,7 @@
       />
     </template>
     <template #actions>
-      <Button appearance="primary" @click="addImage(addImageDialog.url)">
+      <Button variant="solid" @click="addImage(addImageDialog.url)">
         Insert Image
       </Button>
       <Button @click="reset"> Cancel </Button>

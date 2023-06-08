@@ -14,7 +14,7 @@
       />
     </template>
     <template #actions>
-      <Button appearance="primary" @click="setLink(setLinkDialog.url)">
+      <Button variant="solid" @click="setLink(setLinkDialog.url)">
         Save
       </Button>
     </template>

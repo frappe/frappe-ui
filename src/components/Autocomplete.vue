@@ -46,7 +46,9 @@
               autocomplete="off"
               placeholder="Search by keyword"
             />
-            <Button icon="x" @click="selectedValue = null" />
+            <Button @click="selectedValue = null">
+              <template #icon><FeatherIcon name="x" class="w-4" /></template>
+            </Button>
           </div>
           <div
             v-for="group in groups"

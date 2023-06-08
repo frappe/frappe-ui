@@ -7,9 +7,11 @@
       <slot name="body">
         <div
           v-if="text"
-          class="rounded-lg border border-gray-100 bg-gray-800 px-2 py-1 text-xs text-white shadow-xl"
+          class="rounded bg-gray-900 px-2 py-1 text-xs text-white shadow-xl"
         >
-          {{ text }}
+          <div class="py-px">
+            {{ text }}
+          </div>
         </div>
       </slot>
     </template>
