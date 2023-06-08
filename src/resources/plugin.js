@@ -33,22 +33,7 @@ let createMixin = (mixinOptions) => ({
                 JSON.stringify(options) !== JSON.stringify(oldOptions)
 
               if (!changed) return
-
-              if (options.type === 'document') {
-                let resource = createDocumentResource(options, this)
-                this._resources[key] = resource
-              } else {
-                let resource = this._resources[key]
-                if (!resource) {
-                  resource = createResourceForOptions(options, this)
-                  this._resources[key] = resource
-                } else {
-                  resource.update(options)
-                  if (resource.auto) {
-                    resource.reload()
-                  }
-                }
-              }
+              this._resources[key] = createResourceForOptions(options, this)
             },
             {
               immediate: true,
