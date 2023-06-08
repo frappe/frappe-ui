@@ -104,7 +104,7 @@ import FeatherIcon from './FeatherIcon.vue'
 export default {
   name: 'Autocomplete',
   props: ['modelValue', 'options', 'placeholder'],
-  emits: ['update:modelValue', 'change'],
+  emits: ['update:modelValue', 'update:query', 'change'],
   components: {
     Popover,
     Button,
@@ -150,6 +150,11 @@ export default {
           }
         })
         .filter((group) => group.items.length > 0)
+    },
+  },
+  watch: {
+    query(q) {
+      this.$emit('update:query', q)
     },
   },
   methods: {

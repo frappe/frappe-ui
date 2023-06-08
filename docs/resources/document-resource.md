@@ -151,7 +151,7 @@ todos.setValue.submit({
 
 // same as setValue but debounced
 todos.setValueDebounced
-// will run once every 500ms
+// will run once after 500ms
 todos.setValueDebounced.submit({
     description: 'Updated description'
 })

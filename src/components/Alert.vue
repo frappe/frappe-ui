@@ -24,10 +24,10 @@
           <h3 class="text-lg font-medium text-gray-900" v-if="title">
             {{ title }}
           </h3>
-          <div class="mt-1 md:mt-0 md:ml-2">
+          <div class="mt-1 md:ml-2 md:mt-0">
             <slot></slot>
           </div>
-          <div class="mt-3 md:mt-0 md:ml-auto">
+          <div class="mt-3 md:ml-auto md:mt-0">
             <slot name="actions"></slot>
           </div>
         </div>

@@ -33,7 +33,10 @@ export function createListResource(options, vm) {
     parent: options.parent,
     debug: options.debug || 0,
     originalData: null,
+    dataMap: {},
     data: null,
+    previous,
+    hasPreviousPage: false,
     next,
     hasNextPage: true,
     auto: options.auto,
@@ -56,6 +59,7 @@ export function createListResource(options, vm) {
           }
         },
         onSuccess(data) {
+          out.hasPreviousPage = !!out.start
           if (data.length < out.pageLength) {
             out.hasNextPage = false
           }
@@ -174,21 +178,15 @@ export function createListResource(options, vm) {
       vm
     ),
     update,
+    fetch,
     reload,
     setData,
     transform,
+    getRow,
   })
 
   function update(updatedOptions) {
-    out.doctype = updatedOptions.doctype
-    out.fields = updatedOptions.fields
-    out.filters = updatedOptions.filters
-    out.orderBy = updatedOptions.orderBy
-    out.start = updatedOptions.start
-    out.pageLength = updatedOptions.pageLength
-    out.groupBy = updatedOptions.groupBy
-    out.parent = updatedOptions.parent
-    out.debug = updatedOptions.debug
+    Object.assign(out, updatedOptions)
   }
 
   function transform(data) {
@@ -214,17 +212,40 @@ export function createListResource(options, vm) {
     })
   }
 
+  function fetch() {
+    reload()
+  }
+
   function setData(data) {
     out.originalData = data
     if (typeof data === 'function') {
       data = data.call(vm, out.data)
     }
     out.data = transform(data)
+
+    if (Array.isArray(out.data)) {
+      out.dataMap = {}
+      for (let row of out.data) {
+        if (!row.name) continue
+        let key = row.name.toString()
+        out.dataMap[key] = row
+      }
+    }
+  }
+
+  function previous() {
+    out.start = out.start - out.pageLength
+    out.list.fetch()
   }
 
   function next() {
     out.start = out.start + out.pageLength
     out.list.fetch()
+  }
+
+  function getRow(name) {
+    let key = name.toString()
+    return out.dataMap[key]
   }
 
   if (options.realtime && vm.$socket) {
@@ -287,7 +308,7 @@ export function deleteRowInListResource(doctype, docname) {
   for (let resource of resources) {
     if (resource.originalData) {
       resource.originalData = resource.originalData.filter(
-        (row) => row.name.toString() !== docname
+        (row) => row.name.toString() !== docname.toString()
       )
       resource.data = resource.transform(resource.originalData)
     }

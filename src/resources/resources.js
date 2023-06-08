@@ -86,9 +86,7 @@ export function createResource(options, vm) {
       try {
         invalidMessage = await validateFunction.call(vm, out.params)
         if (invalidMessage && typeof invalidMessage == 'string') {
-          let error = new Error(invalidMessage)
-          handleError(error, errorFunctions)
-          return
+          throw new Error(invalidMessage)
         }
       } catch (error) {
         handleError(error, errorFunctions)
