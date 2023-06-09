@@ -27,10 +27,6 @@ import type { TextInputTypes } from './types/TextInput'
 import Select from './Select.vue'
 import Textarea from './Textarea.vue'
 
-defineOptions({
-  inheritAttrs: false,
-})
-
 interface FormControlProps {
   label?: string
   description?: string
@@ -75,4 +71,9 @@ const descriptionClasses = computed(() => {
     'text-gray-600',
   ]
 })
+</script>
+<script lang="ts">
+export default {
+  inheritAttrs: false,
+}
 </script>
