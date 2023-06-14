@@ -1,5 +1,8 @@
 <template>
-  <div class="relative shrink-0" :class="[sizeClasses, shapeClasses]">
+  <div
+    class="relative inline-block shrink-0"
+    :class="[sizeClasses, shapeClasses]"
+  >
     <img
       v-if="image"
       :src="image"
