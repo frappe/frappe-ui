@@ -31,8 +31,8 @@ interface BadgeProps {
 
 const props = withDefaults(defineProps<BadgeProps>(), {
   theme: 'gray',
-  size: 'sm',
-  variant: 'solid',
+  size: 'md',
+  variant: 'subtle',
 })
 
 const classes = computed(() => {
