@@ -21,7 +21,7 @@
   .form-input,
   .form-textarea,
   .form-select {
-    @apply rounded border-0 bg-gray-100 py-1 text-base leading-5 placeholder-gray-700 focus:bg-gray-200 focus:shadow-none focus:ring-0;
+    @apply h-7 rounded border border-gray-100 bg-gray-100 py-1.5 pl-2 pr-2 text-base text-gray-800 placeholder-gray-500 transition-colors hover:border-gray-200 hover:bg-gray-200 focus:border-gray-500 focus:bg-white focus:shadow-sm focus:ring-0 focus-visible:ring-2 focus-visible:ring-gray-400;
   }
 
   .form-checkbox {
