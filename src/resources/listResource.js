@@ -248,7 +248,7 @@ export function createListResource(options, vm) {
     return out.dataMap[key]
   }
 
-  if (options.realtime && vm.$socket) {
+  if (options.realtime && vm?.$socket) {
     onDocUpdate(vm.$socket, out.doctype, (name) => {
       if (out.originalData?.find((d) => d.name === name)) {
         out.fetchOne.submit(name)
