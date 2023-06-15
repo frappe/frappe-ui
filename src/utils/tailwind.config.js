@@ -43,6 +43,34 @@ module.exports = {
             '--tw-prose-body': theme('colors.gray.800'),
           },
         },
+        sm: {
+          css: {
+            fontSize: '14px',
+            fontWeight: 420,
+            lineHeight: 1.6,
+            letterSpacing: '0.02em',
+            p: {
+              marginTop: '0.5rem',
+              marginBottom: '1rem',
+            },
+            '> ul > li p': {
+              marginTop: '0.5rem',
+              marginBottom: '0.5rem',
+            },
+            '> ul > li > *:first-child': {
+              marginTop: '0.5rem',
+            },
+            '> ul > li > *:last-child': {
+              marginBottom: '0.5rem',
+            },
+            '> ol > li > *:first-child': {
+              marginTop: '0.5rem',
+            },
+            '> ol > li > *:last-child': {
+              marginBottom: '0.5rem',
+            },
+          },
+        },
       }),
     },
     colors: ({ colors }) => ({
