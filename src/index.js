@@ -52,6 +52,9 @@ export {
   createResource,
   createDocumentResource,
   createListResource,
+  getCachedResource,
+  getCachedDocumentResource,
+  getCachedListResource,
   resourcesPlugin,
 } from './resources'
 export { request } from './utils/request.js'
