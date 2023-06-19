@@ -94,7 +94,7 @@ export default {
       default: () => [],
     },
   },
-  emits: ['change'],
+  emits: ['change', 'focus', 'blur'],
   expose: ['editor'],
   provide() {
     return {
@@ -166,6 +166,12 @@ export default {
       ],
       onUpdate: ({ editor }) => {
         this.$emit('change', editor.getHTML())
+      },
+      onFocus: ({ editor, event }) => {
+        this.$emit('focus', event)
+      },
+      onBlur: ({ editor, event }) => {
+        this.$emit('blur', event)
       },
     })
   },
