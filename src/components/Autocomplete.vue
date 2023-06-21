@@ -9,7 +9,7 @@
             @click="() => togglePopover()"
           >
             <span
-              class="overflow-hidden text-ellipsis text-base leading-5"
+              class="overflow-hidden text-ellipsis whitespace-nowrap text-base leading-5"
               v-if="selectedValue"
             >
               {{ displayValue(selectedValue) }}
@@ -186,7 +186,9 @@ export default {
     },
     displayValue(option) {
       if (typeof option === 'string') {
-        return option
+        let allOptions = this.groups.flatMap((group) => group.items)
+        let selectedOption = allOptions.find((o) => o.value === option)
+        return selectedOption?.label || option
       }
       return option?.label
     },
