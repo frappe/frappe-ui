@@ -7,13 +7,24 @@
       v-if="type === 'select'"
       :id="id"
       v-bind="{ ...controlAttrs, size }"
-    />
+    >
+      <template #prefix v-if="$slots.prefix">
+        <slot name="prefix" />
+      </template>
+    </Select>
     <Textarea
       v-else-if="type === 'textarea'"
       :id="id"
       v-bind="{ ...controlAttrs, size }"
     />
-    <TextInput v-else :id="id" v-bind="{ ...controlAttrs, size }" />
+    <TextInput v-else :id="id" v-bind="{ ...controlAttrs, size }">
+      <template #prefix v-if="$slots.prefix">
+        <slot name="prefix" />
+      </template>
+      <template #suffix v-if="$slots.suffix">
+        <slot name="suffix" />
+      </template>
+    </TextInput>
     <slot name="description">
       <p v-if="description" :class="descriptionClasses">{{ description }}</p>
     </slot>
