@@ -1,5 +1,5 @@
 <template>
-  <div :class="['space-y-1.5', attrs.class]">
+  <div v-if="type != 'checkbox'" :class="['space-y-1.5', attrs.class]">
     <label class="block" :class="labelClasses" v-if="label" :for="id">
       {{ label }}
     </label>
@@ -13,11 +13,16 @@
       :id="id"
       v-bind="{ ...controlAttrs, size }"
     />
-    <TextInput v-else :id="id" v-bind="{ ...controlAttrs, type, size }" />
+    <TextInput v-else :id="id" v-bind="{ ...controlAttrs, size }" />
     <slot name="description">
       <p v-if="description" :class="descriptionClasses">{{ description }}</p>
     </slot>
   </div>
+  <Checkbox
+    v-else
+    :id="id"
+    v-bind="{ ...controlAttrs, label, size, class: attrs.class }"
+  />
 </template>
 <script setup lang="ts">
 import { useAttrs, computed } from 'vue'
@@ -26,11 +31,12 @@ import TextInput from './TextInput.vue'
 import type { TextInputTypes } from './types/TextInput'
 import Select from './Select.vue'
 import Textarea from './Textarea.vue'
+import Checkbox from './Checkbox.vue'
 
 interface FormControlProps {
   label?: string
   description?: string
-  type?: TextInputTypes | 'textarea' | 'select'
+  type?: TextInputTypes | 'textarea' | 'select' | 'checkbox'
   size?: 'sm' | 'md'
 }
 
