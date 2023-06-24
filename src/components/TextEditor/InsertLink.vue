@@ -6,7 +6,7 @@
     @after-leave="reset"
   >
     <template #body-content>
-      <Input
+      <FormControl
         type="text"
         label="URL"
         v-model="setLinkDialog.url"
