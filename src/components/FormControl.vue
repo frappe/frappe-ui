@@ -17,7 +17,7 @@
       :id="id"
       v-bind="{ ...controlAttrs, size }"
     />
-    <TextInput v-else :id="id" v-bind="{ ...controlAttrs, size }">
+    <TextInput v-else :id="id" v-bind="{ ...controlAttrs, type, size }">
       <template #prefix v-if="$slots.prefix">
         <slot name="prefix" />
       </template>
