@@ -9,6 +9,8 @@ interface UploadOptions {
   type?: string;
 }
 
+type EventListenerOption = 'start' | 'progress' | 'finish' | 'error';
+
 declare global {
   interface Window {
     csrf_token?: string;
@@ -24,7 +26,7 @@ class FileUploadHandler {
     this.failed = false;
   }
 
-  on(event: string, handler: Function) {
+  on(event: EventListenerOption, handler: Function) {
     this.listeners[event] = this.listeners[event] || [];
     this.listeners[event].push(handler);
   }
