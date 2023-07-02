@@ -48,6 +48,7 @@ export { default as call, createCall } from './utils/call.js'
 export { default as debounce } from './utils/debounce.ts'
 export { default as fileToBase64 } from './utils/file-to-base64.js'
 export { default as FileUploadHandler } from './utils/fileUploadHandler'
+export { usePageMeta } from './utils/pageMeta.js'
 
 // data-fetching, resources
 export {
