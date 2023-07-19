@@ -15,7 +15,10 @@
     "build": "vite build",
     "preview": "vite preview",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "story:dev": "histoire dev",
+    "story:build": "histoire build",
+    "story:preview": "histoire preview"
   },
   "files": [
     "src",
@@ -60,6 +63,7 @@
     "vue-router": "^4.1.6"
   },
   "devDependencies": {
+    "@histoire/plugin-vue": "^0.16.1",
     "@storybook/addon-essentials": "^7.0.0-beta.61",
     "@storybook/addon-interactions": "^7.0.0-beta.61",
     "@storybook/addon-links": "^7.0.0-beta.61",
@@ -70,6 +74,7 @@
     "@vitejs/plugin-vue": "^4.0.0",
     "autoprefixer": "^10.4.13",
     "cross-fetch": "^3.1.5",
+    "histoire": "^0.16.2",
     "husky": ">=6",
     "lint-staged": ">=10",
     "postcss": "^8.4.21",
