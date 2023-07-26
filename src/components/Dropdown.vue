@@ -39,6 +39,7 @@
                 v-if="item.component"
                 :is="item.component"
                 :active="active"
+                :item="item"
               />
               <button
                 v-else
