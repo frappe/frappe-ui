@@ -18,7 +18,8 @@
     "build-storybook": "storybook build"
   },
   "files": [
-    "src"
+    "src",
+    "vite.js"
   ],
   "repository": {
     "type": "git",
