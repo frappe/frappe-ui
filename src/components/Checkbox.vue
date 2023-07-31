@@ -16,6 +16,7 @@
       :id="htmlId"
       :checked="Boolean(modelValue)"
       @change="(e) => $emit('update:modelValue', (e.target as HTMLInputElement).checked)"
+      v-bind="attrs"
     />
     <label class="block" :class="labelClasses" v-if="label" :for="htmlId">
       {{ label }}
@@ -23,7 +24,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, useAttrs } from 'vue'
 import { useId } from '../utils/useId'
 
 interface CheckboxProps {
@@ -39,6 +40,8 @@ const props = withDefaults(defineProps<CheckboxProps>(), {
   size: 'sm',
   padding: false,
 })
+
+const attrs = useAttrs()
 
 const htmlId = props.id ?? useId()
 

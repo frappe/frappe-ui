@@ -16,6 +16,7 @@
       :id="id"
       :value="modelValue"
       @change="handleChange"
+      v-bind="attrs"
     >
       <option
         v-for="option in selectOptions"
