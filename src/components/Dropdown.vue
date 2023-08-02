@@ -6,7 +6,7 @@
       :placement="popoverPlacement"
     >
       <template #target>
-        <MenuButton as="div">
+        <MenuButton as="div" class="w-full">
           <slot v-if="$slots.default" v-bind="{ open }" />
           <Button v-else :active="open" v-bind="button">
             {{ button ? button?.label || null : 'Options' }}
