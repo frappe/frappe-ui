@@ -215,10 +215,10 @@ export default {
       }
       return option?.label
     },
-    getValidOptions() {
+    getValidOptions(options) {
       // to make autocomplete's value work with primitive type options
       // i.e array of strings instead of array of objects
-      return this.options.map((option) => {
+      return options.map((option) => {
         if (typeof option === 'string') {
           return { label: option, value: option }
         }
