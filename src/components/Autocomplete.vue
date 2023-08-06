@@ -4,22 +4,25 @@
       <template #target="{ open: openPopover, togglePopover }">
         <div class="w-full">
           <button
-            class="flex h-7 w-full items-center justify-between rounded bg-gray-100 py-1 pl-3 pr-2 transition-colors hover:bg-gray-200 focus:ring-2 focus:ring-gray-400"
+            class="flex h-7 w-full items-center gap-2 justify-between rounded bg-gray-100 py-1 px-2 transition-colors hover:bg-gray-200 focus:ring-2 focus:ring-gray-400"
             :class="{ 'bg-gray-200': isComboboxOpen }"
             @click="() => togglePopover()"
           >
-            <span
-              class="overflow-hidden text-ellipsis whitespace-nowrap text-base leading-5"
-              v-if="selectedValue?.value"
-            >
-              {{ displayValue(selectedValue) }}
-            </span>
-            <span class="text-base leading-5 text-gray-500" v-else>
-              {{ placeholder || '' }}
-            </span>
+            <div class="flex items-center">
+              <slot name="prefix" />
+              <span
+                class="overflow-hidden text-ellipsis whitespace-nowrap text-base leading-5"
+                v-if="selectedValue?.value"
+              >
+                {{ displayValue(selectedValue) }}
+              </span>
+              <span class="text-base leading-5 text-gray-500" v-else>
+                {{ placeholder || '' }}
+              </span>
+            </div>
             <FeatherIcon
               name="chevron-down"
-              class="h-4 w-4 text-gray-500"
+              class="h-4 w-4 text-gray-600"
               aria-hidden="true"
             />
           </button>
@@ -80,7 +83,10 @@
                     { 'bg-gray-100': active },
                   ]"
                 >
-                  <slot name="prefix" v-bind="{ active, selected, option }" />
+                  <slot
+                    name="item-prefix"
+                    v-bind="{ active, selected, option }"
+                  />
                   {{ option.label }}
                 </li>
               </ComboboxOption>

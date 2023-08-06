@@ -15,7 +15,7 @@
         'h-4.5 w-4.5': size == 'xl' || size == '2xl',
       }"
     />
-    <slot name="prefix" v-else-if="$slots['prefix']">
+    <slot name="prefix" v-else-if="$slots['prefix'] || iconLeft">
       <FeatherIcon
         v-if="iconLeft"
         :name="iconLeft"

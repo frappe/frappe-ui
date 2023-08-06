@@ -8,6 +8,7 @@
     :rows="rows"
     @input="handleChange"
     @change="handleChange"
+    v-bind="attrs"
   />
 </template>
 

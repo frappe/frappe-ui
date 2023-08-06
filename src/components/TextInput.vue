@@ -19,6 +19,7 @@
       :value="modelValue"
       @input="handleChange"
       @change="handleChange"
+      v-bind="attrs"
     />
     <div
       :class="[
