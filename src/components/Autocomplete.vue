@@ -140,7 +140,7 @@ export default {
       return 'value' in this.$attrs
     },
     valueIsOption() {
-      // to make autocomplete's value work with primitive types like string, number, boolean
+      // to make autocomplete's value work with primitive types like string & number
       const val = this.valuePropPassed ? this.$attrs.value : this.modelValue
       return typeof val === 'object'
     },
