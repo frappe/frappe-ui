@@ -10,7 +10,7 @@
           >
             <span
               class="overflow-hidden text-ellipsis whitespace-nowrap text-base leading-5"
-              v-if="selectedValue"
+              v-if="selectedValue?.value"
             >
               {{ displayValue(selectedValue) }}
             </span>
@@ -133,16 +133,25 @@ export default {
     valuePropPassed() {
       return 'value' in this.$attrs
     },
+    valueIsOption() {
+      // to make autocomplete's value work with primitive types like string, number, boolean
+      const val = this.valuePropPassed ? this.$attrs.value : this.modelValue
+      return typeof val === 'object'
+    },
     selectedValue: {
       get() {
-        return this.valuePropPassed ? this.$attrs.value : this.modelValue
+        const val = this.valuePropPassed ? this.$attrs.value : this.modelValue
+        return this.valueIsOption ? val : this.findOption(val)
       },
       set(val) {
         this.query = ''
         if (val) {
           this.showOptions = false
         }
-        this.$emit(this.valuePropPassed ? 'change' : 'update:modelValue', val)
+        this.$emit(
+          this.valuePropPassed ? 'change' : 'update:modelValue',
+          this.valueIsOption ? val : val?.value
+        )
       },
     },
     groups() {
@@ -158,10 +167,13 @@ export default {
             key: i,
             group: group.group,
             hideLabel: group.hideLabel || false,
-            items: this.filterOptions(group.items),
+            items: this.filterOptions(this.getValidOptions(group.items)),
           }
         })
         .filter((group) => group.items.length > 0)
+    },
+    allOptions() {
+      return this.groups.flatMap((group) => group.items)
     },
   },
   watch: {
@@ -170,6 +182,12 @@ export default {
     },
   },
   methods: {
+    findOption(value) {
+      if (typeof value === 'object') {
+        return value
+      }
+      return this.allOptions.find((o) => o.value === value)
+    },
     filterOptions(options) {
       if (!this.query) {
         return options
@@ -186,11 +204,20 @@ export default {
     },
     displayValue(option) {
       if (typeof option === 'string') {
-        let allOptions = this.groups.flatMap((group) => group.items)
-        let selectedOption = allOptions.find((o) => o.value === option)
+        let selectedOption = this.allOptions.find((o) => o.value === option)
         return selectedOption?.label || option
       }
       return option?.label
+    },
+    getValidOptions() {
+      // to make autocomplete's value work with primitive type options
+      // i.e array of strings instead of array of objects
+      return this.options.map((option) => {
+        if (typeof option === 'string') {
+          return { label: option, value: option }
+        }
+        return option
+      })
     },
   },
 }
