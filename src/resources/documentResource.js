@@ -53,7 +53,7 @@ export function createDocumentResource(options, vm) {
     doctype: options.doctype,
     name: options.name,
     doc: null,
-    auto: options.auto || true,
+    auto: options.auto,
     get: createResource(
       {
         url: 'frappe.client.get',
