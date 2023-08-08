@@ -196,17 +196,19 @@ export default {
     },
     filterOptions(options) {
       if (!this.query) {
-        return options
+        return options.slice(0, 50)
       }
-      return options.filter((option) => {
-        let searchTexts = [option.label, option.value]
-        return searchTexts.some((text) =>
-          (text || '')
-            .toString()
-            .toLowerCase()
-            .includes(this.query.toLowerCase())
-        )
-      })
+      return options
+        .filter((option) => {
+          let searchTexts = [option.label, option.value]
+          return searchTexts.some((text) =>
+            (text || '')
+              .toString()
+              .toLowerCase()
+              .includes(this.query.toLowerCase())
+          )
+        })
+        .slice(0, 50)
     },
     displayValue(option) {
       if (typeof option === 'string') {
