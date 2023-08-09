@@ -49,11 +49,13 @@ export function createDocumentResource(options, vm) {
     },
   }
 
+  const autoPropIsPassed = options.auto !== undefined
+
   let out = reactive({
     doctype: options.doctype,
     name: options.name,
     doc: null,
-    auto: options.auto,
+    auto: autoPropIsPassed ? options.auto : true,
     get: createResource(
       {
         url: 'frappe.client.get',
