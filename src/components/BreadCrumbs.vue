@@ -40,6 +40,7 @@
 import { computed } from 'vue'
 import { RouteLocation, useRouter } from 'vue-router'
 import { useWindowSize } from '@vueuse/core'
+import Button from './Button.vue'
 import Dropdown from './Dropdown.vue'
 
 interface Item {
