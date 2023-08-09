@@ -40,7 +40,7 @@
 import { computed } from 'vue'
 import { RouteLocation, useRouter } from 'vue-router'
 import { useWindowSize } from '@vueuse/core'
-import { Dropdown } from 'frappe-ui'
+import Dropdown from './Dropdown.vue'
 
 interface Item {
   label: string
