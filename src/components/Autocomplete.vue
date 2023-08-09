@@ -2,31 +2,33 @@
   <Combobox v-model="selectedValue" nullable v-slot="{ open: isComboboxOpen }">
     <Popover class="w-full" v-model:show="showOptions">
       <template #target="{ open: openPopover, togglePopover }">
-        <div class="w-full">
-          <button
-            class="flex h-7 w-full items-center gap-2 justify-between rounded bg-gray-100 py-1 px-2 transition-colors hover:bg-gray-200 focus:ring-2 focus:ring-gray-400"
-            :class="{ 'bg-gray-200': isComboboxOpen }"
-            @click="() => togglePopover()"
-          >
-            <div class="flex items-center">
-              <slot name="prefix" />
-              <span
-                class="overflow-hidden text-ellipsis whitespace-nowrap text-base leading-5"
-                v-if="selectedValue"
-              >
-                {{ displayValue(selectedValue) }}
-              </span>
-              <span class="text-base leading-5 text-gray-500" v-else>
-                {{ placeholder || '' }}
-              </span>
-            </div>
-            <FeatherIcon
-              name="chevron-down"
-              class="h-4 w-4 text-gray-600"
-              aria-hidden="true"
-            />
-          </button>
-        </div>
+        <slot name="target" v-bind="{ open: openPopover, togglePopover }">
+          <div class="w-full">
+            <button
+              class="flex h-7 w-full items-center gap-2 justify-between rounded bg-gray-100 py-1 px-2 transition-colors hover:bg-gray-200 focus:ring-2 focus:ring-gray-400"
+              :class="{ 'bg-gray-200': isComboboxOpen }"
+              @click="() => togglePopover()"
+            >
+              <div class="flex items-center">
+                <slot name="prefix" />
+                <span
+                  class="overflow-hidden text-ellipsis whitespace-nowrap text-base leading-5"
+                  v-if="selectedValue"
+                >
+                  {{ displayValue(selectedValue) }}
+                </span>
+                <span class="text-base leading-5 text-gray-500" v-else>
+                  {{ placeholder || '' }}
+                </span>
+              </div>
+              <FeatherIcon
+                name="chevron-down"
+                class="h-4 w-4 text-gray-600"
+                aria-hidden="true"
+              />
+            </button>
+          </div>
+        </slot>
       </template>
       <template #body="{ isOpen }">
         <div v-show="isOpen">
