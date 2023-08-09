@@ -41,6 +41,7 @@
             >
               <div class="relative w-full">
                 <ComboboxInput
+                  ref="search"
                   class="form-input w-full"
                   type="text"
                   @change="
@@ -175,6 +176,13 @@ export default {
   watch: {
     query(q) {
       this.$emit('update:query', q)
+    },
+    showOptions(val) {
+      if (val) {
+        this.$nextTick(() => {
+          this.$refs.search.el.focus()
+        })
+      }
     },
   },
   methods: {
