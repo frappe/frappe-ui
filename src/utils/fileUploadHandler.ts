@@ -7,6 +7,7 @@ interface UploadOptions {
   fieldname?: string;
   method?: string;
   type?: string;
+  upload_endpoint?: string;
 }
 
 type EventListenerOption = 'start' | 'progress' | 'finish' | 'error';
@@ -87,8 +88,11 @@ class FileUploadHandler {
           reject(error);
         }
       };
-      xhr.open('POST', '/api/method/upload_file', true);
+
+      const uploadEndpoint = options.upload_endpoint || '/api/method/upload_file';
+      xhr.open('POST', uploadEndpoint, true);
       xhr.setRequestHeader('Accept', 'application/json');
+
       if (window.csrf_token && window.csrf_token !== '{{ csrf_token }}') {
         xhr.setRequestHeader('X-Frappe-CSRF-Token', window.csrf_token);
       }
