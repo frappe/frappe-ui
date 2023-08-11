@@ -2,7 +2,7 @@
   <SwitchGroup
     as="div"
     :tabindex="switchType == SwitchVariant.ONLY_LABEL ? 0 : -1"
-    @keyup.space.self="enabled = !enabled"
+    @keyup.space.self="emit('update:modelValue', !modelValue)"
     :class="switchGroupClasses"
   >
     <span :class="labelContainerClasses">
@@ -17,14 +17,19 @@
         {{ props.description }}
       </SwitchDescription>
     </span>
-    <Switch :disabled="props.disabled" v-model="enabled" :class="switchClasses">
+    <Switch
+      :disabled="props.disabled"
+      :model-value="modelValue"
+      :class="switchClasses"
+      @update:model-value="emit('update:modelValue', !modelValue)"
+    >
       <span aria-hidden="true" :class="switchCircleClasses"></span>
     </Switch>
   </SwitchGroup>
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed } from 'vue'
 import {
   Switch,
   SwitchDescription,
@@ -55,15 +60,6 @@ const props = withDefaults(defineProps<SwitchProps>(), {
 
 const emit = defineEmits(['change', 'update:modelValue'])
 
-// Handle the enabled state
-const enabled = ref(true)
-onMounted(() => {
-  enabled.value = props.modelValue as boolean
-})
-watch(enabled, (value) => {
-  emit('update:modelValue', value)
-})
-
 const switchType = computed(() => {
   if (props.label && props.description) {
     return SwitchVariant.WITH_LABEL_AND_DESCRIPTION
@@ -81,7 +77,7 @@ const switchClasses = computed(() => {
     'relative inline-flex flex-shrink-0 cursor-pointer rounded-full border-transparent transition-colors duration-100 ease-in-out items-center',
     'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-400',
     'disabled:cursor-not-allowed disabled:bg-gray-200',
-    enabled.value
+    props.modelValue
       ? 'bg-gray-900 enabled:hover:bg-gray-800 active:bg-gray-700 group-hover:enabled:bg-gray-800'
       : 'bg-gray-300 enabled:hover:bg-gray-400 active:bg-gray-500 group-hover:enabled:bg-gray-400',
     props.size === 'md' ? 'h-5 w-8 border-[3px]' : 'h-4 w-[26px] border-2',
@@ -93,10 +89,10 @@ const switchCircleClasses = computed(() => {
     'pointer-events-none inline-block transform rounded-full bg-white shadow ring-0 transition duration-100 ease-in-out',
     props.size === 'md' ? 'h-3.5 w-3.5' : 'h-3 w-3',
     props.size === 'md'
-      ? enabled.value
+      ? props.modelValue
         ? 'translate-x-3'
         : 'translate-x-0'
-      : enabled.value
+      : props.modelValue
       ? 'translate-x-2.5'
       : 'translate-x-0',
   ]
