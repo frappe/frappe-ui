@@ -39,6 +39,8 @@ export {
 export { default as Toast } from './components/Toast.vue'
 export { toast, Toasts } from './components/toast.js'
 export { default as Tooltip } from './components/Tooltip.vue'
+export { default as CommandPalette } from './components/CommandPalette/CommandPalette.vue'
+export { default as CommandPaletteItem } from './components/CommandPalette/CommandPaletteItem.vue'
 
 // directives
 export { default as onOutsideClickDirective } from './directives/onOutsideClick.js'
