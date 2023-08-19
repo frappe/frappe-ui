@@ -7,7 +7,7 @@
     >
       <template #body>
         <div>
-          <Combobox nullable @update:model-value="emit('select', $event)">
+          <Combobox nullable @update:model-value="select">
             <div class="relative">
               <div class="absolute inset-y-0 left-0 flex items-center pl-4.5">
                 <LucideSearch class="h-4 w-4" />
@@ -65,9 +65,8 @@ import {
   ComboboxOption,
   ComboboxOptions,
 } from '@headlessui/vue'
-import { useMagicKeys } from '@vueuse/core'
 import { LucideSearch } from 'lucide-vue-next'
-import { computed, watch } from 'vue'
+import { computed, onMounted, onBeforeUnmount } from 'vue'
 
 const emit = defineEmits(['update:show', 'update:searchQuery', 'select'])
 const props = defineProps({
@@ -76,19 +75,37 @@ const props = defineProps({
   groups: { type: Array, default: () => [] },
 })
 
-const keys = useMagicKeys()
-const cmdK = keys['Meta+K']
-const escape = keys['Escape']
-
 const show = computed({
   get: () => props.show,
   set: (value) => emit('update:show', value),
 })
-watch(cmdK, (pressed) => pressed && (show.value = true))
-watch(escape, (pressed) => pressed && show.value && (show.value = false))
 
 const searchQuery = computed({
   get: () => props.searchQuery,
   set: (value) => emit('update:searchQuery', value),
 })
+
+function select(item) {
+  emit('select', item)
+  show.value = false
+}
+
+function keydownWatcher(e) {
+  if (e.key === 'Escape' && show.value) {
+    show.value = false
+    e.preventDefault()
+  }
+
+  if (
+    e.key === 'k' &&
+    (e.ctrlKey || e.metaKey) &&
+    !e.target.classList.contains('ProseMirror')
+  ) {
+    show.value = true
+    e.preventDefault()
+  }
+}
+
+onMounted(() => window.addEventListener('keydown', keydownWatcher))
+onBeforeUnmount(() => window.removeEventListener('keydown', keydownWatcher))
 </script>
