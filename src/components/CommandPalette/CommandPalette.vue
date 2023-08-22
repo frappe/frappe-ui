@@ -10,7 +10,7 @@
           <Combobox nullable @update:model-value="select">
             <div class="relative">
               <div class="absolute inset-y-0 left-0 flex items-center pl-4.5">
-                <LucideSearch class="h-4 w-4" />
+                <FeatherIcon name="search" class="w-4 h-4" />
               </div>
               <ComboboxInput
                 placeholder="Search"
@@ -65,8 +65,7 @@ import {
   ComboboxOption,
   ComboboxOptions,
 } from '@headlessui/vue'
-import { LucideSearch } from 'lucide-vue-next'
-import { computed, onMounted, onBeforeUnmount } from 'vue'
+import { computed, onBeforeUnmount, onMounted } from 'vue'
 
 const emit = defineEmits(['update:show', 'update:searchQuery', 'select'])
 const props = defineProps({
