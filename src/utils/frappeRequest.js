@@ -71,6 +71,7 @@ export function frappeRequest(options) {
         let e = new Error(errorParts.join('\n'))
         e.exc_type = error.exc_type
         e.exc = exception
+        e.response = response
         e.status = errorResponse.status
         e.messages = error._server_messages
           ? JSON.parse(error._server_messages)
@@ -89,15 +90,7 @@ export function frappeRequest(options) {
             ? [error._error_message]
             : ['Internal Server Error']
         }
-
-        if (options.onError) {
-          options.onError({
-            response: errorResponse,
-            status: errorResponse.status,
-            error: e,
-          })
-        }
-
+        options.onError && options.onError(e)
         throw e
       }
     },

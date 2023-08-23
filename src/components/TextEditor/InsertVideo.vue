@@ -44,7 +44,7 @@
       />
     </template>
     <template #actions>
-      <Button appearance="primary" @click="addVideo(addVideoDialog.url)">
+      <Button variant="solid" @click="addVideo(addVideoDialog.url)">
         Insert Video
       </Button>
       <Button @click="reset">Cancel</Button>

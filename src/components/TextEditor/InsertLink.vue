@@ -6,7 +6,7 @@
     @after-leave="reset"
   >
     <template #body-content>
-      <Input
+      <FormControl
         type="text"
         label="URL"
         v-model="setLinkDialog.url"
@@ -14,7 +14,7 @@
       />
     </template>
     <template #actions>
-      <Button appearance="primary" @click="setLink(setLinkDialog.url)">
+      <Button variant="solid" @click="setLink(setLinkDialog.url)">
         Save
       </Button>
     </template>

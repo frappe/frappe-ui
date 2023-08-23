@@ -159,7 +159,7 @@ export default {
     popupTransition() {
       let templates = {
         default: {
-          enterActiveClass: 'transition duration-200 ease-out',
+          enterActiveClass: 'transition duration-150 ease-out',
           enterFromClass: 'translate-y-1 opacity-0',
           enterToClass: 'translate-y-0 opacity-100',
           leaveActiveClass: 'transition duration-150 ease-in',

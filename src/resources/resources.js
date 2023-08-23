@@ -1,5 +1,6 @@
 import { reactive } from 'vue'
-import { debounce, request } from '../index'
+import debounce from '../utils/debounce'
+import { request } from '../utils/request'
 import { getLocal, saveLocal } from './local'
 import { getConfig } from '../utils/config'
 

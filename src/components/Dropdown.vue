@@ -1,6 +1,10 @@
 <template>
   <Menu as="div" class="relative inline-block text-left" v-slot="{ open }">
-    <Popover :transition="dropdownTransition" :show="open">
+    <Popover
+      :transition="dropdownTransition"
+      :show="open"
+      :placement="popoverPlacement"
+    >
       <template #target>
         <MenuButton as="div">
           <slot v-if="$slots.default" v-bind="{ open }" />
@@ -12,17 +16,17 @@
 
       <template #body>
         <MenuItems
-          class="min-w-40 mt-2 divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+          class="mt-2 min-w-40 divide-y divide-gray-100 rounded-lg bg-white shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
           :class="{
             'left-0 origin-top-left': placement == 'left',
             'right-0 origin-top-right': placement == 'right',
             'inset-x-0 origin-top': placement == 'center',
           }"
         >
-          <div v-for="group in groups" :key="group.key" class="px-1 py-1">
+          <div v-for="group in groups" :key="group.key" class="p-1.5">
             <div
               v-if="group.group && !group.hideLabel"
-              class="px-2 py-1 text-xs font-semibold uppercase tracking-wider text-gray-500"
+              class="flex h-7 items-center px-2 text-sm font-medium text-gray-500"
             >
               {{ group.group }}
             </div>
@@ -39,19 +43,19 @@
               <button
                 v-else
                 :class="[
-                  active ? 'bg-gray-100' : 'text-gray-900',
-                  'group flex w-full items-center rounded-md px-2 py-2 text-sm',
+                  active ? 'bg-gray-100' : 'text-gray-800',
+                  'group flex h-7 w-full items-center rounded px-2 text-base',
                 ]"
                 @click="item.onClick"
               >
                 <FeatherIcon
                   v-if="item.icon && typeof item.icon === 'string'"
                   :name="item.icon"
-                  class="mr-2 h-4 w-4 flex-shrink-0 text-gray-500"
+                  class="mr-2 h-4 w-4 flex-shrink-0 text-gray-700"
                   aria-hidden="true"
                 />
                 <component
-                  class="mr-2 h-4 w-4 flex-shrink-0 text-gray-500"
+                  class="mr-2 h-4 w-4 flex-shrink-0 text-gray-700"
                   v-else-if="item.icon"
                   :is="item.icon"
                 />
@@ -100,7 +104,7 @@ export default {
   },
   methods: {
     normalizeDropdownItem(option) {
-      let onClick = option.handler || null
+      let onClick = option.onClick || null
       if (!onClick && option.route && this.$router) {
         onClick = () => this.$router.push(option.route)
       }
@@ -144,6 +148,12 @@ export default {
         leaveFromClass: 'transform scale-100 opacity-100',
         leaveToClass: 'transform scale-95 opacity-0',
       }
+    },
+    popoverPlacement() {
+      if (this.placement === 'left') return 'bottom-start'
+      if (this.placement === 'right') return 'bottom-end'
+      if (this.placement === 'center') return 'bottom-center'
+      return 'bottom'
     },
   },
 }
