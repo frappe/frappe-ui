@@ -289,6 +289,7 @@ export function updateRowInListResource(doctype, doc) {
     if (resource.originalData) {
       for (let row of resource.originalData) {
         if (row.name && row.name == doc.name) {
+          delete row._previousData
           let previousRowData = JSON.stringify(row)
           for (let key in row) {
             if (key in doc) {
