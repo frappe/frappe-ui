@@ -46,7 +46,7 @@ interface TextInputProps {
   placeholder?: string
   disabled?: boolean
   id?: string
-  modelValue?: string
+  modelValue?: string | number
   debounce?: number
 }
 
