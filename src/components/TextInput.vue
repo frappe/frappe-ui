@@ -11,6 +11,7 @@
       <slot name="prefix"> </slot>
     </div>
     <input
+      ref="inputRef"
       :type="type"
       :placeholder="placeholder"
       :class="inputClasses"
@@ -35,7 +36,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, useSlots, useAttrs } from 'vue'
+import { computed, useSlots, useAttrs, ref } from 'vue'
 import type { TextInputTypes } from './types/TextInput'
 import debounce from '../utils/debounce'
 
@@ -60,6 +61,10 @@ const emit = defineEmits(['update:modelValue'])
 
 const slots = useSlots()
 const attrs = useAttrs()
+
+const inputRef = ref<HTMLInputElement | null>(null)
+
+defineExpose({ el: inputRef })
 
 const textColor = computed(() => {
   return props.disabled ? 'text-gray-600' : 'text-gray-800'
