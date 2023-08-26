@@ -13,6 +13,11 @@
             {{ text }}
           </div>
         </div>
+        <div
+          v-else-if="html"
+          class="rounded bg-gray-900 px-2 py-1 text-xs text-white shadow-xl"
+          v-html="html"
+        />
       </slot>
     </template>
   </Popover>
@@ -30,6 +35,10 @@ export default {
       default: 'top',
     },
     text: {
+      type: String,
+      default: null,
+    },
+    html: {
       type: String,
       default: null,
     },
