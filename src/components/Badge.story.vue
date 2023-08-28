@@ -1,29 +1,24 @@
 <script setup lang="ts">
 import { reactive } from 'vue'
-import Button from './Button.vue'
+import Badge from './Badge.vue'
 const state = reactive({
   theme: 'gray',
   size: 'sm',
-  label: 'Button',
-  loading: false,
-  loadingText: null,
-  disabled: false,
-  link: null,
+  label: 'Badge',
 })
 const variants = ['solid', 'subtle', 'outline', 'ghost']
-const themes = ['gray', 'blue', 'green', 'red']
-const sizes = ['sm', 'md', 'lg', 'xl', '2xl']
+const themes = ['gray', 'blue', 'green', 'orange', 'red']
+const sizes = ['sm', 'md', 'lg']
 </script>
 
 <template>
   <Story :layout="{ type: 'grid', width: 300 }">
     <Variant v-for="variant in variants" :key="variant" :title="variant">
-      <Button :variant="variant" v-bind="state">{{ state.label }}</Button>
+      <Badge :variant="variant" v-bind="state">{{ state.label }}</Badge>
     </Variant>
 
     <template #controls>
       <HstText v-model="state.label" title="Content" />
-      <HstCheckbox v-model="state.disabled" title="Disabled" />
       <HstSelect v-model="state.theme" :options="themes" title="Theme" />
       <HstSelect v-model="state.size" :options="sizes" title="Size" />
     </template>
