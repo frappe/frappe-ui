@@ -13,7 +13,7 @@ const options = [
 ]
 </script>
 <template>
-  <Story :layout="{ width: 500, type: 'grid' }">
+  <Story :layout="{ width: 500, type: 'grid' }" autoPropsDisabled>
     <div class="p-2">
       <Autocomplete
         :options="options"
