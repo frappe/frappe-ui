@@ -13,7 +13,7 @@ export default defineConfig({
     defaultColorScheme: 'light',
     hideColorSchemeSwitch: true,
     logo: {
-      square: './frappe-ui-logo-200.png',
+      square: './frappe-ui-only-logo.png',
       light: './frappe-ui-logo-200.png',
       dark: './frappe-ui-logo-200.png',
     },
