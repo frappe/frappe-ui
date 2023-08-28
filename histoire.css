@@ -1,0 +1,18 @@
+html,
+body {
+  font-family: 'Inter', sans-serif;
+}
+@supports (font-variation-settings: normal) {
+  html,
+  body {
+    font-family: 'InterVar', sans-serif;
+    font-optical-sizing: auto;
+  }
+}
+
+input.htw-text-inherit {
+  border-radius: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 100%;
+  line-height: normal;
+}
