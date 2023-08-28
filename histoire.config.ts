@@ -22,4 +22,17 @@ export default defineConfig({
       primary: fullConfig.theme.colors.orange,
     },
   },
+  tree: {
+    groups: [
+      {
+        id: 'top',
+        title: '',
+      },
+      {
+        id: 'components',
+        title: 'Components',
+        include: (file) => true,
+      },
+    ],
+  },
 })
