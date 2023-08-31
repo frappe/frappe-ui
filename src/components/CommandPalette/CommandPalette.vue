@@ -10,7 +10,7 @@
           <Combobox nullable @update:model-value="select">
             <div class="relative">
               <div class="absolute inset-y-0 left-0 flex items-center pl-4.5">
-                <FeatherIcon name="search" class="w-4 h-4" />
+                <FeatherIcon name="search" class="h-4 w-4" />
               </div>
               <ComboboxInput
                 placeholder="Search"

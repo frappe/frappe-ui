@@ -1,19 +1,19 @@
 <template>
-  <div id="content" class="flex flex-col w-full overflow-x-auto flex-1">
-    <div class="flex flex-col overflow-y-hidden w-max min-w-full">
+  <div id="content" class="flex w-full flex-1 flex-col overflow-x-auto">
+    <div class="flex w-max min-w-full flex-col overflow-y-hidden">
       <div
         id="list-header"
-        class="flex space-x-4 items-center mx-2 py-2 border-b"
+        class="mx-2 flex items-center space-x-4 border-b py-2"
       >
         <Checkbox
-          class="duration-300 cursor-pointer"
+          class="cursor-pointer duration-300"
           :modelValue="state.allRowsSelected"
           @click.stop="state.toggleAllRows(!allRowsSelected)"
         />
         <div
           v-for="column in props.columns"
           :key="column"
-          class="text-sm text-gray-600 flex-1"
+          class="flex-1 text-sm text-gray-600"
           :class="column.class"
         >
           {{ column.label }}
@@ -43,7 +43,7 @@
           class="fixed inset-x-0 bottom-6 mx-auto w-max text-base"
         >
           <div
-            class="w-[596px] flex items-center space-x-3 rounded-lg bg-white px-4 py-2 shadow-2xl"
+            class="flex w-[596px] items-center space-x-3 rounded-lg bg-white px-4 py-2 shadow-2xl"
           >
             <div
               class="flex flex-1 items-center space-x-3 border-r border-gray-300 text-gray-900"

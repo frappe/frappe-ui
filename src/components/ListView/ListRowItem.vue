@@ -2,7 +2,7 @@
 
 <template>
   <div
-    class="flex items-center space-x-2 text-base truncate flex-1 min-h-[1.5rem]"
+    class="flex min-h-[1.5rem] flex-1 items-center space-x-2 truncate text-base"
     :class="$attrs.class"
   >
     <slot> </slot>

@@ -12,7 +12,7 @@ const props = defineProps({
 <template>
   <component
     :is="as"
-    class="flex space-x-4 items-center mx-2 py-2 border-b cursor-pointer transition-all duration-300 ease-in-out"
+    class="mx-2 flex cursor-pointer items-center space-x-4 border-b py-2 transition-all duration-300 ease-in-out"
     :class="
       list.selections.has(row.name)
         ? 'bg-gray-100 hover:bg-gray-200'
@@ -22,7 +22,7 @@ const props = defineProps({
     <Checkbox
       :modelValue="list.selections.has(row.name)"
       @click.stop="list.toggleSelection(row.name)"
-      class="duration-300 cursor-pointer"
+      class="cursor-pointer duration-300"
     />
     <slot></slot>
   </component>
