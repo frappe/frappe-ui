@@ -36,6 +36,9 @@ export {
   TextEditorFloatingMenu,
   TextEditorContent,
 } from './components/TextEditor'
+export { default as List } from './components/ListView/ListView.vue'
+export { default as ListRow } from './components/ListView/ListRow.vue'
+export { default as ListRowItem } from './components/ListView/ListRowItem.vue'
 export { default as Toast } from './components/Toast.vue'
 export { toast, Toasts } from './components/toast.js'
 export { default as Tooltip } from './components/Tooltip.vue'
