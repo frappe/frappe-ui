@@ -196,7 +196,7 @@ export default {
         this.dialogActions = actions.map((action) => {
           let _action = {
             ...action,
-            loading: false,
+            loading: action.loading || false,
             _onClick: action.onClick,
             onClick: () => this.handleAction(_action),
           }
