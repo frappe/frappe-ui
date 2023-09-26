@@ -11,7 +11,7 @@
       >
         <slot name="tab" v-bind="{ tab, selected }">
           <button
-            class="-mb-[1px] flex items-center gap-2 border-b border-transparent py-2.5 text-base text-gray-600 duration-300 ease-in-out hover:border-gray-400 hover:text-gray-900"
+            class="-mb-px flex items-center gap-2 border-b border-transparent py-2.5 text-base text-gray-600 duration-300 ease-in-out hover:border-gray-400 hover:text-gray-900"
             :class="{ 'text-gray-900': selected }"
           >
             <component v-if="tab.icon" :is="tab.icon" class="h-5" />
@@ -21,7 +21,7 @@
       </Tab>
       <div
         ref="indicator"
-        class="absolute -bottom-[1px] h-[1px] w-[82px] bg-gray-900"
+        class="absolute -bottom-px h-px bg-gray-900"
         :style="{ left: `${indicatorLeftValue}px` }"
       />
     </TabList>
