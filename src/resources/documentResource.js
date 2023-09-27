@@ -1,4 +1,4 @@
-import { reactive } from 'vue'
+import { reactive, watch } from 'vue'
 import { getCacheKey, createResource } from './resources'
 import {
   updateRowInListResource,
@@ -39,6 +39,7 @@ export function createDocumentResource(options, vm) {
     },
     onSuccess(data) {
       out.doc = transform(data)
+      out.originalDoc = JSON.parse(JSON.stringify(out.doc))
       options.setValue?.onSuccess?.call(vm, data)
     },
     onError(error) {
@@ -55,6 +56,8 @@ export function createDocumentResource(options, vm) {
     doctype: options.doctype,
     name: options.name,
     doc: null,
+    originalDoc: null,
+    isDirty: false,
     auto: autoPropIsPassed ? options.auto : true,
     get: createResource(
       {
@@ -68,6 +71,7 @@ export function createDocumentResource(options, vm) {
         onSuccess(data) {
           saveLocal(cacheKey, data)
           out.doc = transform(data)
+          out.originalDoc = JSON.parse(JSON.stringify(out.doc))
           options.onSuccess?.call(vm, out.doc)
         },
         onError: options.onError,
@@ -79,6 +83,22 @@ export function createDocumentResource(options, vm) {
       {
         ...setValueOptions,
         debounce: options.debounce || 500,
+      },
+      vm
+    ),
+    save: createResource(
+      {
+        ...setValueOptions,
+        makeParams() {
+          let values = JSON.parse(JSON.stringify(out.doc))
+          delete values.doctype
+          delete values.name
+          return {
+            doctype: out.doctype,
+            name: out.name,
+            fieldname: values,
+          }
+        },
       },
       vm
     ),
@@ -104,6 +124,17 @@ export function createDocumentResource(options, vm) {
     reload,
     setDoc,
   })
+
+  // keep track of isDirty as doc changes
+  watch(
+    () => out.doc,
+    () => {
+      out.isDirty = JSON.stringify(out.doc) !== JSON.stringify(out.originalDoc)
+    },
+    {
+      deep: true,
+    }
+  )
 
   for (let methodKey in options.whitelistedMethods) {
     let methodOptions = options.whitelistedMethods[methodKey]

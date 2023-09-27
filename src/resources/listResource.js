@@ -2,6 +2,7 @@ import { reactive } from 'vue'
 import { getCacheKey, createResource } from './resources'
 import { saveLocal, getLocal } from './local'
 import { onDocUpdate } from './realtime'
+import { getConfig } from '../utils/config'
 
 let listCache = reactive({})
 let resourcesByDocType = {}
@@ -21,6 +22,8 @@ export function createListResource(options, vm) {
       return cachedResource
     }
   }
+
+  let defaultListUrl = getConfig('defaultListUrl') || 'frappe.client.get_list'
 
   let out = reactive({
     doctype: options.doctype,
@@ -42,7 +45,7 @@ export function createListResource(options, vm) {
     auto: options.auto,
     list: createResource(
       {
-        url: options.url || 'frappe.client.get_list',
+        url: options.url || defaultListUrl,
         makeParams() {
           return {
             doctype: out.doctype,
