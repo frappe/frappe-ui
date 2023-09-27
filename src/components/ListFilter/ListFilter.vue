@@ -16,8 +16,8 @@
       <div class="my-2 rounded-lg border border-gray-100 bg-white shadow-xl">
         <div class="min-w-[400px] p-2">
           <div
-            v-if="filters.size"
-            v-for="(f, i) in filters"
+            v-if="filters.length"
+            v-for="(filter, i) in filters"
             :key="i"
             id="filter-list"
             class="mb-3 flex items-center justify-between gap-2"
@@ -30,35 +30,41 @@
               </div>
               <div id="fieldname" class="!min-w-[140px] flex-1">
                 <Autocomplete
-                  :value="f.field.fieldname"
+                  :value="filter.fieldname"
                   :options="fields"
-                  @change="(e) => updateFilter(e, i)"
+                  @change="filter.fieldname = $event.value"
                   placeholder="Filter by..."
                 />
               </div>
               <div id="operator" class="!min-w-[140px] flex-shrink-0">
                 <FormControl
                   type="select"
-                  v-model="f.operator"
-                  :options="getOperators(f.field.fieldtype)"
+                  :modelValue="filter.operator"
+                  @update:modelValue="filter.operator = $event.value"
+                  :options="getOperators(filter.field.fieldtype)"
                   placeholder="Operator"
                 />
               </div>
               <div id="value" class="!min-w-[140px] flex-1">
                 <SearchComplete
                   v-if="
-                    typeLink.includes(f.field.fieldtype) &&
-                    f.operator.includes('equals')
+                    typeLink.includes(filter.field.fieldtype) &&
+                    ['=', '!='].includes(filter.operator)
                   "
-                  :doctype="f.field.options"
-                  :value="f.value"
-                  @change="(v) => (f.value = v.value)"
+                  :doctype="filter.field.options"
+                  :value="filter.value"
+                  @change="filter.value = $event.value"
                   placeholder="Value"
                 />
                 <component
                   v-else
-                  :is="getValueSelector(f.field.fieldtype, f.field.options)"
-                  v-model="f.value"
+                  :is="
+                    getValueSelector(
+                      filter.field.fieldtype,
+                      filter.field.options
+                    )
+                  "
+                  v-model="filter.value"
                   placeholder="Value"
                 />
               </div>
@@ -77,7 +83,7 @@
             <Autocomplete
               value=""
               :options="fields"
-              @change="(e) => setfilter(e)"
+              @change="(field) => addFilter(field.value)"
               placeholder="Filter by..."
             >
               <template #target="{ togglePopover }">
@@ -94,11 +100,11 @@
               </template>
             </Autocomplete>
             <Button
-              v-if="filters.size"
+              v-if="filters.length"
               class="!text-gray-600"
               variant="ghost"
               label="Clear all filter"
-              @click="clearfilter(close)"
+              @click="filters = []"
             />
           </div>
         </div>
@@ -106,9 +112,10 @@
     </template>
   </NestedPopover>
 </template>
+
 <script setup>
-import { Autocomplete, FeatherIcon, FormControl, debounce } from 'frappe-ui'
-import { computed, h, ref, watch } from 'vue'
+import { Autocomplete, FeatherIcon, FormControl } from 'frappe-ui'
+import { computed, h } from 'vue'
 import FilterIcon from './FilterIcon.vue'
 import NestedPopover from './NestedPopover.vue'
 import SearchComplete from './SearchComplete.vue'
@@ -127,8 +134,12 @@ const typeString = [
   'Code',
 ]
 
-const emits = defineEmits(['change'])
+const emits = defineEmits(['update:modelValue'])
 const props = defineProps({
+  modelValue: {
+    type: Object,
+    default: () => ({}),
+  },
   docfields: {
     type: Array,
     default: () => [],
@@ -158,21 +169,42 @@ const fields = computed(() => {
   return fields
 })
 
-const filters = ref(new Set())
-const filtersDict = computed(() => makeFiltersDict(filters.value))
-watch(
-  filters,
-  debounce(() => emits('change', filtersDict.value), 300),
-  { deep: true }
-)
+const filters = computed({
+  get: () => makeFiltersList(props.modelValue),
+  set: (value) => emits('update:modelValue', makeFiltersDict(value)),
+})
+
+function makeFiltersList(filtersDict) {
+  return Object.entries(filtersDict).map(([fieldname, [operator, value]]) => {
+    const field = getField(fieldname)
+    return {
+      fieldname,
+      operator,
+      value,
+      field,
+    }
+  })
+}
+
+function getField(fieldname) {
+  return fields.value.find((f) => f.fieldname === fieldname)
+}
+
+function makeFiltersDict(filtersList) {
+  return filtersList.reduce((acc, filter) => {
+    const { fieldname, operator, value } = filter
+    acc[fieldname] = [operator, value]
+    return acc
+  }, {})
+}
 
 function getOperators(fieldtype) {
   let options = []
   if (typeString.includes(fieldtype) || typeLink.includes(fieldtype)) {
     options.push(
       ...[
-        { label: 'Equals', value: 'equals' },
-        { label: 'Not Equals', value: 'not equals' },
+        { label: 'Equals', value: '=' },
+        { label: 'Not Equals', value: '!=' },
         { label: 'Like', value: 'like' },
         { label: 'Not Like', value: 'not like' },
       ]
@@ -185,21 +217,21 @@ function getOperators(fieldtype) {
         { label: '>', value: '>' },
         { label: '<=', value: '<=' },
         { label: '>=', value: '>=' },
-        { label: 'Equals', value: 'equals' },
-        { label: 'Not Equals', value: 'not equals' },
+        { label: 'Equals', value: '=' },
+        { label: 'Not Equals', value: '!=' },
       ]
     )
   }
   if (typeSelect.includes(fieldtype)) {
     options.push(
       ...[
-        { label: 'Equals', value: 'equals' },
-        { label: 'Not Equals', value: 'not equals' },
+        { label: 'Equals', value: '=' },
+        { label: 'Not Equals', value: '!=' },
       ]
     )
   }
   if (typeCheck.includes(fieldtype)) {
-    options.push(...[{ label: 'Equals', value: 'equals' }])
+    options.push(...[{ label: 'Equals', value: '=' }])
   }
   return options
 }
@@ -211,7 +243,7 @@ function getDefaultOperator(fieldtype) {
     typeCheck.includes(fieldtype) ||
     typeNumber.includes(fieldtype)
   ) {
-    return 'equals'
+    return '='
   }
   return 'like'
 }
@@ -222,10 +254,7 @@ function getValueSelector(fieldtype, options) {
       fieldtype == 'Check' ? ['Yes', 'No'] : getSelectOptions(options)
     return h(FormControl, {
       type: 'select',
-      options: _options.map((o) => ({
-        label: o,
-        value: o,
-      })),
+      options: _options,
     })
   } else {
     return h(FormControl, { type: 'text' })
@@ -246,81 +275,18 @@ function getSelectOptions(options) {
   return options.split('\n')
 }
 
-function setfilter(data) {
-  if (!data) return
-  filters.value.add({
-    field: {
-      label: data.label,
-      fieldname: data.value,
-      fieldtype: data.fieldtype,
-      options: data.options,
-    },
-    fieldname: data.value,
-    operator: getDefaultOperator(data.fieldtype),
-    value: getDefaultValue(data),
-  })
-}
-
-function updateFilter(data, index) {
-  filters.value.delete(Array.from(filters.value)[index])
-  if (!data) return
-  filters.value.add({
-    fieldname: data.value,
-    operator: getDefaultOperator(data.fieldtype),
-    value: getDefaultValue(data),
-    field: {
-      label: data.label,
-      fieldname: data.value,
-      fieldtype: data.fieldtype,
-      options: data.options,
-    },
-  })
+function addFilter(fieldname) {
+  const field = getField(fieldname)
+  const filter = {
+    fieldname,
+    operator: getDefaultOperator(field.fieldtype),
+    value: getDefaultValue(field),
+    field,
+  }
+  filters.value = [...filters.value, filter]
 }
 
 function removeFilter(index) {
-  filters.value.delete(Array.from(filters.value)[index])
-}
-
-function clearfilter(close) {
-  filters.value.clear()
-  close()
-}
-
-function makeFiltersDict(filters) {
-  const operatorMap = {
-    equals: '=',
-    'not equals': '!=',
-    yes: true,
-    no: false,
-    like: 'LIKE',
-    'not like': 'NOT LIKE',
-    '>': '>',
-    '<': '<',
-    '>=': '>=',
-    '<=': '<=',
-  }
-  const filtersDict = {}
-  for (const filter of filters) {
-    const { fieldname, operator, value } = filter
-    if (value) {
-      switch (operator) {
-        case 'equals':
-        case 'not equals':
-          filtersDict[fieldname] = [operatorMap[operator], value]
-          break
-        case 'like':
-        case 'not like':
-          filtersDict[fieldname] = [operatorMap[operator], `%${value}%`]
-          break
-        case '>':
-        case '<':
-        case '>=':
-        case '<=':
-          filtersDict[fieldname] = [operatorMap[operator], value]
-          break
-      }
-    }
-  }
-  return filtersDict
+  filters.value = filters.value.filter((_, i) => i !== index)
 }
 </script>
