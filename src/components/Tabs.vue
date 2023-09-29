@@ -4,7 +4,7 @@
     class="flex flex-1 flex-col"
     :defaultIndex="changedIndex"
     :selectedIndex="changedIndex"
-    @change="onTabChange"
+    @change="(idx) => (changedIndex = idx)"
   >
     <TabList class="relative flex items-center gap-6 border-b pl-5">
       <Tab
@@ -46,22 +46,29 @@
 <script setup>
 import { TabGroup, TabList, Tab, TabPanels, TabPanel } from '@headlessui/vue'
 import { TransitionPresets, useTransition } from '@vueuse/core'
-import { ref, watch, nextTick } from 'vue'
+import { ref, watch, computed, onMounted, nextTick } from 'vue'
 
 const props = defineProps({
   tabs: {
     type: Array,
     required: true,
   },
+  modelValue: {
+    type: Number,
+    default: 0,
+  },
 })
 
-const changedIndex = defineModel({
-  type: Number,
-  default: 0,
+const emit = defineEmits(['update:modelValue'])
+
+const changedIndex = computed({
+  get: () => props.modelValue,
+  set: (index) => emit('update:modelValue', index),
 })
 
 const tabRef = ref([])
 const indicator = ref(null)
+const tabsLength = ref(props.tabs?.length)
 
 let indicatorLeft = ref(0)
 
@@ -70,17 +77,21 @@ const indicatorLeftValue = useTransition(indicatorLeft, {
   ease: TransitionPresets.easeOutCubic,
 })
 
-function onTabChange(index) {
+function moveIndicator(index) {
+  if (index >= tabsLength.value) {
+    index = tabsLength.value - 1
+  }
   const selectedTab = tabRef.value[index].el
   indicator.value.style.width = `${selectedTab.offsetWidth}px`
   indicatorLeft.value = selectedTab.offsetLeft
 }
 
-watch(
-  changedIndex,
-  (index) => {
-    index && nextTick(() => onTabChange(index))
-  },
-  { immediate: true }
-)
+watch(changedIndex, (index) => {
+  if (index >= tabsLength.value) {
+    changedIndex.value = tabsLength.value - 1
+  }
+  nextTick(() => moveIndicator(index))
+})
+
+onMounted(() => moveIndicator(changedIndex.value))
 </script>
