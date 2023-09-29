@@ -1,5 +1,11 @@
 <template>
-  <TabGroup as="div" class="flex flex-1 flex-col" @change="onTabChange">
+  <TabGroup
+    as="div"
+    class="flex flex-1 flex-col"
+    :defaultIndex="changedIndex"
+    :selectedIndex="changedIndex"
+    @change="onTabChange"
+  >
     <TabList class="relative flex items-center gap-6 border-b pl-5">
       <Tab
         ref="tabRef"
@@ -40,13 +46,18 @@
 <script setup>
 import { TabGroup, TabList, Tab, TabPanels, TabPanel } from '@headlessui/vue'
 import { TransitionPresets, useTransition } from '@vueuse/core'
-import { ref, onMounted } from 'vue'
+import { ref, watch, nextTick } from 'vue'
 
 const props = defineProps({
   tabs: {
     type: Array,
     required: true,
   },
+})
+
+const changedIndex = defineModel({
+  type: Number,
+  default: 0,
 })
 
 const tabRef = ref([])
@@ -65,5 +76,11 @@ function onTabChange(index) {
   indicatorLeft.value = selectedTab.offsetLeft
 }
 
-onMounted(() => onTabChange(0))
+watch(
+  changedIndex,
+  (index) => {
+    index && nextTick(() => onTabChange(index))
+  },
+  { immediate: true }
+)
 </script>
