@@ -9,7 +9,7 @@
     >
       <slot name="prefix"></slot>
     </div>
-    <slot>{{ props.label }}</slot>
+    <slot>{{ props.label?.toString() }}</slot>
     <div
       :class="[props.size == 'lg' ? 'max-h-6' : 'max-h-4']"
       v-if="$slots.suffix"
@@ -22,11 +22,15 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 
+interface Label {
+  toString(): string
+}
+
 interface BadgeProps {
   theme?: 'gray' | 'blue' | 'green' | 'orange' | 'red'
   size?: 'sm' | 'md' | 'lg'
   variant?: 'solid' | 'subtle' | 'outline' | 'ghost'
-  label?: string
+  label?: Label | string | number
 }
 
 const props = withDefaults(defineProps<BadgeProps>(), {
