@@ -9,7 +9,7 @@
   >
     <div
       v-if="selections.size"
-      class="fixed inset-x-0 bottom-6 mx-auto w-max text-base"
+      class="absolute inset-x-0 bottom-6 mx-auto w-max text-base"
     >
       <div
         class="flex min-w-[596px] items-center space-x-3 rounded-lg bg-white px-4 py-2 shadow-2xl"
