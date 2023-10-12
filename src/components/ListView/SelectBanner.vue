@@ -12,7 +12,8 @@
       class="fixed inset-x-0 bottom-6 mx-auto w-max text-base"
     >
       <div
-        class="flex w-[596px] items-center space-x-3 rounded-lg bg-white px-4 py-2 shadow-2xl"
+        class="flex min-w-[596px] items-center space-x-3 rounded-lg bg-white px-4 py-2 shadow-2xl"
+        :class="$attrs.class"
       >
         <div
           class="flex flex-1 justify-between border-r border-gray-300 text-gray-900"
@@ -50,6 +51,10 @@
 import Checkbox from '../Checkbox.vue'
 import Button from '../Button.vue'
 import { computed, inject } from 'vue'
+
+defineOptions({
+  inheritAttrs: false,
+})
 
 let selectedText = computed(() => {
   let title = selections.size === 1 ? list.singular_label : list.plural_label
