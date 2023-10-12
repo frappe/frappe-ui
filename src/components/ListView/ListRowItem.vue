@@ -2,7 +2,7 @@
   <Tooltip
     :text="tooltipText"
     class="flex items-center space-x-2"
-    :class="align == 'text-right' ? 'justify-end' : ''"
+    :class="alignmentMap[align]"
   >
     <slot name="prefix" />
     <slot v-bind="{ label }">
@@ -14,7 +14,7 @@
   </Tooltip>
 </template>
 <script setup>
-import { dateFormat, timeAgo, htmlToText } from './utils'
+import { dateFormat, timeAgo, htmlToText, alignmentMap } from './utils'
 import Tooltip from '../Tooltip.vue'
 import { computed } from 'vue'
 

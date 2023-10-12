@@ -11,7 +11,7 @@
       class="flex items-center space-x-2 text-base text-gray-600"
       :class="[
         customWidth(column.size) ? '' : getWidth(column.size),
-        column.align,
+        alignmentMap[column.align],
       ]"
       :style="customWidth(column.size) ? { width: column.size } : ''"
     >
@@ -26,7 +26,7 @@
 
 <script setup>
 import Checkbox from '../Checkbox.vue'
-import { getWidth, customWidth } from './utils'
+import { getWidth, customWidth, alignmentMap } from './utils'
 import { inject } from 'vue'
 
 const { columns, allRowsSelected, toggleAllRows } = inject('list')

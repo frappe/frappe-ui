@@ -38,3 +38,12 @@ export function htmlToText(html) {
   div.innerHTML = html
   return div.textContent || div.innerText || ''
 }
+
+export const alignmentMap = {
+  left: 'justify-start',
+  start: 'justify-start',
+  center: 'justify-center',
+  middle: 'justify-center',
+  right: 'justify-end',
+  end: 'justify-end',
+}
