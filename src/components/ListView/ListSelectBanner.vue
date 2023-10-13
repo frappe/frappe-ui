@@ -15,33 +15,50 @@
         class="flex min-w-[596px] items-center space-x-3 rounded-lg bg-white px-4 py-2 shadow-2xl"
         :class="$attrs.class"
       >
-        <div
-          class="flex flex-1 justify-between border-r border-gray-300 text-gray-900"
+        <slot
+          v-bind="{
+            selections,
+            allRowsSelected,
+            selectAll: () => toggleAllRows(true),
+            unselectAll: () => toggleAllRows(false),
+          }"
         >
-          <div class="flex items-center space-x-3">
-            <Checkbox
-              :modelValue="true"
-              :disabled="true"
-              class="text-gray-900"
-            />
-            <div>{{ selectedText }}</div>
-          </div>
-          <div class="mr-3">
-            <slot></slot>
-          </div>
-        </div>
-        <div class="flex items-center space-x-1">
-          <Button
-            class="w- text-gray-700"
-            :disabled="allRowsSelected"
-            :class="allRowsSelected ? 'cursor-not-allowed' : ''"
-            variant="ghost"
-            @click="toggleAllRows(true)"
+          <div
+            class="flex flex-1 justify-between border-r border-gray-300 text-gray-900"
           >
-            Select all
-          </Button>
-          <Button icon="x" variant="ghost" @click="toggleAllRows(false)" />
-        </div>
+            <div class="flex items-center space-x-3">
+              <Checkbox
+                :modelValue="true"
+                :disabled="true"
+                class="text-gray-900"
+              />
+              <div>{{ selectedText }}</div>
+            </div>
+            <div class="mr-3">
+              <slot
+                name="actions"
+                v-bind="{
+                  selections,
+                  allRowsSelected,
+                  selectAll: () => toggleAllRows(true),
+                  unselectAll: () => toggleAllRows(false),
+                }"
+              />
+            </div>
+          </div>
+          <div class="flex items-center space-x-1">
+            <Button
+              class="w- text-gray-700"
+              :disabled="allRowsSelected"
+              :class="allRowsSelected ? 'cursor-not-allowed' : ''"
+              variant="ghost"
+              @click="toggleAllRows(true)"
+            >
+              Select all
+            </Button>
+            <Button icon="x" variant="ghost" @click="toggleAllRows(false)" />
+          </div>
+        </slot>
       </div>
     </div>
   </transition>
