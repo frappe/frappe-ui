@@ -24,21 +24,6 @@ export function customWidth(size) {
   return size.endsWith('px') || size.endsWith('rem') || size.endsWith('%')
 }
 
-export function dateFormat(date, format) {
-  const _format = format || 'DD-MM-YYYY HH:mm:ss'
-  return useDateFormat(date, _format).value
-}
-
-export function timeAgo(date) {
-  return useTimeAgo(date).value
-}
-
-export function htmlToText(html) {
-  const div = document.createElement('div')
-  div.innerHTML = html
-  return div.textContent || div.innerText || ''
-}
-
 export const alignmentMap = {
   left: 'justify-start',
   start: 'justify-start',
