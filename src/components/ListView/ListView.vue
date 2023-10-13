@@ -7,7 +7,7 @@
       <slot>
         <ListHeader />
         <ListRows />
-        <SelectBanner />
+        <ListSelectBanner />
       </slot>
     </div>
   </div>
@@ -15,7 +15,7 @@
 <script setup>
 import ListHeader from './ListHeader.vue'
 import ListRows from './ListRows.vue'
-import SelectBanner from './SelectBanner.vue'
+import ListSelectBanner from './ListSelectBanner.vue'
 import { reactive, computed, provide } from 'vue'
 
 defineOptions({

@@ -4,7 +4,7 @@ import ListHeader from './ListView/ListHeader.vue'
 import ListRows from './ListView/ListRows.vue'
 import ListRow from './ListView/ListRow.vue'
 import ListRowItem from './ListView/ListRowItem.vue'
-import SelectBanner from './ListView/SelectBanner.vue'
+import ListSelectBanner from './ListView/ListSelectBanner.vue'
 import FeatherIcon from './FeatherIcon.vue'
 import Badge from './Badge.vue'
 import Button from './Button.vue'
@@ -187,12 +187,12 @@ const custom_rows = [
             </ListRow>
           </template>
         </ListRows>
-        <SelectBanner>
+        <ListSelectBanner>
           <div class="flex gap-2">
             <Button variant="ghost" label="Delete" />
             <Button variant="ghost" label="Edit" />
           </div>
-        </SelectBanner>
+        </ListSelectBanner>
       </ListView>
     </Variant>
   </Story>
