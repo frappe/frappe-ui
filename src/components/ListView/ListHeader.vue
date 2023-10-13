@@ -11,7 +11,7 @@
     <slot>
       <ListHeaderItem
         v-for="column in columns"
-        :key="column"
+        :key="column.key"
         :column="column"
       />
     </slot>

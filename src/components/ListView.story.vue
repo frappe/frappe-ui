@@ -1,6 +1,7 @@
-<script setup lang="ts">
+<script setup>
 import ListView from './ListView/ListView.vue'
 import ListHeader from './ListView/ListHeader.vue'
+import ListHeaderItem from './ListView/ListHeaderItem.vue'
 import ListRows from './ListView/ListRows.vue'
 import ListRow from './ListView/ListRow.vue'
 import ListRowItem from './ListView/ListRowItem.vue'
@@ -10,32 +11,24 @@ import Badge from './Badge.vue'
 import Button from './Button.vue'
 import Avatar from './Avatar.vue'
 
-const list = {
-  title: 'Users',
-  plural_label: 'Users',
-  singular_label: 'User',
-}
-
 const simple_columns = [
   {
     label: 'Name',
     key: 'name',
-    size: 'full',
+    width: 3,
   },
   {
     label: 'Email',
     key: 'email',
-    size: '150px',
+    width: '200px',
   },
   {
     label: 'Role',
     key: 'role',
-    size: 'md',
   },
   {
     label: 'Status',
     key: 'status',
-    size: 'md',
   },
 ]
 
@@ -66,26 +59,24 @@ const custom_columns = [
   {
     label: 'Name',
     key: 'name',
+    width: 3,
     icon: 'user',
-    size: 'full',
   },
   {
     label: 'Email',
     key: 'email',
+    width: '200px',
     icon: 'at-sign',
-    size: '150px',
   },
   {
     label: 'Role',
     key: 'role',
     icon: 'users',
-    size: 'md',
   },
   {
     label: 'Status',
     key: 'status',
     icon: 'check-circle',
-    size: 'md',
   },
 ]
 
@@ -136,7 +127,6 @@ const custom_rows = [
     <Variant title="Simple List">
       <ListView
         class="h-[250px]"
-        :list="list"
         :columns="simple_columns"
         :rows="simple_rows"
         row-key="id"
@@ -145,53 +135,64 @@ const custom_rows = [
     <Variant title="Custom List">
       <ListView
         class="h-[250px]"
-        :list="list"
         :columns="custom_columns"
         :rows="custom_rows"
         row-key="id"
       >
         <ListHeader>
-          <template #prefix="{ column }">
-            <FeatherIcon :name="column.icon" class="h-4 w-4" />
-          </template>
+          <ListHeaderItem
+            v-for="column in custom_columns"
+            :key="column.key"
+            :column="column"
+          >
+            <template #prefix="{ column }">
+              <FeatherIcon :name="column.icon" class="h-4 w-4" />
+            </template>
+          </ListHeaderItem>
         </ListHeader>
         <ListRows>
-          <template v-for="(row, i) in custom_rows" :key="row['name']">
-            <ListRow v-slot="{ column, item }" :row="row" :idx="i">
-              <ListRowItem
-                :item="item"
-                :type="column.type"
-                :align="column.align"
-              >
-                <template #prefix>
-                  <div
-                    v-if="column.key == 'status'"
-                    class="h-3 w-3 rounded-full"
-                    :class="item.bg_color"
-                  />
-                  <Avatar
-                    v-if="column.key == 'name'"
-                    :shape="'circle'"
-                    :image="item.image"
-                    size="sm"
-                  />
-                </template>
-                <Badge
-                  v-if="column.key == 'role'"
-                  variant="subtle"
-                  :theme="item.color"
-                  size="md"
-                  :label="item.label"
+          <ListRow
+            v-for="(row, i) in custom_rows"
+            :key="i"
+            v-slot="{ column, item }"
+            :row="row"
+            :idx="i"
+          >
+            <ListRowItem :item="item" :align="column.align">
+              <template #prefix>
+                <div
+                  v-if="column.key == 'status'"
+                  class="h-3 w-3 rounded-full"
+                  :class="item.bg_color"
                 />
-              </ListRowItem>
-            </ListRow>
-          </template>
+                <Avatar
+                  v-if="column.key == 'name'"
+                  :shape="'circle'"
+                  :image="item.image"
+                  size="sm"
+                />
+              </template>
+              <Badge
+                v-if="column.key == 'role'"
+                variant="subtle"
+                :theme="item.color"
+                size="md"
+                :label="item.label"
+              />
+            </ListRowItem>
+          </ListRow>
         </ListRows>
         <ListSelectBanner>
-          <div class="flex gap-2">
-            <Button variant="ghost" label="Delete" />
-            <Button variant="ghost" label="Edit" />
-          </div>
+          <template #actions="{ unselectAll }">
+            <div class="flex gap-2">
+              <Button variant="ghost" label="Delete" />
+              <Button
+                variant="ghost"
+                label="Unselect all"
+                @click="unselectAll"
+              />
+            </div>
+          </template>
         </ListSelectBanner>
       </ListView>
     </Variant>
