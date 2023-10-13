@@ -9,12 +9,13 @@
       class="[all:unset] hover:[all:unset]"
     >
       <div
-        class="flex items-center space-x-4 rounded px-2 py-2.5"
+        class="grid items-center space-x-4 rounded px-2 py-2.5"
         :class="
           selections.has(row[rowKey])
             ? 'bg-gray-100 hover:bg-gray-200'
             : 'hover:bg-gray-50'
         "
+        :style="{ gridTemplateColumns: getGridTemplateColumns(columns) }"
       >
         <Checkbox
           :modelValue="selections.has(row[rowKey])"
@@ -24,11 +25,7 @@
         <div
           v-for="column in columns"
           :key="column.key"
-          :class="[
-            customWidth(column.size) ? '' : getWidth(column.size),
-            alignmentMap[column.align],
-          ]"
-          :style="customWidth(column.size) ? { width: column.size } : ''"
+          :class="alignmentMap[column.align]"
         >
           <slot v-bind="{ column, item: _row(row)[column.key] }">
             <ListRowItem
@@ -50,7 +47,7 @@
 <script setup>
 import Checkbox from '../Checkbox.vue'
 import ListRowItem from './ListRowItem.vue'
-import { getWidth, customWidth, alignmentMap } from './utils'
+import { alignmentMap, getGridTemplateColumns } from './utils'
 import { inject } from 'vue'
 
 const props = defineProps({
