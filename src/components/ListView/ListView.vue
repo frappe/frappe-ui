@@ -23,10 +23,6 @@ defineOptions({
 })
 
 const props = defineProps({
-  list: {
-    type: Object,
-    required: true,
-  },
   columns: {
     type: Array,
     default: [],
@@ -63,7 +59,6 @@ function toggleAllRows(select) {
 }
 
 provide('list', {
-  list: props.list,
   rowKey: props.rowKey,
   rows: props.rows,
   columns: props.columns,

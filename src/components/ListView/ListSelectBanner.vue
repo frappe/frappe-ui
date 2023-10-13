@@ -57,7 +57,7 @@ defineOptions({
 })
 
 let selectedText = computed(() => {
-  let title = selections.size === 1 ? list.singular_label : list.plural_label
+  let title = selections.size === 1 ? 'Row' : 'Rows'
   return `${selections.size} ${title} selected`
 })
 
