@@ -8,24 +8,20 @@
       :modelValue="allRowsSelected"
       @click.stop="toggleAllRows"
     />
-    <div
-      v-for="column in columns"
-      :key="column"
-      class="flex items-center space-x-2 text-base text-gray-600"
-      :class="alignmentMap[column.align]"
-    >
-      <slot name="prefix" v-bind="{ column }" />
-      <div>
-        {{ column.label }}
-      </div>
-      <slot name="suffix" v-bind="{ column }" />
-    </div>
+    <slot>
+      <ListHeaderItem
+        v-for="column in columns"
+        :key="column"
+        :column="column"
+      />
+    </slot>
   </div>
 </template>
 
 <script setup>
 import Checkbox from '../Checkbox.vue'
-import { alignmentMap, getGridTemplateColumns } from './utils'
+import ListHeaderItem from './ListHeaderItem.vue'
+import { getGridTemplateColumns } from './utils'
 import { inject } from 'vue'
 
 const { columns, allRowsSelected, toggleAllRows } = inject('list')
