@@ -24,43 +24,70 @@
 1. The row object must contain a unique_key which was mentioned in ListView
    `row-key`
 2. You can either add all row fields in a separate `row` object or just add them
-   in directly if there is field name doesn't conflict with `route` or `onClick`
-   E.g. 1
+   in directly if the fieldnames doesn't conflict with `route` or `onClick` E.g.
+   1
+
    ```
    {
-   	// unique_key
+   	// unique_key 'id'
    	id: 1,
+
    	// row fields
    	name: 'John Doe',
    	age: 25,
    	email: 'john@doe.com',
+
    	// if you need to route
    	route: { label: 'User', { params: { userId: 1 } }
+
    	// if you need to perform action
    	onClick: () => console.log('John Doe was clicked')
+
    	// you can add more options after this which you can use to render custom row items
    }
    ```
+
    E.g. 2
+
    ```
    {
-   	// unique_key
+   	// unique_key 'id'
    	id: 1,
+
    	// row fields in separate row object
    	row: {
-   		name: 'John Doe',
-   		age: 25,
-   		email: 'john@doe.com',
-   		route: '', // used separate row to avoid this conflict
+   	name: 'John Doe',
+   	age: 25,
+   	email: 'john@doe.com',
+   	route: '', // used separate row to avoid this conflict
    	}
+
    	// if you need to route
    	route: { label: 'User', { params: { userId: 1 } }
+
    	// if you need to perform action
    	onClick: () => console.log('John Doe was clicked')
+
    	// you can add more options after this which you can use to render custom row items
    }
    ```
-3. Click action: Add route or onClick event in row object
+
+3. You can also add an object for the field value but make sure it has a `label`
+   attribute which holds the actual value to be shown
+   ```
+   row: {
+   	name: {
+   		label: 'John Doe',
+   		image: '/johndoe.jpg',
+   	},
+   	age: 25,
+   	status: {
+   		label: 'Active',
+   		color: 'green'
+   	}
+   }
+   ```
+4. Click action: Add route or onClick event in row object
    1. If you want to route using router-link just add a
       `route: { name: 'User', params: { userId: 2 } }`
    2. if you need to do some action or open a dialog add a click event instead
