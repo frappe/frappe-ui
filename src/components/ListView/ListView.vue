@@ -7,7 +7,7 @@
       <slot>
         <ListHeader />
         <ListRows />
-        <ListSelectBanner />
+        <ListSelectBanner v-if="_options.selectable" />
       </slot>
     </div>
   </div>
@@ -41,6 +41,7 @@ const props = defineProps({
       getRowRoute: null,
       onRowClick: null,
       showTooltip: true,
+      selectable: true,
     },
   },
 })
@@ -48,13 +49,15 @@ const props = defineProps({
 let selections = reactive(new Set())
 
 let _options = computed(() => {
+  function defaultTrue(value) {
+    return value === undefined ? true : value
+  }
+
   return {
     getRowRoute: props.options.getRowRoute || null,
     onRowClick: props.options.onRowClick || null,
-    showTooltip:
-      props.options.showTooltip === undefined
-        ? true
-        : props.options.showTooltip,
+    showTooltip: defaultTrue(props.options.showTooltip),
+    selectable: defaultTrue(props.options.selectable),
   }
 })
 

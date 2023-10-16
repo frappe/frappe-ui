@@ -19,9 +19,15 @@
             ? 'bg-gray-100 hover:bg-gray-200'
             : 'hover:bg-gray-50'
         "
-        :style="{ gridTemplateColumns: getGridTemplateColumns(columns) }"
+        :style="{
+          gridTemplateColumns: getGridTemplateColumns(
+            columns,
+            options.selectable
+          ),
+        }"
       >
         <Checkbox
+          v-if="options.selectable"
           :modelValue="selections.has(row[rowKey])"
           @click.stop="toggleRow(row[rowKey])"
           class="cursor-pointer duration-300"
