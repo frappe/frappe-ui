@@ -35,6 +35,19 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  options: {
+    type: Object,
+    default: {
+      getRowRoute: {
+        type: Function,
+        default: null,
+      },
+      onRowClick: {
+        type: Function,
+        default: null,
+      },
+    },
+  },
 })
 
 let selections = reactive(new Set())
@@ -62,6 +75,7 @@ provide('list', {
   rowKey: props.rowKey,
   rows: props.rows,
   columns: props.columns,
+  options: props.options,
   selections,
   allRowsSelected,
   toggleRow,

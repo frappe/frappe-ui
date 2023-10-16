@@ -1,11 +1,15 @@
 <template>
   <component
-    :is="row.route ? 'router-link' : 'div'"
+    :is="options.getRowRoute ? 'router-link' : 'div'"
     class="flex cursor-pointer flex-col transition-all duration-300 ease-in-out"
-    v-bind="row.route ? { to: row.route } : { onClick: row.onClick }"
+    v-bind="
+      options.getRowRoute
+        ? { to: options.getRowRoute(row) }
+        : { onClick: () => options.onRowClick(row) }
+    "
   >
     <component
-      :is="row.route ? 'template' : 'button'"
+      :is="options.getRowRoute ? 'template' : 'button'"
       class="[all:unset] hover:[all:unset]"
     >
       <div
@@ -27,19 +31,16 @@
           :key="column.key"
           :class="alignmentMap[column.align]"
         >
-          <slot v-bind="{ column, item: _row(row)[column.key] }">
+          <slot v-bind="{ column, item: row[column.key] }">
             <ListRowItem
-              :item="_row(row)[column.key]"
+              :item="row[column.key]"
               :type="column.type"
               :align="column.align"
             />
           </slot>
         </div>
       </div>
-      <div
-        v-if="idx < rows.length - 1"
-        class="mx-2 h-px border-t border-gray-200"
-      />
+      <div v-if="!isLastRow" class="mx-2 h-px border-t border-gray-200" />
     </component>
   </component>
 </template>
@@ -48,25 +49,18 @@
 import Checkbox from '../Checkbox.vue'
 import ListRowItem from './ListRowItem.vue'
 import { alignmentMap, getGridTemplateColumns } from './utils'
-import { inject } from 'vue'
+import { computed, inject } from 'vue'
 
 const props = defineProps({
   row: {
     type: Object,
     required: true,
   },
-  idx: {
-    type: Number,
-    required: true,
-  },
 })
 
-function _row(row) {
-  if (row.row && typeof row.row === 'object' && (row.onClick || row.route)) {
-    return row.row
-  }
-  return row
-}
+const isLastRow = computed(() => {
+  return rows[rows.length - 1][rowKey] === props.row[rowKey]
+})
 
-const { rows, columns, rowKey, selections, toggleRow } = inject('list')
+const { rows, columns, rowKey, options, selections, toggleRow } = inject('list')
 </script>

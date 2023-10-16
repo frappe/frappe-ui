@@ -1,12 +1,7 @@
 <template>
   <div class="h-full overflow-y-auto">
     <slot>
-      <ListRow
-        v-for="(row, i) in rows"
-        :key="row[rowKey]"
-        :row="row"
-        :idx="i"
-      />
+      <ListRow v-for="(row, i) in rows" :key="row[rowKey]" :row="row" />
     </slot>
   </div>
 </template>
