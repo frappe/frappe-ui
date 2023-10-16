@@ -38,19 +38,25 @@ const props = defineProps({
   options: {
     type: Object,
     default: {
-      getRowRoute: {
-        type: Function,
-        default: null,
-      },
-      onRowClick: {
-        type: Function,
-        default: null,
-      },
+      getRowRoute: null,
+      onRowClick: null,
+      showTooltip: true,
     },
   },
 })
 
 let selections = reactive(new Set())
+
+let _options = computed(() => {
+  return {
+    getRowRoute: props.options.getRowRoute || null,
+    onRowClick: props.options.onRowClick || null,
+    showTooltip:
+      props.options.showTooltip === undefined
+        ? true
+        : props.options.showTooltip,
+  }
+})
 
 const allRowsSelected = computed(() => {
   if (!props.rows.length) return false
@@ -75,7 +81,7 @@ provide('list', {
   rowKey: props.rowKey,
   rows: props.rows,
   columns: props.columns,
-  options: props.options,
+  options: _options.value,
   selections,
   allRowsSelected,
   toggleRow,

@@ -1,6 +1,7 @@
 <template>
-  <Tooltip
-    :text="label"
+  <component
+    :is="options.showTooltip ? Tooltip : 'div'"
+    v-bind="options.showTooltip ? { text: label } : {}"
     class="flex items-center space-x-2"
     :class="alignmentMap[align]"
   >
@@ -11,12 +12,12 @@
       </div>
     </slot>
     <slot name="suffix" />
-  </Tooltip>
+  </component>
 </template>
 <script setup>
 import { alignmentMap } from './utils'
 import Tooltip from '../Tooltip.vue'
-import { computed } from 'vue'
+import { computed, inject } from 'vue'
 
 const props = defineProps({
   item: {
@@ -39,4 +40,6 @@ function getValue(value) {
   }
   return { label: value }
 }
+
+const { options } = inject('list')
 </script>
