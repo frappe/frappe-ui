@@ -1,7 +1,7 @@
 <template>
   <component
     :is="row.route ? 'router-link' : 'div'"
-    class="mx-5 flex cursor-pointer flex-col transition-all duration-300 ease-in-out"
+    class="flex cursor-pointer flex-col transition-all duration-300 ease-in-out"
     v-bind="row.route ? { to: row.route } : { onClick: row.onClick }"
   >
     <component

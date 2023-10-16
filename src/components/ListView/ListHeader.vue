@@ -1,6 +1,6 @@
 <template>
   <div
-    class="mx-5 mb-2 grid items-center space-x-4 rounded bg-gray-100 p-2"
+    class="mb-2 grid items-center space-x-4 rounded bg-gray-100 p-2"
     :style="{ gridTemplateColumns: getGridTemplateColumns(columns) }"
   >
     <Checkbox
