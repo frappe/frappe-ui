@@ -1,20 +1,20 @@
 <template>
   <div
     class="flex items-center space-x-2 text-base text-gray-600"
-    :class="alignmentMap[column.align]"
+    :class="alignmentMap[item.align]"
   >
-    <slot name="prefix" v-bind="{ column }" />
+    <slot name="prefix" v-bind="{ item }" />
     <div>
-      {{ column.label }}
+      {{ item.label }}
     </div>
-    <slot name="suffix" v-bind="{ column }" />
+    <slot name="suffix" v-bind="{ item }" />
   </div>
 </template>
 
 <script setup>
 import { alignmentMap } from './utils'
 const props = defineProps({
-  column: {
+  item: {
     type: Object,
     required: true,
   },
