@@ -1,7 +1,7 @@
 <template>
   <component
-    :is="options.showTooltip ? Tooltip : 'div'"
-    v-bind="options.showTooltip ? { text: label } : {}"
+    :is="list.options.showTooltip ? Tooltip : 'div'"
+    v-bind="list.options.showTooltip ? { text: label } : {}"
     class="flex items-center space-x-2"
     :class="alignmentMap[align]"
   >
@@ -41,5 +41,5 @@ function getValue(value) {
   return { label: value }
 }
 
-const { options } = inject('list')
+const list = inject('list')
 </script>

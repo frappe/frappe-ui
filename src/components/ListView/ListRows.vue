@@ -1,7 +1,11 @@
 <template>
   <div class="h-full overflow-y-auto">
     <slot>
-      <ListRow v-for="(row, i) in rows" :key="row[rowKey]" :row="row" />
+      <ListRow
+        v-for="(row, i) in list.rows"
+        :key="row[list.rowKey]"
+        :row="row"
+      />
     </slot>
   </div>
 </template>
@@ -10,5 +14,5 @@
 import ListRow from './ListRow.vue'
 import { inject } from 'vue'
 
-const { rows, rowKey } = inject('list')
+const list = inject('list')
 </script>

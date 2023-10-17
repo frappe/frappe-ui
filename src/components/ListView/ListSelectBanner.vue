@@ -8,7 +8,7 @@
     leave-to-class="transform opacity-0"
   >
     <div
-      v-if="selections.size"
+      v-if="list.selections.size"
       class="absolute inset-x-0 bottom-6 mx-auto w-max text-base"
     >
       <div
@@ -17,10 +17,10 @@
       >
         <slot
           v-bind="{
-            selections,
-            allRowsSelected,
-            selectAll: () => toggleAllRows(true),
-            unselectAll: () => toggleAllRows(false),
+            selections: list.selections,
+            allRowsSelected: list.allRowsSelected,
+            selectAll: () => list.toggleAllRows(true),
+            unselectAll: () => list.toggleAllRows(false),
           }"
         >
           <div
@@ -38,10 +38,10 @@
               <slot
                 name="actions"
                 v-bind="{
-                  selections,
-                  allRowsSelected,
-                  selectAll: () => toggleAllRows(true),
-                  unselectAll: () => toggleAllRows(false),
+                  selections: list.selections,
+                  allRowsSelected: list.allRowsSelected,
+                  selectAll: () => list.toggleAllRows(true),
+                  unselectAll: () => list.toggleAllRows(false),
                 }"
               />
             </div>
@@ -49,14 +49,18 @@
           <div class="flex items-center space-x-1">
             <Button
               class="w- text-gray-700"
-              :disabled="allRowsSelected"
-              :class="allRowsSelected ? 'cursor-not-allowed' : ''"
+              :disabled="list.allRowsSelected"
+              :class="list.allRowsSelected ? 'cursor-not-allowed' : ''"
               variant="ghost"
-              @click="toggleAllRows(true)"
+              @click="list.toggleAllRows(true)"
             >
               Select all
             </Button>
-            <Button icon="x" variant="ghost" @click="toggleAllRows(false)" />
+            <Button
+              icon="x"
+              variant="ghost"
+              @click="list.toggleAllRows(false)"
+            />
           </div>
         </slot>
       </div>
@@ -73,10 +77,10 @@ defineOptions({
   inheritAttrs: false,
 })
 
-let selectedText = computed(() => {
-  let title = selections.size === 1 ? 'Row' : 'Rows'
-  return `${selections.size} ${title} selected`
-})
+const list = inject('list')
 
-const { selections, allRowsSelected, toggleAllRows } = inject('list')
+let selectedText = computed(() => {
+  let title = list.selections.size === 1 ? 'Row' : 'Rows'
+  return `${list.selections.size} ${title} selected`
+})
 </script>

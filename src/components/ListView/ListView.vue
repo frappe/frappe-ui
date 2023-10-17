@@ -80,14 +80,17 @@ function toggleAllRows(select) {
   props.rows.forEach((row) => selections.add(row[props.rowKey]))
 }
 
-provide('list', {
-  rowKey: props.rowKey,
-  rows: props.rows,
-  columns: props.columns,
-  options: _options.value,
-  selections,
-  allRowsSelected,
-  toggleRow,
-  toggleAllRows,
-})
+provide(
+  'list',
+  computed(() => ({
+    rowKey: props.rowKey,
+    rows: props.rows,
+    columns: props.columns,
+    options: _options.value,
+    selections: selections,
+    allRowsSelected: allRowsSelected.value,
+    toggleRow,
+    toggleAllRows,
+  }))
+)
 </script>
