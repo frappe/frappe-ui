@@ -1,16 +1,15 @@
-export function getGridTemplateColumns(columns) {
-  return (
-    '14px ' +
-    columns
-      .map((col) => {
-        let width = col.width || 1
-        if (typeof width === 'number') {
-          return width + 'fr'
-        }
-        return width
-      })
-      .join(' ')
-  )
+export function getGridTemplateColumns(columns, withCheckbox = true) {
+  let checkBoxWidth = withCheckbox ? '14px ' : ''
+  let columnsWidth = columns
+    .map((col) => {
+      let width = col.width || 1
+      if (typeof width === 'number') {
+        return width + 'fr'
+      }
+      return width
+    })
+    .join(' ')
+  return checkBoxWidth + columnsWidth
 }
 
 export const alignmentMap = {

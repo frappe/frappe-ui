@@ -78,5 +78,5 @@ let selectedText = computed(() => {
   return `${selections.size} ${title} selected`
 })
 
-const { list, selections, allRowsSelected, toggleAllRows } = inject('list')
+const { selections, allRowsSelected, toggleAllRows } = inject('list')
 </script>
