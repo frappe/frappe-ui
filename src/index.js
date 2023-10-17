@@ -50,6 +50,7 @@ export { toast, Toasts } from './components/toast.js'
 export { default as Tooltip } from './components/Tooltip.vue'
 export { default as CommandPalette } from './components/CommandPalette/CommandPalette.vue'
 export { default as CommandPaletteItem } from './components/CommandPalette/CommandPaletteItem.vue'
+export { default as ListFilter } from './components/ListFilter/ListFilter.vue'
 
 // directives
 export { default as onOutsideClickDirective } from './directives/onOutsideClick.js'
