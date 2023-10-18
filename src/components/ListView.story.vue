@@ -10,6 +10,12 @@ import FeatherIcon from './FeatherIcon.vue'
 import Badge from './Badge.vue'
 import Button from './Button.vue'
 import Avatar from './Avatar.vue'
+import { reactive } from 'vue'
+
+const state = reactive({
+  selectable: true,
+  showTooltip: true,
+})
 
 const simple_columns = [
   {
@@ -35,23 +41,17 @@ const simple_columns = [
 const simple_rows = [
   {
     id: 1,
-    row: {
-      name: 'John Doe',
-      email: 'john@doe.com',
-      status: 'Active',
-      role: 'Developer',
-    },
-    onClick: () => console.log('John Doe was clicked'),
+    name: 'John Doe',
+    email: 'john@doe.com',
+    status: 'Active',
+    role: 'Developer',
   },
   {
     id: 2,
-    row: {
-      name: 'Jane Doe',
-      email: 'jane@doe.com',
-      status: 'Inactive',
-      role: 'HR',
-    },
-    route: { name: 'User', params: { userId: 2 } },
+    name: 'Jane Doe',
+    email: 'jane@doe.com',
+    status: 'Inactive',
+    role: 'HR',
   },
 ]
 
@@ -83,41 +83,35 @@ const custom_columns = [
 const custom_rows = [
   {
     id: 1,
-    row: {
-      name: {
-        label: 'John Doe',
-        image: 'https://avatars.githubusercontent.com/u/499550',
-      },
-      email: 'john@doe.com',
-      status: {
-        label: 'Active',
-        bg_color: 'bg-green-600',
-      },
-      role: {
-        label: 'Developer',
-        color: 'green',
-      },
+    name: {
+      label: 'John Doe',
+      image: 'https://avatars.githubusercontent.com/u/499550',
     },
-    onClick: () => console.log('John Doe was clicked'),
+    email: 'john@doe.com',
+    status: {
+      label: 'Active',
+      bg_color: 'bg-green-600',
+    },
+    role: {
+      label: 'Developer',
+      color: 'green',
+    },
   },
   {
     id: 2,
-    row: {
-      name: {
-        label: 'Jane Doe',
-        image: 'https://avatars.githubusercontent.com/u/499120',
-      },
-      email: 'jane@doe.com',
-      status: {
-        label: 'Inactive',
-        bg_color: 'bg-red-600',
-      },
-      role: {
-        label: 'HR',
-        color: 'red',
-      },
+    name: {
+      label: 'Jane Doe',
+      image: 'https://avatars.githubusercontent.com/u/499120',
     },
-    route: { name: 'User', params: { userId: 2 } },
+    email: 'jane@doe.com',
+    status: {
+      label: 'Inactive',
+      bg_color: 'bg-red-600',
+    },
+    role: {
+      label: 'HR',
+      color: 'red',
+    },
   },
 ]
 </script>
@@ -129,6 +123,11 @@ const custom_rows = [
         class="h-[250px]"
         :columns="simple_columns"
         :rows="simple_rows"
+        :options="{
+          getRowRoute: (row) => ({ name: 'User', params: { userId: row.id } }),
+          selectable: state.selectable,
+          showTooltip: state.showTooltip,
+        }"
         row-key="id"
       />
     </Variant>
@@ -137,26 +136,30 @@ const custom_rows = [
         class="h-[250px]"
         :columns="custom_columns"
         :rows="custom_rows"
+        :options="{
+          onRowClick: (row) => console.log(row),
+          selectable: state.selectable,
+          showTooltip: state.showTooltip,
+        }"
         row-key="id"
       >
         <ListHeader>
           <ListHeaderItem
             v-for="column in custom_columns"
             :key="column.key"
-            :column="column"
+            :item="column"
           >
-            <template #prefix="{ column }">
-              <FeatherIcon :name="column.icon" class="h-4 w-4" />
+            <template #prefix="{ item }">
+              <FeatherIcon :name="item.icon" class="h-4 w-4" />
             </template>
           </ListHeaderItem>
         </ListHeader>
         <ListRows>
           <ListRow
-            v-for="(row, i) in custom_rows"
-            :key="i"
+            v-for="row in custom_rows"
+            :key="row.id"
             v-slot="{ column, item }"
             :row="row"
-            :idx="i"
           >
             <ListRowItem :item="item" :align="column.align">
               <template #prefix>
@@ -196,5 +199,10 @@ const custom_rows = [
         </ListSelectBanner>
       </ListView>
     </Variant>
+
+    <template #controls>
+      <HstCheckbox v-model="state.selectable" title="Selectable" />
+      <HstCheckbox v-model="state.showTooltip" title="Show tooltip" />
+    </template>
   </Story>
 </template>
