@@ -7,6 +7,7 @@ import {
 } from './listResource'
 import { getLocal, saveLocal } from './local'
 import { onDocUpdate } from './realtime'
+import { getConfig } from '../utils/config'
 
 let documentCache = reactive({})
 
