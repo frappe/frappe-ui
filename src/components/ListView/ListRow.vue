@@ -38,11 +38,7 @@
           :class="alignmentMap[column.align]"
         >
           <slot v-bind="{ column, item: row[column.key] }">
-            <ListRowItem
-              :item="row[column.key]"
-              :type="column.type"
-              :align="column.align"
-            />
+            <ListRowItem :item="row[column.key]" :align="column.align" />
           </slot>
         </div>
       </div>
