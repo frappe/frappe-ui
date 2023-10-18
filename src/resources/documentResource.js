@@ -22,8 +22,14 @@ export function createDocumentResource(options, vm) {
     return cachedResource
   }
 
+  let defaultDocGetUrl = getConfig('defaultDocGetUrl') || 'frappe.client.get'
+  let defaultDocUpdateUrl =
+    getConfig('defaultDocUpdateUrl') || 'frappe.client.set_value'
+  let defaultDocDeleteUrl =
+    getConfig('defaultDocDeleteUrl') || 'frappe.client.delete'
+
   let setValueOptions = {
-    url: 'frappe.client.set_value',
+    url: defaultDocUpdateUrl,
     makeParams(values) {
       return {
         doctype: out.doctype,
@@ -61,7 +67,7 @@ export function createDocumentResource(options, vm) {
     auto: autoPropIsPassed ? options.auto : true,
     get: createResource(
       {
-        url: 'frappe.client.get',
+        url: defaultDocGetUrl,
         makeParams() {
           return {
             doctype: out.doctype,
@@ -104,7 +110,7 @@ export function createDocumentResource(options, vm) {
     ),
     delete: createResource(
       {
-        url: 'frappe.client.delete',
+        url: defaultDocDeleteUrl,
         makeParams() {
           return {
             doctype: out.doctype,

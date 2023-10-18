@@ -24,6 +24,12 @@ export function createListResource(options, vm) {
   }
 
   let defaultListUrl = getConfig('defaultListUrl') || 'frappe.client.get_list'
+  let defaultDocInsertUrl =
+    getConfig('defaultDocInsertUrl') || 'frappe.client.insert'
+  let defaultDocUpdateUrl =
+    getConfig('defaultDocUpdateUrl') || 'frappe.client.set_value'
+  let defaultDocDeleteUrl =
+    getConfig('defaultDocDeleteUrl') || 'frappe.client.delete'
 
   let out = reactive({
     doctype: options.doctype,
@@ -82,7 +88,7 @@ export function createListResource(options, vm) {
     ),
     fetchOne: createResource(
       {
-        url: 'frappe.client.get_list',
+        url: options.url || defaultListUrl,
         makeParams(name) {
           return {
             doctype: out.doctype,
@@ -104,7 +110,7 @@ export function createListResource(options, vm) {
     ),
     insert: createResource(
       {
-        url: 'frappe.client.insert',
+        url: defaultDocInsertUrl,
         makeParams(values) {
           return {
             doc: {
@@ -123,7 +129,7 @@ export function createListResource(options, vm) {
     ),
     setValue: createResource(
       {
-        url: 'frappe.client.set_value',
+        url: defaultDocUpdateUrl,
         makeParams(options) {
           let { name, ...values } = options
           return {
@@ -142,7 +148,7 @@ export function createListResource(options, vm) {
     ),
     delete: createResource(
       {
-        url: 'frappe.client.delete',
+        url: defaultDocDeleteUrl,
         makeParams(name) {
           return {
             doctype: out.doctype,
