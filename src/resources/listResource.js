@@ -272,6 +272,7 @@ export function createListResource(options, vm) {
     getLocal(cacheKey).then((data) => {
       if ((out.list.loading || !out.list.fetched) && data) {
         setData(data)
+        options.onData?.call(vm, data)
       }
     })
   }
