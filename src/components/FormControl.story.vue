@@ -54,6 +54,19 @@ const variants = ['subtle', 'outline']
         />
       </div>
     </Variant>
+    <Variant title="select">
+      <div class="p-2">
+        <FormControl
+          type="autocomplete"
+          :options="[
+            { label: 'One', value: '1' },
+            { label: 'Two', value: '2' },
+            { label: 'Three', value: '3' },
+          ]"
+          v-bind="state"
+        />
+      </div>
+    </Variant>
     <Variant title="checkbox">
       <div class="p-2">
         <FormControl type="checkbox" v-bind="state" />

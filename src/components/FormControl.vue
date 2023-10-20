@@ -12,6 +12,17 @@
         <slot name="prefix" />
       </template>
     </Select>
+    <Autocomplete
+      v-else-if="type === 'autocomplete'"
+      v-bind="{ ...controlAttrs }"
+    >
+      <template #prefix v-if="$slots.prefix">
+        <slot name="prefix" />
+      </template>
+      <template #item-prefix="itemPrefixProps" v-if="$slots['item-prefix']">
+        <slot name="item-prefix" v-bind="itemPrefixProps" />
+      </template>
+    </Autocomplete>
     <Textarea
       v-else-if="type === 'textarea'"
       :id="id"
@@ -43,11 +54,12 @@ import type { TextInputTypes } from './types/TextInput'
 import Select from './Select.vue'
 import Textarea from './Textarea.vue'
 import Checkbox from './Checkbox.vue'
+import Autocomplete from './Autocomplete.vue'
 
 interface FormControlProps {
   label?: string
   description?: string
-  type?: TextInputTypes | 'textarea' | 'select' | 'checkbox'
+  type?: TextInputTypes | 'textarea' | 'select' | 'checkbox' | 'autocomplete'
   size?: 'sm' | 'md'
 }
 
