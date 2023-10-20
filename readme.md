@@ -73,7 +73,7 @@ Frappe UI is being used in a lot of products by
 
 - [Frappe Cloud](https://frappecloud.com)
 - [Gameplan](https://github.com/frappe/gameplan)
-- [Frappe Desk](https://frappedesk.com)
+- [Helpdesk](https://github.com/frappe/helpdesk)
 - [Frappe Insights](https://github.com/frappe/insights)
 - [Frappe Drive](https://github.com/frappe/drive)
 
