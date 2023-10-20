@@ -149,7 +149,7 @@
 </template>
 
 <script>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import {
   Dialog as HDialog,
   DialogPanel,
@@ -194,34 +194,24 @@ export default {
       handler(actions) {
         if (!actions) return
         this.dialogActions = actions.map((action) => {
-          let _action = {
+          let loading = ref(false)
+          return {
             ...action,
-            loading: action.loading || false,
-            _onClick: action.onClick,
-            onClick: () => this.handleAction(_action),
+            loading,
+            onClick: !action.onClick
+              ? this.close
+              : async () => {
+                  loading.value = true
+                  await action.onClick()
+                  loading.value = false
+                },
           }
-          return _action
         })
       },
       immediate: true,
     },
   },
   methods: {
-    handleAction(action) {
-      if (action._onClick && typeof action._onClick === 'function') {
-        action.loading = true
-        let result = action._onClick({ close: this.close })
-        if (result && result.then) {
-          result
-            .then(() => (action.loading = false))
-            .catch(() => (action.loading = false))
-        } else {
-          action.loading = false
-        }
-      } else {
-        this.close()
-      }
-    },
     close() {
       this.open = false
     },
