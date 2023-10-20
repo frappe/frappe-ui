@@ -202,8 +202,11 @@ export default {
               ? this.close
               : async () => {
                   loading.value = true
-                  await action.onClick()
-                  loading.value = false
+                  try {
+                    await action.onClick()
+                  } finally {
+                    loading.value = false
+                  }
                 },
           }
         })
