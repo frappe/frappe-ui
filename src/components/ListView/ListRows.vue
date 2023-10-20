@@ -1,11 +1,7 @@
 <template>
   <div class="h-full overflow-y-auto">
     <slot>
-      <ListRow
-        v-for="(row, i) in list.rows"
-        :key="row[list.rowKey]"
-        :row="row"
-      />
+      <ListRow v-for="row in list.rows" :key="row[list.rowKey]" :row="row" />
     </slot>
   </div>
 </template>

@@ -1,4 +1,11 @@
-**Column:**
+## Props
+
+### Row Key
+
+`row-key` is a unique key which is used to identify each row in the list. It is
+required to be passed in the `row` object.
+
+### Column
 
 1. `label` & `key` is required in column object.
 
@@ -19,13 +26,12 @@
 4. You can add more attributes which can be used to render custom column header
    items.
 
-**Row**
+### Row
 
 1. The row object must contain a unique_key which was mentioned in ListView
    `row-key`
-2. You can either add all row fields in a separate `row` object or just add them
-   in directly if the fieldnames doesn't conflict with `route` or `onClick` E.g.
-   1
+2. Then you can add the row fields as key value pairs and each field can be an
+   object or a string (to handle custom rendering)
 
    ```
    {
@@ -36,44 +42,12 @@
    	name: 'John Doe',
    	age: 25,
    	email: 'john@doe.com',
-
-   	// if you need to route
-   	route: { label: 'User', { params: { userId: 1 } }
-
-   	// if you need to perform action
-   	onClick: () => console.log('John Doe was clicked')
-
-   	// you can add more options after this which you can use to render custom row items
    }
    ```
 
-   E.g. 2
+   E.g field value as an object (to handle custom rendering), but make sure it
+   has a `label` attribute which holds the actual value to be shown
 
-   ```
-   {
-   	// unique_key 'id'
-   	id: 1,
-
-   	// row fields in separate row object
-   	row: {
-   	name: 'John Doe',
-   	age: 25,
-   	email: 'john@doe.com',
-   	route: '', // used separate row to avoid this conflict
-   	}
-
-   	// if you need to route
-   	route: { label: 'User', { params: { userId: 1 } }
-
-   	// if you need to perform action
-   	onClick: () => console.log('John Doe was clicked')
-
-   	// you can add more options after this which you can use to render custom row items
-   }
-   ```
-
-3. You can also add an object for the field value but make sure it has a `label`
-   attribute which holds the actual value to be shown
    ```
    row: {
    	name: {
@@ -87,13 +61,26 @@
    	}
    }
    ```
-4. Click action: Add route or onClick event in row object
-   1. If you want to route using router-link just add a
-      `route: { name: 'User', params: { userId: 2 } }`
-   2. if you need to do some action or open a dialog add a click event instead
-      of a route `onClick: () => console.log('John Doe was clicked')`
 
-**Selection Banner:**
+### Options
+
+1. If you want to route using router-link just add a `getRowRoute` function
+   which returns a route object
+
+   `getRowRoute: (row) => ({ name: 'User', params: { userId: row.id } })`
+
+2. if you need to do some action add a `onRowClick` event handler
+
+   `onRowClick: (row) => console.log(row.label + ' was clicked')`
+
+3. selectable (Boolean) - if true, checkbox will be shown in header and rows, to
+   select/multiselect rows and perform some action on them - default is true
+4. showTooltip (Boolean) - if true, tooltip will be shown on hover of row -
+   default is true
+
+---
+
+### Selection Banner (Will be shown when selectable (default is true) is true)
 
 **Without custom action buttons:**
 <img width="1213" alt="image" src="https://github.com/frappe/frappe-ui/assets/30859809/36fafcf5-45c6-43f0-acde-f64afe38b550">

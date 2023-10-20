@@ -29,7 +29,7 @@
         <Checkbox
           v-if="list.options.selectable"
           :modelValue="list.selections.has(row[list.rowKey])"
-          @click.stop="toggleRow(row[list.rowKey])"
+          @click.stop="list.toggleRow(row[list.rowKey])"
           class="cursor-pointer duration-300"
         />
         <div
@@ -38,11 +38,7 @@
           :class="alignmentMap[column.align]"
         >
           <slot v-bind="{ column, item: row[column.key] }">
-            <ListRowItem
-              :item="row[column.key]"
-              :type="column.type"
-              :align="column.align"
-            />
+            <ListRowItem :item="row[column.key]" :align="column.align" />
           </slot>
         </div>
       </div>
@@ -64,11 +60,13 @@ const props = defineProps({
   },
 })
 
-// const { rows, columns, rowKey, options, selections, toggleRow } = inject('list')
 const list = inject('list')
 
 const isLastRow = computed(() => {
-  if (!list.rows?.length) return false
-  return list.rows[list.rows.length - 1][list.rowKey] === props.row[list.rowKey]
+  if (!list.value.rows?.length) return false
+  return (
+    list.value.rows[list.value.rows.length - 1][list.value.rowKey] ===
+    props.row[list.value.rowKey]
+  )
 })
 </script>
