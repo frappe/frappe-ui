@@ -109,12 +109,16 @@ class FileUploadHandler {
         form_data.append('file_url', options.file_url)
       }
 
-      if (options.doctype && options.docname) {
+      if (options.doctype) {
         form_data.append('doctype', options.doctype)
+      }
+
+      if (options.docname) {
         form_data.append('docname', options.docname)
-        if (options.fieldname) {
-          form_data.append('fieldname', options.fieldname)
-        }
+      }
+
+      if (options.fieldname) {
+        form_data.append('fieldname', options.fieldname)
       }
 
       if (options.method) {
