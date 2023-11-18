@@ -52,9 +52,11 @@ module.exports = {
 }
 ```
 
+Now, you can import needed components and start using it:
+
 ```html
 <template>
-  <button>Click me</button>
+  <Button>Click me</Button>
 </template>
 <script>
   import { Button } from 'frappe-ui'
