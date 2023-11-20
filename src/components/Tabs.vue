@@ -27,8 +27,8 @@
       </Tab>
       <div
         ref="indicator"
-        class="absolute -bottom-px h-px bg-gray-900"
-        :style="{ left: `${indicatorLeftValue}px` }"
+        class="absolute -bottom-px h-px bg-gray-900 transition-all duration-300 ease-in-out"
+        :style="{ left: `${indicatorLeft}px` }"
       />
     </TabList>
     <TabPanels class="flex flex-1 overflow-hidden">
@@ -45,7 +45,6 @@
 
 <script setup>
 import { TabGroup, TabList, Tab, TabPanels, TabPanel } from '@headlessui/vue'
-import { TransitionPresets, useTransition } from '@vueuse/core'
 import { ref, watch, computed, onMounted, nextTick } from 'vue'
 
 const props = defineProps({
@@ -70,12 +69,7 @@ const tabRef = ref([])
 const indicator = ref(null)
 const tabsLength = ref(props.tabs?.length)
 
-let indicatorLeft = ref(0)
-
-const indicatorLeftValue = useTransition(indicatorLeft, {
-  duration: 250,
-  ease: TransitionPresets.easeOutCubic,
-})
+const indicatorLeft = ref(0)
 
 function moveIndicator(index) {
   if (index >= tabsLength.value) {
