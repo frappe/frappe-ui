@@ -56,6 +56,12 @@ const props = defineProps({
     type: Number,
     default: 0,
   },
+  options: {
+    type: Object,
+    default: () => ({
+      indicatorLeft: 20,
+    }),
+  },
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -69,7 +75,7 @@ const tabRef = ref([])
 const indicator = ref(null)
 const tabsLength = ref(props.tabs?.length)
 
-const indicatorLeft = ref(0)
+const indicatorLeft = ref(props.options?.indicatorLeft)
 
 function moveIndicator(index) {
   if (index >= tabsLength.value) {
