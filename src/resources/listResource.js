@@ -30,6 +30,8 @@ export function createListResource(options, vm) {
     getConfig('defaultDocUpdateUrl') || 'frappe.client.set_value'
   let defaultDocDeleteUrl =
     getConfig('defaultDocDeleteUrl') || 'frappe.client.delete'
+  let defaultRunDocMethodUrl =
+    getConfig('defaultRunDocMethodUrl') || 'run_doc_method'
 
   let out = reactive({
     doctype: options.doctype,
@@ -165,7 +167,7 @@ export function createListResource(options, vm) {
     ),
     runDocMethod: createResource(
       {
-        url: 'run_doc_method',
+        url: defaultRunDocMethodUrl,
         makeParams({ method, name, ...values }) {
           return {
             dt: out.doctype,

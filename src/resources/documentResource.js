@@ -28,6 +28,8 @@ export function createDocumentResource(options, vm) {
     getConfig('defaultDocUpdateUrl') || 'frappe.client.set_value'
   let defaultDocDeleteUrl =
     getConfig('defaultDocDeleteUrl') || 'frappe.client.delete'
+  let defaultRunDocMethodUrl =
+    getConfig('defaultRunDocMethodUrl') || 'run_doc_method'
 
   let setValueOptions = {
     url: defaultDocUpdateUrl,
@@ -153,7 +155,7 @@ export function createDocumentResource(options, vm) {
     let { method, onSuccess, ...otherOptions } = methodOptions
     out[methodKey] = createResource(
       {
-        url: 'run_doc_method',
+        url: defaultRunDocMethodUrl,
         makeParams(values) {
           return {
             dt: out.doctype,
