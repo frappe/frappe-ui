@@ -27,7 +27,8 @@
       </Tab>
       <div
         ref="indicator"
-        class="absolute -bottom-px h-px bg-gray-900 transition-all duration-300 ease-in-out"
+        class="absolute -bottom-px h-px bg-gray-900"
+        :class="transitionClass"
         :style="{ left: `${indicatorLeft}px` }"
       />
     </TabList>
@@ -76,6 +77,7 @@ const indicator = ref(null)
 const tabsLength = ref(props.tabs?.length)
 
 const indicatorLeft = ref(props.options?.indicatorLeft)
+const transitionClass = ref('')
 
 function moveIndicator(index) {
   if (index >= tabsLength.value) {
@@ -93,5 +95,10 @@ watch(changedIndex, (index) => {
   nextTick(() => moveIndicator(index))
 })
 
-onMounted(() => moveIndicator(changedIndex.value))
+onMounted(() => {
+  moveIndicator(changedIndex.value)
+  nextTick(() => {
+    transitionClass.value = 'transition-all duration-300 ease-in-out'
+  })
+})
 </script>
