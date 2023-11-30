@@ -5,7 +5,7 @@ import {
   deleteRowInListResource,
   revertRowInListResource,
 } from './listResource'
-import { getLocal, saveLocal } from './local'
+import { getLocal, saveLocal, deleteLocal } from './local'
 import { onDocUpdate } from './realtime'
 import { getConfig } from '../utils/config'
 
@@ -83,7 +83,12 @@ export function createDocumentResource(options, vm) {
           out.originalDoc = JSON.parse(JSON.stringify(out.doc))
           options.onSuccess?.call(vm, out.doc)
         },
-        onError: options.onError,
+        onError(error) {
+          deleteLocal(cacheKey)
+          out.doc = null
+          out.originalDoc = null
+          options.onError?.call(vm, error)
+        },
       },
       vm
     ),
