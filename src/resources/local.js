@@ -9,11 +9,11 @@ export function saveLocal(key, data) {
 }
 
 export function deleteLocal(key) {
-    if (typeof indexedDB === 'undefined') {
-        return Promise.resolve(null)
-    }
-    if (!key) return Promise.resolve()
-    return del(key)
+  if (typeof indexedDB === 'undefined') {
+    return Promise.resolve(null)
+  }
+  if (!key) return Promise.resolve()
+  return del(key)
 }
 
 export function getLocal(key) {
