@@ -115,7 +115,10 @@ export default {
       let insideClick = $els.some(
         ($el) => $el && (e.target === $el || $el.contains(e.target))
       )
-      if (insideClick) {
+      let insidePopoverRoot = document
+        .getElementById('frappeui-popper-root')
+        .contains(e.target)
+      if (insideClick || insidePopoverRoot) {
         return
       }
       this.close()
