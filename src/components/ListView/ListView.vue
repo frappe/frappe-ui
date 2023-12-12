@@ -16,7 +16,7 @@
 import ListHeader from './ListHeader.vue'
 import ListRows from './ListRows.vue'
 import ListSelectBanner from './ListSelectBanner.vue'
-import { reactive, computed, provide } from 'vue'
+import { reactive, computed, provide, watch } from 'vue'
 
 defineOptions({
   inheritAttrs: false,
@@ -47,6 +47,12 @@ const props = defineProps({
 })
 
 let selections = reactive(new Set())
+
+const emit = defineEmits(['update:selections'])
+
+watch(selections, (value) => {
+  emit('update:selections', value)
+})
 
 let _options = computed(() => {
   function defaultTrue(value) {
