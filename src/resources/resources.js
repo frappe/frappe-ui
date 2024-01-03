@@ -157,6 +157,18 @@ export function createResource(options, vm) {
         fn.call(vm, error)
       }
     }
+    // if no error handler is defined, use fallbackErrorHandler
+    if (errorFunctions.every((fn) => fn == null)) {
+      let errorHandler = getConfig('fallbackErrorHandler')
+      if (errorHandler) {
+        try {
+          errorHandler(error)
+        } catch (error) {
+          // who handles the error handler?
+          console.warn('Error in fallbackErrorHandler', error)
+        }
+      }
+    }
     throw error
   }
 
