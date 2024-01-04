@@ -19,6 +19,8 @@ const options = [
         :options="options"
         v-model="value"
         placeholder="Select person"
+        :hide-search="false"
+        :multiple="false"
       />
     </div>
   </Story>
