@@ -16,7 +16,7 @@
         v-for="(tab, i) in tabs"
         :key="i"
         v-slot="{ selected }"
-        class="focus:outline-none focus:transition-none focus-visible:rounded focus-visible:ring-2 focus-visible:ring-gray-400"
+        class="focus:outline-none focus:transition-none"
       >
         <slot name="tab" v-bind="{ tab, selected }">
           <button
