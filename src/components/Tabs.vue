@@ -6,7 +6,10 @@
     :selectedIndex="changedIndex"
     @change="(idx) => (changedIndex = idx)"
   >
-    <TabList class="relative flex items-center gap-6 border-b pl-5">
+    <TabList
+      class="relative flex items-center gap-6 overflow-x-auto border-b pl-5"
+      :class="tablistClass"
+    >
       <Tab
         ref="tabRef"
         as="template"
@@ -17,7 +20,7 @@
       >
         <slot name="tab" v-bind="{ tab, selected }">
           <button
-            class="-mb-px flex items-center gap-2 border-b border-transparent py-2.5 text-base text-gray-600 duration-300 ease-in-out hover:border-gray-400 hover:text-gray-900"
+            class="flex items-center gap-2 border-b border-transparent py-2.5 text-base text-gray-600 duration-300 ease-in-out hover:border-gray-400 hover:text-gray-900"
             :class="{ 'text-gray-900': selected }"
           >
             <component v-if="tab.icon" :is="tab.icon" class="h-5" />
@@ -27,12 +30,12 @@
       </Tab>
       <div
         ref="indicator"
-        class="absolute -bottom-px h-px bg-gray-900"
+        class="absolute bottom-0 h-px bg-gray-900"
         :class="transitionClass"
         :style="{ left: `${indicatorLeft}px` }"
       />
     </TabList>
-    <TabPanels class="flex flex-1 overflow-hidden">
+    <TabPanels class="flex flex-1 overflow-hidden" :class="tabPanelClass">
       <TabPanel
         class="flex flex-1 flex-col overflow-y-auto focus:outline-none"
         v-for="(tab, i) in tabs"
@@ -56,6 +59,14 @@ const props = defineProps({
   modelValue: {
     type: Number,
     default: 0,
+  },
+  tablistClass: {
+    type: String,
+    default: '',
+  },
+  tabPanelClass: {
+    type: String,
+    default: '',
   },
   options: {
     type: Object,
