@@ -2,11 +2,12 @@
   <component
     :is="list.options.getRowRoute ? 'router-link' : 'div'"
     class="flex cursor-pointer flex-col transition-all duration-300 ease-in-out"
-    v-bind="
-      list.options.getRowRoute
-        ? { to: list.options.getRowRoute(row) }
-        : { onClick: () => list.options.onRowClick(row) }
-    "
+    v-bind="{
+      to: list.options.getRowRoute ? list.options.getRowRoute(row) : undefined,
+      onClick: list.options.onRowClick
+        ? () => list.options.onRowClick(row)
+        : undefined,
+    }"
   >
     <component
       :is="list.options.getRowRoute ? 'template' : 'button'"
