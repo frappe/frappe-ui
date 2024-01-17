@@ -7,6 +7,7 @@
             <button
               class="flex h-7 w-full items-center justify-between gap-2 rounded bg-gray-100 px-2 py-1 transition-colors hover:bg-gray-200 focus:ring-2 focus:ring-gray-400"
               :class="{ 'bg-gray-200': isComboboxOpen }"
+              :disabled="isDisabled"
               @click="() => togglePopover()"
             >
               <div class="flex items-center">
@@ -120,7 +121,7 @@ import FeatherIcon from './FeatherIcon.vue'
 
 export default {
   name: 'Autocomplete',
-  props: ['modelValue', 'options', 'placeholder'],
+  props: ['modelValue', 'options', 'placeholder', 'isDisabled'],
   emits: ['update:modelValue', 'update:query', 'change'],
   components: {
     Popover,
