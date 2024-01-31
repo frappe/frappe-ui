@@ -40,6 +40,7 @@
           >
             <ComboboxOptions
               class="max-h-[15rem] overflow-y-auto px-1.5 pb-1.5"
+              :class="{ 'pt-1.5': hideSearch }"
               static
             >
               <div
@@ -102,15 +103,11 @@
                           v-bind="{ active, selected, option }"
                         >
                           <FeatherIcon
-                            name="square"
-                            v-if="!isOptionSelected(option)"
+                            name="check"
+                            v-if="isOptionSelected(option)"
                             class="h-4 w-4 text-gray-700"
                           />
-                          <FeatherIcon
-                            name="check-square"
-                            v-else
-                            class="h-4 w-4 text-gray-700"
-                          />
+                          <div v-else class="h-4 w-4" />
                         </slot>
                       </div>
                       <span class="flex-1 truncate">
