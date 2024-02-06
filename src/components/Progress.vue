@@ -10,11 +10,13 @@
       <!-- Empty for alignment -->
       <span v-else></span>
 
-      <span
-        class="self-end text-base font-medium text-gray-500"
-        v-if="props.hint"
-        >{{ props.value }}%</span
-      >
+      <span class="self-end" v-if="props.hint || $slots.hint">
+        <slot name="hint">
+          <span class="text-base font-medium text-gray-500">
+            {{ props.value }}%
+          </span>
+        </slot>
+      </span>
     </div>
 
     <div
