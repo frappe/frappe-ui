@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex items-center space-x-2 text-base text-gray-600"
+    class="flex items-center space-x-2 text-sm text-gray-600"
     :class="alignmentMap[item.align]"
   >
     <slot name="prefix" v-bind="{ item }" />
