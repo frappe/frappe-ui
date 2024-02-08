@@ -33,11 +33,14 @@
           class="cursor-pointer duration-300"
         />
         <div
-          v-for="column in list.columns"
+          v-for="(column, i) in list.columns"
           :key="column.key"
-          :class="alignmentMap[column.align]"
+          :class="[
+            alignmentMap[column.align],
+            i == 0 ? 'text-gray-900' : 'text-gray-700',
+          ]"
         >
-          <slot v-bind="{ column, item: row[column.key] }">
+          <slot v-bind="{ idx: i, column, item: row[column.key] }">
             <ListRowItem :item="row[column.key]" :align="column.align" />
           </slot>
         </div>
