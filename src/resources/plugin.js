@@ -16,14 +16,18 @@ let createMixin = (mixinOptions) => ({
         if (typeof options == 'function') {
           watch(
             () => {
+              let out = null
               try {
-                return options.call(this)
+                out = options.call(this)
               } catch (error) {
                 console.warn('Failed to get resource options\n\n', error)
-                return null
+                out = null
               }
+              return JSON.stringify(out)
             },
-            (options, oldOptions) => {
+            (_options, _oldOptions) => {
+              let options = _options ? JSON.parse(_options) : null
+              let oldOptions = _oldOptions ? JSON.parse(_oldOptions) : null
               if (!options) {
                 return
               }
@@ -37,6 +41,7 @@ let createMixin = (mixinOptions) => ({
             },
             {
               immediate: true,
+              deep: true,
             }
           )
         } else {
