@@ -1,5 +1,6 @@
 <template>
   <div
+    ref="columnRef"
     class="group flex items-center justify-between"
     :class="alignmentMap[item.align]"
   >
@@ -41,6 +42,7 @@ const props = defineProps({
 const emit = defineEmits(['updateWidth'])
 
 const resizer = ref(null)
+const columnRef = ref(null)
 
 const widthInPx = computed(() => {
   if (typeof props.item.width === 'string') {
@@ -51,7 +53,7 @@ const widthInPx = computed(() => {
       return parsedWidth
     }
   }
-  return props.item.width
+  return columnRef.value.offsetWidth
 })
 
 const startResizing = (e) => {
