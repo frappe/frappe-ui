@@ -15,9 +15,10 @@ import { reactive } from 'vue'
 const state = reactive({
   selectable: true,
   showTooltip: true,
+  resizeColumn: true,
 })
 
-const simple_columns = [
+const simple_columns = reactive([
   {
     label: 'Name',
     key: 'name',
@@ -36,7 +37,7 @@ const simple_columns = [
     label: 'Status',
     key: 'status',
   },
-]
+])
 
 const simple_rows = [
   {
@@ -55,7 +56,7 @@ const simple_rows = [
   },
 ]
 
-const custom_columns = [
+const custom_columns = reactive([
   {
     label: 'Name',
     key: 'name',
@@ -78,7 +79,7 @@ const custom_columns = [
     key: 'status',
     icon: 'check-circle',
   },
-]
+])
 
 const custom_rows = [
   {
@@ -127,6 +128,7 @@ const custom_rows = [
           getRowRoute: (row) => ({ name: 'User', params: { userId: row.id } }),
           selectable: state.selectable,
           showTooltip: state.showTooltip,
+          resizeColumn: state.resizeColumn,
         }"
         row-key="id"
       />
@@ -140,6 +142,7 @@ const custom_rows = [
           onRowClick: (row) => console.log(row),
           selectable: state.selectable,
           showTooltip: state.showTooltip,
+          resizeColumn: state.resizeColumn,
         }"
         row-key="id"
       >
@@ -203,6 +206,7 @@ const custom_rows = [
     <template #controls>
       <HstCheckbox v-model="state.selectable" title="Selectable" />
       <HstCheckbox v-model="state.showTooltip" title="Show tooltip" />
+      <HstCheckbox v-model="state.resizeColumn" title="Resize Column" />
     </template>
   </Story>
 </template>

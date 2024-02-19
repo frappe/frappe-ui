@@ -19,6 +19,7 @@
         v-for="column in list.columns"
         :key="column.key"
         :item="column"
+        @updateWidth="(w) => (column.width = w)"
       />
     </slot>
   </div>
