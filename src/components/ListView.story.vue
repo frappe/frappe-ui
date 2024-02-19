@@ -15,6 +15,7 @@ import { reactive } from 'vue'
 const state = reactive({
   selectable: true,
   showTooltip: true,
+  resizeColumn: true,
 })
 
 const simple_columns = [
@@ -127,6 +128,7 @@ const custom_rows = [
           getRowRoute: (row) => ({ name: 'User', params: { userId: row.id } }),
           selectable: state.selectable,
           showTooltip: state.showTooltip,
+          resizeColumn: state.resizeColumn,
         }"
         row-key="id"
       />
@@ -140,6 +142,7 @@ const custom_rows = [
           onRowClick: (row) => console.log(row),
           selectable: state.selectable,
           showTooltip: state.showTooltip,
+          resizeColumn: state.resizeColumn,
         }"
         row-key="id"
       >
