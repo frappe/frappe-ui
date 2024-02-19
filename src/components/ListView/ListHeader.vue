@@ -1,7 +1,7 @@
 <template>
   <div
     class="mb-2 grid items-center space-x-4 rounded bg-gray-100 p-2"
-    :style="{ gridTemplateColumns: columnsWidths }"
+    :style="{ gridTemplateColumns }"
   >
     <Checkbox
       v-if="list.options.selectable"
@@ -27,7 +27,7 @@ import { inject, computed } from 'vue'
 
 const list = inject('list')
 
-const columnsWidths = computed(() => {
+const gridTemplateColumns = computed(() => {
   let checkBoxWidth = list.value.options.selectable ? '14px ' : ''
   let columnsWidth = list.value.columns
     .map((col) => {
