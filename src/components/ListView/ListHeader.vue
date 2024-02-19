@@ -1,7 +1,12 @@
 <template>
   <div
     class="mb-2 grid items-center space-x-4 rounded bg-gray-100 p-2"
-    :style="{ gridTemplateColumns }"
+    :style="{
+      gridTemplateColumns: getGridTemplateColumns(
+        list.columns,
+        list.options.selectable
+      ),
+    }"
   >
     <Checkbox
       v-if="list.options.selectable"
@@ -23,21 +28,8 @@
 <script setup>
 import Checkbox from '../Checkbox.vue'
 import ListHeaderItem from './ListHeaderItem.vue'
-import { inject, computed } from 'vue'
+import { getGridTemplateColumns } from './utils'
+import { inject } from 'vue'
 
 const list = inject('list')
-
-const gridTemplateColumns = computed(() => {
-  let checkBoxWidth = list.value.options.selectable ? '14px ' : ''
-  let columnsWidth = list.value.columns
-    .map((col) => {
-      let width = col.width || 1
-      if (typeof width === 'number') {
-        return width + 'fr'
-      }
-      return width
-    })
-    .join(' ')
-  return checkBoxWidth + columnsWidth
-})
 </script>
