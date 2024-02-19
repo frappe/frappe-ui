@@ -30,6 +30,7 @@
 
 <script setup>
 import { alignmentMap } from './utils'
+import { useDebounceFn } from '@vueuse/core'
 import { ref, computed, inject } from 'vue'
 
 const props = defineProps({
@@ -37,9 +38,13 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  debounce: {
+    type: Number,
+    default: 1000,
+  },
 })
 
-const emit = defineEmits(['updateWidth'])
+const emit = defineEmits(['columnWidthUpdated'])
 
 const resizer = ref(null)
 const columnRef = ref(null)
@@ -66,7 +71,7 @@ const startResizing = (e) => {
     let newWidth = initialWidth + (e.clientX - initialX)
 
     props.item.width = `${newWidth < 50 ? 50 : newWidth}px`
-    emit('updateWidth', props.item.width)
+    updateWidth(props.item.width)
   }
   const onMouseUp = () => {
     document.body.classList.remove('select-none')
@@ -78,6 +83,11 @@ const startResizing = (e) => {
   window.addEventListener('mousemove', onMouseMove)
   window.addEventListener('mouseup', onMouseUp)
 }
+
+const updateWidth = useDebounceFn((width) => {
+  props.item.width = width
+  emit('columnWidthUpdated')
+}, props.debounce)
 
 const list = inject('list')
 </script>
