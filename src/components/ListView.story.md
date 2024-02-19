@@ -77,6 +77,8 @@ required to be passed in the `row` object.
    select/multiselect rows and perform some action on them - default is true
 4. showTooltip (Boolean) - if true, tooltip will be shown on hover of row -
    default is true
+5. resizeColumn (Boolean) - if true, column can be resized by dragging the
+   resizer on the right side of the column header - default is true
 
 ---
 
