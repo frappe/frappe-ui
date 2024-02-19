@@ -42,6 +42,7 @@ const props = defineProps({
       onRowClick: null,
       showTooltip: true,
       selectable: true,
+      resizeColumn: true,
     },
   },
 })
@@ -64,6 +65,7 @@ let _options = computed(() => {
     onRowClick: props.options.onRowClick || null,
     showTooltip: defaultTrue(props.options.showTooltip),
     selectable: defaultTrue(props.options.selectable),
+    resizeColumn: defaultTrue(props.options.resizeColumn),
   }
 })
 
