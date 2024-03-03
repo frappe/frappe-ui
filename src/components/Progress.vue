@@ -1,5 +1,5 @@
 <template>
-  <div class="min-w-50 space-y-[10px]">
+  <div class="w-full space-y-[10px]">
     <div
       v-if="props.label || props.hint"
       class="flex items-baseline justify-between"
