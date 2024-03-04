@@ -23,11 +23,9 @@ let createMixin = (mixinOptions) => ({
                 console.warn('Failed to get resource options\n\n', error)
                 out = null
               }
-              return JSON.stringify(out)
+              return out
             },
-            (_options, _oldOptions) => {
-              let options = _options ? JSON.parse(_options) : null
-              let oldOptions = _oldOptions ? JSON.parse(_oldOptions) : null
+            (options, oldOptions) => {
               if (!options) {
                 return
               }
