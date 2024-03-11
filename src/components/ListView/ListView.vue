@@ -42,7 +42,7 @@ const props = defineProps({
       onRowClick: null,
       showTooltip: true,
       selectable: true,
-      resizeColumn: true,
+      resizeColumn: false,
     },
   },
 })
@@ -60,12 +60,16 @@ let _options = computed(() => {
     return value === undefined ? true : value
   }
 
+  function defaultFalse(value) {
+    return value === undefined ? false : value
+  }
+
   return {
     getRowRoute: props.options.getRowRoute || null,
     onRowClick: props.options.onRowClick || null,
     showTooltip: defaultTrue(props.options.showTooltip),
     selectable: defaultTrue(props.options.selectable),
-    resizeColumn: defaultTrue(props.options.resizeColumn),
+    resizeColumn: defaultFalse(props.options.resizeColumn),
   }
 })
 

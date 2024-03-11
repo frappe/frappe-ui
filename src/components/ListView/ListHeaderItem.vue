@@ -1,8 +1,8 @@
 <template>
   <div
     ref="columnRef"
-    class="group flex items-center justify-between"
-    :class="alignmentMap[item.align]"
+    class="group flex items-center"
+    :class="item.align ? alignmentMap[item.align] : 'justify-between'"
   >
     <div
       class="flex items-center space-x-2 truncate text-sm text-gray-600"
