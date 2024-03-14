@@ -14,7 +14,7 @@
       class="[all:unset] hover:[all:unset]"
     >
       <div
-        class="grid items-center space-x-4 rounded px-2 py-2.5"
+        class="grid h-[40px] items-center space-x-4 rounded px-2"
         :class="
           list.selections.has(row[list.rowKey])
             ? 'bg-gray-100 hover:bg-gray-200'
@@ -42,7 +42,12 @@
           ]"
         >
           <slot v-bind="{ idx: i, column, item: row[column.key] }">
-            <ListRowItem :item="row[column.key]" :align="column.align" />
+            <ListRowItem
+              :column="column"
+              :row="row"
+              :item="row[column.key]"
+              :align="column.align"
+            />
           </slot>
         </div>
       </div>

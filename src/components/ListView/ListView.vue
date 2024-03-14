@@ -1,7 +1,7 @@
 <template>
-  <div class="relative flex w-full flex-1 flex-col overflow-x-auto">
+  <div class="relative flex h-full w-full flex-1 flex-col overflow-x-auto">
     <div
-      class="flex w-max min-w-full flex-col overflow-y-hidden"
+      class="flex w-max min-w-full flex-1 flex-col overflow-y-hidden"
       :class="$attrs.class"
     >
       <slot>
@@ -43,6 +43,10 @@ const props = defineProps({
       showTooltip: true,
       selectable: true,
       resizeColumn: false,
+      emptyState: {
+        title: 'No Data',
+        description: 'No data available',
+      },
     },
   },
 })
@@ -70,6 +74,7 @@ let _options = computed(() => {
     showTooltip: defaultTrue(props.options.showTooltip),
     selectable: defaultTrue(props.options.selectable),
     resizeColumn: defaultFalse(props.options.resizeColumn),
+    emptyState: props.options.emptyState,
   }
 })
 
