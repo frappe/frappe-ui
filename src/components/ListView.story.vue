@@ -1,21 +1,30 @@
 <script setup>
-import ListView from './ListView/ListView.vue'
-import ListHeader from './ListView/ListHeader.vue'
-import ListHeaderItem from './ListView/ListHeaderItem.vue'
-import ListRows from './ListView/ListRows.vue'
-import ListRow from './ListView/ListRow.vue'
-import ListRowItem from './ListView/ListRowItem.vue'
-import ListSelectBanner from './ListView/ListSelectBanner.vue'
-import FeatherIcon from './FeatherIcon.vue'
+import { reactive, h } from 'vue'
+import Avatar from './Avatar.vue'
 import Badge from './Badge.vue'
 import Button from './Button.vue'
-import Avatar from './Avatar.vue'
-import { reactive } from 'vue'
+import FeatherIcon from './FeatherIcon.vue'
+import ListHeader from './ListView/ListHeader.vue'
+import ListHeaderItem from './ListView/ListHeaderItem.vue'
+import ListRow from './ListView/ListRow.vue'
+import ListRowItem from './ListView/ListRowItem.vue'
+import ListRows from './ListView/ListRows.vue'
+import ListSelectBanner from './ListView/ListSelectBanner.vue'
+import ListView from './ListView/ListView.vue'
 
 const state = reactive({
   selectable: true,
   showTooltip: true,
   resizeColumn: true,
+  emptyState: {
+    title: 'No records found',
+    description: 'Create a new record to get started',
+    button: {
+      label: 'New Record',
+      variant: 'solid',
+      onClick: () => console.log('New Record'),
+    },
+  },
 })
 
 const simple_columns = reactive([
@@ -23,6 +32,14 @@ const simple_columns = reactive([
     label: 'Name',
     key: 'name',
     width: 3,
+    getLabel: ({ row }) => row.name,
+    prefix: ({ row }) => {
+      return h(Avatar, {
+        shape: 'circle',
+        image: row.user_image,
+        size: 'sm',
+      })
+    },
   },
   {
     label: 'Email',
@@ -46,6 +63,7 @@ const simple_rows = [
     email: 'john@doe.com',
     status: 'Active',
     role: 'Developer',
+    user_image: 'https://avatars.githubusercontent.com/u/499550',
   },
   {
     id: 2,
@@ -53,6 +71,7 @@ const simple_rows = [
     email: 'jane@doe.com',
     status: 'Inactive',
     role: 'HR',
+    user_image: 'https://avatars.githubusercontent.com/u/499120',
   },
 ]
 
@@ -119,6 +138,21 @@ const custom_rows = [
 
 <template>
   <Story :layout="{ type: 'grid', width: '95%' }">
+    <Variant title="Empty List">
+      <div class="h-[250px]">
+        <ListView
+          :columns="simple_columns"
+          :rows="[]"
+          :options="{
+            selectable: state.selectable,
+            showTooltip: state.showTooltip,
+            resizeColumn: state.resizeColumn,
+            emptyState: state.emptyState,
+          }"
+          row-key="id"
+        />
+      </div>
+    </Variant>
     <Variant title="Simple List">
       <ListView
         class="h-[250px]"
@@ -207,6 +241,17 @@ const custom_rows = [
       <HstCheckbox v-model="state.selectable" title="Selectable" />
       <HstCheckbox v-model="state.showTooltip" title="Show tooltip" />
       <HstCheckbox v-model="state.resizeColumn" title="Resize Column" />
+      <!-- empty state config -->
+      <HstText
+        v-model="state.emptyState.title"
+        title="Empty Title"
+        placeholder="No records found"
+      />
+      <HstText
+        v-model="state.emptyState.description"
+        title="Empty Description"
+        placeholder="Create a new record to get started"
+      />
     </template>
   </Story>
 </template>

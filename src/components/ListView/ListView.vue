@@ -1,18 +1,20 @@
 <template>
-  <div class="relative flex w-full flex-1 flex-col overflow-x-auto">
+  <div class="relative flex h-full w-full flex-1 flex-col overflow-x-auto">
     <div
-      class="flex w-max min-w-full flex-col overflow-y-hidden"
+      class="flex w-max min-w-full flex-1 flex-col overflow-y-hidden"
       :class="$attrs.class"
     >
       <slot>
         <ListHeader />
-        <ListRows />
+        <ListRows v-if="props.rows.length" />
+        <ListEmptyState v-else />
         <ListSelectBanner v-if="_options.selectable" />
       </slot>
     </div>
   </div>
 </template>
 <script setup>
+import ListEmptyState from './ListEmptyState.vue'
 import ListHeader from './ListHeader.vue'
 import ListRows from './ListRows.vue'
 import ListSelectBanner from './ListSelectBanner.vue'
@@ -43,6 +45,11 @@ const props = defineProps({
       showTooltip: true,
       selectable: true,
       resizeColumn: false,
+      rowHeight: 40,
+      emptyState: {
+        title: 'No Data',
+        description: 'No data available',
+      },
     },
   },
 })
@@ -70,6 +77,8 @@ let _options = computed(() => {
     showTooltip: defaultTrue(props.options.showTooltip),
     selectable: defaultTrue(props.options.selectable),
     resizeColumn: defaultFalse(props.options.resizeColumn),
+    rowHeight: props.options.rowHeight || 40,
+    emptyState: props.options.emptyState,
   }
 })
 

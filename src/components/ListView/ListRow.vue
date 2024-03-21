@@ -14,13 +14,14 @@
       class="[all:unset] hover:[all:unset]"
     >
       <div
-        class="grid items-center space-x-4 rounded px-2 py-2.5"
+        class="grid items-center space-x-4 rounded px-2"
         :class="
           list.selections.has(row[list.rowKey])
             ? 'bg-gray-100 hover:bg-gray-200'
             : 'hover:bg-gray-50'
         "
         :style="{
+          height: rowHeight,
           gridTemplateColumns: getGridTemplateColumns(
             list.columns,
             list.options.selectable
@@ -42,7 +43,12 @@
           ]"
         >
           <slot v-bind="{ idx: i, column, item: row[column.key] }">
-            <ListRowItem :item="row[column.key]" :align="column.align" />
+            <ListRowItem
+              :column="column"
+              :row="row"
+              :item="row[column.key]"
+              :align="column.align"
+            />
           </slot>
         </div>
       </div>
@@ -72,5 +78,12 @@ const isLastRow = computed(() => {
     list.value.rows[list.value.rows.length - 1][list.value.rowKey] ===
     props.row[list.value.rowKey]
   )
+})
+
+const rowHeight = computed(() => {
+  if (typeof list.value.options.rowHeight === 'number') {
+    return `${list.value.options.rowHeight}px`
+  }
+  return list.value.options.rowHeight
 })
 </script>

@@ -41,6 +41,7 @@ export {
 export { default as ListView } from './components/ListView/ListView.vue'
 export { default as ListHeader } from './components/ListView/ListHeader.vue'
 export { default as ListHeaderItem } from './components/ListView/ListHeaderItem.vue'
+export { default as ListEmptyState } from './components/ListView/ListEmptyState.vue'
 export { default as ListRows } from './components/ListView/ListRows.vue'
 export { default as ListRow } from './components/ListView/ListRow.vue'
 export { default as ListRowItem } from './components/ListView/ListRowItem.vue'

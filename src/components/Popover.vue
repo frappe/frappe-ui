@@ -17,8 +17,8 @@
     <teleport to="#frappeui-popper-root">
       <div
         ref="popover"
-        :class="popoverClass"
-        class="popover-container relative z-[100]"
+        class="relative z-[100]"
+        :class="[popoverContainerClass, popoverClass]"
         :style="{ minWidth: targetWidth ? targetWidth + 'px' : null }"
         @mouseover="pointerOverTargetOrPopup = true"
         @mouseleave="onMouseleave"
@@ -87,6 +87,7 @@ export default {
   expose: ['open', 'close'],
   data() {
     return {
+      popoverContainerClass: 'body-container',
       showPopup: false,
       targetWidth: null,
       pointerOverTargetOrPopup: false,
@@ -111,14 +112,35 @@ export default {
   },
   mounted() {
     this.listener = (e) => {
-      let $els = [this.$refs.reference, this.$refs.popover]
-      let insideClick = $els.some(
-        ($el) => $el && (e.target === $el || $el.contains(e.target))
-      )
+      const clickedElement = e.target
+      const reference = this.$refs.reference
+      const popoverBody = this.$refs.popover
+      const insideClick =
+        clickedElement === reference ||
+        clickedElement === popoverBody ||
+        reference?.contains(clickedElement) ||
+        popoverBody?.contains(clickedElement)
       if (insideClick) {
         return
       }
-      this.close()
+
+      const root = document.getElementById('frappeui-popper-root')
+      const insidePopoverRoot = root.contains(clickedElement)
+      if (!insidePopoverRoot) {
+        return this.close()
+      }
+
+      const bodyClass = `.${this.popoverContainerClass}`
+      const clickedElementBody = clickedElement?.closest(bodyClass)
+      const currentPopoverBody = reference?.closest(bodyClass)
+      const isSiblingClicked =
+        clickedElementBody &&
+        currentPopoverBody &&
+        clickedElementBody === currentPopoverBody
+
+      if (isSiblingClicked) {
+        this.close()
+      }
     }
     if (this.hideOnBlur) {
       document.addEventListener('click', this.listener)

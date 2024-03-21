@@ -5,21 +5,38 @@
     class="flex items-center space-x-2"
     :class="alignmentMap[align]"
   >
-    <slot name="prefix" />
+    <slot name="prefix">
+      <component
+        v-if="column.prefix"
+        :is="
+          typeof column.prefix === 'function'
+            ? column.prefix({ row })
+            : column.prefix
+        "
+      />
+    </slot>
     <slot v-bind="{ label }">
       <div class="truncate text-base">
-        {{ label }}
+        {{ column?.getLabel ? column.getLabel({ row }) : label }}
       </div>
     </slot>
     <slot name="suffix" />
   </component>
 </template>
 <script setup>
-import { alignmentMap } from './utils'
-import Tooltip from '../Tooltip.vue'
 import { computed, inject } from 'vue'
+import Tooltip from '../Tooltip.vue'
+import { alignmentMap } from './utils'
 
 const props = defineProps({
+  column: {
+    type: Object,
+    default: {},
+  },
+  row: {
+    type: Object,
+    default: {},
+  },
   item: {
     type: [String, Number, Object],
     default: '',
