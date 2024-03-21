@@ -6,13 +6,15 @@
     >
       <slot>
         <ListHeader />
-        <ListRows />
+        <ListRows v-if="props.rows.length" />
+        <ListEmptyState v-else />
         <ListSelectBanner v-if="_options.selectable" />
       </slot>
     </div>
   </div>
 </template>
 <script setup>
+import ListEmptyState from './ListEmptyState.vue'
 import ListHeader from './ListHeader.vue'
 import ListRows from './ListRows.vue'
 import ListSelectBanner from './ListSelectBanner.vue'
