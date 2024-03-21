@@ -17,7 +17,7 @@
     </slot>
     <slot v-bind="{ label }">
       <div class="truncate text-base">
-        {{ column.getLabel ? column.getLabel({ row }) : label }}
+        {{ column?.getLabel ? column.getLabel({ row }) : label }}
       </div>
     </slot>
     <slot name="suffix" />
@@ -31,11 +31,11 @@ import { alignmentMap } from './utils'
 const props = defineProps({
   column: {
     type: Object,
-    required: true,
+    default: {},
   },
   row: {
     type: Object,
-    required: true,
+    default: {},
   },
   item: {
     type: [String, Number, Object],
