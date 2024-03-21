@@ -43,6 +43,7 @@ const props = defineProps({
       showTooltip: true,
       selectable: true,
       resizeColumn: false,
+      rowHeight: 40,
       emptyState: {
         title: 'No Data',
         description: 'No data available',
@@ -74,6 +75,7 @@ let _options = computed(() => {
     showTooltip: defaultTrue(props.options.showTooltip),
     selectable: defaultTrue(props.options.selectable),
     resizeColumn: defaultFalse(props.options.resizeColumn),
+    rowHeight: props.options.rowHeight || 40,
     emptyState: props.options.emptyState,
   }
 })

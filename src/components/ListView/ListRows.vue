@@ -2,7 +2,9 @@
   <div class="h-full overflow-y-auto">
     <slot>
       <ListRow v-for="row in list.rows" :key="row[list.rowKey]" :row="row" />
-      <ListEmptyState v-if="!list.rows.length" />
+      <slot name="empty-state" v-if="!list.rows.length">
+        <ListEmptyState />
+      </slot>
     </slot>
   </div>
 </template>
