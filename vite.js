@@ -13,7 +13,7 @@ module.exports = function proxyOptions({ port = 8080 } = {}) {
       server: {
         port: port,
         proxy: {
-          '^/(app|login|api|assets|files)': {
+          '^/(app|login|api|assets|files|pages)': {
             target: `http://127.0.0.1:${webserver_port}`,
             ws: true,
             router: function (req) {
