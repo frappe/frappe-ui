@@ -4,11 +4,14 @@
       class="flex w-max min-w-full flex-1 flex-col overflow-y-hidden"
       :class="$attrs.class"
     >
-      <slot>
+      <slot v-bind="{ showGroupedRows, selectable }">
         <ListHeader />
-        <ListRows v-if="props.rows.length" />
+        <template v-if="props.rows.length">
+          <ListGroups v-if="showGroupedRows" />
+          <ListRows v-else />
+        </template>
         <ListEmptyState v-else />
-        <ListSelectBanner v-if="_options.selectable" />
+        <ListSelectBanner v-if="selectable" />
       </slot>
     </div>
   </div>
@@ -17,6 +20,7 @@
 import ListEmptyState from './ListEmptyState.vue'
 import ListHeader from './ListHeader.vue'
 import ListRows from './ListRows.vue'
+import ListGroups from './ListGroups.vue'
 import ListSelectBanner from './ListSelectBanner.vue'
 import { reactive, computed, provide, watch } from 'vue'
 
@@ -39,7 +43,7 @@ const props = defineProps({
   },
   options: {
     type: Object,
-    default: {
+    default: () => ({
       getRowRoute: null,
       onRowClick: null,
       showTooltip: true,
@@ -50,7 +54,7 @@ const props = defineProps({
         title: 'No Data',
         description: 'No data available',
       },
-    },
+    }),
   },
 })
 
@@ -85,6 +89,14 @@ let _options = computed(() => {
 const allRowsSelected = computed(() => {
   if (!props.rows.length) return false
   return selections.size === props.rows.length
+})
+
+const selectable = computed(() => {
+  return _options.value.selectable
+})
+
+let showGroupedRows = computed(() => {
+  return props.rows.every((row) => row.group)
 })
 
 function toggleRow(row) {

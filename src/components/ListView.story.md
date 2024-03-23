@@ -62,6 +62,31 @@ required to be passed in the `row` object.
    }
    ```
 
+### Grouped Rows
+
+To render grouped rows, you must provide `rows` in the following format:
+
+```
+[
+    {
+        group: 'Group Title 1',
+        collapsed: false,
+        rows: [
+            {id: 1, key1: value1, key2: value2, ...},
+            {id: 2, key1: value1, key2: value2, ...},
+        ]
+    },
+    {
+        group: 'Group Title 2',
+        collapsed: false,
+        rows: [
+            {id: 3, key1: value1, key2: value2, ...},
+            {id: 4, key1: value1, key2: value2, ...},
+        ]
+    },
+]
+```
+
 ### Options
 
 1. If you want to route using router-link just add a `getRowRoute` function
