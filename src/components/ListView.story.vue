@@ -277,21 +277,6 @@ const custom_rows = [
 
 <template>
   <Story :layout="{ type: 'grid', width: '95%' }">
-    <Variant title="Empty List">
-      <div class="h-[250px]">
-        <ListView
-          :columns="simple_columns"
-          :rows="[]"
-          :options="{
-            selectable: state.selectable,
-            showTooltip: state.showTooltip,
-            resizeColumn: state.resizeColumn,
-            emptyState: state.emptyState,
-          }"
-          row-key="id"
-        />
-      </div>
-    </Variant>
     <Variant title="Simple List">
       <ListView
         class="h-[150px]"
@@ -400,6 +385,22 @@ const custom_rows = [
         <ListRows v-else />
         <ListSelectBanner v-if="selectable" />
       </ListView>
+    </Variant>
+    <Variant title="Empty List">
+      <div>
+        <ListView
+          class="h-[250px]"
+          :columns="simple_columns"
+          :rows="[]"
+          :options="{
+            selectable: state.selectable,
+            showTooltip: state.showTooltip,
+            resizeColumn: state.resizeColumn,
+            emptyState: state.emptyState,
+          }"
+          row-key="id"
+        />
+      </div>
     </Variant>
 
     <template #controls>
