@@ -43,7 +43,18 @@
           ]"
         >
           <slot v-bind="{ idx: i, column, item: row[column.key] }">
+            <component
+              v-if="list.slots.cell"
+              :is="list.slots.cell"
+              v-bind="{
+                column,
+                row,
+                item: row[column.key],
+                align: column.align,
+              }"
+            />
             <ListRowItem
+              v-else
               :column="column"
               :row="row"
               :item="row[column.key]"

@@ -386,6 +386,27 @@ const custom_rows = [
         <ListSelectBanner v-if="selectable" />
       </ListView>
     </Variant>
+    <Variant title="Cell Slot">
+      <div>
+        <ListView
+          class="h-[250px]"
+          :columns="simple_columns"
+          :rows="simple_rows"
+          :options="{
+            selectable: state.selectable,
+            showTooltip: state.showTooltip,
+            resizeColumn: state.resizeColumn,
+            emptyState: state.emptyState,
+          }"
+          row-key="id"
+        >
+          <template #cell="{ item, row, column }">
+            <Badge v-if="column.key == 'status'">{{ item }}</Badge>
+            <span class="font-medium text-gray-700" v-else>{{ item }}</span>
+          </template>
+        </ListView>
+      </div>
+    </Variant>
     <Variant title="Empty List">
       <div>
         <ListView

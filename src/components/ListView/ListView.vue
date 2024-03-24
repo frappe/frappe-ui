@@ -22,7 +22,7 @@ import ListHeader from './ListHeader.vue'
 import ListRows from './ListRows.vue'
 import ListGroups from './ListGroups.vue'
 import ListSelectBanner from './ListSelectBanner.vue'
-import { reactive, computed, provide, watch } from 'vue'
+import { reactive, computed, provide, watch, useSlots } from 'vue'
 
 defineOptions({
   inheritAttrs: false,
@@ -57,6 +57,8 @@ const props = defineProps({
     }),
   },
 })
+
+const slots = useSlots()
 
 let selections = reactive(new Set())
 
@@ -122,6 +124,7 @@ provide(
     options: _options.value,
     selections: selections,
     allRowsSelected: allRowsSelected.value,
+    slots: slots,
     toggleRow,
     toggleAllRows,
   }))
