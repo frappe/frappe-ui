@@ -372,18 +372,12 @@ const custom_rows = [
           resizeColumn: state.resizeColumn,
         }"
         row-key="id"
-        v-slot="{ showGroupedRows, selectable }"
       >
-        <ListHeader />
-        <ListGroups v-if="showGroupedRows">
-          <template #group-header="{ group }">
-            <span class="text-base font-medium leading-6 text-gray-900">
-              {{ group.group }} ({{ group.rows.length }})
-            </span>
-          </template>
-        </ListGroups>
-        <ListRows v-else />
-        <ListSelectBanner v-if="selectable" />
+        <template #group-header="{ group }">
+          <span class="text-base font-medium leading-6 text-gray-900">
+            {{ group.group }} ({{ group.rows.length }})
+          </span>
+        </template>
       </ListView>
     </Variant>
     <Variant title="Cell Slot">

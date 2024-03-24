@@ -1,22 +1,29 @@
 <template>
-  <div class="flex items-center px-2 py-1.5">
-    <button @click="toggleGroup" class="-ml-[1px] rounded-sm hover:bg-gray-50">
+  <div class="flex items-center">
+    <button
+      @click="toggleGroup"
+      class="ml-[3px] mr-[11px] rounded p-1 hover:bg-gray-100"
+    >
       <DownSolid
         class="h-4 w-4 text-gray-900 transition-transform duration-200"
         :class="[group.collapsed ? '-rotate-90' : '']"
       />
     </button>
-    <div class="ml-[15px] w-full">
-      <slot>
-        <span class="text-base font-medium leading-6">
-          {{ group.group }}
-        </span>
-      </slot>
+    <div class="w-full py-1.5 pr-2">
+      <component
+        v-if="list.slots['group-header']"
+        :is="list.slots['group-header']"
+        v-bind="{ group }"
+      />
+      <span v-else class="text-base font-medium leading-6">
+        {{ group.group }}
+      </span>
     </div>
   </div>
   <div class="mx-2 h-px border-t border-gray-200"></div>
 </template>
 <script setup>
+import { inject } from 'vue'
 import DownSolid from '../../icons/DownSolid.vue'
 
 const props = defineProps({
@@ -25,6 +32,8 @@ const props = defineProps({
     required: true,
   },
 })
+
+const list = inject('list')
 
 function toggleGroup() {
   if (props.group.collapsed == null) {
