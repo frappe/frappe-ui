@@ -12,8 +12,9 @@
     </div>
     <div
       v-if="placeholder"
-      class="absolute select-none text-gray-500"
-      :class="paddingClasses"
+      v-show="!modelValue"
+      class="pointer-events-none absolute text-gray-500"
+      :class="[fontSizeClasses, paddingClasses]"
     >
       {{ placeholder }}
     </div>
@@ -96,6 +97,15 @@ const textColor = computed(() => {
   return props.disabled ? 'text-gray-500' : 'text-gray-800'
 })
 
+const fontSizeClasses = computed(() => {
+  return {
+    sm: 'text-base',
+    md: 'text-base',
+    lg: 'text-lg',
+    xl: 'text-xl',
+  }[props.size]
+})
+
 const paddingClasses = computed(() => {
   return {
     sm: 'px-2',
@@ -107,10 +117,10 @@ const paddingClasses = computed(() => {
 
 const selectClasses = computed(() => {
   let sizeClasses = {
-    sm: 'text-base rounded h-7',
-    md: 'text-base rounded h-8',
-    lg: 'text-lg rounded-md h-10',
-    xl: 'text-xl rounded-md h-10',
+    sm: 'rounded h-7',
+    md: 'rounded h-8',
+    lg: 'rounded-md h-10',
+    xl: 'rounded-md h-10',
   }[props.size]
 
   let variant = props.disabled ? 'disabled' : props.variant
@@ -130,10 +140,11 @@ const selectClasses = computed(() => {
 
   return [
     sizeClasses,
+    fontSizeClasses.value,
     paddingClasses.value,
     variantClasses,
     textColor.value,
-    'transition-colors w-full',
+    'transition-colors w-full py-0',
   ]
 })
 
