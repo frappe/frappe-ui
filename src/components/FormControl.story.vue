@@ -54,7 +54,7 @@ const variants = ['subtle', 'outline']
         />
       </div>
     </Variant>
-    <Variant title="select">
+    <Variant title="autocomplete">
       <div class="p-2">
         <FormControl
           type="autocomplete"
