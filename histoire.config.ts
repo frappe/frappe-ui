@@ -9,9 +9,10 @@ export default defineConfig({
   setupFile: './histoire.setup.ts',
   plugins: [HstVue()],
   theme: {
-    title: 'Espresso Design System.',
+    title: 'Frappe UI',
     defaultColorScheme: 'light',
     hideColorSchemeSwitch: true,
+    favicon: 'frappe-ui-only-logo.png',
     logo: {
       square: './frappe-ui-only-logo.png',
       light: './frappe-ui-logo-200.png',
@@ -23,14 +24,57 @@ export default defineConfig({
     },
   },
   tree: {
+    order(a, b) {
+      let maintainOrder = [
+        'Introduction',
+        'Getting Started',
+        'Resource',
+        'List Resource',
+        'Document Resource',
+        'Utilities',
+        'Directives',
+      ]
+      let aIndex = maintainOrder.indexOf(a)
+      let bIndex = maintainOrder.indexOf(b)
+      if (aIndex > -1 && bIndex > -1) {
+        return aIndex - bIndex
+      } else if (aIndex > -1) {
+        return -1
+      } else if (bIndex > -1) {
+        return 1
+      } else {
+        return a.localeCompare(b)
+      }
+    },
     groups: [
       {
         id: 'top',
         title: '',
+        include: (file) => {
+          return (
+            file.path.includes('docs/') &&
+            !file.path.includes('docs/resources/') &&
+            !file.path.includes('docs/other/')
+          )
+        },
+      },
+      {
+        id: 'resources',
+        title: 'Data Fetching',
+        include: (file) => {
+          return file.path.includes('docs/resources/')
+        },
       },
       {
         id: 'components',
         title: 'Components',
+        include: (file) => {
+          return !file.path.includes('docs/')
+        },
+      },
+      {
+        id: 'other',
+        title: 'Other',
         include: (file) => true,
       },
     ],

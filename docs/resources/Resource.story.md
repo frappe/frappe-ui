@@ -1,30 +1,3 @@
-<script setup>
-import { createResource, setConfig, request, Button } from '../../src'
-let post = createResource({
-  url: 'https://jsonplaceholder.typicode.com/posts/1',
-})
-if (typeof window !== 'undefined') {
-    post.fetch()
-}
-
-let post2 = createResource({
-  url: 'https://jsonplaceholder.typicode.com/posts/1',
-  cache: 'posts'
-})
-</script>
-<script>
-export default {
-  resources: {
-    posts() {
-      return {
-        url: 'https://jsonplaceholder.typicode.com/posts/1',
-        auto: true
-      }
-    },
-  },
-}
-</script>
-
 # Resource
 
 Resource is a feature to manage async data fetching and mutations in your Vue
@@ -68,11 +41,6 @@ post.fetch()
 </script>
 ```
 
-<Story class="!block">
-  <Button @click="post.reload()" :loading="post.loading"> Reload </Button>
-  <pre>{{ post }}</pre>
-</Story>
-
 ## Options API example
 
 Resources can also be used in options API style. You need to register the
@@ -111,10 +79,6 @@ export default {
 </script>
 ```
 
-<Story class="!block">
-    <pre>{{ $resources.posts }}</pre>
-</Story>
-
 ## Caching example
 
 Caching is a first-class feature in resources. To cache responses, just define a
@@ -139,13 +103,6 @@ let post = createResource({
 })
 </script>
 ```
-
-<Story class="!block">
-  <Button @click="post2.reload()" :loading="post2.loading">
-    {{ post2.fetched ? 'Reload' : 'Fetch data' }}
-  </Button>
-  <pre>{{ post2.data }}</pre>
-</Story>
 
 ## List of Options and API
 
@@ -318,8 +275,8 @@ from `message` key and error from `exc`.
 <script setup>
 import { createResource } from 'frappe-ui'
 let todos = createResource({
-  url: '/api/method/frappe.client.get_list', // [!code --]
-  url: 'frappe.client.get_list', // [!code ++]
+- url: '/api/method/frappe.client.get_list',
++ url: 'frappe.client.get_list',
   params: {
     doctype: 'ToDo',
     filters: {
