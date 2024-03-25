@@ -114,7 +114,7 @@
 </template>
 
 <script setup>
-import { Autocomplete, FeatherIcon, FormControl } from 'frappe-ui'
+import { Autocomplete, FeatherIcon, FormControl } from '../../index'
 import { computed, h } from 'vue'
 import FilterIcon from './FilterIcon.vue'
 import NestedPopover from './NestedPopover.vue'
