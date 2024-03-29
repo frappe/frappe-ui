@@ -6,6 +6,7 @@
     <img
       v-if="image"
       :src="image"
+      :alt="label"
       :class="[shapeClasses, 'h-full w-full object-cover']"
     />
     <div
