@@ -52,7 +52,7 @@ export { default as ListSelectBanner } from './components/ListView/ListSelectBan
 export { default as ListFooter } from './components/ListView/ListFooter.vue'
 export { default as Toast } from './components/Toast.vue'
 export { toast, Toasts } from './components/toast.js'
-export { default as Tooltip } from './components/Tooltip.vue'
+export { default as Tooltip } from './components/Tooltip/Tooltip.vue'
 export { default as CommandPalette } from './components/CommandPalette/CommandPalette.vue'
 export { default as CommandPaletteItem } from './components/CommandPalette/CommandPaletteItem.vue'
 export { default as ListFilter } from './components/ListFilter/ListFilter.vue'
@@ -65,7 +65,7 @@ export { default as visibilityDirective } from './directives/visibility.js'
 export { default as call, createCall } from './utils/call.js'
 export { default as debounce } from './utils/debounce.ts'
 export { default as fileToBase64 } from './utils/file-to-base64.js'
-export { default as FileUploadHandler } from './utils/fileUploadHandler'
+export { default as FileUploadHandler } from './utils/fileUploadHandler.ts'
 export { usePageMeta } from './utils/pageMeta.js'
 
 // data-fetching, resources
@@ -77,7 +77,7 @@ export {
   getCachedDocumentResource,
   getCachedListResource,
   resourcesPlugin,
-} from './resources'
+} from './resources/index.js'
 export { request } from './utils/request.js'
 export { frappeRequest } from './utils/frappeRequest.js'
 export { default as initSocket } from './utils/socketio.js'
