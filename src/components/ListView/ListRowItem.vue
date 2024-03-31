@@ -25,7 +25,7 @@
 </template>
 <script setup>
 import { computed, inject } from 'vue'
-import Tooltip from '../Tooltip.vue'
+import { Tooltip } from '../../index'
 import { alignmentMap } from './utils'
 
 const props = defineProps({
