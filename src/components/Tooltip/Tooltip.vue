@@ -44,6 +44,7 @@ const delayDuration = computed(() => props.hoverDelay * 1000)
           v-if="props.text || $slots.body"
           :side="props.placement"
           :side-offset="4"
+          class="z-10"
         >
           <slot name="body">
             <div
