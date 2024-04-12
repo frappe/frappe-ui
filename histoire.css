@@ -16,3 +16,12 @@ input.htw-text-inherit {
   font-size: 100%;
   line-height: normal;
 }
+
+.htw-prose a {
+  text-decoration: underline;
+  color: var(--tw-prose-code);
+}
+
+.histoire-app-logo {
+  width: 100px;
+}
