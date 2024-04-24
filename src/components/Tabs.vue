@@ -85,7 +85,7 @@ const changedIndex = computed({
 
 const tabRef = ref([])
 const indicator = ref(null)
-const tabsLength = ref(props.tabs?.length)
+const tabsLength = computed(() => props.tabs?.length)
 
 const indicatorLeft = ref(props.options?.indicatorLeft)
 const transitionClass = ref('')
