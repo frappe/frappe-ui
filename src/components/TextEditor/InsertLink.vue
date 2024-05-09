@@ -23,7 +23,7 @@
 <script>
 import Dialog from '../Dialog.vue'
 import Button from '../Button.vue'
-import Input from '../Input.vue'
+import FormControl from '../FormControl.vue'
 
 export default {
   name: 'InsertLink',
