@@ -28,7 +28,7 @@ import FormControl from '../FormControl.vue'
 export default {
   name: 'InsertLink',
   props: ['editor'],
-  components: { Button, Input, Dialog },
+  components: { Button, FormControl, Dialog },
   data() {
     return {
       setLinkDialog: { url: '', show: false },
