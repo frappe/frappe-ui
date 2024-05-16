@@ -26,6 +26,9 @@ to reload your data.
 When you create a resource using the `createResource` function, it will create a
 reactive object with properties like `data`, `loading`, `error`, `reload()` etc.
 
+The default request method is `POST`. This can be changed in the `options`
+object.
+
 ```vue
 <template>
   <Button @click="post.reload()" :loading="post.loading"> Reload </Button>
@@ -36,6 +39,7 @@ reactive object with properties like `data`, `loading`, `error`, `reload()` etc.
 import { createResource } from 'frappe-ui'
 let post = createResource({
   url: 'https://jsonplaceholder.typicode.com/posts/1',
+  method: 'GET',
 })
 post.fetch()
 </script>
