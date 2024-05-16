@@ -231,8 +231,8 @@ service.
 
 ```vue
 <template>
-  <Button @click="post.reload()" :loading="post.loading"> Reload </Button>
-  <pre>{{ post }}</pre>
+  <Button @click="todos.reload()" :loading="todos.loading"> Reload </Button>
+  <pre>{{ todos }}</pre>
 </template>
 
 <script setup>
