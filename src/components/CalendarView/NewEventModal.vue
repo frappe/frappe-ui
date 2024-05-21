@@ -167,14 +167,13 @@ function submitEvent(close) {
   }
 
   // if it has ID then event already exists
+  handleEventTime()
   if (props.event.hasOwnProperty('id')) {
     newEvent.id = props.event.id
-    handleEventTime()
     updateEventState(newEvent)
   }
   // else new event is created with ID
   else {
-    handleEventTime()
     const id = '#' + Math.random().toString(36).substring(3, 9)
     newEvent.id = id
     createNewEvent(newEvent)

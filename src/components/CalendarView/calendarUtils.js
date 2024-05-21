@@ -133,12 +133,15 @@ export function handleSeconds(time) {
 
 export function findOverlappingEventsCount(events) {
   // Sort events based on start time
-  events.sort((a, b) => a.startTime - b.startTime)
+  events = events.sort((a, b) => a.startTime - b.startTime)
 
   let hallNumber = 0
   const result = []
 
   for (const event of events) {
+    if (event.date == '2024-05-05') {
+      debugger
+    }
     const availableHall = result.find(
       (hall) => hall[hall.length - 1].endTime <= event.startTime
     )

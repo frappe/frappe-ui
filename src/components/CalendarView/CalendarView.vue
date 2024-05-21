@@ -169,7 +169,7 @@ let date = ref(
   )
 )
 
-let parsedData = computed(() => groupBy(props.events, (row) => row.date))
+let parsedData = computed(() => groupBy(events.value, (row) => row.date))
 
 let incrementClickEvents = {
   Month: incrementMonth,

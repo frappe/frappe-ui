@@ -189,14 +189,13 @@ const parsedData = computed(() => {
   let groupByDate = groupBy(props.events, (row) => row.date)
   let sortedArray = {}
 
-  for (const [key, value] of Object.entries(groupByDate)) {
+  for (let [key, value] of Object.entries(groupByDate)) {
+    value = value.filter((event) => !event.isFullDay)
     value.forEach((task) => {
       task.startTime = calculateMinutes(task.from_time)
       task.endTime = calculateMinutes(task.to_time)
     })
-    let sortedEvents = value
-      .filter((event) => !event.isFullDay)
-      .sort((a, b) => a.startTime - b.startTime)
+    let sortedEvents = value.sort((a, b) => a.startTime - b.startTime)
 
     sortedArray[key] = findOverlappingEventsCount(sortedEvents)
   }

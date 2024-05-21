@@ -116,10 +116,7 @@ const parsedData = computed(() => {
       task.startTime = calculateMinutes(task.from_time)
       task.endTime = calculateMinutes(task.to_time)
     })
-    let sortedEvents = value
-      .filter((event) => !event.isFullDay)
-      .sort((a, b) => a.startTime - b.startTime)
-
+    let sortedEvents = value.sort((a, b) => a.startTime - b.startTime)
     sortedArray[key] = findOverlappingEventsCount(sortedEvents)
   }
   return sortedArray
