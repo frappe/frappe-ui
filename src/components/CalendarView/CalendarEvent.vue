@@ -36,7 +36,7 @@
 
       <div class="flex w-fit flex-col overflow-hidden whitespace-nowrap">
         <p class="text-ellipsis text-sm font-medium text-gray-800">
-          {{ calendarEvent.title || '(No Title)' }}
+          {{ calendarEvent.title || 'New Event' }}
         </p>
         <p
           class="text-ellipsis text-xs font-normal text-gray-800"

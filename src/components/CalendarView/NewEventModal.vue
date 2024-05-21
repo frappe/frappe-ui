@@ -90,9 +90,10 @@ import { computed, inject, reactive, ref } from 'vue'
 import Dialog from '../Dialog.vue'
 import FormControl from '../FormControl.vue'
 import ErrorMessage from '../ErrorMessage.vue'
+import Button from '../Button.vue'
 
 import { calculateDiff, colorMap, handleSeconds } from './calendarUtils'
-const show = defineModel()
+const show = ref(false)
 
 const props = defineProps({
   event: {

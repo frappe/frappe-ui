@@ -13,7 +13,7 @@
     </div>
     <div class="flex flex-col gap-5">
       <div class="flex justify-between text-xl font-semibold">
-        <span>{{ calendarEvent.title || '(No Title)' }}</span>
+        <span>{{ calendarEvent.title || 'New Event' }}</span>
       </div>
       <div class="flex flex-col gap-4">
         <div class="flex items-center gap-2">

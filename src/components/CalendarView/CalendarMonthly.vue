@@ -1,5 +1,5 @@
 <template>
-  <div class="h-[92%] min-h-[600px] min-w-[600px]">
+  <div class="h-[92%]">
     <!-- Day List -->
     <div class="grid w-full grid-cols-7 pb-2">
       <span
@@ -15,7 +15,7 @@
     >
       <div
         v-for="date in currentMonthDates"
-        class="border-b-[1px] border-r-[1px] border-gray-200"
+        class="h-28 overflow-scroll border-b-[1px] border-r-[1px] border-gray-200"
         @dblclick.prevent="openNewEventModal(date)"
         @dragover.prevent
         @drageneter.prevent
