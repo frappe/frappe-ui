@@ -80,8 +80,6 @@ const props = defineProps({
 
 const defaultConfig = {
   scrollToHour: 15,
-  hourHeight: 72,
-  redundantCellHeight: 50,
   disableModes: [],
   defaultMode: 'Month',
   isEditMode: false,
@@ -89,6 +87,8 @@ const defaultConfig = {
 }
 
 const overrideConfig = { ...defaultConfig, ...props.config }
+overrideConfig['redundantCellHeight'] = 50
+overrideConfig['hourHeight'] = 72
 let activeView = ref(overrideConfig.defaultMode)
 
 provide('activeView', activeView)

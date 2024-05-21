@@ -139,9 +139,6 @@ export function findOverlappingEventsCount(events) {
   const result = []
 
   for (const event of events) {
-    if (event.date == '2024-05-05') {
-      debugger
-    }
     const availableHall = result.find(
       (hall) => hall[hall.length - 1].endTime <= event.startTime
     )

@@ -4,19 +4,21 @@
       <CalendarView
         :config="config"
         :events="events"
-        @createEvent="createEvent"
-        @updateEvent="updateEvent"
-        @deleteEvent="deleteEvent"
+        @createEvent="(event) => logEvent('createEvent', event)"
+        @updateEvent="(event) => logEvent('updateEvent', event)"
+        @deleteEvent="(event) => logEvent('deleteEvent', event)"
       />
     </div>
   </Story>
 </template>
 <script setup>
 import CalendarView from './CalendarView/CalendarView.vue'
+import { logEvent } from 'histoire/client'
 
 const config = {
   defaultMode: 'Month',
   isEditMode: true,
+  eventIcons: {},
 }
 
 const events = [
@@ -24,7 +26,7 @@ const events = [
     title: 'Maths by Sheldon',
     participant: 'Sheldon',
     id: 'EDU-CSH-2024-00013',
-    venue: 'Room No: HTL-ROOM-2024-00002',
+    venue: 'CNF-ROOM-2024-00002',
     date: '2024-05-01',
     from_time: '12:00:00',
     to_time: '13:00:00',
@@ -34,7 +36,7 @@ const events = [
     title: 'Maths by Sheldon',
     participant: 'Sheldon',
     id: 'EDU-CSH-2024-00014',
-    venue: 'Room No: HTL-ROOM-2024-00002',
+    venue: 'CNF-ROOM-2024-00002',
     date: '2024-05-02',
     from_time: '12:00:00',
     to_time: '13:00:00',
@@ -44,7 +46,7 @@ const events = [
     title: 'English by Ryan Mathew',
     participant: 'Ryan Mathew',
     id: 'EDU-CSH-2024-00001',
-    venue: 'Room No: HTL-ROOM-2024-00001',
+    venue: 'CNF-ROOM-2024-00001',
     date: '2024-05-05',
     from_time: '16:00:00',
     to_time: '17:00:00',
@@ -54,7 +56,7 @@ const events = [
     title: 'Maths by Sheldon',
     participant: 'Sheldon',
     id: 'EDU-CSH-2024-00115',
-    venue: 'Room No: HTL-ROOM-2024-00002',
+    venue: 'CNF-ROOM-2024-00002',
     date: '2024-05-05',
     from_time: '12:00:00',
     to_time: '13:00:00',
@@ -64,7 +66,7 @@ const events = [
     title: 'English by Ryan Mathew',
     participant: 'Ryan Mathew',
     id: 'EDU-CSH-2024-00002',
-    venue: 'Room No: HTL-ROOM-2024-00001',
+    venue: 'CNF-ROOM-2024-00001',
     date: '2024-05-06',
     from_time: '16:00:00',
     to_time: '17:00:00',
@@ -74,7 +76,7 @@ const events = [
     title: 'English by Ryan Mathew',
     participant: 'Ryan Mathew',
     id: 'EDU-CSH-2024-00099',
-    venue: 'Room No: HTL-ROOM-2024-00001',
+    venue: 'CNF-ROOM-2024-00001',
     date: '2024-05-06',
     from_time: '16:30:00',
     to_time: '17:30:00',
@@ -90,17 +92,5 @@ const events = [
     isFullDay: true,
   },
 ]
-
-function createEvent(event) {
-  console.log('createEvent', event)
-}
-
-function updateEvent(event) {
-  console.log('updateEvent', event)
-}
-
-function deleteEvent(event) {
-  console.log('deleteEvent', event)
-}
 </script>
 <style></style>
