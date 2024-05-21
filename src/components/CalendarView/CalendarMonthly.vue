@@ -113,16 +113,21 @@ const parsedData = computed(() => {
 })
 
 function sortEvents(events) {
-  let sortedEvents = events.sort((a, b) =>
-    a.from_time !== b.from_time
-      ? calculateMinutes(a.from_time) > calculateMinutes(b.from_time)
+  let fullDayEvents = events.filter((event) => event.isFullDay)
+
+  let sortedEvents = events
+    .filter((event) => !event.isFullDay)
+    .sort((a, b) =>
+      a.from_time !== b.from_time
+        ? calculateMinutes(a.from_time) > calculateMinutes(b.from_time)
+          ? 1
+          : -1
+        : calculateMinutes(a.to_time) > calculateMinutes(b.to_time)
         ? 1
         : -1
-      : calculateMinutes(a.to_time) > calculateMinutes(b.to_time)
-      ? 1
-      : -1
-  )
-  return sortedEvents
+    )
+  // full day events should be at the top in month view
+  return [...fullDayEvents, ...sortedEvents]
 }
 
 function currentMonthDate(date) {
@@ -137,10 +142,6 @@ const dragStart = (event, calendarEventID) => {
   event.dataTransfer.dropEffect = 'move'
   event.dataTransfer.effectAllowed = 'move'
   event.dataTransfer.setData('calendarEventID', calendarEventID)
-}
-
-const dragOver = (event) => {
-  event.preventDefault()
 }
 
 const onDrop = (event, date) => {

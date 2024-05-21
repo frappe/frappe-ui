@@ -3,9 +3,7 @@
     <div class="mb-2 flex justify-between">
       <!-- left side  -->
       <!-- Year, Month -->
-      <span class="text-xl font-medium">
-        {{ getMonth() + ', ' + currentYear }}</span
-      >
+      <span class="text-xl font-medium"> {{ currentMonthYear }}</span>
       <!-- right side -->
       <!-- actions buttons for calendar -->
       <div class="flex gap-x-1">
@@ -45,7 +43,6 @@
     <CalendarDaily
       v-else
       :events="events"
-      :currentMonthEvents="parsedData"
       :current-date="currentMonthDates[date]"
       :config="overrideConfig"
     />
@@ -169,8 +166,6 @@ let date = ref(
   )
 )
 
-let parsedData = computed(() => groupBy(events.value, (row) => row.date))
-
 let incrementClickEvents = {
   Month: incrementMonth,
   Week: incrementWeek,
@@ -285,10 +280,9 @@ function findIndexOfDate(date) {
     (d) => new Date(d).toDateString() === new Date(date).toDateString()
   )
 }
-
-function getMonth() {
-  return monthList[currentMonth.value]
-}
+const currentMonthYear = computed(() => {
+  return monthList[currentMonth.value] + ', ' + currentYear.value
+})
 
 function isCurrentMonthDate(date) {
   date = new Date(date)

@@ -94,10 +94,6 @@ const props = defineProps({
     type: Object,
     required: false,
   },
-  currentMonthEvents: {
-    type: Object,
-    required: true,
-  },
   config: {
     type: Object,
   },
@@ -108,9 +104,10 @@ const props = defineProps({
 })
 
 const parsedData = computed(() => {
+  let groupByDate = groupBy(props.events, (row) => row.date)
   let sortedArray = {}
 
-  for (let [key, value] of Object.entries(props.currentMonthEvents)) {
+  for (let [key, value] of Object.entries(groupByDate)) {
     value = value.filter((event) => !event.isFullDay)
     value.forEach((task) => {
       task.startTime = calculateMinutes(task.from_time)
@@ -162,17 +159,5 @@ function openNewEventModal(event, from_time) {
   newEvent.from_time = from_time
   newEvent.to_time = to_time
   showEventModal.value = true
-}
-
-function handleClick(e) {
-  // change the event z-index to 100
-  increaseZIndex.value = true
-  e.target.parentElement.style.zIndex = 100
-}
-
-function handleBlur(e, calendarEvent) {
-  // change the event z-index to 0
-  increaseZIndex.value = false
-  e.target.parentElement.style.zIndex = 0
 }
 </script>
