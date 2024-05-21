@@ -1,0 +1,317 @@
+<template>
+  <div class="h-[90%] p-4">
+    <div class="h-full min-h-[500px] min-w-[600px] overflow-auto">
+      <!-- Day List -->
+      <div class="flex">
+        <div class="w-16"></div>
+        <div class="mb-2 grid w-full grid-cols-7">
+          <span
+            v-for="date in weeklyDates"
+            class="text-center text-sm text-gray-600"
+            :class="
+              new Date(date).toDateString() === new Date().toDateString()
+                ? 'font-bold'
+                : 'font-normal'
+            "
+          >
+            {{ parseDateWithDay(date) }}
+          </span>
+        </div>
+      </div>
+
+      <div class="h-8 border-[1px]">
+        <p class="w-16 text-center">All Day</p>
+      </div>
+
+      <div
+        class="flex w-full overflow-scroll border-b-[1px] border-l-[1px]"
+        ref="gridRef"
+      >
+        <!-- Time List form 0 - 24 -->
+        <div class="grid h-full w-16 grid-cols-1">
+          <span
+            v-for="time in 24"
+            class="flex h-[72px] items-end justify-center text-center text-sm font-normal text-gray-600"
+            :style="{ height: `${hourHeight}px` }"
+          />
+        </div>
+
+        <!-- Grid -->
+        <div class="grid w-full grid-cols-7">
+          <!-- full day events -->
+          <div v-for="(date, idx) in weeklyDates">
+            <div
+              class="flex w-full flex-col gap-1 border-b-[1px] border-r-[1px] border-gray-200 transition-all"
+              :class="[idx === 0 && 'relative border-l-[1px]']"
+              ref="allDayCells"
+              :data-date-attr="date"
+            >
+              <Button
+                v-if="showCollapsable"
+                @click="isCollapsed = !isCollapsed"
+                class="absolute -left-[42px] bottom-[4px] cursor-pointer font-bold"
+                :icon="isCollapsed ? 'chevron-down' : 'chevron-up'"
+                variant="ghost"
+                size="lg"
+              />
+              <div class="w-full" v-if="!isCollapsed">
+                <CalendarEvent
+                  v-for="(calendarEvent, idx) in fullDayEvents[parseDate(date)]"
+                  class="mb-1 w-[90%] cursor-pointer"
+                  :event="{ ...calendarEvent, idx }"
+                  :key="calendarEvent.id"
+                  :date="date"
+                />
+              </div>
+              <div v-else class="flex flex-col justify-between">
+                <ShowMoreCalendarEvent
+                  v-if="fullDayEvents[parseDate(date)]?.length > 0"
+                  :event="fullDayEvents[parseDate(date)][0]"
+                  :date="date"
+                  :totalEventsCount="fullDayEvents[parseDate(date)].length"
+                  @showMoreEvents="isCollapsed = !isCollapsed"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- time events -> not full day events -->
+          <div
+            v-for="(date, idx) in weeklyDates"
+            class="relative border-r-[1px]"
+            :class="idx === 0 && 'calendar-column'"
+            :data-date-attr="date"
+          >
+            <!-- Time Grid -->
+            <div
+              class="cell relative flex cursor-pointer"
+              v-for="time in twentyFourHoursFormat"
+              :data-time-attr="time"
+              @dblclick="openNewEventModal($event, time)"
+            >
+              <div
+                class="w-full border-b-[1px] border-gray-200"
+                :style="{ height: `${hourHeight}px` }"
+              />
+            </div>
+
+            <!-- Calendar Events populations  -->
+            <CalendarEvent
+              v-for="(calendarEvent, idx) in parsedData[parseDate(date)]"
+              class="absolute mb-2 w-[90%] cursor-pointer"
+              :event="calendarEvent"
+              :key="calendarEvent.id"
+              :date="date"
+            />
+
+            <!-- Current time style  -->
+            <div
+              class="absolute top-20 z-50 w-full pl-2"
+              v-if="new Date(date).toDateString() === new Date().toDateString()"
+              :style="setCurrentTime"
+            >
+              <div class="current-time relative h-0.5 bg-red-600" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <NewEventModal
+    v-if="showEventModal"
+    v-model="showEventModal"
+    :event="newEvent"
+  />
+</template>
+<script setup>
+import { computed, ref, onMounted, reactive, watch } from 'vue'
+import CalendarEvent from './CalendarEvent.vue'
+import NewEventModal from './NewEventModal.vue'
+import {
+  calculateMinutes,
+  convertMinutesToHours,
+  twentyFourHoursFormat,
+  findOverlappingEventsCount,
+  parseDateWithDay,
+  parseDate,
+  groupBy,
+} from './calendarUtils'
+
+import Button from '../Button.vue'
+import ShowMoreCalendarEvent from './ShowMoreCalendarEvent.vue'
+
+let props = defineProps({
+  events: {
+    type: Object,
+    required: true,
+  },
+  config: {
+    type: Object,
+  },
+  weeklyDates: {
+    type: Array,
+    required: false,
+  },
+})
+
+const gridRef = ref(null)
+const allDayCells = ref(null)
+const showCollapsable = ref(false)
+const isCollapsed = ref(false)
+
+watch(isCollapsed, (newVal) => {
+  if (newVal) {
+    allDayCells.value.forEach((cell) => {
+      cell.style.height = '56px'
+    })
+  } else {
+    setFullDayEventsHeight(fullDayEvents.value, props.weeklyDates)
+  }
+})
+
+onMounted(() => {
+  let scrollTop = props.config.scrollToHour * 60 * minuteHeight
+  gridRef.value.scrollBy(0, scrollTop)
+})
+
+let hourHeight = props.config.hourHeight
+let minuteHeight = hourHeight / 60
+
+const setCurrentTime = computed(() => {
+  let d = new Date()
+  let hour = d.getHours()
+  let minutes = d.getMinutes()
+  let top = (hour * 60 + minutes) * minuteHeight + 'px'
+  return { top }
+})
+
+const parsedData = computed(() => {
+  let groupByDate = groupBy(props.events, (row) => row.date)
+  let sortedArray = {}
+
+  for (const [key, value] of Object.entries(groupByDate)) {
+    value.forEach((task) => {
+      task.startTime = calculateMinutes(task.from_time)
+      task.endTime = calculateMinutes(task.to_time)
+    })
+    let sortedEvents = value
+      .filter((event) => !event.isFullDay)
+      .sort((a, b) => a.startTime - b.startTime)
+
+    sortedArray[key] = findOverlappingEventsCount(sortedEvents)
+  }
+
+  return sortedArray
+})
+
+const fullDayEvents = computed(() => {
+  let fullDay = props.events.filter((event) => event.isFullDay)
+  let dateGroup = groupBy(fullDay, (row) => row.date)
+  return dateGroup
+})
+const getCellHeight = (length) => 49 + 36 * (length - 1)
+function getEventsInCurrentWeek(eventsObject, weeklyDates) {
+  let currentWeekEvents = {}
+  let weeklyFullDayEvents = Object.keys(eventsObject)
+  weeklyDates.forEach((date) => {
+    date = parseDate(date)
+
+    if (weeklyFullDayEvents.includes(date)) {
+      currentWeekEvents[date] = eventsObject[date]
+    }
+  })
+  return currentWeekEvents
+}
+
+function maxFullDayEventsInWeek(eventsObject) {
+  let lengthArray = []
+  Object.values(eventsObject).forEach((events) => {
+    lengthArray.push(events.length)
+  })
+  let maxEvents = Math.max(...lengthArray, 1)
+  return maxEvents
+}
+
+function setFullDayEventsHeight(eventsObject, weeklyDates) {
+  let currentWeekEvents = getEventsInCurrentWeek(eventsObject, weeklyDates)
+  let maxEvents = maxFullDayEventsInWeek(currentWeekEvents)
+  if (maxEvents > 3) {
+    showCollapsable.value = true
+  } else {
+    showCollapsable.value = false
+  }
+  let height = getCellHeight(maxEvents)
+  if (isCollapsed.value) return
+  allDayCells.value.forEach((cell) => {
+    cell.style.height = height + 'px'
+  })
+}
+
+onMounted(() => {
+  setFullDayEventsHeight(fullDayEvents.value, props.weeklyDates)
+})
+
+watch(
+  () => fullDayEvents.value,
+  (newFullDayEvents) => {
+    setFullDayEventsHeight(newFullDayEvents, props.weeklyDates)
+  }
+)
+
+watch(
+  () => props.weeklyDates,
+  (newWeeklyDates) => {
+    setFullDayEventsHeight(fullDayEvents.value, newWeeklyDates)
+  }
+)
+
+const showEventModal = ref(false)
+const newEvent = reactive({
+  date: '',
+  participant: '',
+  from_time: '',
+  to_time: '',
+  venue: '',
+  title: '',
+})
+function openNewEventModal(event, from_time) {
+  if (!props.config.isEditMode) return
+  let date = event.target.parentNode.parentNode.getAttribute('data-date-attr')
+  let to_time = convertMinutesToHours(calculateMinutes(from_time) + 60).slice(
+    0,
+    -3
+  )
+
+  newEvent.date = parseDate(new Date(date))
+  newEvent.from_time = from_time
+  newEvent.to_time = to_time
+  showEventModal.value = true
+}
+</script>
+
+<style>
+.calendar-column {
+  border-left: 1px solid #e5e5e5;
+}
+
+.calendar-column ::before {
+  content: attr(data-time-attr);
+  position: absolute;
+  left: -45px;
+  top: -9px;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.current-time::before {
+  content: '';
+  display: block;
+  width: 12px;
+  height: 12px;
+  background-color: red;
+  border-radius: 50%;
+  position: absolute;
+  left: -8px;
+  top: -5px;
+}
+</style>
