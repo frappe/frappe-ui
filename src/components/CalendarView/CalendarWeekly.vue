@@ -87,7 +87,9 @@
               class="cell relative flex cursor-pointer"
               v-for="time in twentyFourHoursFormat"
               :data-time-attr="time"
-              @dblclick="openNewEventModal($event, time)"
+              @dblclick="
+                openNewEventModal($event, 'Week', date, config.isEditMode, time)
+              "
             >
               <div
                 class="w-full border-b-[1px] border-gray-200"
@@ -139,7 +141,7 @@ import {
 
 import Button from '../Button.vue'
 import ShowMoreCalendarEvent from './ShowMoreCalendarEvent.vue'
-
+import useNewEventModal from './composables/useNewEventModal'
 let props = defineProps({
   events: {
     type: Object,
@@ -263,29 +265,7 @@ watch(
     setFullDayEventsHeight(fullDayEvents.value, newWeeklyDates)
   }
 )
-
-const showEventModal = ref(false)
-const newEvent = reactive({
-  date: '',
-  participant: '',
-  from_time: '',
-  to_time: '',
-  venue: '',
-  title: '',
-})
-function openNewEventModal(event, from_time) {
-  if (!props.config.isEditMode) return
-  let date = event.target.parentNode.parentNode.getAttribute('data-date-attr')
-  let to_time = convertMinutesToHours(calculateMinutes(from_time) + 60).slice(
-    0,
-    -3
-  )
-
-  newEvent.date = parseDate(new Date(date))
-  newEvent.from_time = from_time
-  newEvent.to_time = to_time
-  showEventModal.value = true
-}
+const { showEventModal, newEvent, openNewEventModal } = useNewEventModal()
 </script>
 
 <style>

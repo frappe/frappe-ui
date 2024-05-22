@@ -37,7 +37,15 @@
               class="relative flex"
               v-for="time in twentyFourHoursFormat"
               :data-time-attr="time"
-              @dblclick="openNewEventModal($event, time)"
+              @dblclick="
+                openNewEventModal(
+                  $event,
+                  'Day',
+                  currentDate,
+                  config.isEditMode,
+                  time
+                )
+              "
             >
               <div
                 class="w-full border-b-[1px] border-gray-200"
@@ -78,7 +86,7 @@
 import { computed, ref, reactive } from 'vue'
 import CalendarEvent from './CalendarEvent.vue'
 import NewEventModal from './NewEventModal.vue'
-
+import useNewEventModal from './composables/useNewEventModal'
 import {
   parseDate,
   parseDateWithComma,
@@ -137,27 +145,5 @@ const setCurrentTime = computed(() => {
   let top = (hour * 60 + minutes) * minuteHeight + redundantCellHeight + 'px'
   return { top }
 })
-
-const showEventModal = ref(false)
-const newEvent = reactive({
-  date: '',
-  participant: '',
-  from_time: '',
-  to_time: '',
-  venue: '',
-  title: '',
-})
-function openNewEventModal(event, from_time) {
-  if (!props.config.isEditMode) return
-  let date = props.currentDate
-  let to_time = convertMinutesToHours(calculateMinutes(from_time) + 60).slice(
-    0,
-    -3
-  )
-
-  newEvent.date = parseDate(date)
-  newEvent.from_time = from_time
-  newEvent.to_time = to_time
-  showEventModal.value = true
-}
+const { showEventModal, newEvent, openNewEventModal } = useNewEventModal()
 </script>

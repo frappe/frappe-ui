@@ -16,7 +16,9 @@
       <div
         v-for="date in currentMonthDates"
         class="h-28 overflow-scroll border-b-[1px] border-r-[1px] border-gray-200"
-        @dblclick.prevent="openNewEventModal(date)"
+        @dblclick.prevent="
+          openNewEventModal($event, 'Month', date, config.isEditMode)
+        "
         @dragover.prevent
         @drageneter.prevent
         @drop="onDrop($event, date)"
@@ -77,7 +79,7 @@ import {
 import { computed, inject, ref, reactive } from 'vue'
 import CalendarEvent from './CalendarEvent.vue'
 import NewEventModal from './NewEventModal.vue'
-
+import useNewEventModal from './composables/useNewEventModal'
 const props = defineProps({
   events: {
     type: Object,
@@ -154,18 +156,5 @@ const onDrop = (event, date) => {
   calendarEvent.date = parseDate(date)
   updateEventState(calendarEvent)
 }
-const showEventModal = ref(false)
-const newEvent = reactive({
-  date: '',
-  participant: '',
-  from_time: '',
-  to_time: '',
-  venue: '',
-  title: '',
-})
-function openNewEventModal(date) {
-  if (!props.config.isEditMode) return
-  newEvent.date = parseDate(new Date(date))
-  showEventModal.value = true
-}
+const { showEventModal, newEvent, openNewEventModal } = useNewEventModal()
 </script>
