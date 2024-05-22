@@ -89,6 +89,7 @@ import {
   twentyFourHoursFormat,
 } from './calendarUtils'
 import useCalendarData from './composables/useCalendarData'
+import { computed } from 'vue'
 
 const props = defineProps({
   events: {
@@ -103,7 +104,12 @@ const props = defineProps({
     required: true,
   },
 })
-const { timedEvents, fullDayEvents } = useCalendarData(props.events)
+const timedEvents = computed(
+  () => useCalendarData(props.events).timedEvents.value
+)
+const fullDayEvents = computed(
+  () => useCalendarData(props.events).fullDayEvents.value
+)
 const { showEventModal, newEvent, openNewEventModal } = useNewEventModal()
 
 const hourHeight = props.config.hourHeight

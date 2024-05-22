@@ -134,8 +134,9 @@ import Button from '../Button.vue'
 import ShowMoreCalendarEvent from './ShowMoreCalendarEvent.vue'
 import useNewEventModal from './composables/useNewEventModal'
 import useCalendarData from './composables/useCalendarData'
+import { computed } from 'vue'
 
-let props = defineProps({
+const props = defineProps({
   events: {
     type: Object,
     required: true,
@@ -157,11 +158,17 @@ const isCollapsed = ref(false)
 const hourHeight = props.config.hourHeight
 const minuteHeight = hourHeight / 60
 
-const { timedEvents, fullDayEvents } = useCalendarData(props.events)
+const timedEvents = computed(
+  () => useCalendarData(props.events).timedEvents.value
+)
+const fullDayEvents = computed(
+  () => useCalendarData(props.events).fullDayEvents.value
+)
+
 const { showEventModal, newEvent, openNewEventModal } = useNewEventModal()
 
 const getCellHeight = (length) => 49 + 36 * (length - 1)
-function getEventsInCurrentWeek(eventsObject, weeklyDates) {
+function getFullDayEventsInCurrentWeek(eventsObject, weeklyDates) {
   let currentWeekEvents = {}
   let weeklyFullDayEvents = Object.keys(eventsObject)
   weeklyDates.forEach((date) => {
@@ -184,7 +191,10 @@ function getFullDayEventsCount(eventsObject) {
 }
 
 function setFullDayEventsHeight(eventsObject, weeklyDates) {
-  let currentWeekEvents = getEventsInCurrentWeek(eventsObject, weeklyDates)
+  let currentWeekEvents = getFullDayEventsInCurrentWeek(
+    eventsObject,
+    weeklyDates
+  )
   let maxEvents = getFullDayEventsCount(currentWeekEvents)
   if (maxEvents > 3) {
     showCollapsable.value = true
@@ -241,17 +251,5 @@ watch(
   top: -9px;
   font-size: 12px;
   font-weight: 400;
-}
-
-.current-time::before {
-  content: '';
-  display: block;
-  width: 12px;
-  height: 12px;
-  background-color: red;
-  border-radius: 50%;
-  position: absolute;
-  left: -8px;
-  top: -5px;
 }
 </style>

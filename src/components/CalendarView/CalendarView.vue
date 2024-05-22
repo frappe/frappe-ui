@@ -27,9 +27,8 @@
     <CalendarMonthly
       v-if="activeView === 'Month'"
       :events="events"
-      :currentYear="currentYear"
-      :currentMonthDates="currentMonthDates"
       :currentMonth="currentMonth"
+      :currentMonthDates="currentMonthDates"
       :config="overrideConfig"
     />
 
@@ -166,13 +165,13 @@ let date = ref(
   )
 )
 
-let incrementClickEvents = {
+const incrementClickEvents = {
   Month: incrementMonth,
   Week: incrementWeek,
   Day: incrementDay,
 }
 
-let decrementClickEvents = {
+const decrementClickEvents = {
   Month: decrementMonth,
   Week: decrementWeek,
   Day: decrementDay,

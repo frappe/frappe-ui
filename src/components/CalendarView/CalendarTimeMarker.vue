@@ -35,7 +35,7 @@ const setCurrentTime = computed(() => {
   return { top }
 })
 </script>
-<style>
+<style scoped>
 .current-time::before {
   content: '';
   display: block;

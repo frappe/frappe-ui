@@ -74,6 +74,9 @@ import { inject } from 'vue'
 import CalendarEvent from './CalendarEvent.vue'
 import NewEventModal from './NewEventModal.vue'
 import useNewEventModal from './composables/useNewEventModal'
+import useCalendarData from './composables/useCalendarData'
+import { computed } from 'vue'
+
 const props = defineProps({
   events: {
     type: Object,
@@ -87,17 +90,15 @@ const props = defineProps({
     type: Number,
     required: true,
   },
-  currentYear: {
-    type: Number,
-    required: true,
-  },
   config: {
     type: Object,
   },
 })
-import useCalendarData from './composables/useCalendarData'
 
-const { timedEvents } = useCalendarData(props.events, 'Month')
+const timedEvents = computed(
+  () => useCalendarData(props.events, 'Month').timedEvents.value
+)
+
 const { showEventModal, newEvent, openNewEventModal } = useNewEventModal()
 
 function currentMonthDate(date) {
