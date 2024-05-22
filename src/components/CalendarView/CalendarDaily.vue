@@ -53,7 +53,9 @@
               />
             </div>
             <CalendarEvent
-              v-for="(calendarEvent, idx) in parsedData[parseDate(currentDate)]"
+              v-for="(calendarEvent, idx) in timedEvents[
+                parseDate(currentDate)
+              ]"
               class="absolute mb-2 cursor-pointer"
               :event="calendarEvent"
               :key="calendarEvent.id"
@@ -77,7 +79,6 @@
 </template>
 
 <script setup>
-import { computed, ref, reactive } from 'vue'
 import CalendarEvent from './CalendarEvent.vue'
 import NewEventModal from './NewEventModal.vue'
 import useNewEventModal from './composables/useNewEventModal'
@@ -85,11 +86,9 @@ import CalendarTimeMarker from './CalendarTimeMarker.vue'
 import {
   parseDate,
   parseDateWithComma,
-  groupBy,
-  calculateMinutes,
   twentyFourHoursFormat,
-  findOverlappingEventsCount,
 } from './calendarUtils'
+import useCalendarData from './composables/useCalendarData'
 
 const props = defineProps({
   events: {
@@ -104,30 +103,8 @@ const props = defineProps({
     required: true,
   },
 })
-
-const parsedData = computed(() => {
-  let groupByDate = groupBy(props.events, (row) => row.date)
-  let sortedArray = {}
-
-  for (let [key, value] of Object.entries(groupByDate)) {
-    value = value.filter((event) => !event.isFullDay)
-    value.forEach((task) => {
-      task.startTime = calculateMinutes(task.from_time)
-      task.endTime = calculateMinutes(task.to_time)
-    })
-    let sortedEvents = value.sort((a, b) => a.startTime - b.startTime)
-    sortedArray[key] = findOverlappingEventsCount(sortedEvents)
-  }
-  return sortedArray
-})
-
-const fullDayEvents = computed(() => {
-  let fullDay = props.events.filter((event) => event.isFullDay)
-  let dateGroup = groupBy(fullDay, (row) => row.date)
-  return dateGroup
-})
+const { timedEvents, fullDayEvents } = useCalendarData(props.events)
+const { showEventModal, newEvent, openNewEventModal } = useNewEventModal()
 
 const hourHeight = props.config.hourHeight
-
-const { showEventModal, newEvent, openNewEventModal } = useNewEventModal()
 </script>

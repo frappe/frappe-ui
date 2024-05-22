@@ -99,7 +99,7 @@
 
             <!-- Calendar Events populations  -->
             <CalendarEvent
-              v-for="(calendarEvent, idx) in parsedData[parseDate(date)]"
+              v-for="(calendarEvent, idx) in timedEvents[parseDate(date)]"
               class="absolute mb-2 w-[90%] cursor-pointer"
               :event="calendarEvent"
               :key="calendarEvent.id"
@@ -120,22 +120,21 @@
   />
 </template>
 <script setup>
-import { computed, ref, onMounted, reactive, watch } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import CalendarEvent from './CalendarEvent.vue'
 import NewEventModal from './NewEventModal.vue'
 import CalendarTimeMarker from './CalendarTimeMarker.vue'
 import {
-  calculateMinutes,
   twentyFourHoursFormat,
-  findOverlappingEventsCount,
   parseDateWithDay,
   parseDate,
-  groupBy,
 } from './calendarUtils'
 
 import Button from '../Button.vue'
 import ShowMoreCalendarEvent from './ShowMoreCalendarEvent.vue'
 import useNewEventModal from './composables/useNewEventModal'
+import useCalendarData from './composables/useCalendarData'
+
 let props = defineProps({
   events: {
     type: Object,
@@ -155,47 +154,12 @@ const allDayCells = ref(null)
 const showCollapsable = ref(false)
 const isCollapsed = ref(false)
 
-watch(isCollapsed, (newVal) => {
-  if (newVal) {
-    allDayCells.value.forEach((cell) => {
-      cell.style.height = '56px'
-    })
-  } else {
-    setFullDayEventsHeight(fullDayEvents.value, props.weeklyDates)
-  }
-})
-
-onMounted(() => {
-  let scrollTop = props.config.scrollToHour * 60 * minuteHeight
-  gridRef.value.scrollBy(0, scrollTop)
-})
-
 const hourHeight = props.config.hourHeight
 const minuteHeight = hourHeight / 60
 
-const parsedData = computed(() => {
-  let groupByDate = groupBy(props.events, (row) => row.date)
-  let sortedArray = {}
+const { timedEvents, fullDayEvents } = useCalendarData(props.events)
+const { showEventModal, newEvent, openNewEventModal } = useNewEventModal()
 
-  for (let [key, value] of Object.entries(groupByDate)) {
-    value = value.filter((event) => !event.isFullDay)
-    value.forEach((task) => {
-      task.startTime = calculateMinutes(task.from_time)
-      task.endTime = calculateMinutes(task.to_time)
-    })
-    let sortedEvents = value.sort((a, b) => a.startTime - b.startTime)
-
-    sortedArray[key] = findOverlappingEventsCount(sortedEvents)
-  }
-
-  return sortedArray
-})
-
-const fullDayEvents = computed(() => {
-  let fullDay = props.events.filter((event) => event.isFullDay)
-  let dateGroup = groupBy(fullDay, (row) => row.date)
-  return dateGroup
-})
 const getCellHeight = (length) => 49 + 36 * (length - 1)
 function getEventsInCurrentWeek(eventsObject, weeklyDates) {
   let currentWeekEvents = {}
@@ -210,18 +174,18 @@ function getEventsInCurrentWeek(eventsObject, weeklyDates) {
   return currentWeekEvents
 }
 
-function maxFullDayEventsInWeek(eventsObject) {
+function getFullDayEventsCount(eventsObject) {
   let lengthArray = []
   Object.values(eventsObject).forEach((events) => {
     lengthArray.push(events.length)
   })
-  let maxEvents = Math.max(...lengthArray, 1)
-  return maxEvents
+  let maxEventsInWeek = Math.max(...lengthArray, 1)
+  return maxEventsInWeek
 }
 
 function setFullDayEventsHeight(eventsObject, weeklyDates) {
   let currentWeekEvents = getEventsInCurrentWeek(eventsObject, weeklyDates)
-  let maxEvents = maxFullDayEventsInWeek(currentWeekEvents)
+  let maxEvents = getFullDayEventsCount(currentWeekEvents)
   if (maxEvents > 3) {
     showCollapsable.value = true
   } else {
@@ -236,6 +200,18 @@ function setFullDayEventsHeight(eventsObject, weeklyDates) {
 
 onMounted(() => {
   setFullDayEventsHeight(fullDayEvents.value, props.weeklyDates)
+  let scrollTop = props.config.scrollToHour * 60 * minuteHeight
+  gridRef.value.scrollBy(0, scrollTop)
+})
+
+watch(isCollapsed, (newVal) => {
+  if (newVal) {
+    allDayCells.value.forEach((cell) => {
+      cell.style.height = '56px'
+    })
+  } else {
+    setFullDayEventsHeight(fullDayEvents.value, props.weeklyDates)
+  }
 })
 
 watch(
@@ -251,7 +227,6 @@ watch(
     setFullDayEventsHeight(fullDayEvents.value, newWeeklyDates)
   }
 )
-const { showEventModal, newEvent, openNewEventModal } = useNewEventModal()
 </script>
 
 <style>

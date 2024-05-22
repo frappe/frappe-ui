@@ -42,13 +42,13 @@
 
             <div class="w-full overflow-y-auto">
               <CalendarEvent
-                v-for="calendarEvent in parsedData[parseDate(date)]"
+                v-for="calendarEvent in timedEvents[parseDate(date)]"
                 :event="calendarEvent"
                 :date="date"
                 class="z-10 mb-2 w-full cursor-pointer"
                 :key="calendarEvent.id"
                 :draggable="config.isEditMode"
-                @dragstart="dragStart($event, calendarEvent.id)"
+                @dragstart="onDragStart($event, calendarEvent.id)"
                 @dragend="$event.target.style.opacity = '1'"
                 @dragover.prevent
               />
@@ -69,14 +69,8 @@
 </template>
 
 <script setup>
-import {
-  groupBy,
-  parseDateEventPopupFormat,
-  daysList,
-  calculateMinutes,
-  parseDate,
-} from './calendarUtils'
-import { computed, inject, ref, reactive } from 'vue'
+import { parseDateEventPopupFormat, daysList, parseDate } from './calendarUtils'
+import { inject } from 'vue'
 import CalendarEvent from './CalendarEvent.vue'
 import NewEventModal from './NewEventModal.vue'
 import useNewEventModal from './composables/useNewEventModal'
@@ -101,36 +95,10 @@ const props = defineProps({
     type: Object,
   },
 })
+import useCalendarData from './composables/useCalendarData'
 
-const config = inject('config')
-
-const parsedData = computed(() => {
-  let groupByDate = groupBy(props.events, (row) => row.date)
-  let sortedArray = {}
-  for (const [date, events] of Object.entries(groupByDate)) {
-    let sortedEvents = sortEvents(events)
-    sortedArray[date] = sortedEvents
-  }
-  return sortedArray
-})
-
-function sortEvents(events) {
-  let fullDayEvents = events.filter((event) => event.isFullDay)
-
-  let sortedEvents = events
-    .filter((event) => !event.isFullDay)
-    .sort((a, b) =>
-      a.from_time !== b.from_time
-        ? calculateMinutes(a.from_time) > calculateMinutes(b.from_time)
-          ? 1
-          : -1
-        : calculateMinutes(a.to_time) > calculateMinutes(b.to_time)
-        ? 1
-        : -1
-    )
-  // full day events should be at the top in month view
-  return [...fullDayEvents, ...sortedEvents]
-}
+const { timedEvents } = useCalendarData(props.events, 'Month')
+const { showEventModal, newEvent, openNewEventModal } = useNewEventModal()
 
 function currentMonthDate(date) {
   return date.getMonth() === props.currentMonth
@@ -138,7 +106,7 @@ function currentMonthDate(date) {
 
 const { updateEventState } = inject('eventActions')
 
-const dragStart = (event, calendarEventID) => {
+const onDragStart = (event, calendarEventID) => {
   event.target.style.opacity = '0.5'
   event.target.style.cursor = 'move'
   event.dataTransfer.dropEffect = 'move'
@@ -156,5 +124,4 @@ const onDrop = (event, date) => {
   calendarEvent.date = parseDate(date)
   updateEventState(calendarEvent)
 }
-const { showEventModal, newEvent, openNewEventModal } = useNewEventModal()
 </script>
