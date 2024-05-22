@@ -59,17 +59,11 @@
               :key="calendarEvent.id"
               :date="currentDate"
             />
-            <!-- Current time style  -->
-            <div
-              class="absolute top-20 z-50 w-full pl-2"
-              v-if="
-                new Date(currentDate).toDateString() ===
-                new Date().toDateString()
-              "
-              :style="setCurrentTime"
-            >
-              <div class="current-time relative h-0.5 bg-red-600" />
-            </div>
+            <!-- Current time Marker -->
+            <CalendarTimeMarker
+              :date="currentDate"
+              :redundantCellHeight="config.redundantCellHeight"
+            />
           </div>
         </div>
       </div>
@@ -87,13 +81,13 @@ import { computed, ref, reactive } from 'vue'
 import CalendarEvent from './CalendarEvent.vue'
 import NewEventModal from './NewEventModal.vue'
 import useNewEventModal from './composables/useNewEventModal'
+import CalendarTimeMarker from './CalendarTimeMarker.vue'
 import {
   parseDate,
   parseDateWithComma,
   groupBy,
   calculateMinutes,
   twentyFourHoursFormat,
-  convertMinutesToHours,
   findOverlappingEventsCount,
 } from './calendarUtils'
 
@@ -133,17 +127,7 @@ const fullDayEvents = computed(() => {
   return dateGroup
 })
 
-let redundantCellHeight = props.config.redundantCellHeight
-let hourHeight = props.config.hourHeight
-let minuteHeight = hourHeight / 60
-let increaseZIndex = ref(false)
+const hourHeight = props.config.hourHeight
 
-const setCurrentTime = computed(() => {
-  let d = new Date()
-  let hour = d.getHours()
-  let minutes = d.getMinutes()
-  let top = (hour * 60 + minutes) * minuteHeight + redundantCellHeight + 'px'
-  return { top }
-})
 const { showEventModal, newEvent, openNewEventModal } = useNewEventModal()
 </script>

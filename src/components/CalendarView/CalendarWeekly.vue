@@ -106,14 +106,8 @@
               :date="date"
             />
 
-            <!-- Current time style  -->
-            <div
-              class="absolute top-20 z-50 w-full pl-2"
-              v-if="new Date(date).toDateString() === new Date().toDateString()"
-              :style="setCurrentTime"
-            >
-              <div class="current-time relative h-0.5 bg-red-600" />
-            </div>
+            <!-- Current time Marker  -->
+            <CalendarTimeMarker :date="date" />
           </div>
         </div>
       </div>
@@ -129,9 +123,9 @@
 import { computed, ref, onMounted, reactive, watch } from 'vue'
 import CalendarEvent from './CalendarEvent.vue'
 import NewEventModal from './NewEventModal.vue'
+import CalendarTimeMarker from './CalendarTimeMarker.vue'
 import {
   calculateMinutes,
-  convertMinutesToHours,
   twentyFourHoursFormat,
   findOverlappingEventsCount,
   parseDateWithDay,
@@ -176,16 +170,8 @@ onMounted(() => {
   gridRef.value.scrollBy(0, scrollTop)
 })
 
-let hourHeight = props.config.hourHeight
-let minuteHeight = hourHeight / 60
-
-const setCurrentTime = computed(() => {
-  let d = new Date()
-  let hour = d.getHours()
-  let minutes = d.getMinutes()
-  let top = (hour * 60 + minutes) * minuteHeight + 'px'
-  return { top }
-})
+const hourHeight = props.config.hourHeight
+const minuteHeight = hourHeight / 60
 
 const parsedData = computed(() => {
   let groupByDate = groupBy(props.events, (row) => row.date)
