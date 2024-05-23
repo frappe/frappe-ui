@@ -10,8 +10,8 @@
         <slot name="target" v-bind="{ open: openPopover, togglePopover }">
           <div class="w-full">
             <button
-              class="flex h-7 w-full items-center justify-between gap-2 rounded bg-gray-100 px-2 py-1 transition-colors focus:ring-2 focus:ring-gray-400"
-              :class="{ 'bg-gray-200': isComboboxOpen,  'text-gray-600 bg-gray-50 placeholder-gray-400 hover:bg-gray-50': disabled }"
+              class="flex h-7 w-full items-center justify-between gap-2 rounded px-2 py-1 transition-colors focus:ring-2 focus:ring-gray-400"
+              :class="{ 'bg-gray-200': isComboboxOpen, 'text-gray-600 bg-gray-50 placeholder-gray-400 hover:bg-gray-50': disabled, 'bg-gray-100 hover:bg-gray-200': !disabled }"
               :disabled="disabled"
               @click="() => togglePopover()"
             >
