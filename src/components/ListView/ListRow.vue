@@ -2,24 +2,26 @@
   <component
     :is="list.options.getRowRoute ? 'router-link' : 'div'"
     class="flex cursor-pointer flex-col transition-all duration-300 ease-in-out"
-    v-bind="
-      list.options.getRowRoute
-        ? { to: list.options.getRowRoute(row) }
-        : { onClick: () => list.options.onRowClick(row) }
-    "
+    v-bind="{
+      to: list.options.getRowRoute ? list.options.getRowRoute(row) : undefined,
+      onClick: list.options.onRowClick
+        ? () => list.options.onRowClick(row)
+        : undefined,
+    }"
   >
     <component
       :is="list.options.getRowRoute ? 'template' : 'button'"
       class="[all:unset] hover:[all:unset]"
     >
       <div
-        class="grid items-center space-x-4 rounded px-2 py-2.5"
+        class="grid items-center space-x-4 rounded px-2"
         :class="
           list.selections.has(row[list.rowKey])
             ? 'bg-gray-100 hover:bg-gray-200'
             : 'hover:bg-gray-50'
         "
         :style="{
+          height: rowHeight,
           gridTemplateColumns: getGridTemplateColumns(
             list.columns,
             list.options.selectable
@@ -33,12 +35,31 @@
           class="cursor-pointer duration-300"
         />
         <div
-          v-for="column in list.columns"
+          v-for="(column, i) in list.columns"
           :key="column.key"
-          :class="alignmentMap[column.align]"
+          :class="[
+            alignmentMap[column.align],
+            i == 0 ? 'text-gray-900' : 'text-gray-700',
+          ]"
         >
-          <slot v-bind="{ column, item: row[column.key] }">
-            <ListRowItem :item="row[column.key]" :align="column.align" />
+          <slot v-bind="{ idx: i, column, item: row[column.key] }">
+            <component
+              v-if="list.slots.cell"
+              :is="list.slots.cell"
+              v-bind="{
+                column,
+                row,
+                item: row[column.key],
+                align: column.align,
+              }"
+            />
+            <ListRowItem
+              v-else
+              :column="column"
+              :row="row"
+              :item="row[column.key]"
+              :align="column.align"
+            />
           </slot>
         </div>
       </div>
@@ -68,5 +89,12 @@ const isLastRow = computed(() => {
     list.value.rows[list.value.rows.length - 1][list.value.rowKey] ===
     props.row[list.value.rowKey]
   )
+})
+
+const rowHeight = computed(() => {
+  if (typeof list.value.options.rowHeight === 'number') {
+    return `${list.value.options.rowHeight}px`
+  }
+  return list.value.options.rowHeight
 })
 </script>

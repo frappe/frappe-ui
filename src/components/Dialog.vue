@@ -53,7 +53,7 @@
               <slot name="body-main">
                 <div class="bg-white px-4 pb-6 pt-5 sm:px-6">
                   <div class="flex">
-                    <div class="flex-1">
+                    <div class="w-full flex-1">
                       <div class="mb-6 flex items-center justify-between">
                         <div class="flex items-center space-x-2">
                           <div

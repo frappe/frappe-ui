@@ -23,12 +23,12 @@
 <script>
 import Dialog from '../Dialog.vue'
 import Button from '../Button.vue'
-import Input from '../Input.vue'
+import FormControl from '../FormControl.vue'
 
 export default {
   name: 'InsertLink',
   props: ['editor'],
-  components: { Button, Input, Dialog },
+  components: { Button, FormControl, Dialog },
   data() {
     return {
       setLinkDialog: { url: '', show: false },

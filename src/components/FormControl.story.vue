@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'
 import FormControl from './FormControl.vue'
 import FeatherIcon from './FeatherIcon.vue'
 import Avatar from './Avatar.vue'
@@ -10,8 +10,11 @@ const state = reactive({
   placeholder: 'Placeholder',
   disabled: false,
   label: 'Label',
-  modelValue: '',
 })
+const inputValue = ref('')
+const selectValue = ref(null)
+const autocompleteValue = ref(null)
+const checkboxValue = ref(false)
 
 const inputTypes = [
   'text',
@@ -34,11 +37,7 @@ const variants = ['subtle', 'outline']
       :title="inputType"
     >
       <div class="p-2">
-        <FormControl
-          :type="inputType"
-          v-bind="state"
-          v-model="state.modelValue"
-        />
+        <FormControl :type="inputType" v-bind="state" v-model="inputValue" />
       </div>
     </Variant>
     <Variant title="select">
@@ -51,10 +50,11 @@ const variants = ['subtle', 'outline']
             { label: 'Three', value: '3' },
           ]"
           v-bind="state"
+          v-model="selectValue"
         />
       </div>
     </Variant>
-    <Variant title="select">
+    <Variant title="autocomplete">
       <div class="p-2">
         <FormControl
           type="autocomplete"
@@ -64,12 +64,13 @@ const variants = ['subtle', 'outline']
             { label: 'Three', value: '3' },
           ]"
           v-bind="state"
+          v-model="autocompleteValue"
         />
       </div>
     </Variant>
     <Variant title="checkbox">
       <div class="p-2">
-        <FormControl type="checkbox" v-bind="state" />
+        <FormControl type="checkbox" v-bind="state" v-model="checkboxValue" />
       </div>
     </Variant>
 

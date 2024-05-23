@@ -19,6 +19,7 @@
         v-for="column in list.columns"
         :key="column.key"
         :item="column"
+        @columnWidthUpdated="emit('columnWidthUpdated', column)"
       />
     </slot>
   </div>
@@ -29,6 +30,8 @@ import Checkbox from '../Checkbox.vue'
 import ListHeaderItem from './ListHeaderItem.vue'
 import { getGridTemplateColumns } from './utils'
 import { inject } from 'vue'
+
+const emit = defineEmits(['columnWidthUpdated'])
 
 const list = inject('list')
 </script>

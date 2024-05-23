@@ -1,6 +1,6 @@
 # List Resource
 
-List Resource is a wrapper on top of [Resource](/resources/resource) for working
+List Resource is a wrapper on top of [Resource](./Resource.story.md) for working
 with lists. This feature only works with a Frappe Framework backend as of now.
 
 ## Usage
@@ -170,7 +170,7 @@ let todos = createListResource({
 
 A list resource is made up of multiple individual resources. In our running
 example, the resource object that fetches the list is at `todos.list`. So all
-the [properties of a resource](/resources/resource) are available on this
+the [properties of a resource](./Resource.story.md) are available on this
 object. Similarly, there are resources for `fetchOne`, `setValue`, `insert`,
 `delete`, and `runDocMethod`.
 

@@ -37,6 +37,7 @@ export function createListResource(options, vm) {
     doctype: options.doctype,
     fields: options.fields,
     filters: options.filters,
+    orFilters: options.orFilters,
     orderBy: options.orderBy,
     start: options.start || 0,
     pageLength: options.pageLength || 20,
@@ -59,6 +60,7 @@ export function createListResource(options, vm) {
             doctype: out.doctype,
             fields: out.fields,
             filters: out.filters,
+            or_filters: out.orFilters,
             order_by: out.orderBy,
             start: out.start,
             limit: out.pageLength,
@@ -71,9 +73,7 @@ export function createListResource(options, vm) {
         },
         onSuccess(data) {
           out.hasPreviousPage = !!out.start
-          if (data.length < out.pageLength) {
-            out.hasNextPage = false
-          }
+          out.hasNextPage = data.length < out.pageLength ? false : true
           let pagedData
           if (!out.start || out.start == 0) {
             pagedData = data

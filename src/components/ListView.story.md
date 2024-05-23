@@ -62,6 +62,31 @@ required to be passed in the `row` object.
    }
    ```
 
+### Grouped Rows
+
+To render grouped rows, you must provide `rows` in the following format:
+
+```
+[
+    {
+        group: 'Group Title 1',
+        collapsed: false,
+        rows: [
+            {id: 1, key1: value1, key2: value2, ...},
+            {id: 2, key1: value1, key2: value2, ...},
+        ]
+    },
+    {
+        group: 'Group Title 2',
+        collapsed: false,
+        rows: [
+            {id: 3, key1: value1, key2: value2, ...},
+            {id: 4, key1: value1, key2: value2, ...},
+        ]
+    },
+]
+```
+
 ### Options
 
 1. If you want to route using router-link just add a `getRowRoute` function
@@ -77,6 +102,8 @@ required to be passed in the `row` object.
    select/multiselect rows and perform some action on them - default is true
 4. showTooltip (Boolean) - if true, tooltip will be shown on hover of row -
    default is true
+5. resizeColumn (Boolean) - if true, column can be resized by dragging the
+   resizer on the right side of the column header - default is false
 
 ---
 

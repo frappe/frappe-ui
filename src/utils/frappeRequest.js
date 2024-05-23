@@ -31,7 +31,7 @@ export function frappeRequest(options) {
       let url = options.url
       if (response.ok) {
         const data = await response.json()
-        if (data.docs || url === 'login') {
+        if (data.docs || url === '/api/method/login') {
           return data
         }
         if (data.exc) {

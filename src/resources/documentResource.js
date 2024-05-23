@@ -157,17 +157,35 @@ export function createDocumentResource(options, vm) {
         method: methodOptions,
       }
     }
-    let { method, onSuccess, ...otherOptions } = methodOptions
+
+    let {
+      method,
+      onSuccess,
+      makeParams,
+      transform: _transform,
+      ...otherOptions
+    } = methodOptions
+
     out[methodKey] = createResource(
       {
         url: defaultRunDocMethodUrl,
         makeParams(values) {
+          values = makeParams ? makeParams.call(vm, values) : values
           return {
             dt: out.doctype,
             dn: out.name,
             method: method,
             args: values,
           }
+        },
+        transform(data) {
+          if (_transform) {
+            let returnValue = _transform.call(vm, data.message)
+            if (returnValue != null) {
+              return returnValue
+            }
+          }
+          return data.message
         },
         onSuccess(data) {
           if (data.docs) {

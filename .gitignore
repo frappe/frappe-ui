@@ -1,7 +1,5 @@
 .DS_Store
 node_modules
-docs/.vitepress/.temp
-docs/.vitepress/dist
 
 # Logs
 logs

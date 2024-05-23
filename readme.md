@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://github.com/frappe/frappe-ui">
-    <img src="./docs/public/frappe-ui-logo.svg" width="250" />
+    <img src="./frappe-ui.svg" width="250" />
   </a>
 </p>
 <h1 style="font-size: 24px" align="center">Rapidly build modern frontends for Frappe apps</h1>
@@ -56,7 +56,7 @@ Now, you can import needed components and start using it:
 
 ```html
 <template>
-  <Button>Click me</Button>
+  <button>Click me</button>
 </template>
 <script>
   import { Button } from 'frappe-ui'

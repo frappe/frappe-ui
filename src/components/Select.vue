@@ -10,6 +10,14 @@
     >
       <slot name="prefix"> </slot>
     </div>
+    <div
+      v-if="placeholder"
+      v-show="!modelValue"
+      class="pointer-events-none absolute text-gray-500"
+      :class="[fontSizeClasses, paddingClasses]"
+    >
+      {{ placeholder }}
+    </div>
     <select
       :class="selectClasses"
       :disabled="disabled"
@@ -33,7 +41,10 @@
 
 <script setup lang="ts">
 import { computed, useSlots, useAttrs } from 'vue'
-import debounce from '../utils/debounce'
+
+defineOptions({
+  inheritAttrs: false,
+})
 
 type SelectOption =
   | string
@@ -86,19 +97,30 @@ const textColor = computed(() => {
   return props.disabled ? 'text-gray-500' : 'text-gray-800'
 })
 
+const fontSizeClasses = computed(() => {
+  return {
+    sm: 'text-base',
+    md: 'text-base',
+    lg: 'text-lg',
+    xl: 'text-xl',
+  }[props.size]
+})
+
+const paddingClasses = computed(() => {
+  return {
+    sm: 'px-2',
+    md: 'px-2.5',
+    lg: 'px-3',
+    xl: 'px-3',
+  }[props.size]
+})
+
 const selectClasses = computed(() => {
   let sizeClasses = {
-    sm: 'text-base rounded h-7',
-    md: 'text-base rounded h-8',
-    lg: 'text-lg rounded-md h-10',
-    xl: 'text-xl rounded-md h-10',
-  }[props.size]
-
-  let paddingClasses = {
-    sm: ['py-0', slots.prefix ? 'pl-8' : 'pl-2'],
-    md: ['py-0', slots.prefix ? 'pl-9' : 'pl-2.5'],
-    lg: ['py-0', slots.prefix ? 'pl-10' : 'pl-3'],
-    xl: ['py-0', slots.prefix ? 'pl-10' : 'pl-3'],
+    sm: 'rounded h-7',
+    md: 'rounded h-8',
+    lg: 'rounded-md h-10',
+    xl: 'rounded-md h-10',
   }[props.size]
 
   let variant = props.disabled ? 'disabled' : props.variant
@@ -118,10 +140,11 @@ const selectClasses = computed(() => {
 
   return [
     sizeClasses,
-    paddingClasses,
+    fontSizeClasses.value,
+    paddingClasses.value,
     variantClasses,
     textColor.value,
-    'transition-colors w-full',
+    'transition-colors w-full py-0',
   ]
 })
 

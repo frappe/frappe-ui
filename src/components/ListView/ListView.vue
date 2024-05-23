@@ -4,19 +4,25 @@
       class="flex w-max min-w-full flex-col overflow-y-hidden"
       :class="$attrs.class"
     >
-      <slot>
+      <slot v-bind="{ showGroupedRows, selectable }">
         <ListHeader />
-        <ListRows />
-        <ListSelectBanner v-if="_options.selectable" />
+        <template v-if="props.rows.length">
+          <ListGroups v-if="showGroupedRows" />
+          <ListRows v-else />
+        </template>
+        <ListEmptyState v-else />
+        <ListSelectBanner v-if="selectable" />
       </slot>
     </div>
   </div>
 </template>
 <script setup>
+import ListEmptyState from './ListEmptyState.vue'
 import ListHeader from './ListHeader.vue'
 import ListRows from './ListRows.vue'
+import ListGroups from './ListGroups.vue'
 import ListSelectBanner from './ListSelectBanner.vue'
-import { reactive, computed, provide } from 'vue'
+import { reactive, computed, provide, watch, useSlots } from 'vue'
 
 defineOptions({
   inheritAttrs: false,
@@ -37,20 +43,38 @@ const props = defineProps({
   },
   options: {
     type: Object,
-    default: {
+    default: () => ({
       getRowRoute: null,
       onRowClick: null,
       showTooltip: true,
       selectable: true,
-    },
+      resizeColumn: false,
+      rowHeight: 40,
+      emptyState: {
+        title: 'No Data',
+        description: 'No data available',
+      },
+    }),
   },
 })
 
+const slots = useSlots()
+
 let selections = reactive(new Set())
+
+const emit = defineEmits(['update:selections'])
+
+watch(selections, (value) => {
+  emit('update:selections', value)
+})
 
 let _options = computed(() => {
   function defaultTrue(value) {
     return value === undefined ? true : value
+  }
+
+  function defaultFalse(value) {
+    return value === undefined ? false : value
   }
 
   return {
@@ -58,12 +82,25 @@ let _options = computed(() => {
     onRowClick: props.options.onRowClick || null,
     showTooltip: defaultTrue(props.options.showTooltip),
     selectable: defaultTrue(props.options.selectable),
+    resizeColumn: defaultFalse(props.options.resizeColumn),
+    rowHeight: props.options.rowHeight || 40,
+    emptyState: props.options.emptyState,
   }
 })
 
 const allRowsSelected = computed(() => {
   if (!props.rows.length) return false
   return selections.size === props.rows.length
+})
+
+const selectable = computed(() => {
+  return _options.value.selectable
+})
+
+let showGroupedRows = computed(() => {
+  return props.rows.every(
+    (row) => row.group && row.rows && Array.isArray(row.rows)
+  )
 })
 
 function toggleRow(row) {
@@ -89,6 +126,7 @@ provide(
     options: _options.value,
     selections: selections,
     allRowsSelected: allRowsSelected.value,
+    slots: slots,
     toggleRow,
     toggleAllRows,
   }))
