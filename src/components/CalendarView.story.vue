@@ -1,14 +1,12 @@
 <template>
   <Story>
-    <div class="h-full w-full flex-1 overflow-auto">
-      <CalendarView
-        :config="config"
-        :events="events"
-        @createEvent="(event) => logEvent('createEvent', event)"
-        @updateEvent="(event) => logEvent('updateEvent', event)"
-        @deleteEvent="(event) => logEvent('deleteEvent', event)"
-      />
-    </div>
+    <CalendarView
+      :config="config"
+      :events="events"
+      @createEvent="(event) => logEvent('createEvent', event)"
+      @updateEvent="(event) => logEvent('updateEvent', event)"
+      @deleteEvent="(event) => logEvent('deleteEvent', event)"
+    />
   </Story>
 </template>
 <script setup>

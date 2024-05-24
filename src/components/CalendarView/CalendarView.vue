@@ -51,12 +51,7 @@
 import { computed, provide, ref } from 'vue'
 import Button from '../Button.vue'
 import TabButtons from '../TabButtons.vue'
-import {
-  groupBy,
-  getCalendarDates,
-  monthList,
-  handleSeconds,
-} from './calendarUtils'
+import { getCalendarDates, monthList, handleSeconds } from './calendarUtils'
 import CalendarMonthly from './CalendarMonthly.vue'
 import CalendarWeekly from './CalendarWeekly.vue'
 import CalendarDaily from './CalendarDaily.vue'

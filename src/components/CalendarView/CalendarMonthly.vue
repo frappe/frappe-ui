@@ -73,7 +73,7 @@ import { parseDateEventPopupFormat, daysList, parseDate } from './calendarUtils'
 import { inject } from 'vue'
 import CalendarEvent from './CalendarEvent.vue'
 import NewEventModal from './NewEventModal.vue'
-import useNewEventModal from './composables/useNewEventModal'
+import useEventModal from './composables/useEventModal'
 import useCalendarData from './composables/useCalendarData'
 import { computed } from 'vue'
 
@@ -99,7 +99,7 @@ const timedEvents = computed(
   () => useCalendarData(props.events, 'Month').timedEvents.value
 )
 
-const { showEventModal, newEvent, openNewEventModal } = useNewEventModal()
+const { showEventModal, newEvent, openNewEventModal } = useEventModal()
 
 function currentMonthDate(date) {
   return date.getMonth() === props.currentMonth

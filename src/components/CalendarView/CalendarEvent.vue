@@ -1,12 +1,13 @@
 <template>
+  <!-- TODO: v if else for monthly  -->
   <div
     class="h-min-[18px] rounded-lg p-2 transition-all duration-75"
     ref="eventRef"
     v-bind="$attrs"
     :class="[
-      colorMap[calendarEvent?.color]?.background_color || 'bg-green-100',
+      colorMap[props.event?.color]?.background_color || 'bg-green-100',
       activeView !== 'Month' && 'shadow-lg',
-      opened && activeView !== 'Month' && ' !z-20 drop-shadow-xl',
+      opened && activeView !== 'Month' && '!z-20 drop-shadow-xl',
     ]"
     :style="activeView !== 'Month' && setEventStyles"
     @dblclick.prevent="handleEventEdit()"
@@ -21,28 +22,28 @@
     <div
       class="relative flex h-full select-none items-start gap-2 overflow-hidden px-2"
       :class="
-        calendarEvent.from_time && [
+        props.event.from_time && [
           'border-l-2',
-          colorMap[calendarEvent?.color]?.border_color || 'border-green-600',
+          colorMap[props.event?.color]?.border_color || 'border-green-600',
         ]
       "
     >
       <component
-        v-if="eventIcons[calendarEvent.type]"
-        :is="eventIcons[calendarEvent.type]"
+        v-if="eventIcons[props.event.type]"
+        :is="eventIcons[props.event.type]"
         class="h-4 w-4 text-black"
       />
       <FeatherIcon v-else name="circle" class="h-4 text-black" />
 
       <div class="flex w-fit flex-col overflow-hidden whitespace-nowrap">
         <p class="text-ellipsis text-sm font-medium text-gray-800">
-          {{ calendarEvent.title || 'New Event' }}
+          {{ props.event.title || 'New Event' }}
         </p>
         <p
           class="text-ellipsis text-xs font-normal text-gray-800"
-          v-if="calendarEvent.from_time"
+          v-if="props.event.from_time"
         >
-          {{ updatedTime.from_time }} - {{ updatedTime.to_time }}
+          {{ updatedEvent.from_time }} - {{ updatedEvent.to_time }}
         </p>
       </div>
     </div>
@@ -105,15 +106,6 @@ const props = defineProps({
     required: true,
   },
 })
-watch(
-  () => props.event,
-  (newVal) => {
-    updatedTime.from_time = newVal.from_time
-    updatedTime.to_time = newVal.to_time
-    calendarEvent.value = newVal
-  },
-  { deep: true }
-)
 
 const activeView = inject('activeView')
 const config = inject('config')
@@ -126,7 +118,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside)
 })
-const handleClickOutside = (e) => {
+function handleClickOutside(e) {
   const insidePopover = floating.value && floating.value.contains(e.target)
   if (insidePopover) return
   const insideTarget = eventRef.value && eventRef.value.contains(e.target)
@@ -135,7 +127,23 @@ const handleClickOutside = (e) => {
 }
 
 const calendarEvent = ref(props.event)
-// calendarEvent.value.type = Math.random() > 0.67 ? 'mail' : 'phone'
+
+const updatedEvent = reactive({
+  date: props.event.date,
+  from_time: props.event.from_time,
+  to_time: props.event.to_time,
+})
+
+watch(
+  () => props.event,
+  (newVal) => {
+    updatedEvent.from_time = newVal.from_time
+    updatedEvent.to_time = newVal.to_time
+    calendarEvent.value = newVal
+  },
+  { deep: true }
+)
+
 const eventIcons = config.eventIcons
 const minuteHeight = config.hourHeight / 60
 const height_15_min = minuteHeight * 15
@@ -205,7 +213,6 @@ const resize = ref(null)
 const isResizing = ref(false)
 const isRepositioning = ref(false)
 const isEventUpdated = ref(false)
-const updatedDate = ref(props.event.date)
 
 function newEventEndTime(newHeight) {
   let newEndTime =
@@ -216,30 +223,6 @@ function newEventEndTime(newHeight) {
     newEndTime = 1440
   }
   return convertMinutesToHours(newEndTime)
-}
-
-function newEventDuration(changeInTime) {
-  let newFromTime =
-    calculateMinutes(calendarEvent.value.from_time) +
-    changeInTime / minuteHeight
-  let newToTime =
-    calculateMinutes(calendarEvent.value.to_time) + changeInTime / minuteHeight
-  if (newFromTime < 0) {
-    newFromTime = 0
-    newToTime = calculateDiff(
-      calendarEvent.value.from_time,
-      calendarEvent.value.to_time
-    )
-  }
-
-  if (newToTime > 1440) {
-    newToTime = 1440
-    newFromTime =
-      newToTime -
-      calculateDiff(calendarEvent.value.from_time, calendarEvent.value.to_time)
-  }
-
-  return [convertMinutesToHours(newFromTime), convertMinutesToHours(newToTime)]
 }
 
 const preventClick = ref(false)
@@ -259,7 +242,7 @@ function handleResizeMouseDown(e) {
       Math.round(diffX / height_15_min) * height_15_min + 'px'
 
     eventRef.value.style.width = '100%'
-    updatedTime.to_time = newEventEndTime(eventRef.value.style.height)
+    updatedEvent.to_time = newEventEndTime(eventRef.value.style.height)
     calendarEvent.value.to_time = newEventEndTime(eventRef.value.style.height)
   }
 
@@ -300,8 +283,8 @@ function handleRepositionMouseDown(e) {
     if (!props.event.isFullDay) handleVerticalMovement(e.clientY, prevY)
 
     if (
-      calendarEvent.value.from_time !== updatedTime.from_time ||
-      calendarEvent.value.to_time !== updatedTime.to_time
+      calendarEvent.value.from_time !== updatedEvent.from_time ||
+      calendarEvent.value.to_time !== updatedEvent.to_time
     ) {
       isEventUpdated.value = true
     } else {
@@ -318,13 +301,13 @@ function handleRepositionMouseDown(e) {
     if (calendarEvent.value.isFullDay && activeView.value === 'Week') {
       eventRef.value.style.width = '90%'
     }
-    if (calendarEvent.value.date !== updatedDate.value) {
+    if (calendarEvent.value.date !== updatedEvent.date) {
       isEventUpdated.value = true
     }
     if (isEventUpdated.value) {
-      calendarEvent.value.date = updatedDate.value
-      calendarEvent.value.from_time = updatedTime.from_time
-      calendarEvent.value.to_time = updatedTime.to_time
+      calendarEvent.value.date = updatedEvent.date
+      calendarEvent.value.from_time = updatedEvent.from_time
+      calendarEvent.value.to_time = updatedEvent.to_time
       updateEventState(calendarEvent.value)
       isEventUpdated.value = false
       state.xAxis = 0
@@ -367,13 +350,8 @@ function handleHorizontalMovement(clientX, rect) {
   }
   let xPos = Math.ceil(diff * eventWidth)
   state.xAxis = xPos
-  updatedDate.value = parseDate(getDate(currentDate, diff))
+  updatedEvent.date = parseDate(getDate(currentDate, diff))
 }
-
-const updatedTime = reactive({
-  from_time: props.event.from_time,
-  to_time: props.event.to_time,
-})
 
 function handleVerticalMovement(clientY, prevY) {
   let diffY = clientY - prevY
@@ -381,11 +359,11 @@ function handleVerticalMovement(clientY, prevY) {
 
   state.yAxis = diffY
 
-  updatedTime.from_time = convertMinutesToHours(
+  updatedEvent.from_time = convertMinutesToHours(
     calculateMinutes(calendarEvent.value.from_time) +
       Math.round(diffY / minuteHeight)
   )
-  updatedTime.to_time = convertMinutesToHours(
+  updatedEvent.to_time = convertMinutesToHours(
     calculateMinutes(calendarEvent.value.to_time) +
       Math.round(diffY / minuteHeight)
   )
@@ -393,17 +371,17 @@ function handleVerticalMovement(clientY, prevY) {
 }
 
 function handleTimeConstraints() {
-  if (updatedTime.from_time < '00:00:00') {
-    updatedTime.from_time = '00:00:00'
+  if (updatedEvent.from_time < '00:00:00') {
+    updatedEvent.from_time = '00:00:00'
   }
-  if (updatedTime.from_time > '24:00:00') {
-    updatedTime.from_time = '24:00:00'
+  if (updatedEvent.from_time > '24:00:00') {
+    updatedEvent.from_time = '24:00:00'
   }
-  if (updatedTime.to_time < '00:00:00') {
-    updatedTime.to_time = '00:00:00'
+  if (updatedEvent.to_time < '00:00:00') {
+    updatedEvent.to_time = '00:00:00'
   }
-  if (updatedTime.to_time > '24:00:00') {
-    updatedTime.to_time = '24:00:00'
+  if (updatedEvent.to_time > '24:00:00') {
+    updatedEvent.to_time = '24:00:00'
   }
 }
 
@@ -411,7 +389,7 @@ const toggle = () => (opened.value = !opened.value)
 const close = () => (opened.value = false)
 
 function handleEventClick() {
-  // hack to precent event modal from opening when resizing or repositioning
+  // hack to prevent event modal from opening when resizing or repositioning
   if (preventClick.value) {
     preventClick.value = false
     return

@@ -1,5 +1,5 @@
 <template>
-  <div class="h-[90%] p-4">
+  <div class="h-[90%]">
     <div class="h-full min-h-[500px] min-w-[600px] overflow-auto">
       <!-- Day List -->
       <div class="flex">
@@ -19,12 +19,12 @@
         </div>
       </div>
 
-      <div class="h-8 border-[1px]">
+      <!-- <div class="h-8 border-[1px]">
         <p class="w-16 text-center">All Day</p>
-      </div>
+      </div> -->
 
       <div
-        class="flex w-full overflow-scroll border-b-[1px] border-l-[1px]"
+        class="flex w-full overflow-scroll border-b-[1px] border-l-[1px] border-t-[1px]"
         ref="gridRef"
       >
         <!-- Time List form 0 - 24 -->
@@ -132,7 +132,7 @@ import {
 
 import Button from '../Button.vue'
 import ShowMoreCalendarEvent from './ShowMoreCalendarEvent.vue'
-import useNewEventModal from './composables/useNewEventModal'
+import useEventModal from './composables/useEventModal'
 import useCalendarData from './composables/useCalendarData'
 import { computed } from 'vue'
 
@@ -165,7 +165,7 @@ const fullDayEvents = computed(
   () => useCalendarData(props.events).fullDayEvents.value
 )
 
-const { showEventModal, newEvent, openNewEventModal } = useNewEventModal()
+const { showEventModal, newEvent, openNewEventModal } = useEventModal()
 
 const getCellHeight = (length) => 49 + 36 * (length - 1)
 function getFullDayEventsInCurrentWeek(eventsObject, weeklyDates) {

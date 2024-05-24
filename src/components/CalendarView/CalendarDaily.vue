@@ -81,7 +81,7 @@
 <script setup>
 import CalendarEvent from './CalendarEvent.vue'
 import NewEventModal from './NewEventModal.vue'
-import useNewEventModal from './composables/useNewEventModal'
+import useEventModal from './composables/useEventModal'
 import CalendarTimeMarker from './CalendarTimeMarker.vue'
 import {
   parseDate,
@@ -110,7 +110,7 @@ const timedEvents = computed(
 const fullDayEvents = computed(
   () => useCalendarData(props.events).fullDayEvents.value
 )
-const { showEventModal, newEvent, openNewEventModal } = useNewEventModal()
+const { showEventModal, newEvent, openNewEventModal } = useEventModal()
 
 const hourHeight = props.config.hourHeight
 </script>

@@ -13,7 +13,7 @@
     class="z-50"
   >
     <template #body-content>
-      <div class="p-4">
+      <div>
         <div class="grid grid-cols-1 gap-4">
           <FormControl
             type="Input"
