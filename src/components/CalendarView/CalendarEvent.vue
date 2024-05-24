@@ -1,22 +1,20 @@
 <template>
-  <!-- TODO: v if else for monthly  -->
+  <!-- Weekly and Daily Event Template  -->
   <div
     class="h-min-[18px] rounded-lg p-2 transition-all duration-75"
     ref="eventRef"
+    v-if="activeView !== 'Month'"
     v-bind="$attrs"
     :class="[
       colorMap[props.event?.color]?.background_color || 'bg-green-100',
-      activeView !== 'Month' && 'shadow-lg',
-      opened && activeView !== 'Month' && '!z-20 drop-shadow-xl',
+      'shadow-lg',
+      opened && '!z-20 drop-shadow-xl',
     ]"
-    :style="activeView !== 'Month' && setEventStyles"
+    :style="setEventStyles"
     @dblclick.prevent="handleEventEdit()"
     @click="handleEventClick()"
     v-on="{
-      mousedown:
-        config.isEditMode &&
-        activeView !== 'Month' &&
-        handleRepositionMouseDown,
+      mousedown: config.isEditMode && handleRepositionMouseDown,
     }"
   >
     <div
@@ -48,11 +46,51 @@
       </div>
     </div>
     <div
-      v-if="config.isEditMode && activeView !== 'Month' && !event.isFullDay"
+      v-if="config.isEditMode && !event.isFullDay"
       class="absolute h-[8px] w-[100%] cursor-row-resize"
       ref="resize"
       @mousedown="handleResizeMouseDown"
     />
+  </div>
+
+  <!-- Monthly Event Template -->
+  <div
+    v-else
+    class="h-min-[18px] rounded-lg p-2 transition-all duration-75"
+    ref="eventRef"
+    v-bind="$attrs"
+    :class="[colorMap[props.event?.color]?.background_color || 'bg-green-100']"
+    @dblclick.prevent="handleEventEdit()"
+    @click="handleEventClick()"
+  >
+    <div
+      class="relative flex h-full select-none items-start gap-2 overflow-hidden px-2"
+      :class="
+        props.event.from_time && [
+          'border-l-2',
+          colorMap[props.event?.color]?.border_color || 'border-green-600',
+        ]
+      "
+    >
+      <component
+        v-if="eventIcons[props.event.type]"
+        :is="eventIcons[props.event.type]"
+        class="h-4 w-4 text-black"
+      />
+      <FeatherIcon v-else name="circle" class="h-4 text-black" />
+
+      <div class="flex w-fit flex-col overflow-hidden whitespace-nowrap">
+        <p class="text-ellipsis text-sm font-medium text-gray-800">
+          {{ props.event.title || 'New Event' }}
+        </p>
+        <p
+          class="text-ellipsis text-xs font-normal text-gray-800"
+          v-if="props.event.from_time"
+        >
+          {{ updatedEvent.from_time }} - {{ updatedEvent.to_time }}
+        </p>
+      </div>
+    </div>
   </div>
 
   <div ref="floating" :style="{ ...floatingStyles, zIndex: 100 }" v-if="opened">
@@ -65,11 +103,7 @@
       @delete="handleEventDelete"
     />
   </div>
-  <NewEventModal
-    v-if="showEventModal"
-    v-model="showEventModal"
-    :event="props.event"
-  />
+  <NewEventModal v-model="showEventModal" :event="props.event" />
 </template>
 
 <script setup>
@@ -157,7 +191,7 @@ const setEventStyles = computed(() => {
   if (props.event.isFullDay) {
     return {
       transform: `translate(${state.xAxis}px, ${state.yAxis}px)`,
-      zIndex: props.event.idx + 1,
+      zIndex: isRepositioning ? 100 : props.event.idx + 1,
     }
   }
 
@@ -165,8 +199,7 @@ const setEventStyles = computed(() => {
     calendarEvent.value.from_time,
     calendarEvent.value.to_time
   )
-  let height =
-    activeView.value === 'Month' ? 'auto' : diff * minuteHeight + 'px'
+  let height = diff * minuteHeight + 'px'
 
   let top = calculateMinutes(calendarEvent.value.from_time) * minuteHeight
   if (activeView.value === 'Day') {
@@ -258,7 +291,6 @@ function handleResizeMouseDown(e) {
 
 function handleRepositionMouseDown(e) {
   e.preventDefault()
-  if (activeView.value === 'Month') return
   let prevY = e.clientY
   const rect = eventRef.value.getBoundingClientRect()
 
