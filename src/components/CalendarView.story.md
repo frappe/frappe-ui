@@ -124,3 +124,10 @@ e.g.
     	@deleteEvent=(eventID) => deleteEvent(eventID)
 
     />
+
+## Calendar Events
+
+1. Single Click any event to get additional data of the event via Popover,
+   edit/delete the event from the popover.
+2. Double Click any cell to create a new event.
+3. Double Click any Event to edit an event.
