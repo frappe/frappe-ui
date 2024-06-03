@@ -33,7 +33,7 @@ interface CheckboxProps {
   checked?: boolean
   disabled?: boolean
   padding?: boolean
-  modelValue?: boolean
+  modelValue?: boolean | 1 | 0
   id?: string
 }
 const props = withDefaults(defineProps<CheckboxProps>(), {
