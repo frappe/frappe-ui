@@ -90,6 +90,12 @@ let _options = computed(() => {
 
 const allRowsSelected = computed(() => {
   if (!props.rows.length) return false
+  if (showGroupedRows.value) {
+    return (
+      selections.size ===
+      props.rows.reduce((acc, row) => acc + row.rows.length, 0)
+    )
+  }
   return selections.size === props.rows.length
 })
 
@@ -112,6 +118,12 @@ function toggleRow(row) {
 function toggleAllRows(select) {
   if (!select || allRowsSelected.value) {
     selections.clear()
+    return
+  }
+  if (showGroupedRows.value) {
+    props.rows.forEach((row) => {
+      row.rows.forEach((r) => selections.add(r[props.rowKey]))
+    })
     return
   }
   props.rows.forEach((row) => selections.add(row[props.rowKey]))
