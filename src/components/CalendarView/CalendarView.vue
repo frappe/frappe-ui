@@ -1,5 +1,5 @@
 <template>
-  <div class="h-full p-5">
+  <div class="h-full">
     <div class="mb-2 flex justify-between">
       <!-- left side  -->
       <!-- Year, Month -->
@@ -56,7 +56,7 @@ import CalendarMonthly from './CalendarMonthly.vue'
 import CalendarWeekly from './CalendarWeekly.vue'
 import CalendarDaily from './CalendarDaily.vue'
 
-const emit = defineEmits(['updateEvent', 'createEvent', 'deleteEvent'])
+const emit = defineEmits(['update', 'create', 'delete'])
 
 const props = defineProps({
   events: {
@@ -85,7 +85,7 @@ let activeView = ref(overrideConfig.defaultMode)
 provide('activeView', activeView)
 provide('config', overrideConfig)
 
-let events = ref(props.events)
+let events = computed(() => props.events)
 events.value.forEach((event) => {
   if (!event.from_time || !event.to_time) {
     return
@@ -98,19 +98,21 @@ provide('eventActions', { createNewEvent, updateEventState, deleteEvent })
 // CRUD actions on an event
 function createNewEvent(event) {
   events.value.push(event)
-  emit('createEvent', event)
+  emit('create', event)
 }
 
 function updateEventState(event) {
   const eventID = event.id
   let eventIndex = events.value.findIndex((e) => e.id === eventID)
   events.value[eventIndex] = event
-  emit('updateEvent', events.value[eventIndex])
+  emit('update', events.value[eventIndex])
 }
 
 function deleteEvent(eventID) {
-  events.value = events.value.filter((event) => event.id !== eventID)
-  emit('deleteEvent', eventID)
+  // Delete event
+  const eventIndex = events.value.findIndex((event) => event.id === eventID)
+  events.value.splice(eventIndex, 1)
+  emit('delete', eventID)
 }
 
 // Calendar View Options

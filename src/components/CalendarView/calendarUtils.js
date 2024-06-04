@@ -102,13 +102,21 @@ export function parseDate(date) {
   return `${yyyy}-${mm}-${dd}`
 }
 
-export function parseDateEventPopupFormat(date, showDay = true) {
+export function parseDateEventPopupFormat(
+  date,
+  showDay = true,
+  showMonth = true,
+  weekDay = 'short'
+) {
   const options = {
-    month: 'short',
     day: 'numeric',
   }
+  if (showMonth) {
+    options.month = 'short'
+  }
+
   if (showDay) {
-    options.weekday = 'short'
+    options.weekday = weekDay
   }
   return date.toLocaleDateString('en-US', options)
 }
@@ -117,8 +125,10 @@ export function parseDateWithComma(date, showDay = false) {
   return parseDateEventPopupFormat(date, showDay).split(' ').join(', ')
 }
 
-export function parseDateWithDay(date) {
-  return daysList[date.getDay()] + ', ' + date.getDate()
+export function parseDateWithDay(date, fullDay = false) {
+  return fullDay
+    ? daysListFull[date.getDay()] + ', ' + date.getDate()
+    : daysList[date.getDay()] + ' ' + date.getDate()
 }
 
 export function calculateDiff(from, to) {
@@ -181,7 +191,15 @@ export const monthList = [
 ]
 
 export const daysList = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-
+export const daysListFull = [
+  'Sunday',
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+]
 export const twentyFourHoursFormat = [
   '00:00',
   '01:00',

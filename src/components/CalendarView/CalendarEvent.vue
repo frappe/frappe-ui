@@ -93,7 +93,12 @@
     </div>
   </div>
 
-  <div ref="floating" :style="{ ...floatingStyles, zIndex: 100 }" v-if="opened">
+  <div
+    ref="floating"
+    :style="{ ...floatingStyles, zIndex: 100 }"
+    v-if="opened"
+    class="rounded shadow-xl"
+  >
     <EventModalContent
       :calendarEvent="calendarEvent"
       :date="date"
@@ -101,6 +106,7 @@
       @close="close"
       @edit="handleEventEdit"
       @delete="handleEventDelete"
+      class="shadow-xl"
     />
   </div>
   <NewEventModal v-model="showEventModal" :event="props.event" />

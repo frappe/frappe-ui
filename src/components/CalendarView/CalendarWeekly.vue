@@ -7,13 +7,13 @@
         <div class="mb-2 grid w-full grid-cols-7">
           <span
             v-for="date in weeklyDates"
-            class="text-center text-sm text-gray-600"
-            :class="
-              new Date(date).toDateString() === new Date().toDateString()
-                ? 'font-bold'
-                : 'font-normal'
-            "
+            class="relative p-2 text-center text-sm text-gray-600"
+            :class="isToday(date) ? 'font-bold text-gray-800' : 'font-normal'"
           >
+            <div
+              v-if="isToday(date)"
+              class="absolute left-[88px] top-0 h-[2px] w-5 bg-gray-800"
+            />
             {{ parseDateWithDay(date) }}
           </span>
         </div>
@@ -165,6 +165,9 @@ const fullDayEvents = computed(
   () => useCalendarData(props.events).fullDayEvents.value
 )
 
+const isToday = (date) =>
+  new Date(date).toDateString() === new Date().toDateString()
+
 const { showEventModal, newEvent, openNewEventModal } = useEventModal()
 
 const getCellHeight = (length) => 49 + 36 * (length - 1)
@@ -211,6 +214,7 @@ function setFullDayEventsHeight(eventsObject, weeklyDates) {
 onMounted(() => {
   setFullDayEventsHeight(fullDayEvents.value, props.weeklyDates)
   let scrollTop = props.config.scrollToHour * 60 * minuteHeight
+  debugger
   gridRef.value.scrollBy(0, scrollTop)
 })
 

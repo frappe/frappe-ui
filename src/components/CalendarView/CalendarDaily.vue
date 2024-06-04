@@ -1,6 +1,8 @@
 <template>
   <div class="h-[90%] min-h-[500px] min-w-[600px]">
-    <span class="font-bold">{{ parseDateWithComma(currentDate) }}</span>
+    <p class="pb-2 text-base font-bold text-gray-800">
+      {{ parseDateWithDay(currentDate, (fullDay = true)) }}
+    </p>
     <div class="h-full overflow-hidden">
       <div
         class="flex h-full w-full overflow-scroll border-b-[1px] border-l-[1px] border-t-[1px]"
@@ -85,7 +87,7 @@ import useEventModal from './composables/useEventModal'
 import CalendarTimeMarker from './CalendarTimeMarker.vue'
 import {
   parseDate,
-  parseDateWithComma,
+  parseDateWithDay,
   twentyFourHoursFormat,
 } from './calendarUtils'
 import useCalendarData from './composables/useCalendarData'

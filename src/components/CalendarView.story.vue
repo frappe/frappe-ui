@@ -1,25 +1,28 @@
 <template>
   <Story>
-    <CalendarView
-      :config="config"
-      :events="events"
-      @createEvent="(event) => logEvent('createEvent', event)"
-      @updateEvent="(event) => logEvent('updateEvent', event)"
-      @deleteEvent="(event) => logEvent('deleteEvent', event)"
-    />
+    <div class="p-5">
+      <CalendarView
+        :config="config"
+        :events="events"
+        @create="(event) => logEvent('createEvent', event)"
+        @update="(event) => logEvent('updateEvent', event)"
+        @delete="(event) => logEvent('deleteEvent', event)"
+      />
+    </div>
   </Story>
 </template>
 <script setup>
+import { ref } from 'vue'
 import CalendarView from './CalendarView/CalendarView.vue'
 import { logEvent } from 'histoire/client'
 
 const config = {
-  defaultMode: 'Month',
+  defaultMode: 'Week',
   isEditMode: true,
   eventIcons: {},
 }
 
-const events = [
+const events = ref([
   {
     title: 'Maths by Sheldon',
     participant: 'Sheldon',
@@ -89,6 +92,6 @@ const events = [
     id: '#htrht4',
     isFullDay: true,
   },
-]
+])
 </script>
 <style></style>
