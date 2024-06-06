@@ -1,6 +1,6 @@
 <template>
   <div class="h-[90%]">
-    <div class="h-full min-h-[500px] min-w-[600px] overflow-auto">
+    <div class="h-full min-h-[500px] min-w-[600px]">
       <!-- Day List -->
       <div class="flex">
         <div class="w-16"></div>
@@ -12,21 +12,14 @@
           >
             <div
               v-if="isToday(date)"
-              class="absolute left-[88px] top-0 h-[2px] w-5 bg-gray-800"
+              class="absolute left-[45%] top-0 h-[2px] w-5 bg-gray-800"
             />
             {{ parseDateWithDay(date) }}
           </span>
         </div>
       </div>
 
-      <!-- <div class="h-8 border-[1px]">
-        <p class="w-16 text-center">All Day</p>
-      </div> -->
-
-      <div
-        class="flex w-full overflow-scroll border-b-[1px] border-l-[1px] border-t-[1px]"
-        ref="gridRef"
-      >
+      <div class="flex w-full border-b-[1px] border-l-[1px] border-t-[1px]">
         <!-- Time List form 0 - 24 -->
         <div class="grid h-full w-16 grid-cols-1">
           <span
@@ -37,77 +30,88 @@
         </div>
 
         <!-- Grid -->
-        <div class="grid w-full grid-cols-7">
+        <div class="flex w-full flex-col">
           <!-- full day events -->
-          <div v-for="(date, idx) in weeklyDates">
-            <div
-              class="flex w-full flex-col gap-1 border-b-[1px] border-r-[1px] border-gray-200 transition-all"
-              :class="[idx === 0 && 'relative border-l-[1px]']"
-              ref="allDayCells"
-              :data-date-attr="date"
-            >
-              <Button
-                v-if="showCollapsable"
-                @click="isCollapsed = !isCollapsed"
-                class="absolute -left-[42px] bottom-[4px] cursor-pointer font-bold"
-                :icon="isCollapsed ? 'chevron-down' : 'chevron-up'"
-                variant="ghost"
-                size="lg"
-              />
-              <div class="w-full" v-if="!isCollapsed">
-                <CalendarEvent
-                  v-for="(calendarEvent, idx) in fullDayEvents[parseDate(date)]"
-                  class="mb-1 w-[90%] cursor-pointer"
-                  :event="{ ...calendarEvent, idx }"
-                  :key="calendarEvent.id"
-                  :date="date"
+          <div class="grid w-full grid-cols-7">
+            <div v-for="(date, idx) in weeklyDates">
+              <div
+                class="flex w-full flex-col gap-1 border-b-[1px] border-r-[1px] border-gray-200 transition-all"
+                :class="[idx === 0 && 'relative border-l-[1px]']"
+                ref="allDayCells"
+                :data-date-attr="date"
+              >
+                <Button
+                  v-if="showCollapsable"
+                  @click="isCollapsed = !isCollapsed"
+                  class="absolute -left-[42px] bottom-[4px] cursor-pointer font-bold"
+                  :icon="isCollapsed ? 'chevron-down' : 'chevron-up'"
+                  variant="ghost"
+                  size="lg"
                 />
-              </div>
-              <div v-else class="flex flex-col justify-between">
-                <ShowMoreCalendarEvent
-                  v-if="fullDayEvents[parseDate(date)]?.length > 0"
-                  :event="fullDayEvents[parseDate(date)][0]"
-                  :date="date"
-                  :totalEventsCount="fullDayEvents[parseDate(date)].length"
-                  @showMoreEvents="isCollapsed = !isCollapsed"
-                />
+                <div class="w-full" v-if="!isCollapsed">
+                  <CalendarEvent
+                    v-for="(calendarEvent, idx) in fullDayEvents[
+                      parseDate(date)
+                    ]"
+                    class="!z-1 mb-1 w-[90%] cursor-pointer"
+                    :event="{ ...calendarEvent, idx }"
+                    :key="calendarEvent.id"
+                    :date="date"
+                  />
+                </div>
+                <div v-else class="flex flex-col justify-between">
+                  <ShowMoreCalendarEvent
+                    v-if="fullDayEvents[parseDate(date)]?.length > 0"
+                    :event="fullDayEvents[parseDate(date)][0]"
+                    :date="date"
+                    :totalEventsCount="fullDayEvents[parseDate(date)].length"
+                    @showMoreEvents="isCollapsed = !isCollapsed"
+                  />
+                </div>
               </div>
             </div>
           </div>
-
-          <!-- time events -> not full day events -->
-          <div
-            v-for="(date, idx) in weeklyDates"
-            class="relative border-r-[1px]"
-            :class="idx === 0 && 'calendar-column'"
-            :data-date-attr="date"
-          >
-            <!-- Time Grid -->
+          <!-- time events => not full day events -->
+          <div class="grid w-full grid-cols-7" ref="gridRef">
             <div
-              class="cell relative flex cursor-pointer"
-              v-for="time in twentyFourHoursFormat"
-              :data-time-attr="time"
-              @dblclick="
-                openNewEventModal($event, 'Week', date, config.isEditMode, time)
-              "
+              v-for="(date, idx) in weeklyDates"
+              class="relative w-full border-r-[1px]"
+              :class="idx === 0 && 'calendar-column'"
+              :data-date-attr="date"
             >
+              <!-- Time Grid -->
               <div
-                class="w-full border-b-[1px] border-gray-200"
-                :style="{ height: `${hourHeight}px` }"
+                class="cell relative flex cursor-pointer"
+                v-for="time in twentyFourHoursFormat"
+                :data-time-attr="time"
+                @dblclick="
+                  openNewEventModal(
+                    $event,
+                    'Week',
+                    date,
+                    config.isEditMode,
+                    time
+                  )
+                "
+              >
+                <div
+                  class="w-full border-b-[1px] border-gray-200"
+                  :style="{ height: `${hourHeight}px` }"
+                />
+              </div>
+
+              <!-- Calendar Events populations  -->
+              <CalendarEvent
+                v-for="(calendarEvent, idx) in timedEvents[parseDate(date)]"
+                class="absolute mb-2 w-[90%] cursor-pointer"
+                :event="calendarEvent"
+                :key="calendarEvent.id"
+                :date="date"
               />
+
+              <!-- Current time Marker  -->
+              <CalendarTimeMarker :date="date" />
             </div>
-
-            <!-- Calendar Events populations  -->
-            <CalendarEvent
-              v-for="(calendarEvent, idx) in timedEvents[parseDate(date)]"
-              class="absolute mb-2 w-[90%] cursor-pointer"
-              :event="calendarEvent"
-              :key="calendarEvent.id"
-              :date="date"
-            />
-
-            <!-- Current time Marker  -->
-            <CalendarTimeMarker :date="date" />
           </div>
         </div>
       </div>
@@ -212,10 +216,10 @@ function setFullDayEventsHeight(eventsObject, weeklyDates) {
 }
 
 onMounted(() => {
+  // document.body.style.overflow = 'hidden'
   setFullDayEventsHeight(fullDayEvents.value, props.weeklyDates)
-  let scrollTop = props.config.scrollToHour * 60 * minuteHeight
-  debugger
-  gridRef.value.scrollBy(0, scrollTop)
+  // let scrollTop = props.config.scrollToHour * 60 * minuteHeight
+  gridRef.value.scrollBy(0, 200)
 })
 
 watch(isCollapsed, (newVal) => {
