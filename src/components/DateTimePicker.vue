@@ -296,7 +296,7 @@ export default {
         date = this.getDate(
           date.getFullYear(),
           date.getMonth(),
-          date.getDate() + incrementer,
+          date.getDate() + incrementer
         )
         dates.push(date)
         count--
@@ -329,11 +329,11 @@ export default {
       date.setHours(this.hour, this.minute, this.second, 0)
       // "YYYY-MM-DD HH:MM:SS"
       return `${date.getFullYear()}-${this.twoDigit(
-        date.getMonth() + 1,
+        date.getMonth() + 1
       )}-${this.twoDigit(date.getDate())} ${this.twoDigit(
-        date.getHours(),
+        date.getHours()
       )}:${this.twoDigit(date.getMinutes())}:${this.twoDigit(
-        date.getSeconds(),
+        date.getSeconds()
       )}`
     },
     getDate(...args) {
