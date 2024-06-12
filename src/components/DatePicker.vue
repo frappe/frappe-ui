@@ -9,7 +9,7 @@
         type="text"
         icon-left="calendar"
         :placeholder="placeholder"
-        :value="value && formatter ? formatter(value) : value"
+        :value="modelValue && formatter ? formatter(modelValue) : modelValue"
         @focus="!readonly ? togglePopover() : null"
         class="w-full"
         :class="inputClass"
@@ -43,7 +43,7 @@
           <TextInput
             class="text-sm"
             type="text"
-            :value="value"
+            :value="modelValue"
             @change="
               selectDate(getDate($event.target.value)) || togglePopover()
             "
@@ -80,7 +80,7 @@
                 'font-extrabold text-gray-900':
                   toValue(date) === toValue(today),
                 'bg-gray-800 text-white hover:bg-gray-800':
-                  toValue(date) === value,
+                  toValue(date) === modelValue,
               }"
               @click="
                 () => {
@@ -118,8 +118,8 @@ import FeatherIcon from './FeatherIcon.vue'
 import TextInput from './TextInput.vue'
 export default {
   name: 'DatePicker',
-  props: ['value', 'placeholder', 'formatter', 'readonly', 'inputClass'],
-  emits: ['change'],
+  props: ['modelValue', 'placeholder', 'formatter', 'readonly', 'inputClass'],
+  emits: ['update:modelValue'],
   components: {
     Popover,
     Input,
@@ -188,10 +188,12 @@ export default {
   },
   methods: {
     selectDate(date) {
-      this.$emit('change', this.toValue(date))
+      this.$emit('update:modelValue', this.toValue(date))
     },
     selectCurrentMonthYear() {
-      let date = this.value ? this.getDate(this.value) : this.getDate()
+      let date = this.modelValue
+        ? this.getDate(this.modelValue)
+        : this.getDate()
       if (date === 'Invalid Date') {
         date = this.getDate()
       }

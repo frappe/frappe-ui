@@ -9,7 +9,7 @@
         type="text"
         icon-left="calendar"
         :placeholder="placeholder"
-        :value="formatter ? formatDates(value) : value"
+        :value="modelValue && formatter ? formatDates(modelValue) : modelValue"
         @focus="!readonly ? togglePopover() : null"
         class="w-full"
         :class="inputClass"
@@ -107,8 +107,8 @@ import FeatherIcon from './FeatherIcon.vue'
 import TextInput from './TextInput.vue'
 export default {
   name: 'DateRangePicker',
-  props: ['value', 'placeholder', 'formatter', 'readonly', 'inputClass'],
-  emits: ['change'],
+  props: ['modelValue', 'placeholder', 'formatter', 'readonly', 'inputClass'],
+  emits: ['update:modelValue'],
   components: {
     Popover,
     Input,
@@ -117,8 +117,8 @@ export default {
     TextInput,
   },
   data() {
-    const fromDate = this.value ? this.value[0] : ''
-    const toDate = this.value ? this.value[1] : ''
+    const fromDate = this.modelValue ? this.modelValue[0] : ''
+    const toDate = this.modelValue ? this.modelValue[1] : ''
     return {
       currentYear: null,
       currentMonth: null,
@@ -193,9 +193,9 @@ export default {
     },
     selectDates() {
       if (!this.fromDate && !this.toDate) {
-        return this.$emit('change', '')
+        return this.$emit('update:modelValue', '')
       }
-      this.$emit('change', `${this.fromDate},${this.toDate}`)
+      this.$emit('update:modelValue', `${this.fromDate},${this.toDate}`)
     },
     swapDatesIfNecessary() {
       if (!this.fromDate || !this.toDate) {

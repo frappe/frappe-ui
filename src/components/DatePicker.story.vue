@@ -19,29 +19,17 @@ const dateRangeValue = ref('')
   <Story :layout="{ type: 'grid', width: 500 }">
     <Variant title="Date">
       <div class="p-2">
-        <DatePicker
-          :value="dateValue"
-          @change="(val) => (dateValue = val)"
-          v-bind="state"
-        />
+        <DatePicker v-model="dateValue" v-bind="state" />
       </div>
     </Variant>
     <Variant title="Date Time">
       <div class="p-2">
-        <DateTimePicker
-          :value="dateTimeValue"
-          @change="(val) => (dateTimeValue = val)"
-          v-bind="state"
-        />
+        <DateTimePicker v-model="dateTimeValue" v-bind="state" />
       </div>
     </Variant>
     <Variant title="Date Range">
       <div class="p-2">
-        <DateRangePicker
-          :value="dateRangeValue"
-          @change="(val) => (dateRangeValue = val)"
-          v-bind="state"
-        />
+        <DateRangePicker v-model="dateRangeValue" v-bind="state" />
       </div>
     </Variant>
   </Story>
