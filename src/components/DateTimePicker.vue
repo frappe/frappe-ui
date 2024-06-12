@@ -47,7 +47,7 @@
             @change="updateDate($event.target.value) || togglePopover()"
           />
           <Button
-            :label="__('Now')"
+            :label="'Now'"
             class="text-sm"
             @click="selectDate(getDate(), false, true) || togglePopover()"
           />
@@ -61,7 +61,7 @@
               v-for="(d, i) in ['su', 'mo', 'tu', 'we', 'th', 'fr', 'sa']"
               :key="i"
             >
-              {{ __(d) }}
+              {{ d }}
             </div>
           </div>
           <div
@@ -134,7 +134,7 @@
         </div>
         <div class="flex justify-end p-1">
           <Button
-            :label="__('Clear')"
+            :label="'Clear'"
             class="text-sm"
             @click="
               () => {
@@ -150,13 +150,21 @@
 </template>
 
 <script>
-import Popover from '@/components/frappe-ui/Popover.vue'
+import Input from './Input.vue'
+import Button from './Button.vue'
+import Popover from './Popover.vue'
+import FeatherIcon from './FeatherIcon.vue'
+import TextInput from './TextInput.vue'
 export default {
   name: 'DatePicker',
   props: ['value', 'placeholder', 'formatter', 'readonly', 'inputClass'],
   emits: ['change'],
   components: {
     Popover,
+    Input,
+    Button,
+    FeatherIcon,
+    TextInput,
   },
   data() {
     return {
@@ -214,11 +222,9 @@ export default {
     },
     formatMonth() {
       let date = this.getDate(this.currentYear, this.currentMonth - 1, 1)
-      let month = __(
-        date.toLocaleString('en-US', {
-          month: 'long',
-        })
-      )
+      let month = date.toLocaleString('en-US', {
+        month: 'long',
+      })
       return `${month}, ${date.getFullYear()}`
     },
   },

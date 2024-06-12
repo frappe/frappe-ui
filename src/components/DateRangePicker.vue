@@ -7,6 +7,7 @@
       <Input
         readonly
         type="text"
+        icon-left="calendar"
         :placeholder="placeholder"
         :value="formatter ? formatDates(value) : value"
         @focus="!readonly ? togglePopover() : null"
@@ -51,7 +52,7 @@
               v-for="(d, i) in ['su', 'mo', 'tu', 'we', 'th', 'fr', 'sa']"
               :key="i"
             >
-              {{ __(d) }}
+              {{ d }}
             </div>
           </div>
           <div
@@ -82,13 +83,13 @@
         </div>
         <div class="flex justify-end space-x-1 p-1">
           <Button
-            :label="__('Clear')"
+            :label="'Clear'"
             @click="() => clearDates() | togglePopover()"
             :disabled="!fromDate || !toDate"
           />
           <Button
             variant="solid"
-            :label="__('Apply')"
+            :label="'Apply'"
             :disabled="!fromDate || !toDate"
             @click="() => selectDates() | togglePopover()"
           />
@@ -99,13 +100,21 @@
 </template>
 
 <script>
-import Popover from '@/components/frappe-ui/Popover.vue'
+import Input from './Input.vue'
+import Button from './Button.vue'
+import Popover from './Popover.vue'
+import FeatherIcon from './FeatherIcon.vue'
+import TextInput from './TextInput.vue'
 export default {
   name: 'DateRangePicker',
   props: ['value', 'placeholder', 'formatter', 'readonly', 'inputClass'],
   emits: ['change'],
   components: {
     Popover,
+    Input,
+    Button,
+    FeatherIcon,
+    TextInput,
   },
   data() {
     const fromDate = this.value ? this.value[0] : ''
@@ -164,11 +173,9 @@ export default {
     },
     formatMonth() {
       let date = this.getDate(this.currentYear, this.currentMonth - 1, 1)
-      let month = __(
-        date.toLocaleString('en-US', {
-          month: 'long',
-        })
-      )
+      let month = date.toLocaleString('en-US', {
+        month: 'long',
+      })
       return `${month}, ${date.getFullYear()}`
     },
   },
