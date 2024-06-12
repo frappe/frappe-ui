@@ -44,14 +44,12 @@
             class="text-sm"
             type="text"
             :value="value"
-            @change="
-              selectDate(getDate($event.target.value)) || togglePopover()
-            "
+            @change="updateDate($event.target.value) || togglePopover()"
           />
           <Button
-            :label="__('Today')"
+            :label="__('Now')"
             class="text-sm"
-            @click="selectDate(getDate()) || togglePopover()"
+            @click="selectDate(getDate(), false, true) || togglePopover()"
           />
         </div>
         <div
@@ -89,7 +87,48 @@
                 }
               "
             >
-              {{ __(date.getDate()) }}
+              {{ date.getDate() }}
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center justify-around gap-2 p-1">
+          <div>
+            {{ twoDigit(hour) }} : {{ twoDigit(minute) }} :
+            {{ twoDigit(second) }}
+          </div>
+          <div class="flex flex-col items-center justify-center">
+            <div class="slider flex min-h-4 items-center justify-center">
+              <TextInput
+                v-model="hour"
+                name="hours"
+                type="range"
+                min="0"
+                max="23"
+                step="1"
+                @change="() => changeTime() || togglePopover()"
+              />
+            </div>
+            <div class="slider flex min-h-4 items-center justify-center">
+              <TextInput
+                v-model="minute"
+                name="minutes"
+                type="range"
+                min="0"
+                max="59"
+                step="1"
+                @change="() => changeTime() || togglePopover()"
+              />
+            </div>
+            <div class="slider flex min-h-4 items-center justify-center">
+              <TextInput
+                v-model="second"
+                name="seconds"
+                type="range"
+                min="0"
+                max="59"
+                step="1"
+                @change="() => changeTime() || togglePopover()"
+              />
             </div>
           </div>
         </div>
@@ -123,6 +162,9 @@ export default {
     return {
       currentYear: null,
       currentMonth: null,
+      hour: 0,
+      minute: 0,
+      second: 0,
     }
   },
   created() {
@@ -181,7 +223,18 @@ export default {
     },
   },
   methods: {
-    selectDate(date) {
+    changeTime() {
+      let date = this.value ? this.getDate(this.value) : this.getDate()
+      this.selectDate(date, true)
+    },
+    selectDate(date, isTimeChange = false, isNow = false) {
+      if (!isTimeChange) {
+        let currentDate =
+          this.value && !isNow ? this.getDate(this.value) : this.getDate()
+        this.hour = currentDate.getHours()
+        this.minute = currentDate.getMinutes()
+        this.second = currentDate.getSeconds()
+      }
       this.$emit('change', this.toValue(date))
     },
     selectCurrentMonthYear() {
@@ -191,6 +244,9 @@ export default {
       }
       this.currentYear = date.getFullYear()
       this.currentMonth = date.getMonth() + 1
+      this.hour = date.getHours()
+      this.minute = date.getMinutes()
+      this.second = date.getSeconds()
     },
     prevMonth() {
       this.changeMonth(-1)
@@ -230,7 +286,6 @@ export default {
       }
       return dates
     },
-
     getDaysInMonth(monthIndex, year) {
       let daysInMonthMap = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
       let daysInMonth = daysInMonthMap[monthIndex]
@@ -239,33 +294,92 @@ export default {
       }
       return daysInMonth
     },
-
     isLeapYear(year) {
       if (year % 400 === 0) return true
       if (year % 100 === 0) return false
       if (year % 4 === 0) return true
       return false
     },
-
-    toValue(date) {
-      if (!date) {
-        return ''
-      }
-
-      // toISOString is buggy and reduces the day by one
-      // this is because it considers the UTC timestamp
-      // in order to circumvent that we need to use luxon/moment
-      // but that refactor could take some time, so fixing the time difference
-      // as suggested in this answer.
-      // https://stackoverflow.com/a/16084846/3541205
-      date.setHours(0, -date.getTimezoneOffset(), 0, 0)
-      return date.toISOString().slice(0, 10)
+    twoDigit(number) {
+      return number.toString().padStart(2, '0')
     },
+    toValue(date) {
+      if (!date) return ''
 
+      date.setHours(this.hour, this.minute, this.second, 0)
+      // "YYYY-MM-DD HH:MM:SS"
+      return `${date.getFullYear()}-${this.twoDigit(
+        date.getMonth() + 1
+      )}-${this.twoDigit(date.getDate())} ${this.twoDigit(
+        date.getHours()
+      )}:${this.twoDigit(date.getMinutes())}:${this.twoDigit(
+        date.getSeconds()
+      )}`
+    },
     getDate(...args) {
       let d = new Date(...args)
       return d
     },
+    updateDate(date) {
+      date = this.getDate(date)
+      this.hour = date.getHours()
+      this.minute = date.getMinutes()
+      this.second = date.getSeconds()
+      this.selectDate(date, true)
+    },
   },
 }
 </script>
+
+<style scoped>
+.slider {
+  --trackHeight: 1px;
+  --thumbRadius: 10px;
+}
+:deep(.slider input[type='range']) {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 100%;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+:deep(.slider input[type='range']::-webkit-slider-runnable-track) {
+  appearance: none;
+  background: #000;
+  height: var(--trackHeight);
+  border-radius: 999px;
+}
+
+:deep(.slider input[type='range']:focus-visible) {
+  outline: none;
+}
+
+:deep(.slider input[type='range']::-webkit-slider-thumb) {
+  width: var(--thumbRadius);
+  height: var(--thumbRadius);
+  margin-top: calc((var(--trackHeight) - var(--thumbRadius)) / 2);
+  background: #fff;
+  border-radius: 3px;
+  pointer-events: all;
+  appearance: none;
+  outline: 1px solid #777777;
+  z-index: 1;
+}
+
+:deep(.slider:hover input[type='range']::-webkit-slider-thumb) {
+  outline: 1px solid #000;
+}
+:deep(.slider input[type='range']::-webkit-slider-thumb) {
+  width: var(--thumbRadius);
+  height: var(--thumbRadius);
+  margin-top: calc((var(--trackHeight) - var(--thumbRadius)) / 2);
+  background: #fff;
+  border-radius: 3px;
+  pointer-events: all;
+  appearance: none;
+  z-index: 1;
+}
+</style>

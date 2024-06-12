@@ -7,9 +7,8 @@
       <Input
         readonly
         type="text"
-        icon-left="calendar"
         :placeholder="placeholder"
-        :value="value && formatter ? formatter(value) : value"
+        :value="formatter ? formatDates(value) : value"
         @focus="!readonly ? togglePopover() : null"
         class="w-full"
         :class="inputClass"
@@ -40,19 +39,8 @@
           </Button>
         </div>
         <div class="flex items-center justify-center gap-1 p-1">
-          <TextInput
-            class="text-sm"
-            type="text"
-            :value="value"
-            @change="
-              selectDate(getDate($event.target.value)) || togglePopover()
-            "
-          />
-          <Button
-            :label="__('Today')"
-            class="text-sm"
-            @click="selectDate(getDate()) || togglePopover()"
-          />
+          <TextInput class="w-28 text-sm" type="text" v-model="fromDate" />
+          <TextInput class="w-28 text-sm" type="text" v-model="toDate" />
         </div>
         <div
           class="flex flex-col items-center justify-center p-1 text-gray-800"
@@ -77,32 +65,32 @@
               class="flex h-8 w-8 cursor-pointer items-center justify-center rounded hover:bg-gray-50"
               :class="{
                 'text-gray-400': date.getMonth() !== currentMonth - 1,
+                'text-gray-900': date.getMonth() === currentMonth - 1,
                 'font-extrabold text-gray-900':
                   toValue(date) === toValue(today),
-                'bg-gray-800 text-white hover:bg-gray-800':
-                  toValue(date) === value,
+                'rounded-none bg-gray-100': isInRange(date),
+                'rounded-l-md rounded-r-none bg-gray-800 text-white hover:bg-gray-800':
+                  fromDate && toValue(date) === toValue(fromDate),
+                'rounded-r-md bg-gray-800 text-white hover:bg-gray-800':
+                  toDate && toValue(date) === toValue(toDate),
               }"
-              @click="
-                () => {
-                  selectDate(date)
-                  togglePopover()
-                }
-              "
+              @click="() => handleDateClick(date)"
             >
-              {{ __(date.getDate()) }}
+              {{ date.getDate() }}
             </div>
           </div>
         </div>
-        <div class="flex justify-end p-1">
+        <div class="flex justify-end space-x-1 p-1">
           <Button
             :label="__('Clear')"
-            class="text-sm"
-            @click="
-              () => {
-                selectDate('')
-                togglePopover()
-              }
-            "
+            @click="() => clearDates() | togglePopover()"
+            :disabled="!fromDate || !toDate"
+          />
+          <Button
+            variant="solid"
+            :label="__('Apply')"
+            :disabled="!fromDate || !toDate"
+            @click="() => selectDates() | togglePopover()"
           />
         </div>
       </div>
@@ -113,16 +101,20 @@
 <script>
 import Popover from '@/components/frappe-ui/Popover.vue'
 export default {
-  name: 'DatePicker',
+  name: 'DateRangePicker',
   props: ['value', 'placeholder', 'formatter', 'readonly', 'inputClass'],
   emits: ['change'],
   components: {
     Popover,
   },
   data() {
+    const fromDate = this.value ? this.value[0] : ''
+    const toDate = this.value ? this.value[1] : ''
     return {
       currentYear: null,
       currentMonth: null,
+      fromDate,
+      toDate,
     }
   },
   created() {
@@ -181,14 +173,40 @@ export default {
     },
   },
   methods: {
-    selectDate(date) {
-      this.$emit('change', this.toValue(date))
+    handleDateClick(date) {
+      if (this.fromDate && this.toDate) {
+        this.fromDate = this.toValue(date)
+        this.toDate = ''
+      } else if (this.fromDate && !this.toDate) {
+        this.toDate = this.toValue(date)
+      } else {
+        this.fromDate = this.toValue(date)
+      }
+      this.swapDatesIfNecessary()
+    },
+    selectDates() {
+      if (!this.fromDate && !this.toDate) {
+        return this.$emit('change', '')
+      }
+      this.$emit('change', `${this.fromDate},${this.toDate}`)
+    },
+    swapDatesIfNecessary() {
+      if (!this.fromDate || !this.toDate) {
+        return
+      }
+      // if fromDate is greater than toDate, swap them
+      let fromDate = this.getDate(this.fromDate)
+      let toDate = this.getDate(this.toDate)
+      if (fromDate > toDate) {
+        let temp = fromDate
+        fromDate = toDate
+        toDate = temp
+      }
+      this.fromDate = this.toValue(fromDate)
+      this.toDate = this.toValue(toDate)
     },
     selectCurrentMonthYear() {
-      let date = this.value ? this.getDate(this.value) : this.getDate()
-      if (date === 'Invalid Date') {
-        date = this.getDate()
-      }
+      let date = this.toDate ? this.getDate(this.toDate) : this.today
       this.currentYear = date.getFullYear()
       this.currentMonth = date.getMonth() + 1
     },
@@ -251,6 +269,9 @@ export default {
       if (!date) {
         return ''
       }
+      if (typeof date === 'string') {
+        return date
+      }
 
       // toISOString is buggy and reduces the day by one
       // this is because it considers the UTC timestamp
@@ -265,6 +286,28 @@ export default {
     getDate(...args) {
       let d = new Date(...args)
       return d
+    },
+
+    isInRange(date) {
+      if (!this.fromDate || !this.toDate) {
+        return false
+      }
+      return (
+        date >= this.getDate(this.fromDate) && date <= this.getDate(this.toDate)
+      )
+    },
+
+    formatDates(value) {
+      if (!value) {
+        return ''
+      }
+      const values = value.split(',')
+      return this.formatter(values[0]) + ' to ' + this.formatter(values[1])
+    },
+    clearDates() {
+      this.fromDate = ''
+      this.toDate = ''
+      this.selectDates()
     },
   },
 }
