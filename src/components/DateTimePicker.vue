@@ -9,7 +9,7 @@
         type="text"
         icon-left="calendar"
         :placeholder="placeholder"
-        :value="modelValue && formatter ? formatter(modelValue) : modelValue"
+        :value="dateValue && formatter ? formatter(dateValue) : dateValue"
         @focus="!readonly ? togglePopover() : null"
         class="w-full"
         :class="inputClass"
@@ -43,7 +43,7 @@
           <TextInput
             class="text-sm"
             type="text"
-            :value="modelValue"
+            :value="dateValue"
             @change="updateDate($event.target.value) || togglePopover()"
           />
           <Button
@@ -78,7 +78,7 @@
                 'font-extrabold text-gray-900':
                   toValue(date) === toValue(today),
                 'bg-gray-800 text-white hover:bg-gray-800':
-                  toValue(date) === modelValue,
+                  toValue(date) === dateValue,
               }"
               @click="
                 () => {
@@ -157,8 +157,15 @@ import FeatherIcon from './FeatherIcon.vue'
 import TextInput from './TextInput.vue'
 export default {
   name: 'DatePicker',
-  props: ['modelValue', 'placeholder', 'formatter', 'readonly', 'inputClass'],
-  emits: ['update:modelValue'],
+  props: [
+    'value',
+    'modelValue',
+    'placeholder',
+    'formatter',
+    'readonly',
+    'inputClass',
+  ],
+  emits: ['update:modelValue', 'change'],
   components: {
     Popover,
     Input,
@@ -227,30 +234,31 @@ export default {
       })
       return `${month}, ${date.getFullYear()}`
     },
+    dateValue() {
+      return this.value ? this.value : this.modelValue
+    },
   },
   methods: {
     changeTime() {
-      let date = this.modelValue
-        ? this.getDate(this.modelValue)
-        : this.getDate()
+      let date = this.dateValue ? this.getDate(this.dateValue) : this.getDate()
       this.selectDate(date, true)
     },
     selectDate(date, isTimeChange = false, isNow = false) {
       if (!isTimeChange) {
         let currentDate =
-          this.modelValue && !isNow
-            ? this.getDate(this.modelValue)
+          this.dateValue && !isNow
+            ? this.getDate(this.dateValue)
             : this.getDate()
         this.hour = currentDate.getHours()
         this.minute = currentDate.getMinutes()
         this.second = currentDate.getSeconds()
       }
+
+      this.$emit('change', this.toValue(date))
       this.$emit('update:modelValue', this.toValue(date))
     },
     selectCurrentMonthYear() {
-      let date = this.modelValue
-        ? this.getDate(this.modelValue)
-        : this.getDate()
+      let date = this.dateValue ? this.getDate(this.dateValue) : this.getDate()
       if (date === 'Invalid Date') {
         date = this.getDate()
       }
