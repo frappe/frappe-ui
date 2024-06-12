@@ -105,7 +105,7 @@ const selectable = computed(() => {
 
 let showGroupedRows = computed(() => {
   return props.rows.every(
-    (row) => row.group && row.rows && Array.isArray(row.rows)
+    (row) => row.group && row.rows && Array.isArray(row.rows),
   )
 })
 
@@ -141,6 +141,6 @@ provide(
     slots: slots,
     toggleRow,
     toggleAllRows,
-  }))
+  })),
 )
 </script>

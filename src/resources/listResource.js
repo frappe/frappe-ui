@@ -86,7 +86,7 @@ export function createListResource(options, vm) {
         },
         onError: options.onError,
       },
-      vm
+      vm,
     ),
     fetchOne: createResource(
       {
@@ -108,7 +108,7 @@ export function createListResource(options, vm) {
         },
         onError: options.fetchOne?.onError,
       },
-      vm
+      vm,
     ),
     insert: createResource(
       {
@@ -127,7 +127,7 @@ export function createListResource(options, vm) {
         },
         onError: options.insert?.onError,
       },
-      vm
+      vm,
     ),
     setValue: createResource(
       {
@@ -146,7 +146,7 @@ export function createListResource(options, vm) {
         },
         onError: options.setValue?.onError,
       },
-      vm
+      vm,
     ),
     delete: createResource(
       {
@@ -163,7 +163,7 @@ export function createListResource(options, vm) {
         },
         onError: options.delete?.onError,
       },
-      vm
+      vm,
     ),
     runDocMethod: createResource(
       {
@@ -186,7 +186,7 @@ export function createListResource(options, vm) {
         },
         onError: options.runDocMethod?.onError,
       },
-      vm
+      vm,
     ),
     update,
     fetch,
@@ -321,7 +321,7 @@ export function deleteRowInListResource(doctype, docname) {
   for (let resource of resources) {
     if (resource.originalData) {
       resource.originalData = resource.originalData.filter(
-        (row) => row.name.toString() !== docname.toString()
+        (row) => row.name.toString() !== docname.toString(),
       )
       resource.data = resource.transform(resource.originalData)
     }

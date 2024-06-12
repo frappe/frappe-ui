@@ -17,7 +17,7 @@ function getSuggestionOptions(options) {
     items: ({ query }) => {
       return options
         .filter((item) =>
-          item.label.toLowerCase().startsWith(query.toLowerCase())
+          item.label.toLowerCase().startsWith(query.toLowerCase()),
         )
         .slice(0, 10)
     },

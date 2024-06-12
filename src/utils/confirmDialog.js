@@ -13,7 +13,7 @@ export function confirmDialog({
       message,
       fields,
       onConfirm,
-    })
+    }),
   )
 }
 

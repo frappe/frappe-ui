@@ -17,8 +17,8 @@
                 uploading
                   ? `Uploading ${progress}%`
                   : addVideoDialog.url
-                  ? 'Change Video'
-                  : 'Upload Video'
+                    ? 'Change Video'
+                    : 'Upload Video'
               }}
             </Button>
             <Button

@@ -15,7 +15,10 @@
       :disabled="disabled"
       :id="htmlId"
       :checked="Boolean(modelValue)"
-      @change="(e) => $emit('update:modelValue', (e.target as HTMLInputElement).checked)"
+      @change="
+        (e) =>
+          $emit('update:modelValue', (e.target as HTMLInputElement).checked)
+      "
       v-bind="attrs"
     />
     <label class="block" :class="labelClasses" v-if="label" :for="htmlId">
@@ -64,8 +67,8 @@ const inputClasses = computed(() => {
   let interactionClasses = props.disabled
     ? ''
     : props.padding
-    ? 'focus:ring-0'
-    : 'hover:shadow-sm focus:ring-0 focus-visible:ring-2 focus-visible:ring-gray-400 active:bg-gray-100'
+      ? 'focus:ring-0'
+      : 'hover:shadow-sm focus:ring-0 focus-visible:ring-2 focus-visible:ring-gray-400 active:bg-gray-100'
 
   let sizeClasses = {
     sm: 'w-3.5 h-3.5',

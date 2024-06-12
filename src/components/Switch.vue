@@ -93,8 +93,8 @@ const switchCircleClasses = computed(() => {
         ? 'translate-x-3'
         : 'translate-x-0'
       : props.modelValue
-      ? 'translate-x-2.5'
-      : 'translate-x-0',
+        ? 'translate-x-2.5'
+        : 'translate-x-0',
   ]
 })
 
@@ -117,13 +117,13 @@ const switchGroupClasses = computed(() => {
 
   if (switchType.value === SwitchVariant.ONLY_LABEL) {
     classes.push(
-      'group items-center space-x-3 cursor-pointer rounded focus-visible:bg-gray-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-400'
+      'group items-center space-x-3 cursor-pointer rounded focus-visible:bg-gray-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-400',
     )
 
     classes.push(
       props.disabled
         ? 'cursor-not-allowed'
-        : 'hover:bg-gray-200 active:bg-gray-300'
+        : 'hover:bg-gray-200 active:bg-gray-300',
     )
 
     classes.push(props.size === 'md' ? 'px-3 py-1.5' : 'px-2.5 py-1.5')

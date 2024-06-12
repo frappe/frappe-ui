@@ -13,7 +13,7 @@ export function frappeRequest(options) {
           'Content-Type': 'application/json; charset=utf-8',
           'X-Frappe-Site-Name': window.location.hostname,
         },
-        options.headers || {}
+        options.headers || {},
       )
       if (window.csrf_token && window.csrf_token !== '{{ csrf_token }}') {
         headers['X-Frappe-CSRF-Token'] = window.csrf_token

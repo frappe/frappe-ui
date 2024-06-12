@@ -40,7 +40,7 @@ let createMixin = (mixinOptions) => ({
             {
               immediate: true,
               deep: true,
-            }
+            },
           )
         } else {
           let resource = createResourceForOptions(options, this)

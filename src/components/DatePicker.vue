@@ -237,7 +237,7 @@ export default {
         date = this.getDate(
           date.getFullYear(),
           date.getMonth(),
-          date.getDate() + incrementer
+          date.getDate() + incrementer,
         )
         dates.push(date)
         count--
