@@ -112,17 +112,11 @@ functions as props to the CalendarView component:
 e.g.
 
     <CalendarView
-
     	:events=events
-
     	:config=config
-
-    	@createEvent=(event) => createEvent(event)
-
-    	@updateEvent=(event) => updateEvent(event)
-
-    	@deleteEvent=(eventID) => deleteEvent(eventID)
-
+    	@create=(event) => createEvent(event)
+    	@update=(event) => updateEvent(event)
+    	@delete=(eventID) => deleteEvent(eventID)
     />
 
 ## Calendar Events

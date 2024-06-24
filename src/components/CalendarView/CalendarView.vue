@@ -79,7 +79,7 @@ const defaultConfig = {
 
 const overrideConfig = { ...defaultConfig, ...props.config }
 overrideConfig['redundantCellHeight'] = 50
-overrideConfig['hourHeight'] = 72
+overrideConfig['hourHeight'] = 50
 let activeView = ref(overrideConfig.defaultMode)
 
 provide('activeView', activeView)
