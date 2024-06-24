@@ -12,17 +12,31 @@
           :class="[
             active ? 'ring-gray-300 focus-visible:ring' : '',
             checked ? 'bg-white text-gray-900 shadow' : 'text-gray-700',
-            'rounded-[7px] px-2 py-1.5 leading-none transition-colors focus:outline-none',
+            'flex flex-1 justify-center gap-2 whitespace-nowrap rounded-[7px] px-3 py-[5px] leading-none transition-colors focus:outline-none',
           ]"
         >
-          <RadioGroupLabel as="span">{{ button.label }}</RadioGroupLabel>
+          <FeatherIcon
+            class="h-4 w-4"
+            v-if="button.icon"
+            :name="button.icon"
+            :label="button.label"
+            :aria-label="button.label"
+          />
+          <RadioGroupLabel
+            as="span"
+            class="flex h-4 items-center"
+            v-show="button.label && !button.hideLabel"
+            >{{ button.label }}</RadioGroupLabel
+          >
         </button>
       </RadioGroupOption>
     </div>
   </RadioGroup>
 </template>
 <script>
-import { RadioGroup, RadioGroupOption, RadioGroupLabel } from '@headlessui/vue'
+import { RadioGroup, RadioGroupLabel, RadioGroupOption } from '@headlessui/vue'
+import FeatherIcon from './FeatherIcon.vue'
+
 export default {
   name: 'TabButtons',
   props: {

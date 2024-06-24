@@ -49,7 +49,7 @@ watch(
   (value) => {
     r.doctype = value
     r.reload()
-  }
+  },
 )
 
 const r = createListResource({
@@ -69,7 +69,7 @@ const options = computed(
     r.data?.map((result) => ({
       label: result[props.labelField],
       value: result[props.valueField],
-    })) || []
+    })) || [],
 )
 const selection = ref(null)
 

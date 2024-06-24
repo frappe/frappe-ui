@@ -90,7 +90,7 @@ export function createDocumentResource(options, vm) {
           options.onError?.call(vm, error)
         },
       },
-      vm
+      vm,
     ),
     setValue: createResource(setValueOptions, vm),
     setValueDebounced: createResource(
@@ -98,7 +98,7 @@ export function createDocumentResource(options, vm) {
         ...setValueOptions,
         debounce: options.debounce || 500,
       },
-      vm
+      vm,
     ),
     save: createResource(
       {
@@ -114,7 +114,7 @@ export function createDocumentResource(options, vm) {
           }
         },
       },
-      vm
+      vm,
     ),
     delete: createResource(
       {
@@ -133,7 +133,7 @@ export function createDocumentResource(options, vm) {
         },
         onError: options.delete?.onError,
       },
-      vm
+      vm,
     ),
     reload,
     setDoc,
@@ -147,7 +147,7 @@ export function createDocumentResource(options, vm) {
     },
     {
       deep: true,
-    }
+    },
   )
 
   for (let methodKey in options.whitelistedMethods) {
@@ -205,7 +205,7 @@ export function createDocumentResource(options, vm) {
         },
         ...otherOptions,
       },
-      vm
+      vm,
     )
   }
 

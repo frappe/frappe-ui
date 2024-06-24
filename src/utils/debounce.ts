@@ -1,7 +1,7 @@
 export default function debounce(
   func: Function,
   wait: number,
-  immediate?: boolean
+  immediate?: boolean,
 ) {
   var timeout: number | undefined
   return function () {

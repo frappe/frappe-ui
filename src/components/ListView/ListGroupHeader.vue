@@ -9,16 +9,18 @@
         :class="[group.collapsed ? '-rotate-90' : '']"
       />
     </button>
-    <div class="w-full py-1.5 pr-2">
-      <component
-        v-if="list.slots['group-header']"
-        :is="list.slots['group-header']"
-        v-bind="{ group }"
-      />
-      <span v-else class="text-base font-medium leading-6">
-        {{ group.group }}
-      </span>
-    </div>
+    <slot>
+      <div class="w-full py-1.5 pr-2">
+        <component
+          v-if="list.slots['group-header']"
+          :is="list.slots['group-header']"
+          v-bind="{ group }"
+        />
+        <span v-else class="text-base font-medium leading-6">
+          {{ group.group }}
+        </span>
+      </div>
+    </slot>
   </div>
   <div class="mx-2 h-px border-t border-gray-200"></div>
 </template>

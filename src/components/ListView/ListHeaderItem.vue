@@ -9,9 +9,11 @@
       :class="$attrs.class"
     >
       <slot name="prefix" v-bind="{ item }" />
-      <div class="truncate">
-        {{ item.label }}
-      </div>
+      <slot>
+        <div class="truncate">
+          {{ item.label }}
+        </div>
+      </slot>
       <slot name="suffix" v-bind="{ item }" />
     </div>
     <slot v-if="list.options.resizeColumn" name="resizer" v-bind="{ item }">

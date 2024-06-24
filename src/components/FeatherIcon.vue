@@ -13,7 +13,7 @@ export default {
         const valid = validIcons.includes(value)
         if (!valid) {
           console.groupCollapsed(
-            '[frappe-ui] name property for feather-icon must be one of '
+            '[frappe-ui] name property for feather-icon must be one of ',
           )
           console.dir(validIcons)
           console.groupEnd()
@@ -51,8 +51,8 @@ export default {
           class: [icon.attrs.class, 'shrink-0'],
           innerHTML: icon.contents,
         },
-        this.$attrs
-      )
+        this.$attrs,
+      ),
     )
   },
 }

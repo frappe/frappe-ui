@@ -33,7 +33,7 @@ export function usePageMeta(fn) {
     {
       immediate: true,
       deep: true,
-    }
+    },
   )
 }
 

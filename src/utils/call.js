@@ -9,7 +9,7 @@ export default async function call(method, args, options = {}) {
       'Content-Type': 'application/json; charset=utf-8',
       'X-Frappe-Site-Name': window.location.hostname,
     },
-    options.headers || {}
+    options.headers || {},
   )
 
   if (window.csrf_token && window.csrf_token !== '{{ csrf_token }}') {

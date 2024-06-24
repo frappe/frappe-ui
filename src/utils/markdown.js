@@ -23,7 +23,7 @@ export function detectMarkdown(text) {
       line.startsWith('```') ||
       line.startsWith('`') ||
       line.startsWith('[') ||
-      line.startsWith('---')
+      line.startsWith('---'),
   )
   return markdown.length > 0
 }
