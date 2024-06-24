@@ -1,29 +1,49 @@
 <template>
   <div class="h-full">
-    <div class="mb-2 flex justify-between">
-      <!-- left side  -->
-      <!-- Year, Month -->
-      <span class="text-xl font-medium"> {{ currentMonthYear }}</span>
-      <!-- right side -->
-      <!-- actions buttons for calendar -->
-      <div class="flex gap-x-1">
-        <!-- Increment and Decrement Button-->
-        <Button
-          @click="decrementClickEvents[activeView]"
-          variant="ghost"
-          class="h-4 w-4"
-          icon="chevron-left"
-        />
-        <Button
-          @click="incrementClickEvents[activeView]"
-          variant="ghost"
-          class="h-4 w-4"
-          icon="chevron-right"
-        />
-        <!--  View change button default is months or can be set via props!  -->
-        <TabButtons :buttons="enabledModes" class="ml-2" v-model="activeView" />
+    <!-- how can I change the value of activeView from the parent -->
+    <!-- how can I achieve 2 way binding on activeView -->
+
+    <slot
+      name="header"
+      v-bind="{
+        currentMonthYear,
+        enabledModes,
+        decrement,
+        increment,
+      }"
+    >
+      <div class="mb-2 flex justify-between">
+        <!-- left side  -->
+        <!-- Year, Month -->
+        <span class="text-xl font-medium"> {{ currentMonthYear }}</span>
+        <!-- right side -->
+        <!-- actions buttons for calendar -->
+        <div class="flex gap-x-1">
+          <!-- Increment and Decrement Button-->
+
+          <Button
+            @click="decrement()"
+            variant="ghost"
+            class="h-4 w-4"
+            icon="chevron-left"
+          />
+          <Button
+            @click="increment()"
+            variant="ghost"
+            class="h-4 w-4"
+            icon="chevron-right"
+          />
+
+          <!--  View change button default is months or can be set via props!  -->
+          <TabButtons
+            :buttons="enabledModes"
+            class="ml-2"
+            v-model="activeView"
+          />
+        </div>
       </div>
-    </div>
+    </slot>
+
     <CalendarMonthly
       v-if="activeView === 'Month'"
       :events="events"
@@ -55,8 +75,9 @@ import { getCalendarDates, monthList, handleSeconds } from './calendarUtils'
 import CalendarMonthly from './CalendarMonthly.vue'
 import CalendarWeekly from './CalendarWeekly.vue'
 import CalendarDaily from './CalendarDaily.vue'
+import { watch } from 'vue'
 
-const emit = defineEmits(['update', 'create', 'delete'])
+const emit = defineEmits(['update', 'create', 'delete', 'update:modelValue'])
 
 const props = defineProps({
   events: {
@@ -67,7 +88,17 @@ const props = defineProps({
   config: {
     type: Object,
   },
+  modelValue: {
+    type: [String, Boolean, Number],
+  },
 })
+
+watch(
+  () => props.modelValue,
+  (value) => {
+    activeView.value = value
+  }
+)
 
 const defaultConfig = {
   scrollToHour: 15,
@@ -162,6 +193,13 @@ let date = ref(
   )
 )
 
+const value = computed({
+  get: () => activeView.value,
+  set: (value) => {
+    emit('update:modelValue', value)
+  },
+})
+
 const incrementClickEvents = {
   Month: incrementMonth,
   Week: incrementWeek,
@@ -192,6 +230,14 @@ function decrementMonth() {
     currentMonth.value = 11
     currentYear.value--
   }
+}
+
+function increment() {
+  incrementClickEvents[activeView.value]()
+}
+
+function decrement() {
+  decrementClickEvents[activeView.value]()
 }
 
 function incrementWeek() {

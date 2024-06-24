@@ -7,7 +7,23 @@
         @create="(event) => logEvent('createEvent', event)"
         @update="(event) => logEvent('updateEvent', event)"
         @delete="(event) => logEvent('deleteEvent', event)"
-      />
+      >
+        <template
+          #header="{ currentMonthYear, enabledModes, decrement, increment }"
+        >
+          <TabButtons
+            :buttons="enabledModes"
+            class="ml-2"
+            v-model="activeView"
+          />
+
+          <button @click="decrement">Previous</button>
+          <button @click="increment">Next</button>
+          <h1>
+            {{ currentMonthYear }}
+          </h1>
+        </template>
+      </CalendarView>
     </div>
   </Story>
 </template>
@@ -15,6 +31,9 @@
 import { ref } from 'vue'
 import CalendarView from './CalendarView/CalendarView.vue'
 import { logEvent } from 'histoire/client'
+import TabButtons from './TabButtons.vue'
+
+const activeView = ref('Week')
 
 const config = {
   defaultMode: 'Week',
