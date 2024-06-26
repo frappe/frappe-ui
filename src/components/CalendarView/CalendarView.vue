@@ -112,7 +112,7 @@ const defaultConfig = {
   defaultMode: 'Month',
   isEditMode: false,
   eventIcons: {},
-  useCustomClickEvents: false,
+  allowCustomClickEvents: false,
 }
 
 const overrideConfig = { ...defaultConfig, ...props.config }
@@ -138,14 +138,13 @@ events.value.forEach((event) => {
 
 const { showEventModal, newEvent, openNewEventModal } = useEventModal()
 
-provide('eventActions', {
+provide('calendarActions', {
   createNewEvent,
   updateEventState,
   deleteEvent,
-  openModal,
   customSingleClickCalendarEvent,
   customDoubleClickCalendarEvent,
-  customDoubleClickCell,
+  handleCellDblClick,
 })
 
 // CRUD actions on an event
@@ -181,14 +180,23 @@ function customDoubleClickCell(data) {
 }
 
 function openModal(data) {
-  // <NewEventModal
-  //   v-if="showEventModal"
-  //   v-model="showEventModal"
-  //   :event="newEvent"
-  // />
-  debugger
-  const { e, view, date, config, time } = data
+  const { e, view, date, time } = data
+  const config = overrideConfig.isEditMode
   openNewEventModal(e, view, date, config, time)
+}
+
+function handleCellDblClick(e, date, time = '') {
+  const data = {
+    e,
+    view: activeView.value,
+    date,
+    time,
+  }
+  if (overrideConfig.allowCustomClickEvents) {
+    customDoubleClickCell(data)
+    return
+  }
+  openModal(data)
 }
 
 // Calendar View Options

@@ -19,7 +19,7 @@
         @dragover.prevent
         @drageneter.prevent
         @drop="onDrop($event, date)"
-        @dblclick="openNewEventModal($event, 'Month', date, config.isEditMode)"
+        @dblclick="calendarActions.handleCellDblClick($event, date)"
       >
         <div
           class="mx-2 flex h-full justify-center font-normal"
@@ -59,19 +59,12 @@
       </div>
     </div>
   </div>
-  <NewEventModal
-    v-if="showEventModal"
-    v-model="showEventModal"
-    :event="newEvent"
-  />
 </template>
 
 <script setup>
 import { parseDateEventPopupFormat, daysList, parseDate } from './calendarUtils'
 import { inject } from 'vue'
 import CalendarEvent from './CalendarEvent.vue'
-import NewEventModal from './NewEventModal.vue'
-import useEventModal from './composables/useEventModal'
 import useCalendarData from './composables/useCalendarData'
 import { computed } from 'vue'
 
@@ -97,13 +90,11 @@ const timedEvents = computed(
   () => useCalendarData(props.events, 'Month').timedEvents.value
 )
 
-const { showEventModal, newEvent, openNewEventModal } = useEventModal()
-
 function currentMonthDate(date) {
   return date.getMonth() === props.currentMonth
 }
 
-const calendarActions = inject('eventActions')
+const calendarActions = inject('calendarActions')
 
 const onDragStart = (event, calendarEventID) => {
   event.target.style.opacity = '0.5'

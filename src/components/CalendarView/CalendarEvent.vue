@@ -149,7 +149,7 @@ const props = defineProps({
 
 const activeView = inject('activeView')
 const config = inject('config')
-const calendarActions = inject('eventActions')
+const calendarActions = inject('calendarActions')
 
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)

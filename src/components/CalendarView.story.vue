@@ -71,7 +71,7 @@ const config = {
   defaultMode: 'Week',
   isEditMode: true,
   eventIcons: {},
-  useCustomClickEvents: false,
+  allowCustomClickEvents: true,
 }
 
 const events = ref([

@@ -154,7 +154,7 @@ function validateStartEndTime() {
   }
 }
 
-const calendarActions = inject('eventActions')
+const calendarActions = inject('calendarActions')
 
 function submitEvent(close) {
   validateFields()

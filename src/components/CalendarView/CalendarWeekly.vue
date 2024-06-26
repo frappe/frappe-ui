@@ -87,7 +87,9 @@
                   class="cell relative flex cursor-pointer"
                   v-for="time in twentyFourHoursFormat"
                   :data-time-attr="time"
-                  @dblclick="handleCellDblClick($event, date, time)"
+                  @dblclick="
+                    calendarActions.handleCellDblClick($event, date, time)
+                  "
                 >
                   <div
                     class="border-gray-20 w-full border-b-[1px]"
@@ -113,16 +115,10 @@
       </div>
     </div>
   </div>
-  <NewEventModal
-    v-if="showEventModal"
-    v-model="showEventModal"
-    :event="newEvent"
-  />
 </template>
 <script setup>
 import { ref, onMounted, watch, computed, inject } from 'vue'
 import CalendarEvent from './CalendarEvent.vue'
-import NewEventModal from './NewEventModal.vue'
 import CalendarTimeMarker from './CalendarTimeMarker.vue'
 import {
   twentyFourHoursFormat,
@@ -132,7 +128,6 @@ import {
 
 import Button from '../Button.vue'
 import ShowMoreCalendarEvent from './ShowMoreCalendarEvent.vue'
-import useEventModal from './composables/useEventModal'
 import useCalendarData from './composables/useCalendarData'
 
 const props = defineProps({
@@ -167,9 +162,7 @@ const fullDayEvents = computed(
 const isToday = (date) =>
   new Date(date).toDateString() === new Date().toDateString()
 
-const { showEventModal, newEvent, openNewEventModal } = useEventModal()
-
-const calendarActions = inject('eventActions')
+const calendarActions = inject('calendarActions')
 
 const getCellHeight = (length) => 49 + 36 * (length - 1)
 function getFullDayEventsInCurrentWeek(eventsObject, weeklyDates) {
@@ -183,26 +176,6 @@ function getFullDayEventsInCurrentWeek(eventsObject, weeklyDates) {
     }
   })
   return currentWeekEvents
-}
-
-function handleCellDblClick(e, date, time) {
-  if (props.config.useCustomClickEvents) {
-    calendarActions.customDoubleClickCell({
-      e,
-      view: 'Week',
-      date,
-      time,
-    })
-  } else {
-    calendarActions.openModal({
-      e,
-      view: 'Week',
-      date,
-      config: props.config.isEditMode,
-      time,
-    })
-    // openNewEventModal(e, 'Week', date, props.config.isEditMode, time)
-  }
 }
 
 function getFullDayEventsCount(eventsObject) {

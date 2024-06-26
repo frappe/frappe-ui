@@ -40,13 +40,7 @@
               v-for="time in twentyFourHoursFormat"
               :data-time-attr="time"
               @dblclick="
-                openNewEventModal(
-                  $event,
-                  'Day',
-                  currentDate,
-                  config.isEditMode,
-                  time
-                )
+                calendarActions.handleCellDblClick($event, currentDate, time)
               "
             >
               <div
@@ -73,17 +67,11 @@
       </div>
     </div>
   </div>
-  <NewEventModal
-    v-if="showEventModal"
-    v-model="showEventModal"
-    :event="newEvent"
-  />
 </template>
 
 <script setup>
+import { computed, inject } from 'vue'
 import CalendarEvent from './CalendarEvent.vue'
-import NewEventModal from './NewEventModal.vue'
-import useEventModal from './composables/useEventModal'
 import CalendarTimeMarker from './CalendarTimeMarker.vue'
 import {
   parseDate,
@@ -91,7 +79,6 @@ import {
   twentyFourHoursFormat,
 } from './calendarUtils'
 import useCalendarData from './composables/useCalendarData'
-import { computed } from 'vue'
 
 const props = defineProps({
   events: {
@@ -112,7 +99,8 @@ const timedEvents = computed(
 const fullDayEvents = computed(
   () => useCalendarData(props.events).fullDayEvents.value
 )
-const { showEventModal, newEvent, openNewEventModal } = useEventModal()
+
+const calendarActions = inject('calendarActions')
 
 const hourHeight = props.config.hourHeight
 </script>
