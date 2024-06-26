@@ -15,11 +15,12 @@ export default function useEventModal() {
     venue: '',
     title: '',
   })
-  function openNewEventModal(event, view, date, isEditMode, from_time = '') {
+  function openNewEventModal(e, view, date, isEditMode, from_time = '') {
+    console.log('dkf')
     if (!isEditMode) return
     date =
       view === 'Week'
-        ? event.target.parentNode.parentNode.getAttribute('data-date-attr')
+        ? e.target.parentNode.parentNode.getAttribute('data-date-attr')
         : date
     newEvent.date = parseDate(new Date(date))
     if (view === 'Month') {

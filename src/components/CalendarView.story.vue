@@ -1,30 +1,62 @@
 <template>
   <Story>
-    <div class="p-5">
-      <CalendarView
-        :config="config"
-        :events="events"
-        @create="(event) => logEvent('createEvent', event)"
-        @update="(event) => logEvent('updateEvent', event)"
-        @delete="(event) => logEvent('deleteEvent', event)"
-      >
-        <template
-          #header="{ currentMonthYear, enabledModes, decrement, increment }"
+    <Variant title="default">
+      <div class="p-5">
+        <CalendarView
+          :config="config"
+          :events="events"
+          @create="(event) => logEvent('createEvent', event)"
+          @update="(event) => logEvent('updateEvent', event)"
+          @delete="(event) => logEvent('deleteEvent', event)"
+          @customSingleClickCalendarEvent="
+            (event) => logEvent('customSingleClickCalendarEvent', event)
+          "
+          @dblclickCalendarEvent="
+            (event) => logEvent('customDoubleClickCalendarEvent', event)
+          "
+          @customDoubleClickCell="
+            (data) => logEvent('customDoubleClickCell', data)
+          "
         >
-          <TabButtons
-            :buttons="enabledModes"
-            class="ml-2"
-            v-model="activeView"
-          />
+          <!-- @dblclickevent="" -->
+        </CalendarView>
+      </div>
+    </Variant>
+    <!-- <Variant title="custom-header">
+      <div class="p-5">
+        <CalendarView
+          :config="config"
+          :events="events"
+          @create="(event) => logEvent('createEvent', event)"
+          @update="(event) => logEvent('updateEvent', event)"
+          @delete="(event) => logEvent('deleteEvent', event)"
+        >
+          <template
+            #header="{
+              currentMonthYear,
+              enabledModes,
+              activeView,
+              decrement,
+              increment,
+              updateActiveView,
+            }"
+          >
+            <TabButtons
+              :buttons="enabledModes"
+              class="ml-2"
+              :modelValue="activeView"
+              @update:modelValue="updateActiveView($event)"
+            />
 
-          <button @click="decrement">Previous</button>
-          <button @click="increment">Next</button>
-          <h1>
-            {{ currentMonthYear }}
-          </h1>
-        </template>
-      </CalendarView>
-    </div>
+            <button @click="decrement">Previous</button>
+            <button @click="increment">Next</button>
+            <h1>
+              {{ currentMonthYear }}
+            </h1>
+          </template>
+        </CalendarView>
+      </div>
+    </Variant> -->
   </Story>
 </template>
 <script setup>
@@ -39,6 +71,7 @@ const config = {
   defaultMode: 'Week',
   isEditMode: true,
   eventIcons: {},
+  useCustomClickEvents: false,
 }
 
 const events = ref([

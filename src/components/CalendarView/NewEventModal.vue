@@ -154,7 +154,7 @@ function validateStartEndTime() {
   }
 }
 
-const { updateEventState, createNewEvent } = inject('eventActions')
+const calendarActions = inject('eventActions')
 
 function submitEvent(close) {
   validateFields()
@@ -170,13 +170,13 @@ function submitEvent(close) {
   handleEventTime()
   if (props.event.hasOwnProperty('id')) {
     newEvent.id = props.event.id
-    updateEventState(newEvent)
+    calendarActions.updateEventState(newEvent)
   }
   // else new event is created with ID
   else {
     const id = '#' + Math.random().toString(36).substring(3, 9)
     newEvent.id = id
-    createNewEvent(newEvent)
+    calendarActions.createNewEvent(newEvent)
   }
   close()
 }

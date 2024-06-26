@@ -149,7 +149,7 @@ const props = defineProps({
 
 const activeView = inject('activeView')
 const config = inject('config')
-const { updateEventState, deleteEvent } = inject('eventActions')
+const calendarActions = inject('eventActions')
 
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
@@ -288,7 +288,7 @@ function handleResizeMouseDown(e) {
   function stopResize() {
     isResizing.value = false
     if (oldTime !== calendarEvent.value.to_time) {
-      updateEventState(calendarEvent.value)
+      calendarActions.updateEventState(calendarEvent.value)
     }
 
     window.removeEventListener('mousemove', resize)
@@ -346,7 +346,7 @@ function handleRepositionMouseDown(e) {
       calendarEvent.value.date = updatedEvent.date
       calendarEvent.value.from_time = updatedEvent.from_time
       calendarEvent.value.to_time = updatedEvent.to_time
-      updateEventState(calendarEvent.value)
+      calendarActions.updateEventState(calendarEvent.value)
       isEventUpdated.value = false
       state.xAxis = 0
       state.yAxis = 0
@@ -443,6 +443,6 @@ function handleEventEdit() {
 }
 
 function handleEventDelete() {
-  deleteEvent(calendarEvent.value.id)
+  calendarActions.deleteEvent(calendarEvent.value.id)
 }
 </script>

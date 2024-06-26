@@ -16,12 +16,10 @@
       <div
         v-for="date in currentMonthDates"
         class="h-28 overflow-scroll border-b-[1px] border-r-[1px] border-gray-200"
-        @dblclick.prevent="
-          openNewEventModal($event, 'Month', date, config.isEditMode)
-        "
         @dragover.prevent
         @drageneter.prevent
         @drop="onDrop($event, date)"
+        @dblclick="openNewEventModal($event, 'Month', date, config.isEditMode)"
       >
         <div
           class="mx-2 flex h-full justify-center font-normal"
@@ -105,7 +103,7 @@ function currentMonthDate(date) {
   return date.getMonth() === props.currentMonth
 }
 
-const { updateEventState } = inject('eventActions')
+const calendarActions = inject('eventActions')
 
 const onDragStart = (event, calendarEventID) => {
   event.target.style.opacity = '0.5'
@@ -123,6 +121,6 @@ const onDrop = (event, date) => {
   if (parseDate(date) === e.date) return
   let calendarEvent = props.events.find((e) => e.id === calendarEventID)
   calendarEvent.date = parseDate(date)
-  updateEventState(calendarEvent)
+  calendarActions.updateEventState(calendarEvent)
 }
 </script>

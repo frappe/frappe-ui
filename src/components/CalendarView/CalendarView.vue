@@ -8,8 +8,10 @@
       v-bind="{
         currentMonthYear,
         enabledModes,
+        activeView,
         decrement,
         increment,
+        updateActiveView,
       }"
     >
       <div class="mb-2 flex justify-between">
@@ -65,6 +67,12 @@
       :current-date="currentMonthDates[date]"
       :config="overrideConfig"
     />
+
+    <NewEventModal
+      v-if="showEventModal"
+      v-model="showEventModal"
+      :event="newEvent"
+    />
   </div>
 </template>
 <script setup>
@@ -75,9 +83,17 @@ import { getCalendarDates, monthList, handleSeconds } from './calendarUtils'
 import CalendarMonthly from './CalendarMonthly.vue'
 import CalendarWeekly from './CalendarWeekly.vue'
 import CalendarDaily from './CalendarDaily.vue'
-import { watch } from 'vue'
+import NewEventModal from './NewEventModal.vue'
+import useEventModal from './composables/useEventModal'
 
-const emit = defineEmits(['update', 'create', 'delete', 'update:modelValue'])
+const emit = defineEmits([
+  'update',
+  'create',
+  'delete',
+  'customSingleClickCalendarEvent',
+  'customDoubleClickCell',
+  'customDoubleClickCalendarEvent',
+])
 
 const props = defineProps({
   events: {
@@ -88,17 +104,7 @@ const props = defineProps({
   config: {
     type: Object,
   },
-  modelValue: {
-    type: [String, Boolean, Number],
-  },
 })
-
-watch(
-  () => props.modelValue,
-  (value) => {
-    activeView.value = value
-  }
-)
 
 const defaultConfig = {
   scrollToHour: 15,
@@ -106,12 +112,17 @@ const defaultConfig = {
   defaultMode: 'Month',
   isEditMode: false,
   eventIcons: {},
+  useCustomClickEvents: false,
 }
 
 const overrideConfig = { ...defaultConfig, ...props.config }
 overrideConfig['redundantCellHeight'] = 50
 overrideConfig['hourHeight'] = 50
 let activeView = ref(overrideConfig.defaultMode)
+
+function updateActiveView(value) {
+  activeView.value = value
+}
 
 provide('activeView', activeView)
 provide('config', overrideConfig)
@@ -125,7 +136,18 @@ events.value.forEach((event) => {
   event.to_time = handleSeconds(event.to_time)
 })
 
-provide('eventActions', { createNewEvent, updateEventState, deleteEvent })
+const { showEventModal, newEvent, openNewEventModal } = useEventModal()
+
+provide('eventActions', {
+  createNewEvent,
+  updateEventState,
+  deleteEvent,
+  openModal,
+  customSingleClickCalendarEvent,
+  customDoubleClickCalendarEvent,
+  customDoubleClickCell,
+})
+
 // CRUD actions on an event
 function createNewEvent(event) {
   events.value.push(event)
@@ -144,6 +166,29 @@ function deleteEvent(eventID) {
   const eventIndex = events.value.findIndex((event) => event.id === eventID)
   events.value.splice(eventIndex, 1)
   emit('delete', eventID)
+}
+
+function customSingleClickCalendarEvent(event) {
+  emit('customSingleClickCalendarEvent', event)
+}
+
+function customDoubleClickCalendarEvent(event) {
+  emit('customDoubleClickCalendarEvent', event)
+}
+
+function customDoubleClickCell(data) {
+  emit('customDoubleClickCell', data)
+}
+
+function openModal(data) {
+  // <NewEventModal
+  //   v-if="showEventModal"
+  //   v-model="showEventModal"
+  //   :event="newEvent"
+  // />
+  debugger
+  const { e, view, date, config, time } = data
+  openNewEventModal(e, view, date, config, time)
 }
 
 // Calendar View Options
@@ -192,13 +237,6 @@ let date = ref(
     (date) => new Date(date).toDateString() === currentDate.value.toDateString()
   )
 )
-
-const value = computed({
-  get: () => activeView.value,
-  set: (value) => {
-    emit('update:modelValue', value)
-  },
-})
 
 const incrementClickEvents = {
   Month: incrementMonth,
