@@ -11,8 +11,8 @@
       opened && '!z-20 drop-shadow-xl',
     ]"
     :style="setEventStyles"
-    @dblclick.prevent="handleEventEdit()"
-    @click="handleEventClick()"
+    @dblclick.prevent="handleEventEdit($event)"
+    @click="handleEventClick($event)"
     v-on="{
       mousedown: config.isEditMode && handleRepositionMouseDown,
     }"
@@ -426,20 +426,36 @@ function handleTimeConstraints() {
 const toggle = () => (opened.value = !opened.value)
 const close = () => (opened.value = false)
 
-function handleEventClick() {
+function handleEventClick(e = null) {
   // hack to prevent event modal from opening when resizing or repositioning
   if (preventClick.value) {
     preventClick.value = false
     return
   }
-  toggle()
+  if (!config.allowCustomClickEvents) {
+    toggle()
+    return
+  }
+  if (e && e.detail === 1) {
+    calendarActions.customSingleClickCalendarEvent(calendarEvent.value)
+  }
 }
 
 const showEventModal = ref(false)
-function handleEventEdit() {
-  if (!config.isEditMode) return
-  close()
-  showEventModal.value = true
+function handleEventEdit(e = null) {
+  if (!config.allowCustomClickEvents) {
+    if (!config.isEditMode) return
+    close()
+    showEventModal.value = true
+    return
+  }
+
+  if (config.allowCustomClickEvents) {
+    if (e && e.detail === 2) {
+      calendarActions.customDoubleClickCalendarEvent(calendarEvent.value)
+      return
+    }
+  }
 }
 
 function handleEventDelete() {

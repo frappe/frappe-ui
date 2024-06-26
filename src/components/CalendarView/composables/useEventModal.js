@@ -16,7 +16,6 @@ export default function useEventModal() {
     title: '',
   })
   function openNewEventModal(e, view, date, isEditMode, from_time = '') {
-    console.log('dkf')
     if (!isEditMode) return
     date =
       view === 'Week'

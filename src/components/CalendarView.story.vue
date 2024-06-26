@@ -11,7 +11,7 @@
           @customSingleClickCalendarEvent="
             (event) => logEvent('customSingleClickCalendarEvent', event)
           "
-          @dblclickCalendarEvent="
+          @customDoubleClickCalendarEvent="
             (event) => logEvent('customDoubleClickCalendarEvent', event)
           "
           @customDoubleClickCell="
@@ -71,7 +71,7 @@ const config = {
   defaultMode: 'Week',
   isEditMode: true,
   eventIcons: {},
-  allowCustomClickEvents: true,
+  allowCustomClickEvents: false,
 }
 
 const events = ref([
