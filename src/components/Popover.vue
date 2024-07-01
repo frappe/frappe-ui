@@ -144,6 +144,8 @@ export default {
     }
     if (this.hideOnBlur) {
       document.addEventListener('click', this.listener)
+      // https://github.com/tailwindlabs/headlessui/issues/834#issuecomment-1030907894
+      document.addEventListener('mousedown', this.listener)
     }
     this.$nextTick(() => {
       this.targetWidth = this.$refs['target'].clientWidth
@@ -152,6 +154,7 @@ export default {
   beforeDestroy() {
     this.popper && this.popper.destroy()
     document.removeEventListener('click', this.listener)
+    document.removeEventListener('mousedown', this.listener)
   },
   computed: {
     showPropPassed() {
