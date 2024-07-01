@@ -107,7 +107,14 @@ import FeatherIcon from './FeatherIcon.vue'
 import TextInput from './TextInput.vue'
 export default {
   name: 'DateRangePicker',
-  props: ['modelValue', 'placeholder', 'formatter', 'readonly', 'inputClass'],
+  props: [
+    'value',
+    'modelValue',
+    'placeholder',
+    'formatter',
+    'readonly',
+    'inputClass',
+  ],
   emits: ['update:modelValue', 'change'],
   components: {
     Popover,
