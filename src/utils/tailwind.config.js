@@ -63,6 +63,10 @@ module.exports = {
             '> ul > li > *:last-child': {
               marginBottom: '0.5rem',
             },
+            '> ol > li p': {
+              marginTop: '0.5rem',
+              marginBottom: '0.5rem',
+            },
             '> ol > li > *:first-child': {
               marginTop: '0.5rem',
             },
