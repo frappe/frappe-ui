@@ -51,6 +51,9 @@ export default {
     },
   },
   methods: {
+    inputRef() {
+      return this.$refs['input']
+    },
     openFileSelector() {
       this.$refs['input'].click()
     },
@@ -114,5 +117,6 @@ export default {
         })
     },
   },
+  expose: ['inputRef'],
 }
 </script>
