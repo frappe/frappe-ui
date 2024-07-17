@@ -51,11 +51,10 @@ export default {
     },
   },
   methods: {
-    openFileSelector(type) {
-      if (type) {
-        // change inputs filetype to accept the type of file you want to upload
-        this.$refs['input'].accept = type
-      }
+    inputRef() {
+      return this.$refs['input']
+    },
+    openFileSelector() {
       this.$refs['input'].click()
     },
     async onFileAdd(e) {
@@ -118,5 +117,6 @@ export default {
         })
     },
   },
+  expose: ['inputRef'],
 }
 </script>
