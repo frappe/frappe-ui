@@ -445,6 +445,23 @@ function handleTimeConstraints() {
 const toggle = () => (opened.value = !opened.value)
 const close = () => (opened.value = false)
 
+function handleDeleteShortcut(e) {
+  if (e.key === 'Delete' || e.key === 'Backspace') {
+    handleEventDelete()
+  }
+}
+
+watch(
+  () => opened.value,
+  (newVal) => {
+    if (newVal) {
+      document.addEventListener('keydown', handleDeleteShortcut)
+    } else {
+      document.removeEventListener('keydown', handleDeleteShortcut)
+    }
+  }
+)
+
 let clickTimer = null
 function handleEventClick(e = null) {
   e.cancelBubble = true
@@ -453,6 +470,11 @@ function handleEventClick(e = null) {
     preventClick.value = false
     return
   }
+
+  // add shortcut for deleting event on clicking delete button
+  // if (e.key === 'Delete') {
+  //   handleEventDelete()
+  // }
   // hack: timeout to see whether it's a double click or a single click
   if (e.detail === 1) {
     clickTimer = setTimeout(() => {
@@ -485,5 +507,6 @@ function handleEventEdit(e = null) {
 
 function handleEventDelete() {
   calendarActions.deleteEvent(calendarEvent.value.id)
+  close()
 }
 </script>
