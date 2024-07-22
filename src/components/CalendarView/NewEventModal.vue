@@ -63,7 +63,16 @@
             v-model="newEvent.color"
             :options="colors"
             label="Color"
-          />
+          >
+            <template #prefix>
+              <div
+                class="mr-2 h-5 w-5 rounded-full shadow-sm"
+                :class="[
+                  colorMap[newEvent?.color]?.background_color || 'bg-green-100',
+                ]"
+              />
+            </template>
+          </FormControl>
           <FormControl
             type="checkbox"
             label="Full Day Event?"

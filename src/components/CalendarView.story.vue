@@ -5,20 +5,13 @@
         <CalendarView
           :config="config"
           :events="events"
-          @create="(event) => logEvent('createEvent', event)"
-          @update="(event) => logEvent('updateEvent', event)"
-          @delete="(event) => logEvent('deleteEvent', event)"
-          @customSingleClickCalendarEvent="
-            (event) => logEvent('customSingleClickCalendarEvent', event)
-          "
-          @customDoubleClickCalendarEvent="
-            (event) => logEvent('customDoubleClickCalendarEvent', event)
-          "
-          @customDoubleClickCell="
-            (data) => logEvent('customDoubleClickCell', data)
-          "
+          :create="(event) => logEvent('createEvent', event)"
+          :update="(event) => logEvent('updateEvent', event)"
+          :delete="(event) => logEvent('deleteEvent', event)"
+          :onCellDblClick="(data) => logEvent('onCellDblClick', data)"
         >
-          <!-- @dblclickevent="" -->
+          <!-- :onClick="(event) => logEvent('onClick', event)"
+          :onDblClick="(event) => logEvent('onDblClick', event)" -->
         </CalendarView>
       </div>
     </Variant>
@@ -71,7 +64,7 @@ const config = {
   defaultMode: 'Week',
   isEditMode: true,
   eventIcons: {},
-  allowCustomClickEvents: false,
+  allowCustomClickEvents: true,
 }
 
 const events = ref([

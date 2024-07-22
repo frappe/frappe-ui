@@ -12,7 +12,7 @@
     ]"
     :style="setEventStyles"
     @dblclick.prevent="handleEventEdit($event)"
-    @click="handleEventClick($event)"
+    @click.prevent="handleEventClick($event)"
     v-on="{
       mousedown: config.isEditMode && handleRepositionMouseDown,
     }"
@@ -60,8 +60,8 @@
     ref="eventRef"
     v-bind="$attrs"
     :class="[colorMap[props.event?.color]?.background_color || 'bg-green-100']"
-    @dblclick.prevent="handleEventEdit()"
-    @click="handleEventClick()"
+    @dblclick.prevent="handleEventEdit($event)"
+    @click="handleEventClick($event)"
   >
     <div
       class="relative flex h-full select-none items-start gap-2 overflow-hidden px-2"
@@ -432,30 +432,38 @@ function handleEventClick(e = null) {
     preventClick.value = false
     return
   }
-  if (!config.allowCustomClickEvents) {
-    toggle()
-    return
-  }
-  if (e && e.detail === 1) {
-    calendarActions.customSingleClickCalendarEvent(calendarEvent.value)
-  }
+
+  setTimeout(() => {
+    if (e.detail === 1) {
+      debugger
+      calendarActions.props.onClick
+        ? calendarActions.props.onClick({
+            e,
+            calendarEvent: calendarEvent.value,
+          })
+        : console.log('Event Clicked') && toggle()
+    }
+  }, 500)
 }
 
 const showEventModal = ref(false)
 function handleEventEdit(e = null) {
-  if (!config.allowCustomClickEvents) {
-    if (!config.isEditMode) return
-    close()
-    showEventModal.value = true
-    return
-  }
-
-  if (config.allowCustomClickEvents) {
-    if (e && e.detail === 2) {
-      calendarActions.customDoubleClickCalendarEvent(calendarEvent.value)
-      return
+  setTimeout(() => {
+    if (e.detail === 2) {
+      debugger
+      if (calendarActions.props.onDblClick) {
+        calendarActions.props.onDblClick({
+          e,
+          calendarEvent: calendarEvent.value,
+        })
+        return
+      }
+      if (!config.isEditMode) return
+      close()
+      console.log('Event Dbl Clicked')
+      showEventModal.value = true
     }
-  }
+  }, 500)
 }
 
 function handleEventDelete() {

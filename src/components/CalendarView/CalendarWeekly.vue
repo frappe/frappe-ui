@@ -87,7 +87,7 @@
                   class="cell relative flex cursor-pointer"
                   v-for="time in twentyFourHoursFormat"
                   :data-time-attr="time"
-                  @dblclick="
+                  @dblclick.prevent="
                     calendarActions.handleCellDblClick($event, date, time)
                   "
                 >

@@ -86,15 +86,6 @@ import CalendarDaily from './CalendarDaily.vue'
 import NewEventModal from './NewEventModal.vue'
 import useEventModal from './composables/useEventModal'
 
-const emit = defineEmits([
-  'update',
-  'create',
-  'delete',
-  'customSingleClickCalendarEvent',
-  'customDoubleClickCell',
-  'customDoubleClickCalendarEvent',
-])
-
 const props = defineProps({
   events: {
     type: Object,
@@ -103,6 +94,30 @@ const props = defineProps({
   },
   config: {
     type: Object,
+  },
+  create: {
+    type: Function,
+    required: false,
+  },
+  update: {
+    type: Function,
+    required: false,
+  },
+  delete: {
+    type: Function,
+    required: false,
+  },
+  onClick: {
+    type: Function,
+    required: false,
+  },
+  onDblClick: {
+    type: Function,
+    required: false,
+  },
+  onCellDblClick: {
+    type: Function,
+    required: false,
   },
 })
 
@@ -142,41 +157,28 @@ provide('calendarActions', {
   createNewEvent,
   updateEventState,
   deleteEvent,
-  customSingleClickCalendarEvent,
-  customDoubleClickCalendarEvent,
   handleCellDblClick,
+  props,
 })
 
 // CRUD actions on an event
 function createNewEvent(event) {
   events.value.push(event)
-  emit('create', event)
+  props.create && props.create(event)
 }
 
 function updateEventState(event) {
   const eventID = event.id
   let eventIndex = events.value.findIndex((e) => e.id === eventID)
   events.value[eventIndex] = event
-  emit('update', events.value[eventIndex])
+  props.update && props.update(events.value[eventIndex])
 }
 
 function deleteEvent(eventID) {
   // Delete event
   const eventIndex = events.value.findIndex((event) => event.id === eventID)
   events.value.splice(eventIndex, 1)
-  emit('delete', eventID)
-}
-
-function customSingleClickCalendarEvent(event) {
-  emit('customSingleClickCalendarEvent', event)
-}
-
-function customDoubleClickCalendarEvent(event) {
-  emit('customDoubleClickCalendarEvent', event)
-}
-
-function customDoubleClickCell(data) {
-  emit('customDoubleClickCell', data)
+  props.delete && props.delete(eventID)
 }
 
 function openModal(data) {
@@ -192,10 +194,12 @@ function handleCellDblClick(e, date, time = '') {
     date,
     time,
   }
-  if (overrideConfig.allowCustomClickEvents) {
-    customDoubleClickCell(data)
+
+  if (props.onCellDblClick) {
+    props.onCellDblClick(data)
     return
   }
+  console.log('Cell Dbl Clicked')
   openModal(data)
 }
 
