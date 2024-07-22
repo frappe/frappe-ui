@@ -36,7 +36,7 @@
             icon="chevron-right"
           />
 
-          <!--  View change button default is months or can be set via props!  -->
+          <!--  View change button, default is months or can be set via props!  -->
           <TabButtons
             :buttons="enabledModes"
             class="ml-2"
@@ -199,7 +199,6 @@ function handleCellDblClick(e, date, time = '') {
     props.onCellDblClick(data)
     return
   }
-  console.log('Cell Dbl Clicked')
   openModal(data)
 }
 
