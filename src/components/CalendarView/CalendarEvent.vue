@@ -318,7 +318,7 @@ function handleRepositionMouseDown(e) {
     }
 
     // handle movement within the same day
-    if (!props.event.isFullDay) handleVerticalMovement(e.clientY, prevY)
+    if (!props.event.isFullDay) handleVerticalMovement(e.clientY, prevY, rect)
 
     if (
       calendarEvent.value.from_time !== updatedEvent.from_time ||
@@ -372,8 +372,6 @@ function handleHorizontalMovement(clientX, rect) {
       ? eventRef.value.parentNode.parentNode.getAttribute('data-date-attr')
       : eventRef.value.parentNode.getAttribute('data-date-attr')
   )
-  const leftPadding = currentDate.getDay()
-  const rightPadding = 6 - currentDate.getDay()
 
   if (props.event.isFullDay) {
     eventRef.value.style.width = '100%'
@@ -381,20 +379,41 @@ function handleHorizontalMovement(clientX, rect) {
 
   let eventWidth = eventRef.value.clientWidth
   let diff = Math.floor((clientX - rect.left) / eventWidth)
-  if (diff < -leftPadding) {
-    diff = -leftPadding
-  } else if (diff > rightPadding) {
-    diff = rightPadding
-  }
+
+  const leftBoundary = currentDate.getDay()
+  const rightBoundary = 6 - currentDate.getDay()
+  diff = handleHorizontalBoundary(diff, leftBoundary, rightBoundary)
   let xPos = Math.ceil(diff * eventWidth)
   state.xAxis = xPos
   updatedEvent.date = parseDate(getDate(currentDate, diff))
 }
 
-function handleVerticalMovement(clientY, prevY) {
-  let diffY = clientY - prevY
-  diffY = Math.round(diffY / height_15_min) * height_15_min
+function handleHorizontalBoundary(diff, leftBoundary, rightBoundary) {
+  if (diff < -leftBoundary) {
+    diff = -leftBoundary
+  } else if (diff > rightBoundary) {
+    diff = rightBoundary
+  }
+  return diff
+}
 
+function handleVerticalMovement(clientY, prevY, rect) {
+  let diffY = clientY - prevY
+
+  // handle boundaries for the calendar event
+  let parentTop = eventRef.value.parentNode.getBoundingClientRect().top
+  let parentBottom = eventRef.value.parentNode.getBoundingClientRect().bottom
+
+  // to prevent event from going above the top of the parent cell
+  if (clientY < parentTop) {
+    diffY = parentTop - rect.top
+  }
+  // to prevent event from going below the bottom of the parent cell
+  if (clientY > parentBottom) {
+    diffY = parentBottom - rect.bottom
+  }
+
+  diffY = Math.round(diffY / height_15_min) * height_15_min
   state.yAxis = diffY
 
   updatedEvent.from_time = convertMinutesToHours(
