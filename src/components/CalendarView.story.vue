@@ -1,5 +1,5 @@
 <template>
-  <Story>
+  <Story :layout="{ type: 'grid', width: '95%' }">
     <Variant title="default">
       <div class="p-5">
         <CalendarView
@@ -8,14 +8,14 @@
           :create="(event) => logEvent('createEvent', event)"
           :update="(event) => logEvent('updateEvent', event)"
           :delete="(event) => logEvent('deleteEvent', event)"
-          :onCellDblClick="(data) => logEvent('onCellDblClick', data)"
         >
-          <!-- :onClick="(event) => logEvent('onClick', event)"
-          :onDblClick="(event) => logEvent('onDblClick', event)" -->
+          <!-- :onDblClick="(event) => logEvent('onDblClick', event)" -->
+          <!-- :onCellDblClick="(data) => logEvent('onCellDblClick', data)" -->
+          <!-- :onClick="(event) => logEvent('onClick', event)" -->
         </CalendarView>
       </div>
     </Variant>
-    <!-- <Variant title="custom-header">
+    <Variant title="custom-header">
       <div class="p-5">
         <CalendarView
           :config="config"
@@ -49,7 +49,22 @@
           </template>
         </CalendarView>
       </div>
-    </Variant> -->
+    </Variant>
+    <Variant title="custom-click-events">
+      <div class="p-5">
+        <CalendarView
+          :config="config"
+          :events="events"
+          :create="(event) => logEvent('createEvent', event)"
+          :update="(event) => logEvent('updateEvent', event)"
+          :delete="(event) => logEvent('deleteEvent', event)"
+          :onClick="(event) => logEvent('onClick', event)"
+          :onDblClick="(event) => logEvent('onDblClick', event)"
+          :onCellDblClick="(data) => logEvent('onCellDblClick', data)"
+        >
+        </CalendarView>
+      </div>
+    </Variant>
   </Story>
 </template>
 <script setup>
@@ -73,7 +88,7 @@ const events = ref([
     participant: 'Sheldon',
     id: 'EDU-CSH-2024-00013',
     venue: 'CNF-ROOM-2024-00002',
-    date: '2024-06-01',
+    date: '2024-07-01',
     from_time: '12:00:00',
     to_time: '13:00:00',
     color: 'pink',
@@ -83,7 +98,7 @@ const events = ref([
     participant: 'Sheldon',
     id: 'EDU-CSH-2024-00014',
     venue: 'CNF-ROOM-2024-00002',
-    date: '2024-06-02',
+    date: '2024-07-02',
     from_time: '12:00:00',
     to_time: '13:00:00',
     color: 'purple',
@@ -93,7 +108,7 @@ const events = ref([
     participant: 'Ryan Mathew',
     id: 'EDU-CSH-2024-00001',
     venue: 'CNF-ROOM-2024-00001',
-    date: '2024-06-06',
+    date: '2024-07-07',
     from_time: '16:00:00',
     to_time: '17:00:00',
     color: 'violet',
@@ -103,7 +118,7 @@ const events = ref([
     participant: 'Sheldon',
     id: 'EDU-CSH-2024-00115',
     venue: 'CNF-ROOM-2024-00002',
-    date: '2024-06-05',
+    date: '2024-07-05',
     from_time: '12:00:00',
     to_time: '13:00:00',
     color: 'blue',
@@ -113,7 +128,7 @@ const events = ref([
     participant: 'Ryan Mathew',
     id: 'EDU-CSH-2024-00002',
     venue: 'CNF-ROOM-2024-00001',
-    date: '2024-06-05',
+    date: '2024-07-05',
     from_time: '16:00:00',
     to_time: '17:00:00',
     color: 'cyan',
@@ -123,14 +138,14 @@ const events = ref([
     participant: 'Ryan Mathew',
     id: 'EDU-CSH-2024-00099',
     venue: 'CNF-ROOM-2024-00001',
-    date: '2024-06-06',
+    date: '2024-07-07',
     from_time: '16:30:00',
     to_time: '17:30:00',
     color: 'green',
   },
   {
     title: 'Google Meet with John ',
-    date: '2024-06-21',
+    date: '2024-07-21',
     participant: 'John',
     venue: 'Google Meet',
     color: 'amber',
