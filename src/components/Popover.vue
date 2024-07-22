@@ -144,6 +144,8 @@ export default {
     }
     if (this.hideOnBlur) {
       document.addEventListener('click', this.listener)
+      // https://github.com/tailwindlabs/headlessui/issues/834#issuecomment-1030907894
+      document.addEventListener('mousedown', this.listener)
     }
     this.$nextTick(() => {
       this.targetWidth = this.$refs['target'].clientWidth
@@ -152,6 +154,7 @@ export default {
   beforeDestroy() {
     this.popper && this.popper.destroy()
     document.removeEventListener('click', this.listener)
+    document.removeEventListener('mousedown', this.listener)
   },
   computed: {
     showPropPassed() {
@@ -237,14 +240,11 @@ export default {
       }
       if (this.trigger === 'hover') {
         if (this.hoverDelay) {
-          this.hoverTimer = setTimeout(
-            () => {
-              if (this.pointerOverTargetOrPopup) {
-                this.open()
-              }
-            },
-            Number(this.hoverDelay) * 1000,
-          )
+          this.hoverTimer = setTimeout(() => {
+            if (this.pointerOverTargetOrPopup) {
+              this.open()
+            }
+          }, Number(this.hoverDelay) * 1000)
         } else {
           this.open()
         }
@@ -261,14 +261,11 @@ export default {
           clearTimeout(this.leaveTimer)
         }
         if (this.leaveDelay) {
-          this.leaveTimer = setTimeout(
-            () => {
-              if (!this.pointerOverTargetOrPopup) {
-                this.close()
-              }
-            },
-            Number(this.leaveDelay) * 1000,
-          )
+          this.leaveTimer = setTimeout(() => {
+            if (!this.pointerOverTargetOrPopup) {
+              this.close()
+            }
+          }, Number(this.leaveDelay) * 1000)
         } else {
           if (!this.pointerOverTargetOrPopup) {
             this.close()

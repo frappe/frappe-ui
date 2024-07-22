@@ -51,11 +51,10 @@ export default {
     },
   },
   methods: {
-    openFileSelector(type) {
-      if (type) {
-        // change inputs filetype to accept the type of file you want to upload
-        this.$refs['input'].accept = type
-      }
+    inputRef() {
+      return this.$refs['input']
+    },
+    openFileSelector() {
       this.$refs['input'].click()
     },
     async onFileAdd(e) {
@@ -108,7 +107,7 @@ export default {
           let errorMessage = 'Error Uploading File'
           if (error?._server_messages) {
             errorMessage = JSON.parse(
-              JSON.parse(error._server_messages)[0],
+              JSON.parse(error._server_messages)[0]
             ).message
           } else if (error?.exc) {
             errorMessage = JSON.parse(error.exc)[0].split('\n').slice(-2, -1)[0]
@@ -118,5 +117,6 @@ export default {
         })
     },
   },
+  expose: ['inputRef'],
 }
 </script>

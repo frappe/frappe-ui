@@ -60,6 +60,7 @@ export { default as CommandPalette } from './components/CommandPalette/CommandPa
 export { default as CommandPaletteItem } from './components/CommandPalette/CommandPaletteItem.vue'
 export { default as ListFilter } from './components/ListFilter/ListFilter.vue'
 export { default as CalendarView } from './components/CalendarView/CalendarView.vue'
+export { default as NestedPopover } from './components/ListFilter/NestedPopover.vue'
 
 // directives
 export { default as onOutsideClickDirective } from './directives/onOutsideClick.js'
