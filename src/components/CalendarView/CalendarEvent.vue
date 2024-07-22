@@ -426,44 +426,42 @@ function handleTimeConstraints() {
 const toggle = () => (opened.value = !opened.value)
 const close = () => (opened.value = false)
 
+let clickTimer = null
 function handleEventClick(e = null) {
+  e.cancelBubble = true
   // hack to prevent event modal from opening when resizing or repositioning
   if (preventClick.value) {
     preventClick.value = false
     return
   }
-
-  setTimeout(() => {
-    if (e.detail === 1) {
-      debugger
+  // hack: timeout to see whether it's a double click or a single click
+  if (e.detail === 1) {
+    clickTimer = setTimeout(() => {
       calendarActions.props.onClick
         ? calendarActions.props.onClick({
             e,
             calendarEvent: calendarEvent.value,
           })
-        : console.log('Event Clicked') && toggle()
-    }
-  }, 500)
+        : toggle()
+    }, 200)
+  }
 }
 
 const showEventModal = ref(false)
 function handleEventEdit(e = null) {
-  setTimeout(() => {
-    if (e.detail === 2) {
-      debugger
-      if (calendarActions.props.onDblClick) {
-        calendarActions.props.onDblClick({
-          e,
-          calendarEvent: calendarEvent.value,
-        })
-        return
-      }
-      if (!config.isEditMode) return
-      close()
-      console.log('Event Dbl Clicked')
-      showEventModal.value = true
-    }
-  }, 500)
+  e && (e.cancelBubble = true)
+  // if it's a double click, clear the timeout
+  clearTimeout(clickTimer)
+  if (calendarActions.props.onDblClick) {
+    calendarActions.props.onDblClick({
+      e,
+      calendarEvent: calendarEvent.value,
+    })
+    return
+  }
+  if (!config.isEditMode) return
+  close()
+  showEventModal.value = true
 }
 
 function handleEventDelete() {
