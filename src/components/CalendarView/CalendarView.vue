@@ -47,7 +47,7 @@
     </slot>
 
     <CalendarMonthly
-      v-if="activeView === 'Month'"
+      v-show="activeView === 'Month'"
       :events="events"
       :currentMonth="currentMonth"
       :currentMonthDates="currentMonthDates"
@@ -55,14 +55,14 @@
     />
 
     <CalendarWeekly
-      v-else-if="activeView === 'Week'"
+      v-show="activeView === 'Week'"
       :events="events"
       :weeklyDates="datesInWeeks[week]"
       :config="overrideConfig"
     />
 
     <CalendarDaily
-      v-else
+      v-show="activeView === 'Day'"
       :events="events"
       :current-date="currentMonthDates[date]"
       :config="overrideConfig"
@@ -76,7 +76,7 @@
   </div>
 </template>
 <script setup>
-import { computed, provide, ref } from 'vue'
+import { computed, onMounted, onUnmounted, provide, ref } from 'vue'
 import Button from '../Button.vue'
 import TabButtons from '../TabButtons.vue'
 import { getCalendarDates, monthList, handleSeconds } from './calendarUtils'
@@ -137,6 +137,31 @@ let activeView = ref(overrideConfig.defaultMode)
 
 function updateActiveView(value) {
   activeView.value = value
+}
+
+// shortcuts for changing the active view and navigating through the calendar
+onMounted(() => {
+  window.addEventListener('keydown', handleShortcuts)
+})
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleShortcuts)
+})
+function handleShortcuts(e) {
+  if (e.key === 'm' || e.key === 'M') {
+    activeView.value = 'Month'
+  }
+  if (e.key === 'w' || e.key === 'W') {
+    activeView.value = 'Week'
+  }
+  if (e.key === 'd' || e.key === 'D') {
+    activeView.value = 'Day'
+  }
+  if (e.key === 'ArrowLeft') {
+    decrement()
+  }
+  if (e.key === 'ArrowRight') {
+    increment()
+  }
 }
 
 provide('activeView', activeView)

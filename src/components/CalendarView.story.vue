@@ -9,9 +9,6 @@
           :update="(event) => logEvent('updateEvent', event)"
           :delete="(event) => logEvent('deleteEvent', event)"
         >
-          <!-- :onDblClick="(event) => logEvent('onDblClick', event)" -->
-          <!-- :onCellDblClick="(data) => logEvent('onCellDblClick', data)" -->
-          <!-- :onClick="(event) => logEvent('onClick', event)" -->
         </CalendarView>
       </div>
     </Variant>
