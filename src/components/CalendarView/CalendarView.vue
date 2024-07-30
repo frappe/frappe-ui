@@ -1,8 +1,5 @@
 <template>
-  <div class="h-full">
-    <!-- how can I change the value of activeView from the parent -->
-    <!-- how can I achieve 2 way binding on activeView -->
-
+  <div class="h-full flex flex-col overflow-hidden">
     <slot
       name="header"
       v-bind="{
@@ -47,7 +44,7 @@
     </slot>
 
     <CalendarMonthly
-      v-show="activeView === 'Month'"
+      v-if="activeView === 'Month'"
       :events="events"
       :currentMonth="currentMonth"
       :currentMonthDates="currentMonthDates"
@@ -55,14 +52,14 @@
     />
 
     <CalendarWeekly
-      v-show="activeView === 'Week'"
+      v-else-if="activeView === 'Week'"
       :events="events"
       :weeklyDates="datesInWeeks[week]"
       :config="overrideConfig"
     />
 
     <CalendarDaily
-      v-show="activeView === 'Day'"
+      v-else-if="activeView === 'Day'"
       :events="events"
       :current-date="currentMonthDates[date]"
       :config="overrideConfig"
@@ -234,7 +231,7 @@ const actionOptions = [
   { label: 'Month', variant: 'solid' },
 ]
 let enabledModes = actionOptions.filter(
-  (mode) => !overrideConfig.disableModes.includes(mode.label)
+  (mode) => !overrideConfig.disableModes.includes(mode.label),
 )
 
 let currentYear = ref(new Date().getFullYear())
@@ -261,8 +258,8 @@ function findCurrentWeek(date) {
     week.find(
       (d) =>
         new Date(d).toLocaleDateString().split('T')[0] ===
-        new Date(date).toLocaleDateString().split('T')[0]
-    )
+        new Date(date).toLocaleDateString().split('T')[0],
+    ),
   )
 }
 
@@ -270,8 +267,9 @@ let week = ref(findCurrentWeek(currentDate.value))
 
 let date = ref(
   currentMonthDates.value.findIndex(
-    (date) => new Date(date).toDateString() === currentDate.value.toDateString()
-  )
+    (date) =>
+      new Date(date).toDateString() === currentDate.value.toDateString(),
+  ),
 )
 
 const incrementClickEvents = {
@@ -350,7 +348,7 @@ function decrementWeek() {
 function filterCurrentWeekDates() {
   let currentWeekDates = datesInWeeks.value[week.value]
   let differentMonthDates = currentWeekDates.filter(
-    (d) => d.getMonth() !== currentMonth.value
+    (d) => d.getMonth() !== currentMonth.value,
   )
   return differentMonthDates
 }
@@ -378,7 +376,7 @@ function decrementDay() {
 function findLastDateOfMonth(month, year) {
   let inputDate = new Date(year, month + 1, 0)
   let lastDateIndex = currentMonthDates.value.findIndex(
-    (date) => new Date(date).toDateString() === inputDate.toDateString()
+    (date) => new Date(date).toDateString() === inputDate.toDateString(),
   )
   return lastDateIndex
 }
@@ -386,14 +384,14 @@ function findLastDateOfMonth(month, year) {
 function findFirstDateOfMonth(month, year) {
   let inputDate = new Date(year, month, 1)
   let firstDateIndex = currentMonthDates.value.findIndex(
-    (date) => new Date(date).toDateString() === inputDate.toDateString()
+    (date) => new Date(date).toDateString() === inputDate.toDateString(),
   )
   return firstDateIndex
 }
 
 function findIndexOfDate(date) {
   return currentMonthDates.value.findIndex(
-    (d) => new Date(d).toDateString() === new Date(date).toDateString()
+    (d) => new Date(d).toDateString() === new Date(date).toDateString(),
   )
 }
 const currentMonthYear = computed(() => {
@@ -405,5 +403,3 @@ function isCurrentMonthDate(date) {
   return date.getMonth() === currentMonth.value
 }
 </script>
-
-<style></style>
