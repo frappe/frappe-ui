@@ -11,11 +11,11 @@
 
     <!-- Date Grid -->
     <div
-      class="grid w-full grid-cols-7 grid-rows-5 border-l-[1px] border-t-[1px] flex-1"
+      class="grid w-full grid-cols-7 border-l-[1px] border-t-[1px] flex-1"
+      :class="currentMonthDates.length > 35 ? 'grid-rows-6' : 'grid-rows-5'"
     >
       <div
         v-for="date in currentMonthDates"
-        ref="monthCell"
         class="overflow-y-auto border-b-[1px] border-r-[1px] border-gray-200"
         @dragover.prevent
         @drageneter.prevent
@@ -26,11 +26,9 @@
           class="mx-2 flex justify-center font-normal"
           :class="currentMonthDate(date) ? 'text-gray-700' : 'text-gray-200'"
         >
-          <div
-            v-if="currentMonthDate(date)"
-            class="flex w-full flex-col items-center"
-          >
+          <div class="flex w-full flex-col items-center">
             <span
+              v-if="currentMonthDate(date)"
               class="z-10 w-full bg-white py-1 text-center"
               :class="
                 date.toDateString() === new Date().toDateString() && 'font-bold'
@@ -38,10 +36,13 @@
             >
               {{ date.getDate() }}
             </span>
+            <span v-else>
+              {{ parseDateEventPopupFormat(date, (showDay = false)) }}
+            </span>
 
             <div
               class="w-full"
-              v-if="timedEvents[parseDate(date)]?.length <= 2"
+              v-if="timedEvents[parseDate(date)]?.length <= maxEventsInCell"
             >
               <CalendarEvent
                 v-for="calendarEvent in timedEvents[parseDate(date)]"
@@ -72,9 +73,6 @@
               />
             </div>
           </div>
-          <span v-else>{{
-            parseDateEventPopupFormat(date, (showDay = false))
-          }}</span>
         </div>
       </div>
     </div>
@@ -110,6 +108,10 @@ const emit = defineEmits(['setCurrentDate'])
 
 const timedEvents = computed(
   () => useCalendarData(props.events, 'Month').timedEvents.value,
+)
+
+const maxEventsInCell = computed(() =>
+  props.currentMonthDates.length > 35 ? 1 : 2,
 )
 
 function currentMonthDate(date) {
