@@ -36,7 +36,7 @@
             >
               {{ date.getDate() }}
             </span>
-            <span v-else>
+            <span v-else class="z-10 w-full bg-white py-1 text-center">
               {{ parseDateEventPopupFormat(date, (showDay = false)) }}
             </span>
 
