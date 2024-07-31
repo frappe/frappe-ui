@@ -49,6 +49,7 @@
       :currentMonth="currentMonth"
       :currentMonthDates="currentMonthDates"
       :config="overrideConfig"
+      @setCurrentDate="(d) => updateCurrentDate(d)"
     />
 
     <CalendarWeekly
@@ -61,7 +62,7 @@
     <CalendarDaily
       v-else-if="activeView === 'Day'"
       :events="events"
-      :current-date="currentMonthDates[date]"
+      :current-date="selectedDay"
       :config="overrideConfig"
     />
 
@@ -73,7 +74,7 @@
   </div>
 </template>
 <script setup>
-import { computed, onMounted, onUnmounted, provide, ref } from 'vue'
+import { computed, onMounted, onUnmounted, provide, ref, watch } from 'vue'
 import Button from '../Button.vue'
 import TabButtons from '../TabButtons.vue'
 import { getCalendarDates, monthList, handleSeconds } from './calendarUtils'
@@ -271,6 +272,13 @@ let date = ref(
       new Date(date).toDateString() === currentDate.value.toDateString(),
   ),
 )
+let selectedDay = computed(() => currentMonthDates.value[date.value])
+
+function updateCurrentDate(d) {
+  activeView.value = 'Day'
+  date.value = findIndexOfDate(d)
+  week.value = findCurrentWeek(d)
+}
 
 const incrementClickEvents = {
   Month: incrementMonth,

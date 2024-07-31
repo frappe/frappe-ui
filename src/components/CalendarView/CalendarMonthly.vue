@@ -68,7 +68,7 @@
                 :event="timedEvents[parseDate(date)][0]"
                 :date="date"
                 :totalEventsCount="timedEvents[parseDate(date)].length"
-                @showMoreEvents="() => console.log('show more events')"
+                @showMoreEvents="emit('setCurrentDate', date)"
               />
             </div>
           </div>
@@ -105,6 +105,8 @@ const props = defineProps({
     type: Object,
   },
 })
+
+const emit = defineEmits(['setCurrentDate'])
 
 const timedEvents = computed(
   () => useCalendarData(props.events, 'Month').timedEvents.value,
