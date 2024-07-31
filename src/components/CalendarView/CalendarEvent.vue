@@ -39,7 +39,7 @@
         </p>
         <p
           class="text-ellipsis text-xs font-normal text-gray-800"
-          v-if="props.event.from_time"
+          v-if="!props.event.isFullDay"
         >
           {{ updatedEvent.from_time }} - {{ updatedEvent.to_time }}
         </p>
@@ -109,7 +109,7 @@
       class="shadow-xl"
     />
   </div>
-  <NewEventModal v-model="showEventModal" :event="props.event" />
+  <NewEventModal v-model="showEventModal" :event="updatedEvent" />
 </template>
 
 <script setup>
@@ -169,9 +169,7 @@ function handleClickOutside(e) {
 const calendarEvent = ref(props.event)
 
 const updatedEvent = reactive({
-  date: props.event.date,
-  from_time: props.event.from_time,
-  to_time: props.event.to_time,
+  ...props.event,
 })
 
 watch(
@@ -193,6 +191,8 @@ const state = reactive({
   yAxis: 0,
 })
 
+const heightThreshold = 40
+const minimumHeight = 32.5
 const setEventStyles = computed(() => {
   if (props.event.isFullDay) {
     return {
@@ -205,7 +205,11 @@ const setEventStyles = computed(() => {
     calendarEvent.value.from_time,
     calendarEvent.value.to_time,
   )
-  let height = diff * minuteHeight + 'px'
+  let height = diff * minuteHeight
+  if (height < heightThreshold) {
+    height = minimumHeight
+  }
+  height += 'px'
 
   let top = calculateMinutes(calendarEvent.value.from_time) * minuteHeight
   if (activeView.value === 'Day') {
@@ -447,6 +451,7 @@ const close = () => (opened.value = false)
 
 function handleDeleteShortcut(e) {
   if (e.key === 'Delete' || e.key === 'Backspace') {
+    opened.value = false
     handleEventDelete()
   }
 }
@@ -455,9 +460,7 @@ watch(
   () => opened.value,
   (newVal) => {
     if (newVal) {
-      document.addEventListener('keydown', handleDeleteShortcut)
-    } else {
-      document.removeEventListener('keydown', handleDeleteShortcut)
+      document.addEventListener('keydown', handleDeleteShortcut, { once: true })
     }
   },
 )
