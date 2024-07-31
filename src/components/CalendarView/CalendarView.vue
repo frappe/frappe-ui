@@ -77,7 +77,12 @@
 import { computed, onMounted, onUnmounted, provide, ref, watch } from 'vue'
 import Button from '../Button.vue'
 import TabButtons from '../TabButtons.vue'
-import { getCalendarDates, monthList, handleSeconds } from './calendarUtils'
+import {
+  getCalendarDates,
+  monthList,
+  handleSeconds,
+  parseDate,
+} from './calendarUtils'
 import CalendarMonthly from './CalendarMonthly.vue'
 import CalendarWeekly from './CalendarWeekly.vue'
 import CalendarDaily from './CalendarDaily.vue'
@@ -126,11 +131,12 @@ const defaultConfig = {
   isEditMode: false,
   eventIcons: {},
   allowCustomClickEvents: false,
+  redundantCellHeight: 50,
+  hourHeight: 50,
+  enableShortcuts: true,
 }
 
 const overrideConfig = { ...defaultConfig, ...props.config }
-overrideConfig['redundantCellHeight'] = 50
-overrideConfig['hourHeight'] = 50
 let activeView = ref(overrideConfig.defaultMode)
 
 function updateActiveView(value) {
@@ -139,6 +145,7 @@ function updateActiveView(value) {
 
 // shortcuts for changing the active view and navigating through the calendar
 onMounted(() => {
+  if (!overrideConfig.enableShortcuts) return
   window.addEventListener('keydown', handleShortcuts)
 })
 onUnmounted(() => {
@@ -165,10 +172,10 @@ function handleShortcuts(e) {
 provide('activeView', activeView)
 provide('config', overrideConfig)
 
-let parseEvents = computed(() => {
+const parseEvents = computed(() => {
   return props.events.map((event) => {
     const { fromDate, toDate, ...rest } = event
-    const date = fromDate.split(' ')[0]
+    const date = parseDate(fromDate)
     const from_time = new Date(fromDate).toLocaleTimeString()
     const to_time = new Date(toDate).toLocaleTimeString()
     if (event.isFullDay) {
@@ -177,7 +184,7 @@ let parseEvents = computed(() => {
     return { ...rest, date, from_time, to_time }
   })
 })
-let events = ref(parseEvents.value)
+const events = ref(parseEvents.value)
 
 events.value.forEach((event) => {
   if (!event.from_time || !event.to_time) {
@@ -281,8 +288,7 @@ let week = ref(findCurrentWeek(currentDate.value))
 
 let date = ref(
   currentMonthDates.value.findIndex(
-    (date) =>
-      new Date(date).toDateString() === currentDate.value.toDateString(),
+    (d) => new Date(d).toDateString() === currentDate.value.toDateString(),
   ),
 )
 let selectedDay = computed(() => currentMonthDates.value[date.value])
