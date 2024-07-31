@@ -39,7 +39,7 @@
         </p>
         <p
           class="text-ellipsis text-xs font-normal text-gray-800"
-          v-if="props.event.from_time"
+          v-if="!props.event.isFullDay"
         >
           {{ updatedEvent.from_time }} - {{ updatedEvent.to_time }}
         </p>
@@ -109,7 +109,7 @@
       class="shadow-xl"
     />
   </div>
-  <NewEventModal v-model="showEventModal" :event="props.event" />
+  <NewEventModal v-model="showEventModal" :event="updatedEvent" />
 </template>
 
 <script setup>
@@ -169,9 +169,7 @@ function handleClickOutside(e) {
 const calendarEvent = ref(props.event)
 
 const updatedEvent = reactive({
-  date: props.event.date,
-  from_time: props.event.from_time,
-  to_time: props.event.to_time,
+  ...props.event,
 })
 
 watch(
@@ -181,7 +179,7 @@ watch(
     updatedEvent.to_time = newVal.to_time
     calendarEvent.value = newVal
   },
-  { deep: true }
+  { deep: true },
 )
 
 const eventIcons = config.eventIcons
@@ -193,6 +191,8 @@ const state = reactive({
   yAxis: 0,
 })
 
+const heightThreshold = 40
+const minimumHeight = 32.5
 const setEventStyles = computed(() => {
   if (props.event.isFullDay) {
     return {
@@ -203,9 +203,13 @@ const setEventStyles = computed(() => {
 
   let diff = calculateDiff(
     calendarEvent.value.from_time,
-    calendarEvent.value.to_time
+    calendarEvent.value.to_time,
   )
-  let height = diff * minuteHeight + 'px'
+  let height = diff * minuteHeight
+  if (height < heightThreshold) {
+    height = minimumHeight
+  }
+  height += 'px'
 
   let top = calculateMinutes(calendarEvent.value.from_time) * minuteHeight
   if (activeView.value === 'Day') {
@@ -361,7 +365,7 @@ function getDate(date, nextDate = 0) {
   let newDate = new Date(
     date.getFullYear(),
     date.getMonth(),
-    date.getDate() + nextDate
+    date.getDate() + nextDate,
   )
   return newDate
 }
@@ -370,7 +374,7 @@ function handleHorizontalMovement(clientX, rect) {
   const currentDate = new Date(
     props.event.isFullDay
       ? eventRef.value.parentNode.parentNode.getAttribute('data-date-attr')
-      : eventRef.value.parentNode.getAttribute('data-date-attr')
+      : eventRef.value.parentNode.getAttribute('data-date-attr'),
   )
 
   if (props.event.isFullDay) {
@@ -418,11 +422,11 @@ function handleVerticalMovement(clientY, prevY, rect) {
 
   updatedEvent.from_time = convertMinutesToHours(
     calculateMinutes(calendarEvent.value.from_time) +
-      Math.round(diffY / minuteHeight)
+      Math.round(diffY / minuteHeight),
   )
   updatedEvent.to_time = convertMinutesToHours(
     calculateMinutes(calendarEvent.value.to_time) +
-      Math.round(diffY / minuteHeight)
+      Math.round(diffY / minuteHeight),
   )
   handleTimeConstraints()
 }
@@ -447,6 +451,7 @@ const close = () => (opened.value = false)
 
 function handleDeleteShortcut(e) {
   if (e.key === 'Delete' || e.key === 'Backspace') {
+    opened.value = false
     handleEventDelete()
   }
 }
@@ -455,16 +460,13 @@ watch(
   () => opened.value,
   (newVal) => {
     if (newVal) {
-      document.addEventListener('keydown', handleDeleteShortcut)
-    } else {
-      document.removeEventListener('keydown', handleDeleteShortcut)
+      document.addEventListener('keydown', handleDeleteShortcut, { once: true })
     }
-  }
+  },
 )
 
 let clickTimer = null
-function handleEventClick(e = null) {
-  e.cancelBubble = true
+function handleEventClick(e) {
   // hack to prevent event modal from opening when resizing or repositioning
   if (preventClick.value) {
     preventClick.value = false

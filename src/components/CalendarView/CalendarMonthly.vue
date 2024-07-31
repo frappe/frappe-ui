@@ -1,5 +1,5 @@
 <template>
-  <div class="h-[92%]">
+  <div class="flex flex-col flex-1 overflow-scroll">
     <!-- Day List -->
     <div class="grid w-full grid-cols-7 pb-2">
       <span
@@ -11,25 +11,24 @@
 
     <!-- Date Grid -->
     <div
-      class="grid h-full w-full grid-cols-7 grid-rows-6 border-l-[1px] border-t-[1px]"
+      class="grid w-full grid-cols-7 border-l-[1px] border-t-[1px] flex-1"
+      :class="currentMonthDates.length > 35 ? 'grid-rows-6' : 'grid-rows-5'"
     >
       <div
         v-for="date in currentMonthDates"
-        class="h-28 overflow-scroll border-b-[1px] border-r-[1px] border-gray-200"
+        class="overflow-y-auto border-b-[1px] border-r-[1px] border-gray-200"
         @dragover.prevent
         @drageneter.prevent
         @drop="onDrop($event, date)"
         @dblclick="calendarActions.handleCellDblClick($event, date)"
       >
         <div
-          class="mx-2 flex h-full justify-center font-normal"
+          class="mx-2 flex justify-center font-normal"
           :class="currentMonthDate(date) ? 'text-gray-700' : 'text-gray-200'"
         >
-          <div
-            v-if="currentMonthDate(date)"
-            class="flex w-full flex-col items-center"
-          >
+          <div class="flex w-full flex-col items-center">
             <span
+              v-if="currentMonthDate(date)"
               class="z-10 w-full bg-white py-1 text-center"
               :class="
                 date.toDateString() === new Date().toDateString() && 'font-bold'
@@ -37,8 +36,14 @@
             >
               {{ date.getDate() }}
             </span>
+            <span v-else>
+              {{ parseDateEventPopupFormat(date, (showDay = false)) }}
+            </span>
 
-            <div class="w-full overflow-y-auto">
+            <div
+              class="w-full"
+              v-if="timedEvents[parseDate(date)]?.length <= maxEventsInCell"
+            >
               <CalendarEvent
                 v-for="calendarEvent in timedEvents[parseDate(date)]"
                 :event="calendarEvent"
@@ -51,10 +56,23 @@
                 @dragover.prevent
               />
             </div>
+            <div v-else class="w-full flex flex-col justify-between">
+              <ShowMoreCalendarEvent
+                v-if="timedEvents[parseDate(date)]"
+                class="z-10 mb-2 cursor-pointer"
+                :draggable="config.isEditMode"
+                @dragstart="
+                  onDragStart($event, timedEvents[parseDate(date)][0].id)
+                "
+                @dragend="$event.target.style.opacity = '1'"
+                @dragover.prevent
+                :event="timedEvents[parseDate(date)][0]"
+                :date="date"
+                :totalEventsCount="timedEvents[parseDate(date)].length"
+                @showMoreEvents="emit('setCurrentDate', date)"
+              />
+            </div>
           </div>
-          <span v-else>{{
-            parseDateEventPopupFormat(date, (showDay = false))
-          }}</span>
         </div>
       </div>
     </div>
@@ -67,7 +85,7 @@ import { inject } from 'vue'
 import CalendarEvent from './CalendarEvent.vue'
 import useCalendarData from './composables/useCalendarData'
 import { computed } from 'vue'
-
+import ShowMoreCalendarEvent from './ShowMoreCalendarEvent.vue'
 const props = defineProps({
   events: {
     type: Object,
@@ -86,8 +104,14 @@ const props = defineProps({
   },
 })
 
+const emit = defineEmits(['setCurrentDate'])
+
 const timedEvents = computed(
-  () => useCalendarData(props.events, 'Month').timedEvents.value
+  () => useCalendarData(props.events, 'Month').timedEvents.value,
+)
+
+const maxEventsInCell = computed(() =>
+  props.currentMonthDates.length > 35 ? 1 : 2,
 )
 
 function currentMonthDate(date) {
@@ -97,6 +121,7 @@ function currentMonthDate(date) {
 const calendarActions = inject('calendarActions')
 
 const onDragStart = (event, calendarEventID) => {
+  if (!calendarEventID) return
   event.target.style.opacity = '0.5'
   event.target.style.cursor = 'move'
   event.dataTransfer.dropEffect = 'move'
@@ -106,6 +131,7 @@ const onDragStart = (event, calendarEventID) => {
 
 const onDrop = (event, date) => {
   let calendarEventID = event.dataTransfer.getData('calendarEventID')
+  if (!calendarEventID) return
   event.target.style.cursor = 'default'
   // if same date then return
   let e = props.events.find((e) => e.id === calendarEventID)

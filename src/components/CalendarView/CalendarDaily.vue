@@ -70,7 +70,7 @@
 </template>
 
 <script setup>
-import { computed, inject } from 'vue'
+import { computed, inject, onMounted, ref } from 'vue'
 import CalendarEvent from './CalendarEvent.vue'
 import CalendarTimeMarker from './CalendarTimeMarker.vue'
 import {
@@ -94,13 +94,19 @@ const props = defineProps({
   },
 })
 const timedEvents = computed(
-  () => useCalendarData(props.events).timedEvents.value
+  () => useCalendarData(props.events).timedEvents.value,
 )
 const fullDayEvents = computed(
-  () => useCalendarData(props.events).fullDayEvents.value
+  () => useCalendarData(props.events).fullDayEvents.value,
 )
+const gridRef = ref(null)
+const hourHeight = props.config.hourHeight
+const minuteHeight = hourHeight / 60
+
+onMounted(() => {
+  const currentHour = new Date().getHours()
+  gridRef.value.scrollBy(0, currentHour * 60 * minuteHeight)
+})
 
 const calendarActions = inject('calendarActions')
-
-const hourHeight = props.config.hourHeight
 </script>

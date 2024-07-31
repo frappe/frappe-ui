@@ -63,10 +63,11 @@
             v-model="newEvent.color"
             :options="colors"
             label="Color"
+            class="form-control prefix"
           >
             <template #prefix>
               <div
-                class="mr-2 h-5 w-5 rounded-full shadow-sm"
+                class="h-5 w-5 rounded-full shadow-sm"
                 :class="[
                   colorMap[newEvent?.color]?.background_color || 'bg-green-100',
                 ]"
@@ -117,7 +118,7 @@ const newEvent = reactive({
   from_time: props.event?.from_time || '',
   to_time: props.event?.to_time || '',
   venue: props.event?.venue || '',
-  color: props.event?.color || '',
+  color: props.event?.color || 'green',
   id: '',
   isFullDay: props.event?.isFullDay || false,
 })
@@ -201,4 +202,9 @@ function handleEventTime() {
 }
 </script>
 
-<style></style>
+<style>
+.form-control.prefix select {
+  padding-left: 2.2rem !important;
+  text-transform: capitalize !important;
+}
+</style>

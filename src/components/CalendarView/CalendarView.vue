@@ -1,8 +1,5 @@
 <template>
-  <div class="h-full">
-    <!-- how can I change the value of activeView from the parent -->
-    <!-- how can I achieve 2 way binding on activeView -->
-
+  <div class="h-full flex flex-col overflow-hidden">
     <slot
       name="header"
       v-bind="{
@@ -47,24 +44,25 @@
     </slot>
 
     <CalendarMonthly
-      v-show="activeView === 'Month'"
+      v-if="activeView === 'Month'"
       :events="events"
       :currentMonth="currentMonth"
       :currentMonthDates="currentMonthDates"
       :config="overrideConfig"
+      @setCurrentDate="(d) => updateCurrentDate(d)"
     />
 
     <CalendarWeekly
-      v-show="activeView === 'Week'"
+      v-else-if="activeView === 'Week'"
       :events="events"
       :weeklyDates="datesInWeeks[week]"
       :config="overrideConfig"
     />
 
     <CalendarDaily
-      v-show="activeView === 'Day'"
+      v-else-if="activeView === 'Day'"
       :events="events"
-      :current-date="currentMonthDates[date]"
+      :current-date="selectedDay"
       :config="overrideConfig"
     />
 
@@ -76,10 +74,15 @@
   </div>
 </template>
 <script setup>
-import { computed, onMounted, onUnmounted, provide, ref } from 'vue'
+import { computed, onMounted, onUnmounted, provide, ref, watch } from 'vue'
 import Button from '../Button.vue'
 import TabButtons from '../TabButtons.vue'
-import { getCalendarDates, monthList, handleSeconds } from './calendarUtils'
+import {
+  getCalendarDates,
+  monthList,
+  handleSeconds,
+  parseDate,
+} from './calendarUtils'
 import CalendarMonthly from './CalendarMonthly.vue'
 import CalendarWeekly from './CalendarWeekly.vue'
 import CalendarDaily from './CalendarDaily.vue'
@@ -128,11 +131,12 @@ const defaultConfig = {
   isEditMode: false,
   eventIcons: {},
   allowCustomClickEvents: false,
+  redundantCellHeight: 50,
+  hourHeight: 50,
+  enableShortcuts: true,
 }
 
 const overrideConfig = { ...defaultConfig, ...props.config }
-overrideConfig['redundantCellHeight'] = 50
-overrideConfig['hourHeight'] = 50
 let activeView = ref(overrideConfig.defaultMode)
 
 function updateActiveView(value) {
@@ -141,6 +145,7 @@ function updateActiveView(value) {
 
 // shortcuts for changing the active view and navigating through the calendar
 onMounted(() => {
+  if (!overrideConfig.enableShortcuts) return
   window.addEventListener('keydown', handleShortcuts)
 })
 onUnmounted(() => {
@@ -167,7 +172,20 @@ function handleShortcuts(e) {
 provide('activeView', activeView)
 provide('config', overrideConfig)
 
-let events = computed(() => props.events)
+const parseEvents = computed(() => {
+  return props.events.map((event) => {
+    const { fromDate, toDate, ...rest } = event
+    const date = parseDate(fromDate)
+    const from_time = new Date(fromDate).toLocaleTimeString()
+    const to_time = new Date(toDate).toLocaleTimeString()
+    if (event.isFullDay) {
+      return { ...rest, date }
+    }
+    return { ...rest, date, from_time, to_time }
+  })
+})
+const events = ref(parseEvents.value)
+
 events.value.forEach((event) => {
   if (!event.from_time || !event.to_time) {
     return
@@ -234,7 +252,7 @@ const actionOptions = [
   { label: 'Month', variant: 'solid' },
 ]
 let enabledModes = actionOptions.filter(
-  (mode) => !overrideConfig.disableModes.includes(mode.label)
+  (mode) => !overrideConfig.disableModes.includes(mode.label),
 )
 
 let currentYear = ref(new Date().getFullYear())
@@ -261,8 +279,8 @@ function findCurrentWeek(date) {
     week.find(
       (d) =>
         new Date(d).toLocaleDateString().split('T')[0] ===
-        new Date(date).toLocaleDateString().split('T')[0]
-    )
+        new Date(date).toLocaleDateString().split('T')[0],
+    ),
   )
 }
 
@@ -270,9 +288,16 @@ let week = ref(findCurrentWeek(currentDate.value))
 
 let date = ref(
   currentMonthDates.value.findIndex(
-    (date) => new Date(date).toDateString() === currentDate.value.toDateString()
-  )
+    (d) => new Date(d).toDateString() === currentDate.value.toDateString(),
+  ),
 )
+let selectedDay = computed(() => currentMonthDates.value[date.value])
+
+function updateCurrentDate(d) {
+  activeView.value = 'Day'
+  date.value = findIndexOfDate(d)
+  week.value = findCurrentWeek(d)
+}
 
 const incrementClickEvents = {
   Month: incrementMonth,
@@ -350,7 +375,7 @@ function decrementWeek() {
 function filterCurrentWeekDates() {
   let currentWeekDates = datesInWeeks.value[week.value]
   let differentMonthDates = currentWeekDates.filter(
-    (d) => d.getMonth() !== currentMonth.value
+    (d) => d.getMonth() !== currentMonth.value,
   )
   return differentMonthDates
 }
@@ -378,7 +403,7 @@ function decrementDay() {
 function findLastDateOfMonth(month, year) {
   let inputDate = new Date(year, month + 1, 0)
   let lastDateIndex = currentMonthDates.value.findIndex(
-    (date) => new Date(date).toDateString() === inputDate.toDateString()
+    (date) => new Date(date).toDateString() === inputDate.toDateString(),
   )
   return lastDateIndex
 }
@@ -386,14 +411,14 @@ function findLastDateOfMonth(month, year) {
 function findFirstDateOfMonth(month, year) {
   let inputDate = new Date(year, month, 1)
   let firstDateIndex = currentMonthDates.value.findIndex(
-    (date) => new Date(date).toDateString() === inputDate.toDateString()
+    (date) => new Date(date).toDateString() === inputDate.toDateString(),
   )
   return firstDateIndex
 }
 
 function findIndexOfDate(date) {
   return currentMonthDates.value.findIndex(
-    (d) => new Date(d).toDateString() === new Date(date).toDateString()
+    (d) => new Date(d).toDateString() === new Date(date).toDateString(),
   )
 }
 const currentMonthYear = computed(() => {
@@ -405,5 +430,3 @@ function isCurrentMonthDate(date) {
   return date.getMonth() === currentMonth.value
 }
 </script>
-
-<style></style>
