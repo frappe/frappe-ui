@@ -63,6 +63,7 @@
                   <ShowMoreCalendarEvent
                     v-if="fullDayEvents[parseDate(date)]?.length > 0"
                     :event="fullDayEvents[parseDate(date)][0]"
+                    class="w-[90%]"
                     :date="date"
                     :totalEventsCount="fullDayEvents[parseDate(date)].length"
                     @showMoreEvents="isCollapsed = !isCollapsed"

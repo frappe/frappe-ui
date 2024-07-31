@@ -1,5 +1,5 @@
 <template>
-  <div class="h-[92%]">
+  <div class="flex flex-col flex-1 overflow-scroll">
     <!-- Day List -->
     <div class="grid w-full grid-cols-7 pb-2">
       <span
@@ -11,18 +11,19 @@
 
     <!-- Date Grid -->
     <div
-      class="grid h-full w-full grid-cols-7 grid-rows-6 border-l-[1px] border-t-[1px]"
+      class="grid w-full grid-cols-7 grid-rows-5 border-l-[1px] border-t-[1px] flex-1"
     >
       <div
         v-for="date in currentMonthDates"
-        class="h-28 overflow-scroll border-b-[1px] border-r-[1px] border-gray-200"
+        ref="monthCell"
+        class="overflow-y-auto border-b-[1px] border-r-[1px] border-gray-200"
         @dragover.prevent
         @drageneter.prevent
         @drop="onDrop($event, date)"
         @dblclick="calendarActions.handleCellDblClick($event, date)"
       >
         <div
-          class="mx-2 flex h-full justify-center font-normal"
+          class="mx-2 flex justify-center font-normal"
           :class="currentMonthDate(date) ? 'text-gray-700' : 'text-gray-200'"
         >
           <div
@@ -38,7 +39,10 @@
               {{ date.getDate() }}
             </span>
 
-            <div class="w-full overflow-y-auto">
+            <div
+              class="w-full"
+              v-if="timedEvents[parseDate(date)]?.length <= 2"
+            >
               <CalendarEvent
                 v-for="calendarEvent in timedEvents[parseDate(date)]"
                 :event="calendarEvent"
@@ -49,6 +53,22 @@
                 @dragstart="onDragStart($event, calendarEvent.id)"
                 @dragend="$event.target.style.opacity = '1'"
                 @dragover.prevent
+              />
+            </div>
+            <div v-else class="w-full flex flex-col justify-between">
+              <ShowMoreCalendarEvent
+                v-if="timedEvents[parseDate(date)]"
+                class="z-10 mb-2 cursor-pointer"
+                :draggable="config.isEditMode"
+                @dragstart="
+                  onDragStart($event, timedEvents[parseDate(date)][0].id)
+                "
+                @dragend="$event.target.style.opacity = '1'"
+                @dragover.prevent
+                :event="timedEvents[parseDate(date)][0]"
+                :date="date"
+                :totalEventsCount="timedEvents[parseDate(date)].length"
+                @showMoreEvents="() => console.log('show more events')"
               />
             </div>
           </div>
@@ -67,7 +87,7 @@ import { inject } from 'vue'
 import CalendarEvent from './CalendarEvent.vue'
 import useCalendarData from './composables/useCalendarData'
 import { computed } from 'vue'
-
+import ShowMoreCalendarEvent from './ShowMoreCalendarEvent.vue'
 const props = defineProps({
   events: {
     type: Object,
@@ -87,7 +107,7 @@ const props = defineProps({
 })
 
 const timedEvents = computed(
-  () => useCalendarData(props.events, 'Month').timedEvents.value
+  () => useCalendarData(props.events, 'Month').timedEvents.value,
 )
 
 function currentMonthDate(date) {
@@ -97,6 +117,7 @@ function currentMonthDate(date) {
 const calendarActions = inject('calendarActions')
 
 const onDragStart = (event, calendarEventID) => {
+  if (!calendarEventID) return
   event.target.style.opacity = '0.5'
   event.target.style.cursor = 'move'
   event.dataTransfer.dropEffect = 'move'
@@ -106,6 +127,7 @@ const onDragStart = (event, calendarEventID) => {
 
 const onDrop = (event, date) => {
   let calendarEventID = event.dataTransfer.getData('calendarEventID')
+  if (!calendarEventID) return
   event.target.style.cursor = 'default'
   // if same date then return
   let e = props.events.find((e) => e.id === calendarEventID)

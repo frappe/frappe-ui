@@ -30,9 +30,10 @@ export function getCalendarDates(month, year) {
   }
 
   function getNextMonthDates(currentAndPreviousMonthDates) {
+    const numberofDaysInCalendar = 35
     let lengthOfDates = currentAndPreviousMonthDates.length
     let lastDate = currentAndPreviousMonthDates[lengthOfDates - 1]
-    let diff = 42 - lengthOfDates + 1
+    let diff = numberofDaysInCalendar - lengthOfDates + 1
 
     let allDates = getDatesAfter(lastDate, 1, diff, 1, true)
     return allDates

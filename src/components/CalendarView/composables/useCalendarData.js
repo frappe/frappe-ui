@@ -38,7 +38,7 @@ export default function useCalendarData(events, view = '') {
 
 function sortMonthlyEvents(events) {
   let fullDayEvents = events.filter((event) => event.isFullDay)
-  let sortedEvents = events
+  let timedEvents = events
     .filter((event) => !event.isFullDay)
     .sort((a, b) =>
       a.from_time !== b.from_time
@@ -50,5 +50,5 @@ function sortMonthlyEvents(events) {
         : -1
     )
   // full day events should be at the top in month view
-  return [...fullDayEvents, ...sortedEvents]
+  return [...fullDayEvents, ...timedEvents]
 }

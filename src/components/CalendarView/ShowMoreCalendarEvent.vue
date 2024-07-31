@@ -3,7 +3,8 @@
     :event="event"
     :date="date"
     :key="event.id"
-    class="mb-1 w-[90%] cursor-pointer"
+    class="mb-1 cursor-pointer"
+    v-bind="$attrs"
   />
   <span
     v-if="totalEventsCount > 1"

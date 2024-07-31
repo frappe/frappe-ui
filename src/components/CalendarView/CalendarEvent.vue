@@ -181,7 +181,7 @@ watch(
     updatedEvent.to_time = newVal.to_time
     calendarEvent.value = newVal
   },
-  { deep: true }
+  { deep: true },
 )
 
 const eventIcons = config.eventIcons
@@ -203,7 +203,7 @@ const setEventStyles = computed(() => {
 
   let diff = calculateDiff(
     calendarEvent.value.from_time,
-    calendarEvent.value.to_time
+    calendarEvent.value.to_time,
   )
   let height = diff * minuteHeight + 'px'
 
@@ -361,7 +361,7 @@ function getDate(date, nextDate = 0) {
   let newDate = new Date(
     date.getFullYear(),
     date.getMonth(),
-    date.getDate() + nextDate
+    date.getDate() + nextDate,
   )
   return newDate
 }
@@ -370,7 +370,7 @@ function handleHorizontalMovement(clientX, rect) {
   const currentDate = new Date(
     props.event.isFullDay
       ? eventRef.value.parentNode.parentNode.getAttribute('data-date-attr')
-      : eventRef.value.parentNode.getAttribute('data-date-attr')
+      : eventRef.value.parentNode.getAttribute('data-date-attr'),
   )
 
   if (props.event.isFullDay) {
@@ -418,11 +418,11 @@ function handleVerticalMovement(clientY, prevY, rect) {
 
   updatedEvent.from_time = convertMinutesToHours(
     calculateMinutes(calendarEvent.value.from_time) +
-      Math.round(diffY / minuteHeight)
+      Math.round(diffY / minuteHeight),
   )
   updatedEvent.to_time = convertMinutesToHours(
     calculateMinutes(calendarEvent.value.to_time) +
-      Math.round(diffY / minuteHeight)
+      Math.round(diffY / minuteHeight),
   )
   handleTimeConstraints()
 }
@@ -459,12 +459,11 @@ watch(
     } else {
       document.removeEventListener('keydown', handleDeleteShortcut)
     }
-  }
+  },
 )
 
 let clickTimer = null
-function handleEventClick(e = null) {
-  e.cancelBubble = true
+function handleEventClick(e) {
   // hack to prevent event modal from opening when resizing or repositioning
   if (preventClick.value) {
     preventClick.value = false
