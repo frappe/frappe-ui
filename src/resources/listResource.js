@@ -173,7 +173,7 @@ export function createListResource(options, vm) {
             dt: out.doctype,
             dn: name,
             method: method,
-            args: JSON.stringify(values),
+            args: values,
           }
         },
         onSuccess(data) {
