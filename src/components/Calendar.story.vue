@@ -1,7 +1,7 @@
 <template>
-  <Story :layout="{ type: 'grid', width: '95%' }">
+  <Story :layout="{ type: 'grid', width: '100%' }">
     <Variant title="default">
-      <div class="flex h-full flex-col overflow-hidden p-5">
+      <div class="flex h-screen flex-col overflow-hidden p-5">
         <Calendar
           :config="config"
           :events="events"
@@ -13,7 +13,7 @@
       </div>
     </Variant>
     <Variant title="custom-header">
-      <div class="p-5">
+      <div class="flex h-screen flex-col overflow-hidden p-5">
         <Calendar
           :config="config"
           :events="events"
@@ -48,7 +48,7 @@
       </div>
     </Variant>
     <Variant title="custom-click-events">
-      <div class="p-5">
+      <div class="flex h-screen flex-col overflow-hidden p-5">
         <Calendar
           :config="config"
           :events="events"
@@ -67,15 +67,13 @@ import Calendar from './Calendar/Calendar.vue'
 import { logEvent } from 'histoire/client'
 import TabButtons from './TabButtons.vue'
 
-const activeView = ref('Week')
-
 const config = {
   defaultMode: 'Month',
   isEditMode: true,
   eventIcons: {},
   allowCustomClickEvents: true,
   redundantCellHeight: 100,
-  enableShortcuts: false,
+  enableShortcuts: true,
 }
 
 const events = ref([
