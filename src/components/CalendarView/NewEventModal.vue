@@ -67,7 +67,7 @@
           >
             <template #prefix>
               <div
-                class="h-5 w-5 rounded-full shadow-sm"
+                class="h-5 w-5 rounded-full shadow-md"
                 :class="[
                   colorMap[newEvent?.color]?.background_color || 'bg-green-100',
                 ]"
