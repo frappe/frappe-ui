@@ -23,6 +23,7 @@
             <!-- Top Redundant Cell before time starts for giving the calendar some space -->
             <div
               class="flex h-[50px] w-full flex-wrap gap-2 overflow-y-scroll border-b-[1px] border-gray-200 transition-all"
+              :style="{ height: `${config.redundantCellHeight}px` }"
             >
               <CalendarEvent
                 v-for="(calendarEvent, idx) in fullDayEvents[
@@ -94,10 +95,10 @@ const props = defineProps({
   },
 })
 const timedEvents = computed(
-  () => useCalendarData(props.events).timedEvents.value,
+  () => useCalendarData(props.events).timedEvents.value
 )
 const fullDayEvents = computed(
-  () => useCalendarData(props.events).fullDayEvents.value,
+  () => useCalendarData(props.events).fullDayEvents.value
 )
 const gridRef = ref(null)
 const hourHeight = props.config.hourHeight

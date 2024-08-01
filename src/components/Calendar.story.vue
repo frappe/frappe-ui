@@ -1,25 +1,25 @@
 <template>
   <Story :layout="{ type: 'grid', width: '95%' }">
     <Variant title="default">
-      <div class="p-5">
-        <CalendarView
+      <div class="flex h-full flex-col overflow-hidden p-5">
+        <Calendar
           :config="config"
           :events="events"
           :create="(event) => logEvent('createEvent', event)"
           :update="(event) => logEvent('updateEvent', event)"
           :delete="(event) => logEvent('deleteEvent', event)"
         >
-        </CalendarView>
+        </Calendar>
       </div>
     </Variant>
     <Variant title="custom-header">
       <div class="p-5">
-        <CalendarView
+        <Calendar
           :config="config"
           :events="events"
-          @create="(event) => logEvent('createEvent', event)"
-          @update="(event) => logEvent('updateEvent', event)"
-          @delete="(event) => logEvent('deleteEvent', event)"
+          :create="(event) => logEvent('createEvent', event)"
+          :update="(event) => logEvent('updateEvent', event)"
+          :delete="(event) => logEvent('deleteEvent', event)"
         >
           <template
             #header="{
@@ -44,109 +44,95 @@
               {{ currentMonthYear }}
             </h1>
           </template>
-        </CalendarView>
+        </Calendar>
       </div>
     </Variant>
     <Variant title="custom-click-events">
       <div class="p-5">
-        <CalendarView
+        <Calendar
           :config="config"
           :events="events"
-          :create="(event) => logEvent('createEvent', event)"
-          :update="(event) => logEvent('updateEvent', event)"
-          :delete="(event) => logEvent('deleteEvent', event)"
           :onClick="(event) => logEvent('onClick', event)"
           :onDblClick="(event) => logEvent('onDblClick', event)"
           :onCellDblClick="(data) => logEvent('onCellDblClick', data)"
         >
-        </CalendarView>
+        </Calendar>
       </div>
     </Variant>
   </Story>
 </template>
 <script setup>
 import { ref } from 'vue'
-import CalendarView from './CalendarView/CalendarView.vue'
+import Calendar from './Calendar/Calendar.vue'
 import { logEvent } from 'histoire/client'
 import TabButtons from './TabButtons.vue'
 
 const activeView = ref('Week')
 
 const config = {
-  defaultMode: 'Week',
+  defaultMode: 'Month',
   isEditMode: true,
   eventIcons: {},
   allowCustomClickEvents: true,
+  redundantCellHeight: 100,
+  enableShortcuts: false,
 }
 
 const events = ref([
   {
-    title: 'Maths by Sheldon',
-    participant: 'Sheldon',
-    id: 'EDU-CSH-2024-00013',
-    venue: 'CNF-ROOM-2024-00002',
-    date: '2024-07-01',
-    from_time: '12:00:00',
-    to_time: '13:00:00',
-    color: 'pink',
-  },
-  {
-    title: 'Maths by Sheldon',
-    participant: 'Sheldon',
-    id: 'EDU-CSH-2024-00014',
-    venue: 'CNF-ROOM-2024-00002',
-    date: '2024-07-02',
-    from_time: '12:00:00',
-    to_time: '13:00:00',
-    color: 'purple',
+    title: 'English by Ryan Mathew',
+    participant: 'Ryan Mathew',
+    id: 'EDU-CSH-2024-00091',
+    venue: 'CNF-ROOM-2024-00001',
+    fromDate: '2024-07-08 16:30:00', //can be a date object
+    toDate: '2024-07-08 17:30:00',
+    color: 'green',
   },
   {
     title: 'English by Ryan Mathew',
     participant: 'Ryan Mathew',
-    id: 'EDU-CSH-2024-00001',
-    venue: 'CNF-ROOM-2024-00001',
-    date: '2024-07-07',
-    from_time: '16:00:00',
-    to_time: '17:00:00',
-    color: 'violet',
-  },
-  {
-    title: 'Maths by Sheldon',
-    participant: 'Sheldon',
-    id: 'EDU-CSH-2024-00115',
+    id: 'EDU-CSH-2024-00092',
     venue: 'CNF-ROOM-2024-00002',
-    date: '2024-07-05',
-    from_time: '12:00:00',
-    to_time: '13:00:00',
-    color: 'blue',
+    fromDate: '2024-07-08 13:30:00',
+    toDate: '2024-07-08 17:30:00',
+    color: 'green',
+  },
+  {
+    title: 'English by Sheldon',
+    participant: 'Sheldon',
+    id: 'EDU-CSH-2024-00093',
+    venue: 'CNF-ROOM-2024-00001',
+    fromDate: '2024-07-09 10:30:00',
+    toDate: '2024-07-09 11:30:00',
+    color: 'green',
   },
   {
     title: 'English by Ryan Mathew',
     participant: 'Ryan Mathew',
-    id: 'EDU-CSH-2024-00002',
+    id: 'EDU-CSH-2024-00094',
     venue: 'CNF-ROOM-2024-00001',
-    date: '2024-07-05',
-    from_time: '16:00:00',
-    to_time: '17:00:00',
-    color: 'cyan',
-  },
-  {
-    title: 'English by Ryan Mathew',
-    participant: 'Ryan Mathew',
-    id: 'EDU-CSH-2024-00099',
-    venue: 'CNF-ROOM-2024-00001',
-    date: '2024-07-07',
-    from_time: '16:30:00',
-    to_time: '17:30:00',
+    fromDate: '2024-07-17 16:30:00',
+    toDate: '2024-07-17 17:30:00',
     color: 'green',
   },
   {
     title: 'Google Meet with John ',
-    date: '2024-07-21',
     participant: 'John',
+    id: '#htrht41',
     venue: 'Google Meet',
+    fromDate: '2024-07-21 00:00:00',
+    toDate: '2024-07-21 23:59:59',
     color: 'amber',
-    id: '#htrht4',
+    isFullDay: true,
+  },
+  {
+    title: 'Zoom Meet with Sheldon',
+    participant: 'Sheldon',
+    id: '#htrht42',
+    venue: 'Google Meet',
+    fromDate: '2024-07-21 00:00:00',
+    toDate: '2024-07-21 23:59:59',
+    color: 'amber',
     isFullDay: true,
   },
 ])

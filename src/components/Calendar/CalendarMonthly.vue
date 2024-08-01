@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col flex-1 overflow-scroll">
+  <div class="flex flex-1 flex-col overflow-scroll">
     <!-- Day List -->
     <div class="grid w-full grid-cols-7 pb-2">
       <span
@@ -11,7 +11,7 @@
 
     <!-- Date Grid -->
     <div
-      class="grid w-full grid-cols-7 border-l-[1px] border-t-[1px] flex-1"
+      class="grid w-full flex-1 grid-cols-7 border-l-[1px] border-t-[1px]"
       :class="currentMonthDates.length > 35 ? 'grid-rows-6' : 'grid-rows-5'"
     >
       <div
@@ -56,7 +56,7 @@
                 @dragover.prevent
               />
             </div>
-            <div v-else class="w-full flex flex-col justify-between">
+            <div v-else class="flex w-full flex-col justify-between">
               <ShowMoreCalendarEvent
                 v-if="timedEvents[parseDate(date)]"
                 class="z-10 mb-2 cursor-pointer"
@@ -107,11 +107,11 @@ const props = defineProps({
 const emit = defineEmits(['setCurrentDate'])
 
 const timedEvents = computed(
-  () => useCalendarData(props.events, 'Month').timedEvents.value,
+  () => useCalendarData(props.events, 'Month').timedEvents.value
 )
 
 const maxEventsInCell = computed(() =>
-  props.currentMonthDates.length > 35 ? 1 : 2,
+  props.currentMonthDates.length > 35 ? 1 : 2
 )
 
 function currentMonthDate(date) {

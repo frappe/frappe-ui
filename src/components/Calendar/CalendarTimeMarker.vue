@@ -31,7 +31,6 @@ const setCurrentTime = computed(() => {
   let minutes = d.getMinutes()
   let top =
     (hour * 60 + minutes) * minuteHeight + props.redundantCellHeight + 'px'
-
   return { top }
 })
 </script>
