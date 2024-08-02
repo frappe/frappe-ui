@@ -179,7 +179,7 @@ watch(
     updatedEvent.to_time = newVal.to_time
     calendarEvent.value = newVal
   },
-  { deep: true }
+  { deep: true },
 )
 
 const eventIcons = config.eventIcons
@@ -203,7 +203,7 @@ const setEventStyles = computed(() => {
 
   let diff = calculateDiff(
     calendarEvent.value.from_time,
-    calendarEvent.value.to_time
+    calendarEvent.value.to_time,
   )
   let height = diff * minuteHeight
   if (height < heightThreshold) {
@@ -365,7 +365,7 @@ function getDate(date, nextDate = 0) {
   let newDate = new Date(
     date.getFullYear(),
     date.getMonth(),
-    date.getDate() + nextDate
+    date.getDate() + nextDate,
   )
   return newDate
 }
@@ -374,7 +374,7 @@ function handleHorizontalMovement(clientX, rect) {
   const currentDate = new Date(
     props.event.isFullDay
       ? eventRef.value.parentNode.parentNode.getAttribute('data-date-attr')
-      : eventRef.value.parentNode.getAttribute('data-date-attr')
+      : eventRef.value.parentNode.getAttribute('data-date-attr'),
   )
 
   if (props.event.isFullDay) {
@@ -422,11 +422,11 @@ function handleVerticalMovement(clientY, prevY, rect) {
 
   updatedEvent.from_time = convertMinutesToHours(
     calculateMinutes(calendarEvent.value.from_time) +
-      Math.round(diffY / minuteHeight)
+      Math.round(diffY / minuteHeight),
   )
   updatedEvent.to_time = convertMinutesToHours(
     calculateMinutes(calendarEvent.value.to_time) +
-      Math.round(diffY / minuteHeight)
+      Math.round(diffY / minuteHeight),
   )
   handleTimeConstraints()
 }
@@ -460,10 +460,11 @@ watch(
   () => opened.value,
   (newVal) => {
     if (newVal) {
+      if (!config.isEditMode) return
       if (!config.enableShortcuts) return
       document.addEventListener('keydown', handleDeleteShortcut, { once: true })
     }
-  }
+  },
 )
 
 let clickTimer = null
