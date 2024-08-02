@@ -59,6 +59,7 @@ export { default as Tooltip } from './components/Tooltip/Tooltip.vue'
 export { default as CommandPalette } from './components/CommandPalette/CommandPalette.vue'
 export { default as CommandPaletteItem } from './components/CommandPalette/CommandPaletteItem.vue'
 export { default as ListFilter } from './components/ListFilter/ListFilter.vue'
+export { default as Calendar } from './components/Calendar/Calendar.vue'
 export { default as NestedPopover } from './components/ListFilter/NestedPopover.vue'
 
 // directives
