@@ -94,5 +94,9 @@ export function frappeRequest(options) {
         throw e
       }
     },
+    transformError: (error) => {
+      options.onError && options.onError(error)
+      throw error
+    },
   })
 }
