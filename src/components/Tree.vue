@@ -6,25 +6,19 @@
   >
     <slot
       name="node"
-      :node="node"
-      :hasChildren="hasChildren"
-      :isCollapsed="isCollapsed"
-      :toggleCollapsed="toggleCollapsed"
+      v-bind="{ node, hasChildren, isCollapsed, toggleCollapsed }"
     >
       <slot
         v-if="$slots['icon']"
         name="icon"
-        :hasChildren="hasChildren"
-        :isCollapsed="isCollapsed"
+        v-bind="{ hasChildren, isCollapsed }"
       />
-      <FeatherIcon v-else-if="!isCollapsed" name="chevron-up" class="h-3.5" />
-      <FeatherIcon v-else-if="hasChildren" name="chevron-down" class="h-3.5" />
+      <FeatherIcon v-else-if="!isCollapsed" name="chevron-down" class="h-3.5" />
+      <FeatherIcon v-else-if="hasChildren" name="chevron-right" class="h-3.5" />
       <slot
         v-if="$slots['label']"
         name="label"
-        :node="node"
-        :hasChildren="hasChildren"
-        :isCollapsed="isCollapsed"
+        v-bind="{ node, hasChildren, isCollapsed }"
       />
       <div
         v-else
@@ -45,29 +39,17 @@
         <template #node="{ node, isCollapsed, hasChildren, toggleCollapsed }">
           <slot
             name="node"
-            :node="child"
-            :hasChildren="hasChildren"
-            :isCollapsed="isCollapsed"
-            :toggleCollapsed="toggleCollapsed"
+            v-bind="{ node, hasChildren, isCollapsed, toggleCollapsed }"
           />
         </template>
         <template v-if="$slots['icon']" #icon="{ isCollapsed, hasChildren }">
-          <slot
-            name="icon"
-            :hasChildren="hasChildren"
-            :isCollapsed="isCollapsed"
-          />
+          <slot name="icon" v-bind="{ hasChildren, isCollapsed }" />
         </template>
         <template
           v-if="$slots['label']"
           #label="{ node, hasChildren, isCollapsed }"
         >
-          <slot
-            name="label"
-            :node="node"
-            :hasChildren="hasChildren"
-            :isCollapsed="isCollapsed"
-          />
+          <slot name="label" v-bind="{ node, hasChildren, isCollapsed }" />
         </template>
       </Tree>
     </li>
