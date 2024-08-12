@@ -74,30 +74,49 @@
   </ul>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue'
 import FeatherIcon from './FeatherIcon.vue'
 
-const props = defineProps({
-  node: {
-    type: Object,
-    required: true,
-  },
-  lineHeight: {
-    type: String,
-    default: '20px',
-  },
-  indentWidth: {
-    type: String,
-    default: '20px',
-  },
+interface TreeNode {
+  label: string
+  children: TreeNode[]
+}
+
+interface TreeProps {
+  node: TreeNode
+  lineHeight?: string
+  indentWidth?: string
+}
+
+const props = withDefaults(defineProps<TreeProps>(), {
+  lineHeight: '20px',
+  indentWidth: '20px',
 })
+
+const slots = defineSlots<{
+  node: {
+    node: TreeNode
+    hasChildren: boolean
+    isCollapsed: boolean
+    toggleCollapsed: (event: MouseEvent) => void
+  }
+  icon: {
+    hasChildren: boolean
+    isCollapsed: boolean
+  }
+  label: {
+    node: TreeNode
+    hasChildren: boolean
+    isCollapsed: boolean
+  }
+}>()
 
 const isCollapsed = ref(true)
 
 const hasChildren = computed(() => props.node.children?.length > 0)
 
-const toggleCollapsed = (event) => {
+const toggleCollapsed = (event: MouseEvent) => {
   event.stopPropagation()
   if (hasChildren.value) isCollapsed.value = !isCollapsed.value
 }
