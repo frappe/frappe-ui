@@ -61,6 +61,7 @@ export { default as CommandPaletteItem } from './components/CommandPalette/Comma
 export { default as ListFilter } from './components/ListFilter/ListFilter.vue'
 export { default as Calendar } from './components/Calendar/Calendar.vue'
 export { default as NestedPopover } from './components/ListFilter/NestedPopover.vue'
+export { default as CircularProgressBar } from './components/CircularProgressBar.vue'
 
 // directives
 export { default as onOutsideClickDirective } from './directives/onOutsideClick.js'
