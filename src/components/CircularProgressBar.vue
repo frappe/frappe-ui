@@ -18,47 +18,30 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-const props = defineProps({
-  step: {
-    type: Number,
-    required: true,
-  },
-  totalSteps: {
-    type: Number,
-    required: true,
-  },
-  ringSize: {
-    type: Number,
-    default: 42,
-  },
-  ringBarWidth: {
-    type: Number,
-    default: 10,
-  },
-  progressColor: {
-    type: String,
-    default: '#333',
-  },
-  progressRemainingColor: {
-    type: String,
-    default: '#888',
-  },
-  progressCompleteColor: {
-    type: String,
-    default: '#76f7be',
-  },
-  innerTextFontSize: {
-    type: Number,
-    default: 16,
-  },
-  isOuterCircleFilledOnComplete: {
-    type: Boolean,
-    default: false,
-  },
-  showPercentage: {
-    type: Boolean,
-    default: false,
-  },
+interface Props {
+  step: number
+  totalSteps: number
+  ringSize: string
+  ringBarWidth: string
+  innerTextFontSize: string
+  progressColor: string
+  progressRemainingColor: string
+  progressCompleteColor: string
+  isOuterCircleFilledOnComplete: boolean
+  showPercentage: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  step: 1,
+  totalSteps: 4,
+  ringSize: '42px',
+  ringBarWidth: '10px',
+  innerTextFontSize: '16px',
+  progressColor: '#333',
+  progressRemainingColor: '#888',
+  progressCompleteColor: '#76f7be',
+  isOuterCircleFilledOnComplete: false,
+  showPercentage: false,
 })
 
 const progress = computed(() => (props.step / props.totalSteps) * 100)
@@ -72,12 +55,12 @@ const isCompleted = computed(() => props.step === props.totalSteps)
   initial-value: 0%;
 }
 .progressbar {
-  --size: v-bind($props.ringSize + 'px');
-  --bar-width: v-bind($props.ringBarWidth + 'px');
+  --size: v-bind($props.ringSize);
+  --bar-width: v-bind($props.ringBarWidth);
+  --font-size: v-bind($props.innerTextFontSize);
   --color-incomplete: v-bind($props.progressColor);
   --color-remaining-circle: v-bind($props.progressRemainingColor);
   --color-complete: v-bind($props.progressCompleteColor);
-  --font-size: v-bind($props.innerTextFontSize + 'px');
 
   width: var(--size);
   height: var(--size);
