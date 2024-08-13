@@ -4,7 +4,7 @@
     :show="open"
     @after-leave="$emit('after-leave')"
   >
-    <HDialog as="div" class="fixed inset-0 z-10 overflow-y-auto" @close="close">
+    <HDialog as="div" class="fixed inset-0 z-50 overflow-y-auto" @close="close">
       <div
         class="flex min-h-screen flex-col items-center px-4 py-4 text-center"
         :class="dialogPositionClasses"
