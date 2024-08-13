@@ -28,7 +28,7 @@
           height: rowHeight,
           gridTemplateColumns: getGridTemplateColumns(
             list.columns,
-            list.options.selectable
+            list.options.selectable,
           ),
         }"
       >
