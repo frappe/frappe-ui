@@ -29,7 +29,7 @@ export default function useEventModal() {
 
     let to_time = convertMinutesToHours(calculateMinutes(from_time) + 60).slice(
       0,
-      -3
+      -3,
     )
 
     newEvent.from_time = from_time

@@ -2,7 +2,7 @@
 
 ### events
 
-`events` is an array of objects, where each object consists of a single event. 
+`events` is an array of objects, where each object consists of a single event.
 By default the value of events props is an empty array `[]`
 
 A single event can be of 2 types
@@ -26,8 +26,8 @@ Event object looks like:
 - `id` should be unique for each event.
 
 - `fromDate` and `toDate` should be in the above format or can be a date object.
-  Currently Single date event is created and it is taken from fromDate.
-  In future multiple day events will also be introduced.
+  Currently Single date event is created and it is taken from fromDate. In
+  future multiple day events will also be introduced.
 
 - `color` can be from a list of
 
@@ -82,17 +82,17 @@ The object for this kind of event looks like:
 
 - `isEditMode`: This is a boolean value which is used to enable or disable the
   edit mode. The default value is false. So by default the calendar is in
-  read-only mode. If it is set to true then the user can 
-  perform actions like adding, editing, and deleting the events.
+  read-only mode. If it is set to true then the user can perform actions like
+  adding, editing, and deleting the events.
 
 - `eventIcons`: This is an object which consists of the icons which are to be
   displayed for the events. The default value is an empty object. This objects
   changes the icon of the event on the basis of the type of event. If the type
   of event is not present in the object then the default icon will be displayed.
   `type_of_event` property can be set in the event object to display the icon.
-  The icon of the event will be taken from this object. So if your event has an event type
-  of  "Call" then the icon will be taken from this object.
-  The object should be in the following format:
+  The icon of the event will be taken from this object. So if your event has an
+  event type of "Call" then the icon will be taken from this object. The object
+  should be in the following format:
 
       {
       	'type_of_event1': 'icon_component1',
@@ -149,7 +149,8 @@ e.g.
     	:delete="(eventID) => console.log('deleteEvent', eventID)"
     />
 
-In these functions, you can set up your API calls to create, update, and delete events.
+In these functions, you can set up your API calls to create, update, and delete
+events.
 
 ## Calendar Click Events
 

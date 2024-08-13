@@ -95,10 +95,10 @@ const props = defineProps({
   },
 })
 const timedEvents = computed(
-  () => useCalendarData(props.events).timedEvents.value
+  () => useCalendarData(props.events).timedEvents.value,
 )
 const fullDayEvents = computed(
-  () => useCalendarData(props.events).fullDayEvents.value
+  () => useCalendarData(props.events).fullDayEvents.value,
 )
 const gridRef = ref(null)
 const hourHeight = props.config.hourHeight
