@@ -49,11 +49,6 @@ const isCompleted = computed(() => props.step === props.totalSteps)
 </script>
 
 <style scoped>
-@property --progress-animation {
-  syntax: '<length-percentage>';
-  inherits: false;
-  initial-value: 0%;
-}
 .progressbar {
   --size: v-bind($props.ringSize);
   --bar-width: v-bind($props.ringBarWidth);
@@ -61,6 +56,7 @@ const isCompleted = computed(() => props.step === props.totalSteps)
   --color-incomplete: v-bind($props.progressColor);
   --color-remaining-circle: v-bind($props.progressRemainingColor);
   --color-complete: v-bind($props.progressCompleteColor);
+  --progress: v-bind(progress + '%');
 
   width: var(--size);
   height: var(--size);
@@ -70,7 +66,11 @@ const isCompleted = computed(() => props.step === props.totalSteps)
 
   position: relative;
   font-size: var(--font-size);
-  transition: --progress-animation 500ms linear !important;
+}
+@property --progress {
+  syntax: '<length-percentage>';
+  inherits: true;
+  initial-value: 80%;
 }
 
 .progressbar::before {
@@ -79,11 +79,11 @@ const isCompleted = computed(() => props.step === props.totalSteps)
   inset: 0;
   border-radius: inherit;
   background: conic-gradient(
-    var(--color-incomplete) v-bind(progress + '%'),
+    var(--color-incomplete) var(--progress),
     var(--color-remaining-circle) 0%
   );
-  transition: --progress-animation 500ms linear !important;
-  aspect-ratio: 1;
+  transition: --progress 500ms linear !important;
+  aspect-ratio: 1 / 1;
   align-self: center;
 }
 
@@ -95,7 +95,6 @@ const isCompleted = computed(() => props.step === props.totalSteps)
   z-index: 1;
   width: calc(100% - var(--bar-width));
   aspect-ratio: 1 / 1;
-  transition: --progress-animation 500ms linear !important;
 }
 
 .progressbar > div {
@@ -105,11 +104,9 @@ const isCompleted = computed(() => props.step === props.totalSteps)
 
 .progressbar.completed:not(.fillOuter):after {
   background: var(--color-complete);
-  transition: --progress-animation 500ms linear !important;
 }
 .progressbar.completed.fillOuter::before {
   background: var(--color-complete);
-  transition: --progress-animation 500ms linear !important;
 }
 
 .check-icon {
