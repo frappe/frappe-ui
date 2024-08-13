@@ -70,7 +70,7 @@ const isCompleted = computed(() => props.step === props.totalSteps)
 @property --progress {
   syntax: '<length-percentage>';
   inherits: true;
-  initial-value: 80%;
+  initial-value: 0%;
 }
 
 .progressbar::before {
@@ -82,7 +82,7 @@ const isCompleted = computed(() => props.step === props.totalSteps)
     var(--color-incomplete) var(--progress),
     var(--color-remaining-circle) 0%
   );
-  transition: --progress 500ms linear !important;
+  transition: --progress 500ms linear;
   aspect-ratio: 1 / 1;
   align-self: center;
 }
@@ -102,7 +102,7 @@ const isCompleted = computed(() => props.step === props.totalSteps)
   position: relative;
 }
 
-.progressbar.completed:not(.fillOuter):after {
+.progressbar.completed:not(.fillOuter)::after {
   background: var(--color-complete);
 }
 .progressbar.completed.fillOuter::before {
