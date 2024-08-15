@@ -2,7 +2,7 @@
   <!-- Current Tree Node -->
   <div
     class="flex items-center cursor-pointer gap-1"
-    :style="{ height: rowHeight }"
+    :style="{ height: options.rowHeight }"
     @click="(event) => toggleCollapsed(event)"
   >
     <!-- Slot to completely override the Tree Node -->
@@ -50,16 +50,11 @@
     <div
       :style="{ paddingLeft: linePadding }"
       class="border-r"
-      v-if="showLines"
+      v-if="options.showLines"
     ></div>
-    <ul class="w-full" :style="{ paddingLeft: indentWidth }">
+    <ul class="w-full" :style="{ paddingLeft: options.indentWidth }">
       <li v-for="(child, index) in node.children" :key="index">
-        <Tree
-          :node="child"
-          :rowHeight="rowHeight"
-          :indentWidth="indentWidth"
-          :showLines="showLines"
-        >
+        <Tree :node="child" :options="options">
           <!-- Pass the parent slots to the children of current node -->
           <template #node="{ node, hasChildren, isCollapsed, toggleCollapsed }">
             <slot
@@ -87,23 +82,21 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import FeatherIcon from '../FeatherIcon.vue'
+import type { TreeNode, TreeOptions } from '../types/Tree'
 
-interface TreeNode {
-  label: string
-  children: TreeNode[]
-}
-
-interface TreeProps {
-  node: TreeNode
-  rowHeight?: string
-  indentWidth?: string
-  showLines?: boolean
-}
-
-const props = withDefaults(defineProps<TreeProps>(), {
-  rowHeight: '25px',
-  indentWidth: '20px',
-})
+const props = withDefaults(
+  defineProps<{
+    node: TreeNode
+    options?: TreeOptions
+  }>(),
+  {
+    options: () => ({
+      rowHeight: '25px',
+      indentWidth: '20px',
+      showLines: true,
+    }),
+  },
+)
 
 const slots = defineSlots<{
   node: {
@@ -137,7 +130,7 @@ const toggleCollapsed = (event: MouseEvent) => {
 }
 
 onMounted(() => {
-  if (iconRef.value?.offsetWidth) {
+  if (iconRef.value?.clientWidth) {
     // Set the padding for the LHS line to align with the center of icon
     linePadding.value = iconRef.value.offsetWidth / 2 + 'px'
   }
