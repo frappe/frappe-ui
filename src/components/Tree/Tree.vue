@@ -61,14 +61,14 @@
           :showLines="showLines"
         >
           <!-- Pass the parent slots to the children of current node -->
-          <template #node="{ node, isCollapsed, hasChildren, toggleCollapsed }">
+          <template #node="{ node, hasChildren, isCollapsed, toggleCollapsed }">
             <slot
               name="node"
               v-bind="{ node, hasChildren, isCollapsed, toggleCollapsed }"
             />
           </template>
 
-          <template v-if="$slots['icon']" #icon="{ isCollapsed, hasChildren }">
+          <template v-if="$slots['icon']" #icon="{ hasChildren, isCollapsed }">
             <slot name="icon" v-bind="{ hasChildren, isCollapsed }" />
           </template>
 
@@ -86,7 +86,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import FeatherIcon from './FeatherIcon.vue'
+import FeatherIcon from '../FeatherIcon.vue'
 
 interface TreeNode {
   label: string
