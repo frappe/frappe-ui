@@ -1,17 +1,16 @@
 <template>
   <!-- Current Tree Node -->
-  <div
-    class="flex items-center cursor-pointer gap-1"
-    :style="{ height: options.rowHeight }"
-    @click="(event) => toggleCollapsed(event)"
+  <slot
+    name="node"
+    v-bind="{ node, hasChildren, isCollapsed, toggleCollapsed }"
   >
-    <!-- Slot to completely override the Tree Node -->
-    <slot
-      name="node"
-      v-bind="{ node, hasChildren, isCollapsed, toggleCollapsed }"
+    <div
+      class="flex items-center cursor-pointer gap-1"
+      :style="{ height: options.rowHeight }"
+      @click="toggleCollapsed"
     >
       <div ref="iconRef">
-        <!-- Slot to only override the Icon -->
+        <!-- slot to only override the Icon -->
         <slot
           v-if="$slots['icon']"
           name="icon"
@@ -29,7 +28,7 @@
         />
       </div>
 
-      <!-- Slot to only override the label -->
+      <!-- slot to only override the label -->
       <slot
         v-if="$slots['label']"
         name="label"
@@ -42,8 +41,8 @@
       >
         {{ node.label }}
       </div>
-    </slot>
-  </div>
+    </div>
+  </slot>
 
   <!-- Recursively render the children -->
   <div v-if="hasChildren && !isCollapsed" class="flex">
@@ -130,9 +129,8 @@ const toggleCollapsed = (event: MouseEvent) => {
 }
 
 onMounted(() => {
-  if (iconRef.value?.clientWidth) {
+  if (iconRef.value?.clientWidth)
     // Set the padding for the LHS line to align with the center of icon
-    linePadding.value = iconRef.value.offsetWidth / 2 + 'px'
-  }
+    linePadding.value = iconRef.value.clientWidth / 2 + 'px'
 })
 </script>
