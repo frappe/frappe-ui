@@ -4,7 +4,7 @@
     role="progressbar"
     :class="{
       completed: isCompleted,
-      fillOuter: isOuterCircleFilledOnComplete,
+      fillOuter: variant === 'outline',
     }"
   >
     <div v-if="!isCompleted">
@@ -21,28 +21,104 @@ import { computed } from 'vue'
 interface Props {
   step: number
   totalSteps: number
-  ringSize?: string
-  ringBarWidth?: string
-  innerTextFontSize?: string
-  progressColor?: string
-  progressRemainingColor?: string
-  progressCompleteColor?: string
-  isOuterCircleFilledOnComplete?: boolean
   showPercentage?: boolean
+  size?: Size
+  theme?: string | ThemeProps
+  variant?: Variant
+  // allow primary, secondary, etc.
+  progressCompleteColor?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
   step: 1,
   totalSteps: 4,
-  ringSize: '42px',
-  ringBarWidth: '10px',
-  innerTextFontSize: '16px',
-  progressColor: '#333',
-  progressRemainingColor: '#888',
-  progressCompleteColor: '#76f7be',
-  isOuterCircleFilledOnComplete: false,
   showPercentage: false,
+  theme: 'black',
+  size: 'md',
+  progressCompleteColor: '#76f7be',
+  variant: 'solid',
 })
+
+type Size = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+interface SizeProps {
+  ringSize: string
+  ringBarWidth: string
+  innerTextFontSize: string
+}
+
+// predefined sizes for the circular progress bar
+const sizeMap: Record<Size, SizeProps> = {
+  xs: {
+    ringSize: '30px',
+    ringBarWidth: '6px',
+    innerTextFontSize: props.showPercentage ? '8px' : '12px',
+  },
+  sm: {
+    ringSize: '42px',
+    ringBarWidth: '10px',
+    innerTextFontSize: props.showPercentage ? '12px' : '16px',
+  },
+  md: {
+    ringSize: '60px',
+    ringBarWidth: '14px',
+    innerTextFontSize: props.showPercentage ? '16px' : '20px',
+  },
+  lg: {
+    ringSize: '84px',
+    ringBarWidth: '18px',
+    innerTextFontSize: props.showPercentage ? '20px' : '24px',
+  },
+  xl: {
+    ringSize: '108px',
+    ringBarWidth: '22px',
+    innerTextFontSize: props.showPercentage ? '24px' : '28px',
+  },
+}
+
+const size = computed(() => sizeMap[props.size] || sizeMap['md'])
+
+type Theme = 'black' | 'red' | 'green' | 'blue' | 'purple' | 'pink' | 'orange'
+interface ThemeProps {
+  primary: string
+  secondary: string
+}
+// predefined themes for the circular progress bar
+const themeMap: Record<Theme, ThemeProps> = {
+  black: {
+    primary: '#333',
+    secondary: '#888',
+  },
+  red: {
+    primary: '#FF0000',
+    secondary: '#FFD7D7',
+  },
+  green: {
+    primary: '#22C55E',
+    secondary: '#b1ffda',
+  },
+  blue: {
+    primary: '#2376f5',
+    secondary: '#D7D7FF',
+  },
+  purple: {
+    primary: '#FF00FF',
+    secondary: '#FFD7FF',
+  },
+  pink: {
+    primary: '#FF69B4',
+    secondary: '#FFD1DC',
+  },
+  orange: {
+    primary: '#FFA500',
+    secondary: '#FFE5CC',
+  },
+}
+
+const theme = computed(
+  () => themeMap[props.theme as Theme] || (props.theme as ThemeProps),
+)
+
+type Variant = 'solid' | 'outline'
 
 const progress = computed(() => (props.step / props.totalSteps) * 100)
 const isCompleted = computed(() => props.step === props.totalSteps)
@@ -50,11 +126,11 @@ const isCompleted = computed(() => props.step === props.totalSteps)
 
 <style scoped>
 .progressbar {
-  --size: v-bind($props.ringSize);
-  --bar-width: v-bind($props.ringBarWidth);
-  --font-size: v-bind($props.innerTextFontSize);
-  --color-incomplete: v-bind($props.progressColor);
-  --color-remaining-circle: v-bind($props.progressRemainingColor);
+  --size: v-bind(size.ringSize);
+  --bar-width: v-bind(size.ringBarWidth);
+  --font-size: v-bind(size.innerTextFontSize);
+  --color-progress: v-bind(theme.primary);
+  --color-remaining-circle: v-bind(theme.secondary);
   --color-complete: v-bind($props.progressCompleteColor);
   --progress: v-bind(progress + '%');
 
@@ -79,7 +155,7 @@ const isCompleted = computed(() => props.step === props.totalSteps)
   inset: 0;
   border-radius: inherit;
   background: conic-gradient(
-    var(--color-incomplete) var(--progress),
+    var(--color-progress) var(--progress),
     var(--color-remaining-circle) 0%
   );
   transition: --progress 500ms linear;

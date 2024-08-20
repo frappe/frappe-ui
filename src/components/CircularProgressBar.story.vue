@@ -5,13 +5,30 @@
         <CircularProgressBar :step="1" :totalSteps="4" />
       </div>
     </Variant>
-    <Variant title="Progress Different Color">
+    <Variant title="Size">
+      <div class="p-2 w-full h-full">
+        <CircularProgressBar
+          :step="1"
+          :totalSteps="4"
+          size="lg"
+          :showPercentage="true"
+        />
+      </div>
+    </Variant>
+    <Variant title="Theme">
+      <div class="p-2 w-full h-full">
+        <CircularProgressBar :step="3" :totalSteps="4" theme="orange" />
+      </div>
+    </Variant>
+    <Variant title="Custom Theme">
       <div class="p-2 w-full h-full">
         <CircularProgressBar
           :step="3"
           :totalSteps="4"
-          progressColor=" #123abc"
-          progressRemainingColor="#75ed6b"
+          :theme="{
+            primary: '#2376f5',
+            secondary: '#ddd5d5',
+          }"
         />
       </div>
     </Variant>
@@ -20,8 +37,8 @@
         <CircularProgressBar
           :step="9"
           :totalSteps="9"
-          progressCompleteColor="#f7b6f7"
-          :isOuterCircleFilledOnComplete="false"
+          progressCompleteColor="lightgreen"
+          variant="solid"
         />
       </div>
     </Variant>
@@ -30,8 +47,8 @@
         <CircularProgressBar
           :step="9"
           :totalSteps="9"
-          progressCompleteColor="#f7b6f7"
-          :isOuterCircleFilledOnComplete="true"
+          variant="outline"
+          progressCompleteColor="lightgreen"
         />
       </div>
     </Variant>
