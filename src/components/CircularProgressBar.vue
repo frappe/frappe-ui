@@ -21,14 +21,14 @@ import { computed } from 'vue'
 interface Props {
   step: number
   totalSteps: number
-  ringSize: string
-  ringBarWidth: string
-  innerTextFontSize: string
-  progressColor: string
-  progressRemainingColor: string
-  progressCompleteColor: string
-  isOuterCircleFilledOnComplete: boolean
-  showPercentage: boolean
+  ringSize?: string
+  ringBarWidth?: string
+  innerTextFontSize?: string
+  progressColor?: string
+  progressRemainingColor?: string
+  progressCompleteColor?: string
+  isOuterCircleFilledOnComplete?: boolean
+  showPercentage?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
