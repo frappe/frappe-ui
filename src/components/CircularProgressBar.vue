@@ -22,10 +22,9 @@ interface Props {
   step: number
   totalSteps: number
   showPercentage?: boolean
-  size?: Size
-  theme?: string | ThemeProps
   variant?: Variant
-  // allow primary, secondary, etc.
+  theme?: string | ThemeProps
+  size?: Size
   progressCompleteColor?: string
 }
 
@@ -38,6 +37,8 @@ const props = withDefaults(defineProps<Props>(), {
   progressCompleteColor: '#76f7be',
   variant: 'solid',
 })
+
+type Variant = 'solid' | 'outline'
 
 type Size = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 interface SizeProps {
@@ -77,7 +78,7 @@ const sizeMap: Record<Size, SizeProps> = {
 
 const size = computed(() => sizeMap[props.size] || sizeMap['md'])
 
-type Theme = 'black' | 'red' | 'green' | 'blue' | 'purple' | 'pink' | 'orange'
+type Theme = 'black' | 'red' | 'green' | 'blue' | 'orange'
 interface ThemeProps {
   primary: string
   secondary: string
@@ -100,25 +101,18 @@ const themeMap: Record<Theme, ThemeProps> = {
     primary: '#2376f5',
     secondary: '#D7D7FF',
   },
-  purple: {
-    primary: '#FF00FF',
-    secondary: '#FFD7FF',
-  },
-  pink: {
-    primary: '#FF69B4',
-    secondary: '#FFD1DC',
-  },
   orange: {
     primary: '#FFA500',
     secondary: '#FFE5CC',
   },
 }
 
-const theme = computed(
-  () => themeMap[props.theme as Theme] || (props.theme as ThemeProps),
-)
-
-type Variant = 'solid' | 'outline'
+const theme = computed(() => {
+  if (typeof props.theme === 'string') {
+    return themeMap[props.theme as Theme] || themeMap['black']
+  }
+  return props.theme
+})
 
 const progress = computed(() => (props.step / props.totalSteps) * 100)
 const isCompleted = computed(() => props.step === props.totalSteps)
