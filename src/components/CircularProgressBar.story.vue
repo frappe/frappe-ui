@@ -37,8 +37,8 @@
         <CircularProgressBar
           :step="9"
           :totalSteps="9"
-          progressCompleteColor="lightgreen"
           variant="solid"
+          progressCompleteColor="lightgreen"
         />
       </div>
     </Variant>
