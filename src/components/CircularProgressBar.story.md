@@ -16,12 +16,6 @@ If true, the percentage of the progress will be shown in the center of the circl
 The size of the progress bar. Default value is 'md'.
 Available options are 'xs', 'sm', 'md', 'lg', 'xl'.
 
-### variant
-The variant of the progress bar. Default value is 'solid'. 
-Available options are 'solid', 'outline'.
-
-When the variant is 'solid', the progress bar will be filled with the progress color. When the variant is 'outline', the progress bar will be an outline with the progress color.
-
 ### theme
 The theme of the progress bar. Default value is 'black'.
 Available options are 'black', 'red', 'green', 'blue', 'orange'.
@@ -29,5 +23,11 @@ Available options are 'black', 'red', 'green', 'blue', 'orange'.
 If a string is passed, the predefined theme will be used, and if the color does not match any predefined theme, the default theme will be used.
 If a custom theme is needed, an object with primary and secondary colors can be passed.
 
-### progressCompleteColor
+### themeComplete
 The color of the completed progress. Default value is #76f7be (light green).
+
+### variant
+The variant of the progress bar. Default value is 'solid'. 
+Available options are 'solid', 'outline'.
+
+When the variant is 'solid', the progress bar on complete will be filled with the progress color. When the variant is 'outline', the progress bar on complete will be an outline with the progress color.

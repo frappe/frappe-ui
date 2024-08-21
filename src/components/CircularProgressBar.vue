@@ -11,7 +11,7 @@
       <p v-if="!showPercentage">{{ step }}</p>
       <p v-else>{{ progress.toFixed(0) }}%</p>
     </div>
-    <div v-else class="check-icon"></div>
+    <div v-else class="check-icon" />
   </div>
 </template>
 
@@ -25,7 +25,7 @@ interface Props {
   variant?: Variant
   theme?: string | ThemeProps
   size?: Size
-  progressCompleteColor?: string
+  themeComplete?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -34,7 +34,7 @@ const props = withDefaults(defineProps<Props>(), {
   showPercentage: false,
   theme: 'black',
   size: 'md',
-  progressCompleteColor: '#76f7be',
+  themeComplete: 'lightgreen',
   variant: 'solid',
 })
 
@@ -125,7 +125,7 @@ const isCompleted = computed(() => props.step === props.totalSteps)
   --font-size: v-bind(size.innerTextFontSize);
   --color-progress: v-bind(theme.primary);
   --color-remaining-circle: v-bind(theme.secondary);
-  --color-complete: v-bind($props.progressCompleteColor);
+  --color-complete: v-bind($props.themeComplete);
   --progress: v-bind(progress + '%');
 
   width: var(--size);

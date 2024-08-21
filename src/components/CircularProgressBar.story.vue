@@ -23,8 +23,8 @@
     <Variant title="Custom Theme">
       <div class="p-2 w-full h-full">
         <CircularProgressBar
-          :step="3"
-          :totalSteps="4"
+          :step="2"
+          :totalSteps="6"
           :theme="{
             primary: '#2376f5',
             secondary: '#ddd5d5',
@@ -32,23 +32,23 @@
         />
       </div>
     </Variant>
-    <Variant title="Progress Complete Fill Color Inside">
+    <Variant title="Solid Variant">
       <div class="p-2 w-full h-full">
         <CircularProgressBar
           :step="9"
           :totalSteps="9"
           variant="solid"
-          progressCompleteColor="lightgreen"
+          themeComplete="lightgreen"
         />
       </div>
     </Variant>
-    <Variant title="Progress Complete Fill Color Outside">
+    <Variant title="Outline Variant">
       <div class="p-2 w-full h-full">
         <CircularProgressBar
           :step="9"
           :totalSteps="9"
           variant="outline"
-          progressCompleteColor="lightgreen"
+          themeComplete="lightgreen"
         />
       </div>
     </Variant>
