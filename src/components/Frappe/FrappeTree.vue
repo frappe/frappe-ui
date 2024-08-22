@@ -14,7 +14,7 @@
 <script setup lang="ts">
 import { ref, onBeforeMount } from 'vue'
 import { createResource } from '../../resources'
-import Tree from './Tree.vue'
+import Tree from '../Tree/Tree.vue'
 import type { TreeNode, TreeOptions } from '../types/Tree'
 
 const props = defineProps<{
