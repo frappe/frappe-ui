@@ -11,36 +11,22 @@
     >
       <div ref="iconRef">
         <!-- slot to only override the Icon -->
-        <slot
-          v-if="$slots['icon']"
-          name="icon"
-          v-bind="{ hasChildren, isCollapsed }"
-        />
-        <FeatherIcon
-          v-else-if="hasChildren && !isCollapsed"
-          name="chevron-down"
-          class="h-3.5"
-        />
-        <FeatherIcon
-          v-else-if="hasChildren"
-          name="chevron-right"
-          class="h-3.5"
-        />
+        <slot name="icon" v-bind="{ hasChildren, isCollapsed }">
+          <FeatherIcon v-if="!isCollapsed" name="chevron-down" class="h-3.5" />
+          <FeatherIcon
+            v-else-if="hasChildren"
+            name="chevron-right"
+            class="h-3.5"
+          />
+        </slot>
       </div>
 
       <!-- slot to only override the label -->
-      <slot
-        v-if="$slots['label']"
-        name="label"
-        v-bind="{ node, hasChildren, isCollapsed }"
-      />
-      <div
-        v-else
-        class="text-base truncate"
-        :class="!hasChildren ? 'pl-3.5' : ''"
-      >
-        {{ node.label }}
-      </div>
+      <slot name="label" v-bind="{ node, hasChildren, isCollapsed }">
+        <div class="text-base truncate" :class="hasChildren ? '' : 'pl-3.5'">
+          {{ node.label }}
+        </div>
+      </slot>
     </div>
   </slot>
 
@@ -49,11 +35,11 @@
     <div
       :style="{ paddingLeft: linePadding }"
       class="border-r"
-      v-if="options.showLines"
+      v-if="options.showLevelMarkers"
     ></div>
     <ul class="w-full" :style="{ paddingLeft: options.indentWidth }">
-      <li v-for="(child, index) in node.children" :key="index">
-        <Tree :node="child" :options="options">
+      <li v-for="child in node.children" :key="child[nodeKey]">
+        <Tree :node="child" :nodeKey="nodeKey" :options="options">
           <!-- Pass the parent slots to the children of current node -->
           <template #node="{ node, hasChildren, isCollapsed, toggleCollapsed }">
             <slot
@@ -62,14 +48,11 @@
             />
           </template>
 
-          <template v-if="$slots['icon']" #icon="{ hasChildren, isCollapsed }">
+          <template #icon="{ hasChildren, isCollapsed }">
             <slot name="icon" v-bind="{ hasChildren, isCollapsed }" />
           </template>
 
-          <template
-            v-if="$slots['label']"
-            #label="{ node, hasChildren, isCollapsed }"
-          >
+          <template #label="{ node, hasChildren, isCollapsed }">
             <slot name="label" v-bind="{ node, hasChildren, isCollapsed }" />
           </template>
         </Tree>
@@ -86,13 +69,14 @@ import type { TreeNode, TreeOptions } from '../types/Tree'
 const props = withDefaults(
   defineProps<{
     node: TreeNode
+    nodeKey: string
     options?: TreeOptions
   }>(),
   {
     options: () => ({
       rowHeight: '25px',
       indentWidth: '20px',
-      showLines: true,
+      showLevelMarkers: true,
     }),
   },
 )
@@ -117,9 +101,9 @@ const slots = defineSlots<{
 
 const isCollapsed = ref(true)
 
-const hasChildren = computed(() => props.node.children?.length > 0)
-
 const linePadding = ref('')
+
+const hasChildren = computed(() => props.node.children?.length > 0)
 
 const iconRef = ref<HTMLElement | null>(null)
 

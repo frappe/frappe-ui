@@ -1,6 +1,6 @@
 <template>
   <div v-if="treeNodes">
-    <Tree :node="treeNodes" :options="options">
+    <Tree :node="treeNodes" nodeKey="name" :options="options">
       <template #node="{ node, hasChildren, isCollapsed, toggleCollapsed }">
         <slot
           name="node"
@@ -22,6 +22,14 @@ const props = defineProps<{
   options?: TreeOptions
 }>()
 
+type TreeData = {
+  parent: string
+  data: {
+    value: string
+    title: string
+  }[]
+}
+
 const treeNodes = ref<TreeNode>()
 
 const allChildren = createResource({
@@ -35,19 +43,33 @@ const allChildren = createResource({
   }),
 })
 
-const buildNestedTree = (node: string): TreeNode => {
-  const rootData = allChildren.data.find((child: any) => child.parent == node)
-  const children = rootData.data || []
-  if (!children.length) return { label: node, children: [] }
+const buildNestedTree = (
+  node = props.doctype,
+  label = props.doctype,
+): TreeNode => {
+  const rootData = (allChildren.data as TreeData[]).find(
+    (child) => child.parent == node,
+  )
+  const children = rootData?.data || []
+  if (!children.length) {
+    return {
+      name: node,
+      label: label,
+      children: [],
+    }
+  }
   return {
-    label: node,
+    name: node,
+    label: label,
     // build sub-tree for each child
-    children: children.map((child: any) => buildNestedTree(child.title)),
+    children: children.map((child) =>
+      buildNestedTree(child.value, child.title),
+    ),
   }
 }
 
 onBeforeMount(async () => {
   await allChildren.fetch()
-  treeNodes.value = buildNestedTree(props.doctype)
+  treeNodes.value = buildNestedTree()
 })
 </script>

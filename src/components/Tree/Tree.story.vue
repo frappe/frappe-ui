@@ -3,7 +3,7 @@
     <Variant title="default">
       <Tree
         :options="{
-          showLines: state.showLines,
+          showLevelMarkers: state.showLevelMarkers,
           rowHeight: state.rowHeight,
           indentWidth: state.indentWidth,
         }"
@@ -11,7 +11,7 @@
       />
     </Variant>
     <template #controls>
-      <HstCheckbox v-model="state.showLines" title="Show Lines" />
+      <HstCheckbox v-model="state.showLevelMarkers" title="Show Lines" />
       <HstText v-model="state.rowHeight" title="Row Height" />
       <HstText v-model="state.indentWidth" title="Indent Width" />
     </template>
@@ -23,7 +23,7 @@ import { reactive } from 'vue'
 import Tree from './Tree.vue'
 
 const state = reactive({
-  showLines: true,
+  showLevelMarkers: true,
   rowHeight: '25px',
   indentWidth: '15px',
   node: {

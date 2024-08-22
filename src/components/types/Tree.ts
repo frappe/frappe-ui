@@ -1,10 +1,12 @@
 export type TreeNode = {
   label: string
   children: TreeNode[]
+  // added TreeNode[] due to enforcement that dynamic key types should accommodate all static key types
+  [nodeKey: string]: string | number | TreeNode[]
 }
 
 export type TreeOptions = {
   rowHeight?: string
   indentWidth?: string
-  showLines?: boolean
+  showLevelMarkers?: boolean
 }
