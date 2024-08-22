@@ -45,14 +45,14 @@ export function getCalendarDates(month, year) {
     startIndex,
     counter,
     stepper = 1,
-    getNextMonthDates = false
+    getNextMonthDates = false,
   ) {
     let allDates = []
     for (let index = startIndex; index < counter; index++) {
       let tempDate = new Date(
         date.getFullYear(),
         getNextMonthDates ? date.getMonth() + 1 : date.getMonth(),
-        index * stepper
+        index * stepper,
       )
       allDates.push(tempDate)
     }
@@ -108,7 +108,7 @@ export function parseDateEventPopupFormat(
   date,
   showDay = true,
   showMonth = true,
-  weekDay = 'short'
+  weekDay = 'short',
 ) {
   const options = {
     day: 'numeric',
@@ -152,7 +152,7 @@ export function findOverlappingEventsCount(events) {
 
   for (const event of events) {
     const availableHall = result.find(
-      (hall) => hall[hall.length - 1].endTime <= event.startTime
+      (hall) => hall[hall.length - 1].endTime <= event.startTime,
     )
 
     if (availableHall) {
@@ -170,7 +170,7 @@ export function findOverlappingEventsCount(events) {
         ...event,
         hallNumber: idx,
         idx: eventIdx,
-      }))
+      })),
     )
     .flat()
 }

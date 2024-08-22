@@ -107,11 +107,11 @@ const props = defineProps({
 const emit = defineEmits(['setCurrentDate'])
 
 const timedEvents = computed(
-  () => useCalendarData(props.events, 'Month').timedEvents.value
+  () => useCalendarData(props.events, 'Month').timedEvents.value,
 )
 
 const maxEventsInCell = computed(() =>
-  props.currentMonthDates.length > 35 ? 1 : 2
+  props.currentMonthDates.length > 35 ? 1 : 2,
 )
 
 function currentMonthDate(date) {

@@ -46,8 +46,8 @@ function sortMonthlyEvents(events) {
           ? 1
           : -1
         : calculateMinutes(a.to_time) > calculateMinutes(b.to_time)
-        ? 1
-        : -1
+          ? 1
+          : -1,
     )
   // full day events should be at the top in month view
   return [...fullDayEvents, ...timedEvents]

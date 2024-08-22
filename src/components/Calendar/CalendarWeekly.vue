@@ -151,10 +151,10 @@ const hourHeight = props.config.hourHeight
 const minuteHeight = hourHeight / 60
 
 const timedEvents = computed(
-  () => useCalendarData(props.events).timedEvents.value
+  () => useCalendarData(props.events).timedEvents.value,
 )
 const fullDayEvents = computed(
-  () => useCalendarData(props.events).fullDayEvents.value
+  () => useCalendarData(props.events).fullDayEvents.value,
 )
 
 const isToday = (date) =>
@@ -188,7 +188,7 @@ function getFullDayEventsCount(eventsObject) {
 function setFullDayEventsHeight(eventsObject, weeklyDates) {
   let currentWeekEvents = getFullDayEventsInCurrentWeek(
     eventsObject,
-    weeklyDates
+    weeklyDates,
   )
   let maxEvents = getFullDayEventsCount(currentWeekEvents)
   if (maxEvents > 3) {
@@ -224,14 +224,14 @@ watch(
   () => fullDayEvents.value,
   (newFullDayEvents) => {
     setFullDayEventsHeight(newFullDayEvents, props.weeklyDates)
-  }
+  },
 )
 
 watch(
   () => props.weeklyDates,
   (newWeeklyDates) => {
     setFullDayEventsHeight(fullDayEvents.value, newWeeklyDates)
-  }
+  },
 )
 </script>
 
