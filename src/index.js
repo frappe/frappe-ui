@@ -63,7 +63,6 @@ export { default as Calendar } from './components/Calendar/Calendar.vue'
 export { default as NestedPopover } from './components/ListFilter/NestedPopover.vue'
 export { default as CircularProgressBar } from './components/CircularProgressBar.vue'
 export { default as Tree } from './components/Tree/Tree.vue'
-export { default as FrappeTree } from './components/Frappe/FrappeTree.vue'
 
 // directives
 export { default as onOutsideClickDirective } from './directives/onOutsideClick.js'

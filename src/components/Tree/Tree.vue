@@ -12,7 +12,11 @@
       <div ref="iconRef">
         <!-- slot to only override the Icon -->
         <slot name="icon" v-bind="{ hasChildren, isCollapsed }">
-          <FeatherIcon v-if="!isCollapsed" name="chevron-down" class="h-3.5" />
+          <FeatherIcon
+            v-if="hasChildren && !isCollapsed"
+            name="chevron-down"
+            class="h-3.5"
+          />
           <FeatherIcon
             v-else-if="hasChildren"
             name="chevron-right"
@@ -38,7 +42,7 @@
       v-if="options.showLevelMarkers"
     ></div>
     <ul class="w-full" :style="{ paddingLeft: options.indentWidth }">
-      <li v-for="child in node.children" :key="child[nodeKey]">
+      <li v-for="child in node.children" :key="child[nodeKey] as string">
         <Tree :node="child" :nodeKey="nodeKey" :options="options">
           <!-- Pass the parent slots to the children of current node -->
           <template #node="{ node, hasChildren, isCollapsed, toggleCollapsed }">
