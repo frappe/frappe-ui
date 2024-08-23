@@ -8,5 +8,5 @@ export type TreeNode = {
 export type TreeOptions = {
   rowHeight?: string
   indentWidth?: string
-  showLevelMarkers?: boolean
+  showIndentationGuides?: boolean
 }

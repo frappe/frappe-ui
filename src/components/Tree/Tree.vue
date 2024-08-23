@@ -39,7 +39,7 @@
     <div
       :style="{ paddingLeft: linePadding }"
       class="border-r"
-      v-if="options.showLevelMarkers"
+      v-if="options.showIndentationGuides"
     ></div>
     <ul class="w-full" :style="{ paddingLeft: options.indentWidth }">
       <li v-for="child in node.children" :key="child[nodeKey] as string">
@@ -80,7 +80,7 @@ const props = withDefaults(
     options: () => ({
       rowHeight: '25px',
       indentWidth: '20px',
-      showLevelMarkers: true,
+      showIndentationGuides: true,
     }),
   },
 )

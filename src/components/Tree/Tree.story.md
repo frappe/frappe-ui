@@ -19,8 +19,8 @@ following properties:
 - **indentWidth** (string) - Width for the indentation at each depth of the
   tree. Gets incremented with every nested sub-tree. Defaults to `15px`.
 
-- **showLevelMarkers** (boolean) - Flag for displaying LHS lines. Defaults to
-  `true`.
+- **showIndentationGuides** (boolean) - Flag for displaying LHS lines. Defaults
+  to `true`.
 
 <br>
 
