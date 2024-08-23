@@ -42,6 +42,7 @@ export {
   TextEditorContent,
 } from './components/TextEditor'
 export { default as ListView } from './components/ListView/ListView.vue'
+export { default as List } from './components/ListView/ListView.vue'
 export { default as ListHeader } from './components/ListView/ListHeader.vue'
 export { default as ListHeaderItem } from './components/ListView/ListHeaderItem.vue'
 export { default as ListEmptyState } from './components/ListView/ListEmptyState.vue'
@@ -62,6 +63,7 @@ export { default as ListFilter } from './components/ListFilter/ListFilter.vue'
 export { default as Calendar } from './components/Calendar/Calendar.vue'
 export { default as NestedPopover } from './components/ListFilter/NestedPopover.vue'
 export { default as CircularProgressBar } from './components/CircularProgressBar.vue'
+export { default as Tree } from './components/Tree/Tree.vue'
 
 // directives
 export { default as onOutsideClickDirective } from './directives/onOutsideClick.js'
