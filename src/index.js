@@ -42,6 +42,7 @@ export {
   TextEditorContent,
 } from './components/TextEditor'
 export { default as ListView } from './components/ListView/ListView.vue'
+export { default as List } from './components/ListView/ListView.vue'
 export { default as ListHeader } from './components/ListView/ListHeader.vue'
 export { default as ListHeaderItem } from './components/ListView/ListHeaderItem.vue'
 export { default as ListEmptyState } from './components/ListView/ListEmptyState.vue'
