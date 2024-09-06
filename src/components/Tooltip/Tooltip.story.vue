@@ -4,12 +4,23 @@ import Tooltip from './Tooltip.vue'
 import Button from '../Button.vue'
 
 const placement = ref('top')
+const disabled = ref(true)
 </script>
 <template>
   <Story :layout="{ type: 'grid', width: '300px' }">
     <Variant title="with text prop">
       <Tooltip
         text="This action cannot be undone"
+        :hover-delay="1"
+        :placement="placement"
+      >
+        <Button theme="red">Delete</Button>
+      </Tooltip>
+    </Variant>
+    <Variant title="disabled">
+      <Tooltip
+        text="disabled tooltip"
+        :disabled="disabled"
         :hover-delay="1"
         :placement="placement"
       >

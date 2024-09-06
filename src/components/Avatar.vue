@@ -4,10 +4,11 @@
     :class="[sizeClasses, shapeClasses]"
   >
     <img
-      v-if="image"
+      v-if="image && !imgFetchError"
       :src="image"
       :alt="label"
       :class="[shapeClasses, 'h-full w-full object-cover']"
+      @error="(err) => handleImageError(err)"
     />
     <div
       v-else
@@ -36,7 +37,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
+
+const imgFetchError = ref(false)
 
 interface AvatarProps {
   image?: string
@@ -125,4 +128,10 @@ const iconClasses = computed(() => {
     '3xl': 'h-5 w-5',
   }[props.size]
 })
+
+function handleImageError(err) {
+  if (err.type) {
+    imgFetchError.value = true
+  }
+}
 </script>

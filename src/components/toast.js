@@ -80,9 +80,9 @@ function getToastsGroup(position) {
               onClose: () => {
                 toasts.value = toasts.value.filter((t) => t !== toast)
               },
-            })
+            }),
           )
-        })
+        }),
   )
 }
 

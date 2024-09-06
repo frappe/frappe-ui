@@ -61,7 +61,7 @@
                   :is="
                     getValueSelector(
                       filter.field.fieldtype,
-                      filter.field.options
+                      filter.field.options,
                     )
                   "
                   v-model="filter.value"
@@ -207,7 +207,7 @@ function getOperators(fieldtype) {
         { label: 'Not Equals', value: '!=' },
         { label: 'Like', value: 'like' },
         { label: 'Not Like', value: 'not like' },
-      ]
+      ],
     )
   }
   if (typeNumber.includes(fieldtype)) {
@@ -219,7 +219,7 @@ function getOperators(fieldtype) {
         { label: '>=', value: '>=' },
         { label: 'Equals', value: '=' },
         { label: 'Not Equals', value: '!=' },
-      ]
+      ],
     )
   }
   if (typeSelect.includes(fieldtype)) {
@@ -227,7 +227,7 @@ function getOperators(fieldtype) {
       ...[
         { label: 'Equals', value: '=' },
         { label: 'Not Equals', value: '!=' },
-      ]
+      ],
     )
   }
   if (typeCheck.includes(fieldtype)) {

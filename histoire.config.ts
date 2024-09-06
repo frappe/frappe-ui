@@ -12,15 +12,15 @@ export default defineConfig({
     title: 'Frappe UI',
     defaultColorScheme: 'light',
     hideColorSchemeSwitch: true,
-    favicon: 'frappe-ui-only-logo.png',
+    favicon: 'frappe-ui-square.png',
     logo: {
-      square: './frappe-ui-only-logo.png',
-      light: './frappe-ui-logo-200.png',
-      dark: './frappe-ui-logo-200.png',
+      square: './frappe-ui-square.png',
+      light: './frappe-ui.png',
+      dark: './frappe-ui.png',
     },
     colors: {
       gray: fullConfig.theme.colors.gray,
-      primary: fullConfig.theme.colors.orange,
+      primary: fullConfig.theme.colors.gray,
     },
   },
   tree: {

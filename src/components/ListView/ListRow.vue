@@ -1,7 +1,8 @@
 <template>
   <component
     :is="list.options.getRowRoute ? 'router-link' : 'div'"
-    class="flex cursor-pointer flex-col transition-all duration-300 ease-in-out"
+    :class="{ 'cursor-pointer': isHoverable }"
+    class="flex flex-col transition-all duration-300 ease-in-out"
     v-bind="{
       to: list.options.getRowRoute ? list.options.getRowRoute(row) : undefined,
       onClick: list.options.onRowClick
@@ -15,16 +16,19 @@
     >
       <div
         class="grid items-center space-x-4 rounded px-2"
-        :class="
-          list.selections.has(row[list.rowKey])
-            ? 'bg-gray-100 hover:bg-gray-200'
-            : 'hover:bg-gray-50'
-        "
+        :class="[
+          isSelected ? 'bg-gray-100' : '',
+          isHoverable
+            ? isSelected
+              ? 'hover:bg-gray-200'
+              : 'hover:bg-gray-50'
+            : '',
+        ]"
         :style="{
           height: rowHeight,
           gridTemplateColumns: getGridTemplateColumns(
             list.columns,
-            list.options.selectable
+            list.options.selectable,
           ),
         }"
       >
@@ -89,6 +93,14 @@ const isLastRow = computed(() => {
     list.value.rows[list.value.rows.length - 1][list.value.rowKey] ===
     props.row[list.value.rowKey]
   )
+})
+
+const isSelected = computed(() => {
+  return list.value.selections.has(props.row[list.value.rowKey])
+})
+
+const isHoverable = computed(() => {
+  return list.value.options.getRowRoute || list.value.options.onRowClick
 })
 
 const rowHeight = computed(() => {

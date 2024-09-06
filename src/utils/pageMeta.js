@@ -1,7 +1,7 @@
 import { watch } from 'vue'
 
 let faviconRef = document.querySelector('link[rel="icon"]')
-let defaultFavIcon = faviconRef.href
+let defaultFavIcon = faviconRef?.href
 
 export function usePageMeta(fn) {
   watch(
@@ -33,7 +33,7 @@ export function usePageMeta(fn) {
     {
       immediate: true,
       deep: true,
-    }
+    },
   )
 }
 

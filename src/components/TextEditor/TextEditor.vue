@@ -192,7 +192,7 @@ export default {
           if (!detectMarkdown(text)) return
           if (
             !confirm(
-              'Do you want to convert markdown content to HTML before pasting?'
+              'Do you want to convert markdown content to HTML before pasting?',
             )
           )
             return

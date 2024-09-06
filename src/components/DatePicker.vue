@@ -1,91 +1,109 @@
 <template>
-  <Popover @open="selectCurrentMonthYear" transition="default">
+  <Popover
+    @open="selectCurrentMonthYear"
+    class="flex w-full [&>div:first-child]:w-full"
+  >
     <template #target="{ togglePopover }">
       <Input
+        readonly
         type="text"
         icon-left="calendar"
-        :class="inputClass"
-        :value="
-          modelValue && formatValue ? formatValue(modelValue) : modelValue || ''
-        "
         :placeholder="placeholder"
+        :value="dateValue && formatter ? formatter(dateValue) : dateValue"
         @focus="!readonly ? togglePopover() : null"
-        readonly
+        class="w-full"
+        :class="inputClass"
+        v-bind="$attrs"
       />
     </template>
-    <template #body-main="{ togglePopover }">
-      <div class="mt-1 select-none p-3 text-left">
-        <div class="flex items-center justify-between">
-          <span class="text-base font-medium text-blue-500">
+    <template #body="{ togglePopover }">
+      <div
+        class="mt-2 w-fit select-none divide-y rounded-lg bg-white text-base shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
+      >
+        <div class="flex items-center p-1 text-gray-500">
+          <Button variant="ghost" class="h-7 w-7" @click="prevMonth">
+            <FeatherIcon
+              :stroke-width="2"
+              name="chevron-left"
+              class="h-4 w-4"
+            />
+          </Button>
+          <div class="flex-1 text-center text-base font-medium text-gray-700">
             {{ formatMonth }}
-          </span>
-          <span class="flex">
-            <div
-              class="grid h-5 w-5 cursor-pointer place-items-center rounded-md hover:bg-gray-100"
-            >
-              <FeatherIcon
-                @click="prevMonth"
-                name="chevron-left"
-                class="h-4 w-4"
-              />
-            </div>
-            <div
-              class="ml-2 grid h-5 w-5 cursor-pointer place-items-center rounded-md hover:bg-gray-100"
-            >
-              <FeatherIcon
-                @click="nextMonth"
-                name="chevron-right"
-                class="h-4 w-4"
-              />
-            </div>
-          </span>
+          </div>
+          <Button variant="ghost" class="h-7 w-7" @click="nextMonth">
+            <FeatherIcon
+              :stroke-width="2"
+              name="chevron-right"
+              class="h-4 w-4"
+            />
+          </Button>
         </div>
-        <div class="mt-2 text-sm">
-          <div class="grid w-full grid-cols-7 place-items-center text-gray-600">
+        <div class="flex items-center justify-center gap-1 p-1">
+          <TextInput
+            class="text-sm"
+            type="text"
+            :value="dateValue"
+            @change="
+              selectDate(getDate($event.target.value)) || togglePopover()
+            "
+          />
+          <Button
+            :label="'Today'"
+            class="text-sm"
+            @click="selectDate(getDate()) || togglePopover()"
+          />
+        </div>
+        <div
+          class="flex flex-col items-center justify-center p-1 text-gray-800"
+        >
+          <div class="flex items-center text-xs uppercase">
             <div
-              class="grid h-6 w-6 place-items-center gap-1 text-center"
-              v-for="(d, i) in ['S', 'M', 'T', 'W', 'T', 'F', 'S']"
+              class="flex h-6 w-8 items-center justify-center text-center"
+              v-for="(d, i) in ['su', 'mo', 'tu', 'we', 'th', 'fr', 'sa']"
               :key="i"
             >
               {{ d }}
             </div>
           </div>
-          <div v-for="(week, i) in datesAsWeeks" :key="i" class="mt-1">
-            <div class="grid w-full grid-cols-7 place-items-center gap-1">
-              <div
-                v-for="date in week"
-                :key="toValue(date)"
-                class="grid h-6 w-6 cursor-pointer place-items-center rounded-md hover:bg-blue-100 hover:text-blue-700"
-                :class="{
-                  'text-gray-600': date.getMonth() !== currentMonth - 1,
-                  'text-blue-500': toValue(date) === toValue(today),
-                  'bg-blue-100 font-semibold text-blue-500':
-                    toValue(date) === modelValue,
-                }"
-                @click="
-                  () => {
-                    selectDate(date)
-                    togglePopover()
-                  }
-                "
-              >
-                {{ date.getDate() }}
-              </div>
+          <div
+            class="flex items-center"
+            v-for="(week, i) in datesAsWeeks"
+            :key="i"
+          >
+            <div
+              v-for="date in week"
+              :key="toValue(date)"
+              class="flex h-8 w-8 cursor-pointer items-center justify-center rounded hover:bg-gray-50"
+              :class="{
+                'text-gray-400': date.getMonth() !== currentMonth - 1,
+                'font-extrabold text-gray-900':
+                  toValue(date) === toValue(today),
+                'bg-gray-800 text-white hover:bg-gray-800':
+                  toValue(date) === dateValue,
+              }"
+              @click="
+                () => {
+                  selectDate(date)
+                  togglePopover()
+                }
+              "
+            >
+              {{ date.getDate() }}
             </div>
           </div>
         </div>
-        <div class="mt-2 flex w-full justify-end">
-          <div
-            class="cursor-pointer rounded-md px-2 py-1 text-sm hover:bg-gray-100"
+        <div class="flex justify-end p-1">
+          <Button
+            :label="'Clear'"
+            class="text-sm"
             @click="
               () => {
                 selectDate('')
                 togglePopover()
               }
             "
-          >
-            Clear
-          </div>
+          />
         </div>
       </div>
     </template>
@@ -94,17 +112,27 @@
 
 <script>
 import Input from './Input.vue'
-import FeatherIcon from './FeatherIcon.vue'
+import Button from './Button.vue'
 import Popover from './Popover.vue'
-
+import FeatherIcon from './FeatherIcon.vue'
+import TextInput from './TextInput.vue'
 export default {
   name: 'DatePicker',
-  props: ['modelValue', 'placeholder', 'readonly', 'formatValue', 'inputClass'],
-  emits: ['update:modelValue'],
+  props: [
+    'value',
+    'modelValue',
+    'placeholder',
+    'formatter',
+    'readonly',
+    'inputClass',
+  ],
+  emits: ['update:modelValue', 'change'],
   components: {
-    Input,
-    FeatherIcon,
     Popover,
+    Input,
+    Button,
+    FeatherIcon,
+    TextInput,
   },
   data() {
     return {
@@ -159,17 +187,25 @@ export default {
     },
     formatMonth() {
       let date = this.getDate(this.currentYear, this.currentMonth - 1, 1)
-      return date.toLocaleString('en-US', { month: 'short', year: 'numeric' })
+      let month = date.toLocaleString('en-US', {
+        month: 'long',
+      })
+      return `${month}, ${date.getFullYear()}`
+    },
+    dateValue() {
+      return this.value ? this.value : this.modelValue
     },
   },
   methods: {
     selectDate(date) {
+      this.$emit('change', this.toValue(date))
       this.$emit('update:modelValue', this.toValue(date))
     },
     selectCurrentMonthYear() {
-      let date = this.modelValue
-        ? this.getDate(this.modelValue)
-        : this.getDate()
+      let date = this.dateValue ? this.getDate(this.dateValue) : this.getDate()
+      if (date === 'Invalid Date') {
+        date = this.getDate()
+      }
       this.currentYear = date.getFullYear()
       this.currentMonth = date.getMonth() + 1
     },
@@ -201,7 +237,7 @@ export default {
         date = this.getDate(
           date.getFullYear(),
           date.getMonth(),
-          date.getDate() + incrementer
+          date.getDate() + incrementer,
         )
         dates.push(date)
         count--

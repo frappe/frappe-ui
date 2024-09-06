@@ -274,8 +274,10 @@ export default {
       if (!this.query) return options
       return options.filter((option) => {
         return (
-          option.label.toLowerCase().includes(this.query.toLowerCase()) ||
-          option.value.toLowerCase().includes(this.query.toLowerCase())
+          option.label
+            .toLowerCase()
+            .includes(this.query.trim().toLowerCase()) ||
+          option.value.toLowerCase().includes(this.query.trim().toLowerCase())
         )
       })
     },

@@ -4,7 +4,11 @@
     :show="open"
     @after-leave="$emit('after-leave')"
   >
-    <HDialog as="div" class="fixed inset-0 z-10 overflow-y-auto" @close="close">
+    <HDialog
+      as="div"
+      class="fixed inset-0 z-10 overflow-y-auto"
+      @close="!disableOutsideClickToClose && close()"
+    >
       <div
         class="flex min-h-screen flex-col items-center px-4 py-4 text-center"
         :class="dialogPositionClasses"
@@ -149,14 +153,14 @@
 </template>
 
 <script>
-import { computed, ref } from 'vue'
 import {
-  Dialog as HDialog,
   DialogPanel,
   DialogTitle,
+  Dialog as HDialog,
   TransitionChild,
   TransitionRoot,
 } from '@headlessui/vue'
+import { ref } from 'vue'
 import Button from './Button.vue'
 import FeatherIcon from './FeatherIcon.vue'
 
@@ -172,6 +176,10 @@ export default {
       default() {
         return {}
       },
+    },
+    disableOutsideClickToClose: {
+      type: Boolean,
+      default: false,
     },
   },
   emits: ['update:modelValue', 'close', 'after-leave'],

@@ -21,20 +21,23 @@ const props = withDefaults(
     hoverDelay?: number
     placement?: TooltipContentProps['side']
     arrowClass?: HTMLAttributes['class']
+    disabled?: boolean
   }>(),
   {
     text: '',
     placement: 'top',
     hoverDelay: 0.5,
     arrowClass: 'fill-gray-900',
-  }
+    disabled: false,
+  },
 )
 
 const delayDuration = computed(() => props.hoverDelay * 1000)
 </script>
 
 <template>
-  <TooltipProvider :delayDuration="delayDuration">
+  <slot v-if="disabled" />
+  <TooltipProvider v-else :delayDuration="delayDuration">
     <TooltipRoot>
       <TooltipTrigger as-child>
         <slot />
@@ -44,6 +47,7 @@ const delayDuration = computed(() => props.hoverDelay * 1000)
           v-if="props.text || $slots.body"
           :side="props.placement"
           :side-offset="4"
+          class="z-[100]"
         >
           <slot name="body">
             <div
