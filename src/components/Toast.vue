@@ -12,11 +12,10 @@
             v-if="title"
             class="text-base font-medium text-gray-900"
             :class="{ 'mb-1': text }"
+            v-html="title"
           >
-            {{ title }}
           </p>
-          <p v-if="text" class="text-base text-gray-600">
-            {{ text }}
+          <p v-if="text" class="text-base text-gray-600" v-html="text">
           </p>
         </slot>
       </div>
