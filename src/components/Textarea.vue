@@ -1,15 +1,20 @@
 <template>
-  <textarea
-    :placeholder="placeholder"
-    :class="inputClasses"
-    :disabled="disabled"
-    :id="id"
-    :value="modelValue"
-    :rows="rows"
-    @input="handleChange"
-    @change="handleChange"
-    v-bind="attrs"
-  />
+  <div class="space-y-1.5">
+    <label class="block" :class="labelClasses" v-if="label" :for="id">
+      {{ label }}
+    </label>
+    <textarea
+      :placeholder="placeholder"
+      :class="inputClasses"
+      :disabled="disabled"
+      :id="id"
+      :value="modelValue"
+      :rows="rows"
+      @input="handleChange"
+      @change="handleChange"
+      v-bind="attrs"
+    />
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -26,6 +31,7 @@ interface TextareaProps {
   modelValue?: string
   debounce?: number
   rows?: number
+  label?: string
 }
 
 const props = withDefaults(defineProps<TextareaProps>(), {
@@ -52,7 +58,7 @@ const inputClasses = computed(() => {
     lg: ['py-1.5 px-3'],
     xl: ['py-1.5 px-3'],
   }[props.size]
-
+  
   let variant = props.disabled ? 'disabled' : props.variant
   let variantClasses = {
     subtle:
@@ -71,6 +77,18 @@ const inputClasses = computed(() => {
     variantClasses,
     props.disabled ? 'text-gray-600' : 'text-gray-800',
     'transition-colors w-full block',
+  ]
+})
+
+const labelClasses = computed(() => {
+  return [
+    {
+      sm: 'text-xs',
+      md: 'text-base',
+      lg: 'text-lg',
+      xl: 'text-xl',
+    }[props.size],
+    'text-gray-600',
   ]
 })
 
