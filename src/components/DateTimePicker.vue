@@ -156,7 +156,7 @@ import Popover from './Popover.vue'
 import FeatherIcon from './FeatherIcon.vue'
 import TextInput from './TextInput.vue'
 export default {
-  name: 'DatePicker',
+  name: 'DateTimePicker',
   props: [
     'value',
     'modelValue',
