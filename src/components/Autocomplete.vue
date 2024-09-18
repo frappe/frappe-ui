@@ -179,14 +179,29 @@ import FeatherIcon from './FeatherIcon.vue'
 
 export default {
   name: 'Autocomplete',
-  props: [
-    'modelValue',
-    'options',
-    'placeholder',
-    'bodyClasses',
-    'multiple',
-    'hideSearch',
-  ],
+  props: {
+    options: {
+      type: Array,
+      default: () => [],
+    },
+    modelValue: {
+      type: [Object, Array],
+    },
+    placeholder: {
+      type: String,
+    },
+    bodyClasses: {
+      type: [String, Array, Object],
+    },
+    multiple: {
+      type: Boolean,
+      default: false,
+    },
+    hideSearch: {
+      type: Boolean,
+      default: false,
+    },
+  },
   emits: ['update:modelValue', 'update:query', 'change'],
   components: {
     Popover,
