@@ -5,7 +5,7 @@
     nullable
     v-slot="{ open: isComboboxOpen }"
   >
-    <Popover class="w-full" v-model:show="showOptions">
+    <Popover class="w-full" v-model:show="showOptions" ref="rootRef">
       <template #target="{ open: openPopover, togglePopover }">
         <slot name="target" v-bind="{ open: openPopover, togglePopover }">
           <div class="w-full">
@@ -198,7 +198,7 @@ export default {
     ComboboxOption,
     ComboboxButton,
   },
-  expose: ['togglePopover'],
+  expose: ['togglePopover', 'rootRef'],
   data() {
     return {
       query: '',
@@ -262,6 +262,9 @@ export default {
     },
   },
   methods: {
+    rootRef() {
+      return this.$refs['rootRef']
+    },
     togglePopover(val) {
       this.showOptions = val ?? !this.showOptions
     },
