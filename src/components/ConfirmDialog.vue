@@ -14,7 +14,18 @@
 import Dialog from './Dialog.vue'
 export default {
   name: 'ConfirmDialog',
-  props: ['title', 'message', 'fields', 'onConfirm'],
+  props: {
+    title: {
+      type: String,
+    },
+    message: {
+      type: String,
+    },
+    onConfirm: {
+      type: Function,
+      default: null,
+    },
+  },
   expose: ['show', 'hide'],
   components: {
     Dialog,
