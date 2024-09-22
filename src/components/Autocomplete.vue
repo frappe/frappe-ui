@@ -185,7 +185,7 @@ export default {
       default: () => [],
     },
     modelValue: {
-      type: [Object, Array],
+      type: [String, Object, Array],
     },
     placeholder: {
       type: String,
