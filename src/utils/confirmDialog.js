@@ -4,14 +4,12 @@ import { h, ref } from 'vue'
 export function confirmDialog({
   title = 'Untitled',
   message = '',
-  fields = [],
   onConfirm,
 }) {
   renderDialog(
     h(ConfirmDialog, {
       title,
       message,
-      fields,
       onConfirm,
     }),
   )
