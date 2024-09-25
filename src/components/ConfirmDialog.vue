@@ -12,6 +12,8 @@
 </template>
 <script>
 import Dialog from './Dialog.vue'
+import Button from './Button.vue'
+
 export default {
   name: 'ConfirmDialog',
   props: {
@@ -29,6 +31,7 @@ export default {
   expose: ['show', 'hide'],
   components: {
     Dialog,
+    Button,
   },
   data() {
     return {
