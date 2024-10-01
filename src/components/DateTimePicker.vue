@@ -157,14 +157,27 @@ import FeatherIcon from './FeatherIcon.vue'
 import TextInput from './TextInput.vue'
 export default {
   name: 'DateTimePicker',
-  props: [
-    'value',
-    'modelValue',
-    'placeholder',
-    'formatter',
-    'readonly',
-    'inputClass',
-  ],
+  props: {
+    value: {
+      type: String,
+    },
+    modelValue: {
+      type: String,
+    },
+    placeholder: {
+      type: String,
+    },
+    formatter: {
+      type: Function,
+      default: null,
+    },
+    readonly: {
+      type: Boolean,
+    },
+    inputClass: {
+      type: [String, Array, Object],
+    },
+  },
   emits: ['update:modelValue', 'change'],
   components: {
     Popover,

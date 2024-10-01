@@ -5,7 +5,7 @@
     nullable
     v-slot="{ open: isComboboxOpen }"
   >
-    <Popover class="w-full" v-model:show="showOptions">
+    <Popover class="w-full" v-model:show="showOptions" ref="rootRef">
       <template #target="{ open: openPopover, togglePopover }">
         <slot name="target" v-bind="{ open: openPopover, togglePopover }">
           <div class="w-full">
@@ -179,14 +179,29 @@ import FeatherIcon from './FeatherIcon.vue'
 
 export default {
   name: 'Autocomplete',
-  props: [
-    'modelValue',
-    'options',
-    'placeholder',
-    'bodyClasses',
-    'multiple',
-    'hideSearch',
-  ],
+  props: {
+    options: {
+      type: Array,
+      default: () => [],
+    },
+    modelValue: {
+      type: [String, Object, Array],
+    },
+    placeholder: {
+      type: String,
+    },
+    bodyClasses: {
+      type: [String, Array, Object],
+    },
+    multiple: {
+      type: Boolean,
+      default: false,
+    },
+    hideSearch: {
+      type: Boolean,
+      default: false,
+    },
+  },
   emits: ['update:modelValue', 'update:query', 'change'],
   components: {
     Popover,
@@ -198,7 +213,7 @@ export default {
     ComboboxOption,
     ComboboxButton,
   },
-  expose: ['togglePopover'],
+  expose: ['togglePopover', 'rootRef'],
   data() {
     return {
       query: '',
@@ -262,6 +277,9 @@ export default {
     },
   },
   methods: {
+    rootRef() {
+      return this.$refs['rootRef']
+    },
     togglePopover(val) {
       this.showOptions = val ?? !this.showOptions
     },

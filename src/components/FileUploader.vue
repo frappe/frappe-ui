@@ -28,7 +28,18 @@ import FileUploadHandler from '../utils/fileUploadHandler'
 
 export default {
   name: 'FileUploader',
-  props: ['fileTypes', 'uploadArgs', 'validateFile'],
+  props: {
+    fileTypes: {
+      type: [String, Array],
+    },
+    uploadArgs: {
+      type: Object,
+    },
+    validateFile: {
+      type: Function,
+      default: null,
+    },
+  },
   data() {
     return {
       uploader: null,
