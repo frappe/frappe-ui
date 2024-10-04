@@ -4,8 +4,15 @@ const fs = require('fs')
 module.exports = function proxyOptions({
   port = 8080,
   source = '^/(app|login|api|assets|files)',
- } = {}) {
-  const config = getCommonSiteConfig()
+  site_config_path = null,
+} = {}) {
+  const config = site_config_path ?
+    (
+      JSON.parse(fs.readFileSync(site_config_path))
+    ) :
+    (
+      getCommonSiteConfig()
+    )
   const webserver_port = config ? config.webserver_port : 8000
   if (!config) {
     console.log('No common_site_config.json found, using default port 8000')
