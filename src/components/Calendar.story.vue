@@ -3,7 +3,7 @@
     <Variant title="default">
       <div class="flex h-screen flex-col overflow-hidden p-5">
         <Calendar
-          :config="config"
+          :config="config2"
           :events="events"
           :create="(event) => logEvent('createEvent', event)"
           :update="(event) => logEvent('updateEvent', event)"
@@ -74,6 +74,15 @@ const config = {
   allowCustomClickEvents: true,
   redundantCellHeight: 100,
   enableShortcuts: false,
+}
+const config2 = {
+  defaultMode: 'Month',
+  isEditMode: true,
+  eventIcons: {},
+  allowCustomClickEvents: true,
+  redundantCellHeight: 100,
+  enableShortcuts: false,
+  hideIcon: true,
 }
 
 const events = ref([

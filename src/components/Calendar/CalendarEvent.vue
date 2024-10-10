@@ -26,7 +26,7 @@
         ]
       "
     >
-      <div v-if="config.showIcon">
+      <div v-if="!config.hideIcon">
         <component
           v-if="eventIcons[props.event.type]"
           :is="eventIcons[props.event.type]"
@@ -74,7 +74,7 @@
         ]
       "
     >
-      <div v-if="config.showIcon">
+      <div v-if="!config.hideIcon">
         <component
           v-if="eventIcons[props.event.type]"
           :is="eventIcons[props.event.type]"

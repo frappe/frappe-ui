@@ -133,7 +133,7 @@ const defaultConfig = {
   redundantCellHeight: 50,
   hourHeight: 50,
   enableShortcuts: true,
-  showIcon: true,
+  hideIcon: false,
 }
 
 const overrideConfig = { ...defaultConfig, ...props.config }
