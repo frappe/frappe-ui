@@ -2,6 +2,7 @@
   <div v-if="type != 'checkbox'" :class="['space-y-1.5', attrs.class]">
     <label class="block" :class="labelClasses" v-if="label" :for="id">
       {{ label }}
+      <span class="text-red-500" v-if="required">*</span>
     </label>
     <Select
       v-if="type === 'select'"
@@ -61,6 +62,7 @@ interface FormControlProps {
   description?: string
   type?: TextInputTypes | 'textarea' | 'select' | 'checkbox' | 'autocomplete'
   size?: 'sm' | 'md'
+  required?: boolean
 }
 
 const id = useId()
