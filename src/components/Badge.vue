@@ -41,35 +41,37 @@ const props = withDefaults(defineProps<BadgeProps>(), {
 
 const classes = computed(() => {
   let solidClasses = {
-    gray: 'text-white bg-gray-900',
-    blue: 'text-white bg-blue-500',
-    green: 'text-white bg-green-600',
-    orange: 'text-white bg-amber-600',
-    red: 'text-white bg-red-600',
+    gray: 'text-text-icons-white bg-surface-gray-7',
+    blue: 'text-text-icons-blue-1 bg-surface-blue-2',
+    green: 'text-text-icons-green-1 bg-surface-green-3',
+    orange: 'text-text-icons-amber-1 bg-surface-amber-2',
+    red: 'text-text-icons-red-1 bg-surface-red-4',
   }[props.theme]
 
   let subtleClasses = {
-    gray: 'text-gray-700 bg-gray-100',
-    blue: 'text-blue-600 bg-blue-100',
-    green: 'text-green-800 bg-green-200',
-    orange: 'text-amber-700 bg-amber-100',
-    red: 'text-red-600 bg-red-100',
+    gray: 'text-text-icons-gray-6 bg-surface-gray-2',
+    blue: 'text-text-icons-blue-2 bg-surface-blue-1',
+    green: 'text-text-green-800 bg-surface-green-2',
+    orange: 'text-text-icons-amber-3 bg-surface-amber-1',
+    red: 'text-text-icon-red-4 bg-surface-red-1',
   }[props.theme]
 
   let outlineClasses = {
-    gray: 'text-gray-700 bg-white border border-gray-300',
-    blue: 'text-blue-600 bg-white border border-blue-300',
-    green: 'text-green-800 bg-white border border-green-300',
-    orange: 'text-amber-700 bg-white border border-amber-300',
-    red: 'text-red-600 bg-white border border-red-300',
+    gray: 'text-text-icons-gray-6 bg-transparent border border-outline-gray-1',
+    blue: 'text-text-icons-blue-2 bg-transparent border border-outline-blue-1',
+    green:
+      'text-text-icons-green-3 bg-transparent border border-outline-green-2',
+    orange:
+      'text-text-icons-amber-3 bg-transparent border border-outline-amber-2',
+    red: 'text-text-icons-red-4 bg-transparent border border-outline-red-2',
   }[props.theme]
 
   let ghostClasses = {
-    gray: 'text-gray-700 bg-transparent',
-    blue: 'text-blue-600 bg-transparent',
-    green: 'text-green-800 bg-transparent',
-    orange: 'text-amber-700 bg-transparent',
-    red: 'text-red-600 bg-transparent',
+    gray: 'text-text-icons-gray-6 bg-transparent',
+    blue: 'text-text-icons-blue-2 bg-transparent',
+    green: 'text-text-icons-green-3 bg-transparent',
+    orange: 'text-text-icons-amber-3 bg-transparent',
+    red: 'text-text-icons-red-4 bg-transparent',
   }[props.theme]
 
   let variantClasses = {
