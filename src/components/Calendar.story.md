@@ -65,6 +65,7 @@ The object for this kind of event looks like:
     	redundantCellHeight: 50,
     	hourHeight: 50,
     	enableShortcuts: true,
+      showIcon: true,
 
     }
 
@@ -121,6 +122,10 @@ e.g.
     your keyboard you can navigate inside a view.
   - Delete: When an event is focused you can press the delete button to delete
     the event.
+
+- `showIcon`: Boolean value which determines whether the icon will be displayed
+  or not in the Event. By default the value is true i.e. icon will be displayed,
+  can be disabled by setting it to false.
 
 - Many functional props are also there which will be discussed in the below
   sections.

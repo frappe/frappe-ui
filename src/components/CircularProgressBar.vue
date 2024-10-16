@@ -11,12 +11,13 @@
       <p v-if="!showPercentage">{{ step }}</p>
       <p v-else>{{ progress.toFixed(0) }}%</p>
     </div>
-    <div v-else class="check-icon" />
+    <FeatherIcon v-else name="check" class="check-icon" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import FeatherIcon from './FeatherIcon.vue'
 
 interface Props {
   step: number
@@ -45,6 +46,7 @@ interface SizeProps {
   ringSize: string
   ringBarWidth: string
   innerTextFontSize: string
+  checkIconSize: string
 }
 
 // predefined sizes for the circular progress bar
@@ -53,26 +55,31 @@ const sizeMap: Record<Size, SizeProps> = {
     ringSize: '30px',
     ringBarWidth: '6px',
     innerTextFontSize: props.showPercentage ? '8px' : '12px',
+    checkIconSize: '16px',
   },
   sm: {
     ringSize: '42px',
     ringBarWidth: '10px',
     innerTextFontSize: props.showPercentage ? '12px' : '16px',
+    checkIconSize: '20px',
   },
   md: {
     ringSize: '60px',
     ringBarWidth: '14px',
     innerTextFontSize: props.showPercentage ? '16px' : '20px',
+    checkIconSize: '24px',
   },
   lg: {
     ringSize: '84px',
     ringBarWidth: '18px',
     innerTextFontSize: props.showPercentage ? '20px' : '24px',
+    checkIconSize: '40px',
   },
   xl: {
     ringSize: '108px',
     ringBarWidth: '22px',
     innerTextFontSize: props.showPercentage ? '24px' : '28px',
+    checkIconSize: '48px',
   },
 }
 
@@ -123,6 +130,7 @@ const isCompleted = computed(() => props.step === props.totalSteps)
   --size: v-bind(size.ringSize);
   --bar-width: v-bind(size.ringBarWidth);
   --font-size: v-bind(size.innerTextFontSize);
+  --check-icon-size: v-bind(size.checkIconSize);
   --color-progress: v-bind(theme.primary);
   --color-remaining-circle: v-bind(theme.secondary);
   --color-complete: v-bind($props.themeComplete);
@@ -180,11 +188,8 @@ const isCompleted = computed(() => props.step === props.totalSteps)
 }
 
 .check-icon {
-  width: 15px;
-  height: 15px;
-  background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODUiIGhlaWdodD0iODUiIHZpZXdCb3g9IjUgMzAgNzUgMTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik0zNS40MjM3IDUzLjczMjdMNjcuOTc4NyAyMS4xNzc3TDcyLjk4OTUgMjYuMTg0MkwzNS40MTk1IDYzLjc1TDEyLjg4NiA0MS4yMTIyTDE3Ljg5MjUgMzYuMjAxNUwzNS40MjM3IDUzLjczMjdaIiBmaWxsPSIjMWYxYTM4Ii8+Cjwvc3ZnPgo=');
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
+  z-index: 3;
+  width: var(--check-icon-size);
+  height: var(--check-icon-size);
 }
 </style>

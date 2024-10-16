@@ -29,7 +29,17 @@
 import LoadingText from './LoadingText.vue'
 export default {
   name: 'Card',
-  props: ['title', 'subtitle', 'loading'],
+  props: {
+    title: {
+      type: String,
+    },
+    subtitle: {
+      type: String,
+    },
+    loading: {
+      type: Boolean,
+    },
+  },
   components: {
     LoadingText,
   },

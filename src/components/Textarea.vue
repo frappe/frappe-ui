@@ -4,6 +4,7 @@
       {{ label }}
     </label>
     <textarea
+      ref="textareaRef"
       :placeholder="placeholder"
       :class="inputClasses"
       :disabled="disabled"
@@ -18,8 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, useAttrs } from 'vue'
-import type { TextInputTypes } from './types/TextInput'
+import { computed, useAttrs, ref } from 'vue'
 import debounce from '../utils/debounce'
 
 interface TextareaProps {
@@ -43,6 +43,7 @@ const props = withDefaults(defineProps<TextareaProps>(), {
 
 const emit = defineEmits(['update:modelValue'])
 const attrs = useAttrs()
+const textareaRef = ref<HTMLTextAreaElement | null>(null)
 
 const inputClasses = computed(() => {
   let sizeClasses = {
@@ -102,4 +103,6 @@ if (props.debounce) {
 let handleChange = (e: Event) => {
   emitChange((e.target as HTMLInputElement).value)
 }
+
+defineExpose({ el: textareaRef })
 </script>
