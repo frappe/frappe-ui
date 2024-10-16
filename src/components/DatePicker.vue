@@ -29,7 +29,7 @@
             />
           </Button>
           <div class="flex-1 text-center text-base font-medium text-gray-700">
-            {{ formatMonth }}
+            {{ formattedMonth }}
           </div>
           <Button variant="ghost" class="h-7 w-7" @click="nextMonth">
             <FeatherIcon
@@ -44,14 +44,15 @@
             class="text-sm"
             type="text"
             :value="dateValue"
-            @change="
-              selectDate(getDate($event.target.value)) || togglePopover()
-            "
+            @change="selectDate(getDate($event.target.value))"
           />
           <Button
             :label="'Today'"
             class="text-sm"
-            @click="selectDate(getDate()) || togglePopover()"
+            @click="() => {
+              selectDate(getDate())
+              togglePopover()
+            }"
           />
         </div>
         <div
@@ -99,7 +100,7 @@
             class="text-sm"
             @click="
               () => {
-                selectDate('')
+                selectDate(new Date(''))
                 togglePopover()
               }
             "
@@ -110,192 +111,189 @@
   </Popover>
 </template>
 
-<script>
+<script setup lang='ts'>
+import { computed, ref, onMounted } from 'vue'
+
 import Input from './Input.vue'
 import Button from './Button.vue'
 import Popover from './Popover.vue'
 import FeatherIcon from './FeatherIcon.vue'
 import TextInput from './TextInput.vue'
-export default {
-  name: 'DatePicker',
-  props: {
-    value: {
-      type: String,
-    },
-    modelValue: {
-      type: String,
-    },
-    placeholder: {
-      type: String,
-    },
-    formatter: {
-      type: Function,
-      default: null,
-    },
-    readonly: {
-      type: Boolean,
-    },
-    inputClass: {
-      type: [String, Array, Object],
-    },
-  },
-  emits: ['update:modelValue', 'change'],
-  components: {
-    Popover,
-    Input,
-    Button,
-    FeatherIcon,
-    TextInput,
-  },
-  data() {
-    return {
-      currentYear: null,
-      currentMonth: null,
-    }
-  },
-  created() {
-    this.selectCurrentMonthYear()
-  },
-  computed: {
-    today() {
-      return this.getDate()
-    },
-    datesAsWeeks() {
-      let datesAsWeeks = []
-      let dates = this.dates.slice()
-      while (dates.length) {
-        let week = dates.splice(0, 7)
-        datesAsWeeks.push(week)
-      }
-      return datesAsWeeks
-    },
-    dates() {
-      if (!(this.currentYear && this.currentMonth)) {
-        return []
-      }
-      let monthIndex = this.currentMonth - 1
-      let year = this.currentYear
 
-      let firstDayOfMonth = this.getDate(year, monthIndex, 1)
-      let lastDayOfMonth = this.getDate(year, monthIndex + 1, 0)
-      let leftPaddingCount = firstDayOfMonth.getDay()
-      let rightPaddingCount = 6 - lastDayOfMonth.getDay()
-
-      let leftPadding = this.getDatesAfter(firstDayOfMonth, -leftPaddingCount)
-      let rightPadding = this.getDatesAfter(lastDayOfMonth, rightPaddingCount)
-      let daysInMonth = this.getDaysInMonth(monthIndex, year)
-      let datesInMonth = this.getDatesAfter(firstDayOfMonth, daysInMonth - 1)
-
-      let dates = [
-        ...leftPadding,
-        firstDayOfMonth,
-        ...datesInMonth,
-        ...rightPadding,
-      ]
-      if (dates.length < 42) {
-        const finalPadding = this.getDatesAfter(dates.at(-1), 42 - dates.length)
-        dates = dates.concat(...finalPadding)
-      }
-      return dates
-    },
-    formatMonth() {
-      let date = this.getDate(this.currentYear, this.currentMonth - 1, 1)
-      let month = date.toLocaleString('en-US', {
-        month: 'long',
-      })
-      return `${month}, ${date.getFullYear()}`
-    },
-    dateValue() {
-      return this.value ? this.value : this.modelValue
-    },
-  },
-  methods: {
-    selectDate(date) {
-      this.$emit('change', this.toValue(date))
-      this.$emit('update:modelValue', this.toValue(date))
-    },
-    selectCurrentMonthYear() {
-      let date = this.dateValue ? this.getDate(this.dateValue) : this.getDate()
-      if (date === 'Invalid Date') {
-        date = this.getDate()
-      }
-      this.currentYear = date.getFullYear()
-      this.currentMonth = date.getMonth() + 1
-    },
-    prevMonth() {
-      this.changeMonth(-1)
-    },
-    nextMonth() {
-      this.changeMonth(1)
-    },
-    changeMonth(adder) {
-      this.currentMonth = this.currentMonth + adder
-      if (this.currentMonth < 1) {
-        this.currentMonth = 12
-        this.currentYear = this.currentYear - 1
-      }
-      if (this.currentMonth > 12) {
-        this.currentMonth = 1
-        this.currentYear = this.currentYear + 1
-      }
-    },
-    getDatesAfter(date, count) {
-      let incrementer = 1
-      if (count < 0) {
-        incrementer = -1
-        count = Math.abs(count)
-      }
-      let dates = []
-      while (count) {
-        date = this.getDate(
-          date.getFullYear(),
-          date.getMonth(),
-          date.getDate() + incrementer,
-        )
-        dates.push(date)
-        count--
-      }
-      if (incrementer === -1) {
-        return dates.reverse()
-      }
-      return dates
-    },
-
-    getDaysInMonth(monthIndex, year) {
-      let daysInMonthMap = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-      let daysInMonth = daysInMonthMap[monthIndex]
-      if (monthIndex === 1 && this.isLeapYear(year)) {
-        return 29
-      }
-      return daysInMonth
-    },
-
-    isLeapYear(year) {
-      if (year % 400 === 0) return true
-      if (year % 100 === 0) return false
-      if (year % 4 === 0) return true
-      return false
-    },
-
-    toValue(date) {
-      if (!date) {
-        return ''
-      }
-
-      // toISOString is buggy and reduces the day by one
-      // this is because it considers the UTC timestamp
-      // in order to circumvent that we need to use luxon/moment
-      // but that refactor could take some time, so fixing the time difference
-      // as suggested in this answer.
-      // https://stackoverflow.com/a/16084846/3541205
-      date.setHours(0, -date.getTimezoneOffset(), 0, 0)
-      return date.toISOString().slice(0, 10)
-    },
-
-    getDate(...args) {
-      let d = new Date(...args)
-      return d
-    },
-  },
+interface DatePickerProps {
+  value?: string
+  modelValue?: string
+  placeholder?: string
+  formatter?: (date: string) => string
+  readonly?: boolean
+  inputClass?: string | string[] | Record<string, string>
 }
+
+const props = withDefaults(defineProps<DatePickerProps>(), {
+  readonly: false,
+  formatter: undefined,
+})
+
+const emit = defineEmits(['update:modelValue', 'change'])
+
+const currentYear = ref<number>(0)
+const currentMonth = ref<number>(0)
+
+const today = computed(() => getDate())
+
+const dates = computed(() => {
+  if (!(currentYear.value && currentMonth.value)) {
+    return []
+  }
+  const monthIndex = currentMonth.value - 1
+  const year = currentYear.value
+
+  const firstDayOfMonth = getDate(year, monthIndex, 1)
+  const lastDayOfMonth = getDate(year, monthIndex + 1, 0)
+  const leftPaddingCount = firstDayOfMonth.getDay()
+  const rightPaddingCount = 6 - lastDayOfMonth.getDay()
+
+  const leftPadding = getDatesAfter(firstDayOfMonth, -leftPaddingCount)
+  const rightPadding = getDatesAfter(lastDayOfMonth, rightPaddingCount)
+  const daysInMonth = getDaysInMonth(monthIndex, year)
+  const datesInMonth = getDatesAfter(firstDayOfMonth, daysInMonth - 1)
+
+  let dates = [
+    ...leftPadding,
+    firstDayOfMonth,
+    ...datesInMonth,
+    ...rightPadding,
+  ]
+
+  if (dates.length < 42) {
+    const lastDate = dates.at(-1)
+    if (lastDate) {
+      const finalPadding = getDatesAfter(lastDate, 42 - dates.length)
+      dates = dates.concat(...finalPadding)
+    }
+  }
+  return dates
+})
+
+const datesAsWeeks = computed(() => {
+  const datesAsWeeks: Date[][] = []
+  const computedDates = dates.value.slice()
+  while (computedDates.length) {
+    const week = computedDates.splice(0, 7)
+    datesAsWeeks.push(week)
+  }
+  return datesAsWeeks
+})
+
+const formattedMonth = computed(() => {
+  if (!(currentYear.value && currentMonth.value)) {
+    return ''
+  }
+  const date = getDate(currentYear.value, currentMonth.value - 1, 1)
+  const month = date.toLocaleString('en-US', {
+    month: 'long',
+  })
+  return `${month}, ${date.getFullYear()}`
+})
+
+const dateValue = computed(() => {
+  return props.value ? props.value : props.modelValue
+})
+
+function selectDate(date: Date) {
+  emit('change', toValue(date))
+  emit('update:modelValue', toValue(date))
+}
+
+type DateConstructorParam = string | number | Date
+
+function getDate(...args: DateConstructorParam[]): Date {
+  return new Date(...args as [DateConstructorParam])
+}
+
+function toValue(date: Date) {
+  if (!date) {
+    return ''
+  }
+
+  // toISOString is buggy and reduces the day by one
+  // this is because it considers the UTC timestamp
+  // in order to circumvent that we need to use luxon/moment
+  // but that refactor could take some time, so fixing the time difference
+  // as suggested in this answer.
+  // https://stackoverflow.com/a/16084846/3541205
+  date.setHours(0, -date.getTimezoneOffset(), 0, 0)
+  return date.toISOString().slice(0, 10)
+}
+
+function prevMonth() {
+  changeMonth(-1)
+}
+
+function nextMonth() {
+  changeMonth(1)
+}
+
+function changeMonth(adder: number) {
+  currentMonth.value = currentMonth.value + adder
+  if (currentMonth.value < 1) {
+    currentMonth.value = 12
+    currentYear.value = currentYear.value - 1
+  }
+  if (currentMonth.value > 12) {
+    currentMonth.value = 1
+    currentYear.value = currentYear.value + 1
+  }
+}
+
+function getDatesAfter(date: Date, count: number) {
+  let incrementer = 1
+  if (count < 0) {
+    incrementer = -1
+    count = Math.abs(count)
+  }
+  const dates: Date[] = []
+
+  while (count) {
+    date = getDate(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate() + incrementer,
+    )
+    dates.push(date)
+    count--
+  }
+
+  if (incrementer === -1) {
+    return dates.reverse()
+  }
+  return dates
+}
+
+function getDaysInMonth(monthIndex: number, year: number) {
+  const daysInMonthMap = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+  const daysInMonth = daysInMonthMap[monthIndex]
+  if (monthIndex === 1 && isLeapYear(year)) {
+    return 29
+  }
+  return daysInMonth
+}
+
+function isLeapYear(year: number) {
+  if (year % 400 === 0) return true
+  if (year % 100 === 0) return false
+  if (year % 4 === 0) return true
+  return false
+}
+
+function selectCurrentMonthYear() {
+  let date = dateValue.value ? getDate(dateValue.value) : getDate()
+  if (date.toString() === 'Invalid Date') {
+    date = getDate()
+  }
+  currentYear.value = date.getFullYear()
+  currentMonth.value = date.getMonth() + 1
+}
+
+onMounted(() => selectCurrentMonthYear())
 </script>

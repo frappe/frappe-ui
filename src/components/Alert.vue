@@ -36,8 +36,8 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { computed } from "vue"
+<script setup lang='ts'>
+import { computed } from 'vue'
 
 interface AlertProps {
   title?: string
