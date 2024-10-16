@@ -22,7 +22,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { ref, watch } from 'vue'
 import FeatherIcon from '../FeatherIcon.vue'
 
 interface RatingProps {
@@ -53,6 +53,7 @@ const iconClasses = (index) => {
 			xl: 'size-7',
 		}[props.size],
 	]
+
 	if (index <= hoveredRating.value && index > rating.value) {
 		classes.push('fill-yellow-200')
 	} else if (index <= rating.value) {
