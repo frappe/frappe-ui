@@ -51,9 +51,9 @@ const classes = computed(() => {
   let subtleClasses = {
     gray: 'text-text-icons-gray-6 bg-surface-gray-2',
     blue: 'text-text-icons-blue-2 bg-surface-blue-1',
-    green: 'text-text-green-800 bg-surface-green-2',
+    green: 'text-text-icons-green-3 bg-surface-green-2',
     orange: 'text-text-icons-amber-3 bg-surface-amber-1',
-    red: 'text-text-icon-red-4 bg-surface-red-1',
+    red: 'text-text-icons-red-4 bg-surface-red-1',
   }[props.theme]
 
   let outlineClasses = {
