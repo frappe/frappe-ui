@@ -15,9 +15,7 @@
           >
             {{ title }}
           </p>
-          <p v-if="text" class="text-base text-gray-600">
-            {{ text }}
-          </p>
+          <p v-if="text" class="text-base text-gray-600" v-html="text"></p>
         </slot>
       </div>
       <div class="ml-auto pl-2">
