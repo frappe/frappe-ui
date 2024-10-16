@@ -1,5 +1,5 @@
-import { defineConfig } from 'histoire'
 import { HstVue } from '@histoire/plugin-vue'
+import { defineConfig } from 'histoire'
 import resolveConfig from 'tailwindcss/resolveConfig'
 import tailwindConfig from './tailwind.config.js'
 
@@ -11,7 +11,8 @@ export default defineConfig({
   theme: {
     title: 'Frappe UI',
     defaultColorScheme: 'light',
-    hideColorSchemeSwitch: true,
+    hideColorSchemeSwitch: false,
+    storeColorScheme: false,
     favicon: 'frappe-ui-square.png',
     logo: {
       square: './frappe-ui-square.png',
