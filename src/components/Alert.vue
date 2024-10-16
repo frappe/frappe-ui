@@ -36,22 +36,21 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'Alert',
-  props: {
-    title: String,
-    type: {
-      type: String,
-      default: 'warning',
-    },
-  },
-  computed: {
-    classes() {
-      return {
-        warning: 'text-gray-700 bg-blue-50',
-      }[this.type]
-    },
-  },
+<script setup lang="ts">
+import { computed } from "vue"
+
+interface AlertProps {
+  title?: string
+  type?: 'warning'
 }
+
+const props = withDefaults(defineProps<AlertProps>(), {
+  type: 'warning',
+})
+
+const classes = computed(() => {
+  return {
+    warning: 'text-gray-700 bg-blue-50',
+  }[props.type]
+})
 </script>
