@@ -1,6 +1,8 @@
 const plugin = require('tailwindcss/plugin')
+import espressoVariables from './espressoVariables'
 
 module.exports = {
+  darkMode: ['selector', '[data-theme="dark"]'],
   theme: {
     extend: {
       spacing: {
@@ -251,6 +253,7 @@ module.exports = {
         800: 'rgba(0, 0, 0, 0.81)',
         900: 'rgba(0, 0, 0, 0.90)',
       },
+      ...espressoVariables,
     }),
     borderRadius: {
       none: '0px', // 0
