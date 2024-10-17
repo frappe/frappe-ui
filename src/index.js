@@ -36,11 +36,11 @@ export { default as Tabs } from './components/Tabs.vue'
 export { default as TextInput } from './components/TextInput.vue'
 export { default as Textarea } from './components/Textarea.vue'
 export {
-	TextEditor,
-	TextEditorFixedMenu,
-	TextEditorBubbleMenu,
-	TextEditorFloatingMenu,
-	TextEditorContent,
+  TextEditor,
+  TextEditorFixedMenu,
+  TextEditorBubbleMenu,
+  TextEditorFloatingMenu,
+  TextEditorContent,
 } from './components/TextEditor'
 export { default as ListView } from './components/ListView/ListView.vue'
 export { default as List } from './components/ListView/ListView.vue'
@@ -79,13 +79,13 @@ export { usePageMeta } from './utils/pageMeta.js'
 
 // data-fetching, resources
 export {
-	createResource,
-	createDocumentResource,
-	createListResource,
-	getCachedResource,
-	getCachedDocumentResource,
-	getCachedListResource,
-	resourcesPlugin,
+  createResource,
+  createDocumentResource,
+  createListResource,
+  getCachedResource,
+  getCachedDocumentResource,
+  getCachedListResource,
+  resourcesPlugin,
 } from './resources/index.js'
 export { request } from './utils/request.js'
 export { frappeRequest } from './utils/frappeRequest.js'
