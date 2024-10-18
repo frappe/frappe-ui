@@ -1,5 +1,5 @@
 const plugin = require('tailwindcss/plugin')
-import espressoVariables from './espressoVariables'
+const espressoVariables = require('./espressoVariables.js')
 
 module.exports = {
   darkMode: ['selector', '[data-theme="dark"]'],

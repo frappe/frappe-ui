@@ -80,4 +80,4 @@ const espressoColors = {
   },
 }
 
-export default espressoColors
+module.exports = espressoColors
