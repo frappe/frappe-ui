@@ -28,6 +28,9 @@ jobs:
       - name: Build Histoire
         run: yarn run story:build
 
+      - name: Create CNAME file
+        run: echo 'ui.frappe.io' > ./.histoire/dist/CNAME
+
       - name: Deploy Histoire to
 
         uses: peaceiris/actions-gh-pages@v3
