@@ -1,9 +1,8 @@
 name: Build and Deploy Storybook
 
 on:
-  pull_request:
-    types:
-      - closed
+  push:
+    branches: [ main ]
 
 permissions:
   contents: write
