@@ -49,10 +49,12 @@
           <Button
             :label="'Today'"
             class="text-sm"
-            @click="() => {
-              selectDate(getDate())
-              togglePopover()
-            }"
+            @click="
+              () => {
+                selectDate(getDate())
+                togglePopover()
+              }
+            "
           />
         </div>
         <div
@@ -111,7 +113,7 @@
   </Popover>
 </template>
 
-<script setup lang='ts'>
+<script setup lang="ts">
 import { computed, ref, onMounted } from 'vue'
 
 import Input from './Input.vue'
@@ -208,7 +210,7 @@ function selectDate(date: Date) {
 type DateConstructorParam = string | number | Date
 
 function getDate(...args: DateConstructorParam[]): Date {
-  return new Date(...args as [DateConstructorParam])
+  return new Date(...(args as [DateConstructorParam]))
 }
 
 function toValue(date: Date) {
