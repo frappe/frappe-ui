@@ -4,9 +4,11 @@ function getDate(...args: DateConstructorParam[]): Date {
   return new Date(...(args as [DateConstructorParam]))
 }
 
-function getDateValue(date: Date) {
-  if (!date) {
-    return ''
+function getDateValue(date: Date | string) {
+  if (!date || date.toString() === 'Invalid Date') return ''
+
+  if (typeof date === 'string') {
+    date = new Date(date)
   }
 
   // toISOString is buggy and reduces the day by one
