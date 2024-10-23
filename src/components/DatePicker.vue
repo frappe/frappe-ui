@@ -135,7 +135,7 @@ interface DatePickerProps {
   placeholder?: string
   formatter?: (date: string) => string
   readonly?: boolean
-  inputClass?: string | string[] | Record<string, string>
+  inputClass?: string | Array<string> | Record<string, boolean>
 }
 
 const props = withDefaults(defineProps<DatePickerProps>(), {

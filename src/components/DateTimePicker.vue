@@ -29,7 +29,7 @@
             />
           </Button>
           <div class="flex-1 text-center text-base font-medium text-gray-700">
-            {{ formatMonth }}
+            {{ formattedMonth }}
           </div>
           <Button variant="ghost" class="h-7 w-7" @click="nextMonth">
             <FeatherIcon
@@ -44,12 +44,22 @@
             class="text-sm"
             type="text"
             :value="dateValue"
-            @change="updateDate($event.target.value) || togglePopover()"
+            @change="
+              (e: Event) => {
+                updateDate((e.target as HTMLInputElement).value)
+                togglePopover()
+              }
+            "
           />
           <Button
             :label="'Now'"
             class="text-sm"
-            @click="selectDate(getDate(), false, true) || togglePopover()"
+            @click="
+              () => {
+                selectDate(getDate(), false, true)
+                togglePopover()
+              }
+            "
           />
         </div>
         <div
@@ -105,7 +115,12 @@
                 min="0"
                 max="23"
                 step="1"
-                @change="() => changeTime() || togglePopover()"
+                @change="
+                  () => {
+                    changeTime()
+                    togglePopover()
+                  }
+                "
               />
             </div>
             <div class="slider flex min-h-4 items-center justify-center">
@@ -116,7 +131,12 @@
                 min="0"
                 max="59"
                 step="1"
-                @change="() => changeTime() || togglePopover()"
+                @change="
+                  () => {
+                    changeTime()
+                    togglePopover()
+                  }
+                "
               />
             </div>
             <div class="slider flex min-h-4 items-center justify-center">
@@ -127,7 +147,12 @@
                 min="0"
                 max="59"
                 step="1"
-                @change="() => changeTime() || togglePopover()"
+                @change="
+                  () => {
+                    changeTime()
+                    togglePopover()
+                  }
+                "
               />
             </div>
           </div>
@@ -149,219 +174,177 @@
   </Popover>
 </template>
 
-<script>
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue'
+
 import Input from './Input.vue'
 import Button from './Button.vue'
 import Popover from './Popover.vue'
 import FeatherIcon from './FeatherIcon.vue'
 import TextInput from './TextInput.vue'
-export default {
-  name: 'DateTimePicker',
-  props: {
-    value: {
-      type: String,
-    },
-    modelValue: {
-      type: String,
-    },
-    placeholder: {
-      type: String,
-    },
-    formatter: {
-      type: Function,
-      default: null,
-    },
-    readonly: {
-      type: Boolean,
-    },
-    inputClass: {
-      type: [String, Array, Object],
-    },
-  },
-  emits: ['update:modelValue', 'change'],
-  components: {
-    Popover,
-    Input,
-    Button,
-    FeatherIcon,
-    TextInput,
-  },
-  data() {
-    return {
-      currentYear: null,
-      currentMonth: null,
-      hour: 0,
-      minute: 0,
-      second: 0,
-    }
-  },
-  created() {
-    this.selectCurrentMonthYear()
-  },
-  computed: {
-    today() {
-      return this.getDate()
-    },
-    datesAsWeeks() {
-      let datesAsWeeks = []
-      let dates = this.dates.slice()
-      while (dates.length) {
-        let week = dates.splice(0, 7)
-        datesAsWeeks.push(week)
-      }
-      return datesAsWeeks
-    },
-    dates() {
-      if (!(this.currentYear && this.currentMonth)) {
-        return []
-      }
-      let monthIndex = this.currentMonth - 1
-      let year = this.currentYear
 
-      let firstDayOfMonth = this.getDate(year, monthIndex, 1)
-      let lastDayOfMonth = this.getDate(year, monthIndex + 1, 0)
-      let leftPaddingCount = firstDayOfMonth.getDay()
-      let rightPaddingCount = 6 - lastDayOfMonth.getDay()
+import { getDate, getDatesAfter, getDaysInMonth } from '../utils/dates'
 
-      let leftPadding = this.getDatesAfter(firstDayOfMonth, -leftPaddingCount)
-      let rightPadding = this.getDatesAfter(lastDayOfMonth, rightPaddingCount)
-      let daysInMonth = this.getDaysInMonth(monthIndex, year)
-      let datesInMonth = this.getDatesAfter(firstDayOfMonth, daysInMonth - 1)
-
-      let dates = [
-        ...leftPadding,
-        firstDayOfMonth,
-        ...datesInMonth,
-        ...rightPadding,
-      ]
-      if (dates.length < 42) {
-        const finalPadding = this.getDatesAfter(dates.at(-1), 42 - dates.length)
-        dates = dates.concat(...finalPadding)
-      }
-      return dates
-    },
-    formatMonth() {
-      let date = this.getDate(this.currentYear, this.currentMonth - 1, 1)
-      let month = date.toLocaleString('en-US', {
-        month: 'long',
-      })
-      return `${month}, ${date.getFullYear()}`
-    },
-    dateValue() {
-      return this.value ? this.value : this.modelValue
-    },
-  },
-  methods: {
-    changeTime() {
-      let date = this.dateValue ? this.getDate(this.dateValue) : this.getDate()
-      this.selectDate(date, true)
-    },
-    selectDate(date, isTimeChange = false, isNow = false) {
-      if (!isTimeChange) {
-        let currentDate =
-          this.dateValue && !isNow
-            ? this.getDate(this.dateValue)
-            : this.getDate()
-        this.hour = currentDate.getHours()
-        this.minute = currentDate.getMinutes()
-        this.second = currentDate.getSeconds()
-      }
-
-      this.$emit('change', this.toValue(date))
-      this.$emit('update:modelValue', this.toValue(date))
-    },
-    selectCurrentMonthYear() {
-      let date = this.dateValue ? this.getDate(this.dateValue) : this.getDate()
-      if (date === 'Invalid Date') {
-        date = this.getDate()
-      }
-      this.currentYear = date.getFullYear()
-      this.currentMonth = date.getMonth() + 1
-      this.hour = date.getHours()
-      this.minute = date.getMinutes()
-      this.second = date.getSeconds()
-    },
-    prevMonth() {
-      this.changeMonth(-1)
-    },
-    nextMonth() {
-      this.changeMonth(1)
-    },
-    changeMonth(adder) {
-      this.currentMonth = this.currentMonth + adder
-      if (this.currentMonth < 1) {
-        this.currentMonth = 12
-        this.currentYear = this.currentYear - 1
-      }
-      if (this.currentMonth > 12) {
-        this.currentMonth = 1
-        this.currentYear = this.currentYear + 1
-      }
-    },
-    getDatesAfter(date, count) {
-      let incrementer = 1
-      if (count < 0) {
-        incrementer = -1
-        count = Math.abs(count)
-      }
-      let dates = []
-      while (count) {
-        date = this.getDate(
-          date.getFullYear(),
-          date.getMonth(),
-          date.getDate() + incrementer,
-        )
-        dates.push(date)
-        count--
-      }
-      if (incrementer === -1) {
-        return dates.reverse()
-      }
-      return dates
-    },
-    getDaysInMonth(monthIndex, year) {
-      let daysInMonthMap = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-      let daysInMonth = daysInMonthMap[monthIndex]
-      if (monthIndex === 1 && this.isLeapYear(year)) {
-        return 29
-      }
-      return daysInMonth
-    },
-    isLeapYear(year) {
-      if (year % 400 === 0) return true
-      if (year % 100 === 0) return false
-      if (year % 4 === 0) return true
-      return false
-    },
-    twoDigit(number) {
-      return number.toString().padStart(2, '0')
-    },
-    toValue(date) {
-      if (!date) return ''
-
-      date.setHours(this.hour, this.minute, this.second, 0)
-      // "YYYY-MM-DD HH:MM:SS"
-      return `${date.getFullYear()}-${this.twoDigit(
-        date.getMonth() + 1,
-      )}-${this.twoDigit(date.getDate())} ${this.twoDigit(
-        date.getHours(),
-      )}:${this.twoDigit(date.getMinutes())}:${this.twoDigit(
-        date.getSeconds(),
-      )}`
-    },
-    getDate(...args) {
-      let d = new Date(...args)
-      return d
-    },
-    updateDate(date) {
-      date = this.getDate(date)
-      this.hour = date.getHours()
-      this.minute = date.getMinutes()
-      this.second = date.getSeconds()
-      this.selectDate(date, true)
-    },
-  },
+interface DateTimePickerProps {
+  value?: string
+  modelValue?: string
+  placeholder?: string
+  formatter?: (date: string) => string
+  readonly?: boolean
+  inputClass?: string | Array<string> | Record<string, boolean>
 }
+
+const props = withDefaults(defineProps<DateTimePickerProps>(), {
+  readonly: false,
+  formatter: undefined,
+})
+const emit = defineEmits(['update:modelValue', 'change'])
+
+const currentYear = ref<number>(0)
+const currentMonth = ref<number>(0)
+const hour = ref<number>(0)
+const minute = ref<number>(0)
+const second = ref<number>(0)
+
+const today = computed(() => getDate())
+const dateValue = computed(() => {
+  return props.value ? props.value : props.modelValue
+})
+
+const dates = computed(() => {
+  if (!(currentYear.value && currentMonth.value)) {
+    return []
+  }
+  const monthIndex = currentMonth.value - 1
+  const year = currentYear.value
+
+  const firstDayOfMonth = getDate(year, monthIndex, 1)
+  const lastDayOfMonth = getDate(year, monthIndex + 1, 0)
+  const leftPaddingCount = firstDayOfMonth.getDay()
+  const rightPaddingCount = 6 - lastDayOfMonth.getDay()
+
+  const leftPadding = getDatesAfter(firstDayOfMonth, -leftPaddingCount)
+  const rightPadding = getDatesAfter(lastDayOfMonth, rightPaddingCount)
+  const daysInMonth = getDaysInMonth(monthIndex, year)
+  const datesInMonth = getDatesAfter(firstDayOfMonth, daysInMonth - 1)
+
+  let dates = [
+    ...leftPadding,
+    firstDayOfMonth,
+    ...datesInMonth,
+    ...rightPadding,
+  ]
+
+  if (dates.length < 42) {
+    const lastDate = dates.at(-1)
+    if (lastDate) {
+      const finalPadding = getDatesAfter(lastDate, 42 - dates.length)
+      dates = dates.concat(...finalPadding)
+    }
+  }
+  return dates
+})
+
+const datesAsWeeks = computed(() => {
+  const datesAsWeeks: Date[][] = []
+  const computedDates = dates.value.slice()
+  while (computedDates.length) {
+    const week = computedDates.splice(0, 7)
+    datesAsWeeks.push(week)
+  }
+  return datesAsWeeks
+})
+
+const formattedMonth = computed(() => {
+  if (!(currentYear.value && currentMonth.value)) {
+    return ''
+  }
+  const date = getDate(currentYear.value, currentMonth.value - 1, 1)
+  const month = date.toLocaleString('en-US', {
+    month: 'long',
+  })
+  return `${month}, ${date.getFullYear()}`
+})
+
+function changeTime() {
+  let date = dateValue.value ? getDate(dateValue.value) : getDate()
+  selectDate(date, true)
+}
+
+function selectDate(
+  date: Date,
+  isTimeChange: boolean = false,
+  isNow: boolean = false,
+) {
+  if (!isTimeChange) {
+    let currentDate =
+      dateValue.value && !isNow ? getDate(dateValue.value) : getDate()
+    hour.value = currentDate.getHours()
+    minute.value = currentDate.getMinutes()
+    second.value = currentDate.getSeconds()
+  }
+
+  emit('change', toValue(date))
+  emit('update:modelValue', toValue(date))
+}
+
+function toValue(date: Date) {
+  if (!date) return ''
+
+  date.setHours(hour.value, minute.value, second.value, 0)
+  // "YYYY-MM-DD HH:MM:SS"
+  return `${date.getFullYear()}-${twoDigit(
+    date.getMonth() + 1,
+  )}-${twoDigit(date.getDate())} ${twoDigit(
+    date.getHours(),
+  )}:${twoDigit(date.getMinutes())}:${twoDigit(date.getSeconds())}`
+}
+
+function twoDigit(number: number) {
+  return number.toString().padStart(2, '0')
+}
+
+function prevMonth() {
+  changeMonth(-1)
+}
+
+function nextMonth() {
+  changeMonth(1)
+}
+
+function changeMonth(adder: number) {
+  currentMonth.value = currentMonth.value + adder
+  if (currentMonth.value < 1) {
+    currentMonth.value = 12
+    currentYear.value = currentYear.value - 1
+  }
+  if (currentMonth.value > 12) {
+    currentMonth.value = 1
+    currentYear.value = currentYear.value + 1
+  }
+}
+
+function updateDate(date: Date) {
+  date = getDate(date)
+  hour.value = date.getHours()
+  minute.value = date.getMinutes()
+  second.value = date.getSeconds()
+  selectDate(date, true)
+}
+
+function selectCurrentMonthYear() {
+  let date = dateValue.value ? getDate(dateValue.value) : getDate()
+  if (date.toString() === 'Invalid Date') {
+    date = getDate()
+  }
+  currentYear.value = date.getFullYear()
+  currentMonth.value = date.getMonth() + 1
+  hour.value = date.getHours()
+  minute.value = date.getMinutes()
+  second.value = date.getSeconds()
+}
+
+onMounted(() => selectCurrentMonthYear())
 </script>
 
 <style scoped>
