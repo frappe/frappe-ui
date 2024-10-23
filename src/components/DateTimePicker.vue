@@ -183,7 +183,8 @@ import Popover from './Popover.vue'
 import FeatherIcon from './FeatherIcon.vue'
 import TextInput from './TextInput.vue'
 
-import { getDate, getDatesAfter, getDaysInMonth } from '../utils/dates'
+import { getDate } from '../utils/dates'
+import { useDatePicker } from '../utils/useDatePicker'
 
 interface DateTimePickerProps {
   value?: string
@@ -200,70 +201,22 @@ const props = withDefaults(defineProps<DateTimePickerProps>(), {
 })
 const emit = defineEmits(['update:modelValue', 'change'])
 
-const currentYear = ref<number>(0)
-const currentMonth = ref<number>(0)
+const {
+  currentYear,
+  currentMonth,
+  today,
+  datesAsWeeks,
+  formattedMonth,
+  prevMonth,
+  nextMonth,
+} = useDatePicker()
+
 const hour = ref<number>(0)
 const minute = ref<number>(0)
 const second = ref<number>(0)
 
-const today = computed(() => getDate())
 const dateValue = computed(() => {
   return props.value ? props.value : props.modelValue
-})
-
-const dates = computed(() => {
-  if (!(currentYear.value && currentMonth.value)) {
-    return []
-  }
-  const monthIndex = currentMonth.value - 1
-  const year = currentYear.value
-
-  const firstDayOfMonth = getDate(year, monthIndex, 1)
-  const lastDayOfMonth = getDate(year, monthIndex + 1, 0)
-  const leftPaddingCount = firstDayOfMonth.getDay()
-  const rightPaddingCount = 6 - lastDayOfMonth.getDay()
-
-  const leftPadding = getDatesAfter(firstDayOfMonth, -leftPaddingCount)
-  const rightPadding = getDatesAfter(lastDayOfMonth, rightPaddingCount)
-  const daysInMonth = getDaysInMonth(monthIndex, year)
-  const datesInMonth = getDatesAfter(firstDayOfMonth, daysInMonth - 1)
-
-  let dates = [
-    ...leftPadding,
-    firstDayOfMonth,
-    ...datesInMonth,
-    ...rightPadding,
-  ]
-
-  if (dates.length < 42) {
-    const lastDate = dates.at(-1)
-    if (lastDate) {
-      const finalPadding = getDatesAfter(lastDate, 42 - dates.length)
-      dates = dates.concat(...finalPadding)
-    }
-  }
-  return dates
-})
-
-const datesAsWeeks = computed(() => {
-  const datesAsWeeks: Date[][] = []
-  const computedDates = dates.value.slice()
-  while (computedDates.length) {
-    const week = computedDates.splice(0, 7)
-    datesAsWeeks.push(week)
-  }
-  return datesAsWeeks
-})
-
-const formattedMonth = computed(() => {
-  if (!(currentYear.value && currentMonth.value)) {
-    return ''
-  }
-  const date = getDate(currentYear.value, currentMonth.value - 1, 1)
-  const month = date.toLocaleString('en-US', {
-    month: 'long',
-  })
-  return `${month}, ${date.getFullYear()}`
 })
 
 function changeTime() {
@@ -272,7 +225,7 @@ function changeTime() {
 }
 
 function selectDate(
-  date: Date,
+  date: Date | string,
   isTimeChange: boolean = false,
   isNow: boolean = false,
 ) {
@@ -288,8 +241,12 @@ function selectDate(
   emit('update:modelValue', toValue(date))
 }
 
-function toValue(date: Date) {
-  if (!date) return ''
+function toValue(date: Date | string) {
+  if (!date || date.toString() === 'Invalid Date') return ''
+
+  if (typeof date === 'string') {
+    date = new Date(date)
+  }
 
   date.setHours(hour.value, minute.value, second.value, 0)
   // "YYYY-MM-DD HH:MM:SS"
@@ -304,27 +261,7 @@ function twoDigit(number: number) {
   return number.toString().padStart(2, '0')
 }
 
-function prevMonth() {
-  changeMonth(-1)
-}
-
-function nextMonth() {
-  changeMonth(1)
-}
-
-function changeMonth(adder: number) {
-  currentMonth.value = currentMonth.value + adder
-  if (currentMonth.value < 1) {
-    currentMonth.value = 12
-    currentYear.value = currentYear.value - 1
-  }
-  if (currentMonth.value > 12) {
-    currentMonth.value = 1
-    currentYear.value = currentYear.value + 1
-  }
-}
-
-function updateDate(date: Date) {
+function updateDate(date: Date | string) {
   date = getDate(date)
   hour.value = date.getHours()
   minute.value = date.getMinutes()

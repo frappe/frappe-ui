@@ -118,12 +118,8 @@ import Popover from './Popover.vue'
 import FeatherIcon from './FeatherIcon.vue'
 import TextInput from './TextInput.vue'
 
-import {
-  getDate,
-  getDateValue,
-  getDatesAfter,
-  getDaysInMonth,
-} from '../utils/dates'
+import { getDate, getDateValue } from '../utils/dates'
+import { useDatePicker } from '../utils/useDatePicker'
 
 interface DateRangePickerProps {
   value?: string
@@ -140,8 +136,15 @@ const props = withDefaults(defineProps<DateRangePickerProps>(), {
 
 const emit = defineEmits(['update:modelValue', 'change'])
 
-const currentYear = ref<number>(0)
-const currentMonth = ref<number>(0)
+const {
+  currentYear,
+  currentMonth,
+  today,
+  datesAsWeeks,
+  formattedMonth,
+  prevMonth,
+  nextMonth,
+} = useDatePicker()
 
 const dateValue = computed(() => {
   return props.value ? props.value : props.modelValue
@@ -149,63 +152,6 @@ const dateValue = computed(() => {
 
 const fromDate = ref<string>(dateValue.value ? dateValue.value[0] : '')
 const toDate = ref<string>(dateValue.value ? dateValue.value[1] : '')
-
-const today = computed(() => getDate())
-
-const dates = computed(() => {
-  if (!(currentYear.value && currentMonth.value)) {
-    return []
-  }
-  const monthIndex = currentMonth.value - 1
-  const year = currentYear.value
-
-  const firstDayOfMonth = getDate(year, monthIndex, 1)
-  const lastDayOfMonth = getDate(year, monthIndex + 1, 0)
-  const leftPaddingCount = firstDayOfMonth.getDay()
-  const rightPaddingCount = 6 - lastDayOfMonth.getDay()
-
-  const leftPadding = getDatesAfter(firstDayOfMonth, -leftPaddingCount)
-  const rightPadding = getDatesAfter(lastDayOfMonth, rightPaddingCount)
-  const daysInMonth = getDaysInMonth(monthIndex, year)
-  const datesInMonth = getDatesAfter(firstDayOfMonth, daysInMonth - 1)
-
-  let dates = [
-    ...leftPadding,
-    firstDayOfMonth,
-    ...datesInMonth,
-    ...rightPadding,
-  ]
-
-  if (dates.length < 42) {
-    const lastDate = dates.at(-1)
-    if (lastDate) {
-      const finalPadding = getDatesAfter(lastDate, 42 - dates.length)
-      dates = dates.concat(...finalPadding)
-    }
-  }
-  return dates
-})
-
-const datesAsWeeks = computed(() => {
-  const datesAsWeeks: Date[][] = []
-  const computedDates = dates.value.slice()
-  while (computedDates.length) {
-    const week = computedDates.splice(0, 7)
-    datesAsWeeks.push(week)
-  }
-  return datesAsWeeks
-})
-
-const formattedMonth = computed(() => {
-  if (!(currentYear.value && currentMonth.value)) {
-    return ''
-  }
-  const date = getDate(currentYear.value, currentMonth.value - 1, 1)
-  const month = date.toLocaleString('en-US', {
-    month: 'long',
-  })
-  return `${month}, ${date.getFullYear()}`
-})
 
 function handleDateClick(date: Date) {
   if (fromDate.value && toDate.value) {
@@ -243,26 +189,6 @@ function selectDates() {
   }
   emit('change', val)
   emit('update:modelValue', val)
-}
-
-function prevMonth() {
-  changeMonth(-1)
-}
-
-function nextMonth() {
-  changeMonth(1)
-}
-
-function changeMonth(adder: number) {
-  currentMonth.value = currentMonth.value + adder
-  if (currentMonth.value < 1) {
-    currentMonth.value = 12
-    currentYear.value = currentYear.value - 1
-  }
-  if (currentMonth.value > 12) {
-    currentMonth.value = 1
-    currentYear.value = currentYear.value + 1
-  }
 }
 
 function selectCurrentMonthYear() {
