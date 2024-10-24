@@ -16,7 +16,9 @@
         v-bind="$attrs"
       />
     </template>
+
     <template #body="{ togglePopover }">
+      <!-- Month Switcher -->
       <div
         class="mt-2 w-fit select-none divide-y rounded-lg bg-white text-base shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
       >
@@ -39,6 +41,8 @@
             />
           </Button>
         </div>
+
+        <!-- Date Input -->
         <div class="flex items-center justify-center gap-1 p-1">
           <TextInput
             class="text-sm"
@@ -57,6 +61,8 @@
             "
           />
         </div>
+
+        <!-- Calendar -->
         <div
           class="flex flex-col items-center justify-center p-1 text-gray-800"
         >
@@ -96,13 +102,15 @@
             </div>
           </div>
         </div>
+
+        <!-- Actions -->
         <div class="flex justify-end p-1">
           <Button
             :label="'Clear'"
             class="text-sm"
             @click="
               () => {
-                selectDate(new Date(''))
+                selectDate('')
                 togglePopover()
               }
             "
@@ -125,14 +133,7 @@ import TextInput from './TextInput.vue'
 import { getDate, getDateValue } from '../utils/dates'
 import { useDatePicker } from '../utils/useDatePicker'
 
-interface DatePickerProps {
-  value?: string
-  modelValue?: string
-  placeholder?: string
-  formatter?: (date: string) => string
-  readonly?: boolean
-  inputClass?: string | Array<string> | Record<string, boolean>
-}
+import type { DatePickerProps } from './types/DatePicker'
 
 const props = withDefaults(defineProps<DatePickerProps>(), {
   readonly: false,
@@ -155,7 +156,7 @@ const dateValue = computed(() => {
   return props.value ? props.value : props.modelValue
 })
 
-function selectDate(date: Date) {
+function selectDate(date: Date | string) {
   emit('change', getDateValue(date))
   emit('update:modelValue', getDateValue(date))
 }

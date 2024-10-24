@@ -16,7 +16,9 @@
         v-bind="$attrs"
       />
     </template>
+
     <template #body="{ togglePopover }">
+      <!-- Month Switcher -->
       <div
         class="mt-2 w-fit select-none divide-y rounded-lg bg-white text-base shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
       >
@@ -39,6 +41,8 @@
             />
           </Button>
         </div>
+
+        <!-- Date Time Input -->
         <div class="flex items-center justify-center gap-1 p-1">
           <TextInput
             class="text-sm"
@@ -62,6 +66,8 @@
             "
           />
         </div>
+
+        <!-- Date Picker -->
         <div
           class="flex flex-col items-center justify-center p-1 text-gray-800"
         >
@@ -101,6 +107,8 @@
             </div>
           </div>
         </div>
+
+        <!-- Time Picker -->
         <div class="flex items-center justify-around gap-2 p-1">
           <div>
             {{ twoDigit(hour) }} : {{ twoDigit(minute) }} :
@@ -157,6 +165,8 @@
             </div>
           </div>
         </div>
+
+        <!-- Actions -->
         <div class="flex justify-end p-1">
           <Button
             :label="'Clear'"
@@ -186,16 +196,9 @@ import TextInput from './TextInput.vue'
 import { getDate } from '../utils/dates'
 import { useDatePicker } from '../utils/useDatePicker'
 
-interface DateTimePickerProps {
-  value?: string
-  modelValue?: string
-  placeholder?: string
-  formatter?: (date: string) => string
-  readonly?: boolean
-  inputClass?: string | Array<string> | Record<string, boolean>
-}
+import type { DatePickerProps } from './types/DatePicker'
 
-const props = withDefaults(defineProps<DateTimePickerProps>(), {
+const props = withDefaults(defineProps<DatePickerProps>(), {
   readonly: false,
   formatter: undefined,
 })
