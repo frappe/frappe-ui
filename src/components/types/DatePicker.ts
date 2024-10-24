@@ -6,3 +6,8 @@ export interface DatePickerProps {
   readonly?: boolean
   inputClass?: string | Array<string> | Record<string, boolean>
 }
+
+export type DatePickerEmits = {
+  (event: 'update:modelValue', value: string): void
+  (event: 'change', value: string): void
+}

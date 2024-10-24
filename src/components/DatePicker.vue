@@ -133,14 +133,14 @@ import TextInput from './TextInput.vue'
 import { getDate, getDateValue } from '../utils/dates'
 import { useDatePicker } from '../utils/useDatePicker'
 
-import type { DatePickerProps } from './types/DatePicker'
+import type { DatePickerEmits, DatePickerProps } from './types/DatePicker'
 
 const props = withDefaults(defineProps<DatePickerProps>(), {
   readonly: false,
   formatter: undefined,
 })
 
-const emit = defineEmits(['update:modelValue', 'change'])
+const emit = defineEmits<DatePickerEmits>()
 
 const {
   currentYear,

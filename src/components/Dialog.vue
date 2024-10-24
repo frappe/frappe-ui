@@ -193,7 +193,12 @@ const props = withDefaults(defineProps<DialogProps>(), {
   options: () => ({}),
   disableOutsideClickToClose: false,
 })
-const emit = defineEmits(['update:modelValue', 'close', 'after-leave'])
+
+const emit = defineEmits<{
+  (event: 'update:modelValue', value: boolean): void
+  (event: 'close'): void
+  (event: 'after-leave'): void
+}>()
 
 const dialogActions = ref<Array<DialogAction>>([])
 watch(
