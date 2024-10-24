@@ -150,12 +150,7 @@ import {
 import { computed, ref, watch } from 'vue'
 import Button from './Button.vue'
 import FeatherIcon from './FeatherIcon.vue'
-
-type DialogAction = {
-  label: string
-  onClick?: (close: () => void) => Promise<void> | void
-  [key: string]: any
-}
+import { ButtonProps } from './types/Button'
 
 type DialogIcon = {
   name: string
@@ -182,6 +177,10 @@ type DialogOptions = {
   actions?: Array<DialogAction>
   // default position = 'center'
   position?: 'top' | 'center'
+}
+
+type DialogAction = ButtonProps & {
+  onClick?: (close: () => void) => Promise<void> | void
 }
 
 interface DialogProps {
@@ -253,32 +252,32 @@ const icon = computed(() => {
 })
 
 const dialogPositionClasses = computed(() => {
-  let position = props.options?.position || 'center'
+  const position = props.options?.position || 'center'
   return {
-    'justify-center': position === 'center',
-    'pt-[20vh]': position === 'top',
-  }
+    center: 'justify-center',
+    top: 'pt-[20vh]',
+  }[position]
 })
 
 const dialogIconBgClasses = computed(() => {
   const appearance = icon.value?.appearance
+  if (!appearance) return 'bg-gray-100'
   return {
-    'bg-gray-100': !appearance,
-    'bg-yellow-100': appearance === 'warning',
-    'bg-blue-100': appearance === 'info',
-    'bg-red-100': appearance === 'danger',
-    'bg-green-100': appearance === 'success',
-  }
+    warning: 'bg-yellow-100',
+    info: 'bg-blue-100',
+    danger: 'bg-red-100',
+    success: 'bg-green-100',
+  }[appearance]
 })
 
 const dialogIconClasses = computed(() => {
   const appearance = icon.value?.appearance
+  if (!appearance) return 'text-gray-600'
   return {
-    'text-gray-600': !appearance,
-    'text-yellow-600': appearance === 'warning',
-    'text-blue-600': appearance === 'info',
-    'text-red-600': appearance === 'danger',
-    'text-green-600': appearance === 'success',
-  }
+    warning: 'text-yellow-600',
+    info: 'text-blue-600',
+    danger: 'text-red-600',
+    success: 'text-green-600',
+  }[appearance]
 })
 </script>
