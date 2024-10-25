@@ -6,11 +6,10 @@
     <div class="flex flex-col gap-1">
       <div class="inline-flex gap-2 items-center font-medium">
         <FeatherIcon class="h-4" name="info" />
-        {{ 'Trial ends in' }} {{ trialEndDays }} {{ 'day'
-        }}{{ trialEndDays > 1 ? 's' : '' }}
+        {{ trialTitle }}
       </div>
       <div class="text-gray-700 text-sm font-normal leading-5">
-        {{ 'Upgrade to get latest and exclusive features' }}
+        {{ trialMessage }}
       </div>
     </div>
     <Button :label="'Upgrade plan'" theme="red" @click="emit('upgradePlan')">
@@ -36,6 +35,13 @@ const emit = defineEmits(['upgradePlan'])
 
 const trialEndDays = calculateTrialEndDays()
 
+const trialTitle =
+  trialEndDays > 1
+    ? 'Trial ends in ' + trialEndDays + ' days'
+    : 'Trial will end tomorrow'
+
+const trialMessage = 'Upgrade to get latest and exclusive features'
+
 function showBanner() {
   if (!window.setup_complete || !window.subscription_conf) return false
   return window.subscription_conf.status !== 'Subscribed' && trialEndDays > 0
@@ -49,7 +55,7 @@ function calculateTrialEndDays() {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
     return diffDays
   } else {
-    return 15 - window.telemetry_site_age
+    return 15 - window.telemetry_site_age || 1
   }
 }
 </script>
