@@ -69,6 +69,7 @@ export { default as Tree } from './components/Tree/Tree.vue'
 // Saas billing components
 export { default as Billing } from './components/Billing/Billing.vue'
 export { default as Plans } from './components/Billing/Plans.vue'
+export { default as TrialBanner } from './components/Billing/TrialBanner.vue'
 
 // directives
 export { default as onOutsideClickDirective } from './directives/onOutsideClick.js'
