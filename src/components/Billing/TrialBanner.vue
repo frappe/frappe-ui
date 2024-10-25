@@ -37,7 +37,7 @@ const emit = defineEmits(['upgradePlan'])
 const trialEndDays = calculateTrialEndDays()
 
 function showBanner() {
-  if (!window.subscription_conf) return false
+  if (!window.setup_complete || !window.subscription_conf) return false
   return window.subscription_conf.status !== 'Subscribed' && trialEndDays > 0
 }
 
