@@ -6,7 +6,8 @@
     <div class="flex flex-col gap-1">
       <div class="inline-flex gap-2 items-center font-medium">
         <FeatherIcon class="h-4" name="info" />
-        {{ 'Your trial end soon!' }}
+        {{ 'Trial ends in' }} {{ trialEndDays }} {{ 'day'
+        }}{{ trialEndDays > 1 ? 's' : '' }}
       </div>
       <div class="text-gray-700 text-sm font-normal leading-5">
         {{ 'Upgrade to get latest and exclusive features' }}
