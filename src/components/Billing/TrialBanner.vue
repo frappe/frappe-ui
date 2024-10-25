@@ -12,7 +12,7 @@
         {{ 'Upgrade to get latest and exclusive features' }}
       </div>
     </div>
-    <Button :label="'Upgrade plan'" theme="red">
+    <Button :label="'Upgrade plan'" theme="red" @click="emit('upgradePlan')">
       <template #prefix>
         <LightningIcon class="size-4" />
       </template>
@@ -30,6 +30,8 @@ const props = defineProps({
     default: false,
   },
 })
+
+const emit = defineEmits(['upgradePlan'])
 
 const trialEndDays = calculateTrialEndDays()
 
