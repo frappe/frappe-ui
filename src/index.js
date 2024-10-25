@@ -66,6 +66,10 @@ export { default as NestedPopover } from './components/ListFilter/NestedPopover.
 export { default as CircularProgressBar } from './components/CircularProgressBar.vue'
 export { default as Tree } from './components/Tree/Tree.vue'
 
+// Saas billing components
+export { default as Billing } from './components/Billing/Billing.vue'
+export { default as Plans } from './components/Billing/Plans.vue'
+
 // directives
 export { default as onOutsideClickDirective } from './directives/onOutsideClick.js'
 export { default as visibilityDirective } from './directives/visibility.js'
