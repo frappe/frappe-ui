@@ -335,7 +335,7 @@ const areAllOptionsSelected = computed(() => {
   if (!props.multiple) return false
   return (
     allOptions.value.length ===
-    (selectedValue.value as string[] | objOption[])?.length
+    (selectedValue.value as AutocompleteOptions)?.length
   )
 })
 
