@@ -315,7 +315,9 @@ const displayValue = computed(() => {
   if (!props.multiple) {
     return getLabel(selectedValue.value as AutocompleteOption)
   }
-  return (selectedValue.value as objOption[]).map((v) => getLabel(v)).join(', ')
+  return (selectedValue.value as AutocompleteOptions)
+    .map((v) => getLabel(v))
+    .join(', ')
 })
 
 const isOptionSelected = (option: AutocompleteOption) => {
@@ -324,8 +326,8 @@ const isOptionSelected = (option: AutocompleteOption) => {
   if (!props.multiple) {
     return selectedValue.value === value
   }
-  return (selectedValue.value as objOption[]).find(
-    (v) => v && v.value === value,
+  return (selectedValue.value as AutocompleteOptions).find((v) =>
+    isObjOption(v) ? v.value === value : v === value,
   )
 }
 
