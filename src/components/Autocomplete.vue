@@ -185,6 +185,7 @@ type objOption = {
   group?: string
   items?: objOption[]
   hideLabel?: boolean
+  [key: string]: any
 }
 
 type AutocompleteOption = valueOption | objOption
@@ -199,11 +200,11 @@ type AutocompleteProps = {
 } & (
   | {
       multiple: true
-      modelValue: AutocompleteOptions
+      modelValue: AutocompleteOptions | null
     }
   | {
       multiple: false
-      modelValue: AutocompleteOption
+      modelValue: AutocompleteOption | null
     }
 )
 
