@@ -50,6 +50,7 @@ export default {
   },
   emits: ['update:modelValue'],
   components: {
+    FeatherIcon,
     RadioGroup,
     RadioGroupOption,
     RadioGroupLabel,
