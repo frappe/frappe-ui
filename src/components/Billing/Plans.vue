@@ -36,7 +36,7 @@
                 v-if="column.key == 'price'"
                 class="text-base text-gray-900 font-semibold"
               >
-                <span v-if="item.isTrial" class=""> Free Trial </span>
+                <span v-if="item.isTrial" class=""> Free trial </span>
                 <span v-else>
                   <span>{{ item.currency }} {{ item.label }}</span>
                   <span class="text-gray-700 font-normal">/mo</span>
@@ -128,7 +128,7 @@ const rows = computed(() => {
       return {
         name: plan.name,
         price: {
-          label: price,
+          label: price.toString(),
           isTrial: plan.name === 'Trial',
           currency: currency.value === 'INR' ? '₹' : '$',
         },
