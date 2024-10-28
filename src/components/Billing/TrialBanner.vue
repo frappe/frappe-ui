@@ -20,7 +20,7 @@
   </div>
 </template>
 <script setup>
-import LightningIcon from './LightningIcon.vue'
+import LightningIcon from '../../icons/LightningIcon.vue'
 import FeatherIcon from '../FeatherIcon.vue'
 import Button from '../Button.vue'
 
