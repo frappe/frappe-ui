@@ -4,7 +4,7 @@
       {{ __('Billing') }}
     </h2>
     <div v-if="team.data">
-      <CurrentPlan />
+      <CurrentPlan @changePlan="emit('changePlan')" />
       <div class="bg-gray-100 h-px my-7" />
       <PaymentDetails :team="team.data" />
       <div class="bg-gray-100 h-px my-7" />
@@ -21,6 +21,8 @@ import PaymentDetails from './PaymentDetails.vue'
 import BillingHistory from './BillingHistory.vue'
 import Spinner from '../Spinner.vue'
 import { createResource } from '../../resources/index.js'
+
+const emit = defineEmits(['changePlan'])
 
 const team = createResource({
   url: 'press.saas.api.team.info',

@@ -23,8 +23,14 @@
           </div>
         </div>
       </div>
-      <Button variant="solid" :label="'Manage plan'" />
+      <Button
+        variant="solid"
+        :label="'Manage plan'"
+        @click="emit('changePlan')"
+      />
     </div>
   </div>
 </template>
-<script setup></script>
+<script setup>
+const emit = defineEmits(['changePlan'])
+</script>
