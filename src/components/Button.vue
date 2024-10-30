@@ -54,20 +54,7 @@ import FeatherIcon from './FeatherIcon.vue'
 import LoadingIndicator from './LoadingIndicator.vue'
 import { useRouter } from 'vue-router'
 
-interface ButtonProps {
-  theme?: 'gray' | 'blue' | 'green' | 'red'
-  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl'
-  variant?: 'solid' | 'subtle' | 'outline' | 'ghost'
-  label?: string
-  icon?: string
-  iconLeft?: string
-  iconRight?: string
-  loading?: boolean
-  loadingText?: string
-  disabled?: boolean
-  route?: string | object
-  link?: string
-}
+import type { ButtonProps } from './types/Button'
 
 const props = withDefaults(defineProps<ButtonProps>(), {
   theme: 'gray',

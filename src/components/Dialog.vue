@@ -63,25 +63,12 @@
                           <div
                             v-if="icon"
                             class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full"
-                            :class="{
-                              'bg-gray-100': !icon.appearance,
-                              'bg-yellow-100': icon.appearance === 'warning',
-                              'bg-blue-100': icon.appearance === 'info',
-                              'bg-red-100': icon.appearance === 'danger',
-                              'bg-green-100': icon.appearance === 'success',
-                            }"
+                            :class="dialogIconBgClasses"
                           >
                             <FeatherIcon
                               :name="icon.name"
                               class="h-4 w-4"
-                              :class="{
-                                'text-gray-600': !icon.appearance,
-                                'text-yellow-600':
-                                  icon.appearance === 'warning',
-                                'text-blue-600': icon.appearance === 'info',
-                                'text-red-600': icon.appearance === 'danger',
-                                'text-green-600': icon.appearance === 'success',
-                              }"
+                              :class="dialogIconClasses"
                               aria-hidden="true"
                             />
                           </div>
@@ -152,7 +139,7 @@
   </TransitionRoot>
 </template>
 
-<script>
+<script setup lang="ts">
 import {
   DialogPanel,
   DialogTitle,
@@ -160,101 +147,142 @@ import {
   TransitionChild,
   TransitionRoot,
 } from '@headlessui/vue'
-import { ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import Button from './Button.vue'
 import FeatherIcon from './FeatherIcon.vue'
+import { ButtonProps } from './types/Button'
 
-export default {
-  name: 'Dialog',
-  props: {
-    modelValue: {
-      type: Boolean,
-      required: true,
-    },
-    options: {
-      type: Object,
-      default() {
-        return {}
-      },
-    },
-    disableOutsideClickToClose: {
-      type: Boolean,
-      default: false,
-    },
+type DialogIcon = {
+  name: string
+  appearance?: 'warning' | 'info' | 'danger' | 'success'
+}
+
+type DialogOptions = {
+  title?: string
+  message?: string
+  // default size = 'lg'
+  size?:
+    | 'xs'
+    | 'sm'
+    | 'md'
+    | 'lg'
+    | 'xl'
+    | '2xl'
+    | '3xl'
+    | '4xl'
+    | '5xl'
+    | '6xl'
+    | '7xl'
+  icon?: DialogIcon | string
+  actions?: Array<DialogAction>
+  // default position = 'center'
+  position?: 'top' | 'center'
+}
+
+type DialogAction = ButtonProps & {
+  onClick?: (close: () => void) => Promise<void> | void
+}
+
+interface DialogProps {
+  modelValue: boolean
+  options?: DialogOptions
+  disableOutsideClickToClose?: boolean
+}
+
+const props = withDefaults(defineProps<DialogProps>(), {
+  options: () => ({}),
+  disableOutsideClickToClose: false,
+})
+
+const emit = defineEmits<{
+  (event: 'update:modelValue', value: boolean): void
+  (event: 'close'): void
+  (event: 'after-leave'): void
+}>()
+
+const dialogActions = ref<Array<DialogAction>>([])
+watch(
+  () => props.options.actions,
+  (actions) => {
+    if (!actions?.length) return
+
+    dialogActions.value = actions.map((action) => {
+      let loading = ref(false)
+      return {
+        ...action,
+        loading,
+        onClick: !action.onClick
+          ? close
+          : async () => {
+              loading.value = true
+              try {
+                if (action.onClick) {
+                  // pass close function to action
+                  await action.onClick(close)
+                }
+              } finally {
+                loading.value = false
+              }
+            },
+      }
+    })
   },
-  emits: ['update:modelValue', 'close', 'after-leave'],
-  components: {
-    HDialog,
-    DialogPanel,
-    DialogTitle,
-    TransitionChild,
-    TransitionRoot,
-    Button,
-    FeatherIcon,
+  { immediate: true },
+)
+
+const open = computed({
+  get() {
+    return props.modelValue
   },
-  data() {
-    return {
-      dialogActions: [],
+  set(val) {
+    emit('update:modelValue', val)
+    if (!val) {
+      emit('close')
     }
   },
-  watch: {
-    'options.actions': {
-      handler(actions) {
-        if (!actions) return
-        this.dialogActions = actions.map((action) => {
-          let loading = ref(false)
-          return {
-            ...action,
-            loading,
-            onClick: !action.onClick
-              ? this.close
-              : async () => {
-                  loading.value = true
-                  try {
-                    await action.onClick(this.close)
-                  } finally {
-                    loading.value = false
-                  }
-                },
-          }
-        })
-      },
-      immediate: true,
-    },
-  },
-  methods: {
-    close() {
-      this.open = false
-    },
-  },
-  computed: {
-    open: {
-      get() {
-        return this.modelValue
-      },
-      set(val) {
-        this.$emit('update:modelValue', val)
-        if (!val) {
-          this.$emit('close')
-        }
-      },
-    },
-    icon() {
-      if (!this.options?.icon) return null
+})
 
-      let icon = this.options.icon
-      if (typeof icon === 'string') {
-        icon = { name: icon }
-      }
-      return icon
-    },
-    dialogPositionClasses() {
-      let position = this.options?.position || 'center'
-      return {
-        'justify-center': position === 'center',
-        'pt-[20vh]': position === 'top',
-      }
-    },
-  },
+function close() {
+  open.value = false
 }
+
+const icon = computed(() => {
+  if (!props.options?.icon) return null
+
+  let icon = props.options.icon
+  if (typeof icon === 'string') {
+    icon = { name: icon }
+  }
+  return icon as DialogIcon
+})
+
+const dialogPositionClasses = computed(() => {
+  const position = props.options?.position || 'center'
+  return {
+    center: 'justify-center',
+    top: 'pt-[20vh]',
+  }[position]
+})
+
+const dialogIconBgClasses = computed(() => {
+  const appearance = icon.value?.appearance
+  if (!appearance) return 'bg-gray-100'
+  return {
+    warning: 'bg-yellow-100',
+    info: 'bg-blue-100',
+    danger: 'bg-red-100',
+    success: 'bg-green-100',
+  }[appearance]
+})
+
+const dialogIconClasses = computed(() => {
+  const appearance = icon.value?.appearance
+  if (!appearance) return 'text-gray-600'
+  return {
+    warning: 'text-yellow-600',
+    info: 'text-blue-600',
+    danger: 'text-red-600',
+    success: 'text-green-600',
+  }[appearance]
+})
 </script>
