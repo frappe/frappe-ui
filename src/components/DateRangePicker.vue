@@ -131,10 +131,7 @@ import { useDatePicker } from '../utils/useDatePicker'
 
 import type { DatePickerEmits, DatePickerProps } from './types/DatePicker'
 
-const props = withDefaults(defineProps<DatePickerProps>(), {
-  formatter: undefined,
-})
-
+const props = defineProps<DatePickerProps>()
 const emit = defineEmits<DatePickerEmits>()
 
 const {
