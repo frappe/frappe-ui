@@ -11,7 +11,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "story:dev": "histoire dev",
-    "story:build": "histoire build",
+    "story:build": "histoire build && cp 404.html .histoire/dist",
     "story:preview": "histoire preview"
   },
   "files": [
