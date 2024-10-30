@@ -14,3 +14,10 @@ document
       document.documentElement.setAttribute('data-theme', 'light')
     }
   })
+
+// handle route param in url
+const urlParams = new URLSearchParams(window.location.search)
+const route = urlParams.get('route')
+if (route) {
+  history.pushState({}, '', route)
+}
