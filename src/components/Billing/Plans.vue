@@ -155,6 +155,14 @@ function parseSize(sizeInMB) {
 }
 
 function changePlan(planName) {
-  // change plan
+  createResource({
+    url: 'press.saas.api.site.change_plan',
+    params: { plan: planName },
+    auto: true,
+    onSuccess: () => {
+      site.reload()
+      plans.reload()
+    },
+  })
 }
 </script>
