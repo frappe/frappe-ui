@@ -6,6 +6,21 @@
         v-model="billingInformation.billing_name"
         label="Billing Name"
       />
+      <div class="mt-4" v-show="billingInformation.country == 'India'">
+        <FormControl
+          label="I have GSTIN"
+          type="checkbox"
+          v-model="gstApplicable"
+        />
+        <FormControl
+          v-if="gstApplicable"
+          class="mt-2"
+          label="GSTIN"
+          type="text"
+          v-model="billingInformation.gstin"
+          :disabled="!gstApplicable"
+        />
+      </div>
       <ErrorMessage class="mt-2" :message="updateBillingInformation.error" />
     </template>
     <template #actions>
@@ -24,7 +39,7 @@ import FormControl from '../FormControl.vue'
 import ErrorMessage from '../ErrorMessage.vue'
 import Dialog from '../Dialog.vue'
 import { createResource } from '../../resources/index.js'
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'
 
 const emit = defineEmits(['after'])
 
@@ -53,6 +68,7 @@ createResource({
       gstin: data.gstin == 'Not Applicable' ? '' : data.gstin,
       billing_name: data.billing_name,
     })
+    gstApplicable.value = data.gstin && data.gstin !== 'Not Applicable'
   },
 })
 
@@ -72,6 +88,10 @@ const updateBillingInformation = createResource({
       return 'Billing Name contains invalid characters'
     }
 
+    if (!gstApplicable.value) {
+      billingInformation.gstin = 'Not Applicable'
+    }
+
     // validate gstin
     return await validateGST()
   },
@@ -80,6 +100,8 @@ const updateBillingInformation = createResource({
     emit('after')
   },
 })
+
+const gstApplicable = ref(false)
 
 const _validateGST = createResource({
   url: 'press.saas.api.billing.validate_gst',
