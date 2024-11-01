@@ -56,7 +56,7 @@ import Dialog from '../Dialog.vue'
 import { createResource } from '../../resources/index.js'
 import { reactive, ref, computed } from 'vue'
 
-const emit = defineEmits(['after'])
+const emit = defineEmits(['success'])
 
 const show = defineModel()
 
@@ -119,7 +119,7 @@ const updateBillingInformation = createResource({
   },
   onSuccess: () => {
     show.value = false
-    emit('after')
+    emit('success')
   },
 })
 

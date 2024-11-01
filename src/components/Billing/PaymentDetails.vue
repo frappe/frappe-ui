@@ -29,11 +29,11 @@
         <div class="flex flex-col gap-1.5">
           <div class="font-medium">{{ 'Credit balance' }}</div>
           <div class="text-gray-700">
-            {{ availableCredits }}
+            {{ upcomingInvoice.data?.available_credits || 0 }}
           </div>
         </div>
         <div class="shrink-0">
-          <Button :label="'Add credit'">
+          <Button :label="'Add credit'" @click="showCreditBalanceModal = true">
             <template #prefix>
               <FeatherIcon class="h-4" name="plus" />
             </template>
@@ -60,11 +60,18 @@
   <BillingDetailsModal
     v-if="showBillingDetailsDialog"
     v-model="showBillingDetailsDialog"
-    @after="billingDetails.reload()"
+    @success="billingDetails.reload()"
+  />
+  <CreditBalanceModal
+    v-if="showCreditBalanceModal"
+    v-model="showCreditBalanceModal"
+    :team="team"
+    @success="upcomingInvoice.reload()"
   />
 </template>
 <script setup>
 import BillingDetailsModal from './BillingDetailsModal.vue'
+import CreditBalanceModal from './CreditBalanceModal.vue'
 import { createResource } from '../../resources/index.js'
 import { computed, ref } from 'vue'
 
@@ -76,6 +83,8 @@ const props = defineProps({
 })
 
 const showBillingDetailsDialog = ref(false)
+const showCreditBalanceModal = ref(false)
+
 const billingDetails = createResource({
   url: 'press.saas.api.billing.get_information',
   auto: true,
@@ -94,19 +103,6 @@ const billingDetailsSummary = computed(() => {
 
 const upcomingInvoice = createResource({
   url: 'press.saas.api.billing.upcoming_invoice',
-  auto: true,
-})
-
-const currentBillingAmount = computed(() => {
-  return upcomingInvoice.data?.upcoming_invoice
-})
-
-const availableCredits = computed(() => {
-  return upcomingInvoice.data?.available_credits
-})
-
-const totalUnpaidAmount = createResource({
-  url: 'press.saas.api.billing.total_unpaid_amount',
   auto: true,
 })
 </script>
