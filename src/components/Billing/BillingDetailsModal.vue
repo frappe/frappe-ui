@@ -1,25 +1,40 @@
 <template>
   <Dialog v-model="show" :options="{ title: 'Billing Details' }">
     <template #body-content>
-      <FormControl
-        class="mt-4"
-        v-model="billingInformation.billing_name"
-        label="Billing Name"
-      />
-      <div class="mt-4" v-show="billingInformation.country == 'India'">
-        <FormControl
-          label="I have GSTIN"
-          type="checkbox"
-          v-model="gstApplicable"
-        />
-        <FormControl
-          v-if="gstApplicable"
-          class="mt-2"
-          label="GSTIN"
-          type="text"
-          v-model="billingInformation.gstin"
-          :disabled="!gstApplicable"
-        />
+      <div class="flex flex-col gap-5">
+        <div
+          v-for="section in sections"
+          :key="section.name"
+          class="grid gap-4"
+          :class="'grid-cols-' + section.columns"
+        >
+          <div v-for="field in section.fields" :key="field.name">
+            <FormControl
+              :label="field.label || field.fieldname"
+              :type="getInputType(field)"
+              :name="field.fieldname"
+              :options="field.options"
+              v-model="billingInformation[field.fieldname]"
+              :disabled="field.disabled"
+              :placeholder="field.placeholder"
+              :required="field.required"
+            />
+          </div>
+        </div>
+        <div v-show="billingInformation.country == 'India'">
+          <FormControl
+            label="I have GSTIN"
+            type="checkbox"
+            v-model="gstApplicable"
+          />
+          <FormControl
+            v-if="gstApplicable"
+            class="mt-5"
+            label="GSTIN"
+            type="text"
+            v-model="billingInformation.gstin"
+          />
+        </div>
       </div>
       <ErrorMessage class="mt-2" :message="updateBillingInformation.error" />
     </template>
@@ -39,7 +54,7 @@ import FormControl from '../FormControl.vue'
 import ErrorMessage from '../ErrorMessage.vue'
 import Dialog from '../Dialog.vue'
 import { createResource } from '../../resources/index.js'
-import { reactive, ref } from 'vue'
+import { reactive, ref, computed } from 'vue'
 
 const emit = defineEmits(['after'])
 
@@ -80,6 +95,13 @@ const updateBillingInformation = createResource({
     }
   },
   validate: async () => {
+    // validate mandatory fields
+    for (let field of sections.value.flatMap((s) => s.fields)) {
+      if (field.required && !billingInformation[field.fieldname]) {
+        return `${field.label} is required`
+      }
+    }
+
     // validate billing name
     let billingName = billingInformation.billing_name.trim()
     let billingNameRegex = /^[a-zA-Z0-9\-\'\,\.\s]+$/
@@ -100,6 +122,159 @@ const updateBillingInformation = createResource({
     emit('after')
   },
 })
+
+const team = createResource({
+  url: 'press.saas.api.team.info',
+  auto: true,
+})
+
+const _indianStates = [
+  'Andaman and Nicobar Islands',
+  'Andhra Pradesh',
+  'Arunachal Pradesh',
+  'Assam',
+  'Bihar',
+  'Chandigarh',
+  'Chhattisgarh',
+  'Dadra and Nagar Haveli and Daman and Diu',
+  'Delhi',
+  'Goa',
+  'Gujarat',
+  'Haryana',
+  'Himachal Pradesh',
+  'Jammu and Kashmir',
+  'Jharkhand',
+  'Karnataka',
+  'Kerala',
+  'Ladakh',
+  'Lakshadweep Islands',
+  'Madhya Pradesh',
+  'Maharashtra',
+  'Manipur',
+  'Meghalaya',
+  'Mizoram',
+  'Nagaland',
+  'Odisha',
+  'Other Territory',
+  'Puducherry',
+  'Punjab',
+  'Rajasthan',
+  'Sikkim',
+  'Tamil Nadu',
+  'Telangana',
+  'Tripura',
+  'Uttar Pradesh',
+  'Uttarakhand',
+  'West Bengal',
+]
+
+const _countryList = createResource({
+  url: 'press.saas.api.billing.country_list',
+  auto: true,
+  onSuccess: () => {
+    let userCountry = team.data?.country
+    if (userCountry) {
+      let country = countryList.value?.find((d) => d.label === userCountry)
+      if (country) {
+        billingInformation.country = country.value
+      }
+    }
+  },
+})
+
+const countryList = computed(() => {
+  return (_countryList.data || []).map((d) => ({
+    label: d.name,
+    value: d.name,
+  }))
+})
+
+const indianStates = computed(() => {
+  return _indianStates.map((state) => ({
+    label: state,
+    value: state,
+  }))
+})
+
+const sections = computed(() => {
+  return [
+    {
+      name: 'Billing Name',
+      columns: 1,
+      fields: [
+        {
+          fieldtype: 'Data',
+          label: 'Billing Name',
+          fieldname: 'billing_name',
+          required: true,
+        },
+      ],
+    },
+    {
+      name: 'Country and City',
+      columns: 2,
+      fields: [
+        {
+          fieldtype: 'Select',
+          label: 'Country',
+          fieldname: 'country',
+          options: countryList.value,
+          required: true,
+        },
+        {
+          fieldtype: 'Data',
+          label: 'City',
+          fieldname: 'city',
+          required: true,
+        },
+      ],
+    },
+    {
+      name: 'Address',
+      columns: 1,
+      fields: [
+        {
+          fieldtype: 'Data',
+          label: 'Address',
+          fieldname: 'address',
+          required: true,
+        },
+      ],
+    },
+    {
+      name: 'State and Postal Code',
+      columns: 2,
+      fields: [
+        {
+          fieldtype: billingInformation.country === 'India' ? 'Select' : 'Data',
+          label: 'State / Province / Region',
+          fieldname: 'state',
+          required: true,
+          options:
+            billingInformation.country === 'India' ? indianStates.value : null,
+        },
+        {
+          fieldtype: 'Data',
+          label: 'Postal Code',
+          fieldname: 'postal_code',
+          required: true,
+        },
+      ],
+    },
+  ]
+})
+
+function getInputType(field) {
+  return {
+    Data: 'text',
+    Int: 'number',
+    Select: 'select',
+    Check: 'checkbox',
+    Password: 'password',
+    Text: 'textarea',
+    Date: 'date',
+  }[field.fieldtype || 'Data']
+}
 
 const gstApplicable = ref(false)
 
