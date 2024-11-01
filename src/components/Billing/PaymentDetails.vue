@@ -49,7 +49,10 @@
           </div>
         </div>
         <div class="shrink-0">
-          <Button :label="'Edit information'" />
+          <Button
+            :label="'Edit information'"
+            @click="showBillingDetailsDialog = true"
+          />
         </div>
       </div>
     </div>
@@ -57,6 +60,7 @@
   <BillingDetailsModal
     v-if="showBillingDetailsDialog"
     v-model="showBillingDetailsDialog"
+    @after="billingDetails.reload()"
   />
 </template>
 <script setup>
