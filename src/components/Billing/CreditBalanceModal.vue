@@ -98,7 +98,7 @@
 import BuyCreditsStripe from './BuyCreditsStripe.vue'
 import BuyCreditsRazorpay from './BuyCreditsRazorpay.vue'
 import RazorpayLogo from './logo/RazorpayLogo.vue'
-import StripeLogo from './logo/stripeLogo.vue'
+import StripeLogo from './logo/StripeLogo.vue'
 import FormControl from '../FormControl.vue'
 import Button from '../Button.vue'
 import { createResource } from '../../resources/index.js'
