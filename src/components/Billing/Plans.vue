@@ -65,17 +65,17 @@ import Button from '../Button.vue'
 import { computed } from 'vue'
 
 const team = createResource({
-  url: 'press.saas.api.team.info',
+  url: 'https://5f48-157-119-84-112.ngrok-free.app/api/method/press.saas.api.team.info',
   auto: true,
 })
 
 const plans = createResource({
-  url: 'press.saas.api.site.get_plans',
+  url: 'https://5f48-157-119-84-112.ngrok-free.app/api/method/press.saas.api.site.get_plans',
   auto: true,
 })
 
 const site = createResource({
-  url: 'press.saas.api.site.info',
+  url: 'https://5f48-157-119-84-112.ngrok-free.app/api/method/press.saas.api.site.info',
   auto: true,
 })
 
@@ -156,7 +156,7 @@ function parseSize(sizeInMB) {
 
 function changePlan(planName) {
   createResource({
-    url: 'press.saas.api.site.change_plan',
+    url: 'https://5f48-157-119-84-112.ngrok-free.app/api/method/press.saas.api.site.change_plan',
     params: { plan: planName },
     auto: true,
     onSuccess: () => {
