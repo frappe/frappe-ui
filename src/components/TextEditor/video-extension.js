@@ -38,6 +38,7 @@ const Video = Node.create({
       const video = document.createElement('video')
       if (editor.isEditable) {
         video.className = 'pointer-events-none'
+        video.controls = true
       }
       video.src = node.attrs.src
       if (!editor.isEditable) {
