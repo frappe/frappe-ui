@@ -52,19 +52,16 @@ import ListHeader from '../ListView/ListHeader.vue'
 import ListRows from '../ListView/ListRows.vue'
 import ListRow from '../ListView/ListRow.vue'
 import ListRowItem from '../ListView/ListRowItem.vue'
-import Badge from '../Badge.vue'
-import { computed } from 'vue'
 import InvoiceIcon from '../../icons/InvoiceIcon.vue'
+import Badge from '../Badge.vue'
+import { computed, inject } from 'vue'
 
-const props = defineProps({
-  team: {
-    type: Object,
-    required: true,
-  },
-})
+const { baseAPIPath, team } = inject('billing')
 
 const invoices = createResource({
-  url: 'press.saas.api.billing.get_invoices',
+  url: `${baseAPIPath}.saas_api`,
+  params: { method: 'billing.get_invoices' },
+  cache: 'invoices',
   auto: true,
 })
 
@@ -96,7 +93,7 @@ const columns = [
 ]
 
 const rows = computed(() => {
-  if (!props.team) return []
+  if (!team.value) return []
   return invoices.data?.map((invoice) => {
     // Set name based on invoice type
     let name = 'Prepaid Credits'
@@ -150,7 +147,10 @@ const rows = computed(() => {
 })
 
 function downloadInvoice(invoice) {
-  call('press.saas.api.billing.download_invoice', { name: invoice })
+  call(`${baseAPIPath}.saas_api`, {
+    method: 'billing.download_invoice',
+    data: { name: invoice },
+  })
 }
 
 function formatCurrency(value) {
@@ -169,6 +169,6 @@ function currency(value, currency, fractions = 2) {
 }
 
 function userCurrency(value, fractions = 2) {
-  return currency(value, props.team?.currency, fractions)
+  return currency(value, team.value?.currency, fractions)
 }
 </script>

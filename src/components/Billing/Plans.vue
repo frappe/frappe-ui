@@ -64,18 +64,31 @@ import Spinner from '../Spinner.vue'
 import Button from '../Button.vue'
 import { computed } from 'vue'
 
+const props = defineProps({
+  baseAPIPath: {
+    type: String,
+    required: true,
+  },
+})
+
 const team = createResource({
-  url: 'https://5f48-157-119-84-112.ngrok-free.app/api/method/press.saas.api.team.info',
+  url: `${props.baseAPIPath}.saas_api`,
+  params: { method: 'team.info' },
+  cache: 'team',
   auto: true,
 })
 
 const plans = createResource({
-  url: 'https://5f48-157-119-84-112.ngrok-free.app/api/method/press.saas.api.site.get_plans',
+  url: `${props.baseAPIPath}.saas_api`,
+  params: { method: 'site.get_plans' },
+  cache: 'plans',
   auto: true,
 })
 
 const site = createResource({
-  url: 'https://5f48-157-119-84-112.ngrok-free.app/api/method/press.saas.api.site.info',
+  url: `${props.baseAPIPath}.saas_api`,
+  params: { method: 'site.info' },
+  cache: 'site',
   auto: true,
 })
 
@@ -156,8 +169,8 @@ function parseSize(sizeInMB) {
 
 function changePlan(planName) {
   createResource({
-    url: 'https://5f48-157-119-84-112.ngrok-free.app/api/method/press.saas.api.site.change_plan',
-    params: { plan: planName },
+    url: `${props.baseAPIPath}.saas_api`,
+    params: { method: 'site.change_plan', data: { plan: planName } },
     auto: true,
     onSuccess: () => {
       site.reload()

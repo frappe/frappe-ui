@@ -68,7 +68,6 @@
         v-if="paymentGateway === 'Stripe'"
         :amount="creditsToBuy"
         :minimumAmount="minimumAmount"
-        :team="team"
         @success="
           () => {
             show = false
@@ -82,7 +81,6 @@
         v-if="paymentGateway === 'Razorpay'"
         :amount="creditsToBuy"
         :minimumAmount="minimumAmount"
-        :team="team"
         @success="
           () => {
             show = false
@@ -102,28 +100,25 @@ import StripeLogo from './logo/StripeLogo.vue'
 import FormControl from '../FormControl.vue'
 import Button from '../Button.vue'
 import { createResource } from '../../resources/index.js'
-import { ref, computed } from 'vue'
-
-const props = defineProps({
-  team: {
-    type: Object,
-    required: true,
-  },
-})
+import { ref, computed, inject } from 'vue'
 
 const emit = defineEmits(['success'])
+
+const { baseAPIPath, team } = inject('billing')
 
 const show = defineModel()
 
 const totalUnpaidAmount = createResource({
-  url: 'press.saas.api.billing.total_unpaid_amount',
+  url: `${baseAPIPath}.saas_api`,
+  params: { method: 'billing.total_unpaid_amount' },
+  cache: 'totalUnpaidAmount',
   auto: true,
 })
 
 const minimumAmount = computed(() => {
-  if (!props.team) return 0
+  if (!team.value) return 0
   const unpaidAmount = totalUnpaidAmount.data || 0
-  const minimumDefault = props.team?.currency == 'INR' ? 410 : 5
+  const minimumDefault = team.value?.currency == 'INR' ? 410 : 5
 
   return Math.ceil(
     unpaidAmount && unpaidAmount > 0 ? unpaidAmount : minimumDefault,
@@ -135,10 +130,10 @@ const paymentGateway = ref('')
 
 const totalAmount = computed(() => {
   let _creditsToBuy = creditsToBuy.value || 0
-  if (props.team?.currency === 'INR') {
+  if (team.value?.currency === 'INR') {
     return (
       _creditsToBuy +
-      _creditsToBuy * (props.team.billing_info.gst_percentage || 0)
+      _creditsToBuy * (team.value.billing_info.gst_percentage || 0)
     ).toFixed(2)
   } else {
     return _creditsToBuy

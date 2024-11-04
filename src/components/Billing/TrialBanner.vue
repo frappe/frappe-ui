@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="!isSidebarCollapsed && showBanner()"
+    v-if="!isSidebarCollapsed && showBanner"
     class="m-2 flex flex-col gap-3 shadow-sm rounded-lg py-2.5 px-3 bg-white text-base"
   >
     <div class="flex flex-col gap-1">
@@ -20,11 +20,17 @@
   </div>
 </template>
 <script setup>
+import { createResource } from '../../resources/index.js'
 import LightningIcon from '../../icons/LightningIcon.vue'
 import FeatherIcon from '../FeatherIcon.vue'
 import Button from '../Button.vue'
+import { ref, computed } from 'vue'
 
 const props = defineProps({
+  baseAPIPath: {
+    type: String,
+    required: true,
+  },
   isSidebarCollapsed: {
     type: Boolean,
     default: false,
@@ -33,29 +39,34 @@ const props = defineProps({
 
 const emit = defineEmits(['upgradePlan'])
 
-const trialEndDays = calculateTrialEndDays()
+const trialEndDays = ref(0)
+const showBanner = ref(false)
 
-const trialTitle =
-  trialEndDays > 1
-    ? 'Trial ends in ' + trialEndDays + ' days'
+const trialTitle = computed(() => {
+  return trialEndDays.value > 1
+    ? 'Trial ends in ' + trialEndDays.value + ' days'
     : 'Trial will end tomorrow'
+})
 
 const trialMessage = 'Upgrade to get latest and exclusive features'
 
-function showBanner() {
-  if (!window.setup_complete || !window.subscription_conf) return false
-  return window.subscription_conf.status !== 'Subscribed' && trialEndDays > 0
-}
+createResource({
+  url: `${props.baseAPIPath}.current_site_info`,
+  auto: true,
+  onSuccess: (data) => {
+    trialEndDays.value = calculateTrialEndDays(data.trial_end_date)
+    showBanner.value =
+      window.setup_complete && data.plan.is_trial_plan && trialEndDays.value > 0
+  },
+})
 
-function calculateTrialEndDays() {
-  if (window.subscription_conf?.trial_end_date) {
-    const trial_end_date = new Date(window.subscription_conf.trial_end_date)
-    const today = new Date()
-    const diffTime = trial_end_date - today
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    return diffDays
-  } else {
-    return 15 - window.telemetry_site_age || 1
-  }
+function calculateTrialEndDays(trialEndDate) {
+  if (!trialEndDate) return 0
+
+  trialEndDate = new Date(trialEndDate)
+  const today = new Date()
+  const diffTime = trialEndDate - today
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+  return diffDays
 }
 </script>

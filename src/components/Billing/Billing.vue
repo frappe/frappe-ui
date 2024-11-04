@@ -6,9 +6,9 @@
     <div v-if="team.data">
       <CurrentPlan @changePlan="emit('changePlan')" />
       <div class="bg-gray-100 h-px my-7" />
-      <PaymentDetails :team="team.data" />
+      <PaymentDetails />
       <div class="bg-gray-100 h-px my-7" />
-      <BillingHistory :team="team.data" />
+      <BillingHistory />
     </div>
     <div v-else class="flex flex-1 items-center justify-center">
       <Spinner class="size-8" />
@@ -21,11 +21,25 @@ import PaymentDetails from './PaymentDetails.vue'
 import BillingHistory from './BillingHistory.vue'
 import Spinner from '../Spinner.vue'
 import { createResource } from '../../resources/index.js'
+import { computed, provide } from 'vue'
 
+const props = defineProps({
+  baseAPIPath: {
+    type: String,
+    required: true,
+  },
+})
 const emit = defineEmits(['changePlan'])
 
 const team = createResource({
-  url: 'press.saas.api.team.info',
+  url: `${props.baseAPIPath}.saas_api`,
+  params: { method: 'team.info' },
+  cache: 'team',
   auto: true,
+})
+
+provide('billing', {
+  baseAPIPath: props.baseAPIPath,
+  team: computed(() => team.data),
 })
 </script>

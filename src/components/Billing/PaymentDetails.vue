@@ -65,7 +65,6 @@
   <CreditBalanceModal
     v-if="showCreditBalanceModal"
     v-model="showCreditBalanceModal"
-    :team="team"
     @success="upcomingInvoice.reload()"
   />
 </template>
@@ -73,20 +72,17 @@
 import BillingDetailsModal from './BillingDetailsModal.vue'
 import CreditBalanceModal from './CreditBalanceModal.vue'
 import { createResource } from '../../resources/index.js'
-import { computed, ref } from 'vue'
+import { computed, ref, inject } from 'vue'
 
-const props = defineProps({
-  team: {
-    type: Object,
-    required: true,
-  },
-})
+const { baseAPIPath, team } = inject('billing')
 
 const showBillingDetailsDialog = ref(false)
 const showCreditBalanceModal = ref(false)
 
 const billingDetails = createResource({
-  url: 'press.saas.api.billing.get_information',
+  url: `${baseAPIPath}.saas_api`,
+  params: { method: 'billing.get_information' },
+  cache: 'billingDetails',
   auto: true,
 })
 
@@ -102,7 +98,9 @@ const billingDetailsSummary = computed(() => {
 })
 
 const upcomingInvoice = createResource({
-  url: 'press.saas.api.billing.upcoming_invoice',
+  url: `${baseAPIPath}.saas_api`,
+  params: { method: 'billing.upcoming_invoice' },
+  cache: 'upcomingInvoice',
   auto: true,
 })
 </script>

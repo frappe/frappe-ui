@@ -54,9 +54,10 @@ import FormControl from '../FormControl.vue'
 import ErrorMessage from '../ErrorMessage.vue'
 import Dialog from '../Dialog.vue'
 import { createResource } from '../../resources/index.js'
-import { reactive, ref, computed } from 'vue'
+import { reactive, ref, computed, inject } from 'vue'
 
 const emit = defineEmits(['success'])
+const { baseAPIPath, team } = inject('billing')
 
 const show = defineModel()
 
@@ -71,7 +72,9 @@ const billingInformation = reactive({
 })
 
 createResource({
-  url: 'press.saas.api.billing.get_information',
+  url: `${baseAPIPath}.saas_api`,
+  params: { method: 'billing.get_information' },
+  cache: 'billingInformations',
   auto: true,
   onSuccess: (data) => {
     Object.assign(billingInformation, {
@@ -88,7 +91,8 @@ createResource({
 })
 
 const updateBillingInformation = createResource({
-  url: 'press.saas.api.billing.update_information',
+  url: `${baseAPIPath}.saas_api`,
+  params: { method: 'billing.update_information' },
   makeParams: () => {
     return {
       billing_details: billingInformation,
@@ -121,11 +125,6 @@ const updateBillingInformation = createResource({
     show.value = false
     emit('success')
   },
-})
-
-const team = createResource({
-  url: 'press.saas.api.team.info',
-  auto: true,
 })
 
 const _indianStates = [
@@ -169,10 +168,12 @@ const _indianStates = [
 ]
 
 const _countryList = createResource({
-  url: 'press.saas.api.billing.country_list',
+  url: `${baseAPIPath}.saas_api`,
+  params: { method: 'billing.country_list' },
+  cache: 'countryList',
   auto: true,
   onSuccess: () => {
-    let userCountry = team.data?.country
+    let userCountry = team.value?.country
     if (userCountry) {
       let country = countryList.value?.find((d) => d.label === userCountry)
       if (country) {
@@ -279,7 +280,8 @@ function getInputType(field) {
 const gstApplicable = ref(false)
 
 const _validateGST = createResource({
-  url: 'press.saas.api.billing.validate_gst',
+  url: `${baseAPIPath}.saas_api`,
+  params: { method: 'billing.validate_gst' },
   makeParams() {
     return {
       address: billingInformation,

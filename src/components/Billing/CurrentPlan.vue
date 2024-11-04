@@ -37,22 +37,21 @@
 </template>
 <script setup>
 import { createResource } from '../../resources/index.js'
-import { computed } from 'vue'
+import { computed, inject } from 'vue'
 
 const emit = defineEmits(['changePlan'])
 
-const team = createResource({
-  url: 'press.saas.api.team.info',
-  auto: true,
-})
+const { baseAPIPath, team } = inject('billing')
 
 const currency = computed(() => {
-  if (!team.data) return 'INR'
-  return team.data.currency || 'INR'
+  if (!team.value) return 'INR'
+  return team.value.currency || 'INR'
 })
 
 const site = createResource({
-  url: 'press.saas.api.site.info',
+  url: `${baseAPIPath}.saas_api`,
+  params: { method: 'site.info' },
+  cache: 'site',
   auto: true,
 })
 

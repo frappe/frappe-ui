@@ -37,7 +37,7 @@
 import { createResource } from '../../resources/index.js'
 import FeatherIcon from '../FeatherIcon.vue'
 import { toast } from '../toast.js'
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount, inject } from 'vue'
 
 const props = defineProps({
   amount: {
@@ -48,13 +48,10 @@ const props = defineProps({
     type: Number,
     default: 0,
   },
-  team: {
-    type: Object,
-    required: true,
-  },
 })
 
 const emit = defineEmits(['success'])
+const { baseAPIPath, team } = inject('billing')
 
 const isPaymentComplete = ref(false)
 const isVerifyingPayment = ref(false)
@@ -76,9 +73,10 @@ onBeforeUnmount(() => {
 })
 
 const createRazorpayOrder = createResource({
-  url: 'press.api.billing.create_razorpay_order',
+  url: `${baseAPIPath}.saas_api`,
   params: {
-    amount: props.amount,
+    method: 'billing.create_razorpay_order',
+    data: { amount: props.amount },
   },
   onSuccess: (data) => processOrder(data),
   validate: () => {
@@ -89,7 +87,8 @@ const createRazorpayOrder = createResource({
 })
 
 const handlePaymentFailed = createResource({
-  url: 'press.api.billing.handle_razorpay_payment_failed',
+  url: `${baseAPIPath}.saas_api`,
+  params: { method: 'billing.handle_razorpay_payment_failed' },
   onSuccess: () => {
     console.log('Payment Failed.')
   },
@@ -101,9 +100,7 @@ function processOrder(data) {
     order_id: data.order_id,
     name: 'Frappe Cloud',
     image: 'https://frappe.io/files/cloud.png',
-    prefill: {
-      email: props.team.user,
-    },
+    prefill: { email: team.value?.user },
     handler: handlePaymentSuccess,
     theme: { color: '#171717' },
   }

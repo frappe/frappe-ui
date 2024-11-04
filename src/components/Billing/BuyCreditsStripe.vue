@@ -48,7 +48,7 @@ import { createResource } from '../../resources/index.js'
 import Spinner from '../Spinner.vue'
 import { toast } from '../toast.js'
 import { loadStripe } from '@stripe/stripe-js'
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, inject } from 'vue'
 
 const props = defineProps({
   amount: {
@@ -59,13 +59,11 @@ const props = defineProps({
     type: Number,
     default: 0,
   },
-  team: {
-    type: Object,
-    required: true,
-  },
 })
 
 const emit = defineEmits(['success'])
+
+const { baseAPIPath, team } = inject('billing')
 
 const step = ref('Get Amount')
 const clientSecret = ref(null)
@@ -81,12 +79,13 @@ const ready = ref(false)
 const cardElementRef = ref(null)
 
 const createPaymentIntent = createResource({
-  url: 'press.api.billing.create_payment_intent_for_buying_credits',
+  url: `${baseAPIPath}.saas_api`,
   params: {
-    amount: props.amount,
+    method: 'billing.create_payment_intent_for_buying_credits',
+    data: { amount: props.amount },
   },
   validate() {
-    if (props.amount < props.minimumAmount && !props.team.erpnext_partner) {
+    if (props.amount < props.minimumAmount && !team.value.erpnext_partner) {
       return `Amount must be greater than or equal to ${props.minimumAmount}`
     }
   },
