@@ -89,7 +89,7 @@ const labelClasses = computed(() => {
       sm: 'text-xs',
       md: 'text-base',
     }[props.size],
-    'text-gray-600',
+    'text-text-icons-gray-5',
   ]
 })
 
@@ -99,7 +99,7 @@ const descriptionClasses = computed(() => {
       sm: 'text-xs',
       md: 'text-base',
     }[props.size],
-    'text-gray-600',
+    'text-icons-gray-6',
   ]
 })
 </script>

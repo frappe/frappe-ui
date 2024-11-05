@@ -2,7 +2,7 @@
   <label :class="[type == 'checkbox' ? 'flex' : 'block', $attrs.class]">
     <span
       v-if="label && type != 'checkbox'"
-      class="mb-2 block text-sm leading-4 text-gray-700"
+      class="mb-2 block text-sm leading-4 text-text-icons-gray-7"
     >
       {{ label }}
     </span>
@@ -13,13 +13,13 @@
       <FeatherIcon
         v-if="iconLeft && type != 'checkbox'"
         :name="iconLeft"
-        class="absolute mx-2 h-4 w-4 text-gray-600"
+        class="absolute mx-2 h-4 w-4 text-icons-gray-6"
         :class="{ 'mt-2': type == 'textarea' }"
       />
       <input
         v-if="isNormalInput"
         v-bind="inputAttributes"
-        class="border-gray-400 placeholder-gray-500"
+        class="border-outline-gray-3 placeholder-text-icons-gray-4"
         ref="input"
         :class="[
           {
@@ -38,7 +38,7 @@
         v-if="type === 'textarea'"
         v-bind="inputAttributes"
         :placeholder="placeholder"
-        class="placeholder-gray-500"
+        class="placeholder-text-icons-gray-4"
         :class="[
           'form-textarea block w-full resize-none',
           inputClass,

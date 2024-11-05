@@ -13,7 +13,7 @@
     <div
       v-if="placeholder"
       v-show="!modelValue"
-      class="pointer-events-none absolute text-gray-500"
+      class="pointer-events-none absolute text-text-icons-gray-4"
       :class="[fontSizeClasses, paddingClasses]"
     >
       {{ placeholder }}
@@ -94,7 +94,7 @@ const selectOptions = computed(() => {
 })
 
 const textColor = computed(() => {
-  return props.disabled ? 'text-gray-500' : 'text-gray-800'
+  return props.disabled ? 'text-text-icons-gray-6' : 'text-text-icons-gray-8'
 })
 
 const fontSizeClasses = computed(() => {
@@ -126,15 +126,15 @@ const selectClasses = computed(() => {
   let variant = props.disabled ? 'disabled' : props.variant
   let variantClasses = {
     subtle:
-      'border border-gray-100 bg-gray-100 hover:border-gray-200 hover:bg-gray-200 focus:border-gray-500 focus:ring-0 focus-visible:ring-2 focus-visible:ring-gray-400',
+      'border border-outline-gray-1 bg-surface-gray-2 hover:border-outline-gray-1 hover:bg-surface-gray-3 focus:border-outline-gray-4 focus:ring-0 focus-visible:ring-2 focus-visible:ring-outline-gray-3',
     outline:
-      'border border-gray-300 bg-white hover:border-gray-400 focus:border-gray-500 focus:ring-0 focus-visible:ring-2 focus-visible:ring-gray-400',
+      'border border-outline-gray-2 bg-surface-white hover:border-outline-gray-3 focus:border-outline-gray-4 focus:ring-0 focus-visible:ring-2 focus-visible:ring-outline-gray-3',
     ghost:
-      'bg-transparent border-transparent hover:bg-gray-200 focus:bg-gray-200 focus:border-gray-500 focus:ring-0 focus-visible:ring-2 focus-visible:ring-gray-400',
+      'bg-transparent border-transparent hover:bg-surface-gray-3 focus:bg-surface-gray-3 focus:border-outline-gray-4 focus:ring-0 focus-visible:ring-2 focus-visible:ring-outline-gray-3',
     disabled: [
       'border',
-      props.variant !== 'ghost' ? 'bg-gray-50' : '',
-      props.variant === 'outline' ? 'border-gray-300' : 'border-transparent',
+      props.variant !== 'ghost' ? 'bg-surface-gray-1' : '',
+      props.variant === 'outline' ? 'border-outline-gray-2' : 'border-transparent',
     ],
   }[variant]
 

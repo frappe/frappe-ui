@@ -28,10 +28,10 @@
   .form-input,
   .form-textarea,
   .form-select {
-    @apply h-7 rounded border border-gray-100 bg-gray-100 py-1.5 pl-2 pr-2 text-base text-gray-800 placeholder-gray-500 transition-colors hover:border-gray-200 hover:bg-gray-200 focus:border-gray-500 focus:bg-white focus:shadow-sm focus:ring-0 focus-visible:ring-2 focus-visible:ring-gray-400;
+    @apply h-7 rounded border border-outline-gray-1 bg-outline-gray-1 py-1.5 pl-2 pr-2 text-base text-text-icons-gray-8 placeholder-text-icons-gray-4 transition-colors hover:border-outline-gray-2 hover:bg-surface-gray-3 focus:border-outline-gray-4 focus:bg-surface-white focus:shadow-sm focus:ring-0 focus-visible:ring-2 focus-visible:ring-outline-gray-3;
   }
 
   .form-checkbox {
-    @apply rounded-md bg-gray-100 text-blue-500 focus:ring-0 focus-visible:ring-1;
+    @apply rounded-md bg-surface-gray-2 text-text-icons-blue-2 focus:ring-0 focus-visible:ring-1;
   }
 }
