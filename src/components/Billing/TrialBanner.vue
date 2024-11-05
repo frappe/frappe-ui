@@ -20,10 +20,11 @@
   </div>
 </template>
 <script setup>
-import { createResource } from '../../resources/index.js'
 import LightningIcon from '../../icons/LightningIcon.vue'
 import FeatherIcon from '../FeatherIcon.vue'
 import Button from '../Button.vue'
+import { calculateTrialEndDays } from './utils.js'
+import { createResource } from '../../resources/index.js'
 import { ref, computed } from 'vue'
 
 const props = defineProps({
@@ -59,14 +60,4 @@ createResource({
       window.setup_complete && data.plan.is_trial_plan && trialEndDays.value > 0
   },
 })
-
-function calculateTrialEndDays(trialEndDate) {
-  if (!trialEndDate) return 0
-
-  trialEndDate = new Date(trialEndDate)
-  const today = new Date()
-  const diffTime = trialEndDate - today
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-  return diffDays
-}
 </script>
