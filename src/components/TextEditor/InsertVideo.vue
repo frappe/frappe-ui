@@ -44,10 +44,12 @@
       />
     </template>
     <template #actions>
-      <Button variant="solid" @click="addVideo(addVideoDialog.url)">
-        Insert Video
-      </Button>
-      <Button @click="reset">Cancel</Button>
+      <div class="flex gap-2">
+        <Button variant="solid" @click="addVideo(addVideoDialog.url)">
+          Insert Video
+        </Button>
+        <Button @click="reset">Cancel</Button>
+      </div>
     </template>
   </Dialog>
 </template>
