@@ -7,7 +7,7 @@
     @change="(idx) => (changedIndex = idx)"
   >
     <TabList
-      class="relative flex items-center gap-7.5 overflow-x-auto border-b pl-5"
+      class="relative flex items-center gap-7.5 overflow-x-auto border-b border-outline-gray-1 pl-5"
       :class="tablistClass"
     >
       <Tab
@@ -20,8 +20,8 @@
       >
         <slot name="tab" v-bind="{ tab, selected }">
           <button
-            class="flex items-center gap-1.5 border-b border-transparent py-3 text-base text-gray-600 duration-300 ease-in-out hover:border-gray-400 hover:text-gray-900"
-            :class="{ 'text-gray-900': selected }"
+            class="flex items-center gap-1.5 border-b border-transparent py-3 text-base text-icons-gray-6 duration-300 ease-in-out hover:border-outline-gray-3 hover:text-text-icons-gray-9"
+            :class="{ 'text-text-icons-gray-9': selected }"
           >
             <component v-if="tab.icon" :is="tab.icon" class="size-4" />
             {{ tab.label }}
@@ -30,7 +30,7 @@
       </Tab>
       <div
         ref="indicator"
-        class="absolute bottom-0 h-px bg-gray-900"
+        class="absolute bottom-0 h-px bg-surface-gray-7"
         :class="transitionClass"
         :style="{ left: `${indicatorLeft}px` }"
       />
