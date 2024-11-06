@@ -137,12 +137,13 @@
 </template>
 <script setup>
 import Dropdown from '../Dropdown.vue'
+import DropdownItem from './DropdownItem.vue'
 import Button from '../Button.vue'
 import FeatherIcon from '../FeatherIcon.vue'
 import BillingDetailsModal from './BillingDetailsModal.vue'
 import CreditBalanceModal from './CreditBalanceModal.vue'
 import { createResource } from '../../resources/index.js'
-import { computed, ref, inject } from 'vue'
+import { computed, ref, inject, h } from 'vue'
 
 const { baseAPIPath, team, reloadTeam } = inject('billing')
 
@@ -176,9 +177,13 @@ const upcomingInvoice = createResource({
 
 const paymentModeOptions = [
   {
-    label: 'Credit card',
+    label: 'Card',
     value: 'Card',
     description: 'Your card will be charged for monthly subscription',
+    component: h(DropdownItem, {
+      label: 'Card',
+      checked: team.value.payment_mode === 'Card',
+    }),
     onClick: () => updatePaymentMode('Card'),
   },
   {
@@ -186,6 +191,10 @@ const paymentModeOptions = [
     value: 'Prepaid Credits',
     description:
       'You will be charged from your credit balance for monthly subscription',
+    component: h(DropdownItem, {
+      label: 'Prepaid credits',
+      checked: team.value.payment_mode === 'Prepaid Credits',
+    }),
     onClick: () => updatePaymentMode('Prepaid Credits'),
   },
 ]
