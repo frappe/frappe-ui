@@ -16,7 +16,7 @@
 
       <template #body>
         <MenuItems
-          class="mt-2 min-w-40 divide-y divide-gray-100 rounded-lg bg-white shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
+          class="mt-2 min-w-40 divide-y divide-outline-gray-1 rounded-lg bg-surface-white shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
           :class="{
             'left-0 origin-top-left': placement == 'left',
             'right-0 origin-top-right': placement == 'right',
@@ -43,7 +43,7 @@
               <button
                 v-else
                 :class="[
-                  active ? 'bg-gray-100' : 'text-text-icons-gray-6',
+                  active ? 'bg-surface-gray-2 text-text-icons-gray-6' : 'text-text-icons-gray-6',
                   'group flex h-7 w-full items-center rounded px-2 text-base',
                 ]"
                 @click="item.onClick"
