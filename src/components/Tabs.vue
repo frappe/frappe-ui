@@ -20,7 +20,7 @@
       >
         <slot name="tab" v-bind="{ tab, selected }">
           <button
-            class="flex items-center gap-1.5 border-b border-transparent py-3 text-base text-icons-gray-6 duration-300 ease-in-out hover:border-outline-gray-3 hover:text-text-icons-gray-9"
+            class="flex items-center gap-1.5 border-b border-transparent py-3 text-base text-text-icons-gray-5 duration-300 ease-in-out hover:border-outline-gray-3 hover:text-text-icons-gray-9"
             :class="{ 'text-text-icons-gray-9': selected }"
           >
             <component v-if="tab.icon" :is="tab.icon" class="size-4" />
