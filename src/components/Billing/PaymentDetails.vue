@@ -34,15 +34,30 @@
       <div class="flex justify-between items-center text-base text-gray-900">
         <div class="flex flex-col gap-1.5">
           <div class="font-medium">{{ 'Payment mode' }}</div>
-          <div v-if="team.payment_mode" class="text-gray-700">
-            {{ team.payment_mode }}
+          <div
+            v-if="team.payment_mode"
+            class="inline-flex items-center gap-2 text-gray-700"
+          >
+            <FeatherIcon class="h-4" name="info" />
+            {{
+              paymentModeOptions.find((o) => o.value === team.payment_mode)
+                .description
+            }}
           </div>
           <span v-else class="text-gray-700">Not set</span>
         </div>
         <div class="shrink-0">
           <Dropdown :options="paymentModeOptions">
             <template #default="{ open }">
-              <Button :label="team.payment_mode ? 'Change mode' : 'Set mode'">
+              <Button
+                :label="
+                  team.payment_mode
+                    ? paymentModeOptions.find(
+                        (o) => o.value === team.payment_mode,
+                      ).label
+                    : 'Set mode'
+                "
+              >
                 <template #suffix>
                   <FeatherIcon
                     :name="open ? 'chevron-up' : 'chevron-down'"
@@ -160,10 +175,17 @@ const upcomingInvoice = createResource({
 })
 
 const paymentModeOptions = [
-  { label: 'Card', value: 'Card', onClick: () => updatePaymentMode('Card') },
   {
-    label: 'Prepaid Credits',
+    label: 'Credit card',
+    value: 'Card',
+    description: 'Your card will be charged for monthly subscription',
+    onClick: () => updatePaymentMode('Card'),
+  },
+  {
+    label: 'Prepaid credits',
     value: 'Prepaid Credits',
+    description:
+      'You will be charged from your credit balance for monthly subscription',
     onClick: () => updatePaymentMode('Prepaid Credits'),
   },
 ]
