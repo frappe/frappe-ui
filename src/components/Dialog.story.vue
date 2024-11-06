@@ -24,10 +24,10 @@ const dialog2 = ref(false)
       <Button @click="dialog2 = true">Show Dialog</Button>
       <Dialog v-model="dialog2">
         <template #body-title>
-          <h3>Custom Title</h3>
+          <h3 class="text-text-icons-gray-9">Custom Title</h3>
         </template>
         <template #body-content>
-          <p>Custom Body</p>
+          <p class="text-text-icons-gray-9">Custom Body</p>
         </template>
         <template #actions>
           <Button variant="solid">Confirm</Button>
