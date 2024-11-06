@@ -1,6 +1,15 @@
 <template>
   <Dialog v-model="show" :options="{ title: 'Add Credit Balance' }">
     <template #body-content>
+      <div
+        v-if="showMessage"
+        class="inline-flex gap-1.5 text-base mb-5 text-gray-700"
+      >
+        <FeatherIcon class="h-4" name="info" />
+        <span>
+          Add credits to your account before changing the payment mode.
+        </span>
+      </div>
       <!-- Amount -->
       <div>
         <FormControl
@@ -101,6 +110,14 @@ import FormControl from '../FormControl.vue'
 import Button from '../Button.vue'
 import { createResource } from '../../resources/index.js'
 import { ref, computed, inject } from 'vue'
+import FeatherIcon from '../FeatherIcon.vue'
+
+const props = defineProps({
+  showMessage: {
+    type: Boolean,
+    default: false,
+  },
+})
 
 const emit = defineEmits(['success'])
 

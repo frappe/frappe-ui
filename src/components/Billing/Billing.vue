@@ -41,5 +41,6 @@ const team = createResource({
 provide('billing', {
   baseAPIPath: props.baseAPIPath,
   team: computed(() => team.data),
+  reloadTeam: team.reload,
 })
 </script>

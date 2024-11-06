@@ -32,7 +32,7 @@
       </div>
       <Button
         variant="solid"
-        :label="'Change plan'"
+        :label="currentPlan.is_trial_plan ? 'Upgrade now' : 'Change plan'"
         @click="emit('changePlan')"
       />
     </div>

@@ -1,6 +1,13 @@
 <template>
   <Dialog v-model="show" :options="{ title: 'Billing Details' }">
     <template #body-content>
+      <div
+        v-if="showMessage"
+        class="inline-flex gap-1.5 text-base mb-5 text-gray-700"
+      >
+        <FeatherIcon class="h-4" name="info" />
+        <span> Add billing details to your account before proceeding.</span>
+      </div>
       <div class="flex flex-col gap-5">
         <div
           v-for="section in sections"
@@ -50,12 +57,19 @@
   </Dialog>
 </template>
 <script setup>
+import FeatherIcon from '../FeatherIcon.vue'
 import FormControl from '../FormControl.vue'
 import ErrorMessage from '../ErrorMessage.vue'
 import Dialog from '../Dialog.vue'
 import { createResource } from '../../resources/index.js'
 import { reactive, ref, computed, inject } from 'vue'
 
+const props = defineProps({
+  showMessage: {
+    type: Boolean,
+    default: false,
+  },
+})
 const emit = defineEmits(['success'])
 const { baseAPIPath, team } = inject('billing')
 
@@ -92,10 +106,10 @@ createResource({
 
 const updateBillingInformation = createResource({
   url: `${baseAPIPath}.saas_api`,
-  params: { method: 'billing.update_information' },
   makeParams: () => {
     return {
-      billing_details: billingInformation,
+      method: 'billing.update_information',
+      data: { billing_details: billingInformation },
     }
   },
   validate: async () => {
@@ -281,10 +295,10 @@ const gstApplicable = ref(false)
 
 const _validateGST = createResource({
   url: `${baseAPIPath}.saas_api`,
-  params: { method: 'billing.validate_gst' },
   makeParams() {
     return {
-      address: billingInformation,
+      method: 'billing.validate_gst',
+      data: { address: billingInformation },
     }
   },
 })
