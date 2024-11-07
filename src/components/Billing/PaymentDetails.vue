@@ -89,6 +89,11 @@
             @click="
               () => {
                 showMessage = false
+                if (!billingDetailsSummary) {
+                  showMessage = true
+                  showBillingDetailsDialog = true
+                  return
+                }
                 showCreditBalanceModal = true
               }
             "
