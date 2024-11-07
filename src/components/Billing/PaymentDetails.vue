@@ -4,9 +4,12 @@
       {{ 'Payment details' }}
     </div>
     <div class="flex flex-col">
-      <div class="flex justify-between items-center text-base text-gray-900">
+      <div
+        v-if="team.payment_mode == 'Card'"
+        class="flex justify-between items-center text-base text-gray-900"
+      >
         <div class="flex flex-col gap-1.5">
-          <div class="font-medium">{{ 'Payment method' }}</div>
+          <div class="font-medium">{{ 'Active card' }}</div>
           <div class="overflow-hidden text-gray-700 text-ellipsis">
             <div v-if="team.payment_method">
               {{ team.payment_method.name_on_card }}
@@ -30,10 +33,10 @@
           </Button>
         </div>
       </div>
-      <div class="bg-gray-100 h-px my-3" />
+      <div v-if="team.payment_mode == 'Card'" class="bg-gray-100 h-px my-3" />
       <div class="flex justify-between items-center text-base text-gray-900">
         <div class="flex flex-col gap-1.5">
-          <div class="font-medium">{{ 'Payment mode' }}</div>
+          <div class="font-medium">{{ 'Mode of payment' }}</div>
           <div
             v-if="team.payment_mode"
             class="inline-flex items-center gap-2 text-gray-700"
@@ -180,24 +183,27 @@ const paymentModeOptions = [
     label: 'Card',
     value: 'Card',
     description: 'Your card will be charged for monthly subscription',
-    component: h(DropdownItem, {
-      label: 'Card',
-      checked: team.value.payment_mode === 'Card',
-    }),
-    onClick: () => updatePaymentMode('Card'),
+    component: () =>
+      h(DropdownItem, {
+        label: 'Card',
+        active: team.value.payment_mode === 'Card',
+        onClick: () => updatePaymentMode('Card'),
+      }),
   },
   {
     label: 'Prepaid credits',
     value: 'Prepaid Credits',
     description:
       'You will be charged from your credit balance for monthly subscription',
-    component: h(DropdownItem, {
-      label: 'Prepaid credits',
-      checked: team.value.payment_mode === 'Prepaid Credits',
-    }),
-    onClick: () => updatePaymentMode('Prepaid Credits'),
+    component: () =>
+      h(DropdownItem, {
+        label: 'Prepaid credits',
+        active: team.value.payment_mode === 'Prepaid Credits',
+        onClick: () => updatePaymentMode('Prepaid Credits'),
+      }),
   },
 ]
+
 const showMessage = ref(false)
 function updatePaymentMode(mode) {
   showMessage.value = false
@@ -217,6 +223,7 @@ function updatePaymentMode(mode) {
       method: 'billing.change_payment_mode',
       data: { mode },
     },
+    auto: true,
     onSuccess: () => reloadTeam(),
   })
 }

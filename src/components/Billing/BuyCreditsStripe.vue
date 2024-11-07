@@ -95,7 +95,7 @@ const createPaymentIntent = createResource({
     clientSecret.value = client_secret
     stripe.value = await loadStripe(publishable_key)
     elements.value = stripe.value.elements()
-    let style = {
+    const style = {
       base: {
         color: '#171717',
         fontFamily: [
