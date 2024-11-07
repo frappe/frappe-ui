@@ -7,3 +7,11 @@ export function calculateTrialEndDays(trialEndDate) {
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
   return diffDays
 }
+
+export function currency(value, currency, fractions = 2) {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency,
+    maximumFractionDigits: fractions,
+  }).format(value)
+}

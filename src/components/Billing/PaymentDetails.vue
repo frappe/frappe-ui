@@ -11,22 +11,25 @@
         <div class="flex flex-col gap-1.5">
           <div class="font-medium">{{ 'Active card' }}</div>
           <div class="overflow-hidden text-gray-700 text-ellipsis">
-            <div v-if="team.payment_method">
-              {{ team.payment_method.name_on_card }}
-              <span class="text-gray-500">••••</span>
-              {{ team.payment_method.last_4 }}
-              &middot;
-              <span class="font-normal text-gray-600">
-                Expiry {{ team.payment_method.expiry_month }}/{{
-                  team.payment_method.expiry_year
-                }}
-              </span>
+            <div
+              v-if="team.payment_method"
+              class="inline-flex items-center gap-2"
+            >
+              <component :is="cardBrandIcon(team.payment_method.brand)" />
+              <div class="text-gray-700">
+                <span>{{ team.payment_method.name_on_card }}</span>
+                <span> &middot; Card ending in •••• </span>
+                <span>{{ team.payment_method.last_4 }}</span>
+              </div>
             </div>
             <span v-else class="text-gray-700">No card added</span>
           </div>
         </div>
         <div class="shrink-0">
-          <Button :label="team.payment_method ? 'Change method' : 'Add card'">
+          <Button
+            :label="team.payment_method ? 'Change method' : 'Add card'"
+            @click="changeMethod"
+          >
             <template v-if="!team.payment_method" #prefix>
               <FeatherIcon class="h-4" name="plus" />
             </template>
@@ -137,6 +140,18 @@
     :showMessage="showMessage"
     @success="upcomingInvoice.reload()"
   />
+  <AddCardModal
+    v-if="showAddCardModal"
+    v-model="showAddCardModal"
+    :showMessage="showMessage"
+    @success="
+      () => {
+        showMessage = false
+        showAddCardModal = false
+        reloadTeam()
+      }
+    "
+  />
 </template>
 <script setup>
 import Dropdown from '../Dropdown.vue'
@@ -145,13 +160,15 @@ import Button from '../Button.vue'
 import FeatherIcon from '../FeatherIcon.vue'
 import BillingDetailsModal from './BillingDetailsModal.vue'
 import CreditBalanceModal from './CreditBalanceModal.vue'
+import AddCardModal from './AddCardModal.vue'
 import { createResource } from '../../resources/index.js'
-import { computed, ref, inject, h } from 'vue'
+import { computed, ref, inject, defineAsyncComponent, h } from 'vue'
 
 const { baseAPIPath, team, reloadTeam } = inject('billing')
 
 const showBillingDetailsDialog = ref(false)
 const showCreditBalanceModal = ref(false)
+const showAddCardModal = ref(false)
 
 const billingDetails = createResource({
   url: `${baseAPIPath}.saas_api`,
@@ -216,6 +233,9 @@ function updatePaymentMode(mode) {
     showMessage.value = true
     showCreditBalanceModal.value = true
     return
+  } else if (mode === 'Card' && !team.value.payment_method) {
+    showMessage.value = true
+    showAddCardModal.value = true
   }
   createResource({
     url: `${baseAPIPath}.saas_api`,
@@ -226,5 +246,29 @@ function updatePaymentMode(mode) {
     auto: true,
     onSuccess: () => reloadTeam(),
   })
+}
+
+function changeMethod() {
+  showMessage.value = false
+  showAddCardModal.value = true
+}
+
+function cardBrandIcon(brand) {
+  let component = {
+    'master-card': defineAsyncComponent(
+      () => import('../../icons/MasterCard.vue'),
+    ),
+    visa: defineAsyncComponent(() => import('../../icons/Visa.vue')),
+    amex: defineAsyncComponent(() => import('../../icons/Amex.vue')),
+    jcb: defineAsyncComponent(() => import('../../icons/JCB.vue')),
+    generic: defineAsyncComponent(() => import('../../icons/Generic.vue')),
+    'union-pay': defineAsyncComponent(() => import('../../icons/UnionPay.vue')),
+  }[brand || 'generic']
+
+  if (!component) {
+    component = defineAsyncComponent(() => import('../../icons/Generic.vue'))
+  }
+
+  return h(component, { class: 'size-6' })
 }
 </script>
