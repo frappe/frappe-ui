@@ -39,3 +39,11 @@ export function cardBrandIcon(brand) {
 
   return h(component, { class: 'size-6' })
 }
+
+export function parseSize(sizeInMB) {
+  if (sizeInMB < 1024) {
+    return `${sizeInMB} MB`
+  } else {
+    return `${(sizeInMB / 1024).toFixed(0)} GB`
+  }
+}

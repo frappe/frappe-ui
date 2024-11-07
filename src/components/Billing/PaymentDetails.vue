@@ -80,7 +80,7 @@
         <div class="flex flex-col gap-1.5">
           <div class="font-medium">{{ 'Credit balance' }}</div>
           <div class="text-gray-700">
-            {{ upcomingInvoice.data?.available_credits || 0 }}
+            {{ availableCredits || currency + ' 0.00' }}
           </div>
         </div>
         <div class="shrink-0">
@@ -143,7 +143,7 @@
     v-if="showCreditBalanceModal"
     v-model="showCreditBalanceModal"
     :showMessage="showMessage"
-    @success="upcomingInvoice.reload()"
+    @success="reloadUpcomingInvoice()"
   />
   <AddCardModal
     v-if="showAddCardModal"
@@ -182,12 +182,20 @@ import { createResource } from '../../resources/index.js'
 import { cardBrandIcon } from './utils.js'
 import { computed, ref, inject, h } from 'vue'
 
-const { baseAPIPath, team, reloadTeam } = inject('billing')
+const {
+  baseAPIPath,
+  team,
+  reloadTeam,
+  availableCredits,
+  reloadUpcomingInvoice,
+} = inject('billing')
 
 const showBillingDetailsDialog = ref(false)
 const showCreditBalanceModal = ref(false)
 const showAddCardModal = ref(false)
 const showChangeCardModal = ref(false)
+
+const currency = computed(() => (team.value.currency == 'INR' ? '₹' : '$'))
 
 const billingDetails = createResource({
   url: `${baseAPIPath}.saas_api`,
@@ -205,13 +213,6 @@ const billingDetailsSummary = computed(() => {
   return [billing_name, address_line1, city, state, country, pincode, gstin]
     .filter(Boolean)
     .join(', ')
-})
-
-const upcomingInvoice = createResource({
-  url: `${baseAPIPath}.saas_api`,
-  params: { method: 'billing.upcoming_invoice' },
-  cache: 'upcomingInvoice',
-  auto: true,
 })
 
 const paymentModeOptions = [

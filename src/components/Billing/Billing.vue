@@ -38,9 +38,19 @@ const team = createResource({
   auto: true,
 })
 
+const upcomingInvoice = createResource({
+  url: `${props.baseAPIPath}.saas_api`,
+  params: { method: 'billing.upcoming_invoice' },
+  cache: 'upcomingInvoice',
+  auto: true,
+})
+
 provide('billing', {
   baseAPIPath: props.baseAPIPath,
   team: computed(() => team.data),
   reloadTeam: team.reload,
+  availableCredits: computed(() => upcomingInvoice.data?.available_credits),
+  currentBillingAmount: computed(() => upcomingInvoice.data?.upcoming_invoice.total),
+  reloadUpcomingInvoice: upcomingInvoice.reload,
 })
 </script>

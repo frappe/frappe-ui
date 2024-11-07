@@ -4,7 +4,7 @@
       {{ 'Current plan' }}
     </div>
     <div
-      v-if="currentPlan"
+      v-if="currentPlan?.is_trial_plan"
       class="flex justify-between shadow rounded-lg py-3 px-4 text-base"
     >
       <div class="flex gap-3">
@@ -25,7 +25,7 @@
             <span> Support Included </span>
           </div>
           <div v-else class="text-gray-700">
-            <span>{{ price.currency }}{{ price.value }}</span>
+            <span>{{ currency }}{{ price.value }}</span>
             <span class="font-normal">{{ ' / month · See plan details' }}</span>
           </div>
         </div>
@@ -36,17 +36,95 @@
         @click="emit('changePlan')"
       />
     </div>
+    <div
+      v-else-if="currentPlan"
+      class="flex flex-col shadow rounded-lg text-base text-gray-900"
+    >
+      <div class="flex flex-col gap-2.5 py-3 px-4">
+        <div class="flex justify-between items-center">
+          <div class="flex flex-col gap-1.5">
+            <div class="font-semibold text-lg">Recurring Charges</div>
+            <div class="text-gray-700">
+              <!-- <span>Next charge date — </span>
+              <span>Dec 2 ,2024</span>
+              <span> · </span> -->
+              <Tooltip>
+                <template #body>
+                  <PlanDetails :plan="currentPlan" />
+                </template>
+                <span class="hover:underline cursor-pointer">
+                  See plan details
+                </span>
+              </Tooltip>
+            </div>
+          </div>
+          <div class="flex flex-col gap-1.5 text-end">
+            <div>
+              <span class="font-semibold text-xl">
+                {{ currency }}{{ price.value }}
+              </span>
+              <span>/mo</span>
+            </div>
+            <div class="text-gray-600">
+              <span>{{ currency }}{{ price.valuePerDay }}</span>
+              <span>/day</span>
+            </div>
+          </div>
+        </div>
+        <div class="flex justify-between items-center">
+          <div class="text-gray-700 flex gap-2">
+            <BillingIcon class="h-4 w-4" />
+            <div>
+              <span>Current billing amount so far </span>
+              <span class="text-gray-900 font-medium">
+                {{ currency }} {{ currentBillingAmount?.toFixed(2) }}
+              </span>
+            </div>
+          </div>
+          <div>
+            <Button
+              variant="solid"
+              label="Upgrade plan"
+              @click="emit('changePlan')"
+            />
+          </div>
+        </div>
+      </div>
+      <div
+        v-if="unpaidAmount.data"
+        class="flex justify-between items-center rounded-lg py-2 px-2.5 m-1.5 bg-gray-50"
+      >
+        <div class="text-gray-800 flex gap-2">
+          <UnPaidBillIcon class="h-4 w-4" />
+          <div>
+            <span>Unpaid amount is </span>
+            <span>{{ currency }} {{ unpaidAmount.data?.toFixed(2) }}</span>
+          </div>
+        </div>
+        <div>
+          <Button variant="outline" label="Pay now" />
+        </div>
+      </div>
+    </div>
+    <div v-else class="flex items-start justify-center">
+      <Spinner class="h-4 w-4 text-gray-700" />
+    </div>
   </div>
 </template>
 <script setup>
+import Tooltip from '../Tooltip/Tooltip.vue'
+import Spinner from '../Spinner.vue'
 import FeatherIcon from '../FeatherIcon.vue'
+import BillingIcon from '../../icons/BillingIcon.vue'
+import UnPaidBillIcon from '../../icons/UnPaidBillIcon.vue'
+import PlanDetails from './PlanDetails.vue'
 import { createResource } from '../../resources/index.js'
 import { calculateTrialEndDays } from './utils.js'
 import { ref, computed, inject } from 'vue'
 
 const emit = defineEmits(['changePlan'])
 
-const { baseAPIPath, team } = inject('billing')
+const { baseAPIPath, team, currentBillingAmount } = inject('billing')
 
 const trialEndDays = ref(0)
 const trialDescription = computed(() => {
@@ -57,6 +135,7 @@ const trialDescription = computed(() => {
 
 const currentPlan = ref(null)
 const price = ref(null)
+const currency = computed(() => (team.value.currency == 'INR' ? '₹' : '$'))
 
 createResource({
   url: `${baseAPIPath}.current_site_info`,
@@ -65,16 +144,24 @@ createResource({
     trialEndDays.value = calculateTrialEndDays(data.trial_end_date)
     currentPlan.value = data.plan
 
-    let currency = team.value.currency || 'INR'
     let _price =
-      currency === 'INR'
+      currency.value === '₹'
         ? currentPlan.value.price_inr
         : currentPlan.value.price_usd
 
+    let valuePerDay = _price / 30
+
     price.value = {
+      valuePerDay: valuePerDay.toFixed(0),
       value: _price,
-      currency: currency === 'INR' ? '₹' : '$',
     }
   },
+})
+
+const unpaidAmount = createResource({
+  url: `${baseAPIPath}.saas_api`,
+  params: { method: 'billing.total_unpaid_amount' },
+  cache: 'unpaidAmount',
+  auto: true,
 })
 </script>

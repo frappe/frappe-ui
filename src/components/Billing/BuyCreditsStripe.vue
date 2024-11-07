@@ -15,7 +15,7 @@
     </label>
 
     <div v-if="step == 'Setting up Stripe'" class="mt-8 flex justify-center">
-      <Spinner class="h-4 w-4 text-gray-600" />
+      <Spinner class="h-4 w-4 text-gray-700" />
     </div>
     <ErrorMessage
       class="mt-2"

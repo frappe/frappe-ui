@@ -62,6 +62,7 @@ import ListRowItem from '../ListView/ListRowItem.vue'
 import Badge from '../Badge.vue'
 import Spinner from '../Spinner.vue'
 import Button from '../Button.vue'
+import { parseSize } from './utils.js'
 import { computed } from 'vue'
 
 const props = defineProps({
@@ -158,14 +159,6 @@ const rows = computed(() => {
         (row.name === 'Trial' && row.name === currentPlan.value),
     )
 })
-
-function parseSize(sizeInMB) {
-  if (sizeInMB < 1024) {
-    return `${sizeInMB} MB`
-  } else {
-    return `${(sizeInMB / 1024).toFixed(0)} GB`
-  }
-}
 
 function changePlan(planName) {
   createResource({
