@@ -27,7 +27,7 @@
         </div>
         <div class="shrink-0">
           <Button
-            :label="team.payment_method ? 'Change method' : 'Add card'"
+            :label="team.payment_method ? 'Change card' : 'Add card'"
             @click="changeMethod"
           >
             <template v-if="!team.payment_method" #prefix>
@@ -152,6 +152,11 @@
       }
     "
   />
+  <ChangeCardModal
+    v-if="showChangeCardModal"
+    v-model="showChangeCardModal"
+    @success="() => reloadTeam()"
+  />
 </template>
 <script setup>
 import Dropdown from '../Dropdown.vue'
@@ -161,14 +166,17 @@ import FeatherIcon from '../FeatherIcon.vue'
 import BillingDetailsModal from './BillingDetailsModal.vue'
 import CreditBalanceModal from './CreditBalanceModal.vue'
 import AddCardModal from './AddCardModal.vue'
+import ChangeCardModal from './ChangeCardModal.vue'
 import { createResource } from '../../resources/index.js'
-import { computed, ref, inject, defineAsyncComponent, h } from 'vue'
+import { cardBrandIcon } from './utils.js'
+import { computed, ref, inject, h } from 'vue'
 
 const { baseAPIPath, team, reloadTeam } = inject('billing')
 
 const showBillingDetailsDialog = ref(false)
 const showCreditBalanceModal = ref(false)
 const showAddCardModal = ref(false)
+const showChangeCardModal = ref(false)
 
 const billingDetails = createResource({
   url: `${baseAPIPath}.saas_api`,
@@ -249,26 +257,11 @@ function updatePaymentMode(mode) {
 }
 
 function changeMethod() {
-  showMessage.value = false
-  showAddCardModal.value = true
-}
-
-function cardBrandIcon(brand) {
-  let component = {
-    'master-card': defineAsyncComponent(
-      () => import('../../icons/MasterCard.vue'),
-    ),
-    visa: defineAsyncComponent(() => import('../../icons/Visa.vue')),
-    amex: defineAsyncComponent(() => import('../../icons/Amex.vue')),
-    jcb: defineAsyncComponent(() => import('../../icons/JCB.vue')),
-    generic: defineAsyncComponent(() => import('../../icons/Generic.vue')),
-    'union-pay': defineAsyncComponent(() => import('../../icons/UnionPay.vue')),
-  }[brand || 'generic']
-
-  if (!component) {
-    component = defineAsyncComponent(() => import('../../icons/Generic.vue'))
+  if (team.value.payment_method) {
+    showChangeCardModal.value = true
+  } else {
+    showMessage.value = false
+    showAddCardModal.value = true
   }
-
-  return h(component, { class: 'size-6' })
 }
 </script>

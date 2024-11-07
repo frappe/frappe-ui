@@ -1,3 +1,5 @@
+import { defineAsyncComponent, h } from 'vue'
+
 export function calculateTrialEndDays(trialEndDate) {
   if (!trialEndDate) return 0
 
@@ -14,4 +16,23 @@ export function currency(value, currency, fractions = 2) {
     currency,
     maximumFractionDigits: fractions,
   }).format(value)
+}
+
+export function cardBrandIcon(brand) {
+  let component = {
+    'master-card': defineAsyncComponent(
+      () => import('../../icons/MasterCard.vue'),
+    ),
+    visa: defineAsyncComponent(() => import('../../icons/Visa.vue')),
+    amex: defineAsyncComponent(() => import('../../icons/Amex.vue')),
+    jcb: defineAsyncComponent(() => import('../../icons/JCB.vue')),
+    generic: defineAsyncComponent(() => import('../../icons/Generic.vue')),
+    'union-pay': defineAsyncComponent(() => import('../../icons/UnionPay.vue')),
+  }[brand || 'generic']
+
+  if (!component) {
+    component = defineAsyncComponent(() => import('../../icons/Generic.vue'))
+  }
+
+  return h(component, { class: 'size-6' })
 }
