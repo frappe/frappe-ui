@@ -23,6 +23,9 @@ export function cardBrandIcon(brand) {
     'master-card': defineAsyncComponent(
       () => import('../../icons/MasterCard.vue'),
     ),
+    mastercard: defineAsyncComponent(
+      () => import('../../icons/MasterCard.vue'),
+    ),
     visa: defineAsyncComponent(() => import('../../icons/Visa.vue')),
     amex: defineAsyncComponent(() => import('../../icons/Amex.vue')),
     jcb: defineAsyncComponent(() => import('../../icons/JCB.vue')),

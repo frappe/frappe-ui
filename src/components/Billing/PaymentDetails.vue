@@ -155,6 +155,12 @@
   <ChangeCardModal
     v-if="showChangeCardModal"
     v-model="showChangeCardModal"
+    @addCard="
+      () => {
+        showChangeCardModal = false
+        showAddCardModal = true
+      }
+    "
     @success="() => reloadTeam()"
   />
 </template>

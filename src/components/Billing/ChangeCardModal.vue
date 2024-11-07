@@ -58,7 +58,12 @@
           </div>
         </div>
         <div class="w-full mt-2">
-          <Button label="Add new card" size="md" variant="ghost">
+          <Button
+            label="Add new card"
+            size="md"
+            variant="ghost"
+            @click="emit('addCard')"
+          >
             <template #prefix>
               <FeatherIcon name="plus" class="h-4" />
             </template>
@@ -79,7 +84,7 @@ import { createResource } from '../../resources/index.js'
 import { cardBrandIcon } from './utils.js'
 import { ref, inject } from 'vue'
 
-const emit = defineEmits(['success'])
+const emit = defineEmits(['success', 'addCard'])
 
 const show = defineModel()
 
