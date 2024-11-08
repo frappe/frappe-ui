@@ -52,7 +52,7 @@ import ListHeader from '../ListView/ListHeader.vue'
 import ListRows from '../ListView/ListRows.vue'
 import ListRow from '../ListView/ListRow.vue'
 import ListRowItem from '../ListView/ListRowItem.vue'
-import InvoiceIcon from '../../icons/InvoiceIcon.vue'
+import InvoiceIcon from './icons/InvoiceIcon.vue'
 import Badge from '../Badge.vue'
 import { computed, inject } from 'vue'
 

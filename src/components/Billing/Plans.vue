@@ -10,6 +10,7 @@
         row-key="name"
         :options="{
           selectable: false,
+          showTooltip: false,
         }"
       >
         <ListHeader />
@@ -19,18 +20,21 @@
             :key="row.name"
             v-slot="{ column, item }"
             :row="row"
+            :class="{ 'bg-gray-50 rounded': row.isCurrent }"
           >
             <ListRowItem :item="item" :align="column.align">
               <Badge
                 v-if="column.key == 'upgrade' && row.isCurrent"
+                class="shrink-0 bg-white"
                 label="Current plan"
-                variant="subtle"
-                size="md"
+                variant="outline"
+                size="lg"
               />
               <Button
                 v-else-if="column.key == 'upgrade' && !row.isCurrent"
-                label="Upgrade"
+                :label="row.downgrade ? 'Downgrade' : 'Upgrade'"
                 @click="row.onClick"
+                :disabled="!row.downgradable && row.downgrade"
               />
               <div
                 v-if="column.key == 'price'"
@@ -42,6 +46,12 @@
                   <span class="text-gray-700 font-normal">/mo</span>
                 </span>
               </div>
+              <Tooltip v-if="column.key == 'info'">
+                <template #body>
+                  <PlanDetails :plan="item" />
+                </template>
+                <FeatherIcon class="h-4 cursor-pointer" name="info" />
+              </Tooltip>
             </ListRowItem>
           </ListRow>
         </ListRows>
@@ -62,6 +72,9 @@ import ListRowItem from '../ListView/ListRowItem.vue'
 import Badge from '../Badge.vue'
 import Spinner from '../Spinner.vue'
 import Button from '../Button.vue'
+import FeatherIcon from '../FeatherIcon.vue'
+import Tooltip from '../Tooltip/Tooltip.vue'
+import PlanDetails from './PlanDetails.vue'
 import { parseSize } from './utils.js'
 import { computed } from 'vue'
 
@@ -105,6 +118,11 @@ const currency = computed(() => {
 
 const columns = [
   {
+    label: '',
+    key: 'info',
+    width: '8px',
+  },
+  {
     label: 'Cost',
     key: 'price',
     width: 0.8,
@@ -122,12 +140,12 @@ const columns = [
   {
     label: 'Disk',
     key: 'disk',
-    width: 0.8,
+    width: 0.7,
   },
   {
     label: '',
     key: 'upgrade',
-    width: 0.7,
+    width: 0.8,
     align: 'right',
   },
 ]
@@ -135,8 +153,11 @@ const columns = [
 const rows = computed(() => {
   if (!currentPlan.value) return []
   if (!plans.data) return []
+  let currentPlanIndex = plans.data.findIndex(
+    (plan) => plan.name === currentPlan.value,
+  )
   return plans.data
-    .map((plan) => {
+    .map((plan, i) => {
       let cpu = plan.cpu_time_per_day > 1 ? 'compute hrs/day' : 'compute hr/day'
       let price = currency.value === 'INR' ? plan.price_inr : plan.price_usd
       return {
@@ -149,7 +170,10 @@ const rows = computed(() => {
         cpu: `${plan.cpu_time_per_day} ${cpu}`,
         memory: `${parseSize(plan.max_database_usage)} Database`,
         disk: `${parseSize(plan.max_storage_usage)} Disk`,
+        info: plan,
         isCurrent: plan.name === currentPlan.value,
+        downgradable: plan.allow_downgrading_from_other_plan,
+        downgrade: currentPlanIndex > i,
         onClick: () => changePlan(plan.name),
       }
     })
