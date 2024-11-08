@@ -45,9 +45,9 @@
           <div class="flex flex-col gap-1.5">
             <div class="font-semibold text-lg">Recurring Charges</div>
             <div class="text-gray-700">
-              <!-- <span>Next charge date — </span>
-              <span>Dec 2 ,2024</span>
-              <span> · </span> -->
+              <span>Next charge date — </span>
+              <span>{{ currentMonthEnd() }}</span>
+              <span> · </span>
               <Tooltip>
                 <template #body>
                   <PlanDetails :plan="currentPlan" />
@@ -94,21 +94,30 @@
         v-if="unpaidAmount.data"
         class="flex justify-between items-center rounded-lg py-2 px-2.5 m-1.5 bg-gray-50"
       >
-        <div class="text-gray-800 flex gap-2">
+        <div class="text-gray-800 flex items-center gap-2 h-7">
           <UnPaidBillIcon class="h-4 w-4" />
           <div>
             <span>Unpaid amount is </span>
             <span>{{ currency }} {{ unpaidAmount.data?.toFixed(2) }}</span>
           </div>
         </div>
-        <div>
-          <Button variant="outline" label="Pay now" />
+        <div v-if="team.payment_mode == 'Prepaid Credits'">
+          <Button
+            variant="outline"
+            label="Pay now"
+            @click="showCreditBalanceModal = true"
+          />
         </div>
       </div>
     </div>
     <div v-else class="flex items-start justify-center">
       <Spinner class="h-4 w-4 text-gray-700" />
     </div>
+    <CreditBalanceModal
+      v-if="showCreditBalanceModal"
+      v-model="showCreditBalanceModal"
+      @success="reloadUpcomingInvoice()"
+    />
   </div>
 </template>
 <script setup>
@@ -118,13 +127,15 @@ import FeatherIcon from '../FeatherIcon.vue'
 import BillingIcon from '../../icons/BillingIcon.vue'
 import UnPaidBillIcon from '../../icons/UnPaidBillIcon.vue'
 import PlanDetails from './PlanDetails.vue'
+import CreditBalanceModal from './CreditBalanceModal.vue'
 import { createResource } from '../../resources/index.js'
 import { calculateTrialEndDays } from './utils.js'
 import { ref, computed, inject } from 'vue'
 
 const emit = defineEmits(['changePlan'])
 
-const { baseAPIPath, team, currentBillingAmount } = inject('billing')
+const { baseAPIPath, team, currentBillingAmount, reloadUpcomingInvoice } =
+  inject('billing')
 
 const trialEndDays = ref(0)
 const trialDescription = computed(() => {
@@ -136,6 +147,8 @@ const trialDescription = computed(() => {
 const currentPlan = ref(null)
 const price = ref(null)
 const currency = computed(() => (team.value.currency == 'INR' ? '₹' : '$'))
+
+const showCreditBalanceModal = ref(false)
 
 createResource({
   url: `${baseAPIPath}.current_site_info`,
@@ -164,4 +177,14 @@ const unpaidAmount = createResource({
   cache: 'unpaidAmount',
   auto: true,
 })
+
+const currentMonthEnd = () => {
+  const date = new Date()
+  const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0)
+  return lastDay.toLocaleDateString('en-US', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
+}
 </script>
