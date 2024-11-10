@@ -35,7 +35,7 @@
                 v-if="column.key == 'download' && item.url"
                 variant="ghost"
                 icon="download"
-                @click="item.onClick"
+                @click.stop="item.onClick"
               />
             </ListRowItem>
           </ListRow>
@@ -147,9 +147,37 @@ const rows = computed(() => {
 })
 
 function downloadInvoice(invoice) {
-  call(`${baseAPIPath}.saas_api`, {
-    method: 'billing.download_invoice',
-    data: { name: invoice },
+  createResource({
+    url: `${baseAPIPath}.get_token_and_base_url`,
+    auto: true,
+    onSuccess: (data) => {
+      fetch(
+        `${data.base_url}/api/method/press.saas.api.billing.download_invoice`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Site-Access-Token': data.token,
+          },
+          body: JSON.stringify({ name: invoice }),
+        },
+      )
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(
+              'Network response was not ok ' + response.statusText,
+            )
+          }
+          return response.blob()
+        })
+        .then((blob) => {
+          const url = window.URL.createObjectURL(blob)
+          window.open(url, '_blank')
+        })
+        .catch((error) => {
+          console.error('There was a problem with the fetch operation:', error)
+        })
+    },
   })
 }
 
