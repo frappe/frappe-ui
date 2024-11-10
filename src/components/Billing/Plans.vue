@@ -64,6 +64,7 @@
       v-if="showUpgradePlanStepsModal"
       v-model="showUpgradePlanStepsModal"
       :defaultStep="defaultStep"
+      :planName="planName"
     />
   </div>
 </template>
@@ -199,17 +200,19 @@ const rows = computed(() => {
 
 const defaultStep = ref(1)
 const showUpgradePlanStepsModal = ref(false)
+const planName = ref('')
 
-function changePlan(planName) {
+function changePlan(_planName) {
   if (!billingDetails.data || team.data.payment_mode) {
     defaultStep.value = billingDetails.data ? 2 : 1
     showUpgradePlanStepsModal.value = true
+    planName.value = _planName
     return
   }
 
   createResource({
     url: `${props.baseAPIPath}.saas_api`,
-    params: { method: 'site.change_plan', data: { plan: planName } },
+    params: { method: 'site.change_plan', data: { plan: _planName } },
     auto: true,
     onSuccess: () => {
       site.reload()
@@ -221,5 +224,7 @@ function changePlan(planName) {
 provide('billing', {
   baseAPIPath: props.baseAPIPath,
   team: computed(() => team.data),
+  reloadPlans: plans.reload,
+  reloadSite: site.reload,
 })
 </script>

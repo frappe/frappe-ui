@@ -38,44 +38,47 @@
             />
           </div>
         </div>
-        <BillingDetails
-          v-show="step === 1"
-          ref="billingRef"
-          @success="() => (step = step + 1)"
-        />
+        <div v-show="step === 1">
+          <BillingDetails ref="billingRef" @success="() => (step = step + 1)" />
+        </div>
+        <div v-show="step === 2">
+          <div class="text-sm text-gray-800 mb-7.5">
+            <div class="mb-1.5">Payment mode</div>
+            <TabButtons v-model="activeTab" :buttons="paymentModes" />
+            <div class="flex gap-1.5 mt-2">
+              <FeatherIcon class="h-4" name="info" />
+              {{ paymentModes.find((m) => m.value == activeTab).description }}
+            </div>
+          </div>
+          <CardForm v-show="activeTab == 'Card'" @success="updateMode" />
+        </div>
       </div>
-    </template>
-    <template #actions>
-      <Button
-        v-if="step > 1"
-        class="w-full mb-2"
-        label="Previous"
-        @click="step = step - 1"
-      />
-      <Button
-        class="w-full"
-        variant="solid"
-        label="Next"
-        :loading="loading"
-        @click="next"
-      />
     </template>
   </Dialog>
 </template>
 <script setup>
 import BillingDetails from './BillingDetails.vue'
+import CardForm from './CardForm.vue'
 import Dialog from '../Dialog.vue'
 import Button from '../Button.vue'
 import FeatherIcon from '../FeatherIcon.vue'
+import TabButtons from '../TabButtons.vue'
 import { DialogTitle } from '@headlessui/vue'
-import { ref, computed } from 'vue'
+import { createResource } from '../../resources/index.js'
+import { ref, computed, inject } from 'vue'
 
 const props = defineProps({
   defaultStep: {
     type: Number,
     default: 1,
   },
+  planName: {
+    type: String,
+    required: true,
+  },
 })
+
+const { baseAPIPath, reloadPlans, reloadSite } = inject('billing')
 
 const show = defineModel()
 const step = ref(props.defaultStep)
@@ -84,17 +87,44 @@ const title = computed(() =>
 )
 
 const billingRef = ref(null)
+const activeTab = ref('Card')
 
-const loading = computed(() => {
-  if (step.value === 1 && billingRef.value) {
-    return billingRef.value.getUpdateResource().loading
-  }
-  return false
-})
+const paymentModes = [
+  {
+    label: 'Card',
+    value: 'Card',
+    description: 'Your card will be charged for monthly subscription',
+  },
+  {
+    label: 'Prepaid credits',
+    value: 'Prepaid Credits',
+    description:
+      'You will be charged from your credit balance for monthly subscription',
+  },
+]
 
-function next() {
-  if (step.value === 1) {
-    billingRef.value.getUpdateResource().submit()
-  }
+function updateMode() {
+  createResource({
+    url: `${baseAPIPath}.saas_api`,
+    params: {
+      method: 'billing.change_payment_mode',
+      data: { mode: activeTab.value },
+    },
+    auto: true,
+    onSuccess: () => upgradePlan(),
+  })
+}
+
+function upgradePlan() {
+  createResource({
+    url: `${baseAPIPath}.saas_api`,
+    params: { method: 'site.change_plan', data: { plan: props.planName } },
+    auto: true,
+    onSuccess: () => {
+      reloadSite()
+      reloadPlans()
+      show.value = false
+    },
+  })
 }
 </script>
