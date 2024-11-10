@@ -60,6 +60,11 @@
     <div v-else class="flex flex-1 items-center justify-center">
       <Spinner class="size-8" />
     </div>
+    <UpgradePlanStepsModal
+      v-if="showUpgradePlanStepsModal"
+      v-model="showUpgradePlanStepsModal"
+      :defaultStep="defaultStep"
+    />
   </div>
 </template>
 <script setup>
@@ -75,14 +80,22 @@ import Button from '../Button.vue'
 import FeatherIcon from '../FeatherIcon.vue'
 import Tooltip from '../Tooltip/Tooltip.vue'
 import PlanDetails from './PlanDetails.vue'
+import UpgradePlanStepsModal from './UpgradePlanStepsModal.vue'
 import { parseSize } from './utils.js'
-import { computed } from 'vue'
+import { ref, computed, provide } from 'vue'
 
 const props = defineProps({
   baseAPIPath: {
     type: String,
     required: true,
   },
+})
+
+const billingDetails = createResource({
+  url: `${props.baseAPIPath}.saas_api`,
+  params: { method: 'billing.get_information' },
+  cache: 'billingDetails',
+  auto: true,
 })
 
 const team = createResource({
@@ -184,7 +197,16 @@ const rows = computed(() => {
     )
 })
 
+const defaultStep = ref(1)
+const showUpgradePlanStepsModal = ref(false)
+
 function changePlan(planName) {
+  if (!billingDetails.data || team.data.payment_mode) {
+    defaultStep.value = billingDetails.data ? 2 : 1
+    showUpgradePlanStepsModal.value = true
+    return
+  }
+
   createResource({
     url: `${props.baseAPIPath}.saas_api`,
     params: { method: 'site.change_plan', data: { plan: planName } },
@@ -195,4 +217,9 @@ function changePlan(planName) {
     },
   })
 }
+
+provide('billing', {
+  baseAPIPath: props.baseAPIPath,
+  team: computed(() => team.data),
+})
 </script>
