@@ -203,7 +203,7 @@ const showUpgradePlanStepsModal = ref(false)
 const planName = ref('')
 
 function changePlan(_planName) {
-  if (!billingDetails.data || team.data.payment_mode) {
+  if (!billingDetails.data || !team.data.payment_mode) {
     defaultStep.value = billingDetails.data ? 2 : 1
     showUpgradePlanStepsModal.value = true
     planName.value = _planName

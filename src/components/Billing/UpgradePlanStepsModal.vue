@@ -51,6 +51,10 @@
             </div>
           </div>
           <CardForm v-show="activeTab == 'Card'" @success="updateMode" />
+          <PrepaidCreditsForm
+            v-show="activeTab == 'Prepaid Credits'"
+            @success="updateMode"
+          />
         </div>
       </div>
     </template>
@@ -59,6 +63,7 @@
 <script setup>
 import BillingDetails from './BillingDetails.vue'
 import CardForm from './CardForm.vue'
+import PrepaidCreditsForm from './PrepaidCreditsForm.vue'
 import Dialog from '../Dialog.vue'
 import Button from '../Button.vue'
 import FeatherIcon from '../FeatherIcon.vue'

@@ -94,7 +94,7 @@
                   showBillingDetailsDialog = true
                   return
                 }
-                showCreditBalanceModal = true
+                showAddPrepaidCreditsModal = true
               }
             "
           >
@@ -139,9 +139,9 @@
     :showMessage="showMessage"
     @success="billingDetails.reload()"
   />
-  <CreditBalanceModal
-    v-if="showCreditBalanceModal"
-    v-model="showCreditBalanceModal"
+  <AddPrepaidCreditsModal
+    v-if="showAddPrepaidCreditsModal"
+    v-model="showAddPrepaidCreditsModal"
     :showMessage="showMessage"
     @success="reloadUpcomingInvoice()"
   />
@@ -175,7 +175,7 @@ import DropdownItem from './DropdownItem.vue'
 import Button from '../Button.vue'
 import FeatherIcon from '../FeatherIcon.vue'
 import BillingDetailsModal from './BillingDetailsModal.vue'
-import CreditBalanceModal from './CreditBalanceModal.vue'
+import AddPrepaidCreditsModal from './AddPrepaidCreditsModal.vue'
 import AddCardModal from './AddCardModal.vue'
 import ChangeCardModal from './ChangeCardModal.vue'
 import { createResource } from '../../resources/index.js'
@@ -191,7 +191,7 @@ const {
 } = inject('billing')
 
 const showBillingDetailsDialog = ref(false)
-const showCreditBalanceModal = ref(false)
+const showAddPrepaidCreditsModal = ref(false)
 const showAddCardModal = ref(false)
 const showChangeCardModal = ref(false)
 
@@ -251,7 +251,7 @@ function updatePaymentMode(mode) {
   }
   if (mode === 'Prepaid Credits' && team.value.balance === 0) {
     showMessage.value = true
-    showCreditBalanceModal.value = true
+    showAddPrepaidCreditsModal.value = true
     return
   } else if (mode === 'Card' && !team.value.payment_method) {
     showMessage.value = true

@@ -105,7 +105,7 @@
           <Button
             variant="outline"
             label="Pay now"
-            @click="showCreditBalanceModal = true"
+            @click="showAddPrepaidCreditsModal = true"
           />
         </div>
       </div>
@@ -113,9 +113,9 @@
     <div v-else class="flex items-start justify-center">
       <Spinner class="h-4 w-4 text-gray-700" />
     </div>
-    <CreditBalanceModal
-      v-if="showCreditBalanceModal"
-      v-model="showCreditBalanceModal"
+    <AddPrepaidCreditsModal
+      v-if="showAddPrepaidCreditsModal"
+      v-model="showAddPrepaidCreditsModal"
       @success="reloadUpcomingInvoice()"
     />
   </div>
@@ -127,7 +127,7 @@ import FeatherIcon from '../FeatherIcon.vue'
 import BillingIcon from './icons/BillingIcon.vue'
 import UnPaidBillIcon from './icons/UnPaidBillIcon.vue'
 import PlanDetails from './PlanDetails.vue'
-import CreditBalanceModal from './CreditBalanceModal.vue'
+import AddPrepaidCreditsModal from './AddPrepaidCreditsModal.vue'
 import { createResource } from '../../resources/index.js'
 import { calculateTrialEndDays } from './utils.js'
 import { ref, computed, inject } from 'vue'
@@ -137,7 +137,7 @@ const emit = defineEmits(['changePlan'])
 const { baseAPIPath, team, currentBillingAmount, reloadUpcomingInvoice } =
   inject('billing')
 
-const showCreditBalanceModal = ref(false)
+const showAddPrepaidCreditsModal = ref(false)
 
 const trialEndDays = ref(0)
 const trialDescription = computed(() => {
