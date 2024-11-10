@@ -13,10 +13,20 @@
       @success="() => emit('success')"
     />
   </div>
+  <div v-if="addressFormRef" class="mt-6">
+    <Button
+      class="w-full"
+      variant="solid"
+      label="Update billing details"
+      :loading="addressFormRef.updateBillingInformation.loading"
+      @click="addressFormRef.updateBillingInformation.submit()"
+    />
+  </div>
 </template>
 <script setup>
 import AddressForm from './AddressForm.vue'
 import FormControl from '../FormControl.vue'
+import Button from '../Button.vue'
 import { createResource } from '../../resources/index.js'
 import { reactive, ref, inject } from 'vue'
 
@@ -50,9 +60,5 @@ createResource({
       billing_name: data.billing_name,
     })
   },
-})
-
-defineExpose({
-  getUpdateResource: () => addressFormRef.value.updateBillingInformation,
 })
 </script>

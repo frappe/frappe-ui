@@ -18,15 +18,6 @@
         "
       />
     </template>
-    <template v-if="billingRef?.getUpdateResource" #actions>
-      <Button
-        class="w-full"
-        label="Submit"
-        variant="solid"
-        :loading="billingRef.getUpdateResource().loading"
-        @click="billingRef.getUpdateResource().submit()"
-      />
-    </template>
   </Dialog>
 </template>
 <script setup>
