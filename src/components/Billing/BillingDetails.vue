@@ -12,6 +12,7 @@
       v-model="billingInformation"
       @success="() => emit('success')"
     />
+    <ErrorMessage class="mt-2" :message="errorMessage" />
   </div>
   <div v-if="addressFormRef" class="mt-6">
     <Button
@@ -19,13 +20,14 @@
       variant="solid"
       label="Update billing details"
       :loading="addressFormRef.updateBillingInformation.loading"
-      @click="addressFormRef.updateBillingInformation.submit()"
+      @click="updateBillingInformation"
     />
   </div>
 </template>
 <script setup>
 import AddressForm from './AddressForm.vue'
 import FormControl from '../FormControl.vue'
+import ErrorMessage from '../ErrorMessage.vue'
 import Button from '../Button.vue'
 import { createResource } from '../../resources/index.js'
 import { reactive, ref, inject } from 'vue'
@@ -61,4 +63,14 @@ createResource({
     })
   },
 })
+
+const errorMessage = ref('')
+
+function updateBillingInformation() {
+  if (!billingInformation.billing_name) {
+    errorMessage.value = 'Billing Name is required'
+    return
+  }
+  addressFormRef.value.updateBillingInformation.submit()
+}
 </script>
