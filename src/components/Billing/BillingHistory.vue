@@ -16,7 +16,7 @@
         <ListRows>
           <ListRow
             v-for="row in rows"
-            :key="row.name"
+            :key="row.id"
             v-slot="{ column, item }"
             :row="row"
           >
@@ -126,6 +126,7 @@ const rows = computed(() => {
     }
 
     return {
+      id: invoice.name,
       name: name,
       status: {
         label: invoice.status,
