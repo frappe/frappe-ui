@@ -61,12 +61,12 @@
           <div class="flex flex-col gap-1.5 text-end">
             <div>
               <span class="font-semibold text-xl">
-                {{ currency }}{{ price.value }}
+                {{ currency }}{{ price }}
               </span>
               <span>/mo</span>
             </div>
             <div class="text-gray-600">
-              <span>{{ currency }}{{ price.valuePerDay }}</span>
+              <span>{{ currency }}{{ (price / 30).toFixed(2) }}</span>
               <span>/day</span>
             </div>
           </div>
@@ -137,6 +137,8 @@ const emit = defineEmits(['changePlan'])
 const { baseAPIPath, team, currentBillingAmount, reloadUpcomingInvoice } =
   inject('billing')
 
+const showCreditBalanceModal = ref(false)
+
 const trialEndDays = ref(0)
 const trialDescription = computed(() => {
   return trialEndDays.value > 1
@@ -144,31 +146,24 @@ const trialDescription = computed(() => {
     : 'Your trial plan will end tomorrow'
 })
 
-const currentPlan = ref(null)
+const currentSiteInfo = createResource({
+  url: `${baseAPIPath}.current_site_info`,
+  auto: true,
+  cache: 'currentSiteInfo',
+})
+
 const price = ref(null)
 const currency = computed(() => (team.value.currency == 'INR' ? '₹' : '$'))
 
-const showCreditBalanceModal = ref(false)
-
-createResource({
-  url: `${baseAPIPath}.current_site_info`,
-  auto: true,
-  onSuccess: (data) => {
-    trialEndDays.value = calculateTrialEndDays(data.trial_end_date)
-    currentPlan.value = data.plan
-
-    let _price =
-      currency.value === '₹'
-        ? currentPlan.value.price_inr
-        : currentPlan.value.price_usd
-
-    let valuePerDay = _price / 30
-
-    price.value = {
-      valuePerDay: valuePerDay.toFixed(0),
-      value: _price,
-    }
-  },
+const currentPlan = computed(() => {
+  if (!currentSiteInfo.data) return null
+  trialEndDays.value = calculateTrialEndDays(
+    currentSiteInfo.data.trial_end_date,
+  )
+  let _currentPlan = currentSiteInfo.data.plan
+  price.value =
+    currency.value === '₹' ? _currentPlan.price_inr : _currentPlan.price_usd
+  return _currentPlan
 })
 
 const unpaidAmount = createResource({

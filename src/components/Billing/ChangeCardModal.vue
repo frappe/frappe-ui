@@ -114,8 +114,6 @@ const removeCard = (card) => {
   createDialog({
     title: 'Remove Card',
     message: 'Are you sure you want to remove this card?',
-    variant: 'solid',
-    theme: 'red',
     actions: [
       {
         label: 'Delete',
