@@ -33,7 +33,6 @@ import { createResource } from '../../resources/index.js'
 import { reactive, ref, inject } from 'vue'
 
 const emit = defineEmits(['success'])
-const { baseAPIPath } = inject('billing')
 
 const addressFormRef = ref(null)
 
@@ -48,7 +47,7 @@ const billingInformation = reactive({
 })
 
 createResource({
-  url: `${baseAPIPath}.saas_api`,
+  url: 'frappe.integrations.frappe_providers.frappecloud_billing.api',
   params: { method: 'billing.get_information' },
   auto: true,
   onSuccess: (data) => {

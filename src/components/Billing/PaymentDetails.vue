@@ -182,13 +182,8 @@ import { createResource } from '../../resources/index.js'
 import { cardBrandIcon } from './utils.js'
 import { computed, ref, inject, h } from 'vue'
 
-const {
-  baseAPIPath,
-  team,
-  reloadTeam,
-  availableCredits,
-  reloadUpcomingInvoice,
-} = inject('billing')
+const { team, reloadTeam, availableCredits, reloadUpcomingInvoice } =
+  inject('billing')
 
 const showBillingDetailsDialog = ref(false)
 const showAddPrepaidCreditsModal = ref(false)
@@ -198,7 +193,7 @@ const showChangeCardModal = ref(false)
 const currency = computed(() => (team.value.currency == 'INR' ? '₹' : '$'))
 
 const billingDetails = createResource({
-  url: `${baseAPIPath}.saas_api`,
+  url: 'frappe.integrations.frappe_providers.frappecloud_billing.api',
   params: { method: 'billing.get_information' },
   cache: 'billingDetails',
   auto: true,
@@ -258,7 +253,7 @@ function updatePaymentMode(mode) {
     showAddCardModal.value = true
   }
   createResource({
-    url: `${baseAPIPath}.saas_api`,
+    url: 'frappe.integrations.frappe_providers.frappecloud_billing.api',
     params: {
       method: 'billing.change_payment_mode',
       data: { mode },

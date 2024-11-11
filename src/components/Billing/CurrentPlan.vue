@@ -134,7 +134,7 @@ import { ref, computed, inject } from 'vue'
 
 const emit = defineEmits(['changePlan'])
 
-const { baseAPIPath, team, currentBillingAmount, reloadUpcomingInvoice } =
+const { team, currentBillingAmount, reloadUpcomingInvoice } =
   inject('billing')
 
 const showAddPrepaidCreditsModal = ref(false)
@@ -147,7 +147,7 @@ const trialDescription = computed(() => {
 })
 
 const currentSiteInfo = createResource({
-  url: `${baseAPIPath}.current_site_info`,
+  url: 'frappe.integrations.frappe_providers.frappecloud_billing.current_site_info',
   auto: true,
   cache: 'currentSiteInfo',
 })
@@ -167,7 +167,7 @@ const currentPlan = computed(() => {
 })
 
 const unpaidAmount = createResource({
-  url: `${baseAPIPath}.saas_api`,
+  url: 'frappe.integrations.frappe_providers.frappecloud_billing.api',
   params: { method: 'billing.total_unpaid_amount' },
   cache: 'unpaidAmount',
   auto: true,

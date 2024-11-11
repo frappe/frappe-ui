@@ -63,7 +63,7 @@ const props = defineProps({
 
 const emit = defineEmits(['success'])
 
-const { baseAPIPath, team } = inject('billing')
+const { team } = inject('billing')
 
 const step = ref('Get Amount')
 const clientSecret = ref(null)
@@ -79,7 +79,7 @@ const ready = ref(false)
 const cardElementRef = ref(null)
 
 const createPaymentIntent = createResource({
-  url: `${baseAPIPath}.saas_api`,
+  url: 'frappe.integrations.frappe_providers.frappecloud_billing.api',
   params: {
     method: 'billing.create_payment_intent_for_buying_credits',
     data: { amount: props.amount },

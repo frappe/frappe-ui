@@ -56,10 +56,10 @@ import InvoiceIcon from './icons/InvoiceIcon.vue'
 import Badge from '../Badge.vue'
 import { computed, inject } from 'vue'
 
-const { baseAPIPath, team } = inject('billing')
+const { team } = inject('billing')
 
 const invoices = createResource({
-  url: `${baseAPIPath}.saas_api`,
+  url: 'frappe.integrations.frappe_providers.frappecloud_billing.api',
   params: { method: 'billing.get_invoices' },
   cache: 'invoices',
   auto: true,
@@ -149,7 +149,7 @@ const rows = computed(() => {
 
 function downloadInvoice(invoice) {
   createResource({
-    url: `${baseAPIPath}.get_token_and_base_url`,
+    url: 'frappe.integrations.frappe_providers.frappecloud_billing.get_token_and_base_url',
     auto: true,
     onSuccess: (data) => {
       fetch(

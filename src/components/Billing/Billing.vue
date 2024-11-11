@@ -23,34 +23,29 @@ import Spinner from '../Spinner.vue'
 import { createResource } from '../../resources/index.js'
 import { computed, provide } from 'vue'
 
-const props = defineProps({
-  baseAPIPath: {
-    type: String,
-    required: true,
-  },
-})
 const emit = defineEmits(['changePlan'])
 
 const team = createResource({
-  url: `${props.baseAPIPath}.saas_api`,
+  url: 'frappe.integrations.frappe_providers.frappecloud_billing.api',
   params: { method: 'team.info' },
   cache: 'team',
   auto: true,
 })
 
 const upcomingInvoice = createResource({
-  url: `${props.baseAPIPath}.saas_api`,
+  url: 'frappe.integrations.frappe_providers.frappecloud_billing.api',
   params: { method: 'billing.upcoming_invoice' },
   cache: 'upcomingInvoice',
   auto: true,
 })
 
 provide('billing', {
-  baseAPIPath: props.baseAPIPath,
   team: computed(() => team.data),
   reloadTeam: team.reload,
   availableCredits: computed(() => upcomingInvoice.data?.available_credits),
-  currentBillingAmount: computed(() => upcomingInvoice.data?.upcoming_invoice.total),
+  currentBillingAmount: computed(
+    () => upcomingInvoice.data?.upcoming_invoice.total,
+  ),
   reloadUpcomingInvoice: upcomingInvoice.reload,
 })
 </script>

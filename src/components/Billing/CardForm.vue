@@ -92,7 +92,7 @@ import { ref, reactive, computed, inject, onMounted } from 'vue'
 
 const emit = defineEmits(['success'])
 
-const { baseAPIPath, team } = inject('billing')
+const { team } = inject('billing')
 
 const stripe = ref(null)
 const elements = ref(null)
@@ -111,7 +111,7 @@ onMounted(() => setupStripeIntent())
 const cardElementRef = ref(null)
 
 const getPublishedKeyAndSetupIntent = createResource({
-  url: `${baseAPIPath}.saas_api`,
+  url: 'frappe.integrations.frappe_providers.frappecloud_billing.api',
   params: { method: 'billing.get_publishable_key_and_setup_intent' },
   onSuccess: async (data) => {
     const { publishable_key, setup_intent } = data
@@ -167,7 +167,7 @@ const getPublishedKeyAndSetupIntent = createResource({
 })
 
 const countryList = createResource({
-  url: `${baseAPIPath}.saas_api`,
+  url: 'frappe.integrations.frappe_providers.frappecloud_billing.api',
   params: { method: 'billing.country_list' },
   cache: 'countryList',
   auto: true,
@@ -187,7 +187,7 @@ const billingInformation = reactive({
 })
 
 createResource({
-  url: `${baseAPIPath}.saas_api`,
+  url: 'frappe.integrations.frappe_providers.frappecloud_billing.api',
   params: {
     method: 'billing.get_information',
     data: { timezone: browserTimezone.value },
@@ -205,7 +205,7 @@ createResource({
 })
 
 const setupIntentSuccess = createResource({
-  url: `${baseAPIPath}.saas_api`,
+  url: 'frappe.integrations.frappe_providers.frappecloud_billing.api',
   makeParams: ({ setupIntent }) => {
     return {
       method: 'billing.setup_intent_success',
@@ -239,7 +239,7 @@ const setupIntentSuccess = createResource({
 })
 
 const verifyCardWithMicroCharge = createResource({
-  url: `${baseAPIPath}.saas_api`,
+  url: 'frappe.integrations.frappe_providers.frappecloud_billing.api',
   makeParams: ({ paymentMethodName }) => {
     return {
       method: 'billing.create_payment_intent_for_micro_debit',

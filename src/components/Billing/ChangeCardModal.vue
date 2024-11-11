@@ -89,17 +89,15 @@ const emit = defineEmits(['success', 'addCard'])
 
 const show = defineModel()
 
-const { baseAPIPath } = inject('billing')
-
 const cards = createResource({
-  url: `${baseAPIPath}.saas_api`,
+  url: 'frappe.integrations.frappe_providers.frappecloud_billing.api',
   params: { method: 'billing.get_payment_methods' },
   auto: true,
 })
 
 const setAsPrimary = (card) => {
   createResource({
-    url: `${baseAPIPath}.saas_api`,
+    url: 'frappe.integrations.frappe_providers.frappecloud_billing.api',
     params: { method: 'billing.set_as_default', data: { name: card.name } },
     auto: true,
     onSuccess: () => {
@@ -122,7 +120,7 @@ const removeCard = (card) => {
         theme: 'red',
         onClick: (close) => {
           createResource({
-            url: `${baseAPIPath}.saas_api`,
+            url: 'frappe.integrations.frappe_providers.frappecloud_billing.api',
             params: {
               method: 'billing.remove_payment_method',
               data: { name: card.name },

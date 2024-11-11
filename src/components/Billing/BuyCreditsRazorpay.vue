@@ -51,7 +51,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['success'])
-const { baseAPIPath, team } = inject('billing')
+const { team } = inject('billing')
 
 const isPaymentComplete = ref(false)
 const isVerifyingPayment = ref(false)
@@ -73,7 +73,7 @@ onBeforeUnmount(() => {
 })
 
 const createRazorpayOrder = createResource({
-  url: `${baseAPIPath}.saas_api`,
+  url: 'frappe.integrations.frappe_providers.frappecloud_billing.api',
   params: {
     method: 'billing.create_razorpay_order',
     data: { amount: props.amount },
@@ -87,7 +87,7 @@ const createRazorpayOrder = createResource({
 })
 
 const handlePaymentFailed = createResource({
-  url: `${baseAPIPath}.saas_api`,
+  url: 'frappe.integrations.frappe_providers.frappecloud_billing.api',
   params: { method: 'billing.handle_razorpay_payment_failed' },
   onSuccess: () => {
     console.log('Payment Failed.')

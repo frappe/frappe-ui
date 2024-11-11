@@ -65,6 +65,7 @@
       v-model="showUpgradePlanStepsModal"
       :defaultStep="defaultStep"
       :planName="planName"
+      @success="() => emit('success')"
     />
   </div>
 </template>
@@ -85,36 +86,31 @@ import UpgradePlanStepsModal from './UpgradePlanStepsModal.vue'
 import { parseSize } from './utils.js'
 import { ref, computed, provide } from 'vue'
 
-const props = defineProps({
-  baseAPIPath: {
-    type: String,
-    required: true,
-  },
-})
+const emit = defineEmits(['success'])
 
 const billingDetails = createResource({
-  url: `${props.baseAPIPath}.saas_api`,
+  url: 'frappe.integrations.frappe_providers.frappecloud_billing.api',
   params: { method: 'billing.get_information' },
   cache: 'billingDetails',
   auto: true,
 })
 
 const team = createResource({
-  url: `${props.baseAPIPath}.saas_api`,
+  url: 'frappe.integrations.frappe_providers.frappecloud_billing.api',
   params: { method: 'team.info' },
   cache: 'team',
   auto: true,
 })
 
 const plans = createResource({
-  url: `${props.baseAPIPath}.saas_api`,
+  url: 'frappe.integrations.frappe_providers.frappecloud_billing.api',
   params: { method: 'site.get_plans' },
   cache: 'plans',
   auto: true,
 })
 
 const site = createResource({
-  url: `${props.baseAPIPath}.saas_api`,
+  url: 'frappe.integrations.frappe_providers.frappecloud_billing.api',
   params: { method: 'site.info' },
   cache: 'site',
   auto: true,
@@ -211,18 +207,18 @@ function changePlan(_planName) {
   }
 
   createResource({
-    url: `${props.baseAPIPath}.saas_api`,
+    url: 'frappe.integrations.frappe_providers.frappecloud_billing.api',
     params: { method: 'site.change_plan', data: { plan: _planName } },
     auto: true,
     onSuccess: () => {
       site.reload()
       plans.reload()
+      emit('success')
     },
   })
 }
 
 provide('billing', {
-  baseAPIPath: props.baseAPIPath,
   team: computed(() => team.data),
   reloadPlans: plans.reload,
   reloadSite: site.reload,

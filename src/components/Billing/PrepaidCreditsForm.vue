@@ -92,10 +92,10 @@ import { ref, computed, inject } from 'vue'
 
 const emit = defineEmits(['success'])
 
-const { baseAPIPath, team } = inject('billing')
+const { team } = inject('billing')
 
 const totalUnpaidAmount = createResource({
-  url: `${baseAPIPath}.saas_api`,
+  url: 'frappe.integrations.frappe_providers.frappecloud_billing.api',
   params: { method: 'billing.total_unpaid_amount' },
   cache: 'totalUnpaidAmount',
   auto: true,

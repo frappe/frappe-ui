@@ -44,12 +44,12 @@ import { toast } from '../toast.js'
 import { ref, computed, inject, watch } from 'vue'
 
 const emit = defineEmits(['success'])
-const { baseAPIPath, team } = inject('billing')
+const { team } = inject('billing')
 
 const billingInformation = defineModel()
 
 const updateBillingInformation = createResource({
-  url: `${baseAPIPath}.saas_api`,
+  url: 'frappe.integrations.frappe_providers.frappecloud_billing.api',
   makeParams: () => {
     return {
       method: 'billing.update_information',
@@ -137,7 +137,7 @@ const _indianStates = [
 ]
 
 const _countryList = createResource({
-  url: `${baseAPIPath}.saas_api`,
+  url: 'frappe.integrations.frappe_providers.frappecloud_billing.api',
   params: { method: 'billing.country_list' },
   cache: 'countryList',
   auto: true,
@@ -238,7 +238,7 @@ function getInputType(field) {
 }
 
 const _validateGST = createResource({
-  url: `${baseAPIPath}.saas_api`,
+  url: 'frappe.integrations.frappe_providers.frappecloud_billing.api',
   makeParams() {
     return {
       method: 'billing.validate_gst',

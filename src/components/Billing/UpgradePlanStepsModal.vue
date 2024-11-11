@@ -83,7 +83,9 @@ const props = defineProps({
   },
 })
 
-const { baseAPIPath, reloadPlans, reloadSite } = inject('billing')
+const emit = defineEmits(['success'])
+
+const { reloadPlans, reloadSite } = inject('billing')
 
 const show = defineModel()
 const step = ref(props.defaultStep)
@@ -110,7 +112,7 @@ const paymentModes = [
 
 function updateMode() {
   createResource({
-    url: `${baseAPIPath}.saas_api`,
+    url: 'frappe.integrations.frappe_providers.frappecloud_billing.api',
     params: {
       method: 'billing.change_payment_mode',
       data: { mode: activeTab.value },
@@ -122,13 +124,14 @@ function updateMode() {
 
 function upgradePlan() {
   createResource({
-    url: `${baseAPIPath}.saas_api`,
+    url: 'frappe.integrations.frappe_providers.frappecloud_billing.api',
     params: { method: 'site.change_plan', data: { plan: props.planName } },
     auto: true,
     onSuccess: () => {
       reloadSite()
       reloadPlans()
       show.value = false
+      emit('success')
     },
   })
 }

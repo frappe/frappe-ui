@@ -28,10 +28,6 @@ import { createResource } from '../../resources/index.js'
 import { ref, computed } from 'vue'
 
 const props = defineProps({
-  baseAPIPath: {
-    type: String,
-    required: true,
-  },
   isSidebarCollapsed: {
     type: Boolean,
     default: false,
@@ -52,7 +48,8 @@ const trialTitle = computed(() => {
 const trialMessage = 'Upgrade to get latest and exclusive features'
 
 createResource({
-  url: `${props.baseAPIPath}.current_site_info`,
+  url: 'frappe.integrations.frappe_providers.frappecloud_billing.current_site_info',
+  cache: 'currentSiteInfo',
   auto: true,
   onSuccess: (data) => {
     trialEndDays.value = calculateTrialEndDays(data.trial_end_date)
