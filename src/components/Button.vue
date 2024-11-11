@@ -72,22 +72,22 @@ const buttonClasses = computed(() => {
     gray: 'text-text-icons-white bg-surface-gray-7 hover:bg-surface-gray-6 active:bg-surface-gray-5',
     blue: 'text-white bg-blue-500 hover:bg-blue-600 active:bg-blue-700',
     green: 'text-white bg-green-600 hover:bg-green-700 active:bg-green-800',
-    red: 'text-white bg-red-600 hover:bg-red-700 active:bg-red-800',
+    red: 'text-white bg-surface-red-4 hover:bg-surface-red-5 active:bg-surface-red-6',
   }[props.theme]
 
   let subtleClasses = {
     gray: 'text-text-icons-gray-8 bg-surface-gray-2 hover:bg-surface-gray-3 active:bg-surface-gray-4',
     blue: 'text-blue-600 bg-blue-100 hover:bg-blue-200 active:bg-blue-300',
     green: 'text-green-800 bg-green-100 hover:bg-green-200 active:bg-green-300',
-    red: 'text-red-700 bg-red-100 hover:bg-red-200 active:bg-red-300',
+    red: 'text-text-icons-red-4 bg-surface-red-1 hover:bg-surface-red-2 active:bg-surface-red-3',
   }[props.theme]
 
   let outlineClasses = {
-    gray: 'text-text-icons-gray-8 bg-transparent border border-outline-gray-2 hover:border-outline-gray-3 active:border-outline-gray-3 active:bg-surface-gray-4',
+    gray: 'text-text-icons-gray-8 bg-transparent border border-outline-gray-1 hover:border-outline-gray-3 active:border-outline-gray-4 active:bg-surface-gray-4',
     blue: 'text-blue-600 bg-transparent border border-blue-300 hover:border-blue-400 active:border-blue-400 active:bg-blue-300',
     green:
       'text-green-800 bg-transparent border border-green-400 hover:border-green-500 active:border-green-500 active:bg-green-300',
-    red: 'text-red-700 bg-transparent border border-red-300 hover:border-red-400 active:border-red-400 active:bg-red-200',
+    red: 'text-text-icons-red-4 bg-transparent border border-outline-red-2 hover:border-outline-red-3 active:border-outline-red-2 active:bg-surface-red-2',
   }[props.theme]
 
   let ghostClasses = {
@@ -95,7 +95,7 @@ const buttonClasses = computed(() => {
     blue: 'text-blue-600 bg-transparent hover:bg-blue-200 active:bg-blue-300',
     green:
       'text-green-800 bg-transparent hover:bg-green-200 active:bg-green-300',
-    red: 'text-red-700 bg-transparent hover:bg-red-200 active:bg-red-300',
+    red: 'text-text-icons-red-4 bg-transparent hover:bg-surface-red-2 active:bg-surface-red-3',
   }[props.theme]
 
   let focusClasses = {
@@ -115,10 +115,10 @@ const buttonClasses = computed(() => {
   let themeVariant = `${props.theme}-${props.variant}`
 
   let disabledClassesMap = {
-    gray: 'bg-surface-gray-2 text-text-icons-gray-6',
+    gray: 'bg-surface-gray-2 text-text-icons-gray-4',
     'gray-outline':
-      'bg-surface-gray-2 text-text-icons-gray-6 border border-outline-gray-2',
-    'gray-ghost': 'text-text-icons-gray-6',
+      'bg-surface-gray-2 text-text-icons-gray-4 border border-outline-gray-2',
+    'gray-ghost': 'text-text-icons-gray-4',
 
     'blue-solid': 'bg-blue-300 text-white',
     'blue-subtle': 'bg-blue-100 text-blue-400',
@@ -129,8 +129,8 @@ const buttonClasses = computed(() => {
     'green-outline': 'bg-green-100 text-green-500 border border-green-400',
     'green-ghost': 'text-green-500',
 
-    red: 'bg-red-100 text-red-400',
-    'red-outline': 'bg-red-100 text-red-400 border border-red-300',
+    red: 'bg-surface-red-1 text-text-icons-red-2',
+    'red-outline': 'bg-surface-red-1 text-text-icons-red-2 border border-red-300',
     'red-ghost': 'text-red-400',
   }
   let disabledClasses =
