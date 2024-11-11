@@ -1,6 +1,6 @@
 {
   "name": "frappe-ui",
-  "version": "0.1.71",
+  "version": "0.1.72",
   "description": "A set of components and utilities for rapid UI development",
   "main": "./src/index.js",
   "scripts": {
@@ -11,7 +11,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "story:dev": "histoire dev",
-    "story:build": "histoire build",
+    "story:build": "histoire build && cp 404.html .histoire/dist",
     "story:preview": "histoire preview"
   },
   "files": [
