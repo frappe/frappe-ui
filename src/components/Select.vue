@@ -94,7 +94,7 @@ const selectOptions = computed(() => {
 })
 
 const textColor = computed(() => {
-  return props.disabled ? 'text-text-icons-gray-6' : 'text-text-icons-gray-8'
+  return props.disabled ? 'text-text-icons-gray-4' : 'text-text-icons-gray-8'
 })
 
 const fontSizeClasses = computed(() => {
