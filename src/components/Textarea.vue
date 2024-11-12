@@ -63,11 +63,11 @@ const inputClasses = computed(() => {
   let variant = props.disabled ? 'disabled' : props.variant
   let variantClasses = {
     subtle:
-      'border border-outline-gray-1 bg-surface-gray-2 placeholder-text-icons-gray-4 hover:border-outline-gray-1 hover:bg-surface-gray-3 focus:bg-surface-white focus:border-outline-gray-4 focus:shadow-sm focus:ring-0 focus-visible:ring-2 focus-visible:ring-outline-gray-3',
+      'border border-outline-gray-1 bg-surface-gray-2 placeholder-text-text-icons-gray-4 hover:border-outline-gray-1 hover:bg-surface-gray-3 focus:bg-surface-white focus:border-outline-gray-4 focus:shadow-sm focus:ring-0 focus-visible:ring-2 focus-visible:ring-outline-gray-3',
     outline:
-      'border border-outline-gray-2 bg-surface-white placeholder-text-icons-gray-4 hover:border-outline-gray-3 hover:shadow-sm focus:bg-surface-white focus:border-outline-gray-4 focus:shadow-sm focus:ring-0 focus-visible:ring-2 focus-visible:ring-outline-gray-3',
+      'border border-outline-gray-2 bg-surface-white placeholder-text-text-icons-gray-4 hover:border-outline-gray-3 hover:shadow-sm focus:bg-surface-white focus:border-outline-gray-4 focus:shadow-sm focus:ring-0 focus-visible:ring-2 focus-visible:ring-outline-gray-3',
     disabled: [
-      'border bg-surface-gray-1 placeholder-gray-400',
+      'border bg-surface-gray-1 placeholder-text-text-icons-gray-4',
       props.variant === 'outline' ? 'border-outline-gray-2' : 'border-transparent',
     ],
   }[variant]
@@ -76,7 +76,7 @@ const inputClasses = computed(() => {
     sizeClasses,
     paddingClasses,
     variantClasses,
-    props.disabled ? 'text-icons-gray-6' : 'text-text-icons-gray-8',
+    props.disabled ? 'text-icons-gray-5 placeholder-text-text-icons-gray-5' : 'text-text-icons-gray-8',
     'transition-colors w-full block',
   ]
 })
