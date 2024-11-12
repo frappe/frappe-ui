@@ -65,7 +65,7 @@ const inputClasses = computed(() => {
     subtle:
       'border border-outline-gray-1 bg-surface-gray-2 placeholder-text-text-icons-gray-4 hover:border-outline-gray-1 hover:bg-surface-gray-3 focus:bg-surface-white focus:border-outline-gray-4 focus:shadow-sm focus:ring-0 focus-visible:ring-2 focus-visible:ring-outline-gray-3',
     outline:
-      'border border-outline-gray-2 bg-surface-white placeholder-text-text-icons-gray-4 hover:border-outline-gray-3 hover:shadow-sm focus:bg-surface-white focus:border-outline-gray-4 focus:shadow-sm focus:ring-0 focus-visible:ring-2 focus-visible:ring-outline-gray-3',
+      'border border-outline-gray-2 bg-transparent placeholder-text-text-icons-gray-4 hover:border-outline-gray-3 hover:shadow-sm focus:bg-surface-white focus:border-outline-gray-4 focus:shadow-sm focus:ring-0 focus-visible:ring-2 focus-visible:ring-outline-gray-3',
     disabled: [
       'border bg-surface-gray-1 placeholder-text-text-icons-gray-4',
       props.variant === 'outline' ? 'border-outline-gray-2' : 'border-transparent',
