@@ -42,7 +42,7 @@ const trialTitle = computed(() => {
     : 'Trial will end tomorrow'
 })
 
-const trialMessage = 'Upgrade to get latest and exclusive features'
+const trialMessage = 'Upgrade to a paid plan for uninterrupted services'
 
 createResource({
   url: 'frappe.integrations.frappe_providers.frappecloud_billing.current_site_info',
