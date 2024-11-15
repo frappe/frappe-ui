@@ -12,7 +12,7 @@
         {{ trialMessage }}
       </div>
     </div>
-    <Button :label="'Upgrade plan'" theme="red" @click="openBillingPage">
+    <Button :label="'Upgrade plan'" theme="blue" @click="openBillingPage">
       <template #prefix>
         <LightningIcon class="size-4" />
       </template>
