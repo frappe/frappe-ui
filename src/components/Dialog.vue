@@ -116,13 +116,13 @@
               </slot>
               <div
                 class="px-4 pb-7 pt-4 sm:px-6"
-                v-if="dialogActions.length || $slots.actions"
+                v-if="actions.length || $slots.actions"
               >
                 <slot name="actions" v-bind="{ close }">
                   <div class="space-y-2">
                     <Button
                       class="w-full"
-                      v-for="action in dialogActions"
+                      v-for="action in actions"
                       :key="action.label"
                       v-bind="action"
                     >
@@ -147,7 +147,7 @@ import {
   TransitionChild,
   TransitionRoot,
 } from '@headlessui/vue'
-import { computed, ref, watch } from 'vue'
+import { computed, reactive } from 'vue'
 import { Button, ButtonProps } from './Button'
 import FeatherIcon from './FeatherIcon.vue'
 
@@ -202,36 +202,31 @@ const emit = defineEmits<{
   (event: 'after-leave'): void
 }>()
 
-const dialogActions = ref<Array<DialogAction>>([])
-watch(
-  () => props.options.actions,
-  (actions) => {
-    if (!actions?.length) return
+const actions = computed(() => {
+  let actions = props.options.actions
+  if (!actions?.length) return []
 
-    dialogActions.value = actions.map((action) => {
-      let loading = ref(false)
-      return {
-        ...action,
-        loading: loading.value,
-        onClick: !action.onClick
-          ? close
-          : async () => {
-              loading.value = true
-              try {
-                if (action.onClick) {
-                  // pass close function to action
-                  let context: DialogActionContext = { close }
-                  await action.onClick(context)
-                }
-              } finally {
-                loading.value = false
+  return actions.map((action) => {
+    let _action = reactive({
+      ...action,
+      loading: false,
+      onClick: !action.onClick
+        ? close
+        : async () => {
+            _action.loading = true
+            try {
+              if (action.onClick) {
+                let context: DialogActionContext = { close }
+                await action.onClick(context)
               }
-            },
-      }
+            } finally {
+              _action.loading = false
+            }
+          },
     })
-  },
-  { immediate: true },
-)
+    return _action
+  })
+})
 
 const isOpen = computed({
   get() {
