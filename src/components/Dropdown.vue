@@ -77,31 +77,31 @@ import Popover from './Popover.vue'
 import { Button, ButtonProps } from './Button'
 import FeatherIcon from './FeatherIcon.vue'
 import { computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { RouterLinkProps, useRouter } from 'vue-router'
 
 const router = useRouter()
 
 type DropdownOption = {
   label: string
-  icon?: string
-  group?: string
+  icon?: string | null
   component?: any
   onClick?: () => void
-  route?: string
+  route?: RouterLinkProps['to']
   condition?: () => boolean
 }
 
-type DropdownGroupOptions = {
+type DropdownGroupOption = {
+  key?: number
   group: string
   items: DropdownOption[]
   hideLabel?: boolean
 }
 
-type DropdownOptions = string | DropdownOption | DropdownGroupOptions
+type DropdownOptions = Array<DropdownOption | DropdownGroupOption>
 
 interface DropdownProps {
   button?: ButtonProps
-  options?: DropdownOptions[]
+  options?: DropdownOptions
   placement?: string
 }
 
@@ -111,42 +111,55 @@ const props = withDefaults(defineProps<DropdownProps>(), {
 })
 
 const normalizeDropdownItem = (option: DropdownOption) => {
-  let onClick = option.onClick || null
-  if (!onClick && option.route && router) {
-    onClick = () => router.push(option.route!)
+  let onClick = () => {
+    if (option.route) {
+      router.push(option.route)
+    } else if (option.onClick) {
+      option.onClick()
+    }
   }
 
   return {
     label: option.label,
     icon: option.icon,
-    group: option.group,
     component: option.component,
     onClick,
   }
 }
 
-const filterOptions = (options: DropdownOptions) => {
+const filterOptions = (options: DropdownOption[]) => {
   return (options || [])
     .filter(Boolean)
-    .filter((option: DropdownOption) =>
-      option.condition ? option.condition() : true,
-    )
-    .map((option: DropdownOption) => normalizeDropdownItem(option))
+    .filter((option) => (option.condition ? option.condition() : true))
+    .map((option) => normalizeDropdownItem(option))
 }
 
 const groups = computed(() => {
-  let groups = props.options[0]?.group
-    ? props.options
-    : [{ group: '', items: props.options }]
-
-  return groups.map((group, i) => {
-    return {
-      key: i,
-      group: group.group,
-      hideLabel: group.hideLabel || false,
-      items: filterOptions(group.items),
+  let groups: DropdownGroupOption[] = []
+  let i = 0
+  for (let option of props.options) {
+    if (option == null) {
+      continue
     }
-  })
+    if ('group' in option) {
+      let groupOption = {
+        key: i,
+        ...option,
+        items: filterOptions(option.items),
+      } as DropdownGroupOption
+      groups.push(groupOption)
+    } else {
+      let groupOption = {
+        key: i,
+        group: '',
+        hideLabel: true,
+        items: filterOptions([option]),
+      } as DropdownGroupOption
+      groups.push(groupOption)
+    }
+    i++
+  }
+  return groups
 })
 
 const dropdownTransition = computed(() => {
