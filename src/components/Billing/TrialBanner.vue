@@ -22,7 +22,7 @@
 <script setup>
 import LightningIcon from './LightningIcon.vue'
 import FeatherIcon from '../FeatherIcon.vue'
-import Button from '../Button.vue'
+import { Button } from '../Button'
 import { createResource } from '../../resources'
 import { ref, computed } from 'vue'
 
