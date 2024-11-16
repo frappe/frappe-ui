@@ -1,7 +1,7 @@
 <template>
   <TransitionRoot
     as="template"
-    :show="open"
+    :show="isOpen"
     @after-leave="$emit('after-leave')"
   >
     <HDialog
@@ -178,8 +178,11 @@ type DialogOptions = {
   position?: 'top' | 'center'
 }
 
+type DialogActionContext = {
+  close: () => void
+}
 type DialogAction = ButtonProps & {
-  onClick?: (close: () => void) => Promise<void> | void
+  onClick?: (context: DialogActionContext) => void | Promise<void>
 }
 
 interface DialogProps {
@@ -209,7 +212,7 @@ watch(
       let loading = ref(false)
       return {
         ...action,
-        loading,
+        loading: loading.value,
         onClick: !action.onClick
           ? close
           : async () => {
@@ -217,7 +220,8 @@ watch(
               try {
                 if (action.onClick) {
                   // pass close function to action
-                  await action.onClick(close)
+                  let context: DialogActionContext = { close }
+                  await action.onClick(context)
                 }
               } finally {
                 loading.value = false
@@ -229,7 +233,7 @@ watch(
   { immediate: true },
 )
 
-const open = computed({
+const isOpen = computed({
   get() {
     return props.modelValue
   },
@@ -242,7 +246,7 @@ const open = computed({
 })
 
 function close() {
-  open.value = false
+  isOpen.value = false
 }
 
 const icon = computed(() => {
