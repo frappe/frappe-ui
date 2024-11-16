@@ -36,7 +36,7 @@
 <script>
 import fileToBase64 from '../../utils/file-to-base64'
 import Dialog from '../Dialog.vue'
-import Button from '../Button.vue'
+import { Button } from '../Button'
 
 export default {
   name: 'InsertImage',

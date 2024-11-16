@@ -54,7 +54,7 @@
   </Dialog>
 </template>
 <script>
-import Button from '../Button.vue'
+import { Button } from '../Button'
 import Dialog from '../Dialog.vue'
 import FileUploader from '../FileUploader.vue'
 

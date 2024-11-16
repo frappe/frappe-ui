@@ -74,7 +74,7 @@
 <script setup lang="ts">
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 import Popover from './Popover.vue'
-import Button from './Button.vue'
+import { Button, ButtonProps } from './Button'
 import FeatherIcon from './FeatherIcon.vue'
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
@@ -91,12 +91,13 @@ type DropdownOption = {
   condition?: () => boolean
 }
 
-type DropdownOptions = string | DropdownOption
-
-type ButtonProps = {
-  label: string
-  icon?: string
+type DropdownGroupOptions = {
+  group: string
+  items: DropdownOption[]
+  hideLabel?: boolean
 }
+
+type DropdownOptions = string | DropdownOption | DropdownGroupOptions
 
 interface DropdownProps {
   button?: ButtonProps

@@ -2,7 +2,7 @@
 import { h } from 'vue'
 import Dropdown from './Dropdown.vue'
 import FeatherIcon from './FeatherIcon.vue'
-import Button from './Button.vue'
+import { Button } from './Button'
 </script>
 
 <template>

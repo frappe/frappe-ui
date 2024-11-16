@@ -188,7 +188,7 @@
 import { ref, computed, onMounted } from 'vue'
 
 import Input from './Input.vue'
-import Button from './Button.vue'
+import { Button } from './Button'
 import Popover from './Popover.vue'
 import FeatherIcon from './FeatherIcon.vue'
 import TextInput from './TextInput.vue'

@@ -70,7 +70,7 @@
 
 <script setup>
 import Checkbox from '../Checkbox.vue'
-import Button from '../Button.vue'
+import { Button } from '../Button'
 import { computed, inject } from 'vue'
 
 defineOptions({

@@ -17,21 +17,23 @@
     />
     <slot name="prefix" v-else-if="$slots['prefix'] || iconLeft">
       <FeatherIcon
-        v-if="iconLeft"
+        v-if="iconLeft && typeof iconLeft === 'string'"
         :name="iconLeft"
         :class="slotClasses"
         aria-hidden="true"
       />
+      <component v-else-if="iconLeft" :is="iconLeft" :class="slotClasses" />
     </slot>
 
     <template v-if="loading && loadingText">{{ loadingText }}</template>
     <template v-else-if="isIconButton && !loading">
       <FeatherIcon
-        v-if="icon"
+        v-if="icon && typeof icon === 'string'"
         :name="icon"
         :class="slotClasses"
         :aria-label="label"
       />
+      <component v-else-if="icon" :is="icon" :class="slotClasses" />
       <slot name="icon" v-else-if="$slots.icon" />
     </template>
     <span v-else :class="{ 'sr-only': isIconButton }">
@@ -40,21 +42,39 @@
 
     <slot name="suffix">
       <FeatherIcon
-        v-if="iconRight"
+        v-if="iconRight && typeof iconRight === 'string'"
         :name="iconRight"
         :class="slotClasses"
         aria-hidden="true"
       />
+      <component v-else-if="iconRight" :is="iconRight" :class="slotClasses" />
     </slot>
   </button>
 </template>
 <script lang="ts" setup>
-import { computed, useSlots } from 'vue'
-import FeatherIcon from './FeatherIcon.vue'
-import LoadingIndicator from './LoadingIndicator.vue'
-import { useRouter } from 'vue-router'
+import { computed, useSlots, type Component } from 'vue'
+import FeatherIcon from '../FeatherIcon.vue'
+import LoadingIndicator from '../LoadingIndicator.vue'
+import { useRouter, type RouteLocation } from 'vue-router'
 
-import type { ButtonProps } from './types/Button'
+type Theme = 'gray' | 'blue' | 'green' | 'red'
+type Size = 'sm' | 'md' | 'lg' | 'xl' | '2xl'
+type Variant = 'solid' | 'subtle' | 'outline' | 'ghost'
+
+export interface ButtonProps {
+  theme?: Theme
+  size?: Size
+  variant?: Variant
+  label?: string
+  icon?: string | Component
+  iconLeft?: string | Component
+  iconRight?: string | Component
+  loading?: boolean
+  loadingText?: string
+  disabled?: boolean
+  route?: RouteLocation
+  link?: string
+}
 
 const props = withDefaults(defineProps<ButtonProps>(), {
   theme: 'gray',
@@ -112,10 +132,12 @@ const buttonClasses = computed(() => {
     ghost: ghostClasses,
   }[props.variant]
 
-  let themeVariant = `${props.theme}-${props.variant}`
+  type ThemeVariant = `${Theme}-${Variant}`
+  let themeVariant: ThemeVariant = `${props.theme}-${props.variant}`
 
-  let disabledClassesMap = {
-    gray: 'bg-gray-100 text-gray-500',
+  let disabledClassesMap: Record<ThemeVariant, string> = {
+    'gray-solid': 'bg-gray-100 text-gray-500',
+    'gray-subtle': 'bg-gray-100 text-gray-500',
     'gray-outline': 'bg-gray-100 text-gray-500 border border-gray-300',
     'gray-ghost': 'text-gray-500',
 
@@ -124,16 +146,17 @@ const buttonClasses = computed(() => {
     'blue-outline': 'bg-blue-100 text-blue-400 border border-blue-300',
     'blue-ghost': 'text-blue-400',
 
-    green: 'bg-green-100 text-green-500',
+    'green-solid': 'bg-green-100 text-green-500',
+    'green-subtle': 'bg-green-100 text-green-500',
     'green-outline': 'bg-green-100 text-green-500 border border-green-400',
     'green-ghost': 'text-green-500',
 
-    red: 'bg-red-100 text-red-400',
+    'red-solid': 'bg-red-100 text-red-400',
+    'red-subtle': 'bg-red-100 text-red-400',
     'red-outline': 'bg-red-100 text-red-400 border border-red-300',
     'red-ghost': 'text-red-400',
   }
-  let disabledClasses =
-    disabledClassesMap[themeVariant] || disabledClassesMap[props.theme]
+  let disabledClasses = disabledClassesMap[themeVariant]
 
   let sizeClasses = {
     sm: 'h-7 text-base px-2 rounded',

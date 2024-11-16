@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import Tooltip from './Tooltip.vue'
-import Button from '../Button.vue'
+import { Button } from '../Button'
 
 const placement = ref('top')
 const disabled = ref(true)

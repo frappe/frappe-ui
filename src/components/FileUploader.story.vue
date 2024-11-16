@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import FileUploader from './FileUploader.vue'
-import Button from './Button.vue'
+import { Button } from './Button'
 
 const validateFileFunction = (fileObject) => {}
 const onSuccess = (file) => {}

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Popover from './Popover.vue'
-import Button from './Button.vue'
+import { Button } from './Button'
 </script>
 <template>
   <Story :layout="{ type: 'grid' }">

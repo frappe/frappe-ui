@@ -174,7 +174,7 @@ import {
 } from '@headlessui/vue'
 import { nextTick } from 'vue'
 import Popover from './Popover.vue'
-import Button from './Button.vue'
+import { Button } from './Button'
 import FeatherIcon from './FeatherIcon.vue'
 
 export default {

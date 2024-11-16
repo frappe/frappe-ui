@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { reactive } from 'vue'
-import Button from './Button.vue'
+import { Button } from './index'
 const state = reactive({
   theme: 'gray',
   size: 'sm',

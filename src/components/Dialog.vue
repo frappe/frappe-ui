@@ -148,9 +148,8 @@ import {
   TransitionRoot,
 } from '@headlessui/vue'
 import { computed, ref, watch } from 'vue'
-import Button from './Button.vue'
+import { Button, ButtonProps } from './Button'
 import FeatherIcon from './FeatherIcon.vue'
-import { ButtonProps } from './types/Button'
 
 type DialogIcon = {
   name: string

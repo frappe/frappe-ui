@@ -2,7 +2,7 @@
 import { reactive, h, ref } from 'vue'
 import Avatar from './Avatar.vue'
 import Badge from './Badge.vue'
-import Button from './Button.vue'
+import { Button } from './Button'
 import FeatherIcon from './FeatherIcon.vue'
 import ListHeader from './ListView/ListHeader.vue'
 import ListHeaderItem from './ListView/ListHeaderItem.vue'

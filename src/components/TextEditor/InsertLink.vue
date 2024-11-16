@@ -26,7 +26,7 @@
 </template>
 <script>
 import Dialog from '../Dialog.vue'
-import Button from '../Button.vue'
+import { Button } from '../Button'
 import FormControl from '../FormControl.vue'
 
 export default {

@@ -11,8 +11,8 @@
   </Dialog>
 </template>
 <script>
+import { Button } from './Button'
 import Dialog from './Dialog.vue'
-import Button from './Button.vue'
 
 export default {
   name: 'ConfirmDialog',

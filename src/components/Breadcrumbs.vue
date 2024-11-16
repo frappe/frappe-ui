@@ -63,7 +63,7 @@ import { useWindowSize } from '@vueuse/core'
 import { computed } from 'vue'
 import { RouterLinkProps, useRouter } from 'vue-router'
 import Dropdown from '../components/Dropdown.vue'
-import Button from '../components/Button.vue'
+import { Button } from './Button'
 
 interface BreadcrumbItem {
   label: string
