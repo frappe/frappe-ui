@@ -90,7 +90,13 @@ const dropdownItems = computed(() => {
 
   let allExceptLastTwo = items.value.slice(0, -2)
   return allExceptLastTwo.map((item) => {
-    let onClick = item.onClick ? item.onClick : () => router.push(item.route)
+    let onClick = () => {
+      if (item.route) {
+        router.push(item.route)
+      } else if (item.onClick) {
+        item.onClick()
+      }
+    }
     return {
       ...item,
       icon: null,
