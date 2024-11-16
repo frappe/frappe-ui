@@ -137,40 +137,6 @@
       "markdownFile": null
     },
     {
-      "id": "src-components-button-story-vue",
-      "title": "Button",
-      "layout": {
-        "type": "grid",
-        "width": 300
-      },
-      "docsOnly": false,
-      "variants": [
-        {
-          "id": "src-components-button-story-vue-0",
-          "title": "solid"
-        },
-        {
-          "id": "src-components-button-story-vue-1",
-          "title": "subtle"
-        },
-        {
-          "id": "src-components-button-story-vue-2",
-          "title": "outline"
-        },
-        {
-          "id": "src-components-button-story-vue-3",
-          "title": "ghost"
-        }
-      ],
-      "relativePath": "src/components/Button.story.vue",
-      "supportPluginId": "vue3",
-      "treePath": [
-        "Button"
-      ],
-      "virtual": false,
-      "markdownFile": null
-    },
-    {
       "id": "src-components-calendar-story-vue",
       "title": "Calendar",
       "layout": {
@@ -778,6 +744,40 @@
       "supportPluginId": "vue3",
       "treePath": [
         "Textarea"
+      ],
+      "virtual": false,
+      "markdownFile": null
+    },
+    {
+      "id": "src-components-button-button-story-vue",
+      "title": "Button",
+      "layout": {
+        "type": "grid",
+        "width": 300
+      },
+      "docsOnly": false,
+      "variants": [
+        {
+          "id": "src-components-button-button-story-vue-0",
+          "title": "solid"
+        },
+        {
+          "id": "src-components-button-button-story-vue-1",
+          "title": "subtle"
+        },
+        {
+          "id": "src-components-button-button-story-vue-2",
+          "title": "outline"
+        },
+        {
+          "id": "src-components-button-button-story-vue-3",
+          "title": "ghost"
+        }
+      ],
+      "relativePath": "src/components/Button/Button.story.vue",
+      "supportPluginId": "vue3",
+      "treePath": [
+        "Button"
       ],
       "virtual": false,
       "markdownFile": null
