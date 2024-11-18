@@ -41,37 +41,35 @@ const props = withDefaults(defineProps<BadgeProps>(), {
 
 const classes = computed(() => {
   let solidClasses = {
-    gray: 'text-text-icons-white bg-surface-gray-7',
-    blue: 'text-text-icons-blue-1 bg-surface-blue-2',
-    green: 'text-text-icons-green-1 bg-surface-green-3',
-    orange: 'text-text-icons-amber-1 bg-surface-amber-2',
-    red: 'text-text-icons-red-1 bg-surface-red-4',
+    gray: 'text-ink-white bg-surface-gray-7',
+    blue: 'text-ink-blue-1 bg-surface-blue-2',
+    green: 'text-ink-green-1 bg-surface-green-3',
+    orange: 'text-ink-amber-1 bg-surface-amber-2',
+    red: 'text-ink-red-1 bg-surface-red-4',
   }[props.theme]
 
   let subtleClasses = {
-    gray: 'text-text-icons-gray-6 bg-surface-gray-2',
-    blue: 'text-text-icons-blue-2 bg-surface-blue-1',
-    green: 'text-text-icons-green-3 bg-surface-green-2',
-    orange: 'text-text-icons-amber-3 bg-surface-amber-1',
-    red: 'text-text-icons-red-4 bg-surface-red-1',
+    gray: 'text-ink-gray-6 bg-surface-gray-2',
+    blue: 'text-ink-blue-2 bg-surface-blue-1',
+    green: 'text-ink-green-3 bg-surface-green-2',
+    orange: 'text-ink-amber-3 bg-surface-amber-1',
+    red: 'text-ink-red-4 bg-surface-red-1',
   }[props.theme]
 
   let outlineClasses = {
-    gray: 'text-text-icons-gray-6 bg-transparent border border-outline-gray-1',
-    blue: 'text-text-icons-blue-2 bg-transparent border border-outline-blue-1',
-    green:
-      'text-text-icons-green-3 bg-transparent border border-outline-green-2',
-    orange:
-      'text-text-icons-amber-3 bg-transparent border border-outline-amber-2',
-    red: 'text-text-icons-red-4 bg-transparent border border-outline-red-2',
+    gray: 'text-ink-gray-6 bg-transparent border border-outline-gray-1',
+    blue: 'text-ink-blue-2 bg-transparent border border-outline-blue-1',
+    green: 'text-ink-green-3 bg-transparent border border-outline-green-2',
+    orange: 'text-ink-amber-3 bg-transparent border border-outline-amber-2',
+    red: 'text-ink-red-4 bg-transparent border border-outline-red-2',
   }[props.theme]
 
   let ghostClasses = {
-    gray: 'text-text-icons-gray-6 bg-transparent',
-    blue: 'text-text-icons-blue-2 bg-transparent',
-    green: 'text-text-icons-green-3 bg-transparent',
-    orange: 'text-text-icons-amber-3 bg-transparent',
-    red: 'text-text-icons-red-4 bg-transparent',
+    gray: 'text-ink-gray-6 bg-transparent',
+    blue: 'text-ink-blue-2 bg-transparent',
+    green: 'text-ink-green-3 bg-transparent',
+    orange: 'text-ink-amber-3 bg-transparent',
+    red: 'text-ink-red-4 bg-transparent',
   }[props.theme]
 
   let variantClasses = {

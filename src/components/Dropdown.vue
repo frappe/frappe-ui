@@ -26,7 +26,7 @@
           <div v-for="group in groups" :key="group.key" class="p-1.5">
             <div
               v-if="group.group && !group.hideLabel"
-              class="flex h-7 items-center px-2 text-sm font-medium text-text-icons-gray-6"
+              class="flex h-7 items-center px-2 text-sm font-medium text-ink-gray-6"
             >
               {{ group.group }}
             </div>
@@ -43,7 +43,7 @@
               <button
                 v-else
                 :class="[
-                  active ? 'bg-gray-100' : 'text-text-icons-gray-6',
+                  active ? 'bg-gray-100' : 'text-ink-gray-6',
                   'group flex h-7 w-full items-center rounded px-2 text-base',
                 ]"
                 @click="item.onClick"
@@ -51,11 +51,11 @@
                 <FeatherIcon
                   v-if="item.icon && typeof item.icon === 'string'"
                   :name="item.icon"
-                  class="mr-2 h-4 w-4 flex-shrink-0 text-text-icons-gray-6"
+                  class="mr-2 h-4 w-4 flex-shrink-0 text-ink-gray-6"
                   aria-hidden="true"
                 />
                 <component
-                  class="mr-2 h-4 w-4 flex-shrink-0 text-text-icons-gray-6"
+                  class="mr-2 h-4 w-4 flex-shrink-0 text-ink-gray-6"
                   v-else-if="item.icon"
                   :is="item.icon"
                 />
