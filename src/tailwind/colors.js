@@ -327,7 +327,7 @@ const blackOverlay = {
 
 function withOpacity(color) {
   return ({ opacityValue }) => {
-    if (opacityValue !== undefined || !color.includes('/')) {
+    if (opacityValue !== undefined && !color.includes('/')) {
       return `rgb(${color} / ${opacityValue})`
     }
     return `rgb(${color})`
@@ -514,7 +514,92 @@ function themedCssVariables() {
   }
 }
 
-function colorsFn({ colors }) {
+let semanticColors = {
+  // for border color
+  outline: {
+    'amber-1': withOpacity('var(--outline-amber-1)'),
+    'amber-2': withOpacity('var(--outline-amber-2)'),
+    'blue-1': withOpacity('var(--outline-blue-1)'),
+    'blue-2': withOpacity('var(--outline-blue-2)'),
+    'gray-1': withOpacity('var(--outline-gray-1)'),
+    'gray-2': withOpacity('var(--outline-gray-2)'),
+    'gray-3': withOpacity('var(--outline-gray-3)'),
+    'gray-4': withOpacity('var(--outline-gray-4)'),
+    'gray-5': withOpacity('var(--outline-gray-5)'),
+    'gray-modals': withOpacity('var(--outline-gray-modals)'),
+    'green-1': withOpacity('var(--outline-green-1)'),
+    'green-2': withOpacity('var(--outline-green-2)'),
+    'orange-1': withOpacity('var(--outline-orange-1)'),
+    'red-1': withOpacity('var(--outline-red-1)'),
+    'red-2': withOpacity('var(--outline-red-2)'),
+    'red-3': withOpacity('var(--outline-red-3)'),
+    'red-4': withOpacity('var(--outline-red-4)'),
+    white: withOpacity('var(--outline-white)'),
+  },
+  // for background color
+  surface: {
+    'amber-1': withOpacity('var(--surface-amber-1)'),
+    'amber-2': withOpacity('var(--surface-amber-2)'),
+    'blue-1': withOpacity('var(--surface-blue-1)'),
+    'blue-2': withOpacity('var(--surface-blue-2)'),
+    cards: withOpacity('var(--surface-cards)'),
+    'cyan-1': withOpacity('var(--surface-cyan-1)'),
+    'gray-1': withOpacity('var(--surface-gray-1)'),
+    'gray-2': withOpacity('var(--surface-gray-2)'),
+    'gray-3': withOpacity('var(--surface-gray-3)'),
+    'gray-4': withOpacity('var(--surface-gray-4)'),
+    'gray-5': withOpacity('var(--surface-gray-5)'),
+    'gray-6': withOpacity('var(--surface-gray-6)'),
+    'gray-7': withOpacity('var(--surface-gray-7)'),
+    'green-1': withOpacity('var(--surface-green-1)'),
+    'green-2': withOpacity('var(--surface-green-2)'),
+    'green-3': withOpacity('var(--surface-green-3)'),
+    'menu-bar': withOpacity('var(--surface-menu-bar)'),
+    modal: withOpacity('var(--surface-modal)'),
+    'orange-1': withOpacity('var(--surface-orange-1)'),
+    'pink-1': withOpacity('var(--surface-pink-1)'),
+    'red-1': withOpacity('var(--surface-red-1)'),
+    'red-2': withOpacity('var(--surface-red-2)'),
+    'red-3': withOpacity('var(--surface-red-3)'),
+    'red-4': withOpacity('var(--surface-red-4)'),
+    'red-5': withOpacity('var(--surface-red-5)'),
+    'red-6': withOpacity('var(--surface-red-6)'),
+    selected: withOpacity('var(--surface-selected)'),
+    'violet-1': withOpacity('var(--surface-violet-1)'),
+    white: withOpacity('var(--surface-white)'),
+  },
+  // for text color and svg stroke/fill
+  ink: {
+    'amber-1': withOpacity('var(--text-ink-amber-1)'),
+    'amber-2': withOpacity('var(--text-ink-amber-2)'),
+    'amber-3': withOpacity('var(--text-ink-amber-3)'),
+    'blue-1': withOpacity('var(--text-ink-blue-1)'),
+    'blue-2': withOpacity('var(--text-ink-blue-2)'),
+    'blue-3': withOpacity('var(--text-ink-blue-3)'),
+    'cyan-1': withOpacity('var(--text-ink-cyan-1)'),
+    'gray-1': withOpacity('var(--text-ink-gray-1)'),
+    'gray-2': withOpacity('var(--text-ink-gray-2)'),
+    'gray-3': withOpacity('var(--text-ink-gray-3)'),
+    'gray-4': withOpacity('var(--text-ink-gray-4)'),
+    'gray-5': withOpacity('var(--text-ink-gray-5)'),
+    'gray-6': withOpacity('var(--text-ink-gray-6)'),
+    'gray-7': withOpacity('var(--text-ink-gray-7)'),
+    'gray-8': withOpacity('var(--text-ink-gray-8)'),
+    'gray-9': withOpacity('var(--text-ink-gray-9)'),
+    'green-1': withOpacity('var(--text-ink-green-1)'),
+    'green-2': withOpacity('var(--text-ink-green-2)'),
+    'green-3': withOpacity('var(--text-ink-green-3)'),
+    'pink-1': withOpacity('var(--text-ink-pink-1)'),
+    'red-1': withOpacity('var(--text-ink-red-1)'),
+    'red-2': withOpacity('var(--text-ink-red-2)'),
+    'red-3': withOpacity('var(--text-ink-red-3)'),
+    'red-4': withOpacity('var(--text-ink-red-4)'),
+    'violet-1': withOpacity('var(--text-ink-violet-1)'),
+    white: withOpacity('var(--text-ink-white)'),
+  },
+}
+
+function colorPalette({ colors }) {
   return {
     inherit: colors.inherit,
     current: colors.current,
@@ -533,109 +618,25 @@ function colorsFn({ colors }) {
     amber: getDefaultColorMap('amber'),
     pink: getDefaultColorMap('pink'),
     purple: getDefaultColorMap('purple'),
-    'white-overlay': () => {
+    'white-overlay': (() => {
       let obj = {}
       for (let shade in whiteOverlay) {
         obj[shade] = `rgb(${whiteOverlay[shade]})`
       }
       return obj
-    },
-    'black-overlay': {
-      50: 'rgba(0, 0, 0, 0.09)',
-      100: 'rgba(0, 0, 0, 0.18)',
-      200: 'rgba(0, 0, 0, 0.27)',
-      300: 'rgba(0, 0, 0, 0.36)',
-      400: 'rgba(0, 0, 0, 0.45)',
-      500: 'rgba(0, 0, 0, 0.54)',
-      600: 'rgba(0, 0, 0, 0.63)',
-      700: 'rgba(0, 0, 0, 0.72)',
-      800: 'rgba(0, 0, 0, 0.81)',
-      900: 'rgba(0, 0, 0, 0.90)',
-    },
-    // semantic colors
-    outline: {
-      'amber-1': withOpacity('var(--outline-amber-1)'),
-      'amber-2': withOpacity('var(--outline-amber-2)'),
-      'blue-1': withOpacity('var(--outline-blue-1)'),
-      'blue-2': withOpacity('var(--outline-blue-2)'),
-      'gray-1': withOpacity('var(--outline-gray-1)'),
-      'gray-2': withOpacity('var(--outline-gray-2)'),
-      'gray-3': withOpacity('var(--outline-gray-3)'),
-      'gray-4': withOpacity('var(--outline-gray-4)'),
-      'gray-5': withOpacity('var(--outline-gray-5)'),
-      'gray-modals': withOpacity('var(--outline-gray-modals)'),
-      'green-1': withOpacity('var(--outline-green-1)'),
-      'green-2': withOpacity('var(--outline-green-2)'),
-      'orange-1': withOpacity('var(--outline-orange-1)'),
-      'red-1': withOpacity('var(--outline-red-1)'),
-      'red-2': withOpacity('var(--outline-red-2)'),
-      'red-3': withOpacity('var(--outline-red-3)'),
-      'red-4': withOpacity('var(--outline-red-4)'),
-      white: withOpacity('var(--outline-white)'),
-    },
-    surface: {
-      'amber-1': withOpacity('var(--surface-amber-1)'),
-      'amber-2': withOpacity('var(--surface-amber-2)'),
-      'blue-1': withOpacity('var(--surface-blue-1)'),
-      'blue-2': withOpacity('var(--surface-blue-2)'),
-      cards: withOpacity('var(--surface-cards)'),
-      'cyan-1': withOpacity('var(--surface-cyan-1)'),
-      'gray-1': withOpacity('var(--surface-gray-1)'),
-      'gray-2': withOpacity('var(--surface-gray-2)'),
-      'gray-3': withOpacity('var(--surface-gray-3)'),
-      'gray-4': withOpacity('var(--surface-gray-4)'),
-      'gray-5': withOpacity('var(--surface-gray-5)'),
-      'gray-6': withOpacity('var(--surface-gray-6)'),
-      'gray-7': withOpacity('var(--surface-gray-7)'),
-      'green-1': withOpacity('var(--surface-green-1)'),
-      'green-2': withOpacity('var(--surface-green-2)'),
-      'green-3': withOpacity('var(--surface-green-3)'),
-      'menu-bar': withOpacity('var(--surface-menu-bar)'),
-      modal: withOpacity('var(--surface-modal)'),
-      'orange-1': withOpacity('var(--surface-orange-1)'),
-      'pink-1': withOpacity('var(--surface-pink-1)'),
-      'red-1': withOpacity('var(--surface-red-1)'),
-      'red-2': withOpacity('var(--surface-red-2)'),
-      'red-3': withOpacity('var(--surface-red-3)'),
-      'red-4': withOpacity('var(--surface-red-4)'),
-      'red-5': withOpacity('var(--surface-red-5)'),
-      'red-6': withOpacity('var(--surface-red-6)'),
-      selected: withOpacity('var(--surface-selected)'),
-      'violet-1': withOpacity('var(--surface-violet-1)'),
-      white: withOpacity('var(--surface-white)'),
-    },
-    ink: {
-      'amber-1': withOpacity('var(--text-ink-amber-1)'),
-      'amber-2': withOpacity('var(--text-ink-amber-2)'),
-      'amber-3': withOpacity('var(--text-ink-amber-3)'),
-      'blue-1': withOpacity('var(--text-ink-blue-1)'),
-      'blue-2': withOpacity('var(--text-ink-blue-2)'),
-      'blue-3': withOpacity('var(--text-ink-blue-3)'),
-      'cyan-1': withOpacity('var(--text-ink-cyan-1)'),
-      'gray-1': withOpacity('var(--text-ink-gray-1)'),
-      'gray-2': withOpacity('var(--text-ink-gray-2)'),
-      'gray-3': withOpacity('var(--text-ink-gray-3)'),
-      'gray-4': withOpacity('var(--text-ink-gray-4)'),
-      'gray-5': withOpacity('var(--text-ink-gray-5)'),
-      'gray-6': withOpacity('var(--text-ink-gray-6)'),
-      'gray-7': withOpacity('var(--text-ink-gray-7)'),
-      'gray-8': withOpacity('var(--text-ink-gray-8)'),
-      'gray-9': withOpacity('var(--text-ink-gray-9)'),
-      'green-1': withOpacity('var(--text-ink-green-1)'),
-      'green-2': withOpacity('var(--text-ink-green-2)'),
-      'green-3': withOpacity('var(--text-ink-green-3)'),
-      'pink-1': withOpacity('var(--text-ink-pink-1)'),
-      'red-1': withOpacity('var(--text-ink-red-1)'),
-      'red-2': withOpacity('var(--text-ink-red-2)'),
-      'red-3': withOpacity('var(--text-ink-red-3)'),
-      'red-4': withOpacity('var(--text-ink-red-4)'),
-      'violet-1': withOpacity('var(--text-ink-violet-1)'),
-      white: withOpacity('var(--text-ink-white)'),
-    },
+    })(),
+    'black-overlay': (() => {
+      let obj = {}
+      for (let shade in blackOverlay) {
+        obj[shade] = `rgb(${blackOverlay[shade]})`
+      }
+      return obj
+    })(),
   }
 }
 
 module.exports = {
-  colorsFn,
+  colorPalette,
   themedCssVariables,
+  semanticColors,
 }
