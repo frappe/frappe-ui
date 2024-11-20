@@ -216,8 +216,16 @@ const actions = computed(() => {
             _action.loading = true
             try {
               if (action.onClick) {
-                let context: DialogActionContext = { close }
-                await action.onClick(context)
+                // deprecated: uncomment this when we remove the backwards compatibility
+                // let context: DialogActionContext = { close }
+                let backwardsCompatibleContext = function () {
+                  console.warn(
+                    'Value passed to onClick is a context object. Please use context.close() instead of context() to close the dialog.',
+                  )
+                  close()
+                }
+                backwardsCompatibleContext.close = close
+                await action.onClick(backwardsCompatibleContext)
               }
             } finally {
               _action.loading = false
