@@ -5,6 +5,12 @@ import { Button } from './Button'
 
 const dialog1 = ref(false)
 const dialog2 = ref(false)
+
+const createPromise = () => {
+  return new Promise((resolve) => {
+    setTimeout(resolve, 2000)
+  })
+}
 </script>
 <template>
   <Story :layout="{ width: 500, type: 'grid' }">
@@ -15,7 +21,15 @@ const dialog2 = ref(false)
           title: 'Confirm',
           message: 'Are you sure you want to confirm this action?',
           size: 'xl',
-          actions: [{ label: 'Confirm', variant: 'solid', onClick: () => {} }],
+          actions: [
+            {
+              label: 'Confirm',
+              variant: 'solid',
+              onClick: () => {
+                return createPromise()
+              },
+            },
+          ],
         }"
         v-model="dialog1"
       />
