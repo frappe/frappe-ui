@@ -1,6 +1,6 @@
 <template>
   <div class="space-y-1">
-    <label class="block text-xs text-text-icons-gray-5" v-if="label">
+    <label class="block text-xs text-ink-gray-5" v-if="label">
       {{ label }}
     </label>
     <div class="flex text-center">
@@ -12,7 +12,7 @@
       >
         <FeatherIcon
           name="star"
-          class="fill-gray-400 text-text-icons-gray-1 stroke-1 mr-1"
+          class="fill-gray-400 text-ink-gray-1 stroke-1 mr-1"
           :class="iconClasses(index)"
           @click="markRating(index)"
         />
