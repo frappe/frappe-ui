@@ -51,6 +51,10 @@ interface TextInputProps {
   debounce?: number
 }
 
+defineOptions({
+  inheritAttrs: false,
+})
+
 const props = withDefaults(defineProps<TextInputProps>(), {
   type: 'text',
   size: 'sm',
