@@ -210,9 +210,6 @@ module.exports = plugin(
         textColor: {
           ink: semanticColors.ink,
         },
-        borderColor: {
-          outline: semanticColors.outline,
-        },
         backgroundColor: {
           surface: semanticColors.surface,
         },
@@ -255,6 +252,7 @@ module.exports = plugin(
         },
         borderColor: (theme) => ({
           DEFAULT: theme('colors.gray.200'),
+          outline: semanticColors.outline,
         }),
         typography: (theme) => ({
           DEFAULT: {
