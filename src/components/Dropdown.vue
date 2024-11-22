@@ -136,12 +136,19 @@ const filterOptions = (options: DropdownOption[]) => {
 
 const groups = computed(() => {
   let groups: DropdownGroupOption[] = []
+  let currentGroup: DropdownGroupOption | null = null
   let i = 0
+
   for (let option of props.options) {
     if (option == null) {
       continue
     }
+
     if ('group' in option) {
+      if (currentGroup) {
+        groups.push(currentGroup)
+        currentGroup = null
+      }
       let groupOption = {
         key: i,
         ...option,
@@ -149,16 +156,23 @@ const groups = computed(() => {
       } as DropdownGroupOption
       groups.push(groupOption)
     } else {
-      let groupOption = {
-        key: i,
-        group: '',
-        hideLabel: true,
-        items: filterOptions([option]),
-      } as DropdownGroupOption
-      groups.push(groupOption)
+      if (!currentGroup) {
+        currentGroup = {
+          key: i,
+          group: '',
+          hideLabel: true,
+          items: [],
+        } as DropdownGroupOption
+      }
+      currentGroup.items.push(...filterOptions([option]))
     }
     i++
   }
+
+  if (currentGroup) {
+    groups.push(currentGroup)
+  }
+
   return groups
 })
 
