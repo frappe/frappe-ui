@@ -219,6 +219,13 @@ module.exports = plugin(
         stroke: {
           ink: semanticColors.ink,
         },
+        borderColor: (theme) => ({
+          DEFAULT: theme('colors.gray.200'),
+          outline: semanticColors.outline,
+        }),
+        ringColor: {
+          outline: semanticColors.outline,
+        },
         spacing: {
           4.5: '1.125rem',
           5.5: '1.375rem',
@@ -250,10 +257,6 @@ module.exports = plugin(
         maxHeight: {
           52: '13rem',
         },
-        borderColor: (theme) => ({
-          DEFAULT: theme('colors.gray.200'),
-          outline: semanticColors.outline,
-        }),
         typography: (theme) => ({
           DEFAULT: {
             css: {
