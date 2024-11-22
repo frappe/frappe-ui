@@ -2,7 +2,7 @@
   <TabGroup
     as="div"
     class="flex flex-1 flex-col overflow-y-hidden"
-    :style="`height: calc(100vh - ${tabListRef?.$el.offsetTop}px)`"
+    :style="containerStyle"
     :defaultIndex="changedIndex"
     :selectedIndex="changedIndex"
     @change="(idx) => (changedIndex = idx)"
@@ -84,6 +84,14 @@ const indicator = ref(null)
 const tabsLength = computed(() => props.tabs?.length)
 
 const transitionClass = ref('')
+
+const containerStyle = computed(() => {
+  let headerHeight = 0
+  if (tabListRef.value) {
+    headerHeight = tabListRef.value.offsetTop
+  }
+  return `height: calc(100vh - ${headerHeight}px)`
+})
 
 function moveIndicator(index) {
   if (index >= tabsLength.value) {
