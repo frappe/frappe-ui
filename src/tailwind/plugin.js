@@ -1,5 +1,13 @@
 const plugin = require('tailwindcss/plugin')
-const { themedCssVariables, colorPalette, semanticColors } = require('./colors')
+const {
+  generateColorPalette,
+  generateSemanticColors,
+  generateCSSVariables,
+} = require('./colorPalette')
+
+let colorPalette = generateColorPalette()
+let semanticColors = generateSemanticColors()
+let cssVariables = generateCSSVariables()
 
 let globalStyles = (theme) => ({
   html: {
@@ -37,7 +45,7 @@ let componentStyles = {
 
 module.exports = plugin(
   function ({ addBase, addComponents, theme }) {
-    addBase({ ...globalStyles(theme), ...themedCssVariables() })
+    addBase({ ...globalStyles(theme), ...cssVariables })
     addComponents(componentStyles)
   },
   {
