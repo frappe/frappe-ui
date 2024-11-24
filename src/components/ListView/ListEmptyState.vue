@@ -4,7 +4,7 @@
   >
     <slot>
       <div class="text-xl font-medium">{{ list.options.emptyState.title }}</div>
-      <div class="mt-1 text-base text-gray-600">
+      <div class="mt-1 text-base text-ink-gray-5">
         {{ list.options.emptyState.description }}
       </div>
       <Button
