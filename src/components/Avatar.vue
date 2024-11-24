@@ -12,7 +12,7 @@
     />
     <div
       v-else
-      class="flex h-full w-full items-center justify-center bg-gray-100 uppercase text-gray-600"
+      class="flex h-full w-full items-center justify-center bg-surface-gray-2 uppercase text-ink-gray-5"
       :class="[labelClasses, shapeClasses]"
     >
       <div :class="iconClasses" v-if="$slots.default">
@@ -25,7 +25,7 @@
     <div
       v-if="$slots.indicator"
       :class="[
-        'absolute bottom-0 right-0 grid place-items-center rounded-full bg-white',
+        'absolute bottom-0 right-0 grid place-items-center rounded-full bg-surface-white',
         indicatorContainerClasses,
       ]"
     >
