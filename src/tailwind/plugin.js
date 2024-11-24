@@ -234,6 +234,9 @@ module.exports = plugin(
         ringColor: {
           outline: semanticColors.outline,
         },
+        divideColor: {
+          outline: semanticColors.outline,
+        },
         spacing: {
           4.5: '1.125rem',
           5.5: '1.375rem',

@@ -21,9 +21,12 @@ function generateClassMap() {
   Object.keys(colors.themedVariables.light.outline).forEach((key) => {
     const reference = colors.themedVariables.light.outline[key]
     const [mode, color, shade] = reference.split('/')
-    const className = `border-${color}-${shade}`
+    const borderClassName = `border-${color}-${shade}`
+    const divideClassName = `divide-${color}-${shade}`
     const outlineClassName = `border-outline-${key}`
-    classMap[className] = outlineClassName
+    const divideOutlineClassName = `divide-outline-${key}`
+    classMap[borderClassName] = outlineClassName
+    classMap[divideClassName] = divideOutlineClassName
   })
 
   // Generate ink class map
