@@ -622,6 +622,28 @@
       "markdownFile": null
     },
     {
+      "id": "src-components-tabbuttons-story-vue",
+      "title": "TabButtons",
+      "layout": {
+        "type": "grid",
+        "width": "80%"
+      },
+      "docsOnly": false,
+      "variants": [
+        {
+          "id": "src-components-tabbuttons-story-vue-0",
+          "title": "Tab Buttons"
+        }
+      ],
+      "relativePath": "src/components/TabButtons.story.vue",
+      "supportPluginId": "vue3",
+      "treePath": [
+        "TabButtons"
+      ],
+      "virtual": false,
+      "markdownFile": null
+    },
+    {
       "id": "src-components-tabs-story-vue",
       "title": "Tabs",
       "layout": {
