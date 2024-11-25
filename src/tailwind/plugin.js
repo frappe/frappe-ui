@@ -226,6 +226,7 @@ module.exports = plugin(
         },
         fill: {
           ink: semanticColors.ink,
+          surface: semanticColors.surface,
         },
         stroke: {
           ink: semanticColors.ink,
