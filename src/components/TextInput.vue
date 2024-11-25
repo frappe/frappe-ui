@@ -1,5 +1,9 @@
 <template>
-  <div class="relative flex items-center">
+  <div
+    class="relative flex items-center"
+    :class="attrs.class"
+    :style="attrs.style"
+  >
     <div
       :class="[
         'absolute inset-y-0 left-0 flex items-center',
@@ -20,7 +24,7 @@
       :value="modelValue"
       @input="handleChange"
       @change="handleChange"
-      v-bind="attrs"
+      v-bind="attrsWithoutClassStyle"
     />
     <div
       :class="[
@@ -65,6 +69,13 @@ const emit = defineEmits(['update:modelValue'])
 
 const slots = useSlots()
 const attrs = useAttrs()
+
+const attrsWithoutClassStyle = computed(() => {
+  return Object.fromEntries(
+    // class and style is passed to the root element
+    Object.entries(attrs).filter(([key]) => key !== 'class' && key !== 'style'),
+  )
+})
 
 const inputRef = ref<HTMLInputElement | null>(null)
 
