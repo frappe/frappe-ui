@@ -21,6 +21,10 @@ const createPromise = () => {
           title: 'Confirm',
           message: 'Are you sure you want to confirm this action?',
           size: 'xl',
+          icon: {
+            name: 'alert-triangle',
+            appearance: 'warning',
+          },
           actions: [
             {
               label: 'Confirm',
