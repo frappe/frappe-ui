@@ -249,7 +249,7 @@ const custom_rows = [
     email: 'john@doe.com',
     status: {
       label: 'Active',
-      bg_color: 'bg-green-600',
+      bg_color: 'bg-surface-green-3',
     },
     role: {
       label: 'Developer',
@@ -265,7 +265,7 @@ const custom_rows = [
     email: 'jane@doe.com',
     status: {
       label: 'Inactive',
-      bg_color: 'bg-red-600',
+      bg_color: 'bg-surface-red-5',
     },
     role: {
       label: 'HR',
@@ -374,7 +374,7 @@ const custom_rows = [
         row-key="id"
       >
         <template #group-header="{ group }">
-          <span class="text-base font-medium leading-6 text-gray-900">
+          <span class="text-base font-medium leading-6 text-ink-gray-9">
             {{ group.group }} ({{ group.rows.length }})
           </span>
         </template>
@@ -396,7 +396,7 @@ const custom_rows = [
         >
           <template #cell="{ item, row, column }">
             <Badge v-if="column.key == 'status'">{{ item }}</Badge>
-            <span class="font-medium text-gray-700" v-else>{{ item }}</span>
+            <span class="font-medium text-ink-gray-7" v-else>{{ item }}</span>
           </template>
         </ListView>
       </div>

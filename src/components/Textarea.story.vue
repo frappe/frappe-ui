@@ -15,7 +15,9 @@ const variants = ['subtle', 'outline']
 <template>
   <Story :layout="{ type: 'grid', width: 500 }">
     <Variant v-for="type in variants" :key="type" :title="`${type} variant`">
-      <Textarea :variant="type" v-bind="state" />
+      <div class="p-1">
+        <Textarea :variant="type" v-bind="state" />
+      </div>
     </Variant>
 
     <template #controls>
