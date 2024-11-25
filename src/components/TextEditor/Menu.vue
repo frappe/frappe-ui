@@ -1,5 +1,5 @@
 <template>
-  <div class="inline-flex bg-white px-1 py-1">
+  <div class="inline-flex bg-surface-white px-1 py-1">
     <div class="inline-flex items-center gap-1">
       <template v-for="button in buttons" :key="button.label">
         <div
@@ -10,7 +10,7 @@
           <Popover>
             <template #target="{ togglePopover }">
               <button
-                class="rounded px-2 py-1 text-base font-medium text-gray-800 transition-colors hover:bg-gray-100"
+                class="rounded px-2 py-1 text-base font-medium text-ink-gray-8 transition-colors hover:bg-surface-gray-2"
                 @click="togglePopover"
                 :set="
                   (activeBtn =
@@ -28,14 +28,14 @@
               </button>
             </template>
             <template #body="{ close }">
-              <ul class="rounded border bg-white p-1 shadow-md">
+              <ul class="rounded border bg-surface-white p-1 shadow-md">
                 <li
                   class="w-full"
                   v-for="option in button"
                   v-show="option.isDisabled ? !option.isDisabled(editor) : true"
                 >
                   <button
-                    class="w-full rounded px-2 py-1 text-left text-base hover:bg-gray-50"
+                    class="w-full rounded px-2 py-1 text-left text-base hover:bg-surface-menu-bar"
                     @click="
                       () => {
                         onButtonClick(option)
@@ -53,11 +53,11 @@
         <component v-else :is="button.component || 'div'" v-bind="{ editor }">
           <template v-slot="componentSlotProps">
             <button
-              class="flex rounded p-1 text-gray-800 transition-colors"
+              class="flex rounded p-1 text-ink-gray-8 transition-colors"
               :class="
                 button.isActive(editor) || componentSlotProps?.isActive
-                  ? 'bg-gray-100'
-                  : 'hover:bg-gray-100'
+                  ? 'bg-surface-gray-2'
+                  : 'hover:bg-surface-gray-2'
               "
               @click="
                 componentSlotProps?.onClick

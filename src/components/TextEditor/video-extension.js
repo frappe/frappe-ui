@@ -46,7 +46,7 @@ const Video = Node.create({
       } else {
         let videoPill = document.createElement('div')
         videoPill.className =
-          'absolute top-0 right-0 text-xs m-2 bg-gray-800 text-white px-2 py-1 rounded-md'
+          'absolute top-0 right-0 text-xs m-2 bg-surface-gray-6 text-ink-white px-2 py-1 rounded-md'
         videoPill.innerHTML = 'Video'
         div.append(videoPill)
       }

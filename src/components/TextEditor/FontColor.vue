@@ -7,7 +7,7 @@
     </template>
     <template #body-main>
       <div class="p-2">
-        <div class="text-sm text-gray-700">Text Color</div>
+        <div class="text-sm text-ink-gray-7">Text Color</div>
         <div class="mt-1 grid grid-cols-8 gap-1">
           <Tooltip
             class="flex"
@@ -27,7 +27,7 @@
             </button>
           </Tooltip>
         </div>
-        <div class="mt-2 text-sm text-gray-700">Background Color</div>
+        <div class="mt-2 text-sm text-ink-gray-7">Background Color</div>
         <div class="mt-1 grid grid-cols-8 gap-1">
           <Tooltip
             class="flex"
@@ -37,8 +37,8 @@
           >
             <button
               :aria-label="color.name"
-              class="flex h-5 w-5 items-center justify-center rounded border text-base text-gray-900"
-              :class="!color.hex ? 'border-gray-200' : 'border-transparent'"
+              class="flex h-5 w-5 items-center justify-center rounded border text-base text-ink-gray-9"
+              :class="!color.hex ? 'border-outline-gray-modals' : 'border-transparent'"
               :style="{
                 backgroundColor: color.hex,
               }"
