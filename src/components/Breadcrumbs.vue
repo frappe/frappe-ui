@@ -33,7 +33,7 @@
       <template v-for="(item, i) in crumbs" :key="item.label">
         <component
           :is="item.route ? 'router-link' : 'button'"
-          class="flex items-center rounded px-0.5 py-1 text-lg font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
+          class="flex items-center rounded px-0.5 py-1 text-lg font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
           :class="[
             i == crumbs.length - 1
               ? 'text-ink-gray-9'

@@ -4,7 +4,7 @@
     :class="{
       'px-2.5 py-1.5': padding && size === 'sm',
       'px-3 py-2': padding && size === 'md',
-      'focus-within:bg-surface-gray-2 focus-within:ring-2 focus-within:ring-gray-400 hover:bg-surface-gray-3 active:bg-surface-gray-4':
+      'focus-within:bg-surface-gray-2 focus-within:ring-2 focus-within:ring-outline-gray-3 hover:bg-surface-gray-3 active:bg-surface-gray-4':
         padding && !disabled,
     }"
   >
@@ -68,7 +68,7 @@ const inputClasses = computed(() => {
     ? ''
     : props.padding
       ? 'focus:ring-0'
-      : 'hover:shadow-sm focus:ring-0 focus-visible:ring-2 focus-visible:ring-gray-400 active:bg-surface-gray-2'
+      : 'hover:shadow-sm focus:ring-0 focus-visible:ring-2 focus-visible:ring-outline-gray-3 active:bg-surface-gray-2'
 
   let sizeClasses = {
     sm: 'w-3.5 h-3.5',
