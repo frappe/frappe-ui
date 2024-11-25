@@ -16,7 +16,7 @@
 
       <template #body>
         <MenuItems
-          class="mt-2 min-w-40 divide-y divide-gray-100 rounded-lg bg-white shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
+          class="mt-2 min-w-40 divide-y divide-outline-gray-1 rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
           :class="{
             'left-0 origin-top-left': placement == 'left',
             'right-0 origin-top-right': placement == 'right',
@@ -43,7 +43,7 @@
               <button
                 v-else
                 :class="[
-                  active ? 'bg-gray-100' : 'text-ink-gray-6',
+                  active ? 'bg-surface-gray-2' : 'text-ink-gray-6',
                   'group flex h-7 w-full items-center rounded px-2 text-base',
                 ]"
                 @click="item.onClick"
@@ -59,7 +59,7 @@
                   v-else-if="item.icon"
                   :is="item.icon"
                 />
-                <span class="whitespace-nowrap">
+                <span class="whitespace-nowrap text-ink-gray-7">
                   {{ item.label }}
                 </span>
               </button>
@@ -136,12 +136,19 @@ const filterOptions = (options: DropdownOption[]) => {
 
 const groups = computed(() => {
   let groups: DropdownGroupOption[] = []
+  let currentGroup: DropdownGroupOption | null = null
   let i = 0
+
   for (let option of props.options) {
     if (option == null) {
       continue
     }
+
     if ('group' in option) {
+      if (currentGroup) {
+        groups.push(currentGroup)
+        currentGroup = null
+      }
       let groupOption = {
         key: i,
         ...option,
@@ -149,16 +156,23 @@ const groups = computed(() => {
       } as DropdownGroupOption
       groups.push(groupOption)
     } else {
-      let groupOption = {
-        key: i,
-        group: '',
-        hideLabel: true,
-        items: filterOptions([option]),
-      } as DropdownGroupOption
-      groups.push(groupOption)
+      if (!currentGroup) {
+        currentGroup = {
+          key: i,
+          group: '',
+          hideLabel: true,
+          items: [],
+        } as DropdownGroupOption
+      }
+      currentGroup.items.push(...filterOptions([option]))
     }
     i++
   }
+
+  if (currentGroup) {
+    groups.push(currentGroup)
+  }
+
   return groups
 })
 

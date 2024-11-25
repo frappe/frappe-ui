@@ -1,5 +1,13 @@
 const plugin = require('tailwindcss/plugin')
-const { themedCssVariables, colorPalette, semanticColors } = require('./colors')
+const {
+  generateColorPalette,
+  generateSemanticColors,
+  generateCSSVariables,
+} = require('./colorPalette')
+
+let colorPalette = generateColorPalette()
+let semanticColors = generateSemanticColors()
+let cssVariables = generateCSSVariables()
 
 let globalStyles = (theme) => ({
   html: {
@@ -37,7 +45,7 @@ let componentStyles = {
 
 module.exports = plugin(
   function ({ addBase, addComponents, theme }) {
-    addBase({ ...globalStyles(theme), ...themedCssVariables() })
+    addBase({ ...globalStyles(theme), ...cssVariables })
     addComponents(componentStyles)
   },
   {
@@ -219,6 +227,16 @@ module.exports = plugin(
         stroke: {
           ink: semanticColors.ink,
         },
+        borderColor: (theme) => ({
+          DEFAULT: theme('colors.gray.200'),
+          outline: semanticColors.outline,
+        }),
+        ringColor: {
+          outline: semanticColors.outline,
+        },
+        divideColor: {
+          outline: semanticColors.outline,
+        },
         spacing: {
           4.5: '1.125rem',
           5.5: '1.375rem',
@@ -250,10 +268,6 @@ module.exports = plugin(
         maxHeight: {
           52: '13rem',
         },
-        borderColor: (theme) => ({
-          DEFAULT: theme('colors.gray.200'),
-          outline: semanticColors.outline,
-        }),
         typography: (theme) => ({
           DEFAULT: {
             css: {
