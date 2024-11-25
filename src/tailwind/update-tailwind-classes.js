@@ -23,10 +23,13 @@ function generateClassMap() {
     const [mode, color, shade] = reference.split('/')
     const borderClassName = `border-${color}-${shade}`
     const divideClassName = `divide-${color}-${shade}`
+    const ringClassName = `ring-${color}-${shade}`
     const outlineClassName = `border-outline-${key}`
     const divideOutlineClassName = `divide-outline-${key}`
+    const ringOutlineClassName = `ring-outline-${key}`
     classMap[borderClassName] = outlineClassName
     classMap[divideClassName] = divideOutlineClassName
+    classMap[ringClassName] = ringOutlineClassName
   })
 
   // Generate ink class map
@@ -59,20 +62,38 @@ function replaceClassesInFile(filePath, classMap) {
   console.log(`Replaced ${classesChanged} classes in ${filePath}`)
 }
 
-function getFilePath() {
-  let filePath = process.argv[2]
-  let fullPath = path.resolve(process.cwd(), filePath)
+function replaceClassesInFolder(targetPath, classMap) {
+  const files = fs.readdirSync(targetPath)
+
+  files.forEach((file) => {
+    const fullPath = path.join(targetPath, file)
+    const stat = fs.statSync(fullPath)
+
+    if (stat.isDirectory()) {
+      replaceClassesInFolder(fullPath, classMap)
+    } else if (stat.isFile()) {
+      replaceClassesInFile(fullPath, classMap)
+    }
+  })
+}
+
+function getPath() {
+  let targetPath = process.argv[2]
+  let fullPath = path.resolve(process.cwd(), targetPath)
   if (fs.existsSync(fullPath)) {
     return fullPath
-  } else {
-    console.error(`File not found: ${filePath}`)
-    process.exit(1)
   }
+  console.error(`Invalid path: ${fullPath}`)
+  process.exit(1)
 }
 
 // Generate the class map
 const classMap = generateClassMap()
 
-// Replace classes in a file
-const filePath = getFilePath()
-replaceClassesInFile(filePath, classMap)
+const targetPath = getPath()
+let stats = fs.statSync(targetPath)
+if (stats.isFile()) {
+  replaceClassesInFile(targetPath, classMap)
+} else if (stats.isDirectory()) {
+  replaceClassesInFolder(targetPath, classMap)
+}
