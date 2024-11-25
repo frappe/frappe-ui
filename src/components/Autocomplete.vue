@@ -16,7 +16,10 @@
             >
               <div class="flex items-center overflow-hidden">
                 <slot name="prefix" />
-                <span class="truncate text-base leading-5" v-if="selectedValue">
+                <span
+                  class="truncate text-base leading-5 text-ink-gray-8"
+                  v-if="selectedValue"
+                >
                   {{ displayValue(selectedValue) }}
                 </span>
                 <span class="text-base leading-5 text-ink-gray-4" v-else>
@@ -45,7 +48,7 @@
             >
               <div
                 v-if="!hideSearch"
-                class="sticky top-0 z-10 flex items-stretch space-x-1.5 bg-surface- py-1.5"
+                class="sticky top-0 z-10 flex items-stretch space-x-1.5 bg-surface-modal py-1.5"
               >
                 <div class="relative w-full">
                   <ComboboxInput
@@ -76,7 +79,7 @@
               >
                 <div
                   v-if="group.group && !group.hideLabel"
-                  class="sticky top-10 truncate bg-surface-white px-2.5 py-1.5 text-sm font-medium text-ink-gray-5"
+                  class="sticky top-10 truncate bg-surface-modal px-2.5 py-1.5 text-sm font-medium text-ink-gray-5"
                 >
                   {{ group.group }}
                 </div>
