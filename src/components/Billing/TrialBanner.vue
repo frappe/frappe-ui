@@ -1,14 +1,14 @@
 <template>
   <div
     v-if="!isSidebarCollapsed && showBanner"
-    class="m-2 flex flex-col gap-3 shadow-sm rounded-lg py-2.5 px-3 bg-white text-base"
+    class="m-2 flex flex-col gap-3 shadow-sm rounded-lg py-2.5 px-3 bg-surface-white text-base"
   >
     <div class="flex flex-col gap-1">
       <div class="inline-flex gap-2 items-center font-medium">
         <FeatherIcon class="h-4" name="info" />
         {{ trialTitle }}
       </div>
-      <div class="text-gray-700 text-sm font-normal leading-5">
+      <div class="text-ink-gray-7 text-sm font-normal leading-5">
         {{ trialMessage }}
       </div>
     </div>

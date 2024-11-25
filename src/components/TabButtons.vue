@@ -10,7 +10,7 @@
       >
         <button
           :class="[
-            active ? 'ring-gray-300 focus-visible:ring' : '',
+            active ? 'ring-outline-gray-2 focus-visible:ring' : '',
             checked ? 'bg-surface-white text-ink-gray-9 shadow' : 'text-ink-gray-7',
             'flex flex-1 justify-center gap-2 whitespace-nowrap rounded-[7px] px-3 py-[5px] leading-none transition-colors focus:outline-none',
           ]"
