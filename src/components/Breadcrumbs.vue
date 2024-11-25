@@ -5,7 +5,7 @@
         <Button variant="ghost">
           <template #icon>
             <svg
-              class="w-4 text-gray-600"
+              class="w-4 text-ink-gray-5"
               xmlns="http://www.w3.org/2000/svg"
               width="24"
               height="24"
@@ -23,7 +23,7 @@
           </template>
         </Button>
       </Dropdown>
-      <span class="ml-1 mr-0.5 text-base text-gray-500" aria-hidden="true">
+      <span class="ml-1 mr-0.5 text-base text-ink-gray-4" aria-hidden="true">
         /
       </span>
     </template>
@@ -36,8 +36,8 @@
           class="flex items-center rounded px-0.5 py-1 text-lg font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
           :class="[
             i == crumbs.length - 1
-              ? 'text-gray-900'
-              : 'text-gray-600 hover:text-gray-700',
+              ? 'text-ink-gray-9'
+              : 'text-ink-gray-5 hover:text-ink-gray-7',
           ]"
           v-bind="item.route ? { to: item.route } : { onClick: item.onClick }"
         >
@@ -49,7 +49,7 @@
         </component>
         <span
           v-if="i != crumbs.length - 1"
-          class="mx-0.5 text-base text-gray-500"
+          class="mx-0.5 text-base text-ink-gray-4"
           aria-hidden="true"
         >
           /

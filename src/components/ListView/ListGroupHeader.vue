@@ -2,10 +2,10 @@
   <div class="flex items-center">
     <button
       @click="toggleGroup"
-      class="ml-[3px] mr-[11px] rounded p-1 hover:bg-gray-100"
+      class="ml-[3px] mr-[11px] rounded p-1 hover:bg-surface-gray-2"
     >
       <DownSolid
-        class="h-4 w-4 text-gray-900 transition-transform duration-200"
+        class="h-4 w-4 text-ink-gray-9 transition-transform duration-200"
         :class="[group.collapsed ? '-rotate-90' : '']"
       />
     </button>
@@ -22,7 +22,7 @@
       </div>
     </slot>
   </div>
-  <div class="mx-2 h-px border-t border-gray-200"></div>
+  <div class="mx-2 h-px border-t border-outline-gray-modals"></div>
 </template>
 <script setup>
 import { inject } from 'vue'
