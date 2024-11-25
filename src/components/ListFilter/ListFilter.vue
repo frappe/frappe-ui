@@ -13,7 +13,9 @@
       </Button>
     </template>
     <template #body="{ close }">
-      <div class="my-2 rounded-lg border border-gray-100 bg-surface-white shadow-xl">
+      <div
+        class="my-2 rounded-lg border border-gray-100 bg-surface-white shadow-xl"
+      >
         <div class="min-w-[400px] p-2">
           <div
             v-if="filters.length"

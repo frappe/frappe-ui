@@ -67,7 +67,10 @@
           </slot>
         </div>
       </div>
-      <div v-if="!isLastRow" class="mx-2 h-px border-t border-outline-gray-modals" />
+      <div
+        v-if="!isLastRow"
+        class="mx-2 h-px border-t border-outline-gray-modals"
+      />
     </component>
   </component>
 </template>

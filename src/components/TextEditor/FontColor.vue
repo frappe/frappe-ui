@@ -38,7 +38,9 @@
             <button
               :aria-label="color.name"
               class="flex h-5 w-5 items-center justify-center rounded border text-base text-ink-gray-9"
-              :class="!color.hex ? 'border-outline-gray-modals' : 'border-transparent'"
+              :class="
+                !color.hex ? 'border-outline-gray-modals' : 'border-transparent'
+              "
               :style="{
                 backgroundColor: color.hex,
               }"
