@@ -38,7 +38,10 @@ function generateClassMap() {
     const [mode, color, shade] = reference.split('/')
     const className = `text-${color}-${shade}`
     const inkClassName = `text-ink-${key}`
+    const placeholderClassName = `placeholder-${color}-${shade}`
+    const placeholderInkClassName = `placeholder-ink-${key}`
     classMap[className] = inkClassName
+    classMap[placeholderClassName] = placeholderInkClassName
   })
 
   return classMap

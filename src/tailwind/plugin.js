@@ -230,6 +230,9 @@ module.exports = plugin(
         stroke: {
           ink: semanticColors.ink,
         },
+        placeholderColor: {
+          ink: semanticColors.ink,
+        },
         borderColor: () => ({
           DEFAULT: 'var(--outline-gray-1)',
           outline: semanticColors.outline,
