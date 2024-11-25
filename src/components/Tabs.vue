@@ -22,8 +22,8 @@
       >
         <slot name="tab" v-bind="{ tab, selected }">
           <button
-            class="flex items-center gap-1.5 border-b border-transparent py-3 text-base text-gray-600 duration-300 ease-in-out hover:border-gray-400 hover:text-gray-900"
-            :class="{ 'text-gray-900': selected }"
+            class="flex items-center gap-1.5 border-b border-transparent py-3 text-base text-ink-gray-5 duration-300 ease-in-out hover:border-outline-gray-3 hover:text-ink-gray-9"
+            :class="{ 'text-ink-gray-9': selected }"
           >
             <component v-if="tab.icon" :is="tab.icon" class="size-4" />
             {{ tab.label }}
@@ -32,7 +32,7 @@
       </Tab>
       <div
         ref="indicator"
-        class="tab-indicator absolute bottom-0 h-px bg-gray-900"
+        class="tab-indicator absolute bottom-0 h-px bg-surface-gray-7"
         :class="transitionClass"
       />
     </TabList>
