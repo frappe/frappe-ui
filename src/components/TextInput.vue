@@ -71,7 +71,7 @@ const inputRef = ref<HTMLInputElement | null>(null)
 defineExpose({ el: inputRef })
 
 const textColor = computed(() => {
-  return props.disabled ? 'text-gray-600' : 'text-gray-800'
+  return props.disabled ? 'text-ink-gray-5' : 'text-ink-gray-8'
 })
 
 const inputClasses = computed(() => {
@@ -108,12 +108,14 @@ const inputClasses = computed(() => {
   let variant = props.disabled ? 'disabled' : props.variant
   let variantClasses = {
     subtle:
-      'border border-gray-100 bg-gray-100 placeholder-gray-500 hover:border-gray-200 hover:bg-gray-200 focus:bg-white focus:border-gray-500 focus:shadow-sm focus:ring-0 focus-visible:ring-2 focus-visible:ring-gray-400',
+      'border border-[--surface-gray-2] bg-surface-gray-2 placeholder-ink-gray-4 hover:border-outline-gray-modals hover:bg-surface-gray-3 focus:bg-surface-white focus:border-outline-gray-4 focus:shadow-sm focus:ring-0 focus-visible:ring-2 focus-visible:ring-outline-gray-3',
     outline:
-      'border border-gray-300 bg-white placeholder-gray-500 hover:border-gray-400 hover:shadow-sm focus:bg-white focus:border-gray-500 focus:shadow-sm focus:ring-0 focus-visible:ring-2 focus-visible:ring-gray-400',
+      'border border-outline-gray-2 bg-surface-white placeholder-ink-gray-4 hover:border-outline-gray-3 hover:shadow-sm focus:bg-surface-white focus:border-outline-gray-4 focus:shadow-sm focus:ring-0 focus-visible:ring-2 focus-visible:ring-outline-gray-3',
     disabled: [
-      'border bg-gray-50 placeholder-gray-400',
-      props.variant === 'outline' ? 'border-gray-300' : 'border-transparent',
+      'border bg-surface-gray-1 placeholder-ink-gray-3',
+      props.variant === 'outline'
+        ? 'border-outline-gray-2'
+        : 'border-transparent',
     ],
   }[variant]
 
@@ -122,7 +124,7 @@ const inputClasses = computed(() => {
     paddingClasses,
     variantClasses,
     textColor.value,
-    'transition-colors w-full',
+    'transition-colors w-full dark:[color-scheme:dark]',
   ]
 })
 
