@@ -53,7 +53,7 @@
                 <div class="relative w-full">
                   <ComboboxInput
                     ref="searchInput"
-                    class="form-input w-full bg-surface-gray-2 focus:bg-surface-gray-3 hover:bg-surface-gray-4 text-ink-gray-8"
+                    class="form-input w-full focus:bg-surface-gray-3 hover:bg-surface-gray-4 text-ink-gray-8"
                     type="text"
                     @change="
                       (e) => {
