@@ -278,7 +278,7 @@ module.exports = plugin(
         typography: (theme) => ({
           DEFAULT: {
             css: {
-              '--tw-prose-body': theme('colors.gray.800'),
+              '--tw-prose-body': 'var(--ink-gray-6)',
             },
           },
           sm: {
