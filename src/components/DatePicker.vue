@@ -57,7 +57,7 @@
             class="text-sm"
             @click="
               () => {
-                selectDate(getDate())
+                selectDate(getDate(), true)
                 togglePopover()
               }
             "
@@ -132,7 +132,7 @@ import Popover from './Popover.vue'
 import FeatherIcon from './FeatherIcon.vue'
 import TextInput from './TextInput.vue'
 
-import { getDate, getDateValue } from '../utils/dates'
+import { getDate, getDateValue, toZonedTime } from '../utils/dates'
 import { useDatePicker } from '../utils/useDatePicker'
 
 import type { DatePickerEmits, DatePickerProps } from './types/DatePicker'
@@ -166,7 +166,10 @@ const dateValue = computed(() => {
   return props.value ? props.value : props.modelValue
 })
 
-function selectDate(date: Date | string) {
+function selectDate(date: Date | string, isNow: boolean = false) {
+  if (isNow && window.timezone?.user) {
+    date = toZonedTime(date, window.timezone.user)
+  }
   emit('change', getDateValue(date))
   emit('update:modelValue', getDateValue(date))
 }
