@@ -195,7 +195,14 @@ import Popover from './Popover.vue'
 import FeatherIcon from './FeatherIcon.vue'
 import TextInput from './TextInput.vue'
 
-import { getDate } from '../utils/dates'
+import {
+  getDate,
+  convertToUserTimezone,
+  convertToSystemTimezone,
+  toZonedTime,
+  formatDate,
+  setDate,
+} from '../utils/dates'
 import { useDatePicker } from '../utils/useDatePicker'
 
 import type { DatePickerEmits, DatePickerProps } from './types/DatePicker'
@@ -230,7 +237,8 @@ const minute = ref<number>(0)
 const second = ref<number>(0)
 
 const dateValue = computed(() => {
-  return props.value ? props.value : props.modelValue
+  let date = props.value ? props.value : props.modelValue
+  return date ? convertToUserTimezone(date) : ''
 })
 
 function changeTime() {
@@ -244,15 +252,21 @@ function selectDate(
   isNow: boolean = false,
 ) {
   if (!isTimeChange) {
-    let currentDate =
-      dateValue.value && !isNow ? getDate(dateValue.value) : getDate()
+    let currentDate = getDate()
+    if (dateValue.value && !isNow) {
+      currentDate = getDate(dateValue.value)
+    } else if (isNow && window.timezone?.user) {
+      currentDate = toZonedTime(currentDate, window.timezone.user)
+      date = setDate(date, { date: currentDate.getDate() })
+    }
+
     hour.value = currentDate.getHours()
     minute.value = currentDate.getMinutes()
     second.value = currentDate.getSeconds()
   }
 
-  emit('change', toValue(date))
-  emit('update:modelValue', toValue(date))
+  emit('change', convertToSystemTimezone(toValue(date)))
+  emit('update:modelValue', convertToSystemTimezone(toValue(date)))
 }
 
 function toValue(date: Date | string) {
@@ -262,13 +276,13 @@ function toValue(date: Date | string) {
     date = new Date(date)
   }
 
-  date.setHours(hour.value, minute.value, second.value, 0)
+  date = setDate(date, {
+    hours: hour.value,
+    minutes: minute.value,
+    seconds: second.value,
+  })
   // "YYYY-MM-DD HH:MM:SS"
-  return `${date.getFullYear()}-${twoDigit(
-    date.getMonth() + 1,
-  )}-${twoDigit(date.getDate())} ${twoDigit(
-    date.getHours(),
-  )}:${twoDigit(date.getMinutes())}:${twoDigit(date.getSeconds())}`
+  return formatDate(date, 'yyyy-MM-dd HH:mm:ss')
 }
 
 function twoDigit(number: number) {

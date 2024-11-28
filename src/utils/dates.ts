@@ -1,4 +1,29 @@
+import {
+  toZonedTime,
+  fromZonedTime,
+  format as formatTimezone,
+} from 'date-fns-tz'
+import {
+  formatDistanceToNowStrict,
+  formatDistanceStrict,
+  format as _format,
+  set as setDate,
+} from 'date-fns'
+
+declare global {
+  interface Window {
+    timezone?: {
+      system?: string
+      user?: string
+    }
+  }
+}
+
 type DateConstructorParam = string | number | Date
+
+const systemTimeZone = window.timezone?.system || null
+const userTimeZone = window.timezone?.user || null
+const isTimezoneEnabled = systemTimeZone && userTimeZone
 
 function getDate(...args: DateConstructorParam[]): Date {
   return new Date(...(args as [DateConstructorParam]))
@@ -11,14 +36,8 @@ function getDateValue(date: Date | string) {
     date = new Date(date)
   }
 
-  // toISOString is buggy and reduces the day by one
-  // this is because it considers the UTC timestamp
-  // in order to circumvent that we need to use luxon/moment
-  // but that refactor could take some time, so fixing the time difference
-  // as suggested in this answer.
-  // https://stackoverflow.com/a/16084846/3541205
-  date.setHours(0, -date.getTimezoneOffset(), 0, 0)
-  return date.toISOString().slice(0, 10)
+  date = setDate(date, { hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })
+  return formatDate(date, 'yyyy-MM-dd')
 }
 
 function getDatesAfter(date: Date, count: number) {
@@ -61,4 +80,63 @@ function isLeapYear(year: number) {
   return false
 }
 
-export { getDate, getDateValue, getDatesAfter, getDaysInMonth, isLeapYear }
+function convertToUserTimezone(date: string, format = 'yyyy-MM-dd HH:mm:ss') {
+  if (!date) return ''
+
+  if (!isTimezoneEnabled) return formatDate(new Date(date), format)
+
+  // Convert the date from system to UTC to the user's time zone
+  const systemTimezoneInUTC = fromZonedTime(date, systemTimeZone)
+  const userTimezoneDate = toZonedTime(systemTimezoneInUTC, userTimeZone)
+
+  return formatDate(userTimezoneDate, format)
+}
+
+function convertToSystemTimezone(date: string, format = 'yyyy-MM-dd HH:mm:ss') {
+  if (!date) return ''
+
+  if (!isTimezoneEnabled) return formatDate(new Date(date), format)
+
+  // Convert the date from user's to UTC to the system time zone
+  const userTimezoneInUTC = fromZonedTime(date, userTimeZone)
+  const systemTimezoneDate = toZonedTime(userTimezoneInUTC, systemTimeZone)
+
+  return formatDate(systemTimezoneDate, format)
+}
+
+function formatAsTimeAgo(date: string) {
+  if (!date) return ''
+
+  if (!isTimezoneEnabled)
+    return formatDistanceToNowStrict(new Date(date), { addSuffix: true })
+
+  const userTimezoneDate = convertToUserTimezone(date)
+  const nowInUserTimezone = toZonedTime(new Date(), userTimeZone)
+
+  return formatDistanceStrict(userTimezoneDate, nowInUserTimezone, {
+    addSuffix: true,
+  })
+}
+
+function formatDate(date: Date, format: string) {
+  if (!date) return ''
+
+  if (!isTimezoneEnabled) return _format(date, format)
+
+  return formatTimezone(date, format)
+}
+
+export {
+  getDate,
+  getDateValue,
+  getDatesAfter,
+  getDaysInMonth,
+  isLeapYear,
+  convertToUserTimezone,
+  convertToSystemTimezone,
+  formatAsTimeAgo,
+  fromZonedTime,
+  toZonedTime,
+  formatDate,
+  setDate,
+}
