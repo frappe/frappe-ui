@@ -39,13 +39,7 @@
               ? 'text-ink-gray-9'
               : 'text-ink-gray-5 hover:text-ink-gray-7',
           ]"
-          v-bind="
-            item.route
-              ? {
-                  to: item.route,
-                }
-              : { onClick: item.onClick }
-          "
+          v-bind="item.route ? { to: item.route } : { onClick: item.onClick }"
         >
           <slot name="prefix" :item="item" />
           <span>
