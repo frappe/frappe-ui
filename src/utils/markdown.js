@@ -2,6 +2,7 @@ import showdown from 'showdown'
 
 export function markdownToHTML(text) {
   const converter = new showdown.Converter()
+  converter.setFlavor('github')
   return converter.makeHtml(text)
 }
 
