@@ -31,22 +31,38 @@
       class="flex min-w-0 items-center overflow-hidden text-ellipsis whitespace-nowrap"
     >
       <template v-for="(item, i) in crumbs" :key="item.label">
-        <component
-          :is="item.route ? 'router-link' : 'button'"
+        <router-link
+          v-if="item.route"
+          :to="item.route"
           class="flex items-center rounded px-0.5 py-1 text-lg font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
           :class="[
             i == crumbs.length - 1
               ? 'text-ink-gray-9'
               : 'text-ink-gray-5 hover:text-ink-gray-7',
           ]"
-          v-bind="item.route ? { to: item.route } : { onClick: item.onClick }"
         >
           <slot name="prefix" :item="item" />
           <span>
             {{ item.label }}
           </span>
           <slot name="suffix" :item="item" />
-        </component>
+        </router-link>
+        <button
+          v-else
+          class="flex items-center rounded px-0.5 py-1 text-lg font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
+          :class="[
+            i == crumbs.length - 1
+              ? 'text-ink-gray-9'
+              : 'text-ink-gray-5 hover:text-ink-gray-7',
+          ]"
+          @click="item.onClick"
+        >
+          <slot name="prefix" :item="item" />
+          <span>
+            {{ item.label }}
+          </span>
+          <slot name="suffix" :item="item" />
+        </button>
         <span
           v-if="i != crumbs.length - 1"
           class="mx-0.5 text-base text-ink-gray-4"
