@@ -32,7 +32,7 @@
     >
       <template v-for="(item, i) in crumbs" :key="item.label">
         <component
-          :is="item.route ? 'router-link' : 'button'"
+          :is="item.route ? 'router-link' : button"
           class="flex items-center rounded px-0.5 py-1 text-lg font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
           :class="[
             i == crumbs.length - 1
@@ -43,7 +43,6 @@
             item.route
               ? {
                   to: item.route,
-                  onClick: item.hasOwnProperty('onClick') && item.onClick,
                 }
               : { onClick: item.onClick }
           "
@@ -71,6 +70,7 @@ import { computed } from 'vue'
 import { RouterLinkProps, useRouter } from 'vue-router'
 import Dropdown from '../components/Dropdown.vue'
 import { Button } from './Button'
+import { h } from 'vue'
 
 interface BreadcrumbItem {
   label: string
@@ -118,5 +118,10 @@ const crumbs = computed(() => {
 
   let lastTwo = items.value.slice(-2)
   return lastTwo
+})
+
+const button = h(Button, {
+  variant: 'ghost',
+  class: 'hover:bg-inherit active:bg-inherit',
 })
 </script>
