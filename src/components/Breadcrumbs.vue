@@ -60,11 +60,10 @@
 </template>
 <script setup lang="ts">
 import { useWindowSize } from '@vueuse/core'
-import { computed } from 'vue'
+import { computed, h } from 'vue'
 import { RouterLinkProps, useRouter } from 'vue-router'
 import Dropdown from '../components/Dropdown.vue'
 import { Button } from './Button'
-import { h } from 'vue'
 
 interface BreadcrumbItem {
   label: string
