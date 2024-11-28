@@ -3,8 +3,8 @@ const fs = require('fs')
 
 module.exports = function proxyOptions({
   port = 8080,
-  source = '^/(app|login|api|assets|files)',
- } = {}) {
+  source = '^/(app|login|api|assets|files|private)',
+} = {}) {
   const config = getCommonSiteConfig()
   const webserver_port = config ? config.webserver_port : 8000
   if (!config) {
@@ -17,7 +17,7 @@ module.exports = function proxyOptions({
     router: function (req) {
       const site_name = req.headers.host.split(':')[0]
       return `http://${site_name}:${webserver_port}`
-    }
+    },
   }
   return {
     name: 'frappeui-vite-plugin',
