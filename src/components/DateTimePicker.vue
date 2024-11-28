@@ -2,6 +2,7 @@
   <Popover
     @open="selectCurrentMonthYear"
     class="flex w-full [&>div:first-child]:w-full"
+    :placement="placement"
   >
     <template #target="{ togglePopover }">
       <Input
@@ -18,10 +19,11 @@
     </template>
 
     <template #body="{ togglePopover }">
-      <!-- Month Switcher -->
       <div
-        class="mt-2 w-fit select-none divide-y rounded-lg bg-white text-base shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
+        class="w-fit select-none divide-y rounded-lg bg-white text-base shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
+        :class="marginClass"
       >
+        <!-- Month Switcher -->
         <div class="flex items-center p-1 text-gray-500">
           <Button variant="ghost" class="h-7 w-7" @click="prevMonth">
             <FeatherIcon
@@ -210,6 +212,18 @@ const {
   prevMonth,
   nextMonth,
 } = useDatePicker()
+
+const marginClass = computed(() => {
+  let _marginClass = 'mt-2'
+  if (props.placement?.startsWith('top')) {
+    _marginClass = 'mb-2'
+  } else if (props.placement?.startsWith('left')) {
+    _marginClass = 'mr-2'
+  } else if (props.placement?.startsWith('right')) {
+    _marginClass = 'ml-2'
+  }
+  return _marginClass
+})
 
 const hour = ref<number>(0)
 const minute = ref<number>(0)
