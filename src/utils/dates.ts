@@ -1,14 +1,4 @@
-import {
-  toZonedTime,
-  fromZonedTime,
-  format as formatTimezone,
-} from 'date-fns-tz'
-import {
-  formatDistanceToNowStrict,
-  formatDistanceStrict,
-  format as _format,
-  set as setDate,
-} from 'date-fns'
+import { DateTime } from 'luxon'
 
 declare global {
   interface Window {
@@ -21,10 +11,6 @@ declare global {
 
 type DateConstructorParam = string | number | Date
 
-const systemTimeZone = window.timezone?.system || null
-const userTimeZone = window.timezone?.user || null
-const isTimezoneEnabled = systemTimeZone && userTimeZone
-
 function getDate(...args: DateConstructorParam[]): Date {
   return new Date(...(args as [DateConstructorParam]))
 }
@@ -32,12 +18,9 @@ function getDate(...args: DateConstructorParam[]): Date {
 function getDateValue(date: Date | string) {
   if (!date || date.toString() === 'Invalid Date') return ''
 
-  if (typeof date === 'string') {
-    date = new Date(date)
-  }
-
-  date = setDate(date, { hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })
-  return formatDate(date, 'yyyy-MM-dd')
+  return luxonDate(date)
+    .set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })
+    .toFormat('yyyy-MM-dd')
 }
 
 function getDatesAfter(date: Date, count: number) {
@@ -83,47 +66,50 @@ function isLeapYear(year: number) {
 function convertToUserTimezone(date: string, format = 'yyyy-MM-dd HH:mm:ss') {
   if (!date) return ''
 
-  if (!isTimezoneEnabled) return formatDate(new Date(date), format)
+  const systemTimeZone = window.timezone?.system || null
+  const userTimeZone = window.timezone?.user || null
+  const isTimezoneEnabled = systemTimeZone && userTimeZone
 
-  // Convert the date from system to UTC to the user's time zone
-  const systemTimezoneInUTC = fromZonedTime(date, systemTimeZone)
-  const userTimezoneDate = toZonedTime(systemTimezoneInUTC, userTimeZone)
+  if (!isTimezoneEnabled) return formatDate(date, format)
 
-  return formatDate(userTimezoneDate, format)
+  // Convert the date from system to the user's time zone
+  let systemTimezoneDate = luxonDate(date).setZone(systemTimeZone, {
+    keepLocalTime: true,
+  })
+  let userTimezoneDate = systemTimezoneDate.setZone(userTimeZone)
+
+  return userTimezoneDate.toFormat(format)
 }
 
 function convertToSystemTimezone(date: string, format = 'yyyy-MM-dd HH:mm:ss') {
   if (!date) return ''
 
-  if (!isTimezoneEnabled) return formatDate(new Date(date), format)
+  const systemTimeZone = window.timezone?.system || null
+  const userTimeZone = window.timezone?.user || null
+  const isTimezoneEnabled = systemTimeZone && userTimeZone
 
-  // Convert the date from user's to UTC to the system time zone
-  const userTimezoneInUTC = fromZonedTime(date, userTimeZone)
-  const systemTimezoneDate = toZonedTime(userTimezoneInUTC, systemTimeZone)
-
-  return formatDate(systemTimezoneDate, format)
-}
-
-function formatAsTimeAgo(date: string) {
-  if (!date) return ''
-
-  if (!isTimezoneEnabled)
-    return formatDistanceToNowStrict(new Date(date), { addSuffix: true })
-
-  const userTimezoneDate = convertToUserTimezone(date)
-  const nowInUserTimezone = toZonedTime(new Date(), userTimeZone)
-
-  return formatDistanceStrict(userTimezoneDate, nowInUserTimezone, {
-    addSuffix: true,
+  if (!isTimezoneEnabled) return formatDate(date, format)
+  // Convert the date from user's to the system time zone
+  let userTimezoneDate = luxonDate(date).setZone(userTimeZone, {
+    keepLocalTime: true,
   })
+  let systemTimezoneDate = userTimezoneDate.setZone(systemTimeZone)
+
+  return systemTimezoneDate.toFormat(format)
 }
 
-function formatDate(date: Date, format: string) {
-  if (!date) return ''
+function formatDate(date: string | Date, format: string) {
+  return luxonDate(date).toFormat(format)
+}
 
-  if (!isTimezoneEnabled) return _format(date, format)
-
-  return formatTimezone(date, format)
+function luxonDate(date: string | Date | DateTime | null = null) {
+  if (!date) return DateTime.local()
+  if (typeof date === 'string') {
+    date = new Date(date)
+  } else if (date.isLuxonDateTime) {
+    return date
+  }
+  return DateTime.fromJSDate(date)
 }
 
 export {
@@ -134,9 +120,7 @@ export {
   isLeapYear,
   convertToUserTimezone,
   convertToSystemTimezone,
-  formatAsTimeAgo,
-  fromZonedTime,
-  toZonedTime,
   formatDate,
-  setDate,
+  luxonDate,
+  DateTime,
 }

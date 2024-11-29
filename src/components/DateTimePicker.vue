@@ -199,9 +199,7 @@ import {
   getDate,
   convertToUserTimezone,
   convertToSystemTimezone,
-  toZonedTime,
-  formatDate,
-  setDate,
+  luxonDate,
 } from '../utils/dates'
 import { useDatePicker } from '../utils/useDatePicker'
 
@@ -252,17 +250,24 @@ function selectDate(
   isNow: boolean = false,
 ) {
   if (!isTimeChange) {
-    let currentDate = getDate()
+    let currentDate = luxonDate()
     if (dateValue.value && !isNow) {
-      currentDate = getDate(dateValue.value)
+      currentDate = luxonDate(dateValue.value)
     } else if (isNow && window.timezone?.user) {
-      currentDate = toZonedTime(currentDate, window.timezone.user)
-      date = setDate(date, { date: currentDate.getDate() })
+      currentDate = currentDate.setZone(window.timezone.user)
+      // set only date part of currentDate to date
+      date = luxonDate(date)
+        .set({
+          year: currentDate.year,
+          month: currentDate.month,
+          day: currentDate.day,
+        })
+        .toJSDate()
     }
 
-    hour.value = currentDate.getHours()
-    minute.value = currentDate.getMinutes()
-    second.value = currentDate.getSeconds()
+    hour.value = currentDate.hour
+    minute.value = currentDate.minute
+    second.value = currentDate.second
   }
 
   emit('change', convertToSystemTimezone(toValue(date)))
@@ -272,17 +277,14 @@ function selectDate(
 function toValue(date: Date | string) {
   if (!date || date.toString() === 'Invalid Date') return ''
 
-  if (typeof date === 'string') {
-    date = new Date(date)
-  }
-
-  date = setDate(date, {
-    hours: hour.value,
-    minutes: minute.value,
-    seconds: second.value,
-  })
   // "YYYY-MM-DD HH:MM:SS"
-  return formatDate(date, 'yyyy-MM-dd HH:mm:ss')
+  return luxonDate(date)
+    .set({
+      hours: hour.value,
+      minutes: minute.value,
+      seconds: second.value,
+    })
+    .toFormat('yyyy-MM-dd HH:mm:ss')
 }
 
 function twoDigit(number: number) {
