@@ -3040,6 +3040,11 @@ lucide-vue-next@^0.383.0:
   resolved "https://registry.yarnpkg.com/lucide-vue-next/-/lucide-vue-next-0.383.0.tgz#7222eea85c185634ceb6d494d5153a6868805a07"
   integrity sha512-paQmd2cHAye7Zl/lA0avZN2efZxFkMehfoori1BiHKX//KQG4DVuy00yl4YHVQ6h1B4EsR+QDRCpVUtwvKUBRw==
 
+luxon@^3.5.0:
+  version "3.5.0"
+  resolved "https://registry.yarnpkg.com/luxon/-/luxon-3.5.0.tgz#6b6f65c5cd1d61d1fd19dbf07ee87a50bf4b8e20"
+  integrity sha512-rh+Zjr6DNfUYR3bPwJEnuwDdqMbxZW7LOQfUN4B54+Cl+0o5zaU9RJ6bcidfDtC1cWCZXQ+nvX8bf6bAji37QQ==
+
 magic-string@^0.30.11:
   version "0.30.12"
   resolved "https://registry.yarnpkg.com/magic-string/-/magic-string-0.30.12.tgz#9eb11c9d072b9bcb4940a5b2c2e1a217e4ee1a60"

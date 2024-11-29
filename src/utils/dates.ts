@@ -1,3 +1,14 @@
+import { DateTime } from 'luxon'
+
+declare global {
+  interface Window {
+    timezone?: {
+      system?: string
+      user?: string
+    }
+  }
+}
+
 type DateConstructorParam = string | number | Date
 
 function getDate(...args: DateConstructorParam[]): Date {
@@ -7,18 +18,9 @@ function getDate(...args: DateConstructorParam[]): Date {
 function getDateValue(date: Date | string) {
   if (!date || date.toString() === 'Invalid Date') return ''
 
-  if (typeof date === 'string') {
-    date = new Date(date)
-  }
-
-  // toISOString is buggy and reduces the day by one
-  // this is because it considers the UTC timestamp
-  // in order to circumvent that we need to use luxon/moment
-  // but that refactor could take some time, so fixing the time difference
-  // as suggested in this answer.
-  // https://stackoverflow.com/a/16084846/3541205
-  date.setHours(0, -date.getTimezoneOffset(), 0, 0)
-  return date.toISOString().slice(0, 10)
+  return luxonDate(date)
+    .set({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })
+    .toFormat('yyyy-MM-dd')
 }
 
 function getDatesAfter(date: Date, count: number) {
@@ -61,4 +63,64 @@ function isLeapYear(year: number) {
   return false
 }
 
-export { getDate, getDateValue, getDatesAfter, getDaysInMonth, isLeapYear }
+function convertToUserTimezone(date: string, format = 'yyyy-MM-dd HH:mm:ss') {
+  if (!date) return ''
+
+  const systemTimeZone = window.timezone?.system || null
+  const userTimeZone = window.timezone?.user || null
+  const isTimezoneEnabled = systemTimeZone && userTimeZone
+
+  if (!isTimezoneEnabled) return formatDate(date, format)
+
+  // Convert the date from system to the user's time zone
+  let systemTimezoneDate = luxonDate(date).setZone(systemTimeZone, {
+    keepLocalTime: true,
+  })
+  let userTimezoneDate = systemTimezoneDate.setZone(userTimeZone)
+
+  return userTimezoneDate.toFormat(format)
+}
+
+function convertToSystemTimezone(date: string, format = 'yyyy-MM-dd HH:mm:ss') {
+  if (!date) return ''
+
+  const systemTimeZone = window.timezone?.system || null
+  const userTimeZone = window.timezone?.user || null
+  const isTimezoneEnabled = systemTimeZone && userTimeZone
+
+  if (!isTimezoneEnabled) return formatDate(date, format)
+  // Convert the date from user's to the system time zone
+  let userTimezoneDate = luxonDate(date).setZone(userTimeZone, {
+    keepLocalTime: true,
+  })
+  let systemTimezoneDate = userTimezoneDate.setZone(systemTimeZone)
+
+  return systemTimezoneDate.toFormat(format)
+}
+
+function formatDate(date: string | Date, format: string) {
+  return luxonDate(date).toFormat(format)
+}
+
+function luxonDate(date: string | Date | DateTime | null = null) {
+  if (!date) return DateTime.local()
+  if (typeof date === 'string') {
+    date = new Date(date)
+  } else if (date.isLuxonDateTime) {
+    return date
+  }
+  return DateTime.fromJSDate(date)
+}
+
+export {
+  getDate,
+  getDateValue,
+  getDatesAfter,
+  getDaysInMonth,
+  isLeapYear,
+  convertToUserTimezone,
+  convertToSystemTimezone,
+  formatDate,
+  luxonDate,
+  DateTime,
+}
