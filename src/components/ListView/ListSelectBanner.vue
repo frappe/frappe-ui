@@ -53,9 +53,8 @@
               :class="list.allRowsSelected ? 'cursor-not-allowed' : ''"
               variant="ghost"
               @click="list.toggleAllRows(true)"
-            >
-              Select all
-            </Button>
+              label="Select all"
+            />
             <Button
               icon="x"
               variant="ghost"
@@ -69,6 +68,7 @@
 </template>
 
 <script setup>
+import { __ } from '../../utils/translation'
 import Checkbox from '../Checkbox.vue'
 import { Button } from '../Button'
 import { computed, inject } from 'vue'
@@ -81,6 +81,6 @@ const list = inject('list')
 
 let selectedText = computed(() => {
   let title = list.value.selections.size === 1 ? 'Row' : 'Rows'
-  return `${list.value.selections.size} ${title} selected`
+  return __('{0} {1} selected', [list.value.selections.size, title])
 })
 </script>

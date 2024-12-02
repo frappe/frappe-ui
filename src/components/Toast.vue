@@ -13,9 +13,9 @@
             class="text-base font-medium text-ink-gray-9"
             :class="{ 'mb-1': text }"
           >
-            {{ title }}
+            {{ __(title) }}
           </p>
-          <p v-if="text" class="text-base text-ink-gray-5" v-html="text"></p>
+          <p v-if="text" class="text-base text-ink-gray-5" v-html="__(text)"></p>
         </slot>
       </div>
       <div class="ml-auto pl-2">
@@ -32,6 +32,7 @@
   </div>
 </template>
 <script>
+import { __ } from '../utils/translation'
 import FeatherIcon from './FeatherIcon.vue'
 const positions = [
   'top-right',

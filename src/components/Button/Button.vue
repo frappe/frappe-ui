@@ -37,7 +37,7 @@
       <slot name="icon" v-else-if="$slots.icon" />
     </template>
     <span v-else :class="{ 'sr-only': isIconButton }">
-      <slot>{{ label }}</slot>
+      <slot>{{ __(label || '') }}</slot>
     </span>
 
     <slot name="suffix">
@@ -53,6 +53,7 @@
 </template>
 <script lang="ts" setup>
 import { computed, useSlots, type Component } from 'vue'
+import { __ } from '../../utils/translation'
 import FeatherIcon from '../FeatherIcon.vue'
 import LoadingIndicator from '../LoadingIndicator.vue'
 import { useRouter, type RouteLocation } from 'vue-router'

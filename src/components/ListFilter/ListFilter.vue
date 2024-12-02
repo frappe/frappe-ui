@@ -7,7 +7,7 @@
           <div
             class="flex h-5 w-5 items-center justify-center rounded bg-surface-gray-7 pt-[1px] text-2xs font-medium text-ink-white"
           >
-            {{ filters.size }}
+            {{ __(filters.size.toString()) }}
           </div>
         </template>
       </Button>
@@ -28,7 +28,7 @@
               <div
                 class="w-13 flex-shrink-0 pl-2 text-end text-base text-ink-gray-5"
               >
-                {{ i == 0 ? 'Where' : 'And' }}
+                {{ i == 0 ? __('Where') : __('And') }}
               </div>
               <div id="fieldname" class="!min-w-[140px] flex-1">
                 <Autocomplete
@@ -79,7 +79,7 @@
             v-else
             class="mb-3 flex h-7 items-center px-3 text-sm text-ink-gray-5"
           >
-            Empty - Choose a field to filter by
+            {{ __('Empty - Choose a field to filter by') }}
           </div>
           <div class="flex items-center justify-between gap-2">
             <Autocomplete
@@ -116,6 +116,7 @@
 </template>
 
 <script setup>
+import { __ } from '../../utils/translation'
 import { Autocomplete, FeatherIcon, FormControl } from '../../index'
 import { computed, h } from 'vue'
 import FilterIcon from './FilterIcon.vue'

@@ -22,11 +22,12 @@
       v-bind="attrs"
     />
     <label class="block" :class="labelClasses" v-if="label" :for="htmlId">
-      {{ label }}
+      {{ __(label) }}
     </label>
   </div>
 </template>
 <script lang="ts" setup>
+import { __ } from '../utils/translation'
 import { computed, useAttrs } from 'vue'
 import { useId } from '../utils/useId'
 

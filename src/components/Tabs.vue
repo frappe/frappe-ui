@@ -26,7 +26,7 @@
             :class="{ 'text-ink-gray-9': selected }"
           >
             <component v-if="tab.icon" :is="tab.icon" class="size-4" />
-            {{ tab.label }}
+            {{ __(tab.label) }}
           </button>
         </slot>
       </Tab>
@@ -49,6 +49,7 @@
 </template>
 
 <script setup>
+import { __ } from '../utils/translation'
 import { TabGroup, TabList, Tab, TabPanels, TabPanel } from '@headlessui/vue'
 import { ref, watch, computed, onMounted, nextTick } from 'vue'
 

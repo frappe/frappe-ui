@@ -28,14 +28,16 @@
             as="span"
             class="flex h-4 items-center"
             v-show="button.label && !button.hideLabel"
-            >{{ button.label }}</RadioGroupLabel
           >
+            {{ __(button.label) }}
+          </RadioGroupLabel>
         </button>
       </RadioGroupOption>
     </div>
   </RadioGroup>
 </template>
 <script>
+import { __ } from '../utils/translation'
 import { RadioGroup, RadioGroupLabel, RadioGroupOption } from '@headlessui/vue'
 import FeatherIcon from './FeatherIcon.vue'
 

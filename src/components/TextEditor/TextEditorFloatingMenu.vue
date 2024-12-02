@@ -19,12 +19,13 @@
     >
       <component v-if="button.icon" :is="button.icon" class="h-4 w-4" />
       <span class="inline-block h-4 min-w-[1rem] text-sm leading-4" v-else>
-        {{ button.text }}
+        {{ __(button.text) }}
       </span>
     </button>
   </FloatingMenu>
 </template>
 <script>
+import { __ } from '../../utils/translation'
 import { FloatingMenu } from '@tiptap/vue-3'
 import { createEditorButton } from './utils'
 

@@ -5,7 +5,7 @@
       class="flex items-baseline justify-between"
     >
       <span v-if="props.label" class="text-base font-medium text-ink-gray-8">
-        {{ props.label }}
+        {{ __(props.label) }}
       </span>
       <!-- Empty for alignment -->
       <span v-else></span>
@@ -13,7 +13,7 @@
       <span class="self-end" v-if="props.hint || $slots.hint">
         <slot name="hint">
           <span class="text-base font-medium text-ink-gray-4">
-            {{ props.value }}%
+            {{ __(props.value.toString()) }}%
           </span>
         </slot>
       </span>
@@ -50,6 +50,7 @@
 </template>
 
 <script lang="ts" setup>
+import { __ } from '../utils/translation'
 import { computed } from '@vue/reactivity'
 
 const MIN_VALUE = 0

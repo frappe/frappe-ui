@@ -4,7 +4,7 @@
       v-if="label && type != 'checkbox'"
       class="mb-2 block text-sm leading-4 text-gray-700"
     >
-      {{ label }}
+      {{ __(label) }}
     </span>
     <div
       class="relative flex"
@@ -37,7 +37,7 @@
       <textarea
         v-if="type === 'textarea'"
         v-bind="inputAttributes"
-        :placeholder="placeholder"
+        :placeholder="__(placeholder)"
         class="placeholder-gray-500"
         :class="[
           'form-textarea block w-full resize-none',
@@ -74,12 +74,13 @@
       v-if="label && type == 'checkbox'"
       class="ml-2 inline-block text-base leading-4"
     >
-      {{ label }}
+      {{ __(label) }}
     </span>
   </label>
 </template>
 
 <script>
+import { __ } from '../utils/translation'
 import debounce from '../utils/debounce.ts'
 import FeatherIcon from './FeatherIcon.vue'
 

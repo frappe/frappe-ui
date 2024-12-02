@@ -9,7 +9,7 @@
     >
       <slot name="prefix"></slot>
     </div>
-    <slot>{{ props.label?.toString() }}</slot>
+    <slot>{{ __(props.label?.toString() || '') }}</slot>
     <div
       :class="[props.size == 'lg' ? 'max-h-6' : 'max-h-4']"
       v-if="$slots.suffix"
@@ -20,6 +20,7 @@
 </template>
 
 <script lang="ts" setup>
+import { __ } from '../utils/translation'
 import { computed } from 'vue'
 
 interface Label {

@@ -8,6 +8,7 @@
 </template>
 
 <script>
+import { __ } from '../utils/translation'
 export default {
   name: 'ErrorMessage',
   props: ['message'],
@@ -17,7 +18,7 @@ export default {
       if (this.message instanceof Error) {
         return this.message.messages || this.message.message
       }
-      return this.message
+      return __(this.message)
     },
   },
 }

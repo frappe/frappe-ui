@@ -43,7 +43,7 @@
         >
           <slot name="prefix" :item="item" />
           <span>
-            {{ item.label }}
+            {{ __(item.label) }}
           </span>
           <slot name="suffix" :item="item" />
         </router-link>
@@ -59,7 +59,7 @@
         >
           <slot name="prefix" :item="item" />
           <span>
-            {{ item.label }}
+            {{ __(item.label) }}
           </span>
           <slot name="suffix" :item="item" />
         </button>
@@ -75,6 +75,7 @@
   </div>
 </template>
 <script setup lang="ts">
+import { __ } from '../utils/translation'
 import { useWindowSize } from '@vueuse/core'
 import { computed } from 'vue'
 import { RouterLinkProps, useRouter } from 'vue-router'

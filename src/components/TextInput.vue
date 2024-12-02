@@ -17,7 +17,7 @@
     <input
       ref="inputRef"
       :type="type"
-      :placeholder="placeholder"
+      :placeholder="__(placeholder || '')"
       :class="inputClasses"
       :disabled="disabled"
       :id="id"
@@ -40,6 +40,7 @@
 </template>
 
 <script setup lang="ts">
+import { __ } from '../utils/translation'
 import { computed, useSlots, useAttrs, ref } from 'vue'
 import type { TextInputTypes } from './types/TextInput'
 import debounce from '../utils/debounce'

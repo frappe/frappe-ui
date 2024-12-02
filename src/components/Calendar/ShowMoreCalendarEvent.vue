@@ -11,10 +11,11 @@
     class="w-fit self-center rounded-sm p-[1px] text-sm font-bold text-gray-600 hover:cursor-pointer hover:bg-gray-200"
     @click="emit('showMoreEvents')"
   >
-    +{{ totalEventsCount - 1 }} more
+    {{ __('+{0} more', [totalEventsCount - 1]) }}
   </span>
 </template>
 <script setup>
+import { __ } from '../../utils/translation'
 import CalendarEvent from './CalendarEvent.vue'
 
 const props = defineProps({

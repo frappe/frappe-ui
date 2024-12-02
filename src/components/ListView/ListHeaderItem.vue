@@ -11,7 +11,7 @@
       <slot name="prefix" v-bind="{ item }" />
       <slot>
         <div class="truncate">
-          {{ item.label }}
+          {{ __(item.label) }}
         </div>
       </slot>
       <slot name="suffix" v-bind="{ item }" />
@@ -31,6 +31,7 @@
 </template>
 
 <script setup>
+import { __ } from '../../utils/translation'
 import { alignmentMap } from './utils'
 import { useDebounceFn } from '@vueuse/core'
 import { ref, computed, inject } from 'vue'

@@ -22,7 +22,7 @@
       <div class="ml-2 w-full">
         <div class="flex flex-col md:flex-row md:items-baseline">
           <h3 class="text-lg font-medium text-ink-gray-9" v-if="title">
-            {{ title }}
+            {{ __(title) }}
           </h3>
           <div class="mt-1 md:ml-2 md:mt-0">
             <slot></slot>
@@ -37,6 +37,7 @@
 </template>
 
 <script setup lang="ts">
+import { __ } from '../utils/translation'
 import { computed } from 'vue'
 
 interface AlertProps {

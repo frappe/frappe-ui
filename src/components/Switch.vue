@@ -6,15 +6,15 @@
     :class="switchGroupClasses"
   >
     <span :class="labelContainerClasses">
-      <SwitchLabel v-if="props.label" as="span" :class="switchLabelClasses">{{
-        props.label
-      }}</SwitchLabel>
+      <SwitchLabel v-if="props.label" as="span" :class="switchLabelClasses">
+        {{ __(props.label) }}
+      </SwitchLabel>
       <SwitchDescription
         v-if="props.description"
         as="span"
         :class="switchDescriptionClasses"
       >
-        {{ props.description }}
+        {{ __(props.description) }}
       </SwitchDescription>
     </span>
     <Switch
@@ -29,6 +29,7 @@
 </template>
 
 <script lang="ts" setup>
+import { __ } from '../utils/translation'
 import { computed } from 'vue'
 import {
   Switch,

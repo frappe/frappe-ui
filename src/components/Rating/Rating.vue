@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-1">
     <label class="block text-xs text-ink-gray-5" v-if="label">
-      {{ label }}
+      {{ __(label) }}
     </label>
     <div class="flex text-center">
       <div
@@ -22,6 +22,7 @@
 </template>
 
 <script setup lang="ts">
+import { __ } from '../../utils/translation'
 import { ref, watch } from 'vue'
 import FeatherIcon from '../FeatherIcon.vue'
 

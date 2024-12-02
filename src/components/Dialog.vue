@@ -77,7 +77,7 @@
                               <h3
                                 class="text-2xl font-semibold leading-6 text-ink-gray-9"
                               >
-                                {{ options.title || 'Untitled' }}
+                                {{ __(options.title || 'Untitled') }}
                               </h3>
                             </slot>
                           </DialogTitle>
@@ -108,7 +108,7 @@
                           class="text-p-base text-ink-gray-7"
                           v-if="options.message"
                         >
-                          {{ options.message }}
+                          {{ __(options.message) }}
                         </p>
                       </slot>
                     </div>
@@ -126,9 +126,8 @@
                       v-for="action in actions"
                       :key="action.label"
                       v-bind="action"
-                    >
-                      {{ action.label }}
-                    </Button>
+                      :label="action.label"
+                    />
                   </div>
                 </slot>
               </div>
@@ -148,6 +147,7 @@ import {
   TransitionChild,
   TransitionRoot,
 } from '@headlessui/vue'
+import { __ } from '../utils/translation'
 import { computed, reactive } from 'vue'
 import { Button, ButtonProps } from './Button'
 import FeatherIcon from './FeatherIcon.vue'
