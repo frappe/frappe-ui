@@ -16,7 +16,7 @@
 
       <template #body>
         <MenuItems
-          class="mt-2 min-w-40 divide-y divide-gray-100 rounded-lg bg-white shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
+          class="mt-2 min-w-40 divide-y divide-outline-gray-1 rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
           :class="{
             'left-0 origin-top-left': placement == 'left',
             'right-0 origin-top-right': placement == 'right',
@@ -26,7 +26,7 @@
           <div v-for="group in groups" :key="group.key" class="p-1.5">
             <div
               v-if="group.group && !group.hideLabel"
-              class="flex h-7 items-center px-2 text-sm font-medium text-gray-500"
+              class="flex h-7 items-center px-2 text-sm font-medium text-ink-gray-6"
             >
               {{ group.group }}
             </div>
@@ -43,7 +43,7 @@
               <button
                 v-else
                 :class="[
-                  active ? 'bg-gray-100' : 'text-gray-800',
+                  active ? 'bg-surface-gray-3' : 'text-ink-gray-6',
                   'group flex h-7 w-full items-center rounded px-2 text-base',
                 ]"
                 @click="item.onClick"
@@ -51,15 +51,15 @@
                 <FeatherIcon
                   v-if="item.icon && typeof item.icon === 'string'"
                   :name="item.icon"
-                  class="mr-2 h-4 w-4 flex-shrink-0 text-gray-700"
+                  class="mr-2 h-4 w-4 flex-shrink-0 text-ink-gray-6"
                   aria-hidden="true"
                 />
                 <component
-                  class="mr-2 h-4 w-4 flex-shrink-0 text-gray-700"
+                  class="mr-2 h-4 w-4 flex-shrink-0 text-ink-gray-6"
                   v-else-if="item.icon"
                   :is="item.icon"
                 />
-                <span class="whitespace-nowrap">
+                <span class="whitespace-nowrap text-ink-gray-7">
                   {{ item.label }}
                 </span>
               </button>
@@ -71,90 +71,126 @@
   </Menu>
 </template>
 
-<script>
+<script setup lang="ts">
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 import Popover from './Popover.vue'
-import Button from './Button.vue'
+import { Button, ButtonProps } from './Button'
 import FeatherIcon from './FeatherIcon.vue'
+import { computed } from 'vue'
+import { RouterLinkProps, useRouter } from 'vue-router'
 
-export default {
-  name: 'Dropdown',
-  props: {
-    button: {
-      type: Object,
-      default: null,
-    },
-    options: {
-      type: Array,
-      default: () => [],
-    },
-    placement: {
-      type: String,
-      default: 'left',
-    },
-  },
-  components: {
-    Menu,
-    MenuButton,
-    MenuItems,
-    MenuItem,
-    Button,
-    FeatherIcon,
-    Popover,
-  },
-  methods: {
-    normalizeDropdownItem(option) {
-      let onClick = option.onClick || null
-      if (!onClick && option.route && this.$router) {
-        onClick = () => this.$router.push(option.route)
-      }
+const router = useRouter()
 
-      return {
-        label: option.label,
-        icon: option.icon,
-        group: option.group,
-        component: option.component,
-        onClick,
-      }
-    },
-    filterOptions(options) {
-      return (options || [])
-        .filter(Boolean)
-        .filter((option) => (option.condition ? option.condition() : true))
-        .map((option) => this.normalizeDropdownItem(option))
-    },
-  },
-  computed: {
-    groups() {
-      let groups = this.options[0]?.group
-        ? this.options
-        : [{ group: '', items: this.options }]
-
-      return groups.map((group, i) => {
-        return {
-          key: i,
-          group: group.group,
-          hideLabel: group.hideLabel || false,
-          items: this.filterOptions(group.items),
-        }
-      })
-    },
-    dropdownTransition() {
-      return {
-        enterActiveClass: 'transition duration-100 ease-out',
-        enterFromClass: 'transform scale-95 opacity-0',
-        enterToClass: 'transform scale-100 opacity-100',
-        leaveActiveClass: 'transition duration-75 ease-in',
-        leaveFromClass: 'transform scale-100 opacity-100',
-        leaveToClass: 'transform scale-95 opacity-0',
-      }
-    },
-    popoverPlacement() {
-      if (this.placement === 'left') return 'bottom-start'
-      if (this.placement === 'right') return 'bottom-end'
-      if (this.placement === 'center') return 'bottom-center'
-      return 'bottom'
-    },
-  },
+type DropdownOption = {
+  label: string
+  icon?: string | null
+  component?: any
+  onClick?: () => void
+  route?: RouterLinkProps['to']
+  condition?: () => boolean
 }
+
+type DropdownGroupOption = {
+  key?: number
+  group: string
+  items: DropdownOption[]
+  hideLabel?: boolean
+}
+
+type DropdownOptions = Array<DropdownOption | DropdownGroupOption>
+
+interface DropdownProps {
+  button?: ButtonProps
+  options?: DropdownOptions
+  placement?: string
+}
+
+const props = withDefaults(defineProps<DropdownProps>(), {
+  options: () => [],
+  placement: 'left',
+})
+
+const normalizeDropdownItem = (option: DropdownOption) => {
+  let onClick = () => {
+    if (option.route) {
+      router.push(option.route)
+    } else if (option.onClick) {
+      option.onClick()
+    }
+  }
+
+  return {
+    label: option.label,
+    icon: option.icon,
+    component: option.component,
+    onClick,
+  }
+}
+
+const filterOptions = (options: DropdownOption[]) => {
+  return (options || [])
+    .filter(Boolean)
+    .filter((option) => (option.condition ? option.condition() : true))
+    .map((option) => normalizeDropdownItem(option))
+}
+
+const groups = computed(() => {
+  let groups: DropdownGroupOption[] = []
+  let currentGroup: DropdownGroupOption | null = null
+  let i = 0
+
+  for (let option of props.options) {
+    if (option == null) {
+      continue
+    }
+
+    if ('group' in option) {
+      if (currentGroup) {
+        groups.push(currentGroup)
+        currentGroup = null
+      }
+      let groupOption = {
+        key: i,
+        ...option,
+        items: filterOptions(option.items),
+      } as DropdownGroupOption
+      groups.push(groupOption)
+    } else {
+      if (!currentGroup) {
+        currentGroup = {
+          key: i,
+          group: '',
+          hideLabel: true,
+          items: [],
+        } as DropdownGroupOption
+      }
+      currentGroup.items.push(...filterOptions([option]))
+    }
+    i++
+  }
+
+  if (currentGroup) {
+    groups.push(currentGroup)
+  }
+
+  return groups
+})
+
+const dropdownTransition = computed(() => {
+  return {
+    enterActiveClass: 'transition duration-100 ease-out',
+    enterFromClass: 'transform scale-95 opacity-0',
+    enterToClass: 'transform scale-100 opacity-100',
+    leaveActiveClass: 'transition duration-75 ease-in',
+    leaveFromClass: 'transform scale-100 opacity-100',
+    leaveToClass: 'transform scale-95 opacity-0',
+  }
+})
+
+const popoverPlacement = computed(() => {
+  if (props.placement === 'left') return 'bottom-start'
+  if (props.placement === 'right') return 'bottom-end'
+  if (props.placement === 'center') return 'bottom-center'
+  return 'bottom'
+})
 </script>

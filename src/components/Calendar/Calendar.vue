@@ -75,7 +75,7 @@
 </template>
 <script setup>
 import { computed, onMounted, onUnmounted, provide, ref, watch } from 'vue'
-import Button from '../Button.vue'
+import { Button } from '../Button'
 import TabButtons from '../TabButtons.vue'
 import {
   getCalendarDates,

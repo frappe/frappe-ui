@@ -14,7 +14,11 @@
       />
     </template>
     <template #actions>
-      <Button variant="solid" @click="setLink(setLinkDialog.url)">
+      <Button
+        variant="solid"
+        @click="setLink(setLinkDialog.url)"
+        class="w-full"
+      >
         Save
       </Button>
     </template>
@@ -22,7 +26,7 @@
 </template>
 <script>
 import Dialog from '../Dialog.vue'
-import Button from '../Button.vue'
+import { Button } from '../Button'
 import FormControl from '../FormControl.vue'
 
 export default {

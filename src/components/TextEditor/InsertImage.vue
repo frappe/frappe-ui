@@ -7,7 +7,7 @@
   >
     <template #body-content>
       <label
-        class="relative cursor-pointer rounded-lg bg-gray-100 py-1 focus-within:bg-gray-200 hover:bg-gray-200"
+        class="relative cursor-pointer rounded-lg bg-surface-gray-2 py-1 focus-within:bg-surface-gray-3 hover:bg-surface-gray-3"
       >
         <input
           type="file"
@@ -36,7 +36,7 @@
 <script>
 import fileToBase64 from '../../utils/file-to-base64'
 import Dialog from '../Dialog.vue'
-import Button from '../Button.vue'
+import { Button } from '../Button'
 
 export default {
   name: 'InsertImage',

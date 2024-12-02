@@ -75,18 +75,18 @@ const switchType = computed(() => {
 const switchClasses = computed(() => {
   return [
     'relative inline-flex flex-shrink-0 cursor-pointer rounded-full border-transparent transition-colors duration-100 ease-in-out items-center',
-    'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-400',
-    'disabled:cursor-not-allowed disabled:bg-gray-200',
+    'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-outline-gray-3',
+    'disabled:cursor-not-allowed disabled:bg-surface-gray-3',
     props.modelValue
-      ? 'bg-gray-900 enabled:hover:bg-gray-800 active:bg-gray-700 group-hover:enabled:bg-gray-800'
-      : 'bg-gray-300 enabled:hover:bg-gray-400 active:bg-gray-500 group-hover:enabled:bg-gray-400',
+      ? 'bg-surface-gray-7 enabled:hover:bg-surface-gray-6 active:bg-surface-gray-5 group-hover:enabled:bg-surface-gray-6'
+      : 'bg-surface-gray-4 enabled:hover:bg-gray-400 active:bg-gray-500 group-hover:enabled:bg-gray-400',
     props.size === 'md' ? 'h-5 w-8 border-[3px]' : 'h-4 w-[26px] border-2',
   ]
 })
 
 const switchCircleClasses = computed(() => {
   return [
-    'pointer-events-none inline-block transform rounded-full bg-white shadow ring-0 transition duration-100 ease-in-out',
+    'pointer-events-none inline-block transform rounded-full bg-surface-white shadow ring-0 transition duration-100 ease-in-out',
     props.size === 'md' ? 'h-3.5 w-3.5' : 'h-3 w-3',
     props.size === 'md'
       ? props.modelValue
@@ -102,14 +102,14 @@ const switchLabelClasses = computed(() => {
   return [
     'font-medium leading-normal',
     props.disabled && switchType.value === SwitchVariant.ONLY_LABEL
-      ? 'text-gray-500'
-      : 'text-gray-800',
+      ? 'text-ink-gray-4'
+      : 'text-ink-gray-8',
     props.size === 'md' ? 'text-lg' : 'text-base',
   ]
 })
 
 const switchDescriptionClasses = computed(() => {
-  return ['max-w-xs text-p-base text-gray-700']
+  return ['max-w-xs text-p-base text-ink-gray-7']
 })
 
 const switchGroupClasses = computed(() => {
@@ -117,13 +117,13 @@ const switchGroupClasses = computed(() => {
 
   if (switchType.value === SwitchVariant.ONLY_LABEL) {
     classes.push(
-      'group items-center space-x-3 cursor-pointer rounded focus-visible:bg-gray-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-400',
+      'group items-center space-x-3 cursor-pointer rounded focus-visible:bg-surface-gray-2 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-outline-gray-3',
     )
 
     classes.push(
       props.disabled
         ? 'cursor-not-allowed'
-        : 'hover:bg-gray-200 active:bg-gray-300',
+        : 'hover:bg-surface-gray-3 active:bg-surface-gray-4',
     )
 
     classes.push(props.size === 'md' ? 'px-3 py-1.5' : 'px-2.5 py-1.5')

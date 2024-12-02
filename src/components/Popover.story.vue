@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Popover from './Popover.vue'
-import Button from './Button.vue'
+import { Button } from './Button'
 </script>
 <template>
   <Story :layout="{ type: 'grid' }">
@@ -10,7 +10,7 @@ import Button from './Button.vue'
           <Button @click="togglePopover()">Click me</Button>
         </template>
         <template #body-main>
-          <div class="p-2">Popover content</div>
+          <div class="p-2 text-ink-gray-9">Popover content</div>
         </template>
       </Popover>
     </Variant>
@@ -21,7 +21,7 @@ import Button from './Button.vue'
           <Button>Hover me</Button>
         </template>
         <template #body-main>
-          <div class="p-2">Popover content</div>
+          <div class="p-2 text-ink-gray-9">Popover content</div>
         </template>
       </Popover>
     </Variant>

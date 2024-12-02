@@ -20,8 +20,4 @@
     ></path>
   </svg>
 </template>
-<script>
-export default {
-  name: 'LoadingIndicator',
-}
-</script>
+<script setup lang="ts"></script>

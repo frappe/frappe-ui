@@ -5,7 +5,7 @@
         <template #prefix><FilterIcon class="h-4" /></template>
         <template v-if="filters.size" #suffix>
           <div
-            class="flex h-5 w-5 items-center justify-center rounded bg-gray-900 pt-[1px] text-2xs font-medium text-white"
+            class="flex h-5 w-5 items-center justify-center rounded bg-surface-gray-7 pt-[1px] text-2xs font-medium text-ink-white"
           >
             {{ filters.size }}
           </div>
@@ -13,7 +13,9 @@
       </Button>
     </template>
     <template #body="{ close }">
-      <div class="my-2 rounded-lg border border-gray-100 bg-white shadow-xl">
+      <div
+        class="my-2 rounded-lg border border-gray-100 bg-surface-white shadow-xl"
+      >
         <div class="min-w-[400px] p-2">
           <div
             v-if="filters.length"
@@ -24,7 +26,7 @@
           >
             <div class="flex flex-1 items-center gap-2">
               <div
-                class="w-13 flex-shrink-0 pl-2 text-end text-base text-gray-600"
+                class="w-13 flex-shrink-0 pl-2 text-end text-base text-ink-gray-5"
               >
                 {{ i == 0 ? 'Where' : 'And' }}
               </div>
@@ -75,7 +77,7 @@
           </div>
           <div
             v-else
-            class="mb-3 flex h-7 items-center px-3 text-sm text-gray-600"
+            class="mb-3 flex h-7 items-center px-3 text-sm text-ink-gray-5"
           >
             Empty - Choose a field to filter by
           </div>
@@ -88,7 +90,7 @@
             >
               <template #target="{ togglePopover }">
                 <Button
-                  class="!text-gray-600"
+                  class="!text-ink-gray-5"
                   variant="ghost"
                   @click="togglePopover()"
                   label="Add filter"
@@ -101,7 +103,7 @@
             </Autocomplete>
             <Button
               v-if="filters.length"
-              class="!text-gray-600"
+              class="!text-ink-gray-5"
               variant="ghost"
               label="Clear all filter"
               @click="filters = []"

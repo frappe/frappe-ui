@@ -2,6 +2,7 @@
   <Popover
     @open="selectCurrentMonthYear"
     class="flex w-full [&>div:first-child]:w-full"
+    :placement="placement"
   >
     <template #target="{ togglePopover }">
       <Input
@@ -16,11 +17,14 @@
         v-bind="$attrs"
       />
     </template>
+
     <template #body="{ togglePopover }">
       <div
-        class="mt-2 w-fit select-none divide-y rounded-lg bg-white text-base shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
+        class="w-fit select-none text-base text-ink-gray-9 divide-y divide-outline-gray-modals rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
+        :class="marginClass"
       >
-        <div class="flex items-center p-1 text-gray-500">
+        <!-- Month Switcher -->
+        <div class="flex items-center p-1 text-ink-gray-4">
           <Button variant="ghost" class="h-7 w-7" @click="prevMonth">
             <FeatherIcon
               :stroke-width="2"
@@ -28,8 +32,8 @@
               class="h-4 w-4"
             />
           </Button>
-          <div class="flex-1 text-center text-base font-medium text-gray-700">
-            {{ formatMonth }}
+          <div class="flex-1 text-center text-base font-medium text-ink-gray-6">
+            {{ formattedMonth }}
           </div>
           <Button variant="ghost" class="h-7 w-7" @click="nextMonth">
             <FeatherIcon
@@ -39,26 +43,40 @@
             />
           </Button>
         </div>
+
+        <!-- Date Time Input -->
         <div class="flex items-center justify-center gap-1 p-1">
           <TextInput
             class="text-sm"
             type="text"
             :value="dateValue"
-            @change="updateDate($event.target.value) || togglePopover()"
+            @change="
+              (e: Event) => {
+                updateDate((e.target as HTMLInputElement).value)
+                togglePopover()
+              }
+            "
           />
           <Button
             :label="'Now'"
             class="text-sm"
-            @click="selectDate(getDate(), false, true) || togglePopover()"
+            @click="
+              () => {
+                selectDate(getDate(), false, true)
+                togglePopover()
+              }
+            "
           />
         </div>
+
+        <!-- Date Picker -->
         <div
-          class="flex flex-col items-center justify-center p-1 text-gray-800"
+          class="flex flex-col items-center justify-center p-1 text-ink-gray-8"
         >
           <div class="flex items-center text-xs uppercase">
             <div
               class="flex h-6 w-8 items-center justify-center text-center"
-              v-for="(d, i) in ['su', 'mo', 'tu', 'we', 'th', 'fr', 'sa']"
+              v-for="(d, i) in ['s', 'm', 't', 'w', 't', 'f', 's']"
               :key="i"
             >
               {{ d }}
@@ -72,12 +90,12 @@
             <div
               v-for="date in week"
               :key="toValue(date)"
-              class="flex h-8 w-8 cursor-pointer items-center justify-center rounded hover:bg-gray-50"
+              class="flex h-8 w-8 cursor-pointer items-center justify-center rounded hover:bg-surface-gray-2"
               :class="{
-                'text-gray-400': date.getMonth() !== currentMonth - 1,
-                'font-extrabold text-gray-900':
+                'text-ink-gray-3': date.getMonth() !== currentMonth - 1,
+                'font-extrabold text-ink-gray-9':
                   toValue(date) === toValue(today),
-                'bg-gray-800 text-white hover:bg-gray-800':
+                'bg-surface-gray-6 text-ink-white hover:bg-surface-gray-6':
                   toValue(date) === dateValue,
               }"
               @click="
@@ -91,6 +109,8 @@
             </div>
           </div>
         </div>
+
+        <!-- Time Picker -->
         <div class="flex items-center justify-around gap-2 p-1">
           <div>
             {{ twoDigit(hour) }} : {{ twoDigit(minute) }} :
@@ -105,7 +125,12 @@
                 min="0"
                 max="23"
                 step="1"
-                @change="() => changeTime() || togglePopover()"
+                @change="
+                  () => {
+                    changeTime()
+                    togglePopover()
+                  }
+                "
               />
             </div>
             <div class="slider flex min-h-4 items-center justify-center">
@@ -116,7 +141,12 @@
                 min="0"
                 max="59"
                 step="1"
-                @change="() => changeTime() || togglePopover()"
+                @change="
+                  () => {
+                    changeTime()
+                    togglePopover()
+                  }
+                "
               />
             </div>
             <div class="slider flex min-h-4 items-center justify-center">
@@ -127,11 +157,18 @@
                 min="0"
                 max="59"
                 step="1"
-                @change="() => changeTime() || togglePopover()"
+                @change="
+                  () => {
+                    changeTime()
+                    togglePopover()
+                  }
+                "
               />
             </div>
           </div>
         </div>
+
+        <!-- Actions -->
         <div class="flex justify-end p-1">
           <Button
             :label="'Clear'"
@@ -149,219 +186,132 @@
   </Popover>
 </template>
 
-<script>
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue'
+
 import Input from './Input.vue'
-import Button from './Button.vue'
+import { Button } from './Button'
 import Popover from './Popover.vue'
 import FeatherIcon from './FeatherIcon.vue'
 import TextInput from './TextInput.vue'
-export default {
-  name: 'DateTimePicker',
-  props: {
-    value: {
-      type: String,
-    },
-    modelValue: {
-      type: String,
-    },
-    placeholder: {
-      type: String,
-    },
-    formatter: {
-      type: Function,
-      default: null,
-    },
-    readonly: {
-      type: Boolean,
-    },
-    inputClass: {
-      type: [String, Array, Object],
-    },
-  },
-  emits: ['update:modelValue', 'change'],
-  components: {
-    Popover,
-    Input,
-    Button,
-    FeatherIcon,
-    TextInput,
-  },
-  data() {
-    return {
-      currentYear: null,
-      currentMonth: null,
-      hour: 0,
-      minute: 0,
-      second: 0,
-    }
-  },
-  created() {
-    this.selectCurrentMonthYear()
-  },
-  computed: {
-    today() {
-      return this.getDate()
-    },
-    datesAsWeeks() {
-      let datesAsWeeks = []
-      let dates = this.dates.slice()
-      while (dates.length) {
-        let week = dates.splice(0, 7)
-        datesAsWeeks.push(week)
-      }
-      return datesAsWeeks
-    },
-    dates() {
-      if (!(this.currentYear && this.currentMonth)) {
-        return []
-      }
-      let monthIndex = this.currentMonth - 1
-      let year = this.currentYear
 
-      let firstDayOfMonth = this.getDate(year, monthIndex, 1)
-      let lastDayOfMonth = this.getDate(year, monthIndex + 1, 0)
-      let leftPaddingCount = firstDayOfMonth.getDay()
-      let rightPaddingCount = 6 - lastDayOfMonth.getDay()
+import {
+  getDate,
+  convertToUserTimezone,
+  convertToSystemTimezone,
+  luxonDate,
+} from '../utils/dates'
+import { useDatePicker } from '../utils/useDatePicker'
 
-      let leftPadding = this.getDatesAfter(firstDayOfMonth, -leftPaddingCount)
-      let rightPadding = this.getDatesAfter(lastDayOfMonth, rightPaddingCount)
-      let daysInMonth = this.getDaysInMonth(monthIndex, year)
-      let datesInMonth = this.getDatesAfter(firstDayOfMonth, daysInMonth - 1)
+import type { DatePickerEmits, DatePickerProps } from './types/DatePicker'
 
-      let dates = [
-        ...leftPadding,
-        firstDayOfMonth,
-        ...datesInMonth,
-        ...rightPadding,
-      ]
-      if (dates.length < 42) {
-        const finalPadding = this.getDatesAfter(dates.at(-1), 42 - dates.length)
-        dates = dates.concat(...finalPadding)
-      }
-      return dates
-    },
-    formatMonth() {
-      let date = this.getDate(this.currentYear, this.currentMonth - 1, 1)
-      let month = date.toLocaleString('en-US', {
-        month: 'long',
-      })
-      return `${month}, ${date.getFullYear()}`
-    },
-    dateValue() {
-      return this.value ? this.value : this.modelValue
-    },
-  },
-  methods: {
-    changeTime() {
-      let date = this.dateValue ? this.getDate(this.dateValue) : this.getDate()
-      this.selectDate(date, true)
-    },
-    selectDate(date, isTimeChange = false, isNow = false) {
-      if (!isTimeChange) {
-        let currentDate =
-          this.dateValue && !isNow
-            ? this.getDate(this.dateValue)
-            : this.getDate()
-        this.hour = currentDate.getHours()
-        this.minute = currentDate.getMinutes()
-        this.second = currentDate.getSeconds()
-      }
+const props = defineProps<DatePickerProps>()
+const emit = defineEmits<DatePickerEmits>()
 
-      this.$emit('change', this.toValue(date))
-      this.$emit('update:modelValue', this.toValue(date))
-    },
-    selectCurrentMonthYear() {
-      let date = this.dateValue ? this.getDate(this.dateValue) : this.getDate()
-      if (date === 'Invalid Date') {
-        date = this.getDate()
-      }
-      this.currentYear = date.getFullYear()
-      this.currentMonth = date.getMonth() + 1
-      this.hour = date.getHours()
-      this.minute = date.getMinutes()
-      this.second = date.getSeconds()
-    },
-    prevMonth() {
-      this.changeMonth(-1)
-    },
-    nextMonth() {
-      this.changeMonth(1)
-    },
-    changeMonth(adder) {
-      this.currentMonth = this.currentMonth + adder
-      if (this.currentMonth < 1) {
-        this.currentMonth = 12
-        this.currentYear = this.currentYear - 1
-      }
-      if (this.currentMonth > 12) {
-        this.currentMonth = 1
-        this.currentYear = this.currentYear + 1
-      }
-    },
-    getDatesAfter(date, count) {
-      let incrementer = 1
-      if (count < 0) {
-        incrementer = -1
-        count = Math.abs(count)
-      }
-      let dates = []
-      while (count) {
-        date = this.getDate(
-          date.getFullYear(),
-          date.getMonth(),
-          date.getDate() + incrementer,
-        )
-        dates.push(date)
-        count--
-      }
-      if (incrementer === -1) {
-        return dates.reverse()
-      }
-      return dates
-    },
-    getDaysInMonth(monthIndex, year) {
-      let daysInMonthMap = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-      let daysInMonth = daysInMonthMap[monthIndex]
-      if (monthIndex === 1 && this.isLeapYear(year)) {
-        return 29
-      }
-      return daysInMonth
-    },
-    isLeapYear(year) {
-      if (year % 400 === 0) return true
-      if (year % 100 === 0) return false
-      if (year % 4 === 0) return true
-      return false
-    },
-    twoDigit(number) {
-      return number.toString().padStart(2, '0')
-    },
-    toValue(date) {
-      if (!date) return ''
+const {
+  currentYear,
+  currentMonth,
+  today,
+  datesAsWeeks,
+  formattedMonth,
+  prevMonth,
+  nextMonth,
+} = useDatePicker()
 
-      date.setHours(this.hour, this.minute, this.second, 0)
-      // "YYYY-MM-DD HH:MM:SS"
-      return `${date.getFullYear()}-${this.twoDigit(
-        date.getMonth() + 1,
-      )}-${this.twoDigit(date.getDate())} ${this.twoDigit(
-        date.getHours(),
-      )}:${this.twoDigit(date.getMinutes())}:${this.twoDigit(
-        date.getSeconds(),
-      )}`
-    },
-    getDate(...args) {
-      let d = new Date(...args)
-      return d
-    },
-    updateDate(date) {
-      date = this.getDate(date)
-      this.hour = date.getHours()
-      this.minute = date.getMinutes()
-      this.second = date.getSeconds()
-      this.selectDate(date, true)
-    },
-  },
+const marginClass = computed(() => {
+  let _marginClass = 'mt-2'
+  if (props.placement?.startsWith('top')) {
+    _marginClass = 'mb-2'
+  } else if (props.placement?.startsWith('left')) {
+    _marginClass = 'mr-2'
+  } else if (props.placement?.startsWith('right')) {
+    _marginClass = 'ml-2'
+  }
+  return _marginClass
+})
+
+const hour = ref<number>(0)
+const minute = ref<number>(0)
+const second = ref<number>(0)
+
+const dateValue = computed(() => {
+  let date = props.value ? props.value : props.modelValue
+  return date ? convertToUserTimezone(date) : ''
+})
+
+function changeTime() {
+  let date = dateValue.value ? getDate(dateValue.value) : getDate()
+  selectDate(date, true)
 }
+
+function selectDate(
+  date: Date | string,
+  isTimeChange: boolean = false,
+  isNow: boolean = false,
+) {
+  if (!isTimeChange) {
+    let currentDate = luxonDate()
+    if (dateValue.value && !isNow) {
+      currentDate = luxonDate(dateValue.value)
+    } else if (isNow && window.timezone?.user) {
+      currentDate = currentDate.setZone(window.timezone.user)
+      // set only date part of currentDate to date
+      date = luxonDate(date)
+        .set({
+          year: currentDate.year,
+          month: currentDate.month,
+          day: currentDate.day,
+        })
+        .toJSDate()
+    }
+
+    hour.value = currentDate.hour
+    minute.value = currentDate.minute
+    second.value = currentDate.second
+  }
+
+  emit('change', convertToSystemTimezone(toValue(date)))
+  emit('update:modelValue', convertToSystemTimezone(toValue(date)))
+}
+
+function toValue(date: Date | string) {
+  if (!date || date.toString() === 'Invalid Date') return ''
+
+  // "YYYY-MM-DD HH:MM:SS"
+  return luxonDate(date)
+    .set({
+      hours: hour.value,
+      minutes: minute.value,
+      seconds: second.value,
+    })
+    .toFormat('yyyy-MM-dd HH:mm:ss')
+}
+
+function twoDigit(number: number) {
+  return number.toString().padStart(2, '0')
+}
+
+function updateDate(date: Date | string) {
+  date = getDate(date)
+  hour.value = date.getHours()
+  minute.value = date.getMinutes()
+  second.value = date.getSeconds()
+  selectDate(date, true)
+}
+
+function selectCurrentMonthYear() {
+  let date = dateValue.value ? getDate(dateValue.value) : getDate()
+  if (date.toString() === 'Invalid Date') {
+    date = getDate()
+  }
+  currentYear.value = date.getFullYear()
+  currentMonth.value = date.getMonth() + 1
+  hour.value = date.getHours()
+  minute.value = date.getMinutes()
+  second.value = date.getSeconds()
+}
+
+onMounted(() => selectCurrentMonthYear())
 </script>
 
 <style scoped>

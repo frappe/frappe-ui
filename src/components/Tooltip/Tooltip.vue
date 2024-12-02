@@ -27,7 +27,7 @@ const props = withDefaults(
     text: '',
     placement: 'top',
     hoverDelay: 0.5,
-    arrowClass: 'fill-gray-900',
+    arrowClass: 'fill-surface-gray-7',
     disabled: false,
   },
 )
@@ -51,7 +51,7 @@ const delayDuration = computed(() => props.hoverDelay * 1000)
         >
           <slot name="body">
             <div
-              class="rounded bg-gray-900 px-2 py-1 text-xs text-white shadow-xl"
+              class="rounded bg-surface-gray-7 px-2 py-1 text-xs text-ink-white shadow-xl"
             >
               <div>{{ props.text }}</div>
             </div>

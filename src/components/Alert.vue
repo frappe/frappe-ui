@@ -21,7 +21,7 @@
       </svg>
       <div class="ml-2 w-full">
         <div class="flex flex-col md:flex-row md:items-baseline">
-          <h3 class="text-lg font-medium text-gray-900" v-if="title">
+          <h3 class="text-lg font-medium text-ink-gray-9" v-if="title">
             {{ title }}
           </h3>
           <div class="mt-1 md:ml-2 md:mt-0">
@@ -36,22 +36,21 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'Alert',
-  props: {
-    title: String,
-    type: {
-      type: String,
-      default: 'warning',
-    },
-  },
-  computed: {
-    classes() {
-      return {
-        warning: 'text-gray-700 bg-blue-50',
-      }[this.type]
-    },
-  },
+<script setup lang="ts">
+import { computed } from 'vue'
+
+interface AlertProps {
+  title?: string
+  type?: 'warning'
 }
+
+const props = withDefaults(defineProps<AlertProps>(), {
+  type: 'warning',
+})
+
+const classes = computed(() => {
+  return {
+    warning: 'text-ink-gray-7 bg-surface-blue-1',
+  }[props.type]
+})
 </script>

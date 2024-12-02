@@ -1,10 +1,16 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import Dialog from './Dialog.vue'
-import Button from './Button.vue'
+import { Button } from './Button'
 
 const dialog1 = ref(false)
 const dialog2 = ref(false)
+
+const createPromise = () => {
+  return new Promise((resolve) => {
+    setTimeout(resolve, 2000)
+  })
+}
 </script>
 <template>
   <Story :layout="{ width: 500, type: 'grid' }">
@@ -15,7 +21,19 @@ const dialog2 = ref(false)
           title: 'Confirm',
           message: 'Are you sure you want to confirm this action?',
           size: 'xl',
-          actions: [{ label: 'Confirm', variant: 'solid', onClick: () => {} }],
+          icon: {
+            name: 'alert-triangle',
+            appearance: 'warning',
+          },
+          actions: [
+            {
+              label: 'Confirm',
+              variant: 'solid',
+              onClick: () => {
+                return createPromise()
+              },
+            },
+          ],
         }"
         v-model="dialog1"
       />

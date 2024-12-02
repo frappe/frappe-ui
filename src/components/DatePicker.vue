@@ -2,6 +2,7 @@
   <Popover
     @open="selectCurrentMonthYear"
     class="flex w-full [&>div:first-child]:w-full"
+    :placement="placement"
   >
     <template #target="{ togglePopover }">
       <Input
@@ -16,11 +17,14 @@
         v-bind="$attrs"
       />
     </template>
+
     <template #body="{ togglePopover }">
       <div
-        class="mt-2 w-fit select-none divide-y rounded-lg bg-white text-base shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
+        class="w-fit select-none text-base text-ink-gray-9 divide-y divide-outline-gray-modals rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
+        :class="marginClass"
       >
-        <div class="flex items-center p-1 text-gray-500">
+        <!-- Month Switcher -->
+        <div class="flex items-center p-1 text-ink-gray-4">
           <Button variant="ghost" class="h-7 w-7" @click="prevMonth">
             <FeatherIcon
               :stroke-width="2"
@@ -28,8 +32,8 @@
               class="h-4 w-4"
             />
           </Button>
-          <div class="flex-1 text-center text-base font-medium text-gray-700">
-            {{ formatMonth }}
+          <div class="flex-1 text-center text-base font-medium text-ink-gray-6">
+            {{ formattedMonth }}
           </div>
           <Button variant="ghost" class="h-7 w-7" @click="nextMonth">
             <FeatherIcon
@@ -39,28 +43,35 @@
             />
           </Button>
         </div>
+
+        <!-- Date Input -->
         <div class="flex items-center justify-center gap-1 p-1">
           <TextInput
             class="text-sm"
             type="text"
             :value="dateValue"
-            @change="
-              selectDate(getDate($event.target.value)) || togglePopover()
-            "
+            @change="selectDate(getDate($event.target.value))"
           />
           <Button
             :label="'Today'"
             class="text-sm"
-            @click="selectDate(getDate()) || togglePopover()"
+            @click="
+              () => {
+                selectDate(getDate(), true)
+                togglePopover()
+              }
+            "
           />
         </div>
+
+        <!-- Calendar -->
         <div
-          class="flex flex-col items-center justify-center p-1 text-gray-800"
+          class="flex flex-col items-center justify-center p-1 text-ink-gray-8"
         >
           <div class="flex items-center text-xs uppercase">
             <div
               class="flex h-6 w-8 items-center justify-center text-center"
-              v-for="(d, i) in ['su', 'mo', 'tu', 'we', 'th', 'fr', 'sa']"
+              v-for="(d, i) in ['s', 'm', 't', 'w', 't', 'f', 's']"
               :key="i"
             >
               {{ d }}
@@ -73,14 +84,14 @@
           >
             <div
               v-for="date in week"
-              :key="toValue(date)"
-              class="flex h-8 w-8 cursor-pointer items-center justify-center rounded hover:bg-gray-50"
+              :key="getDateValue(date)"
+              class="flex h-8 w-8 cursor-pointer items-center justify-center rounded hover:bg-surface-gray-2"
               :class="{
-                'text-gray-400': date.getMonth() !== currentMonth - 1,
-                'font-extrabold text-gray-900':
-                  toValue(date) === toValue(today),
-                'bg-gray-800 text-white hover:bg-gray-800':
-                  toValue(date) === dateValue,
+                'text-ink-gray-3': date.getMonth() !== currentMonth - 1,
+                'font-extrabold text-ink-gray-9':
+                  getDateValue(date) === getDateValue(today),
+                'bg-surface-gray-6 text-ink-white hover:bg-surface-gray-6':
+                  getDateValue(date) === dateValue,
               }"
               @click="
                 () => {
@@ -93,6 +104,8 @@
             </div>
           </div>
         </div>
+
+        <!-- Actions -->
         <div class="flex justify-end p-1">
           <Button
             :label="'Clear'"
@@ -110,192 +123,65 @@
   </Popover>
 </template>
 
-<script>
+<script setup lang="ts">
+import { computed, onMounted } from 'vue'
+
 import Input from './Input.vue'
-import Button from './Button.vue'
+import { Button } from './Button'
 import Popover from './Popover.vue'
 import FeatherIcon from './FeatherIcon.vue'
 import TextInput from './TextInput.vue'
-export default {
-  name: 'DatePicker',
-  props: {
-    value: {
-      type: String,
-    },
-    modelValue: {
-      type: String,
-    },
-    placeholder: {
-      type: String,
-    },
-    formatter: {
-      type: Function,
-      default: null,
-    },
-    readonly: {
-      type: Boolean,
-    },
-    inputClass: {
-      type: [String, Array, Object],
-    },
-  },
-  emits: ['update:modelValue', 'change'],
-  components: {
-    Popover,
-    Input,
-    Button,
-    FeatherIcon,
-    TextInput,
-  },
-  data() {
-    return {
-      currentYear: null,
-      currentMonth: null,
-    }
-  },
-  created() {
-    this.selectCurrentMonthYear()
-  },
-  computed: {
-    today() {
-      return this.getDate()
-    },
-    datesAsWeeks() {
-      let datesAsWeeks = []
-      let dates = this.dates.slice()
-      while (dates.length) {
-        let week = dates.splice(0, 7)
-        datesAsWeeks.push(week)
-      }
-      return datesAsWeeks
-    },
-    dates() {
-      if (!(this.currentYear && this.currentMonth)) {
-        return []
-      }
-      let monthIndex = this.currentMonth - 1
-      let year = this.currentYear
 
-      let firstDayOfMonth = this.getDate(year, monthIndex, 1)
-      let lastDayOfMonth = this.getDate(year, monthIndex + 1, 0)
-      let leftPaddingCount = firstDayOfMonth.getDay()
-      let rightPaddingCount = 6 - lastDayOfMonth.getDay()
+import { getDate, getDateValue, luxonDate } from '../utils/dates'
+import { useDatePicker } from '../utils/useDatePicker'
 
-      let leftPadding = this.getDatesAfter(firstDayOfMonth, -leftPaddingCount)
-      let rightPadding = this.getDatesAfter(lastDayOfMonth, rightPaddingCount)
-      let daysInMonth = this.getDaysInMonth(monthIndex, year)
-      let datesInMonth = this.getDatesAfter(firstDayOfMonth, daysInMonth - 1)
+import type { DatePickerEmits, DatePickerProps } from './types/DatePicker'
 
-      let dates = [
-        ...leftPadding,
-        firstDayOfMonth,
-        ...datesInMonth,
-        ...rightPadding,
-      ]
-      if (dates.length < 42) {
-        const finalPadding = this.getDatesAfter(dates.at(-1), 42 - dates.length)
-        dates = dates.concat(...finalPadding)
-      }
-      return dates
-    },
-    formatMonth() {
-      let date = this.getDate(this.currentYear, this.currentMonth - 1, 1)
-      let month = date.toLocaleString('en-US', {
-        month: 'long',
-      })
-      return `${month}, ${date.getFullYear()}`
-    },
-    dateValue() {
-      return this.value ? this.value : this.modelValue
-    },
-  },
-  methods: {
-    selectDate(date) {
-      this.$emit('change', this.toValue(date))
-      this.$emit('update:modelValue', this.toValue(date))
-    },
-    selectCurrentMonthYear() {
-      let date = this.dateValue ? this.getDate(this.dateValue) : this.getDate()
-      if (date === 'Invalid Date') {
-        date = this.getDate()
-      }
-      this.currentYear = date.getFullYear()
-      this.currentMonth = date.getMonth() + 1
-    },
-    prevMonth() {
-      this.changeMonth(-1)
-    },
-    nextMonth() {
-      this.changeMonth(1)
-    },
-    changeMonth(adder) {
-      this.currentMonth = this.currentMonth + adder
-      if (this.currentMonth < 1) {
-        this.currentMonth = 12
-        this.currentYear = this.currentYear - 1
-      }
-      if (this.currentMonth > 12) {
-        this.currentMonth = 1
-        this.currentYear = this.currentYear + 1
-      }
-    },
-    getDatesAfter(date, count) {
-      let incrementer = 1
-      if (count < 0) {
-        incrementer = -1
-        count = Math.abs(count)
-      }
-      let dates = []
-      while (count) {
-        date = this.getDate(
-          date.getFullYear(),
-          date.getMonth(),
-          date.getDate() + incrementer,
-        )
-        dates.push(date)
-        count--
-      }
-      if (incrementer === -1) {
-        return dates.reverse()
-      }
-      return dates
-    },
+const props = defineProps<DatePickerProps>()
+const emit = defineEmits<DatePickerEmits>()
 
-    getDaysInMonth(monthIndex, year) {
-      let daysInMonthMap = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-      let daysInMonth = daysInMonthMap[monthIndex]
-      if (monthIndex === 1 && this.isLeapYear(year)) {
-        return 29
-      }
-      return daysInMonth
-    },
+const {
+  currentYear,
+  currentMonth,
+  today,
+  datesAsWeeks,
+  formattedMonth,
+  prevMonth,
+  nextMonth,
+} = useDatePicker()
 
-    isLeapYear(year) {
-      if (year % 400 === 0) return true
-      if (year % 100 === 0) return false
-      if (year % 4 === 0) return true
-      return false
-    },
+const marginClass = computed(() => {
+  let _marginClass = 'mt-2'
+  if (props.placement?.startsWith('top')) {
+    _marginClass = 'mb-2'
+  } else if (props.placement?.startsWith('left')) {
+    _marginClass = 'mr-2'
+  } else if (props.placement?.startsWith('right')) {
+    _marginClass = 'ml-2'
+  }
+  return _marginClass
+})
 
-    toValue(date) {
-      if (!date) {
-        return ''
-      }
+const dateValue = computed(() => {
+  return props.value ? props.value : props.modelValue
+})
 
-      // toISOString is buggy and reduces the day by one
-      // this is because it considers the UTC timestamp
-      // in order to circumvent that we need to use luxon/moment
-      // but that refactor could take some time, so fixing the time difference
-      // as suggested in this answer.
-      // https://stackoverflow.com/a/16084846/3541205
-      date.setHours(0, -date.getTimezoneOffset(), 0, 0)
-      return date.toISOString().slice(0, 10)
-    },
-
-    getDate(...args) {
-      let d = new Date(...args)
-      return d
-    },
-  },
+function selectDate(date: Date | string, isNow: boolean = false) {
+  if (isNow && window.timezone?.user) {
+    date = luxonDate(date).setZone(window.timezone.user)
+  }
+  emit('change', getDateValue(date))
+  emit('update:modelValue', getDateValue(date))
 }
+
+function selectCurrentMonthYear() {
+  let date = dateValue.value ? getDate(dateValue.value) : getDate()
+  if (date.toString() === 'Invalid Date') {
+    date = getDate()
+  }
+  currentYear.value = date.getFullYear()
+  currentMonth.value = date.getMonth() + 1
+}
+
+onMounted(() => selectCurrentMonthYear())
 </script>

@@ -8,8 +8,12 @@
     <button
       v-for="button in floatingMenuButtons"
       :key="button.label"
-      class="flex rounded p-1 text-gray-800 transition-colors"
-      :class="button.isActive(editor) ? 'bg-gray-100' : 'hover:bg-gray-100'"
+      class="flex rounded p-1 text-ink-gray-8 transition-colors"
+      :class="
+        button.isActive(editor)
+          ? 'bg-surface-gray-2'
+          : 'hover:bg-surface-gray-2'
+      "
       @click="() => button.action(editor)"
       :title="button.label"
     >

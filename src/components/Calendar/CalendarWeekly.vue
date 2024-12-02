@@ -124,7 +124,7 @@ import {
   parseDate,
 } from './calendarUtils'
 
-import Button from '../Button.vue'
+import { Button } from '../Button'
 import ShowMoreCalendarEvent from './ShowMoreCalendarEvent.vue'
 import useCalendarData from './composables/useCalendarData'
 

@@ -1,7 +1,7 @@
 <template>
   <component
     :is="props.action ? 'div' : 'hr'"
-    class="relative whitespace-nowrap border-0 border-gray-300"
+    class="relative whitespace-nowrap border-0 border-outline-gray-2"
     :class="alignmentClasses"
   >
     <span class="absolute" v-if="props.action" :class="actionAlignmentClasses">

@@ -1,6 +1,6 @@
 <template>
   <div
-    class="my-2 min-w-[15rem] max-w-[40rem] rounded-lg border bg-white p-4 shadow-md"
+    class="my-2 min-w-[15rem] max-w-[40rem] rounded-lg border bg-surface-white p-4 shadow-md"
   >
     <div class="flex items-start">
       <div v-if="icon" class="mr-3 grid h-5 w-5 place-items-center">
@@ -10,23 +10,21 @@
         <slot>
           <p
             v-if="title"
-            class="text-base font-medium text-gray-900"
+            class="text-base font-medium text-ink-gray-9"
             :class="{ 'mb-1': text }"
           >
             {{ title }}
           </p>
-          <p v-if="text" class="text-base text-gray-600">
-            {{ text }}
-          </p>
+          <p v-if="text" class="text-base text-ink-gray-5" v-html="text"></p>
         </slot>
       </div>
       <div class="ml-auto pl-2">
         <slot name="actions">
           <button
-            class="grid h-5 w-5 place-items-center rounded hover:bg-gray-100"
+            class="grid h-5 w-5 place-items-center rounded hover:bg-surface-gray-2"
             @click="$emit('close')"
           >
-            <FeatherIcon name="x" class="h-4 w-4 text-gray-700" />
+            <FeatherIcon name="x" class="h-4 w-4 text-ink-gray-7" />
           </button>
         </slot>
       </div>

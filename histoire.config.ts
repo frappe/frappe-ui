@@ -1,5 +1,5 @@
-import { defineConfig } from 'histoire'
 import { HstVue } from '@histoire/plugin-vue'
+import { defineConfig } from 'histoire'
 import resolveConfig from 'tailwindcss/resolveConfig'
 import tailwindConfig from './tailwind.config.js'
 
@@ -11,16 +11,40 @@ export default defineConfig({
   theme: {
     title: 'Frappe UI',
     defaultColorScheme: 'light',
-    hideColorSchemeSwitch: true,
+    hideColorSchemeSwitch: false,
+    storeColorScheme: false,
     favicon: 'frappe-ui-square.png',
     logo: {
       square: './frappe-ui-square.png',
-      light: './frappe-ui.png',
-      dark: './frappe-ui.png',
+      light: './frappe-ui.svg',
+      dark: './frappe-ui.svg',
     },
     colors: {
-      gray: fullConfig.theme.colors.gray,
-      primary: fullConfig.theme.colors.gray,
+      gray: {
+        50: '#f8f8f8',
+        100: '#f3f3f3',
+        200: '#ededed',
+        300: '#e2e2e2',
+        400: '#c7c7c7',
+        500: '#999999',
+        600: '#7c7c7c',
+        700: 'rgb(23 23 23)',
+        750: 'rgb(20 20 20)',
+        800: '#383838',
+        900: '#171717',
+      },
+      primary: {
+        50: '#f8f8f8',
+        100: '#f3f3f3',
+        200: '#ededed',
+        300: '#e2e2e2',
+        400: '#c7c7c7',
+        500: '#999999',
+        600: '#7c7c7c',
+        700: '#525252',
+        800: '#383838',
+        900: '#171717',
+      },
     },
   },
   tree: {

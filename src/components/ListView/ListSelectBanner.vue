@@ -12,7 +12,7 @@
       class="absolute inset-x-0 bottom-6 mx-auto w-max text-base"
     >
       <div
-        class="flex min-w-[596px] items-center space-x-3 rounded-lg bg-white px-4 py-2 shadow-2xl"
+        class="flex min-w-[596px] items-center space-x-3 rounded-lg bg-surface-white px-4 py-2 shadow-2xl"
         :class="$attrs.class"
       >
         <slot
@@ -24,13 +24,13 @@
           }"
         >
           <div
-            class="flex flex-1 justify-between border-r border-gray-300 text-gray-900"
+            class="flex flex-1 justify-between border-r border-outline-gray-2 text-ink-gray-9"
           >
             <div class="flex items-center space-x-3">
               <Checkbox
                 :modelValue="true"
                 :disabled="true"
-                class="text-gray-900"
+                class="text-ink-gray-9"
               />
               <div>{{ selectedText }}</div>
             </div>
@@ -48,7 +48,7 @@
           </div>
           <div class="flex items-center space-x-1">
             <Button
-              class="w- text-gray-700"
+              class="w- text-ink-gray-7"
               :disabled="list.allRowsSelected"
               :class="list.allRowsSelected ? 'cursor-not-allowed' : ''"
               variant="ghost"
@@ -70,7 +70,7 @@
 
 <script setup>
 import Checkbox from '../Checkbox.vue'
-import Button from '../Button.vue'
+import { Button } from '../Button'
 import { computed, inject } from 'vue'
 
 defineOptions({

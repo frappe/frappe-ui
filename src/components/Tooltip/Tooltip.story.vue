@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import Tooltip from './Tooltip.vue'
-import Button from '../Button.vue'
+import { Button } from '../Button'
 
 const placement = ref('top')
 const disabled = ref(true)
@@ -28,10 +28,10 @@ const disabled = ref(true)
       </Tooltip>
     </Variant>
     <Variant title="with slot">
-      <Tooltip arrow-class="fill-white" :placement="placement">
+      <Tooltip arrow-class="fill-surface-white" :placement="placement">
         <template #body>
           <div
-            class="min-w-[6rem] rounded bg-white px-2 py-1 text-xs text-gray-900 shadow-xl"
+            class="min-w-[6rem] rounded bg-surface-white px-2 py-1 text-xs text-ink-gray-9 shadow-xl"
           >
             test
           </div>

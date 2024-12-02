@@ -12,3 +12,4 @@ export type TextInputTypes =
   | 'time'
   | 'url'
   | 'week'
+  | 'range'

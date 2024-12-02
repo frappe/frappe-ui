@@ -4,7 +4,7 @@ export { default as Autocomplete } from './components/Autocomplete.vue'
 export { default as Avatar } from './components/Avatar.vue'
 export { default as Badge } from './components/Badge.vue'
 export { default as Breadcrumbs } from './components/Breadcrumbs.vue'
-export { default as Button } from './components/Button.vue'
+export * from './components/Button'
 export { default as Card } from './components/Card.vue'
 export { default as Checkbox } from './components/Checkbox.vue'
 export { default as DatePicker } from './components/DatePicker.vue'
@@ -26,6 +26,7 @@ export { default as LoadingIndicator } from './components/LoadingIndicator.vue'
 export { default as LoadingText } from './components/LoadingText.vue'
 export { default as Progress } from './components/Progress.vue'
 export { default as Popover } from './components/Popover.vue'
+export { default as Rating } from './components/Rating/Rating.vue'
 export { default as Resource } from './components/Resource.vue'
 export { default as Select } from './components/Select.vue'
 export { default as Spinner } from './components/Spinner.vue'
@@ -65,6 +66,9 @@ export { default as NestedPopover } from './components/ListFilter/NestedPopover.
 export { default as CircularProgressBar } from './components/CircularProgressBar.vue'
 export { default as Tree } from './components/Tree/Tree.vue'
 
+// billing components
+export { default as TrialBanner } from './components/Billing/TrialBanner.vue'
+
 // directives
 export { default as onOutsideClickDirective } from './directives/onOutsideClick.js'
 export { default as visibilityDirective } from './directives/visibility.js'
@@ -75,6 +79,7 @@ export { default as debounce } from './utils/debounce.ts'
 export { default as fileToBase64 } from './utils/file-to-base64.js'
 export { default as FileUploadHandler } from './utils/fileUploadHandler.ts'
 export { usePageMeta } from './utils/pageMeta.js'
+export * from './utils/dates.ts'
 
 // data-fetching, resources
 export {

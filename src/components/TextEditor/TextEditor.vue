@@ -2,7 +2,7 @@
   <div class="relative w-full" :class="$attrs.class" v-if="editor">
     <TextEditorBubbleMenu :buttons="bubbleMenu" :options="bubbleMenuOptions" />
     <TextEditorFixedMenu
-      class="w-full overflow-x-auto rounded-t-lg border border-gray-200"
+      class="w-full overflow-x-auto rounded-t-lg border border-outline-gray-modals"
       :buttons="fixedMenu"
     />
     <TextEditorFloatingMenu :buttons="floatingMenu" />
@@ -184,7 +184,7 @@ export default {
       return {
         attributes: {
           class: normalizeClass([
-            'prose prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-gray-300 prose-th:border-gray-300 prose-td:relative prose-th:relative prose-th:bg-gray-100',
+            'prose prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-outline-gray-2 prose-th:border-outline-gray-2 prose-td:relative prose-th:relative prose-th:bg-surface-gray-2',
             this.editorClass,
           ]),
         },
@@ -216,7 +216,7 @@ export default {
 <style>
 .ProseMirror {
   outline: none;
-  caret-color: theme('colors.gray.900');
+  caret-color: var(--ink-gray-9);
   word-break: break-word;
 }
 
@@ -229,14 +229,14 @@ export default {
 .ProseMirror:not(.ProseMirror-focused) p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   float: left;
-  color: theme('colors.gray.500');
+  color: var(--ink-gray-4);
   pointer-events: none;
   height: 0;
 }
 
 .ProseMirror-selectednode video,
 img.ProseMirror-selectednode {
-  outline: 2px solid theme('colors.gray.300');
+  outline: 2px solid var(--outline-gray-2);
 }
 
 /* Mentions */

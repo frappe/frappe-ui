@@ -17,11 +17,11 @@
       <div
         class="grid items-center space-x-4 rounded px-2"
         :class="[
-          isSelected ? 'bg-gray-100' : '',
+          isSelected ? 'bg-surface-gray-2' : '',
           isHoverable
             ? isSelected
-              ? 'hover:bg-gray-200'
-              : 'hover:bg-gray-50'
+              ? 'hover:bg-surface-gray-3'
+              : 'hover:bg-surface-menu-bar'
             : '',
         ]"
         :style="{
@@ -43,7 +43,7 @@
           :key="column.key"
           :class="[
             alignmentMap[column.align],
-            i == 0 ? 'text-gray-900' : 'text-gray-700',
+            i == 0 ? 'text-ink-gray-9' : 'text-ink-gray-7',
           ]"
         >
           <slot v-bind="{ idx: i, column, item: row[column.key] }">
@@ -67,7 +67,10 @@
           </slot>
         </div>
       </div>
-      <div v-if="!isLastRow" class="mx-2 h-px border-t border-gray-200" />
+      <div
+        v-if="!isLastRow"
+        class="mx-2 h-px border-t border-outline-gray-modals"
+      />
     </component>
   </component>
 </template>

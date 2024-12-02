@@ -44,15 +44,17 @@
       />
     </template>
     <template #actions>
-      <Button variant="solid" @click="addVideo(addVideoDialog.url)">
-        Insert Video
-      </Button>
-      <Button @click="reset">Cancel</Button>
+      <div class="flex gap-2">
+        <Button variant="solid" @click="addVideo(addVideoDialog.url)">
+          Insert Video
+        </Button>
+        <Button @click="reset">Cancel</Button>
+      </div>
     </template>
   </Dialog>
 </template>
 <script>
-import Button from '../Button.vue'
+import { Button } from '../Button'
 import Dialog from '../Dialog.vue'
 import FileUploader from '../FileUploader.vue'
 
