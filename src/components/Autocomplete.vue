@@ -23,7 +23,7 @@
                   {{ displayValue(selectedValue) }}
                 </span>
                 <span class="text-base leading-5 text-ink-gray-4" v-else>
-                  {{ placeholder || '' }}
+                  {{ __(placeholder) || '' }}
                 </span>
               </div>
               <FeatherIcon
@@ -62,7 +62,7 @@
                     "
                     :value="query"
                     autocomplete="off"
-                    placeholder="Search"
+                    :placeholder="__('Search')"
                   />
                   <button
                     class="absolute right-0 inline-flex h-7 w-7 items-center justify-center"
@@ -81,7 +81,7 @@
                   v-if="group.group && !group.hideLabel"
                   class="sticky top-10 truncate bg-surface-modal px-2.5 py-1.5 text-sm font-medium text-ink-gray-5"
                 >
-                  {{ group.group }}
+                  {{ __(group.group) }}
                 </div>
                 <ComboboxOption
                   as="template"
@@ -130,7 +130,7 @@
                           v-if="option?.description"
                           class="text-sm text-ink-gray-5"
                         >
-                          {{ option.description }}
+                          {{ __(option.description) }}
                         </div>
                       </slot>
                     </div>
@@ -141,7 +141,7 @@
                 v-if="groups.length == 0"
                 class="rounded-md px-2.5 py-1.5 text-base text-ink-gray-5"
               >
-                No results found
+                {{ __('No results found') }}
               </li>
             </ComboboxOptions>
 
@@ -175,6 +175,7 @@ import {
   ComboboxOption,
   ComboboxOptions,
 } from '@headlessui/vue'
+import { __ } from '../utils/translation'
 import { nextTick } from 'vue'
 import Popover from './Popover.vue'
 import { Button } from './Button'
@@ -280,6 +281,9 @@ export default {
     },
   },
   methods: {
+    __(message) {
+      return __(message)
+    },
     rootRef() {
       return this.$refs['rootRef']
     },
@@ -317,7 +321,7 @@ export default {
     },
     getLabel(option) {
       if (isOptionOrValue(option) === 'value') return option
-      return option?.label || option?.value || 'No label'
+      return __(option?.label || option?.value || 'No label')
     },
     sanitizeOptions(options) {
       if (!options) return []
@@ -325,7 +329,7 @@ export default {
       return options.map((option) => {
         return isOptionOrValue(option) === 'option'
           ? option
-          : { label: option, value: option }
+          : { label: __(option), value: option }
       })
     },
     isOptionSelected(option) {

@@ -5,8 +5,9 @@
       <span
         v-for="day in daysList"
         class="text-center text-sm font-normal text-gray-600"
-        >{{ day }}</span
       >
+        {{ __(day) }}
+      </span>
     </div>
 
     <!-- Date Grid -->
@@ -34,7 +35,7 @@
                 date.toDateString() === new Date().toDateString() && 'font-bold'
               "
             >
-              {{ date.getDate() }}
+              {{ __(date.getDate().toString()) }}
             </span>
             <span v-else class="z-10 w-full bg-white py-1 text-center">
               {{ parseDateEventPopupFormat(date, (showDay = false)) }}
@@ -80,6 +81,7 @@
 </template>
 
 <script setup>
+import { __ } from '../../utils/translation'
 import { parseDateEventPopupFormat, daysList, parseDate } from './calendarUtils'
 import { inject } from 'vue'
 import CalendarEvent from './CalendarEvent.vue'

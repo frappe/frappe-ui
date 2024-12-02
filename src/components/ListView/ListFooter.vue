@@ -16,9 +16,12 @@
           />
           <div v-if="showLoadMore" class="mx-3 h-[80%] border-l" />
           <div class="flex items-center gap-1 text-base text-ink-gray-5">
-            <div>{{ options.rowCount || '0' }}</div>
-            <div>of</div>
-            <div>{{ options.totalCount || '0' }}</div>
+            {{
+              __('{0} of {1}', [
+                options.rowCount || '0',
+                options.totalCount || '0',
+              ])
+            }}
           </div>
         </div>
       </slot>
@@ -26,6 +29,7 @@
   </div>
 </template>
 <script setup>
+import { __ } from '../../utils/translation'
 import TabButtons from '../TabButtons.vue'
 import { ref, computed } from 'vue'
 

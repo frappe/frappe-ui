@@ -5,14 +5,14 @@
         <div class="flex items-center space-x-2" v-if="$slots['actions-left']">
           <slot name="actions-left"></slot>
         </div>
-        <h2 class="text-xl font-semibold">{{ title }}</h2>
+        <h2 class="text-xl font-semibold">{{ __(title) }}</h2>
       </div>
       <div class="flex items-center space-x-2" v-if="$slots['actions']">
         <slot name="actions"></slot>
       </div>
     </div>
     <p class="mt-1.5 text-base text-gray-600" v-if="subtitle">
-      {{ subtitle }}
+      {{ __(subtitle) }}
     </p>
     <div
       v-if="loading"
@@ -25,23 +25,19 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { __ } from '../utils/translation'
 import LoadingText from './LoadingText.vue'
-export default {
-  name: 'Card',
-  props: {
-    title: {
-      type: String,
-    },
-    subtitle: {
-      type: String,
-    },
-    loading: {
-      type: Boolean,
-    },
+
+const props = defineProps({
+  title: {
+    type: String,
   },
-  components: {
-    LoadingText,
+  subtitle: {
+    type: String,
   },
-}
+  loading: {
+    type: Boolean,
+  },
+})
 </script>

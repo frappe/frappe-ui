@@ -19,7 +19,7 @@
         <slot></slot>
       </div>
       <template v-else>
-        {{ label && label[0] }}
+        {{ label && __(label[0]) }}
       </template>
     </div>
     <div
@@ -37,6 +37,7 @@
 </template>
 
 <script setup lang="ts">
+import { __ } from '../utils/translation'
 import { ref, computed } from 'vue'
 
 const imgFetchError = ref(false)

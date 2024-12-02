@@ -13,9 +13,13 @@
             class="text-base font-medium text-ink-gray-9"
             :class="{ 'mb-1': text }"
           >
-            {{ title }}
+            {{ __(title) }}
           </p>
-          <p v-if="text" class="text-base text-ink-gray-5" v-html="text"></p>
+          <p
+            v-if="text"
+            class="text-base text-ink-gray-5"
+            v-html="__(text)"
+          ></p>
         </slot>
       </div>
       <div class="ml-auto pl-2">
@@ -31,51 +35,41 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { __ } from '../utils/translation'
 import FeatherIcon from './FeatherIcon.vue'
-const positions = [
-  'top-right',
-  'top-center',
-  'top-left',
-  'bottom-right',
-  'bottom-center',
-  'bottom-left',
-]
+import { onMounted } from 'vue'
 
-export default {
-  name: 'Toast',
-  props: {
-    position: {
-      type: String,
-      default: 'top-center',
-    },
-    icon: {
-      type: String,
-    },
-    iconClasses: {
-      type: String,
-    },
-    title: {
-      type: String,
-    },
-    text: {
-      type: String,
-    },
-    timeout: {
-      type: Number,
-      default: 5,
-    },
+const props = defineProps({
+  position: {
+    type: String,
+    default: 'top-center',
   },
-  emits: ['close'],
-  components: {
-    FeatherIcon,
+  icon: {
+    type: String,
   },
-  mounted() {
-    if (this.timeout > 0) {
-      setTimeout(() => {
-        this.$emit('close')
-      }, this.timeout * 1000)
-    }
+  iconClasses: {
+    type: String,
   },
-}
+  title: {
+    type: String,
+  },
+  text: {
+    type: String,
+  },
+  timeout: {
+    type: Number,
+    default: 5,
+  },
+})
+
+const emit = defineEmits(['close'])
+
+onMounted(() => {
+  if (props.timeout > 0) {
+    setTimeout(() => {
+      emit('close')
+    }, props.timeout * 1000)
+  }
+})
 </script>

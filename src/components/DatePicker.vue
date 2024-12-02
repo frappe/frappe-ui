@@ -33,7 +33,7 @@
             />
           </Button>
           <div class="flex-1 text-center text-base font-medium text-ink-gray-6">
-            {{ formattedMonth }}
+            {{ __(formattedMonth) }}
           </div>
           <Button variant="ghost" class="h-7 w-7" @click="nextMonth">
             <FeatherIcon
@@ -74,7 +74,7 @@
               v-for="(d, i) in ['s', 'm', 't', 'w', 't', 'f', 's']"
               :key="i"
             >
-              {{ d }}
+              {{ __(d) }}
             </div>
           </div>
           <div
@@ -100,7 +100,7 @@
                 }
               "
             >
-              {{ date.getDate() }}
+              {{ __(date.getDate().toString()) }}
             </div>
           </div>
         </div>
@@ -132,6 +132,7 @@ import Popover from './Popover.vue'
 import FeatherIcon from './FeatherIcon.vue'
 import TextInput from './TextInput.vue'
 
+import { __ } from '../utils/translation'
 import { getDate, getDateValue, luxonDate } from '../utils/dates'
 import { useDatePicker } from '../utils/useDatePicker'
 

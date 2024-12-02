@@ -13,7 +13,7 @@
     </div>
     <div class="flex flex-col gap-5">
       <div class="flex justify-between text-xl font-semibold">
-        <span>{{ calendarEvent.title || 'New Event' }}</span>
+        <span>{{ __(calendarEvent.title || 'New Event') }}</span>
       </div>
       <div class="flex flex-col gap-4">
         <div class="flex items-center gap-2">
@@ -25,7 +25,7 @@
         <div class="flex items-center gap-2" v-if="calendarEvent.participant">
           <FeatherIcon name="user" class="h-4 w-4" />
           <span class="text-sm font-normal">
-            {{ calendarEvent.participant }}
+            {{ __(calendarEvent.participant) }}
           </span>
         </div>
         <div
@@ -40,7 +40,7 @@
         <div class="flex items-center gap-2" v-if="calendarEvent.venue">
           <FeatherIcon name="map-pin" class="h-4 w-4" />
           <span class="text-sm font-normal">
-            {{ calendarEvent.venue }}
+            {{ __(calendarEvent.venue) }}
           </span>
         </div>
       </div>
@@ -48,6 +48,7 @@
   </div>
 </template>
 <script setup>
+import { __ } from '../../utils/translation'
 import FeatherIcon from '../FeatherIcon.vue'
 
 import { parseDateEventPopupFormat } from './calendarUtils'

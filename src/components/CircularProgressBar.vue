@@ -8,14 +8,15 @@
     }"
   >
     <div v-if="!isCompleted">
-      <p v-if="!showPercentage">{{ step }}</p>
-      <p v-else>{{ progress.toFixed(0) }}%</p>
+      <p v-if="!showPercentage">{{ __(step.toString()) }}</p>
+      <p v-else>{{ __(progress.toFixed(0)) }}%</p>
     </div>
     <FeatherIcon v-else name="check" class="check-icon" />
   </div>
 </template>
 
 <script setup lang="ts">
+import { __ } from '../utils/translation'
 import { computed } from 'vue'
 import FeatherIcon from './FeatherIcon.vue'
 

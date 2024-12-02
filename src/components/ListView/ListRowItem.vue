@@ -16,7 +16,7 @@
       </slot>
       <slot v-bind="{ label }">
         <div class="truncate text-base">
-          {{ column?.getLabel ? column.getLabel({ row }) : label }}
+          {{ column?.getLabel ? __(column.getLabel({ row })) : __(label) }}
         </div>
       </slot>
       <slot name="suffix" />
@@ -27,6 +27,7 @@
 import { computed, inject } from 'vue'
 import { Tooltip } from '../../index'
 import { alignmentMap } from './utils'
+import { __ } from '../../utils/translation'
 
 const props = defineProps({
   column: {

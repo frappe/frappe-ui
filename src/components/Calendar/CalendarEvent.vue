@@ -37,7 +37,7 @@
 
       <div class="flex w-fit flex-col overflow-hidden whitespace-nowrap">
         <p class="text-ellipsis text-sm font-medium text-gray-800">
-          {{ props.event.title || 'New Event' }}
+          {{ __(props.event.title || 'New Event') }}
         </p>
         <p
           class="text-ellipsis text-xs font-normal text-gray-800"
@@ -85,7 +85,7 @@
 
       <div class="flex w-fit flex-col overflow-hidden whitespace-nowrap">
         <p class="text-ellipsis text-sm font-medium text-gray-800">
-          {{ props.event.title || 'New Event' }}
+          {{ __(props.event.title || 'New Event') }}
         </p>
         <p
           class="text-ellipsis text-xs font-normal text-gray-800"
@@ -117,6 +117,7 @@
 </template>
 
 <script setup>
+import { __ } from '../../utils/translation'
 import FeatherIcon from '../FeatherIcon.vue'
 import EventModalContent from './EventModalContent.vue'
 import NewEventModal from './NewEventModal.vue'

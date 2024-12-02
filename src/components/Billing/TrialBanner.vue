@@ -23,6 +23,7 @@
 import LightningIcon from './LightningIcon.vue'
 import FeatherIcon from '../FeatherIcon.vue'
 import { Button } from '../Button'
+import { __ } from '../../utils/translation'
 import { createResource } from '../../resources'
 import { ref, computed } from 'vue'
 
@@ -38,11 +39,11 @@ const showBanner = ref(false)
 
 const trialTitle = computed(() => {
   return trialEndDays.value > 1
-    ? 'Trial ends in ' + trialEndDays.value + ' days'
-    : 'Trial will end tomorrow'
+    ? __('Trial ends in {0} days', [trialEndDays.value])
+    : __('Trial will end tomorrow')
 })
 
-const trialMessage = 'Upgrade to a paid plan for uninterrupted services'
+const trialMessage = __('Upgrade to a paid plan for uninterrupted services')
 
 createResource({
   url: 'frappe.integrations.frappe_providers.frappecloud_billing.current_site_info',

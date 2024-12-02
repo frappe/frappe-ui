@@ -1,7 +1,7 @@
 <template>
   <div v-if="type != 'checkbox'" :class="['space-y-1.5', attrs.class]">
     <label class="block" :class="labelClasses" v-if="label" :for="id">
-      {{ label }}
+      {{ __(label) }}
       <span class="text-ink-red-3" v-if="required">*</span>
     </label>
     <Select
@@ -38,7 +38,7 @@
       </template>
     </TextInput>
     <slot name="description">
-      <p v-if="description" :class="descriptionClasses">{{ description }}</p>
+      <p v-if="description" :class="descriptionClasses">{{ __(description) }}</p>
     </slot>
   </div>
   <Checkbox
@@ -49,6 +49,7 @@
 </template>
 <script setup lang="ts">
 import { useAttrs, computed } from 'vue'
+import { __ } from '../utils/translation'
 import { useId } from '../utils/useId'
 import TextInput from './TextInput.vue'
 import type { TextInputTypes } from './types/TextInput'

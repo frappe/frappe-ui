@@ -16,7 +16,7 @@
       class="pointer-events-none absolute text-ink-gray-4"
       :class="[fontSizeClasses, paddingClasses]"
     >
-      {{ placeholder }}
+      {{ __(placeholder) }}
     </div>
     <select
       :class="selectClasses"
@@ -33,13 +33,14 @@
         :disabled="option.disabled || false"
         :selected="modelValue === option.value"
       >
-        {{ option.label }}
+        {{ __(option.label) }}
       </option>
     </select>
   </div>
 </template>
 
 <script setup lang="ts">
+import { __ } from '../utils/translation'
 import { computed, useSlots, useAttrs } from 'vue'
 
 defineOptions({

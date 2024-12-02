@@ -2,7 +2,7 @@
   <div class="flex items-center justify-between py-3">
     <div>
       <h3 class="text-base font-medium text-gray-900">
-        {{ title }}
+        {{ __(title) }}
       </h3>
       <div class="mt-1" v-if="secondaryText || $slots.subtitle">
         <template v-if="secondaryText">
@@ -14,15 +14,23 @@
     <slot name="actions"></slot>
   </div>
 </template>
-<script>
-export default {
-  name: 'ListItem',
-  props: ['title', 'subtitle'],
-  computed: {
-    secondaryText() {
-      let text = this.subtitle || ''
-      return text.replace('\n', '<br>')
-    },
+<script setup>
+import { __ } from '../utils/translation'
+import { computed } from 'vue'
+
+const props = defineProps({
+  title: {
+    type: String,
+    required: true,
   },
-}
+  subtitle: {
+    type: String,
+    default: '',
+  },
+})
+
+const secondaryText = computed(() => {
+  let text = __(props.subtitle) || ''
+  return text.replace('\n', '<br>')
+})
 </script>

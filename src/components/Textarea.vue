@@ -1,11 +1,11 @@
 <template>
   <div class="space-y-1.5">
     <label class="block" :class="labelClasses" v-if="label" :for="id">
-      {{ label }}
+      {{ __(label) }}
     </label>
     <textarea
       ref="textareaRef"
-      :placeholder="placeholder"
+      :placeholder="__(placeholder || '')"
       :class="inputClasses"
       :disabled="disabled"
       :id="id"
@@ -19,6 +19,7 @@
 </template>
 
 <script setup lang="ts">
+import { __ } from '../utils/translation'
 import { computed, useAttrs, ref } from 'vue'
 import debounce from '../utils/debounce'
 

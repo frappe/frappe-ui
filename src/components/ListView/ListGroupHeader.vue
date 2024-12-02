@@ -17,7 +17,7 @@
           v-bind="{ group }"
         />
         <span v-else class="text-base font-medium leading-6">
-          {{ group.group }}
+          {{ __(group.group) }}
         </span>
       </div>
     </slot>
@@ -26,6 +26,7 @@
 </template>
 <script setup>
 import { inject } from 'vue'
+import { __ } from '../../utils/translation'
 import DownSolid from '../../icons/DownSolid.vue'
 
 const props = defineProps({

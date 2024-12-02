@@ -8,9 +8,12 @@
       <template #target>
         <MenuButton as="div">
           <slot v-if="$slots.default" v-bind="{ open }" />
-          <Button v-else :active="open" v-bind="button">
-            {{ button ? button?.label || null : 'Options' }}
-          </Button>
+          <Button
+            v-else
+            :label="button ? button?.label || '' : 'Options'"
+            :active="open"
+            v-bind="button"
+          />
         </MenuButton>
       </template>
 
@@ -28,41 +31,43 @@
               v-if="group.group && !group.hideLabel"
               class="flex h-7 items-center px-2 text-sm font-medium text-ink-gray-6"
             >
-              {{ group.group }}
+              {{ __(group.group) }}
             </div>
             <MenuItem
               v-for="item in group.items"
               :key="item.label"
               v-slot="{ active }"
             >
-              <component
-                v-if="item.component"
-                :is="item.component"
-                :active="active"
-              />
-              <button
-                v-else
-                :class="[
-                  active ? 'bg-surface-gray-3' : 'text-ink-gray-6',
-                  'group flex h-7 w-full items-center rounded px-2 text-base',
-                ]"
-                @click="item.onClick"
-              >
-                <FeatherIcon
-                  v-if="item.icon && typeof item.icon === 'string'"
-                  :name="item.icon"
-                  class="mr-2 h-4 w-4 flex-shrink-0 text-ink-gray-6"
-                  aria-hidden="true"
-                />
+              <slot name="item" :item="item" :active="active">
                 <component
-                  class="mr-2 h-4 w-4 flex-shrink-0 text-ink-gray-6"
-                  v-else-if="item.icon"
-                  :is="item.icon"
+                  v-if="item.component"
+                  :is="item.component"
+                  :active="active"
                 />
-                <span class="whitespace-nowrap text-ink-gray-7">
-                  {{ item.label }}
-                </span>
-              </button>
+                <button
+                  v-else
+                  :class="[
+                    active ? 'bg-surface-gray-3' : 'text-ink-gray-6',
+                    'group flex h-7 w-full items-center rounded px-2 text-base',
+                  ]"
+                  @click="item.onClick"
+                >
+                  <FeatherIcon
+                    v-if="item.icon && typeof item.icon === 'string'"
+                    :name="item.icon"
+                    class="mr-2 h-4 w-4 flex-shrink-0 text-ink-gray-6"
+                    aria-hidden="true"
+                  />
+                  <component
+                    class="mr-2 h-4 w-4 flex-shrink-0 text-ink-gray-6"
+                    v-else-if="item.icon"
+                    :is="item.icon"
+                  />
+                  <span class="whitespace-nowrap text-ink-gray-7">
+                    {{ __(item.label) }}
+                  </span>
+                </button>
+              </slot>
             </MenuItem>
           </div>
         </MenuItems>
@@ -73,6 +78,7 @@
 
 <script setup lang="ts">
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
+import { __ } from '../utils/translation'
 import Popover from './Popover.vue'
 import { Button, ButtonProps } from './Button'
 import FeatherIcon from './FeatherIcon.vue'

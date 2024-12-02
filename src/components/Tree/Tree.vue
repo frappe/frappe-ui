@@ -28,7 +28,7 @@
       <!-- slot to only override the label -->
       <slot name="label" v-bind="{ node, hasChildren, isCollapsed }">
         <div class="text-base truncate" :class="hasChildren ? '' : 'pl-3.5'">
-          {{ node.label }}
+          {{ __(node.label) }}
         </div>
       </slot>
     </div>
@@ -69,6 +69,7 @@
 import { ref, computed, onMounted } from 'vue'
 import FeatherIcon from '../FeatherIcon.vue'
 import type { TreeNode, TreeOptions } from '../types/Tree'
+import { __ } from '../../utils/translation'
 
 const props = withDefaults(
   defineProps<{

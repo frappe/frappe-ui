@@ -28,44 +28,35 @@
             as="span"
             class="flex h-4 items-center"
             v-show="button.label && !button.hideLabel"
-            >{{ button.label }}</RadioGroupLabel
           >
+            {{ __(button.label) }}
+          </RadioGroupLabel>
         </button>
       </RadioGroupOption>
     </div>
   </RadioGroup>
 </template>
-<script>
+<script setup>
+import { __ } from '../utils/translation'
 import { RadioGroup, RadioGroupLabel, RadioGroupOption } from '@headlessui/vue'
 import FeatherIcon from './FeatherIcon.vue'
+import { computed } from 'vue'
 
-export default {
-  name: 'TabButtons',
-  props: {
-    buttons: {
-      type: Array,
-      required: true,
-    },
-    modelValue: {
-      type: [String, Boolean, Number],
-    },
+const props = defineProps({
+  buttons: {
+    type: Array,
+    required: true,
   },
-  emits: ['update:modelValue'],
-  components: {
-    FeatherIcon,
-    RadioGroup,
-    RadioGroupOption,
-    RadioGroupLabel,
+  modelValue: {
+    type: [String, Boolean, Number],
+    default: null,
   },
-  computed: {
-    value: {
-      get() {
-        return this.modelValue
-      },
-      set(value) {
-        this.$emit('update:modelValue', value)
-      },
-    },
-  },
-}
+})
+
+const emit = defineEmits(['update:modelValue'])
+
+const value = computed({
+  get: () => props.modelValue,
+  set: (val) => emit('update:modelValue', val),
+})
 </script>
