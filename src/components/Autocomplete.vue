@@ -192,18 +192,18 @@ type AutocompleteOptionGroup = {
 type AutocompleteOptions = AutocompleteOption[] | AutocompleteOptionGroup[]
 
 type AutocompleteProps = {
-  options?: AutocompleteOptions
+  options: AutocompleteOptions
   hideSearch?: boolean
   placeholder?: string
   bodyClasses?: string | string[]
 } & (
   | {
       multiple: true
-      modelValue: AutocompleteOption[] | null
+      modelValue?: AutocompleteOption[] | null
     }
   | {
-      multiple: false
-      modelValue: AutocompleteOption | null
+      multiple?: false
+      modelValue?: AutocompleteOption | null
     }
 )
 
