@@ -1,10 +1,13 @@
 import { createResource } from '../resources'
 import { App } from 'vue'
 
+type Replace = { [key: string]: string }
+type TranslatedMessages = Replace
+
 declare global {
   interface Window {
-    __: (message: string, replace?: any, context?: string | null) => string
-    translatedMessages?: { [key: string]: string }
+    __: (message: string, replace?: Replace, context?: string | null) => string
+    translatedMessages?: TranslatedMessages
   }
 }
 
@@ -14,15 +17,16 @@ export default function translationPlugin(app: App) {
   if (!window.translatedMessages) fetchTranslations()
 }
 
-function format(message: string, replace: string) {
+function format(message: string, replace?: Replace) {
+  if (!replace) return message
   return message.replace(/{(\d+)}/g, function (match, number) {
     return typeof replace[number] != 'undefined' ? replace[number] : match
   })
 }
 
-function translate(
+export function translate(
   message: string,
-  replace?: any,
+  replace?: Replace,
   context: string | null = null,
 ) {
   let translatedMessages = window.translatedMessages || {}
@@ -52,8 +56,17 @@ function fetchTranslations() {
     url: 'crm.api.get_translations',
     cache: 'translations',
     auto: true,
-    transform: (data: { [key: string]: string }) => {
-      window.translatedMessages = data
+    transform: (messages: TranslatedMessages) => {
+      window.translatedMessages = messages
     },
   })
+}
+
+export function __(
+  message: string,
+  replace?: Replace,
+  context: string | null = null,
+): string {
+  if (!window.__) return message
+  return translate(message, replace, context)
 }
