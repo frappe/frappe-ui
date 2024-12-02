@@ -52,12 +52,8 @@
                     ref="searchInput"
                     class="form-input w-full"
                     type="text"
-                    @change="
-                      (e) => {
-                        query = e.target.value
-                      }
-                    "
                     :value="query"
+                    @change="query = $event.target.value"
                     autocomplete="off"
                     placeholder="Search"
                   />
@@ -165,32 +161,35 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, nextTick, watch } from 'vue'
 import {
   Combobox,
   ComboboxInput,
   ComboboxOption,
   ComboboxOptions,
-} from '@headlessui/vue'
+} from '@headlessui/vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import Popover from './Popover.vue'
 import Button from './Button.vue'
 import FeatherIcon from './FeatherIcon.vue'
 
-type valueOption = string | number | boolean
-
-type objOption = {
+type Option = {
   label: string
-  value: valueOption
+  value: OptionValue
   description?: string
-  group?: string
-  items?: objOption[]
-  hideLabel?: boolean
   [key: string]: any
 }
 
-type AutocompleteOption = valueOption | objOption
+type OptionValue = string | number | boolean
 
-type AutocompleteOptions = valueOption[] | objOption[]
+type AutocompleteOption = OptionValue | Option
+
+type AutocompleteOptionGroup = {
+  group: string
+  items: AutocompleteOption[]
+  hideLabel?: boolean
+}
+
+type AutocompleteOptions = AutocompleteOption[] | AutocompleteOptionGroup[]
 
 type AutocompleteProps = {
   options?: AutocompleteOptions
@@ -200,7 +199,7 @@ type AutocompleteProps = {
 } & (
   | {
       multiple: true
-      modelValue: AutocompleteOptions | null
+      modelValue: AutocompleteOption[] | null
     }
   | {
       multiple: false
@@ -212,29 +211,27 @@ const props = withDefaults(defineProps<AutocompleteProps>(), {
   multiple: false,
   hideSearch: false,
 })
-
 const emit = defineEmits(['update:modelValue', 'update:query', 'change'])
 
-const showOptions = ref(false)
-
 const searchInput = ref()
-
+const showOptions = ref(false)
 const query = ref('')
 
 const groups = computed(() => {
-  if (!props.options || props.options.length == 0) return []
+  if (!props.options?.length) return []
 
-  let groups
-  if (isObjOption(props.options[0]) && props.options[0].group)
-    groups = props.options as objOption[]
-  else
+  let groups: AutocompleteOptionGroup[]
+  if (isOptionGroup(props.options[0])) {
+    groups = props.options as AutocompleteOptionGroup[]
+  } else {
     groups = [
       {
         group: '',
-        items: sanitizeOptions(props.options),
+        items: sanitizeOptions(props.options as AutocompleteOption[]),
         hideLabel: false,
       },
     ]
+  }
 
   return groups
     .map((group, i) => {
@@ -252,17 +249,17 @@ const allOptions = computed(() => {
   return groups.value.flatMap((group) => group.items)
 })
 
-const sanitizeOptions = (options: AutocompleteOptions) => {
+const sanitizeOptions = (options: AutocompleteOption[]) => {
   if (!options) return []
   // in case the options are just values, convert them to objects
   return options.map((option) => {
-    return isObjOption(option)
+    return isOption(option)
       ? option
       : { label: option.toString(), value: option }
   })
 }
 
-const filterOptions = (options: objOption[]) => {
+const filterOptions = (options: Option[]) => {
   if (!query.value) return options
   return options.filter((option) => {
     return (
@@ -282,9 +279,9 @@ const selectedValue = computed({
     }
     // in case of `multiple`, modelValue is an array of values
     // if the modelValue is a list of values, convert them to options
-    let values = props.modelValue as AutocompleteOptions
+    let values = props.modelValue as AutocompleteOption[]
     if (!values) return []
-    return isObjOption(values[0]) ? values : values?.map((v) => findOption(v))
+    return isOption(values[0]) ? values : values.map((v) => findOption(v))
   },
   set(val) {
     query.value = ''
@@ -299,12 +296,12 @@ const selectedValue = computed({
 
 const findOption = (option: AutocompleteOption) => {
   if (!option) return option
-  const value = isObjOption(option) ? option.value : option
+  const value = isOption(option) ? option.value : option
   return allOptions.value.find((o) => o.value === value)
 }
 
 const getLabel = (option: AutocompleteOption) => {
-  if (isObjOption(option)) {
+  if (isOption(option)) {
     return option?.label || option?.value || 'No label'
   }
   return option
@@ -315,19 +312,19 @@ const displayValue = computed(() => {
   if (!props.multiple) {
     return getLabel(selectedValue.value as AutocompleteOption)
   }
-  return (selectedValue.value as AutocompleteOptions)
+  return (selectedValue.value as AutocompleteOption[])
     .map((v) => getLabel(v))
     .join(', ')
 })
 
 const isOptionSelected = (option: AutocompleteOption) => {
   if (!selectedValue.value) return false
-  const value = isObjOption(option) ? option.value : option
+  const value = isOption(option) ? option.value : option
   if (!props.multiple) {
     return selectedValue.value === value
   }
-  return (selectedValue.value as AutocompleteOptions).find((v) =>
-    isObjOption(v) ? v.value === value : v === value,
+  return (selectedValue.value as AutocompleteOption[]).find((v) =>
+    isOption(v) ? v.value === value : v === value,
   )
 }
 
@@ -335,7 +332,7 @@ const areAllOptionsSelected = computed(() => {
   if (!props.multiple) return false
   return (
     allOptions.value.length ===
-    (selectedValue.value as AutocompleteOptions)?.length
+    (selectedValue.value as AutocompleteOption[])?.length
   )
 })
 
@@ -347,8 +344,12 @@ const clearAll = () => {
   selectedValue.value = []
 }
 
-const isObjOption = (optionOrValue: AutocompleteOption) => {
-  return typeof optionOrValue === 'object'
+const isOption = (option: AutocompleteOption) => {
+  return typeof option === 'object'
+}
+
+const isOptionGroup = (option: any) => {
+  return typeof option === 'object' && 'items' in option && 'group' in option
 }
 
 watch(
