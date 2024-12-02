@@ -3,20 +3,14 @@
     <LoadingIndicator class="-ml-1 mr-2 h-3 w-3" /> {{ __(text) }}
   </div>
 </template>
-<script>
+<script setup>
 import { __ } from '../utils/translation'
 import LoadingIndicator from './LoadingIndicator.vue'
 
-export default {
-  name: 'Loading',
-  props: {
-    text: {
-      type: String,
-      default: 'Loading...',
-    },
+const props = defineProps({
+  text: {
+    type: String,
+    default: 'Loading...',
   },
-  components: {
-    LoadingIndicator,
-  },
-}
+})
 </script>

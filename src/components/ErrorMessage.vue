@@ -7,19 +7,22 @@
   ></div>
 </template>
 
-<script>
+<script setup>
 import { __ } from '../utils/translation'
-export default {
-  name: 'ErrorMessage',
-  props: ['message'],
-  computed: {
-    errorMessage() {
-      if (!this.message) return ''
-      if (this.message instanceof Error) {
-        return this.message.messages || this.message.message
-      }
-      return __(this.message)
-    },
+import { computed } from 'vue'
+
+const props = defineProps({
+  message: {
+    type: [String, Error],
+    required: true,
   },
-}
+})
+
+const errorMessage = computed(() => {
+  if (!props.message) return ''
+  if (props.message instanceof Error) {
+    return props.message.messages || props.message.message
+  }
+  return __(props.message)
+})
 </script>

@@ -281,6 +281,9 @@ export default {
     },
   },
   methods: {
+    __(message) {
+      return __(message)
+    },
     rootRef() {
       return this.$refs['rootRef']
     },

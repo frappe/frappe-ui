@@ -14,16 +14,23 @@
     <slot name="actions"></slot>
   </div>
 </template>
-<script>
+<script setup>
 import { __ } from '../utils/translation'
-export default {
-  name: 'ListItem',
-  props: ['title', 'subtitle'],
-  computed: {
-    secondaryText() {
-      let text = __(this.subtitle) || ''
-      return text.replace('\n', '<br>')
-    },
+import { computed } from 'vue'
+
+const props = defineProps({
+  title: {
+    type: String,
+    required: true,
   },
-}
+  subtitle: {
+    type: String,
+    default: '',
+  },
+})
+
+const secondaryText = computed(() => {
+  let text = __(props.subtitle) || ''
+  return text.replace('\n', '<br>')
+})
 </script>

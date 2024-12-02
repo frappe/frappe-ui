@@ -2,7 +2,11 @@
   <Dialog v-model="showDialog" :options="{ title: __(title) }">
     <template #body-content>
       <div class="space-y-4">
-        <p class="text-p-base text-gray-800" v-if="message" v-html="__(message)" />
+        <p
+          class="text-p-base text-gray-800"
+          v-if="message"
+          v-html="__(message)"
+        />
       </div>
     </template>
     <template #actions>
@@ -11,7 +15,7 @@
   </Dialog>
 </template>
 <script>
-import { __ } from '../utils/translation';
+import { __ } from '../utils/translation'
 import { Button } from './Button'
 import Dialog from './Dialog.vue'
 
@@ -41,6 +45,9 @@ export default {
     }
   },
   methods: {
+    __(message) {
+      return __(message)
+    },
     handleConfirmation() {
       try {
         this.onConfirm?.({

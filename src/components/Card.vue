@@ -25,24 +25,19 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
 import { __ } from '../utils/translation'
 import LoadingText from './LoadingText.vue'
-export default {
-  name: 'Card',
-  props: {
-    title: {
-      type: String,
-    },
-    subtitle: {
-      type: String,
-    },
-    loading: {
-      type: Boolean,
-    },
+
+const props = defineProps({
+  title: {
+    type: String,
   },
-  components: {
-    LoadingText,
+  subtitle: {
+    type: String,
   },
-}
+  loading: {
+    type: Boolean,
+  },
+})
 </script>

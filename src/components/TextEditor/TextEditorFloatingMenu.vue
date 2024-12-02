@@ -24,37 +24,39 @@
     </button>
   </FloatingMenu>
 </template>
-<script>
+<script setup>
 import { __ } from '../../utils/translation'
 import { FloatingMenu } from '@tiptap/vue-3'
 import { createEditorButton } from './utils'
+import { computed, inject } from 'vue'
 
-export default {
-  name: 'TextEditorFloatingMenu',
-  props: ['buttons'],
-  components: { FloatingMenu },
-  inject: ['editor'],
-  computed: {
-    floatingMenuButtons() {
-      if (!this.buttons) return false
-
-      let buttons
-      if (Array.isArray(this.buttons)) {
-        buttons = this.buttons
-      } else {
-        buttons = [
-          'Paragraph',
-          'Heading 2',
-          'Heading 3',
-          'Bullet List',
-          'Numbered List',
-          'Blockquote',
-          'Code',
-          'Horizontal Rule',
-        ]
-      }
-      return buttons.map(createEditorButton)
-    },
+const props = defineProps({
+  buttons: {
+    type: Array,
+    default: null,
   },
-}
+})
+
+const editor = inject('editor')
+
+const floatingMenuButtons = computed(() => {
+  if (!props.buttons) return false
+
+  let buttons
+  if (Array.isArray(props.buttons)) {
+    buttons = props.buttons
+  } else {
+    buttons = [
+      'Paragraph',
+      'Heading 2',
+      'Heading 3',
+      'Bullet List',
+      'Numbered List',
+      'Blockquote',
+      'Code',
+      'Horizontal Rule',
+    ]
+  }
+  return buttons.map(createEditorButton)
+})
 </script>

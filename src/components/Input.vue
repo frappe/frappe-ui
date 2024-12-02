@@ -141,6 +141,9 @@ export default {
   },
   emits: ['input', 'change', 'update:modelValue'],
   methods: {
+    __(message) {
+      return __(message)
+    },
     focus() {
       this.$refs.input.focus()
     },
