@@ -53,7 +53,7 @@ export function translate(
 
 function fetchTranslations() {
   createResource({
-    url: 'crm.api.get_translations',
+    url: 'frappe.translate.get_app_translations',
     cache: 'translations',
     auto: true,
     transform: (messages: TranslatedMessages) => {
