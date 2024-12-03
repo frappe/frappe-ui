@@ -62,7 +62,7 @@
             class="text-sm"
             @click="
               () => {
-                selectDate(getDate(), false, true)
+                selectDate(getDate(), true)
                 togglePopover()
               }
             "
@@ -237,27 +237,15 @@ const dateValue = computed(() => {
 
 function changeTime() {
   let date = dateValue.value ? getDate(dateValue.value) : getDate()
-  selectDate(date, true)
+  selectDate(date)
 }
 
-function selectDate(
-  date: Date | string,
-  isTimeChange: boolean = false,
-  isNow: boolean = false,
-) {
-  if (!isTimeChange) {
-    let currentDate = dayjs()
-    if (dateValue.value && !isNow) {
-      currentDate = dayjs(dateValue.value)
-    } else if (isNow) {
-      currentDate = dayjsLocal()
-      // set only date part of currentDate to date
-      date = dayjs(date).date(currentDate.date())
-    }
-
-    hour.value = currentDate.hour()
-    minute.value = currentDate.minute()
-    second.value = currentDate.second()
+function selectDate(date: Date | string, isNow: boolean = false) {
+  if (isNow) {
+    date = dayjsLocal(date)
+    hour.value = date.hour()
+    minute.value = date.minute()
+    second.value = date.second()
   }
 
   let systemParsedDate = date
@@ -287,7 +275,7 @@ function updateDate(date: Date | string) {
   hour.value = date.getHours()
   minute.value = date.getMinutes()
   second.value = date.getSeconds()
-  selectDate(date, true)
+  selectDate(date)
 }
 
 function selectCurrentMonthYear() {

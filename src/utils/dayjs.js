@@ -18,7 +18,6 @@ _dayjs.extend(utc)
 _dayjs.extend(timezone)
 _dayjs.extend(advancedFormat)
 
-// to clear datetime field set now to false
 export function dayjsLocal(dateTimeString) {
   let tz = getConfig('timezone')
 

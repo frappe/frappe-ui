@@ -132,7 +132,7 @@ import Popover from './Popover.vue'
 import FeatherIcon from './FeatherIcon.vue'
 import TextInput from './TextInput.vue'
 
-import { getDate, getDateValue, luxonDate } from '../utils/dates'
+import { getDate, getDateValue } from '../utils/dates'
 import { dayjsLocal } from '../utils/dayjs'
 import { useDatePicker } from '../utils/useDatePicker'
 
