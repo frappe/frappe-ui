@@ -195,12 +195,8 @@ import Popover from './Popover.vue'
 import FeatherIcon from './FeatherIcon.vue'
 import TextInput from './TextInput.vue'
 
-import {
-  getDate,
-  convertToUserTimezone,
-  convertToSystemTimezone,
-  luxonDate,
-} from '../utils/dates'
+import { getDate } from '../utils/dates'
+import { dayjs, dayjsLocal, dayjsSystem } from '../utils/dayjs'
 import { useDatePicker } from '../utils/useDatePicker'
 
 import type { DatePickerEmits, DatePickerProps } from './types/DatePicker'
@@ -236,7 +232,7 @@ const second = ref<number>(0)
 
 const dateValue = computed(() => {
   let date = props.value ? props.value : props.modelValue
-  return date ? convertToUserTimezone(date) : ''
+  return date ? dayjsLocal(date).format('YYYY-MM-DD HH:mm:ss') : ''
 })
 
 function changeTime() {
@@ -250,41 +246,36 @@ function selectDate(
   isNow: boolean = false,
 ) {
   if (!isTimeChange) {
-    let currentDate = luxonDate()
+    let currentDate = dayjs()
     if (dateValue.value && !isNow) {
-      currentDate = luxonDate(dateValue.value)
-    } else if (isNow && window.timezone?.user) {
-      currentDate = currentDate.setZone(window.timezone.user)
+      currentDate = dayjs(dateValue.value)
+    } else if (isNow) {
+      currentDate = dayjsLocal()
       // set only date part of currentDate to date
-      date = luxonDate(date)
-        .set({
-          year: currentDate.year,
-          month: currentDate.month,
-          day: currentDate.day,
-        })
-        .toJSDate()
+      date = dayjs(date).date(currentDate.date())
     }
 
-    hour.value = currentDate.hour
-    minute.value = currentDate.minute
-    second.value = currentDate.second
+    hour.value = currentDate.hour()
+    minute.value = currentDate.minute()
+    second.value = currentDate.second()
   }
 
-  emit('change', convertToSystemTimezone(toValue(date)))
-  emit('update:modelValue', convertToSystemTimezone(toValue(date)))
+  let systemParsedDate = dayjsSystem(toValue(date), false)?.format(
+    'YYYY-MM-DD HH:mm:ss',
+  )
+  emit('change', systemParsedDate)
+  emit('update:modelValue', systemParsedDate)
 }
 
 function toValue(date: Date | string) {
   if (!date || date.toString() === 'Invalid Date') return ''
 
-  // "YYYY-MM-DD HH:MM:SS"
-  return luxonDate(date)
-    .set({
-      hours: hour.value,
-      minutes: minute.value,
-      seconds: second.value,
-    })
-    .toFormat('yyyy-MM-dd HH:mm:ss')
+  // "YYYY-MM-DD HH:mm:ss"
+  return dayjs(date)
+    .set('hour', hour.value)
+    .set('minute', minute.value)
+    .set('second', second.value)
+    .format('YYYY-MM-DD HH:mm:ss')
 }
 
 function twoDigit(number: number) {

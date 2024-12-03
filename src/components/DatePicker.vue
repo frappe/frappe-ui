@@ -133,6 +133,7 @@ import FeatherIcon from './FeatherIcon.vue'
 import TextInput from './TextInput.vue'
 
 import { getDate, getDateValue, luxonDate } from '../utils/dates'
+import { dayjsLocal } from '../utils/dayjs'
 import { useDatePicker } from '../utils/useDatePicker'
 
 import type { DatePickerEmits, DatePickerProps } from './types/DatePicker'
@@ -167,9 +168,7 @@ const dateValue = computed(() => {
 })
 
 function selectDate(date: Date | string, isNow: boolean = false) {
-  if (isNow && window.timezone?.user) {
-    date = luxonDate(date).setZone(window.timezone.user)
-  }
+  date = isNow ? dayjsLocal(date) : date
   emit('change', getDateValue(date))
   emit('update:modelValue', getDateValue(date))
 }

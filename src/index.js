@@ -79,7 +79,7 @@ export { default as debounce } from './utils/debounce.ts'
 export { default as fileToBase64 } from './utils/file-to-base64.js'
 export { default as FileUploadHandler } from './utils/fileUploadHandler.ts'
 export { usePageMeta } from './utils/pageMeta.js'
-export * from './utils/dates.ts'
+export { dayjsLocal, dayjs } from './utils/dayjs.js'
 
 // data-fetching, resources
 export {
