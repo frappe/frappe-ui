@@ -260,9 +260,9 @@ function selectDate(
     second.value = currentDate.second()
   }
 
-  let systemParsedDate = dayjsSystem(toValue(date), false)?.format(
-    'YYYY-MM-DD HH:mm:ss',
-  )
+  let systemParsedDate = date
+    ? dayjsSystem(toValue(date)).format('YYYY-MM-DD HH:mm:ss')
+    : ''
   emit('change', systemParsedDate)
   emit('update:modelValue', systemParsedDate)
 }

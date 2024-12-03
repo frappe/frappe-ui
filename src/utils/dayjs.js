@@ -19,23 +19,21 @@ _dayjs.extend(timezone)
 _dayjs.extend(advancedFormat)
 
 // to clear datetime field set now to false
-export function dayjsLocal(dateTimeString, now = true) {
+export function dayjsLocal(dateTimeString) {
   let tz = getConfig('timezone')
 
-  if (!tz?.system && !tz?.user)
-    return !now && !dateTimeString ? null : _dayjs(dateTimeString)
+  if (!tz?.system && !tz?.user) return _dayjs(dateTimeString)
 
-  if (!dateTimeString) return now ? _dayjs().tz(tz.user) : null
+  if (!dateTimeString) return _dayjs().tz(tz.user)
   return _dayjs.tz(dateTimeString, tz.system).tz(tz.user)
 }
 
-export function dayjsSystem(dateTimeString, now = true) {
+export function dayjsSystem(dateTimeString) {
   let tz = getConfig('timezone')
 
-  if (!tz?.system && !tz?.user)
-    return !now && !dateTimeString ? null : _dayjs(dateTimeString)
+  if (!tz?.system && !tz?.user) return _dayjs(dateTimeString)
 
-  if (!dateTimeString) return now ? _dayjs().tz(tz.system) : null
+  if (!dateTimeString) return _dayjs().tz(tz.system)
   return _dayjs.tz(dateTimeString, tz.user).tz(tz.system)
 }
 
