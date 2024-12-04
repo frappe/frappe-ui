@@ -62,7 +62,7 @@
             class="text-sm"
             @click="
               () => {
-                selectDate(getDate(), false, true)
+                selectDate(getDate(), true)
                 togglePopover()
               }
             "
@@ -189,21 +189,17 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 
-import Input from './Input.vue'
-import { Button } from './Button'
-import Popover from './Popover.vue'
-import FeatherIcon from './FeatherIcon.vue'
-import TextInput from './TextInput.vue'
+import Input from '../Input.vue'
+import { Button } from '../Button'
+import Popover from '../Popover.vue'
+import FeatherIcon from '../FeatherIcon.vue'
+import TextInput from '../TextInput.vue'
 
-import {
-  getDate,
-  convertToUserTimezone,
-  convertToSystemTimezone,
-  luxonDate,
-} from '../utils/dates'
-import { useDatePicker } from '../utils/useDatePicker'
+import { getDate } from './utils'
+import { useDatePicker } from './useDatePicker'
+import { dayjs, dayjsLocal, dayjsSystem } from '../../utils/dayjs'
 
-import type { DatePickerEmits, DatePickerProps } from './types/DatePicker'
+import type { DatePickerEmits, DatePickerProps } from './DatePicker'
 
 const props = defineProps<DatePickerProps>()
 const emit = defineEmits<DatePickerEmits>()
@@ -236,55 +232,38 @@ const second = ref<number>(0)
 
 const dateValue = computed(() => {
   let date = props.value ? props.value : props.modelValue
-  return date ? convertToUserTimezone(date) : ''
+  return date ? dayjsLocal(date).format('YYYY-MM-DD HH:mm:ss') : ''
 })
 
 function changeTime() {
   let date = dateValue.value ? getDate(dateValue.value) : getDate()
-  selectDate(date, true)
+  selectDate(date)
 }
 
-function selectDate(
-  date: Date | string,
-  isTimeChange: boolean = false,
-  isNow: boolean = false,
-) {
-  if (!isTimeChange) {
-    let currentDate = luxonDate()
-    if (dateValue.value && !isNow) {
-      currentDate = luxonDate(dateValue.value)
-    } else if (isNow && window.timezone?.user) {
-      currentDate = currentDate.setZone(window.timezone.user)
-      // set only date part of currentDate to date
-      date = luxonDate(date)
-        .set({
-          year: currentDate.year,
-          month: currentDate.month,
-          day: currentDate.day,
-        })
-        .toJSDate()
-    }
-
-    hour.value = currentDate.hour
-    minute.value = currentDate.minute
-    second.value = currentDate.second
+function selectDate(date: Date | string, isNow: boolean = false) {
+  if (isNow) {
+    date = dayjsLocal(date)
+    hour.value = date.hour()
+    minute.value = date.minute()
+    second.value = date.second()
   }
 
-  emit('change', convertToSystemTimezone(toValue(date)))
-  emit('update:modelValue', convertToSystemTimezone(toValue(date)))
+  let systemParsedDate = date
+    ? dayjsSystem(toValue(date)).format('YYYY-MM-DD HH:mm:ss')
+    : ''
+  emit('change', systemParsedDate)
+  emit('update:modelValue', systemParsedDate)
 }
 
 function toValue(date: Date | string) {
   if (!date || date.toString() === 'Invalid Date') return ''
 
-  // "YYYY-MM-DD HH:MM:SS"
-  return luxonDate(date)
-    .set({
-      hours: hour.value,
-      minutes: minute.value,
-      seconds: second.value,
-    })
-    .toFormat('yyyy-MM-dd HH:mm:ss')
+  // "YYYY-MM-DD HH:mm:ss"
+  return dayjs(date)
+    .set('hour', hour.value)
+    .set('minute', minute.value)
+    .set('second', second.value)
+    .format('YYYY-MM-DD HH:mm:ss')
 }
 
 function twoDigit(number: number) {
@@ -296,7 +275,7 @@ function updateDate(date: Date | string) {
   hour.value = date.getHours()
   minute.value = date.getMinutes()
   second.value = date.getSeconds()
-  selectDate(date, true)
+  selectDate(date)
 }
 
 function selectCurrentMonthYear() {

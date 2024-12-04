@@ -10,7 +10,7 @@
         type="text"
         icon-left="calendar"
         :placeholder="placeholder"
-        :value="dateValue && formatter ? formatter(dateValue) : dateValue"
+        :value="dateValue && formatter ? formatDates(dateValue) : dateValue"
         @focus="!readonly ? togglePopover() : null"
         class="w-full"
         :class="inputClass"
@@ -44,24 +44,10 @@
           </Button>
         </div>
 
-        <!-- Date Input -->
+        <!-- Date Range Inputs -->
         <div class="flex items-center justify-center gap-1 p-1">
-          <TextInput
-            class="text-sm"
-            type="text"
-            :value="dateValue"
-            @change="selectDate(getDate($event.target.value))"
-          />
-          <Button
-            :label="'Today'"
-            class="text-sm"
-            @click="
-              () => {
-                selectDate(getDate(), true)
-                togglePopover()
-              }
-            "
-          />
+          <TextInput class="w-28 text-sm" type="text" v-model="fromDate" />
+          <TextInput class="w-28 text-sm" type="text" v-model="toDate" />
         </div>
 
         <!-- Calendar -->
@@ -88,17 +74,16 @@
               class="flex h-8 w-8 cursor-pointer items-center justify-center rounded hover:bg-surface-gray-2"
               :class="{
                 'text-ink-gray-3': date.getMonth() !== currentMonth - 1,
+                'text-ink-gray-9': date.getMonth() === currentMonth - 1,
                 'font-extrabold text-ink-gray-9':
                   getDateValue(date) === getDateValue(today),
-                'bg-surface-gray-6 text-ink-white hover:bg-surface-gray-6':
-                  getDateValue(date) === dateValue,
+                'rounded-none bg-surface-gray-3': isInRange(date),
+                'rounded-l-md rounded-r-none bg-surface-gray-6 text-ink-white hover:bg-surface-gray-6':
+                  fromDate && getDateValue(date) === getDateValue(fromDate),
+                'rounded-r-md bg-surface-gray-6 text-ink-white hover:bg-surface-gray-6':
+                  toDate && getDateValue(date) === getDateValue(toDate),
               }"
-              @click="
-                () => {
-                  selectDate(date)
-                  togglePopover()
-                }
-              "
+              @click="() => handleDateClick(date)"
             >
               {{ date.getDate() }}
             </div>
@@ -106,13 +91,24 @@
         </div>
 
         <!-- Actions -->
-        <div class="flex justify-end p-1">
+        <div class="flex justify-end space-x-1 p-1">
           <Button
             :label="'Clear'"
-            class="text-sm"
             @click="
               () => {
-                selectDate('')
+                clearDates()
+                togglePopover()
+              }
+            "
+            :disabled="!fromDate || !toDate"
+          />
+          <Button
+            variant="solid"
+            :label="'Apply'"
+            :disabled="!fromDate || !toDate"
+            @click="
+              () => {
+                selectDates()
                 togglePopover()
               }
             "
@@ -124,18 +120,18 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 
-import Input from './Input.vue'
-import { Button } from './Button'
-import Popover from './Popover.vue'
-import FeatherIcon from './FeatherIcon.vue'
-import TextInput from './TextInput.vue'
+import Input from '../Input.vue'
+import { Button } from '../Button'
+import Popover from '../Popover.vue'
+import FeatherIcon from '../FeatherIcon.vue'
+import TextInput from '../TextInput.vue'
 
-import { getDate, getDateValue, luxonDate } from '../utils/dates'
-import { useDatePicker } from '../utils/useDatePicker'
+import { getDate, getDateValue } from './utils'
+import { useDatePicker } from './useDatePicker'
 
-import type { DatePickerEmits, DatePickerProps } from './types/DatePicker'
+import type { DatePickerEmits, DatePickerProps } from './DatePicker'
 
 const props = defineProps<DatePickerProps>()
 const emit = defineEmits<DatePickerEmits>()
@@ -166,21 +162,74 @@ const dateValue = computed(() => {
   return props.value ? props.value : props.modelValue
 })
 
-function selectDate(date: Date | string, isNow: boolean = false) {
-  if (isNow && window.timezone?.user) {
-    date = luxonDate(date).setZone(window.timezone.user)
+const fromDate = ref<string>(dateValue.value ? dateValue.value[0] : '')
+const toDate = ref<string>(dateValue.value ? dateValue.value[1] : '')
+
+function handleDateClick(date: Date) {
+  if (fromDate.value && toDate.value) {
+    fromDate.value = getDateValue(date)
+    toDate.value = ''
+  } else if (fromDate.value && !toDate.value) {
+    toDate.value = getDateValue(date)
+  } else {
+    fromDate.value = getDateValue(date)
   }
-  emit('change', getDateValue(date))
-  emit('update:modelValue', getDateValue(date))
+  swapDatesIfNecessary()
+}
+
+function swapDatesIfNecessary() {
+  if (!fromDate.value || !toDate.value) {
+    return
+  }
+
+  // if fromDate is greater than toDate, swap them
+  let from = getDate(fromDate.value)
+  let to = getDate(toDate.value)
+  if (from > to) {
+    let temp = from
+    from = to
+    to = temp
+  }
+  fromDate.value = getDateValue(from)
+  toDate.value = getDateValue(to)
+}
+
+function selectDates() {
+  let val = `${fromDate.value},${toDate.value}`
+  if (!fromDate.value && !toDate.value) {
+    val = ''
+  }
+  emit('change', val)
+  emit('update:modelValue', val)
 }
 
 function selectCurrentMonthYear() {
-  let date = dateValue.value ? getDate(dateValue.value) : getDate()
-  if (date.toString() === 'Invalid Date') {
-    date = getDate()
-  }
+  let date = toDate.value ? getDate(toDate.value) : today.value
   currentYear.value = date.getFullYear()
   currentMonth.value = date.getMonth() + 1
+}
+
+function isInRange(date: Date) {
+  if (!fromDate.value || !toDate.value) {
+    return false
+  }
+  return date >= getDate(fromDate.value) && date <= getDate(toDate.value)
+}
+
+function formatDates(value: string) {
+  if (!value) {
+    return ''
+  }
+  const values = value.split(',')
+  return props.formatter
+    ? props.formatter(values[0]) + ' to ' + props.formatter(values[1])
+    : value
+}
+
+function clearDates() {
+  fromDate.value = ''
+  toDate.value = ''
+  selectDates()
 }
 
 onMounted(() => selectCurrentMonthYear())

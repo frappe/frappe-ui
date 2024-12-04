@@ -1,5 +1,5 @@
 import { computed, ref } from 'vue'
-import { getDate, getDatesAfter, getDaysInMonth } from './dates'
+import { getDate, getDatesAfter, getDaysInMonth } from './utils'
 
 export function useDatePicker() {
   const currentYear = ref<number>(0)
