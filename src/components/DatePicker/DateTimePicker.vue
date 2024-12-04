@@ -189,17 +189,17 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 
-import Input from './Input.vue'
-import { Button } from './Button'
-import Popover from './Popover.vue'
-import FeatherIcon from './FeatherIcon.vue'
-import TextInput from './TextInput.vue'
+import Input from '../Input.vue'
+import { Button } from '../Button'
+import Popover from '../Popover.vue'
+import FeatherIcon from '../FeatherIcon.vue'
+import TextInput from '../TextInput.vue'
 
-import { getDate } from '../utils/dates'
-import { dayjs, dayjsLocal, dayjsSystem } from '../utils/dayjs'
-import { useDatePicker } from '../utils/useDatePicker'
+import { getDate } from './utils'
+import { useDatePicker } from './useDatePicker'
+import { dayjs, dayjsLocal, dayjsSystem } from '../../utils/dayjs'
 
-import type { DatePickerEmits, DatePickerProps } from './types/DatePicker'
+import type { DatePickerEmits, DatePickerProps } from './DatePicker'
 
 const props = defineProps<DatePickerProps>()
 const emit = defineEmits<DatePickerEmits>()
