@@ -18,22 +18,28 @@ _dayjs.extend(utc)
 _dayjs.extend(timezone)
 _dayjs.extend(advancedFormat)
 
+function getBrowserTimezone() {
+  return Intl.DateTimeFormat().resolvedOptions().timeZone
+}
+
 export function dayjsLocal(dateTimeString) {
-  let tz = getConfig('timezone')
+  let systemTimezone = getConfig('systemTimezone')
+  let localTimezone = getConfig('localTimezone') || getBrowserTimezone()
 
-  if (!tz?.system && !tz?.user) return _dayjs(dateTimeString)
+  if (!systemTimezone) return _dayjs(dateTimeString)
 
-  if (!dateTimeString) return _dayjs().tz(tz.user)
-  return _dayjs.tz(dateTimeString, tz.system).tz(tz.user)
+  if (!dateTimeString) return _dayjs().tz(localTimezone)
+  return _dayjs.tz(dateTimeString, systemTimezone).tz(localTimezone)
 }
 
 export function dayjsSystem(dateTimeString) {
-  let tz = getConfig('timezone')
+  let systemTimezone = getConfig('systemTimezone')
+  let localTimezone = getConfig('localTimezone') || getBrowserTimezone()
 
-  if (!tz?.system && !tz?.user) return _dayjs(dateTimeString)
+  if (!systemTimezone) return _dayjs(dateTimeString)
 
-  if (!dateTimeString) return _dayjs().tz(tz.system)
-  return _dayjs.tz(dateTimeString, tz.user).tz(tz.system)
+  if (!dateTimeString) return _dayjs().tz(systemTimezone)
+  return _dayjs.tz(dateTimeString, localTimezone).tz(systemTimezone)
 }
 
 export let dayjs = _dayjs
