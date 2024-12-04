@@ -242,36 +242,6 @@
       }
     },
     {
-      "id": "src-components-datepicker-story-vue",
-      "title": "DatePicker",
-      "layout": {
-        "type": "grid",
-        "width": 500
-      },
-      "docsOnly": false,
-      "variants": [
-        {
-          "id": "src-components-datepicker-story-vue-0",
-          "title": "Date"
-        },
-        {
-          "id": "src-components-datepicker-story-vue-1",
-          "title": "Date Time"
-        },
-        {
-          "id": "src-components-datepicker-story-vue-2",
-          "title": "Date Range"
-        }
-      ],
-      "relativePath": "src/components/DatePicker.story.vue",
-      "supportPluginId": "vue3",
-      "treePath": [
-        "DatePicker"
-      ],
-      "virtual": false,
-      "markdownFile": null
-    },
-    {
       "id": "src-components-dialog-story-vue",
       "title": "Dialog",
       "layout": {
@@ -800,6 +770,36 @@
       "supportPluginId": "vue3",
       "treePath": [
         "Button"
+      ],
+      "virtual": false,
+      "markdownFile": null
+    },
+    {
+      "id": "src-components-datepicker-datepicker-story-vue",
+      "title": "DatePicker",
+      "layout": {
+        "type": "grid",
+        "width": 500
+      },
+      "docsOnly": false,
+      "variants": [
+        {
+          "id": "src-components-datepicker-datepicker-story-vue-0",
+          "title": "Date"
+        },
+        {
+          "id": "src-components-datepicker-datepicker-story-vue-1",
+          "title": "Date Time"
+        },
+        {
+          "id": "src-components-datepicker-datepicker-story-vue-2",
+          "title": "Date Range"
+        }
+      ],
+      "relativePath": "src/components/DatePicker/DatePicker.story.vue",
+      "supportPluginId": "vue3",
+      "treePath": [
+        "DatePicker"
       ],
       "virtual": false,
       "markdownFile": null
