@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import Autocomplete from './Autocomplete.vue'
 
-const single = ref('')
+const single = ref()
 const people = ref(null)
 const options = [
   {
@@ -74,7 +74,7 @@ const options = [
           :options="options"
           v-model="single"
           placeholder="Select person"
-          hide-search="true"
+          :hideSearch="true"
         />
       </div>
     </Variant>
@@ -84,7 +84,7 @@ const options = [
           :options="options"
           v-model="people"
           placeholder="Select people"
-          multiple="true"
+          :multiple="true"
         />
       </div>
     </Variant>
@@ -94,8 +94,8 @@ const options = [
           :options="options"
           v-model="people"
           placeholder="Select people"
-          multiple="true"
-          hide-search="true"
+          :multiple="true"
+          :hideSearch="true"
         />
       </div>
     </Variant>
