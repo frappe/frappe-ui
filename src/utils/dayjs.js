@@ -6,7 +6,7 @@ import isToday from 'dayjs/esm/plugin/isToday'
 import duration from 'dayjs/esm/plugin/duration'
 import utc from 'dayjs/esm/plugin/utc'
 import timezone from 'dayjs/esm/plugin/timezone'
-import advancedFormat from 'dayjs/plugin/advancedFormat'
+import advancedFormat from 'dayjs/esm/plugin/advancedFormat'
 import { getConfig } from './config'
 
 _dayjs.extend(updateLocale)
