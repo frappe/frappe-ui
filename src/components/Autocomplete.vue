@@ -59,7 +59,7 @@
                   />
                   <button
                     class="absolute right-0 inline-flex h-7 w-7 items-center justify-center"
-                    @click="selectedValue = []"
+                    @click="clearAll"
                   >
                     <FeatherIcon name="x" class="w-4 text-ink-gray-8" />
                   </button>
@@ -341,7 +341,7 @@ const selectAll = () => {
 }
 
 const clearAll = () => {
-  selectedValue.value = []
+  selectedValue.value = props.multiple ? [] : undefined
 }
 
 const isOption = (option: AutocompleteOption) => {
@@ -361,8 +361,10 @@ watch(
 
 watch(
   () => showOptions.value,
-  (val) => {
-    if (val) nextTick(() => searchInput.value?.$el.focus())
+  () => {
+    if (showOptions.value) {
+      nextTick(() => searchInput.value?.$el.focus())
+    }
   },
 )
 
