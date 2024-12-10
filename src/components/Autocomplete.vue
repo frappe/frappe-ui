@@ -16,11 +16,8 @@
             >
               <div class="flex items-center overflow-hidden">
                 <slot name="prefix" />
-                <span
-                  class="truncate text-base leading-5 text-ink-gray-8"
-                  v-if="selectedValue"
-                >
-                  {{ displayValue(selectedValue) }}
+                <span class="truncate text-base leading-5 text-ink-gray-8" v-if="displayValue">
+                  {{ displayValue }}
                 </span>
                 <span class="text-base leading-5 text-ink-gray-4" v-else>
                   {{ placeholder || '' }}
@@ -55,18 +52,14 @@
                     ref="searchInput"
                     class="form-input w-full focus:bg-surface-gray-3 hover:bg-surface-gray-4 text-ink-gray-8"
                     type="text"
-                    @change="
-                      (e) => {
-                        query = e.target.value
-                      }
-                    "
                     :value="query"
+                    @change="query = $event.target.value"
                     autocomplete="off"
                     placeholder="Search"
                   />
                   <button
                     class="absolute right-0 inline-flex h-7 w-7 items-center justify-center"
-                    @click="selectedValue = null"
+                    @click="clearAll"
                   >
                     <FeatherIcon name="x" class="w-4 text-ink-gray-8" />
                   </button>
@@ -86,7 +79,7 @@
                 <ComboboxOption
                   as="template"
                   v-for="(option, idx) in group.items.slice(0, 50)"
-                  :key="option?.value || idx"
+                  :key="idx"
                   :value="option"
                   v-slot="{ active, selected }"
                 >
@@ -167,185 +160,222 @@
   </Combobox>
 </template>
 
-<script>
+<script setup lang="ts">
 import {
   Combobox,
-  ComboboxButton,
   ComboboxInput,
   ComboboxOption,
   ComboboxOptions,
-} from '@headlessui/vue'
-import { nextTick } from 'vue'
+} from '@headlessui/vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import Popover from './Popover.vue'
 import { Button } from './Button'
 import FeatherIcon from './FeatherIcon.vue'
 
-export default {
-  name: 'Autocomplete',
-  props: {
-    options: {
-      type: Array,
-      default: () => [],
-    },
-    modelValue: {
-      type: [String, Object, Array],
-    },
-    placeholder: {
-      type: String,
-    },
-    bodyClasses: {
-      type: [String, Array, Object],
-    },
-    multiple: {
-      type: Boolean,
-      default: false,
-    },
-    hideSearch: {
-      type: Boolean,
-      default: false,
-    },
+type Option = {
+  label: string
+  value: OptionValue
+  description?: string
+  [key: string]: any
+}
+
+type OptionValue = string | number | boolean
+
+type AutocompleteOption = OptionValue | Option
+
+type AutocompleteOptionGroup = {
+  group: string
+  items: AutocompleteOption[]
+  hideLabel?: boolean
+}
+
+type AutocompleteOptions = AutocompleteOption[] | AutocompleteOptionGroup[]
+
+type AutocompleteProps = {
+  options: AutocompleteOptions
+  hideSearch?: boolean
+  placeholder?: string
+  bodyClasses?: string | string[]
+} & (
+  | {
+      multiple: true
+      modelValue?: AutocompleteOption[] | null
+    }
+  | {
+      multiple?: false
+      modelValue?: AutocompleteOption | null
+    }
+)
+
+const props = withDefaults(defineProps<AutocompleteProps>(), {
+  multiple: false,
+  hideSearch: false,
+})
+const emit = defineEmits(['update:modelValue', 'update:query', 'change'])
+
+const searchInput = ref()
+const showOptions = ref(false)
+const query = ref('')
+
+const groups = computed(() => {
+  if (!props.options?.length) return []
+
+  let groups: AutocompleteOptionGroup[]
+  if (isOptionGroup(props.options[0])) {
+    groups = props.options as AutocompleteOptionGroup[]
+  } else {
+    groups = [
+      {
+        group: '',
+        items: sanitizeOptions(props.options as AutocompleteOption[]),
+        hideLabel: false,
+      },
+    ]
+  }
+
+  return groups
+    .map((group, i) => {
+      return {
+        key: i,
+        group: group.group,
+        hideLabel: group.hideLabel,
+        items: filterOptions(sanitizeOptions(group.items || [])),
+      }
+    })
+    .filter((group) => group.items.length > 0)
+})
+
+const allOptions = computed(() => {
+  return groups.value.flatMap((group) => group.items)
+})
+
+const sanitizeOptions = (options: AutocompleteOption[]) => {
+  if (!options) return []
+  // in case the options are just values, convert them to objects
+  return options.map((option) => {
+    return isOption(option)
+      ? option
+      : { label: option.toString(), value: option }
+  })
+}
+
+const filterOptions = (options: Option[]) => {
+  if (!query.value) return options
+  return options.filter((option) => {
+    return (
+      option.label.toLowerCase().includes(query.value.trim().toLowerCase()) ||
+      option.value
+        .toString()
+        .toLowerCase()
+        .includes(query.value.trim().toLowerCase())
+    )
+  })
+}
+
+const selectedValue = computed({
+  get() {
+    if (!props.multiple) {
+      return findOption(props.modelValue as AutocompleteOption)
+    }
+    // in case of `multiple`, modelValue is an array of values
+    // if the modelValue is a list of values, convert them to options
+    let values = props.modelValue as AutocompleteOption[]
+    if (!values) return []
+    return isOption(values[0]) ? values : values.map((v) => findOption(v))
   },
-  emits: ['update:modelValue', 'update:query', 'change'],
-  components: {
-    Popover,
-    Button,
-    FeatherIcon,
-    Combobox,
-    ComboboxInput,
-    ComboboxOptions,
-    ComboboxOption,
-    ComboboxButton,
+  set(val) {
+    query.value = ''
+    if (val && !props.multiple) showOptions.value = false
+    if (!props.multiple) {
+      emit('update:modelValue', val)
+      return
+    }
+    emit('update:modelValue', val)
   },
-  expose: ['togglePopover', 'rootRef'],
-  data() {
-    return {
-      query: '',
-      showOptions: false,
+})
+
+const findOption = (option: AutocompleteOption) => {
+  if (!option) return option
+  const value = isOption(option) ? option.value : option
+  return allOptions.value.find((o) => o.value === value)
+}
+
+const getLabel = (option: AutocompleteOption) => {
+  if (isOption(option)) {
+    return option?.label || option?.value || 'No label'
+  }
+  return option
+}
+
+const displayValue = computed(() => {
+  if (!selectedValue.value) return ''
+  if (!props.multiple) {
+    return getLabel(selectedValue.value as AutocompleteOption)
+  }
+  return (selectedValue.value as AutocompleteOption[])
+    .map((v) => getLabel(v))
+    .join(', ')
+})
+
+const isOptionSelected = (option: AutocompleteOption) => {
+  if (!selectedValue.value) return false
+  const value = isOption(option) ? option.value : option
+  if (!props.multiple) {
+    return selectedValue.value === value
+  }
+  return (selectedValue.value as AutocompleteOption[]).find((v) =>
+    isOption(v) ? v.value === value : v === value,
+  )
+}
+
+const areAllOptionsSelected = computed(() => {
+  if (!props.multiple) return false
+  return (
+    allOptions.value.length ===
+    (selectedValue.value as AutocompleteOption[])?.length
+  )
+})
+
+const selectAll = () => {
+  selectedValue.value = allOptions.value
+}
+
+const clearAll = () => {
+  selectedValue.value = props.multiple ? [] : undefined
+}
+
+const isOption = (option: AutocompleteOption) => {
+  return typeof option === 'object'
+}
+
+const isOptionGroup = (option: any) => {
+  return typeof option === 'object' && 'items' in option && 'group' in option
+}
+
+watch(
+  () => query.value,
+  () => {
+    emit('update:query', query.value)
+  },
+)
+
+watch(
+  () => showOptions.value,
+  () => {
+    if (showOptions.value) {
+      nextTick(() => searchInput.value?.$el.focus())
     }
   },
-  computed: {
-    selectedValue: {
-      get() {
-        if (!this.multiple) {
-          return this.findOption(this.modelValue)
-        }
-        // in case of `multiple`, modelValue is an array of values
-        // if the modelValue is a list of values, convert them to options
-        return isOptionOrValue(this.modelValue?.[0]) === 'value'
-          ? this.modelValue?.map((v) => this.findOption(v))
-          : this.modelValue
-      },
-      set(val) {
-        this.query = ''
-        if (val && !this.multiple) this.showOptions = false
-        if (!this.multiple) {
-          this.$emit('update:modelValue', val)
-          return
-        }
-        this.$emit('update:modelValue', val)
-      },
-    },
-    groups() {
-      if (!this.options || this.options.length == 0) return []
+)
 
-      let groups = this.options[0]?.group
-        ? this.options
-        : [{ group: '', items: this.sanitizeOptions(this.options) }]
+const rootRef = ref()
 
-      return groups
-        .map((group, i) => {
-          return {
-            key: i,
-            group: group.group,
-            hideLabel: group.hideLabel || false,
-            items: this.filterOptions(this.sanitizeOptions(group.items)),
-          }
-        })
-        .filter((group) => group.items.length > 0)
-    },
-    allOptions() {
-      return this.groups.flatMap((group) => group.items)
-    },
-    areAllOptionsSelected() {
-      if (!this.multiple) return false
-      return this.allOptions.length === this.selectedValue?.length
-    },
-  },
-  watch: {
-    query(q) {
-      this.$emit('update:query', q)
-    },
-    showOptions(val) {
-      if (val) nextTick(() => this.$refs.searchInput?.$el?.focus())
-    },
-  },
-  methods: {
-    rootRef() {
-      return this.$refs['rootRef']
-    },
-    togglePopover(val) {
-      this.showOptions = val ?? !this.showOptions
-    },
-    findOption(option) {
-      if (!option) return option
-      const value = isOptionOrValue(option) === 'value' ? option : option.value
-      return this.allOptions.find((o) => o.value === value)
-    },
-    filterOptions(options) {
-      if (!this.query) return options
-      return options.filter((option) => {
-        return (
-          option.label
-            .toLowerCase()
-            .includes(this.query.trim().toLowerCase()) ||
-          option.value.toLowerCase().includes(this.query.trim().toLowerCase())
-        )
-      })
-    },
-    displayValue(option) {
-      if (!option) return ''
-
-      if (!this.multiple) {
-        return this.getLabel(this.findOption(option))
-      }
-
-      if (!Array.isArray(option)) return ''
-
-      // in case of `multiple`, option is an array of values
-      // so the display value should be comma separated labels
-      return option.map((v) => this.getLabel(this.findOption(v))).join(', ')
-    },
-    getLabel(option) {
-      if (isOptionOrValue(option) === 'value') return option
-      return option?.label || option?.value || 'No label'
-    },
-    sanitizeOptions(options) {
-      if (!options) return []
-      // in case the options are just values, convert them to objects
-      return options.map((option) => {
-        return isOptionOrValue(option) === 'option'
-          ? option
-          : { label: option, value: option }
-      })
-    },
-    isOptionSelected(option) {
-      if (!this.selectedValue) return false
-      const value = isOptionOrValue(option) === 'value' ? option : option.value
-      if (!this.multiple) {
-        return this.selectedValue?.value === value
-      }
-      return this.selectedValue?.find((v) => v && v.value === value)
-    },
-    selectAll() {
-      this.selectedValue = this.allOptions
-    },
-    clearAll() {
-      this.selectedValue = []
-    },
-  },
+const togglePopover = () => {
+  showOptions.value = !showOptions.value
 }
 
-function isOptionOrValue(optionOrValue) {
-  return typeof optionOrValue === 'object' ? 'option' : 'value'
-}
+defineExpose({
+  rootRef,
+  togglePopover,
+})
 </script>
