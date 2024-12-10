@@ -37,3 +37,8 @@ const route = urlParams.get('route')
 if (route) {
   history.pushState({}, '', route)
 }
+
+// set theme attribute on load
+if (document.documentElement.classList.contains('htw-dark')) {
+  document.documentElement.setAttribute('data-theme', 'dark')
+}
