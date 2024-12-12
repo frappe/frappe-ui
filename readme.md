@@ -1,18 +1,32 @@
-<p align="center">
-  <a href="https://github.com/frappe/frappe-ui">
-    <img src="./frappe-ui.svg" width="250" />
-  </a>
-</p>
-<h1 style="font-size: 24px" align="center">Rapidly build modern frontends for Frappe apps</h1>
+<div align="center" markdown="1">
 
-<p align="center">
-  <img alt="MIT License" src="https://img.shields.io/github/license/frappe/frappe-ui"/>
-  <img alt="NPM Downloads" src="https://img.shields.io/npm/dm/frappe-ui.svg?style=flat"/>
-</p>
+<img src="https://github.com/user-attachments/assets/0a81cdc1-d957-47a9-b151-f5571be0d038" width="80" />
 
-Frappe UI provides a set of components and utilities for rapid UI development.
-Components are built using Vue 3 and Tailwind. Along with components, there are
-directives and utilities that make UI development easier.
+# Frappe UI
+**Rapidly build modern frontends for Frappe apps**
+
+<img alt="NPM Downloads" src="https://img.shields.io/npm/dm/frappe-ui.svg?style=flat"/>
+
+<a href="https://ui.frappe.io">
+<img width="1292" alt="Screenshot 2024-12-12 at 5 27 58 PM" src="https://github.com/user-attachments/assets/56800b45-2859-4dc5-92b8-e40959ce4902" />
+</a>
+</div>
+
+## Frappe UI
+
+Frappe UI provides a set of components and utilities for rapid UI development. Components are built using Vue 3 and Tailwind.
+Along with generic components like Button, Link, Dialog, etc., it also contains utilities for handling server-side data fetching, directives and utilities.
+
+
+### Motivation
+In 2019, I began building [Frappe Books](https://github.com/frappe/books) which had a new design. This led to the creation of small reusable components like Button, Dialog, and Card. Moving on to [Frappe Cloud](https://github.com/frappe/press) in 2020, I reused and evolved these components in the Frappe Cloud UI. In 2022, while starting a new project, I decided to extract these components into a standalone package to avoid repeating the copy-paste process. This package is now being developed alongside the [Gameplan](https://github.com/frappe/gameplan), continually adding generic components and utilities for frontend development.
+
+### Under the Hood
+
+- [TailwindCSS](https://github.com/tailwindlabs/tailwindcss): Utility first CSS Framework to build design system based UI.
+- [Headless UI](https://github.com/tailwindlabs/headlessui): Unstyled and accessible UI components.
+- [TipTap](https://github.com/ueberdosis/tiptap): ProseMirror based rich-text editor with a Vue API.
+- [dayjs](https://github.com/iamkun/dayjs): Minimal javascript library for working with dates.
 
 ## Links
 
@@ -20,7 +34,7 @@ directives and utilities that make UI development easier.
 - [Frappe UI Starter Boilerplate](https://github.com/netchampfaris/frappe-ui-starter)
 - [Community](https://github.com/frappe/frappe-ui/discussions)
 
-## Installation
+## Usage
 
 ```sh
 npm install frappe-ui
@@ -78,7 +92,15 @@ Frappe UI is being used in a lot of products by
 - [Helpdesk](https://github.com/frappe/helpdesk)
 - [Frappe Insights](https://github.com/frappe/insights)
 - [Frappe Drive](https://github.com/frappe/drive)
+- [Frappe Builder](https://github.com/frappe/builder)
 
-## License
-
-MIT
+<br>
+<br>
+<div align="center">
+	<a href="https://frappe.io" target="_blank">
+		<picture>
+			<source media="(prefers-color-scheme: dark)" srcset="https://frappe.io/files/Frappe-white.png">
+			<img src="https://frappe.io/files/Frappe-black.png" alt="Frappe Technologies" height="28"/>
+		</picture>
+	</a>
+</div>
