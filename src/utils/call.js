@@ -20,7 +20,7 @@ export default async function call(method, args, options = {}) {
   
   // Allow custom path override using the url args
   if (args.url) {
-    path = url;
+    path = url + path;
   }
   const res = await fetch(path, {
     method: 'POST',
