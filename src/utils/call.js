@@ -17,6 +17,11 @@ export default async function call(method, args, options = {}) {
   }
 
   let path = method.startsWith('/') ? method : `/api/method/${method}`
+  
+  // Allow custom path override using the url args
+  if (args.url) {
+    path = url;
+  }
   const res = await fetch(path, {
     method: 'POST',
     headers,
