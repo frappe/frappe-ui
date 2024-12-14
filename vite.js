@@ -1,13 +1,16 @@
 const path = require('path')
 const fs = require('fs')
+const DocTypeInterfaceGenerator = require('./scripts/generateInterface')
 
 module.exports = function proxyOptions({
   port = 8080,
   source = '^/(app|login|api|assets|files|private)',
 } = {}) {
-  const config = getCommonSiteConfig()
-  const webserver_port = config ? config.webserver_port : 8000
-  if (!config) {
+  const commonSiteConfig = getCommonSiteConfig()
+  const webserver_port = commonSiteConfig
+    ? commonSiteConfig.webserver_port
+    : 8000
+  if (!commonSiteConfig) {
     console.log('No common_site_config.json found, using default port 8000')
   }
   let proxy = {}
@@ -19,15 +22,44 @@ module.exports = function proxyOptions({
       return `http://${site_name}:${webserver_port}`
     },
   }
+
   return {
     name: 'frappeui-vite-plugin',
-    config: () => ({
-      server: {
-        port: port,
-        proxy: proxy,
-      },
-    }),
+    config: async () => {
+      await generateDocTypeInterfaces()
+
+      return {
+        server: {
+          port: port,
+          proxy: proxy,
+        },
+      }
+    },
   }
+}
+
+async function generateDocTypeInterfaces() {
+  const config = getConfig()
+  if (!(config && config.typeGeneration && config.typeGeneration.input)) return
+
+  const frontendFolder = process.cwd()
+  let outputPath = config.typeGeneration.output || 'src/types/doctypes.ts'
+  if (!path.isAbsolute(outputPath)) {
+    outputPath = path.join(frontendFolder, outputPath)
+  }
+
+  const appsFolder = findAppsFolder()
+  if (!appsFolder) {
+    console.error('Could not find frappe-bench/apps folder')
+    return
+  }
+
+  const generator = new DocTypeInterfaceGenerator(
+    appsFolder,
+    config.typeGeneration.input,
+    outputPath,
+  )
+  await generator.generate()
 }
 
 function getCommonSiteConfig() {
@@ -47,4 +79,25 @@ function getCommonSiteConfig() {
     currentDir = path.resolve(currentDir, '..')
   }
   return null
+}
+
+function findAppsFolder() {
+  let currentDir = process.cwd()
+  while (currentDir !== '/') {
+    if (
+      fs.existsSync(path.join(currentDir, 'apps')) &&
+      fs.existsSync(path.join(currentDir, 'sites'))
+    ) {
+      return path.join(currentDir, 'apps')
+    }
+    currentDir = path.resolve(currentDir, '..')
+  }
+  return null
+}
+
+function getConfig() {
+  let configPath = path.join(process.cwd(), 'frappeui.json')
+  if (fs.existsSync(configPath)) {
+    return JSON.parse(fs.readFileSync(configPath))
+  }
 }

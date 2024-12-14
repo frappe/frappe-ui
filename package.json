@@ -50,6 +50,7 @@
     "dayjs": "^1.11.13",
     "feather-icons": "^4.28.0",
     "idb-keyval": "^6.2.0",
+    "ora": "5.4.1",
     "prettier": "^3.3.2",
     "radix-vue": "^1.5.3",
     "showdown": "^2.1.0",
