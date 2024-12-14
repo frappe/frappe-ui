@@ -155,7 +155,9 @@ module.exports = class DocTypeInterfaceGenerator {
         description += ` (${field.options})`
       }
       description += ' */'
-      interfaceString += `  ${description}\n  ${field.fieldname}: ${tsType};\n`
+      interfaceString += `  ${description}\n  ${field.fieldname}${
+        field.reqd || field.fieldtype === 'Check' ? '' : '?'
+      }: ${tsType};\n`
     }
 
     interfaceString += `}\n`
