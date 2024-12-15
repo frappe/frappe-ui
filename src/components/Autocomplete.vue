@@ -16,7 +16,10 @@
             >
               <div class="flex items-center overflow-hidden">
                 <slot name="prefix" />
-                <span class="truncate text-base leading-5 text-ink-gray-8" v-if="displayValue">
+                <span
+                  class="truncate text-base leading-5 text-ink-gray-8"
+                  v-if="displayValue"
+                >
                   {{ displayValue }}
                 </span>
                 <span class="text-base leading-5 text-ink-gray-4" v-else>
@@ -166,8 +169,8 @@ import {
   ComboboxInput,
   ComboboxOption,
   ComboboxOptions,
-} from '@headlessui/vue';
-import { computed, nextTick, ref, watch } from 'vue';
+} from '@headlessui/vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import Popover from './Popover.vue'
 import { Button } from './Button'
 import FeatherIcon from './FeatherIcon.vue'
