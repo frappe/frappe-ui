@@ -155,9 +155,12 @@ module.exports = class DocTypeInterfaceGenerator {
         description += ` (${field.options})`
       }
       description += ' */'
-      interfaceString += `  ${description}\n  ${field.fieldname}${
-        field.reqd || field.fieldtype === 'Check' ? '' : '?'
-      }: ${tsType};\n`
+      let optional =
+        field.reqd ||
+        ['Check', 'Table', 'Table MultiSelect'].includes(field.fieldtype)
+          ? ''
+          : '?'
+      interfaceString += `  ${description}\n  ${field.fieldname}${optional}: ${tsType};\n`
     }
 
     interfaceString += `}\n`
