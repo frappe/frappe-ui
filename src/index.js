@@ -96,6 +96,12 @@ export { frappeRequest } from './utils/frappeRequest.js'
 export { default as initSocket } from './utils/socketio.js'
 export { setConfig, getConfig } from './utils/config.js'
 
+// new data fetching
+export { useCall } from './data-fetching/useCall'
+export { useList } from './data-fetching/useList'
+export { useDoc } from './data-fetching/useDoc'
+export { useFrappeFetch } from './data-fetching/useFrappeFetch'
+
 // plugin
 export { default as pageMetaPlugin } from './utils/pageMeta.js'
 export { default as FrappeUI } from './utils/plugin.js'
