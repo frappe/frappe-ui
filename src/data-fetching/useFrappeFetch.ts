@@ -2,6 +2,7 @@ import { createFetch } from '@vueuse/core'
 
 export const useFrappeFetch = createFetch({
   options: {
+    fetch: (...args) => fetch(...args), // required for vitest
     beforeFetch({ options }) {
       options.headers = setHeaders(options.headers || {})
       return { options }
@@ -60,14 +61,24 @@ export const useFrappeFetch = createFetch({
 })
 
 function setHeaders(headers: HeadersInit) {
+  // handle case where this could run in node environment (vitest)
+  let siteName = null
+  let csrfToken = null
+  if (typeof window !== 'undefined') {
+    siteName = window.location.hostname
+    csrfToken =
+      window.csrf_token !== '{{ csrf_token }}' ? window.csrf_token : null
+  }
+
   const defaultHeaders: Record<string, string> = {
     Accept: 'application/json',
     'Content-Type': 'application/json; charset=utf-8',
-    'X-Frappe-Site-Name': window.location.hostname,
   }
-
-  if (window.csrf_token && window.csrf_token !== '{{ csrf_token }}') {
-    defaultHeaders['X-Frappe-CSRF-Token'] = window.csrf_token
+  if (siteName) {
+    defaultHeaders['X-Frappe-Site-Name'] = siteName
+  }
+  if (csrfToken) {
+    defaultHeaders['X-Frappe-CSRF-Token'] = csrfToken
   }
 
   return { ...headers, ...defaultHeaders }
