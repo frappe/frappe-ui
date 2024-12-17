@@ -1,72 +1,32 @@
-import { computed, Reactive, reactive, readonly, ref, unref } from 'vue'
-import { isEmptyObject, makeGetParams } from './common'
+import { computed, reactive, readonly, ref } from 'vue'
+import { UseFetchOptions } from '@vueuse/core'
 import { useFrappeFetch } from './useFrappeFetch'
 import { useCall } from './useCall'
+import { parseFilters, makeGetParams } from './utils'
+import { ListOptions, ListResponse } from './types'
 
-type Field = string
+export function useList<T>(options: ListOptions<T>) {
+  const {
+    doctype,
+    fields,
+    filters,
+    orderBy,
+    start,
+    limit,
+    groupBy,
+    parent,
+    debug,
+    initialData,
+    immediate = true,
+    refetch = true,
+  } = options
 
-type ChildTableField = {
-  [key: string]: Field[]
-}
-
-type FilterValue =
-  | string
-  | number
-  | boolean
-  | [string, string | number | boolean]
-
-export interface ListFilters {
-  [key: Field]: FilterValue
-}
-
-type OrderBy =
-  | `${Field} ASC`
-  | `${Field} DESC`
-  | `${Field} asc`
-  | `${Field} desc`
-
-export interface ListOptions<T> {
-  doctype: string
-  fields?: Array<keyof T | ChildTableField>
-  filters?: Reactive<ListFilters>
-  orderBy?: OrderBy
-  start?: number
-  limit?: number
-  groupBy?: Field
-  parent?: string
-  debug?: boolean
-  cacheKey?: string | Array<string | number | boolean>
-  immediate?: boolean
-  refetch?: boolean
-  transform?: (data: T[]) => T[]
-  onSuccess?: (data: T[]) => void
-  onError?: (error: Error) => void
-}
-
-export function useList<T>({
-  doctype,
-  fields,
-  filters,
-  orderBy,
-  start,
-  limit,
-  groupBy,
-  parent,
-  debug,
-  cacheKey,
-  immediate = true,
-  refetch = true,
-  transform,
-  onSuccess,
-  onError,
-}: ListOptions<T>) {
   const _start = ref(start || 0)
   const _limit = ref(limit || 20)
 
   const url = computed(() => {
-    let parsedFilters = parseFilters(filters || {})
-
-    let params = makeGetParams({
+    const parsedFilters = parseFilters(filters || {})
+    const params = makeGetParams({
       fields: fields?.length ? JSON.stringify(fields) : null,
       filters: parsedFilters ? JSON.stringify(parsedFilters) : null,
       order_by: orderBy,
@@ -79,9 +39,14 @@ export function useList<T>({
     return `/api/v2/document/${doctype}?${params}`
   })
 
-  type ListResponse = {
-    result: T[]
-    has_next_page: boolean
+  const fetchOptions: UseFetchOptions = {
+    immediate,
+    refetch,
+    initialData: initialData
+      ? { result: initialData, has_next_page: false }
+      : null,
+    afterFetch: handleAfterFetch<T>(options),
+    onFetchError: handleFetchError<T>(options),
   }
 
   const {
@@ -93,58 +58,20 @@ export function useList<T>({
     aborted,
     abort,
     execute,
-  } = useFrappeFetch<ListResponse>(url, {
-    immediate,
-    refetch,
-    afterFetch(ctx) {
-      if (transform) {
-        let returnValue = transform(ctx.data.result)
-        if (Array.isArray(returnValue)) {
-          ctx.data.result = returnValue
-        }
-      }
-      if (onSuccess) {
-        try {
-          onSuccess(ctx.data.result)
-        } catch (e) {
-          console.error('Error in onSuccess hook:', e)
-        }
-      }
-      return ctx
-    },
-    onFetchError(ctx) {
-      if (onError) {
-        try {
-          onError(ctx.error)
-        } catch (e) {
-          console.error('Error in onError hook:', e)
-        }
-      }
-      return ctx
-    },
-  })
+  } = useFrappeFetch<ListResponse<T>>(url, fetchOptions).get()
 
-  const result = computed(() => (data.value ? data.value.result : null))
-  const hasNextPage = computed(() =>
-    data.value ? data.value.has_next_page : false,
-  )
+  const result = computed(() => data.value?.result ?? null)
+  const hasNextPage = computed(() => data.value?.has_next_page ?? false)
   const hasPreviousPage = computed(() => _start.value > 0)
 
   const next = () => {
     _start.value += _limit.value
-    if (!refetch) {
-      execute()
-    }
+    if (!refetch) execute()
   }
 
   const previous = () => {
-    _start.value -= _limit.value
-    if (_start.value < 0) {
-      _start.value = 0
-    }
-    if (!refetch) {
-      execute()
-    }
+    _start.value = Math.max(0, _start.value - _limit.value)
+    if (!refetch) execute()
   }
 
   const insert = useCall({
@@ -153,9 +80,7 @@ export function useList<T>({
     immediate: false,
     refetch: false,
     onSuccess() {
-      if (refetch) {
-        execute()
-      }
+      if (refetch) execute()
     },
   })
 
@@ -181,32 +106,34 @@ export function useList<T>({
   })
 }
 
-export function parseFilters(filters: ListFilters): ListFilters | null {
-  let parsedFilters: ListFilters = {}
-  for (let key in filters) {
-    let value = filters[key]
-    if (Array.isArray(value)) {
-      let [operator, actualValue] = value
-      operator = unref(operator)
-      actualValue = unref(actualValue)
-      if (operator === 'like') {
-        if (typeof actualValue != 'string') {
-          actualValue = String(actualValue)
-        }
-        if (actualValue == null || actualValue == '') {
-          continue
-        }
-        if (!actualValue.includes('%')) {
-          actualValue = `%${actualValue}%`
-        }
+function handleAfterFetch<T>({ transform, onSuccess }: ListOptions<T>) {
+  return function (ctx) {
+    if (transform) {
+      const returnValue = transform(ctx.data.result)
+      if (Array.isArray(returnValue)) {
+        ctx.data.result = returnValue
       }
-      parsedFilters[key] = [operator, actualValue]
-    } else {
-      parsedFilters[key] = unref(value)
     }
-  }
-  if (isEmptyObject(parsedFilters)) {
-    return null
-  }
-  return parsedFilters
+    if (onSuccess) {
+      try {
+        onSuccess(ctx.data.result)
+      } catch (e) {
+        console.error('Error in onSuccess hook:', e)
+      }
+    }
+    return ctx
+  } as UseFetchOptions['afterFetch']
+}
+
+function handleFetchError<T>({ onError }: ListOptions<T>) {
+  return function (ctx) {
+    if (onError) {
+      try {
+        onError(ctx.error)
+      } catch (e) {
+        console.error('Error in onError hook:', e)
+      }
+    }
+    return ctx
+  } as UseFetchOptions['onFetchError']
 }
