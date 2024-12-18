@@ -81,9 +81,7 @@ export default {
     },
 
     addVideo(src) {
-      if (!src) {
-        return
-      }
+      if (!src) return
       this.editor
         .chain()
         .focus()

@@ -65,9 +65,7 @@ export default {
       })
     },
     addImage(src) {
-      if (!src) {
-        return
-      }
+      if (!src) return
       this.editor.chain().focus().setImage({ src }).run()
       this.reset()
     },
