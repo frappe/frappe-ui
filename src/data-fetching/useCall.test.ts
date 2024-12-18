@@ -2,9 +2,9 @@
  * @vitest-environment node
  */
 
-import { nextTick, ref } from 'vue'
+import { ref } from 'vue'
 import { useCall } from './index'
-import { url } from '../mocks/utils'
+import { url, waitUntilValueChanges } from '../mocks/utils'
 
 describe('msw works', () => {
   it('ping responds with pong', async () => {
@@ -38,14 +38,8 @@ describe('useCall', () => {
     ping.execute()
     expect(ping.loading).toBe(true)
 
-    // Wait for response
     await ping.promise
-
-    // TODO: 3 nextTicks are required to ensure loading is updated
-    // find a better way to handle this
-    await nextTick()
-    await nextTick()
-    await nextTick()
+    await waitUntilValueChanges(() => ping.loading)
 
     // Verify final state
     expect(ping.data).toBe('pong')
@@ -65,9 +59,7 @@ describe('useCall', () => {
     errorCall.fetch()
     await errorCall.promise.catch(() => {})
 
-    await nextTick()
-    await nextTick()
-    await nextTick()
+    await waitUntilValueChanges(() => errorCall.loading)
 
     expect(errorCall.loading).toBe(false)
     expect(errorCall.error).toBeInstanceOf(Error)

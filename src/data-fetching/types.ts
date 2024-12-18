@@ -1,3 +1,5 @@
+import { Reactive, Ref } from 'vue'
+
 export type Field = string
 
 export type ChildTableField = {
@@ -8,7 +10,7 @@ export type FilterValue =
   | string
   | number
   | boolean
-  | [string, string | number | boolean]
+  | [string, string | number | boolean | Ref<string | number | boolean>]
 
 export interface ListFilters {
   [key: Field]: FilterValue
@@ -34,6 +36,7 @@ export interface ListOptions<T> {
   initialData?: T[]
   immediate?: boolean
   refetch?: boolean
+  baseUrl?: string
   transform?: (data: T[]) => T[]
   onSuccess?: (data: T[]) => void
   onError?: (error: Error) => void

@@ -51,4 +51,50 @@ export const handlers = [
       data: { success: true },
     })
   }),
+
+  http.get(url('/api/v2/document/User'), async ({ request }) => {
+    const url = new URL(request.url)
+
+    let listParams = parseListParams(url.searchParams)
+    let result = getUsers(listParams)
+
+    return HttpResponse.json({
+      data: {
+        result,
+        has_next_page: true,
+      },
+    })
+  }),
 ]
+
+function getUsers(listParams) {
+  let { start = 0, limit = 20, filters = {} } = listParams
+
+  return Array.from({ length: limit }, (_, i) => {
+    let n = i + start + 1
+    return {
+      name: `User${n}`,
+      email: `user${n}@example.com`,
+    }
+  }).filter((user) => {
+    if (filters.email?.[0] === 'like') {
+      let query = filters.email[1].replace(/%/g, '')
+      return user.email.includes(query)
+    }
+    return true
+  })
+}
+
+function parseListParams(searchParams) {
+  let out = {}
+  for (let [key, value] of searchParams) {
+    if (key === 'fields' || key === 'filters') {
+      out[key] = JSON.parse(value)
+    } else if (key === 'start' || key === 'limit') {
+      out[key] = parseInt(value)
+    } else if (['group_by', 'order_by', 'parent'].includes(key)) {
+      out[key] = value
+    }
+  }
+  return out
+}
