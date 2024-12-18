@@ -5,7 +5,7 @@
   "main": "./src/index.js",
   "scripts": {
     "test": "vitest",
-    "prettier": "npx prettier -w ./src",
+    "prettier": "yarn prettier -w ./src",
     "bump-and-release": "git pull --rebase origin main && yarn version --patch && git push && git push --tags",
     "dev": "vite",
     "build": "vite build",
