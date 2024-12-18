@@ -19,6 +19,7 @@ export function useList<T>(options: ListOptions<T>) {
     initialData,
     immediate = true,
     refetch = true,
+    baseUrl = '',
   } = options
 
   const _start = ref(start || 0)
@@ -36,7 +37,7 @@ export function useList<T>(options: ListOptions<T>) {
       parent: parent,
       debug: debug,
     })
-    return `/api/v2/document/${doctype}?${params}`
+    return `${baseUrl}/api/v2/document/${doctype}?${params}`
   })
 
   const fetchOptions: UseFetchOptions = {
@@ -98,9 +99,10 @@ export function useList<T>(options: ListOptions<T>) {
     aborted,
     url,
     abort,
-    execute,
     next,
     previous,
+    execute,
+    fetch: execute,
     reload: execute,
     insert,
   })
