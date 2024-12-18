@@ -16,6 +16,7 @@
   },
   "files": [
     "src",
+    "scripts",
     "vite.js"
   ],
   "repository": {
