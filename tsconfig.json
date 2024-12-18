@@ -11,14 +11,17 @@
     "esModuleInterop": true,
     "lib": ["ESNext", "DOM"],
     "skipLibCheck": true,
-    "noEmit": true
+    "noEmit": true,
+    "types": ["vitest/globals"]
   },
   "include": [
     "src/**/*.ts",
     "src/**/*.d.ts",
     "src/**/*.tsx",
     "src/**/*.vue",
-    "src/index.js"
+    "src/index.js",
+    "vitest.config.ts",
+    "vitest.setup.ts"
   ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
