@@ -32,6 +32,7 @@ describe('useDoc', () => {
 
     // Verify final state
     expect(user.doc).toStrictEqual({
+      doctype: 'User',
       name: 'user1',
       email: 'user1@example.com',
       first_name: 'User',
@@ -109,6 +110,7 @@ describe('useDoc', () => {
     const newEmail = 'updated@example.com'
     await user.updateEmail.submit({ email: newEmail })
 
+    await waitUntilValueChanges(() => user.loading, true)
     await waitUntilValueChanges(() => user.doc)
 
     // Verify that the doc was updated

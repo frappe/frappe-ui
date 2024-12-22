@@ -39,7 +39,7 @@ class DocStore {
   getDoc(
     doctype: string,
     name: string | Ref<string> | ComputedRef<string>,
-  ): Doc | undefined {
+  ): Doc | null {
     const nameStr = unref(name)
     if (!doctype || !nameStr) {
       throw new Error('doctype and name are required')
@@ -47,9 +47,9 @@ class DocStore {
     const key = this.getKey(doctype, nameStr)
     if (this.isStale(key)) {
       this.cleanup(key)
-      return undefined
+      return null
     }
-    return this.docs.get(key)
+    return this.docs.get(key) || null
   }
 
   setDocs(docs: Doc[]) {
