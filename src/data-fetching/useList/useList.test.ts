@@ -3,8 +3,8 @@
  */
 
 import { ref } from 'vue'
-import { baseUrl, waitUntilValueChanges } from '../mocks/utils'
-import { useList } from './index'
+import { baseUrl, waitUntilValueChanges } from '../../mocks/utils'
+import { useList } from '../index'
 
 describe('useList', () => {
   it('it returns expected object', async () => {

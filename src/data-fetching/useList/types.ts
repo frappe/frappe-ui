@@ -22,7 +22,7 @@ export type OrderBy =
   | `${Field} asc`
   | `${Field} desc`
 
-export interface ListOptions<T> {
+export interface UseListOptions<T> {
   doctype: string
   fields?: Array<keyof T | ChildTableField>
   filters?: Reactive<ListFilters>
@@ -42,7 +42,7 @@ export interface ListOptions<T> {
   onError?: (error: Error) => void
 }
 
-export interface ListResponse<T> {
+export interface UseListResponse<T> {
   result: T[]
   has_next_page: boolean
 }

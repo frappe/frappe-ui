@@ -3,8 +3,8 @@
  */
 
 import { ref } from 'vue'
-import { useCall } from './index'
-import { url, waitUntilValueChanges } from '../mocks/utils'
+import { useCall } from '../index'
+import { url, waitUntilValueChanges } from '../../mocks/utils'
 
 describe('msw works', () => {
   it('ping responds with pong', async () => {
@@ -115,8 +115,9 @@ describe('useCall', () => {
   })
 
   it('supports submit with different params', async () => {
+    type Params = { value: string }
     type Response = { success: boolean; received: any }
-    const call = useCall<Response>({
+    const call = useCall<Response, Params>({
       url: url('/api/v2/method/post'),
       method: 'POST',
       refetch: true,
@@ -139,6 +140,24 @@ describe('useCall', () => {
     })
   })
 
+  it('supports submit with no params', async () => {
+    type Response = { success: boolean; received: any }
+    const call = useCall<Response>({
+      url: url('/api/v2/method/post'),
+      method: 'POST',
+      refetch: true,
+      immediate: false,
+    })
+
+    call.submit()
+    await waitUntilValueChanges(() => call.data)
+
+    expect(call.data).toEqual({
+      success: true,
+      received: {},
+    })
+  })
+
   it('handles abort correctly', async () => {
     const call = useCall({
       url: url('/api/v2/method/slow'),
@@ -150,5 +169,23 @@ describe('useCall', () => {
 
     call.abort()
     expect(call.aborted).toBe(true)
+  })
+
+  it('supports generic type parameters for Response and Params', async () => {
+    interface GetResponse {
+      value: string
+    }
+    interface GetParams {
+      value: string
+    }
+    const call = useCall<GetResponse, GetParams>({
+      url: url('/api/v2/method/get'),
+      immediate: false,
+    })
+
+    // @ts-expect-error
+    call.submit({ hello: 1 })
+
+    call.submit({ value: 'test' })
   })
 })

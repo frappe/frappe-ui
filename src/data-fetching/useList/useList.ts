@@ -1,11 +1,15 @@
 import { computed, reactive, readonly, ref } from 'vue'
-import { UseFetchOptions } from '@vueuse/core'
-import { useFrappeFetch } from './useFrappeFetch'
-import { useCall } from './useCall'
-import { parseFilters, makeGetParams } from './utils'
-import { ListOptions, ListResponse } from './types'
+import {
+  AfterFetchContext,
+  OnFetchErrorContext,
+  UseFetchOptions,
+} from '@vueuse/core'
+import { useFrappeFetch } from '../useFrappeFetch'
+import { useCall } from '../useCall/useCall'
+import { parseFilters, makeGetParams } from '../utils'
+import { UseListOptions, UseListResponse } from './types'
 
-export function useList<T>(options: ListOptions<T>) {
+export function useList<T>(options: UseListOptions<T>) {
   const {
     doctype,
     fields,
@@ -59,7 +63,7 @@ export function useList<T>(options: ListOptions<T>) {
     aborted,
     abort,
     execute,
-  } = useFrappeFetch<ListResponse<T>>(url, fetchOptions).get()
+  } = useFrappeFetch<UseListResponse<T>>(url, fetchOptions).get()
 
   const result = computed(() => data.value?.result ?? null)
   const hasNextPage = computed(() => data.value?.has_next_page ?? false)
@@ -108,8 +112,8 @@ export function useList<T>(options: ListOptions<T>) {
   })
 }
 
-function handleAfterFetch<T>({ transform, onSuccess }: ListOptions<T>) {
-  return function (ctx) {
+function handleAfterFetch<T>({ transform, onSuccess }: UseListOptions<T>) {
+  return function (ctx: AfterFetchContext) {
     if (transform) {
       const returnValue = transform(ctx.data.result)
       if (Array.isArray(returnValue)) {
@@ -127,8 +131,8 @@ function handleAfterFetch<T>({ transform, onSuccess }: ListOptions<T>) {
   } as UseFetchOptions['afterFetch']
 }
 
-function handleFetchError<T>({ onError }: ListOptions<T>) {
-  return function (ctx) {
+function handleFetchError<T>({ onError }: UseListOptions<T>) {
+  return function (ctx: OnFetchErrorContext) {
     if (onError) {
       try {
         onError(ctx.error)

@@ -1,27 +1,11 @@
-import { computed, reactive, readonly, ref } from 'vue'
+import { computed, reactive, readonly, ref, unref } from 'vue'
 import { UseFetchOptions } from '@vueuse/core'
-import { useFrappeFetch } from './useFrappeFetch'
-import { unrefObject, makeGetParams } from './utils'
+import { useFrappeFetch } from '../useFrappeFetch'
+import { unrefObject, makeGetParams } from '../utils'
+import { BasicParams, UseCallOptions } from './types'
 
-type BasicObject = Record<string, any>
-
-export interface CallOptions<
-  TResponse,
-  TParams extends BasicObject = BasicObject,
-> {
-  url: string
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
-  params?: TParams | (() => TParams)
-  cacheKey?: string | Array<string | number | boolean>
-  immediate?: boolean
-  refetch?: boolean
-  transform?: (data: TResponse) => TResponse
-  onSuccess?: (data: TResponse) => void
-  onError?: (error: Error) => void
-}
-
-export function useCall<TResponse, TParams extends BasicObject = BasicObject>(
-  options: CallOptions<TResponse, TParams>,
+export function useCall<TResponse, TParams extends BasicParams = undefined>(
+  options: UseCallOptions<TResponse, TParams>,
 ) {
   const {
     url,
@@ -29,9 +13,10 @@ export function useCall<TResponse, TParams extends BasicObject = BasicObject>(
     params,
     immediate = true,
     refetch = false,
+    baseUrl = '',
   } = options
 
-  let submitParams = ref<TParams | null>(null)
+  let submitParams = ref<TParams | null | undefined>(null)
 
   let resolve: (value?: any) => void
   let reject: (reason?: any) => void
@@ -52,16 +37,17 @@ export function useCall<TResponse, TParams extends BasicObject = BasicObject>(
       out = params
     }
     if (out === undefined) {
-      return null
+      return {}
     }
     return unrefObject(out)
   })
 
-  const urlForGet = computed(() => {
+  const computedUrl = computed(() => {
+    const base = `${baseUrl}${unref(url)}`
     if (method === 'GET' && computedParams.value) {
-      return `${url}?${makeGetParams(computedParams.value)}`
+      return `${base}?${makeGetParams(computedParams.value)}`
     }
-    return url
+    return base
   })
 
   const fetchOptions: UseFetchOptions = {
@@ -73,13 +59,19 @@ export function useCall<TResponse, TParams extends BasicObject = BasicObject>(
 
   let result
   if (method === 'POST') {
-    result = useFrappeFetch<TResponse>(url, fetchOptions).post(computedParams)
+    result = useFrappeFetch<TResponse>(computedUrl, fetchOptions).post(
+      computedParams,
+    )
   } else if (method === 'PUT') {
-    result = useFrappeFetch<TResponse>(url, fetchOptions).put(computedParams)
+    result = useFrappeFetch<TResponse>(computedUrl, fetchOptions).put(
+      computedParams,
+    )
   } else if (method === 'DELETE') {
-    result = useFrappeFetch<TResponse>(url, fetchOptions).delete(computedParams)
+    result = useFrappeFetch<TResponse>(computedUrl, fetchOptions).delete(
+      computedParams,
+    )
   } else {
-    result = useFrappeFetch<TResponse>(urlForGet, fetchOptions).get()
+    result = useFrappeFetch<TResponse>(computedUrl, fetchOptions).get()
   }
 
   const {
@@ -105,7 +97,7 @@ export function useCall<TResponse, TParams extends BasicObject = BasicObject>(
     promise.value = makePromise()
   })
 
-  const submit = async (params: TParams) => {
+  const submit = async (params?: TParams) => {
     submitParams.value = params
     if (!refetch) {
       execute()
@@ -116,7 +108,7 @@ export function useCall<TResponse, TParams extends BasicObject = BasicObject>(
     submitParams.value = null
   }
 
-  return reactive({
+  let out = reactive({
     data: data,
     error: readonly(error),
     loading: isFetching,
@@ -124,7 +116,7 @@ export function useCall<TResponse, TParams extends BasicObject = BasicObject>(
     isFinished,
     canAbort,
     aborted,
-    url: urlForGet,
+    url: computedUrl,
     promise,
     abort,
     execute: execute,
@@ -133,12 +125,18 @@ export function useCall<TResponse, TParams extends BasicObject = BasicObject>(
     reset,
     submit,
   })
+
+  return out as Omit<typeof out, 'submit'> & {
+    submit: TParams extends undefined
+      ? (params?: never) => Promise<void>
+      : (params: TParams) => Promise<void>
+  }
 }
 
-function handleAfterFetch<R, P extends BasicObject>({
+function handleAfterFetch<R, P extends BasicParams>({
   transform,
   onSuccess,
-}: CallOptions<R, P>) {
+}: UseCallOptions<R, P>) {
   return function (ctx) {
     if (transform) {
       let returnValue = transform(ctx.data)
@@ -157,9 +155,9 @@ function handleAfterFetch<R, P extends BasicObject>({
   } as UseFetchOptions['afterFetch']
 }
 
-function handleFetchError<R, P extends BasicObject>({
+function handleFetchError<R, P extends BasicParams>({
   onError,
-}: CallOptions<R, P>) {
+}: UseCallOptions<R, P>) {
   return function (ctx) {
     if (onError) {
       try {
