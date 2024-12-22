@@ -1,8 +1,0 @@
-[build]
-  publish = ".histoire/dist"
-  command = "yarn story:build"
-
-[[redirects]]
-  from = "/*"
-  to = "/"
-  status = 200
