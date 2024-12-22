@@ -65,6 +65,17 @@ export const handlers = [
       },
     })
   }),
+
+  http.get(url('/api/v2/document/User/user1'), async () => {
+    return HttpResponse.json({
+      data: {
+        name: 'user1',
+        email: 'user1@example.com',
+        first_name: 'User',
+        last_name: '1',
+      },
+    })
+  }),
 ]
 
 function getUsers(listParams) {
