@@ -1,4 +1,5 @@
 import { createFetch } from '@vueuse/core'
+import { docStore } from './docStore'
 
 export const useFrappeFetch = createFetch({
   options: {
@@ -16,6 +17,9 @@ export const useFrappeFetch = createFetch({
           console.log(d?.message)
         }
         console.groupEnd()
+      }
+      if (responseData.docs) {
+        docStore.setDocs(responseData.docs)
       }
       ctx.data = responseData.data
       return ctx

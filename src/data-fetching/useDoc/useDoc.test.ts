@@ -5,7 +5,7 @@ import { ref } from 'vue'
 import { baseUrl, waitUntilValueChanges } from '../../mocks/utils'
 import { useCall, useDoc } from '../index'
 
-describe('useList', () => {
+describe('useDoc', () => {
   it('it returns expected object', async () => {
     interface User {
       name: string
@@ -70,8 +70,6 @@ describe('useList', () => {
 
     await waitUntilValueChanges(() => user.loading, false)
 
-    console.log(user.doc)
-
     expect(user.getFullName).toBeDefined()
     expect(user.updateEmail).toBeDefined()
 
@@ -79,5 +77,41 @@ describe('useList', () => {
 
     const newEmail = 'updated@example.com'
     user.updateEmail.submit({ email: newEmail })
+  })
+
+  it('updates doc after running doc method', async () => {
+    interface User {
+      name: string
+      email: string
+      first_name: string
+      last_name: string
+    }
+
+    interface UserMethods {
+      updateEmail: (params: { email: string }) => void
+    }
+
+    let user = useDoc<User, UserMethods>({
+      baseUrl,
+      doctype: 'User',
+      name: 'user1',
+      methods: {
+        updateEmail: 'update_email',
+      },
+    })
+
+    await waitUntilValueChanges(() => user.doc)
+
+    // Initial email value
+    expect(user.doc.email).toBe('user1@example.com')
+
+    // Update email
+    const newEmail = 'updated@example.com'
+    await user.updateEmail.submit({ email: newEmail })
+
+    await waitUntilValueChanges(() => user.doc)
+
+    // Verify that the doc was updated
+    expect(user.doc.email).toBe(newEmail)
   })
 })

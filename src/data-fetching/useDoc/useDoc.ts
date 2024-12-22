@@ -3,6 +3,7 @@ import { UseFetchOptions } from '@vueuse/core'
 import { useFrappeFetch } from '../useFrappeFetch'
 import { useCall } from '../useCall/useCall'
 import { UseCallOptions } from '../useCall/types'
+import { docStore } from '../docStore'
 
 // Transform method signatures into useCall return type
 type TransformMethods<T> = {
@@ -20,7 +21,7 @@ interface DocMethodOption<T = any>
   name: string
 }
 
-interface UseDocOptions<TMethods = {}> {
+interface UseDocOptions {
   doctype: string
   name: string | MaybeRef<string>
   baseUrl?: string
@@ -28,19 +29,7 @@ interface UseDocOptions<TMethods = {}> {
   immediate?: boolean
 }
 
-interface DocTypeMeta {
-  name: string
-  fields: any[]
-  permissions: any
-  whitelisted_methods: Array<{
-    method: string
-    class: string
-    app: string
-    http_methods: Array<'GET' | 'POST' | 'PUT' | 'DELETE'>
-  }>
-}
-
-export function useDoc<TDoc, TMethods = {}>(options: UseDocOptions<TMethods>) {
+export function useDoc<TDoc, TMethods = {}>(options: UseDocOptions) {
   const {
     baseUrl = '',
     doctype,
@@ -54,9 +43,20 @@ export function useDoc<TDoc, TMethods = {}>(options: UseDocOptions<TMethods>) {
     return `${baseUrl}/api/v2/document/${doctype}/${_name}`
   })
 
+  let initialDoc: TDoc | null = null
+  let storedDoc = docStore.getDoc(doctype, unref(name))
+  if (storedDoc) {
+    initialDoc = storedDoc as TDoc
+  }
+
   const fetchOptions: UseFetchOptions = {
     immediate,
     refetch: true,
+    initialData: initialDoc,
+    afterFetch(ctx) {
+      docStore.setDoc({ doctype, ...ctx.data })
+      return ctx
+    },
   }
 
   const {
@@ -68,7 +68,7 @@ export function useDoc<TDoc, TMethods = {}>(options: UseDocOptions<TMethods>) {
     aborted,
     abort,
     execute,
-  } = useFrappeFetch<TDoc>(url, fetchOptions).get()
+  } = useFrappeFetch(url, fetchOptions).get()
 
   let docMethods: Record<string, ReturnType<typeof useCall>> = {}
   if (methods) {
@@ -85,6 +85,7 @@ export function useDoc<TDoc, TMethods = {}>(options: UseDocOptions<TMethods>) {
       let callOptions: UseCallOptions = {
         immediate: false,
         refetch: true,
+        method: 'POST',
         ...option,
         baseUrl,
         url: computed(
@@ -97,8 +98,10 @@ export function useDoc<TDoc, TMethods = {}>(options: UseDocOptions<TMethods>) {
     }
   }
 
+  const doc = computed(() => docStore.getDoc(doctype, name) as TDoc)
+
   let out = reactive({
-    doc: data,
+    doc,
     error,
     loading: isFetching,
     aborted,
