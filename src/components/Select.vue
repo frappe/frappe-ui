@@ -108,10 +108,10 @@ const fontSizeClasses = computed(() => {
 
 const paddingClasses = computed(() => {
   return {
-    sm: 'px-2',
-    md: 'px-2.5',
-    lg: 'px-3',
-    xl: 'px-3',
+    sm: 'pl-2 pr-5',
+    md: 'pl-2.5 pr-5.5',
+    lg: 'pl-3 pr-6',
+    xl: 'pl-3 pr-6',
   }[props.size]
 })
 
@@ -146,7 +146,7 @@ const selectClasses = computed(() => {
     paddingClasses.value,
     variantClasses,
     textColor.value,
-    'transition-colors w-full py-0',
+    'transition-colors w-full py-0 truncate',
   ]
 })
 
