@@ -1,7 +1,7 @@
 <template>
   <div
     ref="columnRef"
-    class="group flex items-center"
+    class="group relative flex items-center"
     :class="item.align ? alignmentMap[item.align] : 'justify-between'"
   >
     <div
@@ -18,7 +18,7 @@
     </div>
     <slot v-if="list.options.resizeColumn" name="resizer" v-bind="{ item }">
       <div
-        class="flex h-4 w-2 cursor-col-resize justify-center"
+        class="flex h-4 absolute -right-2 w-2 cursor-col-resize justify-center"
         @mousedown="startResizing"
       >
         <div
