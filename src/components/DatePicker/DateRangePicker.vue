@@ -5,7 +5,7 @@
     :placement="placement"
   >
     <template #target="{ togglePopover }">
-      <Input
+      <TextInput
         readonly
         type="text"
         icon-left="calendar"
@@ -122,7 +122,6 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue'
 
-import Input from '../Input.vue'
 import { Button } from '../Button'
 import Popover from '../Popover.vue'
 import FeatherIcon from '../FeatherIcon.vue'
