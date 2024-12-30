@@ -97,10 +97,10 @@ export { default as initSocket } from './utils/socketio.js'
 export { setConfig, getConfig } from './utils/config.js'
 
 // new data fetching
-export { useCall } from './data-fetching/useCall'
-export { useList } from './data-fetching/useList'
-export { useDoc } from './data-fetching/useDoc'
-export { useFrappeFetch } from './data-fetching/useFrappeFetch'
+export { useCall } from './data-fetching/useCall/useCall.ts'
+export { useList } from './data-fetching/useList/useList.ts'
+export { useDoc } from './data-fetching/useDoc/useDoc.ts'
+export { useFrappeFetch } from './data-fetching/useFrappeFetch.ts'
 
 // plugin
 export { default as pageMetaPlugin } from './utils/pageMeta.js'
