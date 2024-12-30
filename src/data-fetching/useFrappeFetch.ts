@@ -53,6 +53,9 @@ export const useFrappeFetch = createFetch({
           ? ` (Traceback)`
           : ''
       let frappeError = new Error(`${error.type}${errorDescription}`)
+      frappeError.title = error.title
+      frappeError.type = error.type
+      frappeError.exception = error.exception
 
       if (import.meta.env.DEV && error.exception) {
         console.log(error.exception)
