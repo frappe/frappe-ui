@@ -98,7 +98,7 @@ export function useDoc<TDoc, TMethods = {}>(options: UseDocOptions) {
     }
   }
 
-  const doc = computed(() => docStore.getDoc(doctype, name) as TDoc)
+  const doc = computed(() => docStore.getDoc(doctype, name) as TDoc | null)
 
   let out = reactive({
     doc,
