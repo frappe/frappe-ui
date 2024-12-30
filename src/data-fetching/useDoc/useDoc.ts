@@ -1,4 +1,4 @@
-import { computed, MaybeRef, reactive, readonly, unref } from 'vue'
+import { computed, MaybeRef, reactive, readonly, unref, Ref } from 'vue'
 import { UseFetchOptions } from '@vueuse/core'
 import { useFrappeFetch } from '../useFrappeFetch'
 import { useCall } from '../useCall/useCall'
@@ -38,21 +38,13 @@ export function useDoc<TDoc, TMethods = {}>(options: UseDocOptions) {
     immediate = true,
   } = options
 
-  const url = computed(() => {
-    let _name = unref(name)
-    return `${baseUrl}/api/v2/document/${doctype}/${_name}`
-  })
-
-  let initialDoc: TDoc | null = null
-  let storedDoc = docStore.getDoc(doctype, unref(name))
-  if (storedDoc) {
-    initialDoc = storedDoc as TDoc
-  }
+  const url = computed(
+    () => `${baseUrl}/api/v2/document/${doctype}/${unref(name)}`,
+  )
 
   const fetchOptions: UseFetchOptions = {
     immediate,
     refetch: true,
-    initialData: initialDoc,
     afterFetch(ctx) {
       docStore.setDoc({ doctype, ...ctx.data })
       return ctx
@@ -98,7 +90,7 @@ export function useDoc<TDoc, TMethods = {}>(options: UseDocOptions) {
     }
   }
 
-  const doc = computed(() => docStore.getDoc(doctype, name) as TDoc | null)
+  const doc = docStore.getDoc(doctype, name) as Ref<TDoc | null>
 
   let out = reactive({
     doc,

@@ -58,12 +58,16 @@ export function unrefObject(
 
 export function normalizeCacheKey(
   cacheKey: string | Array<string | number | boolean | object> | undefined,
+  prefix?: string,
 ) {
   if (!cacheKey) {
     return null
   }
   if (typeof cacheKey === 'string') {
     cacheKey = [cacheKey]
+  }
+  if (prefix) {
+    cacheKey = [prefix, ...cacheKey]
   }
   return JSON.stringify(cacheKey)
 }

@@ -1,4 +1,5 @@
-import { reactive, watch, type Ref, type ComputedRef, unref } from 'vue'
+import { type Ref, type ComputedRef, unref, ref } from 'vue'
+import { idbStore } from './idbStore'
 
 type Doc = {
   doctype: string
@@ -7,115 +8,108 @@ type Doc = {
 }
 
 type DocKey = `${string}/${string}`
-type SubscriberCallback = (doc: Doc) => void
 
 class DocStore {
-  private docs: Map<DocKey, Doc>
+  private docs: Map<DocKey, Ref<Doc | null>>
   private lastFetched: Map<DocKey, number>
-  private subscribers: Map<DocKey, Set<SubscriberCallback>>
   private cacheTimeout: number = 5 * 60 * 1000 // 5 minutes
+  private storePrefix = 'doc:'
 
   constructor() {
-    this.docs = reactive(new Map<DocKey, Doc>())
+    this.docs = new Map<DocKey, Ref<Doc | null>>()
     this.lastFetched = new Map()
-    this.subscribers = new Map()
   }
 
-  setDoc(doc: Doc) {
+  setCacheTimeout(minutes: number) {
+    if (minutes < 1) {
+      throw new Error('Cache timeout must be at least 1 minute')
+    }
+    this.cacheTimeout = minutes * 60 * 1000
+  }
+
+  async setDoc(doc: Doc) {
     if (!doc?.doctype || !doc?.name) {
       throw new Error('Invalid doc: must have doctype and name')
     }
     const key = this.getKey(doc.doctype, doc.name)
-    this.docs.set(key, doc)
-    this.lastFetched.set(key, Date.now())
-
-    // Notify subscribers
-    const docSubscribers = this.subscribers.get(key)
-    if (docSubscribers) {
-      docSubscribers.forEach((callback) => callback(doc))
+    try {
+      await idbStore.set(this.storePrefix + key, doc)
+      if (!this.docs.has(key)) {
+        this.docs.set(key, ref(null))
+      }
+      const docRef = this.docs.get(key)
+      if (docRef) {
+        docRef.value = doc
+      }
+      this.lastFetched.set(key, Date.now())
+    } catch (error) {
+      console.error('Failed to set doc in IDB:', error)
+      throw error
     }
   }
 
   getDoc(
     doctype: string,
     name: string | Ref<string> | ComputedRef<string>,
-  ): Doc | null {
+  ): Ref<Doc | null> {
     const nameStr = unref(name)
     if (!doctype || !nameStr) {
       throw new Error('doctype and name are required')
     }
     const key = this.getKey(doctype, nameStr)
-    if (this.isStale(key)) {
-      this.cleanup(key)
-      return null
+
+    if (!this.docs.has(key)) {
+      this.docs.set(key, ref(null))
+      this.loadDoc(key, true)
+    } else if (this.isStale(key)) {
+      this.loadDoc(key, false)
     }
-    return this.docs.get(key) || null
+
+    return this.docs.get(key)!
   }
 
-  setDocs(docs: Doc[]) {
-    docs.forEach((doc) => this.setDoc(doc))
+  private async loadDoc(key: DocKey, isFirstLoad: boolean) {
+    try {
+      if (!isFirstLoad && this.isStale(key)) {
+        await this.cleanup(key)
+      }
+
+      const idbDoc = (await idbStore.get(this.storePrefix + key)) as Doc | null
+      if (idbDoc) {
+        const docRef = this.docs.get(key)
+        if (docRef) {
+          docRef.value = idbDoc
+        }
+        this.lastFetched.set(key, Date.now())
+      }
+    } catch (error) {
+      console.error('Failed to load doc from IDB:', error)
+      throw error
+    }
   }
 
-  invalidateDoc(doctype: string, name: string) {
+  async setDocs(docs: Doc[]) {
+    const docMap: Record<string, Doc> = {}
+    for (const doc of docs) {
+      if (!doc?.doctype || !doc?.name) continue
+      const key = this.getKey(doc.doctype, doc.name)
+      if (!this.docs.has(key)) {
+        this.docs.set(key, ref(null))
+      }
+      const docRef = this.docs.get(key)
+      if (docRef) {
+        docRef.value = doc
+      }
+      this.lastFetched.set(key, Date.now())
+      docMap[this.storePrefix + key] = doc
+    }
+    await idbStore.setMany(docMap)
+  }
+
+  async invalidateDoc(doctype: string, name: string) {
     if (!doctype || !name) return
     const key = this.getKey(doctype, name)
-    this.cleanup(key)
-  }
-
-  subscribe(
-    doctype: string,
-    name: string | Ref<string> | ComputedRef<string>,
-    callback: SubscriberCallback,
-  ): () => void {
-    if (typeof name === 'string') {
-      return this.subscribeToKey(doctype, name, callback)
-    }
-
-    // Handle reactive name
-    const stopWatch = watch(
-      () => unref(name),
-      (newName, oldName) => {
-        if (oldName) {
-          this.unsubscribe(doctype, oldName, callback)
-        }
-        this.subscribeToKey(doctype, newName, callback)
-      },
-      { immediate: true },
-    )
-
-    // Return combined cleanup function
-    return () => {
-      stopWatch()
-      this.unsubscribe(doctype, unref(name), callback)
-    }
-  }
-
-  private subscribeToKey(
-    doctype: string,
-    name: string,
-    callback: SubscriberCallback,
-  ): () => void {
-    if (!doctype || !name || !callback) {
-      throw new Error('doctype, name, and callback are required')
-    }
-    const key = this.getKey(doctype, name)
-    if (!this.subscribers.has(key)) {
-      this.subscribers.set(key, new Set())
-    }
-    this.subscribers.get(key)?.add(callback)
-
-    return () => {
-      this.unsubscribe(doctype, name, callback)
-    }
-  }
-
-  unsubscribe(doctype: string, name: string, callback: SubscriberCallback) {
-    const key = this.getKey(doctype, name)
-    this.subscribers.get(key)?.delete(callback)
-    if (this.subscribers.get(key)?.size === 0) {
-      this.subscribers.delete(key)
-    }
-    this.lastFetched.delete(key)
+    await this.cleanup(key)
   }
 
   private getKey(doctype: string, name: string): DocKey {
@@ -128,20 +122,25 @@ class DocStore {
     return Date.now() - fetchTime > this.cacheTimeout
   }
 
-  private cleanup(key: DocKey) {
+  private async cleanup(key: DocKey) {
     this.docs.delete(key)
     this.lastFetched.delete(key)
-    this.subscribers.delete(key)
+    await idbStore.delete(this.storePrefix + key)
   }
 
-  clearAll() {
-    this.docs.clear()
-    this.lastFetched.clear()
-    // Cleanup all subscriptions
-    this.subscribers.forEach((subscribers) => {
-      subscribers.clear()
-    })
-    this.subscribers.clear()
+  async clearAll() {
+    try {
+      const allKeys = await idbStore.keys()
+      const docKeys = allKeys.filter((key: string) =>
+        key.startsWith(this.storePrefix),
+      )
+      await Promise.all(docKeys.map((key: string) => idbStore.delete(key)))
+      this.docs.clear()
+      this.lastFetched.clear()
+    } catch (error) {
+      console.error('Failed to clear all docs:', error)
+      throw error
+    }
   }
 }
 
