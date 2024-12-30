@@ -55,3 +55,15 @@ export function unrefObject(
   }
   return newObj
 }
+
+export function normalizeCacheKey(
+  cacheKey: string | Array<string | number | boolean | object> | undefined,
+) {
+  if (!cacheKey) {
+    return null
+  }
+  if (typeof cacheKey === 'string') {
+    cacheKey = [cacheKey]
+  }
+  return JSON.stringify(cacheKey)
+}

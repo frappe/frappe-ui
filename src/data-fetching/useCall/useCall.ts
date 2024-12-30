@@ -1,7 +1,8 @@
 import { computed, reactive, readonly, ref, unref } from 'vue'
 import { UseFetchOptions } from '@vueuse/core'
 import { useFrappeFetch } from '../useFrappeFetch'
-import { unrefObject, makeGetParams } from '../utils'
+import { unrefObject, makeGetParams, normalizeCacheKey } from '../utils'
+import { idbStore } from '../idbStore'
 import { BasicParams, UseCallOptions } from './types'
 
 export function useCall<TResponse, TParams extends BasicParams = undefined>(
@@ -14,6 +15,9 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
     immediate = true,
     refetch = false,
     baseUrl = '',
+    initialData,
+    cacheKey,
+    transform,
   } = options
 
   let submitParams = ref<TParams | null | undefined>(null)
@@ -53,6 +57,7 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
   const fetchOptions: UseFetchOptions = {
     immediate,
     refetch,
+    initialData,
     afterFetch: handleAfterFetch<TResponse, TParams>(options),
     onFetchError: handleFetchError<TResponse, TParams>(options),
   }
@@ -108,8 +113,33 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
     submitParams.value = null
   }
 
+  let normalizedCacheKey = normalizeCacheKey(cacheKey)
+  let cachedResponse = ref<TResponse | null>(null)
+
+  const _data = computed(() => {
+    if (normalizedCacheKey && (out.loading || !out.isFinished)) {
+      let data = cachedResponse.value as TResponse
+      if (transform) {
+        let returnValue = transform(data)
+        if (returnValue !== undefined) {
+          data = returnValue
+        }
+      }
+      return data
+    }
+    return data.value
+  })
+
+  if (normalizedCacheKey) {
+    idbStore.get(normalizedCacheKey).then((data) => {
+      if (data) {
+        cachedResponse.value = data
+      }
+    })
+  }
+
   let out = reactive({
-    data: data,
+    data: _data,
     error: readonly(error),
     loading: isFetching,
     isFetching,
@@ -136,6 +166,7 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
 function handleAfterFetch<R, P extends BasicParams>({
   transform,
   onSuccess,
+  cacheKey,
 }: UseCallOptions<R, P>) {
   return function (ctx) {
     if (transform) {
@@ -144,6 +175,12 @@ function handleAfterFetch<R, P extends BasicParams>({
         ctx.data = returnValue
       }
     }
+
+    let normalizedCacheKey = normalizeCacheKey(cacheKey)
+    if (normalizedCacheKey) {
+      idbStore.set(normalizedCacheKey, ctx.data)
+    }
+
     if (onSuccess) {
       try {
         onSuccess(ctx.data)

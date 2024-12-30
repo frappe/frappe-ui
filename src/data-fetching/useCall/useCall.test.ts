@@ -188,4 +188,23 @@ describe('useCall', () => {
 
     call.submit({ value: 'test' })
   })
+
+  it('caches data if cacheKey is provided', async () => {
+    const call = useCall({
+      url: url('/api/v2/method/ping'),
+      cacheKey: 'ping',
+    })
+
+    await waitUntilValueChanges(() => call.data)
+    expect(call.data).toBe('pong')
+
+    const secondCall = useCall({
+      url: url('/api/v2/method/ping'),
+      immediate: false,
+      cacheKey: 'ping',
+    })
+
+    await waitUntilValueChanges(() => secondCall.data)
+    expect(secondCall.data).toBe('pong')
+  })
 })
