@@ -6,8 +6,9 @@ import {
 } from '@vueuse/core'
 import { useFrappeFetch } from '../useFrappeFetch'
 import { useCall } from '../useCall/useCall'
-import { parseFilters, makeGetParams } from '../utils'
+import { parseFilters, makeGetParams, normalizeCacheKey } from '../utils'
 import { UseListOptions, UseListResponse } from './types'
+import { idbStore } from '../idbStore'
 
 export function useList<T>(options: UseListOptions<T>) {
   const {
@@ -23,7 +24,9 @@ export function useList<T>(options: UseListOptions<T>) {
     initialData,
     immediate = true,
     refetch = true,
+    cacheKey,
     baseUrl = '',
+    transform,
   } = options
 
   const _start = ref(start || 0)
@@ -65,9 +68,40 @@ export function useList<T>(options: UseListOptions<T>) {
     execute,
   } = useFrappeFetch<UseListResponse<T>>(url, fetchOptions).get()
 
-  const result = computed(() => data.value?.result ?? null)
-  const hasNextPage = computed(() => data.value?.has_next_page ?? false)
+  let normalizedCacheKey = normalizeCacheKey(cacheKey, 'useList')
+  let cachedResponse = ref<UseListResponse<T> | null>(null)
+
+  const result = computed(() => {
+    if (normalizedCacheKey && (out.loading || !out.isFinished)) {
+      let data = cachedResponse.value
+      if (data) {
+        if (transform) {
+          let returnValue = transform(data.result as T[])
+          if (returnValue !== undefined) {
+            return returnValue
+          }
+        }
+        return data.result
+      }
+    }
+    return data.value?.result ?? null
+  })
+  const hasNextPage = computed(() => {
+    if (normalizedCacheKey && (out.loading || !out.isFinished)) {
+      let data = cachedResponse.value
+      return data?.has_next_page ?? false
+    }
+    return data.value?.has_next_page ?? false
+  })
   const hasPreviousPage = computed(() => _start.value > 0)
+
+  if (normalizedCacheKey) {
+    idbStore.get(normalizedCacheKey).then((data) => {
+      if (data) {
+        cachedResponse.value = data as UseListResponse<T>
+      }
+    })
+  }
 
   const next = () => {
     _start.value += _limit.value
@@ -89,7 +123,7 @@ export function useList<T>(options: UseListOptions<T>) {
     },
   })
 
-  return reactive({
+  let out = reactive({
     data: result,
     hasNextPage,
     hasPreviousPage,
@@ -110,9 +144,15 @@ export function useList<T>(options: UseListOptions<T>) {
     reload: execute,
     insert,
   })
+
+  return out
 }
 
-function handleAfterFetch<T>({ transform, onSuccess }: UseListOptions<T>) {
+function handleAfterFetch<T>({
+  transform,
+  onSuccess,
+  cacheKey,
+}: UseListOptions<T>) {
   return function (ctx: AfterFetchContext) {
     if (transform) {
       const returnValue = transform(ctx.data.result)
@@ -120,6 +160,12 @@ function handleAfterFetch<T>({ transform, onSuccess }: UseListOptions<T>) {
         ctx.data.result = returnValue
       }
     }
+
+    let normalizedCacheKey = normalizeCacheKey(cacheKey, 'useList')
+    if (normalizedCacheKey) {
+      idbStore.set(normalizedCacheKey, ctx.data)
+    }
+
     if (onSuccess) {
       try {
         onSuccess(ctx.data.result)

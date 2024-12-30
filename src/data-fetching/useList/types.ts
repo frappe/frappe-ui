@@ -1,4 +1,5 @@
 import { Reactive, Ref } from 'vue'
+import { CacheKey } from '../useCall/types'
 
 export type Field = string
 
@@ -32,7 +33,7 @@ export interface UseListOptions<T> {
   groupBy?: Field
   parent?: string
   debug?: boolean
-  cacheKey?: string | Array<string | number | boolean>
+  cacheKey?: CacheKey
   initialData?: T[]
   immediate?: boolean
   refetch?: boolean

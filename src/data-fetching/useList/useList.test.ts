@@ -170,4 +170,44 @@ describe('useList', () => {
     expect(users.error).toBeTruthy()
     expect(errorCaught).toBeTruthy()
   })
+
+  it('it caches response if cacheKey is provided', async () => {
+    interface User {
+      name: string
+      email: string
+    }
+
+    let users = useList<User>({
+      baseUrl,
+      doctype: 'User',
+      fields: ['name', 'email'],
+      orderBy: 'email asc',
+      cacheKey: 'users',
+      start: 0,
+      limit: 2,
+    })
+
+    await waitUntilValueChanges(() => users.data)
+    expect(users.data).toStrictEqual([
+      { name: 'User1', email: 'user1@example.com' },
+      { name: 'User2', email: 'user2@example.com' },
+    ])
+
+    let users2 = useList<User>({
+      baseUrl,
+      doctype: 'User',
+      fields: ['name', 'email'],
+      orderBy: 'email asc',
+      cacheKey: 'users',
+      start: 0,
+      limit: 2,
+      immediate: false,
+    })
+
+    await waitUntilValueChanges(() => users2.data)
+    expect(users2.data).toStrictEqual([
+      { name: 'User1', email: 'user1@example.com' },
+      { name: 'User2', email: 'user2@example.com' },
+    ])
+  })
 })
