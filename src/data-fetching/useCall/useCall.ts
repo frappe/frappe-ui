@@ -113,7 +113,7 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
     submitParams.value = null
   }
 
-  let normalizedCacheKey = normalizeCacheKey(cacheKey)
+  let normalizedCacheKey = normalizeCacheKey(cacheKey, 'useCall')
   let cachedResponse = ref<TResponse | null>(null)
 
   const _data = computed(() => {
@@ -176,7 +176,7 @@ function handleAfterFetch<R, P extends BasicParams>({
       }
     }
 
-    let normalizedCacheKey = normalizeCacheKey(cacheKey)
+    let normalizedCacheKey = normalizeCacheKey(cacheKey, 'useCall')
     if (normalizedCacheKey) {
       idbStore.set(normalizedCacheKey, ctx.data)
     }

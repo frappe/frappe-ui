@@ -1,6 +1,7 @@
 import { Ref } from 'vue'
 
 export type BasicParams = Record<string, any> | undefined
+export type CacheKey = string | Array<string | number | boolean | object>
 
 export interface UseCallOptions<
   TResponse = any,
@@ -9,7 +10,7 @@ export interface UseCallOptions<
   url: string | Ref<string>
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
   params?: TParams | (() => TParams)
-  cacheKey?: string | Array<string | number | boolean | object>
+  cacheKey?: CacheKey
   immediate?: boolean
   refetch?: boolean
   baseUrl?: string
