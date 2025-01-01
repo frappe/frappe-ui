@@ -1,5 +1,6 @@
 import { createFetch } from '@vueuse/core'
 import { docStore } from './docStore'
+import { listStore } from './useList/listStore'
 
 export const useFrappeFetch = createFetch({
   options: {
@@ -19,7 +20,12 @@ export const useFrappeFetch = createFetch({
         console.groupEnd()
       }
       if (responseData.docs) {
-        docStore.setDocs(responseData.docs)
+        let docs = responseData.docs
+        for (let doc of docs) {
+          doc.name = doc.name.toString()
+        }
+        docStore.setDocs(docs)
+        listStore.updateRows(docs)
       }
       ctx.data = responseData.data
       return ctx
