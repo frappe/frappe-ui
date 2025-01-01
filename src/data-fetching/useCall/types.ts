@@ -15,6 +15,7 @@ export interface UseCallOptions<
   refetch?: boolean
   baseUrl?: string
   initialData?: TResponse
+  beforeSubmit?: (params?: TParams) => void
   transform?: (data: TResponse) => TResponse
   onSuccess?: (data: TResponse) => void
   onError?: (error: Error) => void

@@ -18,6 +18,7 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
     initialData,
     cacheKey,
     transform,
+    beforeSubmit,
   } = options
 
   let submitParams = ref<TParams | null | undefined>(null)
@@ -103,9 +104,12 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
   })
 
   const submit = async (params?: TParams) => {
+    if (beforeSubmit) {
+      beforeSubmit(params)
+    }
     submitParams.value = params
     if (!refetch) {
-      execute()
+      return execute()
     }
   }
 
@@ -147,6 +151,7 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
     canAbort,
     aborted,
     url: computedUrl,
+    params: computedParams,
     promise,
     abort,
     execute: execute,
