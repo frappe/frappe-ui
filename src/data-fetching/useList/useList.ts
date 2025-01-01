@@ -1,4 +1,4 @@
-import { computed, reactive, readonly, ref } from 'vue'
+import { computed, reactive, readonly, ref, triggerRef } from 'vue'
 import {
   AfterFetchContext,
   OnFetchErrorContext,
@@ -9,8 +9,11 @@ import { useCall } from '../useCall/useCall'
 import { parseFilters, makeGetParams, normalizeCacheKey } from '../utils'
 import { UseListOptions, UseListResponse } from './types'
 import { idbStore } from '../idbStore'
+import { listStore } from './listStore'
 
-export function useList<T>(options: UseListOptions<T>) {
+export function useList<T extends { name: string }>(
+  options: UseListOptions<T>,
+) {
   const {
     doctype,
     fields,
@@ -113,11 +116,52 @@ export function useList<T>(options: UseListOptions<T>) {
     if (!refetch) execute()
   }
 
-  const insert = useCall({
+  type PartialDoc = Partial<T extends { name: string } ? T : { name: string }>
+
+  const updateRow = (doc: PartialDoc) => {
+    if (data.value?.result) {
+      let changed = false
+      for (let row of data.value.result) {
+        if (doc.name && doc.name === row.name) {
+          for (let key in doc) {
+            if (key in row) {
+              row[key] = doc[key]
+              changed = true
+            }
+          }
+          break
+        }
+      }
+      if (changed) {
+        data.value.result = [...data.value.result]
+        triggerRef(data)
+      }
+    }
+  }
+
+  const insert = useCall<T, Partial<T>>({
     url: `/api/v2/document/${doctype}`,
     method: 'POST',
     immediate: false,
     refetch: false,
+    onSuccess() {
+      if (refetch) execute()
+    },
+  })
+
+  let deleteUrl = ref(`/api/v2/document/${doctype}/<name>`)
+  type DeleteResponse = 'ok'
+  type DeleteParams = { name: string }
+  const delete_ = useCall<DeleteResponse, DeleteParams>({
+    url: deleteUrl,
+    method: 'DELETE',
+    immediate: false,
+    refetch: false,
+    beforeSubmit(params) {
+      if (params?.name) {
+        deleteUrl.value = `/api/v2/document/${doctype}/${params.name}`
+      }
+    },
     onSuccess() {
       if (refetch) execute()
     },
@@ -142,8 +186,12 @@ export function useList<T>(options: UseListOptions<T>) {
     execute,
     fetch: execute,
     reload: execute,
+    updateRow,
     insert,
+    delete: delete_,
   })
+
+  listStore.addList(doctype, out)
 
   return out
 }
