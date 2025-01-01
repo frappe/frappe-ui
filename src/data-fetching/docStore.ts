@@ -31,6 +31,7 @@ class DocStore {
     if (!doc?.doctype || !doc?.name) {
       throw new Error('Invalid doc: must have doctype and name')
     }
+    doc.name = doc.name.toString()
     const key = this.getKey(doc.doctype, doc.name)
     try {
       await idbStore.set(this.storePrefix + key, doc)
@@ -92,6 +93,7 @@ class DocStore {
     const docMap: Record<string, Doc> = {}
     for (const doc of docs) {
       if (!doc?.doctype || !doc?.name) continue
+      doc.name = doc.name.toString()
       const key = this.getKey(doc.doctype, doc.name)
       if (!this.docs.has(key)) {
         this.docs.set(key, ref(null))
