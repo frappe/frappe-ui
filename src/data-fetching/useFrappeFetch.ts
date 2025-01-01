@@ -31,6 +31,15 @@ export const useFrappeFetch = createFetch({
       return ctx
     },
     onFetchError(ctx) {
+      if (ctx.response?.ok && ctx.error) {
+        // if response is ok and there is an error, it's a client side programming error
+        console.error(
+          'Fetch request succeeded but there was a programming error:\n\n',
+          ctx.error,
+        )
+        return ctx
+      }
+
       type FrappeError = {
         title: string
         message: string
@@ -51,7 +60,6 @@ export const useFrappeFetch = createFetch({
           },
         ]
       }
-      //   debugger
       let error = errors[0] // assuming only one error for now
       let errorDescription = error.message
         ? `: ${error.message}`
