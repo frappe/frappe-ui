@@ -12,11 +12,9 @@ class ListStore {
     this.byDocType = {}
   }
 
-  addList(docType: string, list: ReturnType<typeof useList>) {
-    if (!this.byDocType[docType]) {
-      this.byDocType[docType] = []
-    }
-    this.byDocType[docType].push(list)
+  addList(doctype: string, list: ReturnType<typeof useList>) {
+    this.ensureList(doctype)
+    this.byDocType[doctype].push(list)
   }
 
   updateRows(docs: Array<Doc>) {
@@ -26,9 +24,16 @@ class ListStore {
   }
 
   updateRow(doctype: string, doc: Doc) {
+    this.ensureList(doctype)
     this.byDocType[doctype].forEach((list) => {
       list.updateRow(doc)
     })
+  }
+
+  ensureList(docType: string) {
+    if (!this.byDocType[docType]) {
+      this.byDocType[docType] = []
+    }
   }
 }
 

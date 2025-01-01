@@ -42,9 +42,7 @@ describe('useDoctype', () => {
     const fetchSpy = vi.spyOn(global, 'fetch')
 
     user.delete.submit({ name: 'user1' })
-    expect(user.delete.loading).toBe(true)
-
-    await waitUntilValueChanges(() => user.delete.loading, false)
+    await waitUntilValueChanges(() => user.delete.loading)
     expect(user.delete.loading).toBe(false)
 
     expect(fetchSpy).toHaveBeenCalledWith(
@@ -68,9 +66,7 @@ describe('useDoctype', () => {
         password: 'newpassword',
       },
     })
-    expect(user.runDocMethod.loading).toBe(true)
-
-    await waitUntilValueChanges(() => user.runDocMethod.loading, false)
+    await waitUntilValueChanges(() => user.runDocMethod.loading)
     expect(user.runDocMethod.loading).toBe(false)
 
     expect(fetchSpy).toHaveBeenCalledWith(

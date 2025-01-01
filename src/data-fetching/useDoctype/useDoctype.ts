@@ -92,6 +92,8 @@ function useRunDocMethod(doctype: string, options: UseDoctypeOptions = {}) {
         if (errorMessage) {
           validateError.value = new Error(errorMessage)
           return Promise.reject(validateError.value)
+        } else {
+          validateError.value = null
         }
       }
       return runDocMethod.submit(params)
