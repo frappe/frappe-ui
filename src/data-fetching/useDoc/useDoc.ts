@@ -4,6 +4,7 @@ import { useFrappeFetch } from '../useFrappeFetch'
 import { useCall } from '../useCall/useCall'
 import { UseCallOptions } from '../useCall/types'
 import { docStore } from '../docStore'
+import { listStore } from '../useList/listStore'
 
 // Transform method signatures into useCall return type
 type TransformMethods<T> = {
@@ -29,7 +30,9 @@ interface UseDocOptions {
   immediate?: boolean
 }
 
-export function useDoc<TDoc, TMethods = {}>(options: UseDocOptions) {
+export function useDoc<TDoc extends { name: string }, TMethods = {}>(
+  options: UseDocOptions,
+) {
   const {
     baseUrl = '',
     doctype,
@@ -47,6 +50,7 @@ export function useDoc<TDoc, TMethods = {}>(options: UseDocOptions) {
     refetch: true,
     afterFetch(ctx) {
       docStore.setDoc({ doctype, ...ctx.data })
+      listStore.updateRow(doctype, ctx.data)
       return ctx
     },
   }
@@ -90,6 +94,18 @@ export function useDoc<TDoc, TMethods = {}>(options: UseDocOptions) {
     }
   }
 
+  let setValue = useCall<TDoc, Partial<TDoc>>({
+    immediate: false,
+    refetch: false,
+    method: 'PUT',
+    baseUrl,
+    url: computed(() => `/api/v2/document/${doctype}/${unref(name)}`),
+    onSuccess(data) {
+      docStore.setDoc({ doctype, ...data })
+      listStore.updateRow(doctype, data)
+    },
+  })
+
   const doc = docStore.getDoc(doctype, name) as Ref<TDoc | null>
 
   let out = reactive({
@@ -104,6 +120,7 @@ export function useDoc<TDoc, TMethods = {}>(options: UseDocOptions) {
     fetch: execute,
     reload: execute,
     abort,
+    setValue,
     ...docMethods,
   })
 
