@@ -1,4 +1,6 @@
 export { useCall } from './useCall/useCall'
 export { useList } from './useList/useList'
 export { useDoc } from './useDoc/useDoc'
+export { useDoctype } from './useDoctype/useDoctype'
+export { useNewDoc } from './useNewDoc/useNewDoc'
 export { useFrappeFetch } from './useFrappeFetch'
