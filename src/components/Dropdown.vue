@@ -16,7 +16,7 @@
 
       <template #body>
         <MenuItems
-          class="mt-2 min-w-40 divide-y divide-outline-gray-1 rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
+          class="mt-2 min-w-40 divide-y divide-outline-gray-modals rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
           :class="{
             'left-0 origin-top-left': placement == 'left',
             'right-0 origin-top-right': placement == 'right',

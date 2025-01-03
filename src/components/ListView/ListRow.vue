@@ -69,7 +69,7 @@
       </div>
       <div
         v-if="!isLastRow"
-        class="mx-2 h-px border-t border-outline-gray-modals"
+        class="mx-2 h-px border-t border-outline-gray-1"
       />
     </component>
   </component>
