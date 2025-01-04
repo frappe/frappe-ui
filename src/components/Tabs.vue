@@ -1,16 +1,12 @@
 <template>
   <TabGroup
-    as="div"
-    class="flex flex-1 flex-col overflow-y-hidden"
-    :style="`height: calc(100vh - ${tabListRef?.$el.offsetTop}px)`"
     :defaultIndex="changedIndex"
     :selectedIndex="changedIndex"
     @change="(idx) => (changedIndex = idx)"
   >
     <TabList
-      ref="tabListRef"
       class="relative flex items-center gap-7.5 overflow-x-auto border-b px-5"
-      :class="tablistClass"
+      v-bind="$attrs"
     >
       <Tab
         ref="tabRef"
@@ -19,6 +15,7 @@
         :key="i"
         v-slot="{ selected }"
         class="focus:outline-none focus:transition-none"
+        :class="tabClass"
       >
         <slot name="tab" v-bind="{ tab, selected }">
           <button
@@ -61,7 +58,7 @@ const props = defineProps({
     type: Number,
     default: 0,
   },
-  tablistClass: {
+  tabClass: {
     type: String,
     default: '',
   },
@@ -78,7 +75,6 @@ const changedIndex = computed({
   set: (index) => emit('update:modelValue', index),
 })
 
-const tabListRef = ref(null)
 const tabRef = ref([])
 const indicator = ref(null)
 const tabsLength = computed(() => props.tabs?.length)
