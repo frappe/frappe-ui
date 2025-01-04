@@ -30,6 +30,13 @@ class ListStore {
     })
   }
 
+  removeRow(doctype: string, name: string) {
+    this.ensureList(doctype)
+    this.byDocType[doctype].forEach((list) => {
+      list.removeRow(name)
+    })
+  }
+
   ensureList(docType: string) {
     if (!this.byDocType[docType]) {
       this.byDocType[docType] = []

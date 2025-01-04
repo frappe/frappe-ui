@@ -1,4 +1,4 @@
-import { type Ref, type ComputedRef, unref, ref } from 'vue'
+import { Ref, ref, MaybeRefOrGetter, toValue } from 'vue'
 import { idbStore } from './idbStore'
 
 type Doc = {
@@ -49,11 +49,8 @@ class DocStore {
     }
   }
 
-  getDoc(
-    doctype: string,
-    name: string | Ref<string> | ComputedRef<string>,
-  ): Ref<Doc | null> {
-    const nameStr = unref(name)
+  getDoc(doctype: string, name: MaybeRefOrGetter<string>): Ref<Doc | null> {
+    const nameStr = toValue(name)
     if (!doctype || !nameStr) {
       throw new Error('doctype and name are required')
     }
@@ -112,6 +109,10 @@ class DocStore {
     if (!doctype || !name) return
     const key = this.getKey(doctype, name)
     await this.cleanup(key)
+  }
+
+  removeDoc(doctype: string, name: string) {
+    return this.invalidateDoc(doctype, name)
   }
 
   private getKey(doctype: string, name: string): DocKey {

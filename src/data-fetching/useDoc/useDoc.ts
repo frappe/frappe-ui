@@ -1,4 +1,11 @@
-import { computed, MaybeRef, reactive, readonly, unref, Ref } from 'vue'
+import {
+  computed,
+  reactive,
+  readonly,
+  Ref,
+  MaybeRefOrGetter,
+  toValue,
+} from 'vue'
 import { UseFetchOptions } from '@vueuse/core'
 import { useFrappeFetch } from '../useFrappeFetch'
 import { useCall } from '../useCall/useCall'
@@ -24,7 +31,7 @@ interface DocMethodOption<T = any>
 
 interface UseDocOptions {
   doctype: string
-  name: string | MaybeRef<string>
+  name: MaybeRefOrGetter<string>
   baseUrl?: string
   methods?: Record<string, string | DocMethodOption>
   immediate?: boolean
@@ -42,8 +49,20 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
   } = options
 
   const url = computed(
-    () => `${baseUrl}/api/v2/document/${doctype}/${unref(name)}`,
+    () => `${baseUrl}/api/v2/document/${doctype}/${toValue(name)}`,
   )
+
+  type SuccessCallback = (doc: TDoc) => void
+  const successCallbacks: SuccessCallback[] = []
+  const triggerSuccessCallbacks = (doc: TDoc) => {
+    for (let cb of successCallbacks) {
+      try {
+        cb(doc)
+      } catch (e) {
+        console.error('Error in onSuccess hook:', e)
+      }
+    }
+  }
 
   const fetchOptions: UseFetchOptions = {
     immediate,
@@ -51,6 +70,7 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
     afterFetch(ctx) {
       docStore.setDoc({ doctype, ...ctx.data })
       listStore.updateRow(doctype, ctx.data)
+      triggerSuccessCallbacks(ctx.data)
       return ctx
     },
   }
@@ -86,7 +106,7 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
         baseUrl,
         url: computed(
           () =>
-            `/api/v2/document/${doctype}/${unref(name)}/method/${option.name}`,
+            `/api/v2/document/${doctype}/${toValue(name)}/method/${option.name}`,
         ),
       }
 
@@ -95,14 +115,27 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
   }
 
   let setValue = useCall<TDoc, Partial<TDoc>>({
-    immediate: false,
-    refetch: false,
+    url: computed(() => `/api/v2/document/${doctype}/${toValue(name)}`),
     method: 'PUT',
     baseUrl,
-    url: computed(() => `/api/v2/document/${doctype}/${unref(name)}`),
+    immediate: false,
+    refetch: false,
     onSuccess(data) {
       docStore.setDoc({ doctype, ...data })
       listStore.updateRow(doctype, data)
+    },
+  })
+
+  type DeleteResponse = 'ok'
+  const delete_ = useCall<DeleteResponse>({
+    url: computed(() => `/api/v2/document/${doctype}/${toValue(name)}`),
+    method: 'DELETE',
+    baseUrl,
+    immediate: false,
+    refetch: false,
+    onSuccess() {
+      docStore.removeDoc(doctype, toValue(name))
+      listStore.removeRow(doctype, toValue(name))
     },
   })
 
@@ -121,6 +154,17 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
     reload: execute,
     abort,
     setValue,
+    delete: delete_,
+    onSuccess: (callback: SuccessCallback) => {
+      successCallbacks.push(callback)
+      return () => {
+        // unsubscribe function
+        const index = successCallbacks.indexOf(callback)
+        if (index > -1) {
+          successCallbacks.splice(index, 1)
+        }
+      }
+    },
     ...docMethods,
   })
 
