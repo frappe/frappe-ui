@@ -1,4 +1,12 @@
-import { computed, reactive, readonly, ref, triggerRef } from 'vue'
+import {
+  computed,
+  MaybeRefOrGetter,
+  reactive,
+  readonly,
+  Ref,
+  ref,
+  toValue,
+} from 'vue'
 import {
   AfterFetchContext,
   OnFetchErrorContext,
@@ -10,6 +18,7 @@ import { parseFilters, makeGetParams, normalizeCacheKey } from '../utils'
 import { UseListOptions, UseListResponse } from './types'
 import { idbStore } from '../idbStore'
 import { listStore } from './listStore'
+import { docStore } from '../docStore'
 
 export function useList<T extends { name: string }>(
   options: UseListOptions<T>,
@@ -29,13 +38,14 @@ export function useList<T extends { name: string }>(
     refetch = true,
     cacheKey,
     baseUrl = '',
+    url = '',
     transform,
   } = options
 
   const _start = ref(start || 0)
   const _limit = ref(limit || 20)
 
-  const url = computed(() => {
+  const _url = computed(() => {
     const parsedFilters = parseFilters(filters || {})
     const params = makeGetParams({
       fields: fields?.length ? JSON.stringify(fields) : null,
@@ -47,8 +57,13 @@ export function useList<T extends { name: string }>(
       parent: parent,
       debug: debug,
     })
+    if (url) {
+      return `${baseUrl}${url}?${params}`
+    }
     return `${baseUrl}/api/v2/document/${doctype}?${params}`
   })
+
+  const allData: Ref<T[] | null> = ref(null)
 
   const fetchOptions: UseFetchOptions = {
     immediate,
@@ -56,7 +71,7 @@ export function useList<T extends { name: string }>(
     initialData: initialData
       ? { result: initialData, has_next_page: false }
       : null,
-    afterFetch: handleAfterFetch<T>(options),
+    afterFetch: handleAfterFetch<T>({ ...options, allData, _start }),
     onFetchError: handleFetchError<T>(options),
   }
 
@@ -69,7 +84,7 @@ export function useList<T extends { name: string }>(
     aborted,
     abort,
     execute,
-  } = useFrappeFetch<UseListResponse<T>>(url, fetchOptions).get()
+  } = useFrappeFetch<UseListResponse<T>>(_url, fetchOptions).get()
 
   let normalizedCacheKey = normalizeCacheKey(cacheKey, 'useList')
   let cachedResponse = ref<UseListResponse<T> | null>(null)
@@ -87,7 +102,7 @@ export function useList<T extends { name: string }>(
         return data.result
       }
     }
-    return data.value?.result ?? null
+    return allData.value
   })
   const hasNextPage = computed(() => {
     if (normalizedCacheKey && (out.loading || !out.isFinished)) {
@@ -119,23 +134,30 @@ export function useList<T extends { name: string }>(
   type PartialDoc = Partial<T extends { name: string } ? T : { name: string }>
 
   const updateRow = (doc: PartialDoc) => {
-    if (data.value?.result) {
-      let changed = false
-      for (let row of data.value.result) {
-        if (doc.name && doc.name === row.name) {
-          for (let key in doc) {
-            if (key in row) {
-              row[key] = doc[key]
-              changed = true
-            }
+    if (allData.value == null) return
+    let changed = false
+    for (let row of allData.value) {
+      if (doc.name && doc.name === row.name) {
+        for (let key in doc) {
+          if (key in row) {
+            row[key] = doc[key]
+            changed = true
           }
-          break
         }
+        break
       }
-      if (changed) {
-        data.value.result = [...data.value.result]
-        triggerRef(data)
-      }
+    }
+    if (changed) {
+      allData.value = [...allData.value]
+    }
+  }
+
+  const removeRow = (name: string) => {
+    if (allData.value == null) return
+    const index = allData.value.findIndex((row) => row.name === name)
+    if (index > -1) {
+      allData.value.splice(index, 1)
+      allData.value = [...allData.value]
     }
   }
 
@@ -145,6 +167,26 @@ export function useList<T extends { name: string }>(
     immediate: false,
     refetch: false,
     onSuccess() {
+      if (refetch) execute()
+    },
+  })
+
+  const setValueUrl = ref(`/api/v2/document/${doctype}/<name>`)
+
+  const setValue = useCall<T, Partial<T>>({
+    url: setValueUrl,
+    method: 'PUT',
+    baseUrl,
+    immediate: false,
+    refetch: false,
+    beforeSubmit(params) {
+      if (params?.name) {
+        setValueUrl.value = `/api/v2/document/${doctype}/${params.name}`
+      }
+    },
+    onSuccess(data) {
+      docStore.setDoc({ doctype, ...data })
+      listStore.updateRow(doctype, data)
       if (refetch) execute()
     },
   })
@@ -167,6 +209,42 @@ export function useList<T extends { name: string }>(
     },
   })
 
+  function useEdit(name: MaybeRefOrGetter<string>) {
+    if (!allData.value) {
+      throw new Error('Data not found')
+    }
+    let row = allData.value.find((row) => row.name === toValue(name))
+    if (!row) {
+      throw new Error(`Couldn't find row with name ${toValue(name)}`)
+    }
+
+    let originalRow = JSON.parse(JSON.stringify(row))
+    let doc = reactive(row)
+
+    const setValue = useCall<T, Partial<T>>({
+      url: `/api/v2/document/${doctype}/${toValue(name)}`,
+      method: 'PUT',
+      baseUrl,
+      immediate: false,
+      refetch: false,
+      onSuccess(data) {
+        docStore.setDoc({ doctype, ...data })
+        listStore.updateRow(doctype, data)
+      },
+    })
+
+    return {
+      doc,
+      reset: () => {
+        for (let key in originalRow) {
+          doc[key] = originalRow[key]
+        }
+      },
+      setValue,
+      update: () => setValue.submit(doc),
+    }
+  }
+
   let out = reactive({
     data: result,
     hasNextPage,
@@ -179,7 +257,7 @@ export function useList<T extends { name: string }>(
     isFinished,
     canAbort,
     aborted,
-    url,
+    url: _url,
     abort,
     next,
     previous,
@@ -187,8 +265,11 @@ export function useList<T extends { name: string }>(
     fetch: execute,
     reload: execute,
     updateRow,
+    removeRow,
     insert,
+    setValue,
     delete: delete_,
+    edit: useEdit,
   })
 
   listStore.addList(doctype, out)
@@ -196,18 +277,34 @@ export function useList<T extends { name: string }>(
   return out
 }
 
-function handleAfterFetch<T>({
+function handleAfterFetch<T extends { name: string }>({
   transform,
   onSuccess,
   cacheKey,
-}: UseListOptions<T>) {
+  allData,
+  _start,
+}: UseListOptions<T> & {
+  allData: Ref<T[] | null>
+  _start: Ref<number>
+}) {
   return function (ctx: AfterFetchContext) {
+    let resultData = (ctx.data.result as T[]).map((item) => ({
+      ...item,
+      name: String(item.name),
+    }))
     if (transform) {
-      const returnValue = transform(ctx.data.result)
+      const returnValue = transform(resultData)
       if (Array.isArray(returnValue)) {
-        ctx.data.result = returnValue
+        resultData = returnValue
       }
     }
+
+    if (_start.value === 0) {
+      allData.value = resultData
+    } else {
+      allData.value = [...(allData.value || []), ...resultData]
+    }
+    ctx.data.result = allData.value
 
     let normalizedCacheKey = normalizeCacheKey(cacheKey, 'useList')
     if (normalizedCacheKey) {
@@ -216,7 +313,7 @@ function handleAfterFetch<T>({
 
     if (onSuccess) {
       try {
-        onSuccess(ctx.data.result)
+        onSuccess(allData.value)
       } catch (e) {
         console.error('Error in onSuccess hook:', e)
       }

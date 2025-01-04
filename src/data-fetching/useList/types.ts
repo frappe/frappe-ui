@@ -13,7 +13,7 @@ export type FilterValue =
   | boolean
   | [string, string | number | boolean | Ref<string | number | boolean>]
 
-export interface ListFilters {
+export interface Filters {
   [key: Field]: FilterValue
 }
 
@@ -26,7 +26,7 @@ export type OrderBy =
 export interface UseListOptions<T> {
   doctype: string
   fields?: Array<keyof T | ChildTableField>
-  filters?: Reactive<ListFilters>
+  filters?: Reactive<Filters>
   orderBy?: OrderBy
   start?: number
   limit?: number
@@ -38,6 +38,7 @@ export interface UseListOptions<T> {
   immediate?: boolean
   refetch?: boolean
   baseUrl?: string
+  url?: `/${string}`
   transform?: (data: T[]) => T[]
   onSuccess?: (data: T[]) => void
   onError?: (error: Error) => void

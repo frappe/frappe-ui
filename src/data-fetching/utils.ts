@@ -1,5 +1,5 @@
 import { MaybeRef, unref } from 'vue'
-import { ListFilters } from './useList/types'
+import { Filters } from './useList/types'
 
 export function makeGetParams(params: Record<string, any>) {
   let url = new URLSearchParams()
@@ -16,8 +16,8 @@ export function isEmptyObject(obj: any) {
   return Object.keys(obj).length === 0 && obj.constructor === Object
 }
 
-export function parseFilters(filters: ListFilters): ListFilters | null {
-  let parsedFilters: ListFilters = {}
+export function parseFilters(filters: Filters): Filters | null {
+  let parsedFilters: Filters = {}
   for (let key in filters) {
     let value = filters[key]
     if (Array.isArray(value)) {
