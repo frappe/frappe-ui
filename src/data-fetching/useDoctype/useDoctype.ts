@@ -13,14 +13,16 @@ export function useDoctype<T>(
 ) {
   const insert = useInsert<T>(doctype, options)
   const delete_ = useDelete(doctype, options)
-  const runDocMethod = useRunDocMethod(doctype, options)
   const setValue = useSetValue<T>(doctype, options)
+  const runDocMethod = useRunDocMethod(doctype, options)
+  const runMethod = useRunMethod(doctype, options)
 
   return reactive({
     insert,
     delete: delete_,
     setValue,
     runDocMethod,
+    runMethod,
   })
 }
 
@@ -105,6 +107,54 @@ function useRunDocMethod(doctype: string, options: UseDoctypeOptions = {}) {
       )
     },
   } as RunDocMethodReturnValue)
+}
+
+function useRunMethod(doctype: string, options: UseDoctypeOptions = {}) {
+  let { baseUrl = '' } = options
+  let url = ref(`/api/v2/method/${doctype}/<method>`)
+
+  interface RunMethodParams {
+    method: string
+    validate?: () => string | void
+    params?: Record<string, any>
+  }
+
+  type RunMethodReturnValue = ReturnType<typeof useCall> & {
+    submit: (params: RunMethodParams) => Promise<any>
+    isLoading: (method: string) => boolean
+  }
+
+  let runMethod = useCall<any, RunMethodParams['params']>({
+    url,
+    method: 'POST',
+    immediate: false,
+    baseUrl,
+  })
+
+  let validateError = ref<Error | null>(null)
+
+  return reactive({
+    ...runMethod,
+    error: computed(() => validateError.value || runMethod.error),
+    submit: ({ method, validate, params }: RunMethodParams) => {
+      url.value = `/api/v2/method/${doctype}/${method}`
+      if (validate) {
+        const errorMessage = validate()
+        if (errorMessage) {
+          validateError.value = new Error(errorMessage)
+          return Promise.reject(validateError.value)
+        } else {
+          validateError.value = null
+        }
+      }
+      return runMethod.submit(params)
+    },
+    isLoading: (method: string) => {
+      return (
+        runMethod.loading && url.value === `/api/v2/method/${doctype}/${method}`
+      )
+    },
+  } as RunMethodReturnValue)
 }
 
 function useSetValue<T>(doctype: string, options: UseDoctypeOptions = {}) {
