@@ -32,7 +32,7 @@ export { default as Select } from './components/Select.vue'
 export { default as Spinner } from './components/Spinner.vue'
 export { default as Switch } from './components/Switch.vue'
 export { default as TabButtons } from './components/TabButtons.vue'
-export { default as Tabs } from './components/Tabs.vue'
+export { default as Tabs } from './components/Tabs/Tabs.vue'
 export { default as TextInput } from './components/TextInput.vue'
 export { default as Textarea } from './components/Textarea.vue'
 export {
