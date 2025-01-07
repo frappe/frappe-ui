@@ -1,6 +1,13 @@
 <template>
   <TabGroup
-    v-bind="as == 'div' ? { as: 'div', class: 'flex flex-col flex-1' } : {}"
+    v-bind="
+      as == 'div'
+        ? {
+            as: 'div',
+            class: vertical ? 'flex flex-1' : 'flex flex-1 flex-col',
+          }
+        : {}
+    "
     :defaultIndex="tabIndex"
     :selectedIndex="tabIndex"
     @change="(idx) => (tabIndex = idx)"
@@ -31,10 +38,15 @@ const props = defineProps({
     type: Array,
     required: true,
   },
+  vertical: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const tabIndex = defineModel()
 
 provide('tabIndex', tabIndex)
 provide('tabs', props.tabs)
+provide('vertical', props.vertical)
 </script>
