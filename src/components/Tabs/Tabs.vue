@@ -1,9 +1,9 @@
 <template>
   <TabGroup
     v-bind="
-      as == 'div'
+      as !== 'template'
         ? {
-            as: 'div',
+            as,
             class: vertical ? 'flex flex-1' : 'flex flex-1 flex-col',
           }
         : {}
