@@ -1,6 +1,7 @@
 import { reactive, unref } from 'vue'
 import { useCall } from '../useCall/useCall'
 import { UseCallOptions } from '../useCall/types'
+import { docStore } from '../docStore'
 
 type UseNewDocOptions = Omit<
   UseCallOptions,
@@ -18,7 +19,11 @@ export function useNewDoc<T extends object>(
 ) {
   let doc = reactive<NewDoc<T>>(initialValues)
 
-  const out = useCall<T>({
+  type DocResponse = T & {
+    name: string
+  }
+
+  const out = useCall<DocResponse>({
     url: `/api/v2/document/${doctype}`,
     method: 'POST',
     params() {
@@ -34,8 +39,19 @@ export function useNewDoc<T extends object>(
     ...options,
   })
 
+  function submit() {
+    return out
+      .submit()
+      .then((doc) =>
+        docStore
+          .setDoc({ doctype, ...(doc as DocResponse) })
+          .then(() => docStore.getDoc(doctype, doc.name.toString()).value as T),
+      )
+  }
+
   return reactive({
     ...out,
+    submit,
     doc,
   })
 }
