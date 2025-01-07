@@ -420,49 +420,6 @@
       "markdownFile": null
     },
     {
-      "id": "src-components-listview-story-vue",
-      "title": "ListView",
-      "layout": {
-        "type": "grid",
-        "width": "95%"
-      },
-      "docsOnly": false,
-      "variants": [
-        {
-          "id": "src-components-listview-story-vue-0",
-          "title": "Simple List"
-        },
-        {
-          "id": "src-components-listview-story-vue-1",
-          "title": "Custom List"
-        },
-        {
-          "id": "src-components-listview-story-vue-2",
-          "title": "Grouped Rows"
-        },
-        {
-          "id": "src-components-listview-story-vue-3",
-          "title": "Cell Slot"
-        },
-        {
-          "id": "src-components-listview-story-vue-4",
-          "title": "Empty List"
-        }
-      ],
-      "relativePath": "src/components/ListView.story.vue",
-      "supportPluginId": "vue3",
-      "treePath": [
-        "ListView"
-      ],
-      "virtual": false,
-      "markdownFile": {
-        "id": "src-components-listview-story-md",
-        "relativePath": "src/components/ListView.story.md",
-        "isRelatedToStory": true,
-        "frontmatter": {}
-      }
-    },
-    {
       "id": "src-components-popover-story-vue",
       "title": "Popover",
       "layout": {
@@ -612,37 +569,6 @@
       ],
       "virtual": false,
       "markdownFile": null
-    },
-    {
-      "id": "src-components-tabs-story-vue",
-      "title": "Tabs",
-      "layout": {
-        "type": "grid",
-        "width": "80%"
-      },
-      "docsOnly": false,
-      "variants": [
-        {
-          "id": "src-components-tabs-story-vue-0",
-          "title": "Without Icon"
-        },
-        {
-          "id": "src-components-tabs-story-vue-1",
-          "title": "With Icon"
-        }
-      ],
-      "relativePath": "src/components/Tabs.story.vue",
-      "supportPluginId": "vue3",
-      "treePath": [
-        "Tabs"
-      ],
-      "virtual": false,
-      "markdownFile": {
-        "id": "src-components-tabs-story-md",
-        "relativePath": "src/components/Tabs.story.md",
-        "isRelatedToStory": true,
-        "frontmatter": {}
-      }
     },
     {
       "id": "src-components-textinput-story-vue",
@@ -805,6 +731,49 @@
       "markdownFile": null
     },
     {
+      "id": "src-components-listview-listview-story-vue",
+      "title": "ListView",
+      "layout": {
+        "type": "grid",
+        "width": "95%"
+      },
+      "docsOnly": false,
+      "variants": [
+        {
+          "id": "src-components-listview-listview-story-vue-0",
+          "title": "Simple List"
+        },
+        {
+          "id": "src-components-listview-listview-story-vue-1",
+          "title": "Custom List"
+        },
+        {
+          "id": "src-components-listview-listview-story-vue-2",
+          "title": "Grouped Rows"
+        },
+        {
+          "id": "src-components-listview-listview-story-vue-3",
+          "title": "Cell Slot"
+        },
+        {
+          "id": "src-components-listview-listview-story-vue-4",
+          "title": "Empty List"
+        }
+      ],
+      "relativePath": "src/components/ListView/ListView.story.vue",
+      "supportPluginId": "vue3",
+      "treePath": [
+        "ListView"
+      ],
+      "virtual": false,
+      "markdownFile": {
+        "id": "src-components-listview-listview-story-md",
+        "relativePath": "src/components/ListView/ListView.story.md",
+        "isRelatedToStory": true,
+        "frontmatter": {}
+      }
+    },
+    {
       "id": "src-components-rating-rating-story-vue",
       "title": "Rating",
       "layout": {
@@ -825,6 +794,41 @@
       ],
       "virtual": false,
       "markdownFile": null
+    },
+    {
+      "id": "src-components-tabs-tabs-story-vue",
+      "title": "Tabs",
+      "layout": {
+        "type": "grid",
+        "width": "80%"
+      },
+      "docsOnly": false,
+      "variants": [
+        {
+          "id": "src-components-tabs-tabs-story-vue-0",
+          "title": "Without Icon"
+        },
+        {
+          "id": "src-components-tabs-tabs-story-vue-1",
+          "title": "With Icon"
+        },
+        {
+          "id": "src-components-tabs-tabs-story-vue-2",
+          "title": "Vertical Tabs"
+        }
+      ],
+      "relativePath": "src/components/Tabs/Tabs.story.vue",
+      "supportPluginId": "vue3",
+      "treePath": [
+        "Tabs"
+      ],
+      "virtual": false,
+      "markdownFile": {
+        "id": "src-components-tabs-tabs-story-md",
+        "relativePath": "src/components/Tabs/Tabs.story.md",
+        "isRelatedToStory": true,
+        "frontmatter": {}
+      }
     },
     {
       "id": "src-components-texteditor-texteditor-story-vue",
@@ -1227,14 +1231,14 @@
       "frontmatter": {}
     },
     {
-      "id": "src-components-listview-story-md",
-      "relativePath": "src/components/ListView.story.md",
+      "id": "src-components-listview-listview-story-md",
+      "relativePath": "src/components/ListView/ListView.story.md",
       "isRelatedToStory": true,
       "frontmatter": {}
     },
     {
-      "id": "src-components-tabs-story-md",
-      "relativePath": "src/components/Tabs.story.md",
+      "id": "src-components-tabs-tabs-story-md",
+      "relativePath": "src/components/Tabs/Tabs.story.md",
       "isRelatedToStory": true,
       "frontmatter": {}
     },
