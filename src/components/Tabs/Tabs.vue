@@ -4,7 +4,7 @@
       as !== 'template'
         ? {
             as,
-            class: vertical ? 'flex flex-1' : 'flex flex-1 flex-col',
+            class: ['flex flex-1 overflow-hidden', vertical ? '' : 'flex-col '],
           }
         : {}
     "

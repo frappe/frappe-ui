@@ -17,12 +17,12 @@
     >
       <slot v-bind="{ tab, selected }">
         <button
-          class="flex items-center gap-1.5 py-3 text-base text-ink-gray-5 duration-300 ease-in-out hover:text-ink-gray-9"
+          class="flex items-center gap-1.5 text-base text-ink-gray-5 duration-300 ease-in-out hover:text-ink-gray-9"
           :class="[
             selected ? 'text-ink-gray-9' : '',
             vertical
-              ? 'py-2 px-3'
-              : 'border-b border-transparent hover:border-outline-gray-3',
+              ? 'py-2.5 px-4 border-r border-transparent hover:border-outline-gray-3'
+              : 'py-3 border-b border-transparent hover:border-outline-gray-3',
           ]"
         >
           <component v-if="tab.icon" :is="tab.icon" class="size-4" />
@@ -31,10 +31,9 @@
       </slot>
     </Tab>
     <div
-      v-if="!vertical"
       ref="indicator"
-      class="tab-indicator absolute bottom-0 h-px bg-surface-gray-7"
-      :class="transitionClass"
+      class="tab-indicator absolute bg-surface-gray-7"
+      :class="[vertical ? 'right-0 w-px' : 'bottom-0 h-px', transitionClass]"
     />
   </TabList>
 </template>
@@ -57,21 +56,24 @@ function moveIndicator(index) {
     index = tabsLength.value - 1
   }
   const selectedTab = tabRef.value[index].el
-  indicator.value.style.width = `${selectedTab.offsetWidth}px`
-  indicator.value.style.left = `${selectedTab.offsetLeft}px`
+  if (vertical) {
+    indicator.value.style.height = `${selectedTab.offsetHeight}px`
+    indicator.value.style.top = `${selectedTab.offsetTop}px`
+  } else {
+    indicator.value.style.width = `${selectedTab.offsetWidth}px`
+    indicator.value.style.left = `${selectedTab.offsetLeft}px`
+  }
 }
 
 watch(tabIndex, (index) => {
   if (index >= tabsLength.value) {
     tabIndex.value = tabsLength.value - 1
   }
-  if (vertical) return
   transitionClass.value = 'transition-all duration-300 ease-in-out'
   nextTick(() => moveIndicator(index))
 })
 
 onMounted(() => {
-  if (vertical) return
   nextTick(() => moveIndicator(tabIndex.value))
   // Fix for indicator not moving on initial load
   setTimeout(() => moveIndicator(tabIndex.value), 100)
