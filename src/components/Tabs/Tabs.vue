@@ -13,11 +13,11 @@
     @change="(idx) => (tabIndex = idx)"
   >
     <slot>
-      <TabList>
-        <slot name="tab-item" />
+      <TabList v-slot="{ tab, selected }">
+        <slot name="tab-item" v-bind="{ tab, selected }" />
       </TabList>
-      <TabPanel>
-        <slot name="tab-panel" />
+      <TabPanel v-slot="{ tab }">
+        <slot name="tab-panel" v-bind="{ tab }" />
       </TabPanel>
     </slot>
   </TabGroup>
