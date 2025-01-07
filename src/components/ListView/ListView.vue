@@ -143,4 +143,11 @@ provide(
     toggleAllRows,
   })),
 )
+
+defineExpose({
+  selections,
+  allRowsSelected,
+  toggleRow,
+  toggleAllRows,
+})
 </script>
