@@ -22,6 +22,7 @@
       :disabled="disabled"
       :id="id"
       :value="modelValue"
+      :required="required"
       @input="handleChange"
       @change="handleChange"
       v-bind="attrsWithoutClassStyle"
@@ -53,6 +54,7 @@ interface TextInputProps {
   id?: string
   modelValue?: string | number
   debounce?: number
+  required?: boolean
 }
 
 defineOptions({
