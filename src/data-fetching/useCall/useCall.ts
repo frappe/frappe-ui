@@ -88,10 +88,14 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
     canAbort,
     aborted,
     abort,
-    execute,
+    execute: _execute,
     onFetchResponse,
     onFetchError,
   } = result
+
+  function execute(): Promise<TResponse | null> {
+    return _execute().then((r) => data.value)
+  }
 
   onFetchResponse(() => {
     resolve()
@@ -107,7 +111,9 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
     if (beforeSubmit) {
       beforeSubmit(params)
     }
-    submitParams.value = params
+    if (params != null) {
+      submitParams.value = params
+    }
     if (!refetch) {
       return execute()
     }
@@ -122,14 +128,14 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
 
   const _data = computed(() => {
     if (normalizedCacheKey && (out.loading || !out.isFinished)) {
-      let data = cachedResponse.value as TResponse
+      let cachedData = cachedResponse.value as TResponse
       if (transform) {
-        let returnValue = transform(data)
+        let returnValue = transform(cachedData)
         if (returnValue !== undefined) {
-          data = returnValue
+          cachedData = returnValue
         }
       }
-      return data
+      return cachedData
     }
     return data.value
   })
