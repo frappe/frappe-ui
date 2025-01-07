@@ -1,7 +1,9 @@
-import { Reactive, Ref } from 'vue'
+import { MaybeRefOrGetter, Reactive, Ref } from 'vue'
 import { CacheKey } from '../useCall/types'
 
 export type Field = string
+export type LinkField = `${Field}.${Field}` | `${Field}.${Field} as ${string}`
+export type FieldWithAlias = `${Field} as ${string}`
 
 export type ChildTableField = {
   [key: string]: Field[]
@@ -25,9 +27,9 @@ export type OrderBy =
 
 export interface UseListOptions<T> {
   doctype: string
-  fields?: Array<keyof T | ChildTableField>
-  filters?: Reactive<Filters>
-  orderBy?: OrderBy
+  fields?: Array<keyof T | ChildTableField | LinkField | FieldWithAlias | '*'>
+  filters?: MaybeRefOrGetter<Filters>
+  orderBy?: MaybeRefOrGetter<OrderBy>
   start?: number
   limit?: number
   groupBy?: Field

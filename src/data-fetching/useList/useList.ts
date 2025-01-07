@@ -46,11 +46,12 @@ export function useList<T extends { name: string }>(
   const _limit = ref(limit || 20)
 
   const _url = computed(() => {
-    const parsedFilters = parseFilters(filters || {})
+    const parsedFilters = parseFilters(filters ? toValue(filters) : {})
+    const _fields = fields ? toValue(fields) : []
     const params = makeGetParams({
-      fields: fields?.length ? JSON.stringify(fields) : null,
+      fields: _fields.length ? JSON.stringify(_fields) : null,
       filters: parsedFilters ? JSON.stringify(parsedFilters) : null,
-      order_by: orderBy,
+      order_by: toValue(orderBy),
       start: _start.value,
       limit: _limit.value,
       group_by: groupBy,
@@ -288,10 +289,14 @@ function handleAfterFetch<T extends { name: string }>({
   _start: Ref<number>
 }) {
   return function (ctx: AfterFetchContext) {
-    let resultData = (ctx.data.result as T[]).map((item) => ({
-      ...item,
-      name: String(item.name),
-    }))
+    let resultData = ctx.data.result as T[]
+    if (resultData[0]?.name) {
+      resultData = resultData.map((item) => ({
+        ...item,
+        name: String(item.name),
+      }))
+    }
+
     if (transform) {
       const returnValue = transform(resultData)
       if (Array.isArray(returnValue)) {
