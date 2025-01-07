@@ -1,17 +1,16 @@
 <script setup>
 import { reactive, h, ref } from 'vue'
-import Avatar from './Avatar.vue'
-import Badge from './Badge.vue'
-import { Button } from './Button'
-import FeatherIcon from './FeatherIcon.vue'
-import ListHeader from './ListView/ListHeader.vue'
-import ListHeaderItem from './ListView/ListHeaderItem.vue'
-import ListRow from './ListView/ListRow.vue'
-import ListRowItem from './ListView/ListRowItem.vue'
-import ListRows from './ListView/ListRows.vue'
-import ListGroups from './ListView/ListGroups.vue'
-import ListSelectBanner from './ListView/ListSelectBanner.vue'
-import ListView from './ListView/ListView.vue'
+import Avatar from '../Avatar.vue'
+import Badge from '../Badge.vue'
+import { Button } from '../Button'
+import FeatherIcon from '../FeatherIcon.vue'
+import ListHeader from './ListHeader.vue'
+import ListHeaderItem from './ListHeaderItem.vue'
+import ListRow from './ListRow.vue'
+import ListRowItem from './ListRowItem.vue'
+import ListRows from './ListRows.vue'
+import ListSelectBanner from './ListSelectBanner.vue'
+import ListView from './ListView.vue'
 
 const state = reactive({
   selectable: true,
