@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { h, reactive } from 'vue'
 import Tabs from './Tabs.vue'
-import FeatherIcon from './FeatherIcon.vue'
+import FeatherIcon from '../FeatherIcon.vue'
 const state = reactive({
   index: 0,
   tabs_without_icon: [
@@ -47,21 +47,36 @@ const state = reactive({
 <template>
   <Story :layout="{ type: 'grid', width: '80%' }">
     <Variant title="Without Icon">
-      <Tabs
-        v-slot="{ tab }"
-        v-model="state.index"
-        :tabs="state.tabs_without_icon"
-      >
-        <div class="p-5">
-          {{ tab.content }}
-        </div>
+      <Tabs as="div" v-model="state.index" :tabs="state.tabs_without_icon">
+        <template #tab-panel="{ tab }">
+          <div class="p-5">
+            {{ tab.content }}
+          </div>
+        </template>
       </Tabs>
     </Variant>
     <Variant title="With Icon">
-      <Tabs v-slot="{ tab }" v-model="state.index" :tabs="state.tabs_with_icon">
-        <div class="p-5">
-          {{ tab.content }}
-        </div>
+      <Tabs as="div" v-model="state.index" :tabs="state.tabs_with_icon">
+        <template #tab-panel="{ tab }">
+          <div class="p-5">
+            {{ tab.content }}
+          </div>
+        </template>
+      </Tabs>
+    </Variant>
+    <Variant title="Vertical Tabs">
+      <Tabs
+        as="div"
+        class="border rounded"
+        v-model="state.index"
+        :tabs="state.tabs_with_icon"
+        vertical
+      >
+        <template #tab-panel="{ tab }">
+          <div class="p-5">
+            {{ tab.content }}
+          </div>
+        </template>
       </Tabs>
     </Variant>
 
