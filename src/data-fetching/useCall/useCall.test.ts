@@ -145,7 +145,7 @@ describe('useCall', () => {
     const call = useCall<Response>({
       url: url('/api/v2/method/post'),
       method: 'POST',
-      refetch: true,
+      refetch: false,
       immediate: false,
     })
 

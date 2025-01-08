@@ -59,10 +59,7 @@ export const handlers = [
     let result = getUsers(listParams)
 
     return HttpResponse.json({
-      data: {
-        result,
-        has_next_page: true,
-      },
+      data: result,
     })
   }),
 

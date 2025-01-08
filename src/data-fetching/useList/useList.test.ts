@@ -27,7 +27,7 @@ describe('useList', () => {
     // Verify initial state
     expect(users.data).toBe(null)
     expect(users.error).toBe(null)
-    expect(users.hasNextPage).toBe(false)
+    expect(users.hasNextPage).toBe(true)
     expect(typeof users.fetch).toBe('function')
 
     // fetch
