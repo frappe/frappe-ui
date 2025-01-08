@@ -48,6 +48,13 @@ function useDelete(doctype: string, options: UseDoctypeOptions = {}) {
     method: 'DELETE',
     immediate: false,
     baseUrl,
+    onSuccess() {
+      if (delete_.params.name) {
+        let { name } = delete_.params
+        docStore.removeDoc(doctype, name)
+        listStore.removeRow(doctype, name)
+      }
+    },
   })
 
   return reactive({

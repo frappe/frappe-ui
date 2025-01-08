@@ -204,7 +204,14 @@ export function useList<T extends { name: string }>(
       }
     },
     onSuccess() {
-      if (refetch) execute()
+      if (refetch) {
+        execute()
+      }
+      if (delete_.params.name) {
+        let { name } = delete_.params
+        docStore.removeDoc(doctype, name)
+        listStore.removeRow(doctype, name)
+      }
     },
   })
 
