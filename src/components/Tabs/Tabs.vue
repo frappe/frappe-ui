@@ -27,7 +27,7 @@
 import TabList from './TabList.vue'
 import TabPanel from './TabPanel.vue'
 import { TabGroup } from '@headlessui/vue'
-import { provide } from 'vue'
+import { computed, provide } from 'vue'
 
 const props = defineProps({
   as: {
@@ -46,7 +46,12 @@ const props = defineProps({
 
 const tabIndex = defineModel()
 
-provide('tabIndex', tabIndex)
-provide('tabs', props.tabs)
-provide('vertical', props.vertical)
+provide(
+  'tab',
+  computed(() => ({
+    tabIndex,
+    tabs: props.tabs,
+    vertical: props.vertical,
+  })),
+)
 </script>
