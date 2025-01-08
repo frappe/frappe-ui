@@ -65,14 +65,20 @@ export function useList<T extends { name: string }>(
   })
 
   const allData: Ref<T[] | null> = ref(null)
+  const hasNextPage = ref(true)
+  const hasPreviousPage = computed(() => _start.value > 0)
 
   const fetchOptions: UseFetchOptions = {
     immediate,
     refetch,
-    initialData: initialData
-      ? { result: initialData, has_next_page: false }
-      : null,
-    afterFetch: handleAfterFetch<T>({ ...options, allData, _start }),
+    initialData: initialData || null,
+    afterFetch: handleAfterFetch<T>({
+      ...options,
+      allData,
+      _start,
+      _limit,
+      hasNextPage,
+    }),
     onFetchError: handleFetchError<T>(options),
   }
 
@@ -95,24 +101,16 @@ export function useList<T extends { name: string }>(
       let data = cachedResponse.value
       if (data) {
         if (transform) {
-          let returnValue = transform(data.result as T[])
+          let returnValue = transform(data as T[])
           if (returnValue !== undefined) {
             return returnValue
           }
         }
-        return data.result
+        return data
       }
     }
     return allData.value
   })
-  const hasNextPage = computed(() => {
-    if (normalizedCacheKey && (out.loading || !out.isFinished)) {
-      let data = cachedResponse.value
-      return data?.has_next_page ?? false
-    }
-    return data.value?.has_next_page ?? false
-  })
-  const hasPreviousPage = computed(() => _start.value > 0)
 
   if (normalizedCacheKey) {
     idbStore.get(normalizedCacheKey).then((data) => {
@@ -248,7 +246,7 @@ export function useList<T extends { name: string }>(
 
   let out = reactive({
     data: result,
-    hasNextPage,
+    hasNextPage: readonly(hasNextPage),
     hasPreviousPage,
     start: readonly(_start),
     limit: readonly(_limit),
@@ -284,18 +282,23 @@ function handleAfterFetch<T extends { name: string }>({
   cacheKey,
   allData,
   _start,
+  _limit,
+  hasNextPage,
 }: UseListOptions<T> & {
   allData: Ref<T[] | null>
   _start: Ref<number>
+  _limit: Ref<number>
+  hasNextPage: Ref<boolean>
 }) {
   return function (ctx: AfterFetchContext) {
-    let resultData = ctx.data.result as T[]
+    let resultData = ctx.data
     if (resultData[0]?.name) {
       resultData = resultData.map((item) => ({
         ...item,
         name: String(item.name),
       }))
     }
+    hasNextPage.value = resultData.length < _limit.value ? false : true
 
     if (transform) {
       const returnValue = transform(resultData)
@@ -305,11 +308,11 @@ function handleAfterFetch<T extends { name: string }>({
     }
 
     if (_start.value === 0) {
-      allData.value = resultData
+      allData.value = resultData as T[]
     } else {
       allData.value = [...(allData.value || []), ...resultData]
     }
-    ctx.data.result = allData.value
+    ctx.data = allData.value
 
     let normalizedCacheKey = normalizeCacheKey(cacheKey, 'useList')
     if (normalizedCacheKey) {

@@ -46,7 +46,4 @@ export interface UseListOptions<T> {
   onError?: (error: Error) => void
 }
 
-export interface UseListResponse<T> {
-  result: T[]
-  has_next_page: boolean
-}
+export type UseListResponse<T> = T[]
