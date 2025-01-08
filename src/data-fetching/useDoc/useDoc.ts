@@ -68,9 +68,10 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
     immediate,
     refetch: true,
     afterFetch(ctx) {
-      docStore.setDoc({ doctype, ...ctx.data })
+      let doc = { doctype, ...ctx.data, name: String(ctx.data.name) }
+      docStore.setDoc(doc)
       listStore.updateRow(doctype, ctx.data)
-      triggerSuccessCallbacks(ctx.data)
+      triggerSuccessCallbacks(doc)
       return ctx
     },
   }
