@@ -100,7 +100,7 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
 
       let callOptions: UseCallOptions = {
         immediate: false,
-        refetch: true,
+        refetch: false,
         method: 'POST',
         ...option,
         baseUrl,
