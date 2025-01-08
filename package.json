@@ -6,7 +6,7 @@
   "scripts": {
     "test": "vitest",
     "prettier": "yarn prettier -w ./src",
-    "bump-and-release": "git pull --rebase origin main && yarn version --patch && git push && git push --tags",
+    "bump-and-release": "yarn vitest && git pull --rebase origin main && yarn version --patch && git push && git push --tags",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
