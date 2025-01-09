@@ -93,8 +93,13 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
     onFetchError,
   } = result
 
-  function execute(): Promise<TResponse | null> {
-    return _execute().then((r) => data.value)
+  async function execute(): Promise<TResponse | null> {
+    try {
+      await _execute(true)
+      return data.value
+    } catch (e) {
+      throw error.value || e
+    }
   }
 
   onFetchResponse(() => {
