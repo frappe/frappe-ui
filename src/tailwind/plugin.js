@@ -127,7 +127,7 @@ module.exports = plugin(
         xl: [
           '18px',
           {
-            lineHeight: '1.4',
+            lineHeight: '1.3',
             letterSpacing: '0.01em',
             fontWeight: '400',
           },
