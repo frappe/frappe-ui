@@ -5,7 +5,7 @@
       class="ml-[3px] mr-[11px] rounded p-1 hover:bg-surface-gray-2"
     >
       <DownSolid
-        class="h-4 w-4 text-ink-gray-9 transition-transform duration-200"
+        class="h-4 w-4 text-ink-gray-6 transition-transform duration-200"
         :class="[group.collapsed ? '-rotate-90' : '']"
       />
     </button>
