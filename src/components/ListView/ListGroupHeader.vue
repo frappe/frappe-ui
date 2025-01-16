@@ -8,11 +8,6 @@
         class="h-4 w-4 text-ink-gray-6 transition-transform duration-200"
         :class="[group.collapsed ? '-rotate-90' : '']"
       />
-      <!-- <FeatherIcon
-        name="chevron-down"
-        class="h-4 w-4 text-ink-gray-6 transition-transform duration-200"
-        :class="[group.collapsed ? '-rotate-90' : '']"
-      /> -->
     </button>
     <slot>
       <div class="w-full py-1.5 pr-2">
@@ -31,7 +26,6 @@
 </template>
 <script setup>
 import { inject } from 'vue'
-import { FeatherIcon } from 'frappe-ui'
 import DownSolid from '../../icons/DownSolid.vue'
 
 const props = defineProps({
