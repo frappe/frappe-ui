@@ -26,10 +26,12 @@
       />
     </template>
     <template #actions>
-      <Button variant="solid" @click="addImage(addImageDialog.url)">
-        Insert Image
-      </Button>
-      <Button @click="reset"> Cancel </Button>
+      <div class="flex gap-2">
+        <Button variant="solid" @click="addImage(addImageDialog.url)">
+          Insert Image
+        </Button>
+        <Button @click="reset"> Cancel </Button>
+      </div>
     </template>
   </Dialog>
 </template>
@@ -63,6 +65,7 @@ export default {
       })
     },
     addImage(src) {
+      if (!src) return
       this.editor.chain().focus().setImage({ src }).run()
       this.reset()
     },
