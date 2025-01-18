@@ -13,7 +13,7 @@
     <div
       v-if="placeholder"
       v-show="!modelValue"
-      class="pointer-events-none absolute text-ink-gray-4"
+      class="pointer-events-none absolute text-ink-gray-4 truncate w-full"
       :class="[fontSizeClasses, paddingClasses]"
     >
       {{ placeholder }}
