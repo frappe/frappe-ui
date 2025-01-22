@@ -87,7 +87,7 @@ module.exports = plugin(
         '2xs': [
           '11px',
           {
-            lineHeight: '1.4',
+            lineHeight: '1.15',
             letterSpacing: '0.01em',
             fontWeight: '420',
           },
@@ -95,7 +95,7 @@ module.exports = plugin(
         xs: [
           '12px',
           {
-            lineHeight: '1.4',
+            lineHeight: '1.15',
             letterSpacing: '0.02em',
             fontWeight: '420',
           },
@@ -103,7 +103,7 @@ module.exports = plugin(
         sm: [
           '13px',
           {
-            lineHeight: '1.4',
+            lineHeight: '1.15',
             letterSpacing: '0.02em',
             fontWeight: '420',
           },
@@ -111,7 +111,7 @@ module.exports = plugin(
         base: [
           '14px',
           {
-            lineHeight: '1.4',
+            lineHeight: '1.15',
             letterSpacing: '0.02em',
             fontWeight: '420',
           },
@@ -119,7 +119,7 @@ module.exports = plugin(
         lg: [
           '16px',
           {
-            lineHeight: '1.4',
+            lineHeight: '1.15',
             letterSpacing: '0.02em',
             fontWeight: '400',
           },
@@ -127,7 +127,7 @@ module.exports = plugin(
         xl: [
           '18px',
           {
-            lineHeight: '1.3',
+            lineHeight: '1.15',
             letterSpacing: '0.01em',
             fontWeight: '400',
           },
@@ -135,7 +135,7 @@ module.exports = plugin(
         '2xl': [
           '20px',
           {
-            lineHeight: '1.3',
+            lineHeight: '1.15',
             letterSpacing: '0.01em',
             fontWeight: '400',
           },
@@ -143,7 +143,7 @@ module.exports = plugin(
         '3xl': [
           '24px',
           {
-            lineHeight: '1.25',
+            lineHeight: '1.15',
             fontWeight: 400,
             letterSpacing: '0.005em',
           },
