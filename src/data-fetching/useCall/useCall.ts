@@ -112,9 +112,17 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
     promise.value = makePromise()
   })
 
+  let beforeSubmitError = ref<Error | null>(null)
+
   const submit = async (params?: TParams) => {
     if (beforeSubmit) {
-      beforeSubmit(params)
+      beforeSubmitError.value = null
+      try {
+        await beforeSubmit(params)
+      } catch (e) {
+        console.error('Error in beforeSubmit hook:', e)
+        beforeSubmitError.value = e as Error
+      }
     }
     if (params != null) {
       submitParams.value = params
@@ -155,7 +163,7 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
 
   let out = reactive({
     data: _data,
-    error: readonly(error),
+    error: readonly(beforeSubmitError.value ? beforeSubmitError : error),
     loading: isFetching,
     isFetching,
     isFinished,
