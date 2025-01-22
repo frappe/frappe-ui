@@ -47,36 +47,30 @@ export const useFrappeFetch = createFetch({
         type: string
         indicator: string
       }
-      let errors: Array<FrappeError> = []
       try {
-        errors = JSON.parse(ctx.data).errors
+        let errorResponse = JSON.parse(ctx.data)
+        let errors: Array<FrappeError> = errorResponse.errors
+        let error = errors[0] // assuming only one error for now
+        let errorDescription = error.message
+          ? `: ${error.message}`
+          : error.exception
+            ? ` (Traceback)`
+            : ''
+        let frappeError = new Error(`${error.type}${errorDescription}`)
+        frappeError.title = error.title
+        frappeError.type = error.type
+        frappeError.exception = error.exception
+
+        if (import.meta.env.DEV && error.exception) {
+          console.log(error.exception)
+        }
+
+        ctx.error = frappeError
+        return ctx
       } catch (e) {
-        errors = [
-          {
-            title: 'Internal Server Error',
-            message: 'Internal Server Error',
-            type: 'ServerError',
-            indicator: 'red',
-          },
-        ]
+        console.log('Error parsing error response:', e)
+        return ctx
       }
-      let error = errors[0] // assuming only one error for now
-      let errorDescription = error.message
-        ? `: ${error.message}`
-        : error.exception
-          ? ` (Traceback)`
-          : ''
-      let frappeError = new Error(`${error.type}${errorDescription}`)
-      frappeError.title = error.title
-      frappeError.type = error.type
-      frappeError.exception = error.exception
-
-      if (import.meta.env.DEV && error.exception) {
-        console.log(error.exception)
-      }
-
-      ctx.error = frappeError
-      return ctx
     },
   },
 })
