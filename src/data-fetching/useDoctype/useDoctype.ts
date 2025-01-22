@@ -34,7 +34,11 @@ function useInsert<T>(doctype: string, options: UseDoctypeOptions = {}) {
     immediate: false,
     baseUrl,
   })
-  return out
+
+  return {
+    ...out,
+    submit: (params: Partial<T>) => out.submit(params).then(() => out.data),
+  }
 }
 
 function useDelete(doctype: string, options: UseDoctypeOptions = {}) {

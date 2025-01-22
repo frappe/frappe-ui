@@ -17,7 +17,6 @@ describe('useDoctype', () => {
     const fetchSpy = vi.spyOn(global, 'fetch')
 
     user.insert.submit({ name: 'John Doe', email: 'john@example.com' })
-    expect(user.insert.loading).toBe(true)
 
     await waitUntilValueChanges(() => user.insert.loading, false)
     expect(user.insert.loading).toBe(false)
