@@ -58,50 +58,52 @@
                 <div class="bg-surface-modal px-4 pb-6 pt-5 sm:px-6">
                   <div class="flex">
                     <div class="w-full flex-1">
-                      <div class="mb-6 flex items-center justify-between">
-                        <div class="flex items-center space-x-2">
-                          <div
-                            v-if="icon"
-                            class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full"
-                            :class="dialogIconBgClasses"
-                          >
-                            <FeatherIcon
-                              :name="icon.name"
-                              class="h-4 w-4"
-                              :class="dialogIconClasses"
-                              aria-hidden="true"
-                            />
-                          </div>
-                          <DialogTitle as="header">
-                            <slot name="body-title">
-                              <h3
-                                class="text-2xl font-semibold leading-6 text-ink-gray-9"
-                              >
-                                {{ options.title || 'Untitled' }}
-                              </h3>
-                            </slot>
-                          </DialogTitle>
-                        </div>
-                        <Button variant="ghost" @click="close">
-                          <template #icon>
-                            <svg
-                              width="16"
-                              height="16"
-                              viewBox="0 0 16 16"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                              class="text-ink-gray-9"
+                      <slot name="body-header">
+                        <div class="mb-6 flex items-center justify-between">
+                          <div class="flex items-center space-x-2">
+                            <div
+                              v-if="icon"
+                              class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full"
+                              :class="dialogIconBgClasses"
                             >
-                              <path
-                                fill-rule="evenodd"
-                                clip-rule="evenodd"
-                                d="M12.8567 3.85355C13.052 3.65829 13.052 3.34171 12.8567 3.14645C12.6615 2.95118 12.3449 2.95118 12.1496 3.14645L8.00201 7.29405L3.85441 3.14645C3.65914 2.95118 3.34256 2.95118 3.1473 3.14645C2.95204 3.34171 2.95204 3.65829 3.1473 3.85355L7.29491 8.00116L3.14645 12.1496C2.95118 12.3449 2.95118 12.6615 3.14645 12.8567C3.34171 13.052 3.65829 13.052 3.85355 12.8567L8.00201 8.70827L12.1505 12.8567C12.3457 13.052 12.6623 13.052 12.8576 12.8567C13.0528 12.6615 13.0528 12.3449 12.8576 12.1496L8.70912 8.00116L12.8567 3.85355Z"
-                                fill="currentColor"
+                              <FeatherIcon
+                                :name="icon.name"
+                                class="h-4 w-4"
+                                :class="dialogIconClasses"
+                                aria-hidden="true"
                               />
-                            </svg>
-                          </template>
-                        </Button>
-                      </div>
+                            </div>
+                            <DialogTitle as="header">
+                              <slot name="body-title">
+                                <h3
+                                  class="text-2xl font-semibold leading-6 text-ink-gray-9"
+                                >
+                                  {{ options.title || 'Untitled' }}
+                                </h3>
+                              </slot>
+                            </DialogTitle>
+                          </div>
+                          <Button variant="ghost" @click="close">
+                            <template #icon>
+                              <svg
+                                width="16"
+                                height="16"
+                                viewBox="0 0 16 16"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="text-ink-gray-9"
+                              >
+                                <path
+                                  fill-rule="evenodd"
+                                  clip-rule="evenodd"
+                                  d="M12.8567 3.85355C13.052 3.65829 13.052 3.34171 12.8567 3.14645C12.6615 2.95118 12.3449 2.95118 12.1496 3.14645L8.00201 7.29405L3.85441 3.14645C3.65914 2.95118 3.34256 2.95118 3.1473 3.14645C2.95204 3.34171 2.95204 3.65829 3.1473 3.85355L7.29491 8.00116L3.14645 12.1496C2.95118 12.3449 2.95118 12.6615 3.14645 12.8567C3.34171 13.052 3.65829 13.052 3.85355 12.8567L8.00201 8.70827L12.1505 12.8567C12.3457 13.052 12.6623 13.052 12.8576 12.8567C13.0528 12.6615 13.0528 12.3449 12.8576 12.1496L8.70912 8.00116L12.8567 3.85355Z"
+                                  fill="currentColor"
+                                />
+                              </svg>
+                            </template>
+                          </Button>
+                        </div>
+                      </slot>
 
                       <slot name="body-content">
                         <p
