@@ -1,5 +1,5 @@
 <template>
-  <Dialog v-model="showDialog" :options="{ title }">
+  <Dialog v-model="showDialog" :options="{ title }" @close="closeDialog">
     <template #body-content>
       <div class="space-y-4">
         <p class="text-p-base text-gray-800" v-if="message" v-html="message" />
@@ -27,6 +27,10 @@ export default {
       type: Function,
       default: null,
     },
+    onCancel: {
+      type: Function,
+      default: null,
+    },
   },
   expose: ['show', 'hide'],
   components: {
@@ -51,6 +55,10 @@ export default {
     },
     show() {
       this.showDialog = true
+    },
+    closeDialog() {
+      this.hide()
+      this.onCancel?.()
     },
     hide() {
       this.showDialog = false
