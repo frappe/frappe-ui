@@ -18,6 +18,7 @@ You need to make sure you include the `Dialogs` component in your root component
           // deleteFile()
           // hideDialog() // closes dialog
         },
+        onCancel: () => {}
       })
     "
   >
@@ -37,6 +38,7 @@ You need to make sure you include the `Dialogs` component in your root component
           // deleteFile()
           // hideDialog() // closes dialog
         },
+        onCancel: () => {}
       })
     "
   >
