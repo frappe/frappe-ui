@@ -1,5 +1,5 @@
 const tailwindColors = require('tailwindcss/colors')
-const colorsData = require('./colors.json')
+const colorsData = require('./colorsv2.json')
 
 function generateColorPalette() {
   const colorPalette = {
