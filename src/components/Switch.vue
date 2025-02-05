@@ -103,13 +103,13 @@ const switchLabelClasses = computed(() => {
     'font-medium leading-normal',
     props.disabled && switchType.value === SwitchVariant.ONLY_LABEL
       ? 'text-ink-gray-4'
-      : 'text-ink-gray-8',
+      : 'text-ink-gray-7',
     props.size === 'md' ? 'text-lg' : 'text-base',
   ]
 })
 
 const switchDescriptionClasses = computed(() => {
-  return ['max-w-xs text-p-base text-ink-gray-7']
+  return ['max-w-xs text-p-base text-ink-gray-6']
 })
 
 const switchGroupClasses = computed(() => {

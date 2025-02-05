@@ -43,7 +43,7 @@
           :key="column.key"
           :class="[
             alignmentMap[column.align],
-            i == 0 ? 'text-ink-gray-9' : 'text-ink-gray-7',
+            i == 0 ? 'text-ink-gray-8' : 'text-ink-gray-6',
           ]"
         >
           <slot v-bind="{ idx: i, column, item: row[column.key] }">

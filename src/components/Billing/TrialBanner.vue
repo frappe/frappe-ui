@@ -8,7 +8,7 @@
         <FeatherIcon class="h-4" name="info" />
         {{ trialTitle }}
       </div>
-      <div class="text-ink-gray-7 text-sm font-normal leading-5">
+      <div class="text-ink-gray-6 text-sm font-normal leading-5">
         {{ trialMessage }}
       </div>
     </div>

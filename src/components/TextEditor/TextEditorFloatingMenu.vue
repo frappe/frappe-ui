@@ -8,7 +8,7 @@
     <button
       v-for="button in floatingMenuButtons"
       :key="button.label"
-      class="flex rounded p-1 text-ink-gray-8 transition-colors"
+      class="flex rounded p-1 text-ink-gray-7 transition-colors"
       :class="
         button.isActive(editor)
           ? 'bg-surface-gray-2'

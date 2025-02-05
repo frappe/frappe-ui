@@ -78,7 +78,7 @@ const inputClasses = computed(() => {
     sizeClasses,
     paddingClasses,
     variantClasses,
-    props.disabled ? 'text-ink-gray-5' : 'text-ink-gray-8',
+    props.disabled ? 'text-ink-gray-5' : 'text-ink-gray-7',
     'transition-colors w-full block',
   ]
 })

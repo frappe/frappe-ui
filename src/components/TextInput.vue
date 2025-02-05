@@ -84,7 +84,7 @@ const inputRef = ref<HTMLInputElement | null>(null)
 defineExpose({ el: inputRef })
 
 const textColor = computed(() => {
-  return props.disabled ? 'text-ink-gray-5' : 'text-ink-gray-8'
+  return props.disabled ? 'text-ink-gray-5' : 'text-ink-gray-7'
 })
 
 const inputClasses = computed(() => {

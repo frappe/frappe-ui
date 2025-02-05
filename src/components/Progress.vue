@@ -4,7 +4,7 @@
       v-if="props.label || props.hint"
       class="flex items-baseline justify-between"
     >
-      <span v-if="props.label" class="text-base font-medium text-ink-gray-8">
+      <span v-if="props.label" class="text-base font-medium text-ink-gray-7">
         {{ props.label }}
       </span>
       <!-- Empty for alignment -->

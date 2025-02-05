@@ -43,32 +43,32 @@ const classes = computed(() => {
   let solidClasses = {
     gray: 'text-ink-white bg-surface-gray-7',
     blue: 'text-ink-blue-1 bg-surface-blue-2',
-    green: 'text-ink-green-1 bg-surface-green-3',
+    green: 'text-ink-green-1 bg-surface-green-5',
     orange: 'text-ink-amber-1 bg-surface-amber-2',
     red: 'text-ink-red-1 bg-surface-red-4',
   }[props.theme]
 
   let subtleClasses = {
     gray: 'text-ink-gray-6 bg-surface-gray-2',
-    blue: 'text-ink-blue-2 bg-surface-blue-1',
-    green: 'text-ink-green-3 bg-surface-green-2',
-    orange: 'text-ink-amber-3 bg-surface-amber-1',
+    blue: 'text-ink-blue-3 bg-surface-blue-1',
+    green: 'text-ink-green-4 bg-surface-green-2',
+    orange: 'text-ink-amber-4 bg-surface-amber-1',
     red: 'text-ink-red-4 bg-surface-red-1',
   }[props.theme]
 
   let outlineClasses = {
     gray: 'text-ink-gray-6 bg-transparent border border-outline-gray-1',
-    blue: 'text-ink-blue-2 bg-transparent border border-outline-blue-1',
-    green: 'text-ink-green-3 bg-transparent border border-outline-green-2',
-    orange: 'text-ink-amber-3 bg-transparent border border-outline-amber-2',
-    red: 'text-ink-red-4 bg-transparent border border-outline-red-2',
+    blue: 'text-ink-blue-3 bg-transparent border border-outline-blue-2',
+    green: 'text-ink-green-4 bg-transparent border border-outline-green-3',
+    orange: 'text-ink-amber-4 bg-transparent border border-outline-amber-3',
+    red: 'text-ink-red-4 bg-transparent border border-outline-red-3',
   }[props.theme]
 
   let ghostClasses = {
     gray: 'text-ink-gray-6 bg-transparent',
-    blue: 'text-ink-blue-2 bg-transparent',
-    green: 'text-ink-green-3 bg-transparent',
-    orange: 'text-ink-amber-3 bg-transparent',
+    blue: 'text-ink-blue-3 bg-transparent',
+    green: 'text-ink-green-4 bg-transparent',
+    orange: 'text-ink-amber-4 bg-transparent',
     red: 'text-ink-red-4 bg-transparent',
   }[props.theme]
 
