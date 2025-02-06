@@ -98,9 +98,14 @@ function generateSemanticColors() {
     Object.keys(colorsData.themedVariables.light[category]).forEach(
       (colorName) => {
         const variableName = `${category}-${colorName}`
-        const reference = colorsData.themedVariables.light[category][colorName]
-        const lightValue = resolveColorReference(reference)
-        output[category][colorName] = `var(--${variableName}, ${lightValue})`
+        const lightReference =
+          colorsData.themedVariables.light[category][colorName]
+        const lightValue = resolveColorReference(lightReference)
+        const darkReference =
+          colorsData.themedVariables.dark[category][colorName]
+        const darkValue = resolveColorReference(darkReference)
+        output[category][colorName] =
+          `var(--${variableName}, ${lightValue} /* dark: ${darkValue} */)`
       },
     )
   })
