@@ -11,12 +11,12 @@
 
     <!-- Date Grid -->
     <div
-      class="grid w-full flex-1 grid-cols-7 border-l-[1px] border-t-[1px]"
+      class="grid w-full flex-1 grid-cols-7 border-2 rounded-md"
       :class="currentMonthDates.length > 35 ? 'grid-rows-6' : 'grid-rows-5'"
     >
       <div
         v-for="date in currentMonthDates"
-        class="overflow-y-auto border-b-[1px] border-r-[1px] border-gray-200"
+        class="overflow-y-auto border"
         @dragover.prevent
         @drageneter.prevent
         @drop="onDrop($event, date)"
@@ -29,14 +29,14 @@
           <div class="flex w-full flex-col items-center">
             <span
               v-if="currentMonthDate(date)"
-              class="z-10 w-full bg-white py-1 text-center"
+              class="z-10 w-full bg-surface-white py-1 text-center text-ink-gray-9"
               :class="
                 date.toDateString() === new Date().toDateString() && 'font-bold'
               "
             >
               {{ date.getDate() }}
             </span>
-            <span v-else class="z-10 w-full bg-white py-1 text-center">
+            <span v-else class="z-10 w-full bg-surface-white py-1 text-center text-ink-gray-5">
               {{ parseDateEventPopupFormat(date, (showDay = false)) }}
             </span>
 
