@@ -36,6 +36,7 @@ import configureMention from './mention'
 import TextEditorFixedMenu from './TextEditorFixedMenu.vue'
 import TextEditorBubbleMenu from './TextEditorBubbleMenu.vue'
 import TextEditorFloatingMenu from './TextEditorFloatingMenu.vue'
+import EmojiExtension from './emoji-extension'
 import { detectMarkdown, markdownToHTML } from '../../utils/markdown'
 import { DOMParser } from 'prosemirror-model'
 
@@ -162,6 +163,7 @@ export default {
               : () => this.placeholder,
         }),
         configureMention(this.mentions),
+        EmojiExtension,
         ...(this.extensions || []),
       ],
       onUpdate: ({ editor }) => {
