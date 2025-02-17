@@ -5,6 +5,7 @@ const DocTypeInterfaceGenerator = require('./scripts/generateInterface')
 module.exports = function proxyOptions({
   port = 8080,
   source = '^/(app|login|api|assets|files|private)',
+  enableDocTypeInterfaces = true,
 } = {}) {
   const commonSiteConfig = getCommonSiteConfig()
   const webserver_port = commonSiteConfig
@@ -26,7 +27,9 @@ module.exports = function proxyOptions({
   return {
     name: 'frappeui-vite-plugin',
     config: async () => {
-      await generateDocTypeInterfaces()
+      if (enableDocTypeInterfaces) {
+        await generateDocTypeInterfaces()
+      }
 
       return {
         server: {
