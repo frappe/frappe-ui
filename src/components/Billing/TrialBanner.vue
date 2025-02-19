@@ -49,6 +49,7 @@ const trialMessage = 'Upgrade to a paid plan for uninterrupted services'
 
 createResource({
   url: 'frappe.integrations.frappe_providers.frappecloud_billing.current_site_info',
+  cache: 'current_site_info_data',
   auto: true,
   onSuccess: (data) => {
     trialEndDays.value = calculateTrialEndDays(data.trial_end_date)
