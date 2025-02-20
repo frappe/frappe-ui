@@ -17,9 +17,9 @@
     >
       <slot v-bind="{ tab, selected }">
         <button
-          class="flex items-center gap-1.5 text-base text-ink-gray-5 duration-300 ease-in-out hover:text-ink-gray-9"
+          class="flex items-center gap-1.5 text-base text-ink-gray-5 duration-300 ease-in-out hover:text-ink-gray-8"
           :class="[
-            selected ? 'text-ink-gray-9' : '',
+            selected ? 'text-ink-gray-8' : '',
             t.vertical
               ? 'py-2.5 px-4 border-r border-transparent hover:border-outline-gray-3'
               : 'py-3 border-b border-transparent hover:border-outline-gray-3',

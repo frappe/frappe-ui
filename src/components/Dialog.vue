@@ -76,7 +76,7 @@
                             <DialogTitle as="header">
                               <slot name="body-title">
                                 <h3
-                                  class="text-2xl font-semibold leading-6 text-ink-gray-9"
+                                  class="text-2xl font-semibold leading-6 text-ink-gray-8"
                                 >
                                   {{ options.title || 'Untitled' }}
                                 </h3>
@@ -91,7 +91,7 @@
                                 viewBox="0 0 16 16"
                                 fill="none"
                                 xmlns="http://www.w3.org/2000/svg"
-                                class="text-ink-gray-9"
+                                class="text-ink-gray-8"
                               >
                                 <path
                                   fill-rule="evenodd"
@@ -107,7 +107,7 @@
 
                       <slot name="body-content">
                         <p
-                          class="text-p-base text-ink-gray-7"
+                          class="text-p-base text-ink-gray-6"
                           v-if="options.message"
                         >
                           {{ options.message }}
@@ -288,10 +288,10 @@ const dialogIconClasses = computed(() => {
   const appearance = icon.value?.appearance
   if (!appearance) return 'text-ink-gray-5'
   return {
-    warning: 'text-ink-amber-3',
-    info: 'text-ink-blue-3',
+    warning: 'text-ink-amber-4',
+    info: 'text-ink-blue-4',
     danger: 'text-ink-red-4',
-    success: 'text-ink-green-3',
+    success: 'text-ink-green-4',
   }[appearance]
 })
 </script>

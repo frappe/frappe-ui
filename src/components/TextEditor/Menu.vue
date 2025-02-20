@@ -10,7 +10,7 @@
           <Popover>
             <template #target="{ togglePopover }">
               <button
-                class="rounded px-2 py-1 text-base font-medium text-ink-gray-8 transition-colors hover:bg-surface-gray-2"
+                class="rounded px-2 py-1 text-base font-medium text-ink-gray-7 transition-colors hover:bg-surface-gray-2"
                 @click="togglePopover"
                 :set="
                   (activeBtn =
@@ -53,7 +53,7 @@
         <component v-else :is="button.component || 'div'" v-bind="{ editor }">
           <template v-slot="componentSlotProps">
             <button
-              class="flex rounded p-1 text-ink-gray-8 transition-colors"
+              class="flex rounded p-1 text-ink-gray-7 transition-colors"
               :class="
                 button.isActive(editor) || componentSlotProps?.isActive
                   ? 'bg-surface-gray-2'

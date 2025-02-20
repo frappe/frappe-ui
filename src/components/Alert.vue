@@ -21,7 +21,7 @@
       </svg>
       <div class="ml-2 w-full">
         <div class="flex flex-col md:flex-row md:items-baseline">
-          <h3 class="text-lg font-medium text-ink-gray-9" v-if="title">
+          <h3 class="text-lg font-medium text-ink-gray-8" v-if="title">
             {{ title }}
           </h3>
           <div class="mt-1 md:ml-2 md:mt-0">
@@ -50,7 +50,7 @@ const props = withDefaults(defineProps<AlertProps>(), {
 
 const classes = computed(() => {
   return {
-    warning: 'text-ink-gray-7 bg-surface-blue-1',
+    warning: 'text-ink-gray-6 bg-surface-blue-1',
   }[props.type]
 })
 </script>

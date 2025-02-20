@@ -54,7 +54,7 @@ const labelClasses = computed(() => {
       sm: 'text-base font-medium',
       md: 'text-lg font-medium',
     }[props.size],
-    props.disabled ? 'text-ink-gray-4' : 'text-ink-gray-8',
+    props.disabled ? 'text-ink-gray-4' : 'text-ink-gray-7',
     'select-none',
   ]
 })
@@ -62,7 +62,7 @@ const labelClasses = computed(() => {
 const inputClasses = computed(() => {
   let baseClasses = props.disabled
     ? 'border-outline-gray-2 bg-surface-menu-bar text-ink-gray-3'
-    : 'border-outline-gray-4 text-ink-gray-9 hover:border-gray-600 focus:ring-offset-0 focus:border-gray-900 active:border-gray-700 transition'
+    : 'border-outline-gray-4 text-ink-gray-8 hover:border-gray-600 focus:ring-offset-0 focus:border-gray-900 active:border-gray-700 transition'
 
   let interactionClasses = props.disabled
     ? ''

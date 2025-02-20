@@ -7,13 +7,13 @@ defineProps({
 
 <template>
   <div
-    class="flex w-full min-w-0 items-center rounded px-2 py-2 text-base font-medium text-ink-gray-8"
+    class="flex w-full min-w-0 items-center rounded px-2 py-2 text-base font-medium text-ink-gray-7"
     :class="{ 'bg-surface-gray-3': active }"
   >
     <component
       :is="item.icon"
       v-if="item.icon"
-      class="mr-3 h-4 w-4 text-ink-gray-7"
+      class="mr-3 h-4 w-4 text-ink-gray-6"
     />
     <span class="overflow-hidden text-ellipsis whitespace-nowrap">
       {{ item.title }}

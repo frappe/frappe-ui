@@ -10,7 +10,7 @@
         <slot>
           <p
             v-if="title"
-            class="text-base font-medium text-ink-gray-9"
+            class="text-base font-medium text-ink-gray-8"
             :class="{ 'mb-1': text }"
           >
             {{ title }}
@@ -24,7 +24,7 @@
             class="grid h-5 w-5 place-items-center rounded hover:bg-surface-gray-2"
             @click="$emit('close')"
           >
-            <FeatherIcon name="x" class="h-4 w-4 text-ink-gray-7" />
+            <FeatherIcon name="x" class="h-4 w-4 text-ink-gray-6" />
           </button>
         </slot>
       </div>

@@ -24,13 +24,13 @@
           }"
         >
           <div
-            class="flex flex-1 justify-between border-r border-outline-gray-2 text-ink-gray-9"
+            class="flex flex-1 justify-between border-r border-outline-gray-2 text-ink-gray-8"
           >
             <div class="flex items-center space-x-3">
               <Checkbox
                 :modelValue="true"
                 :disabled="true"
-                class="text-ink-gray-9"
+                class="text-ink-gray-8"
               />
               <div>{{ selectedText }}</div>
             </div>
@@ -48,7 +48,7 @@
           </div>
           <div class="flex items-center space-x-1">
             <Button
-              class="w- text-ink-gray-7"
+              class="w- text-ink-gray-6"
               :disabled="list.allRowsSelected"
               :class="list.allRowsSelected ? 'cursor-not-allowed' : ''"
               variant="ghost"

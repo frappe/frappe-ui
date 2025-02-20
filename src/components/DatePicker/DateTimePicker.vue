@@ -20,7 +20,7 @@
 
     <template #body="{ togglePopover }">
       <div
-        class="w-fit select-none text-base text-ink-gray-9 divide-y divide-outline-gray-modals rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
+        class="w-fit select-none text-base text-ink-gray-8 divide-y divide-outline-gray-modals rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
         :class="marginClass"
       >
         <!-- Month Switcher -->
@@ -71,7 +71,7 @@
 
         <!-- Date Picker -->
         <div
-          class="flex flex-col items-center justify-center p-1 text-ink-gray-8"
+          class="flex flex-col items-center justify-center p-1 text-ink-gray-7"
         >
           <div class="flex items-center text-xs uppercase">
             <div
@@ -93,7 +93,7 @@
               class="flex h-8 w-8 cursor-pointer items-center justify-center rounded hover:bg-surface-gray-2"
               :class="{
                 'text-ink-gray-3': date.getMonth() !== currentMonth - 1,
-                'font-extrabold text-ink-gray-9':
+                'font-extrabold text-ink-gray-8':
                   toValue(date) === toValue(today),
                 'bg-surface-gray-6 text-ink-white hover:bg-surface-gray-6':
                   toValue(date) === dateValue,

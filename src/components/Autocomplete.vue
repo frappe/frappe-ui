@@ -17,7 +17,7 @@
               <div class="flex items-center overflow-hidden">
                 <slot name="prefix" />
                 <span
-                  class="truncate text-base leading-5 text-ink-gray-8"
+                  class="truncate text-base leading-5 text-ink-gray-7"
                   v-if="displayValue"
                 >
                   {{ displayValue }}
@@ -53,7 +53,7 @@
                 <div class="relative w-full">
                   <ComboboxInput
                     ref="searchInput"
-                    class="form-input w-full focus:bg-surface-gray-3 hover:bg-surface-gray-4 text-ink-gray-8"
+                    class="form-input w-full focus:bg-surface-gray-3 hover:bg-surface-gray-4 text-ink-gray-7"
                     type="text"
                     :value="query"
                     @change="query = $event.target.value"
@@ -64,7 +64,7 @@
                     class="absolute right-0 inline-flex h-7 w-7 items-center justify-center"
                     @click="clearAll"
                   >
-                    <FeatherIcon name="x" class="w-4 text-ink-gray-8" />
+                    <FeatherIcon name="x" class="w-4 text-ink-gray-7" />
                   </button>
                 </div>
               </div>
@@ -104,12 +104,12 @@
                           <FeatherIcon
                             name="check"
                             v-if="isOptionSelected(option)"
-                            class="h-4 w-4 text-ink-gray-7"
+                            class="h-4 w-4 text-ink-gray-6"
                           />
                           <div v-else class="h-4 w-4" />
                         </slot>
                       </div>
-                      <span class="flex-1 truncate text-ink-gray-7">
+                      <span class="flex-1 truncate text-ink-gray-6">
                         {{ getLabel(option) }}
                       </span>
                     </div>

@@ -1,6 +1,5 @@
-const fs = require('fs')
-const path = require('path')
 const colors = require('./colors.json')
+const { runMigration } = require('./tailwind-class-migration-utils')
 
 function generateClassMap() {
   const classMap = {
@@ -47,56 +46,4 @@ function generateClassMap() {
   return classMap
 }
 
-function replaceClassesInFile(filePath, classMap) {
-  let fileContent = fs.readFileSync(filePath, 'utf8')
-  let classesChanged = 0
-
-  Object.keys(classMap).forEach((key) => {
-    const value = classMap[key]
-    const regex = new RegExp(`\\b${key}\\b`, 'g')
-    const matches = fileContent.match(regex)
-    if (matches) {
-      classesChanged += matches.length
-    }
-    fileContent = fileContent.replace(regex, value)
-  })
-
-  fs.writeFileSync(filePath, fileContent, 'utf8')
-  console.log(`Replaced ${classesChanged} classes in ${filePath}`)
-}
-
-function replaceClassesInFolder(targetPath, classMap) {
-  const files = fs.readdirSync(targetPath)
-
-  files.forEach((file) => {
-    const fullPath = path.join(targetPath, file)
-    const stat = fs.statSync(fullPath)
-
-    if (stat.isDirectory()) {
-      replaceClassesInFolder(fullPath, classMap)
-    } else if (stat.isFile()) {
-      replaceClassesInFile(fullPath, classMap)
-    }
-  })
-}
-
-function getPath() {
-  let targetPath = process.argv[2]
-  let fullPath = path.resolve(process.cwd(), targetPath)
-  if (fs.existsSync(fullPath)) {
-    return fullPath
-  }
-  console.error(`Invalid path: ${fullPath}`)
-  process.exit(1)
-}
-
-// Generate the class map
-const classMap = generateClassMap()
-
-const targetPath = getPath()
-let stats = fs.statSync(targetPath)
-if (stats.isFile()) {
-  replaceClassesInFile(targetPath, classMap)
-} else if (stats.isDirectory()) {
-  replaceClassesInFolder(targetPath, classMap)
-}
+runMigration(generateClassMap())

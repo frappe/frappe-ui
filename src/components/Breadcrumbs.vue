@@ -37,8 +37,8 @@
           class="flex items-center rounded px-0.5 py-1 text-lg font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
           :class="[
             i == crumbs.length - 1
-              ? 'text-ink-gray-9'
-              : 'text-ink-gray-5 hover:text-ink-gray-7',
+              ? 'text-ink-gray-8'
+              : 'text-ink-gray-5 hover:text-ink-gray-6',
           ]"
         >
           <slot name="prefix" :item="item" />
@@ -52,8 +52,8 @@
           class="flex items-center rounded px-0.5 py-1 text-lg font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
           :class="[
             i == crumbs.length - 1
-              ? 'text-ink-gray-9'
-              : 'text-ink-gray-5 hover:text-ink-gray-7',
+              ? 'text-ink-gray-8'
+              : 'text-ink-gray-5 hover:text-ink-gray-6',
           ]"
           @click="item.onClick"
         >

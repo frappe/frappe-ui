@@ -59,7 +59,7 @@
                   v-else-if="item.icon"
                   :is="item.icon"
                 />
-                <span class="whitespace-nowrap text-ink-gray-7">
+                <span class="whitespace-nowrap text-ink-gray-6">
                   {{ item.label }}
                 </span>
               </button>
