@@ -4,15 +4,15 @@
     class="m-2 flex flex-col gap-3 shadow-sm rounded-lg py-2.5 px-3 bg-surface-white text-base"
   >
     <div class="flex flex-col gap-1">
-      <div class="inline-flex gap-2 items-center font-medium">
+      <div class="inline-flex gap-1 items-center font-medium">
         <FeatherIcon class="h-4" name="info" />
         {{ trialTitle }}
       </div>
-      <div class="text-ink-gray-7 text-sm font-normal leading-5">
+      <div class="text-ink-gray-7 text-p-sm">
         {{ trialMessage }}
       </div>
     </div>
-    <Button :label="'Upgrade plan'" theme="blue" @click="openBillingPage">
+    <Button :label="'Upgrade plan'" theme="blue" @click="upgradePlan">
       <template #prefix>
         <LightningIcon class="size-4" />
       </template>
@@ -35,23 +35,27 @@ const props = defineProps({
 
 const trialEndDays = ref(0)
 const showBanner = ref(false)
+const baseEndpoint = ref('https://frappecloud.com')
+const siteName = ref('')
 
 const trialTitle = computed(() => {
   return trialEndDays.value > 1
     ? 'Trial ends in ' + trialEndDays.value + ' days'
-    : 'Trial will end tomorrow'
+    : 'Trial ends tomorrow'
 })
 
 const trialMessage = 'Upgrade to a paid plan for uninterrupted services'
 
 createResource({
   url: 'frappe.integrations.frappe_providers.frappecloud_billing.current_site_info',
-  cache: 'currentSiteInfo',
+  cache: 'current_site_info_data',
   auto: true,
   onSuccess: (data) => {
     trialEndDays.value = calculateTrialEndDays(data.trial_end_date)
+    baseEndpoint.value = data.base_url
+    siteName.value = data.site_name
     showBanner.value =
-      window.setup_complete && data.plan.is_trial_plan && trialEndDays.value > 0
+      data.setup_complete && data.plan.is_trial_plan && trialEndDays.value > 0
   },
 })
 
@@ -65,7 +69,10 @@ function calculateTrialEndDays(trialEndDate) {
   return diffDays
 }
 
-function openBillingPage() {
-  window.location.href = '/billing'
+function upgradePlan() {
+  window.open(
+    `${baseEndpoint.value}/dashboard/sites/${siteName.value}`,
+    '_blank',
+  )
 }
 </script>
