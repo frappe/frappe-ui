@@ -34,8 +34,7 @@ const props = defineProps({
 })
 
 const trialEndDays = ref(0)
-const showBanner = ref(true)
-const isPaymentModeAdded = ref(false)
+const showBanner = ref(false)
 const baseEndpoint = ref('https://frappecloud.com')
 const siteName = ref('')
 
@@ -53,7 +52,6 @@ createResource({
   auto: true,
   onSuccess: (data) => {
     trialEndDays.value = calculateTrialEndDays(data.trial_end_date)
-    isPaymentModeAdded.value = data.is_payment_method_added
     baseEndpoint.value = data.base_url
     siteName.value = data.site_name
     showBanner.value =
@@ -72,13 +70,9 @@ function calculateTrialEndDays(trialEndDate) {
 }
 
 function upgradePlan() {
-  let redirectRoute = ''
-  if (isPaymentModeAdded.value) {
-    redirectRoute = '/dashboard/sites/' + siteName.value
-  } else {
-    redirectRoute = '/dashboard/welcome'
-  }
-
-  window.open(`${baseEndpoint.value}${redirectRoute}`, '_blank')
+  window.open(
+    `${baseEndpoint.value}/dashboard/sites/${siteName.value}`,
+    '_blank',
+  )
 }
 </script>
