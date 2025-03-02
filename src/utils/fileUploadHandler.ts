@@ -8,6 +8,9 @@ interface UploadOptions {
   method?: string
   type?: string
   upload_endpoint?: string
+  optimize?: boolean
+  max_width?: number
+  max_height?: number
 }
 
 type EventListenerOption = 'start' | 'progress' | 'finish' | 'error'
@@ -127,6 +130,16 @@ class FileUploadHandler {
 
       if (options.type) {
         form_data.append('type', options.type)
+      }
+
+      if (options.optimize) {
+        form_data.append('optimize', '1')
+        if (options.max_width) {
+            form_data.append('max_width', options.max_width.toString())
+        }
+        if (options.max_height) {
+            form_data.append('max_height', options.max_height.toString())
+        }
       }
 
       xhr.send(form_data)
