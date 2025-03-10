@@ -2,7 +2,7 @@
   <node-view-wrapper>
     <div class="code-block-container">
       <select
-        class="language-selector form-select"
+        class="language-selector form-select py-0"
         contenteditable="false"
         v-model="selectedLanguage"
       >
