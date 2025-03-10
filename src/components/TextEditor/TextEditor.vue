@@ -17,7 +17,7 @@
 <script>
 import { normalizeClass } from 'vue'
 import { computed } from '@vue/reactivity'
-import { Editor, EditorContent } from '@tiptap/vue-3'
+import { Editor, EditorContent, VueNodeViewRenderer } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import TextAlign from '@tiptap/extension-text-align'
@@ -32,6 +32,9 @@ import Typography from '@tiptap/extension-typography'
 import TextStyle from '@tiptap/extension-text-style'
 import Highlight from '@tiptap/extension-highlight'
 import { Color } from '@tiptap/extension-color'
+import { common, createLowlight } from 'lowlight'
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
+import CodeBlockComponent from './CodeBlockComponent.vue'
 import configureMention from './mention'
 import TextEditorFixedMenu from './TextEditorFixedMenu.vue'
 import TextEditorBubbleMenu from './TextEditorBubbleMenu.vue'
@@ -39,6 +42,8 @@ import TextEditorFloatingMenu from './TextEditorFloatingMenu.vue'
 import EmojiExtension from './emoji-extension'
 import { detectMarkdown, markdownToHTML } from '../../utils/markdown'
 import { DOMParser } from 'prosemirror-model'
+
+const lowlight = createLowlight(common)
 
 export default {
   name: 'TextEditor',
@@ -136,6 +141,7 @@ export default {
       extensions: [
         StarterKit.configure({
           ...this.starterkitOptions,
+          codeBlock: false,
         }),
         Table.configure({
           resizable: true,
@@ -150,6 +156,11 @@ export default {
         TextStyle,
         Color,
         Highlight.configure({ multicolor: true }),
+        CodeBlockLowlight.extend({
+          addNodeView() {
+            return VueNodeViewRenderer(CodeBlockComponent)
+          },
+        }).configure({ lowlight }),
         Image,
         Video,
         Link.configure({
