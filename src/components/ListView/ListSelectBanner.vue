@@ -9,7 +9,7 @@
   >
     <div
       v-if="list.selections.size"
-      class="absolute inset-x-0 bottom-6 mx-auto w-max text-base"
+      class="sticky bottom-4 inset-x-0 bottom-0 mx-auto w-max text-base"
     >
       <div
         class="flex min-w-[596px] items-center space-x-3 rounded-lg bg-surface-white px-4 py-2 shadow-2xl"
@@ -80,7 +80,7 @@ defineOptions({
 const list = inject('list')
 
 let selectedText = computed(() => {
-  let title = list.value.selections.size === 1 ? 'Row' : 'Rows'
+  let title = list.value.options.selectionWord(list.value.selections.size)
   return `${list.value.selections.size} ${title} selected`
 })
 </script>

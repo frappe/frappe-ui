@@ -1,27 +1,27 @@
 <template>
-  <component
-    :is="list.options.showTooltip ? Tooltip : 'div'"
-    v-bind="list.options.showTooltip ? { text: label } : {}"
-  >
-    <div class="flex items-center space-x-2" :class="alignmentMap[align]">
-      <slot name="prefix">
-        <component
-          v-if="column.prefix"
-          :is="
-            typeof column.prefix === 'function'
-              ? column.prefix({ row })
-              : column.prefix
-          "
-        />
-      </slot>
-      <slot v-bind="{ label }">
+  <div class="flex items-center space-x-2" :class="alignmentMap[align]">
+    <slot name="prefix">
+      <component
+        v-if="column.prefix"
+        :is="
+          typeof column.prefix === 'function'
+            ? column.prefix({ row })
+            : column.prefix
+        "
+      />
+    </slot>
+    <slot v-bind="{ label }">
+      <component
+        :is="list.options.showTooltip ? Tooltip : 'div'"
+        v-bind="list.options.showTooltip ? { text: label } : {}"
+      >
         <div class="truncate text-base">
           {{ column?.getLabel ? column.getLabel({ row }) : label }}
         </div>
-      </slot>
-      <slot name="suffix" />
-    </div>
-  </component>
+      </component>
+    </slot>
+    <slot name="suffix" />
+  </div>
 </template>
 <script setup>
 import { computed, inject } from 'vue'

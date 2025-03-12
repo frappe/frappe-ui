@@ -1,9 +1,6 @@
 <template>
   <div class="relative flex w-full flex-1 flex-col overflow-x-auto">
-    <div
-      class="flex w-max min-w-full flex-col overflow-y-hidden"
-      :class="$attrs.class"
-    >
+    <div class="flex w-max min-w-full  flex-col" :class="$attrs.class">
       <slot v-bind="{ showGroupedRows, selectable }">
         <ListHeader />
         <template v-if="props.rows.length">
@@ -81,6 +78,7 @@ let _options = computed(() => {
     getRowRoute: props.options.getRowRoute || null,
     onRowClick: props.options.onRowClick || null,
     showTooltip: defaultTrue(props.options.showTooltip),
+    selectionWord: props.options.selectionWord || ((val) => val === 1 ? 'Row' : 'Rows'),
     selectable: defaultTrue(props.options.selectable),
     resizeColumn: defaultFalse(props.options.resizeColumn),
     rowHeight: props.options.rowHeight || 40,
