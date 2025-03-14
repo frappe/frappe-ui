@@ -5,10 +5,28 @@
     nullable
     v-slot="{ open: isComboboxOpen }"
   >
-    <Popover class="w-full" v-model:show="showOptions" ref="rootRef">
-      <template #target="{ open: openPopover, togglePopover }">
-        <slot name="target" v-bind="{ open: openPopover, togglePopover }">
-          <div class="w-full">
+    <Popover
+      class="w-full"
+      v-model:show="showOptions"
+      ref="rootRef"
+      :placement="placement"
+    >
+      <template
+        #target="{ open: openPopover, togglePopover, close: closePopover }"
+      >
+        <slot
+          name="target"
+          v-bind="{
+            open: openPopover,
+            close: closePopover,
+            togglePopover,
+            isOpen: isComboboxOpen,
+          }"
+        >
+          <div class="w-full space-y-1.5">
+            <label v-if="props.label" class="block text-xs text-ink-gray-5">
+              {{ props.label }}
+            </label>
             <button
               class="flex h-7 w-full items-center justify-between gap-2 rounded bg-surface-gray-2 px-2 py-1 transition-colors hover:bg-surface-gray-3 border border-transparent focus:border-outline-gray-4 focus:outline-none focus:ring-2 focus:ring-outline-gray-3"
               :class="{ 'bg-surface-gray-3': isComboboxOpen }"
@@ -25,8 +43,14 @@
                 <span class="text-base leading-5 text-ink-gray-4" v-else>
                   {{ placeholder || '' }}
                 </span>
+                <slot name="suffix" />
               </div>
+              <LoadingIndicator
+                v-if="props.loading && isComboboxOpen"
+                class="h-4 w-4 text-gray-600"
+              />
               <FeatherIcon
+                v-else
                 name="chevron-down"
                 class="h-4 w-4 text-ink-gray-5"
                 aria-hidden="true"
@@ -84,17 +108,21 @@
                   v-for="(option, idx) in group.items.slice(0, 50)"
                   :key="idx"
                   :value="option"
+                  :disabled="option.disabled"
                   v-slot="{ active, selected }"
                 >
                   <li
                     :class="[
                       'flex cursor-pointer items-center justify-between rounded px-2.5 py-1.5 text-base',
-                      { 'bg-surface-gray-3': active },
+                      {
+                        'bg-surface-gray-3': active,
+                        'opacity-50': option.disabled,
+                      },
                     ]"
                   >
                     <div class="flex flex-1 gap-2 overflow-hidden items-center">
                       <div
-                        v-if="$slots['item-prefix'] || $props.multiple"
+                        v-if="$slots['item-prefix'] || props.multiple"
                         class="flex flex-shrink-0"
                       >
                         <slot
@@ -141,7 +169,10 @@
               </li>
             </ComboboxOptions>
 
-            <div v-if="$slots.footer || multiple" class="border-t p-1">
+            <div
+              v-if="$slots.footer || props.showFooter || multiple"
+              class="border-t p-1"
+            >
               <slot name="footer" v-bind="{ togglePopover }">
                 <div v-if="multiple" class="flex items-center justify-end">
                   <Button
@@ -153,8 +184,12 @@
                     v-if="areAllOptionsSelected"
                     label="Clear All"
                     @click.stop="clearAll"
-                  /></div
-              ></slot>
+                  />
+                </div>
+                <div v-else class="flex items-center justify-end">
+                  <Button label="Clear" @click.stop="clearAll" />
+                </div>
+              </slot>
             </div>
           </div>
         </div>
@@ -174,6 +209,7 @@ import { computed, nextTick, ref, watch } from 'vue'
 import Popover from './Popover.vue'
 import { Button } from './Button'
 import FeatherIcon from './FeatherIcon.vue'
+import LoadingIndicator from './LoadingIndicator.vue'
 
 type Option = {
   label: string
@@ -195,10 +231,14 @@ type AutocompleteOptionGroup = {
 type AutocompleteOptions = AutocompleteOption[] | AutocompleteOptionGroup[]
 
 type AutocompleteProps = {
+  label: string
   options: AutocompleteOptions
   hideSearch?: boolean
   placeholder?: string
   bodyClasses?: string | string[]
+  loading?: boolean
+  placement?: string
+  showFooter?: boolean
 } & (
   | {
       multiple: true
