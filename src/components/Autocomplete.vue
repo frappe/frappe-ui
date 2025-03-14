@@ -45,12 +45,7 @@
                 </span>
                 <slot name="suffix" />
               </div>
-              <LoadingIndicator
-                v-if="props.loading && isComboboxOpen"
-                class="h-4 w-4 text-gray-600"
-              />
               <FeatherIcon
-                v-else
                 name="chevron-down"
                 class="h-4 w-4 text-ink-gray-5"
                 aria-hidden="true"
@@ -84,12 +79,17 @@
                     autocomplete="off"
                     placeholder="Search"
                   />
-                  <button
+                  <div
                     class="absolute right-0 inline-flex h-7 w-7 items-center justify-center"
-                    @click="clearAll"
                   >
-                    <FeatherIcon name="x" class="w-4 text-ink-gray-8" />
-                  </button>
+                    <LoadingIndicator
+                      v-if="!props.loading"
+                      class="h-4 w-4 text-ink-gray-5"
+                    />
+                    <button v-else @click="clearAll">
+                      <FeatherIcon name="x" class="w-4 text-ink-gray-8" />
+                    </button>
+                  </div>
                 </div>
               </div>
               <div
@@ -328,7 +328,9 @@ const selectedValue = computed({
     // in case of `multiple`, modelValue is an array of values
     // if the modelValue is a list of values, convert them to options
     const values = (props.modelValue || []) as AutocompleteOption[]
-    return isOption(values[0]) ? values : values.map((v) => findOption(v) || makeOption(v))
+    return isOption(values[0])
+      ? values
+      : values.map((v) => findOption(v) || makeOption(v))
   },
   set(val) {
     query.value = ''
