@@ -231,7 +231,7 @@ type AutocompleteOptionGroup = {
 type AutocompleteOptions = AutocompleteOption[] | AutocompleteOptionGroup[]
 
 type AutocompleteProps = {
-  label: string
+  label?: string
   options: AutocompleteOptions
   hideSearch?: boolean
   placeholder?: string
