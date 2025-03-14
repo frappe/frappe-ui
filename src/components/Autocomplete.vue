@@ -318,13 +318,17 @@ const filterOptions = (options: Option[]) => {
 const selectedValue = computed({
   get() {
     if (!props.multiple) {
-      return findOption(props.modelValue as AutocompleteOption)
+      return (
+        findOption(props.modelValue as AutocompleteOption) ||
+        // if the modelValue is not found in the option list
+        // return the modelValue as is
+        makeOption(props.modelValue as AutocompleteOption)
+      )
     }
     // in case of `multiple`, modelValue is an array of values
     // if the modelValue is a list of values, convert them to options
-    let values = props.modelValue as AutocompleteOption[]
-    if (!values) return []
-    return isOption(values[0]) ? values : values.map((v) => findOption(v))
+    const values = (props.modelValue || []) as AutocompleteOption[]
+    return isOption(values[0]) ? values : values.map((v) => findOption(v) || makeOption(v))
   },
   set(val) {
     query.value = ''
@@ -341,6 +345,10 @@ const findOption = (option: AutocompleteOption) => {
   if (!option) return option
   const value = isOption(option) ? option.value : option
   return allOptions.value.find((o) => o.value === value)
+}
+
+const makeOption = (option: AutocompleteOption) => {
+  return isOption(option) ? option : { label: option, value: option }
 }
 
 const getLabel = (option: AutocompleteOption) => {
