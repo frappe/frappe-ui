@@ -6,8 +6,11 @@
     v-bind="{
       to: list.options.getRowRoute ? list.options.getRowRoute(row) : undefined,
       onClick: list.options.onRowClick
-        ? () => list.options.onRowClick(row)
-        : undefined,
+        ? (e) => {
+            if (e.metaKey) list.toggleRow(row[list.rowKey])
+            list.options.onRowClick(row)
+          }
+        : (e) => (e.metaKey ? list.toggleRow(row[list.rowKey]) : null),
     }"
   >
     <component
@@ -15,8 +18,9 @@
       class="[all:unset] hover:[all:unset]"
     >
       <div
-        class="grid items-center space-x-4 rounded px-2"
+        class="grid items-center space-x-4 px-2"
         :class="[
+          roundedClass,
           isSelected ? 'bg-surface-gray-2' : '',
           isHoverable
             ? isSelected
@@ -28,13 +32,13 @@
           height: rowHeight,
           gridTemplateColumns: getGridTemplateColumns(
             list.columns,
-            list.options.selectable,
+            list.options.selectable
           ),
         }"
       >
         <Checkbox
           v-if="list.options.selectable"
-          :modelValue="list.selections.has(row[list.rowKey])"
+          :modelValue="isSelected"
           @click.stop="list.toggleRow(row[list.rowKey])"
           class="cursor-pointer duration-300"
         />
@@ -68,7 +72,10 @@
         </div>
       </div>
       <div
-        v-if="!isLastRow"
+        v-if="
+          !isLastRow &&
+          (roundedClass === 'rounded' || roundedClass?.includes?.('rounded-b'))
+        "
         class="mx-2 h-px border-t border-outline-gray-1"
       />
     </component>
@@ -111,5 +118,14 @@ const rowHeight = computed(() => {
     return `${list.value.options.rowHeight}px`
   }
   return list.value.options.rowHeight
+})
+
+const roundedClass = computed(() => {
+  const selections = [...list.value.selections]
+  if (!isSelected.value) return 'rounded'
+  let currentIndex = list.value.rows.findIndex((k) => k == props.row)
+  let atBottom = !selections.includes(list.value.rows[currentIndex + 1]?.name)
+  let atTop = !selections.includes(list.value.rows[currentIndex - 1]?.name)
+  return (atBottom ? 'rounded-b ' : '') + (atTop ? 'rounded-t' : '')
 })
 </script>
