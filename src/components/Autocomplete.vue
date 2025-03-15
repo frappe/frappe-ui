@@ -2,6 +2,7 @@
   <Combobox
     v-model="selectedValue"
     :multiple="multiple"
+    :by="by"
     nullable
     v-slot="{ open: isComboboxOpen }"
   >
@@ -253,6 +254,7 @@ type AutocompleteProps = {
 const props = withDefaults(defineProps<AutocompleteProps>(), {
   multiple: false,
   hideSearch: false,
+  by: null,
 })
 const emit = defineEmits(['update:modelValue', 'update:query', 'change'])
 
