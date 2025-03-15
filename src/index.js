@@ -68,6 +68,9 @@ export { default as NestedPopover } from './components/ListFilter/NestedPopover.
 export { default as CircularProgressBar } from './components/CircularProgressBar.vue'
 export { default as Tree } from './components/Tree/Tree.vue'
 
+// chart components
+export { default as BarChart } from './components/Charts/BarChart.vue'
+
 // billing components
 export { default as TrialBanner } from './components/Billing/TrialBanner.vue'
 
