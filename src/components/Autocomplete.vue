@@ -83,7 +83,7 @@
                     class="absolute right-0 inline-flex h-7 w-7 items-center justify-center"
                   >
                     <LoadingIndicator
-                      v-if="!props.loading"
+                      v-if="props.loading"
                       class="h-4 w-4 text-ink-gray-5"
                     />
                     <button v-else @click="clearAll">
