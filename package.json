@@ -17,7 +17,7 @@
   "files": [
     "src",
     "scripts",
-    "vite.js"
+    "vite"
   ],
   "repository": {
     "type": "git",
@@ -53,6 +53,7 @@
     "feather-icons": "^4.28.0",
     "idb-keyval": "^6.2.0",
     "lowlight": "^3.3.0",
+    "lucide-static": "^0.479.0",
     "ora": "5.4.1",
     "prettier": "^3.3.2",
     "radix-vue": "^1.5.3",
@@ -60,7 +61,9 @@
     "showdown": "^2.1.0",
     "socket.io-client": "^4.5.1",
     "tippy.js": "^6.3.7",
-    "typescript": "^5.0.2"
+    "typescript": "^5.0.2",
+    "unplugin-icons": "^22.1.0",
+    "unplugin-vue-components": "^28.4.1"
   },
   "peerDependencies": {
     "vue": ">=3.5.0",
