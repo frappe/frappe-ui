@@ -71,6 +71,13 @@ export { default as Tree } from './components/Tree/Tree.vue'
 // billing components
 export { default as TrialBanner } from './components/Billing/TrialBanner.vue'
 
+// onboarding components
+export { default as GettingStartedBanner } from './frappe/components/Onboarding/GettingStartedBanner.vue'
+export { default as OnboardingSteps } from './frappe/components/Onboarding/OnboardingSteps.vue'
+
+// help components
+export { default as HelpModal } from './frappe/components/Help/HelpModal.vue'
+
 // directives
 export { default as onOutsideClickDirective } from './directives/onOutsideClick.js'
 export { default as visibilityDirective } from './directives/visibility.js'
@@ -82,6 +89,14 @@ export { default as fileToBase64 } from './utils/file-to-base64.js'
 export { default as FileUploadHandler } from './utils/fileUploadHandler.ts'
 export { usePageMeta } from './utils/pageMeta.js'
 export { dayjsLocal, dayjs } from './utils/dayjs.js'
+
+// composable
+export { useOnboarding } from './frappe/composables/onboarding.js'
+export {
+  showHelpModal,
+  showHelpCenter,
+  minimize,
+} from './frappe/composables/help.js'
 
 // data-fetching, resources
 export {
