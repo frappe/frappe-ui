@@ -2,14 +2,14 @@
   <div
     v-show="show"
     class="fixed z-20 right-0 w-80 h-[calc(100%_-_80px)] text-ink-gray-9 m-5 mt-[62px] p-3 flex gap-2 flex-col justify-between rounded-lg bg-surface-modal shadow-2xl"
-    :class="{ 'top-[calc(100%_-_110px)]': minimize }"
+    :class="{ 'top-[calc(100%_-_120px)]': minimize }"
     @click.stop
   >
-    <div class="flex items-center justify-between">
-      <div class="text-base font-medium ml-1">
-        {{ title }}
+    <div class="flex items-center justify-between px-2 py-1.5">
+      <div class="text-base font-medium">
+        {{ headingTitle }}
       </div>
-      <div>
+      <div class="flex gap-1">
         <Dropdown v-if="options.length" :options="options">
           <Button variant="ghost" icon="more-horizontal" />
         </Dropdown>
@@ -33,6 +33,7 @@
         :afterSkipAll="afterSkipAll"
         :afterReset="afterReset"
       />
+      <HelpCenter v-else-if="showHelpCenter" />
     </div>
     <div v-for="item in footerItems" class="flex flex-col gap-1.5">
       <div
@@ -53,6 +54,7 @@ import MinimizeIcon from '../Icons/MinimizeIcon.vue'
 import MaximizeIcon from '../Icons/MaximizeIcon.vue'
 import HelpIcon from '../Icons/HelpIcon.vue'
 import OnboardingSteps from '../Onboarding/OnboardingSteps.vue'
+import HelpCenter from '../Help/HelpCenter.vue'
 import { useOnboarding } from '../../composables/onboarding'
 import { showHelpCenter, minimize } from '../../composables/help'
 import { onMounted, computed } from 'vue'
@@ -90,7 +92,7 @@ const { syncStatus, reset, isOnboardingStepsCompleted } = useOnboarding(
 
 const show = defineModel()
 
-const title = computed(() => {
+const headingTitle = computed(() => {
   if (!isOnboardingStepsCompleted.value && !showHelpCenter.value) {
     return 'Getting started'
   } else if (showHelpCenter.value) {
