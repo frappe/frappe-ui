@@ -49,11 +49,11 @@
   </Button>
 </template>
 <script setup>
-import StepsIcon from '../Icons/StepsIcon.vue'
-import Button from '../../../src/components/Button/Button.vue'
-import FeatherIcon from '../../../src/components/FeatherIcon.vue'
-import { useOnboarding } from '../../composables/onboarding'
-import { showHelpCenter, showHelpModal, minimize } from '../../composables/help'
+import StepsIcon from './Icons/StepsIcon.vue'
+import Button from '../../components/Button/Button.vue'
+import FeatherIcon from '../../components/FeatherIcon.vue'
+import { useOnboarding } from '../composables/onboarding'
+import { showHelpCenter, showHelpModal, minimize } from '../composables/help'
 
 const props = defineProps({
   isSidebarCollapsed: {
