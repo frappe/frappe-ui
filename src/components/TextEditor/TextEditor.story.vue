@@ -5,7 +5,24 @@ import TextEditor from './TextEditor.vue'
 import TextEditorFixedMenu from './TextEditorFixedMenu.vue'
 import { Button } from '../Button'
 
-const value = ref('')
+const value = ref(`
+<div>
+  <h2>Heading 2</h2>
+  <p>
+    This is a paragraph with <strong>bold</strong> and <em>italic</em> text.
+  </p>
+  <ul>
+    <li>Item 1</li>
+    <li>Item 2</li>
+  </ul>
+  <p>
+    <a href="https://frappe.io">Frappe</a>
+  </p>
+  <pre><code class="language-javascript">import { Button } from 'frappe-ui'
+const value = ref(true);</code>
+  </pre>
+</div>
+`)
 const customValue = ref('')
 const customButtons = [
   'Paragraph',

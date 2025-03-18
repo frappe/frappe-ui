@@ -1,6 +1,6 @@
 {
   "name": "frappe-ui",
-  "version": "0.1.111",
+  "version": "0.1.116",
   "description": "A set of components and utilities for rapid UI development",
   "main": "./src/index.js",
   "scripts": {
@@ -17,7 +17,7 @@
   "files": [
     "src",
     "scripts",
-    "vite.js"
+    "vite"
   ],
   "repository": {
     "type": "git",
@@ -30,6 +30,7 @@
     "@popperjs/core": "^2.11.2",
     "@tailwindcss/forms": "^0.5.3",
     "@tailwindcss/typography": "^0.5.16",
+    "@tiptap/extension-code-block-lowlight": "^2.11.5",
     "@tiptap/extension-color": "^2.0.3",
     "@tiptap/extension-highlight": "^2.0.3",
     "@tiptap/extension-image": "^2.0.3",
@@ -51,13 +52,18 @@
     "dayjs": "^1.11.13",
     "feather-icons": "^4.28.0",
     "idb-keyval": "^6.2.0",
+    "lowlight": "^3.3.0",
+    "lucide-static": "^0.479.0",
     "ora": "5.4.1",
     "prettier": "^3.3.2",
     "radix-vue": "^1.5.3",
+    "reka-ui": "^2.0.2",
     "showdown": "^2.1.0",
     "socket.io-client": "^4.5.1",
     "tippy.js": "^6.3.7",
-    "typescript": "^5.0.2"
+    "typescript": "^5.0.2",
+    "unplugin-icons": "^22.1.0",
+    "unplugin-vue-components": "^28.4.1"
   },
   "peerDependencies": {
     "vue": ">=3.5.0",
