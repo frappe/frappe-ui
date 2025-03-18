@@ -1,8 +1,7 @@
 <template>
   <div class="flex flex-col gap-2 overflow-hidden">
-    <div class="p-1">
+    <div class="m-1">
       <FormControl
-        class="-m-1"
         :placeholder="'Search articles...'"
         v-model="search"
         :debounce="300"
@@ -13,7 +12,7 @@
       </FormControl>
     </div>
     <div
-      class="flex justify-between items-center text-base text-ink-gray-5 my-1.5 mx-2"
+      class="flex justify-between items-center text-base text-ink-gray-5 mx-2"
     >
       <div>All articles</div>
       <Button variant="ghost" @click="openDocs">
