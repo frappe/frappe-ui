@@ -1,7 +1,8 @@
 <template>
   <div class="flex flex-col gap-2 overflow-hidden">
     <div class="m-1">
-      <FormControl
+      <TextInput
+        ref="searchInput"
         :placeholder="'Search articles...'"
         v-model="search"
         :debounce="300"
@@ -9,7 +10,7 @@
         <template #prefix>
           <FeatherIcon name="search" class="h-4 text-ink-gray-5" />
         </template>
-      </FormControl>
+      </TextInput>
     </div>
     <div
       class="flex justify-between items-center text-base text-ink-gray-5 mx-2"
@@ -63,8 +64,8 @@
 <script setup>
 import Button from '../../components/Button/Button.vue'
 import FeatherIcon from '../../components/FeatherIcon.vue'
-import FormControl from '../../components/FormControl.vue'
-import { ref, computed } from 'vue'
+import TextInput from '../../components/TextInput.vue'
+import { ref, computed, onMounted } from 'vue'
 
 const props = defineProps({
   docsLink: {
@@ -73,6 +74,7 @@ const props = defineProps({
   },
 })
 
+const searchInput = ref(null)
 const search = ref('')
 const articles = defineModel()
 
@@ -105,4 +107,8 @@ function openDocs() {
 function openDoc(name) {
   window.open(`${props.docsLink}/${name}`, '_blank')
 }
+
+onMounted(() => {
+  searchInput.value?.el?.focus()
+})
 </script>
