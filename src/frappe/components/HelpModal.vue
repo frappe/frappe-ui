@@ -33,7 +33,11 @@
         :afterSkipAll="afterSkipAll"
         :afterReset="afterReset"
       />
-      <HelpCenter v-else-if="showHelpCenter" />
+      <HelpCenter
+        v-else-if="showHelpCenter"
+        v-model="articles"
+        :docsLink="docsLink"
+      />
     </div>
     <div v-for="item in footerItems" class="flex flex-col gap-1.5">
       <div
@@ -47,16 +51,16 @@
   </div>
 </template>
 <script setup>
-import Dropdown from '../../../src/components/Dropdown.vue'
-import Button from '../../../src/components/Button/Button.vue'
-import StepsIcon from '../Icons/StepsIcon.vue'
-import MinimizeIcon from '../Icons/MinimizeIcon.vue'
-import MaximizeIcon from '../Icons/MaximizeIcon.vue'
-import HelpIcon from '../Icons/HelpIcon.vue'
-import OnboardingSteps from '../Onboarding/OnboardingSteps.vue'
-import HelpCenter from '../Help/HelpCenter.vue'
-import { useOnboarding } from '../../composables/onboarding'
-import { showHelpCenter, minimize } from '../../composables/help'
+import Dropdown from '../../components/Dropdown.vue'
+import Button from '../../components/Button/Button.vue'
+import StepsIcon from './Icons/StepsIcon.vue'
+import MinimizeIcon from './Icons/MinimizeIcon.vue'
+import MaximizeIcon from './Icons/MaximizeIcon.vue'
+import HelpIcon from './Icons/HelpIcon.vue'
+import OnboardingSteps from './OnboardingSteps.vue'
+import HelpCenter from './HelpCenter.vue'
+import { useOnboarding } from '../composables/onboarding'
+import { showHelpCenter, minimize } from '../composables/help'
 import { onMounted, computed } from 'vue'
 
 const props = defineProps({
@@ -84,6 +88,10 @@ const props = defineProps({
     type: Function,
     required: true,
   },
+  docsLink: {
+    type: String,
+    default: 'https://docs.frappe.io/crm',
+  },
 })
 
 const { syncStatus, reset, isOnboardingStepsCompleted } = useOnboarding(
@@ -91,6 +99,7 @@ const { syncStatus, reset, isOnboardingStepsCompleted } = useOnboarding(
 )
 
 const show = defineModel()
+const articles = defineModel('articles')
 
 const headingTitle = computed(() => {
   if (!isOnboardingStepsCompleted.value && !showHelpCenter.value) {
