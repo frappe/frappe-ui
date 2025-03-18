@@ -53,12 +53,7 @@ export function useOnboarding(appName) {
       onboardings[appName][index].completed = true
     }
 
-    window.user = user
-
-    call('crm.api.onboarding.update_user_onboarding_status', {
-      steps: JSON.stringify(_steps),
-      appName,
-    })
+    updateUserOnboardingStatus(_steps)
 
     callback?.(step, skipped)
   }
@@ -88,14 +83,16 @@ export function useOnboarding(appName) {
       step.completed = value
     })
 
-    window.user = user
-
-    call('crm.api.onboarding.update_user_onboarding_status', {
-      steps: JSON.stringify(_steps),
-      appName,
-    })
+    updateUserOnboardingStatus(_steps)
 
     callback?.(value)
+  }
+
+  function updateUserOnboardingStatus(steps) {
+    call('frappe.onboarding.update_user_onboarding_status', {
+      steps: JSON.stringify(steps),
+      appName,
+    })
   }
 
   function syncStatus() {
