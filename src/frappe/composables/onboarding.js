@@ -1,8 +1,10 @@
 import call from '../../utils/call'
 import { useStorage } from '@vueuse/core'
-import { ref, computed, reactive } from 'vue'
+import { computed, reactive } from 'vue'
+import { createResource } from '../../resources'
 
 const onboardings = reactive({})
+const onboardingStatus = useStorage('onboardingStatus', {})
 
 export function useOnboarding(appName) {
   const isOnboardingStepsCompleted = useStorage(
@@ -10,7 +12,21 @@ export function useOnboarding(appName) {
     false,
   )
 
-  const onboardingName = ref(appName + '_onboarding_status')
+  const onboardingSteps = computed(
+    () => onboardingStatus.value?.[appName + '_onboarding_status'] || [],
+  )
+
+  if (!onboardingSteps.value.length && !isOnboardingStepsCompleted.value) {
+    createResource({
+      url: 'frappe.onboarding.get_onboarding_status',
+      cache: 'onboarding_status',
+      auto: true,
+      onSuccess: (data) => {
+        onboardingStatus.value = data
+        syncStatus()
+      },
+    })
+  }
 
   const stepsCompleted = computed(
     () => onboardings[appName]?.filter((step) => step.completed).length || 0,
@@ -35,46 +51,37 @@ export function useOnboarding(appName) {
 
   function updateOnboardingStep(step, skipped = false, callback = null) {
     if (isOnboardingStepsCompleted.value) return
-    let user = window.user
-    if (!user) return false
 
-    if (!user.onboarding_status[onboardingName.value]) {
-      user.onboarding_status[onboardingName.value] = onboardings[appName].map(
-        (s) => {
-          return { name: s.name, completed: false }
-        },
-      )
+    if (!onboardingSteps.value.length) {
+      onboardingStatus.value[appName + '_onboarding_status'] = onboardings[
+        appName
+      ].map((s) => {
+        return { name: s.name, completed: false }
+      })
     }
 
-    let _steps = user.onboarding_status[onboardingName.value]
-    let index = _steps.findIndex((s) => s.name === step)
+    let index = onboardingSteps.value.findIndex((s) => s.name === step)
     if (index !== -1) {
-      _steps[index].completed = true
+      onboardingSteps.value[index].completed = true
       onboardings[appName][index].completed = true
     }
 
-    updateUserOnboardingStatus(_steps)
+    updateUserOnboardingStatus(onboardingSteps.value)
 
     callback?.(step, skipped)
   }
 
   function updateAll(value, callback = null) {
     if (isOnboardingStepsCompleted.value && value) return
-    let user = window.user
-    if (!user) return false
 
-    let _steps
-
-    if (!user.onboarding_status[onboardingName.value]) {
-      user.onboarding_status[onboardingName.value] = onboardings[appName].map(
-        (s) => {
-          return { name: s.name, completed: value }
-        },
-      )
-      _steps = user.onboarding_status[onboardingName.value]
+    if (!onboardingSteps.value.length) {
+      onboardingStatus.value[appName + '_onboarding_status'] = onboardings[
+        appName
+      ].map((s) => {
+        return { name: s.name, completed: value }
+      })
     } else {
-      _steps = user.onboarding_status[onboardingName.value]
-      _steps.forEach((step) => {
+      onboardingSteps.value.forEach((step) => {
         step.completed = value
       })
     }
@@ -83,7 +90,7 @@ export function useOnboarding(appName) {
       step.completed = value
     })
 
-    updateUserOnboardingStatus(_steps)
+    updateUserOnboardingStatus(onboardingSteps.value)
 
     callback?.(value)
   }
@@ -97,11 +104,9 @@ export function useOnboarding(appName) {
 
   function syncStatus() {
     if (isOnboardingStepsCompleted.value) return
-    let user = window.user
-    if (!user) return false
 
-    if (user.onboarding_status[onboardingName.value]) {
-      let _steps = user.onboarding_status[onboardingName.value]
+    if (onboardingSteps.value.length) {
+      let _steps = onboardingSteps.value
       _steps.forEach((step, index) => {
         onboardings[appName][index].completed = step.completed
       })
