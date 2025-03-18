@@ -20,13 +20,13 @@
           v-if="completedPercentage != 0"
           variant="ghost"
           :label="'Reset'"
-          @click="() => reset()"
+          @click="() => reset(afterReset)"
         />
         <Button
           v-if="completedPercentage != 100"
           variant="ghost"
           :label="'Skip all'"
-          @click="() => skipAll()"
+          @click="() => skipAll(afterSkipAll)"
         />
       </div>
     </div>
@@ -50,7 +50,7 @@
           v-if="!step.completed"
           :label="'Skip'"
           class="!h-4 text-xs !text-ink-gray-6 hidden group-hover:flex"
-          @click="() => skip(step.name)"
+          @click="() => skip(step.name, afterSkip)"
         />
       </div>
     </div>
@@ -60,17 +60,29 @@
 import { useOnboarding } from '../../composables/onboarding'
 
 const props = defineProps({
-  logo: {
-    type: Object,
-    required: true,
+  appName: {
+    type: String,
+    default: 'frappecrm',
   },
   title: {
     type: String,
     default: 'Frappe CRM',
   },
-  appName: {
-    type: String,
-    default: 'frappecrm',
+  logo: {
+    type: Object,
+    required: true,
+  },
+  afterSkip: {
+    type: Function,
+    default: () => {},
+  },
+  afterSkipAll: {
+    type: Function,
+    default: () => {},
+  },
+  afterReset: {
+    type: Function,
+    default: () => {},
   },
 })
 

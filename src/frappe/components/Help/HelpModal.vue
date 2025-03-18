@@ -24,7 +24,11 @@
     <div class="h-full overflow-hidden flex flex-col">
       <OnboardingSteps
         v-if="!isOnboardingStepsCompleted && !showHelpCenter"
+        :title="title"
         :logo="logo"
+        :afterSkip="afterSkip"
+        :afterSkipAll="afterSkipAll"
+        :afterReset="afterReset"
       />
     </div>
     <div v-for="item in footerItems" class="flex flex-col gap-1.5">
@@ -53,8 +57,24 @@ const props = defineProps({
     type: String,
     default: 'frappecrm',
   },
+  title: {
+    type: String,
+    default: 'Frappe CRM',
+  },
   logo: {
     type: Object,
+    required: true,
+  },
+  afterSkip: {
+    type: Function,
+    required: true,
+  },
+  afterSkipAll: {
+    type: Function,
+    required: true,
+  },
+  afterReset: {
+    type: Function,
     required: true,
   },
 })

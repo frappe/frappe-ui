@@ -26,11 +26,11 @@ export function useOnboarding(appName) {
   }
 
   function skipAll(callback = null) {
-    updateAll(true, false, callback)
+    updateAll(true, callback)
   }
 
   function reset(callback = null) {
-    updateAll(false, true, callback)
+    updateAll(false, callback)
   }
 
   function updateOnboardingStep(step, skipped = false, callback = null) {
@@ -63,8 +63,8 @@ export function useOnboarding(appName) {
     callback?.(step, skipped)
   }
 
-  function updateAll(value, reset = false, callback = null) {
-    if (isOnboardingStepsCompleted.value && !reset) return
+  function updateAll(value, callback = null) {
+    if (isOnboardingStepsCompleted.value && value) return
     let user = window.user
     if (!user) return false
 
@@ -95,7 +95,7 @@ export function useOnboarding(appName) {
       appName,
     })
 
-    callback?.(reset)
+    callback?.(value)
   }
 
   function syncStatus() {
