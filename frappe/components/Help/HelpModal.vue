@@ -10,6 +10,9 @@
         {{ title }}
       </div>
       <div>
+        <Dropdown v-if="options.length" :options="options">
+          <Button variant="ghost" icon="more-horizontal" />
+        </Dropdown>
         <Button @click="minimize = !minimize" variant="ghost">
           <component
             :is="minimize ? MaximizeIcon : MinimizeIcon"
@@ -43,6 +46,8 @@
   </div>
 </template>
 <script setup>
+import Dropdown from '../../../src/components/Dropdown.vue'
+import Button from '../../../src/components/Button/Button.vue'
 import StepsIcon from '../Icons/StepsIcon.vue'
 import MinimizeIcon from '../Icons/MinimizeIcon.vue'
 import MaximizeIcon from '../Icons/MaximizeIcon.vue'
@@ -93,6 +98,19 @@ const title = computed(() => {
   }
 })
 
+const options = computed(() => {
+  let items = [
+    {
+      icon: StepsIcon,
+      label: 'Reset onboarding steps',
+      onClick: resetOnboardingSteps,
+      condition: () => showHelpCenter.value && isOnboardingStepsCompleted.value,
+    },
+  ]
+
+  return items.filter((item) => item.condition())
+})
+
 const footerItems = computed(() => {
   let items = [
     {
@@ -109,12 +127,6 @@ const footerItems = computed(() => {
       label: 'Getting started',
       onClick: () => (showHelpCenter.value = false),
       condition: showHelpCenter.value && !isOnboardingStepsCompleted.value,
-    },
-    {
-      icon: StepsIcon,
-      label: 'Reset onboarding steps',
-      onClick: resetOnboardingSteps,
-      condition: showHelpCenter.value && isOnboardingStepsCompleted.value,
     },
   ]
 
