@@ -23,10 +23,10 @@
   </Button>
 </template>
 <script setup>
-import LightningIcon from './LightningIcon.vue'
-import FeatherIcon from '../FeatherIcon.vue'
-import { Button } from '../Button'
-import { createResource } from '../../resources'
+import LightningIcon from '../Icons/LightningIcon.vue'
+import FeatherIcon from '../../src/components/FeatherIcon.vue'
+import { Button } from '../../src/components/Button'
+import { createResource } from '../../src/resources'
 import { ref, computed } from 'vue'
 
 const props = defineProps({

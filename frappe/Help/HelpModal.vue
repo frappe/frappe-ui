@@ -51,16 +51,17 @@
   </div>
 </template>
 <script setup>
-import Dropdown from '../../components/Dropdown.vue'
-import Button from '../../components/Button/Button.vue'
-import StepsIcon from './Icons/StepsIcon.vue'
-import MinimizeIcon from './Icons/MinimizeIcon.vue'
-import MaximizeIcon from './Icons/MaximizeIcon.vue'
-import HelpIcon from './Icons/HelpIcon.vue'
-import OnboardingSteps from './OnboardingSteps.vue'
-import HelpCenter from './HelpCenter.vue'
-import { useOnboarding } from '../composables/onboarding'
-import { showHelpCenter, minimize } from '../composables/help'
+import Dropdown from '../../src/components/Dropdown.vue'
+import Button from '../../src/components/Button/Button.vue'
+import StepsIcon from '../Icons/StepsIcon.vue'
+import MinimizeIcon from '../Icons/MinimizeIcon.vue'
+import MaximizeIcon from '../Icons/MaximizeIcon.vue'
+import HelpIcon from '../Icons/HelpIcon.vue'
+import OnboardingSteps from '../Onboarding/OnboardingSteps.vue'
+import HelpCenter from '../HelpCenter/HelpCenter.vue'
+import { useOnboarding } from '../Onboarding/onboarding'
+import { showHelpCenter } from '../HelpCenter/helpCenter'
+import { minimize } from '../Help/help'
 import { onMounted, computed } from 'vue'
 
 const props = defineProps({

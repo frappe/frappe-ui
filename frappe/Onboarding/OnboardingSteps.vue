@@ -57,7 +57,7 @@
   </div>
 </template>
 <script setup>
-import { useOnboarding } from '../composables/onboarding'
+import { useOnboarding } from './onboarding'
 
 const props = defineProps({
   appName: {

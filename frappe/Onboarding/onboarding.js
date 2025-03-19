@@ -1,7 +1,7 @@
-import call from '../../utils/call'
+import call from '../../src/utils/call'
 import { useStorage } from '@vueuse/core'
 import { computed, reactive } from 'vue'
-import { createResource } from '../../resources'
+import { createResource } from '../../src/resources'
 
 const onboardings = reactive({})
 const onboardingStatus = useStorage('onboardingStatus', {})
