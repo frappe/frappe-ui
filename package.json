@@ -15,6 +15,7 @@
     "story:preview": "histoire preview"
   },
   "files": [
+    "frappe",
     "src",
     "scripts",
     "vite"
