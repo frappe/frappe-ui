@@ -79,15 +79,15 @@ const props = defineProps({
   },
   afterSkip: {
     type: Function,
-    required: true,
+    default: () => {},
   },
   afterSkipAll: {
     type: Function,
-    required: true,
+    default: () => {},
   },
   afterReset: {
     type: Function,
-    required: true,
+    default: () => {},
   },
   docsLink: {
     type: String,
