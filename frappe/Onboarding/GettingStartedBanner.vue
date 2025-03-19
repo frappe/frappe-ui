@@ -10,7 +10,7 @@
       <StepsIcon class="h-4 my-0.5 shrink-0" />
       <div class="flex flex-col text-p-sm gap-0.5">
         <div class="font-medium">
-          {{ 'Gettings started' }}
+          {{ 'Getting started' }}
         </div>
         <div class="text-ink-gray-7">
           {{ `${stepsCompleted}/${totalSteps} steps` }}
