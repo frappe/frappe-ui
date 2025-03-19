@@ -71,9 +71,6 @@ export { default as Tree } from './components/Tree/Tree.vue'
 // chart components
 export { default as BarChart } from './components/Charts/BarChart.vue'
 
-// billing components
-export { default as TrialBanner } from './components/Billing/TrialBanner.vue'
-
 // directives
 export { default as onOutsideClickDirective } from './directives/onOutsideClick.js'
 export { default as visibilityDirective } from './directives/visibility.js'

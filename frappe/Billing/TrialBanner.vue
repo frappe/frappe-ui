@@ -1,10 +1,10 @@
 <template>
   <div
     v-if="!isSidebarCollapsed && showBanner"
-    class="m-2 flex flex-col gap-3 shadow-sm rounded-lg py-2.5 px-3 bg-surface-white text-base"
+    class="m-2 flex flex-col gap-3 shadow-sm rounded-lg py-2.5 px-3 bg-surface-modal text-base"
   >
     <div class="flex flex-col gap-1">
-      <div class="inline-flex gap-1 items-center font-medium">
+      <div class="inline-flex text-ink-gray-9 gap-2 items-center font-medium">
         <FeatherIcon class="h-4" name="info" />
         {{ trialTitle }}
       </div>
@@ -18,12 +18,15 @@
       </template>
     </Button>
   </div>
+  <Button v-else-if="isSidebarCollapsed && showBanner" @click="upgradePlan">
+    <LightningIcon class="h-4 my-0.5 shrink-0" />
+  </Button>
 </template>
 <script setup>
-import LightningIcon from './LightningIcon.vue'
-import FeatherIcon from '../FeatherIcon.vue'
-import { Button } from '../Button'
-import { createResource } from '../../resources'
+import LightningIcon from '../Icons/LightningIcon.vue'
+import FeatherIcon from '../../src/components/FeatherIcon.vue'
+import { Button } from '../../src/components/Button'
+import { createResource } from '../../src/resources'
 import { ref, computed } from 'vue'
 
 const props = defineProps({
