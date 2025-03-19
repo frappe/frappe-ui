@@ -4,19 +4,16 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import useBarChartOptions from './barChartOptions'
+import useAxisChartOptions from './axisChartOptions'
 import ECharts from './ECharts.vue'
-import { BarChartConfig } from './types'
+import { AxisChartConfig } from './types'
 
-const props = defineProps<{
-  data: Record<string, any>[]
-  config: BarChartConfig
-}>()
+const props = defineProps<{ config: AxisChartConfig }>()
 
 const error = ref('')
 const options = computed(() => {
   try {
-    return useBarChartOptions(props.config, props.data)
+    return useAxisChartOptions(props.config)
   } catch (e: any) {
     error.value = e.message
     return {}

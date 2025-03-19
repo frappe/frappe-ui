@@ -14,9 +14,9 @@ export default function useEchartsOptions(config: AxisChartConfig) {
   const subtitle = config.subtitle
   const hasTitle = title ? 1 : 0
   const hasSubtitle = subtitle ? 1 : 0
-  const hasXAxisTitle = config.xAxisTitle ? 1 : 0
-  const hasYAxisTitle = config.yAxisTitle ? 1 : 0
-  const hasY2AxisTitle = config.y2AxisTitle ? 1 : 0
+  const hasXAxisTitle = config.xAxis.title ? 1 : 0
+  const hasYAxisTitle = config.yAxis.title ? 1 : 0
+  const hasY2AxisTitle = config.y2Axis?.title ? 1 : 0
   const hasLegend = config.series.length > 1 ? 1 : 0
 
   const xAxisOptions = getXAxisOptions(config)
@@ -50,7 +50,7 @@ export default function useEchartsOptions(config: AxisChartConfig) {
     animationDuration: 700,
     grid: {
       left: '1%',
-      right: config.swapAxes ? '2.5%' : '1%',
+      right: config.swapXY ? '2.5%' : '1%',
       top:
         PADDING_TOP + TITLE_HEIGHT * hasTitle + SUBTITLE_HEIGHT * hasSubtitle,
       bottom: PADDING_BOTTOM + LEGEND_HEIGHT * hasLegend,
@@ -72,36 +72,36 @@ export default function useEchartsOptions(config: AxisChartConfig) {
 
         if (!Array.isArray(params)) {
           const p = params as any
-          const value = config.swapAxes ? p.value[0] : p.value[1]
+          const value = config.swapXY ? p.value[0] : p.value[1]
           const formatted = isNaN(value) ? value : formatValue(value)
           return `
-								<div class="flex items-center justify-between gap-5">
-									<div>${p.name}</div>
-									<div class="font-bold">${formatted}</div>
-								</div>
-							`
+                <div class="flex items-center justify-between gap-5">
+                  <div>${p.name}</div>
+                  <div class="font-bold">${formatted}</div>
+                </div>
+              `
         }
         if (Array.isArray(params)) {
           const t = params.map((p, idx) => {
-            const xValue = config.swapAxes ? p.value[1] : p.value[0]
-            const yValue = config.swapAxes ? p.value[0] : p.value[1]
+            const xValue = config.swapXY ? p.value[1] : p.value[0]
+            const yValue = config.swapXY ? p.value[0] : p.value[1]
             const formattedX =
-              config.xType == 'time' && config.timeGrain
-                ? formatDate(xValue, undefined, config.timeGrain)
+              config.xAxis.type == 'time'
+                ? formatDate(xValue, undefined, config.xAxis.timeGrain)
                 : xValue
             const formattedY = isNaN(yValue) ? yValue : formatValue(yValue)
             return `
-							<div class="flex flex-col">
-								${idx == 0 ? `<div>${formattedX}</div>` : ''}
-								<div class="flex items-center justify-between gap-5">
-									<div class="flex gap-1 items-center">
-										${p.marker}
-										<div>${formatLabel(p.seriesName)}:</div>
-									</div>
-									<div class="font-bold">${formattedY}</div>
-								</div>
-							</div>
-						`
+              <div class="flex flex-col">
+                ${idx == 0 ? `<div>${formattedX}</div>` : ''}
+                <div class="flex items-center justify-between gap-5">
+                  <div class="flex gap-1 items-center">
+                    ${p.marker}
+                    <div>${formatLabel(p.seriesName)}:</div>
+                  </div>
+                  <div class="font-bold">${formattedY}</div>
+                </div>
+              </div>
+            `
           })
           return t.join('')
         }
@@ -146,13 +146,26 @@ export default function useEchartsOptions(config: AxisChartConfig) {
 }
 
 function getXAxisOptions(config: AxisChartConfig) {
-  return config.swapAxes
+  return config.swapXY
     ? {
         type: 'value',
         scale: false,
         z: 2,
         alignTicks: true,
         boundaryGap: false,
+        position: 'top',
+        name: `${config.yAxis.title} →`,
+        nameGap: 6,
+        nameLocation: 'end',
+        nameTextStyle: {
+          align: 'right',
+          verticalAlign: 'bottom',
+          padding: [0, 0, 26, 0],
+          // color: '#000',
+          backgroundColor: '#fff',
+          borderColor: '#fff',
+          borderWidth: 4,
+        },
         axisLabel: {
           show: true,
           hideOverlap: true,
@@ -179,7 +192,7 @@ function getXAxisOptions(config: AxisChartConfig) {
       }
     : {
         z: 2,
-        type: config.xType,
+        type: config.xAxis.type,
         scale: true,
         splitLine: {
           show: false,
@@ -194,17 +207,18 @@ function getXAxisOptions(config: AxisChartConfig) {
         axisLabel: {
           show: true,
           hideOverlap: true,
-          showMaxLabel: config.xType === 'category' || config.xType === 'value',
+          showMaxLabel:
+            config.xAxis.type === 'category' || config.xAxis.type === 'value',
           margin: 6,
         },
       }
 }
 
 function getYAxisOptions(config: AxisChartConfig) {
-  const primaryYAxisOptions = config.swapAxes
+  const primaryYAxisOptions = config.swapXY
     ? {
         show: true,
-        type: config.xType,
+        type: config.xAxis.type,
         z: 2,
         scale: true,
         inverse: 'true',
@@ -230,7 +244,7 @@ function getYAxisOptions(config: AxisChartConfig) {
         z: 2,
         scale: false,
         boundaryGap: ['0%', '1%'],
-        name: `↑ ${config.yAxisTitle}`,
+        name: `↑ ${config.yAxis.title}`,
         nameLocation: 'end',
         nameTextStyle: {
           align: 'left',
@@ -271,7 +285,7 @@ function getYAxisOptions(config: AxisChartConfig) {
     alignTicks: true,
     scale: false,
     boundaryGap: ['0%', '1%'],
-    name: `${config.y2AxisTitle} ↑`,
+    name: `${config.y2Axis?.title} ↑`,
     nameLocation: 'end',
     nameTextStyle: {
       align: 'right',

@@ -49,7 +49,7 @@ export type TimeGrain =
   | 'month'
   | 'quarter'
   | 'year'
-export function formatDate(date: string, format?: string, grain?: TimeGrain) {
+export function formatDate(date: string, format?: string, grain: TimeGrain = 'day') {
   if (!date) return ''
 
   if (grain) {
