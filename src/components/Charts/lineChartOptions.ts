@@ -1,8 +1,8 @@
 import useEchartsOptions from './eChartOptions'
 import { formatValue } from './helpers'
-import { BarChartConfig } from './types'
+import { LineChartConfig } from './types'
 
-export default function useBarChartOptions(config: BarChartConfig, data: any) {
+export default function useLineChartOptions(config: LineChartConfig, data: any) {
 	const baseOptions = useEchartsOptions(config)
 
 	if (config.xType === 'time' && config.swapAxes) {

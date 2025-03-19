@@ -1,27 +1,52 @@
 import { TimeGrain } from './helpers'
 
-export type SeriesConfig = {
-	name: string
-	type: 'bar' | 'line' | 'area'
-	color?: string
-	axis?: 'y' | 'y2'
-	showDataLabels?: boolean
-}
-
 export type AxisChartConfig = {
-	title: string
-	subtitle?: string
-	colors?: string[]
-	x: string
-	xType: 'category' | 'time' | 'value'
-	timeGrain?: TimeGrain
-	series: SeriesConfig[]
-	xAxisTitle?: string
-	yAxisTitle?: string
-	y2AxisTitle?: string
-	swapAxes?: boolean
+  data: Record<string, any>[]
+  title: string
+  subtitle?: string
+  colors?: string[]
+  xAxis: {
+    key: string
+    type: 'category' | 'time' | 'value'
+    timeGrain?: TimeGrain
+    title?: string
+  }
+  yAxis: {
+    title?: string
+    yMin?: number
+    yMax?: number
+  }
+  y2Axis?: {
+    title?: string
+    yMin?: number
+    yMax?: number
+  }
+  swapXY?: boolean
+  stacked?: boolean
+  series: (BarSeriesConfig | LineSeriesConfig | AreaSeriesConfig)[]
 }
 
-export type BarChartConfig = AxisChartConfig & {
-	stacked?: boolean
+export type SeriesConfig = {
+  name: string
+  type: 'bar' | 'line' | 'area'
+  color?: string
+  axis?: 'y' | 'y2'
+  showDataLabels?: boolean
+}
+
+export type BarSeriesConfig = SeriesConfig & {
+  type: 'bar'
+  stackName?: string
+}
+
+export type LineSeriesConfig = SeriesConfig & {
+  type: 'line'
+  lineType?: 'solid' | 'dashed' | 'dotted'
+  lineWidth?: number
+  showDataPoints?: boolean
+}
+
+export type AreaSeriesConfig = SeriesConfig & {
+  type: 'area'
+  fillOpacity?: number
 }
