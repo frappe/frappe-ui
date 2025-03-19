@@ -1,8 +1,7 @@
 const fs = require('fs').promises
 const path = require('path')
-const ora = require('ora')
 
-module.exports = class DocTypeInterfaceGenerator {
+class DocTypeInterfaceGenerator {
   constructor(appsPath, appDoctypeMap, outputPath) {
     this.appsPath = appsPath
     this.appDoctypeMap = appDoctypeMap
@@ -10,8 +9,14 @@ module.exports = class DocTypeInterfaceGenerator {
     this.processedDoctypes = new Set()
     this.existingInterfaces = {}
     this.updatedInterfaces = 0
-    this.spinner = ora('Generating doctype interfaces...').start()
     this.jsonFileCache = new Map()
+    this.summary = {
+      processed: 0,
+      updated: 0,
+      skipped: 0,
+      notFound: 0,
+      details: [],
+    }
   }
 
   async generate() {
@@ -25,6 +30,8 @@ module.exports = class DocTypeInterfaceGenerator {
     }
     await Promise.all(promises)
 
+    this.printSummary()
+
     if (this.updatedInterfaces > 0) {
       const baseInterfaces = this.generateBaseInterfaces()
       const interfacesString = [
@@ -34,11 +41,24 @@ module.exports = class DocTypeInterfaceGenerator {
 
       await fs.mkdir(path.dirname(this.outputPath), { recursive: true })
       await fs.writeFile(this.outputPath, interfacesString)
-      this.spinner.succeed(
-        `Updated ${this.updatedInterfaces} interface${this.updatedInterfaces === 1 ? '' : 's'}. Output file updated.`,
+    }
+  }
+
+  printSummary() {
+    console.log('\nFrappe Type Generation Summary:')
+    console.log(`- Total processed: ${this.summary.processed} doctypes`)
+    console.log(`- Updated: ${this.summary.updated} interfaces`)
+    console.log(`- Skipped: ${this.summary.skipped} (no changes)`)
+    if (this.summary.notFound > 0) {
+      console.log(`- Not found: ${this.summary.notFound}`)
+    }
+
+    if (this.updatedInterfaces > 0) {
+      console.log(
+        `\nOutput file updated with ${this.updatedInterfaces} interface${this.updatedInterfaces === 1 ? '' : 's'}.`,
       )
     } else {
-      this.spinner.info('No new schema changes.')
+      console.log('\nNo new schema changes.')
     }
   }
 
@@ -69,10 +89,12 @@ module.exports = class DocTypeInterfaceGenerator {
       return
     }
     this.processedDoctypes.add(doctypeName)
+    this.summary.processed++
 
     const jsonFilePath = await this.findJsonFile(appName, doctypeName)
     if (!jsonFilePath) {
-      this.spinner.text = `Processing: ${doctypeName} [not found]`
+      this.summary.notFound++
+      this.summary.details.push(`${doctypeName}: not found`)
       return
     }
     const jsonData = JSON.parse(await fs.readFile(jsonFilePath, 'utf8'))
@@ -84,7 +106,8 @@ module.exports = class DocTypeInterfaceGenerator {
       existingInterface &&
       existingInterface.includes(`// Last updated: ${lastModified}`)
     ) {
-      this.spinner.text = `Processing: ${doctypeName} [skipped]`
+      this.summary.skipped++
+      this.summary.details.push(`${doctypeName}: skipped (no changes)`)
       return
     }
 
@@ -166,7 +189,8 @@ module.exports = class DocTypeInterfaceGenerator {
     interfaceString += `}\n`
     this.updatedInterfaces++
     this.existingInterfaces[interfaceName] = interfaceString
-    this.spinner.text = `Processing: ${doctypeName} [updated]`
+    this.summary.updated++
+    this.summary.details.push(`${doctypeName}: updated`)
   }
 
   async findJsonFile(appName, doctypeName) {
@@ -204,19 +228,21 @@ module.exports = class DocTypeInterfaceGenerator {
 
   generateBaseInterfaces() {
     return `interface DocType {
-  name: string;
-  creation: string;
-  modified: string;
-  owner: string;
-  modified_by: string;
-}
+    name: string;
+    creation: string;
+    modified: string;
+    owner: string;
+    modified_by: string;
+  }
 
-interface ChildDocType extends DocType {
-  parent?: string;
-  parentfield?: string;
-  parenttype?: string;
-  idx?: number;
-}
-`
+  interface ChildDocType extends DocType {
+    parent?: string;
+    parentfield?: string;
+    parenttype?: string;
+    idx?: number;
+  }
+  `
   }
 }
+
+exports.DocTypeInterfaceGenerator = DocTypeInterfaceGenerator

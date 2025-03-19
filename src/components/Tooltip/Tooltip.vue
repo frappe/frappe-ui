@@ -8,7 +8,7 @@ import {
   TooltipContent,
   TooltipArrow,
   type TooltipContentProps,
-} from 'radix-vue'
+} from 'reka-ui'
 import { computed } from 'vue'
 
 defineOptions({
