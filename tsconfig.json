@@ -20,6 +20,11 @@
     "src/**/*.tsx",
     "src/**/*.vue",
     "src/index.js",
+    "frappe/**/*.ts",
+    "frappe/**/*.d.ts",
+    "frappe/**/*.tsx",
+    "frappe/**/*.vue",
+    "frappe/index.js",
     "vitest.config.ts",
     "vitest.setup.ts"
   ],
