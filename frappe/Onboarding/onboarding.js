@@ -2,6 +2,7 @@ import call from '../../src/utils/call'
 import { useStorage } from '@vueuse/core'
 import { computed, reactive } from 'vue'
 import { createResource } from '../../src/resources'
+import { minimize } from '../Help/help'
 
 const onboardings = reactive({})
 const onboardingStatus = useStorage('onboardingStatus', {})
@@ -69,6 +70,8 @@ export function useOnboarding(appName) {
     updateUserOnboardingStatus(onboardingSteps.value)
 
     callback?.(step, skipped)
+
+    minimize.value = false
   }
 
   function updateAll(value, callback = null) {
