@@ -356,33 +356,33 @@ module.exports = plugin(
                 marginBottom: '1rem',
               },
               'ul > li': {
-                margin: '0.25rem 0',
+                margin: '0.5rem 0',
                 '> p': {
                   margin: '0.5rem 0',
                 },
                 '> p:first-child:last-child': {
-                  margin: '0.25rem 0',
+                  margin: '0.5rem 0',
                 },
                 '> p:first-child': {
-                  marginTop: '0.75rem',
+                  marginTop: '0.5rem',
                 },
                 '> p:last-child': {
-                  marginBottom: '0.75rem',
+                  marginBottom: '0.5rem',
                 },
               },
               'ol > li': {
-                margin: '0.25rem 0',
+                margin: '0.5rem 0',
                 '> p': {
                   margin: '0.5rem 0',
                 },
                 '> p:first-child:last-child': {
-                  margin: '0.25rem 0',
+                  margin: '0.5rem 0',
                 },
                 '> p:first-child': {
-                  marginTop: '0.75rem',
+                  marginTop: '0.5rem',
                 },
                 '> p:last-child': {
-                  marginBottom: '0.75rem',
+                  marginBottom: '0.5rem',
                 },
               },
             },
