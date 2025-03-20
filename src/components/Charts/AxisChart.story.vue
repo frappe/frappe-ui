@@ -128,8 +128,8 @@ const areaConfig: AxisChartConfig = {
   stacked: true,
   series: [
     { name: 'sales', type: 'area' },
-    { name: 'profit', type: 'area', lineType: 'dashed' },
-    { name: 'returns', type: 'area', lineType: 'dotted' },
+    { name: 'profit', type: 'area' },
+    { name: 'returns', type: 'area' },
   ],
 }
 </script>
