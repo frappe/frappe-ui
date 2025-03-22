@@ -32,6 +32,7 @@
         :afterSkip="afterSkip"
         :afterSkipAll="afterSkipAll"
         :afterReset="afterReset"
+        :afterResetAll="afterResetAll"
       />
       <HelpCenter
         v-else-if="showHelpCenter"
@@ -89,13 +90,17 @@ const props = defineProps({
     type: Function,
     default: () => {},
   },
+  afterResetAll: {
+    type: Function,
+    default: () => {},
+  },
   docsLink: {
     type: String,
     default: 'https://docs.frappe.io/crm',
   },
 })
 
-const { syncStatus, reset, isOnboardingStepsCompleted } = useOnboarding(
+const { syncStatus, resetAll, isOnboardingStepsCompleted } = useOnboarding(
   props.appName,
 )
 
@@ -146,7 +151,7 @@ const footerItems = computed(() => {
 })
 
 function resetOnboardingSteps() {
-  reset()
+  resetAll()
   isOnboardingStepsCompleted.value = false
   showHelpCenter.value = false
 }

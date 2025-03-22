@@ -10,6 +10,7 @@ export { default as HelpCenter } from './HelpCenter/HelpCenter.vue'
 
 // billing components
 export { default as TrialBanner } from './Billing/TrialBanner.vue'
+export { default as SignupBanner } from './Billing/SignupBanner.vue'
 
 // composables
 export { useOnboarding } from './Onboarding/onboarding.js'

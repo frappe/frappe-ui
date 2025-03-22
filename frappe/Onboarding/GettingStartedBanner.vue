@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="!isSidebarCollapsed"
-    class="m-2 flex flex-col gap-3 shadow-sm rounded-lg py-2.5 px-3 bg-surface-modal text-base"
+    class="flex flex-col gap-3 shadow-sm rounded-lg py-2.5 px-3 bg-surface-modal text-base"
   >
     <div
       v-if="stepsCompleted != totalSteps"
@@ -22,7 +22,7 @@
         <div class="flex items-center gap-2 shrink-0">
           <StepsIcon class="h-4 my-0.5" />
           <div class="text-ink-gray-9 font-medium">
-            {{ 'You are all set!' }}
+            {{ 'You are all set' }}
           </div>
         </div>
         <FeatherIcon
@@ -37,15 +37,19 @@
         />
       </div>
       <div class="text-p-sm text-ink-gray-7">
-        {{ 'All steps are completed successfully!' }}
+        {{ 'All steps are completed successfully' }}
       </div>
     </div>
     <Button
       v-if="stepsCompleted != totalSteps"
-      :label="'Complete now'"
+      :label="stepsCompleted == 0 ? 'Start now' : 'Continue'"
       theme="blue"
       @click="openOnboarding"
-    />
+    >
+      <template #prefix>
+        <FeatherIcon name="chevrons-right" class="size-4" />
+      </template>
+    </Button>
   </div>
   <Button v-else-if="stepsCompleted != totalSteps" @click="openOnboarding">
     <StepsIcon class="h-4 my-0.5 shrink-0" />
