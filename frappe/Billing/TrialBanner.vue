@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="!isSidebarCollapsed && showBanner"
-    class="m-2 flex flex-col gap-3 shadow-sm rounded-lg py-2.5 px-3 bg-surface-modal text-base"
+    class="flex flex-col gap-3 shadow-sm rounded-lg py-2.5 px-3 bg-surface-modal text-base"
   >
     <div class="flex flex-col gap-1">
       <div class="inline-flex text-ink-gray-9 gap-2 items-center font-medium">
