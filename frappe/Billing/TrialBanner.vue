@@ -34,6 +34,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  afterUpgrade: {
+    type: Function,
+    default: () => {},
+  },
 })
 
 const trialEndDays = ref(0)
@@ -77,5 +81,6 @@ function upgradePlan() {
     `${baseEndpoint.value}/dashboard/sites/${siteName.value}`,
     '_blank',
   )
+  props.afterUpgrade?.()
 }
 </script>
