@@ -19,8 +19,8 @@
         <Button
           v-if="completedPercentage != 0"
           variant="ghost"
-          :label="'Reset'"
-          @click="() => reset(afterReset)"
+          :label="'Reset all'"
+          @click="() => resetAll(afterResetAll)"
         />
         <Button
           v-if="completedPercentage != 100"
@@ -51,6 +51,12 @@
           :label="'Skip'"
           class="!h-4 text-xs !text-ink-gray-6 hidden group-hover:flex"
           @click="() => skip(step.name, afterSkip)"
+        />
+        <Button
+          v-else
+          :label="'Reset'"
+          class="!h-4 text-xs !text-ink-gray-6 hidden group-hover:flex"
+          @click.stop="() => reset(step.name, afterReset)"
         />
       </div>
     </div>
@@ -84,6 +90,10 @@ const props = defineProps({
     type: Function,
     default: () => {},
   },
+  afterResetAll: {
+    type: Function,
+    default: () => {},
+  },
 })
 
 const {
@@ -94,5 +104,6 @@ const {
   skip,
   skipAll,
   reset,
+  resetAll,
 } = useOnboarding(props.appName)
 </script>
