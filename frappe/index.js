@@ -4,6 +4,7 @@ export { default as HelpModal } from './Help/HelpModal.vue'
 // onboarding components
 export { default as GettingStartedBanner } from './Onboarding/GettingStartedBanner.vue'
 export { default as OnboardingSteps } from './Onboarding/OnboardingSteps.vue'
+export { default as IntermediateStepModal } from './Onboarding/IntermediateStepModal.vue'
 
 // help center components
 export { default as HelpCenter } from './HelpCenter/HelpCenter.vue'
