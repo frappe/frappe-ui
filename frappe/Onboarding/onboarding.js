@@ -1,8 +1,8 @@
 import call from '../../src/utils/call'
-import { useStorage } from '@vueuse/core'
-import { computed, reactive } from 'vue'
 import { createResource } from '../../src/resources'
 import { minimize } from '../Help/help'
+import { useStorage } from '@vueuse/core'
+import { computed, reactive } from 'vue'
 
 const onboardings = reactive({})
 const onboardingStatus = useStorage('onboardingStatus', {})
@@ -39,18 +39,27 @@ export function useOnboarding(appName) {
   )
 
   function skip(step, callback = null) {
-    updateOnboardingStep(step, true, callback)
+    updateOnboardingStep(step, true, true, callback)
   }
 
   function skipAll(callback = null) {
     updateAll(true, callback)
   }
 
-  function reset(callback = null) {
+  function reset(step, callback = null) {
+    updateOnboardingStep(step, false, false, callback)
+  }
+
+  function resetAll(callback = null) {
     updateAll(false, callback)
   }
 
-  function updateOnboardingStep(step, skipped = false, callback = null) {
+  function updateOnboardingStep(
+    step,
+    value = true,
+    skipped = false,
+    callback = null,
+  ) {
     if (isOnboardingStepsCompleted.value) return
 
     if (!onboardingSteps.value.length) {
@@ -63,8 +72,8 @@ export function useOnboarding(appName) {
 
     let index = onboardingSteps.value.findIndex((s) => s.name === step)
     if (index !== -1) {
-      onboardingSteps.value[index].completed = true
-      onboardings[appName][index].completed = true
+      onboardingSteps.value[index].completed = value
+      onboardings[appName][index].completed = value
     }
 
     updateUserOnboardingStatus(onboardingSteps.value)
@@ -136,6 +145,7 @@ export function useOnboarding(appName) {
     skip,
     skipAll,
     reset,
+    resetAll,
     setUp,
     syncStatus,
   }
