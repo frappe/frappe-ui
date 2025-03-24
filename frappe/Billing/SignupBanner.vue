@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="!isSidebarCollapsed"
-    class="m-2 flex flex-col gap-3 shadow-sm rounded-lg py-2.5 px-3 bg-surface-white text-base"
+    class="flex flex-col gap-3 shadow-sm rounded-lg py-2.5 px-3 bg-surface-white text-base"
   >
     <div class="flex flex-col gap-1">
       <slot>
