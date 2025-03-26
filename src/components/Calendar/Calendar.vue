@@ -14,7 +14,7 @@
       <div class="mb-2 flex justify-between">
         <!-- left side  -->
         <!-- Year, Month -->
-        <span class="text-xl font-medium"> {{ currentMonthYear }}</span>
+        <span class="text-lg font-medium text-ink-gray-8"> {{ currentMonthYear }}</span>
         <!-- right side -->
         <!-- actions buttons for calendar -->
         <div class="flex gap-x-1">

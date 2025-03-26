@@ -1,28 +1,30 @@
 <template>
   <div class="h-[90%] min-h-[500px] min-w-[600px]">
-    <p class="pb-2 text-base font-bold text-gray-800">
+    <p class="pb-2 text-base font-semibold text-ink-gray-8">
       {{ parseDateWithDay(currentDate, (fullDay = true)) }}
     </p>
     <div class="h-full overflow-hidden">
       <div
-        class="flex h-full w-full overflow-scroll border-b-[1px] border-l-[1px] border-t-[1px]"
+        class="flex h-full w-full overflow-scroll border-t-[1px] border-l-[1px] border-b-[1px]"
         ref="gridRef"
       >
         <!-- Left column -->
         <div class="grid h-full w-16 grid-cols-1">
           <span
             v-for="time in 24"
-            class="flex h-[72px] items-end justify-center text-center text-sm font-normal text-gray-600"
+            class="flex h-[72px] items-end justify-center text-center text-sm font-normal text-ink-gray-5"
             :style="{ height: `${hourHeight}px` }"
           />
         </div>
 
         <!-- Calendar Grid / Right Column -->
         <div class="grid h-full w-full grid-cols-1 pb-2">
-          <div class="calendar-column relative border-r-[1px]">
+          <div
+            class="calendar-column relative border-r-[1px] border-l-[1px] border-outline-gray-1"
+          >
             <!-- Top Redundant Cell before time starts for giving the calendar some space -->
             <div
-              class="flex h-[50px] w-full flex-wrap gap-2 overflow-y-scroll border-b-[1px] border-gray-200 transition-all"
+              class="flex h-[50px] w-full flex-wrap gap-2 overflow-y-scroll border-b-[1px] border-outline-gray-1 transition-all"
               :style="{ height: `${config.redundantCellHeight}px` }"
             >
               <CalendarEvent
@@ -37,7 +39,7 @@
             </div>
             <!-- Day Grid -->
             <div
-              class="relative flex"
+              class="relative flex text-ink-gray-8"
               v-for="time in twentyFourHoursFormat"
               :data-time-attr="time"
               @dblclick="
@@ -45,7 +47,7 @@
               "
             >
               <div
-                class="w-full border-b-[1px] border-gray-200"
+                class="w-full border-b-[1px] border-outline-gray-1"
                 :style="{ height: `${hourHeight}px` }"
               />
             </div>
