@@ -1,7 +1,7 @@
 <template>
   <div
     v-show="show"
-    class="fixed z-20 right-0 w-80 h-[calc(100%_-_80px)] text-ink-gray-9 m-5 mt-[62px] p-3 flex gap-2 flex-col justify-between rounded-lg bg-surface-modal shadow-2xl"
+    class="fixed z-50 right-0 w-80 h-[calc(100%_-_80px)] text-ink-gray-9 m-5 mt-[62px] p-3 flex gap-2 flex-col justify-between rounded-lg bg-surface-modal shadow-2xl"
     :class="{ 'top-[calc(100%_-_120px)] border': minimize }"
     @click.stop
   >
@@ -33,6 +33,7 @@
         :afterSkipAll="afterSkipAll"
         :afterReset="afterReset"
         :afterResetAll="afterResetAll"
+        :appName="appName"
       />
       <HelpCenter
         v-else-if="showHelpCenter"
@@ -64,6 +65,7 @@ import { useOnboarding } from '../Onboarding/onboarding'
 import { showHelpCenter } from '../HelpCenter/helpCenter'
 import { minimize } from '../Help/help'
 import { onMounted, computed } from 'vue'
+import FeatherIcon from '../../src/components/FeatherIcon.vue'
 
 const props = defineProps({
   appName: {

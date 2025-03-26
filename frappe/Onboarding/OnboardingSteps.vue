@@ -64,6 +64,8 @@
 </template>
 <script setup>
 import { useOnboarding } from './onboarding'
+import Button from '../../src/components/Button/Button.vue'
+import Badge from '../../src/components/Badge.vue'
 
 const props = defineProps({
   appName: {
