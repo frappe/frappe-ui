@@ -7,7 +7,10 @@
     </slot>
     <div class="h-full overflow-hidden">
       <div
-        class="flex h-full w-full overflow-scroll border-t-[1px] border-l-[1px] border-b-[1px]"
+        class="flex h-full w-full overflow-scroll border-outline-gray-1"
+        :class="[
+          config.noBorder ? 'border-t-[1px]' : 'border-[1px] border-r-0',
+        ]"
         ref="gridRef"
       >
         <!-- Left column -->

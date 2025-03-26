@@ -21,7 +21,8 @@
     </div>
 
     <div
-      class="relative flex h-full flex-col overflow-auto border-b-[1px] border-l-[1px] border-outline-gray-1"
+      class="relative flex h-full flex-col overflow-auto border-outline-gray-1"
+      :class="[config.noBorder ? '' : 'border-b-[1px] border-l-[1px]']"
       ref="gridRef"
     >
       <div class="flex">
@@ -41,7 +42,12 @@
             <div v-for="(date, idx) in weeklyDates">
               <div
                 class="flex w-full flex-col gap-1 border-b-[1px] border-r-[1px] border-outline-gray-1 transition-all"
-                :class="[idx === 0 && 'relative border-l-[1px]']"
+                :class="[
+                  idx === 0 && 'relative border-l-[1px]',
+                  config.noBorder &&
+                    idx === weeklyDates.length - 1 &&
+                    'border-r-0',
+                ]"
                 ref="allDayCells"
                 :data-date-attr="date"
               >
@@ -82,7 +88,12 @@
             <div
               v-for="(date, idx) in weeklyDates"
               class="relative w-full border-r-[1px] border-outline-gray-1"
-              :class="[idx === 0 && 'calendar-column border-l-[1px]']"
+              :class="[
+                idx === 0 && 'calendar-column border-l-[1px]',
+                config.noBorder &&
+                  idx == weeklyDates.length - 1 &&
+                  'border-r-0',
+              ]"
               :data-date-attr="date"
             >
               <!-- Time Grid -->

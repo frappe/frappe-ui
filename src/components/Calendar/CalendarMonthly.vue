@@ -11,8 +11,11 @@
 
     <!-- Date Grid -->
     <div
-      class="grid w-full flex-1 grid-cols-7 border-[0.5px] border-outline-gray-1"
-      :class="currentMonthDates.length > 35 ? 'grid-rows-6' : 'grid-rows-5'"
+      class="grid w-full flex-1 grid-cols-7 border-outline-gray-1"
+      :class="[
+        currentMonthDates.length > 35 ? 'grid-rows-6' : 'grid-rows-5',
+        config.noBorder ? 'border-t-[0.5px]' : 'border-[0.5px]',
+      ]"
     >
       <div
         v-for="date in currentMonthDates"
