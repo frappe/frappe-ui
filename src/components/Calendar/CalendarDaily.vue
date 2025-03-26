@@ -1,8 +1,10 @@
 <template>
   <div class="h-[90%] min-h-[500px] min-w-[600px]">
-    <p class="pb-2 text-base font-semibold text-ink-gray-8">
-      {{ parseDateWithDay(currentDate, (fullDay = true)) }}
-    </p>
+    <slot name="header" v-bind="{ parseDateWithDay, currentDate, fullDay }">
+      <p class="pb-2 text-base font-semibold text-ink-gray-8">
+        {{ parseDateWithDay(currentDate, (fullDay = true)) }}
+      </p>
+    </slot>
     <div class="h-full overflow-hidden">
       <div
         class="flex h-full w-full overflow-scroll border-t-[1px] border-l-[1px] border-b-[1px]"

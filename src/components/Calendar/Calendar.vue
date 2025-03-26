@@ -14,7 +14,9 @@
       <div class="mb-2 flex justify-between">
         <!-- left side  -->
         <!-- Year, Month -->
-        <span class="text-lg font-medium text-ink-gray-8"> {{ currentMonthYear }}</span>
+        <span class="text-lg font-medium text-ink-gray-8">
+          {{ currentMonthYear }}
+        </span>
         <!-- right side -->
         <!-- actions buttons for calendar -->
         <div class="flex gap-x-1">
@@ -64,7 +66,14 @@
       :events="events"
       :current-date="selectedDay"
       :config="overrideConfig"
-    />
+    >
+      <template #header="{ parseDateWithDay, currentDate, fullDay }">
+        <slot
+          name="daily-header"
+          v-bind="{ parseDateWithDay, currentDate, fullDay }"
+        />
+      </template>
+    </CalendarDaily>
 
     <NewEventModal
       v-if="showEventModal"
