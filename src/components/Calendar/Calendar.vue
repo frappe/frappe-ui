@@ -196,7 +196,7 @@ const parseEvents = computed(() => {
     }) || []
   )
 })
-const events = computed(() => parseEvents.value)
+const events = ref(parseEvents.value)
 
 events.value.forEach((event) => {
   if (!event.from_time || !event.to_time) {
@@ -216,24 +216,28 @@ provide('calendarActions', {
   props,
 })
 
+function syncEvents() {
+  events.value = parseEvents.value
+}
+
 // CRUD actions on an event
 function createNewEvent(event) {
   events.value.push(event)
-  props.create && props.create(event)
+  props.create && props.create(event, syncEvents)
 }
 
 function updateEventState(event) {
   const eventID = event.id
   let eventIndex = events.value.findIndex((e) => e.id === eventID)
   events.value[eventIndex] = event
-  props.update && props.update(events.value[eventIndex])
+  props.update && props.update(events.value[eventIndex], syncEvents)
 }
 
 function deleteEvent(eventID) {
   // Delete event
   const eventIndex = events.value.findIndex((event) => event.id === eventID)
   events.value.splice(eventIndex, 1)
-  props.delete && props.delete(eventID)
+  props.delete && props.delete(eventID, syncEvents)
 }
 
 function openModal(data) {
