@@ -83,7 +83,7 @@
   </div>
 </template>
 <script setup>
-import { computed, onMounted, onUnmounted, provide, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, provide, ref } from 'vue'
 import { Button } from '../Button'
 import TabButtons from '../TabButtons.vue'
 import {
@@ -216,28 +216,24 @@ provide('calendarActions', {
   props,
 })
 
-function syncEvents() {
-  events.value = parseEvents.value
-}
-
 // CRUD actions on an event
 function createNewEvent(event) {
   events.value.push(event)
-  props.create && props.create(event, syncEvents)
+  props.create && props.create(event)
 }
 
 function updateEventState(event) {
   const eventID = event.id
   let eventIndex = events.value.findIndex((e) => e.id === eventID)
   events.value[eventIndex] = event
-  props.update && props.update(events.value[eventIndex], syncEvents)
+  props.update && props.update(events.value[eventIndex])
 }
 
 function deleteEvent(eventID) {
   // Delete event
   const eventIndex = events.value.findIndex((event) => event.id === eventID)
   events.value.splice(eventIndex, 1)
-  props.delete && props.delete(eventID, syncEvents)
+  props.delete && props.delete(eventID)
 }
 
 function openModal(data) {
