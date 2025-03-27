@@ -183,18 +183,20 @@ provide('activeView', activeView)
 provide('config', overrideConfig)
 
 const parseEvents = computed(() => {
-  return props.events.map((event) => {
-    const { fromDate, toDate, ...rest } = event
-    const date = parseDate(fromDate)
-    const from_time = new Date(fromDate).toLocaleTimeString()
-    const to_time = new Date(toDate).toLocaleTimeString()
-    if (event.isFullDay) {
-      return { ...rest, date }
-    }
-    return { ...rest, date, from_time, to_time }
-  })
+  return (
+    props.events?.map((event) => {
+      const { fromDate, toDate, ...rest } = event
+      const date = parseDate(fromDate)
+      const from_time = new Date(fromDate).toLocaleTimeString()
+      const to_time = new Date(toDate).toLocaleTimeString()
+      if (event.isFullDay) {
+        return { ...rest, date }
+      }
+      return { ...rest, date, from_time, to_time }
+    }) || []
+  )
 })
-const events = ref(parseEvents.value)
+const events = computed(() => parseEvents.value)
 
 events.value.forEach((event) => {
   if (!event.from_time || !event.to_time) {
