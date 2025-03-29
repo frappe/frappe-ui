@@ -215,6 +215,8 @@ function createNewEvent(event) {
 function updateEventState(event) {
   const eventID = event.id
   let eventIndex = events.value.findIndex((e) => e.id === eventID)
+  event.fromDate = event.date + ' ' + event.from_time
+  event.toDate = event.date + ' ' + event.to_time
   events.value[eventIndex] = event
   emit('update', event)
 }
