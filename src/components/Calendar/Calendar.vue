@@ -107,18 +107,6 @@ const props = defineProps({
   config: {
     type: Object,
   },
-  create: {
-    type: Function,
-    required: false,
-  },
-  update: {
-    type: Function,
-    required: false,
-  },
-  delete: {
-    type: Function,
-    required: false,
-  },
   onClick: {
     type: Function,
     required: false,
@@ -132,6 +120,8 @@ const props = defineProps({
     required: false,
   },
 })
+
+const emit = defineEmits(['create', 'update', 'delete'])
 
 const defaultConfig = {
   scrollToHour: 15,
@@ -219,21 +209,21 @@ provide('calendarActions', {
 // CRUD actions on an event
 function createNewEvent(event) {
   events.value.push(event)
-  props.create && props.create(event)
+  emit('create', event)
 }
 
 function updateEventState(event) {
   const eventID = event.id
   let eventIndex = events.value.findIndex((e) => e.id === eventID)
   events.value[eventIndex] = event
-  props.update && props.update(events.value[eventIndex])
+  emit('update', event)
 }
 
 function deleteEvent(eventID) {
   // Delete event
   const eventIndex = events.value.findIndex((event) => event.id === eventID)
   events.value.splice(eventIndex, 1)
-  props.delete && props.delete(eventID)
+  emit('delete', eventID)
 }
 
 function openModal(data) {
