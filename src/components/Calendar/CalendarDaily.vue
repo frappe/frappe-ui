@@ -45,7 +45,8 @@
             <!-- Day Grid -->
             <div
               class="relative flex text-ink-gray-8"
-              v-for="time in twentyFourHoursFormat"
+              v-for="time in timeArray"
+              :key="time"
               :data-time-attr="time"
               @dblclick="
                 calendarActions.handleCellDblClick($event, currentDate, time)
@@ -84,6 +85,7 @@ import CalendarTimeMarker from './CalendarTimeMarker.vue'
 import {
   parseDate,
   parseDateWithDay,
+  twelveHoursFormat,
   twentyFourHoursFormat,
 } from './calendarUtils'
 import useCalendarData from './composables/useCalendarData'
@@ -110,6 +112,9 @@ const fullDayEvents = computed(
 const gridRef = ref(null)
 const hourHeight = props.config.hourHeight
 const minuteHeight = hourHeight / 60
+
+const timeArray =
+  props.config.timeFormat == '24h' ? twentyFourHoursFormat : twelveHoursFormat
 
 onMounted(() => {
   const currentHour = new Date().getHours()

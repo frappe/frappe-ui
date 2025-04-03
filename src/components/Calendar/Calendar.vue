@@ -133,6 +133,7 @@ const defaultConfig = {
   hourHeight: 50,
   enableShortcuts: true,
   showIcon: true,
+  timeFormat: '12h',
 }
 
 const overrideConfig = { ...defaultConfig, ...props.config }
@@ -187,6 +188,10 @@ const parseEvents = computed(() => {
   )
 })
 const events = ref(parseEvents.value)
+
+function reloadEvents() {
+  events.value = parseEvents.value
+}
 
 events.value.forEach((event) => {
   if (!event.from_time || !event.to_time) {
@@ -433,4 +438,6 @@ function isCurrentMonthDate(date) {
   date = new Date(date)
   return date.getMonth() === currentMonth.value
 }
+
+defineExpose({ reloadEvents })
 </script>

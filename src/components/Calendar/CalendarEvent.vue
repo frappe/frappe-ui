@@ -26,24 +26,29 @@
         ]
       "
     >
-      <div v-if="config.showIcon">
+      <div v-if="config.showIcon && eventIcons[props.event.type]">
         <component
           v-if="eventIcons[props.event.type]"
           :is="eventIcons[props.event.type]"
           class="h-4 w-4 text-black"
         />
-        <FeatherIcon v-else name="circle" class="h-4 text-black" />
       </div>
 
       <div class="flex w-fit flex-col overflow-hidden whitespace-nowrap">
-        <p class="text-ellipsis text-sm font-medium text-gray-800">
+        <p class="text-ellipsis text-sm font-medium text-ink-gray-8 truncate">
           {{ props.event.title || 'New Event' }}
         </p>
         <p
           class="text-ellipsis text-xs font-normal text-gray-800"
           v-if="!props.event.isFullDay"
         >
-          {{ updatedEvent.from_time }} - {{ updatedEvent.to_time }}
+          {{
+            formattedDuration(
+              updatedEvent.from_time,
+              updatedEvent.to_time,
+              config.timeFormat,
+            )
+          }}
         </p>
       </div>
     </div>
@@ -138,6 +143,7 @@ import {
   calculateDiff,
   parseDate,
   colorMap,
+  formattedDuration,
 } from './calendarUtils'
 
 const props = defineProps({

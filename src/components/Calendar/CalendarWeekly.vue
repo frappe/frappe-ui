@@ -99,7 +99,8 @@
               <!-- Time Grid -->
               <div
                 class="cell relative flex cursor-pointer text-ink-gray-8"
-                v-for="(time, i) in twentyFourHoursFormat"
+                v-for="(time, i) in timeArray"
+                :key="time"
                 :data-time-attr="time"
                 @dblclick.prevent="
                   calendarActions.handleCellDblClick($event, date, time)
@@ -107,9 +108,7 @@
               >
                 <div
                   class="border-outline-gray-1 w-full border-b-[1px]"
-                  :class="
-                    i === twentyFourHoursFormat.length - 1 && 'border-b-0'
-                  "
+                  :class="i === timeArray.length - 1 && 'border-b-0'"
                   :style="{ height: `${hourHeight}px` }"
                 />
               </div>
@@ -137,6 +136,7 @@ import { ref, onMounted, watch, computed, inject } from 'vue'
 import CalendarEvent from './CalendarEvent.vue'
 import CalendarTimeMarker from './CalendarTimeMarker.vue'
 import {
+  twelveHoursFormat,
   twentyFourHoursFormat,
   parseDateWithDay,
   parseDate,
@@ -167,6 +167,9 @@ const isCollapsed = ref(false)
 
 const hourHeight = props.config.hourHeight
 const minuteHeight = hourHeight / 60
+
+const timeArray =
+  props.config.timeFormat == '24h' ? twentyFourHoursFormat : twelveHoursFormat
 
 const timedEvents = computed(
   () => useCalendarData(props.events).timedEvents.value,
