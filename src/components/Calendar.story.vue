@@ -7,7 +7,7 @@
           :events="events"
           @create="(event) => logEvent('createEvent', event)"
           @update="(event) => logEvent('updateEvent', event)"
-          @delete="(event) => logEvent('deleteEvent', event)"
+          @delete="(eventID) => logEvent('deleteEvent', eventID)"
         >
         </Calendar>
       </div>
@@ -19,7 +19,7 @@
           :events="events"
           @create="(event) => logEvent('createEvent', event)"
           @update="(event) => logEvent('updateEvent', event)"
-          @delete="(event) => logEvent('deleteEvent', event)"
+          @delete="(eventID) => logEvent('deleteEvent', eventID)"
         >
           <template
             #header="{

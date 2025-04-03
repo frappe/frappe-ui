@@ -227,7 +227,8 @@ function setFullDayEventsHeight(eventsObject, weeklyDates) {
 onMounted(() => {
   // document.body.style.overflow = 'hidden'
   setFullDayEventsHeight(fullDayEvents.value, props.weeklyDates)
-  gridRef.value.scrollBy(0, document.body.clientHeight / 2)
+  const currentHour = new Date().getHours()
+  gridRef.value.scrollBy(0, currentHour * 60 * minuteHeight)
 })
 
 watch(isCollapsed, (newVal) => {

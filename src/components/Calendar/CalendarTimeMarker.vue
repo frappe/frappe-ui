@@ -1,6 +1,6 @@
 <template>
   <div
-    class="absolute top-20 z-50 w-full pl-2"
+    class="absolute top-20 z-10 w-full pl-2"
     :style="setCurrentTime"
     v-if="new Date(date).toDateString() === new Date().toDateString()"
   >

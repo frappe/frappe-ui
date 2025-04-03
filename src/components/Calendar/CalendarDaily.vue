@@ -117,7 +117,8 @@ const timeArray =
   props.config.timeFormat == '24h' ? twentyFourHoursFormat : twelveHoursFormat
 
 onMounted(() => {
-  gridRef.value.scrollBy(0, document.body.clientHeight / 2)
+  const currentHour = new Date().getHours()
+  gridRef.value.scrollBy(0, currentHour * 60 * minuteHeight)
 })
 
 const calendarActions = inject('calendarActions')

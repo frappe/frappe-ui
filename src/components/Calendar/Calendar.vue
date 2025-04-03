@@ -214,6 +214,8 @@ provide('calendarActions', {
 // CRUD actions on an event
 function createNewEvent(event) {
   events.value.push(event)
+  event.fromDate = event.date + ' ' + event.from_time
+  event.toDate = event.date + ' ' + event.to_time
   emit('create', event)
 }
 
