@@ -34,12 +34,14 @@
         />
       </div>
 
-      <div class="flex w-fit flex-col overflow-hidden whitespace-nowrap">
-        <p class="text-ellipsis text-sm font-medium text-ink-gray-8 truncate">
+      <div
+        class="flex w-fit flex-col overflow-hidden whitespace-nowrap text-gray-800"
+      >
+        <p class="text-ellipsis text-sm font-medium truncate">
           {{ props.event.title || 'New Event' }}
         </p>
         <p
-          class="text-ellipsis text-xs font-normal text-gray-800"
+          class="text-ellipsis text-xs font-normal"
           v-if="!props.event.isFullDay"
         >
           {{

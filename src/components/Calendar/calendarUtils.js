@@ -305,7 +305,7 @@ export const colorMap = {
 export function formattedDuration(from_time, to_time, timeFormat) {
   from_time = formatTime(from_time, timeFormat)
   to_time = formatTime(to_time, timeFormat)
-  return from_time + '-' + to_time
+  return from_time + ' - ' + to_time
 }
 
 export function formatTime(time, format) {
@@ -315,6 +315,11 @@ export function formatTime(time, format) {
     const ampm = hours >= 12 ? 'pm' : 'am'
     hours = hours % 12
     hours = hours ? hours : 12 // the hour '0' should be '12'
+
+    // if minutes is 00, remove it
+    if (minutes === '00') {
+      return `${hours} ${ampm}`
+    }
     time = `${hours}:${minutes} ${ampm}`
   }
   return time
