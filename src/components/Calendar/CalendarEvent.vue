@@ -81,24 +81,28 @@
         ]
       "
     >
-      <div v-if="config.showIcon">
+      <div v-if="config.showIcon && eventIcons[props.event.type]">
         <component
           v-if="eventIcons[props.event.type]"
           :is="eventIcons[props.event.type]"
           class="h-4 w-4 text-black"
         />
-        <FeatherIcon v-else name="circle" class="h-4 text-black" />
       </div>
 
-      <div class="flex w-fit flex-col overflow-hidden whitespace-nowrap">
-        <p class="text-ellipsis text-sm font-medium text-gray-800">
+      <div
+        class="flex w-fit flex-col text-start overflow-hidden whitespace-nowrap text-gray-800"
+      >
+        <p class="text-sm font-medium truncate">
           {{ props.event.title || 'New Event' }}
         </p>
-        <p
-          class="text-ellipsis text-xs font-normal text-gray-800"
-          v-if="props.event.from_time"
-        >
-          {{ updatedEvent.from_time }} - {{ updatedEvent.to_time }}
+        <p v-if="props.event.from_time" class="text-xs font-normal">
+          {{
+            formattedDuration(
+              updatedEvent.from_time,
+              updatedEvent.to_time,
+              config.timeFormat,
+            )
+          }}
         </p>
       </div>
     </div>
