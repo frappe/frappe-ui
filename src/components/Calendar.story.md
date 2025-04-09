@@ -130,10 +130,10 @@ e.g.
 - Many functional props are also there which will be discussed in the below
   sections.
 
-## Custom API Integrations with Prop functions
+## Custom API Integrations
 
 To integrate the calendar with your API, you need to pass the following
-functions as props to the Calendar component:
+functions as emits to the Calendar component:
 
 - create: This function is called when a new event is created from the UI. The
   first argument in the function is the new event created.
@@ -149,9 +149,9 @@ e.g.
     <Calendar
     	:config="config"
     	:events="events"
-    	:create="(event) => console.log('createEvent', event)"
-    	:update="(event) => console.log('updateEvent', event)"
-    	:delete="(eventID) => console.log('deleteEvent', eventID)"
+    	@create="(event) => console.log('createEvent', event)"
+    	@update="(event) => console.log('updateEvent', event)"
+    	@delete="(eventID) => console.log('deleteEvent', eventID)"
     />
 
 In these functions, you can set up your API calls to create, update, and delete

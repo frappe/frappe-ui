@@ -1,5 +1,5 @@
 <template>
-  <div class="w-80 rounded bg-surface-white p-4 shadow">
+  <div class="w-80 rounded bg-surface-modal text-ink-gray-8 p-4 shadow">
     <div class="flex flex-row-reverse gap-2">
       <span class="cursor-pointer" @click="$emit('close')">
         <FeatherIcon name="x" class="h-4 w-4" />

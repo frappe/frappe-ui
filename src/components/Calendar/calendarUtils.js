@@ -202,6 +202,32 @@ export const daysListFull = [
   'Friday',
   'Saturday',
 ]
+export const twelveHoursFormat = [
+  '12 am',
+  '1 am',
+  '2 am',
+  '3 am',
+  '4 am',
+  '5 am',
+  '6 am',
+  '7 am',
+  '8 am',
+  '9 am',
+  '10 am',
+  '11 am',
+  '12 pm',
+  '1 pm',
+  '2 pm',
+  '3 pm',
+  '4 pm',
+  '5 pm',
+  '6 pm',
+  '7 pm',
+  '8 pm',
+  '9 pm',
+  '10 pm',
+  '11 pm',
+]
 export const twentyFourHoursFormat = [
   '00:00',
   '01:00',
@@ -274,4 +300,27 @@ export const colorMap = {
     background_color: 'bg-amber-100',
     border_color: 'border-amber-600',
   },
+}
+
+export function formattedDuration(from_time, to_time, timeFormat) {
+  from_time = formatTime(from_time, timeFormat)
+  to_time = formatTime(to_time, timeFormat)
+  return from_time + ' - ' + to_time
+}
+
+export function formatTime(time, format) {
+  if (format === '12h') {
+    let [hours, minutes] = time.split(':')
+    hours = parseInt(hours)
+    const ampm = hours >= 12 ? 'pm' : 'am'
+    hours = hours % 12
+    hours = hours ? hours : 12 // the hour '0' should be '12'
+
+    // if minutes is 00, remove it
+    if (minutes === '00') {
+      return `${hours} ${ampm}`
+    }
+    time = `${hours}:${minutes} ${ampm}`
+  }
+  return time
 }
