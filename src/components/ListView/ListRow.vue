@@ -33,12 +33,15 @@
           ),
         }"
       >
-        <Checkbox
-          v-if="list.options.selectable"
-          :modelValue="isSelected"
-          @click.stop="list.toggleRow(row[list.rowKey])"
-          class="cursor-pointer duration-300"
-        />
+        <div class="pl-1 pr-5 py-1 flex" @click.prevent.stop="alert('hey')">
+          <Checkbox
+            v-if="list.options.selectable"
+            :modelValue="isSelected"
+            class="cursor-pointer duration-300"
+            @click.stop="list.toggleRow(row[list.rowKey])"
+            @dblclick.stopclass=""
+          />
+        </div>
         <div
           v-for="(column, i) in list.columns"
           :key="column.key"
@@ -69,11 +72,13 @@
         </div>
       </div>
       <div
-        v-if="
+        class="h-px border-t"
+        :class="
           !isLastRow &&
           (roundedClass === 'rounded' || roundedClass?.includes?.('rounded-b'))
+            ? 'mx-2 border-outline-gray-1'
+            : 'border-t-[#F3F3F3]'
         "
-        class="mx-2 h-px border-t border-outline-gray-1"
       />
     </component>
   </component>
@@ -105,9 +110,7 @@ const isLastRow = computed(() => {
 const isSelected = computed(() => {
   return list.value.selections.has(props.row[list.value.rowKey])
 })
-const isActive = computed(() => {
-  return list.value.activeRow.value === props.row.name
-})
+const isActive = computed(() => list.value.activeRow.value === props.row.name)
 
 const isHovered = ref(false)
 
@@ -141,6 +144,11 @@ const roundedClass = computed(() => {
 const onRowClick = (row, e) => {
   if (list.value.options.onRowClick) list.value.options.onRowClick(row, e)
   if (e.metaKey) list.value.toggleRow(row[list.rowKey])
-  list.value.activeRow.value = row.name
+  if (list.value.activeRow.value === row.name) {
+    list.value.activeRow.value = null
+    isActive.value = false
+  } else {
+    list.value.activeRow.value = row.name
+  }
 }
 </script>

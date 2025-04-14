@@ -80,7 +80,6 @@ defineOptions({
 const list = inject('list')
 
 let selectedText = computed(() => {
-  let title = list.value.options.selectionWord(list.value.selections.size)
-  return `${list.value.selections.size} ${title} selected`
+  return list.value.options.selectionText(list.value.selections.size)
 })
 </script>

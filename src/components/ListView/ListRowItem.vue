@@ -10,16 +10,16 @@
         "
       />
     </slot>
-    <slot v-bind="{ label }">
-      <component
-        :is="list.options.showTooltip ? Tooltip : 'div'"
-        v-bind="list.options.showTooltip ? { text: label } : {}"
-      >
+    <component
+      :is="list.options.showTooltip ? Tooltip : 'div'"
+      v-bind="list.options.showTooltip ? { text: label } : {}"
+    >
+      <slot v-bind="{ label }">
         <div class="truncate text-base">
           {{ column?.getLabel ? column.getLabel({ row }) : label }}
         </div>
-      </component>
-    </slot>
+      </slot>
+    </component>
     <slot name="suffix" />
   </div>
 </template>
