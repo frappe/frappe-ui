@@ -1,6 +1,6 @@
 <template>
   <div class="relative flex w-full flex-1 flex-col overflow-x-auto">
-    <div class="flex w-max min-w-full  flex-col" :class="$attrs.class">
+    <div class="flex w-max min-w-full flex-col" :class="$attrs.class">
       <slot v-bind="{ showGroupedRows, selectable }">
         <ListHeader />
         <template v-if="props.rows.length">
@@ -19,7 +19,7 @@ import ListHeader from './ListHeader.vue'
 import ListRows from './ListRows.vue'
 import ListGroups from './ListGroups.vue'
 import ListSelectBanner from './ListSelectBanner.vue'
-import { reactive, computed, provide, watch, useSlots } from 'vue'
+import { ref, reactive, computed, provide, watch, useSlots } from 'vue'
 
 defineOptions({
   inheritAttrs: false,
@@ -58,11 +58,21 @@ const props = defineProps({
 const slots = useSlots()
 
 let selections = reactive(new Set())
+let activeRow = ref(null)
 
-const emit = defineEmits(['update:selections'])
+const emit = defineEmits(['update:selections', 'update:active-row'])
 
 watch(selections, (value) => {
   emit('update:selections', value)
+  activeRow.value = null
+})
+
+watch(activeRow, (value) => {
+  if (selections.size) {
+    activeRow.value = null
+  } else {
+    emit('update:active-row', value)
+  }
 })
 
 let _options = computed(() => {
@@ -78,7 +88,9 @@ let _options = computed(() => {
     getRowRoute: props.options.getRowRoute || null,
     onRowClick: props.options.onRowClick || null,
     showTooltip: defaultTrue(props.options.showTooltip),
-    selectionWord: props.options.selectionWord || ((val) => val === 1 ? 'Row' : 'Rows'),
+    selectionText:
+      props.options.selectionText ||
+      ((val) => (val === 1 ? '1 row selected' : '${val} rows selected')),
     selectable: defaultTrue(props.options.selectable),
     resizeColumn: defaultFalse(props.options.resizeColumn),
     rowHeight: props.options.rowHeight || 40,
@@ -103,7 +115,7 @@ const selectable = computed(() => {
 
 let showGroupedRows = computed(() => {
   return props.rows.every(
-    (row) => row.group && row.rows && Array.isArray(row.rows),
+    (row) => row.group && row.rows && Array.isArray(row.rows)
   )
 })
 
@@ -135,11 +147,12 @@ provide(
     columns: props.columns,
     options: _options.value,
     selections: selections,
+    activeRow: activeRow,
     allRowsSelected: allRowsSelected.value,
     slots: slots,
     toggleRow,
     toggleAllRows,
-  })),
+  }))
 )
 
 defineExpose({

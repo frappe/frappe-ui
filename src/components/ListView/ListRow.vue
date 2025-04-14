@@ -1,16 +1,13 @@
 <template>
   <component
+    @mouseover="isHovered = true"
+    @mouseleave="isHovered = false"
     :is="list.options.getRowRoute ? 'router-link' : 'div'"
     :class="{ 'cursor-pointer': isHoverable }"
     class="flex flex-col transition-all duration-300 ease-in-out"
     v-bind="{
       to: list.options.getRowRoute ? list.options.getRowRoute(row) : undefined,
-      onClick: list.options.onRowClick
-        ? (e) => {
-            if (e.metaKey) list.toggleRow(row[list.rowKey])
-            list.options.onRowClick(row)
-          }
-        : (e) => (e.metaKey ? list.toggleRow(row[list.rowKey]) : null),
+      onClick: (e) => onRowClick(row, e),
     }"
   >
     <component
@@ -21,9 +18,9 @@
         class="grid items-center space-x-4 px-2"
         :class="[
           roundedClass,
-          isSelected ? 'bg-surface-gray-2' : '',
+          isSelected || isActive ? 'bg-surface-gray-2' : '',
           isHoverable
-            ? isSelected
+            ? isSelected || isActive
               ? 'hover:bg-surface-gray-3'
               : 'hover:bg-surface-menu-bar'
             : '',
@@ -50,7 +47,7 @@
             i == 0 ? 'text-ink-gray-9' : 'text-ink-gray-7',
           ]"
         >
-          <slot v-bind="{ idx: i, column, item: row[column.key] }">
+          <slot v-bind="{ idx: i, column, item: row[column.key], isHovered }">
             <component
               v-if="list.slots.cell"
               :is="list.slots.cell"
@@ -86,7 +83,7 @@
 import Checkbox from '../Checkbox.vue'
 import ListRowItem from './ListRowItem.vue'
 import { alignmentMap, getGridTemplateColumns } from './utils'
-import { computed, inject } from 'vue'
+import { computed, inject, ref } from 'vue'
 
 const props = defineProps({
   row: {
@@ -108,6 +105,11 @@ const isLastRow = computed(() => {
 const isSelected = computed(() => {
   return list.value.selections.has(props.row[list.value.rowKey])
 })
+const isActive = computed(() => {
+  return list.value.activeRow.value === props.row.name
+})
+
+const isHovered = ref(false)
 
 const isHoverable = computed(() => {
   return list.value.options.getRowRoute || list.value.options.onRowClick
@@ -135,4 +137,10 @@ const roundedClass = computed(() => {
     return (atBottom ? 'rounded-b ' : '') + (atTop ? 'rounded-t' : '')
   }
 })
+
+const onRowClick = (row, e) => {
+  if (list.value.options.onRowClick) list.value.options.onRowClick(row, e)
+  if (e.metaKey) list.value.toggleRow(row[list.rowKey])
+  list.value.activeRow.value = row.name
+}
 </script>
