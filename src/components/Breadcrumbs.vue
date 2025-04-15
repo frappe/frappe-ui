@@ -50,6 +50,7 @@
         </router-link>
         <button
           v-else
+          @click="item.onClick ? item.onClick() : null"
           class="flex items-center rounded px-0.5 py-1 text-lg font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
           :class="[
             i == crumbs.length - 1
