@@ -36,6 +36,7 @@
         <div
           v-if="list.options.selectable"
           class="w-fit pr-2 py-3 flex"
+          @click.stop.prevent
           @dblclick.stop
         >
           <Checkbox
