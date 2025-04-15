@@ -53,7 +53,7 @@ const delayDuration = computed(() => props.hoverDelay * 1000)
             <div
               class="rounded bg-surface-gray-7 px-2 py-1 text-xs text-ink-white shadow-xl"
             >
-              <div v-html="props.text"></div>
+              <div>{{ props.text }}</div>
             </div>
           </slot>
           <TooltipArrow :class="props.arrowClass" :width="8" :height="4" />

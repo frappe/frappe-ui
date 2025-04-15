@@ -10,7 +10,15 @@
         "
       />
     </slot>
-    <Tooltip v-bind="list.options.showTooltip ? { text: label } : { text: '' }">
+    <Tooltip
+      v-bind="
+        list.options.showTooltip
+          ? {
+              text: tooltip,
+            }
+          : { text: '' }
+      "
+    >
       <slot v-bind="{ label }">
         <div class="truncate text-base">{{ label }}</div>
       </slot>
@@ -45,6 +53,13 @@ const props = defineProps({
 const label = computed(() => {
   if (props.column?.getLabel) return props.column?.getLabel({ row: props.row })
   return getValue(props.item).label || ''
+})
+
+const tooltip = computed(() => {
+  if (!list.value.options.showTooltip) return ''
+  return props.column.getTooltip
+    ? props.column.getTooltip(props.row)
+    : getValue(props.item).label
 })
 
 function getValue(value) {
