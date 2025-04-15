@@ -33,9 +33,8 @@
           ),
         }"
       >
-        <div class="pl-1 pr-5 py-1 flex" @click.prevent.stop="alert('hey')">
+        <div v-if="list.options.selectable" class="pl-1 pr-5 py-1 flex">
           <Checkbox
-            v-if="list.options.selectable"
             :modelValue="isSelected"
             class="cursor-pointer duration-300"
             @click.stop="list.toggleRow(row[list.rowKey])"

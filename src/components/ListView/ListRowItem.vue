@@ -10,16 +10,11 @@
         "
       />
     </slot>
-    <component
-      :is="list.options.showTooltip ? Tooltip : 'div'"
-      v-bind="list.options.showTooltip ? { text: label } : {}"
-    >
+    <Tooltip v-bind="list.options.showTooltip ? { text: label } : { text: '' }">
       <slot v-bind="{ label }">
-        <div class="truncate text-base">
-          {{ column?.getLabel ? column.getLabel({ row }) : label }}
-        </div>
+        <div class="truncate text-base">{{ label }}</div>
       </slot>
-    </component>
+    </Tooltip>
     <slot name="suffix" />
   </div>
 </template>
@@ -48,6 +43,7 @@ const props = defineProps({
 })
 
 const label = computed(() => {
+  if (props.column?.getLabel) return props.column?.getLabel({ row: props.row })
   return getValue(props.item).label || ''
 })
 
