@@ -107,10 +107,11 @@ const dropdownItems = computed(() => {
   let allExceptLastTwo = items.value.slice(0, -2)
   return allExceptLastTwo.map((item) => {
     let onClick = () => {
+      if (item.onClick) {
+        item.onClick()
+      }
       if (item.route) {
         router.push(item.route)
-      } else if (item.onClick) {
-        item.onClick()
       }
     }
     return {
