@@ -1,6 +1,9 @@
 <template>
   <div class="relative flex w-full flex-1 flex-col overflow-x-auto">
-    <div class="flex w-max min-w-full flex-col" :class="$attrs.class">
+    <div
+      class="flex w-max min-w-full flex-col overflow-y-hidden"
+      :class="$attrs.class"
+    >
       <slot v-bind="{ showGroupedRows, selectable }">
         <ListHeader />
         <template v-if="props.rows.length">
