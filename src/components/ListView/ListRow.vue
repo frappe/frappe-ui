@@ -145,7 +145,6 @@ const roundedClass = computed(() => {
 
 const onRowClick = (row, e) => {
   if (list.value.options.onRowClick) list.value.options.onRowClick(row, e)
-  if (e.metaKey) list.value.toggleRow(row[list.rowKey])
   if (list.value.activeRow.value === row.name) {
     list.value.activeRow.value = null
     isActive.value = false
