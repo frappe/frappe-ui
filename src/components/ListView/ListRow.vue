@@ -33,12 +33,15 @@
           ),
         }"
       >
-        <div v-if="list.options.selectable" class="pl-1 pr-5 py-1 flex">
+        <div
+          v-if="list.options.selectable"
+          class="w-fit pr-2 py-3 flex"
+          @dblclick.stop
+        >
           <Checkbox
             :modelValue="isSelected"
             class="cursor-pointer duration-300"
             @click.stop="list.toggleRow(row[list.rowKey])"
-            @dblclick.stopclass=""
           />
         </div>
         <div
