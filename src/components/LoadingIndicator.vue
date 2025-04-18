@@ -3,6 +3,7 @@
     class="max-w-xs animate-spin"
     xmlns="http://www.w3.org/2000/svg"
     fill="none"
+    :style="`width: 24px; scale: ${scale}%;`"
     viewBox="0 0 24 24"
   >
     <circle
@@ -20,4 +21,6 @@
     ></path>
   </svg>
 </template>
-<script setup lang="ts"></script>
+<script setup lang="ts">
+defineProps({ scale: { required: false, default: 100 } })
+</script>

@@ -1,13 +1,13 @@
 <template>
   <component
+    @mouseover="isHovered = true"
+    @mouseleave="isHovered = false"
     :is="list.options.getRowRoute ? 'router-link' : 'div'"
     :class="{ 'cursor-pointer': isHoverable }"
     class="flex flex-col transition-all duration-300 ease-in-out"
     v-bind="{
       to: list.options.getRowRoute ? list.options.getRowRoute(row) : undefined,
-      onClick: list.options.onRowClick
-        ? () => list.options.onRowClick(row)
-        : undefined,
+      onClick: (e) => onRowClick(row, e),
     }"
   >
     <component
@@ -15,11 +15,12 @@
       class="[all:unset] hover:[all:unset]"
     >
       <div
-        class="grid items-center space-x-4 rounded px-2"
+        class="grid items-center space-x-4 px-2"
         :class="[
-          isSelected ? 'bg-surface-gray-2' : '',
+          roundedClass,
+          isSelected || isActive ? 'bg-surface-gray-2' : '',
           isHoverable
-            ? isSelected
+            ? isSelected || isActive
               ? 'hover:bg-surface-gray-3'
               : 'hover:bg-surface-menu-bar'
             : '',
@@ -28,16 +29,22 @@
           height: rowHeight,
           gridTemplateColumns: getGridTemplateColumns(
             list.columns,
-            list.options.selectable,
+            list.options.selectable
           ),
         }"
       >
-        <Checkbox
+        <div
           v-if="list.options.selectable"
-          :modelValue="list.selections.has(row[list.rowKey])"
-          @click.stop="list.toggleRow(row[list.rowKey])"
-          class="cursor-pointer duration-300"
-        />
+          class="w-fit pr-2 py-3 flex"
+          @click.stop.prevent
+          @dblclick.stop
+        >
+          <Checkbox
+            :modelValue="isSelected"
+            class="cursor-pointer duration-300"
+            @click.stop="list.toggleRow(row[list.rowKey])"
+          />
+        </div>
         <div
           v-for="(column, i) in list.columns"
           :key="column.key"
@@ -46,7 +53,7 @@
             i == 0 ? 'text-ink-gray-9' : 'text-ink-gray-7',
           ]"
         >
-          <slot v-bind="{ idx: i, column, item: row[column.key] }">
+          <slot v-bind="{ idx: i, column, item: row[column.key], isHovered }">
             <component
               v-if="list.slots.cell"
               :is="list.slots.cell"
@@ -68,8 +75,13 @@
         </div>
       </div>
       <div
-        v-if="!isLastRow"
-        class="mx-2 h-px border-t border-outline-gray-1"
+        class="h-px border-t"
+        :class="
+          !isLastRow &&
+          (roundedClass === 'rounded' || roundedClass?.includes?.('rounded-b'))
+            ? 'mx-2 border-outline-gray-1'
+            : 'border-t-[#F3F3F3]'
+        "
       />
     </component>
   </component>
@@ -79,7 +91,7 @@
 import Checkbox from '../Checkbox.vue'
 import ListRowItem from './ListRowItem.vue'
 import { alignmentMap, getGridTemplateColumns } from './utils'
-import { computed, inject } from 'vue'
+import { computed, inject, ref } from 'vue'
 
 const props = defineProps({
   row: {
@@ -101,6 +113,9 @@ const isLastRow = computed(() => {
 const isSelected = computed(() => {
   return list.value.selections.has(props.row[list.value.rowKey])
 })
+const isActive = computed(() => list.value.activeRow.value === props.row.name)
+
+const isHovered = ref(false)
 
 const isHoverable = computed(() => {
   return list.value.options.getRowRoute || list.value.options.onRowClick
@@ -112,4 +127,30 @@ const rowHeight = computed(() => {
   }
   return list.value.options.rowHeight
 })
+
+const roundedClass = computed(() => {
+  const selections = [...list.value.selections]
+  if (!isSelected.value) return 'rounded'
+  let groups = list.value.rows[0]?.group
+    ? list.value.rows.map((k) => k.rows)
+    : [list.value.rows]
+
+  for (let rows of groups) {
+    let currentIndex = rows.findIndex((k) => k == props.row)
+    if (currentIndex === -1) continue
+    let atBottom = !selections.includes(rows[currentIndex + 1]?.name)
+    let atTop = !selections.includes(rows[currentIndex - 1]?.name)
+    return (atBottom ? 'rounded-b ' : '') + (atTop ? 'rounded-t' : '')
+  }
+})
+
+const onRowClick = (row, e) => {
+  if (list.value.options.onRowClick) list.value.options.onRowClick(row, e)
+  if (list.value.activeRow.value === row.name) {
+    list.value.activeRow.value = null
+    isActive.value = false
+  } else {
+    list.value.activeRow.value = row.name
+  }
+}
 </script>

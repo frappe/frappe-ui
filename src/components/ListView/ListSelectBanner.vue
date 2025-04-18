@@ -80,7 +80,6 @@ defineOptions({
 const list = inject('list')
 
 let selectedText = computed(() => {
-  let title = list.value.selections.size === 1 ? 'Row' : 'Rows'
-  return `${list.value.selections.size} ${title} selected`
+  return list.value.options.selectionText(list.value.selections.size)
 })
 </script>
