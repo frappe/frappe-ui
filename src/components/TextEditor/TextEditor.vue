@@ -25,7 +25,7 @@ import Table from '@tiptap/extension-table'
 import TableCell from '@tiptap/extension-table-cell'
 import TableHeader from '@tiptap/extension-table-header'
 import TableRow from '@tiptap/extension-table-row'
-import Image from './image-extension'
+import ImageExtension from './image-extension'
 import Video from './video-extension'
 import Link from '@tiptap/extension-link'
 import Typography from '@tiptap/extension-typography'
@@ -99,6 +99,10 @@ export default {
       type: Array,
       default: () => [],
     },
+    imageUploadFunction: {
+      type: Function,
+      default: () => null,
+    },
   },
   emits: ['change', 'focus', 'blur'],
   expose: ['editor'],
@@ -161,7 +165,9 @@ export default {
             return VueNodeViewRenderer(CodeBlockComponent)
           },
         }).configure({ lowlight }),
-        Image,
+        ImageExtension.configure({
+          uploadFunction: this.imageUploadFunction,
+        }),
         Video,
         Link.configure({
           openOnClick: false,

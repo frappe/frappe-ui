@@ -1,77 +1,31 @@
 <template>
-  <slot v-bind="{ onClick: openDialog }"></slot>
-  <Dialog
-    :options="{ title: 'Add Image' }"
-    v-model="addImageDialog.show"
-    @after-leave="reset"
-  >
-    <template #body-content>
-      <label
-        class="relative cursor-pointer rounded-lg bg-surface-gray-2 py-1 focus-within:bg-surface-gray-3 hover:bg-surface-gray-3"
-      >
-        <input
-          type="file"
-          class="w-full opacity-0"
-          @change="onImageSelect"
-          accept="image/*"
-        />
-        <span class="absolute inset-0 select-none px-2 py-1 text-base">
-          {{ addImageDialog.file ? 'Select another image' : 'Select an image' }}
-        </span>
-      </label>
-      <img
-        v-if="addImageDialog.url"
-        :src="addImageDialog.url"
-        class="mt-2 w-full rounded-lg"
-      />
-    </template>
-    <template #actions>
-      <div class="flex gap-2">
-        <Button variant="solid" @click="addImage(addImageDialog.url)">
-          Insert Image
-        </Button>
-        <Button @click="reset"> Cancel </Button>
-      </div>
-    </template>
-  </Dialog>
+  <slot v-bind="{ onClick: openFileSelector }"></slot>
+  <input
+    ref="fileInput"
+    type="file"
+    class="hidden"
+    @change="onImageSelect"
+    accept="image/*"
+  />
 </template>
-<script>
-import fileToBase64 from '../../utils/file-to-base64'
-import Dialog from '../Dialog.vue'
-import { Button } from '../Button'
+<script setup lang="ts">
+import { useTemplateRef } from 'vue'
 
-export default {
-  name: 'InsertImage',
-  props: ['editor'],
-  expose: ['openDialog'],
-  data() {
-    return {
-      addImageDialog: { url: '', file: null, show: false },
-    }
-  },
-  components: { Button, Dialog },
-  methods: {
-    openDialog() {
-      this.addImageDialog.show = true
-    },
-    onImageSelect(e) {
-      let file = e.target.files[0]
-      if (!file) {
-        return
-      }
-      this.addImageDialog.file = file
-      fileToBase64(file).then((base64) => {
-        this.addImageDialog.url = base64
-      })
-    },
-    addImage(src) {
-      if (!src) return
-      this.editor.chain().focus().setImage({ src }).run()
-      this.reset()
-    },
-    reset() {
-      this.addImageDialog = this.$options.data().addImageDialog
-    },
-  },
+const props = defineProps<{
+  editor: any
+}>()
+
+const fileInput = useTemplateRef('fileInput')
+
+function openFileSelector() {
+  fileInput.value?.click()
+}
+
+function onImageSelect(e: Event) {
+  const target = e.target as HTMLInputElement
+  const file = target.files?.[0]
+  if (file) {
+    props.editor.chain().focus().uploadImage(file).run()
+  }
 }
 </script>
