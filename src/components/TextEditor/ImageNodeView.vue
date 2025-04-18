@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
 import LoadingIndicator from '../LoadingIndicator.vue'
-import { defineProps, ref, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import ErrorMessage from '../ErrorMessage.vue'
 
 const props = defineProps(nodeViewProps)
