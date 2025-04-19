@@ -36,7 +36,7 @@
       <component v-else-if="icon" :is="icon" :class="slotClasses" />
       <slot name="icon" v-else-if="$slots.icon" />
     </template>
-    <span v-else :class="{ 'sr-only': isIconButton }">
+    <span v-else :class="{ 'sr-only': isIconButton }" class="truncate">
       <slot>{{ label }}</slot>
     </span>
 
