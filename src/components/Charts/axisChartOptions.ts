@@ -23,7 +23,10 @@ export default function useAxisChartOptions(config: AxisChartConfig) {
   }
 
   const swapXY = config.swapXY
-  const seriesCount = config.series.length
+  const lastBarSeriesIdx = config.series
+    .slice()
+    .reverse()
+    .findIndex((s) => s.type === 'bar')
   const hasY2 = config.series.some((s) => s.axis === 'y2')
 
   if (hasY2) {
@@ -34,21 +37,27 @@ export default function useAxisChartOptions(config: AxisChartConfig) {
     ...baseOptions,
     series: config.series.map((s, idx) => {
       let labelPosition = 'top'
-      if (config.stacked && seriesCount > 1) {
-        labelPosition = 'inside'
-        if (idx === seriesCount - 1) {
-          // Last series
-          labelPosition = swapXY ? 'right' : 'top'
-        }
+      if (s.type == 'bar' && config.stacked) {
+        labelPosition = idx == lastBarSeriesIdx ? 'top' : 'inside'
+      }
+      if (s.type == 'bar' && swapXY) {
+        labelPosition = 'right'
       }
 
       const standardOptions = {
         type: s.type,
         name: s.name,
-        data: data.map((row: any) => [
-          swapXY ? row[s.name] : row[config.xAxis.key],
-          swapXY ? row[config.xAxis.key] : row[s.name],
-        ]),
+        data: data.map((row: any) => {
+          let x, y
+          if (swapXY) {
+            x = row[s.name]
+            y = row[config.xAxis.key]
+          } else {
+            x = row[config.xAxis.key]
+            y = row[s.name]
+          }
+          return [x, y]
+        }),
         yAxisIndex: s.axis === 'y2' ? 1 : 0,
         label: {
           show: s.showDataLabels,
@@ -84,14 +93,19 @@ export default function useAxisChartOptions(config: AxisChartConfig) {
 function getBarSeriesOptions(config: AxisChartConfig, series: BarSeriesConfig) {
   const roundedCorners = config.swapXY ? [0, 2, 2, 0] : [2, 2, 0, 0]
   const idx = config.series.findIndex((s) => s.name === series.name)
-  const isLast = idx === config.series.length - 1
+  const lastBarSeriesIdx = config.series
+    .slice()
+    .reverse()
+    .findIndex((s) => s.type === 'bar')
+
+  const isLastBar = lastBarSeriesIdx === idx
 
   return {
     stack: config.stacked ? 'stack' : undefined,
     barMaxWidth: 60,
     itemStyle: {
       borderRadius: config.stacked
-        ? isLast
+        ? isLastBar
           ? roundedCorners
           : 0
         : roundedCorners,
