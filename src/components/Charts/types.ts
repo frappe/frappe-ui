@@ -52,7 +52,6 @@ export type AreaSeriesConfig = SeriesConfig & {
   fillOpacity?: number
 }
 
-
 export type DonutChartConfig = {
   data: Record<string, any>[]
   title: string
@@ -64,6 +63,15 @@ export type DonutChartConfig = {
   showInlineLabels?: boolean
 }
 
+export type FunnelChartConfig = {
+  data: Record<string, any>[]
+  title: string
+  subtitle?: string
+  colors?: string[]
+  categoryColumn: string
+  valueColumn: string
+  showPercentages?: boolean
+}
 
 export type NumberChartConfig = {
   title: string

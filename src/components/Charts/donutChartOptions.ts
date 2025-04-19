@@ -87,7 +87,6 @@ export default function useDonutChartOptions(config: DonutChartConfig) {
           type: 'scroll',
           itemGap: 12,
           formatter: function (name: string) {
-            console.log(name)
             const labelIndex = labels.indexOf(name)
             const percentage =
               total > 0 ? (values[labelIndex] / total) * 100 : 0
@@ -117,26 +116,20 @@ export default function useDonutChartOptions(config: DonutChartConfig) {
       trigger: 'item',
       confine: true,
       appendToBody: false,
-      valueFormatter: (value: number) => {
-        const percent = (value / total) * 100
-        return `${formatValue(value, 2)} (${percent.toFixed(0)}%)`
-      },
       formatter: function (params: any) {
-        if (!Array.isArray(params)) {
-          const p = params as any
-          const value = p.value[1]
-          const percentage = total > 0 ? (value / total) * 100 : 0
-          const formatted = isNaN(value) ? value : formatValue(value)
-          const formattedPercentage = percentage.toFixed(0)
-          return `
-                <div class="flex items-center justify-between gap-5">
-                  <div>${p.name}</div>
-                  <div class="font-bold">
-                    ${formatted} (${formattedPercentage}%)
-                  </div>
-                </div>
-              `
-        }
+        const p = params as any
+        const value = p.value[1]
+        const percentage = total > 0 ? (value / total) * 100 : 0
+        const formatted = isNaN(value) ? value : formatValue(value, 1, true)
+        const formattedPercentage = percentage.toFixed(0)
+        return `
+          <div class="flex items-center justify-between gap-5">
+            <div>${p.name}</div>
+            <div class="font-bold">
+              ${formatted} (${formattedPercentage}%)
+            </div>
+          </div>
+        `
       },
     },
   }

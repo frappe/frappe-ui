@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AxisChart from './AxisChart.vue'
 import DonutChart from './DonutChart.vue'
+import FunnelChart from './FunnelChart.vue'
 import NumberChart from './NumberChart.vue'
 import { AxisChartConfig, DonutChartConfig } from './types'
 
@@ -167,6 +168,20 @@ const numberChart3Config = {
   deltaSuffix: '% MoM',
   negativeIsBetter: false,
 }
+
+const funnelConfig = {
+  data: [
+    { stage: 'Stage 1', value: 100 },
+    { stage: 'Stage 2', value: 50 },
+    { stage: 'Stage 3', value: 30 },
+    { stage: 'Stage 4', value: 20 },
+    { stage: 'Stage 5', value: 10 },
+  ],
+  title: 'Sales Funnel',
+  subtitle: 'Conversion rates at each stage',
+  categoryColumn: 'stage',
+  valueColumn: 'value',
+}
 </script>
 
 <template>
@@ -195,6 +210,9 @@ const numberChart3Config = {
     </Variant>
     <Variant title="Donut Chart">
       <DonutChart :config="donutConfig" />
+    </Variant>
+    <Variant title="Funnel Chart">
+      <FunnelChart :config="funnelConfig" />
     </Variant>
   </Story>
 </template>

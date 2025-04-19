@@ -6,8 +6,9 @@ export const PADDING_BOTTOM = 10
 export const AXIS_TITLE_HEIGHT = 20
 export const LEGEND_HEIGHT = 30
 export const LEGEND_BOTTOM = 10
-export const TITLE_HEIGHT = 40
-export const SUBTITLE_HEIGHT = 30
+export const TITLE_HEIGHT = 20
+export const SUBTITLE_HEIGHT = 18
+export const TITLE_BOTTOM = 24
 
 export default function useEchartsOptions(config: AxisChartConfig) {
   const title = config.title
@@ -32,7 +33,10 @@ export default function useEchartsOptions(config: AxisChartConfig) {
       left: '1%',
       right: config.swapXY ? '2.5%' : '1%',
       top:
-        PADDING_TOP + TITLE_HEIGHT * hasTitle + SUBTITLE_HEIGHT * hasSubtitle,
+        PADDING_TOP +
+        TITLE_HEIGHT * hasTitle +
+        SUBTITLE_HEIGHT * hasSubtitle +
+        TITLE_BOTTOM,
       bottom: PADDING_BOTTOM + LEGEND_HEIGHT * hasLegend,
       containLabel: true,
     },
