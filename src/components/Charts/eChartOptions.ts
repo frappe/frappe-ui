@@ -318,5 +318,7 @@ function getYAxisOptions(config: AxisChartConfig) {
     },
   }
 
-  return [primaryYAxisOptions, secondaryYAxisOptions]
+  return config.swapXY
+    ? [primaryYAxisOptions]
+    : [primaryYAxisOptions, secondaryYAxisOptions]
 }
