@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AxisChart from './AxisChart.vue'
 import DonutChart from './DonutChart.vue'
+import NumberChart from './NumberChart.vue'
 import { AxisChartConfig, DonutChartConfig } from './types'
 
 const salesData = [
@@ -141,10 +142,42 @@ const donutConfig: DonutChartConfig = {
   categoryColumn: 'product',
   valueColumn: 'sales',
 }
+
+const numberChart1Config = {
+  title: 'Total Sales',
+  value: 123456,
+  prefix: '$',
+  delta: 10,
+  deltaSuffix: '% MoM',
+  negativeIsBetter: false,
+}
+const numberChart2Config = {
+  title: 'Total Expenses',
+  value: 5682,
+  prefix: '$',
+  delta: -2,
+  deltaSuffix: '% MoM',
+  negativeIsBetter: true,
+}
+const numberChart3Config = {
+  title: 'Total Profit',
+  value: 123456 - 5682,
+  prefix: '$',
+  delta: 8,
+  deltaSuffix: '% MoM',
+  negativeIsBetter: false,
+}
 </script>
 
 <template>
   <Story :layout="{ type: 'grid', width: 800 }">
+    <Variant title="Number Charts">
+      <div class="flex gap-2">
+        <NumberChart :config="numberChart1Config" />
+        <NumberChart :config="numberChart2Config" />
+        <NumberChart :config="numberChart3Config" />
+      </div>
+    </Variant>
     <Variant title="Simple Bar Chart">
       <AxisChart :config="simpleConfig" />
     </Variant>

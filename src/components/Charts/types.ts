@@ -63,3 +63,15 @@ export type DonutChartConfig = {
   maxSliceCount?: number
   showInlineLabels?: boolean
 }
+
+
+export type NumberChartConfig = {
+  title: string
+  value: number
+  prefix?: string
+  suffix?: string
+  delta?: number
+  deltaPrefix?: string
+  deltaSuffix?: string
+  negativeIsBetter?: boolean
+}
