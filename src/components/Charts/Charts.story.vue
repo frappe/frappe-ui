@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AxisChart from './AxisChart.vue'
-import { AxisChartConfig } from './types'
+import DonutChart from './DonutChart.vue'
+import { AxisChartConfig, DonutChartConfig } from './types'
 
 const salesData = [
   { month: new Date('2021-01-01'), sales: 200, profit: 50, returns: 20 },
@@ -132,6 +133,14 @@ const areaConfig: AxisChartConfig = {
     { name: 'returns', type: 'area' },
   ],
 }
+
+const donutConfig: DonutChartConfig = {
+  data: productData,
+  title: 'Product Sales Distribution',
+  subtitle: 'Sales distribution across products',
+  categoryColumn: 'product',
+  valueColumn: 'sales',
+}
 </script>
 
 <template>
@@ -150,6 +159,9 @@ const areaConfig: AxisChartConfig = {
     </Variant>
     <Variant title="Area Chart">
       <AxisChart :config="areaConfig" />
+    </Variant>
+    <Variant title="Donut Chart">
+      <DonutChart :config="donutConfig" />
     </Variant>
   </Story>
 </template>

@@ -136,9 +136,10 @@ function getAreaSeriesOptions(
 ) {
   return {
     type: 'line',
+    showSymbol: series.showDataPoints,
     areaStyle: {
       color: series.color,
-      opacity: series.fillOpacity || 0.6,
+      opacity: series.fillOpacity || 0.5,
     },
   }
 }

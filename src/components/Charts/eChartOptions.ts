@@ -1,13 +1,13 @@
 import { formatDate, formatLabel, formatValue } from './helpers'
 import { AxisChartConfig } from './types'
 
-const PADDING_TOP = 0
-const PADDING_BOTTOM = 10
-const AXIS_TITLE_HEIGHT = 20
-const LEGEND_HEIGHT = 30
-const LEGEND_BOTTOM = 10
-const TITLE_HEIGHT = 40
-const SUBTITLE_HEIGHT = 30
+export const PADDING_TOP = 0
+export const PADDING_BOTTOM = 10
+export const AXIS_TITLE_HEIGHT = 20
+export const LEGEND_HEIGHT = 30
+export const LEGEND_BOTTOM = 10
+export const TITLE_HEIGHT = 40
+export const SUBTITLE_HEIGHT = 30
 
 export default function useEchartsOptions(config: AxisChartConfig) {
   const title = config.title
@@ -23,31 +23,11 @@ export default function useEchartsOptions(config: AxisChartConfig) {
   const yAxisOptions = getYAxisOptions(config)
 
   return {
-    textStyle: {
-      fontFamily: ['InterVar', 'sans-serif'],
-    },
-    title: {
-      top: '4px',
-      left: '0.8%',
-      text: title,
-      subtext: subtitle,
-      padding: 0,
-      itemGap: -3,
-      textStyle: {
-        fontSize: 14,
-        fontWeight: 500,
-        lineHeight: 24,
-        // color: titleColor
-      },
-      subtextStyle: {
-        fontSize: 13,
-        fontWeight: 400,
-        lineHeight: 20,
-        // color: subtitleColor,
-      },
-    },
     animation: true,
     animationDuration: 700,
+    textStyle: { fontFamily: ['InterVar', 'sans-serif'] },
+    title: getTitleOptions(title, subtitle),
+    color: config.colors,
     grid: {
       left: '1%',
       right: config.swapXY ? '2.5%' : '1%',
@@ -56,7 +36,6 @@ export default function useEchartsOptions(config: AxisChartConfig) {
       bottom: PADDING_BOTTOM + LEGEND_HEIGHT * hasLegend,
       containLabel: true,
     },
-    color: config.colors,
     xAxis: xAxisOptions,
     yAxis: yAxisOptions,
     series: [],
@@ -66,7 +45,9 @@ export default function useEchartsOptions(config: AxisChartConfig) {
       formatter: (params: Object | Array<Object>) => {
         if (Array.isArray(params)) {
           params = params
+            // remove zero values
             .filter((p) => p.value?.[1] !== 0)
+            // sort in descending order by value
             .sort((a, b) => b.value?.[1] - a.value?.[1])
         }
 
@@ -81,6 +62,7 @@ export default function useEchartsOptions(config: AxisChartConfig) {
                 </div>
               `
         }
+
         if (Array.isArray(params)) {
           const t = params.map((p, idx) => {
             const xValue = config.swapXY ? p.value[1] : p.value[0]
@@ -111,7 +93,6 @@ export default function useEchartsOptions(config: AxisChartConfig) {
       axisPointer: {
         type: 'shadow',
       },
-      order: 'valueDesc',
     },
     legend: {
       show: hasLegend,
@@ -145,13 +126,36 @@ export default function useEchartsOptions(config: AxisChartConfig) {
   }
 }
 
+export function getTitleOptions(title: string, subtitle?: string) {
+  return {
+    top: '4px',
+    left: '0.8%',
+    text: title,
+    subtext: subtitle,
+    padding: 0,
+    itemGap: -3,
+    textStyle: {
+      fontSize: 14,
+      fontWeight: 500,
+      lineHeight: 24,
+      // color: titleColor
+    },
+    subtextStyle: {
+      fontSize: 13,
+      fontWeight: 400,
+      lineHeight: 20,
+      // color: subtitleColor,
+    },
+  }
+}
+
 function getXAxisOptions(config: AxisChartConfig) {
   return config.swapXY
     ? {
+        show: true,
         type: 'value',
-        scale: false,
         z: 2,
-        alignTicks: true,
+        scale: false,
         boundaryGap: false,
         position: 'top',
         name: `${config.yAxis.title} →`,
@@ -166,14 +170,6 @@ function getXAxisOptions(config: AxisChartConfig) {
           borderColor: '#fff',
           borderWidth: 4,
         },
-        axisLabel: {
-          show: true,
-          hideOverlap: true,
-          margin: 8,
-          formatter: function (value: number) {
-            return formatValue(value, 1, true)
-          },
-        },
         splitLine: {
           show: true,
           width: 1,
@@ -185,6 +181,14 @@ function getXAxisOptions(config: AxisChartConfig) {
         axisTick: {
           show: false,
           alignWithLabel: true,
+          formatter: function (value: number) {
+            return formatValue(value, 1, true)
+          },
+        },
+        axisLabel: {
+          show: true,
+          hideOverlap: true,
+          margin: 8,
           formatter: function (value: number) {
             return formatValue(value, 1, true)
           },
@@ -224,7 +228,6 @@ function getYAxisOptions(config: AxisChartConfig) {
         inverse: 'true',
         splitLine: {
           show: false,
-          width: 1,
         },
         axisLine: {
           show: true,
@@ -236,6 +239,7 @@ function getYAxisOptions(config: AxisChartConfig) {
         axisLabel: {
           show: true,
           hideOverlap: true,
+          margin: 6,
         },
       }
     : {
@@ -245,6 +249,7 @@ function getYAxisOptions(config: AxisChartConfig) {
         scale: false,
         boundaryGap: ['0%', '1%'],
         name: `↑ ${config.yAxis.title}`,
+        nameGap: 6,
         nameLocation: 'end',
         nameTextStyle: {
           align: 'left',
@@ -255,7 +260,6 @@ function getYAxisOptions(config: AxisChartConfig) {
           borderColor: '#fff',
           borderWidth: 4,
         },
-        nameGap: 6,
         splitLine: {
           show: true,
           width: 1,

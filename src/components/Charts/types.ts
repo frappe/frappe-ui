@@ -48,5 +48,18 @@ export type LineSeriesConfig = SeriesConfig & {
 
 export type AreaSeriesConfig = SeriesConfig & {
   type: 'area'
+  showDataPoints?: boolean
   fillOpacity?: number
+}
+
+
+export type DonutChartConfig = {
+  data: Record<string, any>[]
+  title: string
+  subtitle?: string
+  colors?: string[]
+  categoryColumn: string
+  valueColumn: string
+  maxSliceCount?: number
+  showInlineLabels?: boolean
 }
