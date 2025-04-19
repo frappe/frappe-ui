@@ -9,7 +9,7 @@
     }"
   >
     <input
-      class="rounded-sm"
+      class="rounded-sm self-start mt-[1.3px]"
       :class="inputClasses"
       type="checkbox"
       :disabled="disabled"
