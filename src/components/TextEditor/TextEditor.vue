@@ -26,6 +26,7 @@ import TableCell from '@tiptap/extension-table-cell'
 import TableHeader from '@tiptap/extension-table-header'
 import TableRow from '@tiptap/extension-table-row'
 import ImageExtension from './image-extension'
+import ImageViewerExtension from './image-viewer-extension'
 import Video from './video-extension'
 import Link from '@tiptap/extension-link'
 import Typography from '@tiptap/extension-typography'
@@ -168,6 +169,7 @@ export default {
         ImageExtension.configure({
           uploadFunction: this.imageUploadFunction,
         }),
+        ImageViewerExtension,
         Video,
         Link.configure({
           openOnClick: false,
