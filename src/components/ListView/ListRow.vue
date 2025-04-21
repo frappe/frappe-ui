@@ -1,7 +1,5 @@
 <template>
   <component
-    @mouseover="isHovered = true"
-    @mouseleave="isHovered = false"
     :is="list.options.getRowRoute ? 'router-link' : 'div'"
     :class="{ 'cursor-pointer': isHoverable }"
     class="flex flex-col transition-all duration-300 ease-in-out"
@@ -53,7 +51,7 @@
             i == 0 ? 'text-ink-gray-9' : 'text-ink-gray-7',
           ]"
         >
-          <slot v-bind="{ idx: i, column, item: row[column.key], isHovered }">
+          <slot v-bind="{ idx: i, column, item: row[column.key] }">
             <component
               v-if="list.slots.cell"
               :is="list.slots.cell"
@@ -75,12 +73,12 @@
         </div>
       </div>
       <div
+        v-if="!isLastRow"
         class="h-px border-t"
         :class="
-          !isLastRow &&
-          (roundedClass === 'rounded' || roundedClass?.includes?.('rounded-b'))
+          roundedClass === 'rounded' || roundedClass?.includes?.('rounded-b')
             ? 'mx-2 border-outline-gray-1'
-            : 'border-t-[#F3F3F3]'
+            : 'border-t-[--surface-gray-2]'
         "
       />
     </component>
@@ -113,9 +111,11 @@ const isLastRow = computed(() => {
 const isSelected = computed(() => {
   return list.value.selections.has(props.row[list.value.rowKey])
 })
-const isActive = computed(() => list.value.activeRow.value === props.row.name)
-
-const isHovered = ref(false)
+const isActive = computed(
+  () =>
+    list.value.options.enableActive &&
+    list.value.activeRow.value === props.row.name
+)
 
 const isHoverable = computed(() => {
   return list.value.options.getRowRoute || list.value.options.onRowClick
@@ -129,8 +129,8 @@ const rowHeight = computed(() => {
 })
 
 const roundedClass = computed(() => {
-  const selections = [...list.value.selections]
   if (!isSelected.value) return 'rounded'
+  const selections = [...list.value.selections]
   let groups = list.value.rows[0]?.group
     ? list.value.rows.map((k) => k.rows)
     : [list.value.rows]

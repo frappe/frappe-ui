@@ -94,6 +94,7 @@ let _options = computed(() => {
     selectionText:
       props.options.selectionText ||
       ((val) => (val === 1 ? '1 row selected' : `${val} rows selected`)),
+    enableActive: defaultFalse(props.options.enableActive),
     selectable: defaultTrue(props.options.selectable),
     resizeColumn: defaultFalse(props.options.resizeColumn),
     rowHeight: props.options.rowHeight || 40,
