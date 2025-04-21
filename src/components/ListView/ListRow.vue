@@ -51,7 +51,7 @@
             i == 0 ? 'text-ink-gray-9' : 'text-ink-gray-7',
           ]"
         >
-          <slot v-bind="{ idx: i, column, item: row[column.key] }">
+          <slot v-bind="{ idx: i, column, item: row[column.key], isActive }">
             <component
               v-if="list.slots.cell"
               :is="list.slots.cell"
