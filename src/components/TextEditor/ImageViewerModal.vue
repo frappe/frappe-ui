@@ -11,6 +11,9 @@
         v-if="props.show"
         class="fixed top-0 left-0 w-full h-full bg-black sm:bg-black/90 z-[50] flex flex-col justify-center items-center overflow-hidden touch-none"
         ref="imageContainer"
+        @mousemove="handleActivity"
+        @touchstart="handleActivity"
+        @touchmove="handleActivity"
       >
         <!-- Dedicated Backdrop -->
         <div
@@ -46,7 +49,8 @@
         <!-- Caption -->
         <div
           v-if="currentImage.alt"
-          class="absolute bottom-4 p-2 text-center rounded-sm text-white text-sm bg-black/50 z-10"
+          class="absolute bottom-4 p-2 text-center rounded-sm text-white text-sm bg-black/65 z-10 transition-opacity duration-300 ease-in-out"
+          :class="{ 'opacity-0 pointer-events-none': !isControlsVisible }"
         >
           {{ currentImage.alt }}
         </div>
@@ -54,7 +58,8 @@
         <!-- Controls bar -->
         <div
           ref="controlsBar"
-          class="absolute top-4 flex items-center space-x-3 p-2 text-white z-20"
+          class="absolute top-4 flex items-center space-x-3 p-2 text-white z-20 transition-opacity duration-300 ease-in-out"
+          :class="{ 'opacity-0 pointer-events-none': !isControlsVisible }"
           @touchstart.stop
           @touchmove.stop
           @touchend.stop
@@ -62,7 +67,7 @@
           @wheel.stop
         >
           <!-- Navigation controls -->
-          <div class="bg-black bg-opacity-50 rounded flex items-center">
+          <div class="bg-black/65 rounded flex items-center">
             <Tooltip text="Previous image">
               <button
                 class="p-2 hover:bg-gray-900 rounded-l focus:outline-none"
@@ -117,7 +122,7 @@
           </div>
 
           <!-- Action controls -->
-          <div class="bg-black bg-opacity-50 rounded flex items-center">
+          <div class="bg-black/65 rounded flex items-center">
             <Tooltip text="Download image">
               <button
                 class="p-2 hover:bg-gray-900 rounded-l focus:outline-none"
@@ -141,7 +146,7 @@
           </div>
 
           <!-- Close button -->
-          <div class="bg-black bg-opacity-50 rounded flex items-center">
+          <div class="bg-black/65 rounded flex items-center">
             <Tooltip text="Close">
               <button
                 class="p-2 hover:bg-gray-900 rounded focus:outline-none"
@@ -203,6 +208,10 @@ const controlsBarHeight = ref(0)
 
 const isFullscreen = ref(false)
 const touchStartZoom = ref(100)
+
+const isControlsVisible = ref(true)
+const inactivityTimer = ref<ReturnType<typeof setTimeout> | null>(null)
+const INACTIVITY_TIMEOUT = 3000 // 3 seconds
 
 const {
   zoomLevel,
@@ -297,9 +306,33 @@ const {
 
 const isPanning = computed(() => isMousePanning.value || isTouchPanning.value)
 
+function showControlsAndResetTimer() {
+  isControlsVisible.value = true
+  if (inactivityTimer.value) {
+    clearTimeout(inactivityTimer.value)
+  }
+  inactivityTimer.value = setTimeout(() => {
+    if (!isPanning.value && !isPinching.value) {
+      isControlsVisible.value = false
+    } else {
+      showControlsAndResetTimer()
+    }
+  }, INACTIVITY_TIMEOUT)
+}
+
+function handleActivity() {
+  if (!isPinching.value || !isControlsVisible.value) {
+    showControlsAndResetTimer()
+  }
+}
+
 function close() {
   emit('update:show', false)
   resetZoom()
+  if (inactivityTimer.value) {
+    clearTimeout(inactivityTimer.value)
+    inactivityTimer.value = null
+  }
 }
 
 function downloadImage() {
@@ -342,6 +375,8 @@ function handleFullscreenChange() {
 function handleKeyDown(event: KeyboardEvent) {
   if (!props.show) return
 
+  handleActivity()
+
   switch (event.key) {
     case 'ArrowLeft':
       if (!isPanning.value) previousImage()
@@ -372,6 +407,25 @@ function handleKeyDown(event: KeyboardEvent) {
   }
 }
 
+watch(
+  () => props.show,
+  (newValue) => {
+    if (newValue) {
+      isControlsVisible.value = true
+      resetZoom()
+      showControlsAndResetTimer()
+    } else {
+      if (inactivityTimer.value) {
+        clearTimeout(inactivityTimer.value)
+        inactivityTimer.value = null
+      }
+      if (isFullscreen.value && document.exitFullscreen) {
+        document.exitFullscreen()
+      }
+    }
+  },
+)
+
 watch(controlsBar, (newVal) => {
   if (newVal) {
     const updateHeight = () => {
@@ -394,6 +448,10 @@ onMounted(() => {
 onUnmounted(() => {
   document.removeEventListener('fullscreenchange', handleFullscreenChange)
   document.removeEventListener('keydown', handleKeyDown)
+
+  if (inactivityTimer.value) {
+    clearTimeout(inactivityTimer.value)
+  }
 
   if (isFullscreen.value && document.exitFullscreen) {
     document.exitFullscreen()
