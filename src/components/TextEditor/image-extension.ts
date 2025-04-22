@@ -5,7 +5,7 @@ import {
 } from '@tiptap/core'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
 import ImageNodeView from './ImageNodeView.vue'
-import { Plugin, Selection } from 'prosemirror-state'
+import { Plugin } from 'prosemirror-state'
 import { EditorView } from 'prosemirror-view'
 import { Node } from '@tiptap/pm/model'
 import fileToBase64 from '../../utils/file-to-base64'
@@ -46,6 +46,11 @@ declare module '@tiptap/core' {
        * Upload and insert an image
        */
       uploadImage: (file: File) => ReturnType
+
+      /**
+       * Select an image file using the file picker and upload it
+       */
+      selectAndUploadImage: () => ReturnType
     }
   }
 }
@@ -153,6 +158,23 @@ export default NodeExtension.create<ImageOptions>({
         ({ editor }) => {
           return uploadImage(file, editor.view, null, this.options)
         },
+
+      selectAndUploadImage:
+        () =>
+        ({ editor }) => {
+          const input = document.createElement('input')
+          input.type = 'file'
+          input.accept = 'image/*'
+          input.onchange = (event) => {
+            const target = event.target as HTMLInputElement
+            if (target.files && target.files.length) {
+              const file = target.files[0]
+              editor.commands.uploadImage(file)
+            }
+          }
+          input.click()
+          return true
+        },
     }
   },
 
@@ -216,7 +238,7 @@ export default NodeExtension.create<ImageOptions>({
             },
           },
 
-          handlePaste: (view, event, slice) => {
+          handlePaste: (view, event) => {
             if (!extensionThis.options.uploadFunction) {
               return false
             }
@@ -252,7 +274,7 @@ export default NodeExtension.create<ImageOptions>({
           },
         },
 
-        appendTransaction(transactions, oldState, newState) {
+        appendTransaction(transactions, _, newState) {
           const newImageNodes: { node: Node; pos: number }[] = []
 
           if (transactions.some((tr) => tr.docChanged)) {

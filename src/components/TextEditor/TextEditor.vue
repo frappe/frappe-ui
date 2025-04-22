@@ -27,8 +27,8 @@ import TableHeader from '@tiptap/extension-table-header'
 import TableRow from '@tiptap/extension-table-row'
 import ImageExtension from './image-extension'
 import ImageViewerExtension from './image-viewer-extension'
-import Video from './video-extension'
-import Link from '@tiptap/extension-link'
+import VideoExtension from './video-extension'
+import LinkExtension from './link-extension'
 import Typography from '@tiptap/extension-typography'
 import TextStyle from '@tiptap/extension-text-style'
 import Highlight from '@tiptap/extension-highlight'
@@ -41,6 +41,7 @@ import TextEditorFixedMenu from './TextEditorFixedMenu.vue'
 import TextEditorBubbleMenu from './TextEditorBubbleMenu.vue'
 import TextEditorFloatingMenu from './TextEditorFloatingMenu.vue'
 import EmojiExtension from './emoji-extension'
+import SlashCommands from './slash-commands-extension'
 import { detectMarkdown, markdownToHTML } from '../../utils/markdown'
 import { DOMParser } from 'prosemirror-model'
 
@@ -100,7 +101,7 @@ export default {
       type: Array,
       default: () => [],
     },
-    imageUploadFunction: {
+    uploadFunction: {
       type: Function,
       default: () => null,
     },
@@ -167,15 +168,16 @@ export default {
           },
         }).configure({ lowlight }),
         ImageExtension.configure({
-          uploadFunction: this.imageUploadFunction,
+          uploadFunction: this.uploadFunction,
         }),
         ImageViewerExtension,
-        Video,
-        Link.configure({
+        VideoExtension.configure({
+          uploadFunction: this.uploadFunction,
+        }),
+        LinkExtension.configure({
           openOnClick: false,
         }),
         Placeholder.configure({
-          showOnlyWhenEditable: false,
           placeholder:
             typeof this.placeholder === 'function'
               ? this.placeholder
@@ -183,6 +185,7 @@ export default {
         }),
         configureMention(this.mentions),
         EmojiExtension,
+        SlashCommands,
         ...(this.extensions || []),
       ],
       onUpdate: ({ editor }) => {
@@ -247,7 +250,7 @@ export default {
 }
 
 /* Placeholder */
-.ProseMirror:not(.ProseMirror-focused) p.is-editor-empty:first-child::before {
+.ProseMirror:not(.ProseMirror-focused) p.is-editor-empty::before {
   content: attr(data-placeholder);
   float: left;
   color: var(--ink-gray-4);
