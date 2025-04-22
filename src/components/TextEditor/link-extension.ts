@@ -21,9 +21,19 @@ export const LinkExtension = Link.extend({
         const { from, to } = state.selection
         const { doc } = state
 
+        // If there's no selection but cursor is within a link, extend the selection to the link
         if (from === to) {
-          return false
+          if (editor.isActive('link')) {
+            editor.chain().focus().extendMarkRange('link').run()
+          } else {
+            // No selection and not within a link
+            return false
+          }
         }
+
+        // Get the updated selection and position
+        const updatedSelection = editor.state.selection
+        const updatedTo = updatedSelection.to
 
         const existingHref = editor.getAttributes('link').href || ''
 
@@ -39,7 +49,7 @@ export const LinkExtension = Link.extend({
                 .focus()
                 .extendMarkRange('link')
                 .unsetLink()
-                .setTextSelection(to)
+                .setTextSelection(updatedTo)
                 .command(({ tr }) => {
                   tr.setStoredMarks([])
                   return true
@@ -53,13 +63,13 @@ export const LinkExtension = Link.extend({
               .focus()
               .extendMarkRange('link')
               .setLink({ href })
-              .setTextSelection(to)
+              .setTextSelection(updatedTo)
               .command(({ tr }) => {
                 tr.setStoredMarks([])
                 return true
               })
 
-            const posAfterLink = to
+            const posAfterLink = updatedTo
             const charAfter =
               posAfterLink < doc.content.size
                 ? doc.textBetween(posAfterLink, posAfterLink + 1)
