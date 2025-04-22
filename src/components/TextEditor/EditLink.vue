@@ -27,10 +27,12 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, useTemplateRef, defineEmits } from 'vue'
+import { onMounted, ref, useTemplateRef } from 'vue'
 import Button from '../Button/Button.vue'
 import TextInput from '../TextInput.vue'
 import Tooltip from '../Tooltip/Tooltip.vue'
+import LucideCheck from '~icons/lucide/check'
+import LucideX from '~icons/lucide/x'
 
 const props = defineProps<{
   show: boolean
