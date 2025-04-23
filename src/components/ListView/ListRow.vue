@@ -1,7 +1,16 @@
 <template>
   <component
     :is="list.options.getRowRoute ? 'router-link' : 'div'"
-    :class="{ 'cursor-pointer': isHoverable }"
+    :class="[
+      roundedClass,
+      isSelected || isActive ? 'bg-surface-gray-2' : '',
+      isHoverable ? 'cursor-pointer' : '',
+      isHoverable
+        ? isSelected || isActive
+          ? 'hover:bg-surface-gray-3'
+          : 'hover:bg-surface-menu-bar'
+        : '',
+    ]"
     class="flex flex-col transition-all duration-300 ease-in-out"
     v-bind="{
       to: list.options.getRowRoute ? list.options.getRowRoute(row) : undefined,
@@ -14,15 +23,6 @@
     >
       <div
         class="grid items-center space-x-4 px-2"
-        :class="[
-          roundedClass,
-          isSelected || isActive ? 'bg-surface-gray-2' : '',
-          isHoverable
-            ? isSelected || isActive
-              ? 'hover:bg-surface-gray-3'
-              : 'hover:bg-surface-menu-bar'
-            : '',
-        ]"
         :style="{
           height: rowHeight,
           gridTemplateColumns: getGridTemplateColumns(

@@ -66,6 +66,9 @@ let activeRow = ref(null)
 const emit = defineEmits(['update:selections', 'update:active-row'])
 
 watch(selections, (value) => {
+  if (selections.size) {
+    activeRow.value = null
+  }
   emit('update:selections', value)
 })
 
