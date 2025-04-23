@@ -187,6 +187,8 @@ watch(
     updatedEvent.toTime = newVal.toTime
     updatedEvent.fromDate = newVal.fromDate
     updatedEvent.toDate = newVal.toDate
+    updatedEvent.fromDateTime = newVal.fromDate + ' ' + newVal.fromTime
+    updatedEvent.toDateTime = newVal.toDate + ' ' + newVal.toTime
     calendarEvent.value = newVal
   },
   { deep: true },
