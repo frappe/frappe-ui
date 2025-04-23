@@ -1,7 +1,7 @@
 <template>
   <!-- Weekly and Daily Event Template  -->
   <div
-    class="h-min-[18px] rounded-lg p-2 transition-all duration-75"
+    class="h-min-[18px] rounded-lg transition-all duration-75"
     ref="eventRef"
     v-if="activeView !== 'Month'"
     v-bind="$attrs"
@@ -13,40 +13,45 @@
       mousedown: config.isEditMode && handleRepositionMouseDown,
     }"
   >
-    <div
-      class="relative flex h-full select-none items-start gap-2 overflow-hidden px-2"
-      :class="props.event.fromTime && ['border-l-2']"
-      :style="eventBorderStyle"
-    >
-      <div v-if="config.showIcon && eventIcons[props.event.type]">
-        <component
-          v-if="eventIcons[props.event.type]"
-          :is="eventIcons[props.event.type]"
-          class="h-4 w-4"
-        />
-      </div>
+    <div class="flex gap-1.5 h-full p-2 pl-1.5">
+      <div
+        v-if="props.event.fromTime"
+        class="h-full w-[2px] rounded shrink-0"
+        :style="eventBorderStyle"
+      />
+      <div
+        class="relative flex h-full select-none items-start gap-2 overflow-hidden"
+      >
+        <div v-if="config.showIcon && eventIcons[props.event.type]">
+          <component
+            v-if="eventIcons[props.event.type]"
+            :is="eventIcons[props.event.type]"
+            class="h-4 w-4"
+          />
+        </div>
 
-      <div class="flex w-fit flex-col gap-0.5 overflow-hidden">
-        <p
-          ref="eventTitleRef"
-          class="text-sm font-medium"
-          :class="lineClampClass"
-        >
-          {{ props.event.title || 'New Event' }}
-        </p>
-        <p
-          ref="eventTimeRef"
-          class="text-xs font-normal"
-          v-if="!props.event.isFullDay"
-        >
-          {{
-            formattedDuration(
-              updatedEvent.fromTime,
-              updatedEvent.toTime,
-              config.timeFormat,
-            )
-          }}
-        </p>
+        <div class="flex w-fit flex-col gap-0.5 overflow-hidden">
+          <p
+            ref="eventTitleRef"
+            class="text-sm font-medium"
+            :class="lineClampClass"
+          >
+            {{ props.event.title || 'New Event' }}
+          </p>
+          <p
+            ref="eventTimeRef"
+            class="text-xs font-normal"
+            v-if="!props.event.isFullDay"
+          >
+            {{
+              formattedDuration(
+                updatedEvent.fromTime,
+                updatedEvent.toTime,
+                config.timeFormat,
+              )
+            }}
+          </p>
+        </div>
       </div>
     </div>
     <div
@@ -60,7 +65,7 @@
   <!-- Monthly Event Template -->
   <div
     v-else
-    class="h-min-[18px] rounded-lg p-2 transition-all duration-75"
+    class="flex gap-1.5 h-min-[18px] rounded-lg p-2 transition-all duration-75"
     ref="eventRef"
     v-bind="$attrs"
     @dblclick.prevent="handleEventEdit($event)"
@@ -68,9 +73,12 @@
     :style="eventBgStyle"
   >
     <div
-      class="relative flex h-full select-none items-start gap-2 overflow-hidden px-2"
-      :class="props.event.fromTime && ['border-l-2']"
+      v-if="props.event.fromTime"
+      class="w-[2px] rounded shrink-0"
       :style="eventBorderStyle"
+    />
+    <div
+      class="relative flex h-full select-none items-start gap-2 overflow-hidden"
     >
       <div v-if="config.showIcon && eventIcons[props.event.type]">
         <component
@@ -269,7 +277,7 @@ const eventBorderStyle = computed(() => {
       getContrastingSameColor(props.event.color)
   }
 
-  return { borderColor }
+  return { backgroundColor: borderColor }
 })
 
 const eventTitleRef = ref(null)
