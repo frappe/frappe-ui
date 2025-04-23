@@ -228,15 +228,13 @@ const setEventStyles = computed(() => {
   let width =
     isResizing.value || isRepositioning.value
       ? '100%'
-      : `${80 - hallNumber * 20}%`
+      : `${93 - hallNumber * 20}%`
   let left =
     isResizing.value || isRepositioning.value ? '0' : `${hallNumber * 20}%`
   let zIndex =
     isResizing.value || isRepositioning.value
       ? 100
       : (props.event.idx || 1) * hallNumber + 1
-  // border: 1px solid #fff;
-  let border = hallNumber >= 1 ? '1px solid #fff' : ''
 
   return {
     height,
@@ -245,8 +243,6 @@ const setEventStyles = computed(() => {
     left,
     width,
     transform: `translate(${state.xAxis}px, ${state.yAxis}px)`,
-    borderLeft: border,
-    borderTop: border,
   }
 })
 
