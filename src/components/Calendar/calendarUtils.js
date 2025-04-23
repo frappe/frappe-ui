@@ -305,6 +305,11 @@ export const colorMap = {
 export function formattedDuration(from_time, to_time, timeFormat) {
   from_time = formatTime(from_time, timeFormat)
   to_time = formatTime(to_time, timeFormat)
+
+  if (from_time.split(' ')[1] === to_time.split(' ')[1]) {
+    from_time = from_time.split(' ')[0]
+  }
+
   return from_time + ' - ' + to_time
 }
 
