@@ -399,6 +399,12 @@ function handleRepositionMouseDown(e) {
     }
     if (isEventUpdated.value) {
       calendarEvent.value.date = updatedEvent.date
+      calendarEvent.value.fromDate = updatedEvent.date
+      calendarEvent.value.toDate = updatedEvent.date
+      calendarEvent.value.fromDateTime =
+        updatedEvent.date + ' ' + updatedEvent.fromTime
+      calendarEvent.value.toDateTime =
+        updatedEvent.date + ' ' + updatedEvent.toTime
       calendarEvent.value.fromTime = updatedEvent.fromTime
       calendarEvent.value.toTime = updatedEvent.toTime
       calendarActions.updateEventState(calendarEvent.value)

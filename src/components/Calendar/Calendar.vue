@@ -178,13 +178,10 @@ const parseEvents = computed(() => {
     props.events?.map((event) => {
       const { fromDate: fromDateTime, toDate: toDateTime, ...rest } = event
       const date = dayjs(fromDateTime).format('YYYY-MM-DD')
-
-      if (event.isFullDay) return { ...rest, date }
-
-      const fromTime = dayjs(fromDateTime).format('HH:mm:ss')
-      const toTime = dayjs(toDateTime).format('HH:mm:ss')
       const fromDate = date
       const toDate = dayjs(toDateTime).format('YYYY-MM-DD')
+      const fromTime = dayjs(fromDateTime).format('HH:mm:ss')
+      const toTime = dayjs(toDateTime).format('HH:mm:ss')
 
       return {
         ...rest,
