@@ -26,14 +26,17 @@
         />
       </div>
 
-      <div
-        class="flex w-fit flex-col overflow-hidden whitespace-nowrap text-gray-800"
-      >
-        <p class="text-ellipsis text-sm font-medium truncate">
+      <div class="flex w-fit flex-col gap-0.5 overflow-hidden">
+        <p
+          ref="eventTitleRef"
+          class="text-sm font-medium"
+          :class="lineClampClass"
+        >
           {{ props.event.title || 'New Event' }}
         </p>
         <p
-          class="text-ellipsis text-xs font-normal"
+          ref="eventTimeRef"
+          class="text-xs font-normal"
           v-if="!props.event.isFullDay"
         >
           {{
@@ -267,6 +270,28 @@ const eventBorderStyle = computed(() => {
   }
 
   return { borderColor }
+})
+
+const eventTitleRef = ref(null)
+const eventTimeRef = ref(null)
+
+const lineClampClass = computed(() => {
+  if (activeView.value === 'Month') return
+  if (!eventRef.value || !eventTitleRef.value || !eventTimeRef.value) return
+  if (!props.event.from_time && !props.event.to_time) return
+
+  const containerHeight = eventRef.value.clientHeight
+  const subtitleHeight = eventTimeRef.value.offsetHeight
+  const availableHeightForTitle = containerHeight - subtitleHeight - 8 // margin
+
+  const computedStyle = getComputedStyle(eventTitleRef.value)
+  const lineHeight = parseFloat(computedStyle.lineHeight)
+
+  const maxLines = Math.max(1, Math.floor(availableHeightForTitle / lineHeight))
+
+  // Clamp between 1 and 6 lines (Tailwind supports line-clamp-1 to line-clamp-6 by default)
+  const clampValue = Math.min(maxLines, 6)
+  return `line-clamp-${clampValue}`
 })
 
 const eventRef = ref(null)
