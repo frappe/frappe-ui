@@ -148,7 +148,6 @@ const onRowClick = (row, e) => {
   if (list.value.options.onRowClick) list.value.options.onRowClick(row, e)
   if (list.value.activeRow.value === row.name) {
     list.value.activeRow.value = null
-    isActive.value = false
   } else {
     list.value.activeRow.value = row.name
   }

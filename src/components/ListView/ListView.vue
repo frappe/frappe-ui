@@ -67,15 +67,10 @@ const emit = defineEmits(['update:selections', 'update:active-row'])
 
 watch(selections, (value) => {
   emit('update:selections', value)
-  activeRow.value = null
 })
 
 watch(activeRow, (value) => {
-  if (selections.size) {
-    activeRow.value = null
-  } else {
-    emit('update:active-row', value)
-  }
+  emit('update:active-row', value)
 })
 
 let _options = computed(() => {
