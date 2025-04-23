@@ -257,60 +257,60 @@ export const twentyFourHoursFormat = [
 
 export const colorMap = {
   blue: {
-    bg_hex: '#ebf8ff',
-    border_hex: '#3b82f6',
+    bgHex: '#ebf8ff',
+    borderHex: '#3b82f6',
   },
   green: {
-    bg_hex: '#bbf7d0',
-    border_hex: '#22c55e',
+    bgHex: '#bbf7d0',
+    borderHex: '#22c55e',
   },
   red: {
-    bg_hex: '#fee2e2',
-    border_hex: '#ef4444',
+    bgHex: '#fee2e2',
+    borderHex: '#ef4444',
   },
   orange: {
-    bg_hex: '#ffedd5',
-    border_hex: '#f97316',
+    bgHex: '#ffedd5',
+    borderHex: '#f97316',
   },
   yellow: {
-    bg_hex: '#fefcbf',
-    border_hex: '#eab308',
+    bgHex: '#fefcbf',
+    borderHex: '#eab308',
   },
   teal: {
-    bg_hex: '#cffafe',
-    border_hex: '#14b8a6',
+    bgHex: '#cffafe',
+    borderHex: '#14b8a6',
   },
   violet: {
-    bg_hex: '#e0e7ff',
-    border_hex: '#8b5cf6',
+    bgHex: '#e0e7ff',
+    borderHex: '#8b5cf6',
   },
   cyan: {
-    bg_hex: '#cffafe',
-    border_hex: '#06b6d4',
+    bgHex: '#cffafe',
+    borderHex: '#06b6d4',
   },
   purple: {
-    bg_hex: '#f3e8ff',
-    border_hex: '#a855f7',
+    bgHex: '#f3e8ff',
+    borderHex: '#a855f7',
   },
   pink: {
-    bg_hex: '#fbcfe8',
-    border_hex: '#ec4899',
+    bgHex: '#fbcfe8',
+    borderHex: '#ec4899',
   },
   amber: {
-    bg_hex: '#fefcbf',
-    border_hex: '#f59e0b',
+    bgHex: '#fefcbf',
+    borderHex: '#f59e0b',
   },
 }
 
-export function formattedDuration(from_time, to_time, timeFormat) {
-  from_time = formatTime(from_time, timeFormat)
-  to_time = formatTime(to_time, timeFormat)
+export function formattedDuration(fromTime, toTime, timeFormat) {
+  fromTime = formatTime(fromTime, timeFormat)
+  toTime = formatTime(toTime, timeFormat)
 
-  if (from_time.split(' ')[1] === to_time.split(' ')[1]) {
-    from_time = from_time.split(' ')[0]
+  if (fromTime.split(' ')[1] === toTime.split(' ')[1]) {
+    fromTime = fromTime.split(' ')[0]
   }
 
-  return from_time + ' - ' + to_time
+  return fromTime + ' - ' + toTime
 }
 
 export function formatTime(time, format) {

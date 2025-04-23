@@ -17,8 +17,8 @@ export default function useCalendarData(events, view = '') {
       for (let [key, value] of Object.entries(groupByDate)) {
         value = value.filter((event) => !event.isFullDay)
         value.forEach((task) => {
-          task.startTime = calculateMinutes(task.from_time)
-          task.endTime = calculateMinutes(task.to_time)
+          task.startTime = calculateMinutes(task.fromTime)
+          task.endTime = calculateMinutes(task.toTime)
         })
         let sortedEvents = value.sort((a, b) => a.startTime - b.startTime)
         sortedArray[key] = findOverlappingEventsCount(sortedEvents)
@@ -41,11 +41,11 @@ function sortMonthlyEvents(events) {
   let timedEvents = events
     .filter((event) => !event.isFullDay)
     .sort((a, b) =>
-      a.from_time !== b.from_time
-        ? calculateMinutes(a.from_time) > calculateMinutes(b.from_time)
+      a.fromTime !== b.fromTime
+        ? calculateMinutes(a.fromTime) > calculateMinutes(b.fromTime)
           ? 1
           : -1
-        : calculateMinutes(a.to_time) > calculateMinutes(b.to_time)
+        : calculateMinutes(a.toTime) > calculateMinutes(b.toTime)
           ? 1
           : -1,
     )
