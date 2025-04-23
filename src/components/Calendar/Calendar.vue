@@ -86,11 +86,7 @@
 import { computed, onMounted, onUnmounted, provide, ref } from 'vue'
 import { Button } from '../Button'
 import { TabButtons } from '../TabButtons'
-import {
-  getCalendarDates,
-  monthList,
-  parseDate,
-} from './calendarUtils'
+import { getCalendarDates, monthList, handleSeconds } from './calendarUtils'
 import { dayjs } from "../../utils/dayjs"
 import CalendarMonthly from './CalendarMonthly.vue'
 import CalendarWeekly from './CalendarWeekly.vue'
@@ -180,14 +176,26 @@ provide('config', overrideConfig)
 const parseEvents = computed(() => {
   return (
     props.events?.map((event) => {
-      const { fromDate, toDate, ...rest } = event
-      const date = parseDate(fromDate)
-      const from_time = dayjs(fromDate).format("HH:mm:ss")
-      const to_time = dayjs(toDate).format("HH:mm:ss")
-      if (event.isFullDay) {
-        return { ...rest, date }
+      const { fromDate: fromDateTime, toDate: toDateTime, ...rest } = event
+      const date = dayjs(fromDateTime).format('YYYY-MM-DD')
+
+      if (event.isFullDay) return { ...rest, date }
+
+      const fromTime = dayjs(fromDateTime).format('HH:mm:ss')
+      const toTime = dayjs(toDateTime).format('HH:mm:ss')
+      const fromDate = date
+      const toDate = dayjs(toDateTime).format('YYYY-MM-DD')
+
+      return {
+        ...rest,
+        date,
+        fromDateTime,
+        toDateTime,
+        fromDate,
+        toDate,
+        fromTime,
+        toTime,
       }
-      return { ...rest, date, from_time, to_time }
     }) || []
   )
 })
@@ -196,6 +204,13 @@ const events = ref(parseEvents.value)
 function reloadEvents() {
   events.value = parseEvents.value
 }
+
+events.value.forEach((event) => {
+  if (!event.fromTime || !event.toTime) return
+
+  event.fromTime = handleSeconds(event.fromTime)
+  event.toTime = handleSeconds(event.toTime)
+})
 
 const { showEventModal, newEvent, openNewEventModal } = useEventModal()
 
@@ -211,16 +226,16 @@ provide('calendarActions', {
 // CRUD actions on an event
 function createNewEvent(event) {
   events.value.push(event)
-  event.fromDate = event.date + ' ' + event.from_time
-  event.toDate = event.date + ' ' + event.to_time
+  event.fromDateTime = event.fromDate + ' ' + event.fromTime
+  event.toDateTime = event.toDate + ' ' + event.toTime
   emit('create', event)
 }
 
 function updateEventState(event) {
   const eventID = event.id
   let eventIndex = events.value.findIndex((e) => e.id === eventID)
-  event.fromDate = event.date + ' ' + event.from_time
-  event.toDate = event.date + ' ' + event.to_time
+  event.fromDateTime = event.fromDate + ' ' + event.fromTime
+  event.toDateTime = event.toDate + ' ' + event.toTime
   events.value[eventIndex] = event
   emit('update', event)
 }

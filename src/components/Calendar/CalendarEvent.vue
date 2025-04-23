@@ -15,7 +15,7 @@
   >
     <div
       class="relative flex h-full select-none items-start gap-2 overflow-hidden px-2"
-      :class="props.event.from_time && ['border-l-2']"
+      :class="props.event.fromTime && ['border-l-2']"
       :style="eventBorderStyle"
     >
       <div v-if="config.showIcon && eventIcons[props.event.type]">
@@ -41,8 +41,8 @@
         >
           {{
             formattedDuration(
-              updatedEvent.from_time,
-              updatedEvent.to_time,
+              updatedEvent.fromTime,
+              updatedEvent.toTime,
               config.timeFormat,
             )
           }}
@@ -69,7 +69,7 @@
   >
     <div
       class="relative flex h-full select-none items-start gap-2 overflow-hidden px-2"
-      :class="props.event.from_time && ['border-l-2']"
+      :class="props.event.fromTime && ['border-l-2']"
       :style="eventBorderStyle"
     >
       <div v-if="config.showIcon && eventIcons[props.event.type]">
@@ -86,11 +86,11 @@
         <p class="text-sm font-medium truncate">
           {{ props.event.title || 'New Event' }}
         </p>
-        <p v-if="props.event.from_time" class="text-xs font-normal">
+        <p v-if="props.event.fromTime" class="text-xs font-normal">
           {{
             formattedDuration(
-              updatedEvent.from_time,
-              updatedEvent.to_time,
+              updatedEvent.fromTime,
+              updatedEvent.toTime,
               config.timeFormat,
             )
           }}
@@ -183,8 +183,10 @@ const updatedEvent = reactive({
 watch(
   () => props.event,
   (newVal) => {
-    updatedEvent.from_time = newVal.from_time
-    updatedEvent.to_time = newVal.to_time
+    updatedEvent.fromTime = newVal.fromTime
+    updatedEvent.toTime = newVal.toTime
+    updatedEvent.fromDate = newVal.fromDate
+    updatedEvent.toDate = newVal.toDate
     calendarEvent.value = newVal
   },
   { deep: true },
@@ -192,7 +194,7 @@ watch(
 
 const eventIcons = config.eventIcons
 const minuteHeight = config.hourHeight / 60
-const height_15_min = minuteHeight * 15
+const height15Min = minuteHeight * 15
 
 const state = reactive({
   xAxis: 0,
@@ -210,8 +212,8 @@ const setEventStyles = computed(() => {
   }
 
   let diff = calculateDiff(
-    calendarEvent.value.from_time,
-    calendarEvent.value.to_time,
+    calendarEvent.value.fromTime,
+    calendarEvent.value.toTime,
   )
   let height = diff * minuteHeight
   if (height < heightThreshold) {
@@ -219,7 +221,7 @@ const setEventStyles = computed(() => {
   }
   height += 'px'
 
-  let top = calculateMinutes(calendarEvent.value.from_time) * minuteHeight
+  let top = calculateMinutes(calendarEvent.value.fromTime) * minuteHeight
   if (activeView.value === 'Day') {
     top += config.redundantCellHeight
   }
@@ -250,7 +252,7 @@ const eventBgStyle = computed(() => {
   let backgroundColor = '#e4faeb'
 
   if (props.event.color) {
-    backgroundColor = colorMap[props.event.color]?.bg_hex || props.event.color
+    backgroundColor = colorMap[props.event.color]?.bgHex || props.event.color
   }
 
   return { backgroundColor, color: getContrastingSameColor(backgroundColor) }
@@ -261,7 +263,7 @@ const eventBorderStyle = computed(() => {
 
   if (props.event.color) {
     borderColor =
-      colorMap[props.event.color]?.border_hex ||
+      colorMap[props.event.color]?.borderHex ||
       getContrastingSameColor(props.event.color)
   }
 
@@ -274,7 +276,7 @@ const eventTimeRef = ref(null)
 const lineClampClass = computed(() => {
   if (activeView.value === 'Month') return
   if (!eventRef.value || !eventTitleRef.value || !eventTimeRef.value) return
-  if (!props.event.from_time && !props.event.to_time) return
+  if (!props.event.fromTime && !props.event.toTime) return
 
   const containerHeight = eventRef.value.clientHeight
   const subtitleHeight = eventTimeRef.value.offsetHeight
@@ -308,7 +310,7 @@ const isEventUpdated = ref(false)
 function newEventEndTime(newHeight) {
   let newEndTime =
     parseFloat(newHeight) / minuteHeight +
-    calculateMinutes(calendarEvent.value.from_time)
+    calculateMinutes(calendarEvent.value.fromTime)
   newEndTime = Math.floor(newEndTime)
   if (newEndTime > 1440) {
     newEndTime = 1440
@@ -321,7 +323,7 @@ function handleResizeMouseDown(e) {
   isResizing.value = true
   isRepositioning.value = false
 
-  let oldTime = calendarEvent.value.to_time
+  let oldTime = calendarEvent.value.toTime
   window.addEventListener('mousemove', resize)
   window.addEventListener('mouseup', stopResize, { once: true })
 
@@ -330,16 +332,16 @@ function handleResizeMouseDown(e) {
     // difference between where mouse is and where event's top is, to find the new height
     let diffX = e.clientY - eventRef.value.getBoundingClientRect().top
     eventRef.value.style.height =
-      Math.round(diffX / height_15_min) * height_15_min + 'px'
+      Math.round(diffX / height15Min) * height15Min + 'px'
 
     eventRef.value.style.width = '100%'
-    updatedEvent.to_time = newEventEndTime(eventRef.value.style.height)
-    calendarEvent.value.to_time = newEventEndTime(eventRef.value.style.height)
+    updatedEvent.toTime = newEventEndTime(eventRef.value.style.height)
+    calendarEvent.value.toTime = newEventEndTime(eventRef.value.style.height)
   }
 
   function stopResize() {
     isResizing.value = false
-    if (oldTime !== calendarEvent.value.to_time) {
+    if (oldTime !== calendarEvent.value.toTime) {
       calendarActions.updateEventState(calendarEvent.value)
     }
 
@@ -373,8 +375,8 @@ function handleRepositionMouseDown(e) {
     if (!props.event.isFullDay) handleVerticalMovement(e.clientY, prevY, rect)
 
     if (
-      calendarEvent.value.from_time !== updatedEvent.from_time ||
-      calendarEvent.value.to_time !== updatedEvent.to_time
+      calendarEvent.value.fromTime !== updatedEvent.fromTime ||
+      calendarEvent.value.toTime !== updatedEvent.toTime
     ) {
       isEventUpdated.value = true
     } else {
@@ -396,8 +398,8 @@ function handleRepositionMouseDown(e) {
     }
     if (isEventUpdated.value) {
       calendarEvent.value.date = updatedEvent.date
-      calendarEvent.value.from_time = updatedEvent.from_time
-      calendarEvent.value.to_time = updatedEvent.to_time
+      calendarEvent.value.fromTime = updatedEvent.fromTime
+      calendarEvent.value.toTime = updatedEvent.toTime
       calendarActions.updateEventState(calendarEvent.value)
       isEventUpdated.value = false
       state.xAxis = 0
@@ -465,32 +467,32 @@ function handleVerticalMovement(clientY, prevY, rect) {
     diffY = parentBottom - rect.bottom
   }
 
-  diffY = Math.round(diffY / height_15_min) * height_15_min
+  diffY = Math.round(diffY / height15Min) * height15Min
   state.yAxis = diffY
 
-  updatedEvent.from_time = convertMinutesToHours(
-    calculateMinutes(calendarEvent.value.from_time) +
+  updatedEvent.fromTime = convertMinutesToHours(
+    calculateMinutes(calendarEvent.value.fromTime) +
       Math.round(diffY / minuteHeight),
   )
-  updatedEvent.to_time = convertMinutesToHours(
-    calculateMinutes(calendarEvent.value.to_time) +
+  updatedEvent.toTime = convertMinutesToHours(
+    calculateMinutes(calendarEvent.value.toTime) +
       Math.round(diffY / minuteHeight),
   )
   handleTimeConstraints()
 }
 
 function handleTimeConstraints() {
-  if (updatedEvent.from_time < '00:00:00') {
-    updatedEvent.from_time = '00:00:00'
+  if (updatedEvent.fromTime < '00:00:00') {
+    updatedEvent.fromTime = '00:00:00'
   }
-  if (updatedEvent.from_time > '24:00:00') {
-    updatedEvent.from_time = '24:00:00'
+  if (updatedEvent.fromTime > '24:00:00') {
+    updatedEvent.fromTime = '24:00:00'
   }
-  if (updatedEvent.to_time < '00:00:00') {
-    updatedEvent.to_time = '00:00:00'
+  if (updatedEvent.toTime < '00:00:00') {
+    updatedEvent.toTime = '00:00:00'
   }
-  if (updatedEvent.to_time > '24:00:00') {
-    updatedEvent.to_time = '24:00:00'
+  if (updatedEvent.toTime > '24:00:00') {
+    updatedEvent.toTime = '24:00:00'
   }
 }
 

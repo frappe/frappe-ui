@@ -30,11 +30,11 @@
         </div>
         <div
           class="flex items-center gap-2"
-          v-if="calendarEvent.from_time && calendarEvent.to_time"
+          v-if="calendarEvent.fromTime && calendarEvent.toTime"
         >
           <FeatherIcon name="clock" class="h-4 w-4" />
           <span class="text-sm font-normal">
-            {{ calendarEvent.from_time }} - {{ calendarEvent.to_time }}
+            {{ calendarEvent.fromTime }} - {{ calendarEvent.toTime }}
           </span>
         </div>
         <div class="flex items-center gap-2" v-if="calendarEvent.venue">
