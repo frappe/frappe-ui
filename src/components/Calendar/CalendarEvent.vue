@@ -5,12 +5,8 @@
     ref="eventRef"
     v-if="activeView !== 'Month'"
     v-bind="$attrs"
-    :class="[
-      colorMap[props.event?.color]?.background_color || 'bg-green-100',
-      'shadow-lg',
-      opened && '!z-20 drop-shadow-xl',
-    ]"
-    :style="setEventStyles"
+    :class="['shadow-lg', opened && '!z-20 drop-shadow-xl']"
+    :style="[setEventStyles, eventBgStyle]"
     @dblclick.prevent="handleEventEdit($event)"
     @click.prevent="handleEventClick($event)"
     v-on="{
@@ -19,18 +15,14 @@
   >
     <div
       class="relative flex h-full select-none items-start gap-2 overflow-hidden px-2"
-      :class="
-        props.event.from_time && [
-          'border-l-2',
-          colorMap[props.event?.color]?.border_color || 'border-green-600',
-        ]
-      "
+      :class="props.event.from_time && ['border-l-2']"
+      :style="eventBorderStyle"
     >
       <div v-if="config.showIcon && eventIcons[props.event.type]">
         <component
           v-if="eventIcons[props.event.type]"
           :is="eventIcons[props.event.type]"
-          class="h-4 w-4 text-black"
+          class="h-4 w-4"
         />
       </div>
 
@@ -68,18 +60,14 @@
     class="h-min-[18px] rounded-lg p-2 transition-all duration-75"
     ref="eventRef"
     v-bind="$attrs"
-    :class="[colorMap[props.event?.color]?.background_color || 'bg-green-100']"
     @dblclick.prevent="handleEventEdit($event)"
     @click="handleEventClick($event)"
+    :style="eventBgStyle"
   >
     <div
       class="relative flex h-full select-none items-start gap-2 overflow-hidden px-2"
-      :class="
-        props.event.from_time && [
-          'border-l-2',
-          colorMap[props.event?.color]?.border_color || 'border-green-600',
-        ]
-      "
+      :class="props.event.from_time && ['border-l-2']"
+      :style="eventBorderStyle"
     >
       <div v-if="config.showIcon && eventIcons[props.event.type]">
         <component
@@ -90,7 +78,7 @@
       </div>
 
       <div
-        class="flex w-fit flex-col text-start overflow-hidden whitespace-nowrap text-gray-800"
+        class="flex w-fit flex-col text-start overflow-hidden whitespace-nowrap"
       >
         <p class="text-sm font-medium truncate">
           {{ props.event.title || 'New Event' }}
@@ -150,6 +138,7 @@ import {
   parseDate,
   colorMap,
   formattedDuration,
+  getContrastingSameColor,
 } from './calendarUtils'
 
 const props = defineProps({
@@ -256,6 +245,28 @@ const setEventStyles = computed(() => {
     borderLeft: border,
     borderTop: border,
   }
+})
+
+const eventBgStyle = computed(() => {
+  let backgroundColor = '#e4faeb'
+
+  if (props.event.color) {
+    backgroundColor = colorMap[props.event.color]?.bg_hex || props.event.color
+  }
+
+  return { backgroundColor, color: getContrastingSameColor(backgroundColor) }
+})
+
+const eventBorderStyle = computed(() => {
+  let borderColor = '#278f5e'
+
+  if (props.event.color) {
+    borderColor =
+      colorMap[props.event.color]?.border_hex ||
+      getContrastingSameColor(props.event.color)
+  }
+
+  return { borderColor }
 })
 
 const eventRef = ref(null)

@@ -257,48 +257,48 @@ export const twentyFourHoursFormat = [
 
 export const colorMap = {
   blue: {
-    background_color: 'bg-blue-100',
-    border_color: 'border-blue-600',
+    bg_hex: '#ebf8ff',
+    border_hex: '#3b82f6',
   },
   green: {
-    background_color: 'bg-green-100',
-    border_color: 'border-green-600',
+    bg_hex: '#bbf7d0',
+    border_hex: '#22c55e',
   },
   red: {
-    background_color: 'bg-red-200',
-    border_color: 'border-red-600',
+    bg_hex: '#fee2e2',
+    border_hex: '#ef4444',
   },
   orange: {
-    background_color: 'bg-orange-100',
-    border_color: 'border-orange-600',
+    bg_hex: '#ffedd5',
+    border_hex: '#f97316',
   },
   yellow: {
-    background_color: 'bg-yellow-100',
-    border_color: 'border-yellow-600',
+    bg_hex: '#fefcbf',
+    border_hex: '#eab308',
   },
   teal: {
-    background_color: 'bg-teal-100',
-    border_color: 'border-teal-600',
+    bg_hex: '#cffafe',
+    border_hex: '#14b8a6',
   },
   violet: {
-    background_color: 'bg-violet-100',
-    border_color: 'border-violet-600',
+    bg_hex: '#e0e7ff',
+    border_hex: '#8b5cf6',
   },
   cyan: {
-    background_color: 'bg-cyan-100',
-    border_color: 'border-cyan-600',
+    bg_hex: '#cffafe',
+    border_hex: '#06b6d4',
   },
   purple: {
-    background_color: 'bg-purple-100',
-    border_color: 'border-purple-600',
+    bg_hex: '#f3e8ff',
+    border_hex: '#a855f7',
   },
   pink: {
-    background_color: 'bg-pink-100',
-    border_color: 'border-pink-600',
+    bg_hex: '#fbcfe8',
+    border_hex: '#ec4899',
   },
   amber: {
-    background_color: 'bg-amber-100',
-    border_color: 'border-amber-600',
+    bg_hex: '#fefcbf',
+    border_hex: '#f59e0b',
   },
 }
 
@@ -328,4 +328,83 @@ export function formatTime(time, format) {
     time = `${hours}:${minutes} ${ampm}`
   }
   return time
+}
+
+export function hexToHSL(hex) {
+  // Remove the '#' if present
+  hex = hex.replace(/^#/, '')
+  if (hex.length === 3) {
+    hex = hex
+      .split('')
+      .map((x) => x + x)
+      .join('')
+  }
+
+  const r = parseInt(hex.substr(0, 2), 16) / 255
+  const g = parseInt(hex.substr(2, 2), 16) / 255
+  const b = parseInt(hex.substr(4, 2), 16) / 255
+
+  const max = Math.max(r, g, b),
+    min = Math.min(r, g, b)
+  let h,
+    s,
+    l = (max + min) / 2
+
+  if (max === min) {
+    h = s = 0 // achromatic
+  } else {
+    const d = max - min
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min)
+    switch (max) {
+      case r:
+        h = (g - b) / d + (g < b ? 6 : 0)
+        break
+      case g:
+        h = (b - r) / d + 2
+        break
+      case b:
+        h = (r - g) / d + 4
+        break
+    }
+    h *= 60
+  }
+
+  return { h, s: s * 100, l: l * 100 }
+}
+
+export function hslToHex(h, s, l) {
+  s /= 100
+  l /= 100
+
+  const c = (1 - Math.abs(2 * l - 1)) * s
+  const x = c * (1 - Math.abs(((h / 60) % 2) - 1))
+  const m = l - c / 2
+
+  let [r, g, b] = [0, 0, 0]
+
+  if (0 <= h && h < 60) [r, g, b] = [c, x, 0]
+  else if (60 <= h && h < 120) [r, g, b] = [x, c, 0]
+  else if (120 <= h && h < 180) [r, g, b] = [0, c, x]
+  else if (180 <= h && h < 240) [r, g, b] = [0, x, c]
+  else if (240 <= h && h < 300) [r, g, b] = [x, 0, c]
+  else if (300 <= h && h < 360) [r, g, b] = [c, 0, x]
+
+  r = Math.round((r + m) * 255)
+    .toString(16)
+    .padStart(2, '0')
+  g = Math.round((g + m) * 255)
+    .toString(16)
+    .padStart(2, '0')
+  b = Math.round((b + m) * 255)
+    .toString(16)
+    .padStart(2, '0')
+
+  return `#${r}${g}${b}`
+}
+
+export function getContrastingSameColor(hex) {
+  const hsl = hexToHSL(hex)
+  // Flip lightness: if it's dark, make it light and vice versa
+  hsl.l = hsl.l > 50 ? 25 : 80
+  return hslToHex(hsl.h, hsl.s, hsl.l)
 }
