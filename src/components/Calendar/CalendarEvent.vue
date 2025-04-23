@@ -275,6 +275,7 @@ const eventTimeRef = ref(null)
 
 const lineClampClass = computed(() => {
   if (activeView.value === 'Month') return
+  if (props.event.isFullDay) return 'line-clamp-1'
   if (!eventRef.value || !eventTitleRef.value || !eventTimeRef.value) return
   if (!props.event.fromTime && !props.event.toTime) return
 
