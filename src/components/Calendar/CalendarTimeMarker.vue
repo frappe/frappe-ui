@@ -4,15 +4,19 @@
     :style="setCurrentTime"
     v-if="new Date(date).toDateString() === new Date().toDateString()"
   >
-    <div class="current-time relative h-0.5 bg-red-600" />
+    <Tooltip :text="dayjs().format('ddd, MMM D, YYYY h:mm a')">
+      <div class="current-time relative h-0.5 bg-red-600" />
+    </Tooltip>
   </div>
 </template>
 <script setup>
+import Tooltip from '../Tooltip/Tooltip.vue'
+import { dayjs } from '../../utils/dayjs'
 import { computed, inject } from 'vue'
 
 const props = defineProps({
   date: {
-    type: String,
+    type: [String, Date],
     required: true,
   },
   redundantCellHeight: {
