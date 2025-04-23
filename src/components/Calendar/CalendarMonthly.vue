@@ -27,13 +27,13 @@
       >
         <div
           class="flex justify-center font-normal"
-          :class="currentMonthDate(date) ? 'text-gray-700' : 'text-gray-200'"
+          :class="isCurrentMonth(date) ? 'text-gray-700' : 'text-gray-200'"
         >
           <div
             class="flex gap-1 w-full flex-col items-center text-xs text-right"
           >
             <span
-              v-if="currentMonthDate(date)"
+              v-if="isCurrentMonth(date)"
               class="z-10 w-full flex justify-between items-center"
               :class="[
                 date.toDateString() === new Date().toDateString()
@@ -43,18 +43,28 @@
             >
               <div></div>
               <div
+                class="cursor-pointer"
                 :class="[
                   date.toDateString() === new Date().toDateString()
                     ? 'bg-surface-gray-7 text-ink-white rounded-sm p-[2px]'
                     : 'bg-surface-white text-ink-gray-6',
                 ]"
+                @click="calendarActions.updateActiveView('Day', date)"
               >
                 {{ date.getDate() }}
               </div>
             </span>
             <span
               v-else
-              class="z-10 w-full bg-surface-white py-1 px-2 text-ink-gray-4"
+              class="z-10 w-full bg-surface-white py-1 px-2 text-ink-gray-4 cursor-pointer"
+              @click="
+                calendarActions.updateActiveView(
+                  'Day',
+                  date,
+                  isPreviousMonth(date),
+                  isNextMonth(date),
+                )
+              "
             >
               {{ parseDateEventPopupFormat(date, (showDay = false)) }}
             </span>
@@ -133,8 +143,24 @@ const maxEventsInCell = computed(() =>
   props.currentMonthDates.length > 35 ? 1 : 2,
 )
 
-function currentMonthDate(date) {
+function isCurrentMonth(date) {
   return date.getMonth() === props.currentMonth
+}
+
+function isPreviousMonth(date) {
+  let previousMonth = false
+  if (date.getMonth() === props.currentMonth - 1) {
+    previousMonth = true
+  }
+  return previousMonth
+}
+
+function isNextMonth(date) {
+  let nextMonth = false
+  if (date.getMonth() === props.currentMonth + 1) {
+    nextMonth = true
+  }
+  return nextMonth
 }
 
 const calendarActions = inject('calendarActions')

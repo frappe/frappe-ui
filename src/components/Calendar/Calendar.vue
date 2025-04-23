@@ -139,9 +139,13 @@ const defaultConfig = {
 const overrideConfig = { ...defaultConfig, ...props.config }
 let activeView = ref(overrideConfig.defaultMode)
 
-function updateActiveView(value) {
-  console.log(value)
+function updateActiveView(value, d, isPreviousMonth, isNextMonth) {
   activeView.value = value
+  if (value == 'Day' && d) {
+    date.value = findIndexOfDate(d)
+    isPreviousMonth && decrementMonth()
+    isNextMonth && incrementMonth()
+  }
 }
 
 // shortcuts for changing the active view and navigating through the calendar
@@ -200,6 +204,7 @@ provide('calendarActions', {
   updateEventState,
   deleteEvent,
   handleCellDblClick,
+  updateActiveView,
   props,
 })
 

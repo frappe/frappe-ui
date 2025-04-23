@@ -6,10 +6,11 @@
       <div class="mb-2 grid w-full grid-cols-7">
         <span
           v-for="date in weeklyDates"
-          class="relative p-2 text-center text-sm text-gray-600"
+          class="relative p-2 text-center text-sm text-ink-gray-5 cursor-pointer"
           :class="
             isToday(date) ? 'font-semibold text-ink-gray-8' : 'font-normal'
           "
+          @click="calendarActions.updateActiveView('Day', date)"
         >
           <div
             v-if="isToday(date)"
