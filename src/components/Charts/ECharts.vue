@@ -42,7 +42,7 @@ onMounted(() => {
   <div
     ref="chartDiv"
     v-show="!error"
-    class="h-full w-full min-w-[400px] min-h-[300px]"
+    class="h-full w-full min-w-[400px] min-h-[300px] px-4 py-2"
   ></div>
   <div
     v-show="error"

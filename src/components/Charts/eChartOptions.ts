@@ -31,7 +31,7 @@ export default function useEchartsOptions(config: AxisChartConfig) {
     color: config.colors,
     grid: {
       left: '1%',
-      right: config.swapXY ? '2.5%' : '1%',
+      right: config.swapXY ? '2.5%' : '1.5%',
       top:
         PADDING_TOP +
         TITLE_HEIGHT * hasTitle +
@@ -217,7 +217,7 @@ function getXAxisOptions(config: AxisChartConfig) {
           hideOverlap: true,
           showMaxLabel:
             config.xAxis.type === 'category' || config.xAxis.type === 'value',
-          margin: 6,
+          margin: 8,
         },
       }
 }
