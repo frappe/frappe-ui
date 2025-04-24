@@ -701,6 +701,56 @@
       "markdownFile": null
     },
     {
+      "id": "src-components-charts-charts-story-vue",
+      "title": "Charts",
+      "layout": {
+        "type": "grid",
+        "width": 800
+      },
+      "docsOnly": false,
+      "variants": [
+        {
+          "id": "src-components-charts-charts-story-vue-0",
+          "title": "Number Charts"
+        },
+        {
+          "id": "src-components-charts-charts-story-vue-1",
+          "title": "Simple Bar Chart"
+        },
+        {
+          "id": "src-components-charts-charts-story-vue-2",
+          "title": "Stacked Bar Chart"
+        },
+        {
+          "id": "src-components-charts-charts-story-vue-3",
+          "title": "Bar and Line Combo"
+        },
+        {
+          "id": "src-components-charts-charts-story-vue-4",
+          "title": "Horizontal Bar Chart"
+        },
+        {
+          "id": "src-components-charts-charts-story-vue-5",
+          "title": "Area Chart"
+        },
+        {
+          "id": "src-components-charts-charts-story-vue-6",
+          "title": "Donut Chart"
+        },
+        {
+          "id": "src-components-charts-charts-story-vue-7",
+          "title": "Funnel Chart"
+        }
+      ],
+      "relativePath": "src/components/Charts/Charts.story.vue",
+      "supportPluginId": "vue3",
+      "treePath": [
+        "Charts"
+      ],
+      "virtual": false,
+      "markdownFile": null
+    },
+    {
       "id": "src-components-datepicker-datepicker-story-vue",
       "title": "DatePicker",
       "layout": {
