@@ -5,7 +5,7 @@ import {
 } from '@tiptap/core'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
 import ImageNodeView from './ImageNodeView.vue'
-import { Plugin, Selection } from 'prosemirror-state'
+import { Plugin, Selection, Transaction, EditorState } from 'prosemirror-state'
 import { EditorView } from 'prosemirror-view'
 import { Node } from '@tiptap/pm/model'
 import fileToBase64 from '../../utils/file-to-base64'
@@ -46,6 +46,11 @@ declare module '@tiptap/core' {
        * Upload and insert an image
        */
       uploadImage: (file: File) => ReturnType
+
+      /**
+       * Select an image file using the file picker and upload it
+       */
+      selectAndUploadImage: () => ReturnType
     }
   }
 }
@@ -132,9 +137,7 @@ export default NodeExtension.create<ImageOptions>({
             attrs: attributes,
           })
 
-          // Calculate and update dimensions if successful
           if (result && attributes.src) {
-            // Find the newly inserted node
             findImageNodeBySource(editor.view, attributes.src, (node, pos) => {
               updateNodeWithDimensions(
                 attributes.src,
@@ -152,6 +155,23 @@ export default NodeExtension.create<ImageOptions>({
         (file: File) =>
         ({ editor }) => {
           return uploadImage(file, editor.view, null, this.options)
+        },
+
+      selectAndUploadImage:
+        () =>
+        ({ editor }) => {
+          const input = document.createElement('input')
+          input.type = 'file'
+          input.accept = 'image/*'
+          input.onchange = (event) => {
+            const target = event.target as HTMLInputElement
+            if (target.files && target.files.length) {
+              const file = target.files[0]
+              editor.commands.uploadImage(file)
+            }
+          }
+          input.click()
+          return true
         },
     }
   },
@@ -193,7 +213,6 @@ export default NodeExtension.create<ImageOptions>({
 
               event.preventDefault()
 
-              // Set selection to drop position
               const coordinates = view.posAtCoords({
                 left: event.clientX,
                 top: event.clientY,
@@ -208,51 +227,51 @@ export default NodeExtension.create<ImageOptions>({
                 view.dispatch(transaction)
               }
 
-              images.forEach((file) => {
-                uploadImage(file, view, pos, extensionThis.options)
-              })
+              processMultipleImages(images, view, pos, extensionThis.options)
+              return true
+            },
 
+            handlePaste: (view, event) => {
+              if (!extensionThis.options.uploadFunction) {
+                return false
+              }
+
+              const clipboardItems = event.clipboardData?.items
+              if (!clipboardItems || clipboardItems.length === 0) {
+                return false
+              }
+
+              const images: File[] = []
+
+              for (let i = 0; i < clipboardItems.length; i++) {
+                const item = clipboardItems[i]
+                if (
+                  item.kind === 'file' &&
+                  item.type.indexOf('image/') !== -1
+                ) {
+                  const file = item.getAsFile()
+                  if (file) {
+                    images.push(file)
+                  }
+                }
+              }
+
+              if (images.length === 0) {
+                return false
+              }
+
+              event.preventDefault()
+              processMultipleImages(images, view, null, extensionThis.options)
               return true
             },
           },
-
-          handlePaste: (view, event, slice) => {
-            if (!extensionThis.options.uploadFunction) {
-              return false
-            }
-
-            const clipboardItems = event.clipboardData?.items
-            if (!clipboardItems || clipboardItems.length === 0) {
-              return false
-            }
-
-            const images: File[] = []
-
-            for (let i = 0; i < clipboardItems.length; i++) {
-              const item = clipboardItems[i]
-              if (item.kind === 'file' && item.type.indexOf('image/') !== -1) {
-                const file = item.getAsFile()
-                if (file) {
-                  images.push(file)
-                }
-              }
-            }
-
-            if (images.length === 0) {
-              return false
-            }
-
-            event.preventDefault()
-
-            images.forEach((file) => {
-              uploadImage(file, view, null, extensionThis.options)
-            })
-
-            return true
-          },
         },
 
-        appendTransaction(transactions, oldState, newState) {
+        appendTransaction(
+          transactions: readonly Transaction[],
+          oldState: EditorState,
+          newState: EditorState,
+        ): Transaction | null {
           const newImageNodes: { node: Node; pos: number }[] = []
 
           if (transactions.some((tr) => tr.docChanged)) {
@@ -289,11 +308,35 @@ export default NodeExtension.create<ImageOptions>({
   },
 })
 
-function uploadImage(
+function findInsertPosition(
+  view: EditorView,
+  lastNodeId: string | null,
+): number | null {
+  if (!lastNodeId) {
+    return null
+  }
+
+  let insertPos = null
+
+  view.state.doc.descendants((node, pos) => {
+    if (node.type.name === 'image' && node.attrs.uploadId === lastNodeId) {
+      insertPos = pos + node.nodeSize
+      return false
+    }
+  })
+
+  return insertPos
+}
+
+// Base upload function shared by all image upload methods
+function uploadImageBase(
   file: File,
   view: EditorView,
   pos: number | null | undefined,
   options: Record<string, any>,
+  insertMode: 'insert' | 'replace',
+  onComplete?: (nodeId: string) => void,
+  moveCursor = false,
 ): boolean {
   if (!options.uploadFunction) {
     console.error('uploadFunction option is not provided')
@@ -307,18 +350,47 @@ function uploadImage(
       const node = view.state.schema.nodes.image.create({
         loading: true,
         uploadId,
-        src: base64Result, // Base64 preview while uploading
+        src: base64Result,
       })
 
       const tr = view.state.tr
 
       if (pos != null) {
         tr.insert(pos, node)
-      } else {
+      } else if (insertMode === 'replace') {
         tr.replaceSelectionWith(node)
+      } else {
+        const insertPos = view.state.selection.from
+        tr.insert(insertPos, node)
       }
 
       view.dispatch(tr)
+
+      // Optionally move cursor after the node
+      if (moveCursor) {
+        const nodeSize = node.nodeSize || 1
+        setTimeout(() => {
+          try {
+            let nodePos = null
+            view.state.doc.descendants((n, p) => {
+              if (n.type.name === 'image' && n.attrs.uploadId === uploadId) {
+                nodePos = p
+                return false
+              }
+            })
+
+            if (nodePos !== null) {
+              const posAfter = nodePos + nodeSize
+              const transaction = view.state.tr.setSelection(
+                Selection.near(view.state.doc.resolve(posAfter)),
+              )
+              view.dispatch(transaction)
+            }
+          } catch (e) {
+            console.error('Error moving cursor:', e)
+          }
+        }, 10)
+      }
 
       return options.uploadFunction(file)
     })
@@ -347,32 +419,59 @@ function uploadImage(
             height: uploadedImage.height || node.attrs.height,
             loading: false,
           })
-          return false // Stop traversal after finding our node
+          return false
         }
       })
 
       view.dispatch(transaction)
+
+      if (onComplete) onComplete(uploadId)
     })
     .catch((error: Error) => {
       console.error('Image upload failed:', error)
 
-      const transaction = view.state.tr
+      try {
+        const transaction = view.state.tr
 
-      view.state.doc.descendants((node, pos) => {
-        if (node.type.name === 'image' && node.attrs.uploadId === uploadId) {
-          transaction.setNodeMarkup(pos, undefined, {
-            ...node.attrs,
-            loading: false,
-            error: error.message || 'Failed to upload image',
-          })
-          return false // Stop traversal after finding our node
-        }
-      })
+        view.state.doc.descendants((node, pos) => {
+          if (node.type.name === 'image' && node.attrs.uploadId === uploadId) {
+            transaction.setNodeMarkup(pos, undefined, {
+              ...node.attrs,
+              loading: false,
+              error: error.message || 'Failed to upload image',
+            })
+            return false
+          }
+        })
 
-      view.dispatch(transaction)
+        view.dispatch(transaction)
+      } catch (e) {
+        console.error('Error updating failed node:', e)
+      }
+
+      if (onComplete) onComplete(uploadId)
     })
 
   return true
+}
+
+function uploadImageWithTracking(
+  file: File,
+  view: EditorView,
+  pos: number | null | undefined,
+  options: Record<string, any>,
+  onComplete?: (nodeId: string) => void,
+): boolean {
+  return uploadImageBase(file, view, pos, options, 'insert', onComplete, true)
+}
+
+function uploadImage(
+  file: File,
+  view: EditorView,
+  pos: number | null | undefined,
+  options: Record<string, any>,
+): boolean {
+  return uploadImageBase(file, view, pos, options, 'replace')
 }
 
 function findImageNodeBySource(
@@ -383,7 +482,7 @@ function findImageNodeBySource(
   view.state.doc.descendants((node, pos) => {
     if (node.type.name === 'image' && node.attrs.src === src) {
       callback(node, pos)
-      return false // Stop traversal after finding our node
+      return false
     }
   })
 }
@@ -421,4 +520,40 @@ function getImageDimensions(
     img.onerror = reject
     img.src = src
   })
+}
+
+/**
+ * Process multiple image uploads sequentially
+ */
+function processMultipleImages(
+  images: File[],
+  view: EditorView,
+  pos: number | null,
+  options: Record<string, any>,
+) {
+  if (images.length === 1) {
+    uploadImage(images[0], view, pos, options)
+    return
+  }
+
+  let imageQueue = [...images]
+  let lastInsertedNodeId: string | null = null
+
+  const processNextImage = () => {
+    if (imageQueue.length === 0) return
+
+    const file = imageQueue.shift()
+    if (!file) return
+
+    const currentPos = lastInsertedNodeId
+      ? findInsertPosition(view, lastInsertedNodeId)
+      : pos
+
+    uploadImageWithTracking(file, view, currentPos, options, (newNodeId) => {
+      lastInsertedNodeId = newNodeId
+      setTimeout(processNextImage, 100)
+    })
+  }
+
+  processNextImage()
 }

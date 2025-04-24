@@ -28,11 +28,10 @@ function updateCaption(event: Event) {
 }
 
 function handleKeydown(event: KeyboardEvent) {
-  if (
-    event.key === 'Enter' ||
-    event.key === 'Escape' ||
-    event.key === 'ArrowDown'
-  ) {
+  if (event.key === 'Enter') {
+    event.preventDefault()
+    createParagraphAfterImage()
+  } else if (event.key === 'Escape' || event.key === 'ArrowDown') {
     event.preventDefault()
     setCursorAfterImage()
   }
@@ -47,9 +46,20 @@ function setCursorAt(pos: number) {
   props.editor.chain().setTextSelection(pos).scrollIntoView().run()
 }
 
+function createParagraphAfterImage() {
+  const pos = props.getPos()
+  props.editor.commands.focus()
+  props.editor
+    .chain()
+    .setTextSelection(pos + 1)
+    .createParagraphNear()
+    .scrollIntoView()
+    .run()
+}
+
 function setCursorAfterImage() {
-  const pos = props.getPos() + props.node.nodeSize
-  setCursorAt(pos)
+  const pos = props.getPos()
+  setCursorAt(pos + 1)
 }
 
 function setCursorBeforeImage() {

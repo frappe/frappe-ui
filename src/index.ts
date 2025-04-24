@@ -6,6 +6,7 @@ export { default as Badge } from './components/Badge.vue'
 export { default as Breadcrumbs } from './components/Breadcrumbs.vue'
 export * from './components/Button'
 export { default as Card } from './components/Card.vue'
+export * from './components/Combobox'
 export { default as Checkbox } from './components/Checkbox.vue'
 export { default as DatePicker } from './components/DatePicker/DatePicker.vue'
 export { default as DateTimePicker } from './components/DatePicker/DateTimePicker.vue'
@@ -81,9 +82,9 @@ export { default as visibilityDirective } from './directives/visibility.js'
 
 // utilities
 export { default as call, createCall } from './utils/call.js'
-export { default as debounce } from './utils/debounce.ts'
+export { default as debounce } from './utils/debounce'
 export { default as fileToBase64 } from './utils/file-to-base64.js'
-export { default as FileUploadHandler } from './utils/fileUploadHandler.ts'
+export { default as FileUploadHandler } from './utils/fileUploadHandler'
 export { usePageMeta } from './utils/pageMeta.js'
 export { dayjsLocal, dayjs } from './utils/dayjs.js'
 
@@ -103,10 +104,10 @@ export { default as initSocket } from './utils/socketio.js'
 export { setConfig, getConfig } from './utils/config.js'
 
 // new data fetching
-export { useCall } from './data-fetching/useCall/useCall.ts'
-export { useList } from './data-fetching/useList/useList.ts'
-export { useDoc } from './data-fetching/useDoc/useDoc.ts'
-export { useFrappeFetch } from './data-fetching/useFrappeFetch.ts'
+export { useCall } from './data-fetching/useCall/useCall'
+export { useList } from './data-fetching/useList/useList'
+export { useDoc } from './data-fetching/useDoc/useDoc'
+export { useFrappeFetch } from './data-fetching/useFrappeFetch'
 
 // plugin
 export { default as pageMetaPlugin } from './utils/pageMeta.js'
