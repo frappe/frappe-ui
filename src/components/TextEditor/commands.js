@@ -24,6 +24,7 @@ import ArrowGoBack from './icons/arrow-go-back-line.vue'
 import ArrowGoForward from './icons/arrow-go-forward-line.vue'
 import Separator from './icons/separator.vue'
 import Table from './icons/table-2.vue'
+import Search from './icons/search.vue'
 
 export default {
   Paragraph: {
@@ -268,5 +269,11 @@ export default {
   },
   Separator: {
     type: 'separator',
+  },
+  FindReplace: {
+    label: 'Search Text',
+    icon: Search, 
+    isActive: () => false, 
+    component: defineAsyncComponent(() => import('./FindAndReplace.vue')),
   },
 }

@@ -44,6 +44,7 @@ import EmojiExtension from './emoji-extension'
 import SlashCommands from './slash-commands-extension'
 import { detectMarkdown, markdownToHTML } from '../../utils/markdown'
 import { DOMParser } from 'prosemirror-model'
+import FindAndReplace from './FindAndReplace.vue'
 
 const lowlight = createLowlight(common)
 
@@ -156,6 +157,7 @@ export default {
         TableHeader,
         TableCell,
         Typography,
+        FindAndReplace,
         TextAlign.configure({
           types: ['heading', 'paragraph'],
         }),
