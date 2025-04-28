@@ -183,6 +183,10 @@ const onDrop = (event, date) => {
   if (parseDate(date) === e.date) return
   let calendarEvent = props.events.find((e) => e.id === calendarEventID)
   calendarEvent.date = parseDate(date)
+  calendarEvent.fromDate = calendarEvent.date
+  calendarEvent.toDate = calendarEvent.date
+  calendarEvent.fromDateTime = calendarEvent.date + ' ' + calendarEvent.fromTime
+  calendarEvent.toDateTime = calendarEvent.date + ' ' + calendarEvent.toTime
   calendarActions.updateEventState(calendarEvent)
 }
 </script>
