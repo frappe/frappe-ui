@@ -127,7 +127,6 @@
 </template>
 
 <script setup>
-import FeatherIcon from '../FeatherIcon.vue'
 import EventModalContent from './EventModalContent.vue'
 import NewEventModal from './NewEventModal.vue'
 import { useFloating, shift, flip, offset, autoUpdate } from '@floating-ui/vue'
