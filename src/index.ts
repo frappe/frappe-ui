@@ -83,7 +83,7 @@ export { default as visibilityDirective } from './directives/visibility.js'
 // utilities
 export { default as call, createCall } from './utils/call.js'
 export { default as debounce } from './utils/debounce'
-export { default as fileToBase64 } from './utils/file-to-base64.js'
+export { default as fileToBase64 } from './utils/file-to-base64'
 export { default as FileUploadHandler } from './utils/fileUploadHandler'
 export { usePageMeta } from './utils/pageMeta.js'
 export { dayjsLocal, dayjs } from './utils/dayjs.js'
