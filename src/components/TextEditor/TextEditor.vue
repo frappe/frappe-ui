@@ -15,8 +15,7 @@
 </template>
 
 <script>
-import { normalizeClass } from 'vue'
-import { computed } from '@vue/reactivity'
+import { normalizeClass, computed } from 'vue'
 import { Editor, EditorContent, VueNodeViewRenderer } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
@@ -25,7 +24,7 @@ import Table from '@tiptap/extension-table'
 import TableCell from '@tiptap/extension-table-cell'
 import TableHeader from '@tiptap/extension-table-header'
 import TableRow from '@tiptap/extension-table-row'
-import ImageExtension from './image-extension'
+import { ImageExtension } from './extensions/image'
 import ImageViewerExtension from './image-viewer-extension'
 import VideoExtension from './video-extension'
 import LinkExtension from './link-extension'

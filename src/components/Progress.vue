@@ -50,7 +50,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from '@vue/reactivity'
+import { computed } from 'vue'
 
 const MIN_VALUE = 0
 const MAX_VALUE = 100

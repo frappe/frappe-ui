@@ -8,9 +8,9 @@ import ImageNodeView from './ImageNodeView.vue'
 import { Plugin, Selection, Transaction, EditorState } from 'prosemirror-state'
 import { EditorView } from 'prosemirror-view'
 import { Node } from '@tiptap/pm/model'
-import fileToBase64 from '../../utils/file-to-base64'
+import { fileToBase64 } from '../../../../index'
 
-export interface ImageOptions {
+export interface ImageExtensionOptions {
   /**
    * Function to handle image uploads
    * @default null
@@ -51,6 +51,11 @@ declare module '@tiptap/core' {
        * Select an image file using the file picker and upload it
        */
       selectAndUploadImage: () => ReturnType
+
+      /**
+       * Set image alignment
+       */
+      setImageAlign: (align: 'left' | 'center' | 'right') => ReturnType
     }
   }
 }
@@ -58,10 +63,9 @@ declare module '@tiptap/core' {
 /**
  * Matches markdown image syntax: ![alt](src "title")
  */
-export const inputRegex =
-  /(?:^|\s)(!\[(.+|:?)]\((\S+)(?:(?:\s+)["'](\S+)["'])?\))$/
+const inputRegex = /(?:^|\s)(!\[(.+|:?)]\((\S+)(?:(?:\s+)["'](\S+)["'])?\))$/
 
-export default NodeExtension.create<ImageOptions>({
+export const ImageExtension = NodeExtension.create<ImageExtensionOptions>({
   name: 'image',
 
   group: 'block',
@@ -78,6 +82,26 @@ export default NodeExtension.create<ImageOptions>({
       loading: {
         default: false,
         parseHTML: () => false,
+      },
+      align: {
+        default: 'left',
+        parseHTML: (element) => {
+          const align = (
+            element.getAttribute('data-align') ||
+            element.getAttribute('align') ||
+            'left'
+          ).toLowerCase()
+
+          if (['left', 'center', 'right'].includes(align)) {
+            return align as 'left' | 'center' | 'right'
+          }
+          return 'left'
+        },
+        renderHTML: (attributes) => {
+          return {
+            'data-align': attributes.align || 'left',
+          }
+        },
       },
       uploadId: {
         default: null,
@@ -129,6 +153,12 @@ export default NodeExtension.create<ImageOptions>({
 
   addCommands() {
     return {
+      setImageAlign:
+        (align: 'left' | 'center' | 'right') =>
+        ({ commands }) => {
+          return commands.updateAttributes(this.name, { align })
+        },
+
       setImage:
         (attributes: SetImageOptions) =>
         ({ commands, editor }) => {
@@ -139,12 +169,7 @@ export default NodeExtension.create<ImageOptions>({
 
           if (result && attributes.src) {
             findImageNodeBySource(editor.view, attributes.src, (node, pos) => {
-              updateNodeWithDimensions(
-                attributes.src,
-                editor.view,
-                pos,
-                node.attrs,
-              )
+              updateNodeWithDimensions(attributes.src, editor.view, pos)
             })
           }
 
@@ -292,12 +317,7 @@ export default NodeExtension.create<ImageOptions>({
           newImageNodes.forEach(({ node, pos }) => {
             const editor = extensionThis.editor
             if (editor) {
-              updateNodeWithDimensions(
-                node.attrs.src,
-                editor.view,
-                pos,
-                node.attrs,
-              )
+              updateNodeWithDimensions(node.attrs.src, editor.view, pos)
             }
           })
 
@@ -491,19 +511,26 @@ function updateNodeWithDimensions(
   src: string,
   view: EditorView,
   pos: number,
-  attrs: any,
-) {
+): void {
   getImageDimensions(src)
     .then((dimensions) => {
-      const transaction = view.state.tr.setNodeMarkup(pos, undefined, {
-        ...attrs,
-        width: dimensions.width,
-        height: dimensions.height,
-      })
-      view.dispatch(transaction)
+      const node = view.state.doc.nodeAt(pos)
+      if (!node || node.type.name !== 'image') {
+        return
+      }
+      const currentAttrs = node.attrs
+
+      if (currentAttrs.width == null || currentAttrs.height == null) {
+        const transaction = view.state.tr.setNodeMarkup(pos, undefined, {
+          ...currentAttrs,
+          width: currentAttrs.width ?? dimensions.width,
+          height: currentAttrs.height ?? dimensions.height,
+        })
+        view.dispatch(transaction)
+      }
     })
     .catch((error) => {
-      console.error('Failed to get image dimensions:', error)
+      // Don't log error if it's just about dimensions for an existing node
     })
 }
 

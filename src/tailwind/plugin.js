@@ -328,6 +328,14 @@ module.exports = plugin(
               'h5 strong': {
                 fontWeight: 600,
               },
+              'img[data-align=right]': {
+                marginLeft: 'auto',
+                marginRight: '0',
+              },
+              'img[data-align=center]': {
+                marginLeft: 'auto',
+                marginRight: 'auto',
+              },
             },
           },
           sm: {
