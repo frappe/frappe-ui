@@ -7,18 +7,18 @@
   ></div>
 </template>
 
-<script>
-export default {
-  name: 'ErrorMessage',
-  props: ['message'],
-  computed: {
-    errorMessage() {
-      if (!this.message) return ''
-      if (this.message instanceof Error) {
-        return this.message.messages || this.message.message
-      }
-      return this.message
-    },
-  },
-}
+<script setup lang="ts">
+import { computed } from 'vue'
+
+const props = defineProps<{
+  message?: string | Error
+}>()
+
+const errorMessage = computed(() => {
+  if (!props.message) return ''
+  if (props.message instanceof Error) {
+    return (props.message as any).messages || props.message.message
+  }
+  return props.message
+})
 </script>
