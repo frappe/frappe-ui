@@ -2,6 +2,18 @@ import Link from '@tiptap/extension-link'
 import { createApp, h } from 'vue'
 import EditLink from './EditLink.vue'
 import tippy from 'tippy.js'
+import { getMarkRange, Mark, Range, Editor } from '@tiptap/core'
+
+declare module '@tiptap/core' {
+  interface Commands<ReturnType> {
+    link: {
+      /**
+       * Opens the link editor bubble menu.
+       */
+      openLinkEditor: () => ReturnType
+    }
+  }
+}
 
 export const LinkExtension = Link.extend({
   addOptions() {
@@ -13,78 +25,102 @@ export const LinkExtension = Link.extend({
     }
   },
 
-  addKeyboardShortcuts() {
+  addCommands() {
     return {
-      'Mod-k': () => {
-        const editor = this.editor
-        const { state } = editor
-        const { from, to } = state.selection
-        const { doc } = state
+      ...this.parent?.(),
+      openLinkEditor:
+        () =>
+        ({ editor }: { editor: Editor }): boolean => {
+          const { state } = editor
+          const { from, to } = state.selection
+          const { doc } = state
 
-        // If there's no selection but cursor is within a link, extend the selection to the link
-        if (from === to) {
-          if (editor.isActive('link')) {
-            editor.chain().focus().extendMarkRange('link').run()
-          } else {
-            // No selection and not within a link
-            return false
-          }
-        }
+          let range: Range | undefined = undefined
+          let mark: Mark | undefined = undefined
 
-        // Get the updated selection and position
-        const updatedSelection = editor.state.selection
-        const updatedTo = updatedSelection.to
-
-        const existingHref = editor.getAttributes('link').href || ''
-
-        openLinkEditor(existingHref, editor.view.dom)
-          .then((href) => {
-            if (href === null) {
-              return
+          // Check if cursor is within a link or if there's a selection
+          if (from === to) {
+            // Cursor is within a link
+            const $pos = state.selection.$from
+            const markRange = getMarkRange($pos, this.type)
+            if (markRange) {
+              range = markRange
+              mark = doc
+                .resolve(markRange.from)
+                .marks()
+                .find((m) => m.type === this.type)
+            } else {
+              // No selection and not within a link
+              return false
             }
+          } else {
+            // There is a selection
+            range = { from, to }
+            // Check if the selection is already a link
+            mark = doc
+              .resolve(from)
+              .marks()
+              .find((m) => m.type === this.type)
+          }
 
-            if (href === '') {
-              editor
-                .chain()
-                .focus()
-                .extendMarkRange('link')
-                .unsetLink()
-                .setTextSelection(updatedTo)
+          if (!range) return false
+
+          const existingHref = mark?.attrs.href || ''
+          const selectionFrom = range.from
+          const selectionTo = range.to
+
+          openLinkEditor(existingHref, editor.view.dom)
+            .then((href) => {
+              if (href === null) {
+                return
+              }
+
+              let chain = editor.chain().focus(null, { scrollIntoView: false })
+
+              if (href === '') {
+                chain
+                  .setTextSelection({ from: selectionFrom, to: selectionTo })
+                  .unsetLink()
+                  .command(({ tr }) => {
+                    tr.setStoredMarks([])
+                    return true
+                  })
+                  .run()
+                return
+              }
+
+              chain = chain
+                .setTextSelection({ from: selectionFrom, to: selectionTo })
+                .setLink({ href })
+                .setTextSelection(selectionTo) // Move cursor to the end of the link
                 .command(({ tr }) => {
-                  tr.setStoredMarks([])
+                  tr.setStoredMarks([]) // Clear stored marks to avoid applying link to next typed char
                   return true
                 })
-                .run()
-              return
-            }
 
-            let chain = editor
-              .chain()
-              .focus()
-              .extendMarkRange('link')
-              .setLink({ href })
-              .setTextSelection(updatedTo)
-              .command(({ tr }) => {
-                tr.setStoredMarks([])
-                return true
-              })
+              const posAfterLink = selectionTo
+              const charAfter =
+                posAfterLink < doc.content.size
+                  ? doc.textBetween(posAfterLink, posAfterLink + 1)
+                  : null
 
-            const posAfterLink = updatedTo
-            const charAfter =
-              posAfterLink < doc.content.size
-                ? doc.textBetween(posAfterLink, posAfterLink + 1)
-                : null
+              // Insert a space after the link if needed
+              if (charAfter === null || charAfter !== ' ') {
+                chain = chain.insertContent(' ')
+              }
 
-            if (charAfter === null || charAfter !== ' ') {
-              chain = chain.insertContent(' ')
-            }
+              chain.run()
+            })
+            .catch(() => {}) // Ignore cancellation
 
-            chain.run()
-          })
-          .catch(() => {})
+          return true
+        },
+    }
+  },
 
-        return true
-      },
+  addKeyboardShortcuts() {
+    return {
+      'Mod-k': () => this.editor.commands.openLinkEditor(),
     }
   },
 })
