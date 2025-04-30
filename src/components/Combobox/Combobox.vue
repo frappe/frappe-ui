@@ -46,7 +46,7 @@ interface ComboboxProps {
 const props = defineProps<ComboboxProps>()
 const emit = defineEmits(['update:modelValue', 'update:selectedOption'])
 
-const searchTerm = ref('')
+const searchTerm = ref(getDisplayValue(props.modelValue))
 const internalModelValue = ref(props.modelValue)
 const isOpen = ref(false)
 const userHasTyped = ref(false)
@@ -71,23 +71,23 @@ const onUpdateModelValue = (value: string | null) => {
   emit('update:selectedOption', selectedOpt)
 }
 
-const isGroup = (option: ComboboxOption): option is GroupedOption => {
+function isGroup(option: ComboboxOption): option is GroupedOption {
   return typeof option === 'object' && 'group' in option
 }
 
-const getLabel = (option: SimpleOption): string => {
+function getLabel(option: SimpleOption): string {
   return typeof option === 'string' ? option : option.label
 }
 
-const getValue = (option: SimpleOption): string => {
+function getValue(option: SimpleOption): string {
   return typeof option === 'string' ? option : option.value
 }
 
-const isDisabled = (option: SimpleOption): boolean => {
+function isDisabled(option: SimpleOption): boolean {
   return typeof option === 'object' && !!option.disabled
 }
 
-const getIcon = (option: SimpleOption): string | Component | undefined => {
+function getIcon(option: SimpleOption): string | Component | undefined {
   return typeof option === 'object' ? option.icon : undefined
 }
 
@@ -105,9 +105,10 @@ const allOptionsFlat = computed(() => {
 
 function getDisplayValue(selectedValue: string | null | undefined): string {
   if (!selectedValue) return ''
-  const selectedOption = allOptionsFlat.value.find(
-    (opt) => getValue(opt) === selectedValue,
+  const options = props.options.flatMap((opt) =>
+    isGroup(opt) ? opt.options : opt,
   )
+  const selectedOption = options.find((opt) => getValue(opt) === selectedValue)
   return selectedOption ? getLabel(selectedOption) : selectedValue || ''
 }
 
