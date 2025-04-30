@@ -6,9 +6,7 @@ import tippy, { Instance as TippyInstance, Props as TippyProps } from 'tippy.js'
 import SlashCommandsList from './SlashCommandsList.vue'
 import { Component } from 'vue'
 
-import Heading1 from '~icons/lucide/heading-1'
 import Heading2 from '~icons/lucide/heading-2'
-import Pilcrow from '~icons/lucide/pilcrow'
 import Heading3 from '~icons/lucide/heading-3'
 import List from '~icons/lucide/list'
 import ListOrdered from '~icons/lucide/list-ordered'
@@ -36,18 +34,6 @@ type CommandExecutionProps = {
 }
 
 const getCommands = (): Command[] => [
-  {
-    title: 'Heading 1',
-    icon: Heading1,
-    command: ({ editor, range }: CommandExecutionProps) => {
-      editor
-        .chain()
-        .focus()
-        .deleteRange(range)
-        .setNode('heading', { level: 1 })
-        .run()
-    },
-  },
   {
     title: 'Heading 2',
     icon: Heading2,
@@ -138,13 +124,6 @@ const getCommands = (): Command[] => [
         .deleteRange(range)
         .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
         .run()
-    },
-  },
-  {
-    title: 'Paragraph',
-    icon: Pilcrow,
-    command: ({ editor, range }: CommandExecutionProps) => {
-      editor.chain().focus().deleteRange(range).setNode('paragraph').run()
     },
   },
 ]
