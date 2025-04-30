@@ -10,9 +10,10 @@
 </template>
 <script setup lang="ts">
 import { useTemplateRef } from 'vue'
+import type { Editor } from '@tiptap/vue-3'
 
 const props = defineProps<{
-  editor: any
+  editor: Editor
 }>()
 
 const fileInput = useTemplateRef('fileInput')
