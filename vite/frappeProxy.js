@@ -1,6 +1,6 @@
-const { getCommonSiteConfig } = require('./utils')
+import { getCommonSiteConfig } from './utils.js'
 
-function frappeProxy({
+export function frappeProxy({
   port = 8080,
   source = '^/(app|login|api|assets|files|private)',
 } = {}) {
@@ -32,5 +32,3 @@ function frappeProxy({
     }),
   }
 }
-
-exports.frappeProxy = frappeProxy

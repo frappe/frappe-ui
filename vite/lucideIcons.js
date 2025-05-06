@@ -1,19 +1,19 @@
-const LucideIcons = require('lucide-static')
-const Icons = require('unplugin-icons/vite')
-const Components = require('unplugin-vue-components/vite')
-const IconsResolver = require('unplugin-icons/resolver')
+import * as LucideIcons from 'lucide-static'
+import Icons from 'unplugin-icons/vite'
+import Components from 'unplugin-vue-components/vite'
+import IconsResolver from 'unplugin-icons/resolver'
 
-function lucideIconsPlugin() {
+export function lucideIcons() {
   return [
-    Components.default({
+    Components({
       resolvers: [
-        IconsResolver.default({
+        IconsResolver({
           prefix: false,
           enabledCollections: ['lucide'],
         }),
       ],
     }),
-    Icons.default({
+    Icons({
       customCollections: {
         lucide: getIcons(),
       },
@@ -63,5 +63,3 @@ function camelToDash(key) {
   }
   return [withNumber]
 }
-
-exports.lucideIcons = lucideIconsPlugin

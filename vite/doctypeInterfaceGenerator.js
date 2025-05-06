@@ -1,7 +1,7 @@
-const fs = require('fs').promises
-const path = require('path')
+import fs from 'fs/promises'
+import path from 'path'
 
-class DocTypeInterfaceGenerator {
+export class DocTypeInterfaceGenerator {
   constructor(appsPath, appDoctypeMap, outputPath) {
     this.appsPath = appsPath
     this.appDoctypeMap = appDoctypeMap
@@ -244,5 +244,3 @@ class DocTypeInterfaceGenerator {
   `
   }
 }
-
-exports.DocTypeInterfaceGenerator = DocTypeInterfaceGenerator

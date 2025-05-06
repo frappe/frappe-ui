@@ -1,14 +1,14 @@
-const path = require('path')
-const fs = require('fs')
+import path from 'path'
+import fs from 'fs'
 
-function getConfig() {
+export function getConfig() {
   let configPath = path.join(process.cwd(), 'frappeui.json')
   if (fs.existsSync(configPath)) {
     return JSON.parse(fs.readFileSync(configPath))
   }
 }
 
-function getCommonSiteConfig() {
+export function getCommonSiteConfig() {
   let currentDir = path.resolve('.')
   // traverse up till we find frappe-bench with sites directory
   while (currentDir !== '/') {
@@ -27,7 +27,7 @@ function getCommonSiteConfig() {
   return null
 }
 
-function findAppsFolder() {
+export function findAppsFolder() {
   let currentDir = process.cwd()
   while (currentDir !== '/') {
     if (
@@ -39,10 +39,4 @@ function findAppsFolder() {
     currentDir = path.resolve(currentDir, '..')
   }
   return null
-}
-
-module.exports = {
-  getConfig,
-  getCommonSiteConfig,
-  findAppsFolder,
 }

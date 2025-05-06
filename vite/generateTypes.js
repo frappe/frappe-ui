@@ -1,6 +1,7 @@
-const path = require('path')
-const { findAppsFolder } = require('./utils')
-const { DocTypeInterfaceGenerator } = require('./doctypeInterfaceGenerator')
+import path from 'path'
+import { fileURLToPath } from 'url'
+import { findAppsFolder } from './utils.js'
+import { DocTypeInterfaceGenerator } from './doctypeInterfaceGenerator.js'
 
 // Handle termination signals to exit cleanly
 process.on('SIGINT', () => process.exit(0))
@@ -49,7 +50,8 @@ async function main() {
 }
 
 // Execute if run directly
-if (require.main === module) {
+const currentFilePath = fileURLToPath(import.meta.url)
+if (process.argv[1] === currentFilePath) {
   main()
     .then(() => process.exit(0))
     .catch((err) => {

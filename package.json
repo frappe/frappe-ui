@@ -3,6 +3,7 @@
   "version": "0.1.139",
   "description": "A set of components and utilities for rapid UI development",
   "main": "./src/index.ts",
+  "type": "module",
   "scripts": {
     "test": "vitest",
     "prettier": "yarn prettier -w ./src",
