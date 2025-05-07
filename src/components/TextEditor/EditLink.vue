@@ -27,18 +27,16 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, useTemplateRef } from 'vue'
+import { onMounted, ref, useTemplateRef, nextTick } from 'vue'
 import Button from '../Button/Button.vue'
 import TextInput from '../TextInput.vue'
 import Tooltip from '../Tooltip/Tooltip.vue'
 import LucideCheck from '~icons/lucide/check'
 import LucideX from '~icons/lucide/x'
+import { isValidUrl } from '../../utils/url-validation'
 
 const props = defineProps<{
-  show: boolean
   href: string
-  onClose: () => void
-  onUpdateHref: (href: string) => void
 }>()
 
 const emit = defineEmits<{
@@ -49,28 +47,17 @@ const emit = defineEmits<{
 const _href = ref(props.href)
 const input = useTemplateRef('input')
 
-// Simple URL validation regex
-const isValidUrl = (url: string) => {
-  if (!url) return true
-  const regex =
-    /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/i
-  return regex.test(url)
-}
-
 const submitLink = () => {
-  if (isValidUrl(_href.value)) {
+  if (_href.value === '' || isValidUrl(_href.value)) {
     emit('updateHref', _href.value)
   }
 }
 
-onMounted(() => {
-  if (props.show) {
-    setTimeout(() => {
-      if (input.value?.el) {
-        input.value.el.focus()
-        input.value.el.select()
-      }
-    }, 0)
+onMounted(async () => {
+  await nextTick()
+  if (input.value?.el) {
+    input.value.el.focus()
+    input.value.el.select()
   }
 })
 </script>

@@ -1,8 +1,11 @@
-import Link from '@tiptap/extension-link'
 import { createApp, h } from 'vue'
+import Link from '@tiptap/extension-link'
+import tippy, { type Instance as TippyInstance } from 'tippy.js'
+import { getMarkRange, Range, Editor } from '@tiptap/core'
+import { MarkType, Mark as ProseMirrorMark } from 'prosemirror-model'
+import { Plugin, PluginKey } from 'prosemirror-state'
 import EditLink from './EditLink.vue'
-import tippy from 'tippy.js'
-import { getMarkRange, Mark, Range, Editor } from '@tiptap/core'
+import { linkPasteHandler } from './linkPasteHandler'
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
@@ -22,6 +25,7 @@ export const LinkExtension = Link.extend({
       openOnClick: false,
       autolink: true,
       defaultProtocol: 'https',
+      linkOnPaste: false,
     }
   },
 
@@ -36,7 +40,8 @@ export const LinkExtension = Link.extend({
           const { doc } = state
 
           let range: Range | undefined = undefined
-          let mark: Mark | undefined = undefined
+          let mark: ProseMirrorMark | undefined = undefined
+          let shouldDelayPopover = false
 
           // Check if cursor is within a link or if there's a selection
           if (from === to) {
@@ -49,8 +54,15 @@ export const LinkExtension = Link.extend({
                 .resolve(markRange.from)
                 .marks()
                 .find((m) => m.type === this.type)
+
+              // Select the link text
+              editor
+                .chain()
+                .setTextSelection({ from: markRange.from, to: markRange.to })
+                .run()
+              shouldDelayPopover = true
             } else {
-              // No selection and not within a link
+              // No selection and not within a link, and cursor not in link
               return false
             }
           } else {
@@ -69,49 +81,58 @@ export const LinkExtension = Link.extend({
           const selectionFrom = range.from
           const selectionTo = range.to
 
-          openLinkEditor(existingHref, editor.view.dom)
-            .then((href) => {
-              if (href === null) {
-                return
-              }
+          const showPopover = () => {
+            openLinkEditor(existingHref, editor.view.dom)
+              .then((href) => {
+                if (href === null) {
+                  return
+                }
 
-              let chain = editor.chain().focus(null, { scrollIntoView: false })
+                let chain = editor
+                  .chain()
+                  .focus(null, { scrollIntoView: false })
 
-              if (href === '') {
-                chain
+                if (href === '') {
+                  chain
+                    .setTextSelection({ from: selectionFrom, to: selectionTo })
+                    .unsetLink()
+                    .command(({ tr }) => {
+                      tr.setStoredMarks([])
+                      return true
+                    })
+                    .run()
+                  return
+                }
+
+                chain = chain
                   .setTextSelection({ from: selectionFrom, to: selectionTo })
-                  .unsetLink()
+                  .setLink({ href })
+                  .setTextSelection(selectionTo)
                   .command(({ tr }) => {
                     tr.setStoredMarks([])
                     return true
                   })
-                  .run()
-                return
-              }
 
-              chain = chain
-                .setTextSelection({ from: selectionFrom, to: selectionTo })
-                .setLink({ href })
-                .setTextSelection(selectionTo) // Move cursor to the end of the link
-                .command(({ tr }) => {
-                  tr.setStoredMarks([]) // Clear stored marks to avoid applying link to next typed char
-                  return true
-                })
+                const posAfterLink = selectionTo
+                const charAfter =
+                  posAfterLink < doc.content.size
+                    ? doc.textBetween(posAfterLink, posAfterLink + 1)
+                    : null
 
-              const posAfterLink = selectionTo
-              const charAfter =
-                posAfterLink < doc.content.size
-                  ? doc.textBetween(posAfterLink, posAfterLink + 1)
-                  : null
+                if (charAfter === null || charAfter !== ' ') {
+                  chain = chain.insertContent(' ')
+                }
 
-              // Insert a space after the link if needed
-              if (charAfter === null || charAfter !== ' ') {
-                chain = chain.insertContent(' ')
-              }
+                chain.run()
+              })
+              .catch(() => {})
+          }
 
-              chain.run()
-            })
-            .catch(() => {}) // Ignore cancellation
+          if (shouldDelayPopover) {
+            requestAnimationFrame(showPopover)
+          } else {
+            showPopover()
+          }
 
           return true
         },
@@ -122,6 +143,27 @@ export const LinkExtension = Link.extend({
     return {
       'Mod-k': () => this.editor.commands.openLinkEditor(),
     }
+  },
+
+  addProseMirrorPlugins() {
+    let plugins = this.parent?.() || []
+
+    plugins.push(
+      linkPasteHandler({
+        editor: this.editor,
+        defaultProtocol: this.options.defaultProtocol,
+        type: this.type,
+      }),
+    )
+
+    plugins.push(
+      clearLinkOnBoundaryPlugin({
+        editor: this.editor,
+        type: this.type,
+      }),
+    )
+
+    return plugins
   },
 })
 
@@ -138,16 +180,17 @@ function openLinkEditor(href: string, anchor: HTMLElement): Promise<string> {
     if (selection && selection.rangeCount > 0) {
       const range = selection.getRangeAt(0)
       const rect = range.getBoundingClientRect()
+      const isCollapsed = range.collapsed
 
       virtualReference = {
         getBoundingClientRect: () => ({
           width: 0,
-          height: 0,
+          height: rect.height,
           top: rect.top,
-          right: rect.left + rect.width / 2,
-          bottom: rect.top,
-          left: rect.left + rect.width / 2,
-          x: rect.left + rect.width / 2,
+          right: isCollapsed ? rect.left : rect.right,
+          bottom: rect.bottom,
+          left: rect.left,
+          x: rect.left,
           y: rect.top,
           toJSON: () => {},
         }),
@@ -158,18 +201,47 @@ function openLinkEditor(href: string, anchor: HTMLElement): Promise<string> {
       }
     }
 
-    const app = createApp({
+    let app: ReturnType<typeof createApp> | null = null
+    let tippyInstance: TippyInstance | null = null
+    let isDestroyed = false
+    let promiseSettled = false
+
+    const settlePromise = (action: 'resolve' | 'reject', value?: any) => {
+      if (promiseSettled) return
+      promiseSettled = true
+      if (action === 'resolve') {
+        resolve(value)
+      } else {
+        reject(value)
+      }
+    }
+
+    const destroy = () => {
+      if (isDestroyed) return
+      isDestroyed = true
+
+      settlePromise('reject', 'Link editing cancelled or destroyed')
+
+      requestAnimationFrame(() => {
+        tippyInstance?.destroy()
+        app?.unmount()
+        container?.remove()
+        app = null
+        tippyInstance = null
+      })
+    }
+
+    app = createApp({
       render() {
         return h(EditLink, {
-          show: true,
           href,
           onClose: () => {
+            settlePromise('reject', 'Link editing cancelled')
             destroy()
-            reject('Link editing cancelled')
           },
           onUpdateHref: (newHref: string) => {
+            settlePromise('resolve', newHref)
             destroy()
-            resolve(newHref)
           },
         })
       },
@@ -177,7 +249,7 @@ function openLinkEditor(href: string, anchor: HTMLElement): Promise<string> {
 
     app.mount(container)
 
-    const tippyInstance = tippy(anchor, {
+    tippyInstance = tippy(anchor, {
       getReferenceClientRect: () => virtualReference.getBoundingClientRect(),
       content: container,
       trigger: 'manual',
@@ -189,19 +261,68 @@ function openLinkEditor(href: string, anchor: HTMLElement): Promise<string> {
       maxWidth: 'none',
       onHidden() {
         destroy()
-        reject('Link editing cancelled')
       },
+      hideOnClick: true,
+      interactiveDebounce: 75,
     })
 
-    function destroy() {
-      setTimeout(() => {
-        tippyInstance.destroy()
-        app.unmount()
-        container.remove()
-      }, 0)
+    if (!tippyInstance) {
+      container.remove()
+      settlePromise('reject', 'Failed to initialize link editor tooltip')
+      return
     }
 
     tippyInstance.show()
+  })
+}
+
+function clearLinkOnBoundaryPlugin(options: {
+  editor: Editor
+  type: MarkType
+}) {
+  return new Plugin({
+    key: new PluginKey('clearLinkMarkOnBoundary'),
+    appendTransaction: (transactions, oldState, newState) => {
+      if (!options.editor.isEditable) {
+        return null
+      }
+
+      const { tr, doc, selection, storedMarks } = newState
+      const { $from, empty } = selection
+
+      if (!empty || !storedMarks || storedMarks.length === 0) {
+        // Only apply for cursor selections and if there are stored marks
+        return null
+      }
+
+      const linkMarkType = options.type
+      const hasStoredLinkMark = storedMarks.some(
+        (mark) => mark.type === linkMarkType,
+      )
+
+      if (!hasStoredLinkMark) {
+        return null
+      }
+
+      // Check if the cursor position itself has an active link mark in the document
+      const marksAtCursor = $from.marks()
+      const activeLinkAtCursor = marksAtCursor.some(
+        (mark) => mark.type === linkMarkType,
+      )
+
+      if (activeLinkAtCursor) {
+        // If there's an actual link mark active in the document at the cursor,
+        // then it's correct for the stored mark to be there.
+        return null
+      }
+
+      // If we are here, it means:
+      // 1. Selection is a cursor (empty).
+      // 2. There's a stored link mark.
+      // 3. There's no active link mark in the document at the cursor position.
+      // This indicates the stored link mark should be cleared.
+      return tr.setStoredMarks([])
+    },
   })
 }
 
