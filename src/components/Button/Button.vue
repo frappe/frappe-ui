@@ -85,6 +85,7 @@ const props = withDefaults(defineProps<ButtonProps>(), {
 })
 
 const slots = useSlots()
+const router = useRouter()
 
 const buttonClasses = computed(() => {
   let solidClasses = {
@@ -215,7 +216,6 @@ const isIconButton = computed(() => {
 
 const handleClick = () => {
   if (props.route) {
-    const router = useRouter()
     return router.push(props.route)
   } else if (props.link) {
     return window.open(props.link, '_blank')
