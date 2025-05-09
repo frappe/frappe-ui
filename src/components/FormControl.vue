@@ -1,9 +1,12 @@
 <template>
   <div v-if="type != 'checkbox'" :class="['space-y-1.5', attrs.class]">
-    <label class="block" :class="labelClasses" v-if="label" :for="id">
-      {{ label }}
-      <span class="text-ink-red-3" v-if="required">*</span>
-    </label>
+    <FormLabel
+      v-if="label"
+      :label="label"
+      :size="size"
+      :id="id"
+      :required="required"
+    />
     <Select
       v-if="type === 'select'"
       :id="id"
@@ -60,6 +63,7 @@ import Select from './Select.vue'
 import Textarea from './Textarea.vue'
 import Checkbox from './Checkbox.vue'
 import Autocomplete from './Autocomplete.vue'
+import FormLabel from './FormLabel.vue'
 
 interface FormControlProps {
   label?: string
