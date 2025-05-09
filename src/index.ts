@@ -59,8 +59,8 @@ export { default as ListGroupHeader } from './components/ListView/ListGroupHeade
 export { default as ListGroupRows } from './components/ListView/ListGroupRows.vue'
 export { default as ListSelectBanner } from './components/ListView/ListSelectBanner.vue'
 export { default as ListFooter } from './components/ListView/ListFooter.vue'
-export { default as Toast } from './components/Toast.vue'
-export { toast, Toasts } from './components/toast.js'
+export { default as Toast } from './components/Toast/Toast.vue'
+export { toast } from './components/Toast/index'
 export { default as Tooltip } from './components/Tooltip/Tooltip.vue'
 export { default as CommandPalette } from './components/CommandPalette/CommandPalette.vue'
 export { default as CommandPaletteItem } from './components/CommandPalette/CommandPaletteItem.vue'
@@ -69,6 +69,7 @@ export { default as Calendar } from './components/Calendar/Calendar.vue'
 export { default as NestedPopover } from './components/ListFilter/NestedPopover.vue'
 export { default as CircularProgressBar } from './components/CircularProgressBar.vue'
 export { default as Tree } from './components/Tree/Tree.vue'
+export { default as FrappeUIProvider } from './components/Provider/FrappeUIProvider.vue'
 
 // chart components
 export { default as AxisChart } from './components/Charts/AxisChart.vue'
