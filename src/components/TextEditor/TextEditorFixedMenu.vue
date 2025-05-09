@@ -45,6 +45,7 @@ export default {
           'Blockquote',
           'Code',
           'Horizontal Rule',
+          'FindReplace',
           [
             'InsertTable',
             'AddColumnBefore',
