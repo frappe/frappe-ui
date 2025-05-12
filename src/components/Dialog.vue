@@ -127,6 +127,7 @@
                       class="w-full"
                       v-for="action in actions"
                       :key="action.label"
+                      :disabled="action.disabled"
                       v-bind="action"
                     >
                       {{ action.label }}
@@ -223,7 +224,7 @@ const actions = computed(() => {
                 // let context: DialogActionContext = { close }
                 let backwardsCompatibleContext = function () {
                   console.warn(
-                    'Value passed to onClick is a context object. Please use context.close() instead of context() to close the dialog.',
+                    'Value passed to onClick is a context object. Please use context.close() instead of context() to close the dialog.'
                   )
                   close()
                 }
