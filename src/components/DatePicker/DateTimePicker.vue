@@ -15,7 +15,9 @@
         class="w-full"
         :class="inputClass"
         v-bind="$attrs"
-      />
+      >
+        <template #prefix><LucideCalendar class="size-4" /></template>
+      </TextInput>
     </template>
 
     <template #body="{ togglePopover }">

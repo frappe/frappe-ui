@@ -8,14 +8,15 @@
       <TextInput
         readonly
         type="text"
-        icon-left="calendar"
         :placeholder="placeholder"
         :value="dateValue && formatter ? formatter(dateValue) : dateValue"
         @focus="!readonly ? togglePopover() : null"
         class="w-full"
         :class="inputClass"
         v-bind="$attrs"
-      />
+      >
+        <template #prefix><LucideCalendar class="size-4" /></template>
+      </TextInput>
     </template>
 
     <template #body="{ togglePopover }">
