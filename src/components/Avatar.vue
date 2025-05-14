@@ -12,7 +12,7 @@
     />
     <div
       v-else
-      class="flex h-full w-full items-center justify-center bg-surface-gray-2 uppercase text-ink-gray-5"
+      class="flex h-full w-full items-center justify-center bg-surface-gray-2 uppercase text-ink-gray-5 select-none"
       :class="[labelClasses, shapeClasses]"
     >
       <div :class="iconClasses" v-if="$slots.default">
