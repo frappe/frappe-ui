@@ -28,8 +28,11 @@
               {{ props.label }}
             </label>
             <button
-              class="flex h-7 w-full items-center justify-between gap-2 rounded bg-surface-gray-2 px-2 py-1 transition-colors hover:bg-surface-gray-3 border border-transparent focus:border-outline-gray-4 focus:outline-none focus:ring-2 focus:ring-outline-gray-3"
-              :class="{ 'bg-surface-gray-3': isComboboxOpen }"
+              class="flex h-7 w-full items-center justify-between gap-2 rounded px-2 py-1 transition-colors"
+              :class="[
+                isComboboxOpen ? 'bg-surface-gray-3' : '',
+                variantClasses,
+              ]"
               @click="() => togglePopover()"
             >
               <div class="flex items-center overflow-hidden">
@@ -233,6 +236,7 @@ type AutocompleteOptions = AutocompleteOption[] | AutocompleteOptionGroup[]
 type AutocompleteProps = {
   label?: string
   options: AutocompleteOptions
+  variant?: 'subtle' | 'outline'
   hideSearch?: boolean
   placeholder?: string
   bodyClasses?: string | string[]
@@ -253,6 +257,7 @@ type AutocompleteProps = {
 const props = withDefaults(defineProps<AutocompleteProps>(), {
   multiple: false,
   hideSearch: false,
+  variant: 'subtle',
 })
 const emit = defineEmits(['update:modelValue', 'update:query', 'change'])
 
@@ -430,5 +435,14 @@ const togglePopover = () => {
 defineExpose({
   rootRef,
   togglePopover,
+})
+
+const variantClasses = computed(() => {
+  return {
+    subtle:
+      'bg-surface-gray-2 hover:bg-surface-gray-3 border border-transparent focus:border-outline-gray-4 focus:outline-none focus:ring-2 focus:ring-outline-gray-3',
+    outline:
+      'border border-outline-gray-2 bg-surface-white hover:border-outline-gray-3 focus:border-outline-gray-4 focus:ring-0 focus-visible:ring-2 focus-visible:ring-outline-gray-3',
+  }[props.variant]
 })
 </script>
