@@ -284,6 +284,8 @@ function getYAxisOptions(config: AxisChartConfig) {
             return formatValue(value, 1, true)
           },
         },
+        min: config.yAxis.yMin,
+        max: config.yAxis.yMax,
       }
 
   const secondaryYAxisOptions = {
@@ -324,6 +326,8 @@ function getYAxisOptions(config: AxisChartConfig) {
       },
       // color: '#000',
     },
+    min: config.y2Axis?.yMin,
+    max: config.y2Axis?.yMax,
   }
 
   return config.swapXY
