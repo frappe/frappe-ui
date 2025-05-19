@@ -30,7 +30,7 @@ function getIcons() {
     let iconSvg = LucideIcons[icon]
 
     // set stroke-width to 1.5
-    if (iconSvg && iconSvg.includes('stroke-width')) {
+    if (typeof iconSvg === 'string' && iconSvg.includes('stroke-width')) {
       iconSvg = iconSvg.replace(/stroke-width="2"/g, 'stroke-width="1.5"')
     }
     icons[icon] = iconSvg
