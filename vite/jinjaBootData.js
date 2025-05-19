@@ -1,4 +1,4 @@
-function jinjaBootData() {
+export function jinjaBootData() {
   return {
     name: 'frappeui-jinja-boot-data-plugin',
     transformIndexHtml(html, context) {
@@ -21,5 +21,3 @@ function jinjaBootData() {
     },
   }
 }
-
-module.exports = { jinjaBootData }

@@ -7,7 +7,13 @@
       <slot>
         <div class="flex flex-col gap-2 text-ink-gray-9 text-base">
           <div v-if="currentStep.message">{{ currentStep.message }}</div>
-          <video v-if="currentStep.videoURL" class="w-full rounded" controls>
+          <video
+            v-if="currentStep.videoURL"
+            class="w-full rounded"
+            controls
+            autoplay
+            muted
+          >
             <source :src="currentStep.videoURL" type="video/mp4" />
             Your browser does not support the video tag.
           </video>

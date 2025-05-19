@@ -1,7 +1,7 @@
-const path = require('path')
-const fs = require('fs')
+import path from 'path'
+import fs from 'fs'
 
-function buildConfig(options = {}) {
+export function buildConfig(options = {}) {
   let outDir = options.outDir || findOutputDir()
   if (!outDir) {
     console.error(
@@ -165,5 +165,3 @@ function findAppDir() {
 
   return null
 }
-
-module.exports = { buildConfig }

@@ -1,9 +1,9 @@
-const plugin = require('tailwindcss/plugin')
-const {
+import plugin from 'tailwindcss/plugin'
+import {
   generateColorPalette,
   generateSemanticColors,
   generateCSSVariables,
-} = require('./colorPalette')
+} from './colorPalette.js'
 
 let colorPalette = generateColorPalette()
 let semanticColors = generateSemanticColors()
@@ -49,7 +49,7 @@ let componentStyles = {
   },
 }
 
-module.exports = plugin(
+export default plugin(
   function ({ addBase, addComponents, theme }) {
     addBase({ ...globalStyles(theme), ...cssVariables })
     addComponents(componentStyles)
@@ -328,13 +328,21 @@ module.exports = plugin(
               'h5 strong': {
                 fontWeight: 600,
               },
+              'img[data-align=right]': {
+                marginLeft: 'auto',
+                marginRight: '0',
+              },
+              'img[data-align=center]': {
+                marginLeft: 'auto',
+                marginRight: 'auto',
+              },
             },
           },
           sm: {
             css: {
               fontSize: '14px',
               fontWeight: 420,
-              lineHeight: 1.6,
+              lineHeight: 1.5,
               letterSpacing: '0.02em',
               h1: {
                 fontSize: em(20, 14),
@@ -353,7 +361,7 @@ module.exports = plugin(
               },
               p: {
                 marginTop: '0.5rem',
-                marginBottom: '1rem',
+                marginBottom: '0.5rem',
               },
               'ul > li': {
                 margin: '0.5rem 0',

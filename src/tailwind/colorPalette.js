@@ -1,5 +1,5 @@
-const tailwindColors = require('tailwindcss/colors')
-const colorsData = require('./colors.json')
+import tailwindColors from 'tailwindcss/colors'
+import colorsData from './colors.json' assert { type: 'json' }
 
 function generateColorPalette() {
   const colorPalette = {
@@ -108,8 +108,4 @@ function generateSemanticColors() {
   return output
 }
 
-module.exports = {
-  generateColorPalette,
-  generateCSSVariables,
-  generateSemanticColors,
-}
+export { generateColorPalette, generateCSSVariables, generateSemanticColors }

@@ -1,8 +1,8 @@
-const { lucideIcons } = require('./lucideIcons')
-const { frappeProxy } = require('./frappeProxy')
-const { frappeTypes } = require('./frappeTypes')
-const { jinjaBootData } = require('./jinjaBootData')
-const { buildConfig } = require('./buildConfig')
+import { lucideIcons } from './lucideIcons.js'
+import { frappeProxy } from './frappeProxy.js'
+import { frappeTypes } from './frappeTypes.js'
+import { jinjaBootData } from './jinjaBootData.js'
+import { buildConfig } from './buildConfig.js'
 
 function frappeuiPlugin(
   options = {
@@ -32,4 +32,4 @@ function frappeuiPlugin(
   return plugins
 }
 
-module.exports = frappeuiPlugin
+export default frappeuiPlugin

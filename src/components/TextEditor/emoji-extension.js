@@ -25,6 +25,24 @@ export default Extension.create({
             .filter((item) =>
               item.name.toLowerCase().includes(query.toLowerCase()),
             )
+            .sort((a, b) => {
+              const aName = a.name.toLowerCase()
+              const bName = b.name.toLowerCase()
+              const queryLower = query.toLowerCase()
+
+              // Exact matches first
+              if (aName === queryLower && bName !== queryLower) return -1
+              if (bName === queryLower && aName !== queryLower) return 1
+
+              // Then names starting with the query
+              if (aName.startsWith(queryLower) && !bName.startsWith(queryLower))
+                return -1
+              if (bName.startsWith(queryLower) && !aName.startsWith(queryLower))
+                return 1
+
+              // Then sort by name length (shorter first)
+              return aName.length - bName.length
+            })
             .slice(0, 5)
         },
         render: () => {

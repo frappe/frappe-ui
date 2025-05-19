@@ -1,6 +1,7 @@
-/** @type {import('tailwindcss').Config} */
-module.exports = {
-  presets: [require('./src/tailwind/preset')],
+import preset from './src/tailwind/preset'
+
+export default {
+  presets: [preset],
   content: [
     './index.html',
     './App.vue',

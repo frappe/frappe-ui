@@ -1,10 +1,9 @@
-const themePlugin = require('./plugin')
+import themePlugin from './plugin.js'
+import forms from '@tailwindcss/forms'
+import typography from '@tailwindcss/typography'
+
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+export default {
   darkMode: ['selector', '[data-theme="dark"]'],
-  plugins: [
-    require('@tailwindcss/forms'),
-    require('@tailwindcss/typography'),
-    themePlugin,
-  ],
+  plugins: [forms, typography, themePlugin],
 }

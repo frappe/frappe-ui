@@ -15,8 +15,7 @@
 </template>
 
 <script>
-import { normalizeClass } from 'vue'
-import { computed } from '@vue/reactivity'
+import { normalizeClass, computed } from 'vue'
 import { Editor, EditorContent, VueNodeViewRenderer } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
@@ -25,9 +24,10 @@ import Table from '@tiptap/extension-table'
 import TableCell from '@tiptap/extension-table-cell'
 import TableHeader from '@tiptap/extension-table-header'
 import TableRow from '@tiptap/extension-table-row'
-import Image from './image-extension'
-import Video from './video-extension'
-import Link from '@tiptap/extension-link'
+import { ImageExtension } from './extensions/image'
+import ImageViewerExtension from './image-viewer-extension'
+import VideoExtension from './video-extension'
+import LinkExtension from './link-extension'
 import Typography from '@tiptap/extension-typography'
 import TextStyle from '@tiptap/extension-text-style'
 import Highlight from '@tiptap/extension-highlight'
@@ -40,6 +40,7 @@ import TextEditorFixedMenu from './TextEditorFixedMenu.vue'
 import TextEditorBubbleMenu from './TextEditorBubbleMenu.vue'
 import TextEditorFloatingMenu from './TextEditorFloatingMenu.vue'
 import EmojiExtension from './emoji-extension'
+import SlashCommands from './slash-commands-extension'
 import { detectMarkdown, markdownToHTML } from '../../utils/markdown'
 import { DOMParser } from 'prosemirror-model'
 
@@ -98,6 +99,10 @@ export default {
     mentions: {
       type: Array,
       default: () => [],
+    },
+    uploadFunction: {
+      type: Function,
+      default: () => null,
     },
   },
   emits: ['change', 'focus', 'blur'],
@@ -161,13 +166,17 @@ export default {
             return VueNodeViewRenderer(CodeBlockComponent)
           },
         }).configure({ lowlight }),
-        Image,
-        Video,
-        Link.configure({
+        ImageExtension.configure({
+          uploadFunction: this.uploadFunction,
+        }),
+        ImageViewerExtension,
+        VideoExtension.configure({
+          uploadFunction: this.uploadFunction,
+        }),
+        LinkExtension.configure({
           openOnClick: false,
         }),
         Placeholder.configure({
-          showOnlyWhenEditable: false,
           placeholder:
             typeof this.placeholder === 'function'
               ? this.placeholder
@@ -175,6 +184,7 @@ export default {
         }),
         configureMention(this.mentions),
         EmojiExtension,
+        SlashCommands,
         ...(this.extensions || []),
       ],
       onUpdate: ({ editor }) => {
@@ -239,7 +249,7 @@ export default {
 }
 
 /* Placeholder */
-.ProseMirror:not(.ProseMirror-focused) p.is-editor-empty:first-child::before {
+.ProseMirror:not(.ProseMirror-focused) p.is-editor-empty::before {
   content: attr(data-placeholder);
   float: left;
   color: var(--ink-gray-4);

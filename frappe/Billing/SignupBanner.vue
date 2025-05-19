@@ -7,14 +7,14 @@
       <slot>
         <div class="inline-flex gap-2 items-center font-medium">
           <FeatherIcon class="h-4" name="info" />
-          {{ __('Loved the demo?') }}
+          Loved the demo?
         </div>
         <div class="text-ink-gray-7 text-p-sm">
           {{ `Try ${appName} for free with a 14-day trial.` }}
         </div>
       </slot>
     </div>
-    <Button :label="__('Sign up now')" theme="blue" @click="signupNow">
+    <Button label="Sign up now" theme="blue" @click="signupNow">
       <template #prefix>
         <LightningIcon class="size-4" />
       </template>
