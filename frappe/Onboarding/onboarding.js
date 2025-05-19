@@ -1,6 +1,6 @@
 import call from '../../src/utils/call'
 import { createResource } from '../../src/resources'
-import { minimize } from '../Help/help'
+import { minimize, showHelpModal } from '../Help/help'
 import { sessionUser } from '../session'
 import { useStorage } from '@vueuse/core'
 import { computed, reactive } from 'vue'
@@ -140,6 +140,8 @@ export function useOnboarding(appName) {
   }
 
   function setUp(steps) {
+    showHelpModal.value = !isOnboardingStepsCompleted.value
+
     if (onboardings[appName]) return
 
     onboardings[appName] = steps
