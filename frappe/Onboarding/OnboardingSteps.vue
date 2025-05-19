@@ -126,7 +126,7 @@ function dependsOnTooltip(step) {
   if (step.dependsOn && !step.completed) {
     const dependsOnStep = steps.find((s) => s.name === step.dependsOn)
     if (dependsOnStep && !dependsOnStep.completed) {
-      return `First complete "${dependsOnStep.title}" step to proceed`
+      return `You need to complete "${dependsOnStep.title}" first.`
     }
   }
   return ''
