@@ -1,5 +1,5 @@
 <template>
-  <label :class="[type == 'checkbox' ? 'flex' : 'block', $attrs.class]">
+  <label :class="[type == 'checkbox' ? 'flex' : 'block', $attrs.class]" :style="$attrs.style">
     <span
       v-if="label && type != 'checkbox'"
       class="mb-2 block text-sm leading-4 text-gray-700"

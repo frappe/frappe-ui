@@ -3,6 +3,7 @@
     <div
       class="flex w-max min-w-full flex-col overflow-y-hidden"
       :class="$attrs.class"
+      :style="$attrs.style"
     >
       <slot v-bind="{ showGroupedRows, selectable }">
         <ListHeader />
