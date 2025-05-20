@@ -11,6 +11,7 @@
       v-if="type === 'select'"
       :id="id"
       v-bind="{ ...controlAttrs, size }"
+      :class="$slots.prefix ? 'pl-6' : ''"
     >
       <template #prefix v-if="$slots.prefix">
         <slot name="prefix" />
