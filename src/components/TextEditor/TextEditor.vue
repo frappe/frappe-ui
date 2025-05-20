@@ -1,5 +1,5 @@
 <template>
-  <div class="relative w-full" :class="$attrs.class" v-if="editor">
+  <div class="relative w-full" :class="$attrs.class" :style="$attrs.style" v-if="editor">
     <TextEditorBubbleMenu :buttons="bubbleMenu" :options="bubbleMenuOptions" />
     <TextEditorFixedMenu
       class="w-full overflow-x-auto rounded-t-lg border border-outline-gray-modals"

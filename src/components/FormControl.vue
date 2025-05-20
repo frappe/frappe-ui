@@ -1,5 +1,5 @@
 <template>
-  <div v-if="type != 'checkbox'" :class="['space-y-1.5', attrs.class]">
+  <div v-if="type != 'checkbox'" :class="['space-y-1.5', attrs.class]" :style="attrs.style">
     <FormLabel
       v-if="label"
       :label="label"
