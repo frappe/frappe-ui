@@ -1,10 +1,11 @@
-import { Extension, Editor, Range } from '@tiptap/core'
-import { VueRenderer } from '@tiptap/vue-3'
-import Suggestion, { SuggestionProps } from '@tiptap/suggestion'
+import { Editor, Range } from '@tiptap/core'
 import { PluginKey } from 'prosemirror-state'
-import tippy, { Instance as TippyInstance, Props as TippyProps } from 'tippy.js'
+import {
+  createSuggestionExtension,
+  type BaseSuggestionItem,
+} from './createSuggestionExtension'
 import SlashCommandsList from './SlashCommandsList.vue'
-import { Component } from 'vue'
+import { Component as VueComponent } from 'vue'
 
 import Heading2 from '~icons/lucide/heading-2'
 import Heading3 from '~icons/lucide/heading-3'
@@ -22,9 +23,9 @@ export const SlashCommandSuggestionKey = new PluginKey<any>(
   'slashCommandSuggestion',
 )
 
-interface Command {
+export interface CommandItem extends BaseSuggestionItem {
   title: string
-  icon: Component
+  icon: VueComponent
   command: (props: CommandExecutionProps) => void
 }
 
@@ -33,7 +34,7 @@ type CommandExecutionProps = {
   range: Range
 }
 
-const getCommands = (): Command[] => [
+const getCommands = (): CommandItem[] => [
   {
     title: 'Heading 2',
     icon: Heading2,
@@ -128,117 +129,27 @@ const getCommands = (): Command[] => [
   },
 ]
 
-type CommandProps = SuggestionProps<Command>
-
-export const SlashCommands = Extension.create({
+export const SlashCommands = createSuggestionExtension<CommandItem>({
   name: 'slashCommands',
-
-  addOptions() {
-    return {
-      suggestion: {
-        char: '/',
-        pluginKey: SlashCommandSuggestionKey,
-        items: ({ query }: { query: string }): Command[] => {
-          const commands = getCommands()
-          return commands.filter((item) =>
-            item.title.toLowerCase().startsWith(query.toLowerCase()),
-          )
-        },
-        command: ({
-          editor,
-          range,
-          props,
-        }: {
-          editor: Editor
-          range: Range
-          props: Command
-        }) => {
-          props.command({ editor, range })
-        },
-        render: () => {
-          let component: VueRenderer | null
-          let popup: TippyInstance[] | null
-
-          return {
-            onStart: (props: CommandProps) => {
-              component = new VueRenderer(SlashCommandsList, {
-                props,
-                editor: props.editor,
-              })
-
-              if (!props.clientRect || !component.element) {
-                return
-              }
-
-              const tippyOptions: Partial<TippyProps> = {
-                getReferenceClientRect: props.clientRect as () => DOMRect,
-                appendTo: () => document.body,
-                content: component.element,
-                showOnCreate: true,
-                interactive: true,
-                trigger: 'manual',
-                placement: 'bottom-start',
-              }
-
-              popup = tippy('body', tippyOptions)
-            },
-
-            onUpdate(props: CommandProps) {
-              component?.updateProps(props)
-
-              if (!props.clientRect) {
-                return
-              }
-
-              if (popup && popup[0]) {
-                popup[0].setProps({
-                  getReferenceClientRect: props.clientRect as () => DOMRect,
-                })
-              }
-            },
-
-            onKeyDown(props: { event: KeyboardEvent }): boolean {
-              if (props.event.key === 'Escape') {
-                if (popup && popup[0]) {
-                  popup[0].hide()
-                }
-                return true
-              }
-
-              if (
-                component &&
-                component.ref &&
-                typeof (component.ref as any).onKeyDown === 'function'
-              ) {
-                return (component.ref as any).onKeyDown(props)
-              }
-              return false
-            },
-
-            onExit() {
-              if (popup && popup[0]) {
-                popup[0].destroy()
-              }
-              if (component) {
-                component.destroy()
-              }
-              popup = null
-              component = null
-            },
-          }
-        },
-      },
+  char: '/',
+  pluginKey: SlashCommandSuggestionKey,
+  items: ({ query }) => {
+    const commands = getCommands()
+    return commands.filter((item) =>
+      item.title.toLowerCase().startsWith(query.toLowerCase()),
+    )
+  },
+  command: ({ editor, range, props: item }) => {
+    if (item && typeof item.command === 'function') {
+      item.command({ editor, range })
+    } else {
+      console.error(
+        'Slash command execution error: command function not found on selected item or item is invalid.',
+        item,
+      )
     }
   },
-
-  addProseMirrorPlugins() {
-    return [
-      Suggestion<Command>({
-        editor: this.editor,
-        ...this.options.suggestion,
-      }),
-    ]
-  },
+  component: SlashCommandsList,
 })
 
 export default SlashCommands
