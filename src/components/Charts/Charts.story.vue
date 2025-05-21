@@ -47,6 +47,10 @@ const simpleConfig: AxisChartConfig = {
   },
   yAxis: {
     title: 'Amount ($)',
+    echartOptions: {
+      min: 0,
+      max: 800,
+    }
   },
   series: [{ name: 'sales', type: 'bar' }],
 }
@@ -186,17 +190,17 @@ const funnelConfig = {
 
 <template>
   <Story :layout="{ type: 'grid', width: 800 }">
-    <Variant title="Number Charts">
+    <!-- <Variant title="Number Charts">
       <div class="flex gap-2">
         <NumberChart :config="numberChart1Config" />
         <NumberChart :config="numberChart2Config" />
         <NumberChart :config="numberChart3Config" />
       </div>
-    </Variant>
+    </Variant> -->
     <Variant title="Simple Bar Chart">
       <AxisChart :config="simpleConfig" />
     </Variant>
-    <Variant title="Stacked Bar Chart">
+    <!-- <Variant title="Stacked Bar Chart">
       <AxisChart :config="stackedConfig" />
     </Variant>
     <Variant title="Bar and Line Combo">
@@ -213,6 +217,6 @@ const funnelConfig = {
     </Variant>
     <Variant title="Funnel Chart">
       <FunnelChart :config="funnelConfig" />
-    </Variant>
+    </Variant> -->
   </Story>
 </template>

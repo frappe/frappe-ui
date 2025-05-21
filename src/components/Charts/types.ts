@@ -10,20 +10,32 @@ export type AxisChartConfig = {
     type: 'category' | 'time' | 'value'
     timeGrain?: TimeGrain
     title?: string
+    echartOptions?: {
+      [key: string]: any
+    }
   }
   yAxis: {
     title?: string
     yMin?: number
     yMax?: number
+    echartOptions?: {
+      [key: string]: any
+    }
   }
   y2Axis?: {
     title?: string
     yMin?: number
     yMax?: number
+    echartOptions?: {
+      [key: string]: any
+    }
   }
   swapXY?: boolean
   stacked?: boolean
   series: (BarSeriesConfig | LineSeriesConfig | AreaSeriesConfig)[]
+  echartOptions?: {
+    [key: string]: any
+  }
 }
 
 export type SeriesConfig = {
@@ -32,6 +44,9 @@ export type SeriesConfig = {
   color?: string
   axis?: 'y' | 'y2'
   showDataLabels?: boolean
+  echartOptions?: {
+    [key: string]: any
+  }
 }
 
 export type BarSeriesConfig = SeriesConfig & {
@@ -61,6 +76,9 @@ export type DonutChartConfig = {
   valueColumn: string
   maxSliceCount?: number
   showInlineLabels?: boolean
+  echartOptions?: {
+    [key: string]: any
+  }
 }
 
 export type FunnelChartConfig = {
@@ -71,6 +89,9 @@ export type FunnelChartConfig = {
   categoryColumn: string
   valueColumn: string
   showPercentages?: boolean
+  echartOptions?: {
+    [key: string]: any
+  }
 }
 
 export type NumberChartConfig = {
