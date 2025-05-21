@@ -136,7 +136,7 @@ import { getDate, getDateValue } from './utils'
 import { useDatePicker } from './useDatePicker'
 import { dayjsLocal } from '../../utils/dayjs'
 
-import type { DatePickerEmits, DatePickerProps } from './DatePicker'
+import type { DatePickerProps, DatePickerEmits } from './types'
 
 const props = defineProps<DatePickerProps>()
 const emit = defineEmits<DatePickerEmits>()
