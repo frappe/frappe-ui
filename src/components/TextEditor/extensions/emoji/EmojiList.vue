@@ -14,7 +14,7 @@
 
 <script setup lang="ts">
 import { ref, type PropType } from 'vue'
-import SuggestionList from './SuggestionList.vue'
+import SuggestionList from '../suggestion/SuggestionList.vue'
 import type { Editor, Range } from '@tiptap/core'
 import type { EmojiItem } from './emoji-extension'
 

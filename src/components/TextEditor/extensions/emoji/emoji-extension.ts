@@ -2,7 +2,7 @@ import { PluginKey } from 'prosemirror-state'
 import {
   BaseSuggestionItem,
   createSuggestionExtension,
-} from './createSuggestionExtension'
+} from '../suggestion/createSuggestionExtension'
 import EmojiList from './EmojiList.vue'
 import _EMOJIS from './emojis.json'
 

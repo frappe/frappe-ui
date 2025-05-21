@@ -1,5 +1,10 @@
 <template>
-  <div class="relative w-full" :class="$attrs.class" :style="$attrs.style" v-if="editor">
+  <div
+    class="relative w-full"
+    :class="$attrs.class"
+    :style="$attrs.style"
+    v-if="editor"
+  >
     <TextEditorBubbleMenu :buttons="bubbleMenu" :options="bubbleMenuOptions" />
     <TextEditorFixedMenu
       class="w-full overflow-x-auto rounded-t-lg border border-outline-gray-modals"
@@ -14,7 +19,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { normalizeClass, computed } from 'vue'
 import { Editor, EditorContent, VueNodeViewRenderer } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
@@ -39,8 +44,8 @@ import configureMention from './mention'
 import TextEditorFixedMenu from './TextEditorFixedMenu.vue'
 import TextEditorBubbleMenu from './TextEditorBubbleMenu.vue'
 import TextEditorFloatingMenu from './TextEditorFloatingMenu.vue'
-import EmojiExtension from './emoji-extension'
-import SlashCommands from './slash-commands-extension'
+import EmojiExtension from './extensions/emoji/emoji-extension'
+import SlashCommands from './extensions/slash-commands/slash-commands-extension'
 import { detectMarkdown, markdownToHTML } from '../../utils/markdown'
 import { DOMParser } from 'prosemirror-model'
 

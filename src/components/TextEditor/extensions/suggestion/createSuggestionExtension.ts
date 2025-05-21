@@ -79,13 +79,6 @@ export function createSuggestionExtension<TItem extends BaseSuggestionItem>(
                   ...defaultTippyOptions,
                   ...options.tippyOptions,
                 })
-
-                console.log({
-                  ...defaultTippyOptions,
-                  ...options.tippyOptions,
-                })
-
-                console.log(popup)
               },
 
               onUpdate(props: SuggestionProps<TItem>) {

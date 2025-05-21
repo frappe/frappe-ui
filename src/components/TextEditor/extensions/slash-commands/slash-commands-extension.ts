@@ -3,7 +3,7 @@ import { PluginKey } from 'prosemirror-state'
 import {
   createSuggestionExtension,
   type BaseSuggestionItem,
-} from './createSuggestionExtension'
+} from '../suggestion/createSuggestionExtension'
 import SlashCommandsList from './SlashCommandsList.vue'
 import { Component as VueComponent } from 'vue'
 
