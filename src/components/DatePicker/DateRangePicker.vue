@@ -130,7 +130,7 @@ import TextInput from '../TextInput.vue'
 import { getDate, getDateValue } from './utils'
 import { useDatePicker } from './useDatePicker'
 
-import type { DatePickerEmits, DatePickerProps } from './DatePicker'
+import type { DatePickerEmits, DatePickerProps } from './types'
 
 const props = defineProps<DatePickerProps>()
 const emit = defineEmits<DatePickerEmits>()
