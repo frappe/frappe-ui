@@ -37,6 +37,7 @@
     "@tiptap/extension-code-block": "^2.11.9",
     "@tiptap/extension-code-block-lowlight": "^2.11.5",
     "@tiptap/extension-color": "^2.0.3",
+    "@tiptap/extension-heading": "^2.12.0",
     "@tiptap/extension-highlight": "^2.0.3",
     "@tiptap/extension-image": "^2.0.3",
     "@tiptap/extension-link": "^2.0.3",

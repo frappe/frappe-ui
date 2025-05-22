@@ -31,16 +31,26 @@ export interface CreateSuggestionExtensionOptions<
   startOfLine?: boolean
   decorationTag?: string
   decorationClass?: string
+  addOptions?: () => Record<string, any>
 }
 
 export function createSuggestionExtension<TItem extends BaseSuggestionItem>(
   options: CreateSuggestionExtensionOptions<TItem>,
 ) {
-  return Extension.create({
+  type ExtensionFullOptions = Record<string, any> & {
+    suggestion: Omit<SuggestionOptions<TItem>, 'editor'>
+  }
+
+  return Extension.create<ExtensionFullOptions>({
     name: options.name,
 
     addOptions() {
+      const customOptions = options.addOptions
+        ? options.addOptions.call(this)
+        : {}
+
       return {
+        ...customOptions,
         suggestion: {
           char: options.char,
           pluginKey: options.pluginKey,

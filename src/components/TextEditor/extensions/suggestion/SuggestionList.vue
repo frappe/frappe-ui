@@ -22,7 +22,7 @@
       @mouseover="selectedIndex = index"
     >
       <slot :item="item" :index="index">
-        <span>{{ item.title || item.name }}</span>
+        <span>{{ item.display || item.title || item.name }}</span>
       </slot>
     </button>
     <div
