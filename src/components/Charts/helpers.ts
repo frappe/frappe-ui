@@ -73,3 +73,34 @@ export function formatDate(date: string, format?: string, grain: TimeGrain = 'da
 
   return dayjs(date).format(format)
 }
+
+
+export function isObject(item: any) {
+  return item && typeof item === 'object' && !Array.isArray(item)
+}
+
+export function mergeDeep(target: any, ...sources: any[]) {
+  if (!sources.length) return target;
+  const source = sources.shift();
+
+  if (!source || !isObject(target) || !isObject(source)) {
+    // Skip the current source if it's not a proper object
+    return mergeDeep(target, ...sources);
+  }
+
+  let output = Object.assign({}, target);
+
+  Object.keys(source).forEach((key) => {
+    if (isObject(source[key])) {
+      if (!(key in output)) {
+        output[key] = source[key];
+      } else {
+        output[key] = mergeDeep(output[key], source[key]);
+      }
+    } else {
+      output[key] = source[key];
+    }
+  });
+
+  return mergeDeep(output, ...sources);
+}
