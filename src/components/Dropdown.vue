@@ -99,10 +99,18 @@ type DropdownGroupOption = {
 
 type DropdownOptions = Array<DropdownOption | DropdownGroupOption>
 
+type PlacementOptions =
+  | 'left'
+  | 'right'
+  | 'center'
+  | 'top'
+  | 'top-left'
+  | 'top-right'
+
 interface DropdownProps {
   button?: ButtonProps
   options?: DropdownOptions
-  placement?: string
+  placement?: PlacementOptions
 }
 
 const props = withDefaults(defineProps<DropdownProps>(), {
