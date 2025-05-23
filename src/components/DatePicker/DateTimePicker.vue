@@ -5,19 +5,24 @@
     :placement="placement"
   >
     <template #target="{ togglePopover }">
-      <TextInput
-        readonly
-        type="text"
-        icon-left="calendar"
-        :placeholder="placeholder"
-        :value="dateValue && formatter ? formatter(dateValue) : dateValue"
-        @focus="!readonly ? togglePopover() : null"
-        class="w-full"
-        :class="inputClass"
-        v-bind="$attrs"
-      >
-        <template #prefix><LucideCalendar class="size-4" /></template>
-      </TextInput>
+      <div class="flex flex-col space-y-1.5">
+        <label v-if="props.label" class="block text-xs text-ink-gray-5">
+          {{ props.label }}
+        </label>
+        <TextInput
+          readonly
+          type="text"
+          icon-left="calendar"
+          :placeholder="placeholder"
+          :value="dateValue && formatter ? formatter(dateValue) : dateValue"
+          @focus="!readonly ? togglePopover() : null"
+          class="w-full"
+          :class="inputClass"
+          v-bind="$attrs"
+        >
+          <template #prefix><LucideCalendar class="size-4" /></template>
+        </TextInput>
+      </div>
     </template>
 
     <template #body="{ togglePopover }">
