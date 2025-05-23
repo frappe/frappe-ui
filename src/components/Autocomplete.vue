@@ -239,6 +239,7 @@ type AutocompleteProps = {
   loading?: boolean
   placement?: string
   showFooter?: boolean
+  unique?: boolean
 } & (
   | {
       multiple: true
@@ -335,11 +336,25 @@ const selectedValue = computed({
   set(val) {
     query.value = ''
     if (val && !props.multiple) showOptions.value = false
+
+    // Single-select mode: just emit the value as is, no need for unique checks.
     if (!props.multiple) {
-      emit('update:modelValue', val)
-      return
+      emit('update:modelValue', val?.value ?? null)
+      emit('change', val?.value ?? null)
+    } else {
+      const values = (val || []) as Option[]
+      const uniqueValues = props.unique
+        ? [...new Map(values.map((v) => [v.value, v])).values()]
+        : values
+      emit(
+        'update:modelValue',
+        uniqueValues.map((v) => v.value)
+      )
+      emit(
+        'change',
+        uniqueValues.map((v) => v.value)
+      )
     }
-    emit('update:modelValue', val)
   },
 })
 
