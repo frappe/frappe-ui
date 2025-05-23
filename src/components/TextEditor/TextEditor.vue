@@ -1,10 +1,9 @@
 <template>
   <div
-    class="relative w-full"
+    class="relative w-full table-editor"
     :class="$attrs.class"
     :style="$attrs.style"
     v-if="editor"
-    @mousemove="handleEditorMouseMove"
     ref="editorContainer"
   >
     <TextEditorBubbleMenu :buttons="bubbleMenu" :options="bubbleMenuOptions" />
@@ -18,34 +17,6 @@
       <editor-content :editor="editor" />
     </slot>
     <slot name="bottom" />
-    <TableCellActionHandle
-      v-if="showActionHandle"
-      :position="actionHandlePosition"
-      :axis="actionHandleAxis"
-      @click="showTableActionMenu"
-    />
-    <TableCellActionHandle
-      v-if="showColumnActionDots"
-      class="column-action-handle"
-      :position="columnActionPosition"
-      :axis="'column'"
-      @click="showTableActionMenu('column')"
-    />
-    <TableCellActionHandle
-      v-if="showRowActionDots"
-      class="row-action-handle"
-      :position="rowActionPosition"
-      :axis="'row'"
-      @click="showTableActionMenu('row')"
-    />
-    <TableActionMenu
-      v-if="showMenu"
-      :editor="editor"
-      :position="menuPosition"
-      :axis="menuAxis"
-      :cell-info="activeCellInfo"
-      @close="hideTableActionMenu"
-    />
   </div>
 </template>
 
@@ -55,10 +26,6 @@ import { Editor, EditorContent, VueNodeViewRenderer } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import TextAlign from '@tiptap/extension-text-align'
-import Table from '@tiptap/extension-table'
-import TableCell from '@tiptap/extension-table-cell'
-import TableHeader from '@tiptap/extension-table-header'
-import TableRow from '@tiptap/extension-table-row'
 import { ImageExtension } from './extensions/image'
 import ImageViewerExtension from './image-viewer-extension'
 import VideoExtension from './video-extension'
@@ -80,8 +47,7 @@ import { detectMarkdown, markdownToHTML } from '../../utils/markdown'
 import { DOMParser } from 'prosemirror-model'
 import { TagNode, TagExtension } from './extensions/tag/tag-extension'
 import { Heading } from './extensions/heading/heading'
-import TableCellActionHandle from './TableCellActionHandle.vue'
-import TableActionMenu from './TableActionMenu.vue'
+import { TableExtension, TableHandler } from './extensions/table'
 
 const lowlight = createLowlight(common)
 
@@ -93,8 +59,6 @@ export default {
     TextEditorFixedMenu,
     TextEditorBubbleMenu,
     TextEditorFloatingMenu,
-    TableCellActionHandle,
-    TableActionMenu,
   },
   props: {
     content: {
@@ -160,20 +124,6 @@ export default {
   data() {
     return {
       editor: null,
-      showActionHandle: false,
-      actionHandlePosition: { top: 0, left: 0 },
-      actionHandleAxis: 'row', // 'row' or 'column'
-      showMenu: false,
-      menuPosition: { top: 0, left: 0 },
-      menuAxis: 'row',
-      hoveredCellInfo: null, // { element, pos, node, rowIndex, colIndex, isFirstRow, isFirstCol }
-      showColumnActionDots: false,
-      showRowActionDots: false,
-      columnActionPosition: { top: 0, left: 0 },
-      columnCellInfo: null,
-      rowActionPosition: { top: 0, left: 0 },
-      rowCellInfo: null,
-      activeCellInfo: null,
     }
   },
   watch: {
@@ -214,12 +164,10 @@ export default {
             ? this.starterkitOptions.heading
             : {}),
         }),
-        Table.configure({
-          resizable: true,
+        TableExtension.configure({
+          scrollable: true,
+          showActionHandles: this.editable,
         }),
-        TableRow,
-        TableHeader,
-        TableCell,
         Typography,
         TextAlign.configure({
           types: ['heading', 'paragraph'],
@@ -259,23 +207,27 @@ export default {
       ],
       onUpdate: ({ editor }) => {
         this.$emit('change', editor.getHTML())
-        this.hideTableActionMenu()
-        this.hideActionHandle()
       },
       onFocus: ({ editor, event }) => {
         this.$emit('focus', event)
       },
       onBlur: ({ editor, event }) => {
         this.$emit('blur', event)
-        setTimeout(() => {
-          if (!this.showMenu) {
-            this.hideActionHandle()
-          }
-        }, 100)
       },
+    })
+
+    this.$nextTick(() => {
+      if (this.$refs.editorContainer && this.editor) {
+        const tableHandler = new TableHandler(this.editor, this.$refs.editorContainer)
+        this.$refs.editorContainer.tableHandler = tableHandler
+      }
     })
   },
   beforeUnmount() {
+    if (this.$refs.editorContainer?.tableHandler) {
+      this.$refs.editorContainer.tableHandler.destroy()
+      this.$refs.editorContainer.tableHandler = null
+    }
     this.editor.destroy()
     this.editor = null
   },
@@ -309,223 +261,6 @@ export default {
             context: $context,
           })
         },
-      }
-    },
-  },
-  methods: {
-    handleEditorMouseMove(event) {
-      if (!this.editor || !this.editable || this.showMenu) {
-        if (!this.showMenu) this.hideActionHandle()
-        return
-      }
-
-      const view = this.editor.view
-      const pos = view.posAtCoords({ left: event.clientX, top: event.clientY })
-      if (!pos) return
-
-      const directDom = view.domAtPos(pos.pos)
-      let cell =
-        directDom?.node.nodeType === Node.ELEMENT_NODE
-          ? directDom.node
-          : directDom?.node.parentElement
-
-      while (
-        cell &&
-        cell.tagName !== 'TD' &&
-        cell.tagName !== 'TH' &&
-        cell.closest('.ProseMirror')
-      ) {
-        cell = cell.parentElement
-      }
-
-      if (cell && (cell.tagName === 'TD' || cell.tagName === 'TH')) {
-        const cellPos = this.getCellPosition(cell)
-        const table = cell.closest('table')
-
-        if (!table) {
-          this.hideActionHandleIfNeeded(event)
-          return
-        }
-
-        const editorContainerRect =
-          this.$refs.editorContainer.getBoundingClientRect()
-
-        const topmostCell = this.getTopmostCellInColumn(table, cellPos.colIndex)
-        const leftmostCell = this.getLeftmostCellInRow(table, cellPos.rowIndex)
-
-        if (topmostCell) {
-          const topmostRect = topmostCell.getBoundingClientRect()
-          this.showColumnActionDots = true
-          this.columnActionPosition = {
-            top: topmostRect.top - editorContainerRect.top,
-            left:
-              topmostRect.left -
-              editorContainerRect.left +
-              topmostRect.width / 2,
-          }
-          this.columnCellInfo = {
-            element: topmostCell,
-            axis: 'column',
-            ...this.getCellPosition(topmostCell),
-            hoveredColIndex: cellPos.colIndex,
-            originalHoveredCell: cell,
-          }
-        }
-
-        if (leftmostCell) {
-          const leftmostRect = leftmostCell.getBoundingClientRect()
-          this.showRowActionDots = true
-          this.rowActionPosition = {
-            top:
-              leftmostRect.top -
-              editorContainerRect.top +
-              leftmostRect.height / 2,
-            left: leftmostRect.left - editorContainerRect.left,
-          }
-          this.rowCellInfo = {
-            element: leftmostCell,
-            axis: 'row',
-            ...this.getCellPosition(leftmostCell),
-            hoveredRowIndex: cellPos.rowIndex,
-            originalHoveredCell: cell,
-          }
-        }
-
-        this.hoveredCellInfo = {
-          element: cell,
-          ...cellPos,
-        }
-
-        return
-      } else {
-        this.hideActionHandleIfNeeded(event)
-      }
-    },
-    getTopmostCellInColumn(table, colIndex) {
-      const rows = table.querySelectorAll('tr')
-      if (rows.length === 0) return null
-
-      const firstRow = rows[0]
-      const cells = Array.from(firstRow.children)
-      return cells[colIndex] || null
-    },
-    getLeftmostCellInRow(table, rowIndex) {
-      const rows = table.querySelectorAll('tr')
-      if (rowIndex >= rows.length) return null
-
-      const targetRow = rows[rowIndex]
-      const cells = Array.from(targetRow.children)
-      return cells[0] || null
-    },
-    hideActionHandleIfNeeded(event) {
-      if (this.showColumnActionDots || this.showRowActionDots) {
-        const columnHandleEl = this.$el.querySelector('.column-action-handle')
-        const rowHandleEl = this.$el.querySelector('.row-action-handle')
-        if (
-          (columnHandleEl && columnHandleEl.contains(event.target)) ||
-          (rowHandleEl && rowHandleEl.contains(event.target))
-        ) {
-          return
-        }
-      }
-      this.hideActionHandle()
-    },
-    hideActionHandle() {
-      this.showActionHandle = false
-      this.showColumnActionDots = false
-      this.showRowActionDots = false
-      this.hoveredCellInfo = null
-      this.columnCellInfo = null
-      this.rowCellInfo = null
-    },
-    focusCellForMenu(cellInfo) {
-      if (!cellInfo || !cellInfo.element) {
-        return false
-      }
-
-      const targetElement = cellInfo.originalHoveredCell || cellInfo.element
-      if (!targetElement) return false
-
-      const view = this.editor.view
-      try {
-        let pos = view.posAtDOM(targetElement, 0)
-        if (pos === null || pos === undefined || pos < 0) {
-          const rect = targetElement.getBoundingClientRect()
-          const coords = view.posAtCoords({
-            left: rect.left + 1,
-            top: rect.top + 1,
-          })
-          if (coords) {
-            pos = coords.pos
-          }
-        }
-
-        if (pos !== null && pos !== undefined && pos >= 0) {
-          this.editor.commands.setTextSelection(pos)
-          this.editor.commands.focus()
-          return true
-        } else {
-          return false
-        }
-      } catch (error) {
-        this.editor.commands.focus()
-        return false
-      }
-    },
-    showTableActionMenu(type) {
-      const cellInfo =
-        type === 'column' ? this.columnCellInfo : this.rowCellInfo
-      const position =
-        type === 'column' ? this.columnActionPosition : this.rowActionPosition
-
-      if (!cellInfo) {
-        return
-      }
-
-      this.focusCellForMenu(cellInfo)
-
-      const editorContainerRect =
-        this.$refs.editorContainer.getBoundingClientRect()
-
-      if (type === 'row') {
-        this.menuPosition = {
-          top: position.top,
-          left: position.left + 20,
-        }
-      } else {
-        this.menuPosition = {
-          top: position.top + 20,
-          left: position.left,
-        }
-      }
-      this.menuAxis = type
-      this.activeCellInfo = cellInfo
-      this.showMenu = true
-    },
-    hideTableActionMenu() {
-      this.showMenu = false
-      this.activeCellInfo = null
-    },
-    getCellPosition(cellElement) {
-      const table = cellElement.closest('table')
-      if (!table)
-        return {
-          rowIndex: -1,
-          colIndex: -1,
-          isFirstRow: false,
-          isFirstCol: false,
-        }
-
-      const row = cellElement.closest('tr')
-      const rowIndex = Array.from(table.querySelectorAll('tr')).indexOf(row)
-      const colIndex = Array.from(row.children).indexOf(cellElement)
-
-      return {
-        rowIndex,
-        colIndex,
-        isFirstRow: rowIndex === 0,
-        isFirstCol: colIndex === 0,
-        cellElement,
       }
     },
   },

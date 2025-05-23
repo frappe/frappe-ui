@@ -40,20 +40,20 @@ export default {
           top: `${this.position.top}px`,
           left: `${this.position.left}px`,
           transform: 'translate(-50%, -50%)',
-        };
+        }
       } else {
         return {
           top: `${this.position.top}px`,
           left: `${this.position.left}px`,
           transform: 'translate(-50%, -50%)',
-        };
+        }
       }
     },
   },
   methods: {
     handleClick(event) {
-      this.$emit('click');
+      this.$emit('click')
     },
   },
-};
+}
 </script>

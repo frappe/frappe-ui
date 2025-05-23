@@ -33,8 +33,8 @@
 </template>
 
 <script>
-import commands from './commands'
-import FeatherIcon from '../FeatherIcon.vue'
+import commands from '../../commands'
+import FeatherIcon from '../../../FeatherIcon.vue'
 
 export default {
   name: 'TableActionMenu',
@@ -94,6 +94,7 @@ export default {
       this.$nextTick(() => {
         action.action(this.editor)
         this.$emit('close')
+        this.$el.dispatchEvent(new CustomEvent('vue:close'))
       })
     },
     focusHoveredCell() {
@@ -203,12 +204,18 @@ export default {
     this.outsideClickListener = (event) => {
       if (!this.$el.contains(event.target)) {
         this.$emit('close')
+        this.$el.dispatchEvent(new CustomEvent('vue:close'))
       }
     }
-    document.addEventListener('click', this.outsideClickListener, true)
+
+    setTimeout(() => {
+      document.addEventListener('click', this.outsideClickListener, true)
+    }, 100)
   },
   beforeUnmount() {
-    document.removeEventListener('click', this.outsideClickListener, true)
+    if (this.outsideClickListener) {
+      document.removeEventListener('click', this.outsideClickListener, true)
+    }
   },
 }
 </script>

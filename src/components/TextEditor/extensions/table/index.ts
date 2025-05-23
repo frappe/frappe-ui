@@ -1,0 +1,5 @@
+export { default as TableExtension } from './table-extension'
+export type { TableExtensionOptions } from './table-extension'
+export { default as TableHandler } from './TableHandler'
+export { default as TableActionMenu } from './TableActionMenu.vue'
+export { default as TableCellActionHandle } from './TableCellActionHandle.vue'
