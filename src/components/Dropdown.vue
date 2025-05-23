@@ -72,12 +72,12 @@
 </template>
 
 <script setup lang="ts">
-import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
-import Popover from './Popover.vue'
-import { Button, ButtonProps } from './Button'
-import FeatherIcon from './FeatherIcon.vue'
+import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 import { computed } from 'vue'
 import { RouterLinkProps, useRouter } from 'vue-router'
+import { Button, ButtonProps } from './Button'
+import FeatherIcon from './FeatherIcon.vue'
+import Popover from './Popover.vue'
 
 const router = useRouter()
 
@@ -191,6 +191,9 @@ const popoverPlacement = computed(() => {
   if (props.placement === 'left') return 'bottom-start'
   if (props.placement === 'right') return 'bottom-end'
   if (props.placement === 'center') return 'bottom-center'
+  if (props.placement === 'top') return 'top'
+  if (props.placement === 'top-left') return 'top-start'
+  if (props.placement === 'top-right') return 'top-end'
   return 'bottom'
 })
 </script>
