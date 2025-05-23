@@ -336,27 +336,25 @@ const selectedValue = computed({
   set(val) {
     query.value = ''
     if (val && !props.multiple) showOptions.value = false
-    if (!props.multiple) {
-      emit('update:modelValue', val)
-      return
-    }
 
-    if (props.unique) {
-      // Only allow unique values when unique is true
-      const uniqueVals = []
-      const seen = new Set()
-      for (const v of val) {
-        const value = isOption(v) ? v.value : v
-        if (!seen.has(value)) {
-          seen.add(value)
-          uniqueVals.push(v)
-        }
-      }
-      emit('update:modelValue', uniqueVals)
-      return
-    } 
-    
-    emit('update:modelValue', val)
+    // Single-select mode: just emit the value as is, no need for unique checks.
+    if (!props.multiple) {
+      emit('update:modelValue', val?.value ?? null)
+      emit('change', val?.value ?? null)
+    } else {
+      const values = (val || []) as Option[]
+      const uniqueValues = props.unique
+        ? [...new Map(values.map((v) => [v.value, v])).values()]
+        : values
+      emit(
+        'update:modelValue',
+        uniqueValues.map((v) => v.value)
+      )
+      emit(
+        'change',
+        uniqueValues.map((v) => v.value)
+      )
+    }
   },
 })
 
