@@ -6,6 +6,7 @@ export interface DatePickerProps {
   readonly?: boolean
   inputClass?: string | Array<string> | Record<string, boolean>
   placement?: string
+  label?: string
 }
 
 export type DatePickerEmits = {
