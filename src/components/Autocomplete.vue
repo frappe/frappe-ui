@@ -239,6 +239,7 @@ type AutocompleteProps = {
   loading?: boolean
   placement?: string
   showFooter?: boolean
+  unique?: boolean
 } & (
   | {
       multiple: true
@@ -339,6 +340,22 @@ const selectedValue = computed({
       emit('update:modelValue', val)
       return
     }
+
+    if (props.unique) {
+      // Only allow unique values when unique is true
+      const uniqueVals = []
+      const seen = new Set()
+      for (const v of val) {
+        const value = isOption(v) ? v.value : v
+        if (!seen.has(value)) {
+          seen.add(value)
+          uniqueVals.push(v)
+        }
+      }
+      emit('update:modelValue', uniqueVals)
+      return
+    } 
+    
     emit('update:modelValue', val)
   },
 })

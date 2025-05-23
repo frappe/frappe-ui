@@ -99,5 +99,17 @@ const options = [
         />
       </div>
     </Variant>
+    <Variant title="Multiple options without duplicates">
+      <div class="p-2">
+        <Autocomplete
+          :options="options"
+          v-model="people"
+          placeholder="Select people"
+          :multiple="true"
+          :hideSearch="true"
+          :unique="true"
+        />
+      </div>
+    </Variant>
   </Story>
 </template>
