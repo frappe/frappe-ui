@@ -1,9 +1,10 @@
 <template>
   <div
-    class="relative w-full"
+    class="relative w-full table-editor"
     :class="$attrs.class"
     :style="$attrs.style"
     v-if="editor"
+    ref="editorContainer"
   >
     <TextEditorBubbleMenu :buttons="bubbleMenu" :options="bubbleMenuOptions" />
     <TextEditorFixedMenu
@@ -25,10 +26,6 @@ import { Editor, EditorContent, VueNodeViewRenderer } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import TextAlign from '@tiptap/extension-text-align'
-import Table from '@tiptap/extension-table'
-import TableCell from '@tiptap/extension-table-cell'
-import TableHeader from '@tiptap/extension-table-header'
-import TableRow from '@tiptap/extension-table-row'
 import { ImageExtension } from './extensions/image'
 import ImageViewerExtension from './image-viewer-extension'
 import VideoExtension from './video-extension'
@@ -50,6 +47,7 @@ import { detectMarkdown, markdownToHTML } from '../../utils/markdown'
 import { DOMParser } from 'prosemirror-model'
 import { TagNode, TagExtension } from './extensions/tag/tag-extension'
 import { Heading } from './extensions/heading/heading'
+import { TableExtension, TableHandler } from './extensions/table'
 
 const lowlight = createLowlight(common)
 
@@ -166,12 +164,10 @@ export default {
             ? this.starterkitOptions.heading
             : {}),
         }),
-        Table.configure({
-          resizable: true,
+        TableExtension.configure({
+          scrollable: true,
+          showActionHandles: this.editable,
         }),
-        TableRow,
-        TableHeader,
-        TableCell,
         Typography,
         TextAlign.configure({
           types: ['heading', 'paragraph'],
@@ -219,8 +215,19 @@ export default {
         this.$emit('blur', event)
       },
     })
+
+    this.$nextTick(() => {
+      if (this.$refs.editorContainer && this.editor) {
+        const tableHandler = new TableHandler(this.editor, this.$refs.editorContainer)
+        this.$refs.editorContainer.tableHandler = tableHandler
+      }
+    })
   },
   beforeUnmount() {
+    if (this.$refs.editorContainer?.tableHandler) {
+      this.$refs.editorContainer.tableHandler.destroy()
+      this.$refs.editorContainer.tableHandler = null
+    }
     this.editor.destroy()
     this.editor = null
   },
@@ -230,6 +237,7 @@ export default {
         attributes: {
           class: normalizeClass([
             'prose prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-outline-gray-2 prose-th:border-outline-gray-2 prose-td:relative prose-th:relative prose-th:bg-surface-gray-2',
+            'scrollable-tables',
             this.editorClass,
           ]),
         },
@@ -346,5 +354,77 @@ img.ProseMirror-selectednode {
 
 .tag-suggestion-active {
   background-color: var(--surface-gray-2, #f3f3f3);
+}
+
+.scrollable-tables table {
+  table-layout: auto !important;
+  width: 100%;
+  min-width: 100%;
+  max-width: none;
+  overflow-x: auto;
+  display: block;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.scrollable-tables table thead,
+.scrollable-tables table tbody,
+.scrollable-tables table tfoot {
+  display: table;
+  width: 100%;
+  table-layout: auto;
+}
+
+.scrollable-tables table tr {
+  display: table-row;
+}
+
+.scrollable-tables table th,
+.scrollable-tables table td {
+  display: table-cell;
+  white-space: nowrap;
+  min-width: 120px;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.scrollable-tables table .selectedCell:after {
+  z-index: 2;
+  position: absolute;
+  content: '';
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+  background: theme('colors.blue.200');
+  opacity: 0.3;
+}
+
+.scrollable-tables table .column-resize-handle {
+  position: absolute;
+  right: -1px;
+  top: 0;
+  bottom: -2px;
+  width: 4px;
+  background-color: theme('colors.blue.200');
+  pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .scrollable-tables table th,
+  .scrollable-tables table td {
+    min-width: 100px;
+    max-width: 200px;
+  }
+}
+
+@media (max-width: 480px) {
+  .scrollable-tables table th,
+  .scrollable-tables table td {
+    min-width: 80px;
+    max-width: 150px;
+  }
 }
 </style>
