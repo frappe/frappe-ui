@@ -37,8 +37,8 @@ export * from './components/TabButtons'
 export { default as Tabs } from './components/Tabs/Tabs.vue'
 export { default as TabList } from './components/Tabs/TabList.vue'
 export { default as TabPanel } from './components/Tabs/TabPanel.vue'
-export { default as TextInput } from './components/TextInput/TextInput.vue'
-export { default as Textarea } from './components/Textarea/Textarea.vue'
+export * from './components/TextInput'
+export * from './components/Textarea'
 export {
   TextEditor,
   TextEditorFixedMenu,
