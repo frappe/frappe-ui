@@ -2,7 +2,7 @@
   <SuggestionList
     ref="suggestionList"
     :items="items"
-    :command="selectItem"
+    :command="(item) => onItemSelect(item as EmojiItem)"
     item-class="py-2"
   >
     <template #default="{ item }">
@@ -14,29 +14,34 @@
 
 <script setup lang="ts">
 import { ref, type PropType } from 'vue'
-import SuggestionList, { type SuggestionItem } from './SuggestionList.vue'
-
-interface EmojiItem extends SuggestionItem {
-  name: string
-  emoji: string
-}
+import SuggestionList from '../suggestion/SuggestionList.vue'
+import type { Editor, Range } from '@tiptap/core'
+import type { EmojiItem } from './emoji-extension'
 
 const props = defineProps({
   items: {
     type: Array as PropType<EmojiItem[]>,
     required: true,
   },
+  editor: {
+    type: Object as PropType<Editor>,
+    required: true,
+  },
+  range: {
+    type: Object as PropType<Range>,
+    required: true,
+  },
   command: {
-    type: Function as PropType<(params: { emoji: string }) => void>,
+    type: Function as PropType<(item: EmojiItem) => void>,
     required: true,
   },
 })
 
 const suggestionList = ref<InstanceType<typeof SuggestionList> | null>(null)
 
-const selectItem = (item: SuggestionItem) => {
+const onItemSelect = (item: EmojiItem) => {
   if (item) {
-    props.command({ emoji: item.emoji })
+    props.command(item)
   }
 }
 

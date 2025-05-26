@@ -1,5 +1,10 @@
 <template>
-  <div class="relative w-full" :class="$attrs.class" :style="$attrs.style" v-if="editor">
+  <div
+    class="relative w-full"
+    :class="$attrs.class"
+    :style="$attrs.style"
+    v-if="editor"
+  >
     <TextEditorBubbleMenu :buttons="bubbleMenu" :options="bubbleMenuOptions" />
     <TextEditorFixedMenu
       class="w-full overflow-x-auto rounded-t-lg border border-outline-gray-modals"
@@ -14,7 +19,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { normalizeClass, computed } from 'vue'
 import { Editor, EditorContent, VueNodeViewRenderer } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
@@ -39,10 +44,12 @@ import configureMention from './mention'
 import TextEditorFixedMenu from './TextEditorFixedMenu.vue'
 import TextEditorBubbleMenu from './TextEditorBubbleMenu.vue'
 import TextEditorFloatingMenu from './TextEditorFloatingMenu.vue'
-import EmojiExtension from './emoji-extension'
-import SlashCommands from './slash-commands-extension'
+import EmojiExtension from './extensions/emoji/emoji-extension'
+import SlashCommands from './extensions/slash-commands/slash-commands-extension'
 import { detectMarkdown, markdownToHTML } from '../../utils/markdown'
 import { DOMParser } from 'prosemirror-model'
+import { TagNode, TagExtension } from './extensions/tag/tag-extension'
+import { Heading } from './extensions/heading/heading'
 
 const lowlight = createLowlight(common)
 
@@ -100,6 +107,10 @@ export default {
       type: Array,
       default: () => [],
     },
+    tags: {
+      type: Array,
+      default: () => [],
+    },
     uploadFunction: {
       type: Function,
       default: () => null,
@@ -147,6 +158,13 @@ export default {
         StarterKit.configure({
           ...this.starterkitOptions,
           codeBlock: false,
+          heading: false,
+        }),
+        Heading.configure({
+          ...(typeof this.starterkitOptions?.heading === 'object' &&
+          this.starterkitOptions.heading !== null
+            ? this.starterkitOptions.heading
+            : {}),
         }),
         Table.configure({
           resizable: true,
@@ -185,6 +203,10 @@ export default {
         configureMention(this.mentions),
         EmojiExtension,
         SlashCommands,
+        TagNode,
+        TagExtension.configure({
+          tags: () => this.tags,
+        }),
         ...(this.extensions || []),
       ],
       onUpdate: ({ editor }) => {
@@ -305,5 +327,24 @@ img.ProseMirror-selectednode {
 .ProseMirror mark {
   border-radius: 3px;
   padding: 0 2px;
+}
+.tag-item,
+.tag-suggestion-active {
+  background-color: var(--surface-gray-1, #f8f8f8);
+  color: inherit;
+  border: 1px solid transparent;
+  padding: 0px 2px;
+  border-radius: 4px;
+  font-size: 1em;
+  white-space: nowrap;
+  cursor: default;
+}
+
+.tag-item.ProseMirror-selectednode {
+  border-color: var(--outline-gray-3, #c7c7c7);
+}
+
+.tag-suggestion-active {
+  background-color: var(--surface-gray-2, #f3f3f3);
 }
 </style>

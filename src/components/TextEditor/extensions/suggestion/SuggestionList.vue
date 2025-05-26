@@ -22,7 +22,7 @@
       @mouseover="selectedIndex = index"
     >
       <slot :item="item" :index="index">
-        <span>{{ item.title || item.name }}</span>
+        <span>{{ item.display || item.title || item.name }}</span>
       </slot>
     </button>
     <div
@@ -36,18 +36,15 @@
 
 <script setup lang="ts">
 import { ref, watch, type PropType, nextTick, onBeforeUpdate } from 'vue'
-
-export interface SuggestionItem {
-  [key: string]: any
-}
+import type { BaseSuggestionItem } from './createSuggestionExtension'
 
 const props = defineProps({
   items: {
-    type: Array as PropType<SuggestionItem[]>,
+    type: Array as PropType<BaseSuggestionItem[]>,
     required: true,
   },
   command: {
-    type: Function as PropType<(item: SuggestionItem) => void>,
+    type: Function as PropType<(item: BaseSuggestionItem) => void>,
     required: true,
   },
   containerClass: {
