@@ -123,9 +123,9 @@
 import { computed, ref, onMounted } from 'vue'
 
 import { Button } from '../Button'
-import Popover from '../Popover.vue'
+import { Popover } from '../Popover'
 import FeatherIcon from '../FeatherIcon.vue'
-import TextInput from '../TextInput.vue'
+import { TextInput } from '../TextInput'
 
 import { getDate, getDateValue } from './utils'
 import { useDatePicker } from './useDatePicker'

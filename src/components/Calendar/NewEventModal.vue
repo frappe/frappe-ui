@@ -98,8 +98,8 @@
 <script setup>
 import { computed, inject, reactive, ref } from 'vue'
 import Dialog from '../Dialog.vue'
-import FormControl from '../FormControl.vue'
-import ErrorMessage from '../ErrorMessage.vue'
+import { FormControl } from '../FormControl'
+import { ErrorMessage } from '../ErrorMessage'
 import { Button } from '../Button'
 
 import { calculateDiff, colorMap, handleSeconds } from './calendarUtils'
