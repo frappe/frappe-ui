@@ -18,20 +18,8 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
-import { Button } from '../index'
-
-interface DividerAction {
-  label: string
-  handler: () => any
-  loading?: boolean
-}
-
-interface DividerProps {
-  orientation?: 'horizontal' | 'vertical'
-  position?: 'start' | 'center' | 'end'
-  flexItem?: boolean
-  action?: DividerAction
-}
+import { Button } from '../../index'
+import type { DividerProps } from './types'
 
 const props = withDefaults(defineProps<DividerProps>(), {
   orientation: 'horizontal',

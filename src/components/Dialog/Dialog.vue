@@ -152,48 +152,9 @@ import {
   TransitionRoot,
 } from '@headlessui/vue'
 import { computed, reactive } from 'vue'
-import { Button, ButtonProps } from './Button'
-import FeatherIcon from './FeatherIcon.vue'
-
-type DialogIcon = {
-  name: string
-  appearance?: 'warning' | 'info' | 'danger' | 'success'
-}
-
-type DialogOptions = {
-  title?: string
-  message?: string
-  // default size = 'lg'
-  size?:
-    | 'xs'
-    | 'sm'
-    | 'md'
-    | 'lg'
-    | 'xl'
-    | '2xl'
-    | '3xl'
-    | '4xl'
-    | '5xl'
-    | '6xl'
-    | '7xl'
-  icon?: DialogIcon | string
-  actions?: Array<DialogAction>
-  // default position = 'center'
-  position?: 'top' | 'center'
-}
-
-type DialogActionContext = {
-  close: () => void
-}
-type DialogAction = ButtonProps & {
-  onClick?: (context: DialogActionContext) => void | Promise<void>
-}
-
-interface DialogProps {
-  modelValue: boolean
-  options?: DialogOptions
-  disableOutsideClickToClose?: boolean
-}
+import { Button } from '../Button'
+import FeatherIcon from '../FeatherIcon.vue'
+import type { DialogProps, DialogIcon } from './types'
 
 const props = withDefaults(defineProps<DialogProps>(), {
   options: () => ({}),
