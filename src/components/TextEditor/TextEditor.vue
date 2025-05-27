@@ -35,8 +35,8 @@ import VideoExtension from './video-extension'
 import LinkExtension from './link-extension'
 import Typography from '@tiptap/extension-typography'
 import TextStyle from '@tiptap/extension-text-style'
-import Highlight from '@tiptap/extension-highlight'
-import { Color } from '@tiptap/extension-color'
+import NamedColorExtension from './extensions/color'
+import NamedHighlightExtension from './extensions/highlight'
 import { common, createLowlight } from 'lowlight'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import CodeBlockComponent from './CodeBlockComponent.vue'
@@ -177,8 +177,8 @@ export default {
           types: ['heading', 'paragraph'],
         }),
         TextStyle,
-        Color,
-        Highlight.configure({ multicolor: true }),
+        NamedColorExtension,
+        NamedHighlightExtension,
         CodeBlockLowlight.extend({
           addNodeView() {
             return VueNodeViewRenderer(CodeBlockComponent)
@@ -259,6 +259,9 @@ export default {
 }
 </script>
 <style>
+@import './extensions/color/color-styles.css';
+@import './extensions/highlight/highlight-styles.css';
+
 .ProseMirror {
   outline: none;
   caret-color: var(--ink-gray-9);
@@ -324,10 +327,6 @@ img.ProseMirror-selectednode {
   cursor: col-resize;
 }
 
-.ProseMirror mark {
-  border-radius: 3px;
-  padding: 0 2px;
-}
 .tag-item,
 .tag-suggestion-active {
   background-color: var(--surface-gray-1, #f8f8f8);

@@ -8,7 +8,7 @@
     <template #body-main>
       <div class="p-2">
         <div class="text-sm text-ink-gray-7">Text Color</div>
-        <div class="mt-1 grid grid-cols-8 gap-1">
+        <div class="mt-1 grid grid-cols-6 gap-1">
           <Tooltip
             class="flex"
             v-for="color in foregroundColors"
@@ -18,9 +18,7 @@
             <button
               :aria-label="color.name"
               class="flex h-5 w-5 items-center justify-center rounded border text-base"
-              :style="{
-                color: color.hex,
-              }"
+              :class="color.class"
               @click="setForegroundColor(color)"
             >
               A
@@ -28,7 +26,7 @@
           </Tooltip>
         </div>
         <div class="mt-2 text-sm text-ink-gray-7">Background Color</div>
-        <div class="mt-1 grid grid-cols-8 gap-1">
+        <div class="mt-1 grid grid-cols-6 gap-1">
           <Tooltip
             class="flex"
             v-for="color in backgroundColors"
@@ -38,12 +36,7 @@
             <button
               :aria-label="color.name"
               class="flex h-5 w-5 items-center justify-center rounded border text-base text-ink-gray-9"
-              :class="
-                !color.hex ? 'border-outline-gray-modals' : 'border-transparent'
-              "
-              :style="{
-                backgroundColor: color.hex,
-              }"
+              :class="color.class"
               @click="setBackgroundColor(color)"
             >
               A
@@ -65,14 +58,22 @@ export default {
   methods: {
     setBackgroundColor(color) {
       if (color.name != 'Default') {
-        this.editor.chain().focus().toggleHighlight({ color: color.hex }).run()
+        this.editor
+          .chain()
+          .focus()
+          .toggleHighlightByName(color.name.toLowerCase())
+          .run()
       } else {
         this.editor.chain().focus().unsetHighlight().run()
       }
     },
     setForegroundColor(color) {
       if (color.name != 'Default') {
-        this.editor.chain().focus().setColor(color.hex).run()
+        this.editor
+          .chain()
+          .focus()
+          .setColorByName(color.name.toLowerCase())
+          .run()
       } else {
         this.editor.chain().focus().unsetColor().run()
       }
@@ -80,29 +81,63 @@ export default {
   },
   computed: {
     foregroundColors() {
-      // tailwind css colors, scale 600
       return [
-        { name: 'Default', hex: '#1F272E' },
-        { name: 'Yellow', hex: '#ca8a04' },
-        { name: 'Orange', hex: '#ea580c' },
-        { name: 'Red', hex: '#dc2626' },
-        { name: 'Green', hex: '#16a34a' },
-        { name: 'Blue', hex: '#1579D0' },
-        { name: 'Purple', hex: '#9333ea' },
-        { name: 'Pink', hex: '#db2777' },
+        { name: 'Default', class: 'text-ink-gray-9' },
+        { name: 'Red', class: 'text-red-600 dark:text-dark-red-400' },
+        { name: 'Orange', class: 'text-orange-600 dark:text-dark-orange-400' },
+        { name: 'Yellow', class: 'text-yellow-600 dark:text-dark-yellow-400' },
+        { name: 'Green', class: 'text-green-600 dark:text-dark-green-400' },
+        { name: 'Teal', class: 'text-teal-600 dark:text-dark-teal-400' },
+        { name: 'Cyan', class: 'text-cyan-600 dark:text-dark-cyan-400' },
+        { name: 'Blue', class: 'text-blue-600 dark:text-dark-blue-400' },
+        { name: 'Purple', class: 'text-purple-600 dark:text-dark-purple-400' },
+        { name: 'Pink', class: 'text-pink-600 dark:text-dark-pink-400' },
+        { name: 'Gray', class: 'text-gray-600 dark:text-dark-gray-400' },
       ]
     },
     backgroundColors() {
-      // tailwind css colors, scale 100
       return [
-        { name: 'Default', hex: null },
-        { name: 'Yellow', hex: '#fef9c3' },
-        { name: 'Orange', hex: '#ffedd5' },
-        { name: 'Red', hex: '#fee2e2' },
-        { name: 'Green', hex: '#dcfce7' },
-        { name: 'Blue', hex: '#D3E9FC' },
-        { name: 'Purple', hex: '#f3e8ff' },
-        { name: 'Pink', hex: '#fce7f3' },
+        { name: 'Default', class: 'border-outline-gray-modals' },
+        {
+          name: 'Red',
+          class: 'bg-red-100 dark:bg-dark-red-800 border-transparent',
+        },
+        {
+          name: 'Orange',
+          class: 'bg-orange-100 dark:bg-dark-orange-800 border-transparent',
+        },
+        {
+          name: 'Yellow',
+          class: 'bg-yellow-100 dark:bg-dark-yellow-800 border-transparent',
+        },
+        {
+          name: 'Green',
+          class: 'bg-green-100 dark:bg-dark-green-800 border-transparent',
+        },
+        {
+          name: 'Teal',
+          class: 'bg-teal-100 dark:bg-dark-teal-800 border-transparent',
+        },
+        {
+          name: 'Cyan',
+          class: 'bg-cyan-100 dark:bg-dark-cyan-800 border-transparent',
+        },
+        {
+          name: 'Blue',
+          class: 'bg-blue-100 dark:bg-dark-blue-800 border-transparent',
+        },
+        {
+          name: 'Purple',
+          class: 'bg-purple-100 dark:bg-dark-purple-800 border-transparent',
+        },
+        {
+          name: 'Pink',
+          class: 'bg-pink-100 dark:bg-dark-pink-800 border-transparent',
+        },
+        {
+          name: 'Gray',
+          class: 'bg-gray-100 dark:bg-dark-gray-800 border-transparent',
+        },
       ]
     },
   },
