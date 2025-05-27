@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
 import FormControl from './FormControl.vue'
-import FeatherIcon from './FeatherIcon.vue'
-import Avatar from './Avatar/Avatar.vue'
+import FeatherIcon from '../FeatherIcon.vue'
+import { Avatar } from '../Avatar'
 
 const state = reactive({
   size: 'sm',

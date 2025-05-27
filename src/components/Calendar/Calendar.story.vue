@@ -63,9 +63,9 @@
 </template>
 <script setup>
 import { ref } from 'vue'
-import Calendar from './Calendar/Calendar.vue'
+import Calendar from './Calendar.vue'
 import { logEvent } from 'histoire/client'
-import TabButtons from './TabButtons/TabButtons.vue'
+import { TabButtons } from '../TabButtons'
 
 const config = {
   defaultMode: 'Month',
