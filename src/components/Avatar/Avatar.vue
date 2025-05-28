@@ -38,7 +38,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import type { AvatarProps } from '../types/Avatar'
+import type { AvatarProps } from './types'
 
 const imgFetchError = ref(false)
 
