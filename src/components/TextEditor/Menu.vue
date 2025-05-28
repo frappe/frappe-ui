@@ -81,7 +81,7 @@
   </div>
 </template>
 <script>
-import Popover from '../Popover.vue'
+import Popover from '../Popover/Popover.vue'
 
 export default {
   name: 'TipTapMenu',

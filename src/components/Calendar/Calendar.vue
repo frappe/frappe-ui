@@ -85,7 +85,7 @@
 <script setup>
 import { computed, onMounted, onUnmounted, provide, ref } from 'vue'
 import { Button } from '../Button'
-import TabButtons from '../TabButtons.vue'
+import { TabButtons } from '../TabButtons'
 import {
   getCalendarDates,
   monthList,
