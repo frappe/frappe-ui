@@ -24,14 +24,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import FeatherIcon from '../FeatherIcon.vue'
-
-interface RatingProps {
-  modelValue?: number
-  rating_from?: number
-  label?: string
-  readonly?: boolean
-  size?: 'sm' | 'md' | 'lg' | 'xl'
-}
+import type { RatingProps } from './types'
 
 const props = withDefaults(defineProps<RatingProps>(), {
   modelValue: 0,

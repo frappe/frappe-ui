@@ -48,7 +48,7 @@
   </Popover>
 </template>
 <script>
-import Popover from '../Popover.vue'
+import Popover from '../Popover/Popover.vue'
 import { Tooltip } from '../../index'
 
 export default {
