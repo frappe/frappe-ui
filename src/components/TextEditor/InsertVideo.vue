@@ -56,7 +56,7 @@
 <script>
 import { Button } from '../Button'
 import { Dialog } from '../Dialog'
-import FileUploader from '../FileUploader/FileUploader.vue'
+import { FileUploader } from '../FileUploader'
 
 export default {
   name: 'InsertImage',
