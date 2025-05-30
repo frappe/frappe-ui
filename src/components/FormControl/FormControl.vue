@@ -14,7 +14,7 @@
     <Select
       v-if="type === 'select'"
       :id="id"
-      v-bind="{ ...controlAttrs, size }"
+      v-bind="{ ...controlAttrs, size, variant }"
       v-model="model"
     >
       <template #prefix v-if="$slots.prefix">
@@ -36,13 +36,13 @@
     <Textarea
       v-else-if="type === 'textarea'"
       :id="id"
-      v-bind="{ ...controlAttrs, size }"
+      v-bind="{ ...controlAttrs, size, variant }"
       v-model="model"
     />
     <TextInput
       v-else
       :id="id"
-      v-bind="{ ...controlAttrs, type, size, required }"
+      v-bind="{ ...controlAttrs, type, size, variant, required }"
       v-model="model"
     >
       <template #prefix v-if="$slots.prefix">
@@ -78,6 +78,7 @@ const id = useId()
 const props = withDefaults(defineProps<FormControlProps>(), {
   type: 'text',
   size: 'sm',
+  variant: 'subtle',
 })
 
 const model = defineModel()
