@@ -1,9 +1,10 @@
 <template>
   <div
-    class="relative w-full"
+    class="relative w-full table-editor"
     :class="$attrs.class"
     :style="$attrs.style"
     v-if="editor"
+    ref="editorContainer"
   >
     <TextEditorBubbleMenu :buttons="bubbleMenu" :options="bubbleMenuOptions" />
     <TextEditorFixedMenu
@@ -25,10 +26,6 @@ import { Editor, EditorContent, VueNodeViewRenderer } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import TextAlign from '@tiptap/extension-text-align'
-import Table from '@tiptap/extension-table'
-import TableCell from '@tiptap/extension-table-cell'
-import TableHeader from '@tiptap/extension-table-header'
-import TableRow from '@tiptap/extension-table-row'
 import { ImageExtension } from './extensions/image'
 import ImageViewerExtension from './image-viewer-extension'
 import VideoExtension from './video-extension'
@@ -50,6 +47,7 @@ import { detectMarkdown, markdownToHTML } from '../../utils/markdown'
 import { DOMParser } from 'prosemirror-model'
 import { TagNode, TagExtension } from './extensions/tag/tag-extension'
 import { Heading } from './extensions/heading/heading'
+import { TableExtension } from './extensions/table'
 
 const lowlight = createLowlight(common)
 
@@ -166,12 +164,9 @@ export default {
             ? this.starterkitOptions.heading
             : {}),
         }),
-        Table.configure({
-          resizable: true,
+        TableExtension.configure({
+          showActionHandles: this.editable,
         }),
-        TableRow,
-        TableHeader,
-        TableCell,
         Typography,
         TextAlign.configure({
           types: ['heading', 'paragraph'],
@@ -261,6 +256,7 @@ export default {
 <style>
 @import './extensions/color/color-styles.css';
 @import './extensions/highlight/highlight-styles.css';
+@import './extensions/table/table-styles.css';
 
 .ProseMirror {
   outline: none;
@@ -298,30 +294,6 @@ img.ProseMirror-selectednode {
   margin: 0;
 }
 
-/* Prosemirror specific table styles */
-.ProseMirror table .selectedCell:after {
-  z-index: 2;
-  position: absolute;
-  content: '';
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  pointer-events: none;
-  background: theme('colors.blue.200');
-  opacity: 0.3;
-}
-
-.ProseMirror table .column-resize-handle {
-  position: absolute;
-  right: -1px;
-  top: 0;
-  bottom: -2px;
-  width: 4px;
-  background-color: theme('colors.blue.200');
-  pointer-events: none;
-}
-
 .resize-cursor {
   cursor: ew-resize;
   cursor: col-resize;
@@ -346,4 +318,5 @@ img.ProseMirror-selectednode {
 .tag-suggestion-active {
   background-color: var(--surface-gray-2, #f3f3f3);
 }
+
 </style>

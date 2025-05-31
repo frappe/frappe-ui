@@ -1,0 +1,136 @@
+.table-editor {
+  position: relative;
+}
+
+.ProseMirror table {
+  display: block;
+  width: 100%;
+  min-width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow-x: auto;
+  overflow-y: visible;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.3s ease;
+}
+
+.ProseMirror table:hover {
+  scrollbar-color: #c1c1c1 #f1f1f1;
+}
+
+.ProseMirror table thead,
+.ProseMirror table tbody,
+.ProseMirror table tfoot {
+  display: table;
+  width: 100%;
+  table-layout: auto;
+}
+
+.ProseMirror table tbody {
+  display: table;
+}
+
+.ProseMirror table tfoot {
+  display: table;
+}
+
+.ProseMirror table tr {
+  display: table-row;
+}
+
+.ProseMirror table th,
+.ProseMirror table td {
+  display: table-cell;
+  white-space: nowrap;
+  min-width: 120px;
+  padding: 8px 12px;
+  vertical-align: top;
+  box-sizing: border-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 768px) {
+  .ProseMirror table th,
+  .ProseMirror table td {
+    min-width: 100px;
+  }
+}
+
+@media (max-width: 480px) {
+  .ProseMirror table th,
+  .ProseMirror table td {
+    min-width: 80px;
+  }
+}
+
+.ProseMirror table .selectedCell:after {
+  z-index: 2;
+  position: absolute;
+  content: '';
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+  background: #dbeafe;
+  opacity: 0.3;
+}
+
+.ProseMirror table .column-resize-handle {
+  position: absolute;
+  right: -1px;
+  top: 0;
+  bottom: -2px;
+  width: 4px;
+  background-color: #dbeafe;
+  pointer-events: none;
+}
+
+.ProseMirror table::-webkit-scrollbar {
+  height: 8px;
+}
+
+.ProseMirror table::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+.ProseMirror table:hover::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.ProseMirror table::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+.ProseMirror table:hover::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+}
+
+.ProseMirror table::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+.ProseMirror table::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 20px;
+  background: linear-gradient(to left, rgba(255,255,255,0.8) 0%, transparent 100%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.ProseMirror table:hover::after {
+  opacity: 1;
+}
