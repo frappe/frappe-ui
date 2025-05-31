@@ -4,24 +4,18 @@
     :style="style"
     @click.stop="handleClick"
   >
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      class="w-4 h-4 text-gray-600"
-    >
-      <path
-        fill-rule="evenodd"
-        d="M4.5 12a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0zm6 0a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0zm6 0a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0z"
-        clip-rule="evenodd"
-      />
-    </svg>
+    <LucideGripVertical class="w-4 h-4 text-gray-600" />
   </button>
 </template>
 
 <script>
+import LucideGripVertical from '~icons/lucide/grip-vertical'
+
 export default {
   name: 'TableCellActionHandle',
+  components: {
+    LucideGripVertical,
+  },
   props: {
     position: {
       type: Object, // { top, left, right, bottom }

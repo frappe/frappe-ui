@@ -15,13 +15,8 @@
           :disabled="action.isDisabled && action.isDisabled(editor)"
           @click="() => performAction(action)"
         >
-          <FeatherIcon
-            v-if="action.featherIcon"
-            :name="action.featherIcon"
-            class="w-4 h-4 text-gray-500"
-          />
           <component
-            v-else-if="action.icon"
+            v-if="action.icon" 
             :is="action.icon"
             class="w-4 h-4 text-gray-500"
           />
@@ -34,13 +29,15 @@
 
 <script>
 import commands from '../../commands'
-import FeatherIcon from '../../../FeatherIcon.vue'
+import LucideArrowUp from '~icons/lucide/arrow-up'
+import LucideArrowDown from '~icons/lucide/arrow-down'
+import LucideTrash2 from '~icons/lucide/trash-2'
+import LucideArrowLeft from '~icons/lucide/arrow-left'
+import LucideArrowRight from '~icons/lucide/arrow-right'
+import LucidePilcrow from '~icons/lucide/pilcrow' 
 
 export default {
   name: 'TableActionMenu',
-  components: {
-    FeatherIcon,
-  },
   props: {
     editor: {
       type: Object,
@@ -133,17 +130,17 @@ export default {
           {
             ...commands.AddRowBefore,
             label: 'Insert row above',
-            featherIcon: 'arrow-up',
+            icon: LucideArrowUp,
           },
           {
             ...commands.AddRowAfter,
             label: 'Insert row below',
-            featherIcon: 'arrow-down',
+            icon: LucideArrowDown,
           },
           {
             ...commands.DeleteRow,
             label: 'Delete row',
-            featherIcon: 'trash-2',
+            icon: LucideTrash2,
           },
         ]
       }
@@ -151,17 +148,17 @@ export default {
         {
           ...commands.AddColumnBefore,
           label: 'Insert column left',
-          featherIcon: 'arrow-left',
+          icon: LucideArrowLeft,
         },
         {
           ...commands.AddColumnAfter,
           label: 'Insert column right',
-          featherIcon: 'arrow-right',
+          icon: LucideArrowRight,
         },
         {
           ...commands.DeleteColumn,
           label: 'Delete column',
-          featherIcon: 'trash-2',
+          icon: LucideTrash2,
         },
       ]
     },
@@ -173,7 +170,7 @@ export default {
         actions.push({
           ...commands.ToggleHeaderRow,
           label: 'Toggle Header Row',
-          featherIcon: 'type',
+          icon: LucidePilcrow,
         })
       }
 
@@ -181,7 +178,7 @@ export default {
         actions.push({
           ...commands.ToggleHeaderColumn,
           label: 'Toggle Header Column',
-          featherIcon: 'type',
+          icon: LucidePilcrow,
         })
       }
 
@@ -195,7 +192,7 @@ export default {
         {
           ...commands.DeleteTable,
           label: 'Delete Table',
-          featherIcon: 'trash',
+          icon: LucideTrash2, // Changed from featherIcon: 'trash' (using Trash2 for consistency)
         },
       ]
     },
