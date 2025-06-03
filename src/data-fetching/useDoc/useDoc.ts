@@ -33,6 +33,8 @@ interface UseDocOptions<TDoc> {
   doctype: string
   name: MaybeRefOrGetter<string>
   baseUrl?: string
+  headers?: Record<string, string>
+  credentials?: string
   methods?: Record<string, string | DocMethodOption>
   immediate?: boolean
   transform?: (doc: TDoc & { doctype: string }) => TDoc & { doctype: string }
@@ -49,6 +51,11 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
     immediate = true,
     transform,
   } = options
+
+  const extraFetchOptions = {
+    ...(options?.headers && { headers: options.headers }),
+    ...(options?.credentials && { credentials: options.credentials }),
+  }
 
   const url = computed(
     () => `${baseUrl}/api/v2/document/${doctype}/${toValue(name)}`,
@@ -69,6 +76,9 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
   const fetchOptions: UseFetchOptions = {
     immediate,
     refetch: true,
+    beforeFetch: ({ options }) => {
+      Object.assign(options, extraFetchOptions)
+    },
     afterFetch(ctx: AfterFetchContext<{ data: TDoc }>) {
       if (ctx.data) {
         let doc = {

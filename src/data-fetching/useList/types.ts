@@ -38,6 +38,8 @@ export interface UseListOptions<T> {
   immediate?: boolean
   refetch?: boolean
   baseUrl?: string
+  headers?: Record<string, string>
+  credentials?: string
   url?: `/${string}`
   transform?: (data: T[]) => T[]
   onSuccess?: (data: T[]) => void
