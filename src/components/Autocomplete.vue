@@ -344,18 +344,19 @@ const selectedValue = computed({
     } else {
       const values = (val || []) as Option[]
       const uniqueValues = props.unique
-        ? [...new Map(values.map((v) => [v.value, v])).values()]
+        ? values.filter(
+            (v, i, self) =>
+              self.findIndex((o) => o.value === v.value) === i
+          )
         : values
-      emit(
-        'update:modelValue',
-        uniqueValues.map((v) => v.value)
-      )
-      emit(
-        'change',
-        uniqueValues.map((v) => v.value)
-      )
+
+      const result = uniqueValues.map((v) => v.value)
+
+      emit('update:modelValue', result)
+      emit('change', result)
     }
-  },
+}
+
 })
 
 const findOption = (option: AutocompleteOption) => {
