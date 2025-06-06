@@ -51,7 +51,7 @@ export function useFileUpload() {
   const result = computed(() => state.result)
 
   return {
-    upload: (file: File) => upload(file, {}, state, reset),
+    upload: (file: File, options: UploadOptions = {}) => upload(file, options, state, reset),
     reset,
     state,
     isUploading,
