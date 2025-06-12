@@ -82,7 +82,7 @@ const props = withDefaults(
       indentWidth: '20px',
       showIndentationGuides: true,
     }),
-  },
+  }
 )
 
 const slots = defineSlots<{
@@ -103,7 +103,7 @@ const slots = defineSlots<{
   }
 }>()
 
-const isCollapsed = ref(true)
+const isCollapsed = ref(props.node.isCollapsed || true)
 
 const linePadding = ref('')
 
