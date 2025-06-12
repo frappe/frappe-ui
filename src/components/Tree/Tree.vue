@@ -35,7 +35,7 @@
   </slot>
 
   <!-- Recursively render the children -->
-  <div v-if="hasChildren && !isCollapsed" class="flex">
+  <div v-if="hasChildren" v-show="!isCollapsed" class="flex">
     <div
       :style="{ paddingLeft: linePadding }"
       class="border-r"
@@ -66,7 +66,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import FeatherIcon from '../FeatherIcon.vue'
 import type { TreeNode, TreeOptions } from '../types/Tree'
 
@@ -104,7 +104,12 @@ const slots = defineSlots<{
 }>()
 
 const isCollapsed = ref(props.node.isCollapsed || true)
-
+watch(
+  () => props.node.isCollapsed,
+  (val) => {
+    isCollapsed.value = val
+  }
+)
 const linePadding = ref('')
 
 const hasChildren = computed(() => props.node.children?.length > 0)
