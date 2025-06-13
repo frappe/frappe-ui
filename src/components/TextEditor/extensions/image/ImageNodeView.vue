@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
 import LoadingIndicator from '../../../LoadingIndicator.vue'
-import ErrorMessage from '../../../ErrorMessage.vue'
+import { ErrorMessage } from '../../../ErrorMessage'
 import LucideMoveDiagonal2 from '~icons/lucide/move-diagonal-2'
 import LucideAlignLeft from '~icons/lucide/align-left'
 import LucideAlignCenter from '~icons/lucide/align-center'

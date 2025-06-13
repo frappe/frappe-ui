@@ -27,7 +27,7 @@
           height: rowHeight,
           gridTemplateColumns: getGridTemplateColumns(
             list.columns,
-            list.options.selectable
+            list.options.selectable,
           ),
         }"
       >
@@ -86,7 +86,7 @@
 </template>
 
 <script setup>
-import Checkbox from '../Checkbox.vue'
+import Checkbox from '../Checkbox/Checkbox.vue'
 import ListRowItem from './ListRowItem.vue'
 import { alignmentMap, getGridTemplateColumns } from './utils'
 import { computed, inject, ref } from 'vue'
@@ -114,7 +114,7 @@ const isSelected = computed(() => {
 const isActive = computed(
   () =>
     list.value.options.enableActive &&
-    list.value.activeRow.value === props.row.name
+    list.value.activeRow.value === props.row.name,
 )
 
 const isHoverable = computed(() => {

@@ -26,7 +26,7 @@
   </Dialog>
 </template>
 <script setup>
-import Dialog from '../../src/components/Dialog.vue'
+import { Dialog } from '../../src/components/Dialog'
 import { computed } from 'vue'
 
 const props = defineProps({

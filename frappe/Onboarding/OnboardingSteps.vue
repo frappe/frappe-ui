@@ -79,7 +79,7 @@
 import { useOnboarding } from './onboarding'
 import Tooltip from '../../src/components/Tooltip/Tooltip.vue'
 import Button from '../../src/components/Button/Button.vue'
-import Badge from '../../src/components/Badge.vue'
+import Badge from '../../src/components/Badge/Badge.vue'
 
 const props = defineProps({
   appName: {
