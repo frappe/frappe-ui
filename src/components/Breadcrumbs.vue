@@ -30,42 +30,42 @@
     <div
       class="flex min-w-0 items-center overflow-hidden text-ellipsis whitespace-nowrap"
     >
-      <template v-for="(item, i) in crumbs" :key="item.label">
+      <template v-for="(item, index) in crumbs" :key="item.label">
         <router-link
           v-if="item.route"
           :to="item.route"
           @click="item.onClick ? item.onClick() : null"
           class="flex items-center rounded px-0.5 py-1 text-lg font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
           :class="[
-            i == crumbs.length - 1
+            index == crumbs.length - 1
               ? 'text-ink-gray-9'
               : 'text-ink-gray-5 hover:text-ink-gray-7',
           ]"
         >
-          <slot name="prefix" :item="item" />
+          <slot name="prefix" :item :index />
           <span>
             {{ item.label }}
           </span>
-          <slot name="suffix" :item="item" />
+          <slot name="suffix" :item :index />
         </router-link>
         <button
           v-else
           @click="item.onClick ? item.onClick() : null"
           class="flex items-center rounded px-0.5 py-1 text-lg font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
           :class="[
-            i == crumbs.length - 1
+            index == crumbs.length - 1
               ? 'text-ink-gray-9'
               : 'text-ink-gray-5 hover:text-ink-gray-7',
           ]"
         >
-          <slot name="prefix" :item="item" />
+          <slot name="prefix" :item :index />
           <span>
             {{ item.label }}
           </span>
-          <slot name="suffix" :item="item" />
+          <slot name="suffix" :item :index />
         </button>
         <span
-          v-if="i != crumbs.length - 1"
+          v-if="index != crumbs.length - 1"
           class="mx-0.5 text-base text-ink-gray-4"
           aria-hidden="true"
         >
