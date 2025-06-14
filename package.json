@@ -73,7 +73,8 @@
     "tippy.js": "^6.3.7",
     "typescript": "^5.0.2",
     "unplugin-icons": "^22.1.0",
-    "unplugin-vue-components": "^28.4.1"
+    "unplugin-vue-components": "^28.4.1",
+    "highlight.js" : "^11.11.1"
   },
   "peerDependencies": {
     "vue": ">=3.5.0",
