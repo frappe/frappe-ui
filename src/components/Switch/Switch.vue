@@ -83,10 +83,10 @@ const switchCircleClasses = computed(() => {
     props.size === 'md' ? 'h-3.5 w-3.5' : 'h-3 w-3',
     props.size === 'md'
       ? props.modelValue
-        ? 'translate-x-3'
+        ? 'ltr:translate-x-3 rtl:-translate-x-3'
         : 'translate-x-0'
       : props.modelValue
-        ? 'translate-x-2.5'
+        ? 'ltr:translate-x-2.5 rtl:-translate-x-2.5'
         : 'translate-x-0',
   ]
 })
