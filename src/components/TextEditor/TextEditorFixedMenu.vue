@@ -33,6 +33,7 @@ export default {
           'Separator',
           'Bullet List',
           'Numbered List',
+          'Task List',
           'Separator',
           'Align Left',
           'Align Center',

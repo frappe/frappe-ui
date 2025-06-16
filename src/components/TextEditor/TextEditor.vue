@@ -28,6 +28,8 @@ import TableHeader from '@tiptap/extension-table-header'
 import TableRow from '@tiptap/extension-table-row'
 import TextAlign from '@tiptap/extension-text-align'
 import TextStyle from '@tiptap/extension-text-style'
+import TaskItem from '@tiptap/extension-task-item'
+import TaskList from '@tiptap/extension-task-list'
 import Typography from '@tiptap/extension-typography'
 import StarterKit from '@tiptap/starter-kit'
 import { Editor, EditorContent, VueNodeViewRenderer } from '@tiptap/vue-3'
@@ -175,6 +177,10 @@ export default {
         Table.configure({
           resizable: true,
         }),
+        TaskList,
+        TaskItem.configure({
+          nested: true,
+        }),
         TableRow,
         TableHeader,
         TableCell,
@@ -243,7 +249,7 @@ export default {
           if (!detectMarkdown(text)) return
           if (
             !confirm(
-              'Do you want to convert markdown content to HTML before pasting?',
+              'Do you want to convert markdown content to HTML before pasting?'
             )
           )
             return
@@ -326,6 +332,40 @@ img.ProseMirror-selectednode {
   width: 4px;
   background-color: theme('colors.blue.200');
   pointer-events: none;
+}
+
+.ProseMirror ul[data-type='taskList'] {
+  list-style: none;
+  padding: 0;
+
+  li {
+    align-items: flex-start;
+    display: flex;
+    margin: 0;
+
+    > label {
+      flex: 0 0 auto;
+      margin-right: 0.5rem;
+      user-select: none;
+    }
+
+    > div {
+      flex: 1 1 auto;
+      margin-bottom: 0;
+    }
+  }
+
+  input[type='checkbox'] {
+    cursor: pointer;
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    color: theme('colors.gray.900');
+  }
+
+  ul[data-type='taskList'] {
+    margin: 0;
+  }
 }
 
 .resize-cursor {

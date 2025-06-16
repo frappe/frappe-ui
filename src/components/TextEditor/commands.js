@@ -15,6 +15,7 @@ import AlignRight from './icons/align-right.vue'
 import FontColor from './icons/font-color.vue'
 import ListOrdered from './icons/list-ordered.vue'
 import ListUnordered from './icons/list-unordered.vue'
+import ListTask from './icons/list-task.vue'
 import DoubleQuotes from './icons/double-quotes-r.vue'
 import CodeView from './icons/code-view.vue'
 import Link from './icons/link.vue'
@@ -109,6 +110,12 @@ export default {
     icon: ListOrdered,
     action: (editor) => editor.chain().focus().toggleOrderedList().run(),
     isActive: (editor) => editor.isActive('orderedList'),
+  },
+  'Task List': {
+    label: 'Task List',
+    icon: ListTask,
+    action: (editor) => editor.chain().focus().toggleTaskList().run(),
+    isActive: (editor) => editor.isActive('taskList'),
   },
   'Align Center': {
     label: 'Align Center',
