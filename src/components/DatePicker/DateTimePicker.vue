@@ -195,6 +195,7 @@ import { Button } from '../Button'
 import { Popover } from '../Popover'
 import FeatherIcon from '../FeatherIcon.vue'
 import { TextInput } from '../TextInput'
+import LucideCalendar from '~icons/lucide/calendar'
 
 import { getDate } from './utils'
 import { useDatePicker } from './useDatePicker'
