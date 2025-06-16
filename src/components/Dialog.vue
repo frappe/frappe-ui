@@ -23,7 +23,7 @@
           leave-to="opacity-0"
         >
           <div
-            class="fixed inset-0 bg-black-overlay-200 transition-opacity dark:backdrop-filter dark:backdrop-blur-[1px]"
+            class="fixed inset-0 bg-black-overlay-200 transition-opacity backdrop-filter backdrop-blur-[1px]"
             :data-dialog="options.title"
           />
         </TransitionChild>
