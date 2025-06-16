@@ -129,6 +129,6 @@ const switchGroupClasses = computed(() => {
 })
 
 const labelContainerClasses = computed(() => {
-  return ['flex flex-col text-left space-y-0.5']
+  return ['flex flex-col space-y-0.5']
 })
 </script>
