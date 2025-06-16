@@ -10,9 +10,7 @@
         type="text"
         icon-left="calendar"
         :placeholder="placeholder"
-        :value="
-          dateValue && formatter ? formatDates(dateValue.join(',')) : dateValue
-        "
+        :value="dateValue && formatter ? formatDates(dateValue) : dateValue"
         @focus="!readonly ? togglePopover() : null"
         class="w-full"
         :class="inputClass"
@@ -122,7 +120,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 
 import { Button } from '../Button'
 import FeatherIcon from '../FeatherIcon.vue'
@@ -165,6 +163,23 @@ const dateValue = computed(() => {
 
 const fromDate = ref<string>(dateValue.value ? dateValue.value[0] : '')
 const toDate = ref<string>(dateValue.value ? dateValue.value[1] : '')
+
+// this watchers ensures that both string and array values are handled in the v-model
+watch(
+  () => dateValue.value,
+  (newValue: any) => {
+    if (newValue) {
+      let dates: string | string[] =
+        typeof newValue === 'string' ? newValue.split(',') : newValue
+      fromDate.value = dates[0] || ''
+      toDate.value = dates[1] || ''
+    } else {
+      fromDate.value = ''
+      toDate.value = ''
+    }
+  },
+  { immediate: true },
+)
 
 function handleDateClick(date: Date) {
   if (fromDate.value && toDate.value) {
@@ -217,13 +232,15 @@ function isInRange(date: Date) {
   return date >= getDate(fromDate.value) && date <= getDate(toDate.value)
 }
 
-function formatDates(value: string) {
-  if (!value) {
-    return ''
+function formatDates(value: string | string[]) {
+  if (!value) return ''
+
+  if (typeof value === 'string') {
+    value = value.split(',')
   }
-  const values = value.split(',')
+
   return props.formatter
-    ? props.formatter(values[0]) + ' to ' + props.formatter(values[1])
+    ? props.formatter(value[0]) + ' to ' + props.formatter(value[1])
     : value
 }
 
