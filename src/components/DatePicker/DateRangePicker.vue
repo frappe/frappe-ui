@@ -15,7 +15,11 @@
         class="w-full"
         :class="inputClass"
         v-bind="$attrs"
-      />
+      >
+        <template #prefix v-if="$slots.prefix">
+          <slot name="prefix" />
+        </template>
+      </TextInput>
     </template>
 
     <template #body="{ togglePopover }">
@@ -120,18 +124,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
-import { Button } from '../Button'
-import FeatherIcon from '../FeatherIcon.vue'
 import { Popover } from '../Popover'
 import { TextInput } from '../TextInput'
 
 import { useDatePicker } from './useDatePicker'
 import { getDate, getDateValue } from './utils'
 
-import type { DatePickerEmits, DatePickerProps } from './types'
 import { watchOnce } from '@vueuse/core'
+import type { DatePickerEmits, DatePickerProps } from './types'
 
 const props = defineProps<DatePickerProps>()
 const emit = defineEmits<DatePickerEmits>()
