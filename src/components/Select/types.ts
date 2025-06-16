@@ -12,7 +12,6 @@ export interface SelectProps {
   placeholder?: string
   disabled?: boolean
   id?: string
-  value?: string | number
   modelValue?: string | number
   options?: SelectOption[]
 }
