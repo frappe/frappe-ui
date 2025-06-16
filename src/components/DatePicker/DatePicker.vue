@@ -15,7 +15,7 @@
         :class="inputClass"
         v-bind="$attrs"
       >
-        <template #prefix><LucideCalendar class="size-4" /></template>
+        <template v-if="!hideIcon" #prefix><LucideCalendar class="size-4" /></template>
       </TextInput>
     </template>
 
@@ -131,6 +131,7 @@ import { Button } from '../Button'
 import { Popover } from '../Popover'
 import FeatherIcon from '../FeatherIcon.vue'
 import { TextInput } from '../TextInput'
+import LucideCalendar from '~icons/lucide/calendar'
 
 import { getDate, getDateValue } from './utils'
 import { useDatePicker } from './useDatePicker'
