@@ -7,6 +7,7 @@ export interface TextInputProps {
   placeholder?: string
   disabled?: boolean
   id?: string
+  value?: string | number
   modelValue?: string | number
   debounce?: number
   required?: boolean
