@@ -15,7 +15,6 @@
       v-if="type === 'select'"
       :id="id"
       v-bind="{ ...controlAttrs, size, variant }"
-      v-model="model"
     >
       <template #prefix v-if="$slots.prefix">
         <slot name="prefix" />
@@ -24,7 +23,6 @@
     <Autocomplete
       v-else-if="type === 'autocomplete'"
       v-bind="{ ...controlAttrs }"
-      v-model="model"
     >
       <template #prefix v-if="$slots.prefix">
         <slot name="prefix" />
@@ -37,13 +35,11 @@
       v-else-if="type === 'textarea'"
       :id="id"
       v-bind="{ ...controlAttrs, size, variant }"
-      v-model="model"
     />
     <TextInput
       v-else
       :id="id"
       v-bind="{ ...controlAttrs, type, size, variant, required }"
-      v-model="model"
     >
       <template #prefix v-if="$slots.prefix">
         <slot name="prefix" />
@@ -60,7 +56,6 @@
     v-else
     :id="id"
     v-bind="{ ...controlAttrs, label, size, class: attrs.class }"
-    v-model="model"
   />
 </template>
 <script setup lang="ts">
@@ -80,8 +75,6 @@ const props = withDefaults(defineProps<FormControlProps>(), {
   size: 'sm',
   variant: 'subtle',
 })
-
-const model = defineModel()
 
 const attrs = useAttrs()
 const controlAttrs = computed(() => {
