@@ -10,7 +10,9 @@
         type="text"
         icon-left="calendar"
         :placeholder="placeholder"
-        :value="dateValue && formatter ? formatDates(dateValue) : dateValue"
+        :value="
+          dateValue && formatter ? formatDates(dateValue.join(',')) : dateValue
+        "
         @focus="!readonly ? togglePopover() : null"
         class="w-full"
         :class="inputClass"
@@ -120,7 +122,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 import { Button } from '../Button'
 import FeatherIcon from '../FeatherIcon.vue'
@@ -163,21 +165,6 @@ const dateValue = computed(() => {
 
 const fromDate = ref<string>(dateValue.value ? dateValue.value[0] : '')
 const toDate = ref<string>(dateValue.value ? dateValue.value[1] : '')
-
-watch(
-  () => dateValue.value,
-  (newValue) => {
-    if (newValue) {
-      const values = newValue.split(',')
-      fromDate.value = values[0] || ''
-      toDate.value = values[1] || ''
-    } else {
-      fromDate.value = ''
-      toDate.value = ''
-    }
-  },
-  { immediate: true },
-)
 
 function handleDateClick(date: Date) {
   if (fromDate.value && toDate.value) {
