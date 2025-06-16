@@ -120,15 +120,15 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 
 import { Button } from '../Button'
-import { Popover } from '../Popover'
 import FeatherIcon from '../FeatherIcon.vue'
+import { Popover } from '../Popover'
 import { TextInput } from '../TextInput'
 
-import { getDate, getDateValue } from './utils'
 import { useDatePicker } from './useDatePicker'
+import { getDate, getDateValue } from './utils'
 
 import type { DatePickerEmits, DatePickerProps } from './types'
 
@@ -163,6 +163,21 @@ const dateValue = computed(() => {
 
 const fromDate = ref<string>(dateValue.value ? dateValue.value[0] : '')
 const toDate = ref<string>(dateValue.value ? dateValue.value[1] : '')
+
+watch(
+  () => dateValue.value,
+  (newValue) => {
+    if (newValue) {
+      const values = newValue.split(',')
+      fromDate.value = values[0] || ''
+      toDate.value = values[1] || ''
+    } else {
+      fromDate.value = ''
+      toDate.value = ''
+    }
+  },
+  { immediate: true },
+)
 
 function handleDateClick(date: Date) {
   if (fromDate.value && toDate.value) {
