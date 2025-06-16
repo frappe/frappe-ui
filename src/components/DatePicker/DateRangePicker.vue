@@ -131,6 +131,7 @@ import { useDatePicker } from './useDatePicker'
 import { getDate, getDateValue } from './utils'
 
 import type { DatePickerEmits, DatePickerProps } from './types'
+import { watchOnce } from '@vueuse/core'
 
 const props = defineProps<DatePickerProps>()
 const emit = defineEmits<DatePickerEmits>()
@@ -165,7 +166,7 @@ const fromDate = ref<string>(dateValue.value ? dateValue.value[0] : '')
 const toDate = ref<string>(dateValue.value ? dateValue.value[1] : '')
 
 // this watchers ensures that both string and array values are handled in the v-model
-watch(
+watchOnce(
   () => dateValue.value,
   (newValue: any) => {
     if (newValue) {
