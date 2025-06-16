@@ -15,7 +15,7 @@
         :class="inputClass"
         v-bind="$attrs"
       >
-        <template #prefix><LucideCalendar class="size-4" /></template>
+        <template v-if="!hideIcon" #prefix><LucideCalendar class="size-4" /></template>
       </TextInput>
     </template>
 

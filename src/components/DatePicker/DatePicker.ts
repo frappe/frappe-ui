@@ -5,7 +5,8 @@ export interface DatePickerProps {
   formatter?: (date: string) => string
   readonly?: boolean
   inputClass?: string | Array<string> | Record<string, boolean>
-  placement?: string
+  placement?: string,
+  hideIcon?: boolean
 }
 
 export type DatePickerEmits = {
