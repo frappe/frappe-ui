@@ -9,6 +9,7 @@ import Text from './icons/text.vue'
 import Bold from './icons/bold.vue'
 import Italic from './icons/italic.vue'
 import Underline from './icons/underline.vue'
+import Strikethrough from './icons/strikethrough.vue'
 import AlignCenter from './icons/align-center.vue'
 import AlignLeft from './icons/align-left.vue'
 import AlignRight from './icons/align-right.vue'
@@ -98,6 +99,12 @@ export default {
     icon: Underline,
     action: (editor) => editor.chain().focus().toggleUnderline().run(),
     isActive: (editor) => editor.isActive('underline'),
+  },
+  Strikethrough: {
+    label: 'Strikethrough',
+    icon: Strikethrough,
+    action: (editor) => editor.chain().focus().toggleStrike().run(),
+    isActive: (editor) => editor.isActive('strike'),
   },
   'Bullet List': {
     label: 'Bullet List',

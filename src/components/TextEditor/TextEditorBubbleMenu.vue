@@ -37,6 +37,7 @@ export default {
           'Separator',
           'Bold',
           'Italic',
+          'Strike',
           'FontColor',
           'Link',
           'Separator',
