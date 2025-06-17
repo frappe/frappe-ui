@@ -25,7 +25,7 @@
     <template #body="{ close }">
       <div class="rounded border bg-surface-white p-1 my-1 shadow-md">
         <TextInput v-if="button.search" v-model="search" class="mb-0.5" />
-        <ul :class="button.search && 'max-h-32 overflow-scroll'">
+        <ul :class="button.search && 'max-h-32 overflow-scroll scroll-shadow'">
           <li
             class="w-full"
             v-for="option in filteredActions"
