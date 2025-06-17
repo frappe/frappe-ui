@@ -322,7 +322,7 @@ const makeOption = (option: AutocompleteOption) => {
 
 const getLabel = (option: AutocompleteOption) => {
   if (isOption(option)) {
-    return option?.label || option?.value || 'No label'
+    return option?.label || option?.value
   }
   return option
 }
