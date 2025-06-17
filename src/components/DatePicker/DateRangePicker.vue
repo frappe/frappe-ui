@@ -1,5 +1,6 @@
 <template>
   <Popover
+    ref="popoverRef"
     @open="selectCurrentMonthYear"
     class="flex w-full [&>div:first-child]:w-full"
     :placement="placement"
@@ -132,7 +133,6 @@ import { TextInput } from '../TextInput'
 import { useDatePicker } from './useDatePicker'
 import { getDate, getDateValue } from './utils'
 
-import { watchOnce } from '@vueuse/core'
 import type { DatePickerEmits, DatePickerProps } from './types'
 
 const props = defineProps<DatePickerProps>()
@@ -167,22 +167,14 @@ const dateValue = computed(() => {
 const fromDate = ref<string>(dateValue.value ? dateValue.value[0] : '')
 const toDate = ref<string>(dateValue.value ? dateValue.value[1] : '')
 
-// this watchers ensures that both string and array values are handled in the v-model
-watchOnce(
-  () => dateValue.value,
-  (newValue: any) => {
-    if (newValue) {
-      let dates: string | string[] =
-        typeof newValue === 'string' ? newValue.split(',') : newValue
-      fromDate.value = dates[0] || ''
-      toDate.value = dates[1] || ''
-    } else {
-      fromDate.value = ''
-      toDate.value = ''
-    }
-  },
-  { immediate: true },
-)
+onMounted(() => {
+  let dates: string | string[] | undefined =
+    typeof dateValue?.value === 'string'
+      ? dateValue.value.split(',')
+      : dateValue.value
+  fromDate.value = dates?.[0] || ''
+  toDate.value = dates?.[1] || ''
+})
 
 function handleDateClick(date: Date) {
   if (fromDate.value && toDate.value) {
@@ -253,5 +245,13 @@ function clearDates() {
   selectDates()
 }
 
+const popoverRef = ref<InstanceType<typeof Popover>>()
+
 onMounted(() => selectCurrentMonthYear())
+
+defineExpose({
+  open: () => {
+    popoverRef.value?.open()
+  },
+})
 </script>

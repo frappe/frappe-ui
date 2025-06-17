@@ -1,6 +1,6 @@
 export interface DatePickerProps {
-  value?: string
-  modelValue?: string
+  value?: string | string[] // format: "YYYY-MM-DD,YYYY-MM-DD" or ["YYYY-MM-DD","YYYY-MM-DD"]
+  modelValue?: string | string[] // format: "YYYY-MM-DD,YYYY-MM-DD" or ["YYYY-MM-DD","YYYY-MM-DD"]
   placeholder?: string
   formatter?: (date: string) => string
   readonly?: boolean
