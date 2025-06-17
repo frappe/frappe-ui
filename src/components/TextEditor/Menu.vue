@@ -33,7 +33,7 @@
               </button>
             </template>
             <template #body="{ close }">
-              <ul class="rounded border bg-surface-white p-1 mt-1 shadow-md">
+              <ul class="rounded border bg-surface-white p-1 my-1 shadow-md">
                 <li
                   class="w-full"
                   v-for="option in button"
@@ -41,11 +41,12 @@
                 >
                   <button
                     class="w-full flex gap-1 rounded-sm p-1 text-ink-gray-8 transition-colors text-sm"
-                    :class="
+                    :class="[
                       option.isActive(editor)
                         ? 'bg-surface-gray-3'
-                        : 'hover:bg-surface-gray-2'
-                    "
+                        : 'hover:bg-surface-gray-2',
+                      option.class,
+                    ]"
                     @click="
                       () => {
                         onButtonClick(option)
@@ -69,11 +70,12 @@
           <template v-slot="componentSlotProps">
             <button
               class="flex rounded p-1 text-ink-gray-8 transition-colors"
-              :class="
+              :class="[
                 button.isActive(editor) || componentSlotProps?.isActive
                   ? 'bg-surface-gray-3'
-                  : 'hover:bg-surface-gray-2'
-              "
+                  : 'hover:bg-surface-gray-2',
+                button.class,
+              ]"
               @click="
                 componentSlotProps?.onClick
                   ? componentSlotProps.onClick(button)
