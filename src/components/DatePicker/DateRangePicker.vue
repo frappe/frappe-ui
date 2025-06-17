@@ -167,15 +167,6 @@ const dateValue = computed(() => {
 const fromDate = ref<string>(dateValue.value ? dateValue.value[0] : '')
 const toDate = ref<string>(dateValue.value ? dateValue.value[1] : '')
 
-onMounted(() => {
-  let dates: string | string[] | undefined =
-    typeof dateValue?.value === 'string'
-      ? dateValue.value.split(',')
-      : dateValue.value
-  fromDate.value = dates?.[0] || ''
-  toDate.value = dates?.[1] || ''
-})
-
 function handleDateClick(date: Date) {
   if (fromDate.value && toDate.value) {
     fromDate.value = getDateValue(date)
@@ -247,7 +238,16 @@ function clearDates() {
 
 const popoverRef = ref<InstanceType<typeof Popover>>()
 
-onMounted(() => selectCurrentMonthYear())
+onMounted(() => {
+  let dates: string | string[] | undefined =
+    typeof dateValue?.value === 'string'
+      ? dateValue.value.split(',')
+      : dateValue.value
+  fromDate.value = dates?.[0] || ''
+  toDate.value = dates?.[1] || ''
+
+  selectCurrentMonthYear()
+})
 
 defineExpose({
   open: () => {
