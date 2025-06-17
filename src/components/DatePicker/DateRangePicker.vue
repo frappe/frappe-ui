@@ -164,8 +164,8 @@ const dateValue = computed(() => {
   return props.value ? props.value : props.modelValue
 })
 
-const fromDate = ref<string>(dateValue.value ? dateValue.value[0] : '')
-const toDate = ref<string>(dateValue.value ? dateValue.value[1] : '')
+const fromDate = ref<string>('')
+const toDate = ref<string>('')
 
 function handleDateClick(date: Date) {
   if (fromDate.value && toDate.value) {
