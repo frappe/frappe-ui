@@ -10,7 +10,12 @@
           <Popover>
             <template #target="{ togglePopover }">
               <button
-                class="rounded px-2 py-1 text-base font-medium text-ink-gray-8 transition-colors hover:bg-surface-gray-2"
+                class="rounded px-2 py-1 text-base font-medium text-ink-gray-8 transition-colors"
+                :class="
+                  button.find((o) => o.isActive(editor))
+                    ? 'bg-surface-gray-3'
+                    : 'hover:bg-surface-gray-2'
+                "
                 @click="togglePopover"
                 :set="
                   (activeBtn =
@@ -28,14 +33,19 @@
               </button>
             </template>
             <template #body="{ close }">
-              <ul class="rounded border bg-surface-white p-1 shadow-md">
+              <ul class="rounded border bg-surface-white p-1 mt-1 shadow-md">
                 <li
                   class="w-full"
                   v-for="option in button"
                   v-show="option.isDisabled ? !option.isDisabled(editor) : true"
                 >
                   <button
-                    class="w-full rounded px-2 py-1 text-left text-base hover:bg-surface-menu-bar"
+                    class="w-full flex gap-1 rounded-sm p-1 text-ink-gray-8 transition-colors text-sm"
+                    :class="
+                      option.isActive(editor)
+                        ? 'bg-surface-gray-3'
+                        : 'hover:bg-surface-gray-2'
+                    "
                     @click="
                       () => {
                         onButtonClick(option)
@@ -43,7 +53,12 @@
                       }
                     "
                   >
-                    {{ option.label }}
+                    <component
+                      v-if="option.icon"
+                      :is="option.icon"
+                      class="size-4"
+                    />
+                    <template v-if="option.label">{{ option.label }}</template>
                   </button>
                 </li>
               </ul>
@@ -56,7 +71,7 @@
               class="flex rounded p-1 text-ink-gray-8 transition-colors"
               :class="
                 button.isActive(editor) || componentSlotProps?.isActive
-                  ? 'bg-surface-gray-2'
+                  ? 'bg-surface-gray-3'
                   : 'hover:bg-surface-gray-2'
               "
               @click="
@@ -92,6 +107,7 @@ export default {
   },
   methods: {
     onButtonClick(button) {
+      console.log(this.buttons)
       button.action(this.editor)
     },
   },
