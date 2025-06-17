@@ -9,7 +9,6 @@
       <TextInput
         readonly
         type="text"
-        icon-left="calendar"
         :placeholder="placeholder"
         :value="dateValue && formatter ? formatDates(dateValue) : dateValue"
         @focus="!readonly ? togglePopover() : null"
