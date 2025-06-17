@@ -3,19 +3,22 @@
     <template #target="{ togglePopover }">
       <button
         class="rounded px-2 py-1 text-base font-medium text-ink-gray-8 transition-colors"
-        :class="
+        :class="[
           actions.find((o) => o.isActive(editor))
             ? 'bg-surface-gray-3'
-            : 'hover:bg-surface-gray-2'
-        "
+            : 'hover:bg-surface-gray-2',
+          activeAction.class,
+        ]"
         @click="togglePopover"
-        :set="
-          (activeBtn = actions.find((b) => b.isActive(editor)) || actions[0])
-        "
+        :set="activeAction"
       >
-        <component v-if="activeBtn.icon" :is="activeBtn.icon" class="h-4 w-4" />
+        <component
+          v-if="activeAction.icon"
+          :is="activeAction.icon"
+          class="h-4 w-4"
+        />
         <span v-else>
-          {{ activeBtn.label }}
+          {{ activeAction.label }}
         </span>
       </button>
     </template>
@@ -69,8 +72,13 @@ const search = ref('')
 const actions = computed(() =>
   props.button.group ? props.button.actions : props.button
 )
+const activeAction = computed(
+  () =>
+    actions.value.find((b) => b.isActive(props.editor)) ||
+    actions.value.find((k) => k.default) ||
+    actions.value[0]
+)
 const filteredActions = computed(() => {
-  console.log(search.value)
   return props.button.search
     ? actions.value.filter((k) =>
         k.label.toLowerCase().includes(search.value.toLowerCase())
