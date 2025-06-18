@@ -146,6 +146,7 @@ const buttonClasses = computed(() => {
   let disabledClasses = disabledClassesMap[themeVariant]
 
   let sizeClasses = {
+    xs: 'h-5 text-xs px-1.5 rounded-sm',
     sm: 'h-7 text-base px-2 rounded',
     md: 'h-8 text-base font-medium px-2.5 rounded',
     lg: 'h-10 text-lg font-medium px-3 rounded-md',
