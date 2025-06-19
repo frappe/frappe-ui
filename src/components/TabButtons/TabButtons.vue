@@ -5,6 +5,7 @@
         as="template"
         v-for="button in buttons"
         :key="button.label"
+        :disabled="button.disabled"
         :value="button.value ?? button.label"
         v-slot="{ active, checked }"
       >
@@ -16,11 +17,19 @@
               : 'text-ink-gray-7',
             'flex flex-1 justify-center gap-2 whitespace-nowrap rounded-[7px] px-3 py-[5px] leading-none transition-colors focus:outline-none',
           ]"
+          @click="button.onClick"
         >
           <FeatherIcon
             class="h-4 w-4"
-            v-if="button.icon"
+            v-if="button.icon && typeof button.icon === 'string'"
             :name="button.icon"
+            :label="button.label"
+            :aria-label="button.label"
+          />
+          <component
+            v-else-if="button.icon"
+            class="h-4 w-4"
+            :is="button.icon"
             :label="button.label"
             :aria-label="button.label"
           />
