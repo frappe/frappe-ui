@@ -88,7 +88,7 @@ export { default as debounce } from './utils/debounce'
 export { default as fileToBase64 } from './utils/file-to-base64'
 export { default as FileUploadHandler } from './utils/fileUploadHandler'
 export { usePageMeta } from './utils/pageMeta.js'
-export { dayjsLocal, dayjs } from './utils/dayjs.js'
+export { dayjsLocal, dayjs } from './utils/dayjs'
 
 // data-fetching, resources
 export {
@@ -103,7 +103,7 @@ export {
 export { request } from './utils/request.js'
 export { frappeRequest } from './utils/frappeRequest.js'
 export { default as initSocket } from './utils/socketio.js'
-export { setConfig, getConfig } from './utils/config.js'
+export { setConfig, getConfig } from './utils/config'
 
 // new data fetching
 export { useCall } from './data-fetching/useCall/useCall'
