@@ -79,8 +79,8 @@ export { default as FunnelChart } from './components/Charts/FunnelChart.vue'
 export { default as ECharts } from './components/Charts/ECharts.vue'
 
 // directives
-export { default as onOutsideClickDirective } from './directives/onOutsideClick.js'
-export { default as visibilityDirective } from './directives/visibility.js'
+export { default as onOutsideClickDirective } from './directives/onOutsideClick'
+export { default as visibilityDirective } from './directives/visibility'
 
 // utilities
 export { default as call, createCall } from './utils/call.js'
