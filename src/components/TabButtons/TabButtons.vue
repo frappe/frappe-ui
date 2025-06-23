@@ -15,8 +15,11 @@
           class="!h-6"
           :class="[
             active ? 'ring-outline-gray-2 focus-visible:ring' : '',
-            checked
-              ? '!bg-surface-white text-ink-gray-9 shadow'
+            checked && '!bg-surface-white',
+            button.disabled
+              ? ''
+              : checked
+              ? ' text-ink-gray-9 shadow'
               : 'text-ink-gray-7',
           ]"
         >
