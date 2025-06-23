@@ -5,9 +5,9 @@
   "main": "./src/index.ts",
   "type": "module",
   "scripts": {
-    "test": "vitest",
+    "test": "vitest --run",
     "prettier": "yarn prettier -w ./src",
-    "bump-and-release": "yarn vitest && git pull --rebase origin main && yarn version --patch && git push && git push --tags",
+    "bump-and-release": "yarn test && git pull --rebase origin main && yarn version --patch && git push && git push --tags",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
