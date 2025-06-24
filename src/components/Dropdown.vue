@@ -90,16 +90,17 @@ import { RouterLinkProps, useRouter } from 'vue-router'
 
 const router = useRouter()
 
-type DropdownOption = {
+type DropdownItem = {
   label: string
   icon?: string | null
   color?: string | null
-  divider?: boolean | null
   component?: any
   onClick?: () => void
   route?: RouterLinkProps['to']
   condition?: () => boolean
 }
+type DropdownDivider = { divider: true }
+type DropdownOption = DropdownItem | DropdownDivider
 
 type DropdownGroupOption = {
   key?: number
