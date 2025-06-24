@@ -11,11 +11,11 @@
       :buttons="fixedMenu"
     />
     <TextEditorFloatingMenu :buttons="floatingMenu" />
-    <slot name="top" />
+    <slot name="top" :editor />
     <slot name="editor" :editor="editor">
       <editor-content :editor="editor" />
     </slot>
-    <slot name="bottom" />
+    <slot name="bottom" :editor />
   </div>
 </template>
 
