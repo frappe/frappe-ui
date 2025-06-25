@@ -6,16 +6,17 @@
     <div class="p-2">
       <AppSidebarHeader
         :isCollapsed="isCollapsed"
-        :title="props.headerTitle"
-        :subtitle="props.headerSubtitle"
+        :title="props.header.title"
+        :subtitle="props.header.subtitle"
+        :menu-items="props.header.menuItems"
       >
     </AppSidebarHeader>
     </div>
     <div class="flex-1">
-      <template v-for="section in props.sidebarItems" :key="section.group">
+      <template v-for="section in props.items" :key="section.group">
         <div
           v-if="section.group"
-          class="mt-3 flex items-center justify-between px-2 mb-1"
+          class="relative mt-2 flex items-center justify-between px-2 mb-0.5"
         >
           <h3
             class="px-2 py-1.5 text-sm text-ink-gray-5 transition-all duration-300 ease-in-out"
@@ -23,6 +24,13 @@
           >
             {{ section.group }}
           </h3>
+          <div
+            v-if="isCollapsed"
+            class="absolute top-0 left-0 flex h-full w-full items-center justify-center transition-all duration-300 ease-in-out px-2"
+            :class="isCollapsed ? 'opacity-100' : 'opacity-0'"
+          >
+            <hr class="w-full border-t border-ink-gray-3" />
+          </div>
         </div>
         <nav class="space-y-0.5 px-2">
           <AppSidebarItem
@@ -32,13 +40,13 @@
             :to="item.to"
             :isActive="item.isActive"
             :isCollapsed="isCollapsed"
-            :onClick="item.label === 'Search' ? () => {} : undefined"
+            :onClick="item.onClick"
           >
             <template #icon>
               <component :is="item.icon" class="size-4 text-ink-gray-6" />
             </template>
             <template #suffix>
-              <span v-if="item.label === 'Search'" class="!ml-auto text-sm text-ink-gray-4"> ⌘K </span>
+              <span v-if="item.suffix" class="!ml-auto text-sm text-ink-gray-4">{{ item.suffix }}</span>
             </template>
           </AppSidebarItem>
         </nav>
@@ -64,26 +72,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { breakpointsTailwind, useBreakpoints } from '@vueuse/core';
+import { provide, ref, watchEffect } from 'vue';
 import AppSidebarHeader from './AppSidebarHeader.vue';
 import AppSidebarItem from './AppSidebarItem.vue';
+import { AppSidebarProps } from './types';
 
 import LucidePanelRightOpen from '~icons/lucide/panel-right-open';
 
-const props = defineProps<{
-  headerTitle: string;
-  headerSubtitle: string;
-  sidebarItems?: Array<{
-    group: string;
-    items: Array<{
-      label: string;
-      icon?: any; // Icon component
-      to?: { name: string };
-      isActive?: boolean;
-      onClick?: () => void;
-    }>;
-  }>;
-}>()
+const props = defineProps<AppSidebarProps>()
 
-const isCollapsed = ref(false);
+const isCollapsed = ref(false)
+provide('isSidebarCollapsed', isCollapsed);
+
+const breakpoints = useBreakpoints(breakpointsTailwind)
+const isMobile = breakpoints.smaller('sm')
+watchEffect(() => {
+  isCollapsed.value = isMobile.value
+})
 </script>

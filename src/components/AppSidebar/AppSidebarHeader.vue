@@ -1,5 +1,5 @@
 <template>
-  <Dropdown :options="dropdownItems">
+  <Dropdown :options="props.menuItems">
     <template v-slot="{ open }">
       <button
         class="flex h-12 items-center rounded-md py-2 duration-300 ease-in-out w-[14rem]"
@@ -45,61 +45,10 @@
 </template>
 
 <script setup lang="ts">
-import { clear as clearIndexDb } from 'idb-keyval';
-import { computed, onMounted } from 'vue';
-import Dropdown from '../Dropdown/Dropdown.vue';
+import { inject } from 'vue';
+import LucideChevronDown from '~icons/lucide/chevron-down';
+import { AppSidebarHeaderProps } from './types';
 
-import LucideInfo from '~icons/lucide/info';
-import LucideListRestart from '~icons/lucide/list-restart';
-import LucideMoon from '~icons/lucide/moon';
-
-const props = defineProps<{
-  title: string;
-  subtitle: string;
-  isCollapsed?: boolean;
-}>();
-
-const dropdownItems = computed(() => [
-  {
-    icon: LucideMoon,
-    label: 'Toggle theme',
-    onClick: toggleTheme,
-  },
-  {
-    icon: LucideListRestart,
-    label: 'Clear cache',
-    onClick: clearCache,
-  },
-  {
-    icon: LucideInfo,
-    label: 'About',
-  },
-  {
-    icon: 'log-out',
-    label: 'Log out',
-  },
-])
-
-function toggleTheme() {
-  const currentTheme = document.documentElement.getAttribute('data-theme')
-  let theme = currentTheme === 'dark' ? 'light' : 'dark'
-  document.documentElement.setAttribute('data-theme', theme)
-  localStorage.setItem('theme', theme)
-}
-
-function clearCache() {
-  localStorage.clear()
-  sessionStorage.clear()
-  clearIndexDb().then(() => {
-    console.log('Cache cleared')
-    window.location.reload()
-  })
-}
-
-onMounted(() => {
-  const theme = localStorage.getItem('theme') || 'light'
-  if (['light', 'dark'].includes(theme)) {
-    document.documentElement.setAttribute('data-theme', theme)
-  }
-})
+const props = defineProps<AppSidebarHeaderProps>();
+const isCollapsed = inject('isSidebarCollapsed', false);
 </script>

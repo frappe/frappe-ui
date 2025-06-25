@@ -3,7 +3,7 @@
     :label="props.label"
     @click="handleClick"
     class="!w-full"
-    :class="isActive ? 'bg-surface-selected shadow-sm' : 'hover:bg-surface-gray-2'"
+    :class="props.isActive ? '!bg-surface-selected shadow-sm' : 'hover:bg-surface-gray-2'"
     variant="ghost"
     >
     <template #icon>
@@ -11,13 +11,13 @@
         class="flex w-full items-center justify-between transition-all ease-in-out px-2 py-1"
       >
         <div class="flex items-center truncate">
-          <Tooltip :text="label" placement="right" :disabled="!isCollapsed">
+          <Tooltip :text="props.label" placement="right" :disabled="!isCollapsed">
             <span class="grid flex-shrink-0 place-items-center">
               <slot name="icon"></slot>
             </span>
           </Tooltip>
           <Tooltip
-            :text="label"
+            :text="props.label"
             placement="right"
             :disabled="isCollapsed"
             :hoverDelay="1.5"
@@ -30,7 +30,7 @@
                   : 'ml-2 w-auto opacity-100'
               "
             >
-              {{ label }}
+              {{ props.label }}
             </span>
           </Tooltip>
         </div>
@@ -46,17 +46,14 @@
 </template>
 
 <script setup lang="ts">
-import { useRouter, type RouteLocationRaw } from 'vue-router';
-import Button from '../Button/Button.vue'
+import { inject } from 'vue';
+import { useRouter } from 'vue-router';
+import Button from '../Button/Button.vue';
 import Tooltip from '../Tooltip/Tooltip.vue';
+import { AppSidebarItem } from './types';
 
-const props = defineProps<{
-  label?: string
-  to?: RouteLocationRaw
-  onClick?: () => void
-  isActive?: boolean
-  isCollapsed?: boolean
-}>()
+const props = defineProps<AppSidebarItem>()
+const isCollapsed = inject('isSidebarCollapsed', false)
 
 const router = useRouter()
 function handleClick() {
