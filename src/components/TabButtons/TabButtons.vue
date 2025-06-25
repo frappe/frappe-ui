@@ -1,36 +1,35 @@
 <template>
   <RadioGroup v-model="value">
-    <div class="flex space-x-1 rounded bg-surface-gray-2 p-0.5 text-sm">
+    <div class="flex space-x-1 rounded bg-surface-gray-2 h-7 p-0.5 text-sm">
       <RadioGroupOption
-        as="template"
+        as="div"
         v-for="button in buttons"
         :key="button.label"
+        :disabled="button.disabled"
         :value="button.value ?? button.label"
         v-slot="{ active, checked }"
       >
-        <button
+        <Button
+          @click="button.onClick"
+          v-bind="button"
+          class="!h-6"
           :class="[
             active ? 'ring-outline-gray-2 focus-visible:ring' : '',
-            checked
-              ? 'bg-surface-white text-ink-gray-9 shadow'
+            checked && '!bg-surface-white',
+            button.disabled
+              ? ''
+              : checked
+              ? ' text-ink-gray-9 shadow'
               : 'text-ink-gray-7',
-            'flex flex-1 justify-center gap-2 whitespace-nowrap rounded-[7px] px-3 py-[5px] leading-none transition-colors focus:outline-none',
           ]"
         >
-          <FeatherIcon
-            class="h-4 w-4"
-            v-if="button.icon"
-            :name="button.icon"
-            :label="button.label"
-            :aria-label="button.label"
-          />
           <RadioGroupLabel
             as="span"
             class="flex h-4 items-center"
             v-show="button.label && !button.hideLabel"
             >{{ button.label }}</RadioGroupLabel
           >
-        </button>
+        </Button>
       </RadioGroupOption>
     </div>
   </RadioGroup>
