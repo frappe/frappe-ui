@@ -18,7 +18,8 @@
       :collapsible="section.collapsible"
     />
 
-    <div class="mt-auto">
+    <div class="mt-auto flex flex-col gap-2">
+      <slot name="footer-items" />
       <SidebarItem
         :label="isCollapsed ? 'Expand' : 'Collapse'"
         :isCollapsed="isCollapsed"
