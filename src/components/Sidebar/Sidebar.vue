@@ -4,6 +4,7 @@
     :class="isCollapsed ? 'w-12' : 'w-60'"
   >
     <SidebarHeader
+      v-if="props.header"
       :isCollapsed="isCollapsed"
       :title="props.header.title"
       :subtitle="props.header.subtitle"
