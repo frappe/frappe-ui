@@ -1,6 +1,6 @@
 import { RouteLocationRaw } from "vue-router";
 
-export type AppSidebarHeaderProps = {
+export type SidebarHeaderProps = {
 	title: string;
 	subtitle: string;
 	menuItems: {
@@ -10,7 +10,7 @@ export type AppSidebarHeaderProps = {
 	}[]
 }
 
-export type AppSidebarItem = {
+export type SidebarItemProps = {
 	label: string;
 	icon?: any; // Icon component
 	suffix?: string;
@@ -19,10 +19,13 @@ export type AppSidebarItem = {
 	onClick?: () => void;
 };
 
-export type AppSidebarProps = {
-	header: AppSidebarHeaderProps;
-	items?: {
-		group: string;
-		items: AppSidebarItem[];
-	}[];
+export type SidebarSectionProps = {
+	label: string;
+	items: SidebarItemProps[];
+	collapsible?: boolean;
+}
+
+export type SidebarProps = {
+	header: SidebarHeaderProps;
+	sections?: SidebarSectionProps[];
 }

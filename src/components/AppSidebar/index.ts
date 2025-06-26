@@ -1,2 +1,2 @@
-export { default as AppSidebar } from './AppSidebar.vue'
-export type { AppSidebarProps } from './types'
+export { default as Sidebar } from './Sidebar.vue'
+export type { SidebarProps } from './types'

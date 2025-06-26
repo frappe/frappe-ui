@@ -50,9 +50,9 @@ import { inject } from 'vue';
 import { useRouter } from 'vue-router';
 import Button from '../Button/Button.vue';
 import Tooltip from '../Tooltip/Tooltip.vue';
-import { AppSidebarItem } from './types';
+import { SidebarItemProps } from './types';
 
-const props = defineProps<AppSidebarItem>()
+const props = defineProps<SidebarItemProps>()
 const isCollapsed = inject('isSidebarCollapsed', false)
 
 const router = useRouter()

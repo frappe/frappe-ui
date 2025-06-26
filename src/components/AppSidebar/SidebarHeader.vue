@@ -47,8 +47,8 @@
 <script setup lang="ts">
 import { inject } from 'vue';
 import LucideChevronDown from '~icons/lucide/chevron-down';
-import { AppSidebarHeaderProps } from './types';
+import { SidebarHeaderProps } from './types';
 
-const props = defineProps<AppSidebarHeaderProps>();
+const props = defineProps<SidebarHeaderProps>();
 const isCollapsed = inject('isSidebarCollapsed', false);
 </script>
