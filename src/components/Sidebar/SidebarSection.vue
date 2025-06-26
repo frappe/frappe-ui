@@ -1,6 +1,6 @@
 <template>
-  <div class="flex flex-col gap-0.5">
-    <div v-if="props.label" class="relative flex items-center gap-1 px-4 py-1.5"
+  <div class="flex flex-col mt-2">
+    <div v-if="props.label" class="relative flex items-center gap-1 px-2 py-1.5"
       :class="props.collapsible ? 'cursor-pointer' : ''" @click="isCollapsed = !isCollapsed">
       <h3 class="h-4 text-sm text-ink-gray-5 transition-all duration-300 ease-in-out"
         :class="isSidebarCollapsed ? 'w-0 overflow-hidden opacity-0' : 'w-auto opacity-100'">
@@ -14,7 +14,7 @@
         />
       </div>
       <div v-if="isSidebarCollapsed"
-        class="absolute top-0 left-0 flex h-full w-full items-center justify-center transition-all duration-300 ease-in-out px-2"
+        class="absolute top-0 left-0 flex h-full w-full items-center justify-center transition-all duration-300 ease-in-out"
         :class="isSidebarCollapsed ? 'opacity-100' : 'opacity-0'">
         <hr class="w-full border-t border-ink-gray-3" />
       </div>
@@ -27,7 +27,7 @@
       enter-from-class="max-h-0 overflow-hidden"
       leave-to-class="max-h-0 overflow-hidden"
     >
-      <nav v-if="!isCollapsed" class="space-y-0.5 px-2">
+      <nav v-if="!isCollapsed" class="space-y-0.5">
         <SidebarItem v-for="item in props.items" :key="item.label" :label="item.label" :to="item.to"
           :isActive="item.isActive" :isCollapsed="isSidebarCollapsed" :onClick="item.onClick">
           <template #icon>
