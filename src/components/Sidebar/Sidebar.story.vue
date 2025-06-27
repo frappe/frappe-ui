@@ -7,6 +7,7 @@ import Deals from '~icons/lucide/briefcase';
 import Organizations from '~icons/lucide/building';
 import Tasks from '~icons/lucide/check-square';
 import Notes from '~icons/lucide/clipboard';
+import Link from '~icons/lucide/link';
 import EmailTemplates from '~icons/lucide/mail';
 import Moon from '~icons/lucide/moon';
 import CallLogs from '~icons/lucide/phone';
@@ -14,7 +15,6 @@ import Settings from '~icons/lucide/settings';
 import User from '~icons/lucide/user';
 import Contacts from '~icons/lucide/user-check';
 import Leads from '~icons/lucide/users';
-import Link from '~icons/lucide/link';
 
 const crmSidebar = reactive({
   header: {

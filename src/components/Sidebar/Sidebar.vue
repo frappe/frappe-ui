@@ -38,19 +38,19 @@
 </template>
 
 <script setup lang="ts">
-import { breakpointsTailwind, useBreakpoints } from '@vueuse/core';
-import { provide, ref, watchEffect } from 'vue';
-import SidebarHeader from './SidebarHeader.vue';
-import SidebarItem from './SidebarItem.vue';
-import { SidebarProps } from './types';
+import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
+import { provide, ref, watchEffect } from 'vue'
+import SidebarHeader from './SidebarHeader.vue'
+import SidebarItem from './SidebarItem.vue'
+import { SidebarProps } from './types'
 
-import LucidePanelRightOpen from '~icons/lucide/panel-right-open';
-import SidebarSection from './SidebarSection.vue';
+import LucidePanelRightOpen from '~icons/lucide/panel-right-open'
+import SidebarSection from './SidebarSection.vue'
 
 const props = defineProps<SidebarProps>()
 
 const isCollapsed = ref(false)
-provide('isSidebarCollapsed', isCollapsed);
+provide('isSidebarCollapsed', isCollapsed)
 
 const breakpoints = useBreakpoints(breakpointsTailwind)
 const isMobile = breakpoints.smaller('sm')

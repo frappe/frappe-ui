@@ -1,9 +1,19 @@
 <template>
   <div class="flex flex-col mt-2">
-    <div v-if="props.label" class="relative flex items-center gap-1 px-2 py-1.5"
-      :class="props.collapsible ? 'cursor-pointer' : ''" @click="isCollapsed = !isCollapsed">
-      <h3 class="h-4 text-sm text-ink-gray-5 transition-all duration-300 ease-in-out"
-        :class="isSidebarCollapsed ? 'w-0 overflow-hidden opacity-0' : 'w-auto opacity-100'">
+    <div
+      v-if="props.label"
+      class="relative flex items-center gap-1 px-2 py-1.5"
+      :class="props.collapsible ? 'cursor-pointer' : ''"
+      @click="isCollapsed = !isCollapsed"
+    >
+      <h3
+        class="h-4 text-sm text-ink-gray-5 transition-all duration-300 ease-in-out"
+        :class="
+          isSidebarCollapsed
+            ? 'w-0 overflow-hidden opacity-0'
+            : 'w-auto opacity-100'
+        "
+      >
         {{ props.label }}
       </h3>
       <div v-if="props.collapsible">
@@ -13,9 +23,11 @@
           :class="{ 'rotate-90': !isCollapsed }"
         />
       </div>
-      <div v-if="isSidebarCollapsed"
+      <div
+        v-if="isSidebarCollapsed"
         class="absolute top-0 left-0 flex h-full w-full items-center justify-center transition-all duration-300 ease-in-out"
-        :class="isSidebarCollapsed ? 'opacity-100' : 'opacity-0'">
+        :class="isSidebarCollapsed ? 'opacity-100' : 'opacity-0'"
+      >
         <hr class="w-full border-t border-ink-gray-3" />
       </div>
     </div>
@@ -28,13 +40,22 @@
       leave-to-class="max-h-0 overflow-hidden"
     >
       <nav v-if="!isCollapsed" class="space-y-0.5">
-        <SidebarItem v-for="item in props.items" :key="item.label" :label="item.label" :to="item.to"
-          :isActive="item.isActive" :isCollapsed="isSidebarCollapsed" :onClick="item.onClick">
+        <SidebarItem
+          v-for="item in props.items"
+          :key="item.label"
+          :label="item.label"
+          :to="item.to"
+          :isActive="item.isActive"
+          :isCollapsed="isSidebarCollapsed"
+          :onClick="item.onClick"
+        >
           <template #icon>
             <component :is="item.icon" class="size-4 text-ink-gray-6" />
           </template>
           <template #suffix>
-            <span v-if="item.suffix" class="!ml-auto text-sm text-ink-gray-4">{{ item.suffix }}</span>
+            <span v-if="item.suffix" class="!ml-auto text-sm text-ink-gray-4">
+              {{ item.suffix }}
+            </span>
           </template>
         </SidebarItem>
       </nav>
@@ -47,8 +68,8 @@ import { inject, ref } from 'vue';
 import SidebarItem from './SidebarItem.vue';
 import { SidebarSectionProps } from './types';
 
-const props = defineProps<SidebarSectionProps>();
+const props = defineProps<SidebarSectionProps>()
 
-const isSidebarCollapsed = inject('isSidebarCollapsed', false);
-const isCollapsed = ref(false);
+const isSidebarCollapsed = inject('isSidebarCollapsed', false)
+const isCollapsed = ref(false)
 </script>
