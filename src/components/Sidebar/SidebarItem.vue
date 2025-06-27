@@ -21,7 +21,19 @@
             :disabled="!isCollapsed"
           >
             <span class="grid flex-shrink-0 place-items-center">
-              <slot name="icon"></slot>
+              <slot name="icon">
+                <span
+                  v-if="props.icon && typeof props.icon === 'string'"
+                  class="size-4 text-ink-gray-6"
+                >
+                  {{ props.icon }}
+                </span>
+                <component
+                  v-else
+                  :is="props.icon"
+                  class="size-4 text-ink-gray-6"
+                />
+              </slot>
             </span>
           </Tooltip>
           <Tooltip
@@ -47,10 +59,14 @@
           :class="
             isCollapsed
               ? 'ml-0 w-0 overflow-hidden opacity-0'
-              : 'ml-2 w-auto opacity-100'
+              : 'ml-auto w-auto opacity-100'
           "
         >
-          <slot name="suffix" />
+          <slot name="suffix">
+            <span v-if="props.suffix" class="text-sm text-ink-gray-4">
+              {{ props.suffix }}
+            </span>
+          </slot>
         </div>
       </div>
     </template>
@@ -72,7 +88,7 @@ function handleClick() {
   if (props.onClick) {
     props.onClick()
   } else if (props.to) {
-    router.push(props.to)
+    router.replace(props.to)
   }
 }
 </script>

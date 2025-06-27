@@ -44,19 +44,13 @@
           v-for="item in props.items"
           :key="item.label"
           :label="item.label"
+          :icon="item.icon"
+          :suffix="item.suffix"
           :to="item.to"
           :isActive="item.isActive"
           :isCollapsed="isSidebarCollapsed"
           :onClick="item.onClick"
         >
-          <template #icon>
-            <component :is="item.icon" class="size-4 text-ink-gray-6" />
-          </template>
-          <template #suffix>
-            <span v-if="item.suffix" class="!ml-auto text-sm text-ink-gray-4">
-              {{ item.suffix }}
-            </span>
-          </template>
         </SidebarItem>
       </nav>
     </transition>
