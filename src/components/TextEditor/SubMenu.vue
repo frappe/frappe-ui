@@ -32,7 +32,7 @@
             v-show="option.isDisabled ? !option.isDisabled(editor) : true"
           >
             <button
-              class="w-full flex gap-1 rounded-sm p-1 text-ink-gray-8 transition-colors text-sm"
+              class="w-full flex gap-1 rounded-sm p-1 text-ink-gray-8 transition-colors text-sm h-7 items-center"
               :class="[
                 option.isActive(editor)
                   ? 'bg-surface-gray-3'
