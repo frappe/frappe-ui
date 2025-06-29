@@ -326,6 +326,64 @@
       }
     },
     {
+      "id": "src-components-combobox-combobox-story-vue",
+      "title": "Combobox",
+      "layout": {
+        "type": "grid",
+        "width": 400
+      },
+      "docsOnly": false,
+      "variants": [
+        {
+          "id": "src-components-combobox-combobox-story-vue-0",
+          "title": "Simple String Options"
+        },
+        {
+          "id": "src-components-combobox-combobox-story-vue-1",
+          "title": "Object Options"
+        },
+        {
+          "id": "src-components-combobox-combobox-story-vue-2",
+          "title": "Options with Icons"
+        },
+        {
+          "id": "src-components-combobox-combobox-story-vue-3",
+          "title": "Grouped Options"
+        },
+        {
+          "id": "src-components-combobox-combobox-story-vue-4",
+          "title": "Disabled State"
+        },
+        {
+          "id": "src-components-combobox-combobox-story-vue-5",
+          "title": "Pre-selected Value"
+        },
+        {
+          "id": "src-components-combobox-combobox-story-vue-6",
+          "title": "Multiple Selection - Simple"
+        },
+        {
+          "id": "src-components-combobox-combobox-story-vue-7",
+          "title": "Multiple Selection - Objects"
+        },
+        {
+          "id": "src-components-combobox-combobox-story-vue-8",
+          "title": "Multiple Selection - Grouped"
+        },
+        {
+          "id": "src-components-combobox-combobox-story-vue-9",
+          "title": "Complex Objects with Display Value"
+        }
+      ],
+      "relativePath": "src/components/Combobox/Combobox.story.vue",
+      "supportPluginId": "vue3",
+      "treePath": [
+        "Combobox"
+      ],
+      "virtual": false,
+      "markdownFile": null
+    },
+    {
       "id": "src-components-datepicker-datepicker-story-vue",
       "title": "DatePicker",
       "layout": {
