@@ -70,6 +70,7 @@ export { default as NestedPopover } from './components/ListFilter/NestedPopover.
 export * from './components/CircularProgressBar'
 export * from './components/Tree'
 export { default as FrappeUIProvider } from './components/Provider/FrappeUIProvider.vue'
+export { default as Sidebar } from './components/Sidebar/Sidebar.vue'
 
 // chart components
 export { default as AxisChart } from './components/Charts/AxisChart.vue'
