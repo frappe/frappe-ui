@@ -23,7 +23,7 @@
       </button>
     </template>
     <template #body="{ close }">
-      <div class="rounded border bg-surface-white p-1 my-1 shadow-md">
+      <div class="rounded bg-surface-white p-1 shadow-xl">
         <TextInput v-if="button.search" v-model="search" class="mb-0.5" />
         <ul :class="button.search && 'max-h-32 overflow-scroll scroll-shadow'">
           <li
