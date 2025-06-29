@@ -1,18 +1,21 @@
 import * as LucideIcons from 'lucide-static'
+import AutoImport from 'unplugin-auto-import/vite'
 import Icons from 'unplugin-icons/vite'
 import Components from 'unplugin-vue-components/vite'
 import IconsResolver from 'unplugin-icons/resolver'
 
 export function lucideIcons() {
+  const resolverObj = {
+    resolvers: [
+      IconsResolver({
+        prefix: false,
+        enabledCollections: ['lucide'],
+      }),
+    ],
+  }
   return [
-    Components({
-      resolvers: [
-        IconsResolver({
-          prefix: false,
-          enabledCollections: ['lucide'],
-        }),
-      ],
-    }),
+    AutoImport(resolverObj),
+    Components(resolverObj),
     Icons({
       customCollections: {
         lucide: getIcons(),
