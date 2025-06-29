@@ -111,9 +111,6 @@ export default Node.create<VideoOptions>({
         (editor.isEditable ? ' cursor-pointer' : '')
 
       const video = document.createElement('video')
-      if (editor.isEditable) {
-        video.className = 'pointer-events-none'
-      }
       video.src = node.attrs.src
       video.setAttribute('controls', '')
 
