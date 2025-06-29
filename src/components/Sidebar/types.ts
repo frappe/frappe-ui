@@ -2,10 +2,10 @@ import { RouteLocationRaw } from 'vue-router'
 
 export type SidebarHeaderProps = {
   title: string
-  subtitle: string
-  menuItems: {
+  subtitle?: string
+  menuItems?: {
     label: string
-    icon?: any // Icon component
+    icon: any // Icon component
     onClick?: () => void
   }[]
 }
