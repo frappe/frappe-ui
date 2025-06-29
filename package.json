@@ -1,11 +1,12 @@
 {
   "name": "frappe-ui",
-  "version": "0.1.162",
+  "version": "0.1.163",
   "description": "A set of components and utilities for rapid UI development",
   "main": "./src/index.ts",
   "type": "module",
   "scripts": {
     "test": "vitest --run",
+    "type-check": "tsc --noEmit",
     "prettier": "yarn prettier -w ./src",
     "bump-and-release": "yarn test && git pull --rebase origin main && yarn version --patch && git push && git push --tags",
     "dev": "vite",
