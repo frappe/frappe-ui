@@ -1,7 +1,8 @@
-import { ref, defineComponent, h, Ref } from 'vue'
+import DOMPurify from 'dompurify'
+import { defineComponent, h, ref, Ref } from 'vue'
+import LoadingIndicator from '../LoadingIndicator.vue'
 import ToastComponent from './Toast.vue'
 import type { ToastProps } from './types'
-import LoadingIndicator from '../LoadingIndicator.vue'
 
 interface ToastOptions
   extends Omit<Partial<ToastProps>, 'open' | 'message' | 'title'> {
@@ -56,10 +57,14 @@ export const toast = {
     const durationInMs =
       options.duration != null ? options.duration * 1000 : 5000
 
+    const sanitizedMessage = DOMPurify.sanitize(options.message, {
+      ALLOWED_TAGS: ['a', 'em', 'strong', 'i', 'b', 'u'],
+    })
+
     const toastItem: ToastItem = {
       id: options.id || id,
       open: true,
-      message: options.message,
+      message: sanitizedMessage,
       type: options.type || 'info',
       duration: durationInMs,
       action: options.action,
