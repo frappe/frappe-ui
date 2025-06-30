@@ -51,7 +51,7 @@ export function frappeRequest(options) {
 
         if (data._server_messages) {
           let onMessageHandler =
-            getConfig('messageHandler') || options.onMessage || null
+            getConfig('serverMessagesHandler') || options.onServerMessages || null
           if (onMessageHandler) {
             onMessageHandler(JSON.parse(data?._server_messages) || [])
           }
