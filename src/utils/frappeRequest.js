@@ -1,3 +1,4 @@
+import { getConfig } from './config'
 import { request } from './request'
 
 export function frappeRequest(options) {
@@ -47,6 +48,15 @@ export function frappeRequest(options) {
             console.warn('Error printing debug messages', e)
           }
         }
+
+        if (data._server_messages) {
+          let onMessageHandler =
+            getConfig('messageHandler') || options.onMessage || null
+          if (onMessageHandler) {
+            onMessageHandler(JSON.parse(data?._server_messages) || [])
+          }
+        }
+
         return data.message
       } else {
         let errorResponse = await response.text()
