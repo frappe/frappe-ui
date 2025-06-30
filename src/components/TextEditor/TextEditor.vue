@@ -82,6 +82,10 @@ export default {
       type: Boolean,
       default: true,
     },
+    autofocus: {
+      type: Boolean,
+      default: false,
+    },
     bubbleMenu: {
       type: [Boolean, Array],
       default: false,
@@ -162,6 +166,7 @@ export default {
       content: this.content || null,
       editorProps: this.editorProps,
       editable: this.editable,
+      autofocus: this.autofocus,
       extensions: [
         StarterKit.configure({
           ...this.starterkitOptions,
