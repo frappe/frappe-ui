@@ -318,64 +318,26 @@ const filterOptions = (options: Option[]) => {
 const selectedValue = computed({
   get() {
     if (!props.multiple) {
-      return (
-        findOption(props.modelValue as AutocompleteOption) ||
-        // if the modelValue is not found in the option list
-        // return the modelValue as is
-        makeOption(props.modelValue as AutocompleteOption)
-      )
+      // For single, always return an object from options or a value
+      return findOption(props.modelValue) || makeOption(props.modelValue)
     }
-    // in case of `multiple`, modelValue is an array of values
-    // if the modelValue is a list of values, convert them to options
-    // Always dedupe, map to option objects
+    // For multiple, always return array of option objects or values
     const values = (props.modelValue || []) as AutocompleteOption[]
-    const seen = new Set<OptionValue>()
-    const result: Option[] = []
-    for (const v of values) {
-      const opt = isOption(v) ? v : findOption(v) || makeOption(v)
-      if (!seen.has(opt.value)) {
-        seen.add(opt.value)
-        result.push(opt)
-      }
-    }
-    return result
+    return values.map(v => findOption(v) || makeOption(v))
   },
-set(val) {
-  query.value = ''
-  if (!props.multiple) {
-    emit('update:modelValue', val?.value ?? null)
-    emit('change', val?.value ?? null)
-  } else {
-    // If val is empty or falsy, emit empty array
-    if (!val || (Array.isArray(val) && val.length === 0)) {
-      emit('update:modelValue', [])
-      emit('change', [])
-      return
-    }
-    // Toggle logic for multiple selection:
-    const options = val as Option[]
-    const last = options[options.length - 1]
-    const prevValues = (props.modelValue || []) as AutocompleteOption[]
-    const prevSet = new Set(prevValues.map(v => isOption(v) ? v.value : v))
-    const lastValue = last?.value
-
-    let result: OptionValue[]
-    if (last && prevSet.has(lastValue)) {
-      // Remove
-      result = prevValues
-        .map(v => isOption(v) ? v.value : v)
-        .filter(v => v !== lastValue)
+  set(val) {
+    query.value = ''
+    if (!props.multiple) {
+      emit('update:modelValue', val?.value ?? null)
+      emit('change', val?.value ?? null)
     } else {
-      // Add (ensure unique)
-      result = [...prevValues.map(v => isOption(v) ? v.value : v)]
-      if (last && !prevSet.has(lastValue)) {
-        result.push(lastValue)
-      }
+      // Map to value (primitive) always
+      const arr = Array.isArray(val) ? val : []
+      const result = arr.map(v => isOption(v) ? v.value : v)
+      emit('update:modelValue', result)
+      emit('change', result)
     }
-    emit('update:modelValue', result)
-    emit('change', result)
   }
-}
 })
 
 const findOption = (option: AutocompleteOption) => {
@@ -406,13 +368,13 @@ const displayValue = computed(() => {
 })
 
 const isOptionSelected = (option: AutocompleteOption) => {
-  if (!selectedValue.value) return false
   const value = isOption(option) ? option.value : option
   if (!props.multiple) {
-    return selectedValue.value === value
+    if (!selectedValue.value) return false
+    return (isOption(selectedValue.value) ? selectedValue.value.value : selectedValue.value) === value
   }
-  return (selectedValue.value as AutocompleteOption[]).find((v) =>
-    isOption(v) ? v.value === value : v === value,
+  return (selectedValue.value as AutocompleteOption[]).some(
+    v => (isOption(v) ? v.value : v) === value
   )
 }
 
