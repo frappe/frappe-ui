@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex h-full flex-col overflow-y-auto border-r border-outline-gray-1 bg-surface-menu-bar transition-all duration-300 ease-in-out p-2"
+    class="flex h-full flex-col flex-shrink-0 overflow-y-auto border-r border-outline-gray-1 bg-surface-menu-bar transition-all duration-300 ease-in-out p-2"
     :class="isCollapsed ? 'w-12' : 'w-60'"
   >
     <SidebarHeader
