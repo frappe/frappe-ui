@@ -16,7 +16,7 @@
       </slot>
       <slot name="suffix" v-bind="{ item }" />
     </div>
-    <slot v-if="list.options.resizeColumn" name="resizer" v-bind="{ item }">
+    <slot v-if="list?.options.resizeColumn" name="resizer" v-bind="{ item }">
       <div
         class="flex h-4 absolute -right-2 w-2 cursor-col-resize justify-center"
         @mousedown="startResizing"
@@ -30,26 +30,31 @@
   </div>
 </template>
 
-<script setup>
-import { alignmentMap } from './utils'
+<script setup lang="ts">
 import { useDebounceFn } from '@vueuse/core'
-import { ref, computed, inject } from 'vue'
+import { computed, ComputedRef, inject, ref, withDefaults } from 'vue'
+import type { ListColumn, ListContext } from './types'
+import { alignmentMap } from './utils'
 
-const props = defineProps({
-  item: {
-    type: Object,
-    required: true,
-  },
-  debounce: {
-    type: Number,
-    default: 1000,
-  },
+interface ListHeaderItemProps {
+  item: ListColumn
+  debounce?: number
+}
+
+interface ListHeaderItemEmits {
+  (event: 'columnWidthUpdated'): void
+}
+
+const list = inject<ComputedRef<ListContext>>('list')
+
+const props = withDefaults(defineProps<ListHeaderItemProps>(), {
+  debounce: 1000,
 })
 
-const emit = defineEmits(['columnWidthUpdated'])
+const emit = defineEmits<ListHeaderItemEmits>()
 
-const resizer = ref(null)
-const columnRef = ref(null)
+const resizer = ref<HTMLElement | null>(null)
+const columnRef = ref<HTMLElement | null>(null)
 
 const widthInPx = computed(() => {
   if (typeof props.item.width === 'string') {
@@ -60,16 +65,18 @@ const widthInPx = computed(() => {
       return parsedWidth
     }
   }
-  return columnRef.value.offsetWidth
+  return columnRef.value?.offsetWidth || 0
 })
 
-const startResizing = (e) => {
+const startResizing = (e: MouseEvent) => {
   const initialX = e.clientX
   const initialWidth = widthInPx.value
-  const onMouseMove = (e) => {
+  const onMouseMove = (e: MouseEvent) => {
     document.body.classList.add('select-none')
     document.body.classList.add('cursor-col-resize')
-    resizer.value.style.backgroundColor = 'rgb(199 199 199)'
+    if (resizer.value) {
+      resizer.value.style.backgroundColor = 'rgb(199 199 199)'
+    }
     let newWidth = initialWidth + (e.clientX - initialX)
 
     props.item.width = `${newWidth < 50 ? 50 : newWidth}px`
@@ -78,7 +85,9 @@ const startResizing = (e) => {
   const onMouseUp = () => {
     document.body.classList.remove('select-none')
     document.body.classList.remove('cursor-col-resize')
-    resizer.value.style.backgroundColor = ''
+    if (resizer.value) {
+      resizer.value.style.backgroundColor = ''
+    }
     window.removeEventListener('mousemove', onMouseMove)
     window.removeEventListener('mouseup', onMouseUp)
   }
@@ -86,10 +95,8 @@ const startResizing = (e) => {
   window.addEventListener('mouseup', onMouseUp)
 }
 
-const updateWidth = useDebounceFn((width) => {
+const updateWidth = useDebounceFn((width: string) => {
   props.item.width = width
   emit('columnWidthUpdated')
 }, props.debounce)
-
-const list = inject('list')
 </script>

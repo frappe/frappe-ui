@@ -2,8 +2,8 @@
   <div class="relative flex w-full h-full flex-1 flex-col overflow-x-auto">
     <div
       class="flex w-max min-w-full h-full flex-col overflow-y-hidden"
-      :class="$attrs.class"
-      :style="$attrs.style"
+      :class="attrClass"
+      :style="attrStyle"
     >
       <slot v-bind="{ showGroupedRows, selectable }">
         <ListHeader />
@@ -17,62 +17,53 @@
     </div>
   </div>
 </template>
-<script setup>
+
+<script setup lang="ts">
+import {
+  computed,
+  provide,
+  reactive,
+  ref,
+  useAttrs,
+  useSlots,
+  watch,
+  withDefaults,
+} from 'vue'
 import ListEmptyState from './ListEmptyState.vue'
+import ListGroups from './ListGroups.vue'
 import ListHeader from './ListHeader.vue'
 import ListRows from './ListRows.vue'
-import ListGroups from './ListGroups.vue'
 import ListSelectBanner from './ListSelectBanner.vue'
-import { ref, reactive, computed, provide, watch, useSlots } from 'vue'
+import {
+  type Row,
+  type ListViewEmits,
+  type ListViewOptions,
+  type ListViewProps,
+} from './types'
 
 defineOptions({
   inheritAttrs: false,
 })
 
-const props = defineProps({
-  id: {
-    type: String,
-    default: 'list-view',
-  },
-  columns: {
-    type: Array,
-    default: [],
-  },
-  rows: {
-    type: Array,
-    default: [],
-  },
-  rowKey: {
-    type: String,
-    required: true,
-  },
-  options: {
-    type: Object,
-    default: () => ({
-      getRowRoute: null,
-      onRowClick: null,
-      showTooltip: true,
-      selectable: true,
-      resizeColumn: false,
-      rowHeight: 40,
-      emptyState: {
-        title: 'No Data',
-        description: 'No data available',
-      },
-    }),
-  },
+const emit = defineEmits<ListViewEmits>()
+const props = withDefaults(defineProps<ListViewProps>(), {
+  id: 'list-view',
+  columns: () => [],
+  rows: () => [],
+  options: () => ({}),
 })
 
 const slots = useSlots()
+const attrs = useAttrs()
+const attrClass = computed(() => attrs.class as string)
+const attrStyle = computed(() => attrs.style as string)
 
-let selections = reactive(new Set())
-let activeRow = ref(null)
-
-const emit = defineEmits(['update:selections', 'update:active-row'])
+let selections = reactive(new Set<string>())
+let activeRow = ref<string>('')
 
 watch(selections, (value) => {
   if (selections.size) {
-    activeRow.value = null
+    activeRow.value = ''
   }
   emit('update:selections', value)
 })
@@ -81,27 +72,31 @@ watch(activeRow, (value) => {
   emit('update:active-row', value)
 })
 
-let _options = computed(() => {
-  function defaultTrue(value) {
+let _options = computed((): ListViewOptions => {
+  function defaultTrue(value: boolean | undefined): boolean {
     return value === undefined ? true : value
   }
 
-  function defaultFalse(value) {
+  function defaultFalse(value: boolean | undefined): boolean {
     return value === undefined ? false : value
   }
 
   return {
-    getRowRoute: props.options.getRowRoute || null,
-    onRowClick: props.options.onRowClick || null,
-    showTooltip: defaultTrue(props.options.showTooltip),
+    getRowRoute: props.options?.getRowRoute || undefined,
+    onRowClick: props.options?.onRowClick || undefined,
+    showTooltip: defaultTrue(props.options?.showTooltip),
     selectionText:
-      props.options.selectionText ||
-      ((val) => (val === 1 ? '1 row selected' : `${val} rows selected`)),
-    enableActive: defaultFalse(props.options.enableActive),
-    selectable: defaultTrue(props.options.selectable),
-    resizeColumn: defaultFalse(props.options.resizeColumn),
-    rowHeight: props.options.rowHeight || 40,
-    emptyState: props.options.emptyState,
+      props.options?.selectionText ||
+      ((count: number) =>
+        count === 1 ? '1 row selected' : `${count} rows selected`),
+    enableActive: defaultFalse(props.options?.enableActive),
+    selectable: defaultTrue(props.options?.selectable),
+    resizeColumn: defaultFalse(props.options?.resizeColumn),
+    rowHeight: props.options?.rowHeight || 40,
+    emptyState: props.options?.emptyState || {
+      title: 'No Data',
+      description: 'No data available',
+    },
   }
 })
 
@@ -122,46 +117,45 @@ const selectable = computed(() => {
 
 let showGroupedRows = computed(() => {
   return props.rows.every(
-    (row) => row.group && row.rows && Array.isArray(row.rows)
+    (row) => row.group && row.rows && Array.isArray(row.rows),
   )
 })
 
-function toggleRow(row) {
-  if (!selections.delete(row)) {
-    selections.add(row)
+function toggleRow(row_id: string) {
+  if (!selections.delete(row_id)) {
+    selections.add(row_id)
   }
 }
 
-function toggleAllRows(select) {
+function toggleAllRows(select?: boolean) {
   if (!select || allRowsSelected.value) {
     selections.clear()
     return
   }
   if (showGroupedRows.value) {
-    props.rows.forEach((row) => {
-      row.rows.forEach((r) => selections.add(r[props.rowKey]))
+    props.rows.forEach((row: Row) => {
+      row.rows.forEach((r: Row) => selections.add(r[props.rowKey]))
     })
     return
   }
-  props.rows.forEach((row) => selections.add(row[props.rowKey]))
+  props.rows.forEach((row: Row) => selections.add(row[props.rowKey]))
 }
 
-provide(
-  'list',
-  computed(() => ({
-    id: props.id || 'list-view',
-    rowKey: props.rowKey,
-    rows: props.rows,
-    columns: props.columns,
-    options: _options.value,
-    selections: selections,
-    activeRow: activeRow,
-    allRowsSelected: allRowsSelected.value,
-    slots: slots,
-    toggleRow,
-    toggleAllRows,
-  }))
-)
+const listContext = computed(() => ({
+  id: props.id || 'list-view',
+  rowKey: props.rowKey,
+  rows: props.rows,
+  columns: props.columns,
+  options: _options.value,
+  selections: selections,
+  activeRow: activeRow,
+  allRowsSelected: allRowsSelected.value,
+  slots: slots,
+  toggleRow,
+  toggleAllRows,
+}))
+
+provide('list', listContext)
 
 defineExpose({
   selections,

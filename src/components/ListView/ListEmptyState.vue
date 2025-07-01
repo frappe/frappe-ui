@@ -1,5 +1,6 @@
 <template>
   <div
+    v-if="list?.options.emptyState"
     class="flex h-full w-full flex-col items-center justify-center text-base"
   >
     <slot>
@@ -16,9 +17,10 @@
   </div>
 </template>
 
-<script setup>
-import { inject } from 'vue'
+<script setup lang="ts">
+import { ComputedRef, inject } from 'vue'
 import { Button } from '../Button'
+import type { ListContext } from './types'
 
-const list = inject('list')
+const list = inject<ComputedRef<ListContext>>('list')
 </script>
