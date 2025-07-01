@@ -1,7 +1,7 @@
 <template>
-  <div class="relative flex w-full flex-1 flex-col overflow-x-auto">
+  <div class="relative flex w-full h-full flex-1 flex-col overflow-x-auto">
     <div
-      class="flex w-max min-w-full flex-col overflow-y-hidden"
+      class="flex w-max min-w-full h-full flex-col overflow-y-hidden"
       :class="$attrs.class"
       :style="$attrs.style"
     >
@@ -30,6 +30,10 @@ defineOptions({
 })
 
 const props = defineProps({
+  id: {
+    type: String,
+    default: 'list-view',
+  },
   columns: {
     type: Array,
     default: [],
@@ -145,6 +149,7 @@ function toggleAllRows(select) {
 provide(
   'list',
   computed(() => ({
+    id: props.id || 'list-view',
     rowKey: props.rowKey,
     rows: props.rows,
     columns: props.columns,
