@@ -61,8 +61,7 @@ createResource({
     trialEndDays.value = calculateTrialEndDays(data.trial_end_date)
     baseEndpoint.value = data.base_url
     siteName.value = data.site_name
-    showBanner.value =
-      data.setup_complete && data.plan.is_trial_plan && trialEndDays.value > 0
+    showBanner.value = data.plan.is_trial_plan && trialEndDays.value > 0
   },
 })
 
