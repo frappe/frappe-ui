@@ -8,6 +8,7 @@ import { processMultipleImages } from './image/image-extension'
 export interface MarkdownPasteOptions {
   enabled: boolean
   showConfirmation: boolean
+  uploadFunction: Function | null
 }
 
 export const MarkdownPasteExtension = Extension.create<MarkdownPasteOptions>({
@@ -17,6 +18,7 @@ export const MarkdownPasteExtension = Extension.create<MarkdownPasteOptions>({
     return {
       enabled: true,
       showConfirmation: true,
+      uploadFunction: null,
     }
   },
 
@@ -33,7 +35,7 @@ export const MarkdownPasteExtension = Extension.create<MarkdownPasteOptions>({
           ) => {
             if (!this.options.enabled) return false
 
-            // Check for images first
+            // upload images from clipboard
             const files: File[] | [] = Array.from(
               event.clipboardData?.files || [],
             )

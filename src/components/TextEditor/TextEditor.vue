@@ -205,6 +205,7 @@ onMounted(() => {
       MarkdownPasteExtension.configure({
         enabled: true,
         showConfirmation: true,
+        uploadFunction: props.uploadFunction || defaultUploadFunction,
       }),
       ...(props.extensions || []),
     ],
