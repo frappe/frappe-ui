@@ -1,6 +1,6 @@
 import { Extension } from '@tiptap/core'
-import { DOMParser } from '@tiptap/pm/model'
 import { Plugin, PluginKey } from '@tiptap/pm/state'
+import { DOMParser } from '@tiptap/pm/model'
 import { EditorView } from 'prosemirror-view'
 import { detectMarkdown, markdownToHTML } from '../../../utils/markdown'
 import { processMultipleImages } from './image/image-extension'

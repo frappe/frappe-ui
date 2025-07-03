@@ -21,50 +21,50 @@
 
 <script setup lang="ts">
 import {
-  computed,
   normalizeClass,
   normalizeStyle,
-  onBeforeUnmount,
+  computed,
+  watch,
   onMounted,
+  onBeforeUnmount,
   provide,
   ref,
   useAttrs,
-  watch,
 } from 'vue'
 
 defineOptions({ inheritAttrs: false })
 
-import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
+import { Editor, EditorContent, VueNodeViewRenderer } from '@tiptap/vue-3'
+import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
+import TextAlign from '@tiptap/extension-text-align'
 import Table from '@tiptap/extension-table'
 import TableCell from '@tiptap/extension-table-cell'
 import TableHeader from '@tiptap/extension-table-header'
 import TableRow from '@tiptap/extension-table-row'
-import TextAlign from '@tiptap/extension-text-align'
-import TextStyle from '@tiptap/extension-text-style'
-import Typography from '@tiptap/extension-typography'
-import StarterKit from '@tiptap/starter-kit'
-import { Editor, EditorContent, VueNodeViewRenderer } from '@tiptap/vue-3'
-import { common, createLowlight } from 'lowlight'
-import { useFileUpload } from '../../utils/useFileUpload'
-import CodeBlockComponent from './CodeBlockComponent.vue'
-import NamedColorExtension from './extensions/color'
-import { ContentPasteExtension } from './extensions/content-paste-extension'
-import EmojiExtension from './extensions/emoji/emoji-extension'
-import { Heading } from './extensions/heading/heading'
-import NamedHighlightExtension from './extensions/highlight'
 import { ImageExtension } from './extensions/image'
-import { ImageGroup } from './extensions/image-group/image-group-extension'
-import SlashCommands from './extensions/slash-commands/slash-commands-extension'
-import { TagExtension, TagNode } from './extensions/tag/tag-extension'
 import ImageViewerExtension from './image-viewer-extension'
-import LinkExtension from './link-extension'
-import configureMention from './mention'
-import TextEditorBubbleMenu from './TextEditorBubbleMenu.vue'
-import TextEditorFixedMenu from './TextEditorFixedMenu.vue'
-import TextEditorFloatingMenu from './TextEditorFloatingMenu.vue'
-import { TextEditorEmits, TextEditorProps } from './types'
 import VideoExtension from './video-extension'
+import LinkExtension from './link-extension'
+import Typography from '@tiptap/extension-typography'
+import TextStyle from '@tiptap/extension-text-style'
+import NamedColorExtension from './extensions/color'
+import NamedHighlightExtension from './extensions/highlight'
+import { common, createLowlight } from 'lowlight'
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
+import CodeBlockComponent from './CodeBlockComponent.vue'
+import configureMention from './mention'
+import TextEditorFixedMenu from './TextEditorFixedMenu.vue'
+import TextEditorBubbleMenu from './TextEditorBubbleMenu.vue'
+import TextEditorFloatingMenu from './TextEditorFloatingMenu.vue'
+import EmojiExtension from './extensions/emoji/emoji-extension'
+import SlashCommands from './extensions/slash-commands/slash-commands-extension'
+import { ContentPasteExtension } from './extensions/content-paste-extension'
+import { TagNode, TagExtension } from './extensions/tag/tag-extension'
+import { Heading } from './extensions/heading/heading'
+import { ImageGroup } from './extensions/image-group/image-group-extension'
+import { useFileUpload } from '../../utils/useFileUpload'
+import { TextEditorEmits, TextEditorProps } from './types'
 
 const lowlight = createLowlight(common)
 
