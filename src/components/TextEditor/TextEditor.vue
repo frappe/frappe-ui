@@ -59,7 +59,7 @@ import TextEditorBubbleMenu from './TextEditorBubbleMenu.vue'
 import TextEditorFloatingMenu from './TextEditorFloatingMenu.vue'
 import EmojiExtension from './extensions/emoji/emoji-extension'
 import SlashCommands from './extensions/slash-commands/slash-commands-extension'
-import { MarkdownPasteExtension } from './extensions/markdown-paste-extension'
+import { ContentPasteExtension } from './extensions/content-paste-extension'
 import { TagNode, TagExtension } from './extensions/tag/tag-extension'
 import { Heading } from './extensions/heading/heading'
 import { ImageGroup } from './extensions/image-group/image-group-extension'
@@ -202,9 +202,10 @@ onMounted(() => {
       TagExtension.configure({
         tags: () => props.tags,
       }),
-      MarkdownPasteExtension.configure({
+      ContentPasteExtension.configure({
         enabled: true,
         showConfirmation: true,
+        uploadFunction: props.uploadFunction || defaultUploadFunction,
       }),
       ...(props.extensions || []),
     ],

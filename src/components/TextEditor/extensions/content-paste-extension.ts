@@ -1,31 +1,53 @@
 import { Extension } from '@tiptap/core'
 import { Plugin, PluginKey } from '@tiptap/pm/state'
 import { DOMParser } from '@tiptap/pm/model'
+import { EditorView } from 'prosemirror-view'
 import { detectMarkdown, markdownToHTML } from '../../../utils/markdown'
+import { processMultipleImages } from './image/image-extension'
 
-export interface MarkdownPasteOptions {
+export interface ContentPasteOptions {
   enabled: boolean
   showConfirmation: boolean
+  uploadFunction: Function | null
 }
 
-export const MarkdownPasteExtension = Extension.create<MarkdownPasteOptions>({
-  name: 'markdownPaste',
+export const ContentPasteExtension = Extension.create<ContentPasteOptions>({
+  name: 'contentPaste',
 
   addOptions() {
     return {
       enabled: true,
       showConfirmation: true,
+      uploadFunction: null,
     }
   },
 
   addProseMirrorPlugins() {
+    const extensionThis = this
     return [
       new Plugin({
-        key: new PluginKey('markdownPaste'),
+        key: new PluginKey('contentPaste'),
         props: {
-          handlePaste: (view, event, slice) => {
+          handlePaste: (
+            view: EditorView,
+            event: ClipboardEvent,
+            slice: any,
+          ) => {
             if (!this.options.enabled) return false
 
+            // handle image pasting
+            const files: File[] | [] = Array.from(
+              event.clipboardData?.files || [],
+            )
+            const images = Array.from(files).filter((file) =>
+              file.type.startsWith('image/'),
+            )
+            if (images.length > 0) {
+              processMultipleImages(images, view, null, extensionThis.options)
+              return true
+            }
+
+            // handle markdown pasting
             const text = event.clipboardData?.getData('text/plain')
             if (!text) return false
 

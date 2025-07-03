@@ -554,7 +554,7 @@ function getImageDimensions(
 /**
  * Process multiple image uploads sequentially
  */
-function processMultipleImages(
+export function processMultipleImages(
   images: File[],
   view: EditorView,
   pos: number | null,

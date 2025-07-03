@@ -1,17 +1,4 @@
-interface UploadOptions {
-  private?: boolean
-  folder?: string
-  file_url?: string
-  doctype?: string
-  docname?: string
-  fieldname?: string
-  method?: string
-  type?: string
-  upload_endpoint?: string
-  optimize?: boolean
-  max_width?: number
-  max_height?: number
-}
+import { UploadOptions } from "./useFileUpload"
 
 type EventListenerOption = 'start' | 'progress' | 'finish' | 'error'
 
