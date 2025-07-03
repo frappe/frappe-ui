@@ -19,3 +19,9 @@ export { useOnboarding } from './Onboarding/onboarding.js'
 // utils
 export { showHelpModal, minimize } from './Help/help.js'
 export { showHelpCenter } from './HelpCenter/helpCenter.js'
+
+// view components
+export { default as ListView } from './Views/List/ListView.vue'
+
+// session management
+export { default as session } from './session'
