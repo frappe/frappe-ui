@@ -12,7 +12,7 @@ export interface ContentPasteOptions {
 }
 
 export const ContentPasteExtension = Extension.create<ContentPasteOptions>({
-  name: 'markdownPaste',
+  name: 'contentPaste',
 
   addOptions() {
     return {
@@ -26,7 +26,7 @@ export const ContentPasteExtension = Extension.create<ContentPasteOptions>({
     const extensionThis = this
     return [
       new Plugin({
-        key: new PluginKey('markdownPaste'),
+        key: new PluginKey('contentPaste'),
         props: {
           handlePaste: (
             view: EditorView,
@@ -35,7 +35,7 @@ export const ContentPasteExtension = Extension.create<ContentPasteOptions>({
           ) => {
             if (!this.options.enabled) return false
 
-            // upload images from clipboard
+            // handle image pasting
             const files: File[] | [] = Array.from(
               event.clipboardData?.files || [],
             )
@@ -47,6 +47,7 @@ export const ContentPasteExtension = Extension.create<ContentPasteOptions>({
               return true
             }
 
+            // handle markdown pasting
             const text = event.clipboardData?.getData('text/plain')
             if (!text) return false
 
