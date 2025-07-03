@@ -1,17 +1,17 @@
 import { Extension } from '@tiptap/core'
-import { Plugin, PluginKey } from '@tiptap/pm/state'
 import { DOMParser } from '@tiptap/pm/model'
-import { detectMarkdown, markdownToHTML } from '../../../utils/markdown'
+import { Plugin, PluginKey } from '@tiptap/pm/state'
 import { EditorView } from 'prosemirror-view'
+import { detectMarkdown, markdownToHTML } from '../../../utils/markdown'
 import { processMultipleImages } from './image/image-extension'
 
-export interface MarkdownPasteOptions {
+export interface ContentPasteOptions {
   enabled: boolean
   showConfirmation: boolean
   uploadFunction: Function | null
 }
 
-export const MarkdownPasteExtension = Extension.create<MarkdownPasteOptions>({
+export const ContentPasteExtension = Extension.create<ContentPasteOptions>({
   name: 'markdownPaste',
 
   addOptions() {
