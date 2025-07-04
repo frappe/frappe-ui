@@ -66,7 +66,7 @@ export function frappeRequest(options) {
           // eslint-disable-next-line no-empty
         } catch (e) {}
         let errorParts = [
-          [options.url, error.exc_type, error._error_message]
+          [options.url, error?.exc_type, error?._error_message]
             .filter(Boolean)
             .join(' '),
         ]
