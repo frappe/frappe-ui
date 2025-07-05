@@ -60,9 +60,9 @@
             class="text-sm"
             @click="
               () => {
-                if (isWithinRange(date)) {
-                  selectDate(getDate(), true)
-                  togglePopover()
+                if (isWithinRange(getDate())) {
+                selectDate(getDate(), true)
+                togglePopover()
                 }
               }
             "
@@ -92,7 +92,7 @@
               :key="getDateValue(date)"
               class="flex h-8 w-8 cursor-pointer items-center justify-center rounded hover:bg-surface-gray-2"
               :class="{
-                'text-ink-gray-3': date.getMonth() !== currentMonth - 1,
+                'text-ink-gray-3': date.getMonth() !== currentMonth - 1 && !isWithinRange(date),
                 'font-extrabold text-ink-gray-9':
                   getDateValue(date) === getDateValue(today),
                 'bg-surface-gray-6 text-ink-white hover:bg-surface-gray-6':
@@ -174,13 +174,12 @@ const dateValue = computed(() => {
   return props.value ? props.value : props.modelValue
 })
 
-const isWithinRange = (date: Date) => {
+const isWithinRange = (date: Date) => {  
   const d = date.getTime()
   const min = props.minDate ? new Date(props.minDate).getTime() : -Infinity
   const max = props.maxDate ? new Date(props.maxDate).getTime() : Infinity
   return d >= min && d <= max
 }
-
 
 function selectDate(date: Date | string, isNow: boolean = false) {
   date = isNow ? dayjsLocal(date) : date
