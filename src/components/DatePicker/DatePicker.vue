@@ -60,8 +60,10 @@
             class="text-sm"
             @click="
               () => {
-                selectDate(getDate(), true)
-                togglePopover()
+                if (isWithinRange(date)) {
+                  selectDate(getDate(), true)
+                  togglePopover()
+                }
               }
             "
           />
@@ -95,11 +97,14 @@
                   getDateValue(date) === getDateValue(today),
                 'bg-surface-gray-6 text-ink-white hover:bg-surface-gray-6':
                   getDateValue(date) === dateValue,
+                'opacity-40 pointer-events-none': !isWithinRange(date),
               }"
               @click="
                 () => {
-                  selectDate(date)
-                  togglePopover()
+                  if (isWithinRange(date)) {
+                    selectDate(date)
+                    togglePopover()
+                  }
                 }
               "
             >
@@ -168,6 +173,14 @@ const marginClass = computed(() => {
 const dateValue = computed(() => {
   return props.value ? props.value : props.modelValue
 })
+
+const isWithinRange = (date: Date) => {
+  const d = date.getTime()
+  const min = props.minDate ? new Date(props.minDate).getTime() : -Infinity
+  const max = props.maxDate ? new Date(props.maxDate).getTime() : Infinity
+  return d >= min && d <= max
+}
+
 
 function selectDate(date: Date | string, isNow: boolean = false) {
   date = isNow ? dayjsLocal(date) : date
