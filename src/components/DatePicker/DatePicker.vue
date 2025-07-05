@@ -58,6 +58,7 @@
           <Button
             :label="'Today'"
             class="text-sm"
+            :disabled="!isWithinRange(getDate())"
             @click="
               () => {
                 if (isWithinRange(getDate())) {
