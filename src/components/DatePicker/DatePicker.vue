@@ -93,7 +93,7 @@
               :key="getDateValue(date)"
               class="flex h-8 w-8 cursor-pointer items-center justify-center rounded hover:bg-surface-gray-2"
               :class="{
-                'text-ink-gray-3': date.getMonth() !== currentMonth - 1 && !isWithinRange(date),
+                'text-ink-gray-3': date.getMonth() !== currentMonth - 1,                
                 'font-extrabold text-ink-gray-9':
                   getDateValue(date) === getDateValue(today),
                 'bg-surface-gray-6 text-ink-white hover:bg-surface-gray-6':
