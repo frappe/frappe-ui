@@ -3,16 +3,3 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-.scroll-shadow {
-  /* Credit: adapted from https://css-tricks.com/books/greatest-css-tricks/scroll-shadows/ */
-  background:
-    linear-gradient(to bottom, white, rgba(255,255,255,0)) top,
-    linear-gradient(to top, white, rgba(255,255,255,0)) bottom,
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.06), transparent) top,
-    linear-gradient(to top, rgba(0, 0, 0, 0.06), transparent) bottom;
-
-  background-repeat: no-repeat;
-  background-size: 100% 30px, 100% 30px, 100% 15px, 100% 15px;
-  background-attachment: local, local, scroll, scroll;
-}

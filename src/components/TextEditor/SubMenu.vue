@@ -23,12 +23,11 @@
       </button>
     </template>
     <template #body="{ close }">
-      <div class="rounded bg-surface-white p-1 shadow-xl">
-        <TextInput v-if="button.search" v-model="search" class="mb-0.5" />
-        <ul :class="button.search && 'max-h-32 overflow-scroll scroll-shadow'">
+      <div class="rounded bg-surface-white p-1 my-1 shadow-xl">
+        <ul>
           <li
             class="w-full"
-            v-for="option in filteredActions"
+            v-for="option in actions"
             v-show="option.isDisabled ? !option.isDisabled(editor) : true"
           >
             <button
@@ -57,8 +56,7 @@
 </template>
 <script setup>
 import Popover from '../Popover/Popover.vue'
-import TextInput from '../TextInput/TextInput.vue'
-import { ref, computed } from 'vue'
+import { computed } from 'vue'
 
 const props = defineProps({
   editor: Object,
@@ -66,9 +64,7 @@ const props = defineProps({
 })
 
 defineEmits('click')
-
 // Handle both array-based and object-based actions
-const search = ref('')
 const actions = computed(() =>
   props.button.group ? props.button.actions : props.button
 )
@@ -78,11 +74,4 @@ const activeAction = computed(
     actions.value.find((k) => k.default) ||
     actions.value[0]
 )
-const filteredActions = computed(() => {
-  return props.button.search
-    ? actions.value.filter((k) =>
-        k.label.toLowerCase().includes(search.value.toLowerCase())
-      )
-    : actions.value
-})
 </script>

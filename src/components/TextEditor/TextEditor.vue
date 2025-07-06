@@ -351,6 +351,10 @@ img.ProseMirror-selectednode {
     > label {
       flex: 0 0 auto;
       margin-right: 0.5rem;
+      margin-top: 0.5rem;
+      height: 1.5em;
+      display: flex;
+      align-items: center;
       user-select: none;
     }
 
