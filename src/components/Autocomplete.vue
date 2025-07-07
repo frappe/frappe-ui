@@ -333,7 +333,7 @@ const selectedValue = computed({
     } else {
       // Map to value (primitive) always
       const arr = Array.isArray(val) ? val : []
-      const result = arr.map(v => isOption(v) ? v.value : v)
+      const result = arr.map(v => isOption(v) ? v : null);
       emit('update:modelValue', result)
       emit('change', result)
     }
