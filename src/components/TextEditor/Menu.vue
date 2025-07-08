@@ -6,7 +6,7 @@
           class="h-4 w-[2px] border-l"
           v-if="button.type === 'separator'"
         ></div>
-        <div <div class="shrink-0" v-else-if="button.map">
+        <div class="shrink-0" v-else-if="button.map">
           <Popover>
             <template #target="{ togglePopover }">
               <button
@@ -81,15 +81,15 @@
     </div>
   </div>
 </template>
-<script>
-export default {
-  name: 'TipTapMenu',
-  props: ['buttons'],
-  inject: ['editor'],
-  methods: {
-    onButtonClick(button) {
-      button.action(this.editor)
-    },
-  },
+<script setup lang="ts">
+import { inject } from 'vue'
+import Popover from '../Popover/Popover.vue'
+import { MenuProps, Button } from './types'
+import type { Editor } from '@tiptap/vue-3'
+
+const props = defineProps<MenuProps>()
+const editor = inject('editor') as { value: Editor }
+const onButtonClick = (button: Button) => {
+  button.action(editor.value)
 }
 </script>
