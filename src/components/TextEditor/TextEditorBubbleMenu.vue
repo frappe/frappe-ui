@@ -5,6 +5,7 @@
     :tippy-options="{ duration: 100 }"
     :editor="editor"
     v-bind="options"
+    :should-show="always && showAlways"
   >
     <Menu
       class="rounded-md border-gray-100 shadow-lg"
@@ -15,11 +16,21 @@
 <script>
 import { BubbleMenu } from '@tiptap/vue-3'
 import { createEditorButton } from './utils'
+import { isTextSelection } from '@tiptap/core'
 import Menu from './Menu.vue'
 
+const showAlways = ({ state, from, to }) => {
+  // Adapated from official Tiptap plugin; removed constraints for isEditable and focus
+  const { doc, selection } = state
+  const { empty } = selection
+  const isEmptyTextBlock =
+    !doc.textBetween(from, to).length && isTextSelection(state.selection)
+
+  return !empty && !isEmptyTextBlock
+}
 export default {
   name: 'TextEditorBubbleMenu',
-  props: ['buttons', 'options'],
+  props: ['buttons', 'options', 'always'],
   components: { BubbleMenu, Menu },
   inject: ['editor'],
   computed: {
@@ -72,6 +83,9 @@ export default {
       }
       return buttons.map(createEditorButton)
     },
+  },
+  methods: {
+    showAlways,
   },
 }
 </script>

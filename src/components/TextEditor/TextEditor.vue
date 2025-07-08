@@ -5,7 +5,11 @@
     :style="$attrs.style"
     v-if="editor"
   >
-    <TextEditorBubbleMenu :buttons="bubbleMenu" :options="bubbleMenuOptions" />
+    <TextEditorBubbleMenu
+      :buttons="bubbleMenu"
+      :options="bubbleMenuOptions"
+      :always="showBubbleMenuAlways"
+    />
     <TextEditorFixedMenu
       class="w-full overflow-x-auto rounded-t-lg border border-outline-gray-modals"
       :buttons="fixedMenu"
@@ -93,6 +97,10 @@ export default {
     bubbleMenuOptions: {
       type: Object,
       default: () => ({}),
+    },
+    showBubbleMenuAlways: {
+      type: Boolean,
+      default: false,
     },
     fixedMenu: {
       type: [Boolean, Array],
