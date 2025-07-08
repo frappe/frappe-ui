@@ -6,8 +6,49 @@
           class="h-4 w-[2px] border-l"
           v-if="button.type === 'separator'"
         ></div>
-        <div class="shrink-0" v-else-if="button.map || button.group">
-          <SubMenu :editor :button @click="onButtonClick" />
+        <div <div class="shrink-0" v-else-if="button.map">
+          <Popover>
+            <template #target="{ togglePopover }">
+              <button
+                class="rounded px-2 py-1 text-base font-medium text-ink-gray-8 transition-colors hover:bg-surface-gray-2"
+                @click="togglePopover"
+                :set="
+                  (activeBtn =
+                    button.find((b) => b.isActive(editor)) || button[0])
+                "
+              >
+                <component
+                  v-if="activeBtn.icon"
+                  :is="activeBtn.icon"
+                  class="h-4 w-4"
+                />
+                <span v-else>
+                  {{ activeBtn.label }}
+                </span>
+              </button>
+            </template>
+            <template #body="{ close }">
+              <ul class="rounded border bg-surface-white p-1 shadow-md">
+                <li
+                  class="w-full"
+                  v-for="option in button"
+                  v-show="option.isDisabled ? !option.isDisabled(editor) : true"
+                >
+                  <button
+                    class="w-full rounded px-2 py-1 text-left text-base hover:bg-surface-menu-bar"
+                    @click="
+                      () => {
+                        onButtonClick(option)
+                        close()
+                      }
+                    "
+                  >
+                    {{ option.label }}
+                  </button>
+                </li>
+              </ul>
+            </template>
+          </Popover>
         </div>
         <component v-else :is="button.component || 'div'" v-bind="{ editor }">
           <template v-slot="componentSlotProps">
@@ -41,15 +82,10 @@
   </div>
 </template>
 <script>
-import SubMenu from './SubMenu.vue'
-
 export default {
   name: 'TipTapMenu',
   props: ['buttons'],
   inject: ['editor'],
-  components: {
-    SubMenu,
-  },
   methods: {
     onButtonClick(button) {
       button.action(this.editor)
