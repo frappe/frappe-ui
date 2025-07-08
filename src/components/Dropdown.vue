@@ -41,34 +41,28 @@
                 :active="active"
               />
               <div v-else-if="item.divider">
-                <hr class="m-1 bg-gray-300" />
+                <hr class="m-1 bg-surface-gray-3" />
               </div>
               <button
                 v-else
                 :class="[
-                  active ? 'bg-surface-gray-3' : 'text-ink-gray-6',
+                  getItemClasses(item.theme, active),
                   'group flex h-7 w-full items-center rounded px-2 text-base',
-                  item.color,
                 ]"
                 @click="item.onClick"
               >
                 <FeatherIcon
                   v-if="item.icon && typeof item.icon === 'string'"
-                  :class="item.color"
                   :name="item.icon"
-                  class="mr-2 h-4 w-4 flex-shrink-0 text-ink-gray-6"
+                  class="mr-2 h-4 w-4 flex-shrink-0"
                   aria-hidden="true"
                 />
                 <component
-                  class="mr-2 h-4 w-4 flex-shrink-0 text-ink-gray-6"
-                  :class="item.color"
+                  class="mr-2 h-4 w-4 flex-shrink-0"
                   v-else-if="item.icon"
                   :is="item.icon"
                 />
-                <span
-                  class="whitespace-nowrap text-ink-gray-7"
-                  :class="item.color"
-                >
+                <span class="whitespace-nowrap">
                   {{ item.label }}
                 </span>
               </button>
@@ -90,10 +84,12 @@ import { RouterLinkProps, useRouter } from 'vue-router'
 
 const router = useRouter()
 
+type Theme = 'gray' | 'blue' | 'green' | 'red'
+
 type DropdownItem = {
   label: string
   icon?: string | null
-  color?: string | null
+  theme?: Theme
   component?: any
   onClick?: () => void
   route?: RouterLinkProps['to']
@@ -133,7 +129,7 @@ const normalizeDropdownItem = (option: DropdownOption) => {
 
   return {
     label: option.label,
-    color: option.color,
+    theme: option.theme || 'gray',
     divider: option.divider,
     icon: option.icon,
     component: option.component,
@@ -189,6 +185,26 @@ const groups = computed(() => {
 
   return groups
 })
+
+const getItemClasses = (theme: Theme, active: boolean) => {
+  const textClasses = {
+    gray: 'text-ink-gray-6',
+    blue: 'text-ink-blue-3',
+    green: 'text-green-800',
+    red: 'text-red-700',
+  }[theme]
+
+  const hoverClasses = active
+    ? {
+        gray: 'bg-surface-gray-3',
+        blue: 'bg-blue-100',
+        green: 'bg-green-100',
+        red: 'bg-red-100',
+      }[theme]
+    : ''
+
+  return `${textClasses} ${hoverClasses}`
+}
 
 const dropdownTransition = computed(() => {
   return {
