@@ -118,6 +118,7 @@ function getLineSeriesOptions(
 ) {
   const showSymbol = series.showDataPoints || series.showDataLabels
   return {
+    connectNulls: true,
     symbol: 'circle',
     symbolSize: 7,
     showSymbol: showSymbol,

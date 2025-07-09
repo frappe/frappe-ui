@@ -105,7 +105,10 @@
                 </div>
                 <ComboboxOption
                   as="template"
-                  v-for="(option, idx) in group.items.slice(0, 50)"
+                  v-for="(option, idx) in group.items.slice(
+                    0,
+                    props.maxOptions,
+                  )"
                   :key="idx"
                   :value="option"
                   :disabled="option.disabled"
@@ -219,6 +222,7 @@ import type {
 
 const props = withDefaults(defineProps<AutocompleteProps>(), {
   multiple: false,
+  maxOptions: 50,
   hideSearch: false,
 })
 const emit = defineEmits(['update:modelValue', 'update:query', 'change'])
