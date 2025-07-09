@@ -1,6 +1,8 @@
 <template>
   <RadioGroup v-model="value">
-    <div class="flex space-x-1 rounded bg-surface-gray-2 h-7 p-[1px] text-sm">
+    <div
+      class="flex space-x-0.5 rounded-md bg-surface-gray-2 h-7 items-center px-[1px] text-sm"
+    >
       <RadioGroupOption
         as="div"
         v-for="button in buttons"
@@ -12,15 +14,15 @@
         <Button
           @click="button.onClick"
           v-bind="button"
-          class="!h-6"
+          class="!h-6.5"
           :class="[
             active ? 'ring-outline-gray-2 focus-visible:ring' : '',
             checked && '!bg-surface-white',
             button.disabled
               ? ''
               : checked
-              ? ' text-ink-gray-9 shadow'
-              : 'text-ink-gray-7',
+                ? ' text-ink-gray-9 shadow'
+                : 'text-ink-gray-7',
           ]"
         >
           <RadioGroupLabel
