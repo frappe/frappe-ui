@@ -1,6 +1,6 @@
 import { watchDebounced } from '@vueuse/core'
-import { computed, reactive, ref } from 'vue'
-import { ListViewOptions, Row } from '../../../src/components/ListView'
+import { computed, reactive, ref, watchEffect } from 'vue'
+import { ListColumn, ListViewOptions, Row } from '../../../src/components/ListView'
 import { useCall, useList } from '../../../src/data-fetching'
 import { Filters } from '../../../src/data-fetching/useList/types'
 import { Meta } from '../../types'
@@ -77,10 +77,12 @@ export function useListView(doctype: string) {
 		})
 	})
 
-	const listViewColumns = computed(() => {
-		return headerFields.value.map((df) => ({
-			...df,
+	const listViewColumns = ref<ListColumn[]>([])
+	watchEffect(() => {
+		listViewColumns.value = headerFields.value.map((df) => ({
 			key: df.fieldname,
+			label: df.label || df.fieldname,
+			field: df,
 		}))
 	})
 

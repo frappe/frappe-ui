@@ -60,6 +60,7 @@
                 column,
                 row,
                 item: row[column.key],
+                value: row[column.key],
                 align: column.align,
               }"
             />

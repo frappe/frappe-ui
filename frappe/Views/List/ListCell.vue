@@ -95,7 +95,7 @@
 </template>
 
 <script setup lang="ts">
-import { Avatar, Badge, Checkbox, Rating } from 'frappe-ui';
+import { Avatar, Badge, Checkbox, Rating } from '../../../src';
 import { computed } from 'vue';
 import { DocField } from '../../types';
 import {

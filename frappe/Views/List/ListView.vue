@@ -17,11 +17,7 @@
             :key="field.fieldname"
             :field="field"
             :modelValue="list.filters[field.fieldname]"
-            @update:modelValue="
-              $event
-                ? (list.filters[field.fieldname] = $event)
-                : delete list.filters[field.fieldname]
-            "
+            @update:modelValue="updateFilter(field.fieldname, $event)"
           />
         </div>
 
@@ -53,8 +49,8 @@
         :rowKey="list.props.rowKey"
         :options="list.props.options"
       >
-        <template #cell="{ column, row, item: value }">
-          <ListCell :field="column" :value="value" />
+        <template #cell="{ column, row, value }">
+          <ListCell :field="column.field" :value="value" />
         </template>
       </ListView>
     </div>
@@ -80,4 +76,12 @@ const breadcrumbs = [
 ]
 
 const list = useListView(props.doctype)
+
+function updateFilter(fieldname: string, value: any) {
+  if (value) {
+    list.filters[fieldname] = value
+  } else {
+    delete list.filters[fieldname]
+  }
+}
 </script>
