@@ -3,7 +3,7 @@
     v-model="selectedValue"
     :multiple="multiple"
     nullable
-    :compareFn="compareFn"
+    :by="compareFn"
     v-slot="{ open: isComboboxOpen }"
   >
     <Popover
