@@ -58,7 +58,8 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
   }
 
   const url = computed(
-    () => `${baseUrl}/api/v2/document/${doctype}/${toValue(name)}`,
+    () =>
+      `${baseUrl}/api/v2/document/${encodeURIComponent(doctype)}/${encodeURIComponent(toValue(name))}`,
   )
 
   type SuccessCallback = (doc: TDoc) => void
