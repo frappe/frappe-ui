@@ -1,0 +1,25 @@
+.ProseMirror {
+  --prose-color-red: var(--red-600);
+  --prose-color-blue: var(--blue-600);
+  --prose-color-green: var(--green-600);
+  --prose-color-yellow: var(--yellow-600);
+  --prose-color-orange: var(--orange-600);
+  --prose-color-purple: var(--purple-600);
+  --prose-color-pink: var(--pink-600);
+  --prose-color-gray: var(--gray-600);
+  --prose-color-teal: var(--teal-600);
+  --prose-color-cyan: var(--cyan-600);
+}
+
+[data-theme='dark'] .ProseMirror {
+  --prose-color-red: var(--dark-red-400);
+  --prose-color-blue: var(--dark-blue-400);
+  --prose-color-green: var(--dark-green-400);
+  --prose-color-yellow: var(--dark-yellow-400);
+  --prose-color-orange: var(--dark-orange-400);
+  --prose-color-purple: var(--dark-purple-400);
+  --prose-color-pink: var(--dark-pink-400);
+  --prose-color-gray: var(--dark-gray-400);
+  --prose-color-teal: var(--dark-teal-400);
+  --prose-color-cyan: var(--dark-cyan-400);
+}

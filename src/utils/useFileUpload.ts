@@ -21,7 +21,23 @@ export interface UploadState {
   uploaded: number
   total: number
   error: any | null
-  result: any | null
+  result: UploadedFile | null
+}
+
+export interface UploadedFile {
+  file_name: string
+  file_size: number
+  file_url: string
+  name?: string
+  owner?: string
+  creation?: string
+  modified?: string
+  modified_by?: string
+  is_private?: 0 | 1
+  file_type?: string
+  folder?: string
+  is_folder?: 0 | 1
+  content_hash?: string
 }
 
 export function useFileUpload() {
@@ -51,7 +67,8 @@ export function useFileUpload() {
   const result = computed(() => state.result)
 
   return {
-    upload: (file: File) => upload(file, {}, state, reset),
+    upload: (file: File, options: UploadOptions = {}) =>
+      upload(file, options, state, reset),
     reset,
     state,
     isUploading,
@@ -66,7 +83,7 @@ async function upload(
   options: UploadOptions = {},
   state: UploadState,
   reset: () => void,
-) {
+): Promise<UploadedFile> {
   reset()
   state.uploading = true
 
@@ -108,7 +125,7 @@ async function upload(
             r = xhr.responseText
           }
 
-          const result = r.message || r
+          const result = (r.message || r) as UploadedFile
           state.result = result
           resolve(result)
         } else if (xhr.status === 403) {
@@ -221,3 +238,5 @@ declare global {
     csrf_token?: string
   }
 }
+
+export { upload }

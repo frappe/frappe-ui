@@ -35,25 +35,38 @@
         v-for="step in steps"
         :key="step.title"
         class="group w-full flex gap-2 justify-between items-center hover:bg-surface-gray-1 rounded px-2 py-1.5 cursor-pointer"
-        @click.stop="() => !step.completed && step.onClick()"
+        @click.stop="
+          () => !step.completed && !isDependent(step) && step.onClick()
+        "
       >
-        <div
-          class="flex gap-2 items-center"
-          :class="[step.completed ? 'text-ink-gray-5' : 'text-ink-gray-8']"
+        <component
+          :is="isDependent(step) ? Tooltip : 'div'"
+          :text="dependsOnTooltip(step)"
         >
-          <component :is="step.icon" class="h-4" />
-          <div class="text-base" :class="{ 'line-through': step.completed }">
-            {{ step.title }}
+          <div
+            class="flex gap-2 items-center"
+            :class="[
+              step.completed
+                ? 'text-ink-gray-5'
+                : isDependent(step)
+                  ? 'text-ink-gray-4'
+                  : 'text-ink-gray-8',
+            ]"
+          >
+            <component :is="step.icon" class="h-4" />
+            <div class="text-base" :class="{ 'line-through': step.completed }">
+              {{ step.title }}
+            </div>
           </div>
-        </div>
+        </component>
         <Button
-          v-if="!step.completed"
+          v-if="!step.completed && !isDependent(step)"
           :label="'Skip'"
           class="!h-4 text-xs !text-ink-gray-6 hidden group-hover:flex"
           @click="() => skip(step.name, afterSkip)"
         />
         <Button
-          v-else
+          v-else-if="!isDependent(step)"
           :label="'Reset'"
           class="!h-4 text-xs !text-ink-gray-6 hidden group-hover:flex"
           @click.stop="() => reset(step.name, afterReset)"
@@ -64,8 +77,9 @@
 </template>
 <script setup>
 import { useOnboarding } from './onboarding'
+import Tooltip from '../../src/components/Tooltip/Tooltip.vue'
 import Button from '../../src/components/Button/Button.vue'
-import Badge from '../../src/components/Badge.vue'
+import Badge from '../../src/components/Badge/Badge.vue'
 
 const props = defineProps({
   appName: {
@@ -97,6 +111,26 @@ const props = defineProps({
     default: () => {},
   },
 })
+
+function isDependent(step) {
+  if (step.dependsOn && !step.completed) {
+    const dependsOnStep = steps.find((s) => s.name === step.dependsOn)
+    if (dependsOnStep && !dependsOnStep.completed) {
+      return true
+    }
+  }
+  return false
+}
+
+function dependsOnTooltip(step) {
+  if (step.dependsOn && !step.completed) {
+    const dependsOnStep = steps.find((s) => s.name === step.dependsOn)
+    if (dependsOnStep && !dependsOnStep.completed) {
+      return `You need to complete "${dependsOnStep.title}" first.`
+    }
+  }
+  return ''
+}
 
 const {
   steps,

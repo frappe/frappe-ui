@@ -1,4 +1,4 @@
-import { formatDate, formatLabel, formatValue } from './helpers'
+import { formatDate, formatLabel, formatValue, mergeDeep } from './helpers'
 import { AxisChartConfig } from './types'
 
 export const PADDING_TOP = 0
@@ -154,7 +154,7 @@ export function getTitleOptions(title: string, subtitle?: string) {
 }
 
 function getXAxisOptions(config: AxisChartConfig) {
-  return config.swapXY
+  const options = config.swapXY
     ? {
         show: true,
         type: 'value',
@@ -220,10 +220,12 @@ function getXAxisOptions(config: AxisChartConfig) {
           margin: 8,
         },
       }
+
+  return mergeDeep(options, config.swapXY ? config.yAxis.echartOptions : config.xAxis.echartOptions)
 }
 
 function getYAxisOptions(config: AxisChartConfig) {
-  const primaryYAxisOptions = config.swapXY
+  let primaryYAxisOptions = config.swapXY
     ? {
         show: true,
         type: config.xAxis.type,
@@ -288,7 +290,12 @@ function getYAxisOptions(config: AxisChartConfig) {
         max: config.yAxis.yMax,
       }
 
-  const secondaryYAxisOptions = {
+  primaryYAxisOptions = mergeDeep(
+    primaryYAxisOptions,
+    config.swapXY ? config.xAxis.echartOptions : config.yAxis.echartOptions
+  )
+
+  let secondaryYAxisOptions = {
     show: false,
     type: 'value',
     z: 2,
@@ -329,6 +336,11 @@ function getYAxisOptions(config: AxisChartConfig) {
     min: config.y2Axis?.yMin,
     max: config.y2Axis?.yMax,
   }
+
+  secondaryYAxisOptions = mergeDeep(
+    secondaryYAxisOptions,
+    config.swapXY ? config.y2Axis?.echartOptions : config.y2Axis?.echartOptions
+  )
 
   return config.swapXY
     ? [primaryYAxisOptions]

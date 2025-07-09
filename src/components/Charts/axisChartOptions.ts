@@ -1,5 +1,5 @@
 import useEchartsOptions from './eChartOptions'
-import { formatValue } from './helpers'
+import { formatValue, mergeDeep } from './helpers'
 import {
   AreaSeriesConfig,
   AxisChartConfig,
@@ -33,61 +33,60 @@ export default function useAxisChartOptions(config: AxisChartConfig) {
     baseOptions.yAxis[1].show = true
   }
 
-  return {
-    ...baseOptions,
-    series: config.series.map((s, idx) => {
-      let labelPosition = 'top'
-      if (s.type == 'bar' && config.stacked) {
-        labelPosition = idx == lastBarSeriesIdx ? 'top' : 'inside'
-      }
-      if (s.type == 'bar' && swapXY) {
-        labelPosition = 'right'
-      }
+  baseOptions.series = config.series.map((s, idx) => {
+    let labelPosition = 'top'
+    if (s.type == 'bar' && config.stacked) {
+      labelPosition = idx == lastBarSeriesIdx ? 'top' : 'inside'
+    }
+    if (s.type == 'bar' && swapXY) {
+      labelPosition = 'right'
+    }
 
-      const standardOptions = {
-        type: s.type,
-        name: s.name,
-        data: data.map((row: any) => {
-          let x, y
-          if (swapXY) {
-            x = row[s.name]
-            y = row[config.xAxis.key]
-          } else {
-            x = row[config.xAxis.key]
-            y = row[s.name]
-          }
-          return [x, y]
-        }),
-        yAxisIndex: s.axis === 'y2' ? 1 : 0,
-        label: {
-          show: s.showDataLabels,
-          position: labelPosition,
-          formatter: (params: any) => {
-            const _val = swapXY ? params.value?.[0] : params.value?.[1]
-            return formatValue(_val, 1, true)
-          },
-          fontSize: 11,
+    const standardSeriesOptions = {
+      type: s.type,
+      name: s.name,
+      data: data.map((row: any) => {
+        let x, y
+        if (swapXY) {
+          x = row[s.name]
+          y = row[config.xAxis.key]
+        } else {
+          x = row[config.xAxis.key]
+          y = row[s.name]
+        }
+        return [x, y]
+      }),
+      yAxisIndex: s.axis === 'y2' ? 1 : 0,
+      label: {
+        show: s.showDataLabels,
+        position: labelPosition,
+        formatter: (params: any) => {
+          const _val = swapXY ? params.value?.[0] : params.value?.[1]
+          return formatValue(_val, 1, true)
         },
-        labelLayout: { hideOverlap: true },
-        itemStyle: {
-          color: s.color,
-        },
-      }
+        fontSize: 11,
+      },
+      labelLayout: { hideOverlap: true },
+      itemStyle: {
+        color: s.color,
+      },
+    }
 
-      let seriesTypeOptions = {}
-      if (s.type === 'bar') {
-        seriesTypeOptions = getBarSeriesOptions(config, s)
-      }
-      if (s.type === 'line') {
-        seriesTypeOptions = getLineSeriesOptions(config, s)
-      }
-      if (s.type === 'area') {
-        seriesTypeOptions = getAreaSeriesOptions(config, s)
-      }
+    let seriesTypeOptions = {}
+    if (s.type === 'bar') {
+      seriesTypeOptions = getBarSeriesOptions(config, s)
+    }
+    if (s.type === 'line') {
+      seriesTypeOptions = getLineSeriesOptions(config, s)
+    }
+    if (s.type === 'area') {
+      seriesTypeOptions = getAreaSeriesOptions(config, s)
+    }
 
-      return mergeDeep(standardOptions, seriesTypeOptions)
-    }),
-  }
+    return mergeDeep(standardSeriesOptions, seriesTypeOptions, s.echartOptions)
+  })
+
+  return mergeDeep(baseOptions, config.echartOptions)
 }
 
 function getBarSeriesOptions(config: AxisChartConfig, series: BarSeriesConfig) {
@@ -119,6 +118,7 @@ function getLineSeriesOptions(
 ) {
   const showSymbol = series.showDataPoints || series.showDataLabels
   return {
+    connectNulls: true,
     symbol: 'circle',
     symbolSize: 7,
     showSymbol: showSymbol,
@@ -142,23 +142,4 @@ function getAreaSeriesOptions(
       opacity: series.fillOpacity || 0.5,
     },
   }
-}
-
-function isObject(item: any) {
-  return item && typeof item === 'object' && !Array.isArray(item)
-}
-
-function mergeDeep(target: any, source: any) {
-  let output = Object.assign({}, target)
-  if (isObject(target) && isObject(source)) {
-    Object.keys(source).forEach((key) => {
-      if (isObject(source[key])) {
-        if (!(key in target)) Object.assign(output, { [key]: source[key] })
-        else output[key] = mergeDeep(target[key], source[key])
-      } else {
-        Object.assign(output, { [key]: source[key] })
-      }
-    })
-  }
-  return output
 }

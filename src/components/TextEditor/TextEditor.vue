@@ -1,5 +1,10 @@
 <template>
-  <div class="relative w-full" :class="$attrs.class" v-if="editor">
+  <div
+    v-if="editor"
+    class="relative w-full"
+    :class="attrsClass"
+    :style="attrsStyle"
+  >
     <TextEditorBubbleMenu :buttons="bubbleMenu" :options="bubbleMenuOptions" />
     <TextEditorFixedMenu
       class="w-full overflow-x-auto rounded-t-lg border border-outline-gray-modals"
@@ -8,14 +13,27 @@
     <TextEditorFloatingMenu :buttons="floatingMenu" />
     <slot name="top" />
     <slot name="editor" :editor="editor">
-      <editor-content :editor="editor" />
+      <EditorContent :editor="editor" />
     </slot>
     <slot name="bottom" />
   </div>
 </template>
 
-<script>
-import { normalizeClass, computed } from 'vue'
+<script setup lang="ts">
+import {
+  normalizeClass,
+  normalizeStyle,
+  computed,
+  watch,
+  onMounted,
+  onBeforeUnmount,
+  provide,
+  ref,
+  useAttrs,
+} from 'vue'
+
+defineOptions({ inheritAttrs: false })
+
 import { Editor, EditorContent, VueNodeViewRenderer } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
@@ -30,8 +48,8 @@ import VideoExtension from './video-extension'
 import LinkExtension from './link-extension'
 import Typography from '@tiptap/extension-typography'
 import TextStyle from '@tiptap/extension-text-style'
-import Highlight from '@tiptap/extension-highlight'
-import { Color } from '@tiptap/extension-color'
+import NamedColorExtension from './extensions/color'
+import NamedHighlightExtension from './extensions/highlight'
 import { common, createLowlight } from 'lowlight'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import CodeBlockComponent from './CodeBlockComponent.vue'
@@ -39,204 +57,190 @@ import configureMention from './mention'
 import TextEditorFixedMenu from './TextEditorFixedMenu.vue'
 import TextEditorBubbleMenu from './TextEditorBubbleMenu.vue'
 import TextEditorFloatingMenu from './TextEditorFloatingMenu.vue'
-import EmojiExtension from './emoji-extension'
-import SlashCommands from './slash-commands-extension'
-import { detectMarkdown, markdownToHTML } from '../../utils/markdown'
-import { DOMParser } from 'prosemirror-model'
+import EmojiExtension from './extensions/emoji/emoji-extension'
+import SlashCommands from './extensions/slash-commands/slash-commands-extension'
+import { MarkdownPasteExtension } from './extensions/markdown-paste-extension'
+import { TagNode, TagExtension } from './extensions/tag/tag-extension'
+import { Heading } from './extensions/heading/heading'
+import { ImageGroup } from './extensions/image-group/image-group-extension'
+import { useFileUpload } from '../../utils/useFileUpload'
+import { TextEditorEmits, TextEditorProps } from './types'
 
 const lowlight = createLowlight(common)
 
-export default {
-  name: 'TextEditor',
-  inheritAttrs: false,
-  components: {
-    EditorContent,
-    TextEditorFixedMenu,
-    TextEditorBubbleMenu,
-    TextEditorFloatingMenu,
-  },
-  props: {
-    content: {
-      type: String,
-      default: null,
-    },
-    placeholder: {
-      type: [String, Function],
-      default: '',
-    },
-    editorClass: {
-      type: [String, Array, Object],
-      default: '',
-    },
-    editable: {
-      type: Boolean,
-      default: true,
-    },
-    bubbleMenu: {
-      type: [Boolean, Array],
-      default: false,
-    },
-    bubbleMenuOptions: {
-      type: Object,
-      default: () => ({}),
-    },
-    fixedMenu: {
-      type: [Boolean, Array],
-      default: false,
-    },
-    floatingMenu: {
-      type: [Boolean, Array],
-      default: false,
-    },
-    extensions: {
-      type: Array,
-      default: () => [],
-    },
-    starterkitOptions: {
-      type: Object,
-      default: () => ({}),
-    },
-    mentions: {
-      type: Array,
-      default: () => [],
-    },
-    uploadFunction: {
-      type: Function,
-      default: () => null,
-    },
-  },
-  emits: ['change', 'focus', 'blur'],
-  expose: ['editor'],
-  provide() {
-    return {
-      editor: computed(() => this.editor),
-    }
-  },
-  data() {
-    return {
-      editor: null,
-    }
-  },
-  watch: {
-    content(val) {
-      let currentHTML = this.editor.getHTML()
-      if (currentHTML !== val) {
-        this.editor.commands.setContent(val)
-      }
-    },
-    editable(value) {
-      this.editor.setEditable(value)
-    },
-    editorProps: {
-      deep: true,
-      handler(value) {
-        if (this.editor) {
-          this.editor.setOptions({
-            editorProps: value,
-          })
-        }
-      },
-    },
-  },
-  mounted() {
-    this.editor = new Editor({
-      content: this.content || null,
-      editorProps: this.editorProps,
-      editable: this.editable,
-      extensions: [
-        StarterKit.configure({
-          ...this.starterkitOptions,
-          codeBlock: false,
-        }),
-        Table.configure({
-          resizable: true,
-        }),
-        TableRow,
-        TableHeader,
-        TableCell,
-        Typography,
-        TextAlign.configure({
-          types: ['heading', 'paragraph'],
-        }),
-        TextStyle,
-        Color,
-        Highlight.configure({ multicolor: true }),
-        CodeBlockLowlight.extend({
-          addNodeView() {
-            return VueNodeViewRenderer(CodeBlockComponent)
-          },
-        }).configure({ lowlight }),
-        ImageExtension.configure({
-          uploadFunction: this.uploadFunction,
-        }),
-        ImageViewerExtension,
-        VideoExtension.configure({
-          uploadFunction: this.uploadFunction,
-        }),
-        LinkExtension.configure({
-          openOnClick: false,
-        }),
-        Placeholder.configure({
-          placeholder:
-            typeof this.placeholder === 'function'
-              ? this.placeholder
-              : () => this.placeholder,
-        }),
-        configureMention(this.mentions),
-        EmojiExtension,
-        SlashCommands,
-        ...(this.extensions || []),
-      ],
-      onUpdate: ({ editor }) => {
-        this.$emit('change', editor.getHTML())
-      },
-      onFocus: ({ editor, event }) => {
-        this.$emit('focus', event)
-      },
-      onBlur: ({ editor, event }) => {
-        this.$emit('blur', event)
-      },
-    })
-  },
-  beforeUnmount() {
-    this.editor.destroy()
-    this.editor = null
-  },
-  computed: {
-    editorProps() {
-      return {
-        attributes: {
-          class: normalizeClass([
-            'prose prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-outline-gray-2 prose-th:border-outline-gray-2 prose-td:relative prose-th:relative prose-th:bg-surface-gray-2',
-            this.editorClass,
-          ]),
-        },
-        clipboardTextParser: (text, $context) => {
-          if (!detectMarkdown(text)) return
-          if (
-            !confirm(
-              'Do you want to convert markdown content to HTML before pasting?',
-            )
-          )
-            return
-
-          let dom = document.createElement('div')
-          dom.innerHTML = markdownToHTML(text)
-          let parser =
-            this.editor.view.someProp('clipboardParser') ||
-            this.editor.view.someProp('domParser') ||
-            DOMParser.fromSchema(this.editor.schema)
-          return parser.parseSlice(dom, {
-            preserveWhitespace: true,
-            context: $context,
-          })
-        },
-      }
-    },
-  },
+function defaultUploadFunction(file: File) {
+  // useFileUpload is frappe specific
+  let fileUpload = useFileUpload()
+  return fileUpload.upload(file)
 }
+
+const props = withDefaults(defineProps<TextEditorProps>(), {
+  content: null,
+  placeholder: '',
+  editorClass: '',
+  editable: true,
+  bubbleMenu: false,
+  bubbleMenuOptions: () => ({}),
+  fixedMenu: false,
+  floatingMenu: false,
+  extensions: () => [],
+  starterkitOptions: () => ({}),
+  mentions: () => [],
+  tags: () => [],
+})
+
+const emit = defineEmits<TextEditorEmits>()
+
+const editor = ref<Editor | null>(null)
+
+const attrs = useAttrs()
+const attrsClass = computed(() => normalizeClass(attrs.class))
+const attrsStyle = computed(() => normalizeStyle(attrs.style))
+
+const editorProps = computed(() => {
+  return {
+    attributes: {
+      class: normalizeClass([
+        'prose prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-outline-gray-2 prose-th:border-outline-gray-2 prose-td:relative prose-th:relative prose-th:bg-surface-gray-2',
+        props.editorClass,
+      ]),
+    },
+  }
+})
+
+watch(
+  () => props.content,
+  (val) => {
+    if (editor.value) {
+      let currentHTML = editor.value.getHTML()
+      if (currentHTML !== val) {
+        editor.value.commands.setContent(val)
+      }
+    }
+  },
+)
+
+watch(
+  () => props.editable,
+  (value) => {
+    if (editor.value) {
+      editor.value.setEditable(value)
+    }
+  },
+)
+
+watch(
+  editorProps,
+  (value) => {
+    if (editor.value) {
+      editor.value.setOptions({
+        editorProps: value,
+      })
+    }
+  },
+  { deep: true },
+)
+
+onMounted(() => {
+  editor.value = new Editor({
+    content: props.content || null,
+    editorProps: editorProps.value,
+    editable: props.editable,
+    extensions: [
+      StarterKit.configure({
+        ...props.starterkitOptions,
+        codeBlock: false,
+        heading: false,
+      }),
+      Heading.configure({
+        ...(typeof props.starterkitOptions?.heading === 'object' &&
+        props.starterkitOptions.heading !== null
+          ? props.starterkitOptions.heading
+          : {}),
+      }),
+      Table.configure({
+        resizable: true,
+      }),
+      TableRow,
+      TableHeader,
+      TableCell,
+      Typography,
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
+      }),
+      TextStyle,
+      NamedColorExtension,
+      NamedHighlightExtension,
+      CodeBlockLowlight.extend({
+        addNodeView() {
+          return VueNodeViewRenderer(CodeBlockComponent)
+        },
+      }).configure({ lowlight }),
+      ImageExtension.configure({
+        uploadFunction: props.uploadFunction || defaultUploadFunction,
+      }),
+      ImageGroup.configure({
+        uploadFunction: props.uploadFunction || defaultUploadFunction,
+      }),
+      ImageViewerExtension,
+      VideoExtension.configure({
+        uploadFunction: props.uploadFunction || defaultUploadFunction,
+      }),
+      LinkExtension.configure({
+        openOnClick: false,
+      }),
+      Placeholder.configure({
+        placeholder:
+          typeof props.placeholder === 'function'
+            ? props.placeholder
+            : () => props.placeholder as string,
+      }),
+      configureMention(props.mentions),
+      EmojiExtension,
+      SlashCommands,
+      TagNode,
+      TagExtension.configure({
+        tags: () => props.tags,
+      }),
+      MarkdownPasteExtension.configure({
+        enabled: true,
+        showConfirmation: true,
+      }),
+      ...(props.extensions || []),
+    ],
+    onUpdate: ({ editor }) => {
+      emit('change', editor.getHTML())
+    },
+    onFocus: ({ editor, event }) => {
+      emit('focus', event)
+    },
+    onBlur: ({ editor, event }) => {
+      emit('blur', event)
+    },
+  })
+})
+
+onBeforeUnmount(() => {
+  if (editor.value) {
+    editor.value.destroy()
+    editor.value = null
+  }
+})
+
+provide(
+  'editor',
+  computed(() => editor.value),
+)
+
+defineExpose({
+  editor,
+})
 </script>
+
 <style>
+@import './extensions/color/color-styles.css';
+@import './extensions/highlight/highlight-styles.css';
+
 .ProseMirror {
   outline: none;
   caret-color: var(--ink-gray-9);
@@ -302,8 +306,23 @@ img.ProseMirror-selectednode {
   cursor: col-resize;
 }
 
-.ProseMirror mark {
-  border-radius: 3px;
-  padding: 0 2px;
+.tag-item,
+.tag-suggestion-active {
+  background-color: var(--surface-gray-1, #f8f8f8);
+  color: inherit;
+  border: 1px solid transparent;
+  padding: 0px 2px;
+  border-radius: 4px;
+  font-size: 1em;
+  white-space: nowrap;
+  cursor: default;
+}
+
+.tag-item.ProseMirror-selectednode {
+  border-color: var(--outline-gray-3, #c7c7c7);
+}
+
+.tag-suggestion-active {
+  background-color: var(--surface-gray-2, #f3f3f3);
 }
 </style>

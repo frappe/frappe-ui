@@ -8,7 +8,6 @@
       <TextInput
         readonly
         type="text"
-        icon-left="calendar"
         :placeholder="placeholder"
         :value="dateValue && formatter ? formatter(dateValue) : dateValue"
         @focus="!readonly ? togglePopover() : null"
@@ -16,7 +15,9 @@
         :class="inputClass"
         v-bind="$attrs"
       >
-        <template #prefix><LucideCalendar class="size-4" /></template>
+        <template #prefix v-if="$slots.prefix">
+          <slot name="prefix" />
+        </template>
       </TextInput>
     </template>
 
@@ -189,18 +190,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 import { Button } from '../Button'
-import Popover from '../Popover.vue'
 import FeatherIcon from '../FeatherIcon.vue'
-import TextInput from '../TextInput.vue'
+import { Popover } from '../Popover'
+import { TextInput } from '../TextInput'
 
-import { getDate } from './utils'
-import { useDatePicker } from './useDatePicker'
 import { dayjs, dayjsLocal, dayjsSystem } from '../../utils/dayjs'
+import { useDatePicker } from './useDatePicker'
+import { getDate } from './utils'
 
-import type { DatePickerEmits, DatePickerProps } from './DatePicker'
+import type { DatePickerEmits, DatePickerProps } from './types'
 
 const props = defineProps<DatePickerProps>()
 const emit = defineEmits<DatePickerEmits>()

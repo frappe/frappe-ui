@@ -15,7 +15,9 @@
         :class="inputClass"
         v-bind="$attrs"
       >
-        <template #prefix><LucideCalendar class="size-4" /></template>
+        <template #prefix v-if="$slots.prefix">
+          <slot name="prefix" />
+        </template>
       </TextInput>
     </template>
 
@@ -128,15 +130,15 @@
 import { computed, onMounted } from 'vue'
 
 import { Button } from '../Button'
-import Popover from '../Popover.vue'
 import FeatherIcon from '../FeatherIcon.vue'
-import TextInput from '../TextInput.vue'
+import { Popover } from '../Popover'
+import { TextInput } from '../TextInput'
 
-import { getDate, getDateValue } from './utils'
-import { useDatePicker } from './useDatePicker'
 import { dayjsLocal } from '../../utils/dayjs'
+import { useDatePicker } from './useDatePicker'
+import { getDate, getDateValue } from './utils'
 
-import type { DatePickerEmits, DatePickerProps } from './DatePicker'
+import type { DatePickerEmits, DatePickerProps } from './types'
 
 const props = defineProps<DatePickerProps>()
 const emit = defineEmits<DatePickerEmits>()

@@ -47,6 +47,10 @@ const simpleConfig: AxisChartConfig = {
   },
   yAxis: {
     title: 'Amount ($)',
+    echartOptions: {
+      min: 0,
+      max: 800,
+    }
   },
   series: [{ name: 'sales', type: 'bar' }],
 }

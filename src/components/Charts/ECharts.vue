@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { EChartsOption, init } from 'echarts'
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import debounce from '../../utils/debounce'
 
 const props = defineProps<{
@@ -36,13 +36,23 @@ onMounted(() => {
   setTimeout(() => resizeObserver.observe(chartDiv.value!), 500)
   onBeforeUnmount(() => resizeObserver.unobserve(chartDiv.value!))
 })
+
+watch(
+  () => props.options,
+  (newOptions) => {
+    if (chart) {
+      chart.setOption(newOptions, true)
+    }
+  },
+  { deep: true },
+)
 </script>
 
 <template>
   <div
     ref="chartDiv"
     v-show="!error"
-    class="h-full w-full min-w-[400px] min-h-[300px] px-4 py-2"
+    class="h-full w-full min-w-[300px] md:min-w-[400px] min-h-[300px] px-4 py-2"
   ></div>
   <div
     v-show="error"

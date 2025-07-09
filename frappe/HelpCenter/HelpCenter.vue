@@ -64,7 +64,7 @@
 <script setup>
 import Button from '../../src/components/Button/Button.vue'
 import FeatherIcon from '../../src/components/FeatherIcon.vue'
-import TextInput from '../../src/components/TextInput.vue'
+import TextInput from '../../src/components/TextInput/TextInput.vue'
 import { ref, computed, onMounted } from 'vue'
 
 const props = defineProps({
