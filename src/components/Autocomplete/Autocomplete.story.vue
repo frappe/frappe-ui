@@ -85,7 +85,7 @@ const options = [
           v-model="people"
           placeholder="Select people"
           :multiple="true"
-          :by="(a, b) => a.value === b.value"
+          :compareFn="(a, b) => a.value === b.value"
         />
       </div>
     </Variant>

@@ -3,7 +3,7 @@
     v-model="selectedValue"
     :multiple="multiple"
     nullable
-    :by="by"
+    :compareFn="compareFn"
     v-slot="{ open: isComboboxOpen }"
   >
     <Popover
@@ -221,7 +221,7 @@ import type {
 const props = withDefaults(defineProps<AutocompleteProps>(), {
   multiple: false,
   hideSearch: false,
-  by: (a, b) => a.value === b.value,
+  compareFn: (a, b) => a.value === b.value,
 })
 const emit = defineEmits(['update:modelValue', 'update:query', 'change'])
 
