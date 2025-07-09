@@ -1,5 +1,5 @@
-const tailwindColors = require('tailwindcss/colors')
-const colorsData = require('./colors.json')
+import tailwindColors from 'tailwindcss/colors'
+import colorsData from './colors.json' assert { type: 'json' }
 
 function generateColorPalette() {
   const colorPalette = {
@@ -26,6 +26,9 @@ function generateColorPalette() {
 
   Object.keys(colorsData.lightMode).forEach((color) => {
     colorPalette[color] = colorsData.lightMode[color]
+  })
+  Object.keys(colorsData.darkMode).forEach((color) => {
+    colorPalette[`dark-${color}`] = colorsData.darkMode[color]
   })
 
   Object.keys(colorsData.overlay.white).forEach((shade) => {
@@ -83,6 +86,23 @@ function generateCSSVariables() {
     )
   })
 
+  // Generate CSS variables for each color shade
+  Object.keys(colorsData.lightMode).forEach((color) => {
+    Object.keys(colorsData.lightMode[color]).forEach((shade) => {
+      const variableName = `--${color}-${shade}`
+      const value = colorsData.lightMode[color][shade]
+      output[':root'][variableName] = value
+    })
+  })
+
+  Object.keys(colorsData.darkMode).forEach((color) => {
+    Object.keys(colorsData.darkMode[color]).forEach((shade) => {
+      const variableName = `--dark-${color}-${shade}`
+      const value = colorsData.darkMode[color][shade]
+      output['[data-theme="dark"]'][variableName] = value
+    })
+  })
+
   return output
 }
 
@@ -108,8 +128,4 @@ function generateSemanticColors() {
   return output
 }
 
-module.exports = {
-  generateColorPalette,
-  generateCSSVariables,
-  generateSemanticColors,
-}
+export { generateColorPalette, generateCSSVariables, generateSemanticColors }

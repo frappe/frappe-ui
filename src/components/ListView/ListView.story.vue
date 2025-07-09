@@ -1,7 +1,7 @@
 <script setup>
 import { reactive, h, ref } from 'vue'
-import Avatar from '../Avatar.vue'
-import Badge from '../Badge.vue'
+import Avatar from '../Avatar/Avatar.vue'
+import Badge from '../Badge/Badge.vue'
 import { Button } from '../Button'
 import FeatherIcon from '../FeatherIcon.vue'
 import ListHeader from './ListHeader.vue'

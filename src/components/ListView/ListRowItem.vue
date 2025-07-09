@@ -1,27 +1,30 @@
 <template>
-  <component
-    :is="list.options.showTooltip ? Tooltip : 'div'"
-    v-bind="list.options.showTooltip ? { text: label } : {}"
-  >
-    <div class="flex items-center space-x-2" :class="alignmentMap[align]">
-      <slot name="prefix">
-        <component
-          v-if="column.prefix"
-          :is="
-            typeof column.prefix === 'function'
-              ? column.prefix({ row })
-              : column.prefix
-          "
-        />
-      </slot>
+  <div class="flex items-center space-x-2" :class="alignmentMap[align]">
+    <slot name="prefix">
+      <component
+        v-if="column.prefix"
+        :is="
+          typeof column.prefix === 'function'
+            ? column.prefix({ row })
+            : column.prefix
+        "
+      />
+    </slot>
+    <Tooltip
+      v-bind="
+        list.options.showTooltip
+          ? {
+              text: tooltip,
+            }
+          : { text: '' }
+      "
+    >
       <slot v-bind="{ label }">
-        <div class="truncate text-base">
-          {{ column?.getLabel ? column.getLabel({ row }) : label }}
-        </div>
+        <div class="truncate text-base">{{ label }}</div>
       </slot>
-      <slot name="suffix" />
-    </div>
-  </component>
+    </Tooltip>
+    <slot name="suffix" />
+  </div>
 </template>
 <script setup>
 import { computed, inject } from 'vue'
@@ -48,7 +51,15 @@ const props = defineProps({
 })
 
 const label = computed(() => {
+  if (props.column?.getLabel) return props.column?.getLabel({ row: props.row })
   return getValue(props.item).label || ''
+})
+
+const tooltip = computed(() => {
+  if (!list.value.options.showTooltip) return ''
+  return props.column.getTooltip
+    ? props.column.getTooltip(props.row)
+    : getValue(props.item).label
 })
 
 function getValue(value) {

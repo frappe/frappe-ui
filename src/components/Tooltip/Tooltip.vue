@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { type HTMLAttributes } from 'vue'
 import {
   TooltipProvider,
   TooltipRoot,
@@ -7,30 +6,21 @@ import {
   TooltipTrigger,
   TooltipContent,
   TooltipArrow,
-  type TooltipContentProps,
-} from 'radix-vue'
+} from 'reka-ui'
 import { computed } from 'vue'
+import type { TooltipProps } from './types'
 
 defineOptions({
   inheritAttrs: false,
 })
 
-const props = withDefaults(
-  defineProps<{
-    text?: string
-    hoverDelay?: number
-    placement?: TooltipContentProps['side']
-    arrowClass?: HTMLAttributes['class']
-    disabled?: boolean
-  }>(),
-  {
-    text: '',
-    placement: 'top',
-    hoverDelay: 0.5,
-    arrowClass: 'fill-surface-gray-7',
-    disabled: false,
-  },
-)
+const props = withDefaults(defineProps<TooltipProps>(), {
+  text: '',
+  placement: 'top',
+  hoverDelay: 0.5,
+  arrowClass: 'fill-surface-gray-7',
+  disabled: false,
+})
 
 const delayDuration = computed(() => props.hoverDelay * 1000)
 </script>

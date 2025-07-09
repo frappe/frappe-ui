@@ -7,19 +7,25 @@
         <span
           v-for="date in weeklyDates"
           class="relative p-2 text-center text-sm text-gray-600"
-          :class="isToday(date) ? 'font-bold text-gray-800' : 'font-normal'"
+          :class="
+            isToday(date) ? 'font-semibold text-ink-gray-8' : 'font-normal'
+          "
         >
           <div
             v-if="isToday(date)"
-            class="absolute left-[45%] top-0 h-[2px] w-5 bg-gray-800"
+            class="absolute left-[45%] top-0 h-[2px] w-5 bg-surface-gray-7"
           />
           {{ parseDateWithDay(date) }}
         </span>
       </div>
     </div>
 
-    <div class="relative flex h-full flex-col overflow-auto" ref="gridRef">
-      <div class="flex border-b-[1px] border-l-[1px]">
+    <div
+      class="relative flex h-full flex-col overflow-auto border-outline-gray-1"
+      :class="[config.noBorder ? '' : 'border-b-[1px] border-l-[1px]']"
+      ref="gridRef"
+    >
+      <div class="flex">
         <!-- Time List form 0 - 24 -->
         <div class="grid w-16 grid-cols-1">
           <span
@@ -35,8 +41,13 @@
           <div class="grid w-full grid-cols-7">
             <div v-for="(date, idx) in weeklyDates">
               <div
-                class="flex w-full flex-col gap-1 border-b-[1px] border-r-[1px] border-gray-200 transition-all"
-                :class="[idx === 0 && 'relative border-l-[1px]']"
+                class="flex w-full flex-col gap-1 border-b-[1px] border-r-[1px] border-outline-gray-1 transition-all"
+                :class="[
+                  idx === 0 && 'relative border-l-[1px]',
+                  config.noBorder &&
+                    idx === weeklyDates.length - 1 &&
+                    'border-r-0',
+                ]"
                 ref="allDayCells"
                 :data-date-attr="date"
               >
@@ -46,7 +57,6 @@
                   class="absolute -left-[42px] bottom-[4px] cursor-pointer font-bold"
                   :icon="isCollapsed ? 'chevron-down' : 'chevron-up'"
                   variant="ghost"
-                  size="lg"
                 />
                 <div class="w-full" v-if="!isCollapsed">
                   <CalendarEvent
@@ -77,21 +87,28 @@
             <!-- 7 Columns -->
             <div
               v-for="(date, idx) in weeklyDates"
-              class="relative w-full border-r-[1px]"
-              :class="idx === 0 && 'calendar-column'"
+              class="relative w-full border-r-[1px] border-outline-gray-1"
+              :class="[
+                idx === 0 && 'calendar-column border-l-[1px]',
+                config.noBorder &&
+                  idx == weeklyDates.length - 1 &&
+                  'border-r-0',
+              ]"
               :data-date-attr="date"
             >
               <!-- Time Grid -->
               <div
-                class="cell relative flex cursor-pointer"
-                v-for="time in twentyFourHoursFormat"
+                class="cell relative flex cursor-pointer text-ink-gray-8"
+                v-for="(time, i) in timeArray"
+                :key="time"
                 :data-time-attr="time"
                 @dblclick.prevent="
                   calendarActions.handleCellDblClick($event, date, time)
                 "
               >
                 <div
-                  class="border-gray-20 w-full border-b-[1px]"
+                  class="border-outline-gray-1 w-full border-b-[1px]"
+                  :class="i === timeArray.length - 1 && 'border-b-0'"
                   :style="{ height: `${hourHeight}px` }"
                 />
               </div>
@@ -119,6 +136,7 @@ import { ref, onMounted, watch, computed, inject } from 'vue'
 import CalendarEvent from './CalendarEvent.vue'
 import CalendarTimeMarker from './CalendarTimeMarker.vue'
 import {
+  twelveHoursFormat,
   twentyFourHoursFormat,
   parseDateWithDay,
   parseDate,
@@ -149,6 +167,9 @@ const isCollapsed = ref(false)
 
 const hourHeight = props.config.hourHeight
 const minuteHeight = hourHeight / 60
+
+const timeArray =
+  props.config.timeFormat == '24h' ? twentyFourHoursFormat : twelveHoursFormat
 
 const timedEvents = computed(
   () => useCalendarData(props.events).timedEvents.value,
@@ -237,7 +258,6 @@ watch(
 
 <style>
 .calendar-column {
-  border-left: 1px solid #e5e5e5;
   position: relative;
 }
 

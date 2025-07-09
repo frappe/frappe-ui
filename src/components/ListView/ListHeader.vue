@@ -26,7 +26,7 @@
 </template>
 
 <script setup>
-import Checkbox from '../Checkbox.vue'
+import Checkbox from '../Checkbox/Checkbox.vue'
 import ListHeaderItem from './ListHeaderItem.vue'
 import { getGridTemplateColumns } from './utils'
 import { inject } from 'vue'

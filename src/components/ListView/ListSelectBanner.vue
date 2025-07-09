@@ -69,7 +69,7 @@
 </template>
 
 <script setup>
-import Checkbox from '../Checkbox.vue'
+import Checkbox from '../Checkbox/Checkbox.vue'
 import { Button } from '../Button'
 import { computed, inject } from 'vue'
 
@@ -80,7 +80,6 @@ defineOptions({
 const list = inject('list')
 
 let selectedText = computed(() => {
-  let title = list.value.selections.size === 1 ? 'Row' : 'Rows'
-  return `${list.value.selections.size} ${title} selected`
+  return list.value.options.selectionText(list.value.selections.size)
 })
 </script>

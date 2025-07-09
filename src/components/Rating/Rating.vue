@@ -12,7 +12,7 @@
       >
         <FeatherIcon
           name="star"
-          class="fill-gray-400 text-ink-gray-1 stroke-1 mr-1"
+          class="fill-gray-300 text-transparent mr-0.5"
           :class="iconClasses(index)"
           @click="markRating(index)"
         />
@@ -24,14 +24,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import FeatherIcon from '../FeatherIcon.vue'
-
-interface RatingProps {
-  modelValue?: number
-  rating_from?: number
-  label?: string
-  readonly?: boolean
-  size?: 'sm' | 'md' | 'lg' | 'xl'
-}
+import type { RatingProps } from './types'
 
 const props = withDefaults(defineProps<RatingProps>(), {
   modelValue: 0,
@@ -55,9 +48,9 @@ const iconClasses = (index: number) => {
   ]
 
   if (index <= hoveredRating.value && index > rating.value) {
-    classes.push('fill-yellow-200')
+    classes.push('!fill-yellow-200')
   } else if (index <= rating.value) {
-    classes.push('fill-yellow-500')
+    classes.push('!fill-yellow-500')
   }
 
   if (!props.readonly) {

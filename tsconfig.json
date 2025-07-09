@@ -12,14 +12,19 @@
     "lib": ["ESNext", "DOM"],
     "skipLibCheck": true,
     "noEmit": true,
-    "types": ["vitest/globals"]
+    "types": ["vitest/globals", "unplugin-icons/types/vue"]
   },
   "include": [
     "src/**/*.ts",
     "src/**/*.d.ts",
     "src/**/*.tsx",
     "src/**/*.vue",
-    "src/index.js",
+    "src/index.ts",
+    "frappe/**/*.ts",
+    "frappe/**/*.d.ts",
+    "frappe/**/*.tsx",
+    "frappe/**/*.vue",
+    "frappe/index.js",
     "vitest.config.ts",
     "vitest.setup.ts"
   ],

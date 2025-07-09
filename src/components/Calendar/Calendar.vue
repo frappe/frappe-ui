@@ -14,7 +14,9 @@
       <div class="mb-2 flex justify-between">
         <!-- left side  -->
         <!-- Year, Month -->
-        <span class="text-xl font-medium"> {{ currentMonthYear }}</span>
+        <span class="text-lg font-medium text-ink-gray-8">
+          {{ currentMonthYear }}
+        </span>
         <!-- right side -->
         <!-- actions buttons for calendar -->
         <div class="flex gap-x-1">
@@ -64,7 +66,14 @@
       :events="events"
       :current-date="selectedDay"
       :config="overrideConfig"
-    />
+    >
+      <template #header="{ parseDateWithDay, currentDate, fullDay }">
+        <slot
+          name="daily-header"
+          v-bind="{ parseDateWithDay, currentDate, fullDay }"
+        />
+      </template>
+    </CalendarDaily>
 
     <NewEventModal
       v-if="showEventModal"
@@ -74,9 +83,9 @@
   </div>
 </template>
 <script setup>
-import { computed, onMounted, onUnmounted, provide, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, provide, ref } from 'vue'
 import { Button } from '../Button'
-import TabButtons from '../TabButtons.vue'
+import { TabButtons } from '../TabButtons'
 import {
   getCalendarDates,
   monthList,
@@ -98,18 +107,6 @@ const props = defineProps({
   config: {
     type: Object,
   },
-  create: {
-    type: Function,
-    required: false,
-  },
-  update: {
-    type: Function,
-    required: false,
-  },
-  delete: {
-    type: Function,
-    required: false,
-  },
   onClick: {
     type: Function,
     required: false,
@@ -124,6 +121,8 @@ const props = defineProps({
   },
 })
 
+const emit = defineEmits(['create', 'update', 'delete'])
+
 const defaultConfig = {
   scrollToHour: 15,
   disableModes: [],
@@ -134,6 +133,7 @@ const defaultConfig = {
   hourHeight: 50,
   enableShortcuts: true,
   showIcon: true,
+  timeFormat: '12h',
 }
 
 const overrideConfig = { ...defaultConfig, ...props.config }
@@ -174,18 +174,24 @@ provide('activeView', activeView)
 provide('config', overrideConfig)
 
 const parseEvents = computed(() => {
-  return props.events.map((event) => {
-    const { fromDate, toDate, ...rest } = event
-    const date = parseDate(fromDate)
-    const from_time = new Date(fromDate).toLocaleTimeString()
-    const to_time = new Date(toDate).toLocaleTimeString()
-    if (event.isFullDay) {
-      return { ...rest, date }
-    }
-    return { ...rest, date, from_time, to_time }
-  })
+  return (
+    props.events?.map((event) => {
+      const { fromDate, toDate, ...rest } = event
+      const date = parseDate(fromDate)
+      const from_time = new Date(fromDate).toLocaleTimeString()
+      const to_time = new Date(toDate).toLocaleTimeString()
+      if (event.isFullDay) {
+        return { ...rest, date }
+      }
+      return { ...rest, date, from_time, to_time }
+    }) || []
+  )
 })
 const events = ref(parseEvents.value)
+
+function reloadEvents() {
+  events.value = parseEvents.value
+}
 
 events.value.forEach((event) => {
   if (!event.from_time || !event.to_time) {
@@ -208,21 +214,25 @@ provide('calendarActions', {
 // CRUD actions on an event
 function createNewEvent(event) {
   events.value.push(event)
-  props.create && props.create(event)
+  event.fromDate = event.date + ' ' + event.from_time
+  event.toDate = event.date + ' ' + event.to_time
+  emit('create', event)
 }
 
 function updateEventState(event) {
   const eventID = event.id
   let eventIndex = events.value.findIndex((e) => e.id === eventID)
+  event.fromDate = event.date + ' ' + event.from_time
+  event.toDate = event.date + ' ' + event.to_time
   events.value[eventIndex] = event
-  props.update && props.update(events.value[eventIndex])
+  emit('update', event)
 }
 
 function deleteEvent(eventID) {
   // Delete event
   const eventIndex = events.value.findIndex((event) => event.id === eventID)
   events.value.splice(eventIndex, 1)
-  props.delete && props.delete(eventID)
+  emit('delete', eventID)
 }
 
 function openModal(data) {
@@ -430,4 +440,6 @@ function isCurrentMonthDate(date) {
   date = new Date(date)
   return date.getMonth() === currentMonth.value
 }
+
+defineExpose({ reloadEvents })
 </script>

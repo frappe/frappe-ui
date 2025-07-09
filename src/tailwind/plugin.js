@@ -1,9 +1,9 @@
-const plugin = require('tailwindcss/plugin')
-const {
+import plugin from 'tailwindcss/plugin'
+import {
   generateColorPalette,
   generateSemanticColors,
   generateCSSVariables,
-} = require('./colorPalette')
+} from './colorPalette.js'
 
 let colorPalette = generateColorPalette()
 let semanticColors = generateSemanticColors()
@@ -49,7 +49,7 @@ let componentStyles = {
   },
 }
 
-module.exports = plugin(
+export default plugin(
   function ({ addBase, addComponents, theme }) {
     addBase({ ...globalStyles(theme), ...cssVariables })
     addComponents(componentStyles)
@@ -289,7 +289,7 @@ module.exports = plugin(
               '--tw-prose-counters': 'var(--ink-gray-4)',
               '--tw-prose-bullets': 'var(--ink-gray-2)',
               '--tw-prose-hr': 'var(--ink-gray-1)',
-              '--tw-prose-quotes': 'var(--ink-gray-9)',
+              '--tw-prose-quotes': 'var(--ink-gray-8)',
               '--tw-prose-quote-borders': 'var(--ink-gray-1)',
               '--tw-prose-captions': 'var(--ink-gray-4)',
               '--tw-prose-kbd': 'var(--ink-gray-9)',
@@ -298,37 +298,100 @@ module.exports = plugin(
               '--tw-prose-pre-bg': 'var(--ink-gray-8)',
               '--tw-prose-th-borders': 'var(--ink-gray-2)',
               '--tw-prose-td-borders': 'var(--ink-gray-1)',
+              h1: {
+                fontWeight: 600,
+              },
+              h2: {
+                fontWeight: 600,
+              },
+              h3: {
+                fontWeight: 600,
+              },
+              h4: {
+                fontWeight: 600,
+              },
+              h5: {
+                fontWeight: 600,
+              },
+              'h1 strong': {
+                fontWeight: 600,
+              },
+              'h2 strong': {
+                fontWeight: 600,
+              },
+              'h3 strong': {
+                fontWeight: 600,
+              },
+              'h4 strong': {
+                fontWeight: 600,
+              },
+              'h5 strong': {
+                fontWeight: 600,
+              },
+              'img[data-align=right]': {
+                marginLeft: 'auto',
+                marginRight: '0',
+              },
+              'img[data-align=center]': {
+                marginLeft: 'auto',
+                marginRight: 'auto',
+              },
             },
           },
           sm: {
             css: {
               fontSize: '14px',
               fontWeight: 420,
-              lineHeight: 1.6,
+              lineHeight: 1.5,
               letterSpacing: '0.02em',
+              h1: {
+                fontSize: em(20, 14),
+              },
+              h2: {
+                fontSize: em(18, 14),
+              },
+              h3: {
+                fontSize: em(16, 14),
+              },
+              h4: {
+                fontSize: em(14, 14),
+              },
+              h5: {
+                fontSize: em(13, 14),
+              },
               p: {
                 marginTop: '0.5rem',
-                marginBottom: '1rem',
-              },
-              '> ul > li p': {
-                marginTop: '0.5rem',
                 marginBottom: '0.5rem',
               },
-              '> ul > li > *:first-child': {
-                marginTop: '0.5rem',
+              'ul > li': {
+                margin: '0.5rem 0',
+                '> p': {
+                  margin: '0.5rem 0',
+                },
+                '> p:first-child:last-child': {
+                  margin: '0.5rem 0',
+                },
+                '> p:first-child': {
+                  marginTop: '0.5rem',
+                },
+                '> p:last-child': {
+                  marginBottom: '0.5rem',
+                },
               },
-              '> ul > li > *:last-child': {
-                marginBottom: '0.5rem',
-              },
-              '> ol > li p': {
-                marginTop: '0.5rem',
-                marginBottom: '0.5rem',
-              },
-              '> ol > li > *:first-child': {
-                marginTop: '0.5rem',
-              },
-              '> ol > li > *:last-child': {
-                marginBottom: '0.5rem',
+              'ol > li': {
+                margin: '0.5rem 0',
+                '> p': {
+                  margin: '0.5rem 0',
+                },
+                '> p:first-child:last-child': {
+                  margin: '0.5rem 0',
+                },
+                '> p:first-child': {
+                  marginTop: '0.5rem',
+                },
+                '> p:last-child': {
+                  marginBottom: '0.5rem',
+                },
               },
             },
           },
@@ -337,3 +400,7 @@ module.exports = plugin(
     },
   },
 )
+
+function em(pixels, base = 16) {
+  return `${pixels / base}em`
+}

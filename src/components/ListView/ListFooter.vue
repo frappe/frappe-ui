@@ -26,7 +26,7 @@
   </div>
 </template>
 <script setup>
-import TabButtons from '../TabButtons.vue'
+import TabButtons from '../TabButtons/TabButtons.vue'
 import { ref, computed } from 'vue'
 
 const props = defineProps({

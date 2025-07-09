@@ -1,6 +1,6 @@
-const fs = require('fs')
-const path = require('path')
-const colors = require('./colors.json')
+import fs from 'fs'
+import path from 'path'
+import colors from './colors.json' assert { type: 'json' }
 
 function generateClassMap() {
   const classMap = {

@@ -3,8 +3,8 @@
  * to colors JSON object that can be used in the Tailwind config.
  */
 
-const fs = require('fs')
-const path = require('path')
+import fs from 'fs'
+import path from 'path'
 
 function main() {
   const variables = getVariables()
@@ -144,7 +144,7 @@ function getVariables() {
     console.log('Please provide path to variables.json file')
     process.exit(1)
   }
-  return require(variablesJSONPath)
+  return JSON.parse(fs.readFileSync(variablesJSONPath, 'utf-8'))
 }
 
 main()
