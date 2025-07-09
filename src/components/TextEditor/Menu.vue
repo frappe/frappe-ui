@@ -7,7 +7,7 @@
           v-if="button.type === 'separator'"
         ></div>
         <div class="shrink-0" v-else-if="button.map">
-          <Popover>
+          <Popover popoverClass="z-[10000]">
             <template #target="{ togglePopover }">
               <button
                 class="rounded px-2 py-1 text-base font-medium text-ink-gray-8 transition-colors hover:bg-surface-gray-2"
@@ -28,14 +28,14 @@
               </button>
             </template>
             <template #body="{ close }">
-              <ul class="rounded border bg-surface-white p-1 shadow-md">
+              <ul class="rounded bg-surface-white p-1 shadow-md mt-1">
                 <li
                   class="w-full"
                   v-for="option in button"
                   v-show="option.isDisabled ? !option.isDisabled(editor) : true"
                 >
                   <button
-                    class="w-full rounded px-2 py-1 text-left text-base hover:bg-surface-menu-bar"
+                    class="w-full h-7 rounded px-2 py-1 text-left text-base hover:bg-surface-menu-bar flex items-center gap-2"
                     @click="
                       () => {
                         onButtonClick(option)
@@ -43,7 +43,12 @@
                       }
                     "
                   >
-                    {{ option.label }}
+                    <component
+                      v-if="option.icon"
+                      :is="option.icon"
+                      class="size-4"
+                    />
+                    <template v-if="option.label">{{ option.label }}</template>
                   </button>
                 </li>
               </ul>

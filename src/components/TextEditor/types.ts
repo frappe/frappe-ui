@@ -16,5 +16,5 @@ interface Separator {
 
 type ActionButton = Button | Separator
 export type ActionItem = ActionButton | ActionButton[]
-export type MenuProps = ActionItem[]
+export type MenuProps = { buttons: ActionItem[] }
 
