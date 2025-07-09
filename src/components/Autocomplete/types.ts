@@ -27,6 +27,7 @@ export type AutocompleteProps = {
   placement?: string
   showFooter?: boolean
   compareFn?: (a: Option, b: Option) => boolean
+  maxOptions?: number
 } & (
   | {
       multiple: true

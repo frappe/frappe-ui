@@ -90,6 +90,7 @@ export { default as fileToBase64 } from './utils/file-to-base64'
 export { default as FileUploadHandler } from './utils/fileUploadHandler'
 export { usePageMeta } from './utils/pageMeta'
 export { dayjsLocal, dayjs } from './utils/dayjs'
+export * from './utils/useFileUpload'
 
 // data-fetching, resources
 export {
