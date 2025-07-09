@@ -26,6 +26,7 @@ export type AutocompleteProps = {
   loading?: boolean
   placement?: string
   showFooter?: boolean
+  maxOptions?: number
 } & (
   | {
       multiple: true
