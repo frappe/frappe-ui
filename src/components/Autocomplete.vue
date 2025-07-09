@@ -368,13 +368,13 @@ const displayValue = computed(() => {
 })
 
 const isOptionSelected = (option: AutocompleteOption) => {
+  if (!selectedValue.value) return false
   const value = isOption(option) ? option.value : option
   if (!props.multiple) {
-    if (!selectedValue.value) return false
-    return (isOption(selectedValue.value) ? selectedValue.value.value : selectedValue.value) === value
+    return selectedValue.value === value
   }
-  return (selectedValue.value as AutocompleteOption[]).some(
-    v => (isOption(v) ? v.value : v) === value
+  return (selectedValue.value as AutocompleteOption[]).find((v) =>
+    isOption(v) ? v.value === value : v === value,
   )
 }
 
