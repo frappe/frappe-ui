@@ -209,10 +209,10 @@ import {
   ComboboxOptions,
 } from '@headlessui/vue'
 import { computed, nextTick, ref, watch } from 'vue'
-import Popover from './Popover.vue'
-import { Button } from './Button'
-import FeatherIcon from './FeatherIcon.vue'
-import LoadingIndicator from './LoadingIndicator.vue'
+import { Popover } from '../Popover'
+import { Button } from '../Button'
+import FeatherIcon from '../FeatherIcon.vue'
+import LoadingIndicator from '../LoadingIndicator.vue'
 import type {
   AutocompleteOptionGroup,
   AutocompleteOption,
