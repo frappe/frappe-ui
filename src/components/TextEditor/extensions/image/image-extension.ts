@@ -9,15 +9,14 @@ import { Plugin, Selection, Transaction, EditorState } from 'prosemirror-state'
 import { EditorView } from 'prosemirror-view'
 import { Node } from '@tiptap/pm/model'
 import { fileToBase64 } from '../../../../index'
+import { UploadedFile } from '../../../../utils/useFileUpload'
 
 export interface ImageExtensionOptions {
   /**
    * Function to handle image uploads
    * @default null
    */
-  uploadFunction:
-    | ((file: File) => Promise<{ src: string; [key: string]: any }>)
-    | null
+  uploadFunction: ((file: File) => Promise<UploadedFile>) | null
 
   /**
    * HTML attributes to add to the image element
@@ -414,27 +413,30 @@ function uploadImageBase(
 
       return options.uploadFunction(file)
     })
-    .then((uploadedImage: any) => {
-      return getImageDimensions(uploadedImage.src)
+    .then((uploadedImage: UploadedFile) => {
+      return getImageDimensions(uploadedImage.file_url)
         .then((dimensions) => {
           return {
             ...uploadedImage,
             width: dimensions.width,
             height: dimensions.height,
-          }
+          } as UploadedFile & { width: number; height: number }
         })
         .catch(() => {
-          return uploadedImage
+          return uploadedImage as UploadedFile & {
+            width: number
+            height: number
+          }
         })
     })
-    .then((uploadedImage: any) => {
+    .then((uploadedImage) => {
       const transaction = view.state.tr
 
       view.state.doc.descendants((node, pos) => {
         if (node.type.name === 'image' && node.attrs.uploadId === uploadId) {
           transaction.setNodeMarkup(pos, undefined, {
             ...node.attrs,
-            src: uploadedImage.src,
+            src: uploadedImage.file_url,
             width: uploadedImage.width || node.attrs.width,
             height: uploadedImage.height || node.attrs.height,
             loading: false,

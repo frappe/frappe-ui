@@ -55,8 +55,8 @@
 </template>
 <script>
 import { Button } from '../Button'
-import Dialog from '../Dialog.vue'
-import FileUploader from '../FileUploader.vue'
+import { Dialog } from '../Dialog'
+import { FileUploader } from '../FileUploader'
 
 export default {
   name: 'InsertImage',

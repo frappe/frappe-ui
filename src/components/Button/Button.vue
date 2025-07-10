@@ -52,29 +52,11 @@
   </button>
 </template>
 <script lang="ts" setup>
-import { computed, useSlots, type Component } from 'vue'
+import { computed, useSlots } from 'vue'
 import FeatherIcon from '../FeatherIcon.vue'
 import LoadingIndicator from '../LoadingIndicator.vue'
-import { useRouter, type RouteLocation } from 'vue-router'
-
-type Theme = 'gray' | 'blue' | 'green' | 'red'
-type Size = 'sm' | 'md' | 'lg' | 'xl' | '2xl'
-type Variant = 'solid' | 'subtle' | 'outline' | 'ghost'
-
-export interface ButtonProps {
-  theme?: Theme
-  size?: Size
-  variant?: Variant
-  label?: string
-  icon?: string | Component
-  iconLeft?: string | Component
-  iconRight?: string | Component
-  loading?: boolean
-  loadingText?: string
-  disabled?: boolean
-  route?: RouteLocation
-  link?: string
-}
+import { useRouter } from 'vue-router'
+import type { ButtonProps, ThemeVariant } from './types'
 
 const props = withDefaults(defineProps<ButtonProps>(), {
   theme: 'gray',
@@ -134,7 +116,6 @@ const buttonClasses = computed(() => {
     ghost: ghostClasses,
   }[props.variant]
 
-  type ThemeVariant = `${Theme}-${Variant}`
   let themeVariant: ThemeVariant = `${props.theme}-${props.variant}`
 
   let disabledClassesMap: Record<ThemeVariant, string> = {

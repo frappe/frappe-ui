@@ -118,8 +118,6 @@ export const TagExtension = createSuggestionExtension<TagSuggestionItem>({
         isNew: true,
       })
     }
-
-    console.log('filteredTags', filteredTags)
     return filteredTags
   },
 

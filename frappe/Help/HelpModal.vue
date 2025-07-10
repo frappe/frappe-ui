@@ -53,7 +53,7 @@
   </div>
 </template>
 <script setup>
-import Dropdown from '../../src/components/Dropdown.vue'
+import Dropdown from '../../src/components/Dropdown/Dropdown.vue'
 import Button from '../../src/components/Button/Button.vue'
 import StepsIcon from '../Icons/StepsIcon.vue'
 import MinimizeIcon from '../Icons/MinimizeIcon.vue'

@@ -29,7 +29,7 @@
 <script setup lang="ts">
 import { onMounted, ref, useTemplateRef, nextTick } from 'vue'
 import Button from '../Button/Button.vue'
-import TextInput from '../TextInput.vue'
+import TextInput from '../TextInput/TextInput.vue'
 import Tooltip from '../Tooltip/Tooltip.vue'
 import LucideCheck from '~icons/lucide/check'
 import LucideX from '~icons/lucide/x'
