@@ -5,20 +5,25 @@
     :placement="placement"
   >
     <template #target="{ togglePopover }">
-      <TextInput
-        readonly
-        type="text"
-        :placeholder="placeholder"
-        :value="dateValue && formatter ? formatter(dateValue) : dateValue"
-        @focus="!readonly ? togglePopover() : null"
-        class="w-full"
-        :class="inputClass"
-        v-bind="$attrs"
-      >
-        <template #prefix v-if="$slots.prefix">
-          <slot name="prefix" />
-        </template>
-      </TextInput>
+      <div class="flex flex-col space-y-1.5">
+        <label v-if="props.label" class="block text-xs text-ink-gray-5">
+          {{ props.label }}
+        </label>
+         <TextInput
+          readonly
+          type="text"
+          :placeholder="placeholder"
+          :value="dateValue && formatter ? formatter(dateValue) : dateValue"
+          @focus="!readonly ? togglePopover() : null"
+          class="w-full"
+          :class="inputClass"
+          v-bind="$attrs"
+        >
+          <template #prefix v-if="$slots.prefix">
+            <slot name="prefix" />
+          </template>
+        </TextInput>
+      </div>
     </template>
 
     <template #body="{ togglePopover }">
