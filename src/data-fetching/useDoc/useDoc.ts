@@ -125,11 +125,7 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
         refetch: false,
         method: 'POST',
         ...option,
-        baseUrl,
-        url: computed(
-          () =>
-            `/api/v2/document/${doctype}/${toValue(name)}/method/${option.name}`,
-        ),
+        url: computed(() => `${url.value}/method/${option.name}`),
       }
 
       docMethods[key] = readonly(useCall(callOptions))
@@ -137,9 +133,8 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
   }
 
   let setValue = useCall<TDoc, Partial<TDoc>>({
-    url: computed(() => `/api/v2/document/${doctype}/${toValue(name)}`),
+    url,
     method: 'PUT',
-    baseUrl,
     immediate: false,
     refetch: false,
     onSuccess(data) {
@@ -150,19 +145,20 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
       docStore.setDoc(docWithType)
       listStore.updateRow(doctype, data)
     },
+    ...extraFetchOptions,
   })
 
   type DeleteResponse = 'ok'
   const delete_ = useCall<DeleteResponse>({
-    url: computed(() => `/api/v2/document/${doctype}/${toValue(name)}`),
+    url,
     method: 'DELETE',
-    baseUrl,
     immediate: false,
     refetch: false,
     onSuccess() {
       docStore.removeDoc(doctype, toValue(name))
       listStore.removeRow(doctype, toValue(name))
     },
+    ...extraFetchOptions,
   })
 
   const doc = docStore.getDoc(doctype, name) as Ref<TDoc | null>

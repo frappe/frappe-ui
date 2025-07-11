@@ -23,6 +23,11 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
     onError,
   } = options
 
+  const extraFetchOptions = {
+    ...(options?.headers && { headers: options.headers }),
+    ...(options?.credentials && { credentials: options.credentials }),
+  }
+
   let submitParams = ref<TParams | null | undefined>(null)
 
   let resolve: (value?: any) => void
@@ -63,6 +68,9 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
     immediate,
     refetch,
     initialData,
+    beforeFetch: ({ options }) => {
+      Object.assign(options, extraFetchOptions)
+    },
     afterFetch(ctx: AfterFetchContext<FrappeResponse<TResponse>>) {
       if (ctx.data) {
         if (transform) {
