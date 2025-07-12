@@ -1,5 +1,6 @@
 <template>
   <div
+    v-if="list"
     class="mb-2 grid items-center space-x-4 rounded bg-surface-gray-2 p-2"
     :style="{
       gridTemplateColumns: getGridTemplateColumns(
@@ -25,13 +26,18 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import { ComputedRef, inject } from 'vue'
 import Checkbox from '../Checkbox/Checkbox.vue'
 import ListHeaderItem from './ListHeaderItem.vue'
+import type { ListColumn, ListContext } from './types'
 import { getGridTemplateColumns } from './utils'
-import { inject } from 'vue'
 
-const emit = defineEmits(['columnWidthUpdated'])
+interface ListHeaderEmits {
+  (event: 'columnWidthUpdated', column: ListColumn): void
+}
 
-const list = inject('list')
+const emit = defineEmits<ListHeaderEmits>()
+
+const list = inject<ComputedRef<ListContext>>('list')
 </script>
