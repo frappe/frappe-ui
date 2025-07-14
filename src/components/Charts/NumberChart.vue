@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex max-h-[140px] items-center gap-2 overflow-hidden bg-white px-6 pt-5"
+    class="flex max-h-[140px] items-center gap-2 overflow-hidden bg-surface-white text-ink-gray-8 px-6 pt-5"
     :class="config.delta ? 'pb-6' : 'pb-3'"
   >
     <div class="flex w-full flex-col">
