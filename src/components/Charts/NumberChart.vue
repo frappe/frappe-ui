@@ -19,11 +19,11 @@
         :class="[
           config.negativeIsBetter
             ? config.delta >= 0
-              ? 'text-red-500'
-              : 'text-green-500'
+              ? 'text-ink-red-4'
+              : 'text-ink-green-3'
             : config.delta >= 0
-              ? 'text-green-500'
-              : 'text-red-500',
+              ? 'text-ink-green-3'
+              : 'text-ink-red-4',
         ]"
       >
         <span class="">
