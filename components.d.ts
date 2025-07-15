@@ -94,6 +94,7 @@ declare module 'vue' {
     InsertLink: typeof import('./src/components/TextEditor/InsertLink.vue')['default']
     InsertVideo: typeof import('./src/components/TextEditor/InsertVideo.vue')['default']
     Italic: typeof import('./src/components/TextEditor/icons/italic.vue')['default']
+    Layout: typeof import('./src/components/VueGridLayout/Layout.vue')['default']
     Link: typeof import('./src/components/Link.vue')['default']
     ListEmptyState: typeof import('./src/components/ListView/ListEmptyState.vue')['default']
     ListFilter: typeof import('./src/components/ListFilter/ListFilter.vue')['default']
