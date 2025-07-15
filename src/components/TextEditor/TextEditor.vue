@@ -379,10 +379,6 @@ img.ProseMirror-selectednode {
     border-radius: 4px;
     color: theme('colors.gray.900');
   }
-
-  ul[data-type='taskList'] {
-    margin: 0;
-  }
 }
 
 .resize-cursor {
