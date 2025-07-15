@@ -39,6 +39,7 @@
 <script>
 import { RadioGroup, RadioGroupLabel, RadioGroupOption } from '@headlessui/vue'
 import FeatherIcon from '../FeatherIcon.vue'
+import Button from '../Button/Button.vue'
 
 export default {
   name: 'TabButtons',
@@ -53,6 +54,7 @@ export default {
   },
   emits: ['update:modelValue'],
   components: {
+    Button,
     FeatherIcon,
     RadioGroup,
     RadioGroupOption,
