@@ -86,15 +86,20 @@
     </div>
   </div>
 </template>
-<script setup lang="ts">
-import { inject } from 'vue'
+<script>
 import Popover from '../Popover/Popover.vue'
-import { MenuProps, Button } from './types'
-import type { Editor } from '@tiptap/vue-3'
 
-const props = defineProps<MenuProps>()
-const editor = inject('editor') as { value: Editor }
-const onButtonClick = (button: Button) => {
-  button.action(editor.value)
+export default {
+  name: 'TipTapMenu',
+  props: ['buttons'],
+  inject: ['editor'],
+  components: {
+    Popover,
+  },
+  methods: {
+    onButtonClick(button) {
+      button.action(this.editor)
+    },
+  },
 }
 </script>
