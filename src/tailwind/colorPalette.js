@@ -1,5 +1,5 @@
 import tailwindColors from 'tailwindcss/colors'
-import colorsData from './colors.json' assert { type: 'json' }
+import colorsData from './colors.json'
 
 function generateColorPalette() {
   const colorPalette = {
