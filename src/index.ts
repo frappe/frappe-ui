@@ -70,6 +70,10 @@ export { default as NestedPopover } from './components/ListFilter/NestedPopover.
 export * from './components/CircularProgressBar'
 export * from './components/Tree'
 export { default as FrappeUIProvider } from './components/Provider/FrappeUIProvider.vue'
+export { default as Sidebar } from './components/Sidebar/Sidebar.vue'
+
+// grid layout
+export { default as GridLayout } from './components/VueGridLayout/Layout.vue'
 
 // chart components
 export { default as AxisChart } from './components/Charts/AxisChart.vue'
@@ -79,16 +83,17 @@ export { default as FunnelChart } from './components/Charts/FunnelChart.vue'
 export { default as ECharts } from './components/Charts/ECharts.vue'
 
 // directives
-export { default as onOutsideClickDirective } from './directives/onOutsideClick.js'
-export { default as visibilityDirective } from './directives/visibility.js'
+export { default as onOutsideClickDirective } from './directives/onOutsideClick'
+export { default as visibilityDirective } from './directives/visibility'
 
 // utilities
 export { default as call, createCall } from './utils/call.js'
 export { default as debounce } from './utils/debounce'
 export { default as fileToBase64 } from './utils/file-to-base64'
 export { default as FileUploadHandler } from './utils/fileUploadHandler'
-export { usePageMeta } from './utils/pageMeta.js'
-export { dayjsLocal, dayjs } from './utils/dayjs.js'
+export { usePageMeta } from './utils/pageMeta'
+export { dayjsLocal, dayjs } from './utils/dayjs'
+export * from './utils/useFileUpload'
 
 // data-fetching, resources
 export {
@@ -103,7 +108,7 @@ export {
 export { request } from './utils/request.js'
 export { frappeRequest } from './utils/frappeRequest.js'
 export { default as initSocket } from './utils/socketio.js'
-export { setConfig, getConfig } from './utils/config.js'
+export { setConfig, getConfig } from './utils/config'
 
 // new data fetching
 export { useCall } from './data-fetching/useCall/useCall'

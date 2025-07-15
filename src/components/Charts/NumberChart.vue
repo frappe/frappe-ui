@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex max-h-[140px] items-center gap-2 overflow-hidden bg-white px-6 pt-5"
+    class="flex max-h-[140px] items-center gap-2 overflow-hidden bg-surface-white text-ink-gray-8 px-6 pt-5"
     :class="config.delta ? 'pb-6' : 'pb-3'"
   >
     <div class="flex w-full flex-col">
@@ -19,11 +19,11 @@
         :class="[
           config.negativeIsBetter
             ? config.delta >= 0
-              ? 'text-red-500'
-              : 'text-green-500'
+              ? 'text-ink-red-4'
+              : 'text-ink-green-3'
             : config.delta >= 0
-              ? 'text-green-500'
-              : 'text-red-500',
+              ? 'text-ink-green-3'
+              : 'text-ink-red-4',
         ]"
       >
         <span class="">

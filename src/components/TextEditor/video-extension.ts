@@ -1,11 +1,10 @@
 import { Node, mergeAttributes, Editor } from '@tiptap/core'
 import { Node as ProseMirrorNode } from '@tiptap/pm/model'
 import { EditorView } from 'prosemirror-view'
+import { UploadedFile } from '../../utils/useFileUpload'
 
 export interface VideoOptions {
-  uploadFunction:
-    | ((file: File) => Promise<{ src: string; [key: string]: any }>)
-    | null
+  uploadFunction: ((file: File) => Promise<UploadedFile>) | null
   HTMLAttributes: Record<string, any>
 }
 
@@ -112,9 +111,6 @@ export default Node.create<VideoOptions>({
         (editor.isEditable ? ' cursor-pointer' : '')
 
       const video = document.createElement('video')
-      if (editor.isEditable) {
-        video.className = 'pointer-events-none'
-      }
       video.src = node.attrs.src
       video.setAttribute('controls', '')
 
@@ -146,9 +142,9 @@ function uploadVideoInternal(
 
   options
     .uploadFunction(file)
-    .then((uploadedVideo: { src: string }) => {
+    .then((uploadedVideo: UploadedFile) => {
       const { schema } = view.state
-      const node = schema.nodes.video.create({ src: uploadedVideo.src })
+      const node = schema.nodes.video.create({ src: uploadedVideo.file_url })
 
       const transaction = view.state.tr
       if (pos != null) {

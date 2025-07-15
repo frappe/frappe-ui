@@ -1,20 +1,23 @@
-import type { Component } from 'vue'
-import type { Editor } from '@tiptap/vue-3'
+import { type UploadedFile } from '../../utils/useFileUpload'
 
-export interface Button {
-  label?: string
-  icon?: Component
-  class?: string
-  component?: Component
-  isActive?: (editor: Editor | null) => boolean
-  action: (editor: Editor | null) => void
+export interface TextEditorProps {
+  content?: string | null
+  placeholder?: string | (() => string)
+  editorClass?: string | string[] | object
+  editable?: boolean
+  bubbleMenu?: boolean | any[]
+  bubbleMenuOptions?: object
+  fixedMenu?: boolean | any[]
+  floatingMenu?: boolean | any[]
+  extensions?: any[]
+  starterkitOptions?: any
+  mentions?: any[]
+  tags?: any[]
+  uploadFunction?: (file: File) => Promise<UploadedFile>
 }
 
-interface Separator {
-  type: 'separator'
+export interface TextEditorEmits {
+  change: [content: string]
+  focus: [event: FocusEvent]
+  blur: [event: FocusEvent]
 }
-
-type ActionButton = Button | Separator
-export type ActionItem = ActionButton | ActionButton[]
-export type MenuProps = { buttons: ActionItem[] }
-

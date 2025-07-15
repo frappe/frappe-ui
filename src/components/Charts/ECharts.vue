@@ -52,11 +52,11 @@ watch(
   <div
     ref="chartDiv"
     v-show="!error"
-    class="h-full w-full min-w-[400px] min-h-[300px] px-4 py-2"
+    class="h-full w-full min-w-[300px] md:min-w-[400px] min-h-[300px] px-4 py-2"
   ></div>
   <div
     v-show="error"
-    class="flex h-full w-full items-center justify-center text-center text-red-500"
+    class="flex h-full w-full items-center justify-center text-center text-ink-red-3"
   >
     Error: {{ error }}
   </div>

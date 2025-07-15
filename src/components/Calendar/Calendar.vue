@@ -89,9 +89,9 @@ import { TabButtons } from '../TabButtons'
 import {
   getCalendarDates,
   monthList,
-  handleSeconds,
   parseDate,
 } from './calendarUtils'
+import { dayjs } from "../../utils/dayjs"
 import CalendarMonthly from './CalendarMonthly.vue'
 import CalendarWeekly from './CalendarWeekly.vue'
 import CalendarDaily from './CalendarDaily.vue'
@@ -178,8 +178,8 @@ const parseEvents = computed(() => {
     props.events?.map((event) => {
       const { fromDate, toDate, ...rest } = event
       const date = parseDate(fromDate)
-      const from_time = new Date(fromDate).toLocaleTimeString()
-      const to_time = new Date(toDate).toLocaleTimeString()
+      const from_time = dayjs(fromDate).format("HH:mm:ss")
+      const to_time = dayjs(toDate).format("HH:mm:ss")
       if (event.isFullDay) {
         return { ...rest, date }
       }
@@ -192,14 +192,6 @@ const events = ref(parseEvents.value)
 function reloadEvents() {
   events.value = parseEvents.value
 }
-
-events.value.forEach((event) => {
-  if (!event.from_time || !event.to_time) {
-    return
-  }
-  event.from_time = handleSeconds(event.from_time)
-  event.to_time = handleSeconds(event.to_time)
-})
 
 const { showEventModal, newEvent, openNewEventModal } = useEventModal()
 

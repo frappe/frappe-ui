@@ -27,9 +27,8 @@
         <ToastDescription
           v-if="message"
           class="text-p-sm break-words text-ink-white"
-        >
-          {{ message }}
-        </ToastDescription>
+          v-html="message"
+        />
       </div>
     </div>
     <div class="flex items-center gap-2 h-7">

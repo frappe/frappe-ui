@@ -1,17 +1,15 @@
-import showdown from 'showdown'
+import { marked } from 'marked'
 
-export function markdownToHTML(text) {
-  const converter = new showdown.Converter()
-  converter.setFlavor('github')
-  return converter.makeHtml(text)
+export function markdownToHTML(text: string): string {
+  // Use synchronous marked.parse
+  return marked.parse(text, {
+    gfm: true,
+    breaks: true,
+    async: false,
+  }) as string
 }
 
-export function htmlToMarkdown(text) {
-  const converter = new showdown.Converter()
-  return converter.makeMarkdown(text)
-}
-
-export function detectMarkdown(text) {
+export function detectMarkdown(text: string): boolean {
   const lines = text.split('\n')
   const markdown = lines.filter(
     (line) =>

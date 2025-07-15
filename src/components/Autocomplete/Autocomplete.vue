@@ -3,6 +3,7 @@
     v-model="selectedValue"
     :multiple="multiple"
     nullable
+    :by="compareFn"
     v-slot="{ open: isComboboxOpen }"
   >
     <Popover
@@ -105,7 +106,10 @@
                 </div>
                 <ComboboxOption
                   as="template"
-                  v-for="(option, idx) in group.items.slice(0, 50)"
+                  v-for="(option, idx) in group.items.slice(
+                    0,
+                    props.maxOptions,
+                  )"
                   :key="idx"
                   :value="option"
                   :disabled="option.disabled"
@@ -219,7 +223,9 @@ import type {
 
 const props = withDefaults(defineProps<AutocompleteProps>(), {
   multiple: false,
+  maxOptions: 50,
   hideSearch: false,
+  compareFn: (a, b) => a.value === b.value,
 })
 const emit = defineEmits(['update:modelValue', 'update:query', 'change'])
 
@@ -322,7 +328,7 @@ const makeOption = (option: AutocompleteOption) => {
 
 const getLabel = (option: AutocompleteOption) => {
   if (isOption(option)) {
-    return option?.label || option?.value || 'No label'
+    return option?.label || option?.value
   }
   return option
 }

@@ -19,7 +19,7 @@
     </span>
     <Switch
       :disabled="props.disabled"
-      :model-value="modelValue"
+      :model-value="modelValue ? true : false"
       :class="switchClasses"
       @update:model-value="emit('update:modelValue', !modelValue)"
     >
@@ -83,10 +83,10 @@ const switchCircleClasses = computed(() => {
     props.size === 'md' ? 'h-3.5 w-3.5' : 'h-3 w-3',
     props.size === 'md'
       ? props.modelValue
-        ? 'ltr:translate-x-3 rtl:-translate-x-3'
+        ? 'translate-x-3 rtl:-translate-x-3'
         : 'translate-x-0'
       : props.modelValue
-        ? 'ltr:translate-x-2.5 rtl:-translate-x-2.5'
+        ? 'translate-x-2.5 rtl:-translate-x-2.5'
         : 'translate-x-0',
   ]
 })

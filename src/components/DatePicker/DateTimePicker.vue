@@ -5,19 +5,25 @@
     :placement="placement"
   >
     <template #target="{ togglePopover }">
-      <TextInput
-        readonly
-        type="text"
-        icon-left="calendar"
-        :placeholder="placeholder"
-        :value="dateValue && formatter ? formatter(dateValue) : dateValue"
-        @focus="!readonly ? togglePopover() : null"
-        class="w-full"
-        :class="inputClass"
-        v-bind="$attrs"
-      >
-        <template v-if="!hideIcon" #prefix><LucideCalendar class="size-4" /></template>
-      </TextInput>
+      <div class="flex flex-col space-y-1.5">
+        <label v-if="props.label" class="block text-xs text-ink-gray-5">
+          {{ props.label }}
+        </label>
+        <TextInput
+          readonly
+          type="text"
+          :placeholder="placeholder"
+          :value="dateValue && formatter ? formatter(dateValue) : dateValue"
+          @focus="!readonly ? togglePopover() : null"
+          class="w-full"
+          :class="inputClass"
+          v-bind="$attrs"
+        >
+          <template #prefix v-if="$slots.prefix">
+            <slot name="prefix" />
+          </template>
+        </TextInput>
+      </div>
     </template>
 
     <template #body="{ togglePopover }">
@@ -189,17 +195,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 import { Button } from '../Button'
-import { Popover } from '../Popover'
 import FeatherIcon from '../FeatherIcon.vue'
+import { Popover } from '../Popover'
 import { TextInput } from '../TextInput'
-import LucideCalendar from '~icons/lucide/calendar'
 
-import { getDate } from './utils'
-import { useDatePicker } from './useDatePicker'
 import { dayjs, dayjsLocal, dayjsSystem } from '../../utils/dayjs'
+import { useDatePicker } from './useDatePicker'
+import { getDate } from './utils'
 
 import type { DatePickerEmits, DatePickerProps } from './types'
 

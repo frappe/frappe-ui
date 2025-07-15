@@ -1,4 +1,4 @@
-import _dayjs from 'dayjs/esm'
+import _dayjs, { Dayjs } from 'dayjs/esm'
 import relativeTime from 'dayjs/esm/plugin/relativeTime'
 import localizedFormat from 'dayjs/esm/plugin/localizedFormat'
 import updateLocale from 'dayjs/esm/plugin/updateLocale'
@@ -18,11 +18,11 @@ _dayjs.extend(utc)
 _dayjs.extend(timezone)
 _dayjs.extend(advancedFormat)
 
-function getBrowserTimezone() {
+function getBrowserTimezone(): string {
   return Intl.DateTimeFormat().resolvedOptions().timeZone
 }
 
-export function dayjsLocal(dateTimeString) {
+export function dayjsLocal(dateTimeString?: string): Dayjs {
   let systemTimezone = getConfig('systemTimezone')
   let localTimezone = getConfig('localTimezone') || getBrowserTimezone()
 
@@ -32,7 +32,7 @@ export function dayjsLocal(dateTimeString) {
   return _dayjs.tz(dateTimeString, systemTimezone).tz(localTimezone)
 }
 
-export function dayjsSystem(dateTimeString) {
+export function dayjsSystem(dateTimeString?: string): Dayjs {
   let systemTimezone = getConfig('systemTimezone')
   let localTimezone = getConfig('localTimezone') || getBrowserTimezone()
 

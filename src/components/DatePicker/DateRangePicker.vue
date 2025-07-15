@@ -1,21 +1,30 @@
 <template>
   <Popover
+    ref="popoverRef"
     @open="selectCurrentMonthYear"
     class="flex w-full [&>div:first-child]:w-full"
     :placement="placement"
   >
     <template #target="{ togglePopover }">
-      <TextInput
-        readonly
-        type="text"
-        icon-left="calendar"
-        :placeholder="placeholder"
-        :value="dateValue && formatter ? formatDates(dateValue) : dateValue"
-        @focus="!readonly ? togglePopover() : null"
-        class="w-full"
-        :class="inputClass"
-        v-bind="$attrs"
-      />
+      <div class="flex flex-col space-y-1.5">
+        <label v-if="props.label" class="block text-xs text-ink-gray-5">
+          {{ props.label }}
+        </label>
+        <TextInput
+          readonly
+          type="text"
+          :placeholder="placeholder"
+          :value="dateValue && formatter ? formatDates(dateValue) : dateValue"
+          @focus="!readonly ? togglePopover() : null"
+          class="w-full"
+          :class="inputClass"
+          v-bind="$attrs"
+        >
+          <template #prefix v-if="$slots.prefix">
+            <slot name="prefix" />
+          </template>
+        </TextInput>
+      </div>
     </template>
 
     <template #body="{ togglePopover }">
@@ -120,15 +129,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
-import { Button } from '../Button'
 import { Popover } from '../Popover'
-import FeatherIcon from '../FeatherIcon.vue'
 import { TextInput } from '../TextInput'
 
-import { getDate, getDateValue } from './utils'
 import { useDatePicker } from './useDatePicker'
+import { getDate, getDateValue } from './utils'
 
 import type { DatePickerEmits, DatePickerProps } from './types'
 
@@ -161,8 +168,8 @@ const dateValue = computed(() => {
   return props.value ? props.value : props.modelValue
 })
 
-const fromDate = ref<string>(dateValue.value ? dateValue.value[0] : '')
-const toDate = ref<string>(dateValue.value ? dateValue.value[1] : '')
+const fromDate = ref<string>('')
+const toDate = ref<string>('')
 
 function handleDateClick(date: Date) {
   if (fromDate.value && toDate.value) {
@@ -215,13 +222,15 @@ function isInRange(date: Date) {
   return date >= getDate(fromDate.value) && date <= getDate(toDate.value)
 }
 
-function formatDates(value: string) {
-  if (!value) {
-    return ''
+function formatDates(value: string | string[]) {
+  if (!value) return ''
+
+  if (typeof value === 'string') {
+    value = value.split(',')
   }
-  const values = value.split(',')
+
   return props.formatter
-    ? props.formatter(values[0]) + ' to ' + props.formatter(values[1])
+    ? props.formatter(value[0]) + ' to ' + props.formatter(value[1])
     : value
 }
 
@@ -231,5 +240,22 @@ function clearDates() {
   selectDates()
 }
 
-onMounted(() => selectCurrentMonthYear())
+const popoverRef = ref<InstanceType<typeof Popover>>()
+
+onMounted(() => {
+  let dates: string | string[] | undefined =
+    typeof dateValue?.value === 'string'
+      ? dateValue.value.split(',')
+      : dateValue.value
+  fromDate.value = dates?.[0] || ''
+  toDate.value = dates?.[1] || ''
+
+  selectCurrentMonthYear()
+})
+
+defineExpose({
+  open: () => {
+    popoverRef.value?.open()
+  },
+})
 </script>
