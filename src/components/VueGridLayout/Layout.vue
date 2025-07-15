@@ -48,7 +48,7 @@ const layoutReady = ref(false)
 const options = reactive({
   colNum: props.cols || 12,
   margin: [0, 0],
-  rowHeight: 52,
+  rowHeight: props.rowHeight || 52,
   isDraggable: computed(() => !props.disabled),
   isResizable: computed(() => !props.disabled),
   responsive: true,
