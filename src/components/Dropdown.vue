@@ -54,7 +54,7 @@
                 <FeatherIcon
                   v-if="item.icon && typeof item.icon === 'string'"
                   :name="item.icon"
-                  class="mr-2 h-4 w-4 flex-shrink-0"
+                  class="mr-2 h-4 w-4 flex-shrink-0 "
                   aria-hidden="true"
                 />
                 <component
@@ -190,8 +190,8 @@ const getItemClasses = (theme: Theme, active: boolean) => {
   const textClasses = {
     gray: 'text-ink-gray-6',
     blue: 'text-ink-blue-3',
-    green: 'text-green-800',
-    red: 'text-red-700',
+    green: 'text-ink-green-3',
+    red: 'text-ink-red-3',
   }[theme]
 
   const hoverClasses = active
@@ -199,7 +199,7 @@ const getItemClasses = (theme: Theme, active: boolean) => {
         gray: 'bg-surface-gray-3',
         blue: 'bg-blue-100',
         green: 'bg-green-100',
-        red: 'bg-red-100',
+        red: 'bg-surface-red-3',
       }[theme]
     : ''
 
