@@ -5,11 +5,7 @@
     :style="$attrs.style"
     v-if="editor"
   >
-    <TextEditorBubbleMenu
-      :buttons="bubbleMenu"
-      :options="bubbleMenuOptions"
-      :always="showBubbleMenuAlways"
-    />
+    <TextEditorBubbleMenu :buttons="bubbleMenu" :options="bubbleMenuOptions" />
     <TextEditorFixedMenu
       class="w-full overflow-x-auto rounded-t-lg border border-outline-gray-modals"
       :buttons="fixedMenu"
@@ -97,10 +93,6 @@ export default {
     bubbleMenuOptions: {
       type: Object,
       default: () => ({}),
-    },
-    showBubbleMenuAlways: {
-      type: Boolean,
-      default: false,
     },
     fixedMenu: {
       type: [Boolean, Array],
@@ -359,7 +351,7 @@ img.ProseMirror-selectednode {
     > label {
       flex: 0 0 auto;
       margin-right: 0.5rem;
-      margin-top: 0.5rem;
+      margin-top: 0.25rem;
       height: 1.5em;
       display: flex;
       align-items: center;
@@ -369,6 +361,10 @@ img.ProseMirror-selectednode {
     > div {
       flex: 1 1 auto;
       margin-bottom: 0;
+
+      > p {
+        margin: 0.25rem 0;
+      }
     }
   }
 
