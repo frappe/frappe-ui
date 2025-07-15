@@ -19,14 +19,14 @@ import { createEditorButton } from './utils'
 import { isTextSelection } from '@tiptap/core'
 import Menu from './Menu.vue'
 
-const showAlways = ({ state, from, to }) => {
+const showAlways = ({ state, from, to, view }) => {
   // Adapated from official Tiptap plugin; removed constraints for isEditable and focus
   const { doc, selection } = state
   const { empty } = selection
   const isEmptyTextBlock =
     !doc.textBetween(from, to).length && isTextSelection(state.selection)
 
-  return !empty && !isEmptyTextBlock
+  return !empty && !isEmptyTextBlock && (!view.editable || view.hasFocus())
 }
 export default {
   name: 'TextEditorBubbleMenu',
