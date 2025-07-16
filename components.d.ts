@@ -110,6 +110,7 @@ declare module 'vue' {
     ListRowItem: typeof import('./src/components/ListView/ListRowItem.vue')['default']
     ListRows: typeof import('./src/components/ListView/ListRows.vue')['default']
     ListSelectBanner: typeof import('./src/components/ListView/ListSelectBanner.vue')['default']
+    ListTask: typeof import('./src/components/TextEditor/icons/list-task.vue')['default']
     ListUnordered: typeof import('./src/components/TextEditor/icons/list-unordered.vue')['default']
     ListView: typeof import('./src/components/ListView/ListView.vue')['default']
     'ListView.story': typeof import('./src/components/ListView/ListView.story.vue')['default']
