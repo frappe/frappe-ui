@@ -48,6 +48,8 @@ import VideoExtension from './video-extension'
 import LinkExtension from './link-extension'
 import Typography from '@tiptap/extension-typography'
 import TextStyle from '@tiptap/extension-text-style'
+import TaskItem from '@tiptap/extension-task-item'
+import TaskList from '@tiptap/extension-task-list'
 import NamedColorExtension from './extensions/color'
 import NamedHighlightExtension from './extensions/highlight'
 import { common, createLowlight } from 'lowlight'
@@ -118,7 +120,7 @@ watch(
         editor.value.commands.setContent(val)
       }
     }
-  },
+  }
 )
 
 watch(
@@ -127,7 +129,7 @@ watch(
     if (editor.value) {
       editor.value.setEditable(value)
     }
-  },
+  }
 )
 
 watch(
@@ -139,7 +141,7 @@ watch(
       })
     }
   },
-  { deep: true },
+  { deep: true }
 )
 
 onMounted(() => {
@@ -162,6 +164,10 @@ onMounted(() => {
       }),
       Table.configure({
         resizable: true,
+      }),
+      TaskList,
+      TaskItem.configure({
+        nested: true,
       }),
       TableRow,
       TableHeader,
@@ -232,7 +238,7 @@ onBeforeUnmount(() => {
 
 provide(
   'editor',
-  computed(() => editor.value),
+  computed(() => editor.value)
 )
 
 defineExpose({
