@@ -444,21 +444,37 @@
       "title": "Dropdown",
       "layout": {
         "type": "grid",
-        "width": 300
+        "width": "200px"
       },
       "docsOnly": false,
       "variants": [
         {
           "id": "src-components-dropdown-dropdown-story-vue-0",
-          "title": "Basic"
+          "title": "Default"
         },
         {
           "id": "src-components-dropdown-dropdown-story-vue-1",
-          "title": "Button prop"
+          "title": "With Custom Button"
         },
         {
           "id": "src-components-dropdown-dropdown-story-vue-2",
-          "title": "Custom Button and Groups"
+          "title": "With Groups"
+        },
+        {
+          "id": "src-components-dropdown-dropdown-story-vue-3",
+          "title": "Right Aligned"
+        },
+        {
+          "id": "src-components-dropdown-dropdown-story-vue-4",
+          "title": "Center Aligned"
+        },
+        {
+          "id": "src-components-dropdown-dropdown-story-vue-5",
+          "title": "With Submenus"
+        },
+        {
+          "id": "src-components-dropdown-dropdown-story-vue-6",
+          "title": "With Nested Submenus"
         }
       ],
       "relativePath": "src/components/Dropdown/Dropdown.story.vue",
