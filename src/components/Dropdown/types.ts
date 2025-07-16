@@ -8,6 +8,7 @@ export type DropdownOption = {
   onClick?: () => void
   route?: RouterLinkProps['to']
   condition?: () => boolean
+  submenu?: DropdownOptions
 }
 
 export type DropdownGroupOption = {
