@@ -28,14 +28,16 @@
               </button>
             </template>
             <template #body="{ close }">
-              <ul class="rounded bg-surface-white p-1 shadow-md mt-1">
+              <ul
+                class="p-1.5 mt-2 min-w-40 rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
+              >
                 <li
                   class="w-full"
                   v-for="option in button"
                   v-show="option.isDisabled ? !option.isDisabled(editor) : true"
                 >
                   <button
-                    class="w-full h-7 rounded px-2 py-1 text-left text-base hover:bg-surface-menu-bar flex items-center gap-2"
+                    class="w-full h-7 rounded px-2 text-base flex items-center gap-2 hover:bg-surface-gray-3"
                     @click="
                       () => {
                         onButtonClick(option)
@@ -46,9 +48,13 @@
                     <component
                       v-if="option.icon"
                       :is="option.icon"
-                      class="size-4"
+                      class="size-4 flex-shrink-0 text-ink-gray-6"
                     />
-                    <template v-if="option.label">{{ option.label }}</template>
+                    <span
+                      v-if="option.label"
+                      class="whitespace-nowrap text-ink-gray-7"
+                      >{{ option.label }}</span
+                    >
                   </button>
                 </li>
               </ul>
