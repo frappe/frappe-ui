@@ -3,9 +3,9 @@ interface FrappeUIConfig {
   systemTimezone?: string | null
   localTimezone?: string | null
 
-  locale?: string
-  precision?: number
-  currency?: string
+  userLocale?: string
+  defaultPrecision?: number
+  defaultCurrency?: string
   defaultDateFormat?: string // dayjs compatible format
   defaultTimeFormat?: string // dayjs compatible format
 
