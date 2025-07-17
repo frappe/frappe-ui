@@ -5,7 +5,7 @@ import {
   TITLE_BOTTOM,
   TITLE_HEIGHT,
 } from './eChartOptions'
-import { formatValue } from './helpers'
+import { formatNumber } from '@/utils/format'
 import { FunnelChartConfig } from './types'
 
 export default function getFunnelChartOptions(config: FunnelChartConfig) {
@@ -61,7 +61,7 @@ export default function getFunnelChartOptions(config: FunnelChartConfig) {
           lineHeight: 16,
           formatter: (params: any) => {
             const index = labels.indexOf(params.name)
-            const value = formatValue(values[index], 1, true)
+            const value = formatNumber(values[index], { compact: true })
             if (!config.showPercentages) {
               return value
             }
@@ -101,7 +101,7 @@ export default function getFunnelChartOptions(config: FunnelChartConfig) {
         const p = params as any
         const value = p.value
         const percentage = total > 0 ? (value / total) * 100 : 0
-        const formatted = isNaN(value) ? value : formatValue(value, 1, true)
+        const formatted = isNaN(value) ? value : formatNumber(value, { compact: true })
         const formattedPercentage = percentage.toFixed(0)
         return `
           <div class="flex items-center justify-between gap-5">
