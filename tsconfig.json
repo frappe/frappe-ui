@@ -30,7 +30,9 @@
     "frappe/**/*.vue",
     "frappe/index.js",
     "vitest.config.ts",
-    "vitest.setup.ts"
+    "vitest.setup.ts",
+    "auto-imports.d.ts",
+    "components.d.ts",
   ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
