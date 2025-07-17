@@ -10,7 +10,7 @@ type NumberFormatOptions = {
 
 export function formatNumber(value: number, options: NumberFormatOptions = {}) {
   if (isNaN(value) || value === null || value === undefined) {
-    throw new Error('Invalid value for formatting: ' + value)
+    return value
   }
 
   const {
