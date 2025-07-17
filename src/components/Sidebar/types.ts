@@ -3,6 +3,7 @@ import { RouteLocationRaw } from 'vue-router'
 export type SidebarHeaderProps = {
   title: string
   subtitle?: string
+  logo?: string
   menuItems?: {
     label: string
     icon: any // Icon component
