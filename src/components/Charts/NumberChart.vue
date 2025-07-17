@@ -10,7 +10,7 @@
       <div
         class="flex-1 flex-shrink-0 truncate text-[24px] font-semibold leading-10"
       >
-        {{ config.prefix }}{{ formatValue(config.value, 1, true)
+        {{ config.prefix }}{{ formatNumber(config.value, { compact: true })
         }}{{ config.suffix }}
       </div>
       <div
@@ -30,7 +30,7 @@
           {{ config.delta >= 0 ? '↑' : '↓' }}
         </span>
         <span>
-          {{ config.deltaPrefix }}{{ formatValue(config.delta, 1, true)
+          {{ config.deltaPrefix }}{{ formatNumber(config.delta, { compact: true })
           }}{{ config.deltaSuffix }}
         </span>
       </div>
@@ -40,7 +40,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { formatValue } from './helpers'
+import { formatNumber } from '@/utils/format';
 import { NumberChartConfig } from './types'
 
 const props = defineProps<{ config: NumberChartConfig }>()

@@ -1,4 +1,5 @@
-import { formatDate, formatLabel, formatValue, mergeDeep } from './helpers'
+import { formatNumber } from '@/utils/format'
+import { formatDate, formatLabel, mergeDeep } from './helpers'
 import { AxisChartConfig } from './types'
 
 export const PADDING_TOP = 0
@@ -58,7 +59,7 @@ export default function useEchartsOptions(config: AxisChartConfig) {
         if (!Array.isArray(params)) {
           const p = params as any
           const value = config.swapXY ? p.value[0] : p.value[1]
-          const formatted = isNaN(value) ? value : formatValue(value)
+          const formatted = isNaN(value) ? value : formatNumber(value)
           return `
                 <div class="flex items-center justify-between gap-5">
                   <div>${p.name}</div>
@@ -75,7 +76,7 @@ export default function useEchartsOptions(config: AxisChartConfig) {
               config.xAxis.type == 'time'
                 ? formatDate(xValue, undefined, config.xAxis.timeGrain)
                 : xValue
-            const formattedY = isNaN(yValue) ? yValue : formatValue(yValue)
+            const formattedY = isNaN(yValue) ? yValue : formatNumber(yValue)
             return `
               <div class="flex flex-col">
                 ${idx == 0 ? `<div>${formattedX}</div>` : ''}
@@ -189,7 +190,7 @@ function getXAxisOptions(config: AxisChartConfig) {
           show: false,
           alignWithLabel: true,
           formatter: function (value: number) {
-            return formatValue(value, 1, true)
+            return formatNumber(value, { compact: true })
           },
         },
         axisLabel: {
@@ -197,7 +198,7 @@ function getXAxisOptions(config: AxisChartConfig) {
           hideOverlap: true,
           margin: 8,
           formatter: function (value: number) {
-            return formatValue(value, 1, true)
+            return formatNumber(value, { compact: true })
           },
         },
       }
@@ -289,7 +290,7 @@ function getYAxisOptions(config: AxisChartConfig) {
           hideOverlap: true,
           margin: 8,
           formatter: function (value: number) {
-            return formatValue(value, 1, true)
+            return formatNumber(value, { compact: true })
           },
         },
         min: config.yAxis.yMin,
@@ -339,7 +340,7 @@ function getYAxisOptions(config: AxisChartConfig) {
       hideOverlap: true,
       margin: 8,
       formatter: function (value: number) {
-        return formatValue(value, 1, true)
+        return formatNumber(value, { compact: true })
       },
       // color: '#000',
     },

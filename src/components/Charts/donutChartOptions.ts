@@ -1,5 +1,5 @@
+import { formatNumber } from '@/utils/format'
 import { getTitleOptions } from './eChartOptions'
-import { formatValue } from './helpers'
 import { DonutChartConfig } from './types'
 
 export default function useDonutChartOptions(config: DonutChartConfig) {
@@ -120,7 +120,7 @@ export default function useDonutChartOptions(config: DonutChartConfig) {
         const p = params as any
         const value = p.value[1]
         const percentage = total > 0 ? (value / total) * 100 : 0
-        const formatted = isNaN(value) ? value : formatValue(value, 1, true)
+        const formatted = isNaN(value) ? value : formatNumber(value, { compact: true })
         const formattedPercentage = percentage.toFixed(0)
         return `
           <div class="flex items-center justify-between gap-5">

@@ -1,5 +1,6 @@
+import { formatNumber } from '@/utils/format'
 import useEchartsOptions from './eChartOptions'
-import { formatValue, mergeDeep } from './helpers'
+import { mergeDeep } from './helpers'
 import {
   AreaSeriesConfig,
   AxisChartConfig,
@@ -62,7 +63,7 @@ export default function useAxisChartOptions(config: AxisChartConfig) {
         position: labelPosition,
         formatter: (params: any) => {
           const _val = swapXY ? params.value?.[0] : params.value?.[1]
-          return formatValue(_val, 1, true)
+          return formatNumber(_val, { compact: true })
         },
         fontSize: 11,
       },

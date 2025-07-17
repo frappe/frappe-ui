@@ -7,39 +7,6 @@ export function formatLabel(name: string) {
     .join(' ')
 }
 
-export function formatValue(value: number, precision = 0, shorten = false) {
-  if (isNaN(value)) return value.toString()
-
-  let locale = 'en-US'
-
-  if (shorten) {
-    let formatted = new Intl.NumberFormat(locale, {
-      notation: 'compact',
-      maximumFractionDigits: precision,
-    }).format(value)
-
-    if (locale == 'en-IN') {
-      formatted = formatted.replace('T', 'K')
-    }
-
-    return formatted
-  } else {
-    precision = precision || guessPrecision(value)
-    return new Intl.NumberFormat(locale, {
-      minimumFractionDigits: precision,
-      maximumFractionDigits: precision,
-    }).format(value)
-  }
-}
-
-function guessPrecision(number: number) {
-  if (!number || isNaN(number)) return 0
-  const str = number.toString()
-  const decimalIndex = str.indexOf('.')
-  if (decimalIndex === -1) return 0
-  return Math.min(str.length - decimalIndex - 1, 2)
-}
-
 export type TimeGrain =
   | 'second'
   | 'minute'
