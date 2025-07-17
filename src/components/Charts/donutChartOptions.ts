@@ -1,4 +1,4 @@
-import { formatNumber } from '@/utils/format'
+import { formatNumber } from '../../utils/format'
 import { getTitleOptions } from './eChartOptions'
 import { DonutChartConfig } from './types'
 

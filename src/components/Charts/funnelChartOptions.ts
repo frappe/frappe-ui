@@ -5,7 +5,7 @@ import {
   TITLE_BOTTOM,
   TITLE_HEIGHT,
 } from './eChartOptions'
-import { formatNumber } from '@/utils/format'
+import { formatNumber } from '../../utils/format'
 import { FunnelChartConfig } from './types'
 
 export default function getFunnelChartOptions(config: FunnelChartConfig) {

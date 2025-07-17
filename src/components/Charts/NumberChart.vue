@@ -40,7 +40,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { formatNumber } from '@/utils/format';
+import { formatNumber } from '../../utils/format';
 import { NumberChartConfig } from './types'
 
 const props = defineProps<{ config: NumberChartConfig }>()

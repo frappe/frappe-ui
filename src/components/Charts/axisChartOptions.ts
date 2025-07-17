@@ -1,4 +1,4 @@
-import { formatNumber } from '@/utils/format'
+import { formatNumber } from '../../utils/format'
 import useEchartsOptions from './eChartOptions'
 import { mergeDeep } from './helpers'
 import {

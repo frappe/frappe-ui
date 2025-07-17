@@ -1,4 +1,4 @@
-import { formatNumber } from '@/utils/format'
+import { formatNumber } from '../../utils/format'
 import { formatDate, formatLabel, mergeDeep } from './helpers'
 import { AxisChartConfig } from './types'
 
