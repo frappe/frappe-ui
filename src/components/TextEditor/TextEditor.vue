@@ -11,11 +11,11 @@
       :buttons="fixedMenu"
     />
     <TextEditorFloatingMenu :buttons="floatingMenu" />
-    <slot name="top" />
+    <slot name="top" :editor />
     <slot name="editor" :editor="editor">
       <EditorContent :editor="editor" />
     </slot>
-    <slot name="bottom" />
+    <slot name="bottom" :editor />
   </div>
 </template>
 
@@ -48,6 +48,8 @@ import VideoExtension from './video-extension'
 import LinkExtension from './link-extension'
 import Typography from '@tiptap/extension-typography'
 import TextStyle from '@tiptap/extension-text-style'
+import TaskItem from '@tiptap/extension-task-item'
+import TaskList from '@tiptap/extension-task-list'
 import NamedColorExtension from './extensions/color'
 import NamedHighlightExtension from './extensions/highlight'
 import { common, createLowlight } from 'lowlight'
@@ -79,6 +81,7 @@ const props = withDefaults(defineProps<TextEditorProps>(), {
   placeholder: '',
   editorClass: '',
   editable: true,
+  autofocus: false,
   bubbleMenu: false,
   bubbleMenuOptions: () => ({}),
   fixedMenu: false,
@@ -117,7 +120,7 @@ watch(
         editor.value.commands.setContent(val)
       }
     }
-  },
+  }
 )
 
 watch(
@@ -126,7 +129,7 @@ watch(
     if (editor.value) {
       editor.value.setEditable(value)
     }
-  },
+  }
 )
 
 watch(
@@ -138,7 +141,7 @@ watch(
       })
     }
   },
-  { deep: true },
+  { deep: true }
 )
 
 onMounted(() => {
@@ -146,6 +149,7 @@ onMounted(() => {
     content: props.content || null,
     editorProps: editorProps.value,
     editable: props.editable,
+    autofocus: props.autofocus,
     extensions: [
       StarterKit.configure({
         ...props.starterkitOptions,
@@ -160,6 +164,10 @@ onMounted(() => {
       }),
       Table.configure({
         resizable: true,
+      }),
+      TaskList,
+      TaskItem.configure({
+        nested: true,
       }),
       TableRow,
       TableHeader,
@@ -230,7 +238,7 @@ onBeforeUnmount(() => {
 
 provide(
   'editor',
-  computed(() => editor.value),
+  computed(() => editor.value)
 )
 
 defineExpose({
@@ -300,6 +308,44 @@ img.ProseMirror-selectednode {
   width: 4px;
   background-color: theme('colors.blue.200');
   pointer-events: none;
+}
+
+.ProseMirror ul[data-type='taskList'] {
+  list-style: none;
+  padding: 0;
+
+  li {
+    align-items: flex-start;
+    display: flex;
+    margin: 0;
+
+    > label {
+      flex: 0 0 auto;
+      margin-right: 0.5rem;
+      margin-top: 0.25rem;
+      height: 1.5em;
+      display: flex;
+      align-items: center;
+      user-select: none;
+    }
+
+    > div {
+      flex: 1 1 auto;
+      margin-bottom: 0;
+
+      > p {
+        margin: 0.25rem 0;
+      }
+    }
+  }
+
+  input[type='checkbox'] {
+    cursor: pointer;
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    color: theme('colors.gray.900');
+  }
 }
 
 .resize-cursor {

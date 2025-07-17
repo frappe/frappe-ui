@@ -28,14 +28,16 @@
               </button>
             </template>
             <template #body="{ close }">
-              <ul class="rounded border bg-surface-white p-1 shadow-md">
+              <ul
+                class="p-1.5 mt-2 min-w-40 rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
+              >
                 <li
                   class="w-full"
                   v-for="option in button"
                   v-show="option.isDisabled ? !option.isDisabled(editor) : true"
                 >
                   <button
-                    class="w-full rounded px-2 py-1 text-left text-base hover:bg-surface-menu-bar"
+                    class="w-full h-7 rounded px-2 text-base flex items-center gap-2 hover:bg-surface-gray-3"
                     @click="
                       () => {
                         onButtonClick(option)
@@ -43,7 +45,16 @@
                       }
                     "
                   >
-                    {{ option.label }}
+                    <component
+                      v-if="option.icon"
+                      :is="option.icon"
+                      class="size-4 flex-shrink-0 text-ink-gray-6"
+                    />
+                    <span
+                      v-if="option.label"
+                      class="whitespace-nowrap text-ink-gray-7"
+                      >{{ option.label }}</span
+                    >
                   </button>
                 </li>
               </ul>
@@ -54,11 +65,12 @@
           <template v-slot="componentSlotProps">
             <button
               class="flex rounded p-1 text-ink-gray-8 transition-colors"
-              :class="
+              :class="[
                 button.isActive(editor) || componentSlotProps?.isActive
-                  ? 'bg-surface-gray-2'
-                  : 'hover:bg-surface-gray-2'
-              "
+                  ? 'bg-surface-gray-3'
+                  : 'hover:bg-surface-gray-2',
+                button.class,
+              ]"
               @click="
                 componentSlotProps?.onClick
                   ? componentSlotProps.onClick(button)
