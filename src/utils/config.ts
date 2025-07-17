@@ -3,6 +3,10 @@ interface FrappeUIConfig {
   systemTimezone?: string | null
   localTimezone?: string | null
 
+  locale?: string
+  precision?: number
+  currency?: string
+
   // Resource fetcher function
   resourceFetcher?: (options: any) => Promise<any>
 
