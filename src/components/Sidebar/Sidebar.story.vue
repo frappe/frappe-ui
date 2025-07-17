@@ -20,6 +20,7 @@ const crmSidebar = reactive({
   header: {
     title: 'Frappe CRM',
     subtitle: 'Jane Doe',
+    logo: 'https://raw.githubusercontent.com/frappe/crm/develop/.github/logo.svg',
     menuItems: [
       { label: 'Toggle Theme', icon: Moon, onClick: toggleTheme },
       { label: 'Help', to: '/help', icon: Settings, onClick: () => alert('Help clicked!') },
