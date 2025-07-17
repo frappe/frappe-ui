@@ -6,6 +6,8 @@ interface FrappeUIConfig {
   locale?: string
   precision?: number
   currency?: string
+  defaultDateFormat?: string // dayjs compatible format
+  defaultTimeFormat?: string // dayjs compatible format
 
   // Resource fetcher function
   resourceFetcher?: (options: any) => Promise<any>
