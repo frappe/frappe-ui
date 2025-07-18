@@ -12,7 +12,7 @@
     <slot>
       <div class="w-full py-1.5 pr-2">
         <component
-          v-if="list.slots['group-header']"
+          v-if="list?.slots['group-header']"
           :is="list.slots['group-header']"
           v-bind="{ group }"
         />
@@ -24,18 +24,18 @@
   </div>
   <div class="mx-2 h-px border-t border-outline-gray-modals"></div>
 </template>
-<script setup>
-import { inject } from 'vue'
-import DownSolid from '../../icons/DownSolid.vue'
+<script setup lang="ts">
+import { ComputedRef, inject } from 'vue';
+import DownSolid from '../../icons/DownSolid.vue';
+import type { GroupedRow, ListContext } from './types';
 
-const props = defineProps({
-  group: {
-    type: Object,
-    required: true,
-  },
-})
+interface ListGroupHeaderProps {
+  group: GroupedRow
+}
 
-const list = inject('list')
+const props = defineProps<ListGroupHeaderProps>()
+
+const list = inject<ComputedRef<ListContext>>('list')
 
 function toggleGroup() {
   if (props.group.collapsed == null) {
