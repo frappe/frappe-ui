@@ -1,6 +1,6 @@
 import { Node, mergeAttributes, Editor } from '@tiptap/core'
 import { Node as ProseMirrorNode } from '@tiptap/pm/model'
-import { EditorView } from 'prosemirror-view'
+import { EditorView } from '@tiptap/pm/view'
 import { UploadedFile } from '../../utils/useFileUpload'
 
 export interface VideoOptions {

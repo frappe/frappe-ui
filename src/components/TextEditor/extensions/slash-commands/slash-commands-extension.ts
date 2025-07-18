@@ -1,5 +1,5 @@
 import { Editor, Range } from '@tiptap/core'
-import { PluginKey } from 'prosemirror-state'
+import { PluginKey } from '@tiptap/pm/state'
 import {
   createSuggestionExtension,
   type BaseSuggestionItem,
