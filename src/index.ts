@@ -68,6 +68,7 @@ export { default as CommandPaletteItem } from './components/CommandPalette/Comma
 export { default as ListFilter } from './components/ListFilter/ListFilter.vue'
 export { default as Calendar } from './components/Calendar/Calendar.vue'
 export { default as NestedPopover } from './components/ListFilter/NestedPopover.vue'
+export { default as KeyboardShortcut } from './components/KeyboardShortcut.vue'
 export * from './components/CircularProgressBar'
 export * from './components/Tree'
 export { default as FrappeUIProvider } from './components/Provider/FrappeUIProvider.vue'

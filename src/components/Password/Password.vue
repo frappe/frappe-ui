@@ -45,18 +45,11 @@ import LucideEyeOff from '~icons/lucide/eye-off'
 import KeyboardShortcut from '../KeyboardShortcut.vue'
 import FormControl from '../FormControl/FormControl.vue'
 import Tooltip from '../Tooltip/Tooltip.vue'
+import type { PasswordProps } from './types'
 import { ref, computed } from 'vue'
 
-const props = defineProps({
-  modelValue: {
-    type: String,
-    default: '',
-  },
-  value: {
-    type: String,
-    default: '',
-  },
-})
+const props = defineProps<PasswordProps>()
+
 const show = ref(false)
 const showEye = computed(() => {
   let v = props.modelValue || props.value
