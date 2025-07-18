@@ -23,7 +23,8 @@
     </template>
     <template #body="{ placement }">
       <div
-        class="sfd mt-2 min-w-40 max-h-72 overflow-hidden overflow-y-auto divide-y divide-outline-gray-modals rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none [&>div]:focus-visible:ring-0"
+        ref="container"
+        class="mt-2 min-w-40 max-h-72 overflow-hidden overflow-y-auto divide-y divide-outline-gray-modals rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none [&>div]:focus-visible:ring-0"
         :class="{
           'mt-2': ['bottom', 'left', 'right'].includes(placement),
           'ml-2': placement == 'right-start',
@@ -81,7 +82,7 @@ const emitUpdate = (value: string | null): void => {
 }
 
 const timeValue = computed<string>(() => {
-let time = props.value || props.modelValue
+  let time = props.value || props.modelValue
 
   if (!time) return ''
 
@@ -118,6 +119,7 @@ const options = computed<TimeOption[]>(() => {
 })
 
 const menu = ref<InstanceType<typeof MenuItems> | null>(null)
+const container = ref<HTMLElement | null>(null)
 
 watch(
   () => (menu.value as any)?.el,
@@ -184,6 +186,11 @@ function updateScroll(el: HTMLElement): void {
         inline: 'start',
         block: 'start',
       })
+
+      // Unscroll 5px from top
+      if (container.value) {
+        container.value.scrollTop -= 5
+      }
     }
   }
 }
