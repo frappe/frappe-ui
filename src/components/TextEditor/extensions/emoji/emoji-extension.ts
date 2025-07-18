@@ -1,4 +1,4 @@
-import { PluginKey } from 'prosemirror-state'
+import { PluginKey } from '@tiptap/pm/state'
 import {
   BaseSuggestionItem,
   createSuggestionExtension,
