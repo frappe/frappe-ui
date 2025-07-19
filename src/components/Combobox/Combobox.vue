@@ -44,7 +44,12 @@ interface ComboboxProps {
 }
 
 const props = defineProps<ComboboxProps>()
-const emit = defineEmits(['update:modelValue', 'update:selectedOption'])
+const emit = defineEmits([
+  'update:modelValue',
+  'update:selectedOption',
+  'focus',
+  'blur',
+])
 
 const searchTerm = ref(getDisplayValue(props.modelValue))
 const internalModelValue = ref(props.modelValue)
@@ -196,6 +201,14 @@ const handleOpenChange = (open: boolean) => {
     userHasTyped.value = false
   }
 }
+
+const handleFocus = (event: FocusEvent) => {
+  emit('focus', event)
+}
+
+const handleBlur = (event: FocusEvent) => {
+  emit('blur', event)
+}
 </script>
 
 <template>
@@ -215,6 +228,8 @@ const handleOpenChange = (open: boolean) => {
           <ComboboxInput
             :value="searchTerm"
             @input="handleInputChange"
+            @focus="handleFocus"
+            @blur="handleBlur"
             class="bg-transparent p-0 focus:outline-0 border-0 focus:border-0 focus:ring-0 text-base text-ink-gray-8 h-full placeholder:text-ink-gray-4 w-full"
             :placeholder="placeholder || ''"
             :disabled="disabled"

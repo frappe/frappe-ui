@@ -1,5 +1,5 @@
 import { Editor, Range } from '@tiptap/core'
-import { PluginKey } from 'prosemirror-state'
+import { PluginKey } from '@tiptap/pm/state'
 import {
   createSuggestionExtension,
   type BaseSuggestionItem,
@@ -11,6 +11,7 @@ import Heading2 from '~icons/lucide/heading-2'
 import Heading3 from '~icons/lucide/heading-3'
 import List from '~icons/lucide/list'
 import ListOrdered from '~icons/lucide/list-ordered'
+import ListTask from '~icons/lucide/list-checks'
 import Code from '~icons/lucide/code'
 import Quote from '~icons/lucide/quote'
 import Image from '~icons/lucide/image'
@@ -67,10 +68,17 @@ const getCommands = (): CommandItem[] => [
     },
   },
   {
-    title: 'Ordered List',
+    title: 'Numbered List',
     icon: ListOrdered,
     command: ({ editor, range }: CommandExecutionProps) => {
       editor.chain().focus().deleteRange(range).toggleOrderedList().run()
+    },
+  },
+  {
+    title: 'Task List',
+    icon: ListTask,
+    command: ({ editor, range }: CommandExecutionProps) => {
+      editor.chain().focus().deleteRange(range).toggleTaskList().run()
     },
   },
   {

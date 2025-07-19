@@ -47,6 +47,7 @@ export default {
           'Heading 3',
           'Bullet List',
           'Numbered List',
+          'Task List',
           'Blockquote',
           'Code',
           'Horizontal Rule',

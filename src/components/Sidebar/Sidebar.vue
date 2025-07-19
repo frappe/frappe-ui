@@ -8,8 +8,13 @@
       :isCollapsed="isCollapsed"
       :title="props.header.title"
       :subtitle="props.header.subtitle"
+      :logo="props.header.logo"
       :menu-items="props.header.menuItems"
-    />
+    >
+      <template #header-logo>
+        <slot name="logo"></slot>
+      </template>
+    </SidebarHeader>
 
     <SidebarSection
       v-for="section in props.sections"

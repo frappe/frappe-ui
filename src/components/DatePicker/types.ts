@@ -8,6 +8,7 @@ export interface DatePickerProps {
   placement?: string
   minDate?: string | Date
   maxDate?: string | Date
+  label?: string
 }
 
 export type DatePickerEmits = {

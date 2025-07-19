@@ -94,7 +94,7 @@ export default function useDonutChartOptions(config: DonutChartConfig) {
           },
           textStyle: {
             padding: [0, 0, 0, -5],
-            color: '#000',
+            color: 'var(--ink-gray-8)',
           },
           icon: 'circle',
           pageIcons: {
@@ -103,11 +103,11 @@ export default function useDonutChartOptions(config: DonutChartConfig) {
               'M 12 27 h -2 c -0.386 0 -0.738 -0.223 -0.904 -0.572 s -0.115 -0.762 0.13 -1.062 L 17.708 15 L 9.226 4.633 c -0.245 -0.299 -0.295 -0.712 -0.13 -1.062 S 9.614 3 10 3 h 2 c 0.3 0 0.584 0.135 0.774 0.367 l 9 11 c 0.301 0.369 0.301 0.898 0 1.267 l -9 11 C 12.584 26.865 12.3 27 12 27 Z',
             ],
           },
-          pageIconColor: '#64748B',
-          pageInactiveColor: '#C0CCDA',
+          pageIconColor: 'var(--ink-gray-6)',
+          pageInactiveColor: 'var(--ink-gray-4)',
           pageIconSize: 10,
           pageTextStyle: {
-            color: '#64748B',
+            color: 'var(--ink-gray-6)',
           },
           animationDurationUpdate: 300,
         }

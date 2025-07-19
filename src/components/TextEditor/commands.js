@@ -9,12 +9,14 @@ import Text from './icons/text.vue'
 import Bold from './icons/bold.vue'
 import Italic from './icons/italic.vue'
 import Underline from './icons/underline.vue'
+import Strikethrough from './icons/strikethrough.vue'
 import AlignCenter from './icons/align-center.vue'
 import AlignLeft from './icons/align-left.vue'
 import AlignRight from './icons/align-right.vue'
 import FontColor from './icons/font-color.vue'
 import ListOrdered from './icons/list-ordered.vue'
 import ListUnordered from './icons/list-unordered.vue'
+import ListTask from './icons/list-task.vue'
 import DoubleQuotes from './icons/double-quotes-r.vue'
 import CodeView from './icons/code-view.vue'
 import Link from './icons/link.vue'
@@ -98,6 +100,12 @@ export default {
     action: (editor) => editor.chain().focus().toggleUnderline().run(),
     isActive: (editor) => editor.isActive('underline'),
   },
+  Strikethrough: {
+    label: 'Strikethrough',
+    icon: Strikethrough,
+    action: (editor) => editor.chain().focus().toggleStrike().run(),
+    isActive: (editor) => editor.isActive('strike'),
+  },
   'Bullet List': {
     label: 'Bullet List',
     icon: ListUnordered,
@@ -109,6 +117,12 @@ export default {
     icon: ListOrdered,
     action: (editor) => editor.chain().focus().toggleOrderedList().run(),
     isActive: (editor) => editor.isActive('orderedList'),
+  },
+  'Task List': {
+    label: 'Task List',
+    icon: ListTask,
+    action: (editor) => editor.chain().focus().toggleTaskList().run(),
+    isActive: (editor) => editor.isActive('taskList'),
   },
   'Align Center': {
     label: 'Align Center',

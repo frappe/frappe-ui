@@ -4,7 +4,7 @@ import Suggestion, {
   SuggestionOptions,
   SuggestionProps,
 } from '@tiptap/suggestion'
-import { PluginKey } from 'prosemirror-state'
+import { PluginKey } from '@tiptap/pm/state'
 import tippy, { Instance as TippyInstance, Props as TippyProps } from 'tippy.js'
 import { Component as VueComponent } from 'vue'
 

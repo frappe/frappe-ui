@@ -72,6 +72,9 @@ export * from './components/Tree'
 export { default as FrappeUIProvider } from './components/Provider/FrappeUIProvider.vue'
 export { default as Sidebar } from './components/Sidebar/Sidebar.vue'
 
+// grid layout
+export { default as GridLayout } from './components/VueGridLayout/Layout.vue'
+
 // chart components
 export { default as AxisChart } from './components/Charts/AxisChart.vue'
 export { default as NumberChart } from './components/Charts/NumberChart.vue'
@@ -90,6 +93,7 @@ export { default as fileToBase64 } from './utils/file-to-base64'
 export { default as FileUploadHandler } from './utils/fileUploadHandler'
 export { usePageMeta } from './utils/pageMeta'
 export { dayjsLocal, dayjs } from './utils/dayjs'
+export * from './utils/useFileUpload'
 
 // data-fetching, resources
 export {

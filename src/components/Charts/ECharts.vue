@@ -56,7 +56,7 @@ watch(
   ></div>
   <div
     v-show="error"
-    class="flex h-full w-full items-center justify-center text-center text-red-500"
+    class="flex h-full w-full items-center justify-center text-center text-ink-red-3"
   >
     Error: {{ error }}
   </div>
