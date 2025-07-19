@@ -6,5 +6,26 @@
 // biome-ignore lint: disable
 export {}
 declare global {
-
+  const LucideArchive: typeof import('~icons/lucide/archive')['default']
+  const LucideBriefcase: typeof import('~icons/lucide/briefcase')['default']
+  const LucideCircle: typeof import('~icons/lucide/circle')['default']
+  const LucideCopy: typeof import('~icons/lucide/copy')['default']
+  const LucideDownload: typeof import('~icons/lucide/download')['default']
+  const LucideEdit: typeof import('~icons/lucide/edit')['default']
+  const LucideEdit2: typeof import('~icons/lucide/edit2')['default']
+  const LucideFile: typeof import('~icons/lucide/file')['default']
+  const LucideFilePlus: typeof import('~icons/lucide/file-plus')['default']
+  const LucideFileText: typeof import('~icons/lucide/file-text')['default']
+  const LucideFolderPlus: typeof import('~icons/lucide/folder-plus')['default']
+  const LucideLink: typeof import('~icons/lucide/link')['default']
+  const LucideMail: typeof import('~icons/lucide/mail')['default']
+  const LucideMoreHorizontal: typeof import('~icons/lucide/more-horizontal')['default']
+  const LucideNote: typeof import('~icons/lucide/note')['default']
+  const LucidePlus: typeof import('~icons/lucide/plus')['default']
+  const LucideSearch: typeof import('~icons/lucide/search')['default']
+  const LucideSettings: typeof import('~icons/lucide/settings')['default']
+  const LucideShare: typeof import('~icons/lucide/share')['default']
+  const LucideShield: typeof import('~icons/lucide/shield')['default']
+  const LucideTask: typeof import('~icons/lucide/task')['default']
+  const LucideTrash2: typeof import('~icons/lucide/trash2')['default']
 }

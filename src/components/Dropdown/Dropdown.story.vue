@@ -5,12 +5,12 @@ import { Button } from '../Button'
 const actions = [
   {
     label: 'Edit',
-    icon: 'edit',
+    icon: LucideEdit,
     onClick: () => console.log('Edit clicked'),
   },
   {
     label: 'Delete',
-    icon: 'trash-2',
+    icon: LucideTrash2,
     onClick: () => console.log('Delete clicked'),
   },
 ]
@@ -21,42 +21,42 @@ const groupedActions = [
     items: [
       {
         label: 'Edit',
-        icon: 'edit',
+        icon: LucideEdit,
         onClick: () => console.log('Edit clicked'),
       },
       {
         label: 'Duplicate',
-        icon: 'copy',
+        icon: LucideCopy,
         onClick: () => console.log('Duplicate clicked'),
       },
       {
         label: 'More Actions',
-        icon: 'more-horizontal',
+        icon: LucideMoreHorizontal,
         submenu: [
           {
             label: 'Archive',
-            icon: 'archive',
+            icon: LucideArchive,
             onClick: () => console.log('Archive clicked'),
           },
           {
             label: 'Export',
-            icon: 'download',
+            icon: LucideDownload,
             submenu: [
               {
                 label: 'Export as PDF',
-                icon: 'file-text',
+                icon: LucideFileText,
                 onClick: () => console.log('Export as PDF clicked'),
               },
               {
                 label: 'Export as CSV',
-                icon: 'file',
+                icon: LucideFile,
                 onClick: () => console.log('Export as CSV clicked'),
               },
             ],
           },
           {
             label: 'Share',
-            icon: 'share',
+            icon: LucideShare,
             onClick: () => console.log('Share clicked'),
           },
         ],
@@ -68,7 +68,7 @@ const groupedActions = [
     items: [
       {
         label: 'Delete',
-        icon: 'trash-2',
+        icon: LucideTrash2,
         onClick: () => console.log('Delete clicked'),
       },
     ],
@@ -78,19 +78,19 @@ const groupedActions = [
 const submenuActions = [
   {
     label: 'New',
-    icon: 'plus',
+    icon: LucidePlus,
     submenu: [
       {
         group: 'Documents',
         items: [
           {
             label: 'New Document',
-            icon: 'file-plus',
+            icon: LucideFilePlus,
             onClick: () => console.log('New Document clicked'),
           },
           {
             label: 'New Template',
-            icon: 'file-text',
+            icon: LucideFileText,
             onClick: () => console.log('New Template clicked'),
           },
         ],
@@ -100,12 +100,12 @@ const submenuActions = [
         items: [
           {
             label: 'New Folder',
-            icon: 'folder-plus',
+            icon: LucideFolderPlus,
             onClick: () => console.log('New Folder clicked'),
           },
           {
             label: 'New Project',
-            icon: 'briefcase',
+            icon: LucideBriefcase,
             onClick: () => console.log('New Project clicked'),
           },
         ],
@@ -114,21 +114,21 @@ const submenuActions = [
   },
   {
     label: 'Edit',
-    icon: 'edit',
+    icon: LucideEdit,
     onClick: () => console.log('Edit clicked'),
   },
   {
     label: 'Share',
-    icon: 'share',
+    icon: LucideShare,
     submenu: [
       {
         label: 'Share with Link',
-        icon: 'link',
+        icon: LucideLink,
         onClick: () => console.log('Share with Link clicked'),
       },
       {
         label: 'Share with Email',
-        icon: 'mail',
+        icon: LucideMail,
         onClick: () => console.log('Share with Email clicked'),
       },
       {
@@ -136,12 +136,12 @@ const submenuActions = [
         items: [
           {
             label: 'Share Settings',
-            icon: 'settings',
+            icon: LucideSettings,
             onClick: () => console.log('Share Settings clicked'),
           },
           {
             label: 'Permission Management',
-            icon: 'shield',
+            icon: LucideShield,
             onClick: () => console.log('Permission Management clicked'),
           },
         ],
