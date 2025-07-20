@@ -1,8 +1,8 @@
 <template>
   <DropdownMenuRoot v-slot="{ open }">
     <DropdownMenuTrigger as-child>
-      <slot v-if="$slots.default" v-bind="{ open }" />
-      <Button v-else :active="false" v-bind="button">
+      <slot v-if="$slots.default" v-bind="{ open, ...attrs }" />
+      <Button v-else :active="false" v-bind="{ ...button, ...attrs }">
         {{ button ? button?.label || null : 'Options' }}
       </Button>
     </DropdownMenuTrigger>
@@ -156,7 +156,7 @@ import {
 } from 'reka-ui'
 import { Button } from '../Button'
 import FeatherIcon from '../FeatherIcon.vue'
-import { computed } from 'vue'
+import { computed, useAttrs } from 'vue'
 import { useRouter } from 'vue-router'
 import type {
   DropdownProps,
@@ -165,7 +165,12 @@ import type {
   DropdownOptions,
 } from './types'
 
+defineOptions({
+  inheritAttrs: false,
+})
+
 const router = useRouter()
+const attrs = useAttrs()
 
 const props = withDefaults(defineProps<DropdownProps>(), {
   options: () => [],
