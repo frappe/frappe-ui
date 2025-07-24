@@ -3,7 +3,3 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-svg[data-lucide] * {
-	stroke-width: 1.5 !important;
-}

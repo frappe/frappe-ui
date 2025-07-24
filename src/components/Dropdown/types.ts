@@ -1,12 +1,9 @@
-import { FunctionalComponent } from 'vue'
 import { RouterLinkProps } from 'vue-router'
 import { ButtonProps } from '../Button'
 
-export type Icon = string | FunctionalComponent
-
 export type DropdownOption = {
   label: string
-  icon?: Icon
+  icon?: string | null
   component?: any
   onClick?: () => void
   route?: RouterLinkProps['to']

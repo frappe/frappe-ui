@@ -116,6 +116,8 @@ declare module 'vue' {
     'ListView.story': typeof import('./src/components/ListView/ListView.story.vue')['default']
     LoadingIndicator: typeof import('./src/components/LoadingIndicator.vue')['default']
     LoadingText: typeof import('./src/components/LoadingText.vue')['default']
+    LucideCalendar: typeof import('~icons/lucide/calendar')['default']
+    LucideChevronDown: typeof import('~icons/lucide/chevron-down')['default']
     LucideChevronRight: typeof import('~icons/lucide/chevron-right')['default']
     MentionList: typeof import('./src/components/TextEditor/MentionList.vue')['default']
     Menu: typeof import('./src/components/TextEditor/Menu.vue')['default']
