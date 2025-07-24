@@ -22,6 +22,8 @@
             close: closePopover,
             togglePopover,
             isOpen: isComboboxOpen,
+            selectedValue,
+            displayValue,
           }"
         >
           <div class="w-full space-y-1.5">
@@ -36,26 +38,28 @@
               <div class="flex items-center overflow-hidden">
                 <slot name="prefix" />
                 <span
-                  class="truncate text-base leading-5 text-ink-gray-8"
                   v-if="displayValue"
+                  class="truncate text-base leading-5 text-ink-gray-8"
                 >
                   {{ displayValue }}
                 </span>
-                <span class="text-base leading-5 text-ink-gray-4" v-else>
+                <span
+                  v-else
+                  class="truncate text-base leading-5 text-ink-gray-4"
+                >
                   {{ placeholder || '' }}
                 </span>
                 <slot name="suffix" />
               </div>
-              <FeatherIcon
-                name="chevron-down"
-                class="h-4 w-4 text-ink-gray-5"
+              <LucideChevronDown
+                class="size-4 text-ink-gray-5"
                 aria-hidden="true"
               />
             </button>
           </div>
         </slot>
       </template>
-      <template #body="{ isOpen, togglePopover }">
+      <template #body="{ isOpen, togglePopover, closePopover }">
         <div v-show="isOpen">
           <div
             class="relative mt-1 rounded-lg bg-surface-modal text-base shadow-2xl"
@@ -88,7 +92,10 @@
                       class="h-4 w-4 text-ink-gray-5"
                     />
                     <button v-else @click="clearAll">
-                      <FeatherIcon name="x" class="w-4 text-ink-gray-8" />
+                      <LucideX
+                        class="size-4 text-ink-gray-8"
+                        aria-hidden="true"
+                      />
                     </button>
                   </div>
                 </div>
@@ -133,17 +140,22 @@
                           name="item-prefix"
                           v-bind="{ active, selected, option }"
                         >
-                          <FeatherIcon
-                            name="check"
+                          <LucideCheck
                             v-if="isOptionSelected(option)"
-                            class="h-4 w-4 text-ink-gray-7"
+                            class="size-4 text-ink-gray-7"
+                            aria-hidden="true"
                           />
                           <div v-else class="h-4 w-4" />
                         </slot>
                       </div>
-                      <span class="flex-1 truncate text-ink-gray-7">
-                        {{ getLabel(option) }}
-                      </span>
+                      <slot
+                        name="item-label"
+                        v-bind="{ active, selected, option }"
+                      >
+                        <span class="flex-1 truncate text-ink-gray-7">
+                          {{ getLabel(option) }}
+                        </span>
+                      </slot>
                     </div>
 
                     <div
@@ -177,7 +189,10 @@
               v-if="$slots.footer || props.showFooter || multiple"
               class="border-t p-1"
             >
-              <slot name="footer" v-bind="{ togglePopover }">
+              <slot
+                name="footer"
+                v-bind="{ searchInput, togglePopover, close: closePopover }"
+              >
                 <div v-if="multiple" class="flex items-center justify-end">
                   <Button
                     v-if="!areAllOptionsSelected"
@@ -210,13 +225,12 @@ import {
   ComboboxOptions,
 } from '@headlessui/vue'
 import { computed, nextTick, ref, watch } from 'vue'
-import { Popover } from '../Popover'
 import { Button } from '../Button'
-import FeatherIcon from '../FeatherIcon.vue'
 import LoadingIndicator from '../LoadingIndicator.vue'
+import { Popover } from '../Popover'
 import type {
-  AutocompleteOptionGroup,
   AutocompleteOption,
+  AutocompleteOptionGroup,
   AutocompleteProps,
   Option,
 } from './types'
@@ -267,11 +281,12 @@ const allOptions = computed(() => {
 
 const sanitizeOptions = (options: AutocompleteOption[]) => {
   if (!options) return []
-  // in case the options are just values, convert them to objects
   return options.map((option) => {
+    if (!option) return option
+    // in case the option is just a value, convert it to an object
     return isOption(option)
-      ? option
-      : { label: option.toString(), value: option }
+      ? { ...option, label: getLabel(option) }
+      : { label: option, value: option }
   })
 }
 
@@ -323,6 +338,9 @@ const findOption = (option: AutocompleteOption) => {
 }
 
 const makeOption = (option: AutocompleteOption) => {
+  if (option === undefined || option === null) {
+    return undefined
+  }
   return isOption(option) ? option : { label: option, value: option }
 }
 
