@@ -651,6 +651,28 @@
       }
     },
     {
+      "id": "src-components-password-password-story-vue",
+      "title": "Password",
+      "layout": {
+        "width": 500,
+        "type": "grid"
+      },
+      "docsOnly": false,
+      "variants": [
+        {
+          "id": "_default",
+          "title": "default"
+        }
+      ],
+      "relativePath": "src/components/Password/Password.story.vue",
+      "supportPluginId": "vue3",
+      "treePath": [
+        "Password"
+      ],
+      "virtual": false,
+      "markdownFile": null
+    },
+    {
       "id": "src-components-popover-popover-story-vue",
       "title": "Popover",
       "layout": {
