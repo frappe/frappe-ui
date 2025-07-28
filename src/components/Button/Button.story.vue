@@ -9,6 +9,7 @@ const state = reactive({
   loadingText: null,
   disabled: false,
   link: null,
+  tooltip: 'Hover for more!',
 })
 const variants = ['solid', 'subtle', 'outline', 'ghost']
 const themes = ['gray', 'blue', 'green', 'red']
