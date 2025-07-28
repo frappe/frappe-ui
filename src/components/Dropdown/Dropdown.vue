@@ -227,8 +227,8 @@ const getTextColor = (item: DropdownItem) =>
   item.theme === 'red' ? 'text-ink-red-3' : 'text-ink-gray-7'
 const getBackgroundColor = (item: DropdownItem) =>
   item.theme === 'red'
-    ? 'focus:bg-surface-red-3 data-[highlighted]:bg-surface-red-3  data-[state=open]:bg-surface-gray-3'
-    : 'focus:bg-surface-gray-3 data-[highlighted]:bg-surface-gray-3 '
+    ? 'focus:bg-surface-red-3 data-[highlighted]:bg-surface-red-3 data-[state=open]:bg-surface-red-3'
+    : 'focus:bg-surface-gray-3 data-[highlighted]:bg-surface-gray-3 data-[state=open]:bg-surface-gray-3'
 const getSubmenuBackgroundColor = (item: DropdownItem) =>
   getBackgroundColor(item) +
   ' data-[state=open]:bg-surface-' +
