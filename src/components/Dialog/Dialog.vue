@@ -1,44 +1,17 @@
 <template>
-  <TransitionRoot
-    as="template"
-    :show="isOpen"
-    @after-leave="$emit('after-leave')"
-  >
-    <HDialog
-      as="div"
-      class="fixed inset-0 z-10 overflow-y-auto"
-      @close="!disableOutsideClickToClose && close()"
-    >
-      <div
-        class="flex min-h-screen flex-col items-center px-4 py-4 text-center"
-        :class="dialogPositionClasses"
+  <DialogRoot v-model:open="isOpen" @update:open="handleOpenChange">
+    <DialogPortal>
+      <DialogOverlay
+        class="fixed inset-0 bg-black-overlay-200 backdrop-filter backdrop-blur-[12px] overflow-y-auto dialog-overlay"
+        :data-dialog="options.title"
+        @after-leave="$emit('after-leave')"
       >
-        <TransitionChild
-          as="template"
-          enter="ease-out duration-150"
-          enter-from="opacity-0"
-          enter-to="opacity-100"
-          leave="ease-in duration-150"
-          leave-from="opacity-100"
-          leave-to="opacity-0"
+        <div
+          class="flex min-h-screen flex-col items-center px-4 py-4 text-center"
+          :class="dialogPositionClasses"
         >
-          <div
-            class="fixed inset-0 bg-black-overlay-200 transition-opacity dark:backdrop-filter dark:backdrop-blur-[1px]"
-            :data-dialog="options.title"
-          />
-        </TransitionChild>
-
-        <TransitionChild
-          as="template"
-          enter="ease-out duration-150"
-          enter-from="opacity-50 translate-y-2 scale-95"
-          enter-to="opacity-100 translate-y-0 scale-100"
-          leave="ease-in duration-150"
-          leave-from="opacity-100 translate-y-0 scale-100"
-          leave-to="opacity-50 translate-y-4 translate-y-4 scale-95"
-        >
-          <DialogPanel
-            class="my-8 inline-block w-full transform overflow-hidden rounded-xl bg-surface-modal text-left align-middle shadow-xl transition-all"
+          <DialogContent
+            class="my-8 inline-block w-full transform overflow-hidden rounded-xl bg-surface-modal text-left align-middle shadow-xl dialog-content"
             :class="{
               'max-w-7xl': options.size === '7xl',
               'max-w-6xl': options.size === '6xl',
@@ -52,6 +25,14 @@
               'max-w-sm': options.size === 'sm',
               'max-w-xs': options.size === 'xs',
             }"
+            @escape-key-down="close()"
+            @interact-outside="
+              (e: Event) => {
+                if (props.disableOutsideClickToClose) {
+                  e.preventDefault()
+                }
+              }
+            "
           >
             <slot name="body">
               <slot name="body-main">
@@ -83,35 +64,22 @@
                               </slot>
                             </DialogTitle>
                           </div>
-                          <Button variant="ghost" @click="close">
-                            <template #icon>
-                              <svg
-                                width="16"
-                                height="16"
-                                viewBox="0 0 16 16"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                                class="text-ink-gray-9"
-                              >
-                                <path
-                                  fill-rule="evenodd"
-                                  clip-rule="evenodd"
-                                  d="M12.8567 3.85355C13.052 3.65829 13.052 3.34171 12.8567 3.14645C12.6615 2.95118 12.3449 2.95118 12.1496 3.14645L8.00201 7.29405L3.85441 3.14645C3.65914 2.95118 3.34256 2.95118 3.1473 3.14645C2.95204 3.34171 2.95204 3.65829 3.1473 3.85355L7.29491 8.00116L3.14645 12.1496C2.95118 12.3449 2.95118 12.6615 3.14645 12.8567C3.34171 13.052 3.65829 13.052 3.85355 12.8567L8.00201 8.70827L12.1505 12.8567C12.3457 13.052 12.6623 13.052 12.8576 12.8567C13.0528 12.6615 13.0528 12.3449 12.8576 12.1496L8.70912 8.00116L12.8567 3.85355Z"
-                                  fill="currentColor"
-                                />
-                              </svg>
-                            </template>
-                          </Button>
+                          <DialogClose as-child>
+                            <Button variant="ghost" @click="close">
+                              <template #icon>
+                                <LucideX class="h-4 w-4 text-ink-gray-9" />
+                              </template>
+                            </Button>
+                          </DialogClose>
                         </div>
                       </slot>
 
                       <slot name="body-content">
-                        <p
-                          class="text-p-base text-ink-gray-7"
-                          v-if="options.message"
-                        >
-                          {{ options.message }}
-                        </p>
+                        <DialogDescription as-child v-if="options.message">
+                          <p class="text-p-base text-ink-gray-7">
+                            {{ options.message }}
+                          </p>
+                        </DialogDescription>
                       </slot>
                     </div>
                   </div>
@@ -136,25 +104,37 @@
                 </slot>
               </div>
             </slot>
-          </DialogPanel>
-        </TransitionChild>
-      </div>
-    </HDialog>
-  </TransitionRoot>
+          </DialogContent>
+        </div>
+      </DialogOverlay>
+    </DialogPortal>
+  </DialogRoot>
 </template>
 
 <script setup lang="ts">
 import {
-  DialogPanel,
+  DialogRoot,
+  DialogPortal,
+  DialogOverlay,
+  DialogContent,
   DialogTitle,
-  Dialog as HDialog,
-  TransitionChild,
-  TransitionRoot,
-} from '@headlessui/vue'
+  DialogDescription,
+  DialogClose,
+} from 'reka-ui'
 import { computed, reactive } from 'vue'
 import { Button } from '../Button'
 import FeatherIcon from '../FeatherIcon.vue'
-import type { DialogProps, DialogIcon } from './types'
+import type {
+  DialogProps,
+  DialogIcon,
+  DialogAction,
+  DialogActionContext,
+} from './types'
+
+// Type for dialog action with reactive loading state
+type ReactiveDialogAction = DialogAction & {
+  loading: boolean
+}
 
 const props = withDefaults(defineProps<DialogProps>(), {
   options: () => ({}),
@@ -167,7 +147,7 @@ const emit = defineEmits<{
   (event: 'after-leave'): void
 }>()
 
-const actions = computed(() => {
+const actions = computed((): ReactiveDialogAction[] => {
   let actions = props.options.actions
   if (!actions?.length) return []
 
@@ -183,12 +163,15 @@ const actions = computed(() => {
               if (action.onClick) {
                 // deprecated: uncomment this when we remove the backwards compatibility
                 // let context: DialogActionContext = { close }
-                let backwardsCompatibleContext = function () {
+                type BackwardsCompatibleDialogActionContext = (() => void) &
+                  DialogActionContext
+
+                let backwardsCompatibleContext = (() => {
                   console.warn(
-                    'Value passed to onClick is a context object. Please use context.close() instead of context() to close the dialog.'
+                    'Value passed to onClick is a context object. Please use context.close() instead of context() to close the dialog.',
                   )
                   close()
-                }
+                }) as BackwardsCompatibleDialogActionContext
                 backwardsCompatibleContext.close = close
                 await action.onClick(backwardsCompatibleContext)
               }
@@ -205,13 +188,17 @@ const isOpen = computed({
   get() {
     return props.modelValue
   },
-  set(val) {
+  set(val: boolean) {
     emit('update:modelValue', val)
     if (!val) {
       emit('close')
     }
   },
 })
+
+function handleOpenChange(open: boolean) {
+  isOpen.value = open
+}
 
 function close() {
   isOpen.value = false
@@ -229,31 +216,92 @@ const icon = computed(() => {
 
 const dialogPositionClasses = computed(() => {
   const position = props.options?.position || 'center'
-  return {
+  const classMap: Record<string, string> = {
     center: 'justify-center',
     top: 'pt-[20vh]',
-  }[position]
+  }
+  return classMap[position]
 })
 
 const dialogIconBgClasses = computed(() => {
   const appearance = icon.value?.appearance
   if (!appearance) return 'bg-surface-gray-2'
-  return {
+  const classMap: Record<string, string> = {
     warning: 'bg-surface-amber-2',
     info: 'bg-surface-blue-2',
     danger: 'bg-surface-red-2',
     success: 'bg-surface-green-2',
-  }[appearance]
+  }
+  return classMap[appearance]
 })
 
 const dialogIconClasses = computed(() => {
   const appearance = icon.value?.appearance
   if (!appearance) return 'text-ink-gray-5'
-  return {
+  const classMap: Record<string, string> = {
     warning: 'text-ink-amber-3',
     info: 'text-ink-blue-3',
     danger: 'text-ink-red-4',
     success: 'text-ink-green-3',
-  }[appearance]
+  }
+  return classMap[appearance]
 })
 </script>
+
+<style scoped>
+@keyframes dialog-overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes dialog-overlay-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes dialog-content-in {
+  from {
+    opacity: 0.5;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes dialog-content-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0.5;
+    transform: scale(0.98);
+  }
+}
+
+:global(.dialog-overlay[data-state='open']) {
+  animation: dialog-overlay-in 100ms ease-out;
+}
+
+:global(.dialog-overlay[data-state='closed']) {
+  animation: dialog-overlay-out 150ms ease-in;
+}
+
+:global(.dialog-content[data-state='open']) {
+  animation: dialog-content-in 100ms ease-out;
+}
+
+:global(.dialog-content[data-state='closed']) {
+  animation: dialog-content-out 150ms ease-in;
+}
+</style>
