@@ -424,11 +424,23 @@
       "variants": [
         {
           "id": "src-components-dialog-dialog-story-vue-0",
-          "title": "With options"
+          "title": "Basic Dialog with Actions"
         },
         {
           "id": "src-components-dialog-dialog-story-vue-1",
-          "title": "With slots"
+          "title": "Custom Content with Slots"
+        },
+        {
+          "id": "src-components-dialog-dialog-story-vue-2",
+          "title": "Different Sizes"
+        },
+        {
+          "id": "src-components-dialog-dialog-story-vue-3",
+          "title": "Disable Outside Click to Close"
+        },
+        {
+          "id": "src-components-dialog-dialog-story-vue-4",
+          "title": "Dialog with Interactive Components"
         }
       ],
       "relativePath": "src/components/Dialog/Dialog.story.vue",
