@@ -27,10 +27,10 @@ type DialogOptions = {
   position?: 'top' | 'center'
 }
 
-type DialogActionContext = {
+export type DialogActionContext = {
   close: () => void
 }
-type DialogAction = ButtonProps & {
+export type DialogAction = ButtonProps & {
   onClick?: (context: DialogActionContext) => void | Promise<void>
 }
 

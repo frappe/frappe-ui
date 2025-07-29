@@ -27,7 +27,7 @@
             }"
             @escape-key-down="close()"
             @interact-outside="
-              (e) => {
+              (e: Event) => {
                 if (props.disableOutsideClickToClose) {
                   e.preventDefault()
                 }
@@ -140,7 +140,17 @@ import {
 import { computed, reactive } from 'vue'
 import { Button } from '../Button'
 import FeatherIcon from '../FeatherIcon.vue'
-import type { DialogProps, DialogIcon } from './types'
+import type {
+  DialogProps,
+  DialogIcon,
+  DialogAction,
+  DialogActionContext,
+} from './types'
+
+// Type for dialog action with reactive loading state
+type ReactiveDialogAction = DialogAction & {
+  loading: boolean
+}
 
 const props = withDefaults(defineProps<DialogProps>(), {
   options: () => ({}),
@@ -153,11 +163,11 @@ const emit = defineEmits<{
   (event: 'after-leave'): void
 }>()
 
-const actions = computed(() => {
+const actions = computed((): ReactiveDialogAction[] => {
   let actions = props.options.actions
   if (!actions?.length) return []
 
-  return actions.map((action: any) => {
+  return actions.map((action) => {
     let _action = reactive({
       ...action,
       loading: false,
@@ -169,12 +179,15 @@ const actions = computed(() => {
               if (action.onClick) {
                 // deprecated: uncomment this when we remove the backwards compatibility
                 // let context: DialogActionContext = { close }
-                let backwardsCompatibleContext = function () {
+                type BackwardsCompatibleDialogActionContext = (() => void) &
+                  DialogActionContext
+
+                let backwardsCompatibleContext = (() => {
                   console.warn(
                     'Value passed to onClick is a context object. Please use context.close() instead of context() to close the dialog.',
                   )
                   close()
-                } as any
+                }) as BackwardsCompatibleDialogActionContext
                 backwardsCompatibleContext.close = close
                 await action.onClick(backwardsCompatibleContext)
               }
