@@ -11,6 +11,7 @@ const actions = [
   {
     label: 'Delete',
     icon: 'trash-2',
+    theme: 'red',
     onClick: () => console.log('Delete clicked'),
   },
 ]
@@ -69,6 +70,7 @@ const groupedActions = [
       {
         label: 'Delete',
         icon: 'trash-2',
+        theme: 'red',
         onClick: () => console.log('Delete clicked'),
       },
     ],
@@ -92,6 +94,12 @@ const submenuActions = [
             label: 'New Template',
             icon: 'file-text',
             onClick: () => console.log('New Template clicked'),
+          },
+          {
+            label: 'Delete',
+            icon: 'trash-2',
+            theme: 'red',
+            onClick: () => console.log('Delete clicked'),
           },
         ],
       },
