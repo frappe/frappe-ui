@@ -740,6 +740,28 @@
       "markdownFile": null
     },
     {
+      "id": "src-components-rating-rating-story-vue",
+      "title": "Rating",
+      "layout": {
+        "type": "grid",
+        "width": 300
+      },
+      "docsOnly": false,
+      "variants": [
+        {
+          "id": "src-components-rating-rating-story-vue-0",
+          "title": "default"
+        }
+      ],
+      "relativePath": "src/components/Rating/Rating.story.vue",
+      "supportPluginId": "vue3",
+      "treePath": [
+        "Rating"
+      ],
+      "virtual": false,
+      "markdownFile": null
+    },
+    {
       "id": "src-components-select-select-story-vue",
       "title": "Select",
       "layout": {
@@ -779,28 +801,6 @@
       "supportPluginId": "vue3",
       "treePath": [
         "Sidebar"
-      ],
-      "virtual": false,
-      "markdownFile": null
-    },
-    {
-      "id": "src-components-rating-rating-story-vue",
-      "title": "Rating",
-      "layout": {
-        "type": "grid",
-        "width": 300
-      },
-      "docsOnly": false,
-      "variants": [
-        {
-          "id": "src-components-rating-rating-story-vue-0",
-          "title": "default"
-        }
-      ],
-      "relativePath": "src/components/Rating/Rating.story.vue",
-      "supportPluginId": "vue3",
-      "treePath": [
-        "Rating"
       ],
       "virtual": false,
       "markdownFile": null
