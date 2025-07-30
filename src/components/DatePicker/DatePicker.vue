@@ -9,7 +9,7 @@
         <label v-if="props.label" class="block text-xs text-ink-gray-5">
           {{ props.label }}
         </label>
-         <TextInput
+        <TextInput
           readonly
           type="text"
           :placeholder="placeholder"
@@ -57,7 +57,7 @@
           <TextInput
             class="text-sm"
             type="text"
-            :value="dateValue"
+            :value="dateValue && formatter ? formatter(dateValue) : dateValue"
             @change="selectDate(getDate($event.target.value))"
           />
           <Button
