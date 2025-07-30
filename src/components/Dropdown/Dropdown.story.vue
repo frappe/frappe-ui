@@ -95,6 +95,12 @@ const submenuActions = [
             icon: 'file-text',
             onClick: () => console.log('New Template clicked'),
           },
+          {
+            label: 'Delete',
+            icon: 'trash-2',
+            theme: 'red',
+            onClick: () => console.log('Delete clicked'),
+          },
         ],
       },
       {
