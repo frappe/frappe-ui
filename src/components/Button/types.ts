@@ -13,6 +13,7 @@ export interface ButtonProps {
   icon?: string | Component
   iconLeft?: string | Component
   iconRight?: string | Component
+  tooltip?: string
   loading?: boolean
   loadingText?: string
   disabled?: boolean
