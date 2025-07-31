@@ -9,6 +9,7 @@ export type TreeOptions = {
   rowHeight?: string
   indentWidth?: string
   showIndentationGuides?: boolean
+  defaultCollapsed?: boolean
 }
 
 export interface TreeProps {
