@@ -75,6 +75,7 @@ const props = withDefaults(defineProps<TreeProps>(), {
     rowHeight: '25px',
     indentWidth: '20px',
     showIndentationGuides: true,
+    defaultCollapsed: true,
   }),
 })
 
@@ -96,7 +97,7 @@ const slots = defineSlots<{
   }
 }>()
 
-const isCollapsed = ref(true)
+const isCollapsed = ref(props.options.defaultCollapsed ?? true)
 
 const linePadding = ref('')
 
