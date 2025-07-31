@@ -1,4 +1,6 @@
-export function getGridTemplateColumns(columns, withCheckbox = true) {
+import { type ListColumn, type ColumnAlignment } from './types'
+
+export function getGridTemplateColumns(columns: ListColumn[], withCheckbox: boolean = true): string {
   let checkBoxWidth = withCheckbox ? '14px ' : ''
   let columnsWidth = columns
     .map((col) => {
@@ -12,7 +14,7 @@ export function getGridTemplateColumns(columns, withCheckbox = true) {
   return checkBoxWidth + columnsWidth
 }
 
-export const alignmentMap = {
+export const alignmentMap: Record<ColumnAlignment, string> = {
   left: 'justify-start',
   start: 'justify-start',
   center: 'justify-center',

@@ -1,19 +1,23 @@
 <template>
-  <div class="mb-5 mt-2" v-if="!group.collapsed">
+  <div v-if="list && !props.group.collapsed" class="mb-5 mt-2">
     <slot>
-      <ListRow v-for="row in group.rows" :key="row[list.rowKey]" :row="row" />
+      <ListRow
+        v-for="row in props.group.rows"
+        :key="row[list.rowKey]"
+        :row="row"
+      />
     </slot>
   </div>
 </template>
-<script setup>
-import ListRow from './ListRow.vue'
-import { inject } from 'vue'
+<script setup lang="ts">
+import { ComputedRef, inject } from 'vue';
+import ListRow from './ListRow.vue';
+import type { GroupedRow, ListContext } from './types';
 
-const props = defineProps({
-  group: {
-    type: Object,
-    required: true,
-  },
-})
-const list = inject('list')
+interface ListGroupRowsProps {
+  group: GroupedRow
+}
+
+const props = defineProps<ListGroupRowsProps>()
+const list = inject<ComputedRef<ListContext>>('list')
 </script>

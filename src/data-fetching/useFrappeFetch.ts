@@ -27,7 +27,11 @@ export const useFrappeFetch = createFetch({
         docStore.setDocs(docs)
         listStore.updateRows(docs)
       }
-      ctx.data = responseData.data
+      if (responseData.message) {
+        ctx.data = responseData.message
+      } else if (responseData.data) {
+        ctx.data = responseData.data
+      }
       return ctx
     },
     onFetchError(ctx) {

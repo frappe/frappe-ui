@@ -28,7 +28,7 @@
     "frappe/**/*.d.ts",
     "frappe/**/*.tsx",
     "frappe/**/*.vue",
-    "frappe/index.js",
+    "frappe/index.ts",
     "vitest.config.ts",
     "vitest.setup.ts"
   ],

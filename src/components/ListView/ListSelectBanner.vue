@@ -8,7 +8,7 @@
     leave-to-class="transform opacity-0"
   >
     <div
-      v-if="list.selections.size"
+      v-if="list && list.selections.size"
       class="absolute inset-x-0 bottom-6 mx-auto w-max text-base"
     >
       <div
@@ -19,8 +19,8 @@
           v-bind="{
             selections: list.selections,
             allRowsSelected: list.allRowsSelected,
-            selectAll: () => list.toggleAllRows(true),
-            unselectAll: () => list.toggleAllRows(false),
+            selectAll: () => list?.toggleAllRows(true),
+            unselectAll: () => list?.toggleAllRows(false),
           }"
         >
           <div
@@ -32,7 +32,7 @@
                 :disabled="true"
                 class="text-ink-gray-9"
               />
-              <div>{{ selectedText }}</div>
+              <div>{{ list.options.selectionText?.(list.selections.size) || '' }}</div>
             </div>
             <div class="mr-3">
               <slot
@@ -40,8 +40,8 @@
                 v-bind="{
                   selections: list.selections,
                   allRowsSelected: list.allRowsSelected,
-                  selectAll: () => list.toggleAllRows(true),
-                  unselectAll: () => list.toggleAllRows(false),
+                  selectAll: () => list?.toggleAllRows(true),
+                  unselectAll: () => list?.toggleAllRows(false),
                 }"
               />
             </div>
@@ -68,18 +68,15 @@
   </transition>
 </template>
 
-<script setup>
-import Checkbox from '../Checkbox/Checkbox.vue'
+<script setup lang="ts">
+import { ComputedRef, inject } from 'vue'
 import { Button } from '../Button'
-import { computed, inject } from 'vue'
+import Checkbox from '../Checkbox/Checkbox.vue'
+import type { ListContext } from './types'
 
 defineOptions({
   inheritAttrs: false,
 })
 
-const list = inject('list')
-
-let selectedText = computed(() => {
-  return list.value.options.selectionText(list.value.selections.size)
-})
+const list = inject<ComputedRef<ListContext>>('list')
 </script>

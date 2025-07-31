@@ -1,5 +1,6 @@
 <template>
   <component
+    v-if="list"
     :is="list.options.getRowRoute ? 'router-link' : 'div'"
     :class="[
       roundedClass,
@@ -14,7 +15,7 @@
     class="flex flex-col transition-all duration-300 ease-in-out"
     v-bind="{
       to: list.options.getRowRoute ? list.options.getRowRoute(row) : undefined,
-      onClick: (e) => onRowClick(row, e),
+      onClick: (e: any) => onRowClick(row, e),
     }"
   >
     <component
@@ -47,7 +48,7 @@
           v-for="(column, i) in list.columns"
           :key="column.key"
           :class="[
-            alignmentMap[column.align],
+            alignmentMap[column.align || 'left'],
             i == 0 ? 'text-ink-gray-9' : 'text-ink-gray-7',
           ]"
         >
@@ -59,6 +60,7 @@
                 column,
                 row,
                 item: row[column.key],
+                value: row[column.key],
                 align: column.align,
               }"
             />
@@ -85,58 +87,59 @@
   </component>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import { computed, ComputedRef, inject } from 'vue'
 import Checkbox from '../Checkbox/Checkbox.vue'
 import ListRowItem from './ListRowItem.vue'
+import type { ListContext, Row } from './types'
 import { alignmentMap, getGridTemplateColumns } from './utils'
-import { computed, inject, ref } from 'vue'
 
-const props = defineProps({
-  row: {
-    type: Object,
-    required: true,
-  },
-})
+interface ListRowProps {
+  row: Row
+}
 
-const list = inject('list')
+const props = defineProps<ListRowProps>()
+
+const list = inject<ComputedRef<ListContext>>('list')
 
 const isLastRow = computed(() => {
-  if (!list.value.rows?.length) return false
-  return (
-    list.value.rows[list.value.rows.length - 1][list.value.rowKey] ===
-    props.row[list.value.rowKey]
-  )
+  if (!list?.value.rows?.length) return false
+  const lastRow = list.value.rows[list.value.rows.length - 1] as Row
+  return lastRow[list.value.rowKey] === props.row[list.value.rowKey]
 })
 
 const isSelected = computed(() => {
-  return list.value.selections.has(props.row[list.value.rowKey])
+  return list?.value.selections.has(props.row[list.value.rowKey])
 })
+
 const isActive = computed(
   () =>
-    list.value.options.enableActive &&
-    list.value.activeRow.value === props.row.name,
+    list?.value.options.enableActive &&
+    list.value.activeRow === props.row[list.value.rowKey],
 )
 
 const isHoverable = computed(() => {
-  return list.value.options.getRowRoute || list.value.options.onRowClick
+  return list?.value.options.getRowRoute || list?.value.options.onRowClick
 })
 
 const rowHeight = computed(() => {
-  if (typeof list.value.options.rowHeight === 'number') {
+  if (typeof list?.value.options.rowHeight === 'number') {
     return `${list.value.options.rowHeight}px`
   }
-  return list.value.options.rowHeight
+  return list?.value.options.rowHeight
 })
 
 const roundedClass = computed(() => {
   if (!isSelected.value) return 'rounded'
+  if (!list?.value.rows?.length) return 'rounded'
+
   const selections = [...list.value.selections]
   let groups = list.value.rows[0]?.group
     ? list.value.rows.map((k) => k.rows)
     : [list.value.rows]
 
   for (let rows of groups) {
-    let currentIndex = rows.findIndex((k) => k == props.row)
+    let currentIndex = rows.findIndex((k: Row) => k == props.row)
     if (currentIndex === -1) continue
     let atBottom = !selections.includes(rows[currentIndex + 1]?.name)
     let atTop = !selections.includes(rows[currentIndex - 1]?.name)
@@ -144,12 +147,12 @@ const roundedClass = computed(() => {
   }
 })
 
-const onRowClick = (row, e) => {
-  if (list.value.options.onRowClick) list.value.options.onRowClick(row, e)
-  if (list.value.activeRow.value === row.name) {
-    list.value.activeRow.value = null
+const onRowClick = (row: Row, e: Event) => {
+  if (list?.value.options.onRowClick) list.value.options.onRowClick(row)
+  if (list?.value.activeRow === row[list.value.rowKey]) {
+    if (list?.value) list.value.activeRow = ''
   } else {
-    list.value.activeRow.value = row.name
+    if (list?.value) list.value.activeRow = row[list.value.rowKey]
   }
 }
 </script>
