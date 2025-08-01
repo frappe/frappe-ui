@@ -55,7 +55,7 @@ import NamedHighlightExtension from './extensions/highlight'
 import { common, createLowlight } from 'lowlight'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import CodeBlockComponent from './CodeBlockComponent.vue'
-import configureMention from './mention'
+import { MentionExtension } from './extensions/mention'
 import TextEditorFixedMenu from './TextEditorFixedMenu.vue'
 import TextEditorBubbleMenu from './TextEditorBubbleMenu.vue'
 import TextEditorFloatingMenu from './TextEditorFloatingMenu.vue'
@@ -88,7 +88,7 @@ const props = withDefaults(defineProps<TextEditorProps>(), {
   floatingMenu: false,
   extensions: () => [],
   starterkitOptions: () => ({}),
-  mentions: () => [],
+  mentions: null,
   tags: () => [],
 })
 
@@ -120,7 +120,7 @@ watch(
         editor.value.commands.setContent(val)
       }
     }
-  }
+  },
 )
 
 watch(
@@ -129,7 +129,7 @@ watch(
     if (editor.value) {
       editor.value.setEditable(value)
     }
-  }
+  },
 )
 
 watch(
@@ -141,7 +141,7 @@ watch(
       })
     }
   },
-  { deep: true }
+  { deep: true },
 )
 
 onMounted(() => {
@@ -203,7 +203,15 @@ onMounted(() => {
             ? props.placeholder
             : () => props.placeholder as string,
       }),
-      configureMention(props.mentions),
+      props.mentions &&
+        MentionExtension.configure(
+          Array.isArray(props.mentions)
+            ? { mentions: props.mentions }
+            : {
+                mentions: props.mentions.mentions,
+                component: props.mentions.component,
+              },
+        ),
       EmojiExtension,
       SlashCommands,
       TagNode,
@@ -238,7 +246,7 @@ onBeforeUnmount(() => {
 
 provide(
   'editor',
-  computed(() => editor.value)
+  computed(() => editor.value),
 )
 
 defineExpose({
@@ -273,12 +281,6 @@ defineExpose({
 .ProseMirror-selectednode video,
 img.ProseMirror-selectednode {
   outline: 2px solid var(--outline-gray-2);
-}
-
-/* Mentions */
-.mention {
-  font-weight: 600;
-  box-decoration-break: clone;
 }
 
 /* Table styles */

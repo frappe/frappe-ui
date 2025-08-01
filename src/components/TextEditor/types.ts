@@ -1,4 +1,14 @@
+import { type Component } from 'vue'
 import { type UploadedFile } from '../../utils/useFileUpload'
+import { type MentionSuggestionItem } from './extensions/mention/mention-extension'
+
+type ConfigureMentionOptions =
+  | {
+      mentions: MentionSuggestionItem[]
+      component?: Component
+    }
+  | MentionSuggestionItem[]
+  | null
 
 export interface TextEditorProps {
   content?: string | null
@@ -11,7 +21,7 @@ export interface TextEditorProps {
   floatingMenu?: boolean | any[]
   extensions?: any[]
   starterkitOptions?: any
-  mentions?: any[]
+  mentions?: ConfigureMentionOptions
   tags?: any[]
   uploadFunction?: (file: File) => Promise<UploadedFile>
 }
