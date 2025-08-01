@@ -46,11 +46,9 @@
                 </span>
                 <slot name="suffix" />
               </div>
-              <FeatherIcon
-                name="chevron-down"
-                class="h-4 w-4 text-ink-gray-5"
-                aria-hidden="true"
-              />
+              <slot name="suffix-icon">
+                <LucideChevronDown class="size-4 text-ink-gray-5" />
+              </slot>
             </button>
           </div>
         </slot>
@@ -220,6 +218,7 @@ import type {
   AutocompleteProps,
   Option,
 } from './types'
+import LucideChevronDown from '~icons/lucide/chevron-down'
 
 const props = withDefaults(defineProps<AutocompleteProps>(), {
   multiple: false,
@@ -350,7 +349,7 @@ const isOptionSelected = (option: AutocompleteOption) => {
     return selectedValue.value === value
   }
   return (selectedValue.value as AutocompleteOption[]).find((v) =>
-    isOption(v) ? v.value === value : v === value,
+    isOption(v) ? v.value === value : v === value
   )
 }
 
@@ -382,7 +381,7 @@ watch(
   () => query.value,
   () => {
     emit('update:query', query.value)
-  },
+  }
 )
 
 watch(
@@ -391,7 +390,7 @@ watch(
     if (showOptions.value) {
       nextTick(() => searchInput.value?.$el.focus())
     }
-  },
+  }
 )
 
 const rootRef = ref()
