@@ -1,12 +1,13 @@
 <template>
   <div class="flex flex-1 flex-col overflow-scroll">
     <!-- Day List -->
-    <div class="grid w-full grid-cols-7 py-2">
+    <div class="grid w-full grid-cols-7">
       <span
         v-for="day in daysList"
-        class="text-center text-base text-ink-gray-5"
-        >{{ day }}</span
+        class="inline-flex items-center justify-center text-base text-ink-gray-6 h-8"
       >
+        {{ day }}
+      </span>
     </div>
 
     <!-- Date Grid -->
