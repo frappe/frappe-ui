@@ -1,25 +1,26 @@
 <template>
   <CalendarEvent
+    v-for="event in events.slice(0, 2)"
+    :key="event.id"
     :event="event"
     :date="date"
-    :key="event.id"
     class="mb-1 cursor-pointer"
     v-bind="$attrs"
   />
   <span
-    v-if="totalEventsCount > 1"
-    class="w-fit rounded-sm p-px px-1.5 mx-1 text-base font-medium text-ink-gray-6 hover:cursor-pointer hover:bg-surface-gray-1"
+    v-if="totalEventsCount > 2"
+    class="w-fit rounded-sm p-px px-1 mx-px text-base font-medium text-ink-gray-6 hover:cursor-pointer hover:bg-surface-gray-1"
     @click="emit('showMoreEvents')"
   >
-    +{{ totalEventsCount - 1 }} more
+    +{{ totalEventsCount - 2 }} more
   </span>
 </template>
 <script setup>
 import CalendarEvent from './CalendarEvent.vue'
 
 const props = defineProps({
-  event: {
-    type: Object,
+  events: {
+    type: Array,
     required: true,
   },
   date: {

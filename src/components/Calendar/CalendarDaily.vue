@@ -1,8 +1,8 @@
 <template>
   <div class="h-[90%] min-h-[500px] min-w-[600px]">
     <slot name="header" v-bind="{ parseDateWithDay, currentDate, fullDay }">
-      <p class="pb-2 text-base font-semibold text-ink-gray-8">
-        {{ parseDateWithDay(currentDate, (fullDay = true)) }}
+      <p class="pb-2 text-base text-ink-gray-6">
+        {{ parseDateWithDay(currentDate) }}
       </p>
     </slot>
     <div class="h-full overflow-hidden">
