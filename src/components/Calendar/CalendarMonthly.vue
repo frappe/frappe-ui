@@ -30,15 +30,14 @@
           :class="isCurrentMonth(date) ? 'text-gray-700' : 'text-gray-200'"
         >
           <div
-            class="flex gap-1 w-full flex-col items-center text-xs text-right"
+            class="flex gap-0.5 w-full flex-col items-center text-xs text-right"
           >
             <span
-              v-if="isCurrentMonth(date)"
               class="z-10 w-full flex justify-between items-center"
               :class="[
                 date.toDateString() === new Date().toDateString()
-                  ? 'py-0.5 px-1'
-                  : 'py-1 px-2',
+                  ? 'p-[3px] pb-0.5'
+                  : 'p-2',
               ]"
             >
               <div></div>
@@ -46,38 +45,34 @@
                 class="cursor-pointer"
                 :class="[
                   date.toDateString() === new Date().toDateString()
-                    ? 'bg-surface-gray-7 text-ink-white rounded-sm p-[2px]'
-                    : 'bg-surface-white text-ink-gray-6',
+                    ? 'flex items-center justify-center bg-surface-gray-7 text-ink-white rounded size-[25px]'
+                    : 'bg-surface-white ',
+                  isCurrentMonth(date) ? 'text-ink-gray-6' : 'text-ink-gray-4',
                 ]"
-                @click="calendarActions.updateActiveView('Day', date)"
+                @click="
+                  isCurrentMonth(date)
+                    ? calendarActions.updateActiveView('Day', date)
+                    : calendarActions.updateActiveView(
+                        'Day',
+                        date,
+                        isPreviousMonth(date),
+                        isNextMonth(date),
+                      )
+                "
               >
                 {{ date.getDate() }}
               </div>
             </span>
-            <span
-              v-else
-              class="z-10 w-full bg-surface-white py-1 px-2 text-ink-gray-4 cursor-pointer"
-              @click="
-                calendarActions.updateActiveView(
-                  'Day',
-                  date,
-                  isPreviousMonth(date),
-                  isNextMonth(date),
-                )
-              "
-            >
-              {{ parseDateEventPopupFormat(date, (showDay = false)) }}
-            </span>
 
             <div
-              class="w-full"
+              class="flex w-full flex-col justify-between"
               v-if="timedEvents[parseDate(date)]?.length <= maxEventsInCell"
             >
               <CalendarEvent
                 v-for="calendarEvent in timedEvents[parseDate(date)]"
                 :event="calendarEvent"
                 :date="date"
-                class="z-10 mb-2 w-full cursor-pointer"
+                class="z-10 mb-2 cursor-pointer"
                 :key="calendarEvent.id"
                 :draggable="config.isEditMode"
                 @dragstart="onDragStart($event, calendarEvent.id)"
@@ -95,7 +90,7 @@
                 "
                 @dragend="$event.target.style.opacity = '1'"
                 @dragover.prevent
-                :event="timedEvents[parseDate(date)][0]"
+                :events="timedEvents[parseDate(date)]"
                 :date="date"
                 :totalEventsCount="timedEvents[parseDate(date)].length"
                 @showMoreEvents="emit('setCurrentDate', date)"
@@ -109,7 +104,7 @@
 </template>
 
 <script setup>
-import { parseDateEventPopupFormat, daysList, parseDate } from './calendarUtils'
+import { daysList, parseDate } from './calendarUtils'
 import { inject } from 'vue'
 import CalendarEvent from './CalendarEvent.vue'
 import useCalendarData from './composables/useCalendarData'

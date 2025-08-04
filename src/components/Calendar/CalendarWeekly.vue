@@ -3,20 +3,19 @@
     <!-- Day List -->
     <div class="flex border-b-[1px]">
       <div class="w-16"></div>
-      <div class="mb-2 grid w-full grid-cols-7">
+      <div class="grid w-full grid-cols-7">
         <span
           v-for="date in weeklyDates"
-          class="relative p-2 text-center text-sm text-ink-gray-5 cursor-pointer"
-          :class="
-            isToday(date) ? 'font-semibold text-ink-gray-8' : 'font-normal'
-          "
+          class="relative flex items-center justify-center gap-1.5 h-8 text-center text-base text-ink-gray-7 cursor-pointer"
           @click="calendarActions.updateActiveView('Day', date)"
         >
-          <div
+          {{ isToday(date) ? daysList[date.getDay()] : parseDateWithDay(date) }}
+          <span
             v-if="isToday(date)"
-            class="absolute left-[45%] top-0 h-[2px] w-5 bg-surface-gray-7"
-          />
-          {{ parseDateWithDay(date) }}
+            class="inline-flex items-center justify-center bg-surface-gray-7 text-ink-white rounded size-[25px]"
+          >
+            {{ date.getDate() }}
+          </span>
         </span>
       </div>
     </div>
@@ -145,6 +144,7 @@ import {
   twentyFourHoursFormat,
   parseDateWithDay,
   parseDate,
+  daysList,
 } from './calendarUtils'
 
 import { Button } from '../Button'

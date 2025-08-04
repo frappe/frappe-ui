@@ -1,11 +1,11 @@
 <template>
   <!-- Weekly and Daily Event Template  -->
   <div
-    class="h-min-[18px] rounded-lg transition-all duration-75"
+    class="min-h-6 mx-px shadow rounded transition-all duration-75"
     ref="eventRef"
     v-if="activeView !== 'Month'"
     v-bind="$attrs"
-    :class="['shadow-lg', opened && '!z-20 drop-shadow-xl']"
+    :class="[opened && '!z-20 drop-shadow-xl']"
     :style="[setEventStyles, eventBgStyle]"
     @dblclick.prevent="handleEventEdit($event)"
     @click.prevent="handleEventClick($event)"
@@ -13,7 +13,7 @@
       mousedown: config.isEditMode && handleRepositionMouseDown,
     }"
   >
-    <div class="flex gap-1.5 h-full p-2 pl-1.5">
+    <div class="flex gap-1.5 h-full p-[5px]">
       <div
         v-if="props.event.fromTime"
         class="h-full w-[2px] rounded shrink-0"
@@ -65,7 +65,7 @@
   <!-- Monthly Event Template -->
   <div
     v-else
-    class="flex gap-1.5 h-min-[18px] rounded-lg p-2 transition-all duration-75"
+    class="flex gap-1.5 min-h-6 mx-px rounded p-[5px] transition-all duration-75"
     ref="eventRef"
     v-bind="$attrs"
     @dblclick.prevent="handleEventEdit($event)"
@@ -93,15 +93,6 @@
       >
         <p class="text-sm font-medium truncate">
           {{ props.event.title || 'New Event' }}
-        </p>
-        <p v-if="props.event.fromTime" class="text-xs font-normal">
-          {{
-            formattedDuration(
-              updatedEvent.fromTime,
-              updatedEvent.toTime,
-              config.timeFormat,
-            )
-          }}
         </p>
       </div>
     </div>
