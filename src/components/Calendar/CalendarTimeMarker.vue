@@ -1,11 +1,11 @@
 <template>
   <div
-    class="absolute top-20 z-10 w-full pl-2"
+    class="absolute top-20 z-10 w-full px-px"
     :style="setCurrentTime"
     v-if="new Date(date).toDateString() === new Date().toDateString()"
   >
     <Tooltip :text="dayjs().format('ddd, MMM D, YYYY h:mm a')">
-      <div class="current-time relative h-0.5 bg-red-600" />
+      <div class="current-time relative h-0.5 bg-[#E03636] rounded" />
     </Tooltip>
   </div>
 </template>
@@ -42,12 +42,12 @@ const setCurrentTime = computed(() => {
 .current-time::before {
   content: '';
   display: block;
-  width: 12px;
+  width: 2px;
   height: 12px;
-  background-color: red;
-  border-radius: 50%;
+  border-radius: 8px;
+  background-color: #e03636;
   position: absolute;
-  left: -8px;
+  left: 0;
   top: -5px;
 }
 </style>
