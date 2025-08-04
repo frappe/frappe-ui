@@ -87,7 +87,10 @@ import { computed, onMounted, onUnmounted, provide, ref } from 'vue'
 import { Button } from '../Button'
 import { TabButtons } from '../TabButtons'
 import { getCalendarDates, monthList, handleSeconds } from './calendarUtils'
-import { dayjs } from "../../utils/dayjs"
+import { dayjs } from '../../utils/dayjs'
+import DayIcon from './Icon/DayIcon.vue'
+import WeekIcon from './Icon/WeekIcon.vue'
+import MonthIcon from './Icon/MonthIcon.vue'
 import CalendarMonthly from './CalendarMonthly.vue'
 import CalendarWeekly from './CalendarWeekly.vue'
 import CalendarDaily from './CalendarDaily.vue'
@@ -267,12 +270,12 @@ function handleCellDblClick(e, date, time = '') {
 
 // Calendar View Options
 const actionOptions = [
-  { label: 'Day', variant: 'solid' },
-  { label: 'Week', variant: 'solid' },
-  { label: 'Month', variant: 'solid' },
+  { label: 'Day', value: 'Day', iconLeft: DayIcon },
+  { label: 'Week', value: 'Week', iconLeft: WeekIcon },
+  { label: 'Month', value: 'Month', iconLeft: MonthIcon },
 ]
 let enabledModes = actionOptions.filter(
-  (mode) => !overrideConfig.disableModes.includes(mode.label),
+  (mode) => !overrideConfig.disableModes.includes(mode.value),
 )
 
 let currentYear = ref(new Date().getFullYear())

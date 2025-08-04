@@ -21,8 +21,8 @@
             button.disabled
               ? ''
               : checked
-                ? ' text-ink-gray-9 shadow'
-                : 'text-ink-gray-7',
+                ? ' text-ink-gray-8 shadow'
+                : '!text-ink-gray-5',
           ]"
         >
           <RadioGroupLabel
