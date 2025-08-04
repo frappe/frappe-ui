@@ -11,8 +11,8 @@
       :logo="props.header.logo"
       :menu-items="props.header.menuItems"
     >
-      <template #header-logo>
-        <slot name="logo"></slot>
+      <template #logo>
+        <slot name="header-logo"></slot>
       </template>
     </SidebarHeader>
 
@@ -25,7 +25,7 @@
     />
 
     <div class="mt-auto flex flex-col gap-2">
-      <slot name="footer-items" />
+      <slot name="footer-items" v-bind="{ isCollapsed, isMobile }"/>
       <SidebarItem
         :label="isCollapsed ? 'Expand' : 'Collapse'"
         :isCollapsed="isCollapsed"

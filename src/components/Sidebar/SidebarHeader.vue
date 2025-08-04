@@ -14,17 +14,18 @@
         <div class="w-8 h-8 rounded overflow-hidden">
           <slot name="logo">
             <img
-              v-if="props.logo"
+              v-if="typeof props.logo === 'string'"
               :src="props.logo"
               class="w-full h-full object-cover"
               alt="Logo"
             />
             <div
-              v-else
+              v-else-if="!props.logo"
               class="w-full h-full bg-surface-gray-4 flex items-center justify-center text-ink-gray-7"
             >
               {{ props.title.charAt(0).toUpperCase() }}
             </div>
+            <component v-else :is="props.logo" class="w-full h-full" />
           </slot>
         </div>
         <div
