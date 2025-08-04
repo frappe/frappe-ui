@@ -37,7 +37,7 @@
         </div>
 
         <!-- Grid -->
-        <div class="flex w-full flex-col">
+        <div class="relative flex w-full flex-col">
           <!-- full day events -->
           <div class="grid w-full grid-cols-7">
             <div v-for="(date, idx) in weeklyDates">
@@ -84,6 +84,10 @@
             </div>
           </div>
           <!-- time events => not full day events => overflow-scroll here -->
+          <div
+            class="w-[calc(100%-4px)] h-px z-[1] left-0.5 mt-[0.5px] bg-[#F79596] absolute"
+            :style="currentTime"
+          />
           <div class="grid w-full grid-cols-7">
             <!-- 7 Columns -->
             <div
@@ -181,6 +185,17 @@ const fullDayEvents = computed(
 
 const isToday = (date) =>
   new Date(date).toDateString() === new Date().toDateString()
+
+const currentTime = computed(() => {
+  let d = new Date()
+  let hour = d.getHours()
+  let minutes = d.getMinutes()
+  let top =
+    (hour * 60 + minutes) * minuteHeight +
+    props.config.redundantCellHeight +
+    'px'
+  return { top }
+})
 
 const calendarActions = inject('calendarActions')
 const redundantCellHeight = props.config.redundantCellHeight
