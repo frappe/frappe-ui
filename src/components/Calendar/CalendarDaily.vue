@@ -1,5 +1,5 @@
 <template>
-  <div class="h-[90%] min-h-[500px] min-w-[600px]">
+  <div class="h-[90%] flex-1 min-h-[500px] min-w-[600px]">
     <slot name="header" v-bind="{ parseDateWithDay, currentDate, fullDay }">
       <p class="pb-2 text-base text-ink-gray-6">
         {{ parseDateWithDay(currentDate) }}

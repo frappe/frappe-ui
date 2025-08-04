@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col overflow-y-auto">
+  <div class="flex flex-1 flex-col overflow-y-auto">
     <!-- Day List -->
     <div class="flex border-b-[1px]">
       <div class="w-16"></div>
