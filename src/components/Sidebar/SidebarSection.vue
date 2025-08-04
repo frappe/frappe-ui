@@ -4,7 +4,7 @@
       v-if="props.label"
       class="relative flex items-center gap-1 px-2 py-1.5"
       :class="props.collapsible ? 'cursor-pointer' : ''"
-      @click="isCollapsed = !isCollapsed"
+      @click="props.collapsible ? (isCollapsed = !isCollapsed) : null"
     >
       <h3
         class="h-4 text-sm text-ink-gray-5 transition-all duration-300 ease-in-out"
@@ -58,9 +58,9 @@
 </template>
 
 <script setup lang="ts">
-import { inject, ref } from 'vue';
-import SidebarItem from './SidebarItem.vue';
-import { SidebarSectionProps } from './types';
+import { inject, ref } from 'vue'
+import SidebarItem from './SidebarItem.vue'
+import { SidebarSectionProps } from './types'
 
 const props = defineProps<SidebarSectionProps>()
 
