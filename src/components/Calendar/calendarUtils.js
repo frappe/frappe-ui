@@ -363,8 +363,8 @@ export function getContrastingSameColor(hex) {
 }
 
 export const colorMap = {
-  '#DB7706': {
-    name: 'amber',
+  amber: {
+    color: '#DB7706',
     border: '#DB7706',
     borderActive: '#FBCC55',
     text: '#91400D',
@@ -373,8 +373,8 @@ export const colorMap = {
     bgHover: '#FEEDA9',
     bgActive: '#E79913',
   },
-  '#6846E3': {
-    name: 'violet',
+  violet: {
+    color: '#6846E3',
     border: '#6846E3',
     borderActive: '#B3A1F5',
     text: '#5F46C7',
@@ -383,8 +383,8 @@ export const colorMap = {
     bgHover: '#DBD5FF',
     bgActive: '#7A51F4',
   },
-  '#E34AA6': {
-    name: 'pink',
+  pink: {
+    color: '#E34AA6',
     border: '#E34AA6',
     borderActive: '#F6A7D6',
     text: '#CF3A96',
@@ -393,8 +393,8 @@ export const colorMap = {
     bgHover: '#FFD5F0',
     bgActive: '#E34AA6',
   },
-  '#3BBDE5': {
-    name: 'cyan',
+  cyan: {
+    color: '#3BBDE5',
     border: '#3BBDE5',
     borderActive: '#72D5F3',
     text: '#267A94',
@@ -403,8 +403,8 @@ export const colorMap = {
     bgHover: '#B3E8F7',
     bgActive: '#32A4C7',
   },
-  '#0289F7': {
-    name: 'blue',
+  blue: {
+    color: '#0289F7',
     border: '#0289F7',
     borderActive: '#A7D7FD',
     text: '#007BE0',
@@ -413,8 +413,8 @@ export const colorMap = {
     bgHover: '#C8E6FF',
     bgActive: '#0289F7',
   },
-  '#E86C13': {
-    name: 'orange',
+  orange: {
+    color: '#E86C13',
     border: '#E86C13',
     borderActive: '#FFCBA3',
     text: '#E86C13',
@@ -423,8 +423,8 @@ export const colorMap = {
     bgHover: '#FFDEC5',
     bgActive: '#E86C13',
   },
-  '#30A66D': {
-    name: 'green',
+  green: {
+    color: '#30A66D',
     border: '#30A66D',
     borderActive: '#88D5A5',
     text: '#137949',
