@@ -15,12 +15,16 @@
       class="grid w-full flex-1 grid-cols-7 border-outline-gray-1"
       :class="[
         currentMonthDates.length > 35 ? 'grid-rows-6' : 'grid-rows-5',
-        config.noBorder ? 'border-t-[0.5px]' : 'border-[0.5px]',
+        !config.noBorder && 'border-[0.5px]',
       ]"
     >
       <div
-        v-for="date in currentMonthDates"
-        class="overflow-y-auto border-[0.5px]"
+        v-for="(date, i) in currentMonthDates"
+        class="overflow-y-auto"
+        :class="[
+          config.noBorder ? 'border-l border-t border-0' : 'border-[0.5px]',
+          config.noBorder && i % 7 === 0 && 'border-l-0',
+        ]"
         @dragover.prevent
         @drageneter.prevent
         @drop="onDrop($event, date)"

@@ -1,5 +1,5 @@
 <template>
-  <div class="h-[90%] flex-1 min-h-[500px] min-w-[600px]">
+  <div class="flex flex-col flex-1 overflow-y-auto">
     <slot name="header" v-bind="{ parseDateWithDay, currentDate, fullDay }">
       <p class="pb-2 text-base text-ink-gray-6">
         {{ parseDateWithDay(currentDate) }}
@@ -25,7 +25,8 @@
         <!-- Calendar Grid / Right Column -->
         <div class="grid h-full w-full grid-cols-1 pb-2">
           <div
-            class="calendar-column relative border-r-[1px] border-l-[1px] border-outline-gray-1"
+            class="calendar-column relative border-l-[1px] border-outline-gray-1"
+            :class="[config.noBorder ? '' : ' border-r-[1px]']"
           >
             <!-- Top Redundant Cell before time starts for giving the calendar some space -->
             <div
@@ -45,7 +46,7 @@
             <!-- Day Grid -->
             <div
               class="relative flex text-ink-gray-8"
-              v-for="time in timeArray"
+              v-for="(time, i) in timeArray"
               :key="time"
               :data-time-attr="time"
               @dblclick="
@@ -53,7 +54,8 @@
               "
             >
               <div
-                class="w-full border-b-[1px] border-outline-gray-1"
+                class="w-full border-outline-gray-1"
+                :class="i !== timeArray.length - 1 && 'border-b-[1px]'"
                 :style="{ height: `${hourHeight}px` }"
               />
             </div>
