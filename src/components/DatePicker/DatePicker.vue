@@ -22,6 +22,9 @@
           <template #prefix v-if="$slots.prefix">
             <slot name="prefix" />
           </template>
+          <template #suffix v-if="$slots.suffix">
+            <slot name="suffix" v-bind="{ togglePopover }" />
+          </template>
         </TextInput>
       </div>
     </template>
