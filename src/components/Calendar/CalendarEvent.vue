@@ -144,7 +144,6 @@ import {
   parseDate,
   colorMap,
   formattedDuration,
-  getContrastingSameColor,
 } from './calendarUtils'
 
 const props = defineProps({
