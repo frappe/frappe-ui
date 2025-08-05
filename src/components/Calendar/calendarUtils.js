@@ -255,53 +255,6 @@ export const twentyFourHoursFormat = [
   '23:00',
 ]
 
-export const colorMap = {
-  blue: {
-    bgHex: '#ebf8ff',
-    borderHex: '#3b82f6',
-  },
-  green: {
-    bgHex: '#bbf7d0',
-    borderHex: '#22c55e',
-  },
-  red: {
-    bgHex: '#fee2e2',
-    borderHex: '#ef4444',
-  },
-  orange: {
-    bgHex: '#ffedd5',
-    borderHex: '#f97316',
-  },
-  yellow: {
-    bgHex: '#fefcbf',
-    borderHex: '#eab308',
-  },
-  teal: {
-    bgHex: '#cffafe',
-    borderHex: '#14b8a6',
-  },
-  violet: {
-    bgHex: '#e0e7ff',
-    borderHex: '#8b5cf6',
-  },
-  cyan: {
-    bgHex: '#cffafe',
-    borderHex: '#06b6d4',
-  },
-  purple: {
-    bgHex: '#f3e8ff',
-    borderHex: '#a855f7',
-  },
-  pink: {
-    bgHex: '#fbcfe8',
-    borderHex: '#ec4899',
-  },
-  amber: {
-    bgHex: '#fefcbf',
-    borderHex: '#f59e0b',
-  },
-}
-
 export function formattedDuration(fromTime, toTime, timeFormat) {
   fromTime = formatTime(fromTime, timeFormat)
   toTime = formatTime(toTime, timeFormat)
@@ -407,4 +360,77 @@ export function getContrastingSameColor(hex) {
   // Flip lightness: if it's dark, make it light and vice versa
   hsl.l = hsl.l > 50 ? 25 : 80
   return hslToHex(hsl.h, hsl.s, hsl.l)
+}
+
+export const colorMap = {
+  '#DB7706': {
+    name: 'amber',
+    border: '#DB7706',
+    borderActive: '#FBCC55',
+    text: '#91400D',
+    subtext: '#763813',
+    bg: '#FFF7D3',
+    bgHover: '#FEEDA9',
+    bgActive: '#E79913',
+  },
+  '#6846E3': {
+    name: 'violet',
+    border: '#6846E3',
+    borderActive: '#B3A1F5',
+    text: '#5F46C7',
+    subtext: '#251959',
+    bg: '#F0EBFF',
+    bgHover: '#DBD5FF',
+    bgActive: '#7A51F4',
+  },
+  '#E34AA6': {
+    name: 'pink',
+    border: '#E34AA6',
+    borderActive: '#F6A7D6',
+    text: '#CF3A96',
+    subtext: '#801458',
+    bg: '#FDE8F5',
+    bgHover: '#FFD5F0',
+    bgActive: '#E34AA6',
+  },
+  '#3BBDE5': {
+    name: 'cyan',
+    border: '#3BBDE5',
+    borderActive: '#72D5F3',
+    text: '#267A94',
+    subtext: '#164759',
+    bg: '#DDF7FF',
+    bgHover: '#B3E8F7',
+    bgActive: '#32A4C7',
+  },
+  '#0289F7': {
+    name: 'blue',
+    border: '#0289F7',
+    borderActive: '#A7D7FD',
+    text: '#007BE0',
+    subtext: '#004880',
+    bg: '#E6F4FF',
+    bgHover: '#C8E6FF',
+    bgActive: '#0289F7',
+  },
+  '#E86C13': {
+    name: 'orange',
+    border: '#E86C13',
+    borderActive: '#FFCBA3',
+    text: '#E86C13',
+    subtext: '#6B2711',
+    bg: '#FFEFE4',
+    bgHover: '#FFDEC5',
+    bgActive: '#E86C13',
+  },
+  '#30A66D': {
+    name: 'green',
+    border: '#30A66D',
+    borderActive: '#88D5A5',
+    text: '#137949',
+    subtext: '#173B2C',
+    bg: '#E4FAEB',
+    bgHover: '#CBF3D7',
+    bgActive: '#30A66D',
+  },
 }
