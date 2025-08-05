@@ -1,11 +1,14 @@
 <template>
   <!-- Weekly and Daily Event Template  -->
   <div
-    class="min-h-6 mx-px shadow rounded transition-all duration-75"
+    class="event min-h-6 mx-px shadow rounded transition-all duration-75"
     ref="eventRef"
     v-if="activeView !== 'Month'"
     v-bind="$attrs"
-    :class="[opened && '!z-20 drop-shadow-xl']"
+    :class="[
+      opened && '!z-20 drop-shadow-xl',
+      activeEvent == (props.event?.id || props.event?.name) && 'active',
+    ]"
     :style="[setEventStyles, eventBgStyle]"
     @dblclick.prevent="handleEventEdit($event)"
     @click.prevent="handleEventClick($event)"
@@ -16,7 +19,7 @@
     <div class="flex gap-1.5 h-full p-[5px]">
       <div
         v-if="props.event.fromTime"
-        class="h-full w-[2px] rounded shrink-0"
+        class="event-border h-full w-[2px] rounded shrink-0"
         :style="eventBorderStyle"
       />
       <div
@@ -65,7 +68,8 @@
   <!-- Monthly Event Template -->
   <div
     v-else
-    class="flex gap-1.5 min-h-6 mx-px rounded p-[5px] transition-all duration-75"
+    class="event flex gap-1.5 min-h-6 mx-px rounded p-[5px] transition-all duration-75"
+    :class="activeEvent == (props.event?.id || props.event?.name) && 'active'"
     ref="eventRef"
     v-bind="$attrs"
     @dblclick.prevent="handleEventEdit($event)"
@@ -74,7 +78,7 @@
   >
     <div
       v-if="props.event.fromTime"
-      class="w-[2px] rounded shrink-0"
+      class="event-border w-[2px] rounded shrink-0"
       :style="eventBorderStyle"
     />
     <div
@@ -121,6 +125,7 @@
 import EventModalContent from './EventModalContent.vue'
 import NewEventModal from './NewEventModal.vue'
 import { useFloating, shift, flip, offset, autoUpdate } from '@floating-ui/vue'
+import { activeEvent } from './composables/useCalendarData.js'
 
 import {
   ref,
@@ -249,25 +254,37 @@ const setEventStyles = computed(() => {
 })
 
 const eventBgStyle = computed(() => {
-  let backgroundColor = '#e4faeb'
+  let bg = '#E4FAEB'
+  let text = '#137949'
+  let bgHover = '#CBF3D7'
+  let bgActive = '#30A66D'
 
   if (props.event.color) {
-    backgroundColor = colorMap[props.event.color]?.bgHex || props.event.color
+    bg = colorMap[props.event.color]?.bg || bg
+    text = colorMap[props.event.color]?.text || text
+    bgHover = colorMap[props.event.color]?.bgHover || bgHover
+    bgActive = colorMap[props.event.color]?.bgActive || bgActive
   }
 
-  return { backgroundColor, color: getContrastingSameColor(backgroundColor) }
+  return {
+    '--bg': bg,
+    '--text': text,
+    '--bg-hover': bgHover,
+    '--bg-active': bgActive,
+  }
 })
 
 const eventBorderStyle = computed(() => {
-  let borderColor = '#278f5e'
+  let borderColor = '#30A66D'
+  let activeBorderColor = '#88D5A5'
 
   if (props.event.color) {
-    borderColor =
-      colorMap[props.event.color]?.borderHex ||
-      getContrastingSameColor(props.event.color)
+    borderColor = colorMap[props.event.color]?.border || borderColor
+    activeBorderColor =
+      colorMap[props.event.color]?.borderActive || activeBorderColor
   }
 
-  return { backgroundColor: borderColor }
+  return { '--border': borderColor, '--border-active': activeBorderColor }
 })
 
 const eventTitleRef = ref(null)
@@ -567,3 +584,27 @@ function handleEventDelete() {
   close()
 }
 </script>
+
+<style scoped>
+.event {
+  background-color: var(--bg);
+  color: var(--text);
+}
+
+.event .event-border {
+  background-color: var(--border);
+}
+
+.event.active {
+  background-color: var(--bg-active);
+  color: #fff;
+}
+
+.event.active .event-border {
+  background-color: var(--border-active);
+}
+
+.event:not(.active):hover {
+  background-color: var(--bg-hover);
+}
+</style>
