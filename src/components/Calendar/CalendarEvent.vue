@@ -254,38 +254,35 @@ const setEventStyles = computed(() => {
 })
 
 const eventBgStyle = computed(() => {
-  let bg = '#E4FAEB'
-  let text = '#137949'
-  let bgHover = '#CBF3D7'
-  let bgActive = '#30A66D'
-
-  if (props.event.color) {
-    bg = colorMap[props.event.color]?.bg || bg
-    text = colorMap[props.event.color]?.text || text
-    bgHover = colorMap[props.event.color]?.bgHover || bgHover
-    bgActive = colorMap[props.event.color]?.bgActive || bgActive
-  }
+  let _color = props.event.color || 'green'
+  _color = color(_color)
 
   return {
-    '--bg': bg,
-    '--text': text,
-    '--bg-hover': bgHover,
-    '--bg-active': bgActive,
+    '--bg': _color.bg,
+    '--text': _color.text,
+    '--bg-hover': _color.bgHover,
+    '--bg-active': _color.bgActive,
   }
 })
 
 const eventBorderStyle = computed(() => {
-  let borderColor = '#30A66D'
-  let activeBorderColor = '#88D5A5'
+  let _color = props.event.color || 'green'
+  _color = color(_color)
 
-  if (props.event.color) {
-    borderColor = colorMap[props.event.color]?.border || borderColor
-    activeBorderColor =
-      colorMap[props.event.color]?.borderActive || activeBorderColor
+  return { '--border': _color.border, '--border-active': _color.borderActive }
+})
+
+function color(color) {
+  if (!color?.startsWith('#')) {
+    return colorMap[color] || colorMap['green']
   }
 
-  return { '--border': borderColor, '--border-active': activeBorderColor }
-})
+  for (const value of Object.values(colorMap)) {
+    if (value.color === color) return value
+  }
+
+  return colorMap['green']
+}
 
 const eventTitleRef = ref(null)
 const eventTimeRef = ref(null)
