@@ -84,7 +84,7 @@
           </div>
           <!-- time events => not full day events => overflow-scroll here -->
           <div
-            class="w-[calc(100%-4px)] h-px z-[1] left-0.5 mt-[0.5px] bg-[#F79596] absolute"
+            class="w-[calc(100%-4px)] h-px z-[2] left-0.5 mt-[0.5px] bg-[#F79596] absolute"
             :style="currentTime"
           />
           <div class="grid w-full grid-cols-7">
