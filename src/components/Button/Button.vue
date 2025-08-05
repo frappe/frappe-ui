@@ -6,6 +6,7 @@
       @click="handleClick"
       :disabled="isDisabled"
       :ariaLabel="ariaLabel"
+      ref="rootRef"
     >
       <LoadingIndicator
         v-if="loading"
@@ -54,12 +55,14 @@
   </Tooltip>
 </template>
 <script lang="ts" setup>
-import { computed, useSlots } from 'vue'
+import { computed, useSlots, ref } from 'vue'
 import FeatherIcon from '../FeatherIcon.vue'
 import LoadingIndicator from '../LoadingIndicator.vue'
 import { useRouter } from 'vue-router'
 import type { ButtonProps, ThemeVariant } from './types'
 import Tooltip from '../Tooltip/Tooltip.vue'
+
+defineOptions({ inheritAttrs: false })
 
 const props = withDefaults(defineProps<ButtonProps>(), {
   theme: 'gray',
@@ -205,4 +208,9 @@ const handleClick = () => {
     return window.open(props.link, '_blank')
   }
 }
+
+const rootRef = ref()
+defineExpose({
+  rootRef,
+})
 </script>
