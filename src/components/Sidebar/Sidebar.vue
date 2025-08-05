@@ -44,7 +44,7 @@
 
 <script setup lang="ts">
 import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
-import { provide, watchEffect } from 'vue'
+import { provide, watch } from 'vue'
 import SidebarHeader from './SidebarHeader.vue'
 import SidebarItem from './SidebarItem.vue'
 import { SidebarProps } from './types'
@@ -62,7 +62,10 @@ provide('isSidebarCollapsed', isCollapsed)
 
 const breakpoints = useBreakpoints(breakpointsTailwind)
 const isMobile = breakpoints.smaller('sm')
-watchEffect(() => {
+if (isMobile.value) {
+  isCollapsed.value = true
+}
+watch(isMobile, () => {
   isCollapsed.value = isMobile.value
 })
 </script>
