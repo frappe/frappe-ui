@@ -124,6 +124,7 @@ import {
 import { computed, reactive } from 'vue'
 import { Button } from '../Button'
 import FeatherIcon from '../FeatherIcon.vue'
+import LucideX from '~icons/lucide/x'
 import type {
   DialogProps,
   DialogIcon,
