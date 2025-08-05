@@ -6,6 +6,7 @@ import { Dropdown } from '../Dropdown'
 import LucideSettings from '~icons/lucide/settings'
 import LucideStar from '~icons/lucide/star'
 import LucideChevronDown from '~icons/lucide/chevron-down'
+import { Autocomplete } from '../Autocomplete'
 
 const dialog1 = ref(false)
 const dialog2 = ref(false)
@@ -16,6 +17,8 @@ const dialog6 = ref(false)
 
 // Dropdown state
 const selectedOption = ref('Option 1')
+
+const autocompleteValue = ref({ label: '', value: '' })
 
 const dropdownOptions = [
   {
@@ -180,6 +183,16 @@ const createPromise = (): Promise<void> => {
             <p class="text-gray-700">
               This dialog contains interactive elements to test proper layering.
             </p>
+
+            <Autocomplete
+              :options="[
+                { label: 'Option A', value: 'A' },
+                { label: 'Option B', value: 'B' },
+                { label: 'Option C', value: 'C' },
+              ]"
+              placeholder="Type to search..."
+              v-model="autocompleteValue"
+            />
 
             <div class="space-y-3">
               <label class="block text-sm font-medium text-gray-700">

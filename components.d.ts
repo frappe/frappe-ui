@@ -120,6 +120,7 @@ declare module 'vue' {
     LucideCalendar: typeof import('~icons/lucide/calendar')['default']
     LucideChevronDown: typeof import('~icons/lucide/chevron-down')['default']
     LucideChevronRight: typeof import('~icons/lucide/chevron-right')['default']
+    LucideX: typeof import('~icons/lucide/x')['default']
     MentionList: typeof import('./src/components/TextEditor/MentionList.vue')['default']
     Menu: typeof import('./src/components/TextEditor/Menu.vue')['default']
     NestedPopover: typeof import('./src/components/ListFilter/NestedPopover.vue')['default']
