@@ -43,8 +43,8 @@
 </template>
 
 <script setup lang="ts">
-import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
-import { provide, ref, watchEffect } from 'vue'
+import { breakpointsTailwind, useBreakpoints, useStorage } from '@vueuse/core'
+import { provide, watchEffect } from 'vue'
 import SidebarHeader from './SidebarHeader.vue'
 import SidebarItem from './SidebarItem.vue'
 import { SidebarProps } from './types'
@@ -54,7 +54,7 @@ import SidebarSection from './SidebarSection.vue'
 
 const props = defineProps<SidebarProps>()
 
-const isCollapsed = ref(false)
+const isCollapsed = useStorage('sidebar-collapsed', false)
 provide('isSidebarCollapsed', isCollapsed)
 
 const breakpoints = useBreakpoints(breakpointsTailwind)
