@@ -41,12 +41,12 @@
           <div class="grid w-full grid-cols-7">
             <div v-for="(date, idx) in weeklyDates">
               <div
-                class="flex w-full flex-col gap-1 border-b-[1px] border-r-[1px] border-outline-gray-1 transition-all"
+                class="flex w-full flex-col gap-1 border-b-[1px] border-outline-gray-1 transition-all"
                 :class="[
                   idx === 0 && 'relative border-l-[1px]',
-                  config.noBorder &&
-                    idx === weeklyDates.length - 1 &&
-                    'border-r-0',
+                  config.noBorder && idx === weeklyDates.length - 1
+                    ? ''
+                    : 'border-r-[1px]',
                 ]"
                 ref="allDayCells"
                 :data-date-attr="date"
@@ -91,12 +91,12 @@
             <!-- 7 Columns -->
             <div
               v-for="(date, idx) in weeklyDates"
-              class="relative w-full border-r-[1px] border-outline-gray-1"
+              class="relative w-full border-outline-gray-1"
               :class="[
                 idx === 0 && 'calendar-column border-l-[1px]',
-                config.noBorder &&
-                  idx == weeklyDates.length - 1 &&
-                  'border-r-0',
+                config.noBorder && idx === weeklyDates.length - 1
+                  ? ''
+                  : 'border-r-[1px]',
               ]"
               :data-date-attr="date"
             >
@@ -111,8 +111,8 @@
                 "
               >
                 <div
-                  class="border-outline-gray-1 w-full border-b-[1px]"
-                  :class="i === timeArray.length - 1 && 'border-b-0'"
+                  class="border-outline-gray-1 w-full"
+                  :class="i !== timeArray.length - 1 && 'border-b-[1px]'"
                   :style="{ height: `${hourHeight}px` }"
                 />
               </div>
