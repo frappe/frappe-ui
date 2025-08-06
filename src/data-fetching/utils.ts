@@ -1,4 +1,4 @@
-import { MaybeRef, unref } from 'vue'
+import { MaybeRef, toValue, MaybeRefOrGetter } from 'vue'
 import { Filters } from './useList/types'
 
 export function makeGetParams(params: Record<string, any>) {
@@ -16,14 +16,17 @@ export function isEmptyObject(obj: any) {
   return Object.keys(obj).length === 0 && obj.constructor === Object
 }
 
-export function parseFilters(filters: Filters): Filters | null {
+export function parseFilters(
+  _filters: MaybeRefOrGetter<Filters>,
+): Filters | null {
+  let filters = typeof _filters == 'function' ? _filters() : toValue(_filters)
   let parsedFilters: Filters = {}
   for (let key in filters) {
     let value = filters[key]
     if (Array.isArray(value)) {
       let [operator, actualValue] = value
-      operator = unref(operator)
-      actualValue = unref(actualValue)
+      operator = toValue(operator)
+      actualValue = toValue(actualValue)
       if (operator === 'like') {
         if (typeof actualValue != 'string') {
           actualValue = String(actualValue)
@@ -37,7 +40,7 @@ export function parseFilters(filters: Filters): Filters | null {
       }
       parsedFilters[key] = [operator, actualValue]
     } else {
-      parsedFilters[key] = unref(value)
+      parsedFilters[key] = toValue(value)
     }
   }
   if (isEmptyObject(parsedFilters)) {
@@ -51,7 +54,7 @@ export function unrefObject(
 ) {
   let newObj: Record<keyof typeof obj, any> = {}
   for (let key in obj) {
-    newObj[key] = unref(obj[key])
+    newObj[key] = toValue(obj[key])
   }
   return newObj
 }

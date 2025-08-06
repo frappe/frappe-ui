@@ -10,10 +10,8 @@ export type ChildTableField = {
 }
 
 export type FilterValue =
-  | string
-  | number
-  | boolean
-  | [string, string | number | boolean | Ref<string | number | boolean>]
+  | MaybeRefOrGetter<string | number | boolean>
+  | [string, MaybeRefOrGetter<string | number | boolean>]
 
 export interface Filters {
   [key: Field]: FilterValue

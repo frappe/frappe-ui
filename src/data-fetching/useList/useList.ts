@@ -46,7 +46,7 @@ export function useList<T extends { name: string }>(
   const _limit = ref(limit || 20)
 
   const _url = computed(() => {
-    const parsedFilters = parseFilters(filters ? toValue(filters) : {})
+    const parsedFilters = filters ? parseFilters(filters) : null
     const _fields = fields ? toValue(fields) : []
     const params = makeGetParams({
       fields: _fields.length ? JSON.stringify(_fields) : null,
