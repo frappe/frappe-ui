@@ -37,6 +37,9 @@
         />
         <component v-else-if="icon" :is="icon" :class="slotClasses" />
         <slot name="icon" v-else-if="$slots.icon" />
+        <div v-else-if="hasLucideIconInDefaultSlot" :class="slotClasses">
+          <slot>{{ label }}</slot>
+        </div>
       </template>
       <span v-else :class="{ 'sr-only': isIconButton }" class="truncate">
         <slot>{{ label }}</slot>
@@ -198,7 +201,24 @@ const ariaLabel = computed(() => {
 })
 
 const isIconButton = computed(() => {
-  return props.icon || slots.icon
+  return props.icon || slots.icon || hasLucideIconInDefaultSlot.value
+})
+
+const hasLucideIconInDefaultSlot = computed(() => {
+  if (!slots.default) return false
+
+  const slotContent = slots.default()
+  if (!Array.isArray(slotContent)) return false
+  // if the slot contains only one element and it's a lucide icon
+  // render it as an icon button
+  let firstVNode = slotContent[0]
+  if (
+    typeof firstVNode.type?.name == 'string' &&
+    firstVNode.type?.name?.startsWith('lucide-')
+  ) {
+    return true
+  }
+  return false
 })
 
 const handleClick = () => {
