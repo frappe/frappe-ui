@@ -83,7 +83,7 @@
   </div>
 </template>
 <script setup>
-import { computed, onMounted, onUnmounted, provide, ref } from 'vue'
+import { computed, onMounted, onUnmounted, provide, ref, watch } from 'vue'
 import { Button } from '../Button'
 import { TabButtons } from '../TabButtons'
 import { getCalendarDates, monthList, handleSeconds } from './calendarUtils'
@@ -200,6 +200,12 @@ const parseEvents = computed(() => {
   )
 })
 const events = ref(parseEvents.value)
+
+watch(
+  () => props.events,
+  () => reloadEvents(),
+  { deep: true },
+)
 
 function reloadEvents() {
   events.value = parseEvents.value
