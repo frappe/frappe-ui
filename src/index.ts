@@ -91,7 +91,7 @@ export { usePageMeta } from './utils/pageMeta'
 export { dayjsLocal, dayjs } from './utils/dayjs'
 export * from './utils/useFileUpload'
 
-// data-fetching, resources
+// old data-fetching: resources
 export {
   createResource,
   createDocumentResource,
@@ -106,11 +106,15 @@ export { frappeRequest } from './utils/frappeRequest.js'
 export { default as initSocket } from './utils/socketio.js'
 export { setConfig, getConfig } from './utils/config'
 
-// new data fetching
-export { useCall } from './data-fetching/useCall/useCall'
-export { useList } from './data-fetching/useList/useList'
-export { useDoc } from './data-fetching/useDoc/useDoc'
-export { useFrappeFetch } from './data-fetching/useFrappeFetch'
+// new data-fetching composables
+export {
+  useCall,
+  useList,
+  useDoc,
+  useNewDoc,
+  useDoctype,
+  useFrappeFetch,
+} from './data-fetching'
 
 // plugin
 export { default as pageMetaPlugin } from './utils/pageMeta.js'
