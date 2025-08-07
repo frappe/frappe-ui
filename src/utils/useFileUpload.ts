@@ -13,6 +13,7 @@ export interface UploadOptions {
   optimize?: boolean
   max_width?: number
   max_height?: number
+  params?: object
 }
 
 export interface UploadState {
@@ -225,6 +226,11 @@ async function upload(
       }
       if (options.max_height) {
         formData.append('max_height', options.max_height.toString())
+      }
+    }
+    if (options.params) {
+      for (let [k, v] of Object.entries(options.params)) {
+        formData.append(k, v)
       }
     }
 
