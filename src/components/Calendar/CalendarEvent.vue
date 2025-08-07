@@ -39,7 +39,7 @@
             class="text-sm font-medium"
             :class="lineClampClass"
           >
-            {{ props.event.title || 'New Event' }}
+            {{ props.event.title || '(No title)' }}
           </p>
           <p
             ref="eventTimeRef"
