@@ -28,7 +28,7 @@
         @dragover.prevent
         @drageneter.prevent
         @drop="onDrop($event, date)"
-        @dblclick="calendarActions.handleCellDblClick($event, date)"
+        @click="calendarActions.handleCellClick($event, date)"
       >
         <div
           class="flex justify-center font-normal"
@@ -54,7 +54,7 @@
                     : 'bg-surface-white ',
                   isCurrentMonth(date) ? 'text-ink-gray-6' : 'text-ink-gray-4',
                 ]"
-                @click="
+                @click.stop="
                   isCurrentMonth(date)
                     ? calendarActions.updateActiveView('Day', date)
                     : calendarActions.updateActiveView(

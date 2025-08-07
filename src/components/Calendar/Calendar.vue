@@ -114,7 +114,7 @@ const props = defineProps({
     type: Function,
     required: false,
   },
-  onCellDblClick: {
+  onCellClick: {
     type: Function,
     required: false,
   },
@@ -224,7 +224,7 @@ provide('calendarActions', {
   createNewEvent,
   updateEventState,
   deleteEvent,
-  handleCellDblClick,
+  handleCellClick,
   updateActiveView,
   props,
 })
@@ -259,7 +259,7 @@ function openModal(data) {
   openNewEventModal(e, view, date, config, time)
 }
 
-function handleCellDblClick(e, date, time = '') {
+function handleCellClick(e, date, time = '') {
   const data = {
     e,
     view: activeView.value,
@@ -267,8 +267,8 @@ function handleCellDblClick(e, date, time = '') {
     time,
   }
 
-  if (props.onCellDblClick) {
-    props.onCellDblClick(data)
+  if (props.onCellClick) {
+    props.onCellClick(data)
     return
   }
   openModal(data)

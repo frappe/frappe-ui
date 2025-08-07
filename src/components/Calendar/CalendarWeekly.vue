@@ -106,8 +106,8 @@
                 v-for="(time, i) in timeArray"
                 :key="time"
                 :data-time-attr="time"
-                @dblclick.prevent="
-                  calendarActions.handleCellDblClick($event, date, time)
+                @click.prevent="
+                  calendarActions.handleCellClick($event, date, time)
                 "
               >
                 <div

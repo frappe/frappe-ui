@@ -73,7 +73,7 @@
     ref="eventRef"
     v-bind="$attrs"
     @dblclick.prevent="handleEventEdit($event)"
-    @click="handleEventClick($event)"
+    @click.stop="handleEventClick($event)"
     :style="eventBgStyle"
   >
     <div
@@ -560,6 +560,7 @@ function handleEventClick(e) {
 
 const showEventModal = ref(false)
 function handleEventEdit(e = null) {
+  debugger
   e && (e.cancelBubble = true)
   // if it's a double click, clear the timeout
   clearTimeout(clickTimer)
