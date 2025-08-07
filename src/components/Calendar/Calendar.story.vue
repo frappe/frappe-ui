@@ -54,7 +54,7 @@
           :events="events"
           :onClick="(event) => logEvent('onClick', event)"
           :onDblClick="(event) => logEvent('onDblClick', event)"
-          :onCellDblClick="(data) => logEvent('onCellDblClick', data)"
+          :onCellClick="(data) => logEvent('onCellClick', data)"
         >
         </Calendar>
       </div>

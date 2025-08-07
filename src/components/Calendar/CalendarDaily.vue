@@ -49,8 +49,8 @@
               v-for="(time, i) in timeArray"
               :key="time"
               :data-time-attr="time"
-              @dblclick="
-                calendarActions.handleCellDblClick($event, currentDate, time)
+              @click="
+                calendarActions.handleCellClick($event, currentDate, time)
               "
             >
               <div
