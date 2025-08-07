@@ -560,7 +560,6 @@ function handleEventClick(e) {
 
 const showEventModal = ref(false)
 function handleEventEdit(e = null) {
-  debugger
   e && (e.cancelBubble = true)
   // if it's a double click, clear the timeout
   clearTimeout(clickTimer)
