@@ -33,6 +33,8 @@ interface UseDocOptions {
   doctype: string
   name: MaybeRefOrGetter<string>
   baseUrl?: string
+  headers?: Record<string, string>
+  credentials?: string
   methods?: Record<string, string | DocMethodOption>
   immediate?: boolean
 }
@@ -48,8 +50,14 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
     immediate = true,
   } = options
 
+  const extraFetchOptions = {
+    ...(options?.headers && { headers: options.headers }),
+    ...(options?.credentials && { credentials: options.credentials }),
+  }
+
   const url = computed(
-    () => `${baseUrl}/api/v2/document/${doctype}/${toValue(name)}`,
+    () =>
+      `${baseUrl}/api/v2/document/${encodeURIComponent(doctype)}/${encodeURIComponent(toValue(name))}`,
   )
 
   type SuccessCallback = (doc: TDoc) => void
@@ -67,6 +75,9 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
   const fetchOptions: UseFetchOptions = {
     immediate,
     refetch: true,
+    beforeFetch: ({ options }) => {
+      Object.assign(options, extraFetchOptions)
+    },
     afterFetch(ctx) {
       let doc = { doctype, ...ctx.data, name: String(ctx.data.name) }
       docStore.setDoc(doc)
@@ -104,11 +115,7 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
         refetch: false,
         method: 'POST',
         ...option,
-        baseUrl,
-        url: computed(
-          () =>
-            `/api/v2/document/${doctype}/${toValue(name)}/method/${option.name}`,
-        ),
+        url: computed(() => `${url.value}/method/${option.name}`),
       }
 
       docMethods[key] = readonly(useCall(callOptions))
@@ -116,28 +123,28 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
   }
 
   let setValue = useCall<TDoc, Partial<TDoc>>({
-    url: computed(() => `/api/v2/document/${doctype}/${toValue(name)}`),
+    url,
     method: 'PUT',
-    baseUrl,
     immediate: false,
     refetch: false,
     onSuccess(data) {
       docStore.setDoc({ doctype, ...data })
       listStore.updateRow(doctype, data)
     },
+    ...extraFetchOptions,
   })
 
   type DeleteResponse = 'ok'
   const delete_ = useCall<DeleteResponse>({
-    url: computed(() => `/api/v2/document/${doctype}/${toValue(name)}`),
+    url,
     method: 'DELETE',
-    baseUrl,
     immediate: false,
     refetch: false,
     onSuccess() {
       docStore.removeDoc(doctype, toValue(name))
       listStore.removeRow(doctype, toValue(name))
     },
+    ...extraFetchOptions,
   })
 
   const doc = docStore.getDoc(doctype, name) as Ref<TDoc | null>
