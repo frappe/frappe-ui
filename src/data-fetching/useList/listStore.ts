@@ -1,4 +1,7 @@
-import { useList } from './useList'
+export interface ListInstanceMethods {
+  updateRow: (doc: Partial<{ name: string }> & Record<string, unknown>) => void
+  removeRow: (name: string) => void
+}
 
 interface Doc {
   name: string
@@ -6,13 +9,13 @@ interface Doc {
 }
 
 class ListStore {
-  byDocType: { [key: string]: Array<ReturnType<typeof useList>> }
+  byDocType: { [key: string]: Array<ListInstanceMethods> }
 
   constructor() {
     this.byDocType = {}
   }
 
-  addList(doctype: string, list: ReturnType<typeof useList>) {
+  addList(doctype: string, list: ListInstanceMethods) {
     this.ensureList(doctype)
     this.byDocType[doctype].push(list)
   }

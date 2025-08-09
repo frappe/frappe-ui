@@ -40,6 +40,7 @@ export const useFrappeFetch = createFetch({
     },
     afterFetch(ctx) {
       let responseData = JSON.parse(ctx.data)
+      ctx.data = responseData
       if (responseData.debug) {
         let path = ctx.response.url.replace(window.location.origin, '')
         console.group(path)
@@ -56,7 +57,6 @@ export const useFrappeFetch = createFetch({
         docStore.setDocs(docs)
         listStore.updateRows(docs)
       }
-      ctx.data = responseData.data
       return ctx
     },
     onFetchError(ctx) {
@@ -86,11 +86,11 @@ export const useFrappeFetch = createFetch({
             ? ` (Traceback)`
             : ''
         let frappeError = new FrappeResponseError(
-`${error.type}${errorDescription}`,
+          `${error.type}${errorDescription}`,
           {
-title: error.title,
-type: error.type,
-exception: error.exception,
+            title: error.title,
+            type: error.type,
+            exception: error.exception,
             indicator: error.indicator,
           },
         )

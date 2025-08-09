@@ -130,16 +130,16 @@ export function useList<T extends { name: string }>(
     if (!refetch) execute()
   }
 
-  type PartialDoc = Partial<T extends { name: string } ? T : { name: string }>
-
-  const updateRow = (doc: PartialDoc) => {
+  const updateRow = (
+    doc: Partial<{ name: string }> & Record<string, unknown>,
+  ) => {
     if (allData.value == null) return
     let changed = false
     for (let row of allData.value) {
       if (doc.name && doc.name === row.name) {
         for (let key in doc) {
-          if (key in row) {
-            row[key] = doc[key]
+          if (key in row && doc[key] !== undefined) {
+            ;(row as Record<string, unknown>)[key] = doc[key]
             changed = true
           }
         }
@@ -215,42 +215,6 @@ export function useList<T extends { name: string }>(
     },
   })
 
-  function useEdit(name: MaybeRefOrGetter<string>) {
-    if (!allData.value) {
-      throw new Error('Data not found')
-    }
-    let row = allData.value.find((row) => row.name === toValue(name))
-    if (!row) {
-      throw new Error(`Couldn't find row with name ${toValue(name)}`)
-    }
-
-    let originalRow = JSON.parse(JSON.stringify(row))
-    let doc = reactive(row)
-
-    const setValue = useCall<T, Partial<T>>({
-      url: `/api/v2/document/${doctype}/${toValue(name)}`,
-      method: 'PUT',
-      baseUrl,
-      immediate: false,
-      refetch: false,
-      onSuccess(data) {
-        docStore.setDoc({ doctype, ...data })
-        listStore.updateRow(doctype, data)
-      },
-    })
-
-    return {
-      doc,
-      reset: () => {
-        for (let key in originalRow) {
-          doc[key] = originalRow[key]
-        }
-      },
-      setValue,
-      update: () => setValue.submit(doc),
-    }
-  }
-
   let out = reactive({
     data: result,
     hasNextPage: readonly(hasNextPage),
@@ -275,7 +239,6 @@ export function useList<T extends { name: string }>(
     insert,
     setValue,
     delete: delete_,
-    edit: useEdit,
   })
 
   listStore.addList(doctype, out)
@@ -297,42 +260,51 @@ function handleAfterFetch<T extends { name: string }>({
   _limit: Ref<number>
   hasNextPage: Ref<boolean>
 }) {
-  return function (ctx: AfterFetchContext) {
-    let resultData = ctx.data
-    if (resultData[0]?.name) {
-      resultData = resultData.map((item) => ({
-        ...item,
-        name: String(item.name),
-      }))
-    }
-    hasNextPage.value = resultData.length < _limit.value ? false : true
+  return function (
+    ctx: AfterFetchContext<{
+      data: UseListResponse<T>
+      has_next_page: boolean
+    }>,
+  ) {
+    if (ctx.data) {
+      let resultData = ctx.data.data
+      if (resultData[0]?.name) {
+        for (let row of resultData) {
+          row.name = String(row.name)
+        }
+      }
+      if (ctx.data.has_next_page != null) {
+        hasNextPage.value = ctx.data.has_next_page
+      } else {
+        hasNextPage.value = resultData.length < _limit.value ? false : true
+      }
+      if (transform) {
+        const returnValue = transform(resultData)
+        if (Array.isArray(returnValue)) {
+          resultData = returnValue
+        }
+      }
 
-    if (transform) {
-      const returnValue = transform(resultData)
-      if (Array.isArray(returnValue)) {
-        resultData = returnValue
+      if (_start.value === 0) {
+        allData.value = resultData
+      } else {
+        allData.value = [...(allData.value || []), ...resultData]
+      }
+      ctx.data.data = allData.value
+
+      let normalizedCacheKey = normalizeCacheKey(cacheKey, 'useList')
+      if (normalizedCacheKey) {
+        idbStore.set(normalizedCacheKey, ctx.data.data)
+      }
+      if (onSuccess) {
+        try {
+          onSuccess(allData.value)
+        } catch (e) {
+          console.error('Error in onSuccess hook:', e)
+        }
       }
     }
 
-    if (_start.value === 0) {
-      allData.value = resultData as T[]
-    } else {
-      allData.value = [...(allData.value || []), ...resultData]
-    }
-    ctx.data = allData.value
-
-    let normalizedCacheKey = normalizeCacheKey(cacheKey, 'useList')
-    if (normalizedCacheKey) {
-      idbStore.set(normalizedCacheKey, ctx.data)
-    }
-
-    if (onSuccess) {
-      try {
-        onSuccess(allData.value)
-      } catch (e) {
-        console.error('Error in onSuccess hook:', e)
-      }
-    }
     return ctx
   } as UseFetchOptions['afterFetch']
 }

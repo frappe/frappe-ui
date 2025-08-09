@@ -72,7 +72,7 @@ describe('useCall', () => {
 
   it('handles POST requests with params', async () => {
     type Response = { success: boolean; received: any }
-    const postCall = useCall<Response>({
+    const postCall = useCall<Response, { name: string }>({
       url: url('/api/v2/method/post'),
       method: 'POST',
       params: { name: 'test' },
@@ -90,7 +90,7 @@ describe('useCall', () => {
 
   it('supports dynamic params with reactive values', async () => {
     const dynamicValue = ref('test')
-    const call = useCall<{ value: string }>({
+    const call = useCall<{ value: string }, { value: string }>({
       url: url('/api/v2/method/get'),
       params: () => ({ value: dynamicValue.value }),
       immediate: false,

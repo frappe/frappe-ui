@@ -6,7 +6,7 @@ import {
   MaybeRefOrGetter,
   toValue,
 } from 'vue'
-import { UseFetchOptions } from '@vueuse/core'
+import { UseFetchOptions, AfterFetchContext } from '@vueuse/core'
 import { useFrappeFetch } from '../useFrappeFetch'
 import { useCall } from '../useCall/useCall'
 import { UseCallOptions } from '../useCall/types'
@@ -67,11 +67,17 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
   const fetchOptions: UseFetchOptions = {
     immediate,
     refetch: true,
-    afterFetch(ctx) {
-      let doc = { doctype, ...ctx.data, name: String(ctx.data.name) }
-      docStore.setDoc(doc)
-      listStore.updateRow(doctype, ctx.data)
-      triggerSuccessCallbacks(doc)
+    afterFetch(ctx: AfterFetchContext<{ data: TDoc }>) {
+      if (ctx.data) {
+        let doc = {
+          doctype,
+          ...ctx.data.data,
+          name: String(ctx.data.data.name),
+        }
+        docStore.setDoc(doc)
+        listStore.updateRow(doctype, ctx.data.data)
+        triggerSuccessCallbacks(doc)
+      }
       return ctx
     },
   }

@@ -1,5 +1,5 @@
 import { computed, reactive, readonly, ref, unref } from 'vue'
-import { UseFetchOptions } from '@vueuse/core'
+import { AfterFetchContext, UseFetchOptions } from '@vueuse/core'
 import { useFrappeFetch } from '../useFrappeFetch'
 import { unrefObject, makeGetParams, normalizeCacheKey } from '../utils'
 import { idbStore } from '../idbStore'
@@ -19,6 +19,8 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
     cacheKey,
     transform,
     beforeSubmit,
+    onSuccess,
+    onError,
   } = options
 
   let submitParams = ref<TParams | null | undefined>(null)
@@ -55,29 +57,69 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
     return base
   })
 
+  type FrappeResponse<T> = { data: T }
+
   const fetchOptions: UseFetchOptions = {
     immediate,
     refetch,
     initialData,
-    afterFetch: handleAfterFetch<TResponse, TParams>(options),
-    onFetchError: handleFetchError<TResponse, TParams>(options),
+    afterFetch(ctx: AfterFetchContext<FrappeResponse<TResponse>>) {
+      if (ctx.data) {
+        if (transform) {
+          let returnValue = transform(ctx.data.data)
+          if (returnValue !== undefined) {
+            ctx.data.data = returnValue
+          }
+        }
+
+        let normalizedCacheKey = normalizeCacheKey(cacheKey, 'useCall')
+        if (normalizedCacheKey) {
+          idbStore.set(normalizedCacheKey, ctx.data.data)
+        }
+
+        if (onSuccess) {
+          try {
+            onSuccess(ctx.data.data)
+          } catch (e) {
+            console.error('Error in onSuccess hook:', e)
+          }
+        }
+      }
+      return ctx
+    },
+    onFetchError(ctx) {
+      if (onError) {
+        try {
+          onError(ctx.error)
+        } catch (e) {
+          console.error('Error in onError hook:', e)
+        }
+      }
+      return ctx
+    },
   }
 
   let result
   if (method === 'POST') {
-    result = useFrappeFetch<TResponse>(computedUrl, fetchOptions).post(
-      computedParams,
-    )
+    result = useFrappeFetch<FrappeResponse<TResponse>>(
+      computedUrl,
+      fetchOptions,
+    ).post(computedParams)
   } else if (method === 'PUT') {
-    result = useFrappeFetch<TResponse>(computedUrl, fetchOptions).put(
-      computedParams,
-    )
+    result = useFrappeFetch<FrappeResponse<TResponse>>(
+      computedUrl,
+      fetchOptions,
+    ).put(computedParams)
   } else if (method === 'DELETE') {
-    result = useFrappeFetch<TResponse>(computedUrl, fetchOptions).delete(
-      computedParams,
-    )
+    result = useFrappeFetch<FrappeResponse<TResponse>>(
+      computedUrl,
+      fetchOptions,
+    ).delete(computedParams)
   } else {
-    result = useFrappeFetch<TResponse>(computedUrl, fetchOptions).get()
+    result = useFrappeFetch<FrappeResponse<TResponse>>(
+      computedUrl,
+      fetchOptions,
+    ).get()
   }
 
   const {
@@ -94,7 +136,7 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
   } = result
 
   function execute(): Promise<TResponse | null> {
-    return _execute().then((r) => data.value)
+    return _execute().then((r) => data.value?.data ?? null)
   }
 
   onFetchResponse(() => {
@@ -145,7 +187,7 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
       }
       return cachedData
     }
-    return data.value
+    return data.value?.data ?? null
   })
 
   if (normalizedCacheKey) {
@@ -180,48 +222,4 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
       ? (params?: never) => Promise<void>
       : (params: TParams) => Promise<void>
   }
-}
-
-function handleAfterFetch<R, P extends BasicParams>({
-  transform,
-  onSuccess,
-  cacheKey,
-}: UseCallOptions<R, P>) {
-  return function (ctx) {
-    if (transform) {
-      let returnValue = transform(ctx.data)
-      if (returnValue !== undefined) {
-        ctx.data = returnValue
-      }
-    }
-
-    let normalizedCacheKey = normalizeCacheKey(cacheKey, 'useCall')
-    if (normalizedCacheKey) {
-      idbStore.set(normalizedCacheKey, ctx.data)
-    }
-
-    if (onSuccess) {
-      try {
-        onSuccess(ctx.data)
-      } catch (e) {
-        console.error('Error in onSuccess hook:', e)
-      }
-    }
-    return ctx
-  } as UseFetchOptions['afterFetch']
-}
-
-function handleFetchError<R, P extends BasicParams>({
-  onError,
-}: UseCallOptions<R, P>) {
-  return function (ctx) {
-    if (onError) {
-      try {
-        onError(ctx.error)
-      } catch (e) {
-        console.error('Error in onError hook:', e)
-      }
-    }
-    return ctx
-  } as UseFetchOptions['onFetchError']
 }

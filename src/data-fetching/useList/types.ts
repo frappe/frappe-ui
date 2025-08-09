@@ -11,10 +11,10 @@ export type ChildTableField = {
 
 export type FilterValue =
   | MaybeRefOrGetter<string | number | boolean>
-  | [string, MaybeRefOrGetter<string | number | boolean>]
+  | [string, MaybeRefOrGetter<string | number | boolean | string[]>]
 
 export interface Filters {
-  [key: Field]: FilterValue
+  [key: Field]: FilterValue | undefined
 }
 
 export type OrderBy =
