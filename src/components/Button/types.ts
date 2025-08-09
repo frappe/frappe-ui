@@ -1,4 +1,4 @@
-import { type RouteLocation } from 'vue-router'
+import { type RouterLinkProps } from 'vue-router'
 import { type Component } from 'vue'
 
 type Theme = 'gray' | 'blue' | 'green' | 'red'
@@ -17,7 +17,7 @@ export interface ButtonProps {
   loading?: boolean
   loadingText?: string
   disabled?: boolean
-  route?: RouteLocation
+  route?: RouterLinkProps['to']
   link?: string
 }
 
