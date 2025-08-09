@@ -2,6 +2,35 @@ import { createFetch } from '@vueuse/core'
 import { docStore } from './docStore'
 import { listStore } from './useList/listStore'
 
+export class FrappeResponseError extends Error {
+  title: string
+  type: string
+  exception?: string
+  indicator?: string
+
+  constructor(
+    message: string,
+    options: {
+      title: string
+      type: string
+      exception?: string
+      indicator?: string
+    },
+  ) {
+    super(message)
+    this.name = 'FrappeResponseError'
+    this.title = options.title
+    this.type = options.type
+    this.exception = options.exception
+    this.indicator = options.indicator
+
+    // Maintains proper stack trace for where our error was thrown (only available on V8)
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, FrappeResponseError)
+    }
+  }
+}
+
 export const useFrappeFetch = createFetch({
   options: {
     fetch: (...args) => fetch(...args), // required for vitest
@@ -56,10 +85,15 @@ export const useFrappeFetch = createFetch({
           : error.exception
             ? ` (Traceback)`
             : ''
-        let frappeError = new Error(`${error.type}${errorDescription}`)
-        frappeError.title = error.title
-        frappeError.type = error.type
-        frappeError.exception = error.exception
+        let frappeError = new FrappeResponseError(
+`${error.type}${errorDescription}`,
+          {
+title: error.title,
+type: error.type,
+exception: error.exception,
+            indicator: error.indicator,
+          },
+        )
 
         if (import.meta.env.DEV && error.exception) {
           console.log(error.exception)
