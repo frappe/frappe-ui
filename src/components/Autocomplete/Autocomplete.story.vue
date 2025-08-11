@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { reactive, ref } from 'vue'
 import Autocomplete from './Autocomplete.vue'
 
 const single = ref()
@@ -36,6 +36,11 @@ const options = [
     image: 'https://randomuser.me/api/portraits/women/51.jpg',
   },
 ]
+
+
+const state = reactive({
+  disabled: false,
+}) 
 </script>
 <template>
   <Story :layout="{ width: 500, type: 'grid' }" autoPropsDisabled>
@@ -44,6 +49,7 @@ const options = [
         <Autocomplete
           :options="options"
           v-model="single"
+          :disabled="state.disabled"
           placeholder="Select person"
         />
       </div>
@@ -53,6 +59,7 @@ const options = [
         <Autocomplete
           :options="options"
           v-model="single"
+          :disabled="state.disabled"
           placeholder="Select person"
         >
           <template #prefix>
@@ -73,6 +80,7 @@ const options = [
         <Autocomplete
           :options="options"
           v-model="single"
+          :disabled="state.disabled"
           placeholder="Select person"
           :hideSearch="true"
         />
@@ -83,6 +91,7 @@ const options = [
         <Autocomplete
           :options="options"
           v-model="people"
+          :disabled="state.disabled"
           placeholder="Select people"
           :multiple="true"
           :compareFn="(a, b) => a.value === b.value"
@@ -94,11 +103,16 @@ const options = [
         <Autocomplete
           :options="options"
           v-model="people"
+          :disabled="state.disabled"
           placeholder="Select people"
           :multiple="true"
           :hideSearch="true"
         />
       </div>
     </Variant>
+
+    <template #controls>
+      <HstCheckbox v-model="state.disabled" title="Disabled" />
+    </template>
   </Story>
 </template>
