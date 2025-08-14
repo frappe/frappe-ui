@@ -40,7 +40,7 @@
           <Checkbox
             :modelValue="isSelected"
             class="cursor-pointer duration-300"
-            @click.stop="list.toggleRow(row[list.rowKey])"
+            @click.stop="handleCheckboxClick"
           />
         </div>
         <div
@@ -89,7 +89,7 @@
 import Checkbox from '../Checkbox/Checkbox.vue'
 import ListRowItem from './ListRowItem.vue'
 import { alignmentMap, getGridTemplateColumns } from './utils'
-import { computed, inject, ref } from 'vue'
+import { computed, inject } from 'vue'
 
 const props = defineProps({
   row: {
@@ -150,6 +150,26 @@ const onRowClick = (row, e) => {
     list.value.activeRow.value = null
   } else {
     list.value.activeRow.value = row.name
+  }
+}
+
+const handleCheckboxClick = (event) => {
+  const value = props.row[list.value.rowKey]
+  if (event.shiftKey && !list.value.selections.has(value)) {
+    const lastSelected = Array.from(list.value.selections).pop()
+    const lastIndex = list.value.rows.findIndex(
+      (k) => lastSelected === k[list.value.rowKey],
+    )
+    const curIndex = list.value.rows.findIndex(
+      (k) => value === k[list.value.rowKey],
+    )
+    const start = Math.min(lastIndex, curIndex)
+    const end = Math.max(lastIndex, curIndex)
+    for (let i = start; i <= end; i++) {
+      list.value.selections.add(list.value.rows[i][list.value.rowKey])
+    }
+  } else {
+    list.value.toggleRow(value)
   }
 }
 </script>
