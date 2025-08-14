@@ -14,7 +14,7 @@
     class="flex flex-col transition-all duration-300 ease-in-out"
     v-bind="{
       to: list.options.getRowRoute ? list.options.getRowRoute(row) : undefined,
-      onClick: (e) => onRowClick(row, e),
+      onClick: onRowClick,
     }"
   >
     <component
@@ -144,12 +144,13 @@ const roundedClass = computed(() => {
   }
 })
 
-const onRowClick = (row, e) => {
-  if (list.value.options.onRowClick) list.value.options.onRowClick(row, e)
-  if (list.value.activeRow.value === row.name) {
+const onRowClick = (event) => {
+  if (list.value.options.onRowClick)
+    list.value.options.onRowClick(props.row, event)
+  if (list.value.activeRow.value === props.row.name) {
     list.value.activeRow.value = null
   } else {
-    list.value.activeRow.value = row.name
+    list.value.activeRow.value = props.row.name
   }
 }
 
