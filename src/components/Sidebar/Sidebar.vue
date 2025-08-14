@@ -1,11 +1,11 @@
 <template>
   <div
     class="flex h-full flex-col flex-shrink-0 overflow-y-auto overflow-x-hidden border-r border-outline-gray-1 bg-surface-menu-bar transition-all duration-300 ease-in-out p-2"
-    :class="isCollapsed ? 'w-12' : 'w-60'"
+    :class="shouldCollapse ? 'w-12' : 'w-60'"
   >
     <SidebarHeader
       v-if="props.header"
-      :isCollapsed="isCollapsed"
+      :isCollapsed="shouldCollapse"
       :title="props.header.title"
       :subtitle="props.header.subtitle"
       :logo="props.header.logo"
@@ -25,16 +25,19 @@
     />
 
     <div class="mt-auto flex flex-col gap-2">
-      <slot name="footer-items" v-bind="{ isCollapsed, isMobile }"/>
+      <slot
+        name="footer-items"
+        v-bind="{ isCollapsed: shouldCollapse, isMobile }"
+      />
       <SidebarItem
-        :label="isCollapsed ? 'Expand' : 'Collapse'"
-        :isCollapsed="isCollapsed"
+        :label="shouldCollapse ? 'Expand' : 'Collapse'"
+        :isCollapsed="shouldCollapse"
         @click="isCollapsed = !isCollapsed"
       >
         <template #icon>
           <LucidePanelRightOpen
             class="size-4 text-ink-gray-6 duration-300 ease-in-out"
-            :class="{ 'rotate-180': isCollapsed }"
+            :class="{ 'rotate-180': shouldCollapse }"
           />
         </template>
       </SidebarItem>
@@ -44,7 +47,7 @@
 
 <script setup lang="ts">
 import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
-import { provide, watch } from 'vue'
+import { provide, computed } from 'vue'
 import SidebarHeader from './SidebarHeader.vue'
 import SidebarItem from './SidebarItem.vue'
 import { SidebarProps } from './types'
@@ -56,16 +59,11 @@ const props = defineProps<SidebarProps>()
 
 const isCollapsed = defineModel('collapsed', {
   type: Boolean,
-  default: false,
+  default: null,
 })
 provide('isSidebarCollapsed', isCollapsed)
+const shouldCollapse = computed(() => isCollapsed.value || isMobile.value)
 
 const breakpoints = useBreakpoints(breakpointsTailwind)
 const isMobile = breakpoints.smaller('sm')
-if (isMobile.value) {
-  isCollapsed.value = true
-}
-watch(isMobile, () => {
-  isCollapsed.value = isMobile.value
-})
 </script>

@@ -61,6 +61,7 @@
 import { inject, ref } from 'vue'
 import SidebarItem from './SidebarItem.vue'
 import { SidebarSectionProps } from './types'
+import LucideChevronRight from '~icons/lucide/chevron-right'
 
 const props = defineProps<SidebarSectionProps>()
 
