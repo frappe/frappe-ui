@@ -1,60 +1,66 @@
 <template>
   <Tooltip :text="tooltip" :disabled="!tooltip?.length">
-    <button
-      v-bind="$attrs"
-      :class="buttonClasses"
-      @click="handleClick"
-      :disabled="isDisabled"
-      :ariaLabel="ariaLabel"
-      ref="rootRef"
-    >
-      <LoadingIndicator
-        v-if="loading"
-        :class="{
-          'h-3 w-3': size == 'sm',
-          'h-[13.5px] w-[13.5px]': size == 'md',
-          'h-[15px] w-[15px]': size == 'lg',
-          'h-4.5 w-4.5': size == 'xl' || size == '2xl',
-        }"
-      />
-      <slot name="prefix" v-else-if="$slots['prefix'] || iconLeft">
-        <FeatherIcon
-          v-if="iconLeft && typeof iconLeft === 'string'"
-          :name="iconLeft"
-          :class="slotClasses"
-          aria-hidden="true"
+    <div class="flex h-fit w-fit">
+      <button
+        v-bind="$attrs"
+        :class="buttonClasses"
+        @click="handleClick"
+        :disabled="isDisabled"
+        :ariaLabel="ariaLabel"
+        ref="rootRef"
+      >
+        <LoadingIndicator
+          v-if="loading"
+          :class="{
+            'h-3 w-3': size == 'sm',
+            'h-[13.5px] w-[13.5px]': size == 'md',
+            'h-[15px] w-[15px]': size == 'lg',
+            'h-4.5 w-4.5': size == 'xl' || size == '2xl',
+          }"
         />
-        <component v-else-if="iconLeft" :is="iconLeft" :class="slotClasses" />
-      </slot>
+        <slot name="prefix" v-else-if="$slots['prefix'] || iconLeft">
+          <FeatherIcon
+            v-if="iconLeft && typeof iconLeft === 'string'"
+            :name="iconLeft"
+            :class="slotClasses"
+            aria-hidden="true"
+          />
+          <component v-else-if="iconLeft" :is="iconLeft" :class="slotClasses" />
+        </slot>
 
-      <template v-if="loading && loadingText">{{ loadingText }}</template>
-      <template v-else-if="isIconButton && !loading">
-        <FeatherIcon
-          v-if="icon && typeof icon === 'string'"
-          :name="icon"
-          :class="slotClasses"
-          :aria-label="label"
-        />
-        <component v-else-if="icon" :is="icon" :class="slotClasses" />
-        <slot name="icon" v-else-if="$slots.icon" />
-        <div v-else-if="hasLucideIconInDefaultSlot" :class="slotClasses">
+        <template v-if="loading && loadingText">{{ loadingText }}</template>
+        <template v-else-if="isIconButton && !loading">
+          <FeatherIcon
+            v-if="icon && typeof icon === 'string'"
+            :name="icon"
+            :class="slotClasses"
+            :aria-label="label"
+          />
+          <component v-else-if="icon" :is="icon" :class="slotClasses" />
+          <slot name="icon" v-else-if="$slots.icon" />
+          <div v-else-if="hasLucideIconInDefaultSlot" :class="slotClasses">
+            <slot>{{ label }}</slot>
+          </div>
+        </template>
+        <span v-else :class="{ 'sr-only': isIconButton }" class="truncate">
           <slot>{{ label }}</slot>
-        </div>
-      </template>
-      <span v-else :class="{ 'sr-only': isIconButton }" class="truncate">
-        <slot>{{ label }}</slot>
-      </span>
+        </span>
 
-      <slot name="suffix">
-        <FeatherIcon
-          v-if="iconRight && typeof iconRight === 'string'"
-          :name="iconRight"
-          :class="slotClasses"
-          aria-hidden="true"
-        />
-        <component v-else-if="iconRight" :is="iconRight" :class="slotClasses" />
-      </slot>
-    </button>
+        <slot name="suffix">
+          <FeatherIcon
+            v-if="iconRight && typeof iconRight === 'string'"
+            :name="iconRight"
+            :class="slotClasses"
+            aria-hidden="true"
+          />
+          <component
+            v-else-if="iconRight"
+            :is="iconRight"
+            :class="slotClasses"
+          />
+        </slot>
+      </button>
+    </div>
   </Tooltip>
 </template>
 <script lang="ts" setup>
@@ -230,7 +236,5 @@ const handleClick = () => {
 }
 
 const rootRef = ref()
-defineExpose({
-  rootRef,
-})
+defineExpose({ rootRef })
 </script>
