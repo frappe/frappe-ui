@@ -29,13 +29,13 @@ import Table from './icons/table-2.vue'
 
 export default {
   Paragraph: {
-    label: '123',
+    label: 'Paragraph',
     icon: Text,
     action: (editor) => editor.chain().focus().setParagraph().run(),
     isActive: (editor) => editor.isActive('paragraph'),
   },
   'Heading 1': {
-    label: 'Heading 1',
+    label: '123 1',
     text: 'H1',
     icon: H1,
     action: (editor) =>
