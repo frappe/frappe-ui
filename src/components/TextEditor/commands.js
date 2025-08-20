@@ -29,7 +29,7 @@ import Table from './icons/table-2.vue'
 
 export default {
   Paragraph: {
-    label: 'Paragraph',
+    label: '123',
     icon: Text,
     action: (editor) => editor.chain().focus().setParagraph().run(),
     isActive: (editor) => editor.isActive('paragraph'),
