@@ -1,9 +1,10 @@
 import { RouterLinkProps } from 'vue-router'
 import { ButtonProps } from '../Button'
+import { type Component } from 'vue'
 
 export type DropdownOption = {
   label: string
-  icon?: string | null
+  icon?: string | Component | null
   theme?: 'gray' | 'red'
   component?: any
   onClick?: () => void

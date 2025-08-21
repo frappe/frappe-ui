@@ -61,6 +61,10 @@
                       v-else-if="item.icon"
                       :is="item.icon"
                     />
+                    <div
+                      v-else-if="groupHasIcons(group)"
+                      :class="cssClasses.itemIconPlaceholder"
+                    />
                     <span :class="[cssClasses.itemLabel, getTextColor(item)]">
                       {{ item.label }}
                     </span>
@@ -125,6 +129,10 @@
                             v-else-if="subItem.icon"
                             :is="subItem.icon"
                           />
+                          <div
+                            v-else-if="groupHasIcons(submenuGroup)"
+                            :class="cssClasses.itemIconPlaceholder"
+                          />
                           <span
                             :class="[
                               cssClasses.itemLabel,
@@ -153,6 +161,10 @@
                   :class="[cssClasses.itemIcon, getIconColor(item)]"
                   v-else-if="item.icon"
                   :is="item.icon"
+                />
+                <div
+                  v-else-if="groupHasIcons(group)"
+                  :class="cssClasses.itemIconPlaceholder"
                 />
                 <span :class="[cssClasses.itemLabel, getTextColor(item)]"
                   >{{ item.label }}
@@ -297,6 +309,11 @@ const filterOptions = (options: DropdownOption[]) => {
     .map((option) => normalizeDropdownItem(option))
 }
 
+// Check if any item in a group has an icon
+const groupHasIcons = (group: DropdownGroupOption) => {
+  return group.items.some((item) => item.icon)
+}
+
 // Semantic CSS classes for consistent styling
 const cssClasses = {
   // Container classes
@@ -310,6 +327,7 @@ const cssClasses = {
 
   // Icon classes
   itemIcon: 'mr-2 h-4 w-4 flex-shrink-0',
+  itemIconPlaceholder: 'mr-2 h-4 w-4 flex-shrink-0',
   chevronIcon: 'ml-auto h-4 w-4 flex-shrink-0',
 
   // Button classes
