@@ -34,7 +34,7 @@ const delayDuration = computed(() => props.hoverDelay * 1000)
       </TooltipTrigger>
       <TooltipPortal>
         <TooltipContent
-          v-if="props.text || $slots.body"
+          v-if="props.text || $slots.body || $slots.content"
           :side="props.placement"
           :side-offset="4"
           class="z-[100]"
