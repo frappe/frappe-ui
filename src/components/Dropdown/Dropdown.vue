@@ -1,7 +1,7 @@
 <template>
-  <DropdownMenuRoot v-slot="{ open }">
+  <DropdownMenuRoot v-model:open="toggleState" v-slot="{ open }">
     <DropdownMenuTrigger as-child>
-      <slot v-if="$slots.default" v-bind="{ open, ...attrs }" />
+      <slot v-if="$slots.default" v-bind="{ open, close, ...attrs }" />
       <Button v-else :active="false" v-bind="{ ...button, ...attrs }">
         {{ button ? button?.label || null : 'Options' }}
       </Button>
@@ -36,8 +36,9 @@
               as-child
               @select="item.onClick"
             >
+              <slot v-if="$slots.item" name="item" v-bind="{ item, close }" />
               <component
-                v-if="item.component"
+                v-else-if="item.component"
                 :is="item.component"
                 :active="false"
               />
@@ -179,7 +180,7 @@ import {
 } from 'reka-ui'
 import { Button } from '../Button'
 import FeatherIcon from '../FeatherIcon.vue'
-import { computed, useAttrs } from 'vue'
+import { ref, computed, useAttrs } from 'vue'
 import { useRouter } from 'vue-router'
 import type {
   DropdownProps,
@@ -193,6 +194,7 @@ defineOptions({
   inheritAttrs: false,
 })
 
+const toggleState = ref(false)
 const router = useRouter()
 const attrs = useAttrs()
 
@@ -200,6 +202,10 @@ const props = withDefaults(defineProps<DropdownProps>(), {
   options: () => [],
   placement: 'left',
 })
+
+function close() {
+  toggleState.value = false
+}
 
 // Unified click handling for all dropdown items
 const handleItemClick = (item: DropdownOption) => {
@@ -212,6 +218,7 @@ const handleItemClick = (item: DropdownOption) => {
 
 const normalizeDropdownItem = (option: DropdownOption) => {
   return {
+    ...option,
     label: option.label,
     theme: option.theme || 'gray',
     icon: option.icon,
