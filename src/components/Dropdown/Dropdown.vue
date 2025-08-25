@@ -96,7 +96,10 @@
                         v-for="subItem in submenuGroup.items"
                         :key="subItem.label"
                         as-child
-                        @select="() => handleItemClick(subItem)"
+                        @select="
+                          (event: PointerEvent) =>
+                            handleItemClick(subItem, event)
+                        "
                       >
                         <component
                           v-if="subItem.component"
@@ -220,11 +223,11 @@ function close() {
 }
 
 // Unified click handling for all dropdown items
-const handleItemClick = (item: DropdownOption) => {
+const handleItemClick = (item: DropdownOption, event: PointerEvent) => {
   if (item.route) {
     router.push(item.route)
   } else if (item.onClick) {
-    item.onClick()
+    item.onClick(event)
   }
 }
 
@@ -235,7 +238,7 @@ const normalizeDropdownItem = (option: DropdownOption) => {
     theme: option.theme || 'gray',
     icon: option.icon,
     component: option.component,
-    onClick: () => handleItemClick(option),
+    onClick: (event: PointerEvent) => handleItemClick(option, event),
     submenu: option.submenu,
   }
 }
