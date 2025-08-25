@@ -1140,6 +1140,52 @@
       }
     },
     {
+      "id": "docs-other-directives-story-js",
+      "title": "Directives",
+      "layout": {
+        "type": "single",
+        "iframe": true
+      },
+      "icon": "carbon:document-blank",
+      "docsOnly": true,
+      "variants": [],
+      "relativePath": "docs/other/Directives.story.js",
+      "supportPluginId": "vanilla",
+      "treePath": [
+        "Directives"
+      ],
+      "virtual": true,
+      "markdownFile": {
+        "id": "docs-other-directives-story-md",
+        "relativePath": "docs/other/Directives.story.md",
+        "isRelatedToStory": false,
+        "frontmatter": {}
+      }
+    },
+    {
+      "id": "docs-other-utilities-story-js",
+      "title": "Utilities",
+      "layout": {
+        "type": "single",
+        "iframe": true
+      },
+      "icon": "carbon:document-blank",
+      "docsOnly": true,
+      "variants": [],
+      "relativePath": "docs/other/Utilities.story.js",
+      "supportPluginId": "vanilla",
+      "treePath": [
+        "Utilities"
+      ],
+      "virtual": true,
+      "markdownFile": {
+        "id": "docs-other-utilities-story-md",
+        "relativePath": "docs/other/Utilities.story.md",
+        "isRelatedToStory": false,
+        "frontmatter": {}
+      }
+    },
+    {
       "id": "docs-resources-document-resource-story-js",
       "title": "Document Resource",
       "layout": {
@@ -1204,52 +1250,6 @@
       "markdownFile": {
         "id": "docs-resources-resource-story-md",
         "relativePath": "docs/resources/Resource.story.md",
-        "isRelatedToStory": false,
-        "frontmatter": {}
-      }
-    },
-    {
-      "id": "docs-other-directives-story-js",
-      "title": "Directives",
-      "layout": {
-        "type": "single",
-        "iframe": true
-      },
-      "icon": "carbon:document-blank",
-      "docsOnly": true,
-      "variants": [],
-      "relativePath": "docs/other/Directives.story.js",
-      "supportPluginId": "vanilla",
-      "treePath": [
-        "Directives"
-      ],
-      "virtual": true,
-      "markdownFile": {
-        "id": "docs-other-directives-story-md",
-        "relativePath": "docs/other/Directives.story.md",
-        "isRelatedToStory": false,
-        "frontmatter": {}
-      }
-    },
-    {
-      "id": "docs-other-utilities-story-js",
-      "title": "Utilities",
-      "layout": {
-        "type": "single",
-        "iframe": true
-      },
-      "icon": "carbon:document-blank",
-      "docsOnly": true,
-      "variants": [],
-      "relativePath": "docs/other/Utilities.story.js",
-      "supportPluginId": "vanilla",
-      "treePath": [
-        "Utilities"
-      ],
-      "virtual": true,
-      "markdownFile": {
-        "id": "docs-other-utilities-story-md",
-        "relativePath": "docs/other/Utilities.story.md",
         "isRelatedToStory": false,
         "frontmatter": {}
       }
@@ -1369,6 +1369,18 @@
       "frontmatter": {}
     },
     {
+      "id": "docs-other-directives-story-md",
+      "relativePath": "docs/other/Directives.story.md",
+      "isRelatedToStory": false,
+      "frontmatter": {}
+    },
+    {
+      "id": "docs-other-utilities-story-md",
+      "relativePath": "docs/other/Utilities.story.md",
+      "isRelatedToStory": false,
+      "frontmatter": {}
+    },
+    {
       "id": "docs-resources-document-resource-story-md",
       "relativePath": "docs/resources/Document Resource.story.md",
       "isRelatedToStory": false,
@@ -1383,18 +1395,6 @@
     {
       "id": "docs-resources-resource-story-md",
       "relativePath": "docs/resources/Resource.story.md",
-      "isRelatedToStory": false,
-      "frontmatter": {}
-    },
-    {
-      "id": "docs-other-directives-story-md",
-      "relativePath": "docs/other/Directives.story.md",
-      "isRelatedToStory": false,
-      "frontmatter": {}
-    },
-    {
-      "id": "docs-other-utilities-story-md",
-      "relativePath": "docs/other/Utilities.story.md",
       "isRelatedToStory": false,
       "frontmatter": {}
     },
