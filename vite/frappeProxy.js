@@ -5,9 +5,17 @@ export function frappeProxy({
   source = '^/(app|login|api|assets|files|private)',
 } = {}) {
   const commonSiteConfig = getCommonSiteConfig()
-  const webserver_port = commonSiteConfig
-    ? commonSiteConfig.webserver_port
-    : 8000
+  const env_web_server_port = process.env.FRAPPE_WEB_SERVER_PORT
+  const webserver_port =
+    env_web_server_port ||
+    (commonSiteConfig ? commonSiteConfig.webserver_port : 8000)
+
+  if (env_web_server_port) {
+    console.log(
+      `Using web server port from environment: ${env_web_server_port}`,
+    )
+  }
+
   if (!commonSiteConfig) {
     console.log('No common_site_config.json found, using default port 8000')
   }
