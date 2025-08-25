@@ -7,7 +7,7 @@ export type DropdownOption = {
   icon?: string | Component | null
   theme?: 'gray' | 'red'
   component?: any
-  onClick?: () => void
+  onClick?: (event: PointerEvent) => void
   route?: RouterLinkProps['to']
   condition?: () => boolean
   submenu?: DropdownOptions
