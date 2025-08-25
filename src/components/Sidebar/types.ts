@@ -13,6 +13,7 @@ export type SidebarHeaderProps = {
 
 export type SidebarItemProps = {
   label: string
+  accessKey?: string
   icon?: any // Icon component
   suffix?: string
   to?: RouteLocationRaw
