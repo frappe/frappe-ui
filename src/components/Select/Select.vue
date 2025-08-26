@@ -1,4 +1,138 @@
+<script setup lang="ts">
+import { computed, useSlots, useAttrs } from 'vue'
+import LucideChevronDown from '~icons/lucide/chevron-down'
+import LucideChevronUp from '~icons/lucide/chevron-up'
+
+import {
+  type SimpleOption,
+  isGroup,
+  getLabel,
+  getValue,
+  getIcon,
+  isDisabled,
+  RenderIcon,
+} from '../Combobox/utils'
+
+import {
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectItemText,
+  SelectItemIndicator,
+  SelectLabel,
+  SelectPortal,
+  SelectRoot,
+  SelectScrollDownButton,
+  SelectScrollUpButton,
+  SelectSeparator,
+  SelectTrigger,
+  SelectValue,
+  SelectViewport,
+} from 'reka-ui'
+
+type SelectOption =
+  | string
+  | {
+      label: string
+      value: string
+      icon?: any
+      disabled?: boolean
+    }
+
+interface SelectProps {
+  size?: 'sm' | 'md' | 'lg'
+  variant?: 'subtle' | 'outline' | 'ghost'
+  placeholder?: string
+  disabled?: boolean
+  id?: string
+  modelValue?: string | number
+  options: SelectOption[]
+}
+
+defineOptions({
+  inheritAttrs: false,
+})
+
+const props = withDefaults(defineProps<SelectProps>(), {
+  size: 'sm',
+  variant: 'subtle',
+})
+
+const emit = defineEmits(['update:modelValue'])
+const slots = useSlots()
+const attrs = useAttrs()
+const selected = defineModel<string>()
+const flatOptions = computed<SimpleOption[]>(() =>
+  props.options.flatMap((opt) => (isGroup(opt) ? opt.options : opt)),
+)
+const selectedOption = computed<SimpleOption>(() => {
+  if (!selected.value) return { label: 'Select an option...', value: null }
+  return flatOptions.value.find((opt) => getValue(opt) === selected.value)
+})
+const selectedOptionIcon = computed(() => getIcon(selectedOption.value))
+</script>
+
 <template>
+  <SelectRoot v-model="selected">
+    <SelectTrigger
+      class="flex h-7 items-center justify-between gap-2 rounded bg-surface-gray-2 px-2 py-1 transition-colors hover:bg-surface-gray-3 border border-transparent focus-within:border-outline-gray-4 focus-within:ring-2 focus-within:ring-outline-gray-3"
+    >
+      <div class="flex items-center flex-1 gap-2 overflow-hidden">
+        <RenderIcon v-if="selectedOptionIcon" :icon="selectedOptionIcon" />
+        <SelectValue
+          placeholder="Select an option..."
+          class="text-base text-ink-gray-8 h-full placeholder:text-ink-gray-4"
+        />
+        <RenderIcon :icon="LucideChevronDown" class="ml-auto" />
+      </div>
+    </SelectTrigger>
+
+    <SelectPortal>
+      <SelectContent
+        position="popper"
+        class="z-10 min-w-[--reka-combobox-trigger-width] mt-1 bg-surface-modal overflow-hidden rounded-lg shadow-2xl"
+      >
+        <SelectScrollUpButton
+          class="flex items-center justify-center py-0.5 bg-white cursor-default"
+        >
+          <RenderIcon :icon="LucideChevronUp" />
+        </SelectScrollUpButton>
+        <SelectViewport class="max-h-60 overflow-auto py-1.5">
+          <SelectGroup class="px-1.5">
+            <SelectLabel />
+
+            <SelectItem
+              v-for="(option, idx) in options"
+              :key="idx"
+              :value="option.value"
+              class="text-base leading-none text-ink-gray-7 rounded flex items-center h-7 px-2.5 py-1.5 relative select-none data-[disabled]:opacity-50 data-[disabled]:pointer-events-none data-[highlighted]:outline-none data-[highlighted]:bg-surface-gray-3"
+            >
+              <SelectItemText
+                ><span class="flex items-center gap-2 pr-6 flex-1">
+                  <RenderIcon :icon="getIcon(option)" />
+                  {{ getLabel(option) }}
+                </span></SelectItemText
+              >
+              <SelectItemIndicator
+                class="inline-flex ml-auto items-center justify-center"
+              >
+                <LucideCheck class="size-4" />
+              </SelectItemIndicator>
+            </SelectItem>
+          </SelectGroup>
+          <SelectSeparator />
+        </SelectViewport>
+        <SelectScrollDownButton />
+        <SelectScrollDownButton
+          class="flex items-center justify-center py-0.5 bg-white cursor-default"
+        >
+          <RenderIcon :icon="LucideChevronDown" />
+        </SelectScrollDownButton>
+      </SelectContent>
+    </SelectPortal>
+  </SelectRoot>
+</template>
+<!-- <template>
   <div class="relative flex items-center">
     <div
       :class="[
@@ -37,24 +171,14 @@
       </option>
     </select>
   </div>
-</template>
+</template> -->
 
-<script setup lang="ts">
+<!-- <script setup lang="ts">
 import { computed, useSlots, useAttrs } from 'vue'
-import type { SelectProps } from './types'
 
-defineOptions({
-  inheritAttrs: false,
-})
 
-const props = withDefaults(defineProps<SelectProps>(), {
-  size: 'sm',
-  variant: 'subtle',
-})
 
-const emit = defineEmits(['update:modelValue'])
-const slots = useSlots()
-const attrs = useAttrs()
+
 
 function handleChange(e: Event) {
   emit('update:modelValue', (e.target as HTMLInputElement).value)
@@ -141,4 +265,4 @@ let prefixClasses = computed(() => {
     xl: 'pl-3',
   }[props.size]
 })
-</script>
+</script> -->

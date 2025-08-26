@@ -24,20 +24,20 @@ import {
 } from 'reka-ui'
 import LucideCheck from '~icons/lucide/check'
 import LucideChevronDown from '~icons/lucide/chevron-down'
-
-type SimpleOption =
-  | string
-  | {
-      label: string
-      value: string
-      icon?: string | Component
-      disabled?: boolean
-    }
-type GroupedOption = { group: string; options: SimpleOption[] }
-type ComboboxOption = SimpleOption | GroupedOption
+import {
+  type SimpleOption,
+  type GenericOption,
+  getDisplayValue,
+  isGroup,
+  getLabel,
+  getValue,
+  getIcon,
+  isDisabled,
+  RenderIcon,
+} from './utils'
 
 interface ComboboxProps {
-  options: Array<ComboboxOption>
+  options: Array<GenericOption>
   modelValue?: string | null
   placeholder?: string
   disabled?: boolean
@@ -51,7 +51,7 @@ const emit = defineEmits([
   'blur',
 ])
 
-const searchTerm = ref(getDisplayValue(props.modelValue))
+const searchTerm = ref(getDisplayValue(props.options, props.modelValue))
 const internalModelValue = ref(props.modelValue)
 const isOpen = ref(false)
 const userHasTyped = ref(false)
@@ -60,40 +60,20 @@ watch(
   () => props.modelValue,
   (newValue) => {
     internalModelValue.value = newValue
-    searchTerm.value = getDisplayValue(newValue)
+    searchTerm.value = getDisplayValue(props.options, newValue)
   },
 )
 
 const onUpdateModelValue = (value: string | null) => {
   internalModelValue.value = value
   emit('update:modelValue', value)
-  searchTerm.value = getDisplayValue(value)
+  searchTerm.value = getDisplayValue(props.options, value)
   userHasTyped.value = false
 
   const selectedOpt = value
     ? allOptionsFlat.value.find((opt) => getValue(opt) === value) || null
     : null
   emit('update:selectedOption', selectedOpt)
-}
-
-function isGroup(option: ComboboxOption): option is GroupedOption {
-  return typeof option === 'object' && 'group' in option
-}
-
-function getLabel(option: SimpleOption): string {
-  return typeof option === 'string' ? option : option.label
-}
-
-function getValue(option: SimpleOption): string {
-  return typeof option === 'string' ? option : option.value
-}
-
-function isDisabled(option: SimpleOption): boolean {
-  return typeof option === 'object' && !!option.disabled
-}
-
-function getIcon(option: SimpleOption): string | Component | undefined {
-  return typeof option === 'object' ? option.icon : undefined
 }
 
 const allOptionsFlat = computed(() => {
@@ -108,15 +88,6 @@ const allOptionsFlat = computed(() => {
   return flatOptions
 })
 
-function getDisplayValue(selectedValue: string | null | undefined): string {
-  if (!selectedValue) return ''
-  const options = props.options.flatMap((opt) =>
-    isGroup(opt) ? opt.options : opt,
-  )
-  const selectedOption = options.find((opt) => getValue(opt) === selectedValue)
-  return selectedOption ? getLabel(selectedOption) : selectedValue || ''
-}
-
 const selectedOption = computed(() => {
   if (!internalModelValue.value) return null
   return allOptionsFlat.value.find(
@@ -128,29 +99,11 @@ const selectedOptionIcon = computed(() => {
   return selectedOption.value ? getIcon(selectedOption.value) : undefined
 })
 
-const RenderIcon: FunctionalComponent<{ icon?: string | Component }> = (
-  props,
-) => {
-  if (!props.icon) return null
-  const iconContent =
-    typeof props.icon === 'string'
-      ? h('span', props.icon)
-      : h(props.icon, { class: 'w-4 h-4' })
-
-  return h(
-    'span',
-    {
-      class: 'flex-shrink-0 w-4 h-4 inline-flex items-center justify-center',
-    },
-    [iconContent],
-  )
-}
-
-const filterFunction = (options: ComboboxOption[], search: string) => {
+const filterFunction = (options: GenericOption[], search: string) => {
   if (!search) return options
 
   const lowerSearch = search.toLowerCase()
-  const filtered: ComboboxOption[] = []
+  const filtered: GenericOption[] = []
 
   options.forEach((optionOrGroup) => {
     if (isGroup(optionOrGroup)) {
