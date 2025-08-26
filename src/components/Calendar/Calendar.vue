@@ -4,11 +4,14 @@
       name="header"
       v-bind="{
         currentMonthYear,
+        currentYear,
+        currentMonth,
         enabledModes,
         activeView,
         decrement,
         increment,
         updateActiveView,
+        setCalendarDate,
       }"
     >
       <div class="mb-2 flex justify-between">
@@ -83,11 +86,18 @@
   </div>
 </template>
 <script setup>
-import { computed, onMounted, onUnmounted, provide, ref, watch } from 'vue'
+import {
+  computed,
+  onMounted,
+  onUnmounted,
+  provide,
+  ref,
+  watch,
+  nextTick,
+} from 'vue'
 import { Button } from '../Button'
 import { TabButtons } from '../TabButtons'
 import { getCalendarDates, monthList, handleSeconds } from './calendarUtils'
-import { dayjs } from '../../utils/dayjs'
 import DayIcon from './Icon/DayIcon.vue'
 import WeekIcon from './Icon/WeekIcon.vue'
 import MonthIcon from './Icon/MonthIcon.vue'
@@ -326,6 +336,14 @@ function updateCurrentDate(d) {
   week.value = findCurrentWeek(d)
 }
 
+function increment() {
+  incrementClickEvents[activeView.value]()
+}
+
+function decrement() {
+  decrementClickEvents[activeView.value]()
+}
+
 const incrementClickEvents = {
   Month: incrementMonth,
   Week: incrementWeek,
@@ -340,71 +358,90 @@ const decrementClickEvents = {
 
 function incrementMonth() {
   currentMonth.value++
-  date.value = findFirstDateOfMonth(currentMonth.value, currentYear.value)
-  week.value = findCurrentWeek(currentMonthDates.value[date.value]) + 1
   if (currentMonth.value > 11) {
     currentMonth.value = 0
     currentYear.value++
   }
+  // After month changes, recompute month dates and reset to first in-month day
+  date.value = findFirstDateOfMonth(currentMonth.value, currentYear.value)
+  week.value = findCurrentWeek(currentMonthDates.value[date.value])
 }
 
 function decrementMonth() {
-  currentMonth.value--
-  date.value = findLastDateOfMonth(currentMonth.value, currentYear.value)
-  week.value = findCurrentWeek(currentMonthDates.value[date.value])
-  if (currentMonth.value < 0) {
+  if (currentMonth.value === 0) {
     currentMonth.value = 11
     currentYear.value--
+  } else {
+    currentMonth.value--
   }
-}
-
-function increment() {
-  incrementClickEvents[activeView.value]()
-}
-
-function decrement() {
-  decrementClickEvents[activeView.value]()
+  // After adjusting month/year, pick last in-month date and its week
+  date.value = findLastDateOfMonth(currentMonth.value, currentYear.value)
+  week.value = findCurrentWeek(currentMonthDates.value[date.value])
 }
 
 function incrementWeek() {
-  week.value += 1
-  if (week.value < datesInWeeks.value.length) {
-    date.value = findIndexOfDate(datesInWeeks.value[week.value][0])
-  }
-  if (week.value > datesInWeeks.value.length - 1) {
-    incrementMonth()
-  }
-  let nextMonthDates = filterCurrentWeekDates()
-  if (nextMonthDates.length > 0) {
-    incrementMonth()
-    week.value = findCurrentWeek(nextMonthDates[0])
-  }
-}
+  const nextWeek = week.value + 1
 
-function decrementWeek() {
-  week.value -= 1
-  if (week.value < 0) {
-    decrementMonth()
+  // Case 1: normal advance within current month grid
+  if (nextWeek < datesInWeeks.value.length) {
+    week.value = nextWeek
+    const weekDates = datesInWeeks.value[week.value]
+    // If week spans into next month, jump into that month (single increment)
+    const spansNextMonth = weekDates.some(
+      (d) => d.getMonth() !== currentMonth.value,
+    )
+    if (spansNextMonth) {
+      incrementMonth()
+      week.value = 0
+      const firstWeekDates = datesInWeeks.value[0]
+      const day = firstInMonth(firstWeekDates, currentMonth.value)
+      date.value = findIndexOfDate(day)
+      return
+    }
+    // Stay in same month
+    const day = firstInMonth(weekDates, currentMonth.value)
+    date.value = findIndexOfDate(day)
     return
   }
 
-  if (week.value > 0) {
-    date.value = findIndexOfDate(datesInWeeks.value[week.value][0])
-  }
-
-  let previousMonthDates = filterCurrentWeekDates()
-  if (previousMonthDates.length > 0) {
-    decrementMonth()
-    week.value = findCurrentWeek(previousMonthDates[0])
-  }
+  // Case 2: overflow beyond last week -> move to next month first week
+  incrementMonth()
+  week.value = 0
+  const firstWeekDates = datesInWeeks.value[0]
+  const day = firstInMonth(firstWeekDates, currentMonth.value)
+  date.value = findIndexOfDate(day)
 }
 
-function filterCurrentWeekDates() {
-  let currentWeekDates = datesInWeeks.value[week.value]
-  let differentMonthDates = currentWeekDates.filter(
-    (d) => d.getMonth() !== currentMonth.value,
-  )
-  return differentMonthDates
+function decrementWeek() {
+  const prevWeek = week.value - 1
+
+  // Case 1: normal move within current month grid
+  if (prevWeek >= 0) {
+    week.value = prevWeek
+    const weekDates = datesInWeeks.value[week.value]
+    const spansPrevMonth = weekDates.some(
+      (d) => d.getMonth() !== currentMonth.value,
+    )
+    if (spansPrevMonth) {
+      // Move to previous month once
+      decrementMonth()
+      week.value = datesInWeeks.value.length - 1
+      const lastWeekDates = datesInWeeks.value[week.value]
+      const day = firstInMonth(lastWeekDates, currentMonth.value)
+      date.value = findIndexOfDate(day)
+      return
+    }
+    const day = firstInMonth(weekDates, currentMonth.value)
+    date.value = findIndexOfDate(day)
+    return
+  }
+
+  // Case 2: underflow beyond first week -> previous month last week
+  decrementMonth()
+  week.value = datesInWeeks.value.length - 1
+  const lastWeekDates = datesInWeeks.value[week.value]
+  const day = firstInMonth(lastWeekDates, currentMonth.value)
+  date.value = findIndexOfDate(day)
 }
 
 function incrementDay() {
@@ -425,6 +462,10 @@ function decrementDay() {
   ) {
     decrementMonth()
   }
+}
+
+function firstInMonth(weekDates, month) {
+  return weekDates.find((d) => d.getMonth() === month) || weekDates[0]
 }
 
 function findLastDateOfMonth(month, year) {
@@ -448,6 +489,7 @@ function findIndexOfDate(date) {
     (d) => new Date(d).toDateString() === new Date(date).toDateString(),
   )
 }
+
 const currentMonthYear = computed(() => {
   return monthList[currentMonth.value] + ', ' + currentYear.value
 })
@@ -457,5 +499,25 @@ function isCurrentMonthDate(date) {
   return date.getMonth() === currentMonth.value
 }
 
-defineExpose({ reloadEvents })
+function setCalendarDate(d) {
+  if (!d) return
+  const dt = new Date(d)
+  if (dt.toString() === 'Invalid Date') return
+  currentYear.value = dt.getFullYear()
+  currentMonth.value = dt.getMonth()
+  currentDate.value = dt
+  // Wait for reactive recalculations of month dates
+  nextTick(() => {
+    week.value = findCurrentWeek(dt)
+    const idx = findIndexOfDate(dt)
+    if (idx >= 0) {
+      date.value = idx
+    } else {
+      // Fallback: first date of month
+      date.value = findFirstDateOfMonth(currentMonth.value, currentYear.value)
+    }
+  })
+}
+
+defineExpose({ reloadEvents, setCalendarDate })
 </script>
