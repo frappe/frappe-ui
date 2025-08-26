@@ -1,12 +1,5 @@
 <script setup lang="ts">
-import {
-  computed,
-  type Component,
-  ref,
-  watch,
-  h,
-  FunctionalComponent,
-} from 'vue'
+import { computed, ref, watch } from 'vue'
 import {
   ComboboxAnchor,
   ComboboxContent,
@@ -18,7 +11,6 @@ import {
   ComboboxLabel,
   ComboboxPortal,
   ComboboxRoot,
-  ComboboxSeparator,
   ComboboxTrigger,
   ComboboxViewport,
 } from 'reka-ui'
@@ -148,7 +140,7 @@ const handleInputChange = (event: Event) => {
 const handleOpenChange = (open: boolean) => {
   isOpen.value = open
   if (!open) {
-    searchTerm.value = getDisplayValue(internalModelValue.value)
+    searchTerm.value = getDisplayValue(props.options, internalModelValue.value)
     userHasTyped.value = false
   } else {
     userHasTyped.value = false

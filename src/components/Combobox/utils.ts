@@ -29,6 +29,11 @@ export function isGroup(option: GenericOption): option is GroupedOption {
   return typeof option === 'object' && 'group' in option
 }
 
+export function getMultipleLabel(options: [SimpleOption]) {
+  if (options.length === 1) return getLabel(options[0])
+  return `${options.length} options selected`
+}
+
 export function getLabel(option: SimpleOption): string {
   return typeof option === 'string' ? option : option.label
 }

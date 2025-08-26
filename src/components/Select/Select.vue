@@ -7,6 +7,7 @@ import {
   type SimpleOption,
   isGroup,
   getLabel,
+  getMultipleLabel,
   getValue,
   getIcon,
   isDisabled,
@@ -39,14 +40,18 @@ type SelectOption =
       disabled?: boolean
     }
 
+type Value = string | string[] | undefined
+
 interface SelectProps {
   size?: 'sm' | 'md' | 'lg'
   variant?: 'subtle' | 'outline' | 'ghost'
   placeholder?: string
   disabled?: boolean
+  multiple?: boolean
   id?: string
-  modelValue?: string | number
+  modelValue?: string | [String]
   options: SelectOption[]
+  getLabel?: Function
 }
 
 defineOptions({
@@ -56,75 +61,109 @@ defineOptions({
 const props = withDefaults(defineProps<SelectProps>(), {
   size: 'sm',
   variant: 'subtle',
+  placeholder: 'Select an option...',
 })
 
 const emit = defineEmits(['update:modelValue'])
-const slots = useSlots()
-const attrs = useAttrs()
-const selected = defineModel<string>()
+const selected = defineModel<Value>()
+const selectedOption = computed<SimpleOption | SimpleOption[]>(() => {
+  if (!selected.value) return null
+  if (props.multiple) {
+    return selected.value.map((k) =>
+      flatOptions.value.find((opt) => getValue(opt) === k),
+    )
+  }
+  return flatOptions.value.find((opt) => getValue(opt) === selected.value)
+})
+const selectedOptionIcon = computed(() =>
+  selectedOption.value && !props.multiple
+    ? getIcon(selectedOption.value)
+    : null,
+)
+
 const flatOptions = computed<SimpleOption[]>(() =>
   props.options.flatMap((opt) => (isGroup(opt) ? opt.options : opt)),
 )
-const selectedOption = computed<SimpleOption>(() => {
-  if (!selected.value) return { label: 'Select an option...', value: null }
-  return flatOptions.value.find((opt) => getValue(opt) === selected.value)
-})
-const selectedOptionIcon = computed(() => getIcon(selectedOption.value))
+
+const labelFunction = (val: Value, selected = false) => {
+  if (props.getLabel) return props.getLabel(val, selected)
+  if (!val || (val.map && !val.length)) return props.placeholder
+  return (val.map ? getMultipleLabel : getLabel)(val)
+}
 </script>
 
 <template>
-  <SelectRoot v-model="selected">
+  <SelectRoot v-model="selected" :multiple>
     <SelectTrigger
-      class="flex h-7 items-center justify-between gap-2 rounded bg-surface-gray-2 px-2 py-1 transition-colors hover:bg-surface-gray-3 border border-transparent focus-within:border-outline-gray-4 focus-within:ring-2 focus-within:ring-outline-gray-3"
+      :disabled="disabled"
+      class="flex h-7 w-full items-center justify-between gap-2 rounded bg-surface-gray-2 px-2 py-1 transition-colors hover:bg-surface-gray-3 focus:outline-0 focus:ring-0"
+      :class="{ 'opacity-50 pointer-events-none': disabled }"
     >
-      <div class="flex items-center flex-1 gap-2 overflow-hidden">
+      <div class="flex items-center flex-1 gap-2 overflow-hidden focus:ring-0">
         <RenderIcon v-if="selectedOptionIcon" :icon="selectedOptionIcon" />
+        <!-- Using plain renders the icon too -->
         <SelectValue
-          placeholder="Select an option..."
-          class="text-base text-ink-gray-8 h-full placeholder:text-ink-gray-4"
-        />
+          class="text-base text-ink-gray-8 h-full placeholder:text-ink-gray-4 focus:outline-0 border-0"
+        >
+          {{ labelFunction(selectedOption, true) }}
+        </SelectValue>
         <RenderIcon :icon="LucideChevronDown" class="ml-auto" />
       </div>
     </SelectTrigger>
 
-    <SelectPortal>
+    <SelectPortal class="w-full">
       <SelectContent
         position="popper"
-        class="z-10 min-w-[--reka-combobox-trigger-width] mt-1 bg-surface-modal overflow-hidden rounded-lg shadow-2xl"
+        class="z-10 min-w-[--reka-select-trigger-width] mt-1 bg-surface-modal overflow-hidden rounded-lg shadow-2xl"
       >
         <SelectScrollUpButton
-          class="flex items-center justify-center py-0.5 bg-white cursor-default"
+          class="absolute left-[calc(50%-0.5rem)] py-1 z-[11] cursor-default"
         >
           <RenderIcon :icon="LucideChevronUp" />
         </SelectScrollUpButton>
-        <SelectViewport class="max-h-60 overflow-auto py-1.5">
-          <SelectGroup class="px-1.5">
-            <SelectLabel />
-
-            <SelectItem
-              v-for="(option, idx) in options"
-              :key="idx"
-              :value="option.value"
-              class="text-base leading-none text-ink-gray-7 rounded flex items-center h-7 px-2.5 py-1.5 relative select-none data-[disabled]:opacity-50 data-[disabled]:pointer-events-none data-[highlighted]:outline-none data-[highlighted]:bg-surface-gray-3"
+        <SelectViewport
+          class="max-h-60 overflow-auto p-1.5"
+          :class="{ 'pt-0': isGroup(options[0]) }"
+        >
+          <template v-for="(optionOrGroup, index) in options" :key="index">
+            <component
+              :is="isGroup(optionOrGroup) ? SelectGroup : 'div'"
+              :class="{ '': isGroup(optionOrGroup) }"
             >
-              <SelectItemText
-                ><span class="flex items-center gap-2 pr-6 flex-1">
-                  <RenderIcon :icon="getIcon(option)" />
-                  {{ getLabel(option) }}
-                </span></SelectItemText
+              <SelectLabel
+                v-if="isGroup(optionOrGroup)"
+                class="px-2.5 pt-3 pb-1.5 text-sm font-medium text-ink-gray-5 sticky top-0 bg-surface-modal z-10"
               >
-              <SelectItemIndicator
-                class="inline-flex ml-auto items-center justify-center"
+                {{ optionOrGroup.group }}
+              </SelectLabel>
+
+              <SelectItem
+                v-for="(option, idx) in optionOrGroup.options || [
+                  optionOrGroup,
+                ]"
+                :key="idx"
+                :value="getValue(option)"
+                :disabled="isDisabled(option)"
+                class="text-base leading-none text-ink-gray-7 rounded flex items-center h-7 px-2.5 py-1.5 relative select-none data-[disabled]:opacity-50 data-[disabled]:pointer-events-none data-[highlighted]:outline-none data-[highlighted]:bg-surface-gray-3"
               >
-                <LucideCheck class="size-4" />
-              </SelectItemIndicator>
-            </SelectItem>
-          </SelectGroup>
-          <SelectSeparator />
+                <SelectItemText
+                  ><span class="flex items-center gap-2 pr-6 flex-1">
+                    <RenderIcon :icon="getIcon(option)" />
+                    {{ labelFunction(option) }}
+                  </span></SelectItemText
+                >
+                <SelectItemIndicator
+                  class="inline-flex ml-auto items-center justify-center"
+                >
+                  <LucideCheck class="size-4" />
+                </SelectItemIndicator>
+              </SelectItem>
+            </component>
+            <SelectSeparator />
+          </template>
         </SelectViewport>
-        <SelectScrollDownButton />
         <SelectScrollDownButton
-          class="flex items-center justify-center py-0.5 bg-white cursor-default"
+          class="absolute bottom-0 left-[calc(50%-0.5rem)] z-[11] cursor-default"
         >
           <RenderIcon :icon="LucideChevronDown" />
         </SelectScrollDownButton>
