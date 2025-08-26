@@ -44,6 +44,7 @@
           v-for="item in props.items"
           :key="item.label"
           :label="item.label"
+          :accessKey="item.accessKey"
           :icon="item.icon"
           :suffix="item.suffix"
           :to="item.to"

@@ -9,6 +9,7 @@
         : 'hover:bg-surface-gray-2'
     "
     variant="ghost"
+    :accesskey="props.accessKey"
   >
     <template #icon>
       <div

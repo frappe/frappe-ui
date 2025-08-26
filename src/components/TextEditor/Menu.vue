@@ -13,8 +13,8 @@
                 class="rounded px-2 py-1 text-base font-medium text-ink-gray-8 transition-colors hover:bg-surface-gray-2"
                 @click="togglePopover"
                 :set="
-                  (activeBtn =
-                    button.find((b) => b.isActive(editor)) || button[0])
+                  activeBtn =
+                    button.find((b) => b.isActive(editor)) || button[0]
                 "
               >
                 <component
@@ -36,7 +36,7 @@
                   v-show="option.isDisabled ? !option.isDisabled(editor) : true"
                 >
                   <button
-                    class="h-7 rounded px-2 text-base flex items-center gap-2 hover:bg-surface-gray-3"
+                    class="w-full h-7 rounded px-2 text-base flex items-center gap-2 hover:bg-surface-gray-3"
                     @click="
                       () => {
                         onButtonClick(option)

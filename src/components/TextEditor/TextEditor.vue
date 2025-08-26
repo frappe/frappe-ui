@@ -325,7 +325,7 @@ img.ProseMirror-selectednode {
       flex: 0 0 auto;
       margin-right: 0.5rem;
       margin-top: 0.25rem;
-      height: 1.5em;
+      height: 1lh;
       display: flex;
       align-items: center;
       user-select: none;
@@ -339,6 +339,9 @@ img.ProseMirror-selectednode {
         margin: 0.25rem 0;
       }
     }
+  }
+  ul[data-type='taskList'] {
+    margin: 0;
   }
 
   input[type='checkbox'] {
