@@ -26,7 +26,7 @@
       :class="[config.noBorder ? 'border-b-[1px]' : 'border-[1px] border-t-0']"
     >
       <div
-        class="flex justify-center items-start pt-[3px] w-20 text-base text-ink-gray-6 text-center"
+        class="flex justify-center items-start py-0.5 w-20 text-base text-ink-gray-6 text-center"
       >
         <component
           :is="showCollapsable ? Button : 'div'"
@@ -37,7 +37,9 @@
           "
           @click="showCollapsable && (isCollapsed = !isCollapsed)"
         >
-          <div class="text-sm text-ink-gray-6 h-7 inline-flex items-center">
+          <div
+            class="text-sm text-ink-gray-6 h-[29px] inline-flex items-center"
+          >
             All day
           </div>
         </component>
@@ -48,7 +50,12 @@
             class="cell flex flex-col gap-1 py-1 w-full cursor-pointer"
             :data-date-attr="date"
             @click.prevent="
-              calendarActions.handleCellClick($event, date, '', true)
+              (e) => {
+                if (fullDayEvents[parseDate(date)]?.length > 1) {
+                  isCollapsed = false
+                }
+                calendarActions.handleCellClick(e, date, '', true)
+              }
             "
           >
             <CalendarEvent
@@ -200,10 +207,7 @@ const currentTime = computed(() => {
   let d = new Date()
   let hour = d.getHours()
   let minutes = d.getMinutes()
-  let top =
-    (hour * 60 + minutes) * minuteHeight +
-    props.config.redundantCellHeight +
-    'px'
+  let top = (hour * 60 + minutes) * minuteHeight + 'px'
   return { top }
 })
 
