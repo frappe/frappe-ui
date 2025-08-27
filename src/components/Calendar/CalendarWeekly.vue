@@ -116,6 +116,7 @@
                 config.noBorder && idx === weeklyDates.length - 1
                   ? ''
                   : 'border-r-[1px]',
+                isWeekend(date, config) && 'bg-surface-gray-1',
               ]"
               :data-date-attr="date"
             >
@@ -164,6 +165,7 @@ import {
   parseDateWithDay,
   parseDate,
   daysList,
+  isWeekend,
 } from './calendarUtils'
 
 import { Button } from '../Button'

@@ -142,6 +142,7 @@ const defaultConfig = {
   enableShortcuts: true,
   showIcon: true,
   timeFormat: '12h',
+  weekends: ['sunday'],
 }
 
 const overrideConfig = { ...defaultConfig, ...props.config }

@@ -355,3 +355,38 @@ export const colorMap = {
     bgActive: '#30A66D',
   },
 }
+
+// config.weekends can be array of numbers [0-6] (0=Sun) or weekday names (e.g., 'Saturday').
+// Falls back to [0] (Sunday) if not provided / invalid.
+const _weekdayNameToIndex = {
+  sunday: 0,
+  monday: 1,
+  tuesday: 2,
+  wednesday: 3,
+  thursday: 4,
+  friday: 5,
+  saturday: 6,
+}
+
+export function getWeekendDays(config) {
+  // Support both weekendDays (preferred) and weekends (legacy) keys
+  const raw = config?.weekendDays || config?.weekends
+  if (!raw || !Array.isArray(raw) || raw.length === 0) return [0]
+  return raw
+    .map((d) => {
+      if (typeof d === 'number') return d
+      if (typeof d === 'string') {
+        const key = d.trim().toLowerCase()
+        if (_weekdayNameToIndex.hasOwnProperty(key))
+          return _weekdayNameToIndex[key]
+      }
+      return null
+    })
+    .filter((v) => v !== null && v >= 0 && v <= 6)
+}
+
+export function isWeekend(date, config) {
+  const day = new Date(date).getDay()
+  const weekendDays = getWeekendDays(config)
+  return weekendDays.includes(day)
+}
