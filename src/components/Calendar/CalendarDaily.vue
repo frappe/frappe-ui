@@ -5,6 +5,59 @@
         {{ parseDateWithDay(currentDate) }}
       </p>
     </slot>
+
+    <!-- Full day events -->
+    <div
+      class="flex shrink-0 h-fit"
+      :class="[
+        config.noBorder
+          ? 'border-t-[1px]'
+          : 'border-[1px] border-t-0 border-b-0',
+      ]"
+    >
+      <div
+        class="flex justify-center items-start pt-[3px] w-20 text-base text-ink-gray-6 text-center"
+      >
+        <component
+          :is="showCollapsable ? Button : 'div'"
+          :class="{ '!pl-1.5 pr-1 py-1 !gap-1': showCollapsable }"
+          variant="ghost"
+          :iconRight="
+            showCollapsable ? (isCollapsed ? 'chevron-down' : 'chevron-up') : ''
+          "
+          @click="showCollapsable && (isCollapsed = !isCollapsed)"
+        >
+          <div class="text-sm text-ink-gray-6 h-7 inline-flex items-center">
+            All day
+          </div>
+        </component>
+      </div>
+      <div
+        class="flex flex-wrap gap-1 py-1 w-full overflow-hidden"
+        :data-date-attr="currentDate"
+        @click.prevent="
+          calendarActions.handleCellClick($event, currentDate, '', true)
+        "
+      >
+        <CalendarEvent
+          v-for="(calendarEvent, idx) in !showCollapsable || !isCollapsed
+            ? dayFullDayEvents
+            : dayFullDayEvents.slice(0, 4)"
+          class="w-[21%] cursor-pointer"
+          :event="{ ...calendarEvent, idx }"
+          :key="calendarEvent.id"
+          :date="currentDate"
+          @click.stop
+        />
+        <Button
+          v-if="showCollapsable && isCollapsed && dayFullDayEvents.length > 4"
+          :label="dayFullDayEvents.length - 4 + ' more'"
+          variant="ghost"
+          class="w-fit text-sm !h-6 !justify-start cursor-pointer"
+          @click.stop="isCollapsed = false"
+        />
+      </div>
+    </div>
     <div class="h-full overflow-hidden">
       <div
         class="flex h-full w-full overflow-scroll border-outline-gray-1"
@@ -14,7 +67,7 @@
         ref="gridRef"
       >
         <!-- Left column -->
-        <div class="grid h-full w-16 grid-cols-1">
+        <div class="grid h-full w-20 grid-cols-1">
           <span
             v-for="time in 24"
             class="flex h-[72px] items-end justify-center text-center text-sm font-normal text-ink-gray-5"
@@ -28,27 +81,12 @@
             class="calendar-column relative border-l-[1px] border-outline-gray-1"
             :class="[config.noBorder ? '' : ' border-r-[1px]']"
           >
-            <!-- Top Redundant Cell before time starts for giving the calendar some space -->
-            <div
-              class="flex h-[50px] w-full flex-wrap gap-2 overflow-y-scroll border-b-[1px] border-outline-gray-1 transition-all"
-              :style="{ height: `${config.redundantCellHeight}px` }"
-            >
-              <CalendarEvent
-                v-for="(calendarEvent, idx) in fullDayEvents[
-                  parseDate(currentDate)
-                ]"
-                class="mb-1 w-[20%] cursor-pointer"
-                :event="{ ...calendarEvent, idx }"
-                :key="calendarEvent.id"
-                :date="currentDate"
-              />
-            </div>
             <!-- Day Grid -->
             <div
               class="relative flex text-ink-gray-8"
               v-for="(time, i) in timeArray"
               :key="time"
-              :data-time-attr="time"
+              :data-time-attr="i == 0 ? '' : time"
               @click="
                 calendarActions.handleCellClick($event, currentDate, time)
               "
@@ -69,10 +107,7 @@
               :date="currentDate"
             />
             <!-- Current time Marker -->
-            <CalendarTimeMarker
-              :date="currentDate"
-              :redundantCellHeight="config.redundantCellHeight"
-            />
+            <CalendarTimeMarker :date="currentDate" />
           </div>
         </div>
       </div>
@@ -81,9 +116,10 @@
 </template>
 
 <script setup>
-import { computed, inject, onMounted, ref } from 'vue'
+import { computed, inject, onMounted, ref, watch } from 'vue'
 import CalendarEvent from './CalendarEvent.vue'
 import CalendarTimeMarker from './CalendarTimeMarker.vue'
+import { Button } from '../Button'
 import {
   parseDate,
   parseDateWithDay,
@@ -114,6 +150,22 @@ const fullDayEvents = computed(
 const gridRef = ref(null)
 const hourHeight = props.config.hourHeight
 const minuteHeight = hourHeight / 60
+
+const showCollapsable = ref(false)
+const isCollapsed = ref(true)
+const dayFullDayEvents = computed(
+  () => fullDayEvents.value?.[parseDate(props.currentDate)] || [],
+)
+
+function updateFullDayEventsState() {
+  // Show collapsible if more than 4 events
+  showCollapsable.value = dayFullDayEvents.value.length > 4
+  if (!showCollapsable.value) {
+    isCollapsed.value = true
+  }
+}
+
+watch(dayFullDayEvents, updateFullDayEventsState, { immediate: true })
 
 const timeArray =
   props.config.timeFormat == '24h' ? twentyFourHoursFormat : twelveHoursFormat

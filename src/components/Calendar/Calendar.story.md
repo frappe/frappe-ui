@@ -59,7 +59,6 @@ The object for this kind of event looks like:
     	defaultMode: 'Month',
     	isEditMode: false,
     	eventIcons: {},
-    	redundantCellHeight: 50,
     	hourHeight: 50,
     	enableShortcuts: true,
       showIcon: true,
@@ -90,7 +89,6 @@ e.g.
     	'Meeting': <MeetingIcon />,
     }
 
-- `redundantCellHeight`: The height of the cell to display full day events. This value is in Pixel, by default the value is `50px`.
 - `hourHeight`: The height of each cell below the full day events cell. This value is in pixel, by default the value is `50px`.
 - `enableShortcuts`: Boolean value which determines whether shortcuts will be enabled or not. By default the value is true i.e. shortcuts will be enabled, can be disabled by setting it to false, currently the calendar supports shortcuts like
 

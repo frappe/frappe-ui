@@ -226,9 +226,6 @@ const setEventStyles = computed(() => {
   height += 'px'
 
   let top = calculateMinutes(calendarEvent.value.fromTime) * minuteHeight
-  if (activeView.value === 'Day') {
-    top += config.redundantCellHeight
-  }
 
   let hallNumber = calendarEvent.value.hallNumber
   let width =

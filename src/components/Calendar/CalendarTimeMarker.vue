@@ -19,10 +19,6 @@ const props = defineProps({
     type: [String, Date],
     required: true,
   },
-  redundantCellHeight: {
-    type: Number,
-    default: 0,
-  },
 })
 
 const config = inject('config')
@@ -33,8 +29,7 @@ const setCurrentTime = computed(() => {
   let d = new Date()
   let hour = d.getHours()
   let minutes = d.getMinutes()
-  let top =
-    (hour * 60 + minutes) * minuteHeight + props.redundantCellHeight + 'px'
+  let top = (hour * 60 + minutes) * minuteHeight + 'px'
   return { top }
 })
 </script>

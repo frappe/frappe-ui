@@ -138,7 +138,6 @@ const defaultConfig = {
   defaultMode: 'Month',
   isEditMode: false,
   eventIcons: {},
-  redundantCellHeight: 50,
   hourHeight: 50,
   enableShortcuts: true,
   showIcon: true,

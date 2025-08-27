@@ -72,7 +72,6 @@ const config = {
   isEditMode: true,
   eventIcons: {},
   allowCustomClickEvents: true,
-  redundantCellHeight: 100,
   enableShortcuts: false,
 }
 
