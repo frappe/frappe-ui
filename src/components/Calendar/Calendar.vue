@@ -267,12 +267,13 @@ function openModal(data) {
   openNewEventModal(e, view, date, config, time)
 }
 
-function handleCellClick(e, date, time = '') {
+function handleCellClick(e, date, time = '', isFullDay = false) {
   const data = {
     e,
     view: activeView.value,
     date,
     time,
+    isFullDay,
   }
 
   if (props.onCellClick) {
