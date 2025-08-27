@@ -24,6 +24,7 @@
         :class="[
           config.noBorder ? 'border-l border-t border-0' : 'border-[0.5px]',
           config.noBorder && i % 7 === 0 && 'border-l-0',
+          isWeekend(date, config) && 'bg-surface-gray-1',
         ]"
         @dragover.prevent
         @drageneter.prevent
@@ -109,7 +110,7 @@
 </template>
 
 <script setup>
-import { daysList, parseDate } from './calendarUtils'
+import { daysList, parseDate, isWeekend } from './calendarUtils'
 import { inject } from 'vue'
 import CalendarEvent from './CalendarEvent.vue'
 import useCalendarData from './composables/useCalendarData'
