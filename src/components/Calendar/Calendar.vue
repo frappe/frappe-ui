@@ -25,18 +25,9 @@
         <div class="flex gap-x-1">
           <!-- Increment and Decrement Button-->
 
-          <Button
-            @click="decrement()"
-            variant="ghost"
-            class="h-4 w-4"
-            icon="chevron-left"
-          />
-          <Button
-            @click="increment()"
-            variant="ghost"
-            class="h-4 w-4"
-            icon="chevron-right"
-          />
+          <Button @click="decrement()" variant="ghost" icon="chevron-left" />
+          <Button label="Today" @click="setCalendarDate()" variant="ghost" />
+          <Button @click="increment()" variant="ghost" icon="chevron-right" />
 
           <!--  View change button, default is months or can be set via props!  -->
           <TabButtons
@@ -501,8 +492,7 @@ function isCurrentMonthDate(date) {
 }
 
 function setCalendarDate(d) {
-  if (!d) return
-  const dt = new Date(d)
+  const dt = d ? new Date(d) : new Date()
   if (dt.toString() === 'Invalid Date') return
   currentYear.value = dt.getFullYear()
   currentMonth.value = dt.getMonth()
