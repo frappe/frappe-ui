@@ -16,7 +16,7 @@
       mousedown: config.isEditMode && handleRepositionMouseDown,
     }"
   >
-    <div class="flex gap-1.5 h-full p-[5px]">
+    <div class="flex gap-1.5 h-full p-[5px]" :class="isPastEvent && 'past'">
       <div
         v-if="props.event.fromTime"
         class="event-border h-full w-[2px] rounded shrink-0"
@@ -69,7 +69,10 @@
   <div
     v-else
     class="event flex gap-1.5 min-h-6 mx-px rounded p-[5px] transition-all duration-75"
-    :class="activeEvent == (props.event?.id || props.event?.name) && 'active'"
+    :class="[
+      activeEvent == (props.event?.id || props.event?.name) && 'active',
+      isPastEvent && 'past',
+    ]"
     ref="eventRef"
     v-bind="$attrs"
     @dblclick.prevent="handleEventEdit($event)"
@@ -574,6 +577,30 @@ function handleEventDelete() {
   calendarActions.deleteEvent(calendarEvent.value.id)
   close()
 }
+
+const isPastEvent = computed(() => {
+  try {
+    // determine end date/time
+    const endDateStr =
+      calendarEvent.value.toDate ||
+      calendarEvent.value.date ||
+      calendarEvent.value.fromDate ||
+      props.event.toDate ||
+      props.event.date ||
+      props.event.fromDate
+    if (!endDateStr) return false
+    // If event has a toTime use it; else if full day, treat end as end of day; fallback 00:00:00
+    let endTimeStr = '00:00:00'
+    if (calendarEvent.value.toTime) endTimeStr = calendarEvent.value.toTime
+    else if (calendarEvent.value.isFullDay || props.event.isFullDay)
+      endTimeStr = '23:59:59'
+
+    const end = new Date(`${endDateStr}T${endTimeStr}`.replace(' ', 'T'))
+    return end.getTime() < new Date().getTime()
+  } catch (e) {
+    return false
+  }
+})
 </script>
 
 <style scoped>
@@ -597,5 +624,10 @@ function handleEventDelete() {
 
 .event:not(.active):hover {
   background-color: var(--bg-hover);
+}
+
+.event:not(.active) .past,
+.event.past:not(.active) {
+  opacity: 0.5;
 }
 </style>
