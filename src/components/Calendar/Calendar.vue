@@ -262,9 +262,9 @@ function deleteEvent(eventID) {
 }
 
 function openModal(data) {
-  const { e, view, date, time } = data
+  const { e, view, date, time, isFullDay } = data
   const config = overrideConfig.isEditMode
-  openNewEventModal(e, view, date, config, time)
+  openNewEventModal(e, view, date, config, time, isFullDay)
 }
 
 function handleCellClick(e, date, time = '', isFullDay = false) {
