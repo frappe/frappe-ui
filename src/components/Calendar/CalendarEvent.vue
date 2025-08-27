@@ -1,7 +1,7 @@
 <template>
   <!-- Weekly and Daily Event Template  -->
   <div
-    class="event min-h-6 mx-px shadow rounded transition-all duration-75"
+    class="event min-h-6 mx-px shadow rounded transition-all duration-75 shrink-0"
     ref="eventRef"
     v-if="activeView !== 'Month'"
     v-bind="$attrs"
@@ -211,7 +211,7 @@ const setEventStyles = computed(() => {
   if (props.event.isFullDay) {
     return {
       transform: `translate(${state.xAxis}px, ${state.yAxis}px)`,
-      zIndex: isRepositioning ? 100 : props.event.idx + 1,
+      zIndex: isRepositioning.value ? 100 : props.event.idx + 1,
     }
   }
 
@@ -442,9 +442,7 @@ function getDate(date, nextDate = 0) {
 
 function handleHorizontalMovement(clientX, rect) {
   const currentDate = new Date(
-    props.event.isFullDay
-      ? eventRef.value.parentNode.parentNode.getAttribute('data-date-attr')
-      : eventRef.value.parentNode.getAttribute('data-date-attr'),
+    eventRef.value.parentNode.getAttribute('data-date-attr'),
   )
 
   if (props.event.isFullDay) {
