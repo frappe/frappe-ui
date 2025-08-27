@@ -9,11 +9,7 @@
     <!-- Full day events -->
     <div
       class="flex shrink-0 h-fit"
-      :class="[
-        config.noBorder
-          ? 'border-t-[1px]'
-          : 'border-[1px] border-t-0 border-b-0',
-      ]"
+      :class="[config.noBorder ? 'border-t-[1px]' : 'border-[1px] border-b-0']"
     >
       <div
         class="flex justify-center items-start pt-[3px] w-20 text-base text-ink-gray-6 text-center"

@@ -16,8 +16,16 @@ export default function useEventModal() {
     toTime: '',
     venue: '',
     title: '',
+    isFullDay: false,
   })
-  function openNewEventModal(e, view, date, isEditMode, fromTime = '') {
+  function openNewEventModal(
+    e,
+    view,
+    date,
+    isEditMode,
+    fromTime = '',
+    isFullDay = false,
+  ) {
     if (!isEditMode) return
     date =
       view === 'Week'
@@ -26,6 +34,7 @@ export default function useEventModal() {
     newEvent.date = parseDate(new Date(date))
     newEvent.fromDate = date
     newEvent.toDate = date
+    newEvent.isFullDay = isFullDay
 
     if (view === 'Month') {
       showEventModal.value = true
