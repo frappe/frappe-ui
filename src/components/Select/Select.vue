@@ -9,8 +9,6 @@ import {
   SelectLabel,
   SelectPortal,
   SelectRoot,
-  SelectScrollDownButton,
-  SelectScrollUpButton,
   SelectSeparator,
   SelectTrigger,
   SelectValue,
@@ -86,22 +84,20 @@ const labelFunction = (val: Value, selected = false) => {
     <SelectRoot v-model="selected" :multiple>
       <SelectTrigger
         :disabled="disabled"
-        class="flex h-7 w-full items-center justify-between gap-2 rounded bg-surface-gray-2 px-2 py-1 transition-colors hover:bg-surface-gray-3 focus:outline-0 focus:ring-0"
+        class="flex h-7 w-full overflow-hidden focus:ring-0 rounded bg-surface-gray-2 px-2 py-1 transition-colors hover:bg-surface-gray-3 focus:outline-0 focus:ring-0"
         :class="{ 'opacity-50 pointer-events-none': disabled }"
       >
-        <div
-          class="flex items-center flex-1 gap-2 overflow-hidden focus:ring-0"
+        <!-- Using SelectValue alone renders the icon too -->
+        <SelectValue
+          :placeholder
+          class="gap-2 text-base h-full flex items-center w-full focus:outline-0 text-ink-gray-8 data-[placeholder]:text-ink-gray-4"
         >
           <RenderIcon v-if="selectedOptionIcon" :icon="selectedOptionIcon" />
-          <!-- Using plain renders the icon too -->
-          <SelectValue
-            :placeholder
-            class="text-base h-full flex w-full focus:outline-0 text-ink-gray-8 data-[placeholder]:text-ink-gray-4"
-          >
-            <div>{{ labelFunction(selectedOption, true) }}</div>
-            <RenderIcon :icon="LucideChevronDown" class="ml-auto" />
-          </SelectValue>
-        </div>
+          <div class="flex-1 flex justify-start">
+            {{ labelFunction(selectedOption, true) }}
+          </div>
+          <RenderIcon :icon="LucideChevronDown" />
+        </SelectValue>
       </SelectTrigger>
 
       <SelectPortal class="w-full">
@@ -111,11 +107,6 @@ const labelFunction = (val: Value, selected = false) => {
           position="popper"
           class="z-10 min-w-[--reka-select-trigger-width] mt-1 bg-surface-modal overflow-hidden rounded-lg shadow-2xl"
         >
-          <SelectScrollUpButton
-            class="absolute left-[calc(50%-0.5rem)] py-1 z-[11] cursor-default"
-          >
-            <RenderIcon :icon="LucideChevronUp" />
-          </SelectScrollUpButton>
           <SelectViewport
             class="max-h-60 overflow-auto p-1.5"
             :class="{ 'pt-0': isGroup(options[0]) }"
@@ -157,11 +148,6 @@ const labelFunction = (val: Value, selected = false) => {
               <SelectSeparator />
             </template>
           </SelectViewport>
-          <SelectScrollDownButton
-            class="absolute bottom-0 left-[calc(50%-0.5rem)] z-[11] cursor-default"
-          >
-            <RenderIcon :icon="LucideChevronDown" />
-          </SelectScrollDownButton>
         </SelectContent>
       </SelectPortal>
     </SelectRoot>
