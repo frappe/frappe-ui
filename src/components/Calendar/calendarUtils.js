@@ -393,7 +393,7 @@ export function isWeekend(date, config) {
 
 // Format single month & year (e.g., "August, 2025")
 export function formatMonthYear(month, year) {
-  return `${monthList[month]}, ${year}`
+  return `${monthList[month]} ${year}`
 }
 
 // Extract ordered unique {month, year} pairs from a week of dates
