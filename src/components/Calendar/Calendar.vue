@@ -22,7 +22,7 @@
         <div class="flex items-center">
           <DateMonthYearPicker
             :modelValue="selectedMonthDate"
-            :formatter="(d) => dayjs(d).format('MMM YYYY')"
+            :formatter="() => currentMonthYear"
             @update:modelValue="(val) => onMonthYearChange(val)"
           />
         </div>
