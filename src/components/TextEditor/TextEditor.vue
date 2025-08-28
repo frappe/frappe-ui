@@ -152,6 +152,20 @@ onMounted(() => {
         ...props.starterkitOptions,
         codeBlock: false,
         heading: false,
+      }).extend({
+        addKeyboardShortcuts() {
+          return {
+            Backspace: () => {
+              const { $from } = this.editor.view.state.selection
+              if (
+                !this.editor.can().liftListItem('listItem') ||
+                $from.parentOffset > 0
+              )
+                return false
+              return this.editor.commands.liftListItem('listItem')
+            },
+          }
+        },
       }),
       Heading.configure({
         ...(typeof props.starterkitOptions?.heading === 'object' &&
