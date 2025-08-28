@@ -15,6 +15,7 @@ export interface TextEditorProps {
   placeholder?: string | (() => string)
   editorClass?: string | string[] | object
   editable?: boolean
+  autofocus?: boolean
   bubbleMenu?: boolean | any[]
   bubbleMenuOptions?: object
   fixedMenu?: boolean | any[]

@@ -34,7 +34,7 @@ import {
 
 defineOptions({ inheritAttrs: false })
 
-import { Editor, EditorContent, VueNodeViewRenderer } from '@tiptap/vue-3'
+import { Editor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import TextAlign from '@tiptap/extension-text-align'
@@ -52,9 +52,7 @@ import TaskItem from '@tiptap/extension-task-item'
 import TaskList from '@tiptap/extension-task-list'
 import NamedColorExtension from './extensions/color'
 import NamedHighlightExtension from './extensions/highlight'
-import { common, createLowlight } from 'lowlight'
-import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
-import CodeBlockComponent from './CodeBlockComponent.vue'
+
 import { MentionExtension } from './extensions/mention'
 import TextEditorFixedMenu from './TextEditorFixedMenu.vue'
 import TextEditorBubbleMenu from './TextEditorBubbleMenu.vue'
@@ -65,10 +63,9 @@ import { ContentPasteExtension } from './extensions/content-paste-extension'
 import { TagNode, TagExtension } from './extensions/tag/tag-extension'
 import { Heading } from './extensions/heading/heading'
 import { ImageGroup } from './extensions/image-group/image-group-extension'
+import { ExtendedCodeBlock } from './extensions/code-block'
 import { useFileUpload } from '../../utils/useFileUpload'
 import { TextEditorEmits, TextEditorProps } from './types'
-
-const lowlight = createLowlight(common)
 
 function defaultUploadFunction(file: File) {
   // useFileUpload is frappe specific
@@ -179,11 +176,7 @@ onMounted(() => {
       TextStyle,
       NamedColorExtension,
       NamedHighlightExtension,
-      CodeBlockLowlight.extend({
-        addNodeView() {
-          return VueNodeViewRenderer(CodeBlockComponent)
-        },
-      }).configure({ lowlight }),
+      ExtendedCodeBlock,
       ImageExtension.configure({
         uploadFunction: props.uploadFunction || defaultUploadFunction,
       }),
