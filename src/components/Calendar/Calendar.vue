@@ -88,7 +88,13 @@ import {
 } from 'vue'
 import { Button } from '../Button'
 import { TabButtons } from '../TabButtons'
-import { getCalendarDates, monthList, handleSeconds } from './calendarUtils'
+import {
+  getCalendarDates,
+  monthList,
+  handleSeconds,
+  formatMonthYear,
+  getWeekMonthParts,
+} from './calendarUtils'
 import DayIcon from './Icon/DayIcon.vue'
 import WeekIcon from './Icon/WeekIcon.vue'
 import MonthIcon from './Icon/MonthIcon.vue'
@@ -372,67 +378,74 @@ function decrementMonth() {
 }
 
 function incrementWeek() {
-  const nextWeek = week.value + 1
+  const nextWeek = week.value + 1 // target next week index
 
-  // Case 1: normal advance within current month grid
+  // Case 1: still within current grid
   if (nextWeek < datesInWeeks.value.length) {
     week.value = nextWeek
     const weekDates = datesInWeeks.value[week.value]
-    // If week spans into next month, jump into that month (single increment)
     const spansNextMonth = weekDates.some(
       (d) => d.getMonth() !== currentMonth.value,
-    )
+    ) // overlap into next month
     if (spansNextMonth) {
+      // cross boundary -> advance month
       incrementMonth()
-      week.value = 0
+      week.value = 0 // first week row of new month
       const firstWeekDates = datesInWeeks.value[0]
-      const day = firstInMonth(firstWeekDates, currentMonth.value)
+      const day = firstInMonth(firstWeekDates, currentMonth.value) // first in-month day
       date.value = findIndexOfDate(day)
       return
     }
-    // Stay in same month
-    const day = firstInMonth(weekDates, currentMonth.value)
+    const day = firstInMonth(weekDates, currentMonth.value) // first in-month day in target week
     date.value = findIndexOfDate(day)
     return
   }
 
-  // Case 2: overflow beyond last week -> move to next month first week
+  // Case 2: overflow -> next month first week
   incrementMonth()
   week.value = 0
   const firstWeekDates = datesInWeeks.value[0]
-  const day = firstInMonth(firstWeekDates, currentMonth.value)
+  const day = firstInMonth(firstWeekDates, currentMonth.value) // first valid in-month day
   date.value = findIndexOfDate(day)
 }
 
 function decrementWeek() {
-  const prevWeek = week.value - 1
+  const prevWeek = week.value - 1 // target previous week index
 
-  // Case 1: normal move within current month grid
+  // Case 1: still within current grid
   if (prevWeek >= 0) {
     week.value = prevWeek
     const weekDates = datesInWeeks.value[week.value]
     const spansPrevMonth = weekDates.some(
       (d) => d.getMonth() !== currentMonth.value,
-    )
+    ) // overlap into previous month
     if (spansPrevMonth) {
-      // Move to previous month once
+      // cross boundary -> go to previous month
       decrementMonth()
-      week.value = datesInWeeks.value.length - 1
-      const lastWeekDates = datesInWeeks.value[week.value]
-      const day = firstInMonth(lastWeekDates, currentMonth.value)
+      week.value = datesInWeeks.value.length - 1 // last week row of new month
+      const targetWeekDates = datesInWeeks.value[week.value]
+      const day = firstInMonth(targetWeekDates, currentMonth.value) // first day actually in that month
       date.value = findIndexOfDate(day)
       return
     }
-    const day = firstInMonth(weekDates, currentMonth.value)
+    const day = firstInMonth(weekDates, currentMonth.value) // first in-month day in target week
     date.value = findIndexOfDate(day)
     return
   }
 
-  // Case 2: underflow beyond first week -> previous month last week
+  // Case 2: underflow -> jump to previous month
   decrementMonth()
-  week.value = datesInWeeks.value.length - 1
-  const lastWeekDates = datesInWeeks.value[week.value]
-  const day = firstInMonth(lastWeekDates, currentMonth.value)
+  let targetIndex = datesInWeeks.value.length - 1 // start at last row
+  const lastWeekDates = datesInWeeks.value[targetIndex]
+  const hasNextMonthDates = lastWeekDates.some(
+    (d) => d.getMonth() !== currentMonth.value,
+  ) // overlap into next month
+  if (hasNextMonthDates && targetIndex > 0) {
+    targetIndex = targetIndex - 1 // skip overlap row
+  }
+  week.value = targetIndex
+  const targetWeekDates = datesInWeeks.value[week.value]
+  const day = firstInMonth(targetWeekDates, currentMonth.value) // first valid in-month day
   date.value = findIndexOfDate(day)
 }
 
@@ -483,7 +496,24 @@ function findIndexOfDate(date) {
 }
 
 const currentMonthYear = computed(() => {
-  return monthList[currentMonth.value] + ', ' + currentYear.value
+  // Non-week views or empty week fallback
+  if (activeView.value !== 'Week')
+    return formatMonthYear(currentMonth.value, currentYear.value)
+
+  const weekDates = datesInWeeks.value[week.value] || []
+  if (!weekDates.length)
+    return formatMonthYear(currentMonth.value, currentYear.value)
+
+  const parts = getWeekMonthParts(weekDates)
+  if (parts.length === 1) return formatMonthYear(parts[0].month, parts[0].year)
+
+  const short = monthList.map((m) => m.slice(0, 3))
+  const first = parts[0]
+  const last = parts[parts.length - 1]
+
+  return first.year === last.year
+    ? `${short[first.month]} - ${short[last.month]} ${first.year}` // Same year span
+    : `${short[first.month]} ${first.year} - ${short[last.month]} ${last.year}` // Cross-year span
 })
 
 function isCurrentMonthDate(date) {
