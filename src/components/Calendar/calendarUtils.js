@@ -390,3 +390,22 @@ export function isWeekend(date, config) {
   const weekendDays = getWeekendDays(config)
   return weekendDays.includes(day)
 }
+
+// Format single month & year (e.g., "August, 2025")
+export function formatMonthYear(month, year) {
+  return `${monthList[month]}, ${year}`
+}
+
+// Extract ordered unique {month, year} pairs from a week of dates
+export function getWeekMonthParts(weekDates) {
+  const parts = []
+  for (const d of weekDates || []) {
+    const dt = new Date(d)
+    const m = dt.getMonth()
+    const y = dt.getFullYear()
+    const key = `${y}-${m}`
+    if (!parts.find((p) => p.key === key))
+      parts.push({ key, month: m, year: y })
+  }
+  return parts
+}
