@@ -12,22 +12,28 @@
         increment,
         updateActiveView,
         setCalendarDate,
+        onMonthYearChange,
+        selectedMonthDate,
       }"
     >
       <div class="mb-2 flex justify-between">
         <!-- left side  -->
         <!-- Year, Month -->
-        <span class="text-lg font-medium text-ink-gray-8">
-          {{ currentMonthYear }}
-        </span>
+        <div class="flex items-center">
+          <DateMonthYearPicker
+            :modelValue="selectedMonthDate"
+            :formatter="(d) => dayjs(d).format('MMM YYYY')"
+            @update:modelValue="(val) => onMonthYearChange(val)"
+          />
+        </div>
         <!-- right side -->
         <!-- actions buttons for calendar -->
         <div class="flex gap-x-1">
           <!-- Increment and Decrement Button-->
 
-          <Button @click="decrement()" variant="ghost" icon="chevron-left" />
+          <Button @click="decrement" variant="ghost" icon="chevron-left" />
           <Button label="Today" @click="setCalendarDate()" variant="ghost" />
-          <Button @click="increment()" variant="ghost" icon="chevron-right" />
+          <Button @click="increment" variant="ghost" icon="chevron-right" />
 
           <!--  View change button, default is months or can be set via props!  -->
           <TabButtons
@@ -95,9 +101,11 @@ import {
   formatMonthYear,
   getWeekMonthParts,
 } from './calendarUtils'
+import { dayjs } from '../../utils/dayjs'
 import DayIcon from './Icon/DayIcon.vue'
 import WeekIcon from './Icon/WeekIcon.vue'
 import MonthIcon from './Icon/MonthIcon.vue'
+import DateMonthYearPicker from './DateMonthYearPicker.vue'
 import CalendarMonthly from './CalendarMonthly.vue'
 import CalendarWeekly from './CalendarWeekly.vue'
 import CalendarDaily from './CalendarDaily.vue'
@@ -151,6 +159,33 @@ function updateActiveView(value, d, isPreviousMonth, isNextMonth) {
     date.value = findIndexOfDate(d)
     isPreviousMonth && decrementMonth()
     isNextMonth && incrementMonth()
+  }
+}
+
+const selectedMonthDate = ref(dayjs().format('YYYY-MM-DD'))
+
+function onMonthYearChange(val = '') {
+  const d = dayjs(val)
+  selectedMonthDate.value = d.format('YYYY-MM-DD')
+
+  setCalendarDate(selectedMonthDate.value)
+}
+
+function syncSelectedMonth(year, month) {
+  // Keep same day if possible; otherwise clamp to last day
+  if (typeof year === 'number' && typeof month === 'number') {
+    const currentDay = dayjs(selectedMonthDate.value).date()
+
+    let tentative = dayjs(
+      `${year}-${String(month + 1).padStart(2, '0')}-01`,
+    ).date(currentDay)
+
+    if (tentative.month() !== month) {
+      // overflowed into next month, use last day of target month
+      tentative = tentative.startOf('month').month(month).endOf('month')
+    }
+
+    selectedMonthDate.value = tentative.format('YYYY-MM-DD')
   }
 }
 
@@ -336,10 +371,12 @@ function updateCurrentDate(d) {
 
 function increment() {
   incrementClickEvents[activeView.value]()
+  syncSelectedMonth(currentYear.value, currentMonth.value)
 }
 
 function decrement() {
   decrementClickEvents[activeView.value]()
+  syncSelectedMonth(currentYear.value, currentMonth.value)
 }
 
 const incrementClickEvents = {
@@ -540,5 +577,5 @@ function setCalendarDate(d) {
   })
 }
 
-defineExpose({ reloadEvents, setCalendarDate })
+defineExpose({ reloadEvents })
 </script>
