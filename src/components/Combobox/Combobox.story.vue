@@ -204,77 +204,8 @@ const state = reactive({
       </div>
     </Variant>
 
-    <Variant title="Multiple Selection - Simple">
-      <div class="p-4">
-        <label class="block text-sm font-medium mb-2"
-          >Multiple Simple Options</label
-        >
-        <Combobox
-          :options="simpleOptions"
-          v-model="multipleSimpleValue"
-          :placeholder="state.placeholder"
-          :disabled="state.disabled"
-          :show-cancel="state.showCancel"
-          :multiple="true"
-        />
-        <div class="mt-2 text-sm text-gray-600">
-          Selected:
-          {{
-            multipleSimpleValue.length > 0
-              ? multipleSimpleValue.join(', ')
-              : 'None'
-          }}
-        </div>
-      </div>
-    </Variant>
-
-    <Variant title="Multiple Selection - Objects">
-      <div class="p-4">
-        <label class="block text-sm font-medium mb-2"
-          >Multiple Object Options</label
-        >
-        <Combobox
-          :options="objectOptions"
-          v-model="multipleObjectValue"
-          :placeholder="state.placeholder"
-          :disabled="state.disabled"
-          :multiple="true"
-        />
-        <div class="mt-2 text-sm text-gray-600">
-          Selected:
-          {{
-            multipleObjectValue.length > 0
-              ? multipleObjectValue.join(', ')
-              : 'None'
-          }}
-        </div>
-      </div>
-    </Variant>
-
-    <Variant title="Multiple Selection - Grouped">
-      <div class="p-4">
-        <label class="block text-sm font-medium mb-2"
-          >Multiple Grouped Options</label
-        >
-        <Combobox
-          :options="groupedOptions"
-          v-model="multipleGroupedValue"
-          :placeholder="state.placeholder"
-          :disabled="state.disabled"
-          :multiple="true"
-        />
-        <div class="mt-2 text-sm text-gray-600">
-          Selected:
-          {{
-            multipleGroupedValue.length > 0
-              ? multipleGroupedValue.join(', ')
-              : 'None'
-          }}
-        </div>
-      </div>
-    </Variant>
-
-    <Variant title="Complex Objects with Display Value">
+    <!-- Do we want to add this  -->
+    <!-- <Variant title="Complex Objects with Display Value">
       <div class="p-4">
         <label class="block text-sm font-medium mb-2">Complex Objects</label>
         <Combobox
@@ -289,7 +220,7 @@ const state = reactive({
           Selected: {{ complexObjectValue || 'None' }}
         </div>
       </div>
-    </Variant>
+    </Variant> -->
 
     <template #controls>
       <HstText v-model="state.placeholder" title="Placeholder" />
