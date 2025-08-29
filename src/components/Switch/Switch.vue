@@ -2,7 +2,7 @@
   <SwitchGroup
     as="div"
     :tabindex="switchType == SwitchVariant.ONLY_LABEL ? 0 : -1"
-    @keyup.space.self="emit('update:modelValue', !modelValue)"
+    @keyup.space.self="model = !model"
     :class="switchGroupClasses"
   >
     <span :class="labelContainerClasses">
@@ -19,9 +19,9 @@
     </span>
     <Switch
       :disabled="props.disabled"
-      :model-value="modelValue ? true : false"
+      :model-value="model ? true : false"
       :class="switchClasses"
-      @update:model-value="emit('update:modelValue', !modelValue)"
+      @update:model-value="model = !model"
     >
       <span aria-hidden="true" :class="switchCircleClasses"></span>
     </Switch>
@@ -29,7 +29,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import {
   Switch,
   SwitchDescription,
@@ -50,8 +50,11 @@ const props = withDefaults(defineProps<SwitchProps>(), {
   description: '',
   disabled: false,
 })
-
-const emit = defineEmits(['change', 'update:modelValue'])
+const model = defineModel<boolean | number | string>({ default: false })
+const emit = defineEmits(['change'])
+watch(model, (val) => {
+  emit('change', val)
+})
 
 const switchType = computed(() => {
   if (props.label && props.description) {
@@ -70,7 +73,7 @@ const switchClasses = computed(() => {
     'relative inline-flex flex-shrink-0 cursor-pointer rounded-full border-transparent transition-colors duration-100 ease-in-out items-center',
     'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-outline-gray-3',
     'disabled:cursor-not-allowed disabled:bg-surface-gray-3',
-    props.modelValue
+    model.value
       ? 'bg-surface-gray-7 enabled:hover:bg-surface-gray-6 active:bg-surface-gray-5 group-hover:enabled:bg-surface-gray-6'
       : 'bg-surface-gray-4 enabled:hover:bg-gray-400 active:bg-gray-500 group-hover:enabled:bg-gray-400',
     props.size === 'md' ? 'h-5 w-8 border-[3px]' : 'h-4 w-[26px] border-2',
@@ -82,10 +85,10 @@ const switchCircleClasses = computed(() => {
     'pointer-events-none inline-block transform rounded-full bg-surface-white shadow ring-0 transition duration-100 ease-in-out',
     props.size === 'md' ? 'h-3.5 w-3.5' : 'h-3 w-3',
     props.size === 'md'
-      ? props.modelValue
+      ? model.value
         ? 'translate-x-3 rtl:-translate-x-3'
         : 'translate-x-0'
-      : props.modelValue
+      : model.value
         ? 'translate-x-2.5 rtl:-translate-x-2.5'
         : 'translate-x-0',
   ]
