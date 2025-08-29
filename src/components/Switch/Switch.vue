@@ -39,6 +39,7 @@
 <script lang="ts" setup>
 import { computed, watch } from 'vue'
 import { useId } from '../../utils/useId'
+import FeatherIcon from '../FeatherIcon.vue'
 import { SwitchRoot, SwitchThumb } from 'reka-ui'
 import type { SwitchProps } from './types'
 
