@@ -33,8 +33,9 @@
             <template v-for="item in group.items" :key="item.label">
               <Switch
                 v-if="item.switch"
+                class="!px-2 !py-0 h-7"
                 :label="item.label"
-                label-classes="font-normal"
+                label-classes="font-normal cursor-pointer"
                 :icon="item.icon"
                 @change="item.onClick?.($event)"
               />
