@@ -54,7 +54,7 @@
           :events="events"
           :onClick="(event) => logEvent('onClick', event)"
           :onDblClick="(event) => logEvent('onDblClick', event)"
-          :onCellDblClick="(data) => logEvent('onCellDblClick', data)"
+          :onCellClick="(data) => logEvent('onCellClick', data)"
         >
         </Calendar>
       </div>
@@ -72,7 +72,6 @@ const config = {
   isEditMode: true,
   eventIcons: {},
   allowCustomClickEvents: true,
-  redundantCellHeight: 100,
   enableShortcuts: false,
 }
 
@@ -92,8 +91,10 @@ const events = ref([
     participant: 'Ryan Mathew',
     id: 'EDU-CSH-2024-00091',
     venue: 'CNF-ROOM-2024-00001',
-    fromDate: currentMonthYear + '-02 16:30:00', //can be a date object
-    toDate: currentMonthYear + '-02 17:30:00',
+    fromDate: currentMonthYear + '-02', //can be a date object
+    toDate: currentMonthYear + '-02',
+    fromTime: '16:30',
+    toTime: '17:30',
     color: 'violet',
   },
   {
@@ -101,8 +102,10 @@ const events = ref([
     participant: 'Ryan Mathew',
     id: 'EDU-CSH-2024-00092',
     venue: 'CNF-ROOM-2024-00002',
-    fromDate: currentMonthYear + '-04 13:30:00',
-    toDate: currentMonthYear + '-04 17:30:00',
+    fromDate: currentMonthYear + '-04',
+    toDate: currentMonthYear + '-04',
+    fromTime: '13:30',
+    toTime: '17:30',
     color: 'green',
   },
   {
@@ -110,8 +113,10 @@ const events = ref([
     participant: 'Sheldon',
     id: 'EDU-CSH-2024-00093',
     venue: 'CNF-ROOM-2024-00001',
-    fromDate: currentMonthYear + '-16 10:30:00',
-    toDate: currentMonthYear + '-16 11:30:00',
+    fromDate: currentMonthYear + '-16',
+    toDate: currentMonthYear + '-16',
+    fromTime: '10:30',
+    toTime: '11:30',
     color: 'blue',
   },
   {
@@ -119,8 +124,10 @@ const events = ref([
     participant: 'Ryan Mathew',
     id: 'EDU-CSH-2024-00094',
     venue: 'CNF-ROOM-2024-00001',
-    fromDate: currentMonthYear + '-21 16:30:00',
-    toDate: currentMonthYear + '-21 17:30:00',
+    fromDate: currentMonthYear + '-21',
+    toDate: currentMonthYear + '-21',
+    fromTime: '16:30',
+    toTime: '17:30',
     color: 'red',
   },
   {
@@ -128,8 +135,10 @@ const events = ref([
     participant: 'John',
     id: '#htrht41',
     venue: 'Google Meet',
-    fromDate: currentMonthYear + '-11 00:00:00',
-    toDate: currentMonthYear + '-11 23:59:59',
+    fromDate: currentMonthYear + '-11',
+    toDate: currentMonthYear + '-11',
+    fromTime: '00:00',
+    toTime: '02:00',
     color: 'amber',
     isFullDay: true,
   },
@@ -138,8 +147,10 @@ const events = ref([
     participant: 'Sheldon',
     id: '#htrht42',
     venue: 'Google Meet',
-    fromDate: currentMonthYear + '-07 00:00:00',
-    toDate: currentMonthYear + '-07 23:59:59',
+    fromDate: currentMonthYear + '-07',
+    toDate: currentMonthYear + '-07',
+    fromTime: '00:00',
+    toTime: '02:00',
     color: 'amber',
     isFullDay: true,
   },

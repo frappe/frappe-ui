@@ -47,10 +47,12 @@ declare module 'vue' {
     CommandPalette: typeof import('./src/components/CommandPalette/CommandPalette.vue')['default']
     CommandPaletteItem: typeof import('./src/components/CommandPalette/CommandPaletteItem.vue')['default']
     ConfirmDialog: typeof import('./src/components/ConfirmDialog.vue')['default']
+    DateMonthYearPicker: typeof import('./src/components/Calendar/DateMonthYearPicker.vue')['default']
     DatePicker: typeof import('./src/components/DatePicker/DatePicker.vue')['default']
     'DatePicker.story': typeof import('./src/components/DatePicker/DatePicker.story.vue')['default']
     DateRangePicker: typeof import('./src/components/DatePicker/DateRangePicker.vue')['default']
     DateTimePicker: typeof import('./src/components/DatePicker/DateTimePicker.vue')['default']
+    DayIcon: typeof import('./src/components/Calendar/Icon/DayIcon.vue')['default']
     Dialog: typeof import('./src/components/Dialog/Dialog.vue')['default']
     'Dialog.story': typeof import('./src/components/Dialog/Dialog.story.vue')['default']
     Dialogs: typeof import('./src/components/Dialogs.vue')['default']
@@ -123,6 +125,7 @@ declare module 'vue' {
     LucideX: typeof import('~icons/lucide/x')['default']
     MentionList: typeof import('./src/components/TextEditor/MentionList.vue')['default']
     Menu: typeof import('./src/components/TextEditor/Menu.vue')['default']
+    MonthIcon: typeof import('./src/components/Calendar/Icon/MonthIcon.vue')['default']
     NestedPopover: typeof import('./src/components/ListFilter/NestedPopover.vue')['default']
     NewEventModal: typeof import('./src/components/Calendar/NewEventModal.vue')['default']
     NumberChart: typeof import('./src/components/Charts/NumberChart.vue')['default']
@@ -179,5 +182,6 @@ declare module 'vue' {
     'Tree.story': typeof import('./src/components/Tree/Tree.story.vue')['default']
     Underline: typeof import('./src/components/TextEditor/icons/underline.vue')['default']
     VideoAddLine: typeof import('./src/components/TextEditor/icons/video-add-line.vue')['default']
+    WeekIcon: typeof import('./src/components/Calendar/Icon/WeekIcon.vue')['default']
   }
 }

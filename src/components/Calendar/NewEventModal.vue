@@ -38,7 +38,7 @@
 
           <FormControl
             type="time"
-            v-model="newEvent.from_time"
+            v-model="newEvent.fromTime"
             label="Start Time"
             @blur="validateFields()"
             v-if="!newEvent.isFullDay"
@@ -46,7 +46,7 @@
 
           <FormControl
             type="time"
-            v-model="newEvent.to_time"
+            v-model="newEvent.toTime"
             label="End Time"
             @blur="validateFields()"
             v-if="!newEvent.isFullDay"
@@ -68,9 +68,9 @@
             <template #prefix>
               <div
                 class="h-5 w-5 rounded-full shadow-md"
-                :class="[
-                  colorMap[newEvent?.color]?.background_color || 'bg-green-100',
-                ]"
+                :style="{
+                  backgroundColor: colorMap[newEvent?.color]?.color,
+                }"
               />
             </template>
           </FormControl>
@@ -115,8 +115,12 @@ const newEvent = reactive({
   title: props.event?.title || '',
   date: props.event?.date || '',
   participant: props.event?.participant || '',
-  from_time: props.event?.from_time || '',
-  to_time: props.event?.to_time || '',
+  fromDateTime: props.event?.fromDateTime || '',
+  toDateTime: props.event?.toDateTime || '',
+  fromDate: props.event?.fromDate || '',
+  toDate: props.event?.toDate || '',
+  fromTime: props.event?.fromTime || '',
+  toTime: props.event?.toTime || '',
   venue: props.event?.venue || '',
   color: props.event?.color || 'green',
   id: '',
@@ -128,8 +132,10 @@ const isUpdated = computed(() => {
     newEvent.title !== props.event.title ||
     newEvent.date !== props.event.date ||
     newEvent.participant !== props.event.participant ||
-    newEvent.from_time !== props.event.from_time ||
-    newEvent.to_time !== props.event.to_time ||
+    newEvent.fromDate !== props.event.fromDate ||
+    newEvent.toDate !== props.event.toDate ||
+    newEvent.fromTime !== props.event.fromTime ||
+    newEvent.toTime !== props.event.toTime ||
     newEvent.venue !== props.event.venue ||
     newEvent.color !== props.event.color ||
     newEvent.isFullDay !== props.event.isFullDay
@@ -142,23 +148,23 @@ const errorMessage = ref('')
 function validateFields() {
   if (!newEvent.date) {
     errorMessage.value = 'Date is required'
-  } else if (!newEvent.from_time && !newEvent.isFullDay) {
+  } else if (!newEvent.fromTime && !newEvent.isFullDay) {
     errorMessage.value = 'Start Time is required'
-  } else if (!newEvent.to_time && !newEvent.isFullDay) {
+  } else if (!newEvent.toTime && !newEvent.isFullDay) {
     errorMessage.value = 'End Time is required'
   } else {
     errorMessage.value = ''
   }
   if (
-    newEvent.hasOwnProperty('from_time') &&
-    newEvent.hasOwnProperty('to_time')
+    newEvent.hasOwnProperty('fromTime') &&
+    newEvent.hasOwnProperty('toTime')
   ) {
     validateStartEndTime()
   }
 }
 
 function validateStartEndTime() {
-  let timeDiff = calculateDiff(newEvent.from_time, newEvent.to_time)
+  let timeDiff = calculateDiff(newEvent.fromTime, newEvent.toTime)
   if (timeDiff <= 0) {
     errorMessage.value = 'Start time must be less than End Time'
   }
@@ -193,11 +199,11 @@ function submitEvent(close) {
 
 function handleEventTime() {
   if (newEvent.isFullDay) {
-    newEvent.from_time = ''
-    newEvent.to_time = ''
+    newEvent.fromTime = ''
+    newEvent.toTime = ''
   } else {
-    newEvent.from_time = handleSeconds(newEvent.from_time)
-    newEvent.to_time = handleSeconds(newEvent.to_time)
+    newEvent.fromTime = handleSeconds(newEvent.fromTime)
+    newEvent.toTime = handleSeconds(newEvent.toTime)
   }
 }
 </script>

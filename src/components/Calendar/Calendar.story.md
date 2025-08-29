@@ -59,7 +59,6 @@ The object for this kind of event looks like:
     	defaultMode: 'Month',
     	isEditMode: false,
     	eventIcons: {},
-    	redundantCellHeight: 50,
     	hourHeight: 50,
     	enableShortcuts: true,
       showIcon: true,
@@ -90,7 +89,6 @@ e.g.
     	'Meeting': <MeetingIcon />,
     }
 
-- `redundantCellHeight`: The height of the cell to display full day events. This value is in Pixel, by default the value is `50px`.
 - `hourHeight`: The height of each cell below the full day events cell. This value is in pixel, by default the value is `50px`.
 - `enableShortcuts`: Boolean value which determines whether shortcuts will be enabled or not. By default the value is true i.e. shortcuts will be enabled, can be disabled by setting it to false, currently the calendar supports shortcuts like
 
@@ -141,7 +139,7 @@ If you wish to handle clicks on your own, the Calendar provides 3 functions to h
 		:events="events"
 		:onClick="(event) =>  console.log('onClick', event)"
 		:onDblClick="(event) =>  console.log('onDblClick', event)"
-		:onCellDblClick="(data) =>  console.log('onCellDblClick', data)"
+		:onCellClick="(data) =>  console.log('onCellClick', data)"
 	/>
 
 `Note: while using custom click events, the create, update & delete prop functions will not be triggered.`
@@ -166,7 +164,7 @@ If you wish to handle clicks on your own, the Calendar provides 3 functions to h
   - e: this key represent the MouseEvent.
   - calendarEvent: This key is an object, the object of calendarEvent is displayed above
 
-- `onCellDblClick`: The function is triggered when a cell is double clicked. In the callback function you receive an argument which is an object and it looks like this:
+- `onCellClick`: The function is triggered when a cell is clicked. In the callback function you receive an argument which is an object and it looks like this:
 
       {
       	e:MouseEvent,
@@ -176,7 +174,7 @@ If you wish to handle clicks on your own, the Calendar provides 3 functions to h
       }
 
   - e: this key represent the MouseEvent.
-  - date: Date Object, which has the date of the cell which was double clicked.
+  - date: Date Object, which has the date of the cell which was clicked.
   - time: String, ranges from "00:00" to "23:00", where the cell was clicked in the grid that time value will be displayed over here. (Note, this will be empty in Month view)
   - view: String, shows the view in which the event was triggered.
 

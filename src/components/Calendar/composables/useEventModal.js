@@ -10,30 +10,44 @@ export default function useEventModal() {
   const newEvent = reactive({
     date: '',
     participant: '',
-    from_time: '',
-    to_time: '',
+    fromDate: '',
+    toDate: '',
+    fromTime: '',
+    toTime: '',
     venue: '',
     title: '',
+    isFullDay: false,
   })
-  function openNewEventModal(e, view, date, isEditMode, from_time = '') {
+  function openNewEventModal(
+    e,
+    view,
+    date,
+    isEditMode,
+    fromTime = '',
+    isFullDay = false,
+  ) {
     if (!isEditMode) return
     date =
       view === 'Week'
         ? e.target.parentNode.parentNode.getAttribute('data-date-attr')
         : date
     newEvent.date = parseDate(new Date(date))
+    newEvent.fromDate = date
+    newEvent.toDate = date
+    newEvent.isFullDay = isFullDay
+
     if (view === 'Month') {
       showEventModal.value = true
       return
     }
 
-    let to_time = convertMinutesToHours(calculateMinutes(from_time) + 60).slice(
+    let toTime = convertMinutesToHours(calculateMinutes(fromTime) + 60).slice(
       0,
       -3,
     )
 
-    newEvent.from_time = from_time
-    newEvent.to_time = to_time
+    newEvent.fromTime = fromTime
+    newEvent.toTime = toTime
     showEventModal.value = true
   }
 

@@ -1,57 +1,60 @@
 <template>
   <!-- Weekly and Daily Event Template  -->
   <div
-    class="h-min-[18px] rounded-lg p-2 transition-all duration-75"
+    class="event min-h-6 mx-px shadow rounded transition-all duration-75 shrink-0"
     ref="eventRef"
     v-if="activeView !== 'Month'"
     v-bind="$attrs"
     :class="[
-      colorMap[props.event?.color]?.background_color || 'bg-green-100',
-      'shadow-lg',
       opened && '!z-20 drop-shadow-xl',
+      activeEvent == (props.event?.id || props.event?.name) && 'active',
     ]"
-    :style="setEventStyles"
+    :style="[setEventStyles, eventBgStyle]"
     @dblclick.prevent="handleEventEdit($event)"
     @click.prevent="handleEventClick($event)"
     v-on="{
       mousedown: config.isEditMode && handleRepositionMouseDown,
     }"
   >
-    <div
-      class="relative flex h-full select-none items-start gap-2 overflow-hidden px-2"
-      :class="
-        props.event.from_time && [
-          'border-l-2',
-          colorMap[props.event?.color]?.border_color || 'border-green-600',
-        ]
-      "
-    >
-      <div v-if="config.showIcon && eventIcons[props.event.type]">
-        <component
-          v-if="eventIcons[props.event.type]"
-          :is="eventIcons[props.event.type]"
-          class="h-4 w-4 text-black"
-        />
-      </div>
-
+    <div class="flex gap-1.5 h-full p-[5px]" :class="isPastEvent && 'past'">
       <div
-        class="flex w-fit flex-col overflow-hidden whitespace-nowrap text-gray-800"
+        v-if="props.event.fromTime"
+        class="event-border h-full w-[2px] rounded shrink-0"
+        :style="eventBorderStyle"
+      />
+      <div
+        class="relative flex h-full select-none items-start gap-2 overflow-hidden"
       >
-        <p class="text-ellipsis text-sm font-medium truncate">
-          {{ props.event.title || 'New Event' }}
-        </p>
-        <p
-          class="text-ellipsis text-xs font-normal"
-          v-if="!props.event.isFullDay"
-        >
-          {{
-            formattedDuration(
-              updatedEvent.from_time,
-              updatedEvent.to_time,
-              config.timeFormat,
-            )
-          }}
-        </p>
+        <div v-if="config.showIcon && eventIcons[props.event.type]">
+          <component
+            v-if="eventIcons[props.event.type]"
+            :is="eventIcons[props.event.type]"
+            class="h-4 w-4"
+          />
+        </div>
+
+        <div class="flex w-fit flex-col gap-0.5 overflow-hidden">
+          <p
+            ref="eventTitleRef"
+            class="text-sm font-medium"
+            :class="lineClampClass"
+          >
+            {{ props.event.title || '(No title)' }}
+          </p>
+          <p
+            ref="eventTimeRef"
+            class="text-xs font-normal"
+            v-if="!props.event.isFullDay"
+          >
+            {{
+              formattedDuration(
+                updatedEvent.fromTime,
+                updatedEvent.toTime,
+                config.timeFormat,
+              )
+            }}
+          </p>
+        </div>
       </div>
     </div>
     <div
@@ -65,21 +68,24 @@
   <!-- Monthly Event Template -->
   <div
     v-else
-    class="h-min-[18px] rounded-lg p-2 transition-all duration-75"
+    class="event flex gap-1.5 min-h-6 mx-px rounded p-[5px] transition-all duration-75"
+    :class="[
+      activeEvent == (props.event?.id || props.event?.name) && 'active',
+      isPastEvent && 'past',
+    ]"
     ref="eventRef"
     v-bind="$attrs"
-    :class="[colorMap[props.event?.color]?.background_color || 'bg-green-100']"
     @dblclick.prevent="handleEventEdit($event)"
-    @click="handleEventClick($event)"
+    @click.stop="handleEventClick($event)"
+    :style="eventBgStyle"
   >
     <div
-      class="relative flex h-full select-none items-start gap-2 overflow-hidden px-2"
-      :class="
-        props.event.from_time && [
-          'border-l-2',
-          colorMap[props.event?.color]?.border_color || 'border-green-600',
-        ]
-      "
+      v-if="props.event.fromTime"
+      class="event-border w-[2px] rounded shrink-0"
+      :style="eventBorderStyle"
+    />
+    <div
+      class="relative flex h-full select-none items-start gap-2 overflow-hidden"
     >
       <div v-if="config.showIcon && eventIcons[props.event.type]">
         <component
@@ -90,19 +96,10 @@
       </div>
 
       <div
-        class="flex w-fit flex-col text-start overflow-hidden whitespace-nowrap text-gray-800"
+        class="flex w-fit flex-col text-start overflow-hidden whitespace-nowrap"
       >
         <p class="text-sm font-medium truncate">
           {{ props.event.title || 'New Event' }}
-        </p>
-        <p v-if="props.event.from_time" class="text-xs font-normal">
-          {{
-            formattedDuration(
-              updatedEvent.from_time,
-              updatedEvent.to_time,
-              config.timeFormat,
-            )
-          }}
         </p>
       </div>
     </div>
@@ -128,10 +125,10 @@
 </template>
 
 <script setup>
-import FeatherIcon from '../FeatherIcon.vue'
 import EventModalContent from './EventModalContent.vue'
 import NewEventModal from './NewEventModal.vue'
 import { useFloating, shift, flip, offset, autoUpdate } from '@floating-ui/vue'
+import { activeEvent } from './composables/useCalendarData.js'
 
 import {
   ref,
@@ -191,8 +188,12 @@ const updatedEvent = reactive({
 watch(
   () => props.event,
   (newVal) => {
-    updatedEvent.from_time = newVal.from_time
-    updatedEvent.to_time = newVal.to_time
+    updatedEvent.fromTime = newVal.fromTime
+    updatedEvent.toTime = newVal.toTime
+    updatedEvent.fromDate = newVal.fromDate
+    updatedEvent.toDate = newVal.toDate
+    updatedEvent.fromDateTime = newVal.fromDate + ' ' + newVal.fromTime
+    updatedEvent.toDateTime = newVal.toDate + ' ' + newVal.toTime
     calendarEvent.value = newVal
   },
   { deep: true },
@@ -200,7 +201,7 @@ watch(
 
 const eventIcons = config.eventIcons
 const minuteHeight = config.hourHeight / 60
-const height_15_min = minuteHeight * 15
+const height15Min = minuteHeight * 15
 
 const state = reactive({
   xAxis: 0,
@@ -213,13 +214,13 @@ const setEventStyles = computed(() => {
   if (props.event.isFullDay) {
     return {
       transform: `translate(${state.xAxis}px, ${state.yAxis}px)`,
-      zIndex: isRepositioning ? 100 : props.event.idx + 1,
+      zIndex: isRepositioning.value ? 100 : props.event.idx + 1,
     }
   }
 
   let diff = calculateDiff(
-    calendarEvent.value.from_time,
-    calendarEvent.value.to_time,
+    calendarEvent.value.fromTime,
+    calendarEvent.value.toTime,
   )
   let height = diff * minuteHeight
   if (height < heightThreshold) {
@@ -227,24 +228,19 @@ const setEventStyles = computed(() => {
   }
   height += 'px'
 
-  let top = calculateMinutes(calendarEvent.value.from_time) * minuteHeight
-  if (activeView.value === 'Day') {
-    top += config.redundantCellHeight
-  }
+  let top = calculateMinutes(calendarEvent.value.fromTime) * minuteHeight
 
   let hallNumber = calendarEvent.value.hallNumber
   let width =
     isResizing.value || isRepositioning.value
       ? '100%'
-      : `${80 - hallNumber * 20}%`
+      : `${93 - hallNumber * 20}%`
   let left =
     isResizing.value || isRepositioning.value ? '0' : `${hallNumber * 20}%`
   let zIndex =
     isResizing.value || isRepositioning.value
       ? 100
       : (props.event.idx || 1) * hallNumber + 1
-  // border: 1px solid #fff;
-  let border = hallNumber >= 1 ? '1px solid #fff' : ''
 
   return {
     height,
@@ -253,9 +249,61 @@ const setEventStyles = computed(() => {
     left,
     width,
     transform: `translate(${state.xAxis}px, ${state.yAxis}px)`,
-    borderLeft: border,
-    borderTop: border,
   }
+})
+
+const eventBgStyle = computed(() => {
+  let _color = props.event.color || 'green'
+  _color = color(_color)
+
+  return {
+    '--bg': _color.bg,
+    '--text': _color.text,
+    '--bg-hover': _color.bgHover,
+    '--bg-active': _color.bgActive,
+  }
+})
+
+const eventBorderStyle = computed(() => {
+  let _color = props.event.color || 'green'
+  _color = color(_color)
+
+  return { '--border': _color.border, '--border-active': _color.borderActive }
+})
+
+function color(color) {
+  if (!color?.startsWith('#')) {
+    return colorMap[color] || colorMap['green']
+  }
+
+  for (const value of Object.values(colorMap)) {
+    if (value.color === color) return value
+  }
+
+  return colorMap['green']
+}
+
+const eventTitleRef = ref(null)
+const eventTimeRef = ref(null)
+
+const lineClampClass = computed(() => {
+  if (activeView.value === 'Month') return
+  if (props.event.isFullDay) return 'line-clamp-1'
+  if (!eventRef.value || !eventTitleRef.value || !eventTimeRef.value) return
+  if (!props.event.fromTime && !props.event.toTime) return
+
+  const containerHeight = eventRef.value.clientHeight
+  const subtitleHeight = eventTimeRef.value.offsetHeight
+  const availableHeightForTitle = containerHeight - subtitleHeight - 8 // margin
+
+  const computedStyle = getComputedStyle(eventTitleRef.value)
+  const lineHeight = parseFloat(computedStyle.lineHeight)
+
+  const maxLines = Math.max(1, Math.floor(availableHeightForTitle / lineHeight))
+
+  // Clamp between 1 and 6 lines (Tailwind supports line-clamp-1 to line-clamp-6 by default)
+  const clampValue = Math.min(maxLines, 6)
+  return `line-clamp-${clampValue}`
 })
 
 const eventRef = ref(null)
@@ -276,7 +324,7 @@ const isEventUpdated = ref(false)
 function newEventEndTime(newHeight) {
   let newEndTime =
     parseFloat(newHeight) / minuteHeight +
-    calculateMinutes(calendarEvent.value.from_time)
+    calculateMinutes(calendarEvent.value.fromTime)
   newEndTime = Math.floor(newEndTime)
   if (newEndTime > 1440) {
     newEndTime = 1440
@@ -289,7 +337,7 @@ function handleResizeMouseDown(e) {
   isResizing.value = true
   isRepositioning.value = false
 
-  let oldTime = calendarEvent.value.to_time
+  let oldTime = calendarEvent.value.toTime
   window.addEventListener('mousemove', resize)
   window.addEventListener('mouseup', stopResize, { once: true })
 
@@ -298,16 +346,16 @@ function handleResizeMouseDown(e) {
     // difference between where mouse is and where event's top is, to find the new height
     let diffX = e.clientY - eventRef.value.getBoundingClientRect().top
     eventRef.value.style.height =
-      Math.round(diffX / height_15_min) * height_15_min + 'px'
+      Math.round(diffX / height15Min) * height15Min + 'px'
 
     eventRef.value.style.width = '100%'
-    updatedEvent.to_time = newEventEndTime(eventRef.value.style.height)
-    calendarEvent.value.to_time = newEventEndTime(eventRef.value.style.height)
+    updatedEvent.toTime = newEventEndTime(eventRef.value.style.height)
+    calendarEvent.value.toTime = newEventEndTime(eventRef.value.style.height)
   }
 
   function stopResize() {
     isResizing.value = false
-    if (oldTime !== calendarEvent.value.to_time) {
+    if (oldTime !== calendarEvent.value.toTime) {
       calendarActions.updateEventState(calendarEvent.value)
     }
 
@@ -341,8 +389,8 @@ function handleRepositionMouseDown(e) {
     if (!props.event.isFullDay) handleVerticalMovement(e.clientY, prevY, rect)
 
     if (
-      calendarEvent.value.from_time !== updatedEvent.from_time ||
-      calendarEvent.value.to_time !== updatedEvent.to_time
+      calendarEvent.value.fromTime !== updatedEvent.fromTime ||
+      calendarEvent.value.toTime !== updatedEvent.toTime
     ) {
       isEventUpdated.value = true
     } else {
@@ -364,8 +412,14 @@ function handleRepositionMouseDown(e) {
     }
     if (isEventUpdated.value) {
       calendarEvent.value.date = updatedEvent.date
-      calendarEvent.value.from_time = updatedEvent.from_time
-      calendarEvent.value.to_time = updatedEvent.to_time
+      calendarEvent.value.fromDate = updatedEvent.date
+      calendarEvent.value.toDate = updatedEvent.date
+      calendarEvent.value.fromDateTime =
+        updatedEvent.date + ' ' + updatedEvent.fromTime
+      calendarEvent.value.toDateTime =
+        updatedEvent.date + ' ' + updatedEvent.toTime
+      calendarEvent.value.fromTime = updatedEvent.fromTime
+      calendarEvent.value.toTime = updatedEvent.toTime
       calendarActions.updateEventState(calendarEvent.value)
       isEventUpdated.value = false
       state.xAxis = 0
@@ -388,9 +442,7 @@ function getDate(date, nextDate = 0) {
 
 function handleHorizontalMovement(clientX, rect) {
   const currentDate = new Date(
-    props.event.isFullDay
-      ? eventRef.value.parentNode.parentNode.getAttribute('data-date-attr')
-      : eventRef.value.parentNode.getAttribute('data-date-attr'),
+    eventRef.value.parentNode.getAttribute('data-date-attr'),
   )
 
   if (props.event.isFullDay) {
@@ -433,32 +485,32 @@ function handleVerticalMovement(clientY, prevY, rect) {
     diffY = parentBottom - rect.bottom
   }
 
-  diffY = Math.round(diffY / height_15_min) * height_15_min
+  diffY = Math.round(diffY / height15Min) * height15Min
   state.yAxis = diffY
 
-  updatedEvent.from_time = convertMinutesToHours(
-    calculateMinutes(calendarEvent.value.from_time) +
+  updatedEvent.fromTime = convertMinutesToHours(
+    calculateMinutes(calendarEvent.value.fromTime) +
       Math.round(diffY / minuteHeight),
   )
-  updatedEvent.to_time = convertMinutesToHours(
-    calculateMinutes(calendarEvent.value.to_time) +
+  updatedEvent.toTime = convertMinutesToHours(
+    calculateMinutes(calendarEvent.value.toTime) +
       Math.round(diffY / minuteHeight),
   )
   handleTimeConstraints()
 }
 
 function handleTimeConstraints() {
-  if (updatedEvent.from_time < '00:00:00') {
-    updatedEvent.from_time = '00:00:00'
+  if (updatedEvent.fromTime < '00:00:00') {
+    updatedEvent.fromTime = '00:00:00'
   }
-  if (updatedEvent.from_time > '24:00:00') {
-    updatedEvent.from_time = '24:00:00'
+  if (updatedEvent.fromTime > '24:00:00') {
+    updatedEvent.fromTime = '24:00:00'
   }
-  if (updatedEvent.to_time < '00:00:00') {
-    updatedEvent.to_time = '00:00:00'
+  if (updatedEvent.toTime < '00:00:00') {
+    updatedEvent.toTime = '00:00:00'
   }
-  if (updatedEvent.to_time > '24:00:00') {
-    updatedEvent.to_time = '24:00:00'
+  if (updatedEvent.toTime > '24:00:00') {
+    updatedEvent.toTime = '24:00:00'
   }
 }
 
@@ -525,4 +577,57 @@ function handleEventDelete() {
   calendarActions.deleteEvent(calendarEvent.value.id)
   close()
 }
+
+const isPastEvent = computed(() => {
+  try {
+    // determine end date/time
+    const endDateStr =
+      calendarEvent.value.toDate ||
+      calendarEvent.value.date ||
+      calendarEvent.value.fromDate ||
+      props.event.toDate ||
+      props.event.date ||
+      props.event.fromDate
+    if (!endDateStr) return false
+    // If event has a toTime use it; else if full day, treat end as end of day; fallback 00:00:00
+    let endTimeStr = '00:00:00'
+    if (calendarEvent.value.toTime) endTimeStr = calendarEvent.value.toTime
+    else if (calendarEvent.value.isFullDay || props.event.isFullDay)
+      endTimeStr = '23:59:59'
+
+    const end = new Date(`${endDateStr}T${endTimeStr}`.replace(' ', 'T'))
+    return end.getTime() < new Date().getTime()
+  } catch (e) {
+    return false
+  }
+})
 </script>
+
+<style scoped>
+.event {
+  background-color: var(--bg);
+  color: var(--text);
+}
+
+.event .event-border {
+  background-color: var(--border);
+}
+
+.event.active {
+  background-color: var(--bg-active);
+  color: #fff;
+}
+
+.event.active .event-border {
+  background-color: var(--border-active);
+}
+
+.event:not(.active):hover {
+  background-color: var(--bg-hover);
+}
+
+.event:not(.active) .past,
+.event.past:not(.active) {
+  opacity: 0.5;
+}
+</style>

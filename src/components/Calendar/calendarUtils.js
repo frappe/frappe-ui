@@ -255,57 +255,15 @@ export const twentyFourHoursFormat = [
   '23:00',
 ]
 
-export const colorMap = {
-  blue: {
-    background_color: 'bg-blue-100',
-    border_color: 'border-blue-600',
-  },
-  green: {
-    background_color: 'bg-green-100',
-    border_color: 'border-green-600',
-  },
-  red: {
-    background_color: 'bg-red-200',
-    border_color: 'border-red-600',
-  },
-  orange: {
-    background_color: 'bg-orange-100',
-    border_color: 'border-orange-600',
-  },
-  yellow: {
-    background_color: 'bg-yellow-100',
-    border_color: 'border-yellow-600',
-  },
-  teal: {
-    background_color: 'bg-teal-100',
-    border_color: 'border-teal-600',
-  },
-  violet: {
-    background_color: 'bg-violet-100',
-    border_color: 'border-violet-600',
-  },
-  cyan: {
-    background_color: 'bg-cyan-100',
-    border_color: 'border-cyan-600',
-  },
-  purple: {
-    background_color: 'bg-purple-100',
-    border_color: 'border-purple-600',
-  },
-  pink: {
-    background_color: 'bg-pink-100',
-    border_color: 'border-pink-600',
-  },
-  amber: {
-    background_color: 'bg-amber-100',
-    border_color: 'border-amber-600',
-  },
-}
+export function formattedDuration(fromTime, toTime, timeFormat) {
+  fromTime = formatTime(fromTime, timeFormat)
+  toTime = formatTime(toTime, timeFormat)
 
-export function formattedDuration(from_time, to_time, timeFormat) {
-  from_time = formatTime(from_time, timeFormat)
-  to_time = formatTime(to_time, timeFormat)
-  return from_time + ' - ' + to_time
+  if (fromTime.split(' ')[1] === toTime.split(' ')[1]) {
+    fromTime = fromTime.split(' ')[0]
+  }
+
+  return fromTime + ' - ' + toTime
 }
 
 export function formatTime(time, format) {
@@ -323,4 +281,131 @@ export function formatTime(time, format) {
     time = `${hours}:${minutes} ${ampm}`
   }
   return time
+}
+
+export const colorMap = {
+  amber: {
+    color: '#DB7706',
+    border: '#DB7706',
+    borderActive: '#FBCC55',
+    text: '#91400D',
+    subtext: '#763813',
+    bg: '#FFF7D3',
+    bgHover: '#FEEDA9',
+    bgActive: '#E79913',
+  },
+  violet: {
+    color: '#6846E3',
+    border: '#6846E3',
+    borderActive: '#B3A1F5',
+    text: '#5F46C7',
+    subtext: '#251959',
+    bg: '#F0EBFF',
+    bgHover: '#DBD5FF',
+    bgActive: '#7A51F4',
+  },
+  pink: {
+    color: '#E34AA6',
+    border: '#E34AA6',
+    borderActive: '#F6A7D6',
+    text: '#CF3A96',
+    subtext: '#801458',
+    bg: '#FDE8F5',
+    bgHover: '#FFD5F0',
+    bgActive: '#E34AA6',
+  },
+  cyan: {
+    color: '#3BBDE5',
+    border: '#3BBDE5',
+    borderActive: '#72D5F3',
+    text: '#267A94',
+    subtext: '#164759',
+    bg: '#DDF7FF',
+    bgHover: '#B3E8F7',
+    bgActive: '#32A4C7',
+  },
+  blue: {
+    color: '#0289F7',
+    border: '#0289F7',
+    borderActive: '#A7D7FD',
+    text: '#007BE0',
+    subtext: '#004880',
+    bg: '#E6F4FF',
+    bgHover: '#C8E6FF',
+    bgActive: '#0289F7',
+  },
+  orange: {
+    color: '#E86C13',
+    border: '#E86C13',
+    borderActive: '#FFCBA3',
+    text: '#E86C13',
+    subtext: '#6B2711',
+    bg: '#FFEFE4',
+    bgHover: '#FFDEC5',
+    bgActive: '#E86C13',
+  },
+  green: {
+    color: '#30A66D',
+    border: '#30A66D',
+    borderActive: '#88D5A5',
+    text: '#137949',
+    subtext: '#173B2C',
+    bg: '#E4FAEB',
+    bgHover: '#CBF3D7',
+    bgActive: '#30A66D',
+  },
+}
+
+// config.weekends can be array of numbers [0-6] (0=Sun) or weekday names (e.g., 'Saturday').
+// Falls back to [0] (Sunday) if not provided / invalid.
+const _weekdayNameToIndex = {
+  sunday: 0,
+  monday: 1,
+  tuesday: 2,
+  wednesday: 3,
+  thursday: 4,
+  friday: 5,
+  saturday: 6,
+}
+
+export function getWeekendDays(config) {
+  // Support both weekendDays (preferred) and weekends (legacy) keys
+  const raw = config?.weekendDays || config?.weekends
+  if (!raw || !Array.isArray(raw) || raw.length === 0) return [0]
+  return raw
+    .map((d) => {
+      if (typeof d === 'number') return d
+      if (typeof d === 'string') {
+        const key = d.trim().toLowerCase()
+        if (_weekdayNameToIndex.hasOwnProperty(key))
+          return _weekdayNameToIndex[key]
+      }
+      return null
+    })
+    .filter((v) => v !== null && v >= 0 && v <= 6)
+}
+
+export function isWeekend(date, config) {
+  const day = new Date(date).getDay()
+  const weekendDays = getWeekendDays(config)
+  return weekendDays.includes(day)
+}
+
+// Format single month & year (e.g., "August, 2025")
+export function formatMonthYear(month, year) {
+  return `${monthList[month]} ${year}`
+}
+
+// Extract ordered unique {month, year} pairs from a week of dates
+export function getWeekMonthParts(weekDates) {
+  const parts = []
+  for (const d of weekDates || []) {
+    const dt = new Date(d)
+    const m = dt.getMonth()
+    const y = dt.getFullYear()
+    const key = `${y}-${m}`
+    if (!parts.find((p) => p.key === key))
+      parts.push({ key, month: m, year: y })
+  }
+  return parts
 }

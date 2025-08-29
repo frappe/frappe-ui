@@ -1,23 +1,23 @@
 <template>
   <div
-    class="absolute top-20 z-10 w-full pl-2"
+    class="absolute top-20 z-10 w-full px-px"
     :style="setCurrentTime"
     v-if="new Date(date).toDateString() === new Date().toDateString()"
   >
-    <div class="current-time relative h-0.5 bg-red-600" />
+    <Tooltip :text="dayjs().format('ddd, MMM D, YYYY h:mm a')">
+      <div class="current-time relative h-0.5 bg-[#E03636] rounded" />
+    </Tooltip>
   </div>
 </template>
 <script setup>
+import Tooltip from '../Tooltip/Tooltip.vue'
+import { dayjs } from '../../utils/dayjs'
 import { computed, inject } from 'vue'
 
 const props = defineProps({
   date: {
-    type: String,
+    type: [String, Date],
     required: true,
-  },
-  redundantCellHeight: {
-    type: Number,
-    default: 0,
   },
 })
 
@@ -29,8 +29,7 @@ const setCurrentTime = computed(() => {
   let d = new Date()
   let hour = d.getHours()
   let minutes = d.getMinutes()
-  let top =
-    (hour * 60 + minutes) * minuteHeight + props.redundantCellHeight + 'px'
+  let top = (hour * 60 + minutes) * minuteHeight + 'px'
   return { top }
 })
 </script>
@@ -38,12 +37,12 @@ const setCurrentTime = computed(() => {
 .current-time::before {
   content: '';
   display: block;
-  width: 12px;
+  width: 2px;
   height: 12px;
-  background-color: red;
-  border-radius: 50%;
+  border-radius: 8px;
+  background-color: #e03636;
   position: absolute;
-  left: -8px;
+  left: 0;
   top: -5px;
 }
 </style>
