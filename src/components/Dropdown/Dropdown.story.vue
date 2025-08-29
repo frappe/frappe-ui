@@ -156,6 +156,31 @@ const submenuActions = [
       },
     ],
   },
+  {
+    label: 'Collaborate',
+    switch: true,
+    icon: 'file-text',
+  },
+]
+
+const switchActions = [
+  {
+    label: 'Rename',
+    icon: 'edit',
+    onClick: () => console.log('Rename clicked'),
+  },
+  {
+    label: 'Lock',
+    icon: 'lock',
+    switch: true,
+    onClick: (val) => console.log('Lock switch value:', val),
+  },
+  {
+    label: 'Collaborate',
+    switch: true,
+    icon: 'users',
+    onClick: (val) => console.log('Collaborate switch value:', val),
+  },
 ]
 </script>
 
@@ -187,6 +212,9 @@ const submenuActions = [
 
     <Variant title="With Submenus">
       <Dropdown :options="submenuActions" />
+    </Variant>
+    <Variant title="With Switches">
+      <Dropdown :options="switchActions" />
     </Variant>
 
     <Variant title="With Nested Submenus">

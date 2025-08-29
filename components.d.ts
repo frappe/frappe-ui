@@ -122,6 +122,7 @@ declare module 'vue' {
     LoadingIndicator: typeof import('./src/components/LoadingIndicator.vue')['default']
     LoadingText: typeof import('./src/components/LoadingText.vue')['default']
     LucideCalendar: typeof import('~icons/lucide/calendar')['default']
+    LucideCheck: typeof import('~icons/lucide/check')['default']
     LucideChevronDown: typeof import('~icons/lucide/chevron-down')['default']
     LucideChevronRight: typeof import('~icons/lucide/chevron-right')['default']
     LucideX: typeof import('~icons/lucide/x')['default']

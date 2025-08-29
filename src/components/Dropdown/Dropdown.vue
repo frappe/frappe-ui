@@ -30,150 +30,153 @@
               {{ group.group }}
             </DropdownMenuLabel>
 
-            <DropdownMenuItem
-              v-for="item in group.items"
-              :key="item.label"
-              as-child
-              @select="item.onClick"
-            >
-              <slot v-if="$slots.item" name="item" v-bind="{ item, close }" />
-              <component
-                v-else-if="item.component"
-                :is="item.component"
-                :active="false"
+            <template v-for="item in group.items" :key="item.label">
+              <Switch
+                v-if="item.switch"
+                :label="item.label"
+                @change="item.onClick?.($event)"
               />
-              <DropdownMenuSub v-else-if="item.submenu">
-                <DropdownMenuSubTrigger as-child>
-                  <button
-                    :class="[
-                      cssClasses.submenuTrigger,
-                      getSubmenuBackgroundColor(item),
-                    ]"
-                  >
-                    <FeatherIcon
-                      v-if="item.icon && typeof item.icon === 'string'"
-                      :name="item.icon"
-                      :class="[cssClasses.itemIcon, getIconColor(item)]"
-                      aria-hidden="true"
-                    />
-                    <component
-                      :class="[cssClasses.itemIcon, getIconColor(item)]"
-                      v-else-if="item.icon"
-                      :is="item.icon"
-                    />
-                    <div
-                      v-else-if="groupHasIcons(group)"
-                      :class="cssClasses.itemIconPlaceholder"
-                    />
-                    <span :class="[cssClasses.itemLabel, getTextColor(item)]">
-                      {{ item.label }}
-                    </span>
-                    <FeatherIcon
-                      name="chevron-right"
-                      :class="[cssClasses.chevronIcon, getIconColor(item)]"
-                      aria-hidden="true"
-                    />
-                  </button>
-                </DropdownMenuSubTrigger>
-                <DropdownMenuPortal>
-                  <DropdownMenuSubContent
-                    :class="cssClasses.dropdownContent"
-                    :side-offset="4"
-                  >
-                    <div
-                      v-for="submenuGroup in getSubmenuGroups(item.submenu)"
-                      :key="submenuGroup.key"
-                      :class="cssClasses.groupContainer"
-                    >
-                      <DropdownMenuLabel
-                        v-if="submenuGroup.group && !submenuGroup.hideLabel"
-                        :class="cssClasses.groupLabel"
-                      >
-                        {{ submenuGroup.group }}
-                      </DropdownMenuLabel>
+              <DropdownMenuItem v-else as-child @select="item.onClick">
+                <slot v-if="$slots.item" name="item" v-bind="{ item, close }" />
+                <component
+                  v-else-if="item.component"
+                  :is="item.component"
+                  :active="false"
+                />
 
-                      <DropdownMenuItem
-                        v-for="subItem in submenuGroup.items"
-                        :key="subItem.label"
-                        as-child
-                        @select="
-                          (event: PointerEvent) =>
-                            handleItemClick(subItem, event)
-                        "
+                <DropdownMenuSub v-else-if="item.submenu">
+                  <DropdownMenuSubTrigger as-child>
+                    <button
+                      :class="[
+                        cssClasses.submenuTrigger,
+                        getSubmenuBackgroundColor(item),
+                      ]"
+                    >
+                      <FeatherIcon
+                        v-if="item.icon && typeof item.icon === 'string'"
+                        :name="item.icon"
+                        :class="[cssClasses.itemIcon, getIconColor(item)]"
+                        aria-hidden="true"
+                      />
+                      <component
+                        :class="[cssClasses.itemIcon, getIconColor(item)]"
+                        v-else-if="item.icon"
+                        :is="item.icon"
+                      />
+                      <div
+                        v-else-if="groupHasIcons(group)"
+                        :class="cssClasses.itemIconPlaceholder"
+                      />
+                      <span :class="[cssClasses.itemLabel, getTextColor(item)]">
+                        {{ item.label }}
+                      </span>
+                      <FeatherIcon
+                        name="chevron-right"
+                        :class="[cssClasses.chevronIcon, getIconColor(item)]"
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuPortal>
+                    <DropdownMenuSubContent
+                      :class="cssClasses.dropdownContent"
+                      :side-offset="4"
+                    >
+                      <div
+                        v-for="submenuGroup in getSubmenuGroups(item.submenu)"
+                        :key="submenuGroup.key"
+                        :class="cssClasses.groupContainer"
                       >
-                        <component
-                          v-if="subItem.component"
-                          :is="subItem.component"
-                          :active="false"
-                        />
-                        <button
-                          v-else
-                          :class="[
-                            cssClasses.itemButton,
-                            getBackgroundColor(subItem),
-                          ]"
+                        <DropdownMenuLabel
+                          v-if="submenuGroup.group && !submenuGroup.hideLabel"
+                          :class="cssClasses.groupLabel"
                         >
-                          <FeatherIcon
-                            v-if="
-                              subItem.icon && typeof subItem.icon === 'string'
-                            "
-                            :name="subItem.icon"
-                            :class="[
-                              cssClasses.itemIcon,
-                              getIconColor(subItem),
-                            ]"
-                            aria-hidden="true"
-                          />
+                          {{ submenuGroup.group }}
+                        </DropdownMenuLabel>
+
+                        <DropdownMenuItem
+                          v-for="subItem in submenuGroup.items"
+                          :key="subItem.label"
+                          as-child
+                          @select="
+                            (event: PointerEvent) =>
+                              handleItemClick(subItem, event)
+                          "
+                        >
                           <component
-                            :class="[
-                              cssClasses.itemIcon,
-                              getIconColor(subItem),
-                            ]"
-                            v-else-if="subItem.icon"
-                            :is="subItem.icon"
+                            v-if="subItem.component"
+                            :is="subItem.component"
+                            :active="false"
                           />
-                          <div
-                            v-else-if="groupHasIcons(submenuGroup)"
-                            :class="cssClasses.itemIconPlaceholder"
-                          />
-                          <span
+                          <button
+                            v-else
                             :class="[
-                              cssClasses.itemLabel,
-                              getTextColor(subItem),
+                              cssClasses.itemButton,
+                              getBackgroundColor(subItem),
                             ]"
                           >
-                            {{ subItem.label }}
-                          </span>
-                        </button>
-                      </DropdownMenuItem>
-                    </div>
-                  </DropdownMenuSubContent>
-                </DropdownMenuPortal>
-              </DropdownMenuSub>
-              <button
-                v-else
-                :class="[cssClasses.itemButton, getBackgroundColor(item)]"
-              >
-                <FeatherIcon
-                  v-if="item.icon && typeof item.icon === 'string'"
-                  :name="item.icon"
-                  :class="[cssClasses.itemIcon, getIconColor(item)]"
-                  aria-hidden="true"
-                />
-                <component
-                  :class="[cssClasses.itemIcon, getIconColor(item)]"
-                  v-else-if="item.icon"
-                  :is="item.icon"
-                />
-                <div
-                  v-else-if="groupHasIcons(group)"
-                  :class="cssClasses.itemIconPlaceholder"
-                />
-                <span :class="[cssClasses.itemLabel, getTextColor(item)]"
-                  >{{ item.label }}
-                </span>
-              </button>
-            </DropdownMenuItem>
+                            <FeatherIcon
+                              v-if="
+                                subItem.icon && typeof subItem.icon === 'string'
+                              "
+                              :name="subItem.icon"
+                              :class="[
+                                cssClasses.itemIcon,
+                                getIconColor(subItem),
+                              ]"
+                              aria-hidden="true"
+                            />
+                            <component
+                              :class="[
+                                cssClasses.itemIcon,
+                                getIconColor(subItem),
+                              ]"
+                              v-else-if="subItem.icon"
+                              :is="subItem.icon"
+                            />
+                            <div
+                              v-else-if="groupHasIcons(submenuGroup)"
+                              :class="cssClasses.itemIconPlaceholder"
+                            />
+                            <span
+                              :class="[
+                                cssClasses.itemLabel,
+                                getTextColor(subItem),
+                              ]"
+                            >
+                              {{ subItem.label }}
+                            </span>
+                          </button>
+                        </DropdownMenuItem>
+                      </div>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuPortal>
+                </DropdownMenuSub>
+                <button
+                  v-else
+                  :class="[cssClasses.itemButton, getBackgroundColor(item)]"
+                >
+                  <FeatherIcon
+                    v-if="item.icon && typeof item.icon === 'string'"
+                    :name="item.icon"
+                    :class="[cssClasses.itemIcon, getIconColor(item)]"
+                    aria-hidden="true"
+                  />
+                  <component
+                    :class="[cssClasses.itemIcon, getIconColor(item)]"
+                    v-else-if="item.icon"
+                    :is="item.icon"
+                  />
+                  <div
+                    v-else-if="groupHasIcons(group)"
+                    :class="cssClasses.itemIconPlaceholder"
+                  />
+                  <span :class="[cssClasses.itemLabel, getTextColor(item)]"
+                    >{{ item.label }}
+                  </span>
+                </button>
+              </DropdownMenuItem>
+            </template>
           </div>
         </template>
       </DropdownMenuContent>
@@ -204,12 +207,14 @@ import type {
   DropdownOptions,
   DropdownItem,
 } from './types'
+import Switch from '../Switch/Switch.vue'
 
 defineOptions({
   inheritAttrs: false,
 })
 
 const toggleState = ref(false)
+const test = ref(true)
 const router = useRouter()
 const attrs = useAttrs()
 
