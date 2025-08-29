@@ -35,6 +35,7 @@ interface UseDocOptions {
   baseUrl?: string
   methods?: Record<string, string | DocMethodOption>
   immediate?: boolean
+  transform?: (doc: object) => object
 }
 
 export function useDoc<TDoc extends { name: string }, TMethods = {}>(
@@ -46,6 +47,7 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
     name,
     methods = {},
     immediate = true,
+    transform,
   } = options
 
   const url = computed(
@@ -73,6 +75,9 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
           doctype,
           ...ctx.data.data,
           name: String(ctx.data.data.name),
+        }
+        if (transform) {
+          doc = transform(doc)
         }
         docStore.setDoc(doc)
         listStore.updateRow(doctype, ctx.data.data)
@@ -128,6 +133,9 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
     immediate: false,
     refetch: false,
     onSuccess(data) {
+      if (transform) {
+        data = transform(data)
+      }
       docStore.setDoc({ doctype, ...data })
       listStore.updateRow(doctype, data)
     },
