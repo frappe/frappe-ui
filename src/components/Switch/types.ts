@@ -3,5 +3,6 @@ export interface SwitchProps {
   label?: string
   description?: string
   disabled?: boolean
-  modelValue?: boolean | number | string
+  icon?: any
+  labelClasses?: string 
 }
