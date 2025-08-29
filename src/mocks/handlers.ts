@@ -90,6 +90,23 @@ export const handlers = [
       })
     },
   ),
+
+  http.post(url('/api/v2/method/bulk_update'), async ({ request }) => {
+    const body = (await request.json()) as any
+    const docs = body.docs || []
+
+    // For bulk update, documents should already have names
+    // Just return the updated documents as-is
+    const updatedDocs = docs.map((doc: any) => {
+      return {
+        ...doc,
+      }
+    })
+
+    return HttpResponse.json({
+      data: updatedDocs,
+    })
+  }),
 ]
 
 function getUsers(listParams) {
