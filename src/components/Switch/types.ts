@@ -3,4 +3,6 @@ export interface SwitchProps {
   label?: string
   description?: string
   disabled?: boolean
+  icon?: any
+  labelClasses?: string 
 }

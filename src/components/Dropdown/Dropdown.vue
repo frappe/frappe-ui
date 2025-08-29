@@ -34,6 +34,8 @@
               <Switch
                 v-if="item.switch"
                 :label="item.label"
+                label-classes="font-normal"
+                :icon="item.icon"
                 @change="item.onClick?.($event)"
               />
               <DropdownMenuItem v-else as-child @select="item.onClick">
