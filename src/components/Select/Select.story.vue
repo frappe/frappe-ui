@@ -274,7 +274,6 @@ const state = reactive({})
     <template #controls>
       <HstText v-model="state.placeholder" title="Placeholder" />
       <HstCheckbox v-model="state.disabled" title="Disabled" />
-      <HstCheckbox v-model="state.showCancel" title="Show Cancel Button" />
     </template>
   </Story>
 </template>
