@@ -16,6 +16,7 @@ import Code from '~icons/lucide/code'
 import Quote from '~icons/lucide/quote'
 import Image from '~icons/lucide/image'
 import Video from '~icons/lucide/video'
+import GalleryVertical from '~icons/lucide/gallery-vertical'
 import Link from '~icons/lucide/link'
 import Minus from '~icons/lucide/minus'
 import Table from '~icons/lucide/table-2'
@@ -107,6 +108,13 @@ const getCommands = (): CommandItem[] => [
     icon: Video,
     command: ({ editor, range }: CommandExecutionProps) => {
       editor.chain().focus().deleteRange(range).selectAndUploadVideo().run()
+    },
+  },
+  {
+    title: 'Embed',
+    icon: GalleryVertical,
+    command: ({ editor, range }: CommandExecutionProps) => {
+      editor.chain().focus().deleteRange(range).openIframeDialog().run()
     },
   },
   {

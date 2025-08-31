@@ -42,6 +42,7 @@ export default {
           'Separator',
           'Image',
           'Video',
+          'Iframe',
           'Link',
           'Blockquote',
           'Code',
