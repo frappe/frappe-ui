@@ -22,6 +22,7 @@ import CodeView from './icons/code-view.vue'
 import Link from './icons/link.vue'
 import Image from './icons/image-add-line.vue'
 import Video from './icons/video-add-line.vue'
+import GalleryVertical from '~icons/lucide/gallery-vertical'
 import ArrowGoBack from './icons/arrow-go-back-line.vue'
 import ArrowGoForward from './icons/arrow-go-forward-line.vue'
 import Separator from './icons/separator.vue'
@@ -184,6 +185,12 @@ export default {
     icon: Video,
     isActive: (editor) => false,
     component: defineAsyncComponent(() => import('./InsertVideo.vue')),
+  },
+  Iframe: {
+    label: 'Embed',
+    icon: GalleryVertical,
+    isActive: (editor) => editor.isActive('iframe'),
+    component: defineAsyncComponent(() => import('./extensions/iframe/InsertIframe.vue')),
   },
   Undo: {
     label: 'Undo',

@@ -45,6 +45,7 @@ import TableRow from '@tiptap/extension-table-row'
 import { ImageExtension } from './extensions/image'
 import ImageViewerExtension from './image-viewer-extension'
 import VideoExtension from './video-extension'
+import { IframeExtension } from './extensions/iframe'
 import LinkExtension from './link-extension'
 import Typography from '@tiptap/extension-typography'
 import TextStyle from '@tiptap/extension-text-style'
@@ -201,6 +202,7 @@ onMounted(() => {
       VideoExtension.configure({
         uploadFunction: props.uploadFunction || defaultUploadFunction,
       }),
+      IframeExtension,
       LinkExtension.configure({
         openOnClick: false,
       }),
