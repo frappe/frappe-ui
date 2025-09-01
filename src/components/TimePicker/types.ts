@@ -41,8 +41,6 @@ export interface TimePickerProps {
   use12Hour?: boolean
   disabled?: boolean
   scrollMode?: 'center' | 'start' | 'nearest'
-  amLabel?: string
-  pmLabel?: string
   minTime?: string
   maxTime?: string
 }

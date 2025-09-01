@@ -50,8 +50,6 @@ interface StoryState {
   placement: Placement
   placeholder: string
   disabled: boolean
-  amLabel: string
-  pmLabel: string
   minTime: string
   maxTime: string
   scrollMode: 'center' | 'start' | 'nearest'
@@ -65,8 +63,6 @@ const state = reactive<StoryState>({
   placement: 'bottom-start',
   placeholder: 'Select time',
   disabled: false,
-  amLabel: 'am',
-  pmLabel: 'pm',
   minTime: '',
   maxTime: '',
   scrollMode: 'center',
@@ -74,7 +70,7 @@ const state = reactive<StoryState>({
 </script>
 
 <template>
-  <Story :layout="{ type: 'grid', width: 520 }" autoPropsDisabled>
+  <Story :layout="{ type: 'grid', width: 300 }" autoPropsDisabled>
     <Variant title="Basic">
       <div class="p-2 space-y-2">
         <TimePicker v-model="valueBasic" v-bind="state" />
@@ -134,8 +130,6 @@ const state = reactive<StoryState>({
         :options="scrollModes"
         title="Scroll Mode"
       />
-      <HstText v-model="state.amLabel" title="AM Label" />
-      <HstText v-model="state.pmLabel" title="PM Label" />
       <HstText v-model="state.minTime" title="Min Time (HH:MM)" />
       <HstText v-model="state.maxTime" title="Max Time (HH:MM)" />
       <HstText v-model="state.placeholder" title="Placeholder" />
