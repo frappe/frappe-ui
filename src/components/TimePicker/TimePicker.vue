@@ -3,11 +3,6 @@
     v-model:show="showOptions"
     transition="default"
     :placement="placement"
-    @update:show="
-      (v) => {
-        if (!v) emit('close')
-      }
-    "
   >
     <template #target="{ togglePopover, isOpen }">
       <TextInput
@@ -18,6 +13,7 @@
         class="text-sm w-full cursor-text"
         :placeholder="placeholder"
         :disabled="disabled"
+        :readonly="!props.allowCustom"
         @focus="onFocus"
         @click="onClickInput(isOpen, togglePopover)"
         @keydown.enter.prevent="onEnter"
@@ -53,7 +49,7 @@
           type="button"
           class="group flex h-7 w-full items-center rounded px-2 text-left"
           :class="buttonClasses(opt, idx)"
-          @click="() => select(opt.value, autoClose)"
+          @click="select(opt.value)"
           @mouseenter="highlightIndex = idx"
           role="option"
           :id="optionId(idx)"
@@ -209,6 +205,7 @@ function parseFlexibleTime(input: string): ParsedTime {
     if (isNaN(ss) || ss < 0 || ss > 59) return { valid: false }
   }
   if (ap) {
+    if (hh < 1 || hh > 12) return { valid: false }
     if (hh === 12 && ap === 'am') hh = 0
     else if (hh < 12 && ap === 'pm') hh += 12
   }
@@ -287,11 +284,9 @@ function commitInput() {
   applyValue(normalized)
 }
 
-function select(val: string, close: boolean = props.autoClose) {
-  internalValue.value = val
-  displayValue.value = formatDisplay(val)
-  emit('update:modelValue', val)
-  if (close) showOptions.value = false
+function select(val: string) {
+  applyValue(val)
+  if (props.autoClose) showOptions.value = false
 }
 
 const selectedAndNearest = computed<{
@@ -336,7 +331,7 @@ watch(
 
 function scheduleScroll() {
   nextTick(() => {
-    if (!panelRef.value) return
+    if (!panelRef.value || !showOptions.value) return
     let targetEl: HTMLElement | null = null
     if (highlightIndex.value > -1) {
       targetEl = panelRef.value.querySelector(
@@ -367,6 +362,8 @@ watch(showOptions, (open) => {
     emit('open')
     initHighlight()
     scheduleScroll()
+  } else {
+    emit('close')
   }
 })
 
@@ -440,7 +437,7 @@ function onEnter() {
   }
   if (highlightIndex.value > -1) {
     const opt = displayedOptions.value[highlightIndex.value]
-    if (opt) select(opt.value, true)
+    if (opt) select(opt.value)
   } else {
     commitInput()
     if (props.autoClose) showOptions.value = false
@@ -450,11 +447,11 @@ function onEnter() {
 
 function onClickInput(isOpen: boolean | undefined, togglePopover: () => void) {
   if (!isOpen) togglePopover()
-  selectAll()
+  if (props.allowCustom) selectAll()
 }
 
 function onFocus() {
-  if (!hasSelectedOnFirstClick.value) selectAll()
+  if (props.allowCustom && !hasSelectedOnFirstClick.value) selectAll()
 }
 
 function selectAll() {
@@ -483,7 +480,7 @@ function blurInput() {
 }
 
 function onEscape() {
-  showOptions.value = false
+  if (showOptions.value) showOptions.value = false
   blurInput()
 }
 
