@@ -22,6 +22,9 @@
         @keydown.up.prevent="onArrowUp(togglePopover, isOpen)"
         @keydown.esc.prevent="onEscape"
       >
+        <template v-if="$slots.prefix" #prefix>
+          <slot name="prefix" />
+        </template>
         <template #suffix>
           <slot name="suffix" v-bind="{ togglePopover, isOpen }">
             <FeatherIcon
