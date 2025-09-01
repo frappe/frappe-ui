@@ -89,8 +89,6 @@ const props = withDefaults(defineProps<TimePickerProps>(), {
   use12Hour: true,
   disabled: false,
   scrollMode: 'center' as const,
-  amLabel: 'am',
-  pmLabel: 'pm',
   minTime: '',
   maxTime: '',
 })
@@ -189,7 +187,7 @@ function formatDisplay(val24: string): string {
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`
   const am = h < 12
   const hour12 = h % 12 === 0 ? 12 : h % 12
-  return `${hour12}:${m.toString().padStart(2, '0')} ${am ? props.amLabel : props.pmLabel}`
+  return `${hour12}:${m.toString().padStart(2, '0')} ${am ? 'am' : 'pm'}`
 }
 
 function parseFlexibleTime(input: string): ParsedTime {

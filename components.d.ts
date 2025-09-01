@@ -86,12 +86,14 @@ declare module 'vue' {
     H4: typeof import('./src/components/TextEditor/icons/h-4.vue')['default']
     H5: typeof import('./src/components/TextEditor/icons/h-5.vue')['default']
     H6: typeof import('./src/components/TextEditor/icons/h-6.vue')['default']
+    IframeNodeView: typeof import('./src/components/TextEditor/extensions/iframe/IframeNodeView.vue')['default']
     ImageAddLine: typeof import('./src/components/TextEditor/icons/image-add-line.vue')['default']
     ImageGroupNodeView: typeof import('./src/components/TextEditor/extensions/image-group/ImageGroupNodeView.vue')['default']
     ImageGroupUploadDialog: typeof import('./src/components/TextEditor/extensions/image-group/ImageGroupUploadDialog.vue')['default']
     ImageNodeView: typeof import('./src/components/TextEditor/extensions/image/ImageNodeView.vue')['default']
     ImageViewerModal: typeof import('./src/components/TextEditor/ImageViewerModal.vue')['default']
     Input: typeof import('./src/components/Input.vue')['default']
+    InsertIframe: typeof import('./src/components/TextEditor/extensions/iframe/InsertIframe.vue')['default']
     InsertImage: typeof import('./src/components/TextEditor/InsertImage.vue')['default']
     InsertLink: typeof import('./src/components/TextEditor/InsertLink.vue')['default']
     InsertVideo: typeof import('./src/components/TextEditor/InsertVideo.vue')['default']
@@ -186,12 +188,4 @@ declare module 'vue' {
     VideoAddLine: typeof import('./src/components/TextEditor/icons/video-add-line.vue')['default']
     WeekIcon: typeof import('./src/components/Calendar/Icon/WeekIcon.vue')['default']
   }
-}
-
-// Global SFC module declaration (moved from env.d.ts)
-declare module '*.vue' {
-  import { DefineComponent } from 'vue'
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  const component: DefineComponent<{}, {}, any>
-  export default component
 }
