@@ -588,12 +588,13 @@ const isPastEvent = computed(() => {
       props.event.toDate ||
       props.event.date ||
       props.event.fromDate
+
     if (!endDateStr) return false
     // If event has a toTime use it; else if full day, treat end as end of day; fallback 00:00:00
     let endTimeStr = '00:00:00'
-    if (calendarEvent.value.toTime) endTimeStr = calendarEvent.value.toTime
-    else if (calendarEvent.value.isFullDay || props.event.isFullDay)
+    if (calendarEvent.value.isFullDay || props.event.isFullDay)
       endTimeStr = '23:59:59'
+    else if (calendarEvent.value.toTime) endTimeStr = calendarEvent.value.toTime
 
     const end = new Date(`${endDateStr}T${endTimeStr}`.replace(' ', 'T'))
     return end.getTime() < new Date().getTime()
