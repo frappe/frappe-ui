@@ -1,4 +1,54 @@
 import { dayjs } from '../../utils/dayjs'
+import type { Dayjs } from 'dayjs/esm'
+import type { DatePickerDateObj as DateObj } from './types'
+
+// Constant list of month labels
+export const months: string[] = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+]
+
+// Start of given month (0-indexed month)
+export function monthStart(year: number, monthIndex: number): Dayjs {
+  return dayjs(`${year}-${monthIndex + 1}-01`)
+}
+
+// Build weeks grid for the calendar
+export function generateWeeks(
+  year: number,
+  monthIndex: number,
+  selected: string,
+): DateObj[][] {
+  const start = monthStart(year, monthIndex).startOf('week')
+  const end = monthStart(year, monthIndex).endOf('month').endOf('week')
+  const days: DateObj[] = []
+  let d: Dayjs = start
+  while (d.isBefore(end) || d.isSame(end)) {
+    const inMonth = d.month() === monthIndex
+    const sel = dayjs(selected)
+    days.push({
+      date: d,
+      key: d.format('YYYY-MM-DD'),
+      inMonth,
+      isToday: d.isSame(dayjs(), 'day'),
+      isSelected: sel.isValid() && d.isSame(sel, 'day'),
+    })
+    d = d.add(1, 'day')
+  }
+  const chunked: DateObj[][] = []
+  for (let i = 0; i < days.length; i += 7) chunked.push(days.slice(i, i + 7))
+  return chunked
+}
 
 type DateConstructorParam = string | number | Date
 
