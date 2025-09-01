@@ -21,28 +21,48 @@
           @update="(event) => logEvent('updateEvent', event)"
           @delete="(eventID) => logEvent('deleteEvent', eventID)"
         >
-          <template
-            #header="{
-              currentMonthYear,
-              enabledModes,
-              activeView,
-              decrement,
-              increment,
-              updateActiveView,
-            }"
-          >
-            <TabButtons
-              :buttons="enabledModes"
-              class="ml-2"
-              :modelValue="activeView"
-              @update:modelValue="updateActiveView($event)"
-            />
-
-            <button @click="decrement">Previous</button>
-            <button @click="increment">Next</button>
-            <h1>
-              {{ currentMonthYear }}
-            </h1>
+          <template #header="headerProps">
+            <!-- Custom header demonstrating full control over layout while keeping design aligned -->
+            <div class="mb-2 flex items-center justify-between gap-3">
+              <!-- Left cluster: date picker + nav + title -->
+              <div class="flex items-center gap-2">
+                <DateMonthYearPicker
+                  :modelValue="headerProps.selectedMonthDate"
+                  :formatter="() => headerProps.currentMonthYear"
+                  @update:modelValue="
+                    (val) => headerProps.onMonthYearChange(val)
+                  "
+                />
+              </div>
+              <!-- Right cluster: view mode select -->
+              <div class="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  icon="chevron-left"
+                  @click="headerProps.decrement"
+                />
+                <Button
+                  label="Today"
+                  variant="ghost"
+                  @click="headerProps.setCalendarDate()"
+                />
+                <Button
+                  variant="ghost"
+                  icon="chevron-right"
+                  @click="headerProps.increment"
+                />
+              </div>
+              <div class="">
+                <Select
+                  class="!w-20"
+                  size="sm"
+                  variant="ghost"
+                  :options="headerProps.enabledModes"
+                  :modelValue="headerProps.activeView"
+                  @update:modelValue="(v) => headerProps.updateActiveView(v)"
+                />
+              </div>
+            </div>
           </template>
         </Calendar>
       </div>
@@ -64,8 +84,9 @@
 <script setup>
 import { ref } from 'vue'
 import Calendar from './Calendar.vue'
-import { logEvent } from 'histoire/client'
-import { TabButtons } from '../TabButtons'
+import { Select } from '../Select'
+import DateMonthYearPicker from './DateMonthYearPicker.vue'
+import { Button } from '../Button'
 
 const config = {
   defaultMode: 'Month',
