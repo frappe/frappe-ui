@@ -174,6 +174,8 @@ declare module 'vue' {
     TextEditorFloatingMenu: typeof import('./src/components/TextEditor/TextEditorFloatingMenu.vue')['default']
     TextInput: typeof import('./src/components/TextInput/TextInput.vue')['default']
     'TextInput.story': typeof import('./src/components/TextInput/TextInput.story.vue')['default']
+    TimePicker: typeof import('./src/components/TimePicker/TimePicker.vue')['default']
+    'TimePicker.story': typeof import('./src/components/TimePicker/TimePicker.story.vue')['default']
     Toast: typeof import('./src/components/Toast/Toast.vue')['default']
     ToastProvider: typeof import('./src/components/Toast/ToastProvider.vue')['default']
     Tooltip: typeof import('./src/components/Tooltip/Tooltip.vue')['default']
@@ -184,4 +186,12 @@ declare module 'vue' {
     VideoAddLine: typeof import('./src/components/TextEditor/icons/video-add-line.vue')['default']
     WeekIcon: typeof import('./src/components/Calendar/Icon/WeekIcon.vue')['default']
   }
+}
+
+// Global SFC module declaration (moved from env.d.ts)
+declare module '*.vue' {
+  import { DefineComponent } from 'vue'
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  const component: DefineComponent<{}, {}, any>
+  export default component
 }
