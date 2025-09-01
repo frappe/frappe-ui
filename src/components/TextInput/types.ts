@@ -3,7 +3,7 @@ import type { TextInputTypes } from '../types/TextInput'
 export interface TextInputProps {
   type?: TextInputTypes
   size?: 'sm' | 'md' | 'lg' | 'xl'
-  variant?: 'subtle' | 'outline'
+  variant?: 'subtle' | 'outline' | 'ghost'
   placeholder?: string
   disabled?: boolean
   id?: string

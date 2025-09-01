@@ -137,9 +137,9 @@ import { TextInput } from '../TextInput'
 import { useDatePicker } from './useDatePicker'
 import { getDate, getDateValue } from './utils'
 
-import type { DatePickerEmits, DatePickerProps } from './types'
+import type { DatePickerEmits, DateRangePickerProps } from './types'
 
-const props = defineProps<DatePickerProps>()
+const props = defineProps<DateRangePickerProps>()
 const emit = defineEmits<DatePickerEmits>()
 
 const {
