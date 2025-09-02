@@ -5,9 +5,10 @@ import { type Component } from 'vue'
 export type DropdownOption = {
   label: string
   icon?: string | Component | null
+  switch?: boolean
   theme?: 'gray' | 'red'
   component?: any
-  onClick?: () => void
+  onClick?: (val: any) => void
   route?: RouterLinkProps['to']
   condition?: () => boolean
   submenu?: DropdownOptions
