@@ -20,8 +20,8 @@
           :placeholder="props.placeholder"
           :disabled="props.disabled"
           :readonly="props.readonly || !props.allowCustom"
-          @focus="onFocusInput(isOpen, togglePopover)"
-          @click="onClickInput(isOpen, togglePopover)"
+          @focus="activateInput(isOpen, togglePopover)"
+          @click="activateInput(isOpen, togglePopover)"
           @blur="onBlur"
           @keydown.enter.prevent="onEnter(togglePopover)"
         >
@@ -51,7 +51,6 @@
         ref="popoverContentRef"
         class="w-fit min-w-60 select-none text-base text-ink-gray-9 rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5 mt-2"
       >
-        <!-- Navigation / Label -->
         <div class="flex items-center justify-between p-2 pb-0 gap-1">
           <Button
             variant="ghost"
@@ -89,9 +88,7 @@
             />
           </div>
         </div>
-        <!-- Views -->
         <div class="p-2">
-          <!-- Date grid -->
           <div v-if="view === 'date'" role="grid" aria-label="Calendar dates">
             <div
               class="flex items-center text-xs font-medium uppercase text-ink-gray-4 mb-1"
@@ -129,7 +126,6 @@
               </button>
             </div>
           </div>
-          <!-- Month grid -->
           <div
             v-else-if="view === 'month'"
             class="grid grid-cols-3 gap-1"
@@ -151,7 +147,6 @@
               {{ m.slice(0, 3) }}
             </button>
           </div>
-          <!-- Year grid -->
           <div
             v-else
             class="grid grid-cols-3 gap-1"
@@ -174,7 +169,6 @@
             </button>
           </div>
         </div>
-        <!-- Footer actions -->
         <div
           v-if="props.clearable"
           class="flex items-center justify-between gap-1 p-2 border-t"
@@ -219,7 +213,6 @@ import type {
   DatePickerDateObj as DateObj,
 } from './types'
 
-// Props & Emits
 const props = withDefaults(defineProps<DatePickerProps>(), {
   value: '',
   modelValue: '',
@@ -236,67 +229,55 @@ const emit = defineEmits<DatePickerEmits>()
 
 const { autoClose } = toRefs(props)
 
-// State
 const view = ref<ViewMode>('date')
 const currentYear = ref<number>(dayjs().year())
 const currentMonth = ref<number>(dayjs().month()) // 0-index
 const DATE_FORMAT = 'YYYY-MM-DD'
 
-// Internal selected date is always stored in DATE_FORMAT
 const selected = ref<string>('')
 const initialValue = props.modelValue || props.value || ''
 
-if (initialValue) {
+function coerceToDayjs(val?: string | null): Dayjs | null {
+  if (!val) return null
+  const raw = String(val).trim()
+  if (!raw) return null
   if (props.format) {
-    const _d = dayjs(initialValue, props.format, true)
-    if (_d.isValid()) {
-      selected.value = _d.format(DATE_FORMAT)
-    } else {
-      // fallback attempt generic parse
-      const d1 = dayjs(initialValue)
-      if (d1.isValid()) selected.value = d1.format(DATE_FORMAT)
-      else selected.value = initialValue // keep raw (will show as-is)
-    }
-  } else {
-    const d = dayjs(initialValue)
-    if (d.isValid()) selected.value = d.format(DATE_FORMAT)
-    else selected.value = initialValue
+    const dStrict = dayjs(raw, props.format, true)
+    if (dStrict.isValid()) return dStrict
   }
-} else {
-  selected.value = ''
+  const dLoose = dayjs(raw)
+  if (dLoose.isValid()) return dLoose
+  const normalized = getDateValue(raw)
+  if (normalized) {
+    const dNorm = dayjs(normalized)
+    if (dNorm.isValid()) return dNorm
+  }
+  return null
 }
 
 function syncFromValue(val?: string): void {
-  let d: Dayjs | null = null
-
   if (!val) {
     if (!props.clearable) {
-      d = dayjsLocal()
+      const today = dayjsLocal()
+      currentYear.value = today.year()
+      currentMonth.value = today.month()
+      selected.value = today.format(DATE_FORMAT)
     } else {
       selected.value = ''
-      return
     }
+    return
   }
-
-  if (props.format) {
-    const _d = dayjs(val, props.format, true)
-    if (_d.isValid()) d = _d
-  }
-
-  if (!d) {
-    const _d = dayjs(val)
-    if (_d.isValid()) d = _d
-  }
-
+  const d = coerceToDayjs(val)
   if (!d) {
     selected.value = ''
     return
   }
-
   currentYear.value = d.year()
   currentMonth.value = d.month()
   selected.value = d.format(DATE_FORMAT)
 }
+
+syncFromValue(initialValue)
 
 function initFromValue(): void {
   syncFromValue(props.modelValue || props.value)
@@ -320,62 +301,48 @@ function formatter(dateStr: string, format: string): string {
   return d.format(format)
 }
 
-// Manual input support
 const inputValue = ref<string>(displayLabel.value)
 const isTyping = ref(false)
 
 watch(displayLabel, (val) => {
-  // update input only if not actively typing
   if (!isTyping.value) inputValue.value = val
 })
 
 function parseInput(val: string): Dayjs | null {
-  if (!val) return null
-  const raw = val.trim()
-  const format = props.format || DATE_FORMAT
-  let d: Dayjs | null = null
+  return coerceToDayjs(val)
+}
 
-  // Strictly parse using provided format (raw is already in props.format)
-  d = dayjs(raw, format, true)
-  if (d.isValid()) return d
+function maybeClose(togglePopover?: () => void, condition = true) {
+  if (condition && autoClose.value && togglePopover) togglePopover()
+}
 
-  // Fallback: use getDateValue to normalize arbitrary input to YYYY-MM-DD (if dayjs can parse it)
-  const normalized = getDateValue(raw)
-  if (normalized) {
-    d = dayjs(normalized)
-    if (d.isValid()) return d
-  }
-
-  return null
+function clearSelection() {
+  if (!selected.value) return
+  selected.value = ''
+  emit('update:modelValue', '')
+  emit('change', '')
+  inputValue.value = ''
 }
 
 function commitInput(close = false, togglePopover?: () => void): void {
   const raw = inputValue.value.trim()
-
   if (!raw) {
     if (!props.clearable) {
-      // Force today
       selectDate(dayjsLocal())
-      if (close && autoClose.value && togglePopover) togglePopover()
+      maybeClose(togglePopover, close)
     } else {
-      if (selected.value) {
-        selected.value = ''
-        emit('update:modelValue', '')
-        emit('change', '')
-      }
-      if (close && autoClose.value && togglePopover) togglePopover()
+      clearSelection()
+      maybeClose(togglePopover, close)
     }
     return
   }
-
   const d = parseInput(raw)
   if (d) {
     selectDate(d)
-    if (close && autoClose.value && togglePopover) togglePopover()
+    maybeClose(togglePopover, close)
   }
 }
 
-// Ref to popover content for focus containment checks
 const popoverContentRef = ref<HTMLElement | null>(null)
 
 function onBlur(e: FocusEvent) {
@@ -388,16 +355,9 @@ function onEnter(togglePopover: () => void) {
   commitInput(true, togglePopover)
   isTyping.value = false
 }
-function ensureOpen(isOpen: boolean | undefined, togglePopover: () => void) {
+function activateInput(isOpen: boolean | undefined, togglePopover: () => void) {
+  isTyping.value = true
   if (!isOpen) togglePopover()
-}
-function onFocusInput(isOpen: boolean | undefined, togglePopover: () => void) {
-  isTyping.value = true
-  ensureOpen(isOpen, togglePopover)
-}
-function onClickInput(isOpen: boolean | undefined, togglePopover: () => void) {
-  isTyping.value = true
-  ensureOpen(isOpen, togglePopover)
 }
 const weeks = computed<DateObj[][]>(() =>
   generateWeeks(currentYear.value, currentMonth.value, selected.value),
@@ -412,10 +372,12 @@ function selectDate(date: string | Date | Dayjs): void {
   currentMonth.value = d.month()
   emit('update:modelValue', selected.value)
   if (selected.value !== prev) emit('change', selected.value)
-  else
+  // Reflect new value in input immediately if not typing
+  if (!isTyping.value) {
     inputValue.value = props.format
       ? formatter(selected.value, props.format)
       : selected.value
+  }
   view.value = 'date'
 }
 function selectMonth(i: number): void {
@@ -437,7 +399,7 @@ function prev(): void {
   } else if (view.value === 'month') {
     currentYear.value -= 1
   } else {
-    yearRangeStart.value -= 12
+    currentYear.value -= 12
   }
 }
 function next(): void {
@@ -448,7 +410,7 @@ function next(): void {
   } else if (view.value === 'month') {
     currentYear.value += 1
   } else {
-    yearRangeStart.value += 12
+    currentYear.value += 12
   }
 }
 function handleDateCellClick(
@@ -460,24 +422,20 @@ function handleDateCellClick(
   isTyping.value = false
 }
 
-function handleTodayClick(togglePopover: () => void) {
-  handleDateCellClick(dayjsLocal(), togglePopover)
+function selectOffset(days = 0, togglePopover: () => void) {
+  handleDateCellClick(dayjsLocal().add(days, 'day'), togglePopover)
 }
-
+function handleTodayClick(togglePopover: () => void) {
+  selectOffset(0, togglePopover)
+}
 function handleTomorrowClick(togglePopover: () => void) {
-  handleDateCellClick(dayjsLocal().add(1, 'day'), togglePopover)
+  selectOffset(1, togglePopover)
 }
 
 function handleClearClick(togglePopover: () => void) {
-  if (selected.value) {
-    selected.value = ''
-    emit('update:modelValue', '')
-    emit('change', '')
-    inputValue.value = ''
-  }
-  if (autoClose.value) togglePopover()
+  clearSelection()
+  maybeClose(togglePopover)
   isTyping.value = false
-
   view.value = 'date'
 }
 
@@ -488,21 +446,17 @@ function cycleView(): void {
 }
 
 function handleClose() {
-  // Reset view
   view.value = 'date'
-  // If user was typing and popover closed (click outside / escape), commit pending input
   if (isTyping.value) {
     commitInput()
     isTyping.value = false
   }
 }
 
-const yearRangeStart = ref<number>(currentYear.value - (currentYear.value % 12))
+const yearRangeStart = computed(
+  () => currentYear.value - (currentYear.value % 12),
+)
 const yearRange = computed<number[]>(() =>
   Array.from({ length: 12 }, (_, i) => yearRangeStart.value + i),
 )
-watch(currentYear, (y) => {
-  if (y < yearRangeStart.value || y > yearRangeStart.value + 11)
-    yearRangeStart.value = y - (y % 12)
-})
 </script>
