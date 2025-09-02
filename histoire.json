@@ -39,40 +39,6 @@
       "markdownFile": null
     },
     {
-      "id": "src-components-avatar-avatar-story-vue",
-      "title": "Avatar",
-      "layout": {
-        "type": "grid",
-        "width": 300
-      },
-      "docsOnly": false,
-      "variants": [
-        {
-          "id": "src-components-avatar-avatar-story-vue-0",
-          "title": "circle"
-        },
-        {
-          "id": "src-components-avatar-avatar-story-vue-1",
-          "title": "square"
-        },
-        {
-          "id": "src-components-avatar-avatar-story-vue-2",
-          "title": "circle"
-        },
-        {
-          "id": "src-components-avatar-avatar-story-vue-3",
-          "title": "square"
-        }
-      ],
-      "relativePath": "src/components/Avatar/Avatar.story.vue",
-      "supportPluginId": "vue3",
-      "treePath": [
-        "Avatar"
-      ],
-      "virtual": false,
-      "markdownFile": null
-    },
-    {
       "id": "src-components-badge-badge-story-vue",
       "title": "Badge",
       "layout": {
@@ -102,6 +68,40 @@
       "supportPluginId": "vue3",
       "treePath": [
         "Badge"
+      ],
+      "virtual": false,
+      "markdownFile": null
+    },
+    {
+      "id": "src-components-avatar-avatar-story-vue",
+      "title": "Avatar",
+      "layout": {
+        "type": "grid",
+        "width": 300
+      },
+      "docsOnly": false,
+      "variants": [
+        {
+          "id": "src-components-avatar-avatar-story-vue-0",
+          "title": "circle"
+        },
+        {
+          "id": "src-components-avatar-avatar-story-vue-1",
+          "title": "square"
+        },
+        {
+          "id": "src-components-avatar-avatar-story-vue-2",
+          "title": "circle"
+        },
+        {
+          "id": "src-components-avatar-avatar-story-vue-3",
+          "title": "square"
+        }
+      ],
+      "relativePath": "src/components/Avatar/Avatar.story.vue",
+      "supportPluginId": "vue3",
+      "treePath": [
+        "Avatar"
       ],
       "virtual": false,
       "markdownFile": null
