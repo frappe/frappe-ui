@@ -4,6 +4,7 @@
     :class="rootClasses"
     :aria-label="ariaLabel"
     role="note"
+    v-bind="$attrs"
   >
     <!-- Primary combo rendering -->
     <template v-if="parsedParts.length">
