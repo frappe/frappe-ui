@@ -1,11 +1,5 @@
 <template>
   <div class="flex flex-col flex-1 overflow-y-auto">
-    <slot name="header" v-bind="{ parseDateWithDay, currentDate, fullDay }">
-      <p class="pb-2 text-base text-ink-gray-6">
-        {{ parseDateWithDay(currentDate) }}
-      </p>
-    </slot>
-
     <!-- Full day events -->
     <div
       class="flex shrink-0 h-fit"
@@ -168,7 +162,8 @@ const timeArray =
 
 onMounted(() => {
   const currentHour = new Date().getHours()
-  gridRef.value.scrollBy(0, currentHour * 60 * minuteHeight)
+  const scrollToHour = props.config.scrollToHour || currentHour
+  gridRef.value.scrollBy(0, scrollToHour * 60 * minuteHeight - 10)
 })
 
 const calendarActions = inject('calendarActions')
