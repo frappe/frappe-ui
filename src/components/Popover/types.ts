@@ -15,6 +15,7 @@ export interface PopoverProps {
   popoverClass?: string | object | Array<string | object>
   transition?: 'default' | null
   hideOnBlur?: boolean
+  matchTargetWidth?: boolean
 }
 
 export interface PopoverEmits {
