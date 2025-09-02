@@ -1,4 +1,4 @@
-import { dayjs } from '../../utils/dayjs'
+import { dayjs, dayjsLocal } from '../../utils/dayjs'
 import type { Dayjs } from 'dayjs/esm'
 import type { DatePickerDateObj as DateObj } from './types'
 
@@ -40,7 +40,7 @@ export function generateWeeks(
       date: d,
       key: d.format('YYYY-MM-DD'),
       inMonth,
-      isToday: d.isSame(dayjs(), 'day'),
+      isToday: d.isSame(dayjsLocal().format('YYYY-MM-DD'), 'day'),
       isSelected: sel.isValid() && d.isSame(sel, 'day'),
     })
     d = d.add(1, 'day')

@@ -3,7 +3,7 @@
     class="inline-block"
     :placement="placement"
     @open="initFromValue"
-    @close="view = 'date'"
+    @close="handleClose"
   >
     <template #target="{ togglePopover, isOpen }">
       <slot
@@ -48,6 +48,7 @@
     </template>
     <template #body="{ togglePopover }">
       <div
+        ref="popoverContentRef"
         class="w-fit min-w-60 select-none text-base text-ink-gray-9 rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5 mt-2"
       >
         <!-- Navigation / Label -->
@@ -182,7 +183,7 @@ import { Popover } from '../Popover'
 import { Button } from '../Button'
 import { TextInput } from '../TextInput'
 import FeatherIcon from '../FeatherIcon.vue'
-import { dayjs } from '../../utils/dayjs'
+import { dayjs, dayjsLocal } from '../../utils/dayjs'
 import { months, monthStart, generateWeeks, getDateValue } from './utils'
 import type { Dayjs } from 'dayjs/esm'
 import type {
@@ -213,15 +214,41 @@ const view = ref<ViewMode>('date')
 const currentYear = ref<number>(dayjs().year())
 const currentMonth = ref<number>(dayjs().month()) // 0-index
 const DATE_FORMAT = 'YYYY-MM-DD'
-// initial selected from either modelValue or value prop (modelValue has priority)
-const selected = ref<string>(
-  props.modelValue || props.value || dayjs().format(DATE_FORMAT),
-)
+
+// Internal selected date is always stored in DATE_FORMAT
+const selected = ref<string>('')
+const initialValue = props.modelValue || props.value || ''
+
+if (initialValue) {
+  if (props.format) {
+    const _d = dayjs(initialValue, props.format, true)
+    if (_d.isValid()) {
+      selected.value = _d.format(DATE_FORMAT)
+    } else {
+      // fallback attempt generic parse
+      const d1 = dayjs(initialValue)
+      if (d1.isValid()) selected.value = d1.format(DATE_FORMAT)
+      else selected.value = initialValue // keep raw (will show as-is)
+    }
+  } else {
+    const d = dayjs(initialValue)
+    if (d.isValid()) selected.value = d.format(DATE_FORMAT)
+    else selected.value = initialValue
+  }
+}
 
 function syncFromValue(val?: string): void {
   if (!val) return
-  const d = dayjs(val)
-  if (!d.isValid()) return
+  let d: Dayjs | null = null
+  if (props.format) {
+    const _d = dayjs(val, props.format, true)
+    if (_d.isValid()) d = _d
+  }
+  if (!d) {
+    const _d = dayjs(val)
+    if (_d.isValid()) d = _d
+  }
+  if (!d) return
   currentYear.value = d.year()
   currentMonth.value = d.month()
   selected.value = d.format(DATE_FORMAT)
@@ -240,8 +267,14 @@ watch(
 )
 
 const displayLabel = computed<string>(() =>
-  props.formatter ? props.formatter(selected.value) : selected.value,
+  props.format ? formatter(selected.value, props.format) : selected.value,
 )
+
+function formatter(dateStr: string, format: string): string {
+  const d = dayjs(dateStr)
+  if (!d.isValid()) return dateStr
+  return d.format(format)
+}
 
 // Manual input support
 const inputValue = ref<string>(displayLabel.value)
@@ -255,15 +288,20 @@ watch(displayLabel, (val) => {
 function parseInput(val: string): Dayjs | null {
   if (!val) return null
   const raw = val.trim()
-  // First try strict expected format
-  let d = dayjs(raw, DATE_FORMAT, true)
+  const format = props.format || DATE_FORMAT
+  let d: Dayjs | null = null
+
+  // Strictly parse using provided format (raw is already in props.format)
+  d = dayjs(raw, format, true)
   if (d.isValid()) return d
+
   // Fallback: use getDateValue to normalize arbitrary input to YYYY-MM-DD (if dayjs can parse it)
   const normalized = getDateValue(raw)
   if (normalized) {
-    d = dayjs(normalized, DATE_FORMAT, true)
+    d = dayjs(normalized)
     if (d.isValid()) return d
   }
+
   return null
 }
 
@@ -271,14 +309,16 @@ function commitInput(close = false, togglePopover?: () => void): void {
   const d = parseInput(inputValue.value)
   if (d) {
     selectDate(d)
-    inputValue.value = displayLabel.value
     if (close && autoClose.value && togglePopover) togglePopover()
-  } else {
-    inputValue.value = displayLabel.value
   }
 }
 
-function onBlur() {
+// Ref to popover content for focus containment checks
+const popoverContentRef = ref<HTMLElement | null>(null)
+
+function onBlur(e: FocusEvent) {
+  const next = e.relatedTarget as Node | null
+  if (next && popoverContentRef.value?.contains(next)) return
   commitInput()
   isTyping.value = false
 }
@@ -309,7 +349,6 @@ function selectDate(date: string | Date | Dayjs): void {
   currentYear.value = d.year()
   currentMonth.value = d.month()
   emit('update:modelValue', selected.value)
-  emit('change', selected.value)
   if (selected.value !== prev) emit('change', selected.value)
   view.value = 'date'
 }
@@ -356,12 +395,23 @@ function handleDateCellClick(
 }
 
 function handleTodayClick(togglePopover: () => void) {
-  handleDateCellClick(dayjs(), togglePopover)
+  handleDateCellClick(dayjsLocal(), togglePopover)
 }
+
 function cycleView(): void {
   if (view.value === 'date') view.value = 'month'
   else if (view.value === 'month') view.value = 'year'
   else view.value = 'date'
+}
+
+function handleClose() {
+  // Reset view
+  view.value = 'date'
+  // If user was typing and popover closed (click outside / escape), commit pending input
+  if (isTyping.value) {
+    commitInput()
+    isTyping.value = false
+  }
 }
 
 const yearRangeStart = ref<number>(currentYear.value - (currentYear.value % 12))

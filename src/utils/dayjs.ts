@@ -7,6 +7,7 @@ import duration from 'dayjs/esm/plugin/duration'
 import utc from 'dayjs/esm/plugin/utc'
 import timezone from 'dayjs/esm/plugin/timezone'
 import advancedFormat from 'dayjs/esm/plugin/advancedFormat'
+import customParseFormat from 'dayjs/esm/plugin/customParseFormat'
 import { getConfig } from './config'
 
 _dayjs.extend(updateLocale)
@@ -17,6 +18,7 @@ _dayjs.extend(duration)
 _dayjs.extend(utc)
 _dayjs.extend(timezone)
 _dayjs.extend(advancedFormat)
+_dayjs.extend(customParseFormat)
 
 function getBrowserTimezone(): string {
   return Intl.DateTimeFormat().resolvedOptions().timeZone
