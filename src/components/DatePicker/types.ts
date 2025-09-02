@@ -3,7 +3,7 @@ import type { Dayjs } from 'dayjs/esm'
 // Shared props for both single date and range pickers
 export interface CommonDatePickerProps {
   placement?: DatePickerPlacement
-  formatter?: (d: string) => string
+  format?: string
   variant?: 'subtle' | 'ghost' | 'outline'
   readonly?: boolean
   placeholder?: string
