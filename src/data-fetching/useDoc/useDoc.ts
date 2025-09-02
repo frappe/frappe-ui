@@ -29,17 +29,17 @@ interface DocMethodOption<T = any>
   name: string
 }
 
-interface UseDocOptions {
+interface UseDocOptions<TDoc> {
   doctype: string
   name: MaybeRefOrGetter<string>
   baseUrl?: string
   methods?: Record<string, string | DocMethodOption>
   immediate?: boolean
-  transform?: (doc: object) => object
+  transform?: (doc: TDoc & { doctype: string }) => TDoc & { doctype: string }
 }
 
 export function useDoc<TDoc extends { name: string }, TMethods = {}>(
-  options: UseDocOptions,
+  options: UseDocOptions<TDoc>,
 ) {
   const {
     baseUrl = '',
@@ -72,8 +72,8 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
     afterFetch(ctx: AfterFetchContext<{ data: TDoc }>) {
       if (ctx.data) {
         let doc = {
-          doctype,
           ...ctx.data.data,
+          doctype,
           name: String(ctx.data.data.name),
         }
         if (transform) {
@@ -88,7 +88,6 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
   }
 
   const {
-    data,
     error,
     isFetching,
     isFinished,
@@ -133,10 +132,11 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
     immediate: false,
     refetch: false,
     onSuccess(data) {
+      let docWithType = { ...data, doctype }
       if (transform) {
-        data = transform(data)
+        docWithType = transform(docWithType)
       }
-      docStore.setDoc({ doctype, ...data })
+      docStore.setDoc(docWithType)
       listStore.updateRow(doctype, data)
     },
   })
