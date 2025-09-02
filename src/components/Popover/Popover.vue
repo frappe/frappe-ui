@@ -24,10 +24,11 @@
         :side="placementSide"
         :align="placementAlign"
         :style="{
-          minWidth: 'var(--reka-popover-trigger-width)',
+          minWidth: matchTargetWidth
+            ? 'var(--reka-popover-trigger-width)'
+            : undefined,
         }"
-        class="PopoverContent"
-        :class="{ 'has-transition': hasTransition }"
+        :class="['PopoverContent', { 'has-transition': hasTransition }]"
         @mouseover="
           () => {
             pointerOverTargetOrPopup = true
