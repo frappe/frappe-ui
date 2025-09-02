@@ -26,13 +26,23 @@
             <div class="mb-2 flex items-center justify-between gap-3">
               <!-- Left cluster: date picker + nav + title -->
               <div class="flex items-center gap-2">
-                <DateMonthYearPicker
+                <DatePicker
                   :modelValue="headerProps.selectedMonthDate"
-                  :formatter="() => headerProps.currentMonthYear"
                   @update:modelValue="
                     (val) => headerProps.onMonthYearChange(val)
                   "
-                />
+                  :clearable="false"
+                >
+                  <template #target="{ togglePopover }">
+                    <Button
+                      variant="ghost"
+                      class="text-lg font-medium text-ink-gray-7"
+                      :label="headerProps.currentMonthYear"
+                      iconRight="chevron-down"
+                      @click="togglePopover"
+                    />
+                  </template>
+                </DatePicker>
               </div>
               <!-- Right cluster: view mode select -->
               <div class="flex items-center gap-2">
@@ -85,7 +95,7 @@
 import { ref } from 'vue'
 import Calendar from './Calendar.vue'
 import { Select } from '../Select'
-import DateMonthYearPicker from './DateMonthYearPicker.vue'
+import DatePicker from '../DatePicker/DatePicker.vue'
 import { Button } from '../Button'
 
 const config = {
