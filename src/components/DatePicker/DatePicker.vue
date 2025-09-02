@@ -235,20 +235,32 @@ if (initialValue) {
     if (d.isValid()) selected.value = d.format(DATE_FORMAT)
     else selected.value = initialValue
   }
+} else {
+  selected.value = ''
 }
 
 function syncFromValue(val?: string): void {
-  if (!val) return
+  if (!val) {
+    selected.value = ''
+    return
+  }
+
   let d: Dayjs | null = null
   if (props.format) {
     const _d = dayjs(val, props.format, true)
     if (_d.isValid()) d = _d
   }
+
   if (!d) {
     const _d = dayjs(val)
     if (_d.isValid()) d = _d
   }
-  if (!d) return
+
+  if (!d) {
+    selected.value = ''
+    return
+  }
+
   currentYear.value = d.year()
   currentMonth.value = d.month()
   selected.value = d.format(DATE_FORMAT)
@@ -262,7 +274,7 @@ watch(
   () => [props.modelValue, props.value],
   ([m, v]) => {
     const val = m || v
-    if (val) syncFromValue(val)
+    syncFromValue(val)
   },
 )
 
