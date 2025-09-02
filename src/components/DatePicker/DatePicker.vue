@@ -75,6 +75,7 @@
               @click="prev"
             />
             <Button
+              v-if="!clearable"
               variant="ghost"
               class="text-xs"
               :label="'Today'"
@@ -173,6 +174,31 @@
             </button>
           </div>
         </div>
+        <!-- Footer actions -->
+        <div
+          v-if="props.clearable"
+          class="flex items-center justify-between gap-1 p-2 border-t"
+        >
+          <div class="flex gap-1">
+            <Button
+              variant="outline"
+              :label="'Today'"
+              @click="() => handleTodayClick(togglePopover)"
+            />
+            <Button
+              variant="outline"
+              :label="'Tomorrow'"
+              @click="() => handleTomorrowClick(togglePopover)"
+            />
+          </div>
+          <Button
+            v-if="selected"
+            size="sm"
+            variant="outline"
+            :label="'Clear'"
+            @click="() => handleClearClick(togglePopover)"
+          />
+        </div>
       </div>
     </template>
   </Popover>
@@ -204,6 +230,7 @@ const props = withDefaults(defineProps<DatePickerProps>(), {
   allowCustom: true,
   autoClose: true,
   disabled: false,
+  clearable: true,
 })
 const emit = defineEmits<DatePickerEmits>()
 
@@ -240,12 +267,17 @@ if (initialValue) {
 }
 
 function syncFromValue(val?: string): void {
+  let d: Dayjs | null = null
+
   if (!val) {
-    selected.value = ''
-    return
+    if (!props.clearable) {
+      d = dayjsLocal()
+    } else {
+      selected.value = ''
+      return
+    }
   }
 
-  let d: Dayjs | null = null
   if (props.format) {
     const _d = dayjs(val, props.format, true)
     if (_d.isValid()) d = _d
@@ -318,7 +350,25 @@ function parseInput(val: string): Dayjs | null {
 }
 
 function commitInput(close = false, togglePopover?: () => void): void {
-  const d = parseInput(inputValue.value)
+  const raw = inputValue.value.trim()
+
+  if (!raw) {
+    if (!props.clearable) {
+      // Force today
+      selectDate(dayjsLocal())
+      if (close && autoClose.value && togglePopover) togglePopover()
+    } else {
+      if (selected.value) {
+        selected.value = ''
+        emit('update:modelValue', '')
+        emit('change', '')
+      }
+      if (close && autoClose.value && togglePopover) togglePopover()
+    }
+    return
+  }
+
+  const d = parseInput(raw)
   if (d) {
     selectDate(d)
     if (close && autoClose.value && togglePopover) togglePopover()
@@ -362,6 +412,10 @@ function selectDate(date: string | Date | Dayjs): void {
   currentMonth.value = d.month()
   emit('update:modelValue', selected.value)
   if (selected.value !== prev) emit('change', selected.value)
+  else
+    inputValue.value = props.format
+      ? formatter(selected.value, props.format)
+      : selected.value
   view.value = 'date'
 }
 function selectMonth(i: number): void {
@@ -408,6 +462,23 @@ function handleDateCellClick(
 
 function handleTodayClick(togglePopover: () => void) {
   handleDateCellClick(dayjsLocal(), togglePopover)
+}
+
+function handleTomorrowClick(togglePopover: () => void) {
+  handleDateCellClick(dayjsLocal().add(1, 'day'), togglePopover)
+}
+
+function handleClearClick(togglePopover: () => void) {
+  if (selected.value) {
+    selected.value = ''
+    emit('update:modelValue', '')
+    emit('change', '')
+    inputValue.value = ''
+  }
+  if (autoClose.value) togglePopover()
+  isTyping.value = false
+
+  view.value = 'date'
 }
 
 function cycleView(): void {
