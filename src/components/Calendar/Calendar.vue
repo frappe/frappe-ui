@@ -208,14 +208,17 @@ onUnmounted(() => {
   window.removeEventListener('keydown', handleShortcuts)
 })
 function handleShortcuts(e) {
-  if (e.key === 'm' || e.key === 'M') {
+  if (e.key.toLowerCase() === 'm') {
     activeView.value = 'Month'
   }
-  if (e.key === 'w' || e.key === 'W') {
+  if (e.key.toLowerCase() === 'w') {
     activeView.value = 'Week'
   }
-  if (e.key === 'd' || e.key === 'D') {
+  if (e.key.toLowerCase() === 'd') {
     activeView.value = 'Day'
+  }
+if (e.key.toLowerCase() === 't') {
+    setCalendarDate()
   }
   if (e.key === 'ArrowLeft') {
     decrement()
