@@ -486,6 +486,10 @@
         },
         {
           "id": "src-components-dropdown-dropdown-story-vue-6",
+          "title": "With Switches"
+        },
+        {
+          "id": "src-components-dropdown-dropdown-story-vue-7",
           "title": "With Nested Submenus"
         }
       ],
@@ -842,11 +846,27 @@
       "variants": [
         {
           "id": "src-components-switch-switch-story-vue-0",
-          "title": "Label"
+          "title": "Plain"
         },
         {
           "id": "src-components-switch-switch-story-vue-1",
-          "title": "Label and Description"
+          "title": "Label"
+        },
+        {
+          "id": "src-components-switch-switch-story-vue-2",
+          "title": "Description and icon"
+        },
+        {
+          "id": "src-components-switch-switch-story-vue-3",
+          "title": "Size "
+        },
+        {
+          "id": "src-components-switch-switch-story-vue-4",
+          "title": "Disabled"
+        },
+        {
+          "id": "src-components-switch-switch-story-vue-5",
+          "title": "Classes"
         }
       ],
       "relativePath": "src/components/Switch/Switch.story.vue",
