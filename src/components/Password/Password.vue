@@ -19,11 +19,9 @@
               {{ show ? 'Hide Password' : 'Show Password' }}
               <KeyboardShortcut
                 bg
-                ctrl
+                combo="Mod+I"
                 class="!bg-surface-gray-5 !text-ink-gray-2 px-1"
-              >
-                <span class="font-mono leading-none tracking-widest">+I</span>
-              </KeyboardShortcut>
+              />
             </span>
           </div>
         </template>
