@@ -143,12 +143,7 @@ function findAppDir() {
       const dirPath = path.join(appDir, dir)
       try {
         const contents = fs.readdirSync(dirPath)
-        if (
-          contents.includes('public') &&
-          contents.includes('patches') &&
-          contents.includes('www') &&
-          contents.includes('hooks.py')
-        ) {
+        if (contents.includes('public') && contents.includes('hooks.py')) {
           return dirPath
         }
       } catch (error) {
