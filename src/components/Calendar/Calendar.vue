@@ -198,6 +198,10 @@ onUnmounted(() => {
   window.removeEventListener('keydown', handleShortcuts)
 })
 function handleShortcuts(e) {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) {
+    return
+  }
+  
   if (e.key.toLowerCase() === 'm') {
     activeView.value = 'Month'
   }
