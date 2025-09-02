@@ -11,6 +11,7 @@
       v-model:show="showOptions"
       ref="rootRef"
       :placement="placement"
+      :match-target-width="true"
     >
       <template
         #target="{ open: openPopover, togglePopover, close: closePopover }"
