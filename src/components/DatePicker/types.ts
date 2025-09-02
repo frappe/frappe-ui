@@ -12,6 +12,7 @@ export interface CommonDatePickerProps {
   autoClose?: boolean
   disabled?: boolean
   label?: string
+  clearable?: boolean
 }
 
 export interface DatePickerProps extends CommonDatePickerProps {
