@@ -207,7 +207,7 @@ function handleShortcuts(e) {
   if (e.key.toLowerCase() === 'd') {
     activeView.value = 'Day'
   }
-if (e.key.toLowerCase() === 't') {
+  if (e.key.toLowerCase() === 't') {
     setCalendarDate()
   }
   if (e.key === 'ArrowLeft') {
@@ -536,6 +536,13 @@ function findIndexOfDate(date) {
 }
 
 const currentMonthYear = computed(() => {
+  if (activeView.value === 'Day') {
+    const dayDate = currentMonthDates.value[date.value]
+    if (dayDate) {
+      return dayjs(dayDate).format('ddd, D MMM YYYY')
+    }
+  }
+
   // Non-week views or empty week fallback
   if (activeView.value !== 'Week')
     return formatMonthYear(currentMonth.value, currentYear.value)
@@ -580,5 +587,18 @@ function setCalendarDate(d) {
   })
 }
 
-defineExpose({ reloadEvents })
+defineExpose({
+  reloadEvents,
+  currentMonthYear,
+  currentYear,
+  currentMonth,
+  enabledModes,
+  activeView,
+  decrement,
+  increment,
+  updateActiveView,
+  setCalendarDate,
+  onMonthYearChange,
+  selectedMonthDate,
+})
 </script>
