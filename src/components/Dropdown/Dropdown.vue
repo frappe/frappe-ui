@@ -17,9 +17,9 @@
             'origin-top': placement == 'center',
           },
         ]"
-        :side="contentSide"
-        :align="contentAlign"
-        :side-offset="4"
+        :side="side"
+        :align="align"
+        :side-offset="offset"
       >
         <template v-for="group in groups" :key="group.key">
           <div v-if="group.items.length" :class="cssClasses.groupContainer">
@@ -236,6 +236,8 @@ const attrs = useAttrs()
 const props = withDefaults(defineProps<DropdownProps>(), {
   options: () => [],
   placement: 'left',
+  side: 'bottom',
+  offset: 4,
 })
 
 function close() {
@@ -364,11 +366,7 @@ const groups = computed(() => {
   return processOptionsIntoGroups(props.options)
 })
 
-const contentSide = computed(() => {
-  return 'bottom' as const
-})
-
-const contentAlign = computed(() => {
+const align = computed(() => {
   if (props.placement === 'left') return 'start' as const
   if (props.placement === 'right') return 'end' as const
   if (props.placement === 'center') return 'center' as const
