@@ -210,12 +210,21 @@ export class DocTypeInterfaceGenerator {
       const files = await fs.readdir(directory)
       for (const file of files) {
         const fullPath = path.join(directory, file)
-        const stat = await fs.stat(fullPath)
-        if (stat.isDirectory()) {
-          await searchDirectory(fullPath)
-        } else if (fullPath.endsWith(targetPattern)) {
-          foundPath = fullPath
-          return
+        try {
+          const stat = await fs.stat(fullPath)
+          if (stat.isDirectory()) {
+            await searchDirectory(fullPath)
+          } else if (fullPath.endsWith(targetPattern)) {
+            foundPath = fullPath
+            return
+          }
+        } catch (error) {
+          // Skip files/directories that can't be accessed (e.g., broken symlinks, permission denied)
+          if (error.code === 'ENOENT' || error.code === 'EACCES') {
+            continue
+          }
+          // Re-throw other unexpected errors
+          throw error
         }
       }
     }
