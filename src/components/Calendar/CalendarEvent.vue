@@ -59,7 +59,7 @@
     </div>
     <div
       v-if="config.isEditMode && !event.isFullDay"
-      class="absolute h-[8px] w-[100%] cursor-row-resize"
+      class="absolute -bottom-1 h-3 w-full cursor-ns-resize"
       ref="resize"
       @mousedown="handleResizeMouseDown"
     />
