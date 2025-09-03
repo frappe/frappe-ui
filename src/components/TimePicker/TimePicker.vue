@@ -311,8 +311,12 @@ function commitInput() {
   applyValue(normalized, true)
 }
 
-function select(val: string) {
+function select(val: string, forceChange = false) {
+  const prev = internalValue.value
   applyValue(val, true)
+  if (forceChange && prev === internalValue.value) {
+    emit('change', internalValue.value)
+  }
   if (props.autoClose) showOptions.value = false
 }
 
@@ -478,7 +482,7 @@ function onEnter() {
   }
   if (highlightIndex.value > -1) {
     const opt = displayedOptions.value[highlightIndex.value]
-    if (opt) select(opt.value)
+    if (opt) select(opt.value, true)
   } else {
     commitInput()
     if (props.autoClose) showOptions.value = false

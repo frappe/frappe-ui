@@ -181,13 +181,13 @@
         <!-- Time Picker Section -->
         <div class="flex flex-col gap-2 p-2 pt-0">
           <TimePicker
-            v-model="timeValue"
+            :value="timeValue"
             :allowCustom="props.allowCustomTime"
             :placement="'bottom-start'"
             placeholder="Select time"
             :minTime="computedMinTime"
             :maxTime="computedMaxTime"
-            @update:modelValue="onTimeChange"
+            @change="onTimeChange"
           />
         </div>
 
@@ -501,7 +501,8 @@ function handleDateCellClick(
   view.value = 'date'
 }
 
-function onTimeChange() {
+function onTimeChange(val: string) {
+  timeValue.value = val
   isTyping.value = false
   if (selectedDate.value) emitChange()
 }
