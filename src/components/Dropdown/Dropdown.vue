@@ -31,14 +31,28 @@
             </DropdownMenuLabel>
 
             <template v-for="item in group.items" :key="item.label">
-              <Switch
-                v-if="item.switch"
-                class="!px-2 !py-0 h-7"
-                :label="item.label"
-                label-classes="font-normal cursor-pointer"
-                :icon="item.icon"
-                @change="item.onClick?.($event)"
-              />
+              <div v-if="item.switch" :class="cssClasses.itemButton">
+                <FeatherIcon
+                  v-if="item.icon && typeof item.icon === 'string'"
+                  :name="item.icon"
+                  :class="[cssClasses.itemIcon, getIconColor(item)]"
+                  aria-hidden="true"
+                />
+                <component
+                  :class="[cssClasses.itemIcon, getIconColor(item)]"
+                  v-else-if="item.icon"
+                  :is="item.icon"
+                />
+                <span :class="[cssClasses.itemLabel, getTextColor(item)]">
+                  {{ item.label }}
+                </span>
+                <Switch
+                  class="ml-auto"
+                  label-classes="font-normal cursor-pointer"
+                  @change="item.onClick?.($event)"
+                  :model-value="item.switchValue || false"
+                />
+              </div>
               <DropdownMenuItem v-else as-child @select="item.onClick">
                 <slot v-if="$slots.item" name="item" v-bind="{ item, close }" />
                 <component
@@ -100,14 +114,45 @@
                           v-for="subItem in submenuGroup.items"
                           :key="subItem.label"
                         >
-                          <Switch
+                          <div
                             v-if="subItem.switch"
-                            class="!px-2 !py-0 h-7"
-                            :label="subItem.label"
-                            label-classes="font-normal cursor-pointer"
-                            :icon="subItem.icon"
-                            @change="subItem.onClick?.($event)"
-                          />
+                            :class="cssClasses.itemButton"
+                          >
+                            <FeatherIcon
+                              v-if="
+                                subItem.icon && typeof subItem.icon === 'string'
+                              "
+                              :name="subItem.icon"
+                              :class="[
+                                cssClasses.itemIcon,
+                                getIconColor(subItem),
+                              ]"
+                              aria-hidden="true"
+                            />
+                            <component
+                              :class="[
+                                cssClasses.itemIcon,
+                                getIconColor(subItem),
+                              ]"
+                              v-else-if="subItem.icon"
+                              :is="subItem.icon"
+                            />
+                            <span
+                              :class="[
+                                cssClasses.itemLabel,
+                                getTextColor(subItem),
+                              ]"
+                            >
+                              {{ subItem.label }}
+                            </span>
+                            <Switch
+                              class="ml-auto"
+                              label-classes="font-normal cursor-pointer"
+                              @change="subItem.onClick?.($event)"
+                              :model-value="subItem.switchValue || false"
+                            />
+                          </div>
+
                           <DropdownMenuItem
                             v-else
                             as-child
