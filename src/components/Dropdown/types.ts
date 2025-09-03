@@ -6,6 +6,7 @@ export type DropdownOption = {
   label: string
   icon?: string | Component | null
   switch?: boolean
+  switchValue?: boolean
   theme?: 'gray' | 'red'
   component?: any
   onClick?: (val: any) => void
