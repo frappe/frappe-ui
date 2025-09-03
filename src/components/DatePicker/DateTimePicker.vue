@@ -1,192 +1,219 @@
 <template>
   <Popover
-    @open="selectCurrentMonthYear"
-    class="flex w-full [&>div:first-child]:w-full"
+    class="inline-block"
     :placement="placement"
+    @open="initFromValue"
+    @close="handleClose"
   >
-    <template #target="{ togglePopover }">
-      <div class="flex flex-col space-y-1.5">
-        <label v-if="props.label" class="block text-xs text-ink-gray-5">
-          {{ props.label }}
-        </label>
+    <template #target="{ togglePopover, isOpen }">
+      <slot
+        name="target"
+        v-bind="{ togglePopover, isOpen, displayLabel, inputValue }"
+      >
         <TextInput
-          readonly
+          v-model="inputValue"
           type="text"
-          :placeholder="placeholder"
-          :value="dateValue && formatter ? formatter(dateValue) : dateValue"
-          @focus="!readonly ? togglePopover() : null"
-          class="w-full"
-          :class="inputClass"
-          v-bind="$attrs"
+          class="cursor-text w-full"
+          :class="props.inputClass"
+          :label="props.label"
+          :variant="props.variant"
+          :placeholder="props.placeholder || 'Select date & time'"
+          :disabled="props.disabled"
+          :readonly="props.readonly || !props.allowCustom"
+          @focus="activateInput(isOpen, togglePopover)"
+          @click="activateInput(isOpen, togglePopover)"
+          @blur="onBlur"
+          @keydown.enter.prevent="onEnter(togglePopover)"
         >
-          <template #prefix v-if="$slots.prefix">
-            <slot name="prefix" />
+          <template v-if="$slots.prefix" #prefix>
+            <slot
+              name="prefix"
+              v-bind="{ togglePopover, isOpen, displayLabel, inputValue }"
+            />
+          </template>
+          <template #suffix>
+            <slot
+              name="suffix"
+              v-bind="{ togglePopover, isOpen, displayLabel, inputValue }"
+            >
+              <FeatherIcon
+                name="chevron-down"
+                class="h-4 w-4 cursor-pointer"
+                @mousedown.prevent="togglePopover"
+              />
+            </slot>
           </template>
         </TextInput>
-      </div>
+      </slot>
     </template>
 
     <template #body="{ togglePopover }">
       <div
-        class="w-fit select-none text-base text-ink-gray-9 divide-y divide-outline-gray-modals rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
-        :class="marginClass"
+        ref="popoverContentRef"
+        class="w-fit min-w-60 select-none text-base text-ink-gray-9 rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5 mt-2"
       >
-        <!-- Month Switcher -->
-        <div class="flex items-center p-1 text-ink-gray-4">
-          <Button variant="ghost" class="h-7 w-7" @click="prevMonth">
-            <FeatherIcon
-              :stroke-width="2"
-              name="chevron-left"
-              class="h-4 w-4"
-            />
-          </Button>
-          <div class="flex-1 text-center text-base font-medium text-ink-gray-6">
-            {{ formattedMonth }}
-          </div>
-          <Button variant="ghost" class="h-7 w-7" @click="nextMonth">
-            <FeatherIcon
-              :stroke-width="2"
-              name="chevron-right"
-              class="h-4 w-4"
-            />
-          </Button>
-        </div>
-
-        <!-- Date Time Input -->
-        <div class="flex items-center justify-center gap-1 p-1">
-          <TextInput
-            class="text-sm"
-            type="text"
-            :value="dateValue"
-            @change="
-              (e: Event) => {
-                updateDate((e.target as HTMLInputElement).value)
-                togglePopover()
-              }
-            "
-          />
+        <!-- Header (Month/Year navigation) -->
+        <div class="flex items-center justify-between p-2 pb-0 gap-1">
           <Button
-            :label="'Now'"
-            class="text-sm"
-            @click="
-              () => {
-                selectDate(getDate(), true)
-                togglePopover()
-              }
-            "
-          />
+            variant="ghost"
+            size="sm"
+            class="text-sm font-medium text-ink-gray-7"
+            @click="cycleView"
+          >
+            <span v-if="view === 'date'"
+              >{{ months[currentMonth] }} {{ currentYear }}</span
+            >
+            <span v-else-if="view === 'month'">{{ currentYear }}</span>
+            <span v-else>{{ yearRangeStart }} - {{ yearRangeStart + 11 }}</span>
+          </Button>
+          <div class="flex items-center">
+            <Button
+              variant="ghost"
+              icon="chevron-left"
+              class="size-7"
+              @click="prev"
+            />
+            <Button
+              v-if="!clearable"
+              variant="ghost"
+              class="text-xs"
+              :label="'Now'"
+              @click="() => handleNowClick(togglePopover)"
+            />
+            <Button
+              variant="ghost"
+              icon="chevron-right"
+              class="size-7"
+              @click="next"
+            />
+          </div>
         </div>
 
-        <!-- Date Picker -->
-        <div
-          class="flex flex-col items-center justify-center p-1 text-ink-gray-8"
-        >
-          <div class="flex items-center text-xs uppercase">
+        <!-- Calendar -->
+        <div class="p-2">
+          <div v-if="view === 'date'" role="grid" aria-label="Calendar dates">
             <div
-              class="flex h-6 w-8 items-center justify-center text-center"
-              v-for="(d, i) in ['s', 'm', 't', 'w', 't', 'f', 's']"
-              :key="i"
+              class="flex items-center text-xs font-medium uppercase text-ink-gray-4 mb-1"
             >
-              {{ d }}
+              <div
+                v-for="d in ['S', 'M', 'T', 'W', 'T', 'F', 'S']"
+                :key="d"
+                class="flex h-6 w-8 items-center justify-center"
+              >
+                {{ d }}
+              </div>
+            </div>
+            <div v-for="(week, wi) in weeks" :key="wi" class="flex" role="row">
+              <button
+                v-for="dateObj in week"
+                type="button"
+                :key="dateObj.key"
+                class="flex h-8 w-8 items-center justify-center rounded cursor-pointer text-sm focus:outline-none focus:ring-2 focus:ring-outline-gray-2"
+                :class="[
+                  dateObj.inMonth ? 'text-ink-gray-8' : 'text-ink-gray-3',
+                  dateObj.isToday ? 'font-extrabold text-ink-gray-9' : '',
+                  dateObj.disabled
+                    ? 'opacity-30 cursor-not-allowed hover:bg-transparent'
+                    : dateObj.isSelected
+                      ? 'bg-surface-gray-6 text-ink-white hover:bg-surface-gray-6'
+                      : 'hover:bg-surface-gray-2',
+                ]"
+                role="gridcell"
+                :aria-selected="dateObj.isSelected ? 'true' : 'false'"
+                :aria-label="
+                  dateObj.date.format('YYYY-MM-DD') +
+                  (dateObj.isToday ? ' (Today)' : '')
+                "
+                :disabled="dateObj.disabled"
+                @click="
+                  !dateObj.disabled &&
+                    handleDateCellClick(dateObj.date, togglePopover)
+                "
+              >
+                {{ dateObj.date.date() }}
+              </button>
             </div>
           </div>
           <div
-            class="flex items-center"
-            v-for="(week, i) in datesAsWeeks"
-            :key="i"
+            v-else-if="view === 'month'"
+            class="grid grid-cols-3 gap-1"
+            role="grid"
+            aria-label="Select month"
           >
-            <div
-              v-for="date in week"
-              :key="toValue(date)"
-              class="flex h-8 w-8 cursor-pointer items-center justify-center rounded hover:bg-surface-gray-2"
+            <button
+              v-for="(m, i) in months"
+              type="button"
+              :key="m"
+              class="py-2 text-sm rounded cursor-pointer text-center hover:bg-surface-gray-2 focus:outline-none focus:ring-2 focus:ring-brand-6"
               :class="{
-                'text-ink-gray-3': date.getMonth() !== currentMonth - 1,
-                'font-extrabold text-ink-gray-9':
-                  toValue(date) === toValue(today),
                 'bg-surface-gray-6 text-ink-white hover:bg-surface-gray-6':
-                  toValue(date) === dateValue,
+                  i === currentMonth,
               }"
-              @click="
-                () => {
-                  selectDate(date)
-                  togglePopover()
-                }
-              "
+              :aria-selected="i === currentMonth ? 'true' : 'false'"
+              @click="selectMonth(i)"
             >
-              {{ date.getDate() }}
-            </div>
+              {{ m.slice(0, 3) }}
+            </button>
+          </div>
+          <div
+            v-else
+            class="grid grid-cols-3 gap-1"
+            role="grid"
+            aria-label="Select year"
+          >
+            <button
+              v-for="y in yearRange"
+              type="button"
+              :key="y"
+              class="py-2 text-sm rounded cursor-pointer text-center hover:bg-surface-gray-2 focus:outline-none focus:ring-2 focus:ring-brand-6"
+              :class="{
+                'bg-surface-gray-6 text-ink-white hover:bg-surface-gray-6':
+                  y === currentYear,
+              }"
+              :aria-selected="y === currentYear ? 'true' : 'false'"
+              @click="selectYear(y)"
+            >
+              {{ y }}
+            </button>
           </div>
         </div>
 
-        <!-- Time Picker -->
-        <div class="flex items-center justify-around gap-2 p-1">
-          <div>
-            {{ twoDigit(hour) }} : {{ twoDigit(minute) }} :
-            {{ twoDigit(second) }}
-          </div>
-          <div class="flex flex-col items-center justify-center">
-            <div class="slider flex min-h-4 items-center justify-center">
-              <TextInput
-                v-model="hour"
-                name="hours"
-                type="range"
-                min="0"
-                max="23"
-                step="1"
-                @change="
-                  () => {
-                    changeTime()
-                    togglePopover()
-                  }
-                "
-              />
-            </div>
-            <div class="slider flex min-h-4 items-center justify-center">
-              <TextInput
-                v-model="minute"
-                name="minutes"
-                type="range"
-                min="0"
-                max="59"
-                step="1"
-                @change="
-                  () => {
-                    changeTime()
-                    togglePopover()
-                  }
-                "
-              />
-            </div>
-            <div class="slider flex min-h-4 items-center justify-center">
-              <TextInput
-                v-model="second"
-                name="seconds"
-                type="range"
-                min="0"
-                max="59"
-                step="1"
-                @change="
-                  () => {
-                    changeTime()
-                    togglePopover()
-                  }
-                "
-              />
-            </div>
-          </div>
+        <!-- Time Picker Section -->
+        <div class="flex flex-col gap-2 p-2 pt-0">
+          <TimePicker
+            v-model="timeValue"
+            :allowCustom="props.allowCustomTime"
+            :placement="'bottom-start'"
+            placeholder="Select time"
+            :minTime="computedMinTime"
+            :maxTime="computedMaxTime"
+            @update:modelValue="onTimeChange"
+          />
         </div>
 
-        <!-- Actions -->
-        <div class="flex justify-end p-1">
+        <!-- Footer Actions (clearable variant) -->
+        <div
+          v-if="props.clearable"
+          class="flex items-center justify-between gap-1 p-2 border-t"
+        >
+          <div class="flex gap-1">
+            <Button
+              variant="outline"
+              :label="'Now'"
+              @click="() => handleNowClick(togglePopover)"
+            />
+            <Button
+              variant="outline"
+              :label="'Tomorrow'"
+              @click="() => handleTomorrowClick()"
+            />
+          </div>
           <Button
+            v-if="selectedDate"
+            size="sm"
+            variant="outline"
             :label="'Clear'"
-            class="text-sm"
-            @click="
-              () => {
-                selectDate('')
-                togglePopover()
-              }
-            "
+            @click="() => handleClearClick(togglePopover)"
           />
         </div>
       </div>
@@ -195,160 +222,342 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
-
-import { Button } from '../Button'
-import FeatherIcon from '../FeatherIcon.vue'
+import { ref, computed, watch, toRefs } from 'vue'
 import { Popover } from '../Popover'
+import { Button } from '../Button'
 import { TextInput } from '../TextInput'
-
+// @ts-ignore - Vue SFC without explicit types
+import FeatherIcon from '../FeatherIcon.vue'
+import TimePicker from '../TimePicker/TimePicker.vue'
 import { dayjs, dayjsLocal, dayjsSystem } from '../../utils/dayjs'
-import { useDatePicker } from './useDatePicker'
-import { getDate } from './utils'
+import { months, monthStart, generateWeeks, getDateValue } from './utils'
+import type { Dayjs } from 'dayjs/esm'
+import type {
+  DatePickerProps,
+  DatePickerEmits,
+  DatePickerViewMode as ViewMode,
+} from './types'
 
-import type { DatePickerEmits, DatePickerProps } from './types'
+interface ExtraDateTimeProps {
+  minDateTime?: string
+  maxDateTime?: string
+  allowCustomTime?: boolean
+}
 
-const props = defineProps<DatePickerProps>()
+const props = withDefaults(
+  defineProps<DatePickerProps & ExtraDateTimeProps>(),
+  {
+    value: '',
+    modelValue: '',
+    placement: 'bottom-start',
+    variant: 'subtle',
+    placeholder: 'Select date & time',
+    readonly: false,
+    allowCustom: true,
+    autoClose: true,
+    disabled: false,
+    clearable: true,
+    allowCustomTime: true,
+  },
+)
 const emit = defineEmits<DatePickerEmits>()
 
-const {
-  currentYear,
-  currentMonth,
-  today,
-  datesAsWeeks,
-  formattedMonth,
-  prevMonth,
-  nextMonth,
-} = useDatePicker()
+const { autoClose } = toRefs(props)
 
-const marginClass = computed(() => {
-  let _marginClass = 'mt-2'
-  if (props.placement?.startsWith('top')) {
-    _marginClass = 'mb-2'
-  } else if (props.placement?.startsWith('left')) {
-    _marginClass = 'mr-2'
-  } else if (props.placement?.startsWith('right')) {
-    _marginClass = 'ml-2'
+const view = ref<ViewMode>('date')
+const currentYear = ref<number>(dayjs().year())
+const currentMonth = ref<number>(dayjs().month())
+const DATE_FORMAT = 'YYYY-MM-DD'
+const DATE_TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss'
+
+const selectedDate = ref<string>('') // YYYY-MM-DD
+const timeValue = ref<string>('') // HH:mm:ss
+
+const initialValue = props.modelValue || props.value || ''
+
+function coerceDateTime(val?: string | null): Dayjs | null {
+  if (!val) return null
+  const raw = String(val).trim()
+  if (!raw) return null
+
+  if (props.format) {
+    const dStrict = dayjs(raw, props.format, true)
+    if (dStrict.isValid()) return dStrict
   }
-  return _marginClass
+
+  const dLoose = dayjs(raw)
+  if (dLoose.isValid()) return dLoose
+
+  const normalized = getDateValue(raw)
+  if (normalized) {
+    const dNorm = dayjs(normalized)
+    if (dNorm.isValid()) return dNorm
+  }
+  return null
+}
+
+function syncFromValue(val?: string): void {
+  if (!val) {
+    if (!props.clearable) {
+      const now = dayjsLocal()
+      currentYear.value = now.year()
+      currentMonth.value = now.month()
+      selectedDate.value = now.format(DATE_FORMAT)
+      timeValue.value = now.format('HH:mm:ss')
+    } else {
+      selectedDate.value = ''
+      timeValue.value = ''
+    }
+    return
+  }
+  const d = coerceDateTime(val)
+  if (!d) {
+    selectedDate.value = ''
+    timeValue.value = ''
+    return
+  }
+  currentYear.value = d.year()
+  currentMonth.value = d.month()
+  selectedDate.value = d.format(DATE_FORMAT)
+  timeValue.value = d.format('HH:mm:ss')
+}
+
+syncFromValue(initialValue)
+
+function initFromValue(): void {
+  syncFromValue(props.modelValue || props.value)
+}
+
+watch(
+  () => [props.modelValue, props.value],
+  ([m, v]) => {
+    const val = m || v
+    syncFromValue(val)
+  },
+)
+
+const combinedValue = computed<string>(() => {
+  if (!selectedDate.value) return ''
+  const base = `${selectedDate.value} ${timeValue.value || '00:00:00'}`
+  const local = dayjsLocal(base)
+  if (!local.isValid()) return ''
+  const sys = dayjsSystem(local.format(DATE_TIME_FORMAT))
+  return sys.format(DATE_TIME_FORMAT)
 })
 
-const hour = ref<number>(0)
-const minute = ref<number>(0)
-const second = ref<number>(0)
-
-const dateValue = computed(() => {
-  let date = props.value ? props.value : props.modelValue
-  return date ? dayjsLocal(date).format('YYYY-MM-DD HH:mm:ss') : ''
+const displayLabel = computed<string>(() => {
+  if (!combinedValue.value) return ''
+  if (props.format) return dayjs(combinedValue.value).format(props.format)
+  return combinedValue.value
 })
 
-function changeTime() {
-  let date = dateValue.value ? getDate(dateValue.value) : getDate()
-  selectDate(date)
+const inputValue = ref<string>(displayLabel.value)
+const isTyping = ref(false)
+watch(displayLabel, (val) => {
+  if (!isTyping.value) inputValue.value = val
+})
+
+function maybeClose(togglePopover?: () => void, condition = true) {
+  if (condition && autoClose.value && togglePopover) togglePopover()
 }
 
-function selectDate(date: Date | string, isNow: boolean = false) {
-  if (isNow) {
-    date = dayjsLocal(date)
-    hour.value = date.hour()
-    minute.value = date.minute()
-    second.value = date.second()
+function clearSelection() {
+  if (!selectedDate.value && !timeValue.value) return
+  selectedDate.value = ''
+  timeValue.value = ''
+  emit('update:modelValue', '')
+  emit('change', '')
+  inputValue.value = ''
+}
+
+function commitInput(close = false, togglePopover?: () => void): void {
+  const raw = inputValue.value.trim()
+  if (!raw) {
+    if (!props.clearable) {
+      const now = dayjsLocal()
+      selectDate(now)
+      timeValue.value = now.format('HH:mm:ss')
+      emitChange()
+      maybeClose(togglePopover, close)
+    } else {
+      clearSelection()
+      maybeClose(togglePopover, close)
+    }
+    return
   }
-
-  let systemParsedDate = date
-    ? dayjsSystem(toValue(date)).format('YYYY-MM-DD HH:mm:ss')
-    : ''
-  emit('change', systemParsedDate)
-  emit('update:modelValue', systemParsedDate)
-}
-
-function toValue(date: Date | string) {
-  if (!date || date.toString() === 'Invalid Date') return ''
-
-  // "YYYY-MM-DD HH:mm:ss"
-  return dayjs(date)
-    .set('hour', hour.value)
-    .set('minute', minute.value)
-    .set('second', second.value)
-    .format('YYYY-MM-DD HH:mm:ss')
-}
-
-function twoDigit(number: number) {
-  return number.toString().padStart(2, '0')
-}
-
-function updateDate(date: Date | string) {
-  date = getDate(date)
-  hour.value = date.getHours()
-  minute.value = date.getMinutes()
-  second.value = date.getSeconds()
-  selectDate(date)
-}
-
-function selectCurrentMonthYear() {
-  let date = dateValue.value ? getDate(dateValue.value) : getDate()
-  if (date.toString() === 'Invalid Date') {
-    date = getDate()
+  const parsed = coerceDateTime(raw)
+  if (parsed) {
+    selectDate(parsed)
+    timeValue.value = parsed.format('HH:mm:ss')
+    emitChange()
+    maybeClose(togglePopover, close)
   }
-  currentYear.value = date.getFullYear()
-  currentMonth.value = date.getMonth() + 1
-  hour.value = date.getHours()
-  minute.value = date.getMinutes()
-  second.value = date.getSeconds()
 }
 
-onMounted(() => selectCurrentMonthYear())
+const popoverContentRef = ref<HTMLElement | null>(null)
+function onBlur(e: FocusEvent) {
+  const next = e.relatedTarget as Node | null
+  if (next && popoverContentRef.value?.contains(next)) return
+  commitInput()
+  isTyping.value = false
+}
+function onEnter(togglePopover: () => void) {
+  commitInput(true, togglePopover)
+  isTyping.value = false
+}
+function activateInput(isOpen: boolean | undefined, togglePopover: () => void) {
+  isTyping.value = true
+  if (!isOpen) togglePopover()
+}
+
+const minDT = computed<Dayjs | null>(() =>
+  props.minDateTime ? coerceDateTime(props.minDateTime) : null,
+)
+const maxDT = computed<Dayjs | null>(() =>
+  props.maxDateTime ? coerceDateTime(props.maxDateTime) : null,
+)
+
+function dateDisabled(d: Dayjs): boolean {
+  if (minDT.value && d.endOf('day').isBefore(minDT.value)) return true
+  if (maxDT.value && d.startOf('day').isAfter(maxDT.value)) return true
+  return false
+}
+
+const weeks = computed<any[][]>(() => {
+  const base = generateWeeks(
+    currentYear.value,
+    currentMonth.value,
+    selectedDate.value,
+  )
+  return base.map((week) =>
+    week.map((obj) => ({ ...obj, disabled: dateDisabled(obj.date) })),
+  )
+})
+
+const computedMinTime = computed<string>(() => {
+  if (!minDT.value || !selectedDate.value) return ''
+  if (dayjs(selectedDate.value).isSame(minDT.value, 'day'))
+    return minDT.value.format('HH:mm:ss')
+  return ''
+})
+const computedMaxTime = computed<string>(() => {
+  if (!maxDT.value || !selectedDate.value) return ''
+  if (dayjs(selectedDate.value).isSame(maxDT.value, 'day'))
+    return maxDT.value.format('HH:mm:ss')
+  return ''
+})
+
+watch([computedMinTime, computedMaxTime, timeValue, selectedDate], () => {
+  if (!selectedDate.value || !timeValue.value) return
+  const cur = dayjs(`${selectedDate.value} ${timeValue.value}`)
+  if (minDT.value && cur.isBefore(minDT.value))
+    timeValue.value = computedMinTime.value || timeValue.value
+  if (maxDT.value && cur.isAfter(maxDT.value))
+    timeValue.value = computedMaxTime.value || timeValue.value
+})
+
+function selectDate(date: string | Date | Dayjs): void {
+  const d = dayjs(date as any)
+  if (!d.isValid()) return
+  if (dateDisabled(d)) return
+  selectedDate.value = d.format(DATE_FORMAT)
+  currentYear.value = d.year()
+  currentMonth.value = d.month()
+}
+function selectMonth(i: number): void {
+  currentMonth.value = i
+  view.value = 'date'
+}
+function selectYear(y: number): void {
+  currentYear.value = y
+  view.value = 'month'
+}
+function prev(): void {
+  if (view.value === 'date') {
+    const m = monthStart(currentYear.value, currentMonth.value).subtract(
+      1,
+      'month',
+    )
+    currentYear.value = m.year()
+    currentMonth.value = m.month()
+  } else if (view.value === 'month') currentYear.value -= 1
+  else currentYear.value -= 12
+}
+function next(): void {
+  if (view.value === 'date') {
+    const m = monthStart(currentYear.value, currentMonth.value).add(1, 'month')
+    currentYear.value = m.year()
+    currentMonth.value = m.month()
+  } else if (view.value === 'month') currentYear.value += 1
+  else currentYear.value += 12
+}
+function handleDateCellClick(
+  date: string | Date | Dayjs,
+  togglePopover: () => void,
+) {
+  selectDate(date)
+  emitChange(true, togglePopover)
+  isTyping.value = false
+  view.value = 'date'
+}
+
+function onTimeChange() {
+  isTyping.value = false
+  if (selectedDate.value) emitChange()
+}
+
+function emitChange(close = false, togglePopover?: () => void) {
+  if (!selectedDate.value) {
+    clearSelection()
+    return
+  }
+  const out = combinedValue.value
+
+  emit('update:modelValue', out)
+  emit('change', out)
+  if (!isTyping.value) inputValue.value = displayLabel.value
+  maybeClose(togglePopover, close)
+}
+
+function handleNowClick(togglePopover: () => void) {
+  const now = dayjsLocal()
+  selectDate(now)
+  timeValue.value = now.format('HH:mm:ss')
+  emitChange(true, togglePopover)
+  isTyping.value = false
+}
+function handleTomorrowClick() {
+  const tomorrow = dayjsLocal().add(1, 'day')
+  selectDate(tomorrow)
+  // keep current time value if any, else set to now's time
+  if (!timeValue.value) timeValue.value = dayjsLocal().format('HH:mm:ss')
+  emitChange()
+  isTyping.value = false
+}
+function handleClearClick(togglePopover: () => void) {
+  clearSelection()
+  maybeClose(togglePopover)
+  isTyping.value = false
+  view.value = 'date'
+}
+
+function cycleView(): void {
+  if (view.value === 'date') view.value = 'month'
+  else if (view.value === 'month') view.value = 'year'
+  else view.value = 'date'
+}
+function handleClose() {
+  view.value = 'date'
+  if (isTyping.value) {
+    commitInput()
+    isTyping.value = false
+  }
+}
+
+const yearRangeStart = computed(
+  () => currentYear.value - (currentYear.value % 12),
+)
+const yearRange = computed<number[]>(() =>
+  Array.from({ length: 12 }, (_, i) => yearRangeStart.value + i),
+)
 </script>
-
-<style scoped>
-.slider {
-  --trackHeight: 1px;
-  --thumbRadius: 10px;
-}
-:deep(.slider input[type='range']) {
-  -webkit-appearance: none;
-  appearance: none;
-  height: 100%;
-  background: transparent;
-  padding: 0;
-  margin: 0;
-  cursor: pointer;
-}
-
-:deep(.slider input[type='range']::-webkit-slider-runnable-track) {
-  appearance: none;
-  background: #000;
-  height: var(--trackHeight);
-  border-radius: 999px;
-}
-
-:deep(.slider input[type='range']:focus-visible) {
-  outline: none;
-}
-
-:deep(.slider input[type='range']::-webkit-slider-thumb) {
-  width: var(--thumbRadius);
-  height: var(--thumbRadius);
-  margin-top: calc((var(--trackHeight) - var(--thumbRadius)) / 2);
-  background: #fff;
-  border-radius: 3px;
-  pointer-events: all;
-  appearance: none;
-  outline: 1px solid #777777;
-  z-index: 1;
-}
-
-:deep(.slider:hover input[type='range']::-webkit-slider-thumb) {
-  outline: 1px solid #000;
-}
-:deep(.slider input[type='range']::-webkit-slider-thumb) {
-  width: var(--thumbRadius);
-  height: var(--thumbRadius);
-  margin-top: calc((var(--trackHeight) - var(--thumbRadius)) / 2);
-  background: #fff;
-  border-radius: 3px;
-  pointer-events: all;
-  appearance: none;
-  z-index: 1;
-}
-</style>
