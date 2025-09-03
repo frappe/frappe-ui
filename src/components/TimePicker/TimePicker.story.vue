@@ -55,7 +55,7 @@ interface StoryState {
   scrollMode: 'center' | 'start' | 'nearest'
 }
 const state = reactive<StoryState>({
-  variant: 'outline',
+  variant: 'subtle',
   interval: 15,
   allowCustom: true,
   autoClose: true,
