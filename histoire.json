@@ -360,19 +360,15 @@
         },
         {
           "id": "src-components-combobox-combobox-story-vue-6",
-          "title": "Multiple Selection - Simple"
+          "title": "Custom Options with onClick"
         },
         {
           "id": "src-components-combobox-combobox-story-vue-7",
-          "title": "Multiple Selection - Objects"
+          "title": "Custom Options with Render Function"
         },
         {
           "id": "src-components-combobox-combobox-story-vue-8",
-          "title": "Multiple Selection - Grouped"
-        },
-        {
-          "id": "src-components-combobox-combobox-story-vue-9",
-          "title": "Complex Objects with Display Value"
+          "title": "Custom Options with Slots"
         }
       ],
       "relativePath": "src/components/Combobox/Combobox.story.vue",
