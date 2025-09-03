@@ -173,6 +173,7 @@ const switchActions = [
     label: 'Lock',
     icon: 'lock',
     switch: true,
+    switchValue: true,
     onClick: (val) => console.log('Lock switch value:', val),
   },
   {
