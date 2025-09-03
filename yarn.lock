@@ -2984,10 +2984,10 @@ object-hash@^3.0.0:
   resolved "https://registry.yarnpkg.com/object-hash/-/object-hash-3.0.0.tgz#73f97f753e7baffc0e2cc9d6e079079744ac82e9"
   integrity sha512-RSn9F68PjH9HqtltsSnqYC1XXoWe9Bju5+213R98cNGttag9q9yAOTzdbsqvIa7aNm5WffBZFpWYr2aWrklWAw==
 
-ohash@^1.1.4:
-  version "1.1.6"
-  resolved "https://registry.yarnpkg.com/ohash/-/ohash-1.1.6.tgz#9ff7b0271d7076290794537d68ec2b40a60d133e"
-  integrity sha512-TBu7PtV8YkAZn0tSxobKY2n2aAQva936lhRrj6957aDaCf9IEtqsKbgMzXE/F/sjqYOwmrukeORHNLe5glk7Cg==
+ohash@^2.0.11:
+  version "2.0.11"
+  resolved "https://registry.yarnpkg.com/ohash/-/ohash-2.0.11.tgz#60b11e8cff62ca9dee88d13747a5baa145f5900b"
+  integrity sha512-RdR9FQrFwNBNXAr4GixM8YaRZRJ5PUWbKYbE5eOsrwAjJW0q2REGcf79oYPsLyskQCZG1PLN+S/K1V00joZAoQ==
 
 on-finished@~2.3.0:
   version "2.3.0"
@@ -3513,10 +3513,10 @@ readdirp@~3.6.0:
   dependencies:
     picomatch "^2.2.1"
 
-reka-ui@^2.0.2:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/reka-ui/-/reka-ui-2.0.2.tgz#1a1991d24f9a346b70b268f8e4ae87ac3a511ff3"
-  integrity sha512-pC2UF6Z+kJF96aJvIErhkSO4DJYIeq9pgvh3pntNqcZb3zFGMzw8h2uny+GnLX2CKiQV54kZNYXxecYIiPMGyg==
+reka-ui@^2.5.0:
+  version "2.5.0"
+  resolved "https://registry.yarnpkg.com/reka-ui/-/reka-ui-2.5.0.tgz#3797f3cc5296ebb3352a8fa79f0eb506a9d27570"
+  integrity sha512-81aMAmJeVCy2k0E6x7n1kypDY6aM1ldLis5+zcdV1/JtoAlSDck5OBsyLRJU9CfgbrQp1ImnRnBSmC4fZ2fkZQ==
   dependencies:
     "@floating-ui/dom" "^1.6.13"
     "@floating-ui/vue" "^1.1.6"
@@ -3527,7 +3527,7 @@ reka-ui@^2.0.2:
     "@vueuse/shared" "^12.5.0"
     aria-hidden "^1.2.4"
     defu "^6.1.4"
-    ohash "^1.1.4"
+    ohash "^2.0.11"
 
 require-directory@^2.1.1:
   version "2.1.1"

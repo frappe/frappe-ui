@@ -29,16 +29,17 @@ interface DocMethodOption<T = any>
   name: string
 }
 
-interface UseDocOptions {
+interface UseDocOptions<TDoc> {
   doctype: string
   name: MaybeRefOrGetter<string>
   baseUrl?: string
   methods?: Record<string, string | DocMethodOption>
   immediate?: boolean
+  transform?: (doc: TDoc & { doctype: string }) => TDoc & { doctype: string }
 }
 
 export function useDoc<TDoc extends { name: string }, TMethods = {}>(
-  options: UseDocOptions,
+  options: UseDocOptions<TDoc>,
 ) {
   const {
     baseUrl = '',
@@ -46,6 +47,7 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
     name,
     methods = {},
     immediate = true,
+    transform,
   } = options
 
   const url = computed(
@@ -70,9 +72,12 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
     afterFetch(ctx: AfterFetchContext<{ data: TDoc }>) {
       if (ctx.data) {
         let doc = {
-          doctype,
           ...ctx.data.data,
+          doctype,
           name: String(ctx.data.data.name),
+        }
+        if (transform) {
+          doc = transform(doc)
         }
         docStore.setDoc(doc)
         listStore.updateRow(doctype, ctx.data.data)
@@ -83,7 +88,6 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
   }
 
   const {
-    data,
     error,
     isFetching,
     isFinished,
@@ -128,7 +132,11 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
     immediate: false,
     refetch: false,
     onSuccess(data) {
-      docStore.setDoc({ doctype, ...data })
+      let docWithType = { ...data, doctype }
+      if (transform) {
+        docWithType = transform(docWithType)
+      }
+      docStore.setDoc(docWithType)
       listStore.updateRow(doctype, data)
     },
   })

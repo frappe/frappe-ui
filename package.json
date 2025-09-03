@@ -73,7 +73,7 @@
     "ora": "5.4.1",
     "prettier": "^3.3.2",
     "radix-vue": "^1.5.3",
-    "reka-ui": "^2.0.2",
+    "reka-ui": "^2.5.0",
     "socket.io-client": "^4.5.1",
     "tippy.js": "^6.3.7",
     "typescript": "^5.0.2",

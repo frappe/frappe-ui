@@ -41,6 +41,8 @@ interface ComboboxProps {
   modelValue?: string | null
   placeholder?: string
   disabled?: boolean
+  openOnFocus?: boolean
+  openOnClick?: boolean
 }
 
 const props = defineProps<ComboboxProps>()
@@ -203,12 +205,33 @@ const handleOpenChange = (open: boolean) => {
 }
 
 const handleFocus = (event: FocusEvent) => {
+  if (props.openOnFocus) {
+    isOpen.value = true
+  }
   emit('focus', event)
 }
 
 const handleBlur = (event: FocusEvent) => {
   emit('blur', event)
 }
+
+const handleClick = (event: MouseEvent) => {
+  if (props.openOnClick) {
+    isOpen.value = true
+  }
+}
+
+const reset = () => {
+  searchTerm.value = ''
+  userHasTyped.value = false
+  internalModelValue.value = null
+  emit('update:modelValue', null)
+  emit('update:selectedOption', null)
+}
+
+defineExpose({
+  reset,
+})
 </script>
 
 <template>
@@ -218,10 +241,12 @@ const handleBlur = (event: FocusEvent) => {
       @update:modelValue="onUpdateModelValue"
       @update:open="handleOpenChange"
       :ignore-filter="true"
+      :open="isOpen"
     >
       <ComboboxAnchor
         class="flex h-7 w-full items-center justify-between gap-2 rounded bg-surface-gray-2 px-2 py-1 transition-colors hover:bg-surface-gray-3 border border-transparent focus-within:border-outline-gray-4 focus-within:ring-2 focus-within:ring-outline-gray-3"
         :class="{ 'opacity-50 pointer-events-none': disabled }"
+        @click="handleClick"
       >
         <div class="flex items-center gap-2 flex-1 overflow-hidden">
           <RenderIcon v-if="selectedOptionIcon" :icon="selectedOptionIcon" />
