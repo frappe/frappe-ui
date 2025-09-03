@@ -36,14 +36,14 @@
         <div class="flex w-fit flex-col gap-0.5 overflow-hidden">
           <p
             ref="eventTitleRef"
-            class="text-sm font-medium"
+            class="text-sm font-medium event-title"
             :class="lineClampClass"
           >
             {{ props.event.title || '(No title)' }}
           </p>
           <p
             ref="eventTimeRef"
-            class="text-xs font-normal"
+            class="text-xs font-normal event-subtitle"
             v-if="!props.event.isFullDay"
           >
             {{
@@ -129,6 +129,7 @@ import EventModalContent from './EventModalContent.vue'
 import NewEventModal from './NewEventModal.vue'
 import { useFloating, shift, flip, offset, autoUpdate } from '@floating-ui/vue'
 import { activeEvent } from './composables/useCalendarData.js'
+import { useTheme } from '../../utils/theme'
 
 import {
   ref,
@@ -146,6 +147,7 @@ import {
   calculateDiff,
   parseDate,
   colorMap,
+  colorMapDark,
   formattedDuration,
 } from './calendarUtils'
 
@@ -259,6 +261,9 @@ const eventBgStyle = computed(() => {
   return {
     '--bg': _color.bg,
     '--text': _color.text,
+    '--subtext': _color.subtext,
+    '--text-active': _color.textActive,
+    '--subtext-active': _color.subtextActive,
     '--bg-hover': _color.bgHover,
     '--bg-active': _color.bgActive,
   }
@@ -271,16 +276,20 @@ const eventBorderStyle = computed(() => {
   return { '--border': _color.border, '--border-active': _color.borderActive }
 })
 
+const { currentTheme } = useTheme()
+
 function color(color) {
+  let map = currentTheme.value === 'dark' ? colorMapDark : colorMap
+
   if (!color?.startsWith('#')) {
-    return colorMap[color] || colorMap['green']
+    return map[color] || map['green']
   }
 
-  for (const value of Object.values(colorMap)) {
+  for (const value of Object.values(map)) {
     if (value.color === color) return value
   }
 
-  return colorMap['green']
+  return map['green']
 }
 
 const eventTitleRef = ref(null)
@@ -607,7 +616,13 @@ const isPastEvent = computed(() => {
 <style scoped>
 .event {
   background-color: var(--bg);
+}
+.event .event-title {
   color: var(--text);
+}
+
+.event .event-subtitle {
+  color: var(--subtext);
 }
 
 .event .event-border {
@@ -616,7 +631,14 @@ const isPastEvent = computed(() => {
 
 .event.active {
   background-color: var(--bg-active);
-  color: #fff;
+}
+
+.event.active .event-title {
+  color: var(--text-active, #FFF);
+}
+
+.event.active .event-subtitle {
+  color: var(--subtext-active);
 }
 
 .event.active .event-border {
