@@ -22,6 +22,7 @@ export interface ParsedTimeValid {
   valid: true
   hh24: string
   mm: string
+  ss?: string
   total: number
 }
 export interface ParsedTimeInvalid {
@@ -30,6 +31,7 @@ export interface ParsedTimeInvalid {
 export type ParsedTime = ParsedTimeValid | ParsedTimeInvalid
 
 export interface TimePickerProps {
+  value?: string
   modelValue?: string
   interval?: number
   options?: Array<{ value: string; label?: string }>
@@ -43,4 +45,13 @@ export interface TimePickerProps {
   scrollMode?: 'center' | 'start' | 'nearest'
   minTime?: string
   maxTime?: string
+}
+
+export type TimePickerEmits = {
+  (e: 'update:modelValue', value: string): void
+  (e: 'change', value: string): void
+  (e: 'input-invalid', input: string): void
+  (e: 'invalid-change', invalid: boolean): void
+  (e: 'open'): void
+  (e: 'close'): void
 }

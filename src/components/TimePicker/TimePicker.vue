@@ -17,7 +17,7 @@
         @focus="onFocus"
         @click="onClickInput(isOpen, togglePopover)"
         @keydown.enter.prevent="onEnter"
-        @blur="commitInput"
+        @blur="onBlur"
         @keydown.down.prevent="onArrowDown(togglePopover, isOpen)"
         @keydown.up.prevent="onArrowUp(togglePopover, isOpen)"
         @keydown.esc.prevent="onEscape"
@@ -74,15 +74,17 @@ import type {
   TimePickerProps,
   Placement,
   Variant,
+  TimePickerEmits,
 } from './types'
 
 const props = withDefaults(defineProps<TimePickerProps>(), {
+  value: '',
   modelValue: '',
   interval: 15,
   options: () => [],
   placement: 'bottom-start' as Placement,
   placeholder: 'Select time',
-  variant: 'outline' as Variant,
+  variant: 'subtle' as Variant,
   allowCustom: true,
   autoClose: true,
   use12Hour: true,
@@ -92,25 +94,20 @@ const props = withDefaults(defineProps<TimePickerProps>(), {
   maxTime: '',
 })
 
-const emit = defineEmits<{
-  (e: 'update:modelValue', value: string): void
-  (e: 'input-invalid', input: string): void
-  (e: 'invalid-change', invalid: boolean): void
-  (e: 'open'): void
-  (e: 'close'): void
-}>()
+const emit = defineEmits<TimePickerEmits>()
 
 const panelRef = ref<HTMLElement | null>(null)
+const isFocused = ref(false)
 const showOptions = ref(false)
 const highlightIndex = ref<number>(-1)
 const hasSelectedOnFirstClick = ref(false)
 const isTyping = ref(false)
 let navUpdating = false
 let invalidState = false
-// TextInput exposes .el internally in this codebase; declare as any to avoid tight coupling
+
 const inputRef = ref<any>(null)
-// always normalized 24h HH:MM or ''
-const internalValue = ref<string>(props.modelValue)
+const initial = props.modelValue || props.value || ''
+const internalValue = ref<string>(initial)
 const displayValue = ref<string>('')
 displayValue.value = formatDisplay(internalValue.value)
 const uid = Math.random().toString(36).slice(2, 9)
@@ -159,8 +156,9 @@ const displayedOptions = computed<Option[]>(() => {
 })
 
 watch(
-  () => props.modelValue,
-  (nv) => {
+  () => [props.modelValue, props.value],
+  ([m, v]) => {
+    const nv = m || v || ''
     if (nv && nv !== internalValue.value) {
       internalValue.value = normalize24(nv)
       displayValue.value = formatDisplay(internalValue.value)
@@ -174,19 +172,29 @@ watch(
 function normalize24(raw: string): string {
   if (!raw) return ''
   if (/^\d{2}:\d{2}$/.test(raw)) return raw
-  if (/^\d{2}:\d{2}:\d{2}$/.test(raw)) return raw.slice(0, 5)
+  if (/^\d{2}:\d{2}:\d{2}$/.test(raw)) return raw // keep seconds if present
   const parsed = parseFlexibleTime(raw)
-  return parsed.valid ? `${parsed.hh24}:${parsed.mm}` : ''
+  if (!parsed.valid) return ''
+  return parsed.ss
+    ? `${parsed.hh24}:${parsed.mm}:${parsed.ss}`
+    : `${parsed.hh24}:${parsed.mm}`
 }
 
 function formatDisplay(val24: string): string {
   if (!val24) return ''
-  const [h, m] = val24.split(':').map((n) => parseInt(n))
-  if (!props.use12Hour)
-    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`
+  const segs = val24.split(':')
+  const h = parseInt(segs[0])
+  const m = parseInt(segs[1])
+  const s = segs[2]
+  const base24 = `${h.toString().padStart(2, '0')}:${m
+    .toString()
+    .padStart(2, '0')}${s ? `:${s}` : ''}`
+  if (!props.use12Hour) return base24
   const am = h < 12
   const hour12 = h % 12 === 0 ? 12 : h % 12
-  return `${hour12}:${m.toString().padStart(2, '0')} ${am ? 'am' : 'pm'}`
+  return `${hour12}:${m.toString().padStart(2, '0')}${s ? `:${s}` : ''} ${
+    am ? 'am' : 'pm'
+  }`
 }
 
 function parseFlexibleTime(input: string): ParsedTime {
@@ -203,8 +211,9 @@ function parseFlexibleTime(input: string): ParsedTime {
   if (ssStr && !mmStr) return { valid: false }
   let mm = mmStr != null && mmStr !== '' ? parseInt(mmStr) : 0
   if (isNaN(mm) || mm < 0 || mm > 59) return { valid: false }
+  let ss: number | undefined
   if (ssStr) {
-    const ss = parseInt(ssStr)
+    ss = parseInt(ssStr)
     if (isNaN(ss) || ss < 0 || ss > 59) return { valid: false }
   }
   if (ap) {
@@ -216,6 +225,7 @@ function parseFlexibleTime(input: string): ParsedTime {
     valid: true,
     hh24: hh.toString().padStart(2, '0'),
     mm: mm.toString().padStart(2, '0'),
+    ss: ss != null ? ss.toString().padStart(2, '0') : undefined,
     total: hh * 60 + mm,
   }
 }
@@ -252,10 +262,12 @@ function isOutOfRange(totalMinutes: number): boolean {
   return false
 }
 
-function applyValue(val24: string) {
+function applyValue(val24: string, commit = false) {
+  const prev = internalValue.value
   internalValue.value = val24
   displayValue.value = formatDisplay(val24)
-  emit('update:modelValue', val24)
+  if (commit || !isFocused.value) emit('update:modelValue', val24)
+  if (commit && val24 !== prev) emit('change', val24)
   setInvalid(false)
 }
 
@@ -263,8 +275,10 @@ function commitInput() {
   const raw = displayValue.value
   const parsed = parseFlexibleTime(raw)
   if (!raw) {
+    const prev = internalValue.value
     internalValue.value = ''
-    emit('update:modelValue', '')
+    if (!isFocused.value) emit('update:modelValue', '')
+    if (prev && prev !== '') emit('change', '')
     setInvalid(false)
     return
   }
@@ -273,22 +287,32 @@ function commitInput() {
     setInvalid(true)
     return
   }
-  const normalized = `${parsed.hh24}:${parsed.mm}`
+  const normalized = parsed.ss
+    ? `${parsed.hh24}:${parsed.mm}:${parsed.ss}`
+    : `${parsed.hh24}:${parsed.mm}`
   if (
     !props.allowCustom &&
-    !displayedOptions.value.some((o) => o.value === normalized)
+    !displayedOptions.value.some((o) => {
+      const base = normalized.length === 8 ? normalized.slice(0, 5) : normalized
+      return o.value === base
+    })
   ) {
     const nearestIdx = findNearestIndex(parsed.total, displayedOptions.value)
     if (nearestIdx > -1) {
-      applyValue(displayedOptions.value[nearestIdx].value)
+      const nearestVal = displayedOptions.value[nearestIdx].value
+      const committed =
+        normalized.length === 8 && nearestVal.length === 5
+          ? `${nearestVal}${normalized.slice(5)}`
+          : nearestVal
+      applyValue(committed, true)
       return
     }
   }
-  applyValue(normalized)
+  applyValue(normalized, true)
 }
 
 function select(val: string) {
-  applyValue(val)
+  applyValue(val, true)
   if (props.autoClose) showOptions.value = false
 }
 
@@ -301,10 +325,14 @@ const selectedAndNearest = computed<{
   const parsedTyped = parseFlexibleTime(displayValue.value)
   const candidate =
     isTyping.value && parsedTyped.valid
-      ? `${parsedTyped.hh24}:${parsedTyped.mm}`
+      ? parsedTyped.ss
+        ? `${parsedTyped.hh24}:${parsedTyped.mm}:${parsedTyped.ss}`
+        : `${parsedTyped.hh24}:${parsedTyped.mm}`
       : internalValue.value || null
   if (!candidate) return { selected: null, nearest: null }
-  const selected = list.find((o) => o.value === candidate) || null
+  const candidateCompare =
+    candidate && candidate.length === 8 ? candidate.slice(0, 5) : candidate
+  const selected = list.find((o) => o.value === candidateCompare) || null
   if (selected) return { selected, nearest: null }
   const parsed = parseFlexibleTime(candidate)
   if (!parsed.valid) return { selected: null, nearest: null }
@@ -401,9 +429,11 @@ function moveHighlight(delta: number) {
   const opt = list[highlightIndex.value]
   if (opt) {
     navUpdating = true
-    internalValue.value = opt.value
-    displayValue.value = formatDisplay(opt.value)
-    emit('update:modelValue', opt.value)
+    const val =
+      internalValue.value.length === 8 && opt.value.length === 5
+        ? `${opt.value}${internalValue.value.slice(5)}`
+        : opt.value
+    applyValue(val, false)
     nextTick(() => {
       navUpdating = false
     })
@@ -428,9 +458,17 @@ function onEnter() {
     return
   }
   const parsed = parseFlexibleTime(displayValue.value)
-  const normalized = parsed.valid ? `${parsed.hh24}:${parsed.mm}` : null
+  const normalized = parsed.valid
+    ? parsed.ss
+      ? `${parsed.hh24}:${parsed.mm}:${parsed.ss}`
+      : `${parsed.hh24}:${parsed.mm}`
+    : null
   const exists = normalized
-    ? displayedOptions.value.some((o) => o.value === normalized)
+    ? displayedOptions.value.some((o) => {
+        const base =
+          normalized.length === 8 ? normalized.slice(0, 5) : normalized
+        return o.value === base
+      })
     : false
   if (parsed.valid && (!exists || isTyping.value)) {
     commitInput()
@@ -454,7 +492,17 @@ function onClickInput(isOpen: boolean | undefined, togglePopover: () => void) {
 }
 
 function onFocus() {
+  isFocused.value = true
   if (props.allowCustom && !hasSelectedOnFirstClick.value) selectAll()
+}
+
+function onBlur() {
+  if (showOptions.value) {
+    isFocused.value = false
+    return
+  }
+  commitInput()
+  isFocused.value = false
 }
 
 function selectAll() {
@@ -479,6 +527,7 @@ function blurInput() {
     } else if (el?.blur) {
       el.blur()
     }
+    isFocused.value = false
   })
 }
 
