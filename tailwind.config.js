@@ -1,4 +1,6 @@
-import preset from './src/tailwind/preset'
+import plugin from "tailwindcss/plugin"
+import preset from "frappe-ui/src/tailwind/preset"
+
 
 export default {
   presets: [preset],
@@ -9,7 +11,18 @@ export default {
     './frappe/**/*.{vue,js,ts,jsx,tsx}',
   ],
   theme: {
-    extend: {},
+    fontFamily: {
+      serif: ['serif'],
+    },
   },
-  plugins: [],
+  plugins: [ plugin(({ matchUtilities }) => {
+  matchUtilities(
+    {
+      ff: (value) => ({
+        fontFamily: value,
+      }),
+    },
+    { supportsArbitraryValues: true, values: theme('fontFamily')  }
+  )
+})],
 }
