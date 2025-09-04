@@ -41,6 +41,7 @@ export { default as TabPanel } from './components/Tabs/TabPanel.vue'
 export * from './components/TextInput'
 export * from './components/Textarea'
 export * from './components/TextEditor'
+export * from './components/TimePicker'
 export { default as ListView } from './components/ListView/ListView.vue'
 export { default as List } from './components/ListView/ListView.vue'
 export { default as ListHeader } from './components/ListView/ListHeader.vue'
@@ -90,6 +91,7 @@ export { default as FileUploadHandler } from './utils/fileUploadHandler'
 export { usePageMeta } from './utils/pageMeta'
 export { dayjsLocal, dayjs } from './utils/dayjs'
 export * from './utils/useFileUpload'
+export * from './utils/theme'
 
 // old data-fetching: resources
 export {

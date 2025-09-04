@@ -20,11 +20,21 @@
         <!-- left side  -->
         <!-- Year, Month -->
         <div class="flex items-center">
-          <DateMonthYearPicker
+          <DatePicker
             :modelValue="selectedMonthDate"
-            :formatter="() => currentMonthYear"
             @update:modelValue="(val) => onMonthYearChange(val)"
-          />
+            :clearable="false"
+          >
+            <template #target="{ togglePopover }">
+              <Button
+                variant="ghost"
+                class="text-lg font-medium text-ink-gray-7"
+                :label="currentMonthYear"
+                iconRight="chevron-down"
+                @click="togglePopover"
+              />
+            </template>
+          </DatePicker>
         </div>
         <!-- right side -->
         <!-- actions buttons for calendar -->
@@ -105,7 +115,7 @@ import { dayjs } from '../../utils/dayjs'
 import DayIcon from './Icon/DayIcon.vue'
 import WeekIcon from './Icon/WeekIcon.vue'
 import MonthIcon from './Icon/MonthIcon.vue'
-import DateMonthYearPicker from './DateMonthYearPicker.vue'
+import DatePicker from '../DatePicker/DatePicker.vue'
 import CalendarMonthly from './CalendarMonthly.vue'
 import CalendarWeekly from './CalendarWeekly.vue'
 import CalendarDaily from './CalendarDaily.vue'

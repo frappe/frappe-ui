@@ -29,4 +29,6 @@ export interface DropdownProps {
   button?: ButtonProps
   options?: DropdownOptions
   placement?: string
+  side?: 'top' | 'right' | 'bottom' | 'left'
+  offset?: number
 }
