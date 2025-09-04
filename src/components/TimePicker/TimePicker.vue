@@ -66,7 +66,9 @@
 </template>
 
 <script setup lang="ts">
-import { Popover, TextInput } from 'frappe-ui'
+import Popover from '../Popover/Popover.vue'
+import TextInput from '../TextInput/TextInput.vue'
+import FeatherIcon from '../FeatherIcon.vue'
 import { ref, computed, watch, nextTick } from 'vue'
 import type {
   Option,
