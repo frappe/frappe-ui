@@ -129,7 +129,6 @@ import EventModalContent from './EventModalContent.vue'
 import NewEventModal from './NewEventModal.vue'
 import { useFloating, shift, flip, offset, autoUpdate } from '@floating-ui/vue'
 import { activeEvent } from './composables/useCalendarData.js'
-import { useTheme } from '../../utils/theme'
 
 import {
   ref,
@@ -276,10 +275,17 @@ const eventBorderStyle = computed(() => {
   return { '--border': _color.border, '--border-active': _color.borderActive }
 })
 
-const { currentTheme } = useTheme()
+const getTheme = () => {
+  const theme = document.documentElement.getAttribute('data-theme')
+
+  if (theme) return theme
+  return document.documentElement.classList.contains('htw-dark')
+    ? 'dark'
+    : 'light'
+}
 
 function color(color) {
-  let map = currentTheme.value === 'dark' ? colorMapDark : colorMap
+  let map = getTheme() === 'dark' ? colorMapDark : colorMap
 
   if (!color?.startsWith('#')) {
     return map[color] || map['green']
@@ -634,7 +640,7 @@ const isPastEvent = computed(() => {
 }
 
 .event.active .event-title {
-  color: var(--text-active, #FFF);
+  color: var(--text-active, #fff);
 }
 
 .event.active .event-subtitle {
