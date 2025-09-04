@@ -2,6 +2,7 @@
 import {
   computed,
   type Component,
+  type VNode,
   ref,
   watch,
   h,
@@ -18,32 +19,18 @@ import {
   ComboboxLabel,
   ComboboxPortal,
   ComboboxRoot,
-  ComboboxSeparator,
   ComboboxTrigger,
   ComboboxViewport,
 } from 'reka-ui'
 import LucideCheck from '~icons/lucide/check'
 import LucideChevronDown from '~icons/lucide/chevron-down'
-
-type SimpleOption =
-  | string
-  | {
-      label: string
-      value: string
-      icon?: string | Component
-      disabled?: boolean
-    }
-type GroupedOption = { group: string; options: SimpleOption[] }
-type ComboboxOption = SimpleOption | GroupedOption
-
-interface ComboboxProps {
-  options: Array<ComboboxOption>
-  modelValue?: string | null
-  placeholder?: string
-  disabled?: boolean
-  openOnFocus?: boolean
-  openOnClick?: boolean
-}
+import type {
+  CustomOption,
+  SimpleOption,
+  GroupedOption,
+  ComboboxOption,
+  ComboboxProps,
+} from './types'
 
 const props = defineProps<ComboboxProps>()
 const emit = defineEmits([
@@ -57,6 +44,7 @@ const searchTerm = ref(getDisplayValue(props.modelValue))
 const internalModelValue = ref(props.modelValue)
 const isOpen = ref(false)
 const userHasTyped = ref(false)
+const lastSearchTerm = ref('') // Preserve search context for custom option onClick handlers
 
 watch(
   () => props.modelValue,
@@ -67,14 +55,33 @@ watch(
 )
 
 const onUpdateModelValue = (value: string | null) => {
+  const selectedOpt = value
+    ? allOptionsFlat.value.find((opt) => getKey(opt) === value) || null
+    : null
+
+  if (selectedOpt && isCustomOption(selectedOpt)) {
+    const context = { searchTerm: lastSearchTerm.value }
+    selectedOpt.onClick(context)
+
+    if (selectedOpt.keepOpen) {
+      // Defer opening to prevent interference with default close behavior
+      setTimeout(() => {
+        isOpen.value = true
+      }, 0)
+    } else {
+      isOpen.value = false
+      searchTerm.value = getDisplayValue(internalModelValue.value)
+      lastSearchTerm.value = ''
+      userHasTyped.value = false
+    }
+
+    return
+  }
   internalModelValue.value = value
   emit('update:modelValue', value)
   searchTerm.value = getDisplayValue(value)
+  lastSearchTerm.value = ''
   userHasTyped.value = false
-
-  const selectedOpt = value
-    ? allOptionsFlat.value.find((opt) => getValue(opt) === value) || null
-    : null
   emit('update:selectedOption', selectedOpt)
 }
 
@@ -82,12 +89,24 @@ function isGroup(option: ComboboxOption): option is GroupedOption {
   return typeof option === 'object' && 'group' in option
 }
 
+function isCustomOption(option: SimpleOption): option is CustomOption {
+  return typeof option === 'object' && option.type === 'custom'
+}
+
 function getLabel(option: SimpleOption): string {
   return typeof option === 'string' ? option : option.label
 }
 
-function getValue(option: SimpleOption): string {
-  return typeof option === 'string' ? option : option.value
+function getValue(option: SimpleOption): string | undefined {
+  if (typeof option === 'string') return option
+  if (isCustomOption(option)) return undefined
+  return option.value
+}
+
+function getKey(option: SimpleOption): string {
+  if (typeof option === 'string') return option
+  if (isCustomOption(option)) return option.key
+  return option.value
 }
 
 function isDisabled(option: SimpleOption): boolean {
@@ -96,6 +115,14 @@ function isDisabled(option: SimpleOption): boolean {
 
 function getIcon(option: SimpleOption): string | Component | undefined {
   return typeof option === 'object' ? option.icon : undefined
+}
+
+function getSlotName(option: SimpleOption): string | undefined {
+  return isCustomOption(option) ? option.slotName : undefined
+}
+
+function getRenderFunction(option: SimpleOption): (() => VNode) | undefined {
+  return isCustomOption(option) ? option.render : undefined
 }
 
 const allOptionsFlat = computed(() => {
@@ -148,31 +175,43 @@ const RenderIcon: FunctionalComponent<{ icon?: string | Component }> = (
   )
 }
 
-const filterFunction = (options: ComboboxOption[], search: string) => {
-  if (!search) return options
+const shouldShowOption = (
+  option: SimpleOption,
+  search: string,
+  context: { searchTerm: string },
+) => {
+  if (isCustomOption(option)) {
+    if (option.condition) {
+      return option.condition(context)
+    }
+    if (!search) return true
+    return getLabel(option).toLowerCase().includes(search.toLowerCase())
+  }
 
+  if (!search) return true
+  const label = getLabel(option).toLowerCase()
+  const value = getValue(option)?.toLowerCase() || ''
   const lowerSearch = search.toLowerCase()
+  return label.includes(lowerSearch) || value.includes(lowerSearch)
+}
+
+const filterFunction = (options: ComboboxOption[], search: string) => {
+  const context = { searchTerm: search }
   const filtered: ComboboxOption[] = []
 
   options.forEach((optionOrGroup) => {
     if (isGroup(optionOrGroup)) {
-      const filteredGroupOptions = optionOrGroup.options.filter((opt) => {
-        const label = getLabel(opt).toLowerCase()
-        const value = getValue(opt).toLowerCase()
-
-        return label.includes(lowerSearch) || value.includes(lowerSearch)
-      })
+      const filteredGroupOptions = optionOrGroup.options.filter((opt) =>
+        shouldShowOption(opt, search, context),
+      )
       if (filteredGroupOptions.length > 0) {
         filtered.push({ ...optionOrGroup, options: filteredGroupOptions })
       }
-    } else {
-      const label = getLabel(optionOrGroup).toLowerCase()
-      const value = getValue(optionOrGroup).toLowerCase()
-      if (label.includes(lowerSearch) || value.includes(lowerSearch)) {
-        filtered.push(optionOrGroup)
-      }
+    } else if (shouldShowOption(optionOrGroup, search, context)) {
+      filtered.push(optionOrGroup)
     }
   })
+
   return filtered
 }
 
@@ -186,6 +225,7 @@ const filteredOptions = computed(() => {
 const handleInputChange = (event: Event) => {
   const target = event.target as HTMLInputElement
   searchTerm.value = target.value
+  lastSearchTerm.value = target.value
   userHasTyped.value = true
 
   if (searchTerm.value === '') {
@@ -215,7 +255,7 @@ const handleBlur = (event: FocusEvent) => {
   emit('blur', event)
 }
 
-const handleClick = (event: MouseEvent) => {
+const handleClick = () => {
   if (props.openOnClick) {
     isOpen.value = true
   }
@@ -295,40 +335,64 @@ defineExpose({
                 <ComboboxItem
                   v-for="(option, idx) in optionOrGroup.options"
                   :key="`${index}-${idx}`"
-                  :value="getValue(option)"
+                  :value="getKey(option)"
                   :disabled="isDisabled(option)"
                   class="text-base leading-none text-ink-gray-7 rounded flex items-center h-7 px-2.5 py-1.5 relative select-none data-[disabled]:opacity-50 data-[disabled]:pointer-events-none data-[highlighted]:outline-none data-[highlighted]:bg-surface-gray-3"
                 >
-                  <span class="flex items-center gap-2 pr-6 flex-1">
-                    <RenderIcon :icon="getIcon(option)" />
-                    {{ getLabel(option) }}
-                  </span>
-                  <ComboboxItemIndicator
-                    class="inline-flex ml-2 items-center justify-center"
-                  >
-                    <LucideCheck class="size-4" />
-                  </ComboboxItemIndicator>
+                  <slot
+                    v-if="getSlotName(option)"
+                    :name="getSlotName(option)"
+                    :option="option"
+                    :searchTerm="searchTerm"
+                  />
+                  <component
+                    v-else-if="getRenderFunction(option)"
+                    :is="getRenderFunction(option)"
+                  />
+                  <template v-else>
+                    <span class="flex items-center gap-2 pr-6 flex-1">
+                      <RenderIcon :icon="getIcon(option)" />
+                      {{ getLabel(option) }}
+                    </span>
+                    <ComboboxItemIndicator
+                      class="absolute right-0 w-6 inline-flex items-center justify-center"
+                    >
+                      <LucideCheck class="size-4" />
+                    </ComboboxItemIndicator>
+                  </template>
                 </ComboboxItem>
               </ComboboxGroup>
               <ComboboxItem
                 v-else
                 :key="index"
-                :value="getValue(optionOrGroup)"
+                :value="getKey(optionOrGroup)"
                 :disabled="isDisabled(optionOrGroup)"
                 class="text-base leading-none text-ink-gray-7 rounded flex items-center h-7 px-2.5 py-1.5 relative select-none data-[disabled]:opacity-50 data-[disabled]:pointer-events-none data-[highlighted]:outline-none data-[highlighted]:bg-surface-gray-3"
               >
-                <span class="flex items-center gap-2 pr-6 flex-1">
-                  <RenderIcon
-                    v-if="getIcon(optionOrGroup)"
-                    :icon="getIcon(optionOrGroup)"
-                  />
-                  {{ getLabel(optionOrGroup) }}
-                </span>
-                <ComboboxItemIndicator
-                  class="absolute right-0 w-6 inline-flex items-center justify-center"
-                >
-                  <LucideCheck class="h-4 w-4" />
-                </ComboboxItemIndicator>
+                <slot
+                  v-if="getSlotName(optionOrGroup)"
+                  :name="getSlotName(optionOrGroup)"
+                  :option="optionOrGroup"
+                  :searchTerm="searchTerm"
+                />
+                <component
+                  v-else-if="getRenderFunction(optionOrGroup)"
+                  :is="getRenderFunction(optionOrGroup)"
+                />
+                <template v-else>
+                  <span class="flex items-center gap-2 pr-6 flex-1">
+                    <RenderIcon
+                      v-if="getIcon(optionOrGroup)"
+                      :icon="getIcon(optionOrGroup)"
+                    />
+                    {{ getLabel(optionOrGroup) }}
+                  </span>
+                  <ComboboxItemIndicator
+                    class="absolute right-0 w-6 inline-flex items-center justify-center"
+                  >
+                    <LucideCheck class="h-4 w-4" />
+                  </ComboboxItemIndicator>
+                </template>
               </ComboboxItem>
             </template>
           </ComboboxViewport>
