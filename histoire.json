@@ -1053,6 +1053,40 @@
       "markdownFile": null
     },
     {
+      "id": "src-components-timepicker-timepicker-story-vue",
+      "title": "TimePicker",
+      "layout": {
+        "type": "grid",
+        "width": 300
+      },
+      "docsOnly": false,
+      "variants": [
+        {
+          "id": "src-components-timepicker-timepicker-story-vue-0",
+          "title": "Basic"
+        },
+        {
+          "id": "src-components-timepicker-timepicker-story-vue-1",
+          "title": "24 Hour Format"
+        },
+        {
+          "id": "src-components-timepicker-timepicker-story-vue-2",
+          "title": "Custom Options (no interval generation)"
+        },
+        {
+          "id": "src-components-timepicker-timepicker-story-vue-3",
+          "title": "Min / Max Range"
+        }
+      ],
+      "relativePath": "src/components/TimePicker/TimePicker.story.vue",
+      "supportPluginId": "vue3",
+      "treePath": [
+        "TimePicker"
+      ],
+      "virtual": false,
+      "markdownFile": null
+    },
+    {
       "id": "src-components-tooltip-tooltip-story-vue",
       "title": "Tooltip",
       "layout": {
