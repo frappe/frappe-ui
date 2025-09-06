@@ -13,6 +13,7 @@ import Strikethrough from './icons/strikethrough.vue'
 import AlignCenter from './icons/align-center.vue'
 import AlignLeft from './icons/align-left.vue'
 import AlignRight from './icons/align-right.vue'
+import AlignJustify from './icons/align-justify.vue'
 import FontColor from './icons/font-color.vue'
 import ListOrdered from './icons/list-ordered.vue'
 import ListUnordered from './icons/list-unordered.vue'
@@ -142,6 +143,12 @@ export default {
     icon: AlignRight,
     action: (editor) => editor.chain().focus().setTextAlign('right').run(),
     isActive: (editor) => editor.isActive({ textAlign: 'right' }),
+  },
+  'Align Justify': {
+    label: 'Align Justify',
+    icon: AlignJustify,
+    action: (editor) => editor.chain().focus().setTextAlign('justify').run(),
+    isActive: (editor) => editor.isActive({ textAlign: 'justify' }),
   },
   FontColor: {
     label: 'Font Color',
