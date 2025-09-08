@@ -9,20 +9,5 @@ export default {
     './App.vue',
     './src/**/*.{vue,js,ts,jsx,tsx}',
     './frappe/**/*.{vue,js,ts,jsx,tsx}',
-  ],
-  theme: {
-    fontFamily: {
-      serif: ['serif'],
-    },
-  },
-  plugins: [ plugin(({ matchUtilities }) => {
-  matchUtilities(
-    {
-      ff: (value) => ({
-        fontFamily: value,
-      }),
-    },
-    { supportsArbitraryValues: true, values: theme('fontFamily')  }
-  )
-})],
+  ]
 }
