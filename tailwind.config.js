@@ -1,6 +1,4 @@
-import plugin from "tailwindcss/plugin"
-import preset from "frappe-ui/src/tailwind/preset"
-
+import preset from './src/tailwind/preset'
 
 export default {
   presets: [preset],
@@ -9,5 +7,9 @@ export default {
     './App.vue',
     './src/**/*.{vue,js,ts,jsx,tsx}',
     './frappe/**/*.{vue,js,ts,jsx,tsx}',
-  ]
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
 }
