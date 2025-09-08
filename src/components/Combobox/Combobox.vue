@@ -311,7 +311,7 @@ defineExpose({
           position="popper"
           @openAutoFocus.prevent
           @closeAutoFocus.prevent
-          :align="'start'"
+          :align="props.placement || 'start'"
         >
           <ComboboxViewport
             class="max-h-60 overflow-auto pb-1.5"

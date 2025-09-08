@@ -32,4 +32,5 @@ export interface ComboboxProps {
   disabled?: boolean
   openOnFocus?: boolean
   openOnClick?: boolean
+  placement?: 'start' | 'center' | 'end'
 }
