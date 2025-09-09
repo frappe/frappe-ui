@@ -133,6 +133,7 @@ export function getOptimalDimensions(url: string, containerWidth?: number): { wi
 
 export function validateURL(url: string, options: IframeOptions): boolean {
   try {
+    if (url.startsWith('/')) return true
     const urlObj = new URL(url)
     const domain = urlObj.hostname.toLowerCase()
 
