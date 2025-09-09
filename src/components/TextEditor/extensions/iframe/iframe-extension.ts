@@ -20,6 +20,7 @@ export interface SetIframeOptions {
   width?: number
   height?: number
   title?: string
+  interactive?: boolean
   align?: 'left' | 'center' | 'right'
 }
 
@@ -128,6 +129,13 @@ export const IframeExtension = Node.create<IframeOptions>({
           sandbox: attributes.sandbox,
         }),
       },
+      interactive: {
+        default: false,
+        parseHTML: (el) => el.getAttribute('data-interactive') === 'true',
+        renderHTML: (attrs) => ({
+          'data-interactive': attrs.interactive ? 'true' : 'false',
+        }),
+      },
     }
   },
 
@@ -196,7 +204,8 @@ export const IframeExtension = Node.create<IframeOptions>({
             height: options.height || optimalDimensions.height,
             title: options.title,
             align: options.align || 'center',
-            aspectRatio: optimalDimensions.height / optimalDimensions.width
+            aspectRatio: optimalDimensions.height / optimalDimensions.width,
+            interactive: options.interactive,
           }
 
           return commands.insertContent({

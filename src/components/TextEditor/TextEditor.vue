@@ -230,6 +230,9 @@ onMounted(() => {
     onUpdate: ({ editor }) => {
       emit('change', editor.getHTML())
     },
+    onTransaction: ({ editor }) => {
+      emit('transaction', editor)
+    },
     onFocus: ({ editor, event }) => {
       emit('focus', event)
     },
