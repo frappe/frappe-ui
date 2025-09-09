@@ -31,4 +31,5 @@ export interface TextEditorEmits {
   change: [content: string]
   focus: [event: FocusEvent]
   blur: [event: FocusEvent]
+  transaction: [editor: object]
 }

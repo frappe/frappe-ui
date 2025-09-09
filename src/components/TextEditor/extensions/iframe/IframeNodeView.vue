@@ -204,7 +204,9 @@ function setCursorBeforeIframe() {
           v-if="node.attrs.src"
           ref="iframeRef"
           class="rounded-lg border-0 block max-w-full h-auto"
-          :class="{ 'pointer-events-none': isEditable }"
+          :class="{
+            'pointer-events-none': isEditable && !props.node.attrs.interactive,
+          }"
           :src="node.attrs.src"
           :style="iframeStyles"
           :title="node.attrs.title || ''"
@@ -218,7 +220,7 @@ function setCursorBeforeIframe() {
 
         <!-- Transparent overlay for selection in edit mode -->
         <div
-          v-if="isEditable"
+          v-if="isEditable && !props.node.attrs.interactive"
           class="absolute inset-0 cursor-pointer z-10"
           @click.stop="selectIframe"
         ></div>
