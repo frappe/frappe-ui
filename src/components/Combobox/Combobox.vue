@@ -53,6 +53,12 @@ watch(
     searchTerm.value = getDisplayValue(newValue)
   },
 )
+watch(
+  () => getDisplayValue(props.modelValue),
+  (newDisplay) => {
+    if (!userHasTyped.value) searchTerm.value = newDisplay
+  },
+)
 
 const onUpdateModelValue = (value: string | null) => {
   const selectedOpt = value
