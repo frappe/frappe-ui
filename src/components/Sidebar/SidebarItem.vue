@@ -2,7 +2,7 @@
   <Button
     :label="props.label"
     @click="handleClick"
-    class="!w-full"
+    class="!w-full focus-visible:ring-0 focus:outline-none"
     :class="
       props.isActive
         ? '!bg-surface-selected shadow-sm'
