@@ -202,6 +202,7 @@ import { ref, computed, watch, toRefs } from 'vue'
 import { Popover } from '../Popover'
 import { Button } from '../Button'
 import { TextInput } from '../TextInput'
+// @ts-ignore - Vue SFC without explicit types
 import FeatherIcon from '../FeatherIcon.vue'
 import { dayjs, dayjsLocal } from '../../utils/dayjs'
 import { months, monthStart, generateWeeks, getDateValue } from './utils'
@@ -235,7 +236,7 @@ const currentMonth = ref<number>(dayjs().month()) // 0-index
 const DATE_FORMAT = 'YYYY-MM-DD'
 
 const selected = ref<string>('')
-const initialValue = props.modelValue || props.value || ''
+const initialValue = ref(props.modelValue || props.value || '')
 
 function coerceToDayjs(val?: string | null): Dayjs | null {
   if (!val) return null
@@ -277,7 +278,7 @@ function syncFromValue(val?: string): void {
   selected.value = d.format(DATE_FORMAT)
 }
 
-syncFromValue(initialValue)
+syncFromValue(initialValue.value)
 
 function initFromValue(): void {
   syncFromValue(props.modelValue || props.value)
@@ -308,10 +309,6 @@ watch(displayLabel, (val) => {
   if (!isTyping.value) inputValue.value = val
 })
 
-function parseInput(val: string): Dayjs | null {
-  return coerceToDayjs(val)
-}
-
 function maybeClose(togglePopover?: () => void, condition = true) {
   if (condition && autoClose.value && togglePopover) togglePopover()
 }
@@ -321,6 +318,7 @@ function clearSelection() {
   selected.value = ''
   emit('update:modelValue', '')
   emit('change', '')
+  initialValue.value = ''
   inputValue.value = ''
 }
 
@@ -336,7 +334,7 @@ function commitInput(close = false, togglePopover?: () => void): void {
     }
     return
   }
-  const d = parseInput(raw)
+  const d = coerceToDayjs(raw)
   if (d) {
     selectDate(d)
     maybeClose(togglePopover, close)
@@ -370,8 +368,13 @@ function selectDate(date: string | Date | Dayjs): void {
   selected.value = d.format(DATE_FORMAT)
   currentYear.value = d.year()
   currentMonth.value = d.month()
-  emit('update:modelValue', selected.value)
-  if (selected.value !== prev) emit('change', selected.value)
+
+  if (selected.value !== initialValue.value) {
+    emit('update:modelValue', selected.value)
+    if (selected.value !== prev) emit('change', selected.value)
+    initialValue.value = selected.value
+  }
+
   // Reflect new value in input immediately if not typing
   if (!isTyping.value) {
     inputValue.value = props.format

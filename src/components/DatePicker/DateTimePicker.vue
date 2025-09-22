@@ -273,7 +273,7 @@ const DATE_TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss'
 const selectedDate = ref<string>('') // YYYY-MM-DD
 const timeValue = ref<string>('') // HH:mm:ss
 
-const initialValue = props.modelValue || props.value || ''
+const initialValue = ref(props.modelValue || props.value || '')
 
 function coerceDateTime(val?: string | null): Dayjs | null {
   if (!val) return null
@@ -285,12 +285,12 @@ function coerceDateTime(val?: string | null): Dayjs | null {
     if (dStrict.isValid()) return dStrict
   }
 
-  const dLoose = dayjs(raw)
+  const dLoose = dayjsLocal(raw)
   if (dLoose.isValid()) return dLoose
 
   const normalized = getDateValue(raw)
   if (normalized) {
-    const dNorm = dayjs(normalized)
+    const dNorm = dayjsLocal(normalized)
     if (dNorm.isValid()) return dNorm
   }
   return null
@@ -322,7 +322,7 @@ function syncFromValue(val?: string): void {
   timeValue.value = d.format('HH:mm:ss')
 }
 
-syncFromValue(initialValue)
+syncFromValue(initialValue.value)
 
 function initFromValue(): void {
   syncFromValue(props.modelValue || props.value)
@@ -339,10 +339,9 @@ watch(
 const combinedValue = computed<string>(() => {
   if (!selectedDate.value) return ''
   const base = `${selectedDate.value} ${timeValue.value || '00:00:00'}`
-  const local = dayjsLocal(base)
+  const local = dayjs(base)
   if (!local.isValid()) return ''
-  const sys = dayjsSystem(local.format(DATE_TIME_FORMAT))
-  return sys.format(DATE_TIME_FORMAT)
+  return local.format(DATE_TIME_FORMAT)
 })
 
 const displayLabel = computed<string>(() => {
@@ -367,6 +366,7 @@ function clearSelection() {
   timeValue.value = ''
   emit('update:modelValue', '')
   emit('change', '')
+  initialValue.value = ''
   inputValue.value = ''
 }
 
@@ -512,10 +512,16 @@ function emitChange(close = false, togglePopover?: () => void) {
     clearSelection()
     return
   }
-  const out = combinedValue.value
 
-  emit('update:modelValue', out)
-  emit('change', out)
+  const localDateTime = combinedValue.value
+  const systemDateTime = dayjsSystem(localDateTime).format(DATE_TIME_FORMAT)
+
+  if (systemDateTime !== initialValue.value) {
+    emit('update:modelValue', systemDateTime)
+    emit('change', systemDateTime)
+    initialValue.value = systemDateTime
+  }
+
   if (!isTyping.value) inputValue.value = displayLabel.value
   maybeClose(togglePopover, close)
 }
