@@ -40,6 +40,9 @@ export function createDocumentResource(options, vm) {
         fieldname: values,
       }
     },
+    validate(data) {
+      options.setValue?.validate?.call(vm, data)
+    },
     beforeSubmit(params) {
       out.previousDoc = JSON.stringify(out.doc)
       Object.assign(out.doc, params.fieldname || {})
