@@ -25,6 +25,7 @@ export interface TextEditorProps {
   mentions?: ConfigureMentionOptions
   tags?: any[]
   uploadFunction?: (file: File) => Promise<UploadedFile>
+  uploadArgs?: object
 }
 
 export interface TextEditorEmits {
