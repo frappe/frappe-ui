@@ -1,6 +1,6 @@
 <template>
   <div
-    class="inline-flex space-x-2 rounded transition"
+    class="inline-flex space-x-2 rounded transition bg-surface-white"
     :class="{
       'px-2.5 py-1.5': padding && size === 'sm',
       'px-3 py-2': padding && size === 'md',
@@ -54,7 +54,7 @@ const labelClasses = computed(() => {
 const inputClasses = computed(() => {
   let baseClasses = props.disabled
     ? 'border-outline-gray-2 bg-surface-menu-bar text-ink-gray-3'
-    : 'border-outline-gray-4 text-ink-gray-9 hover:border-gray-600 focus:ring-offset-0 focus:border-gray-900 active:border-gray-700 transition'
+    : 'border-outline-gray-4 text-ink-gray-9 hover:border-outline-gray-5 focus:ring-offset-0 focus:border-outline-gray-8 active:border-outline-gray-6 transition'
 
   let interactionClasses = props.disabled
     ? ''
