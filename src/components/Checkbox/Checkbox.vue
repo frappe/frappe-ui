@@ -1,6 +1,6 @@
 <template>
   <div
-    class="inline-flex space-x-2 rounded transition bg-surface-white"
+    class="inline-flex space-x-2 rounded transition"
     :class="{
       'px-2.5 py-1.5': padding && size === 'sm',
       'px-3 py-2': padding && size === 'md',
@@ -9,7 +9,7 @@
     }"
   >
     <input
-      class="rounded-sm mt-[1px]"
+      class="rounded-sm mt-[1px] bg-surface-white"
       :class="inputClasses"
       type="checkbox"
       :disabled="disabled"
