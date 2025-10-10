@@ -74,7 +74,7 @@ const lowlight = createLowlight(common)
 function defaultUploadFunction(file: File) {
   // useFileUpload is frappe specific
   let fileUpload = useFileUpload()
-  return fileUpload.upload(file)
+  return fileUpload.upload(file, props.uploadArgs || {})
 }
 
 const props = withDefaults(defineProps<TextEditorProps>(), {
