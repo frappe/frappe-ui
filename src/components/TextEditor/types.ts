@@ -5,6 +5,7 @@ import { type MentionSuggestionItem } from './extensions/mention/mention-extensi
 type ConfigureMentionOptions =
   | {
       mentions: MentionSuggestionItem[]
+      selectable?: Boolean
       component?: Component
     }
   | MentionSuggestionItem[]

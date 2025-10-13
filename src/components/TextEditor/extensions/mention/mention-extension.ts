@@ -17,14 +17,13 @@ export interface MentionSuggestionItem extends BaseSuggestionItem {
   full_name?: string
 }
 
-function createMentionNode(component?: Component) {
+function createMentionNode(component?: Component, selectable: Boolean = true) {
   const config: any = {
     name: 'mention',
     group: 'inline',
     inline: true,
-    selectable: true,
     atom: true,
-
+    selectable,
     addOptions() {
       return {
         component: undefined,
@@ -82,6 +81,9 @@ function createMentionNode(component?: Component) {
         `@${HTMLAttributes['data-label'] || HTMLAttributes.id || ''}`,
       ]
     },
+    renderText({ node }: any) {
+      return `@${node.attrs.label || node.attrs.id || ''}`
+    }
   }
 
   if (component) {
@@ -139,10 +141,6 @@ const MentionSuggestionExtension =
             type: 'mention',
             attrs: attributes,
           },
-          {
-            type: 'text',
-            text: ' ',
-          },
         ])
         .run()
     },
@@ -159,19 +157,21 @@ const MentionSuggestionExtension =
 export const MentionExtension = Extension.create<{
   mentions: MaybeRefOrGetter<MentionSuggestionItem[]>
   component?: Component
+  selectable?: Boolean
 }>({
   name: 'mentionExtension',
 
   addOptions() {
     return {
       mentions: [],
+      selectable: true,
       component: undefined,
     }
   },
 
   addExtensions() {
     return [
-      createMentionNode(this.options.component),
+      createMentionNode(this.options.component, this.options.selectable),
       MentionSuggestionExtension.configure({
         mentions: this.options.mentions,
       }),

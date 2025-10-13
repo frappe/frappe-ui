@@ -211,6 +211,7 @@ onMounted(() => {
             ? { mentions: props.mentions }
             : {
                 mentions: props.mentions.mentions,
+                selectable: props.mentions.selectable,
                 component: props.mentions.component,
               },
         ),

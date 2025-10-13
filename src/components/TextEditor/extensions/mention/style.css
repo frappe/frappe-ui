@@ -1,7 +1,6 @@
 .mention {
   font-weight: 600;
   box-decoration-break: clone;
-  padding: 1px 3px;
   border-radius: 4px;
   display: inline-block;
 }
