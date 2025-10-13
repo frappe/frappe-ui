@@ -1,9 +1,12 @@
 import { common, createLowlight } from 'lowlight'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
+import Code from '@tiptap/extension-code'
 import CodeBlockComponent from '../CodeBlockComponent.vue'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
+import { markInputRule } from '@tiptap/core'
 
 const INDENT = ' '.repeat(4)
+export const inputRegex = /(?<=^|[^`])`([^`]+)`(?!`)$/
 
 function getCodeBlockCtx(state: any) {
   const { $from, from, to } = state.selection
@@ -92,3 +95,24 @@ export const ExtendedCodeBlock = CodeBlockLowlight.extend({
     }
   },
 }).configure({ lowlight })
+
+export const ExtendedCode = Code.extend({
+  addKeyboardShortcuts() {
+    return {
+      '`': () => {
+        const { from, to } = this.editor.state.selection
+        if (from === to) return false
+        return this.editor.commands.toggleCode()
+      },
+    }
+  },
+  
+  addInputRules() {
+    return [
+      markInputRule({
+        find: inputRegex,
+        type: this.type,
+      }),
+    ]
+  },
+})

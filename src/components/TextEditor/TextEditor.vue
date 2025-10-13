@@ -64,7 +64,7 @@ import { ContentPasteExtension } from './extensions/content-paste-extension'
 import { TagNode, TagExtension } from './extensions/tag/tag-extension'
 import { Heading } from './extensions/heading/heading'
 import { ImageGroup } from './extensions/image-group/image-group-extension'
-import { ExtendedCodeBlock } from './extensions/code-block'
+import { ExtendedCode, ExtendedCodeBlock } from './extensions/code-block'
 import { useFileUpload } from '../../utils/useFileUpload'
 import { TextEditorEmits, TextEditorProps } from './types'
 
@@ -151,6 +151,7 @@ onMounted(() => {
     extensions: [
       StarterKit.configure({
         ...props.starterkitOptions,
+        code: false,
         codeBlock: false,
         heading: false,
       }).extend({
@@ -191,6 +192,7 @@ onMounted(() => {
       TextStyle,
       NamedColorExtension,
       NamedHighlightExtension,
+      ExtendedCode,
       ExtendedCodeBlock,
       ImageExtension.configure({
         uploadFunction: props.uploadFunction || defaultUploadFunction,
