@@ -26,6 +26,29 @@ export const ContentPasteExtension = Extension.create<ContentPasteOptions>({
       new Plugin({
         key: new PluginKey('contentPaste'),
         props: {
+          handleDOMEvents: {
+            copy: (view, event) => {
+              const selection = window.getSelection()
+              if (!selection) return false
+
+              const container = document.createElement('div')
+              for (let i = 0; i < selection.rangeCount; i++) container.appendChild(selection.getRangeAt(i).cloneContents())
+
+              // Update relative image srcs
+              const images = container.querySelectorAll('img')
+              images.forEach((img) => {
+                const src = img.getAttribute('src')
+                if (src && src.startsWith('/')) {
+                  img.setAttribute('src', `${window.location.origin}${src}`)
+                }
+              })
+
+              // Override clipboard HTML
+              event.clipboardData?.setData('text/html', container.innerHTML)
+              event.preventDefault()
+              return true
+            },
+          },
           handlePaste: (
             view: EditorView,
             event: ClipboardEvent,
@@ -106,12 +129,18 @@ async function processHTMLImages(
 
   // Process each image
   const imagePromises = Array.from(imageInfo).map(async ([src, pos]) => {
-    if (src.startsWith('data:') || src.startsWith('blob:') || src.startsWith('http')) {
-      const filename = src.startsWith('http') ? src.split('/').pop() || 'pasted-external-image.png' : 'pasted-data-image.png'
+    if (
+      src.startsWith('data:') ||
+      src.startsWith('blob:') ||
+      src.startsWith('http')
+    ) {
+      const filename = src.startsWith('http')
+        ? src.split('/').pop() || 'pasted-external-image.png'
+        : 'pasted-data-image.png'
       try {
         const response = await fetch(src)
         const blob = await response.blob()
-        file = new File([blob], filename, {
+        const file = new File([blob], filename, {
           type: blob.type,
         })
         processMultipleImages([file], view, pos, extensionOptions)
