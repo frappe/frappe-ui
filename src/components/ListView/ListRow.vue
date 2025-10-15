@@ -158,16 +158,17 @@ const handleCheckboxClick = (event) => {
   const value = props.row[list.value.rowKey]
   if (event.shiftKey && !list.value.selections.has(value)) {
     const lastSelected = Array.from(list.value.selections).pop()
-    const lastIndex = list.value.rows.findIndex(
+    const rows = list.value.rows.find((k) => k.group)
+      ? list.value.rows.reduce((acc, curr) => acc.concat(curr.rows), [])
+      : list.value.rows
+    const lastIndex = rows.findIndex(
       (k) => lastSelected === k[list.value.rowKey],
     )
-    const curIndex = list.value.rows.findIndex(
-      (k) => value === k[list.value.rowKey],
-    )
+    const curIndex = rows.findIndex((k) => value === k[list.value.rowKey])
     const start = Math.min(lastIndex, curIndex)
     const end = Math.max(lastIndex, curIndex)
     for (let i = start; i <= end; i++) {
-      list.value.selections.add(list.value.rows[i][list.value.rowKey])
+      list.value.selections.add(rows[i][list.value.rowKey])
     }
   } else {
     list.value.toggleRow(value)
