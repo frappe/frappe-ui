@@ -4,7 +4,7 @@ import tippy, { type Instance as TippyInstance } from 'tippy.js'
 import { getMarkRange, Range, Editor } from '@tiptap/core'
 import { MarkType, Mark as ProseMirrorMark } from '@tiptap/pm/model'
 import { Plugin, PluginKey } from '@tiptap/pm/state'
-import EditLink from './EditLink.vue'
+import LinkPopup from './LinkPopup.vue'
 import { linkPasteHandler } from './linkPasteHandler'
 
 declare module '@tiptap/core' {
@@ -233,7 +233,7 @@ function openLinkEditor(href: string, anchor: HTMLElement): Promise<string> {
 
     app = createApp({
       render() {
-        return h(EditLink, {
+        return h(LinkPopup, {
           href,
           onClose: () => {
             settlePromise('reject', 'Link editing cancelled')
