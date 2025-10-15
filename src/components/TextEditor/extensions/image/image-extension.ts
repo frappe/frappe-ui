@@ -373,14 +373,18 @@ function uploadImageBase(
       })
 
       const tr = view.state.tr
-
-      if (pos != null) {
-        tr.insert(pos, node)
-      } else if (insertMode === 'replace') {
-        tr.replaceSelectionWith(node)
+      if (insertMode === 'replace') {
+        if (pos === null) tr.replaceSelectionWith(node)
+        else {
+          const nodeAtPos = view.state.doc.nodeAt(pos)
+          if (nodeAtPos) tr.replaceWith(pos, pos + nodeAtPos.nodeSize, node)
+        }
       } else {
-        const insertPos = view.state.selection.from
-        tr.insert(insertPos, node)
+        if (pos != null) tr.insert(pos, node)
+        else {
+          const insertPos = view.state.selection.from
+          tr.insert(insertPos, node)
+        }
       }
 
       view.dispatch(tr)
