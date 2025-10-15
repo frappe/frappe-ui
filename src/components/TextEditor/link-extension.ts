@@ -50,10 +50,8 @@ export const LinkExtension = Link.extend({
             const markRange = getMarkRange($pos, this.type)
             if (markRange) {
               range = markRange
-              mark = doc
-                .resolve(markRange.from)
-                .marks()
-                .find((m) => m.type === this.type)
+              const node = doc.nodeAt($pos.pos)
+              if(node) mark = node.marks.find((m) => m.type === this.type)
 
               // Select the link text
               editor
@@ -147,7 +145,6 @@ export const LinkExtension = Link.extend({
 
   addProseMirrorPlugins() {
     let plugins = this.parent?.() || []
-
     plugins.push(
       linkPasteHandler({
         editor: this.editor,
@@ -162,7 +159,22 @@ export const LinkExtension = Link.extend({
         type: this.type,
       }),
     )
-
+    plugins.push(
+      new Plugin({
+        props: {
+          handleClick: (view, pos, event) => {
+            if (!this.editor.isActive('link')) return false
+            event.preventDefault()
+            if (event.metaKey) {
+              const url = event.target?.getAttribute('href')
+              if (url) window.open(url, '_blank')
+            } else {
+              this.editor.commands.openLinkEditor()
+            }
+          },
+        },
+      }),
+    )
     return plugins
   },
 })

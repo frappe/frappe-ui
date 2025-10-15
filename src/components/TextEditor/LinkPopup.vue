@@ -17,6 +17,7 @@
       class="text-ink-gray-700 underline text-sm max-w-[70%] truncate"
       :title="_href"
       :href="_href"
+      target="_blank"
     >
       {{ _href }}
     </a>
