@@ -14,7 +14,7 @@
     />
     <a
       v-else
-      class="text-ink-gray-700 underline text-sm max-w-[70%] truncate"
+      class="text-ink-gray-700 underline text-sm flex-1 truncate pl-1"
       :title="_href"
       :href="_href"
       target="_blank"
@@ -27,13 +27,13 @@
           @click="submitLink"
           tooltip="Submit"
           :icon="LucideCheck"
-          variant="outline"
+          variant="subtle"
         />
         <Button
           @click="props.href ? (edit = false) : $emit('updateHref', '')"
           tooltip="Exit"
           :icon="LucideX"
-          variant="outline"
+          variant="subtle"
         />
       </template>
       <template v-else>
@@ -41,17 +41,17 @@
           @click="copyLink"
           tooltip="Copy"
           :icon="LucideCopy"
-          variant="outline"
+          variant="subtle"
         />
         <Button
           @click="edit = true"
           tooltip="Edit"
           :icon="LucidePencil"
-          variant="outline"
+          variant="subtle"
         />
         <Button
           tooltip="Remove"
-          variant="outline"
+          variant="subtle"
           @click="$emit('updateHref', '')"
           :icon="Link2Off"
         />
