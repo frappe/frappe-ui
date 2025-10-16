@@ -163,6 +163,7 @@ export const LinkExtension = Link.extend({
       new Plugin({
         props: {
           handleClick: (view, pos, event) => {
+            if (!this.editor.isEditable) return
             if (!this.editor.isActive('link')) return false
             event.preventDefault()
             if (event.metaKey) {
