@@ -222,7 +222,6 @@ onMounted(() => {
       }),
       ContentPasteExtension.configure({
         enabled: true,
-        showConfirmation: true,
         uploadFunction: props.uploadFunction || defaultUploadFunction,
       }),
       ...(props.extensions || []),
