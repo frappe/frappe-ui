@@ -22,9 +22,8 @@ function createMentionNode(component?: Component) {
     name: 'mention',
     group: 'inline',
     inline: true,
-    selectable: true,
     atom: true,
-
+    selectable: true,
     addOptions() {
       return {
         component: undefined,
@@ -82,6 +81,9 @@ function createMentionNode(component?: Component) {
         `@${HTMLAttributes['data-label'] || HTMLAttributes.id || ''}`,
       ]
     },
+    renderText({ node }: any) {
+      return `@${node.attrs.label || node.attrs.id || ''}`
+    }
   }
 
   if (component) {
@@ -139,10 +141,6 @@ const MentionSuggestionExtension =
             type: 'mention',
             attrs: attributes,
           },
-          {
-            type: 'text',
-            text: ' ',
-          },
         ])
         .run()
     },
@@ -165,6 +163,7 @@ export const MentionExtension = Extension.create<{
   addOptions() {
     return {
       mentions: [],
+      selectable: true,
       component: undefined,
     }
   },

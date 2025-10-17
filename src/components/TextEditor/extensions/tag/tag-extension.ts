@@ -5,7 +5,7 @@ import {
   BaseSuggestionItem,
 } from '../suggestion/createSuggestionExtension'
 import SuggestionList from '../suggestion/SuggestionList.vue'
-import { toValue, unref } from 'vue'
+import { toValue } from 'vue'
 
 export const TagNode = Node.create({
   name: 'tagItem',
@@ -59,7 +59,9 @@ export const TagNode = Node.create({
       `#${HTMLAttributes['data-tag-label']}`,
     ]
   },
-
+  renderText({ node }: any) {
+    return `#${node.attrs.tagLabel ||  ''}`
+  },
   addCommands() {
     return {
       setTag:
