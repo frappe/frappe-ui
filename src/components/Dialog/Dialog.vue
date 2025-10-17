@@ -9,6 +9,7 @@
         <div
           class="flex min-h-screen flex-col items-center px-4 py-4 text-center"
           :class="dialogPositionClasses"
+          :style="dialogPositionStyles"
         >
           <DialogContent
             class="my-8 inline-block w-full transform overflow-hidden rounded-xl bg-surface-modal text-left align-middle shadow-xl dialog-content focus-visible:outline-none"
@@ -216,12 +217,21 @@ const icon = computed(() => {
 })
 
 const dialogPositionClasses = computed(() => {
+  if (props.options?.paddingTop) return ''
+
   const position = props.options?.position || 'center'
   const classMap: Record<string, string> = {
     center: 'justify-center',
     top: 'pt-[20vh]',
   }
   return classMap[position]
+})
+
+const dialogPositionStyles = computed(() => {
+  if (props.options?.paddingTop) {
+    return { paddingTop: props.options.paddingTop }
+  }
+  return {}
 })
 
 const dialogIconBgClasses = computed(() => {
