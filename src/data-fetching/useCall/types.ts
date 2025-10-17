@@ -14,6 +14,8 @@ export interface UseCallOptions<
   immediate?: boolean
   refetch?: boolean
   baseUrl?: string
+  headers?: Record<string, string>
+  credentials?: string
   initialData?: TResponse
   beforeSubmit?: (params?: TParams) => void
   transform?: (data: TResponse) => TResponse
