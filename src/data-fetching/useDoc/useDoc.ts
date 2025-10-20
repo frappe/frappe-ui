@@ -126,6 +126,7 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
         method: 'POST',
         ...option,
         url: computed(() => `${url.value}/method/${option.name}`),
+        ...extraFetchOptions,
       }
 
       docMethods[key] = readonly(useCall(callOptions))
