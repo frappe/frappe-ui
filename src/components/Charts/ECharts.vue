@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { EChartsOption, init } from 'echarts'
+import type { EChartsOption } from 'echarts'
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import debounce from '../../utils/debounce'
 
@@ -11,13 +11,17 @@ const props = defineProps<{
   error?: string
 }>()
 
+let echarts
 let chart: echarts.ECharts
 const chartDiv = ref<HTMLDivElement>()
 
-onMounted(() => {
+onMounted(async () => {
+  // Lazy-loading for build size
+  echarts = await import('echarts')
+
   if (!chartDiv.value) return
 
-  chart = init(chartDiv.value, 'light', { renderer: 'svg' })
+  chart = echarts.init(chartDiv.value, 'light', { renderer: 'svg' })
   chart.setOption({ ...props.options }, true)
 
   if (props.events?.click) {
