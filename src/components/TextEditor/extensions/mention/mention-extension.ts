@@ -22,8 +22,8 @@ function createMentionNode(component?: Component) {
     name: 'mention',
     group: 'inline',
     inline: true,
-    atom: true,
     selectable: true,
+    atom: true,
     addOptions() {
       return {
         component: undefined,
@@ -163,7 +163,6 @@ export const MentionExtension = Extension.create<{
   addOptions() {
     return {
       mentions: [],
-      selectable: true,
       component: undefined,
     }
   },
