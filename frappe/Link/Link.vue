@@ -1,9 +1,6 @@
 <template>
   <div class="flex flex-col gap-1.5">
-    <span v-if="props.label" class="block text-xs text-gray-600">
-      {{ props.label }}
-      <span class="text-ink-red-3" v-if="required">*</span>
-    </span>
+    <FormLabel v-if="label" :label="label" size="sm" :required="required" />
     <Autocomplete
       ref="autocompleteRef"
       size="sm"
@@ -18,6 +15,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { Autocomplete } from '../../src/components/Autocomplete'
+import FormLabel from '../../src/components/FormLabel.vue'
 import debounce from '../../src/utils/debounce'
 // @ts-ignore - Vue SFC without explicit types
 import { createResource } from '../../src/resources'
