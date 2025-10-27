@@ -131,16 +131,12 @@ async function processHTMLImages(
   const imagePromises = Array.from(imageInfo).map(async ([src, pos]) => {
     if (
       src.startsWith('data:') ||
-      src.startsWith('blob:') ||
-      src.startsWith('http')
+      src.startsWith('blob:') 
     ) {
-      const filename = src.startsWith('http')
-        ? src.split('/').pop() || 'pasted-external-image.png'
-        : 'pasted-data-image.png'
       try {
         const response = await fetch(src)
         const blob = await response.blob()
-        const file = new File([blob], filename, {
+        const file = new File([blob], 'pasted-data-image.png', {
           type: blob.type,
         })
         processMultipleImages([file], view, pos, extensionOptions)
