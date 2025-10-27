@@ -111,16 +111,6 @@ export const LinkExtension = Link.extend({
                     return true
                   })
 
-                const posAfterLink = selectionTo
-                const charAfter =
-                  posAfterLink < doc.content.size
-                    ? doc.textBetween(posAfterLink, posAfterLink + 1)
-                    : null
-
-                if (charAfter === null || charAfter !== ' ') {
-                  chain = chain.insertContent(' ')
-                }
-
                 chain.run()
               })
               .catch(() => {})
