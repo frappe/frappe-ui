@@ -4,6 +4,8 @@
     class="relative w-full"
     :class="attrsClass"
     :style="attrsStyle"
+    v-bind="attrsWithoutClassStyle"
+    ref="rootRef"
   >
     <TextEditorBubbleMenu :buttons="bubbleMenu" :options="bubbleMenuOptions" />
     <TextEditorFixedMenu
@@ -30,6 +32,7 @@ import {
   provide,
   ref,
   useAttrs,
+  useTemplateRef,
 } from 'vue'
 
 defineOptions({ inheritAttrs: false })
@@ -100,6 +103,11 @@ const editor = ref<Editor | null>(null)
 const attrs = useAttrs()
 const attrsClass = computed(() => normalizeClass(attrs.class))
 const attrsStyle = computed(() => normalizeStyle(attrs.style))
+const attrsWithoutClassStyle = computed(() => {
+  return Object.fromEntries(
+    Object.entries(attrs).filter(([key]) => key !== 'class' && key !== 'style'),
+  )
+})
 
 const editorProps = computed(() => {
   return {
@@ -254,8 +262,10 @@ provide(
   computed(() => editor.value),
 )
 
+const rootRef = useTemplateRef('rootRef')
 defineExpose({
   editor,
+  rootRef,
 })
 </script>
 
