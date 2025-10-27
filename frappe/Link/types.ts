@@ -5,7 +5,6 @@ export interface LinkProps {
   modelValue?: string
   filters?: Record<string, string | [string, string]>
   required?: boolean
-  showTitleFieldAsOption?: boolean
 }
 
-export type SelectOption = { value: string, label: string }
+export type SelectOption = { value: string, label: string, description: string }

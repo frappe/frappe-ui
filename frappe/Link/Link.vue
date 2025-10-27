@@ -2,8 +2,6 @@
   <div class="flex flex-col gap-1.5">
     <FormLabel v-if="label" :label="label" size="sm" :required="required" />
     <Autocomplete
-      ref="autocompleteRef"
-      size="sm"
       v-model="value"
       :placeholder="placeholder || `Select ${doctype}`"
       :options="options.data"
@@ -21,18 +19,12 @@ import debounce from '../../src/utils/debounce'
 import { createResource } from '../../src/resources'
 import type { LinkProps, SelectOption } from './types'
 
-const props = withDefaults(
-  defineProps<LinkProps>(),
-  {
-    label: '',
-    filters: () => ({}),
-    showFieldTitleAsOption: true,
-  },
-)
-
+const props = withDefaults(defineProps<LinkProps>(), {
+  label: '',
+  filters: () => ({}),
+})
 const emit = defineEmits(['update:modelValue'])
 
-const autocompleteRef = ref<InstanceType<typeof Autocomplete> | null>(null)
 const searchText = ref<string>('')
 
 const value = computed({
@@ -57,9 +49,9 @@ const options = createResource({
   transform: (data: SelectOption[]) => {
     return data.map((doc) => {
       return {
-        label:
-          props.showTitleFieldAsOption && doc.label ? doc.label : doc.value,
+        label: doc.label || doc.value,
         value: doc.value,
+        description: doc.description,
       }
     })
   },
