@@ -45,6 +45,7 @@ export const ContentPasteExtension = Extension.create<ContentPasteOptions>({
 
               // Override clipboard HTML
               event.clipboardData?.setData('text/html', container.innerHTML)
+              event.clipboardData?.setData('text/plain', selection.toString())
               event.preventDefault()
               return true
             },
