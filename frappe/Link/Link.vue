@@ -1,18 +1,19 @@
 <template>
   <div class="flex flex-col gap-1.5">
     <FormLabel v-if="label" :label="label" size="sm" :required="required" />
-    <Autocomplete
+    <Combobox
       v-model="value"
       :placeholder="placeholder || `Select ${doctype}`"
       :options="options.data"
-      @update:query="handleQueryUpdate"
+      @input="handleInputChange"
+      :open-on-focus="true"
     />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { Autocomplete } from '../../src/components/Autocomplete'
+import { Combobox } from '../../src/components/Combobox'
 import FormLabel from '../../src/components/FormLabel.vue'
 import debounce from '../../src/utils/debounce'
 // @ts-ignore - Vue SFC without explicit types
@@ -67,8 +68,8 @@ const reloadOptions = (searchTextVal: string) => {
   options.reload()
 }
 
-const handleQueryUpdate = debounce((newQuery: string) => {
-  const val = newQuery || ''
+const handleInputChange = debounce((inputString: string) => {
+  const val = inputString || ''
   if (searchText.value === val) return
   searchText.value = val
   reloadOptions(val)
