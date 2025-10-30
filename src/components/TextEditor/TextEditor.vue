@@ -166,10 +166,11 @@ onMounted(() => {
         addKeyboardShortcuts() {
           return {
             Backspace: () => {
-              const { $from } = this.editor.view.state.selection
+              const selection = this.editor.view.state.selection
+              const { $from } = selection
               if (
                 !this.editor.can().liftListItem('listItem') ||
-                $from.parentOffset > 0
+                $from.parentOffset > 0 || !selection.empty
               )
                 return false
               return this.editor.commands.liftListItem('listItem')
