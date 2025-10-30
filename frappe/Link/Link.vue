@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col gap-1.5">
+  <div class="flex flex-col gap-1.5" :class="attrs.class" :style="attrs.style">
     <FormLabel v-if="label" :label="label" size="sm" :required="required" />
     <Combobox
       v-model="model"
@@ -8,12 +8,13 @@
       @input="handleInputChange"
       @focus="() => loadOptions('')"
       :open-on-focus="true"
+      v-bind="attrsWithoutClassStyle"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { watch } from 'vue'
+import { watch, useAttrs, computed } from 'vue'
 import { Combobox } from '../../src/components/Combobox'
 import FormLabel from '../../src/components/FormLabel.vue'
 import debounce from '../../src/utils/debounce'
@@ -26,6 +27,14 @@ const props = withDefaults(defineProps<LinkProps>(), {
   filters: () => ({}),
 })
 const model = defineModel<string>({ default: '' })
+defineOptions({ inheritAttrs: false })
+
+const attrs = useAttrs() as Record<string, any>
+const attrsWithoutClassStyle = computed(() => {
+  return Object.fromEntries(
+    Object.entries(attrs).filter(([key]) => key !== 'class' && key !== 'style'),
+  )
+})
 
 const options = createResource({
   url: 'frappe.desk.search.search_link',
