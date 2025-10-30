@@ -38,6 +38,7 @@ const emit = defineEmits([
   'update:selectedOption',
   'focus',
   'blur',
+  'input',
 ])
 
 const searchTerm = ref(getDisplayValue(props.modelValue))
@@ -238,6 +239,7 @@ const handleInputChange = (event: Event) => {
     internalModelValue.value = null
     emit('update:modelValue', null)
   }
+  emit('input', searchTerm.value)
 }
 
 const handleOpenChange = (open: boolean) => {
