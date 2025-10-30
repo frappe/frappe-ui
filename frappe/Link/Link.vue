@@ -2,17 +2,18 @@
   <div class="flex flex-col gap-1.5">
     <FormLabel v-if="label" :label="label" size="sm" :required="required" />
     <Combobox
-      v-model="value"
+      v-model="model"
       :placeholder="placeholder || `Select ${doctype}`"
       :options="options.data"
       @input="handleInputChange"
+      @focus="() => loadOptions('')"
       :open-on-focus="true"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { watch } from 'vue'
 import { Combobox } from '../../src/components/Combobox'
 import FormLabel from '../../src/components/FormLabel.vue'
 import debounce from '../../src/utils/debounce'
@@ -24,77 +25,41 @@ const props = withDefaults(defineProps<LinkProps>(), {
   label: '',
   filters: () => ({}),
 })
-const emit = defineEmits(['update:modelValue'])
-
-const searchText = ref<string>('')
-
-const value = computed({
-  get: () => props.modelValue,
-  set: (val: SelectOption | string | undefined) => {
-    if (typeof val === 'string') {
-      emit('update:modelValue', val)
-    } else {
-      emit('update:modelValue', val?.value || '')
-    }
-  },
-})
+const model = defineModel<string>({ default: '' })
 
 const options = createResource({
   url: 'frappe.desk.search.search_link',
   params: {
     doctype: props.doctype,
-    txt: searchText.value,
+    txt: '',
     filters: props.filters,
   },
   method: 'POST',
   transform: (data: SelectOption[]) => {
-    return data.map((doc) => {
-      return {
-        label: doc.label || doc.value,
-        value: doc.value,
-        description: doc.description,
-      }
-    })
+    return data.map((doc) => ({
+      label: doc.label || doc.value,
+      value: doc.value,
+    }))
   },
 })
 
-const reloadOptions = (searchTextVal: string) => {
+const loadOptions = (txt: string = '') => {
   options.update({
     params: {
-      txt: searchTextVal,
+      txt,
       doctype: props.doctype,
+      filters: props.filters,
     },
   })
   options.reload()
 }
 
 const handleInputChange = debounce((inputString: string) => {
-  const val = inputString || ''
-  if (searchText.value === val) return
-  searchText.value = val
-  reloadOptions(val)
+  loadOptions(inputString || '')
 }, 300)
 
-watch(
-  () => props.doctype,
-  () => {
-    if (!props.doctype || props.doctype === options.doctype) return
-    reloadOptions('')
-  },
-  { immediate: true },
-)
-
-watch(
-  () => props.filters,
-  () => {
-    options.update({
-      params: {
-        doctype: props.doctype,
-        txt: searchText.value,
-        filters: props.filters,
-      },
-    })
-    options.reload()
-  },
-)
+watch([() => props.doctype, () => props.filters], () => loadOptions(''), {
+  immediate: true,
+  deep: true,
+})
 </script>
