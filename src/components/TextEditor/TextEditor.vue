@@ -56,6 +56,7 @@ import TaskItem from '@tiptap/extension-task-item'
 import TaskList from '@tiptap/extension-task-list'
 import NamedColorExtension from './extensions/color'
 import NamedHighlightExtension from './extensions/highlight'
+import improvedList from './extensions/list-extension'
 
 import { MentionExtension } from './extensions/mention'
 import TextEditorFixedMenu from './TextEditorFixedMenu.vue'
@@ -165,15 +166,7 @@ onMounted(() => {
       }).extend({
         addKeyboardShortcuts() {
           return {
-            Backspace: () => {
-              const { $from } = this.editor.view.state.selection
-              if (
-                !this.editor.can().liftListItem('listItem') ||
-                $from.parentOffset > 0
-              )
-                return false
-              return this.editor.commands.liftListItem('listItem')
-            },
+            Backspace: () => improvedList(this.editor),
           }
         },
       }),
