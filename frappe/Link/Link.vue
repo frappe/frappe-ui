@@ -4,29 +4,38 @@
     <Combobox
       v-model="model"
       :placeholder="placeholder || `Select ${doctype}`"
-      :options="options.data"
+      :options="linkOptions"
       @input="handleInputChange"
       @focus="() => loadOptions('')"
       :open-on-focus="true"
       v-bind="attrsWithoutClassStyle"
-    />
+    >
+      <template #create-new="{ searchTerm }">
+        <LucidePlus class="size-4 mr-2" />
+        <span class="font-medium"> Create new {{ doctype }}</span>
+      </template>
+    </Combobox>
   </div>
 </template>
 
 <script setup lang="ts">
 import { watch, useAttrs, computed } from 'vue'
-import { Combobox } from '../../src/components/Combobox'
+import { Combobox, type ComboboxOption } from '../../src/components/Combobox'
 import FormLabel from '../../src/components/FormLabel.vue'
 import debounce from '../../src/utils/debounce'
 // @ts-ignore - Vue SFC without explicit types
 import { createResource } from '../../src/resources'
 import type { LinkProps, SelectOption } from './types'
+import LucidePlus from '~icons/lucide/plus'
 
 const props = withDefaults(defineProps<LinkProps>(), {
   label: '',
   filters: () => ({}),
 })
 const model = defineModel<string>({ default: '' })
+const emit = defineEmits<{
+  (e: 'create', value: string): void
+}>()
 defineOptions({ inheritAttrs: false })
 
 const attrs = useAttrs() as Record<string, any>
@@ -50,6 +59,22 @@ const options = createResource({
       value: doc.value,
     }))
   },
+})
+
+const createNewOption = {
+  type: 'custom' as const,
+  key: 'create_new',
+  label: 'Create New',
+  slotName: 'create-new',
+  condition: () => true,
+  onClick: ({ searchTerm }) => emit('create', searchTerm),
+} as ComboboxOption
+
+const linkOptions = computed(() => {
+  if (props.allowCreate) {
+    return [...(options.data || []), createNewOption]
+  }
+  return options.data
 })
 
 const loadOptions = (txt: string = '') => {
