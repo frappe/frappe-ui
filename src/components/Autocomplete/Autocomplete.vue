@@ -309,11 +309,8 @@ const selectedValue = computed({
   set(val) {
     query.value = ''
     if (val && !props.multiple) showOptions.value = false
-    if (!props.multiple) {
-      emit('update:modelValue', val)
-      return
-    }
     emit('update:modelValue', val)
+    emit('change', val)
   },
 })
 
