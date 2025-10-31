@@ -32,9 +32,9 @@ const props = withDefaults(defineProps<LinkProps>(), {
   label: '',
   filters: () => ({}),
 })
-const model = defineModel<string>({ default: '' })
+const model = defineModel<string | null>({ default: '' })
 const emit = defineEmits<{
-  (e: 'create', value: string): void
+  (e: 'create', searchTerm: string): void
 }>()
 defineOptions({ inheritAttrs: false })
 
