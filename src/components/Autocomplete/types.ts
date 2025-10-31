@@ -28,6 +28,7 @@ export type AutocompleteProps = {
   showFooter?: boolean
   compareFn?: (a: Option, b: Option) => boolean
   maxOptions?: number
+  disabled?: boolean
 } & (
   | {
       multiple: true
