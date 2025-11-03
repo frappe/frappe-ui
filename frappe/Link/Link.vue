@@ -25,6 +25,7 @@ import FormLabel from '../../src/components/FormLabel.vue'
 import debounce from '../../src/utils/debounce'
 // @ts-ignore - Vue SFC without explicit types
 import { createResource } from '../../src/resources'
+import { frappeRequest } from '../../src/utils/frappeRequest'
 import type { LinkProps, SelectOption } from './types'
 import LucidePlus from '~icons/lucide/plus'
 
@@ -53,6 +54,7 @@ const options = createResource({
     filters: props.filters,
   },
   method: 'POST',
+  resourceFetcher: frappeRequest,
   transform: (data: SelectOption[]) => {
     return data.map((doc) => ({
       label: doc.label || doc.value,
