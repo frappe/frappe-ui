@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import type { PropTypes,  StateRow } from "./types";
+import type { PropTypes, StateRow } from "./types";
 
 import {
   getDefaultOperator,
@@ -161,15 +161,15 @@ const filterCount = computed(() =>
         </template>
       </div>
 
-      <hr class="mt-6" />
+      <hr class="mt-6 mb-2" />
 
       <!-- footer buttons -->
-      <div class="flex gap-2 justify-between mt-3">
-        <Button variant="solid" @click="insertRow()" icon-left="plus">
+      <div class="flex gap-2 justify-between">
+        <Button variant="ghost" @click="insertRow()" icon-left="plus">
           Add Filter
         </Button>
 
-        <Button theme="red" @click="clearRows(close)" icon-left="trash-2">
+        <Button variant="ghost" @click="clearRows(close)" icon-left="trash-2">
           Clear Filters
         </Button>
       </div>
