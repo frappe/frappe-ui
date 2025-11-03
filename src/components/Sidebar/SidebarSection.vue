@@ -40,19 +40,20 @@
       leave-to-class="max-h-0 overflow-hidden"
     >
       <nav v-if="!isCollapsed" class="space-y-0.5">
-        <SidebarItem
-          v-for="item in props.items"
-          :key="item.label"
-          :label="item.label"
-          :accessKey="item.accessKey"
-          :icon="item.icon"
-          :suffix="item.suffix"
-          :to="item.to"
-          :isActive="item.isActive"
-          :isCollapsed="isSidebarCollapsed"
-          :onClick="item.onClick"
-        >
-        </SidebarItem>
+        <template v-for="item in props.items" :key="item.label">
+          <slot name="sidebar-item" :item="item" :isCollapsed="isSidebarCollapsed">
+            <SidebarItem
+              :label="item.label"
+              :accessKey="item.accessKey"
+              :icon="item.icon"
+              :suffix="item.suffix"
+              :to="item.to"
+              :isActive="item.isActive"
+              :isCollapsed="isSidebarCollapsed"
+              :onClick="item.onClick"
+            />
+          </slot>
+        </template>
       </nav>
     </transition>
   </div>
