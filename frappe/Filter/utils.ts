@@ -135,12 +135,12 @@ export const getValueControl = (row: StateRow) => {
     })
   }
 
-  // if (["like", "not like", "in", "not in"].includes(operator)) {
-  //   return h(TextInput);
-  // }
+  if (['like', 'not like', 'in', 'not in'].includes(operator)) {
+    return h(TextInput, { placeholder: 'Enter value' })
+  }
 
   if (typeSelect.includes(fieldType) || typeCheck.includes(fieldType)) {
-    let _options = options ||  ['yes', 'no']
+    let _options = options || ['yes', 'no']
 
     return h(Select, { placeholder: 'Select Option', options: _options })
   }
@@ -195,7 +195,7 @@ export const getDefaultOperator = (field: {
   return operators[0].value
 }
 
-const transformIn = (row:StateRow) => {
+const transformIn = (row: StateRow) => {
   if (row.operator.includes('like') && !row.value.includes('%')) {
     row.value = `%${row.value}%`
   }
@@ -221,16 +221,14 @@ const operatorMap = {
   timespan: 'timespan',
 }
 
-export const parseFilters = (filters:any) => {
+export const parseFilters = (filters: any) => {
   const _filters = JSON.parse(JSON.stringify(filters))
 
   return _filters.map(transformIn).reduce((p, c) => {
     if (['equals', '='].includes(c.operator)) {
-      if (c.toBoolean) {
-        p[c.field.fieldName] = c.value === 'Yes'
-      } else {
-        p[c.field.fieldName] = c.value
-      }
+      p[c.field.fieldName] = c.toBoolean ? 'Yes' : c.value
+    } else if (c.operator === 'between') {
+      p[c.field.fieldName] = ['between', ...c.value.split(',')]
     } else {
       p[c.field.fieldName] = [operatorMap[c.operator.toLowerCase()], c.value]
     }
