@@ -104,6 +104,7 @@ const filterCount = computed(() =>
 <template>
   <Popover
     popover-class="mt-2 p-3 rounded-lg border bg-surface-modal shadow-xl"
+		placement="bottom-end"
   >
     <template #target="{ close, togglePopover }">
       <Button
