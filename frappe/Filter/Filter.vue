@@ -73,6 +73,8 @@ const filterExists = (val: string) => {
 };
 
 const updateFilter = (val: string, index: number) => {
+  if (!val) return;
+
   if (filterExists(val)) {
     rows.value[index] = dummyObj();
     return;
@@ -103,8 +105,8 @@ const filterCount = computed(() =>
 
 <template>
   <Popover
-    popover-class="mt-2 p-3 rounded-lg border bg-surface-modal shadow-xl"
-		placement="bottom-end"
+    popover-class="mt-2 p-2 rounded-lg border bg-surface-modal shadow-xl"
+    placement="bottom-end"
   >
     <template #target="{ close, togglePopover }">
       <Button
@@ -130,7 +132,7 @@ const filterCount = computed(() =>
     </template>
 
     <template #body="{ close }">
-      <div class="grid lg:grid-cols-[1fr_0.7fr_1fr_auto] gap-3">
+      <div class="grid lg:grid-cols-[1fr_0.7fr_1fr_auto] gap-2">
         <!-- input fields -->
         <template v-for="(row, index) in rows">
           <Combobox
@@ -154,7 +156,7 @@ const filterCount = computed(() =>
             @update:modelValue="apply"
           />
           <Button
-            class="ml-auto lg:-ml-1.5"
+            class="ml-auto lg:-ml-1"
             icon="x"
             variant="ghost"
             @click="deleteRow(index)"
@@ -162,7 +164,7 @@ const filterCount = computed(() =>
         </template>
       </div>
 
-      <hr class="mt-6 mb-2" />
+      <hr class="mt-6 mb-1" />
 
       <!-- footer buttons -->
       <div class="flex gap-2 justify-between">
