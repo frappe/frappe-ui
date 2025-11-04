@@ -73,10 +73,11 @@ const createNewOption = {
 } as ComboboxOption
 
 const linkOptions = computed(() => {
+  const _options = options.data || []
   if (props.allowCreate) {
-    return [...(options.data || []), createNewOption]
+    return [..._options, createNewOption]
   }
-  return options.data
+  return _options
 })
 
 const loadOptions = (txt: string = '') => {
