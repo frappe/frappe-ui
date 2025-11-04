@@ -32,7 +32,9 @@ import type {
   ComboboxProps,
 } from './types'
 
-const props = defineProps<ComboboxProps>()
+const props = withDefaults(defineProps<ComboboxProps>(), {
+  options: () => [],
+})
 const emit = defineEmits([
   'update:modelValue',
   'update:selectedOption',

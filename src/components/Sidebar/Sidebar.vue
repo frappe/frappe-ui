@@ -22,7 +22,11 @@
       :label="section.label"
       :items="section.items"
       :collapsible="section.collapsible"
-    />
+    >
+      <template #sidebar-item="{ item, isCollapsed }"
+        ><slot name="sidebar-item" :item :isCollapsed ></slot
+      ></template>
+    </SidebarSection>
 
     <div class="mt-auto flex flex-col gap-2">
       <slot
