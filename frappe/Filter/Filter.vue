@@ -76,7 +76,7 @@ const updateFilter = (val: string, index: number) => {
   if (!val) return;
 
   if (filterExists(val)) {
-    rows.value[index] = dummyObj();
+    setTimeout(() => rows.value[index] = dummyObj(), 0);
     return;
   }
 
