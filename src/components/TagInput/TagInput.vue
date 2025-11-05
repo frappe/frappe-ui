@@ -15,18 +15,25 @@ const props = defineProps<TagInputProps>()
 const search = ref('')
 const options = defineModel<SimpleOption[]>('options', { default: [] })
 const modelValue = defineModel<SimpleOption[]>({ default: [] })
+const optionsWithIcons = computed(() => {
+  if (!props.renderIcon) return options.value
+  return options.value.map((k) =>
+    getIcon(k) ? k : { ...k, icon: props.renderIcon(k) },
+  )
+})
 const selectedTags = computed(() => {
   return modelValue.value.map((k) => {
-    return options.value.find((j) => getValue(j) === k)
+    return optionsWithIcons.value.find((j) => getValue(j) === k)
   })
 })
 
 const filteredOptions = computed(() => {
-  const remainingOptions = options.value.filter((opt) => {
+  let remainingOptions = optionsWithIcons.value.filter((opt) => {
     const val = getValue(opt)
     if (!val) return false
     return !modelValue.value.includes(val)
   })
+
   return [
     ...remainingOptions,
     {
@@ -47,10 +54,7 @@ const filteredOptions = computed(() => {
           label: searchTerm,
           value: searchTerm,
         }
-        options.value.push({
-          ...tag,
-          icon: props.newOptionIcon && props.newOptionIcon(tag),
-        })
+        options.value.push(tag)
         addTag(searchTerm)
       },
     },

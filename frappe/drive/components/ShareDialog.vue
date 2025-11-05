@@ -1,5 +1,5 @@
 <template>
-  <Dialog v-model="open" :options="{ size: 'lg' }" @close="dialogType = ''">
+  <Dialog v-model="open" :options="{ size: 'lg' }">
     <template #body-main>
       <div class="p-4 sm:px-6">
         <!-- Header -->
@@ -27,11 +27,7 @@
               :icon-left="h(LucideArrowLeft, { class: 'size-4' })"
               @click="advanced = false"
             />
-            <Button
-              class="shrink-0"
-              variant="ghost"
-              @click="$emit('update:modelValue', false)"
-            >
+            <Button class="shrink-0" variant="ghost" @click="open = false">
               <template #icon>
                 <LucideX class="size-4" />
               </template>
@@ -90,7 +86,7 @@
             <TagInput
               v-model="usersToAdd"
               v-model:options="filteredUsers"
-              :new-option-icon="
+              :render-icon="
                 (k) =>
                   h(Avatar, {
                     image: k.user_image,
@@ -173,7 +169,7 @@
               <Button
                 class="text-base"
                 variant="outline"
-                @click="getLink(entity)"
+                @click="getFileLink(entity)"
               >
                 <template #prefix>
                   <LucideLink2 class="w-4 text-ink-gray-6" />
@@ -205,13 +201,9 @@ import {
   Select,
 } from 'frappe-ui'
 import TeamSelector from './TeamSelector.vue'
-import { getLink, dynamicList } from '@/utils/files'
+import { getFileLink, dynamicList } from '../js/utils'
 
-import {
-  usersWithAccess,
-  updateAccess,
-  allUsers,
-} from '@/resources/permissions'
+import { usersWithAccess, updateAccess, allUsers } from '../js/resources'
 
 import LucideBuilding2 from '~icons/lucide/building-2'
 import LucideDiamond from '~icons/lucide/diamond'
@@ -220,26 +212,19 @@ import LucideSettings from '~icons/lucide/settings'
 import LucideArrowLeft from '~icons/lucide/arrow-left'
 import LucideGlobe2 from '~icons/lucide/globe-2'
 
-import store from '@/store'
-
-const props = defineProps({ modelValue: String, entity: Object })
-const emit = defineEmits(['update:modelValue', 'success'])
-const dialogType = defineModel()
-const open = ref(true)
-
-// Advanced section
-const advanced = ref(false)
-const allowDownload = ref(props.entity.allow_download)
-watch(allowDownload, (v) => {
-  props.entity.allow_download = v
-  createResource({
-    url: 'drive.api.permissions.toggle_allow_download',
-    params: { entity: props.entity.name, val: v },
-    auto: true,
-  })
+const open = defineModel()
+const props = defineProps({
+  entity: Object,
+  allUsers: {
+    default: allUsers,
+  },
+  usersWithAccess: { default: usersWithAccess },
+  updateAccess: { default: updateAccess },
 })
-usersWithAccess.fetch({ entity: props.entity.name })
-allUsers.fetch({ team: 'all' })
+const emit = defineEmits(['success'])
+
+props.usersWithAccess.fetch({ entity: props.entity.name })
+props.allUsers.fetch({ team: 'all' })
 
 const levelOptions = [
   {
@@ -306,7 +291,7 @@ const updateGeneralAccess = (level, perms) => {
     return
   }
   if (level !== 'restricted') {
-    updateAccess.submit({
+    props.updateAccess.submit({
       entity_name: props.entity.name,
       user: level === 'public' ? '' : chosenTeam.value,
       team: level === 'team',
@@ -318,7 +303,7 @@ const updateGeneralAccess = (level, perms) => {
     })
     selectingTeam = false
   } else {
-    updateAccess.submit({
+    props.updateAccess.submit({
       entity_name: props.entity.name,
       user: '$GENERAL',
       method: 'unshare',
@@ -339,7 +324,7 @@ const usersToAdd = ref([])
 const accessToAdd = ref('reader')
 const filteredUsers = ref([])
 watch(
-  [() => allUsers.data, () => usersWithAccess.data],
+  [() => props.allUsers.data, () => props.usersWithAccess.data],
   ([users, existingUsers]) => {
     if (!existingUsers || !users) return []
     filteredUsers.value = users.filter(
@@ -357,8 +342,8 @@ const addPermissions = () => {
       user,
       ...access,
     }
-    updateAccess.submit(r)
-    usersWithAccess.data.push({
+    props.updateAccess.submit(r)
+    props.usersWithAccess.data.push({
       ...filteredUsers.value.find((k) => k.value === user),
       ...access,
     })
@@ -369,8 +354,8 @@ const addPermissions = () => {
 
 const updatePermissions = (user, val, entity_name, idx) => {
   if (val === 'remove') {
-    usersWithAccess.data.splice(idx, 1)
-    return updateAccess.submit({
+    props.usersWithAccess.data.splice(idx, 1)
+    return props.updateAccess.submit({
       method: 'unshare',
       entity_name,
       user: user.user,
@@ -378,7 +363,7 @@ const updatePermissions = (user, val, entity_name, idx) => {
   }
   const access = getAccess(val)
   Object.assign(user, access)
-  updateAccess.submit({
+  props.updateAccess.submit({
     entity_name,
     user: user.user,
     ...access,
@@ -392,5 +377,17 @@ const getAccess = (val) => ({
   upload: val === 'upload' || val === 'editor' ? 1 : 0,
   share: val === 'editor' ? 1 : 0,
   write: val === 'editor' ? 1 : 0,
+})
+
+// Advanced section
+const advanced = ref(false)
+const allowDownload = ref(props.entity.allow_download)
+watch(allowDownload, (v) => {
+  props.entity.allow_download = v
+  createResource({
+    url: 'drive.api.permissions.toggle_allow_download',
+    params: { entity: props.entity.name, val: v },
+    auto: true,
+  })
 })
 </script>
