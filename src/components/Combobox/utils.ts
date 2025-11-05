@@ -32,6 +32,7 @@ export function getKey(option: SimpleOption): string {
 }
 
 export function isDisabled(option: SimpleOption): boolean {
+    return false
   return typeof option === 'object' && !!option.disabled
 }
 
