@@ -393,4 +393,12 @@ img.ProseMirror-selectednode {
 .tag-suggestion-active {
   background-color: var(--surface-gray-2, #f3f3f3);
 }
+
+/* Edit prose classes to be more functional */
+.prose-sm {
+  blockquote {
+    quotes: none;
+    font-style: normal;
+  }
+}
 </style>

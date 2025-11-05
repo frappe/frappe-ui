@@ -18,6 +18,7 @@ export default {
         buttons = this.buttons
       } else {
         buttons = [
+          'Paragraph',
           [
             'Heading 1',
             'Heading 2',
@@ -26,10 +27,12 @@ export default {
             'Heading 5',
             'Heading 6',
           ],
-          'Paragraph',
           'Separator',
           'Bold',
           'Italic',
+          'Strikethrough',
+          'Link',
+          'FontColor',
           'Separator',
           'Bullet List',
           'Numbered List',
@@ -38,14 +41,13 @@ export default {
           'Align Left',
           'Align Center',
           'Align Right',
-          'FontColor',
           'Separator',
           'Image',
           'Video',
-          'Iframe',
-          'Link',
           'Blockquote',
           'Code',
+          'Iframe',
+          'Separator',
           'Horizontal Rule',
           [
             'InsertTable',

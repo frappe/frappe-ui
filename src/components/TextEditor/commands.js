@@ -1,32 +1,32 @@
 import { defineAsyncComponent } from 'vue'
-import H1 from './icons/h-1.vue'
-import H2 from './icons/h-2.vue'
-import H3 from './icons/h-3.vue'
-import H4 from './icons/h-4.vue'
-import H5 from './icons/h-5.vue'
-import H6 from './icons/h-6.vue'
-import Text from './icons/text.vue'
-import Bold from './icons/bold.vue'
-import Italic from './icons/italic.vue'
-import Underline from './icons/underline.vue'
-import Strikethrough from './icons/strikethrough.vue'
-import AlignCenter from './icons/align-center.vue'
-import AlignLeft from './icons/align-left.vue'
-import AlignRight from './icons/align-right.vue'
-import FontColor from './icons/font-color.vue'
-import ListOrdered from './icons/list-ordered.vue'
-import ListUnordered from './icons/list-unordered.vue'
-import ListTask from './icons/list-task.vue'
-import DoubleQuotes from './icons/double-quotes-r.vue'
-import CodeView from './icons/code-view.vue'
-import Link from './icons/link.vue'
-import Image from './icons/image-add-line.vue'
-import Video from './icons/video-add-line.vue'
-import GalleryVertical from '~icons/lucide/gallery-vertical'
-import ArrowGoBack from './icons/arrow-go-back-line.vue'
-import ArrowGoForward from './icons/arrow-go-forward-line.vue'
+import H1 from '~icons/lucide/heading-1'
+import H2 from '~icons/lucide/heading-2'
+import H3 from '~icons/lucide/heading-3'
+import H4 from '~icons/lucide/heading-4'
+import H5 from '~icons/lucide/heading-5'
+import H6 from '~icons/lucide/heading-6'
+import Text from '~icons/lucide/type'
+import Underline from '~icons/lucide/underline'
+import Italic from '~icons/lucide/italic'
+import Bold from '~icons/lucide/bold'
+import Strikethrough from '~icons/lucide/strikethrough'
+import AlignLeft from '~icons/lucide/text-align-start'
+import AlignRight from '~icons/lucide/text-align-end'
+import AlignCenter from '~icons/lucide/text-align-end'
+import FontColor from '~icons/lucide/paint-bucket'
+import ListUnordered from '~icons/lucide/list'
+import ListOrdered from '~icons/lucide/list-ordered'
+import ListTask from '~icons/lucide/list-check'
+import DoubleQuotes from '~icons/lucide/quote'
+import CodeView from '~icons/lucide/code'
+import Link from '~icons/lucide/link-2'
+import Image from '~icons/lucide/image-plus'
+import GalleryVertical from '~icons/lucide/youtube'
+import Video from '~icons/lucide/video'
+import Undo from '~icons/lucide/undo-2'
+import Redo from '~icons/lucide/redo-2'
 import Separator from './icons/separator.vue'
-import Table from './icons/table-2.vue'
+import Table from '~icons/lucide/table-properties'
 
 export default {
   Paragraph: {
@@ -190,19 +190,21 @@ export default {
     label: 'Embed',
     icon: GalleryVertical,
     isActive: (editor) => editor.isActive('iframe'),
-    component: defineAsyncComponent(() => import('./extensions/iframe/InsertIframe.vue')),
+    component: defineAsyncComponent(
+      () => import('./extensions/iframe/InsertIframe.vue'),
+    ),
   },
   Undo: {
     label: 'Undo',
-    icon: ArrowGoBack,
+    icon: Undo,
     action: (editor) => editor.chain().focus().undo().run(),
-    isActive: (editor) => false,
+    isDisabled: (editor) => !editor.can().chain().focus().undo().run(),
   },
   Redo: {
     label: 'Redo',
-    icon: ArrowGoForward,
+    icon: Redo,
     action: (editor) => editor.chain().focus().redo().run(),
-    isActive: (editor) => false,
+    isDisabled: (editor) => !editor.can().chain().focus().redo().run(),
   },
   InsertTable: {
     label: 'Insert Table',
