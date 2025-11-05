@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import {
   TagsInputRoot,
   TagsInputItem,
@@ -13,7 +13,7 @@ import { TagInputProps } from './types'
 
 const props = defineProps<TagInputProps>()
 const search = ref('')
-const options = defineModel<SimpleOption[]>('options')
+const options = defineModel<SimpleOption[]>('options', { default: [] })
 const modelValue = defineModel<SimpleOption[]>({ default: [] })
 const selectedTags = computed(() => {
   return modelValue.value.map((k) => {
@@ -90,6 +90,7 @@ function removeTag(tag: string) {
         <LucideX class="size-3 text-ink-gray-6" />
       </TagsInputItemDelete>
     </TagsInputItem>
+    <!-- fix: keyboard navigation doesn't work -->
     <Combobox
       :options="filteredOptions"
       v-model="search"

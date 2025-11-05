@@ -1,144 +1,136 @@
-<template>
-  <div class="relative flex items-center">
-    <div
-      :class="[
-        'absolute inset-y-0 left-0 flex items-center',
-        textColor,
-        prefixClasses,
-      ]"
-      v-if="$slots.prefix"
-    >
-      <slot name="prefix"> </slot>
-    </div>
-    <div
-      v-if="placeholder"
-      v-show="!modelValue"
-      class="pointer-events-none absolute text-ink-gray-4 truncate w-full"
-      :class="[fontSizeClasses, paddingClasses]"
-    >
-      {{ placeholder }}
-    </div>
-    <select
-      :class="selectClasses"
-      :disabled="disabled"
-      :id="id"
-      :value="modelValue"
-      @change="handleChange"
-      v-bind="attrs"
-    >
-      <option
-        v-for="option in selectOptions"
-        :key="option.value"
-        :value="option.value"
-        :disabled="option.disabled || false"
-        :selected="modelValue === option.value"
-      >
-        {{ option.label }}
-      </option>
-    </select>
-  </div>
-</template>
-
 <script setup lang="ts">
-import { computed, useSlots, useAttrs } from 'vue'
-import type { SelectProps } from './types'
+import { computed } from 'vue'
+import {
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectItemText,
+  SelectItemIndicator,
+  SelectLabel,
+  SelectPortal,
+  SelectRoot,
+  SelectSeparator,
+  SelectTrigger,
+  SelectValue,
+  SelectViewport,
+} from 'reka-ui'
+import { SimpleOption } from '../Combobox/types'
+import {
+  isGroup,
+  getLabel,
+  getMultipleLabel,
+  getValue,
+  getIcon,
+  RenderIcon,
+  isDisabled,
+} from '../Combobox/utils'
 
-defineOptions({
-  inheritAttrs: false,
-})
+import LucideChevronDown from '~icons/lucide/chevron-down'
+import { SelectProps, SelectValue as SelectValue_ } from './types'
 
 const props = withDefaults(defineProps<SelectProps>(), {
-  size: 'sm',
-  variant: 'subtle',
+  placeholder: 'Select an option',
 })
 
-const emit = defineEmits(['update:modelValue'])
-const slots = useSlots()
-const attrs = useAttrs()
+const selected = defineModel<SelectValue_>()
+const selectedOption = computed<SimpleOption | SimpleOption[]>(() => {
+  if (!selected.value) return null
+  if (props.multiple) {
+    return selected.value.map((k) =>
+      flatOptions.value.find((opt) => getValue(opt) === k),
+    )
+  }
+  return flatOptions.value.find((opt) => getValue(opt) === selected.value)
+})
+const selectedOptionIcon = computed(() =>
+  selectedOption.value && !props.multiple
+    ? getIcon(selectedOption.value)
+    : null,
+)
 
-function handleChange(e: Event) {
-  emit('update:modelValue', (e.target as HTMLInputElement).value)
+const flatOptions = computed<SimpleOption[]>(() =>
+  props.options.flatMap((opt) => (isGroup(opt) ? opt.options : opt)),
+)
+
+const labelFunction = (val: SelectValue_, selected = false) => {
+  if (props.getLabel) return props.getLabel(val, selected)
+  if (!val || (val.map && !val.length)) return props.placeholder
+  return (val.map ? getMultipleLabel : getLabel)(val)
 }
-
-const selectOptions = computed(() => {
-  return (
-    props.options
-      ?.map((option) => {
-        if (typeof option === 'string') {
-          return {
-            label: option,
-            value: option,
-          }
-        }
-        return option
-      })
-      .filter(Boolean) || []
-  )
-})
-
-const textColor = computed(() => {
-  return props.disabled ? 'text-ink-gray-4' : 'text-ink-gray-8'
-})
-
-const fontSizeClasses = computed(() => {
-  return {
-    sm: 'text-base',
-    md: 'text-base',
-    lg: 'text-lg',
-    xl: 'text-xl',
-  }[props.size]
-})
-
-const paddingClasses = computed(() => {
-  return {
-    sm: 'pl-2 pr-5',
-    md: 'pl-2.5 pr-5.5',
-    lg: 'pl-3 pr-6',
-    xl: 'pl-3 pr-6',
-  }[props.size]
-})
-
-const selectClasses = computed(() => {
-  let sizeClasses = {
-    sm: 'rounded h-7',
-    md: 'rounded h-8',
-    lg: 'rounded-md h-10',
-    xl: 'rounded-md h-10',
-  }[props.size]
-
-  let variant = props.disabled ? 'disabled' : props.variant
-  let variantClasses = {
-    subtle:
-      'border border-[--surface-gray-2] bg-surface-gray-2 hover:border-outline-gray-modals hover:bg-surface-gray-3 focus:border-outline-gray-4 focus:ring-0 focus-visible:ring-2 focus-visible:ring-outline-gray-3',
-    outline:
-      'border border-outline-gray-2 bg-surface-white hover:border-outline-gray-3 focus:border-outline-gray-4 focus:ring-0 focus-visible:ring-2 focus-visible:ring-outline-gray-3',
-    ghost:
-      'bg-transparent border-transparent hover:bg-surface-gray-3 focus:bg-surface-gray-3 focus:border-outline-gray-4 focus:ring-0 focus-visible:ring-2 focus-visible:ring-outline-gray-3',
-    disabled: [
-      'border',
-      props.variant !== 'ghost' ? 'bg-surface-gray-1' : '',
-      props.variant === 'outline'
-        ? 'border-outline-gray-2'
-        : 'border-transparent',
-    ],
-  }[variant]
-
-  return [
-    sizeClasses,
-    fontSizeClasses.value,
-    paddingClasses.value,
-    variantClasses,
-    textColor.value,
-    'transition-colors w-full py-0 truncate',
-  ]
-})
-
-let prefixClasses = computed(() => {
-  return {
-    sm: 'pl-2',
-    md: 'pl-2.5',
-    lg: 'pl-3',
-    xl: 'pl-3',
-  }[props.size]
-})
 </script>
+
+<template>
+  <div class="relative">
+    <SelectRoot v-model="selected" :multiple>
+      <SelectTrigger
+        :disabled
+        class="flex h-7 w-full overflow-hidden focus:ring-0 rounded bg-surface-gray-2 px-2 py-1 transition-colors hover:bg-surface-gray-3 focus:outline-0 focus:ring-0"
+        :class="{ 'opacity-50 pointer-events-none': disabled }"
+      >
+        <!-- Using SelectValue alone renders the icon too -->
+        <SelectValue
+          :placeholder
+          class="gap-2 text-base h-full flex items-center w-full focus:outline-0 text-ink-gray-8 data-[placeholder]:text-ink-gray-4"
+        >
+          <RenderIcon v-if="selectedOptionIcon" :icon="selectedOptionIcon" />
+          <div class="flex-1 flex justify-start truncate">
+            {{ labelFunction(selectedOption, true) }}
+          </div>
+          <RenderIcon :icon="LucideChevronDown" />
+        </SelectValue>
+      </SelectTrigger>
+
+      <SelectPortal>
+        <SelectContent
+          :hide-when-detached="true"
+          :align="'start'"
+          class="z-10 min-w-[--reka-select-trigger-width] mt-1 bg-surface-modal overflow-hidden rounded-lg shadow-2xl"
+        >
+          <SelectViewport
+            class="max-h-60 overflow-auto p-1.5"
+            :class="{ 'pt-0': isGroup(options[0]) }"
+          >
+            <template v-for="(optionOrGroup, index) in options" :key="index">
+              <component
+                :is="isGroup(optionOrGroup) ? SelectGroup : 'div'"
+                :class="{ '': isGroup(optionOrGroup) }"
+              >
+                <template v-if="isGroup(optionOrGroup)">
+                  <hr v-if="optionOrGroup.group === true" class="my-1.5" />
+                  <SelectLabel
+                    v-else
+                    class="px-2.5 pt-3 pb-1.5 text-sm font-medium text-ink-gray-5 sticky top-0 bg-surface-modal z-10"
+                  >
+                    {{ optionOrGroup.group }}
+                  </SelectLabel>
+                </template>
+                <SelectItem
+                  v-for="(option, idx) in optionOrGroup.options || [
+                    optionOrGroup,
+                  ]"
+                  :key="idx"
+                  :value="getValue(option)"
+                  :disabled="isDisabled(option)"
+                  class="text-base leading-none text-ink-gray-7 rounded flex items-center h-7 px-2.5 py-1.5 relative select-none data-[disabled]:opacity-50 data-[disabled]:pointer-events-none data-[highlighted]:outline-none data-[highlighted]:bg-surface-gray-3"
+                >
+                  <SelectItemText>
+                    <span class="flex items-center gap-2 pr-6 flex-1">
+                      <RenderIcon :icon="getIcon(option)" />
+                      {{ labelFunction(option) }}
+                    </span>
+                  </SelectItemText>
+                  <SelectItemIndicator
+                    class="inline-flex ml-auto items-center justify-center"
+                  >
+                    <LucideCheck class="size-4" />
+                  </SelectItemIndicator>
+                </SelectItem>
+              </component>
+              <SelectSeparator />
+            </template>
+          </SelectViewport>
+        </SelectContent>
+      </SelectPortal>
+    </SelectRoot>
+  </div>
+</template>

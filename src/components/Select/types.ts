@@ -1,17 +1,19 @@
+
 type SelectOption =
   | string
   | {
       label: string
       value: string
+      icon?: any
       disabled?: boolean
     }
 
+export type SelectValue = string | string[] | undefined
+
 export interface SelectProps {
-  size?: 'sm' | 'md' | 'lg'
-  variant?: 'subtle' | 'outline' | 'ghost'
+  options: SelectOption[]
   placeholder?: string
   disabled?: boolean
-  id?: string
-  modelValue?: string | number
-  options?: SelectOption[]
+  multiple?: boolean
+  getLabel?: Function
 }
