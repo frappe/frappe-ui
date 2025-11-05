@@ -4,5 +4,5 @@ export interface TagInputProps {
   modelValue?: string | null
   placeholder?: string
   disabled?: boolean
-  newOptionIcon?: Function
+  renderIcon?: Function
 }
