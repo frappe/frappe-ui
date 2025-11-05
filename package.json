@@ -99,7 +99,7 @@
     "highlight.js": "^11.11.1",
     "idb-keyval": "^6.2.0",
     "lowlight": "^3.3.0",
-    "lucide-static": "^0.535.0",
+    "lucide-static": "^0.543.0",
     "marked": "^15.0.12",
     "ora": "5.4.1",
     "prettier": "^3.3.2",
