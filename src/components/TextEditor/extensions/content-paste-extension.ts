@@ -108,7 +108,10 @@ async function processHTMLImages(
   extensionOptions: ContentPasteOptions,
 ): Promise<undefined> {
   const tempDiv = document.createElement('div')
-  tempDiv.innerHTML = html
+  tempDiv.innerHTML = html.replace(/font-size:\s*([\d.]+)pt/gi, (_, pt) => {
+    const px = Math.round((parseFloat(pt) * 96) / 72)
+    return `font-size:${px}px`
+  })
   const images = tempDiv.querySelectorAll('img')
 
   const parser = DOMParser.fromSchema(view.state.schema)
