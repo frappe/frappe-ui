@@ -13,8 +13,8 @@
                 class="rounded px-2 py-1 text-base font-medium text-ink-gray-8 transition-colors hover:bg-surface-gray-2"
                 @click="togglePopover"
                 :set="
-                  activeBtn =
-                    button.find((b) => b.isActive(editor)) || button[0]
+                  (activeBtn =
+                    button.find((b) => b.isActive?.(editor)) || button[0])
                 "
               >
                 <component
@@ -31,6 +31,7 @@
               <ul
                 class="p-1.5 mt-2 rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
               >
+                <!-- fix: isDisabled hides here, and disables elsewhere -->
                 <li
                   v-for="option in button"
                   v-show="option.isDisabled ? !option.isDisabled(editor) : true"
@@ -65,7 +66,8 @@
             <button
               class="flex rounded p-1 text-ink-gray-8 transition-colors"
               :class="[
-                button.isActive(editor) || componentSlotProps?.isActive
+                button.isDisabled?.(editor) && 'opacity-50 pointer-events-none',
+                button.isActive?.(editor) || componentSlotProps?.isActive
                   ? 'bg-surface-gray-3'
                   : 'hover:bg-surface-gray-2',
                 button.class,
