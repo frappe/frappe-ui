@@ -25,7 +25,7 @@ import GalleryVertical from '~icons/lucide/youtube'
 import Video from '~icons/lucide/video'
 import Undo from '~icons/lucide/undo-2'
 import Redo from '~icons/lucide/redo-2'
-import Separator from './icons/separator.vue'
+import Separator from '~icons/lucide/separator-horizontal'
 import Table from '~icons/lucide/table-properties'
 
 export default {
@@ -215,7 +215,7 @@ export default {
         .focus()
         .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
         .run(),
-    isActive: (editor) => false,
+    isActive: (editor) => editor.can().deleteTable(),
   },
   AddColumnBefore: {
     label: 'Add Column Before',
