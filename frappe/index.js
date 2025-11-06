@@ -22,3 +22,6 @@ export { useOnboarding } from './Onboarding/onboarding.js'
 // utils
 export { showHelpModal, minimize } from './Help/help.js'
 export { showHelpCenter } from './HelpCenter/helpCenter.js'
+
+// translation
+export { default as translation } from './translation'
