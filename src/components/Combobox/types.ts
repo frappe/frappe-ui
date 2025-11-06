@@ -33,6 +33,6 @@ export interface ComboboxProps {
   openOnFocus?: boolean
   openOnClick?: boolean
   placement?: 'start' | 'center' | 'end'
-  inputClasses?: string | string[] | object
+  variant?: 'subtle' | 'outline' | 'ghost'
   hideTrigger?: boolean
 }
