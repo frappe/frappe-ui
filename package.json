@@ -4,6 +4,7 @@
   "description": "A set of components and utilities for rapid UI development",
   "main": "./src/index.ts",
   "type": "module",
+  "sideEffects": false,
   "scripts": {
     "test": "vitest --run",
     "type-check": "tsc --noEmit",
@@ -16,6 +17,33 @@
     "story:dev": "histoire dev",
     "story:build": "histoire build && cp 404.html .histoire/dist",
     "story:preview": "histoire preview"
+  },
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    },
+    "./src/tailwind/preset": {
+      "import": "./src/tailwind/preset.js"
+    },
+    "./vite": {
+      "import": "./vite/index.js"
+    },
+    "./style.css": {
+      "import": "./src/style.css"
+    },
+    "./src/*": {
+      "import": "./src/*"
+    },
+    "./charts": {
+      "import": "./src/components/Charts/index.ts"
+    },
+    "./frappe": {
+      "import": "./frappe/index.js"
+    },
+    "./icons": {
+      "import": "./src/icons.ts"
+    }
   },
   "files": [
     "frappe",
