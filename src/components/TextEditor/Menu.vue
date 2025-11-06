@@ -10,20 +10,21 @@
           <Popover>
             <template #target="{ togglePopover }">
               <button
-                class="rounded px-2 py-1 text-base font-medium text-ink-gray-8 transition-colors hover:bg-surface-gray-2"
+                class="rounded p-1 text-base font-medium text-ink-gray-8 transition-colors"
                 @click="togglePopover"
-                :set="
-                  (activeBtn =
-                    button.find((b) => b.isActive?.(editor)) || button[0])
+                :class="
+                  getActiveButton(button)
+                    ? 'bg-surface-gray-3'
+                    : 'hover:bg-surface-gray-2'
                 "
               >
                 <component
-                  v-if="activeBtn.icon"
-                  :is="activeBtn.icon"
+                  v-if="(getActiveButton(button) || button[0]).icon"
+                  :is="(getActiveButton(button) || button[0]).icon"
                   class="h-4 w-4"
                 />
                 <span v-else>
-                  {{ activeBtn.label }}
+                  {{ (getActiveButton(button) || button[0]).label }}
                 </span>
               </button>
             </template>
@@ -93,20 +94,19 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
 import Popover from '../Popover/Popover.vue'
+import { inject } from 'vue'
 
-export default {
-  name: 'TipTapMenu',
-  props: ['buttons'],
-  inject: ['editor'],
-  components: {
-    Popover,
-  },
-  methods: {
-    onButtonClick(button) {
-      button.action(this.editor)
-    },
-  },
+const props = defineProps({
+  buttons: Array,
+})
+const editor = inject('editor')
+
+const onButtonClick = (button) => {
+  button.action(editor.value)
+}
+const getActiveButton = (group) => {
+  return group.find((b) => b.isActive?.(editor.value))
 }
 </script>
