@@ -155,10 +155,8 @@ const filterCount = computed(() =>
         </template>
       </div>
 
-      <hr class="mt-6 mb-1" />
-
       <!-- footer buttons -->
-      <div class="flex gap-2 justify-between">
+      <div class="flex gap-2 justify-between mt-4">
         <Button variant="ghost" @click="insertRow()" icon-left="plus">
           Add Filter
         </Button>
