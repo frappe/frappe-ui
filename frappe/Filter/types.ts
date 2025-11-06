@@ -1,4 +1,4 @@
-export interface PropTypes {
+export interface FilterProps {
 	doctype: string;
 }
 

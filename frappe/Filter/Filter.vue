@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import type { PropTypes, StateRow } from "./types";
+import type { FilterProps, StateRow } from "./types";
 
 import {
   getDefaultOperator,
@@ -18,7 +18,7 @@ import { createResource } from "../../src/resources";
 
 import FilterIcon from "../Icons/FilterIcon.vue";
 
-let props = defineProps<PropTypes>();
+let props = defineProps<FilterProps>();
 
 const doctypeFields = createResource({
   url: "frappe.desk.form.load.getdoctype",
