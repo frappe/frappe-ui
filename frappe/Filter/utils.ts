@@ -224,14 +224,15 @@ const operatorMap = {
 export const parseFilters = (filters: any) => {
   const _filters = JSON.parse(JSON.stringify(filters))
 
-  return _filters.map(transformIn).reduce((p, c) => {
-    if (['equals', '='].includes(c.operator)) {
-      p[c.field.fieldName] = c.toBoolean ? 'Yes' : c.value
-    } else if (c.operator === 'between') {
-      p[c.field.fieldName] = ['between', ...c.value.split(',')]
-    } else {
-      p[c.field.fieldName] = [operatorMap[c.operator.toLowerCase()], c.value]
-    }
-    return p
-  }, {})
+  return _filters.map(transformIn).reduce((acc, cur) => {
+    if (['equals', '='].includes(cur.operator)) {
+      cur.value = cur.toBoolean ? 'Yes' : cur.value
+    } //
+    else if (cur.operator === 'between') cur.value = [...cur.value.split(',')]
+
+    return [
+      ...acc,
+      [cur.field.fieldName, operatorMap[cur.operator.toLowerCase()], cur.value],
+    ]
+  }, [])
 }

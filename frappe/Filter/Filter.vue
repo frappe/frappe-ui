@@ -68,17 +68,8 @@ const getField = (val: string) => {
   return doctypeFields.data?.find((x: StateRow) => x.value === val);
 };
 
-const filterExists = (val: string) => {
-  return rows.value.some((x) => x.field.fieldName === val);
-};
-
 const updateFilter = (val: string, index: number) => {
   if (!val) return;
-
-  if (filterExists(val)) {
-    setTimeout(() => rows.value[index] = dummyObj(), 0);
-    return;
-  }
 
   const field = getField(val);
   rows.value[index] = {
