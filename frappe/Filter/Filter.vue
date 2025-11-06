@@ -116,8 +116,7 @@ const filterCount = computed(() =>
       <Button
         v-if="filterCount != 0"
         @click="clearRows(close)"
-        class="bg-surface-gray-4"
-        :class='{ "rounded-l-none": filterCount }'
+        class="bg-surface-gray-4 rounded-l-none"
         icon="x"
       />
     </template>
