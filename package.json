@@ -24,7 +24,8 @@
       "types": "./src/index.ts"
     },
     "./src/tailwind/preset": {
-      "import": "./src/tailwind/preset.js"
+      "import": "./src/tailwind/preset.js",
+      "default": "./src/tailwind/preset.js"
     },
     "./vite": {
       "import": "./vite/index.js"
