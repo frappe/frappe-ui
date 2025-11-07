@@ -1,4 +1,4 @@
-import { createResource } from 'frappe-ui'
+import { createResource } from '../src'
 
 export default function translation(app, options = {}) {
   if (typeof options !== 'object') {
