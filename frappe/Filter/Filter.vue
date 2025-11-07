@@ -122,7 +122,7 @@ const filterCount = computed(() =>
     </template>
 
     <template #body="{ close }">
-      <div class="grid lg:grid-cols-[1fr_0.7fr_1fr_auto] gap-2">
+      <div class="grid lg:grid-cols-[1fr_0.7fr_1fr_auto] gap-2 items-center">
         <!-- input fields -->
         <template v-for="(row, index) in rows">
           <Combobox
