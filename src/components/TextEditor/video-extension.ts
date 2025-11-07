@@ -55,9 +55,9 @@ declare module '@tiptap/core' {
       selectAndUploadVideo: () => ReturnType
 
       /**
-       * Set video alignment
+       * Set video floating
        */
-      setVideoAlign: (align: 'left' | 'center' | 'right') => ReturnType
+      setVideoFloat: (float: 'left' | 'right' | null) => ReturnType
     }
   }
 }
@@ -95,23 +95,23 @@ export const VideoExtension = NodeExtension.create<VideoExtensionOptions>({
         default: false,
         parseHTML: () => false,
       },
-      align: {
-        default: 'left',
+      float: {
+        default: null,
         parseHTML: (element) => {
-          const align = (
-            element.getAttribute('data-align') ||
-            element.getAttribute('align') ||
+          const float = (
+            element.getAttribute('data-float') ||
+            element.getAttribute('float') ||
             'left'
           ).toLowerCase()
 
-          if (['left', 'center', 'right'].includes(align)) {
-            return align as 'left' | 'center' | 'right'
+          if (['left', 'right', null].includes(float)) {
+            return float as 'left' | 'right' | null
           }
           return 'left'
         },
         renderHTML: (attributes) => {
           return {
-            'data-align': attributes.align || 'left',
+            'data-float': attributes.float || 'left',
           }
         },
       },
@@ -163,10 +163,10 @@ export const VideoExtension = NodeExtension.create<VideoExtensionOptions>({
 
   addCommands() {
     return {
-      setVideoAlign:
-        (align: 'left' | 'center' | 'right') =>
+      setVideoFloat:
+        (float: 'left' | 'right' | null) =>
         ({ commands }) => {
-          return commands.updateAttributes(this.name, { align })
+          return commands.updateAttributes(this.name, { float })
         },
 
       setVideo:
