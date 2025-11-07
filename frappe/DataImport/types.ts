@@ -28,6 +28,7 @@ export interface DocField {
   label: string
   fieldname: string
   reqd: 0 | 1
+  fieldtype: string
 }
 
 export interface File {

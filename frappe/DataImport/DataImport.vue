@@ -45,7 +45,6 @@ const dataImports = createListResource({
 })
 
 const updateStep = (newStep: 'list' | 'new' | 'edit', newData: DataImport) => {
-  console.log('Updating step to:', newStep, newData);
   step.value = newStep
     if (newData) {
         data.value = newData

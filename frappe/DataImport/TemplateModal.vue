@@ -28,17 +28,28 @@
                         <Button label="Select Mandatory Fields" @click="selectMandatoryFields" />
                         <Button label="Unselect All" @click="unselectAllFields" />
                     </div>
-                    <div class="grid grid-cols-2 gap-5">
-                        <div v-for="field in fields.data" :key="field.fieldname" class="flex items-center space-x-2">
-                            <FormControl
-                                type="checkbox"
-                                v-model="fieldSelection[field.fieldname]"
-                            />
-                            <label :class="{
-                                'text-ink-red-3': field.reqd
-                            }">
-                                {{ field.label }}
-                            </label>
+                    <div class="space-y-8">
+                        <div v-for="doctype in Object.keys(fields.data)" :key="doctype" class="flex flex-col space-y-2">
+                            <div class="text-ink-gray-5">
+                                {{ doctype }}
+                            </div>
+                            <div class="grid grid-cols-2 gap-5">
+                                <div v-for="field in fields.data[doctype]" :key="field.fieldname" class="flex items-center space-x-2">
+                                    <FormControl
+                                        type="checkbox"
+                                        v-model="fieldSelection[doctype][field.fieldname]"
+                                        :id="`checkbox-${field.fieldname}`"
+                                        :disabled="field.disabled"
+                                    />
+                                    <label
+                                        :for="`checkbox-${field.fieldname}`"
+                                        :class="{
+                                            'text-ink-red-3': field.reqd
+                                        }">
+                                        {{ field.label || field.fieldname }}
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -55,47 +66,114 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import type { DataImport, DocField } from './types'
-import { createListResource } from '../../src/resources'
+import { createResource } from '../../src/resources'
 import Button from "../../src/components/Button/Button.vue"
 import Dialog from "../../src/components/Dialog/Dialog.vue"
 import FormControl from "../../src/components/FormControl/FormControl.vue"
-import call from '../../src/utils/call'
 
 const show = defineModel<boolean>({ required: true, default: false })
 const fileType = ref<'Excel' | 'CSV'>('CSV')
 const exportType = ref<'All Records' | '5 Records' | 'Blank Template'>('Blank Template')
-const fieldSelection = ref<Record<string, boolean>>({})
+const fieldSelection = ref<Record<string, Record<string, boolean>>>({})
+const doctypeMeta = ref<any>(null)
 
 const props = defineProps<{
     data: DataImport
 }>()
 
-const fields = createListResource({
-    doctype: "DocField",
-    parent: "DocType",
-    filters: {
-        parent: props.data.reference_doctype,
-        parenttype: "DocType",
-        parentfield: "fields",
+const fieldsToIgnore = [
+    "Section Break",
+    "Column Break",
+    "Tab Break",
+    "HTML",
+    "Table",
+    "Table MultiSelect",
+    "Button",
+    "Image",
+    "Fold",
+    "Heading"
+]
+
+const fields = createResource({
+    url: "frappe.desk.form.load.getdoctype",
+    params: {
+        doctype: props.data.reference_doctype,
+        with_parent: 1,
     },
-    fields: ["fieldname", "label", "reqd"],
-    orderBy: "idx asc",
     auto: true,
-    transform(data: DocField[]) {
-        data.unshift({ fieldname: "name", label: "ID", reqd: 1 })
-        data.forEach(field => {
-            fieldSelection.value[field.fieldname] = field.reqd ? true : false
-        })
+    transform(data: any) {
+        return transformFields(data)
     }
 })
 
-const handleExport = async () => {
+const transformFields = (data: any) => {
+    let doctypeMap: Record<string, { fieldname: string; label: string; reqd: number }[]> = {}
+    doctypeMeta.value = data.docs
+
+    prepareDoctypeMap(data.docs, doctypeMap)
+    addIDField(doctypeMap)
+    updateFieldSelection(doctypeMap)
+
+    return doctypeMap
+}
+
+const prepareDoctypeMap = (docs: any[], doctypeMap: Record<string, { fieldname: string; label: string; reqd: number }[]>) => {
+    docs.forEach((doc: any) => {
+        doctypeMap[doc.name] = doc.fields.filter((field: DocField) => {
+            return !fieldsToIgnore.includes(field.fieldtype)
+        }).map((field: DocField) => {
+            return {
+                fieldname: field.fieldname,
+                label: field.label,
+                reqd: field.reqd,
+                disabled: doc.name == props.data.reference_doctype && field.reqd
+            }
+        })
+    })
+}
+
+const addIDField = (doctypeMap: Record<string, { fieldname: string; label: string; reqd: number }[]>) => {
+    Object.keys(doctypeMap).forEach((doctype: string) => {
+        doctypeMap[doctype].unshift({
+            fieldname: "name",
+            label: "ID",
+            reqd: 1,
+        } as { fieldname: string; label: string; reqd: number })
+    })
+}
+
+const updateFieldSelection = (doctypeMap: Record<string, { fieldname: string; label: string; reqd: number }[]>) => {
+    Object.keys(doctypeMap).forEach((doctype: string) => {
+        if (!fieldSelection.value[doctype]) {
+            fieldSelection.value[doctype] = {}
+            if (doctype == props.data.reference_doctype) {
+                doctypeMap[doctype].forEach((field) => {
+                    if (field.reqd) {
+                        fieldSelection.value[doctype][field.fieldname] = true
+                    }
+                })
+            }
+        }
+    })
+}
+
+const getExportURL = () => {
     let doctype = props.data.reference_doctype
-    let exportFields = { [doctype]: Object.keys(fieldSelection.value).filter((fieldname: string) => fieldSelection.value[fieldname]) }
+    let exportFields = getExportFields()
     let exportRecords = getExportType()
     let exportPageLength = exportType.value == "5 Records" ? 5 : ''
-    let url = `/api/method/frappe.core.doctype.data_import.data_import.download_template?doctype=${encodeURIComponent(doctype)}&export_fields=${encodeURIComponent(JSON.stringify(exportFields))}&export_records=${encodeURIComponent(exportRecords)}&file_type=${encodeURIComponent(fileType.value)}&export_page_length=${exportPageLength}`
+    
+    return `/api/method/frappe.core.doctype.data_import.data_import.download_template
+        ?doctype=${encodeURIComponent(doctype)}
+        &export_fields=${encodeURIComponent(JSON.stringify(exportFields))}
+        &export_records=${encodeURIComponent(exportRecords)}
+        &file_type=${encodeURIComponent(fileType.value)}
+        &export_page_length=${exportPageLength}`
+        .replace(/\s+/g, '')
+}
 
+const handleExport = async () => {
+    let url = getExportURL()
     const response = await fetch(url)
     const blob = await response.blob();
     const link = document.createElement('a');
@@ -108,27 +186,61 @@ const handleExport = async () => {
     document.body.removeChild(link);
 }
 
+const getExportFields = () => {
+    let exportFields: Record<string, string[]> = {}
+    Object.keys(fieldSelection.value).forEach((doctype: string) => {
+        let doctypeName = doctype == props.data.reference_doctype ? doctype : getChildTableName(doctype)
+        exportFields[doctypeName] = Object.keys(fieldSelection.value[doctype]).filter((fieldname: string) => fieldSelection.value[doctype][fieldname])
+    })
+    return exportFields
+}
+
+const getChildTableName = (doctype: string) => {
+    let childTableName = ''
+    let doctypeFields = doctypeMeta.value.filter((doc: any) => {
+        return doc.name == props.data.reference_doctype
+    })[0].fields
+
+   doctypeFields.forEach((field: any) => {
+        if (field.options == doctype) {
+            childTableName = field.fieldname
+        }
+   })
+    return childTableName
+}
+
 const getExportType = () => {
     if (exportType.value == "Blank Template")
         return "blank_template"
+    if (exportType.value == "5 Records")
+        return "5_records"
     return "all"
 }
 
 const selectAllFields = () => {
-    fields.data?.forEach((field: DocField) => {
-        fieldSelection.value[field.fieldname] = true
+    Object.keys(fields.data).forEach((doctype: string) => {
+        fields.data[doctype].forEach((field: DocField) => {
+            if (!fieldSelection.value[doctype]) {
+                fieldSelection.value[doctype] = {};
+            }
+            fieldSelection.value[doctype][field.fieldname] = true;
+        })
     })
 }
 
 const selectMandatoryFields = () => {
-    fields.data?.forEach((field: DocField) => {
-        fieldSelection.value[field.fieldname] = field.reqd ? true : false
+    Object.keys(fields.data).forEach((doctype: string) => {
+        fields.data[doctype].forEach((field: DocField) => {
+            fieldSelection.value[doctype][field.fieldname] = field.reqd ? true : false
+        })
     })
 }
 
 const unselectAllFields = () => {
-    fields.data?.forEach((field: DocField) => {
-        fieldSelection.value[field.fieldname] = false
+    Object.keys(fields.data).forEach((doctype: string) => {
+        fields.data[doctype].forEach((field: DocField) => {
+            fieldSelection.value[doctype][field.fieldname] = false
+        })
     })
 }
 

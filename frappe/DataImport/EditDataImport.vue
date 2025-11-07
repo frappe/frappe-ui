@@ -66,7 +66,7 @@
                     </div>
                 </div>
 
-                <div v-if="!data.import_file && !data.google_sheets_url" class="text-ink-gray-5">
+                <div v-if="!importFile && !googleSheet" class="text-ink-gray-5">
                     OR
                 </div>
 
@@ -79,56 +79,68 @@
             </div>
 
             <div v-if="showPreview" class="space-y-2 mt-8">
-                <!-- <div class="font-semibold">
-                    Data 
-                </div> -->
-                <div v-if="data.status == 'Success'" class="flex items-center space-x-2 bg-surface-green-1 px-2 py-1.5 rounded-md">
+                <div class="flex items-center space-x-2 px-2 py-1.5 rounded-md" :class="{
+                    'bg-surface-green-1': data.status == 'Success',
+                    'bg-surface-red-1': ['Partial Success', 'Error'].includes(data.status)
+                }">
                     <div v-if="data.status == 'Success'" class="size-2 bg-surface-green-3 rounded-full">
                     </div>
-                    <span>
+                    <div v-else-if="['Partial Success', 'Error'].includes(data.status)" class="size-2 bg-surface-red-3 rounded-full">
+                    </div>
+                    <span v-if="data.status == 'Success'">
                         Import completed. {{ successfulImports}} rows imported successfully.
                     </span>
+                    <span v-else-if="['Partial Success', 'Error'].includes(data.status)">
+                        Import completed with some errors. {{ successfulImports}} rows imported.
+                    </span>
                 </div>
-                <ListView 
-                    :columns="previewColumns" 
-                    :rows="previewData" 
-                    rowKey="id" 
-                    :options="{
-                        selectable: false,
-                        showTooltip: false
-                }">
-                    <ListHeader
-                        class="mb-2 grid items-center space-x-4 rounded bg-surface-gray-2 p-2"
-                    >
-                        <ListHeaderItem :item="item" v-for="item in previewColumns">
-                        </ListHeaderItem>
-                    </ListHeader>
 
-                    <ListRows>
-                        <ListRow :row="row" v-for="row in previewData">
-                            <template #default="{ column, item }">
-                                <ListRowItem :item="row[column.key]" :align="column.align">
+                <div class="overflow-x-auto border border-outline-gray-2 rounded-md max-h-72">
+                    <table class="table-fixed divide-y">
+                        <thead class="rounded-t-md">
+                            <tr>
+                                <th
+                                    v-for="column in previewColumns"
+                                    :key="column.key"
+                                    :style="{ width: column.width, textAlign: column.align }"
+                                    class="p-2 text-left text-sm text-ink-gray-5 whitespace-nowrap"
+                                    :class="{
+                                        'border-r': column.key != previewColumns[previewColumns.length -1].key
+                                    }"
+                                >
+                                    {{ column.label }}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-surface-gray-2">
+                            <tr v-for="(row, rowIndex) in previewData" :key="rowIndex">
+                                <td
+                                    v-for="column in previewColumns"
+                                    :key="column.key"
+                                    :style="{ width: column.width, textAlign: column.align }"
+                                    class="px-3 py-2 text-sm text-ink-gray-7 align-top whitespace-nowrap"
+                                    :class="{
+                                        'border-r': column.key != previewColumns[previewColumns.length -1].key
+                                    }"
+                                >
                                     <div v-if="column.key == 'Sr. No'" class="flex items-center space-x-2">
-                                        <Tooltip v-if="row.success && row.showStatus" text="Row Imported Successfully">
-                                            <div  class="size-2 bg-surface-green-3 rounded"></div>
-                                        </Tooltip>
-                                        <Tooltip v-else-if="row.showStatus" text="Row Import Failed">
-                                            <div class="size-2 bg-surface-red-5 rounded"></div>
-                                        </Tooltip>
-                                        <div>
+                                        <span v-if="row.success && row.showStatus" class="size-1.5 bg-surface-green-3 rounded"></span>
+                                        <span v-else-if="row.showStatus" class="size-1.5 bg-surface-red-5 rounded"></span>
+                                        <span v-else class="size-1.5"></span>
+                                        <span>
                                             {{ row[column.key] }}
-                                        </div>
+                                        </span>
                                     </div>
                                     <div v-else-if="column.key == 'message'" v-html="row.message">
                                     </div>
                                     <div v-else class="leading-5 text-sm">
                                         {{ row[column.key] }}
                                     </div>
-                                </ListRowItem>
-                            </template>
-                        </ListRow>
-                    </ListRows>
-                </ListView>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
         <div class="mt-auto">
@@ -155,7 +167,7 @@
     />
 </template>
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, vShow, watch } from 'vue'
 import type { DataImport, DataImports } from './types';
 import { getBadgeColor } from "./dataImport"
 import Badge from '../../src/components/Badge/Badge.vue'
@@ -164,14 +176,7 @@ import Button from '../../src/components/Button/Button.vue'
 import FeatherIcon from '../../src/components/FeatherIcon.vue'
 import FileUploader from '../../src/components/FileUploader/FileUploader.vue'
 import FormControl from '../../src/components/FormControl/FormControl.vue'
-import ListHeader from '../../src/components/ListView/ListHeader.vue'
-import ListHeaderItem from '../../src/components/ListView/ListHeaderItem.vue'
-import ListRows from '../../src/components/ListView/ListRows.vue'
-import ListRow from '../../src/components/ListView/ListRow.vue'
-import ListRowItem from '../../src/components/ListView/ListRowItem.vue'
-import ListView from '../../src/components/ListView/ListView.vue'
 import TemplateModal from './TemplateModal.vue';
-import Tooltip from '../../src/components/Tooltip/Tooltip.vue'
 import { toast } from "../../src/components/Toast/index"
 import call from '../../src/utils/call';
 
@@ -184,6 +189,7 @@ const showPreview = ref(false)
 const previewData = ref<Record<string, any>[]>([])
 const previewColumns = ref<Array<{ label: string; key: string; width: string; align: 'left' | 'center' | 'right' }>>([])
 const successfulImports = ref(0)
+const showImportLogs = ref(false)
 
 const props = defineProps<{
     dataImports: DataImports
@@ -196,6 +202,7 @@ const importData = () => {
     }).then(() => {
         props.dataImports.reload()
         setTimeout(() => {
+            showImportLogs.value = true
             let updatedData = props.dataImports.data?.find(d => d.name === props.data.name)
             emit('updateStep', 'edit', updatedData)
         }, 100)
@@ -204,25 +211,33 @@ const importData = () => {
 
 watch([importFile, googleSheet], ([newFile, newSheet]) => {
     if (props.data.import_file != importFile.value || props.data.google_sheets_url != googleSheet.value) {
-        props.dataImports.setValue.submit({
-            ...props.data,
-            import_file: newFile,
-            google_sheets_url: newSheet
-        }, {
-            onSuccess(data: DataImport) {
-                props.dataImports.reload()
-                getPreviewData(newFile, newSheet)
-            }
-        })
+        updateDataImport(newFile, newSheet)
     }
 
     if (!importFile.value && !googleSheet.value) {
-        showPreview.value = false
-        previewData.value = []
-        previewColumns.value = []
-        successfulImports.value = 0
+        resetFormState()
     }
 })
+
+const updateDataImport = (newFile: string | undefined, newSheet: string) => {
+    props.dataImports.setValue.submit({
+        ...props.data,
+        import_file: newFile,
+        google_sheets_url: newSheet
+    }, {
+        onSuccess(data: DataImport) {
+            props.dataImports.reload()
+            getPreviewData(newFile, newSheet)
+        }
+    })
+}
+
+const resetFormState = () => {
+    showPreview.value = false
+    previewData.value = []
+    previewColumns.value = []
+    successfulImports.value = 0
+}
 
 const getPreviewData = (newFile: string | undefined, newSheet: string) => {
     call("frappe.core.doctype.data_import.data_import.get_preview_from_template", {
@@ -247,11 +262,10 @@ const getPreviewData = (newFile: string | undefined, newSheet: string) => {
 const preparePreviewColumns = (data: any, keys: string[]) => {
     previewColumns.value = []
     data.columns.forEach((col: any, index: number) => {
-        let width = "150px"
+        let width = "500px"
         let align: 'left' | 'center' | 'right' = 'left'
         if (index == 0) {
-            width = "50px"
-            align = 'center'
+            width = "100px"
         }
         keys.push(col.header_title)
         previewColumns.value.push({ label: col.header_title, key: col.header_title, width: width, align: align })
@@ -284,7 +298,6 @@ const getImportLogs = () => {
             previewData.value.forEach((log: any, index: number) => {
                 let rowIndex = JSON.parse(row.row_indexes)[0] - 2 
                 if (rowIndex == index) {
-                    console.log(JSON.parse(row.messages)?.[0]?.message)
                     log.showStatus = true
                     log.success = row.success
                     log.message = JSON.parse(row.messages)?.[0]?.message || '-'
