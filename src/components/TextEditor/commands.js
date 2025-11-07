@@ -146,8 +146,7 @@ export default {
   FontColor: {
     label: 'Font Color',
     icon: FontColor,
-    isActive: (editor) =>
-      editor.isActive('textStyle') || editor.isActive('highlight'),
+    isActive: (editor) => editor.getAttributes('textStyle')?.color || editor.isActive('highlight'),
     component: defineAsyncComponent(() => import('./FontColor.vue')),
   },
   Blockquote: {
