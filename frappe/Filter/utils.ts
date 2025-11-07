@@ -180,7 +180,6 @@ export const getValueControl = (row: StateRow) => {
     return h(Rating, {
       rating: row.value || 0,
       static: false,
-      // "onUpdate:modelValue": (v) => updateValue(v, f),
     })
   }
 

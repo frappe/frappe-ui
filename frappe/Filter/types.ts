@@ -2,11 +2,6 @@ export interface FilterProps {
 	doctype: string;
 }
 
-// interface Option {
-// 	label: string;
-// 	value: string;
-// }
-
 export interface Field {
 	fieldName: string;
 	fieldType: string;
