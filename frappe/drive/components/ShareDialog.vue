@@ -39,7 +39,7 @@
         </div>
         <div v-else>
           <!-- General section -->
-          <div class="mb-4 border-b pb-4">
+          <div class="border-b pb-4 mb-4">
             <div class="mb-2 text-ink-gray-5 font-medium text-base">
               General Access
             </div>
@@ -110,7 +110,7 @@
             <div
               v-for="(user, idx) in usersWithAccess.data"
               :key="user.name"
-              class="flex items-center gap-x-3 pr-1"
+              class="flex items-center gap-3 pr-1"
             >
               <Avatar
                 size="xl"

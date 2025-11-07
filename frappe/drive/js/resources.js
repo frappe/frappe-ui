@@ -1,5 +1,5 @@
 import { createResource, toast } from '../../../src'
-import { prettyData } from '../../../../frontend/src/utils/files'
+import { prettyData } from '../js/utils'
 export const getTeams = createResource({
   url: 'drive.api.permissions.get_teams',
   params: {
@@ -93,4 +93,18 @@ export const getTeam = createResource({
     }
   },
   cache: 'team-folder-contents',
+})
+
+export const rename = createResource({
+  url: 'drive.api.files.call_controller_method',
+  method: 'POST',
+  makeParams: (data) => {
+    return {
+      method: 'rename',
+      ...data,
+    }
+  },
+  onError(error) {
+    toast.error(error.messages[error.messages.length - 1])
+  },
 })

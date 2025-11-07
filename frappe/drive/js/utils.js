@@ -1,4 +1,5 @@
 import { toast } from 'frappe-ui'
+import { format } from 'date-fns'
 import slugify from 'slugify'
 import { useTimeAgo } from '@vueuse/core'
 export function dynamicList(k) {
@@ -63,4 +64,20 @@ export const prettyData = (entities) => {
     if (entity.accessed) entity.relativeAccessed = useTimeAgo(entity.accessed)
     return entity
   })
+}
+
+export const formatDate = (date) => {
+  if (!date) return ''
+  const dateObj = new Date(date)
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
+  const hourCycle = navigator.language || 'en-US'
+
+  const formattedDate = format(dateObj, 'MM/dd/yy', { timeZone })
+  let formattedTime
+  if (hourCycle === 'en-US') {
+    formattedTime = format(dateObj, 'hh:mm a', { timeZone })
+  } else {
+    formattedTime = format(dateObj, 'hh:mm a', { timeZone })
+  }
+  return `${formattedDate}, ${formattedTime}`
 }
