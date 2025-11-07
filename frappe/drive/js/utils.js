@@ -1,5 +1,6 @@
 import { toast } from 'frappe-ui'
 import slugify from 'slugify'
+import { useTimeAgo } from '@vueuse/core'
 export function dynamicList(k) {
   return k.filter((a) => typeof a !== 'object' || !('cond' in a) || a.cond)
 }
@@ -53,4 +54,13 @@ const copyToClipboard = (str) => {
     document.body.removeChild(textArea)
     return Promise.resolve()
   }
+}
+
+export const prettyData = (entities) => {
+  return entities.map((entity) => {
+    entity.file_size_pretty = formatSize(entity.file_size)
+    entity.relativeModified = useTimeAgo(entity.modified)
+    if (entity.accessed) entity.relativeAccessed = useTimeAgo(entity.accessed)
+    return entity
+  })
 }

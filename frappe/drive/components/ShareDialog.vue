@@ -82,7 +82,7 @@
           </div>
           <!-- Members section -->
           <div class="text-ink-gray-5 font-medium text-base mb-2">Members</div>
-          <div class="flex gap-3">
+          <div class="flex gap-3 pb-2">
             <TagInput
               v-model="usersToAdd"
               v-model:options="filteredUsers"
@@ -105,7 +105,7 @@
 
           <div
             v-if="usersWithAccess.data"
-            class="flex flex-col gap-4 overflow-y-auto text-base max-h-80 py-4 mb-3"
+            class="flex flex-col gap-4 overflow-y-auto text-base max-h-64 py-4 mb-3 overflow-auto"
           >
             <div
               v-for="(user, idx) in usersWithAccess.data"
