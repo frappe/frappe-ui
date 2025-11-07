@@ -52,9 +52,9 @@ declare module '@tiptap/core' {
       selectAndUploadImage: () => ReturnType
 
       /**
-       * Set image alignment
+       * Set image float for text wrapping
        */
-      setImageAlign: (align: 'left' | 'center' | 'right') => ReturnType
+      setImageFloat: (float: 'left' | 'right' | null) => ReturnType
     }
   }
 }
@@ -67,7 +67,8 @@ const inputRegex = /(?:^|\s)(!\[(.+|:?)]\((\S+)(?:(?:\s+)["'](\S+)["'])?\))$/
 export const ImageExtension = NodeExtension.create<ImageExtensionOptions>({
   name: 'image',
 
-  group: 'block',
+  group: 'inline',
+  inline: true,
   draggable: true,
   selectable: true,
 
@@ -82,23 +83,15 @@ export const ImageExtension = NodeExtension.create<ImageExtensionOptions>({
         default: false,
         parseHTML: () => false,
       },
-      align: {
-        default: 'left',
+      float: {
+        default: null,
         parseHTML: (element) => {
-          const align = (
-            element.getAttribute('data-align') ||
-            element.getAttribute('align') ||
-            'left'
-          ).toLowerCase()
-
-          if (['left', 'center', 'right'].includes(align)) {
-            return align as 'left' | 'center' | 'right'
-          }
-          return 'left'
+          return element.getAttribute('data-float') || null
         },
         renderHTML: (attributes) => {
+          if (!attributes.float) return {}
           return {
-            'data-align': attributes.align || 'left',
+            'data-float': attributes.float,
           }
         },
       },
@@ -152,10 +145,10 @@ export const ImageExtension = NodeExtension.create<ImageExtensionOptions>({
 
   addCommands() {
     return {
-      setImageAlign:
-        (align: 'left' | 'center' | 'right') =>
+      setImageFloat:
+        (float: 'left' | 'right' | null) =>
         ({ commands }) => {
-          return commands.updateAttributes(this.name, { align })
+          return commands.updateAttributes(this.name, { float })
         },
 
       setImage:

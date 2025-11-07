@@ -176,24 +176,34 @@ function stopResize() {
   }
 }
 
-function setAlignment(align: 'left' | 'center' | 'right') {
-  if (isVideo.value) props.editor.commands.setVideoAlign(align)
-  else props.editor.commands.setImageAlign(align)
+function setFloat(float: 'left' | 'right' | null) {
+  if (isVideo.value) props.editor.commands.setVideoAlign(float)
+  else props.editor.commands.setImageFloat(float)
 }
+
+const wrapperClasses = (float: string) => [
+  'w-fit',
+  float === 'right' ? 'float-right ml-5' : 'float-left mr-5',
+]
 </script>
 
 <template>
-  <NodeViewWrapper>
+  <NodeViewWrapper
+    as="div"
+    :class="node.attrs.float && wrapperClasses(node.attrs.float)"
+  >
     <div
       ref="containerRef"
-      class="relative overflow-hidden not-prose my-6 rounded-[2px] block max-w-full"
+      class="relative overflow-hidden not-prose rounded-[2px]"
       :class="[
-        { 'ring-2 ring-outline-gray-3 ring-offset-2': selected },
-        node.attrs.align === 'center' ? 'mx-auto' : '',
-        node.attrs.align === 'right' ? 'ml-auto mr-0' : '',
-        node.attrs.align === 'left' ? 'mr-auto ml-0' : '',
+        {
+          'ring-2 ring-outline-gray-3 ring-offset-2': selected,
+        },
+        !node.attrs.float && 'block max-w-full mx-auto my-6',
       ]"
-      :style="{ width: node.attrs.width ? `${node.attrs.width}px` : 'auto' }"
+      :style="{
+        width: node.attrs.width ? `${node.attrs.width}px` : 'auto',
+      }"
     >
       <div v-if="node.attrs.src" class="relative">
         <img
@@ -229,10 +239,10 @@ function setAlignment(align: 'left' | 'center' | 'right') {
             class="flex divide-x divide-outline-gray-5 rounded bg-black/65"
           >
             <button
-              @click.stop="setAlignment('left')"
+              @click.stop="setFloat('left')"
               :class="[
                 'px-1.5 py-1 hover:text-ink-white',
-                node.attrs.align === 'left'
+                node.attrs.float === 'left'
                   ? 'text-ink-white'
                   : 'text-ink-gray-4',
               ]"
@@ -240,21 +250,19 @@ function setAlignment(align: 'left' | 'center' | 'right') {
               <LucideAlignLeft class="size-4" />
             </button>
             <button
-              @click.stop="setAlignment('center')"
+              @click.stop="setFloat(null)"
               :class="[
                 'px-1.5 py-1 hover:text-ink-white',
-                node.attrs.align === 'center'
-                  ? 'text-ink-white'
-                  : 'text-ink-gray-4',
+                !node.attrs.float ? 'text-ink-white' : 'text-ink-gray-4',
               ]"
             >
               <LucideAlignCenter class="size-4" />
             </button>
             <button
-              @click.stop="setAlignment('right')"
+              @click.stop="setFloat('right')"
               :class="[
                 'px-1.5 py-1 hover:text-ink-white',
-                node.attrs.align === 'right'
+                node.attrs.float === 'right'
                   ? 'text-ink-white'
                   : 'text-ink-gray-4',
               ]"
@@ -295,6 +303,7 @@ function setAlignment(align: 'left' | 'center' | 'right') {
         v-if="(isEditable || node.attrs.alt) && !node.attrs.error"
         v-model="caption"
         class="w-full text-center bg-transparent text-sm text-ink-gray-6 h-7 border-none focus:ring-0 placeholder-ink-gray-4"
+        :class="!selected && 'hidden'"
         placeholder="Add caption"
         :disabled="!isEditable"
         @change="updateCaption"
