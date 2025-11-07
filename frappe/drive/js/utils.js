@@ -1,4 +1,4 @@
-import { toast } from 'frappe-ui'
+import { toast } from '../../../src'
 import { format } from 'date-fns'
 import slugify from 'slugify'
 import { useTimeAgo } from '@vueuse/core'

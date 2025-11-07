@@ -38,7 +38,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import { Dialog } from 'frappe-ui'
+import { Dialog } from '../../../src'
 import { rename } from '../js/resources'
 
 const props = defineProps({ entity: Object, modelValue: String })
