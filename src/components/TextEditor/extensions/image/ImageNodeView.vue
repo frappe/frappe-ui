@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
 import LoadingIndicator from '../../../LoadingIndicator.vue'
 import { ErrorMessage } from '../../../ErrorMessage'
@@ -10,14 +10,16 @@ import LucideAlignRight from '~icons/lucide/align-right'
 
 const props = defineProps(nodeViewProps)
 
-const imageRef = ref<HTMLImageElement | null>(null)
+const mediaRef = ref<HTMLImageElement | HTMLVideoElement | null>(null)
 const containerRef = ref<HTMLDivElement | null>(null)
 const isResizing = ref(false)
 const startDragX = ref(0)
 const startWidth = ref(0)
 const originalAspectRatio = ref(1)
 
-function selectImage() {
+const isVideo = computed(() => props.node.type.name === 'video')
+
+function selectMedia() {
   props.editor.commands.setNodeSelection(props.getPos())
 }
 
@@ -26,20 +28,37 @@ const isEditable = ref(false)
 
 onMounted(() => {
   isEditable.value = props.editor.isEditable
-  if (imageRef.value) {
-    // Ensure initial aspect ratio is captured if dimensions are available
-    const initialWidth = props.node.attrs.width || imageRef.value.naturalWidth
-    const initialHeight =
-      props.node.attrs.height || imageRef.value.naturalHeight
-    if (initialWidth && initialHeight) {
-      originalAspectRatio.value = initialHeight / initialWidth
-    }
+  if (mediaRef.value) {
+    updateAspectRatio()
   }
 })
 
 props.editor.on('update', () => {
   isEditable.value = props.editor.isEditable
 })
+
+function updateAspectRatio() {
+  if (!mediaRef.value) return
+
+  let width, height
+  if (isVideo.value) {
+    const video = mediaRef.value as HTMLVideoElement
+    width = props.node.attrs.width || video.videoWidth
+    height = props.node.attrs.height || video.videoHeight
+  } else {
+    const img = mediaRef.value as HTMLImageElement
+    width = props.node.attrs.width || img.naturalWidth
+    height = props.node.attrs.height || img.naturalHeight
+  }
+
+  if (width && height) {
+    originalAspectRatio.value = height / width
+  }
+}
+
+function handleMediaLoaded() {
+  updateAspectRatio()
+}
 
 function updateCaption(event: Event) {
   const newCaption = (event.target as HTMLInputElement).value
@@ -50,14 +69,14 @@ function updateCaption(event: Event) {
 function handleKeydown(event: KeyboardEvent) {
   if (event.key === 'Enter') {
     event.preventDefault()
-    createParagraphAfterImage()
+    createParagraphAfterMedia()
   } else if (event.key === 'Escape' || event.key === 'ArrowDown') {
     event.preventDefault()
-    setCursorAfterImage()
+    setCursorAfterMedia()
   }
   if (event.key === 'ArrowUp') {
     event.preventDefault()
-    setCursorBeforeImage()
+    setCursorBeforeMedia()
   }
 }
 
@@ -66,7 +85,7 @@ function setCursorAt(pos: number) {
   props.editor.chain().setTextSelection(pos).scrollIntoView().run()
 }
 
-function createParagraphAfterImage() {
+function createParagraphAfterMedia() {
   const pos = props.getPos()
   props.editor.commands.focus()
   props.editor
@@ -77,26 +96,35 @@ function createParagraphAfterImage() {
     .run()
 }
 
-function setCursorAfterImage() {
+function setCursorAfterMedia() {
   const pos = props.getPos()
   setCursorAt(pos + 1)
 }
 
-function setCursorBeforeImage() {
+function setCursorBeforeMedia() {
   const pos = props.getPos()
   setCursorAt(pos - 1)
 }
 
 function startResize(event: MouseEvent) {
   if (!isEditable.value) return
-  selectImage()
+  selectMedia()
   isResizing.value = true
   startDragX.value = event.clientX
-  startWidth.value = imageRef.value?.offsetWidth || props.node.attrs.width || 0
+  startWidth.value = mediaRef.value?.offsetWidth || props.node.attrs.width || 0
 
-  // Calculate aspect ratio from current attributes or natural dimensions
-  const width = props.node.attrs.width || imageRef.value?.naturalWidth
-  const height = props.node.attrs.height || imageRef.value?.naturalHeight
+  // Calculate aspect ratio from current attributes or natural/video dimensions
+  let width, height
+  if (isVideo.value) {
+    const video = mediaRef.value as HTMLVideoElement
+    width = props.node.attrs.width || video.videoWidth
+    height = props.node.attrs.height || video.videoHeight
+  } else {
+    const img = mediaRef.value as HTMLImageElement
+    width = props.node.attrs.width || img.naturalWidth
+    height = props.node.attrs.height || img.naturalHeight
+  }
+
   if (width && height) {
     originalAspectRatio.value = height / width
   } else {
@@ -109,7 +137,7 @@ function startResize(event: MouseEvent) {
 }
 
 function handleResize(event: MouseEvent) {
-  if (!isResizing.value || !imageRef.value || !containerRef.value) return
+  if (!isResizing.value || !mediaRef.value || !containerRef.value) return
 
   const editorElement = props.editor.view.dom
   const editorWidth = editorElement.clientWidth
@@ -123,8 +151,8 @@ function handleResize(event: MouseEvent) {
   const newHeight = newWidth * originalAspectRatio.value
 
   // Apply temporary styles for visual feedback
-  imageRef.value.style.width = `${newWidth}px`
-  imageRef.value.style.height = `${newHeight}px`
+  mediaRef.value.style.width = `${newWidth}px`
+  mediaRef.value.style.height = `${newHeight}px`
   containerRef.value.style.width = `${newWidth}px`
 }
 
@@ -136,20 +164,21 @@ function stopResize() {
   window.removeEventListener('mouseup', stopResize)
   document.body.style.cursor = ''
 
-  if (imageRef.value && containerRef.value) {
-    const finalWidth = imageRef.value.offsetWidth
-    const finalHeight = imageRef.value.offsetHeight
+  if (mediaRef.value && containerRef.value) {
+    const finalWidth = mediaRef.value.offsetWidth
+    const finalHeight = mediaRef.value.offsetHeight
     props.updateAttributes({ width: finalWidth, height: finalHeight })
 
     // Clear temporary styles after updating attributes
-    imageRef.value.style.width = ''
-    imageRef.value.style.height = ''
+    mediaRef.value.style.width = ''
+    mediaRef.value.style.height = ''
     containerRef.value.style.width = ''
   }
 }
 
 function setAlignment(align: 'left' | 'center' | 'right') {
-  props.editor.commands.setImageAlign(align)
+  if (isVideo.value) props.editor.commands.setVideoAlign(align)
+  else props.editor.commands.setImageAlign(align)
 }
 </script>
 
@@ -166,16 +195,31 @@ function setAlignment(align: 'left' | 'center' | 'right') {
       ]"
       :style="{ width: node.attrs.width ? `${node.attrs.width}px` : 'auto' }"
     >
-      <div class="relative">
+      <div v-if="node.attrs.src" class="relative">
         <img
-          v-if="node.attrs.src"
-          ref="imageRef"
+          v-if="!isVideo"
+          ref="mediaRef"
           class="rounded-[2px]"
           :src="node.attrs.src"
           :alt="node.attrs.alt || ''"
           :width="node.attrs.width"
           :height="node.attrs.height"
-          @click.stop="selectImage"
+          @click.stop="selectMedia"
+          @load="handleMediaLoaded"
+        />
+        <video
+          v-else="isVideo"
+          ref="mediaRef"
+          class="rounded-[2px]"
+          :src="node.attrs.src"
+          :width="node.attrs.width"
+          :height="node.attrs.height"
+          :autoplay="node.attrs.autoplay"
+          :loop="node.attrs.loop"
+          :muted="node.attrs.muted"
+          controls
+          @click.stop="selectMedia"
+          @loadedmetadata="handleMediaLoaded"
         />
 
         <div class="absolute bottom-2 right-2 flex items-center gap-2">
@@ -239,7 +283,9 @@ function setAlignment(align: 'left' | 'center' | 'right') {
           >
             <div class="flex items-center gap-2">
               <LoadingIndicator class="text-gray-100 size-4" />
-              <span class="text-gray-100">Uploading...</span>
+              <span class="text-gray-100"
+                >Uploading {{ isVideo ? 'video' : 'image' }}...</span
+              >
             </div>
           </div>
         </div>
