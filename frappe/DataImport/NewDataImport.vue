@@ -11,6 +11,7 @@
                 :filters="{
                     'allow_import': 1
                 }"
+                :required="true"
             />
 
             <FormControl
@@ -18,6 +19,7 @@
                 label="Import Type"
                 type="select"
                 :options="['Insert New Records', 'Update Existing Records']"
+                :required="true"
             />
 
             <FormControl
@@ -39,10 +41,11 @@
 </template>
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { DataImports } from './types'
+import type { DataImports, DataImport } from './types'
 import FormControl from '../../src/components/FormControl/FormControl.vue'
-import Link from "../components/Link/Link.vue"
 import Button from '../../src/components/Button/Button.vue'
+import Link from "../Link/Link.vue"
+import { toast } from "../../src/components/Toast/index"
 
 const referenceDoctype = ref<string>('')
 const importType = ref<'Insert New Records' | 'Update Existing Records'>('Insert New Records')
@@ -60,9 +63,28 @@ const saveImport = () => {
         mute_emails: !sendEmailNotification.value,
         status: 'Pending'
     }, {
-        onSuccess(data) {
+        validate() {
+            return validateImport()
+        },
+        onSuccess(data: DataImport) {
             emit('updateStep', 'edit', data)
+        },
+        onError(error: any) {
+            toast.error(error)
+            console.error('Error creating data import:', error)
         }
     })
+}
+
+const validateImport = () => {
+    if (!referenceDoctype.value) {
+        toast.error('Please select a Document Type to proceed.')
+        return false
+    }
+    if (!importType.value) {
+        toast.error('Please select an Import Type to proceed.')
+        return false
+    }
+    return true
 }
 </script>

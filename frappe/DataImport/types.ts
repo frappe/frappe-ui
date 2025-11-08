@@ -17,8 +17,8 @@ export interface DataImport {
 export interface DataImports {
   data: DataImport[]
   update: (args: { filters: any[] }) => void
-  insert: { submit: (params: DataImport, options: { onSuccess: (data: DataImport) => void }) => void }
-  setValue: { submit: (params: DataImport, options: { onSuccess: (data: DataImport) => void }) => void }
+  insert: { submit: (params: DataImport, options: { validate: () => boolean; onSuccess: (data: DataImport) => void; onError: (err: any) => void }) => void }
+  setValue: { submit: (params: DataImport, options: { onSuccess: (data: DataImport) => void; onError: (err: any) => void }) => void }
   reload: () => void
 }
 

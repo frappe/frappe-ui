@@ -77,9 +77,8 @@
                     :disabled="data.status === 'Success'"
                 />
             </div>
-
-            <div v-if="showPreview" class="space-y-2 mt-8">
-                <div class="flex items-center space-x-2 px-2 py-1.5 rounded-md" :class="{
+            <div class="space-y-2 mt-8">
+                <div v-if="showImportLogs" class="flex items-center space-x-2 px-2 py-1.5 rounded-md" :class="{
                     'bg-surface-green-1': data.status == 'Success',
                     'bg-surface-red-1': ['Partial Success', 'Error'].includes(data.status)
                 }">
@@ -95,7 +94,7 @@
                     </span>
                 </div>
 
-                <div class="overflow-x-auto border border-outline-gray-2 rounded-md max-h-72">
+                <div v-if="showPreview" class="overflow-x-auto border border-outline-gray-2 rounded-md max-h-72">
                     <table class="table-fixed divide-y">
                         <thead class="rounded-t-md">
                             <tr>
@@ -205,7 +204,7 @@ const importData = () => {
             showImportLogs.value = true
             let updatedData = props.dataImports.data?.find(d => d.name === props.data.name)
             emit('updateStep', 'edit', updatedData)
-        }, 100)
+        }, 500)
     })
 }
 
@@ -234,6 +233,7 @@ const updateDataImport = (newFile: string | undefined, newSheet: string) => {
 
 const resetFormState = () => {
     showPreview.value = false
+    showImportLogs.value = false
     previewData.value = []
     previewColumns.value = []
     successfulImports.value = 0
@@ -245,23 +245,24 @@ const getPreviewData = (newFile: string | undefined, newSheet: string) => {
         import_file: newFile,
         google_sheets_url: newSheet
     }).then((data: any) =>  {
+        if (!data) return
         let keys: string[] = []
         showPreview.value = true
 
         preparePreviewColumns(data, keys)
         preparePreviewData(data, keys)
 
-        if (props.data.status != 'Pending')
+        if (props.data.status != 'Pending' && showImportLogs.value)
             getImportLogs()
     }).catch((error: any) => {
-        toast.error(error.messages[0])
+        toast.error(error)
         console.error("Error fetching preview data:", error)
     })
 }
 
 const preparePreviewColumns = (data: any, keys: string[]) => {
     previewColumns.value = []
-    data.columns.forEach((col: any, index: number) => {
+    data?.columns.forEach((col: any, index: number) => {
         let width = "500px"
         let align: 'left' | 'center' | 'right' = 'left'
         if (index == 0) {
@@ -274,7 +275,7 @@ const preparePreviewColumns = (data: any, keys: string[]) => {
 
 const preparePreviewData = (data: any, keys: string[]) => {
     previewData.value = []
-    data.data.forEach((row: any) => {
+    data?.data.forEach((row: any) => {
         let rowData: Record<string, any> = {}
         row.forEach((cell: any, index: number) => {
             rowData.showStatus = false
