@@ -4,6 +4,8 @@
     class="relative w-full"
     :class="attrsClass"
     :style="attrsStyle"
+    v-bind="attrsWithoutClassStyle"
+    ref="rootRef"
   >
     <TextEditorBubbleMenu :buttons="bubbleMenu" :options="bubbleMenuOptions" />
     <TextEditorFixedMenu
@@ -30,11 +32,12 @@ import {
   provide,
   ref,
   useAttrs,
+  useTemplateRef,
 } from 'vue'
 
 defineOptions({ inheritAttrs: false })
 
-import { Editor, EditorContent, VueNodeViewRenderer } from '@tiptap/vue-3'
+import { Editor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import TextAlign from '@tiptap/extension-text-align'
@@ -53,9 +56,8 @@ import TaskItem from '@tiptap/extension-task-item'
 import TaskList from '@tiptap/extension-task-list'
 import NamedColorExtension from './extensions/color'
 import NamedHighlightExtension from './extensions/highlight'
-import { common, createLowlight } from 'lowlight'
-import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
-import CodeBlockComponent from './CodeBlockComponent.vue'
+import improvedList from './extensions/list-extension'
+
 import { MentionExtension } from './extensions/mention'
 import TextEditorFixedMenu from './TextEditorFixedMenu.vue'
 import TextEditorBubbleMenu from './TextEditorBubbleMenu.vue'
@@ -66,10 +68,9 @@ import { ContentPasteExtension } from './extensions/content-paste-extension'
 import { TagNode, TagExtension } from './extensions/tag/tag-extension'
 import { Heading } from './extensions/heading/heading'
 import { ImageGroup } from './extensions/image-group/image-group-extension'
+import { ExtendedCode, ExtendedCodeBlock } from './extensions/code-block'
 import { useFileUpload } from '../../utils/useFileUpload'
 import { TextEditorEmits, TextEditorProps } from './types'
-
-const lowlight = createLowlight(common)
 
 function defaultUploadFunction(file: File) {
   // useFileUpload is frappe specific
@@ -100,6 +101,11 @@ const editor = ref<Editor | null>(null)
 const attrs = useAttrs()
 const attrsClass = computed(() => normalizeClass(attrs.class))
 const attrsStyle = computed(() => normalizeStyle(attrs.style))
+const attrsWithoutClassStyle = computed(() => {
+  return Object.fromEntries(
+    Object.entries(attrs).filter(([key]) => key !== 'class' && key !== 'style'),
+  )
+})
 
 const editorProps = computed(() => {
   return {
@@ -154,8 +160,15 @@ onMounted(() => {
     extensions: [
       StarterKit.configure({
         ...props.starterkitOptions,
+        code: false,
         codeBlock: false,
         heading: false,
+      }).extend({
+        addKeyboardShortcuts() {
+          return {
+            Backspace: () => improvedList(this.editor),
+          }
+        },
       }),
       Heading.configure({
         ...(typeof props.starterkitOptions?.heading === 'object' &&
@@ -180,11 +193,8 @@ onMounted(() => {
       TextStyle,
       NamedColorExtension,
       NamedHighlightExtension,
-      CodeBlockLowlight.extend({
-        addNodeView() {
-          return VueNodeViewRenderer(CodeBlockComponent)
-        },
-      }).configure({ lowlight }),
+      ExtendedCode,
+      ExtendedCodeBlock,
       ImageExtension.configure({
         uploadFunction: props.uploadFunction || defaultUploadFunction,
       }),
@@ -222,7 +232,6 @@ onMounted(() => {
       }),
       ContentPasteExtension.configure({
         enabled: true,
-        showConfirmation: true,
         uploadFunction: props.uploadFunction || defaultUploadFunction,
       }),
       ...(props.extensions || []),
@@ -254,8 +263,10 @@ provide(
   computed(() => editor.value),
 )
 
+const rootRef = useTemplateRef('rootRef')
 defineExpose({
   editor,
+  rootRef,
 })
 </script>
 

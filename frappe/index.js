@@ -1,3 +1,6 @@
+// components dependent on frappe backend
+export * from './Link'
+
 // help components
 export { default as HelpModal } from './Help/HelpModal.vue'
 

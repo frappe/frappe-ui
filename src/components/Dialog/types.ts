@@ -25,6 +25,7 @@ type DialogOptions = {
   actions?: Array<DialogAction>
   // default position = 'center'
   position?: 'top' | 'center'
+  paddingTop?: string | number
 }
 
 export type DialogActionContext = {
