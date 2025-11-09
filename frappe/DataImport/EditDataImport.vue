@@ -166,7 +166,7 @@
     />
 </template>
 <script setup lang="ts">
-import { ref, vShow, watch } from 'vue'
+import { ref, watch } from 'vue'
 import type { DataImport, DataImports } from './types';
 import { getBadgeColor } from "./dataImport"
 import Badge from '../../src/components/Badge/Badge.vue'
@@ -199,8 +199,8 @@ const importData = () => {
     call("frappe.core.doctype.data_import.data_import.form_start_import", {
         data_import: props.data.name
     }).then(() => {
-        props.dataImports.reload()
         setTimeout(() => {
+            props.dataImports.reload()
             showImportLogs.value = true
             let updatedData = props.dataImports.data?.find(d => d.name === props.data.name)
             emit('updateStep', 'edit', updatedData)
