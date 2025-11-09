@@ -63,7 +63,7 @@ const selectAll = () => model.value = props.options;
           v-if="!props.hideSearch"
           class="
             flex w-full items-center justify-between gap-2
-            rounded bg-surface-gray-2 px-2 py-1 ring-2 ring-outline-gray-3
+            rounded bg-surface-gray-2 px-2 py-1 ring-2 ring-outline-gray-2
             transition-colors hover:bg-surface-gray-3 boder borer-transparent
           "
         >
