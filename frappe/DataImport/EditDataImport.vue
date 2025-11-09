@@ -204,6 +204,8 @@ const importData = () => {
             showImportLogs.value = true
             let updatedData = props.dataImports.data?.find(d => d.name === props.data.name)
             emit('updateStep', 'edit', updatedData)
+            console.log(updatedData)
+            console.log(showImportLogs.value)
         }, 500)
     })
 }
@@ -227,6 +229,10 @@ const updateDataImport = (newFile: string | undefined, newSheet: string) => {
         onSuccess(data: DataImport) {
             props.dataImports.reload()
             getPreviewData(newFile, newSheet)
+        },
+        onError(error: any) {
+            toast.error(error)
+            console.error("Error updating data import:", error)
         }
     })
 }
@@ -251,7 +257,8 @@ const getPreviewData = (newFile: string | undefined, newSheet: string) => {
 
         preparePreviewColumns(data, keys)
         preparePreviewData(data, keys)
-
+        console.log(props.data)
+        console.log(showImportLogs.value)
         if (props.data.status != 'Pending' && showImportLogs.value)
             getImportLogs()
     }).catch((error: any) => {

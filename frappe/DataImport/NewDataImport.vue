@@ -1,7 +1,10 @@
 <template>
     <div class="text-base h-full flex flex-col">
-        <div class="text-xl font-semibold mb-1 text-ink-gray-9">
-            New Data Import
+        <div class="flex items-center space-x-2">
+            <FeatherIcon name="chevron-left" class="size-5 stroke-1 cursor-pointer" @click="emit('updateStep', 'list')" />
+            <div class="text-xl font-semibold text-ink-gray-9">
+                New Data Import
+            </div>
         </div>
         <div class="grid grid-cols-1 gap-5 mt-5">
             <Link 
@@ -42,8 +45,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import type { DataImports, DataImport } from './types'
-import FormControl from '../../src/components/FormControl/FormControl.vue'
 import Button from '../../src/components/Button/Button.vue'
+import FeatherIcon from '../../src/components/FeatherIcon.vue'
+import FormControl from '../../src/components/FormControl/FormControl.vue'
 import Link from "../Link/Link.vue"
 import { toast } from "../../src/components/Toast/index"
 
