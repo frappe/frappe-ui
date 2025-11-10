@@ -105,6 +105,6 @@ export const rename = createResource({
     }
   },
   onError(error) {
-    toast.error(error.messages[error.messages.length - 1])
+    toast.error(error)
   },
 })
