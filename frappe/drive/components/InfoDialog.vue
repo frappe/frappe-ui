@@ -49,7 +49,7 @@
           <span class="inline-block w-24 text-ink-gray-5"
             >{{ __('Tags') }}:</span
           >
-          <TagInput class="flex-grow" :entity />
+          <TagInput class="flex-grow bg-transparent" :entity />
         </li>
       </ul>
 
