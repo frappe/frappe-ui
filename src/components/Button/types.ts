@@ -19,6 +19,7 @@ export interface ButtonProps {
   disabled?: boolean
   route?: RouterLinkProps['to']
   link?: string
+  type?: 'button' | 'submit' | 'reset'
 }
 
 export type ThemeVariant = `${Theme}-${Variant}`

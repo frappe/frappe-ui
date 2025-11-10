@@ -6,6 +6,7 @@
       @click="handleClick"
       :disabled="isDisabled"
       :ariaLabel="ariaLabel"
+      :type = "props.type"
       ref="rootRef"
     >
       <LoadingIndicator
@@ -77,6 +78,7 @@ const props = withDefaults(defineProps<ButtonProps>(), {
   variant: 'subtle',
   loading: false,
   disabled: false,
+  type: "button"
 })
 
 const slots = useSlots()
