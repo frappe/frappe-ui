@@ -38,7 +38,6 @@ const props = withDefaults(defineProps<DataImportProps>(), {
 
 const dataImports = createListResource({
     doctype: 'Data Import',
-    cache: 'data_import_list',
     fields: ["name", "reference_doctype", "import_type", "status", "creation", "mute_emails", "import_file", "google_sheets_url"],
     auto: true,
     orderBy: "modified desc",
