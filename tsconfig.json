@@ -21,6 +21,7 @@
   },
   "include": [
     "src/**/*.ts",
+    "frappe/index.d.ts",
     "src/**/*.d.ts",
     "src/**/*.tsx",
     "src/**/*.vue",
