@@ -32,6 +32,18 @@ interface ToastPromiseOptions<TData = any, TError = any> {
   errorDuration?: number
   /** Optional: Common duration in seconds for all toast states, unless overridden by successDuration or errorDuration. */
   duration?: number
+  /** Optional: Action for success state. */
+  successAction?: {
+    label: string
+    altText?: string
+    onClick: () => void
+  }
+  /** Optional: Action for error state. */
+  errorAction?: {
+    label: string
+    altText?: string
+    onClick: () => void
+  }
 }
 
 const toastsState: Ref<ToastItem[]> = ref([])
@@ -111,6 +123,7 @@ export const toast = {
         duration: successToastDurationInSeconds * 1000,
         icon: undefined,
         closable: true,
+		action: options.successAction,
       })
       return data
     } catch (error) {
@@ -128,6 +141,7 @@ export const toast = {
         duration: errorToastDurationInSeconds * 1000,
         icon: undefined,
         closable: true,
+		action: options.errorAction,
       })
       throw error
     }
