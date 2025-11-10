@@ -83,6 +83,7 @@ export { default as ECharts } from './components/Charts/ECharts.vue'
 // directives
 export { default as onOutsideClickDirective } from './directives/onOutsideClick'
 export { default as visibilityDirective } from './directives/visibility'
+export { default as focusDirective } from './directives/focus'
 
 // utilities
 export { default as call, createCall } from './utils/call.js'

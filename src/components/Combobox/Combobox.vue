@@ -114,9 +114,9 @@ function getRenderFunction(option: SimpleOption): (() => VNode) | undefined {
 function getThemeClasses(variant: string = 'subtle', disabled: boolean) {
 	let variants = {
 		subtle:
-			'border border-surface-gray-2 bg-surface-gray-2 placeholder-ink-gray-4 hover:border-outline-gray-modals hover:bg-surface-gray-3 focus-within:bg-surface-white focus-within:border-outline-gray-4 focus-within:shadow-sm focus-within:hover:bg-surface-white focus-within:hover:border-outline-gray-4',
+			'border border-surface-gray-2 bg-surface-gray-2 placeholder-ink-gray-4 hover:border-outline-gray-modals hover:bg-surface-gray-3 focus-within:ring-2 focus-within:ring-outline-gray-3 focus-within:bg-surface-white focus-within:border-outline-gray-4 focus-within:shadow-sm focus-within:hover:bg-surface-white focus-within:hover:border-outline-gray-4',
 		outline:
-			'border border-outline-gray-2 bg-surface-white placeholder-ink-gray-4 hover:shadow-sm focus-within:bg-surface-white focus-within:border-outline-gray-4 focus-within:shadow-sm',
+			'border border-outline-gray-2 bg-surface-white placeholder-ink-gray-4 hover:shadow-sm focus-within:ring-2 focus-within:ring-outline-gray-3 focus-within:bg-surface-white focus-within:border-outline-gray-4 focus-within:shadow-sm',
 		disabled: [
 			'border bg-surface-gray-1 placeholder-ink-gray-3',
 			props.variant === 'outline' ? 'border-outline-gray-2' : 'border-transparent',
@@ -124,7 +124,7 @@ function getThemeClasses(variant: string = 'subtle', disabled: boolean) {
 		ghost: 'border-0 focus-within:ring-0',
 	}
 	return [
-		'flex h-7 w-full items-center justify-between gap-2 rounded px-2 py-1 transition-colors focus-within:ring-2 focus-within:ring-outline-gray-3',
+		'flex h-7 w-full items-center justify-between gap-2 rounded px-2 py-1 transition-colors',
 		variants[variant],
 		disabled ? 'opacity-50 pointer-events-none' : '',
 	]
