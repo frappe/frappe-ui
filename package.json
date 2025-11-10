@@ -33,9 +33,6 @@
     "./style.css": {
       "import": "./src/style.css"
     },
-    "./src/*": {
-      "import": "./src/*"
-    },
     "./charts": {
       "import": "./src/components/Charts/index.ts"
     },
