@@ -199,8 +199,8 @@ const importData = () => {
     call("frappe.core.doctype.data_import.data_import.form_start_import", {
         data_import: props.data.name
     }).then(() => {
+        props.dataImports.reload()
         setTimeout(() => {
-            props.dataImports.reload()
             showImportLogs.value = true
             let updatedData = props.dataImports.data?.find(d => d.name === props.data.name)
             emit('updateStep', 'edit', updatedData)
@@ -253,7 +253,9 @@ const getPreviewData = (newFile: string | undefined, newSheet: string) => {
     }).then((data: any) =>  {
         if (!data) return
         let keys: string[] = []
+
         showPreview.value = true
+        showImportLogs.value = true
 
         preparePreviewColumns(data, keys)
         preparePreviewData(data, keys)
