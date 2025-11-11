@@ -27,6 +27,7 @@ type TransformMethods<T> = {
 interface DocMethodOption<T = any>
   extends Omit<UseCallOptions<T>, 'url' | 'baseUrl'> {
   name: string
+  skipOverride?: boolean
 }
 
 interface UseDocOptions<TDoc> {
