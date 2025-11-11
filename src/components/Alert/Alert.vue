@@ -41,12 +41,12 @@ const props = withDefaults(defineProps<AlertProps>(), { dismissable: true });
     v-if="visible"
     role="alert"
     :class="classes"
-    class="flex gap-3 rounded-md px-4 py-3.5 text-base"
+    class="grid grid-cols-[auto_1fr_auto] gap-3 rounded-md px-4 py-3.5 text-base"
   >
     <slot name="icon">
       <component
         :is="icon.component"
-        class="size-4 flex-shrink-0"
+        class="size-4"
         v-if="icon"
         :class="icon.css"
       />
@@ -69,5 +69,7 @@ const props = withDefaults(defineProps<AlertProps>(), { dismissable: true });
     >
       <LucideX class="size-4 ml-auto flex-shrink-0" />
     </Button>
+
+    <slot name="footer"> </slot>
   </div>
 </template>
