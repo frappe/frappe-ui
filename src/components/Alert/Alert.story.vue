@@ -13,7 +13,7 @@ let dismissed = ref(false);
         title="Source successfully added"
         description="Discover the new feature to enhance your experience. See how it can help you."
         theme="success"
-        :dismissible="false"
+        :dismissable="false"
       />
     </Variant>
 
@@ -22,7 +22,7 @@ let dismissed = ref(false);
         title="Source successfully added"
         description="Discover the new feature to enhance your experience. See how it can help you."
         theme="warning"
-        :dismissible="false"
+        :dismissable="false"
       />
     </Variant>
 
@@ -31,7 +31,7 @@ let dismissed = ref(false);
         title="Source successfully added"
         description="Discover the new feature to enhance your experience. See how it can help you."
         theme="error"
-        :dismissible="false"
+        :dismissable="false"
       />
     </Variant>
 
@@ -40,7 +40,7 @@ let dismissed = ref(false);
         title="Source successfully added"
         description="Discover the new feature to enhance your experience. See how it can help you."
         theme="info"
-        :dismissible="false"
+        :dismissable="false"
       />
     </Variant>
 

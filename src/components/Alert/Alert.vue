@@ -31,7 +31,7 @@ const icon = computed(() => {
   return props.theme ? data[props.theme] : null;
 });
 
-const props = withDefaults(defineProps<AlertProps>(), { dismissible: true });
+const props = withDefaults(defineProps<AlertProps>(), { dismissable: true });
 </script>
 
 <template>
