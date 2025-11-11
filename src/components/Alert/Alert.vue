@@ -9,6 +9,8 @@ import LucideCircleX from "~icons/lucide/circle-x";
 import LucideCheck from "~icons/lucide/circle-check";
 import LucideWarning from "~icons/lucide/triangle-alert";
 
+import Button from "../Button/Button.vue";
+
 const classes = computed(() => {
   const css = {
     warning: "bg-surface-amber-2",
@@ -16,7 +18,7 @@ const classes = computed(() => {
     error: "bg-surface-red-2",
     success: "bg-surface-green-2",
   };
-  return props.type ? css[props.type] : "bg-surface-gray-2";
+  return props.theme ? css[props.theme] : "bg-surface-gray-2";
 });
 
 const icon = computed(() => {
@@ -26,10 +28,10 @@ const icon = computed(() => {
     error: { component: LucideCircleX, css: "text-ink-red-3" },
     success: { component: LucideCheck, css: "text-ink-green-3" },
   };
-  return props.type ? data[props.type] : null;
+  return props.theme ? data[props.theme] : null;
 });
 
-const props = withDefaults(defineProps<AlertProps>(), {});
+const props = withDefaults(defineProps<AlertProps>(), { dismissible: true });
 </script>
 
 <template>
@@ -49,9 +51,16 @@ const props = withDefaults(defineProps<AlertProps>(), {});
 
     <div class="grid gap-2">
       <span class="text-ink-gray-9"> {{ props.title }} </span>
-      <p v-if="props.desc" class="text-ink-gray-6">{{ props.desc }}</p>
+
+      <slot name="description">
+        <p v-if="props.description" class="text-ink-gray-6 prose-sm">
+          {{ props.description }}
+        </p>
+      </slot>
     </div>
 
-    <LucideX v-if="props.closeIcon" class="size-4 ml-auto flex-shrink-0" />
+    <Button v-if="props.dismissible" variant="ghost" @click="props.onClose">
+      <LucideX class="size-4 ml-auto flex-shrink-0" />
+    </Button>
   </div>
 </template>

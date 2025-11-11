@@ -1,6 +1,7 @@
 export interface AlertProps {
   title: string
-  type?: 'warning' | 'info' | 'error' | 'success'
-  desc?: string
-  closeIcon?: boolean
+  theme?: 'warning' | 'info' | 'error' | 'success'
+  description?: string
+  dismissible?: boolean
+  onClose?: () => void
 }
