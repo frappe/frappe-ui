@@ -52,7 +52,7 @@ const props = withDefaults(defineProps<AlertProps>(), { dismissable: true });
       />
     </slot>
 
-    <div class="grid gap-2">
+    <div class="grid gap-2" :class='{ "col-span-2": !$slots.icon && !icon }'>
       <span class="text-ink-gray-9"> {{ props.title }} </span>
 
       <slot name="description">
@@ -67,7 +67,7 @@ const props = withDefaults(defineProps<AlertProps>(), { dismissable: true });
       variant="ghost"
       @click="visible = false"
     >
-      <LucideX class="size-4 ml-auto flex-shrink-0" />
+      <LucideX class="size-4 ml-auto" />
     </Button>
 
     <slot name="footer"> </slot>

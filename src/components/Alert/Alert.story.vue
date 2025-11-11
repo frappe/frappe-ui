@@ -55,11 +55,7 @@ const visible = ref(true);
           v-model="visible"
           title="Source successfully added"
           description="Discover the new feature to enhance your experience. See how it can help you."
-        >
-          <template #icon>
-            <LucideBadge class="size-4" />
-          </template>
-        </Alert>
+        />
       </div>
     </Variant>
 
@@ -74,7 +70,7 @@ const visible = ref(true);
         </template>
 
         <template #footer>
-          <Button class="col-span-full" variant="solid"> Update now</Button>
+          <Button class="col-span-full" variant='solid'> Update now</Button>
         </template>
       </Alert>
     </Variant>
