@@ -164,6 +164,8 @@ declare module 'vue' {
     TabButtons: typeof import('./src/components/TabButtons/TabButtons.vue')['default']
     'TabButtons.story': typeof import('./src/components/TabButtons/TabButtons.story.vue')['default']
     Table2: typeof import('./src/components/TextEditor/icons/table-2.vue')['default']
+    TableActionMenu: typeof import('./src/components/TextEditor/extensions/table/TableActionMenu.vue')['default']
+    TableCellActionHandle: typeof import('./src/components/TextEditor/extensions/table/TableCellActionHandle.vue')['default']
     TabList: typeof import('./src/components/Tabs/TabList.vue')['default']
     TabPanel: typeof import('./src/components/Tabs/TabPanel.vue')['default']
     Tabs: typeof import('./src/components/Tabs/Tabs.vue')['default']
