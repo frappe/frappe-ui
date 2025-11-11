@@ -23,7 +23,7 @@
       "import": "./src/index.ts",
       "types": "./src/index.ts"
     },
-    "./src/tailwind/preset": {
+    "./tailwind/preset": {
       "import": "./src/tailwind/preset.js",
       "default": "./src/tailwind/preset.js"
     },
@@ -33,11 +33,12 @@
     "./style.css": {
       "import": "./src/style.css"
     },
-    "./charts": {
-      "import": "./src/components/Charts/index.ts"
-    },
+    "./tsconfig.base.json": "./tsconfig.base.json",
     "./frappe": {
       "import": "./frappe/index.js"
+    },
+    "./charts": {
+      "import": "./src/components/Charts/index.ts"
     },
     "./icons": {
       "import": "./src/icons.ts"
