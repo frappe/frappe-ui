@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed } from "vue";
 
 import type { AlertProps } from "./types";
 
@@ -11,7 +11,7 @@ import LucideWarning from "~icons/lucide/triangle-alert";
 
 import Button from "../Button/Button.vue";
 
-const visible = ref(true);
+const visible = defineModel({ default: true });
 
 const classes = computed(() => {
   const css = {

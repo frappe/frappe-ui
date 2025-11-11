@@ -1,5 +1,9 @@
 <script setup lang="ts">
+import { ref } from "vue";
 import Alert from "./Alert.vue";
+import Button from "../Button/Button.vue";
+
+const visible = ref(true);
 </script>
 
 <template>
@@ -36,12 +40,22 @@ import Alert from "./Alert.vue";
       />
     </Variant>
 
-    <Variant title="Dismiss">
-      <Alert
-        title="Source successfully added"
-        description="Discover the new feature to enhance your experience. See how it can help you."
-        :dismissable="false"
-      />
+    <Variant title="Controlled State">
+      <div>
+        <Button
+          variant="solid"
+          class="mb-3"
+          @click="visible = !visible"
+        >
+          Toggle Alert
+        </Button>
+
+        <Alert
+          v-model="visible"
+          title="Source successfully added"
+          description="Discover the new feature to enhance your experience. See how it can help you."
+        />
+      </div>
     </Variant>
   </Story>
 </template>
