@@ -150,7 +150,7 @@ export function tableBorderMenuPlugin(editor: Editor) {
                 font-weight: bold;
                 color: var(--surface-gray-5);
                 cursor: pointer;
-                z-index: 1000;
+                z-index: 10;
                 user-select: none;
                 background-color: white;
                 border: 1px solid var(--outline-gray-3);

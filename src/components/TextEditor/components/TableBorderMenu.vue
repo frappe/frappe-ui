@@ -1,16 +1,14 @@
 <template>
   <div
     v-if="show"
-    class="table-border-menu absolute z-[9999] rounded-lg border border-gray-200 bg-white shadow-xl p-2"
+    class="table-border-menu absolute z-40 rounded-lg border border-gray-200 bg-white shadow-xl p-1"
     :style="{
       top: position.top + 'px',
       left: position.left + 'px',
     }"
     @click.stop
   >
-    <!-- Single Row: All Menu Items -->
     <div class="flex items-center gap-1">
-      <!-- Row operations -->
       <template v-if="axis === 'row'">
         <button
           @click="emit('addRowBefore')"
