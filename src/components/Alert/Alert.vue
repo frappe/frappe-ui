@@ -14,13 +14,16 @@ import Button from "../Button/Button.vue";
 const visible = defineModel({ default: true });
 
 const classes = computed(() => {
-  const css = {
+  const subtleBgs = {
     warning: "bg-surface-amber-2",
     info: "bg-surface-blue-2",
     error: "bg-surface-red-2",
     success: "bg-surface-green-2",
   };
-  return props.theme ? css[props.theme] : "bg-surface-gray-2";
+
+  if (props.variant == "outline") return "border border-outline-gray-3";
+
+  return props.theme ? subtleBgs[props.theme] : "bg-surface-gray-2";
 });
 
 const icon = computed(() => {
@@ -33,7 +36,10 @@ const icon = computed(() => {
   return props.theme ? data[props.theme] : null;
 });
 
-const props = withDefaults(defineProps<AlertProps>(), { dismissable: true });
+const props = withDefaults(defineProps<AlertProps>(), {
+  variant: "subtle",
+  dismissable: true,
+});
 </script>
 
 <template>

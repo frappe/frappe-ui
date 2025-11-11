@@ -62,7 +62,7 @@ const visible = ref(true);
     <Variant title="Custom Slots">
       <Alert
         title="Your trial ends soon!"
-        class="bg-surface-modal border border-outline-gray-2"
+        variant="outline"
         description="Upgrade to keep enjoying features and future technical support."
       >
         <template #icon>
@@ -70,7 +70,7 @@ const visible = ref(true);
         </template>
 
         <template #footer>
-          <Button class="col-span-full" variant='solid'> Update now</Button>
+          <Button class="col-span-full" variant="solid"> Update now</Button>
         </template>
       </Alert>
     </Variant>
