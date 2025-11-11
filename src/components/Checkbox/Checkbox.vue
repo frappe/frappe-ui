@@ -9,7 +9,7 @@
     }"
   >
     <input
-      class="rounded-sm mt-[1px]"
+      class="rounded-sm mt-[1px] bg-surface-white"
       :class="inputClasses"
       type="checkbox"
       :disabled="disabled"
@@ -54,7 +54,7 @@ const labelClasses = computed(() => {
 const inputClasses = computed(() => {
   let baseClasses = props.disabled
     ? 'border-outline-gray-2 bg-surface-menu-bar text-ink-gray-3'
-    : 'border-outline-gray-4 text-ink-gray-9 hover:border-gray-600 focus:ring-offset-0 focus:border-gray-900 active:border-gray-700 transition'
+    : 'border-outline-gray-4 text-ink-gray-9 hover:border-outline-gray-5 focus:ring-offset-0 focus:border-outline-gray-8 active:border-outline-gray-6 transition'
 
   let interactionClasses = props.disabled
     ? ''

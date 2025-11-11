@@ -32,12 +32,15 @@ import type {
   ComboboxProps,
 } from './types'
 
-const props = defineProps<ComboboxProps>()
+const props = withDefaults(defineProps<ComboboxProps>(), {
+  options: () => [],
+})
 const emit = defineEmits([
   'update:modelValue',
   'update:selectedOption',
   'focus',
   'blur',
+  'input',
 ])
 
 const searchTerm = ref(getDisplayValue(props.modelValue))
@@ -238,6 +241,7 @@ const handleInputChange = (event: Event) => {
     internalModelValue.value = null
     emit('update:modelValue', null)
   }
+  emit('input', searchTerm.value)
 }
 
 const handleOpenChange = (open: boolean) => {

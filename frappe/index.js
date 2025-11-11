@@ -1,3 +1,6 @@
+// components dependent on frappe backend
+export * from './Link'
+
 // help components
 export { default as HelpModal } from './Help/HelpModal.vue'
 
@@ -19,3 +22,5 @@ export { useOnboarding } from './Onboarding/onboarding.js'
 // utils
 export { showHelpModal, minimize } from './Help/help.js'
 export { showHelpCenter } from './HelpCenter/helpCenter.js'
+
+export { default as Filter } from './Filter/Filter.vue'

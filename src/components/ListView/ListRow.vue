@@ -14,7 +14,7 @@
     class="flex flex-col transition-all duration-300 ease-in-out"
     v-bind="{
       to: list.options.getRowRoute ? list.options.getRowRoute(row) : undefined,
-      onClick: (e) => onRowClick(row, e),
+      onClick: onRowClick,
     }"
   >
     <component
@@ -40,7 +40,7 @@
           <Checkbox
             :modelValue="isSelected"
             class="cursor-pointer duration-300"
-            @click.stop="list.toggleRow(row[list.rowKey])"
+            @click.stop="handleCheckboxClick"
           />
         </div>
         <div
@@ -89,7 +89,7 @@
 import Checkbox from '../Checkbox/Checkbox.vue'
 import ListRowItem from './ListRowItem.vue'
 import { alignmentMap, getGridTemplateColumns } from './utils'
-import { computed, inject, ref } from 'vue'
+import { computed, inject } from 'vue'
 
 const props = defineProps({
   row: {
@@ -144,12 +144,34 @@ const roundedClass = computed(() => {
   }
 })
 
-const onRowClick = (row, e) => {
-  if (list.value.options.onRowClick) list.value.options.onRowClick(row, e)
-  if (list.value.activeRow.value === row.name) {
+const onRowClick = (event) => {
+  if (list.value.options.onRowClick)
+    list.value.options.onRowClick(props.row, event)
+  if (list.value.activeRow.value === props.row.name) {
     list.value.activeRow.value = null
   } else {
-    list.value.activeRow.value = row.name
+    list.value.activeRow.value = props.row.name
+  }
+}
+
+const handleCheckboxClick = (event) => {
+  const value = props.row[list.value.rowKey]
+  if (event.shiftKey && !list.value.selections.has(value)) {
+    const lastSelected = Array.from(list.value.selections).pop()
+    const rows = list.value.rows.find((k) => k.group)
+      ? list.value.rows.reduce((acc, curr) => acc.concat(curr.rows), [])
+      : list.value.rows
+    const lastIndex = rows.findIndex(
+      (k) => lastSelected === k[list.value.rowKey],
+    )
+    const curIndex = rows.findIndex((k) => value === k[list.value.rowKey])
+    const start = Math.min(lastIndex, curIndex)
+    const end = Math.max(lastIndex, curIndex)
+    for (let i = start; i <= end; i++) {
+      list.value.selections.add(rows[i][list.value.rowKey])
+    }
+  } else {
+    list.value.toggleRow(value)
   }
 }
 </script>
