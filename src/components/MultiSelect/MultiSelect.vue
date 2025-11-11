@@ -82,10 +82,10 @@ const selectAll = () => model.value = optionToStr(props.options);
 
           <div class="inline-flex gap-1">
             <LoadingIndicator
-              v-if="false"
+              v-if="props.loading"
               class="size-4 text-ink-gray-5"
             />
-            <LucideX class="size-4" />
+            <LucideX class="size-4 text-ink-gray-9" />
           </div>
         </div>
 
@@ -108,7 +108,9 @@ const selectAll = () => model.value = optionToStr(props.options);
                 data-[highlighted]:outline-none data-[highlighted]:bg-surface-gray-3
               "
             >
-              {{ item.label }}
+              <slot name="item" v-bind="{ item }">
+                {{ item.label }}
+              </slot>
 
               <ComboboxItemIndicator
                 class="absolute right-2 inline-flex items-center justify-center"
@@ -118,13 +120,15 @@ const selectAll = () => model.value = optionToStr(props.options);
             </ComboboxItem>
           </ComboboxViewport>
 
-          <hr />
+          <hr class="border-outline-gray-3" />
 
           <!-- footer btns -->
-          <div class="flex justify-between my-2">
-            <Button variant="ghost" @click="clearAll"> Clear All</Button>
-            <Button @click="selectAll"> Select All</Button>
-          </div>
+          <slot name="footer" v-bind="{ clearAll, selectAll }">
+            <div class="flex justify-between my-2">
+              <Button variant="ghost" @click="clearAll"> Clear All</Button>
+              <Button variant="ghost" @click="selectAll"> Select All</Button>
+            </div>
+          </slot>
         </ComboboxContent>
       </ComboboxRoot>
     </template>
