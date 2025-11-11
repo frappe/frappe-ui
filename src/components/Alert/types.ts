@@ -3,5 +3,4 @@ export interface AlertProps {
   theme?: 'warning' | 'info' | 'error' | 'success'
   description?: string
   dismissable?: boolean
-  onClose?: () => void
 }

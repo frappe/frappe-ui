@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 
 import type { AlertProps } from "./types";
 
@@ -10,6 +10,8 @@ import LucideCheck from "~icons/lucide/circle-check";
 import LucideWarning from "~icons/lucide/triangle-alert";
 
 import Button from "../Button/Button.vue";
+
+const visible = ref(true);
 
 const classes = computed(() => {
   const css = {
@@ -36,6 +38,7 @@ const props = withDefaults(defineProps<AlertProps>(), { dismissable: true });
 
 <template>
   <div
+    v-if="visible"
     role="alert"
     :class="classes"
     class="flex gap-3 rounded-md px-4 py-3.5 text-base"
@@ -59,7 +62,11 @@ const props = withDefaults(defineProps<AlertProps>(), { dismissable: true });
       </slot>
     </div>
 
-    <Button v-if="props.dismissible" variant="ghost" @click="props.onClose">
+    <Button
+      v-if="props.dismissable"
+      variant="ghost"
+      @click="visible = false"
+    >
       <LucideX class="size-4 ml-auto flex-shrink-0" />
     </Button>
   </div>
