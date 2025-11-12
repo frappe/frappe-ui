@@ -59,14 +59,6 @@ const StyleClipboardExtension = Extension.create<StyleClipboardOptions>({
             if (mark) tr.addMark(from, to, mark)
           }
 
-          //   // Optionally apply node attributes (like font size)
-          //   if (nodeAttrs) {
-          //     chain().updateAttributes(
-          //       state.selection.$from.parent.type.name,
-          //       nodeAttrs,
-          //     )
-          //   }
-
           dispatch(tr)
           return true
         },
@@ -81,23 +73,6 @@ const StyleClipboardExtension = Extension.create<StyleClipboardOptions>({
       } | null,
     }
   },
-  //   addProseMirrorPlugins() {
-  //     const extensionThis = this
-
-  //     return [
-  //       new Plugin({
-  //         key: new PluginKey('styleClipboardKey'),
-  //         props: {
-  //           handleDOMEvents: {
-  //             paste: (view, event: KeyboardEvent) => {
-  //                 console.log(event)
-  //               if (event.shiftKey) event.preventDefault()
-  //             },
-  //           },
-  //         },
-  //       }),
-  //     ]
-  //   },
 })
 
 export default StyleClipboardExtension

@@ -9,7 +9,7 @@ export default function improvedList(editor: Editor) {
   let nodeBefore = editor.view.state.doc.resolve($from.pos - 1).nodeBefore
   if (!nodeBefore)
     nodeBefore = editor.state.doc.resolve($from.before() - 1).nodeBefore
-  console.log(nodeBefore)
+
   if (nodeBefore && ['bulletList', 'orderedList', 'listItem'].includes(nodeBefore.type.name)) {
     // Join item with the last bullet item
     editor
