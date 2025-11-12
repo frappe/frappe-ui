@@ -50,7 +50,10 @@ declare module '@tiptap/core' {
        * Select an image file using the file picker and upload it
        */
       selectAndUploadImage: () => ReturnType
-
+      /**
+       * Set image alignment
+       */
+      setImageAlign: (align: 'left' | 'center' | 'right') => ReturnType
       /**
        * Set image float for text wrapping
        */
@@ -82,6 +85,26 @@ export const ImageExtension = NodeExtension.create<ImageExtensionOptions>({
       loading: {
         default: false,
         parseHTML: () => false,
+      },
+      align: {
+        default: 'center',
+        parseHTML: (element) => {
+          const align = (
+            element.getAttribute('data-align') ||
+            element.getAttribute('align') ||
+            'left'
+          ).toLowerCase()
+
+          if (['left', 'center', 'right'].includes(align)) {
+            return align as 'left' | 'center' | 'right'
+          }
+          return 'left'
+        },
+        renderHTML: (attributes) => {
+          return {
+            'data-align': attributes.align || 'left',
+          }
+        },
       },
       float: {
         default: null,
@@ -145,6 +168,11 @@ export const ImageExtension = NodeExtension.create<ImageExtensionOptions>({
 
   addCommands() {
     return {
+      setImageAlign:
+        (align: 'left' | 'center' | 'right') =>
+        ({ commands }) => {
+          return commands.updateAttributes(this.name, { align })
+        },
       setImageFloat:
         (float: 'left' | 'right' | null) =>
         ({ commands }) => {
