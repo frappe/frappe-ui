@@ -56,7 +56,7 @@
   </Button>
 </template>
 <script setup>
-import StepsIcon from '../Icons/StepsIcon.vue'
+import StepsIcon from '../../icons/StepsIcon.vue'
 import Button from '../../src/components/Button/Button.vue'
 import FeatherIcon from '../../src/components/FeatherIcon.vue'
 import { useOnboarding } from './onboarding'
