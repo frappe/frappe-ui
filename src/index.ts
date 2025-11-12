@@ -23,8 +23,8 @@ export { default as Input } from './components/Input.vue'
 export { default as ListItem } from './components/ListItem.vue'
 export { default as LoadingIndicator } from './components/LoadingIndicator.vue'
 export { default as LoadingText } from './components/LoadingText.vue'
-export * from './components/Popover'
 export * from './components/Progress'
+export * from './components/Popover'
 export * from './components/Rating'
 export { default as Resource } from './components/Resource.vue'
 export * from './components/Select'
@@ -72,10 +72,10 @@ export { default as GridLayout } from './components/VueGridLayout/Layout.vue'
 
 // chart components
 export { default as AxisChart } from './components/Charts/AxisChart.vue'
-export { default as DonutChart } from './components/Charts/DonutChart.vue'
-export { default as ECharts } from './components/Charts/ECharts.vue'
-export { default as FunnelChart } from './components/Charts/FunnelChart.vue'
 export { default as NumberChart } from './components/Charts/NumberChart.vue'
+export { default as DonutChart } from './components/Charts/DonutChart.vue'
+export { default as FunnelChart } from './components/Charts/FunnelChart.vue'
+export { default as ECharts } from './components/Charts/ECharts.vue'
 
 // directives
 export { default as onOutsideClickDirective } from './directives/onOutsideClick'
@@ -88,17 +88,17 @@ export { default as debounce } from './utils/debounce'
 export { default as fileToBase64 } from './utils/file-to-base64'
 export { default as FileUploadHandler } from './utils/fileUploadHandler'
 export { usePageMeta } from './utils/pageMeta'
-export { dayjs, dayjsLocal } from './utils/dayjs'
+export { dayjsLocal, dayjs } from './utils/dayjs'
 export * from './utils/useFileUpload'
 export * from './utils/theme'
 
 // old data-fetching: resources
 export * from './resources/index.ts'
 
+export { request } from './utils/request.js'
 export { frappeRequest } from './utils/frappeRequest.js'
 export { default as initSocket } from './utils/socketio.js'
-export { request } from './utils/request.js'
-export { getConfig, setConfig } from './utils/config'
+export { setConfig, getConfig } from './utils/config'
 
 // new data-fetching composables
 export * from './data-fetching'
