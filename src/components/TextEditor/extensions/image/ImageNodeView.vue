@@ -256,7 +256,7 @@ function toggleCaptions() {
 }
 
 const wrapperClasses = (float: string) => [
-  'w-fit',
+  'w-fit m-2',
   float === 'right' ? 'float-right ml-5' : 'float-left mr-5',
 ]
 </script>
@@ -425,6 +425,14 @@ const wrapperClasses = (float: string) => [
           </div>
         </div>
 
+        <!-- Resize Handle -->
+        <button
+          v-if="selected && isEditable"
+          class="absolute bottom-2 right-2 cursor-nw-resize bg-black/65 rounded p-1"
+          @mousedown.prevent="startResize"
+        >
+          <LucideMoveDiagonal2 class="text-white size-4" />
+        </button>
         <!-- Loading indicator overlay -->
         <div
           v-if="node.attrs.loading"
