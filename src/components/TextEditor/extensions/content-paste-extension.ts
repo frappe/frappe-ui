@@ -1,4 +1,4 @@
-import { Extension } from '@tiptap/core'
+import { Extension , markPasteRule} from '@tiptap/core'
 import { Plugin, PluginKey } from '@tiptap/pm/state'
 import { DOMParser } from '@tiptap/pm/model'
 import { EditorView } from '@tiptap/pm/view'
@@ -19,7 +19,6 @@ export const ContentPasteExtension = Extension.create<ContentPasteOptions>({
       uploadFunction: null,
     }
   },
-
   addProseMirrorPlugins() {
     const extensionThis = this
     return [
@@ -53,7 +52,6 @@ export const ContentPasteExtension = Extension.create<ContentPasteOptions>({
           handlePaste: (
             view: EditorView,
             event: ClipboardEvent,
-            slice: any,
           ) => {
             if (!this.options.enabled) return false
 

@@ -56,6 +56,7 @@ import TaskItem from '@tiptap/extension-task-item'
 import TaskList from '@tiptap/extension-task-list'
 import NamedColorExtension from './extensions/color'
 import NamedHighlightExtension from './extensions/highlight'
+import StyleClipboardExtension from './extensions/copy-styles'
 import improvedList from './extensions/list-extension'
 
 import { MentionExtension } from './extensions/mention'
@@ -234,6 +235,7 @@ onMounted(() => {
 				enabled: true,
 				uploadFunction: props.uploadFunction || defaultUploadFunction,
 			}),
+			StyleClipboardExtension,
 			...(props.extensions || []),
 		],
 		onUpdate: ({ editor }) => {
