@@ -23,7 +23,13 @@
       "import": "./src/index.ts",
       "types": "./src/index.ts"
     },
-    "./tailwind/preset": {
+    "./frappe": {
+      "import": "./frappe/index.js"
+    },
+    "./icons": {
+      "import": "./src/icons.ts"
+    },
+    "./tailwind": {
       "import": "./src/tailwind/preset.js",
       "default": "./src/tailwind/preset.js"
     },
@@ -33,16 +39,7 @@
     "./style.css": {
       "import": "./src/style.css"
     },
-    "./tsconfig.base.json": "./tsconfig.base.json",
-    "./frappe": {
-      "import": "./frappe/index.js"
-    },
-    "./charts": {
-      "import": "./src/components/Charts/index.ts"
-    },
-    "./icons": {
-      "import": "./src/icons.ts"
-    }
+    "./tsconfig.base.json": "./tsconfig.base.json"
   },
   "files": [
     "frappe",
