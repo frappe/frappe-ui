@@ -68,6 +68,13 @@ export { default as Toast } from './components/Toast/Toast.vue'
 export * from './components/Tooltip'
 export * from './components/Tree'
 
+// chart components
+export { default as AxisChart } from './components/Charts/AxisChart.vue'
+export { default as DonutChart } from './components/Charts/DonutChart.vue'
+export { default as ECharts } from './components/Charts/ECharts.vue'
+export { default as FunnelChart } from './components/Charts/FunnelChart.vue'
+export { default as NumberChart } from './components/Charts/NumberChart.vue'
+
 // grid layout
 export { default as GridLayout } from './components/VueGridLayout/Layout.vue'
 
@@ -100,10 +107,3 @@ export * from './data-fetching'
 export { confirmDialog } from './utils/confirmDialog.js'
 export { default as pageMetaPlugin } from './utils/pageMeta.js'
 export { default as FrappeUI } from './utils/plugin.js'
-
-// chart components
-export { default as AxisChart } from './components/Charts/AxisChart.vue'
-export { default as DonutChart } from './components/Charts/DonutChart.vue'
-export { default as ECharts } from './components/Charts/ECharts.vue'
-export { default as FunnelChart } from './components/Charts/FunnelChart.vue'
-export { default as NumberChart } from './components/Charts/NumberChart.vue'

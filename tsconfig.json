@@ -1,7 +1,6 @@
 {
   "include": [
     "src/**/*.ts",
-    "frappe/index.d.ts",
     "src/**/*.d.ts",
     "src/**/*.tsx",
     "src/**/*.vue",
@@ -11,6 +10,7 @@
     "frappe/**/*.tsx",
     "frappe/**/*.vue",
     "frappe/index.js",
+    "frappe/index.d.ts",
     "vitest.config.ts",
     "vitest.setup.ts"
   ],

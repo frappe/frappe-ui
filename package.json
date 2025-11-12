@@ -27,7 +27,7 @@
       "import": "./frappe/index.js"
     },
     "./icons": {
-      "import": "./src/icons.ts"
+      "import": "./icons/index.ts"
     },
     "./tailwind": {
       "import": "./src/tailwind/preset.js",
