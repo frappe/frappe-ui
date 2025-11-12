@@ -215,7 +215,7 @@ import LucideGlobe2 from '~icons/lucide/globe-2'
 const open = defineModel()
 const props = defineProps({
   entity: Object,
-  allUsers: {
+  users: {
     default: allUsers,
   },
   usersWithAccess: { default: usersWithAccess },
@@ -224,7 +224,6 @@ const props = defineProps({
 const emit = defineEmits(['success'])
 
 props.usersWithAccess.fetch({ entity: props.entity.name })
-props.allUsers.fetch({ team: 'all' })
 
 const levelOptions = [
   {
@@ -324,7 +323,7 @@ const usersToAdd = ref([])
 const accessToAdd = ref('reader')
 const filteredUsers = ref([])
 watch(
-  [() => props.allUsers.data, () => props.usersWithAccess.data],
+  [() => props.users.data, () => props.usersWithAccess.data],
   ([users, existingUsers]) => {
     if (!existingUsers || !users) return []
     filteredUsers.value = users.filter(
