@@ -108,7 +108,7 @@ const selectAll = () => model.value = optionToStr(props.options);
                 data-[highlighted]:outline-none data-[highlighted]:bg-surface-gray-3
               "
             >
-              <slot name="item" v-bind="{ item }">
+              <slot name="option" v-bind="{ item }">
                 {{ item.label }}
               </slot>
 

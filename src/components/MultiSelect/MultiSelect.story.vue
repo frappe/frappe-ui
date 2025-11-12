@@ -31,13 +31,13 @@ const options = [
       />
     </Variant>
 
-    <Variant title="Item slot">
+    <Variant title="Option slot">
       <MultiSelect
         :options="options"
         v-model="state"
         placeholder="Select fruit"
       >
-        <template #item="{ item }">
+        <template #option="{ item }">
           <Avatar :image="item.img" size="sm" class="mr-2" />
           {{ item.label }}
         </template>
