@@ -10,7 +10,6 @@ export const TableRowExtension = TableRow.extend({
                     if (!attributes.backgroundColor) {
                         return {}
                     }
-
                     return {
                         class: `${attributes.backgroundColor}`
                     }
@@ -39,7 +38,6 @@ export const TableRowExtension = TableRow.extend({
                     if (!attributes.borderWidth) {
                         return {}
                     }
-                    console.log(attributes.borderWidth)
                     return {
                         class: `border-${attributes.borderWidth}`,
                     }

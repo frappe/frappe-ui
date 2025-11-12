@@ -74,7 +74,7 @@ export function useTableMenu(editor: Ref<Editor | null>) {
   }
 
   const toggleHeader = () => {
-    editor.value?.chain().focus().toggleHeaderRow().run()
+    editor.value?.chain().focus().toggleHeaderCell().run()
     showTableBorderMenu.value = false
   }
 

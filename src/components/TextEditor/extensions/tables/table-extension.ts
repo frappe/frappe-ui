@@ -17,7 +17,6 @@ export const TableExtension = Table.extend({
           if (!attributes.backgroundColor) {
             return {}
           }
-
           return {
             class: `${attributes.backgroundColor}`,
           }
@@ -48,6 +47,7 @@ export const TableExtension = Table.extend({
       },
     }
   },
+  
   addProseMirrorPlugins() {
     return [
       ...(this.parent?.() ?? []),

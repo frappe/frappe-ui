@@ -31,7 +31,6 @@
       @set-background-color="setBackgroundColor"
       @set-border-color="setBorderColor"
     />
-    
     <slot name="top" :editor />
     <slot name="editor" :editor="editor">
       <EditorContent :editor="editor" />
@@ -89,8 +88,9 @@ import { TextEditorEmits, TextEditorProps } from './types'
 import TableCellExtension from './extensions/tables/table-cell-extension'
 import TableHeaderExtension from './extensions/tables/table-header-extension'
 import TableRowExtension from './extensions/tables/table-row-extension'
-import TableBorderMenu from './components/TableBorderMenu.vue'
+import TableBorderMenu from './extensions/tables/TableBorderMenu.vue'
 import { useTableMenu } from './extensions/tables/use-table-menu'
+import { TableCommandsExtension } from './extensions/tables/table-selection-extension'
 
 const props = withDefaults(defineProps<TextEditorProps>(), {
   content: null,
@@ -208,9 +208,6 @@ onMounted(() => {
           ? props.starterkitOptions.heading
           : {}),
       }),
-      // Table.configure({
-      // 	resizable: true,
-      // }),
       TaskList,
       TaskItem.configure({
         nested: true,
@@ -221,6 +218,7 @@ onMounted(() => {
       TableCellExtension,
       TableHeaderExtension,
       TableRowExtension,
+	  TableCommandsExtension,
       Typography,
       TextAlign.configure({
         types: ['heading', 'paragraph'],
@@ -401,17 +399,14 @@ img.ProseMirror-selectednode {
   background-color: var(--surface-gray-2, #f3f3f3);
 }
 
-/* Edit prose classes to be more functional */
 .prose-sm {
   blockquote {
     quotes: none;
     font-style: normal;
   }
-  /* fix: heading bottom margin */
   :is(h1, h2, h3, h4, h5, h6) + :is(h1, h2, h3, h4, h5, h6) {
     margin-top: 0;
   }
-
   hr {
     margin: 2.25em 0;
   }
