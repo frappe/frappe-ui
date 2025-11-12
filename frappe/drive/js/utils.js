@@ -57,13 +57,27 @@ const copyToClipboard = (str) => {
   }
 }
 
+export function formatSize(size, nDigits = 1) {
+  if (size === 0) return '0 KB'
+  var i = -1
+  var byteUnits = ['KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+  do {
+    size /= 1000
+    i++
+  } while (size > 1000)
+  return Math.max(size, 0.1).toFixed(nDigits) + ' ' + byteUnits[i]
+}
+
+const prettyFile = (entity) => {
+  entity.file_size_pretty = formatSize(entity.file_size)
+  entity.relativeModified = useTimeAgo(entity.modified)
+  if (entity.accessed) entity.relativeAccessed = useTimeAgo(entity.accessed)
+  return entity
+}
+
 export const prettyData = (entities) => {
-  return entities.map((entity) => {
-    entity.file_size_pretty = formatSize(entity.file_size)
-    entity.relativeModified = useTimeAgo(entity.modified)
-    if (entity.accessed) entity.relativeAccessed = useTimeAgo(entity.accessed)
-    return entity
-  })
+  if (!entities.map) return prettyFile(entities)
+  return entities.map(prettyFile)
 }
 
 export const formatDate = (date) => {
