@@ -19,11 +19,16 @@
         success,
         openFileSelector,
       }"
-    />
+    >
+      <Button @click="openFileSelector" :loading="uploading">
+        {{ uploading ? `Uploading ${progress}%` : 'Upload File' }}
+      </Button>
+    </slot>
   </div>
 </template>
 
 <script>
+import { Button } from '../Button'
 import FileUploadHandler from '../../utils/fileUploadHandler'
 
 export default {
