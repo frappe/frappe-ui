@@ -31,7 +31,7 @@ export const TableHeaderExtension = TableHeader.extend({
             return {}
           }
           return {
-            class: `border-${attributes.borderWidth}`,
+            style: `border-width: ${attributes.borderWidth};`,
           }
         },
       },

@@ -73,9 +73,14 @@ export function useTableMenu(editor: Ref<Editor | null>) {
   const setBackgroundColor = (color: string | null) => {
     editor.value?.chain().focus().setCellAttribute('backgroundColor', color).run()
   }
-
+  
   const setBorderColor = (color: string | null) => {
     editor.value?.chain().focus().setCellAttribute('borderColor', color).run()
+  }
+
+  const setBorderWidth = (width: number | null) => {
+    const borderWidthValue = width ? `${width}px` : null
+    editor.value?.chain().focus().setCellAttribute('borderWidth', borderWidthValue).run()
   }
 
   const canMergeCells = computed(() => {
@@ -108,5 +113,6 @@ export function useTableMenu(editor: Ref<Editor | null>) {
     toggleHeader,
     setBackgroundColor,
     setBorderColor,
+    setBorderWidth
   }
 }

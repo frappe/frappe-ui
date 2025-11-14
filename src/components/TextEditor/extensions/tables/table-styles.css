@@ -1,19 +1,16 @@
-/* Table styles */
 .prose table p {
   margin: 0;
 }
 
-/* Table cells need relative positioning */
 .ProseMirror table td,
 .ProseMirror table th {
   position: relative;
 }
 
-/* Row handle overlay - positioned absolutely outside table */
 .table-row-handle-overlay {
   pointer-events: auto;
 }
-/* Prosemirror specific table styles */
+
 .ProseMirror table .selectedCell:after {
   z-index: 2;
   position: absolute;
@@ -219,6 +216,15 @@
 .ProseMirror table td.rose-border,
 .ProseMirror table th.rose-border {
   border: 2px solid var(--table-border-pink);
+}
+.ProseMirror table td.transparent-border,
+.ProseMirror table th.transparent-border {
+  border: 1px solid transparent;
+}
+.ProseMirror table td.transparent-border:hover,
+.ProseMirror table th.transparent-border:hover {
+  border-bottom: 1px solid rgb(98, 179, 255) !important;
+  transition: border-bottom 0.5s;
 }
 .ProseMirror table td.gray-border,
 .ProseMirror table th.gray-border {

@@ -11,7 +11,6 @@ declare module '@tiptap/core' {
 }
 
 function getCellsInRow(rowIndex: number, table: any, map: TableMap) {
-  //map is used to get dimensions of the table
   const cells = []
   const seenPositions = new Set()
   const rowStart = rowIndex * map.width

@@ -21,7 +21,7 @@
           <component :is="item.icon" class="text-ink-gray-6 size-3.5" />
         </template>
       </Button>
-      
+
       <Button
         @click="$emit('mergeCells')"
         variant="ghost"
@@ -32,7 +32,8 @@
           <LucideMerge class="text-ink-gray-6 size-3.5" />
         </template>
       </Button>
-   <Popover>
+
+      <Popover>
         <template #target="{ togglePopover }">
           <Button class="!size-6" @click="togglePopover()" variant="ghost">
             <template #icon>
@@ -40,7 +41,7 @@
             </template>
           </Button>
         </template>
-        <template #body-main >
+        <template #body-main>
           <div class="p-2">
             <div class="text-sm text-ink-gray-7">Background Color</div>
             <div class="mt-1 grid grid-cols-6 gap-1">
@@ -68,12 +69,43 @@
                 :class="color.borderClass"
                 @click="
                   handleBorderColor(
-                    color.name === 'Default' ? null : color.name.toLowerCase(),
+                    color.name === 'Default'
+                      ? 'transparent'
+                      : color.name.toLowerCase(),
                   )
                 "
                 :title="color.name"
               ></button>
             </div>
+          </div>
+        </template>
+      </Popover>
+      <Popover>
+        <template #target="{ togglePopover }">
+          <Button class="!size-6" @click="togglePopover()" variant="ghost">
+            <template #icon>
+              <LucideFrame class="text-ink-gray-6 size-3.5" />
+            </template>
+          </Button>
+        </template>
+        <template #body-main>
+          <div class="p-2"
+          @mousedown.stop
+          @click.stop
+          @pointerdown.stop
+            @touchstart.stop>
+            <FormControl
+              :type="'number'"
+              :ref_for="true"
+              size="sm"
+              variant="subtle"
+              placeholder="1px"
+              :disabled="false"
+              label="Border Width"
+              :min="1"
+              :max="20"
+              v-model="borderWidth"
+            />
           </div>
         </template>
       </Popover>
@@ -91,7 +123,8 @@ import LucideTrash from '~icons/lucide/trash-2'
 import LucideMerge from '~icons/lucide/merge'
 import LucideHeader from '~icons/lucide/panel-top'
 import LucidePalette from '~icons/lucide/palette'
-import { computed } from 'vue'
+import LucideFrame from '~icons/lucide/frame'
+import { computed , ref, watch} from 'vue'
 
 interface TableBorderMenuProps {
   show: boolean
@@ -131,8 +164,16 @@ const menuObjRow: MenuItem[] = [
   { icon: LucideTrash, action: 'deleteRow', tooltip: 'Delete Row' },
 ]
 const menuObjColumn: MenuItem[] = [
-  { icon: LucideArrowLeft, action: 'addColumnBefore', tooltip: 'Add Column Before' },
-  { icon: LucideArrowRight, action: 'addColumnAfter', tooltip: 'Add Column After' },
+  {
+    icon: LucideArrowLeft,
+    action: 'addColumnBefore',
+    tooltip: 'Add Column Before',
+  },
+  {
+    icon: LucideArrowRight,
+    action: 'addColumnAfter',
+    tooltip: 'Add Column After',
+  },
   { icon: LucideHeader, action: 'toggleHeader', tooltip: 'Make Header' },
   { icon: LucideTrash, action: 'deleteColumn', tooltip: 'Delete Column' },
 ]
@@ -143,16 +184,25 @@ const menuObjIndividual: MenuItem[] = [
 
 const menuObj = computed(() =>
   props.axis === 'row'
-    ? menuObjRow // If axis is 'row'
+    ? menuObjRow
     : props.axis === 'column'
-      ? menuObjColumn // Else if axis is 'column'
-      : menuObjIndividual // Else (for any other axis value or if undefined)
-);
+      ? menuObjColumn
+      : menuObjIndividual,
+)
 const emit = defineEmits<{
   (e: MenuAction | 'mergeCells'): void
   (e: 'setBackgroundColor', color: string | null): void
   (e: 'setBorderColor', color: string | null): void
+  (e: 'setBorderWidth', width: number): void
 }>()
+
+const borderWidth = ref(1)
+
+watch(borderWidth, (newWidth: number) => {
+  if (newWidth && newWidth > 0) {
+    emit('setBorderWidth', newWidth)
+  }
+})
 
 const backgroundColors = [
   { name: 'Default', style: 'background: #fff;' },
@@ -211,7 +261,6 @@ const borderColors = [
     borderClass: 'border-2 border-gray-600 dark:border-dark-gray-400',
   },
 ]
-
 function handleBackgroundColor(color: string | null) {
   emit('setBackgroundColor', color)
 }

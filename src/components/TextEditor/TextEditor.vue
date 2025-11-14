@@ -30,6 +30,7 @@
       @toggle-header="toggleHeader"
       @set-background-color="setBackgroundColor"
       @set-border-color="setBorderColor"
+      @set-border-width="setBorderWidth"
     />
     <slot name="top" :editor />
     <slot name="editor" :editor="editor">
@@ -128,6 +129,7 @@ const {
   toggleHeader,
   setBackgroundColor,
   setBorderColor,
+  setBorderWidth
 } = useTableMenu(editor)
 
 const attrs = useAttrs()

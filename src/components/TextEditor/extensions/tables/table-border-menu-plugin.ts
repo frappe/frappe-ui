@@ -67,12 +67,17 @@ export function tableBorderMenuPlugin(editor: Editor) {
           const cell = target.closest('td, th')
           if (!cell || !cell.closest('.ProseMirror table')) {
             clearHandles()
-            clearCellTrigger()
+            const { selection } = view.state
+            if (!(selection instanceof CellSelection)) {
+              clearCellTrigger()
+            }
             return false
           }
-
           cancelClear()
-          cancelCellTriggerClear()
+          const { selection } = view.state
+          if (!(selection instanceof CellSelection)) {
+            cancelCellTriggerClear()
+          }
 
           const row = cell.closest('tr')!
           const table = cell.closest('table')!
@@ -191,21 +196,10 @@ export function tableBorderMenuPlugin(editor: Editor) {
               const editorRect = editorElement.getBoundingClientRect()
               const menuHeight = 25
               const gap = 8
-
-              const { selection } = view.state
-              const isCellSelection = selection instanceof CellSelection
-
-              if (!isCellSelection) {
-                const cellPos = view.posAtDOM(cellEl as Node, 0)
-                editor.commands.focus()
-                editor.commands.setTextSelection(cellPos)
-
-                if (editor.commands.selectRow) {
-                  editor.commands.selectRow(rowIndex)
-                } else {
-                }
-              } else {
-              }
+              const cellPos = view.posAtDOM(cellEl as Node, 0)
+              editor.commands.focus()
+              editor.commands.setTextSelection(cellPos)
+                editor.commands.selectRow(rowIndex)
 
               const rowEvent = new CustomEvent('table-border-click', {
                 bubbles: true,
@@ -296,20 +290,10 @@ export function tableBorderMenuPlugin(editor: Editor) {
               const menuHeight = 30
               const gap = 8
 
-              const { selection } = view.state
-              const isCellSelection = selection instanceof CellSelection
-
-              if (!isCellSelection) {
-                const cellPos = view.posAtDOM(cell as Node, 0)
-                editor.commands.focus()
-                editor.commands.setTextSelection(cellPos)
-
-                if (editor.commands.selectColumn) {
-                  editor.commands.selectColumn(colIndex)
-                } else {
-                }
-              } else {
-              }
+              const cellPos = view.posAtDOM(cell as Node, 0)
+              editor.commands.focus()
+              editor.commands.setTextSelection(cellPos)
+              editor.commands.selectColumn(colIndex)
 
               const columnEvent = new CustomEvent('table-border-click', {
                 bubbles: true,
@@ -369,7 +353,7 @@ export function tableBorderMenuPlugin(editor: Editor) {
             const circle = document.createElementNS(svgNS, 'circle')
             circle.setAttribute('cx', '12')
             circle.setAttribute('cy', '12')
-            circle.setAttribute('r', '4') // Smaller radius for a dot
+            circle.setAttribute('r', '4')
 
             svg.appendChild(circle)
             currentCellTrigger.appendChild(svg)
@@ -388,9 +372,14 @@ export function tableBorderMenuPlugin(editor: Editor) {
               e.preventDefault()
               e.stopPropagation()
 
-              const cellPos = view.posAtDOM(cell as Node, 0)
-              editor.commands.focus()
-              editor.commands.setTextSelection(cellPos)
+              const { selection } = view.state
+              const isCellSelection = selection instanceof CellSelection
+
+              if (!isCellSelection) {
+                const cellPos = view.posAtDOM(cell as Node, 0)
+                editor.commands.focus()
+                editor.commands.setTextSelection(cellPos)
+              }
 
               const triggerRect = currentCellTrigger!.getBoundingClientRect()
               const editorRect = editorElement.getBoundingClientRect()
@@ -407,7 +396,8 @@ export function tableBorderMenuPlugin(editor: Editor) {
                     element: cell,
                     rowIndex,
                     colIndex,
-                    isIndividualCell: true,
+                    isIndividualCell: !isCellSelection,
+                    isMultiCellSelection: isCellSelection,
                   },
                 },
               })
