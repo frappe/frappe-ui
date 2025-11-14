@@ -1,5 +1,4 @@
 import Table from '@tiptap/extension-table'
-import { tableCellMenuPlugin } from './table-menu-extension';
 import { tableBorderMenuPlugin } from './table-border-menu-plugin';
 import TableRow from '@tiptap/extension-table-row'
 import TableHeader from '@tiptap/extension-table-header'
@@ -12,8 +11,7 @@ export const TableExtension = Table.extend({
   addAttributes() {
     return {
       backgroundColor: {
-        default: null,
-        renderHTML: (attributes) => {
+        renderHTML(attributes){
           if (!attributes.backgroundColor) {
             return {}
           }
@@ -24,19 +22,17 @@ export const TableExtension = Table.extend({
       },
       borderColor: {
         default: null,
-        renderHTML: (attributes) => {
+        renderHTML(attributes){
           if (!attributes.borderColor) {
             return {}
           }
-
           return {
             class: `${attributes.borderColor}!`,
           }
         },
       },
       borderWidth: {
-        default: null,
-        renderHTML: (attributes) => {
+        renderHTML(attributes){
           if (!attributes.borderWidth) {
             return {}
           }
@@ -51,7 +47,6 @@ export const TableExtension = Table.extend({
   addProseMirrorPlugins() {
     return [
       ...(this.parent?.() ?? []),
-      tableCellMenuPlugin(this.editor),
       tableBorderMenuPlugin(this.editor),
     ]
   },

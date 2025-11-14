@@ -11,17 +11,16 @@ declare module '@tiptap/core' {
 }
 
 function getCellsInRow(rowIndex: number, table: any, map: TableMap) {
+  //map is used to get dimensions of the table
   const cells = []
   const seenPositions = new Set()
   const rowStart = rowIndex * map.width
-  
+
   for (let i = 0; i < map.width; i++) {
     const cellPos = map.map[rowStart + i]
-    
     if (seenPositions.has(cellPos)) {
       continue
     }
-    
     const cell = table.node.nodeAt(cellPos)
     if (cell) {
       seenPositions.add(cellPos)

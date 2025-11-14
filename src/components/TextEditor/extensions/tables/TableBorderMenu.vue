@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="show"
-    class="table-border-menu absolute z-40 rounded-lg border border-gray-200 bg-white shadow-xl p-1"
+    class="table-border-menu absolute z-40 rounded-lg border bg-white shadow-xl p-0.5"
     :style="{
       top: position.top + 'px',
       left: position.left + 'px',
@@ -9,50 +9,38 @@
     @click.stop
   >
     <div class="flex items-center gap-1">
-      <template v-if="axis === 'row'">
-        <Button
-          v-for="item in menuObjRow"
-          :key="item.action"
-          :icon="item.icon"
-          :tooltip="item.tooltip"
-          @click="$emit(item.action)"
-          variant="ghost"
-        />
-        <Button
-          :icon="LucideMerge"
-          @click="$emit('mergeCells')"
-          variant="ghost"
-          v-if=canMergeCells
-        />
-        
-      </template>
+      <Button
+        v-for="item in menuObj"
+        :key="item.action"
+        :tooltip="item.tooltip"
+        @click="$emit(item.action)"
+        class="!size-6"
+        variant="ghost"
+      >
+        <template #icon>
+          <component :is="item.icon" class="text-ink-gray-6 size-3.5" />
+        </template>
+      </Button>
 
-      <template v-else-if="axis === 'column'">
-        <Button
-          v-for="item in menuObjColumn"
-          :key="item.action"
-          :icon="item.icon"
-          :tooltip="item.tooltip"
-          @click="$emit(item.action)"
-          variant="ghost"
-        />
-        <Button
-          :icon="LucideMerge"
-          @click="$emit('mergeCells')"
-          variant="ghost"
-          v-if=canMergeCells
-        />
-      </template>
-      <Popover placement="bottom-start">
+      <Button
+        @click="$emit('mergeCells')"
+        variant="ghost"
+        v-if="canMergeCells"
+        class="!size-6"
+      >
+        <template #icon>
+          <LucideMerge class="text-ink-gray-6 size-3.5" />
+        </template>
+      </Button>
+   <Popover placement="top-start">
         <template #target="{ togglePopover }">
-          <Button
-            :icon="LucidePalette"
-            @click="togglePopover()"
-            variant="ghost"
-          >
+          <Button class="!size-6" @click="togglePopover()" variant="ghost">
+            <template #icon>
+              <LucidePalette class="text-ink-gray-6 size-3.5" />
+            </template>
           </Button>
         </template>
-        <template #body-main>
+        <template #body-main >
           <div class="p-2">
             <div class="text-sm text-ink-gray-7">Background Color</div>
             <div class="mt-1 grid grid-cols-6 gap-1">
@@ -61,7 +49,6 @@
                 :key="'bg-' + color.name"
                 :aria-label="color.name"
                 class="h-5 w-5 rounded border"
-                :class="color.class"
                 :style="color.style"
                 @click="
                   handleBackgroundColor(
@@ -104,6 +91,7 @@ import LucideTrash from '~icons/lucide/trash-2'
 import LucideMerge from '~icons/lucide/merge'
 import LucideHeader from '~icons/lucide/panel-top'
 import LucidePalette from '~icons/lucide/palette'
+import { computed } from 'vue'
 
 interface TableBorderMenuProps {
   show: boolean
@@ -120,30 +108,40 @@ interface TableBorderMenuProps {
 
 const props = defineProps<TableBorderMenuProps>()
 
-const menuObjRow = [
-  { icon: LucideArrowUp, action: 'addRowBefore' , tooltip: 'Add Row Before'},
-  { icon: LucideArrowDown, action: 'addRowAfter' , tooltip: 'Add Row After' },
-  { icon: LucideHeader, action: 'toggleHeader' ,tooltip: 'Make Header' },
-  { icon: LucideTrash, action: 'deleteRow' , tooltip: 'Delete Row' },
+type MenuAction =
+  | 'addRowBefore'
+  | 'addRowAfter'
+  | 'deleteRow'
+  | 'addColumnBefore'
+  | 'addColumnAfter'
+  | 'deleteColumn'
+  | 'toggleHeader'
+
+interface MenuItem {
+  icon: any
+  action: MenuAction
+  tooltip: string
+}
+
+const menuObjRow: MenuItem[] = [
+  { icon: LucideArrowUp, action: 'addRowBefore', tooltip: 'Add Row Before' },
+  { icon: LucideArrowDown, action: 'addRowAfter', tooltip: 'Add Row After' },
+  { icon: LucideHeader, action: 'toggleHeader', tooltip: 'Make Header' },
+  { icon: LucideTrash, action: 'deleteRow', tooltip: 'Delete Row' },
 ]
-const menuObjColumn = [
-  { icon: LucideArrowLeft, action: 'addColumnBefore' , tooltip: 'Add Column Before'},
-  { icon: LucideArrowRight, action: 'addColumnAfter' , tooltip: 'Add Column After' },
-  { icon: LucideHeader, action: 'toggleHeader' , tooltip: "Make Header" },
-  { icon: LucideTrash, action: 'deleteColumn' , tooltip: 'Delete Column'},
+const menuObjColumn: MenuItem[] = [
+  { icon: LucideArrowLeft, action: 'addColumnBefore', tooltip: 'Add Column Before' },
+  { icon: LucideArrowRight, action: 'addColumnAfter', tooltip: 'Add Column After' },
+  { icon: LucideHeader, action: 'toggleHeader', tooltip: 'Make Header' },
+  { icon: LucideTrash, action: 'deleteColumn', tooltip: 'Delete Column' },
 ]
 
+
+const menuObj = computed(() => props.axis === 'row' ? menuObjRow : menuObjColumn)
 const emit = defineEmits<{
-  addRowBefore: []
-  addRowAfter: []
-  deleteRow: []
-  addColumnBefore: []
-  addColumnAfter: []
-  deleteColumn: []
-  mergeCells: []
-  toggleHeader: []
-  setBackgroundColor: [color: string | null]
-  setBorderColor: [color: string | null]
+  (e: MenuAction | 'mergeCells'): void
+  (e: 'setBackgroundColor', color: string | null): void
+  (e: 'setBorderColor', color: string | null): void
 }>()
 
 const backgroundColors = [
