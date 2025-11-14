@@ -1,6 +1,7 @@
 // components
 export * from './components/Alert'
 export * from './components/Autocomplete'
+export * from './components/MultiSelect'
 export * from './components/Avatar'
 export * from './components/Badge'
 export * from './components/Breadcrumbs'
