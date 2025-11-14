@@ -1,6 +1,7 @@
 import { Plugin, PluginKey } from '@tiptap/pm/state'
 import { Editor } from '@tiptap/core'
 import LucideGripVertical from '~icons/lucide/grip-vertical?raw'
+import LucideCircle from '~icons/lucide/dot?raw'
 import { CellSelection } from 'prosemirror-tables'
 
 export const tableBorderMenuPluginKey = new PluginKey('tableBorderMenu')
@@ -8,8 +9,10 @@ export const tableBorderMenuPluginKey = new PluginKey('tableBorderMenu')
 export function tableBorderMenuPlugin(editor: Editor) {
   let currentRowHandle: HTMLElement | null = null
   let currentColHandle: HTMLElement | null = null
+  let currentCellTrigger: HTMLElement | null = null
   let currentTableId: string | null = null
   let hideTimeout: NodeJS.Timeout | null = null
+  let cellTriggerTimeout: NodeJS.Timeout | null = null
 
   const clearHandles = () => {
     if (hideTimeout) clearTimeout(hideTimeout)
@@ -20,6 +23,21 @@ export function tableBorderMenuPlugin(editor: Editor) {
       currentColHandle = null
       currentTableId = null
     }, 100)
+  }
+
+  const clearCellTrigger = () => {
+    if (cellTriggerTimeout) clearTimeout(cellTriggerTimeout)
+    cellTriggerTimeout = setTimeout(() => {
+      currentCellTrigger?.remove()
+      currentCellTrigger = null
+    }, 100)
+  }
+
+  const cancelCellTriggerClear = () => {
+    if (cellTriggerTimeout) {
+      clearTimeout(cellTriggerTimeout)
+      cellTriggerTimeout = null
+    }
   }
 
   const cancelClear = () => {
@@ -38,19 +56,23 @@ export function tableBorderMenuPlugin(editor: Editor) {
 
           if (
             target.closest('.table-row-handle-overlay') ||
-            target.closest('.table-col-handle-overlay')
+            target.closest('.table-col-handle-overlay') ||
+            target.closest('.table-cell-trigger-overlay')
           ) {
             cancelClear()
+            cancelCellTriggerClear()
             return false
           }
 
           const cell = target.closest('td, th')
           if (!cell || !cell.closest('.ProseMirror table')) {
             clearHandles()
+            clearCellTrigger()
             return false
           }
 
           cancelClear()
+          cancelCellTriggerClear()
 
           const row = cell.closest('tr')!
           const table = cell.closest('table')!
@@ -116,8 +138,8 @@ export function tableBorderMenuPlugin(editor: Editor) {
             currentRowHandle.appendChild(iconContainer)
             const svg = iconContainer.querySelector('svg')
             if (svg) {
-              svg.style.width = '16px'
-              svg.style.height = '16px'
+              svg.style.width = '13px'
+              svg.style.height = '13px'
             }
             currentRowHandle.setAttribute('data-row-id', String(rowIndex))
             currentRowHandle.setAttribute('data-table-id', tableId)
@@ -126,35 +148,35 @@ export function tableBorderMenuPlugin(editor: Editor) {
 
             currentRowHandle.style.cssText = `
               position: absolute;
-              left: ${tableRect.left - editorRect.left - 30}px;
+              left: ${tableRect.left - editorRect.left - 7}px;
               top: ${rowRect.top - editorRect.top + rowRect.height / 2 - 10}px;
-              height: 20px;
-              width: 20px;
+              height: 16px;
+              width: 12px;
               display: flex;
               align-items: center;
               justify-content: center;
-              color: var(--gray-600);
+              color: var(--ink-gray-7);
               cursor: pointer;
               z-index: 10;
               user-select: none;
-              background-color: var(--gray-50);
-              border: 1px solid var(--gray-200);
+              background-color: var(--surface-white);
+              border: 1px solid var(--outline-gray-2);
               border-radius: 4px;
               box-shadow: 0 1px 2px rgba(0,0,0,0.05);
               transition: all 0.15s ease;
             `
 
             currentRowHandle.addEventListener('mouseenter', function () {
-              this.style.backgroundColor = 'var(--gray-100)'
-              this.style.borderColor = 'var(--gray-300)'
-              this.style.color = 'var(--gray-700)'
+              this.style.backgroundColor = 'var(--surface-gray-2)'
+              this.style.borderColor = 'var(--outline-gray-3)'
+              this.style.color = 'var(--surface-gray-7)'
               cancelClear()
             })
 
             currentRowHandle.addEventListener('mouseleave', function () {
-              this.style.backgroundColor = 'var(--gray-50)'
-              this.style.borderColor = 'var(--gray-200)'
-              this.style.color = 'var(--gray-600)'
+              this.style.backgroundColor = 'var(--surface-white)'
+              this.style.borderColor = 'var(--outline-gray-2)'
+              this.style.color = 'var(--ink-gray-7)'
               clearHandles()
             })
 
@@ -167,7 +189,7 @@ export function tableBorderMenuPlugin(editor: Editor) {
 
               const cellRect = cellEl.getBoundingClientRect()
               const editorRect = editorElement.getBoundingClientRect()
-              const menuHeight = 40
+              const menuHeight = 25
               const gap = 8
 
               const { selection } = view.state
@@ -220,8 +242,8 @@ export function tableBorderMenuPlugin(editor: Editor) {
             iconContainer.innerHTML = LucideGripVertical as unknown as string
             const svg = iconContainer.querySelector('svg')
             if (svg) {
-              svg.style.width = '16px'
-              svg.style.height = '16px'
+              svg.style.width = '13px'
+              svg.style.height = '13px'
             }
 
             currentColHandle.appendChild(iconContainer)
@@ -233,34 +255,35 @@ export function tableBorderMenuPlugin(editor: Editor) {
             currentColHandle.style.cssText = `
               position: absolute;
               left: ${cellRect.left - editorRect.left + cellRect.width / 2 - 10}px;
-              top: ${tableRect.top - editorRect.top - 30}px;
-              height: 20px;
-              width: 20px;
+              top: ${tableRect.top - editorRect.top - 7}px;
+              height: 16px;
+              width: 12px;
               display: flex;
               align-items: center;
               justify-content: center;
-              color: var(--gray-600);
+              color: var(--ink-gray-7);
               cursor: pointer;
               z-index: 10;
+              rotate: 90deg;
               user-select: none;
-              background-color: var(--gray-50);
-              border: 1px solid var(--gray-200);
+              background-color: var(--surface-white);
+              border: 1px solid var(--outline-gray-2);
               border-radius: 4px;
               box-shadow: 0 1px 2px rgba(0,0,0,0.05);
               transition: all 0.15s ease;
             `
 
             currentColHandle.addEventListener('mouseenter', function () {
-              this.style.backgroundColor = 'var(--gray-100)'
-              this.style.borderColor = 'var(--gray-300)'
-              this.style.color = 'var(--gray-700)'
+              this.style.backgroundColor = 'var(--surface-gray-2)'
+              this.style.borderColor = 'var(--outline-gray-3)'
+              this.style.color = 'var(--surface-gray-7)'
               cancelClear()
             })
 
             currentColHandle.addEventListener('mouseleave', function () {
-              this.style.backgroundColor = 'var(--gray-50)'
-              this.style.borderColor = 'var(--gray-200)'
-              this.style.color = 'var(--gray-600)'
+              this.style.backgroundColor = 'var(--surface-white)'
+              this.style.borderColor = 'var(--outline-gray-2)'
+              this.style.color = 'var(--ink-gray-7)'
               clearHandles()
             })
 
@@ -270,7 +293,7 @@ export function tableBorderMenuPlugin(editor: Editor) {
 
               const cellRect = cell.getBoundingClientRect()
               const editorRect = editorElement.getBoundingClientRect()
-              const menuHeight = 40
+              const menuHeight = 30
               const gap = 8
 
               const { selection } = view.state
@@ -309,6 +332,91 @@ export function tableBorderMenuPlugin(editor: Editor) {
 
             editorElement.appendChild(currentColHandle)
           }
+          const cellId = `${tableId}-${rowIndex}-${colIndex}`
+          if (
+            !currentCellTrigger ||
+            currentCellTrigger.getAttribute('data-cell-id') !== cellId
+          ) {
+            currentCellTrigger?.remove()
+
+            currentCellTrigger = document.createElement('div')
+            currentCellTrigger.className = 'table-cell-trigger-overlay'
+            currentCellTrigger.setAttribute('data-cell-id', cellId)
+
+            const cellRect = cell.getBoundingClientRect()
+
+            currentCellTrigger.style.cssText = `
+              position: absolute;
+              left: ${cellRect.right - editorRect.left - 9}px;
+              top: ${cellRect.top - editorRect.top + 8}px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: var(--outline-gray-2);
+              cursor: pointer;
+              transition: all 0.15s ease;
+              z-index: 10;
+              user-select: none;
+            `
+
+            const svgNS = 'http://www.w3.org/2000/svg'
+            const svg = document.createElementNS(svgNS, 'svg')
+            svg.setAttribute('viewBox', '0 0 24 24')
+            svg.setAttribute('width', '18')
+            svg.setAttribute('height', '18')
+            svg.setAttribute('fill', 'currentColor')
+
+            const circle = document.createElementNS(svgNS, 'circle')
+            circle.setAttribute('cx', '12')
+            circle.setAttribute('cy', '12')
+            circle.setAttribute('r', '4') // Smaller radius for a dot
+
+            svg.appendChild(circle)
+            currentCellTrigger.appendChild(svg)
+
+            currentCellTrigger.addEventListener('mouseenter', function () {
+              this.style.color = 'var(--surface-gray-7)'
+              cancelCellTriggerClear()
+            })
+
+            currentCellTrigger.addEventListener('mouseleave', function () {
+              this.style.color = 'var((--outline-gray-2)'
+              clearCellTrigger()
+            })
+
+            currentCellTrigger.addEventListener('click', (e) => {
+              e.preventDefault()
+              e.stopPropagation()
+
+              const cellPos = view.posAtDOM(cell as Node, 0)
+              editor.commands.focus()
+              editor.commands.setTextSelection(cellPos)
+
+              const triggerRect = currentCellTrigger!.getBoundingClientRect()
+              const editorRect = editorElement.getBoundingClientRect()
+
+              const cellEvent = new CustomEvent('table-border-click', {
+                bubbles: true,
+                detail: {
+                  axis: 'cell',
+                  position: {
+                    top: triggerRect.bottom - editorRect.top - 25,
+                    left: triggerRect.left - editorRect.left,
+                  },
+                  cellInfo: {
+                    element: cell,
+                    rowIndex,
+                    colIndex,
+                    isIndividualCell: true,
+                  },
+                },
+              })
+              editorElement.dispatchEvent(cellEvent)
+              window.dispatchEvent(cellEvent)
+            })
+
+            editorElement.appendChild(currentCellTrigger)
+          }
 
           return false
         },
@@ -319,8 +427,10 @@ export function tableBorderMenuPlugin(editor: Editor) {
         destroy() {
           currentRowHandle?.remove()
           currentColHandle?.remove()
+          currentCellTrigger?.remove()
           currentRowHandle = null
           currentColHandle = null
+          currentCellTrigger = null
         },
       }
     },

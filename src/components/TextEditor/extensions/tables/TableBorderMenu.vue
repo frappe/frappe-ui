@@ -21,7 +21,7 @@
           <component :is="item.icon" class="text-ink-gray-6 size-3.5" />
         </template>
       </Button>
-
+      
       <Button
         @click="$emit('mergeCells')"
         variant="ghost"
@@ -32,7 +32,7 @@
           <LucideMerge class="text-ink-gray-6 size-3.5" />
         </template>
       </Button>
-   <Popover placement="top-start">
+   <Popover>
         <template #target="{ togglePopover }">
           <Button class="!size-6" @click="togglePopover()" variant="ghost">
             <template #icon>
@@ -102,6 +102,7 @@ interface TableBorderMenuProps {
     rowIndex: number
     colIndex: number
     isFirstRow: boolean
+    isIndividualCell: boolean
   } | null
   canMergeCells: boolean
 }
@@ -136,8 +137,17 @@ const menuObjColumn: MenuItem[] = [
   { icon: LucideTrash, action: 'deleteColumn', tooltip: 'Delete Column' },
 ]
 
+const menuObjIndividual: MenuItem[] = [
+  { icon: LucideHeader, action: 'toggleHeader', tooltip: 'Make Header' },
+]
 
-const menuObj = computed(() => props.axis === 'row' ? menuObjRow : menuObjColumn)
+const menuObj = computed(() =>
+  props.axis === 'row'
+    ? menuObjRow // If axis is 'row'
+    : props.axis === 'column'
+      ? menuObjColumn // Else if axis is 'column'
+      : menuObjIndividual // Else (for any other axis value or if undefined)
+);
 const emit = defineEmits<{
   (e: MenuAction | 'mergeCells'): void
   (e: 'setBackgroundColor', color: string | null): void

@@ -13,13 +13,6 @@
 .table-row-handle-overlay {
   pointer-events: auto;
 }
-
-.table-row-handle-overlay:hover {
-  background-color: #f3f4f6 !important;
-  border-radius: 4px !important;
-  color: #3b82f6 !important;
-}
-
 /* Prosemirror specific table styles */
 .ProseMirror table .selectedCell:after {
   z-index: 2;
@@ -44,6 +37,7 @@
   top: 0;
   bottom: -2px;
   width: 2px;
+  z-index:5;
   background-color: theme('colors.blue.200');
   pointer-events: none;
 }
