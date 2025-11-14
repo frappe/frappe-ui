@@ -1,4 +1,9 @@
+type Theme =  'yellow' | 'blue' | 'red' | 'green'
+
 export interface AlertProps {
-  title?: string
-  type?: 'warning'
+  title: string
+  theme?: Theme
+  variant?: 'subtle' | 'outline'
+  description?: string
+  dismissable?: boolean
 }
