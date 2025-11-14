@@ -1,6 +1,6 @@
-import { get, set, del } from 'idb-keyval'
+import { del, get, set } from 'idb-keyval'
 
-export function saveLocal(key, data) {
+export function saveLocal<T = any>(key: string, data: T): Promise<void | null> {
   if (typeof indexedDB === 'undefined') {
     return Promise.resolve(null)
   }
@@ -8,7 +8,7 @@ export function saveLocal(key, data) {
   return set(key, JSON.stringify(data))
 }
 
-export function deleteLocal(key) {
+export function deleteLocal(key: string): Promise<void | null> {
   if (typeof indexedDB === 'undefined') {
     return Promise.resolve(null)
   }
@@ -16,7 +16,7 @@ export function deleteLocal(key) {
   return del(key)
 }
 
-export function getLocal(key) {
+export function getLocal<T = any>(key: string): Promise<T | null> {
   if (typeof indexedDB === 'undefined') {
     return Promise.resolve(null)
   }
