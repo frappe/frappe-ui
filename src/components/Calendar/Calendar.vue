@@ -145,7 +145,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['create', 'update', 'delete'])
+const emit = defineEmits(['create', 'update', 'delete', 'rangeChange'])
 
 const defaultConfig = {
   scrollToHour: 15,
@@ -208,10 +208,14 @@ onUnmounted(() => {
   window.removeEventListener('keydown', handleShortcuts)
 })
 function handleShortcuts(e) {
-  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) {
+  if (
+    e.target.tagName === 'INPUT' ||
+    e.target.tagName === 'TEXTAREA' ||
+    e.target.isContentEditable
+  ) {
     return
   }
-  
+
   if (e.key.toLowerCase() === 'm') {
     activeView.value = 'Month'
   }
@@ -600,6 +604,64 @@ function setCalendarDate(d) {
     }
   })
 }
+
+function getVisibleRange() {
+  const toDateString = (date) => (date ? dayjs(date).format('YYYY-MM-DD') : '')
+
+  if (activeView.value === 'Day') {
+    const day = selectedDay.value
+    if (!day) return null
+    const start = dayjs(day).startOf('day')
+    const end = dayjs(day).endOf('day')
+    return {
+      startDate: toDateString(start),
+      endDate: toDateString(end),
+    }
+  }
+
+  if (activeView.value === 'Week') {
+    const weekDates = datesInWeeks.value[week.value] || []
+    if (!weekDates.length) return null
+    const orderedWeek = [...weekDates].sort((a, b) => a - b)
+    const start = dayjs(orderedWeek[0]).startOf('day')
+    const end = dayjs(orderedWeek[orderedWeek.length - 1]).endOf('day')
+    return {
+      startDate: toDateString(start),
+      endDate: toDateString(end),
+    }
+  }
+
+  const start = dayjs(
+    new Date(currentYear.value, currentMonth.value, 1),
+  ).startOf('day')
+  const end = dayjs(
+    new Date(currentYear.value, currentMonth.value + 1, 0),
+  ).endOf('day')
+  return {
+    startDate: toDateString(start),
+    endDate: toDateString(end),
+  }
+}
+
+let lastRangeKey = ''
+watch(
+  () => {
+    const range = getVisibleRange()
+    if (!range) return null
+    return {
+      view: activeView.value,
+      ...range,
+    }
+  },
+  (payload) => {
+    if (!payload) return
+    const key = `${payload.view}-${payload.startDate}-${payload.endDate}`
+    if (key === lastRangeKey) return
+    lastRangeKey = key
+    emit('rangeChange', payload)
+  },
+  { immediate: true },
+)
 
 defineExpose({
   reloadEvents,
