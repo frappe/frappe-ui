@@ -70,6 +70,7 @@ import TaskItem from '@tiptap/extension-task-item'
 import TaskList from '@tiptap/extension-task-list'
 import NamedColorExtension from './extensions/color'
 import NamedHighlightExtension from './extensions/highlight'
+import StyleClipboardExtension from './extensions/copy-styles'
 import improvedList from './extensions/list-extension'
 import TableExtension from './extensions/tables/table-extension'
 import { MentionExtension } from './extensions/mention'
@@ -282,6 +283,104 @@ onMounted(() => {
       emit('blur', event)
     },
   })
+	editor.value = new Editor({
+		content: props.content || null,
+		editorProps: editorProps.value,
+		editable: props.editable,
+		autofocus: props.autofocus,
+		extensions: [
+			StarterKit.configure({
+				...props.starterkitOptions,
+				code: false,
+				codeBlock: false,
+				heading: false,
+			}).extend({
+				addKeyboardShortcuts() {
+					return {
+						Backspace: () => improvedList(this.editor),
+					}
+				},
+			}),
+			Heading.configure({
+				...(typeof props.starterkitOptions?.heading === 'object' &&
+				props.starterkitOptions.heading !== null
+					? props.starterkitOptions.heading
+					: {}),
+			}),
+			Table.configure({
+				resizable: true,
+			}),
+			TaskList,
+			TaskItem.configure({
+				nested: true,
+			}),
+			TableRow,
+			TableHeader,
+			TableCell,
+			Typography,
+			TextAlign.configure({
+				types: ['heading', 'paragraph'],
+			}),
+			TextStyle,
+			NamedColorExtension,
+			NamedHighlightExtension,
+			ExtendedCode,
+			ExtendedCodeBlock,
+			ImageExtension.configure({
+				uploadFunction: props.uploadFunction || defaultUploadFunction,
+			}),
+			ImageGroup.configure({
+				uploadFunction: props.uploadFunction || defaultUploadFunction,
+			}),
+			ImageViewerExtension,
+			VideoExtension.configure({
+				uploadFunction: props.uploadFunction || defaultUploadFunction,
+			}),
+			IframeExtension,
+			LinkExtension.configure({
+				openOnClick: false,
+			}),
+			Placeholder.configure({
+				placeholder:
+					typeof props.placeholder === 'function'
+						? props.placeholder
+						: () => props.placeholder as string,
+			}),
+			props.mentions &&
+				MentionExtension.configure(
+					Array.isArray(props.mentions)
+						? { mentions: props.mentions }
+						: {
+								mentions: props.mentions.mentions,
+								component: props.mentions.component,
+							},
+				),
+			EmojiExtension,
+			SlashCommands,
+			TagNode,
+			TagExtension.configure({
+				tags: () => props.tags,
+			}),
+			ContentPasteExtension.configure({
+				enabled: true,
+				uploadFunction: props.uploadFunction || defaultUploadFunction,
+			}),
+			StyleClipboardExtension,
+			...(props.extensions || []),
+		],
+		onUpdate: ({ editor }) => {
+			emit('change', editor.getHTML())
+		},
+		onTransaction: ({ editor }) => {
+			emit('transaction', editor)
+		},
+		onFocus: ({ editor, event }) => {
+			emit('focus', event)
+		},
+		onBlur: ({ editor, event }) => {
+			emit('blur', event)
+		},
+	})
 })
 
 onBeforeUnmount(() => {

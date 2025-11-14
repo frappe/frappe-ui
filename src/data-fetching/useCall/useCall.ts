@@ -17,6 +17,7 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
     baseUrl = '',
     initialData,
     cacheKey,
+    skipOverride,
     transform,
     beforeSubmit,
     onSuccess,
@@ -63,8 +64,9 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
     immediate,
     refetch,
     initialData,
+    skipOverride,
     afterFetch(ctx: AfterFetchContext<FrappeResponse<TResponse>>) {
-      if (ctx.data) {
+      if (ctx.data && !skipOverride) {
         if (transform) {
           let returnValue = transform(ctx.data.data)
           if (returnValue !== undefined) {

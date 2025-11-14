@@ -27,12 +27,14 @@ type TransformMethods<T> = {
 interface DocMethodOption<T = any>
   extends Omit<UseCallOptions<T>, 'url' | 'baseUrl'> {
   name: string
+  skipOverride?: boolean
 }
 
 interface UseDocOptions<TDoc> {
   doctype: string
   name: MaybeRefOrGetter<string>
   baseUrl?: string
+  url?: string
   methods?: Record<string, string | DocMethodOption>
   immediate?: boolean
   transform?: (doc: TDoc & { doctype: string }) => TDoc & { doctype: string }
@@ -45,14 +47,18 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
     baseUrl = '',
     doctype,
     name,
+    url: customUrl = '',
     methods = {},
     immediate = true,
     transform,
   } = options
 
-  const url = computed(
-    () => `${baseUrl}/api/v2/document/${doctype}/${toValue(name)}`,
-  )
+  const url = computed(() => {
+    if (customUrl) {
+      return `${baseUrl}${customUrl}`
+    }
+    return `${baseUrl}/api/v2/document/${doctype}/${toValue(name)}`
+  })
 
   type SuccessCallback = (doc: TDoc) => void
   const successCallbacks: SuccessCallback[] = []
