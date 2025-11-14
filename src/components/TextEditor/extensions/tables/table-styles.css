@@ -219,13 +219,13 @@
 }
 .ProseMirror table td.transparent-border,
 .ProseMirror table th.transparent-border {
-  border: 1px solid transparent;
+  border: 2px solid transparent;
 }
-.ProseMirror table td.transparent-border:hover,
+/* .ProseMirror table td.transparent-border:hover,
 .ProseMirror table th.transparent-border:hover {
-  border-bottom: 1px solid rgb(98, 179, 255) !important;
-  transition: border-bottom 0.5s;
-}
+  border: 1px solid rgb(98, 179, 255) !important;
+  transition: border-bottom 0.5s ease-out, transform 0.5s ease-in;
+} */
 .ProseMirror table td.gray-border,
 .ProseMirror table th.gray-border {
   border: 2px solid var(--table-border-gray);

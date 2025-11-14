@@ -1,7 +1,6 @@
 import { Plugin, PluginKey } from '@tiptap/pm/state'
 import { Editor } from '@tiptap/core'
 import LucideGripVertical from '~icons/lucide/grip-vertical?raw'
-import LucideCircle from '~icons/lucide/dot?raw'
 import { CellSelection } from 'prosemirror-tables'
 
 export const tableBorderMenuPluginKey = new PluginKey('tableBorderMenu')
@@ -199,7 +198,7 @@ export function tableBorderMenuPlugin(editor: Editor) {
               const cellPos = view.posAtDOM(cellEl as Node, 0)
               editor.commands.focus()
               editor.commands.setTextSelection(cellPos)
-                editor.commands.selectRow(rowIndex)
+              editor.commands.selectRow(rowIndex)
 
               const rowEvent = new CustomEvent('table-border-click', {
                 bubbles: true,
@@ -331,8 +330,8 @@ export function tableBorderMenuPlugin(editor: Editor) {
 
             currentCellTrigger.style.cssText = `
               position: absolute;
-              left: ${cellRect.right - editorRect.left - 9}px;
-              top: ${cellRect.top - editorRect.top + 8}px;
+             left: ${cellRect.left - editorRect.left + cellRect.width - 9}px;
+              top: ${cellRect.top - editorRect.top + cellRect.height / 2 - 9}px;
               display: flex;
               align-items: center;
               justify-content: center;
