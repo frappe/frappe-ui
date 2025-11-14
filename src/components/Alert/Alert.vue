@@ -15,10 +15,10 @@ const visible = defineModel({ default: true });
 
 const classes = computed(() => {
   const subtleBgs = {
-    warning: "bg-surface-amber-2",
-    info: "bg-surface-blue-2",
-    error: "bg-surface-red-2",
-    success: "bg-surface-green-2",
+    yellow: "bg-surface-amber-2",
+    blue: "bg-surface-blue-2",
+    red: "bg-surface-red-2",
+    green: "bg-surface-green-2",
   };
 
   if (props.variant == "outline") return "border border-outline-gray-3";

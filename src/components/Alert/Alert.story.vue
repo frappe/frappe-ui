@@ -13,7 +13,7 @@ const visible = ref(true);
       <Alert
         title="Source successfully added"
         description="Discover the new feature to enhance your experience. See how it can help you."
-        theme="success"
+        theme="green"
       />
     </Variant>
 
@@ -21,7 +21,7 @@ const visible = ref(true);
       <Alert
         title="Source successfully added"
         description="Discover the new feature to enhance your experience. See how it can help you."
-        theme="warning"
+        theme="yellow"
       />
     </Variant>
 
@@ -29,7 +29,7 @@ const visible = ref(true);
       <Alert
         title="Source successfully added"
         description="Discover the new feature to enhance your experience. See how it can help you."
-        theme="error"
+        theme="red"
       />
     </Variant>
 
@@ -37,7 +37,7 @@ const visible = ref(true);
       <Alert
         title="Source successfully added"
         description="Discover the new feature to enhance your experience. See how it can help you."
-        theme="info"
+        theme="blue"
       />
     </Variant>
 
