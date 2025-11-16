@@ -82,10 +82,10 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
           doctype,
           name: String(ctx.data.data.name),
         }
+        docStore.setDoc(doc)
         if (transform) {
           doc = transform(doc)
         }
-        docStore.setDoc(doc)
         listStore.updateRow(doctype, ctx.data.data)
         triggerSuccessCallbacks(doc)
       }
@@ -93,15 +93,8 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
     },
   }
 
-  const {
-    error,
-    isFetching,
-    isFinished,
-    canAbort,
-    aborted,
-    abort,
-    execute,
-  } = useFrappeFetch(url, fetchOptions).get()
+  const { error, isFetching, isFinished, canAbort, aborted, abort, execute } =
+    useFrappeFetch(url, fetchOptions).get()
 
   let docMethods: Record<string, ReturnType<typeof useCall>> = {}
   if (methods) {
@@ -160,8 +153,14 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
     },
   })
 
-  const doc = docStore.getDoc(doctype, name) as Ref<TDoc | null>
-
+  let doc = docStore.getDoc(doctype, name) as Ref<TDoc | null>
+  if (doc.value && transform) {
+    try {
+      doc.value = transform(doc.value)
+    } catch (e) {
+      docStore.removeDoc(doctype, toValue(name))
+    }
+  }
   let out = reactive({
     doc,
     error,
