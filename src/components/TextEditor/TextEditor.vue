@@ -1,7 +1,7 @@
 <template>
 	<div
 		v-if="editor"
-		class="relative w-full"
+		class="relative w-full prose"
 		:class="attrsClass"
 		:style="attrsStyle"
 		v-bind="attrsWithoutClassStyle"
@@ -112,7 +112,7 @@ const editorProps = computed(() => {
 	return {
 		attributes: {
 			class: normalizeClass([
-				'prose prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-outline-gray-2 prose-th:border-outline-gray-2 prose-td:relative prose-th:relative prose-th:bg-surface-gray-2',
+				'prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-outline-gray-2 prose-th:border-outline-gray-2 prose-td:relative prose-th:relative prose-th:bg-surface-gray-2',
 				props.editorClass,
 			]),
 		},
@@ -394,10 +394,18 @@ img.ProseMirror-selectednode {
 }
 
 /* Edit prose classes to be more functional */
-.prose-sm {
+.prose-v2 {
+	line-height: 1.5 !important;
 	blockquote {
 		quotes: none;
 		font-style: normal;
+		margin-top: 0.75em;
+		margin-bottom: 0.75em;
+	}
+
+	p {
+		margin-top: 0;
+		margin-bottom: 0;
 	}
 	/* fix: heading bottom margin */
 	:is(h1, h2, h3, h4, h5, h6) + :is(h1, h2, h3, h4, h5, h6) {
