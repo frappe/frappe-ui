@@ -68,6 +68,7 @@ export * from './components/CircularProgressBar'
 export * from './components/Tree'
 export { default as FrappeUIProvider } from './components/Provider/FrappeUIProvider.vue'
 export { default as Sidebar } from './components/Sidebar/Sidebar.vue'
+export { default as SidebarItem } from './components/Sidebar/SidebarItem.vue'
 
 // grid layout
 export { default as GridLayout } from './components/VueGridLayout/Layout.vue'
