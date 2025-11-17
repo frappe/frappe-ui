@@ -10,6 +10,12 @@ import {
 import type { TabProps } from './types'
 
 const props = defineProps<TabProps>()
+
+const tabIndicatorXCss = `left-0 bottom-0 h-[2px] w-[--reka-tabs-indicator-size] transition-[width,transform] 
+                          translate-x-[--reka-tabs-indicator-position] translate-y-[1px]`
+
+const tabIndicatorYCss = `right-0 w-0.5 h-[--reka-tabs-indicator-size] transition-[height,transform]
+                           translate-y-[--reka-tabs-indicator-position] translate-x-[1px]`
 </script>
 
 <template>
@@ -19,16 +25,11 @@ const props = defineProps<TabProps>()
     :default-value="props.tabs[0].label"
   >
     <TabsList
-      class="relative flex data-[orientation=vertical]:flex-col gap-2 p-1 border-b border-outline-gray-2 data-[orientation=vertical]:border-r"
+      class="relative flex data-[orientation=vertical]:flex-col p-1 border-b border-outline-gray-2 data-[orientation=vertical]:border-r"
     >
       <TabsIndicator
         class="absolute rounded-full duration-300"
-        :class="{
-          'left-0 bottom-0 h-[2px] w-[--reka-tabs-indicator-size] translate-x-[--reka-tabs-indicator-position] translate-y-[1px] transition-[width,transform]':
-            !props.vertical,
-          'right-0 w-0.5 h-[--reka-tabs-indicator-size] translate-y-[--reka-tabs-indicator-position] translate-x-[1px] transition-[height,transform]':
-            props.vertical,
-        }"
+        :class="props.vertical ? tabIndicatorYCss : tabIndicatorXCss"
       >
         <div class="bg-grass8 w-full h-full bg-surface-gray-7" />
       </TabsIndicator>
@@ -40,9 +41,9 @@ const props = defineProps<TabProps>()
       >
         <slot name="tab-item" v-bind="{ item }">
           <button
-            class="flex bg-surfce-gray-2 items-center gap-1.5 text-base text-ink-gray-5 duration-300
-						ease-in-out hover:text-ink-gray-9 p-2"
-            :class="['data-[state=active]:text-ink-gray-9']"
+            class="flex items-center gap-1.5 text-base text-ink-gray-5 duration-300 
+						ease-in-out hover:text-ink-gray-9 p-2.5 data-[state=active]:text-ink-gray-9"
+            :class="{ 'py-2.5 px-4': props.vertical }"
           >
             {{ item.label }}
           </button>
