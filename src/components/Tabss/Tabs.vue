@@ -14,11 +14,11 @@ const props = defineProps<TabProps>()
 
 <template>
   <TabsRoot
-    class="rounded-lg border border-outline-gray-1"
+    class="rounded-lg border border-outline-gray-2"
     :default-value="props.tabs[0].label"
   >
     <TabsList
-      class="relative shrink-0 flex gap-3.5 px-3.5 border-b border-outline-gray-1"
+      class="relative shrink-0 flex gap-3.5 px-3.5 border-b border-outline-gray-2"
     >
       <TabsIndicator
         class="absolute left-0 h-[2px] bottom-0 w-[--reka-tabs-indicator-size] translate-x-[--reka-tabs-indicator-position] translate-y-[1px] rounded-full transition-[width,transform] duration-300"
@@ -42,12 +42,8 @@ const props = defineProps<TabProps>()
       </TabsTrigger>
     </TabsList>
 
-    <TabsContent
-      v-for="(item, i) in props.tabs"
-      class="bg-white rounded-b-md outline-none focus:shadow-[0_0_0_2px] focus:shadow-black"
-      :value="item.label"
-    >
-      <div class="p-5">{{ item.label + ' .' }}</div>
+    <TabsContent v-for="(item, i) in props.tabs" :value="item.label">
+      <slot name="tab-panel" v-bind="{ item }"> </slot>
     </TabsContent>
   </TabsRoot>
 </template>
