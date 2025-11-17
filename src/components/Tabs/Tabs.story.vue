@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { h, reactive } from 'vue'
+import { reactive } from 'vue'
 import Tabs from './Tabs.vue'
-import FeatherIcon from '../FeatherIcon.vue'
+
 const state = reactive({
   index: 0,
   tabs_without_icon: [
@@ -26,19 +26,19 @@ const state = reactive({
       label: 'Github',
       content:
         'Github is a code hosting platform for version control and collaboration. It lets you and others work together on projects from anywhere.',
-      icon: h(FeatherIcon, { class: 'w-4 h-4', name: 'github' }),
+      icon: 'github',
     },
     {
       label: 'Twitter',
       content:
         'Twitter is an American microblogging and social networking service on which users post and interact with messages known as "tweets".',
-      icon: h(FeatherIcon, { class: 'w-4 h-4', name: 'twitter' }),
+      icon: 'twitter',
     },
     {
       label: 'Linkedin',
       content:
         'LinkedIn is an American business and employment-oriented online service that operates via websites and mobile apps.',
-      icon: h(FeatherIcon, { class: 'w-4 h-4', name: 'linkedin' }),
+      icon: 'linkedin',
     },
   ],
 })
@@ -80,7 +80,7 @@ const state = reactive({
         class="border rounded"
         v-model="state.index"
         :tabs="state.tabs_with_icon"
-        vertical
+        :vertical='true'
       >
         <template #tab-panel="{ tab }">
           <div class="p-5">

@@ -7,5 +7,5 @@ type Tab = {
 export interface TabProps {
   as?: string
   tabs: Tab[]
-  vertical: Boolean
+  vertical?: Boolean
 }
