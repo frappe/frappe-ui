@@ -12,10 +12,10 @@ import FeatherIcon from '../FeatherIcon.vue'
 
 const props = defineProps<TabProps>()
 
-const tabIndicatorXCss = `left-0 bottom-0 h-[2px] w-[--reka-tabs-indicator-size] transition-[width,transform] 
+const indicatorXCss = `left-0 bottom-0 h-[2px] w-[--reka-tabs-indicator-size] transition-[width,transform] 
                           translate-x-[--reka-tabs-indicator-position] translate-y-[1px]`
 
-const tabIndicatorYCss = `right-0 w-0.5 h-[--reka-tabs-indicator-size] transition-[height,transform]
+const indicatorYCss = `right-0 w-0.5 h-[--reka-tabs-indicator-size] transition-[height,transform]
                            translate-y-[--reka-tabs-indicator-position] translate-x-[1px]`
 </script>
 
@@ -30,15 +30,15 @@ const tabIndicatorYCss = `right-0 w-0.5 h-[--reka-tabs-indicator-size] transitio
     >
       <TabsIndicator
         class="absolute rounded-full duration-300"
-        :class="props.vertical ? tabIndicatorYCss : tabIndicatorXCss"
+        :class="props.vertical ? indicatorYCss : indicatorXCss"
       >
-        <div class="bg-grass8 w-full h-full bg-surface-gray-7" />
+        <div class="w-full h-full bg-surface-gray-7" />
       </TabsIndicator>
 
       <TabsTrigger
         as="template"
         v-for="(item, i) in props.tabs"
-        :value="item.label"
+        :value="i"
       >
         <slot name="tab-item" v-bind="{ item }">
           <component
@@ -55,7 +55,7 @@ const tabIndicatorYCss = `right-0 w-0.5 h-[--reka-tabs-indicator-size] transitio
       </TabsTrigger>
     </TabsList>
 
-    <TabsContent v-for="(item, i) in props.tabs" :value="item.label">
+    <TabsContent v-for="(item, i) in props.tabs" :value="i">
       <slot name="tab-panel" v-bind="{ item }"> </slot>
     </TabsContent>
   </TabsRoot>
