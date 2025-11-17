@@ -14,14 +14,21 @@ const props = defineProps<TabProps>()
 
 <template>
   <TabsRoot
-    class="rounded-lg border border-outline-gray-2"
+    class="rounded-lg border border-outline-gray-2 data-[orientation=vertical]:flex"
+    :orientation="props.vertical ? 'vertical' : 'horizontal'"
     :default-value="props.tabs[0].label"
   >
     <TabsList
-      class="relative shrink-0 flex gap-3.5 px-3.5 border-b border-outline-gray-2"
+      class="relative flex data-[orientation=vertical]:flex-col gap-2 p-1 border-b border-outline-gray-2 data-[orientation=vertical]:border-r"
     >
       <TabsIndicator
-        class="absolute left-0 h-[2px] bottom-0 w-[--reka-tabs-indicator-size] translate-x-[--reka-tabs-indicator-position] translate-y-[1px] rounded-full transition-[width,transform] duration-300"
+        class="absolute rounded-full duration-300"
+        :class="{
+          'left-0 bottom-0 h-[2px] w-[--reka-tabs-indicator-size] translate-x-[--reka-tabs-indicator-position] translate-y-[1px] transition-[width,transform]':
+            !props.vertical,
+          'right-0 w-0.5 h-[--reka-tabs-indicator-size] translate-y-[--reka-tabs-indicator-position] translate-x-[1px] transition-[height,transform]':
+            props.vertical,
+        }"
       >
         <div class="bg-grass8 w-full h-full bg-surface-gray-7" />
       </TabsIndicator>
@@ -33,7 +40,8 @@ const props = defineProps<TabProps>()
       >
         <slot name="tab-item" v-bind="{ item }">
           <button
-            class="flex items-center gap-1.5 text-base text-ink-gray-5 duration-300 ease-in-out hover:text-ink-gray-9 py-3"
+            class="flex bg-surfce-gray-2 items-center gap-1.5 text-base text-ink-gray-5 duration-300
+						ease-in-out hover:text-ink-gray-9 p-2"
             :class="['data-[state=active]:text-ink-gray-9']"
           >
             {{ item.label }}
