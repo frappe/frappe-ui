@@ -1,6 +1,7 @@
 type Tab = {
   label: string
   icon?: string
+	route?:string
 }
 
 export interface TabProps {
