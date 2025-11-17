@@ -42,7 +42,7 @@ const indicatorYCss = `right-0 w-0.5 h-[--reka-tabs-indicator-size] transition-[
       >
         <slot name="tab-item" v-bind="{ item }">
           <component
-            :is="item.route ? 'router-link' : 'div'"
+            :is="item.route ? 'router-link' : 'button'"
             :to="item.route"
             class="flex items-center gap-1.5 text-base text-ink-gray-5 duration-300 ease-in-out hover:text-ink-gray-9 p-2.5 data-[state=active]:text-ink-gray-9"
             :class="{ 'py-2.5 px-4': props.vertical }"
