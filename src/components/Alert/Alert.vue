@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed } from 'vue'
 
 import type { AlertProps } from "./types";
 
@@ -8,8 +8,6 @@ import LucideInfo from "~icons/lucide/info";
 import LucideCircleX from "~icons/lucide/circle-x";
 import LucideCheck from "~icons/lucide/circle-check";
 import LucideWarning from "~icons/lucide/triangle-alert";
-
-import Button from "../Button/Button.vue";
 
 const visible = defineModel({ default: true });
 
@@ -28,13 +26,13 @@ const classes = computed(() => {
 
 const icon = computed(() => {
   const data = {
-    warning: { component: LucideWarning, css: "text-ink-amber-3" },
-    info: { component: LucideInfo, css: "text-ink-blue-3" },
-    error: { component: LucideCircleX, css: "text-ink-red-3" },
-    success: { component: LucideCheck, css: "text-ink-green-3" },
-  };
-  return props.theme ? data[props.theme] : null;
-});
+    yellow: { component: LucideWarning, css: 'text-ink-amber-3' },
+    blue: { component: LucideInfo, css: 'text-ink-blue-3' },
+    red: { component: LucideCircleX, css: 'text-ink-red-3' },
+    green: { component: LucideCheck, css: 'text-ink-green-3' },
+  }
+  return props.theme ? data[props.theme] : null
+})
 
 const props = withDefaults(defineProps<AlertProps>(), {
   variant: "subtle",
@@ -47,7 +45,7 @@ const props = withDefaults(defineProps<AlertProps>(), {
     v-if="visible"
     role="alert"
     :class="classes"
-    class="grid grid-cols-[auto_1fr_auto] gap-3 rounded-md px-4 py-3.5 text-base"
+    class="grid grid-cols-[auto_1fr_auto] gap-3 rounded-md px-4 py-3.5 text-base items-start"
   >
     <slot name="icon">
       <component
@@ -68,14 +66,9 @@ const props = withDefaults(defineProps<AlertProps>(), {
       </slot>
     </div>
 
-    <Button
-      v-if="props.dismissable"
-      variant="ghost"
-      @click="visible = false"
-    >
-      <LucideX class="size-4 ml-auto" />
-    </Button>
-
+    <button v-if="props.dismissable" @click="visible = false">
+      <LucideX class="size-4" />
+    </button>
     <slot name="footer"> </slot>
   </div>
 </template>
