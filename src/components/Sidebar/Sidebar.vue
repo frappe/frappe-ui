@@ -34,6 +34,7 @@
         v-bind="{ isCollapsed: shouldCollapse, isMobile }"
       />
       <SidebarItem
+	    v-if="!props.disableCollapse"
         :label="shouldCollapse ? 'Expand' : 'Collapse'"
         :isCollapsed="shouldCollapse"
         @click="isCollapsed = !isCollapsed"
@@ -66,7 +67,7 @@ const isCollapsed = defineModel('collapsed', {
   default: null,
 })
 provide('isSidebarCollapsed', isCollapsed)
-const shouldCollapse = computed(() => isCollapsed.value || isMobile.value)
+const shouldCollapse = computed(() => (isCollapsed.value || isMobile.value) && !props.disableCollapse)
 
 const breakpoints = useBreakpoints(breakpointsTailwind)
 const isMobile = breakpoints.smaller('sm')
