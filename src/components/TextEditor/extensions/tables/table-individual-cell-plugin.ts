@@ -86,6 +86,8 @@ currentCellHandle?.remove()
           const editorElement = view.dom.parentElement!
           const editorRect = editorElement.getBoundingClientRect()
           const tableRect = table.getBoundingClientRect()
+          const editorScrollLeft = editorElement.scrollLeft
+          const editorScrollTop = editorElement.scrollTop
 
           if (
             !currentCellHandle ||
@@ -112,8 +114,8 @@ currentCellHandle?.remove()
 
             currentCellHandle.style.cssText = `
               position: absolute;
-              left: ${tableRect.left - editorRect.left - 7}px;
-              top: ${rowRect.top - editorRect.top + rowRect.height / 2 - 10}px;
+              left: ${tableRect.left - editorRect.left + editorScrollLeft - 7}px;
+              top: ${rowRect.top - editorRect.top + editorScrollTop + rowRect.height / 2 - 10}px;
               height: 16px;
               width: 12px;
               display: flex;
@@ -163,12 +165,10 @@ currentCellHandle?.remove()
                 const cellPos = view.posAtDOM(cellEl as Node, 0)
                 editor.commands.focus()
                 editor.commands.setTextSelection(cellPos)
-
-                if (editor.commands.selectRow) {
-                  editor.commands.selectRow(rowIndex)
-                } else {
-                }
+                editor.commands.selectRow(rowIndex)
               } else {
+                editor.commands.focus()
+                editor.commands.selectRow(rowIndex)
               }
 
               const rowEvent = new CustomEvent('table-border-click', {
@@ -176,8 +176,8 @@ currentCellHandle?.remove()
                 detail: {
                   axis: 'row',
                   position: {
-                    top: cellRect.top - editorRect.top - menuHeight - gap,
-                    left: cellRect.left - editorRect.left,
+                    top: cellRect.top - editorRect.top + editorScrollTop - menuHeight - gap,
+                    left: cellRect.left - editorRect.left + editorScrollLeft,
                   },
                   cellInfo: {
                     element: cellEl,

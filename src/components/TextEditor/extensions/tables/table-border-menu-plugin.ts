@@ -126,6 +126,8 @@ export function tableBorderMenuPlugin(editor: Editor) {
           const editorElement = view.dom.parentElement!
           const editorRect = editorElement.getBoundingClientRect()
           const tableRect = table.getBoundingClientRect()
+          const editorScrollLeft = editorElement.scrollLeft
+          const editorScrollTop = editorElement.scrollTop
 
           if (
             !currentRowHandle ||
@@ -152,8 +154,8 @@ export function tableBorderMenuPlugin(editor: Editor) {
 
             currentRowHandle.style.cssText = `
               position: absolute;
-              left: ${tableRect.left - editorRect.left - 7}px;
-              top: ${rowRect.top - editorRect.top + rowRect.height / 2 - 10}px;
+              left: ${tableRect.left - editorRect.left + editorScrollLeft - 7}px;
+              top: ${rowRect.top - editorRect.top + editorScrollTop + rowRect.height / 2 - 10}px;
               height: 16px;
               width: 12px;
               display: flex;
@@ -200,13 +202,17 @@ export function tableBorderMenuPlugin(editor: Editor) {
               editor.commands.setTextSelection(cellPos)
               editor.commands.selectRow(rowIndex)
 
+              const rowHandleLeft =
+                tableRect.left - editorRect.left + editorScrollLeft - 7
+              const rowHandleCenter = rowHandleLeft + 6
+
               const rowEvent = new CustomEvent('table-border-click', {
                 bubbles: true,
                 detail: {
                   axis: 'row',
                   position: {
-                    top: cellRect.top - editorRect.top - menuHeight - gap,
-                    left: cellRect.left - editorRect.left,
+                    top: cellRect.top - editorRect.top + editorScrollTop - menuHeight - gap,
+                    left: rowHandleCenter,
                   },
                   cellInfo: {
                     element: cellEl,
@@ -247,8 +253,8 @@ export function tableBorderMenuPlugin(editor: Editor) {
 
             currentColHandle.style.cssText = `
               position: absolute;
-              left: ${cellRect.left - editorRect.left + cellRect.width / 2 - 10}px;
-              top: ${tableRect.top - editorRect.top - 7}px;
+              left: ${cellRect.left - editorRect.left + editorScrollLeft + cellRect.width / 2 - 10}px;
+              top: ${tableRect.top - editorRect.top + editorScrollTop - 7}px;
               height: 16px;
               width: 12px;
               display: flex;
@@ -294,13 +300,20 @@ export function tableBorderMenuPlugin(editor: Editor) {
               editor.commands.setTextSelection(cellPos)
               editor.commands.selectColumn(colIndex)
 
+              const columnHandleTop =
+                tableRect.top - editorRect.top + editorScrollTop - 7
+
               const columnEvent = new CustomEvent('table-border-click', {
                 bubbles: true,
                 detail: {
                   axis: 'column',
                   position: {
-                    top: cellRect.top - editorRect.top - menuHeight - gap,
-                    left: cellRect.left - editorRect.left,
+                    top: columnHandleTop - menuHeight - gap,
+                    left:
+                      cellRect.left -
+                      editorRect.left +
+                      editorScrollLeft +
+                      cellRect.width / 2,
                   },
                   cellInfo: {
                     element: cell,
@@ -330,8 +343,8 @@ export function tableBorderMenuPlugin(editor: Editor) {
 
             currentCellTrigger.style.cssText = `
               position: absolute;
-             left: ${cellRect.left - editorRect.left + cellRect.width - 9}px;
-              top: ${cellRect.top - editorRect.top + cellRect.height / 2 - 9}px;
+              left: ${cellRect.left - editorRect.left + editorScrollLeft + cellRect.width - 9}px;
+              top: ${cellRect.top - editorRect.top + editorScrollTop + cellRect.height / 2 - 9}px;
               display: flex;
               align-items: center;
               justify-content: center;
@@ -388,8 +401,8 @@ export function tableBorderMenuPlugin(editor: Editor) {
                 detail: {
                   axis: 'cell',
                   position: {
-                    top: triggerRect.bottom - editorRect.top - 25,
-                    left: triggerRect.left - editorRect.left,
+                    top: triggerRect.bottom - editorRect.top + editorScrollTop - 25,
+                    left: triggerRect.left - editorRect.left + editorScrollLeft,
                   },
                   cellInfo: {
                     element: cell,

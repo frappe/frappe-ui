@@ -5,6 +5,7 @@
     :style="{
       top: position.top + 'px',
       left: position.left + 'px',
+      transform: axis === 'column' ? 'translateX(-50%)' : undefined,
     }"
     @click.stop
   >
