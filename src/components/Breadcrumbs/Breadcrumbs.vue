@@ -65,11 +65,11 @@ import { useRouter } from 'vue-router'
 import { Dropdown } from '../Dropdown'
 import { Button } from '../Button'
 import type { BreadcrumbsProps } from './types'
-import { ref, computed, nextTick } from 'vue'
+import { ref, computed, nextTick, useTemplateRef } from 'vue'
 import { useResizeObserver } from '@vueuse/core'
 import LucideEllipsis from '~icons/lucide/ellipsis'
 
-const crumbsRef = ref<HTMLDivElement>()
+const crumbsEl = useTemplateRef<HTMLDivElement>('crumbsRef')
 
 const props = defineProps<BreadcrumbsProps>()
 
@@ -81,19 +81,19 @@ const items = computed(() => {
 })
 
 const checkOverflow = () => {
-  if (!crumbsRef.value) return
+  if (!crumbsEl.value) return
 
   // tmp show all items to measure item width
   overflowedX.value = false
 
   nextTick(() => {
-    const scrollWidth = crumbsRef.value?.scrollWidth || 0
-    const clientWidth = crumbsRef.value?.clientWidth || 0
+    const scrollWidth = crumbsEl.value?.scrollWidth || 0
+    const clientWidth = crumbsEl.value?.clientWidth || 0
     overflowedX.value = scrollWidth > clientWidth
   })
 }
 
-useResizeObserver(crumbsRef, checkOverflow)
+useResizeObserver(crumbsEl, checkOverflow)
 
 const dropdownItems = computed(() => {
   let allExceptLastTwo = items.value.slice(0, -2)
