@@ -1,25 +1,10 @@
 <template>
-  <div class="flex min-w-0 items-center">
-    <template v-if="dropdownItems.length">
+  <div class="flex min-w-0 items-center" ref="crumbsRef">
+    <template v-if="overflowedX">
       <Dropdown class="h-7" :options="dropdownItems">
         <Button variant="ghost">
           <template #icon>
-            <svg
-              class="w-4 text-ink-gray-5"
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <circle cx="12" cy="12" r="1" />
-              <circle cx="19" cy="12" r="1" />
-              <circle cx="5" cy="12" r="1" />
-            </svg>
+            <LucideEllipsis class="w-4 text-ink-gray-5" />
           </template>
         </Button>
       </Dropdown>
@@ -27,9 +12,8 @@
         /
       </span>
     </template>
-    <div
-      class="flex min-w-0 items-center overflow-hidden text-ellipsis whitespace-nowrap"
-    >
+
+    <div class="flex min-w-0 items-center text-ellipsis whitespace-nowrap">
       <template v-for="(item, i) in crumbs" :key="item.label">
         <router-link
           v-if="item.route"
@@ -75,26 +59,43 @@
     </div>
   </div>
 </template>
+
 <script setup lang="ts">
-import { useWindowSize } from '@vueuse/core'
-import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { Dropdown } from '../Dropdown'
 import { Button } from '../Button'
 import type { BreadcrumbsProps } from './types'
+import { ref, computed, nextTick, useTemplateRef } from 'vue'
+import { useResizeObserver } from '@vueuse/core'
+import LucideEllipsis from '~icons/lucide/ellipsis'
+
+const crumbsEl = useTemplateRef<HTMLDivElement>('crumbsRef')
 
 const props = defineProps<BreadcrumbsProps>()
 
 const router = useRouter()
-const { width } = useWindowSize()
+const overflowedX = ref(false)
 
 const items = computed(() => {
   return (props.items || []).filter(Boolean)
 })
 
-const dropdownItems = computed(() => {
-  if (width.value > 640) return []
+const checkOverflow = () => {
+  if (!crumbsEl.value) return
 
+  // tmp show all items to measure item width
+  overflowedX.value = false
+
+  nextTick(() => {
+    const scrollWidth = crumbsEl.value?.scrollWidth || 0
+    const clientWidth = crumbsEl.value?.clientWidth || 0
+    overflowedX.value = scrollWidth > clientWidth
+  })
+}
+
+useResizeObserver(crumbsEl, checkOverflow)
+
+const dropdownItems = computed(() => {
   let allExceptLastTwo = items.value.slice(0, -2)
   return allExceptLastTwo.map((item) => {
     let onClick = () => {
@@ -114,10 +115,5 @@ const dropdownItems = computed(() => {
   })
 })
 
-const crumbs = computed(() => {
-  if (width.value > 640) return items.value
-
-  let lastTwo = items.value.slice(-2)
-  return lastTwo
-})
+const crumbs = computed(() => items.value.slice(overflowedX.value ? -2 : 0))
 </script>
