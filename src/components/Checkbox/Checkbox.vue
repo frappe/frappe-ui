@@ -14,7 +14,6 @@
       type="checkbox"
       :disabled="disabled"
       :id="htmlId"
-      :checked="Boolean(modelValue)"
       @change="
         (e) =>
           $emit('update:modelValue', (e.target as HTMLInputElement).checked)
