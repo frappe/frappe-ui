@@ -23,7 +23,7 @@
   </Button>
 </template>
 <script setup>
-import LightningIcon from '../Icons/LightningIcon.vue'
+import LightningIcon from '../../icons/LightningIcon.vue'
 import FeatherIcon from '../../src/components/FeatherIcon.vue'
 import { Button } from '../../src/components/Button'
 import { createResource } from '../../src/resources'
