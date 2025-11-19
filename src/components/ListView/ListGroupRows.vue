@@ -2,6 +2,11 @@
   <div class="mb-5 mt-2" v-if="!group.collapsed">
     <slot>
       <ListRow v-for="row in group.rows" :key="row[list.rowKey]" :row="row" />
+      <component
+        v-if="list.slots['group-empty'] && group.rows.length == 0"
+        :is="list.slots['group-empty']"
+        v-bind="{ group }"
+      />
     </slot>
   </div>
 </template>
