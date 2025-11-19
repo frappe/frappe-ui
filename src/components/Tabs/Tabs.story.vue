@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { reactive } from 'vue'
 import Tabs from './Tabs.vue'
+import LucideGithub from "~icons/lucide/github";
+import LucideTwitter from "~icons/lucide/twitter";
+import LucideLinkedin from "~icons/lucide/linkedin";
 
 const state = reactive({
   index: 0,
@@ -21,24 +24,25 @@ const state = reactive({
         'LinkedIn is an American business and employment-oriented online service that operates via websites and mobile apps.',
     },
   ],
+
   tabs_with_icon: [
     {
       label: 'Github',
       content:
         'Github is a code hosting platform for version control and collaboration. It lets you and others work together on projects from anywhere.',
-      icon: 'github',
+      icon: LucideGithub,
     },
     {
       label: 'Twitter',
       content:
         'Twitter is an American microblogging and social networking service on which users post and interact with messages known as "tweets".',
-      icon: 'twitter',
+      icon: LucideTwitter,
     },
     {
       label: 'Linkedin',
       content:
         'LinkedIn is an American business and employment-oriented online service that operates via websites and mobile apps.',
-      icon: 'linkedin',
+      icon: LucideLinkedin,
     },
   ],
 })
@@ -60,6 +64,7 @@ const state = reactive({
         </template>
       </Tabs>
     </Variant>
+
     <Variant title="With Icon">
       <Tabs
         as="div"
@@ -74,6 +79,7 @@ const state = reactive({
         </template>
       </Tabs>
     </Variant>
+
     <Variant title="Vertical Tabs">
       <Tabs
         as="div"

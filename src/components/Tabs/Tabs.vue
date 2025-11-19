@@ -8,7 +8,6 @@ import {
 } from 'reka-ui'
 
 import type { TabProps } from './types'
-import FeatherIcon from '../FeatherIcon.vue'
 
 const props = defineProps<TabProps>()
 
@@ -43,7 +42,8 @@ const indicatorYCss = `right-0 w-[1px] h-[--reka-tabs-indicator-size] transition
             class="flex items-center gap-1.5 text-base text-ink-gray-5 duration-300 ease-in-out hover:text-ink-gray-9 p-2.5 data-[state=active]:text-ink-gray-9"
             :class="{ 'py-2.5 px-4': props.vertical }"
           >
-            <FeatherIcon v-if="tab.icon" :name="tab.icon" class="size-4" />
+            <component v-if="tab.icon" :is="tab.icon" class="size-4">
+            </component>
 
             {{ tab.label }}
           </component>
