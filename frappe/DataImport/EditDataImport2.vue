@@ -1,5 +1,5 @@
 <template>
-    <div class="text-base h-full flex flex-col overflow-y-auto">
+    <div class="text-base h-full flex flex-col overflow-y-auto ">
         <div class="flex items-center justify-between">
             <div class="flex items-center space-x-2">
                 <FeatherIcon name="chevron-left" class="size-5 stroke-1 cursor-pointer" @click="emit('updateStep', 'list')" />
@@ -75,6 +75,7 @@
                     label="Import from Google Sheets"
                     v-model="googleSheet"
                     :disabled="data.status === 'Success'"
+                    description="The Google Sheet must be publically accessible"
                 />
             </div>
             <div class="space-y-2 mt-8">
@@ -95,14 +96,14 @@
                 </div>
 
                 <div v-if="showPreview" class="overflow-x-auto border border-outline-gray-2 rounded-md max-h-72">
-                    <table class="table-fixed divide-y">
+                    <table class="divide-y">
                         <thead class="rounded-t-md">
                             <tr>
                                 <th
                                     v-for="column in previewColumns"
                                     :key="column.key"
                                     :style="{ width: column.width, textAlign: column.align }"
-                                    class="p-2 text-left text-sm text-ink-gray-5 whitespace-nowrap"
+                                    class="p-2 text-left text-sm text-ink-gray-5"
                                     :class="{
                                         'border-r': column.key != previewColumns[previewColumns.length -1].key
                                     }"
@@ -116,8 +117,8 @@
                                 <td
                                     v-for="column in previewColumns"
                                     :key="column.key"
-                                    :style="{ width: column.width, textAlign: column.align }"
-                                    class="px-3 py-2 text-sm text-ink-gray-7 align-top whitespace-nowrap"
+                                    :style="{ minWidth: column.width, textAlign: column.align }"
+                                    class="px-3 py-2 text-sm text-ink-gray-7 align-top"
                                     :class="{
                                         'border-r': column.key != previewColumns[previewColumns.length -1].key
                                     }"
@@ -272,10 +273,12 @@ const getPreviewData = (newFile: string | undefined, newSheet: string) => {
 const preparePreviewColumns = (data: any, keys: string[]) => {
     previewColumns.value = []
     data?.columns.forEach((col: any, index: number) => {
-        let width = "500px"
+        let width = "300px"
         let align: 'left' | 'center' | 'right' = 'left'
         if (index == 0) {
-            width = "100px"
+            width = "60px"
+        } else if (col.header_title == "ID") {
+            width = "150px"
         }
         keys.push(col.header_title)
         previewColumns.value.push({ label: col.header_title, key: col.header_title, width: width, align: align })

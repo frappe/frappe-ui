@@ -67,6 +67,7 @@
 import { ref } from 'vue'
 import type { DataImport, DocField } from './types'
 import { createResource } from '../../src/resources'
+import { fieldsToIgnore, getChildTableName } from './dataImport'
 import Button from "../../src/components/Button/Button.vue"
 import Dialog from "../../src/components/Dialog/Dialog.vue"
 import FormControl from "../../src/components/FormControl/FormControl.vue"
@@ -78,37 +79,25 @@ const fieldSelection = ref<Record<string, Record<string, boolean>>>({})
 const doctypeMeta = ref<any>(null)
 
 const props = defineProps<{
-    data: DataImport
+    doctype: string
 }>()
 
-const fieldsToIgnore = [
-    "Section Break",
-    "Column Break",
-    "Tab Break",
-    "HTML",
-    "Table",
-    "Table MultiSelect",
-    "Button",
-    "Image",
-    "Fold",
-    "Heading"
-]
 
 const fields = createResource({
     url: "frappe.desk.form.load.getdoctype",
     params: {
-        doctype: props.data.reference_doctype,
+        doctype: props.doctype,
         with_parent: 1,
     },
     auto: true,
     transform(data: any) {
+        doctypeMeta.value = data.docs
         return transformFields(data)
     }
 })
 
 const transformFields = (data: any) => {
     let doctypeMap: Record<string, { fieldname: string; label: string; reqd: number }[]> = {}
-    doctypeMeta.value = data.docs
 
     prepareDoctypeMap(data.docs, doctypeMap)
     addIDField(doctypeMap)
@@ -126,7 +115,7 @@ const prepareDoctypeMap = (docs: any[], doctypeMap: Record<string, { fieldname: 
                 fieldname: field.fieldname,
                 label: field.label,
                 reqd: field.reqd,
-                disabled: doc.name == props.data.reference_doctype && field.reqd
+                disabled: doc.name == props.doctype && field.reqd
             }
         })
     })
@@ -146,7 +135,7 @@ const updateFieldSelection = (doctypeMap: Record<string, { fieldname: string; la
     Object.keys(doctypeMap).forEach((doctype: string) => {
         if (!fieldSelection.value[doctype]) {
             fieldSelection.value[doctype] = {}
-            if (doctype == props.data.reference_doctype) {
+            if (doctype == props.doctype) {
                 doctypeMap[doctype].forEach((field) => {
                     if (field.reqd) {
                         fieldSelection.value[doctype][field.fieldname] = true
@@ -158,7 +147,7 @@ const updateFieldSelection = (doctypeMap: Record<string, { fieldname: string; la
 }
 
 const getExportURL = () => {
-    let doctype = props.data.reference_doctype
+    let doctype = props.doctype
     let exportFields = getExportFields()
     let exportRecords = getExportType()
     let exportPageLength = exportType.value == "5 Records" ? 5 : ''
@@ -179,7 +168,7 @@ const handleExport = async () => {
     const link = document.createElement('a');
 
     link.href = URL.createObjectURL(blob);
-    link.download = props.data.reference_doctype + (fileType.value === 'CSV' ? '.csv' : '.xlsx');
+    link.download = props.doctype + (fileType.value === 'CSV' ? '.csv' : '.xlsx');
     document.body.appendChild(link);
 
     link.click();
@@ -189,24 +178,10 @@ const handleExport = async () => {
 const getExportFields = () => {
     let exportFields: Record<string, string[]> = {}
     Object.keys(fieldSelection.value).forEach((doctype: string) => {
-        let doctypeName = doctype == props.data.reference_doctype ? doctype : getChildTableName(doctype)
+        let doctypeName = doctype == props.doctype ? doctype : getChildTableName(doctype, props.doctype, doctypeMeta.value)
         exportFields[doctypeName] = Object.keys(fieldSelection.value[doctype]).filter((fieldname: string) => fieldSelection.value[doctype][fieldname])
     })
     return exportFields
-}
-
-const getChildTableName = (doctype: string) => {
-    let childTableName = ''
-    let doctypeFields = doctypeMeta.value.filter((doc: any) => {
-        return doc.name == props.data.reference_doctype
-    })[0].fields
-
-   doctypeFields.forEach((field: any) => {
-        if (field.options == doctype) {
-            childTableName = field.fieldname
-        }
-   })
-    return childTableName
 }
 
 const getExportType = () => {

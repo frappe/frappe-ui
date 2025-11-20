@@ -1,6 +1,9 @@
 export interface DataImportProps {
-  label: string
+  label?: string
   description?: string
+  doctype?: string | null
+  importName?: string | null
+  doctypeMap?: Record<string, { title: string; route: string }>
 }
 
 export interface DataImport {

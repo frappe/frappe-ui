@@ -1,4 +1,6 @@
+import { toast } from "../../src/components/Toast/index"
 import type { DataImportStatus } from './types'
+import call from '../../src/utils/call';
 
 export const getBadgeColor = (status: DataImportStatus) => {
     const colorMap: Record<DataImportStatus, string> = {
@@ -9,4 +11,43 @@ export const getBadgeColor = (status: DataImportStatus) => {
         "Timed Out": "orange"
     }
     return colorMap[status as DataImportStatus] || "gray"
+}
+
+
+export const fieldsToIgnore = [
+    "Section Break",
+    "Column Break",
+    "Tab Break",
+    "HTML",
+    "Table",
+    "Table MultiSelect",
+    "Button",
+    "Image",
+    "Fold",
+    "Heading"
+]
+
+export const getChildTableName = (doctype: string, parentDocType: string, docs: any[]) => {
+    let childTableName = ''
+    let doctypeFields = docs.filter((doc: any) => {
+        return doc.name == parentDocType
+    })[0].fields
+
+   doctypeFields.forEach((field: any) => {
+        if (field.options == doctype) {
+            childTableName = field.fieldname
+        }
+   })
+    return childTableName
+}
+
+export const getPreviewData = (importName: string, file: string | undefined, sheet: string) => {
+    return call("frappe.core.doctype.data_import.data_import.get_preview_from_template", {
+        data_import: importName,
+        import_file: file,
+        google_sheets_url: sheet
+    }).catch((error: any) => {
+        toast.error(error)
+        console.error("Error fetching preview data:", error)
+    })
 }
