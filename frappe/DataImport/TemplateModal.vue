@@ -82,7 +82,6 @@ const props = defineProps<{
     doctype: string
 }>()
 
-
 const fields = createResource({
     url: "frappe.desk.form.load.getdoctype",
     params: {

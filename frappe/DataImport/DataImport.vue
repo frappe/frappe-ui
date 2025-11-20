@@ -99,7 +99,6 @@ watch(
       if (!data.value?.import_file && !data.value?.google_sheets_url) {
         step.value = 'upload'
       } else if (step.value == 'upload' && route.query.step == 'map') {
-        console.log(step.value, route.query.step)
         step.value = route.query.step
       } else {
         step.value = 'preview'
@@ -113,8 +112,8 @@ watch(
 )
 
 watch(() => route.query, () => {
-  if (route.query.step && step.value !== route.query.step) {
-    updateStep(route.query.step, data.value)
+  if (route.query.step == 'list') {
+    step.value = 'list'
   }
 })
 
