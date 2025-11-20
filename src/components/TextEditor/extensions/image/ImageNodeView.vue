@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
 import LoadingIndicator from '../../../LoadingIndicator.vue'
 import Tooltip from '../../../Tooltip/Tooltip.vue'
@@ -12,6 +12,7 @@ import LucideFloatLeft from '~icons/lucide/align-horizontal-justify-start'
 import LucideFloatRight from '~icons/lucide/align-horizontal-justify-end'
 import LucideNoFloat from '~icons/lucide/align-vertical-space-around'
 import LucideCaptions from '~icons/lucide/captions'
+import LucideMoveDiagonal2 from '~icons/lucide/move-diagonal-2'
 
 const props = defineProps(nodeViewProps)
 
@@ -22,7 +23,6 @@ const startDragX = ref(0)
 const startWidth = ref(0)
 const originalAspectRatio = ref(1)
 
-// Popper states
 const showAlignPopper = ref(false)
 const showFloatPopper = ref(false)
 const alignButtonRef = ref<HTMLElement | null>(null)
@@ -63,7 +63,6 @@ onMounted(() => {
     updateAspectRatio()
   }
 
-  // Close poppers on click outside
   document.addEventListener('click', handleClickOutside)
 })
 
@@ -273,7 +272,7 @@ const wrapperClasses = (float: string) => [
         {
           'ring-2 ring-outline-gray-3 ring-offset-2': selected,
         },
-        node.attrs.align === 'center' ? 'mx-auto' : '',
+        node.attrs.align === 'center' || !node.attrs.align ? 'mx-auto' : '',
         node.attrs.align === 'right' ? 'ml-auto mr-0' : '',
         node.attrs.align === 'left' ? 'mr-auto ml-0' : '',
         !node.attrs.float && 'block max-w-full',
@@ -295,7 +294,7 @@ const wrapperClasses = (float: string) => [
           @load="handleMediaLoaded"
         />
         <video
-          v-else="isVideo"
+          v-else
           ref="mediaRef"
           class="rounded-[2px]"
           :src="node.attrs.src"
@@ -321,7 +320,7 @@ const wrapperClasses = (float: string) => [
             />
           </button>
           <button
-            v-if="!node.attrs.float"
+            v-if="!node.attrs.float && !isVideo"
             @click.stop="toggleAlignPopper"
             class="hover:text-ink-white text-ink-gray-4"
             :class="[node.attrs.align ? 'text-ink-white' : 'text-ink-gray-4']"
@@ -338,7 +337,7 @@ const wrapperClasses = (float: string) => [
 
           <div
             ref="alignButtonRef"
-            v-if="showAlignPopper"
+            v-if="showAlignPopper && !isVideo"
             class="absolute top-full mt-1 right-6 bg-black/65 rounded shadow-lg px-1.5 py-1 z-50 gap-2.5 flex items-center"
           >
             <Tooltip text="Align left" class="h-5">
@@ -382,7 +381,6 @@ const wrapperClasses = (float: string) => [
             </Tooltip>
           </div>
 
-          <!-- Float Control with Popper -->
           <div
             v-if="showFloatPopper"
             ref="floatButtonRef"
@@ -425,7 +423,6 @@ const wrapperClasses = (float: string) => [
           </div>
         </div>
 
-        <!-- Resize Handle -->
         <button
           v-if="selected && isEditable"
           class="absolute bottom-2 right-2 cursor-nw-resize bg-black/65 rounded p-1"
@@ -433,7 +430,6 @@ const wrapperClasses = (float: string) => [
         >
           <LucideMoveDiagonal2 class="text-white size-4" />
         </button>
-        <!-- Loading indicator overlay -->
         <div
           v-if="node.attrs.loading"
           class="inset-0 absolute flex items-center justify-center z-10"
