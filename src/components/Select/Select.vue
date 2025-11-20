@@ -1,83 +1,25 @@
-<template>
-  <div class="relative flex items-center">
-    <div
-      :class="[
-        'absolute inset-y-0 left-0 flex items-center',
-        textColor,
-        prefixClasses,
-      ]"
-      v-if="$slots.prefix"
-    >
-      <slot name="prefix"> </slot>
-    </div>
-    <div
-      v-if="placeholder"
-      v-show="!modelValue"
-      class="pointer-events-none absolute text-ink-gray-4 truncate w-full"
-      :class="[fontSizeClasses, paddingClasses]"
-    >
-      {{ placeholder }}
-    </div>
-    <select
-      :class="selectClasses"
-      :disabled="disabled"
-      :id="id"
-      :value="modelValue"
-      @change="handleChange"
-      v-bind="attrs"
-    >
-      <option
-        v-for="option in selectOptions"
-        :key="option.value"
-        :value="option.value"
-        :disabled="option.disabled || false"
-        :selected="modelValue === option.value"
-      >
-        {{ option.label }}
-      </option>
-    </select>
-  </div>
-</template>
-
 <script setup lang="ts">
-import { computed, useSlots, useAttrs } from 'vue'
+import { computed } from 'vue'
 import type { SelectProps } from './types'
+import LucideChevronDown from '~icons/lucide/chevron-down'
 
-defineOptions({
-  inheritAttrs: false,
-})
+import {
+  SelectContent,
+  SelectItem,
+  SelectItemText,
+  SelectPortal,
+  SelectRoot,
+  SelectTrigger,
+  SelectValue,
+  SelectViewport,
+} from 'reka-ui'
+
+const model = defineModel<String>()
 
 const props = withDefaults(defineProps<SelectProps>(), {
   size: 'sm',
   variant: 'subtle',
-})
-
-const emit = defineEmits(['update:modelValue'])
-const slots = useSlots()
-const attrs = useAttrs()
-
-function handleChange(e: Event) {
-  emit('update:modelValue', (e.target as HTMLInputElement).value)
-}
-
-const selectOptions = computed(() => {
-  return (
-    props.options
-      ?.map((option) => {
-        if (typeof option === 'string') {
-          return {
-            label: option,
-            value: option,
-          }
-        }
-        return option
-      })
-      .filter(Boolean) || []
-  )
-})
-
-const textColor = computed(() => {
-  return props.disabled ? 'text-ink-gray-4' : 'text-ink-gray-8'
+  placeholder: 'Select option',
 })
 
 const fontSizeClasses = computed(() => {
@@ -91,29 +33,29 @@ const fontSizeClasses = computed(() => {
 
 const paddingClasses = computed(() => {
   return {
-    sm: 'pl-2 pr-5',
-    md: 'pl-2.5 pr-5.5',
-    lg: 'pl-3 pr-6',
-    xl: 'pl-3 pr-6',
+    sm: 'px-2',
+    md: 'px-2.5 ',
+    lg: 'px-3',
+    xl: 'px-3',
   }[props.size]
 })
 
-const selectClasses = computed(() => {
-  let sizeClasses = {
-    sm: 'rounded h-7',
-    md: 'rounded h-8',
-    lg: 'rounded-md h-10',
-    xl: 'rounded-md h-10',
-  }[props.size]
+let sizeClasses = {
+  sm: 'rounded min-h-7',
+  md: 'rounded min-h-8',
+  lg: 'rounded-md min-h-10',
+  xl: 'rounded-md min-h-10',
+}[props.size]
 
+const selectClasses = computed(() => {
   let variant = props.disabled ? 'disabled' : props.variant
   let variantClasses = {
     subtle:
-      'border border-[--surface-gray-2] bg-surface-gray-2 hover:border-outline-gray-modals hover:bg-surface-gray-3 focus:border-outline-gray-4 focus:ring-0 focus-visible:ring-2 focus-visible:ring-outline-gray-3',
+      'border border-[--surface-gray-2] bg-surface-gray-2 hover:border-outline-gray-modals hover:bg-surface-gray-3',
     outline:
-      'border border-outline-gray-2 bg-surface-white hover:border-outline-gray-3 focus:border-outline-gray-4 focus:ring-0 focus-visible:ring-2 focus-visible:ring-outline-gray-3',
+      'border border-outline-gray-2 bg-surface-white hover:border-outline-gray-3',
     ghost:
-      'bg-transparent border-transparent hover:bg-surface-gray-3 focus:bg-surface-gray-3 focus:border-outline-gray-4 focus:ring-0 focus-visible:ring-2 focus-visible:ring-outline-gray-3',
+      'bg-transparent border-transparent hover:bg-surface-gray-3 focus:bg-surface-gray-3',
     disabled: [
       'border',
       props.variant !== 'ghost' ? 'bg-surface-gray-1' : '',
@@ -128,17 +70,118 @@ const selectClasses = computed(() => {
     fontSizeClasses.value,
     paddingClasses.value,
     variantClasses,
-    textColor.value,
-    'transition-colors w-full py-0 truncate',
+    'transition-colors w-full data-[state=open]:ring-2 ring-outline-gray-2 ',
   ]
 })
 
-let prefixClasses = computed(() => {
-  return {
-    sm: 'pl-2',
-    md: 'pl-2.5',
-    lg: 'pl-3',
-    xl: 'pl-3',
-  }[props.size]
+const selectOptions = computed(() => {
+  const str = typeof props.options?.[0] == 'string'
+  const tmp = props.options?.map((x) => ({ label: x, value: x }))
+  return (str ? tmp : props.options)?.filter(Boolean) || []
 })
 </script>
+
+<template>
+  <SelectRoot v-model="model">
+    <SelectTrigger
+      class="inline-flex items-center gap-2 outline-none text-base data-[placeholder]:text-ink-gray-4 data-[disabled]:text-ink-gray-4"
+      aria-label="Customise options"
+      :class="selectClasses"
+      :disabled="props.disabled"
+    >
+      <slot name="prefix" />
+      <SelectValue :placeholder="props.placeholder" />
+      <LucideChevronDown class="size-4 text-ink-gray-4 ml-auto" />
+    </SelectTrigger>
+
+    <SelectPortal>
+      <SelectContent
+        class="bg-surface-modal border rounded-lg shadow-lg will-change-[opacity,transform] data-[side=top]:animate-slideDownAndFade data-[side=right]:animate-slideLeftAndFade data-[side=bottom]:animate-slideUpAndFade data-[side=left]:animate-slideRightAndFade z-[100] min-w-[--reka-select-trigger-width] max-h-[--reka-select-content-available-height] overflow-auto"
+        :side-offset="5"
+        position="popper"
+      >
+        <SelectViewport class="p-1 flex flex-col">
+          <SelectItem
+            v-for="(option, index) in selectOptions"
+            :disabled="option.disabled"
+            :key="index"
+            :value="option.value"
+            :class="[sizeClasses, paddingClasses, fontSizeClasses]"
+            class="text-base inline-flex items-center relative data-[highlighted]:bg-surface-gray-2 border-0 [data-state=checked]:bg-surface-gray-2 data-[disabled]:text-ink-gray-4"
+          >
+            <SelectItemText>
+              {{ option.label }}
+            </SelectItemText>
+          </SelectItem>
+        </SelectViewport>
+      </SelectContent>
+    </SelectPortal>
+  </SelectRoot>
+</template>
+
+<style>
+@keyframes slideDownFadeSmooth {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slideUpFadeSmooth {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slideLeftFadeSmooth {
+  from {
+    opacity: 0;
+    transform: translateX(4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes slideRightFadeSmooth {
+  from {
+    opacity: 0;
+    transform: translateX(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+[data-side='top'] {
+  animation: slideDownFadeSmooth 280ms;
+}
+
+[data-side='bottom'] {
+  animation: slideUpFadeSmooth 280ms;
+}
+
+[data-side='left'] {
+  animation: slideRightFadeSmooth 280ms;
+}
+
+[data-side='right'] {
+  animation: slideLeftFadeSmooth 280ms;
+}
+
+[data-highlighted],
+[data-state='checked'] {
+  outline: none !important;
+}
+</style>
