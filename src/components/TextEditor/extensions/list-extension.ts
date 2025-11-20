@@ -4,12 +4,11 @@ import { Editor } from '@tiptap/core'
 export default function improvedList(editor: Editor) {
   const selection = editor.view.state.selection
   const { $from } = selection
-  if ($from.parentOffset > 0 || !selection.empty) return false
-
+  if ($from.parentOffset > 0 || !selection.empty || $from.pos === 1) return false
   let nodeBefore = editor.view.state.doc.resolve($from.pos - 1).nodeBefore
   if (!nodeBefore)
     nodeBefore = editor.state.doc.resolve($from.before() - 1).nodeBefore
-  console.log(nodeBefore)
+
   if (nodeBefore && ['bulletList', 'orderedList', 'listItem'].includes(nodeBefore.type.name)) {
     // Join item with the last bullet item
     editor

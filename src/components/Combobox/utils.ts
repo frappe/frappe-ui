@@ -27,7 +27,7 @@ export function getMultipleLabel(options: [SimpleOption]) {
 
 export function getValue(option: SimpleOption): string | undefined {
   if (typeof option === 'string') return option
-  if (isCustomOption(option)) return undefined
+  if (isCustomOption(option)) return option.key
   return option.value
 }
 

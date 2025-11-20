@@ -27,12 +27,14 @@ type TransformMethods<T> = {
 interface DocMethodOption<T = any>
   extends Omit<UseCallOptions<T>, 'url' | 'baseUrl'> {
   name: string
+  skipOverride?: boolean
 }
 
 interface UseDocOptions<TDoc> {
   doctype: string
   name: MaybeRefOrGetter<string>
   baseUrl?: string
+  url?: string
   methods?: Record<string, string | DocMethodOption>
   immediate?: boolean
   transform?: (doc: TDoc & { doctype: string }) => TDoc & { doctype: string }
@@ -45,14 +47,18 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
     baseUrl = '',
     doctype,
     name,
+    url: customUrl = '',
     methods = {},
     immediate = true,
     transform,
   } = options
 
-  const url = computed(
-    () => `${baseUrl}/api/v2/document/${doctype}/${toValue(name)}`,
-  )
+  const url = computed(() => {
+    if (customUrl) {
+      return `${baseUrl}${customUrl}`
+    }
+    return `${baseUrl}/api/v2/document/${doctype}/${toValue(name)}`
+  })
 
   type SuccessCallback = (doc: TDoc) => void
   const successCallbacks: SuccessCallback[] = []
@@ -76,10 +82,10 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
           doctype,
           name: String(ctx.data.data.name),
         }
+        docStore.setDoc(doc)
         if (transform) {
           doc = transform(doc)
         }
-        docStore.setDoc(doc)
         listStore.updateRow(doctype, ctx.data.data)
         triggerSuccessCallbacks(doc)
       }
@@ -87,15 +93,8 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
     },
   }
 
-  const {
-    error,
-    isFetching,
-    isFinished,
-    canAbort,
-    aborted,
-    abort,
-    execute,
-  } = useFrappeFetch(url, fetchOptions).get()
+  const { error, isFetching, isFinished, canAbort, aborted, abort, execute } =
+    useFrappeFetch(url, fetchOptions).get()
 
   let docMethods: Record<string, ReturnType<typeof useCall>> = {}
   if (methods) {
@@ -154,8 +153,14 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
     },
   })
 
-  const doc = docStore.getDoc(doctype, name) as Ref<TDoc | null>
-
+  let doc = docStore.getDoc(doctype, name) as Ref<TDoc | null>
+  if (doc.value && transform) {
+    try {
+      doc.value = transform(doc.value)
+    } catch (e) {
+      docStore.removeDoc(doctype, toValue(name))
+    }
+  }
   let out = reactive({
     doc,
     error,

@@ -74,7 +74,7 @@ export const updateAccess = createResource({
 })
 
 export const allUsers = createResource({
-  url: 'drive.api.product.get_all_users',
+  url: 'drive.api.product.get_drive_users',
   transform: (data) => {
     data.map((item) => {
       item.value = item.email
@@ -105,6 +105,6 @@ export const rename = createResource({
     }
   },
   onError(error) {
-    toast.error(error.messages[error.messages.length - 1])
+    toast.error(error)
   },
 })

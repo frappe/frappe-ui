@@ -12,8 +12,7 @@
       class="w-full overflow-x-auto rounded-t-lg border border-outline-gray-modals"
       :buttons="fixedMenu"
     />
-    <TextEditorFloatingMenu :buttons="floatingMenu" />
-    
+    <TextEditorFloatingMenu :buttons="floatingMenu" />    
     <TableBorderMenu
       :show="showTableBorderMenu"
       :axis="tableBorderAxis"
@@ -71,6 +70,7 @@ import TaskItem from '@tiptap/extension-task-item'
 import TaskList from '@tiptap/extension-task-list'
 import NamedColorExtension from './extensions/color'
 import NamedHighlightExtension from './extensions/highlight'
+import StyleClipboardExtension from './extensions/copy-styles'
 import improvedList from './extensions/list-extension'
 import TableExtension from './extensions/tables/table-extension'
 import { MentionExtension } from './extensions/mention'
@@ -92,6 +92,12 @@ import TableRowExtension from './extensions/tables/table-row-extension'
 import TableBorderMenu from './extensions/tables/TableBorderMenu.vue'
 import { useTableMenu } from './extensions/tables/use-table-menu'
 import { TableCommandsExtension } from './extensions/tables/table-selection-extension'
+
+function defaultUploadFunction(file: File) {
+  // useFileUpload is frappe specific
+  let fileUpload = useFileUpload()
+  return fileUpload.upload(file, props.uploadArgs || {})
+}
 
 const props = withDefaults(defineProps<TextEditorProps>(), {
   content: null,
@@ -210,9 +216,8 @@ onMounted(() => {
           ? props.starterkitOptions.heading
           : {}),
       }),
-      TaskList,
-      TaskItem.configure({
-        nested: true,
+      Table.configure({
+        resizable: true,
       }),
       TableExtension.configure({
         resizable: true,
@@ -220,7 +225,11 @@ onMounted(() => {
       TableCellExtension,
       TableHeaderExtension,
       TableRowExtension,
-	  TableCommandsExtension,
+	    TableCommandsExtension,
+      TaskList,
+      TaskItem.configure({
+        nested: true,
+      }),
       Typography,
       TextAlign.configure({
         types: ['heading', 'paragraph'],
@@ -269,6 +278,7 @@ onMounted(() => {
         enabled: true,
         uploadFunction: props.uploadFunction || defaultUploadFunction,
       }),
+      StyleClipboardExtension,
       ...(props.extensions || []),
     ],
     onUpdate: ({ editor }) => {
@@ -401,14 +411,28 @@ img.ProseMirror-selectednode {
   background-color: var(--surface-gray-2, #f3f3f3);
 }
 
-.prose-sm {
+/* Edit prose classes to be more functional */
+.prose-v2 {
+  line-height: 1.5 !important;
   blockquote {
     quotes: none;
     font-style: normal;
+    margin-top: 0.75em;
+    margin-bottom: 0.75em;
   }
+
+  p {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+  /* fix: heading bottom margin */
   :is(h1, h2, h3, h4, h5, h6) + :is(h1, h2, h3, h4, h5, h6) {
     margin-top: 0;
   }
+  :is(h1, h2, h3, h4, h5, h6):first-child {
+    margin-top: 0;
+  }
+
   hr {
     margin: 2.25em 0;
   }
