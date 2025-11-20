@@ -12,7 +12,7 @@
       class="w-full overflow-x-auto rounded-t-lg border border-outline-gray-modals"
       :buttons="fixedMenu"
     />
-    <TextEditorFloatingMenu :buttons="floatingMenu" />    
+    <TextEditorFloatingMenu :buttons="floatingMenu" />
     <TableBorderMenu
       :show="showTableBorderMenu"
       :axis="tableBorderAxis"
@@ -129,7 +129,7 @@ const {
   toggleHeader,
   setBackgroundColor,
   setBorderColor,
-  setBorderWidth
+  setBorderWidth,
 } = useTableMenu(editor)
 
 const attrs = useAttrs()
@@ -210,16 +210,13 @@ onMounted(() => {
           ? props.starterkitOptions.heading
           : {}),
       }),
-      Table.configure({
-        resizable: true,
-      }),
       TableExtension.configure({
         resizable: true,
       }),
       TableCellExtension,
       TableHeaderExtension,
       TableRowExtension,
-	    TableCommandsExtension,
+      TableCommandsExtension,
       TaskList,
       TaskItem.configure({
         nested: true,
