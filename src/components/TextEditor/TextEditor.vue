@@ -33,7 +33,7 @@
     />
     <slot name="top" :editor />
     <slot name="editor" :editor="editor">
-      <EditorContent :editor="editor" />
+      <EditorContent :editor="editor" class="prose prose-sm" />
     </slot>
     <slot name="bottom" :editor />
   </div>
@@ -151,7 +151,7 @@ const editorProps = computed(() => {
   return {
     attributes: {
       class: normalizeClass([
-        'prose prose-sm prose-v2 prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:relative prose-th:relative prose-th:bg-surface-gray-2',
+        'prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:relative prose-th:relative prose-th:bg-surface-gray-2',
         props.editorClass,
       ]),
     },
