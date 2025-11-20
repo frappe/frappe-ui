@@ -90,7 +90,7 @@
 
             <TabButtons :buttons="tabButtons" v-model="activeTab" class="w-fit" />
 
-            <div class="border rounded-md overflow-x-auto">
+            <div v-if="filteredLogs.length" class="border rounded-md overflow-x-auto">
                 <table class="table-fixed w-full divide-y">
                     <thead class="rounded-t-md">
                         <tr>
@@ -144,6 +144,9 @@
                         </tr>
                     </tbody>
                 </table>
+            </div>
+            <div v-else class="text-ink-gray-5 text-sm">
+                No logs to display.
             </div>
         </div>
     </div>
