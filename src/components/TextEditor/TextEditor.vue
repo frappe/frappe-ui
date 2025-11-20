@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="editor"
-    class="relative w-full prose"
+    class="relative w-full"
     :class="attrsClass"
     :style="attrsStyle"
     v-bind="attrsWithoutClassStyle"
@@ -12,7 +12,25 @@
       class="w-full overflow-x-auto rounded-t-lg border border-outline-gray-modals"
       :buttons="fixedMenu"
     />
-    <TextEditorFloatingMenu :buttons="floatingMenu" />
+    <TextEditorFloatingMenu :buttons="floatingMenu" />    
+    <TableBorderMenu
+      :show="showTableBorderMenu"
+      :axis="tableBorderAxis"
+      :position="tableBorderMenuPos"
+      :cell-info="tableCellInfo"
+      :can-merge-cells="canMergeCells"
+      @add-row-before="addRowBefore"
+      @add-row-after="addRowAfter"
+      @delete-row="deleteRow"
+      @add-column-before="addColumnBefore"
+      @add-column-after="addColumnAfter"
+      @delete-column="deleteColumn"
+      @merge-cells="mergeCells"
+      @toggle-header="toggleHeader"
+      @set-background-color="setBackgroundColor"
+      @set-border-color="setBorderColor"
+      @set-border-width="setBorderWidth"
+    />
     <slot name="top" :editor />
     <slot name="editor" :editor="editor">
       <EditorContent :editor="editor" />
@@ -41,10 +59,6 @@ import { Editor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import TextAlign from '@tiptap/extension-text-align'
-import Table from '@tiptap/extension-table'
-import TableCell from '@tiptap/extension-table-cell'
-import TableHeader from '@tiptap/extension-table-header'
-import TableRow from '@tiptap/extension-table-row'
 import { ImageExtension } from './extensions/image'
 import ImageViewerExtension from './image-viewer-extension'
 import { VideoExtension } from './video-extension'
@@ -58,7 +72,7 @@ import NamedColorExtension from './extensions/color'
 import NamedHighlightExtension from './extensions/highlight'
 import StyleClipboardExtension from './extensions/copy-styles'
 import improvedList from './extensions/list-extension'
-
+import TableExtension from './extensions/tables/table-extension'
 import { MentionExtension } from './extensions/mention'
 import TextEditorFixedMenu from './TextEditorFixedMenu.vue'
 import TextEditorBubbleMenu from './TextEditorBubbleMenu.vue'
@@ -72,6 +86,12 @@ import { ImageGroup } from './extensions/image-group/image-group-extension'
 import { ExtendedCode, ExtendedCodeBlock } from './extensions/code-block'
 import { useFileUpload } from '../../utils/useFileUpload'
 import { TextEditorEmits, TextEditorProps } from './types'
+import TableCellExtension from './extensions/tables/table-cell-extension'
+import TableHeaderExtension from './extensions/tables/table-header-extension'
+import TableRowExtension from './extensions/tables/table-row-extension'
+import TableBorderMenu from './extensions/tables/TableBorderMenu.vue'
+import { useTableMenu } from './extensions/tables/use-table-menu'
+import { TableCommandsExtension } from './extensions/tables/table-selection-extension'
 
 function defaultUploadFunction(file: File) {
   // useFileUpload is frappe specific
@@ -99,6 +119,25 @@ const emit = defineEmits<TextEditorEmits>()
 
 const editor = ref<Editor | null>(null)
 
+const {
+  showTableBorderMenu,
+  tableBorderAxis,
+  tableBorderMenuPos,
+  tableCellInfo,
+  canMergeCells,
+  addRowBefore,
+  addRowAfter,
+  deleteRow,
+  addColumnBefore,
+  addColumnAfter,
+  deleteColumn,
+  mergeCells,
+  toggleHeader,
+  setBackgroundColor,
+  setBorderColor,
+  setBorderWidth
+} = useTableMenu(editor)
+
 const attrs = useAttrs()
 const attrsClass = computed(() => normalizeClass(attrs.class))
 const attrsStyle = computed(() => normalizeStyle(attrs.style))
@@ -112,7 +151,7 @@ const editorProps = computed(() => {
   return {
     attributes: {
       class: normalizeClass([
-        'prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-outline-gray-2 prose-th:border-outline-gray-2 prose-td:relative prose-th:relative prose-th:bg-surface-gray-2',
+        'prose prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:relative prose-th:relative prose-th:bg-surface-gray-2',
         props.editorClass,
       ]),
     },
@@ -180,13 +219,17 @@ onMounted(() => {
       Table.configure({
         resizable: true,
       }),
+      TableExtension.configure({
+        resizable: true,
+      }),
+      TableCellExtension,
+      TableHeaderExtension,
+      TableRowExtension,
+	    TableCommandsExtension,
       TaskList,
       TaskItem.configure({
         nested: true,
       }),
-      TableRow,
-      TableHeader,
-      TableCell,
       Typography,
       TextAlign.configure({
         types: ['heading', 'paragraph'],
@@ -275,6 +318,7 @@ defineExpose({
 <style>
 @import './extensions/color/color-styles.css';
 @import './extensions/highlight/highlight-styles.css';
+@import './extensions/tables/table-styles.css';
 
 .ProseMirror {
   outline: none;
@@ -299,35 +343,6 @@ defineExpose({
 .ProseMirror-selectednode video,
 img.ProseMirror-selectednode {
   outline: 2px solid var(--outline-gray-2);
-}
-
-/* Table styles */
-.prose table p {
-  margin: 0;
-}
-
-/* Prosemirror specific table styles */
-.ProseMirror table .selectedCell:after {
-  z-index: 2;
-  position: absolute;
-  content: '';
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  pointer-events: none;
-  background: theme('colors.blue.200');
-  opacity: 0.3;
-}
-
-.ProseMirror table .column-resize-handle {
-  position: absolute;
-  right: -1px;
-  top: 0;
-  bottom: -2px;
-  width: 4px;
-  background-color: theme('colors.blue.200');
-  pointer-events: none;
 }
 
 .ProseMirror ul[data-type='taskList'] {
