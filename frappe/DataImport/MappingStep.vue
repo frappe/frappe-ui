@@ -88,7 +88,7 @@ const getMappedColumnName = (fieldname: string) => {
 
 const updateColumnMappings = (index: number, value: any) => {
     if (!value) return;
-    let columnToFieldMap = JSON.parse(props.data?.template_options)["column_to_field_map"];
+    let columnToFieldMap = JSON.parse(props.data?.template_options)?.["column_to_field_map"] || {};
     columnToFieldMap[index - 1] = value.value;
 
     props.dataImports.setValue.submit({

@@ -243,9 +243,11 @@ const startImport = () => {
     call("frappe.core.doctype.data_import.data_import.form_start_import", {
         data_import: props.data.name
     }).then(() => {
-        props.dataImports.reload()
-        let updatedData = props.dataImports.data?.find(d => d.name === props.data.name)
-        emit('updateStep', 'preview', { ...updatedData })
+        setTimeout(() => {
+            props.dataImports.reload()
+            let updatedData = props.dataImports.data?.find(d => d.name === props.data.name)
+            emit('updateStep', 'preview', { ...updatedData })
+        }, 500);
         nextTick(() => {
             getImportLogs()
         })
@@ -253,7 +255,6 @@ const startImport = () => {
 }
 
 const getImportLogs = () => {
-    if (importLogs.value.length) return;
     call("frappe.core.doctype.data_import.data_import.get_import_logs", {
         data_import: props.data.name
     }).then((data: any) =>  {
