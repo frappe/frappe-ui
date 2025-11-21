@@ -16,7 +16,7 @@
           :is="list.slots['group-header']"
           v-bind="{ group }"
         />
-        <span v-else class="text-base font-medium leading-6">
+        <span v-else class="text-ink-gray-8 text-base font-medium leading-6">
           {{ group.group }}
         </span>
       </div>
