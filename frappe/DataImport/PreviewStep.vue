@@ -158,6 +158,7 @@ import Badge from '../../src/components/Badge/Badge.vue';
 import Button from '../../src/components/Button/Button.vue';
 import call from '../../src/utils/call';
 import FeatherIcon from '../../src/components/FeatherIcon.vue'
+import initSocket from "../../src/utils/socketio";
 import Tooltip from "../../src/components/Tooltip/Tooltip.vue"
 import Popover from "../../src/components/Popover/Popover.vue"
 import Switch from '../../src/components/Switch/Switch.vue';
@@ -177,6 +178,11 @@ const props = defineProps<{
 }>()
 
 onMounted(async () => {
+    let socket = initSocket();
+    socket.on("data_import_refresh", (data) => {
+        reloadPreviewData(data.data_import);
+    })
+
     preview.value = await getPreviewData(
         props.data.name, props.data.import_file, props.data.google_sheets_url
     );
@@ -184,6 +190,19 @@ onMounted(async () => {
         getImportLogs();
     }
 });
+
+const reloadPreviewData = (dataImport: string) => {
+    if (dataImport != props.data.name) return;
+    nextTick(() => {
+        props.dataImports.reload()
+        nextTick(async () => {
+            let updatedData = props.dataImports.data?.find(d => d.name === props.data.name
+            )
+            emit('updateStep', 'preview', { ...updatedData })
+            getImportLogs()
+        })
+    })
+}
 
 const previewColumns = computed(() => {
     const columns: any[] = [];
@@ -242,15 +261,6 @@ const getMappedColumnName = (index: number) => {
 const startImport = () => {
     call("frappe.core.doctype.data_import.data_import.form_start_import", {
         data_import: props.data.name
-    }).then(() => {
-        setTimeout(() => {
-            props.dataImports.reload()
-            let updatedData = props.dataImports.data?.find(d => d.name === props.data.name)
-            emit('updateStep', 'preview', { ...updatedData })
-        }, 500);
-        nextTick(() => {
-            getImportLogs()
-        })
     })
 }
 
