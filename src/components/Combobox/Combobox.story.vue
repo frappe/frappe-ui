@@ -178,6 +178,24 @@ const state = reactive({
       </div>
     </Variant>
 
+    <Variant title="Outline variant">
+      <div class="p-4">
+        <label class="block text-sm font-medium mb-2">Simple Options</label>
+        <Combobox
+          variant="outline"
+          :options="simpleOptions"
+          v-model="simpleValue"
+          :placeholder="state.placeholder"
+          :disabled="state.disabled"
+          :show-cancel="state.showCancel"
+          @update:selectedOption="selectedOption = $event"
+        />
+        <div class="mt-2 text-sm text-gray-600">
+          Selected: {{ simpleValue || 'None' }}
+        </div>
+      </div>
+    </Variant>
+
     <Variant title="Object Options">
       <div class="p-4">
         <label class="block text-sm font-medium mb-2">Object Options</label>
