@@ -96,7 +96,7 @@ const selectOptions = computed(() => {
 
     <SelectPortal>
       <SelectContent
-        class="bg-surface-modal border rounded-lg shadow-lg will-change-[opacity,transform] data-[side=top]:animate-slideDownAndFade data-[side=right]:animate-slideLeftAndFade data-[side=bottom]:animate-slideUpAndFade data-[side=left]:animate-slideRightAndFade z-[100] min-w-[--reka-select-trigger-width] max-h-[--reka-select-content-available-height] overflow-auto"
+        class="bg-surface-modal border rounded-lg shadow-lg will-change-[opacity,transform] z-[100] min-w-[--reka-select-trigger-width] max-h-[--reka-select-content-available-height] overflow-auto"
         :side-offset="5"
         position="popper"
       >
@@ -120,7 +120,7 @@ const selectOptions = computed(() => {
 </template>
 
 <style>
-@keyframes slideDownFadeSmooth {
+@keyframes slideDownFade {
   from {
     opacity: 0;
     transform: translateY(-4px) scale(0.98);
@@ -131,7 +131,7 @@ const selectOptions = computed(() => {
   }
 }
 
-@keyframes slideUpFadeSmooth {
+@keyframes slideUpFade {
   from {
     opacity: 0;
     transform: translateY(4px) scale(0.98);
@@ -142,42 +142,12 @@ const selectOptions = computed(() => {
   }
 }
 
-@keyframes slideLeftFadeSmooth {
-  from {
-    opacity: 0;
-    transform: translateX(4px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0) scale(1);
-  }
-}
-
-@keyframes slideRightFadeSmooth {
-  from {
-    opacity: 0;
-    transform: translateX(-4px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0) scale(1);
-  }
-}
-
 [data-side='top'] {
-  animation: slideDownFadeSmooth 280ms;
+  animation: slideDownFade 280ms;
 }
 
 [data-side='bottom'] {
-  animation: slideUpFadeSmooth 280ms;
-}
-
-[data-side='left'] {
-  animation: slideRightFadeSmooth 280ms;
-}
-
-[data-side='right'] {
-  animation: slideLeftFadeSmooth 280ms;
+  animation: slideUpFade 280ms;
 }
 
 [data-highlighted],
