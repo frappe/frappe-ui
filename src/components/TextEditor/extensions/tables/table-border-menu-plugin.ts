@@ -52,7 +52,6 @@ export function tableBorderMenuPlugin(editor: Editor) {
       handleDOMEvents: {
         mousemove(view, event) {
           const target = event.target as HTMLElement
-
           if (
             target.closest('.table-row-handle-overlay') ||
             target.closest('.table-col-handle-overlay') ||
@@ -74,7 +73,14 @@ export function tableBorderMenuPlugin(editor: Editor) {
           }
           cancelClear()
           const { selection } = view.state
-          if (!(selection instanceof CellSelection)) {
+          const isCellSelection = selection instanceof CellSelection
+          if (isCellSelection) {
+            currentRowHandle?.remove()
+            currentColHandle?.remove()
+            currentRowHandle = null
+            currentColHandle = null
+            cancelCellTriggerClear()
+          } else {
             cancelCellTriggerClear()
           }
 
@@ -129,15 +135,16 @@ export function tableBorderMenuPlugin(editor: Editor) {
           const editorScrollLeft = editorElement.scrollLeft
           const editorScrollTop = editorElement.scrollTop
 
-          if (
-            !currentRowHandle ||
-            currentRowHandle.getAttribute('data-row-id') !== String(rowIndex) ||
-            currentRowHandle.getAttribute('data-table-id') !== tableId
-          ) {
-            currentRowHandle?.remove()
+          if (!isCellSelection) {
+            if (
+              !currentRowHandle ||
+              currentRowHandle.getAttribute('data-row-id') !== String(rowIndex) ||
+              currentRowHandle.getAttribute('data-table-id') !== tableId
+            ) {
+              currentRowHandle?.remove()
 
-            currentRowHandle = document.createElement('div')
-            currentRowHandle.className = 'table-row-handle-overlay'
+              currentRowHandle = document.createElement('div')
+              currentRowHandle.className = 'table-row-handle-overlay'
 
             let iconContainer = document.createElement('div')
             iconContainer.innerHTML = LucideGripVertical as unknown as string
@@ -226,17 +233,18 @@ export function tableBorderMenuPlugin(editor: Editor) {
             })
 
             editorElement.appendChild(currentRowHandle)
+            }
           }
+          if (!isCellSelection) {
+            if (
+              !currentColHandle ||
+              currentColHandle.getAttribute('data-col-id') !== String(colIndex) ||
+              currentColHandle.getAttribute('data-table-id') !== tableId
+            ) {
+              currentColHandle?.remove()
 
-          if (
-            !currentColHandle ||
-            currentColHandle.getAttribute('data-col-id') !== String(colIndex) ||
-            currentColHandle.getAttribute('data-table-id') !== tableId
-          ) {
-            currentColHandle?.remove()
-
-            currentColHandle = document.createElement('div')
-            currentColHandle.className = 'table-col-handle-overlay'
+              currentColHandle = document.createElement('div')
+              currentColHandle.className = 'table-col-handle-overlay'
             let iconContainer = document.createElement('div')
             iconContainer.innerHTML = LucideGripVertical as unknown as string
             const svg = iconContainer.querySelector('svg')
@@ -327,6 +335,7 @@ export function tableBorderMenuPlugin(editor: Editor) {
             })
 
             editorElement.appendChild(currentColHandle)
+            }
           }
           const cellId = `${tableId}-${rowIndex}-${colIndex}`
           if (

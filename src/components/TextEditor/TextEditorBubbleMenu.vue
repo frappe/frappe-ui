@@ -4,6 +4,7 @@
     class="bubble-menu rounded-md shadow-sm"
     :tippy-options="{ duration: 100 }"
     :editor="editor"
+    :should-show="shouldShow"
     v-bind="options"
   >
     <Menu

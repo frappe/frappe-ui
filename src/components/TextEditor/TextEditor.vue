@@ -13,24 +13,7 @@
       :buttons="fixedMenu"
     />
     <TextEditorFloatingMenu :buttons="floatingMenu" />    
-    <TableBorderMenu
-      :show="showTableBorderMenu"
-      :axis="tableBorderAxis"
-      :position="tableBorderMenuPos"
-      :cell-info="tableCellInfo"
-      :can-merge-cells="canMergeCells"
-      @add-row-before="addRowBefore"
-      @add-row-after="addRowAfter"
-      @delete-row="deleteRow"
-      @add-column-before="addColumnBefore"
-      @add-column-after="addColumnAfter"
-      @delete-column="deleteColumn"
-      @merge-cells="mergeCells"
-      @toggle-header="toggleHeader"
-      @set-background-color="setBackgroundColor"
-      @set-border-color="setBorderColor"
-      @set-border-width="setBorderWidth"
-    />
+    <TableBorderMenuContainer />
     <slot name="top" :editor />
     <slot name="editor" :editor="editor">
       <EditorContent :editor="editor" />
@@ -89,8 +72,7 @@ import { TextEditorEmits, TextEditorProps } from './types'
 import TableCellExtension from './extensions/tables/table-cell-extension'
 import TableHeaderExtension from './extensions/tables/table-header-extension'
 import TableRowExtension from './extensions/tables/table-row-extension'
-import TableBorderMenu from './extensions/tables/TableBorderMenu.vue'
-import { useTableMenu } from './extensions/tables/use-table-menu'
+import TableBorderMenuContainer from './extensions/tables/TableBorderMenuContainer.vue'
 import { TableCommandsExtension } from './extensions/tables/table-selection-extension'
 
 function defaultUploadFunction(file: File) {
@@ -119,24 +101,6 @@ const emit = defineEmits<TextEditorEmits>()
 
 const editor = ref<Editor | null>(null)
 
-const {
-  showTableBorderMenu,
-  tableBorderAxis,
-  tableBorderMenuPos,
-  tableCellInfo,
-  canMergeCells,
-  addRowBefore,
-  addRowAfter,
-  deleteRow,
-  addColumnBefore,
-  addColumnAfter,
-  deleteColumn,
-  mergeCells,
-  toggleHeader,
-  setBackgroundColor,
-  setBorderColor,
-  setBorderWidth
-} = useTableMenu(editor)
 
 const attrs = useAttrs()
 const attrsClass = computed(() => normalizeClass(attrs.class))
@@ -203,6 +167,7 @@ onMounted(() => {
         code: false,
         codeBlock: false,
         heading: false,
+        table: false,
       }).extend({
         addKeyboardShortcuts() {
           return {
@@ -216,9 +181,7 @@ onMounted(() => {
           ? props.starterkitOptions.heading
           : {}),
       }),
-      Table.configure({
-        resizable: true,
-      }),
+
       TableExtension.configure({
         resizable: true,
       }),
