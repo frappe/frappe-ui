@@ -25,7 +25,7 @@
   </FloatingMenu>
 </template>
 <script>
-import { FloatingMenu } from '@tiptap/vue-3'
+import { FloatingMenu } from '@tiptap/vue-3/menus'
 import { createEditorButton } from './utils'
 
 export default {
