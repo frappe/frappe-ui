@@ -58,20 +58,21 @@ defineOptions({ inheritAttrs: false })
 import { Editor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import { Placeholder } from '@tiptap/extensions'
-
+import Typography from '@tiptap/extension-typography'
+import { TextStyleKit } from '@tiptap/extension-text-style'
+import { TaskList, TaskItem } from '@tiptap/extension-list'
 import TextAlign from '@tiptap/extension-text-align'
+import NodeRange from '@tiptap/extension-node-range'
+
 import { ImageExtension } from './extensions/image'
 import ImageViewerExtension from './image-viewer-extension'
 import { VideoExtension } from './video-extension'
 import { IframeExtension } from './extensions/iframe'
 import LinkExtension from './link-extension'
-import Typography from '@tiptap/extension-typography'
-import { TextStyleKit } from '@tiptap/extension-text-style'
-import { ListKeymap, TaskList, TaskItem } from '@tiptap/extension-list'
+
 import NamedColorExtension from './extensions/color'
 import NamedHighlightExtension from './extensions/highlight'
 import StyleClipboardExtension from './extensions/copy-styles'
-import improvedList from './extensions/list-extension'
 import TableExtension from './extensions/tables/table-extension'
 import { MentionExtension } from './extensions/mention'
 import TextEditorFixedMenu from './TextEditorFixedMenu.vue'
@@ -197,12 +198,6 @@ onMounted(() => {
         code: false,
         codeBlock: false,
         heading: false,
-      }).extend({
-        addKeyboardShortcuts() {
-          return {
-            Backspace: () => improvedList(this.editor),
-          }
-        },
       }),
       Heading.configure({
         ...(typeof props.starterkitOptions?.heading === 'object' &&
@@ -270,6 +265,9 @@ onMounted(() => {
         uploadFunction: props.uploadFunction || defaultUploadFunction,
       }),
       StyleClipboardExtension,
+      NodeRange.configure({
+        key: null,
+      }),
       ...(props.extensions || []),
     ],
     onUpdate: ({ editor }) => {
@@ -284,6 +282,9 @@ onMounted(() => {
     onBlur: ({ editor, event }) => {
       emit('blur', event)
     },
+  })
+  editor.value.on('selectionUpdate', ({ editor }) => {
+    console.log('Selection:', editor.state.selection)
   })
 })
 

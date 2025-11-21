@@ -79,6 +79,7 @@
     "@tiptap/extension-link": "^3.11.0",
     "@tiptap/extension-list": "^3.11.0",
     "@tiptap/extension-mention": "^3.11.0",
+    "@tiptap/extension-node-range": "^3.11.0",
     "@tiptap/extension-placeholder": "^3.11.0",
     "@tiptap/extension-table": "^3.11.0",
     "@tiptap/extension-task-item": "^3.11.0",
