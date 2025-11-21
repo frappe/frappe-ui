@@ -163,7 +163,7 @@ import Button from '../../src/components/Button/Button.vue'
 import call from '../../src/utils/call';
 import Dropdown from '../../src/components/Dropdown/Dropdown.vue'
 import FeatherIcon from '../../src/components/FeatherIcon.vue'
-import FileUploadHandler from '../../src/utils/FileUploadHandler';
+import FileUploadHandler from '../../src/utils/fileUploadHandler';
 import FormControl from '../../src/components/FormControl/FormControl.vue'
 import TemplateModal from './TemplateModal.vue'
 
