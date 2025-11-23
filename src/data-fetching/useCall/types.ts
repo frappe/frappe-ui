@@ -13,6 +13,7 @@ export interface UseCallOptions<
   cacheKey?: CacheKey
   immediate?: boolean
   refetch?: boolean
+  skipOverride?: boolean
   baseUrl?: string
   initialData?: TResponse
   beforeSubmit?: (params?: TParams) => void
