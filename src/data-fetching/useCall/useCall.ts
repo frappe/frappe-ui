@@ -64,7 +64,6 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
     immediate,
     refetch,
     initialData,
-    skipOverride,
     afterFetch(ctx: AfterFetchContext<FrappeResponse<TResponse>>) {
       if (ctx.data && !skipOverride) {
         if (transform) {

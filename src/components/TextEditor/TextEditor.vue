@@ -283,9 +283,9 @@ onMounted(() => {
       emit('blur', event)
     },
   })
-  editor.value.on('selectionUpdate', ({ editor }) => {
-    console.log('Selection:', editor.state.selection)
-  })
+  // editor.value.on('selectionUpdate', ({ editor }) => {
+  //   console.log('Selection:', editor.state.selection)
+  // })
 })
 
 onBeforeUnmount(() => {
