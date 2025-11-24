@@ -16,6 +16,9 @@ export { default as HelpCenter } from './HelpCenter/HelpCenter.vue'
 export { default as TrialBanner } from './Billing/TrialBanner.vue'
 export { default as SignupBanner } from './Billing/SignupBanner.vue'
 
+// data import components
+export { default as DataImport } from './DataImport/DataImport.vue'
+
 // composables
 export { useOnboarding } from './Onboarding/onboarding.js'
 
