@@ -8,6 +8,7 @@ import {
 } from 'reka-ui'
 
 import type { TabProps } from './types'
+import { h } from 'vue'
 
 const props = defineProps<TabProps>()
 
@@ -16,6 +17,10 @@ const indicatorXCss = `left-0 bottom-0 h-[1px] w-[--reka-tabs-indicator-size] tr
 
 const indicatorYCss = `right-0 w-[1px] h-[--reka-tabs-indicator-size] transition-[height,transform]
                            translate-y-[--reka-tabs-indicator-position] translate-x-[1px]`
+
+// Using a plain <button> element via `h('button')` to avoid picking up
+// the globally registered Button component and its styles.
+const Btn = h('button')
 </script>
 
 <template>
@@ -37,7 +42,7 @@ const indicatorYCss = `right-0 w-[1px] h-[--reka-tabs-indicator-size] transition
       <TabsTrigger as="template" v-for="(tab, i) in props.tabs" :value="i">
         <slot name="tab-item" v-bind="{ tab }">
           <component
-            :is="tab.route ? 'router-link' : 'button'"
+            :is="tab.route ? 'router-link' : Btn"
             :to="tab.route"
             class="flex items-center gap-1.5 text-base text-ink-gray-5 duration-300 ease-in-out hover:text-ink-gray-9 p-2.5 data-[state=active]:text-ink-gray-9"
             :class="{ 'py-2.5 px-4': props.vertical }"
