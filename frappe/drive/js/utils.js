@@ -11,6 +11,8 @@ export function getFileLink(entity, copy = true) {
   if (entity.is_link) link = entity.path
   else if (entity.mime_type === 'frappe/slides') {
     link = `${window.location.origin}/slides/presentation/${entity.name}`
+  }else if (entity.mime_type === 'frappe_doc') {
+    link = `${window.location.origin}/writer/w/${entity.name}`
   } else {
     link = `${window.location.origin}/drive/${getLinkStem(entity)}`
   }

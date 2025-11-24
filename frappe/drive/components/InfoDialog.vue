@@ -110,12 +110,18 @@
             >{{ __('General') }}:</span
           >
           <div class="col-span-1 flex gap-2">
-            <GeneralAccess
-              size="sm"
-              :access-type="getGeneralAccess.data.type"
-              :show-text="true"
-              class="-mr-[3px]"
-            />
+            <div class="col-span-1 flex gap-2 items-center text-ink-gray-8">
+              <div
+                class="rounded-full flex items-center justify-center p-0.5 size-4.5"
+                :class="accessConfig[getGeneralAccess.data.type].color"
+              >
+                <component
+                  :is="accessConfig[getGeneralAccess.data.type].icon"
+                  class="h-[90%] w-[90%]"
+                />
+              </div>
+              <span>{{ accessConfig[getGeneralAccess.data.type].label }}</span>
+            </div>
           </div>
         </li>
         <li>
@@ -222,4 +228,22 @@ const developer = ref(false)
 onKeyDown('D', () => {
   developer.value = !developer.value
 })
+
+const accessConfig = {
+  team: {
+    icon: LucideBuilding,
+    color: 'bg-surface-blue-2 text-ink-blue-2',
+    label: 'Team',
+  },
+  public: {
+    icon: LucideGlobe2,
+    color: 'bg-surface-red-2 text-ink-red-3',
+    label: 'Public',
+  },
+  restricted: {
+    icon: LucideLock,
+    color: 'text-ink-gray-7 bg-surface-gray-4',
+    label: 'Restricted',
+  },
+}
 </script>
