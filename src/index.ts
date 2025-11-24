@@ -64,6 +64,7 @@ export * from './components/CircularProgressBar'
 export * from './components/Tree'
 export { default as FrappeUIProvider } from './components/Provider/FrappeUIProvider.vue'
 export * from './components/Sidebar/index.ts'
+export { default as ConfirmDialog } from './components/ConfirmDialog.vue'
 
 
 // grid layout
@@ -81,7 +82,6 @@ export { default as onOutsideClickDirective } from './directives/onOutsideClick'
 export { default as visibilityDirective } from './directives/visibility'
 
 // utilities
-export { getCommonSiteConfig } from '../vite/utils.js'
 export { default as call, createCall } from './utils/call.js'
 export { default as debounce } from './utils/debounce'
 export { default as fileToBase64 } from './utils/file-to-base64'
@@ -90,6 +90,7 @@ export { usePageMeta } from './utils/pageMeta'
 export { dayjsLocal, dayjs } from './utils/dayjs'
 export * from './utils/useFileUpload'
 export * from './utils/theme'
+export * from './components/TextEditor/extensions/image'
 
 // old data-fetching: resources
 export * from './resources/index.ts'
