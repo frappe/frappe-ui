@@ -25,12 +25,13 @@ const Btn = h('button')
 
 <template>
   <TabsRoot
-    class="rounded-lg border border-outline-gray-2 data-[orientation=vertical]:flex"
+    :as="props.as"
+    class="data-[orientation=vertical]:flex"
     :orientation="props.vertical ? 'vertical' : 'horizontal'"
     :default-value="props.tabs[0].label"
   >
     <TabsList
-      class="relative flex data-[orientation=vertical]:flex-col p-1 border-b border-outline-gray-2 data-[orientation=vertical]:border-r"
+      class="relative flex data-[orientation=vertical]:flex-col p-1 border-b  data-[orientation=vertical]:border-r"
     >
       <TabsIndicator
         class="absolute rounded-full duration-300"
@@ -45,7 +46,7 @@ const Btn = h('button')
             :is="tab.route ? 'router-link' : Btn"
             :to="tab.route"
             class="flex items-center gap-1.5 text-base text-ink-gray-5 duration-300 ease-in-out hover:text-ink-gray-9 p-2.5 data-[state=active]:text-ink-gray-9"
-            :class="{ 'py-2.5 px-4': props.vertical }"
+            :class="{ 'py-2.5': props.vertical,  }"
           >
             <component v-if="tab.icon" :is="tab.icon" class="size-4">
             </component>
