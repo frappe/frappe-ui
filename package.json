@@ -44,7 +44,8 @@
     "frappe",
     "src",
     "scripts",
-    "vite"
+    "vite",
+    "icons"
   ],
   "repository": {
     "type": "git",
