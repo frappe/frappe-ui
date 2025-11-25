@@ -9,9 +9,7 @@ export * from './components/Button'
 export { default as Card } from './components/Card.vue'
 export * from './components/Combobox'
 export * from './components/Checkbox'
-export { default as DatePicker } from './components/DatePicker/DatePicker.vue'
-export { default as DateTimePicker } from './components/DatePicker/DateTimePicker.vue'
-export { default as DateRangePicker } from './components/DatePicker/DateRangePicker.vue'
+export * from './components/DatePicker'
 export * from './components/Dialog'
 export { default as Dialogs } from './components/Dialogs.vue'
 export * from './components/Divider'
@@ -21,7 +19,6 @@ export { default as FeatherIcon } from './components/FeatherIcon.vue'
 export * from './components/FileUploader'
 export * from './components/FormControl'
 export { default as FormLabel } from './components/FormLabel.vue'
-export { default as GreenCheckIcon } from './components/GreenCheckIcon.vue'
 export { default as Input } from './components/Input.vue'
 export { default as ListItem } from './components/ListItem.vue'
 export { default as LoadingIndicator } from './components/LoadingIndicator.vue'
@@ -67,7 +64,9 @@ export * from './components/Calendar'
 export * from './components/CircularProgressBar'
 export * from './components/Tree'
 export { default as FrappeUIProvider } from './components/Provider/FrappeUIProvider.vue'
-export { default as Sidebar } from './components/Sidebar/Sidebar.vue'
+export * from './components/Sidebar/index.ts'
+export { default as ConfirmDialog } from './components/ConfirmDialog.vue'
+
 
 // grid layout
 export { default as GridLayout } from './components/VueGridLayout/Layout.vue'
@@ -92,33 +91,20 @@ export { usePageMeta } from './utils/pageMeta'
 export { dayjsLocal, dayjs } from './utils/dayjs'
 export * from './utils/useFileUpload'
 export * from './utils/theme'
+export * from './components/TextEditor/extensions/image'
 
 // old data-fetching: resources
-export {
-  createResource,
-  createDocumentResource,
-  createListResource,
-  getCachedResource,
-  getCachedDocumentResource,
-  getCachedListResource,
-  resourcesPlugin,
-} from './resources/index.js'
+export * from './resources/index.ts'
+
 export { request } from './utils/request.js'
 export { frappeRequest } from './utils/frappeRequest.js'
 export { default as initSocket } from './utils/socketio.js'
 export { setConfig, getConfig } from './utils/config'
 
 // new data-fetching composables
-export {
-  useCall,
-  useList,
-  useDoc,
-  useNewDoc,
-  useDoctype,
-  useFrappeFetch,
-} from './data-fetching'
+export * from './data-fetching'
 
 // plugin
+export { confirmDialog } from './utils/confirmDialog.js'
 export { default as pageMetaPlugin } from './utils/pageMeta.js'
 export { default as FrappeUI } from './utils/plugin.js'
-export { confirmDialog } from './utils/confirmDialog.js'
