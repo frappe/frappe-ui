@@ -107,7 +107,7 @@ const selectOptions = computed(() => {
             :key="index"
             :value="option.value"
             :class="[sizeClasses, paddingClasses, fontSizeClasses]"
-            class="text-base inline-flex items-center relative data-[highlighted]:bg-surface-gray-2 border-0 [data-state=checked]:bg-surface-gray-2 data-[disabled]:text-ink-gray-4"
+            class="text-base text-ink-gray-9 flex items-center relative data-[highlighted]:bg-surface-gray-2 border-0 [data-state=checked]:bg-surface-gray-2 data-[disabled]:text-ink-gray-4"
           >
             <SelectItemText>
               {{ option.label }}
