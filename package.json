@@ -1,6 +1,6 @@
 {
   "name": "frappe-ui",
-  "version": "0.1.218",
+  "version": "0.1.219",
   "description": "A set of components and utilities for rapid UI development",
   "type": "module",
   "sideEffects": false,
@@ -44,7 +44,8 @@
     "frappe",
     "src",
     "scripts",
-    "vite"
+    "vite",
+    "icons"
   ],
   "repository": {
     "type": "git",
