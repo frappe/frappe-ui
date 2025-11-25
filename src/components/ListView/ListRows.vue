@@ -24,7 +24,7 @@ const rows = computed(() =>
   list.value.resource ? list.value.resource.data : list.rows,
 )
 if (list.value.resource) {
-  const { reset } = useInfiniteScroll(
+  useInfiniteScroll(
     container,
     () => {
       if (!list.value.resource.loading) list.value.resource.next()
@@ -36,6 +36,5 @@ if (list.value.resource) {
       },
     },
   )
-  onBeforeUnmount(reset)
 }
 </script>
