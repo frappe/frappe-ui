@@ -9,6 +9,7 @@
       @focus="() => loadOptions('')"
       :open-on-focus="true"
       v-bind="attrsWithoutClassStyle"
+      :variant="props.variant"
     >
       <template #create-new="{ searchTerm }">
         <LucidePlus class="size-4 mr-2" />
@@ -32,6 +33,7 @@ import LucidePlus from '~icons/lucide/plus'
 const props = withDefaults(defineProps<LinkProps>(), {
   label: '',
   filters: () => ({}),
+  variant: 'subtle',
 })
 const model = defineModel<string | null>({ default: '' })
 const emit = defineEmits<{
