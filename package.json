@@ -48,7 +48,8 @@
     "src",
     "scripts",
     "vite",
-    "icons"
+    "icons",
+    "tsconfig.base.json"
   ],
   "repository": {
     "type": "git",
