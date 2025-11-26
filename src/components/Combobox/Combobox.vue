@@ -281,9 +281,13 @@ const reset = () => {
 }
 
 const variantClasses = computed(() => {
+  const borderCss =
+    'border focus-within:border-outline-gray-4 focus-within:ring-2 focus-within:ring-outline-gray-3'
+
   return {
-    subtle: 'bg-surface-gray-2 hover:bg-surface-gray-3 border-transparent',
-    outline: 'border-outline-gray-2',
+    subtle: `${borderCss} bg-surface-gray-2 hover:bg-surface-gray-3 border-transparent`,
+    outline: `${borderCss} border-outline-gray-2`,
+    ghost: '',
   }[props.variant]
 })
 
@@ -302,7 +306,7 @@ defineExpose({
       :open="isOpen"
     >
       <ComboboxAnchor
-        class="flex h-7 w-full items-center justify-between gap-2 rounded px-2 py-1 transition-colors border focus-within:border-outline-gray-4 focus-within:ring-2 focus-within:ring-outline-gray-3"
+        class="flex h-7 w-full items-center justify-between gap-2 rounded px-2 py-1 transition-colors"
         :class="{
           'opacity-50 pointer-events-none': disabled,
           [variantClasses]: true,
