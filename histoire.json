@@ -1,6 +1,48 @@
 {
   "stories": [
     {
+      "id": "src-components-alert-alert-story-vue",
+      "title": "Alert",
+      "layout": {
+        "width": 500,
+        "type": "grid"
+      },
+      "docsOnly": false,
+      "variants": [
+        {
+          "id": "src-components-alert-alert-story-vue-0",
+          "title": "Success"
+        },
+        {
+          "id": "src-components-alert-alert-story-vue-1",
+          "title": "Warning"
+        },
+        {
+          "id": "src-components-alert-alert-story-vue-2",
+          "title": "Error"
+        },
+        {
+          "id": "src-components-alert-alert-story-vue-3",
+          "title": "Info"
+        },
+        {
+          "id": "src-components-alert-alert-story-vue-4",
+          "title": "Controlled State"
+        },
+        {
+          "id": "src-components-alert-alert-story-vue-5",
+          "title": "Custom Slots"
+        }
+      ],
+      "relativePath": "src/components/Alert/Alert.story.vue",
+      "supportPluginId": "vue3",
+      "treePath": [
+        "Alert"
+      ],
+      "virtual": false,
+      "markdownFile": null
+    },
+    {
       "id": "src-components-autocomplete-autocomplete-story-vue",
       "title": "Autocomplete",
       "layout": {
@@ -340,34 +382,38 @@
         },
         {
           "id": "src-components-combobox-combobox-story-vue-1",
-          "title": "Object Options"
+          "title": "Outline variant"
         },
         {
           "id": "src-components-combobox-combobox-story-vue-2",
-          "title": "Options with Icons"
+          "title": "Object Options"
         },
         {
           "id": "src-components-combobox-combobox-story-vue-3",
-          "title": "Grouped Options"
+          "title": "Options with Icons"
         },
         {
           "id": "src-components-combobox-combobox-story-vue-4",
-          "title": "Disabled State"
+          "title": "Grouped Options"
         },
         {
           "id": "src-components-combobox-combobox-story-vue-5",
-          "title": "Pre-selected Value"
+          "title": "Disabled State"
         },
         {
           "id": "src-components-combobox-combobox-story-vue-6",
-          "title": "Custom Options with onClick"
+          "title": "Pre-selected Value"
         },
         {
           "id": "src-components-combobox-combobox-story-vue-7",
-          "title": "Custom Options with Render Function"
+          "title": "Custom Options with onClick"
         },
         {
           "id": "src-components-combobox-combobox-story-vue-8",
+          "title": "Custom Options with Render Function"
+        },
+        {
+          "id": "src-components-combobox-combobox-story-vue-9",
           "title": "Custom Options with Slots"
         }
       ],
@@ -663,6 +709,36 @@
       }
     },
     {
+      "id": "src-components-multiselect-multiselect-story-vue",
+      "title": "MultiSelect",
+      "layout": {
+        "width": 500,
+        "type": "grid"
+      },
+      "docsOnly": false,
+      "variants": [
+        {
+          "id": "src-components-multiselect-multiselect-story-vue-0",
+          "title": "Default"
+        },
+        {
+          "id": "src-components-multiselect-multiselect-story-vue-1",
+          "title": "Option slot"
+        },
+        {
+          "id": "src-components-multiselect-multiselect-story-vue-2",
+          "title": "Footer slot"
+        }
+      ],
+      "relativePath": "src/components/MultiSelect/MultiSelect.story.vue",
+      "supportPluginId": "vue3",
+      "treePath": [
+        "MultiSelect"
+      ],
+      "virtual": false,
+      "markdownFile": null
+    },
+    {
       "id": "src-components-password-password-story-vue",
       "title": "Password",
       "layout": {
@@ -771,8 +847,12 @@
       "docsOnly": false,
       "variants": [
         {
-          "id": "_default",
-          "title": "default"
+          "id": "src-components-select-select-story-vue-0",
+          "title": "Default"
+        },
+        {
+          "id": "src-components-select-select-story-vue-1",
+          "title": "With prefix"
         }
       ],
       "relativePath": "src/components/Select/Select.story.vue",
