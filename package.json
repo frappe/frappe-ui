@@ -38,7 +38,10 @@
     "./style.css": {
       "import": "./src/style.css"
     },
-    "./tsconfig.base.json": "./tsconfig.base.json"
+    "./tsconfig.base.json": {
+      "default": "./tsconfig.base.json",
+      "types": "./tsconfig.base.json"
+    }
   },
   "files": [
     "frappe",
