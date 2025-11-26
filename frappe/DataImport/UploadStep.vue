@@ -40,9 +40,7 @@
                     />
                     <div class="leading-5">
                         Drag and drop a CSV file, or upload from your 
-                        <span @click="openFileSelector" class="cursor-pointer font-semibold hover:underline">
-                            Device
-                        </span> 
+                        <span @click="openFileSelector" class="cursor-pointer font-semibold hover:underline">Device</span> 
                         or 
                         <span @click="openSheetSelector" class="cursor-pointer font-semibold hover:underline"> 
                             Google Sheet 
