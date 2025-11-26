@@ -86,7 +86,7 @@ const fields = createResource({
 })
 
 watch(
-  () => [props, dataImports.data],
+  () => [route.params, props, dataImports.data],
   () => {
     if (!dataImports.data?.length) return
     if (props.doctype) {
