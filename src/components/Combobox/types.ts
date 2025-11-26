@@ -26,7 +26,7 @@ export type GroupedOption = { group: string; options: SimpleOption[] }
 export type ComboboxOption = SimpleOption | GroupedOption
 
 export interface ComboboxProps {
-  variant?: 'subtle' | 'outline'
+  variant?: 'subtle' | 'outline' | 'ghost'
   options: Array<ComboboxOption>
   modelValue?: string | null
   placeholder?: string
