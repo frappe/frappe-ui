@@ -27,6 +27,7 @@ import Undo from '~icons/lucide/undo-2'
 import Redo from '~icons/lucide/redo-2'
 import Separator from '~icons/lucide/separator-horizontal'
 import Table from '~icons/lucide/table-properties'
+import TableOfContentsIcon from '~icons/lucide/table-of-contents'
 
 export default {
   Paragraph: {
@@ -288,6 +289,13 @@ export default {
     action: (editor) => editor.chain().focus().toggleHeaderCell().run(),
     isActive: (editor) => false,
     isDisabled: (editor) => !editor.can().toggleHeaderCell(),
+  },
+  TableOfContents: {
+    label: 'Table of Contents',
+    icon: TableOfContentsIcon,
+    action: (editor) =>
+      editor.chain().focus().insertTableOfContentsNode().run(),
+    isActive: (editor) => editor.isActive('tocNode'),
   },
   Separator: {
     type: 'separator',
