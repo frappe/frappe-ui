@@ -11,7 +11,7 @@
             </div>
             
             <div class="space-x-2">
-                <Button label="Start Over" @click="startOver" />
+                <Button v-if="mappingUpdated" label="Reset Mapping" @click="resetMapping" />
                 <Button label="Continue" variant="solid" @click="$emit('updateStep', 'preview')" />
             </div>
        </div>
@@ -32,7 +32,7 @@
                         :model-value="columnMappings[columnsFromFile[i - 1]]"
                         :options="columnsFromSystem"
                         placeholder="Select field" 
-                        @update:model-value="(val) => updateColumnMappings(i, val)"
+                        @update:model-value="(val: any) => updateColumnMappings(i, val)"
                     />
                 </template>
             </div>
@@ -43,14 +43,14 @@
 import type { DataImport, DataImports } from './types';
 import { fieldsToIgnore, getPreviewData } from './dataImport'
 import { computed, nextTick, onMounted, ref } from 'vue';
+import { toast } from "../../src/components/Toast/index"
 import Autocomplete from '../../src/components/Autocomplete/Autocomplete.vue';
 import Button from '../../src/components/Button/Button.vue';
-import FeatherIcon from '../../src/components/FeatherIcon.vue'
-import Link from "../Link/Link.vue"
 
 const previewData = ref<any>(null);
 const emit = defineEmits(['updateStep'])
 const columnMappings = ref<Record<string, string>>({});
+const mappingUpdated = ref(false);
 
 const props = defineProps<{
     dataImports: DataImports
@@ -59,7 +59,7 @@ const props = defineProps<{
 }>()
 
 onMounted(async () => {
-    previewData.value = await getPreviewData(props.data.name, props.data.import_file, props.data.google_sheets_url);
+    previewData.value = await getPreviewData(props.data.name!, props.data?.import_file, props.data?.google_sheets_url);
     initializeColumnMappings();
 });
 
@@ -68,6 +68,9 @@ const initializeColumnMappings = () => {
     let columnToFieldMap = []
     if (props.data?.template_options)
         columnToFieldMap = JSON.parse(props.data?.template_options)?.["column_to_field_map"];
+
+        if (Object.keys(columnToFieldMap).length > 0)
+            mappingUpdated.value = true;
 
         columnsFromFile.value.forEach((col: string, index: number) => {
         if (columnToFieldMap && columnToFieldMap[index])
@@ -88,13 +91,15 @@ const getMappedColumnName = (fieldname: string) => {
 
 const updateColumnMappings = (index: number, value: any) => {
     if (!value) return;
-    let columnToFieldMap = JSON.parse(props.data?.template_options)?.["column_to_field_map"] || {};
+    mappingUpdated.value = true;
+    let templateOptions = props.data?.template_options ? JSON.parse(props.data?.template_options) : {};
+    let columnToFieldMap = templateOptions["column_to_field_map"] || {};
     columnToFieldMap[index - 1] = value.value;
 
     props.dataImports.setValue.submit({
         ...props.data,
         template_options: JSON.stringify({
-            ...JSON.parse(props.data?.template_options),
+            ...templateOptions,
             column_to_field_map: columnToFieldMap
         })
     }, {
@@ -103,6 +108,10 @@ const updateColumnMappings = (index: number, value: any) => {
             nextTick(() => {
                 initializeColumnMappings()
             })
+        },
+        onError: (error: any) => {
+            toast.error(error.messages?.[0] || error)
+            console.error("Error updating column mappings:", error);
         }
     })
 }
@@ -141,11 +150,12 @@ const columnsFromSystem = computed(() => {
     .flat()
 })
 
-const startOver = () => {
+const resetMapping = () => {
+    let templateOptions = props.data?.template_options ? JSON.parse(props.data?.template_options) : {};
     props.dataImports.setValue.submit({
         ...props.data,
         template_options: JSON.stringify({
-            ...JSON.parse(props.data?.template_options),
+            ...templateOptions,
             column_to_field_map: {}
         })
     }, {
@@ -154,6 +164,10 @@ const startOver = () => {
             nextTick(() => {
                 initializeColumnMappings()
             })
+        },
+        onError: (error: any) => {
+            toast.error(error.messages?.[0] || error)
+            console.error("Error resetting column mappings:", error);
         }
     })
 }

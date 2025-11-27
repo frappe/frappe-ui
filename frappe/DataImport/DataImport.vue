@@ -76,7 +76,7 @@ const props = defineProps<Partial<DataImportProps>>()
 
 const fields = createResource({
   url: "frappe.desk.form.load.getdoctype",
-  makeParams: (values) => {
+  makeParams: (values: { doctype: string }) => {
     return {
       doctype: values.doctype,
       with_parent: 1,
@@ -119,7 +119,7 @@ watch(() => route.query, () => {
 
 const updateData = () => {
   data.value = dataImports.data?.find(
-    (di) => di.name === props.importName,
+    (di: DataImport) => di.name === props.importName,
     ) || null
 }
 

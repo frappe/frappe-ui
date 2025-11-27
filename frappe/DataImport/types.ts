@@ -15,6 +15,7 @@ export interface DataImport {
   mute_emails: boolean
   import_file?: string
   google_sheets_url?: string
+  template_options?: string
 }
 
 export interface DataImports {

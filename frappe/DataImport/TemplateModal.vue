@@ -35,6 +35,7 @@
                             </div>
                             <div class="grid grid-cols-2 gap-5">
                                 <div v-for="field in fields.data[doctype]" :key="field.fieldname" class="flex items-center space-x-2">
+                                    {{ fieldSelection[doctype][field.fieldname] }}
                                     <FormControl
                                         type="checkbox"
                                         v-model="fieldSelection[doctype][field.fieldname]"
@@ -192,14 +193,17 @@ const getExportType = () => {
 }
 
 const selectAllFields = () => {
+    const nextSelection = { ...fieldSelection.value }
     Object.keys(fields.data).forEach((doctype: string) => {
         fields.data[doctype].forEach((field: DocField) => {
-            if (!fieldSelection.value[doctype]) {
+            /* if (!fieldSelection.value[doctype]) {
                 fieldSelection.value[doctype] = {};
-            }
-            fieldSelection.value[doctype][field.fieldname] = true;
+            } */
+            nextSelection[doctype][field.fieldname] = true;
         })
     })
+
+    fieldSelection.value = nextSelection;
 }
 
 const selectMandatoryFields = () => {

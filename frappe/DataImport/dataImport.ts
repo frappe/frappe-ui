@@ -41,7 +41,7 @@ export const getChildTableName = (doctype: string, parentDocType: string, docs: 
     return childTableName
 }
 
-export const getPreviewData = (importName: string, file: string | undefined, sheet: string) => {
+export const getPreviewData = (importName: string, file: string | undefined, sheet: string | undefined) => {
     return call("frappe.core.doctype.data_import.data_import.get_preview_from_template", {
         data_import: importName,
         import_file: file,
