@@ -2,7 +2,7 @@
   <BubbleMenu
     v-if="bubbleMenuButtons"
     class="bubble-menu rounded-md shadow-sm"
-    :options="{ duration: 100 }"
+    :tippy-options="{ duration: 100 }"
     :editor="editor"
     v-bind="options"
   >
