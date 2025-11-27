@@ -51,6 +51,7 @@ export default {
           'Blockquote',
           'Code',
           'Horizontal Rule',
+          'TableOfContents',
         ]
       }
       return buttons.map(createEditorButton)

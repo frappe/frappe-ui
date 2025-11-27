@@ -15,7 +15,18 @@ export default {
       if (!this.buttons) return false
       let buttons
       if (Array.isArray(this.buttons)) {
-        buttons = this.buttons
+        buttons = [...this.buttons]
+        if (!buttons.includes('TableOfContents')) {
+          const tableIndex = buttons.findIndex((btn) => {
+            if (Array.isArray(btn)) {
+              return btn.includes('InsertTable')
+            }
+            return false
+          })
+          if (tableIndex !== -1) {
+            buttons.splice(tableIndex + 2, 0, 'TableOfContents', 'Separator')
+          }
+        }
       } else {
         buttons = [
           'Paragraph',
@@ -64,6 +75,8 @@ export default {
             'ToggleHeaderCell',
             'DeleteTable',
           ],
+          'Separator',
+          'TableOfContents',
           'Separator',
           'Undo',
           'Redo',
