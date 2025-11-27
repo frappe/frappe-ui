@@ -14,9 +14,7 @@
     "skipLibCheck": true,
     "noEmit": true,
     "types": ["vitest/globals", "unplugin-icons/types/vue"],
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"]
-    }
+    "declaration": true,
+    "emitDeclarationOnly": true,
   }
 }
