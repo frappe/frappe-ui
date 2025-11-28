@@ -54,10 +54,10 @@ const variants = ['subtle', 'outline']
         />
       </div>
     </Variant>
-    <Variant title="autocomplete">
+    <Variant title="Combobox">
       <div class="p-2">
         <FormControl
-          type="autocomplete"
+          type="combobox"
           :options="[
             { label: 'One', value: '1' },
             { label: 'Two', value: '2' },
