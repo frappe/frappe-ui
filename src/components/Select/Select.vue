@@ -77,7 +77,7 @@ const selectClasses = computed(() => {
 const selectOptions = computed(() => {
   const str = typeof props.options?.[0] == 'string'
   const tmp = props.options?.map((x) => ({ label: x, value: x }))
-  return (str ? tmp : props.options)?.filter((x) => x && x.value) || []
+  return (str ? tmp : props.options)?.filter((x) => x && String(x.value)) || []
 })
 </script>
 
