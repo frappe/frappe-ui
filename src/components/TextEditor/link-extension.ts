@@ -257,7 +257,7 @@ function openLinkEditor(href: string, anchor: HTMLElement): Promise<string> {
       content: container,
       trigger: 'manual',
       interactive: true,
-      appendTo: document.body,
+      appendTo: () => anchor.closest('[role="dialog"]') || document.body,
       placement: 'top',
       arrow: false,
       theme: 'link-editor',
