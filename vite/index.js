@@ -29,6 +29,22 @@ function frappeuiPlugin(
   if (options.buildConfig) {
     plugins.push(buildConfig(options.buildConfig))
   }
+
+  const DepsIncludePlugin = {
+    name: 'optimize-deps-include',
+    config(config) {
+      if (!config.optimizeDeps) config.optimizeDeps = {}
+
+      const includedDeps = config.optimizeDeps?.include || []
+      const moduleName = 'highlight.js/lib/core'
+
+      if (includedDeps.includes(moduleName)) return
+      config.optimizeDeps.include = [moduleName, ...includedDeps]
+    },
+  }
+
+  plugins.push(DepsIncludePlugin)
+
   return plugins
 }
 
