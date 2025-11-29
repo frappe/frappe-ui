@@ -94,6 +94,7 @@ const props = withDefaults(defineProps<TextEditorProps>(), {
   tags: () => [],
 })
 
+const model = defineModel()
 const emit = defineEmits<TextEditorEmits>()
 
 const editor = ref<Editor | null>(null)
@@ -119,10 +120,12 @@ const editorProps = computed(() => {
 })
 
 watch(
-  () => props.content,
-  (val) => {
-    if (editor.value) {
-      let currentHTML = editor.value.getHTML()
+  () => [props.content, model.value],
+  ([content, modelVal]) => {
+    const val = content || modelVal
+
+    if (val && editor.value) {
+      const currentHTML = editor.value.getHTML()
       if (currentHTML !== val) {
         editor.value.commands.setContent(val)
       }
@@ -153,7 +156,7 @@ watch(
 
 onMounted(() => {
   editor.value = new Editor({
-    content: props.content || null,
+    content: props.content || model.value || null,
     editorProps: editorProps.value,
     editable: props.editable,
     autofocus: props.autofocus,
@@ -237,7 +240,9 @@ onMounted(() => {
       ...(props.extensions || []),
     ],
     onUpdate: ({ editor }) => {
-      emit('change', editor.getHTML())
+      const html = editor.getHTML()
+      emit('change', html)
+      model.value = html
     },
     onTransaction: ({ editor }) => {
       emit('transaction', editor)
