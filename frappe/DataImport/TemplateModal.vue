@@ -12,12 +12,12 @@
                         :options="['Excel', 'CSV']"
                         type="select"
                     />
-                    <FormControl
+                    <!-- <FormControl
                         label="Export Type"
                         v-model="exportType"
                         :options="['All Records', '5 Records', 'Blank Template']"
                         type="select"
-                    />
+                    /> -->
                 </div>
                 <div class="border-t">
                     <p class="mt-2 text-ink-gray-5">
@@ -114,7 +114,7 @@ const prepareDoctypeMap = (docs: any[], doctypeMap: Record<string, { fieldname: 
                 fieldname: field.fieldname,
                 label: field.label,
                 reqd: field.reqd,
-                disabled: doc.name == props.doctype && field.reqd
+                disabled: doc.name == props.doctype && field.reqd ? true : false,
             }
         })
     })

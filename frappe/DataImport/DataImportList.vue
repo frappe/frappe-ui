@@ -155,6 +155,11 @@ const createDataImport = (close) => {
 }
 
 const redirectToImport = (importName: string) => {
-    window.location.href = `/data-import/${importName}`;
+    router.replace({
+        name: 'DataImport',
+        params: {
+            importName
+        },
+    })
 }
 </script>

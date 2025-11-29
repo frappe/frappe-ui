@@ -40,9 +40,7 @@
                     />
                     <div class="leading-5">
                         Drag and drop a CSV file, or upload from your 
-                        <span @click="openFileSelector" class="cursor-pointer font-semibold hover:underline">
-                            Device
-                        </span> 
+                        <span @click="openFileSelector" class="cursor-pointer font-semibold hover:underline">Device</span> 
                         or 
                         <span @click="openSheetSelector" class="cursor-pointer font-semibold hover:underline"> 
                             Google Sheet 
@@ -114,7 +112,7 @@
                             },
                         },
                         {
-                            label: __('All Field'),
+                            label: __('All Fields'),
                             onClick() {
                                 exportTemplate('all')
                             },
@@ -253,7 +251,7 @@ const createImport = () => {
         mute_emails: 1,
         status: 'Pending',
         google_sheets_url: googleSheet.value.trim(),
-        import_file: importFile.value,
+        import_file: importFile.value?.file_url,
     }, {
         onSuccess(data: DataImport) {
             router.replace({
@@ -267,7 +265,7 @@ const createImport = () => {
             })
         },
         onError(error: any) {
-            toast.error(error)
+            toast.error(error.messages?.[0] || error)
             console.error('Error creating data import:', error)
         }
     })
@@ -277,13 +275,13 @@ const updateImport = () => {
     props.dataImports.setValue.submit({
         ...props.data,
         google_sheets_url: googleSheet.value.trim(),
-        import_file: importFile.value,
+        import_file: importFile.value?.file_url,
     }, {
         onSuccess(data: DataImport) {
             emit('updateStep', 'map', data)
         },
         onError(error: any) {
-            toast.error(error)
+            toast.error(error.messages?.[0] || error, { duration: 1000 })
             console.error('Error updating data import:', error)
         }
     })
