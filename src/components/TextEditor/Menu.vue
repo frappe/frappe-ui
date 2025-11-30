@@ -41,6 +41,7 @@
                     class="w-full h-7 rounded px-2 text-base flex items-center gap-2 hover:bg-surface-gray-3"
                     @click="
                       () => {
+                        if(!option.action) return
                         onButtonClick(option)
                         close()
                       }
