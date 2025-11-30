@@ -68,6 +68,7 @@ import { ImageExtension } from './extensions/image'
 import ImageViewerExtension from './image-viewer-extension'
 import { VideoExtension } from './video-extension'
 import { IframeExtension } from './extensions/iframe'
+import { TocNodeExtension } from './extensions/toc-node'
 import LinkExtension from './link-extension'
 
 import NamedColorExtension from './extensions/color'
@@ -245,6 +246,7 @@ onMounted(() => {
         uploadFunction: props.uploadFunction || defaultUploadFunction,
       }),
       IframeExtension,
+      TocNodeExtension,
       LinkExtension.configure({
         openOnClick: false,
       }),

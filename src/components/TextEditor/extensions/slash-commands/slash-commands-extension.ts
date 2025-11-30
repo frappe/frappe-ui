@@ -20,6 +20,7 @@ import GalleryVertical from '~icons/lucide/gallery-vertical'
 import Link from '~icons/lucide/link'
 import Minus from '~icons/lucide/minus'
 import Table from '~icons/lucide/table-2'
+import TableOfContents from '~icons/lucide/table-of-contents'
 
 export const SlashCommandSuggestionKey = new PluginKey<any>(
   'slashCommandSuggestion',
@@ -140,6 +141,18 @@ const getCommands = (): CommandItem[] => [
         .focus()
         .deleteRange(range)
         .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+        .run()
+    },
+  },
+  {
+    title: 'Table of Contents',
+    icon: TableOfContents,
+    command: ({ editor, range }: CommandExecutionProps) => {
+      editor
+        .chain()
+        .focus()
+        .deleteRange(range)
+        .insertTableOfContentsNode()
         .run()
     },
   },

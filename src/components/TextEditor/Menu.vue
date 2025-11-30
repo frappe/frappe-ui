@@ -1,12 +1,12 @@
 <template>
   <div class="inline-flex bg-surface-white px-1 py-1">
     <div class="inline-flex items-center gap-1">
-      <template v-for="button in buttons" :key="button.label">
+      <template v-for="(button, index) in buttons" :key="button?.label || button?.type || `btn-${index}`">
         <div
           class="h-4 w-[2px] border-l"
-          v-if="button.type === 'separator'"
+          v-if="button && button.type === 'separator'"
         ></div>
-        <div class="shrink-0" v-else-if="button.map">
+        <div class="shrink-0" v-else-if="button && button.map">
           <Popover>
             <template #target="{ togglePopover }">
               <button
@@ -41,6 +41,7 @@
                     class="w-full h-7 rounded px-2 text-base flex items-center gap-2 hover:bg-surface-gray-3"
                     @click="
                       () => {
+                        if(!option.action) return
                         onButtonClick(option)
                         close()
                       }
@@ -62,7 +63,34 @@
             </template>
           </Popover>
         </div>
-        <component v-else :is="button.component || 'div'" v-bind="{ editor }">
+        <button
+          v-else-if="button && !button.component"
+          class="flex rounded p-1 text-ink-gray-8 transition-colors"
+          :class="[
+            button.isDisabled?.(editor) && 'opacity-50 pointer-events-none',
+            button.isActive?.(editor)
+              ? 'bg-surface-gray-3'
+              : 'hover:bg-surface-gray-2',
+            button.class,
+          ]"
+          @click="onButtonClick(button)"
+          :title="button.label || button.text"
+        >
+          <component v-if="button.icon" :is="button.icon" class="h-4 w-4" />
+          <span
+            class="inline-block h-4 min-w-[1rem] text-sm leading-4"
+            v-else-if="button.text"
+          >
+            {{ button.text }}
+          </span>
+          <span
+            class="inline-block h-4 min-w-[1rem] text-sm leading-4"
+            v-else-if="button.label"
+          >
+            {{ button.label }}
+          </span>
+        </button>
+        <component v-else-if="button && button.component" :is="button.component || 'div'" v-bind="{ editor }">
           <template v-slot="componentSlotProps">
             <button
               class="flex rounded p-1 text-ink-gray-8 transition-colors"
