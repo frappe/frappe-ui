@@ -1,6 +1,6 @@
 <template>
   <NodeViewWrapper
-    class="table-of-contents-node my-4"
+    class="table-of-contents-node"
     contenteditable="false"
   >
     <div v-if="anchors.length === 0" class="text-sm text-ink-gray-5 italic">
