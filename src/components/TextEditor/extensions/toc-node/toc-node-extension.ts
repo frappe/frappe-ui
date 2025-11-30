@@ -37,7 +37,6 @@ export const TocNodeExtension = Node.create({
     return [
       'div',
       { ...HTMLAttributes, 'data-type': 'toc-node' },
-      0,
     ]
   },
 
