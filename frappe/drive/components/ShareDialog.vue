@@ -215,6 +215,7 @@ import LucideGlobe2 from '~icons/lucide/globe-2'
 import LucideEye from '~icons/lucide/eye'
 import LucideUpload from '~icons/lucide/upload'
 import LucidePencil from '~icons/lucide/pencil'
+import LucideLink2 from '~icons/lucide/link-2'
 
 const open = defineModel()
 const props = defineProps({
