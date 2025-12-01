@@ -211,6 +211,9 @@ import LucideLock from '~icons/lucide/lock'
 import LucideSettings from '~icons/lucide/settings'
 import LucideArrowLeft from '~icons/lucide/arrow-left'
 import LucideGlobe2 from '~icons/lucide/globe-2'
+import LucideEye from '~icons/lucide/eye'
+import LucideUpload from '~icons/lucide/upload'
+import LucidePencil from '~icons/lucide/pencil'
 
 const open = defineModel()
 const props = defineProps({
