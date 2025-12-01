@@ -314,6 +314,7 @@ defineExpose({
         @click="handleClick"
       >
         <div class="flex items-center gap-2 flex-1 overflow-hidden">
+          <slot name="prefix" />
           <RenderIcon v-if="selectedOptionIcon" :icon="selectedOptionIcon" />
           <ComboboxInput
             :value="searchTerm"
