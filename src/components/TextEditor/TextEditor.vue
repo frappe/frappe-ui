@@ -124,7 +124,7 @@ watch(
   ([content, modelVal]) => {
     const val = content || modelVal
 
-    if (val && editor.value) {
+    if (editor.value) {
       const currentHTML = editor.value.getHTML()
       if (currentHTML !== val) {
         editor.value.commands.setContent(val)
