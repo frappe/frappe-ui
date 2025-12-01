@@ -199,6 +199,7 @@ onMounted(() => {
         code: false,
         codeBlock: false,
         heading: false,
+        link: false,
       }),
       Heading.configure({
         ...(typeof props.starterkitOptions?.heading === 'object' &&
