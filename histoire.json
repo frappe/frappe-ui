@@ -1003,12 +1003,7 @@
         "Tabs"
       ],
       "virtual": false,
-      "markdownFile": {
-        "id": "src-components-tabs-tabs-story-md",
-        "relativePath": "src/components/Tabs/Tabs.story.md",
-        "isRelatedToStory": true,
-        "frontmatter": {}
-      }
+      "markdownFile": null
     },
     {
       "id": "src-components-texteditor-texteditor-story-vue",
@@ -1543,12 +1538,6 @@
     {
       "id": "src-components-listview-listview-story-md",
       "relativePath": "src/components/ListView/ListView.story.md",
-      "isRelatedToStory": true,
-      "frontmatter": {}
-    },
-    {
-      "id": "src-components-tabs-tabs-story-md",
-      "relativePath": "src/components/Tabs/Tabs.story.md",
       "isRelatedToStory": true,
       "frontmatter": {}
     },
