@@ -7,7 +7,7 @@
                         Review and Import
                     </span>
 
-                    <Badge :theme="getBadgeColor(data?.status)">
+                    <Badge :theme="getBadgeColor(data.status)">
                         {{ data.status }}
                     </Badge>
                 </div>
@@ -155,6 +155,7 @@
 <script setup lang="ts">
 import { getPreviewData, getBadgeColor } from './dataImport'
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
+import type { DataImport, DataImports } from './types';
 import Badge from '../../src/components/Badge/Badge.vue';
 import Button from '../../src/components/Button/Button.vue';
 import call from '../../src/utils/call';
@@ -162,7 +163,6 @@ import FeatherIcon from '../../src/components/FeatherIcon.vue'
 import initSocket from "../../src/utils/socketio";
 import Popover from "../../src/components/Popover/Popover.vue"
 import TabButtons from '../../src/components/TabButtons/TabButtons.vue';
-import { get } from 'idb-keyval';
 
 const preview = ref<any>(null);
 const emit = defineEmits(['updateStep'])
@@ -174,15 +174,16 @@ const props = defineProps<{
     dataImports: DataImports
     data: DataImport
     fields: any
-    doctypeMap: Record<string, { title: string; route: string }>
+    doctypeMap: Record<string, { title: string; listRoute?: string; pageRoute?: string }>
 }>()
 
 onMounted(async () => {
     let socket = initSocket();
-    socket.on("data_import_refresh", (data) => {
+    socket.on("data_import_refresh", (data: { data_import: string }) => {
         reloadPreviewData(data.data_import);
     })
 
+    if (!props.data?.name) return;
     preview.value = await getPreviewData(
         props.data.name, props.data.import_file, props.data.google_sheets_url
     );
@@ -227,9 +228,9 @@ const previewColumns = computed(() => {
 })
 
 const previewData = computed(() => {
-    const data = []
+    const data: Record<string, any>[] = [];
     preview.value?.data.forEach((row: any) => {
-        const dataMap = {};
+        const dataMap: Record<string, any> = {};
         Object.keys(row).forEach((key: any, index: number) => {
             let columnLabel = getColumnLabel(index)
             let mappedFieldIndex = getMappedColumnName(index);
@@ -308,7 +309,7 @@ const importBannerClass = computed(() => {
 })
 
 const mapping = computed(() => {
-    let warningMap = []
+    let warningMap: string[][] = [];
     if (!preview.value?.warnings?.length) return [];
     preview.value.warnings.forEach((warning: any) => {
         const regex = /<strong>(.*?)<\/strong>/g;
@@ -335,7 +336,7 @@ const pageRoute = computed(() => {
     return props.doctypeMap[props.data.reference_doctype]?.pageRoute
 })
 
-const redirectToPage = (docname) => {
+const redirectToPage = (docname: string) => {
     if (!pageRoute.value) return;
     window.location.href = pageRoute.value.replace('docname', docname);
 }

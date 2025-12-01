@@ -12,12 +12,6 @@
                         :options="['Excel', 'CSV']"
                         type="select"
                     />
-                    <!-- <FormControl
-                        label="Export Type"
-                        v-model="exportType"
-                        :options="['All Records', '5 Records', 'Blank Template']"
-                        type="select"
-                    /> -->
                 </div>
                 <div class="border-t">
                     <p class="mt-2 text-ink-gray-5">
@@ -35,15 +29,13 @@
                             </div>
                             <div class="grid grid-cols-2 gap-5">
                                 <div v-for="field in fields.data[doctype]" :key="field.fieldname" class="flex items-center space-x-2">
-                                    {{ fieldSelection[doctype][field.fieldname] }}
-                                    <FormControl
-                                        type="checkbox"
-                                        v-model="fieldSelection[doctype][field.fieldname]"
-                                        :id="`checkbox-${field.fieldname}`"
-                                        :disabled="field.disabled"
-                                    />
+                                    <Checkbox
+                                        :id="`checkbox-${doctype}-${field.fieldname}`"
+                                        :checked="fieldSelection[doctype][field.fieldname]"
+                                        @change="(e: Event) => fieldSelection[doctype][field.fieldname] = (e.target as HTMLInputElement).checked"
+                                        />
                                     <label
-                                        :for="`checkbox-${field.fieldname}`"
+                                        :for="`checkbox-${doctype}-${field.fieldname}`"
                                         :class="{
                                             'text-ink-red-3': field.reqd
                                         }">
@@ -66,10 +58,11 @@
 </template>
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { DataImport, DocField } from './types'
+import type { DocField } from './types'
 import { createResource } from '../../src/resources'
 import { fieldsToIgnore, getChildTableName } from './dataImport'
 import Button from "../../src/components/Button/Button.vue"
+import Checkbox from "../../src/components/Checkbox/Checkbox.vue"
 import Dialog from "../../src/components/Dialog/Dialog.vue"
 import FormControl from "../../src/components/FormControl/FormControl.vue"
 
@@ -193,17 +186,14 @@ const getExportType = () => {
 }
 
 const selectAllFields = () => {
-    const nextSelection = { ...fieldSelection.value }
     Object.keys(fields.data).forEach((doctype: string) => {
         fields.data[doctype].forEach((field: DocField) => {
-            /* if (!fieldSelection.value[doctype]) {
+            if (!fieldSelection.value[doctype]) {
                 fieldSelection.value[doctype] = {};
-            } */
-            nextSelection[doctype][field.fieldname] = true;
+            }
+            fieldSelection.value[doctype][field.fieldname] = true;
         })
     })
-
-    fieldSelection.value = nextSelection;
 }
 
 const selectMandatoryFields = () => {

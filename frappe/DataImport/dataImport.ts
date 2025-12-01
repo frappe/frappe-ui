@@ -3,13 +3,13 @@ import type { DataImportStatus } from './types'
 import call from '../../src/utils/call';
 
 export const getBadgeColor = (status: DataImportStatus) => {
-    const colorMap: Record<DataImportStatus, string> = {
+    const colorMap = {
         "Pending": "orange",
         "Success": "green",
         "Partial Success": "orange",
         "Error": "red",
         "Timed Out": "orange"
-    }
+    } as const;
     return colorMap[status as DataImportStatus] || "gray"
 }
 

@@ -73,7 +73,7 @@ const emit = defineEmits(['updateStep'])
 
 const props = defineProps<{
     data: DataImport | null
-    step: 'list' | 'new' | 'map' | 'preview'
+    step: 'list' | 'upload' | 'map' | 'preview'
 }>()
 
 const onUploadStep = computed(() => {

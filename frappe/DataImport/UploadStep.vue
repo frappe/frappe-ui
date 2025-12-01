@@ -146,14 +146,14 @@
         <TemplateModal
             v-if="props.doctype || props.data?.reference_doctype"
             v-model="showTemplateModal"
-            :doctype="props.doctype || props.data?.reference_doctype"
+            :doctype="props.doctype || props.data?.reference_doctype as string"
         />
     </div>
 </template>
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import type { DataImports, DataImport } from './types'
+import type { DataImports, DataImport, DocField } from './types'
 import { toast } from "../../src/components/Toast/index"
 import { fieldsToIgnore, getChildTableName, getBadgeColor } from './dataImport'
 import Badge from '../../src/components/Badge/Badge.vue'
@@ -181,7 +181,7 @@ const props = defineProps<{
     dataImports: DataImports
     doctype?: string
     fields: any
-    data?: DataImport
+    data: DataImport | null
 }>()
 
 const uploadProgress = computed(() => {
@@ -311,7 +311,7 @@ const getExportURL = (type: 'mandatory' | 'all') => {
     let exportFields = getExportFields(type)
     
     return `/api/method/frappe.core.doctype.data_import.data_import.download_template
-        ?doctype=${encodeURIComponent(props.doctype || props.data?.reference_doctype)}
+        ?doctype=${encodeURIComponent(props.doctype || props.data?.reference_doctype as string)}
         &export_fields=${encodeURIComponent(JSON.stringify(exportFields))}
         &export_records=blank_template
         &file_type=CSV`
@@ -333,7 +333,7 @@ const getMandatoryFields = () => {
     }).map((field: DocField) => field.fieldname)
     exportableFields.unshift('name')
     return {
-        [props.doctype]: exportableFields
+        [props.doctype || props.data?.reference_doctype as string]: exportableFields
     }
 }
 
@@ -345,7 +345,7 @@ const getAllFields = () => {
             return !fieldsToIgnore.includes(field.fieldtype)
         }).map((field: DocField) => field.fieldname)
         exportableFields.unshift('name')
-        let doctypeName = doc.name == props.doctype ? doc.name : getChildTableName(doc.name, props.doctype, docs)
+        let doctypeName = doc.name == props.doctype ? doc.name : getChildTableName(doc.name, props.doctype || props.data?.reference_doctype as string, docs)
         doctypeMap[doctypeName] = exportableFields
     })
     return doctypeMap

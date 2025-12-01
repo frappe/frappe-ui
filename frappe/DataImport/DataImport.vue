@@ -26,7 +26,7 @@
     <MappingStep
       v-else-if="step === 'map'"
       :dataImports="dataImports"
-      :data="data"
+      :data="data as DataImport"
       :fields="fields"
       @updateStep="updateStep"
     />
@@ -34,9 +34,9 @@
     <PreviewStep
       v-else-if="step === 'preview'"
       :dataImports="dataImports"
-      :data="data"
+      :data="data as DataImport"
       :fields="fields"
-      :doctypeMap="doctypeMap"
+      :doctypeMap="doctypeMap as Record<string, { title: string; listRoute?: string; pageRoute?: string }>"
       @updateStep="updateStep"
     />
   </div>
@@ -54,7 +54,7 @@ import PreviewStep from './PreviewStep.vue'
 import UploadStep from './UploadStep.vue'
 
 const route = useRoute()
-const step = ref('list')
+const step = ref<'upload' | 'map' | 'list' | 'preview'>('list')
 const data = ref<DataImport | null>(null)
 
 const props = defineProps<Partial<DataImportProps>>()
@@ -105,9 +105,11 @@ watch(
       } else {
         step.value = 'preview'
       }
-      fields.reload({
-        doctype: data.value?.reference_doctype,
-      })
+      if (data.value?.reference_doctype) {
+        fields.reload({
+          doctype: data.value?.reference_doctype,
+        })
+      }
     }
   },
   { immediate: true },
@@ -125,11 +127,6 @@ const updateData = () => {
     ) || null
 }
 
-const doctypeTitle = computed(() => {
-  let doctype = props.doctype || data.value?.reference_doctype
-  return props.doctypeMap?.[doctype || '']?.title || doctype || ''
-})
-
 const updateStep = (newStep: 'list' | 'upload' | 'map' | 'preview', newData: DataImport) => {
   step.value = newStep
   if (newData) {
@@ -137,16 +134,22 @@ const updateStep = (newStep: 'list' | 'upload' | 'map' | 'preview', newData: Dat
   }
 }
 
+const doctypeTitle = computed(() => {
+  let doctype = props.doctype || data.value?.reference_doctype
+  return props.doctypeMap?.[doctype || '']?.title || doctype || ''
+})
+
 const breadcrumbs = computed(() => {
   let crumbs = [
     {
       label: 'Data Import',
       route: { 
-        name: 'DataImportList', query: {
-        step: 'list'
-      } 
+        name: 'DataImportList', 
+        query: {
+          step: 'list'
+        } 
+      },
     },
-    }
   ]
 
   if (step.value !== 'list') {

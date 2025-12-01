@@ -43,7 +43,7 @@
                 </div>
                 <div 
                     v-for="dataImport in dataImports.data" 
-                    @click="() => redirectToImport(dataImport.name)"
+                    @click="() => redirectToImport(dataImport.name!)"
                     class="grid grid-cols-[75%,20%] lg:grid-cols-[85%,20%] items-center cursor-pointer py-2.5 px-1 mx-2"
                 >
                     <div class="space-y-1">
@@ -100,11 +100,12 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import type { DataImports } from './types'
+import type { DataImports, DataImport } from './types'
 import { dayjs } from "../../src/utils/dayjs"
 import { getBadgeColor } from "./dataImport"
 import Badge from '../../src/components/Badge/Badge.vue'
 import type { BadgeProps } from '../../src/components/Badge/types'
+import { toast } from "../../src/components/Toast/index"
 import Button from '../../src/components/Button/Button.vue'
 import Dialog from '../../src/components/Dialog/Dialog.vue'
 import FeatherIcon from '../../src/components/FeatherIcon.vue'
@@ -137,10 +138,12 @@ watch([search, importStatus], ([newSearch, newStatus]) => {
     props.dataImports.reload()
 })
 
-const createDataImport = (close) => {
+const createDataImport = (close: () => void) => {
     props.dataImports.insert.submit({
-        reference_doctype: doctypeForImport.value,
+        reference_doctype: doctypeForImport.value!,
         import_type: 'Insert New Records',
+        mute_emails: true,
+        status: 'Pending',
     }, {
         onSuccess(data: DataImport) {
             router.replace({
@@ -150,6 +153,10 @@ const createDataImport = (close) => {
                 },
             })
             close()
+        },
+        onError(error: any) {
+            console.error(error)
+            toast.error(error.messages?.[0] || error)
         }
     })
 }

@@ -65,7 +65,7 @@ const props = defineProps<{
 }>()
 
 onMounted(async () => {
-    previewData.value = await getPreviewData(props.data.name!, props.data?.import_file, props.data?.google_sheets_url);
+    previewData.value = await getPreviewData(props.data.name!, props.data.import_file, props.data.google_sheets_url);
     initializeColumnMappings();
 });
 
@@ -132,7 +132,7 @@ const columnsFromFile = computed(() => {
 })
 
 const columnsFromSystem = computed(() => {
-  const parent = props.data.reference_doctype
+  const parent = props.data!.reference_doctype
   const docs = props.fields.data?.docs || []
 
   return docs
