@@ -3,16 +3,15 @@ import type { DataImportStatus } from './types'
 import call from '../../src/utils/call';
 
 export const getBadgeColor = (status: DataImportStatus) => {
-    const colorMap: Record<DataImportStatus, string> = {
+    const colorMap = {
         "Pending": "orange",
         "Success": "green",
         "Partial Success": "orange",
         "Error": "red",
         "Timed Out": "orange"
-    }
+    } as const;
     return colorMap[status as DataImportStatus] || "gray"
 }
-
 
 export const fieldsToIgnore = [
     "Section Break",
@@ -41,13 +40,13 @@ export const getChildTableName = (doctype: string, parentDocType: string, docs: 
     return childTableName
 }
 
-export const getPreviewData = (importName: string, file: string | undefined, sheet: string) => {
+export const getPreviewData = (importName: string, file: string | undefined, sheet: string | undefined) => {
     return call("frappe.core.doctype.data_import.data_import.get_preview_from_template", {
         data_import: importName,
         import_file: file,
         google_sheets_url: sheet
     }).catch((error: any) => {
-        toast.error(error)
+        toast.error(error.messages?.[0] || error)
         console.error("Error fetching preview data:", error)
     })
 }

@@ -3,9 +3,11 @@
 		class="sticky flex items-center justify-between space-x-28 top-0 z-10 border-b bg-surface-white px-3 py-2.5 sm:px-5"
     >
       <Breadcrumbs :items="breadcrumbs" />
-      <ImportSteps class="flex-1" v-if="step != 'list'" :data="data" :step="step" @updateStep="updateStep" />
+      <ImportSteps class="flex-1 hidden lg:flex" v-if="step != 'list'" :data="data" :step="step" @updateStep="updateStep" />
   </header>
   <div>
+      <ImportSteps class="flex-1 lg:hidden w-[90%] mx-auto mt-5" v-if="step != 'list'" :data="data" :step="step" @updateStep="updateStep" />
+
     <DataImportList
       v-if="step === 'list'"
       :dataImports="dataImports"
@@ -24,7 +26,7 @@
     <MappingStep
       v-else-if="step === 'map'"
       :dataImports="dataImports"
-      :data="data"
+      :data="data as DataImport"
       :fields="fields"
       @updateStep="updateStep"
     />
@@ -32,9 +34,9 @@
     <PreviewStep
       v-else-if="step === 'preview'"
       :dataImports="dataImports"
-      :data="data"
+      :data="data as DataImport"
       :fields="fields"
-      :doctypeMap="doctypeMap"
+      :doctypeMap="doctypeMap as Record<string, { title: string; listRoute?: string; pageRoute?: string }>"
       @updateStep="updateStep"
     />
   </div>
@@ -52,7 +54,7 @@ import PreviewStep from './PreviewStep.vue'
 import UploadStep from './UploadStep.vue'
 
 const route = useRoute()
-const step = ref('list')
+const step = ref<'upload' | 'map' | 'list' | 'preview'>('list')
 const data = ref<DataImport | null>(null)
 
 const props = defineProps<Partial<DataImportProps>>()
@@ -76,7 +78,7 @@ const props = defineProps<Partial<DataImportProps>>()
 
 const fields = createResource({
   url: "frappe.desk.form.load.getdoctype",
-  makeParams: (values) => {
+  makeParams: (values: { doctype: string }) => {
     return {
       doctype: values.doctype,
       with_parent: 1,
@@ -86,7 +88,7 @@ const fields = createResource({
 })
 
 watch(
-  () => [props, dataImports.data],
+  () => [route.params, props, dataImports.data],
   () => {
     if (!dataImports.data?.length) return
     if (props.doctype) {
@@ -103,9 +105,11 @@ watch(
       } else {
         step.value = 'preview'
       }
-      fields.reload({
-        doctype: data.value?.reference_doctype,
-      })
+      if (data.value?.reference_doctype) {
+        fields.reload({
+          doctype: data.value?.reference_doctype,
+        })
+      }
     }
   },
   { immediate: true },
@@ -119,14 +123,9 @@ watch(() => route.query, () => {
 
 const updateData = () => {
   data.value = dataImports.data?.find(
-    (di) => di.name === props.importName,
+    (di: DataImport) => di.name === props.importName,
     ) || null
 }
-
-const doctypeTitle = computed(() => {
-  let doctype = props.doctype || data.value?.reference_doctype
-  return props.doctypeMap?.[doctype || '']?.title || doctype || ''
-})
 
 const updateStep = (newStep: 'list' | 'upload' | 'map' | 'preview', newData: DataImport) => {
   step.value = newStep
@@ -135,16 +134,22 @@ const updateStep = (newStep: 'list' | 'upload' | 'map' | 'preview', newData: Dat
   }
 }
 
+const doctypeTitle = computed(() => {
+  let doctype = props.doctype || data.value?.reference_doctype
+  return props.doctypeMap?.[doctype || '']?.title || doctype || ''
+})
+
 const breadcrumbs = computed(() => {
   let crumbs = [
     {
       label: 'Data Import',
       route: { 
-        name: 'DataImportList', query: {
-        step: 'list'
-      } 
+        name: 'DataImportList', 
+        query: {
+          step: 'list'
+        } 
+      },
     },
-    }
   ]
 
   if (step.value !== 'list') {

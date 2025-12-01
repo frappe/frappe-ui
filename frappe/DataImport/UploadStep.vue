@@ -1,18 +1,15 @@
 <template>
-    <div class="text-base h-full flex flex-col w-[700px] mx-auto pt-12 space-y-8">
-        <div class="flex items-center justify-between">
-            <div class="flex flex-col space-y-2 text-ink-gray-7">
-                <div class="text-xl font-semibold text-ink-gray-9">
-                    Choose Import
+    <div class="text-base h-full flex flex-col w-[85%] lg:w-[700px] mx-auto pt-12 space-y-8">
+        <div class="flex flex-col space-y-1 text-ink-gray-7">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2 text-xl font-semibold text-ink-gray-9">
+                    <span>
+                        Choose Import
+                    </span>
+                    <Badge v-if="data?.status" :theme="getBadgeColor(data?.status)">
+                        {{ data?.status }}
+                    </Badge>
                 </div>
-                <div>
-                    Import data into your system using CSV files or Google Sheets.
-                </div>
-            </div>
-            <div class="space-x-2">
-                <Badge v-if="data?.status" :theme="statusTheme" size="lg">
-                    {{ data?.status }}
-                </Badge>
                 <Button 
                     variant="solid" 
                     @click="saveImport"
@@ -20,6 +17,9 @@
                 >
                     Continue
                 </Button>
+            </div>
+            <div class="leading-5">
+                Import data into your system using CSV files or Google Sheets.
             </div>
         </div>
 
@@ -29,7 +29,7 @@
                 @dragover.prevent
                 @drop.prevent="(e) =>  uploadFile(e)" 
                 class="h-[300px] flex items-center justify-center bg-surface-gray-1 border border-dashed border-outline-gray-3 rounded-md">
-                <div v-if="showFileSelector && !uploading" class="w-2/5 text-center">
+                <div v-if="showFileSelector && !uploading" class="w-4/5 lg:w-2/5 text-center">
                     <FeatherIcon name="upload-cloud" class="size-6 stroke-1.5 text-ink-gray-6 mx-auto mb-2.5" />
                     <input
                         ref="fileInput"
@@ -40,16 +40,14 @@
                     />
                     <div class="leading-5">
                         Drag and drop a CSV file, or upload from your 
-                        <span @click="openFileSelector" class="cursor-pointer font-semibold hover:underline">
-                            Device
-                        </span> 
+                        <span @click="openFileSelector" class="cursor-pointer font-semibold hover:underline">Device</span> 
                         or 
                         <span @click="openSheetSelector" class="cursor-pointer font-semibold hover:underline"> 
                             Google Sheet 
                         </span>
                     </div>
                 </div>
-                <div v-else-if="showFileSelector && uploading" class="w-2/5 bg-surface-white border rounded-md p-2">
+                <div v-else-if="showFileSelector && uploading" class="w-4/5 lg:w-2/5 bg-surface-white border rounded-md p-2">
                     <div class="space-y-2">
                         <div class="font-medium">
                             {{ uploadingdFile.name }}
@@ -67,9 +65,9 @@
                 </div>
             </div>
             <div v-else-if="importFile" class="h-[300px] flex items-center justify-center bg-surface-gray-1 border border-dashed border-outline-gray-3 rounded-md">
-                <div class="w-2/5 bg-surface-white border rounded-md p-2 flex items-center justify-between items-center">
+                <div class="w-4/5 lg:w-2/5 bg-surface-white border rounded-md p-2 flex items-center justify-between items-center">
                     <div class="space-y-2">
-                        <div class="font-medium">
+                        <div class="font-medium leading-5">
                             {{ importFile.file_name || importFile.split("/").pop() }}
                         </div>
                         <div v-if="importFile.file_size" class="text-ink-gray-6">
@@ -79,7 +77,7 @@
                     <FeatherIcon 
                         name="trash-2" 
                         class="size-4 stroke-1.5 text-ink-red-3 cursor-pointer"
-                        @click="importFile = null"
+                        @click="deleteFile"
                     />
                 </div>
             </div>
@@ -91,7 +89,7 @@
                         Google Sheet
                     </div>
                 </div>
-                <div class="flex-1 flex flex-col items-center justify-center w-[400px] mx-auto space-y-3">
+                <div class="flex-1 flex flex-col items-center justify-center w-[95%] lg:w-[400px] mx-auto space-y-3">
                     <input
                         v-model="googleSheet"
                         type="text"
@@ -108,19 +106,19 @@
                 <Dropdown
                     :options="[
                         {
-                            label: __('Mandatory Fields'),
+                            label: 'Mandatory Fields',
                             onClick() {
                                 exportTemplate('mandatory')
                             },
                         },
                         {
-                            label: __('All Field'),
+                            label: 'All Fields',
                             onClick() {
                                 exportTemplate('all')
                             },
                         },
                         {
-                            label: __('Custom Template'),
+                            label: 'Custom Template',
                             onClick() {
                                 showTemplateModal = true
                             },
@@ -146,32 +144,30 @@
         </div>
 
         <TemplateModal
+            v-if="props.doctype || props.data?.reference_doctype"
             v-model="showTemplateModal"
-            :doctype="props.doctype || props.data?.reference_doctype"
+            :doctype="props.doctype || props.data?.reference_doctype as string"
         />
     </div>
 </template>
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import type { DataImports, DataImport } from './types'
+import type { DataImports, DataImport, DocField } from './types'
 import { toast } from "../../src/components/Toast/index"
-import { transformFields } from './dataImport'
-import { fieldsToIgnore, getChildTableName } from './dataImport'
+import { fieldsToIgnore, getChildTableName, getBadgeColor } from './dataImport'
 import Badge from '../../src/components/Badge/Badge.vue'
 import Button from '../../src/components/Button/Button.vue'
-import call from '../../src/utils/call';
 import Dropdown from '../../src/components/Dropdown/Dropdown.vue'
 import FeatherIcon from '../../src/components/FeatherIcon.vue'
 import FileUploadHandler from '../../src/utils/fileUploadHandler';
-import FormControl from '../../src/components/FormControl/FormControl.vue'
 import TemplateModal from './TemplateModal.vue'
 
 const emit = defineEmits(['updateStep'])
-const importFile = ref<File | null>(null)
+const importFile = ref<any | null>(null)
 const googleSheet = ref<string>('')
 const uploading = ref(false)
-const uploadingdFile = ref<File | null>(null)
+const uploadingdFile = ref<any | null>(null)
 const uploaded = ref(0)
 const total = ref(0)
 const showTemplateModal = ref(false)
@@ -185,7 +181,7 @@ const props = defineProps<{
     dataImports: DataImports
     doctype?: string
     fields: any
-    data?: DataImport
+    data: DataImport | null
 }>()
 
 const uploadProgress = computed(() => {
@@ -248,12 +244,12 @@ const saveImport = () => {
 
 const createImport = () => {
     props.dataImports.insert.submit({
-        reference_doctype: props.doctype,
+        reference_doctype: props.doctype!,
         import_type: "Insert New Records",
-        mute_emails: 1,
+        mute_emails: true,
         status: 'Pending',
         google_sheets_url: googleSheet.value.trim(),
-        import_file: importFile.value,
+        import_file: importFile.value?.file_url,
     }, {
         onSuccess(data: DataImport) {
             router.replace({
@@ -267,23 +263,30 @@ const createImport = () => {
             })
         },
         onError(error: any) {
-            toast.error(error)
+            toast.error(error.messages?.[0] || error)
             console.error('Error creating data import:', error)
         }
     })
 }
 
 const updateImport = () => {
+    if (!props.data) return;
     props.dataImports.setValue.submit({
         ...props.data,
         google_sheets_url: googleSheet.value.trim(),
-        import_file: importFile.value,
+        import_file: importFile.value ? importFile.value.file_url : '',
     }, {
         onSuccess(data: DataImport) {
-            emit('updateStep', 'map', data)
+            nextTick(() => {
+                if (importFile.value || googleSheet.value.trim().length) {
+                    emit('updateStep', 'map', data)
+                } else {
+                    emit('updateStep', 'upload', data)
+                }
+            })
         },
         onError(error: any) {
-            toast.error(error)
+            toast.error(error.messages?.[0] || error, { duration: 1000 })
             console.error('Error updating data import:', error)
         }
     })
@@ -304,10 +307,11 @@ const exportTemplate = async (type: 'mandatory' | 'all') => {
 }
 
 const getExportURL = (type: 'mandatory' | 'all') => {
+    if (!props.doctype && !props.data?.reference_doctype) return ''
     let exportFields = getExportFields(type)
     
     return `/api/method/frappe.core.doctype.data_import.data_import.download_template
-        ?doctype=${encodeURIComponent(props.doctype)}
+        ?doctype=${encodeURIComponent(props.doctype || props.data?.reference_doctype as string)}
         &export_fields=${encodeURIComponent(JSON.stringify(exportFields))}
         &export_records=blank_template
         &file_type=CSV`
@@ -329,7 +333,7 @@ const getMandatoryFields = () => {
     }).map((field: DocField) => field.fieldname)
     exportableFields.unshift('name')
     return {
-        [props.doctype]: exportableFields
+        [props.doctype || props.data?.reference_doctype as string]: exportableFields
     }
 }
 
@@ -341,7 +345,7 @@ const getAllFields = () => {
             return !fieldsToIgnore.includes(field.fieldtype)
         }).map((field: DocField) => field.fieldname)
         exportableFields.unshift('name')
-        let doctypeName = doc.name == props.doctype ? doc.name : getChildTableName(doc.name, props.doctype, docs)
+        let doctypeName = doc.name == props.doctype ? doc.name : getChildTableName(doc.name, props.doctype || props.data?.reference_doctype as string, docs)
         doctypeMap[doctypeName] = exportableFields
     })
     return doctypeMap
@@ -378,17 +382,17 @@ watch(() => props.data, () => {
     }
 }, { immediate: true })
 
-const convertToMB = (bytes: number) => {
-    return (bytes / (1024 * 1024)).toFixed(2) + ' MB'
-}  
+watch([importFile, googleSheet], () => {
+    if (!importFile.value || !googleSheet.value.trim().length) {
+        updateImport()
+    }
+})
+
+const deleteFile = () => {
+    importFile.value = null
+}
 
 const convertToKB = (bytes: number) => {
     return (bytes / 1024).toFixed(2) + ' KB'
 }
-
-const statusTheme = computed(() => {
-    if (props.data?.status == 'Success') return 'green'
-    else if (props.data?.status == 'Error') return 'red'
-    else return 'orange'
-})
 </script>

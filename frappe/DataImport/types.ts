@@ -3,7 +3,7 @@ export interface DataImportProps {
   description?: string
   doctype?: string | null
   importName?: string | null
-  doctypeMap?: Record<string, { title: string; route: string }>
+  doctypeMap?: Record<string, { title: string; listRoute?: string; pageRoute?: string }>
 }
 
 export interface DataImport {
@@ -15,14 +15,17 @@ export interface DataImport {
   mute_emails: boolean
   import_file?: string
   google_sheets_url?: string
+  template_options?: string
 }
 
 export interface DataImports {
   data: DataImport[]
   update: (args: { filters: any[] }) => void
-  insert: { submit: (params: DataImport, options: { validate: () => boolean; onSuccess: (data: DataImport) => void; onError: (err: any) => void }) => void }
+  insert: { submit: (params: DataImport, options: { validate?: () => boolean; onSuccess: (data: DataImport) => void; onError: (err: any) => void }) => void }
   setValue: { submit: (params: DataImport, options: { onSuccess: (data: DataImport) => void; onError: (err: any) => void }) => void }
   reload: () => void
+  hasNextPage: () => boolean
+  next: () => Promise<void>
 }
 
 export type DataImportStatus = "Pending" | "Success" | "Partial Success" | "Error" | "Timed Out"
