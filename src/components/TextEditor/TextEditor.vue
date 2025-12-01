@@ -268,9 +268,9 @@ onMounted(() => {
         uploadFunction: props.uploadFunction || defaultUploadFunction,
       }),
       StyleClipboardExtension,
-      NodeRange.configure({
-        key: null,
-      }),
+      // NodeRange.configure({
+      //   key: null,
+      // }),
       ...(props.extensions || []),
     ],
     onUpdate: ({ editor }) => {
