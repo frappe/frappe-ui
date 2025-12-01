@@ -1,7 +1,10 @@
 <script setup lang="ts">
-import { h, reactive } from 'vue'
+import { reactive } from 'vue'
 import Tabs from './Tabs.vue'
-import FeatherIcon from '../FeatherIcon.vue'
+import LucideGithub from "~icons/lucide/github";
+import LucideTwitter from "~icons/lucide/twitter";
+import LucideLinkedin from "~icons/lucide/linkedin";
+
 const state = reactive({
   index: 0,
   tabs_without_icon: [
@@ -21,24 +24,25 @@ const state = reactive({
         'LinkedIn is an American business and employment-oriented online service that operates via websites and mobile apps.',
     },
   ],
+
   tabs_with_icon: [
     {
       label: 'Github',
       content:
         'Github is a code hosting platform for version control and collaboration. It lets you and others work together on projects from anywhere.',
-      icon: h(FeatherIcon, { class: 'w-4 h-4', name: 'github' }),
+      icon: LucideGithub,
     },
     {
       label: 'Twitter',
       content:
         'Twitter is an American microblogging and social networking service on which users post and interact with messages known as "tweets".',
-      icon: h(FeatherIcon, { class: 'w-4 h-4', name: 'twitter' }),
+      icon: LucideTwitter,
     },
     {
       label: 'Linkedin',
       content:
         'LinkedIn is an American business and employment-oriented online service that operates via websites and mobile apps.',
-      icon: h(FeatherIcon, { class: 'w-4 h-4', name: 'linkedin' }),
+      icon: LucideLinkedin,
     },
   ],
 })
@@ -48,7 +52,6 @@ const state = reactive({
   <Story :layout="{ type: 'grid', width: '80%' }">
     <Variant title="Without Icon">
       <Tabs
-        as="div"
         class="border rounded"
         v-model="state.index"
         :tabs="state.tabs_without_icon"
@@ -60,9 +63,9 @@ const state = reactive({
         </template>
       </Tabs>
     </Variant>
+
     <Variant title="With Icon">
       <Tabs
-        as="div"
         class="border rounded"
         v-model="state.index"
         :tabs="state.tabs_with_icon"
@@ -74,13 +77,13 @@ const state = reactive({
         </template>
       </Tabs>
     </Variant>
+
     <Variant title="Vertical Tabs">
       <Tabs
-        as="div"
         class="border rounded"
         v-model="state.index"
         :tabs="state.tabs_with_icon"
-        vertical
+        :vertical='true'
       >
         <template #tab-panel="{ tab }">
           <div class="p-5">
