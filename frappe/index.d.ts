@@ -51,3 +51,6 @@ declare module 'frappe-ui/frappe' {
   export const Link: Component
   export type { LinkProps } from './Link/types'
 }
+
+// Data Import
+export const DataImport: Component

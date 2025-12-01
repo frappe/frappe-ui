@@ -1,18 +1,15 @@
 <template>
-    <div class="text-base h-full flex flex-col w-[700px] mx-auto pt-12 space-y-8">
-        <div class="flex items-center justify-between">
-            <div class="flex flex-col space-y-2 text-ink-gray-7">
-                <div class="text-xl font-semibold text-ink-gray-9">
-                    Choose Import
+    <div class="text-base h-full flex flex-col w-[85%] lg:w-[700px] mx-auto pt-12 space-y-8">
+        <div class="flex flex-col space-y-1 text-ink-gray-7">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2 text-xl font-semibold text-ink-gray-9">
+                    <span>
+                        Choose Import
+                    </span>
+                    <Badge v-if="data?.status" :theme="getBadgeColor(data?.status)">
+                        {{ data?.status }}
+                    </Badge>
                 </div>
-                <div>
-                    Import data into your system using CSV files or Google Sheets.
-                </div>
-            </div>
-            <div class="space-x-2">
-                <Badge v-if="data?.status" :theme="statusTheme" size="lg">
-                    {{ data?.status }}
-                </Badge>
                 <Button 
                     variant="solid" 
                     @click="saveImport"
@@ -20,6 +17,9 @@
                 >
                     Continue
                 </Button>
+            </div>
+            <div class="leading-5">
+                Import data into your system using CSV files or Google Sheets.
             </div>
         </div>
 
@@ -29,7 +29,7 @@
                 @dragover.prevent
                 @drop.prevent="(e) =>  uploadFile(e)" 
                 class="h-[300px] flex items-center justify-center bg-surface-gray-1 border border-dashed border-outline-gray-3 rounded-md">
-                <div v-if="showFileSelector && !uploading" class="w-2/5 text-center">
+                <div v-if="showFileSelector && !uploading" class="w-4/5 lg:w-2/5 text-center">
                     <FeatherIcon name="upload-cloud" class="size-6 stroke-1.5 text-ink-gray-6 mx-auto mb-2.5" />
                     <input
                         ref="fileInput"
@@ -47,7 +47,7 @@
                         </span>
                     </div>
                 </div>
-                <div v-else-if="showFileSelector && uploading" class="w-2/5 bg-surface-white border rounded-md p-2">
+                <div v-else-if="showFileSelector && uploading" class="w-4/5 lg:w-2/5 bg-surface-white border rounded-md p-2">
                     <div class="space-y-2">
                         <div class="font-medium">
                             {{ uploadingdFile.name }}
@@ -65,7 +65,7 @@
                 </div>
             </div>
             <div v-else-if="importFile" class="h-[300px] flex items-center justify-center bg-surface-gray-1 border border-dashed border-outline-gray-3 rounded-md">
-                <div class="w-2/5 bg-surface-white border rounded-md p-2 flex items-center justify-between items-center">
+                <div class="w-4/5 lg:w-2/5 bg-surface-white border rounded-md p-2 flex items-center justify-between items-center">
                     <div class="space-y-2">
                         <div class="font-medium leading-5">
                             {{ importFile.file_name || importFile.split("/").pop() }}
@@ -89,7 +89,7 @@
                         Google Sheet
                     </div>
                 </div>
-                <div class="flex-1 flex flex-col items-center justify-center w-[400px] mx-auto space-y-3">
+                <div class="flex-1 flex flex-col items-center justify-center w-[95%] lg:w-[400px] mx-auto space-y-3">
                     <input
                         v-model="googleSheet"
                         type="text"
@@ -155,7 +155,7 @@ import { computed, nextTick, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import type { DataImports, DataImport } from './types'
 import { toast } from "../../src/components/Toast/index"
-import { fieldsToIgnore, getChildTableName } from './dataImport'
+import { fieldsToIgnore, getChildTableName, getBadgeColor } from './dataImport'
 import Badge from '../../src/components/Badge/Badge.vue'
 import Button from '../../src/components/Button/Button.vue'
 import Dropdown from '../../src/components/Dropdown/Dropdown.vue'
@@ -244,9 +244,9 @@ const saveImport = () => {
 
 const createImport = () => {
     props.dataImports.insert.submit({
-        reference_doctype: props.doctype,
+        reference_doctype: props.doctype!,
         import_type: "Insert New Records",
-        mute_emails: 1,
+        mute_emails: true,
         status: 'Pending',
         google_sheets_url: googleSheet.value.trim(),
         import_file: importFile.value?.file_url,
@@ -395,10 +395,4 @@ const deleteFile = () => {
 const convertToKB = (bytes: number) => {
     return (bytes / 1024).toFixed(2) + ' KB'
 }
-
-const statusTheme = computed(() => {
-    if (props.data?.status == 'Success') return 'green'
-    else if (props.data?.status == 'Error') return 'red'
-    else return 'orange'
-})
 </script>

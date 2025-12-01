@@ -13,7 +13,6 @@ export const getBadgeColor = (status: DataImportStatus) => {
     return colorMap[status as DataImportStatus] || "gray"
 }
 
-
 export const fieldsToIgnore = [
     "Section Break",
     "Column Break",
@@ -47,7 +46,7 @@ export const getPreviewData = (importName: string, file: string | undefined, she
         import_file: file,
         google_sheets_url: sheet
     }).catch((error: any) => {
-        toast.error(error)
+        toast.error(error.messages?.[0] || error)
         console.error("Error fetching preview data:", error)
     })
 }

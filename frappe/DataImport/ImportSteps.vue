@@ -1,6 +1,6 @@
 <template>
-    <div class="flex items-center space-x-10">
-        <div class="flex items-center space-x-2 text-ink-gray-5 cursor-pointer" 
+    <div class="flex items-center space-x-3 lg:space-x-10 text-xs lg:text-base">
+        <div class="flex items-center space-x-1 lg:space-x-2 text-ink-gray-5 cursor-pointer" 
         :class="{
             'text-ink-gray-9 font-semibold': onUploadStep
         }"
@@ -20,7 +20,7 @@
                 Upload File
             </div>
         </div>
-        <div class="flex items-center space-x-2 text-ink-gray-5" 
+        <div class="flex items-center space-x-1 lg:space-x-2 text-ink-gray-5" 
         :class="{
             'text-ink-gray-9 font-semibold': onMapStep,
             'cursor-pointer': uploadStepCompleted
@@ -38,10 +38,10 @@
                 </span>
             </div>
             <div>
-                Map File
+                Map Data
             </div>
         </div>
-        <div class="flex items-center space-x-2 text-ink-gray-5" 
+        <div class="flex items-center space-x-1 lg:space-x-2 text-ink-gray-5" 
         :class="{
             'text-ink-gray-9 font-semibold': onPreviewStep,
             'cursor-pointer': uploadStepCompleted

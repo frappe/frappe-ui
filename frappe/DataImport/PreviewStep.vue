@@ -1,23 +1,24 @@
 <template>
-    <div class="text-base h-full flex flex-col w-[700px] mx-auto py-12 space-y-10">
-        <div class="flex items-center justify-between">
-            <div class="space-y-2 text-ink-gray-7">
-                <div class="text-lg font-semibold text-ink-gray-9">
-                    Review and Import
+    <div class="text-base h-full flex flex-col w-[90%] lg:w-[700px] mx-auto py-12 space-y-10">
+        <div class="flex flex-col space-y-1">
+            <div class="flex items-center justify-between text-ink-gray-7">
+                <div class="flex items-center space-x-2 text-lg font-semibold text-ink-gray-9">
+                    <span>
+                        Review and Import
+                    </span>
+
+                    <Badge :theme="getBadgeColor(data?.status)">
+                        {{ data.status }}
+                    </Badge>
                 </div>
-                <div>
-                    Verify the data before starting the import process
-                </div>
-            </div>
-            <div class="space-x-2">
-                <Badge :theme="statusTheme">
-                    {{ data.status }}
-                </Badge>
                 <Button 
                     v-if="data.status != 'Success'" 
                     :label="data.status != 'Pending' ? 'Retry' : 'Import'" 
                     variant="solid" @click="startImport" />
                 <Button v-else-if="listRoute" label="Done" @click="redirectToList()" />
+            </div>
+            <div class="leading-5">
+                Verify the data before starting the import process
             </div>
         </div>
 
@@ -26,7 +27,7 @@
                 Column Mapping
             </div>
             <div class="border rounded-md bg-surface-gray-2 p-4 space-y-4 text-sm">
-                <div v-for="map in mapping" class="grid grid-cols-3 space-x-3">
+                <div v-for="map in mapping" class="grid grid-cols-[40%,10%,40%] lg:grid-cols-3 space-x-3 items-center">
                     <div class="">
                         {{ map[0] }}
                     </div>
@@ -85,7 +86,7 @@
             </div>
 
             <div class="rounded-md p-2" :class="importBannerClass">
-                {{ importSuccessCount }} rows imported successfully, {{ importErrorCount }} rows failed.
+                {{ importSuccessCount }} {{ importSuccessCount == 1 ? 'row' : 'rows' }} imported successfully, {{ importErrorCount }} {{ importErrorCount == 1 ? 'row' : 'rows' }} failed.
             </div>
 
             <TabButtons :buttons="tabButtons" v-model="activeTab" class="w-fit" />
@@ -152,17 +153,16 @@
     </div>
 </template>
 <script setup lang="ts">
-import { getPreviewData } from './dataImport'
+import { getPreviewData, getBadgeColor } from './dataImport'
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import Badge from '../../src/components/Badge/Badge.vue';
 import Button from '../../src/components/Button/Button.vue';
 import call from '../../src/utils/call';
 import FeatherIcon from '../../src/components/FeatherIcon.vue'
 import initSocket from "../../src/utils/socketio";
-import Tooltip from "../../src/components/Tooltip/Tooltip.vue"
 import Popover from "../../src/components/Popover/Popover.vue"
-import Switch from '../../src/components/Switch/Switch.vue';
 import TabButtons from '../../src/components/TabButtons/TabButtons.vue';
+import { get } from 'idb-keyval';
 
 const preview = ref<any>(null);
 const emit = defineEmits(['updateStep'])
@@ -348,13 +348,7 @@ const tabButtons = computed(() => {
     ]
 })
 
-const statusTheme = computed(() => {
-    if (props.data?.status == 'Success') return 'green'
-    else if (props.data?.status == 'Error') return 'red'
-    else return 'orange'
-})
-
-const rowMessage = (row) => {
+const rowMessage = (row: any) => {
     return JSON.parse(row.messages)?.[0]?.message
 }
 </script>

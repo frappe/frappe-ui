@@ -1,5 +1,5 @@
 <template>
-    <div class="flex min-h-0 flex-col text-base py-5 w-[700px] mx-auto">
+    <div class="flex min-h-0 flex-col text-base py-5 w-[90%] lg:w-[700px] mx-auto">
 		<div class="flex items-center justify-between">
 			<div>
 				<div class="text-xl font-semibold mb-1 text-ink-gray-9">
@@ -33,7 +33,7 @@
 
         <div v-if="dataImports.data?.length" class="overflow-y-scroll">
             <div class="divide-y">
-                <div class="grid grid-cols-[85%,20%] items-center text-sm text-ink-gray-5 py-1.5 mx-2 my-0.5 px-1">
+                <div class="grid grid-cols-[75%,20%] lg:grid-cols-[85%,20%] items-center text-sm text-ink-gray-5 py-1.5 mx-2 my-0.5 px-1">
                     <div>
                         Name
                     </div>
@@ -44,7 +44,7 @@
                 <div 
                     v-for="dataImport in dataImports.data" 
                     @click="() => redirectToImport(dataImport.name)"
-                    class="grid grid-cols-[85%,20%] items-center cursor-pointer py-2.5 px-1 mx-2"
+                    class="grid grid-cols-[75%,20%] lg:grid-cols-[85%,20%] items-center cursor-pointer py-2.5 px-1 mx-2"
                 >
                     <div class="space-y-1">
                         <div class="text-ink-gray-7">
