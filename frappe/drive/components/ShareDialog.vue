@@ -207,6 +207,7 @@ import { usersWithAccess, updateAccess, allUsers } from '../js/resources'
 
 import LucideBuilding2 from '~icons/lucide/building-2'
 import LucideDiamond from '~icons/lucide/diamond'
+import LucideX from '~icons/lucide/x'
 import LucideLock from '~icons/lucide/lock'
 import LucideSettings from '~icons/lucide/settings'
 import LucideArrowLeft from '~icons/lucide/arrow-left'

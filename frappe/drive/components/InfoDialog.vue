@@ -188,6 +188,11 @@ import { ref, inject } from 'vue'
 import { onKeyDown } from '@vueuse/core'
 import { formatDate } from '../js/utils'
 
+import LucideBuilding2 from '~icons/lucide/building-2'
+import LucideLock from '~icons/lucide/lock'
+import LucideGlobe2 from '~icons/lucide/globe-2'
+
+
 const dialogType = defineModel()
 const open = ref(true)
 
@@ -231,7 +236,7 @@ onKeyDown('D', () => {
 
 const accessConfig = {
   team: {
-    icon: LucideBuilding,
+    icon: LucideBuilding2,
     color: 'bg-surface-blue-2 text-ink-blue-2',
     label: 'Team',
   },
