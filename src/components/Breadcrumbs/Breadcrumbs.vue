@@ -1,6 +1,6 @@
 <template>
   <div class="flex min-w-0 items-center" ref="crumbsRef">
-    <template v-if="overflowedX">
+    <template v-if="overflowedX && items.length > 2">
       <Dropdown class="h-7" :options="dropdownItems">
         <Button variant="ghost">
           <template #icon>
