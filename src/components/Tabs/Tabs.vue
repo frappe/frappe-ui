@@ -31,7 +31,7 @@ const Btn = h('button')
     :default-value="props.tabs[0].label"
   >
     <TabsList
-      class="relative flex data-[orientation=vertical]:flex-col p-1 border-b data-[orientation=vertical]:border-r"
+      class="relative min-h-fit flex data-[orientation=vertical]:flex-col p-1 border-b data-[orientation=vertical]:border-r"
       :class="{ 'overflow-auto': !props.vertical }"
     >
       <TabsIndicator
