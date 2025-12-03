@@ -65,7 +65,6 @@ export { default as FrappeUIProvider } from './components/Provider/FrappeUIProvi
 export * from './components/Sidebar/index.ts'
 export { default as ConfirmDialog } from './components/ConfirmDialog.vue'
 
-
 // grid layout
 export { default as GridLayout } from './components/VueGridLayout/Layout.vue'
 
@@ -90,6 +89,7 @@ export { dayjsLocal, dayjs } from './utils/dayjs'
 export * from './utils/useFileUpload'
 export * from './utils/theme'
 export * from './components/TextEditor/extensions/image'
+export * from './components/TextEditor/extensions/suggestion'
 
 // old data-fetching: resources
 export * from './resources/index.ts'
