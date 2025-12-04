@@ -26,13 +26,13 @@ const Btn = h('button')
 <template>
   <TabsRoot
     :as="props.as"
-    class="flex flex-1 overflow-hidden flex-col data-[orientation=vertical]:flex-row [&_[role='tabpanel']:not([hidden])]:flex [&_[role='tabpanel']:not([hidden])]:grow"
+    class="flex flex-1 overflow-hidden flex-col data-[orientation=vertical]:flex-row"
     :orientation="props.vertical ? 'vertical' : 'horizontal'"
     :default-value="props.tabs[0].label"
   >
     <TabsList
-      class="relative min-h-fit flex data-[orientation=vertical]:flex-col p-1 border-b data-[orientation=vertical]:border-r"
-      :class="{ 'overflow-auto': !props.vertical }"
+      class="relative min-h-fit flex data-[orientation=vertical]:flex-col p-1 border-b data-[orientation=vertical]:border-r "
+      :class="{ 'overflow-x-auto overflow-y-hidden': !props.vertical }"
     >
       <TabsIndicator
         class="absolute rounded-full duration-300"
@@ -58,10 +58,12 @@ const Btn = h('button')
       </TabsTrigger>
     </TabsList>
 
-    <TabsContent v-for="(tab, i) in props.tabs" :value="i">
-      <div class="flex flex-col flex-1 grow">
-        <slot name="tab-panel" v-bind="{ tab }" />
-      </div>
+    <TabsContent
+      v-for="(tab, i) in props.tabs"
+      :value="i"
+      class="flex flex-col overflow-auto"
+    >
+      <slot name="tab-panel" v-bind="{ tab }" />
     </TabsContent>
   </TabsRoot>
 </template>
