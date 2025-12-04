@@ -208,7 +208,7 @@ onMounted(() => {
           : {}),
       }),
       TableExtension.configure({
-        resizable: true,
+        resizable: false,
       }),
       TableCellExtension,
       TableHeaderExtension,
