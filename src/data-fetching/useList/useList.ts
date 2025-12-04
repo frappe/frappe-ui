@@ -42,6 +42,11 @@ export function useList<T extends { name: string }>(
     transform,
   } = options
 
+  const extraFetchOptions = {
+    ...(options?.headers && { headers: options.headers }),
+    ...(options?.credentials && { credentials: options.credentials }),
+  }
+
   const _start = ref(start || 0)
   const _limit = ref(limit || 20)
 
@@ -72,6 +77,9 @@ export function useList<T extends { name: string }>(
     immediate,
     refetch,
     initialData: initialData || null,
+    beforeFetch: ({ options }) => {
+      Object.assign(options, extraFetchOptions)
+    },
     afterFetch: handleAfterFetch<T>({
       ...options,
       allData,
