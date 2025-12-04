@@ -65,7 +65,8 @@ declare module '@tiptap/core' {
 /**
  * Matches markdown-style video syntax (custom): !video[alt](src "title")
  */
-const inputRegex = /(?:^|\s)(!video\[(.+|:?)]\((\S+)(?:(?:\s+)["'](\S+)["'])?\))$/
+const inputRegex =
+  /(?:^|\s)(!video\[(.+|:?)]\((\S+)(?:(?:\s+)["'](\S+)["'])?\))$/
 
 export const VideoExtension = NodeExtension.create<VideoExtensionOptions>({
   name: 'video',
@@ -98,20 +99,17 @@ export const VideoExtension = NodeExtension.create<VideoExtensionOptions>({
       float: {
         default: null,
         parseHTML: (element) => {
-          const float = (
-            element.getAttribute('data-float') ||
-            element.getAttribute('float') ||
-            'left'
-          ).toLowerCase()
+          const float =
+            element.getAttribute('data-float') || element.getAttribute('float')
 
           if (['left', 'right', null].includes(float)) {
             return float as 'left' | 'right' | null
           }
-          return 'left'
+          return null
         },
         renderHTML: (attributes) => {
           return {
-            'data-float': attributes.float || 'left',
+            'data-float': attributes.float || null,
           }
         },
       },
@@ -149,7 +147,7 @@ export const VideoExtension = NodeExtension.create<VideoExtensionOptions>({
   },
 
   renderHTML({ HTMLAttributes }) {
-   return [
+    return [
       'video',
       mergeAttributes(this.options.HTMLAttributes, HTMLAttributes, {
         controls: '',
@@ -553,7 +551,7 @@ function getVideoDimensions(
   return new Promise((resolve, reject) => {
     const video = document.createElement('video')
     video.preload = 'metadata'
-    
+
     video.onloadedmetadata = () => {
       resolve({
         width: video.videoWidth,
@@ -562,7 +560,7 @@ function getVideoDimensions(
       // Clean up
       video.src = ''
     }
-    
+
     video.onerror = reject
     video.src = src
   })

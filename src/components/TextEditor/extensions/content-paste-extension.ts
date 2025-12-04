@@ -1,4 +1,4 @@
-import { Extension , markPasteRule} from '@tiptap/core'
+import { Extension } from '@tiptap/core'
 import { Plugin, PluginKey } from '@tiptap/pm/state'
 import { DOMParser } from '@tiptap/pm/model'
 import { EditorView } from '@tiptap/pm/view'
@@ -21,38 +21,44 @@ export const ContentPasteExtension = Extension.create<ContentPasteOptions>({
   },
   addProseMirrorPlugins() {
     const extensionThis = this
+    const handleCopy = (view, event, isCut) => {
+      const selection = window.getSelection()
+      if (!selection) return false
+
+      const container = document.createElement('div')
+      for (let i = 0; i < selection.rangeCount; i++)
+        container.appendChild(selection.getRangeAt(i).cloneContents())
+
+      // Update relative image srcs
+      const images = container.querySelectorAll('img')
+      images.forEach((img) => {
+        const src = img.getAttribute('src')
+        if (src && src.startsWith('/')) {
+          img.setAttribute('src', `${window.location.origin}${src}`)
+        }
+      })
+
+      // Override clipboard HTML
+      event.clipboardData?.setData('text/html', container.innerHTML)
+      event.clipboardData?.setData('text/plain', selection.toString())
+      event.preventDefault()
+
+      if (isCut) {
+        const { state, dispatch } = view
+        const tr = state.tr.deleteSelection()
+        dispatch(tr)
+      }
+      return true
+    }
     return [
       new Plugin({
         key: new PluginKey('contentPaste'),
         props: {
           handleDOMEvents: {
-            copy: (view, event) => {
-              const selection = window.getSelection()
-              if (!selection) return false
-
-              const container = document.createElement('div')
-              for (let i = 0; i < selection.rangeCount; i++) container.appendChild(selection.getRangeAt(i).cloneContents())
-
-              // Update relative image srcs
-              const images = container.querySelectorAll('img')
-              images.forEach((img) => {
-                const src = img.getAttribute('src')
-                if (src && src.startsWith('/')) {
-                  img.setAttribute('src', `${window.location.origin}${src}`)
-                }
-              })
-
-              // Override clipboard HTML
-              event.clipboardData?.setData('text/html', container.innerHTML)
-              event.clipboardData?.setData('text/plain', selection.toString())
-              event.preventDefault()
-              return true
-            },
+            copy: (v, e) => handleCopy(v, e, false),
+            cut: (v, e) => handleCopy(v, e, true),
           },
-          handlePaste: (
-            view: EditorView,
-            event: ClipboardEvent,
-          ) => {
+          handlePaste: (view: EditorView, event: ClipboardEvent) => {
             if (!this.options.enabled) return false
 
             // handle image pasting
@@ -131,10 +137,7 @@ async function processHTMLImages(
 
   // Process each image
   const imagePromises = Array.from(imageInfo).map(async ([src, pos]) => {
-    if (
-      src.startsWith('data:') ||
-      src.startsWith('blob:') 
-    ) {
+    if (src.startsWith('data:') || src.startsWith('blob:')) {
       try {
         const response = await fetch(src)
         const blob = await response.blob()
