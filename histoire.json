@@ -709,6 +709,32 @@
       }
     },
     {
+      "id": "src-components-monthpicker-monthpicker-story-vue",
+      "title": "MonthPicker",
+      "layout": {
+        "type": "grid",
+        "width": 500
+      },
+      "docsOnly": false,
+      "variants": [
+        {
+          "id": "src-components-monthpicker-monthpicker-story-vue-0",
+          "title": "Default"
+        },
+        {
+          "id": "src-components-monthpicker-monthpicker-story-vue-1",
+          "title": "Fit width"
+        }
+      ],
+      "relativePath": "src/components/MonthPicker/MonthPicker.story.vue",
+      "supportPluginId": "vue3",
+      "treePath": [
+        "MonthPicker"
+      ],
+      "virtual": false,
+      "markdownFile": null
+    },
+    {
       "id": "src-components-multiselect-multiselect-story-vue",
       "title": "MultiSelect",
       "layout": {
