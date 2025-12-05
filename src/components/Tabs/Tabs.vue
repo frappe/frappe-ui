@@ -12,11 +12,11 @@ import { h } from 'vue'
 
 const props = defineProps<TabProps>()
 
-const indicatorXCss = `left-0 bottom-0 h-[2px] w-[--reka-tabs-indicator-size] transition-[width,transform] 
+const indicatorXCss = `left-0 bottom-0 h-[2px] w-[--reka-tabs-indicator-size] transition-[width,transform]
                           translate-x-[--reka-tabs-indicator-position] translate-y-[1px]`
 
-const indicatorYCss = `right-0 w-[1px] h-[--reka-tabs-indicator-size] transition-[height,transform]
-                           translate-y-[--reka-tabs-indicator-position] translate-x-[1px]`
+const indicatorYCss = `right-0 top-0 w-[2px] h-[--reka-tabs-indicator-size]
+                       translate-y-[--reka-tabs-indicator-position] transition-[height,transform]`
 
 // Using a plain <button> element via `h('button')` to avoid picking up
 // the globally registered Button component and its styles.
@@ -31,8 +31,11 @@ const Btn = h('button')
     :default-value="props.tabs[0].label"
   >
     <TabsList
-      class="relative min-h-fit flex data-[orientation=vertical]:flex-col p-1 border-b data-[orientation=vertical]:border-r "
-      :class="{ 'overflow-x-auto overflow-y-hidden': !props.vertical }"
+      class="relative min-h-fit flex data-[orientation=vertical]:flex-col p-1 border-b data-[orientation=vertical]:border-r gap-5"
+      :class="{
+        'overflow-x-auto overflow-y-hidden px-5': !props.vertical,
+        'py-3': props.vertical,
+      }"
     >
       <TabsIndicator
         class="absolute rounded-full duration-300"
@@ -46,8 +49,8 @@ const Btn = h('button')
           <component
             :is="tab.route ? 'router-link' : Btn"
             :to="tab.route"
-            class="flex items-center gap-1.5 text-base text-ink-gray-5 duration-300 ease-in-out hover:text-ink-gray-9 p-2.5 data-[state=active]:text-ink-gray-9"
-            :class="{ 'py-2.5': props.vertical }"
+            class="flex items-center gap-1.5 text-base text-ink-gray-5 duration-300 ease-in-out hover:text-ink-gray-9 data-[state=active]:text-ink-gray-9"
+            :class="{ 'px-2.5': props.vertical, 'py-2.5': !props.vertical }"
           >
             <component v-if="tab.icon" :is="tab.icon" class="size-4">
             </component>
