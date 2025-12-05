@@ -1,0 +1,82 @@
+const __resolved__virtual_storySource_srcComponentsSelectSelectStoryVue = `<script setup lang="ts">
+import { ref } from 'vue'
+import Select from './Select.vue'
+import LucideUser from '~icons/lucide/user'
+import LucideRotate from '~icons/lucide/rotate-ccw'
+import { SelectItemText } from 'reka-ui'
+
+const value = ref('')
+const options = [
+  { label: 'John Doe', value: 'john-doe' },
+  { label: 'Jane Doe', value: 'jane-doe' },
+  { label: 'John Smith', value: 'john-smith' },
+  { label: 'Jane Smith', value: 'jane-smith', disabled: true },
+  { label: 'John Wayne', value: 'john-wayne' },
+  { label: 'Jane Wayne', value: 'jane-wayne' },
+]
+<\/script>
+<template>
+  <Story :layout="{ width: 300, type: 'grid' }">
+    <Variant title="Default">
+      <div class="p-2">
+        <Select :options="options" v-model="value" />
+      </div>
+    </Variant>
+
+    <Variant title="With prefix">
+      <div class="p-2">
+        <Select :options="options" v-model="value">
+          <template #prefix>
+            <LucideUser class="size-4 text-ink-gray-9" />
+          </template>
+        </Select>
+      </div>
+    </Variant>
+
+    <Variant title="Custom footer slot">
+      <div class="p-2">
+        <Select :options="options" v-model="value">
+          <template #footer>
+            <div class="grid gap-1">
+              <hr />
+              <Button variant='ghost'>
+                <template #prefix>
+                  <LucideRotate class="size-4 text-ink-gray-9" />
+                </template>
+                Reset
+              </Button>
+            </div>
+          </template>
+        </Select>
+      </div>
+    </Variant>
+
+    <Variant title="Custom option slot">
+      <div class="p-2">
+        <Select :options="options" v-model="value">
+          <template #option="{ option }">
+            <div class="inline-flex gap-2 items-center">
+              <Avatar
+                size="sm"
+                image="https://avatars.fastly.steamstatic.com/9ebf36bd3dc6c34f2d79ccf5d63e00eb7866321e_full.jpg"
+              />
+              <SelectItemText> {{ option.label }} </SelectItemText>
+            </div>
+          </template>
+        </Select>
+      </div>
+    </Variant>
+
+    <Variant title="No suffix">
+      <div class="p-2">
+        <Select :options="options" v-model="value">
+          <template #suffix> {{ ' ' }} </template>
+        </Select>
+      </div>
+    </Variant>
+  </Story>
+</template>
+`;
+export {
+  __resolved__virtual_storySource_srcComponentsSelectSelectStoryVue as default
+};

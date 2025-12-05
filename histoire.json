@@ -841,7 +841,7 @@
       "id": "src-components-select-select-story-vue",
       "title": "Select",
       "layout": {
-        "width": 500,
+        "width": 300,
         "type": "grid"
       },
       "docsOnly": false,
@@ -853,6 +853,18 @@
         {
           "id": "src-components-select-select-story-vue-1",
           "title": "With prefix"
+        },
+        {
+          "id": "src-components-select-select-story-vue-2",
+          "title": "Custom footer slot"
+        },
+        {
+          "id": "src-components-select-select-story-vue-3",
+          "title": "Custom option slot"
+        },
+        {
+          "id": "src-components-select-select-story-vue-4",
+          "title": "No suffix"
         }
       ],
       "relativePath": "src/components/Select/Select.story.vue",
