@@ -1,4 +1,5 @@
 import { Extension } from '@tiptap/core'
+import { Plugin } from '@tiptap/pm/state'
 
 interface StyleClipboardOptions {
   enabled: boolean
@@ -83,7 +84,18 @@ const StyleClipboardExtension = Extension.create<StyleClipboardOptions>({
         },
     }
   },
-
+  addKeyboardShortcuts() {
+    return {
+      Escape: ({ tr, dispatch }) => {
+        if (this.storage.styleClipboard) {
+          console.log(this.storage.styleClipboard)
+          this.storage.styleClipboard = null
+          this.editor.commands.focus()
+          return true
+        }
+      },
+    }
+  },
   addStorage() {
     return {
       styleClipboard: null as {
@@ -91,6 +103,35 @@ const StyleClipboardExtension = Extension.create<StyleClipboardOptions>({
         nodeAttrs: Record<string, any>
       } | null,
     }
+  },
+  addProseMirrorPlugins() {
+    const extension = this
+
+    return [
+      new Plugin({
+        view(view) {
+          const applyIfPainting = () => {
+            const stored = extension.storage.styleClipboard
+            if (!stored) return
+
+            const { from, to } = view.state.selection
+            if (from === to) return
+
+            extension.editor.commands.applyStyles()
+          }
+
+          const handleMouseUp = () => applyIfPainting()
+
+          view.dom.addEventListener('mouseup', handleMouseUp)
+
+          return {
+            destroy() {
+              view.dom.removeEventListener('mouseup', handleMouseUp)
+            },
+          }
+        },
+      }),
+    ]
   },
 })
 
