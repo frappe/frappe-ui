@@ -91,7 +91,9 @@ const selectOptions = computed(() => {
     >
       <slot name="prefix" />
       <SelectValue :placeholder="props.placeholder" />
-      <LucideChevronDown class="size-4 text-ink-gray-4 ml-auto" />
+      <slot name="suffix">
+        <LucideChevronDown class="size-4 text-ink-gray-4 ml-auto" />
+      </slot>
     </SelectTrigger>
 
     <SelectPortal>
@@ -109,10 +111,14 @@ const selectOptions = computed(() => {
             :class="[sizeClasses, paddingClasses, fontSizeClasses]"
             class="text-base text-ink-gray-9 flex items-center relative data-[highlighted]:bg-surface-gray-2 border-0 [data-state=checked]:bg-surface-gray-2 data-[disabled]:text-ink-gray-4"
           >
-            <SelectItemText>
-              {{ option.label }}
-            </SelectItemText>
+            <slot name="option" v-bind="{ option }">
+              <SelectItemText>
+                {{ option.label }}
+              </SelectItemText>
+            </slot>
           </SelectItem>
+
+          <slot name="footer" />
         </SelectViewport>
       </SelectContent>
     </SelectPortal>
