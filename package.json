@@ -1,6 +1,6 @@
 {
   "name": "frappe-ui",
-  "version": "0.1.233",
+  "version": "0.1.234",
   "description": "A set of components and utilities for rapid UI development",
   "type": "module",
   "sideEffects": false,
