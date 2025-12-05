@@ -31,6 +31,8 @@ export function createResource(options, vm) {
     ? debounce(fetch, options.debounce)
     : fetch
 
+  const controller = new AbortController()
+
   let out = reactive({
     method: options.method,
     url: options.url,
@@ -45,6 +47,7 @@ export function createResource(options, vm) {
     fetch: fetchFunction,
     reload: fetchFunction,
     submit: fetchFunction,
+    abort: () => controller.abort(),
     reset,
     update,
     setData,
@@ -94,6 +97,8 @@ export function createResource(options, vm) {
         return
       }
     }
+
+    options.signal = controller.signal
 
     try {
       out.promise = resourceFetcher({
