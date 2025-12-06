@@ -38,6 +38,7 @@ export default {
           'Align Left',
           'Align Center',
           'Align Right',
+          'Align Justify',
           'FontColor',
           'Separator',
           'Image',
