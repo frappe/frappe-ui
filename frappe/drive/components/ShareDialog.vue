@@ -207,10 +207,15 @@ import { usersWithAccess, updateAccess, allUsers } from '../js/resources'
 
 import LucideBuilding2 from '~icons/lucide/building-2'
 import LucideDiamond from '~icons/lucide/diamond'
+import LucideX from '~icons/lucide/x'
 import LucideLock from '~icons/lucide/lock'
 import LucideSettings from '~icons/lucide/settings'
 import LucideArrowLeft from '~icons/lucide/arrow-left'
 import LucideGlobe2 from '~icons/lucide/globe-2'
+import LucideEye from '~icons/lucide/eye'
+import LucideUpload from '~icons/lucide/upload'
+import LucidePencil from '~icons/lucide/pencil'
+import LucideLink2 from '~icons/lucide/link-2'
 
 const open = defineModel()
 const props = defineProps({

@@ -205,6 +205,7 @@ onMounted(() => {
         code: false,
         codeBlock: false,
         heading: false,
+        link: false,
       }),
       Heading.configure({
         ...(typeof props.starterkitOptions?.heading === 'object' &&
@@ -213,7 +214,7 @@ onMounted(() => {
           : {}),
       }),
       TableExtension.configure({
-        resizable: true,
+        resizable: false,
       }),
       TableCellExtension,
       TableHeaderExtension,
@@ -276,9 +277,9 @@ onMounted(() => {
         uploadFunction: props.uploadFunction || defaultUploadFunction,
       }),
       StyleClipboardExtension,
-      NodeRange.configure({
-        key: null,
-      }),
+      // NodeRange.configure({
+      //   key: null,
+      // }),
       ...(props.extensions || []),
     ],
     onUpdate: ({ editor }) => {
