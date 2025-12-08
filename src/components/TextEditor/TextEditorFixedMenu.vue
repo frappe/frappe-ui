@@ -15,7 +15,7 @@ export default {
       if (!this.buttons) return false
       let buttons
       if (Array.isArray(this.buttons)) {
-        buttons = this.buttons
+        buttons = [...this.buttons]
       } else {
         buttons = [
           'Paragraph',
@@ -64,6 +64,8 @@ export default {
             'ToggleHeaderCell',
             'DeleteTable',
           ],
+          'Separator',
+          'TableOfContents',
           'Separator',
           'Undo',
           'Redo',

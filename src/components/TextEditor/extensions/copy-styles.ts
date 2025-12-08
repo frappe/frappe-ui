@@ -1,9 +1,20 @@
 import { Extension } from '@tiptap/core'
-import { Plugin, PluginKey } from '@tiptap/pm/state'
+import { Plugin } from '@tiptap/pm/state'
 
 interface StyleClipboardOptions {
   enabled: boolean
 }
+
+const COPIED_MARKS = [
+  'textStyle',
+  'underline',
+  'strike',
+  'bold',
+  'italic',
+  'namedHighlight',
+  'namedColor',
+]
+const PARAGRAPH_ATTRS = ['lineHeight', 'spacingBefore', 'spacingAfter']
 
 const StyleClipboardExtension = Extension.create<StyleClipboardOptions>({
   name: 'styleClipboard',
@@ -11,19 +22,11 @@ const StyleClipboardExtension = Extension.create<StyleClipboardOptions>({
   addOptions() {
     return { enabled: true }
   },
-
-  addKeyboardShortcuts() {
-    return {
-      'Mod-Shift-c': () => this.editor.commands.storeStyles(),
-      'Mod-Shift-v': () =>this.editor.commands.applyStyles()
-    }
-  },
   addCommands() {
     return {
       storeStyles:
         () =>
         ({ editor }) => {
-          console.log('in')
           const { state } = editor
           const { from, to } = state.selection
           if (from === to) return false
@@ -33,38 +36,87 @@ const StyleClipboardExtension = Extension.create<StyleClipboardOptions>({
             node.marks.forEach((mark) => (marks[mark.type.name] = mark.attrs))
           })
 
-          // You could also store node attributes like font size, color, etc.
           const storedNodeAttrs = state.doc.resolve(from).parent.attrs
-          editor.storage.styleClipboard = {
+          this.storage.styleClipboard = {
             marks,
             nodeAttrs: storedNodeAttrs,
           }
-          console.log('Stored styles:', this.editor.storage.styleClipboard)
           return true
         },
 
       applyStyles:
         () =>
         ({ editor, tr, dispatch }) => {
-          const { view, state } = editor
+          const { state } = editor
           const { from, to } = state.selection
-          const stored = editor.storage?.styleClipboard
+          const stored = this.storage?.styleClipboard
           if (!stored) return false
 
-          const { marks, nodeAttrs } = stored
+          COPIED_MARKS.forEach((markName) => {
+            const markType = state.schema.marks[markName]
+            if (markType) {
+              tr.removeMark(from, to, markType)
+            }
+          })
+
+          const { marks } = stored
           for (const [markName, attrs] of Object.entries(marks)) {
             const markType = state.schema.marks[markName]
-            const mark = markType.create(attrs)
-            console.log(markType, mark)
-            if (mark) tr.addMark(from, to, mark)
+            if (markType) {
+              tr.addMark(from, to, markType.create(attrs))
+            }
           }
-
           dispatch(tr)
+          this.storage.styleClipboard = null
           return true
+        },
+
+      clearStyles:
+        () =>
+        ({ editor, tr, dispatch }) => {
+          console.log('called!')
+          const { state } = editor
+          const { from, to } = state.selection
+          COPIED_MARKS.forEach((markName) => {
+            const markType = state.schema.marks[markName]
+            if (markType) {
+              tr.removeMark(from, to, markType)
+            }
+          })
+
+          const paragraphType = state.schema.nodes.paragraph
+          if (paragraphType) {
+            state.doc.nodesBetween(from, to, (node, pos) => {
+              if (node.type === paragraphType) {
+                // Reset paragraph attributes to null
+                const clearedAttrs: Record<string, null> = {}
+                PARAGRAPH_ATTRS.forEach((attr) => {
+                  clearedAttrs[attr] = null
+                })
+
+                tr.setNodeMarkup(pos, null, {
+                  ...node.attrs,
+                  ...clearedAttrs,
+                })
+              }
+            })
+          }
+          dispatch(tr)
         },
     }
   },
-
+  addKeyboardShortcuts() {
+    return {
+      Escape: ({ tr, dispatch }) => {
+        if (this.storage.styleClipboard) {
+          console.log(this.storage.styleClipboard)
+          this.storage.styleClipboard = null
+          this.editor.commands.focus()
+          return true
+        }
+      },
+    }
+  },
   addStorage() {
     return {
       styleClipboard: null as {
@@ -72,6 +124,35 @@ const StyleClipboardExtension = Extension.create<StyleClipboardOptions>({
         nodeAttrs: Record<string, any>
       } | null,
     }
+  },
+  addProseMirrorPlugins() {
+    const extension = this
+
+    return [
+      new Plugin({
+        view(view) {
+          const applyIfPainting = () => {
+            const stored = extension.storage.styleClipboard
+            if (!stored) return
+
+            const { from, to } = view.state.selection
+            if (from === to) return
+
+            extension.editor.commands.applyStyles()
+          }
+
+          const handleMouseUp = () => applyIfPainting()
+
+          view.dom.addEventListener('mouseup', handleMouseUp)
+
+          return {
+            destroy() {
+              view.dom.removeEventListener('mouseup', handleMouseUp)
+            },
+          }
+        },
+      }),
+    ]
   },
 })
 

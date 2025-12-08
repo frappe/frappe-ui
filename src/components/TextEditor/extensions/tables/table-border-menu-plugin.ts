@@ -18,7 +18,6 @@ export function tableBorderMenuPlugin(editor: Editor) {
   const clearHandles = () => {
     if (hideTimeout) clearTimeout(hideTimeout)
     if (isResizing) {
-      // Instant removal during resize
       currentRowHandle?.remove()
       currentColHandle?.remove()
       currentRowHandle = null
@@ -38,7 +37,6 @@ export function tableBorderMenuPlugin(editor: Editor) {
   const clearCellTrigger = () => {
     if (cellTriggerTimeout) clearTimeout(cellTriggerTimeout)
     if (isResizing) {
-      // Instant removal during resize
       currentCellTrigger?.remove()
       currentCellTrigger = null
     } else {
@@ -64,7 +62,6 @@ export function tableBorderMenuPlugin(editor: Editor) {
   }
 
   const hideAllHandles = () => {
-    // Clear timeouts immediately
     if (hideTimeout) {
       clearTimeout(hideTimeout)
       hideTimeout = null
@@ -73,14 +70,12 @@ export function tableBorderMenuPlugin(editor: Editor) {
       clearTimeout(cellTriggerTimeout)
       cellTriggerTimeout = null
     }
-    // Remove all handles immediately - just like row/col handlers
     currentRowHandle?.remove()
     currentColHandle?.remove()
     currentCellTrigger?.remove()
     currentRowHandle = null
     currentColHandle = null
     currentCellTrigger = null
-    // Remove ALL handles from DOM immediately
     document.querySelectorAll('.table-cell-trigger-overlay').forEach(el => el.remove())
     document.querySelectorAll('.table-row-handle-overlay, .table-col-handle-overlay').forEach(el => el.remove())
   }
@@ -90,7 +85,6 @@ export function tableBorderMenuPlugin(editor: Editor) {
     props: {
       handleDOMEvents: {
         selectstart(view, event) {
-          // Prevent text/cell selection during resize
           if (isResizing) {
             event.preventDefault()
             return true
@@ -103,10 +97,8 @@ export function tableBorderMenuPlugin(editor: Editor) {
             isResizing = true
             document.body.classList.add('resizing-table')
             hideAllHandles()
-            // Start continuous cleanup loop - remove all handles instantly
             const cleanup = () => {
               if (isResizing) {
-                // Instant removal - no delays
                 if (currentRowHandle) {
                   currentRowHandle.remove()
                   currentRowHandle = null
@@ -119,7 +111,6 @@ export function tableBorderMenuPlugin(editor: Editor) {
                   currentCellTrigger.remove()
                   currentCellTrigger = null
                 }
-                // Remove ALL from DOM instantly
                 document.querySelectorAll('.table-cell-trigger-overlay').forEach(el => el.remove())
                 document.querySelectorAll('.table-row-handle-overlay, .table-col-handle-overlay').forEach(el => el.remove())
                 resizeCleanupInterval = requestAnimationFrame(cleanup)
@@ -133,7 +124,6 @@ export function tableBorderMenuPlugin(editor: Editor) {
             event.preventDefault()
             return true
           }
-          // If already resizing, prevent any mousedown on table cells
           if (isResizing) {
             const cell = target.closest('td, th')
             if (cell) {
@@ -157,7 +147,6 @@ export function tableBorderMenuPlugin(editor: Editor) {
           return false
         },
         click(view, event) {
-          // Prevent clicks during resize
           if (isResizing) {
             event.preventDefault()
             event.stopPropagation()
@@ -166,13 +155,11 @@ export function tableBorderMenuPlugin(editor: Editor) {
           return false
         },
         mousemove(view, event) {
-          // FIRST THING - if resizing, hide ALL handles immediately
           if (isResizing) {
             hideAllHandles()
             return true
           }
           
-          // Early return if not editable
           if (!editor.isEditable) {
             clearHandles()
             clearCellTrigger()
@@ -202,7 +189,6 @@ export function tableBorderMenuPlugin(editor: Editor) {
           }
           cancelClear()
           
-          // Hide all handles if resizing
           if (isResizing) {
             hideAllHandles()
             return true
@@ -476,7 +462,6 @@ export function tableBorderMenuPlugin(editor: Editor) {
             }
           }
           
-          // Hide cell triggers if resizing
           if (isResizing) {
             hideAllHandles()
             return false
@@ -486,7 +471,6 @@ export function tableBorderMenuPlugin(editor: Editor) {
           if (!currentCellTrigger || currentCellTrigger.getAttribute('data-cell-id') !== cellId) {
             currentCellTrigger?.remove()
             
-            // Check again before creating
             if (isResizing) return false
 
             currentCellTrigger = document.createElement('div')
@@ -562,7 +546,6 @@ export function tableBorderMenuPlugin(editor: Editor) {
 
             editorElement.appendChild(currentCellTrigger)
           } else if (currentCellTrigger && !isResizing) {
-            // Update position of existing trigger
             const cellRect = cell.getBoundingClientRect()
             currentCellTrigger.style.left = `${cellRect.left - editorRect.left + cellRect.width - 9}px`
             currentCellTrigger.style.top = `${cellRect.top - editorRect.top + cellRect.height / 2 - 9}px`

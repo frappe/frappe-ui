@@ -11,9 +11,6 @@
   pointer-events: auto;
 }
 
-
-
-
 .ProseMirror table .selectedCell:after {
   z-index: 2;
   position: absolute;

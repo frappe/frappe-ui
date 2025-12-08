@@ -5,10 +5,8 @@ import { CellSelection } from 'prosemirror-tables'
 
 export const tableIndividualCellPluginKey = new PluginKey('tableCellMenu')
 
-// Shared state to track if resizing is active
 let isResizing = false
 
-// Listen for resize events
 if (typeof window !== 'undefined') {
   window.addEventListener('table-resize-start', () => {
     isResizing = true
@@ -40,20 +38,14 @@ export function tableBorderMenuPlugin(editor: Editor) {
   }
 
   const removeHandleImmediately = () => {
-    // Clear timeout first
     if (hideTimeout) {
       clearTimeout(hideTimeout)
       hideTimeout = null
     }
-    // Remove handle immediately
     currentCellHandle?.remove()
     currentCellHandle = null
-    
-    // Also query DOM to remove any handles that might exist (defensive)
-    // Note: individual cell plugin uses 'table-row-handle-overlay' class
     if (typeof document !== 'undefined') {
       document.querySelectorAll('.table-row-handle-overlay').forEach(el => {
-        // Only remove if it's our handle (check for the circle icon or data attributes)
         const hasCircle = el.querySelector('svg circle')
         if (hasCircle) {
           (el as HTMLElement).remove()
@@ -67,9 +59,7 @@ export function tableBorderMenuPlugin(editor: Editor) {
     props: {
       handleDOMEvents: {
         mousemove(view, event) {
-          // Early return if resizing - must be FIRST check
           if (isResizing) {
-            // Ensure handle is removed (in case it somehow appeared)
             if (currentCellHandle) {
               removeHandleImmediately()
             }
@@ -78,7 +68,6 @@ export function tableBorderMenuPlugin(editor: Editor) {
           
           const target = event.target as HTMLElement
           
-          // Don't show handles if editor is not editable
           if (!editor.isEditable) {
             clearHandles()
             return false
@@ -247,13 +236,11 @@ currentCellHandle?.remove()
       },
     },
     view() {
-      // Listen for resize events to immediately remove handle
       const onResizeStart = () => {
         removeHandleImmediately()
       }
       
       const onResizeEnd = () => {
-        // Handle resize end if needed
       }
       
       window.addEventListener('table-resize-start', onResizeStart)

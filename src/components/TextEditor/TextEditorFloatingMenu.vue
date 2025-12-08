@@ -1,7 +1,7 @@
 <template>
   <FloatingMenu
     v-if="floatingMenuButtons"
-    :tippy-options="{ duration: 100 }"
+    :options="{ duration: 100 }"
     :editor="editor"
     class="flex"
   >
@@ -51,6 +51,7 @@ export default {
           'Blockquote',
           'Code',
           'Horizontal Rule',
+          'TableOfContents',
         ]
       }
       return buttons.map(createEditorButton)

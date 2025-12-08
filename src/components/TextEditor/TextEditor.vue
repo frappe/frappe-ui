@@ -16,7 +16,7 @@
     <TableBorderMenuContainer />
     <slot name="top" :editor />
     <slot name="editor" :editor="editor">
-      <EditorContent :editor="editor" />
+      <EditorContent :editor="editor" class="prose prose-sm" />
     </slot>
     <slot name="bottom" :editor />
   </div>
@@ -40,12 +40,16 @@ defineOptions({ inheritAttrs: false })
 
 import { Editor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
-import Placeholder from '@tiptap/extension-placeholder'
+import { Placeholder } from '@tiptap/extensions'
+import Typography from '@tiptap/extension-typography'
+import { TextStyleKit } from '@tiptap/extension-text-style'
+import { TaskList, TaskItem } from '@tiptap/extension-list'
 import TextAlign from '@tiptap/extension-text-align'
 import { ImageExtension } from './extensions/image'
 import ImageViewerExtension from './image-viewer-extension'
 import { VideoExtension } from './video-extension'
 import { IframeExtension } from './extensions/iframe'
+import { TocNodeExtension } from './extensions/toc-node'
 import LinkExtension from './link-extension'
 import Typography from '@tiptap/extension-typography'
 import { TextStyle } from '@tiptap/extension-text-style'
@@ -76,7 +80,6 @@ import TableBorderMenuContainer from './extensions/tables/TableBorderMenuContain
 import { TableCommandsExtension } from './extensions/tables/table-selection-extension'
 
 function defaultUploadFunction(file: File) {
-  // useFileUpload is frappe specific
   let fileUpload = useFileUpload()
   return fileUpload.upload(file, props.uploadArgs || {})
 }
@@ -98,10 +101,7 @@ const props = withDefaults(defineProps<TextEditorProps>(), {
 })
 
 const emit = defineEmits<TextEditorEmits>()
-
 const editor = ref<Editor | null>(null)
-
-
 const attrs = useAttrs()
 const attrsClass = computed(() => normalizeClass(attrs.class))
 const attrsStyle = computed(() => normalizeStyle(attrs.style))
@@ -197,7 +197,10 @@ onMounted(() => {
       TextAlign.configure({
         types: ['heading', 'paragraph'],
       }),
-      TextStyle,
+      TextStyleKit.configure({
+        backgroundColor: false,
+        color: false,
+      }),
       NamedColorExtension,
       NamedHighlightExtension,
       ExtendedCode,
@@ -213,6 +216,7 @@ onMounted(() => {
         uploadFunction: props.uploadFunction || defaultUploadFunction,
       }),
       IframeExtension,
+      TocNodeExtension,
       LinkExtension.configure({
         openOnClick: false,
       }),
@@ -242,6 +246,9 @@ onMounted(() => {
         uploadFunction: props.uploadFunction || defaultUploadFunction,
       }),
       StyleClipboardExtension,
+      // NodeRange.configure({
+      //   key: null,
+      // }),
       ...(props.extensions || []),
     ],
     onUpdate: ({ editor }) => {
@@ -257,6 +264,9 @@ onMounted(() => {
       emit('blur', event)
     },
   })
+  // editor.value.on('selectionUpdate', ({ editor }) => {
+  //   console.log('Selection:', editor.state.selection)
+  // })
 })
 
 onBeforeUnmount(() => {
@@ -279,125 +289,5 @@ defineExpose({
 </script>
 
 <style>
-@import './extensions/color/color-styles.css';
-@import './extensions/highlight/highlight-styles.css';
-@import './extensions/tables/table-styles.css';
-
-.ProseMirror {
-  outline: none;
-  caret-color: var(--ink-gray-9);
-  word-break: break-word;
-}
-
-/* Firefox */
-.ProseMirror-focused:focus-visible {
-  outline: none;
-}
-
-/* Placeholder */
-.ProseMirror:not(.ProseMirror-focused) p.is-editor-empty::before {
-  content: attr(data-placeholder);
-  float: left;
-  color: var(--ink-gray-4);
-  pointer-events: none;
-  height: 0;
-}
-
-.ProseMirror-selectednode video,
-img.ProseMirror-selectednode {
-  outline: 2px solid var(--outline-gray-2);
-}
-
-.ProseMirror ul[data-type='taskList'] {
-  list-style: none;
-  padding: 0;
-
-  li {
-    align-items: flex-start;
-    display: flex;
-    margin: 0;
-
-    > label {
-      flex: 0 0 auto;
-      margin-right: 0.5rem;
-      margin-top: 0.25rem;
-      height: 1lh;
-      display: flex;
-      align-items: center;
-      user-select: none;
-    }
-
-    > div {
-      flex: 1 1 auto;
-      margin-bottom: 0;
-
-      > p {
-        margin: 0.25rem 0;
-      }
-    }
-  }
-  ul[data-type='taskList'] {
-    margin: 0;
-  }
-
-  input[type='checkbox'] {
-    cursor: pointer;
-    width: 14px;
-    height: 14px;
-    border-radius: 4px;
-    color: theme('colors.gray.900');
-  }
-}
-
-.resize-cursor {
-  cursor: ew-resize;
-  cursor: col-resize;
-}
-
-.tag-item,
-.tag-suggestion-active {
-  background-color: var(--surface-gray-1, #f8f8f8);
-  color: inherit;
-  border: 1px solid transparent;
-  padding: 0px 2px;
-  border-radius: 4px;
-  font-size: 1em;
-  white-space: nowrap;
-  cursor: default;
-}
-
-.tag-item.ProseMirror-selectednode {
-  border-color: var(--outline-gray-3, #c7c7c7);
-}
-
-.tag-suggestion-active {
-  background-color: var(--surface-gray-2, #f3f3f3);
-}
-
-/* Edit prose classes to be more functional */
-.prose-v2 {
-  line-height: 1.5 !important;
-  blockquote {
-    quotes: none;
-    font-style: normal;
-    margin-top: 0.75em;
-    margin-bottom: 0.75em;
-  }
-
-  p {
-    margin-top: 0;
-    margin-bottom: 0;
-  }
-  /* fix: heading bottom margin */
-  :is(h1, h2, h3, h4, h5, h6) + :is(h1, h2, h3, h4, h5, h6) {
-    margin-top: 0;
-  }
-  :is(h1, h2, h3, h4, h5, h6):first-child {
-    margin-top: 0;
-  }
-
-  hr {
-    margin: 2.25em 0;
-  }
-}
+@import './style.css';
 </style>
