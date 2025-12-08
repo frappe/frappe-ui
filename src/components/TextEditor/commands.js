@@ -27,7 +27,7 @@ import Undo from '~icons/lucide/undo-2'
 import Redo from '~icons/lucide/redo-2'
 import Separator from '~icons/lucide/separator-horizontal'
 import Table from '~icons/lucide/table-properties'
-import TableOfContentsIcon from '~icons/lucide/table-of-contents'
+import TableOfContentsIcon from '~icons/lucide/square-menu'
 
 export default {
   Paragraph: {
