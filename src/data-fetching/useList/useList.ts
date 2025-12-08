@@ -68,6 +68,7 @@ export function useList<T extends { name: string }>(
   const hasNextPage = ref(true)
   const hasPreviousPage = computed(() => _start.value > 0)
 
+  let cachedResponse = ref<UseListResponse<T> | null>(null)
   const fetchOptions: UseFetchOptions = {
     immediate,
     refetch,
@@ -78,6 +79,7 @@ export function useList<T extends { name: string }>(
       _start,
       _limit,
       hasNextPage,
+      cachedResponse,
     }),
     onFetchError: handleFetchError<T>(options),
   }
@@ -94,7 +96,6 @@ export function useList<T extends { name: string }>(
   } = useFrappeFetch<UseListResponse<T>>(_url, fetchOptions).get()
 
   let normalizedCacheKey = normalizeCacheKey(cacheKey, 'useList')
-  let cachedResponse = ref<UseListResponse<T> | null>(null)
 
   const result = computed(() => {
     if (normalizedCacheKey && (out.loading || !out.isFinished)) {
@@ -254,11 +255,13 @@ function handleAfterFetch<T extends { name: string }>({
   _start,
   _limit,
   hasNextPage,
+  cachedResponse,
 }: UseListOptions<T> & {
   allData: Ref<T[] | null>
   _start: Ref<number>
   _limit: Ref<number>
   hasNextPage: Ref<boolean>
+  cachedResponse: Ref<UseListResponse<T> | null>
 }) {
   return function (
     ctx: AfterFetchContext<{
@@ -295,6 +298,7 @@ function handleAfterFetch<T extends { name: string }>({
       let normalizedCacheKey = normalizeCacheKey(cacheKey, 'useList')
       if (normalizedCacheKey) {
         idbStore.set(normalizedCacheKey, ctx.data.data)
+        cachedResponse.value = ctx.data.data
       }
       if (onSuccess) {
         try {
