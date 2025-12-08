@@ -48,7 +48,7 @@ import { VideoExtension } from './video-extension'
 import { IframeExtension } from './extensions/iframe'
 import LinkExtension from './link-extension'
 import Typography from '@tiptap/extension-typography'
-import TextStyle from '@tiptap/extension-text-style'
+import { TextStyle } from '@tiptap/extension-text-style'
 import TaskItem from '@tiptap/extension-task-item'
 import TaskList from '@tiptap/extension-task-list'
 import NamedColorExtension from './extensions/color'
@@ -183,7 +183,7 @@ onMounted(() => {
       }),
 
       TableExtension.configure({
-        resizable: true,
+        resizable: false,
       }),
       TableCellExtension,
       TableHeaderExtension,

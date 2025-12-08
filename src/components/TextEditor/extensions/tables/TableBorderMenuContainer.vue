@@ -88,6 +88,10 @@ const closeMenu = (e: MouseEvent) => {
   }
 }
 
+const onHideMenu = () => {
+  showTableBorderMenu.value = false
+}
+
 const addRowBefore = () => {
   editor.value?.chain().focus().addRowBefore().run()
   showTableBorderMenu.value = false
@@ -163,12 +167,20 @@ const canMergeCells = computed(() => {
 
 onMounted(() => {
   window.addEventListener('table-border-click', onBorderClick)
+  window.addEventListener('table-hide-menu', onHideMenu)
   document.addEventListener('click', closeMenu)
+  if (editor.value?.view?.dom?.parentElement) {
+    editor.value.view.dom.parentElement.addEventListener('table-hide-menu', onHideMenu)
+  }
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('table-border-click', onBorderClick)
+  window.removeEventListener('table-hide-menu', onHideMenu)
   document.removeEventListener('click', closeMenu)
+  if (editor.value?.view?.dom?.parentElement) {
+    editor.value.view.dom.parentElement.removeEventListener('table-hide-menu', onHideMenu)
+  }
 })
 </script>
 

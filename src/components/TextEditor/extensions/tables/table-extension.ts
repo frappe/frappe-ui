@@ -1,4 +1,5 @@
-import Table from '@tiptap/extension-table'
+import { Table } from '@tiptap/extension-table'
+import { columnResizing } from '@tiptap/pm/tables'
 import { tableBorderMenuPlugin } from './table-border-menu-plugin';
 
 export const TableExtension = Table.extend({
@@ -41,6 +42,13 @@ export const TableExtension = Table.extend({
   addProseMirrorPlugins() {
     return [
       ...(this.parent?.() ?? []),
+      columnResizing({
+        handleWidth: this.options.handleWidth,
+        cellMinWidth: this.options.cellMinWidth,
+        defaultCellMinWidth: this.options.cellMinWidth,
+        View: this.options.View,
+        lastColumnResizable: this.options.lastColumnResizable,
+      }),
       tableBorderMenuPlugin(this.editor),
     ]
   },
