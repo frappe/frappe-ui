@@ -14,6 +14,8 @@ const COPIED_MARKS = [
   'namedHighlight',
   'namedColor',
 ]
+const PARAGRAPH_ATTRS = ['lineHeight', 'spacingBefore', 'spacingAfter']
+
 const StyleClipboardExtension = Extension.create<StyleClipboardOptions>({
   name: 'styleClipboard',
 
@@ -72,6 +74,7 @@ const StyleClipboardExtension = Extension.create<StyleClipboardOptions>({
       clearStyles:
         () =>
         ({ editor, tr, dispatch }) => {
+          console.log('called!')
           const { state } = editor
           const { from, to } = state.selection
           COPIED_MARKS.forEach((markName) => {
@@ -80,6 +83,24 @@ const StyleClipboardExtension = Extension.create<StyleClipboardOptions>({
               tr.removeMark(from, to, markType)
             }
           })
+
+          const paragraphType = state.schema.nodes.paragraph
+          if (paragraphType) {
+            state.doc.nodesBetween(from, to, (node, pos) => {
+              if (node.type === paragraphType) {
+                // Reset paragraph attributes to null
+                const clearedAttrs: Record<string, null> = {}
+                PARAGRAPH_ATTRS.forEach((attr) => {
+                  clearedAttrs[attr] = null
+                })
+
+                tr.setNodeMarkup(pos, null, {
+                  ...node.attrs,
+                  ...clearedAttrs,
+                })
+              }
+            })
+          }
           dispatch(tr)
         },
     }
