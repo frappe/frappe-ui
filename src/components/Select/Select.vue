@@ -104,18 +104,16 @@ const selectOptions = computed(() => {
       >
         <SelectViewport class="p-1 flex flex-col">
           <SelectItem
-            v-for="(option, index) in selectOptions"
+            v-for="option in selectOptions"
             :disabled="option.disabled"
-            :key="index"
+            :key="option.value"
             :value="option.value"
             :class="[sizeClasses, paddingClasses, fontSizeClasses]"
             class="text-base text-ink-gray-9 flex items-center relative data-[highlighted]:bg-surface-gray-2 border-0 [data-state=checked]:bg-surface-gray-2 data-[disabled]:text-ink-gray-4"
           >
-            <slot name="option" v-bind="{ option }">
-              <SelectItemText>
-                {{ option.label }}
-              </SelectItemText>
-            </slot>
+            <SelectItemText>
+              <slot name="option" v-bind="{ option }">{{ option.label }}</slot>
+            </SelectItemText>
           </SelectItem>
 
           <slot name="footer" />
