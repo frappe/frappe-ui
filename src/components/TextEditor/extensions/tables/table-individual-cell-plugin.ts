@@ -128,6 +128,11 @@ currentCellHandle?.remove()
           const tableRect = table.getBoundingClientRect()
           const editorScrollLeft = editorElement.scrollLeft
           const editorScrollTop = editorElement.scrollTop
+          const rowRect = row.getBoundingClientRect()
+
+          // Calculate position for the handle
+          const handleLeft = tableRect.left - editorRect.left + editorScrollLeft - 7
+          const handleTop = rowRect.top - editorRect.top + editorScrollTop + rowRect.height / 2 - 10
 
           if (
             !currentCellHandle ||
@@ -150,12 +155,10 @@ currentCellHandle?.remove()
             currentCellHandle.setAttribute('data-row-id', String(rowIndex))
             currentCellHandle.setAttribute('data-table-id', tableId)
 
-            const rowRect = row.getBoundingClientRect()
-
             currentCellHandle.style.cssText = `
               position: absolute;
-              left: ${tableRect.left - editorRect.left + editorScrollLeft - 7}px;
-              top: ${rowRect.top - editorRect.top + editorScrollTop + rowRect.height / 2 - 10}px;
+              left: ${handleLeft}px;
+              top: ${handleTop}px;
               height: 16px;
               width: 12px;
               display: flex;
@@ -230,6 +233,10 @@ currentCellHandle?.remove()
             })
 
             editorElement.appendChild(currentCellHandle)
+          } else {
+            // Update position instantly for existing handle
+            currentCellHandle.style.left = `${handleLeft}px`
+            currentCellHandle.style.top = `${handleTop}px`
           }
           return false
         },
