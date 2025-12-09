@@ -2998,294 +2998,33 @@ input.htw-text-inherit {
   src: url('/assets/Inter-Italic.var-BGHziHgI.woff2?v=3.19') format('woff2') tech('variations');
   unicode-range: U+0000-05FF, U+0700-1FFF, U+2C00-2FFF, U+4E00-9FFF, U+AC00-D7AF;
 }
-/* static fonts "Inter" */
+/* Aliased 'InterVar' font as 'Inter' */
+/* To prevent breaking usage of `font-family: 'Inter'` */
 @font-face {
   font-family: 'Inter';
+  font-weight: 100 900;
+  font-display: swap;
   font-style: normal;
-  font-weight: 100;
-  font-display: swap;
-  src: url('/assets/Inter-Thin-D3JiHKaG.woff2?v=3.19') format('woff2');
-  unicode-range: U+0000-05FF, U+0700-1FFF, U+2C00-2FFF, U+4E00-9FFF, U+AC00-D7AF;
-}
-@font-face {
-  font-family: 'Inter';
-  font-style: italic;
-  font-weight: 100;
-  font-display: swap;
-  src: url('/assets/Inter-ThinItalic-Dty9qLU6.woff2?v=3.19') format('woff2');
-  unicode-range: U+0000-05FF, U+0700-1FFF, U+2C00-2FFF, U+4E00-9FFF, U+AC00-D7AF;
-}
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 200;
-  font-display: swap;
-  src: url('/assets/Inter-ExtraLight-CCj5KODw.woff2?v=3.19') format('woff2');
-  unicode-range: U+0000-05FF, U+0700-1FFF, U+2C00-2FFF, U+4E00-9FFF, U+AC00-D7AF;
+  src:
+    url('/assets/Inter.var-C9xDBOS3.woff2?v=3.19') format('woff2-variations'),
+    url('/assets/Inter.var-C9xDBOS3.woff2?v=3.19') format('woff2');
+  src: url('/assets/Inter.var-C9xDBOS3.woff2?v=3.19') format('woff2') tech('variations');
+  unicode-range:
+    U+0000-05FF, /* Latin, Greek, Cyrillic, Hebrew */
+    U+0700-1FFF, /* Extended Latin, Greek, Cyrillic, Armenian, Georgian */
+    U+2C00-2FFF, /* Additional scripts */
+    U+4E00-9FFF, /* CJK (Chinese, Japanese, Korean) */
+    U+AC00-D7AF; /* Hangul (Korean) */
 }
 @font-face {
   font-family: 'Inter';
+  font-weight: 100 900;
+  font-display: swap;
   font-style: italic;
-  font-weight: 200;
-  font-display: swap;
-  src: url('/assets/Inter-ExtraLightItalic-BXS8QPqu.woff2?v=3.19') format('woff2');
-  unicode-range: U+0000-05FF, U+0700-1FFF, U+2C00-2FFF, U+4E00-9FFF, U+AC00-D7AF;
-}
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 300;
-  font-display: swap;
-  src: url('/assets/Inter-Light-dIA14uc3.woff2?v=3.19') format('woff2');
-  unicode-range: U+0000-05FF, U+0700-1FFF, U+2C00-2FFF, U+4E00-9FFF, U+AC00-D7AF;
-}
-@font-face {
-  font-family: 'Inter';
-  font-style: italic;
-  font-weight: 300;
-  font-display: swap;
-  src: url('/assets/Inter-LightItalic-BcJQrN_r.woff2?v=3.19') format('woff2');
-  unicode-range: U+0000-05FF, U+0700-1FFF, U+2C00-2FFF, U+4E00-9FFF, U+AC00-D7AF;
-}
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url('/assets/Inter-Regular-trENmjXB.woff2?v=3.19') format('woff2');
-  unicode-range: U+0000-05FF, U+0700-1FFF, U+2C00-2FFF, U+4E00-9FFF, U+AC00-D7AF;
-}
-@font-face {
-  font-family: 'Inter';
-  font-style: italic;
-  font-weight: 400;
-  font-display: swap;
-  src: url('/assets/Inter-Italic-ClOttZep.woff2?v=3.19') format('woff2');
-  unicode-range: U+0000-05FF, U+0700-1FFF, U+2C00-2FFF, U+4E00-9FFF, U+AC00-D7AF;
-}
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url('/assets/Inter-Medium-BN7iDkqy.woff2?v=3.19') format('woff2');
-  unicode-range: U+0000-05FF, U+0700-1FFF, U+2C00-2FFF, U+4E00-9FFF, U+AC00-D7AF;
-}
-@font-face {
-  font-family: 'Inter';
-  font-style: italic;
-  font-weight: 500;
-  font-display: swap;
-  src: url('/assets/Inter-MediumItalic-iRTrRc5x.woff2?v=3.19') format('woff2');
-  unicode-range: U+0000-05FF, U+0700-1FFF, U+2C00-2FFF, U+4E00-9FFF, U+AC00-D7AF;
-}
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url('/assets/Inter-SemiBold-CBUekF9E.woff2?v=3.19') format('woff2');
-  unicode-range: U+0000-05FF, U+0700-1FFF, U+2C00-2FFF, U+4E00-9FFF, U+AC00-D7AF;
-}
-@font-face {
-  font-family: 'Inter';
-  font-style: italic;
-  font-weight: 600;
-  font-display: swap;
-  src: url('/assets/Inter-SemiBoldItalic-J43nRLRr.woff2?v=3.19') format('woff2');
-  unicode-range: U+0000-05FF, U+0700-1FFF, U+2C00-2FFF, U+4E00-9FFF, U+AC00-D7AF;
-}
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url('/assets/Inter-Bold-R0zHozHF.woff2?v=3.19') format('woff2');
-  unicode-range: U+0000-05FF, U+0700-1FFF, U+2C00-2FFF, U+4E00-9FFF, U+AC00-D7AF;
-}
-@font-face {
-  font-family: 'Inter';
-  font-style: italic;
-  font-weight: 700;
-  font-display: swap;
-  src: url('/assets/Inter-BoldItalic-D0-5Ex_3.woff2?v=3.19') format('woff2');
-  unicode-range: U+0000-05FF, U+0700-1FFF, U+2C00-2FFF, U+4E00-9FFF, U+AC00-D7AF;
-}
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 800;
-  font-display: swap;
-  src: url('/assets/Inter-ExtraBold-Ce88byQn.woff2?v=3.19') format('woff2');
-  unicode-range: U+0000-05FF, U+0700-1FFF, U+2C00-2FFF, U+4E00-9FFF, U+AC00-D7AF;
-}
-@font-face {
-  font-family: 'Inter';
-  font-style: italic;
-  font-weight: 800;
-  font-display: swap;
-  src: url('/assets/Inter-ExtraBoldItalic-Cgmm6Ie2.woff2?v=3.19') format('woff2');
-  unicode-range: U+0000-05FF, U+0700-1FFF, U+2C00-2FFF, U+4E00-9FFF, U+AC00-D7AF;
-}
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 900;
-  font-display: swap;
-  src: url('/assets/Inter-Black-9EvaAvES.woff2?v=3.19') format('woff2');
-  unicode-range: U+0000-05FF, U+0700-1FFF, U+2C00-2FFF, U+4E00-9FFF, U+AC00-D7AF;
-}
-@font-face {
-  font-family: 'Inter';
-  font-style: italic;
-  font-weight: 900;
-  font-display: swap;
-  src: url('/assets/Inter-BlackItalic-I0v0TUo2.woff2?v=3.19') format('woff2');
-  unicode-range: U+0000-05FF, U+0700-1FFF, U+2C00-2FFF, U+4E00-9FFF, U+AC00-D7AF;
-}
-/* static fonts "InterDisplay" */
-@font-face {
-  font-family: 'InterDisplay';
-  font-style: normal;
-  font-weight: 100;
-  font-display: swap;
-  src: url('/assets/Inter-DisplayThin-ChL4oFCg.woff2?v=3.19') format('woff2');
-  unicode-range: U+0000-05FF, U+0700-1FFF, U+2C00-2FFF, U+4E00-9FFF, U+AC00-D7AF;
-}
-@font-face {
-  font-family: 'InterDisplay';
-  font-style: italic;
-  font-weight: 100;
-  font-display: swap;
-  src: url('/assets/Inter-DisplayThinItalic-Cxxw6hRb.woff2?v=3.19') format('woff2');
-  unicode-range: U+0000-05FF, U+0700-1FFF, U+2C00-2FFF, U+4E00-9FFF, U+AC00-D7AF;
-}
-@font-face {
-  font-family: 'InterDisplay';
-  font-style: normal;
-  font-weight: 200;
-  font-display: swap;
-  src: url('/assets/Inter-DisplayExtraLight-D2Ja0abb.woff2?v=3.19') format('woff2');
-  unicode-range: U+0000-05FF, U+0700-1FFF, U+2C00-2FFF, U+4E00-9FFF, U+AC00-D7AF;
-}
-@font-face {
-  font-family: 'InterDisplay';
-  font-style: italic;
-  font-weight: 200;
-  font-display: swap;
-  src: url('/assets/Inter-DisplayExtraLightItalic-DRwiM9T2.woff2?v=3.19') format('woff2');
-  unicode-range: U+0000-05FF, U+0700-1FFF, U+2C00-2FFF, U+4E00-9FFF, U+AC00-D7AF;
-}
-@font-face {
-  font-family: 'InterDisplay';
-  font-style: normal;
-  font-weight: 300;
-  font-display: swap;
-  src: url('/assets/Inter-DisplayLight-w8lPQKnS.woff2?v=3.19') format('woff2');
-  unicode-range: U+0000-05FF, U+0700-1FFF, U+2C00-2FFF, U+4E00-9FFF, U+AC00-D7AF;
-}
-@font-face {
-  font-family: 'InterDisplay';
-  font-style: italic;
-  font-weight: 300;
-  font-display: swap;
-  src: url('/assets/Inter-DisplayLightItalic-DBve3eI1.woff2?v=3.19') format('woff2');
-  unicode-range: U+0000-05FF, U+0700-1FFF, U+2C00-2FFF, U+4E00-9FFF, U+AC00-D7AF;
-}
-@font-face {
-  font-family: 'InterDisplay';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url('Inter-DisplayRegular.woff2?v=3.19') format('woff2');
-  unicode-range: U+0000-05FF, U+0700-1FFF, U+2C00-2FFF, U+4E00-9FFF, U+AC00-D7AF;
-}
-@font-face {
-  font-family: 'InterDisplay';
-  font-style: italic;
-  font-weight: 400;
-  font-display: swap;
-  src: url('/assets/Inter-DisplayItalic-JNEE2o-3.woff2?v=3.19') format('woff2');
-  unicode-range: U+0000-05FF, U+0700-1FFF, U+2C00-2FFF, U+4E00-9FFF, U+AC00-D7AF;
-}
-@font-face {
-  font-family: 'InterDisplay';
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url('/assets/Inter-DisplayMedium-DcjtbkcA.woff2?v=3.19') format('woff2');
-  unicode-range: U+0000-05FF, U+0700-1FFF, U+2C00-2FFF, U+4E00-9FFF, U+AC00-D7AF;
-}
-@font-face {
-  font-family: 'InterDisplay';
-  font-style: italic;
-  font-weight: 500;
-  font-display: swap;
-  src: url('/assets/Inter-DisplayMediumItalic-BBCoS5uP.woff2?v=3.19') format('woff2');
-  unicode-range: U+0000-05FF, U+0700-1FFF, U+2C00-2FFF, U+4E00-9FFF, U+AC00-D7AF;
-}
-@font-face {
-  font-family: 'InterDisplay';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url('/assets/Inter-DisplaySemiBold-BBWLY5vL.woff2?v=3.19') format('woff2');
-  unicode-range: U+0000-05FF, U+0700-1FFF, U+2C00-2FFF, U+4E00-9FFF, U+AC00-D7AF;
-}
-@font-face {
-  font-family: 'InterDisplay';
-  font-style: italic;
-  font-weight: 600;
-  font-display: swap;
-  src: url('/assets/Inter-DisplaySemiBoldItalic-CNvBGF7e.woff2?v=3.19') format('woff2');
-  unicode-range: U+0000-05FF, U+0700-1FFF, U+2C00-2FFF, U+4E00-9FFF, U+AC00-D7AF;
-}
-@font-face {
-  font-family: 'InterDisplay';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url('/assets/Inter-DisplayBold-C-1EDGRh.woff2?v=3.19') format('woff2');
-  unicode-range: U+0000-05FF, U+0700-1FFF, U+2C00-2FFF, U+4E00-9FFF, U+AC00-D7AF;
-}
-@font-face {
-  font-family: 'InterDisplay';
-  font-style: italic;
-  font-weight: 700;
-  font-display: swap;
-  src: url('/assets/Inter-DisplayBoldItalic-CISmTavk.woff2?v=3.19') format('woff2');
-  unicode-range: U+0000-05FF, U+0700-1FFF, U+2C00-2FFF, U+4E00-9FFF, U+AC00-D7AF;
-}
-@font-face {
-  font-family: 'InterDisplay';
-  font-style: normal;
-  font-weight: 800;
-  font-display: swap;
-  src: url('/assets/Inter-DisplayExtraBold-BXf2GJrG.woff2?v=3.19') format('woff2');
-  unicode-range: U+0000-05FF, U+0700-1FFF, U+2C00-2FFF, U+4E00-9FFF, U+AC00-D7AF;
-}
-@font-face {
-  font-family: 'InterDisplay';
-  font-style: italic;
-  font-weight: 800;
-  font-display: swap;
-  src: url('/assets/Inter-DisplayExtraBoldItalic-Czv3KFD8.woff2?v=3.19') format('woff2');
-  unicode-range: U+0000-05FF, U+0700-1FFF, U+2C00-2FFF, U+4E00-9FFF, U+AC00-D7AF;
-}
-@font-face {
-  font-family: 'InterDisplay';
-  font-style: normal;
-  font-weight: 900;
-  font-display: swap;
-  src: url('/assets/Inter-DisplayBlack-WeYNDCAX.woff2?v=3.19') format('woff2');
-  unicode-range: U+0000-05FF, U+0700-1FFF, U+2C00-2FFF, U+4E00-9FFF, U+AC00-D7AF;
-}
-@font-face {
-  font-family: 'InterDisplay';
-  font-style: italic;
-  font-weight: 900;
-  font-display: swap;
-  src: url('/assets/Inter-DisplayBlackItalic-DFEmIFsd.woff2?v=3.19') format('woff2');
+  src:
+    url('/assets/Inter-Italic.var-BGHziHgI.woff2?v=3.19') format('woff2-variations'),
+    url('/assets/Inter-Italic.var-BGHziHgI.woff2?v=3.19') format('woff2');
+  src: url('/assets/Inter-Italic.var-BGHziHgI.woff2?v=3.19') format('woff2') tech('variations');
   unicode-range: U+0000-05FF, U+0700-1FFF, U+2C00-2FFF, U+4E00-9FFF, U+AC00-D7AF;
 }
 *, ::before, ::after {
@@ -3892,13 +3631,8 @@ select {
   outline: 1px auto -webkit-focus-ring-color;
 }
 html {
-  font-family: Inter, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-}
-@supports (font-variation-settings: normal) {
-  html {
-    font-family: InterVar, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-    font-optical-sizing: auto;
-  }
+  font-family: InterVar, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  font-optical-sizing: auto;
 }
 html, body, button, p, span, div {
   font-variation-settings: 'opsz' 24;
