@@ -16,21 +16,15 @@ const dateRangeValue = ref('')
 </script>
 
 <template>
-  <Story :layout="{ type: 'grid', width: 500 }">
-    <Variant title="Date">
-      <div class="p-2">
-        <DatePicker v-model="dateValue" v-bind="state" />
-      </div>
-    </Variant>
-    <Variant title="Date Time">
-      <div class="p-2">
-        <DateTimePicker v-model="dateTimeValue" v-bind="state" />
-      </div>
-    </Variant>
-    <Variant title="Date Range">
-      <div class="p-2">
-        <DateRangePicker v-model="dateRangeValue" v-bind="state" />
-      </div>
-    </Variant>
-  </Story>
+  <div class="grid gap-4">
+    <div class="p-2">
+      <DatePicker v-model="dateValue" v-bind="state" />
+    </div>
+    <div class="p-2">
+      <DateTimePicker v-model="dateTimeValue" v-bind="state" />
+    </div>
+    <div class="p-2">
+      <DateRangePicker v-model="dateRangeValue" v-bind="state" />
+    </div>
+  </div>
 </template>

@@ -1,27 +1,3 @@
-<template>
-  <Story :layout="{ type: 'grid', width: 500 }">
-    <Variant title="default">
-      <Tree
-        :options="{
-          showIndentationGuides: state.showIndentationGuides,
-          rowHeight: state.rowHeight,
-          indentWidth: state.indentWidth,
-        }"
-        nodeKey="name"
-        :node="state.node"
-      />
-    </Variant>
-    <template #controls>
-      <HstCheckbox
-        v-model="state.showIndentationGuides"
-        title="Show Indentation Guides"
-      />
-      <HstText v-model="state.rowHeight" title="Row Height" />
-      <HstText v-model="state.indentWidth" title="Indent Width" />
-    </template>
-  </Story>
-</template>
-
 <script setup lang="ts">
 import { reactive } from 'vue'
 import Tree from './Tree.vue'
@@ -71,3 +47,34 @@ const state = reactive({
   },
 })
 </script>
+
+<template>
+  <div class="space-y-4">
+    <Tree
+      :options="{
+        showIndentationGuides: state.showIndentationGuides,
+        rowHeight: state.rowHeight,
+        indentWidth: state.indentWidth,
+      }"
+      nodeKey="name"
+      :node="state.node"
+    />
+
+    <div class="flex flex-col gap-2 max-w-xs">
+      <label>
+        <input type="checkbox" v-model="state.showIndentationGuides" />
+        Show Indentation Guides
+      </label>
+
+      <label>
+        Row Height
+        <input type="text" v-model="state.rowHeight" class="border rounded p-1 w-full" />
+      </label>
+
+      <label>
+        Indent Width
+        <input type="text" v-model="state.indentWidth" class="border rounded p-1 w-full" />
+      </label>
+    </div>
+  </div>
+</template>

@@ -6,9 +6,11 @@ import { Button } from '../Button'
 const placement = ref('top')
 const disabled = ref(true)
 </script>
+
 <template>
-  <Story :layout="{ type: 'grid', width: '300px' }">
-    <Variant title="with text prop">
+  <div class="space-y-4 max-w-xs">
+    <div class="space-y-1">
+      <label>With Text Prop</label>
       <Tooltip
         text="This action cannot be undone"
         :hover-delay="1"
@@ -16,36 +18,42 @@ const disabled = ref(true)
       >
         <Button theme="red">Delete</Button>
       </Tooltip>
-    </Variant>
-    <Variant title="disabled">
+    </div>
+
+    <div class="space-y-1">
+      <label>Disabled</label>
       <Tooltip
-        text="disabled tooltip"
+        text="Disabled tooltip"
         :disabled="disabled"
         :hover-delay="1"
         :placement="placement"
       >
         <Button theme="red">Delete</Button>
       </Tooltip>
-    </Variant>
-    <Variant title="with slot">
+    </div>
+
+    <div class="space-y-1">
+      <label>With Slot</label>
       <Tooltip arrow-class="fill-surface-white" :placement="placement">
         <template #body>
           <div
             class="min-w-[6rem] rounded bg-surface-white px-2 py-1 text-xs text-ink-gray-9 shadow-xl"
           >
-            test
+            Test
           </div>
         </template>
         <Button theme="red">Delete</Button>
       </Tooltip>
-    </Variant>
+    </div>
 
-    <template #controls>
-      <HstSelect
-        v-model="placement"
-        :options="['top', 'right', 'bottom', 'left']"
-        title="Placement"
-      />
-    </template>
-  </Story>
+    <div class="space-y-1">
+      <label>Placement</label>
+      <select v-model="placement" class="border rounded p-1">
+        <option value="top">Top</option>
+        <option value="right">Right</option>
+        <option value="bottom">Bottom</option>
+        <option value="left">Left</option>
+      </select>
+    </div>
+  </div>
 </template>

@@ -49,52 +49,42 @@ const state = reactive({
 </script>
 
 <template>
-  <Story :layout="{ type: 'grid', width: '80%' }">
-    <Variant title="Without Icon">
+  <div class="grid gap-6 w-4/5">
+    <div>
       <Tabs
         class="border rounded"
         v-model="state.index"
         :tabs="state.tabs_without_icon"
       >
         <template #tab-panel="{ tab }">
-          <div class="p-5">
-            {{ tab.content }}
-          </div>
+          <div class="p-5">{{ tab.content }}</div>
         </template>
       </Tabs>
-    </Variant>
+    </div>
 
-    <Variant title="With Icon">
+    <div>
       <Tabs
         class="border rounded"
         v-model="state.index"
         :tabs="state.tabs_with_icon"
       >
         <template #tab-panel="{ tab }">
-          <div class="p-5">
-            {{ tab.content }}
-          </div>
+          <div class="p-5">{{ tab.content }}</div>
         </template>
       </Tabs>
-    </Variant>
+    </div>
 
-    <Variant title="Vertical Tabs">
+    <div>
       <Tabs
         class="border rounded"
         v-model="state.index"
         :tabs="state.tabs_with_icon"
-        :vertical='true'
+        :vertical="true"
       >
         <template #tab-panel="{ tab }">
-          <div class="p-5">
-            {{ tab.content }}
-          </div>
+          <div class="p-5">{{ tab.content }}</div>
         </template>
       </Tabs>
-    </Variant>
-
-    <template #controls>
-      <HstNumber v-model="state.index" title="Tab Index" />
-    </template>
-  </Story>
+    </div>
+  </div>
 </template>

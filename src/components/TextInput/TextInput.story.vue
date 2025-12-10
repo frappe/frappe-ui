@@ -30,11 +30,7 @@ const variants = ['subtle', 'outline']
 
 <template>
   <Story :layout="{ type: 'grid', width: 500 }">
-    <Variant
-      v-for="inputType in inputTypes"
-      :key="inputType"
-      :title="inputType"
-    >
+    <Variant v-for="inputType in inputTypes" :key="inputType" :title="inputType">
       <div class="p-2">
         <TextInput :type="inputType" v-bind="state" />
       </div>

@@ -1,0 +1,46 @@
+<script setup lang="ts">
+import { ref } from "vue";
+import Tabs from "./Tabs.vue";
+import LucidePreview from "~icons/lucide/square-mouse-pointer";
+import LucideCode from "~icons/lucide/code";
+
+const state = ref(0);
+const tabs = [
+  { label: "Preview", icon: LucidePreview },
+  { label: "Code", icon: LucideCode },
+];
+
+interface DemoProps {
+  code: string;
+  showCode: string;
+  title?: string;
+  description?: string;
+}
+
+const props = defineProps<DemoProps>();
+
+
+const srcCode = ref(decodeURIComponent(props.code));
+// const showSrcCode = ref(decodeURIComponent(props.showCode));
+const showSourceCode = ref(decodeURIComponent(props.showCode));
+
+</script>
+
+<template>
+  <div class="grid gap-5 border rounded p-3 pt-0">
+    <div v-if="props.title" class="font-medium">{{ props.title }}</div>
+    <div v-if="props.description" class="text-sm text-muted">
+      {{ props.description }}
+    </div>
+    <Tabs :tabs="tabs" v-model="state">
+      <template #tab-panel="{ tab }">
+        <div v-if='tab.label === "Preview"' class='mt-5'>
+          <slot />
+        </div>
+        <div v-else >
+          <div v-html="showSourceCode" class="language-vue"></div>
+        </div>
+      </template>
+    </Tabs>
+  </div>
+</template>

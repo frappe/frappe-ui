@@ -1,9 +1,11 @@
+
 <script setup lang="ts">
 import { ref } from "vue";
 import MultiSelect from "./MultiSelect.vue";
+import Avatar from "../Avatar/Avatar.vue";
+import { Button } from "../Button";
 import LucideCheck from "~icons/lucide/check-check";
 import LucideTrash from "~icons/lucide/trash-2";
-import Avatar from "../Avatar/Avatar.vue";
 
 const state = ref();
 
@@ -22,16 +24,16 @@ const options = [
 </script>
 
 <template>
-  <Story :layout='{ width: 500, type: "grid" }'>
-    <Variant title="Default">
+  <div class="grid gap-4 w-[500px]">
+    <div>
       <MultiSelect
         :options="options"
         v-model="state"
         placeholder="Select fruit"
       />
-    </Variant>
+    </div>
 
-    <Variant title="Option slot">
+    <div>
       <MultiSelect
         :options="options"
         v-model="state"
@@ -42,9 +44,9 @@ const options = [
           {{ item.label }}
         </template>
       </MultiSelect>
-    </Variant>
+    </div>
 
-    <Variant title="Footer slot">
+    <div>
       <MultiSelect
         :options="options"
         v-model="state"
@@ -63,6 +65,6 @@ const options = [
           </div>
         </template>
       </MultiSelect>
-    </Variant>
-  </Story>
+    </div>
+  </div>
 </template>

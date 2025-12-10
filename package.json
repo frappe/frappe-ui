@@ -15,7 +15,10 @@
     "preview": "vite preview",
     "story:dev": "histoire dev",
     "story:build": "histoire build && cp 404.html .histoire/dist",
-    "story:preview": "histoire preview"
+    "story:preview": "histoire preview",
+    "docs:dev": "vitepress dev website",
+    "docs:build": "vitepress build website",
+    "docs:preview": "vitepress preview website"
   },
   "exports": {
     ".": {
@@ -117,6 +120,7 @@
   "devDependencies": {
     "@histoire/plugin-vue": "^0.17.17",
     "@vitejs/plugin-vue": "^4.0.0",
+    "@vitepress-demo-preview/plugin": "^1.4.1",
     "autoprefixer": "^10.4.13",
     "histoire": "^0.17.17",
     "lint-staged": ">=10",
@@ -125,6 +129,7 @@
     "prettier-plugin-tailwindcss": "^0.1.13",
     "tailwindcss": "^3.2.7",
     "vite": "^5.1.8",
+    "vitepress": "^1.6.4",
     "vitest": "^2.1.8",
     "vue": "^3.3.0",
     "vue-router": "^4.1.6"

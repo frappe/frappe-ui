@@ -11,6 +11,7 @@ const state = reactive({
   disabled: false,
   label: 'Label',
 })
+
 const inputValue = ref('')
 const selectValue = ref(null)
 const autocompleteValue = ref(null)
@@ -30,86 +31,66 @@ const variants = ['subtle', 'outline']
 </script>
 
 <template>
-  <Story :layout="{ type: 'grid', width: 500 }">
-    <Variant
-      v-for="inputType in inputTypes"
-      :key="inputType"
-      :title="inputType"
-    >
-      <div class="p-2">
-        <FormControl :type="inputType" v-bind="state" v-model="inputValue" />
-      </div>
-    </Variant>
-    <Variant title="select">
-      <div class="p-2">
-        <FormControl
-          type="select"
-          :options="[
-            { label: 'One', value: '1' },
-            { label: 'Two', value: '2' },
-            { label: 'Three', value: '3' },
-          ]"
-          v-bind="state"
-          v-model="selectValue"
-        />
-      </div>
-    </Variant>
-    <Variant title="Combobox">
-      <div class="p-2">
-        <FormControl
-          type="combobox"
-          :options="[
-            { label: 'One', value: '1' },
-            { label: 'Two', value: '2' },
-            { label: 'Three', value: '3' },
-          ]"
-          v-bind="state"
-          v-model="autocompleteValue"
-        />
-      </div>
-    </Variant>
-    <Variant title="checkbox">
-      <div class="p-2">
-        <FormControl type="checkbox" v-bind="state" v-model="checkboxValue" />
-      </div>
-    </Variant>
+  <div class="grid gap-6 w-[500px]">
+    <div v-for="inputType in inputTypes" :key="inputType">
+      <FormControl :type="inputType" v-bind="state" v-model="inputValue" />
+    </div>
 
-    <Variant title="prefix slot icon">
-      <div class="p-2">
-        <FormControl type="text" label="Label">
-          <template #prefix>
-            <FeatherIcon class="w-4" name="search" />
-          </template>
-        </FormControl>
-      </div>
-    </Variant>
+    <div>
+      <FormControl
+        type="select"
+        :options="[
+          { label: 'One', value: '1' },
+          { label: 'Two', value: '2' },
+          { label: 'Three', value: '3' },
+        ]"
+        v-bind="state"
+        v-model="selectValue"
+      />
+    </div>
 
-    <Variant title="suffix slot icon">
-      <div class="p-2">
-        <FormControl type="text" label="Label">
-          <template #suffix>
-            <FeatherIcon class="w-4" name="search" />
-          </template>
-        </FormControl>
-      </div>
-    </Variant>
+    <div>
+      <FormControl
+        type="combobox"
+        :options="[
+          { label: 'One', value: '1' },
+          { label: 'Two', value: '2' },
+          { label: 'Three', value: '3' },
+        ]"
+        v-bind="state"
+        v-model="autocompleteValue"
+      />
+    </div>
 
-    <Variant title="prefix slot avatar">
-      <div class="p-2">
-        <FormControl type="text" label="Label">
-          <template #prefix>
-            <Avatar
-              size="sm"
-              image="https://avatars.githubusercontent.com/u/499550?s=60&v=4"
-            />
-          </template>
-        </FormControl>
-      </div>
-    </Variant>
+    <div>
+      <FormControl type="checkbox" v-bind="state" v-model="checkboxValue" />
+    </div>
 
-    <template #controls>
-      <HstSelect v-model="state.variant" :options="variants" title="Variant" />
-      <HstSelect v-model="state.size" :options="sizes" title="Size" />
-    </template>
-  </Story>
+    <div>
+      <FormControl type="text" label="Label">
+        <template #prefix>
+          <FeatherIcon class="w-4" name="search" />
+        </template>
+      </FormControl>
+    </div>
+
+    <div>
+      <FormControl type="text" label="Label">
+        <template #suffix>
+          <FeatherIcon class="w-4" name="search" />
+        </template>
+      </FormControl>
+    </div>
+
+    <div>
+      <FormControl type="text" label="Label">
+        <template #prefix>
+          <Avatar
+            size="sm"
+            image="https://avatars.githubusercontent.com/u/499550?s=60&v=4"
+          />
+        </template>
+      </FormControl>
+    </div>
+  </div>
 </template>

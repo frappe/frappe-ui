@@ -2,9 +2,10 @@
 import Popover from './Popover.vue'
 import { Button } from '../Button'
 </script>
+
 <template>
-  <Story :layout="{ type: 'grid' }">
-    <Variant title="trigger: click">
+  <div class="space-y-4">
+    <div>
       <Popover>
         <template #target="{ togglePopover }">
           <Button @click="togglePopover()">Click me</Button>
@@ -13,10 +14,10 @@ import { Button } from '../Button'
           <div class="p-2 text-ink-gray-9">Popover content</div>
         </template>
       </Popover>
-    </Variant>
+    </div>
 
-    <Variant title="trigger: hover">
-      <Popover trigger="hover" hoverDelay="0.5">
+    <div>
+      <Popover trigger="hover" :hover-delay="0.5">
         <template #target>
           <Button>Hover me</Button>
         </template>
@@ -24,6 +25,6 @@ import { Button } from '../Button'
           <div class="p-2 text-ink-gray-9">Popover content</div>
         </template>
       </Popover>
-    </Variant>
-  </Story>
+    </div>
+  </div>
 </template>

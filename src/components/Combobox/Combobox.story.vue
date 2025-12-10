@@ -80,7 +80,6 @@ const groupedOptions = [
   },
 ]
 
-// Custom options that appear conditionally
 const customOptions = [
   ...objectOptions,
   {
@@ -109,7 +108,6 @@ const customOptions = [
   },
 ]
 
-// Custom options with render functions
 const customRenderOptions = [
   ...objectOptions.slice(0, 3),
   {
@@ -126,7 +124,6 @@ const customRenderOptions = [
   },
 ]
 
-// Custom options with slot names
 const customSlotOptions = [
   ...objectOptions.slice(0, 2),
   {
@@ -160,189 +157,157 @@ const state = reactive({
 </script>
 
 <template>
-  <Story title="Combobox" :layout="{ type: 'grid', width: 400 }">
-    <Variant title="Simple String Options">
-      <div class="p-4">
-        <label class="block text-sm font-medium mb-2">Simple Options</label>
-        <Combobox
-          :options="simpleOptions"
-          v-model="simpleValue"
-          :placeholder="state.placeholder"
-          :disabled="state.disabled"
-          :show-cancel="state.showCancel"
-          @update:selectedOption="selectedOption = $event"
-        />
-        <div class="mt-2 text-sm text-gray-600">
-          Selected: {{ simpleValue || 'None' }}
-        </div>
+  <div class="grid gap-6">
+    <div class="p-4">
+      <label class="block text-sm font-medium mb-2">Simple Options</label>
+      <Combobox
+        :options="simpleOptions"
+        v-model="simpleValue"
+        :placeholder="state.placeholder"
+        :disabled="state.disabled"
+        :show-cancel="state.showCancel"
+        @update:selectedOption="selectedOption = $event"
+      />
+      <div class="mt-2 text-sm text-gray-600">
+        Selected: {{ simpleValue || 'None' }}
       </div>
-    </Variant>
+    </div>
 
-    <Variant title="Outline variant">
-      <div class="p-4">
-        <label class="block text-sm font-medium mb-2">Simple Options</label>
-        <Combobox
-          variant="outline"
-          :options="simpleOptions"
-          v-model="simpleValue"
-          :placeholder="state.placeholder"
-          :disabled="state.disabled"
-          :show-cancel="state.showCancel"
-          @update:selectedOption="selectedOption = $event"
-        />
-        <div class="mt-2 text-sm text-gray-600">
-          Selected: {{ simpleValue || 'None' }}
-        </div>
+    <div class="p-4">
+      <label class="block text-sm font-medium mb-2">Outline variant</label>
+      <Combobox
+        variant="outline"
+        :options="simpleOptions"
+        v-model="simpleValue"
+        :placeholder="state.placeholder"
+        :disabled="state.disabled"
+        :show-cancel="state.showCancel"
+        @update:selectedOption="selectedOption = $event"
+      />
+      <div class="mt-2 text-sm text-gray-600">
+        Selected: {{ simpleValue || 'None' }}
       </div>
-    </Variant>
+    </div>
 
-    <Variant title="Object Options">
-      <div class="p-4">
-        <label class="block text-sm font-medium mb-2">Object Options</label>
-        <Combobox
-          :options="objectOptions"
-          v-model="objectValue"
-          :placeholder="state.placeholder"
-          :disabled="state.disabled"
-          :show-cancel="state.showCancel"
-        />
-        <div class="mt-2 text-sm text-gray-600">
-          Selected: {{ objectValue || 'None' }}
-        </div>
+    <div class="p-4">
+      <label class="block text-sm font-medium mb-2">Object Options</label>
+      <Combobox
+        :options="objectOptions"
+        v-model="objectValue"
+        :placeholder="state.placeholder"
+        :disabled="state.disabled"
+        :show-cancel="state.showCancel"
+      />
+      <div class="mt-2 text-sm text-gray-600">
+        Selected: {{ objectValue || 'None' }}
       </div>
-    </Variant>
+    </div>
 
-    <Variant title="Options with Icons">
-      <div class="p-4">
-        <label class="block text-sm font-medium mb-2">Options with Icons</label>
-        <Combobox
-          :options="optionsWithIcons"
-          v-model="iconValue"
-          :placeholder="state.placeholder"
-          :disabled="state.disabled"
-        />
-        <div class="mt-2 text-sm text-gray-600">
-          Selected: {{ iconValue || 'None' }}
-        </div>
+    <div class="p-4">
+      <label class="block text-sm font-medium mb-2">Options with Icons</label>
+      <Combobox
+        :options="optionsWithIcons"
+        v-model="iconValue"
+        :placeholder="state.placeholder"
+        :disabled="state.disabled"
+      />
+      <div class="mt-2 text-sm text-gray-600">
+        Selected: {{ iconValue || 'None' }}
       </div>
-    </Variant>
+    </div>
 
-    <Variant title="Grouped Options">
-      <div class="p-4">
-        <label class="block text-sm font-medium mb-2">Grouped Options</label>
-        <Combobox
-          :options="groupedOptions"
-          v-model="groupedValue"
-          :placeholder="state.placeholder"
-          :disabled="state.disabled"
-        />
-        <div class="mt-2 text-sm text-gray-600">
-          Selected: {{ groupedValue || 'None' }}
-        </div>
+    <div class="p-4">
+      <label class="block text-sm font-medium mb-2">Grouped Options</label>
+      <Combobox
+        :options="groupedOptions"
+        v-model="groupedValue"
+        :placeholder="state.placeholder"
+        :disabled="state.disabled"
+      />
+      <div class="mt-2 text-sm text-gray-600">
+        Selected: {{ groupedValue || 'None' }}
       </div>
-    </Variant>
+    </div>
 
-    <Variant title="Disabled State">
-      <div class="p-4">
-        <label class="block text-sm font-medium mb-2">Disabled Combobox</label>
-        <Combobox
-          :options="simpleOptions"
-          v-model="disabledValue"
-          placeholder="This is disabled"
-          :disabled="true"
-        />
+    <div class="p-4">
+      <label class="block text-sm font-medium mb-2">Disabled Combobox</label>
+      <Combobox
+        :options="simpleOptions"
+        v-model="disabledValue"
+        placeholder="This is disabled"
+        :disabled="true"
+      />
+    </div>
+
+    <div class="p-4">
+      <label class="block text-sm font-medium mb-2">Pre-selected Value</label>
+      <Combobox
+        :options="objectOptions"
+        v-model="preselectedValue"
+        :placeholder="state.placeholder"
+        :disabled="state.disabled"
+      />
+      <div class="mt-2 text-sm text-gray-600">
+        Selected: {{ preselectedValue || 'None' }}
       </div>
-    </Variant>
+    </div>
 
-    <Variant title="Pre-selected Value">
-      <div class="p-4">
-        <label class="block text-sm font-medium mb-2">Pre-selected Value</label>
-        <Combobox
-          :options="objectOptions"
-          v-model="preselectedValue"
-          :placeholder="state.placeholder"
-          :disabled="state.disabled"
-        />
-        <div class="mt-2 text-sm text-gray-600">
-          Selected: {{ preselectedValue || 'None' }}
-        </div>
+    <div class="p-4">
+      <label class="block text-sm font-medium mb-2">Custom Options</label>
+      <Combobox
+        :options="customOptions"
+        v-model="customOptionValue"
+        :placeholder="state.placeholder"
+        :disabled="state.disabled"
+        :show-cancel="state.showCancel"
+      />
+      <div class="mt-2 text-sm text-gray-600">
+        Selected: {{ customOptionValue || 'None' }}
       </div>
-    </Variant>
-
-    <Variant title="Custom Options with onClick">
-      <div class="p-4">
-        <label class="block text-sm font-medium mb-2">Custom Options</label>
-        <Combobox
-          :options="customOptions"
-          v-model="customOptionValue"
-          :placeholder="state.placeholder"
-          :disabled="state.disabled"
-          :show-cancel="state.showCancel"
-        />
-        <div class="mt-2 text-sm text-gray-600">
-          Selected: {{ customOptionValue || 'None' }}
-        </div>
-        <div class="mt-2 text-xs text-gray-500">
-          Try typing 'new' or 'create' to see custom options
-        </div>
+      <div class="mt-2 text-xs text-gray-500">
+        Try typing 'new' or 'create' to see custom options
       </div>
-    </Variant>
+    </div>
 
-    <Variant title="Custom Options with Render Function">
-      <div class="p-4">
-        <label class="block text-sm font-medium mb-2">
-          Custom Render Options
-        </label>
-        <Combobox
-          :options="customRenderOptions"
-          v-model="customWithRenderValue"
-          :placeholder="state.placeholder"
-          :disabled="state.disabled"
-        />
-        <div class="mt-2 text-sm text-gray-600">
-          Selected: {{ customWithRenderValue || 'None' }}
-        </div>
-        <div class="mt-2 text-xs text-gray-500">
-          Custom options with render functions and conditional display
-        </div>
+    <div class="p-4">
+      <label class="block text-sm font-medium mb-2">
+        Custom Render Options
+      </label>
+      <Combobox
+        :options="customRenderOptions"
+        v-model="customWithRenderValue"
+        :placeholder="state.placeholder"
+        :disabled="state.disabled"
+      />
+      <div class="mt-2 text-sm text-gray-600">
+        Selected: {{ customWithRenderValue || 'None' }}
       </div>
-    </Variant>
+    </div>
 
-    <Variant title="Custom Options with Slots">
-      <div class="p-4">
-        <label class="block text-sm font-medium mb-2">
-          Custom Slot Options
-        </label>
-        <Combobox
-          :options="customSlotOptions"
-          v-model="customWithSlotValue"
-          :placeholder="state.placeholder"
-          :disabled="state.disabled"
-        >
-          <template #user-profile="{ option }">
-            <Avatar label="F" size="sm" />
-            <span class="ml-2"> View User Profile → </span>
-          </template>
-          <template #settings="{ option }">
-            <div class="flex items-center gap-2">
-              <LucideSettings class="w-4 h-4 text-gray-600" />
-              <div class="font-medium text-sm">Open Settings</div>
-            </div>
-          </template>
-        </Combobox>
-        <div class="mt-2 text-sm text-gray-600">
-          Selected: {{ customWithSlotValue || 'None' }}
-        </div>
-        <div class="mt-2 text-xs text-gray-500">
-          Try typing 'setting' to see the settings option. Slots allow full
-          template control.
-        </div>
+    <div class="p-4">
+      <label class="block text-sm font-medium mb-2">
+        Custom Slot Options
+      </label>
+      <Combobox
+        :options="customSlotOptions"
+        v-model="customWithSlotValue"
+        :placeholder="state.placeholder"
+        :disabled="state.disabled"
+      >
+        <template #user-profile="{ option }">
+          <Avatar label="F" size="sm" />
+          <span class="ml-2"> View User Profile → </span>
+        </template>
+        <template #settings="{ option }">
+          <div class="flex items-center gap-2">
+            <LucideSettings class="w-4 h-4 text-gray-600" />
+            <div class="font-medium text-sm">Open Settings</div>
+          </div>
+        </template>
+      </Combobox>
+      <div class="mt-2 text-sm text-gray-600">
+        Selected: {{ customWithSlotValue || 'None' }}
       </div>
-    </Variant>
-
-    <template #controls>
-      <HstText v-model="state.placeholder" title="Placeholder" />
-      <HstCheckbox v-model="state.disabled" title="Disabled" />
-    </template>
-  </Story>
+    </div>
+  </div>
 </template>

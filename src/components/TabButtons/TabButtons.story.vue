@@ -6,17 +6,13 @@ const currentTab = ref('mytasks')
 </script>
 
 <template>
-  <Story :layout="{ type: 'grid', width: '80%' }">
-    <Variant title="Tab Buttons">
-      <div class="flex">
-        <TabButtons
-          :buttons="[
-            { label: 'Tasks assigned to me', value: 'mytasks' },
-            { label: 'Tasks created by me', value: 'created' },
-          ]"
-          v-model="currentTab"
-        />
-      </div>
-    </Variant>
-  </Story>
+  <div class="flex w-4/5">
+    <TabButtons
+      :buttons="[
+        { label: 'Tasks assigned to me', value: 'mytasks' },
+        { label: 'Tasks created by me', value: 'created' },
+      ]"
+      v-model="currentTab"
+    />
+  </div>
 </template>

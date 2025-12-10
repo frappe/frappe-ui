@@ -5,8 +5,9 @@ import { Button } from '../Button'
 const validateFileFunction = (fileObject) => {}
 const onSuccess = (file) => {}
 </script>
+
 <template>
-  <Story :layout="{ width: 500, type: 'grid' }" autoPropsDisabled>
+  <div class="grid gap-5" style="width: 500px">
     <FileUploader
       :fileTypes="['image/*']"
       :validateFile="validateFileFunction"
@@ -30,5 +31,5 @@ const onSuccess = (file) => {}
         </Button>
       </template>
     </FileUploader>
-  </Story>
+  </div>
 </template>
