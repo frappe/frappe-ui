@@ -103,7 +103,12 @@ img.ProseMirror-selectednode {
     margin-bottom: 0.75em;
   }
 
-  p {
+  p,
+  ul,
+  ol,
+  pre,
+  blockquote,
+  table {
     margin-top: 0;
     margin-bottom: 0;
   }
