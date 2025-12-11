@@ -23,7 +23,7 @@ function getComponentList() {
 
 export default defineConfig({
   markdown: {
-    lineNumbers: true,
+    // lineNumbers: true,
     config(md) {
       md.use(componentPreview, { clientOnly: true, alias })
     },
@@ -38,6 +38,7 @@ export default defineConfig({
     search: { provider: 'local' },
     nav: [
       { text: 'Home', link: '/' },
+      { text: 'Docs', link: '/docs/badge' },
       { text: 'Examples', link: '/markdown-examples' },
     ],
     sidebar: [

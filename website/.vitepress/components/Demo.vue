@@ -27,7 +27,7 @@ const showSourceCode = ref(decodeURIComponent(props.showCode));
 </script>
 
 <template>
-  <div class="grid gap-5 border rounded p-3 pt-0">
+  <div class="grid gap-5 border border-outline-gray-5 rounded p-3 pt-0">
     <div v-if="props.title" class="font-medium">{{ props.title }}</div>
     <div v-if="props.description" class="text-sm text-muted">
       {{ props.description }}

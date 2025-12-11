@@ -6,7 +6,7 @@ const val = ref('')
 </script>
 
 <template>
-  <div class="grid gap-4 w-[500px]">
+  <div class="grid gap-4">
     <div>
       <MonthPicker v-model="val" />
     </div>

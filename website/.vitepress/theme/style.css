@@ -3,14 +3,7 @@
 @tailwind utilities;
 
 .shiki {
-  @apply bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto;
-	@apply max-h-[500px];
-
-  font-family: 'Fira Code', monospace;
-  font-size: 0.875rem; /* 14px */
-  line-height: 1.5;
-  tab-size: 2;
-
+  @apply max-h-[500px];
   /* Optional: Add scrollbar styling */
   /* &::-webkit-scrollbar { */
   /*   height: 6px; */
@@ -27,13 +20,11 @@
     @apply text-gray-500 pr-3 select-none;
   }
 
-
   /* Optional: Add line highlight background */
   .highlighted {
     @apply bg-blue-900/30;
   }
 }
-
 
 /**
  * Customize default theme styling by overriding CSS variables:
@@ -81,30 +72,34 @@
  * -------------------------------------------------------------------------- */
 
 :root {
-  --vp-c-default-1: var(--vp-c-gray-1);
-  --vp-c-default-2: var(--vp-c-gray-2);
-  --vp-c-default-3: var(--vp-c-gray-3);
-  --vp-c-default-soft: var(--vp-c-gray-soft);
+  --vp-c-bg: var(--surface-white);
+  --vp-c-bg-soft: var(--surface-white) --vp-c-bg-elv: var(--surface-white);
+  --vp-c-bg-alt: var(--surface-white);
 
-  --vp-c-brand-1: var(--vp-c-indigo-1);
-  --vp-c-brand-2: var(--vp-c-indigo-2);
-  --vp-c-brand-3: var(--vp-c-indigo-3);
-  --vp-c-brand-soft: var(--vp-c-indigo-soft);
+  --vp-c-default-1: var(--gray-900);
+  --vp-c-default-2: var(--gray-700);
+  --vp-c-default-3: var(--gray-500);
+  --vp-c-default-soft: var(--gray-100);
 
-  --vp-c-tip-1: var(--vp-c-brand-1);
-  --vp-c-tip-2: var(--vp-c-brand-2);
-  --vp-c-tip-3: var(--vp-c-brand-3);
-  --vp-c-tip-soft: var(--vp-c-brand-soft);
+  --vp-c-brand-1: var(--blue-700);
+  --vp-c-brand-2: var(--blue-600);
+  --vp-c-brand-3: var(--blue-500);
+  --vp-c-brand-soft: var(--blue-100);
 
-  --vp-c-warning-1: var(--vp-c-yellow-1);
-  --vp-c-warning-2: var(--vp-c-yellow-2);
-  --vp-c-warning-3: var(--vp-c-yellow-3);
-  --vp-c-warning-soft: var(--vp-c-yellow-soft);
+  --vp-c-tip-1: var(--blue-700);
+  --vp-c-tip-2: var(--blue-600);
+  --vp-c-tip-3: var(--blue-500);
+  --vp-c-tip-soft: var(--blue-100);
 
-  --vp-c-danger-1: var(--vp-c-red-1);
-  --vp-c-danger-2: var(--vp-c-red-2);
-  --vp-c-danger-3: var(--vp-c-red-3);
-  --vp-c-danger-soft: var(--vp-c-red-soft);
+  --vp-c-warning-1: var(--amber-700);
+  --vp-c-warning-2: var(--amber-500);
+  --vp-c-warning-3: var(--amber-400);
+  --vp-c-warning-soft: var(--amber-100);
+
+  --vp-c-danger-1: var(--red-700);
+  --vp-c-danger-2: var(--red-500);
+  --vp-c-danger-3: var(--red-400);
+  --vp-c-danger-soft: var(--red-100);
 }
 
 /**
@@ -170,7 +165,6 @@
  * Component: Algolia
  * -------------------------------------------------------------------------- */
 
-.DocSearch {
-  --docsearch-primary-color: var(--vp-c-brand-1) !important;
-}
-
+/* .DocSearch { */
+/*   --docsearch-primary-color: var(--vp-c-brand-1) !important; */
+/* } */
