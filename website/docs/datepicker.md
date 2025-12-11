@@ -5,4 +5,4 @@
 
 <br/>
 
-<preview path="@/components/DatePicker/DatePicker.story.vue"  />
+<ComponentPreview name='DatePicker' />

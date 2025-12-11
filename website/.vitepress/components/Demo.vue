@@ -4,39 +4,42 @@ import Tabs from "./Tabs.vue";
 import LucidePreview from "~icons/lucide/square-mouse-pointer";
 import LucideCode from "~icons/lucide/code";
 
+interface ComponentPreviewProps {
+  code: string;
+  hlcode: string;
+  title?: string;
+  description?: string;
+}
+
+const props = defineProps<ComponentPreviewProps>();
+
 const state = ref(0);
 const tabs = [
   { label: "Preview", icon: LucidePreview },
   { label: "Code", icon: LucideCode },
 ];
 
-interface DemoProps {
-  code: string;
-  showCode: string;
-  title?: string;
-  description?: string;
-}
-
-const props = defineProps<DemoProps>();
-
-const srcCode = ref(decodeURIComponent(props.code));
-const showSourceCode = ref(decodeURIComponent(props.showCode));
-
+// const code = ref(decodeURIComponent(props.code));
+const highlightedCode = ref(decodeURIComponent(props.hlcode));
 </script>
 
 <template>
-  <div class="grid gap-5 brder rounded">
+  <div class="grid gap-5">
     <div v-if="props.title" class="font-medium">{{ props.title }}</div>
     <div v-if="props.description" class="text-sm text-muted">
       {{ props.description }}
     </div>
     <Tabs :tabs="tabs" v-model="state">
       <template #tab-panel="{ tab }">
-        <div v-if='tab.label === "Preview"' class='mt-5'>
+        <div v-if='tab.label === "Preview"' class="mt-5">
           <slot />
         </div>
-        <div v-else >
-          <div v-html="showSourceCode" class="language-vue"></div>
+
+        <div
+          v-else
+          v-html="highlightedCode"
+          class="border rounded mt-5 language-vue"
+        >
         </div>
       </template>
     </Tabs>

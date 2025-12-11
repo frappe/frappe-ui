@@ -3,7 +3,9 @@ import { lucideIcons } from '../../vite/lucideIcons'
 import fs from 'fs'
 import path from 'path'
 
-import { componentPreview } from '@vitepress-demo-preview/plugin'
+// import { componentPreview } from '@vitepress-demo-preview/plugin'
+
+import componentPreview from './plugins/componentPreview'
 
 const alias = {
   '@': path.resolve(__dirname, '../../src/'),
@@ -25,7 +27,7 @@ export default defineConfig({
   markdown: {
     // lineNumbers: true,
     config(md) {
-      md.use(componentPreview, { clientOnly: true, alias })
+      md.use(componentPreview)
     },
   },
   vite: {

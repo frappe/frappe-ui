@@ -5,4 +5,4 @@
 
 <br/>
 
-<preview path="@/components/Select/Select.story.vue"  />
+<ComponentPreview name="Select"  />

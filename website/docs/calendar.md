@@ -5,4 +5,5 @@
 
 <br/>
 
-<preview path="@/components/Calendar/Calendar.story.vue"  />
+<ComponentPreview name="Calendar"  />
+

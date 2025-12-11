@@ -5,4 +5,5 @@
 
 <br/>
 
-<preview path="@/components/Dialog/Dialog.story.vue"  />
+<ComponentPreview name='Dialog' />
+

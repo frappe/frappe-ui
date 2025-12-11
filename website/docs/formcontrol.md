@@ -5,4 +5,4 @@
 
 <br/>
 
-<preview path="@/components/FormControl/FormControl.story.vue"  />
+<ComponentPreview name="FormControl"  />

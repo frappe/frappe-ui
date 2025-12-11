@@ -5,4 +5,4 @@
 
 <br/>
 
-<preview path="@/components/Alert/Alert.story.vue"  />
+<ComponentPreview name="Alert"  />

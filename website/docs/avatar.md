@@ -5,4 +5,5 @@
 
 <br/>
 
-<preview path="@/components/Avatar/Avatar.story.vue"  />
+<ComponentPreview name="Avatar"  />
+

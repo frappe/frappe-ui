@@ -5,4 +5,4 @@
 
 <br/>
 
-<preview path="@/components/TimePicker/TimePicker.story.vue"  />
+<ComponentPreview name="TimePicker"  />

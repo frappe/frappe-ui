@@ -14,7 +14,7 @@ export default {
     })
   },
   enhanceApp({ app, router, siteData }) {
-    app.component('demo-preview', Demo)
+    app.component('ComponentPreview', Demo)
     // ...
   },
 } satisfies Theme

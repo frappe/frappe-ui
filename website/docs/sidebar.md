@@ -5,4 +5,4 @@
 
 <br/>
 
-<preview path="@/components/Sidebar/Sidebar.story.vue"  />
+<ComponentPreview name="Sidebar"  />

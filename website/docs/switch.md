@@ -5,4 +5,4 @@
 
 <br/>
 
-<preview path="@/components/Switch/Switch.story.vue"  />
+<ComponentPreview name="Switch"  />

@@ -5,4 +5,4 @@
 
 <br/>
 
-<preview path="@/components/Rating/Rating.story.vue"  />
+<ComponentPreview name="Rating"  />

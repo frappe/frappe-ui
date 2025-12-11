@@ -5,4 +5,4 @@
 
 <br/>
 
-<preview path="@/components/FileUploader/FileUploader.story.vue"  />
+<ComponentPreview name="FileUploader"  />

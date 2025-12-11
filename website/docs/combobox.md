@@ -5,4 +5,4 @@
 
 <br/>
 
-<preview path="@/components/Combobox/Combobox.story.vue"  />
+<ComponentPreview name='Combobox' />

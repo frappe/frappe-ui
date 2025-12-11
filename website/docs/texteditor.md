@@ -5,4 +5,4 @@
 
 <br/>
 
-<preview path="@/components/TextEditor/TextEditor.story.vue"  />
+<ComponentPreview name="TextEditor"  />

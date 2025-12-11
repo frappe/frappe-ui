@@ -3,7 +3,7 @@
 </h1>
 
 
-<h3> Variants </h3>
+<h2> Variants </h2>
 <br/>
 
-<preview path="@/components/Button/Button.story.vue"  />
+<ComponentPreview name='Button'  />

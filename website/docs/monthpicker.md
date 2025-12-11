@@ -5,4 +5,4 @@
 
 <br/>
 
-<preview path="@/components/MonthPicker/MonthPicker.story.vue"  />
+<ComponentPreview name="MonthPicker"  />

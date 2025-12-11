@@ -5,4 +5,4 @@
 
 <br/>
 
-<preview path="@/components/Charts/Charts.story.vue"  />
+<ComponentPreview name="Charts"  />

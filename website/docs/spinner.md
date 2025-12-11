@@ -5,4 +5,4 @@
 
 <br/>
 
-<preview path="@/components/Spinner/Spinner.story.vue"  />
+<ComponentPreview name="Spinner"  />

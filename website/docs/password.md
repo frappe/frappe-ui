@@ -5,4 +5,4 @@
 
 <br/>
 
-<preview path="@/components/Password/Password.story.vue"  />
+<ComponentPreview name="Password"  />

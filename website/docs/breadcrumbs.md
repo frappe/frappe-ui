@@ -5,4 +5,4 @@
 
 <br/>
 
-<preview path="@/components/Breadcrumbs/Breadcrumbs.story.vue"  />
+<ComponentPreview name="Breadcrumbs"  />

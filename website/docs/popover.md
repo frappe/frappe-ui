@@ -5,4 +5,4 @@
 
 <br/>
 
-<preview path="@/components/Popover/Popover.story.vue"  />
+<ComponentPreview name="Popover"  />

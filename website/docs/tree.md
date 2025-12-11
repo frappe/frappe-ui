@@ -5,4 +5,4 @@
 
 <br/>
 
-<preview path="@/components/Tree/Tree.story.vue"  />
+<ComponentPreview name="Tree"  />

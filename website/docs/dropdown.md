@@ -5,4 +5,4 @@
 
 <br/>
 
-<preview path="@/components/Dropdown/Dropdown.story.vue"  />
+<ComponentPreview path="Dropdown"  />

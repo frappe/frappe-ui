@@ -5,4 +5,4 @@
 
 <br/>
 
-<preview path="@/components/Checkbox/Checkbox.story.vue"  />
+<ComponentPreview name='Checkbox'  />

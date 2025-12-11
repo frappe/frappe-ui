@@ -5,4 +5,4 @@
 
 <br/>
 
-<preview path="@/components/Tabs/Tabs.story.vue"  />
+<ComponentPreview name="Tabs"  />

@@ -5,4 +5,4 @@
 
 <br/>
 
-<preview path="@/components/TextInput/TextInput.story.vue"  />
+<ComponentPreview name="TextInput"  />

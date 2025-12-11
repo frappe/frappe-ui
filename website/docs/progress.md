@@ -5,4 +5,4 @@
 
 <br/>
 
-<preview path="@/components/Progress/Progress.story.vue"  />
+<ComponentPreview name="Progress"  />

@@ -5,4 +5,4 @@
 
 <br/>
 
-<preview path="@/components/Textarea/Textarea.story.vue"  />
+<ComponentPreview name="Textarea"  />

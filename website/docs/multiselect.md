@@ -5,4 +5,4 @@
 
 <br/>
 
-<preview path="@/components/MultiSelect/MultiSelect.story.vue"  />
+<ComponentPreview name="MultiSelect"  />

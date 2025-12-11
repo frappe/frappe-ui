@@ -5,4 +5,4 @@
 
 <br/>
 
-<preview path="@/components/ErrorMessage/ErrorMessage.story.vue"  />
+<ComponentPreview name="ErrorMessage"  />

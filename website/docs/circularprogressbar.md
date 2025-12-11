@@ -5,4 +5,4 @@
 
 <br/>
 
-<preview path="@/components/CircularProgressBar/CircularProgressBar.story.vue"  />
+<ComponentPreview name='CircularProgressBar' />

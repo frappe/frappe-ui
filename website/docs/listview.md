@@ -5,4 +5,4 @@
 
 <br/>
 
-<preview path="@/components/ListView/ListView.story.vue"  />
+<ComponentPreview name="ListView"  />

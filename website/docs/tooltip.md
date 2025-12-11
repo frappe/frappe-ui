@@ -5,4 +5,4 @@
 
 <br/>
 
-<preview path="@/components/Tooltip/Tooltip.story.vue"  />
+<ComponentPreview name="Tooltip"  />
