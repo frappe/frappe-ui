@@ -19,8 +19,10 @@ const tabs = [
   { label: "Code", icon: LucideCode },
 ];
 
-// const code = ref(decodeURIComponent(props.code));
+const code = ref(decodeURIComponent(props.code));
 const highlightedCode = ref(decodeURIComponent(props.hlcode));
+
+console.log(highlightedCode.value)
 </script>
 
 <template>

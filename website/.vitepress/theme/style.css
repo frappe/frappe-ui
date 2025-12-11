@@ -100,7 +100,24 @@
   --vp-c-danger-2: var(--red-500);
   --vp-c-danger-3: var(--red-400);
   --vp-c-danger-soft: var(--red-100);
+
 }
+
+/* :root { */
+/*   --vp-layout-max-width: 1920px; */
+/* } */
+/**/
+/* .VPDoc:not(.has-sidebar) .container { */
+/*   max-width: 1584px !important; */
+/* } */
+/**/
+/* .VPDoc:not(.has-sidebar) .content { */
+/*   max-width: 1264px !important; */
+/* } */
+/**/
+/* .VPDoc.has-aside .content-container { */
+/*   max-width: 1168px !important; */
+/* } */
 
 /**
  * Component: Button

@@ -5,4 +5,4 @@
 
 <br/>
 
-<ComponentPreview path="Dropdown"  />
+<ComponentPreview name="Dropdown" />
