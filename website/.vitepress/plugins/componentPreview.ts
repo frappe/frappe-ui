@@ -20,11 +20,10 @@ export default function (md: MarkdownRenderer) {
         )
       }
     }
-
     const regex =
-      /<ComponentPreview\s+name="([^"]+)"(?:\s+title="([^"]*)")?(?:\s+description="([^"]*)")?\s*\/>/g
+      /<ComponentPreview\s+name=["']([^"']+)["'](?:\s+title=["']([^"']*)["'])?(?:\s+description=["']([^"']*)["'])?(?:\s+csr=["'](true|false)["'])?\s*\/>/g
 
-    state.src = state.src.replace(regex, (_, name, title, description) => {
+    state.src = state.src.replace(regex, (fullMatch, name, title, _, csr) => {
       const importStr = `import ${name} from '@/components/${name}/${name}.story.vue'`
       insertComponentImport(importStr)
 
@@ -34,25 +33,27 @@ export default function (md: MarkdownRenderer) {
       const componentPath = `../../src/components/${name}/${name}.story.vue`
       const resolvedPath = resolve(dirname(realPath ?? _path), componentPath)
 
-      // Read and highlight using VitePress's highlighter
       const fileContent = readFileSync(resolvedPath, 'utf-8')
       const highlighted =
         md.options.highlight?.(fileContent, 'vue', '') || fileContent
-
       const encodedCode = encodeURIComponent(fileContent)
       const encodedHighlighted = encodeURIComponent(highlighted)
 
       const componentProps = [
         `code="${encodedCode}"`,
         `hlcode="${encodedHighlighted}"`,
-        title ? `title="${title}"` : '',
-        description ? `description="${description}"` : '',
+        title ? `title="${title}"` : ''
+        // description ? `description="${description}"` : '',
       ]
         .filter(Boolean)
         .join(' ')
 
+      const componentTag = `<ComponentPreview ${componentProps}><${name} /></ComponentPreview>`
+
       state.tokens[index].content =
-        `<ComponentPreview ${componentProps}><${name} /></ComponentPreview>`
+        csr === 'true'
+          ? `<ClientOnly>${componentTag}</ClientOnly>`
+          : componentTag
 
       return ''
     })

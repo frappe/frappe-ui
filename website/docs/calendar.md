@@ -5,5 +5,5 @@
 
 <br/>
 
-<ComponentPreview name="Calendar"  />
+<ComponentPreview name="Calendar" csr="true"  />
 
