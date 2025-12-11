@@ -67,37 +67,30 @@ const scrollToHeading = (heading: HeadingAnchor) => {
   const view = props.editor.view
   const pos = heading.pos
 
-  try {
     if (pos < 0 || pos > view.state.doc.content.size) {
       return
     }
 
-    // First, try to find the heading element by ID or data attribute
     let element: Element | null = null
     const editorDom = view.dom
 
-    // Try multiple methods to find the heading
     element =
       editorDom.querySelector(`[data-toc-id="${heading.id}"]`) ||
       editorDom.querySelector(`#${heading.id}`) ||
       null
 
-    // If not found by ID, try to find by position
     if (!element) {
       const domPos = view.domAtPos(pos)
       if (domPos.node && domPos.node.nodeType === Node.ELEMENT_NODE) {
         const node = domPos.node as Element
-        // Check if it's a heading
         if (node.matches('h1, h2, h3, h4, h5, h6')) {
           element = node
         } else {
-          // Find the closest heading parent
           element = node.closest('h1, h2, h3, h4, h5, h6')
         }
       }
     }
 
-    // If still not found, search by text content
     if (!element) {
       const allHeadings = Array.from(
         editorDom.querySelectorAll('h1, h2, h3, h4, h5, h6'),
@@ -107,38 +100,31 @@ const scrollToHeading = (heading: HeadingAnchor) => {
       ) || null
     }
 
-    // Set cursor position and scroll
     const tr = view.state.tr
     tr.setSelection(new TextSelection(tr.doc.resolve(pos)))
     view.dispatch(tr)
     view.focus()
 
-    // Scroll to the element
     const editorContainer = document.querySelector('#editorScrollContainer')
     if (element && editorContainer) {
-      // Get the element's position relative to the container
       const elementRect = element.getBoundingClientRect()
       const containerRect = editorContainer.getBoundingClientRect()
 
-      // Calculate the scroll position needed
       const currentScrollTop = editorContainer.scrollTop
       const elementTopRelativeToContainer =
         elementRect.top - containerRect.top + currentScrollTop
 
-      // Scroll with offset
       editorContainer.scrollTo({
         top: Math.max(0, elementTopRelativeToContainer - 20),
         behavior: 'smooth',
       })
     } else if (element) {
-      // Fallback: use scrollIntoView but prevent window scroll
       element.scrollIntoView({
         behavior: 'smooth',
         block: 'start',
         inline: 'nearest',
       })
     } else {
-      // Last resort: use the position to scroll
       const domPos = view.domAtPos(pos)
       if (domPos.node && domPos.node.nodeType === Node.ELEMENT_NODE) {
         const node = domPos.node as Element
@@ -157,9 +143,6 @@ const scrollToHeading = (heading: HeadingAnchor) => {
         }
       }
     }
-  } catch (error) {
-    // Silently fail if scroll fails
-  }
 }
 
 const TocRecursiveItem = defineComponent({
@@ -273,9 +256,38 @@ const extractAnchors = (): HeadingAnchor[] => {
   const headings: HeadingAnchor[] = []
   const scrollParent = document.querySelector('#editorScrollContainer')
 
+  // Get the current active tab ID
+  let activeTabId: string | null = null
+  let tabStart: number | null = null
+  let tabEnd: number | null = null
+
+  try {
+    activeTabId = props.editor.commands.getCurrentTab() || null
+  } catch (e) {
+    // If getCurrentTab doesn't exist, continue without tab filtering
+  }
+
+  // Find the active tab's position range if tabs exist
+  if (activeTabId) {
+    props.editor.state.doc.descendants((node, pos) => {
+      if (node.type.name === 'tab' && node.attrs?.id === activeTabId) {
+        tabStart = pos
+        tabEnd = pos + node.nodeSize
+        return false
+      }
+    })
+  }
+
   props.editor.state.doc.descendants((node, pos) => {
     if (node.type.name === 'tocNode') return false
     if (node.type.name !== 'heading') return false
+
+    // Filter by tab: only include headings within the active tab
+    if (tabStart !== null && tabEnd !== null) {
+      if (pos < tabStart || pos >= tabEnd) {
+        return false
+      }
+    }
 
     const level = node.attrs?.level
     const textContent = node.textContent?.trim()
@@ -327,12 +339,7 @@ const extractAnchors = (): HeadingAnchor[] => {
 }
 
 const updateAnchors = () => {
-  try {
     anchors.value = extractAnchors()
-  } catch (error) {
-    console.error('Error updating anchors:', error)
-    anchors.value = []
-  }
 }
 
 let updateInterval: ReturnType<typeof setInterval> | null = null
@@ -342,6 +349,20 @@ watch(
   () => props.editor?.state?.doc,
   updateAnchors,
   { deep: true },
+)
+
+// Watch for tab changes
+watch(
+  () => {
+    try {
+      return props.editor?.commands?.getCurrentTab?.() || null
+    } catch {
+      return null
+    }
+  },
+  () => {
+    updateAnchors()
+  },
 )
 
 onMounted(() => {
@@ -395,3 +416,4 @@ onBeforeUnmount(() => {
   text-decoration: underline;
 }
 </style>
+

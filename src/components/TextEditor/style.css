@@ -31,6 +31,8 @@ img.ProseMirror-selectednode {
   outline: 2px solid var(--outline-gray-2);
   outline-offset: 2px;
   border-radius: 4px;
+  padding: 2.5px;
+  margin-top: 10px;
 }
 
 .ProseMirror ul[data-type='taskList'] {
