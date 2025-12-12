@@ -1,6 +1,6 @@
 # Document Resource
 
-Document Resource is a wrapper on top of [Resource](./Resource.story.md) for
+Document Resource is a wrapper on top of [Resource](./resource) for
 working with a single document. This feature only works with a Frappe Framework
 backend as of now.
 
@@ -121,7 +121,7 @@ let todo = createDocumentResource({
 
 A document resource is made up of multiple individual resources. In our running
 example, the resource object that fetches the document is at `todos.get`. So all
-the [properties of a resource](./Resource.story.md) are available on this
+the [properties of a resource](./resource.md) are available on this
 object. Similarly, there are resources for `setValue`, and `delete`.
 
 ```js
