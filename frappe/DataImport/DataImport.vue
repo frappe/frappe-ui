@@ -87,10 +87,16 @@ const fields = createResource({
   auto: false,
 })
 
+
+const updateData = () => {
+  data.value = dataImports.data?.find(
+    (di: DataImport) => di.name === props.importName,
+    ) || null
+}
+
 watch(
   () => [route.params, props, dataImports.data],
   () => {
-    if (!dataImports.data?.length) return
     if (props.doctype) {
       step.value = 'upload'
       fields.reload({
@@ -120,12 +126,6 @@ watch(() => route.query, () => {
     step.value = 'list'
   }
 })
-
-const updateData = () => {
-  data.value = dataImports.data?.find(
-    (di: DataImport) => di.name === props.importName,
-    ) || null
-}
 
 const updateStep = (newStep: 'list' | 'upload' | 'map' | 'preview', newData: DataImport) => {
   step.value = newStep
