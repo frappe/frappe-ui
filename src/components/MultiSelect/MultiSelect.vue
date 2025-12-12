@@ -13,6 +13,7 @@ import {
 } from "reka-ui";
 
 import LucideX from "~icons/lucide/x";
+import Button from "../Button/Button.vue";
 import Popover from "../Popover/Popover.vue";
 import LucideCheck from "~icons/lucide/check";
 import LoadingIndicator from "../LoadingIndicator.vue";
