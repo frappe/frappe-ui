@@ -312,13 +312,15 @@ const mapping = computed(() => {
     let warningMap: string[][] = [];
     if (!preview.value?.warnings?.length) return [];
     preview.value.warnings.forEach((warning: any) => {
-        const regex = /<strong>(.*?)<\/strong>/g;
-        let match;
-        const fields = [];
-        while ((match = regex.exec(warning.message)) !== null) {
-            fields.push(match[1]);
+        if (warning.type == "info") {
+            const regex = /<strong>(.*?)<\/strong>/g;
+            let match;
+            const fields = [];
+            while ((match = regex.exec(warning.message)) !== null) {
+                fields.push(match[1]);
+            }
+            warningMap.push(fields);
         }
-        warningMap.push(fields);
     })
     return warningMap;
 })
