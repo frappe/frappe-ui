@@ -1,50 +1,65 @@
 <script setup>
-import CircularProgressBar from './CircularProgressBar.vue'
+import CircularProgressBar from "./CircularProgressBar.vue";
+import Story from "../Story.vue";
+
+// 'black' | 'red' | 'green' | 'blue' | 'orange'
+
+const themes = ["black", "red", "green", "blue", "orange"];
+const sizes = ["xs", "sm", "md", "lg", "xl"];
 </script>
 
 <template>
-  <div class="grid gap-4">
-    <div class="p-2 w-full h-full">
+  <div class="grid grid-cols-2 gap-4">
+    <Story>
       <CircularProgressBar :step="1" :totalSteps="4" />
-    </div>
+    </Story>
 
-    <div class="p-2 w-full h-full">
-      <CircularProgressBar
-        :step="1"
-        :totalSteps="4"
-        size="lg"
-        :showPercentage="true"
-      />
-    </div>
-
-    <div class="p-2 w-full h-full">
-      <CircularProgressBar :step="3" :totalSteps="4" theme="orange" />
-    </div>
-
-    <div class="p-2 w-full h-full">
-      <CircularProgressBar
-        :step="2"
-        :totalSteps="6"
-        :theme="{ primary: '#2376f5', secondary: '#ddd5d5' }"
-      />
-    </div>
-
-    <div class="p-2 w-full h-full">
+    <Story title="Solid Variant (Complete)">
       <CircularProgressBar
         :step="9"
         :totalSteps="9"
         variant="solid"
         themeComplete="lightgreen"
       />
-    </div>
+    </Story>
 
-    <div class="p-2 w-full h-full">
+    <Story title="Outline Variant (Complete)">
       <CircularProgressBar
         :step="9"
         :totalSteps="9"
         variant="outline"
         themeComplete="lightgreen"
       />
-    </div>
+    </Story>
+
+    <Story title="Custom Theme">
+      <CircularProgressBar
+        :step="2"
+        :totalSteps="6"
+        :theme='{ primary: "#2376f5", secondary: "#ddd5d5" }'
+      />
+    </Story>
+
+    <Story title="Themes" preview-css="flex gap-4" class="col-span-2">
+      <CircularProgressBar
+        v-for="theme in themes"
+        :step="3"
+        :totalSteps="4"
+        :theme="theme"
+      />
+    </Story>
+
+    <Story
+      title="Sizes"
+      preview-css="flex gap-3 items-center"
+			class="col-span-2"
+    >
+      <CircularProgressBar
+        v-for="size in sizes"
+        :step="3"
+        :totalSteps="4"
+        :size="size"
+      />
+    </Story>
   </div>
 </template>

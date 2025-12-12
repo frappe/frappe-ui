@@ -1,9 +1,11 @@
+
 <script setup lang="ts">
 import { ref } from 'vue'
 import { EditorContent } from '@tiptap/vue-3'
 import TextEditor from './TextEditor.vue'
 import TextEditorFixedMenu from './TextEditorFixedMenu.vue'
 import { Button } from '../Button'
+import Story from '../Story.vue'
 
 const value = ref(`
 <div>
@@ -41,7 +43,7 @@ const customButtons = [
 
 <template>
   <div class="grid gap-6 w-[600px]">
-    <div>
+    <Story title="Basic">
       <TextEditor
         editor-class="prose-sm min-h-[4rem] border rounded-b-lg border-t-0 p-2"
         :content="value"
@@ -50,9 +52,9 @@ const customButtons = [
         :bubbleMenu="true"
         :fixed-menu="true"
       />
-    </div>
+    </Story>
 
-    <div>
+    <Story title="Comment Editor">
       <TextEditor
         ref="textEditor"
         editor-class="prose-sm max-w-none min-h-[4rem]"
@@ -81,6 +83,6 @@ const customButtons = [
           </div>
         </template>
       </TextEditor>
-    </div>
+    </Story>
   </div>
 </template>

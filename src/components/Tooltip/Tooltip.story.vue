@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import Tooltip from './Tooltip.vue'
-import { Button } from '../Button'
+import { ref } from "vue";
+import Tooltip from "./Tooltip.vue";
+import { Button } from "../Button";
+import Story from "../Story.vue";
 
-const placement = ref('top')
-const disabled = ref(true)
+const placement = ref("top");
+const disabled = ref(true);
 </script>
 
 <template>
-  <div class="space-y-4 max-w-xs">
-    <div class="space-y-1">
-      <label>With Text Prop</label>
+  <div class="grid gap-5 grid-cols-2">
+    <Story title="With Text Prop">
       <Tooltip
         text="This action cannot be undone"
         :hover-delay="1"
@@ -18,10 +18,9 @@ const disabled = ref(true)
       >
         <Button theme="red">Delete</Button>
       </Tooltip>
-    </div>
+    </Story>
 
-    <div class="space-y-1">
-      <label>Disabled</label>
+    <Story title="Disabled Tooltip">
       <Tooltip
         text="Disabled tooltip"
         :disabled="disabled"
@@ -30,10 +29,9 @@ const disabled = ref(true)
       >
         <Button theme="red">Delete</Button>
       </Tooltip>
-    </div>
+    </Story>
 
-    <div class="space-y-1">
-      <label>With Slot</label>
+    <Story title="With Slot">
       <Tooltip arrow-class="fill-surface-white" :placement="placement">
         <template #body>
           <div
@@ -44,16 +42,6 @@ const disabled = ref(true)
         </template>
         <Button theme="red">Delete</Button>
       </Tooltip>
-    </div>
-
-    <div class="space-y-1">
-      <label>Placement</label>
-      <select v-model="placement" class="border rounded p-1">
-        <option value="top">Top</option>
-        <option value="right">Right</option>
-        <option value="bottom">Bottom</option>
-        <option value="left">Left</option>
-      </select>
-    </div>
+    </Story>
   </div>
 </template>

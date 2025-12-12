@@ -1,18 +1,19 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import MonthPicker from './MonthPicker.vue'
+import { ref } from "vue";
+import MonthPicker from "./MonthPicker.vue";
+import Story from "../Story.vue";
 
-const val = ref('')
+const val = ref("");
 </script>
 
 <template>
-  <div class="grid gap-4">
-    <div>
+  <div class="grid grid-cols-2 gap-4">
+    <Story title="Default MonthPicker">
       <MonthPicker v-model="val" />
-    </div>
+    </Story>
 
-    <div>
+    <Story title="MonthPicker fit">
       <MonthPicker v-model="val" class="w-fit" />
-    </div>
+    </Story>
   </div>
 </template>

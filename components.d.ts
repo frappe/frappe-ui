@@ -154,6 +154,7 @@ declare module 'vue' {
     SlashCommandsList: typeof import('./src/components/TextEditor/extensions/slash-commands/SlashCommandsList.vue')['default']
     Spinner: typeof import('./src/components/Spinner/Spinner.vue')['default']
     'Spinner.story': typeof import('./src/components/Spinner/Spinner.story.vue')['default']
+    Story: typeof import('./src/components/Story.vue')['default']
     Strikethrough: typeof import('./src/components/TextEditor/icons/strikethrough.vue')['default']
     SuggestionList: typeof import('./src/components/TextEditor/extensions/suggestion/SuggestionList.vue')['default']
     Switch: typeof import('./src/components/Switch/Switch.vue')['default']

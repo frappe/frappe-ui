@@ -4,6 +4,7 @@ import Calendar from "./Calendar.vue";
 import { Select } from "../Select";
 import DatePicker from "../DatePicker/DatePicker.vue";
 import { Button } from "../Button";
+import Story from "../Story.vue";
 
 const config = {
   defaultMode: "Month",
@@ -96,83 +97,92 @@ const events = ref([
 
 <template>
   <div class="grid gap-5">
-    <div class="flex h-screen flex-col overflow-hidden p-5">
-      <Calendar
-        :config="config"
-        :events="events"
-        @create='(event) => console.log("createEvent", event)'
-        @update='(event) => console.log("updateEvent", event)'
-        @delete='(eventID) => console.log("deleteEvent", eventID)'
-      />
-    </div>
+    <Story>
+      <div class="flex h-screen flex-col overflow-hidden p-5">
+        <Calendar
+          :config="config"
+          :events="events"
+          @create='(event) => console.log("createEvent", event)'
+          @update='(event) => console.log("updateEvent", event)'
+          @delete='(eventID) => console.log("deleteEvent", eventID)'
+        />
+      </div>
+    </Story>
 
-    <div class="flex h-screen flex-col overflow-hidden p-5">
-      <Calendar
-        :config="config"
-        :events="events"
-        @create='(event) => console.log("createEvent", event)'
-        @update='(event) => console.log("updateEvent", event)'
-        @delete='(eventID) => console.log("deleteEvent", eventID)'
-      >
-        <template #header="headerProps">
-          <div class="mb-2 flex items-center justify-between gap-3">
-            <div class="flex items-center gap-2">
-              <DatePicker
-                :modelValue="headerProps.selectedMonthDate"
-                @update:modelValue="(val) => headerProps.onMonthYearChange(val)"
-                :clearable="false"
-              >
-                <template #target="{ togglePopover }">
-                  <Button
-                    variant="ghost"
-                    class="text-lg font-medium text-ink-gray-7"
-                    :label="headerProps.currentMonthYear"
-                    iconRight="chevron-down"
-                    @click="togglePopover"
-                  />
-                </template>
-              </DatePicker>
+    <Story title="Custom Header">
+      <div class="flex h-screen flex-col overflow-hidden p-5">
+        <Calendar
+          :config="config"
+          :events="events"
+          @create='(event) => console.log("createEvent", event)'
+          @update='(event) => console.log("updateEvent", event)'
+          @delete='(eventID) => console.log("deleteEvent", eventID)'
+        >
+          <template #header="headerProps">
+            <div class="mb-2 flex items-center justify-between gap-3">
+              <div class="flex items-center gap-2">
+                <DatePicker
+                  :modelValue="headerProps.selectedMonthDate"
+                  @update:modelValue="
+                    (val) =>
+                      headerProps.onMonthYearChange(val)
+                  "
+                  :clearable="false"
+                >
+                  <template #target="{ togglePopover }">
+                    <Button
+                      variant="ghost"
+                      class="text-lg font-medium text-ink-gray-7"
+                      :label="headerProps.currentMonthYear"
+                      iconRight="chevron-down"
+                      @click="togglePopover"
+                    />
+                  </template>
+                </DatePicker>
+              </div>
+              <div class="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  icon="chevron-left"
+                  @click="headerProps.decrement"
+                />
+                <Button
+                  label="Today"
+                  variant="ghost"
+                  @click="headerProps.setCalendarDate()"
+                />
+                <Button
+                  variant="ghost"
+                  icon="chevron-right"
+                  @click="headerProps.increment"
+                />
+              </div>
+              <div>
+                <Select
+                  class="!w-20"
+                  size="sm"
+                  variant="ghost"
+                  :options="headerProps.enabledModes"
+                  :modelValue="headerProps.activeView"
+                  @update:modelValue="(v) => headerProps.updateActiveView(v)"
+                />
+              </div>
             </div>
-            <div class="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                icon="chevron-left"
-                @click="headerProps.decrement"
-              />
-              <Button
-                label="Today"
-                variant="ghost"
-                @click="headerProps.setCalendarDate()"
-              />
-              <Button
-                variant="ghost"
-                icon="chevron-right"
-                @click="headerProps.increment"
-              />
-            </div>
-            <div>
-              <Select
-                class="!w-20"
-                size="sm"
-                variant="ghost"
-                :options="headerProps.enabledModes"
-                :modelValue="headerProps.activeView"
-                @update:modelValue="(v) => headerProps.updateActiveView(v)"
-              />
-            </div>
-          </div>
-        </template>
-      </Calendar>
-    </div>
+          </template>
+        </Calendar>
+      </div>
+    </Story>
 
-    <div class="flex h-screen flex-col overflow-hidden p-5">
-      <Calendar
-        :config="config"
-        :events="events"
-        :onClick='(event) => console.log("onClick", event)'
-        :onDblClick='(event) => console.log("onDblClick", event)'
-        :onCellClick='(data) => console.log("onCellClick", data)'
-      />
-    </div>
+    <Story title="Custom click events">
+      <div class="flex h-screen flex-col overflow-hidden p-5">
+        <Calendar
+          :config="config"
+          :events="events"
+          :onClick='(event) => console.log("onClick", event)'
+          :onDblClick='(event) => console.log("onDblClick", event)'
+          :onCellClick='(data) => console.log("onCellClick", data)'
+        />
+      </div>
+    </Story>
   </div>
 </template>

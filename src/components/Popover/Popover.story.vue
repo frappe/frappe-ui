@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import Popover from './Popover.vue'
-import { Button } from '../Button'
+import Popover from "./Popover.vue";
+import { Button } from "../Button";
+import Story from "../Story.vue";
 </script>
 
 <template>
-  <div class="space-y-4">
-    <div>
+  <div class="grid grid-cols-2 gap-4">
+    <Story title="Trigger: Click">
       <Popover>
         <template #target="{ togglePopover }">
           <Button @click="togglePopover()">Click me</Button>
@@ -14,9 +15,9 @@ import { Button } from '../Button'
           <div class="p-2 text-ink-gray-9">Popover content</div>
         </template>
       </Popover>
-    </div>
+    </Story>
 
-    <div>
+    <Story title="Trigger: Hover">
       <Popover trigger="hover" :hover-delay="0.5">
         <template #target>
           <Button>Hover me</Button>
@@ -25,6 +26,6 @@ import { Button } from '../Button'
           <div class="p-2 text-ink-gray-9">Popover content</div>
         </template>
       </Popover>
-    </div>
+    </Story>
   </div>
 </template>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { reactive } from 'vue'
 import Tabs from './Tabs.vue'
+import Story from '../Story.vue'
 import LucideGithub from "~icons/lucide/github";
 import LucideTwitter from "~icons/lucide/twitter";
 import LucideLinkedin from "~icons/lucide/linkedin";
@@ -49,8 +50,8 @@ const state = reactive({
 </script>
 
 <template>
-  <div class="grid gap-6 w-4/5">
-    <div>
+  <div class="grid gap-5">
+    <Story title="Tabs without icons" >
       <Tabs
         class="border rounded"
         v-model="state.index"
@@ -60,9 +61,9 @@ const state = reactive({
           <div class="p-5">{{ tab.content }}</div>
         </template>
       </Tabs>
-    </div>
+    </Story>
 
-    <div>
+    <Story title="Tabs with icons">
       <Tabs
         class="border rounded"
         v-model="state.index"
@@ -72,9 +73,9 @@ const state = reactive({
           <div class="p-5">{{ tab.content }}</div>
         </template>
       </Tabs>
-    </div>
+    </Story>
 
-    <div>
+    <Story title="Vertical tabs with icons">
       <Tabs
         class="border rounded"
         v-model="state.index"
@@ -85,6 +86,6 @@ const state = reactive({
           <div class="p-5">{{ tab.content }}</div>
         </template>
       </Tabs>
-    </div>
+    </Story>
   </div>
 </template>

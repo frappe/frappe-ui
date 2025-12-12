@@ -1,23 +1,23 @@
 <script setup lang="ts">
-import { reactive } from 'vue'
-import Textarea from './Textarea.vue'
+import { reactive } from "vue";
+import Textarea from "./Textarea.vue";
+import Story from "../Story.vue";
 
 const state = reactive({
-  size: 'sm',
-  placeholder: 'Placeholder',
+  size: "sm",
+  placeholder: "Placeholder",
   disabled: false,
-  modelValue: '',
-  label: 'Label',
-})
+  modelValue: "",
+  label: "Label",
+});
 
-const sizes = ['sm', 'md', 'lg', 'xl']
-const variants = ['subtle', 'outline']
+const variants = ["subtle", "outline"];
 </script>
 
 <template>
-  <div class="grid gap-4 w-[500px]">
-    <div v-for="type in variants" :key="type">
+  <div class="grid gap-4 grid-cols-2">
+    <Story v-for="type in variants" :key="type" :title="`Variant: ${type}`">
       <Textarea :variant="type" v-bind="state" />
-    </div>
+    </Story>
   </div>
 </template>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { reactive } from 'vue'
 import Sidebar from './Sidebar.vue'
+import Story from '../Story.vue'
 
 import Notifications from '~icons/lucide/bell'
 import Deals from '~icons/lucide/briefcase'
@@ -68,7 +69,11 @@ const crmSidebar = reactive({
 </script>
 
 <template>
-  <div class="flex h-screen w-full flex-col bg-surface-white shadow">
-    <Sidebar :header="crmSidebar.header" :sections="crmSidebar.sections" />
+  <div class="grid gap-4">
+    <Story title="CRM Sidebar" preview-css='!p-0 !border-0'>
+      <div class="flex h-screen w-full flex-col bg-surface-white shadow">
+        <Sidebar :header="crmSidebar.header" :sections="crmSidebar.sections" />
+      </div>
+    </Story>
   </div>
 </template>

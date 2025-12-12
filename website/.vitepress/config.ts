@@ -63,8 +63,8 @@ export default defineConfig({
         collapsed: false,
         items: [
           { text: 'Resource', link: '/docs/resource' },
-          { text: 'List Resource', link: '/docs/listresource' },
-          { text: 'Form Resource', link: '/docs/formresource' },
+          { text: 'List Resource', link: '/docs/list-resource' },
+          { text: 'Document Resource', link: '/docs/document-resource' },
         ],
       },
 

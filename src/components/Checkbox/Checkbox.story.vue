@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { reactive } from "vue";
 import Checkbox from "./Checkbox.vue";
+import Story from "../Story.vue";
 
 const state = reactive({
   size: "sm",
@@ -12,6 +13,8 @@ const sizes = ["sm", "md"];
 
 <template>
   <div class="p-2">
-    <Checkbox v-bind="state" v-model="state.value" label="Enable feature" />
+    <Story>
+      <Checkbox v-bind="state" v-model="state.value" label="Enable feature" />
+    </Story>
   </div>
 </template>

@@ -4,6 +4,7 @@ import DonutChart from "./DonutChart.vue";
 import FunnelChart from "./FunnelChart.vue";
 import NumberChart from "./NumberChart.vue";
 import { AxisChartConfig, DonutChartConfig } from "./types";
+import Story from "../Story.vue";
 
 const salesData = [
   { month: new Date("2021-01-01"), sales: 200, profit: 50, returns: 20 },
@@ -189,19 +190,39 @@ const funnelConfig = {
 </script>
 
 <template>
-  <div class="grid gap-12 max-w-5xl">
-    <div class="flex gap-4">
+  <div class="grid gap-12">
+    <Story title="Number Chart" preview-css="flex gap-3">
       <NumberChart :config="numberChart1Config" />
       <NumberChart :config="numberChart2Config" />
       <NumberChart :config="numberChart3Config" />
-    </div>
+    </Story>
 
-    <AxisChart :config="simpleConfig" />
-    <AxisChart :config="stackedConfig" />
-    <AxisChart :config="comboConfig" />
-    <AxisChart :config="horizontalConfig" />
-    <AxisChart :config="areaConfig" />
-    <DonutChart :config="donutConfig" />
-    <FunnelChart :config="funnelConfig" />
+    <Story title="Simple Bar Chart">
+      <AxisChart :config="simpleConfig" />
+    </Story>
+
+    <Story title="Stacked Bar Chart">
+      <AxisChart :config="stackedConfig" />
+    </Story>
+
+    <Story title="Bar & Line Combo">
+      <AxisChart :config="comboConfig" />
+    </Story>
+
+    <Story title="Horizontal Bar Chart">
+      <AxisChart :config="horizontalConfig" />
+    </Story>
+
+    <Story title="Area Chart">
+      <AxisChart :config="areaConfig" />
+    </Story>
+
+    <Story title="Donut Chart">
+      <DonutChart :config="donutConfig" />
+    </Story>
+
+    <Story title="Funnel Chart">
+      <FunnelChart :config="funnelConfig" />
+    </Story>
   </div>
 </template>

@@ -2,7 +2,6 @@
 import { reactive } from "vue";
 import Button from "./Button.vue";
 import Story from "../Story.vue";
-import LucideBell from "~icons/lucide/bell-ring";
 
 const state = reactive({
   theme: "gray",

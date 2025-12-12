@@ -1,35 +1,44 @@
 <script setup lang="ts">
-import FileUploader from './FileUploader.vue'
-import { Button } from '../Button'
+import Story from "../Story.vue";
+import FileUploader from "./FileUploader.vue";
+import { Button } from "../Button";
 
-const validateFileFunction = (fileObject) => {}
-const onSuccess = (file) => {}
+const validateFileFunction = (fileObject: File) => {};
+const onSuccess = (file: File) => {};
 </script>
 
 <template>
-  <div class="grid gap-5" style="width: 500px">
-    <FileUploader
-      :fileTypes="['image/*']"
-      :validateFile="validateFileFunction"
-      @success="onSuccess"
-    >
-      <template
-        v-slot="{
-          file,
-          uploading,
-          progress,
-          uploaded,
-          message,
-          error,
-          total,
-          success,
-          openFileSelector,
-        }"
+  <div class="grid grid-cols-1 gap-4">
+    <Story :layout='{ width: 500, type: "grid" }'>
+      <FileUploader
+        :fileTypes='["image/*"]'
+        :validateFile="validateFileFunction"
+        @success="onSuccess"
       >
-        <Button @click="openFileSelector" :loading="uploading">
-          {{ uploading ? `Uploading ${progress}%` : 'Upload Image' }}
-        </Button>
-      </template>
-    </FileUploader>
+        <template
+          v-slot="
+            {
+              file,
+              uploading,
+              progress,
+              uploaded,
+              message,
+              error,
+              total,
+              success,
+              openFileSelector,
+            }
+          "
+        >
+          <Button @click="openFileSelector" :loading="uploading">
+            {{
+              uploading
+                ? `Uploading ${progress}%`
+                : "Upload Image"
+            }}
+          </Button>
+        </template>
+      </FileUploader>
+    </Story>
   </div>
 </template>

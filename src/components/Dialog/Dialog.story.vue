@@ -1,5 +1,7 @@
+
 <script setup lang="ts">
 import { ref } from 'vue'
+import Story from '../Story.vue'
 import Dialog from './Dialog.vue'
 import { Button } from '../Button'
 import { Dropdown } from '../Dropdown'
@@ -34,8 +36,8 @@ const createPromise = (): Promise<void> => new Promise((resolve) => setTimeout(r
 </script>
 
 <template>
-  <div class="grid gap-5">
-    <div>
+  <div class="grid gap-5 grid-cols-2">
+    <Story title="Confirmation Dialog">
       <Button @click="dialog1 = true">Show Confirmation Dialog</Button>
       <Dialog
         :options="{
@@ -47,9 +49,9 @@ const createPromise = (): Promise<void> => new Promise((resolve) => setTimeout(r
         }"
         v-model="dialog1"
       />
-    </div>
+    </Story>
 
-    <div>
+    <Story title="Custom Dialog">
       <Button @click="dialog2 = true">Show Custom Dialog</Button>
       <Dialog v-model="dialog2">
         <template #body-title>
@@ -70,11 +72,13 @@ const createPromise = (): Promise<void> => new Promise((resolve) => setTimeout(r
           </div>
         </template>
       </Dialog>
-    </div>
+    </Story>
 
-    <div class="space-x-2">
-      <Button @click="dialog3 = true">Small Dialog</Button>
-      <Button @click="dialog4 = true">Large Dialog</Button>
+    <Story title="Small and Large Dialogs">
+      <div class="space-x-2">
+        <Button @click="dialog3 = true">Small Dialog</Button>
+        <Button @click="dialog4 = true">Large Dialog</Button>
+      </div>
       <Dialog
         :options="{ title: 'Small Dialog', message: 'This is a small dialog.', size: 'sm', actions: [{ label: 'OK', variant: 'solid' }] }"
         v-model="dialog3"
@@ -83,18 +87,18 @@ const createPromise = (): Promise<void> => new Promise((resolve) => setTimeout(r
         :options="{ title: 'Large Dialog', message: 'This is a large dialog with more space for content.', size: '4xl', actions: [{ label: 'OK', variant: 'solid' }] }"
         v-model="dialog4"
       />
-    </div>
+    </Story>
 
-    <div>
+    <Story title="Modal Dialog">
       <Button @click="dialog5 = true">Show Modal Dialog</Button>
       <Dialog
         :options="{ title: 'Modal Dialog', message: 'This dialog cannot be closed by clicking outside. Use the buttons or ESC key.', actions: [{ label: 'Close', variant: 'solid' }] }"
         :disable-outside-click-to-close="true"
         v-model="dialog5"
       />
-    </div>
+    </Story>
 
-    <div>
+    <Story title="Settings Dialog">
       <Button @click="dialog6 = true">Show Settings Dialog</Button>
       <Dialog v-model="dialog6">
         <template #body-title>
@@ -113,7 +117,6 @@ const createPromise = (): Promise<void> => new Promise((resolve) => setTimeout(r
               v-model="autocompleteValue"
             />
             <div class="space-y-3">
-              <label class="block text-sm font-medium text-gray-700">Select an option:</label>
               <Dropdown :options="dropdownOptions" placement="left">
                 <Button variant="outline">
                   {{ selectedOption }}
@@ -136,6 +139,6 @@ const createPromise = (): Promise<void> => new Promise((resolve) => setTimeout(r
           </div>
         </template>
       </Dialog>
-    </div>
+    </Story>
   </div>
 </template>

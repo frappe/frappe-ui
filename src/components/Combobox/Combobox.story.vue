@@ -5,6 +5,7 @@ import LucidePlus from '~icons/lucide/plus'
 import LucideSearch from '~icons/lucide/search'
 import LucideSettings from '~icons/lucide/settings'
 import { Avatar } from '../Avatar'
+import Story from '../Story.vue'
 
 const simpleValue = ref('')
 const objectValue = ref('')
@@ -157,9 +158,8 @@ const state = reactive({
 </script>
 
 <template>
-  <div class="grid gap-6">
-    <div class="p-4">
-      <label class="block text-sm font-medium mb-2">Simple Options</label>
+  <div class="grid gap-5 grid-cols-2">
+    <Story title="Simple Options" preview-css="p-4">
       <Combobox
         :options="simpleOptions"
         v-model="simpleValue"
@@ -171,10 +171,9 @@ const state = reactive({
       <div class="mt-2 text-sm text-gray-600">
         Selected: {{ simpleValue || 'None' }}
       </div>
-    </div>
+    </Story>
 
-    <div class="p-4">
-      <label class="block text-sm font-medium mb-2">Outline variant</label>
+    <Story title="Outline Variant" preview-css="p-4">
       <Combobox
         variant="outline"
         :options="simpleOptions"
@@ -187,10 +186,9 @@ const state = reactive({
       <div class="mt-2 text-sm text-gray-600">
         Selected: {{ simpleValue || 'None' }}
       </div>
-    </div>
+    </Story>
 
-    <div class="p-4">
-      <label class="block text-sm font-medium mb-2">Object Options</label>
+    <Story title="Object Options" preview-css="p-4">
       <Combobox
         :options="objectOptions"
         v-model="objectValue"
@@ -201,10 +199,9 @@ const state = reactive({
       <div class="mt-2 text-sm text-gray-600">
         Selected: {{ objectValue || 'None' }}
       </div>
-    </div>
+    </Story>
 
-    <div class="p-4">
-      <label class="block text-sm font-medium mb-2">Options with Icons</label>
+    <Story title="Options with Icons" preview-css="p-4">
       <Combobox
         :options="optionsWithIcons"
         v-model="iconValue"
@@ -214,10 +211,9 @@ const state = reactive({
       <div class="mt-2 text-sm text-gray-600">
         Selected: {{ iconValue || 'None' }}
       </div>
-    </div>
+    </Story>
 
-    <div class="p-4">
-      <label class="block text-sm font-medium mb-2">Grouped Options</label>
+    <Story title="Grouped Options" preview-css="p-4">
       <Combobox
         :options="groupedOptions"
         v-model="groupedValue"
@@ -227,20 +223,18 @@ const state = reactive({
       <div class="mt-2 text-sm text-gray-600">
         Selected: {{ groupedValue || 'None' }}
       </div>
-    </div>
+    </Story>
 
-    <div class="p-4">
-      <label class="block text-sm font-medium mb-2">Disabled Combobox</label>
+    <Story title="Disabled Combobox" preview-css="p-4">
       <Combobox
         :options="simpleOptions"
         v-model="disabledValue"
         placeholder="This is disabled"
         :disabled="true"
       />
-    </div>
+    </Story>
 
-    <div class="p-4">
-      <label class="block text-sm font-medium mb-2">Pre-selected Value</label>
+    <Story title="Pre-selected Value" preview-css="p-4">
       <Combobox
         :options="objectOptions"
         v-model="preselectedValue"
@@ -250,10 +244,9 @@ const state = reactive({
       <div class="mt-2 text-sm text-gray-600">
         Selected: {{ preselectedValue || 'None' }}
       </div>
-    </div>
+    </Story>
 
-    <div class="p-4">
-      <label class="block text-sm font-medium mb-2">Custom Options</label>
+    <Story title="Custom Options with onClick" preview-css="p-4">
       <Combobox
         :options="customOptions"
         v-model="customOptionValue"
@@ -267,12 +260,9 @@ const state = reactive({
       <div class="mt-2 text-xs text-gray-500">
         Try typing 'new' or 'create' to see custom options
       </div>
-    </div>
+    </Story>
 
-    <div class="p-4">
-      <label class="block text-sm font-medium mb-2">
-        Custom Render Options
-      </label>
+    <Story title="Custom Options with Render Function" preview-css="p-4">
       <Combobox
         :options="customRenderOptions"
         v-model="customWithRenderValue"
@@ -282,12 +272,12 @@ const state = reactive({
       <div class="mt-2 text-sm text-gray-600">
         Selected: {{ customWithRenderValue || 'None' }}
       </div>
-    </div>
+      <div class="mt-2 text-xs text-gray-500">
+        Custom options with render functions and conditional display
+      </div>
+    </Story>
 
-    <div class="p-4">
-      <label class="block text-sm font-medium mb-2">
-        Custom Slot Options
-      </label>
+    <Story title="Custom Options with Slots" preview-css="p-4">
       <Combobox
         :options="customSlotOptions"
         v-model="customWithSlotValue"
@@ -308,6 +298,10 @@ const state = reactive({
       <div class="mt-2 text-sm text-gray-600">
         Selected: {{ customWithSlotValue || 'None' }}
       </div>
-    </div>
+      <div class="mt-2 text-xs text-gray-500">
+        Try typing 'setting' to see the settings option. Slots allow full template control.
+      </div>
+    </Story>
+
   </div>
 </template>

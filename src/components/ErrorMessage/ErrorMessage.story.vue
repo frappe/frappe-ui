@@ -1,28 +1,44 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import ErrorMessage from './ErrorMessage.vue'
+import Story from "../Story.vue";
+import ErrorMessage from "./ErrorMessage.vue";
+import { ref } from "vue";
 
-const message = ref('Invalid value')
-const error = new Error('There was an error')
+const message = ref("Invalid value");
+const error = new Error("There was an error");
 </script>
 
 <template>
-  <Story :layout="{ width: 500, type: 'grid' }" autoPropsDisabled>
-    <Variant title="String message">
+  <div class="grid grid-cols-2 gap-4">
+    <Story
+      title="String message"
+      :layout='{ width: 500, type: "grid" }'
+      autoPropsDisabled
+    >
       <ErrorMessage :message="message" />
-    </Variant>
+    </Story>
 
-    <Variant title="Error object">
-      <ErrorMessage :message="error" />
-      <template #source>
-        <textarea v-pre>
-          <ErrorMessage :message="Error('There was an error')" />
-        </textarea>
-      </template>
-    </Variant>
+    <Story
+      title="Error object"
+      :layout='{ width: 500, type: "grid" }'
+      autoPropsDisabled
+    >
+      <ErrorMessage :message="error">
+        <template #source>
+          <textarea
+            v-pre
+          >
+            <ErrorMessage :message="Error('There was an error')" />
+          </textarea>
+        </template>
+      </ErrorMessage>
+    </Story>
 
-    <Variant title="Falsy value">
+    <Story
+      title="Falsy value"
+      :layout='{ width: 500, type: "grid" }'
+      autoPropsDisabled
+    >
       <ErrorMessage message="" />
-    </Variant>
-  </Story>
+    </Story>
+  </div>
 </template>

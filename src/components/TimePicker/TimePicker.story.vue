@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
 import TimePicker from './TimePicker.vue'
+import Story from '../Story.vue'
 import type { Placement, Variant } from './types'
 
 const valueBasic = ref('')
@@ -17,64 +18,34 @@ const customOptions = [
   { value: '13:45' },
 ]
 
-const placements: Placement[] = [
-  'bottom-start',
-  'bottom-end',
-  'top-start',
-  'top-end',
-  'right-start',
-  'right-end',
-  'left-start',
-  'left-end',
-]
-
-const scrollModes = ['center', 'start', 'nearest'] as const
-
-interface StoryState {
-  variant: Variant
-  interval: number
-  allowCustom: boolean
-  autoClose: boolean
-  use12Hour: boolean
-  placement: Placement
-  placeholder: string
-  disabled: boolean
-  minTime: string
-  maxTime: string
-  scrollMode: 'center' | 'start' | 'nearest'
-}
-
-const state = reactive<StoryState>({
-  variant: 'subtle',
+const state = reactive({
+  variant: 'subtle' as Variant,
   interval: 15,
   allowCustom: true,
   autoClose: true,
   use12Hour: true,
-  placement: 'bottom-start',
+  placement: 'bottom-start' as Placement,
   placeholder: 'Select time',
   disabled: false,
   minTime: '',
   maxTime: '',
-  scrollMode: 'center',
+  scrollMode: 'center' as 'center' | 'start' | 'nearest',
 })
 </script>
 
 <template>
-  <div class="space-y-4 max-w-sm">
-    <div class="space-y-1">
-      <label>Basic</label>
+  <div class="grid gap-4 grid-cols-2">
+    <Story title="Basic">
       <TimePicker v-model="valueBasic" v-bind="state" />
       <div class="text-xs text-gray-500">Value: {{ valueBasic || '—' }}</div>
-    </div>
+    </Story>
 
-    <div class="space-y-1">
-      <label>24 Hour Format</label>
+    <Story title="24 Hour Format">
       <TimePicker v-model="value24" v-bind="{ ...state, use12Hour: false }" />
       <div class="text-xs text-gray-500">Value: {{ value24 }}</div>
-    </div>
+    </Story>
 
-    <div class="space-y-1">
-      <label>Custom Options</label>
+    <Story title="Custom Options">
       <TimePicker
         v-model="valueCustomOpts"
         v-bind="state"
@@ -82,15 +53,14 @@ const state = reactive<StoryState>({
         :allowCustom="false"
       />
       <div class="text-xs text-gray-500">Value: {{ valueCustomOpts }}</div>
-    </div>
+    </Story>
 
-    <div class="space-y-1">
-      <label>Min / Max Range</label>
+    <Story title="Min / Max Range">
       <TimePicker
         v-model="valueRange"
         v-bind="{ ...state, minTime: '08:00', maxTime: '12:00' }"
       />
       <div class="text-xs text-gray-500">Value: {{ valueRange }}</div>
-    </div>
+    </Story>
   </div>
 </template>

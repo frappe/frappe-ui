@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { reactive } from "vue";
 import Switch from "./Switch.vue";
+import Story from "../Story.vue";
 
 const state = reactive({
   size: "sm",
@@ -12,32 +13,43 @@ const sizes = ["sm", "md"];
 </script>
 
 <template>
-  <div class="grid gap-6" style="width: 300px">
-    <Switch />
-    <Switch v-bind="state" />
-    <div class="flex flex-col gap-2">
+  <div class="grid grid-cols-2 gap-6">
+    <Story title="Default Switch">
+      <Switch />
+    </Story>
+
+    <Story title="Bound Switch">
+      <Switch v-bind="state" />
+    </Story>
+
+    <Story title="With Description">
       <Switch
         v-bind="state"
         description="Get notified when something happens."
       />
       <Switch v-bind="state" icon="inbox" description="This has an icon." />
-    </div>
-    <div class="flex flex-col gap-2">
+    </Story>
+
+    <Story title="Different Sizes">
       <Switch v-bind="state" size="sm" />
       <Switch v-bind="state" size="md" />
-    </div>
-    <div class="flex flex-col gap-2">
+    </Story>
+
+    <Story title="Disabled">
       <Switch v-bind="state" :disabled="true" />
       <Switch
         v-bind="state"
         description="This is a description."
         :disabled="true"
       />
-    </div>
-    <Switch
-      v-bind="state"
-      label-classes="font-normal"
-      description="This switch has a normal font."
-    />
+    </Story>
+
+    <Story title="Custom Label Font">
+      <Switch
+        v-bind="state"
+        label-classes="font-normal"
+        description="This switch has a normal font."
+      />
+    </Story>
   </div>
 </template>

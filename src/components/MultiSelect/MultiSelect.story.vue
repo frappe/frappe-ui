@@ -1,11 +1,11 @@
-
 <script setup lang="ts">
 import { ref } from "vue";
 import MultiSelect from "./MultiSelect.vue";
 import Avatar from "../Avatar/Avatar.vue";
-import { Button } from "../Button";
+import Button from "../Button/Button.vue";
 import LucideCheck from "~icons/lucide/check-check";
 import LucideTrash from "~icons/lucide/trash-2";
+import Story from "../Story.vue";
 
 const state = ref();
 
@@ -24,16 +24,16 @@ const options = [
 </script>
 
 <template>
-  <div class="grid gap-4 w-[500px]">
-    <div>
+  <div class="grid grid-cols-2 gap-4">
+    <Story title="Default MultiSelect">
       <MultiSelect
         :options="options"
         v-model="state"
         placeholder="Select fruit"
       />
-    </div>
+    </Story>
 
-    <div>
+    <Story title="MultiSelect with Option Slot">
       <MultiSelect
         :options="options"
         v-model="state"
@@ -44,9 +44,9 @@ const options = [
           {{ item.label }}
         </template>
       </MultiSelect>
-    </div>
+    </Story>
 
-    <div>
+    <Story title="MultiSelect with Footer Slot">
       <MultiSelect
         :options="options"
         v-model="state"
@@ -54,17 +54,21 @@ const options = [
         <template #footer="{ clearAll, selectAll }">
           <div class="flex justify-between my-2">
             <Button theme="red" @click="clearAll">
-              <template #prefix> <LucideTrash class="size-4" /></template>
+              <template #prefix>
+                <LucideTrash class="size-4" />
+              </template>
               Clear All
             </Button>
 
             <Button @click="selectAll">
-              <template #prefix><LucideCheck class="size-4" /></template>
+              <template #prefix>
+                <LucideCheck class="size-4" />
+              </template>
               Select All
             </Button>
           </div>
         </template>
       </MultiSelect>
-    </div>
+    </Story>
   </div>
 </template>
