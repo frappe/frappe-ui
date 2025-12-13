@@ -5,24 +5,18 @@ import LucidePreview from "~icons/lucide/square-mouse-pointer";
 import LucideCode from "~icons/lucide/code";
 
 interface ComponentPreviewProps {
-  code: string;
-  hlcode: string;
+  name: string;
   title?: string;
   description?: string;
 }
 
 const props = defineProps<ComponentPreviewProps>();
-
 const state = ref(0);
+
 const tabs = [
   { label: "Preview", icon: LucidePreview },
   { label: "Code", icon: LucideCode },
 ];
-
-const code = ref(decodeURIComponent(props.code));
-const highlightedCode = ref(decodeURIComponent(props.hlcode));
-
-console.log(highlightedCode.value)
 </script>
 
 <template>
@@ -37,12 +31,7 @@ console.log(highlightedCode.value)
           <slot />
         </div>
 
-        <div
-          v-else
-          v-html="highlightedCode"
-          class="border rounded mt-5 language-vue"
-        >
-        </div>
+        <slot v-else name="code" />
       </template>
     </Tabs>
   </div>
