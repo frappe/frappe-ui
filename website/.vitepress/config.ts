@@ -2,6 +2,8 @@ import { defineConfig } from 'vitepress'
 import { lucideIcons } from '../../vite/lucideIcons'
 import fs from 'fs'
 import path from 'path'
+import tailwind from 'tailwindcss'
+import autoprefixer from 'autoprefixer'
 
 // import { componentPreview } from '@vitepress-demo-preview/plugin'
 
@@ -30,12 +32,25 @@ export default defineConfig({
       md.use(componentPreview)
     },
   },
+  cleanUrls: true,
+  appearance: 'dark',
   vite: {
     plugins: [lucideIcons()],
     resolve: {
       alias,
     },
+
+    build: {
+      chunkSizeWarningLimit: 1000,
+    },
   },
+
+  css: {
+    postcss: {
+      plugins: [tailwind(), autoprefixer()],
+    },
+  },
+
   themeConfig: {
     search: { provider: 'local' },
     nav: [

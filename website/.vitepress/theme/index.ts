@@ -7,7 +7,7 @@ import './style.css'
 import Demo from '../components/Demo.vue'
 
 export default {
-  extends: DefaultTheme,
+  // extends: DefaultTheme,
   Layout: () => {
     return h(Layout, null, {
       // https://vitepress.dev/guide/extending-default-theme#layout-slots
