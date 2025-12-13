@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useData } from "vitepress";
 import DefaultTheme from "vitepress/theme";
-import { onMounted, provide } from "vue";
+import { onBeforeMount, provide } from "vue";
 
 const { isDark } = useData();
 
@@ -11,7 +11,7 @@ function applyTheme() {
   localStorage.setItem("theme", theme);
 }
 
-onMounted(() => {
+onBeforeMount(() => {
   const saved = localStorage.getItem("theme");
   if (saved) {
     isDark.value = saved === "dark";
