@@ -3,7 +3,7 @@ import { useData } from "vitepress";
 import DefaultTheme from "vitepress/theme";
 import { onBeforeMount, provide } from "vue";
 
-const { isDark } = useData();
+const { isDark, page, frontmatter } = useData();
 
 function applyTheme() {
   const theme = isDark.value ? "dark" : "light";

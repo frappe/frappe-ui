@@ -1,11 +1,10 @@
 import { defineConfig } from 'vitepress'
 import { lucideIcons } from '../../vite/lucideIcons'
-import fs from 'fs'
 import path from 'path'
 import tailwind from 'tailwindcss'
 import autoprefixer from 'autoprefixer'
-
-// import { componentPreview } from '@vitepress-demo-preview/plugin'
+import sidebarConfig from './sidebar'
+import { meta } from './meta'
 
 import componentPreview from './plugins/componentPreview'
 
@@ -14,19 +13,13 @@ const alias = {
   '@/demos': path.resolve(__dirname, '../../src/components/'),
 }
 
-function getComponentList() {
-  const componentsPath = path.resolve(__dirname, '../../src/components')
-  return fs
-    .readdirSync(componentsPath, { withFileTypes: true })
-    .filter((d) => d.isDirectory())
-    .map((d) => ({
-      text: d.name,
-      link: `/docs/${d.name.toLowerCase()}`,
-    }))
-}
-
 export default defineConfig({
+  title: meta.name,
+  description: meta.description,
+  titleTemplate: meta.name,
+
   markdown: {
+    theme: 'github-dark',
     // lineNumbers: true,
     config(md) {
       md.use(componentPreview)
@@ -43,62 +36,25 @@ export default defineConfig({
     build: {
       chunkSizeWarningLimit: 1000,
     },
-  },
 
-  css: {
-    postcss: {
-      plugins: [tailwind(), autoprefixer()],
+    css: {
+      postcss: {
+        plugins: [tailwind(), autoprefixer()],
+      },
     },
   },
 
   themeConfig: {
+		logo: {
+			light: '/logo.svg',
+			dark: '/logo-dark.svg',
+		},
     search: { provider: 'local' },
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Docs', link: '/docs/badge' },
       { text: 'Examples', link: '/markdown-examples' },
     ],
-    sidebar: [
-      {
-        text: 'Introduction',
-        link: '/docs/introduction',
-      },
-
-      {
-        text: 'Getting Started',
-        link: '/docs/getting-started',
-      },
-
-      {
-        text: 'Design System',
-        items: [{ text: 'Tailwind', link: '/docs/tailwind' }],
-      },
-      {
-        text: 'Data Fetching',
-        collapsed: false,
-        items: [
-          { text: 'Resource', link: '/docs/resource' },
-          { text: 'List Resource', link: '/docs/list-resource' },
-          { text: 'Document Resource', link: '/docs/document-resource' },
-        ],
-      },
-
-      {
-        text: 'Components',
-        collapsed: false,
-        items: getComponentList(),
-      },
-
-      {
-        text: 'Other',
-        items: [
-          { text: 'Utilities', link: '/docs/utilities' },
-          { text: 'directives', link: '/docs/directives' },
-        ],
-      },
-    ],
-    socialLinks: [
-      { icon: 'github', link: 'https://github.com/vuejs/vitepress' },
-    ],
+    sidebar: sidebarConfig,
   },
 })

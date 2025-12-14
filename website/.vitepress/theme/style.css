@@ -2,8 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+  /* background-color: var(--surface-white); */
+  /* color: var(--ink-gray-9); */
+  /* font-family: Inter, sans-serif */
+}
+
+.iconlink {
+  display: inline-flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
 .shiki {
-  @apply max-h-[500px];
+  @apply max-h-[500px] border bg-surface-gray-4;
+  font-family: monospace;
+  font-size: 14px;
   /* Optional: Add scrollbar styling */
   /* &::-webkit-scrollbar { */
   /*   height: 6px; */
@@ -70,38 +84,6 @@
  * - `danger`: Used to show error, or dangerous message to the users. Used
  *   in custom container, badges, etc.
  * -------------------------------------------------------------------------- */
-
-:root {
-  --vp-c-bg: var(--surface-white);
-  --vp-c-bg-soft: var(--surface-white) --vp-c-bg-elv: var(--surface-white);
-  --vp-c-bg-alt: var(--surface-white);
-
-  --vp-c-default-1: var(--gray-900);
-  --vp-c-default-2: var(--gray-700);
-  --vp-c-default-3: var(--gray-500);
-  --vp-c-default-soft: var(--gray-100);
-
-  --vp-c-brand-1: var(--blue-700);
-  --vp-c-brand-2: var(--blue-600);
-  --vp-c-brand-3: var(--blue-500);
-  --vp-c-brand-soft: var(--blue-100);
-
-  --vp-c-tip-1: var(--blue-700);
-  --vp-c-tip-2: var(--blue-600);
-  --vp-c-tip-3: var(--blue-500);
-  --vp-c-tip-soft: var(--blue-100);
-
-  --vp-c-warning-1: var(--amber-700);
-  --vp-c-warning-2: var(--amber-500);
-  --vp-c-warning-3: var(--amber-400);
-  --vp-c-warning-soft: var(--amber-100);
-
-  --vp-c-danger-1: var(--red-700);
-  --vp-c-danger-2: var(--red-500);
-  --vp-c-danger-3: var(--red-400);
-  --vp-c-danger-soft: var(--red-100);
-
-}
 
 /* :root { */
 /*   --vp-layout-max-width: 1920px; */
