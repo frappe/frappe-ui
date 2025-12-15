@@ -1,8 +1,7 @@
 // theme/index.ts
 import { h } from 'vue'
 import type { Theme } from 'vitepress'
-// import DefaultTheme from 'vitepress/theme'
-import Layout from './Layout.vue'
+import DefaultTheme from 'vitepress/theme'
 import './style.css'
 import Demo from '../components/Demo.vue'
 
@@ -12,8 +11,11 @@ const storyModules = import.meta.glob(
 )
 
 export default {
+  extends: DefaultTheme,
   Layout: () => {
-    return h(Layout, null, {})
+    return h(DefaultTheme.Layout, null, {
+      // https://vitepress.dev/guide/extending-default-theme#layout-slots
+    })
   },
   enhanceApp({ app, router, siteData }) {
     app.component('ComponentPreview', Demo)

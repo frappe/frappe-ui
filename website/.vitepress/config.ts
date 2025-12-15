@@ -26,19 +26,40 @@ export default defineConfig({
     },
   },
   cleanUrls: true,
-  appearance: 'dark',
   vite: {
     plugins: [lucideIcons()],
     resolve: {
       alias,
     },
+    // css: {
+    //   postcss: {
+    //     plugins: [tailwind(), autoprefixer()],
+    //   },
+    // },
+  },
 
-    css: {
-      postcss: {
-        plugins: [tailwind(), autoprefixer()],
-      },
+  appearance: {
+    onChanged(isDark, defaultHandler, mode) {
+      document.documentElement.setAttribute(
+        'data-theme',
+        isDark ? 'dark' : 'light',
+      )
+      defaultHandler(mode)
     },
   },
+
+  head: [
+    [
+      'script',
+      {},
+      `;(() => {
+        const preference = localStorage.getItem('vitepress-theme-appearance') || 'auto'
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+        const isDark = preference === 'auto' ? prefersDark : preference === 'dark'
+        document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light')
+      })()`,
+    ],
+  ],
 
   themeConfig: {
     logo: {
