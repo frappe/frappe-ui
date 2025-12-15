@@ -33,10 +33,6 @@ export default defineConfig({
       alias,
     },
 
-    build: {
-      chunkSizeWarningLimit: 1000,
-    },
-
     css: {
       postcss: {
         plugins: [tailwind(), autoprefixer()],
@@ -45,16 +41,18 @@ export default defineConfig({
   },
 
   themeConfig: {
-		logo: {
-			light: '/logo.svg',
-			dark: '/logo-dark.svg',
-		},
+    logo: {
+      light: '/logo.svg',
+      dark: '/logo-dark.svg',
+    },
     search: { provider: 'local' },
     nav: [
-      { text: 'Home', link: '/' },
-      { text: 'Docs', link: '/docs/badge' },
+      { text: 'Docs', link: '/docs/introduction' },
       { text: 'Examples', link: '/markdown-examples' },
     ],
     sidebar: sidebarConfig,
+    socialLinks: [
+      { icon: 'github', link: 'https://github.com/frappe/frappe-ui' },
+    ],
   },
 })

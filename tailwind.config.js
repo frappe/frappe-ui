@@ -7,7 +7,7 @@ export default {
     './App.vue',
     './src/**/*.{vue,js,ts,jsx,tsx}',
     './website/**/*.{vue,js,ts,jsx,tsx}',
-		"./website/.vitepress/theme/*.{js,ts,vue}",
+    './website/.vitepress/**/*.{vue,js,ts,jsx,tsx}',
     './frappe/**/*.{vue,js,ts,jsx,tsx}',
   ],
   theme: {

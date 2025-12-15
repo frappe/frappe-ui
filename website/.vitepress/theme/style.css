@@ -18,17 +18,6 @@ body {
   @apply max-h-[500px] border bg-surface-gray-4;
   font-family: monospace;
   font-size: 14px;
-  /* Optional: Add scrollbar styling */
-  /* &::-webkit-scrollbar { */
-  /*   height: 6px; */
-  /* } */
-  /* &::-webkit-scrollbar-thumb { */
-  /*   @apply bg-gray-600 rounded; */
-  /* } */
-  /* &::-webkit-scrollbar-track { */
-  /*   @apply bg-gray-800; */
-  /* } */
-
   /* Style line numbers if enabled */
   .line-number {
     @apply text-gray-500 pr-3 select-none;
@@ -39,6 +28,15 @@ body {
     @apply bg-blue-900/30;
   }
 }
+
+@media (min-width: 960px) {
+    .VPDoc .content-container {
+        margin: 0 -32px !important;
+        max-width: none !important;
+    }
+}
+
+
 
 /**
  * Customize default theme styling by overriding CSS variables:
