@@ -1,3 +1,4 @@
+
 <script setup>
 const props = defineProps({
   data: {
@@ -8,21 +9,20 @@ const props = defineProps({
 </script>
 
 <template>
-  <div class="grid grid-cols-6 gap-4">
-    <div
-      class="grid gap-2"
-      v-for="color in data"
-      :key="color.name"
-    >
-      <div
-        class="rounded border-2 flex items-end p-10"
-        :style="{ borderColor: color.value }"
-      >
-      </div>
-      <span>
+  <div class="grid grid-cols-3 gap-5">
+    <template v-for="color in data" :key="color.name">
+      <h2 v-if="!color.value" class="capitalize col-span-full">
         {{ color.name }}
-      </span>
-      <span class="text-sm text-ink-gray-3"> {{ color.value }}</span>
-    </div>
+      </h2>
+
+      <div v-else class="grid gap-2">
+        <div
+          class="rounded border-2 flex items-end p-5"
+          :style="{ borderColor: color.value }"
+        ></div>
+        <span>{{ color.name }}</span>
+        <span class="text-sm text-ink-gray-3">{{ color.value }}</span>
+      </div>
+    </template>
   </div>
 </template>

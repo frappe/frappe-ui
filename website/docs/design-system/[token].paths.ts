@@ -42,15 +42,27 @@ const getTextColors = () => {
 
 const txtColors = getTextColors()
 
-const borderColors = Object.entries(designTokens.borderColor).flatMap(
-  ([name, value]) =>
-    typeof value === 'string'
-      ? [{ name, value }]
-      : Object.entries(value).map(([shade, hex]) => ({
-          name: `${name}-${shade}`,
-          value: hex,
-        })),
-)
+const getBorderColors = () => {
+  let colors: { name: string; value?: string }[] = []
+  const list = designTokens.borderColor.outline
+
+  for (const [key, value] of Object.entries(list)) {
+    const classname = `border-outline-${key}`
+
+    if (colors.length > 0) {
+      const lastcolor = colors.at(-1).name.split('-')[2]
+      const curColor = key.split('-')[0]
+      if (lastcolor !== curColor) colors.push({ name: curColor })
+    }
+
+    colors.push({ name: classname, value })
+  }
+
+  return colors
+}
+
+const borderColors = getBorderColors()
+
 
 const padding = Object.entries(designTokens.padding).map(([name, value]) => ({
   name,
