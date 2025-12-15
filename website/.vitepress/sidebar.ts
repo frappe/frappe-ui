@@ -30,77 +30,54 @@ export default [
 
   {
     text: 'Design System',
+    collapsed: true,
     items: [
       {
-        text: 'Tailwind',
-        collapsed: true,
-        items: [
-          {
-            text: withIcon('bgColor', 'Background Color'),
-            link: '/docs/design-system/bg-color',
-          },
-          {
-            text: withIcon('textColor', 'Text Color'),
-            link: '/docs/design-system/text-color',
-          },
-          {
-            text: withIcon('borderColor', 'Border Color'),
-            link: '/docs/design-system/border-color',
-          },
+        text: withIcon('bgColor', 'Background Color'),
+        link: '/docs/design-system/bg-color',
+      },
+      {
+        text: withIcon('textColor', 'Text Color'),
+        link: '/docs/design-system/text-color',
+      },
+      {
+        text: withIcon('borderColor', 'Border Color'),
+        link: '/docs/design-system/border-color',
+      },
 
-          {
-            text: withIcon('vector', 'Padding'),
-            link: '/docs/design-system/padding',
-          },
-          {
-            text: withIcon('frame', 'Margin'),
-            link: '/docs/design-system/margin',
-          },
+      {
+        text: withIcon('font', 'Font Size'),
+        link: '/docs/design-system/font-size',
+      },
+      {
+        text: withIcon('font', 'Font Weight'),
+        link: '/docs/design-system/font-weight',
+      },
+      {
+        text: withIcon('font', 'Font Family'),
+        link: '/docs/design-system/font-family',
+      },
 
-          {
-            text: withIcon('font', 'Font Size'),
-            link: '/docs/design-system/font-size',
-          },
-          {
-            text: withIcon('font', 'Font Weight'),
-            link: '/docs/design-system/font-weight',
-          },
-          {
-            text: withIcon('font', 'Font Family'),
-            link: '/docs/design-system/font-family',
-          },
+      {
+        text: withIcon('font', 'Letter Spacing'),
+        link: '/docs/design-system/letter-spacing',
+      },
+      {
+        text: withIcon('font', 'Line Height'),
+        link: '/docs/design-system/line-height',
+      },
 
-          {
-            text: withIcon('font', 'Letter Spacing'),
-            link: '/docs/design-system/letter-spacing',
-          },
-          {
-            text: withIcon('font', 'Line Height'),
-            link: '/docs/design-system/line-height',
-          },
-
-          {
-            text: withIcon('overlay', 'Drop Shadow'),
-            link: '/docs/design-system/drop-shadow',
-          },
-          {
-            text: withIcon('radius', 'Border Radius'),
-            link: '/docs/design-system/border-radius',
-          },
-          {
-            text: withIcon('squareDashed', 'Border Width'),
-            link: '/docs/design-system/border-width',
-          },
-
-          {
-            text: withIcon('movehoriz', 'Width'),
-            link: '/docs/design-system/width',
-          },
-          {
-            text: withIcon('moveup', 'Height'),
-            link: '/docs/design-system/height',
-          },
-        ],
+      {
+        text: withIcon('overlay', 'Drop Shadow'),
+        link: '/docs/design-system/drop-shadow',
+      },
+      {
+        text: withIcon('radius', 'Border Radius'),
+        link: '/docs/design-system/border-radius',
+      },
+      {
+        text: withIcon('squareDashed', 'Border Width'),
+        link: '/docs/design-system/border-width',
       },
     ],
   },

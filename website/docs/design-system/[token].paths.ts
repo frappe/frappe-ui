@@ -63,17 +63,6 @@ const getBorderColors = () => {
 
 const borderColors = getBorderColors()
 
-
-const padding = Object.entries(designTokens.padding).map(([name, value]) => ({
-  name,
-  value,
-}))
-
-const margin = Object.entries(designTokens.margin).map(([name, value]) => ({
-  name,
-  value,
-}))
-
 const fontSize = Object.entries(designTokens.fontSize).map(([name, value]) => ({
   name,
   value,
@@ -128,24 +117,12 @@ const borderWidth = Object.entries(designTokens.borderWidth).map(
   }),
 )
 
-const width = Object.entries(designTokens.width).map(([name, value]) => ({
-  name,
-  value,
-}))
-
-const height = Object.entries(designTokens.height).map(([name, value]) => ({
-  name,
-  value,
-}))
-
 export default {
   paths() {
     return [
       { params: { token: 'bg-color', data: bgColors } },
       { params: { token: 'text-color', data: txtColors } },
       { params: { token: 'border-color', data: borderColors } },
-      { params: { token: 'padding', data: padding } },
-      { params: { token: 'margin', data: margin } },
       { params: { token: 'font-size', data: fontSize } },
       { params: { token: 'font-weight', data: fontWeight } },
       { params: { token: 'font-family', data: fontFamily } },
@@ -154,8 +131,6 @@ export default {
       { params: { token: 'drop-shadow', data: dropShadow } },
       { params: { token: 'border-radius', data: borderRadius } },
       { params: { token: 'border-width', data: borderWidth } },
-      { params: { token: 'width', data: width } },
-      { params: { token: 'height', data: height } },
     ]
   },
 }
