@@ -128,12 +128,42 @@
             {{ button.label }}
           </span>
         </button>
-        <component
-          v-else-if="button && button.component"
-          :is="button.component || 'div'"
-          v-bind="{ editor }"
-        >
-          <template v-slot="componentSlotProps">
+
+        <Suspense v-else-if="button && button.component">
+          <component :is="button.component || 'div'" v-bind="{ editor }">
+            <template v-slot="componentSlotProps">
+              <button
+                class="flex rounded p-1 text-ink-gray-8 transition-colors"
+                :class="[
+                  button.isDisabled?.(editor) &&
+                    'opacity-50 pointer-events-none',
+                  button.isActive?.(editor) || componentSlotProps?.isActive
+                    ? 'bg-surface-gray-3'
+                    : 'hover:bg-surface-gray-2',
+                  button.class,
+                ]"
+                @click="
+                  componentSlotProps?.onClick
+                    ? componentSlotProps.onClick(button)
+                    : onButtonClick(button)
+                "
+                :title="button.label"
+              >
+                <component
+                  v-if="button.icon"
+                  :is="button.icon"
+                  class="h-4 w-4"
+                />
+                <span
+                  class="inline-block h-4 min-w-[1rem] text-sm leading-4"
+                  v-else
+                >
+                  {{ button.text }}
+                </span>
+              </button>
+            </template>
+          </component>
+          <template #fallback>
             <button
               class="flex rounded p-1 text-ink-gray-8 transition-colors"
               :class="[
@@ -157,9 +187,9 @@
               >
                 {{ button.text }}
               </span>
-            </button>
-          </template>
-        </component>
+            </button></template
+          >
+        </Suspense>
       </template>
     </div>
   </div>
