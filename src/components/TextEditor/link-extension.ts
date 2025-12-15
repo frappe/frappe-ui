@@ -2,7 +2,7 @@ import { createApp, h } from 'vue'
 import Link from '@tiptap/extension-link'
 import tippy, { type Instance as TippyInstance } from 'tippy.js'
 import { getMarkRange, Range, Editor } from '@tiptap/core'
-import { MarkType, Mark as ProseMirrorMark } from '@tiptap/pm/model'
+import { MarkType } from '@tiptap/pm/model'
 import { Plugin, PluginKey } from '@tiptap/pm/state'
 import LinkPopup from './LinkPopup.vue'
 import { linkPasteHandler } from './linkPasteHandler'
@@ -40,7 +40,6 @@ export const LinkExtension = Link.extend({
           const { doc } = state
 
           let range: Range | undefined = undefined
-          let mark: ProseMirrorMark | undefined = undefined
           let shouldDelayPopover = false
 
           // Check if cursor is within a link or if there's a selection
@@ -50,9 +49,6 @@ export const LinkExtension = Link.extend({
             const markRange = getMarkRange($pos, this.type)
             if (markRange) {
               range = markRange
-              const node = doc.nodeAt($pos.pos)
-              if(node) mark = node.marks.find((m) => m.type === this.type)
-
               // Select the link text
               editor
                 .chain()
@@ -66,16 +62,9 @@ export const LinkExtension = Link.extend({
           } else {
             // There is a selection
             range = { from, to }
-            // Check if the selection is already a link
-            mark = doc
-              .resolve(from)
-              .marks()
-              .find((m) => m.type === this.type)
           }
 
-          if (!range) return false
-
-          const existingHref = mark?.attrs.href || ''
+          const existingHref = this.editor.getAttributes('link').href || null
           const selectionFrom = range.from
           const selectionTo = range.to
 
@@ -157,8 +146,9 @@ export const LinkExtension = Link.extend({
             if (!this.editor.isActive('link')) return false
             event.preventDefault()
             if (event.metaKey) {
-              const url = event.target?.getAttribute('href')
+              const url = this.editor.getAttributes('link').href
               if (url) window.open(url, '_blank')
+              this.editor.commands.focus()
             } else {
               this.editor.commands.openLinkEditor()
             }
