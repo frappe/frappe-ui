@@ -15,7 +15,8 @@ body {
 }
 
 .shiki {
-  @apply max-h-[500px] border bg-surface-gray-4;
+  @apply max-h-[500px];
+
   font-family: monospace;
   font-size: 14px;
   /* Style line numbers if enabled */
@@ -28,15 +29,6 @@ body {
     @apply bg-blue-900/30;
   }
 }
-
-@media (min-width: 960px) {
-    .VPDoc .content-container {
-        margin: 0 -32px !important;
-        max-width: none !important;
-    }
-}
-
-
 
 /**
  * Customize default theme styling by overriding CSS variables:
@@ -83,21 +75,131 @@ body {
  *   in custom container, badges, etc.
  * -------------------------------------------------------------------------- */
 
-/* :root { */
-/*   --vp-layout-max-width: 1920px; */
-/* } */
-/**/
-/* .VPDoc:not(.has-sidebar) .container { */
-/*   max-width: 1584px !important; */
-/* } */
-/**/
-/* .VPDoc:not(.has-sidebar) .content { */
-/*   max-width: 1264px !important; */
-/* } */
-/**/
-/* .VPDoc.has-aside .content-container { */
-/*   max-width: 1168px !important; */
-/* } */
+:root {
+  --vp-c-gray-1: var(--gray-100);
+  --vp-c-gray-2: var(--gray-200);
+  --vp-c-gray-3: var(--gray-300);
+  --vp-c-gray-soft: var(--surface-gray-2);
+
+  --vp-c-brand-1: var(--ink-violet-1);
+  --vp-c-brand-2: var(--surface-violet);
+  --vp-c-brand-3: var(--surface-violet);
+  --vp-c-brand-soft: var(--surface-violet-2);
+
+  --vp-c-green-1: var(--green-600);
+  --vp-c-green-2: var(--green-500);
+  --vp-c-green-3: var(--green-400);
+  --vp-c-green-soft: var(--surface-green-1);
+
+  --vp-c-yellow-1: var(--amber-600);
+  --vp-c-yellow-2: var(--amber-500);
+  --vp-c-yellow-3: var(--amber-400);
+  --vp-c-yellow-soft: var(--surface-amber-1);
+
+  --vp-c-red-1: var(--red-600);
+  --vp-c-red-2: var(--red-500);
+  --vp-c-red-3: var(--red-400);
+  --vp-c-red-soft: var(--surface-red-1);
+
+  --vp-c-purple-1: var(--violet-600);
+  --vp-c-purple-2: var(--violet-500);
+  --vp-c-purple-3: var(--violet-400);
+  --vp-c-purple-soft: var(--surface-violet-1);
+}
+
+
+/**
+ * Colors: Background
+ *
+ * - `bg`: The bg color used for main screen.
+ *
+ * - `bg-alt`: The alternative bg color used in places such as "sidebar",
+ *   or "code block".
+ *
+ * - `bg-elv`: The elevated bg color. This is used at parts where it "floats",
+ *   such as "dialog".
+ *
+ * - `bg-soft`: The bg color to slightly distinguish some components from
+ *   the page. Used for things like "carbon ads" or "table".
+ * -------------------------------------------------------------------------- */
+
+:root {
+  --vp-c-bg: var(--surface-white);
+  --vp-c-bg-alt: var(--surface-gray-2);
+  --vp-c-bg-elv: var(--surface-modal);
+  --vp-c-bg-soft: var(--surface-gray-2);
+}
+
+[data-theme='dark'] {
+  --vp-c-bg-alt: var(--surface-gray-1);
+}
+
+/**
+ * Colors: Borders
+ *
+ * - `divider`: This is used for separators. This is used to divide sections
+ *   within the same components, such as having separator on "h2" heading.
+ *
+ * - `border`: This is designed for borders on interactive components.
+ *   For example this should be used for a button outline.
+ *
+ * - `gutter`: This is used to divide components in the page. For example
+ *   the header and the lest of the page.
+ * -------------------------------------------------------------------------- */
+
+:root {
+  --vp-c-border: var(--outline-gray-1);
+  --vp-c-divider: var(--outline-gray-1);
+  --vp-c-gutter: var(--outline-gray-1);
+}
+
+
+/**
+ * Colors: Text
+ *
+ * - `text-1`: Used for primary text.
+ *
+ * - `text-2`: Used for muted texts, such as "inactive menu" or "info texts".
+ *
+ * - `text-3`: Used for subtle texts, such as "placeholders" or "caret icon".
+ * -------------------------------------------------------------------------- */
+
+:root {
+  --vp-c-text-1: var(--ink-gray-9);
+  --vp-c-text-2: var(--ink-gray-7);
+  --vp-c-text-3: var(--ink-gray-5);
+}
+
+:root {
+	 --vp-sidebar-bg-color: var(--surface-white);
+  /* --vp-sidebar-bg-color: hsl(from var(--vp-c-bg) h s calc(l - 8%)); */
+}
+
+.VPSidebar {
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-gray-3) var(--surface-gray-1);
+}
+
+/* Chromium / Safari */
+.VPSidebar::-webkit-scrollbar {
+  width: 2px;
+}
+
+.VPSidebar::-webkit-scrollbar-track {
+  background: var(--surface-gray-1);
+}
+
+.VPSidebar::-webkit-scrollbar-thumb {
+  background-color: var(--surface-gray-3);
+  border-radius: 999px;
+}
+
+.VPSidebar::-webkit-scrollbar-thumb:hover {
+  background-color: var(--surface-gray-4);
+}
+
+
 
 /**
  * Component: Button
@@ -165,3 +267,6 @@ body {
 /* .DocSearch { */
 /*   --docsearch-primary-color: var(--vp-c-brand-1) !important; */
 /* } */
+
+
+
