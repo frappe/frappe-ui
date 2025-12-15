@@ -53,7 +53,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/frappe/frappe-ui.git"
+    "url": "git+https://github.com/frappe/frappe-ui.git"
   },
   "author": "Frappe Technologies Pvt. Ltd.",
   "license": "MIT",
