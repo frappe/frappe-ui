@@ -1,5 +1,5 @@
 <template>
-  <div class="inline-flex bg-surface-white px-1 py-1">
+  <div class="inline-flex bg-surface-white p-1">
     <div class="inline-flex items-center gap-1">
       <template
         v-for="(button, index) in buttons"
@@ -102,8 +102,9 @@
         </div>
         <button
           v-else-if="button && !button.component"
-          class="flex rounded p-1 text-ink-gray-8 transition-colors"
+          class="flex rounded text-ink-gray-8 transition-colors focus-within:ring-0"
           :class="[
+            buttons.length > 1 ? 'p-1' : 'p-1.5 border',
             button.isDisabled?.(editor) && 'opacity-50 pointer-events-none',
             button.isActive?.(editor)
               ? 'bg-surface-gray-3'
