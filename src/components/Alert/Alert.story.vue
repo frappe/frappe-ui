@@ -11,7 +11,7 @@ const themes = ["green", "yellow", "red", "blue"];
 </script>
 
 <template>
-  <div class="grid grid-cols-2 gap-5">
+  <div class="grid gap-5">
     <Story v-for="theme in themes" :title="theme">
       <Alert
         title="Source successfully added"
