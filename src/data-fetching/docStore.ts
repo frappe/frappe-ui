@@ -49,7 +49,11 @@ class DocStore {
     }
   }
 
-  getDoc(doctype: string, name: MaybeRefOrGetter<string>): Ref<Doc | null> {
+  getDoc(
+    doctype: string,
+    name: MaybeRefOrGetter<string>,
+    transform: (doc: Doc) => Doc,
+  ): Ref<Doc | null> {
     const nameStr = toValue(name)
     if (!doctype || !nameStr) {
       throw new Error('doctype and name are required')
@@ -58,15 +62,19 @@ class DocStore {
 
     if (!this.docs.has(key)) {
       this.docs.set(key, ref(null))
-      this.loadDoc(key, true)
+      this.loadDoc(key, true, transform)
     } else if (this.isStale(key)) {
-      this.loadDoc(key, false)
+      this.loadDoc(key, false, transform)
     }
 
     return this.docs.get(key)!
   }
 
-  private async loadDoc(key: DocKey, isFirstLoad: boolean) {
+  private async loadDoc(
+    key: DocKey,
+    isFirstLoad: boolean,
+    transform: (doc: Doc) => Doc,
+  ) {
     try {
       if (!isFirstLoad && this.isStale(key)) {
         await this.cleanup(key)
@@ -76,7 +84,11 @@ class DocStore {
       if (idbDoc) {
         const docRef = this.docs.get(key)
         if (docRef) {
-          docRef.value = idbDoc
+          if (transform) {
+            docRef.value = transform(idbDoc)
+          } else {
+            docRef.value = idbDoc
+          }
         }
         this.lastFetched.set(key, Date.now())
       }
