@@ -40,6 +40,8 @@ export default defineConfig({
 
   appearance: {
     onChanged(isDark, defaultHandler, mode) {
+      if (typeof document === 'undefined') return
+
       document.documentElement.setAttribute(
         'data-theme',
         isDark ? 'dark' : 'light',
