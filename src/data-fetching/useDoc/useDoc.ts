@@ -153,7 +153,7 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
     },
   })
 
-  let doc = docStore.getDoc(doctype, name) as Ref<TDoc | null>
+  let doc = docStore.getDoc(doctype, name, transform) as Ref<TDoc | null>
   if (doc.value && transform) {
     try {
       doc.value = transform(doc.value)
