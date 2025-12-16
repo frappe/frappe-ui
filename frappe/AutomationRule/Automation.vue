@@ -57,6 +57,7 @@ const dependencyLabel = computed(() => {
 })
 function handleSubmit(): void {
   console.log('Save automation')
+  console.log(state)
 }
 
 const state = reactive({

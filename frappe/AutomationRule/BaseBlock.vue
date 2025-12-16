@@ -6,8 +6,9 @@
     <!-- left side -->
     <div class="flex gap-2">
       <div class="flex items-center gap-2">
-        <component :is="icon" class="w-4 h-4" />
-        <p class="text-p-sm text-ink-gray-5">
+        <component :is="iconComponent" class="size-4" v-if="iconComponent" />
+        <div v-else class="size-4 abcd"></div>
+        <p class="text-p-sm text-ink-gray-5 text-[14px] w-[40px]">
           {{ title }}
         </p>
       </div>
@@ -19,15 +20,27 @@
 </template>
 
 <script setup lang="ts">
-import { computed, h, type Component } from 'vue'
+import { computed, type Component } from 'vue'
+import ActionIcon from '../Icons/ActionIcon.vue'
+import BellIcon from '../Icons/BellIcon.vue'
+import ConditionIcon from '../Icons/ConditionIcon.vue'
 import EventIcon from '../Icons/EventIcon.vue'
+import FilterIcon from '../Icons/FilterIcon.vue'
 import ScopeIcon from '../Icons/ScopeIcon.vue'
 import TimerIcon from '../Icons/TimerIcon.vue'
 
 const props = withDefaults(
   defineProps<{
     title: string
-    icon: string
+    icon:
+      | 'scope'
+      | 'timer'
+      | 'event'
+      | 'condition'
+      | 'action'
+      | 'notification'
+      | 'filter'
+      | ''
     rounded?: 'all' | 'top' | 'bottom' | 'none'
     indent?: boolean
   }>(),
@@ -51,17 +64,15 @@ const iconMap: Record<string, Component> = {
   scope: ScopeIcon,
   timer: TimerIcon,
   event: EventIcon,
-  // "new": () => import('../../assets/icons/new.vue'),
-  // "update": () => import('../../assets/icons/update.vue'),
-  // "filter": () => import('../../assets/icons/filter.vue'),
-  // "condition": () => import('../../assets/icons/condition.vue'),
-  // "action": () => import('../../assets/icons/action.vue'),
-  // "notification": () => import('../../assets/icons/notification.vue'),
+  condition: ConditionIcon,
+  action: ActionIcon,
+  notification: BellIcon,
+  filter: FilterIcon,
 }
 
-const icon = (): Component => {
-  return h(iconMap[props.icon] || ScopeIcon)
-}
+const iconComponent = computed<Component | null>(() => {
+  return iconMap[props.icon] || null
+})
 </script>
 
 <style scoped></style>
