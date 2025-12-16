@@ -50,6 +50,7 @@ declare module 'frappe-ui/frappe' {
   //   Components
   export const Link: Component
   export type { LinkProps } from './Link/types'
+  export const AutomationRule: Component
 }
 
 // Data Import

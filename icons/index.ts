@@ -3,6 +3,7 @@ export { default as DownSolidIcon } from './DownSolidIcon.vue'
 export { default as GreenCheckIcon } from './GreenCheckIcon.vue'
 
 // Frappe Icons
+export { default as AutomationIcon } from './AutomationIcon.vue'
 export { default as HelpIcon } from './HelpIcon.vue'
 export { default as LightningIcon } from './LightningIcon.vue'
 export { default as MaximizeIcon } from './MaximizeIcon.vue'
