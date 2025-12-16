@@ -6,3 +6,5 @@
 <br/>
 
 <ComponentPreview name="Tree"  />
+
+<!-- @include: ../../meta/Tree.md -->

@@ -6,3 +6,5 @@
 <br/>
 
 <ComponentPreview name="TimePicker"  />
+
+<!-- @include: ../../meta/TimePicker.md -->

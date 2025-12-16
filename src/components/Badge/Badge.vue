@@ -40,10 +40,10 @@ const classes = computed(() => {
 
   let subtleClasses = {
     gray: 'text-ink-gray-6 bg-surface-gray-2',
-    blue: 'text-ink-blue-2 bg-surface-blue-1',
+    blue: 'text-ink-blue-2 bg-surface-blue-2',
     green: 'text-ink-green-3 bg-surface-green-2',
     orange: 'text-ink-amber-3 bg-surface-amber-1',
-    red: 'text-ink-red-4 bg-surface-red-1',
+    red: 'text-ink-red-4 bg-surface-red-2',
   }[props.theme]
 
   let outlineClasses = {
@@ -73,6 +73,7 @@ const classes = computed(() => {
     sm: 'h-4 text-xs px-1.5',
     md: 'h-5 text-xs px-1.5',
     lg: 'h-6 text-sm px-2',
+		xl: 'h-7 text-base px-2',
   }[props.size]
 
   return [variantClasses, sizeClasses]

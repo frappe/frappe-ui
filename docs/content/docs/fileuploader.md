@@ -6,3 +6,5 @@
 <br/>
 
 <ComponentPreview name="FileUploader"  />
+
+<!-- @include: ../../meta/FileUploader.md -->

@@ -6,3 +6,5 @@
 <br/>
 
 <ComponentPreview name="Tooltip"  />
+
+<!-- @include: ../../meta/Tooltip.md -->

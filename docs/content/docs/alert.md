@@ -5,3 +5,5 @@
 <br/>
 
 <ComponentPreview name="Alert"  />
+
+<!-- @include: ../../meta/Alert.md -->

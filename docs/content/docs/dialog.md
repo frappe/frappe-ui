@@ -7,3 +7,5 @@
 
 <ComponentPreview name='Dialog' />
 
+<!-- @include: ../../meta/Dialog.md -->
+

@@ -6,3 +6,5 @@
 <br/>
 
 <ComponentPreview name="Breadcrumbs"  />
+
+<!-- @include: ../../meta/Breadcrumbs.md -->

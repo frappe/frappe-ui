@@ -6,3 +6,5 @@
 <br/>
 
 <ComponentPreview name='Checkbox'  />
+
+<!-- @include: ../../meta/Checkbox.md -->

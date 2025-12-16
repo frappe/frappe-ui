@@ -6,3 +6,5 @@
 <br/>
 
 <ComponentPreview name='DatePicker' />
+
+<!-- @include: ../../meta/DatePicker.md -->

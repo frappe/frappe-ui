@@ -6,3 +6,5 @@
 <br/>
 
 <ComponentPreview name="Progress"  />
+
+<!-- @include: ../../meta/Progress.md -->

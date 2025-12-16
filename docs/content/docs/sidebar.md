@@ -6,3 +6,5 @@
 <br/>
 
 <ComponentPreview name="Sidebar"  />
+
+<!-- @include: ../../meta/Sidebar.md -->

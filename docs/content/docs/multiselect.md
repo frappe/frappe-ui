@@ -6,3 +6,5 @@
 <br/>
 
 <ComponentPreview name="MultiSelect"  />
+
+<!-- @include: ../../meta/MultiSelect.md -->

@@ -6,3 +6,5 @@
 <br/>
 
 <ComponentPreview name="Textarea"  />
+
+<!-- @include: ../../meta/Textarea.md -->

@@ -6,3 +6,5 @@
 <br/>
 
 <ComponentPreview name="Badge" />
+
+<!-- @include: ../../meta/Badge.md -->

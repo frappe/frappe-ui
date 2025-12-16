@@ -6,4 +6,3 @@
 <br/>
 
 <ComponentPreview name="Calendar" csr="true"  />
-

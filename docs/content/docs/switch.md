@@ -6,3 +6,5 @@
 <br/>
 
 <ComponentPreview name="Switch"  />
+
+<!-- @include: ../../meta/Switch.md -->

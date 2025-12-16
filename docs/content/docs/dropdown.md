@@ -6,3 +6,5 @@
 <br/>
 
 <ComponentPreview name="Dropdown" />
+
+<!-- @include: ../../meta/Dropdown.md -->

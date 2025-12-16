@@ -6,3 +6,5 @@
 <br/>
 
 <ComponentPreview name='CircularProgressBar' />
+
+<!-- @include: ../../meta/CircularProgressBar.md -->

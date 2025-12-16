@@ -6,3 +6,5 @@
 <br/>
 
 <ComponentPreview name="Select"  />
+
+<!-- @include: ../../meta/Select.md -->

@@ -6,3 +6,5 @@
 <br/>
 
 <ComponentPreview name="TextEditor"  />
+
+<!-- @include: ../../meta/TextEditor.md -->

@@ -6,3 +6,5 @@
 <br/>
 
 <ComponentPreview name="TextInput"  />
+
+<!-- @include: ../../meta/TextInput.md -->

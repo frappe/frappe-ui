@@ -6,3 +6,5 @@
 <br/>
 
 <ComponentPreview name="Rating"  />
+
+<!-- @include: ../../meta/Rating.md -->

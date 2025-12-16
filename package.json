@@ -15,7 +15,8 @@
     "preview": "vite preview",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs"
+    "docs:preview": "vitepress preview docs",
+		"docs:gen": "node docs/scripts/propsgen.ts --trace-uncaught"
   },
   "exports": {
     ".": {
@@ -126,6 +127,7 @@
     "vitepress": "^2.0.0-alpha.15",
     "vitest": "^2.1.8",
     "vue": "^3.3.0",
+    "vue-component-meta": "^3.1.8",
     "vue-router": "^4.1.6"
   },
   "resolutions": {

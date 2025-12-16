@@ -6,3 +6,5 @@
 <br/>
 
 <ComponentPreview name="Password"  />
+
+<!-- @include: ../../meta/Password.md -->

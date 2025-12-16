@@ -6,3 +6,5 @@
 <br/>
 
 <ComponentPreview name="Popover"  />
+
+<!-- @include: ../../meta/Popover.md -->

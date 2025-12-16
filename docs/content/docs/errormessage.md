@@ -6,3 +6,5 @@
 <br/>
 
 <ComponentPreview name="ErrorMessage"  />
+
+<!-- @include: ../../meta/ErrorMessage.md -->

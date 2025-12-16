@@ -1,4 +1,3 @@
-
 <h1>
   Avatar
 </h1>
@@ -7,3 +6,4 @@
 
 <ComponentPreview name="Avatar"  />
 
+<!-- @include: ../../meta/Avatar.md -->

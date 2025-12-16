@@ -6,3 +6,5 @@
 <br/>
 
 <ComponentPreview name="Tabs"  />
+
+<!-- @include: ../../meta/Tabs.md -->

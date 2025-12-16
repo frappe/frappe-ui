@@ -6,6 +6,8 @@ body {
   /* background-color: var(--surface-white); */
   /* color: var(--ink-gray-9); */
   /* font-family: Inter, sans-serif */
+
+	@apply text-base;
 }
 
 .iconlink {
