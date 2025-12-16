@@ -3,7 +3,7 @@ import { h } from 'vue'
 import type { Theme } from 'vitepress'
 import DefaultTheme from 'vitepress/theme'
 import './style.css'
-import Demo from '../components/Demo.vue'
+import Demo from '../../components/Demo.vue'
 
 const storyModules = import.meta.glob(
   '../../../src/components/**/*.story.vue',

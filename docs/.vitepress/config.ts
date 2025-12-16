@@ -1,19 +1,22 @@
 import { defineConfig } from 'vitepress'
 import { lucideIcons } from '../../vite/lucideIcons'
 import path from 'path'
-import tailwind from 'tailwindcss'
-import autoprefixer from 'autoprefixer'
+// import tailwind from 'tailwindcss'
+// import autoprefixer from 'autoprefixer'
 import sidebarConfig from './sidebar'
 import { meta } from './meta'
 
 import componentPreview from './plugins/componentPreview'
 
 const alias = {
-  '@': path.resolve(__dirname, '../../src/'),
-  '@/demos': path.resolve(__dirname, '../../src/components/'),
+  // '@': path.resolve(__dirname, '../../src/'),
+  '@/srcomponents': path.resolve(__dirname, '../../src/components'),
+	"@/components": path.resolve(__dirname, "../components/"),
 }
 
 export default defineConfig({
+	srcDir: "content",
+
   title: meta.name,
   description: meta.description,
   titleTemplate: meta.name,

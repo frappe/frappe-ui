@@ -1,16 +1,16 @@
 <script setup>
 import { useData } from 'vitepress'
-import BgColor from '../../.vitepress/components/tokens/BgColor.vue'
-import TxtColor from '../../.vitepress/components/tokens/TxtColor.vue'
-import BorderColor from '../../.vitepress/components/tokens/BorderColor.vue'
-import FontSize from '../../.vitepress/components/tokens/FontSize.vue'
-import FontWeight from '../../.vitepress/components/tokens/FontWeight.vue'
-import FontFamily from '../../.vitepress/components/tokens/FontFamily.vue'
-import LetterSpacing from '../../.vitepress/components/tokens/LetterSpacing.vue'
-import LineHeight from '../../.vitepress/components/tokens/LineHeight.vue'
-import DropShadow from '../../.vitepress/components/tokens/DropShadow.vue'
-import BorderRadius from '../../.vitepress/components/tokens/BorderRadius.vue'
-import BorderWidth from '../../.vitepress/components/tokens/BorderWidth.vue'
+import BgColor from '@/components/tokens/BgColor.vue'
+import TxtColor from '@/components/tokens/TxtColor.vue'
+import BorderColor from '@/components/tokens/BorderColor.vue'
+import FontSize from '@/components/tokens/FontSize.vue'
+import FontWeight from '@/components/tokens/FontWeight.vue'
+import FontFamily from '@/components/tokens/FontFamily.vue'
+import LetterSpacing from '@/components/tokens/LetterSpacing.vue'
+import LineHeight from '@/components/tokens/LineHeight.vue'
+import DropShadow from '@/components/tokens/DropShadow.vue'
+import BorderRadius from '@/components/tokens/BorderRadius.vue'
+import BorderWidth from '@/components/tokens/BorderWidth.vue'
 
 const { params } = useData()
 const data = params.value.data

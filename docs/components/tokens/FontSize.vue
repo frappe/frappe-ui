@@ -9,7 +9,7 @@ const props = defineProps({
 });
 
 const text = ref('The quick brown fox jumps over the lazy dog')
-import TextArea from '@/components/Textarea/Textarea.vue'
+import TextArea from '@/srcomponents/Textarea/Textarea.vue'
 </script>
 
 <template>

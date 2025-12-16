@@ -1,4 +1,7 @@
-import { designTokens } from '../../.vitepress/utils/tailwind'
+import resolveConfig from 'tailwindcss/resolveConfig'
+import config from '../../../../tailwind.config'
+
+const designTokens = resolveConfig(config).theme
 
 const getBgColors = () => {
   let colors: { name: string; value?: string }[] = []

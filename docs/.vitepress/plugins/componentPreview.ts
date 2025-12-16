@@ -10,7 +10,7 @@ export default function (md: MarkdownRenderer) {
       const scriptIdx = state.tokens.findIndex(
         (i) => i.type === 'html_block' && /<script setup>/.test(i.content),
       )
-      const importStr = `import Preview from '@/components/${name}/${name}.story.vue'`
+      const importStr = `import Preview from '../../../src/components/${name}/${name}.story.vue'`
 
       if (scriptIdx === -1) {
         const token = new state.Token('html_block', '', 0)
@@ -24,7 +24,7 @@ export default function (md: MarkdownRenderer) {
 
       const idx = state.tokens.findIndex((i) => i.content.match(regex))
       const { realPath, path: _path } = state.env as MarkdownEnv
-      const componentPath = `../../src/components/${name}/${name}.story.vue`
+      const componentPath = `../../../src/components/${name}/${name}.story.vue`
       const props = [
         name && `name="${name}"`,
         title && `title="${title}"`,
