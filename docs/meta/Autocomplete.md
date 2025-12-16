@@ -13,7 +13,7 @@
   {
     'name': 'target',
     'description': '',
-    'type': '{ open: () => void; close: () => void; togglePopover: (flag?: boolean | Event | undefined) => void; isOpen: any; }'
+    'type': '{ open: () => void; close: () => void; togglePopover: (flag?: boolean | Event | undefined) => void; '
   },
   {
     'name': 'prefix',

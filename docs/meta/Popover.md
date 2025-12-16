@@ -76,17 +76,17 @@
   {
     'name': 'target',
     'description': '',
-    'type': '{ togglePopover: (flag?: boolean | Event | undefined) => void; updatePosition: () => void; open: () => void; close: () => void; isOpen: boolean | undefined; }'
+    'type': '{ togglePopover: (flag?: boolean | Event | undefined) => void; updatePosition: () => void; open: () '
   },
   {
     'name': 'body',
     'description': '',
-    'type': '{ togglePopover: (flag?: boolean | Event | undefined) => void; updatePosition: () => void; open: () => void; close: () => void; isOpen: boolean | undefined; }'
+    'type': '{ togglePopover: (flag?: boolean | Event | undefined) => void; updatePosition: () => void; open: () '
   },
   {
     'name': 'body-main',
     'description': '',
-    'type': '{ togglePopover: (flag?: boolean | Event | undefined) => void; updatePosition: () => void; open: () => void; close: () => void; isOpen: boolean | undefined; }'
+    'type': '{ togglePopover: (flag?: boolean | Event | undefined) => void; updatePosition: () => void; open: () '
   }
 ]"/> 
 

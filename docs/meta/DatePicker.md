@@ -102,17 +102,17 @@
   {
     'name': 'target',
     'description': '',
-    'type': '{ togglePopover: (flag?: boolean | Event | undefined) => void; isOpen: boolean | undefined; displayLabel: string; inputValue: string; }'
+    'type': '{ togglePopover: (flag?: boolean | Event | undefined) => void; isOpen: boolean | undefined; displayL'
   },
   {
     'name': 'prefix',
     'description': '',
-    'type': '{ togglePopover: (flag?: boolean | Event | undefined) => void; isOpen: boolean | undefined; displayLabel: string; inputValue: string; }'
+    'type': '{ togglePopover: (flag?: boolean | Event | undefined) => void; isOpen: boolean | undefined; displayL'
   },
   {
     'name': 'suffix',
     'description': '',
-    'type': '{ togglePopover: (flag?: boolean | Event | undefined) => void; isOpen: boolean | undefined; displayLabel: string; inputValue: string; }'
+    'type': '{ togglePopover: (flag?: boolean | Event | undefined) => void; isOpen: boolean | undefined; displayL'
   }
 ]"/> 
 

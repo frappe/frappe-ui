@@ -55,7 +55,7 @@ const genMetaTable = (data) => {
   const arrSlots = slots.map((x) => ({
     name: x.name,
     description: x.description,
-    type: x.type,
+    type: x.type.slice(0, 100),
   }))
 
   if (arrSlots.length > 0) {
