@@ -1,9 +1,6 @@
+# Popover
 
-<h1>
-  Popover
-</h1>
-
-<br/>
+Shows information in a portal that doesnt disturb the page layout.
 
 <ComponentPreview name="Popover"  />
 

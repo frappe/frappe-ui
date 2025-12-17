@@ -1,9 +1,6 @@
+# MonthPicker
 
-<h1>
-  MonthPicker
-</h1>
-
-<br/>
+Datepicker for selecting month and year format.
 
 <ComponentPreview name="MonthPicker"  />
 

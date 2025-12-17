@@ -1,9 +1,6 @@
+# Tree
 
-<h1>
-  Tree
-</h1>
-
-<br/>
+Displays hierarchical data in a collapsible tree structure. Makes it easy to navigate nested items and manage complex relationships.
 
 <ComponentPreview name="Tree"  />
 

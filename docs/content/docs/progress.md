@@ -1,9 +1,6 @@
+# Progress
 
-<h1>
-  Progress
-</h1>
-
-<br/>
+Visually represents progress or completion of a task. Updates dynamically to give users clear feedback on status.
 
 <ComponentPreview name="Progress"  />
 

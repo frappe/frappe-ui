@@ -1,10 +1,8 @@
-<h1>
-  Button
-</h1>
+# Button
 
+An interactive element used to trigger actions, submit forms, or navigate between views.
 
 ## Variants
-<br/>
 
 <ComponentPreview name='Button'  />
 

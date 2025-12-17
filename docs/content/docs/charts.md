@@ -1,8 +1,5 @@
+# Charts
 
-<h1>
-  Charts
-</h1>
-
-<br/>
+A collection of flexible chart components for visualizing data, including axis-based, donut, funnel, and numeric charts.
 
 <ComponentPreview name="Charts"  />

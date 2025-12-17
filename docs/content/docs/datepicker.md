@@ -1,9 +1,7 @@
+# DatePicker
 
-<h1>
-  DatePicker
-</h1>
+A set of pickers for selecting dates, date ranges, or date and time. Smooth, intuitive interfaces make choosing and adjusting values quick and precise.
 
-<br/>
 
 <ComponentPreview name='DatePicker' />
 

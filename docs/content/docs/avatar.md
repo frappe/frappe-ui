@@ -1,8 +1,6 @@
-<h1>
-  Avatar
-</h1>
+# Avatar
 
-<br/>
+A visual representation of a user, typically shown as an image, initials, or an icon.
 
 <ComponentPreview name="Avatar"  />
 

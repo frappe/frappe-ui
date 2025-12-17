@@ -1,8 +1,6 @@
-<h1>
-  Alert
-</h1>
+# Alert
 
-<br/>
+A prominent message used to communicate important information, warnings, or status updates to the user.
 
 <ComponentPreview name="Alert"  />
 

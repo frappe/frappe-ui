@@ -15,9 +15,7 @@ the fields of the document. Along with this, you get `todo.setValue` and
 <template>
   <div v-if="todo.doc">
     <div>
-      <h1>
-        {{ todo.description }}
-      </h1>
+      # {{ todo.description }}
       <Badge>{{ todo.status }}</Badge>
     </div>
     <Button @click="todo.setValue.submit({ status: 'Closed' })">

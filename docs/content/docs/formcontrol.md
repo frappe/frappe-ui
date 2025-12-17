@@ -1,9 +1,6 @@
+# FormControl
 
-<h1>
-  FormControl
-</h1>
-
-<br/>
+Provides a consistent wrapper for inputs, selects, checkboxes, and more. Handles labels, icons, and validation to keep forms clear and organized.
 
 <ComponentPreview name="FormControl"  />
 

@@ -1,9 +1,6 @@
+# ErrorMessage
 
-<h1>
-  ErrorMessage
-</h1>
-
-<br/>
+Displays a clear message to indicate errors or issues. Helps users understand problems and take corrective action quickly.
 
 <ComponentPreview name="ErrorMessage"  />
 

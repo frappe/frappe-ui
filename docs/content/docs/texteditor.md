@@ -1,9 +1,6 @@
+# TextEditor
 
-<h1>
-  TextEditor
-</h1>
-
-<br/>
+A rich text editor based on TipTap for creating and formatting content. Offers intuitive controls, styling options, and smooth editing experience.
 
 <ComponentPreview name="TextEditor"  />
 

@@ -1,9 +1,6 @@
 
-<h1>
-  Spinner
-</h1>
+# Spinner
 
-<br/>
 
 <ComponentPreview name="Spinner"  />
 

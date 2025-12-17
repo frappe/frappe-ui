@@ -1,8 +1,5 @@
 
-<h1>
-  TabButtons
-</h1>
+# TabButtons
 
-<br/>
 
 <ComponentPreview name="TabButtons"  />

@@ -1,9 +1,6 @@
+# Dropdown
 
-<h1>
-  Dropdown
-</h1>
-
-<br/>
+A flexible menu component for selecting actions or options. Easily handles lists, groups, and nested items in a clean. Supports switches, disabled items, custom triggers.
 
 <ComponentPreview name="Dropdown" />
 

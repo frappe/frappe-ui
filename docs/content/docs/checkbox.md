@@ -1,9 +1,6 @@
+# Checkbox
 
-<h1>
-  Checkbox
-</h1>
-
-<br/>
+Allows users to select or deselect an option, commonly used in forms and settings where multiple choices are available.
 
 <ComponentPreview name='Checkbox'  />
 

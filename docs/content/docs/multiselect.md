@@ -1,9 +1,6 @@
+# MultiSelect
 
-<h1>
-  MultiSelect
-</h1>
-
-<br/>
+Allows selecting multiple options from a list with ease. Supports custom content, images, and convenient controls like “Select All” or “Clear All.”
 
 <ComponentPreview name="MultiSelect"  />
 

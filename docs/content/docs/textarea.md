@@ -1,9 +1,6 @@
+# Textarea
 
-<h1>
-  Textarea
-</h1>
-
-<br/>
+A multi-line input for entering longer text. Supports clear editing and flexible sizing for different content needs.
 
 <ComponentPreview name="Textarea"  />
 

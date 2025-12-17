@@ -1,9 +1,6 @@
+# Password
 
-<h1>
-  Password
-</h1>
-
-<br/>
+Provides a secure input for entering passwords. Supports visibility toggling and ensures a clear, user-friendly experience.
 
 <ComponentPreview name="Password"  />
 
