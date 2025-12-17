@@ -17,8 +17,6 @@ const props = defineProps<Props>();
 </script>
 
 <template>
-  <h2>API Reference</h2>
-  <h3 class="!mb-6">Props</h3>
 
   <div
     class="grid grid-cols-3 bg-surface-gray-2 rounded p-3 px-4 text-ink-gray-5"

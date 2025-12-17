@@ -39,6 +39,7 @@ const genMetaTable = (data) => {
   import EmitsTable from '@/components/EmitsTable.vue'
 </script>
 
+## Props 
 `
   const props = data.props.filter((x) => !x.global)
   const arrProps = props.map((x) => ({
@@ -59,7 +60,7 @@ const genMetaTable = (data) => {
   }))
 
   if (arrSlots.length > 0) {
-    markupStr += `<SlotsTable :data="${arrToStr(arrSlots)}"/> \n\n`
+    markupStr += `## Default Slots \n <SlotsTable :data="${arrToStr(arrSlots)}"/> \n\n`
   }
 
   const emits = data.events.filter((x) => !x.global)
@@ -70,7 +71,7 @@ const genMetaTable = (data) => {
   }))
 
   if (arrEmits.length > 0) {
-    markupStr += `<EmitsTable :data="${arrToStr(arrEmits)}"/> \n\n`
+    markupStr += `## Emit Events \n <EmitsTable :data="${arrToStr(arrEmits)}"/> \n\n`
   }
 
   return markupStr

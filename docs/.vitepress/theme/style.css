@@ -2,12 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   /* background-color: var(--surface-white); */
   /* color: var(--ink-gray-9); */
   /* font-family: Inter, sans-serif */
 
-	@apply text-base;
+  @apply text-base;
 }
 
 .iconlink {
@@ -109,7 +113,6 @@ body {
   --vp-c-purple-soft: var(--surface-violet-1);
 }
 
-
 /**
  * Colors: Background
  *
@@ -155,7 +158,6 @@ body {
   --vp-c-gutter: var(--outline-gray-1);
 }
 
-
 /**
  * Colors: Text
  *
@@ -173,7 +175,7 @@ body {
 }
 
 :root {
-	 --vp-sidebar-bg-color: var(--surface-white);
+  --vp-sidebar-bg-color: var(--surface-white);
   /* --vp-sidebar-bg-color: hsl(from var(--vp-c-bg) h s calc(l - 8%)); */
 }
 
@@ -200,8 +202,6 @@ body {
 .VPSidebar::-webkit-scrollbar-thumb:hover {
   background-color: var(--surface-gray-4);
 }
-
-
 
 /**
  * Component: Button
@@ -269,6 +269,3 @@ body {
 /* .DocSearch { */
 /*   --docsearch-primary-color: var(--vp-c-brand-1) !important; */
 /* } */
-
-
-

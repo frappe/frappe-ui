@@ -3,7 +3,7 @@
 </h1>
 
 
-<h2> Variants </h2>
+## Variants
 <br/>
 
 <ComponentPreview name='Button'  />

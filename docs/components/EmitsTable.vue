@@ -15,8 +15,6 @@ const props = defineProps<Props>();
 </script>
 
 <template>
-  <h3 class="!mb-6">Emit Events</h3>
-
   <div
     class="grid grid-cols-2 bg-surface-gray-2 rounded p-3 px-4 text-ink-gray-5"
   >
