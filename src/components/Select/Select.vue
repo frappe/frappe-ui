@@ -90,9 +90,9 @@ const selectOptions = computed(() => {
       :disabled="props.disabled"
     >
       <slot name="prefix" />
-      <SelectValue :placeholder="props.placeholder" />
+      <SelectValue :placeholder="props.placeholder" class='truncate' />
       <slot name="suffix">
-        <LucideChevronDown class="size-4 text-ink-gray-4 ml-auto" />
+        <LucideChevronDown class="size-4 text-ink-gray-4 ml-auto shrink-0" />
       </slot>
     </SelectTrigger>
 
