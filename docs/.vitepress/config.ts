@@ -1,8 +1,8 @@
-import { defineConfig } from 'vitepress'
+import { defineConfig, postcssIsolateStyles } from 'vitepress'
 import { lucideIcons } from '../../vite/lucideIcons'
 import path from 'path'
-// import tailwind from 'tailwindcss'
-// import autoprefixer from 'autoprefixer'
+import tailwind from 'tailwindcss'
+import autoprefixer from 'autoprefixer'
 import sidebarConfig from './sidebar'
 import { meta } from './meta'
 
@@ -23,22 +23,6 @@ export default defineConfig({
     },
   },
   cleanUrls: true,
-  vite: {
-    plugins: [lucideIcons()],
-    resolve: {
-      alias: {
-        // '@': path.resolve(__dirname, '../../src/'),
-        '@/srcomponents': path.resolve(__dirname, '../../src/components'),
-        '@/components': path.resolve(__dirname, '../components/'),
-        'frappe-ui': path.resolve(__dirname, '../../src'),
-      },
-    },
-    // css: {
-    //   postcss: {
-    //     plugins: [tailwind(), autoprefixer()],
-    //   },
-    // },
-  },
 
   appearance: {
     onChanged(isDark, defaultHandler, mode) {
@@ -79,5 +63,28 @@ export default defineConfig({
     socialLinks: [
       { icon: 'github', link: 'https://github.com/frappe/frappe-ui' },
     ],
+  },
+
+  vite: {
+    plugins: [lucideIcons()],
+    resolve: {
+      alias: {
+        // '@': path.resolve(__dirname, '../../src/'),
+        '@/srcomponents': path.resolve(__dirname, '../../src/components'),
+        '@/components': path.resolve(__dirname, '../components/'),
+        'frappe-ui': path.resolve(__dirname, '../../src'),
+      },
+    },
+    css: {
+      postcss: {
+        plugins: [
+          tailwind(),
+          autoprefixer(),
+          postcssIsolateStyles({
+            includeFiles: [/vp-doc\.css/, /base\.css/],
+          }),
+        ],
+      },
+    },
   },
 })

@@ -105,7 +105,7 @@ body {
   --vp-c-red-1: var(--red-600);
   --vp-c-red-2: var(--red-500);
   --vp-c-red-3: var(--red-400);
-  --vp-c-red-soft: var(--surface-red-1);
+  --vp-c-red-soft: var(--surface-red-2);
 
   --vp-c-purple-1: var(--violet-600);
   --vp-c-purple-2: var(--violet-500);

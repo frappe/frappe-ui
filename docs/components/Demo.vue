@@ -27,10 +27,9 @@ const tabs = [
     </div>
     <Tabs :tabs="tabs" v-model="state">
       <template #tab-panel="{ tab }">
-        <div v-if='tab.label === "Preview"' class="mt-5">
+        <div v-if='tab.label === "Preview"' class="vp-raw mt-5">
           <slot />
         </div>
-
         <slot v-else name="code" />
       </template>
     </Tabs>
