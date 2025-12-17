@@ -1,7 +1,18 @@
 import { inject } from 'vue'
-import type { Field, StateRow } from '../Filter/types'
+import type { StateRow } from '../Filter/types'
 import { getDefaultOperator } from '../Filter/utils'
 import { AutomationState, AutomationStateSymbol } from './types'
+
+// Raw field from useDoctypeMeta.getField()
+interface DocFieldMeta {
+  fieldname: string
+  fieldtype: string
+  options?: string
+  label?: string
+}
+
+// Type for getField function from useDoctypeMeta
+type GetFieldFn = (fieldname: string) => DocFieldMeta | null
 
 export function useAutomationState(): AutomationState {
   // this is done to ensure the state is always provided,
@@ -20,7 +31,7 @@ export const createEmptyRow = (): StateRow => ({
   value: '',
 })
 
-export function useFilterConditions(rows: StateRow[]) {
+export function useFilterConditions(rows: StateRow[], getField: GetFieldFn) {
   // Check if a row has a field selected
   const isRowComplete = (row: StateRow): boolean => {
     return !!row.field.fieldName
@@ -51,13 +62,15 @@ export function useFilterConditions(rows: StateRow[]) {
     insertRow()
   }
 
-  // Update a row when field is selected (using raw field meta)
-  const updateField = (index: number, fieldMeta: Field | null) => {
-    if (!fieldMeta) return
+  // Handle field selection change - accepts fieldName string directly
+  const updateField = (index: number, fieldName: string) => {
+    if (!fieldName) return
 
-    const fieldName = fieldMeta.fieldName
-    const fieldType = fieldMeta.fieldType
-    const options = fieldMeta.options || []
+    const rawField = getField(fieldName)
+    if (!rawField) return
+
+    const fieldType = rawField.fieldtype
+    const options = rawField.options?.split('\n') || []
 
     const defaultOperator = getDefaultOperator({
       fieldType,

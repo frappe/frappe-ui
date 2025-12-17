@@ -33,6 +33,12 @@
       <div class="flex flex-col gap-4">
         <ScopeBlock :doctypes="[{ label: 'Tickets', value: 'HD Ticket' }]" />
         <WhenBlock v-if="state.dt" />
+        <!-- RuleBlock -->
+        <!-- Can include -->
+        <!-- ConditionBlock -->
+        <!-- NotificationBlock -->
+        <!-- ActionBlock -->
+        <!-- Selector Block -->
       </div>
     </template>
   </SettingsLayoutBase>

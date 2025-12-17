@@ -8,7 +8,7 @@
       <div class="flex items-center gap-2">
         <component :is="iconComponent" class="size-4" v-if="iconComponent" />
         <div v-else class="size-4 abcd"></div>
-        <p class="text-p-sm text-ink-gray-5 text-[14px] w-[40px]">
+        <p class="text-p-sm text-ink-gray-5 text-[14px]">
           {{ title }}
         </p>
       </div>

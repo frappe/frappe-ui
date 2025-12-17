@@ -7,11 +7,11 @@
             variant="outline"
             :open-on-click="true"
             :open-on-focus="true"
-            :options="fields"
+            :options="getFieldsForRow(row.field.fieldName)"
             placeholder="Select Field"
             class="[&>div>div]:bg-surface-white"
             :modelValue="row.field.fieldName"
-            @update:modelValue="(val) => handleFieldChange(val, index)"
+            @update:modelValue="(val) => updateField(index, val)"
           />
           <Select
             placeholder="is"
@@ -52,7 +52,7 @@
 </template>
 
 <script setup lang="ts">
-import { ModelRef } from 'vue'
+import { computed, ModelRef } from 'vue'
 import Combobox from '../../src/components/Combobox/Combobox.vue'
 import Dropdown from '../../src/components/Dropdown/Dropdown.vue'
 import Select from '../../src/components/Select/Select.vue'
@@ -68,21 +68,26 @@ const { fields, getField } = useDoctypeMeta(state.dt)
 const conditions = defineModel() as ModelRef<StateRow[]>
 const { insertRow, deleteRow, updateField, canAddRow } = useFilterConditions(
   conditions.value,
+  getField,
 )
 
-// Handle field selection change
-function handleFieldChange(fieldName: string, index: number) {
-  if (!fieldName) return
-  const rawField = getField(fieldName)
-  if (!rawField) return
+// Filter out fields already used in conditions
+const availableFields = computed(() => {
+  const usedFieldNames = new Set(
+    conditions.value.map((row) => row.field.fieldName).filter((name) => name), // exclude empty strings
+  )
+  return fields.value.filter((f) => !usedFieldNames.has(f.value))
+})
 
-  // Map DocField to Field type
-  const field = {
-    fieldName: rawField.fieldname,
-    fieldType: rawField.fieldtype,
-    options: rawField.options?.split('\n') || [],
-  }
-  updateField(index, field)
+// Get available fields for a specific row (includes current row's field)
+const getFieldsForRow = (currentFieldName: string) => {
+  if (!currentFieldName) return availableFields.value
+  // Include the current field in options so it shows as selected
+  return fields.value.filter(
+    (f) =>
+      f.value === currentFieldName ||
+      !conditions.value.some((row) => row.field.fieldName === f.value),
+  )
 }
 
 function getPropsToApply(idx: number): {
