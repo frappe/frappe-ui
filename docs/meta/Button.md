@@ -7,6 +7,7 @@
   import EmitsTable from '@/components/EmitsTable.vue'
 </script>
 
+## Props 
 <PropsTable :data="[
   {
     'name': 'theme',
@@ -100,7 +101,8 @@
   }
 ]"/> 
 
-<SlotsTable :data="[
+## Default Slots 
+ <SlotsTable :data="[
   {
     'name': 'prefix',
     'description': '',

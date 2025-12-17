@@ -7,6 +7,7 @@
   import EmitsTable from '@/components/EmitsTable.vue'
 </script>
 
+## Props 
 <PropsTable :data="[
   {
     'name': 'open',
@@ -52,7 +53,8 @@
   }
 ]"/> 
 
-<EmitsTable :data="[
+## Emit Events 
+ <EmitsTable :data="[
   {
     'name': 'action',
     'description': '',
