@@ -48,21 +48,15 @@ export function useFilterConditions(rows: StateRow[], getField: GetFieldFn) {
     rows.push(createEmptyRow())
   }
 
-  // Delete a row at index, ensure at least one row exists
   const deleteRow = (index: number) => {
     rows.splice(index, 1)
-    if (rows.length === 0) {
-      insertRow()
-    }
   }
 
-  // Clear all rows and reset to one empty row
   const clearRows = () => {
     rows.splice(0, rows.length)
     insertRow()
   }
 
-  // Handle field selection change - accepts fieldName string directly
   const updateField = (index: number, fieldName: string) => {
     if (!fieldName) return
 

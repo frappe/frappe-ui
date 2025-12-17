@@ -9,16 +9,16 @@
             :open-on-focus="true"
             :options="getFieldsForRow(row.field.fieldName)"
             placeholder="Select Field"
-            class="[&>div>div]:bg-surface-white"
+            class="[&>div>div]:bg-surface-white w-[120px]"
             :modelValue="row.field.fieldName"
             @update:modelValue="(val) => updateField(index, val)"
           />
           <Select
-            placeholder="is"
+            placeholder="Select Operator"
             :options="getOperators(row.field)"
             v-model="row.operator"
             variant="outline"
-            class="w-[130px]"
+            class="!w-[120px]"
             :disabled="!row.field.fieldName"
           />
 
@@ -27,6 +27,11 @@
             v-model="row.value"
             :disabled="!row.field.fieldName"
             variant="outline"
+            class="w-[160px] abc"
+            :class="
+              row.field.fieldType === 'Link' &&
+              '[&>div>div>div]:bg-surface-white'
+            "
           />
         </template>
         <template #action>

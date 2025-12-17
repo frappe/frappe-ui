@@ -136,7 +136,7 @@ export const getValueControl = (row: StateRow) => {
   }
 
   if (['like', 'not like', 'in', 'not in'].includes(operator)) {
-    return h(TextInput, { placeholder: 'Enter value', variant: 'outline' })
+    return h(TextInput, { placeholder: 'Enter value' })
   }
 
   if (typeSelect.includes(fieldType) || typeCheck.includes(fieldType)) {
@@ -145,7 +145,6 @@ export const getValueControl = (row: StateRow) => {
     return h(Select, {
       placeholder: 'Select Option',
       options: _options,
-      variant: 'outline',
     })
   }
 
@@ -157,7 +156,6 @@ export const getValueControl = (row: StateRow) => {
       class: 'form-control',
       doctype: options?.[0] || '',
       value: row.value,
-      variant: 'outline',
     })
   }
 
