@@ -98,9 +98,7 @@ const selectOptions = computed(() => {
 
     <SelectPortal>
       <SelectContent
-        class="bg-surface-modal border rounded-lg shadow-lg will-change-[opacity,transform] z-[100] min-w-[--reka-select-trigger-width] max-h-[--reka-select-content-available-height] overflow-auto"
-        :side-offset="5"
-        position="popper"
+        class="bg-surface-modal border rounded-lg shadow-lg will-change-[opacity,transform] z-[100]"
       >
         <SelectViewport class="p-1 flex flex-col">
           <SelectItem
@@ -124,36 +122,6 @@ const selectOptions = computed(() => {
 </template>
 
 <style>
-@keyframes slideDownFade {
-  from {
-    opacity: 0;
-    transform: translateY(-4px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes slideUpFade {
-  from {
-    opacity: 0;
-    transform: translateY(4px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-[data-side='top'] {
-  animation: slideDownFade 280ms;
-}
-
-[data-side='bottom'] {
-  animation: slideUpFade 280ms;
-}
-
 [data-highlighted],
 [data-state='checked'] {
   outline: none !important;
