@@ -87,10 +87,10 @@ const selectOptions = computed(() => {
       class="inline-flex items-center gap-2 outline-none text-base data-[placeholder]:text-ink-gray-4 data-[disabled]:text-ink-gray-4"
       aria-label="Customise options"
       :class="[selectClasses, $attrs.class]"
-      :disabled="props.disabled"
+      :disabled="disabled"
     >
       <slot name="prefix" />
-      <SelectValue :placeholder="props.placeholder" class='truncate' />
+      <SelectValue :placeholder="placeholder" class='truncate' />
       <slot name="suffix">
         <LucideChevronDown class="size-4 text-ink-gray-4 ml-auto shrink-0" />
       </slot>
