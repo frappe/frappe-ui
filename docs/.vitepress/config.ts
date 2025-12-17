@@ -8,14 +8,8 @@ import { meta } from './meta'
 
 import componentPreview from './plugins/componentPreview'
 
-const alias = {
-  // '@': path.resolve(__dirname, '../../src/'),
-  '@/srcomponents': path.resolve(__dirname, '../../src/components'),
-	"@/components": path.resolve(__dirname, "../components/"),
-}
-
 export default defineConfig({
-	srcDir: "content",
+  srcDir: 'content',
 
   title: meta.name,
   description: meta.description,
@@ -32,7 +26,12 @@ export default defineConfig({
   vite: {
     plugins: [lucideIcons()],
     resolve: {
-      alias,
+      alias: {
+        // '@': path.resolve(__dirname, '../../src/'),
+        '@/srcomponents': path.resolve(__dirname, '../../src/components'),
+        '@/components': path.resolve(__dirname, '../components/'),
+        'frappe-ui': path.resolve(__dirname, '../../src'),
+      },
     },
     // css: {
     //   postcss: {
