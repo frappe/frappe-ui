@@ -1,5 +1,17 @@
 import { InjectionKey } from 'vue'
 
+export type IconType =
+  | ''
+  | 'scope'
+  | 'timer'
+  | 'event'
+  | 'condition'
+  | 'action'
+  | 'notification'
+  | 'filter'
+
+export type RoundedType = 'all' | 'top' | 'bottom' | 'none'
+
 export interface AutomationState {
   enabled: boolean
   dt: string

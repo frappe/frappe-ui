@@ -32,7 +32,7 @@
     <template #content>
       <div class="flex flex-col gap-4">
         <ScopeBlock :doctypes="[{ label: 'Tickets', value: 'HD Ticket' }]" />
-        <WhenBlock />
+        <WhenBlock v-if="state.dt" />
       </div>
     </template>
   </SettingsLayoutBase>

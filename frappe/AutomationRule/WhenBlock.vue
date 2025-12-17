@@ -25,21 +25,20 @@
           size="sm"
           :icon-left="FilterIcon"
           label="Add Filter"
-          @click="insertRow"
+          @click="() => conditionRef?.insertRow()"
         />
       </template>
     </BaseBlock>
     <ConditionBlock
-      v-if="state.presetsJson.length > 0"
+      v-show="state.presetsJson.length > 0"
       v-model="state.presetsJson"
-      @insert="insertRow"
-      @delete="deleteRow"
+      ref="conditionRef"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import type { Option } from '../../src/components/Autocomplete/types'
 import Select from '../../src/components/Select/Select.vue'
 import FilterIcon from '../Icons/FilterIcon.vue'
@@ -50,7 +49,7 @@ import { useAutomationState } from './automation'
 const icon = 'event'
 
 const state = useAutomationState()
-
+const conditionRef = ref<InstanceType<typeof ConditionBlock> | null>(null)
 const events: Option[] = [
   { label: 'Created', value: 'created' },
   { label: 'Updated', value: 'updated' },
@@ -70,16 +69,6 @@ const timerOptions: Option[] = [
 const roundedClass = computed(() =>
   state.presetsJson.length > 0 ? 'top' : 'all',
 )
-
-const dummyObj = () => ({
-  field: { fieldName: '', fieldType: '', options: [] },
-  operator: '',
-  value: '',
-})
-const insertRow = () => state.presetsJson.push(dummyObj())
-const deleteRow = (index: number) => {
-  state.presetsJson.splice(index, 1)
-}
 </script>
 
 <style scoped></style>

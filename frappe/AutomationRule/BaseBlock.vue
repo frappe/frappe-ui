@@ -28,20 +28,13 @@ import EventIcon from '../Icons/EventIcon.vue'
 import FilterIcon from '../Icons/FilterIcon.vue'
 import ScopeIcon from '../Icons/ScopeIcon.vue'
 import TimerIcon from '../Icons/TimerIcon.vue'
+import type { IconType, RoundedType } from './types'
 
 const props = withDefaults(
   defineProps<{
     title: string
-    icon:
-      | 'scope'
-      | 'timer'
-      | 'event'
-      | 'condition'
-      | 'action'
-      | 'notification'
-      | 'filter'
-      | ''
-    rounded?: 'all' | 'top' | 'bottom' | 'none'
+    icon: IconType
+    rounded?: RoundedType
     indent?: boolean
   }>(),
   {

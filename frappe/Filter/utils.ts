@@ -1,10 +1,10 @@
 import { h } from 'vue'
-import Select from '../../src/components/Select/Select.vue'
-import TextInput from '../../src/components/TextInput/TextInput.vue'
-import Rating from '../../src/components/Rating/Rating.vue'
 import DatePicker from '../../src/components/DatePicker/DatePicker.vue'
 import DateRangePicker from '../../src/components/DatePicker/DateRangePicker.vue'
 import DateTimePicker from '../../src/components/DatePicker/DateTimePicker.vue'
+import Rating from '../../src/components/Rating/Rating.vue'
+import Select from '../../src/components/Select/Select.vue'
+import TextInput from '../../src/components/TextInput/TextInput.vue'
 import { Link } from '../Link'
 
 import type { Field, StateRow } from './types'
@@ -136,13 +136,17 @@ export const getValueControl = (row: StateRow) => {
   }
 
   if (['like', 'not like', 'in', 'not in'].includes(operator)) {
-    return h(TextInput, { placeholder: 'Enter value' })
+    return h(TextInput, { placeholder: 'Enter value', variant: 'outline' })
   }
 
   if (typeSelect.includes(fieldType) || typeCheck.includes(fieldType)) {
     let _options = options || ['yes', 'no']
 
-    return h(Select, { placeholder: 'Select Option', options: _options })
+    return h(Select, {
+      placeholder: 'Select Option',
+      options: _options,
+      variant: 'outline',
+    })
   }
 
   if (typeLink.includes(fieldType)) {
@@ -153,6 +157,7 @@ export const getValueControl = (row: StateRow) => {
       class: 'form-control',
       doctype: options?.[0] || '',
       value: row.value,
+      variant: 'outline',
     })
   }
 
@@ -191,6 +196,9 @@ export const getDefaultOperator = (field: {
   fieldName: string
 }) => {
   const operators = getOperators(field)
+  if (typeString.includes(field.fieldType)) {
+    return 'like'
+  }
   return operators[0].value
 }
 
