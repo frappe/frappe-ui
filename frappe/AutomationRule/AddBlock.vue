@@ -14,7 +14,7 @@
       <component
         :is="action.icon"
         class="text-ink-gray-4 transition-colors"
-        :class="`group-hover:text-[${action.color}]`"
+        :class="action.colorClass"
       />
       <span
         class="text-ink-gray-4 text-p-sm group-hover:text-ink-gray-8 transition-colors"
@@ -37,19 +37,19 @@ const actions = [
   {
     label: 'Condition',
     icon: ConditionIcon,
-    color: '#7757EE',
+    colorClass: 'group-hover:text-[#7757EE]',
     onClick: () => addConditionBlock(),
   },
   {
     label: 'Action',
     icon: ActionIcon,
-    color: '#278F5E',
+    colorClass: 'group-hover:text-[#278F5E]',
     onClick: () => addActionBlock(),
   },
   {
     label: 'Notification',
     icon: BellIcon,
-    color: '#318AD8',
+    colorClass: 'group-hover:text-[#318AD8]',
     onClick: () => addNotificationBlock(),
   },
 ]

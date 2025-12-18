@@ -86,8 +86,20 @@ import type { IconType, RoundedType } from './types'
 type ConditionTuple = [string, string, string]
 type ConditionArray = (ConditionTuple | string)[]
 
-const state = useAutomationState()
+const props = withDefaults(
+  defineProps<{
+    label?: string
+    icon?: IconType
+    roundFirstBlock?: boolean
+  }>(),
+  {
+    label: 'Where',
+    icon: 'filter',
+    roundFirstBlock: false,
+  },
+)
 const conditions = defineModel() as ModelRef<ConditionArray>
+const state = useAutomationState()
 
 const {
   conditionRows,
@@ -111,15 +123,27 @@ function getPropsToApply(idx: number): {
   title: string
   icon: IconType
 } {
-  const rounded: RoundedType =
-    idx === conditionRows.value.length - 1 ? 'bottom' : 'none'
-  const title = idx === 0 ? 'Where' : ''
-  const icon: IconType = idx === 0 ? 'filter' : ''
+  const rounded = getRoundedStyle(idx)
+  const title = idx === 0 ? props.label : ''
+  const icon: IconType = idx === 0 ? props.icon : ''
   return {
     rounded,
     title,
     icon,
   }
+}
+
+function getRoundedStyle(idx: number): RoundedType {
+  if (props.label === 'If') {
+    if (conditionRows.value.length === 1) {
+      return 'all'
+    }
+    if (idx === 0) {
+      return 'top'
+    }
+    return idx === conditionRows.value.length - 1 ? 'bottom' : 'none'
+  }
+  return idx === conditionRows.value.length - 1 ? 'bottom' : 'none'
 }
 
 function rowOptions(idx: number) {

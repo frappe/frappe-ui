@@ -33,6 +33,7 @@
       <div class="flex flex-col gap-6">
         <ScopeBlock :doctypes="[{ label: 'Tickets', value: 'HD Ticket' }]" />
         <WhenBlock v-if="state.dt" />
+        <RuleBlock v-if="state.dt" />
         <!-- RuleBlock -->
         <!-- Can include -->
         <!-- ConditionBlock -->
@@ -49,6 +50,7 @@ import { Switch } from 'frappe-ui'
 import { computed, provide, reactive } from 'vue'
 import SettingsLayoutBase from '../../src/components/SettingsLayoutBase.vue'
 import AddBlock from './AddBlock.vue'
+import RuleBlock from './RuleBlock.vue'
 import ScopeBlock from './ScopeBlock.vue'
 import WhenBlock from './WhenBlock.vue'
 import { AutomationStateSymbol } from './types'
