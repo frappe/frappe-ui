@@ -1,44 +1,61 @@
 <template>
   <div class="space-y-1">
-    <template v-for="(row, index) in conditions">
+    <template v-for="(row, index) in conditionRows" :key="index">
       <BaseBlock v-bind="getPropsToApply(index)">
         <template #meta>
+          <!-- And/Or toggle for rows after the first -->
+          <Button
+            v-if="index > 0"
+            variant="subtle"
+            class="w-max min-w-[50px]"
+            @click="toggleConjunction"
+            icon-right="refresh-cw"
+            :disabled="index > 1"
+            :label="conjunction"
+            :tooltip="conjunctionTooltip"
+          />
+
           <Combobox
             variant="outline"
             :open-on-click="true"
             :open-on-focus="true"
-            :options="getFieldsForRow(row.field.fieldName)"
+            :options="getFieldsForRow(row[0])"
             placeholder="Select Field"
             class="[&>div>div]:bg-surface-white w-[120px]"
-            :modelValue="row.field.fieldName"
-            @update:modelValue="(val) => updateField(index, val)"
+            :modelValue="row[0]"
+            @update:modelValue="(val) => handleFieldChange(row, val)"
           />
           <Select
             placeholder="Select Operator"
-            :options="getOperators(row.field)"
-            v-model="row.operator"
+            :options="getOperatorsForRow(row)"
+            :modelValue="row[1]"
+            @update:modelValue="
+              (val: String | undefined) => handleOperatorChange(row, val)
+            "
             variant="outline"
             class="!w-[120px]"
-            :disabled="!row.field.fieldName"
+            :disabled="!row[0]"
           />
 
           <component
-            :is="getValueControl(row)"
-            v-model="row.value"
-            :disabled="!row.field.fieldName"
+            :is="getValueControlForRow(row)"
             variant="outline"
-            class="w-[160px] abc"
+            :modelValue="row[2]"
+            @update:modelValue="(val: unknown) => handleValueChange(row, val)"
+            :disabled="!row[0]"
+            class="w-[160px]"
             :class="
-              row.field.fieldType === 'Link' &&
+              getFieldTypeFromRow(row) === 'Link' &&
               '[&>div>div>div]:bg-surface-white'
             "
+            placeholder="Select Value"
           />
         </template>
         <template #action>
           <Dropdown
             :options="rowOptions(index)"
             placement="right"
-            v-if="index === conditions.length - 1"
+            v-if="index === conditionRows.length - 1"
           >
             <Button variant="ghost" icon="more-horizontal" />
           </Dropdown>
@@ -57,43 +74,37 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ModelRef } from 'vue'
+import { ModelRef } from 'vue'
+import Button from '../../src/components/Button/Button.vue'
 import Combobox from '../../src/components/Combobox/Combobox.vue'
 import Dropdown from '../../src/components/Dropdown/Dropdown.vue'
 import Select from '../../src/components/Select/Select.vue'
-import { useDoctypeMeta } from '../../src/data-fetching/useDoctypeMeta'
-import type { StateRow } from '../Filter/types'
-import { getOperators, getValueControl } from '../Filter/utils'
 import BaseBlock from './BaseBlock.vue'
-import { useAutomationState, useFilterConditions } from './automation'
+import { useAutomationState, useDoctypeFilters } from './automation'
 import type { IconType, RoundedType } from './types'
 
+type ConditionTuple = [string, string, string]
+type ConditionArray = (ConditionTuple | string)[]
+
 const state = useAutomationState()
-const { fields, getField } = useDoctypeMeta(state.dt)
-const conditions = defineModel() as ModelRef<StateRow[]>
-const { insertRow, deleteRow, updateField, canAddRow } = useFilterConditions(
-  conditions.value,
-  getField,
-)
+const conditions = defineModel() as ModelRef<ConditionArray>
 
-// Filter out fields already used in conditions
-const availableFields = computed(() => {
-  const usedFieldNames = new Set(
-    conditions.value.map((row) => row.field.fieldName).filter((name) => name), // exclude empty strings
-  )
-  return fields.value.filter((f) => !usedFieldNames.has(f.value))
-})
-
-// Get available fields for a specific row (includes current row's field)
-const getFieldsForRow = (currentFieldName: string) => {
-  if (!currentFieldName) return availableFields.value
-  // Include the current field in options so it shows as selected
-  return fields.value.filter(
-    (f) =>
-      f.value === currentFieldName ||
-      !conditions.value.some((row) => row.field.fieldName === f.value),
-  )
-}
+const {
+  conditionRows,
+  conjunction,
+  conjunctionTooltip,
+  toggleConjunction,
+  handleFieldChange,
+  handleOperatorChange,
+  handleValueChange,
+  getFieldTypeFromRow,
+  getOperatorsForRow,
+  getValueControlForRow,
+  getFieldsForRow,
+  insertRow,
+  deleteRow,
+  canAddRow,
+} = useDoctypeFilters(state.dt, conditions)
 
 function getPropsToApply(idx: number): {
   rounded: RoundedType
@@ -101,8 +112,8 @@ function getPropsToApply(idx: number): {
   icon: IconType
 } {
   const rounded: RoundedType =
-    idx === conditions.value.length - 1 ? 'bottom' : 'none'
-  const title = idx === 0 ? 'Where' : 'and'
+    idx === conditionRows.value.length - 1 ? 'bottom' : 'none'
+  const title = idx === 0 ? 'Where' : ''
   const icon: IconType = idx === 0 ? 'filter' : ''
   return {
     rounded,

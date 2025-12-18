@@ -1,14 +1,13 @@
 <template>
   <div
     class="w-full py-[7px] px-3 bg-surface-gray-1 flex items-center justify-between"
-    :class="[roundedClass, props.indent && 'w-[95%] ml-auto']"
+    :class="[roundedClass, props.indent && '!w-[95%] ml-auto']"
   >
     <!-- left side -->
     <div class="flex gap-2">
       <div class="flex items-center gap-2">
         <component :is="iconComponent" class="size-4" v-if="iconComponent" />
-        <div v-else class="size-4 abcd"></div>
-        <p class="text-p-sm text-ink-gray-5 text-[14px]">
+        <p class="text-p-sm text-ink-gray-5 text-[14px]" v-if="title">
           {{ title }}
         </p>
       </div>
@@ -32,8 +31,8 @@ import type { IconType, RoundedType } from './types'
 
 const props = withDefaults(
   defineProps<{
-    title: string
-    icon: IconType
+    title?: string
+    icon?: IconType
     rounded?: RoundedType
     indent?: boolean
   }>(),

@@ -42,14 +42,16 @@ import { computed, ref } from 'vue'
 import type { Option } from '../../src/components/Autocomplete/types'
 import Select from '../../src/components/Select/Select.vue'
 import FilterIcon from '../Icons/FilterIcon.vue'
+import { useAutomationState } from './automation'
 import BaseBlock from './BaseBlock.vue'
 import ConditionBlock from './ConditionBlock.vue'
-import { useAutomationState } from './automation'
-
-const icon = 'event'
+import { IconType } from './types'
 
 const state = useAutomationState()
 const conditionRef = ref<InstanceType<typeof ConditionBlock> | null>(null)
+const icon = computed<IconType>(() =>
+  state.eventType === 'time' ? 'timer' : 'event',
+)
 const events: Option[] = [
   { label: 'Created', value: 'created' },
   { label: 'Updated', value: 'updated' },

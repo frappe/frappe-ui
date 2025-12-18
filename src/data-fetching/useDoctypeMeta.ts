@@ -15,7 +15,7 @@ interface DoctypeMeta {
   [key: string]: any
 }
 
-interface TransformedField {
+export interface TransformedField {
   label: string | undefined
   type: string
   value: string
