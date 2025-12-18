@@ -17,7 +17,7 @@
                     variant="solid" @click="startImport" />
                 <Button v-else-if="listRoute" label="Done" @click="redirectToList()" />
             </div>
-            <div class="leading-5">
+            <div class="leading-5 text-ink-gray-7">
                 Verify the data before starting the import process
             </div>
         </div>
@@ -26,7 +26,7 @@
             <div class="text-ink-gray-5 text-sm">
                 Column Mapping
             </div>
-            <div class="border rounded-md bg-surface-gray-2 p-4 space-y-4 text-sm">
+            <div class="border rounded-md bg-surface-gray-2 p-4 space-y-4 text-sm text-ink-gray-7">
                 <div v-for="map in mapping" class="grid grid-cols-[40%,10%,40%] lg:grid-cols-3 space-x-3 items-center">
                     <div class="">
                         {{ map[0] }}
@@ -48,7 +48,7 @@
             <div class="rounded-md bg-surface-amber-2 p-2 space-y-2 text-xs">
                 <div v-for="warning in warnings" class="flex items-center space-x-2">
                     <FeatherIcon name="alert-circle" class="size-3 text-ink-amber-3" />
-                    <div v-html="warning.message" class=""></div>
+                    <div v-html="warning.message" class="text-ink-amber-3"></div>
                 </div>
             </div>
         </div>
