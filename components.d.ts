@@ -9,6 +9,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     Alert: typeof import('./src/components/Alert/Alert.vue')['default']
+    'Alert.story': typeof import('./src/components/Alert/Alert.story.vue')['default']
     AlignCenter: typeof import('./src/components/TextEditor/icons/align-center.vue')['default']
     AlignJustify: typeof import('./src/components/TextEditor/icons/align-justify.vue')['default']
     AlignLeft: typeof import('./src/components/TextEditor/icons/align-left.vue')['default']
@@ -100,7 +101,8 @@ declare module 'vue' {
     Italic: typeof import('./src/components/TextEditor/icons/italic.vue')['default']
     KeyboardShortcut: typeof import('./src/components/KeyboardShortcut.vue')['default']
     Layout: typeof import('./src/components/VueGridLayout/Layout.vue')['default']
-    Link: typeof import('./src/components/Link.vue')['default']
+    Link: typeof import('./src/components/TextEditor/icons/link.vue')['default']
+    LinkPopup: typeof import('./src/components/TextEditor/LinkPopup.vue')['default']
     ListEmptyState: typeof import('./src/components/ListView/ListEmptyState.vue')['default']
     ListFilter: typeof import('./src/components/ListFilter/ListFilter.vue')['default']
     ListFooter: typeof import('./src/components/ListView/ListFooter.vue')['default']
@@ -129,6 +131,10 @@ declare module 'vue' {
     MentionList: typeof import('./src/components/TextEditor/MentionList.vue')['default']
     Menu: typeof import('./src/components/TextEditor/Menu.vue')['default']
     MonthIcon: typeof import('./src/components/Calendar/Icon/MonthIcon.vue')['default']
+    MonthPicker: typeof import('./src/components/MonthPicker/MonthPicker.vue')['default']
+    'MonthPicker.story': typeof import('./src/components/MonthPicker/MonthPicker.story.vue')['default']
+    MultiSelect: typeof import('./src/components/MultiSelect/MultiSelect.vue')['default']
+    'MultiSelect.story': typeof import('./src/components/MultiSelect/MultiSelect.story.vue')['default']
     NestedPopover: typeof import('./src/components/ListFilter/NestedPopover.vue')['default']
     NewEventModal: typeof import('./src/components/Calendar/NewEventModal.vue')['default']
     NumberChart: typeof import('./src/components/Charts/NumberChart.vue')['default']

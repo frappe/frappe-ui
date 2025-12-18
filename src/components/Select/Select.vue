@@ -98,7 +98,7 @@ const selectOptions = computed(() => {
 
     <SelectPortal>
       <SelectContent
-        class="bg-surface-modal border rounded-lg shadow-lg will-change-[opacity,transform] z-[100]"
+        class="bg-surface-modal border rounded-lg shadow-lg will-change-[opacity,transform] z-[100] overflow-hidden origin-center data-[state=open]:animate-[fadeInScale_150ms] data-[state=closed]:animate-[fadeOutScale_150ms]"
       >
         <SelectViewport class="p-1 flex flex-col">
           <SelectItem
@@ -117,7 +117,6 @@ const selectOptions = computed(() => {
               <slot name="option" v-bind="{ option }">{{ option.label }}</slot>
             </SelectItemText>
           </SelectItem>
-
           <slot name="footer" />
         </SelectViewport>
       </SelectContent>
@@ -125,9 +124,33 @@ const selectOptions = computed(() => {
   </SelectRoot>
 </template>
 
-<style>
+<style scoped>
 [data-highlighted],
 [data-state='checked'] {
   outline: none !important;
+}
+</style>
+
+<style>
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.90);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fadeOutScale {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
 }
 </style>
