@@ -64,12 +64,12 @@
   },
   {
     'name': 'description',
-    'description': 'Custom description slot (replaces `description` prop)',
+    'description': 'Custom description slot (replaces description prop)',
     'type': 'any'
   },
   {
     'name': 'item-prefix',
-    'description': 'Custom slot for autocomplete items' prefix (if using Autocomplete type)',
+    'description': 'Custom slot for autocomplete items prefix (if using Autocomplete type)',
     'type': '{ item: any; }'
   },
   {

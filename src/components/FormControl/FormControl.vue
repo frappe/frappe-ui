@@ -113,9 +113,9 @@ defineSlots<{
   prefix?: () => any
   /** Custom content rendered after the input (suffix icon/content) */
   suffix?: () => any
-  /** Custom description slot (replaces `description` prop) */
+  /** Custom description slot (replaces description prop) */
   description?: () => any
-  /** Custom slot for autocomplete items' prefix (if using Autocomplete type) */
+  /** Custom slot for autocomplete items prefix (if using Autocomplete type) */
   'item-prefix'?: (props: { item: any }) => any
   /** Default slot override for full input rendering */
   default?: () => any
