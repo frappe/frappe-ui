@@ -5310,6 +5310,10 @@ select {
   width: 2.5rem;
   height: 2.5rem;
 }
+.size-3 {
+  width: 0.75rem;
+  height: 0.75rem;
+}
 .size-4 {
   width: 1rem;
   height: 1rem;
