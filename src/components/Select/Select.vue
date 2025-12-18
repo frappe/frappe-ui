@@ -70,7 +70,7 @@ const selectClasses = computed(() => {
     fontSizeClasses.value,
     paddingClasses.value,
     variantClasses,
-    'transition-colors w-full data-[state=open]:ring-2 ring-outline-gray-2 ',
+    'transition-colors w-full focus:ring-2 data-[state=open]:ring-2 ring-outline-gray-3 ',
   ]
 })
 
