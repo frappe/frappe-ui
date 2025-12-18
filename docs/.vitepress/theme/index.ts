@@ -5,7 +5,7 @@ import DefaultTheme from 'vitepress/theme'
 import './style.css'
 import Demo from '../../components/Demo.vue'
 
-import.meta.glob('../../../src/components/**/*.story.vue', { eager: true })
+import.meta.glob('../../stories/*.vue', { eager: true })
 
 export default {
   extends: DefaultTheme,

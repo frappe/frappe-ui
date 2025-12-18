@@ -21,11 +21,11 @@ const tsconfigChecker = createChecker(
 // test meta obj for single component
 // const componentPath = path.join(
 //   __dirname,
-//   '../../src/components/Avatar/Avatar.vue',
+//   '../../src/components/TextEditor/TextEditor.vue',
 // )
 // const meta = tsconfigChecker.getComponentMeta(componentPath)
 //
-// console.log(meta.props, meta.props[0].declarations)
+// console.log(meta.slots)
 
 const arrToStr = (arr) => JSON.stringify(arr, null, 2).replace(/"/g, "'")
 
