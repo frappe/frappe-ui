@@ -41,6 +41,18 @@
             </div>
         </div>
 
+        <div v-if="warnings.length" class="space-y-2">
+            <div class="text-ink-gray-5 text-sm">
+                Warnings
+            </div>
+            <div class="rounded-md bg-surface-amber-2 p-2 space-y-2 text-xs">
+                <div v-for="warning in warnings" class="flex items-center space-x-2">
+                    <FeatherIcon name="alert-circle" class="size-3 text-ink-amber-3" />
+                    <div v-html="warning.message" class=""></div>
+                </div>
+            </div>
+        </div>
+
         <div v-if="preview?.data?.length" class="border rounded-md overflow-x-auto">
             <table class="divide-y">
                 <thead class="rounded-t-md">
@@ -323,6 +335,10 @@ const mapping = computed(() => {
         }
     })
     return warningMap;
+})
+
+const warnings = computed(() => {
+    return preview.value?.warnings?.filter((warning: any) => warning.type != "info") || [];
 })
 
 const listRoute = computed(() => {
