@@ -8,27 +8,27 @@
 </script>
 
 ## Props 
-<PropsTable :data="[
+<PropsTable :data='[
   {
-    'name': 'modelValue',
-    'description': 'The current value of the password input (v-model)',
-    'required': false,
-    'type': 'string | null | undefined'
+    "name": "modelValue",
+    "description": "The current value of the password input (v-model)",
+    "required": false,
+    "type": "string | null | undefined"
   },
   {
-    'name': 'value',
-    'description': 'Alternate way to set the password value',
-    'required': false,
-    'type': 'string | null | undefined'
+    "name": "value",
+    "description": "Alternate way to set the password value",
+    "required": false,
+    "type": "string | null | undefined"
   }
-]"/> 
+]'/> 
 
 ## Default Slots 
- <SlotsTable :data="[
+ <SlotsTable :data='[
   {
-    'name': 'prefix',
-    'description': 'Content shown before the input field (left icon / custom content)',
-    'type': 'any'
+    "name": "prefix",
+    "description": "Content shown before the input field (left icon / custom content)",
+    "type": "any"
   }
-]"/> 
+]'/> 
 

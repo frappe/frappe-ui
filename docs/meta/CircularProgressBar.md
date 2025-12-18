@@ -8,55 +8,55 @@
 </script>
 
 ## Props 
-<PropsTable :data="[
+<PropsTable :data='[
   {
-    'name': 'step',
-    'description': 'Current step or progress value',
-    'required': false,
-    'type': 'number',
-    'default': '1'
+    "name": "step",
+    "description": "Current step or progress value",
+    "required": false,
+    "type": "number",
+    "default": "1"
   },
   {
-    'name': 'totalSteps',
-    'description': 'Total steps for completion',
-    'required': false,
-    'type': 'number',
-    'default': '4'
+    "name": "totalSteps",
+    "description": "Total steps for completion",
+    "required": false,
+    "type": "number",
+    "default": "4"
   },
   {
-    'name': 'showPercentage',
-    'description': 'Show numeric percentage inside the circle',
-    'required': false,
-    'type': 'boolean | undefined',
-    'default': 'false'
+    "name": "showPercentage",
+    "description": "Show numeric percentage inside the circle",
+    "required": false,
+    "type": "boolean | undefined",
+    "default": "false"
   },
   {
-    'name': 'variant',
-    'description': 'Visual style of the progress bar',
-    'required': false,
-    'type': '\'outline\' | \'solid\' | undefined',
-    'default': '\'solid\''
+    "name": "variant",
+    "description": "Visual style of the progress bar",
+    "required": false,
+    "type": "\"outline\" | \"solid\" | undefined",
+    "default": "\"solid\""
   },
   {
-    'name': 'theme',
-    'description': 'Theme used for the progress bar (predefined or custom colors)',
-    'required': false,
-    'type': '\'blue\' | \'red\' | \'green\' | \'orange\' | \'black\' | { primary: string; secondary: string; } | undefined',
-    'default': '\'black\''
+    "name": "theme",
+    "description": "Theme used for the progress bar (predefined or custom colors)",
+    "required": false,
+    "type": "\"blue\" | \"red\" | \"green\" | \"orange\" | \"black\" | { primary: string; secondary: string; } | undefined",
+    "default": "\"black\""
   },
   {
-    'name': 'size',
-    'description': 'Size of the progress bar',
-    'required': false,
-    'type': '\'sm\' | \'md\' | \'lg\' | \'xl\' | \'xs\' | undefined',
-    'default': '\'md\''
+    "name": "size",
+    "description": "Size of the progress bar",
+    "required": false,
+    "type": "\"sm\" | \"md\" | \"lg\" | \"xl\" | \"xs\" | undefined",
+    "default": "\"md\""
   },
   {
-    'name': 'themeComplete',
-    'description': 'Color used when the progress completes',
-    'required': false,
-    'type': 'string | undefined',
-    'default': '\'lightgreen\''
+    "name": "themeComplete",
+    "description": "Color used when the progress completes",
+    "required": false,
+    "type": "string | undefined",
+    "default": "\"lightgreen\""
   }
-]"/> 
+]'/> 
 

@@ -8,38 +8,38 @@
 </script>
 
 ## Props 
-<PropsTable :data="[
+<PropsTable :data='[
   {
-    'name': 'as',
-    'description': 'Element/component used to render the tab container',
-    'required': false,
-    'type': 'string | undefined'
+    "name": "as",
+    "description": "Element/component used to render the tab container",
+    "required": false,
+    "type": "string | undefined"
   },
   {
-    'name': 'tabs',
-    'description': 'List of tabs to render',
-    'required': true,
-    'type': 'Tab[]'
+    "name": "tabs",
+    "description": "List of tabs to render",
+    "required": true,
+    "type": "Tab[]"
   },
   {
-    'name': 'vertical',
-    'description': 'Renders tabs vertically instead of horizontally',
-    'required': false,
-    'type': 'boolean | undefined'
+    "name": "vertical",
+    "description": "Renders tabs vertically instead of horizontally",
+    "required": false,
+    "type": "boolean | undefined"
   }
-]"/> 
+]'/> 
 
 ## Default Slots 
- <SlotsTable :data="[
+ <SlotsTable :data='[
   {
-    'name': 'tab-item',
-    'description': 'Custom renderer for a tab trigger (icon + label / router-link).',
-    'type': '{ tab: { label: string; icon?: string | undefined; route?: string | undefined; }; }'
+    "name": "tab-item",
+    "description": "Custom renderer for a tab trigger (icon + label / router-link).",
+    "type": "{ tab: { label: string; icon?: string | undefined; route?: string | undefined; }; }"
   },
   {
-    'name': 'tab-panel',
-    'description': 'Content rendered for each tab panel.',
-    'type': '{ tab: { label: string; icon?: string | undefined; route?: string | undefined; }; }'
+    "name": "tab-panel",
+    "description": "Content rendered for each tab panel.",
+    "type": "{ tab: { label: string; icon?: string | undefined; route?: string | undefined; }; }"
   }
-]"/> 
+]'/> 
 

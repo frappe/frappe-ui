@@ -8,54 +8,54 @@
 </script>
 
 ## Props 
-<PropsTable :data="[
+<PropsTable :data='[
   {
-    'name': 'button',
-    'description': 'Button configuration (label, icon, size, variant, etc.)',
-    'required': false,
-    'type': 'ButtonProps | undefined'
+    "name": "button",
+    "description": "Button configuration (label, icon, size, variant, etc.)",
+    "required": false,
+    "type": "ButtonProps | undefined"
   },
   {
-    'name': 'options',
-    'description': 'Array of dropdown options or grouped options',
-    'required': false,
-    'type': 'DropdownOptions | undefined',
-    'default': '[]'
+    "name": "options",
+    "description": "Array of dropdown options or grouped options",
+    "required": false,
+    "type": "DropdownOptions | undefined",
+    "default": "[]"
   },
   {
-    'name': 'placement',
-    'description': 'Placement of the dropdown relative to the trigger',
-    'required': false,
-    'type': 'string | undefined',
-    'default': '\'left\''
+    "name": "placement",
+    "description": "Placement of the dropdown relative to the trigger",
+    "required": false,
+    "type": "string | undefined",
+    "default": "\"left\""
   },
   {
-    'name': 'side',
-    'description': 'Side of the trigger the dropdown appears on',
-    'required': false,
-    'type': '\'left\' | \'bottom\' | \'top\' | \'right\' | undefined',
-    'default': '\'bottom\''
+    "name": "side",
+    "description": "Side of the trigger the dropdown appears on",
+    "required": false,
+    "type": "\"left\" | \"bottom\" | \"top\" | \"right\" | undefined",
+    "default": "\"bottom\""
   },
   {
-    'name': 'offset',
-    'description': 'Offset in pixels between trigger and dropdown',
-    'required': false,
-    'type': 'number | undefined',
-    'default': '4'
+    "name": "offset",
+    "description": "Offset in pixels between trigger and dropdown",
+    "required": false,
+    "type": "number | undefined",
+    "default": "4"
   }
-]"/> 
+]'/> 
 
 ## Default Slots 
- <SlotsTable :data="[
+ <SlotsTable :data='[
   {
-    'name': 'default',
-    'description': 'Default slot for custom trigger content (receives `open`, `close`, and extra attrs)',
-    'type': '{ [key: string]: any; open: boolean; close: () => void; }'
+    "name": "default",
+    "description": "Default slot for custom trigger content (receives `open`, `close`, and extra attrs)",
+    "type": "{ [key: string]: any; open: boolean; close: () => void; }"
   },
   {
-    'name': 'item',
-    'description': 'Custom rendering for each dropdown item (receives `item` and `close`)',
-    'type': '{ item: DropdownOption; close: () => void; }'
+    "name": "item",
+    "description": "Custom rendering for each dropdown item (receives `item` and `close`)",
+    "type": "{ item: DropdownOption; close: () => void; }"
   }
-]"/> 
+]'/> 
 

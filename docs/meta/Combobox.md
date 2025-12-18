@@ -8,94 +8,94 @@
 </script>
 
 ## Props 
-<PropsTable :data="[
+<PropsTable :data='[
   {
-    'name': 'variant',
-    'description': 'Visual style of the combobox',
-    'required': false,
-    'type': 'ComboboxVariant | undefined',
-    'default': '\'subtle\''
+    "name": "variant",
+    "description": "Visual style of the combobox",
+    "required": false,
+    "type": "ComboboxVariant | undefined",
+    "default": "\"subtle\""
   },
   {
-    'name': 'options',
-    'description': 'List of options to display',
-    'required': false,
-    'type': 'ComboboxOption[]',
-    'default': '[]'
+    "name": "options",
+    "description": "List of options to display",
+    "required": false,
+    "type": "ComboboxOption[]",
+    "default": "[]"
   },
   {
-    'name': 'modelValue',
-    'description': 'Currently selected value (v-model)',
-    'required': false,
-    'type': 'string | null | undefined'
+    "name": "modelValue",
+    "description": "Currently selected value (v-model)",
+    "required": false,
+    "type": "string | null | undefined"
   },
   {
-    'name': 'placeholder',
-    'description': 'Placeholder text shown when no value is selected',
-    'required': false,
-    'type': 'string | undefined'
+    "name": "placeholder",
+    "description": "Placeholder text shown when no value is selected",
+    "required": false,
+    "type": "string | undefined"
   },
   {
-    'name': 'disabled',
-    'description': 'Disables the combobox',
-    'required': false,
-    'type': 'boolean | undefined'
+    "name": "disabled",
+    "description": "Disables the combobox",
+    "required": false,
+    "type": "boolean | undefined"
   },
   {
-    'name': 'openOnFocus',
-    'description': 'Opens the dropdown when the input is focused',
-    'required': false,
-    'type': 'boolean | undefined'
+    "name": "openOnFocus",
+    "description": "Opens the dropdown when the input is focused",
+    "required": false,
+    "type": "boolean | undefined"
   },
   {
-    'name': 'openOnClick',
-    'description': 'Opens the dropdown when the input is clicked',
-    'required': false,
-    'type': 'boolean | undefined'
+    "name": "openOnClick",
+    "description": "Opens the dropdown when the input is clicked",
+    "required": false,
+    "type": "boolean | undefined"
   },
   {
-    'name': 'placement',
-    'description': 'Dropdown placement relative to the input',
-    'required': false,
-    'type': '\'start\' | \'center\' | \'end\' | undefined'
+    "name": "placement",
+    "description": "Dropdown placement relative to the input",
+    "required": false,
+    "type": "\"start\" | \"center\" | \"end\" | undefined"
   }
-]"/> 
+]'/> 
 
 ## Default Slots 
- <SlotsTable :data="[
+ <SlotsTable :data='[
   {
-    'name': 'prefix',
-    'description': 'Custom content rendered before the input (left side)',
-    'type': 'any'
+    "name": "prefix",
+    "description": "Custom content rendered before the input (left side)",
+    "type": "any"
   }
-]"/> 
+]'/> 
 
 ## Emit Events 
- <EmitsTable :data="[
+ <EmitsTable :data='[
   {
-    'name': 'update:modelValue',
-    'description': '',
-    'type': '[]'
+    "name": "update:modelValue",
+    "description": "",
+    "type": "[]"
   },
   {
-    'name': 'update:selectedOption',
-    'description': '',
-    'type': '[]'
+    "name": "update:selectedOption",
+    "description": "",
+    "type": "[]"
   },
   {
-    'name': 'focus',
-    'description': '',
-    'type': '[]'
+    "name": "focus",
+    "description": "",
+    "type": "[]"
   },
   {
-    'name': 'blur',
-    'description': '',
-    'type': '[]'
+    "name": "blur",
+    "description": "",
+    "type": "[]"
   },
   {
-    'name': 'input',
-    'description': '',
-    'type': '[]'
+    "name": "input",
+    "description": "",
+    "type": "[]"
   }
-]"/> 
+]'/> 
 

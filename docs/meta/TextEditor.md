@@ -8,152 +8,152 @@
 </script>
 
 ## Props 
-<PropsTable :data="[
+<PropsTable :data='[
   {
-    'name': 'content',
-    'description': 'Initial editor content (HTML/string). `null` renders an empty editor',
-    'required': false,
-    'type': 'string | null | undefined',
-    'default': 'null'
+    "name": "content",
+    "description": "Initial editor content (HTML/string). `null` renders an empty editor",
+    "required": false,
+    "type": "string | null | undefined",
+    "default": "null"
   },
   {
-    'name': 'placeholder',
-    'description': 'Placeholder text or dynamic placeholder resolver',
-    'required': false,
-    'type': 'string | (() => string) | undefined',
-    'default': '\'\''
+    "name": "placeholder",
+    "description": "Placeholder text or dynamic placeholder resolver",
+    "required": false,
+    "type": "string | (() => string) | undefined",
+    "default": "\"\""
   },
   {
-    'name': 'editorClass',
-    'description': 'Custom classes applied to the editor root',
-    'required': false,
-    'type': 'string | object | string[] | undefined',
-    'default': '\'\''
+    "name": "editorClass",
+    "description": "Custom classes applied to the editor root",
+    "required": false,
+    "type": "string | object | string[] | undefined",
+    "default": "\"\""
   },
   {
-    'name': 'editable',
-    'description': 'Toggles editability of the editor',
-    'required': false,
-    'type': 'boolean | undefined',
-    'default': 'true'
+    "name": "editable",
+    "description": "Toggles editability of the editor",
+    "required": false,
+    "type": "boolean | undefined",
+    "default": "true"
   },
   {
-    'name': 'autofocus',
-    'description': 'Autofocus the editor on mount',
-    'required': false,
-    'type': 'boolean | undefined',
-    'default': 'false'
+    "name": "autofocus",
+    "description": "Autofocus the editor on mount",
+    "required": false,
+    "type": "boolean | undefined",
+    "default": "false"
   },
   {
-    'name': 'bubbleMenu',
-    'description': 'Enables bubble menu or provides custom bubble menu items',
-    'required': false,
-    'type': 'boolean | any[] | undefined',
-    'default': 'false'
+    "name": "bubbleMenu",
+    "description": "Enables bubble menu or provides custom bubble menu items",
+    "required": false,
+    "type": "boolean | any[] | undefined",
+    "default": "false"
   },
   {
-    'name': 'bubbleMenuOptions',
-    'description': 'Configuration options for the bubble menu',
-    'required': false,
-    'type': 'object | undefined',
-    'default': '{}'
+    "name": "bubbleMenuOptions",
+    "description": "Configuration options for the bubble menu",
+    "required": false,
+    "type": "object | undefined",
+    "default": "{}"
   },
   {
-    'name': 'fixedMenu',
-    'description': 'Enables fixed menu or provides custom fixed menu items',
-    'required': false,
-    'type': 'boolean | any[] | undefined',
-    'default': 'false'
+    "name": "fixedMenu",
+    "description": "Enables fixed menu or provides custom fixed menu items",
+    "required": false,
+    "type": "boolean | any[] | undefined",
+    "default": "false"
   },
   {
-    'name': 'floatingMenu',
-    'description': 'Enables floating menu or provides custom floating menu items',
-    'required': false,
-    'type': 'boolean | any[] | undefined',
-    'default': 'false'
+    "name": "floatingMenu",
+    "description": "Enables floating menu or provides custom floating menu items",
+    "required": false,
+    "type": "boolean | any[] | undefined",
+    "default": "false"
   },
   {
-    'name': 'extensions',
-    'description': 'Custom TipTap extensions',
-    'required': false,
-    'type': 'any[] | undefined',
-    'default': '[]'
+    "name": "extensions",
+    "description": "Custom TipTap extensions",
+    "required": false,
+    "type": "any[] | undefined",
+    "default": "[]"
   },
   {
-    'name': 'starterkitOptions',
-    'description': 'Options passed to TipTap StarterKit',
-    'required': false,
-    'type': 'any',
-    'default': '{}'
+    "name": "starterkitOptions",
+    "description": "Options passed to TipTap StarterKit",
+    "required": false,
+    "type": "any",
+    "default": "{}"
   },
   {
-    'name': 'mentions',
-    'description': 'Mention extension configuration',
-    'required': false,
-    'type': 'ConfigureMentionOptions | undefined',
-    'default': 'null'
+    "name": "mentions",
+    "description": "Mention extension configuration",
+    "required": false,
+    "type": "ConfigureMentionOptions | undefined",
+    "default": "null"
   },
   {
-    'name': 'tags',
-    'description': 'Tag / hashtag configuration',
-    'required': false,
-    'type': 'any[] | undefined',
-    'default': '[]'
+    "name": "tags",
+    "description": "Tag / hashtag configuration",
+    "required": false,
+    "type": "any[] | undefined",
+    "default": "[]"
   },
   {
-    'name': 'uploadFunction',
-    'description': 'Async file upload handler (used for images, files, etc.)',
-    'required': false,
-    'type': '((file: File) => Promise<UploadedFile>) | undefined'
+    "name": "uploadFunction",
+    "description": "Async file upload handler (used for images, files, etc.)",
+    "required": false,
+    "type": "((file: File) => Promise<UploadedFile>) | undefined"
   },
   {
-    'name': 'uploadArgs',
-    'description': 'Extra arguments passed to the upload function',
-    'required': false,
-    'type': 'object | undefined'
+    "name": "uploadArgs",
+    "description": "Extra arguments passed to the upload function",
+    "required": false,
+    "type": "object | undefined"
   }
-]"/> 
+]'/> 
 
 ## Default Slots 
- <SlotsTable :data="[
+ <SlotsTable :data='[
   {
-    'name': 'top',
-    'description': '',
-    'type': '{ editor: { contentComponent: { uid: number; type: FunctionalComponent<{}, {}, any, {}> | { [x: stri'
+    "name": "top",
+    "description": "",
+    "type": "{ editor: { contentComponent: { uid: number; type: FunctionalComponent<{}, {}, any, {}> | { [x: stri"
   },
   {
-    'name': 'editor',
-    'description': '',
-    'type': '{ editor: { contentComponent: { uid: number; type: FunctionalComponent<{}, {}, any, {}> | { [x: stri'
+    "name": "editor",
+    "description": "",
+    "type": "{ editor: { contentComponent: { uid: number; type: FunctionalComponent<{}, {}, any, {}> | { [x: stri"
   },
   {
-    'name': 'bottom',
-    'description': '',
-    'type': '{ editor: { contentComponent: { uid: number; type: FunctionalComponent<{}, {}, any, {}> | { [x: stri'
+    "name": "bottom",
+    "description": "",
+    "type": "{ editor: { contentComponent: { uid: number; type: FunctionalComponent<{}, {}, any, {}> | { [x: stri"
   }
-]"/> 
+]'/> 
 
 ## Emit Events 
- <EmitsTable :data="[
+ <EmitsTable :data='[
   {
-    'name': 'change',
-    'description': '',
-    'type': '[content: string]'
+    "name": "change",
+    "description": "",
+    "type": "[content: string]"
   },
   {
-    'name': 'focus',
-    'description': '',
-    'type': '[event: FocusEvent]'
+    "name": "focus",
+    "description": "",
+    "type": "[event: FocusEvent]"
   },
   {
-    'name': 'blur',
-    'description': '',
-    'type': '[event: FocusEvent]'
+    "name": "blur",
+    "description": "",
+    "type": "[event: FocusEvent]"
   },
   {
-    'name': 'transaction',
-    'description': '',
-    'type': '[editor: object]'
+    "name": "transaction",
+    "description": "",
+    "type": "[editor: object]"
   }
-]"/> 
+]'/> 
 

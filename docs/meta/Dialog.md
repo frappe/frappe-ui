@@ -8,74 +8,74 @@
 </script>
 
 ## Props 
-<PropsTable :data="[
+<PropsTable :data='[
   {
-    'name': 'modelValue',
-    'description': 'Controls whether the dialog is open (v-model)',
-    'required': true,
-    'type': 'boolean'
+    "name": "modelValue",
+    "description": "Controls whether the dialog is open (v-model)",
+    "required": true,
+    "type": "boolean"
   },
   {
-    'name': 'options',
-    'description': 'Configuration options for title, message, size, icon, actions, etc.',
-    'required': false,
-    'type': 'DialogOptions | undefined',
-    'default': '{}'
+    "name": "options",
+    "description": "Configuration options for title, message, size, icon, actions, etc.",
+    "required": false,
+    "type": "DialogOptions | undefined",
+    "default": "{}"
   },
   {
-    'name': 'disableOutsideClickToClose',
-    'description': 'Prevents closing the dialog when clicking outside',
-    'required': false,
-    'type': 'boolean | undefined',
-    'default': 'false'
+    "name": "disableOutsideClickToClose",
+    "description": "Prevents closing the dialog when clicking outside",
+    "required": false,
+    "type": "boolean | undefined",
+    "default": "false"
   }
-]"/> 
+]'/> 
 
 ## Default Slots 
- <SlotsTable :data="[
+ <SlotsTable :data='[
   {
-    'name': 'body',
-    'description': 'Main body content of the dialog, overrides body-header and body-content',
-    'type': 'any'
+    "name": "body",
+    "description": "Main body content of the dialog, overrides body-header and body-content",
+    "type": "any"
   },
   {
-    'name': 'body-header',
-    'description': 'Header section inside the dialog body',
-    'type': 'any'
+    "name": "body-header",
+    "description": "Header section inside the dialog body",
+    "type": "any"
   },
   {
-    'name': 'body-title',
-    'description': 'Title section inside the header',
-    'type': 'any'
+    "name": "body-title",
+    "description": "Title section inside the header",
+    "type": "any"
   },
   {
-    'name': 'body-content',
-    'description': 'Main content section inside the body',
-    'type': 'any'
+    "name": "body-content",
+    "description": "Main content section inside the body",
+    "type": "any"
   },
   {
-    'name': 'actions',
-    'description': 'Actions section at the bottom of the dialog; exposes `{ close }`',
-    'type': '{ close: () => void; }'
+    "name": "actions",
+    "description": "Actions section at the bottom of the dialog; exposes `{ close }`",
+    "type": "{ close: () => void; }"
   }
-]"/> 
+]'/> 
 
 ## Emit Events 
- <EmitsTable :data="[
+ <EmitsTable :data='[
   {
-    'name': 'update:modelValue',
-    'description': '',
-    'type': '[value: boolean]'
+    "name": "update:modelValue",
+    "description": "",
+    "type": "[value: boolean]"
   },
   {
-    'name': 'close',
-    'description': '',
-    'type': '[]'
+    "name": "close",
+    "description": "",
+    "type": "[]"
   },
   {
-    'name': 'after-leave',
-    'description': '',
-    'type': '[]'
+    "name": "after-leave",
+    "description": "",
+    "type": "[]"
   }
-]"/> 
+]'/> 
 

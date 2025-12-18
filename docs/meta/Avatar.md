@@ -8,46 +8,46 @@
 </script>
 
 ## Props 
-<PropsTable :data="[
+<PropsTable :data='[
   {
-    'name': 'image',
-    'description': 'Image URL used for the avatar',
-    'required': false,
-    'type': 'string | undefined'
+    "name": "image",
+    "description": "Image URL used for the avatar",
+    "required": false,
+    "type": "string | undefined"
   },
   {
-    'name': 'label',
-    'description': 'Fallback text shown when the image is missing',
-    'required': false,
-    'type': 'string | undefined'
+    "name": "label",
+    "description": "Fallback text shown when the image is missing",
+    "required": false,
+    "type": "string | undefined"
   },
   {
-    'name': 'size',
-    'description': 'Controls the overall size of the avatar',
-    'required': false,
-    'type': '\'sm\' | \'md\' | \'lg\' | \'xl\' | \'2xl\' | \'xs\' | \'3xl\' | undefined',
-    'default': '\'md\''
+    "name": "size",
+    "description": "Controls the overall size of the avatar",
+    "required": false,
+    "type": "\"sm\" | \"md\" | \"lg\" | \"xl\" | \"2xl\" | \"xs\" | \"3xl\" | undefined",
+    "default": "\"md\""
   },
   {
-    'name': 'shape',
-    'description': 'Defines the avatar shape',
-    'required': false,
-    'type': '\'circle\' | \'square\' | undefined',
-    'default': '\'circle\''
+    "name": "shape",
+    "description": "Defines the avatar shape",
+    "required": false,
+    "type": "\"circle\" | \"square\" | undefined",
+    "default": "\"circle\""
   }
-]"/> 
+]'/> 
 
 ## Default Slots 
- <SlotsTable :data="[
+ <SlotsTable :data='[
   {
-    'name': 'default',
-    'description': 'Custom content shown inside the avatar (icon / initials replacement)',
-    'type': 'any'
+    "name": "default",
+    "description": "Custom content shown inside the avatar (icon / initials replacement)",
+    "type": "any"
   },
   {
-    'name': 'indicator',
-    'description': 'Small indicator shown at the bottom-right of the avatar',
-    'type': 'any'
+    "name": "indicator",
+    "description": "Small indicator shown at the bottom-right of the avatar",
+    "type": "any"
   }
-]"/> 
+]'/> 
 

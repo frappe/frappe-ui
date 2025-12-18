@@ -8,73 +8,73 @@
 </script>
 
 ## Props 
-<PropsTable :data="[
+<PropsTable :data='[
   {
-    'name': 'title',
-    'description': 'Main heading text of the alert',
-    'required': true,
-    'type': 'string'
+    "name": "title",
+    "description": "Main heading text of the alert",
+    "required": true,
+    "type": "string"
   },
   {
-    'name': 'theme',
-    'description': 'Color theme of the alert',
-    'required': false,
-    'type': 'Theme | undefined'
+    "name": "theme",
+    "description": "Color theme of the alert",
+    "required": false,
+    "type": "Theme | undefined"
   },
   {
-    'name': 'variant',
-    'description': 'Visual style of the alert container',
-    'required': false,
-    'type': '\'subtle\' | \'outline\' | undefined',
-    'default': '\'subtle\''
+    "name": "variant",
+    "description": "Visual style of the alert container",
+    "required": false,
+    "type": "\"subtle\" | \"outline\" | undefined",
+    "default": "\"subtle\""
   },
   {
-    'name': 'description',
-    'description': 'Optional supporting text shown below the title',
-    'required': false,
-    'type': 'string | undefined'
+    "name": "description",
+    "description": "Optional supporting text shown below the title",
+    "required": false,
+    "type": "string | undefined"
   },
   {
-    'name': 'dismissable',
-    'description': 'Whether the alert can be closed by the user',
-    'required': false,
-    'type': 'boolean | undefined',
-    'default': 'true'
+    "name": "dismissable",
+    "description": "Whether the alert can be closed by the user",
+    "required": false,
+    "type": "boolean | undefined",
+    "default": "true"
   },
   {
-    'name': 'modelValue',
-    'description': 'Controls the visibility of the alert for dismissing or toggling it',
-    'required': false,
-    'type': 'boolean | undefined',
-    'default': 'true'
+    "name": "modelValue",
+    "description": "Controls the visibility of the alert for dismissing or toggling it",
+    "required": false,
+    "type": "boolean | undefined",
+    "default": "true"
   }
-]"/> 
+]'/> 
 
 ## Default Slots 
- <SlotsTable :data="[
+ <SlotsTable :data='[
   {
-    'name': 'icon',
-    'description': 'Custom icon shown before the content',
-    'type': 'any'
+    "name": "icon",
+    "description": "Custom icon shown before the content",
+    "type": "any"
   },
   {
-    'name': 'description',
-    'description': 'Custom description content',
-    'type': 'any'
+    "name": "description",
+    "description": "Custom description content",
+    "type": "any"
   },
   {
-    'name': 'footer',
-    'description': 'Footer content shown at the bottom of the alert',
-    'type': 'any'
+    "name": "footer",
+    "description": "Footer content shown at the bottom of the alert",
+    "type": "any"
   }
-]"/> 
+]'/> 
 
 ## Emit Events 
- <EmitsTable :data="[
+ <EmitsTable :data='[
   {
-    'name': 'update:modelValue',
-    'description': '',
-    'type': '[value: boolean]'
+    "name": "update:modelValue",
+    "description": "",
+    "type": "[value: boolean]"
   }
-]"/> 
+]'/> 
 

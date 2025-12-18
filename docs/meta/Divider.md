@@ -8,32 +8,32 @@
 </script>
 
 ## Props 
-<PropsTable :data="[
+<PropsTable :data='[
   {
-    'name': 'orientation',
-    'description': '',
-    'required': false,
-    'type': '\'horizontal\' | \'vertical\' | undefined',
-    'default': '\'horizontal\''
+    "name": "orientation",
+    "description": "",
+    "required": false,
+    "type": "\"horizontal\" | \"vertical\" | undefined",
+    "default": "\"horizontal\""
   },
   {
-    'name': 'position',
-    'description': '',
-    'required': false,
-    'type': '\'start\' | \'center\' | \'end\' | undefined',
-    'default': '\'center\''
+    "name": "position",
+    "description": "",
+    "required": false,
+    "type": "\"start\" | \"center\" | \"end\" | undefined",
+    "default": "\"center\""
   },
   {
-    'name': 'flexItem',
-    'description': '',
-    'required': false,
-    'type': 'boolean | undefined'
+    "name": "flexItem",
+    "description": "",
+    "required": false,
+    "type": "boolean | undefined"
   },
   {
-    'name': 'action',
-    'description': '',
-    'required': false,
-    'type': 'DividerAction | undefined'
+    "name": "action",
+    "description": "",
+    "required": false,
+    "type": "DividerAction | undefined"
   }
-]"/> 
+]'/> 
 

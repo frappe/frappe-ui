@@ -8,67 +8,67 @@
 </script>
 
 ## Props 
-<PropsTable :data="[
+<PropsTable :data='[
   {
-    'name': 'placeholder',
-    'description': 'Placeholder text shown when no item is selected',
-    'required': false,
-    'type': 'string | undefined',
-    'default': '\'Select option\''
+    "name": "placeholder",
+    "description": "Placeholder text shown when no item is selected",
+    "required": false,
+    "type": "string | undefined",
+    "default": "\"Select option\""
   },
   {
-    'name': 'options',
-    'description': 'Options available to select from',
-    'required': true,
-    'type': 'MultiSelectOption[]'
+    "name": "options",
+    "description": "Options available to select from",
+    "required": true,
+    "type": "MultiSelectOption[]"
   },
   {
-    'name': 'hideSearch',
-    'description': 'Hides the search input if true',
-    'required': false,
-    'type': 'boolean | undefined'
+    "name": "hideSearch",
+    "description": "Hides the search input if true",
+    "required": false,
+    "type": "boolean | undefined"
   },
   {
-    'name': 'loading',
-    'description': 'Shows a loading state',
-    'required': false,
-    'type': 'boolean | undefined'
+    "name": "loading",
+    "description": "Shows a loading state",
+    "required": false,
+    "type": "boolean | undefined"
   },
   {
-    'name': 'compareFn',
-    'description': 'Custom comparison function to check equality of options',
-    'required': false,
-    'type': '((a: MultiSelectOption, b: MultiSelectOption) => boolean) | undefined'
+    "name": "compareFn",
+    "description": "Custom comparison function to check equality of options",
+    "required": false,
+    "type": "((a: MultiSelectOption, b: MultiSelectOption) => boolean) | undefined"
   },
   {
-    'name': 'modelValue',
-    'description': '',
-    'required': false,
-    'type': 'String[] | undefined',
-    'default': '[]'
+    "name": "modelValue",
+    "description": "",
+    "required": false,
+    "type": "String[] | undefined",
+    "default": "[]"
   }
-]"/> 
+]'/> 
 
 ## Default Slots 
- <SlotsTable :data="[
+ <SlotsTable :data='[
   {
-    'name': 'option',
-    'description': 'Rendered for each option in the dropdown. Receives the option object.',
-    'type': '{ item: MultiSelectOption; }'
+    "name": "option",
+    "description": "Rendered for each option in the dropdown. Receives the option object.",
+    "type": "{ item: MultiSelectOption; }"
   },
   {
-    'name': 'footer',
-    'description': 'Footer slot at the bottom of the dropdown. Receives helper functions `clearAll` and `selectAll`.',
-    'type': '{ clearAll: () => void; selectAll: () => void; }'
+    "name": "footer",
+    "description": "Footer slot at the bottom of the dropdown. Receives helper functions `clearAll` and `selectAll`.",
+    "type": "{ clearAll: () => void; selectAll: () => void; }"
   }
-]"/> 
+]'/> 
 
 ## Emit Events 
- <EmitsTable :data="[
+ <EmitsTable :data='[
   {
-    'name': 'update:modelValue',
-    'description': '',
-    'type': '[value: String[]]'
+    "name": "update:modelValue",
+    "description": "",
+    "type": "[value: String[]]"
   }
-]"/> 
+]'/> 
 

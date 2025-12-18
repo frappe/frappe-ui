@@ -8,39 +8,39 @@
 </script>
 
 ## Props 
-<PropsTable :data="[]"/> 
+<PropsTable :data='[]'/> 
 
 ## Default Slots 
- <SlotsTable :data="[
+ <SlotsTable :data='[
   {
-    'name': 'target',
-    'description': '',
-    'type': '{ open: () => void; close: () => void; togglePopover: () => void; isOpen: any; }'
+    "name": "target",
+    "description": "",
+    "type": "{ open: () => void; close: () => void; togglePopover: () => void; isOpen: any; }"
   },
   {
-    'name': 'prefix',
-    'description': '',
-    'type': '{}'
+    "name": "prefix",
+    "description": "",
+    "type": "{}"
   },
   {
-    'name': 'suffix',
-    'description': '',
-    'type': '{}'
+    "name": "suffix",
+    "description": "",
+    "type": "{}"
   },
   {
-    'name': 'item-prefix',
-    'description': '',
-    'type': '{ active: any; selected: any; option: Option; }'
+    "name": "item-prefix",
+    "description": "",
+    "type": "{ active: any; selected: any; option: Option; }"
   },
   {
-    'name': 'item-suffix',
-    'description': '',
-    'type': '{ active: any; selected: any; option: Option; }'
+    "name": "item-suffix",
+    "description": "",
+    "type": "{ active: any; selected: any; option: Option; }"
   },
   {
-    'name': 'footer',
-    'description': '',
-    'type': '{ togglePopover: () => void; }'
+    "name": "footer",
+    "description": "",
+    "type": "{ togglePopover: () => void; }"
   }
-]"/> 
+]'/> 
 

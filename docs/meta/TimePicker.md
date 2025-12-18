@@ -8,152 +8,152 @@
 </script>
 
 ## Props 
-<PropsTable :data="[
+<PropsTable :data='[
   {
-    'name': 'value',
-    'description': 'Selected time (uncontrolled)',
-    'required': false,
-    'type': 'string | undefined',
-    'default': '\'\''
+    "name": "value",
+    "description": "Selected time (uncontrolled)",
+    "required": false,
+    "type": "string | undefined",
+    "default": "\"\""
   },
   {
-    'name': 'modelValue',
-    'description': 'Selected time (v-model)',
-    'required': false,
-    'type': 'string | undefined',
-    'default': '\'\''
+    "name": "modelValue",
+    "description": "Selected time (v-model)",
+    "required": false,
+    "type": "string | undefined",
+    "default": "\"\""
   },
   {
-    'name': 'interval',
-    'description': 'Minute interval between options',
-    'required': false,
-    'type': 'number | undefined',
-    'default': '15'
+    "name": "interval",
+    "description": "Minute interval between options",
+    "required": false,
+    "type": "number | undefined",
+    "default": "15"
   },
   {
-    'name': 'options',
-    'description': 'Custom time options',
-    'required': false,
-    'type': '{ value: string; label?: string | undefined; }[] | undefined',
-    'default': '[]'
+    "name": "options",
+    "description": "Custom time options",
+    "required": false,
+    "type": "{ value: string; label?: string | undefined; }[] | undefined",
+    "default": "[]"
   },
   {
-    'name': 'placement',
-    'description': 'Popover placement',
-    'required': false,
-    'type': 'Placement | undefined',
-    'default': '\'bottom-start\' as Placement'
+    "name": "placement",
+    "description": "Popover placement",
+    "required": false,
+    "type": "Placement | undefined",
+    "default": "\"bottom-start\" as Placement"
   },
   {
-    'name': 'placeholder',
-    'description': 'Placeholder text when no value is selected',
-    'required': false,
-    'type': 'string | undefined',
-    'default': '\'Select time\''
+    "name": "placeholder",
+    "description": "Placeholder text when no value is selected",
+    "required": false,
+    "type": "string | undefined",
+    "default": "\"Select time\""
   },
   {
-    'name': 'variant',
-    'description': 'Visual style variant',
-    'required': false,
-    'type': 'Variant | undefined',
-    'default': '\'subtle\' as Variant'
+    "name": "variant",
+    "description": "Visual style variant",
+    "required": false,
+    "type": "Variant | undefined",
+    "default": "\"subtle\" as Variant"
   },
   {
-    'name': 'allowCustom',
-    'description': 'Allow entering custom time values',
-    'required': false,
-    'type': 'boolean | undefined',
-    'default': 'true'
+    "name": "allowCustom",
+    "description": "Allow entering custom time values",
+    "required": false,
+    "type": "boolean | undefined",
+    "default": "true"
   },
   {
-    'name': 'autoClose',
-    'description': 'Close picker automatically after selection',
-    'required': false,
-    'type': 'boolean | undefined',
-    'default': 'true'
+    "name": "autoClose",
+    "description": "Close picker automatically after selection",
+    "required": false,
+    "type": "boolean | undefined",
+    "default": "true"
   },
   {
-    'name': 'use12Hour',
-    'description': 'Use 12-hour (AM/PM) format',
-    'required': false,
-    'type': 'boolean | undefined',
-    'default': 'true'
+    "name": "use12Hour",
+    "description": "Use 12-hour (AM/PM) format",
+    "required": false,
+    "type": "boolean | undefined",
+    "default": "true"
   },
   {
-    'name': 'disabled',
-    'description': 'Disable the time picker',
-    'required': false,
-    'type': 'boolean | undefined',
-    'default': 'false'
+    "name": "disabled",
+    "description": "Disable the time picker",
+    "required": false,
+    "type": "boolean | undefined",
+    "default": "false"
   },
   {
-    'name': 'scrollMode',
-    'description': 'Scroll behavior when opening the list',
-    'required': false,
-    'type': '\'start\' | \'center\' | \'nearest\' | undefined',
-    'default': '\'center\' as const'
+    "name": "scrollMode",
+    "description": "Scroll behavior when opening the list",
+    "required": false,
+    "type": "\"start\" | \"center\" | \"nearest\" | undefined",
+    "default": "\"center\" as const"
   },
   {
-    'name': 'minTime',
-    'description': 'Minimum selectable time',
-    'required': false,
-    'type': 'string | undefined',
-    'default': '\'\''
+    "name": "minTime",
+    "description": "Minimum selectable time",
+    "required": false,
+    "type": "string | undefined",
+    "default": "\"\""
   },
   {
-    'name': 'maxTime',
-    'description': 'Maximum selectable time',
-    'required': false,
-    'type': 'string | undefined',
-    'default': '\'\''
+    "name": "maxTime",
+    "description": "Maximum selectable time",
+    "required": false,
+    "type": "string | undefined",
+    "default": "\"\""
   }
-]"/> 
+]'/> 
 
 ## Default Slots 
- <SlotsTable :data="[
+ <SlotsTable :data='[
   {
-    'name': 'prefix',
-    'description': 'Slot rendered before the input value.\nUseful for icons or indicators.',
-    'type': 'any'
+    "name": "prefix",
+    "description": "Slot rendered before the input value.\nUseful for icons or indicators.",
+    "type": "any"
   },
   {
-    'name': 'suffix',
-    'description': 'Slot rendered after the input value.\nExposes popover controls.',
-    'type': '{ togglePopover: () => void; isOpen: boolean; }'
+    "name": "suffix",
+    "description": "Slot rendered after the input value.\nExposes popover controls.",
+    "type": "{ togglePopover: () => void; isOpen: boolean; }"
   }
-]"/> 
+]'/> 
 
 ## Emit Events 
- <EmitsTable :data="[
+ <EmitsTable :data='[
   {
-    'name': 'update:modelValue',
-    'description': '',
-    'type': '[value: string]'
+    "name": "update:modelValue",
+    "description": "",
+    "type": "[value: string]"
   },
   {
-    'name': 'change',
-    'description': '',
-    'type': '[value: string]'
+    "name": "change",
+    "description": "",
+    "type": "[value: string]"
   },
   {
-    'name': 'open',
-    'description': '',
-    'type': '[]'
+    "name": "open",
+    "description": "",
+    "type": "[]"
   },
   {
-    'name': 'close',
-    'description': '',
-    'type': '[]'
+    "name": "close",
+    "description": "",
+    "type": "[]"
   },
   {
-    'name': 'input-invalid',
-    'description': '',
-    'type': '[input: string]'
+    "name": "input-invalid",
+    "description": "",
+    "type": "[input: string]"
   },
   {
-    'name': 'invalid-change',
-    'description': '',
-    'type': '[invalid: boolean]'
+    "name": "invalid-change",
+    "description": "",
+    "type": "[invalid: boolean]"
   }
-]"/> 
+]'/> 
 

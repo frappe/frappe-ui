@@ -8,56 +8,56 @@
 </script>
 
 ## Props 
-<PropsTable :data="[
+<PropsTable :data='[
   {
-    'name': 'value',
-    'description': 'Current progress value',
-    'required': true,
-    'type': 'number'
+    "name": "value",
+    "description": "Current progress value",
+    "required": true,
+    "type": "number"
   },
   {
-    'name': 'size',
-    'description': 'Size of the progress bar: 'sm', 'md', 'lg', or 'xl'',
-    'required': false,
-    'type': '\'sm\' | \'md\' | \'lg\' | \'xl\' | undefined',
-    'default': '\'sm\''
+    "name": "size",
+    "description": "",
+    "required": false,
+    "type": "\"sm\" | \"md\" | \"lg\" | \"xl\" | undefined",
+    "default": "\"sm\""
   },
   {
-    'name': 'label',
-    'description': 'Optional text label displayed on the progress bar',
-    'required': false,
-    'type': 'string | undefined',
-    'default': '\'\''
+    "name": "label",
+    "description": "Optional text label displayed on the progress bar",
+    "required": false,
+    "type": "string | undefined",
+    "default": "\"\""
   },
   {
-    'name': 'hint',
-    'description': 'Whether to show a hint/tooltip for the progress value',
-    'required': false,
-    'type': 'boolean | undefined',
-    'default': 'false'
+    "name": "hint",
+    "description": "Whether to show a hint/tooltip for the progress value",
+    "required": false,
+    "type": "boolean | undefined",
+    "default": "false"
   },
   {
-    'name': 'intervals',
-    'description': 'Whether to show interval markers on the progress bar',
-    'required': false,
-    'type': 'boolean | undefined',
-    'default': 'false'
+    "name": "intervals",
+    "description": "Whether to show interval markers on the progress bar",
+    "required": false,
+    "type": "boolean | undefined",
+    "default": "false"
   },
   {
-    'name': 'intervalCount',
-    'description': 'Number of intervals to display if `intervals` is true',
-    'required': false,
-    'type': 'number | undefined',
-    'default': '6'
+    "name": "intervalCount",
+    "description": "Number of intervals to display if `intervals` is true",
+    "required": false,
+    "type": "number | undefined",
+    "default": "6"
   }
-]"/> 
+]'/> 
 
 ## Default Slots 
- <SlotsTable :data="[
+ <SlotsTable :data='[
   {
-    'name': 'hint',
-    'description': 'Custom content for the hint area (usually displays the progress value). \nIf not provided, defaults to showing `props.value` followed by `%`.',
-    'type': 'any'
+    "name": "hint",
+    "description": "Custom content for the hint area (usually displays the progress value). \nIf not provided, defaults to showing `props.value` followed by `%`.",
+    "type": "any"
   }
-]"/> 
+]'/> 
 

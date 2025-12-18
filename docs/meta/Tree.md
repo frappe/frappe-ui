@@ -8,44 +8,44 @@
 </script>
 
 ## Props 
-<PropsTable :data="[
+<PropsTable :data='[
   {
-    'name': 'node',
-    'description': 'Root tree node to render.\nCan contain nested children to form the tree structure.',
-    'required': true,
-    'type': 'TreeNode'
+    "name": "node",
+    "description": "Root tree node to render.\nCan contain nested children to form the tree structure.",
+    "required": true,
+    "type": "TreeNode"
   },
   {
-    'name': 'nodeKey',
-    'description': 'Unique key used to identify each node.\nUsually an id-like property present on every node.',
-    'required': true,
-    'type': 'string'
+    "name": "nodeKey",
+    "description": "Unique key used to identify each node.\nUsually an id-like property present on every node.",
+    "required": true,
+    "type": "string"
   },
   {
-    'name': 'options',
-    'description': 'Optional configuration for tree layout and behavior.',
-    'required': false,
-    'type': 'TreeOptions | undefined',
-    'default': '{\n    rowHeight: \'25px\',\n    indentWidth: \'20px\',\n    showIndentationGuides: true,\n    defaultCollapsed: true,\n}'
+    "name": "options",
+    "description": "Optional configuration for tree layout and behavior.",
+    "required": false,
+    "type": "TreeOptions | undefined",
+    "default": "{\n    rowHeight: \"25px\",\n    indentWidth: \"20px\",\n    showIndentationGuides: true,\n    defaultCollapsed: true,\n}"
   }
-]"/> 
+]'/> 
 
 ## Default Slots 
- <SlotsTable :data="[
+ <SlotsTable :data='[
   {
-    'name': 'node',
-    'description': 'Slot to fully override how a tree node renders',
-    'type': 'any'
+    "name": "node",
+    "description": "Slot to fully override how a tree node renders",
+    "type": "any"
   },
   {
-    'name': 'icon',
-    'description': 'Slot to override only the node expand/collapse icon',
-    'type': 'any'
+    "name": "icon",
+    "description": "Slot to override only the node expand/collapse icon",
+    "type": "any"
   },
   {
-    'name': 'label',
-    'description': 'Slot to override only the node label/content',
-    'type': 'any'
+    "name": "label",
+    "description": "Slot to override only the node label/content",
+    "type": "any"
   }
-]"/> 
+]'/> 
 

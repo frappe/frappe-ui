@@ -8,44 +8,44 @@
 </script>
 
 ## Props 
-<PropsTable :data="[
+<PropsTable :data='[
   {
-    'name': 'size',
-    'description': 'Controls the size of the checkbox',
-    'required': false,
-    'type': '\'sm\' | \'md\' | undefined',
-    'default': '\'sm\''
+    "name": "size",
+    "description": "Controls the size of the checkbox",
+    "required": false,
+    "type": "\"sm\" | \"md\" | undefined",
+    "default": "\"sm\""
   },
   {
-    'name': 'label',
-    'description': 'Text label shown next to the checkbox',
-    'required': false,
-    'type': 'string | undefined'
+    "name": "label",
+    "description": "Text label shown next to the checkbox",
+    "required": false,
+    "type": "string | undefined"
   },
   {
-    'name': 'disabled',
-    'description': 'Disables the checkbox interaction',
-    'required': false,
-    'type': 'boolean | undefined'
+    "name": "disabled",
+    "description": "Disables the checkbox interaction",
+    "required": false,
+    "type": "boolean | undefined"
   },
   {
-    'name': 'padding',
-    'description': 'Adds padding around the checkbox',
-    'required': false,
-    'type': 'boolean | undefined',
-    'default': 'false'
+    "name": "padding",
+    "description": "Adds padding around the checkbox",
+    "required": false,
+    "type": "boolean | undefined",
+    "default": "false"
   },
   {
-    'name': 'modelValue',
-    'description': 'Checked state of the checkbox',
-    'required': false,
-    'type': 'boolean | 0 | 1 | undefined'
+    "name": "modelValue",
+    "description": "Checked state of the checkbox",
+    "required": false,
+    "type": "boolean | 0 | 1 | undefined"
   },
   {
-    'name': 'id',
-    'description': 'HTML id attribute for the input element',
-    'required': false,
-    'type': 'string | undefined'
+    "name": "id",
+    "description": "HTML id attribute for the input element",
+    "required": false,
+    "type": "string | undefined"
   }
-]"/> 
+]'/> 
 

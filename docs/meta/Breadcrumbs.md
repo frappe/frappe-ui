@@ -8,26 +8,26 @@
 </script>
 
 ## Props 
-<PropsTable :data="[
+<PropsTable :data='[
   {
-    'name': 'items',
-    'description': 'Ordered list of breadcrumb items',
-    'required': true,
-    'type': 'BreadcrumbItem[]'
+    "name": "items",
+    "description": "Ordered list of breadcrumb items",
+    "required": true,
+    "type": "BreadcrumbItem[]"
   }
-]"/> 
+]'/> 
 
 ## Default Slots 
- <SlotsTable :data="[
+ <SlotsTable :data='[
   {
-    'name': 'prefix',
-    'description': 'Content shown before each breadcrumb label',
-    'type': '{ item: BreadcrumbItem; }'
+    "name": "prefix",
+    "description": "Content shown before each breadcrumb label",
+    "type": "{ item: BreadcrumbItem; }"
   },
   {
-    'name': 'suffix',
-    'description': 'Content shown after each breadcrumb label',
-    'type': '{ item: BreadcrumbItem; }'
+    "name": "suffix",
+    "description": "Content shown after each breadcrumb label",
+    "type": "{ item: BreadcrumbItem; }"
   }
-]"/> 
+]'/> 
 

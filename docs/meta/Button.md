@@ -8,120 +8,120 @@
 </script>
 
 ## Props 
-<PropsTable :data="[
+<PropsTable :data='[
   {
-    'name': 'theme',
-    'description': 'Visual color theme of the button',
-    'required': false,
-    'type': 'Theme | undefined',
-    'default': '\'gray\''
+    "name": "theme",
+    "description": "Visual color theme of the button",
+    "required": false,
+    "type": "Theme | undefined",
+    "default": "\"gray\""
   },
   {
-    'name': 'size',
-    'description': 'Controls the button size',
-    'required': false,
-    'type': 'Size | undefined',
-    'default': '\'sm\''
+    "name": "size",
+    "description": "Controls the button size",
+    "required": false,
+    "type": "Size | undefined",
+    "default": "\"sm\""
   },
   {
-    'name': 'variant',
-    'description': 'Visual style of the button',
-    'required': false,
-    'type': 'Variant | undefined',
-    'default': '\'subtle\''
+    "name": "variant",
+    "description": "Visual style of the button",
+    "required": false,
+    "type": "Variant | undefined",
+    "default": "\"subtle\""
   },
   {
-    'name': 'label',
-    'description': 'Text label displayed inside the button',
-    'required': false,
-    'type': 'string | undefined'
+    "name": "label",
+    "description": "Text label displayed inside the button",
+    "required": false,
+    "type": "string | undefined"
   },
   {
-    'name': 'icon',
-    'description': 'Icon shown when no left or right icon is specified',
-    'required': false,
-    'type': 'string | Component | undefined'
+    "name": "icon",
+    "description": "Icon shown when no left or right icon is specified",
+    "required": false,
+    "type": "string | Component | undefined"
   },
   {
-    'name': 'iconLeft',
-    'description': 'Icon shown before the label',
-    'required': false,
-    'type': 'string | Component | undefined'
+    "name": "iconLeft",
+    "description": "Icon shown before the label",
+    "required": false,
+    "type": "string | Component | undefined"
   },
   {
-    'name': 'iconRight',
-    'description': 'Icon shown after the label',
-    'required': false,
-    'type': 'string | Component | undefined'
+    "name": "iconRight",
+    "description": "Icon shown after the label",
+    "required": false,
+    "type": "string | Component | undefined"
   },
   {
-    'name': 'tooltip',
-    'description': 'Tooltip text shown on hover',
-    'required': false,
-    'type': 'string | undefined'
+    "name": "tooltip",
+    "description": "Tooltip text shown on hover",
+    "required": false,
+    "type": "string | undefined"
   },
   {
-    'name': 'loading',
-    'description': 'Shows a loading state and disables interaction',
-    'required': false,
-    'type': 'boolean | undefined',
-    'default': 'false'
+    "name": "loading",
+    "description": "Shows a loading state and disables interaction",
+    "required": false,
+    "type": "boolean | undefined",
+    "default": "false"
   },
   {
-    'name': 'loadingText',
-    'description': 'Text shown while the button is loading',
-    'required': false,
-    'type': 'string | undefined'
+    "name": "loadingText",
+    "description": "Text shown while the button is loading",
+    "required": false,
+    "type": "string | undefined"
   },
   {
-    'name': 'disabled',
-    'description': 'Disables the button',
-    'required': false,
-    'type': 'boolean | undefined',
-    'default': 'false'
+    "name": "disabled",
+    "description": "Disables the button",
+    "required": false,
+    "type": "boolean | undefined",
+    "default": "false"
   },
   {
-    'name': 'route',
-    'description': 'Router destination when used as a link',
-    'required': false,
-    'type': 'string | RouteLocationAsRelativeGeneric | RouteLocationAsPathGeneric | undefined'
+    "name": "route",
+    "description": "Router destination when used as a link",
+    "required": false,
+    "type": "string | RouteLocationAsRelativeGeneric | RouteLocationAsPathGeneric | undefined"
   },
   {
-    'name': 'link',
-    'description': 'External link URL',
-    'required': false,
-    'type': 'string | undefined'
+    "name": "link",
+    "description": "External link URL",
+    "required": false,
+    "type": "string | undefined"
   },
   {
-    'name': 'type',
-    'description': 'Native button type',
-    'required': false,
-    'type': '\'button\' | \'submit\' | \'reset\' | undefined',
-    'default': '\'button\''
+    "name": "type",
+    "description": "Native button type",
+    "required": false,
+    "type": "\"button\" | \"submit\" | \"reset\" | undefined",
+    "default": "\"button\""
   }
-]"/> 
+]'/> 
 
 ## Default Slots 
- <SlotsTable :data="[
+ <SlotsTable :data='[
   {
-    'name': 'prefix',
-    'description': 'Content shown before the button label (left icon / custom content)',
-    'type': 'any'
+    "name": "prefix",
+    "description": "Content shown before the button label (left icon / custom content)",
+    "type": "any"
   },
   {
-    'name': 'icon',
-    'description': 'Icon-only content for icon buttons',
-    'type': 'any'
+    "name": "icon",
+    "description": "Icon-only content for icon buttons",
+    "type": "any"
   },
   {
-    'name': 'default',
-    'description': 'Main button content (overrides `label`)',
-    'type': 'any'
+    "name": "default",
+    "description": "Main button content (overrides `label`)",
+    "type": "any"
   },
   {
-    'name': 'suffix',
-    'description': 'Content shown after the button label (right icon / custom content)',
-    'type': 'any'
+    "name": "suffix",
+    "description": "Content shown after the button label (right icon / custom content)",
+    "type": "any"
   }
-]"/> 
+]'/> 
 

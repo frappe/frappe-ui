@@ -8,127 +8,127 @@
 </script>
 
 ## Props 
-<PropsTable :data="[
+<PropsTable :data='[
   {
-    'name': 'value',
-    'description': '',
-    'required': false,
-    'type': 'string | undefined',
-    'default': '\'\''
+    "name": "value",
+    "description": "",
+    "required": false,
+    "type": "string | undefined",
+    "default": "\"\""
   },
   {
-    'name': 'modelValue',
-    'description': '',
-    'required': false,
-    'type': 'string | undefined',
-    'default': '\'\''
+    "name": "modelValue",
+    "description": "",
+    "required": false,
+    "type": "string | undefined",
+    "default": "\"\""
   },
   {
-    'name': 'placement',
-    'description': '',
-    'required': false,
-    'type': 'DatePickerPlacement | undefined',
-    'default': '\'bottom-start\''
+    "name": "placement",
+    "description": "",
+    "required": false,
+    "type": "DatePickerPlacement | undefined",
+    "default": "\"bottom-start\""
   },
   {
-    'name': 'format',
-    'description': '',
-    'required': false,
-    'type': 'string | undefined'
+    "name": "format",
+    "description": "",
+    "required": false,
+    "type": "string | undefined"
   },
   {
-    'name': 'variant',
-    'description': '',
-    'required': false,
-    'type': '\'subtle\' | \'outline\' | \'ghost\' | undefined',
-    'default': '\'subtle\''
+    "name": "variant",
+    "description": "",
+    "required": false,
+    "type": "\"subtle\" | \"outline\" | \"ghost\" | undefined",
+    "default": "\"subtle\""
   },
   {
-    'name': 'readonly',
-    'description': '',
-    'required': false,
-    'type': 'boolean | undefined',
-    'default': 'false'
+    "name": "readonly",
+    "description": "",
+    "required": false,
+    "type": "boolean | undefined",
+    "default": "false"
   },
   {
-    'name': 'placeholder',
-    'description': '',
-    'required': false,
-    'type': 'string | undefined',
-    'default': '\'Select date\''
+    "name": "placeholder",
+    "description": "",
+    "required": false,
+    "type": "string | undefined",
+    "default": "\"Select date\""
   },
   {
-    'name': 'inputClass',
-    'description': '',
-    'required': false,
-    'type': 'string | string[] | Record<string, boolean> | undefined'
+    "name": "inputClass",
+    "description": "",
+    "required": false,
+    "type": "string | string[] | Record<string, boolean> | undefined"
   },
   {
-    'name': 'allowCustom',
-    'description': '',
-    'required': false,
-    'type': 'boolean | undefined',
-    'default': 'true'
+    "name": "allowCustom",
+    "description": "",
+    "required": false,
+    "type": "boolean | undefined",
+    "default": "true"
   },
   {
-    'name': 'autoClose',
-    'description': '',
-    'required': false,
-    'type': 'boolean | undefined',
-    'default': 'true'
+    "name": "autoClose",
+    "description": "",
+    "required": false,
+    "type": "boolean | undefined",
+    "default": "true"
   },
   {
-    'name': 'disabled',
-    'description': '',
-    'required': false,
-    'type': 'boolean | undefined',
-    'default': 'false'
+    "name": "disabled",
+    "description": "",
+    "required": false,
+    "type": "boolean | undefined",
+    "default": "false"
   },
   {
-    'name': 'label',
-    'description': '',
-    'required': false,
-    'type': 'string | undefined'
+    "name": "label",
+    "description": "",
+    "required": false,
+    "type": "string | undefined"
   },
   {
-    'name': 'clearable',
-    'description': '',
-    'required': false,
-    'type': 'boolean | undefined',
-    'default': 'true'
+    "name": "clearable",
+    "description": "",
+    "required": false,
+    "type": "boolean | undefined",
+    "default": "true"
   }
-]"/> 
+]'/> 
 
 ## Default Slots 
- <SlotsTable :data="[
+ <SlotsTable :data='[
   {
-    'name': 'target',
-    'description': '',
-    'type': '{ togglePopover: () => void; isOpen: boolean; displayLabel: string; inputValue: string; }'
+    "name": "target",
+    "description": "",
+    "type": "{ togglePopover: () => void; isOpen: boolean; displayLabel: string; inputValue: string; }"
   },
   {
-    'name': 'prefix',
-    'description': '',
-    'type': '{ togglePopover: () => void; isOpen: boolean; displayLabel: string; inputValue: string; }'
+    "name": "prefix",
+    "description": "",
+    "type": "{ togglePopover: () => void; isOpen: boolean; displayLabel: string; inputValue: string; }"
   },
   {
-    'name': 'suffix',
-    'description': '',
-    'type': '{ togglePopover: () => void; isOpen: boolean; displayLabel: string; inputValue: string; }'
+    "name": "suffix",
+    "description": "",
+    "type": "{ togglePopover: () => void; isOpen: boolean; displayLabel: string; inputValue: string; }"
   }
-]"/> 
+]'/> 
 
 ## Emit Events 
- <EmitsTable :data="[
+ <EmitsTable :data='[
   {
-    'name': 'update:modelValue',
-    'description': '',
-    'type': '[value: string]'
+    "name": "update:modelValue",
+    "description": "",
+    "type": "[value: string]"
   },
   {
-    'name': 'change',
-    'description': '',
-    'type': '[value: string]'
+    "name": "change",
+    "description": "",
+    "type": "[value: string]"
   }
-]"/> 
+]'/> 
 

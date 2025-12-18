@@ -8,74 +8,74 @@
 </script>
 
 ## Props 
-<PropsTable :data="[
+<PropsTable :data='[
   {
-    'name': 'label',
-    'description': 'Label text displayed above the input',
-    'required': false,
-    'type': 'string | undefined'
+    "name": "label",
+    "description": "Label text displayed above the input",
+    "required": false,
+    "type": "string | undefined"
   },
   {
-    'name': 'description',
-    'description': 'Optional description or helper text shown below the input',
-    'required': false,
-    'type': 'string | undefined'
+    "name": "description",
+    "description": "Optional description or helper text shown below the input",
+    "required": false,
+    "type": "string | undefined"
   },
   {
-    'name': 'type',
-    'description': 'Type of input to render',
-    'required': false,
-    'type': '\'autocomplete\' | \'select\' | TextInputTypes | \'textarea\' | \'checkbox\' | \'combobox\' | undefined',
-    'default': '\'text\''
+    "name": "type",
+    "description": "Type of input to render",
+    "required": false,
+    "type": "\"autocomplete\" | \"select\" | TextInputTypes | \"textarea\" | \"checkbox\" | \"combobox\" | undefined",
+    "default": "\"text\""
   },
   {
-    'name': 'size',
-    'description': 'Size of the input',
-    'required': false,
-    'type': '\'sm\' | \'md\' | undefined',
-    'default': '\'sm\''
+    "name": "size",
+    "description": "Size of the input",
+    "required": false,
+    "type": "\"sm\" | \"md\" | undefined",
+    "default": "\"sm\""
   },
   {
-    'name': 'variant',
-    'description': 'Visual variant of the input',
-    'required': false,
-    'type': '\'subtle\' | \'outline\' | undefined',
-    'default': '\'subtle\''
+    "name": "variant",
+    "description": "Visual variant of the input",
+    "required": false,
+    "type": "\"subtle\" | \"outline\" | undefined",
+    "default": "\"subtle\""
   },
   {
-    'name': 'required',
-    'description': 'Whether the input is required',
-    'required': false,
-    'type': 'boolean | undefined'
+    "name": "required",
+    "description": "Whether the input is required",
+    "required": false,
+    "type": "boolean | undefined"
   }
-]"/> 
+]'/> 
 
 ## Default Slots 
- <SlotsTable :data="[
+ <SlotsTable :data='[
   {
-    'name': 'prefix',
-    'description': 'Custom content rendered before the input (prefix icon/content)',
-    'type': 'any'
+    "name": "prefix",
+    "description": "Custom content rendered before the input (prefix icon/content)",
+    "type": "any"
   },
   {
-    'name': 'suffix',
-    'description': 'Custom content rendered after the input (suffix icon/content)',
-    'type': 'any'
+    "name": "suffix",
+    "description": "Custom content rendered after the input (suffix icon/content)",
+    "type": "any"
   },
   {
-    'name': 'description',
-    'description': 'Custom description slot (replaces description prop)',
-    'type': 'any'
+    "name": "description",
+    "description": "Custom description slot (replaces description prop)",
+    "type": "any"
   },
   {
-    'name': 'item-prefix',
-    'description': 'Custom slot for autocomplete items prefix (if using Autocomplete type)',
-    'type': '{ item: any; }'
+    "name": "item-prefix",
+    "description": "Custom slot for autocomplete items prefix (if using Autocomplete type)",
+    "type": "{ item: any; }"
   },
   {
-    'name': 'default',
-    'description': 'Default slot override for full input rendering',
-    'type': 'any'
+    "name": "default",
+    "description": "Default slot override for full input rendering",
+    "type": "any"
   }
-]"/> 
+]'/> 
 

@@ -8,52 +8,52 @@
 </script>
 
 ## Props 
-<PropsTable :data="[
+<PropsTable :data='[
   {
-    'name': 'theme',
-    'description': 'Visual color theme of the badge',
-    'required': false,
-    'type': '\'blue\' | \'red\' | \'green\' | \'gray\' | \'orange\' | undefined',
-    'default': '\'gray\''
+    "name": "theme",
+    "description": "Visual color theme of the badge",
+    "required": false,
+    "type": "\"blue\" | \"red\" | \"green\" | \"gray\" | \"orange\" | undefined",
+    "default": "\"gray\""
   },
   {
-    'name': 'size',
-    'description': 'Controls the size of the badge',
-    'required': false,
-    'type': '\'sm\' | \'md\' | \'lg\' | undefined',
-    'default': '\'md\''
+    "name": "size",
+    "description": "Controls the size of the badge",
+    "required": false,
+    "type": "\"sm\" | \"md\" | \"lg\" | undefined",
+    "default": "\"md\""
   },
   {
-    'name': 'variant',
-    'description': 'Visual style of the badge',
-    'required': false,
-    'type': '\'subtle\' | \'outline\' | \'solid\' | \'ghost\' | undefined',
-    'default': '\'subtle\''
+    "name": "variant",
+    "description": "Visual style of the badge",
+    "required": false,
+    "type": "\"subtle\" | \"outline\" | \"solid\" | \"ghost\" | undefined",
+    "default": "\"subtle\""
   },
   {
-    'name': 'label',
-    'description': 'Content displayed inside the badge',
-    'required': false,
-    'type': 'string | number | Label | undefined'
+    "name": "label",
+    "description": "Content displayed inside the badge",
+    "required": false,
+    "type": "string | number | Label | undefined"
   }
-]"/> 
+]'/> 
 
 ## Default Slots 
- <SlotsTable :data="[
+ <SlotsTable :data='[
   {
-    'name': 'prefix',
-    'description': 'Content shown before the badge label',
-    'type': 'any'
+    "name": "prefix",
+    "description": "Content shown before the badge label",
+    "type": "any"
   },
   {
-    'name': 'default',
-    'description': 'Main badge content (overrides `label` prop)',
-    'type': 'any'
+    "name": "default",
+    "description": "Main badge content (overrides `label` prop)",
+    "type": "any"
   },
   {
-    'name': 'suffix',
-    'description': 'Content shown after the badge label',
-    'type': 'any'
+    "name": "suffix",
+    "description": "Content shown after the badge label",
+    "type": "any"
   }
-]"/> 
+]'/> 
 

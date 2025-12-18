@@ -8,59 +8,59 @@
 </script>
 
 ## Props 
-<PropsTable :data="[
+<PropsTable :data='[
   {
-    'name': 'header',
-    'description': '',
-    'required': false,
-    'type': 'SidebarHeaderProps | undefined'
+    "name": "header",
+    "description": "",
+    "required": false,
+    "type": "SidebarHeaderProps | undefined"
   },
   {
-    'name': 'sections',
-    'description': '',
-    'required': false,
-    'type': 'SidebarSectionProps[] | undefined'
+    "name": "sections",
+    "description": "",
+    "required": false,
+    "type": "SidebarSectionProps[] | undefined"
   },
   {
-    'name': 'disableCollapse',
-    'description': '',
-    'required': false,
-    'type': 'boolean | undefined'
+    "name": "disableCollapse",
+    "description": "",
+    "required": false,
+    "type": "boolean | undefined"
   },
   {
-    'name': 'collapsed',
-    'description': '',
-    'required': false,
-    'type': 'boolean | undefined',
-    'default': 'null'
+    "name": "collapsed",
+    "description": "",
+    "required": false,
+    "type": "boolean | undefined",
+    "default": "null"
   }
-]"/> 
+]'/> 
 
 ## Default Slots 
- <SlotsTable :data="[
+ <SlotsTable :data='[
   {
-    'name': 'header-logo',
-    'description': '',
-    'type': '{}'
+    "name": "header-logo",
+    "description": "",
+    "type": "{}"
   },
   {
-    'name': 'sidebar-item',
-    'description': '',
-    'type': '{ item: SidebarItemProps; isCollapsed: false; }'
+    "name": "sidebar-item",
+    "description": "",
+    "type": "{ item: SidebarItemProps; isCollapsed: false; }"
   },
   {
-    'name': 'footer-items',
-    'description': '',
-    'type': '{ isCollapsed: boolean; isMobile: boolean; }'
+    "name": "footer-items",
+    "description": "",
+    "type": "{ isCollapsed: boolean; isMobile: boolean; }"
   }
-]"/> 
+]'/> 
 
 ## Emit Events 
- <EmitsTable :data="[
+ <EmitsTable :data='[
   {
-    'name': 'update:collapsed',
-    'description': '',
-    'type': '[value: boolean]'
+    "name": "update:collapsed",
+    "description": "",
+    "type": "[value: boolean]"
   }
-]"/> 
+]'/> 
 

@@ -8,72 +8,72 @@
 </script>
 
 ## Props 
-<PropsTable :data="[
+<PropsTable :data='[
   {
-    'name': 'size',
-    'description': 'Controls the visual size of the textarea',
-    'required': false,
-    'type': '\'sm\' | \'md\' | \'lg\' | \'xl\' | undefined',
-    'default': '\'sm\''
+    "name": "size",
+    "description": "Controls the visual size of the textarea",
+    "required": false,
+    "type": "\"sm\" | \"md\" | \"lg\" | \"xl\" | undefined",
+    "default": "\"sm\""
   },
   {
-    'name': 'variant',
-    'description': 'Visual style variant',
-    'required': false,
-    'type': '\'subtle\' | \'outline\' | undefined',
-    'default': '\'subtle\''
+    "name": "variant",
+    "description": "Visual style variant",
+    "required": false,
+    "type": "\"subtle\" | \"outline\" | undefined",
+    "default": "\"subtle\""
   },
   {
-    'name': 'placeholder',
-    'description': 'Placeholder text shown when empty',
-    'required': false,
-    'type': 'string | undefined'
+    "name": "placeholder",
+    "description": "Placeholder text shown when empty",
+    "required": false,
+    "type": "string | undefined"
   },
   {
-    'name': 'disabled',
-    'description': 'Disables user interaction',
-    'required': false,
-    'type': 'boolean | undefined'
+    "name": "disabled",
+    "description": "Disables user interaction",
+    "required": false,
+    "type": "boolean | undefined"
   },
   {
-    'name': 'id',
-    'description': 'HTML id attribute',
-    'required': false,
-    'type': 'string | undefined'
+    "name": "id",
+    "description": "HTML id attribute",
+    "required": false,
+    "type": "string | undefined"
   },
   {
-    'name': 'modelValue',
-    'description': 'Bound value of the textarea',
-    'required': false,
-    'type': 'string | undefined'
+    "name": "modelValue",
+    "description": "Bound value of the textarea",
+    "required": false,
+    "type": "string | undefined"
   },
   {
-    'name': 'debounce',
-    'description': 'Debounce delay (ms) before emitting value updates',
-    'required': false,
-    'type': 'number | undefined'
+    "name": "debounce",
+    "description": "Debounce delay (ms) before emitting value updates",
+    "required": false,
+    "type": "number | undefined"
   },
   {
-    'name': 'rows',
-    'description': 'Number of visible text rows',
-    'required': false,
-    'type': 'number | undefined',
-    'default': '3'
+    "name": "rows",
+    "description": "Number of visible text rows",
+    "required": false,
+    "type": "number | undefined",
+    "default": "3"
   },
   {
-    'name': 'label',
-    'description': 'Optional label text',
-    'required': false,
-    'type': 'string | undefined'
+    "name": "label",
+    "description": "Optional label text",
+    "required": false,
+    "type": "string | undefined"
   }
-]"/> 
+]'/> 
 
 ## Emit Events 
- <EmitsTable :data="[
+ <EmitsTable :data='[
   {
-    'name': 'update:modelValue',
-    'description': '',
-    'type': 'any[]'
+    "name": "update:modelValue",
+    "description": "",
+    "type": "any[]"
   }
-]"/> 
+]'/> 
 

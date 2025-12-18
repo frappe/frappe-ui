@@ -8,86 +8,86 @@
 </script>
 
 ## Props 
-<PropsTable :data="[
+<PropsTable :data='[
   {
-    'name': 'type',
-    'description': 'HTML input type (text, email, number, password, etc.)',
-    'required': false,
-    'type': 'TextInputTypes | undefined',
-    'default': '\'text\''
+    "name": "type",
+    "description": "HTML input type (text, email, number, password, etc.)",
+    "required": false,
+    "type": "TextInputTypes | undefined",
+    "default": "\"text\""
   },
   {
-    'name': 'size',
-    'description': 'Visual size of the input',
-    'required': false,
-    'type': '\'sm\' | \'md\' | \'lg\' | \'xl\' | undefined',
-    'default': '\'sm\''
+    "name": "size",
+    "description": "Visual size of the input",
+    "required": false,
+    "type": "\"sm\" | \"md\" | \"lg\" | \"xl\" | undefined",
+    "default": "\"sm\""
   },
   {
-    'name': 'variant',
-    'description': 'Style variant of the input',
-    'required': false,
-    'type': '\'subtle\' | \'outline\' | \'ghost\' | undefined',
-    'default': '\'subtle\''
+    "name": "variant",
+    "description": "Style variant of the input",
+    "required": false,
+    "type": "\"subtle\" | \"outline\" | \"ghost\" | undefined",
+    "default": "\"subtle\""
   },
   {
-    'name': 'placeholder',
-    'description': 'Placeholder text shown when the input is empty',
-    'required': false,
-    'type': 'string | undefined'
+    "name": "placeholder",
+    "description": "Placeholder text shown when the input is empty",
+    "required": false,
+    "type": "string | undefined"
   },
   {
-    'name': 'disabled',
-    'description': 'Disables the input when true',
-    'required': false,
-    'type': 'boolean | undefined'
+    "name": "disabled",
+    "description": "Disables the input when true",
+    "required": false,
+    "type": "boolean | undefined"
   },
   {
-    'name': 'id',
-    'description': 'ID attribute for the input element',
-    'required': false,
-    'type': 'string | undefined'
+    "name": "id",
+    "description": "ID attribute for the input element",
+    "required": false,
+    "type": "string | undefined"
   },
   {
-    'name': 'modelValue',
-    'description': 'Bound value of the input',
-    'required': false,
-    'type': 'string | number | undefined'
+    "name": "modelValue",
+    "description": "Bound value of the input",
+    "required": false,
+    "type": "string | number | undefined"
   },
   {
-    'name': 'debounce',
-    'description': 'Debounce delay (in ms) before emitting value updates',
-    'required': false,
-    'type': 'number | undefined'
+    "name": "debounce",
+    "description": "Debounce delay (in ms) before emitting value updates",
+    "required": false,
+    "type": "number | undefined"
   },
   {
-    'name': 'required',
-    'description': 'Marks the input as required',
-    'required': false,
-    'type': 'boolean | undefined'
+    "name": "required",
+    "description": "Marks the input as required",
+    "required": false,
+    "type": "boolean | undefined"
   }
-]"/> 
+]'/> 
 
 ## Default Slots 
- <SlotsTable :data="[
+ <SlotsTable :data='[
   {
-    'name': 'prefix',
-    'description': 'Content rendered before the input (left side)',
-    'type': 'any'
+    "name": "prefix",
+    "description": "Content rendered before the input (left side)",
+    "type": "any"
   },
   {
-    'name': 'suffix',
-    'description': 'Content rendered after the input (right side)',
-    'type': 'any'
+    "name": "suffix",
+    "description": "Content rendered after the input (right side)",
+    "type": "any"
   }
-]"/> 
+]'/> 
 
 ## Emit Events 
- <EmitsTable :data="[
+ <EmitsTable :data='[
   {
-    'name': 'update:modelValue',
-    'description': '',
-    'type': 'any[]'
+    "name": "update:modelValue",
+    "description": "",
+    "type": "any[]"
   }
-]"/> 
+]'/> 
 

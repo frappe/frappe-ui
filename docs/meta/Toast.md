@@ -8,62 +8,62 @@
 </script>
 
 ## Props 
-<PropsTable :data="[
+<PropsTable :data='[
   {
-    'name': 'open',
-    'description': '',
-    'required': true,
-    'type': 'boolean'
+    "name": "open",
+    "description": "",
+    "required": true,
+    "type": "boolean"
   },
   {
-    'name': 'message',
-    'description': '',
-    'required': false,
-    'type': 'string | undefined'
+    "name": "message",
+    "description": "",
+    "required": false,
+    "type": "string | undefined"
   },
   {
-    'name': 'type',
-    'description': '',
-    'required': false,
-    'type': '\'info\' | \'success\' | \'warning\' | \'error\' | undefined'
+    "name": "type",
+    "description": "",
+    "required": false,
+    "type": "\"info\" | \"success\" | \"warning\" | \"error\" | undefined"
   },
   {
-    'name': 'duration',
-    'description': '',
-    'required': false,
-    'type': 'number | undefined'
+    "name": "duration",
+    "description": "",
+    "required": false,
+    "type": "number | undefined"
   },
   {
-    'name': 'icon',
-    'description': '',
-    'required': false,
-    'type': 'Component | undefined'
+    "name": "icon",
+    "description": "",
+    "required": false,
+    "type": "Component | undefined"
   },
   {
-    'name': 'closable',
-    'description': '',
-    'required': false,
-    'type': 'boolean | undefined'
+    "name": "closable",
+    "description": "",
+    "required": false,
+    "type": "boolean | undefined"
   },
   {
-    'name': 'action',
-    'description': '',
-    'required': false,
-    'type': '{ label: string; altText?: string | undefined; onClick: () => void; } | undefined'
+    "name": "action",
+    "description": "",
+    "required": false,
+    "type": "{ label: string; altText?: string | undefined; onClick: () => void; } | undefined"
   }
-]"/> 
+]'/> 
 
 ## Emit Events 
- <EmitsTable :data="[
+ <EmitsTable :data='[
   {
-    'name': 'action',
-    'description': '',
-    'type': '[]'
+    "name": "action",
+    "description": "",
+    "type": "[]"
   },
   {
-    'name': 'update:open',
-    'description': '',
-    'type': '[value: boolean]'
+    "name": "update:open",
+    "description": "",
+    "type": "[value: boolean]"
   }
-]"/> 
+]'/> 
 

@@ -8,29 +8,29 @@
 </script>
 
 ## Props 
-<PropsTable :data="[
+<PropsTable :data='[
   {
-    'name': 'placeholder',
-    'description': 'Placeholder text shown when no value is selected',
-    'required': false,
-    'type': 'string | undefined',
-    'default': '\'Select month\''
+    "name": "placeholder",
+    "description": "Placeholder text shown when no value is selected",
+    "required": false,
+    "type": "string | undefined",
+    "default": "\"Select month\""
   },
   {
-    'name': 'modelValue',
-    'description': '',
-    'required': false,
-    'type': 'String | undefined',
-    'default': '\'\''
+    "name": "modelValue",
+    "description": "",
+    "required": false,
+    "type": "String | undefined",
+    "default": "\"\""
   }
-]"/> 
+]'/> 
 
 ## Emit Events 
- <EmitsTable :data="[
+ <EmitsTable :data='[
   {
-    'name': 'update:modelValue',
-    'description': '',
-    'type': '[value: String]'
+    "name": "update:modelValue",
+    "description": "",
+    "type": "[value: String]"
   }
-]"/> 
+]'/> 
 

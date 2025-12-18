@@ -2,7 +2,7 @@ export interface ProgressProps {
   /** Current progress value */
   value: number
 
-  /** Size of the progress bar: sm|md|lg|xl */
+  // /** Size of the progress bar: "sm" | "md" | "lg" | "xl" */
   size?: 'sm' | 'md' | 'lg' | 'xl'
 
   /** Optional text label displayed on the progress bar */

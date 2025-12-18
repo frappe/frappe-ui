@@ -8,60 +8,60 @@
 </script>
 
 ## Props 
-<PropsTable :data="[
+<PropsTable :data='[
   {
-    'name': 'text',
-    'description': 'Text content shown inside the tooltip.\nIgnored if a default slot is provided.',
-    'required': false,
-    'type': 'string | undefined',
-    'default': '\'\''
+    "name": "text",
+    "description": "Text content shown inside the tooltip.\nIgnored if a default slot is provided.",
+    "required": false,
+    "type": "string | undefined",
+    "default": "\"\""
   },
   {
-    'name': 'hoverDelay',
-    'description': 'Delay (in ms) before showing the tooltip on hover.',
-    'required': false,
-    'type': 'number | undefined',
-    'default': '0.5'
+    "name": "hoverDelay",
+    "description": "Delay (in ms) before showing the tooltip on hover.",
+    "required": false,
+    "type": "number | undefined",
+    "default": "0.5"
   },
   {
-    'name': 'placement',
-    'description': 'Position of the tooltip relative to the trigger.',
-    'required': false,
-    'type': '\'left\' | \'bottom\' | \'top\' | \'right\' | undefined',
-    'default': '\'top\''
+    "name": "placement",
+    "description": "Position of the tooltip relative to the trigger.",
+    "required": false,
+    "type": "\"left\" | \"bottom\" | \"top\" | \"right\" | undefined",
+    "default": "\"top\""
   },
   {
-    'name': 'arrowClass',
-    'description': 'Custom classes applied to the tooltip arrow.',
-    'required': false,
-    'type': 'any',
-    'default': '\'fill-surface-gray-7\''
+    "name": "arrowClass",
+    "description": "Custom classes applied to the tooltip arrow.",
+    "required": false,
+    "type": "any",
+    "default": "\"fill-surface-gray-7\""
   },
   {
-    'name': 'disabled',
-    'description': 'Disables the tooltip entirely.',
-    'required': false,
-    'type': 'boolean | undefined',
-    'default': 'false'
+    "name": "disabled",
+    "description": "Disables the tooltip entirely.",
+    "required": false,
+    "type": "boolean | undefined",
+    "default": "false"
   }
-]"/> 
+]'/> 
 
 ## Default Slots 
- <SlotsTable :data="[
+ <SlotsTable :data='[
   {
-    'name': 'default',
-    'description': 'Default trigger slot.\nWraps the element that the tooltip is attached to.',
-    'type': 'any'
+    "name": "default",
+    "description": "Default trigger slot.\nWraps the element that the tooltip is attached to.",
+    "type": "any"
   },
   {
-    'name': 'body',
-    'description': 'Slot for fully custom tooltip body.\nReplaces the default tooltip container entirely.',
-    'type': 'any'
+    "name": "body",
+    "description": "Slot for fully custom tooltip body.\nReplaces the default tooltip container entirely.",
+    "type": "any"
   },
   {
-    'name': 'content',
-    'description': 'Slot for tooltip content text.\nUsed inside the default tooltip body.',
-    'type': 'any'
+    "name": "content",
+    "description": "Slot for tooltip content text.\nUsed inside the default tooltip body.",
+    "type": "any"
   }
-]"/> 
+]'/> 
 

@@ -27,7 +27,7 @@ const tsconfigChecker = createChecker(
 //
 // console.log(meta.slots)
 
-const arrToStr = (arr) => JSON.stringify(arr, null, 2).replace(/"/g, "'")
+const arrToStr = (arr) => JSON.stringify(arr, null, 2)
 
 const genMetaTable = (data) => {
   let markupStr = `
@@ -50,7 +50,7 @@ const genMetaTable = (data) => {
     default: x.default,
   }))
 
-  markupStr += `<PropsTable :data="${arrToStr(arrProps)}"/> \n\n`
+  markupStr += `<PropsTable :data='${arrToStr(arrProps)}'/> \n\n`
 
   const slots = data.slots.filter((x) => !x.global)
   const arrSlots = slots.map((x) => ({
@@ -60,7 +60,7 @@ const genMetaTable = (data) => {
   }))
 
   if (arrSlots.length > 0) {
-    markupStr += `## Default Slots \n <SlotsTable :data="${arrToStr(arrSlots)}"/> \n\n`
+    markupStr += `## Default Slots \n <SlotsTable :data='${arrToStr(arrSlots)}'/> \n\n`
   }
 
   const emits = data.events.filter((x) => !x.global)
@@ -71,7 +71,7 @@ const genMetaTable = (data) => {
   }))
 
   if (arrEmits.length > 0) {
-    markupStr += `## Emit Events \n <EmitsTable :data="${arrToStr(arrEmits)}"/> \n\n`
+    markupStr += `## Emit Events \n <EmitsTable :data='${arrToStr(arrEmits)}'/> \n\n`
   }
 
   return markupStr
