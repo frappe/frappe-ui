@@ -11,49 +11,49 @@
 <PropsTable :data="[
   {
     'name': 'step',
-    'description': '',
+    'description': 'Current step or progress value',
     'required': false,
     'type': 'number',
     'default': '1'
   },
   {
     'name': 'totalSteps',
-    'description': '',
+    'description': 'Total steps for completion',
     'required': false,
     'type': 'number',
     'default': '4'
   },
   {
     'name': 'showPercentage',
-    'description': '',
+    'description': 'Show numeric percentage inside the circle',
     'required': false,
     'type': 'boolean | undefined',
     'default': 'false'
   },
   {
     'name': 'variant',
-    'description': '',
+    'description': 'Visual style of the progress bar',
     'required': false,
-    'type': 'Variant | undefined',
+    'type': '\'outline\' | \'solid\' | undefined',
     'default': '\'solid\''
   },
   {
     'name': 'theme',
-    'description': '',
+    'description': 'Theme used for the progress bar (predefined or custom colors)',
     'required': false,
-    'type': 'Theme | ThemeProps | undefined',
+    'type': '\'blue\' | \'red\' | \'green\' | \'orange\' | \'black\' | { primary: string; secondary: string; } | undefined',
     'default': '\'black\''
   },
   {
     'name': 'size',
-    'description': '',
+    'description': 'Size of the progress bar',
     'required': false,
-    'type': 'Size | undefined',
+    'type': '\'sm\' | \'md\' | \'lg\' | \'xl\' | \'xs\' | undefined',
     'default': '\'md\''
   },
   {
     'name': 'themeComplete',
-    'description': '',
+    'description': 'Color used when the progress completes',
     'required': false,
     'type': 'string | undefined',
     'default': '\'lightgreen\''

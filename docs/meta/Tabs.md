@@ -11,21 +11,21 @@
 <PropsTable :data="[
   {
     'name': 'as',
-    'description': '',
+    'description': 'Element/component used to render the tab container',
     'required': false,
     'type': 'string | undefined'
   },
   {
     'name': 'tabs',
-    'description': '',
+    'description': 'List of tabs to render',
     'required': true,
     'type': 'Tab[]'
   },
   {
     'name': 'vertical',
-    'description': '',
+    'description': 'Renders tabs vertically instead of horizontally',
     'required': false,
-    'type': 'Boolean | undefined'
+    'type': 'boolean | undefined'
   }
 ]"/> 
 
@@ -33,13 +33,13 @@
  <SlotsTable :data="[
   {
     'name': 'tab-item',
-    'description': '',
-    'type': '{ tab: Tab; }'
+    'description': 'Custom renderer for a tab trigger (icon + label / router-link).',
+    'type': '{ tab: { label: string; icon?: string | undefined; route?: string | undefined; }; }'
   },
   {
     'name': 'tab-panel',
-    'description': '',
-    'type': '{ tab: Tab; }'
+    'description': 'Content rendered for each tab panel.',
+    'type': '{ tab: { label: string; icon?: string | undefined; route?: string | undefined; }; }'
   }
 ]"/> 
 

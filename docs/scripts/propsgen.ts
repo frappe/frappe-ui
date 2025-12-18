@@ -92,8 +92,9 @@ list.forEach((x) => {
     const metaFilePath = path.join(__dirname, `../meta/${x}.md`)
     const str = genMetaTable(meta)
     fs.writeFileSync(metaFilePath, str)
+		console.log(`Generated ${x} meta`)
   } catch (e) {
     // TODO few components dont have default exposts
-    console.log(x, e)
+    console.error('-----------------------------\n',x, ":" ,e)
   }
 })

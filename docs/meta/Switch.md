@@ -11,41 +11,41 @@
 <PropsTable :data="[
   {
     'name': 'size',
-    'description': '',
+    'description': 'Size of the switch control',
     'required': false,
     'type': '\'sm\' | \'md\' | undefined',
     'default': '\'sm\''
   },
   {
     'name': 'label',
-    'description': '',
+    'description': 'Label text displayed next to the switch',
     'required': false,
     'type': 'string | undefined',
     'default': '\'\''
   },
   {
     'name': 'description',
-    'description': '',
+    'description': 'Helper or descriptive text shown below the label',
     'required': false,
     'type': 'string | undefined',
     'default': '\'\''
   },
   {
     'name': 'disabled',
-    'description': '',
+    'description': 'Disables the switch and prevents interaction',
     'required': false,
     'type': 'boolean | undefined',
     'default': 'false'
   },
   {
     'name': 'icon',
-    'description': '',
+    'description': 'Optional icon rendered inside or alongside the switch',
     'required': false,
     'type': 'any'
   },
   {
     'name': 'labelClasses',
-    'description': '',
+    'description': 'Custom classes applied to the label element',
     'required': false,
     'type': 'string | undefined',
     'default': '\'\''
@@ -69,7 +69,7 @@
   {
     'name': 'change',
     'description': '',
-    'type': 'any[]'
+    'type': '[value: boolean]'
   }
 ]"/> 
 

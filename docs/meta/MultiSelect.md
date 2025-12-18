@@ -11,32 +11,32 @@
 <PropsTable :data="[
   {
     'name': 'placeholder',
-    'description': '',
+    'description': 'Placeholder text shown when no item is selected',
     'required': false,
     'type': 'string | undefined',
     'default': '\'Select option\''
   },
   {
     'name': 'options',
-    'description': '',
+    'description': 'Options available to select from',
     'required': true,
     'type': 'MultiSelectOption[]'
   },
   {
     'name': 'hideSearch',
-    'description': '',
+    'description': 'Hides the search input if true',
     'required': false,
     'type': 'boolean | undefined'
   },
   {
     'name': 'loading',
-    'description': '',
+    'description': 'Shows a loading state',
     'required': false,
     'type': 'boolean | undefined'
   },
   {
     'name': 'compareFn',
-    'description': '',
+    'description': 'Custom comparison function to check equality of options',
     'required': false,
     'type': '((a: MultiSelectOption, b: MultiSelectOption) => boolean) | undefined'
   },
@@ -53,13 +53,13 @@
  <SlotsTable :data="[
   {
     'name': 'option',
-    'description': '',
+    'description': 'Rendered for each option in the dropdown. Receives the option object.',
     'type': '{ item: MultiSelectOption; }'
   },
   {
     'name': 'footer',
-    'description': '',
-    'type': '{ clearAll: () => never[]; selectAll: () => string[]; }'
+    'description': 'Footer slot at the bottom of the dropdown. Receives helper functions `clearAll` and `selectAll`.',
+    'type': '{ clearAll: () => void; selectAll: () => void; }'
   }
 ]"/> 
 

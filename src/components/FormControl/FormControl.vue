@@ -107,6 +107,19 @@ const descriptionClasses = computed(() => {
     'text-ink-gray-5',
   ]
 })
+
+defineSlots<{
+  /** Custom content rendered before the input (prefix icon/content) */
+  prefix?: () => any
+  /** Custom content rendered after the input (suffix icon/content) */
+  suffix?: () => any
+  /** Custom description slot (replaces `description` prop) */
+  description?: () => any
+  /** Custom slot for autocomplete items' prefix (if using Autocomplete type) */
+  'item-prefix'?: (props: { item: any }) => any
+  /** Default slot override for full input rendering */
+  default?: () => any
+}>()
 </script>
 <script lang="ts">
 export default {

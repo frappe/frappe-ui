@@ -11,7 +11,7 @@
 <PropsTable :data="[
   {
     'name': 'message',
-    'description': '',
+    'description': 'The error message to display. Can be a string or an Error object',
     'required': false,
     'type': 'string | Error | undefined'
   }

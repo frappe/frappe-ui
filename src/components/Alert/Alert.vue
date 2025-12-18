@@ -9,6 +9,7 @@ import LucideCircleX from "~icons/lucide/circle-x";
 import LucideCheck from "~icons/lucide/circle-check";
 import LucideWarning from "~icons/lucide/triangle-alert";
 
+/** Controls the visibility of the alert for dismissing or toggling it */
 const visible = defineModel({ default: true });
 
 const classes = computed(() => {
@@ -38,6 +39,17 @@ const props = withDefaults(defineProps<AlertProps>(), {
   variant: "subtle",
   dismissable: true,
 });
+
+defineSlots<{
+  /** Custom icon shown before the content */
+  icon?: () => any
+
+  /** Custom description content */
+  description?: () => any
+
+  /** Footer content shown at the bottom of the alert */
+  footer?: () => any
+}>()
 </script>
 
 <template>

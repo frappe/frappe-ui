@@ -11,40 +11,40 @@
 <PropsTable :data="[
   {
     'name': 'label',
-    'description': '',
+    'description': 'Label text displayed above the input',
     'required': false,
     'type': 'string | undefined'
   },
   {
     'name': 'description',
-    'description': '',
+    'description': 'Optional description or helper text shown below the input',
     'required': false,
     'type': 'string | undefined'
   },
   {
     'name': 'type',
-    'description': '',
+    'description': 'Type of input to render',
     'required': false,
     'type': '\'autocomplete\' | \'select\' | TextInputTypes | \'textarea\' | \'checkbox\' | \'combobox\' | undefined',
     'default': '\'text\''
   },
   {
     'name': 'size',
-    'description': '',
+    'description': 'Size of the input',
     'required': false,
     'type': '\'sm\' | \'md\' | undefined',
     'default': '\'sm\''
   },
   {
     'name': 'variant',
-    'description': '',
+    'description': 'Visual variant of the input',
     'required': false,
     'type': '\'subtle\' | \'outline\' | undefined',
     'default': '\'subtle\''
   },
   {
     'name': 'required',
-    'description': '',
+    'description': 'Whether the input is required',
     'required': false,
     'type': 'boolean | undefined'
   }
@@ -54,23 +54,28 @@
  <SlotsTable :data="[
   {
     'name': 'prefix',
-    'description': '',
-    'type': '{}'
-  },
-  {
-    'name': 'item-prefix',
-    'description': '',
+    'description': 'Custom content rendered before the input (prefix icon/content)',
     'type': 'any'
   },
   {
     'name': 'suffix',
-    'description': '',
-    'type': '{}'
+    'description': 'Custom content rendered after the input (suffix icon/content)',
+    'type': 'any'
   },
   {
     'name': 'description',
-    'description': '',
-    'type': '{}'
+    'description': 'Custom description slot (replaces `description` prop)',
+    'type': 'any'
+  },
+  {
+    'name': 'item-prefix',
+    'description': 'Custom slot for autocomplete items' prefix (if using Autocomplete type)',
+    'type': '{ item: any; }'
+  },
+  {
+    'name': 'default',
+    'description': 'Default slot override for full input rendering',
+    'type': 'any'
   }
 ]"/> 
 

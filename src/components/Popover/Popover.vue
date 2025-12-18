@@ -62,6 +62,7 @@
 </template>
 
 <script setup lang="ts">
+import type { PopoverEmits } from "./types";
 import { computed, ref, onUnmounted } from 'vue'
 import {
   PopoverAnchor,
@@ -82,11 +83,7 @@ const props = withDefaults(defineProps<PopoverProps>(), {
   hideOnBlur: true,
 })
 
-const emit = defineEmits<{
-  (event: 'open'): void
-  (event: 'close'): void
-  (event: 'update:show', value: boolean): void
-}>()
+const emit = defineEmits<PopoverEmits>()
 
 defineExpose({ open, close })
 
@@ -240,6 +237,36 @@ onUnmounted(() => {
     clearTimeout(leaveTimer.value)
   }
 })
+
+defineSlots<{
+  /** Content of the trigger/anchor element */
+  target?: (props: {
+    togglePopover: () => void
+    updatePosition: () => void
+    open: () => void
+    close: () => void
+    isOpen: boolean
+  }) => any
+
+  /** Main content of the popover body */
+  body?: (props: {
+    togglePopover: () => void
+    updatePosition: () => void
+    open: () => void
+    close: () => void
+    isOpen: boolean
+  }) => any
+
+  /** Inner content inside the default body container */
+  'body-main'?: (props: {
+    togglePopover: () => void
+    updatePosition: () => void
+    open: () => void
+    close: () => void
+    isOpen: boolean
+  }) => any
+}>()
+
 </script>
 
 <style>

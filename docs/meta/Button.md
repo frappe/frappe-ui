@@ -11,90 +11,90 @@
 <PropsTable :data="[
   {
     'name': 'theme',
-    'description': '',
+    'description': 'Visual color theme of the button',
     'required': false,
     'type': 'Theme | undefined',
     'default': '\'gray\''
   },
   {
     'name': 'size',
-    'description': '',
+    'description': 'Controls the button size',
     'required': false,
     'type': 'Size | undefined',
     'default': '\'sm\''
   },
   {
     'name': 'variant',
-    'description': '',
+    'description': 'Visual style of the button',
     'required': false,
     'type': 'Variant | undefined',
     'default': '\'subtle\''
   },
   {
     'name': 'label',
-    'description': '',
+    'description': 'Text label displayed inside the button',
     'required': false,
     'type': 'string | undefined'
   },
   {
     'name': 'icon',
-    'description': '',
+    'description': 'Icon shown when no left or right icon is specified',
     'required': false,
     'type': 'string | Component | undefined'
   },
   {
     'name': 'iconLeft',
-    'description': '',
+    'description': 'Icon shown before the label',
     'required': false,
     'type': 'string | Component | undefined'
   },
   {
     'name': 'iconRight',
-    'description': '',
+    'description': 'Icon shown after the label',
     'required': false,
     'type': 'string | Component | undefined'
   },
   {
     'name': 'tooltip',
-    'description': '',
+    'description': 'Tooltip text shown on hover',
     'required': false,
     'type': 'string | undefined'
   },
   {
     'name': 'loading',
-    'description': '',
+    'description': 'Shows a loading state and disables interaction',
     'required': false,
     'type': 'boolean | undefined',
     'default': 'false'
   },
   {
     'name': 'loadingText',
-    'description': '',
+    'description': 'Text shown while the button is loading',
     'required': false,
     'type': 'string | undefined'
   },
   {
     'name': 'disabled',
-    'description': '',
+    'description': 'Disables the button',
     'required': false,
     'type': 'boolean | undefined',
     'default': 'false'
   },
   {
     'name': 'route',
-    'description': '',
+    'description': 'Router destination when used as a link',
     'required': false,
     'type': 'string | RouteLocationAsRelativeGeneric | RouteLocationAsPathGeneric | undefined'
   },
   {
     'name': 'link',
-    'description': '',
+    'description': 'External link URL',
     'required': false,
     'type': 'string | undefined'
   },
   {
     'name': 'type',
-    'description': '',
+    'description': 'Native button type',
     'required': false,
     'type': '\'button\' | \'submit\' | \'reset\' | undefined',
     'default': '\'button\''
@@ -105,23 +105,23 @@
  <SlotsTable :data="[
   {
     'name': 'prefix',
-    'description': '',
-    'type': '{}'
+    'description': 'Content shown before the button label (left icon / custom content)',
+    'type': 'any'
   },
   {
     'name': 'icon',
-    'description': '',
-    'type': '{}'
+    'description': 'Icon-only content for icon buttons',
+    'type': 'any'
   },
   {
     'name': 'default',
-    'description': '',
-    'type': '{}'
+    'description': 'Main button content (overrides `label`)',
+    'type': 'any'
   },
   {
     'name': 'suffix',
-    'description': '',
-    'type': '{}'
+    'description': 'Content shown after the button label (right icon / custom content)',
+    'type': 'any'
   }
 ]"/> 
 

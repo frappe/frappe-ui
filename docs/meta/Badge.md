@@ -11,28 +11,28 @@
 <PropsTable :data="[
   {
     'name': 'theme',
-    'description': '',
+    'description': 'Visual color theme of the badge',
     'required': false,
     'type': '\'blue\' | \'red\' | \'green\' | \'gray\' | \'orange\' | undefined',
     'default': '\'gray\''
   },
   {
     'name': 'size',
-    'description': '',
+    'description': 'Controls the size of the badge',
     'required': false,
     'type': '\'sm\' | \'md\' | \'lg\' | undefined',
     'default': '\'md\''
   },
   {
     'name': 'variant',
-    'description': '',
+    'description': 'Visual style of the badge',
     'required': false,
     'type': '\'subtle\' | \'outline\' | \'solid\' | \'ghost\' | undefined',
     'default': '\'subtle\''
   },
   {
     'name': 'label',
-    'description': '',
+    'description': 'Content displayed inside the badge',
     'required': false,
     'type': 'string | number | Label | undefined'
   }
@@ -42,18 +42,18 @@
  <SlotsTable :data="[
   {
     'name': 'prefix',
-    'description': '',
-    'type': '{}'
+    'description': 'Content shown before the badge label',
+    'type': 'any'
   },
   {
     'name': 'default',
-    'description': '',
-    'type': '{}'
+    'description': 'Main badge content (overrides `label` prop)',
+    'type': 'any'
   },
   {
     'name': 'suffix',
-    'description': '',
-    'type': '{}'
+    'description': 'Content shown after the badge label',
+    'type': 'any'
   }
 ]"/> 
 

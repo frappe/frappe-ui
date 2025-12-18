@@ -11,39 +11,39 @@
 <PropsTable :data="[
   {
     'name': 'title',
-    'description': '',
+    'description': 'Main heading text of the alert',
     'required': true,
     'type': 'string'
   },
   {
     'name': 'theme',
-    'description': '',
+    'description': 'Color theme of the alert',
     'required': false,
     'type': 'Theme | undefined'
   },
   {
     'name': 'variant',
-    'description': '',
+    'description': 'Visual style of the alert container',
     'required': false,
     'type': '\'subtle\' | \'outline\' | undefined',
     'default': '\'subtle\''
   },
   {
     'name': 'description',
-    'description': '',
+    'description': 'Optional supporting text shown below the title',
     'required': false,
     'type': 'string | undefined'
   },
   {
     'name': 'dismissable',
-    'description': '',
+    'description': 'Whether the alert can be closed by the user',
     'required': false,
     'type': 'boolean | undefined',
     'default': 'true'
   },
   {
     'name': 'modelValue',
-    'description': '',
+    'description': 'Controls the visibility of the alert for dismissing or toggling it',
     'required': false,
     'type': 'boolean | undefined',
     'default': 'true'
@@ -54,18 +54,18 @@
  <SlotsTable :data="[
   {
     'name': 'icon',
-    'description': '',
-    'type': '{}'
+    'description': 'Custom icon shown before the content',
+    'type': 'any'
   },
   {
     'name': 'description',
-    'description': '',
-    'type': '{}'
+    'description': 'Custom description content',
+    'type': 'any'
   },
   {
     'name': 'footer',
-    'description': '',
-    'type': '{}'
+    'description': 'Footer content shown at the bottom of the alert',
+    'type': 'any'
   }
 ]"/> 
 

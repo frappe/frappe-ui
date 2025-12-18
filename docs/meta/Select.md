@@ -11,46 +11,46 @@
 <PropsTable :data="[
   {
     'name': 'size',
-    'description': '',
+    'description': 'Size of the select input',
     'required': false,
     'type': '\'sm\' | \'md\' | \'lg\' | undefined',
     'default': '\'sm\''
   },
   {
     'name': 'variant',
-    'description': '',
+    'description': 'Visual style of the select input',
     'required': false,
     'type': '\'subtle\' | \'outline\' | \'ghost\' | undefined',
     'default': '\'subtle\''
   },
   {
     'name': 'placeholder',
-    'description': '',
+    'description': 'Placeholder text displayed when no option is selected',
     'required': false,
     'type': 'string | undefined',
     'default': '\'Select option\''
   },
   {
     'name': 'disabled',
-    'description': '',
+    'description': 'If true, disables the select input',
     'required': false,
     'type': 'boolean | undefined'
   },
   {
     'name': 'id',
-    'description': '',
+    'description': 'Optional HTML id for the select element',
     'required': false,
     'type': 'string | undefined'
   },
   {
     'name': 'modelValue',
-    'description': '',
+    'description': 'The currently selected value (controlled)',
     'required': false,
     'type': '((string | number) & String) | undefined'
   },
   {
     'name': 'options',
-    'description': '',
+    'description': 'Options to display in the dropdown',
     'required': false,
     'type': 'SelectOption[] | undefined'
   }
@@ -60,23 +60,23 @@
  <SlotsTable :data="[
   {
     'name': 'prefix',
-    'description': '',
-    'type': '{}'
+    'description': 'Content rendered before the selected value (e.g., left icon or custom content)',
+    'type': 'any'
   },
   {
     'name': 'suffix',
-    'description': '',
-    'type': '{}'
+    'description': 'Content rendered after the selected value (e.g., right icon or custom content)',
+    'type': 'any'
   },
   {
     'name': 'option',
-    'description': '',
-    'type': '{ option: SelectOption | { label: SelectOption; value: SelectOption; }; }'
+    'description': 'Custom rendering for each dropdown option',
+    'type': '{ option: SelectOption; }'
   },
   {
     'name': 'footer',
-    'description': '',
-    'type': '{}'
+    'description': 'Custom content at the bottom of the dropdown',
+    'type': 'any'
   }
 ]"/> 
 

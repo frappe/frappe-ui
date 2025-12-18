@@ -11,104 +11,104 @@
 <PropsTable :data="[
   {
     'name': 'content',
-    'description': '',
+    'description': 'Initial editor content (HTML/string). `null` renders an empty editor',
     'required': false,
     'type': 'string | null | undefined',
     'default': 'null'
   },
   {
     'name': 'placeholder',
-    'description': '',
+    'description': 'Placeholder text or dynamic placeholder resolver',
     'required': false,
     'type': 'string | (() => string) | undefined',
     'default': '\'\''
   },
   {
     'name': 'editorClass',
-    'description': '',
+    'description': 'Custom classes applied to the editor root',
     'required': false,
     'type': 'string | object | string[] | undefined',
     'default': '\'\''
   },
   {
     'name': 'editable',
-    'description': '',
+    'description': 'Toggles editability of the editor',
     'required': false,
     'type': 'boolean | undefined',
     'default': 'true'
   },
   {
     'name': 'autofocus',
-    'description': '',
+    'description': 'Autofocus the editor on mount',
     'required': false,
     'type': 'boolean | undefined',
     'default': 'false'
   },
   {
     'name': 'bubbleMenu',
-    'description': '',
+    'description': 'Enables bubble menu or provides custom bubble menu items',
     'required': false,
     'type': 'boolean | any[] | undefined',
     'default': 'false'
   },
   {
     'name': 'bubbleMenuOptions',
-    'description': '',
+    'description': 'Configuration options for the bubble menu',
     'required': false,
     'type': 'object | undefined',
     'default': '{}'
   },
   {
     'name': 'fixedMenu',
-    'description': '',
+    'description': 'Enables fixed menu or provides custom fixed menu items',
     'required': false,
     'type': 'boolean | any[] | undefined',
     'default': 'false'
   },
   {
     'name': 'floatingMenu',
-    'description': '',
+    'description': 'Enables floating menu or provides custom floating menu items',
     'required': false,
     'type': 'boolean | any[] | undefined',
     'default': 'false'
   },
   {
     'name': 'extensions',
-    'description': '',
+    'description': 'Custom TipTap extensions',
     'required': false,
     'type': 'any[] | undefined',
     'default': '[]'
   },
   {
     'name': 'starterkitOptions',
-    'description': '',
+    'description': 'Options passed to TipTap StarterKit',
     'required': false,
     'type': 'any',
     'default': '{}'
   },
   {
     'name': 'mentions',
-    'description': '',
+    'description': 'Mention extension configuration',
     'required': false,
     'type': 'ConfigureMentionOptions | undefined',
     'default': 'null'
   },
   {
     'name': 'tags',
-    'description': '',
+    'description': 'Tag / hashtag configuration',
     'required': false,
     'type': 'any[] | undefined',
     'default': '[]'
   },
   {
     'name': 'uploadFunction',
-    'description': '',
+    'description': 'Async file upload handler (used for images, files, etc.)',
     'required': false,
     'type': '((file: File) => Promise<UploadedFile>) | undefined'
   },
   {
     'name': 'uploadArgs',
-    'description': '',
+    'description': 'Extra arguments passed to the upload function',
     'required': false,
     'type': 'object | undefined'
   }

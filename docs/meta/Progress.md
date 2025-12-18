@@ -11,41 +11,41 @@
 <PropsTable :data="[
   {
     'name': 'value',
-    'description': '',
+    'description': 'Current progress value',
     'required': true,
     'type': 'number'
   },
   {
     'name': 'size',
-    'description': '',
+    'description': 'Size of the progress bar: 'sm', 'md', 'lg', or 'xl'',
     'required': false,
     'type': '\'sm\' | \'md\' | \'lg\' | \'xl\' | undefined',
     'default': '\'sm\''
   },
   {
     'name': 'label',
-    'description': '',
+    'description': 'Optional text label displayed on the progress bar',
     'required': false,
     'type': 'string | undefined',
     'default': '\'\''
   },
   {
     'name': 'hint',
-    'description': '',
+    'description': 'Whether to show a hint/tooltip for the progress value',
     'required': false,
     'type': 'boolean | undefined',
     'default': 'false'
   },
   {
     'name': 'intervals',
-    'description': '',
+    'description': 'Whether to show interval markers on the progress bar',
     'required': false,
     'type': 'boolean | undefined',
     'default': 'false'
   },
   {
     'name': 'intervalCount',
-    'description': '',
+    'description': 'Number of intervals to display if `intervals` is true',
     'required': false,
     'type': 'number | undefined',
     'default': '6'
@@ -56,8 +56,8 @@
  <SlotsTable :data="[
   {
     'name': 'hint',
-    'description': '',
-    'type': '{}'
+    'description': 'Custom content for the hint area (usually displays the progress value). \nIf not provided, defaults to showing `props.value` followed by `%`.',
+    'type': 'any'
   }
 ]"/> 
 

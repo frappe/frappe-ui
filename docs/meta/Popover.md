@@ -11,63 +11,63 @@
 <PropsTable :data="[
   {
     'name': 'show',
-    'description': '',
+    'description': 'Controls visibility of the popover',
     'required': false,
     'type': 'boolean | undefined',
     'default': 'undefined'
   },
   {
     'name': 'trigger',
-    'description': '',
+    'description': 'Event that triggers the popover',
     'required': false,
     'type': '\'click\' | \'hover\' | undefined',
     'default': '\'click\''
   },
   {
     'name': 'hoverDelay',
-    'description': '',
+    'description': 'Delay in ms before showing popover on hover',
     'required': false,
     'type': 'number | undefined',
     'default': '0'
   },
   {
     'name': 'leaveDelay',
-    'description': '',
+    'description': 'Delay in ms before hiding popover on hover leave',
     'required': false,
     'type': 'number | undefined',
     'default': '0.5'
   },
   {
     'name': 'placement',
-    'description': '',
+    'description': 'Placement of the popover relative to the target',
     'required': false,
     'type': '\'bottom-start\' | \'top-start\' | \'top-end\' | \'bottom-end\' | \'right-start\' | \'right-end\' | \'left-start\' | \'left-end\' | undefined',
     'default': '\'bottom-start\''
   },
   {
     'name': 'popoverClass',
-    'description': '',
+    'description': 'Custom class(es) for the popover',
     'required': false,
     'type': 'string | object | (string | object)[] | undefined',
     'default': '\'\''
   },
   {
     'name': 'transition',
-    'description': '',
+    'description': 'Transition style to use',
     'required': false,
     'type': '\'default\' | null | undefined',
     'default': 'null'
   },
   {
     'name': 'hideOnBlur',
-    'description': '',
+    'description': 'Whether to hide the popover when clicking outside',
     'required': false,
     'type': 'boolean | undefined',
     'default': 'true'
   },
   {
     'name': 'matchTargetWidth',
-    'description': '',
+    'description': 'Whether the popover width should match the target element',
     'required': false,
     'type': 'boolean | undefined'
   }
@@ -77,18 +77,18 @@
  <SlotsTable :data="[
   {
     'name': 'target',
-    'description': '',
-    'type': '{ togglePopover: (flag?: boolean | Event | undefined) => void; updatePosition: () => void; open: () '
+    'description': 'Content of the trigger/anchor element',
+    'type': '{ togglePopover: () => void; updatePosition: () => void; open: () => void; close: () => void; isOpen'
   },
   {
     'name': 'body',
-    'description': '',
-    'type': '{ togglePopover: (flag?: boolean | Event | undefined) => void; updatePosition: () => void; open: () '
+    'description': 'Main content of the popover body',
+    'type': '{ togglePopover: () => void; updatePosition: () => void; open: () => void; close: () => void; isOpen'
   },
   {
     'name': 'body-main',
-    'description': '',
-    'type': '{ togglePopover: (flag?: boolean | Event | undefined) => void; updatePosition: () => void; open: () '
+    'description': 'Inner content inside the default body container',
+    'type': '{ togglePopover: () => void; updatePosition: () => void; open: () => void; close: () => void; isOpen'
   }
 ]"/> 
 

@@ -11,35 +11,35 @@
 <PropsTable :data="[
   {
     'name': 'text',
-    'description': '',
+    'description': 'Text content shown inside the tooltip.\nIgnored if a default slot is provided.',
     'required': false,
     'type': 'string | undefined',
     'default': '\'\''
   },
   {
     'name': 'hoverDelay',
-    'description': '',
+    'description': 'Delay (in ms) before showing the tooltip on hover.',
     'required': false,
     'type': 'number | undefined',
     'default': '0.5'
   },
   {
     'name': 'placement',
-    'description': '',
+    'description': 'Position of the tooltip relative to the trigger.',
     'required': false,
-    'type': '\'top\' | \'right\' | \'bottom\' | \'left\' | undefined',
+    'type': '\'left\' | \'bottom\' | \'top\' | \'right\' | undefined',
     'default': '\'top\''
   },
   {
     'name': 'arrowClass',
-    'description': '',
+    'description': 'Custom classes applied to the tooltip arrow.',
     'required': false,
     'type': 'any',
     'default': '\'fill-surface-gray-7\''
   },
   {
     'name': 'disabled',
-    'description': '',
+    'description': 'Disables the tooltip entirely.',
     'required': false,
     'type': 'boolean | undefined',
     'default': 'false'
@@ -50,18 +50,18 @@
  <SlotsTable :data="[
   {
     'name': 'default',
-    'description': '',
-    'type': '{}'
+    'description': 'Default trigger slot.\nWraps the element that the tooltip is attached to.',
+    'type': 'any'
   },
   {
     'name': 'body',
-    'description': '',
-    'type': '{}'
+    'description': 'Slot for fully custom tooltip body.\nReplaces the default tooltip container entirely.',
+    'type': 'any'
   },
   {
     'name': 'content',
-    'description': '',
-    'type': '{}'
+    'description': 'Slot for tooltip content text.\nUsed inside the default tooltip body.',
+    'type': 'any'
   }
 ]"/> 
 

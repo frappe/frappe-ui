@@ -20,7 +20,7 @@
     'name': 'position',
     'description': '',
     'required': false,
-    'type': '\'center\' | \'start\' | \'end\' | undefined',
+    'type': '\'start\' | \'center\' | \'end\' | undefined',
     'default': '\'center\''
   },
   {

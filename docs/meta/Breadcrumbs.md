@@ -11,7 +11,7 @@
 <PropsTable :data="[
   {
     'name': 'items',
-    'description': '',
+    'description': 'Ordered list of breadcrumb items',
     'required': true,
     'type': 'BreadcrumbItem[]'
   }
@@ -21,12 +21,12 @@
  <SlotsTable :data="[
   {
     'name': 'prefix',
-    'description': '',
+    'description': 'Content shown before each breadcrumb label',
     'type': '{ item: BreadcrumbItem; }'
   },
   {
     'name': 'suffix',
-    'description': '',
+    'description': 'Content shown after each breadcrumb label',
     'type': '{ item: BreadcrumbItem; }'
   }
 ]"/> 

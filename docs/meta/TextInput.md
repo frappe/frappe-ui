@@ -11,58 +11,58 @@
 <PropsTable :data="[
   {
     'name': 'type',
-    'description': '',
+    'description': 'HTML input type (text, email, number, password, etc.)',
     'required': false,
     'type': 'TextInputTypes | undefined',
     'default': '\'text\''
   },
   {
     'name': 'size',
-    'description': '',
+    'description': 'Visual size of the input',
     'required': false,
     'type': '\'sm\' | \'md\' | \'lg\' | \'xl\' | undefined',
     'default': '\'sm\''
   },
   {
     'name': 'variant',
-    'description': '',
+    'description': 'Style variant of the input',
     'required': false,
     'type': '\'subtle\' | \'outline\' | \'ghost\' | undefined',
     'default': '\'subtle\''
   },
   {
     'name': 'placeholder',
-    'description': '',
+    'description': 'Placeholder text shown when the input is empty',
     'required': false,
     'type': 'string | undefined'
   },
   {
     'name': 'disabled',
-    'description': '',
+    'description': 'Disables the input when true',
     'required': false,
     'type': 'boolean | undefined'
   },
   {
     'name': 'id',
-    'description': '',
+    'description': 'ID attribute for the input element',
     'required': false,
     'type': 'string | undefined'
   },
   {
     'name': 'modelValue',
-    'description': '',
+    'description': 'Bound value of the input',
     'required': false,
     'type': 'string | number | undefined'
   },
   {
     'name': 'debounce',
-    'description': '',
+    'description': 'Debounce delay (in ms) before emitting value updates',
     'required': false,
     'type': 'number | undefined'
   },
   {
     'name': 'required',
-    'description': '',
+    'description': 'Marks the input as required',
     'required': false,
     'type': 'boolean | undefined'
   }
@@ -72,13 +72,13 @@
  <SlotsTable :data="[
   {
     'name': 'prefix',
-    'description': '',
-    'type': '{}'
+    'description': 'Content rendered before the input (left side)',
+    'type': 'any'
   },
   {
     'name': 'suffix',
-    'description': '',
-    'type': '{}'
+    'description': 'Content rendered after the input (right side)',
+    'type': 'any'
   }
 ]"/> 
 

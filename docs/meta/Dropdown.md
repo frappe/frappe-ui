@@ -11,34 +11,34 @@
 <PropsTable :data="[
   {
     'name': 'button',
-    'description': '',
+    'description': 'Button configuration (label, icon, size, variant, etc.)',
     'required': false,
     'type': 'ButtonProps | undefined'
   },
   {
     'name': 'options',
-    'description': '',
+    'description': 'Array of dropdown options or grouped options',
     'required': false,
     'type': 'DropdownOptions | undefined',
     'default': '[]'
   },
   {
     'name': 'placement',
-    'description': '',
+    'description': 'Placement of the dropdown relative to the trigger',
     'required': false,
     'type': 'string | undefined',
     'default': '\'left\''
   },
   {
     'name': 'side',
-    'description': '',
+    'description': 'Side of the trigger the dropdown appears on',
     'required': false,
-    'type': '\'top\' | \'right\' | \'bottom\' | \'left\' | undefined',
+    'type': '\'left\' | \'bottom\' | \'top\' | \'right\' | undefined',
     'default': '\'bottom\''
   },
   {
     'name': 'offset',
-    'description': '',
+    'description': 'Offset in pixels between trigger and dropdown',
     'required': false,
     'type': 'number | undefined',
     'default': '4'
@@ -49,12 +49,12 @@
  <SlotsTable :data="[
   {
     'name': 'default',
-    'description': '',
-    'type': '{ open: boolean; close: () => void; }'
+    'description': 'Default slot for custom trigger content (receives `open`, `close`, and extra attrs)',
+    'type': '{ [key: string]: any; open: boolean; close: () => void; }'
   },
   {
     'name': 'item',
-    'description': '',
+    'description': 'Custom rendering for each dropdown item (receives `item` and `close`)',
     'type': '{ item: DropdownOption; close: () => void; }'
   }
 ]"/> 

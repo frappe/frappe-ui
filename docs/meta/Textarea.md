@@ -11,58 +11,58 @@
 <PropsTable :data="[
   {
     'name': 'size',
-    'description': '',
+    'description': 'Controls the visual size of the textarea',
     'required': false,
     'type': '\'sm\' | \'md\' | \'lg\' | \'xl\' | undefined',
     'default': '\'sm\''
   },
   {
     'name': 'variant',
-    'description': '',
+    'description': 'Visual style variant',
     'required': false,
     'type': '\'subtle\' | \'outline\' | undefined',
     'default': '\'subtle\''
   },
   {
     'name': 'placeholder',
-    'description': '',
+    'description': 'Placeholder text shown when empty',
     'required': false,
     'type': 'string | undefined'
   },
   {
     'name': 'disabled',
-    'description': '',
+    'description': 'Disables user interaction',
     'required': false,
     'type': 'boolean | undefined'
   },
   {
     'name': 'id',
-    'description': '',
+    'description': 'HTML id attribute',
     'required': false,
     'type': 'string | undefined'
   },
   {
     'name': 'modelValue',
-    'description': '',
+    'description': 'Bound value of the textarea',
     'required': false,
     'type': 'string | undefined'
   },
   {
     'name': 'debounce',
-    'description': '',
+    'description': 'Debounce delay (ms) before emitting value updates',
     'required': false,
     'type': 'number | undefined'
   },
   {
     'name': 'rows',
-    'description': '',
+    'description': 'Number of visible text rows',
     'required': false,
     'type': 'number | undefined',
     'default': '3'
   },
   {
     'name': 'label',
-    'description': '',
+    'description': 'Optional label text',
     'required': false,
     'type': 'string | undefined'
   }

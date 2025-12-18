@@ -11,13 +11,13 @@
 <PropsTable :data="[
   {
     'name': 'modelValue',
-    'description': '',
+    'description': 'The current value of the password input (v-model)',
     'required': false,
     'type': 'string | null | undefined'
   },
   {
     'name': 'value',
-    'description': '',
+    'description': 'Alternate way to set the password value',
     'required': false,
     'type': 'string | null | undefined'
   }
@@ -27,8 +27,8 @@
  <SlotsTable :data="[
   {
     'name': 'prefix',
-    'description': '',
-    'type': '{}'
+    'description': 'Content shown before the input field (left icon / custom content)',
+    'type': 'any'
   }
 ]"/> 
 

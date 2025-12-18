@@ -15,7 +15,7 @@
   {
     'name': 'target',
     'description': '',
-    'type': '{ open: () => void; close: () => void; togglePopover: (flag?: boolean | Event | undefined) => void; '
+    'type': '{ open: () => void; close: () => void; togglePopover: () => void; isOpen: any; }'
   },
   {
     'name': 'prefix',
@@ -40,7 +40,7 @@
   {
     'name': 'footer',
     'description': '',
-    'type': '{ togglePopover: (flag?: boolean | Event | undefined) => void; }'
+    'type': '{ togglePopover: () => void; }'
   }
 ]"/> 
 

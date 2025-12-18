@@ -11,20 +11,20 @@
 <PropsTable :data="[
   {
     'name': 'modelValue',
-    'description': '',
+    'description': 'Controls whether the dialog is open (v-model)',
     'required': true,
     'type': 'boolean'
   },
   {
     'name': 'options',
-    'description': '',
+    'description': 'Configuration options for title, message, size, icon, actions, etc.',
     'required': false,
     'type': 'DialogOptions | undefined',
     'default': '{}'
   },
   {
     'name': 'disableOutsideClickToClose',
-    'description': '',
+    'description': 'Prevents closing the dialog when clicking outside',
     'required': false,
     'type': 'boolean | undefined',
     'default': 'false'
@@ -35,32 +35,27 @@
  <SlotsTable :data="[
   {
     'name': 'body',
-    'description': '',
-    'type': '{}'
-  },
-  {
-    'name': 'body-main',
-    'description': '',
-    'type': '{}'
+    'description': 'Main body content of the dialog, overrides body-header and body-content',
+    'type': 'any'
   },
   {
     'name': 'body-header',
-    'description': '',
-    'type': '{}'
+    'description': 'Header section inside the dialog body',
+    'type': 'any'
   },
   {
     'name': 'body-title',
-    'description': '',
-    'type': '{}'
+    'description': 'Title section inside the header',
+    'type': 'any'
   },
   {
     'name': 'body-content',
-    'description': '',
-    'type': '{}'
+    'description': 'Main content section inside the body',
+    'type': 'any'
   },
   {
     'name': 'actions',
-    'description': '',
+    'description': 'Actions section at the bottom of the dialog; exposes `{ close }`',
     'type': '{ close: () => void; }'
   }
 ]"/> 

@@ -25,7 +25,7 @@
     'name': 'type',
     'description': '',
     'required': false,
-    'type': '\'warning\' | \'info\' | \'success\' | \'error\' | undefined'
+    'type': '\'info\' | \'success\' | \'warning\' | \'error\' | undefined'
   },
   {
     'name': 'duration',

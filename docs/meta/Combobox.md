@@ -11,53 +11,53 @@
 <PropsTable :data="[
   {
     'name': 'variant',
-    'description': '',
+    'description': 'Visual style of the combobox',
     'required': false,
     'type': 'ComboboxVariant | undefined',
     'default': '\'subtle\''
   },
   {
     'name': 'options',
-    'description': '',
+    'description': 'List of options to display',
     'required': false,
     'type': 'ComboboxOption[]',
     'default': '[]'
   },
   {
     'name': 'modelValue',
-    'description': '',
+    'description': 'Currently selected value (v-model)',
     'required': false,
     'type': 'string | null | undefined'
   },
   {
     'name': 'placeholder',
-    'description': '',
+    'description': 'Placeholder text shown when no value is selected',
     'required': false,
     'type': 'string | undefined'
   },
   {
     'name': 'disabled',
-    'description': '',
+    'description': 'Disables the combobox',
     'required': false,
     'type': 'boolean | undefined'
   },
   {
     'name': 'openOnFocus',
-    'description': '',
+    'description': 'Opens the dropdown when the input is focused',
     'required': false,
     'type': 'boolean | undefined'
   },
   {
     'name': 'openOnClick',
-    'description': '',
+    'description': 'Opens the dropdown when the input is clicked',
     'required': false,
     'type': 'boolean | undefined'
   },
   {
     'name': 'placement',
-    'description': '',
+    'description': 'Dropdown placement relative to the input',
     'required': false,
-    'type': '\'center\' | \'start\' | \'end\' | undefined'
+    'type': '\'start\' | \'center\' | \'end\' | undefined'
   }
 ]"/> 
 
@@ -65,8 +65,8 @@
  <SlotsTable :data="[
   {
     'name': 'prefix',
-    'description': '',
-    'type': '{}'
+    'description': 'Custom content rendered before the input (left side)',
+    'type': 'any'
   }
 ]"/> 
 
@@ -75,27 +75,27 @@
   {
     'name': 'update:modelValue',
     'description': '',
-    'type': 'any[]'
+    'type': '[]'
   },
   {
     'name': 'update:selectedOption',
     'description': '',
-    'type': 'any[]'
+    'type': '[]'
   },
   {
     'name': 'focus',
     'description': '',
-    'type': 'any[]'
+    'type': '[]'
   },
   {
     'name': 'blur',
     'description': '',
-    'type': 'any[]'
+    'type': '[]'
   },
   {
     'name': 'input',
     'description': '',
-    'type': 'any[]'
+    'type': '[]'
   }
 ]"/> 
 

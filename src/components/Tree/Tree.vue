@@ -80,16 +80,21 @@ const props = withDefaults(defineProps<TreeProps>(), {
 })
 
 const slots = defineSlots<{
+  /** Slot to fully override how a tree node renders */
   node: {
     node: TreeNode
     hasChildren: boolean
     isCollapsed: boolean
     toggleCollapsed: (event: MouseEvent) => void
   }
+
+  /** Slot to override only the node expand/collapse icon */
   icon: {
     hasChildren: boolean
     isCollapsed: boolean
   }
+
+  /** Slot to override only the node label/content */
   label: {
     node: TreeNode
     hasChildren: boolean

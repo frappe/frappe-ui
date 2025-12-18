@@ -11,98 +11,98 @@
 <PropsTable :data="[
   {
     'name': 'value',
-    'description': '',
+    'description': 'Selected time (uncontrolled)',
     'required': false,
     'type': 'string | undefined',
     'default': '\'\''
   },
   {
     'name': 'modelValue',
-    'description': '',
+    'description': 'Selected time (v-model)',
     'required': false,
     'type': 'string | undefined',
     'default': '\'\''
   },
   {
     'name': 'interval',
-    'description': '',
+    'description': 'Minute interval between options',
     'required': false,
     'type': 'number | undefined',
     'default': '15'
   },
   {
     'name': 'options',
-    'description': '',
+    'description': 'Custom time options',
     'required': false,
     'type': '{ value: string; label?: string | undefined; }[] | undefined',
     'default': '[]'
   },
   {
     'name': 'placement',
-    'description': '',
+    'description': 'Popover placement',
     'required': false,
     'type': 'Placement | undefined',
     'default': '\'bottom-start\' as Placement'
   },
   {
     'name': 'placeholder',
-    'description': '',
+    'description': 'Placeholder text when no value is selected',
     'required': false,
     'type': 'string | undefined',
     'default': '\'Select time\''
   },
   {
     'name': 'variant',
-    'description': '',
+    'description': 'Visual style variant',
     'required': false,
     'type': 'Variant | undefined',
     'default': '\'subtle\' as Variant'
   },
   {
     'name': 'allowCustom',
-    'description': '',
+    'description': 'Allow entering custom time values',
     'required': false,
     'type': 'boolean | undefined',
     'default': 'true'
   },
   {
     'name': 'autoClose',
-    'description': '',
+    'description': 'Close picker automatically after selection',
     'required': false,
     'type': 'boolean | undefined',
     'default': 'true'
   },
   {
     'name': 'use12Hour',
-    'description': '',
+    'description': 'Use 12-hour (AM/PM) format',
     'required': false,
     'type': 'boolean | undefined',
     'default': 'true'
   },
   {
     'name': 'disabled',
-    'description': '',
+    'description': 'Disable the time picker',
     'required': false,
     'type': 'boolean | undefined',
     'default': 'false'
   },
   {
     'name': 'scrollMode',
-    'description': '',
+    'description': 'Scroll behavior when opening the list',
     'required': false,
-    'type': '\'center\' | \'start\' | \'nearest\' | undefined',
+    'type': '\'start\' | \'center\' | \'nearest\' | undefined',
     'default': '\'center\' as const'
   },
   {
     'name': 'minTime',
-    'description': '',
+    'description': 'Minimum selectable time',
     'required': false,
     'type': 'string | undefined',
     'default': '\'\''
   },
   {
     'name': 'maxTime',
-    'description': '',
+    'description': 'Maximum selectable time',
     'required': false,
     'type': 'string | undefined',
     'default': '\'\''
@@ -113,13 +113,13 @@
  <SlotsTable :data="[
   {
     'name': 'prefix',
-    'description': '',
-    'type': '{}'
+    'description': 'Slot rendered before the input value.\nUseful for icons or indicators.',
+    'type': 'any'
   },
   {
     'name': 'suffix',
-    'description': '',
-    'type': '{ togglePopover: (flag?: boolean | Event | undefined) => void; isOpen: boolean | undefined; }'
+    'description': 'Slot rendered after the input value.\nExposes popover controls.',
+    'type': '{ togglePopover: () => void; isOpen: boolean; }'
   }
 ]"/> 
 

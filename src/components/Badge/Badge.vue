@@ -78,4 +78,15 @@ const classes = computed(() => {
 
   return [variantClasses, sizeClasses]
 })
+
+defineSlots<{
+  /** Content shown before the badge label */
+  prefix?: () => any
+
+  /** Main badge content (overrides `label` prop) */
+  default?: () => any
+
+  /** Content shown after the badge label */
+  suffix?: () => any
+}>()
 </script>

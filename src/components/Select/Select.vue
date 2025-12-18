@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { SelectProps } from './types'
+import type { SelectProps, SelectOption } from './types'
 import LucideChevronDown from '~icons/lucide/chevron-down'
 
 import {
@@ -79,6 +79,21 @@ const selectOptions = computed(() => {
   const tmp = props.options?.map((x) => ({ label: x, value: x }))
   return (str ? tmp : props.options)?.filter((x) => x && String(x.value)) || []
 })
+
+defineSlots<{
+  /** Content rendered before the selected value (e.g., left icon or custom content) */
+  prefix?: () => any
+
+  /** Content rendered after the selected value (e.g., right icon or custom content) */
+  suffix?: () => any
+
+  /** Custom rendering for each dropdown option */
+  option?: (props: { option: SelectOption }) => any
+
+  /** Custom content at the bottom of the dropdown */
+  footer?: () => any
+}>()
+
 </script>
 
 <template>

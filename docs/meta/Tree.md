@@ -11,19 +11,19 @@
 <PropsTable :data="[
   {
     'name': 'node',
-    'description': '',
+    'description': 'Root tree node to render.\nCan contain nested children to form the tree structure.',
     'required': true,
     'type': 'TreeNode'
   },
   {
     'name': 'nodeKey',
-    'description': '',
+    'description': 'Unique key used to identify each node.\nUsually an id-like property present on every node.',
     'required': true,
     'type': 'string'
   },
   {
     'name': 'options',
-    'description': '',
+    'description': 'Optional configuration for tree layout and behavior.',
     'required': false,
     'type': 'TreeOptions | undefined',
     'default': '{\n    rowHeight: \'25px\',\n    indentWidth: \'20px\',\n    showIndentationGuides: true,\n    defaultCollapsed: true,\n}'
@@ -34,17 +34,17 @@
  <SlotsTable :data="[
   {
     'name': 'node',
-    'description': '',
+    'description': 'Slot to fully override how a tree node renders',
     'type': 'any'
   },
   {
     'name': 'icon',
-    'description': '',
+    'description': 'Slot to override only the node expand/collapse icon',
     'type': 'any'
   },
   {
     'name': 'label',
-    'description': '',
+    'description': 'Slot to override only the node label/content',
     'type': 'any'
   }
 ]"/> 

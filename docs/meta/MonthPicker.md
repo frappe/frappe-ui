@@ -11,7 +11,7 @@
 <PropsTable :data="[
   {
     'name': 'placeholder',
-    'description': '',
+    'description': 'Placeholder text shown when no value is selected',
     'required': false,
     'type': 'string | undefined',
     'default': '\'Select month\''

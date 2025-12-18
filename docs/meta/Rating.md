@@ -11,34 +11,34 @@
 <PropsTable :data="[
   {
     'name': 'modelValue',
-    'description': '',
+    'description': 'The current rating value (controlled)',
     'required': false,
     'type': 'number | undefined',
     'default': '0'
   },
   {
     'name': 'rating_from',
-    'description': '',
+    'description': 'Minimum rating value (default is 0 or 1 depending on implementation)',
     'required': false,
     'type': 'number | undefined',
     'default': '5'
   },
   {
     'name': 'label',
-    'description': '',
+    'description': 'Optional label displayed alongside the rating',
     'required': false,
     'type': 'string | undefined'
   },
   {
     'name': 'readonly',
-    'description': '',
+    'description': 'If true, disables interaction and makes the rating read-only',
     'required': false,
     'type': 'boolean | undefined',
     'default': 'false'
   },
   {
     'name': 'size',
-    'description': '',
+    'description': 'Size of the rating component',
     'required': false,
     'type': '\'sm\' | \'md\' | \'lg\' | \'xl\' | undefined',
     'default': '\'md\''

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Badge from "@/srcomponents/Badge/Badge.vue";
+import { Badge } from "frappe-ui";
 
 interface itemProp {
   name: string;
@@ -16,7 +16,7 @@ const props = defineProps<Props>();
 
 <template>
   <div
-    class="grid grid-cols-2 bg-surface-gray-2 rounded p-3 px-4 text-ink-gray-5"
+    class="grid grid-cols-2 bg-surface-gray-2 rounded p-3 px-4 text-ink-gray-5 vp-raw"
   >
     <span>Slots (default)</span>
     <span>Payload </span>
@@ -37,7 +37,7 @@ const props = defineProps<Props>();
           <span> {{ x.type }} </span>
         </Badge>
 
-        <p class="text-sm !m-1 text-ink-gray-6">{{ "hiii sdf sdfsdf" }}</p>
+        <p class="text-sm !m-1 !leading-1 text-ink-gray-5">{{ x.description }}</p>
       </div>
 
       <hr
