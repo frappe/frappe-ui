@@ -21,7 +21,7 @@
             :open-on-focus="true"
             :options="getFieldsForRow(row[0])"
             placeholder="Select Field"
-            class="[&>div>div]:bg-surface-white w-[120px]"
+            class="[&>div>div]:bg-surface-white !w-[120px] !min-w-[120px]"
             :modelValue="row[0]"
             @update:modelValue="(val) => handleFieldChange(row, val)"
           />

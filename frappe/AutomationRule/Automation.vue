@@ -30,7 +30,7 @@
       </div>
     </template>
     <template #content>
-      <div class="flex flex-col gap-4">
+      <div class="flex flex-col gap-6">
         <ScopeBlock :doctypes="[{ label: 'Tickets', value: 'HD Ticket' }]" />
         <WhenBlock v-if="state.dt" />
         <!-- RuleBlock -->
@@ -38,7 +38,7 @@
         <!-- ConditionBlock -->
         <!-- NotificationBlock -->
         <!-- ActionBlock -->
-        <!-- Selector Block -->
+        <AddBlock />
       </div>
     </template>
   </SettingsLayoutBase>
@@ -48,6 +48,7 @@
 import { Switch } from 'frappe-ui'
 import { computed, provide, reactive } from 'vue'
 import SettingsLayoutBase from '../../src/components/SettingsLayoutBase.vue'
+import AddBlock from './AddBlock.vue'
 import ScopeBlock from './ScopeBlock.vue'
 import WhenBlock from './WhenBlock.vue'
 import { AutomationStateSymbol } from './types'
@@ -73,7 +74,7 @@ const state = reactive({
   selectedTimerOption: 5,
   presets: '',
   presetsJson: [],
-  rule: '',
+  rule: [],
 })
 
 provide(AutomationStateSymbol, state)

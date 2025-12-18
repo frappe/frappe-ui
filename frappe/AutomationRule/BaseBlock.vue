@@ -6,7 +6,12 @@
     <!-- left side -->
     <div class="flex gap-2">
       <div class="flex items-center gap-2">
-        <component :is="iconComponent" class="size-4" v-if="iconComponent" />
+        <component
+          :is="iconComponent?.icon"
+          class="size-4"
+          :style="{ color: iconComponent?.color }"
+          v-if="iconComponent"
+        />
         <p class="text-p-sm text-ink-gray-5 text-[14px]" v-if="title">
           {{ title }}
         </p>
@@ -52,17 +57,44 @@ const roundedClass = computed(() => {
   return roundedClassMap[props.rounded || 'all']
 })
 
-const iconMap: Record<string, Component> = {
-  scope: ScopeIcon,
-  timer: TimerIcon,
-  event: EventIcon,
-  condition: ConditionIcon,
-  action: ActionIcon,
-  notification: BellIcon,
-  filter: FilterIcon,
+interface IconConfig {
+  icon: Component
+  color: string
 }
 
-const iconComponent = computed<Component | null>(() => {
+const iconMap: Record<string, IconConfig> = {
+  scope: {
+    icon: ScopeIcon,
+    color: '#0289F7',
+  },
+  timer: {
+    icon: TimerIcon,
+    color: '#E79913',
+  },
+  event: {
+    icon: EventIcon,
+    color: '#E79913',
+  },
+  condition: {
+    icon: ConditionIcon,
+    color: '#7757EE',
+  },
+  action: {
+    icon: ActionIcon,
+    color: '#278F5E',
+  },
+  notification: {
+    icon: BellIcon,
+    color: '#318AD8',
+  },
+  filter: {
+    icon: FilterIcon,
+    color: '',
+  },
+}
+
+const iconComponent = computed<IconConfig | null>(() => {
+  if (!props.icon) return null
   return iconMap[props.icon] || null
 })
 </script>

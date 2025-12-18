@@ -19,7 +19,7 @@ export interface AutomationState {
   selectedTimerOption: number
   presets: string
   presetsJson: any[]
-  rule: string
+  rule: any[]
 }
 
 export const AutomationStateSymbol: InjectionKey<AutomationState> =
