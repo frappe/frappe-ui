@@ -67,7 +67,7 @@
             <div v-else-if="importFile" class="h-[300px] flex items-center justify-center bg-surface-gray-1 border border-dashed border-outline-gray-3 rounded-md">
                 <div class="w-4/5 lg:w-2/5 bg-surface-white border rounded-md p-2 flex items-center justify-between items-center">
                     <div class="space-y-2">
-                        <div class="font-medium leading-5">
+                        <div class="font-medium leading-5 text-ink-gray-9">
                             {{ importFile.file_name || importFile.split("/").pop() }}
                         </div>
                         <div v-if="importFile.file_size" class="text-ink-gray-6">
