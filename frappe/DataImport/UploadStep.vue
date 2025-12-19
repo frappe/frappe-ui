@@ -38,7 +38,7 @@
                         class="hidden"
                         @change="(e) => uploadFile(e)"
                     />
-                    <div class="leading-5">
+                    <div class="leading-5 text-ink-gray-9">
                         Drag and drop a CSV file, or upload from your 
                         <span @click="openFileSelector" class="cursor-pointer font-semibold hover:underline">Device</span> 
                         or 
