@@ -1,11 +1,11 @@
 <template>
-  <BaseBlock icon="action" title="Set" v-bind="$attrs">
+  <BaseBlock icon="action" title="Set" :indent>
     <template #meta>
       <Combobox
         variant="outline"
         :open-on-click="true"
         :open-on-focus="true"
-        :options="fields"
+        :options="filteredFields"
         placeholder="Select Field"
         class="[&>div>div]:bg-surface-white !w-[120px] !min-w-[120px]"
         :modelValue="action.field"
@@ -13,24 +13,25 @@
       />
 
       <component
+        v-if="action.field"
         :is="valueControl"
         variant="outline"
         :modelValue="action.value"
         @update:modelValue="handleValueChange"
         :disabled="!action.field"
-        class="w-[160px]"
+        class="!w-[160px]"
         :class="fieldType === 'Link' && '[&>div>div>div]:bg-surface-white'"
         placeholder="Select Value"
       />
     </template>
     <template #action>
-      <Button
-        variant="ghost"
-        icon="trash-2"
-        theme="red"
-        tooltip="Delete Action"
-        @click="$emit('deleteAction')"
-      />
+      <Dropdown :options="options" placement="right" v-if="options.length">
+        <Button
+          variant="ghost"
+          icon="more-horizontal"
+          :class="indent && 'opacity-0 group-hover:opacity-100 transition-all'"
+        />
+      </Dropdown>
     </template>
   </BaseBlock>
 </template>
@@ -39,24 +40,37 @@
 import { computed, ModelRef } from 'vue'
 import Button from '../../src/components/Button/Button.vue'
 import Combobox from '../../src/components/Combobox/Combobox.vue'
+import Dropdown from '../../src/components/Dropdown/Dropdown.vue'
 import { useDoctypeMeta } from '../../src/data-fetching/useDoctypeMeta'
 import { getValueControl } from '../Filter/utils'
 import BaseBlock from './BaseBlock.vue'
 import { useAutomationState } from './automation'
+import type { DropdownOption, SetAction } from './types'
 
-interface SetAction {
-  type: 'set'
-  field: string
-  value: string
-}
-
-defineEmits<{
-  deleteAction: []
-}>()
+const props = withDefaults(
+  defineProps<{
+    indent?: boolean
+    options?: DropdownOption[]
+    usedFields?: string[]
+  }>(),
+  {
+    indent: false,
+    options: () => [],
+    usedFields: () => [],
+  },
+)
 
 const action = defineModel() as ModelRef<SetAction>
 const state = useAutomationState()
 const { fields, getField } = useDoctypeMeta(state.dt)
+
+const filteredFields = computed(() => {
+  if (!props.usedFields?.length) return fields.value
+  return fields.value.filter(
+    (f) =>
+      !props.usedFields?.includes(f.value) || f.value === action.value.field,
+  )
+})
 
 const fieldType = computed(() => {
   if (!action.value.field) return ''
@@ -95,5 +109,3 @@ function handleValueChange(value: unknown) {
   action.value.value = String(value ?? '')
 }
 </script>
-
-<style scoped></style>

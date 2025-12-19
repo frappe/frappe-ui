@@ -1,29 +1,18 @@
 <template>
-  <template v-for="r in state.rule">
-    <div v-if="r.type == 'if'" class="gap-1 flex flex-col">
-      <ConditionBlock
-        v-model="r.conditions"
-        label="If"
-        icon="condition"
-        :round-first-block="true"
-      />
-      <template v-for="(action, idx) in r.actions" :key="idx">
-        <SetFieldBlock
-          v-model="r.actions[idx]"
-          :indent="true"
-          @deleteAction="r.actions.splice(idx, 1)"
-        />
-      </template>
-    </div>
+  <template v-for="(r, idx) in state.rule">
+    <IfBlock v-if="r.type == 'if'" v-model="state.rule[idx]" />
     <!-- Other Blocks  -->
-    <!-- Else -->
+    <div v-if="r.type === 'set'">
+      <SetFieldBlock v-model="state.rule[idx]" />
+    </div>
+    <!-- Else Block -->
   </template>
 </template>
 
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useAutomationState } from './automation'
-import ConditionBlock from './ConditionBlock.vue'
+import IfBlock from './IfBlock.vue'
 import SetFieldBlock from './SetFieldBlock.vue'
 
 const state = useAutomationState()
@@ -52,11 +41,9 @@ onMounted(() => {
       ],
     },
     {
-      action: {
-        type: 'set',
-        field: 'status',
-        value: 'open',
-      },
+      type: 'set',
+      field: 'status',
+      value: 'Open',
     },
   ]
 })
