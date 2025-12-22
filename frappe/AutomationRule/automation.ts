@@ -209,7 +209,7 @@ export function useDoctypeFilters(
       field: {
         fieldName: field.fieldname,
         fieldType: field.fieldtype,
-        options: field.options?.split('\n') || [],
+        options: field.options?.split('\n') || null,
       },
       operator,
       value: row[2],

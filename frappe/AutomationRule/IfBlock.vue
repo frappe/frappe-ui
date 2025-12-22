@@ -5,6 +5,8 @@
       label="If"
       icon="condition"
       :round-first-block="true"
+      :additional-actions="additionalConditionBlockOptions"
+      @delete="handleDeleteCondition"
     />
     <div
       v-for="(action, actionIdx) in block.actions"
@@ -22,7 +24,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ModelRef } from 'vue'
+import { computed, ModelRef, ref } from 'vue'
+import ActionIcon from '../Icons/ActionIcon.vue'
+import BellIcon from '../Icons/BellIcon.vue'
 import ConditionBlock from './ConditionBlock.vue'
 import SetFieldBlock from './SetFieldBlock.vue'
 import type { DropdownOption, IfBlockData } from './types'
@@ -30,19 +34,19 @@ import type { DropdownOption, IfBlockData } from './types'
 const block = defineModel() as ModelRef<IfBlockData>
 
 const addedFields = computed(() =>
-  block.value.actions.map((a) => a.field).filter(Boolean),
+  block.value?.actions.map((a) => a.field).filter(Boolean),
 )
 
 function addAction() {
-  block.value.actions.push({ type: 'set', field: '', value: '' })
+  block.value?.actions.push({ type: 'set', field: '', value: '' })
 }
 
 function deleteAction(index: number) {
-  block.value.actions.splice(index, 1)
+  block.value?.actions.splice(index, 1)
 }
 
 function getActionOptions(index: number): DropdownOption[] {
-  const isLast = index === block.value.actions.length - 1
+  const isLast = index === block.value?.actions.length - 1
   const deleteOption: DropdownOption = {
     label: 'Delete Action',
     icon: 'trash-2',
@@ -60,6 +64,26 @@ function getActionOptions(index: number): DropdownOption[] {
     },
     deleteOption,
   ]
+}
+
+const additionalConditionBlockOptions: DropdownOption[] = [
+  {
+    label: 'Add Action',
+    icon: ActionIcon,
+    onClick: addAction,
+  },
+  {
+    label: 'Add Notification',
+    icon: BellIcon,
+    onClick: addAction,
+  },
+]
+
+const showConfirmDialog = ref(false)
+function handleDeleteCondition(idx: number) {
+  if (idx !== 0) return
+  // if 0 then delete the whole if block
+  block.value = []
 }
 </script>
 

@@ -3,50 +3,62 @@
     <IfBlock v-if="r.type == 'if'" v-model="state.rule[idx]" />
     <!-- Other Blocks  -->
     <div v-if="r.type === 'set'">
-      <SetFieldBlock v-model="state.rule[idx]" />
+      <SetFieldBlock v-model="state.rule[idx]" :options="actionOptions(idx)" />
     </div>
     <!-- Else Block -->
   </template>
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
 import { useAutomationState } from './automation'
 import IfBlock from './IfBlock.vue'
 import SetFieldBlock from './SetFieldBlock.vue'
 
 const state = useAutomationState()
-onMounted(() => {
-  state.rule = [
+// onMounted(() => {
+//   state.rule = [
+//     {
+//       type: 'if',
+//       conditions: [['priority', 'equals', 'High']],
+//       actions: [
+//         {
+//           type: 'set',
+//           field: 'agent_group',
+//           value: 'Product Experts',
+//         },
+//       ],
+//     },
+//     {
+//       type: 'else',
+//       conditions: 'True',
+//       actions: [
+//         {
+//           type: 'set',
+//           field: 'agent_group',
+//           value: 'Billing',
+//         },
+//       ],
+//     },
+//     {
+//       type: 'set',
+//       field: 'status',
+//       value: 'Open',
+//     },
+//   ]
+// })
+
+function actionOptions(idx: number) {
+  return [
     {
-      type: 'if',
-      conditions: [['priority', 'equals', 'High']],
-      actions: [
-        {
-          type: 'set',
-          field: 'agent_group',
-          value: 'Product Experts',
-        },
-      ],
-    },
-    {
-      type: 'else',
-      conditions: 'True',
-      actions: [
-        {
-          type: 'set',
-          field: 'agent_group',
-          value: 'Billing',
-        },
-      ],
-    },
-    {
-      type: 'set',
-      field: 'status',
-      value: 'Open',
+      label: 'Delete Action',
+      icon: 'trash-2',
+      theme: 'red',
+      onClick: () => {
+        state.rule.splice(idx, 1)
+      },
     },
   ]
-})
+}
 </script>
 
 <style scoped></style>

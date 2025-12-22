@@ -81,7 +81,7 @@ import Dropdown from '../../src/components/Dropdown/Dropdown.vue'
 import Select from '../../src/components/Select/Select.vue'
 import BaseBlock from './BaseBlock.vue'
 import { useAutomationState, useDoctypeFilters } from './automation'
-import type { IconType, RoundedType } from './types'
+import type { DropdownOption, IconType, RoundedType } from './types'
 
 type ConditionTuple = [string, string, string]
 type ConditionArray = (ConditionTuple | string)[]
@@ -91,13 +91,20 @@ const props = withDefaults(
     label?: string
     icon?: IconType
     roundFirstBlock?: boolean
+    additionalActions?: DropdownOption[] | []
   }>(),
   {
     label: 'Where',
     icon: 'filter',
     roundFirstBlock: false,
+    additionalActions: () => [],
   },
 )
+
+const emit = defineEmits<{
+  (e: 'delete', index: number): void
+}>()
+
 const conditions = defineModel() as ModelRef<ConditionArray>
 const state = useAutomationState()
 
@@ -155,9 +162,13 @@ function rowOptions(idx: number) {
       icon: 'plus',
       disabled: !canAdd,
     },
+    ...props.additionalActions,
     {
       label: 'Delete Condition',
-      onClick: () => deleteRow(idx),
+      onClick: () => {
+        emit('delete', idx)
+        deleteRow(idx)
+      },
       icon: 'trash',
       theme: 'red' as const,
     },
