@@ -1,11 +1,17 @@
 <script setup lang="ts">
 import Hero from "./Hero.vue";
 import ComponentGroups from "./ComponentGroups.vue";
+import Why from "./Why.vue";
+import DesignSystem from "./DesignSystem.vue";
+import Footer from "./Footer.vue";
 </script>
 
 <template>
-  <main class="max-w-7xl mx-auto py-10 vp-raw">
+  <main class="vp-raw">
     <Hero />
 		<ComponentGroups/>
+		<Why/>
+		<DesignSystem/>
+		<Footer/>
   </main>
 </template>

@@ -77,7 +77,7 @@ const componentGroups = {
 </script>
 
 <template>
-  <main class="max-w-7xl mx-auto px-6 py-12 prose">
+  <main class="max-w-7xl mx-auto px-6 my-12 prose">
     <h1 class="text-[2.7rem] font-bold text-center mb-4">
       Everything you need <br /> <span> to build. </span>
     </h1>

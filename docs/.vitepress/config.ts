@@ -51,8 +51,8 @@ export default defineConfig({
 
   themeConfig: {
     logo: {
-      light: '/logo.svg',
-      dark: '/logo-dark.svg',
+      light: '/log.svg',
+      dark: '/log.svg',
     },
     search: { provider: 'local' },
     nav: [

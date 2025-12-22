@@ -8,6 +8,11 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    LucideArrowUpRight: typeof import('~icons/lucide/arrow-up-right')['default']
+    LucideBadge: typeof import('~icons/lucide/badge')['default']
+    LucideCheck: typeof import('~icons/lucide/check')['default']
+    LucideShuffle: typeof import('~icons/lucide/shuffle')['default']
+    LucideTrendingUp: typeof import('~icons/lucide/trending-up')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
   }
