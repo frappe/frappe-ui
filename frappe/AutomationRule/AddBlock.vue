@@ -59,7 +59,7 @@ function addConditionBlock() {
   /*
 	{
       "type": "if",
-      "condition": "",
+      "condition": [],
       "actions": [],
     },
 	{
@@ -70,8 +70,30 @@ function addConditionBlock() {
 	*/
   // we will add if block only if else block exists
   //
+  //   {
+  //   type: 'if',
+  //   conditions: [['priority', 'equals', 'High']],
+  //   actions: [
+  //     {
+  //       type: 'set',
+  //       field: 'agent_group',
+  //       value: 'Product Experts',
+  //     },
+  //   ],
+  // },
+  state.rule.push({
+    type: 'if',
+    conditions: [['', '', '']],
+    actions: [],
+  })
 }
-function addActionBlock() {}
+function addActionBlock() {
+  state.rule.push({
+    type: 'set',
+    field: '',
+    value: '',
+  })
+}
 function addNotificationBlock() {}
 </script>
 
