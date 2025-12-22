@@ -6,7 +6,7 @@ import HeroShowcase from "./HeroShowcase/index.vue";
 
 <template>
   <div
-    class="grid lg:grid-cols-2 gap-5 h-[calc(100vh-200px)] max-w-7xl mx-auto py-20"
+    class="grid lg:grid-cols-2 gap-5 min-h-[calc(100vh-200px)] max-w-7xl mx-auto py-20"
   >
     <section class="flex">
       <div class="my-auto p-7 flex flex-col gap-5">

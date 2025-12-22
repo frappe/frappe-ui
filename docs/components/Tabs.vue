@@ -24,7 +24,7 @@ interface TabProps {
 import { h } from "vue";
 
 const props = withDefaults(defineProps<TabProps>(), {
-  variant: "subtle",
+  variant: "underline",
 });
 
 const indicatorXCss =
@@ -40,7 +40,7 @@ const Btn = h("button");
 
 const variants = {
   underline: {
-    tablist: "border-b data-[orientation=vertical]:border-r px-3",
+    tablist: "border-b data-[orientation=vertical]:border-r",
   },
   subtle: {
     tablist: "!gap-1",
