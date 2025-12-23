@@ -105,7 +105,7 @@ const formCompleteStatus = computed(() => {
 <template>
   <section class="max-w-7xl mx-auto px-6 py-12">
     <h1 class="text-[2.7rem] font-bold text-center text-ink-gray-9 mb-4">
-      Espresso <span class="text-ink-violet-1"> Design</span> System
+      Espressofied
     </h1>
 
     <p
