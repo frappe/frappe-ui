@@ -145,7 +145,7 @@ const formCompleteStatus = computed(() => {
           <div class="flex flex-wrap gap-2">
             <span
               v-for="(color, i) in neutralColors"
-              class="p-4 rounded-sm shadow-lg"
+              class="p-4 size-4 rounded-sm shadow-lg"
               :class="color"
             >
             </span>
