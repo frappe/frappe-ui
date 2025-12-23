@@ -33,7 +33,7 @@
     "name": "side",
     "description": "Side of the trigger the dropdown appears on",
     "required": false,
-    "type": "\"left\" | \"bottom\" | \"top\" | \"right\" | undefined",
+    "type": "\"top\" | \"bottom\" | \"right\" | \"left\" | undefined",
     "default": "\"bottom\""
   },
   {

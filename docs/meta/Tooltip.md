@@ -27,7 +27,7 @@
     "name": "placement",
     "description": "Position of the tooltip relative to the trigger.",
     "required": false,
-    "type": "\"left\" | \"bottom\" | \"top\" | \"right\" | undefined",
+    "type": "\"top\" | \"bottom\" | \"right\" | \"left\" | undefined",
     "default": "\"top\""
   },
   {

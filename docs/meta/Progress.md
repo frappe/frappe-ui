@@ -17,7 +17,7 @@
   },
   {
     "name": "size",
-    "description": "",
+    "description": "Size of the progress bar: \"sm\" | \"md\" | \"lg\" | \"xl\"",
     "required": false,
     "type": "\"sm\" | \"md\" | \"lg\" | \"xl\" | undefined",
     "default": "\"sm\""

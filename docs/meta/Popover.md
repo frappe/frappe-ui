@@ -41,12 +41,12 @@
     "name": "placement",
     "description": "Placement of the popover relative to the target",
     "required": false,
-    "type": "\"bottom-start\" | \"top-start\" | \"top-end\" | \"bottom-end\" | \"right-start\" | \"right-end\" | \"left-start\" | \"left-end\" | undefined",
+    "type": "\"bottom-start\" | \"top-start\" | \"top-end\" | \"bottom-end\" | \"right-start\" | \"right-end\" | \"left-start\" | \"left-end\" | \"top\" | \"bottom\" | \"right\" | \"left\" | undefined",
     "default": "\"bottom-start\""
   },
   {
     "name": "popoverClass",
-    "description": "Custom class(es) for the popover",
+    "description": "",
     "required": false,
     "type": "string | object | (string | object)[] | undefined",
     "default": "\"\""

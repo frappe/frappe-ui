@@ -111,6 +111,12 @@
     "description": "Extra arguments passed to the upload function",
     "required": false,
     "type": "object | undefined"
+  },
+  {
+    "name": "modelValue",
+    "description": "",
+    "required": false,
+    "type": "any"
   }
 ]'/> 
 
@@ -135,6 +141,11 @@
 
 ## Emit Events 
  <EmitsTable :data='[
+  {
+    "name": "update:modelValue",
+    "description": "",
+    "type": "[value: any]"
+  },
   {
     "name": "change",
     "description": "",
