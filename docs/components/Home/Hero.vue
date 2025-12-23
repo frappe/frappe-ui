@@ -26,16 +26,19 @@ import pkgJson from "../../../package.json";
         </p>
 
         <div class="flex gap-3 mt-5">
-          <Button variant="solid" size="lg" class="font-normal px-6">
-            Get Started
-            <template #suffix>
-              <LucideRight class="size-4" />
-            </template>
-          </Button>
+          <a href="/docs/getting-started">
+            <Button variant="solid" size="lg" class="font-normal px-6">
+              Get Started
+              <template #suffix>
+                <LucideRight class="size-4" />
+              </template>
+            </Button></a>
 
-          <Button vriant="outline" size="lg" class="font-normal px-6">
-            Show Components
-          </Button>
+          <a href="/docs/badge">
+            <Button vriant="outline" size="lg" class="font-normal px-6">
+              Show Components
+            </Button>
+          </a>
         </div>
       </div>
     </section>
