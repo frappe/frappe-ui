@@ -1,6 +1,6 @@
 {
   "name": "frappe-ui",
-  "version": "0.1.234",
+  "version": "0.1.243",
   "description": "A set of components and utilities for rapid UI development",
   "type": "module",
   "sideEffects": false,
@@ -54,7 +54,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/frappe/frappe-ui.git"
+    "url": "git+https://github.com/frappe/frappe-ui.git"
   },
   "author": "Frappe Technologies Pvt. Ltd.",
   "license": "MIT",

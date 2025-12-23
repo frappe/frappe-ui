@@ -1,3 +1,6 @@
+// old data-fetching: resources
+export * from './resources/index.ts'
+
 // components
 export * from './components/Alert'
 export * from './components/Autocomplete'
@@ -91,9 +94,6 @@ export * from './utils/useFileUpload'
 export * from './utils/theme'
 export * from './components/TextEditor/extensions/image'
 export * from './components/TextEditor/extensions/suggestion'
-
-// old data-fetching: resources
-export * from './resources/index.ts'
 
 export { request } from './utils/request.js'
 export { frappeRequest } from './utils/frappeRequest.js'

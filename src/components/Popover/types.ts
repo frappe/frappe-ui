@@ -21,8 +21,10 @@ export interface PopoverProps {
     | 'right-end'
     | 'left-start'
     | 'left-end'
-
-  /** Custom class(es) for the popover */
+    | 'top'
+    | 'bottom'
+    | 'right'
+    | 'left'
   popoverClass?: string | object | Array<string | object>
 
   /** Transition style to use */
