@@ -37,13 +37,14 @@ const props = defineProps<Props>();
 
       <Badge class="w-fit !rounded" size="lg"> {{ x.default || "-" }} </Badge>
 
-      <div>
+      <div class='flex flex-wrap gap-1'>
         <Badge
+          v-for='item in x.type?.split("|")'
           size="md"
           variant="outline"
-          class="w-fit !rounded border-outline-gray-2"
+          class="!rounded border-outline-gray-2"
         >
-          <span> {{ x.type }} </span>
+          {{ item }}
         </Badge>
 
         <p class="text-sm !m-1 text-ink-gray-6">{{ x.description }}</p>

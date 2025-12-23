@@ -99,7 +99,7 @@ export default [
   },
 
   {
-    text: withIcon('tool', 'Other'),
+    text: 'Other',
     items: [
       { text: 'Utilities', link: '/docs/utilities' },
       { text: 'directives', link: '/docs/directives' },
