@@ -6,11 +6,23 @@ const withIcon = (name: keyof typeof icons, text: string) => {
   return `<span class='iconlink'>${icons[name]} ${text}</span>`
 }
 
+// temporarily remove dead links
+const excludeLinks = [
+  'Autocomplete',
+  'CommandPalette',
+  'Divider',
+  'ListFilter',
+  'Provider',
+  'VueGridLayout',
+  'types',
+	'Toast'
+]
+
 function getComponentList() {
   const componentsPath = path.resolve(__dirname, '../../src/components')
   return fs
     .readdirSync(componentsPath, { withFileTypes: true })
-    .filter((d) => d.isDirectory())
+    .filter((d) => d.isDirectory() && !excludeLinks.includes(d.name))
     .map((d) => ({
       text: withIcon('box', d.name),
       link: `/docs/${d.name.toLowerCase()}`,
