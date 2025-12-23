@@ -16,6 +16,7 @@ export type IconType =
   | 'action'
   | 'notification'
   | 'filter'
+  | 'title'
 
 export type RoundedType = 'all' | 'top' | 'bottom' | 'none'
 
@@ -44,6 +45,7 @@ export interface ElseBlockData {
 }
 
 export interface AutomationState {
+  name: string
   enabled: boolean
   dt: string
   eventType: 'created' | 'updated' | 'time'

@@ -4,7 +4,7 @@
     :class="[roundedClass, props.indent && '!w-[95%] ml-auto']"
   >
     <!-- left side -->
-    <div class="flex gap-2">
+    <div class="flex gap-2" :class="maximizeLeftSide && 'flex-1'">
       <div class="flex items-center gap-2">
         <component
           :is="iconComponent?.icon"
@@ -30,6 +30,7 @@ import BellIcon from '../Icons/BellIcon.vue'
 import ConditionIcon from '../Icons/ConditionIcon.vue'
 import EventIcon from '../Icons/EventIcon.vue'
 import FilterIcon from '../Icons/FilterIcon.vue'
+import FocusIcon from '../Icons/FocusIcon.vue'
 import ScopeIcon from '../Icons/ScopeIcon.vue'
 import TimerIcon from '../Icons/TimerIcon.vue'
 import type { IconType, RoundedType } from './types'
@@ -40,10 +41,12 @@ const props = withDefaults(
     icon?: IconType
     rounded?: RoundedType
     indent?: boolean
+    maximizeLeftSide?: boolean
   }>(),
   {
     rounded: 'all',
     indent: false,
+    maximizeLeftSide: false,
   },
 )
 
@@ -89,6 +92,10 @@ const iconMap: Record<string, IconConfig> = {
   },
   filter: {
     icon: FilterIcon,
+    color: '',
+  },
+  title: {
+    icon: FocusIcon,
     color: '',
   },
 }

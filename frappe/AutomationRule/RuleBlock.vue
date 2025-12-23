@@ -1,18 +1,27 @@
 <template>
   <template v-for="(r, idx) in state.rule">
-    <IfBlock v-if="r.type == 'if'" v-model="state.rule[idx]" />
+    <IfElseBlock
+      v-if="r.type == 'if'"
+      v-model="state.rule[idx]"
+      block-type="if"
+    />
     <!-- Other Blocks  -->
     <div v-if="r.type === 'set'">
       <SetFieldBlock v-model="state.rule[idx]" :options="actionOptions(idx)" />
     </div>
-    <!-- Else Block -->
+    <IfElseBlock
+      v-if="r.type == 'else'"
+      v-model="state.rule[idx]"
+      block-type="else"
+    />
   </template>
 </template>
 
 <script setup lang="ts">
 import { useAutomationState } from './automation'
-import IfBlock from './IfBlock.vue'
+import IfElseBlock from './IfElseBlock.vue'
 import SetFieldBlock from './SetFieldBlock.vue'
+import { DropdownOption } from './types'
 
 const state = useAutomationState()
 // onMounted(() => {
@@ -47,7 +56,7 @@ const state = useAutomationState()
 //   ]
 // })
 
-function actionOptions(idx: number) {
+function actionOptions(idx: number): DropdownOption[] {
   return [
     {
       label: 'Delete Action',

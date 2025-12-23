@@ -26,6 +26,7 @@
             @update:modelValue="(val) => handleFieldChange(row, val)"
           />
           <Select
+            v-if="row[0]"
             placeholder="Select Operator"
             :options="getOperatorsForRow(row)"
             :modelValue="row[1]"
@@ -38,6 +39,7 @@
           />
 
           <component
+            v-if="row[0]"
             :is="getValueControlForRow(row)"
             variant="outline"
             :modelValue="row[2]"
