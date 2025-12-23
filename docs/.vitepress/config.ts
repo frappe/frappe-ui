@@ -67,6 +67,13 @@ export default defineConfig({
 
   vite: {
     plugins: [lucideIcons()],
+
+    build: {
+      rollupOptions: {
+        output: { experimentalMinChunkSize: 20_000 },
+      },
+    },
+
     resolve: {
       alias: {
         // '@': path.resolve(__dirname, '../../src/'),
