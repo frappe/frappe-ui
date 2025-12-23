@@ -117,7 +117,7 @@ const formCompleteStatus = computed(() => {
 
     <!-- 3 column layout -->
     <div
-      class="border bg-surface-cards p-5 grid grid-cols-3 [&_h2]:text-lg"
+      class="shadow-lg border border-outline-gray-2 rounded-xl bg-surface-cards p-5 grid xl:grid-cols-3 gap-5 [&_h2]:text-lg"
     >
       <!-- first column -->
       <div class="grid gap-8">
@@ -195,7 +195,7 @@ const formCompleteStatus = computed(() => {
       </div>
 
       <!-- second column -->
-      <div class="border-l border-r border-outline-gray-2 px-5">
+      <div class="border-y  xl:border-x xl:border-y-0 border-outline-gray-2 py-5 xl:px-5">
         <h2 class="inline-flex gap-2 items-center mb-6">
           <span class="p-2 rounded-full bg-surface-gray-3">
             <LucideType class="size-4" />
@@ -282,7 +282,7 @@ const formCompleteStatus = computed(() => {
       </div>
 
       <!-- third column -->
-      <div class="grid pl-5">
+      <div class="grid">
         <h2 class="inline-flex gap-2 items-center mb-6">
           <span class="p-2 rounded-full bg-surface-gray-3">
             <LucideType class="size-4" />
