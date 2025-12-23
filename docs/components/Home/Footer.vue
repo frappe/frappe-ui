@@ -4,7 +4,7 @@ import { Button } from "frappe-ui";
 </script>
 
 <template>
-  <footer class="border-t p-10 text-gray-50 bg-gray-900">
+  <footer class="border-t p-10 text-gray-50 bg-gray-900 mt-20">
     <div class="max-w-7xl flex [&_a]:text-ink-gray-3 [&_a]:dark:text-ink-gray-5 gap-5 mx-auto ">
       <section class="flex flex-col gap-4">
         <div class="flex gap-3 items-center">

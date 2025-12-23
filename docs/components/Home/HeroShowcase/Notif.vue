@@ -74,7 +74,7 @@ const items = computed(() =>
 </script>
 
 <template>
-  <div class="bg-surface-cards border rounded-xl p-5 grid gap-5">
+  <div class="bg-surface-cards border rounded-xl p-4 grid gap-5">
     <b class="inline-flex items-center gap-3">
       <LucideBell class="size-4" /> Notifications
     </b>
@@ -111,9 +111,9 @@ const items = computed(() =>
       </div>
     </div>
 
-    <hr class="border-outline-gray-2 -mx-5 -my-3" />
+    <hr class="border-outline-gray-2 -mx-4 " />
 
-    <div class="-my-5 -mx-2 flex gap-3">
+    <div class="-my-2 -mx-2 flex gap-3">
       <Button class="mr-auto" @click="prevItem">
         <template #prefix>
           <LucideLeft class="size-4" />

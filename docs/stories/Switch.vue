@@ -27,6 +27,7 @@ const sizes = ["sm", "md"];
         v-bind="state"
         description="Get notified when something happens."
       />
+			<br/>
       <Switch v-bind="state" icon="inbox" description="This has an icon." />
     </Story>
 
