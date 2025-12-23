@@ -31,6 +31,6 @@ const title = params.value.token.replace('-', ' ')
 <FontFamily v-if="params.token =='font-family'"  :data="data" />
 <LetterSpacing v-if="params.token =='letter-spacing'"  :data="data" />
 <LineHeight v-if="params.token =='line-height'"  :data="data" />
-<DropShadow v-if="params.token =='drop-shadow'"  :data="data" />
+<DropShadow v-if="params.token =='drop-shadow'"  />
 <BorderRadius v-if="params.token =='border-radius'"  :data="data" />
 <BorderWidth v-if="params.token =='border-width'"  :data="data" />

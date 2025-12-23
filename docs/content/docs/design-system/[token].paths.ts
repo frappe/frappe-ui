@@ -99,12 +99,12 @@ const lineHeight = Object.entries(designTokens.lineHeight).map(
   }),
 )
 
-const dropShadow = Object.entries(designTokens.dropShadow).map(
-  ([name, value]) => ({
-    name,
-    value,
-  }),
-)
+// const dropShadow = Object.entries(designTokens.dropShadow).map(
+//   ([name, value]) => ({
+//     name,
+//     value,
+//   }),
+// )
 
 const borderRadius = Object.entries(designTokens.borderRadius).map(
   ([name, value]) => ({
@@ -131,7 +131,7 @@ export default {
       { params: { token: 'font-family', data: fontFamily } },
       { params: { token: 'letter-spacing', data: letterSpacing } },
       { params: { token: 'line-height', data: lineHeight } },
-      { params: { token: 'drop-shadow', data: dropShadow } },
+      { params: { token: 'drop-shadow' } },
       { params: { token: 'border-radius', data: borderRadius } },
       { params: { token: 'border-width', data: borderWidth } },
     ]
