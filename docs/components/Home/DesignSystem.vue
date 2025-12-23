@@ -98,7 +98,6 @@ const formCompleteStatus = computed(() => {
     typeof (x[1]) == "string" ? x[1] : x[1]?.length > 0
   ).length;
 
-  console.log(keyvals, filledQty);
   return filledQty / keyvals.length * 100;
 });
 </script>
@@ -133,7 +132,7 @@ const formCompleteStatus = computed(() => {
           <div class="flex gap-3">
             <span
               v-for="color in brandColors"
-              class="p-4 rounded-sm shadow-lg"
+              class="p-4 size-4 rounded-sm shadow-lg"
               :class="color"
             >
             </span>

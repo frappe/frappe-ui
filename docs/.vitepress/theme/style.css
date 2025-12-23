@@ -237,3 +237,7 @@ body {
 /* .DocSearch { */
 /*   --docsearch-primary-color: var(--vp-c-brand-1) !important; */
 /* } */
+
+.search-input {
+	background-color: var(--vp-c-bg);
+}

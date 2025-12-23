@@ -9,10 +9,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     LucideArrowUpRight: typeof import('~icons/lucide/arrow-up-right')['default']
-    LucideBadge: typeof import('~icons/lucide/badge')['default']
-    LucideCheck: typeof import('~icons/lucide/check')['default']
     LucideSearch: typeof import('~icons/lucide/search')['default']
-    LucideShuffle: typeof import('~icons/lucide/shuffle')['default']
     LucideTrash: typeof import('~icons/lucide/trash')['default']
     LucideTrendingUp: typeof import('~icons/lucide/trending-up')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
