@@ -19,7 +19,7 @@ export interface TransformedField {
   label: string | undefined
   type: string
   value: string
-  options: string[] | undefined
+  options: string[] | undefined | null | string
 }
 
 // Global cache for doctype meta
@@ -60,7 +60,7 @@ export function useDoctypeMeta(doctype: string) {
         label: f.label,
         type: f.fieldtype,
         value: f.fieldname,
-        options: f.options?.split('\n'),
+        options: f.fieldtype === 'Select' ? f.options?.split('\n') : f.options,
       }))
       .filter((f) => !EXCLUDED_FIELDTYPES.includes(f.type))
   })
@@ -71,10 +71,33 @@ export function useDoctypeMeta(doctype: string) {
     return doctypeMeta?.fields.find((f) => f.fieldname === fieldname) || null
   }
 
+  const emailFields = computed(() => {
+    if (!fields.value.length) return []
+    const recipients = fields.value.filter(
+      (f) => f.type === 'Data' && f.options === 'Email',
+    )
+    return [
+      {
+        label: 'Owner',
+        value: 'owner',
+        type: 'Data',
+        options: null,
+      },
+      ...recipients,
+      {
+        label: 'Assignee',
+        value: '_assign',
+        type: 'JSON',
+        options: [],
+      },
+    ]
+  })
+
   return {
     meta,
     fields,
     getField,
     resource,
+    emailFields,
   }
 }

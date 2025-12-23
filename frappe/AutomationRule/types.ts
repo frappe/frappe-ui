@@ -17,6 +17,7 @@ export type IconType =
   | 'notification'
   | 'filter'
   | 'title'
+  | 'align'
 
 export type RoundedType = 'all' | 'top' | 'bottom' | 'none'
 
@@ -30,12 +31,19 @@ export interface SetAction {
   field: string
   value: string
 }
+export interface SendEmailAction {
+  type: 'email'
+  to: string
+  via: 'rich_text' | 'template'
+  template?: string
+  text?: string
+}
 
 // Block types
 export interface IfBlockData {
   type: 'if'
   conditions: ConditionArray
-  actions: SetAction[]
+  actions: SetAction[] | SendEmailAction[]
 }
 
 export interface ElseBlockData {

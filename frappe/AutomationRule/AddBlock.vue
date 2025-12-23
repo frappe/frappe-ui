@@ -57,7 +57,7 @@ const actions = computed(() => [
     label: 'Action',
     icon: ActionIcon,
     colorClass: 'group-hover:text-[#278F5E]',
-    onClick: () => addActionBlock(),
+    onClick: () => addSetFieldBlock(),
     condition: true,
   },
   {
@@ -68,6 +68,7 @@ const actions = computed(() => [
     condition: true,
   },
 ])
+
 function addConditionBlock() {
   insertBeforeElse({
     type: 'if',
@@ -86,7 +87,7 @@ function addElseBlock() {
   })
 }
 
-function addActionBlock() {
+function addSetFieldBlock() {
   insertBeforeElse({
     type: 'set',
     field: '',
@@ -94,7 +95,15 @@ function addActionBlock() {
   })
 }
 
-function addNotificationBlock() {}
+function addNotificationBlock() {
+  insertBeforeElse({
+    type: 'email',
+    to: '',
+    via: '',
+    template: '',
+    text: '',
+  })
+}
 
 function insertBeforeElse(block: any) {
   const elseIdx = state.rule.findIndex((r) => r.type === 'else')

@@ -10,12 +10,23 @@
       @delete="handleDeleteCondition"
     />
     <ElseBlock v-else :options="elseBlockOptions" />
-    <div v-for="(_, actionIdx) in block.actions" :key="actionIdx" class="group">
+    <div
+      v-for="(action, actionIdx) in block.actions"
+      :key="actionIdx"
+      class="group"
+    >
       <SetFieldBlock
+        v-if="action.type === 'set'"
         v-model="block.actions[actionIdx]"
         :indent="true"
         :options="getActionOptions(actionIdx)"
         :usedFields="addedFields"
+      />
+      <EmailBlock
+        v-if="action.type === 'email'"
+        v-model="block.actions[actionIdx]"
+        :options="getActionOptions(actionIdx)"
+        :indent="true"
       />
     </div>
   </div>
@@ -28,12 +39,14 @@ import BellIcon from '../Icons/BellIcon.vue'
 import { useAutomationState } from './automation'
 import ConditionBlock from './ConditionBlock.vue'
 import ElseBlock from './ElseBlock.vue'
+import EmailBlock from './EmailBlock.vue'
 import SetFieldBlock from './SetFieldBlock.vue'
 import type { DropdownOption, IfBlockData } from './types'
 
 // type : "if" | "else"
 const props = defineProps<{
   blockType: 'if' | 'else'
+  ruleIdx: number
 }>()
 const label = computed(() => (props.blockType === 'if' ? 'If' : 'Else'))
 
@@ -47,6 +60,16 @@ const addedFields = computed(() =>
 
 function addAction() {
   block.value?.actions.push({ type: 'set', field: '', value: '' })
+}
+
+function addNotifcation() {
+  block.value.actions.push({
+    type: 'email',
+    to: '',
+    via: '',
+    template: '',
+    text: '',
+  })
 }
 
 function deleteAction(index: number) {
@@ -83,7 +106,7 @@ const additionalConditionBlockOptions: DropdownOption[] = [
   {
     label: 'Add Notification',
     icon: BellIcon,
-    onClick: addAction,
+    onClick: addNotifcation,
   },
 ]
 
@@ -100,7 +123,7 @@ const elseBlockOptions: DropdownOption[] = [
 function handleDeleteCondition(idx: number, blockType: 'if' | 'else') {
   if (idx !== 0) return
   // if 0 then delete the whole block
-  block.value = []
+  state.rule.splice(props.ruleIdx, 1)
   // check if this was the last if block
   // check if else block is present, if yes delete that
   if (blockType === 'else') return
@@ -113,7 +136,7 @@ function findAndDeleteElseBlock() {
     return acc
   }, 0)
   if (countIfBlock === 0) {
-    state.rule.splice(state.rule.length - 1)
+    state.rule.splice(props.ruleIdx)
   }
 }
 </script>

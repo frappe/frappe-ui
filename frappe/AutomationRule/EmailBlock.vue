@@ -1,0 +1,93 @@
+<template>
+  <div class="flex flex-col gap-1">
+    <BaseBlock
+      icon="notification"
+      title="Notify"
+      :rounded="action.via === 'rich_text' ? 'top' : 'all'"
+      :indent
+    >
+      <template #meta>
+        <div class="flex gap-1.5">
+          <Select
+            variant="outline"
+            :options="emailFields"
+            placeholder="Select Recipient"
+            v-model="action.to"
+            class="!w-[140px]"
+          />
+          <Select
+            v-if="action.to"
+            variant="outline"
+            :options="via"
+            placeholder="Select Method"
+            v-model="action.via"
+            class="!w-[140px]"
+          />
+          <Link
+            v-if="action.via === 'template'"
+            variant="outline"
+            :doctype="templateDoctype"
+            placeholder="Select Method"
+            v-model="action.template"
+            class="!w-[140px] [&>div>div>div]:bg-surface-white"
+          />
+        </div>
+      </template>
+      <template #action>
+        <Dropdown :options="options" placement="right">
+          <Button variant="ghost" icon="more-horizontal" />
+        </Dropdown>
+      </template>
+    </BaseBlock>
+    <BaseBlock
+      icon="align"
+      title="Text"
+      rounded="bottom"
+      v-if="action.via === 'rich_text'"
+      :indent
+    >
+      <template #footer>
+        <TextEditor
+          class="bg-surface-white rounded-sm px-2.5 py-2 max-h-[240px] overflow-y-scroll"
+        />
+      </template>
+    </BaseBlock>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ModelRef } from 'vue'
+import Dropdown from '../../src/components/Dropdown/Dropdown.vue'
+import Select from '../../src/components/Select/Select.vue'
+import TextEditor from '../../src/components/TextEditor/TextEditor.vue'
+import { useDoctypeMeta } from '../../src/data-fetching/useDoctypeMeta'
+import Link from '../Link/Link.vue'
+import { useAutomationState } from './automation'
+import BaseBlock from './BaseBlock.vue'
+import { DropdownOption, SendEmailAction } from './types'
+
+const props = withDefaults(
+  defineProps<{
+    indent?: boolean
+    options?: DropdownOption[]
+  }>(),
+  {
+    indent: false,
+    options: () => [],
+  },
+)
+
+const action = defineModel() as ModelRef<SendEmailAction>
+const state = useAutomationState()
+
+const { emailFields } = useDoctypeMeta(state.dt)
+
+const via = [
+  { label: 'Rich Text', value: 'rich_text' },
+  { label: 'Template', value: 'template' },
+]
+// will come from prop config
+const templateDoctype = 'HD Canned Response'
+</script>
+
+<style scoped></style>

@@ -4,21 +4,32 @@
       v-if="r.type == 'if'"
       v-model="state.rule[idx]"
       block-type="if"
+      :ruleIdx="idx"
     />
-    <!-- Other Blocks  -->
-    <div v-if="r.type === 'set'">
-      <SetFieldBlock v-model="state.rule[idx]" :options="actionOptions(idx)" />
-    </div>
     <IfElseBlock
       v-if="r.type == 'else'"
       v-model="state.rule[idx]"
       block-type="else"
+      :ruleIdx="idx"
+    />
+    <!-- Other Blocks  -->
+    <SetFieldBlock
+      v-if="r.type === 'set'"
+      v-model="state.rule[idx]"
+      :options="actionOptions(idx)"
+    />
+
+    <EmailBlock
+      v-if="r.type === 'email'"
+      v-model="state.rule[idx]"
+      :options="actionOptions(idx)"
     />
   </template>
 </template>
 
 <script setup lang="ts">
 import { useAutomationState } from './automation'
+import EmailBlock from './EmailBlock.vue'
 import IfElseBlock from './IfElseBlock.vue'
 import SetFieldBlock from './SetFieldBlock.vue'
 import { DropdownOption } from './types'

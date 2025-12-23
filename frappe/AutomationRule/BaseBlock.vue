@@ -1,31 +1,35 @@
 <template>
   <div
-    class="w-full py-[7px] px-3 bg-surface-gray-1 flex items-center justify-between"
+    class="w-full py-[7px] px-3 bg-surface-gray-1 flex flex-col gap-1"
     :class="[roundedClass, props.indent && '!w-[95%] ml-auto']"
   >
-    <!-- left side -->
-    <div class="flex gap-2" :class="maximizeLeftSide && 'flex-1'">
-      <div class="flex items-center gap-2">
-        <component
-          :is="iconComponent?.icon"
-          class="size-4"
-          :style="{ color: iconComponent?.color }"
-          v-if="iconComponent"
-        />
-        <p class="text-p-sm text-ink-gray-5 text-[14px]" v-if="title">
-          {{ title }}
-        </p>
+    <div class="flex justify-between">
+      <!-- left side -->
+      <div class="flex gap-2" :class="maximizeLeftSide && 'flex-1'">
+        <div class="flex items-center gap-2">
+          <component
+            :is="iconComponent?.icon"
+            class="size-4"
+            :style="{ color: iconComponent?.color }"
+            v-if="iconComponent"
+          />
+          <p class="text-p-sm text-ink-gray-5 text-[14px]" v-if="title">
+            {{ title }}
+          </p>
+        </div>
+        <slot name="meta" />
       </div>
-      <slot name="meta" />
+      <!-- right side -->
+      <slot name="action" />
     </div>
-    <!-- right side -->
-    <slot name="action" />
+    <slot name="footer" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, type Component } from 'vue'
 import ActionIcon from '../Icons/ActionIcon.vue'
+import AlignIcon from '../Icons/AlignIcon.vue'
 import BellIcon from '../Icons/BellIcon.vue'
 import ConditionIcon from '../Icons/ConditionIcon.vue'
 import EventIcon from '../Icons/EventIcon.vue'
@@ -97,6 +101,10 @@ const iconMap: Record<string, IconConfig> = {
   title: {
     icon: FocusIcon,
     color: '',
+  },
+  align: {
+    icon: AlignIcon,
+    color: '#0289F7',
   },
 }
 
