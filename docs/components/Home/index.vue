@@ -7,7 +7,7 @@ import Footer from "./Footer.vue";
 </script>
 
 <template>
-  <main class="vp-raw">
+  <main>
     <Hero />
 		<ComponentGroups/>
 		<Why/>

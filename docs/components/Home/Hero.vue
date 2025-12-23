@@ -26,18 +26,19 @@ import pkgJson from "../../../package.json";
         </p>
 
         <div class="flex gap-3 mt-5">
-          <a href="/docs/getting-started">
-            <Button variant="solid" size="lg" class="font-normal px-6">
-              Get Started
-              <template #suffix>
-                <LucideRight class="size-4" />
-              </template>
-            </Button></a>
+          <a
+            href="/docs/getting-started"
+            class="font-normal py-3 px-6 flex gap-3 items-center rounded bg-surface-gray-7 text-ink-gray-1"
+          >
+            Get Started
+            <LucideRight class="size-4" />
+          </a>
 
-          <a href="/docs/badge">
-            <Button vriant="outline" size="lg" class="font-normal px-6">
-              Show Components
-            </Button>
+          <a
+            href="/docs/badge"
+            class="font-normal py-3 px-6 flex gap-3 items-center rounded bg-surface-gray-3"
+          >
+            Show Components
           </a>
         </div>
       </div>
