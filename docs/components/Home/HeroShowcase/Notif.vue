@@ -74,7 +74,7 @@ const items = computed(() =>
 </script>
 
 <template>
-  <div class="bg-surface-cards border rounded-xl p-4 grid gap-5">
+  <div class="bg-surface-cards border rounded-xl p-4 grid gap-5  shadow-lg">
     <b class="inline-flex items-center gap-3">
       <LucideBell class="size-4" /> Notifications
     </b>

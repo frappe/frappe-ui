@@ -1,7 +1,7 @@
 <template>
-  <div class="p-5 bg-surface-gray-1 rounded-t grid gap-4">
+  <div class="p-5">
     <div
-      class="bg-surface-cards rounded p-3 grid grid-cols-2 gap-x-3"
+      class="bg-surface-cards rounded p-3 grid grid-cols-2 gap-x-3 w-full shadow-lg dark:shadow-none"
     >
       <span class="text-ink-gray-4">****</span>
       <span class="text-ink-gray-4">******</span>

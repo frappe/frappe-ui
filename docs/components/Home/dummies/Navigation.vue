@@ -16,9 +16,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div
-    class="p-6 px-20 bg-surface-gray-1 rounded-t flex justify-center flex-wrap"
-  >
+  <div class="p-6 px-20 grid">
     <div
       class="flex items-center gap-1 bg-surface-gray-4 rounded-sm p-1 m-auto w-full"
     >

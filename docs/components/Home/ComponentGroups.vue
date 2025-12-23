@@ -79,7 +79,9 @@ const componentGroups = {
 <template>
   <main class="max-w-7xl mx-auto px-6 my-12 prose">
     <h1 class="text-[2.7rem] font-bold text-center mb-4">
-      Everything you need <br /> to<span class='text-ink-violet-1'> build. </span>
+      Everything you need <br /> to<span class="text-ink-violet-1">
+        build.
+      </span>
     </h1>
 
     <p class="text-2xl max-w-2xl text-center mx-auto text-ink-gray-5 leading-7">
@@ -93,11 +95,10 @@ const componentGroups = {
         :key="group"
         class="rounded border border-outline-gray-2 dark:border-0 grid"
       >
-        <div
-          class="min-h-[130px] bg-surface-gray-1 rounded-t flex justify-center *:w-full"
-        >
-          <component :is="components.component" />
-        </div>
+        <component
+          :is="components.component"
+          class="min-h-[130px] bg-surface-gray-2 dark:bg-surface-gray-1 rounded-t"
+        />
 
         <div class="grid gap-2 p-4 bg-surface-cards rounded-b">
           <h3 class="text-lg font-semibold text-ink-gray-9">

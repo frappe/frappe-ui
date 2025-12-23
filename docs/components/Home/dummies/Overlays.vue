@@ -1,6 +1,6 @@
 <template>
   <div
-    class="p-5 px-9 bg-surface-gray-1 rounded-t"
+    class="p-5 px-9"
   >
     <div class="mx-auto grid gap-2 relative w-1/2">
       <div

@@ -5,7 +5,7 @@ import LucideSparkles from "~icons/lucide/sparkles";
 
 <template>
   <div
-    class="bg-surface-cards rounded-xl p-5 w-72 border border-outline-gray-2 grid gap-5 h-fit"
+    class="bg-surface-cards rounded-xl p-5 w-72 border border-outline-gray-2 grid gap-5 h-fit  shadow-lg"
   >
     <span class="flex gap-3">
       <LucideSparkles class="w-4 h-4 text-ink-amber-3" />

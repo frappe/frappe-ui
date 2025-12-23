@@ -3,11 +3,11 @@ const chartBars = [40, 65, 45, 80, 30, 55, 90, 70, 85, 40, 70, 95];
 </script>
 
 <template>
-  <div class="bg-surface-cards border rounded-2xl p-5 h-fit">
+  <div class="bg-surface-cards border rounded-xl p-5 h-fit shadow-lg">
     <div class="flex items-center justify-between mb-4">
       <div>
         <p class="text-xs text-ink-gray-6">Revenue</p>
-        <p class="text-2xl font-bold text-dark-gray-50">$48,352</p>
+        <p class="text-2xl font-bold text-ink-gray-9">$48,352</p>
       </div>
 
       <div
@@ -21,7 +21,7 @@ const chartBars = [40, 65, 45, 80, 30, 55, 90, 70, 85, 40, 70, 95];
       <div
         v-for="(h, i) in chartBars"
         :key="i"
-        class="flex-1 rounded-sm bg-surface-gray-2"
+        class="flex-1 rounded-sm bg-surface-gray-3"
         :class='{ "bg-violet-500": h > 90, "bg-red-700": h <= 40 }'
         :style='{ height: h + "%" }'
       />

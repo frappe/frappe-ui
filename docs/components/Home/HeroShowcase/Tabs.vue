@@ -41,12 +41,12 @@ const resetState = () => {
       :tabs
       v-model="val"
       variant="subtle"
-      class="bg-surface-gray-1 w-fit rounded mb-3"
+      class="bg-surface-gray-1 w-fit rounded mb-3 shadow-lg border"
     />
 
     <div
       v-if='val == "profile"'
-      class="bg-surface-cards rounded-2xl p-5 w-72 border border-outline-gray-2"
+      class="bg-surface-cards rounded-2xl p-5 w-72 border border-outline-gray-2  shadow-lg"
     >
       <div class="flex items-center gap-4 mb-4">
         <img src="/frappe-logo.svg" class="!size-14 rounded-full" />
@@ -70,16 +70,16 @@ const resetState = () => {
       </p>
 
       <div class="flex items-center gap-1 text-sm" v-if="state.followers">
-        <span class="font-semibold text-dark-gray-50">4</span>
+        <span class="font-semibold text-ink-gray-9">4</span>
         <span class="text-ink-gray-6 mr-5">Following</span>
-        <span class="font-semibold text-dark-gray-50">97.1K</span>
+        <span class="font-semibold text-ink-gray-9">97.1K</span>
         <span class="text-ink-gray-6">Followers</span>
       </div>
     </div>
 
     <div
       v-else
-      class="bg-surface-cards rounded p-3 w-72 border border-outline-gray-2 grid gap-5"
+      class="bg-surface-cards rounded p-3 w-72 border border-outline-gray-2 grid gap-5  shadow-lg"
     >
       <FormControl
         v-model="state.username"
