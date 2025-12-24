@@ -47,8 +47,8 @@
 </template>
 
 <script setup lang="ts">
-import { Switch } from 'frappe-ui'
-import { computed, provide, reactive } from 'vue'
+import { call, Switch } from 'frappe-ui'
+import { computed, provide, ref } from 'vue'
 import SettingsLayoutBase from '../../src/components/SettingsLayoutBase.vue'
 import AddBlock from './AddBlock.vue'
 import NameBlock from './NameBlock.vue'
@@ -66,12 +66,7 @@ const dependencyLabel = computed(() => {
   if (isNew.value) return 'New Automation'
   return props.automationName
 })
-function handleSubmit(): void {
-  console.log('Save automation')
-  console.log(state)
-}
-
-const state = reactive({
+const state = ref({
   name: '',
   enabled: false,
   dt: '',
@@ -81,8 +76,36 @@ const state = reactive({
   presetsJson: [],
   rule: [],
 })
+async function handleSubmit(): Promise<void> {
+  console.log('Save automation')
+  console.log(state)
+  let doc = await call('frappe.client.insert', {
+    doc: {
+      doctype: 'Automation Rule',
+      name: state.value.name,
+      dt: state.value.dt,
+      doctype_event: getEventType(),
+      rule: getRule(),
+      enabled: state.value.enabled,
+    },
+  })
+  console.log(doc.name)
+}
 
-provide(AutomationStateSymbol, state)
+function getEventType() {
+  if (state.value.eventType === 'created') return 'On Creation'
+  if (state.value.eventType === 'updated') return 'On Update'
+}
+
+function getRule() {
+  const rule = {
+    presets_json: state.value.presetsJson,
+    rule: state.value.rule,
+  }
+  return JSON.stringify(rule)
+}
+
+provide(AutomationStateSymbol, state.value)
 </script>
 
 <style scoped></style>
