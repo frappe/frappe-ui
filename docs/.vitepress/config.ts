@@ -10,7 +10,7 @@ import componentPreview from './plugins/componentPreview'
 
 export default defineConfig({
   srcDir: 'content',
-
+  lastUpdated: true,
   title: meta.name,
   description: meta.description,
   titleTemplate: meta.name,
@@ -50,6 +50,7 @@ export default defineConfig({
   ],
 
   themeConfig: {
+    outline: [2, 3],
     logo: {
       light: '/logo.svg',
       dark: '/logo.svg',
@@ -57,7 +58,7 @@ export default defineConfig({
     search: { provider: 'local' },
     nav: [
       { text: 'Docs', link: '/docs/introduction' },
-      { text: 'Examples', link: '/markdown-examples' },
+      { text: 'Blog', link: '/blog' },
     ],
     sidebar: sidebarConfig,
     socialLinks: [

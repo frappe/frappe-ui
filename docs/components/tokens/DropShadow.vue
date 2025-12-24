@@ -17,7 +17,7 @@ const classNames = [
 </script>
 
 <template>
-  <div class="grid grid-cols-3 gap-6">
+  <div class="grid grid-cols-3 gap-6 mt-10">
     <div v-for="item in classNames" class="grid gap-3">
       <span>
         Shadow : {{ item.split("-")[1] }}
@@ -25,7 +25,7 @@ const classNames = [
 
       <div
         :class="item"
-        class="rounded border border-outline-gray-2 grid gap-3 p-3 bg-surface-cards"
+        class="rounded border  grid gap-3 p-3 bg-surface-cards"
       >
         <span class="flex items-center gap-3 border-b pb-3">
           <div class="bg-surface-gray-2 p-2 w-fit rounded-full">
