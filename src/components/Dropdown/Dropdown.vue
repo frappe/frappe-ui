@@ -431,6 +431,14 @@ const align = computed(() => {
   if (props.placement === 'center') return 'center' as const
   return 'start' as const
 })
+
+defineSlots<{
+  /** Default slot for custom trigger content (receives `open`, `close`, and extra attrs) */
+  default?: (props: { open: boolean; close: () => void; [key: string]: any }) => any
+
+  /** Custom rendering for each dropdown item (receives `item` and `close`) */
+  item?: (props: { item: DropdownOption; close: () => void }) => any
+}>()
 </script>
 
 <style scoped>

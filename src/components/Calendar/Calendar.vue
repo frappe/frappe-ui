@@ -623,7 +623,6 @@ function getVisibleRange() {
     const weekDates = datesInWeeks.value[week.value] || []
     if (!weekDates.length) return null
     const orderedWeek = [...weekDates].sort((a, b) => a - b)
-    const start = dayjs(orderedWeek[0]).startOf('day')
     const end = dayjs(orderedWeek[orderedWeek.length - 1]).endOf('day')
     return {
       startDate: toDateString(start),
