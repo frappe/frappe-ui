@@ -26,11 +26,12 @@
           variant="solid"
           size="sm"
           @click="handleSubmit"
+          :disabled="resource.loading"
         />
       </div>
     </template>
     <template #content>
-      <div class="flex flex-col gap-6">
+      <div class="flex flex-col gap-6" v-if="!resource.loading">
         <NameBlock v-model="state.name" />
         <ScopeBlock :doctypes="[{ label: 'Tickets', value: 'HD Ticket' }]" />
         <WhenBlock v-if="state.dt" />
@@ -42,13 +43,22 @@
         <!-- ActionBlock -->
         <AddBlock />
       </div>
+      <div v-else class="flex items-center justify-center h-full">
+        <LoadingIndicator class="w-6" />
+      </div>
     </template>
   </SettingsLayoutBase>
 </template>
 
 <script setup lang="ts">
-import { call, Switch } from 'frappe-ui'
-import { computed, provide, ref } from 'vue'
+import {
+  call,
+  createResource,
+  LoadingIndicator,
+  Switch,
+  toast,
+} from 'frappe-ui'
+import { computed, onMounted, provide, reactive, ref } from 'vue'
 import SettingsLayoutBase from '../../src/components/SettingsLayoutBase.vue'
 import AddBlock from './AddBlock.vue'
 import NameBlock from './NameBlock.vue'
@@ -61,12 +71,26 @@ const props = defineProps<{
   automationName?: string | null
 }>()
 
-const isNew = computed(() => !props.automationName)
+const _automationName = ref(props.automationName)
+
+const isNew = computed(() => !_automationName.value)
 const dependencyLabel = computed(() => {
   if (isNew.value) return 'New Automation'
-  return props.automationName
+  return _automationName.value
 })
-const state = ref({
+
+const eventMap = {
+  created: 'On Creation',
+  updated: 'On Update',
+  time: 'Timer',
+}
+const reverseEventMap = {
+  'On Creation': 'created',
+  'On Update': 'updated',
+  Timer: 'time',
+}
+
+const state = reactive({
   name: '',
   enabled: false,
   dt: '',
@@ -76,36 +100,118 @@ const state = ref({
   presetsJson: [],
   rule: [],
 })
+
 async function handleSubmit(): Promise<void> {
-  console.log('Save automation')
-  console.log(state)
-  let doc = await call('frappe.client.insert', {
-    doc: {
-      doctype: 'Automation Rule',
-      name: state.value.name,
-      dt: state.value.dt,
-      doctype_event: getEventType(),
-      rule: getRule(),
-      enabled: state.value.enabled,
+  if (isNew.value) {
+    await createAutomation()
+  } else {
+    await updateAutomation()
+  }
+}
+
+async function createAutomation() {
+  const doc = prepareDoc()
+  await call(
+    'frappe.client.insert',
+    {
+      doc,
     },
-  })
-  console.log(doc.name)
+    {
+      onSuccess: () => {
+        toast.success('Automation created')
+      },
+    },
+  )
+  resource.submit({ doctype: doc.doctype, name: state.name })
+  _automationName.value = doc.name
 }
 
-function getEventType() {
-  if (state.value.eventType === 'created') return 'On Creation'
-  if (state.value.eventType === 'updated') return 'On Update'
+const hasNameChanged = computed(() => resource.data.name !== state.name)
+
+async function updateAutomation() {
+  if (hasNameChanged.value) {
+    const newName = await call('frappe.client.rename_doc', {
+      doctype: 'Automation Rule',
+      old_name: _automationName.value,
+      new_name: state.name,
+    })
+    _automationName.value = newName
+  }
+
+  const doc = prepareDoc()
+  await call(
+    'frappe.client.set_value',
+    {
+      doctype: doc.doctype,
+      name: doc.name,
+      fieldname: { ...doc },
+    },
+    {
+      onSuccess: () => {
+        toast.success('Automation upated')
+      },
+    },
+  )
+  resource.submit({ doctype: doc.doctype, name: state.name })
 }
 
-function getRule() {
+function prepareDoc() {
+  return {
+    doctype: 'Automation Rule',
+    name: state.name,
+    dt: state.dt,
+    doctype_event: eventMap[state.eventType],
+    rule: parseRule(),
+    enabled: state.enabled,
+  }
+}
+
+function parseRule() {
   const rule = {
-    presets_json: state.value.presetsJson,
-    rule: state.value.rule,
+    presets_json: state.presetsJson,
+    rule: state.rule,
   }
   return JSON.stringify(rule)
 }
 
-provide(AutomationStateSymbol, state.value)
+function handleRule(rule: string) {
+  try {
+    const ruleJson = JSON.parse(rule)
+    const presets = ruleJson.hasOwnProperty('presets_json')
+      ? ruleJson.presets_json
+      : []
+    const _rule = ruleJson.hasOwnProperty('rule') ? ruleJson.rule : []
+
+    return [presets, _rule]
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+const resource = createResource({
+  url: 'frappe.client.get',
+  params: {
+    doctype: 'Automation Rule',
+    name: _automationName.value,
+  },
+  onSuccess(data) {
+    // state
+    state.name = data.name
+    state.dt = data.dt
+    state.eventType = reverseEventMap[data.doctype_event]
+    state.enabled = Boolean(data.enabled)
+    const [presets, rule] = handleRule(data.rule)
+    state.presetsJson = presets
+    state.rule = rule
+  },
+})
+
+onMounted(async () => {
+  if (isNew.value) return
+  resource.reload()
+})
+
+provide(AutomationStateSymbol, state)
 </script>
 
 <style scoped></style>

@@ -17,7 +17,7 @@ import AutomationList from './AutomationList.vue'
 
 type AutomationStep = 'list' | 'view'
 
-const step = ref<AutomationStep>('view')
+const step = ref<AutomationStep>('list')
 const automationViewName = ref<string | null>(null)
 
 function updateStep(newStep: AutomationStep, automationView?: string): void {

@@ -38,7 +38,6 @@ export function useDoctypeMeta(doctype: string) {
     url: 'frappe.desk.form.load.getdoctype',
     cache: ['DoctypeMeta', doctype],
     params: { doctype },
-    auto: !metaCache[doctype],
     onSuccess: (response: any) => {
       const docs = response.docs || []
       for (const doc of docs) {
@@ -49,6 +48,9 @@ export function useDoctypeMeta(doctype: string) {
 
   // Always return meta from cache (reactive)
   const meta = computed(() => metaCache[doctype] || null)
+  if (!meta.value && !resource.loading) {
+    resource.fetch()
+  }
 
   // Computed for transformed fields
   const fields = computed<TransformedField[]>(() => {
