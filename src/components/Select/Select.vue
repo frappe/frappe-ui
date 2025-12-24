@@ -15,6 +15,7 @@ import {
 } from 'reka-ui'
 
 const model = defineModel<String>()
+const emit = defineEmits(["change"])
 
 const props = withDefaults(defineProps<SelectProps>(), {
   size: 'sm',
@@ -82,7 +83,7 @@ const selectOptions = computed(() => {
 </script>
 
 <template>
-  <SelectRoot v-model="model">
+  <SelectRoot v-model="model" @update:model-value="(x) => emit('change', x)">
     <SelectTrigger
       class="inline-flex items-center gap-2 outline-none text-base text-ink-gray-7 data-[placeholder]:text-ink-gray-4 data-[disabled]:text-ink-gray-4"
       aria-label="Customise options"
