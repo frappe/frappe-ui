@@ -33,7 +33,12 @@
     <template #content>
       <div class="flex flex-col gap-6" v-if="!resource.loading">
         <NameBlock v-model="state.name" />
-        <ScopeBlock :doctypes="[{ label: 'Tickets', value: 'HD Ticket' }]" />
+        <ScopeBlock
+          :doctypes="[
+            { label: 'Tickets', value: 'HD Ticket' },
+            { label: 'ToDo', value: 'ToDo' },
+          ]"
+        />
         <WhenBlock v-if="state.dt" />
         <RuleBlock v-if="state.dt" />
         <!-- RuleBlock -->
@@ -98,8 +103,7 @@ const state = reactive({
   dt: '',
   eventType: 'created' as 'created' | 'updated' | 'time',
   selectedTimerOption: 0,
-  presets: '',
-  presetsJson: [],
+  presets: [],
   rule: [],
 })
 
@@ -170,7 +174,7 @@ function prepareDoc() {
 
 function parseRule() {
   const rule = {
-    presets_json: state.presetsJson,
+    presets: state.presets,
     rule: state.rule,
   }
   return JSON.stringify(rule)
@@ -179,9 +183,7 @@ function parseRule() {
 function handleRule(rule: string) {
   try {
     const ruleJson = JSON.parse(rule)
-    const presets = ruleJson.hasOwnProperty('presets_json')
-      ? ruleJson.presets_json
-      : []
+    const presets = ruleJson.hasOwnProperty('presets') ? ruleJson.presets : []
     const _rule = ruleJson.hasOwnProperty('rule') ? ruleJson.rule : []
 
     return [presets, _rule]
@@ -203,7 +205,7 @@ const resource = createResource({
     state.eventType = reverseEventMap[data.doctype_event]
     state.enabled = Boolean(data.enabled)
     const [presets, rule] = handleRule(data.rule)
-    state.presetsJson = presets
+    state.presets = presets
     state.rule = rule
   },
 })

@@ -58,8 +58,7 @@ export interface AutomationState {
   dt: string
   eventType: 'created' | 'updated' | 'time'
   selectedTimerOption?: number
-  presets: string
-  presetsJson: any[]
+  presets: any[]
   rule: any[]
 }
 

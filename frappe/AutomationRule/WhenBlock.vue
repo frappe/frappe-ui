@@ -20,7 +20,7 @@
       </template>
       <template #action>
         <Button
-          v-if="state.presetsJson.length === 0"
+          v-if="state.presets.length === 0"
           variant="ghost"
           size="sm"
           :icon-left="FilterIcon"
@@ -30,8 +30,8 @@
       </template>
     </BaseBlock>
     <ConditionBlock
-      v-show="state.presetsJson.length > 0"
-      v-model="state.presetsJson"
+      v-show="state.presets.length > 0"
+      v-model="state.presets"
       ref="conditionRef"
     />
   </div>
@@ -68,9 +68,7 @@ const timerOptions: Option[] = [
   { label: 'Every 24 hours', value: 1440 },
 ]
 
-const roundedClass = computed(() =>
-  state.presetsJson.length > 0 ? 'top' : 'all',
-)
+const roundedClass = computed(() => (state.presets.length > 0 ? 'top' : 'all'))
 </script>
 
 <style scoped></style>
