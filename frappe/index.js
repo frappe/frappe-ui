@@ -19,6 +19,9 @@ export { default as SignupBanner } from './Billing/SignupBanner.vue'
 // data import components
 export { default as DataImport } from './DataImport/DataImport.vue'
 
+// automation rule components
+export { default as AutomationRule } from './AutomationRule/AutomationLayout.vue'
+
 // composables
 export { useOnboarding } from './Onboarding/onboarding.js'
 

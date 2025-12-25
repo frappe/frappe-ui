@@ -1,0 +1,74 @@
+<template>
+  <div class="flex flex-col gap-1">
+    <BaseBlock title="When" :icon="icon" :rounded="roundedClass">
+      <template #meta>
+        <Select
+          variant="outline"
+          :options="events"
+          placeholder="Select Doctype"
+          v-model="state.eventType"
+          key="1"
+        />
+        <Select
+          v-if="state.eventType === 'time'"
+          variant="outline"
+          :options="timerOptions"
+          placeholder="Select Interval"
+          v-model="state.selectedTimerOption"
+          key="2"
+        />
+      </template>
+      <template #action>
+        <Button
+          v-if="state.presets.length === 0"
+          variant="ghost"
+          size="sm"
+          :icon-left="FilterIcon"
+          label="Add Filter"
+          @click="() => conditionRef?.insertRow()"
+        />
+      </template>
+    </BaseBlock>
+    <ConditionBlock
+      v-show="state.presets.length > 0"
+      v-model="state.presets"
+      ref="conditionRef"
+    />
+  </div>
+</template>
+
+<script setup lang="ts">
+import { computed, ref } from 'vue'
+import type { Option } from '../../src/components/Autocomplete/types'
+import Select from '../../src/components/Select/Select.vue'
+import FilterIcon from '../Icons/FilterIcon.vue'
+import { useAutomationState } from './automation'
+import BaseBlock from './BaseBlock.vue'
+import ConditionBlock from './ConditionBlock.vue'
+import { IconType } from './types'
+
+const state = useAutomationState()
+const conditionRef = ref<InstanceType<typeof ConditionBlock> | null>(null)
+const icon = computed<IconType>(() =>
+  state.eventType === 'time' ? 'timer' : 'event',
+)
+const events: Option[] = [
+  { label: 'Created', value: 'created' },
+  { label: 'Updated', value: 'updated' },
+  { label: 'Time-based', value: 'time' },
+]
+
+const timerOptions: Option[] = [
+  { label: 'Every 5 minutes', value: 5 },
+  { label: 'Every 15 minutes', value: 15 },
+  { label: 'Every 30 minutes', value: 30 },
+  { label: 'Every 1 hour', value: 60 },
+  { label: 'Every 6 hours', value: 360 },
+  { label: 'Every 12 hours', value: 720 },
+  { label: 'Every 24 hours', value: 1440 },
+]
+
+const roundedClass = computed(() => (state.presets.length > 0 ? 'top' : 'all'))
+</script>
+
+<style scoped></style>
