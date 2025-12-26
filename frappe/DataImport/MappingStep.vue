@@ -1,5 +1,5 @@
 <template>
-    <div class="w-[85%] lg:w-[700px] mx-auto py-12 space-y-8">
+    <div class="w-[85%] lg:w-[700px] mx-auto py-12 space-y-8 text-base">
        <div class="flex justify-between">
             <div class="space-y-2">
                 <div class="text-lg font-semibold text-ink-gray-9">
@@ -10,7 +10,7 @@
                         {{ data?.status }}
                     </Badge>
                 </div>
-                <div class="leading-5">
+                <div class="leading-5 text-ink-gray-7">
                     Change the mapping of columns from your file to fields in the system
                 </div>
             </div>

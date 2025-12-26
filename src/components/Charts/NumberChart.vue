@@ -12,10 +12,14 @@
         </slot>
         <slot name="subtitle" v-bind="{ formatValue }">
           <div
-            class="flex-1 flex-shrink-0 truncate text-[24px] text-ink-gray-6 font-semibold leading-10"
+            class="flex flex-1 items-center gap-0.5 flex-shrink-0 truncate text-[24px] text-ink-gray-6 font-semibold leading-10"
           >
-            {{ config.prefix }}{{ formatValue(config.value, 1, true)
-            }}{{ config.suffix }}
+            <div
+              v-if="config.prefix"
+              v-html="config.prefix"
+              class="size-4 table"
+            />
+            {{ formatValue(config.value, 1, true) }}{{ config.suffix }}
           </div>
         </slot>
         <slot name="delta" v-bind="{ formatValue }">

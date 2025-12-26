@@ -13,6 +13,7 @@ import {
 } from "reka-ui";
 
 import LucideX from "~icons/lucide/x";
+import Button from "../Button/Button.vue";
 import Popover from "../Popover/Popover.vue";
 import LucideCheck from "~icons/lucide/check";
 import LoadingIndicator from "../LoadingIndicator.vue";
@@ -28,7 +29,7 @@ const getValues = (arr: String[]) =>
   arr.map((x) => props.options.find((y) => y.value === x)?.label);
 
 const optionToStr = (options: MultiSelectOption[]) =>
-  options.map((x) => x.label);
+  options.map((x) => x.value);
 
 const selectedOptions = computed(() => {
   const values = getValues(model.value).join(", ");

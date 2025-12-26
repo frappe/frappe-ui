@@ -17,7 +17,7 @@
                     variant="solid" @click="startImport" />
                 <Button v-else-if="listRoute" label="Done" @click="redirectToList()" />
             </div>
-            <div class="leading-5">
+            <div class="leading-5 text-ink-gray-7">
                 Verify the data before starting the import process
             </div>
         </div>
@@ -26,7 +26,7 @@
             <div class="text-ink-gray-5 text-sm">
                 Column Mapping
             </div>
-            <div class="border rounded-md bg-surface-gray-2 p-4 space-y-4 text-sm">
+            <div class="border rounded-md bg-surface-gray-2 p-4 space-y-4 text-sm text-ink-gray-7">
                 <div v-for="map in mapping" class="grid grid-cols-[40%,10%,40%] lg:grid-cols-3 space-x-3 items-center">
                     <div class="">
                         {{ map[0] }}
@@ -37,6 +37,18 @@
                     <div>
                         {{ map[1] }}
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="warnings.length" class="space-y-2">
+            <div class="text-ink-gray-5 text-sm">
+                Warnings
+            </div>
+            <div class="rounded-md bg-surface-amber-2 p-2 space-y-2 text-xs">
+                <div v-for="warning in warnings" class="flex items-center space-x-2">
+                    <FeatherIcon name="alert-circle" class="size-3 text-ink-amber-3" />
+                    <div v-html="warning.message" class="text-ink-amber-3"></div>
                 </div>
             </div>
         </div>
@@ -312,15 +324,21 @@ const mapping = computed(() => {
     let warningMap: string[][] = [];
     if (!preview.value?.warnings?.length) return [];
     preview.value.warnings.forEach((warning: any) => {
-        const regex = /<strong>(.*?)<\/strong>/g;
-        let match;
-        const fields = [];
-        while ((match = regex.exec(warning.message)) !== null) {
-            fields.push(match[1]);
+        if (warning.type == "info") {
+            const regex = /<strong>(.*?)<\/strong>/g;
+            let match;
+            const fields = [];
+            while ((match = regex.exec(warning.message)) !== null) {
+                fields.push(match[1]);
+            }
+            warningMap.push(fields);
         }
-        warningMap.push(fields);
     })
     return warningMap;
+})
+
+const warnings = computed(() => {
+    return preview.value?.warnings?.filter((warning: any) => warning.type != "info") || [];
 })
 
 const listRoute = computed(() => {
