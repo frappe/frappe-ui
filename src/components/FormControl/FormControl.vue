@@ -20,6 +20,15 @@
         <slot name="prefix" />
       </template>
     </Select>
+    <Combobox
+      v-else-if="type === 'combobox'"
+      :id="id"
+      v-bind="{ ...controlAttrs, variant }"
+    >
+      <template #prefix v-if="$slots.prefix">
+        <slot name="prefix" />
+      </template>
+    </Combobox>
     <Autocomplete
       v-else-if="type === 'autocomplete'"
       v-bind="{ ...controlAttrs }"
@@ -66,6 +75,7 @@ import { Select } from '../Select'
 import { Textarea } from '../Textarea'
 import { Checkbox } from '../Checkbox'
 import { Autocomplete } from '../Autocomplete'
+import { Combobox } from '../Combobox'
 import FormLabel from '../FormLabel.vue'
 import type { FormControlProps } from './types'
 

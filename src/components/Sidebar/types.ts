@@ -30,4 +30,5 @@ export type SidebarSectionProps = {
 export type SidebarProps = {
   header?: SidebarHeaderProps
   sections?: SidebarSectionProps[]
+  disableCollapse?: boolean
 }

@@ -1,83 +1,25 @@
-<template>
-  <div class="relative flex items-center">
-    <div
-      :class="[
-        'absolute inset-y-0 left-0 flex items-center',
-        textColor,
-        prefixClasses,
-      ]"
-      v-if="$slots.prefix"
-    >
-      <slot name="prefix"> </slot>
-    </div>
-    <div
-      v-if="placeholder"
-      v-show="!modelValue"
-      class="pointer-events-none absolute text-ink-gray-4 truncate w-full"
-      :class="[fontSizeClasses, paddingClasses]"
-    >
-      {{ placeholder }}
-    </div>
-    <select
-      :class="selectClasses"
-      :disabled="disabled"
-      :id="id"
-      :value="modelValue"
-      @change="handleChange"
-      v-bind="attrs"
-    >
-      <option
-        v-for="option in selectOptions"
-        :key="option.value"
-        :value="option.value"
-        :disabled="option.disabled || false"
-        :selected="modelValue === option.value"
-      >
-        {{ option.label }}
-      </option>
-    </select>
-  </div>
-</template>
-
 <script setup lang="ts">
-import { computed, useSlots, useAttrs } from 'vue'
+import { computed } from 'vue'
 import type { SelectProps } from './types'
+import LucideChevronDown from '~icons/lucide/chevron-down'
 
-defineOptions({
-  inheritAttrs: false,
-})
+import {
+  SelectContent,
+  SelectItem,
+  SelectItemText,
+  SelectPortal,
+  SelectRoot,
+  SelectTrigger,
+  SelectValue,
+  SelectViewport,
+} from 'reka-ui'
+
+const model = defineModel<String>()
 
 const props = withDefaults(defineProps<SelectProps>(), {
   size: 'sm',
   variant: 'subtle',
-})
-
-const emit = defineEmits(['update:modelValue'])
-const slots = useSlots()
-const attrs = useAttrs()
-
-function handleChange(e: Event) {
-  emit('update:modelValue', (e.target as HTMLInputElement).value)
-}
-
-const selectOptions = computed(() => {
-  return (
-    props.options
-      ?.map((option) => {
-        if (typeof option === 'string') {
-          return {
-            label: option,
-            value: option,
-          }
-        }
-        return option
-      })
-      .filter(Boolean) || []
-  )
-})
-
-const textColor = computed(() => {
-  return props.disabled ? 'text-ink-gray-4' : 'text-ink-gray-8'
+  placeholder: 'Select option',
 })
 
 const fontSizeClasses = computed(() => {
@@ -91,29 +33,29 @@ const fontSizeClasses = computed(() => {
 
 const paddingClasses = computed(() => {
   return {
-    sm: 'pl-2 pr-5',
-    md: 'pl-2.5 pr-5.5',
-    lg: 'pl-3 pr-6',
-    xl: 'pl-3 pr-6',
+    sm: 'px-2',
+    md: 'px-2.5 ',
+    lg: 'px-3',
+    xl: 'px-3',
   }[props.size]
 })
 
-const selectClasses = computed(() => {
-  let sizeClasses = {
-    sm: 'rounded h-7',
-    md: 'rounded h-8',
-    lg: 'rounded-md h-10',
-    xl: 'rounded-md h-10',
-  }[props.size]
+let sizeClasses = {
+  sm: 'rounded min-h-7',
+  md: 'rounded min-h-8',
+  lg: 'rounded-md min-h-10',
+  xl: 'rounded-md min-h-10',
+}[props.size]
 
+const selectClasses = computed(() => {
   let variant = props.disabled ? 'disabled' : props.variant
   let variantClasses = {
     subtle:
-      'border border-[--surface-gray-2] bg-surface-gray-2 hover:border-outline-gray-modals hover:bg-surface-gray-3 focus:border-outline-gray-4 focus:ring-0 focus-visible:ring-2 focus-visible:ring-outline-gray-3',
+      'border border-[--surface-gray-2] bg-surface-gray-2 hover:border-outline-gray-modals hover:bg-surface-gray-3',
     outline:
-      'border border-outline-gray-2 bg-surface-white hover:border-outline-gray-3 focus:border-outline-gray-4 focus:ring-0 focus-visible:ring-2 focus-visible:ring-outline-gray-3',
+      'border border-outline-gray-2 bg-surface-white hover:border-outline-gray-3',
     ghost:
-      'bg-transparent border-transparent hover:bg-surface-gray-3 focus:bg-surface-gray-3 focus:border-outline-gray-4 focus:ring-0 focus-visible:ring-2 focus-visible:ring-outline-gray-3',
+      'bg-transparent border-transparent hover:bg-surface-gray-3 focus:bg-surface-gray-3',
     disabled: [
       'border',
       props.variant !== 'ghost' ? 'bg-surface-gray-1' : '',
@@ -128,17 +70,87 @@ const selectClasses = computed(() => {
     fontSizeClasses.value,
     paddingClasses.value,
     variantClasses,
-    textColor.value,
-    'transition-colors w-full py-0 truncate',
+    'transition-colors w-full focus:ring-2 data-[state=open]:ring-2 ring-outline-gray-3 ',
   ]
 })
 
-let prefixClasses = computed(() => {
-  return {
-    sm: 'pl-2',
-    md: 'pl-2.5',
-    lg: 'pl-3',
-    xl: 'pl-3',
-  }[props.size]
+const selectOptions = computed(() => {
+  const str = typeof props.options?.[0] == 'string'
+  const tmp = props.options?.map((x) => ({ label: x, value: x }))
+  return (str ? tmp : props.options)?.filter((x) => x && String(x.value)) || []
 })
 </script>
+
+<template>
+  <SelectRoot v-model="model">
+    <SelectTrigger
+      class="inline-flex items-center gap-2 outline-none text-base text-ink-gray-7 data-[placeholder]:text-ink-gray-4 data-[disabled]:text-ink-gray-4"
+      aria-label="Customise options"
+      :class="[selectClasses, $attrs.class]"
+      :disabled="disabled"
+    >
+      <slot name="prefix" />
+      <SelectValue :placeholder="placeholder" class='truncate' />
+      <slot name="suffix">
+        <LucideChevronDown class="size-4 text-ink-gray-4 ml-auto shrink-0" />
+      </slot>
+    </SelectTrigger>
+
+    <SelectPortal>
+      <SelectContent
+        class="bg-surface-modal border rounded-lg shadow-lg will-change-[opacity,transform] z-[100] overflow-hidden origin-center data-[state=open]:animate-[fadeInScale_150ms] data-[state=closed]:animate-[fadeOutScale_150ms]"
+      >
+        <SelectViewport class="p-1 flex flex-col">
+          <SelectItem
+            v-for="option in selectOptions"
+            :disabled="option.disabled"
+            :key="option.value"
+            :value="option.value"
+            :class="[sizeClasses, paddingClasses, fontSizeClasses]"
+						class="
+              text-base text-ink-gray-9 flex items-center relative
+              data-[highlighted]:bg-surface-gray-2 border-0 [data-state=checked]:bg-surface-gray-2
+              data-[disabled]:text-ink-gray-4 select-none
+            "
+          >
+            <SelectItemText>
+              <slot name="option" v-bind="{ option }">{{ option.label }}</slot>
+            </SelectItemText>
+          </SelectItem>
+          <slot name="footer" />
+        </SelectViewport>
+      </SelectContent>
+    </SelectPortal>
+  </SelectRoot>
+</template>
+
+<style scoped>
+[data-highlighted],
+[data-state='checked'] {
+  outline: none !important;
+}
+</style>
+
+<style>
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.90);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fadeOutScale {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+</style>

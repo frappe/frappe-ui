@@ -33,6 +33,7 @@ import type {
 } from './types'
 
 const props = withDefaults(defineProps<ComboboxProps>(), {
+  variant: 'subtle',
   options: () => [],
 })
 const emit = defineEmits([
@@ -279,6 +280,17 @@ const reset = () => {
   emit('update:selectedOption', null)
 }
 
+const variantClasses = computed(() => {
+  const borderCss =
+    'border focus-within:border-outline-gray-4 focus-within:ring-2 focus-within:ring-outline-gray-3'
+
+  return {
+    subtle: `${borderCss} bg-surface-gray-2 hover:bg-surface-gray-3 border-transparent`,
+    outline: `${borderCss} border-outline-gray-2`,
+    ghost: '',
+  }[props.variant]
+})
+
 defineExpose({
   reset,
 })
@@ -294,11 +306,15 @@ defineExpose({
       :open="isOpen"
     >
       <ComboboxAnchor
-        class="flex h-7 w-full items-center justify-between gap-2 rounded bg-surface-gray-2 px-2 py-1 transition-colors hover:bg-surface-gray-3 border border-transparent focus-within:border-outline-gray-4 focus-within:ring-2 focus-within:ring-outline-gray-3"
-        :class="{ 'opacity-50 pointer-events-none': disabled }"
+        class="flex h-7 w-full items-center justify-between gap-2 rounded px-2 py-1 transition-colors"
+        :class="{
+          'opacity-50 pointer-events-none': disabled,
+          [variantClasses]: true,
+        }"
         @click="handleClick"
       >
         <div class="flex items-center gap-2 flex-1 overflow-hidden">
+          <slot name="prefix" />
           <RenderIcon v-if="selectedOptionIcon" :icon="selectedOptionIcon" />
           <ComboboxInput
             :value="searchTerm"

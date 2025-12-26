@@ -272,7 +272,7 @@ from `message` key and error from `exc`.
 
 ```vue
 <template>
-  <Button @click="post.reload()" :loading="post.loading"> Reload </Button>
+  <Button @click="todos.reload()" :loading="todos.loading"> Reload </Button>
   <pre>{{ post }}</pre>
 </template>
 

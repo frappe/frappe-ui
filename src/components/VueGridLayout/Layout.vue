@@ -12,6 +12,10 @@
       :y="l.y"
       :w="l.w"
       :h="l.h"
+      :min-w="l.minW"
+      :min-h="l.minH"
+      :max-w="l.maxW"
+      :max-h="l.maxH"
     >
       <slot
         v-if="layoutReady"
@@ -22,9 +26,23 @@
         :y="l.y"
         :w="l.w"
         :h="l.h"
+        :min-w="l.minW"
+        :min-h="l.minH"
+        :max-w="l.maxW"
+        :max-h="l.maxH"
       >
         <pre class="h-full w-full rounded bg-surface-white p-4 shadow">{{
-          { i: l.i, x: l.x, y: l.y, w: l.w, h: l.h }
+          {
+            i: l.i,
+            x: l.x,
+            y: l.y,
+            w: l.w,
+            h: l.h,
+            minW: l.minW,
+            minH: l.minH,
+            maxW: l.maxW,
+            maxH: l.maxH,
+          }
         }}</pre>
       </slot>
     </GridItem>

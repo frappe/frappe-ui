@@ -97,6 +97,7 @@ import Calendar from './Calendar.vue'
 import { Select } from '../Select'
 import DatePicker from '../DatePicker/DatePicker.vue'
 import { Button } from '../Button'
+import { logEvent } from 'histoire/client'
 
 const config = {
   defaultMode: 'Month',

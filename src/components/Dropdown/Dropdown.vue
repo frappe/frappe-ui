@@ -53,7 +53,13 @@
                   :model-value="item.switchValue || false"
                 />
               </div>
-              <DropdownMenuItem v-else as-child @select="item.onClick">
+              <DropdownMenuItem
+                v-else
+                as-child
+                @select="item.onClick"
+                :disabled="item.disabled"
+                class="data-[disabled]:cursor-not-allowed"
+              >
                 <slot v-if="$slots.item" name="item" v-bind="{ item, close }" />
                 <component
                   v-else-if="item.component"
@@ -160,6 +166,8 @@
                               (event: PointerEvent) =>
                                 handleItemClick(subItem, event)
                             "
+                            :disabled="subItem.disabled"
+                            class="data-[disabled]:cursor-not-allowed"
                           >
                             <component
                               v-if="subItem.component"
@@ -310,10 +318,16 @@ const normalizeDropdownItem = (option: DropdownOption) => {
   }
 }
 
-const getIconColor = (item: DropdownItem) =>
-  item.theme === 'red' ? 'text-ink-red-3' : 'text-ink-gray-6'
-const getTextColor = (item: DropdownItem) =>
-  item.theme === 'red' ? 'text-ink-red-3' : 'text-ink-gray-7'
+const getIconColor = (item: DropdownItem) => {
+  if (item.disabled) return 'text-ink-gray-4'
+  return item.theme === 'red' ? 'text-ink-red-3' : 'text-ink-gray-6'
+}
+
+const getTextColor = (item: DropdownItem) => {
+  if (item.disabled) return 'text-ink-gray-4'
+  return item.theme === 'red' ? 'text-ink-red-3' : 'text-ink-gray-7'
+}
+
 const getBackgroundColor = (item: DropdownItem) =>
   item.theme === 'red'
     ? 'focus:bg-surface-red-3 data-[highlighted]:bg-surface-red-3 data-[state=open]:bg-surface-red-3'

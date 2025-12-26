@@ -12,6 +12,10 @@ export interface PopoverProps {
     | 'right-end'
     | 'left-start'
     | 'left-end'
+    | 'top'
+    | 'bottom'
+    | 'right'
+    | 'left'
   popoverClass?: string | object | Array<string | object>
   transition?: 'default' | null
   hideOnBlur?: boolean

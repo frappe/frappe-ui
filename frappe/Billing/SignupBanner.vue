@@ -25,7 +25,7 @@
   </Button>
 </template>
 <script setup>
-import LightningIcon from '../Icons/LightningIcon.vue'
+import LightningIcon from '../../icons/LightningIcon.vue'
 
 const props = defineProps({
   isSidebarCollapsed: {

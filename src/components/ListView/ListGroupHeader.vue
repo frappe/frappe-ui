@@ -26,7 +26,7 @@
 </template>
 <script setup>
 import { inject } from 'vue'
-import DownSolid from '../../icons/DownSolid.vue'
+import DownSolid from '../../../icons/DownSolidIcon.vue'
 
 const props = defineProps({
   group: {

@@ -11,13 +11,8 @@ let cssVariables = generateCSSVariables()
 
 let globalStyles = (theme) => ({
   html: {
-    'font-family': `Inter, ${theme('fontFamily.sans')}`,
-  },
-  '@supports (font-variation-settings: normal)': {
-    html: {
-      'font-family': `InterVar, ${theme('fontFamily.sans')}`,
-      'font-optical-sizing': 'auto',
-    },
+    'font-family': `InterVar, ${theme('fontFamily.sans')}`,
+    'font-optical-sizing': 'auto',
   },
   'html, body, button, p, span, div': {
     fontVariationSettings: "'opsz' 24",
