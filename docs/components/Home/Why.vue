@@ -68,12 +68,12 @@ const sections: Section[] = [
 
 <template>
   <main class="max-w-7xl mx-auto px-6 py-12">
-    <h1 class="text-[2.7rem] font-bold text-center text-ink-gray-9 mb-4">
+    <h1 class="text-[2rem] md:text-[2.7rem] font-bold text-center text-ink-gray-9 mb-4">
       Build for <span class="text-ink-violet-1">developers</span>
     </h1>
 
     <p
-      class="text-2xl max-w-2xl text-center mx-auto text-ink-gray-5 leading-7 mb-12"
+      class="text-2xl max-w-2xl text-center mx-auto text-ink-gray-5 leading-relaxed mb-12"
     >
       We've obsessed over every detail so you can focus on building great
       products.

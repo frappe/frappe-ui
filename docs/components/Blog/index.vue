@@ -5,7 +5,7 @@ const props = defineProps<{
 </script>
 
 <template>
-  <div class="grid gap-5 vp-raw mt-10  px-10">
+  <div class="grid gap-5 vp-raw md:mt-10  md:px-10">
 		<b class='text-3xl font-semibold mb-5 '>Blog</b>
 
     <a

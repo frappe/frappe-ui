@@ -6,7 +6,7 @@ import Notif from "./Notif.vue";
 </script>
 
 <template>
-  <div class="grid md:flex gap-5 m-auto">
+  <div class="grid md:flex gap-5 md:m-auto *:px-5 md:*:p-0">
     <div class="grid h-fit gap-5">
       <Tabs />
       <Progress />

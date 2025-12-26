@@ -1,7 +1,8 @@
 <template>
   <footer class="border-t p-10 text-gray-50 bg-gray-900 mt-20">
-    <div class="max-w-7xl flex [&_a]:text-ink-gray-3 [&_a]:dark:text-ink-gray-5 gap-5 mx-auto ">
-      <section class="flex flex-col gap-4">
+    <div class="max-w-7xl flex flex-col lg:flex-row [&_a]:text-ink-gray-3 [&_a]:dark:text-ink-gray-5
+			gap-10 mx-auto ">
+      <section class="flex flex-col gap-4 flex-1">
         <div class="flex gap-3 items-center">
           <img src="/logo.svg" class="w-8" />
           <h2 class="text-3xl">Frappe UI</h2>
@@ -13,7 +14,7 @@
         </p>
       </section>
 
-      <section class="flex flex-col gap-4 ml-auto mr-20">
+      <section class="flex flex-col gap-4 ">
         <b> Product </b>
         <a href="/docs/badge"> Components </a>
         <a href="/docs/design-system/bg-color"> Design system </a>

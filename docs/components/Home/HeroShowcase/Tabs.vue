@@ -46,7 +46,7 @@ const resetState = () => {
 
     <div
       v-if='val == "profile"'
-      class="bg-surface-cards rounded-2xl p-5 w-72 border border-outline-gray-2  shadow-lg"
+      class="bg-surface-cards rounded-2xl p-5 md:w-72 border border-outline-gray-2  shadow-lg"
     >
       <div class="flex items-center gap-4 mb-4">
         <img src="/frappe-logo.svg" class="!size-14 rounded-full" />

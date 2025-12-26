@@ -51,10 +51,7 @@ export default defineConfig({
 
   themeConfig: {
     outline: [2, 3],
-    logo: {
-      light: '/logo.svg',
-      dark: '/logo.svg',
-    },
+    logo: '/logo.svg',
     search: { provider: 'local' },
     nav: [
       { text: 'Docs', link: '/docs/introduction' },
