@@ -18,7 +18,7 @@ const sections: Section[] = [
   {
     title: "Themeable",
     description:
-      "Provides a plugin to customize default themes, you can change all semantic tokens or create an entire new theme.",
+      "Override default colors by just changing the css variables.Usage of semantic colors makes components consistent.",
     icon: LucidePalette,
     iconBg: "bg-surface-gray-2",
     iconColor: "text-ink-gray-8",
@@ -50,7 +50,7 @@ const sections: Section[] = [
   {
     title: "Accessible",
     description:
-      "Built with WAI-ARIA guidelines in mind. Keyboard navigation and screen reader support included by default.",
+      "Since Frappe UI is based on Reka-ui, you get accessibility ouf of the box. Built with WAI-ARIA guidelines in mind.",
     icon: LucideAccessibility,
     iconBg: "bg-surface-cyan-1",
     iconColor: "text-ink-cyan-1",
@@ -58,7 +58,7 @@ const sections: Section[] = [
   {
     title: "Beautiful",
     description:
-      "Every component is crafted with attention to detail, ensuring your UI looks stunning right out of the box.",
+      "Every component is crafted with attention to detail based on the Espresso design system, ensuring your UI looks stunning right out of the box.",
     icon: LucideSparkles,
     iconBg: "bg-surface-blue-2",
     iconColor: "text-ink-blue-3",
@@ -68,15 +68,14 @@ const sections: Section[] = [
 
 <template>
   <main class="max-w-7xl mx-auto px-6 py-12">
-    <h1 class="text-[2rem] md:text-[2.7rem] font-bold text-center text-ink-gray-9 mb-4">
+    <h1 class="text-[2rem] md:text-[2.7rem] font-bold text-center text-ink-gray-9 mb-8">
       Build for <span class="text-ink-violet-1">developers</span>
     </h1>
 
     <p
       class="text-2xl max-w-2xl text-center mx-auto text-ink-gray-5 leading-relaxed mb-12"
     >
-      We've obsessed over every detail so you can focus on building great
-      products.
+	Frappe UI provides solid defaults aiming less work done by developers.
     </p>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -91,7 +90,7 @@ const sections: Section[] = [
         "
       >
         <div
-          class="size-12 rounded-lg flex items-center justify-center mb-4"
+          class="size-12 rounded-lg flex items-center justify-center mb-5"
           :class="section.iconBg"
         >
           <component

@@ -104,15 +104,14 @@ const formCompleteStatus = computed(() => {
 
 <template>
   <section class="max-w-7xl mx-auto px-6 py-12">
-    <h1 class="text-[2rem] md:text-[2.7rem] font-bold text-center text-ink-gray-9 mb-4">
+    <h1 class="text-[2rem] md:text-[2.7rem] font-bold text-center text-ink-gray-9 mb-8">
       Espressofied
     </h1>
 
     <p
       class="text-2xl max-w-2xl text-center mx-auto text-ink-gray-5 leading-relaxed mb-12"
     >
-      We've obsessed over every detail so you can focus on building great
-      products.
+		Espresso is a robust design system providing guidelines for building up clean UI interfaces 
     </p>
 
     <!-- 3 column layout -->
