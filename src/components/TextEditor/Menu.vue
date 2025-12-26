@@ -1,7 +1,10 @@
 <template>
-  <div class="inline-flex bg-surface-white px-1 py-1">
+  <div class="inline-flex bg-surface-white p-1">
     <div class="inline-flex items-center gap-1">
-      <template v-for="(button, index) in buttons" :key="button?.label || button?.type || `btn-${index}`">
+      <template
+        v-for="(button, index) in buttons"
+        :key="button?.label || button?.type || `btn-${index}`"
+      >
         <div
           class="h-4 w-[2px] border-l"
           v-if="button && button.type === 'separator'"
@@ -37,11 +40,45 @@
                   v-for="option in button"
                   v-show="option.isDisabled ? !option.isDisabled(editor) : true"
                 >
+                  <component
+                    v-if="option.component"
+                    :is="option.component || 'div'"
+                    v-bind="{ editor }"
+                  >
+                    <template v-slot="componentSlotProps">
+                      <button
+                        class="w-full h-7 rounded px-2 text-base flex items-center gap-2 hover:bg-surface-gray-3"
+                        @click="
+                          () => {
+                            if (componentSlotProps?.onClick)
+                              componentSlotProps.onClick(option)
+                            else if (option.action) onButtonClick(option)
+
+                            close()
+                          }
+                        "
+                        :title="option.label"
+                      >
+                        <component
+                          v-if="option.icon"
+                          :is="option.icon"
+                          class="h-4 w-4"
+                        />
+                        <span
+                          class="whitespace-nowrap text-ink-gray-7"
+                          v-if="option.label"
+                        >
+                          {{ option.label }}
+                        </span>
+                      </button>
+                    </template>
+                  </component>
                   <button
+                    v-else
                     class="w-full h-7 rounded px-2 text-base flex items-center gap-2 hover:bg-surface-gray-3"
                     @click="
                       () => {
-                        if(!option.action) return
+                        if (!option.action) return
                         onButtonClick(option)
                         close()
                       }
@@ -65,8 +102,9 @@
         </div>
         <button
           v-else-if="button && !button.component"
-          class="flex rounded p-1 text-ink-gray-8 transition-colors"
+          class="flex rounded text-ink-gray-8 transition-colors focus-within:ring-0"
           :class="[
+            buttons.length > 1 ? 'p-1' : 'p-1.5 border',
             button.isDisabled?.(editor) && 'opacity-50 pointer-events-none',
             button.isActive?.(editor)
               ? 'bg-surface-gray-3'
@@ -90,8 +128,42 @@
             {{ button.label }}
           </span>
         </button>
-        <component v-else-if="button && button.component" :is="button.component || 'div'" v-bind="{ editor }">
-          <template v-slot="componentSlotProps">
+
+        <Suspense v-else-if="button && button.component">
+          <component :is="button.component || 'div'" v-bind="{ editor }">
+            <template v-slot="componentSlotProps">
+              <button
+                class="flex rounded p-1 text-ink-gray-8 transition-colors"
+                :class="[
+                  button.isDisabled?.(editor) &&
+                    'opacity-50 pointer-events-none',
+                  button.isActive?.(editor) || componentSlotProps?.isActive
+                    ? 'bg-surface-gray-3'
+                    : 'hover:bg-surface-gray-2',
+                  button.class,
+                ]"
+                @click="
+                  componentSlotProps?.onClick
+                    ? componentSlotProps.onClick(button)
+                    : onButtonClick(button)
+                "
+                :title="button.label"
+              >
+                <component
+                  v-if="button.icon"
+                  :is="button.icon"
+                  class="h-4 w-4"
+                />
+                <span
+                  class="inline-block h-4 min-w-[1rem] text-sm leading-4"
+                  v-else
+                >
+                  {{ button.text }}
+                </span>
+              </button>
+            </template>
+          </component>
+          <template #fallback>
             <button
               class="flex rounded p-1 text-ink-gray-8 transition-colors"
               :class="[
@@ -115,9 +187,9 @@
               >
                 {{ button.text }}
               </span>
-            </button>
-          </template>
-        </component>
+            </button></template
+          >
+        </Suspense>
       </template>
     </div>
   </div>

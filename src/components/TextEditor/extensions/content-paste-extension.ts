@@ -28,12 +28,6 @@ export const ContentPasteExtension = Extension.create<ContentPasteOptions>({
         props: {
           transformCopied(slice) {
             if (!slice) return slice
-            const frag = slice.content
-            if (frag.childCount === 1 && frag.child(0).type.name === 'tab') {
-              const tabNode = frag.child(0)
-
-              slice = new Slice(tabNode.content, slice.openStart, slice.openEnd)
-            }
             const newFragment = updateMediaSrcs(slice.content)
             return new Slice(newFragment, slice.openStart, slice.openEnd)
           },

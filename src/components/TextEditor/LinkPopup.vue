@@ -82,7 +82,7 @@ const emit = defineEmits<{
 
 const _href = ref(props.href)
 const input = useTemplateRef('input')
-const edit = ref(props.href === '')
+const edit = ref(!props.href)
 
 const submitLink = () => {
   if (_href.value === '' || isValidUrl(_href.value)) {
