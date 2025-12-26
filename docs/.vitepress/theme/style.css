@@ -21,6 +21,8 @@ body {
 }
 
 .shiki {
+  background: var(--surface-gray-7) !important;
+
   @apply max-h-[500px];
 
   font-family: monospace;
@@ -33,6 +35,11 @@ body {
   /* Optional: Add line highlight background */
   .highlighted {
     @apply bg-blue-900/30;
+  }
+}
+[data-theme='dark'] {
+  .shiki {
+    background: var(--surface-cards) !important;
   }
 }
 
@@ -239,5 +246,5 @@ body {
 /* } */
 
 .search-input {
-	background-color: var(--vp-c-bg);
+  background-color: var(--vp-c-bg);
 }

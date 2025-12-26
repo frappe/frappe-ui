@@ -16,8 +16,7 @@ export default defineConfig({
   titleTemplate: meta.name,
 
   markdown: {
-    theme: 'github-dark',
-    // lineNumbers: true,
+    theme: 'vesper',
     config(md) {
       md.use(componentPreview)
     },
