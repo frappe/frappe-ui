@@ -32,7 +32,13 @@ import Button from '../../src/components/Button/Button.vue'
 import ActionIcon from '../Icons/ActionIcon.vue'
 import BellIcon from '../Icons/BellIcon.vue'
 import ConditionIcon from '../Icons/ConditionIcon.vue'
-import { useAutomationState } from './automation'
+import {
+  getDummyElseBlock,
+  getDummyIfBlock,
+  getDummyNotificationAction,
+  getDummySetAction,
+  useAutomationState,
+} from './automation'
 const state = useAutomationState()
 
 const hasElseBlock = computed(() => state.rule.some((r) => r.type === 'else'))
@@ -70,39 +76,21 @@ const actions = computed(() => [
 ])
 
 function addConditionBlock() {
-  insertBeforeElse({
-    type: 'if',
-    conditions: [['', '', '']],
-    actions: [],
-  })
+  insertBeforeElse(getDummyIfBlock())
 }
 
 function addElseBlock() {
   // add this at the last of the rule array
   if (hasElseBlock.value) return
-  state.rule.push({
-    type: 'else',
-    condition: 'True',
-    actions: [],
-  })
+  state.rule.push(getDummyElseBlock())
 }
 
 function addSetFieldBlock() {
-  insertBeforeElse({
-    type: 'set',
-    field: '',
-    value: '',
-  })
+  insertBeforeElse(getDummySetAction())
 }
 
 function addNotificationBlock() {
-  insertBeforeElse({
-    type: 'email',
-    to: '',
-    via: '',
-    template: '',
-    text: '',
-  })
+  insertBeforeElse(getDummyNotificationAction())
 }
 
 function insertBeforeElse(block: any) {

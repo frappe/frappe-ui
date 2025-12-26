@@ -295,3 +295,30 @@ export function useDoctypeFilters(
     getFieldsForRow,
   }
 }
+
+export const getDummyIfBlock = () => ({
+  type: 'if',
+  conditions: [['', '', '']],
+  actions: [],
+})
+
+export const getDummyElseBlock = () => ({
+  type: 'else',
+  conditions: 'True',
+  actions: [],
+})
+
+export const getDummySetAction = () => ({
+  type: 'set',
+  field: '',
+  value: '',
+})
+
+export const getDummyNotificationAction = (doctype = 'Email Template') => ({
+  type: 'email',
+  to: '',
+  via: '',
+  template: '',
+  message: '',
+  doctype, // this should come from the config only
+})

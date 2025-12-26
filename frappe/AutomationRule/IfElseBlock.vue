@@ -36,7 +36,11 @@
 import { computed, ModelRef } from 'vue'
 import ActionIcon from '../Icons/ActionIcon.vue'
 import BellIcon from '../Icons/BellIcon.vue'
-import { useAutomationState } from './automation'
+import {
+  getDummyNotificationAction,
+  getDummySetAction,
+  useAutomationState,
+} from './automation'
 import ConditionBlock from './ConditionBlock.vue'
 import ElseBlock from './ElseBlock.vue'
 import EmailBlock from './EmailBlock.vue'
@@ -58,18 +62,12 @@ const addedFields = computed(() =>
   block.value?.actions.map((a) => a.field).filter(Boolean),
 )
 
-function addAction() {
-  block.value?.actions.push({ type: 'set', field: '', value: '' })
+function addSetAction() {
+  block.value?.actions.push(getDummySetAction())
 }
 
 function addNotifcation() {
-  block.value.actions.push({
-    type: 'email',
-    to: '',
-    via: '',
-    template: '',
-    text: '',
-  })
+  block.value.actions.push(getDummyNotificationAction())
 }
 
 function deleteAction(index: number) {
@@ -91,7 +89,7 @@ function getActionOptions(index: number): DropdownOption[] {
     {
       label: 'Add Action',
       icon: 'plus',
-      onClick: () => addAction(),
+      onClick: addSetAction,
     },
     deleteOption,
   ]
@@ -101,7 +99,7 @@ const additionalConditionBlockOptions: DropdownOption[] = [
   {
     label: 'Add Action',
     icon: ActionIcon,
-    onClick: addAction,
+    onClick: addSetAction,
   },
   {
     label: 'Add Notification',

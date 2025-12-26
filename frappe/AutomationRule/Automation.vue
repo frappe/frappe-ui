@@ -78,7 +78,7 @@ const props = defineProps<{
 
 const _automationName = ref(props.automationName)
 
-const DOCTYPE_NAME = 'Automation Rule'
+const AUTOMATION_DOCTYPE = 'Automation Rule'
 
 const isNew = computed(() => !_automationName.value)
 const dependencyLabel = computed(() => {
@@ -108,6 +108,10 @@ const state = reactive({
 })
 
 async function handleSubmit(): Promise<void> {
+  console.log(state.rule)
+
+  debugger
+  return
   if (isNew.value) {
     await createAutomation()
   } else {
@@ -128,7 +132,7 @@ async function createAutomation() {
       },
     },
   )
-  resource.submit({ doctype: DOCTYPE_NAME, name: state.name })
+  resource.submit({ doctype: AUTOMATION_DOCTYPE, name: state.name })
   _automationName.value = doc.name
 }
 
@@ -137,7 +141,7 @@ const hasNameChanged = computed(() => resource.data.name !== state.name)
 async function updateAutomation() {
   if (hasNameChanged.value) {
     const newName = await call('frappe.client.rename_doc', {
-      doctype: DOCTYPE_NAME,
+      doctype: AUTOMATION_DOCTYPE,
       old_name: _automationName.value,
       new_name: state.name,
     })
@@ -148,7 +152,7 @@ async function updateAutomation() {
   await call(
     'frappe.client.set_value',
     {
-      doctype: DOCTYPE_NAME,
+      doctype: AUTOMATION_DOCTYPE,
       name: doc.name,
       fieldname: { ...doc },
     },
@@ -158,12 +162,12 @@ async function updateAutomation() {
       },
     },
   )
-  resource.submit({ doctype: DOCTYPE_NAME, name: state.name })
+  resource.submit({ doctype: AUTOMATION_DOCTYPE, name: state.name })
 }
 
 function prepareDoc() {
   return {
-    doctype: DOCTYPE_NAME,
+    doctype: AUTOMATION_DOCTYPE,
     name: state.name,
     dt: state.dt,
     doctype_event: eventMap[state.eventType],
@@ -195,7 +199,7 @@ function handleRule(rule: string) {
 const resource = createResource({
   url: 'frappe.client.get',
   params: {
-    doctype: DOCTYPE_NAME,
+    doctype: AUTOMATION_DOCTYPE,
     name: _automationName.value,
   },
   onSuccess(data) {

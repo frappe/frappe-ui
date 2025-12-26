@@ -35,8 +35,9 @@ export interface SendEmailAction {
   type: 'email'
   to: string
   via: 'rich_text' | 'template'
+  message?: string
   template?: string
-  text?: string
+  doctype?: string
 }
 
 // Block types

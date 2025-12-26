@@ -51,7 +51,7 @@
           class="bg-surface-white rounded-sm px-2.5 py-2 max-h-[240px] overflow-y-scroll"
           placeholder="{{ fieldname }} to add dynamic values"
           editor-class="prose-sm"
-          v-model="action.text"
+          v-model="action.message"
         />
       </template>
     </BaseBlock>

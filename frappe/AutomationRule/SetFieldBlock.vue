@@ -29,7 +29,10 @@
         <Button
           variant="ghost"
           icon="more-horizontal"
-          :class="indent && 'opacity-0 group-hover:opacity-100 transition-all'"
+          :class="
+            indent &&
+            'opacity-0 group-hover:opacity-100 transition-all group-focus-within:opacity-100'
+          "
         />
       </Dropdown>
     </template>
