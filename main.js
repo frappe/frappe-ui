@@ -1,5 +1,8 @@
 import { createApp } from 'vue'
 import './src/style.css'
 import App from './App.vue'
+import { spritePlugin } from './icons'
 
-createApp(App).mount('#app')
+const app = createApp(App)
+app.use(spritePlugin)
+app.mount('#app')
