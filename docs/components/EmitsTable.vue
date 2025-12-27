@@ -22,7 +22,7 @@ const props = defineProps<Props>();
     <span>Payload </span>
   </div>
 
-  <section class="grid grid-cols-2 border-b border-outline-gray-2 p-4 w-full">
+  <section class="grid grid-cols-2 p-4 w-full overflow-auto scrollbar">
     <template v-for="(x, i) in props.data" :key="x.name">
       <Badge size="xl"  class="w-fit !rounded">
         {{ x.name }}
@@ -42,7 +42,7 @@ const props = defineProps<Props>();
 
       <hr
         v-if="i < props.data.length - 1"
-        class="col-span-full !mt-0 !m-4 !-mx-4"
+        class="col-span-full !-mx-4"
       />
     </template>
   </section>
