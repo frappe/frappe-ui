@@ -2,6 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+
+/* make docwidth full */
+/* @layer base { */
+/*   @media (min-width: 960px) { */
+/*     .VPDoc .container { */
+/*       padding: 0 !important; */
+/*       margin: 0 !important; */
+/*     } */
+/*   } */
+/* } */
+
 html {
   scroll-behavior: smooth;
 }
@@ -182,69 +193,77 @@ body {
 }
 
 :root {
+  --vp-sidebar-bg-color: var(--surface-gray-1);
+}
+
+/* scrollbar */
+[data-theme='dark'] {
   --vp-sidebar-bg-color: var(--surface-white);
-  /* --vp-sidebar-bg-color: hsl(from var(--vp-c-bg) h s calc(l - 8%)); */
+
+  .VPSidebar {
+    border-right: 1px solid var(--outline-gray-1);
+  }
+}
+
+/* scrollbar */
+:root {
+  --scrollbar-size: 4px;
+
+  --scrollbar-track: var(--surface-gray-1);
+  --scrollbar-thumb: var(--surface-gray-3);
+  --scrollbar-thumb-hover: var(--surface-gray-4);
+
+  --shiki-track: var(--surface-gray-7);
+  --shiki-thumb: var(--surface-gray-5);
+}
+
+[data-theme='dark'] {
+  --scrollbar-track: var(--surface-white);
+  --scrollbar-thumb: var(--surface-gray-2);
+  --scrollbar-thumb-hover: var(--surface-gray-3);
+
+  --shiki-track: var(--surface-cards);
+  --shiki-thumb: var(--surface-gray-3);
 }
 
 .VPSidebar {
-  /* Firefox */
   scrollbar-width: thin;
-  scrollbar-color: var(--surface-gray-3) var(--surface-gray-1);
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
 
-/* Chromium / Safari */
+.shiki {
+  scrollbar-width: thin;
+  scrollbar-color: var(--shiki-thumb) var(--shiki-track);
+}
+
 .VPSidebar::-webkit-scrollbar {
-  width: 2px;
+  width: var(--scrollbar-size);
 }
 
 .VPSidebar::-webkit-scrollbar-track {
-  background: var(--surface-gray-1);
+  background: var(--scrollbar-track);
 }
 
 .VPSidebar::-webkit-scrollbar-thumb {
-  background-color: var(--surface-gray-3);
+  background-color: var(--scrollbar-thumb);
   border-radius: 999px;
+  background-clip: padding-box;
 }
 
 .VPSidebar::-webkit-scrollbar-thumb:hover {
-  background-color: var(--surface-gray-4);
+  background-color: var(--scrollbar-thumb-hover);
 }
 
-/**
- * Component: Button
- * -------------------------------------------------------------------------- */
-
-:root {
-  --vp-button-brand-border: transparent;
-  --vp-button-brand-text: var(--vp-c-white);
-  --vp-button-brand-bg: var(--vp-c-brand-3);
-  --vp-button-brand-hover-border: transparent;
-  --vp-button-brand-hover-text: var(--vp-c-white);
-  --vp-button-brand-hover-bg: var(--vp-c-brand-2);
-  --vp-button-brand-active-border: transparent;
-  --vp-button-brand-active-text: var(--vp-c-white);
-  --vp-button-brand-active-bg: var(--vp-c-brand-1);
+.shiki::-webkit-scrollbar {
+  height: var(--scrollbar-size);
 }
 
-/**
- * Component: Custom Block
- * -------------------------------------------------------------------------- */
-
-:root {
-  --vp-custom-block-tip-border: transparent;
-  --vp-custom-block-tip-text: var(--vp-c-text-1);
-  --vp-custom-block-tip-bg: var(--vp-c-brand-soft);
-  --vp-custom-block-tip-code-bg: var(--vp-c-brand-soft);
+.shiki::-webkit-scrollbar-track {
+  background: var(--shiki-track);
 }
 
-/**
- * Component: Algolia
- * -------------------------------------------------------------------------- */
-
-/* .DocSearch { */
-/*   --docsearch-primary-color: var(--vp-c-brand-1) !important; */
-/* } */
-
-.search-input {
-  background-color: var(--vp-c-bg);
+.shiki::-webkit-scrollbar-thumb {
+  background-color: var(--shiki-thumb);
+  border-radius: 999px;
+  background-clip: padding-box;
 }

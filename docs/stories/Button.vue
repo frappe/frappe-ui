@@ -21,12 +21,13 @@ const sizes = ["sm", "md", "lg", "xl", "2xl"];
 
 <template>
   <div class="grid gap-6">
-    <Story
-      :title="variant"
-      v-for="variant in variants"
-      :key="variant"
-    >
-      <Button :variant="variant" size="md">{{ state.label }}</Button>
+    <Story title="Variants" preview-css="flex gap-3">
+      <Button
+        :key="variant"
+        v-for="variant in variants"
+        :variant="variant"
+        size="md"
+      >{{ state.label }}</Button>
     </Story>
 
     <Story title="sizes">
