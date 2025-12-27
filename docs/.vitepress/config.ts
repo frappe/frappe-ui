@@ -36,15 +36,45 @@ export default defineConfig({
   },
 
   head: [
+    // set data-theme attribute since vitepress uses just the dark class.
     [
       'script',
       {},
       `;(() => {
-        const preference = localStorage.getItem('vitepress-theme-appearance') || 'auto'
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-        const isDark = preference === 'auto' ? prefersDark : preference === 'dark'
-        document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light')
-      })()`,
+      const preference = localStorage.getItem('vitepress-theme-appearance') || 'auto'
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+      const isDark = preference === 'auto' ? prefersDark : preference === 'dark'
+      document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light')
+    })()`,
+    ],
+
+    // ===== Open Graph =====
+    ['meta', { property: 'og:type', content: 'website' }],
+    ['meta', { property: 'og:site_name', content: meta.name }],
+    ['meta', { property: 'og:title', content: meta.name }],
+    ['meta', { property: 'og:description', content: meta.description }],
+    ['meta', { property: 'og:url', content: 'https://your-site.com' }],
+    [
+      'meta',
+      {
+        property: 'og:image',
+        content: 'https://your-site.com/frappe-demo.png',
+      },
+    ],
+    ['meta', { property: 'og:image:width', content: '1200' }],
+    ['meta', { property: 'og:image:height', content: '630' }],
+    ['meta', { property: 'og:image:alt', content: meta.description }],
+
+    // ===== Twitter =====
+    ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
+    ['meta', { name: 'twitter:title', content: meta.name }],
+    ['meta', { name: 'twitter:description', content: meta.description }],
+    [
+      'meta',
+      {
+        name: 'twitter:image',
+        content: 'https://your-site.com/frappe-demo.png',
+      },
     ],
   ],
 
