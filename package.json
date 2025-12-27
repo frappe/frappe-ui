@@ -16,7 +16,7 @@
     "docs:dev": "vitepress dev docs --host",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
-		"docs:gen": "node docs/scripts/propsgen.ts --trace-uncaught"
+    "docs:gen": "node docs/scripts/propsgen.ts --trace-uncaught"
   },
   "exports": {
     ".": {
