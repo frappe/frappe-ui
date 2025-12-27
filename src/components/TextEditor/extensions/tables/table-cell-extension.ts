@@ -1,4 +1,4 @@
-import {TableCell} from '@tiptap/extension-table'
+import TableCell from '@tiptap/extension-table-cell'
 
 export const TableCellExtension = TableCell.extend({
     addAttributes() {

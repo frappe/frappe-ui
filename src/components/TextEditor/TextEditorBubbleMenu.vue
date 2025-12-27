@@ -4,6 +4,7 @@
     class="bubble-menu rounded-md z-[100]"
     :class="bubbleMenuButtons.length > 1 && 'shadow-sm'"
     :editor="editor"
+    :should-show="shouldShow"
     v-bind="options"
   >
     <Menu
