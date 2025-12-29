@@ -7,10 +7,11 @@ export default function (md: MarkdownRenderer) {
       /<ComponentPreview\s+name=["']([^"']+)["'](?:\s+title=["']([^"']*)["'])?(?:\s+description=["']([^"']*)["'])?(?:\s+csr=["'](true|false)["'])?\s*\/>/g
 
     state.src = state.src.replace(regex, (_, name, title, description, csr) => {
+			const componentPath = `../../../src/components/${name}/${name}.story.vue`
       const scriptIdx = state.tokens.findIndex(
         (i) => i.type === 'html_block' && /<script setup>/.test(i.content),
       )
-      const importStr = `import Preview from '../../stories/${name}.vue'`
+      const importStr = `import Preview from '${componentPath}'`
 
       if (scriptIdx === -1) {
         const token = new state.Token('html_block', '', 0)
@@ -24,7 +25,6 @@ export default function (md: MarkdownRenderer) {
 
       const idx = state.tokens.findIndex((i) => i.content.match(regex))
       const { realPath, path: _path } = state.env as MarkdownEnv
-      const componentPath = `../../stories/${name}.vue`
       const props = [
         name && `name="${name}"`,
         title && `title="${title}"`,
