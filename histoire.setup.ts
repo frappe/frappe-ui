@@ -1,5 +1,7 @@
 import './histoire.css'
 import './src/style.css'
+import { defineSetupVue3 } from '@histoire/plugin-vue'
+import { spritePlugin } from './icons'
 
 // development
 if (document.readyState == 'complete') {
@@ -46,3 +48,8 @@ const route = urlParams.get('route')
 if (route) {
   history.pushState({}, '', route)
 }
+
+
+export const setupVue3 = defineSetupVue3(({ app, story, variant }) => {
+  app.use(spritePlugin)
+})
