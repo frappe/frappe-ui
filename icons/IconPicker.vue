@@ -20,12 +20,14 @@ export interface IconPickerProps {
   openOnFocus?: boolean
   openOnClick?: boolean
   placement?: 'start' | 'center' | 'end'
+  maxIcons?: number
 }
 
 const props = withDefaults(defineProps<IconPickerProps>(), {
   variant: 'subtle',
   openOnClick: true,
   openOnFocus: true,
+  maxIcons: 100,
 })
 
 const emit = defineEmits(['update:modelValue', 'focus', 'blur', 'input'])
@@ -180,7 +182,7 @@ defineExpose({
       </ComboboxAnchor>
       <ComboboxPortal>
         <ComboboxContent
-          class="z-10 min-w-[--reka-combobox-trigger-width] mt-1 bg-surface-modal overflow-hidden rounded-lg shadow-2xl"
+          class="z-10 w-[--reka-combobox-trigger-width] mt-1 bg-surface-modal overflow-hidden rounded-lg shadow-2xl"
           position="popper"
           @openAutoFocus.prevent
           @closeAutoFocus.prevent
@@ -196,12 +198,9 @@ defineExpose({
               </template>
               <template v-else> No icons available. </template>
             </ComboboxEmpty>
-            <div
-              v-if="filteredIcons.length > 0"
-              class="grid grid-cols-[repeat(auto-fit,minmax(2rem,1fr))]"
-            >
+            <div v-if="filteredIcons.length > 0" class="flex flex-wrap gap-1">
               <button
-                v-for="iconName in filteredIcons.slice(0, 60)"
+                v-for="iconName in filteredIcons.slice(0, props.maxIcons)"
                 :key="iconName"
                 @click="handleIconClick(iconName)"
                 type="button"
