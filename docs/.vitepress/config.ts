@@ -53,12 +53,12 @@ export default defineConfig({
     ['meta', { property: 'og:site_name', content: meta.name }],
     ['meta', { property: 'og:title', content: meta.name }],
     ['meta', { property: 'og:description', content: meta.description }],
-    ['meta', { property: 'og:url', content: 'https://your-site.com' }],
+    ['meta', { property: 'og:url', content: 'https://ui.frappe.io' }],
     [
       'meta',
       {
         property: 'og:image',
-        content: 'https://your-site.com/frappe-demo.png',
+        content: '/frappe-demo.png',
       },
     ],
     ['meta', { property: 'og:image:width', content: '1200' }],
@@ -73,7 +73,7 @@ export default defineConfig({
       'meta',
       {
         name: 'twitter:image',
-        content: 'https://your-site.com/frappe-demo.png',
+        content: '/frappe-demo.png',
       },
     ],
   ],
