@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import Story from "@/components/Story.vue";
 import LucideUser from "~icons/lucide/user";
 import LucideRotate from "~icons/lucide/rotate-ccw";
@@ -8,13 +8,50 @@ import { Avatar, Button, Select } from "frappe-ui";
 
 const value = ref("");
 const options = [
-  { label: "John Doe", value: "john-doe" },
-  { label: "Jane Doe", value: "jane-doe" },
-  { label: "John Smith", value: "john-smith" },
-  { label: "Jane Smith", value: "jane-smith", disabled: true },
-  { label: "John Wayne", value: "john-wayne" },
-  { label: "Jane Wayne", value: "jane-wayne" },
-];
+  { 
+    label: "Matcha Tiramisu", 
+    value: "matcha-tiramisu",
+    img: "https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=150&h=150&fit=crop"
+  },
+  { 
+    label: "Strawberry Cheesecake", 
+    value: "strawberry-cheesecake",
+    img: "https://images.unsplash.com/photo-1533134486753-c833f0ed4866?w=150&h=150&fit=crop"
+  },
+  { 
+    label: "Chocolate Lava Cake", 
+    value: "chocolate-lava-cake",
+    img: "https://images.unsplash.com/photo-1624353365286-3f8d62daad51?w=150&h=150&fit=crop"
+  },
+  { 
+    label: "Mango Sticky Rice", 
+    value: "mango-sticky-rice",
+    img: "https://images.unsplash.com/photo-1604085792782-8d92f276d7d8?w=150&h=150&fit=crop",
+    disabled: true
+  },
+  { 
+    label: "Crème Brûlée", 
+    value: "creme-brulee",
+    img: "https://images.unsplash.com/photo-1470124182917-cc6e71b22ecc?w=150&h=150&fit=crop"
+  },
+  { 
+    label: "Pistachio Baklava", 
+    value: "pistachio-baklava",
+    img: "https://images.unsplash.com/photo-1519676867240-f03562e64548?w=150&h=150&fit=crop"
+  },
+  { 
+    label: "Ube Ice Cream", 
+    value: "ube-ice-cream",
+    img: "https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?w=150&h=150&fit=crop"
+  },
+  { 
+    label: "Salted Caramel Tart", 
+    value: "salted-caramel-tart",
+    img: "https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?w=150&h=150&fit=crop"
+  },
+]
+
+const activeImg = computed(() => (options.find(x => x.value === value.value)?.img))
 </script>
 
 <template>
@@ -49,12 +86,13 @@ const options = [
 
     <Story title="Custom Option Slot">
       <Select :options="options" v-model="value">
+				{{ activeImg }}
+				<template #prefix>
+					<Avatar size="sm" :image='activeImg' />
+				</template>
         <template #option="{ option }">
           <div class="inline-flex gap-2 items-center">
-            <Avatar
-              size="sm"
-              image="https://avatars.fastly.steamstatic.com/9ebf36bd3dc6c34f2d79ccf5d63e00eb7866321e_full.jpg"
-            />
+            <Avatar size="sm" :image='option.img' />
             <SelectItemText>{{ option.label }}</SelectItemText>
           </div>
         </template>
