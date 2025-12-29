@@ -1,6 +1,48 @@
 {
   "stories": [
     {
+      "id": "icons-iconpicker-story-vue",
+      "title": "IconPicker",
+      "layout": {
+        "type": "grid",
+        "width": 400
+      },
+      "docsOnly": false,
+      "variants": [
+        {
+          "id": "icons-iconpicker-story-vue-0",
+          "title": "Basic Usage"
+        },
+        {
+          "id": "icons-iconpicker-story-vue-1",
+          "title": "Subtle Variant (Default)"
+        },
+        {
+          "id": "icons-iconpicker-story-vue-2",
+          "title": "Outline Variant"
+        },
+        {
+          "id": "icons-iconpicker-story-vue-3",
+          "title": "Ghost Variant"
+        },
+        {
+          "id": "icons-iconpicker-story-vue-4",
+          "title": "Pre-selected Icon"
+        },
+        {
+          "id": "icons-iconpicker-story-vue-5",
+          "title": "Disabled State"
+        }
+      ],
+      "relativePath": "icons/IconPicker.story.vue",
+      "supportPluginId": "vue3",
+      "treePath": [
+        "IconPicker"
+      ],
+      "virtual": false,
+      "markdownFile": null
+    },
+    {
       "id": "src-components-alert-alert-story-vue",
       "title": "Alert",
       "layout": {
@@ -902,28 +944,6 @@
       "markdownFile": null
     },
     {
-      "id": "src-components-sidebar-sidebar-story-vue",
-      "title": "Sidebar",
-      "layout": {
-        "type": "single",
-        "iframe": true
-      },
-      "docsOnly": false,
-      "variants": [
-        {
-          "id": "src-components-sidebar-sidebar-story-vue-0",
-          "title": "Sidebar"
-        }
-      ],
-      "relativePath": "src/components/Sidebar/Sidebar.story.vue",
-      "supportPluginId": "vue3",
-      "treePath": [
-        "Sidebar"
-      ],
-      "virtual": false,
-      "markdownFile": null
-    },
-    {
       "id": "src-components-spinner-spinner-story-vue",
       "title": "Spinner",
       "layout": {
@@ -945,6 +965,28 @@
       "supportPluginId": "vue3",
       "treePath": [
         "Spinner"
+      ],
+      "virtual": false,
+      "markdownFile": null
+    },
+    {
+      "id": "src-components-sidebar-sidebar-story-vue",
+      "title": "Sidebar",
+      "layout": {
+        "type": "single",
+        "iframe": true
+      },
+      "docsOnly": false,
+      "variants": [
+        {
+          "id": "src-components-sidebar-sidebar-story-vue-0",
+          "title": "Sidebar"
+        }
+      ],
+      "relativePath": "src/components/Sidebar/Sidebar.story.vue",
+      "supportPluginId": "vue3",
+      "treePath": [
+        "Sidebar"
       ],
       "virtual": false,
       "markdownFile": null
