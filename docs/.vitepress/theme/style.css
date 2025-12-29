@@ -21,7 +21,7 @@ body {
   /* color: var(--ink-gray-9); */
   /* font-family: Inter, sans-serif */
 
-  @apply text-base;
+  /* @apply text-base; */
 }
 
 .iconlink {
