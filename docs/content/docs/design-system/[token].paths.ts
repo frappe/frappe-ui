@@ -109,7 +109,7 @@ const borderRadius = Object.entries(designTokens.borderRadius).map(
 export default {
   paths() {
     return [
-      { params: { token: 'bg-color', data: bgColors } },
+      { params: { token: 'background-color', data: bgColors } },
       { params: { token: 'text-color', data: txtColors } },
       { params: { token: 'border-color', data: borderColors } },
       { params: { token: 'font-size', data: fontSize } },

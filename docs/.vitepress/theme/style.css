@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
 /* make docwidth full */
 /* @layer base { */
 /*   @media (min-width: 960px) { */
@@ -299,6 +298,16 @@ body {
 	margin-top: 24px !important;
 }
 
+/**
+ * Component: Custom Block
+ * -------------------------------------------------------------------------- */
+
+:root {
+  --vp-custom-block-tip-border: transparent;
+  --vp-custom-block-tip-text: var(--vp-c-text-1);
+  --vp-custom-block-tip-bg: var(--vp-c-brand-soft);
+  --vp-custom-block-tip-code-bg: var(--vp-c-brand-soft);
+}
 
 .search-input {
   background-color: var(--vp-c-bg);

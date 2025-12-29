@@ -46,7 +46,7 @@ export default [
     items: [
       {
         text: withIcon('bgColor', 'Background Color'),
-        link: '/docs/design-system/bg-color',
+        link: '/docs/design-system/background-color',
       },
       {
         text: withIcon('textColor', 'Text Color'),

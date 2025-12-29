@@ -21,7 +21,7 @@ const title = params.value.token.replace('-', ' ')
 {{ title }}
 </h1>
 
-<BgColor v-if="params.token =='bg-color'"  :data="data" />
+<BgColor v-if="params.token =='background-color'"  :data="data" />
 <TxtColor v-if="params.token =='text-color'"  :data="data" />
 <BorderColor v-if="params.token =='border-color'"  :data="data" />
 <FontSize v-if="params.token =='font-size'"  :data="data" />
