@@ -15,7 +15,7 @@ const excludeLinks = [
   'Provider',
   'VueGridLayout',
   'types',
-	'Toast'
+  'Toast',
 ]
 
 function getComponentList() {
@@ -89,9 +89,15 @@ export default [
     text: 'Data Fetching',
     collapsed: false,
     items: [
-      { text: 'Resource', link: '/docs/resource' },
-      { text: 'List Resource', link: '/docs/list-resource' },
-      { text: 'Document Resource', link: '/docs/document-resource' },
+      { text: withIcon('db', 'Resource'), link: '/docs/resource' },
+      {
+        text: withIcon('listdb', 'List Resource'),
+        link: '/docs/list-resource',
+      },
+      {
+        text: withIcon('docdb', 'Document Resource'),
+        link: '/docs/document-resource',
+      },
     ],
   },
 
