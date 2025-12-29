@@ -2,10 +2,12 @@
 import { computed } from 'vue'
 import type { SelectProps, SelectOption } from './types'
 import LucideChevronDown from '~icons/lucide/chevron-down'
+import LucideCheck from '~icons/lucide/check'
 
 import {
   SelectContent,
   SelectItem,
+  SelectItemIndicator,
   SelectItemText,
   SelectPortal,
   SelectRoot,
@@ -105,7 +107,7 @@ defineSlots<{
       :disabled="disabled"
     >
       <slot name="prefix" />
-      <SelectValue :placeholder="placeholder" class='truncate' />
+      <SelectValue :placeholder="placeholder" class="truncate" />
       <slot name="suffix">
         <LucideChevronDown class="size-4 text-ink-gray-4 ml-auto shrink-0" />
       </slot>
@@ -113,7 +115,7 @@ defineSlots<{
 
     <SelectPortal>
       <SelectContent
-        class="bg-surface-modal border rounded-lg shadow-lg will-change-[opacity,transform] z-[100] overflow-hidden origin-center data-[state=open]:animate-[fadeInScale_150ms] data-[state=closed]:animate-[fadeOutScale_150ms]"
+        class="bg-surface-modal border rounded-lg shadow-lg will-change-[opacity,transform] z-[100] overflow-hidden origin-center data-[state=open]:animate-[fadeInScale_100ms] data-[state=closed]:animate-[fadeOutScale_100ms]"
       >
         <SelectViewport class="p-1 flex flex-col">
           <SelectItem
@@ -122,15 +124,12 @@ defineSlots<{
             :key="option.value"
             :value="option.value"
             :class="[sizeClasses, paddingClasses, fontSizeClasses]"
-						class="
-              text-base text-ink-gray-9 flex items-center relative
-              data-[highlighted]:bg-surface-gray-2 border-0 [data-state=checked]:bg-surface-gray-2
-              data-[disabled]:text-ink-gray-4 select-none
-            "
+            class="text-base text-ink-gray-9 flex items-center data-[highlighted]:bg-surface-gray-2 border-0 [data-state=checked]:bg-surface-gray-2 data-[disabled]:text-ink-gray-4 select-none"
           >
             <SelectItemText>
               <slot name="option" v-bind="{ option }">{{ option.label }}</slot>
             </SelectItemText>
+            <SelectItemIndicator :as="LucideCheck" class="size-4 ml-auto" />
           </SelectItem>
           <slot name="footer" />
         </SelectViewport>
@@ -150,7 +149,7 @@ defineSlots<{
 @keyframes fadeInScale {
   from {
     opacity: 0;
-    transform: scale(0.90);
+    transform: scale(0.9);
   }
   to {
     opacity: 1;

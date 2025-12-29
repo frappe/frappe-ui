@@ -26,3 +26,4 @@ dist-ssr
 
 docs/.vitepress/cache
 docs/.vitepress/dist
+components.d.ts
