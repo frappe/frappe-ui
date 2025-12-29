@@ -109,7 +109,7 @@ const selectOptions = computed(() => {
             :key="option.value"
             :value="option.value"
             :class="[sizeClasses, paddingClasses, fontSizeClasses]"
-            class="text-base text-ink-gray-9 flex items-center data-[highlighted]:bg-surface-gray-2 border-0 [data-state=checked]:bg-surface-gray-2 data-[disabled]:text-ink-gray-4 select-none"
+            class="text-base text-ink-gray-9 flex items-center data-[highlighted]:bg-surface-gray-2 border-0 data-[state=checked]:bg-surface-gray-2 data-[disabled]:text-ink-gray-4 select-none"
           >
             <SelectItemText>
               <slot name="option" v-bind="{ option }">{{ option.label }}</slot>
