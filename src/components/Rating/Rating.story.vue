@@ -1,18 +1,24 @@
-<template>
-  <Story :layout="{ type: 'grid', width: 300 }">
-    <Variant title="default">
-      <div class="p-2">
-        <Rating v-bind="state" />
-      </div>
-    </Variant>
-  </Story>
-</template>
 <script setup lang="ts">
-import { reactive } from 'vue'
-import Rating from './Rating.vue'
+import { reactive } from "vue";
+import { Rating } from "frappe-ui";
+import Story from "@/components/Story.vue";
 
 const state = reactive({
-  size: 'md',
-  label: 'Rating',
-})
+  size: "md",
+  label: "Rating",
+});
 </script>
+
+<template>
+  <div class="grid grid-cols-2 gap-4">
+    <Story><Rating v-bind="state" /></Story>
+
+    <Story
+      v-for='size in ["sm", "md", "lg", "xl"]'
+      :key="size"
+      :title='"Size: " + size'
+    >
+      <Rating v-bind="state" :size="size" />
+    </Story>
+  </div>
+</template>

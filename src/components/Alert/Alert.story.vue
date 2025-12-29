@@ -1,53 +1,27 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import Alert from "./Alert.vue";
-import Button from "../Button/Button.vue";
+import { Alert, Button } from "frappe-ui";
 import LucideBadge from "~icons/lucide/badge-info";
+import Story from "@/components/Story.vue";
 
 const visible = ref(true);
+
+const themes = ["green", "yellow", "red", "blue"];
 </script>
 
 <template>
-  <Story :layout='{ width: 500, type: "grid" }'>
-    <Variant title="Success">
+  <div class="grid gap-5">
+    <Story v-for="theme in themes" :title="theme">
       <Alert
         title="Source successfully added"
         description="Discover the new feature to enhance your experience. See how it can help you."
-        theme="green"
+        :theme="theme"
       />
-    </Variant>
+    </Story>
 
-    <Variant title="Warning">
-      <Alert
-        title="Source successfully added"
-        description="Discover the new feature to enhance your experience. See how it can help you."
-        theme="yellow"
-      />
-    </Variant>
-
-    <Variant title="Error">
-      <Alert
-        title="Source successfully added"
-        description="Discover the new feature to enhance your experience. See how it can help you."
-        theme="red"
-      />
-    </Variant>
-
-    <Variant title="Info">
-      <Alert
-        title="Source successfully added"
-        description="Discover the new feature to enhance your experience. See how it can help you."
-        theme="blue"
-      />
-    </Variant>
-
-    <Variant title="Controlled State">
-      <div>
-        <Button
-          variant="solid"
-          class="mb-3"
-          @click="visible = !visible"
-        >
+    <Story title="Controlled state">
+      <div class="grid gap-3">
+        <Button variant="solid" @click="visible = !visible">
           Toggle Alert
         </Button>
 
@@ -57,9 +31,9 @@ const visible = ref(true);
           description="Discover the new feature to enhance your experience. See how it can help you."
         />
       </div>
-    </Variant>
+    </Story>
 
-    <Variant title="Custom Slots">
+    <Story title="Custom Slots">
       <Alert
         title="Your trial ends soon!"
         variant="outline"
@@ -70,9 +44,9 @@ const visible = ref(true);
         </template>
 
         <template #footer>
-          <Button class="col-span-full" variant="solid"> Update now</Button>
+          <Button class="col-span-full" variant="solid"> Update now </Button>
         </template>
       </Alert>
-    </Variant>
-  </Story>
+    </Story>
+  </div>
 </template>

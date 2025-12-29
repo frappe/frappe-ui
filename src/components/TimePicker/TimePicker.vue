@@ -548,4 +548,22 @@ function setInvalid(val: boolean) {
     emit('invalid-change', val)
   }
 }
+
+defineSlots<{
+  /**
+   * Slot rendered before the input value.
+   * Useful for icons or indicators.
+   */
+  prefix?: () => any
+
+  /**
+   * Slot rendered after the input value.
+   * Exposes popover controls.
+   */
+  suffix?: (props: {
+    togglePopover: () => void
+    isOpen: boolean
+  }) => any
+}>()
+
 </script>

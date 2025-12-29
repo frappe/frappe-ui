@@ -22,6 +22,14 @@ const indicatorYCss = `right-0 top-0 w-[2px] h-[--reka-tabs-indicator-size]
 // Using a plain <button> element via `h('button')` to avoid picking up
 // the globally registered Button component and its styles.
 const Btn = h('button')
+
+defineSlots<{
+  /** Custom renderer for a tab trigger (icon + label / router-link). */
+  'tab-item'?: (props: { tab: { label: string; icon?: string; route?: string } }) => any
+
+  /** Content rendered for each tab panel. */
+  'tab-panel'?: (props: { tab: { label: string; icon?: string; route?: string } }) => any
+}>()
 </script>
 
 <template>

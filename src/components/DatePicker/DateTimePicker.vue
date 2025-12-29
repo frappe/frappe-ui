@@ -231,7 +231,7 @@ import FeatherIcon from '../FeatherIcon.vue'
 import TimePicker from '../TimePicker/TimePicker.vue'
 import { dayjs, dayjsLocal, dayjsSystem } from '../../utils/dayjs'
 import { months, monthStart, generateWeeks, getDateValue } from './utils'
-import type { Dayjs } from 'dayjs/esm'
+import type { Dayjs } from 'dayjs'
 import type {
   DatePickerProps,
   DatePickerEmits,

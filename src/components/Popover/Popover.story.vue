@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import Popover from './Popover.vue'
-import { Button } from '../Button'
+import { Button, Popover } from "frappe-ui";
+import Story from "@/components/Story.vue";
 </script>
+
 <template>
-  <Story :layout="{ type: 'grid' }">
-    <Variant title="trigger: click">
+  <div class="grid grid-cols-2 gap-4">
+    <Story title="Trigger: Click">
       <Popover>
         <template #target="{ togglePopover }">
           <Button @click="togglePopover()">Click me</Button>
@@ -13,10 +14,10 @@ import { Button } from '../Button'
           <div class="p-2 text-ink-gray-9">Popover content</div>
         </template>
       </Popover>
-    </Variant>
+    </Story>
 
-    <Variant title="trigger: hover">
-      <Popover trigger="hover" hoverDelay="0.5">
+    <Story title="Trigger: Hover">
+      <Popover trigger="hover" :hover-delay="0.5">
         <template #target>
           <Button>Hover me</Button>
         </template>
@@ -24,6 +25,6 @@ import { Button } from '../Button'
           <div class="p-2 text-ink-gray-9">Popover content</div>
         </template>
       </Popover>
-    </Variant>
-  </Story>
+    </Story>
+  </div>
 </template>

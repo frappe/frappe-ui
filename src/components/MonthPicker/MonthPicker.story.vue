@@ -1,21 +1,19 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import MonthPicker from './MonthPicker.vue'
-const val = ref('')
+import { ref } from "vue";
+import { MonthPicker } from "frappe-ui";
+import Story from "@/components/Story.vue";
+
+const val = ref("");
 </script>
 
 <template>
-  <Story :layout="{ type: 'grid', width: 500 }">
-    <Variant title="Default">
-      <div class="p-2">
-        <MonthPicker v-model="val" />
-      </div>
-    </Variant>
+  <div class="grid grid-cols-2 gap-4">
+    <Story title="Default MonthPicker">
+      <MonthPicker v-model="val" />
+    </Story>
 
-    <Variant title="Fit width">
-      <div class="p-2">
-        <MonthPicker v-model="val" class="w-fit" />
-      </div>
-    </Variant>
-  </Story>
+    <Story title="MonthPicker fit">
+      <MonthPicker v-model="val" class="w-fit" />
+    </Story>
+  </div>
 </template>

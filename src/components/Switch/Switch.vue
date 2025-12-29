@@ -52,7 +52,11 @@ const props = withDefaults(defineProps<SwitchProps>(), {
 })
 
 const model = defineModel<boolean>({ default: false })
-const emit = defineEmits(['change'])
+const emit = defineEmits<{
+  /** Fired when the switch value changes */
+  change: [value: boolean]
+}>()
+
 watch(model, (val) => {
   emit('change', val)
 })

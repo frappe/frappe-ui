@@ -1,34 +1,37 @@
 <script setup lang="ts">
-import { reactive } from 'vue'
-import Progress from './Progress.vue'
-const state = reactive({
-  size: 'sm',
-  value: 50,
-})
+import { reactive } from "vue";
+import { Progress } from "frappe-ui";
+import Story from "@/components/Story.vue";
 
-const sizes = ['sm', 'md', 'lg', 'xl']
+const state = reactive({
+  size: "sm",
+  value: 50,
+});
+
+const sizes = ["sm", "md", "lg", "xl"];
 </script>
 
 <template>
-  <Story :layout="{ type: 'grid', width: 300 }">
-    <Variant title="Label">
+  <div class="grid grid-cols-2 gap-4">
+    <Story title="Default Progress">
       <Progress v-bind="state" label="Progress" />
-    </Variant>
-    <Variant title="Hint">
+    </Story>
+
+    <Story title="With Hint">
       <Progress v-bind="state" label="Progress" :hint="true" />
-    </Variant>
-    <Variant title="Intervals">
+    </Story>
+
+    <Story title="With Intervals">
       <Progress
         v-bind="state"
         label="Progress"
         :intervals="true"
         :interval-count="5"
       />
-    </Variant>
+    </Story>
 
-    <template #controls>
-      <HstSlider v-model="state.value" :min="0" :max="100" title="Value" />
-      <HstSelect v-model="state.size" :options="sizes" title="Size" />
-    </template>
-  </Story>
+    <Story v-for="size in sizes" :key="size" :title='"Size: " + size'>
+      <Progress v-bind="state" :size="size" label="Progress" />
+    </Story>
+  </div>
 </template>

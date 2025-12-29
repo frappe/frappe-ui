@@ -237,4 +237,18 @@ const handleClick = () => {
 
 const rootRef = ref()
 defineExpose({ rootRef })
+
+defineSlots<{
+  /** Content shown before the button label (left icon / custom content) */
+  prefix?: () => any
+
+  /** Icon-only content for icon buttons */
+  icon?: () => any
+
+  /** Main button content (overrides `label`) */
+  default?: () => any
+
+  /** Content shown after the button label (right icon / custom content) */
+  suffix?: () => any
+}>()
 </script>

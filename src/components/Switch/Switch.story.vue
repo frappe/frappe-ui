@@ -1,59 +1,56 @@
 <script setup lang="ts">
-import { reactive } from 'vue'
-import Switch from './Switch.vue'
+import { reactive } from "vue";
+import { Switch } from "frappe-ui";
+import Story from "@/components/Story.vue";
+
 const state = reactive({
-  size: 'sm',
-  label: 'Enable Notifications',
+  size: "sm",
+  label: "Enable Notifications",
   disabled: false,
   modelValue: false,
-})
-const sizes = ['sm', 'md']
+});
+const sizes = ["sm", "md"];
 </script>
 
 <template>
-  <Story :layout="{ type: 'grid', width: 300 }">
-    <Variant title="Plain">
+  <div class="grid grid-cols-2 gap-6">
+    <Story title="Default Switch">
       <Switch />
-    </Variant>
-    <Variant title="Label">
-      <Switch v-bind="state" />
-    </Variant>
-    <Variant title="Description and icon">
-      <div class="flex flex-col gap-2">
-        <Switch
-          v-bind="state"
-          description="Get notified when something happens."
-        />
-        <Switch v-bind="state" icon="inbox" description="This has an icon." />
-      </div>
-    </Variant>
-    <Variant title="Size ">
-      <div class="flex flex-col gap-2">
-        <Switch v-bind="state" size="sm" />
-        <Switch v-bind="state" size="md" />
-      </div>
-    </Variant>
-    <Variant title="Disabled">
-      <div class="flex flex-col gap-2">
-        <Switch v-bind="state" :disabled="true" />
+    </Story>
 
-        <Switch
-          v-bind="state"
-          description="This is a description."
-          :disabled="true"
-        />
-      </div>
-    </Variant>
-    <Variant title="Classes">
+    <Story title="Bound Switch">
+      <Switch v-bind="state" />
+    </Story>
+
+    <Story title="With Description">
+      <Switch
+        v-bind="state"
+        description="Get notified when something happens."
+      />
+			<br/>
+      <Switch v-bind="state" icon="inbox" description="This has an icon." />
+    </Story>
+
+    <Story title="Different Sizes">
+      <Switch v-bind="state" size="sm" />
+      <Switch v-bind="state" size="md" />
+    </Story>
+
+    <Story title="Disabled">
+      <Switch v-bind="state" :disabled="true" />
+      <Switch
+        v-bind="state"
+        description="This is a description."
+        :disabled="true"
+      />
+    </Story>
+
+    <Story title="Custom Label Font">
       <Switch
         v-bind="state"
         label-classes="font-normal"
         description="This switch has a normal font."
       />
-    </Variant>
-
-    <template #controls>
-      <HstSelect v-model="state.size" :options="sizes" title="Size" />
-    </template>
-  </Story>
+    </Story>
+  </div>
 </template>

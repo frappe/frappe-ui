@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { SelectProps } from './types'
+import type { SelectProps, SelectOption } from './types'
 import LucideChevronDown from '~icons/lucide/chevron-down'
 import LucideCheck from '~icons/lucide/check'
 
@@ -81,6 +81,21 @@ const selectOptions = computed(() => {
   const tmp = props.options?.map((x) => ({ label: x, value: x }))
   return (str ? tmp : props.options)?.filter((x) => x && String(x.value)) || []
 })
+
+defineSlots<{
+  /** Content rendered before the selected value (e.g., left icon or custom content) */
+  prefix?: () => any
+
+  /** Content rendered after the selected value (e.g., right icon or custom content) */
+  suffix?: () => any
+
+  /** Custom rendering for each dropdown option */
+  option?: (props: { option: SelectOption }) => any
+
+  /** Custom content at the bottom of the dropdown */
+  footer?: () => any
+}>()
+
 </script>
 
 <template>
@@ -100,7 +115,7 @@ const selectOptions = computed(() => {
 
     <SelectPortal>
       <SelectContent
-        class="bg-surface-modal border rounded-lg shadow-lg will-change-[opacity,transform] z-[100] overflow-hidden origin-center data-[state=open]:animate-[fadeInScale_150ms] data-[state=closed]:animate-[fadeOutScale_150ms]"
+        class="bg-surface-modal ring-1 ring-black ring-opacity-5 rounded-lg shadow-2xl will-change-[opacity,transform] z-[100] overflow-hidden origin-center data-[state=open]:animate-[fadeInScale_100ms] data-[state=closed]:animate-[fadeOutScale_100ms]"
       >
         <SelectViewport class="p-1 flex flex-col">
           <SelectItem

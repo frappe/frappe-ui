@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import { Password } from './index'
-import { ref } from 'vue'
+import { ref } from "vue";
+import { Password } from "frappe-ui";
+import Story from "@/components/Story.vue";
 
-const value = ref('')
+const value = ref("");
 </script>
 
 <template>
-  <Story title="Password" :layout="{ width: 500, type: 'grid' }">
-    <div class="p-2">
-      <Password v-model="value" />
-    </div>
-  </Story>
+  <div class="grid grid-cols-2 gap-4">
+    <Story>
+      <Password v-model="value" placeholder="Enter password" />
+    </Story>
+  </div>
 </template>

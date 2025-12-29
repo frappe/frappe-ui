@@ -1,78 +1,116 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import Select from './Select.vue'
-import LucideUser from '~icons/lucide/user'
-import LucideRotate from '~icons/lucide/rotate-ccw'
-import { SelectItemText } from 'reka-ui'
+import { computed, ref } from "vue";
+import Story from "@/components/Story.vue";
+import LucideUser from "~icons/lucide/user";
+import LucideRotate from "~icons/lucide/rotate-ccw";
+import { SelectItemText } from "reka-ui";
+import { Avatar, Button, Select } from "frappe-ui";
 
-const value = ref('')
+const value = ref("");
 const options = [
-  { label: 'John Doe', value: 'john-doe' },
-  { label: 'Jane Doe', value: 'jane-doe' },
-  { label: 'John Smith', value: 'john-smith' },
-  { label: 'Jane Smith', value: 'jane-smith', disabled: true },
-  { label: 'John Wayne', value: 'john-wayne' },
-  { label: 'Jane Wayne', value: 'jane-wayne' },
-]
+  {
+    label: "Matcha Tiramisu",
+    value: "matcha-tiramisu",
+    img:
+      "https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=150&h=150&fit=crop",
+  },
+  {
+    label: "Strawberry Cheesecake",
+    value: "strawberry-cheesecake",
+    img:
+      "https://images.unsplash.com/photo-1533134486753-c833f0ed4866?w=150&h=150&fit=crop",
+  },
+  {
+    label: "Chocolate Lava Cake",
+    value: "chocolate-lava-cake",
+    img:
+      "https://images.unsplash.com/photo-1624353365286-3f8d62daad51?w=150&h=150&fit=crop",
+  },
+  {
+    label: "Mango Sticky Rice",
+    value: "mango-sticky-rice",
+    img:
+      "https://images.unsplash.com/photo-1604085792782-8d92f276d7d8?w=150&h=150&fit=crop",
+    disabled: true,
+  },
+  {
+    label: "Pistachio Baklava",
+    value: "pistachio-baklava",
+    img:
+      "https://images.unsplash.com/photo-1519676867240-f03562e64548?w=150&h=150&fit=crop",
+  },
+  {
+    label: "Ube Ice Cream",
+    value: "ube-ice-cream",
+    img:
+      "https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?w=150&h=150&fit=crop",
+  },
+  {
+    label: "Salted Caramel Tart",
+    value: "salted-caramel-tart",
+    img:
+      "https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?w=150&h=150&fit=crop",
+  },
+];
+
+const activeImg = computed(
+  () => (options.find((x) => x.value === value.value)?.img),
+);
+
+const reset = () => value.value = "";
 </script>
+
 <template>
-  <Story :layout="{ width: 300, type: 'grid' }">
-    <Variant title="Default">
-      <div class="p-2">
-        <Select :options="options" v-model="value" />
-      </div>
-    </Variant>
+  <div class="grid grid-cols-2 gap-4">
+    <Story title="Default Select">
+      <Select :options="options" v-model="value" />
+    </Story>
 
-    <Variant title="With prefix">
-      <div class="p-2">
-        <Select :options="options" v-model="value">
-          <template #prefix>
-            <LucideUser class="size-4 text-ink-gray-9" />
-          </template>
-        </Select>
-      </div>
-    </Variant>
+    <Story title="With Prefix Icon">
+      <Select :options="options" v-model="value">
+        <template #prefix>
+          <LucideUser class="size-4 text-ink-gray-9" />
+        </template>
+      </Select>
+    </Story>
 
-    <Variant title="Custom footer slot">
-      <div class="p-2">
-        <Select :options="options" v-model="value">
-          <template #footer>
-            <div class="grid gap-1">
-              <hr />
-              <Button variant='ghost'>
-                <template #prefix>
-                  <LucideRotate class="size-4 text-ink-gray-9" />
-                </template>
-                Reset
-              </Button>
-            </div>
-          </template>
-        </Select>
-      </div>
-    </Variant>
+    <Story title="With Footer">
+      <Select :options="options" v-model="value">
+        <template #footer>
+          <div class="grid gap-1">
+            <hr />
+            <Button variant="ghost" @click="reset">
+              <template #prefix>
+                <LucideRotate class="size-4 text-ink-gray-9" />
+              </template>
+              Reset
+            </Button>
+          </div>
+        </template>
+      </Select>
+    </Story>
 
-    <Variant title="Custom option slot">
-      <div class="p-2">
-        <Select :options="options" v-model="value">
-          <template #option="{ option }">
-            <div class="inline-flex gap-2 items-center">
-              <Avatar
-                size="sm"
-                image="https://avatars.fastly.steamstatic.com/9ebf36bd3dc6c34f2d79ccf5d63e00eb7866321e_full.jpg"
-              />
-              <SelectItemText> {{ option.label }} </SelectItemText>
-            </div>
-          </template>
-        </Select>
-      </div>
-    </Variant>
+    <Story title="Custom Option Slot">
+      <Select :options="options" v-model="value">
+        {{ activeImg }}
+        <template #prefix>
+          <Avatar size="sm" :image="activeImg" />
+        </template>
+        <template #option="{ option }">
+          <div class="inline-flex gap-2 items-center">
+            <Avatar size="sm" :image="option.img" />
+            <SelectItemText>{{ option.label }}</SelectItemText>
+          </div>
+        </template>
+      </Select>
+    </Story>
 
-    <Variant title="No suffix">
-      <div class="p-2">
-        <Select :options="options" v-model="value">
-          <template #suffix> {{ ' ' }} </template>
-        </Select>
-      </div>
-    </Variant>
-  </Story>
+    <Story title="With Suffix Slot">
+      <Select :options="options" v-model="value">
+        <template #suffix>
+          <LucideUser class="size-4 ml-auto text-ink-gray-9" />
+        </template>
+      </Select>
+    </Story>
+  </div>
 </template>

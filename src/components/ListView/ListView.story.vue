@@ -1,306 +1,267 @@
 <script setup>
-import { reactive, h, ref } from 'vue'
-import Avatar from '../Avatar/Avatar.vue'
-import Badge from '../Badge/Badge.vue'
-import { Button } from '../Button'
-import FeatherIcon from '../FeatherIcon.vue'
-import ListHeader from './ListHeader.vue'
-import ListHeaderItem from './ListHeaderItem.vue'
-import ListRow from './ListRow.vue'
-import ListRowItem from './ListRowItem.vue'
-import ListRows from './ListRows.vue'
-import ListSelectBanner from './ListSelectBanner.vue'
-import ListView from './ListView.vue'
+import { h, reactive, ref } from "vue";
+import LucideAtSign from "~icons/lucide/at-sign";
+import LucideCheckCircle from "~icons/lucide/check-circle";
+import LucideUsers from "~icons/lucide/users";
+import LucideUser from "~icons/lucide/user";
+
+import {
+  Avatar,
+  Badge,
+  Button,
+  ListHeader,
+  ListHeaderItem,
+  ListRow,
+  ListRowItem,
+  ListRows,
+  ListSelectBanner,
+  ListView,
+} from "frappe-ui";
+
+import Story from "@/components/Story.vue";
 
 const state = reactive({
   selectable: true,
   showTooltip: true,
   resizeColumn: true,
   emptyState: {
-    title: 'No records found',
-    description: 'Create a new record to get started',
+    title: "No records found",
+    description: "Create a new record to get started",
     button: {
-      label: 'New Record',
-      variant: 'solid',
-      onClick: () => console.log('New Record'),
+      label: "New Record",
+      variant: "solid",
+      onClick: () => console.log("New Record"),
     },
   },
-})
+});
 
 const simple_columns = reactive([
   {
-    label: 'Name',
-    key: 'name',
+    label: "Name",
+    key: "name",
     width: 3,
     getLabel: ({ row }) => row.name,
-    prefix: ({ row }) => {
-      return h(Avatar, {
-        shape: 'circle',
-        image: row.user_image,
-        size: 'sm',
-      })
-    },
+    prefix: ({ row }) =>
+      h(Avatar, { shape: "circle", image: row.user_image, size: "sm" }),
   },
-  {
-    label: 'Email',
-    key: 'email',
-    width: '200px',
-  },
-  {
-    label: 'Role',
-    key: 'role',
-  },
-  {
-    label: 'Status',
-    key: 'status',
-  },
-])
+  { label: "Email", key: "email", width: "200px" },
+  { label: "Role", key: "role" },
+  { label: "Status", key: "status" },
+]);
 
 const simple_rows = [
   {
     id: 1,
-    name: 'John Doe',
-    email: 'john@doe.com',
-    status: 'Active',
-    role: 'Developer',
-    user_image: 'https://avatars.githubusercontent.com/u/499550',
+    name: "John Doe",
+    email: "john@doe.com",
+    status: "Active",
+    role: "Developer",
+    user_image: "https://avatars.githubusercontent.com/u/499550",
   },
   {
     id: 2,
-    name: 'Jane Doe',
-    email: 'jane@doe.com',
-    status: 'Inactive',
-    role: 'HR',
-    user_image: 'https://avatars.githubusercontent.com/u/499120',
+    name: "Jane Doe",
+    email: "jane@doe.com",
+    status: "Inactive",
+    role: "HR",
+    user_image: "https://avatars.githubusercontent.com/u/499120",
   },
-]
+];
 
 const group_columns = reactive([
-  {
-    label: 'Name',
-    key: 'name',
-    width: 3,
-  },
-  {
-    label: 'Email',
-    key: 'email',
-    width: '200px',
-  },
-  {
-    label: 'Role',
-    key: 'role',
-  },
-  {
-    label: 'Status',
-    key: 'status',
-  },
-])
+  { label: "Name", key: "name", width: 3 },
+  { label: "Email", key: "email", width: "200px" },
+  { label: "Role", key: "role" },
+  { label: "Status", key: "status" },
+]);
 
 const grouped_rows = ref([
   {
-    group: 'Developer',
+    group: "Developer",
     collapsed: false,
     rows: [
       {
         id: 2,
-        name: 'Gary Fox',
-        email: 'gary@fox.com',
-        status: 'Inactive',
-        role: 'Developer',
+        name: "Gary Fox",
+        email: "gary@fox.com",
+        status: "Inactive",
+        role: "Developer",
       },
       {
         id: 6,
-        name: 'Emily Davis',
-        email: 'emily@davis.com',
-        status: 'Active',
-        role: 'Developer',
+        name: "Emily Davis",
+        email: "emily@davis.com",
+        status: "Active",
+        role: "Developer",
       },
       {
         id: 9,
-        name: 'David Lee',
-        email: 'david@lee.com',
-        status: 'Inactive',
-        role: 'Developer',
+        name: "David Lee",
+        email: "david@lee.com",
+        status: "Inactive",
+        role: "Developer",
       },
     ],
   },
   {
-    group: 'Manager',
+    group: "Manager",
     collapsed: false,
     rows: [
       {
         id: 3,
-        name: 'John Doe',
-        email: 'john@doe.com',
-        status: 'Active',
-        role: 'Manager',
+        name: "John Doe",
+        email: "john@doe.com",
+        status: "Active",
+        role: "Manager",
       },
       {
         id: 8,
-        name: 'Sarah Wilson',
-        email: 'sarah@wilson.com',
-        status: 'Active',
-        role: 'Manager',
+        name: "Sarah Wilson",
+        email: "sarah@wilson.com",
+        status: "Active",
+        role: "Manager",
       },
     ],
   },
   {
-    group: 'Designer',
+    group: "Designer",
     collapsed: false,
     rows: [
       {
         id: 4,
-        name: 'Alice Smith',
-        email: 'alice@smith.com',
-        status: 'Active',
-        role: 'Designer',
+        name: "Alice Smith",
+        email: "alice@smith.com",
+        status: "Active",
+        role: "Designer",
       },
       {
         id: 10,
-        name: 'Olivia Taylor',
-        email: 'olivia@taylor.com',
-        status: 'Active',
-        role: 'Designer',
+        name: "Olivia Taylor",
+        email: "olivia@taylor.com",
+        status: "Active",
+        role: "Designer",
       },
     ],
   },
   {
-    group: 'HR',
+    group: "HR",
     collapsed: false,
     rows: [
       {
         id: 1,
-        name: 'Jane Mary',
-        email: 'jane@doe.com',
-        status: 'Inactive',
-        role: 'HR',
+        name: "Jane Mary",
+        email: "jane@doe.com",
+        status: "Inactive",
+        role: "HR",
       },
       {
         id: 7,
-        name: 'Michael Brown',
-        email: 'michael@brown.com',
-        status: 'Inactive',
-        role: 'HR',
+        name: "Michael Brown",
+        email: "michael@brown.com",
+        status: "Inactive",
+        role: "HR",
       },
       {
         id: 12,
-        name: 'Sophia Martinez',
-        email: 'sophia@martinez.com',
-        status: 'Active',
-        role: 'HR',
+        name: "Sophia Martinez",
+        email: "sophia@martinez.com",
+        status: "Active",
+        role: "HR",
       },
     ],
   },
   {
-    group: 'Tester',
+    group: "Tester",
     collapsed: false,
     rows: [
       {
         id: 5,
-        name: 'Bob Johnson',
-        email: 'bob@johnson.com',
-        status: 'Inactive',
-        role: 'Tester',
+        name: "Bob Johnson",
+        email: "bob@johnson.com",
+        status: "Inactive",
+        role: "Tester",
       },
       {
         id: 11,
-        name: 'James Anderson',
-        email: 'james@anderson.com',
-        status: 'Inactive',
-        role: 'Tester',
+        name: "James Anderson",
+        email: "james@anderson.com",
+        status: "Inactive",
+        role: "Tester",
       },
     ],
   },
-])
+]);
 
 const custom_columns = reactive([
-  {
-    label: 'Name',
-    key: 'name',
-    width: 3,
-    icon: 'user',
-  },
-  {
-    label: 'Email',
-    key: 'email',
-    width: '200px',
-    icon: 'at-sign',
-  },
-  {
-    label: 'Role',
-    key: 'role',
-    icon: 'users',
-  },
-  {
-    label: 'Status',
-    key: 'status',
-    icon: 'check-circle',
-  },
-])
+  // { label: "Name", key: "name", width: 3, icon: "user" },
+  // { label: "Email", key: "email", width: "200px", icon: "at-sign" },
+  // { label: "Role", key: "role", icon: "users" },
+  // { label: "Status", key: "status", icon: "check-circle" },
+  { label: "Name", key: "name", width: 3, icon: LucideUser },
+  { label: "Email", key: "email", width: "200px", icon: LucideAtSign },
+  { label: "Role", key: "role", icon: LucideUsers },
+  { label: "Status", key: "status", icon: LucideCheckCircle },
+]);
 
 const custom_rows = [
   {
     id: 1,
     name: {
-      label: 'John Doe',
-      image: 'https://avatars.githubusercontent.com/u/499550',
+      label: "John Doe",
+      image: "https://avatars.githubusercontent.com/u/499550",
     },
-    email: 'john@doe.com',
-    status: {
-      label: 'Active',
-      bg_color: 'bg-surface-green-3',
-    },
-    role: {
-      label: 'Developer',
-      color: 'green',
-    },
+    email: "john@doe.com",
+    status: { label: "Active", bg_color: "bg-surface-green-3" },
+    role: { label: "Developer", color: "green" },
   },
   {
     id: 2,
     name: {
-      label: 'Jane Doe',
-      image: 'https://avatars.githubusercontent.com/u/499120',
+      label: "Jane Doe",
+      image: "https://avatars.githubusercontent.com/u/499120",
     },
-    email: 'jane@doe.com',
-    status: {
-      label: 'Inactive',
-      bg_color: 'bg-surface-red-5',
-    },
-    role: {
-      label: 'HR',
-      color: 'red',
-    },
+    email: "jane@doe.com",
+    status: { label: "Inactive", bg_color: "bg-surface-red-5" },
+    role: { label: "HR", color: "red" },
   },
-]
+];
 </script>
 
 <template>
-  <Story :layout="{ type: 'grid', width: '95%' }">
-    <Variant title="Simple List">
+  <div class="grid gap-5 w-full">
+    <Story title="Simple List">
       <ListView
         class="h-[150px]"
         :columns="simple_columns"
         :rows="simple_rows"
-        :options="{
-          getRowRoute: (row) => ({ name: 'User', params: { userId: row.id } }),
-          selectable: state.selectable,
-          showTooltip: state.showTooltip,
-          resizeColumn: state.resizeColumn,
-        }"
+        :options='
+          {
+            getRowRoute: (row) => ({
+              name: "User",
+              params: { userId: row.id },
+            }),
+            selectable: state.selectable,
+            showTooltip: state.showTooltip,
+            resizeColumn: state.resizeColumn,
+          }
+        '
         row-key="id"
       />
-    </Variant>
-    <Variant title="Custom List">
+    </Story>
+
+    <Story title="Custom List">
       <ListView
         class="h-[150px]"
         :columns="custom_columns"
         :rows="custom_rows"
-        :options="{
-          onRowClick: (row) => console.log(row),
-          selectable: state.selectable,
-          showTooltip: state.showTooltip,
-          resizeColumn: state.resizeColumn,
-        }"
+        :options="
+          {
+            onRowClick: (row) => console.log(row),
+            selectable: state.selectable,
+            showTooltip: state.showTooltip,
+            resizeColumn: state.resizeColumn,
+          }
+        "
         row-key="id"
       >
         <ListHeader>
@@ -310,7 +271,7 @@ const custom_rows = [
             :item="column"
           >
             <template #prefix="{ item }">
-              <FeatherIcon :name="item.icon" class="h-4 w-4" />
+              <component :is="item.icon" class="size-4" />
             </template>
           </ListHeaderItem>
         </ListHeader>
@@ -324,19 +285,19 @@ const custom_rows = [
             <ListRowItem :item="item" :align="column.align">
               <template #prefix>
                 <div
-                  v-if="column.key == 'status'"
+                  v-if='column.key === "status"'
                   class="h-3 w-3 rounded-full"
                   :class="item.bg_color"
                 />
                 <Avatar
-                  v-if="column.key == 'name'"
-                  :shape="'circle'"
+                  v-if='column.key === "name"'
+                  shape="circle"
                   :image="item.image"
                   size="sm"
                 />
               </template>
               <Badge
-                v-if="column.key == 'role'"
+                v-if='column.key === "role"'
                 variant="subtle"
                 :theme="item.color"
                 size="md"
@@ -358,18 +319,24 @@ const custom_rows = [
           </template>
         </ListSelectBanner>
       </ListView>
-    </Variant>
-    <Variant title="Grouped Rows">
+    </Story>
+
+    <Story title="Grouped Rows">
       <ListView
         class="h-[250px]"
         :columns="group_columns"
         :rows="grouped_rows"
-        :options="{
-          getRowRoute: (row) => ({ name: 'User', params: { userId: row.id } }),
-          selectable: state.selectable,
-          showTooltip: state.showTooltip,
-          resizeColumn: state.resizeColumn,
-        }"
+        :options='
+          {
+            getRowRoute: (row) => ({
+              name: "User",
+              params: { userId: row.id },
+            }),
+            selectable: state.selectable,
+            showTooltip: state.showTooltip,
+            resizeColumn: state.resizeColumn,
+          }
+        '
         row-key="id"
       >
         <template #group-header="{ group }">
@@ -378,60 +345,45 @@ const custom_rows = [
           </span>
         </template>
       </ListView>
-    </Variant>
-    <Variant title="Cell Slot">
-      <div>
-        <ListView
-          class="h-[250px]"
-          :columns="simple_columns"
-          :rows="simple_rows"
-          :options="{
-            selectable: state.selectable,
-            showTooltip: state.showTooltip,
-            resizeColumn: state.resizeColumn,
-            emptyState: state.emptyState,
-          }"
-          row-key="id"
-        >
-          <template #cell="{ item, row, column }">
-            <Badge v-if="column.key == 'status'">{{ item }}</Badge>
-            <span class="font-medium text-ink-gray-7" v-else>{{ item }}</span>
-          </template>
-        </ListView>
-      </div>
-    </Variant>
-    <Variant title="Empty List">
-      <div>
-        <ListView
-          class="h-[250px]"
-          :columns="simple_columns"
-          :rows="[]"
-          :options="{
-            selectable: state.selectable,
-            showTooltip: state.showTooltip,
-            resizeColumn: state.resizeColumn,
-            emptyState: state.emptyState,
-          }"
-          row-key="id"
-        />
-      </div>
-    </Variant>
+    </Story>
 
-    <template #controls>
-      <HstCheckbox v-model="state.selectable" title="Selectable" />
-      <HstCheckbox v-model="state.showTooltip" title="Show tooltip" />
-      <HstCheckbox v-model="state.resizeColumn" title="Resize Column" />
-      <!-- empty state config -->
-      <HstText
-        v-model="state.emptyState.title"
-        title="Empty Title"
-        placeholder="No records found"
+    <Story title="Cell Slot">
+      <ListView
+        class="h-[250px]"
+        :columns="simple_columns"
+        :rows="simple_rows"
+        :options="
+          {
+            selectable: state.selectable,
+            showTooltip: state.showTooltip,
+            resizeColumn: state.resizeColumn,
+            emptyState: state.emptyState,
+          }
+        "
+        row-key="id"
+      >
+        <template #cell="{ item, row, column }">
+          <Badge v-if='column.key === "status"'>{{ item }}</Badge>
+          <span class="font-medium text-ink-gray-7" v-else>{{ item }}</span>
+        </template>
+      </ListView>
+    </Story>
+
+    <Story title="Empty List">
+      <ListView
+        class="h-[250px]"
+        :columns="simple_columns"
+        :rows="[]"
+        :options="
+          {
+            selectable: state.selectable,
+            showTooltip: state.showTooltip,
+            resizeColumn: state.resizeColumn,
+            emptyState: state.emptyState,
+          }
+        "
+        row-key="id"
       />
-      <HstText
-        v-model="state.emptyState.description"
-        title="Empty Description"
-        placeholder="Create a new record to get started"
-      />
-    </template>
-  </Story>
+    </Story>
+  </div>
 </template>

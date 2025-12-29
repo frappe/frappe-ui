@@ -1,81 +1,71 @@
 <script setup lang="ts">
-import { reactive } from 'vue'
-import TextInput from './TextInput.vue'
-import FeatherIcon from '../FeatherIcon.vue'
-import { Avatar } from '../Avatar'
-
-const state = reactive({
-  size: 'sm',
-  variant: 'subtle',
-  placeholder: 'Placeholder',
-  disabled: false,
-  modelValue: '',
-})
+import Story from "@/components/Story.vue";
+import { Avatar, TextInput } from "frappe-ui";
+import LucideSearch from "~icons/lucide/search";
 
 const inputTypes = [
-  'text',
-  'number',
-  'email',
-  'date',
-  'datetime-local',
-  'password',
-  'search',
-  'tel',
-  'time',
-  'url',
-]
-const sizes = ['sm', 'md', 'lg', 'xl']
-const variants = ['subtle', 'outline']
+  "text",
+  "number",
+  "email",
+  "date",
+  "datetime-local",
+  "password",
+  "search",
+  "tel",
+  "time",
+  "url",
+];
+const sizes = ["sm", "md", "lg", "xl"];
+const variants = ["subtle", "outline"];
 </script>
 
 <template>
-  <Story :layout="{ type: 'grid', width: 500 }">
-    <Variant
+  <div class="grid grid-cols-2 gap-5">
+    <Story
       v-for="inputType in inputTypes"
       :key="inputType"
       :title="inputType"
     >
-      <div class="p-2">
-        <TextInput :type="inputType" v-bind="state" />
-      </div>
-    </Variant>
+      <TextInput :type="inputType" placeholder="Enter input" />
+    </Story>
 
-    <Variant title="prefix slot icon">
-      <div class="p-2">
-        <TextInput type="text">
-          <template #prefix>
-            <FeatherIcon class="w-4" name="search" />
-          </template>
-        </TextInput>
-      </div>
-    </Variant>
+    <Story title="prefix slot icon">
+      <TextInput placeholder="Enter Input">
+        <template #prefix>
+          <LucideSearch class="w-4" name="search" />
+        </template>
+      </TextInput>
+    </Story>
 
-    <Variant title="suffix slot icon">
-      <div class="p-2">
-        <TextInput type="text">
-          <template #suffix>
-            <FeatherIcon class="w-4" name="search" />
-          </template>
-        </TextInput>
-      </div>
-    </Variant>
+    <Story title="suffix slot icon">
+      <TextInput placeholder="Enter Input">
+        <template #suffix>
+          <LucideSearch class="w-4" name="search" />
+        </template>
+      </TextInput>
+    </Story>
 
-    <Variant title="prefix slot avatar">
-      <div class="p-2">
-        <TextInput type="text">
-          <template #prefix>
-            <Avatar
-              size="sm"
-              image="https://avatars.githubusercontent.com/u/499550?s=60&v=4"
-            />
-          </template>
-        </TextInput>
-      </div>
-    </Variant>
+    <Story title="prefix slot avatar">
+      <TextInput placeholder="Enter Name">
+        <template #prefix>
+          <Avatar
+            size="sm"
+            image="https://avatars.githubusercontent.com/u/499550?s=60&v=4"
+          />
+        </template>
+      </TextInput>
+    </Story>
 
-    <template #controls>
-      <HstSelect v-model="state.variant" :options="variants" title="Variant" />
-      <HstSelect v-model="state.size" :options="sizes" title="Size" />
-    </template>
-  </Story>
+    <Story title="Sizes" class="col-span-2" preview-css="flex gap-3">
+      <TextInput v-for="size in sizes" :size="size" placeholder="Enter input" />
+    </Story>
+
+    <Story title="Variants" class="col-span-2" preview-css="flex gap-3">
+      <TextInput
+        v-for="variant in variants"
+        :variant="variant"
+        placeholder="Enter input"
+      />
+    </Story>
+  </div>
 </template>

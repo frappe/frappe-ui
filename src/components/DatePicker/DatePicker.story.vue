@@ -1,36 +1,41 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
-import DatePicker from './DatePicker.vue'
-import DateTimePicker from './DateTimePicker.vue'
-import DateRangePicker from './DateRangePicker.vue'
+import { reactive, ref } from "vue";
+import { DatePicker, DateRangePicker, DateTimePicker } from "frappe-ui";
+import Story from "@/components/Story.vue";
 
 const state = reactive({
-  variant: 'subtle',
-  placeholder: 'Placeholder',
+  variant: "subtle",
+  placeholder: "Placeholder",
   disabled: false,
-  label: 'Label',
-})
-const dateValue = ref('')
-const dateTimeValue = ref('')
-const dateRangeValue = ref('')
+  label: "Label",
+});
+
+const dateValue = ref("");
+const dateTimeValue = ref("");
+const dateRangeValue = ref("");
 </script>
 
 <template>
-  <Story :layout="{ type: 'grid', width: 500 }">
-    <Variant title="Date">
-      <div class="p-2">
-        <DatePicker v-model="dateValue" v-bind="state" />
+  <div class="grid gap-5 grid-cols-2">
+    <Story title="Date Picker" preview-css="p-4">
+      <DatePicker v-model="dateValue" v-bind="state" />
+      <div class="mt-2 text-sm text-gray-600">
+        Selected: {{ dateValue || "None" }}
       </div>
-    </Variant>
-    <Variant title="Date Time">
-      <div class="p-2">
-        <DateTimePicker v-model="dateTimeValue" v-bind="state" />
+    </Story>
+
+    <Story title="DateTime Picker" preview-css="p-4">
+      <DateTimePicker v-model="dateTimeValue" v-bind="state" />
+      <div class="mt-2 text-sm text-gray-600">
+        Selected: {{ dateTimeValue || "None" }}
       </div>
-    </Variant>
-    <Variant title="Date Range">
-      <div class="p-2">
-        <DateRangePicker v-model="dateRangeValue" v-bind="state" />
+    </Story>
+
+    <Story title="Date Range Picker" preview-css="p-4">
+      <DateRangePicker v-model="dateRangeValue" v-bind="state" />
+      <div class="mt-2 text-sm text-gray-600">
+        Selected: {{ dateRangeValue || "None" }}
       </div>
-    </Variant>
-  </Story>
+    </Story>
+  </div>
 </template>

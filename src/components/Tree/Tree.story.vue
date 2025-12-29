@@ -1,50 +1,27 @@
-<template>
-  <Story :layout="{ type: 'grid', width: 500 }">
-    <Variant title="default">
-      <Tree
-        :options="{
-          showIndentationGuides: state.showIndentationGuides,
-          rowHeight: state.rowHeight,
-          indentWidth: state.indentWidth,
-        }"
-        nodeKey="name"
-        :node="state.node"
-      />
-    </Variant>
-    <template #controls>
-      <HstCheckbox
-        v-model="state.showIndentationGuides"
-        title="Show Indentation Guides"
-      />
-      <HstText v-model="state.rowHeight" title="Row Height" />
-      <HstText v-model="state.indentWidth" title="Indent Width" />
-    </template>
-  </Story>
-</template>
-
 <script setup lang="ts">
-import { reactive } from 'vue'
-import Tree from './Tree.vue'
+import { reactive } from "vue";
+import { Tree } from "frappe-ui";
+import Story from "@/components/Story.vue";
 
 const state = reactive({
   showIndentationGuides: true,
-  rowHeight: '25px',
-  indentWidth: '15px',
+  rowHeight: "25px",
+  indentWidth: "15px",
   node: {
-    name: 'guest',
-    label: 'Guest',
+    name: "guest",
+    label: "Guest",
     children: [
       {
-        name: 'downloads',
-        label: 'Downloads',
+        name: "downloads",
+        label: "Downloads",
         children: [
           {
-            name: 'download.zip',
-            label: 'download.zip',
+            name: "download.zip",
+            label: "download.zip",
             children: [
               {
-                name: 'image.png',
-                label: 'image.png',
+                name: "image.png",
+                label: "image.png",
                 children: [],
               },
             ],
@@ -52,22 +29,40 @@ const state = reactive({
         ],
       },
       {
-        name: 'documents',
-        label: 'Documents',
+        name: "documents",
+        label: "Documents",
         children: [
           {
-            name: 'somefile.txt',
-            label: 'somefile.txt',
+            name: "somefile.txt",
+            label: "somefile.txt",
             children: [],
           },
           {
-            name: 'somefile.pdf',
-            label: 'somefile.pdf',
+            name: "somefile.pdf",
+            label: "somefile.pdf",
             children: [],
           },
         ],
       },
     ],
   },
-})
+});
 </script>
+
+<template>
+  <div class="space-y-6">
+    <Story title="Default Tree">
+      <Tree
+        :options="
+          {
+            showIndentationGuides: state.showIndentationGuides,
+            rowHeight: state.rowHeight,
+            indentWidth: state.indentWidth,
+          }
+        "
+        nodeKey="name"
+        :node="state.node"
+      />
+    </Story>
+  </div>
+</template>

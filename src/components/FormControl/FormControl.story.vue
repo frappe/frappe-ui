@@ -1,115 +1,99 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
-import FormControl from './FormControl.vue'
-import FeatherIcon from '../FeatherIcon.vue'
-import { Avatar } from '../Avatar'
+import Story from "@/components/Story.vue";
+import { reactive, ref } from "vue";
+// import FeatherIcon from "../FeatherIcon.vue";
+import LucideSearch from "~icons/lucide/search";
+import { Avatar, FormControl } from "frappe-ui";
 
 const state = reactive({
-  size: 'sm',
-  variant: 'subtle',
-  placeholder: 'Placeholder',
+  size: "sm",
+  variant: "subtle",
+  placeholder: "Placeholder",
   disabled: false,
-  label: 'Label',
-})
-const inputValue = ref('')
-const selectValue = ref(null)
-const autocompleteValue = ref(null)
-const checkboxValue = ref(false)
+  label: "Label",
+});
+
+const inputValue = ref("");
+const selectValue = ref(null);
+const autocompleteValue = ref(null);
+const checkboxValue = ref(false);
 
 const inputTypes = [
-  'text',
-  'number',
-  'email',
-  'date',
-  'password',
-  'search',
-  'textarea',
-]
-const sizes = ['sm', 'md', 'lg', 'xl']
-const variants = ['subtle', 'outline']
+  "text",
+  "number",
+  "email",
+  "date",
+  "password",
+  "search",
+  "textarea",
+];
 </script>
 
 <template>
-  <Story :layout="{ type: 'grid', width: 500 }">
-    <Variant
-      v-for="inputType in inputTypes"
-      :key="inputType"
-      :title="inputType"
-    >
-      <div class="p-2">
-        <FormControl :type="inputType" v-bind="state" v-model="inputValue" />
-      </div>
-    </Variant>
-    <Variant title="select">
-      <div class="p-2">
-        <FormControl
-          type="select"
-          :options="[
-            { label: 'One', value: '1' },
-            { label: 'Two', value: '2' },
-            { label: 'Three', value: '3' },
-          ]"
-          v-bind="state"
-          v-model="selectValue"
-        />
-      </div>
-    </Variant>
-    <Variant title="Combobox">
-      <div class="p-2">
-        <FormControl
-          type="combobox"
-          :options="[
-            { label: 'One', value: '1' },
-            { label: 'Two', value: '2' },
-            { label: 'Three', value: '3' },
-          ]"
-          v-bind="state"
-          v-model="autocompleteValue"
-        />
-      </div>
-    </Variant>
-    <Variant title="checkbox">
-      <div class="p-2">
-        <FormControl type="checkbox" v-bind="state" v-model="checkboxValue" />
-      </div>
-    </Variant>
+  <div class="grid grid-cols-2 gap-6">
+    <Story :title="inputType" v-for="inputType in inputTypes" :key="inputType">
+      <FormControl :type="inputType" v-bind="state" v-model="inputValue" />
+    </Story>
 
-    <Variant title="prefix slot icon">
-      <div class="p-2">
-        <FormControl type="text" label="Label">
-          <template #prefix>
-            <FeatherIcon class="w-4" name="search" />
-          </template>
-        </FormControl>
-      </div>
-    </Variant>
+    <Story title="Select Input" :layout="{ width: 250 }">
+      <FormControl
+        type="select"
+        :options='
+          [
+            { label: "One", value: "1" },
+            { label: "Two", value: "2" },
+            { label: "Three", value: "3" },
+          ]
+        '
+        v-bind="state"
+        v-model="selectValue"
+      />
+    </Story>
 
-    <Variant title="suffix slot icon">
-      <div class="p-2">
-        <FormControl type="text" label="Label">
-          <template #suffix>
-            <FeatherIcon class="w-4" name="search" />
-          </template>
-        </FormControl>
-      </div>
-    </Variant>
+    <Story title="Combobox Input" :layout="{ width: 250 }">
+      <FormControl
+        type="combobox"
+        :options='
+          [
+            { label: "One", value: "1" },
+            { label: "Two", value: "2" },
+            { label: "Three", value: "3" },
+          ]
+        '
+        v-bind="state"
+        v-model="autocompleteValue"
+      />
+    </Story>
 
-    <Variant title="prefix slot avatar">
-      <div class="p-2">
-        <FormControl type="text" label="Label">
-          <template #prefix>
-            <Avatar
-              size="sm"
-              image="https://avatars.githubusercontent.com/u/499550?s=60&v=4"
-            />
-          </template>
-        </FormControl>
-      </div>
-    </Variant>
+    <Story title="Checkbox" :layout="{ width: 250 }">
+      <FormControl type="checkbox" v-bind="state" v-model="checkboxValue" />
+    </Story>
 
-    <template #controls>
-      <HstSelect v-model="state.variant" :options="variants" title="Variant" />
-      <HstSelect v-model="state.size" :options="sizes" title="Size" />
-    </template>
-  </Story>
+    <Story title="Prefix Icon" :layout="{ width: 250 }">
+      <FormControl type="text" label="Label">
+        <template #prefix>
+          <LucideSearch class="size-4" />
+        </template>
+      </FormControl>
+    </Story>
+
+    <Story title="Suffix Icon" :layout="{ width: 250 }">
+      <FormControl type="text" label="Label">
+        <template #suffix>
+          <LucideSearch class="size-4" />
+        </template>
+      </FormControl>
+    </Story>
+
+    <Story title="Prefix Avatar" :layout="{ width: 250 }">
+      <FormControl type="text" label="Label">
+        <template #prefix>
+          <Avatar
+            size="sm"
+            image="https://avatars.githubusercontent.com/u/499550?s=60&v=4"
+          />
+        </template>
+      </FormControl>
+    </Story>
+  </div>
 </template>

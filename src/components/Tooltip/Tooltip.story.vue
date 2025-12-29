@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import Tooltip from './Tooltip.vue'
-import { Button } from '../Button'
+import { ref } from "vue";
+import Story from "@/components/Story.vue";
+import { Button, Tooltip } from "frappe-ui";
 
-const placement = ref('top')
-const disabled = ref(true)
+const placement = ref("top");
+const disabled = ref(true);
 </script>
+
 <template>
-  <Story :layout="{ type: 'grid', width: '300px' }">
-    <Variant title="with text prop">
+  <div class="grid gap-5 grid-cols-2">
+    <Story title="With Text Prop">
       <Tooltip
         text="This action cannot be undone"
         :hover-delay="1"
@@ -16,36 +17,30 @@ const disabled = ref(true)
       >
         <Button theme="red">Delete</Button>
       </Tooltip>
-    </Variant>
-    <Variant title="disabled">
+    </Story>
+
+    <Story title="Disabled Tooltip">
       <Tooltip
-        text="disabled tooltip"
+        text="Disabled tooltip"
         :disabled="disabled"
         :hover-delay="1"
         :placement="placement"
       >
         <Button theme="red">Delete</Button>
       </Tooltip>
-    </Variant>
-    <Variant title="with slot">
+    </Story>
+
+    <Story title="With Slot">
       <Tooltip arrow-class="fill-surface-white" :placement="placement">
         <template #body>
           <div
             class="min-w-[6rem] rounded bg-surface-white px-2 py-1 text-xs text-ink-gray-9 shadow-xl"
           >
-            test
+            Test
           </div>
         </template>
         <Button theme="red">Delete</Button>
       </Tooltip>
-    </Variant>
-
-    <template #controls>
-      <HstSelect
-        v-model="placement"
-        :options="['top', 'right', 'bottom', 'left']"
-        title="Placement"
-      />
-    </template>
-  </Story>
+    </Story>
+  </div>
 </template>
