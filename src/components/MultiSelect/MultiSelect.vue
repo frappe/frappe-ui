@@ -29,7 +29,7 @@ const getValues = (arr: String[]) =>
   arr.map((x) => props.options.find((y) => y.value === x)?.label);
 
 const optionToStr = (options: MultiSelectOption[]) =>
-  options.map((x) => x.label);
+  options.map((x) => x.value);
 
 const selectedOptions = computed(() => {
   const values = getValues(model.value).join(", ");

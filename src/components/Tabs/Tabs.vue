@@ -11,6 +11,7 @@ import type { TabProps } from './types'
 import { h } from 'vue'
 
 const props = defineProps<TabProps>()
+const model = defineModel<string | number>({ default: 0 })
 
 const indicatorXCss = `left-0 bottom-0 h-[2px] w-[--reka-tabs-indicator-size] transition-[width,transform]
                           translate-x-[--reka-tabs-indicator-position] translate-y-[1px]`
@@ -37,6 +38,7 @@ defineSlots<{
     class="flex flex-1 overflow-hidden flex-col data-[orientation=vertical]:flex-row"
     :orientation="props.vertical ? 'vertical' : 'horizontal'"
     :default-value="props.tabs[0].label"
+    v-model="model"
   >
     <TabsList
       class="relative min-h-fit flex data-[orientation=vertical]:flex-col p-1 border-b data-[orientation=vertical]:border-r gap-5"
