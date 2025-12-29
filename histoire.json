@@ -944,6 +944,28 @@
       "markdownFile": null
     },
     {
+      "id": "src-components-sidebar-sidebar-story-vue",
+      "title": "Sidebar",
+      "layout": {
+        "type": "single",
+        "iframe": true
+      },
+      "docsOnly": false,
+      "variants": [
+        {
+          "id": "src-components-sidebar-sidebar-story-vue-0",
+          "title": "Sidebar"
+        }
+      ],
+      "relativePath": "src/components/Sidebar/Sidebar.story.vue",
+      "supportPluginId": "vue3",
+      "treePath": [
+        "Sidebar"
+      ],
+      "virtual": false,
+      "markdownFile": null
+    },
+    {
       "id": "src-components-spinner-spinner-story-vue",
       "title": "Spinner",
       "layout": {
@@ -965,28 +987,6 @@
       "supportPluginId": "vue3",
       "treePath": [
         "Spinner"
-      ],
-      "virtual": false,
-      "markdownFile": null
-    },
-    {
-      "id": "src-components-sidebar-sidebar-story-vue",
-      "title": "Sidebar",
-      "layout": {
-        "type": "single",
-        "iframe": true
-      },
-      "docsOnly": false,
-      "variants": [
-        {
-          "id": "src-components-sidebar-sidebar-story-vue-0",
-          "title": "Sidebar"
-        }
-      ],
-      "relativePath": "src/components/Sidebar/Sidebar.story.vue",
-      "supportPluginId": "vue3",
-      "treePath": [
-        "Sidebar"
       ],
       "virtual": false,
       "markdownFile": null
