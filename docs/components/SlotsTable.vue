@@ -16,7 +16,7 @@ const props = defineProps<Props>();
 
 <template>
   <div
-    class="grid grid-cols-2 bg-surface-gray-2 rounded p-3 px-4 text-ink-gray-5 vp-raw"
+    class="grid grid-cols-2 bg-surface-gray-2 rounded p-3 px-4 text-ink-gray-5"
   >
     <span>Slots (default)</span>
     <span>Payload </span>

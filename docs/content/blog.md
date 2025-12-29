@@ -1,6 +1,7 @@
 ---
 title: Blog
 sidebar: false
+layout: home
 ---
 
 <script setup>

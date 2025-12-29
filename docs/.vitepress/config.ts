@@ -108,6 +108,7 @@ export default defineConfig({
           tailwind(),
           autoprefixer(),
           postcssIsolateStyles({
+					  prefix: ':not(:where(.vp-style-raw, .vp-style-raw *, .vp-raw, .vp-raw *))',
             includeFiles: [/vp-doc\.css/, /base\.css/],
           }),
         ],

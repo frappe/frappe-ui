@@ -298,3 +298,10 @@ body {
 	border: none !important;
 	margin-top: 24px !important;
 }
+
+
+.search-input {
+  background-color: var(--vp-c-bg);
+}
+
+

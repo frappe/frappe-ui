@@ -5,13 +5,15 @@ const props = defineProps<{
 </script>
 
 <template>
-  <div class="grid gap-5 vp-raw md:mt-10  md:px-10">
+  <div class="grid gap-5 md:mt-10 vp-style-raw">
 		<b class='text-3xl font-semibold mb-5 '>Blog</b>
+
+		<div class='grid grid-cols-3'>
 
     <a
       v-for="item in data"
       :href="item.url"
-      class="grid gap-3  border-b border-outline-gray-2 pb-5"
+      class="grid gap-3  border border-outine-gray-2 p-5"
     >
       <b  class="text-lg font-semibold">
         {{ item.frontmatter.title }}
@@ -26,5 +28,6 @@ const props = defineProps<{
           {{ tag }}</span>
       </div>
     </a>
+		</div>
   </div>
 </template>
