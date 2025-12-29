@@ -8,8 +8,6 @@
 </script>
 
 ## Props 
-<PropsTable :data='[]'/> 
-
 ## Default Slots 
  <SlotsTable :data='[
   {

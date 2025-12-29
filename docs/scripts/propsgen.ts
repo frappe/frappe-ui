@@ -50,7 +50,8 @@ const genMetaTable = (data) => {
     default: x.default,
   }))
 
-  markupStr += `<PropsTable :data='${arrToStr(arrProps)}'/> \n\n`
+  if (arrProps.length > 0)
+    markupStr += `<PropsTable :data='${arrToStr(arrProps)}'/> \n\n`
 
   const slots = data.slots.filter((x) => !x.global)
   const arrSlots = slots.map((x) => ({
@@ -59,9 +60,8 @@ const genMetaTable = (data) => {
     type: x.type.slice(0, 100),
   }))
 
-  if (arrSlots.length > 0) {
+  if (arrSlots.length > 0)
     markupStr += `## Default Slots \n <SlotsTable :data='${arrToStr(arrSlots)}'/> \n\n`
-  }
 
   const emits = data.events.filter((x) => !x.global)
   const arrEmits = emits.map((x) => ({
@@ -70,9 +70,8 @@ const genMetaTable = (data) => {
     type: x.type,
   }))
 
-  if (arrEmits.length > 0) {
+  if (arrEmits.length > 0)
     markupStr += `## Emit Events \n <EmitsTable :data='${arrToStr(arrEmits)}'/> \n\n`
-  }
 
   return markupStr
 }
@@ -92,9 +91,9 @@ list.forEach((x) => {
     const metaFilePath = path.join(__dirname, `../meta/${x}.md`)
     const str = genMetaTable(meta)
     fs.writeFileSync(metaFilePath, str)
-		console.log(`Generated ${x} meta`)
+    console.log(`Generated ${x} meta`)
   } catch (e) {
     // TODO few components dont have default exposts
-    console.error('-----------------------------\n',x, ":" ,e)
+    console.error('-----------------------------\n', x, ':', e)
   }
 })

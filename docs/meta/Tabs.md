@@ -26,6 +26,13 @@
     "description": "Renders tabs vertically instead of horizontally",
     "required": false,
     "type": "boolean | undefined"
+  },
+  {
+    "name": "modelValue",
+    "description": "",
+    "required": false,
+    "type": "string | number | undefined",
+    "default": "0"
   }
 ]'/> 
 
@@ -40,6 +47,15 @@
     "name": "tab-panel",
     "description": "Content rendered for each tab panel.",
     "type": "{ tab: { label: string; icon?: string | undefined; route?: string | undefined; }; }"
+  }
+]'/> 
+
+## Emit Events 
+ <EmitsTable :data='[
+  {
+    "name": "update:modelValue",
+    "description": "",
+    "type": "[value: string | number]"
   }
 ]'/> 
 

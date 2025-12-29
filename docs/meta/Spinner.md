@@ -8,5 +8,3 @@
 </script>
 
 ## Props 
-<PropsTable :data='[]'/> 
-
