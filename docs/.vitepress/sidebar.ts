@@ -66,11 +66,6 @@ export default [
         link: '/docs/design-system/font-weight',
       },
       {
-        text: withIcon('font', 'Font Family'),
-        link: '/docs/design-system/font-family',
-      },
-
-      {
         text: withIcon('font', 'Letter Spacing'),
         link: '/docs/design-system/letter-spacing',
       },
@@ -86,10 +81,6 @@ export default [
       {
         text: withIcon('radius', 'Border Radius'),
         link: '/docs/design-system/border-radius',
-      },
-      {
-        text: withIcon('squareDashed', 'Border Width'),
-        link: '/docs/design-system/border-width',
       },
     ],
   },

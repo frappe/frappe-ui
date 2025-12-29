@@ -78,13 +78,6 @@ const fontWeight = Object.entries(designTokens.fontWeight).map(
   }),
 )
 
-const fontFamily = Object.entries(designTokens.fontFamily).map(
-  ([name, value]) => ({
-    name,
-    value,
-  }),
-)
-
 const letterSpacing = Object.entries(designTokens.letterSpacing).map(
   ([name, value]) => ({
     name,
@@ -113,13 +106,6 @@ const borderRadius = Object.entries(designTokens.borderRadius).map(
   }),
 )
 
-const borderWidth = Object.entries(designTokens.borderWidth).map(
-  ([name, value]) => ({
-    name,
-    value,
-  }),
-)
-
 export default {
   paths() {
     return [
@@ -128,12 +114,10 @@ export default {
       { params: { token: 'border-color', data: borderColors } },
       { params: { token: 'font-size', data: fontSize } },
       { params: { token: 'font-weight', data: fontWeight } },
-      { params: { token: 'font-family', data: fontFamily } },
       { params: { token: 'letter-spacing', data: letterSpacing } },
       { params: { token: 'line-height', data: lineHeight } },
       { params: { token: 'drop-shadow' } },
       { params: { token: 'border-radius', data: borderRadius } },
-      { params: { token: 'border-width', data: borderWidth } },
     ]
   },
 }
