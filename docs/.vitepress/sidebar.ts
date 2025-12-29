@@ -41,7 +41,7 @@ export default [
   },
 
   {
-    text: 'Design System',
+    text: 'Espresso Design System',
     collapsed: true,
     items: [
       {
