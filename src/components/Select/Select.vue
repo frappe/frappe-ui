@@ -115,7 +115,7 @@ defineSlots<{
 
     <SelectPortal>
       <SelectContent
-        class="bg-surface-modal border rounded-lg shadow-lg will-change-[opacity,transform] z-[100] overflow-hidden origin-center data-[state=open]:animate-[fadeInScale_100ms] data-[state=closed]:animate-[fadeOutScale_100ms]"
+        class="bg-surface-modal ring-1 ring-black ring-opacity-5 rounded-lg shadow-2xl will-change-[opacity,transform] z-[100] overflow-hidden origin-center data-[state=open]:animate-[fadeInScale_100ms] data-[state=closed]:animate-[fadeOutScale_100ms]"
       >
         <SelectViewport class="p-1 flex flex-col">
           <SelectItem
