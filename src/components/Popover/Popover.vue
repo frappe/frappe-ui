@@ -4,6 +4,7 @@
       <div
         ref="anchorRef"
         :class="['flex', $attrs.class]"
+        :style="($attrs.style as StyleValue)"
         @mouseover="onMouseover"
         @mouseleave="onMouseleave"
       >
@@ -62,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onUnmounted } from 'vue'
+import { computed, ref, onUnmounted, type StyleValue } from 'vue'
 import {
   PopoverAnchor,
   PopoverContent,
