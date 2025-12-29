@@ -182,7 +182,7 @@ defineExpose({
       </ComboboxAnchor>
       <ComboboxPortal>
         <ComboboxContent
-          class="z-10 w-[--reka-combobox-trigger-width] mt-1 bg-surface-modal overflow-hidden rounded-lg shadow-2xl"
+          class="z-10 w-60 mt-1 bg-surface-modal overflow-hidden rounded-lg shadow-2xl"
           position="popper"
           @openAutoFocus.prevent
           @closeAutoFocus.prevent
@@ -198,7 +198,7 @@ defineExpose({
               </template>
               <template v-else> No icons available. </template>
             </ComboboxEmpty>
-            <div v-if="filteredIcons.length > 0" class="flex flex-wrap gap-1">
+            <div v-if="filteredIcons.length > 0" class="flex flex-wrap">
               <button
                 v-for="iconName in filteredIcons.slice(0, props.maxIcons)"
                 :key="iconName"
