@@ -13,46 +13,46 @@
     "name": "size",
     "description": "Size of the select input",
     "required": false,
-    "type": "\"sm\" | \"md\" | \"lg\" | undefined",
+    "type": "\"sm\" | \"md\" | \"lg\"",
     "default": "\"sm\""
   },
   {
     "name": "variant",
     "description": "Visual style of the select input",
     "required": false,
-    "type": "\"subtle\" | \"outline\" | \"ghost\" | undefined",
+    "type": "\"subtle\" | \"outline\" | \"ghost\"",
     "default": "\"subtle\""
   },
   {
     "name": "placeholder",
     "description": "Placeholder text displayed when no option is selected",
     "required": false,
-    "type": "string | undefined",
+    "type": "string",
     "default": "\"Select option\""
   },
   {
     "name": "disabled",
     "description": "If true, disables the select input",
     "required": false,
-    "type": "boolean | undefined"
+    "type": "boolean"
   },
   {
     "name": "id",
     "description": "Optional HTML id for the select element",
     "required": false,
-    "type": "string | undefined"
+    "type": "string"
   },
   {
     "name": "modelValue",
     "description": "The currently selected value (controlled)",
     "required": false,
-    "type": "((string | number) & String) | undefined"
+    "type": "((string | number) & String)"
   },
   {
     "name": "options",
     "description": "Options to display in the dropdown",
     "required": false,
-    "type": "SelectOption[] | undefined"
+    "type": "SelectOption[]"
   }
 ]'/> 
 

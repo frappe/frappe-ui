@@ -13,70 +13,70 @@
     "name": "content",
     "description": "Initial editor content (HTML/string). `null` renders an empty editor",
     "required": false,
-    "type": "string | null | undefined",
+    "type": "string | null",
     "default": "null"
   },
   {
     "name": "placeholder",
     "description": "Placeholder text or dynamic placeholder resolver",
     "required": false,
-    "type": "string | (() => string) | undefined",
+    "type": "string | (() => string)",
     "default": "\"\""
   },
   {
     "name": "editorClass",
     "description": "Custom classes applied to the editor root",
     "required": false,
-    "type": "string | object | string[] | undefined",
+    "type": "string | object | string[]",
     "default": "\"\""
   },
   {
     "name": "editable",
     "description": "Toggles editability of the editor",
     "required": false,
-    "type": "boolean | undefined",
+    "type": "boolean",
     "default": "true"
   },
   {
     "name": "autofocus",
     "description": "Autofocus the editor on mount",
     "required": false,
-    "type": "boolean | undefined",
+    "type": "boolean",
     "default": "false"
   },
   {
     "name": "bubbleMenu",
     "description": "Enables bubble menu or provides custom bubble menu items",
     "required": false,
-    "type": "boolean | any[] | undefined",
+    "type": "boolean | any[]",
     "default": "false"
   },
   {
     "name": "bubbleMenuOptions",
     "description": "Configuration options for the bubble menu",
     "required": false,
-    "type": "object | undefined",
+    "type": "object",
     "default": "{}"
   },
   {
     "name": "fixedMenu",
     "description": "Enables fixed menu or provides custom fixed menu items",
     "required": false,
-    "type": "boolean | any[] | undefined",
+    "type": "boolean | any[]",
     "default": "false"
   },
   {
     "name": "floatingMenu",
     "description": "Enables floating menu or provides custom floating menu items",
     "required": false,
-    "type": "boolean | any[] | undefined",
+    "type": "boolean | any[]",
     "default": "false"
   },
   {
     "name": "extensions",
     "description": "Custom TipTap extensions",
     "required": false,
-    "type": "any[] | undefined",
+    "type": "any[]",
     "default": "[]"
   },
   {
@@ -90,27 +90,27 @@
     "name": "mentions",
     "description": "Mention extension configuration",
     "required": false,
-    "type": "ConfigureMentionOptions | undefined",
+    "type": "ConfigureMentionOptions",
     "default": "null"
   },
   {
     "name": "tags",
     "description": "Tag / hashtag configuration",
     "required": false,
-    "type": "any[] | undefined",
+    "type": "any[]",
     "default": "[]"
   },
   {
     "name": "uploadFunction",
     "description": "Async file upload handler (used for images, files, etc.)",
     "required": false,
-    "type": "((file: File) => Promise<UploadedFile>) | undefined"
+    "type": "((file: File) => Promise<UploadedFile>)"
   },
   {
     "name": "uploadArgs",
     "description": "Extra arguments passed to the upload function",
     "required": false,
-    "type": "object | undefined"
+    "type": "object"
   },
   {
     "name": "modelValue",

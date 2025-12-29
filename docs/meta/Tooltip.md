@@ -13,21 +13,21 @@
     "name": "text",
     "description": "Text content shown inside the tooltip.\nIgnored if a default slot is provided.",
     "required": false,
-    "type": "string | undefined",
+    "type": "string",
     "default": "\"\""
   },
   {
     "name": "hoverDelay",
     "description": "Delay (in ms) before showing the tooltip on hover.",
     "required": false,
-    "type": "number | undefined",
+    "type": "number",
     "default": "0.5"
   },
   {
     "name": "placement",
     "description": "Position of the tooltip relative to the trigger.",
     "required": false,
-    "type": "\"top\" | \"bottom\" | \"right\" | \"left\" | undefined",
+    "type": "\"top\" | \"bottom\" | \"right\" | \"left\"",
     "default": "\"top\""
   },
   {
@@ -41,7 +41,7 @@
     "name": "disabled",
     "description": "Disables the tooltip entirely.",
     "required": false,
-    "type": "boolean | undefined",
+    "type": "boolean",
     "default": "false"
   }
 ]'/> 

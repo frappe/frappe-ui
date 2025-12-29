@@ -13,7 +13,7 @@
     "name": "variant",
     "description": "Visual style of the combobox",
     "required": false,
-    "type": "ComboboxVariant | undefined",
+    "type": "ComboboxVariant",
     "default": "\"subtle\""
   },
   {
@@ -27,37 +27,37 @@
     "name": "modelValue",
     "description": "Currently selected value (v-model)",
     "required": false,
-    "type": "string | null | undefined"
+    "type": "string | null"
   },
   {
     "name": "placeholder",
     "description": "Placeholder text shown when no value is selected",
     "required": false,
-    "type": "string | undefined"
+    "type": "string"
   },
   {
     "name": "disabled",
     "description": "Disables the combobox",
     "required": false,
-    "type": "boolean | undefined"
+    "type": "boolean"
   },
   {
     "name": "openOnFocus",
     "description": "Opens the dropdown when the input is focused",
     "required": false,
-    "type": "boolean | undefined"
+    "type": "boolean"
   },
   {
     "name": "openOnClick",
     "description": "Opens the dropdown when the input is clicked",
     "required": false,
-    "type": "boolean | undefined"
+    "type": "boolean"
   },
   {
     "name": "placement",
     "description": "Dropdown placement relative to the input",
     "required": false,
-    "type": "\"start\" | \"center\" | \"end\" | undefined"
+    "type": "\"start\" | \"center\" | \"end\""
   }
 ]'/> 
 

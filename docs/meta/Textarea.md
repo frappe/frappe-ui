@@ -13,58 +13,58 @@
     "name": "size",
     "description": "Controls the visual size of the textarea",
     "required": false,
-    "type": "\"sm\" | \"md\" | \"lg\" | \"xl\" | undefined",
+    "type": "\"sm\" | \"md\" | \"lg\" | \"xl\"",
     "default": "\"sm\""
   },
   {
     "name": "variant",
     "description": "Visual style variant",
     "required": false,
-    "type": "\"subtle\" | \"outline\" | undefined",
+    "type": "\"subtle\" | \"outline\"",
     "default": "\"subtle\""
   },
   {
     "name": "placeholder",
     "description": "Placeholder text shown when empty",
     "required": false,
-    "type": "string | undefined"
+    "type": "string"
   },
   {
     "name": "disabled",
     "description": "Disables user interaction",
     "required": false,
-    "type": "boolean | undefined"
+    "type": "boolean"
   },
   {
     "name": "id",
     "description": "HTML id attribute",
     "required": false,
-    "type": "string | undefined"
+    "type": "string"
   },
   {
     "name": "modelValue",
     "description": "Bound value of the textarea",
     "required": false,
-    "type": "string | undefined"
+    "type": "string"
   },
   {
     "name": "debounce",
     "description": "Debounce delay (ms) before emitting value updates",
     "required": false,
-    "type": "number | undefined"
+    "type": "number"
   },
   {
     "name": "rows",
     "description": "Number of visible text rows",
     "required": false,
-    "type": "number | undefined",
+    "type": "number",
     "default": "3"
   },
   {
     "name": "label",
     "description": "Optional label text",
     "required": false,
-    "type": "string | undefined"
+    "type": "string"
   }
 ]'/> 
 

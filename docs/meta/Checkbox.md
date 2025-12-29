@@ -13,39 +13,39 @@
     "name": "size",
     "description": "Controls the size of the checkbox",
     "required": false,
-    "type": "\"sm\" | \"md\" | undefined",
+    "type": "\"sm\" | \"md\"",
     "default": "\"sm\""
   },
   {
     "name": "label",
     "description": "Text label shown next to the checkbox",
     "required": false,
-    "type": "string | undefined"
+    "type": "string"
   },
   {
     "name": "disabled",
     "description": "Disables the checkbox interaction",
     "required": false,
-    "type": "boolean | undefined"
+    "type": "boolean"
   },
   {
     "name": "padding",
     "description": "Adds padding around the checkbox",
     "required": false,
-    "type": "boolean | undefined",
+    "type": "boolean",
     "default": "false"
   },
   {
     "name": "modelValue",
     "description": "Checked state of the checkbox",
     "required": false,
-    "type": "boolean | 0 | 1 | undefined"
+    "type": "boolean | 0 | 1"
   },
   {
     "name": "id",
     "description": "HTML id attribute for the input element",
     "required": false,
-    "type": "string | undefined"
+    "type": "string"
   }
 ]'/> 
 

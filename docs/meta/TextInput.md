@@ -13,58 +13,58 @@
     "name": "type",
     "description": "HTML input type (text, email, number, password, etc.)",
     "required": false,
-    "type": "TextInputTypes | undefined",
+    "type": "TextInputTypes",
     "default": "\"text\""
   },
   {
     "name": "size",
     "description": "Visual size of the input",
     "required": false,
-    "type": "\"sm\" | \"md\" | \"lg\" | \"xl\" | undefined",
+    "type": "\"sm\" | \"md\" | \"lg\" | \"xl\"",
     "default": "\"sm\""
   },
   {
     "name": "variant",
     "description": "Style variant of the input",
     "required": false,
-    "type": "\"subtle\" | \"outline\" | \"ghost\" | undefined",
+    "type": "\"subtle\" | \"outline\" | \"ghost\"",
     "default": "\"subtle\""
   },
   {
     "name": "placeholder",
     "description": "Placeholder text shown when the input is empty",
     "required": false,
-    "type": "string | undefined"
+    "type": "string"
   },
   {
     "name": "disabled",
     "description": "Disables the input when true",
     "required": false,
-    "type": "boolean | undefined"
+    "type": "boolean"
   },
   {
     "name": "id",
     "description": "ID attribute for the input element",
     "required": false,
-    "type": "string | undefined"
+    "type": "string"
   },
   {
     "name": "modelValue",
     "description": "Bound value of the input",
     "required": false,
-    "type": "string | number | undefined"
+    "type": "string | number"
   },
   {
     "name": "debounce",
     "description": "Debounce delay (in ms) before emitting value updates",
     "required": false,
-    "type": "number | undefined"
+    "type": "number"
   },
   {
     "name": "required",
     "description": "Marks the input as required",
     "required": false,
-    "type": "boolean | undefined"
+    "type": "boolean"
   }
 ]'/> 
 

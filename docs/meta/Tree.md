@@ -25,7 +25,7 @@
     "name": "options",
     "description": "Optional configuration for tree layout and behavior.",
     "required": false,
-    "type": "TreeOptions | undefined",
+    "type": "TreeOptions",
     "default": "{\n    rowHeight: \"25px\",\n    indentWidth: \"20px\",\n    showIndentationGuides: true,\n    defaultCollapsed: true,\n}"
   }
 ]'/> 

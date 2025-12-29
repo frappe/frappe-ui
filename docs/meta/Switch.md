@@ -13,28 +13,28 @@
     "name": "size",
     "description": "Size of the switch control",
     "required": false,
-    "type": "\"sm\" | \"md\" | undefined",
+    "type": "\"sm\" | \"md\"",
     "default": "\"sm\""
   },
   {
     "name": "label",
     "description": "Label text displayed next to the switch",
     "required": false,
-    "type": "string | undefined",
+    "type": "string",
     "default": "\"\""
   },
   {
     "name": "description",
     "description": "Helper or descriptive text shown below the label",
     "required": false,
-    "type": "string | undefined",
+    "type": "string",
     "default": "\"\""
   },
   {
     "name": "disabled",
     "description": "Disables the switch and prevents interaction",
     "required": false,
-    "type": "boolean | undefined",
+    "type": "boolean",
     "default": "false"
   },
   {
@@ -47,14 +47,14 @@
     "name": "labelClasses",
     "description": "Custom classes applied to the label element",
     "required": false,
-    "type": "string | undefined",
+    "type": "string",
     "default": "\"\""
   },
   {
     "name": "modelValue",
     "description": "",
     "required": false,
-    "type": "boolean | undefined",
+    "type": "boolean",
     "default": "false"
   }
 ]'/> 

@@ -13,63 +13,63 @@
     "name": "show",
     "description": "Controls visibility of the popover",
     "required": false,
-    "type": "boolean | undefined",
+    "type": "boolean",
     "default": "undefined"
   },
   {
     "name": "trigger",
     "description": "Event that triggers the popover",
     "required": false,
-    "type": "\"click\" | \"hover\" | undefined",
+    "type": "\"click\" | \"hover\"",
     "default": "\"click\""
   },
   {
     "name": "hoverDelay",
     "description": "Delay in ms before showing popover on hover",
     "required": false,
-    "type": "number | undefined",
+    "type": "number",
     "default": "0"
   },
   {
     "name": "leaveDelay",
     "description": "Delay in ms before hiding popover on hover leave",
     "required": false,
-    "type": "number | undefined",
+    "type": "number",
     "default": "0.5"
   },
   {
     "name": "placement",
     "description": "Placement of the popover relative to the target",
     "required": false,
-    "type": "\"bottom-start\" | \"top-start\" | \"top-end\" | \"bottom-end\" | \"right-start\" | \"right-end\" | \"left-start\" | \"left-end\" | \"top\" | \"bottom\" | \"right\" | \"left\" | undefined",
+    "type": "\"bottom-start\" | \"top-start\" | \"top-end\" | \"bottom-end\" | \"right-start\" | \"right-end\" | \"left-start\" | \"left-end\" | \"top\" | \"bottom\" | \"right\" | \"left\"",
     "default": "\"bottom-start\""
   },
   {
     "name": "popoverClass",
     "description": "",
     "required": false,
-    "type": "string | object | (string | object)[] | undefined",
+    "type": "string | object | (string | object)[]",
     "default": "\"\""
   },
   {
     "name": "transition",
     "description": "Transition style to use",
     "required": false,
-    "type": "\"default\" | null | undefined",
+    "type": "\"default\" | null",
     "default": "null"
   },
   {
     "name": "hideOnBlur",
     "description": "Whether to hide the popover when clicking outside",
     "required": false,
-    "type": "boolean | undefined",
+    "type": "boolean",
     "default": "true"
   },
   {
     "name": "matchTargetWidth",
     "description": "Whether the popover width should match the target element",
     "required": false,
-    "type": "boolean | undefined"
+    "type": "boolean"
   }
 ]'/> 
 

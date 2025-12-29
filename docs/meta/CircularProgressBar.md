@@ -27,35 +27,35 @@
     "name": "showPercentage",
     "description": "Show numeric percentage inside the circle",
     "required": false,
-    "type": "boolean | undefined",
+    "type": "boolean",
     "default": "false"
   },
   {
     "name": "variant",
     "description": "Visual style of the progress bar",
     "required": false,
-    "type": "\"outline\" | \"solid\" | undefined",
+    "type": "\"outline\" | \"solid\"",
     "default": "\"solid\""
   },
   {
     "name": "theme",
     "description": "Theme used for the progress bar (predefined or custom colors)",
     "required": false,
-    "type": "\"blue\" | \"red\" | \"green\" | \"orange\" | \"black\" | { primary: string; secondary: string; } | undefined",
+    "type": "\"blue\" | \"red\" | \"green\" | \"orange\" | \"black\" | { primary: string; secondary: string; }",
     "default": "\"black\""
   },
   {
     "name": "size",
     "description": "Size of the progress bar",
     "required": false,
-    "type": "\"sm\" | \"md\" | \"lg\" | \"xl\" | \"xs\" | undefined",
+    "type": "\"sm\" | \"md\" | \"lg\" | \"xl\" | \"xs\"",
     "default": "\"md\""
   },
   {
     "name": "themeComplete",
     "description": "Color used when the progress completes",
     "required": false,
-    "type": "string | undefined",
+    "type": "string",
     "default": "\"lightgreen\""
   }
 ]'/> 

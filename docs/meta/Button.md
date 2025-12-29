@@ -13,90 +13,90 @@
     "name": "theme",
     "description": "Visual color theme of the button",
     "required": false,
-    "type": "Theme | undefined",
+    "type": "Theme",
     "default": "\"gray\""
   },
   {
     "name": "size",
     "description": "Controls the button size",
     "required": false,
-    "type": "Size | undefined",
+    "type": "Size",
     "default": "\"sm\""
   },
   {
     "name": "variant",
     "description": "Visual style of the button",
     "required": false,
-    "type": "Variant | undefined",
+    "type": "Variant",
     "default": "\"subtle\""
   },
   {
     "name": "label",
     "description": "Text label displayed inside the button",
     "required": false,
-    "type": "string | undefined"
+    "type": "string"
   },
   {
     "name": "icon",
     "description": "Icon shown when no left or right icon is specified",
     "required": false,
-    "type": "string | Component | undefined"
+    "type": "string | Component"
   },
   {
     "name": "iconLeft",
     "description": "Icon shown before the label",
     "required": false,
-    "type": "string | Component | undefined"
+    "type": "string | Component"
   },
   {
     "name": "iconRight",
     "description": "Icon shown after the label",
     "required": false,
-    "type": "string | Component | undefined"
+    "type": "string | Component"
   },
   {
     "name": "tooltip",
     "description": "Tooltip text shown on hover",
     "required": false,
-    "type": "string | undefined"
+    "type": "string"
   },
   {
     "name": "loading",
     "description": "Shows a loading state and disables interaction",
     "required": false,
-    "type": "boolean | undefined",
+    "type": "boolean",
     "default": "false"
   },
   {
     "name": "loadingText",
     "description": "Text shown while the button is loading",
     "required": false,
-    "type": "string | undefined"
+    "type": "string"
   },
   {
     "name": "disabled",
     "description": "Disables the button",
     "required": false,
-    "type": "boolean | undefined",
+    "type": "boolean",
     "default": "false"
   },
   {
     "name": "route",
     "description": "Router destination when used as a link",
     "required": false,
-    "type": "string | RouteLocationAsRelativeGeneric | RouteLocationAsPathGeneric | undefined"
+    "type": "string | RouteLocationAsRelativeGeneric | RouteLocationAsPathGeneric"
   },
   {
     "name": "link",
     "description": "External link URL",
     "required": false,
-    "type": "string | undefined"
+    "type": "string"
   },
   {
     "name": "type",
     "description": "Native button type",
     "required": false,
-    "type": "\"button\" | \"submit\" | \"reset\" | undefined",
+    "type": "\"button\" | \"submit\" | \"reset\"",
     "default": "\"button\""
   }
 ]'/> 

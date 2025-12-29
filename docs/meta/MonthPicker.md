@@ -13,14 +13,14 @@
     "name": "placeholder",
     "description": "Placeholder text shown when no value is selected",
     "required": false,
-    "type": "string | undefined",
+    "type": "string",
     "default": "\"Select month\""
   },
   {
     "name": "modelValue",
     "description": "",
     "required": false,
-    "type": "String | undefined",
+    "type": "String",
     "default": "\"\""
   }
 ]'/> 

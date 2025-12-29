@@ -13,88 +13,88 @@
     "name": "value",
     "description": "",
     "required": false,
-    "type": "string | undefined",
+    "type": "string",
     "default": "\"\""
   },
   {
     "name": "modelValue",
     "description": "",
     "required": false,
-    "type": "string | undefined",
+    "type": "string",
     "default": "\"\""
   },
   {
     "name": "placement",
     "description": "",
     "required": false,
-    "type": "DatePickerPlacement | undefined",
+    "type": "DatePickerPlacement",
     "default": "\"bottom-start\""
   },
   {
     "name": "format",
     "description": "",
     "required": false,
-    "type": "string | undefined"
+    "type": "string"
   },
   {
     "name": "variant",
     "description": "",
     "required": false,
-    "type": "\"subtle\" | \"outline\" | \"ghost\" | undefined",
+    "type": "\"subtle\" | \"outline\" | \"ghost\"",
     "default": "\"subtle\""
   },
   {
     "name": "readonly",
     "description": "",
     "required": false,
-    "type": "boolean | undefined",
+    "type": "boolean",
     "default": "false"
   },
   {
     "name": "placeholder",
     "description": "",
     "required": false,
-    "type": "string | undefined",
+    "type": "string",
     "default": "\"Select date\""
   },
   {
     "name": "inputClass",
     "description": "",
     "required": false,
-    "type": "string | string[] | Record<string, boolean> | undefined"
+    "type": "string | string[] | Record<string, boolean>"
   },
   {
     "name": "allowCustom",
     "description": "",
     "required": false,
-    "type": "boolean | undefined",
+    "type": "boolean",
     "default": "true"
   },
   {
     "name": "autoClose",
     "description": "",
     "required": false,
-    "type": "boolean | undefined",
+    "type": "boolean",
     "default": "true"
   },
   {
     "name": "disabled",
     "description": "",
     "required": false,
-    "type": "boolean | undefined",
+    "type": "boolean",
     "default": "false"
   },
   {
     "name": "label",
     "description": "",
     "required": false,
-    "type": "string | undefined"
+    "type": "string"
   },
   {
     "name": "clearable",
     "description": "",
     "required": false,
-    "type": "boolean | undefined",
+    "type": "boolean",
     "default": "true"
   }
 ]'/> 

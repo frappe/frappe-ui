@@ -13,7 +13,7 @@
     "name": "as",
     "description": "Element/component used to render the tab container",
     "required": false,
-    "type": "string | undefined"
+    "type": "string"
   },
   {
     "name": "tabs",
@@ -25,13 +25,13 @@
     "name": "vertical",
     "description": "Renders tabs vertically instead of horizontally",
     "required": false,
-    "type": "boolean | undefined"
+    "type": "boolean"
   },
   {
     "name": "modelValue",
     "description": "",
     "required": false,
-    "type": "string | number | undefined",
+    "type": "string | number",
     "default": "0"
   }
 ]'/> 

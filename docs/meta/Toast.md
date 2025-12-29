@@ -19,37 +19,37 @@
     "name": "message",
     "description": "",
     "required": false,
-    "type": "string | undefined"
+    "type": "string"
   },
   {
     "name": "type",
     "description": "",
     "required": false,
-    "type": "\"info\" | \"success\" | \"warning\" | \"error\" | undefined"
+    "type": "\"info\" | \"success\" | \"warning\" | \"error\""
   },
   {
     "name": "duration",
     "description": "",
     "required": false,
-    "type": "number | undefined"
+    "type": "number"
   },
   {
     "name": "icon",
     "description": "",
     "required": false,
-    "type": "Component | undefined"
+    "type": "Component"
   },
   {
     "name": "closable",
     "description": "",
     "required": false,
-    "type": "boolean | undefined"
+    "type": "boolean"
   },
   {
     "name": "action",
     "description": "",
     "required": false,
-    "type": "{ label: string; altText?: string | undefined; onClick: () => void; } | undefined"
+    "type": "{ label: string; altText?: string; onClick: () => void; } | undefined"
   }
 ]'/> 
 

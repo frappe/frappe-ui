@@ -13,40 +13,40 @@
     "name": "label",
     "description": "Label text displayed above the input",
     "required": false,
-    "type": "string | undefined"
+    "type": "string"
   },
   {
     "name": "description",
     "description": "Optional description or helper text shown below the input",
     "required": false,
-    "type": "string | undefined"
+    "type": "string"
   },
   {
     "name": "type",
     "description": "Type of input to render",
     "required": false,
-    "type": "\"autocomplete\" | \"select\" | TextInputTypes | \"textarea\" | \"checkbox\" | \"combobox\" | undefined",
+    "type": "\"autocomplete\" | \"select\" | TextInputTypes | \"textarea\" | \"checkbox\" | \"combobox\"",
     "default": "\"text\""
   },
   {
     "name": "size",
     "description": "Size of the input",
     "required": false,
-    "type": "\"sm\" | \"md\" | undefined",
+    "type": "\"sm\" | \"md\"",
     "default": "\"sm\""
   },
   {
     "name": "variant",
     "description": "Visual variant of the input",
     "required": false,
-    "type": "\"subtle\" | \"outline\" | undefined",
+    "type": "\"subtle\" | \"outline\"",
     "default": "\"subtle\""
   },
   {
     "name": "required",
     "description": "Whether the input is required",
     "required": false,
-    "type": "boolean | undefined"
+    "type": "boolean"
   }
 ]'/> 
 

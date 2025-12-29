@@ -13,25 +13,25 @@
     "name": "header",
     "description": "",
     "required": false,
-    "type": "SidebarHeaderProps | undefined"
+    "type": "SidebarHeaderProps"
   },
   {
     "name": "sections",
     "description": "",
     "required": false,
-    "type": "SidebarSectionProps[] | undefined"
+    "type": "SidebarSectionProps[]"
   },
   {
     "name": "disableCollapse",
     "description": "",
     "required": false,
-    "type": "boolean | undefined"
+    "type": "boolean"
   },
   {
     "name": "collapsed",
     "description": "",
     "required": false,
-    "type": "boolean | undefined",
+    "type": "boolean",
     "default": "null"
   }
 ]'/> 

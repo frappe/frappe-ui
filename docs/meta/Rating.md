@@ -13,34 +13,34 @@
     "name": "modelValue",
     "description": "The current rating value (controlled)",
     "required": false,
-    "type": "number | undefined",
+    "type": "number",
     "default": "0"
   },
   {
     "name": "rating_from",
     "description": "Minimum rating value (default is 0 or 1 depending on implementation)",
     "required": false,
-    "type": "number | undefined",
+    "type": "number",
     "default": "5"
   },
   {
     "name": "label",
     "description": "Optional label displayed alongside the rating",
     "required": false,
-    "type": "string | undefined"
+    "type": "string"
   },
   {
     "name": "readonly",
     "description": "If true, disables interaction and makes the rating read-only",
     "required": false,
-    "type": "boolean | undefined",
+    "type": "boolean",
     "default": "false"
   },
   {
     "name": "size",
     "description": "Size of the rating component",
     "required": false,
-    "type": "\"sm\" | \"md\" | \"lg\" | \"xl\" | undefined",
+    "type": "\"sm\" | \"md\" | \"lg\" | \"xl\"",
     "default": "\"md\""
   }
 ]'/> 

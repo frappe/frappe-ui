@@ -21,11 +21,17 @@ const tsconfigChecker = createChecker(
 // test meta obj for single component
 // const componentPath = path.join(
 //   __dirname,
-//   '../../src/components/TextEditor/TextEditor.vue',
+//   '../../src/components/Alert/Alert.vue',
 // )
 // const meta = tsconfigChecker.getComponentMeta(componentPath)
-//
-// console.log(meta.slots)
+
+const ParseTypeStr = (type: string) => {
+  const hasUndefined = type.includes('undefined')
+  if (hasUndefined) {
+    return type.replace(' | undefined', '').trim()
+  }
+	return type
+}
 
 const arrToStr = (arr) => JSON.stringify(arr, null, 2)
 
@@ -46,7 +52,7 @@ const genMetaTable = (data) => {
     name: x.name,
     description: x.description,
     required: x.required,
-    type: x.type,
+    type: ParseTypeStr(x.type),
     default: x.default,
   }))
 

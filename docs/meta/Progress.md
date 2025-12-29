@@ -19,35 +19,35 @@
     "name": "size",
     "description": "Size of the progress bar: \"sm\" | \"md\" | \"lg\" | \"xl\"",
     "required": false,
-    "type": "\"sm\" | \"md\" | \"lg\" | \"xl\" | undefined",
+    "type": "\"sm\" | \"md\" | \"lg\" | \"xl\"",
     "default": "\"sm\""
   },
   {
     "name": "label",
     "description": "Optional text label displayed on the progress bar",
     "required": false,
-    "type": "string | undefined",
+    "type": "string",
     "default": "\"\""
   },
   {
     "name": "hint",
     "description": "Whether to show a hint/tooltip for the progress value",
     "required": false,
-    "type": "boolean | undefined",
+    "type": "boolean",
     "default": "false"
   },
   {
     "name": "intervals",
     "description": "Whether to show interval markers on the progress bar",
     "required": false,
-    "type": "boolean | undefined",
+    "type": "boolean",
     "default": "false"
   },
   {
     "name": "intervalCount",
     "description": "Number of intervals to display if `intervals` is true",
     "required": false,
-    "type": "number | undefined",
+    "type": "number",
     "default": "6"
   }
 ]'/> 

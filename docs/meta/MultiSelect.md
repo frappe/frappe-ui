@@ -13,7 +13,7 @@
     "name": "placeholder",
     "description": "Placeholder text shown when no item is selected",
     "required": false,
-    "type": "string | undefined",
+    "type": "string",
     "default": "\"Select option\""
   },
   {
@@ -26,25 +26,25 @@
     "name": "hideSearch",
     "description": "Hides the search input if true",
     "required": false,
-    "type": "boolean | undefined"
+    "type": "boolean"
   },
   {
     "name": "loading",
     "description": "Shows a loading state",
     "required": false,
-    "type": "boolean | undefined"
+    "type": "boolean"
   },
   {
     "name": "compareFn",
     "description": "Custom comparison function to check equality of options",
     "required": false,
-    "type": "((a: MultiSelectOption, b: MultiSelectOption) => boolean) | undefined"
+    "type": "((a: MultiSelectOption, b: MultiSelectOption) => boolean)"
   },
   {
     "name": "modelValue",
     "description": "",
     "required": false,
-    "type": "String[] | undefined",
+    "type": "String[]",
     "default": "[]"
   }
 ]'/> 

@@ -19,14 +19,14 @@
     "name": "options",
     "description": "Configuration options for title, message, size, icon, actions, etc.",
     "required": false,
-    "type": "DialogOptions | undefined",
+    "type": "DialogOptions",
     "default": "{}"
   },
   {
     "name": "disableOutsideClickToClose",
     "description": "Prevents closing the dialog when clicking outside",
     "required": false,
-    "type": "boolean | undefined",
+    "type": "boolean",
     "default": "false"
   }
 ]'/> 

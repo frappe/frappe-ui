@@ -13,98 +13,98 @@
     "name": "value",
     "description": "Selected time (uncontrolled)",
     "required": false,
-    "type": "string | undefined",
+    "type": "string",
     "default": "\"\""
   },
   {
     "name": "modelValue",
     "description": "Selected time (v-model)",
     "required": false,
-    "type": "string | undefined",
+    "type": "string",
     "default": "\"\""
   },
   {
     "name": "interval",
     "description": "Minute interval between options",
     "required": false,
-    "type": "number | undefined",
+    "type": "number",
     "default": "15"
   },
   {
     "name": "options",
     "description": "Custom time options",
     "required": false,
-    "type": "{ value: string; label?: string | undefined; }[] | undefined",
+    "type": "{ value: string; label?: string; }[] | undefined",
     "default": "[]"
   },
   {
     "name": "placement",
     "description": "Popover placement",
     "required": false,
-    "type": "Placement | undefined",
+    "type": "Placement",
     "default": "\"bottom-start\" as Placement"
   },
   {
     "name": "placeholder",
     "description": "Placeholder text when no value is selected",
     "required": false,
-    "type": "string | undefined",
+    "type": "string",
     "default": "\"Select time\""
   },
   {
     "name": "variant",
     "description": "Visual style variant",
     "required": false,
-    "type": "Variant | undefined",
+    "type": "Variant",
     "default": "\"subtle\" as Variant"
   },
   {
     "name": "allowCustom",
     "description": "Allow entering custom time values",
     "required": false,
-    "type": "boolean | undefined",
+    "type": "boolean",
     "default": "true"
   },
   {
     "name": "autoClose",
     "description": "Close picker automatically after selection",
     "required": false,
-    "type": "boolean | undefined",
+    "type": "boolean",
     "default": "true"
   },
   {
     "name": "use12Hour",
     "description": "Use 12-hour (AM/PM) format",
     "required": false,
-    "type": "boolean | undefined",
+    "type": "boolean",
     "default": "true"
   },
   {
     "name": "disabled",
     "description": "Disable the time picker",
     "required": false,
-    "type": "boolean | undefined",
+    "type": "boolean",
     "default": "false"
   },
   {
     "name": "scrollMode",
     "description": "Scroll behavior when opening the list",
     "required": false,
-    "type": "\"start\" | \"center\" | \"nearest\" | undefined",
+    "type": "\"start\" | \"center\" | \"nearest\"",
     "default": "\"center\" as const"
   },
   {
     "name": "minTime",
     "description": "Minimum selectable time",
     "required": false,
-    "type": "string | undefined",
+    "type": "string",
     "default": "\"\""
   },
   {
     "name": "maxTime",
     "description": "Maximum selectable time",
     "required": false,
-    "type": "string | undefined",
+    "type": "string",
     "default": "\"\""
   }
 ]'/> 

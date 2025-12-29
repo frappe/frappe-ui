@@ -13,34 +13,34 @@
     "name": "button",
     "description": "Button configuration (label, icon, size, variant, etc.)",
     "required": false,
-    "type": "ButtonProps | undefined"
+    "type": "ButtonProps"
   },
   {
     "name": "options",
     "description": "Array of dropdown options or grouped options",
     "required": false,
-    "type": "DropdownOptions | undefined",
+    "type": "DropdownOptions",
     "default": "[]"
   },
   {
     "name": "placement",
     "description": "Placement of the dropdown relative to the trigger",
     "required": false,
-    "type": "string | undefined",
+    "type": "string",
     "default": "\"left\""
   },
   {
     "name": "side",
     "description": "Side of the trigger the dropdown appears on",
     "required": false,
-    "type": "\"top\" | \"bottom\" | \"right\" | \"left\" | undefined",
+    "type": "\"top\" | \"bottom\" | \"right\" | \"left\"",
     "default": "\"bottom\""
   },
   {
     "name": "offset",
     "description": "Offset in pixels between trigger and dropdown",
     "required": false,
-    "type": "number | undefined",
+    "type": "number",
     "default": "4"
   }
 ]'/> 

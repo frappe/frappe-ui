@@ -19,33 +19,33 @@
     "name": "theme",
     "description": "Color theme of the alert",
     "required": false,
-    "type": "Theme | undefined"
+    "type": "Theme"
   },
   {
     "name": "variant",
     "description": "Visual style of the alert container",
     "required": false,
-    "type": "\"subtle\" | \"outline\" | undefined",
+    "type": "\"subtle\" | \"outline\"",
     "default": "\"subtle\""
   },
   {
     "name": "description",
     "description": "Optional supporting text shown below the title",
     "required": false,
-    "type": "string | undefined"
+    "type": "string"
   },
   {
     "name": "dismissable",
     "description": "Whether the alert can be closed by the user",
     "required": false,
-    "type": "boolean | undefined",
+    "type": "boolean",
     "default": "true"
   },
   {
     "name": "modelValue",
     "description": "Controls the visibility of the alert for dismissing or toggling it",
     "required": false,
-    "type": "boolean | undefined",
+    "type": "boolean",
     "default": "true"
   }
 ]'/> 

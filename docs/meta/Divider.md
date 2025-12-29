@@ -13,27 +13,27 @@
     "name": "orientation",
     "description": "",
     "required": false,
-    "type": "\"horizontal\" | \"vertical\" | undefined",
+    "type": "\"horizontal\" | \"vertical\"",
     "default": "\"horizontal\""
   },
   {
     "name": "position",
     "description": "",
     "required": false,
-    "type": "\"start\" | \"center\" | \"end\" | undefined",
+    "type": "\"start\" | \"center\" | \"end\"",
     "default": "\"center\""
   },
   {
     "name": "flexItem",
     "description": "",
     "required": false,
-    "type": "boolean | undefined"
+    "type": "boolean"
   },
   {
     "name": "action",
     "description": "",
     "required": false,
-    "type": "DividerAction | undefined"
+    "type": "DividerAction"
   }
 ]'/> 
 

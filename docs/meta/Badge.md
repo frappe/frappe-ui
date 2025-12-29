@@ -13,28 +13,28 @@
     "name": "theme",
     "description": "Visual color theme of the badge",
     "required": false,
-    "type": "\"blue\" | \"red\" | \"green\" | \"gray\" | \"orange\" | undefined",
+    "type": "\"blue\" | \"red\" | \"green\" | \"gray\" | \"orange\"",
     "default": "\"gray\""
   },
   {
     "name": "size",
     "description": "Controls the size of the badge",
     "required": false,
-    "type": "\"sm\" | \"md\" | \"lg\" | undefined",
+    "type": "\"sm\" | \"md\" | \"lg\"",
     "default": "\"md\""
   },
   {
     "name": "variant",
     "description": "Visual style of the badge",
     "required": false,
-    "type": "\"subtle\" | \"outline\" | \"solid\" | \"ghost\" | undefined",
+    "type": "\"subtle\" | \"outline\" | \"solid\" | \"ghost\"",
     "default": "\"subtle\""
   },
   {
     "name": "label",
     "description": "Content displayed inside the badge",
     "required": false,
-    "type": "string | number | Label | undefined"
+    "type": "string | number | Label"
   }
 ]'/> 
 

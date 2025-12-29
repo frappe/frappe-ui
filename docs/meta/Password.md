@@ -13,13 +13,13 @@
     "name": "modelValue",
     "description": "The current value of the password input (v-model)",
     "required": false,
-    "type": "string | null | undefined"
+    "type": "string | null"
   },
   {
     "name": "value",
     "description": "Alternate way to set the password value",
     "required": false,
-    "type": "string | null | undefined"
+    "type": "string | null"
   }
 ]'/> 
 
