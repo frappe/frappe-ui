@@ -25,7 +25,7 @@ const props = defineProps<Props>();
     <span>Type </span>
   </div>
 
-  <section class="grid grid-cols-3 p-4 w-full">
+  <section class="grid grid-cols-3 p-4 w-full gap-5">
     <template v-for="(x, i) in props.data" :key="x.name">
       <Badge
         size="xl"
