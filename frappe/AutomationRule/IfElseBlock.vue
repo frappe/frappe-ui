@@ -47,17 +47,17 @@ import EmailBlock from './EmailBlock.vue'
 import SetFieldBlock from './SetFieldBlock.vue'
 import type { DropdownOption, IfBlockData } from './types'
 
-// type : "if" | "else"
 const props = defineProps<{
   blockType: 'if' | 'else'
   ruleIdx: number
 }>()
-const label = computed(() => (props.blockType === 'if' ? 'If' : 'Else'))
 
 const block = defineModel() as ModelRef<IfBlockData>
-
 const state = useAutomationState()
 
+const label = computed(() => (props.blockType === 'if' ? 'If' : 'Else'))
+
+// to hide already addes fields in actions
 const addedFields = computed(() =>
   block.value?.actions.map((a) => a.field).filter(Boolean),
 )
@@ -85,14 +85,7 @@ function getActionOptions(index: number): DropdownOption[] {
 
   if (!isLast) return [deleteOption]
 
-  return [
-    {
-      label: 'Add Action',
-      icon: 'plus',
-      onClick: addSetAction,
-    },
-    deleteOption,
-  ]
+  return [...additionalConditionBlockOptions, deleteOption]
 }
 
 const additionalConditionBlockOptions: DropdownOption[] = [
@@ -138,5 +131,3 @@ function findAndDeleteElseBlock() {
   }
 }
 </script>
-
-<style scoped></style>

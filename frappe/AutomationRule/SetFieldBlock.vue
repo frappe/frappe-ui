@@ -25,28 +25,18 @@
       />
     </template>
     <template #action>
-      <Dropdown :options="options" placement="right" v-if="options.length">
-        <Button
-          variant="ghost"
-          icon="more-horizontal"
-          :class="
-            indent &&
-            'opacity-0 group-hover:opacity-100 transition-all group-focus-within:opacity-100'
-          "
-        />
-      </Dropdown>
+      <DropdownOptions :options="options" v-if="options.length" />
     </template>
   </BaseBlock>
 </template>
 
 <script setup lang="ts">
 import { computed, ModelRef } from 'vue'
-import Button from '../../src/components/Button/Button.vue'
 import Combobox from '../../src/components/Combobox/Combobox.vue'
-import Dropdown from '../../src/components/Dropdown/Dropdown.vue'
 import { useDoctypeMeta } from '../../src/data-fetching/useDoctypeMeta'
 import { getValueControl } from '../Filter/utils'
 import BaseBlock from './BaseBlock.vue'
+import DropdownOptions from './DropdownOptions.vue'
 import { useAutomationState } from './automation'
 import type { DropdownOption, SetAction } from './types'
 

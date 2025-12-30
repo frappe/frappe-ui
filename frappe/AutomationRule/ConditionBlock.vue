@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-1">
     <template v-for="(row, index) in conditionRows" :key="index">
-      <BaseBlock v-bind="getPropsToApply(index)">
+      <BaseBlock v-bind="getPropsToApply(index)" class="group">
         <template #meta>
           <!-- And/Or toggle for rows after the first -->
           <Button
@@ -54,21 +54,7 @@
           />
         </template>
         <template #action>
-          <Dropdown
-            :options="rowOptions(index)"
-            placement="right"
-            v-if="index === conditionRows.length - 1"
-          >
-            <Button variant="ghost" icon="more-horizontal" />
-          </Dropdown>
-          <Button
-            v-else
-            variant="ghost"
-            icon="trash-2"
-            theme="red"
-            tooltip="Delete Condition"
-            @click="() => deleteRow(index)"
-          />
+          <DropdownOptions :options="rowOptions(index)" />
         </template>
       </BaseBlock>
     </template>
@@ -79,9 +65,9 @@
 import { ModelRef } from 'vue'
 import Button from '../../src/components/Button/Button.vue'
 import Combobox from '../../src/components/Combobox/Combobox.vue'
-import Dropdown from '../../src/components/Dropdown/Dropdown.vue'
 import Select from '../../src/components/Select/Select.vue'
 import BaseBlock from './BaseBlock.vue'
+import DropdownOptions from './DropdownOptions.vue'
 import { useAutomationState, useDoctypeFilters } from './automation'
 import type { DropdownOption, IconType, RoundedType } from './types'
 
@@ -157,6 +143,21 @@ function getRoundedStyle(idx: number): RoundedType {
 
 function rowOptions(idx: number) {
   const canAdd = canAddRow()
+
+  const deleteCondition = {
+    label: 'Delete Condition',
+    onClick: () => {
+      emit('delete', idx)
+      deleteRow(idx)
+    },
+    icon: 'trash',
+    theme: 'red' as const,
+  }
+  const isLastCondition = idx === conditionRows.value?.length - 1
+  if (!isLastCondition) {
+    return [deleteCondition]
+  }
+
   return [
     {
       label: 'Add Condition',
@@ -165,15 +166,7 @@ function rowOptions(idx: number) {
       disabled: !canAdd,
     },
     ...props.additionalActions,
-    {
-      label: 'Delete Condition',
-      onClick: () => {
-        emit('delete', idx)
-        deleteRow(idx)
-      },
-      icon: 'trash',
-      theme: 'red' as const,
-    },
+    { ...deleteCondition },
   ]
 }
 

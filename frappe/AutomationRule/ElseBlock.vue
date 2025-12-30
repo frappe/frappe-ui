@@ -1,16 +1,14 @@
 <template>
-  <BaseBlock title="Else" icon="condition">
+  <BaseBlock title="Else" icon="condition" class="group">
     <template #action>
-      <Dropdown :options="options" placement="right">
-        <Button variant="ghost" icon="more-horizontal" />
-      </Dropdown>
+      <DropdownOptions :options="options" />
     </template>
   </BaseBlock>
 </template>
 
 <script setup lang="ts">
-import Dropdown from '../../src/components/Dropdown/Dropdown.vue'
 import BaseBlock from './BaseBlock.vue'
+import DropdownOptions from './DropdownOptions.vue'
 import type { DropdownOption } from './types'
 
 defineProps<{

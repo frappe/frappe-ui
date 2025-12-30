@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col gap-1">
+  <div class="flex flex-col gap-1 group">
     <BaseBlock
       icon="notification"
       title="Notify"
@@ -34,9 +34,7 @@
         </div>
       </template>
       <template #action>
-        <Dropdown :options="options" placement="right">
-          <Button variant="ghost" icon="more-horizontal" />
-        </Dropdown>
+        <DropdownOptions :options="options" />
       </template>
     </BaseBlock>
     <BaseBlock
@@ -60,13 +58,13 @@
 
 <script setup lang="ts">
 import { ModelRef } from 'vue'
-import Dropdown from '../../src/components/Dropdown/Dropdown.vue'
 import Select from '../../src/components/Select/Select.vue'
 import TextEditor from '../../src/components/TextEditor/TextEditor.vue'
 import { useDoctypeMeta } from '../../src/data-fetching/useDoctypeMeta'
 import Link from '../Link/Link.vue'
 import { useAutomationState } from './automation'
 import BaseBlock from './BaseBlock.vue'
+import DropdownOptions from './DropdownOptions.vue'
 import { DropdownOption, SendEmailAction } from './types'
 
 const props = withDefaults(
