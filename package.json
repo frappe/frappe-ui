@@ -29,8 +29,8 @@
       "import": "./icons/index.ts"
     },
     "./tailwind": {
-      "import": "./src/tailwind/preset.js",
-      "default": "./src/tailwind/preset.js"
+      "import": "./tailwind/index.js",
+      "default": "./tailwind/index.js"
     },
     "./vite": {
       "import": "./vite/index.js"
