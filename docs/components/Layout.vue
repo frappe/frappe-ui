@@ -29,7 +29,7 @@ const { frontmatter } = useData();
         <div class="p-5 lg:p-10 pt-0 flex">
           <Content
             as="article"
-            class="docs mx-auto max-w-[720px] flex flex-col gap-10"
+            class="docs mx-auto max-w-[740px] flex flex-col gap-10"
           />
           <OnThisPage />
         </div>
