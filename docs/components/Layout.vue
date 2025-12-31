@@ -2,7 +2,10 @@
 import Navbar from "./Navbar.vue";
 import Sidebar from "./Docs/Sidebar.vue";
 import Home from "./Home/index.vue";
+
 import OnThisPage from "./Docs/OnThisPage.vue";
+import PrevNextBtns from "./Docs/PrevNextBtns.vue";
+
 import { state } from "../state.ts";
 
 import { useData } from "vitepress";
@@ -27,10 +30,14 @@ const { frontmatter } = useData();
         <Sidebar v-if="state.mobsidebar" class="lg:hidden" />
 
         <div class="p-5 lg:p-10 !pt-0 flex gap-5">
-          <Content
-            as="article"
-            class="docs mx-auto max-w-[740px] flex flex-col gap-10"
-          />
+          <div class="flex flex-col gap-5 mx-auto max-w-[740px] ">
+            <Content
+              as="article"
+              class="docs flex flex-col gap-10"
+            />
+            <PrevNextBtns />
+          </div>
+
           <OnThisPage />
         </div>
       </div>
