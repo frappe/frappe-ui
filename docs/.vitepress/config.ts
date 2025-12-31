@@ -3,7 +3,7 @@ import { lucideIcons } from '../../vite/lucideIcons'
 import path from 'path'
 import tailwind from 'tailwindcss'
 import autoprefixer from 'autoprefixer'
-import sidebarConfig from './sidebar'
+// import sidebarConfig from './sidebar'
 import { meta } from './meta'
 
 import componentPreview from './plugins/componentPreview'
@@ -22,18 +22,6 @@ export default defineConfig({
     },
   },
   cleanUrls: true,
-
-  appearance: {
-    onChanged(isDark, defaultHandler, mode) {
-      if (typeof document === 'undefined') return
-
-      document.documentElement.setAttribute(
-        'data-theme',
-        isDark ? 'dark' : 'light',
-      )
-      defaultHandler(mode)
-    },
-  },
 
   head: [
     // set data-theme attribute since vitepress uses just the dark class.
@@ -86,7 +74,7 @@ export default defineConfig({
       { text: 'Docs', link: '/docs/introduction' },
       { text: 'Blog', link: '/blog' },
     ],
-    sidebar: sidebarConfig,
+    // sidebar: sidebarConfig,
     socialLinks: [
       { icon: 'github', link: 'https://github.com/frappe/frappe-ui' },
     ],
@@ -96,7 +84,6 @@ export default defineConfig({
     plugins: [lucideIcons()],
     resolve: {
       alias: {
-        // '@': path.resolve(__dirname, '../../src/'),
         '@/srcomponents': path.resolve(__dirname, '../../src/components'),
         '@/components': path.resolve(__dirname, '../components/'),
         'frappe-ui': path.resolve(__dirname, '../../src'),
@@ -107,10 +94,10 @@ export default defineConfig({
         plugins: [
           tailwind(),
           autoprefixer(),
-          postcssIsolateStyles({
-					  prefix: ':not(:where(.vp-style-raw, .vp-style-raw *, .vp-raw, .vp-raw *))',
-            includeFiles: [/vp-doc\.css/, /base\.css/],
-          }),
+					  //    postcssIsolateStyles({
+					  // prefix: ':not(:where(.vp-style-raw, .vp-style-raw *, .vp-raw, .vp-raw *))',
+					  //      includeFiles: [/vp-doc\.css/, /base\.css/],
+					  //    }),
         ],
       },
     },

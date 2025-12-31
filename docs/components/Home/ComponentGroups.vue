@@ -79,9 +79,7 @@ const componentGroups = {
 <template>
   <main class="max-w-7xl mx-auto px-6 my-12 prose">
     <h1 class="text-[2.7rem] font-bold text-center mb-4">
-      Everything you need <br /> to<span class="text-ink-violet-1">
-        build.
-      </span>
+      Everything you need to build.
     </h1>
 
     <p class="text-2xl max-w-2xl text-center mx-auto text-ink-gray-5 leading-7">
@@ -109,7 +107,7 @@ const componentGroups = {
             {{ components.list.slice(0, 3).join(", ") }}
           </p>
 
-          <span class="text-sm text-ink-blue-2">
+          <span class="text-sm">
             + {{ components.list.slice(3).length }} More
           </span>
         </div>

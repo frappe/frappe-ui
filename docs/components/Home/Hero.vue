@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Badge, Button } from "frappe-ui";
+import { Badge } from "frappe-ui";
 import LucideRight from "~icons/lucide/arrow-right";
 import HeroShowcase from "./HeroShowcase/index.vue";
 
@@ -8,7 +8,7 @@ import pkgJson from "../../../package.json";
 
 <template>
   <div
-    class="grid xl:grid-cols-2 gap-5 min-h-[calc(100vh-200px)] max-w-7xl mx-auto"
+    class="grid xl:grid-cols-2 gap-5 min-h-[calc(100vh-100px)] max-w-7xl mx-auto"
   >
     <div class="my-auto p-7 flex flex-col gap-5">
       <Badge class="w-fit" size="lg" theme="green">
@@ -17,8 +17,7 @@ import pkgJson from "../../../package.json";
       <h1
         class="text-[2rem] xl:text-[2.7rem] font-bold tracing-tight leading-tight"
       >
-        Build <span class="text-ink-violet-1"> beautiful </span> interfaces
-        <span class="text-ink-violet-1"> Fast </span> and accessible
+        Build Beautiful Interfaces  Fast and accessible
       </h1>
 
       <p class="text-2xl xl:text-3xl text-ink-gray-5 leading-relaxed">

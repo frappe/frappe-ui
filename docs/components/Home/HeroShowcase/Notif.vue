@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 
-import { Avatar, Button, Dropdown } from "frappe-ui";
+import { Avatar, Button } from "frappe-ui";
 import LucideBell from "~icons/lucide/bell";
 import LucideServer from "~icons/lucide/server";
 import LucideLeft from "~icons/lucide/chevron-left";
@@ -14,14 +14,12 @@ const data = ref([
     txt: "Server #42 is secretly down.",
     icon: LucideServer,
     at: "2025-12-21T06:30:00Z",
-    css: "text-ink-red-4",
   },
   {
     label: "Backup Completed",
     txt: "Scheduled backup has finished.",
     icon: LucideArchive,
     at: "2025-12-21T03:00:00Z",
-    css: "text-ink-blue-3",
   },
   {
     id: "3",
@@ -35,14 +33,12 @@ const data = ref([
     txt: "CPU usage crossed 92%",
     icon: LucideServer,
     at: "2025-12-21T05:45:00Z",
-    css: "text-ink-red-4",
   },
   {
     label: "Deployment Success",
     txt: "v2.4.1 deployed to production.",
     icon: LucideArchive,
     at: "2025-12-20T22:00:00Z",
-    css: "text-ink-green-3",
   },
   {
     label: "Mentioned You",
@@ -74,7 +70,7 @@ const items = computed(() =>
 </script>
 
 <template>
-  <div class="bg-surface-cards border rounded-xl p-4 grid gap-5  shadow-lg">
+  <div class="bg-surface-cards border rounded-xl p-4 grid gap-5 shadow-lg">
     <b class="inline-flex items-center gap-3">
       <LucideBell class="size-4" /> Notifications
     </b>
@@ -95,7 +91,6 @@ const items = computed(() =>
       <span
         v-else
         class="bg-surface-gray-2 rounded p-3 flex m-auto"
-        :class="x.css"
       >
         <component :is="x.icon" class="size-5 shrink-0" />
       </span>
@@ -111,7 +106,7 @@ const items = computed(() =>
       </div>
     </div>
 
-    <hr class="border-outline-gray-2 -mx-4 " />
+    <hr class="border-outline-gray-2 -mx-4" />
 
     <div class="-my-2 -mx-2 flex gap-3">
       <Button class="mr-auto" @click="prevItem">

@@ -1,21 +1,15 @@
-// theme/index.ts
-import { h } from 'vue'
 import type { Theme } from 'vitepress'
-import DefaultTheme from 'vitepress/theme'
-import './style.css'
+import "../../../src/fonts/Inter/inter.css"
+import "../../css/style.css"
 import Demo from '../../components/Demo.vue'
+import Layout from '../../components/Layout.vue'
 
 if (process.env.NODE_ENV === 'production') {
   import.meta.glob('../components/**/*.story.vue', { eager: true })
 }
 
 export default {
-  extends: DefaultTheme,
-  Layout: () => {
-    return h(DefaultTheme.Layout, null, {
-      // https://vitepress.dev/guide/extending-default-theme#layout-slots
-    })
-  },
+	Layout,
   enhanceApp({ app, router, siteData }) {
     app.component('ComponentPreview', Demo)
   },

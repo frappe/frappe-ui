@@ -300,7 +300,7 @@ const formCompleteStatus = computed(() => {
 
           <div class="mt-2 text-xs text-ink-gray-5 flex">
             {{ item.meta }}
-            <span class="text-ink-violet-1 ml-auto">
+            <span class="text-ink-gray-9 ml-auto">
               {{ item.class.split(" ")[0] }}
             </span>
           </div>

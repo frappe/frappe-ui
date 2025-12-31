@@ -1,0 +1,39 @@
+<script setup lang="ts">
+import Navbar from "./Navbar.vue";
+import Sidebar from "./Docs/Sidebar.vue";
+import Home from "./Home/index.vue";
+import OnThisPage from "./Docs/OnThisPage.vue";
+import { state } from "../state.ts";
+
+import { useData } from "vitepress";
+const { frontmatter } = useData();
+</script>
+
+<template>
+  <div
+    v-if='frontmatter.layout === "home"'
+    class="h-full flex flex-col justify-between flex-1 w-full"
+  >
+    <Navbar />
+    <Home />
+  </div>
+
+  <template v-else>
+    <div class="grid grid-cols-[auto_1fr]">
+      <Sidebar class="hidden lg:flex" />
+
+      <div class="w-full">
+        <Navbar :isDocs="true" />
+        <Sidebar v-if="state.mobsidebar" class="lg:hidden" />
+
+        <div class="p-5 lg:p-10 pt-0 flex">
+          <Content
+            as="article"
+            class="docs mx-auto max-w-[720px] flex flex-col gap-10"
+          />
+          <OnThisPage />
+        </div>
+      </div>
+    </div>
+  </template>
+</template>
