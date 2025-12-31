@@ -26,7 +26,7 @@ const { frontmatter } = useData();
         <Navbar :isDocs="true" />
         <Sidebar v-if="state.mobsidebar" class="lg:hidden" />
 
-        <div class="p-5 lg:p-10 pt-0 flex">
+        <div class="p-5 lg:p-10 !pt-0 flex gap-5">
           <Content
             as="article"
             class="docs mx-auto max-w-[740px] flex flex-col gap-10"
