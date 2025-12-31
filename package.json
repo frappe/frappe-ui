@@ -49,6 +49,7 @@
     "scripts",
     "vite",
     "icons",
+    "tailwind",
     "tsconfig.base.json"
   ],
   "repository": {
