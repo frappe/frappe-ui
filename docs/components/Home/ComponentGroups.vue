@@ -58,7 +58,6 @@ const componentGroups = {
       "ErrorMessage",
       "Progress",
       "CircularProgressBar",
-      "Spinner",
     ],
   },
 

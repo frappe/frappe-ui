@@ -33,7 +33,6 @@ const componentList = [
   'Rating',
   'Select',
   'Sidebar',
-  'Spinner',
   'Switch',
   'Tabs',
   'Textarea',
