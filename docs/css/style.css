@@ -150,4 +150,12 @@ body {
   code:not(pre code) {
     @apply text-sm rounded-sm bg-surface-gray-3 dark:bg-surface-gray-2 p-0.5 px-1;
   }
+
+	ul {
+		@apply list-disc list-inside;
+	}
+
+	li {
+		@apply my-2;
+	}
 }
