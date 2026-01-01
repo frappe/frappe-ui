@@ -127,7 +127,7 @@
                 :disabled="dateObj.disabled"
                 @click="
                   !dateObj.disabled &&
-                    handleDateCellClick(dateObj.date, togglePopover)
+                  handleDateCellClick(dateObj.date, togglePopover)
                 "
               >
                 {{ dateObj.date.date() }}
@@ -268,7 +268,7 @@ const view = ref<ViewMode>('date')
 const currentYear = ref<number>(dayjs().year())
 const currentMonth = ref<number>(dayjs().month())
 const DATE_FORMAT = 'YYYY-MM-DD'
-const DATE_TIME_FORMAT = 'YYYY-MM-DD h:mm a'
+const DATE_TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss'
 
 const selectedDate = ref<string>('') // YYYY-MM-DD
 const timeValue = ref<string>('') // HH:mm:ss
