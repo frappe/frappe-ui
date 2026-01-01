@@ -16,9 +16,10 @@ const linkClass = "p-2 rounded hover:bg-surface-gray-2";
   <aside
     class="
       scrollbar bg-surface-gray-1 dark:bg-surface-white z-50 border-r flex flex-col p-3 h-screen
-      overflow-hidden pr-1 pt-1
+      overflow-hidden pr-0 pt-1
       hover:overflow-y-auto sticky top-0 w-full
     "
+		  style="scrollbar-gutter: stable;"
   >
     <a
       class="hidden lg:flex items-center gap-2 p-2 py-3 border-b mb-3 font-medium text-xl"
