@@ -16,7 +16,7 @@ const linkClass = "p-2 rounded";
   <aside
     class="
       scrollbar bg-surface-gray-1 dark:bg-surface-white z-50 border-r flex flex-col p-3 h-screen
-      overflow-hidden pr-0 pt-1
+      overflow-hidden pr-0 pt-1 min-w-fit
       hover:overflow-y-auto sticky top-0 w-full
     "
 		  style="scrollbar-gutter: stable;"

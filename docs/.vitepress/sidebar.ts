@@ -46,7 +46,7 @@ const componentList = [
 const componentItems = componentList.map((name) => ({
   text: name,
   icon: LucideComponent,
-  link: `/docs/${name.toLowerCase()}`,
+  link: `/docs/components/${name.toLowerCase()}`,
 }))
 
 export default [
@@ -118,17 +118,17 @@ export default [
       {
         text: 'Resource',
         icon: LucideDb,
-        link: '/docs/resource',
+        link: '/docs/data-fetching/resource',
       },
       {
         text: 'List Resource',
         icon: LucideRows,
-        link: '/docs/list-resource',
+        link: '/docs/data-fetching/list-resource',
       },
       {
         text: 'Document Resource',
         icon: LucideJson,
-        link: '/docs/document-resource',
+        link: '/docs/data-fetching/document-resource',
       },
     ],
   },
@@ -145,12 +145,12 @@ export default [
       {
         text: 'Utilities',
         icon: LucideSettings,
-        link: '/docs/utilities',
+        link: '/docs/other/utilities',
       },
       {
         text: 'Directives',
         icon: LucideSettings,
-        link: '/docs/directives',
+        link: '/docs/other/directives',
       },
     ],
   },

@@ -7,7 +7,7 @@ export default function (md: MarkdownRenderer) {
       /<ComponentPreview\s+name=["']([^"']+)["'](?:\s+title=["']([^"']*)["'])?(?:\s+description=["']([^"']*)["'])?(?:\s+csr=["'](true|false)["'])?\s*\/>/g
 
     state.src = state.src.replace(regex, (_, name, title, description, csr) => {
-			const componentPath = `../../../src/components/${name}/${name}.story.vue`
+			const componentPath = `../../../../src/components/${name}/${name}.story.vue`
       const scriptIdx = state.tokens.findIndex(
         (i) => i.type === 'html_block' && /<script setup>/.test(i.content),
       )
