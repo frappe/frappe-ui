@@ -7,7 +7,7 @@ import LucideView from "~icons/lucide/user-star";
 </script>
 
 <template>
-  <div class="grid gap-5 grid-cols-2">
+  <div class="grid gap-5 md:grid-cols-2">
     <Story title="With route option">
       <Breadcrumbs
         :items='

@@ -61,7 +61,7 @@ const reset = () => value.value = "";
 </script>
 
 <template>
-  <div class="grid grid-cols-2 gap-4">
+  <div class="grid md:grid-cols-2 gap-4">
     <Story title="Default Select">
       <Select :options="options" v-model="value" />
     </Story>

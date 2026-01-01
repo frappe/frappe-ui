@@ -15,7 +15,7 @@ const variants = ["subtle", "outline"];
 </script>
 
 <template>
-  <div class="grid gap-4 grid-cols-2">
+  <div class="grid gap-4 md:grid-cols-2">
     <Story v-for="type in variants" :key="type" :title="`Variant: ${type}`">
       <Textarea :variant="type" v-bind="state" />
     </Story>

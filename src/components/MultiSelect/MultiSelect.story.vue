@@ -22,7 +22,7 @@ const options = [
 </script>
 
 <template>
-  <div class="grid grid-cols-2 gap-4">
+  <div class="grid md:grid-cols-2 gap-4">
     <Story title="Default MultiSelect">
       <MultiSelect
         :options="options"

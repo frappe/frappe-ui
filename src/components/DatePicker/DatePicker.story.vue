@@ -16,7 +16,7 @@ const dateRangeValue = ref("");
 </script>
 
 <template>
-  <div class="grid gap-5 grid-cols-2">
+  <div class="grid gap-5 md:grid-cols-2">
     <Story title="Date Picker" preview-css="p-4">
       <DatePicker v-model="dateValue" v-bind="state" />
       <div class="mt-2 text-sm text-gray-600">

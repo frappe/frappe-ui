@@ -157,7 +157,7 @@ const state = reactive({
 </script>
 
 <template>
-  <div class="grid gap-5 grid-cols-2">
+  <div class="grid gap-5 md:grid-cols-2">
     <Story title="Simple Options" preview-css="p-4">
       <Combobox
         :options="simpleOptions"

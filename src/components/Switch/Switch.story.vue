@@ -13,7 +13,7 @@ const sizes = ["sm", "md"];
 </script>
 
 <template>
-  <div class="grid grid-cols-2 gap-6">
+  <div class="grid md:grid-cols-2 gap-6">
     <Story title="Default Switch">
       <Switch />
     </Story>
@@ -31,9 +31,9 @@ const sizes = ["sm", "md"];
       <Switch v-bind="state" icon="inbox" description="This has an icon." />
     </Story>
 
-    <Story title="Different Sizes">
-      <Switch v-bind="state" size="sm" />
-      <Switch v-bind="state" size="md" />
+    <Story title="Different Sizes" preview-css='flex items-center gap-2'>
+      <Switch size="sm" />
+      <Switch size="md" />
     </Story>
 
     <Story title="Disabled">

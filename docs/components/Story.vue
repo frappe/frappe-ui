@@ -22,7 +22,7 @@ const props = withDefaults(defineProps<Props>(), {
     </Button>
 
     <div
-      class="border border-outline-gray-2 p-5 rounded"
+      class="border border-outline-gray-2 p-5 rounded overflow-auto scrollbar"
       :class="props.previewCss"
     >
       <slot />
