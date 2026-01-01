@@ -13,9 +13,8 @@ import BorderRadius from '@/components/tokens/BorderRadius.vue'
 const { params } = useData()
 const data = params.value.data
 
-
-console.log(title, 'undefined data: ' , data)
 const title = params.value.token.replace('-', ' ')
+console.log(title, 'undefined data: ' , data)
 </script>
 
 <h1 class='capitalize mb-5'>

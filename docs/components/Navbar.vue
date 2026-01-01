@@ -15,7 +15,6 @@ import { state } from "../state";
 const theme = ref();
 
 const toggleTheme = () => {
-  console.log(theme.value);
   theme.value = theme.value === "dark" ? "light" : "dark";
   document.documentElement.setAttribute("data-theme", theme.value);
 };
@@ -41,7 +40,6 @@ defineProps({
 const route = useRoute();
 
 watch(route, (x) => {
-  console.log(x);
   state.mobnavbar = false;
   state.mobsidebar = false;
 });

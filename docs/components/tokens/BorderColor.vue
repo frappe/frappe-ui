@@ -11,7 +11,7 @@ const props = defineProps({
 <template>
   <div class="grid grid-cols-3 gap-5">
     <template v-for="color in data" :key="color.name">
-      <h2 v-if="!color.value" class="capitalize col-span-full">
+      <h2 :id="color.name" v-if="!color.value" class="capitalize col-span-full">
         {{ color.name }}
       </h2>
 

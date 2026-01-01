@@ -10,7 +10,7 @@ interface Heading {
 }
 
 const headings = ref<Heading[]>([]);
-const activeHeading = ref("");
+const activeHeading = ref();
 
 const setHeadings = () => {
   const elements = Array.from(document.querySelectorAll("h2, h3"));
@@ -51,6 +51,7 @@ watch(route, setHeadings);
 <template>
   <aside
     class="sticky top-24 hidden lg:flex flex-col h-fit mt-10 leading-relaxed"
+    :class='{ "invisible": headings.length == 0 }'
   >
     <span class="font-medium whitespace-nowrap pl-3">On this page</span>
 
@@ -58,6 +59,7 @@ watch(route, setHeadings);
       v-for="x in headings"
       :href="`#${x.id}`"
       class="text-ink-gray-6 whitespace-nowrap !no-underline pl-4 py-1 border-l transition-all duration-500"
+      @click="activeHeading = x.id"
       :class='
         {
           "pl-7": x.type == "h3",
