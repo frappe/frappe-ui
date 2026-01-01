@@ -85,6 +85,14 @@ const letterSpacing = Object.entries(designTokens.letterSpacing).map(
   }),
 )
 
+// temporary since /docs/design-system breaks sometimes randomly so log data
+console.log(
+  'design tokens ',
+  designTokens,
+  'lineHeight',
+  designTokens.lineHeight,
+)
+
 const lineHeight = Object.entries(designTokens.lineHeight).map(
   ([name, value]) => ({
     name,
