@@ -41,7 +41,8 @@ defineProps({
 const route = useRoute();
 
 const routes = computed(() => {
-  const arr = route.path.split("/").slice(1);
+  let arr = route.path.split("/");
+  arr = arr.filter((x) => !["/", ""].includes(x));
 
   return arr.map((x, i) => {
     let prevlinks = arr.slice(0, i + 1).join("/");
@@ -69,6 +70,7 @@ watch(route, (x) => {
         <a href="/" class="font-medium">Frappe UI</a>
       </span>
 
+      <!-- minimal breadcrumbs -->
       <div class="hidden lg:flex items-center gap-3">
         <a
           v-for="(x, i) in routes"

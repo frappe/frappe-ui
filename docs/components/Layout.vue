@@ -30,11 +30,10 @@ const { frontmatter } = useData();
         <Sidebar v-if="state.mobsidebar" class="lg:hidden" />
 
         <div class="p-5 lg:p-10 flex gap-5">
-          <div class="mx-auto lg:max-w-[740px] flex-1">
+          <main class="mx-auto lg:max-w-[740px] flex-1">
             <Content as="article" class="prose" />
             <PrevNextBtns />
-          </div>
-
+          </main>
           <OnThisPage />
         </div>
       </div>
