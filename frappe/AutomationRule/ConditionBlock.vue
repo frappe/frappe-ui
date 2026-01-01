@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-1">
     <template v-for="(row, index) in conditionRows" :key="index">
-      <BaseBlock v-bind="getPropsToApply(index)" class="group">
+      <BaseBlock v-bind="getPropsToApply(index)">
         <template #meta>
           <!-- And/Or toggle for rows after the first -->
           <Button

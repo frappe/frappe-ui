@@ -1,6 +1,6 @@
 <template>
   <div
-    class="w-full py-[7px] px-3 bg-surface-gray-1 flex flex-col gap-1"
+    class="w-full py-[7px] px-3 bg-surface-gray-1 flex flex-col gap-1 group"
     :class="[roundedClass, props.indent && '!w-[95%] ml-auto']"
   >
     <div class="flex justify-between">

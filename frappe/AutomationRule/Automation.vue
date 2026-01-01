@@ -109,9 +109,6 @@ const state = reactive({
 
 async function handleSubmit(): Promise<void> {
   console.log(state.rule)
-
-  debugger
-  return
   if (isNew.value) {
     await createAutomation()
   } else {

@@ -38,6 +38,7 @@ export interface SendEmailAction {
   message?: string
   template?: string
   doctype?: string
+  create_communication: boolean
 }
 
 // Block types

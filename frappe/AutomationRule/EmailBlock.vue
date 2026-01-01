@@ -7,7 +7,7 @@
       :indent
     >
       <template #meta>
-        <div class="flex gap-1.5">
+        <div class="flex gap-1.5 items-center">
           <Select
             variant="outline"
             :options="emailFields"
@@ -31,6 +31,14 @@
             v-model="action.template"
             class="!w-[140px] [&>div>div>div]:bg-surface-white"
           />
+          <div>
+            <label
+              class="flex items-center gap-1 text-p-sm justify-center text-ink-gray-7"
+            >
+              <Checkbox v-model="action.create_communication" />
+              Create Communication?
+            </label>
+          </div>
         </div>
       </template>
       <template #action>
@@ -58,6 +66,7 @@
 
 <script setup lang="ts">
 import { ModelRef } from 'vue'
+import Checkbox from '../../src/components/Checkbox/Checkbox.vue'
 import Select from '../../src/components/Select/Select.vue'
 import TextEditor from '../../src/components/TextEditor/TextEditor.vue'
 import { useDoctypeMeta } from '../../src/data-fetching/useDoctypeMeta'

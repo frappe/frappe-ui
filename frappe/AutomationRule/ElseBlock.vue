@@ -1,5 +1,5 @@
 <template>
-  <BaseBlock title="Else" icon="condition" class="group">
+  <BaseBlock title="Else" icon="condition">
     <template #action>
       <DropdownOptions :options="options" />
     </template>

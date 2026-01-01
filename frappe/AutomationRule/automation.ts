@@ -321,4 +321,5 @@ export const getDummyNotificationAction = (doctype = 'Email Template') => ({
   template: '',
   message: '',
   doctype, // this should come from the config only
+  create_communication: false,
 })
