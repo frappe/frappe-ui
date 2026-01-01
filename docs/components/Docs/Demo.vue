@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import Tabs from "./Tabs.vue";
+import Tabs from "../Tabs.vue";
 import LucidePreview from "~icons/lucide/square-mouse-pointer";
 import LucideCode from "~icons/lucide/code";
 

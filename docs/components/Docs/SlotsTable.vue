@@ -22,7 +22,7 @@ const props = defineProps<Props>();
     <span>Payload </span>
   </div>
 
-  <section class="grid grid-cols-2 p-4 w-full overflow-auto scrollbar">
+  <section class="grid grid-cols-2 gap-y-3 p-4 w-full overflow-auto scrollbar">
     <template v-for="(x, i) in props.data" :key="x.name">
       <Badge size="xl" theme="blue" class="w-fit !rounded">
         {{ x.name }}
