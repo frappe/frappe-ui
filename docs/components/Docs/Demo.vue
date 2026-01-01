@@ -20,7 +20,7 @@ const tabs = [
 </script>
 
 <template>
-  <div class="grid gap-5">
+  <div class="grid gap-5 not-prose">
     <div v-if="props.title" class="font-medium">{{ props.title }}</div>
     <div v-if="props.description" class="text-sm text-muted">
       {{ props.description }}

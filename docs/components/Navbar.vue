@@ -84,7 +84,7 @@ watch(route, (x) => {
       >
         <a href="/docs/getting-started">Docs</a>
 
-        <Button @click="toggleTheme" class="rounded-full">
+        <Button @click="toggleTheme" class="rounded">
           <template #icon>
             <LucideSun v-if='theme === "dark"' class="size-4" />
             <LucideMoon v-else class="size-4" />

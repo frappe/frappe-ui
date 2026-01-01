@@ -23,7 +23,8 @@ body {
 }
 
 [class*='language'] {
-  @apply rounded mt-5 py-3 px-5 relative bg-surface-gray-7 dark:bg-surface-cards grid;
+	position: relative;
+  /* @apply rounded mt-5 px-3 relative  grid; */
 
   .lang {
     @apply hidden;
@@ -38,7 +39,7 @@ body {
       border-color 0.25s ease 0s,
       background-color 0.25s ease 0s,
       opacity 0.25s ease 0s;
-    @apply absolute top-2 right-2 w-9 h-9 bg-inherit;
+    @apply absolute top-0 right-2 w-9 h-9 bg-inherit;
   }
 
   .copied {
@@ -47,7 +48,9 @@ body {
 }
 
 .shiki {
-  @apply max-h-[500px] w-full  !bg-transparent overflow-auto leading-relaxed;
+	font-size: 12px;
+  @apply max-h-[500px] w-full overflow-auto leading-relaxed rounded;
+	@apply !p-5 !py-4 !bg-surface-gray-7 dark:!bg-surface-cards;
 
   font-family: monospace;
   .line-number {
@@ -127,35 +130,7 @@ body {
 
 /* doc typography */
 .docs {
-  h1:not(.vp-raw *) {
-    @apply text-3xl font-semibold leading-tight tracking-[-0.02em] mt-5 lg:mt-10 mb-4;
-  }
-
-  h2:not(.vp-raw *) {
-    @apply text-2xl font-semibold leading-snug tracking-[-0.02em] mt-4 lg:mt-9 mb-4;
-  }
-
-  h3:not(.vp-raw *) {
-    @apply text-xl font-semibold leading-snug tracking-[-0.01em] mt-3 lg:mt-8 mb-3;
-  }
-
-  a:not(.vp-raw *) {
-    text-decoration: underline;
-  }
-
-  p:not(.vp-raw *) {
-    @apply leading-relaxed my-4 text-ink-gray-8;
-  }
-
   code:not(pre code) {
     @apply text-sm rounded-sm bg-surface-gray-3 dark:bg-surface-gray-2 p-0.5 px-1;
   }
-
-	ul {
-		@apply list-disc list-inside;
-	}
-
-	li {
-		@apply my-2;
-	}
 }

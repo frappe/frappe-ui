@@ -5,11 +5,11 @@ import { useRoute } from "vitepress";
 
 const activeLink = (link: string) => (
   useRoute().path === link
-    ? "bg-surface-white dark:bg-surface-gray-1 shadow-lg"
+    ? "bg-surface-white dark:bg-surface-gray-1 shadow-sm"
     : "text-ink-gray-8"
 );
 
-const linkClass = "p-2 rounded hover:bg-surface-gray-2";
+const linkClass = "p-2 rounded";
 </script>
 
 <template>
