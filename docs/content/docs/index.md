@@ -10,13 +10,13 @@ You can quickly setup `frappe-ui` using
 you already have a Frappe app for which you want to build a frontend you can
 start with **Step 2**.
 
-### 1. Create your Frappe app
+###  Create your Frappe app
 
 ```sh
 bench new-app todo
 ```
 
-### 2. Setup frappe-ui
+### Setup frappe-ui
 
 ```sh
 cd apps/todo
@@ -28,7 +28,7 @@ npx degit netchampfaris/frappe-ui-starter frontend
 Refer [frappe-ui-starter](https://github.com/netchampfaris/frappe-ui-starter)
 for more details.
 
-### 3. ignore_csrf config
+### Ignore_csrf config
 
 ```sh
 bench --site todo.test set-config ignore_csrf 1
@@ -38,7 +38,7 @@ This will prevent CSRFToken errors while using the vite dev server. In
 production environment, the csrf_token is attached to the window object in
 index.html for you.
 
-### 4. Start dev server
+### Start dev server
 
 ```sh
 cd frontend
