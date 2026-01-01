@@ -56,7 +56,7 @@ export default [
   },
   {
     text: 'Getting Started',
-    link: '/docs/getting-started',
+    link: '/docs',
   },
 
   {

@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { Button } from "frappe-ui";
 import LucideSun from "~icons/lucide/sun";
 import LucideMoon from "~icons/lucide/moon-star";
@@ -7,6 +7,7 @@ import LucideSearch from "~icons/lucide/search";
 import LucideMenu from "~icons/lucide/menu";
 import LucideSide from "~icons/lucide/panel-right";
 import GithubIcon from "./Icons/Github.vue";
+import LucideRight from "~icons/lucide/chevron-right";
 
 import { useRoute } from "vitepress";
 
@@ -39,6 +40,15 @@ defineProps({
 
 const route = useRoute();
 
+const routes = computed(() => {
+  const arr = route.path.split("/").slice(1);
+
+  return arr.map((x, i) => {
+    let prevlinks = arr.slice(0, i + 1).join("/");
+    return { text: x, link: "/" + prevlinks };
+  });
+});
+
 watch(route, (x) => {
   state.mobnavbar = false;
   state.mobsidebar = false;
@@ -59,12 +69,17 @@ watch(route, (x) => {
         <a href="/" class="font-medium">Frappe UI</a>
       </span>
 
-      <Button class="lg:mr-auto hidden lg:flex">
-        <template #prefix>
-          <LucideSearch class="size-4" />
-        </template>
-        Search
-      </Button>
+      <div class="hidden lg:flex items-center gap-3">
+        <a
+          v-for="(x, i) in routes"
+          class="capitalize flex gap-2 items-center text-ink-gray-5"
+          :class='{ "text-ink-gray-9": i === routes.length - 1 }'
+          :href="x.link"
+        >
+          <LucideRight class="size-4" />
+          {{ x.text }}
+        </a>
+      </div>
 
       <Button v-if="isDocs" @click="toggleMobSidebar" class="lg:hidden">
         <template #icon>
@@ -79,10 +94,17 @@ watch(route, (x) => {
       </Button>
 
       <div
-        class="gap-3 lg:flex items-center w-full lg:w-auto"
+        class="gap-3 lg:flex items-center w-full ml-auto lg:w-auto"
         :class='{ "flex": state.mobnavbar, "hidden": !state.mobnavbar }'
       >
-        <a href="/docs/getting-started">Docs</a>
+        <a href="/docs">Docs</a>
+
+        <Button class="hidden lg:flex">
+          <template #prefix>
+            <LucideSearch class="size-4" />
+          </template>
+          Search
+        </Button>
 
         <Button @click="toggleTheme" class="rounded">
           <template #icon>

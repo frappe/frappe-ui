@@ -16,7 +16,7 @@ Previously the Tab component was using Headless UI, the new one just uses Reka-u
 
 [PR Link](https://github.com/frappe/frappe-ui/pull/457)
 
-Check the [tabs doc](/docs/tabs) for detailed info
+Check the [tabs doc](/docs/components/tabs) for detailed info
 
 ## Migration
 
