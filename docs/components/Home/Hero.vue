@@ -20,7 +20,7 @@ import pkgJson from "../../../package.json";
         Build Beautiful Interfaces  Fast and accessible
       </h1>
 
-      <p class="text-2xl xl:text-3xl text-ink-gray-5 leading-relaxed">
+      <p class="text-2xl text-ink-gray-5 leading-relaxed">
         Frappe-ui is a modern Vue component library with over 30+ polished
         components
       </p>

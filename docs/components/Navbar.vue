@@ -3,10 +3,10 @@ import { onMounted, ref, watch } from "vue";
 import { Button } from "frappe-ui";
 import LucideSun from "~icons/lucide/sun";
 import LucideMoon from "~icons/lucide/moon-star";
-import LucidGithub from "~icons/lucide/github";
 import LucideSearch from "~icons/lucide/search";
 import LucideMenu from "~icons/lucide/menu";
 import LucideSide from "~icons/lucide/panel-right";
+import GithubIcon from "./Icons/Github.vue";
 
 import { useRoute } from "vitepress";
 
@@ -53,7 +53,10 @@ watch(route, (x) => {
       class="py-3 px-5 flex items-center gap-3 flex-wrap"
       :class='{ "max-w-[1440px] mx-auto": !isDocs }'
     >
-		<span class="flex gap-3 items-center mr-auto lg:mr-0" :class=' {"lg:hidden": isDocs}'>
+      <span
+        class="flex gap-3 items-center mr-auto lg:mr-0"
+        :class='{ "lg:hidden": isDocs }'
+      >
         <img src="/logo.svg" class="w-5" />
         <a href="/" class="font-medium">Frappe UI</a>
       </span>
@@ -91,11 +94,7 @@ watch(route, (x) => {
         </Button>
 
         <a href="https://github.com/frappe/frappe-ui">
-          <Button class="rounded-full">
-            <template #icon>
-              <LucidGithub class="size-4" />
-            </template>
-          </Button>
+          <GithubIcon />
         </a>
       </div>
     </div>
