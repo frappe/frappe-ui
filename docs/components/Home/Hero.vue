@@ -9,14 +9,15 @@ import pkgJson from "../../../package.json";
   <div
     class="grid gap-5 max-w-7xl mx-auto"
   >
-    <div class="mt-10 flex flex-col gap-5 text-center w-fit">
-      <Badge class="w-fit" size="lg" theme="green">
-        v{{ pkgJson.version }}
-      </Badge>
+    <div class="mt-10 p-5 flex flex-col gap-5 text-center w-fit">
+
 
       <h1
-        class="text-[48px] font-semibold tracing-tight leading-tight !m-0"
+        class="text-[48px] font-semibold tracing-tight leading-tight !m-0 relative"
       >
+			      <Badge class="absolute -top-8" size="lg" theme="green" >
+        v{{ pkgJson.version }}
+      </Badge>
         Blazing Fast Beautiful Interfaces
       </h1>
 
