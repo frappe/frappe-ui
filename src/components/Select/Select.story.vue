@@ -92,14 +92,13 @@ const reset = () => value.value = "";
 
     <Story title="Custom Option Slot">
       <Select :options="options" v-model="value">
-        {{ activeImg }}
         <template #prefix>
           <Avatar size="sm" :image="activeImg" />
         </template>
         <template #option="{ option }">
           <div class="inline-flex gap-2 items-center">
             <Avatar size="sm" :image="option.img" />
-            <SelectItemText>{{ option.label }}</SelectItemText>
+            {{ option.label }}
           </div>
         </template>
       </Select>

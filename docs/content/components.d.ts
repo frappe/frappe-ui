@@ -9,6 +9,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     LucideArrowUpRight: typeof import('~icons/lucide/arrow-up-right')['default']
+    LucideCaledar: typeof import('~icons/lucide/caledar')['default']
     LucideTrendingUp: typeof import('~icons/lucide/trending-up')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
