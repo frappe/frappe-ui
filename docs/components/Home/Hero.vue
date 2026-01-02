@@ -1,48 +1,46 @@
 <script setup lang="ts">
-import { Badge } from "frappe-ui";
+import { Badge, Button } from "frappe-ui";
 import LucideRight from "~icons/lucide/arrow-right";
-import HeroShowcase from "./HeroShowcase/index.vue";
 
 import pkgJson from "../../../package.json";
 </script>
 
 <template>
   <div
-    class="grid xl:grid-cols-2 gap-5 min-h-[calc(100vh-100px)] max-w-7xl mx-auto"
+    class="grid gap-5 max-w-7xl mx-auto"
   >
-    <div class="my-auto p-7 flex flex-col gap-5">
+    <div class="mt-10 flex flex-col gap-5 text-center w-fit">
       <Badge class="w-fit" size="lg" theme="green">
-        v{{ pkgJson.version }}</Badge>
+        v{{ pkgJson.version }}
+      </Badge>
 
       <h1
-        class="text-[2rem] xl:text-[2.7rem] font-bold tracing-tight leading-tight"
+        class="text-[48px] font-semibold tracing-tight leading-tight !m-0"
       >
-        Build Beautiful Interfaces  Fast and accessible
+        Blazing Fast Beautiful Interfaces
       </h1>
 
-      <p class="text-2xl text-ink-gray-5 leading-relaxed">
-        Frappe-ui is a modern Vue component library with over 30+ polished
-        components
+      <p class="text-2xl text-ink-gray-5 leading-relaxed w-3/4 mx-auto">
+        Beautifully crafted components built for real world applications. Better
+        defaults helping you ship faster.
       </p>
 
-      <div class="flex gap-3 mt-5">
+      <div class="flex gap-3 mt-2 mx-auto">
         <a
-          href="/docs/getting-started"
-          class="font-normal py-3 px-6 flex gap-3 items-center rounded bg-surface-gray-7 text-ink-gray-1"
+          href="/docs"
+          class="font-normal py-2 px-4 flex gap-3 items-center rounded bg-surface-gray-7 text-ink-gray-1"
         >
           Get Started
           <LucideRight class="size-4" />
         </a>
 
         <a
-          href="/docs/badge"
-          class="font-normal py-3 px-6 flex gap-3 items-center rounded bg-surface-gray-3"
+          href="/docs/components/badge"
+          class="font-normal py-2 px-4 flex gap-3 items-center rounded bg-surface-gray-3"
         >
           Show Components
         </a>
       </div>
     </div>
-
-    <HeroShowcase />
   </div>
 </template>
