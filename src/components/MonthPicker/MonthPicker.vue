@@ -64,6 +64,10 @@ const nextClick = () => {
 
 const formatBtn = (v: string | number) =>
   viewMode.value == 'month' ? (v as String).slice(0, 3) : v
+
+const txtClass = computed(() => {
+  return model.value || props.disabled ? '': '!text-ink-gray-5' 
+})
 </script>
 
 <template>
@@ -71,7 +75,8 @@ const formatBtn = (v: string | number) =>
     popover-class="mt-2 shadow-xl rounded-lg border bg-surface-modal p-2"
   >
     <template #target="{ togglePopover }">
-      <Button @click="togglePopover" class="w-full justify-between border">
+      <Button @click="togglePopover" class="w-full justify-between border" :class="txtClass"
+				:disabled="disabled">
         {{ model || props.placeholder }}
         <template #suffix> <LucideCalender class="size-4" /> </template>
       </Button>
