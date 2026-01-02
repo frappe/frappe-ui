@@ -3,7 +3,8 @@ import { reactive, ref } from "vue";
 import Tabs from "@/components/Tabs.vue";
 import LucideUser from "~icons/lucide/user";
 import LucideCog from "~icons/lucide/cog";
-import { Button, FormControl, Switch } from "frappe-ui";
+import { Button, FormControl, Progress, Switch } from "frappe-ui";
+import LucideTag from "~icons/lucide/tag";
 
 const val = ref("profile");
 const followed = ref(false);
@@ -38,7 +39,7 @@ const resetState = () => {
 
 <template>
   <div
-    class="grid gap-5 *:rounded *:border [&_label]:text-ink-gray-9 [&_label]:mb-2 [&_label]:text-base"
+    class="grid gap-5 *:rounded *:border [&_label]:text-ink-gray-9 [&_label]:mb-2 [&_label]:text-base h-fit"
   >
     <div class="h-fit">
       <Tabs
@@ -99,8 +100,27 @@ const resetState = () => {
 
         <div class="flex items-center justify-between -mb-2">
           <Button theme="red" @click="resetState"> Reset</Button>
-          <Switch label="Followers" v-model="state.followers" class='[&_label]:!m-0'/>
+          <Switch
+            label="Followers"
+            v-model="state.followers"
+            class="[&_label]:!m-0"
+          />
         </div>
+      </div>
+    </div>
+
+    <div class="p-5 grid gap-5 h-fit">
+      <Progress :value="20" label="Daily Progress" size="lg" :hint="true" />
+
+      <div class="flex gap-3">
+        <span class="p-3 px-4 rounded bg-surface-green-2 flex items-center">
+          <LucideTag class="size-5 text-ink-green-3" />
+        </span>
+
+        <p class="leading-relaxed">
+          Prize: 25% discount coupon <br />
+          <span class="text-ink-gray-6"> for all software courses</span>
+        </p>
       </div>
     </div>
   </div>

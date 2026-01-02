@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import { Avatar, Button, FormControl, MonthPicker, Select } from "frappe-ui";
+import {  Button, FormControl } from "frappe-ui";
 import LucideRight from "~icons/lucide/arrow-right";
-import LucideMap from "~icons/lucide/map-pin";
-import LucideUpload from "~icons/lucide/upload";
 
 const countryOptions = [
   { label: "Syria", value: "SY" },
@@ -12,29 +10,11 @@ const countryOptions = [
   { label: "Ireland", value: "IR" },
 ];
 
-const userVal = ref("");
-
-const users = [
-  {
-    label: "John Doe",
-    value: "john-doe",
-    img: "https://avatars.githubusercontent.com/u/499550?s=60&v=4",
-  },
-  {
-    label: "Jane Doe",
-    value: "jane-doe",
-    img: "https://avatars.githubusercontent.com/u/499550?s=60&v=4",
-  },
-];
-
-const activeImg = computed(
-  () => (users.find((x) => x.value === userVal.value)?.img),
-);
 </script>
 
 <template>
   <div
-    class="grid gap-5 *:rounded *:border [&_label]:text-ink-gray-9 [&_label]:mb-2 [&_label]:text-base"
+    class="grid gap-5 *:rounded *:border [&_label]:text-ink-gray-9 [&_label]:mb-2 [&_label]:text-base h-fit"
   >
     <div class="grid p-5 grid-cols-2 gap-y-5 gap-x-4 h-fit">
       <FormControl
