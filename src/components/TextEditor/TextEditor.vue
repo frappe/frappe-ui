@@ -56,6 +56,7 @@ import TaskItem from '@tiptap/extension-task-item'
 import TaskList from '@tiptap/extension-task-list'
 import NamedColorExtension from './extensions/color'
 import NamedHighlightExtension from './extensions/highlight'
+import Underline from '@tiptap/extension-underline'
 import improvedList from './extensions/list-extension'
 
 import { MentionExtension } from './extensions/mention'
@@ -173,6 +174,7 @@ onMounted(() => {
           }
         },
       }),
+      Underline,
       Heading.configure({
         ...(typeof props.starterkitOptions?.heading === 'object' &&
         props.starterkitOptions.heading !== null
