@@ -50,7 +50,7 @@ const resetState = () => {
 
       <div
         v-if='val == "profile"'
-        class="bg-surface-cards p-5"
+        class="p-5"
       >
         <div class="flex items-center gap-4 mb-4">
           <img src="/frappe-logo.svg" class="!size-14 rounded-full" />
@@ -83,7 +83,7 @@ const resetState = () => {
 
       <div
         v-else
-        class="bg-surface-cards p-5 grid gap-5"
+        class="p-5 grid gap-5"
       >
         <FormControl
           v-model="state.username"
