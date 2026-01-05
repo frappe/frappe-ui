@@ -1,7 +1,24 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import {  Button, FormControl } from "frappe-ui";
+import {
+  Avatar,
+  Badge,
+  Button,
+  FormControl,
+  Rating,
+  Select,
+  Switch,
+  TextInput,
+  Tooltip,
+} from "frappe-ui";
 import LucideRight from "~icons/lucide/arrow-right";
+import LucideUser from "~icons/lucide/user";
+import LucideMail from "~icons/lucide/mail";
+import LucideGlobe from "~icons/lucide/globe";
+import LucideLink from "~icons/lucide/link";
+import LucideSearch from "~icons/lucide/search";
+import LucideInfo from "~icons/lucide/info";
+import LucideCircle from "~icons/lucide/circle-plus";
 
 const countryOptions = [
   { label: "Syria", value: "SY" },
@@ -10,6 +27,23 @@ const countryOptions = [
   { label: "Ireland", value: "IR" },
 ];
 
+const users = [
+  {
+    name: "Sandeep",
+    mail: "sandeep@gmail.com",
+    img: "https://i.pravatar.cc/150?img=1",
+  },
+  {
+    name: "John",
+    mail: "john@gmail.com",
+    img: "https://i.pravatar.cc/150?img=2",
+  },
+  {
+    name: "Jane",
+    mail: "jane@gmail.com",
+    img: "https://i.pravatar.cc/150?img=3",
+  },
+];
 </script>
 
 <template>
@@ -90,8 +124,75 @@ const countryOptions = [
       </Button>
     </div>
 
-    <div class="grid p-5 grid-cols-2 gap-y-5 gap-x-4">
-			something here
+    <div class="p-5 grid gap-5">
+      <h1 class="font-semibold text-lg">Create Project</h1>
+      <FormControl
+        label="Title"
+        variant="outline"
+        placeholder="Enter title"
+        value="Operations"
+      />
+
+      <div class="flex gap-3">
+        <div class="my-auto bg-surface-gray-2 p-2 rounded">
+          <LucideGlobe class="size-6" />
+        </div>
+        <div class="grid gap-1 mr-auto">
+          <span class="text-ink-gray-9">Visible to everyone</span>
+          <p class="text-ink-gray-5">
+            Collaborate and stay in sync
+          </p>
+        </div>
+        <Switch />
+      </div>
+
+      <Select placeholder="Add people or emails" variant="outline">
+        <template #prefix>
+          <LucideSearch class="size-4" />
+        </template>
+      </Select>
+
+      <label class="!m-0">Members</label>
+
+      <div v-for="x in users" class="flex gap-3">
+        <Avatar size="xl" label="S" class="my-auto" :image="x.img" />
+
+        <div class="grid gap-1">
+          <span>{{ x.name }}</span>
+          <span class="text-ink-gray-6">{{ x.mail }}</span>
+        </div>
+
+        <Select
+          :options='["Admin", "Editor", "Viewer", "Guest"]'
+          class="my-auto ml-auto !w-fit"
+          variant="ghost"
+          placeholder="Select"
+        />
+      </div>
+
+      <div class="flex gap-3 justify-between items-center">
+        <Button>
+          <template #prefix>
+            <LucideLink class="size-4" />
+          </template>
+          Copy Link</Button>
+
+        <Tooltip
+          text="Gotchu!"
+          hover-delay="0"
+        >
+          <span class="flex gap-2">
+            Learn more
+            <LucideInfo class="size-4" />
+          </span>
+        </Tooltip>
+      </div>
+
+      <Button variant="solid">
+        <template #prefix>
+          <LucideCircle class="size-4" />
+        </template>
+        Create project</Button>
     </div>
   </div>
 </template>

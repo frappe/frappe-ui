@@ -79,9 +79,9 @@ const strengthLabel = computed(() =>
 
 <template>
   <div
-    class="grid gap-5 *:rounded *:border [&_label]:text-ink-gray-9 [&_label]:mb-2 [&_label]:text-base"
+    class="grid gap-5 *:rounded *:border [&_label]:text-ink-gray-9 [&_label]:mb-2 [&_label]:text-base h-fit"
   >
-    <div class="p-5 bg-surface-cards h-fit">
+    <div class="p-5 bg-urface-cards h-fit">
       <Tree
         :options="
           {
@@ -148,7 +148,7 @@ const strengthLabel = computed(() =>
         </template>
       </Progress>
 
-      <div class="px-8 !py-3 rounded bg-surface-gray-2 text-sm text-ink-gray-5">
+      <div class="px-8 !py-3 rounded bg-surface-gray-1 text-sm text-ink-gray-5">
         <li :class='{ "line-through opacity-60": hasValidLength }'>
           Includes 9-16 characters
         </li>

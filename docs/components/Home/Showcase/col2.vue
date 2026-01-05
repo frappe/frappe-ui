@@ -3,8 +3,16 @@ import { reactive, ref } from "vue";
 import Tabs from "@/components/Tabs.vue";
 import LucideUser from "~icons/lucide/user";
 import LucideCog from "~icons/lucide/cog";
-import { Button, FormControl, Progress, Switch } from "frappe-ui";
+import {
+  Badge,
+  Button,
+  FormControl,
+  Progress,
+  Rating,
+  Switch,
+} from "frappe-ui";
 import LucideTag from "~icons/lucide/tag";
+import LucideCloud from "~icons/lucide/cloud";
 
 const val = ref("profile");
 const followed = ref(false);
@@ -121,6 +129,43 @@ const resetState = () => {
           Prize: 25% discount coupon <br />
           <span class="text-ink-gray-6"> for all software courses</span>
         </p>
+      </div>
+    </div>
+
+    <div class="p-5 grid grid-cols-2 *:col-span-2 gap-3">
+      <FormControl
+        label="Username"
+        placeholder="Enter username"
+      >
+        <template #prefix>
+          <LucideUser class="size-4" />
+        </template>
+      </FormControl>
+
+      <FormControl
+        label="mail"
+        :options="countryOptions"
+        placeholder="Enter mail"
+      >
+        <template #prefix>
+          <LucideMail class="size-4" />
+        </template>
+      </FormControl>
+
+      <Rating class="!col-span-1" label="Rating" />
+
+      <div class="!col-span-1 flex flex-wrap gap-x-1">
+        <label class="w-full">Status</label>
+
+        <Badge size="lg" theme="blue" class="rounded-sm"> Stable</Badge>
+        <Badge size="lg" theme="orange" class="rounded-sm"> Moderate</Badge>
+      </div>
+
+      <hr />
+
+      <div class="grid grid-cols-2 gap-3">
+        <Button> Cancel </Button>
+        <Button variant="solid"> Submit </Button>
       </div>
     </div>
   </div>

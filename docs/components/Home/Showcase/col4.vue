@@ -1,9 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from "vue";
-import { Avatar, Badge, Button, Progress, Slider } from "frappe-ui";
-import LucideSun from "~icons/lucide/sun";
-import LucideMinus from "~icons/lucide/minus";
-import LucidePlus from "~icons/lucide/plus";
+import { Avatar, Badge, Button, Progress, Slider, Switch } from "frappe-ui";
 import LucideCoins from "~icons/lucide/circle-dollar-sign";
 
 const imgs = [
@@ -29,8 +26,8 @@ const decProgress = () => {
 
 const themes = ["green", "red", "blue", "yellow", "gray"];
 
-const slider1Val = ref([30]);
 const slider2Val = ref([20, 50]);
+const switchVal = ref(true);
 
 const progressData = [
   {
@@ -85,10 +82,7 @@ const progressData = [
           size="lg"
           class="rounded-sm"
         >
-          {{
-            themes[Math.floor(Math.random() * themes.length)] ||
-              "gray"
-          }}
+          {{ tag }}
         </Badge>
       </div>
 
@@ -109,14 +103,14 @@ const progressData = [
       <div
         class="grid grid-cols-2 mt-3 gap-3 *:py-4 border-t rounded pt-3"
       >
-        <Button @click="decProgress">Skip</Button>
+        <Button @click="decProgress">Back</Button>
         <Button @click="incProgress" variant="solid">Next</Button>
       </div>
     </div>
 
     <div class="px-5 py-3 flex flex-col gap-3 !order-0">
       <div class="flex items-center gap-2 justify-between">
-        <span class='flex gap-2'>
+        <span class="flex gap-2">
           <LucideCoins class="size-4" />
           Price range
         </span>
@@ -130,6 +124,30 @@ const progressData = [
       <div class="flex gap-3 items-center justify-between">
         <span>$0</span>
         <span>$1000</span>
+      </div>
+    </div>
+
+    <div class="grid p-5 gap-y-3 gap-x-4">
+      <div class="flex gap-3 justify-between">
+        <div class="grid gap-2">
+          <span class="text-ink-gray-9">Smart compose</span>
+          <p class="text-ink-gray-5">
+            Enable predictive suggestions
+          </p>
+        </div>
+        <Switch v-model="switchVal" />
+      </div>
+
+      <hr />
+
+      <div class="flex gap-2 justify-between">
+        <div class="grid gap-2">
+          <span class="text-ink-gray-9">Inline completions</span>
+          <p class="text-ink-gray-5">
+            Auto completions as you type
+          </p>
+        </div>
+        <Switch />
       </div>
     </div>
   </div>
