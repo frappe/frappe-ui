@@ -6,7 +6,6 @@ import LucideFolder from "~icons/lucide/folder";
 import LucideFile from "~icons/lucide/file";
 import LucideShield from "~icons/lucide/shield-plus";
 import LucideChevronRight from "~icons/lucide/chevron-right";
-import { isFunctionDeclaration } from "typescript";
 
 const treeState = reactive({
   showIndentationGuides: true,
@@ -53,6 +52,29 @@ const treeState = reactive({
     ],
   },
 });
+
+const password = ref("000000000");
+const hasValidLength = computed(() => password.value.length >= 9);
+
+const hasLettersAndNumbers = computed(
+  () => /[a-zA-Z]/.test(password.value) && /\d/.test(password.value),
+);
+const hasSpecialChar = computed(
+  () => /[#@$%^&*_?@~]/.test(password.value),
+);
+
+const strengthScore = computed(() =>
+  [hasValidLength.value, hasLettersAndNumbers.value, hasSpecialChar.value]
+    .filter(Boolean).length
+);
+
+const strengthLabel = computed(() =>
+  strengthScore.value <= 1
+    ? { text: "Weak", class: "text-ink-red-3" }
+    : strengthScore.value === 2
+    ? { text: "Moderate", class: "text-ink-yellow-3" }
+    : { text: "Strong", class: "text-ink-green-3" }
+);
 </script>
 
 <template>
@@ -105,27 +127,37 @@ const treeState = reactive({
 
       <div class="grid">
         <label class="!text-ink-gray-5">Password</label>
-        <Password placeholder="Enter password" variant="outline" />
+        <Password
+          v-model="password"
+          placeholder="Enter password"
+          variant="outline"
+        />
       </div>
 
       <Progress
         label="Password Strength"
         class="[&_label]:text-ink-gray-5 mt-3"
-        :value="30"
+        :value="strengthScore < 3 ? strengthScore * 30 : 100"
         :hint="true"
-				size='md'
+        size="md"
       >
         <template #hint>
-          <span class="text-sm text-ink-red-3">
-            Weak
+          <span class="text-sm" :class="strengthLabel.class">
+            {{ strengthLabel.text }}
           </span>
         </template>
       </Progress>
 
       <div class="px-8 !py-3 rounded bg-surface-gray-2 text-sm text-ink-gray-5">
-          <li class='line-through'>Includes 9-16 characters</li>
-          <li>Combines letters and numbers</li>
-          <li>A special character #@$%^&*_?@~</li>
+        <li :class='{ "line-through opacity-60": hasValidLength }'>
+          Includes 9-16 characters
+        </li>
+        <li :class='{ "line-through opacity-60": hasLettersAndNumbers }'>
+          Combines letters and numbers
+        </li>
+        <li :class='{ "line-through opacity-60": hasSpecialChar }'>
+          A special character #@$%^&*_?@~
+        </li>
       </div>
 
       <Button variant="solid" class="w-full py-4">
