@@ -29,10 +29,10 @@ export default defineConfig({
       'script',
       {},
       `;(() => {
-      const preference = localStorage.getItem('vitepress-theme-appearance') || 'auto'
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-      const isDark = preference === 'auto' ? prefersDark : preference === 'dark'
-      document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light')
+      const preferredTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+      const theme = localStorage.getItem('theme') || preferredTheme
+      document.documentElement.setAttribute('data-theme', theme)
+      localStorage.theme = theme
     })()`,
     ],
 

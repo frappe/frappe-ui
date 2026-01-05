@@ -18,6 +18,7 @@ const theme = ref();
 const toggleTheme = () => {
   theme.value = theme.value === "dark" ? "light" : "dark";
   document.documentElement.setAttribute("data-theme", theme.value);
+  localStorage.theme = theme.value;
 };
 
 const toggleMobSidebar = () => {
