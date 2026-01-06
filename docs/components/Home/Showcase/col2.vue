@@ -3,6 +3,7 @@ import { reactive, ref } from "vue";
 import Tabs from "@/components/Tabs.vue";
 import LucideUser from "~icons/lucide/user";
 import LucideCog from "~icons/lucide/cog";
+import LucideRight from "~icons/lucide/chevron-right";
 import {
   Badge,
   Button,
@@ -47,7 +48,7 @@ const resetState = () => {
 
 <template>
   <div
-    class="grid gap-5 *:rounded *:border [&_label]:text-ink-gray-9 [&_label]:mb-2 [&_label]:text-base h-fit"
+    class="grid gap-5 *:rounded *:border [&_label]:text-ink-gray-9 [&_label]:mb-2 [&_label]:text-base"
   >
     <div class="h-fit">
       <Tabs
@@ -132,7 +133,7 @@ const resetState = () => {
       </div>
     </div>
 
-    <div class="p-5 grid grid-cols-2 *:col-span-2 gap-3">
+    <div class="p-5 grid grid-cols-2 *:col-span-2 gap-y-5">
       <FormControl
         label="Username"
         placeholder="Enter username"
@@ -160,13 +161,66 @@ const resetState = () => {
         <Badge size="lg" theme="blue" class="rounded-sm"> Stable</Badge>
         <Badge size="lg" theme="orange" class="rounded-sm"> Moderate</Badge>
       </div>
+    </div>
 
-      <hr />
-
-      <div class="grid grid-cols-2 gap-3">
-        <Button> Cancel </Button>
-        <Button variant="solid"> Submit </Button>
+    <div class="p-2 grid ga-5 h-full [&_label]:!m-0 *:rounded *:cursor-pointer">
+      <div class="flex items-center gap-2 boder-b p-1 px-2 pb-3 !rounded-none">
+        <span class="text-ink-gray-5"> Settings </span>
+        <LucideRight class="size-4 text-ink-gray-5" />
+        <span class="text-ink-gray-5"> System </span>
+        <LucideRight class="size-4 text-ink-gray-5" />
+        <span>Power </span>
       </div>
+
+      <label class="flex gap-3 p-3 has-[:checked]:bg-surface-gray-1" for="balanced">
+        <div class="grid gap-1 flex-1">
+          <span>Balanced </span>
+          <span class="text-ink-gray-4">
+            Automatically balances performance with energy consumption
+          </span>
+        </div>
+
+        <input
+          type="radio"
+          id="balanced"
+          name="power"
+          defaultChecked
+          class="m-auto bg-surface-gray-2 text-ink-gray-9 dark:text-ink-gray-3 focus:!ring-outline-gray-5 transition-all"
+        />
+      </label>
+
+      <label class="flex gap-3 p-3 has-[:checked]:bg-surface-gray-1" for="power-save">
+        <div class="grid gap-1 flex-1">
+          <span> Power Saving</span>
+          <span class="text-ink-gray-4">
+            Saves energy by reducing performance where possible
+          </span>
+        </div>
+
+        <input
+          type="radio"
+          class="m-auto bg-surface-gray-2 text-ink-gray-9 dark:text-ink-gray-3 focus:!ring-outline-gray-5 transition-all"
+          id="power-save"
+          name="power"
+        />
+
+      </label>
+
+      <label class="flex gap-3 p-3 has-[:checked]:bg-surface-gray-1" for="perf">
+        <div class="grid gap-1 flex-1">
+          <span> Performance</span>
+          <span class="text-ink-gray-4">
+            High performance but uses more energy
+          </span>
+        </div>
+
+        <input
+          type="radio"
+          class="m-auto bg-surface-gray-2 text-ink-gray-9 dark:text-ink-gray-3 focus:!ring-outline-gray-5 transition-all"
+          id="perf"
+          name="power"
+        />
+      </label>
     </div>
   </div>
 </template>

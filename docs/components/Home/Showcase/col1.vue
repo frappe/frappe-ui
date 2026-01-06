@@ -30,20 +30,22 @@ const countryOptions = [
 const users = [
   {
     name: "Sandeep",
-    mail: "sandeep@gmail.com",
+    label: "sandeep@gmail.com",
     img: "https://i.pravatar.cc/150?img=1",
   },
   {
     name: "John",
-    mail: "john@gmail.com",
+    label: "john@proton.me",
     img: "https://i.pravatar.cc/150?img=2",
   },
   {
-    name: "Jane",
-    mail: "jane@gmail.com",
+    name: "Zach",
+    label: "zach@frappe.io",
     img: "https://i.pravatar.cc/150?img=3",
   },
 ];
+
+const selOpts = ["Admin", "Editor", "Viewer", "Guest"]
 </script>
 
 <template>
@@ -146,7 +148,7 @@ const users = [
         <Switch />
       </div>
 
-      <Select placeholder="Add people or emails" variant="outline">
+      <Select placeholder="Add people or emails" variant="outline" :options="users">
         <template #prefix>
           <LucideSearch class="size-4" />
         </template>
@@ -159,14 +161,15 @@ const users = [
 
         <div class="grid gap-1">
           <span>{{ x.name }}</span>
-          <span class="text-ink-gray-6">{{ x.mail }}</span>
+          <span class="text-ink-gray-6">{{ x.label }}</span>
         </div>
 
         <Select
-          :options='["Admin", "Editor", "Viewer", "Guest"]'
+          :options='selOpts'
           class="my-auto ml-auto !w-fit"
           variant="ghost"
           placeholder="Select"
+          :defaultValue="selOpts[Math.floor(Math.random() * selOpts.length)]"
         />
       </div>
 

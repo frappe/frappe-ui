@@ -1,6 +1,14 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from "vue";
-import { Avatar, Badge, Button, Progress, Slider, Switch } from "frappe-ui";
+import {
+  Avatar,
+  Badge,
+  Button,
+  Checkbox,
+  Progress,
+  Slider,
+  Switch,
+} from "frappe-ui";
 import LucideCoins from "~icons/lucide/circle-dollar-sign";
 
 const imgs = [
@@ -11,6 +19,7 @@ const imgs = [
 ];
 
 const progressVal = ref(1);
+const checkboxVal = ref(true);
 
 const incProgress = () => {
   if (progressVal.value < 3) {
@@ -108,7 +117,7 @@ const progressData = [
       </div>
     </div>
 
-    <div class="px-5 py-3 flex flex-col gap-3 !order-0">
+    <div class="p-5 flex flex-col gap-3">
       <div class="flex items-center gap-2 justify-between">
         <span class="flex gap-2">
           <LucideCoins class="size-4" />
@@ -149,6 +158,18 @@ const progressData = [
         </div>
         <Switch />
       </div>
+    </div>
+
+    <div
+      class="p-5 transition-all duration-200"
+      :class='{ "border-outline-gray-5": checkboxVal }'
+    >
+      <Checkbox
+        v-model="checkboxVal"
+        label="I agree to the terms and conditions"
+        size="md"
+        class="gap-3 [&_label]:!m-0"
+      />
     </div>
   </div>
 </template>
