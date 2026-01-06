@@ -18,14 +18,14 @@ const props = defineProps<Props>();
 
 <template>
   <div
-    class="grid grid-cols-3 bg-surface-gray-2 rounded p-3 px-4 text-ink-gray-5"
+    class="grid grid-cols-3 bg-surface-gray-2 rounded p-3 px-4 text-ink-gray-5 mb-3"
   >
     <span>Prop</span>
     <span>Default</span>
     <span>Type </span>
   </div>
 
-  <section class="grid grid-cols-3 p-4 w-full gap-5 overflow-auto scrollbar">
+  <section class="grid grid-cols-3 p-4 w-full gap-3 overflow-auto scrollbar">
     <template v-for="(x, i) in props.data" :key="x.name">
       <Badge
         size="xl"
@@ -35,9 +35,20 @@ const props = defineProps<Props>();
         {{ x.name }}
       </Badge>
 
-      <Badge class="w-fit !rounded" size="lg"> {{ x.default || "-" }} </Badge>
+      <Badge
+        class="w-fit !rounded"
+        :class='
+          {
+            "whitespace-pre px-3 py-2 leading-relaxed h-full !bg-surface-gray-1":
+              x.default?.includes("{"),
+          }
+        '
+        :size='x.default?.includes("{") ? "lg" : "md"'
+      >
+        {{ x.default || "-" }}
+      </Badge>
 
-      <div class='flex flex-wrap gap-1'>
+      <div class="flex flex-wrap gap-2 h-fit">
         <Badge
           v-for='item in x.type?.split("|")'
           size="md"
@@ -47,7 +58,7 @@ const props = defineProps<Props>();
           {{ item }}
         </Badge>
 
-        <p class="text-sm !m-1 text-ink-gray-6">{{ x.description }}</p>
+        <p class="text-sm  text-ink-gray-6 leading-relaxed">{{ x.description }}</p>
       </div>
 
       <hr

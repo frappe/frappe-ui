@@ -37,7 +37,7 @@ const props = defineProps<Props>();
           <span> {{ x.type }} </span>
         </Badge>
 
-        <p class="text-sm !m-1 !leading-1 text-ink-gray-5">{{ x.description }}</p>
+        <p class="text-sm !m-1 leading-relaxed text-ink-gray-5">{{ x.description }}</p>
       </div>
 
       <hr
