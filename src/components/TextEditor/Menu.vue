@@ -204,7 +204,9 @@ const props = defineProps({
 const editor = inject('editor')
 
 const onButtonClick = (button) => {
-  button.action(editor.value)
+  if (button.action && typeof button.action === 'function') {
+    button.action(editor.value)
+  }
 }
 const getActiveButton = (group) => {
   return group.find((b) => b.isActive?.(editor.value))
