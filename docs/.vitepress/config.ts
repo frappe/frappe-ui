@@ -1,8 +1,6 @@
-import { defineConfig, postcssIsolateStyles } from 'vitepress'
+import { defineConfig } from 'vitepress'
 import { lucideIcons } from '../../vite/lucideIcons'
 import path from 'path'
-import tailwind from 'tailwindcss'
-import autoprefixer from 'autoprefixer'
 // import sidebarConfig from './sidebar'
 import { meta } from './meta'
 
@@ -87,18 +85,6 @@ export default defineConfig({
         '@/srcomponents': path.resolve(__dirname, '../../src/components'),
         '@/components': path.resolve(__dirname, '../components/'),
         'frappe-ui': path.resolve(__dirname, '../../src'),
-      },
-    },
-    css: {
-      postcss: {
-        plugins: [
-          tailwind(),
-          autoprefixer(),
-					  //    postcssIsolateStyles({
-					  // prefix: ':not(:where(.vp-style-raw, .vp-style-raw *, .vp-raw, .vp-raw *))',
-					  //      includeFiles: [/vp-doc\.css/, /base\.css/],
-					  //    }),
-        ],
       },
     },
   },
