@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from "vue";
-import { Button, Password, Progress, Tree } from "frappe-ui";
+import { Avatar, Button, Password, Progress, Tree } from "frappe-ui";
 
 import LucideFolder from "~icons/lucide/folder";
 import LucideFile from "~icons/lucide/file";
 import LucideShield from "~icons/lucide/shield-plus";
 import LucideChevronRight from "~icons/lucide/chevron-right";
+import LucideBell from "~icons/lucide/bell";
+import LucideX from "~icons/lucide/X";
+import LucideUpDown from "~icons/lucide/arrow-down-up";
 
 const treeState = reactive({
   showIndentationGuides: true,
@@ -75,6 +78,33 @@ const strengthLabel = computed(() =>
     ? { text: "Moderate", class: "text-ink-yellow-3" }
     : { text: "Strong", class: "text-ink-green-3" }
 );
+
+const notifs = [
+  {
+    img: "https://randomuser.me/api/portraits/men/32.jpg",
+    name: "Matthew Connor",
+    txt: "The deadline for you is tomorrow.",
+    type: "invitation",
+    time: "Just now",
+    unread: false,
+  },
+  {
+    img: "https://randomuser.me/api/portraits/men/45.jpg",
+    name: "Eeren McKenzie",
+    txt: "Review the latest design updates",
+    type: null,
+    time: "5 min ago",
+    unread: true,
+  },
+  {
+    img: "https://randomuser.me/api/portraits/men/68.jpg",
+    name: "John Doe",
+    txt: "Review the design changes",
+    type: null,
+    time: "10 min ago",
+    unread: true,
+  },
+];
 </script>
 
 <template>
@@ -163,6 +193,42 @@ const strengthLabel = computed(() =>
       <Button variant="solid" class="w-full py-4">
         Create password
       </Button>
+    </div>
+
+    <div>
+      <div class="flex gap-3 p-4 border-b">
+        <LucideBell class="size-4" />
+
+        Notifications
+
+        <LucideUpDown class="size-4 ml-auto" />
+        <LucideX class="size-4" />
+      </div>
+      <div
+        v-for="(x, i) in notifs"
+        class="flex gap-4 p-4"
+        :class='{ "border-b": i < notifs.length - 1 }'
+      >
+        <Avatar size="xl" :image="x.img" />
+
+        <div class="flex flex-wrap gap-x-2 gap-y-2">
+          <span class="w-full">{{ x.name }}</span>
+          <p class="w-full text-ink-gray-6">
+            {{ x.txt }}
+          </p>
+          <span class="w-full text-ink-gray-4"> {{ x.time }}</span>
+
+          <template v-if="x.type">
+            <Button>Accept</Button>
+            <Button variant="outline">Reject</Button>
+          </template>
+        </div>
+
+        <span
+          v-if="x.unread"
+          class="bg-surface-blue-3 rounded-full w-1 h-1 my-auto shrink-0"
+        ></span>
+      </div>
     </div>
   </section>
 </template>

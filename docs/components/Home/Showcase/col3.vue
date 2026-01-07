@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { computed, reactive, ref } from "vue";
+import { ref } from "vue";
 import {
   Avatar,
   Badge,
   Button,
   Checkbox,
-  FormControl,
   Progress,
   Select,
   Slider,
@@ -18,6 +17,7 @@ import LucideMapPin from "~icons/lucide/map-pin";
 import LucideClock from "~icons/lucide/clock";
 import LucideCalendar from "~icons/lucide/calendar";
 import LucideX from "~icons/lucide/x";
+import LucideLink from "~icons/lucide/send";
 
 const imgs = [
   "https://avatars.githubusercontent.com/u/499550?s=60&v=4",
@@ -228,22 +228,32 @@ const toggledDiv = ref(false);
         />
       </div>
 
-      <div class="flex items-center gap-2 py-2 border-y">
-        <LucideVideo class="size-4" />
-        <span>Location</span>
-
-        <Badge class="ml-auto rounded-sm" size="lg">
-          <LucideMapPin class="size-4" />
-          Remote, Relief...
-        </Badge>
-      </div>
-
-      <span class="flex items-center gap-2 pt-2 items">
+      <span
+        class="flex items-center gap-2 border-y py-2 items text-sm text-ink-gray-6"
+      >
         <LucideClock class="size-4" />
         4:00 PM - 5:00 PM
         <LucideCalendar class="size-4 ml-auto" />
         Oct 19 2023
       </span>
+
+      <div class="flex items-center gap-2 pt-2">
+        <LucideVideo class="size-4" />
+        <span>Location</span>
+
+        <Button thme="blue" class="ml-auto">
+          <template #prefix>
+            <LucideMapPin class="size-4" />
+          </template>
+          Remote
+        </Button>
+
+        <Button variant="solid" size="sm" class="px-3">
+          <template #icon>
+            <LucideLink class="size-4 shrink-0" />
+          </template>
+        </Button>
+      </div>
     </div>
   </section>
 </template>

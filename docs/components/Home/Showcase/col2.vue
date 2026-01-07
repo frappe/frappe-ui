@@ -47,7 +47,7 @@ const resetState = () => {
 
 <template>
   <section
-    class="grid gap-5 *:rounded *:border [&_label]:text-ink-gray-9 [&_label]:mb-2 [&_label]:text-base"
+    class="grid gap-5 *:rounded *:border [&_label]:text-ink-gray-9 [&_label]:mb-2 [&_label]:text-base h-fit"
   >
     <div class="h-fit">
       <Tabs
@@ -121,8 +121,8 @@ const resetState = () => {
       <Progress :value="20" label="Daily Progress" size="lg" :hint="true" />
 
       <div class="flex gap-3">
-        <span class="p-3 px-4 rounded bg-surface-green-2 flex items-center">
-          <LucideTag class="size-5 text-ink-green-3" />
+        <span class="p-3 px-4 rounded bg-surface-gray-2 flex items-center">
+          <LucideTag class="size-5" />
         </span>
 
         <p class="leading-relaxed">
@@ -162,8 +162,8 @@ const resetState = () => {
       </div>
     </div>
 
-    <div class="p-2 grid ga-5 h-full [&_label]:!m-0 *:rounded *:cursor-pointer">
-      <div class="flex items-center gap-2 boder-b p-1 px-2 pb-3 !rounded-none">
+    <div class="p-2 grid  h-full [&_label]:!m-0 *:rounded *:cursor-pointer">
+      <div class="flex items-center gap-2 boder-b p-2 px-2 pb-3 !rounded-none">
         <span class="text-ink-gray-5"> Settings </span>
         <LucideRight class="size-4 text-ink-gray-5" />
         <span class="text-ink-gray-5"> System </span>
