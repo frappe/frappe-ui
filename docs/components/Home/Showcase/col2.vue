@@ -13,7 +13,6 @@ import {
   Switch,
 } from "frappe-ui";
 import LucideTag from "~icons/lucide/tag";
-import LucideCloud from "~icons/lucide/cloud";
 
 const val = ref("profile");
 const followed = ref(false);
@@ -47,7 +46,7 @@ const resetState = () => {
 </script>
 
 <template>
-  <div
+  <section
     class="grid gap-5 *:rounded *:border [&_label]:text-ink-gray-9 [&_label]:mb-2 [&_label]:text-base"
   >
     <div class="h-fit">
@@ -222,5 +221,5 @@ const resetState = () => {
         />
       </label>
     </div>
-  </div>
+  </section>
 </template>

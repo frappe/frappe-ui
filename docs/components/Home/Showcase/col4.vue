@@ -78,7 +78,7 @@ const strengthLabel = computed(() =>
 </script>
 
 <template>
-  <div
+  <section
     class="grid gap-5 *:rounded *:border [&_label]:text-ink-gray-9 [&_label]:mb-2 [&_label]:text-base h-fit"
   >
     <div class="p-5 bg-urface-cards h-fit">
@@ -164,5 +164,5 @@ const strengthLabel = computed(() =>
         Create password
       </Button>
     </div>
-  </div>
+  </section>
 </template>

@@ -5,11 +5,19 @@ import {
   Badge,
   Button,
   Checkbox,
+  FormControl,
   Progress,
+  Select,
   Slider,
   Switch,
 } from "frappe-ui";
 import LucideCoins from "~icons/lucide/circle-dollar-sign";
+import LucideUsers from "~icons/lucide/users";
+import LucideVideo from "~icons/lucide/video";
+import LucideMapPin from "~icons/lucide/map-pin";
+import LucideClock from "~icons/lucide/clock";
+import LucideCalendar from "~icons/lucide/calendar";
+import LucideX from "~icons/lucide/x";
 
 const imgs = [
   "https://avatars.githubusercontent.com/u/499550?s=60&v=4",
@@ -60,10 +68,12 @@ const progressData = [
     tags: ["Strategy", "Analytics"],
   },
 ];
+
+const toggledDiv = ref(false);
 </script>
 
 <template>
-  <div
+  <section
     class="grid gap-5 *:rounded *:border [&_label]:text-ink-gray-9 [&_label]:mb-2 [&_label]:text-base h-fit"
   >
     <div class="p-5 h-fit prose prose-sm">
@@ -171,5 +181,69 @@ const progressData = [
         class="gap-3 [&_label]:!m-0"
       />
     </div>
-  </div>
+
+    <div
+      class="p-4 grid"
+      :class='{ "animate-bounce bg-surface-white shadow-lg": toggledDiv }'
+    >
+      <h3 class="text-xl mb-2 font-semibold flex gap-3 justify-between">
+        Schedule an event
+        <LucideX class="size-5" @click="toggledDiv = !toggledDiv" />
+      </h3>
+
+      <span class="leading-relaxed mb-1">Product marketing</span>
+      <p class="leading-relaxed text-ink-gray-5 mb-2">
+        Discussion of new marketing strategies and pricing for the new project
+      </p>
+
+      <div
+        class="grid grid-cols-[auto_1fr_auto] gap-3 pt-2 items-center border-t"
+      >
+        <LucideUsers class="size-4 row-span-2 mb-auto" />
+
+        <div>
+          Add guests <br />
+
+          <span
+            class="flex gap-1 items-center whitespace-nowrap text-sm w-fit h-fit mt-2 text-ink-gray-5"
+          >
+            <Avatar
+              size="sm"
+              :image="imgs[0]"
+              class="border-2 border-surface-white"
+            />
+            <Avatar
+              size="sm"
+              :image="imgs[0]"
+              class="border-2 border-surface-white -ml-2"
+            />
+
+            1 awaiting
+          </span>
+        </div>
+
+        <Select
+          :options='["Send Invite"]'
+          defaultValue="Send Invite"
+        />
+      </div>
+
+      <div class="flex items-center gap-2 py-2 border-y">
+        <LucideVideo class="size-4" />
+        <span>Location</span>
+
+        <Badge class="ml-auto rounded-sm" size="lg">
+          <LucideMapPin class="size-4" />
+          Remote, Relief...
+        </Badge>
+      </div>
+
+      <span class="flex items-center gap-2 pt-2 items">
+        <LucideClock class="size-4" />
+        4:00 PM - 5:00 PM
+        <LucideCalendar class="size-4 ml-auto" />
+        Oct 19 2023
+      </span>
+    </div>
+  </section>
 </template>

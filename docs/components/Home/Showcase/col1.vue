@@ -49,7 +49,7 @@ const selOpts = ["Admin", "Editor", "Viewer", "Guest"]
 </script>
 
 <template>
-  <div
+  <section
     class="grid gap-5 *:rounded *:border [&_label]:text-ink-gray-9 [&_label]:mb-2 [&_label]:text-base h-fit"
   >
     <div class="grid p-5 grid-cols-2 gap-y-5 gap-x-4 h-fit">
@@ -197,5 +197,5 @@ const selOpts = ["Admin", "Editor", "Viewer", "Guest"]
         </template>
         Create project</Button>
     </div>
-  </div>
+  </section>
 </template>
