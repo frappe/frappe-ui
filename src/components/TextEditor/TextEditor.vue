@@ -69,6 +69,7 @@ import { TagNode, TagExtension } from './extensions/tag/tag-extension'
 import { Heading } from './extensions/heading/heading'
 import { ImageGroup } from './extensions/image-group/image-group-extension'
 import { ExtendedCode, ExtendedCodeBlock } from './extensions/code-block'
+import { AttachmentExtension } from './extensions/attachment'
 import { useFileUpload } from '../../utils/useFileUpload'
 import { TextEditorEmits, TextEditorProps } from './types'
 
@@ -202,6 +203,9 @@ onMounted(() => {
         uploadFunction: props.uploadFunction || defaultUploadFunction,
       }),
       ImageGroup.configure({
+        uploadFunction: props.uploadFunction || defaultUploadFunction,
+      }),
+      AttachmentExtension.configure({
         uploadFunction: props.uploadFunction || defaultUploadFunction,
       }),
       ImageViewerExtension,
