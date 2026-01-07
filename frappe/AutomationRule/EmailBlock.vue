@@ -45,9 +45,25 @@
         <DropdownOptions :options="options" />
       </template>
     </BaseBlock>
+
+    <BaseBlock
+      title="Subject"
+      rounded="none"
+      v-if="action.via === 'rich_text'"
+      :indent
+    >
+      <template #footer>
+        <FormControl
+          v-model="action.subject"
+          placeholder="Enter subject"
+          variant="outline"
+        />
+      </template>
+    </BaseBlock>
+
     <BaseBlock
       icon="align"
-      title="Text"
+      title="Message"
       rounded="bottom"
       v-if="action.via === 'rich_text'"
       :indent
@@ -67,6 +83,7 @@
 <script setup lang="ts">
 import { ModelRef } from 'vue'
 import Checkbox from '../../src/components/Checkbox/Checkbox.vue'
+import FormControl from '../../src/components/FormControl/FormControl.vue'
 import Select from '../../src/components/Select/Select.vue'
 import TextEditor from '../../src/components/TextEditor/TextEditor.vue'
 import { useDoctypeMeta } from '../../src/data-fetching/useDoctypeMeta'

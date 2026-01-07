@@ -35,6 +35,7 @@ export interface SendEmailAction {
   type: 'email'
   to: string
   via: 'rich_text' | 'template'
+  subject?: string
   message?: string
   template?: string
   doctype?: string
@@ -58,8 +59,15 @@ export interface AutomationState {
   name: string
   enabled: boolean
   dt: string
-  eventType: 'created' | 'updated' | 'time'
-  selectedTimerOption?: number
+  eventType:
+    | 'created'
+    | 'updated'
+    | 'Minutes After'
+    | 'Minutes Before'
+    | 'Days After'
+    | 'Days Before'
+  timerOffset?: number
+  timeField?: string
   presets: any[]
   rule: any[]
 }

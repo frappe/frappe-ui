@@ -102,7 +102,8 @@ const state = reactive({
   enabled: false,
   dt: '',
   eventType: 'created' as 'created' | 'updated' | 'time',
-  selectedTimerOption: 0,
+  timerOffset: 0,
+  timeField: '',
   presets: [],
   rule: [],
 })

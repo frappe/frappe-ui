@@ -1,9 +1,15 @@
 <template>
-  <Dropdown :options="options" placement="right">
+  <Dropdown :options="options" placement="right" v-slot="{ open }">
     <Button
       variant="ghost"
       icon="more-horizontal"
-      :class="'opacity-0 group-hover:opacity-100 transition-all group-focus-within:opacity-100'"
+      class="opacity-0 group-hover:opacity-100 transition-all group-focus-within:opacity-100"
+      :class="[
+        'transition-opacity',
+        open
+          ? 'opacity-100'
+          : 'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100',
+      ]"
     />
   </Dropdown>
 </template>

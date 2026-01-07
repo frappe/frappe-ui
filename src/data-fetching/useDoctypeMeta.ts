@@ -17,9 +17,9 @@ interface DoctypeMeta {
 
 export interface TransformedField {
   label: string | undefined
-  type: string
+  type?: string
   value: string
-  options: string[] | undefined | null | string
+  options?: string[] | undefined | null | string
 }
 
 // Global cache for doctype meta
@@ -95,11 +95,28 @@ export function useDoctypeMeta(doctype: string) {
     ]
   })
 
+  const timeBaseFields = computed<TransformedField[]>(() => {
+    const doctypeMeta = metaCache[doctype]
+    if (!doctypeMeta?.fields) return []
+    const defaultFields = [
+      { label: 'Created On', value: 'creation' },
+      { label: 'Last Modified', value: 'modified' },
+    ]
+    return doctypeMeta.fields
+      .filter((f) => f.fieldtype === 'Datetime' || f.fieldtype === 'Date')
+      .map((f) => ({
+        label: f.label,
+        value: f.fieldname,
+      }))
+      .concat(defaultFields)
+  })
+
   return {
     meta,
     fields,
     getField,
     resource,
     emailFields,
+    timeBaseFields,
   }
 }
