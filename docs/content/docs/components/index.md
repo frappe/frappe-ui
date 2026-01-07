@@ -1,3 +1,14 @@
+---
+nextprev: false
+---
+
+<script setup>
+import ComponentGroups from '@/components/Home/ComponentGroups.vue'
+</script>
 
 
-list of all components will be shown here
+# Component groups
+<br/>
+
+
+<ComponentGroups/>

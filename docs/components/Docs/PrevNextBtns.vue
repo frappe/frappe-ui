@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { useRoute } from "vitepress";
+import { useData, useRoute } from "vitepress";
 import LucideLeft from "~icons/lucide/arrow-left";
 import LucideRight from "~icons/lucide/arrow-right";
 import sidebarConfig from "../../.vitepress/sidebar";
 
 const route = useRoute();
+const { frontmatter } = useData();
+
+const visible = computed(() => frontmatter.value.nextprev ?? true);
 
 const linkInfos = sidebarConfig.reduce((acc, cur) => {
   cur.items ? acc.push(...cur.items) : acc.push(cur);
-	return acc
+  return acc;
 }, []);
 
 const prevLink = computed(() => {
@@ -34,9 +37,9 @@ const nextLink = computed(() => {
 </script>
 
 <template>
-  <div class="flex justify-between gap-5 mt-10">
+  <div class="flex justify-between gap-5 mt-10" v-if="visible">
     <a
-			v-if="prevLink"
+      v-if="prevLink"
       class="flex items-center gap-2 bg-surface-gray-3 p-3 rounded"
       :href="prevLink?.link"
     >
@@ -44,7 +47,7 @@ const nextLink = computed(() => {
     </a>
 
     <a
-			v-if="nextLink"
+      v-if="nextLink"
       class="flex items-center gap-2 bg-surface-gray-3 p-3 rounded"
       :href="nextLink?.link"
     >

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Badge, Button } from "frappe-ui";
+import { Badge } from "frappe-ui";
 import LucideRight from "~icons/lucide/arrow-right";
 
 import pkgJson from "../../../package.json";
@@ -10,14 +10,12 @@ import pkgJson from "../../../package.json";
     class="grid gap-5 max-w-7xl mx-auto"
   >
     <div class="mt-10 p-5 flex flex-col gap-5 text-center w-fit">
-
-
       <h1
         class="text-[48px] font-semibold tracing-tight leading-tight !m-0 relative"
       >
-			      <Badge class="absolute -top-8" size="lg" theme="green" >
-        v{{ pkgJson.version }}
-      </Badge>
+        <Badge class="absolute -top-8" size="lg" theme="green">
+          v{{ pkgJson.version }}
+        </Badge>
         Blazing Fast Beautiful Interfaces
       </h1>
 
@@ -36,7 +34,7 @@ import pkgJson from "../../../package.json";
         </a>
 
         <a
-          href="/docs/components/badge"
+          href="/docs/components"
           class="font-normal py-2 px-4 flex gap-3 items-center rounded bg-surface-gray-3"
         >
           Show Components

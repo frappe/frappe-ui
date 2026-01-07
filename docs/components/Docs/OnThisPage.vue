@@ -61,12 +61,16 @@ watch(route, setHeadings);
     <a
       v-for="x in headings"
       :href="`#${x.id}`"
-      class="text-ink-gray-6 whitespace-nowrap !no-underline pl-4 py-1 border-l transition-all duration-500"
+      class="
+        text-ink-gray-6 whitespace-nowrap !no-underline pl-4 py-1 border-l
+        hover:text-ink-gray-9
+      "
       @click="activeHeading = x.id"
       :class='
         {
           "pl-7": x.type == "h3" && h2Exists,
-          "border-outline-gray-5 text-ink-gray-9": x.id == activeHeading,
+          "border-outline-gray-5 text-ink-gray-9": activeHeading &&
+            x.id == activeHeading,
         }
       '
     >
