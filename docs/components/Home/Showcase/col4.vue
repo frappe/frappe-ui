@@ -117,7 +117,7 @@ const progressData = [
       </div>
     </div>
 
-    <div class="p-5 flex flex-col gap-3">
+    <div class="p-4 pt-3 flex flex-col gap-3">
       <div class="flex items-center gap-2 justify-between">
         <span class="flex gap-2">
           <LucideCoins class="size-4" />
