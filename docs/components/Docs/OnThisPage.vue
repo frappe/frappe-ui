@@ -11,9 +11,12 @@ interface Heading {
 
 const headings = ref<Heading[]>([]);
 const activeHeading = ref();
+const h2Exists = ref(false);
 
 const setHeadings = () => {
   const elements = Array.from(document.querySelectorAll("h2, h3"));
+
+  h2Exists.value = elements.some((el) => el.tagName == "H2");
 
   headings.value = elements.map((el) => ({
     type: el.tagName.toLowerCase(),
@@ -62,7 +65,7 @@ watch(route, setHeadings);
       @click="activeHeading = x.id"
       :class='
         {
-          "pl-7": x.type == "h3",
+          "pl-7": x.type == "h3" && h2Exists,
           "border-outline-gray-5 text-ink-gray-9": x.id == activeHeading,
         }
       '
