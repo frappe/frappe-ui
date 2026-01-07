@@ -11,7 +11,7 @@ import Col4 from "./col4.vue";
   >
     <Col1 />
     <Col2 />
-    <Col4 />
     <Col3 />
+    <Col4 />
   </section>
 </template>

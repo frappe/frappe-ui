@@ -1,175 +1,168 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from "vue";
-import {
-  Avatar,
-  Badge,
-  Button,
-  Checkbox,
-  Progress,
-  Slider,
-  Switch,
-} from "frappe-ui";
-import LucideCoins from "~icons/lucide/circle-dollar-sign";
+import { Button, Password, Progress, Tree } from "frappe-ui";
 
-const imgs = [
-  "https://avatars.githubusercontent.com/u/499550?s=60&v=4",
-  "https://avatars.githubusercontent.com/u/499550?s=60&v=4",
-  "https://avatars.githubusercontent.com/u/499550?s=60&v=4",
-  "https://avatars.githubusercontent.com/u/499550?s=60&v=4",
-];
+import LucideFolder from "~icons/lucide/folder";
+import LucideFile from "~icons/lucide/file";
+import LucideShield from "~icons/lucide/shield-plus";
+import LucideChevronRight from "~icons/lucide/chevron-right";
 
-const progressVal = ref(1);
-const checkboxVal = ref(true);
-
-const incProgress = () => {
-  if (progressVal.value < 3) {
-    progressVal.value += 1;
-  }
-};
-
-const decProgress = () => {
-  if (progressVal.value > 1) {
-    progressVal.value -= 1;
-  }
-};
-
-const themes = ["green", "red", "blue", "yellow", "gray"];
-
-const slider2Val = ref([20, 50]);
-const switchVal = ref(true);
-
-const progressData = [
-  {
-    title: "Objection Handling",
-    desc:
-      "In this objection handling role-play scenario, participants will engage in a simulated sales interaction.",
-    tags: ["Communication", "Negotiation"],
+const treeState = reactive({
+  showIndentationGuides: true,
+  rowHeight: "25px",
+  indentWidth: "15px",
+  node: {
+    name: "guest",
+    label: "Guest",
+    isCollapsed: true,
+    children: [
+      {
+        name: "downloads",
+        label: "Downloads",
+        children: [
+          {
+            name: "Images",
+            label: "download.zip",
+            children: [
+              {
+                name: "image.png",
+                label: "image.png",
+                children: [],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: "documents",
+        label: "Documents",
+        children: [
+          {
+            name: "somefile.txt",
+            label: "somefile.txt",
+            children: [],
+          },
+          {
+            name: "somefile.pdf",
+            label: "somefile.pdf",
+            children: [],
+          },
+        ],
+      },
+    ],
   },
+});
 
-  {
-    title: "Business Development",
-    desc:
-      "In this business development role-play scenario, participants will engage in a simulated sales interaction.",
-    tags: ["Strategy", "Customer support"],
-  },
+const password = ref("000000000");
+const hasValidLength = computed(() => password.value.length >= 9);
 
-  {
-    title: "Marketing Strategy",
-    desc:
-      "In this marketing strategy role-play scenario, participants will engage in a simulated sales interaction.",
-    tags: ["Strategy", "Analytics"],
-  },
-];
+const hasLettersAndNumbers = computed(
+  () => /[a-zA-Z]/.test(password.value) && /\d/.test(password.value),
+);
+const hasSpecialChar = computed(
+  () => /[#@$%^&*_?@~]/.test(password.value),
+);
+
+const strengthScore = computed(() =>
+  [hasValidLength.value, hasLettersAndNumbers.value, hasSpecialChar.value]
+    .filter(Boolean).length
+);
+
+const strengthLabel = computed(() =>
+  strengthScore.value <= 1
+    ? { text: "Weak", class: "text-ink-red-3" }
+    : strengthScore.value === 2
+    ? { text: "Moderate", class: "text-ink-yellow-3" }
+    : { text: "Strong", class: "text-ink-green-3" }
+);
 </script>
 
 <template>
   <div
     class="grid gap-5 *:rounded *:border [&_label]:text-ink-gray-9 [&_label]:mb-2 [&_label]:text-base h-fit"
   >
-    <div class="p-5 h-fit prose prose-sm">
-      <Progress
-        :value="progressVal * 30"
-        :intervals="true"
-        :interval-count="3"
-        size="md"
-        class="-mb-2"
-      />
+    <div class="p-5 bg-urface-cards h-fit">
+      <Tree
+        :options="
+          {
+            showIndentationGuides: treeState.showIndentationGuides,
+            rowHeight: treeState.rowHeight,
+            indentWidth: treeState.indentWidth,
+            defaultCollapsed: false,
+          }
+        "
+        nodeKey="name"
+        :node="treeState.node"
+      >
+        <template #node="{ node, hasChildren, isCollapsed, toggleCollapsed }">
+          <button
+            class="flex items-center gap-2 mb-3 cursor-pointer"
+            @click="toggleCollapsed"
+          >
+            <LucideChevronRight
+              v-if="hasChildren"
+              class="size-4 transition-transform"
+              :class='{ "rotate-90": isCollapsed }'
+            />
 
-      <h3>
-        {{ progressData[progressVal - 1].title }}
+            <LucideFolder v-if="hasChildren" class="size-4" />
+            <LucideFile v-else class="size-4 ml-2" />
+
+            {{ node.name }}
+          </button>
+        </template>
+      </Tree>
+    </div>
+
+    <div class="prose prose-sm p-5 pt-3 grid gap-3">
+      <h3 class="flex items-center gap-2 border-b pb-3">
+        <LucideShield class="size-5" />
+        Create Password
       </h3>
 
-      <p class="leading-relaxed">
-        {{ progressData[progressVal - 1].desc }}
+      <p>
+        To ensure the safety and security of your account, its essential to
+        create a strong password
       </p>
 
-      <div class="flex gap-2 flex-wrap items-center not-prose mt-3">
-        <Badge
-          v-for="(tag, tagIndex) in progressData[progressVal - 1].tags"
-          :key="tag"
-          :theme='themes[tagIndex] || "gray"'
-          size="lg"
-          class="rounded-sm"
-        >
-          {{ tag }}
-        </Badge>
-      </div>
-
-      <div class="flex items-center not-prose mt-4 ml-2">
-        <Avatar
-          size="xl"
-          v-for="img in imgs"
-          :key="img"
-          :image="img"
-          class="border-2 border-surface-white -ml-2"
+      <div class="grid">
+        <label class="!text-ink-gray-5">Password</label>
+        <Password
+          v-model="password"
+          placeholder="Enter password"
+          variant="outline"
         />
-
-        <span class="ml-3 text-sm !text-ink-gray-9">
-          + 5 more
-        </span>
       </div>
 
-      <div
-        class="grid grid-cols-2 mt-3 gap-3 *:py-4 border-t rounded pt-3"
-      >
-        <Button @click="decProgress">Back</Button>
-        <Button @click="incProgress" variant="solid">Next</Button>
-      </div>
-    </div>
-
-    <div class="p-4 pt-3 flex flex-col gap-3">
-      <div class="flex items-center gap-2 justify-between">
-        <span class="flex gap-2">
-          <LucideCoins class="size-4" />
-          Price range
-        </span>
-        <Badge size="lg" class="!p-3 !py-4 !rounded">
-          ${{ slider2Val[0] * 10 }} - ${{ slider2Val[1] * 10 }}
-        </Badge>
-      </div>
-
-      <Slider v-model="slider2Val" class="w-full" />
-
-      <div class="flex gap-3 items-center justify-between">
-        <span>$0</span>
-        <span>$1000</span>
-      </div>
-    </div>
-
-    <div class="grid p-5 gap-y-3 gap-x-4">
-      <div class="flex gap-3 justify-between">
-        <div class="grid gap-2">
-          <span class="text-ink-gray-9">Smart compose</span>
-          <p class="text-ink-gray-5">
-            Enable predictive suggestions
-          </p>
-        </div>
-        <Switch v-model="switchVal" />
-      </div>
-
-      <hr />
-
-      <div class="flex gap-2 justify-between">
-        <div class="grid gap-2">
-          <span class="text-ink-gray-9">Inline completions</span>
-          <p class="text-ink-gray-5">
-            Auto completions as you type
-          </p>
-        </div>
-        <Switch />
-      </div>
-    </div>
-
-    <div
-      class="p-5 transition-all duration-200"
-      :class='{ "border-outline-gray-5": checkboxVal }'
-    >
-      <Checkbox
-        v-model="checkboxVal"
-        label="I agree to the terms and conditions"
+      <Progress
+        label="Password Strength"
+        class="[&_label]:text-ink-gray-5 mt-3"
+        :value="strengthScore < 3 ? strengthScore * 30 : 100"
+        :hint="true"
         size="md"
-        class="gap-3 [&_label]:!m-0"
-      />
+      >
+        <template #hint>
+          <span class="text-sm" :class="strengthLabel.class">
+            {{ strengthLabel.text }}
+          </span>
+        </template>
+      </Progress>
+
+      <div class="px-8 !py-3 rounded bg-surface-gray-1 text-sm text-ink-gray-5">
+        <li :class='{ "line-through opacity-60": hasValidLength }'>
+          Includes 9-16 characters
+        </li>
+        <li :class='{ "line-through opacity-60": hasLettersAndNumbers }'>
+          Combines letters and numbers
+        </li>
+        <li :class='{ "line-through opacity-60": hasSpecialChar }'>
+          A special character #@$%^&*_?@~
+        </li>
+      </div>
+
+      <Button variant="solid" class="w-full py-4">
+        Create password
+      </Button>
     </div>
   </div>
 </template>
