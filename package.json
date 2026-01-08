@@ -119,6 +119,7 @@
     "@histoire/plugin-vue": "^0.17.17",
     "@vitejs/plugin-vue": "^4.0.0",
     "autoprefixer": "^10.4.13",
+    "cypress": "^15.8.2",
     "histoire": "^0.17.17",
     "lint-staged": ">=10",
     "msw": "^2.7.0",
