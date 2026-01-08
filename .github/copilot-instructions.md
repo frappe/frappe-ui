@@ -27,7 +27,7 @@ Always use `--frozen-lockfile` flag to ensure consistent dependency versions.
 yarn test
 ```
 - Runs Vitest test suite in run mode (non-watch)
-- Tests are located in `src/data-fetching/*/` directories with `.test.ts` suffix
+- Tests are located in `src/data-fetching/` subdirectories with `.test.ts` suffix
 - Uses MSW (Mock Service Worker) for API mocking
 - Test setup file: `vitest.setup.ts`
 - All tests must pass before publishing
@@ -136,6 +136,7 @@ frappe-ui/
   2. `npm install`
   3. `npm test`
   4. `npm publish`
+- **Note**: The publish workflow uses npm commands as configured in the CI environment for publishing to the NPM registry
 
 ## Important Development Guidelines
 
@@ -148,7 +149,7 @@ frappe-ui/
 ### Code Style
 - Prettier is enforced via pre-commit hooks
 - Tailwind CSS classes should be formatted with prettier-plugin-tailwindcss
-- Files affected: `*.js`, `*.vue`, `*.css`, `*.md`
+- Files affected by pre-commit hooks: `*.js`, `*.vue`
 
 ### Component Development
 - Components are Vue 3 Composition API based
