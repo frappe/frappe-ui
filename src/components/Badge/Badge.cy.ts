@@ -250,7 +250,7 @@ describe('<Badge />', () => {
         prefix: () => h(TestIcon),
       },
     })
-    cy.get('div > div').first().should('have.class', 'max-h-4')
+    cy.get('[data-cy="prefix-icon"]').parent().should('have.class', 'max-h-4')
 
     // Test with lg size
     cy.mount(Badge, {
@@ -259,6 +259,6 @@ describe('<Badge />', () => {
         prefix: () => h(TestIcon),
       },
     })
-    cy.get('div > div').first().should('have.class', 'max-h-6')
+    cy.get('[data-cy="prefix-icon"]').parent().should('have.class', 'max-h-6')
   })
 })
