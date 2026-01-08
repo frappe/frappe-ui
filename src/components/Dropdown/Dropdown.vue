@@ -299,11 +299,13 @@ function close() {
 
 // Unified click handling for all dropdown items
 const handleItemClick = (item: DropdownOption, event: PointerEvent) => {
-  if (item.route) {
-    router.push(item.route)
-  } else if (item.onClick) {
-    item.onClick(event)
-  }
+  setTimeout(() => {
+    if (item.route) {
+      router.push(item.route)
+    } else if (item.onClick) {
+      item.onClick(event)
+    }
+  }, 75)
 }
 
 const normalizeDropdownItem = (option: DropdownOption) => {
