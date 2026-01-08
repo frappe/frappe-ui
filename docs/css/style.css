@@ -23,7 +23,7 @@ body {
 }
 
 [class*='language'] {
-	position: relative;
+  position: relative;
   /* @apply rounded mt-5 px-3 relative  grid; */
 
   .lang {
@@ -48,9 +48,9 @@ body {
 }
 
 .shiki {
-	font-size: 12px !important;
+  font-size: 12px !important;
   @apply max-h-[500px] w-full overflow-auto leading-relaxed rounded;
-	@apply !p-5 !py-4 !bg-surface-gray-7 dark:!bg-surface-cards;
+  @apply !p-5 !py-4 !bg-surface-gray-7 dark:!bg-surface-cards;
 
   font-family: monospace;
   .line-number {
@@ -66,16 +66,13 @@ body {
 :root {
   --scrollbar-size: 4px;
 
-  --scrollbar-track: var(--surface-gray-1);
   --scrollbar-thumb: var(--surface-gray-3);
   --scrollbar-thumb-hover: var(--surface-gray-4);
 
-  --shiki-track: var(--surface-gray-7);
   --shiki-thumb: var(--surface-gray-5);
 }
 
 [data-theme='dark'] {
-  --scrollbar-track: var(--surface-white);
   --scrollbar-thumb: var(--surface-gray-2);
   --scrollbar-thumb-hover: var(--surface-gray-3);
 
@@ -85,7 +82,7 @@ body {
 
 .shiki {
   scrollbar-width: thin;
-  scrollbar-color: var(--shiki-thumb) var(--shiki-track);
+  scrollbar-color: var(--shiki-thumb) transparent;
 }
 
 .shiki::-webkit-scrollbar {
@@ -93,7 +90,7 @@ body {
 }
 
 .shiki::-webkit-scrollbar-track {
-  background: var(--shiki-track);
+  background: transparent;
 }
 
 .shiki::-webkit-scrollbar-thumb {
@@ -105,7 +102,7 @@ body {
 /* reusable everywhere */
 .scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+  scrollbar-color: var(--scrollbar-thumb) transparent;
 }
 
 /* WebKit */
@@ -115,7 +112,7 @@ body {
 }
 
 .scrollbar::-webkit-scrollbar-track {
-  background: var(--scrollbar-track);
+  background: transparent;
 }
 
 .scrollbar::-webkit-scrollbar-thumb {
