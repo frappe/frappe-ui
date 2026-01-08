@@ -147,9 +147,10 @@ frappe-ui/
 - Use `--frozen-lockfile` when installing in CI or for reproducible builds
 
 ### Code Style
-- Prettier is enforced via pre-commit hooks
+- Prettier is enforced via pre-commit hooks (`.pre-commit-config.yaml`) for JavaScript and Vue files
+- lint-staged (in `package.json`) also formats CSS and Markdown files on commit
 - Tailwind CSS classes should be formatted with prettier-plugin-tailwindcss
-- Files affected by pre-commit hooks: `*.js`, `*.vue`
+- Files formatted on commit: `*.{js,css,md,vue}`
 
 ### Component Development
 - Components are Vue 3 Composition API based
@@ -198,7 +199,7 @@ The package exports multiple entry points:
 - Icons: `./icons/index.ts`
 - Tailwind preset: `./tailwind/index.js`
 - Vite utilities: `./vite/index.js`
-- Styles: `./style.css`
+- Styles: `./src/style.css` (import as `frappe-ui/style.css`)
 - Base tsconfig: `./tsconfig.base.json`
 
 ## Additional Context
