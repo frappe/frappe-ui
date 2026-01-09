@@ -144,6 +144,14 @@ const formMarkRegex = (terms: Set<string>) => {
     'gi',
   )
 }
+
+const vScrollActive = {
+  updated(el, binding) {
+    if (binding.value) {
+      el.scrollIntoView({ block: 'nearest' })
+    }
+  },
+}
 </script>
 
 <template>
@@ -192,6 +200,7 @@ const formMarkRegex = (terms: Set<string>) => {
           ]"
           @mouseenter="activeIndex = i"
           @click="emits('close')"
+          v-scroll-active="i === activeIndex"
         >
           <template v-for="(t, index) in p.titles" :key="index">
             <span v-html="t" />
