@@ -8,6 +8,7 @@ import LucideMenu from "~icons/lucide/menu";
 import LucideSide from "~icons/lucide/panel-right";
 import GithubIcon from "./Icons/Github.vue";
 import LucideRight from "~icons/lucide/chevron-right";
+import SearchPopup from "./Search/Popup.vue"
 
 import { useRoute } from "vitepress";
 
@@ -59,6 +60,8 @@ watch(route, (x) => {
 
 <template>
   <nav class="border-b sticky top-0 bg-surface-white !z-50">
+    <SearchPopup v-if="state.searchDialog" @close="state.searchDialog = false" />
+
     <div
       class="py-3 px-5 flex items-center gap-3 flex-wrap"
       :class='{ "max-w-[1440px] mx-auto": !isDocs }'
@@ -102,7 +105,7 @@ watch(route, (x) => {
       >
         <a href="/docs">Docs</a>
 
-        <Button class="hidden lg:flex">
+        <Button class="hidden lg:flex" @click="state.searchDialog = true">
           <template #prefix>
             <LucideSearch class="size-4" />
           </template>
