@@ -3,7 +3,7 @@ import type { Ref } from 'vue'
 import type { SearchResult } from 'minisearch'
 
 import MiniSearch from 'minisearch'
-import Mark from 'mark.js/src/vanilla.js'
+import Mark from 'mark.js'
 
 import { useData } from 'vitepress'
 import { computedAsync, debouncedWatch } from '@vueuse/core'
