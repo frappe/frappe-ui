@@ -10,9 +10,9 @@ import GithubIcon from "./Icons/Github.vue";
 import LucideRight from "~icons/lucide/chevron-right";
 import SearchPopup from "./Search/Popup.vue"
 
-import { useRoute } from "vitepress";
-
 import { state } from "../state";
+import { useMagicKeys, whenever } from '@vueuse/core'
+import { useRoute } from "vitepress";
 
 const theme = ref();
 
@@ -22,13 +22,8 @@ const toggleTheme = () => {
   localStorage.theme = theme.value;
 };
 
-const toggleMobSidebar = () => {
-  state.mobsidebar = !state.mobsidebar;
-};
-
-const toggleNavbar = () => {
-  state.mobnavbar = !state.mobnavbar;
-};
+const toggleMobSidebar = () => state.mobsidebar = !state.mobsidebar;
+const toggleNavbar = () => state.mobnavbar = !state.mobnavbar;
 
 onMounted(() => {
   theme.value = document.documentElement.getAttribute("data-theme");
@@ -56,6 +51,13 @@ watch(route, (x) => {
   state.mobnavbar = false;
   state.mobsidebar = false;
 });
+
+const { meta_k } = useMagicKeys()
+
+whenever(meta_k, (n) => {
+  if (n) state.searchDialog = true
+})
+
 </script>
 
 <template>
