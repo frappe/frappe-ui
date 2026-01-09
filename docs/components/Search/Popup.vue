@@ -115,10 +115,6 @@ watch(filterText, () => {
   activeIndex.value = -1
 })
 
-watch(filterText, () => {
-  activeIndex.value = -1
-})
-
 const move = (delta: number) => {
   if (!results.value.length) return
   activeIndex.value =
@@ -146,10 +142,18 @@ const formMarkRegex = (terms: Set<string>) => {
 }
 
 const vScrollActive = {
-  updated(el, binding) {
-    if (binding.value) {
-      el.scrollIntoView({ block: 'nearest' })
-    }
+  updated(el, { value }) {
+    if (!value) return
+
+    const container = el.parentElement
+    if (!container) return
+
+    const elRect = el.getBoundingClientRect()
+    const cRect = container.getBoundingClientRect()
+
+    const isVisible = elRect.top >= cRect.top && elRect.bottom <= cRect.bottom
+
+    if (!isVisible) el.scrollIntoView({ block: 'nearest' })
   },
 }
 </script>
