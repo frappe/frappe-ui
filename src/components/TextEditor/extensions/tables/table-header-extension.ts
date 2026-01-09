@@ -23,9 +23,26 @@ export const TableHeaderExtension = TableHeader.extend({
             class: `${attributes.borderColor}-border`,
           }
         },
-
       },
       borderWidth: {
+        default: null,
+        parseHTML: element => {
+          if (element.tagName.toLowerCase() !== 'th') {
+            return null
+          }
+          const style = element.getAttribute('style') || ''
+          const borderWidthMatch = style.match(/border-width:\s*(\d+px)/i)
+          if (borderWidthMatch) {
+            return borderWidthMatch[1]
+          }
+          const classList = element.classList
+          const borderWidthClassMatch = Array.from(classList).find(cls => cls.startsWith('border-') && /^border-\d+$/.test(cls))
+          if (borderWidthClassMatch) {
+            const width = borderWidthClassMatch.replace('border-', '')
+            return `${width}px`
+          }
+          return null
+        },
         renderHTML(attributes){
           if (!attributes.borderWidth) {
             return {}

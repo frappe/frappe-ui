@@ -57,9 +57,32 @@ const getViewportPosition = (
   let viewportTop = editorRect.top + editorRelativePos.top - editorScrollTop
   let viewportLeft = editorRect.left + editorRelativePos.left - editorScrollLeft
   
-  if (axis === 'column' && cellInfo?.element) {
+  if (cellInfo?.element) {
+    const table = cellInfo.element.closest('table')
+    if (table) {
+      const tableRect = table.getBoundingClientRect()
+      const menuHeight = 30
+      const gap = 12
+      
+      if (axis === 'column') {
+        const cellRect = cellInfo.element.getBoundingClientRect()
+        viewportTop = tableRect.top - menuHeight - gap
+        viewportLeft = cellRect.left + cellRect.width / 2
+      } else if (axis === 'row') {
+        const row = cellInfo.element.closest('tr')
+        if (row) {
+          const rowRect = row.getBoundingClientRect()
+          const menuHeight = 30
+          viewportTop = rowRect.top + rowRect.height / 2 - menuHeight / 2
+        }
+      }
+    }
+  }
+  
+  if (axis === 'cell' && cellInfo?.element) {
     const cellRect = cellInfo.element.getBoundingClientRect()
-    viewportLeft = cellRect.left + cellRect.width / 2
+    viewportLeft = cellRect.right + 8
+    viewportTop = cellRect.top + cellRect.height / 2 - 12
   }
   
   return {
@@ -106,7 +129,6 @@ const deleteRow = () => {
   if (!editor.value?.can().deleteRow()) return
   editor.value.chain().focus().deleteRow().run()
   showTableBorderMenu.value = false
-  // Clear handles after deletion to prevent stale references
   setTimeout(() => {
     const editorElement = editor.value?.view?.dom?.parentElement
     if (editorElement) {
@@ -129,7 +151,6 @@ const deleteColumn = () => {
   if (!editor.value?.can().deleteColumn()) return
   editor.value.chain().focus().deleteColumn().run()
   showTableBorderMenu.value = false
-  // Clear handles after deletion to prevent stale references
   setTimeout(() => {
     const editorElement = editor.value?.view?.dom?.parentElement
     if (editorElement) {

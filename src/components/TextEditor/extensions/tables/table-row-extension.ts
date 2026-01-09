@@ -25,6 +25,18 @@ export const TableRowExtension = TableRow.extend({
                 }
             },
             borderWidth: {
+                default: null,
+                parseHTML: element => {
+                    if (element.tagName.toLowerCase() !== 'tr') {
+                        return null
+                    }
+                    const classList = element.classList
+                    const borderWidthClassMatch = Array.from(classList).find(cls => cls.startsWith('border-') && /^border-\d+$/.test(cls))
+                    if (borderWidthClassMatch) {
+                        return borderWidthClassMatch.replace('border-', '')
+                    }
+                    return null
+                },
                 renderHTML(attributes){
                     if (!attributes.borderWidth) {
                         return {}

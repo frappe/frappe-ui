@@ -1,7 +1,9 @@
-import { Plugin, PluginKey } from '@tiptap/pm/state'
+import { Plugin, PluginKey, EditorState } from '@tiptap/pm/state'
+import { TextSelection } from '@tiptap/pm/state'
 import { Editor } from '@tiptap/core'
 import LucideGripVertical from '~icons/lucide/grip-vertical?raw'
-import { CellSelection } from 'prosemirror-tables'
+import { CellSelection, findTable, TableMap } from '@tiptap/pm/tables'
+import { Decoration, DecorationSet } from '@tiptap/pm/view'
 
 export const tableBorderMenuPluginKey = new PluginKey('tableBorderMenu')
 
@@ -12,39 +14,24 @@ export function tableBorderMenuPlugin(editor: Editor) {
   let currentTableId: string | null = null
   let hideTimeout: NodeJS.Timeout | null = null
   let cellTriggerTimeout: NodeJS.Timeout | null = null
-  let isResizing = false
-  let resizeCleanupInterval: number | null = null
 
   const clearHandles = () => {
     if (hideTimeout) clearTimeout(hideTimeout)
-    if (isResizing) {
+    hideTimeout = setTimeout(() => {
       currentRowHandle?.remove()
       currentColHandle?.remove()
       currentRowHandle = null
       currentColHandle = null
       currentTableId = null
-    } else {
-      hideTimeout = setTimeout(() => {
-        currentRowHandle?.remove()
-        currentColHandle?.remove()
-        currentRowHandle = null
-        currentColHandle = null
-        currentTableId = null
-      }, 100)
-    }
+    }, 100)
   }
 
   const clearCellTrigger = () => {
     if (cellTriggerTimeout) clearTimeout(cellTriggerTimeout)
-    if (isResizing) {
+    cellTriggerTimeout = setTimeout(() => {
       currentCellTrigger?.remove()
       currentCellTrigger = null
-    } else {
-      cellTriggerTimeout = setTimeout(() => {
-        currentCellTrigger?.remove()
-        currentCellTrigger = null
-      }, 100)
-    }
+    }, 100)
   }
 
   const cancelCellTriggerClear = () => {
@@ -76,90 +63,39 @@ export function tableBorderMenuPlugin(editor: Editor) {
     currentRowHandle = null
     currentColHandle = null
     currentCellTrigger = null
-    document.querySelectorAll('.table-cell-trigger-overlay').forEach(el => el.remove())
-    document.querySelectorAll('.table-row-handle-overlay, .table-col-handle-overlay').forEach(el => el.remove())
+    document.querySelectorAll('.table-cell-trigger-overlay').forEach(el => {
+      el.remove()
+    })
+    document.querySelectorAll('.table-row-handle-overlay').forEach(el => {
+      el.remove()
+    })
+    document.querySelectorAll('.table-col-handle-overlay').forEach(el => {
+      el.remove()
+    })
   }
 
   return new Plugin({
     key: tableBorderMenuPluginKey,
+    state: {
+      init() {
+        return DecorationSet.empty
+      },
+      apply(tr, set, oldState, newState) {
+        return set.map(tr.mapping, tr.doc)
+      }
+    },
     props: {
+      decorations(state) {
+        return this.getState(state)
+      },
       handleDOMEvents: {
-        selectstart(view, event) {
-          if (isResizing) {
-            event.preventDefault()
-            return true
-          }
-          return false
-        },
         mousedown(view, event) {
-          const target = event.target as HTMLElement
-          if (target.closest('.column-resize-handle')) {
-            isResizing = true
-            document.body.classList.add('resizing-table')
-            hideAllHandles()
-            const cleanup = () => {
-              if (isResizing) {
-                if (currentRowHandle) {
-                  currentRowHandle.remove()
-                  currentRowHandle = null
-                }
-                if (currentColHandle) {
-                  currentColHandle.remove()
-                  currentColHandle = null
-                }
-                if (currentCellTrigger) {
-                  currentCellTrigger.remove()
-                  currentCellTrigger = null
-                }
-                document.querySelectorAll('.table-cell-trigger-overlay').forEach(el => el.remove())
-                document.querySelectorAll('.table-row-handle-overlay, .table-col-handle-overlay').forEach(el => el.remove())
-                resizeCleanupInterval = requestAnimationFrame(cleanup)
-              } else {
-                resizeCleanupInterval = null
-              }
-            }
-            cleanup()
-            window.dispatchEvent(new CustomEvent('table-resize-start'))
-            view.dom.parentElement?.dispatchEvent(new CustomEvent('table-hide-menu', { bubbles: true }))
-            event.preventDefault()
-            return true
-          }
-          if (isResizing) {
-            const cell = target.closest('td, th')
-            if (cell) {
-              event.preventDefault()
-              event.stopPropagation()
-              return true
-            }
-          }
-          return false
-        },
-        mouseup() {
-          if (isResizing) {
-            isResizing = false
-            if (resizeCleanupInterval !== null) {
-              cancelAnimationFrame(resizeCleanupInterval)
-              resizeCleanupInterval = null
-            }
-            document.body.classList.remove('resizing-table')
-            window.dispatchEvent(new CustomEvent('table-resize-end'))
-          }
           return false
         },
         click(view, event) {
-          if (isResizing) {
-            event.preventDefault()
-            event.stopPropagation()
-            return true
-          }
           return false
         },
         mousemove(view, event) {
-          if (isResizing) {
-            hideAllHandles()
-            return true
-          }
-          
           if (!editor.isEditable) {
             clearHandles()
             clearCellTrigger()
@@ -188,11 +124,6 @@ export function tableBorderMenuPlugin(editor: Editor) {
             return false
           }
           cancelClear()
-          
-          if (isResizing) {
-            hideAllHandles()
-            return true
-          }
           
           const { selection } = view.state
           const isCellSelection = selection instanceof CellSelection
@@ -327,9 +258,9 @@ export function tableBorderMenuPlugin(editor: Editor) {
               if (!cellEl) return
 
               const cellRect = cellEl.getBoundingClientRect()
+              const rowRect = row.getBoundingClientRect()
               const editorRect = editorElement.getBoundingClientRect()
-              const menuHeight = 25
-              const gap = 8
+              const menuHeight = 30
               const cellPos = view.posAtDOM(cellEl as Node, 0)
               editor.commands.focus()
               editor.commands.setTextSelection(cellPos)
@@ -339,12 +270,14 @@ export function tableBorderMenuPlugin(editor: Editor) {
                 tableRect.left - editorRect.left - 7
               const rowHandleCenter = rowHandleLeft + 6
 
+              const rowCenter = rowRect.top - editorRect.top + rowRect.height / 2 - menuHeight / 2
+
               const rowEvent = new CustomEvent('table-border-click', {
                 bubbles: true,
                 detail: {
                   axis: 'row',
                   position: {
-                    top: cellRect.top - editorRect.top - menuHeight - gap,
+                    top: rowCenter,
                     left: rowHandleCenter,
                   },
                   cellInfo: {
@@ -426,22 +359,21 @@ export function tableBorderMenuPlugin(editor: Editor) {
               const cellRect = cell.getBoundingClientRect()
               const editorRect = editorElement.getBoundingClientRect()
               const menuHeight = 30
-              const gap = 8
+              const gap = 12
 
               const cellPos = view.posAtDOM(cell as Node, 0)
               editor.commands.focus()
               editor.commands.setTextSelection(cellPos)
               editor.commands.selectColumn(colIndex)
 
-              const columnHandleTop =
-                tableRect.top - editorRect.top - 7
+              const tableTop = tableRect.top - editorRect.top
 
               const columnEvent = new CustomEvent('table-border-click', {
                 bubbles: true,
                 detail: {
                   axis: 'column',
                   position: {
-                    top: columnHandleTop - menuHeight - gap,
+                    top: tableTop - menuHeight - gap,
                     left:
                       cellRect.left -
                       editorRect.left +
@@ -462,16 +394,9 @@ export function tableBorderMenuPlugin(editor: Editor) {
             }
           }
           
-          if (isResizing) {
-            hideAllHandles()
-            return false
-          }
-          
           const cellId = `${tableId}-${rowIndex}-${colIndex}`
           if (!currentCellTrigger || currentCellTrigger.getAttribute('data-cell-id') !== cellId) {
             currentCellTrigger?.remove()
-            
-            if (isResizing) return false
 
             currentCellTrigger = document.createElement('div')
             currentCellTrigger.className = 'table-cell-trigger-overlay'
@@ -506,31 +431,40 @@ export function tableBorderMenuPlugin(editor: Editor) {
 
 
             currentCellTrigger.addEventListener('mouseenter', () => {
-              if (currentCellTrigger && !isResizing) {
+              if (currentCellTrigger) {
                 currentCellTrigger.style.color = 'var(--surface-gray-7)'
                 cancelCellTriggerClear()
               }
             })
             currentCellTrigger.addEventListener('mouseleave', () => {
-              if (currentCellTrigger && !isResizing) {
+              if (currentCellTrigger) {
                 currentCellTrigger.style.color = 'var(--outline-gray-2)'
                 clearCellTrigger()
               }
             })
             currentCellTrigger.addEventListener('click', (e) => {
-              if (isResizing) {
-                e.preventDefault()
-                e.stopPropagation()
-                return
-              }
               e.preventDefault()
               e.stopPropagation()
               const { selection } = view.state
               const isCellSelection = selection instanceof CellSelection
-              if (!isCellSelection) {
+              const cellPos = view.posAtDOM(cell as Node, 0)
+              const $cellPos = view.state.doc.resolve(cellPos)
+              const table = findTable($cellPos)
+              
+              if (table) {
                 editor.commands.focus()
-                editor.commands.setTextSelection(view.posAtDOM(cell as Node, 0))
+                const map = TableMap.get(table.node)
+                const cellIndex = rowIndex * map.width + colIndex
+                const cellPosInTable = map.map[cellIndex]
+                const absoluteCellPos = table.start + cellPosInTable
+                const cellSelection = CellSelection.create(view.state.doc, absoluteCellPos, absoluteCellPos)
+                const newTr = view.state.tr.setSelection(cellSelection)
+                view.dispatch(newTr)
+              } else {
+                editor.commands.focus()
+                editor.commands.setTextSelection(cellPos)
               }
+              
               const triggerRect = currentCellTrigger!.getBoundingClientRect()
               const cellEvent = new CustomEvent('table-border-click', {
                 bubbles: true,
@@ -545,7 +479,7 @@ export function tableBorderMenuPlugin(editor: Editor) {
             })
 
             editorElement.appendChild(currentCellTrigger)
-          } else if (currentCellTrigger && !isResizing) {
+          } else if (currentCellTrigger) {
             const cellRect = cell.getBoundingClientRect()
             currentCellTrigger.style.left = `${cellRect.left - editorRect.left + cellRect.width - 9}px`
             currentCellTrigger.style.top = `${cellRect.top - editorRect.top + cellRect.height / 2 - 9}px`
@@ -557,46 +491,8 @@ export function tableBorderMenuPlugin(editor: Editor) {
       },
     },
     view() {
-      const observer = new MutationObserver(() => {
-        if (isResizing) {
-          document.querySelectorAll('.table-cell-trigger-overlay').forEach(el => el.remove())
-        }
-      })
-      const editorElement = editor.view.dom.parentElement
-      if (editorElement) {
-        observer.observe(editorElement, { childList: true, subtree: true })
-      }
-      
-      const globalMouseUp = () => {
-        if (isResizing) {
-          isResizing = false
-          if (resizeCleanupInterval !== null) {
-            cancelAnimationFrame(resizeCleanupInterval)
-            resizeCleanupInterval = null
-          }
-          document.body.classList.remove('resizing-table')
-          window.dispatchEvent(new CustomEvent('table-resize-end'))
-        }
-      }
-      const globalSelectStart = (e: Event) => {
-        if (isResizing) {
-          e.preventDefault()
-          e.stopPropagation()
-        }
-      }
-      
-      window.addEventListener('mouseup', globalMouseUp)
-      document.addEventListener('selectstart', globalSelectStart, true)
-      
       return {
         destroy() {
-          if (resizeCleanupInterval !== null) {
-            cancelAnimationFrame(resizeCleanupInterval)
-            resizeCleanupInterval = null
-          }
-          observer.disconnect()
-          window.removeEventListener('mouseup', globalMouseUp)
-          document.removeEventListener('selectstart', globalSelectStart, true)
           hideAllHandles()
         },
       }

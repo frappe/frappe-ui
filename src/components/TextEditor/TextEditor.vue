@@ -40,9 +40,8 @@ defineOptions({ inheritAttrs: false })
 
 import { Editor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
-import { Placeholder } from '@tiptap/extensions'
+import Placeholder from '@tiptap/extension-placeholder'
 import Typography from '@tiptap/extension-typography'
-import { TextStyleKit } from '@tiptap/extension-text-style'
 import TaskItem from '@tiptap/extension-task-item'
 import TaskList from '@tiptap/extension-task-list'
 import TextAlign from '@tiptap/extension-text-align'
@@ -50,7 +49,6 @@ import { ImageExtension } from './extensions/image'
 import ImageViewerExtension from './image-viewer-extension'
 import { VideoExtension } from './video-extension'
 import { IframeExtension } from './extensions/iframe'
-import { TocNodeExtension } from './extensions/toc-node'
 import LinkExtension from './link-extension'
 import { TextStyle } from '@tiptap/extension-text-style'
 import NamedColorExtension from './extensions/color'
@@ -166,6 +164,7 @@ onMounted(() => {
         codeBlock: false,
         heading: false,
         table: false,
+        link: false, // Disable link in StarterKit since we use LinkExtension separately
       }).extend({
         addKeyboardShortcuts() {
           return {
@@ -195,10 +194,7 @@ onMounted(() => {
       TextAlign.configure({
         types: ['heading', 'paragraph'],
       }),
-      TextStyleKit.configure({
-        backgroundColor: false,
-        color: false,
-      }),
+      TextStyle,
       NamedColorExtension,
       NamedHighlightExtension,
       ExtendedCode,
@@ -214,7 +210,6 @@ onMounted(() => {
         uploadFunction: props.uploadFunction || defaultUploadFunction,
       }),
       IframeExtension,
-      TocNodeExtension,
       LinkExtension.configure({
         openOnClick: false,
       }),
@@ -244,9 +239,6 @@ onMounted(() => {
         uploadFunction: props.uploadFunction || defaultUploadFunction,
       }),
       StyleClipboardExtension,
-      // NodeRange.configure({
-      //   key: null,
-      // }),
       ...(props.extensions || []),
     ],
     onUpdate: ({ editor }) => {
@@ -262,9 +254,6 @@ onMounted(() => {
       emit('blur', event)
     },
   })
-  // editor.value.on('selectionUpdate', ({ editor }) => {
-  //   console.log('Selection:', editor.state.selection)
-  // })
 })
 
 onBeforeUnmount(() => {

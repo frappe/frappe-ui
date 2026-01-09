@@ -28,6 +28,7 @@
         variant="ghost"
         v-if="canMergeCells"
         class="!size-6"
+        tooltip="Merge Cells"
       >
         <template #icon>
           <LucideMerge class="text-ink-gray-6 size-3.5" />
@@ -36,7 +37,7 @@
 
       <Popover>
         <template #target="{ togglePopover }">
-          <Button class="!size-6" @click="togglePopover()" variant="ghost">
+          <Button class="!size-6" @click="togglePopover()" variant="ghost" tooltip="Color">
             <template #icon>
               <LucidePalette class="text-ink-gray-6 size-3.5" />
             </template>
@@ -83,7 +84,7 @@
       </Popover>
       <Popover>
         <template #target="{ togglePopover }">
-          <Button class="!size-6" @click="togglePopover()" variant="ghost">
+          <Button class="!size-6" @click="togglePopover()" variant="ghost" tooltip="Border Width">
             <template #icon>
               <LucideFrame class="text-ink-gray-6 size-3.5" />
             </template>
