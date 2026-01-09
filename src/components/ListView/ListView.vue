@@ -38,6 +38,10 @@ const props = defineProps({
     type: Array,
     default: [],
   },
+  resource: {
+    type: Object,
+    default: null,
+  },
   rowKey: {
     type: String,
     required: true,
@@ -147,6 +151,7 @@ provide(
   computed(() => ({
     rowKey: props.rowKey,
     rows: props.rows,
+    resource: props.resource,
     columns: props.columns,
     options: _options.value,
     selections: selections,
