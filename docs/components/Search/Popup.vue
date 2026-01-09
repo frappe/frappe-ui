@@ -7,7 +7,16 @@ import Mark from 'mark.js'
 
 import { useData } from 'vitepress'
 import { computedAsync, debouncedWatch } from '@vueuse/core'
-import { markRaw, nextTick, onMounted, ref, shallowRef, watch } from 'vue'
+
+import {
+  markRaw,
+  nextTick,
+  onMounted,
+  ref,
+  shallowRef,
+  watch,
+  useTemplateRef,
+} from 'vue'
 
 import LucideX from '~icons/lucide/x'
 import LucideSearch from '~icons/lucide/search'
@@ -25,6 +34,7 @@ const { localeIndex } = useData()
 
 const filterText = ref('')
 const showNoResults = ref(false)
+const inputRef = useTemplateRef<HTMLInputElement>('inputRef')
 
 const resultsEl = shallowRef<HTMLElement>()
 const searchIndexData = shallowRef<any>()
@@ -39,6 +49,8 @@ interface Result {
 }
 
 onMounted(() => {
+  inputRef.value?.focus()
+
   // @ts-expect-error vitepress internal
   import('@localSearchIndex').then((m) => {
     searchIndexData.value = m.default
@@ -172,13 +184,14 @@ const vScrollActive = {
         <LucideSearch class="size-4" />
 
         <input
+          ref="inputRef"
           v-model="filterText"
           placeholder="Search documentation"
           class="w-full bg-transparent !outline-none !border-0 text-sm p-0 !ring-0"
           @keydown.down.prevent="move(1)"
           @keydown.up.prevent="move(-1)"
           @keydown.enter.prevent="selectActive"
-          autofocus="true"
+          autofocus
         />
 
         <button
@@ -191,7 +204,11 @@ const vScrollActive = {
       </div>
 
       <!-- results -->
-      <ul ref="resultsEl" class="max-h-[55vh] overflow-auto scrollbar p-2">
+      <ul
+        ref="resultsEl"
+        class="max-h-[55vh] overflow-auto scrollbar"
+        :class="{ 'border-b p-2': results.length > 0 }"
+      >
         <a
           v-for="(p, i) in results"
           :key="p.id"
@@ -225,7 +242,7 @@ const vScrollActive = {
 
       <!-- kb helpers -->
       <div
-        class="border-t flex items-center gap-2 text-ink-gray-6 [&>kbd]:bg-surface-gray-2 [&>kbd]:p-1 [&>kbd]:rounded-sm p-2"
+        class="flex items-center gap-2 text-ink-gray-6 [&>kbd]:bg-surface-gray-2 [&>kbd]:p-1 [&>kbd]:rounded-sm p-2"
       >
         <kbd> <LucideArrowDown class="size-4 text-ink-gray-5" /> </kbd>
         <kbd>
