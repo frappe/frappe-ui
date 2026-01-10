@@ -168,16 +168,10 @@
               class="flex rounded p-1 text-ink-gray-8 transition-colors"
               :class="[
                 button.isDisabled?.(editor) && 'opacity-50 pointer-events-none',
-                button.isActive?.(editor) || componentSlotProps?.isActive
-                  ? 'bg-surface-gray-3'
-                  : 'hover:bg-surface-gray-2',
+                'hover:bg-surface-gray-2',
                 button.class,
               ]"
-              @click="
-                componentSlotProps?.onClick
-                  ? componentSlotProps.onClick(button)
-                  : onButtonClick(button)
-              "
+              @click="onButtonClick(button)"
               :title="button.label"
             >
               <component v-if="button.icon" :is="button.icon" class="h-4 w-4" />
