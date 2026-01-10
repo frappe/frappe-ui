@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import Tabs from "../Tabs.vue";
+import { Tabs } from "frappe-ui";
 import LucidePreview from "~icons/lucide/square-mouse-pointer";
 import LucideCode from "~icons/lucide/code";
 
@@ -25,7 +25,7 @@ const tabs = [
     <div v-if="props.description" class="text-sm text-muted">
       {{ props.description }}
     </div>
-    <Tabs :tabs="tabs" v-model="state">
+    <Tabs :tabs="tabs" v-model="state" class='[&>[role=tablist]]:px-0'>
       <template #tab-panel="{ tab }">
         <div v-if='tab.label === "Preview"' class="vp-raw mt-5">
           <slot />
