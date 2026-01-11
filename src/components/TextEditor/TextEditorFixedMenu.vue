@@ -30,6 +30,7 @@ export default {
           'Separator',
           'Bold',
           'Italic',
+          'Underline',
           'Separator',
           'Bullet List',
           'Numbered List',

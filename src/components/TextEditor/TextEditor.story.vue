@@ -30,6 +30,7 @@ const customButtons = [
   'Separator',
   'Bold',
   'Italic',
+  'Underline',
   'Separator',
   'Bullet List',
   'Numbered List',
