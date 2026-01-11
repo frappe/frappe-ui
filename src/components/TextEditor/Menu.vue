@@ -35,15 +35,19 @@
               <ul
                 class="p-1.5 mt-2 rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
               >
-                <!-- fix: isDisabled hides here, and disables elsewhere -->
                 <li
                   v-for="option in button"
                   v-show="option.isDisabled ? !option.isDisabled(editor) : true"
                 >
                   <component
-                    v-if="option.component"
+                    v-if="option.component && option.isTableSizeSelector"
+                    :is="option.component"
+                    v-bind="{ editor, close }"
+                  />
+                  <component
+                    v-else-if="option.component"
                     :is="option.component || 'div'"
-                    v-bind="{ editor }"
+                    v-bind="{ editor, close }"
                   >
                     <template v-slot="componentSlotProps">
                       <button
@@ -198,7 +202,9 @@ const props = defineProps({
 const editor = inject('editor')
 
 const onButtonClick = (button) => {
-  button.action(editor.value)
+  if (button.action && typeof button.action === 'function') {
+    button.action(editor.value)
+  }
 }
 const getActiveButton = (group) => {
   return group.find((b) => b.isActive?.(editor.value))

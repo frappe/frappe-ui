@@ -5,6 +5,17 @@ import { CellSelection } from 'prosemirror-tables'
 
 export const tableIndividualCellPluginKey = new PluginKey('tableCellMenu')
 
+let isResizing = false
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('table-resize-start', () => {
+    isResizing = true
+  })
+  window.addEventListener('table-resize-end', () => {
+    isResizing = false
+  })
+}
+
 export function tableBorderMenuPlugin(editor: Editor) {
   let currentCellHandle: HTMLElement | null = null
   let currentTableId: string | null = null
@@ -26,12 +37,41 @@ export function tableBorderMenuPlugin(editor: Editor) {
     }
   }
 
+  const removeHandleImmediately = () => {
+    if (hideTimeout) {
+      clearTimeout(hideTimeout)
+      hideTimeout = null
+    }
+    currentCellHandle?.remove()
+    currentCellHandle = null
+    if (typeof document !== 'undefined') {
+      document.querySelectorAll('.table-row-handle-overlay').forEach(el => {
+        const hasCircle = el.querySelector('svg circle')
+        if (hasCircle) {
+          (el as HTMLElement).remove()
+        }
+      })
+    }
+  }
+
   return new Plugin({
     key: tableIndividualCellPluginKey,
     props: {
       handleDOMEvents: {
         mousemove(view, event) {
+          if (isResizing) {
+            if (currentCellHandle) {
+              removeHandleImmediately()
+            }
+            return false
+          }
+          
           const target = event.target as HTMLElement
+          
+          if (!editor.isEditable) {
+            clearHandles()
+            return false
+          }
 
           if (
             target.closest('.table-row-handle-overlay') ||
@@ -88,6 +128,11 @@ currentCellHandle?.remove()
           const tableRect = table.getBoundingClientRect()
           const editorScrollLeft = editorElement.scrollLeft
           const editorScrollTop = editorElement.scrollTop
+          const rowRect = row.getBoundingClientRect()
+
+          // Calculate position for the handle
+          const handleLeft = tableRect.left - editorRect.left + editorScrollLeft - 7
+          const handleTop = rowRect.top - editorRect.top + editorScrollTop + rowRect.height / 2 - 10
 
           if (
             !currentCellHandle ||
@@ -110,12 +155,10 @@ currentCellHandle?.remove()
             currentCellHandle.setAttribute('data-row-id', String(rowIndex))
             currentCellHandle.setAttribute('data-table-id', tableId)
 
-            const rowRect = row.getBoundingClientRect()
-
             currentCellHandle.style.cssText = `
               position: absolute;
-              left: ${tableRect.left - editorRect.left + editorScrollLeft - 7}px;
-              top: ${rowRect.top - editorRect.top + editorScrollTop + rowRect.height / 2 - 10}px;
+              left: ${handleLeft}px;
+              top: ${handleTop}px;
               height: 16px;
               width: 12px;
               display: flex;
@@ -129,7 +172,6 @@ currentCellHandle?.remove()
               border: 1px solid var(--outline-gray-2);
               border-radius: 4px;
               box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-              transition: all 0.15s ease;
             `
 
             currentCellHandle.addEventListener('mouseenter', function () {
@@ -191,14 +233,30 @@ currentCellHandle?.remove()
             })
 
             editorElement.appendChild(currentCellHandle)
+          } else {
+            // Update position instantly for existing handle
+            currentCellHandle.style.left = `${handleLeft}px`
+            currentCellHandle.style.top = `${handleTop}px`
           }
           return false
         },
       },
     },
     view() {
+      const onResizeStart = () => {
+        removeHandleImmediately()
+      }
+      
+      const onResizeEnd = () => {
+      }
+      
+      window.addEventListener('table-resize-start', onResizeStart)
+      window.addEventListener('table-resize-end', onResizeEnd)
+      
       return {
         destroy() {
+          window.removeEventListener('table-resize-start', onResizeStart)
+          window.removeEventListener('table-resize-end', onResizeEnd)
           currentCellHandle?.remove()
           currentCellHandle = null
         },
