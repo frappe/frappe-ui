@@ -20,6 +20,7 @@ export interface PopoverProps {
   transition?: 'default' | null
   hideOnBlur?: boolean
   matchTargetWidth?: boolean
+  offset?: number
 }
 
 export interface PopoverEmits {

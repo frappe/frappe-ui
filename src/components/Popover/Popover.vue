@@ -24,6 +24,7 @@
       <PopoverContent
         :side="placementSide"
         :align="placementAlign"
+        :sideOffset="offset"
         :style="{
           minWidth: matchTargetWidth
             ? 'var(--reka-popover-trigger-width)'
