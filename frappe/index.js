@@ -28,4 +28,4 @@ export { showHelpModal, minimize } from './Help/help.js'
 export { showHelpCenter } from './HelpCenter/helpCenter.js'
 
 // plugins
-export { default as telemetryPlugin } from './telemetry.ts'
+// export { default as telemetryPlugin } from './telemetry.ts'
