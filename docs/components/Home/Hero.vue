@@ -27,7 +27,7 @@ import pkgJson from "../../../package.json";
       <div class="flex gap-3 mt-2 mx-auto">
         <a
           href="/docs"
-          class="font-normal py-2 px-4 flex gap-3 items-center rounded bg-surface-gray-7 text-ink-gray-1"
+          class="font-normal px-2.5 h-8 flex gap-3 items-center rounded bg-surface-gray-7 text-ink-gray-1"
         >
           Get Started
           <LucideRight class="size-4" />
@@ -35,7 +35,7 @@ import pkgJson from "../../../package.json";
 
         <a
           href="/docs/components"
-          class="font-normal py-2 px-4 flex gap-3 items-center rounded bg-surface-gray-3"
+          class="font-normal px-2.5 h-8 flex gap-3 items-center rounded bg-surface-gray-3"
         >
           Show Components
         </a>
