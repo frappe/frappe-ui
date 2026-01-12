@@ -22,6 +22,11 @@ body {
   align-items: center;
 }
 
+code {
+  font-family: monospace;
+  @apply !text-xs;
+}
+
 [class*='language'] {
   position: relative;
   /* @apply rounded mt-5 px-3 relative  grid; */
@@ -48,7 +53,6 @@ body {
 }
 
 .shiki {
-  font-size: 12px !important;
   @apply max-h-[500px] w-full overflow-auto leading-relaxed rounded;
   @apply !p-5 !py-4 !bg-surface-gray-7 dark:!bg-surface-cards;
 
