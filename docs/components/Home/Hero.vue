@@ -16,7 +16,7 @@ import pkgJson from "../../../package.json";
         <Badge class="absolute -top-8" size="lg" theme="green">
           v{{ pkgJson.version }}
         </Badge>
-        Blazing Fast Beautiful Interfaces
+        Build Beautiful Interfaces Fast
       </h1>
 
       <p class="text-2xl text-ink-gray-5 leading-relaxed w-3/4 mx-auto">

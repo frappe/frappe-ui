@@ -1,19 +1,13 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
 import {
   Avatar,
-  Badge,
   Button,
   FormControl,
-  Rating,
   Select,
   Switch,
-  TextInput,
   Tooltip,
 } from "frappe-ui";
 import LucideRight from "~icons/lucide/arrow-right";
-import LucideUser from "~icons/lucide/user";
-import LucideMail from "~icons/lucide/mail";
 import LucideGlobe from "~icons/lucide/globe";
 import LucideLink from "~icons/lucide/link";
 import LucideSearch from "~icons/lucide/search";
@@ -182,7 +176,7 @@ const selOpts = ["Admin", "Editor", "Viewer", "Guest"]
 
         <Tooltip
           text="Gotchu!"
-          hover-delay="0"
+          :hover-delay="0"
         >
           <span class="flex gap-2">
             Learn more

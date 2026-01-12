@@ -217,7 +217,7 @@ const vScrollActive = {
           class="flex gap-1 items-center text-ink-gray-6"
           :class="[
             'p-2 cursor-pointer text-sm rounded',
-            i === activeIndex ? 'bg-surface-gray-1 text-ink-gray-9' : '',
+            i === activeIndex ? 'bg-surface-gray-2 text-ink-gray-9' : '',
           ]"
           @mouseenter="activeIndex = i"
           @click="emits('close')"

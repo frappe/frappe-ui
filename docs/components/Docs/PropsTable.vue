@@ -18,7 +18,7 @@ const props = defineProps<Props>()
 
 <template>
   <div
-    class="grid grid-cols-3 bg-surface-gray-2 rounded p-2 px-4 text-ink-gray-5 mb-3"
+    class="grid grid-cols-3 bg-surface-gray-2 rounded p-2 px-4 text-ink-gray-6 mb-3"
   >
     <span>Prop</span>
     <span>Default</span>
