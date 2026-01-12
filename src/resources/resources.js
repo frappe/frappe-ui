@@ -65,6 +65,7 @@ export function createResource(options, vm) {
     out.previousData = out.data ? JSON.parse(JSON.stringify(out.data)) : null
     out.loading = true
     out.error = null
+    options.url = out.url || options.url
 
     if (options.onFetch) {
       options.onFetch.call(vm, out.params)
