@@ -13,51 +13,57 @@ interface Props {
   data: itemProp[]
 }
 
-const props = defineProps<Props>()
+defineProps<Props>()
 </script>
 
 <template>
-  <div
-    class="grid grid-cols-3 bg-surface-gray-2 rounded p-2 px-4 text-ink-gray-6 mb-3"
-  >
-    <span>Prop</span>
-    <span>Default</span>
-    <span>Type </span>
-  </div>
+  <table class="overflow-auto scrollbar not-prose w-full">
+    <colgroup>
+      <col class="w-[20%]" />
+      <col class="w-[20%]" />
+      <col class="w-[60%]" />
+    </colgroup>
 
-  <section
-    class="grid grid-cols-3 px-2 w-full gap-0 overflow-auto scrollbar not-prose"
-  >
-    <template v-for="(x, i) in props.data" :key="x.name">
-      <Badge :theme="x.required ? 'red' : 'green'" class="w-fit !rounded-sm">
-        {{ x.name }}
-      </Badge>
+    <tbody
+      class="[&_td]:px-3 [&_th]:px-3 [&_td]:p-2 [&_th]:p-2 [&_td]:align-top"
+    >
+      <tr class="text-left *:bg-surface-gray-2 text-ink-gray-6 *:font-semibold">
+        <th class="rounded-l">Name</th>
+        <th>Default</th>
+        <th class="rounded-r">Type</th>
+      </tr>
 
-      <Badge
-        class="w-fit !rounded-sm"
-        :class="{
-          'whitespace-pre px-3 py-2 leading-relaxed h-full !bg-surface-gray-1':
-            x.default?.includes('{'),
-        }"
-        :size="x.default?.includes('{') ? 'lg' : 'md'"
-      >
-        {{ x.default || '-' }}
-      </Badge>
+      <tr v-for="x in data" :key="x.name" class="border-b last:border-0">
+        <td>
+          <Badge
+            :theme="x.required ? 'red' : 'gray'"
+            class="w-fit !rounded-sm mb-auto flex font-mono"
+          >
+            {{ x.name }}
+          </Badge>
+        </td>
 
-      <div class="flex flex-wrap h-fit gap-2">
-        <Badge
-          v-for="item in x.type?.split('|')"
-          class="!rounded-sm border-outline-gray-2"
-        >
-          {{ item }}
-        </Badge>
+        <td>
+          <div
+            v-if="x.default?.includes('{')"
+            class="w-fit rounded-sm whitespace-pre px-3 py-2 leading-relaxed h-full !bg-surface-gray-1"
+          >
+            {{ x.default }}
+          </div>
 
-        <p class="text-sm text-ink-gray-5 leading-relaxed w-full">
-          {{ x.description }}
-        </p>
-      </div>
+          <template v-else>{{ x.default || '-' }}</template>
+        </td>
 
-      <hr v-if="i < props.data.length - 1" class="col-span-full mt-1 mb-2 -mx-1" />
-    </template>
-  </section>
+        <td class="flex flex-wrap h-fit gap-2">
+          <span class="text-sm font-semibold">
+            {{ x.type }}
+          </span>
+
+          <p class="text-sm text-ink-gray-5 leading-relaxed w-full">
+            {{ x.description }}
+          </p>
+        </td>
+      </tr>
+    </tbody>
+  </table>
 </template>
