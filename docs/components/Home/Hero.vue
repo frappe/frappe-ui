@@ -9,7 +9,7 @@ import pkgJson from '../../../package.json'
   <div class="grid gap-5 max-w-7xl mx-auto">
     <div class="mt-10 p-5 flex flex-col gap-5 text-center w-fit">
       <h1
-        class="text-[48px] font-semibold tracing-tight leading-tight !m-0 relative"
+        class="text-[40px] font-semibold tracing-tight leading-tight !m-0 relative"
       >
         <Badge class="absolute -top-8" size="lg" theme="green">
           v{{ pkgJson.version }}
@@ -17,7 +17,7 @@ import pkgJson from '../../../package.json'
         Build Beautiful Interfaces Fast
       </h1>
 
-      <p class="text-2xl text-ink-gray-5 leading-relaxed w-3/4 mx-auto">
+      <p class="text-xl text-ink-gray-5 leading-relaxed w-3/4 mx-auto">
         Beautifully crafted components built for real world applications. Better
         defaults helping you ship faster.
       </p>
