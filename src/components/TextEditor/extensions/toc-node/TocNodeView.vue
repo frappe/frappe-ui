@@ -1,22 +1,11 @@
 <template>
   <NodeViewWrapper class="table-of-contents-node" contenteditable="false">
-    <div v-if="anchors.length === 0" class="text-sm text-ink-gray-5 italic">
-  <NodeViewWrapper
-    class="table-of-contents-node"
-    contenteditable="false"
-  >
     <div v-if="anchorTree.length === 0" class="text-sm text-ink-gray-5 italic">
       No headings found in this document.
     </div>
     <ol v-else v-bind="orderedListHTMLAttrs">
-      <TocRecursiveItem
-        v-for="anchor in anchorTree"
-        :key="anchor.id"
-        :node="anchor"
-        :ordered-attrs="orderedListHTMLAttrs"
-        :list-attrs="listItemHTMLAttrs"
-        :on-heading-click="scrollToHeading"
-      />
+      <TocRecursiveItem v-for="anchor in anchorTree" :key="anchor.id" :node="anchor"
+        :ordered-attrs="orderedListHTMLAttrs" :list-attrs="listItemHTMLAttrs" :on-heading-click="scrollToHeading" />
     </ol>
   </NodeViewWrapper>
 </template>
@@ -69,82 +58,82 @@ const scrollToHeading = (heading: HeadingAnchor) => {
   const view = props.editor.view
   const pos = heading.pos
 
-    if (pos < 0 || pos > view.state.doc.content.size) {
-      return
-    }
+  if (pos < 0 || pos > view.state.doc.content.size) {
+    return
+  }
 
-    let element: Element | null = null
-    const editorDom = view.dom
+  let element: Element | null = null
+  const editorDom = view.dom
 
-    element =
-      editorDom.querySelector(`[data-toc-id="${heading.id}"]`) ||
-      editorDom.querySelector(`#${heading.id}`) ||
-      null
+  element =
+    editorDom.querySelector(`[data-toc-id="${heading.id}"]`) ||
+    editorDom.querySelector(`#${heading.id}`) ||
+    null
 
-    if (!element) {
-      const domPos = view.domAtPos(pos)
-      if (domPos.node && domPos.node.nodeType === Node.ELEMENT_NODE) {
-        const node = domPos.node as Element
-        if (node.matches('h1, h2, h3, h4, h5, h6')) {
-          element = node
-        } else {
-          element = node.closest('h1, h2, h3, h4, h5, h6')
-        }
+  if (!element) {
+    const domPos = view.domAtPos(pos)
+    if (domPos.node && domPos.node.nodeType === Node.ELEMENT_NODE) {
+      const node = domPos.node as Element
+      if (node.matches('h1, h2, h3, h4, h5, h6')) {
+        element = node
+      } else {
+        element = node.closest('h1, h2, h3, h4, h5, h6')
       }
     }
+  }
 
-    if (!element) {
-      const allHeadings = Array.from(
-        editorDom.querySelectorAll('h1, h2, h3, h4, h5, h6'),
-      )
-      element = allHeadings.find(
-        (el) => el.textContent?.trim() === heading.textContent,
-      ) || null
-    }
+  if (!element) {
+    const allHeadings = Array.from(
+      editorDom.querySelectorAll('h1, h2, h3, h4, h5, h6'),
+    )
+    element = allHeadings.find(
+      (el) => el.textContent?.trim() === heading.textContent,
+    ) || null
+  }
 
-    const tr = view.state.tr
-    tr.setSelection(new TextSelection(tr.doc.resolve(pos)))
-    view.dispatch(tr)
-    view.focus()
+  const tr = view.state.tr
+  tr.setSelection(new TextSelection(tr.doc.resolve(pos)))
+  view.dispatch(tr)
+  view.focus()
 
-    const editorContainer = document.querySelector('#editorScrollContainer')
-    if (element && editorContainer) {
-      const elementRect = element.getBoundingClientRect()
-      const containerRect = editorContainer.getBoundingClientRect()
+  const editorContainer = document.querySelector('#editorScrollContainer')
+  if (element && editorContainer) {
+    const elementRect = element.getBoundingClientRect()
+    const containerRect = editorContainer.getBoundingClientRect()
 
-      const currentScrollTop = editorContainer.scrollTop
-      const elementTopRelativeToContainer =
-        elementRect.top - containerRect.top + currentScrollTop
+    const currentScrollTop = editorContainer.scrollTop
+    const elementTopRelativeToContainer =
+      elementRect.top - containerRect.top + currentScrollTop
 
-      editorContainer.scrollTo({
-        top: Math.max(0, elementTopRelativeToContainer - 20),
-        behavior: 'smooth',
-      })
-    } else if (element) {
-      element.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-        inline: 'nearest',
-      })
-    } else {
-      const domPos = view.domAtPos(pos)
-      if (domPos.node && domPos.node.nodeType === Node.ELEMENT_NODE) {
-        const node = domPos.node as Element
-        const editorContainer = document.querySelector('#editorScrollContainer')
-        if (editorContainer) {
-          const nodeRect = node.getBoundingClientRect()
-          const containerRect = editorContainer.getBoundingClientRect()
-          const currentScrollTop = editorContainer.scrollTop
-          const nodeTopRelativeToContainer =
-            nodeRect.top - containerRect.top + currentScrollTop
+    editorContainer.scrollTo({
+      top: Math.max(0, elementTopRelativeToContainer - 20),
+      behavior: 'smooth',
+    })
+  } else if (element) {
+    element.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+      inline: 'nearest',
+    })
+  } else {
+    const domPos = view.domAtPos(pos)
+    if (domPos.node && domPos.node.nodeType === Node.ELEMENT_NODE) {
+      const node = domPos.node as Element
+      const editorContainer = document.querySelector('#editorScrollContainer')
+      if (editorContainer) {
+        const nodeRect = node.getBoundingClientRect()
+        const containerRect = editorContainer.getBoundingClientRect()
+        const currentScrollTop = editorContainer.scrollTop
+        const nodeTopRelativeToContainer =
+          nodeRect.top - containerRect.top + currentScrollTop
 
-          editorContainer.scrollTo({
-            top: Math.max(0, nodeTopRelativeToContainer - 20),
-            behavior: 'smooth',
-          })
-        }
+        editorContainer.scrollTo({
+          top: Math.max(0, nodeTopRelativeToContainer - 20),
+          behavior: 'smooth',
+        })
       }
     }
+  }
 }
 
 const TocRecursiveItem = defineComponent({
@@ -163,7 +152,7 @@ const TocRecursiveItem = defineComponent({
     },
     onHeadingClick: {
       type: Function as PropType<(heading: HeadingAnchor) => void>,
-      default: () => {},
+      default: () => { },
     },
   },
   setup(props) {
@@ -195,23 +184,23 @@ const TocRecursiveItem = defineComponent({
           h('p', { style: { margin: 0 } }, props.node.textContent),
           props.node.children?.length
             ? h(
-                'ol',
-                {
-                  ...props.orderedAttrs,
-                  onClick: (e: MouseEvent) => {
-                    e.stopPropagation()
-                  },
+              'ol',
+              {
+                ...props.orderedAttrs,
+                onClick: (e: MouseEvent) => {
+                  e.stopPropagation()
                 },
-                props.node.children.map((child) =>
-                  h(TocRecursiveItem, {
-                    key: child.id,
-                    node: child,
-                    orderedAttrs: props.orderedAttrs,
-                    listAttrs: props.listAttrs,
-                    onHeadingClick: props.onHeadingClick,
-                  }),
-                ),
-              )
+              },
+              props.node.children.map((child) =>
+                h(TocRecursiveItem, {
+                  key: child.id,
+                  node: child,
+                  orderedAttrs: props.orderedAttrs,
+                  listAttrs: props.listAttrs,
+                  onHeadingClick: props.onHeadingClick,
+                }),
+              ),
+            )
             : null,
         ],
       )
@@ -341,7 +330,7 @@ const extractAnchors = (): HeadingAnchor[] => {
 }
 
 const updateAnchors = () => {
-    anchors.value = extractAnchors()
+  anchors.value = extractAnchors()
 }
 
 let updateInterval: ReturnType<typeof setInterval> | null = null
@@ -417,4 +406,3 @@ onBeforeUnmount(() => {
   text-decoration: underline;
 }
 </style>
-

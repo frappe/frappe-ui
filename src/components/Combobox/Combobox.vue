@@ -309,26 +309,12 @@ defineSlots<{
                   class="px-2.5 pt-3 pb-1.5 text-sm font-medium text-ink-gray-5 sticky top-0 bg-surface-modal z-10">
                   {{ optionOrGroup.group }}
                 </ComboboxLabel>
-                <ComboboxItem
-                  v-for="(option, idx) in optionOrGroup.options"
-                  :key="`${index}-${idx}`"
-                  :value="getKey(option)"
-<<<<<<< HEAD
-=======
-                  :disabled="isDisabled(option)"
->>>>>>> db063511 (fix: revert unnecessary changes)
-                  class="text-base leading-none text-ink-gray-7 rounded flex items-center h-7 px-2.5 py-1.5 relative select-none data-[disabled]:opacity-50 data-[disabled]:pointer-events-none data-[highlighted]:outline-none data-[highlighted]:bg-surface-gray-3"
-                >
-                  <slot
-                    v-if="getSlotName(option)"
-                    :name="getSlotName(option)"
-                    :option="option"
-                    :searchTerm="searchTerm"
-                  />
-                  <component
-                    v-else-if="getRenderFunction(option)"
-                    :is="getRenderFunction(option)"
-                  />
+                <ComboboxItem v-for="(option, idx) in optionOrGroup.options" :key="`${index}-${idx}`"
+                  :value="getKey(option)" :disabled="isDisabled(option)"
+                  class="text-base leading-none text-ink-gray-7 rounded flex items-center h-7 px-2.5 py-1.5 relative select-none data-[disabled]:opacity-50 data-[disabled]:pointer-events-none data-[highlighted]:outline-none data-[highlighted]:bg-surface-gray-3">
+                  <slot v-if="getSlotName(option)" :name="getSlotName(option)" :option="option"
+                    :searchTerm="searchTerm" />
+                  <component v-else-if="getRenderFunction(option)" :is="getRenderFunction(option)" />
                   <template v-else>
                     <span class="flex items-center gap-2 pr-6 flex-1">
                       <RenderIcon :icon="getIcon(option)" />
@@ -340,50 +326,17 @@ defineSlots<{
                   </template>
                 </ComboboxItem>
               </ComboboxGroup>
-              <ComboboxItem
-                v-else
-                :key="index"
-                :value="getKey(optionOrGroup)"
-<<<<<<< HEAD
-=======
-                :disabled="isDisabled(optionOrGroup)"
->>>>>>> db063511 (fix: revert unnecessary changes)
-                class="text-base leading-none text-ink-gray-7 rounded flex items-center h-7 px-2.5 py-1.5 relative select-none data-[disabled]:opacity-50 data-[disabled]:pointer-events-none data-[highlighted]:outline-none data-[highlighted]:bg-surface-gray-3"
-              >
-                <slot
-                  v-if="getSlotName(optionOrGroup)"
-                  :name="getSlotName(optionOrGroup)"
-                  :option="optionOrGroup"
-                  :searchTerm="searchTerm"
-                />
-                <component
-                  v-else-if="getRenderFunction(optionOrGroup)"
-                  :is="getRenderFunction(optionOrGroup)"
-                />
+              <ComboboxItem v-else :key="index" :value="getKey(optionOrGroup)" :disabled="isDisabled(optionOrGroup)"
+                class="text-base leading-none text-ink-gray-7 rounded flex items-center h-7 px-2.5 py-1.5 relative
+                select-none
+                data-[disabled]:opacity-50 data-[disabled]:pointer-events-none data-[highlighted]:outline-none
+                data-[highlighted]:bg-surface-gray-3">
+                <slot v-if="getSlotName(optionOrGroup)" :name="getSlotName(optionOrGroup)" :option="optionOrGroup"
+                  :searchTerm="searchTerm" />
+                <component v-else-if="getRenderFunction(optionOrGroup)" :is="getRenderFunction(optionOrGroup)" />
                 <template v-else>
                   <span class="flex items-center gap-2 pr-6 flex-1">
-                    <RenderIcon
-                      v-if="getIcon(optionOrGroup)"
-                      :icon="getIcon(optionOrGroup)"
-                    />
-<<<<<<< HEAD
-
-										{{ getLabel(optionOrGroup) }}
-									</span>
-									<ComboboxItemIndicator
-										class="absolute right-0 w-6 inline-flex items-center justify-center"
-									>
-										<LucideCheck class="h-4 w-4" />
-									</ComboboxItemIndicator>
-								</template>
-							</ComboboxItem>
-						</template>
-					</ComboboxViewport>
-				</ComboboxContent>
-			</ComboboxPortal>
-		</ComboboxRoot>
-	</div>
-=======
+                    <RenderIcon v-if="getIcon(optionOrGroup)" :icon="getIcon(optionOrGroup)" />
                     {{ getLabel(optionOrGroup) }}
                   </span>
                   <ComboboxItemIndicator class="absolute right-0 w-6 inline-flex items-center justify-center">
@@ -397,5 +350,5 @@ defineSlots<{
       </ComboboxPortal>
     </ComboboxRoot>
   </div>
->>>>>>> db063511 (fix: revert unnecessary changes)
+
 </template>
