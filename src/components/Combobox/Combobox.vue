@@ -1,35 +1,30 @@
 <script setup lang="ts">
 import { computed, type VNode, ref, watch } from 'vue'
 import {
-  ComboboxAnchor,
-  ComboboxContent,
-  ComboboxEmpty,
-  ComboboxGroup,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxItemIndicator,
-  ComboboxLabel,
-  ComboboxPortal,
-  ComboboxRoot,
-  ComboboxTrigger,
-  ComboboxViewport,
+	ComboboxAnchor,
+	ComboboxContent,
+	ComboboxEmpty,
+	ComboboxGroup,
+	ComboboxInput,
+	ComboboxItem,
+	ComboboxItemIndicator,
+	ComboboxLabel,
+	ComboboxPortal,
+	ComboboxRoot,
+	ComboboxTrigger,
+	ComboboxViewport,
 } from 'reka-ui'
 import LucideCheck from '~icons/lucide/check'
 import LucideChevronDown from '~icons/lucide/chevron-down'
-import type {
-  SimpleOption,
-  GroupedOption,
-  ComboboxOption,
-  ComboboxProps,
-} from './types'
+import type { SimpleOption, GroupedOption, ComboboxOption, ComboboxProps } from './types'
 import {
-  getLabel,
-  getValue,
-  isCustomOption,
-  getKey,
-  isDisabled,
-  getIcon,
-  RenderIcon,
+	getLabel,
+	getValue,
+	isCustomOption,
+	getKey,
+	isDisabled,
+	getIcon,
+	RenderIcon,
 } from './utils'
 
 const props = withDefaults(defineProps<ComboboxProps>(), {
@@ -62,186 +57,200 @@ const userHasTyped = ref(false)
 const lastSearchTerm = ref('') // Preserve search context for custom option onClick handlers
 
 watch(
-  () => props.modelValue,
-  (newValue) => {
-    internalModelValue.value = newValue
-    searchTerm.value = getDisplayValue(newValue)
-  },
+	() => props.modelValue,
+	(newValue) => {
+		internalModelValue.value = newValue
+		searchTerm.value = getDisplayValue(newValue)
+	},
 )
 watch(
-  () => getDisplayValue(props.modelValue),
-  (newDisplay) => {
-    if (!userHasTyped.value) searchTerm.value = newDisplay
-  },
+	() => getDisplayValue(props.modelValue),
+	(newDisplay) => {
+		if (!userHasTyped.value) searchTerm.value = newDisplay
+	},
 )
 
 const onUpdateModelValue = (value: string | null) => {
-  const selectedOpt = value
-    ? allOptionsFlat.value.find((opt) => getKey(opt) === value) || null
-    : null
+	const selectedOpt = value
+		? allOptionsFlat.value.find((opt) => getKey(opt) === value) || null
+		: null
 
-  if (selectedOpt && isCustomOption(selectedOpt)) {
-    const context = { searchTerm: lastSearchTerm.value }
-    selectedOpt.onClick(context)
-    if (selectedOpt.keepOpen) {
-      // Defer opening to prevent interference with default close behavior
-      setTimeout(() => {
-        isOpen.value = true
-      }, 0)
-    } else {
-      isOpen.value = false
-      searchTerm.value = getDisplayValue(internalModelValue.value)
-      lastSearchTerm.value = ''
-      userHasTyped.value = false
-    }
+	if (selectedOpt && isCustomOption(selectedOpt)) {
+		const context = { searchTerm: lastSearchTerm.value }
+		selectedOpt.onClick(context)
+		if (selectedOpt.keepOpen) {
+			// Defer opening to prevent interference with default close behavior
+			setTimeout(() => {
+				isOpen.value = true
+			}, 0)
+		} else {
+			isOpen.value = false
+			searchTerm.value = getDisplayValue(internalModelValue.value)
+			lastSearchTerm.value = ''
+			userHasTyped.value = false
+		}
 
-    return
-  }
-  internalModelValue.value = value
-  emit('update:modelValue', value)
-  searchTerm.value = getDisplayValue(value)
-  lastSearchTerm.value = ''
-  userHasTyped.value = false
-  emit('update:selectedOption', selectedOpt)
+		return
+	}
+	internalModelValue.value = value
+	emit('update:modelValue', value)
+	searchTerm.value = getDisplayValue(value)
+	lastSearchTerm.value = ''
+	userHasTyped.value = false
+	emit('update:selectedOption', selectedOpt)
 }
 
 function isGroup(option: ComboboxOption): option is GroupedOption {
-  return typeof option === 'object' && 'group' in option
+	return typeof option === 'object' && 'group' in option
 }
 
 function getSlotName(option: SimpleOption): string | undefined {
-  return isCustomOption(option) ? option.slotName : undefined
+	return isCustomOption(option) ? option.slotName : undefined
 }
 
 function getRenderFunction(option: SimpleOption): (() => VNode) | undefined {
-  return isCustomOption(option) ? option.render : undefined
+	return isCustomOption(option) ? option.render : undefined
+}
+function getThemeClasses(variant: string = 'subtle', disabled: boolean) {
+	let variants = {
+		subtle:
+			'border border-surface-gray-2 bg-surface-gray-2 placeholder-ink-gray-4 hover:border-outline-gray-modals hover:bg-surface-gray-3 focus-within:bg-surface-white focus-within:border-outline-gray-4 focus-within:shadow-sm focus-within:hover:bg-surface-white focus-within:hover:border-outline-gray-4',
+		outline:
+			'border border-outline-gray-2 bg-surface-white placeholder-ink-gray-4 hover:shadow-sm focus-within:bg-surface-white focus-within:border-outline-gray-4 focus-within:shadow-sm',
+		disabled: [
+			'border bg-surface-gray-1 placeholder-ink-gray-3',
+			props.variant === 'outline' ? 'border-outline-gray-2' : 'border-transparent',
+		],
+		ghost: 'border-0 focus-within:ring-0',
+	}
+	return [
+		'flex h-7 w-full items-center justify-between gap-2 rounded px-2 py-1 transition-colors focus-within:ring-2 focus-within:ring-outline-gray-3',
+		variants[variant],
+		disabled ? 'opacity-50 pointer-events-none' : '',
+	]
 }
 
 const allOptionsFlat = computed(() => {
-  const flatOptions: SimpleOption[] = []
-  props.options.forEach((optionOrGroup) => {
-    if (isGroup(optionOrGroup)) {
-      flatOptions.push(...optionOrGroup.options)
-    } else {
-      flatOptions.push(optionOrGroup)
-    }
-  })
-  return flatOptions
+	const flatOptions: SimpleOption[] = []
+	props.options.forEach((optionOrGroup) => {
+		if (isGroup(optionOrGroup)) {
+			flatOptions.push(...optionOrGroup.options)
+		} else {
+			flatOptions.push(optionOrGroup)
+		}
+	})
+	return flatOptions
 })
 
 function getDisplayValue(selectedValue: string | null | undefined): string {
-  if (!selectedValue) return ''
-  const options = props.options.flatMap((opt) =>
-    isGroup(opt) ? opt.options : opt,
-  )
-  const selectedOption = options.find((opt) => getValue(opt) === selectedValue)
-  return selectedOption ? getLabel(selectedOption) : selectedValue || ''
+	if (!selectedValue) return ''
+	const options = props.options.flatMap((opt) => (isGroup(opt) ? opt.options : opt))
+	const selectedOption = options.find((opt) => getValue(opt) === selectedValue)
+	return selectedOption ? getLabel(selectedOption) : selectedValue || ''
 }
 
 const selectedOption = computed(() => {
-  if (!internalModelValue.value) return null
-  return allOptionsFlat.value.find(
-    (opt) => getValue(opt) === internalModelValue.value,
-  )
+	if (!internalModelValue.value) return null
+	return allOptionsFlat.value.find((opt) => getValue(opt) === internalModelValue.value)
 })
 
 const selectedOptionIcon = computed(() => {
-  return selectedOption.value ? getIcon(selectedOption.value) : undefined
+	return selectedOption.value ? getIcon(selectedOption.value) : undefined
 })
 
 const shouldShowOption = (
-  option: SimpleOption,
-  search: string,
-  context: { searchTerm: string },
+	option: SimpleOption,
+	search: string,
+	context: { searchTerm: string },
 ) => {
-  if (isCustomOption(option)) {
-    if (option.condition) {
-      return option.condition(context)
-    }
-    if (!search) return true
-    return getLabel(option).toLowerCase().includes(search.toLowerCase())
-  }
+	if (isCustomOption(option)) {
+		if (option.condition) {
+			return option.condition(context)
+		}
+		if (!search) return true
+		return getLabel(option).toLowerCase().includes(search.toLowerCase())
+	}
 
-  if (!search) return true
-  const label = getLabel(option).toLowerCase()
-  const value = getValue(option)?.toLowerCase() || ''
-  const lowerSearch = search.toLowerCase()
-  return label.includes(lowerSearch) || value.includes(lowerSearch)
+	if (!search) return true
+	const label = getLabel(option).toLowerCase()
+	const value = getValue(option)?.toLowerCase() || ''
+	const lowerSearch = search.toLowerCase()
+	return label.includes(lowerSearch) || value.includes(lowerSearch)
 }
 
 const filterFunction = (options: ComboboxOption[], search: string) => {
-  const context = { searchTerm: search }
-  const filtered: ComboboxOption[] = []
+	const context = { searchTerm: search }
+	const filtered: ComboboxOption[] = []
 
-  options.forEach((optionOrGroup) => {
-    if (isGroup(optionOrGroup)) {
-      const filteredGroupOptions = optionOrGroup.options.filter((opt) =>
-        shouldShowOption(opt, search, context),
-      )
-      if (filteredGroupOptions.length > 0) {
-        filtered.push({ ...optionOrGroup, options: filteredGroupOptions })
-      }
-    } else if (shouldShowOption(optionOrGroup, search, context)) {
-      filtered.push(optionOrGroup)
-    }
-  })
+	options.forEach((optionOrGroup) => {
+		if (isGroup(optionOrGroup)) {
+			const filteredGroupOptions = optionOrGroup.options.filter((opt) =>
+				shouldShowOption(opt, search, context),
+			)
+			if (filteredGroupOptions.length > 0) {
+				filtered.push({ ...optionOrGroup, options: filteredGroupOptions })
+			}
+		} else if (shouldShowOption(optionOrGroup, search, context)) {
+			filtered.push(optionOrGroup)
+		}
+	})
 
-  return filtered
+	return filtered
 }
 
 const filteredOptions = computed(() => {
-  if (isOpen.value && !userHasTyped.value && internalModelValue.value) {
-    return props.options
-  }
-  return filterFunction(props.options, searchTerm.value)
+	if (isOpen.value && !userHasTyped.value && internalModelValue.value) {
+		return props.options
+	}
+	return filterFunction(props.options, searchTerm.value)
 })
 
 const handleInputChange = (event: Event) => {
-  const target = event.target as HTMLInputElement
-  searchTerm.value = target.value
-  lastSearchTerm.value = target.value
-  userHasTyped.value = true
+	const target = event.target as HTMLInputElement
+	searchTerm.value = target.value
+	lastSearchTerm.value = target.value
+	userHasTyped.value = true
 
-  if (searchTerm.value === '') {
-    internalModelValue.value = null
-    emit('update:modelValue', null)
-  }
-  emit('input', searchTerm.value)
+	if (searchTerm.value === '') {
+		internalModelValue.value = null
+		emit('update:modelValue', null)
+	}
+	emit('input', searchTerm.value)
 }
 
 const handleOpenChange = (open: boolean) => {
-  isOpen.value = open
-  if (!open) {
-    searchTerm.value = getDisplayValue(internalModelValue.value)
-    userHasTyped.value = false
-  } else {
-    userHasTyped.value = false
-  }
+	isOpen.value = open
+	if (!open) {
+		searchTerm.value = getDisplayValue(internalModelValue.value)
+		userHasTyped.value = false
+	} else {
+		userHasTyped.value = false
+	}
 }
 
 const handleFocus = (event: FocusEvent) => {
-  if (props.openOnFocus) {
-    isOpen.value = true
-  }
-  emit('focus', event)
+	if (props.openOnFocus) {
+		isOpen.value = true
+	}
+	emit('focus', event)
 }
 
 const handleBlur = (event: FocusEvent) => {
-  emit('blur', event)
+	emit('blur', event)
 }
 
 const handleClick = () => {
-  if (props.openOnClick) {
-    isOpen.value = true
-  }
+	if (props.openOnClick) {
+		isOpen.value = true
+	}
 }
 
 const reset = () => {
-  searchTerm.value = ''
-  userHasTyped.value = false
-  internalModelValue.value = null
-  emit('update:modelValue', null)
-  emit('update:selectedOption', null)
+	searchTerm.value = ''
+	userHasTyped.value = false
+	internalModelValue.value = null
+	emit('update:modelValue', null)
+	emit('update:selectedOption', null)
 }
 
 const variantClasses = computed(() => {
@@ -256,7 +265,7 @@ const variantClasses = computed(() => {
 })
 
 defineExpose({
-  reset,
+	reset,
 })
 
 defineSlots<{
@@ -383,19 +392,19 @@ defineSlots<{
                       :icon="getIcon(optionOrGroup)"
                     />
 
-                    {{ getLabel(optionOrGroup) }}
-                  </span>
-                  <ComboboxItemIndicator
-                    class="absolute right-0 w-6 inline-flex items-center justify-center"
-                  >
-                    <LucideCheck class="h-4 w-4" />
-                  </ComboboxItemIndicator>
-                </template>
-              </ComboboxItem>
-            </template>
-          </ComboboxViewport>
-        </ComboboxContent>
-      </ComboboxPortal>
-    </ComboboxRoot>
-  </div>
+										{{ getLabel(optionOrGroup) }}
+									</span>
+									<ComboboxItemIndicator
+										class="absolute right-0 w-6 inline-flex items-center justify-center"
+									>
+										<LucideCheck class="h-4 w-4" />
+									</ComboboxItemIndicator>
+								</template>
+							</ComboboxItem>
+						</template>
+					</ComboboxViewport>
+				</ComboboxContent>
+			</ComboboxPortal>
+		</ComboboxRoot>
+	</div>
 </template>
