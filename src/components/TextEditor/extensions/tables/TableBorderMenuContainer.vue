@@ -48,7 +48,11 @@ let menuJustOpened = false
 const getViewportPosition = (
   editorRelativePos: { top: number; left: number },
   axis: 'row' | 'column' | 'cell' | null,
-  cellInfo: { element: HTMLElement | null } | null
+  cellInfo: {
+    element: HTMLElement | null
+    isMultiCellSelection?: boolean
+    isIndividualCell?: boolean
+  } | null
 ) => {
   if (!editor.value?.view?.dom?.parentElement) {
     return editorRelativePos
@@ -88,11 +92,13 @@ const getViewportPosition = (
   }
   
   if (axis === 'cell' && cellInfo?.element) {
-    if (cellInfo.isMultiCellSelection) {
-
+    // If coming from a selection-based menu (multi or single cell with isIndividualCell=false),
+    // use the position calculated in the plugin (centered above selection/cell).
+    if (cellInfo.isMultiCellSelection || cellInfo.isIndividualCell === false) {
       viewportTop = editorRelativePos.top
       viewportLeft = editorRelativePos.left
     } else {
+      // For the dot-handler menu on an individual cell, position near the right edge, vertically centered.
       const cellRect = cellInfo.element.getBoundingClientRect()
       viewportLeft = cellRect.right + 8
       viewportTop = cellRect.top + cellRect.height / 2 - 12

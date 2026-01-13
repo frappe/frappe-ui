@@ -5,7 +5,7 @@ export const TableHeaderExtension = TableHeader.extend({
     return {
       ...this.parent?.(),
       backgroundColor: {
-        parseHTML: element => {
+        parseHTML: (element) => {
           if (element.tagName.toLowerCase() !== 'th') {
             return null
           }
@@ -20,12 +20,12 @@ export const TableHeaderExtension = TableHeader.extend({
         },
       },
       borderColor: {
-        parseHTML: element => {
+        parseHTML: (element) => {
           if (element.tagName.toLowerCase() !== 'th') {
             return null
           }
         },
-        renderHTML (attributes) {
+        renderHTML(attributes) {
           if (!attributes.borderColor) {
             return {}
           }
@@ -36,7 +36,7 @@ export const TableHeaderExtension = TableHeader.extend({
       },
       borderWidth: {
         default: null,
-        parseHTML: element => {
+        parseHTML: (element) => {
           if (element.tagName.toLowerCase() !== 'th') {
             return null
           }
@@ -46,14 +46,16 @@ export const TableHeaderExtension = TableHeader.extend({
             return borderWidthMatch[1]
           }
           const classList = element.classList
-          const borderWidthClassMatch = Array.from(classList).find(cls => cls.startsWith('border-') && /^border-\d+$/.test(cls))
+          const borderWidthClassMatch = Array.from(classList).find(
+            (cls) => typeof cls === 'string' && cls.startsWith('border-') && /^border-\d+$/.test(cls),
+          )
           if (borderWidthClassMatch) {
-            const width = borderWidthClassMatch.replace('border-', '')
+            const width = (borderWidthClassMatch as string).replace('border-', '')
             return `${width}px`
           }
           return null
         },
-        renderHTML(attributes){
+        renderHTML(attributes) {
           if (!attributes.borderWidth) {
             return {}
           }
@@ -66,5 +68,6 @@ export const TableHeaderExtension = TableHeader.extend({
   },
 })
 
-
 export default TableHeaderExtension
+
+

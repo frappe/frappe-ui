@@ -53,23 +53,10 @@ export default {
           'Separator',
           'Image',
           'Video',
-          'Blockquote',
-          'Code',
-          [
-            'InsertTable',
-            'AddColumnBefore',
-            'AddColumnAfter',
-            'DeleteColumn',
-            'AddRowBefore',
-            'AddRowAfter',
-            'DeleteRow',
-            'MergeCells',
-            'SplitCell',
-            'ToggleHeaderColumn',
-            'ToggleHeaderRow',
-            'ToggleHeaderCell',
-            'DeleteTable',
-          ],
+        'Blockquote',
+        'Code',
+        // Only show the table size selector here; table structure actions are handled by the table border menu
+        ['InsertTable'],
         ]
       }
       return buttons.map(createEditorButton)

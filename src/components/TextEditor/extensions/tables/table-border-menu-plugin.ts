@@ -14,24 +14,25 @@ export function tableBorderMenuPlugin(editor: Editor) {
   let currentTableId: string | null = null
   let hideTimeout: NodeJS.Timeout | null = null
   let cellTriggerTimeout: NodeJS.Timeout | null = null
+  let isResizing = false
 
   const clearHandles = () => {
     if (hideTimeout) clearTimeout(hideTimeout)
-    hideTimeout = setTimeout(() => {
-      currentRowHandle?.remove()
-      currentColHandle?.remove()
-      currentRowHandle = null
-      currentColHandle = null
-      currentTableId = null
-    }, 100)
+      hideTimeout = setTimeout(() => {
+        currentRowHandle?.remove()
+        currentColHandle?.remove()
+        currentRowHandle = null
+        currentColHandle = null
+        currentTableId = null
+      }, 100)
   }
 
   const clearCellTrigger = () => {
     if (cellTriggerTimeout) clearTimeout(cellTriggerTimeout)
-    cellTriggerTimeout = setTimeout(() => {
-      currentCellTrigger?.remove()
-      currentCellTrigger = null
-    }, 100)
+      cellTriggerTimeout = setTimeout(() => {
+        currentCellTrigger?.remove()
+        currentCellTrigger = null
+      }, 100)
   }
 
   const cancelCellTriggerClear = () => {
@@ -103,14 +104,32 @@ export function tableBorderMenuPlugin(editor: Editor) {
           }
 
           const target = event.target as HTMLElement
+          
+          if (document.body.classList.contains('resizing-table') || target.closest('.column-resize-handle')) {
+            isResizing = true
+            hideAllHandles()
+            return false
+          }
+          
+          if (isResizing && !document.body.classList.contains('resizing-table')) {
+            isResizing = false
+          }
+          
+          if (isResizing) {
+            return false
+          }
+          
           if (
             target.closest('.table-row-handle-overlay') ||
             target.closest('.table-col-handle-overlay') ||
-            target.closest('.table-cell-trigger-overlay') ||
-            target.closest('.column-resize-handle')
+            target.closest('.table-cell-trigger-overlay')
           ) {
             cancelClear()
             cancelCellTriggerClear()
+            return false
+          }
+
+          if (isResizing) {
             return false
           }
 
@@ -396,6 +415,10 @@ export function tableBorderMenuPlugin(editor: Editor) {
             }
           }
           
+          if (isResizing) {
+            return false
+          }
+          
           const cellId = `${tableId}-${rowIndex}-${colIndex}`
           if (!currentCellTrigger || currentCellTrigger.getAttribute('data-cell-id') !== cellId) {
             currentCellTrigger?.remove()
@@ -496,8 +519,14 @@ export function tableBorderMenuPlugin(editor: Editor) {
       let cellSelectionTimeout: NodeJS.Timeout | null = null
       let isMouseDown = false
       let lastSelection: any = null
+      let isResizingHandles = false
 
-      const handleMouseDown = () => {
+      const handleMouseDown = (e: Event) => {
+        const target = e.target as HTMLElement
+        if (target && target.closest('.column-resize-handle')) {
+          isResizingHandles = true
+          hideAllHandles()
+        }
         isMouseDown = true
         if (cellSelectionTimeout) {
           clearTimeout(cellSelectionTimeout)
@@ -506,24 +535,33 @@ export function tableBorderMenuPlugin(editor: Editor) {
       }
 
       const handleMouseUp = () => {
+        if (!document.body.classList.contains('resizing-table')) {
+          isResizing = false
+          isResizingHandles = false
+        }
         isMouseDown = false
         setTimeout(() => {
-          const { selection } = view.state
-          const isCellSelection = selection instanceof CellSelection
-          if (isCellSelection && selection.$anchorCell && selection.$headCell) {
-            const anchorPos = selection.$anchorCell.pos
-            const headPos = selection.$headCell.pos
-            if (anchorPos !== headPos) {
-              checkCellSelection(true)
-            }
+          if (!isResizing && !isResizingHandles) {
+            checkCellSelection(true)
           }
         }, 150)
+      }
+
+      const checkResizing = () => {
+        if (document.body.classList.contains('resizing-table')) {
+          if (!isResizing) {
+            isResizing = true
+            hideAllHandles()
+          }
+        } else if (isResizing) {
+          isResizing = false
+        }
       }
 
       const showMultiCellMenu = () => {
         const selectedCells = view.dom.querySelectorAll('.selectedCell')
         
-        if (selectedCells.length < 2) return
+        if (selectedCells.length < 1) return
         
         let minLeft = Infinity
         let maxRight = -Infinity
@@ -532,19 +570,23 @@ export function tableBorderMenuPlugin(editor: Editor) {
         let firstCell: HTMLElement | null = null
         
         selectedCells.forEach((cell) => {
-          const rect = (cell as HTMLElement).getBoundingClientRect()
+          const cellEl = cell as HTMLElement
+          const rect = cellEl.getBoundingClientRect()
           minLeft = Math.min(minLeft, rect.left)
           maxRight = Math.max(maxRight, rect.right)
           minTop = Math.min(minTop, rect.top)
           maxBottom = Math.max(maxBottom, rect.bottom)
           if (!firstCell) {
-            firstCell = cell as HTMLElement
+            firstCell = cellEl
           }
         })
         
         if (!firstCell) return
         
-        const table = firstCell.closest('table')
+        const isMultiCellSelection = selectedCells.length > 1
+        
+        const firstCellElement = firstCell as HTMLElement
+        const table = firstCellElement.closest('table') as HTMLTableElement | null
         if (!table) return
         
         let editorElement = view.dom.parentElement
@@ -561,9 +603,11 @@ export function tableBorderMenuPlugin(editor: Editor) {
         const menuHeight = 30
         const gap = 12
         
-        const row = firstCell.closest('tr')
-        const colIndex = Array.from(row?.querySelectorAll('td, th') || []).indexOf(firstCell as HTMLTableCellElement)
-        const rowIndex = Array.from(table.querySelectorAll('tr')).indexOf(row as HTMLTableRowElement)
+        const row = firstCell.closest('tr') as HTMLTableRowElement | null
+        if (!row) return
+        
+        const colIndex = Array.from(row.querySelectorAll('td, th')).indexOf(firstCell as HTMLTableCellElement)
+        const rowIndex = Array.from(table.querySelectorAll('tr')).indexOf(row)
         
         const tableRect = table.getBoundingClientRect()
         const spaceAbove = minTop - tableRect.top
@@ -592,8 +636,69 @@ export function tableBorderMenuPlugin(editor: Editor) {
               element: firstCell,
               rowIndex,
               colIndex,
-              isIndividualCell: false,
-              isMultiCellSelection: true,
+              isIndividualCell: !isMultiCellSelection,
+              isMultiCellSelection,
+            },
+          },
+        })
+        editorElement.dispatchEvent(cellEvent)
+        window.dispatchEvent(cellEvent)
+      }
+
+      const showSingleCellMenuFromSelection = () => {
+        const { selection } = view.state
+        if (!(selection instanceof TextSelection)) return
+        if (selection.empty) return
+        if (document.body.classList.contains('resizing-table')) return
+
+        const pos = selection.from
+        const domInfo = view.domAtPos(pos)
+        const node = domInfo.node as HTMLElement
+        const cell =
+          (node.nodeType === Node.ELEMENT_NODE ? (node as HTMLElement) : node.parentElement)?.closest('td, th') ||
+          null
+        if (!cell) return
+
+        const table = cell.closest('table') as HTMLTableElement | null
+        if (!table) return
+
+        let editorElement = view.dom.parentElement
+        while (editorElement && getComputedStyle(editorElement).position === 'static') {
+          editorElement = editorElement.parentElement
+        }
+        if (!editorElement) {
+          editorElement = view.dom.parentElement!
+        }
+
+        const editorRect = editorElement.getBoundingClientRect()
+        const cellRect = cell.getBoundingClientRect()
+
+        const row = cell.closest('tr') as HTMLTableRowElement | null
+        if (!row) return
+
+        const rowIndex = Array.from(table.querySelectorAll('tr')).indexOf(row)
+        const colIndex = Array.from(row.querySelectorAll('td, th')).indexOf(cell as HTMLTableCellElement)
+
+        const centerX = cellRect.left + cellRect.width / 2
+        const menuHeight = 30
+        const gap = 8
+        const finalTop = cellRect.top - menuHeight - gap
+        const finalLeft = centerX
+
+        const cellEvent = new CustomEvent('table-border-click', {
+          bubbles: true,
+          detail: {
+            axis: 'cell',
+            position: {
+              top: finalTop,
+              left: finalLeft,
+            },
+            cellInfo: {
+              element: cell,
+              rowIndex,
+              colIndex,
+              isIndividualCell: true,
+              isMultiCellSelection: false,
             },
           },
         })
@@ -611,32 +716,30 @@ export function tableBorderMenuPlugin(editor: Editor) {
           const anchorPos = selection.$anchorCell.pos
           const headPos = selection.$headCell.pos
           
-          if (anchorPos !== headPos) {
-            const selectionChanged = lastSelection === null || 
-              lastSelection.$anchorCell?.pos !== anchorPos || 
-              lastSelection.$headCell?.pos !== headPos
-            
-            if (selectionChanged || forceCheck) {
-              if (cellSelectionTimeout) {
-                clearTimeout(cellSelectionTimeout)
-              }
-              
-              cellSelectionTimeout = setTimeout(() => {
-                if (!isMouseDown) {
-                  showMultiCellMenu()
-                }
-              }, forceCheck ? 50 : 200)
-            }
-          } else {
+          const selectionChanged = lastSelection === null ||
+            lastSelection.$anchorCell?.pos !== anchorPos ||
+            lastSelection.$headCell?.pos !== headPos
+          
+          if (selectionChanged || forceCheck) {
             if (cellSelectionTimeout) {
               clearTimeout(cellSelectionTimeout)
-              cellSelectionTimeout = null
             }
+            
+            cellSelectionTimeout = setTimeout(() => {
+              if (!isMouseDown && !isResizingHandles) {
+                showMultiCellMenu()
+              }
+            }, forceCheck ? 80 : 220)
           }
         } else {
           if (cellSelectionTimeout) {
             clearTimeout(cellSelectionTimeout)
             cellSelectionTimeout = null
+          }
+
+          // If it's not a CellSelection, still try to show a menu when the selection is inside a single cell
+          if (forceCheck && !isResizingHandles) {
+            showSingleCellMenuFromSelection()
           }
         }
         
@@ -645,10 +748,13 @@ export function tableBorderMenuPlugin(editor: Editor) {
 
       view.dom.addEventListener('mousedown', handleMouseDown)
       document.addEventListener('mouseup', handleMouseUp)
-
+      
+      const resizeCheckInterval = setInterval(checkResizing, 50)
+      
       return {
         update(view, prevState) {
-          if (view.state.selection !== prevState.selection) {
+          checkResizing()
+          if (view.state.selection !== prevState.selection && !isResizing) {
             checkCellSelection()
           }
         },
@@ -656,6 +762,9 @@ export function tableBorderMenuPlugin(editor: Editor) {
           hideAllHandles()
           if (cellSelectionTimeout) {
             clearTimeout(cellSelectionTimeout)
+          }
+          if (resizeCheckInterval) {
+            clearInterval(resizeCheckInterval)
           }
           view.dom.removeEventListener('mousedown', handleMouseDown)
           document.removeEventListener('mouseup', handleMouseUp)

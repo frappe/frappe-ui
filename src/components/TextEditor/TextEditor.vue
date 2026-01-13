@@ -54,7 +54,6 @@ import { TextStyle } from '@tiptap/extension-text-style'
 import NamedColorExtension from './extensions/color'
 import NamedHighlightExtension from './extensions/highlight'
 import StyleClipboardExtension from './extensions/copy-styles'
-import improvedList from './extensions/list-extension'
 import TableExtension from './extensions/tables/table-extension'
 import { MentionExtension } from './extensions/mention'
 import TextEditorFixedMenu from './TextEditorFixedMenu.vue'
@@ -165,12 +164,6 @@ onMounted(() => {
         heading: false,
         table: false,
         link: false, // Disable link in StarterKit since we use LinkExtension separately
-      }).extend({
-        addKeyboardShortcuts() {
-          return {
-            Backspace: () => improvedList(this.editor),
-          }
-        },
       }),
       Heading.configure({
         ...(typeof props.starterkitOptions?.heading === 'object' &&

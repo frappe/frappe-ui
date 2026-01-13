@@ -45,7 +45,7 @@
                     v-bind="{ editor, close }"
                   />
                   <component
-                    v-else-if="option.component"
+                    v-else-if="option.component && !button.some(b => b.isTableSizeSelector)"
                     :is="option.component || 'div'"
                     v-bind="{ editor, close }"
                   >
@@ -78,7 +78,7 @@
                     </template>
                   </component>
                   <button
-                    v-else
+                    v-else-if="!button.some(b => b.isTableSizeSelector)"
                     class="w-full h-7 rounded px-2 text-base flex items-center gap-2 hover:bg-surface-gray-3"
                     @click="
                       () => {
