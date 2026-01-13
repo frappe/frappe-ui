@@ -11,6 +11,13 @@ import LucideWarning from "~icons/lucide/triangle-alert";
 
 const visible = defineModel({ default: true });
 
+const emit = defineEmits(['dismiss'])
+
+const dismissAlert = () => {
+  visible.value = false
+  emit('dismiss')
+}
+
 const classes = computed(() => {
   const subtleBgs = {
     yellow: "bg-surface-amber-2",
@@ -66,7 +73,7 @@ const props = withDefaults(defineProps<AlertProps>(), {
       </slot>
     </div>
 
-    <button v-if="props.dismissable" @click="visible = false">
+    <button v-if="props.dismissable" @click="dismissAlert">
       <LucideX class="size-4" />
     </button>
     <slot name="footer"> </slot>
