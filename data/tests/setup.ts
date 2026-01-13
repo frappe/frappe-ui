@@ -3,7 +3,8 @@ import { beforeAll, afterEach, afterAll } from 'vitest'
 import { watch } from 'vue'
 
 beforeAll(() => {
-  server.listen({ onUnhandledRequest: 'warn' })
+  // Bypass unhandled requests to suppress MSW warnings while still intercepting our test routes
+  server.listen({ onUnhandledRequest: 'bypass' })
 })
 
 afterEach(() => {

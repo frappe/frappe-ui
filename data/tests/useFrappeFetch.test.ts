@@ -23,13 +23,13 @@ describe('useFrappeFetch', () => {
     const result = useFrappeFetch({ url: '/api/test', baseUrl })
 
     expect(result.loading).toBe(true)
-    expect(result.data).toBe(null)
+    expect(result.json).toBe(null)
     expect(result.error).toBe(null)
 
     await waitFor(() => !result.loading)
 
     expect(result.loading).toBe(false)
-    expect(result.data).toStrictEqual({
+    expect(result.json).toStrictEqual({
       message: 'success',
       data: { id: 1, name: 'Test' },
     })
@@ -60,7 +60,7 @@ describe('useFrappeFetch', () => {
     await waitFor(() => !result.loading)
 
     expect(result.loading).toBe(false)
-    expect(result.data).toBe(null)
+    expect(result.json).toBe(null)
     expect(result.error).toBeInstanceOf(FrappeResponseError)
     expect((result.error as FrappeResponseError).type).toBe('NotFoundError')
     expect((result.error as FrappeResponseError).title).toBe('Not Found')
@@ -124,7 +124,7 @@ describe('useFrappeFetch', () => {
 
     await waitFor(() => !result.loading)
 
-    expect(result.data).toStrictEqual({ count: 1 })
+    expect(result.json).toStrictEqual({ count: 1 })
 
     // Reload
     result.execute()
@@ -132,7 +132,7 @@ describe('useFrappeFetch', () => {
     await waitFor(() => result.loading === true)
     await waitFor(() => result.loading === false)
 
-    expect(result.data).toStrictEqual({ count: 2 })
+    expect(result.json).toStrictEqual({ count: 2 })
   })
 
   it('works with relative URL when baseUrl is provided', async () => {
@@ -146,7 +146,7 @@ describe('useFrappeFetch', () => {
 
     await waitFor(() => !result.loading)
 
-    expect(result.data).toStrictEqual({ message: 'with base url' })
+    expect(result.json).toStrictEqual({ message: 'with base url' })
   })
 
   it('handles empty response body', async () => {
@@ -160,7 +160,7 @@ describe('useFrappeFetch', () => {
 
     await waitFor(() => !result.loading)
 
-    expect(result.data).toStrictEqual({})
+    expect(result.json).toStrictEqual({})
   })
 
   it('clears error on successful retry', async () => {
@@ -191,7 +191,7 @@ describe('useFrappeFetch', () => {
     await waitFor(() => !result.loading)
 
     expect(result.error).toBeTruthy()
-    expect(result.data).toBe(null)
+    expect(result.json).toBe(null)
 
     // Retry with success
     shouldFail = false
@@ -201,7 +201,7 @@ describe('useFrappeFetch', () => {
     await waitFor(() => result.loading === false)
 
     expect(result.error).toBe(null)
-    expect(result.data).toStrictEqual({ success: true })
+    expect(result.json).toStrictEqual({ success: true })
   })
 
   it('supports POST requests with body', async () => {
@@ -225,7 +225,7 @@ describe('useFrappeFetch', () => {
 
     expect(result.error).toBe(null)
     expect(receivedBody).toStrictEqual({ name: 'New Item', value: 42 })
-    expect(result.data).toStrictEqual({ id: 123, name: 'New Item', value: 42 })
+    expect(result.json).toStrictEqual({ id: 123, name: 'New Item', value: 42 })
   })
 
   it('supports custom headers', async () => {
@@ -275,7 +275,7 @@ describe('useFrappeFetch', () => {
     await waitFor(() => !result.loading)
 
     expect(result.error).toBe(null)
-    expect(result.data).toStrictEqual({
+    expect(result.json).toStrictEqual({
       id: 123,
       updated: true,
       status: 'completed',
@@ -298,7 +298,7 @@ describe('useFrappeFetch', () => {
     await waitFor(() => !result.loading)
 
     expect(result.error).toBe(null)
-    expect(result.data).toStrictEqual({ deleted: true, id: 123 })
+    expect(result.json).toStrictEqual({ deleted: true, id: 123 })
   })
 
   it('does not auto-execute when immediate is false', async () => {
@@ -316,14 +316,14 @@ describe('useFrappeFetch', () => {
 
     // Should not be loading since immediate is false
     expect(result.loading).toBe(false)
-    expect(result.data).toBe(null)
+    expect(result.json).toBe(null)
 
     // Now manually execute
     result.execute()
 
     await waitFor(() => !result.loading)
 
-    expect(result.data).toStrictEqual({ manual: true })
+    expect(result.json).toStrictEqual({ manual: true })
   })
 
   it('appends params to URL for GET requests', async () => {
@@ -346,7 +346,7 @@ describe('useFrappeFetch', () => {
 
     await waitFor(() => !result.loading)
 
-    expect(result.data).toStrictEqual({ query: 'test', page: '2' })
+    expect(result.json).toStrictEqual({ query: 'test', page: '2' })
   })
 
   it('sends params as JSON body for POST requests', async () => {
@@ -369,7 +369,7 @@ describe('useFrappeFetch', () => {
     await waitFor(() => !result.loading)
 
     expect(receivedBody).toStrictEqual({ name: 'John', age: 30 })
-    expect(result.data).toStrictEqual({
+    expect(result.json).toStrictEqual({
       success: true,
       received: { name: 'John', age: 30 },
     })

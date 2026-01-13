@@ -6,7 +6,7 @@ export const baseUrl = 'http://example.com'
 
 export const url = (path: string) => new URL(path, baseUrl).toString()
 
-const mockTodos: Record<string, ToDoDocType> = {
+export const mockTodos: Record<string, ToDoDocType> = {
   'todo-1': {
     name: 'todo-1',
     description: 'First todo item',
@@ -29,7 +29,7 @@ const mockTodos: Record<string, ToDoDocType> = {
 }
 
 export const handlers = [
-  http.get(url('/api/v2/document/ToDo/:name'), ({ params }) => {
+  http.get(`${baseUrl}/api/v2/document/ToDo/:name`, ({ params }) => {
     const { name } = params
     const todo = mockTodos[name as string]
 
@@ -51,6 +51,33 @@ export const handlers = [
 
     return HttpResponse.json({
       data: todo,
+    })
+  }),
+
+  http.get(`${baseUrl}/api/v2/document/ToDo`, ({ request }) => {
+    const requestUrl = new URL(request.url)
+    const start = parseInt(requestUrl.searchParams.get('start') || '0')
+    const limit = parseInt(requestUrl.searchParams.get('limit') || '20')
+    const filtersParam = requestUrl.searchParams.get('filters')
+    const filters = filtersParam ? JSON.parse(filtersParam) : {}
+
+    let todos = Object.values(mockTodos)
+
+    // Apply filters
+    if (filters.status) {
+      todos = todos.filter((todo) => todo.status === filters.status)
+    }
+
+    // Sort by modified desc (default)
+    todos.sort((a, b) => b.modified.localeCompare(a.modified))
+
+    // Pagination
+    const paginatedTodos = todos.slice(start, start + limit)
+    const hasNextPage = start + limit < todos.length
+
+    return HttpResponse.json({
+      data: paginatedTodos,
+      has_next_page: hasNextPage,
     })
   }),
 ]
