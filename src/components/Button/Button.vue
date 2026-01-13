@@ -1,7 +1,8 @@
 <template>
   <Tooltip :text="tooltip" :disabled="!tooltip?.length">
-    <button
+    <component
       v-bind="$attrs"
+      :is="as"
       :class="buttonClasses"
       @click="handleClick"
       :disabled="isDisabled"
@@ -59,9 +60,10 @@
             :class="slotClasses"
           />
       </slot>
-    </button>
+    </component>
   </Tooltip>
 </template>
+
 <script lang="ts" setup>
 import { computed, useSlots, ref } from 'vue'
 import FeatherIcon from '../FeatherIcon.vue'
@@ -73,6 +75,7 @@ import Tooltip from '../Tooltip/Tooltip.vue'
 defineOptions({ inheritAttrs: false })
 
 const props = withDefaults(defineProps<ButtonProps>(), {
+  as: 'button',
   theme: 'gray',
   size: 'sm',
   variant: 'subtle',
