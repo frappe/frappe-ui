@@ -1,5 +1,5 @@
 import { Extension } from '@tiptap/core'
-import { findTable, TableMap, CellSelection } from '@tiptap/pm/tables'
+import { TableMap, CellSelection } from '@tiptap/pm/tables'
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
