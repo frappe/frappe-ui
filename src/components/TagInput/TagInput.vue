@@ -102,7 +102,7 @@ function removeTag(tag: string) {
       class="flex-1 min-w-[100px] text-xs focus:outline-none"
       @update:modelValue="addTag"
       :open-on-click="true"
-      input-classes="bg-transparent border-none hover:!bg-transparent focus-within:border-none focus-within:!ring-0"
+      variant="ghost"
       :hide-trigger="true"
     >
       <template #add-email="{ searchTerm }">
