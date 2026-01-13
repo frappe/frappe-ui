@@ -57,7 +57,8 @@ defineOptions({ inheritAttrs: false })
 
 import { Editor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
-import Placeholder from '@tiptap/extension-placeholder'
+import { Placeholder } from '@tiptap/extensions'
+
 import TextAlign from '@tiptap/extension-text-align'
 import { ImageExtension } from './extensions/image'
 import ImageViewerExtension from './image-viewer-extension'
@@ -65,9 +66,8 @@ import { VideoExtension } from './video-extension'
 import { IframeExtension } from './extensions/iframe'
 import LinkExtension from './link-extension'
 import Typography from '@tiptap/extension-typography'
-import TextStyle from '@tiptap/extension-text-style'
-import TaskItem from '@tiptap/extension-task-item'
-import TaskList from '@tiptap/extension-task-list'
+import { TextStyleKit } from '@tiptap/extension-text-style'
+import { ListKeymap, TaskList, TaskItem } from '@tiptap/extension-list'
 import NamedColorExtension from './extensions/color'
 import NamedHighlightExtension from './extensions/highlight'
 import StyleClipboardExtension from './extensions/copy-styles'
@@ -231,7 +231,10 @@ onMounted(() => {
       TextAlign.configure({
         types: ['heading', 'paragraph'],
       }),
-      TextStyle,
+      TextStyleKit.configure({
+        backgroundColor: false,
+        color: false,
+      }),
       NamedColorExtension,
       NamedHighlightExtension,
       ExtendedCode,
