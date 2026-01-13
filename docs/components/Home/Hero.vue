@@ -1,14 +1,12 @@
 <script setup lang="ts">
-import { Badge } from "frappe-ui";
-import LucideRight from "~icons/lucide/arrow-right";
+import { Badge, Button } from 'frappe-ui'
+import LucideRight from '~icons/lucide/arrow-right'
 
-import pkgJson from "../../../package.json";
+import pkgJson from '../../../package.json'
 </script>
 
 <template>
-  <div
-    class="grid gap-5 max-w-7xl mx-auto"
-  >
+  <div class="grid gap-5 max-w-7xl mx-auto">
     <div class="mt-10 p-5 flex flex-col gap-5 text-center w-fit">
       <h1
         class="text-[48px] font-semibold tracing-tight leading-tight !m-0 relative"
@@ -25,20 +23,14 @@ import pkgJson from "../../../package.json";
       </p>
 
       <div class="flex gap-3 mt-2 mx-auto">
-        <a
-          href="/docs"
-          class="font-normal px-2.5 h-8 flex gap-3 items-center rounded bg-surface-gray-7 text-ink-gray-1"
-        >
+        <Button href="/docs" as="a" variant='solid' size='md'>
           Get Started
-          <LucideRight class="size-4" />
-        </a>
+          <template #suffix>
+            <LucideRight class="size-4" />
+          </template>
+        </Button>
 
-        <a
-          href="/docs/components"
-          class="font-normal px-2.5 h-8 flex gap-3 items-center rounded bg-surface-gray-3"
-        >
-          Show Components
-        </a>
+        <Button href="/docs/components" as='a' size='md'> Show Components </Button>
       </div>
     </div>
   </div>
