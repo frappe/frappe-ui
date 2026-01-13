@@ -29,7 +29,6 @@ code {
 
 [class*='language'] {
   position: relative;
-  /* @apply rounded mt-5 px-3 relative  grid; */
 
   .lang {
     @apply hidden;

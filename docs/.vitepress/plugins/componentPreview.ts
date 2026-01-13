@@ -3,16 +3,16 @@ import { dirname, resolve } from 'node:path'
 
 export default function (md: MarkdownRenderer) {
   md.core.ruler.after('inline', 'component-preview', (state) => {
-    const regex =
+    const previewRegex =
       /<ComponentPreview\s+name=["']([^"']+)["'](?:\s+csr=["'](true|false)["'])?\s*\/>/g
 
-    state.src = state.src.replace(regex, (_, name, csr) => {
+    state.src = state.src.replace(previewRegex, (_, name, csr) => {
       const componentPath = `../../../../src/components/${name}/${name}.story.vue`
       const scriptIdx = state.tokens.findIndex(
         (i) => i.type === 'html_block' && /<script setup>/.test(i.content),
       )
-      const importStr = `import Preview from '${componentPath}'`
 
+      const importStr = `import Preview from '${componentPath}'`
       if (scriptIdx === -1) {
         const token = new state.Token('html_block', '', 0)
         token.content = `<script setup>\n${importStr}\n</script>\n`
@@ -23,7 +23,7 @@ export default function (md: MarkdownRenderer) {
         ].content.replace('</script>', `${importStr}\n</script>`)
       }
 
-      const idx = state.tokens.findIndex((i) => i.content.match(regex))
+      const idx = state.tokens.findIndex((i) => i.content.match(previewRegex))
       const { realPath, path: _path } = state.env as MarkdownEnv
 
       const open = csr ? '<ClientOnly>' : ''
@@ -40,6 +40,35 @@ export default function (md: MarkdownRenderer) {
       close.content = `</template></ComponentPreview>${csr ? '</ClientOnly>' : ''}`
 
       state.tokens.splice(idx + 1, 0, code, close)
+      return ''
+    })
+
+    // Handle PropsTable
+    const propsRegex =
+      /<PropsTable\s+name=["']([^"']+)["']\s+:data='([^']+)'\/>/g
+
+    state.src = state.src.replace(propsRegex, (match, name, data) => {
+      const typesPath = `../../../../src/components/${name}/types.ts`
+      const idx = state.tokens.findIndex((i) => i.content.includes(match))
+
+      if (idx !== -1) {
+        const { realPath, path: _path } = state.env as MarkdownEnv
+
+        state.tokens[idx].content =
+          `<PropsTable name="${name}" :data='${data}'><template #code>`
+
+        const code = new state.Token('fence', 'code', 0)
+        code.info = 'typescript'
+        code.content = `<<< ${typesPath}`
+        // @ts-expect-error snippets plugin
+        code.src = [resolve(dirname(realPath ?? _path), typesPath)]
+
+        const close = new state.Token('html_inline', '', 0)
+        close.content = `</template></PropsTable>`
+
+        state.tokens.splice(idx + 1, 0, code, close)
+      }
+
       return ''
     })
   })

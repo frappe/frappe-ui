@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import { Badge } from 'frappe-ui'
+import { ref } from 'vue'
+import { Badge, Button } from 'frappe-ui'
+import LucideCode from '~icons/lucide/code-xml'
+// import TSCodeBlock from './TSCodeBlock.vue'
 
 interface itemProp {
   name: string
@@ -13,10 +16,26 @@ interface Props {
   data: itemProp[]
 }
 
+const tsToggled = ref(true)
+
 defineProps<Props>()
 </script>
 
 <template>
+  <div class="flex items-center gap-3 justify-between mt-5" :class='{"-mb-5": !tsToggled}'>
+    <h2>Props</h2>
+
+    <Button size="sm" @click="tsToggled = !tsToggled">
+      <template #prefix>
+        <LucideCode class="size-4" />
+      </template>
+
+      TS
+    </Button>
+  </div>
+
+  <slot v-if="!tsToggled" name="code" />
+
   <table class="overflow-auto scrollbar not-prose w-full">
     <colgroup>
       <col class="w-[20%]" />
