@@ -38,7 +38,10 @@
             </Button>
           </div>
         </div>
-        <div v-if="!advanced">
+        <div v-if="advanced">
+          <Switch v-model="allowDownload" label="Allow download" />
+        </div>
+        <div v-else>
           <!-- General section -->
           <div class="mb-4 border-b pb-4">
             <div class="mb-2 text-ink-gray-5 font-medium text-base">
@@ -85,7 +88,7 @@
           <div class="text-ink-gray-5 font-medium text-base mb-2">Members</div>
           <div class="flex gap-3">
             <TagInput
-              v-model="sharedUsers"
+              v-model="usersToAdd"
               v-model:options="filteredUsers"
               :new-option-icon="
                 (k) =>
@@ -98,24 +101,18 @@
               placeholder="Add people..."
             />
             <Select
-              v-model="shareAccess"
-              :options="
-                advancedTweak
-                  ? filteredAccess.map((k) => ({
-                      value: k,
-                      label: k[0].toUpperCase() + k.slice(1),
-                    }))
-                  : accessOptions
-              "
+              v-if="usersToAdd.length"
+              v-model="accessToAdd"
+              :options="accessOptions"
             />
           </div>
 
           <div
-            v-if="getUsersWithAccess.data"
+            v-if="usersWithAccess.data"
             class="flex flex-col gap-4 overflow-y-auto text-base max-h-80 py-4 mb-3"
           >
             <div
-              v-for="(user, idx) in getUsersWithAccess.data"
+              v-for="(user, idx) in usersWithAccess.data"
               :key="user.name"
               class="flex items-center gap-x-3 pr-1"
             >
@@ -133,44 +130,39 @@
                   user.full_name ? user.user || user.email : ''
                 }}</span>
               </div>
-              <span
-                v-if="user.user == $store.state.user.id"
-                class="ml-auto mr-1 text-ink-gray-7"
-              >
-                <div v-if="user.user === entity.owner" class="flex gap-1">
-                  Owner (you)
-                </div>
-                <template v-else>You</template>
-              </span>
-              <AccessButton
-                v-else-if="user.user !== entity.owner"
-                class="text-ink-gray-7 relative flex-shrink-0 ml-auto"
-                :access-obj="user"
-                :access-levels="filteredAccess"
-                @update-access="
-                  (access) =>
-                    updateAccess.submit({
-                      entity_name: entity.name,
-                      user: user.user,
-                      ...access,
-                    })
-                "
-                @remove-access="
-                  getUsersWithAccess.data.splice(idx, 1),
-                    updateAccess.submit({
-                      method: 'unshare',
-                      entity_name: entity.name,
-                      user: user.user,
-                    })
-                "
-              />
-              <span
-                v-else
-                class="ml-auto flex items-center gap-1 text-ink-gray-5"
-              >
-                Owner
-                <LucideDiamond class="size-3" />
-              </span>
+              <div class="ml-auto">
+                <span
+                  v-if="user.user == $store.state.user.id"
+                  class="mr-1 text-ink-gray-7"
+                >
+                  <div v-if="user.user === entity.owner" class="flex gap-1">
+                    Owner (you)
+                  </div>
+                  <template v-else>You</template>
+                </span>
+                <Select
+                  v-else-if="user.user !== entity.owner"
+                  :modelValue="
+                    user.write ? 'editor' : user.upload ? 'uploader' : 'reader'
+                  "
+                  :options="[
+                    ...accessOptions,
+                    {
+                      group: true,
+                      options: [
+                        { value: 'remove', label: 'Remove', theme: 'red' },
+                      ],
+                    },
+                  ]"
+                  @update:model-value="
+                    (val) => updatePermissions(user, val, entity.name, idx)
+                  "
+                />
+                <span v-else class="flex items-center gap-1 text-ink-gray-5">
+                  Owner
+                  <LucideDiamond class="size-3" />
+                </span>
+              </div>
             </div>
           </div>
           <div v-else class="flex min-h-[19.2vh] w-full">
@@ -189,23 +181,20 @@
                 Copy Link
               </Button>
               <Button
-                v-if="sharedUsers.length"
+                v-if="usersToAdd.length"
                 label="Invite"
                 variant="solid"
-                @click="addShares"
+                @click="addPermissions"
               />
             </div>
           </div>
-        </div>
-        <div v-else>
-          <Switch v-model="allowDownload" label="Allow download" />
         </div>
       </div>
     </template>
   </Dialog>
 </template>
 <script setup>
-import { ref, computed, watch, useTemplateRef, markRaw, h } from 'vue'
+import { ref, computed, watch, markRaw, h } from 'vue'
 import {
   Avatar,
   Dialog,
@@ -213,20 +202,18 @@ import {
   createResource,
   Switch,
   TagInput,
+  Select,
 } from 'frappe-ui'
-import AccessButton from '@/components/ShareDialog/AccessButton.vue'
-import TeamSelector from '@/components/TeamSelector.vue'
+import TeamSelector from './TeamSelector.vue'
 import { getLink, dynamicList } from '@/utils/files'
-import Select from '@/components/Select.vue'
 
 import {
-  getUsersWithAccess,
+  usersWithAccess,
   updateAccess,
   allUsers,
 } from '@/resources/permissions'
 
 import LucideBuilding2 from '~icons/lucide/building-2'
-import LucideCheck from '~icons/lucide/check'
 import LucideDiamond from '~icons/lucide/diamond'
 import LucideLock from '~icons/lucide/lock'
 import LucideSettings from '~icons/lucide/settings'
@@ -251,7 +238,7 @@ watch(allowDownload, (v) => {
     auto: true,
   })
 })
-getUsersWithAccess.fetch({ entity: props.entity.name })
+usersWithAccess.fetch({ entity: props.entity.name })
 allUsers.fetch({ team: 'all' })
 
 const levelOptions = [
@@ -347,69 +334,63 @@ watch(
     updateGeneralAccess(generalAccessLevel.value, generalPerms.value),
 )
 
-// Invite users
-const sharedUsers = ref([])
-watch(sharedUsers, (now, prev) => {
-  if (now.length > prev.length) {
-    const addedUser = sharedUsers.value[sharedUsers.value.length - 1]
-    if (!allUsers.data.some((k) => k.name === addedUser.name))
-      allUsers.data.push(addedUser)
-  }
-})
-const shareAccess = ref('reader')
-const advancedTweak = false
-const query = ref('')
+// Invite specific users
+const usersToAdd = ref([])
+const accessToAdd = ref('reader')
 const filteredUsers = ref([])
 watch(
-  () => allUsers.data,
-  (users) => {
-    const regex = new RegExp(query.value, 'i')
-    filteredUsers.value = users
-      .filter(
-        (k) =>
-          (regex.test(k.email) || regex.test(k.full_name)) &&
-          store.state.user.id != k.name,
-      )
-      .map((k) => {
-        const disabled = getUsersWithAccess.data.find(
-          ({ user }) => user === k.name,
-        )
-        return {
-          ...k,
-          label: k.name,
-          value: k.email,
-          disabled,
-        }
-      })
-    console.log(filteredUsers.value)
+  [() => allUsers.data, () => usersWithAccess.data],
+  ([users, existingUsers]) => {
+    if (!existingUsers || !users) return []
+    filteredUsers.value = users.filter(
+      (k) => !existingUsers.find(({ user }) => user === k.name),
+    )
   },
+  { immediate: true },
 )
-function addShares() {
-  // Used to enable future advanced config
-  const access =
-    shareAccess.value === 'editor'
-      ? { read: 1, comment: 1, share: 1, upload: 1, write: 1 }
-      : { read: 1, comment: 1, share: 0, upload: 0, write: 0 }
-  for (const user of sharedUsers.value) {
+
+const addPermissions = () => {
+  const access = getAccess(accessToAdd.value)
+  for (const user of usersToAdd.value) {
     const r = {
       entity_name: props.entity.name,
       user,
       ...access,
     }
     updateAccess.submit(r)
-    getUsersWithAccess.data.push({
+    usersWithAccess.data.push({
       ...filteredUsers.value.find((k) => k.value === user),
       ...access,
     })
   }
-  sharedUsers.value = []
+  usersToAdd.value = []
   emit('success')
 }
 
-// General access
+const updatePermissions = (user, val, entity_name, idx) => {
+  if (val === 'remove') {
+    usersWithAccess.data.splice(idx, 1)
+    return updateAccess.submit({
+      method: 'unshare',
+      entity_name,
+      user: user.user,
+    })
+  }
+  const access = getAccess(val)
+  Object.assign(user, access)
+  updateAccess.submit({
+    entity_name,
+    user: user.user,
+    ...access,
+  })
+}
 
-const ACCESS_LEVELS = ['read', 'comment', 'upload', 'share', 'write']
-const filteredAccess = computed(() =>
-  ACCESS_LEVELS.filter((l) => props.entity[l]),
-)
+// Util functions
+const getAccess = (val) => ({
+  read: 1,
+  comment: 1,
+  upload: val === 'upload' || val === 'editor' ? 1 : 0,
+  share: val === 'editor' ? 1 : 0,
+  write: val === 'editor' ? 1 : 0,
+})
 </script>

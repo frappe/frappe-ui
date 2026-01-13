@@ -19,6 +19,12 @@ export function getLabel(option: SimpleOption): string {
 }
 
 
+export function getMultipleLabel(options: [SimpleOption]) {
+  if (options.length === 1) return getLabel(options[0])
+  return `${options.length} options selected`
+}
+
+
 export function getValue(option: SimpleOption): string | undefined {
   if (typeof option === 'string') return option
   if (isCustomOption(option)) return undefined
@@ -32,9 +38,15 @@ export function getKey(option: SimpleOption): string {
 }
 
 export function isDisabled(option: SimpleOption): boolean {
+  // fix: this breaks when a new element is added in TagINput
     return false
   return typeof option === 'object' && !!option.disabled
 }
+
+export function isGroup(option: GenericOption): option is GroupedOption {
+  return typeof option === 'object' && 'group' in option
+}
+
 
 export function getIcon(option: SimpleOption): string | Component | undefined {
   return typeof option === 'object' ? option.icon : undefined
