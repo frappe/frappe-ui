@@ -197,10 +197,10 @@ import {
   LoadingIndicator,
   createResource,
   Switch,
-  TagInput,
   Select,
 } from '../../../src'
 import TeamSelector from './TeamSelector.vue'
+import TagInput from './TagInput/TagInput.vue'
 import { getFileLink, dynamicList } from '../js/utils'
 
 import { usersWithAccess, updateAccess, allUsers } from '../js/resources'
