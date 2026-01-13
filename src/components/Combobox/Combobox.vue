@@ -1,13 +1,5 @@
 <script setup lang="ts">
-import {
-  computed,
-  type Component,
-  type VNode,
-  ref,
-  watch,
-  h,
-  FunctionalComponent,
-} from 'vue'
+import { computed, type VNode, ref, watch } from 'vue'
 import {
   ComboboxAnchor,
   ComboboxContent,
@@ -25,12 +17,20 @@ import {
 import LucideCheck from '~icons/lucide/check'
 import LucideChevronDown from '~icons/lucide/chevron-down'
 import type {
-  CustomOption,
   SimpleOption,
   GroupedOption,
   ComboboxOption,
   ComboboxProps,
 } from './types'
+import {
+  getLabel,
+  getValue,
+  isCustomOption,
+  getKey,
+  isDisabled,
+  getIcon,
+  RenderIcon,
+} from './utils'
 
 const props = withDefaults(defineProps<ComboboxProps>(), {
   variant: 'subtle',
@@ -68,6 +68,7 @@ watch(
     searchTerm.value = getDisplayValue(newValue)
   },
 )
+watch(() => props.modelValue, console.log)
 watch(
   () => getDisplayValue(props.modelValue),
   (newDisplay) => {
@@ -83,7 +84,6 @@ const onUpdateModelValue = (value: string | null) => {
   if (selectedOpt && isCustomOption(selectedOpt)) {
     const context = { searchTerm: lastSearchTerm.value }
     selectedOpt.onClick(context)
-
     if (selectedOpt.keepOpen) {
       // Defer opening to prevent interference with default close behavior
       setTimeout(() => {
@@ -108,34 +108,6 @@ const onUpdateModelValue = (value: string | null) => {
 
 function isGroup(option: ComboboxOption): option is GroupedOption {
   return typeof option === 'object' && 'group' in option
-}
-
-function isCustomOption(option: SimpleOption): option is CustomOption {
-  return typeof option === 'object' && option.type === 'custom'
-}
-
-function getLabel(option: SimpleOption): string {
-  return typeof option === 'string' ? option : option.label
-}
-
-function getValue(option: SimpleOption): string | undefined {
-  if (typeof option === 'string') return option
-  if (isCustomOption(option)) return undefined
-  return option.value
-}
-
-function getKey(option: SimpleOption): string {
-  if (typeof option === 'string') return option
-  if (isCustomOption(option)) return option.key
-  return option.value
-}
-
-function isDisabled(option: SimpleOption): boolean {
-  return typeof option === 'object' && !!option.disabled
-}
-
-function getIcon(option: SimpleOption): string | Component | undefined {
-  return typeof option === 'object' ? option.icon : undefined
 }
 
 function getSlotName(option: SimpleOption): string | undefined {
@@ -177,24 +149,6 @@ const selectedOption = computed(() => {
 const selectedOptionIcon = computed(() => {
   return selectedOption.value ? getIcon(selectedOption.value) : undefined
 })
-
-const RenderIcon: FunctionalComponent<{ icon?: string | Component }> = (
-  props,
-) => {
-  if (!props.icon) return null
-  const iconContent =
-    typeof props.icon === 'string'
-      ? h('span', props.icon)
-      : h(props.icon, { class: 'w-4 h-4' })
-
-  return h(
-    'span',
-    {
-      class: 'flex-shrink-0 w-4 h-4 inline-flex items-center justify-center',
-    },
-    [iconContent],
-  )
-}
 
 const shouldShowOption = (
   option: SimpleOption,
@@ -347,7 +301,7 @@ defineSlots<{
             autocomplete="off"
           />
         </div>
-        <ComboboxTrigger :disabled="disabled">
+        <ComboboxTrigger v-if="!hideTrigger" :disabled="disabled">
           <LucideChevronDown class="h-4 w-4 text-ink-gray-5" />
         </ComboboxTrigger>
       </ComboboxAnchor>
@@ -431,6 +385,7 @@ defineSlots<{
                       v-if="getIcon(optionOrGroup)"
                       :icon="getIcon(optionOrGroup)"
                     />
+
                     {{ getLabel(optionOrGroup) }}
                   </span>
                   <ComboboxItemIndicator
