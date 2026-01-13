@@ -5,7 +5,7 @@
     :style="{
       top: position.top + 'px',
       left: position.left + 'px',
-      transform: axis === 'column' ? 'translateX(-50%)' : undefined,
+      transform: axis === 'column' || cellInfo?.isMultiCellSelection ? 'translateX(-50%)' : undefined,
     }"
     @click.stop
   >
@@ -138,6 +138,7 @@ interface TableBorderMenuProps {
     colIndex: number
     isFirstRow: boolean
     isIndividualCell: boolean
+    isMultiCellSelection?: boolean
   } | null
   canMergeCells: boolean
 }
@@ -184,13 +185,21 @@ const menuObjIndividual: MenuItem[] = [
   { icon: LucideHeader, action: 'toggleHeader', tooltip: 'Make Header' },
 ]
 
-const menuObj = computed(() =>
-  props.axis === 'row'
-    ? menuObjRow
-    : props.axis === 'column'
-      ? menuObjColumn
-      : menuObjIndividual,
-)
+const menuObjMultiCell: MenuItem[] = [
+  { icon: LucideHeader, action: 'toggleHeader', tooltip: 'Make Header' },
+]
+
+const menuObj = computed(() => {
+  if (props.axis === 'row') {
+    return menuObjRow
+  } else if (props.axis === 'column') {
+    return menuObjColumn
+  } else if (props.cellInfo?.isMultiCellSelection) {
+    return menuObjMultiCell
+  } else {
+    return menuObjIndividual
+  }
+})
 const emit = defineEmits<{
   (e: MenuAction | 'mergeCells'): void
   (e: 'setBackgroundColor', color: string | null): void

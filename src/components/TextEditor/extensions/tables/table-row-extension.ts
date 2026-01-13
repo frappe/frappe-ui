@@ -5,6 +5,12 @@ export const TableRowExtension = TableRow.extend({
         return {
             ...this.parent?.(),
             backgroundColor: {
+                default: null,
+                parseHTML: element => {
+                    if (element.tagName.toLowerCase() !== 'tr') {
+                        return null
+                    }
+                },
                 renderHTML(attributes){
                     if (!attributes.backgroundColor) {
                         return {}
@@ -15,6 +21,12 @@ export const TableRowExtension = TableRow.extend({
                 },
             },
             borderColor: {
+                default: null,
+                parseHTML: element => {
+                    if (element.tagName.toLowerCase() !== 'tr') {
+                        return null
+                    }
+                },
                 renderHTML(attributes) {
                     if (!attributes.borderColor) {
                         return {}

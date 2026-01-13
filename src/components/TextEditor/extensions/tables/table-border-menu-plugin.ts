@@ -270,6 +270,7 @@ export function tableBorderMenuPlugin(editor: Editor) {
                 tableRect.left - editorRect.left - 7
               const rowHandleCenter = rowHandleLeft + 6
 
+              // Position menu at the center of the row (vertically centered)
               const rowCenter = rowRect.top - editorRect.top + rowRect.height / 2 - menuHeight / 2
 
               const rowEvent = new CustomEvent('table-border-click', {
@@ -366,6 +367,7 @@ export function tableBorderMenuPlugin(editor: Editor) {
               editor.commands.setTextSelection(cellPos)
               editor.commands.selectColumn(colIndex)
 
+              // Position menu above the table with some space
               const tableTop = tableRect.top - editorRect.top
 
               const columnEvent = new CustomEvent('table-border-click', {
@@ -490,10 +492,173 @@ export function tableBorderMenuPlugin(editor: Editor) {
         },
       },
     },
-    view() {
+    view(view) {
+      let cellSelectionTimeout: NodeJS.Timeout | null = null
+      let isMouseDown = false
+      let lastSelection: any = null
+
+      const handleMouseDown = () => {
+        isMouseDown = true
+        if (cellSelectionTimeout) {
+          clearTimeout(cellSelectionTimeout)
+          cellSelectionTimeout = null
+        }
+      }
+
+      const handleMouseUp = () => {
+        isMouseDown = false
+        setTimeout(() => {
+          const { selection } = view.state
+          const isCellSelection = selection instanceof CellSelection
+          if (isCellSelection && selection.$anchorCell && selection.$headCell) {
+            const anchorPos = selection.$anchorCell.pos
+            const headPos = selection.$headCell.pos
+            if (anchorPos !== headPos) {
+              checkCellSelection(true)
+            }
+          }
+        }, 150)
+      }
+
+      const showMultiCellMenu = () => {
+        const selectedCells = view.dom.querySelectorAll('.selectedCell')
+        
+        if (selectedCells.length < 2) return
+        
+        let minLeft = Infinity
+        let maxRight = -Infinity
+        let minTop = Infinity
+        let maxBottom = -Infinity
+        let firstCell: HTMLElement | null = null
+        
+        selectedCells.forEach((cell) => {
+          const rect = (cell as HTMLElement).getBoundingClientRect()
+          minLeft = Math.min(minLeft, rect.left)
+          maxRight = Math.max(maxRight, rect.right)
+          minTop = Math.min(minTop, rect.top)
+          maxBottom = Math.max(maxBottom, rect.bottom)
+          if (!firstCell) {
+            firstCell = cell as HTMLElement
+          }
+        })
+        
+        if (!firstCell) return
+        
+        const table = firstCell.closest('table')
+        if (!table) return
+        
+        let editorElement = view.dom.parentElement
+        while (editorElement && getComputedStyle(editorElement).position === 'static') {
+          editorElement = editorElement.parentElement
+        }
+        if (!editorElement) {
+          editorElement = view.dom.parentElement!
+        }
+        
+        const editorRect = editorElement.getBoundingClientRect()
+        
+        const centerX = (minLeft + maxRight) / 2
+        const menuHeight = 30
+        const gap = 12
+        
+        const row = firstCell.closest('tr')
+        const colIndex = Array.from(row?.querySelectorAll('td, th') || []).indexOf(firstCell as HTMLTableCellElement)
+        const rowIndex = Array.from(table.querySelectorAll('tr')).indexOf(row as HTMLTableRowElement)
+        
+        const tableRect = table.getBoundingClientRect()
+        const spaceAbove = minTop - tableRect.top
+        const spaceBelow = tableRect.bottom - maxBottom
+        
+        let finalTop: number
+        if (spaceAbove >= menuHeight + gap) {
+          finalTop = minTop - menuHeight - gap
+        } else if (spaceBelow >= menuHeight + gap) {
+          finalTop = maxBottom + gap
+        } else {
+          finalTop = minTop - menuHeight - gap
+        }
+        
+        const finalLeft = centerX
+        
+        const cellEvent = new CustomEvent('table-border-click', {
+          bubbles: true,
+          detail: {
+            axis: 'cell',
+            position: {
+              top: finalTop,
+              left: finalLeft,
+            },
+            cellInfo: {
+              element: firstCell,
+              rowIndex,
+              colIndex,
+              isIndividualCell: false,
+              isMultiCellSelection: true,
+            },
+          },
+        })
+        editorElement.dispatchEvent(cellEvent)
+        window.dispatchEvent(cellEvent)
+      }
+
+      const checkCellSelection = (forceCheck = false) => {
+        if (isMouseDown && !forceCheck) return
+        
+        const { selection } = view.state
+        const isCellSelection = selection instanceof CellSelection
+        
+        if (isCellSelection && selection.$anchorCell && selection.$headCell) {
+          const anchorPos = selection.$anchorCell.pos
+          const headPos = selection.$headCell.pos
+          
+          if (anchorPos !== headPos) {
+            const selectionChanged = lastSelection === null || 
+              lastSelection.$anchorCell?.pos !== anchorPos || 
+              lastSelection.$headCell?.pos !== headPos
+            
+            if (selectionChanged || forceCheck) {
+              if (cellSelectionTimeout) {
+                clearTimeout(cellSelectionTimeout)
+              }
+              
+              cellSelectionTimeout = setTimeout(() => {
+                if (!isMouseDown) {
+                  showMultiCellMenu()
+                }
+              }, forceCheck ? 50 : 200)
+            }
+          } else {
+            if (cellSelectionTimeout) {
+              clearTimeout(cellSelectionTimeout)
+              cellSelectionTimeout = null
+            }
+          }
+        } else {
+          if (cellSelectionTimeout) {
+            clearTimeout(cellSelectionTimeout)
+            cellSelectionTimeout = null
+          }
+        }
+        
+        lastSelection = selection
+      }
+
+      view.dom.addEventListener('mousedown', handleMouseDown)
+      document.addEventListener('mouseup', handleMouseUp)
+
       return {
+        update(view, prevState) {
+          if (view.state.selection !== prevState.selection) {
+            checkCellSelection()
+          }
+        },
         destroy() {
           hideAllHandles()
+          if (cellSelectionTimeout) {
+            clearTimeout(cellSelectionTimeout)
+          }
+          view.dom.removeEventListener('mousedown', handleMouseDown)
+          document.removeEventListener('mouseup', handleMouseUp)
         },
       }
     },

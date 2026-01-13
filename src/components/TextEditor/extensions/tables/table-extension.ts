@@ -12,14 +12,7 @@ export const TableExtension = Table.extend({
           if (!element.closest('table') && element.tagName.toLowerCase() !== 'table') {
             return null
           }
-          const classList = element.classList
-          const bgColors = ['red', 'orange', 'yellow', 'green', 'teal', 'cyan', 'blue', 'purple', 'pink', 'gray']
-          for (const color of bgColors) {
-            if (classList.contains(color)) {
-              return color
-            }
-          }
-          return null
+
         },
         renderHTML(attributes){
           if (!attributes.backgroundColor) {
@@ -33,17 +26,7 @@ export const TableExtension = Table.extend({
       borderColor: {
         default: null,
         parseHTML: element => {
-          if (!element.closest('table') && element.tagName.toLowerCase() !== 'table') {
-            return null
-          }
-          const classList = element.classList
-          const borderColors = ['red', 'orange', 'yellow', 'green', 'teal', 'cyan', 'blue', 'purple', 'pink', 'gray']
-          for (const color of borderColors) {
-            if (classList.contains(`${color}!`)) {
-              return color
-            }
-          }
-          return null
+
         },
         renderHTML(attributes){
           if (!attributes.borderColor) {

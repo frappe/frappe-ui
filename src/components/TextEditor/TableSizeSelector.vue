@@ -11,8 +11,8 @@
           :key="`cell-${row}-${col}`"
           class="h-4 w-4 border border-outline-gray-2 cursor-pointer transition-all duration-150 ease-in-out"
           :class="{
-            'transition-all duration-250 ease-in-out bg-surface-gray-3 border-outline-gray-3': row <= hoveredRows && col <= hoveredCols,
-           
+            'bg-surface-gray-3 border-outline-gray-3': row <= hoveredRows && col <= hoveredCols,
+            'hover:bg-ink-gray-9 hover:border-ink-gray-9': !(row <= hoveredRows && col <= hoveredCols)
           }"
           @mouseenter="hoveredRows = row; hoveredCols = col"
           @mouseleave="hoveredRows = 0; hoveredCols = 0"

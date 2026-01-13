@@ -239,6 +239,7 @@ onMounted(() => {
         uploadFunction: props.uploadFunction || defaultUploadFunction,
       }),
       StyleClipboardExtension,
+
       ...(props.extensions || []),
     ],
     onUpdate: ({ editor }) => {
@@ -254,6 +255,9 @@ onMounted(() => {
       emit('blur', event)
     },
   })
+  // editor.value.on('selectionUpdate', ({ editor }) => {
+  //   console.log('Selection:', editor.state.selection)
+  // })
 })
 
 onBeforeUnmount(() => {

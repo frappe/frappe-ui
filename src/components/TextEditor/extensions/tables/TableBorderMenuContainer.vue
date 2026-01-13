@@ -5,7 +5,7 @@
       :show="showTableBorderMenu"
       :axis="(tableBorderAxis === 'cell' ? null : tableBorderAxis) || null"
       :position="tableBorderMenuPos"
-      :cell-info="tableCellInfo ? { ...tableCellInfo, isIndividualCell: tableCellInfo.isIndividualCell ?? false } : null"
+      :cell-info="tableCellInfo ? { ...tableCellInfo, isIndividualCell: tableCellInfo.isIndividualCell ?? false, isMultiCellSelection: tableCellInfo.isMultiCellSelection ?? false } : null"
       :can-merge-cells="canMergeCells"
       @add-row-before="addRowBefore"
       @add-row-after="addRowAfter"
@@ -23,9 +23,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, inject, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { Teleport } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
+import { CellSelection } from '@tiptap/pm/tables'
 import TableBorderMenu from './TableBorderMenu.vue'
 
 const editor = inject<{ value: Editor | null }>('editor', { value: null })
@@ -39,7 +40,10 @@ const tableCellInfo = ref<{
   colIndex: number
   isFirstRow: boolean
   isIndividualCell?: boolean
+  isMultiCellSelection?: boolean
 } | null>(null)
+const isMultiCellMenuOpen = ref(false)
+let menuJustOpened = false
 
 const getViewportPosition = (
   editorRelativePos: { top: number; left: number },
@@ -65,24 +69,34 @@ const getViewportPosition = (
       const gap = 12
       
       if (axis === 'column') {
+        // Position column menu above the table with some space
         const cellRect = cellInfo.element.getBoundingClientRect()
         viewportTop = tableRect.top - menuHeight - gap
         viewportLeft = cellRect.left + cellRect.width / 2
       } else if (axis === 'row') {
+        // Position row menu at the center of the row (vertically centered)
         const row = cellInfo.element.closest('tr')
         if (row) {
           const rowRect = row.getBoundingClientRect()
           const menuHeight = 30
           viewportTop = rowRect.top + rowRect.height / 2 - menuHeight / 2
         }
+        // Left position is already calculated from rowHandleCenter in the plugin
+        // viewportLeft is already set correctly from editorRelativePos
       }
     }
   }
   
   if (axis === 'cell' && cellInfo?.element) {
-    const cellRect = cellInfo.element.getBoundingClientRect()
-    viewportLeft = cellRect.right + 8
-    viewportTop = cellRect.top + cellRect.height / 2 - 12
+    if (cellInfo.isMultiCellSelection) {
+
+      viewportTop = editorRelativePos.top
+      viewportLeft = editorRelativePos.left
+    } else {
+      const cellRect = cellInfo.element.getBoundingClientRect()
+      viewportLeft = cellRect.right + 8
+      viewportTop = cellRect.top + cellRect.height / 2 - 12
+    }
   }
   
   return {
@@ -96,23 +110,45 @@ const onBorderClick = (e: Event) => {
   tableBorderAxis.value = axis
   tableCellInfo.value = cellInfo
   tableBorderMenuPos.value = getViewportPosition(position, axis, cellInfo)
+  isMultiCellMenuOpen.value = cellInfo?.isMultiCellSelection ?? false
   showTableBorderMenu.value = true
+  if (cellInfo?.isMultiCellSelection) {
+    menuJustOpened = true
+    setTimeout(() => {
+      menuJustOpened = false
+    }, 300)
+  }
 }
 
 const closeMenu = (e: MouseEvent) => {
+  if (menuJustOpened) {
+    return
+  }
+  
   const target = e.target as HTMLElement
+  
+  if (isMultiCellMenuOpen.value) {
+    const selectedCells = target.closest('.ProseMirror')?.querySelectorAll('.selectedCell')
+    if (selectedCells && selectedCells.length >= 2) {
+      return
+    }
+  }
+  
   if (
     !target.closest('.table-border-menu') &&
     !target.closest('.table-row-handle-overlay') &&
     !target.closest('.table-col-handle-overlay') &&
-    !target.closest('.table-cell-trigger-overlay')
+    !target.closest('.table-cell-trigger-overlay') &&
+    !target.closest('.selectedCell')
   ) {
     showTableBorderMenu.value = false
+    isMultiCellMenuOpen.value = false
   }
 }
 
 const onHideMenu = () => {
   showTableBorderMenu.value = false
+  isMultiCellMenuOpen.value = false
 }
 
 const addRowBefore = () => {
@@ -129,6 +165,7 @@ const deleteRow = () => {
   if (!editor.value?.can().deleteRow()) return
   editor.value.chain().focus().deleteRow().run()
   showTableBorderMenu.value = false
+  // Clear handles after deletion to prevent stale references
   setTimeout(() => {
     const editorElement = editor.value?.view?.dom?.parentElement
     if (editorElement) {
@@ -151,6 +188,7 @@ const deleteColumn = () => {
   if (!editor.value?.can().deleteColumn()) return
   editor.value.chain().focus().deleteColumn().run()
   showTableBorderMenu.value = false
+  // Clear handles after deletion to prevent stale references
   setTimeout(() => {
     const editorElement = editor.value?.view?.dom?.parentElement
     if (editorElement) {
@@ -186,6 +224,29 @@ const canMergeCells = computed(() => {
   return editor.value?.can().mergeCells() ?? false
 })
 
+watch(
+  () => editor.value?.state?.selection,
+  (selection) => {
+    if (isMultiCellMenuOpen.value && selection) {
+      const isCellSelection = selection instanceof CellSelection
+      if (!isCellSelection) {
+        isMultiCellMenuOpen.value = false
+        return
+      }
+      if (selection.$anchorCell && selection.$headCell) {
+        const anchorPos = selection.$anchorCell.pos
+        const headPos = selection.$headCell.pos
+        if (anchorPos === headPos) {
+          isMultiCellMenuOpen.value = false
+        }
+      } else {
+        isMultiCellMenuOpen.value = false
+      }
+    }
+  },
+  { deep: true }
+)
+
 onMounted(() => {
   window.addEventListener('table-border-click', onBorderClick)
   window.addEventListener('table-hide-menu', onHideMenu)
@@ -193,6 +254,7 @@ onMounted(() => {
   if (editor.value?.view?.dom?.parentElement) {
     editor.value.view.dom.parentElement.addEventListener('table-hide-menu', onHideMenu)
   }
+  
 })
 
 onBeforeUnmount(() => {

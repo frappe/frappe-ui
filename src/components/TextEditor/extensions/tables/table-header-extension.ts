@@ -5,6 +5,11 @@ export const TableHeaderExtension = TableHeader.extend({
     return {
       ...this.parent?.(),
       backgroundColor: {
+        parseHTML: element => {
+          if (element.tagName.toLowerCase() !== 'th') {
+            return null
+          }
+        },
         renderHTML(attributes) {
           if (!attributes.backgroundColor) {
             return {}
@@ -15,6 +20,11 @@ export const TableHeaderExtension = TableHeader.extend({
         },
       },
       borderColor: {
+        parseHTML: element => {
+          if (element.tagName.toLowerCase() !== 'th') {
+            return null
+          }
+        },
         renderHTML (attributes) {
           if (!attributes.borderColor) {
             return {}
