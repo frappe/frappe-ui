@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import {
   TagsInputRoot,
   TagsInputItem,
@@ -13,27 +13,54 @@ import { TagInputProps } from './types'
 
 const props = defineProps<TagInputProps>()
 const search = ref('')
+const options = defineModel<SimpleOption[]>('options')
 const modelValue = defineModel<SimpleOption[]>({ default: [] })
-const selectedTags = computed(() =>
-  modelValue.value.map((k) => props.options.find((j) => getValue(j) === k)),
-)
-const filteredOptions = computed(() =>
-  props.options.filter((opt) => {
+const selectedTags = computed(() => {
+  return modelValue.value.map((k) => {
+    return options.value.find((j) => getValue(j) === k)
+  })
+})
+
+const filteredOptions = computed(() => {
+  const remainingOptions = options.value.filter((opt) => {
     const val = getValue(opt)
     if (!val) return false
-    return (
-      (!search.value ||
-        val.toLowerCase().includes(search.value.toLowerCase())) &&
-      !modelValue.value.includes(val)
-    )
-  }),
-)
+    return !modelValue.value.includes(val)
+  })
+  return [
+    ...remainingOptions,
+    {
+      type: 'custom',
+      key: 'add-email',
+      label: 'Add email',
+      slotName: 'add-email',
+      condition: ({ searchTerm }: any) => {
+        if (!searchTerm) return false
+        const lower = searchTerm.toLowerCase()
+        const matches = options.value.filter((opt) =>
+          getLabel(opt).toLowerCase().includes(lower),
+        )
+        return matches.length === 0
+      },
+      onClick: ({ searchTerm }: any) => {
+        const tag = {
+          label: searchTerm,
+          value: searchTerm,
+        }
+        options.value.push({
+          ...tag,
+          icon: props.newOptionIcon && props.newOptionIcon(tag),
+        })
+        addTag(searchTerm)
+      },
+    },
+  ]
+})
 
 function addTag(tag: string) {
   if (!tag) return
   if (!modelValue.value.includes(tag)) modelValue.value.push(tag)
   search.value = ''
-  console.log(tag, search.value)
 }
 
 function removeTag(tag: string) {
@@ -44,13 +71,13 @@ function removeTag(tag: string) {
 <template>
   <TagsInputRoot
     v-model="modelValue"
-    class="flex flex-wrap justify-between p-0.5 items-start justify-center rounded-md bg-surface-gray-2 gap-2 items-center w-full"
+    class="flex flex-wrap p-1.5 gap-1.5 w-full items-center justify-start rounded-md bg-surface-gray-2"
   >
     <TagsInputItem
       v-for="item in selectedTags"
       :key="getValue(item)"
       :value="getValue(item)"
-      class="shadow-sm m-0.5 px-2 py-1.5 text-sm bg-white flex items-center justify-center gap-1.5 rounded p-0.5 ring-1 ring-outline-gray-1"
+      class="shadow-sm m-0.25 mr-0 p-1.5 text-sm bg-white flex items-center justify-center gap-1.5 rounded p-0.5 ring-1 ring-outline-gray-1"
     >
       <RenderIcon :icon="getIcon(item)" />
       <TagsInputItemText class="text-xs text-ink-gray-8">{{
@@ -70,11 +97,12 @@ function removeTag(tag: string) {
       class="flex-1 min-w-[100px] text-xs focus:outline-none"
       @update:modelValue="addTag"
       :open-on-click="true"
-      :input-classes="[
-        'bg-transparent border-none hover:!bg-transparent focus-within:ring-0 focus-within:border-none',
-        modelValue.length && '!p-0',
-      ]"
+      input-classes="bg-transparent border-none hover:!bg-transparent focus-within:border-none focus-within:!ring-0"
       :hide-trigger="true"
-    />
+    >
+      <template #add-email="{ searchTerm }">
+        {{ searchTerm }}
+      </template>
+    </Combobox>
   </TagsInputRoot>
 </template>
