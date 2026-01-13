@@ -1,21 +1,20 @@
-import { tableBorderMenuPlugin } from './table-border-menu-plugin'
-import {
-  Table,
-  TableRow,
-  TableCell,
-  TableHeader,
-} from '@tiptap/extension-table'
-import { columnResizing } from '@tiptap/pm/tables'
-// import tableIndividualCellPlugin from './table-individual-cell-plugin'
+import { Table } from '@tiptap/extension-table'
+import { columnResizing, CellSelection } from '@tiptap/pm/tables'
+import { tableBorderMenuPlugin } from './table-border-menu-plugin';
+import { Plugin, PluginKey, TextSelection } from '@tiptap/pm/state'
+import { DecorationSet } from '@tiptap/pm/view'
 
 export const TableExtension = Table.extend({
-  TableRow,
-  TableHeader,
-  TableCell,
   addAttributes() {
     return {
       backgroundColor: {
-        renderHTML(attributes) {
+        parseHTML: element => {
+          if (!element.closest('table') && element.tagName.toLowerCase() !== 'table') {
+            return null
+          }
+
+        },
+        renderHTML(attributes){
           if (!attributes.backgroundColor) {
             return {}
           }
@@ -26,7 +25,10 @@ export const TableExtension = Table.extend({
       },
       borderColor: {
         default: null,
-        renderHTML(attributes) {
+        parseHTML: element => {
+
+        },
+        renderHTML(attributes){
           if (!attributes.borderColor) {
             return {}
           }
@@ -36,7 +38,18 @@ export const TableExtension = Table.extend({
         },
       },
       borderWidth: {
-        renderHTML(attributes) {
+        parseHTML: element => {
+          if (!element.closest('table') && element.tagName.toLowerCase() !== 'table') {
+            return null
+          }
+          const classList = element.classList
+          const borderWidthClassMatch = Array.from(classList).find(cls => cls.startsWith('border-') && /^border-\d+$/.test(cls))
+          if (borderWidthClassMatch) {
+            return borderWidthClassMatch.replace('border-', '')
+          }
+          return null
+        },
+        renderHTML(attributes){
           if (!attributes.borderWidth) {
             return {}
           }
@@ -47,9 +60,10 @@ export const TableExtension = Table.extend({
       },
     }
   },
-
+  
   addProseMirrorPlugins() {
     return [
+      tableBorderMenuPlugin(this.editor),
       ...(this.parent?.() ?? []),
       columnResizing({
         handleWidth: this.options.handleWidth,
@@ -58,8 +72,6 @@ export const TableExtension = Table.extend({
         View: this.options.View,
         lastColumnResizable: this.options.lastColumnResizable,
       }),
-      tableBorderMenuPlugin(this.editor),
-      // tableIndividualCellPlugin(this.editor)
     ]
   },
 })

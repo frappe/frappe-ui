@@ -4,6 +4,7 @@
     class="bubble-menu rounded-md z-[100]"
     :class="bubbleMenuButtons.length > 1 && 'shadow-sm'"
     :editor="editor"
+    :should-show="shouldShow"
     v-bind="options"
   >
     <Menu
@@ -14,7 +15,7 @@
   </BubbleMenu>
 </template>
 <script>
-import { BubbleMenu } from '@tiptap/vue-3/menus'
+import { BubbleMenu } from '@tiptap/vue-3'
 import { createEditorButton } from './utils'
 import Menu from './Menu.vue'
 

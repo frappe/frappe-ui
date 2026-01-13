@@ -1,7 +1,9 @@
-import { Plugin, PluginKey } from '@tiptap/pm/state'
+import { Plugin, PluginKey, EditorState } from '@tiptap/pm/state'
+import { TextSelection } from '@tiptap/pm/state'
 import { Editor } from '@tiptap/core'
 import LucideGripVertical from '~icons/lucide/grip-vertical?raw'
-import { CellSelection } from 'prosemirror-tables'
+import { CellSelection, findTable, TableMap } from '@tiptap/pm/tables'
+import { Decoration, DecorationSet } from '@tiptap/pm/view'
 
 export const tableBorderMenuPluginKey = new PluginKey('tableBorderMenu')
 
@@ -46,17 +48,66 @@ export function tableBorderMenuPlugin(editor: Editor) {
     }
   }
 
+  const hideAllHandles = () => {
+    if (hideTimeout) {
+      clearTimeout(hideTimeout)
+      hideTimeout = null
+    }
+    if (cellTriggerTimeout) {
+      clearTimeout(cellTriggerTimeout)
+      cellTriggerTimeout = null
+    }
+    currentRowHandle?.remove()
+    currentColHandle?.remove()
+    currentCellTrigger?.remove()
+    currentRowHandle = null
+    currentColHandle = null
+    currentCellTrigger = null
+    document.querySelectorAll('.table-cell-trigger-overlay').forEach(el => {
+      el.remove()
+    })
+    document.querySelectorAll('.table-row-handle-overlay').forEach(el => {
+      el.remove()
+    })
+    document.querySelectorAll('.table-col-handle-overlay').forEach(el => {
+      el.remove()
+    })
+  }
+
   return new Plugin({
     key: tableBorderMenuPluginKey,
+    state: {
+      init() {
+        return DecorationSet.empty
+      },
+      apply(tr, set, oldState, newState) {
+        return set.map(tr.mapping, tr.doc)
+      }
+    },
     props: {
+      decorations(state) {
+        return this.getState(state)
+      },
       handleDOMEvents: {
+        mousedown(view, event) {
+          return false
+        },
+        click(view, event) {
+          return false
+        },
         mousemove(view, event) {
-          const target = event.target as HTMLElement
+          if (!editor.isEditable) {
+            clearHandles()
+            clearCellTrigger()
+            return false
+          }
 
+          const target = event.target as HTMLElement
           if (
             target.closest('.table-row-handle-overlay') ||
             target.closest('.table-col-handle-overlay') ||
-            target.closest('.table-cell-trigger-overlay')
+            target.closest('.table-cell-trigger-overlay') ||
+            target.closest('.column-resize-handle')
           ) {
             cancelClear()
             cancelCellTriggerClear()
@@ -73,8 +124,16 @@ export function tableBorderMenuPlugin(editor: Editor) {
             return false
           }
           cancelClear()
+          
           const { selection } = view.state
-          if (!(selection instanceof CellSelection)) {
+          const isCellSelection = selection instanceof CellSelection
+          if (isCellSelection) {
+            currentRowHandle?.remove()
+            currentColHandle?.remove()
+            currentRowHandle = null
+            currentColHandle = null
+            cancelCellTriggerClear()
+          } else {
             cancelCellTriggerClear()
           }
 
@@ -123,21 +182,27 @@ export function tableBorderMenuPlugin(editor: Editor) {
             currentColHandle = null
           }
 
-          const editorElement = view.dom.parentElement!
+          let editorElement = view.dom.parentElement
+          while (editorElement && getComputedStyle(editorElement).position === 'static') {
+            editorElement = editorElement.parentElement
+          }
+          if (!editorElement) {
+            editorElement = view.dom.parentElement!
+          }
+          
           const editorRect = editorElement.getBoundingClientRect()
           const tableRect = table.getBoundingClientRect()
-          const editorScrollLeft = editorElement.scrollLeft
-          const editorScrollTop = editorElement.scrollTop
 
-          if (
-            !currentRowHandle ||
-            currentRowHandle.getAttribute('data-row-id') !== String(rowIndex) ||
-            currentRowHandle.getAttribute('data-table-id') !== tableId
-          ) {
-            currentRowHandle?.remove()
+          if (!isCellSelection) {
+            if (
+              !currentRowHandle ||
+              currentRowHandle.getAttribute('data-row-id') !== String(rowIndex) ||
+              currentRowHandle.getAttribute('data-table-id') !== tableId
+            ) {
+              currentRowHandle?.remove()
 
-            currentRowHandle = document.createElement('div')
-            currentRowHandle.className = 'table-row-handle-overlay'
+              currentRowHandle = document.createElement('div')
+              currentRowHandle.className = 'table-row-handle-overlay'
 
             let iconContainer = document.createElement('div')
             iconContainer.innerHTML = LucideGripVertical as unknown as string
@@ -154,8 +219,8 @@ export function tableBorderMenuPlugin(editor: Editor) {
 
             currentRowHandle.style.cssText = `
               position: absolute;
-              left: ${tableRect.left - editorRect.left + editorScrollLeft - 7}px;
-              top: ${rowRect.top - editorRect.top + editorScrollTop + rowRect.height / 2 - 10}px;
+              left: ${tableRect.left - editorRect.left - 7}px;
+              top: ${rowRect.top - editorRect.top + rowRect.height / 2 - 10}px;
               height: 16px;
               width: 12px;
               display: flex;
@@ -169,7 +234,6 @@ export function tableBorderMenuPlugin(editor: Editor) {
               border: 1px solid var(--outline-gray-2);
               border-radius: 4px;
               box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-              transition: all 0.15s ease;
             `
 
             currentRowHandle.addEventListener('mouseenter', function () {
@@ -194,24 +258,27 @@ export function tableBorderMenuPlugin(editor: Editor) {
               if (!cellEl) return
 
               const cellRect = cellEl.getBoundingClientRect()
+              const rowRect = row.getBoundingClientRect()
               const editorRect = editorElement.getBoundingClientRect()
-              const menuHeight = 25
-              const gap = 8
+              const menuHeight = 30
               const cellPos = view.posAtDOM(cellEl as Node, 0)
               editor.commands.focus()
               editor.commands.setTextSelection(cellPos)
               editor.commands.selectRow(rowIndex)
 
               const rowHandleLeft =
-                tableRect.left - editorRect.left + editorScrollLeft - 7
+                tableRect.left - editorRect.left - 7
               const rowHandleCenter = rowHandleLeft + 6
+
+              // Position menu at the center of the row (vertically centered)
+              const rowCenter = rowRect.top - editorRect.top + rowRect.height / 2 - menuHeight / 2
 
               const rowEvent = new CustomEvent('table-border-click', {
                 bubbles: true,
                 detail: {
                   axis: 'row',
                   position: {
-                    top: cellRect.top - editorRect.top + editorScrollTop - menuHeight - gap,
+                    top: rowCenter,
                     left: rowHandleCenter,
                   },
                   cellInfo: {
@@ -226,17 +293,18 @@ export function tableBorderMenuPlugin(editor: Editor) {
             })
 
             editorElement.appendChild(currentRowHandle)
+            }
           }
+          if (!isCellSelection) {
+            if (
+              !currentColHandle ||
+              currentColHandle.getAttribute('data-col-id') !== String(colIndex) ||
+              currentColHandle.getAttribute('data-table-id') !== tableId
+            ) {
+              currentColHandle?.remove()
 
-          if (
-            !currentColHandle ||
-            currentColHandle.getAttribute('data-col-id') !== String(colIndex) ||
-            currentColHandle.getAttribute('data-table-id') !== tableId
-          ) {
-            currentColHandle?.remove()
-
-            currentColHandle = document.createElement('div')
-            currentColHandle.className = 'table-col-handle-overlay'
+              currentColHandle = document.createElement('div')
+              currentColHandle.className = 'table-col-handle-overlay'
             let iconContainer = document.createElement('div')
             iconContainer.innerHTML = LucideGripVertical as unknown as string
             const svg = iconContainer.querySelector('svg')
@@ -253,8 +321,8 @@ export function tableBorderMenuPlugin(editor: Editor) {
 
             currentColHandle.style.cssText = `
               position: absolute;
-              left: ${cellRect.left - editorRect.left + editorScrollLeft + cellRect.width / 2 - 10}px;
-              top: ${tableRect.top - editorRect.top + editorScrollTop - 7}px;
+              left: ${cellRect.left - editorRect.left + cellRect.width / 2 - 10}px;
+              top: ${tableRect.top - editorRect.top - 7}px;
               height: 16px;
               width: 12px;
               display: flex;
@@ -269,7 +337,6 @@ export function tableBorderMenuPlugin(editor: Editor) {
               border: 1px solid var(--outline-gray-2);
               border-radius: 4px;
               box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-              transition: all 0.15s ease;
             `
 
             currentColHandle.addEventListener('mouseenter', function () {
@@ -293,26 +360,25 @@ export function tableBorderMenuPlugin(editor: Editor) {
               const cellRect = cell.getBoundingClientRect()
               const editorRect = editorElement.getBoundingClientRect()
               const menuHeight = 30
-              const gap = 8
+              const gap = 12
 
               const cellPos = view.posAtDOM(cell as Node, 0)
               editor.commands.focus()
               editor.commands.setTextSelection(cellPos)
               editor.commands.selectColumn(colIndex)
 
-              const columnHandleTop =
-                tableRect.top - editorRect.top + editorScrollTop - 7
+              // Position menu above the table with some space
+              const tableTop = tableRect.top - editorRect.top
 
               const columnEvent = new CustomEvent('table-border-click', {
                 bubbles: true,
                 detail: {
                   axis: 'column',
                   position: {
-                    top: columnHandleTop - menuHeight - gap,
+                    top: tableTop - menuHeight - gap,
                     left:
                       cellRect.left -
                       editorRect.left +
-                      editorScrollLeft +
                       cellRect.width / 2,
                   },
                   cellInfo: {
@@ -327,12 +393,11 @@ export function tableBorderMenuPlugin(editor: Editor) {
             })
 
             editorElement.appendChild(currentColHandle)
+            }
           }
+          
           const cellId = `${tableId}-${rowIndex}-${colIndex}`
-          if (
-            !currentCellTrigger ||
-            currentCellTrigger.getAttribute('data-cell-id') !== cellId
-          ) {
+          if (!currentCellTrigger || currentCellTrigger.getAttribute('data-cell-id') !== cellId) {
             currentCellTrigger?.remove()
 
             currentCellTrigger = document.createElement('div')
@@ -340,17 +405,15 @@ export function tableBorderMenuPlugin(editor: Editor) {
             currentCellTrigger.setAttribute('data-cell-id', cellId)
 
             const cellRect = cell.getBoundingClientRect()
-
             currentCellTrigger.style.cssText = `
               position: absolute;
-              left: ${cellRect.left - editorRect.left + editorScrollLeft + cellRect.width - 9}px;
-              top: ${cellRect.top - editorRect.top + editorScrollTop + cellRect.height / 2 - 9}px;
+              left: ${cellRect.left - editorRect.left + cellRect.width - 9}px;
+              top: ${cellRect.top - editorRect.top + cellRect.height / 2 - 9}px;
               display: flex;
               align-items: center;
               justify-content: center;
               color: var(--outline-gray-2);
               cursor: pointer;
-              transition: all 0.15s ease;
               z-index: 10;
               user-select: none;
             `
@@ -361,56 +424,56 @@ export function tableBorderMenuPlugin(editor: Editor) {
             svg.setAttribute('width', '18')
             svg.setAttribute('height', '18')
             svg.setAttribute('fill', 'currentColor')
-
             const circle = document.createElementNS(svgNS, 'circle')
             circle.setAttribute('cx', '12')
             circle.setAttribute('cy', '12')
             circle.setAttribute('r', '4')
-
             svg.appendChild(circle)
             currentCellTrigger.appendChild(svg)
 
-            currentCellTrigger.addEventListener('mouseenter', function () {
-              this.style.color = 'var(--surface-gray-7)'
-              cancelCellTriggerClear()
-            })
 
-            currentCellTrigger.addEventListener('mouseleave', function () {
-              this.style.color = 'var((--outline-gray-2)'
-              clearCellTrigger()
+            currentCellTrigger.addEventListener('mouseenter', () => {
+              if (currentCellTrigger) {
+                currentCellTrigger.style.color = 'var(--surface-gray-7)'
+                cancelCellTriggerClear()
+              }
             })
-
+            currentCellTrigger.addEventListener('mouseleave', () => {
+              if (currentCellTrigger) {
+                currentCellTrigger.style.color = 'var(--outline-gray-2)'
+                clearCellTrigger()
+              }
+            })
             currentCellTrigger.addEventListener('click', (e) => {
               e.preventDefault()
               e.stopPropagation()
-
               const { selection } = view.state
               const isCellSelection = selection instanceof CellSelection
-
-              if (!isCellSelection) {
-                const cellPos = view.posAtDOM(cell as Node, 0)
+              const cellPos = view.posAtDOM(cell as Node, 0)
+              const $cellPos = view.state.doc.resolve(cellPos)
+              const table = findTable($cellPos)
+              
+              if (table) {
+                editor.commands.focus()
+                const map = TableMap.get(table.node)
+                const cellIndex = rowIndex * map.width + colIndex
+                const cellPosInTable = map.map[cellIndex]
+                const absoluteCellPos = table.start + cellPosInTable
+                const cellSelection = CellSelection.create(view.state.doc, absoluteCellPos, absoluteCellPos)
+                const newTr = view.state.tr.setSelection(cellSelection)
+                view.dispatch(newTr)
+              } else {
                 editor.commands.focus()
                 editor.commands.setTextSelection(cellPos)
               }
-
+              
               const triggerRect = currentCellTrigger!.getBoundingClientRect()
-              const editorRect = editorElement.getBoundingClientRect()
-
               const cellEvent = new CustomEvent('table-border-click', {
                 bubbles: true,
                 detail: {
                   axis: 'cell',
-                  position: {
-                    top: triggerRect.bottom - editorRect.top + editorScrollTop - 25,
-                    left: triggerRect.left - editorRect.left + editorScrollLeft,
-                  },
-                  cellInfo: {
-                    element: cell,
-                    rowIndex,
-                    colIndex,
-                    isIndividualCell: !isCellSelection,
-                    isMultiCellSelection: isCellSelection,
-                  },
+                  position: { top: triggerRect.bottom - editorRect.top - 25, left: triggerRect.left - editorRect.left },
+                  cellInfo: { element: cell, rowIndex, colIndex, isIndividualCell: !isCellSelection, isMultiCellSelection: isCellSelection },
                 },
               })
               editorElement.dispatchEvent(cellEvent)
@@ -418,21 +481,184 @@ export function tableBorderMenuPlugin(editor: Editor) {
             })
 
             editorElement.appendChild(currentCellTrigger)
+          } else if (currentCellTrigger) {
+            const cellRect = cell.getBoundingClientRect()
+            currentCellTrigger.style.left = `${cellRect.left - editorRect.left + cellRect.width - 9}px`
+            currentCellTrigger.style.top = `${cellRect.top - editorRect.top + cellRect.height / 2 - 9}px`
+            currentCellTrigger.style.display = 'flex'
           }
 
           return false
         },
       },
     },
-    view() {
+    view(view) {
+      let cellSelectionTimeout: NodeJS.Timeout | null = null
+      let isMouseDown = false
+      let lastSelection: any = null
+
+      const handleMouseDown = () => {
+        isMouseDown = true
+        if (cellSelectionTimeout) {
+          clearTimeout(cellSelectionTimeout)
+          cellSelectionTimeout = null
+        }
+      }
+
+      const handleMouseUp = () => {
+        isMouseDown = false
+        setTimeout(() => {
+          const { selection } = view.state
+          const isCellSelection = selection instanceof CellSelection
+          if (isCellSelection && selection.$anchorCell && selection.$headCell) {
+            const anchorPos = selection.$anchorCell.pos
+            const headPos = selection.$headCell.pos
+            if (anchorPos !== headPos) {
+              checkCellSelection(true)
+            }
+          }
+        }, 150)
+      }
+
+      const showMultiCellMenu = () => {
+        const selectedCells = view.dom.querySelectorAll('.selectedCell')
+        
+        if (selectedCells.length < 2) return
+        
+        let minLeft = Infinity
+        let maxRight = -Infinity
+        let minTop = Infinity
+        let maxBottom = -Infinity
+        let firstCell: HTMLElement | null = null
+        
+        selectedCells.forEach((cell) => {
+          const rect = (cell as HTMLElement).getBoundingClientRect()
+          minLeft = Math.min(minLeft, rect.left)
+          maxRight = Math.max(maxRight, rect.right)
+          minTop = Math.min(minTop, rect.top)
+          maxBottom = Math.max(maxBottom, rect.bottom)
+          if (!firstCell) {
+            firstCell = cell as HTMLElement
+          }
+        })
+        
+        if (!firstCell) return
+        
+        const table = firstCell.closest('table')
+        if (!table) return
+        
+        let editorElement = view.dom.parentElement
+        while (editorElement && getComputedStyle(editorElement).position === 'static') {
+          editorElement = editorElement.parentElement
+        }
+        if (!editorElement) {
+          editorElement = view.dom.parentElement!
+        }
+        
+        const editorRect = editorElement.getBoundingClientRect()
+        
+        const centerX = (minLeft + maxRight) / 2
+        const menuHeight = 30
+        const gap = 12
+        
+        const row = firstCell.closest('tr')
+        const colIndex = Array.from(row?.querySelectorAll('td, th') || []).indexOf(firstCell as HTMLTableCellElement)
+        const rowIndex = Array.from(table.querySelectorAll('tr')).indexOf(row as HTMLTableRowElement)
+        
+        const tableRect = table.getBoundingClientRect()
+        const spaceAbove = minTop - tableRect.top
+        const spaceBelow = tableRect.bottom - maxBottom
+        
+        let finalTop: number
+        if (spaceAbove >= menuHeight + gap) {
+          finalTop = minTop - menuHeight - gap
+        } else if (spaceBelow >= menuHeight + gap) {
+          finalTop = maxBottom + gap
+        } else {
+          finalTop = minTop - menuHeight - gap
+        }
+        
+        const finalLeft = centerX
+        
+        const cellEvent = new CustomEvent('table-border-click', {
+          bubbles: true,
+          detail: {
+            axis: 'cell',
+            position: {
+              top: finalTop,
+              left: finalLeft,
+            },
+            cellInfo: {
+              element: firstCell,
+              rowIndex,
+              colIndex,
+              isIndividualCell: false,
+              isMultiCellSelection: true,
+            },
+          },
+        })
+        editorElement.dispatchEvent(cellEvent)
+        window.dispatchEvent(cellEvent)
+      }
+
+      const checkCellSelection = (forceCheck = false) => {
+        if (isMouseDown && !forceCheck) return
+        
+        const { selection } = view.state
+        const isCellSelection = selection instanceof CellSelection
+        
+        if (isCellSelection && selection.$anchorCell && selection.$headCell) {
+          const anchorPos = selection.$anchorCell.pos
+          const headPos = selection.$headCell.pos
+          
+          if (anchorPos !== headPos) {
+            const selectionChanged = lastSelection === null || 
+              lastSelection.$anchorCell?.pos !== anchorPos || 
+              lastSelection.$headCell?.pos !== headPos
+            
+            if (selectionChanged || forceCheck) {
+              if (cellSelectionTimeout) {
+                clearTimeout(cellSelectionTimeout)
+              }
+              
+              cellSelectionTimeout = setTimeout(() => {
+                if (!isMouseDown) {
+                  showMultiCellMenu()
+                }
+              }, forceCheck ? 50 : 200)
+            }
+          } else {
+            if (cellSelectionTimeout) {
+              clearTimeout(cellSelectionTimeout)
+              cellSelectionTimeout = null
+            }
+          }
+        } else {
+          if (cellSelectionTimeout) {
+            clearTimeout(cellSelectionTimeout)
+            cellSelectionTimeout = null
+          }
+        }
+        
+        lastSelection = selection
+      }
+
+      view.dom.addEventListener('mousedown', handleMouseDown)
+      document.addEventListener('mouseup', handleMouseUp)
+
       return {
+        update(view, prevState) {
+          if (view.state.selection !== prevState.selection) {
+            checkCellSelection()
+          }
+        },
         destroy() {
-          currentRowHandle?.remove()
-          currentColHandle?.remove()
-          currentCellTrigger?.remove()
-          currentRowHandle = null
-          currentColHandle = null
-          currentCellTrigger = null
+          hideAllHandles()
+          if (cellSelectionTimeout) {
+            clearTimeout(cellSelectionTimeout)
+          }
+          view.dom.removeEventListener('mousedown', handleMouseDown)
+          document.removeEventListener('mouseup', handleMouseUp)
         },
       }
     },

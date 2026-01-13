@@ -5,7 +5,7 @@
     :style="{
       top: position.top + 'px',
       left: position.left + 'px',
-      transform: axis === 'column' ? 'translateX(-50%)' : undefined,
+      transform: axis === 'column' || cellInfo?.isMultiCellSelection ? 'translateX(-50%)' : undefined,
     }"
     @click.stop
   >
@@ -28,6 +28,7 @@
         variant="ghost"
         v-if="canMergeCells"
         class="!size-6"
+        tooltip="Merge Cells"
       >
         <template #icon>
           <LucideMerge class="text-ink-gray-6 size-3.5" />
@@ -36,7 +37,7 @@
 
       <Popover>
         <template #target="{ togglePopover }">
-          <Button class="!size-6" @click="togglePopover()" variant="ghost">
+          <Button class="!size-6" @click="togglePopover()" variant="ghost" tooltip="Color">
             <template #icon>
               <LucidePalette class="text-ink-gray-6 size-3.5" />
             </template>
@@ -83,7 +84,7 @@
       </Popover>
       <Popover>
         <template #target="{ togglePopover }">
-          <Button class="!size-6" @click="togglePopover()" variant="ghost">
+          <Button class="!size-6" @click="togglePopover()" variant="ghost" tooltip="Border Width">
             <template #icon>
               <LucideFrame class="text-ink-gray-6 size-3.5" />
             </template>
@@ -137,6 +138,7 @@ interface TableBorderMenuProps {
     colIndex: number
     isFirstRow: boolean
     isIndividualCell: boolean
+    isMultiCellSelection?: boolean
   } | null
   canMergeCells: boolean
 }
@@ -183,13 +185,21 @@ const menuObjIndividual: MenuItem[] = [
   { icon: LucideHeader, action: 'toggleHeader', tooltip: 'Make Header' },
 ]
 
-const menuObj = computed(() =>
-  props.axis === 'row'
-    ? menuObjRow
-    : props.axis === 'column'
-      ? menuObjColumn
-      : menuObjIndividual,
-)
+const menuObjMultiCell: MenuItem[] = [
+  { icon: LucideHeader, action: 'toggleHeader', tooltip: 'Make Header' },
+]
+
+const menuObj = computed(() => {
+  if (props.axis === 'row') {
+    return menuObjRow
+  } else if (props.axis === 'column') {
+    return menuObjColumn
+  } else if (props.cellInfo?.isMultiCellSelection) {
+    return menuObjMultiCell
+  } else {
+    return menuObjIndividual
+  }
+})
 const emit = defineEmits<{
   (e: MenuAction | 'mergeCells'): void
   (e: 'setBackgroundColor', color: string | null): void
