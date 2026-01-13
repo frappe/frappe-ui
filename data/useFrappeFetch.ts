@@ -46,7 +46,7 @@ export interface UseFetchOptions {
 }
 
 export interface UseFetchResult<T> {
-  data: T | null
+  json: T | null
   error: Error | null
   loading: boolean
   execute: () => Promise<void>
@@ -65,7 +65,7 @@ export function useFrappeFetch<T = any>(
   } = options
 
   const state = reactive({
-    data: null as T | null,
+    json: null as T | null,
     error: null as Error | null,
     loading: false,
     execute: async () => {},
@@ -127,10 +127,10 @@ export function useFrappeFetch<T = any>(
         throw new Error(`HTTP ${response.status}: ${response.statusText}`)
       }
 
-      state.data = json as any
+      state.json = json as any
     } catch (e) {
       state.error = e instanceof Error ? e : new Error(String(e))
-      state.data = null
+      state.json = null
     } finally {
       state.loading = false
     }
