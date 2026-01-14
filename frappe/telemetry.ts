@@ -68,7 +68,6 @@ const setupTelemetry = async (
       pulse_provider.capture(event_name, app_name, data)
     },
   }
-  window.frappe.telemetry = app.config.globalProperties.$telemetry
 }
 
 const loadPulseProvider = async () => {
