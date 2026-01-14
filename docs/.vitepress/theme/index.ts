@@ -5,7 +5,7 @@ import Demo from '../../components/Docs/Demo.vue'
 import Layout from '../../components/Layout.vue'
 
 if (process.env.NODE_ENV === 'production') {
-  import.meta.glob('../components/**/*.story.vue', { eager: true })
+  import.meta.glob('../components/**/stories/*.vue', { eager: true })
 }
 
 export default {

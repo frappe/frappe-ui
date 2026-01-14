@@ -1,17 +1,18 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { Button } from 'frappe-ui'
+import { state } from '../../state'
 import { useData, useRoute } from 'vitepress'
+
 import LucideLeft from '~icons/lucide/arrow-left'
 import LucideRight from '~icons/lucide/arrow-right'
-import sidebarConfig from '../../.vitepress/sidebar'
-import { Button } from 'frappe-ui'
 
 const route = useRoute()
 const { frontmatter } = useData()
 
 const visible = computed(() => frontmatter.value.nextprev ?? true)
 
-const linkInfos = sidebarConfig.reduce((acc, cur) => {
+const linkInfos = state.sidebarList?.reduce((acc, cur) => {
   cur.items ? acc.push(...cur.items) : acc.push(cur)
   return acc
 }, [])

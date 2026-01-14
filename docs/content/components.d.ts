@@ -8,9 +8,12 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    LucideArrowRight: typeof import('~icons/lucide/arrow-right')['default']
     LucideArrowUpRight: typeof import('~icons/lucide/arrow-up-right')['default']
+    LucideBolt: typeof import('~icons/lucide/bolt')['default']
     LucideCaledar: typeof import('~icons/lucide/caledar')['default']
     LucideCLock: typeof import('~icons/lucide/c-lock')['default']
+    LucideDownload: typeof import('~icons/lucide/download')['default']
     LucideMail: typeof import('~icons/lucide/mail')['default']
     LucidePlug: typeof import('~icons/lucide/plug')['default']
     LucideRocket: typeof import('~icons/lucide/rocket')['default']

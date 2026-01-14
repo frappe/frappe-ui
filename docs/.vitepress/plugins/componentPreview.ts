@@ -4,15 +4,24 @@ import { dirname, resolve } from 'node:path'
 export default function (md: MarkdownRenderer) {
   md.core.ruler.after('inline', 'component-preview', (state) => {
     const previewRegex =
-      /<ComponentPreview\s+name=["']([^"']+)["'](?:\s+csr=["'](true|false)["'])?\s*\/>/g
+      /<ComponentPreview\s+name=["']([^"']+)["'](?:\s+csr=["'](true|false)["'])?(?:\s+css=["']([^"']+)["'])?\s*\/>/g
 
-    state.src = state.src.replace(previewRegex, (_, name, csr) => {
-      const componentPath = `../../../../src/components/${name}/${name}.story.vue`
+    state.src = state.src.replace(previewRegex, (_, name, csr, css) => {
+      let [componentName, storyName] = name.split('-')
+
+      if (!storyName) {
+        componentName = 'Button'
+        storyName = 'variants'
+      }
+
+      const componentPath = `../../../../src/components/${componentName}/stories/${storyName}.vue`
+
       const scriptIdx = state.tokens.findIndex(
         (i) => i.type === 'html_block' && /<script setup>/.test(i.content),
       )
 
-      const importStr = `import Preview from '${componentPath}'`
+      const importStr = `import ${storyName} from '${componentPath}'`
+
       if (scriptIdx === -1) {
         const token = new state.Token('html_block', '', 0)
         token.content = `<script setup>\n${importStr}\n</script>\n`
@@ -28,7 +37,7 @@ export default function (md: MarkdownRenderer) {
 
       const open = csr ? '<ClientOnly>' : ''
       state.tokens[idx].content =
-        `${open}<ComponentPreview name="${name}"><Preview /><template #code>`
+        `${open}<ComponentPreview name="${name}" css="${css}"><${storyName} /><template #code>`
 
       const code = new state.Token('fence', 'code', 0)
       code.info = 'vue'

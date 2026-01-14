@@ -2,6 +2,6 @@
 
 Datepicker for selecting month and year format.
 
-<ComponentPreview name="MonthPicker"  />
+<ComponentPreview name="monthPicker-example"  />
 
 <!-- @include: ../../../meta/MonthPicker.md -->

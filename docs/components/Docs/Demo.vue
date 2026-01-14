@@ -1,36 +1,36 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import { Tabs } from "frappe-ui";
-import LucidePreview from "~icons/lucide/square-mouse-pointer";
-import LucideCode from "~icons/lucide/code";
+import { ref } from 'vue'
+import { Tabs } from 'frappe-ui'
+import LucidePreview from '~icons/lucide/square-mouse-pointer'
+import LucideCode from '~icons/lucide/code'
 
 interface ComponentPreviewProps {
-  name: string;
-  title?: string;
-  description?: string;
+  name: string
+  css?: string
 }
 
-const props = defineProps<ComponentPreviewProps>();
-const state = ref(0);
+defineProps<ComponentPreviewProps>()
+const state = ref(0)
 
 const tabs = [
-  { label: "Preview", icon: LucidePreview },
-  { label: "Code", icon: LucideCode },
-];
+  { label: 'Preview', icon: LucidePreview },
+  { label: 'Code', icon: LucideCode },
+]
 </script>
 
 <template>
   <div class="grid gap-5 not-prose">
-    <div v-if="props.title" class="font-medium">{{ props.title }}</div>
-    <div v-if="props.description" class="text-sm text-muted">
-      {{ props.description }}
-    </div>
-    <Tabs :tabs="tabs" v-model="state" class='[&>[role=tablist]]:px-0'>
+    <Tabs :tabs="tabs" v-model="state" class="[&>[role=tablist]]:px-0">
       <template #tab-panel="{ tab }">
-        <div v-if='tab.label === "Preview"' class="vp-raw mt-5">
+        <div
+          v-if="tab.label === 'Preview'"
+          :class='["border border-outline-gray-2 p-5 rounded overflow-auto scrollbar mt-3 flex gap-3 items-center", css]'
+        >
           <slot />
         </div>
-        <slot v-else name="code" />
+        <div v-else class="mt-3">
+          <slot name="code" />
+        </div>
       </template>
     </Tabs>
   </div>

@@ -1,8 +1,8 @@
 import { defineConfig } from 'vitepress'
 import { lucideIcons } from '../../vite/lucideIcons'
 import path from 'path'
-// import sidebarConfig from './sidebar'
 import { meta } from './meta'
+import { getComponentItems } from './utils'
 
 import componentPreview from './plugins/componentPreview'
 
@@ -65,6 +65,7 @@ export default defineConfig({
   ],
 
   themeConfig: {
+    sidebarLinks: getComponentItems(),
     outline: [2, 3],
     logo: '/logo.svg',
     search: { provider: 'local' },

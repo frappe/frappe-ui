@@ -4,6 +4,18 @@ An interactive element used to trigger actions, submit forms, or navigate betwee
 
 ## Variants
 
-<ComponentPreview name='Button'  />
+<ComponentPreview name='button-variants'  />
 
-<!-- @include: ../../../meta/Badge.md -->
+## Themes
+
+<ComponentPreview name='button-themes'  />
+
+## Sizes    
+
+<ComponentPreview name='button-sizes'  />
+
+## Icons
+
+<ComponentPreview name='button-icons'  />
+
+<!-- @include: ../../../meta/Button.md -->

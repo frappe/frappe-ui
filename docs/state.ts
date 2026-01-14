@@ -1,7 +1,8 @@
-import { reactive } from "vue";
+import { reactive } from 'vue'
 
 export const state = reactive({
-	mobsidebar: false,
-	mobnavbar: false,
+  mobsidebar: false,
+  mobnavbar: false,
   searchDialog: false,
-});
+  sidebarList: []
+})

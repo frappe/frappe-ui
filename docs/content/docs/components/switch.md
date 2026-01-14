@@ -2,6 +2,10 @@
 
 A toggle input for turning options on or off. Clearly indicates state changes and allows quick, intuitive control.
 
-<ComponentPreview name="Switch"  />
+## Default
+<ComponentPreview name="switch-example" css='justify-center'  />
+
+## Labels 
+<ComponentPreview name="switch-labels" css='grid' />
 
 <!-- @include: ../../../meta/Switch.md -->

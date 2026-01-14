@@ -2,6 +2,7 @@
 
 Provides a vertical navigation panel for organizing links and actions. Supports sections, collapsible groups, and quick access to key features.
 
-<ComponentPreview name="Sidebar"  />
+## Default
+<ComponentPreview name="sidebar-example" css='!p-0'  />
 
 <!-- @include: ../../../meta/Sidebar.md -->

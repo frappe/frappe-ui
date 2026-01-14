@@ -62,7 +62,7 @@ defineProps<Props>()
           </Badge>
         </td>
 
-        <td>
+        <td class='font-mono text-sm'>
           <div
             v-if="x.default?.includes('{')"
             class="w-fit rounded-sm whitespace-pre px-3 py-2 leading-relaxed h-full !bg-surface-gray-1"
@@ -74,7 +74,7 @@ defineProps<Props>()
         </td>
 
         <td class="flex flex-wrap h-fit gap-2">
-          <span class="text-sm font-semibold">
+          <span class="text-sm font-semibold font-mono">
             {{ x.type }}
           </span>
 
