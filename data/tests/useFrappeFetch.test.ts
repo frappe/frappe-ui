@@ -1,7 +1,7 @@
 /**
  * @vitest-environment node
  */
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { useFrappeFetch, FrappeResponseError } from '../useFrappeFetch'
 import { baseUrl } from './mocks'
 import { waitFor } from './setup'
@@ -373,5 +373,116 @@ describe('useFrappeFetch', () => {
       success: true,
       received: { name: 'John', age: 30 },
     })
+  })
+
+  it('can manually abort requests', async () => {
+    let requestCompleted = false
+
+    server.use(
+      http.get(`${baseUrl}/api/slow`, async () => {
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+        requestCompleted = true
+        return HttpResponse.json({ done: true })
+      }),
+    )
+
+    const result = useFrappeFetch({
+      url: '/api/slow',
+      baseUrl,
+    })
+
+    // Wait a bit for request to start
+    await new Promise((resolve) => setTimeout(resolve, 10))
+
+    expect(result.loading).toBe(true)
+
+    result.abort()
+
+    // Wait a bit
+    await new Promise((resolve) => setTimeout(resolve, 100))
+
+    expect(result.loading).toBe(false)
+    expect(result.json).toBe(null)
+    expect(requestCompleted).toBe(false)
+  })
+
+  it('calls onSuccess callback when request succeeds', async () => {
+    const onSuccessMock = vi.fn()
+
+    server.use(
+      http.get(`${baseUrl}/api/callback-test`, () => {
+        return HttpResponse.json({ data: { result: 'success' } })
+      }),
+    )
+
+    const result = useFrappeFetch({
+      url: '/api/callback-test',
+      baseUrl,
+      onSuccess: onSuccessMock,
+    })
+
+    await waitFor(() => !result.loading)
+
+    expect(onSuccessMock).toHaveBeenCalledOnce()
+    expect(onSuccessMock).toHaveBeenCalledWith({ data: { result: 'success' } })
+  })
+
+  it('calls onError callback when request fails', async () => {
+    const onErrorMock = vi.fn()
+
+    server.use(
+      http.get(`${baseUrl}/api/error-test`, () => {
+        return HttpResponse.json(
+          {
+            errors: [
+              {
+                title: 'Error',
+                message: 'Something went wrong',
+                type: 'ServerError',
+                indicator: 'red',
+              },
+            ],
+          },
+          { status: 500 },
+        )
+      }),
+    )
+
+    const result = useFrappeFetch({
+      url: '/api/error-test',
+      baseUrl,
+      onError: onErrorMock,
+    })
+
+    await waitFor(() => !result.loading)
+
+    expect(onErrorMock).toHaveBeenCalledOnce()
+    expect(onErrorMock).toHaveBeenCalledWith(expect.any(FrappeResponseError))
+    expect(result.error).toBeInstanceOf(FrappeResponseError)
+  })
+
+  it('does not call onError on abort', async () => {
+    const onErrorMock = vi.fn()
+
+    server.use(
+      http.get(`${baseUrl}/api/abort-test`, async () => {
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+        return HttpResponse.json({ done: true })
+      }),
+    )
+
+    const result = useFrappeFetch({
+      url: '/api/abort-test',
+      baseUrl,
+      onError: onErrorMock,
+    })
+
+    await new Promise((resolve) => setTimeout(resolve, 10))
+
+    result.abort()
+
+    await new Promise((resolve) => setTimeout(resolve, 100))
+
+    expect(onErrorMock).not.toHaveBeenCalled()
   })
 })
