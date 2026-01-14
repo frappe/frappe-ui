@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { EChartsOption, init } from 'echarts'
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import debounce from '../../utils/debounce'
 
 const props = defineProps<{
@@ -9,10 +9,17 @@ const props = defineProps<{
     click: (params: any) => void
   }
   error?: string
+  class?: string
 }>()
 
 let chart: echarts.ECharts
 const chartDiv = ref<HTMLDivElement>()
+
+const chartClass = computed(() => {
+  const defaults =
+    'h-full w-full min-w-[300px] md:min-w-[400px] min-h-[300px] px-4 py-2'
+  return props.class || defaults
+})
 
 onMounted(() => {
   if (!chartDiv.value) return
@@ -49,11 +56,7 @@ watch(
 </script>
 
 <template>
-  <div
-    ref="chartDiv"
-    v-show="!error"
-    class="h-full w-full min-w-[300px] md:min-w-[400px] min-h-[300px] px-4 py-2"
-  ></div>
+  <div ref="chartDiv" v-show="!error" :class="chartClass"></div>
   <div
     v-show="error"
     class="flex h-full w-full items-center justify-center text-center text-ink-red-3"
