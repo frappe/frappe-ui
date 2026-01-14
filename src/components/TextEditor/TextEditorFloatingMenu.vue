@@ -1,7 +1,7 @@
 <template>
   <FloatingMenu
     v-if="floatingMenuButtons"
-    :tippy-options="{ duration: 100 }"
+    :options="{ duration: 100 }"
     :editor="editor"
     class="flex"
   >
@@ -25,7 +25,7 @@
   </FloatingMenu>
 </template>
 <script>
-import { FloatingMenu } from '@tiptap/vue-3'
+import { FloatingMenu } from '@tiptap/vue-3/menus'
 import { createEditorButton } from './utils'
 
 export default {
@@ -51,6 +51,7 @@ export default {
           'Blockquote',
           'Code',
           'Horizontal Rule',
+          'TableOfContents',
         ]
       }
       return buttons.map(createEditorButton)

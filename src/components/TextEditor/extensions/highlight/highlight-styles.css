@@ -25,7 +25,6 @@
 }
 
 .ProseMirror mark {
-  font-weight: 400;
   border-radius: 3px;
   padding: 0 2px;
   color: inherit;

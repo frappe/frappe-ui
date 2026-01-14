@@ -3,7 +3,10 @@
     <slot v-bind="{ onClick: openIframeDialog }"></slot>
 
     <!-- Iframe URL Input Dialog -->
-    <Dialog v-model="showDialog" :options="{ title: 'Insert Embed', size: 'md' }">
+    <Dialog
+      v-model="showDialog"
+      :options="{ title: 'Insert Embed', size: 'md' }"
+    >
       <template #body-content>
         <div class="space-y-4">
           <div>
@@ -17,8 +20,13 @@
               @keydown.enter="insertIframe"
               @input="validateUrl"
             />
-            <p v-if="urlError" class="text-red-500 text-sm mt-1">{{ urlError }}</p>
-            <p v-else-if="embedUrl && isValidUrl" class="text-ink-green-3 text-sm mt-1">
+            <p v-if="urlError" class="text-red-500 text-sm mt-1">
+              {{ urlError }}
+            </p>
+            <p
+              v-else-if="embedUrl && isValidUrl"
+              class="text-ink-green-3 text-sm mt-1"
+            >
               ✓ Valid {{ platformInfo.platform }} URL
             </p>
           </div>
@@ -194,6 +202,8 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  try {
   props.editor.view.dom.removeEventListener('iframe:open-dialog', handleSlashCommandInsert as EventListener)
+  } catch {}
 })
 </script>
