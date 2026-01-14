@@ -70,7 +70,7 @@ import { ImageGroup } from './extensions/image-group/image-group-extension'
 import { ExtendedCode, ExtendedCodeBlock } from './extensions/code-block'
 import { useFileUpload } from '../../utils/useFileUpload'
 import { TextEditorEmits, TextEditorProps } from './types'
-import { getTagExtensions } from './tagExtensions'
+import { getTagExtensions } from './extensions/tag'
 
 function defaultUploadFunction(file: File) {
   // useFileUpload is frappe specific

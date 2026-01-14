@@ -6,6 +6,7 @@ import {
 } from '../suggestion/createSuggestionExtension'
 import SuggestionList from '../suggestion/SuggestionList.vue'
 import { toValue } from 'vue'
+import { TextEditorProps } from '../../types'
 
 export const TagNode = Node.create({
   name: 'tagItem',
@@ -153,3 +154,16 @@ export const TagExtension = createSuggestionExtension<TagSuggestionItem>({
   decorationTag: 'span',
   decorationClass: 'tag-suggestion-active',
 })
+
+export function getTagExtensions(getTags: () => TextEditorProps['tags']) {
+  if (getTags() === null) {
+    return []
+  }
+
+  return [
+    TagNode,
+    TagExtension.configure({
+      tags: getTags,
+    }),
+  ]
+}
