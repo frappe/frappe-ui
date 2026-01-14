@@ -1,5 +1,5 @@
 import { call } from 'frappe-ui'
-import type { App } from 'vue'
+import { reactive, readonly, ref, type App } from 'vue'
 
 declare global {
   interface Window {
@@ -7,15 +7,65 @@ declare global {
   }
 }
 
+let pulseProvider: {
+  init: () => void
+  capture: (
+    event_name: string,
+    app_name: string,
+    data: Record<string, any>,
+  ) => void
+}
+
+const appName = ref<string>()
+const isEnabled = ref(false)
+
+const disableTelemetry = () => {
+  isEnabled.value = false
+  setFrappeBoot(false)
+}
+
+const captureEvent = (event_name: string, data: Record<string, any> = {}) => {
+  if (!isEnabled.value || !pulseProvider || !appName.value) return
+  pulseProvider.capture(event_name, appName.value, data)
+}
+
+export function useTelemetry() {
+  return reactive({
+    isEnabled: readonly(isEnabled),
+    disable: disableTelemetry,
+    capture: captureEvent,
+  })
+}
+
 export default {
-  install(app: App, options: { app_name: string }) {
-    initializeFrappeBoot()
-    enableTelemetry(app, options.app_name)
+  async install(app: App, options: { app_name: string }) {
+    appName.value = options.app_name
+
+    if (!appName.value) {
+      console.warn(
+        `Telemetry plugin installed without app_name. \n` +
+          `To enable telemetry, please provide the app_name while installing the plugin: \n` +
+          `app.use(telemetryPlugin, { app_name: 'your_app_name' })`,
+      )
+      return
+    }
+
+    isEnabled.value = await silentCall<boolean>(
+      'frappe.utils.telemetry.pulse.client.is_enabled',
+    )
+    if (!isEnabled.value) return
+
+    pulseProvider = await loadPulseProvider()
+    if (!pulseProvider) return
+
+    setFrappeBoot(isEnabled.value)
+    pulseProvider.init()
   },
 }
 
 const silentCall = <T>(method: string): Promise<T> => {
   // To prevent console errors/logs from being shown
+  // when method doesn't exist in older versions of Frappe
   const originalError = console.error
   const originalLog = console.log
   console.error = () => {}
@@ -25,49 +75,6 @@ const silentCall = <T>(method: string): Promise<T> => {
     console.log = originalLog
     console.error = originalError
   })
-}
-
-const enableTelemetry = (app: App, app_name: string) => {
-  silentCall<boolean>('frappe.utils.telemetry.pulse.client.is_enabled')
-    .then((is_enabled: boolean) => {
-      setupTelemetry(app, is_enabled, app_name)
-    })
-    .catch(() => {
-      console.warn('Failed to fetch telemetry settings. Disabling telemetry.')
-      setupTelemetry(app, false, app_name)
-    })
-}
-
-const setupTelemetry = async (
-  app: App,
-  is_enabled: boolean,
-  app_name: string,
-) => {
-  window.frappe.boot.enable_telemetry = is_enabled
-  window.frappe.boot.telemetry_provider = is_enabled ? ['pulse'] : []
-  app.config.globalProperties.$telemetry = {
-    is_enabled: () => false,
-    capture: () => {},
-  }
-
-  if (!is_enabled) {
-    return
-  }
-
-  const pulse_provider = await loadPulseProvider()
-  if (!pulse_provider) {
-    console.warn('Failed to load telemetry provider. Disabling telemetry.')
-    setupTelemetry(app, false, app_name)
-    return
-  }
-
-  pulse_provider.init()
-  app.config.globalProperties.$telemetry = {
-    is_enabled: pulse_provider.is_enabled,
-    capture: (event_name: string, data: Record<string, any> = {}) => {
-      pulse_provider.capture(event_name, app_name, data)
-    },
-  }
 }
 
 const loadPulseProvider = async () => {
@@ -86,11 +93,17 @@ const loadPulseProvider = async () => {
       // Continue to next path
     }
   }
+
+  console.warn(
+    'Telemetry pulse provider could not be loaded. Telemetry will be disabled.',
+  )
 }
 
-const initializeFrappeBoot = () => {
+const setFrappeBoot = (is_enabled: boolean) => {
   window.frappe ??= {}
   window.frappe.boot = {
     ...window.frappe.boot,
+    enable_telemetry: is_enabled,
+    telemetry_provider: is_enabled ? ['pulse'] : [],
   }
 }
