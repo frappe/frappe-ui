@@ -37,7 +37,7 @@ beforeEach(async () => {
 
 describe('getList', () => {
   it('fetches a list of documents', async () => {
-    const ToDo = defineDoctype<ToDoDocType>('ToDo', { baseUrl })
+    const ToDo = defineDoctype<ToDoDocType>()('ToDo', { baseUrl })
 
     const todos = ToDo.getList()
 
@@ -59,7 +59,7 @@ describe('getList', () => {
   })
 
   it('applies filters', async () => {
-    const ToDo = defineDoctype<ToDoDocType>('ToDo', { baseUrl })
+    const ToDo = defineDoctype<ToDoDocType>()('ToDo', { baseUrl })
 
     const todos = ToDo.getList({
       filters: { status: 'Open' },
@@ -73,7 +73,7 @@ describe('getList', () => {
   })
 
   it('handles pagination with limit', async () => {
-    const ToDo = defineDoctype<ToDoDocType>('ToDo', { baseUrl })
+    const ToDo = defineDoctype<ToDoDocType>()('ToDo', { baseUrl })
 
     const todos = ToDo.getList({
       limit: 1,
@@ -86,7 +86,7 @@ describe('getList', () => {
   })
 
   it('loads next page', async () => {
-    const ToDo = defineDoctype<ToDoDocType>('ToDo', { baseUrl })
+    const ToDo = defineDoctype<ToDoDocType>()('ToDo', { baseUrl })
 
     const todos = ToDo.getList({
       limit: 1,
@@ -107,7 +107,7 @@ describe('getList', () => {
   })
 
   it('does not load next page when hasNextPage is false', async () => {
-    const ToDo = defineDoctype<ToDoDocType>('ToDo', { baseUrl })
+    const ToDo = defineDoctype<ToDoDocType>()('ToDo', { baseUrl })
 
     const todos = ToDo.getList()
 
@@ -123,7 +123,7 @@ describe('getList', () => {
   })
 
   it('reloads list', async () => {
-    const ToDo = defineDoctype<ToDoDocType>('ToDo', { baseUrl })
+    const ToDo = defineDoctype<ToDoDocType>()('ToDo', { baseUrl })
 
     const todos = ToDo.getList()
 
@@ -138,7 +138,7 @@ describe('getList', () => {
   })
 
   it('returns empty array when no data', async () => {
-    const ToDo = defineDoctype<ToDoDocType>('ToDo', { baseUrl })
+    const ToDo = defineDoctype<ToDoDocType>()('ToDo', { baseUrl })
 
     const todos = ToDo.getList({
       filters: { status: 'NonExistent' },
@@ -151,7 +151,7 @@ describe('getList', () => {
   })
 
   it('refetches when reactive filters change', async () => {
-    const ToDo = defineDoctype<ToDoDocType>('ToDo', { baseUrl })
+    const ToDo = defineDoctype<ToDoDocType>()('ToDo', { baseUrl })
 
     const statusFilter = ref<string | undefined>('Open')
     const todos = ToDo.getList({
@@ -175,7 +175,7 @@ describe('getList', () => {
   })
 
   it('refetches when reactive limit changes', async () => {
-    const ToDo = defineDoctype<ToDoDocType>('ToDo', { baseUrl })
+    const ToDo = defineDoctype<ToDoDocType>()('ToDo', { baseUrl })
 
     const limit = ref(1)
     const todos = ToDo.getList({
@@ -199,7 +199,7 @@ describe('getList', () => {
 
   it('caches data when cache key is provided', async () => {
     const { setCache } = await import('../cache')
-    const ToDo = defineDoctype<ToDoDocType>('ToDo', { baseUrl })
+    const ToDo = defineDoctype<ToDoDocType>()('ToDo', { baseUrl })
 
     const todos = ToDo.getList({
       cache: 'my-todos',
@@ -221,7 +221,7 @@ describe('getList', () => {
 
   it('shows cached data while loading fresh data', async () => {
     const { getCache, setCache } = await import('../cache')
-    const ToDo = defineDoctype<ToDoDocType>('ToDo', { baseUrl })
+    const ToDo = defineDoctype<ToDoDocType>()('ToDo', { baseUrl })
 
     // Pre-populate cache with mock data
     const cachedData = [
@@ -260,7 +260,7 @@ describe('getList', () => {
   })
 
   it('can update a list item with setValue', async () => {
-    const ToDo = defineDoctype<ToDoDocType>('ToDo', { baseUrl })
+    const ToDo = defineDoctype<ToDoDocType>()('ToDo', { baseUrl })
 
     const todos = ToDo.getList()
 
@@ -283,7 +283,7 @@ describe('getList', () => {
   })
 
   it('can delete a list item', async () => {
-    const ToDo = defineDoctype<ToDoDocType>('ToDo', { baseUrl })
+    const ToDo = defineDoctype<ToDoDocType>()('ToDo', { baseUrl })
 
     const todos = ToDo.getList()
 
@@ -301,7 +301,7 @@ describe('getList', () => {
   })
 
   it('updates optimistically with setValue when optimistic is true', async () => {
-    const ToDo = defineDoctype<ToDoDocType>('ToDo', { baseUrl })
+    const ToDo = defineDoctype<ToDoDocType>()('ToDo', { baseUrl })
 
     const todos = ToDo.getList()
 
@@ -333,7 +333,7 @@ describe('getList', () => {
   })
 
   it('deletes optimistically when optimistic is true', async () => {
-    const ToDo = defineDoctype<ToDoDocType>('ToDo', { baseUrl })
+    const ToDo = defineDoctype<ToDoDocType>()('ToDo', { baseUrl })
 
     const todos = ToDo.getList()
 
@@ -358,7 +358,7 @@ describe('getList', () => {
   })
 
   it('can insert a new item with insert', async () => {
-    const ToDo = defineDoctype<ToDoDocType>('ToDo', { baseUrl })
+    const ToDo = defineDoctype<ToDoDocType>()('ToDo', { baseUrl })
 
     const todos = ToDo.getList()
 
@@ -383,7 +383,7 @@ describe('getList', () => {
   })
 
   it('inserts optimistically when optimistic is true', async () => {
-    const ToDo = defineDoctype<ToDoDocType>('ToDo', { baseUrl })
+    const ToDo = defineDoctype<ToDoDocType>()('ToDo', { baseUrl })
 
     const todos = ToDo.getList()
 

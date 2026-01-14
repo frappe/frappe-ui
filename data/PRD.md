@@ -24,12 +24,12 @@ export const ToDo = defineDoctype<ToDoDocType>()('ToDo', {
     setStatus: {
       method: 'set_status', // Python method name on the document class
       httpMethod: 'POST',
-      args: (status: 'Open' | 'Closed') => ({ status }),
+      args: (params: {status: 'Open' | 'Closed'}) => params,
     },
     assignTo: {
       method: 'assign_to',
       httpMethod: 'POST',
-      args: (user: string, description?: string) => ({ user, description }),
+      args: (params: {user: string, description?: string}) => params,
     },
   },
   // Controller-level methods: operate on the DocType controller
@@ -37,7 +37,7 @@ export const ToDo = defineDoctype<ToDoDocType>()('ToDo', {
     sendEmail: {
       method: 'send_email', // Python @staticmethod or @classmethod on controller
       httpMethod: 'POST',
-      args: (names: string[]) => ({ names }),
+      args: (params: { names: string[] }) => params
     },
   },
 })
