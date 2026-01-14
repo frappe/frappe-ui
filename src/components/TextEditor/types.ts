@@ -23,7 +23,7 @@ export interface TextEditorProps {
   extensions?: any[]
   starterkitOptions?: any
   mentions?: ConfigureMentionOptions
-  tags?: any[]
+  tags?: any[] | null
   uploadFunction?: (file: File) => Promise<UploadedFile>
   uploadArgs?: object
 }

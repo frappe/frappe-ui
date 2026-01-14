@@ -65,12 +65,12 @@ import TextEditorFloatingMenu from './TextEditorFloatingMenu.vue'
 import EmojiExtension from './extensions/emoji/emoji-extension'
 import SlashCommands from './extensions/slash-commands/slash-commands-extension'
 import { ContentPasteExtension } from './extensions/content-paste-extension'
-import { TagNode, TagExtension } from './extensions/tag/tag-extension'
 import { Heading } from './extensions/heading/heading'
 import { ImageGroup } from './extensions/image-group/image-group-extension'
 import { ExtendedCode, ExtendedCodeBlock } from './extensions/code-block'
 import { useFileUpload } from '../../utils/useFileUpload'
 import { TextEditorEmits, TextEditorProps } from './types'
+import { getTagExtensions } from './extensions/tag'
 
 function defaultUploadFunction(file: File) {
   // useFileUpload is frappe specific
@@ -91,7 +91,7 @@ const props = withDefaults(defineProps<TextEditorProps>(), {
   extensions: () => [],
   starterkitOptions: () => ({}),
   mentions: null,
-  tags: () => [],
+  tags: null,
 })
 
 const emit = defineEmits<TextEditorEmits>()
@@ -226,10 +226,7 @@ onMounted(() => {
         ),
       EmojiExtension,
       SlashCommands,
-      TagNode,
-      TagExtension.configure({
-        tags: () => props.tags,
-      }),
+      ...getTagExtensions(() => props.tags),
       ContentPasteExtension.configure({
         enabled: true,
         uploadFunction: props.uploadFunction || defaultUploadFunction,
