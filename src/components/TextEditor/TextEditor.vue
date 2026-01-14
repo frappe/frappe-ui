@@ -91,7 +91,7 @@ const props = withDefaults(defineProps<TextEditorProps>(), {
   extensions: () => [],
   starterkitOptions: () => ({}),
   mentions: null,
-  tags: () => [],
+  tags: null,
 })
 
 const emit = defineEmits<TextEditorEmits>()
