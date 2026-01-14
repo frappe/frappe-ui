@@ -1,0 +1,112 @@
+import { B as Button } from "./Button-BH7iXttv.js";
+import { F as FeatherIcon } from "./FeatherIcon-CrfXch0X.js";
+import { ay as _export_sfc, cp as he, cq as Oe, cr as ke, aC as resolveComponent, aD as openBlock, aE as createBlock, aF as withCtx, aI as createBaseVNode, aL as createElementBlock, aV as Fragment, aU as renderList, aH as createVNode, aW as mergeProps, bh as withDirectives, aT as createTextVNode, aJ as toDisplayString, bi as vShow } from "./vendor-Dk9TTFVx.js";
+const _sfc_main = {
+  name: "TabButtons",
+  props: {
+    buttons: {
+      type: Array,
+      required: true
+    },
+    modelValue: {
+      type: [String, Boolean, Number]
+    }
+  },
+  emits: ["update:modelValue"],
+  components: {
+    Button,
+    FeatherIcon,
+    RadioGroup: he,
+    RadioGroupOption: Oe,
+    RadioGroupLabel: ke
+  },
+  computed: {
+    value: {
+      get() {
+        return this.modelValue;
+      },
+      set(value) {
+        this.$emit("update:modelValue", value);
+      }
+    }
+  }
+};
+const _hoisted_1 = { class: "flex space-x-0.5 rounded-md bg-surface-gray-2 h-7 items-center px-[1px] text-sm" };
+function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
+  const _component_RadioGroupLabel = resolveComponent("RadioGroupLabel");
+  const _component_Button = Button;
+  const _component_RadioGroupOption = resolveComponent("RadioGroupOption");
+  const _component_RadioGroup = resolveComponent("RadioGroup");
+  return openBlock(), createBlock(_component_RadioGroup, {
+    modelValue: $options.value,
+    "onUpdate:modelValue": _cache[0] || (_cache[0] = ($event) => $options.value = $event)
+  }, {
+    default: withCtx(() => [
+      createBaseVNode("div", _hoisted_1, [
+        (openBlock(true), createElementBlock(
+          Fragment,
+          null,
+          renderList($props.buttons, (button) => {
+            return openBlock(), createBlock(_component_RadioGroupOption, {
+              as: "div",
+              key: button.label,
+              disabled: button.disabled,
+              value: button.value ?? button.label
+            }, {
+              default: withCtx(({ active, checked }) => [
+                createVNode(_component_Button, mergeProps({
+                  onClick: button.onClick,
+                  ref_for: true
+                }, button, {
+                  class: ["!h-6.5", [
+                    active ? "ring-outline-gray-2 focus-visible:ring" : "",
+                    checked && "!bg-surface-white",
+                    button.disabled ? "" : checked ? " text-ink-gray-8 shadow" : "!text-ink-gray-5"
+                  ]]
+                }), {
+                  default: withCtx(() => [
+                    withDirectives(createVNode(
+                      _component_RadioGroupLabel,
+                      {
+                        as: "span",
+                        class: "flex h-4 items-center"
+                      },
+                      {
+                        default: withCtx(() => [
+                          createTextVNode(
+                            toDisplayString(button.label),
+                            1
+                            /* TEXT */
+                          )
+                        ]),
+                        _: 2
+                        /* DYNAMIC */
+                      },
+                      1536
+                      /* NEED_PATCH, DYNAMIC_SLOTS */
+                    ), [
+                      [vShow, button.label && !button.hideLabel]
+                    ])
+                  ]),
+                  _: 2
+                  /* DYNAMIC */
+                }, 1040, ["onClick", "class"])
+              ]),
+              _: 2
+              /* DYNAMIC */
+            }, 1032, ["disabled", "value"]);
+          }),
+          128
+          /* KEYED_FRAGMENT */
+        ))
+      ])
+    ]),
+    _: 1
+    /* STABLE */
+  }, 8, ["modelValue"]);
+}
+_sfc_main.__file = "src/components/TabButtons/TabButtons.vue";
+const TabButtons = /* @__PURE__ */ _export_sfc(_sfc_main, [["render", _sfc_render], ["__file", "/home/runner/work/frappe-ui/frappe-ui/src/components/TabButtons/TabButtons.vue"]]);
+export {
+  TabButtons as T
+};
