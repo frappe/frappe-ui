@@ -1,9 +1,6 @@
 export { defineDoctype } from './defineDoctype'
 export { useFrappeFetch, FrappeResponseError } from './useFrappeFetch'
 export type { UseFetchResult, UseFetchOptions } from './useFrappeFetch'
-export type {
-  GetDocResult,
-  GetListResult,
-  GetListOptions,
-  DoctypeOptions,
-} from './defineDoctype'
+export type { DoctypeOptions } from './defineDoctype'
+export type { GetDocResult } from './getDoc'
+export type { GetListResult, GetListOptions } from './getList'
