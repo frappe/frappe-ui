@@ -38,7 +38,7 @@ defineProps<Props>()
 
         <td class="flex flex-wrap h-fit gap-2">
           <span class="text-sm font-semibold">
-            {{ x.type }}
+            {{ x.type == 'any'? '-' : x.type }}
           </span>
 
           <p class="text-sm text-ink-gray-5 leading-relaxed w-full">
