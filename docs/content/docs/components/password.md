@@ -4,6 +4,6 @@ Provides a secure input for entering passwords. Supports visibility toggling and
 
 ## Example
 
-<ComponentPreview name="Password-example"  />
+<ComponentPreview name="Password-Example"  />
 
 <!-- @include: ../../../meta/Password.md -->

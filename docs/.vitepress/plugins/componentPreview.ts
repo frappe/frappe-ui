@@ -9,11 +9,6 @@ export default function (md: MarkdownRenderer) {
     state.src = state.src.replace(previewRegex, (_, name, csr, css) => {
       let [componentName, storyName] = name.split('-')
 
-      if (!storyName) {
-        componentName = 'Button'
-        storyName = 'variants'
-      }
-
       const componentPath = `../../../../src/components/${componentName}/stories/${storyName}.vue`
 
       const scriptIdx = state.tokens.findIndex(

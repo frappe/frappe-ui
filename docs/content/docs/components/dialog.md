@@ -3,16 +3,16 @@
 A flexible overlay for showing messages, forms, or actions. Keeps focus on content while allowing clear, user-friendly interactions.
 
 ## Confirmation
-<ComponentPreview name="dialog-confirm" />
+<ComponentPreview name="Dialog-Confirm" />
 
 ## Custom Content
-<ComponentPreview name="dialog-custom" />
+<ComponentPreview name="Dialog-Custom" />
 
 ## Modal
-<ComponentPreview name="dialog-modal" />
+<ComponentPreview name="Dialog-Modal" />
 
 ## Interactive Content
-<ComponentPreview name="dialog-interactive" />
+<ComponentPreview name="Dialog-Interactive" />
 
 
 <!-- @include: ../../../meta/Dialog.md -->

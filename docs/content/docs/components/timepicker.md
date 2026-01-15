@@ -3,17 +3,16 @@
 Lets users select a specific time from a list or enter a custom value. Supports 12/24-hour formats, custom intervals, and optional time ranges.
 
 ## Basic
-<ComponentPreview name="timePicker-basic" css='grid'  />
-
+<ComponentPreview name="TimePicker-Basic" css='grid'  />
 
 ## 24 Hour Format
-<ComponentPreview name="timePicker-twentyFour" css='grid'  />
+<ComponentPreview name="TimePicker-TwentyFour" css='grid'  />
 
 ## Custom Options
-<ComponentPreview name="timePicker-customOptions" css='grid'  />
+<ComponentPreview name="TimePicker-CustomOptions" css='grid'  />
 
 ## Min / Max Range
-<ComponentPreview name="timePicker-range" css='grid'  />
+<ComponentPreview name="TimePicker-Range" css='grid'  />
 
 <!-- @include: ../../../meta/TimePicker.md -->
 

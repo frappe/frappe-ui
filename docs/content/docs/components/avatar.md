@@ -3,9 +3,9 @@
 A visual representation of a user, typically shown as an image, initials, or an icon.
 
 ## Themes
-<ComponentPreview name="avatar-shapes" />
+<ComponentPreview name="Avatar-Shapes" />
 
 ## Controlled state
-<ComponentPreview name="avatar-sizes"  />
+<ComponentPreview name="Avatar-Sizes"  />
 
 <!-- @include: ../../../meta/Avatar.md -->

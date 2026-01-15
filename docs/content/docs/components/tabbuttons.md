@@ -1,5 +1,0 @@
-
-# TabButtons
-
-
-<ComponentPreview name="TabButtons"  />

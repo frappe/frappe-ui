@@ -4,10 +4,10 @@ A small label used to highlight status, counts, or metadata associated with an e
 
 ## Variants
 
-<ComponentPreview name="badge-variants" />
+<ComponentPreview name="Badge-Variants" />
 
 ## Themes
 
-<ComponentPreview name="badge-themes" />
+<ComponentPreview name="Badge-Themes" />
 
 <!-- @include: ../../../meta/Badge.md -->

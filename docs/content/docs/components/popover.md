@@ -3,9 +3,9 @@
 Shows information in a portal that doesnt disturb the page layout.
 
 ## Trigger Click
-<ComponentPreview name="popover-click"  />
+<ComponentPreview name="Popover-Click"  />
 
 ## Trigger Hover
-<ComponentPreview name="popover-hover"  />
+<ComponentPreview name="Popover-Hover"  />
 
 <!-- @include: ../../../meta/Popover.md -->

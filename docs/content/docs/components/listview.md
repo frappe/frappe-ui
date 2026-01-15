@@ -4,10 +4,10 @@ Displays data in a structured, scrollable list with support for columns, groups,
 
 #  Simple List
 
-<ComponentPreview name="ListView-examples"  />
+<ComponentPreview name="ListView-Examples"  />
 
 ## Custom List
-<ComponentPreview name="ListView-customList"  />
+<ComponentPreview name="ListView-CustomList"  />
 
 ## Grouped Rows 
 <ComponentPreview name="ListView-GroupedRows"  />

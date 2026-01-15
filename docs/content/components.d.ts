@@ -9,17 +9,9 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     LucideArrowRight: typeof import('~icons/lucide/arrow-right')['default']
-    LucideArrowUpRight: typeof import('~icons/lucide/arrow-up-right')['default']
     LucideBolt: typeof import('~icons/lucide/bolt')['default']
-    LucideCaledar: typeof import('~icons/lucide/caledar')['default']
-    LucideCLock: typeof import('~icons/lucide/c-lock')['default']
     LucideDownload: typeof import('~icons/lucide/download')['default']
     LucideMail: typeof import('~icons/lucide/mail')['default']
-    LucidePlug: typeof import('~icons/lucide/plug')['default']
-    LucideRocket: typeof import('~icons/lucide/rocket')['default']
-    LucideRoicket: typeof import('~icons/lucide/roicket')['default']
-    LucideTrendingUp: typeof import('~icons/lucide/trending-up')['default']
-    LucideZap: typeof import('~icons/lucide/zap')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
   }

@@ -3,19 +3,19 @@
 Lets users choose from available options or type their own. Provides clear, responsive feedback for every interaction.
 
 ## Simple
-<ComponentPreview name="combobox-simple" />
+<ComponentPreview name="Combobox-Simple" />
 
 ## With Icons
-<ComponentPreview name="combobox-withIcons" />
+<ComponentPreview name="Combobox-WithIcons" />
 
 ## Grouped Options
-<ComponentPreview name="combobox-grouped" />
+<ComponentPreview name="Combobox-Grouped" />
 
 ## Custom Render
-<ComponentPreview name="combobox-customRender" />
+<ComponentPreview name="Combobox-CustomRender" />
 
 ## Custom Option Slots
-<ComponentPreview name="combobox-optionSlots" />
+<ComponentPreview name="Combobox-OptionSlots" />
 
 
 <!-- @include: ../../../meta/Combobox.md -->

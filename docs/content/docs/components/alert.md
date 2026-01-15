@@ -3,12 +3,12 @@
 A prominent message used to communicate important information, warnings, or status updates to the user.
 
 ## Themes
-<ComponentPreview name="alert-themes" css="grid grid-cols-2" />
+<ComponentPreview name="Alert-Themes" css="grid grid-cols-2" />
 
 ## Controlled state
-<ComponentPreview name="alert-controlled" css="grid" />
+<ComponentPreview name="Alert-Controlled" css="grid" />
 
 ## Slots Example
-<ComponentPreview name="alert-slots" css='grid' />
+<ComponentPreview name="Alert-Slots" css='grid' />
 
 <!-- @include: ../../../meta/Alert.md -->

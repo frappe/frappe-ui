@@ -3,12 +3,12 @@
 Allows selecting multiple options from a list with ease. Supports custom content, images, and convenient controls like “Select All” or “Clear All.”
 
 ## Default
-<ComponentPreview name="multiselect-example" />
+<ComponentPreview name="Multiselect-Example" />
 
 ## Option Slot
-<ComponentPreview name="multiselect-options" />
+<ComponentPreview name="Multiselect-Options" />
 
 ## Footer Slot
-<ComponentPreview name="multiselect-footer" />
+<ComponentPreview name="Multiselect-Footer" />
 
 <!-- @include: ../../../meta/MultiSelect.md -->
