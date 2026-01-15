@@ -27,12 +27,23 @@ img.ProseMirror-selectednode {
   outline: 2px solid var(--outline-gray-2);
 }
 
+.table-of-contents-node {
+  padding: 0 10px;
+}
+.table-of-contents-node li p {
+  width: fit-content;
+  padding: 0 3px;
+  border-radius: 4px;
+}
+
+.table-of-contents-node li p:hover {
+  background-color: var(--surface-gray-2);
+}
+
 .table-of-contents-node.ProseMirror-selectednode {
   outline: 2px solid var(--outline-gray-2);
   outline-offset: 2px;
   border-radius: 4px;
-  padding: 2.5px;
-  margin-top: 10px;
 }
 
 .ProseMirror ul[data-type='taskList'] {

@@ -1,12 +1,19 @@
 <template>
-  <NodeViewWrapper class="table-of-contents-node" contenteditable="false">
-    <div v-if="anchorTree.length === 0" class="text-sm text-ink-gray-5 italic">
-      No headings found in this document.
+  <NodeViewWrapper class="table-of-contents-node group relative" contenteditable="false">
+    <div v-if="anchorTree.length === 0" class="text-sm text-ink-gray-5">
+      There are no headings in this document.
     </div>
     <ol v-else v-bind="orderedListHTMLAttrs">
       <TocRecursiveItem v-for="anchor in anchorTree" :key="anchor.id" :node="anchor"
         :ordered-attrs="orderedListHTMLAttrs" :list-attrs="listItemHTMLAttrs" :on-heading-click="scrollToHeading" />
     </ol>
+
+    <!-- Remove button -->
+    <button v-if="isEditable" @click="removeNode"
+      class="absolute top-2 right-2 bg-black/65 hover:bg-black/80 text-ink-gray-4 hover:text-ink-white p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+      title="Remove table of contents">
+      <LucideX class="size-4" />
+    </button>
   </NodeViewWrapper>
 </template>
 
@@ -42,6 +49,7 @@ type AnchorNode = HeadingAnchor & {
 
 const anchors = ref<HeadingAnchor[]>([])
 const anchorTree = computed(() => buildAnchorTree(anchors.value))
+const isEditable = ref(false)
 
 const orderedListHTMLAttrs = computed(
   () => getExtensionHTMLAttributes('orderedList') ?? {},
@@ -49,6 +57,15 @@ const orderedListHTMLAttrs = computed(
 const listItemHTMLAttrs = computed(
   () => getExtensionHTMLAttributes('listItem') ?? {},
 )
+
+const removeNode = () => {
+  if (!props.editor || !isEditable.value) return
+
+  const pos = props.getPos()
+  const tr = props.editor.view.state.tr
+  tr.delete(pos, pos + props.node.nodeSize)
+  props.editor.view.dispatch(tr)
+}
 
 const scrollToHeading = (heading: HeadingAnchor) => {
   if (!props.editor) {
@@ -107,11 +124,9 @@ const scrollToHeading = (heading: HeadingAnchor) => {
 
     editorContainer.scrollTo({
       top: Math.max(0, elementTopRelativeToContainer - 20),
-      behavior: 'smooth',
     })
   } else if (element) {
     element.scrollIntoView({
-      behavior: 'smooth',
       block: 'start',
       inline: 'nearest',
     })
@@ -177,11 +192,9 @@ const TocRecursiveItem = defineComponent({
           ]
             .filter(Boolean)
             .join(' '),
-          style: { cursor: 'pointer' },
-          onClick: handleClick,
         },
         [
-          h('p', { style: { margin: 0 } }, props.node.textContent),
+          h('p', { style: { margin: 0, cursor: 'pointer', }, onClick: handleClick, }, props.node.textContent),
           props.node.children?.length
             ? h(
               'ol',
@@ -359,6 +372,8 @@ watch(
 onMounted(() => {
   nextTick(() => {
     if (!props.editor || !props.node) return
+
+    isEditable.value = props.editor.isEditable
 
     updateAnchors()
     props.editor.on('update', updateAnchors)
