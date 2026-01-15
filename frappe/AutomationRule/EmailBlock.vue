@@ -114,7 +114,7 @@ const via = [
   { label: 'Template', value: 'template' },
 ]
 // will come from prop config
-const templateDoctype = 'HD Canned Response'
+const templateDoctype = 'Email Template'
 </script>
 
 <style scoped></style>

@@ -35,6 +35,7 @@ const automations = createListResource({
   doctype: 'Automation Rule',
   fields: ['name', 'enabled'],
   auto: true,
+  orderBy: 'modified desc',
 })
 </script>
 

@@ -86,15 +86,29 @@ const dependencyLabel = computed(() => {
   return _automationName.value
 })
 
+//     | 'Minutes After'
+// | 'Minutes Before'
+// | 'Days After'
+// | 'Days Before'
+
 const eventMap = {
   created: 'On Creation',
   updated: 'On Update',
   time: 'Timer',
+  'Minutes Before': 'Minutes Before',
+  'Minutes After': 'Minutes After',
+  'Days Before': 'Days Before',
+  'Days After': 'Days After',
 }
+
 const reverseEventMap = {
   'On Creation': 'created',
   'On Update': 'updated',
   Timer: 'time',
+  'Minutes Before': 'Minutes Before',
+  'Minutes After': 'Minutes After',
+  'Hours Before': 'Hours Before',
+  'Hours After': 'Hours After',
 }
 
 const state = reactive({
@@ -109,7 +123,6 @@ const state = reactive({
 })
 
 async function handleSubmit(): Promise<void> {
-  console.log(state.rule)
   if (isNew.value) {
     await createAutomation()
   } else {
@@ -171,6 +184,8 @@ function prepareDoc() {
     doctype_event: eventMap[state.eventType],
     rule: parseRule(),
     enabled: state.enabled,
+    time_field: state.timeField,
+    time_offset: state.timerOffset,
   }
 }
 
@@ -209,6 +224,8 @@ const resource = createResource({
     const [presets, rule] = handleRule(data.rule)
     state.presets = presets
     state.rule = rule
+    state.timeField = data.time_field
+    state.timerOffset = data.time_offset
   },
 })
 
