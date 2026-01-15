@@ -20,7 +20,7 @@ const tabs = [
 
 <template>
   <div class="grid gap-5 not-prose">
-    <Tabs :tabs="tabs" v-model="state" class="[&>[role=tablist]]:px-0">
+    <Tabs :tabs="tabs" v-model="state" class="[&>[role=tablist]]:border-0 [&>[role=tablist]]:gap-4 [&>[role=tablist]]:px-0">
       <template #tab-panel="{ tab }">
         <div
           v-if="tab.label === 'Preview'"
