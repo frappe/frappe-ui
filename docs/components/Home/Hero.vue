@@ -30,7 +30,7 @@ import pkgJson from '../../../package.json'
           </template>
         </Button>
 
-        <Button href="/docs/components" as='a' size='md'> Show Components </Button>
+        <Button href="/docs/components/button" as='a' size='md'> Show Components </Button>
       </div>
     </div>
   </div>
