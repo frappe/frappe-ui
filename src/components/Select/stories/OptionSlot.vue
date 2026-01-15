@@ -49,7 +49,7 @@ const activeImg = computed(
 
 <template>
   <Select :options="options" v-model="value">
-    <template #prefix>
+    <template #prefix v-if='activeImg'>
       <Avatar size="sm" :image="activeImg" />
     </template>
     <template #option="{ option }">
