@@ -74,6 +74,7 @@ export function createDocumentResource(options, vm) {
     get: createResource(
       {
         url: defaultDocGetUrl,
+        method: 'GET',
         makeParams() {
           return {
             doctype: out.doctype,
