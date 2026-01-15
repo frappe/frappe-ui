@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import LucideShield from "~icons/lucide/shield-alert";
-import Button from "@/srcomponents/Button/Button.vue";
 
 type BorderRadiusToken = {
   name: string;
@@ -23,7 +21,7 @@ const data = props.data.slice(0, props.data.length - 1);
     >
       <div class="text-sm justify-between flex">
         <span class="font-medium">
-          {{ radius.name }}
+          {{ 'rounded-' + radius.name }}
         </span>
         <span class="ml-1 text-xs text-ink-gray-4">
           {{ radius.value }}

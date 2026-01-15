@@ -12,6 +12,7 @@ const props = defineProps({
 const activeTab = ref(0);
 
 const tabs = [
+	{ label: "Text Color" },
   { label: "Font Size" },
   { label: "Font Weight" },
   { label: "Letter Spacing" },
@@ -29,6 +30,27 @@ const para =
 <template>
   <div class="grid gap-3">
     <Tabs :tabs v-model="activeTab" class="[&>div]:!px-1 rounded" />
+
+    <template v-if='activeTabLabel === "Text Color"'>
+      <div class="grid grid-cols-4 gap-x-4 gap-y-10">
+        <template v-for="color in data.txtColors" :key="color.name">
+          <span
+            v-if="!color.value"
+            class="capitalize col-span-full font-semibold text-xl"
+          >
+            {{ color.name }}
+          </span>
+
+          <div v-else class="grid gap-2">
+            <span :style='{ color: color.value, fontSize: "50px" }'>
+              Aa
+            </span>
+            <span>{{ color.name }}</span>
+            <span class="text-sm text-ink-gray-5">{{ color.value }}</span>
+          </div>
+        </template>
+      </div>
+    </template>
 
     <template v-if='activeTabLabel === "Font Size"'>
       <div

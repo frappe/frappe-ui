@@ -12,9 +12,7 @@ const classNames = [
 <template>
   <div class="grid grid-cols-3 gap-6 mt-10">
     <div v-for="item in classNames" class="grid gap-3">
-      <span>
-        Shadow : {{ item.split("-")[1] }}
-      </span>
+      <span>{{ item }} </span>
 
       <div
         :class="item"

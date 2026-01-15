@@ -42,19 +42,14 @@ const list = [
         link: "/docs/design-system/background-color",
       },
       {
-        text: "Text Color",
-        icon: LucideBaseline,
-        link: "/docs/design-system/text-color",
-      },
-      {
         text: "Border Color",
         icon: LucideSquare,
         link: "/docs/design-system/border-color",
       },
       {
-        text: "Font Design",
+        text: "Text Design",
         icon: LucideCase,
-        link: "/docs/design-system/fonts",
+        link: "/docs/design-system/text",
       },
       {
         text: "Drop Shadow",

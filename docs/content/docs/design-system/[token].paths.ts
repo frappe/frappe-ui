@@ -114,8 +114,8 @@ export default {
       { params: { token: 'border-color', data: borderColors } },
       {
         params: {
-          token: 'fonts',
-          data: { fontSize, fontWeight, letterSpacing, lineHeight },
+          token: 'text',
+          data: { fontSize, fontWeight, letterSpacing, lineHeight, txtColors },
         },
       },
       { params: { token: 'drop-shadow' } },

@@ -19,7 +19,7 @@ const props = defineProps({
           Aa
         </span>
         <span>{{ color.name }}</span>
-        <span class="text-sm text-ink-gray-3">{{ color.value }}</span>
+        <span class="text-sm text-ink-gray-5">{{ color.value }}</span>
       </div>
     </template>
   </div>
