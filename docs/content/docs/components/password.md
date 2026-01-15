@@ -4,6 +4,6 @@ Provides a secure input for entering passwords. Supports visibility toggling and
 
 ## Example
 
-<ComponentPreview name="Password-Example"  />
+<ComponentPreview name="Password-Example" css='justify-center !py-20'   />
 
 <!-- @include: ../../../meta/Password.md -->

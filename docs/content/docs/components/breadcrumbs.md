@@ -4,10 +4,10 @@ A navigation aid that shows the user’s current location within a hierarchy and
 
 ## Example
 
-<ComponentPreview name="Breadcrumbs-Example" />
+<ComponentPreview name="Breadcrumbs-Example" css='justify-center !py-20'/>
 
 ## Prefix slot
 
-<ComponentPreview name="Breadcrumbs-Slots" />
+<ComponentPreview name="Breadcrumbs-Slots" css='justify-center !py-20'/>
 
 <!-- @include: ../../../meta/Breadcrumbs.md -->

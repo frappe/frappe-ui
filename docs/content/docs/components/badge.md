@@ -4,7 +4,7 @@ A small label used to highlight status, counts, or metadata associated with an e
 
 ## Variants
 
-<ComponentPreview name="Badge-Variants" />
+<ComponentPreview name="Badge-Variants"  />
 
 ## Themes
 

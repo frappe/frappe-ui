@@ -22,7 +22,7 @@ const { frontmatter } = useData();
   </div>
 
   <template v-else>
-    <div class="grid grid-cols-[auto_1fr]">
+    <div class="grid lg:grid-cols-[auto_1fr]">
       <Sidebar class="hidden lg:flex" />
 
       <div class="w-full">

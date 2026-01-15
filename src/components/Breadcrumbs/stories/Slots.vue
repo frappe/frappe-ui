@@ -18,7 +18,7 @@ import LucideView from '~icons/lucide/user-star'
     ]"
   >
     <template #prefix="{ item }">
-      <component :is="item.icon" class="size-4 mr-1" />
+      <component :is="item.icon" class="size-4 mx-2" />
     </template>
   </Breadcrumbs>
 </template>
