@@ -1,14 +1,21 @@
 ---
 nextprev: false
 ---
-
 <script setup>
-import ComponentGroups from '@/components/Home/ComponentGroups.vue'
+
+import { useData } from 'vitepress'
+const componentList = useData().theme.value.componentList
+
 </script>
 
 
-# Component groups
+# Components
 <br/>
 
 
-<ComponentGroups/>
+<section class='grid grid-cols-3 gap-7 gap-x-3'>
+<a v-for="component in componentList" :key="component" :href="'/docs/components/'+ component.toLowerCase()"
+        class='no-underline'>
+{{ component}}   
+</a>
+</section>

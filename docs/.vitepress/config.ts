@@ -65,7 +65,7 @@ export default defineConfig({
   ],
 
   themeConfig: {
-    sidebarLinks: getComponentItems(),
+    componentList: getComponentItems(),
     outline: [2, 3],
     logo: '/logo.svg',
     search: { provider: 'local' },

@@ -112,10 +112,12 @@ export default {
       { params: { token: 'background-color', data: bgColors } },
       { params: { token: 'text-color', data: txtColors } },
       { params: { token: 'border-color', data: borderColors } },
-      { params: { token: 'font-size', data: fontSize } },
-      { params: { token: 'font-weight', data: fontWeight } },
-      { params: { token: 'letter-spacing', data: letterSpacing } },
-      { params: { token: 'line-height', data: lineHeight } },
+      {
+        params: {
+          token: 'fonts',
+          data: { fontSize, fontWeight, letterSpacing, lineHeight },
+        },
+      },
       { params: { token: 'drop-shadow' } },
       { params: { token: 'border-radius', data: borderRadius } },
     ]

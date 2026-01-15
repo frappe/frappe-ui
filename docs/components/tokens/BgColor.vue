@@ -13,11 +13,12 @@ const formatColor = (color) => {
 </script>
 
 <template>
-	<p class='text-bsae'>
-	Background colors in Frappe UI are prefixed with "surface", for example: surface-gray2
-	<br/>
-	classes would be: bg-surface-gray-2, bg-surface-cards etc 
-	</p>
+  <p class="text-bsae">
+    Background colors in Frappe UI are prefixed with "surface", for example:
+    surface-gray2
+    <br />
+    classes would be: bg-surface-gray-2, bg-surface-cards etc
+  </p>
 
   <div class="flex flex-wrap gap-5">
     <template v-for="color in data" :key="color.name">
@@ -28,11 +29,13 @@ const formatColor = (color) => {
       <div class="grid gap-3" v-else>
         <div
           v-if="color.value"
-          class="rounded shadow-lg border size-20"
+          class="rounded size-20"
           :style="{ backgroundColor: color.value }"
         >
         </div>
-        <span class="whitespace-nowrap bg-surface-gray-2 border-2  p-1 py-2  text-sm rounded text-center w-20">
+        <span
+          class="whitespace-nowrap bg-surface-gray-2 p-1 py-1.5 text-sm rounded-sm text-center w-20"
+        >
           {{ formatColor(color.name) }}
         </span>
       </div>

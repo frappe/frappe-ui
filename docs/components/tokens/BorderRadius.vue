@@ -70,18 +70,4 @@ const data = props.data.slice(0, props.data.length - 1);
       </div>
     </div>
   </div>
-
-  <p>Rounded-full looks good only for buttons or avatars</p>
-
-  <div class="flex items-center gap-3">
-    <Button variant="solid" class="!rounded-full px-5" size="lg">
-      Button
-    </Button>
-
-    <Button size="lg" class="!rounded-full" theme="red">
-      <template #icon>
-        <LucideShield class="size-5" />
-      </template>
-    </Button>
-  </div>
 </template>

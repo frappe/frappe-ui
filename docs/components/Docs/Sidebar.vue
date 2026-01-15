@@ -1,142 +1,127 @@
 <script setup lang="ts">
-import { state } from '../../state'
-import { useData, useRoute } from 'vitepress'
+import { state } from "../../state";
+import { useData, useRoute } from "vitepress";
 
-import LucidePalette from '~icons/lucide/palette'
-import LucideRows from '~icons/lucide/rows-3'
-import LucideJson from '~icons/lucide/braces'
-import LucideSquare from '~icons/lucide/square'
-import LucideDb from '~icons/lucide/database-zap'
-import LucideSettings from '~icons/lucide/settings'
-import LucideBaseline from '~icons/lucide/baseline'
-import LucideCase from '~icons/lucide/case-sensitive'
-import LucideBlend from '~icons/lucide/blend'
-import LucideRadius from '~icons/lucide/radius'
-import ChevronRight from '~icons/lucide/chevron-right'
-import LucideBox from '~icons/lucide/box'
+import LucidePalette from "~icons/lucide/palette";
+import LucideRows from "~icons/lucide/rows-3";
+import LucideJson from "~icons/lucide/braces";
+import LucideSquare from "~icons/lucide/square";
+import LucideDb from "~icons/lucide/database-zap";
+import LucideSettings from "~icons/lucide/settings";
+import LucideBaseline from "~icons/lucide/baseline";
+import LucideCase from "~icons/lucide/case-sensitive";
+import LucideBlend from "~icons/lucide/blend";
+import LucideRadius from "~icons/lucide/radius";
+import ChevronRight from "~icons/lucide/chevron-right";
+import LucideBox from "~icons/lucide/box";
 
-const componentList = useData().theme.value.sidebarLinks
+const componentList = useData().theme.value.componentList;
 const componentItems = componentList.map((name) => ({
   text: name,
   icon: LucideBox,
   link: `/docs/components/${name.toLowerCase()}`,
-}))
+}));
 
 const list = [
   {
-    text: 'Introduction',
-    link: '/docs/introduction',
+    text: "Introduction",
+    link: "/docs/introduction",
   },
   {
-    text: 'Getting Started',
-    link: '/docs',
-  },
-
-  {
-    text: 'Espresso Design System',
-    collapsed: true,
-    items: [
-      {
-        text: 'Background Color',
-        icon: LucidePalette,
-        link: '/docs/design-system/background-color',
-      },
-      {
-        text: 'Text Color',
-        icon: LucideBaseline,
-        link: '/docs/design-system/text-color',
-      },
-      {
-        text: 'Border Color',
-        icon: LucideSquare,
-        link: '/docs/design-system/border-color',
-      },
-      {
-        text: 'Font Size',
-        icon: LucideCase,
-        link: '/docs/design-system/font-size',
-      },
-      {
-        text: 'Font Weight',
-        icon: LucideCase,
-        link: '/docs/design-system/font-weight',
-      },
-      {
-        text: 'Letter Spacing',
-        icon: LucideCase,
-        link: '/docs/design-system/letter-spacing',
-      },
-      {
-        text: 'Line Height',
-        icon: LucideCase,
-        link: '/docs/design-system/line-height',
-      },
-      {
-        text: 'Drop Shadow',
-        icon: LucideBlend,
-        link: '/docs/design-system/drop-shadow',
-      },
-      {
-        text: 'Border Radius',
-        icon: LucideRadius,
-        link: '/docs/design-system/border-radius',
-      },
-    ],
+    text: "Getting Started",
+    link: "/docs",
   },
 
   {
-    text: 'Data Fetching',
+    text: "Espresso Design System",
     collapsed: false,
     items: [
       {
-        text: 'Resource',
-        icon: LucideDb,
-        link: '/docs/data-fetching/resource',
+        text: "Background Color",
+        icon: LucidePalette,
+        link: "/docs/design-system/background-color",
       },
       {
-        text: 'List Resource',
-        icon: LucideRows,
-        link: '/docs/data-fetching/list-resource',
+        text: "Text Color",
+        icon: LucideBaseline,
+        link: "/docs/design-system/text-color",
       },
       {
-        text: 'Document Resource',
-        icon: LucideJson,
-        link: '/docs/data-fetching/document-resource',
+        text: "Border Color",
+        icon: LucideSquare,
+        link: "/docs/design-system/border-color",
+      },
+      {
+        text: "Font Design",
+        icon: LucideCase,
+        link: "/docs/design-system/fonts",
+      },
+      {
+        text: "Drop Shadow",
+        icon: LucideBlend,
+        link: "/docs/design-system/drop-shadow",
+      },
+      {
+        text: "Border Radius",
+        icon: LucideRadius,
+        link: "/docs/design-system/border-radius",
       },
     ],
   },
 
   {
-    text: 'Components',
+    text: "Components",
     collapsed: false,
     items: componentItems,
   },
 
   {
-    text: 'Other',
+    text: "Data Fetching",
+    collapsed: false,
     items: [
       {
-        text: 'Utilities',
-        icon: LucideSettings,
-        link: '/docs/other/utilities',
+        text: "Resource",
+        icon: LucideDb,
+        link: "/docs/data-fetching/resource",
       },
       {
-        text: 'Directives',
-        icon: LucideSettings,
-        link: '/docs/other/directives',
+        text: "List Resource",
+        icon: LucideRows,
+        link: "/docs/data-fetching/list-resource",
+      },
+      {
+        text: "Document Resource",
+        icon: LucideJson,
+        link: "/docs/data-fetching/document-resource",
       },
     ],
   },
-]
 
-state.sidebarList = list
+  {
+    text: "Other",
+    items: [
+      {
+        text: "Utilities",
+        icon: LucideSettings,
+        link: "/docs/other/utilities",
+      },
+      {
+        text: "Directives",
+        icon: LucideSettings,
+        link: "/docs/other/directives",
+      },
+    ],
+  },
+];
+
+state.sidebarList = list;
 
 const activeLink = (link: string) =>
   useRoute().path === link
-    ? 'bg-surface-white dark:bg-surface-gray-1 shadow-sm'
-    : 'text-ink-gray-8'
+    ? "bg-surface-white dark:bg-surface-gray-1 shadow-sm"
+    : "text-ink-gray-8";
 
-const linkClass = 'p-2 rounded'
+const linkClass = "p-2 rounded";
 </script>
 
 <template>
@@ -159,11 +144,13 @@ const linkClass = 'p-2 rounded'
         <a
           v-if="!item.items"
           :href="item.link"
-          :class="[
-            linkClass,
-            activeLink(item.link),
-            list[i + 1].items ? 'mb-6' : '',
-          ]"
+          :class='
+            [
+              linkClass,
+              activeLink(item.link),
+              list[i + 1].items ? "mb-6" : "",
+            ]
+          '
         >
           {{ item.text }}
         </a>

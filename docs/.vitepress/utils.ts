@@ -4,9 +4,7 @@ import path from 'node:path'
 const components_path = path.resolve(__dirname, '../../src/components/')
 
 export const getComponentItems = () => {
-  const entries = fs.readdirSync(components_path, {
-    withFileTypes: true,
-  })
+  const entries = fs.readdirSync(components_path, { withFileTypes: true })
 
   const items = []
 
@@ -15,7 +13,6 @@ export const getComponentItems = () => {
 
     const storiesPath = path.join(components_path, entry.name, 'stories')
 
-    // single filesystem check — very cheap
     if (!fs.existsSync(storiesPath)) continue
 
     items.push(entry.name)
