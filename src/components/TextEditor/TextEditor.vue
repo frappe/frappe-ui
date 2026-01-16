@@ -65,12 +65,12 @@ import TextEditorFloatingMenu from './TextEditorFloatingMenu.vue'
 import EmojiExtension from './extensions/emoji/emoji-extension'
 import SlashCommands from './extensions/slash-commands/slash-commands-extension'
 import { ContentPasteExtension } from './extensions/content-paste-extension'
-import { TagNode, TagExtension } from './extensions/tag/tag-extension'
 import { Heading } from './extensions/heading/heading'
 import { ImageGroup } from './extensions/image-group/image-group-extension'
 import { ExtendedCode, ExtendedCodeBlock } from './extensions/code-block'
 import { useFileUpload } from '../../utils/useFileUpload'
 import { TextEditorEmits, TextEditorProps } from './types'
+import { getTagExtensions } from './extensions/tag'
 
 function defaultUploadFunction(file: File) {
   // useFileUpload is frappe specific
@@ -91,10 +91,9 @@ const props = withDefaults(defineProps<TextEditorProps>(), {
   extensions: () => [],
   starterkitOptions: () => ({}),
   mentions: null,
-  tags: () => [],
+  tags: null,
 })
 
-const model = defineModel()
 const emit = defineEmits<TextEditorEmits>()
 
 const editor = ref<Editor | null>(null)
@@ -120,12 +119,10 @@ const editorProps = computed(() => {
 })
 
 watch(
-  () => [props.content, model.value],
-  ([content, modelVal]) => {
-    const val = content || modelVal
-
+  () => props.content,
+  (val) => {
     if (editor.value) {
-      const currentHTML = editor.value.getHTML()
+      let currentHTML = editor.value.getHTML()
       if (currentHTML !== val) {
         editor.value.commands.setContent(val)
       }
@@ -156,7 +153,7 @@ watch(
 
 onMounted(() => {
   editor.value = new Editor({
-    content: props.content || model.value || null,
+    content: props.content || null,
     editorProps: editorProps.value,
     editable: props.editable,
     autofocus: props.autofocus,
@@ -229,10 +226,7 @@ onMounted(() => {
         ),
       EmojiExtension,
       SlashCommands,
-      TagNode,
-      TagExtension.configure({
-        tags: () => props.tags,
-      }),
+      ...getTagExtensions(() => props.tags),
       ContentPasteExtension.configure({
         enabled: true,
         uploadFunction: props.uploadFunction || defaultUploadFunction,
@@ -240,9 +234,7 @@ onMounted(() => {
       ...(props.extensions || []),
     ],
     onUpdate: ({ editor }) => {
-      const html = editor.getHTML()
-      emit('change', html)
-      model.value = html
+      emit('change', editor.getHTML())
     },
     onTransaction: ({ editor }) => {
       emit('transaction', editor)

@@ -1,5 +1,6 @@
 // components dependent on frappe backend
 export * from './Link'
+export { default as Filter } from './Filter/Filter.vue'
 
 // help components
 export { default as HelpModal } from './Help/HelpModal.vue'
@@ -26,4 +27,5 @@ export { useOnboarding } from './Onboarding/onboarding.js'
 export { showHelpModal, minimize } from './Help/help.js'
 export { showHelpCenter } from './HelpCenter/helpCenter.js'
 
-export { default as Filter } from './Filter/Filter.vue'
+// plugins
+export { default as telemetryPlugin, useTelemetry } from './telemetry.ts'

@@ -35,6 +35,7 @@ export interface PopoverProps {
 
   /** Whether the popover width should match the target element */
   matchTargetWidth?: boolean
+  offset?: number
 }
 
 export interface PopoverEmits {

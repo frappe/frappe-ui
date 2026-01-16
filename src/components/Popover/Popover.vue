@@ -4,6 +4,7 @@
       <div
         ref="anchorRef"
         :class="['flex', $attrs.class]"
+        :style="($attrs.style as StyleValue)"
         @mouseover="onMouseover"
         @mouseleave="onMouseleave"
       >
@@ -23,6 +24,7 @@
       <PopoverContent
         :side="placementSide"
         :align="placementAlign"
+        :sideOffset="offset"
         :style="{
           minWidth: matchTargetWidth
             ? 'var(--reka-popover-trigger-width)'
@@ -62,8 +64,7 @@
 </template>
 
 <script setup lang="ts">
-import type { PopoverEmits } from "./types";
-import { computed, ref, onUnmounted } from 'vue'
+import { computed, ref, onUnmounted, type StyleValue } from 'vue'
 import {
   PopoverAnchor,
   PopoverContent,

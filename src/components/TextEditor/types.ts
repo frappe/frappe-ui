@@ -48,7 +48,7 @@ export interface TextEditorProps {
   mentions?: ConfigureMentionOptions
 
   /** Tag / hashtag configuration */
-  tags?: any[]
+  tags?: any[] | null
 
   /** Async file upload handler (used for images, files, etc.) */
   uploadFunction?: (file: File) => Promise<UploadedFile>
