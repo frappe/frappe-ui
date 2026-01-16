@@ -53,7 +53,7 @@ watch(route, setHeadings);
 
 <template>
   <aside
-    class="sticky top-24 hidden lg:flex flex-col h-fit mt-10 leading-relaxed"
+    class="sticky top-24 hidden lg:flex flex-col h-fit mt-10 leading-relaxed w-[200px]"
     :class='{ "invisible": headings.length == 0 }'
   >
     <span class="font-medium whitespace-nowrap pl-3">On this page</span>
