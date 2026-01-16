@@ -49,20 +49,16 @@ const list = [
         link: '/docs/design-system/background-color',
       },
       {
-        text: 'Text Color',
+        text: 'Text Design',
         icon: LucideBaseline,
-        link: '/docs/design-system/text-color',
+        link: '/docs/design-system/text',
       },
       {
         text: 'Border Color',
         icon: LucideSquare,
         link: '/docs/design-system/border-color',
       },
-      {
-        text: 'Font Design',
-        icon: LucideCase,
-        link: '/docs/design-system/fonts',
-      },
+
       {
         text: 'Drop Shadow',
         icon: LucideBlend,
