@@ -180,6 +180,12 @@ export default {
     isActive: (editor) => false,
     component: defineAsyncComponent(() => import('./InsertImage.vue')),
   },
+  Attach: {
+    label: 'Attach',
+    icon: defineAsyncComponent(() => import('./icons/attachment.vue')),
+    isActive: (editor) => false,
+    component: defineAsyncComponent(() => import('./InsertAttachment.vue')),
+  },
   Video: {
     label: 'Video',
     icon: Video,
