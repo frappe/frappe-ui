@@ -1,0 +1,33 @@
+name: Component Tests
+
+on:
+  pull_request:
+  push:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+jobs:
+  component-test:
+    runs-on: ubuntu-latest
+    name: Component Tests (Cypress)
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Run Component Tests
+        uses: cypress-io/github-action@v6
+        with:
+          component: true
+          build: 'yarn build'
+          start: 'yarn dev'
