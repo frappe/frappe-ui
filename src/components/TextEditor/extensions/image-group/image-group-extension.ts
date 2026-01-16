@@ -33,7 +33,7 @@ declare module '@tiptap/core' {
       /**
        * Group selected images into an image group
        */
-      groupSelectedImages: (columns?: number) => ReturnType
+      groupSelectedImages: () => ReturnType
     }
   }
 }
@@ -116,14 +116,14 @@ export const ImageGroup = Node.create<ImageGroupOptions>({
         },
 
       groupSelectedImages:
-        (columns = 4) =>
+        () =>
         ({ state, chain }) => {
           const { selection } = state
           const { from, to } = selection
-          
+
           // Collect all image nodes within the selection
           const images: { src: string; alt?: string; pos: number }[] = []
-          
+
           state.doc.nodesBetween(from, to, (node, pos) => {
             if (node.type.name === 'image') {
               images.push({
@@ -141,9 +141,9 @@ export const ImageGroup = Node.create<ImageGroupOptions>({
 
           // Sort by position (descending) for deletion
           const sortedImages = [...images].sort((a, b) => b.pos - a.pos)
-          
+
           // Find the position to insert the group (start of selection)
-          const insertPos = Math.min(...images.map(img => img.pos))
+          const insertPos = Math.min(...images.map((img) => img.pos))
 
           // Start a chain of commands
           let cmd = chain()
@@ -152,9 +152,9 @@ export const ImageGroup = Node.create<ImageGroupOptions>({
           sortedImages.forEach((img) => {
             const node = state.doc.nodeAt(img.pos)
             if (node) {
-              cmd = cmd.deleteRange({ 
-                from: img.pos, 
-                to: img.pos + node.nodeSize 
+              cmd = cmd.deleteRange({
+                from: img.pos,
+                to: img.pos + node.nodeSize,
               })
             }
           })
@@ -163,7 +163,7 @@ export const ImageGroup = Node.create<ImageGroupOptions>({
           cmd = cmd
             .insertContentAt(insertPos, {
               type: this.name,
-              attrs: { columns },
+              attrs: { columns: images.length },
               content: images.map((img) => ({
                 type: 'image',
                 attrs: { src: img.src, alt: img.alt },

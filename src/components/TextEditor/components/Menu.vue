@@ -189,7 +189,7 @@
   </div>
 </template>
 <script setup>
-import Popover from '../Popover/Popover.vue'
+import Popover from '../../Popover/Popover.vue'
 import { inject } from 'vue'
 
 const props = defineProps({

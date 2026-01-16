@@ -149,7 +149,7 @@ export default {
     icon: FontColor,
     isActive: (editor) =>
       editor.getAttributes('textStyle')?.color || editor.isActive('highlight'),
-    component: defineAsyncComponent(() => import('./FontColor.vue')),
+    component: defineAsyncComponent(() => import('./components/FontColor.vue')),
   },
   Blockquote: {
     label: 'Blockquote',
@@ -173,19 +173,25 @@ export default {
     label: 'Link',
     icon: Link,
     isActive: (editor) => editor.isActive('link'),
-    component: defineAsyncComponent(() => import('./InsertLink.vue')),
+    component: defineAsyncComponent(
+      () => import('./components/InsertLink.vue'),
+    ),
   },
   Image: {
     label: 'Image',
     icon: Image,
     isActive: (editor) => false,
-    component: defineAsyncComponent(() => import('./InsertImage.vue')),
+    component: defineAsyncComponent(
+      () => import('./components/InsertImage.vue'),
+    ),
   },
   Video: {
     label: 'Video',
     icon: Video,
     isActive: (editor) => false,
-    component: defineAsyncComponent(() => import('./InsertVideo.vue')),
+    component: defineAsyncComponent(
+      () => import('./components/InsertVideo.vue'),
+    ),
   },
   Iframe: {
     label: 'Embed',

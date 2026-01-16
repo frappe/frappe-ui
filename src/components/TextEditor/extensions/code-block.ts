@@ -1,7 +1,7 @@
 import { common, createLowlight } from 'lowlight'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import Code from '@tiptap/extension-code'
-import CodeBlockComponent from '../CodeBlockComponent.vue'
+import CodeBlockComponent from '../components/CodeBlockComponent.vue'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
 import { markInputRule } from '@tiptap/core'
 
@@ -106,7 +106,7 @@ export const ExtendedCode = Code.extend({
       },
     }
   },
-  
+
   addInputRules() {
     return [
       markInputRule({

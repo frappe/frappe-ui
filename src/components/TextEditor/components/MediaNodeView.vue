@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
-import LoadingIndicator from '../../../LoadingIndicator.vue'
-import Tooltip from '../../../Tooltip/Tooltip.vue'
-import { ErrorMessage } from '../../../ErrorMessage'
+import LoadingIndicator from '../../LoadingIndicator.vue'
+import Tooltip from '../../Tooltip/Tooltip.vue'
+import { ErrorMessage } from '../../ErrorMessage'
 import LucideAlignLeft from '~icons/lucide/align-left'
 import LucideAlignCenter from '~icons/lucide/align-center'
 import LucideAlignRight from '~icons/lucide/align-right'
@@ -261,201 +261,113 @@ const wrapperClasses = (float: string) => [
 </script>
 
 <template>
-  <NodeViewWrapper
-    as="div"
-    :class="node.attrs.float ? wrapperClasses(node.attrs.float) : 'my-2'"
-  >
-    <div
-      ref="containerRef"
-      class="group relative overflow-hidden not-prose rounded-[2px]"
-      :class="[
-        {
-          'ring-2 ring-outline-gray-3 ring-offset-2': selected,
-        },
-        node.attrs.align === 'center' || !node.attrs.align ? 'mx-auto' : '',
-        node.attrs.align === 'right' ? 'ml-auto mr-0' : '',
-        node.attrs.align === 'left' ? 'mr-auto ml-0' : '',
-        !node.attrs.float && 'block max-w-full',
-      ]"
-      :style="{
-        width: node.attrs.width ? `${node.attrs.width}px` : 'auto',
-      }"
-    >
+  <NodeViewWrapper as="div" :class="node.attrs.float ? wrapperClasses(node.attrs.float) : 'my-2'">
+    <div ref="containerRef" class="group relative overflow-hidden not-prose rounded-[2px]" :class="[
+      {
+        'ring-2 ring-outline-gray-3 ring-offset-2': selected,
+      },
+      node.attrs.align === 'center' || !node.attrs.align ? 'mx-auto' : '',
+      node.attrs.align === 'right' ? 'ml-auto mr-0' : '',
+      node.attrs.align === 'left' ? 'mr-auto ml-0' : '',
+      !node.attrs.float && 'block max-w-full',
+    ]" :style="{
+      width: node.attrs.width ? `${node.attrs.width}px` : 'auto',
+    }">
       <div v-if="node.attrs.src" class="relative">
-        <img
-          v-if="!isVideo"
-          ref="mediaRef"
-          class="rounded-[2px]"
-          :src="node.attrs.src"
-          :alt="node.attrs.alt || ''"
-          :width="node.attrs.width"
-          :height="node.attrs.height"
-          @click.stop="selectMedia"
-          @load="handleMediaLoaded"
-        />
-        <video
-          v-else
-          ref="mediaRef"
-          class="rounded-[2px]"
-          :src="node.attrs.src"
-          :width="node.attrs.width"
-          :height="node.attrs.height"
-          :autoplay="node.attrs.autoplay"
-          :loop="node.attrs.loop"
-          :muted="node.attrs.muted"
-          controls
-          @click.stop="selectMedia"
-          @loadedmetadata="handleMediaLoaded"
-        />
+        <img v-if="!isVideo" ref="mediaRef" class="rounded-[2px]" :src="node.attrs.src" :alt="node.attrs.alt || ''"
+          :width="node.attrs.width" :height="node.attrs.height" @click.stop="selectMedia" @load="handleMediaLoaded" />
+        <video v-else ref="mediaRef" class="rounded-[2px]" :src="node.attrs.src" :width="node.attrs.width"
+          :height="node.attrs.height" :autoplay="node.attrs.autoplay" :loop="node.attrs.loop" :muted="node.attrs.muted"
+          controls @click.stop="selectMedia" @loadedmetadata="handleMediaLoaded" />
 
-        <div
-          class="absolute top-2 right-2 items-center bg-black/65 px-1.5 py-1 gap-2 rounded group-hover:flex"
-          :class="selected && isEditable ? 'flex' : 'hidden'"
-        >
+        <div class="absolute top-2 right-2 items-center bg-black/65 px-1.5 py-1 gap-2 rounded group-hover:flex"
+          :class="selected && isEditable ? 'flex' : 'hidden'">
           <button>
-            <LucideCaptions
-              @click="toggleCaptions"
-              class="size-4"
-              :class="[showCaption ? 'text-ink-white' : 'text-ink-gray-4']"
-            />
+            <LucideCaptions @click="toggleCaptions" class="size-4"
+              :class="[showCaption ? 'text-ink-white' : 'text-ink-gray-4']" />
           </button>
-          <button
-            v-if="!node.attrs.float && !isVideo"
-            @click.stop="toggleAlignPopper"
+          <button v-if="!node.attrs.float && !isVideo" @click.stop="toggleAlignPopper"
             class="hover:text-ink-white text-ink-gray-4"
-            :class="[node.attrs.align ? 'text-ink-white' : 'text-ink-gray-4']"
-          >
+            :class="[node.attrs.align ? 'text-ink-white' : 'text-ink-gray-4']">
             <component :is="currentAlignIcon" class="size-4" />
           </button>
-          <button
-            @click.stop="toggleFloatPopper"
-            class="hover:text-ink-white text-ink-gray-4"
-            :class="[node.attrs.float ? 'text-ink-white' : 'text-ink-gray-4']"
-          >
+          <button @click.stop="toggleFloatPopper" class="hover:text-ink-white text-ink-gray-4"
+            :class="[node.attrs.float ? 'text-ink-white' : 'text-ink-gray-4']">
             <component :is="currentFloatIcon" class="size-4" />
           </button>
 
-          <div
-            ref="alignButtonRef"
-            v-if="showAlignPopper && !isVideo"
-            class="absolute top-full mt-1 right-6 bg-black/65 rounded shadow-lg px-1.5 py-1 z-50 gap-2.5 flex items-center"
-          >
+          <div ref="alignButtonRef" v-if="showAlignPopper && !isVideo"
+            class="absolute top-full mt-1 right-6 bg-black/65 rounded shadow-lg px-1.5 py-1 z-50 gap-2.5 flex items-center">
             <Tooltip text="Align left" class="h-5">
-              <button
-                @click="setAlignment('left')"
-                class="text-ink-gray-4 hover:text-ink-white"
-                :class="
-                  node.attrs.align === 'left'
-                    ? 'text-ink-white'
-                    : 'text-ink-gray-4'
-                "
-              >
+              <button @click="setAlignment('left')" class="text-ink-gray-4 hover:text-ink-white" :class="node.attrs.align === 'left'
+                ? 'text-ink-white'
+                : 'text-ink-gray-4'
+                ">
                 <LucideAlignLeft class="size-4" />
               </button>
             </Tooltip>
             <Tooltip text="Align center" class="h-5">
-              <button
-                @click="setAlignment('center')"
-                class="text-ink-gray-4 hover:text-ink-white"
-                :class="
-                  node.attrs.align === 'center'
-                    ? 'text-ink-white'
-                    : 'text-ink-gray-4'
-                "
-              >
+              <button @click="setAlignment('center')" class="text-ink-gray-4 hover:text-ink-white" :class="node.attrs.align === 'center'
+                ? 'text-ink-white'
+                : 'text-ink-gray-4'
+                ">
                 <LucideAlignCenter class="size-4" />
               </button>
             </Tooltip>
             <Tooltip text="Align right" class="h-5">
-              <button
-                @click="setAlignment('right')"
-                class="text-ink-gray-4 hover:text-ink-white"
-                :class="
-                  node.attrs.align === 'right'
-                    ? 'text-ink-white'
-                    : 'text-ink-gray-4'
-                "
-              >
+              <button @click="setAlignment('right')" class="text-ink-gray-4 hover:text-ink-white" :class="node.attrs.align === 'right'
+                ? 'text-ink-white'
+                : 'text-ink-gray-4'
+                ">
                 <LucideAlignRight class="size-4" />
               </button>
             </Tooltip>
           </div>
 
-          <div
-            v-if="showFloatPopper"
-            ref="floatButtonRef"
-            class="absolute top-full mt-1 right-0 bg-black/65 rounded shadow-lg px-1.5 py-1 z-50 gap-2.5 flex items-center"
-          >
+          <div v-if="showFloatPopper" ref="floatButtonRef"
+            class="absolute top-full mt-1 right-0 bg-black/65 rounded shadow-lg px-1.5 py-1 z-50 gap-2.5 flex items-center">
             <Tooltip text="Float left" class="h-5">
-              <button
-                @click="setFloat('left')"
-                class="text-ink-gray-4 hover:text-ink-white"
-                :class="
-                  node.attrs.float === 'left'
-                    ? 'text-ink-white'
-                    : 'text-ink-gray-4'
-                "
-              >
+              <button @click="setFloat('left')" class="text-ink-gray-4 hover:text-ink-white" :class="node.attrs.float === 'left'
+                ? 'text-ink-white'
+                : 'text-ink-gray-4'
+                ">
                 <LucideFloatLeft class="size-4" />
               </button>
             </Tooltip>
             <Tooltip text="Float right" class="h-5">
-              <button
-                @click="setFloat('right')"
-                class="text-ink-gray-4 hover:text-ink-white"
-                :class="
-                  node.attrs.float === 'right'
-                    ? 'text-ink-white'
-                    : 'text-ink-gray-4'
-                "
-              >
+              <button @click="setFloat('right')" class="text-ink-gray-4 hover:text-ink-white" :class="node.attrs.float === 'right'
+                ? 'text-ink-white'
+                : 'text-ink-gray-4'
+                ">
                 <LucideFloatRight class="size-4" />
               </button>
             </Tooltip>
             <Tooltip v-if="node.attrs.float" text="Remove float" class="h-5">
-              <button
-                @click="setFloat(null)"
-                class="text-ink-gray-4 hover:text-ink-white hover:bg-transparent"
-              >
+              <button @click="setFloat(null)" class="text-ink-gray-4 hover:text-ink-white hover:bg-transparent">
                 <LucideNoFloat class="size-4" />
               </button>
             </Tooltip>
           </div>
         </div>
 
-        <button
-          v-if="selected && isEditable"
-          class="absolute bottom-2 right-2 cursor-nw-resize bg-black/65 rounded p-1"
-          @mousedown.prevent="startResize"
-        >
+        <button v-if="selected && isEditable" class="absolute bottom-2 right-2 cursor-nw-resize bg-black/65 rounded p-1"
+          @mousedown.prevent="startResize">
           <LucideMoveDiagonal2 class="text-white size-4" />
         </button>
-        <div
-          v-if="node.attrs.loading"
-          class="inset-0 absolute flex items-center justify-center z-10"
-        >
+        <div v-if="node.attrs.loading" class="inset-0 absolute flex items-center justify-center z-10">
           <div
-            class="bg-gray-900/80 p-2 inset-0 leading-none rounded-sm flex flex-col items-center justify-center gap-2"
-          >
+            class="bg-gray-900/80 p-2 inset-0 leading-none rounded-sm flex flex-col items-center justify-center gap-2">
             <div class="flex items-center gap-2">
               <LoadingIndicator class="text-gray-100 size-4" />
-              <span class="text-gray-100"
-                >Uploading {{ isVideo ? 'video' : 'image' }}...</span
-              >
+              <span class="text-gray-100">Uploading {{ isVideo ? 'video' : 'image' }}...</span>
             </div>
           </div>
         </div>
       </div>
 
-      <input
-        v-if="(node.attrs.alt || showCaption) && !node.attrs.error"
-        v-model="caption"
+      <input v-if="(node.attrs.alt || showCaption) && !node.attrs.error" v-model="caption"
         class="w-full text-center bg-transparent text-sm text-ink-gray-6 h-7 border-none focus:ring-0 placeholder-ink-gray-4"
-        placeholder="Add caption"
-        :disabled="!isEditable"
-        @change="updateCaption"
-        @keydown="handleKeydown"
-      />
+        placeholder="Add caption" :disabled="!isEditable" @change="updateCaption" @keydown="handleKeydown" />
 
       <div v-if="node.attrs.error" class="w-full py-1.5">
         <ErrorMessage :message="`Upload Failed: ${node.attrs.error}`" />

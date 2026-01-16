@@ -4,11 +4,11 @@ import {
   mergeAttributes,
 } from '@tiptap/core'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
-import VideoNodeView from './extensions/image/ImageNodeView.vue'
+import MediaNodeView from '../components/MediaNodeView.vue'
 import { Plugin, Selection, Transaction, EditorState } from '@tiptap/pm/state'
 import { EditorView } from '@tiptap/pm/view'
 import { Node } from '@tiptap/pm/model'
-import { fileToBase64 } from '../../index'
+import { fileToBase64 } from '../../../index'
 import { UploadedFile } from '../../../utils/useFileUpload'
 
 export interface VideoExtensionOptions {
@@ -156,7 +156,7 @@ export const VideoExtension = NodeExtension.create<VideoExtensionOptions>({
   },
 
   addNodeView() {
-    return VueNodeViewRenderer(VideoNodeView)
+    return VueNodeViewRenderer(MediaNodeView)
   },
 
   addCommands() {

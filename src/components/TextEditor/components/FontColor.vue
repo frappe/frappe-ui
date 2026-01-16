@@ -48,8 +48,8 @@
   </Popover>
 </template>
 <script>
-import Popover from '../Popover/Popover.vue'
-import { Tooltip } from '../../index'
+import Popover from '../../Popover/Popover.vue'
+import { Tooltip } from '../../../index'
 
 export default {
   name: 'FontColor',

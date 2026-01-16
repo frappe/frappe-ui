@@ -4,7 +4,7 @@ import {
   mergeAttributes,
 } from '@tiptap/core'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
-import ImageNodeView from './ImageNodeView.vue'
+import MediaNodeView from '../../components/MediaNodeView.vue'
 import { Plugin, Selection, Transaction, EditorState } from '@tiptap/pm/state'
 import { EditorView } from '@tiptap/pm/view'
 import { Node } from '@tiptap/pm/model'
@@ -156,7 +156,7 @@ export const ImageExtension = NodeExtension.create<ImageExtensionOptions>({
   },
 
   addNodeView() {
-    return VueNodeViewRenderer(ImageNodeView)
+    return VueNodeViewRenderer(MediaNodeView)
   },
 
   addOptions() {

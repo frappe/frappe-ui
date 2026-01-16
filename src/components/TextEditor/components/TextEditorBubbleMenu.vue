@@ -1,38 +1,37 @@
 <template>
-  <Menu v-if="fixedMenuButtons" :buttons="fixedMenuButtons" />
+  <BubbleMenu v-if="bubbleMenuButtons" class="bubble-menu rounded-md z-[100]"
+    :class="bubbleMenuButtons.length > 1 && 'shadow-sm'" :editor="editor" v-bind="options">
+    <Menu class="rounded" :class="bubbleMenuButtons.length > 1 && 'shadow-lg'" :buttons="bubbleMenuButtons" />
+  </BubbleMenu>
 </template>
 <script>
+import { BubbleMenu } from '@tiptap/vue-3/menus'
+import { createEditorButton } from '../utils'
 import Menu from './Menu.vue'
-import { createEditorButton } from './utils'
 
 export default {
-  name: 'TextEditorFixedMenu',
-  props: ['buttons'],
-  components: { Menu },
+  name: 'TextEditorBubbleMenu',
+  props: ['buttons', 'options'],
+  components: { BubbleMenu, Menu },
   inject: ['editor'],
   computed: {
-    fixedMenuButtons() {
+    bubbleMenuButtons() {
       if (!this.buttons) return false
+
       let buttons
       if (Array.isArray(this.buttons)) {
-        buttons = [...this.buttons]
+        buttons = this.buttons
       } else {
         buttons = [
           'Paragraph',
-          [
-            'Heading 1',
-            'Heading 2',
-            'Heading 3',
-            'Heading 4',
-            'Heading 5',
-            'Heading 6',
-          ],
+          'Heading 2',
+          'Heading 3',
           'Separator',
           'Bold',
           'Italic',
           'Strikethrough',
-          'Link',
           'FontColor',
+          'Link',
           'Separator',
           'Bullet List',
           'Numbered List',
@@ -46,9 +45,6 @@ export default {
           'Video',
           'Blockquote',
           'Code',
-          'Iframe',
-          'Separator',
-          'Horizontal Rule',
           [
             'InsertTable',
             'AddColumnBefore',
@@ -64,11 +60,6 @@ export default {
             'ToggleHeaderCell',
             'DeleteTable',
           ],
-          'Separator',
-          'TableOfContents',
-          'Separator',
-          'Undo',
-          'Redo',
         ]
       }
       return buttons.map(createEditorButton)
