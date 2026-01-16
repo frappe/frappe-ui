@@ -966,6 +966,32 @@
       "markdownFile": null
     },
     {
+      "id": "src-components-spinner-spinner-story-vue",
+      "title": "Spinner",
+      "layout": {
+        "type": "grid",
+        "width": 300
+      },
+      "docsOnly": false,
+      "variants": [
+        {
+          "id": "src-components-spinner-spinner-story-vue-0",
+          "title": "class='w-4'"
+        },
+        {
+          "id": "src-components-spinner-spinner-story-vue-1",
+          "title": "class='w-8'"
+        }
+      ],
+      "relativePath": "src/components/Spinner/Spinner.story.vue",
+      "supportPluginId": "vue3",
+      "treePath": [
+        "Spinner"
+      ],
+      "virtual": false,
+      "markdownFile": null
+    },
+    {
       "id": "src-components-switch-switch-story-vue",
       "title": "Switch",
       "layout": {
@@ -1003,32 +1029,6 @@
       "supportPluginId": "vue3",
       "treePath": [
         "Switch"
-      ],
-      "virtual": false,
-      "markdownFile": null
-    },
-    {
-      "id": "src-components-spinner-spinner-story-vue",
-      "title": "Spinner",
-      "layout": {
-        "type": "grid",
-        "width": 300
-      },
-      "docsOnly": false,
-      "variants": [
-        {
-          "id": "src-components-spinner-spinner-story-vue-0",
-          "title": "class='w-4'"
-        },
-        {
-          "id": "src-components-spinner-spinner-story-vue-1",
-          "title": "class='w-8'"
-        }
-      ],
-      "relativePath": "src/components/Spinner/Spinner.story.vue",
-      "supportPluginId": "vue3",
-      "treePath": [
-        "Spinner"
       ],
       "virtual": false,
       "markdownFile": null
@@ -1081,6 +1081,32 @@
       "supportPluginId": "vue3",
       "treePath": [
         "Tabs"
+      ],
+      "virtual": false,
+      "markdownFile": null
+    },
+    {
+      "id": "src-components-texteditor-texteditor-story-vue",
+      "title": "TextEditor",
+      "layout": {
+        "width": 600,
+        "type": "grid"
+      },
+      "docsOnly": false,
+      "variants": [
+        {
+          "id": "src-components-texteditor-texteditor-story-vue-0",
+          "title": "Basic"
+        },
+        {
+          "id": "src-components-texteditor-texteditor-story-vue-1",
+          "title": "Comment Editor"
+        }
+      ],
+      "relativePath": "src/components/TextEditor/TextEditor.story.vue",
+      "supportPluginId": "vue3",
+      "treePath": [
+        "TextEditor"
       ],
       "virtual": false,
       "markdownFile": null
@@ -1151,32 +1177,6 @@
       "supportPluginId": "vue3",
       "treePath": [
         "TextInput"
-      ],
-      "virtual": false,
-      "markdownFile": null
-    },
-    {
-      "id": "src-components-texteditor-texteditor-story-vue",
-      "title": "TextEditor",
-      "layout": {
-        "width": 600,
-        "type": "grid"
-      },
-      "docsOnly": false,
-      "variants": [
-        {
-          "id": "src-components-texteditor-texteditor-story-vue-0",
-          "title": "Basic"
-        },
-        {
-          "id": "src-components-texteditor-texteditor-story-vue-1",
-          "title": "Comment Editor"
-        }
-      ],
-      "relativePath": "src/components/TextEditor/TextEditor.story.vue",
-      "supportPluginId": "vue3",
-      "treePath": [
-        "TextEditor"
       ],
       "virtual": false,
       "markdownFile": null
