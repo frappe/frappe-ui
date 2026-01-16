@@ -12,6 +12,7 @@ import {
   setCache,
   updateDocumentInCaches,
   removeDocumentFromCaches,
+  watchDocument,
 } from './cache'
 
 export interface GetListOptions {
@@ -162,6 +163,56 @@ export function createGetList<TDoc extends { name: string }>(
         }
       },
     })
+
+    // Track active watchers for list items
+    const documentUnwatchers = new Map<string, () => void>()
+
+    // Subscribe to updates for all items in the list
+    const subscribeToListItems = () => {
+      // Unsubscribe from all previous watchers
+      documentUnwatchers.forEach((unwatch) => unwatch())
+      documentUnwatchers.clear()
+
+      // Subscribe to each item
+      items.value.forEach((item) => {
+        const unwatch = watchDocument(doctype, item.name, (updatedDoc) => {
+          // Find and update the item in the list
+          const index = items.value.findIndex((i) => i.name === updatedDoc.name)
+          if (index !== -1) {
+            items.value = [
+              ...items.value.slice(0, index),
+              updatedDoc,
+              ...items.value.slice(index + 1),
+            ]
+            // Note: Cache is already updated by updateDocumentInCaches
+            // No need to call setCache here - it would be redundant
+          }
+        })
+        documentUnwatchers.set(item.name, unwatch)
+      })
+    }
+
+    // Watch items for changes and resubscribe
+    // Only resubscribe when the set of names actually changes (not on every mutation)
+    let previousNames = new Set<string>()
+
+    watch(
+      () => items.value,
+      () => {
+        const currentNames = new Set(items.value.map((i) => i.name))
+
+        // Check if the set of names has actually changed
+        const hasChanged =
+          currentNames.size !== previousNames.size ||
+          [...currentNames].some((name) => !previousNames.has(name))
+
+        if (hasChanged) {
+          subscribeToListItems()
+          previousNames = currentNames
+        }
+      },
+      { immediate: true },
+    )
 
     // setValue operation
     const setValueParams = ref<Partial<TDoc> | undefined>(undefined)

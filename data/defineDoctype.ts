@@ -2,6 +2,7 @@ import { reactive } from 'vue'
 import { createGetDoc } from './getDoc'
 import { createGetList } from './getList'
 import { useFrappeFetch } from './useFrappeFetch'
+import { syncFromDocs } from './cache'
 
 export interface ControllerMethodDef<
   TArgs extends any[] = any[],
@@ -16,38 +17,66 @@ export type ControllerMethods = Record<string, ControllerMethodDef>
 
 export interface DoctypeOptions<
   TControllerMethods extends ControllerMethods = ControllerMethods,
+  TDocMethods extends ControllerMethods = ControllerMethods,
 > {
   baseUrl?: string
   controllerMethods?: TControllerMethods
+  docMethods?: TDocMethods
 }
 
-export type MappedControllerMethod<TMethod extends ControllerMethodDef> = {
+export type MappedMethod<TMethod extends ControllerMethodDef> = {
   submit: (...args: Parameters<TMethod['args']>) => Promise<void>
   loading: boolean
   error: any
   data: TMethod extends ControllerMethodDef<any, infer R> ? R : any
 }
 
-export type MappedControllerMethods<TControllerMethods extends ControllerMethods> =
-  {
-    [K in keyof TControllerMethods]: MappedControllerMethod<
-      TControllerMethods[K]
-    >
+export type MappedDocMethod<TDoc, TMethod extends ControllerMethodDef> = {
+  submit: (...args: Parameters<TMethod['args']>) => {
+    optimistic: (fn: (doc: TDoc) => TDoc) => Promise<void>
+    then: <T>(
+      onfulfilled?: ((value: void) => T | PromiseLike<T>) | null,
+      onrejected?: ((reason: any) => T | PromiseLike<T>) | null,
+    ) => Promise<T>
+    catch: <T>(
+      onrejected?: ((reason: any) => T | PromiseLike<T>) | null,
+    ) => Promise<T>
+    finally: (onfinally?: (() => void) | null) => Promise<void>
   }
+  loading: boolean
+  error: any
+  data: TMethod extends ControllerMethodDef<any, infer R> ? R : any
+}
+
+export type MappedControllerMethods<
+  TControllerMethods extends ControllerMethods,
+> = {
+  [K in keyof TControllerMethods]: MappedMethod<TControllerMethods[K]>
+}
+
+export type MappedDocMethods<TDoc, TDocMethods extends ControllerMethods> = {
+  [K in keyof TDocMethods]: MappedDocMethod<TDoc, TDocMethods[K]>
+}
 
 export function defineDoctype<TDoc extends { name: string }>() {
   return function <
     TControllerMethods extends ControllerMethods = ControllerMethods,
+    TDocMethods extends ControllerMethods = ControllerMethods,
   >(
     doctype: string,
-    options: DoctypeOptions<TControllerMethods> = {},
+    options: DoctypeOptions<TControllerMethods, TDocMethods> = {},
   ) {
-    const { baseUrl = '', controllerMethods } = options
+    const { baseUrl = '', controllerMethods, docMethods } = options
 
-    const getDoc = createGetDoc<TDoc>({ doctype, baseUrl })
+    const getDoc = createGetDoc<TDoc, TDocMethods>({
+      doctype,
+      baseUrl,
+      docMethods,
+    })
     const getList = createGetList<TDoc>({ doctype, baseUrl })
 
-    const mappedControllerMethods = {} as MappedControllerMethods<TControllerMethods>
+    const mappedControllerMethods =
+      {} as MappedControllerMethods<TControllerMethods>
 
     if (controllerMethods) {
       for (const [key, methodDef] of Object.entries(controllerMethods)) {
@@ -63,6 +92,9 @@ export function defineDoctype<TDoc extends { name: string }>() {
           baseUrl,
           immediate: false,
           params: () => paramsRef,
+          onSuccess: async (json) => {
+            await syncFromDocs(json?.docs)
+          },
         })
 
         const mappedMethod = reactive({
@@ -74,9 +106,15 @@ export function defineDoctype<TDoc extends { name: string }>() {
 
             await result.execute()
           },
-          get loading() { return result.loading },
-          get error() { return result.error },
-          get data() { return result.json },
+          get loading() {
+            return result.loading
+          },
+          get error() {
+            return result.error
+          },
+          get data() {
+            return result.json
+          },
         })
 
         // @ts-ignore

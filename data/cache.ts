@@ -113,3 +113,107 @@ export async function removeDocumentFromCaches(
     }
   }
 }
+
+/**
+ * Registry of active watchers for document updates
+ * Key format: "doctype::name"
+ */
+const documentWatchers = new Map<string, Set<(doc: any) => void>>()
+
+/**
+ * Watch for updates to a specific document
+ * Returns an unsubscribe function
+ *
+ * @template TDoc - The document type
+ * @param doctype - The DocType name
+ * @param name - The document name
+ * @param callback - Function called when document updates
+ * @returns Unsubscribe function to cleanup the watcher
+ *
+ * @example
+ * ```ts
+ * const unwatch = watchDocument<ToDo>('ToDo', 'todo-1', (doc) => {
+ *   console.log('Todo updated:', doc.status)
+ * })
+ * // Later: unwatch()
+ * ```
+ */
+export function watchDocument<TDoc = any>(
+  doctype: string,
+  name: string,
+  callback: (doc: TDoc) => void,
+): () => void {
+  const key = `${doctype}::${name}`
+
+  if (!documentWatchers.has(key)) {
+    documentWatchers.set(key, new Set())
+  }
+
+  documentWatchers.get(key)!.add(callback as (doc: any) => void)
+
+  // Return unsubscribe function
+  return () => {
+    const watchers = documentWatchers.get(key)
+    if (watchers) {
+      watchers.delete(callback as (doc: any) => void)
+      if (watchers.size === 0) {
+        documentWatchers.delete(key)
+      }
+    }
+  }
+}
+
+/**
+ * Notify all watchers of a document update
+ */
+function notifyDocumentWatchers(doctype: string, doc: any): void {
+  const key = `${doctype}::${doc.name}`
+  const watchers = documentWatchers.get(key)
+
+  if (watchers && watchers.size > 0) {
+    watchers.forEach((callback) => callback(doc))
+  }
+}
+
+/**
+ * Enhanced updateDocumentInCaches that also notifies live watchers
+ */
+export async function updateDocumentInCachesAndNotify<
+  TDoc extends { name: string },
+>(doctype: string, doc: TDoc): Promise<void> {
+  await updateDocumentInCaches(doctype, doc)
+  notifyDocumentWatchers(doctype, doc)
+}
+
+/**
+ * Sync multiple documents from json.docs response
+ * This is the main entry point for handling server-side updates
+ *
+ * @param docs - Array of documents from server response (json.docs)
+ *
+ * @example
+ * ```ts
+ * // In onSuccess handler:
+ * await syncFromDocs(response.docs)
+ *
+ * // For WebSocket updates:
+ * socket.on('doc_update', (payload) => {
+ *   syncFromDocs(payload.docs)
+ * })
+ * ```
+ *
+ * TODO: Batch IndexedDB writes for >10 docs to improve performance
+ */
+export async function syncFromDocs(docs: any[]): Promise<void> {
+  if (!docs || !Array.isArray(docs) || docs.length === 0) {
+    return
+  }
+
+  for (const doc of docs) {
+    // Skip invalid documents silently
+    if (!doc || !doc.doctype || !doc.name) {
+      continue
+    }
+    await updateDocumentInCachesAndNotify(doc.doctype, doc)
+  }
+}

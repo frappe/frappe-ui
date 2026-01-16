@@ -165,6 +165,7 @@ export function useFrappeFetch<T = any>(
       if (onError) {
         onError(state.error)
       }
+      throw state.error
     } finally {
       state.loading = false
       abortController = null

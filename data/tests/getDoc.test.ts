@@ -125,6 +125,9 @@ describe('getDoc', () => {
       description: 'Updated description',
     })
 
+    // Wait for reactive watcher to update
+    await nextTick()
+
     expect(todo.setValue.loading).toBe(false)
     expect(todo.setValue.error).toBe(null)
     expect(todo.doc?.status).toBe('Closed')

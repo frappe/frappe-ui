@@ -26,6 +26,8 @@ vi.mock('../cache', () => ({
   getCacheEntries: vi.fn(async () => Array.from(mockCache.entries())),
   updateDocumentInCaches: vi.fn(async () => {}),
   removeDocumentFromCaches: vi.fn(async () => {}),
+  watchDocument: vi.fn(() => () => {}), // Returns unsubscribe function
+  syncFromDocs: vi.fn(async () => {}),
 }))
 
 beforeEach(async () => {
