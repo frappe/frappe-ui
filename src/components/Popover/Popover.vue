@@ -84,7 +84,11 @@ const props = withDefaults(defineProps<PopoverProps>(), {
   hideOnBlur: true,
 })
 
-const emit = defineEmits<PopoverEmits>()
+const emit = defineEmits<{
+  (event: 'open'): void
+  (event: 'close'): void
+  (event: 'update:show', value: boolean): void
+}>()
 
 defineExpose({ open, close })
 

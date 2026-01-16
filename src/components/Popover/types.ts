@@ -37,14 +37,3 @@ export interface PopoverProps {
   matchTargetWidth?: boolean
   offset?: number
 }
-
-export interface PopoverEmits {
-  /** Fired when the popover is opened */
-  (event: 'open'): void
-
-  /** Fired when the popover is closed */
-  (event: 'close'): void
-
-  /** Fired when the show state changes (v-model) */
-  (event: 'update:show', value: boolean): void
-}
