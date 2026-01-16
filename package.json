@@ -85,6 +85,7 @@
     "@tiptap/extension-text-align": "^2.26.1",
     "@tiptap/extension-text-style": "^2.26.1",
     "@tiptap/extension-typography": "^2.26.1",
+    "@tiptap/extension-underline": "^3.14.0",
     "@tiptap/pm": "^2.26.1",
     "@tiptap/starter-kit": "^2.26.1",
     "@tiptap/suggestion": "^2.26.1",
