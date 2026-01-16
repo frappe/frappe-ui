@@ -55,10 +55,9 @@ defineProps<Props>()
       <tr v-for="x in data" :key="x.name" class="border-b last:border-0">
         <td>
           <Badge
-            :theme="x.required ? 'red' : 'gray'"
             class="w-fit !rounded-sm mb-auto flex font-mono"
           >
-            {{ x.name }}
+            {{ x.name + (x.required? "*": "") }} 
           </Badge>
         </td>
 
