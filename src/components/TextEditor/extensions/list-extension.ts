@@ -15,13 +15,22 @@ export default function improvedList(editor: Editor) {
     editor
       .chain()
       .command(({ tr }) => {
+        // 1. Capture the active styles (marks) before the deletion
+        const marks = editor.state.storedMarks || $from.marks()
+
         const paragraphContent = $from.parent.content
         const inList = nodeBefore.type.name === 'listItem'
-        console.log(inList)
+        
+        // 2. Perform the move
         tr.delete($from.before() - (inList ? 1 : 0), $from.after())
         const insertPos = $from.pos - 4
         tr.insert(insertPos, paragraphContent)
         tr.setSelection(Selection.near(tr.doc.resolve(insertPos)))
+
+        // 3. Re-apply the styles to the new cursor position
+        if (marks) {
+          tr.setStoredMarks(marks)
+        }
       })
       .run()
     return true
