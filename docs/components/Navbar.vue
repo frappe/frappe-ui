@@ -79,7 +79,7 @@ whenever(meta_k, (n) => {
     />
 
     <div
-      class="py-3 px-5 flex items-center gap-3 flex-wrap"
+      class="py-2.5 px-5 flex items-center gap-3 flex-wrap"
       :class="{ 'max-w-[1440px] mx-auto': !isDocs }"
     >
       <span

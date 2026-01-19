@@ -9,11 +9,11 @@ import LucideSquare from '~icons/lucide/square'
 import LucideDb from '~icons/lucide/database-zap'
 import LucideSettings from '~icons/lucide/settings'
 import LucideBaseline from '~icons/lucide/baseline'
-import LucideCase from '~icons/lucide/case-sensitive'
 import LucideBlend from '~icons/lucide/blend'
 import LucideRadius from '~icons/lucide/radius'
 import ChevronRight from '~icons/lucide/chevron-right'
 import LucideBox from '~icons/lucide/box'
+import pkgJson from '../../../package.json'
 
 import {
   ScrollAreaRoot,
@@ -22,6 +22,7 @@ import {
   ScrollAreaScrollbar,
 } from 'reka-ui'
 
+const curVersion = pkgJson.version
 const componentList = useData().theme.value.componentList
 const componentItems = componentList.map((name) => ({
   text: name,
@@ -132,11 +133,14 @@ const linkClass = 'p-2 rounded'
     class="bg-surface-gray-1 dark:bg-surface-white border-r flex flex-col p-3 h-screen pr-0 pt-1 min-w-fit sticky top-0 w-full"
   >
     <a
-      class="hidden lg:flex items-center gap-2 p-2 py-3 border-b mb-3 font-medium text-xl"
+      class="hidden lg:flex items-center gap-2 p-2 py-3 mb-3"
       href="/"
     >
-      <img src="/logo.svg" class="w-6" />
-      Frappe UI
+      <img src="/logo.svg" class="w-8" />
+      <div class="flex flex-col gap-1 *:leading-none">
+        <span class="text-base font-medium text-ink-gray-8">Frappe UI</span>
+        <span class="text-sm text-ink-gray-6">v{{ curVersion }}</span>
+      </div>
     </a>
 
     <ScrollAreaRoot
