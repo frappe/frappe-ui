@@ -1,74 +1,74 @@
 <script setup>
-import { computed, onMounted, ref, watch } from "vue";
-import { Button } from "frappe-ui";
-import LucideSun from "~icons/lucide/sun";
-import LucideMoon from "~icons/lucide/moon-star";
-import LucideSearch from "~icons/lucide/search";
-import LucideMenu from "~icons/lucide/menu";
-import LucideSide from "~icons/lucide/panel-right";
-import GithubIcon from "./Icons/Github.vue";
-import LucideRight from "~icons/lucide/chevron-right";
-import SearchPopup from "./Search/Popup.vue";
+import { computed, onMounted, ref, watch } from 'vue'
+import { Button, Breadcrumbs } from 'frappe-ui'
+import LucideSun from '~icons/lucide/sun'
+import LucideMoon from '~icons/lucide/moon-star'
+import LucideSearch from '~icons/lucide/search'
+import LucideMenu from '~icons/lucide/menu'
+import LucideSide from '~icons/lucide/panel-right'
+import GithubIcon from './Icons/Github.vue'
+import LucideRight from '~icons/lucide/chevron-right'
+import SearchPopup from './Search/Popup.vue'
 
-import { state } from "../state";
-import { useMagicKeys, whenever } from "@vueuse/core";
-import { useRoute } from "vitepress";
+import { state } from '../state'
+import { useMagicKeys, whenever } from '@vueuse/core'
+import { useRoute } from 'vitepress'
 
-const theme = ref();
+const theme = ref()
 
 const toggleTheme = () => {
-  theme.value = theme.value === "dark" ? "light" : "dark";
-  document.documentElement.setAttribute("data-theme", theme.value);
-  localStorage.theme = theme.value;
-};
+  theme.value = theme.value === 'dark' ? 'light' : 'dark'
+  document.documentElement.setAttribute('data-theme', theme.value)
+  localStorage.theme = theme.value
+}
 
-const toggleMobSidebar = () => (state.mobsidebar = !state.mobsidebar);
-const toggleNavbar = () => (state.mobnavbar = !state.mobnavbar);
+const toggleMobSidebar = () => (state.mobsidebar = !state.mobsidebar)
+const toggleNavbar = () => (state.mobnavbar = !state.mobnavbar)
 
 onMounted(() => {
-  theme.value = document.documentElement.getAttribute("data-theme");
-});
+  theme.value = document.documentElement.getAttribute('data-theme')
+})
 
 defineProps({
   isDocs: {
     type: Boolean,
   },
-});
+})
 
-const route = useRoute();
+const route = useRoute()
 const routes = computed(() => {
-  let arr = route.path.split("/");
-  arr = arr.filter((x) => !["/", ""].includes(x));
+  let arr = route.path.split('/')
+  arr = arr.filter((x) => !['/', ''].includes(x))
 
   const nestedRoutes = state.sidebarList
-    .reduce(
-      (acc, cur) => [...acc, ...cur.items || []],
-      [],
-    ).map((x) => ({
+    .reduce((acc, cur) => [...acc, ...(cur.items || [])], [])
+    .map((x) => ({
       label: x.text,
-      value: x.link.split("/").at(-1),
+      value: x.link,
     }))
 
-  const lastpath = arr.at(-1);
-  const lastpathLabel = nestedRoutes.find((x) => x.value === lastpath);
+  arr = arr.map((x) => {
+    const routeval = nestedRoutes.find((y) => y.value.split('/').at(-1) === x)
+    let labelval = nestedRoutes.find((y) => y.value === x)?.label
+    labelval = labelval || x.replaceAll('-', ' ')
+    return { label: labelval, route: routeval?.value }
+  })
 
-  arr[1] = arr[1]?.replaceAll("-", " ");
-  arr[arr.length - 1] = lastpathLabel?.label || lastpath;
-	arr = arr.filter(x => x != 'docs')
+  arr = arr.filter((x) => x.label != 'docs')
 
   return arr
-});
+})
 
 watch(route, (x) => {
-  state.mobnavbar = false;
-  state.mobsidebar = false;
-});
+  state.mobnavbar = false
+  state.mobsidebar = false
+})
 
-const { meta_k } = useMagicKeys();
+const { meta_k } = useMagicKeys()
 
 whenever(meta_k, (n) => {
-  if (n) state.searchDialog = true;
-});
+  if (n) state.searchDialog = true
+})
 </script>
 
 <template>
@@ -80,28 +80,21 @@ whenever(meta_k, (n) => {
 
     <div
       class="py-3 px-5 flex items-center gap-3 flex-wrap"
-      :class='{ "max-w-[1440px] mx-auto": !isDocs }'
+      :class="{ 'max-w-[1440px] mx-auto': !isDocs }"
     >
       <span
         class="flex gap-3 items-center mr-auto md:mr-0"
-        :class='{ "md:hidden": isDocs }'
+        :class="{ 'md:hidden': isDocs }"
       >
         <img src="/logo.svg" class="w-5" />
         <a href="/" class="font-medium">Frappe UI</a>
       </span>
 
-      <!-- minimal breadcrumbs -->
-      <div v-if="route.path != '/'" class="hidden md:flex items-center gap-1">
-        <template v-for="(x, i) in routes">
-          <LucideRight class="size-4 text-ink-gray-5" v-if="i != 0" />
-          <span
-            class="capitalize flex gap-1 items-center text-ink-gray-5 hover:text-ink-gray-9"
-            :class='{ "text-ink-gray-9": i === routes.length - 1 }'
-          >
-            {{ x }}
-          </span>
-        </template>
-      </div>
+      <Breadcrumbs
+        :items="routes"
+        class="[&_span]:capitalize"
+        :separator="LucideRight"
+      />
 
       <Button v-if="isDocs" @click="toggleMobSidebar" class="md:hidden">
         <template #icon>
@@ -130,7 +123,7 @@ whenever(meta_k, (n) => {
 
         <Button @click="toggleTheme" class="rounded">
           <template #icon>
-            <LucideSun v-if='theme === "dark"' class="size-4" />
+            <LucideSun v-if="theme === 'dark'" class="size-4" />
             <LucideMoon v-else class="size-4" />
           </template>
         </Button>
