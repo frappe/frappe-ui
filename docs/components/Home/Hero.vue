@@ -11,7 +11,7 @@ import pkgJson from '../../../package.json'
       <h1
         class="text-[40px] font-semibold tracing-tight leading-tight !m-0 relative font-news"
       >
-        <Badge class="absolute -top-8" size="lg" theme="green">
+        <Badge class="absolute -top-8 font-sans" theme="green">
           v{{ pkgJson.version }}
         </Badge>
         Build Beautiful Interfaces Fast
