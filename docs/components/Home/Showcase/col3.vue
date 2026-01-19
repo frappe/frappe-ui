@@ -21,9 +21,9 @@ import LucideLink from "~icons/lucide/send";
 
 const imgs = [
   "https://avatars.githubusercontent.com/u/499550?s=60&v=4",
-  "https://avatars.githubusercontent.com/u/499550?s=60&v=4",
-  "https://avatars.githubusercontent.com/u/499550?s=60&v=4",
-  "https://avatars.githubusercontent.com/u/499550?s=60&v=4",
+  'https://avatars.githubusercontent.com/u/2798204?s=70&v=4',
+  'https://avatars.githubusercontent.com/u/28706372?s=96&v=4',
+  'https://avatars.githubusercontent.com/u/1493221?s=70&v=4',
 ];
 
 const progressVal = ref(1);
