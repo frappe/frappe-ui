@@ -1,15 +1,15 @@
 <script setup>
-const props = defineProps({
+defineProps({
   data: {
     type: Array,
     required: true,
   },
-});
+})
 
 const formatColor = (color) => {
-  const arr = color.split("-");
-  return arr.slice(2).join("-");
-};
+  const arr = color.split('-')
+  return arr.slice(2).join('-')
+}
 </script>
 
 <template>
@@ -31,8 +31,7 @@ const formatColor = (color) => {
           v-if="color.value"
           class="rounded size-20"
           :style="{ backgroundColor: color.value }"
-        >
-        </div>
+        ></div>
         <span
           class="whitespace-nowrap bg-surface-gray-2 p-1 py-1.5 text-sm rounded-sm text-center w-20"
         >

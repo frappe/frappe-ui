@@ -1,11 +1,10 @@
-
 <script setup>
 const props = defineProps({
   data: {
     type: Array,
     required: true,
   },
-});
+})
 
 const _data = props.data.slice(0, props.data.length - 2)
 </script>

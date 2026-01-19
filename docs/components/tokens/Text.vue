@@ -2,7 +2,7 @@
 import { computed, ref } from "vue";
 import { Tabs } from "frappe-ui";
 
-const props = defineProps({
+defineProps({
   data: {
     type: Array,
     required: true,

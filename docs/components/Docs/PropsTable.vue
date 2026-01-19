@@ -2,7 +2,6 @@
 import { ref } from 'vue'
 import { Badge, Button } from 'frappe-ui'
 import LucideCode from '~icons/lucide/code-xml'
-// import TSCodeBlock from './TSCodeBlock.vue'
 
 interface itemProp {
   name: string
@@ -22,8 +21,11 @@ defineProps<Props>()
 </script>
 
 <template>
-  <div class="flex items-center gap-3 justify-between mt-5" :class='{"-mb-5": !tsToggled}'>
-    <h2 id='props'>Props</h2>
+  <div
+    class="flex items-center gap-3 justify-between mt-5"
+    :class="{ '-mb-5': !tsToggled }"
+  >
+    <h2 id="props">Props</h2>
 
     <Button size="sm" @click="tsToggled = !tsToggled">
       <template #prefix>
@@ -54,14 +56,12 @@ defineProps<Props>()
 
       <tr v-for="x in data" :key="x.name" class="border-b last:border-0">
         <td>
-          <Badge
-            class="w-fit !rounded-sm mb-auto flex font-mono"
-          >
-            {{ x.name + (x.required? "*": "") }} 
+          <Badge class="w-fit !rounded-sm mb-auto flex font-mono">
+            {{ x.name + (x.required ? '*' : '') }}
           </Badge>
         </td>
 
-        <td class='font-mono text-sm'>
+        <td class="font-mono text-sm">
           <div
             v-if="x.default?.includes('{')"
             class="w-fit rounded-sm whitespace-pre px-3 py-2 leading-relaxed h-full !bg-surface-gray-1"

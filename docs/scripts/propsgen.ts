@@ -95,7 +95,7 @@ list.forEach((x) => {
     fs.writeFileSync(metaFilePath, str)
     console.log(`Generated ${x} meta`)
   } catch (e) {
-    // TODO few components dont have default exposts
+    // TODO few components dont have default exports
     console.error('-----------------------------\n', x, ':', e)
   }
 })

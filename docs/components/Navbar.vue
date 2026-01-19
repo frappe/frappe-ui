@@ -83,15 +83,15 @@ whenever(meta_k, (n) => {
       :class='{ "max-w-[1440px] mx-auto": !isDocs }'
     >
       <span
-        class="flex gap-3 items-center mr-auto lg:mr-0"
-        :class='{ "lg:hidden": isDocs }'
+        class="flex gap-3 items-center mr-auto md:mr-0"
+        :class='{ "md:hidden": isDocs }'
       >
         <img src="/logo.svg" class="w-5" />
         <a href="/" class="font-medium">Frappe UI</a>
       </span>
 
       <!-- minimal breadcrumbs -->
-      <div v-if="route.path != '/'" class="hidden lg:flex items-center gap-1">
+      <div v-if="route.path != '/'" class="hidden md:flex items-center gap-1">
         <template v-for="(x, i) in routes">
           <LucideRight class="size-4 text-ink-gray-5" v-if="i != 0" />
           <span
@@ -103,25 +103,25 @@ whenever(meta_k, (n) => {
         </template>
       </div>
 
-      <Button v-if="isDocs" @click="toggleMobSidebar" class="lg:hidden">
+      <Button v-if="isDocs" @click="toggleMobSidebar" class="md:hidden">
         <template #icon>
           <LucideSide class="size-4" />
         </template>
       </Button>
 
-      <Button @click="toggleNavbar" class="lg:hidden">
+      <Button @click="toggleNavbar" class="md:hidden">
         <template #icon>
           <LucideMenu class="size-4" />
         </template>
       </Button>
 
       <div
-        class="gap-3 lg:flex items-center w-full ml-auto lg:w-auto"
+        class="gap-3 md:flex items-center w-full ml-auto md:w-auto"
         :class="{ flex: state.mobnavbar, hidden: !state.mobnavbar }"
       >
         <a href="/docs" v-if="route.path == '/'">Docs</a>
 
-        <Button class="hidden lg:flex" @click="state.searchDialog = true">
+        <Button class="hidden md:flex" @click="state.searchDialog = true">
           <template #prefix>
             <LucideSearch class="size-4" />
           </template>
