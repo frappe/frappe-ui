@@ -26,6 +26,12 @@
     "./frappe": {
       "import": "./frappe/index.js"
     },
+    "./drive": {
+      "import": "./frappe/drive/index.js"
+    },
+    "./drive/*": {
+      "import": "./frappe/drive/*"
+    },
     "./icons": {
       "import": "./icons/index.ts"
     },
@@ -38,6 +44,9 @@
     },
     "./style.css": {
       "import": "./src/style.css"
+    },
+    "./editor-style.css": {
+      "import": "./src/components/TextEditor/style.css"
     },
     "./tsconfig.base.json": {
       "default": "./tsconfig.base.json",
