@@ -1,12 +1,28 @@
 import TiptapHeading from '@tiptap/extension-heading'
-import { textblockTypeInputRule } from '@tiptap/core'
+import { textblockTypeInputRule, setBlockType } from '@tiptap/core'
 
-// This custom Heading extension modifies the default input rule behavior.
-// The default Tiptap heading input rule converts text to a heading when '#' is followed by any whitespace (including Enter).
-// This customization ensures that headings are only created when '#' is followed by a literal space.
-// This change is necessary to prevent conflicts with other extensions, such as a tags extension,
-// which uses '#' followed by Enter to add a tag.
 export const Heading = TiptapHeading.extend({
+  // This ensures that when a toolbar button calls 'toggleHeading', 
+  // the styles (marks) are preserved.
+  addCommands() {
+    return {
+      ...this.parent?.(),
+      toggleHeading: (attributes) => ({ state, chain }) => {
+        // 1. Capture the current styles
+        const marks = state.storedMarks || state.selection.$from.marks()
+        
+        return chain()
+          .toggleNode(this.name, 'paragraph', attributes)
+          // 2. Re-apply the captured styles to the new heading node
+          .command(({ tr }) => {
+            if (marks) tr.setStoredMarks(marks)
+            return true
+          })
+          .run()
+      },
+    }
+  },
+
   addInputRules() {
     return this.options.levels.map((level) => {
       let regexp = new RegExp(`^(#{${level}})( |\\u00A0)$`)
