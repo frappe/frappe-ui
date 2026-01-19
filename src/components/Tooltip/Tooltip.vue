@@ -23,6 +23,27 @@ const props = withDefaults(defineProps<TooltipProps>(), {
 })
 
 const delayDuration = computed(() => props.hoverDelay * 1000)
+
+defineSlots<{
+  /**
+   * Default trigger slot.
+   * Wraps the element that the tooltip is attached to.
+   */
+  default?: () => any
+
+  /**
+   * Slot for fully custom tooltip body.
+   * Replaces the default tooltip container entirely.
+   */
+  body?: () => any
+
+  /**
+   * Slot for tooltip content text.
+   * Used inside the default tooltip body.
+   */
+  content?: () => any
+}>()
+
 </script>
 
 <template>

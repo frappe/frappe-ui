@@ -48,12 +48,16 @@
           </span>
           <slot name="suffix" :item="item" />
         </button>
+
         <span
           v-if="i != crumbs.length - 1"
           class="mx-0.5 text-base text-ink-gray-4"
           aria-hidden="true"
         >
-          /
+          <template v-if="typeof separator === 'string'">
+            {{ separator }}
+          </template>
+          <component v-else :is="separator" class="w-4" />
         </span>
       </template>
     </div>
@@ -68,10 +72,13 @@ import type { BreadcrumbsProps } from './types'
 import { ref, computed, nextTick, useTemplateRef } from 'vue'
 import { useResizeObserver } from '@vueuse/core'
 import LucideEllipsis from '~icons/lucide/ellipsis'
+import type { BreadcrumbItem } from './types'
 
 const crumbsEl = useTemplateRef<HTMLDivElement>('crumbsRef')
 
-const props = defineProps<BreadcrumbsProps>()
+const props = withDefaults(defineProps<BreadcrumbsProps>(), {
+  separator: '/',
+})
 
 const router = useRouter()
 const overflowedX = ref(false)
@@ -116,4 +123,12 @@ const dropdownItems = computed(() => {
 })
 
 const crumbs = computed(() => items.value.slice(overflowedX.value ? -2 : 0))
+
+defineSlots<{
+  /** Content shown before each breadcrumb label */
+  prefix?: (props: { item: BreadcrumbItem }) => any
+
+  /** Content shown after each breadcrumb label */
+  suffix?: (props: { item: BreadcrumbItem }) => any
+}>()
 </script>

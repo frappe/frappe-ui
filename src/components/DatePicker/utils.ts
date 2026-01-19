@@ -1,5 +1,5 @@
 import { dayjs, dayjsLocal } from '../../utils/dayjs'
-import type { Dayjs } from 'dayjs/esm'
+import type { Dayjs } from 'dayjs'
 import type { DatePickerDateObj as DateObj } from './types'
 
 // Constant list of month labels

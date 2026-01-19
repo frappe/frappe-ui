@@ -56,8 +56,16 @@ const props = withDefaults(defineProps<TextInputProps>(), {
 })
 
 const emit = defineEmits(['update:modelValue'])
-
 const slots = useSlots()
+
+defineSlots<{
+  /** Content rendered before the input (left side) */
+  prefix?: () => any
+
+  /** Content rendered after the input (right side) */
+  suffix?: () => any
+}>()
+
 const attrs = useAttrs()
 
 const attrsWithoutClassStyle = computed(() => {

@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import { MonthPickerProps } from './types'
 
+import Button from '../Button/Button.vue'
 import Popover from '../Popover/Popover.vue'
 import LucideCalender from '~icons/lucide/calendar'
 import LucideChevronLeft from '~icons/lucide/chevron-left'
@@ -63,6 +64,10 @@ const nextClick = () => {
 
 const formatBtn = (v: string | number) =>
   viewMode.value == 'month' ? (v as String).slice(0, 3) : v
+
+const txtClass = computed(() => {
+  return model.value || props.disabled ? '': '!text-ink-gray-5' 
+})
 </script>
 
 <template>
@@ -70,7 +75,8 @@ const formatBtn = (v: string | number) =>
     popover-class="mt-2 shadow-xl rounded-lg border bg-surface-modal p-2"
   >
     <template #target="{ togglePopover }">
-      <Button @click="togglePopover" class="w-full justify-between">
+      <Button @click="togglePopover" class="w-full justify-between border" :class="txtClass"
+				:disabled="disabled">
         {{ model || props.placeholder }}
         <template #suffix> <LucideCalender class="size-4" /> </template>
       </Button>

@@ -86,4 +86,11 @@ const filledIntervalCount = computed(() => {
 
   return Math.round((props.value / MAX_VALUE) * props.intervalCount)
 })
+
+defineSlots<{
+  /** Custom content for the hint area (usually displays the progress value). 
+   * If not provided, defaults to showing `props.value` followed by `%`.
+   */
+  hint?: () => any
+}>()
 </script>
