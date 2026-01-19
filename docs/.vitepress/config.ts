@@ -83,7 +83,6 @@ export default defineConfig({
     plugins: [lucideIcons()],
     resolve: {
       alias: {
-        '@/srcomponents': path.resolve(__dirname, '../../src/components'),
         '@/components': path.resolve(__dirname, '../components/'),
         'frappe-ui': path.resolve(__dirname, '../../src'),
       },
