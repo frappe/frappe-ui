@@ -90,11 +90,7 @@ whenever(meta_k, (n) => {
         <a href="/" class="font-medium">Frappe UI</a>
       </span>
 
-      <Breadcrumbs
-        :items="routes"
-        class="[&_span]:capitalize"
-        :separator="LucideRight"
-      />
+      <Breadcrumbs :items="routes" class="[&_span]:capitalize" />
 
       <Button v-if="isDocs" @click="toggleMobSidebar" class="md:hidden">
         <template #icon>
