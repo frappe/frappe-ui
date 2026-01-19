@@ -1,4 +1,5 @@
 import { RouterLinkProps } from 'vue-router'
+import { type Component } from 'vue'
 
 export interface BreadcrumbItem {
   /** Text shown for the breadcrumb item */
@@ -12,9 +13,11 @@ export interface BreadcrumbItem {
 
   /** Allows passing additional custom fields */
   [key: string]: any
+
 }
 
 export interface BreadcrumbsProps {
+  separator?: string | Component
   /** Ordered list of breadcrumb items */
   items: BreadcrumbItem[]
 }

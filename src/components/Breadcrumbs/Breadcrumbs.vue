@@ -48,12 +48,16 @@
           </span>
           <slot name="suffix" :item="item" />
         </button>
+
         <span
           v-if="i != crumbs.length - 1"
           class="mx-0.5 text-base text-ink-gray-4"
           aria-hidden="true"
         >
-          /
+          <template v-if="typeof separator === 'string'">
+            {{ separator }}
+          </template>
+          <component v-else :is="separator" class="w-4" />
         </span>
       </template>
     </div>
@@ -72,7 +76,9 @@ import type { BreadcrumbItem } from './types'
 
 const crumbsEl = useTemplateRef<HTMLDivElement>('crumbsRef')
 
-const props = defineProps<BreadcrumbsProps>()
+const props = withDefaults(defineProps<BreadcrumbsProps>(), {
+  separator: '/',
+})
 
 const router = useRouter()
 const overflowedX = ref(false)
