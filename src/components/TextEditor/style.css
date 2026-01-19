@@ -1,6 +1,5 @@
 @import './extensions/color/color-styles.css';
 @import './extensions/highlight/highlight-styles.css';
-@import './extensions/tables/table-styles.css';
 
 .ProseMirror {
   outline: none;
