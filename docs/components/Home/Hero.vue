@@ -9,7 +9,7 @@ import pkgJson from '../../../package.json'
   <div class="grid gap-5 max-w-7xl mx-auto">
     <div class="mt-10 p-5 flex flex-col gap-5 text-center w-fit">
       <h1
-        class="text-[40px] font-semibold tracing-tight leading-tight !m-0 relative"
+        class="text-[40px] font-semibold tracing-tight leading-tight !m-0 relative font-news"
       >
         <Badge class="absolute -top-8" size="lg" theme="green">
           v{{ pkgJson.version }}
