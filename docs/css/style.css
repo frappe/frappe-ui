@@ -53,7 +53,7 @@ code {
 
 .shiki {
   @apply max-h-[500px] w-full overflow-auto leading-relaxed rounded;
-  @apply !p-5 !py-4 !bg-surface-gray-7 dark:!bg-surface-cards;
+  @apply !p-5 !py-4 !bg-surface-gray-1 dark:!bg-transparent dark:border;
 
   font-family: monospace;
   .line-number {
@@ -65,6 +65,14 @@ code {
   }
 }
 
+.shiki span {
+  color: var(--shiki-light, inherit);
+}
+
+[data-theme='dark']  .shiki span {
+  color: var(--shiki-dark, inherit);
+}
+
 /* scrollbar */
 :root {
   --scrollbar-size: 4px;
@@ -72,7 +80,7 @@ code {
   --scrollbar-thumb: var(--surface-gray-3);
   --scrollbar-thumb-hover: var(--surface-gray-4);
 
-  --shiki-thumb: var(--surface-gray-5);
+  --shiki-thumb: var(--surface-gray-4);
 }
 
 [data-theme='dark'] {
