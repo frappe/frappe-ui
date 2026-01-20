@@ -2,7 +2,7 @@ import { getCommonSiteConfig } from './utils.js'
 
 export function frappeProxy({
   port,
-  source = '^/(app|login|api|assets|files|private)',
+  source = '^/(desk|app|login|api|assets|files|private)',
 } = {}) {
   const commonSiteConfig = getCommonSiteConfig()
   const env_web_server_port = process.env.FRAPPE_WEB_SERVER_PORT
