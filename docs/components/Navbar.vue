@@ -7,7 +7,6 @@ import LucideSearch from '~icons/lucide/search'
 import LucideMenu from '~icons/lucide/menu'
 import LucideSide from '~icons/lucide/panel-right'
 import GithubIcon from './Icons/Github.vue'
-import LucideRight from '~icons/lucide/chevron-right'
 import SearchPopup from './Search/Popup.vue'
 
 import { state } from '../state'
@@ -90,7 +89,7 @@ whenever(meta_k, (n) => {
         <a href="/" class="font-medium">Frappe UI</a>
       </span>
 
-      <Breadcrumbs :items="routes" class="[&_span]:capitalize" />
+      <Breadcrumbs :items="routes" class="[&_span]:capitalize hidden md:flex" />
 
       <Button v-if="isDocs" @click="toggleMobSidebar" class="md:hidden">
         <template #icon>
