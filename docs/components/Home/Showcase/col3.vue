@@ -133,7 +133,7 @@ const toggledDiv = ref(false);
           <LucideCoins class="size-4" />
           Price range
         </span>
-        <Badge size="lg" class="!p-3 !py-4 !rounded">
+        <Badge size="lg" class='rounded-sm'>
           ${{ slider2Val[0] * 10 }} - ${{ slider2Val[1] * 10 }}
         </Badge>
       </div>
