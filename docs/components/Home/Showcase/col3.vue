@@ -222,10 +222,7 @@ const toggledDiv = ref(false);
           </span>
         </div>
 
-        <Select
-          :options='["Send Invite"]'
-          defaultValue="Send Invite"
-        />
+        <Button> Send Invite </Button>
       </div>
 
       <span
