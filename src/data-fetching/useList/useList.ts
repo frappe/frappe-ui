@@ -262,8 +262,8 @@ function handleAfterFetch<T extends { name: string }>({
   allData: Ref<T[] | null>
   _start: Ref<number>
   _limit: Ref<number>
-    hasNextPage: Ref<boolean>
-    cachedResponse: Ref<UseListResponse<T> | null>
+  hasNextPage: Ref<boolean>
+  cachedResponse: Ref<UseListResponse<T> | null>
 }) {
   return function (
     ctx: AfterFetchContext<{
