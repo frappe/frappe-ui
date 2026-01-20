@@ -147,8 +147,8 @@ const resetState = () => {
       <div class="!col-span-1 flex flex-wrap gap-x-1">
         <label class="w-full">Status</label>
 
-        <Badge size="lg" theme="blue" class="rounded-sm"> Stable</Badge>
-        <Badge size="lg" theme="orange" class="rounded-sm"> Moderate</Badge>
+        <Badge theme="blue" class="rounded-sm"> Stable</Badge>
+        <Badge theme="orange" class="rounded-sm"> Moderate</Badge>
       </div>
     </div>
 
