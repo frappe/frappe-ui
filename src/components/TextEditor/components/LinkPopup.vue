@@ -62,14 +62,14 @@
 
 <script setup lang="ts">
 import { onMounted, ref, useTemplateRef, nextTick } from 'vue'
-import Button from '../Button/Button.vue'
-import TextInput from '../TextInput/TextInput.vue'
+import Button from '../../Button/Button.vue'
+import TextInput from '../../TextInput/TextInput.vue'
 import LucideCopy from '~icons/lucide/copy'
 import LucideCheck from '~icons/lucide/check'
 import LucidePencil from '~icons/lucide/pencil'
 import LucideX from '~icons/lucide/x'
 import Link2Off from '~icons/lucide/link-2-off'
-import { isValidUrl } from '../../utils/url-validation'
+import { isValidUrl } from '../../../utils/url-validation'
 
 const props = defineProps<{
   href: string

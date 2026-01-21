@@ -1,7 +1,7 @@
 import { Editor } from '@tiptap/core'
 import { MarkType } from '@tiptap/pm/model'
 import { Plugin, PluginKey } from '@tiptap/pm/state'
-import { isValidUrl } from '../../utils/url-validation'
+import { isValidUrl } from '../../../../utils/url-validation'
 
 type PasteHandlerOptions = {
   editor: Editor

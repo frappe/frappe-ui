@@ -4,7 +4,7 @@ import tippy, { type Instance as TippyInstance } from 'tippy.js'
 import { getMarkRange, Range, Editor } from '@tiptap/core'
 import { MarkType } from '@tiptap/pm/model'
 import { Plugin, PluginKey } from '@tiptap/pm/state'
-import LinkPopup from './LinkPopup.vue'
+import LinkPopup from '../../components/LinkPopup.vue'
 import { linkPasteHandler } from './linkPasteHandler'
 
 declare module '@tiptap/core' {

@@ -1,7 +1,7 @@
 import { Extension } from '@tiptap/core'
 import { Plugin, PluginKey } from '@tiptap/pm/state'
 import { createApp, h } from 'vue'
-import ImageViewerModal from './ImageViewerModal.vue'
+import ImageViewerModal from '../components/ImageViewerModal.vue'
 
 interface ImageInfo {
   src: string

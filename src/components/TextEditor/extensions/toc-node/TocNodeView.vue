@@ -1,17 +1,29 @@
 <template>
-  <NodeViewWrapper class="table-of-contents-node group relative" contenteditable="false">
-    <div v-if="anchorTree.length === 0" class="text-sm text-ink-gray-5">
+  <NodeViewWrapper
+    class="table-of-contents-node group relative"
+    contenteditable="false"
+  >
+    <p v-if="anchorTree.length === 0" class="text-sm text-ink-gray-5 py-3">
       There are no headings in this document.
-    </div>
+    </p>
     <ol v-else v-bind="orderedListHTMLAttrs">
-      <TocRecursiveItem v-for="anchor in anchorTree" :key="anchor.id" :node="anchor"
-        :ordered-attrs="orderedListHTMLAttrs" :list-attrs="listItemHTMLAttrs" :on-heading-click="scrollToHeading" />
+      <TocRecursiveItem
+        v-for="anchor in anchorTree"
+        :key="anchor.id"
+        :node="anchor"
+        :ordered-attrs="orderedListHTMLAttrs"
+        :list-attrs="listItemHTMLAttrs"
+        :on-heading-click="scrollToHeading"
+      />
     </ol>
 
     <!-- Remove button -->
-    <button v-if="isEditable" @click="removeNode"
+    <button
+      v-if="isEditable"
+      @click="removeNode"
       class="absolute top-2 right-2 bg-black/65 hover:bg-black/80 text-ink-gray-4 hover:text-ink-white p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-      title="Remove table of contents">
+      title="Remove table of contents"
+    >
       <LucideX class="size-4" />
     </button>
   </NodeViewWrapper>
@@ -103,9 +115,10 @@ const scrollToHeading = (heading: HeadingAnchor) => {
     const allHeadings = Array.from(
       editorDom.querySelectorAll('h1, h2, h3, h4, h5, h6'),
     )
-    element = allHeadings.find(
-      (el) => el.textContent?.trim() === heading.textContent,
-    ) || null
+    element =
+      allHeadings.find(
+        (el) => el.textContent?.trim() === heading.textContent,
+      ) || null
   }
 
   const tr = view.state.tr
@@ -167,7 +180,7 @@ const TocRecursiveItem = defineComponent({
     },
     onHeadingClick: {
       type: Function as PropType<(heading: HeadingAnchor) => void>,
-      default: () => { },
+      default: () => {},
     },
   },
   setup(props) {
@@ -188,32 +201,38 @@ const TocRecursiveItem = defineComponent({
             props.listAttrs?.class,
             'toc-item',
             props.node.isScrolledOver ? 'text-ink-gray-5' : 'text-ink-gray-8',
-            props.node.isActive && !props.node.isScrolledOver ? 'font-medium' : '',
+            props.node.isActive && !props.node.isScrolledOver
+              ? 'font-medium'
+              : '',
           ]
             .filter(Boolean)
             .join(' '),
         },
         [
-          h('p', { style: { margin: 0, cursor: 'pointer', }, onClick: handleClick, }, props.node.textContent),
+          h(
+            'p',
+            { style: { margin: 0, cursor: 'pointer' }, onClick: handleClick },
+            props.node.textContent,
+          ),
           props.node.children?.length
             ? h(
-              'ol',
-              {
-                ...props.orderedAttrs,
-                onClick: (e: MouseEvent) => {
-                  e.stopPropagation()
+                'ol',
+                {
+                  ...props.orderedAttrs,
+                  onClick: (e: MouseEvent) => {
+                    e.stopPropagation()
+                  },
                 },
-              },
-              props.node.children.map((child) =>
-                h(TocRecursiveItem, {
-                  key: child.id,
-                  node: child,
-                  orderedAttrs: props.orderedAttrs,
-                  listAttrs: props.listAttrs,
-                  onHeadingClick: props.onHeadingClick,
-                }),
-              ),
-            )
+                props.node.children.map((child) =>
+                  h(TocRecursiveItem, {
+                    key: child.id,
+                    node: child,
+                    orderedAttrs: props.orderedAttrs,
+                    listAttrs: props.listAttrs,
+                    onHeadingClick: props.onHeadingClick,
+                  }),
+                ),
+              )
             : null,
         ],
       )
@@ -349,11 +368,7 @@ const updateAnchors = () => {
 let updateInterval: ReturnType<typeof setInterval> | null = null
 const scrollParent = document.querySelector('#editorScrollContainer')
 
-watch(
-  () => props.editor?.state?.doc,
-  updateAnchors,
-  { deep: true },
-)
+watch(() => props.editor?.state?.doc, updateAnchors, { deep: true })
 
 // Watch for tab changes
 watch(

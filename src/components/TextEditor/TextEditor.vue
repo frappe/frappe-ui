@@ -1,39 +1,19 @@
 <template>
-  <div
-    v-if="editor"
-    class="relative w-full"
-    :class="attrsClass"
-    :style="attrsStyle"
-    v-bind="attrsWithoutClassStyle"
-    ref="rootRef"
-  >
+  <div v-if="editor" class="relative w-full" :class="attrsClass" :style="attrsStyle" v-bind="attrsWithoutClassStyle"
+    ref="rootRef">
     <TextEditorBubbleMenu :buttons="bubbleMenu" :options="bubbleMenuOptions" />
-    <TextEditorFixedMenu
-      class="w-full overflow-x-auto rounded-t-lg border border-outline-gray-modals"
-      :buttons="fixedMenu"
-    />
+    <TextEditorFixedMenu class="w-full overflow-x-auto rounded-t-lg border border-outline-gray-modals"
+      :buttons="fixedMenu" />
     <TextEditorFloatingMenu :buttons="floatingMenu" />
-    <TableBorderMenu
-      :show="showTableBorderMenu"
-      :axis="tableBorderAxis"
-      :position="tableBorderMenuPos"
-      :cell-info="tableCellInfo"
-      :can-merge-cells="canMergeCells"
-      @add-row-before="addRowBefore"
-      @add-row-after="addRowAfter"
-      @delete-row="deleteRow"
-      @add-column-before="addColumnBefore"
-      @add-column-after="addColumnAfter"
-      @delete-column="deleteColumn"
-      @merge-cells="mergeCells"
-      @toggle-header="toggleHeader"
-      @set-background-color="setBackgroundColor"
-      @set-border-color="setBorderColor"
-      @set-border-width="setBorderWidth"
-    />
+    <TableBorderMenu :show="showTableBorderMenu" :axis="tableBorderAxis" :position="tableBorderMenuPos"
+      :cell-info="tableCellInfo" :can-merge-cells="canMergeCells" @add-row-before="addRowBefore"
+      @add-row-after="addRowAfter" @delete-row="deleteRow" @add-column-before="addColumnBefore"
+      @add-column-after="addColumnAfter" @delete-column="deleteColumn" @merge-cells="mergeCells"
+      @toggle-header="toggleHeader" @set-background-color="setBackgroundColor" @set-border-color="setBorderColor"
+      @set-border-width="setBorderWidth" />
     <slot name="top" :editor />
     <slot name="editor" :editor="editor">
-      <EditorContent :editor="editor" class="prose prose-sm" />
+      <EditorContent :editor="editor" />
     </slot>
     <slot name="bottom" :editor />
   </div>
@@ -62,23 +42,21 @@ import Typography from '@tiptap/extension-typography'
 import { TextStyleKit } from '@tiptap/extension-text-style'
 import { TaskList, TaskItem } from '@tiptap/extension-list'
 import TextAlign from '@tiptap/extension-text-align'
-import NodeRange from '@tiptap/extension-node-range'
-
 import { ImageExtension } from './extensions/image'
-import ImageViewerExtension from './image-viewer-extension'
-import { VideoExtension } from './video-extension'
+import ImageViewerExtension from './extensions/image-viewer-extension'
+import { VideoExtension } from './extensions/video-extension'
 import { IframeExtension } from './extensions/iframe'
 import { TocNodeExtension } from './extensions/toc-node'
-import LinkExtension from './link-extension'
+import { LinkExtension } from './extensions/link/'
 
 import NamedColorExtension from './extensions/color'
 import NamedHighlightExtension from './extensions/highlight'
 import StyleClipboardExtension from './extensions/copy-styles'
 import TableExtension from './extensions/tables/table-extension'
 import { MentionExtension } from './extensions/mention'
-import TextEditorFixedMenu from './TextEditorFixedMenu.vue'
-import TextEditorBubbleMenu from './TextEditorBubbleMenu.vue'
-import TextEditorFloatingMenu from './TextEditorFloatingMenu.vue'
+import TextEditorFixedMenu from './components/TextEditorFixedMenu.vue'
+import TextEditorBubbleMenu from './components/TextEditorBubbleMenu.vue'
+import TextEditorFloatingMenu from './components/TextEditorFloatingMenu.vue'
 import EmojiExtension from './extensions/emoji/emoji-extension'
 import SlashCommands from './extensions/slash-commands/slash-commands-extension'
 import { ContentPasteExtension } from './extensions/content-paste-extension'
@@ -147,7 +125,7 @@ const editorProps = computed(() => {
   return {
     attributes: {
       class: normalizeClass([
-        'prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:relative prose-th:relative prose-th:bg-surface-gray-2',
+        'prose prose-sm prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:relative prose-th:relative prose-th:bg-surface-gray-2',
         props.editorClass,
       ]),
     },
@@ -203,7 +181,7 @@ onMounted(() => {
       }),
       Heading.configure({
         ...(typeof props.starterkitOptions?.heading === 'object' &&
-        props.starterkitOptions.heading !== null
+          props.starterkitOptions.heading !== null
           ? props.starterkitOptions.heading
           : {}),
       }),
@@ -252,14 +230,14 @@ onMounted(() => {
             : () => props.placeholder as string,
       }),
       props.mentions &&
-        MentionExtension.configure(
-          Array.isArray(props.mentions)
-            ? { mentions: props.mentions }
-            : {
-                mentions: props.mentions.mentions,
-                component: props.mentions.component,
-              },
-        ),
+      MentionExtension.configure(
+        Array.isArray(props.mentions)
+          ? { mentions: props.mentions }
+          : {
+            mentions: props.mentions.mentions,
+            component: props.mentions.component,
+          },
+      ),
       EmojiExtension,
       SlashCommands,
       ...getTagExtensions(() => props.tags),
@@ -286,9 +264,6 @@ onMounted(() => {
       emit('blur', event)
     },
   })
-  // editor.value.on('selectionUpdate', ({ editor }) => {
-  //   console.log('Selection:', editor.state.selection)
-  // })
 })
 
 onBeforeUnmount(() => {
