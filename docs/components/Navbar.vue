@@ -82,10 +82,10 @@ whenever(meta_k, (n) => {
       :class="{ 'max-w-[1440px] mx-auto': !isDocs }"
     >
       <span
-        class="flex gap-3 items-center mr-auto md:mr-0"
+        class="flex gap-2 items-center mr-auto md:mr-0"
         :class="{ 'md:hidden': isDocs }"
       >
-        <img src="/logo.svg" class="w-5" />
+        <img src="/logo.svg" class="w-6" />
         <a href="/" class="font-medium">Frappe UI</a>
       </span>
 
