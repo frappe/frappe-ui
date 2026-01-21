@@ -102,6 +102,7 @@ export default defineConfig({
       alias: {
         '@/components': path.resolve(__dirname, '../components/'),
         'frappe-ui': path.resolve(__dirname, '../../src'),
+        'dayjs/esm': 'dayjs'
       },
     },
   },
