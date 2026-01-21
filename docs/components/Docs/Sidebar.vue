@@ -165,7 +165,8 @@ const linkClass = 'p-2 rounded'
 
             <details v-else class="group" :open="!item.collapsed">
               <summary
-                class="list-none w-full flex items-center justify-between gap-2 whitespace-nowrap font-medium text-ink-gray-600 border-t p-3 pr-1 group-open:text-ink-gray-800 cursor-pointer"
+                class="list-none w-full flex items-center justify-between gap-2 whitespace-nowrap font-medium
+                text-ink-gray-600 border-t p-3 pr-1 pl-2 group-open:text-ink-gray-800 cursor-pointer"
               >
                 {{ item.text }}
 

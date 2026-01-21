@@ -29,8 +29,6 @@ import pkgJson from '../../../package.json'
             <LucideRight class="size-4" />
           </template>
         </Button>
-
-        <Button href="/docs/components/button" as='a' size='md'> Show Components </Button>
       </div>
     </div>
   </div>
