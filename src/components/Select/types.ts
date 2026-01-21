@@ -3,11 +3,8 @@ export type SelectOption =
   | {
       label: string
       value: string
-      icon?: any
       disabled?: boolean
     }
-
-export type SelectValue = string | string[] | undefined
 
 export interface SelectProps {
   /** Size of the select input */
