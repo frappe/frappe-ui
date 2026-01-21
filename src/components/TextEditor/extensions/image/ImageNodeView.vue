@@ -177,7 +177,7 @@ function stopResize() {
 }
 
 function setFloat(float: 'left' | 'right' | null) {
-  if (isVideo.value) props.editor.commands.setVideoAlign(float)
+  if (isVideo.value) props.editor.commands.setVideoFloat(float)
   else props.editor.commands.setImageFloat(float)
 }
 

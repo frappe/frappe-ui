@@ -199,7 +199,7 @@ import {
   Switch,
   TagInput,
   Select,
-} from 'frappe-ui'
+} from '../../../src'
 import TeamSelector from './TeamSelector.vue'
 import { getFileLink, dynamicList } from '../js/utils'
 
