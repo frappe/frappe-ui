@@ -264,7 +264,7 @@ const wrapperClasses = (float: string) => [
 <template>
   <NodeViewWrapper
     as="div"
-    :class="node.attrs.float && wrapperClasses(node.attrs.float)"
+    :class="node.attrs.float ? wrapperClasses(node.attrs.float) : 'my-2'"
   >
     <div
       ref="containerRef"
