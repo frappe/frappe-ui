@@ -38,6 +38,14 @@ const selectedOptions = computed(() => {
 
 const clearAll = () => model.value = [];
 const selectAll = () => model.value = optionToStr(props.options);
+
+defineSlots<{
+  /** Rendered for each option in the dropdown. Receives the option object. */
+  option?: (props: { item: MultiSelectOption }) => any
+
+  /** Footer slot at the bottom of the dropdown. Receives helper functions `clearAll` and `selectAll`. */
+  footer?: (props: { clearAll: () => void; selectAll: () => void }) => any
+}>()
 </script>
 
 <template>

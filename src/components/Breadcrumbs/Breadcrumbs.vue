@@ -68,6 +68,7 @@ import type { BreadcrumbsProps } from './types'
 import { ref, computed, nextTick, useTemplateRef } from 'vue'
 import { useResizeObserver } from '@vueuse/core'
 import LucideEllipsis from '~icons/lucide/ellipsis'
+import type { BreadcrumbItem } from './types'
 
 const crumbsEl = useTemplateRef<HTMLDivElement>('crumbsRef')
 
@@ -116,4 +117,12 @@ const dropdownItems = computed(() => {
 })
 
 const crumbs = computed(() => items.value.slice(overflowedX.value ? -2 : 0))
+
+defineSlots<{
+  /** Content shown before each breadcrumb label */
+  prefix?: (props: { item: BreadcrumbItem }) => any
+
+  /** Content shown after each breadcrumb label */
+  suffix?: (props: { item: BreadcrumbItem }) => any
+}>()
 </script>

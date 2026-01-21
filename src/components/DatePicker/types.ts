@@ -1,4 +1,4 @@
-import type { Dayjs } from 'dayjs/esm'
+import type { Dayjs } from 'dayjs'
 
 // Shared props for both single date and range pickers
 export interface CommonDatePickerProps {

@@ -14,12 +14,26 @@ export interface SizeProps {
   checkIconSize: string
 }
 
+/** Props for the CircularProgressBar component */
 export interface CircularProgressBarProps {
+  /** Current step or progress value */
   step: number
+
+  /** Total steps for completion */
   totalSteps: number
+
+  /** Show numeric percentage inside the circle */
   showPercentage?: boolean
-  variant?: Variant
-  theme?: Theme | ThemeProps
-  size?: Size
+
+  /** Visual style of the progress bar */
+  variant?: 'solid' | 'outline'
+
+  /** Theme used for the progress bar (predefined or custom colors) */
+  theme?: 'black' | 'red' | 'green' | 'blue' | 'orange' | { primary: string; secondary: string }
+
+  /** Size of the progress bar */
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+
+  /** Color used when the progress completes */
   themeComplete?: string
 }

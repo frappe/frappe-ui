@@ -13,9 +13,10 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "story:dev": "histoire dev",
-    "story:build": "histoire build && cp 404.html .histoire/dist",
-    "story:preview": "histoire preview"
+    "docs:dev": "vitepress dev docs --host",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs",
+    "docs:gen": "node docs/scripts/propsgen.ts --trace-uncaught"
   },
   "exports": {
     ".": {
@@ -116,18 +117,18 @@
     "vue-router": "^4.1.6"
   },
   "devDependencies": {
-    "@histoire/plugin-vue": "^0.17.17",
     "@vitejs/plugin-vue": "^4.0.0",
     "autoprefixer": "^10.4.13",
-    "histoire": "^0.17.17",
     "lint-staged": ">=10",
     "msw": "^2.7.0",
     "postcss": "^8.4.21",
     "prettier-plugin-tailwindcss": "^0.1.13",
     "tailwindcss": "^3.2.7",
     "vite": "^5.1.8",
+    "vitepress": "^2.0.0-alpha.15",
     "vitest": "^2.1.8",
     "vue": "^3.3.0",
+    "vue-component-meta": "^3.1.8",
     "vue-router": "^4.1.6"
   },
   "resolutions": {

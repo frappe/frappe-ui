@@ -24,4 +24,6 @@ dist-ssr
 *.sln
 *.sw?
 
+docs/.vitepress/cache
+docs/.vitepress/dist
 components.d.ts

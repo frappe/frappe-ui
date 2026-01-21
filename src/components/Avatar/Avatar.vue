@@ -128,4 +128,13 @@ function handleImageError(err) {
     imgFetchError.value = true
   }
 }
+
+defineSlots<{
+  /** Custom content shown inside the avatar (icon / initials replacement) */
+  default?: () => any
+
+  /** Small indicator shown at the bottom-right of the avatar */
+  indicator?: () => any
+}>()
+
 </script>

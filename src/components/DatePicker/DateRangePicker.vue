@@ -210,7 +210,7 @@ import { TextInput } from '../TextInput'
 import FeatherIcon from '../FeatherIcon.vue'
 import { dayjs, dayjsLocal } from '../../utils/dayjs'
 import { months, monthStart, generateWeeks, getDateValue } from './utils'
-import type { Dayjs } from 'dayjs/esm'
+import type { Dayjs } from 'dayjs'
 import type {
   DatePickerEmits,
   DateRangePickerProps,

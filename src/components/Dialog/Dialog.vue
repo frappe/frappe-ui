@@ -144,8 +144,13 @@ const props = withDefaults(defineProps<DialogProps>(), {
 })
 
 const emit = defineEmits<{
+  /** Fired when the dialog `v-model:open` changes */
   (event: 'update:modelValue', value: boolean): void
+
+  /** Fired when the dialog closes */
   (event: 'close'): void
+
+  /** Fired after the dialog overlay finishes leaving */
   (event: 'after-leave'): void
 }>()
 
@@ -257,6 +262,23 @@ const dialogIconClasses = computed(() => {
   }
   return classMap[appearance]
 })
+
+const slots = defineSlots<{
+  /** Main body content of the dialog, overrides body-header and body-content */
+  body?: () => any
+
+  /** Header section inside the dialog body */
+  'body-header'?: () => any
+
+  /** Title section inside the header */
+  'body-title'?: () => any
+
+  /** Main content section inside the body */
+  'body-content'?: () => any
+
+  /** Actions section at the bottom of the dialog; exposes `{ close }` */
+  actions?: (scope: { close: () => void }) => any
+}>()
 </script>
 
 <style scoped>

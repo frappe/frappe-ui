@@ -36,7 +36,12 @@ export type DialogAction = ButtonProps & {
 }
 
 export interface DialogProps {
+  /** Controls whether the dialog is open (v-model) */
   modelValue: boolean
+
+  /** Configuration options for title, message, size, icon, actions, etc. */
   options?: DialogOptions
+
+  /** Prevents closing the dialog when clicking outside */
   disableOutsideClickToClose?: boolean
 }
