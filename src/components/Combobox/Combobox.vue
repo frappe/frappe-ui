@@ -68,7 +68,6 @@ watch(
     searchTerm.value = getDisplayValue(newValue)
   },
 )
-watch(() => props.modelValue, console.log)
 watch(
   () => getDisplayValue(props.modelValue),
   (newDisplay) => {
@@ -336,7 +335,6 @@ defineSlots<{
                   v-for="(option, idx) in optionOrGroup.options"
                   :key="`${index}-${idx}`"
                   :value="getKey(option)"
-                  :disabled="isDisabled(option)"
                   class="text-base leading-none text-ink-gray-7 rounded flex items-center h-7 px-2.5 py-1.5 relative select-none data-[disabled]:opacity-50 data-[disabled]:pointer-events-none data-[highlighted]:outline-none data-[highlighted]:bg-surface-gray-3"
                 >
                   <slot
@@ -366,7 +364,6 @@ defineSlots<{
                 v-else
                 :key="index"
                 :value="getKey(optionOrGroup)"
-                :disabled="isDisabled(optionOrGroup)"
                 class="text-base leading-none text-ink-gray-7 rounded flex items-center h-7 px-2.5 py-1.5 relative select-none data-[disabled]:opacity-50 data-[disabled]:pointer-events-none data-[highlighted]:outline-none data-[highlighted]:bg-surface-gray-3"
               >
                 <slot
