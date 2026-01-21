@@ -6,13 +6,6 @@
 </script>
 <PropsTable name="Button" :data='[
   {
-    "name": "as",
-    "description": "The element or component this should render as",
-    "required": false,
-    "type": "string",
-    "default": "\"button\""
-  },
-  {
     "name": "theme",
     "description": "Visual color theme of the button",
     "required": false,
@@ -87,7 +80,7 @@
     "name": "route",
     "description": "Router destination when used as a link",
     "required": false,
-    "type": "string | RouteLocationAsRelativeGeneric | RouteLocationAsPathGeneric"
+    "type": "string | kt | Tt"
   },
   {
     "name": "link",
