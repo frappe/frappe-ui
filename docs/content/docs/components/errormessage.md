@@ -1,4 +1,4 @@
-# ErrorMessage
+# Error Message
 
 Displays a clear message to indicate errors or issues. Helps users understand problems and take corrective action quickly.
 

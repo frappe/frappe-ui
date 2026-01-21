@@ -41,7 +41,7 @@ const list = [
   },
 
   {
-    text: 'Espresso Design System',
+    text: 'Design System',
     collapsed: false,
     items: [
       {

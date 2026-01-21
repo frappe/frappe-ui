@@ -36,26 +36,24 @@ defineProps({
 
 const route = useRoute()
 const routes = computed(() => {
-  let arr = route.path.split('/')
-  arr = arr.filter((x) => !['/', ''].includes(x))
+  const curoute = route.path.replace(/\/+$/, '')
+  const routelabels = []
 
-  const nestedRoutes = state.sidebarList
-    .reduce((acc, cur) => [...acc, ...(cur.items || [])], [])
-    .map((x) => ({
-      label: x.text,
-      value: x.link,
-    }))
+  for (const x of state.sidebarList) {
+    if (!x.items) {
+      routelabels.push({ label: x.text, link: x.link })
+    } //
+    else {
+      const tmp = x.items.map((nested) => ({
+        label: x.text + '/' + nested.text,
+        link: nested.link,
+      }))
+      routelabels.push(...tmp)
+    }
+  }
 
-  arr = arr.map((x) => {
-    const routeval = nestedRoutes.find((y) => y.value.split('/').at(-1) === x)
-    let labelval = nestedRoutes.find((y) => y.value === x)?.label
-    labelval = labelval || x.replaceAll('-', ' ')
-    return { label: labelval, route: routeval?.value }
-  })
-
-  arr = arr.filter((x) => x.label != 'docs')
-
-  return arr
+  const activeLabel = routelabels.find((x) => x.link === curoute)?.label
+  return activeLabel.split('/').map((x) => ({ label: x }))
 })
 
 watch(route, (x) => {
