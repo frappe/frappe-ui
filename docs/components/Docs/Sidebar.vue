@@ -37,7 +37,7 @@ const list = [
   },
   {
     text: 'Getting Started',
-    link: '/docs',
+    link: '/docs/getting-started',
   },
 
   {

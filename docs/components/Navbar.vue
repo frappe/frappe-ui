@@ -53,7 +53,7 @@ const routes = computed(() => {
   }
 
   const activeLabel = routelabels.find((x) => x.link === curoute)?.label
-  return activeLabel.split('/').map((x) => ({ label: x }))
+  return activeLabel?.split('/')?.map((x) => ({ label: x }))
 })
 
 watch(route, (x) => {
