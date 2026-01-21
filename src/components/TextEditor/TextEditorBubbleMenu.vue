@@ -48,6 +48,7 @@ export default {
           'Align Left',
           'Align Center',
           'Align Right',
+          'Align Justify',
           'Separator',
           'Image',
           'Video',
