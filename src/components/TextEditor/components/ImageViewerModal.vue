@@ -1,18 +1,34 @@
 <template>
   <Teleport to="body">
-    <Transition enter-active-class="transition-opacity duration-150 ease-in-out"
-      leave-active-class="transition-opacity duration-150 ease-in-out" enter-from-class="opacity-0"
-      leave-to-class="opacity-0" appear>
-      <div v-if="props.show"
+    <Transition
+      enter-active-class="transition-opacity duration-150 ease-in-out"
+      leave-active-class="transition-opacity duration-150 ease-in-out"
+      enter-from-class="opacity-0"
+      leave-to-class="opacity-0"
+      appear
+    >
+      <div
+        v-if="props.show"
         class="fixed top-0 left-0 w-full h-full bg-black sm:bg-black/90 z-[50] flex flex-col justify-center items-center overflow-hidden touch-none"
-        ref="imageContainer" @mousemove="handleActivity" @touchstart="handleActivity" @touchmove="handleActivity">
+        ref="imageContainer"
+        @mousemove="handleActivity"
+        @touchstart="handleActivity"
+        @touchmove="handleActivity"
+      >
         <!-- Dedicated Backdrop -->
-        <div class="absolute inset-0 z-0" ref="backdropElement" @click="close"></div>
+        <div
+          class="absolute inset-0 z-0"
+          ref="backdropElement"
+          @click="close"
+        ></div>
 
         <!-- Image Container -->
         <div class="relative z-10 flex flex-col items-center">
-          <img :src="currentImage.src" :alt="currentImage.alt || 'Image preview'"
-            class="max-w-screen max-h-screen object-contain block" :style="{
+          <img
+            :src="currentImage.src"
+            :alt="currentImage.alt || 'Image preview'"
+            class="max-w-screen max-h-screen object-contain block"
+            :style="{
               transform: `scale(${zoomLevel / 100}) translate(${panPosition.x}px, ${panPosition.y}px)`,
               cursor:
                 zoomLevel > 100
@@ -24,25 +40,39 @@
                 isPanning || isPinching || isAnimatingPan
                   ? 'none'
                   : 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-            }" @mousedown="handlePanStart" draggable="false" />
+            }"
+            @mousedown="handlePanStart"
+            draggable="false"
+          />
         </div>
 
         <!-- Caption -->
-        <div v-if="currentImage.alt"
+        <div
+          v-if="currentImage.alt"
           class="absolute bottom-4 p-2 text-center rounded-sm text-white text-sm bg-black/65 z-10 transition-opacity duration-300 ease-in-out"
-          :class="{ 'opacity-0 pointer-events-none': !isControlsVisible }">
+          :class="{ 'opacity-0 pointer-events-none': !isControlsVisible }"
+        >
           {{ currentImage.alt }}
         </div>
 
         <!-- Controls bar -->
-        <div ref="controlsBar"
+        <div
+          ref="controlsBar"
           class="absolute top-4 flex items-center space-x-3 p-2 text-white z-20 transition-opacity duration-300 ease-in-out"
-          :class="{ 'opacity-0 pointer-events-none': !isControlsVisible }" @touchstart.stop @touchmove.stop
-          @touchend.stop @mousedown.stop @wheel.stop>
+          :class="{ 'opacity-0 pointer-events-none': !isControlsVisible }"
+          @touchstart.stop
+          @touchmove.stop
+          @touchend.stop
+          @mousedown.stop
+          @wheel.stop
+        >
           <!-- Navigation controls -->
           <div class="bg-black/65 rounded flex items-center">
             <Tooltip text="Previous image">
-              <button class="p-2 hover:bg-gray-900 rounded-l focus:outline-none" @click.stop="previousImage">
+              <button
+                class="p-2 hover:bg-gray-900 rounded-l focus:outline-none"
+                @click.stop="previousImage"
+              >
                 <LucideChevronLeft class="size-4" />
               </button>
             </Tooltip>
@@ -52,7 +82,10 @@
             </span>
 
             <Tooltip text="Next image">
-              <button class="p-2 hover:bg-gray-900 rounded-r focus:outline-none" @click.stop="nextImage">
+              <button
+                class="p-2 hover:bg-gray-900 rounded-r focus:outline-none"
+                @click.stop="nextImage"
+              >
                 <LucideChevronRight class="size-4" />
               </button>
             </Tooltip>
@@ -61,19 +94,28 @@
           <!-- Zoom controls -->
           <div class="bg-black/65 rounded flex items-center">
             <Tooltip text="Zoom out">
-              <button class="p-2 hover:bg-gray-900 rounded-l focus:outline-none" @click.stop="zoomOut">
+              <button
+                class="p-2 hover:bg-gray-900 rounded-l focus:outline-none"
+                @click.stop="zoomOut"
+              >
                 <LucideMinus class="size-4" />
               </button>
             </Tooltip>
 
             <Tooltip text="Reset zoom">
-              <button class="p-2 hover:bg-gray-900 text-sm text-gray-400 focus:outline-none" @click.stop="resetZoom">
+              <button
+                class="p-2 hover:bg-gray-900 text-sm text-gray-400 focus:outline-none"
+                @click.stop="resetZoom"
+              >
                 {{ zoomLevel }}%
               </button>
             </Tooltip>
 
             <Tooltip text="Zoom in">
-              <button class="p-2 hover:bg-gray-900 rounded-r focus:outline-none" @click.stop="zoomIn">
+              <button
+                class="p-2 hover:bg-gray-900 rounded-r focus:outline-none"
+                @click.stop="zoomIn"
+              >
                 <LucidePlus class="size-4" />
               </button>
             </Tooltip>
@@ -82,14 +124,21 @@
           <!-- Action controls -->
           <div class="bg-black/65 rounded flex items-center">
             <Tooltip text="Download image">
-              <button class="p-2 hover:bg-gray-900 rounded-l focus:outline-none" @click.stop="downloadImage">
+              <button
+                class="p-2 hover:bg-gray-900 rounded-l focus:outline-none"
+                @click.stop="downloadImage"
+              >
                 <LucideDownload class="size-4" />
               </button>
             </Tooltip>
 
-            <Tooltip :text="isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'">
-              <button class="p-2 hover:bg-gray-900 rounded-r focus:outline-none hidden sm:block"
-                @click.stop="toggleFullscreen">
+            <Tooltip
+              :text="isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'"
+            >
+              <button
+                class="p-2 hover:bg-gray-900 rounded-r focus:outline-none hidden sm:block"
+                @click.stop="toggleFullscreen"
+              >
                 <LucideMaximize v-if="!isFullscreen" class="size-4" />
                 <LucideMinimize v-else class="size-4" />
               </button>
@@ -99,7 +148,10 @@
           <!-- Close button -->
           <div class="bg-black/65 rounded flex items-center">
             <Tooltip text="Close">
-              <button class="p-2 hover:bg-gray-900 rounded focus:outline-none" @click.stop="close">
+              <button
+                class="p-2 hover:bg-gray-900 rounded focus:outline-none"
+                @click.stop="close"
+              >
                 <LucideX class="size-4" />
               </button>
             </Tooltip>

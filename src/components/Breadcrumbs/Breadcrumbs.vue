@@ -15,46 +15,61 @@
 
     <div class="flex min-w-0 items-center text-ellipsis whitespace-nowrap">
       <template v-for="(item, i) in crumbs" :key="item.label">
-        <router-link v-if="item.route" :to="item.route" @click="item.onClick ? item.onClick() : null"
+        <router-link
+          v-if="item.route"
+          :to="item.route"
+          @click="item.onClick ? item.onClick() : null"
           class="flex items-center rounded px-0.5 py-1 text-lg font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
           :class="[
             i == crumbs.length - 1
               ? 'text-ink-gray-9'
               : 'text-ink-gray-5 hover:text-ink-gray-7',
-          ]">
+          ]"
+        >
           <slot name="prefix" :item="item" />
           <span>
             {{ item.label }}
           </span>
           <slot name="suffix" :item="item" />
         </router-link>
-        <a v-else-if="item.href" :href="item.href" @click="item.onClick ? item.onClick() : null"
+        <a
+          v-else-if="item.href"
+          :href="item.href"
+          @click="item.onClick ? item.onClick() : null"
           class="flex items-center rounded px-0.5 py-1 text-lg font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
           :class="[
             i == crumbs.length - 1
               ? 'text-ink-gray-9'
               : 'text-ink-gray-5 hover:text-ink-gray-7',
-          ]">
+          ]"
+        >
           <slot name="prefix" :item="item" />
           <span>
             {{ item.label }}
           </span>
           <slot name="suffix" :item="item" />
         </a>
-        <button v-else @click="item.onClick ? item.onClick() : null"
+        <button
+          v-else
+          @click="item.onClick ? item.onClick() : null"
           class="flex items-center rounded px-0.5 py-1 text-lg font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
           :class="[
             i == crumbs.length - 1
               ? 'text-ink-gray-9'
               : 'text-ink-gray-5 hover:text-ink-gray-7',
-          ]">
+          ]"
+        >
           <slot name="prefix" :item="item" />
           <span>
             {{ item.label }}
           </span>
           <slot name="suffix" :item="item" />
         </button>
-        <span v-if="i != crumbs.length - 1" class="mx-0.5 text-base text-ink-gray-4" aria-hidden="true">
+        <span
+          v-if="i != crumbs.length - 1"
+          class="mx-0.5 text-base text-ink-gray-4"
+          aria-hidden="true"
+        >
           /
         </span>
       </template>
