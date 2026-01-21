@@ -77,12 +77,6 @@ import TextEditorFloatingMenu from './components/TextEditorFloatingMenu.vue'
 
 import { useFileUpload } from '../../utils/useFileUpload'
 import { TextEditorEmits, TextEditorProps } from './types'
-import {
-  Table,
-  TableRow,
-  TableCell,
-  TableHeader,
-} from '@tiptap/extension-table'
 import { getTagExtensions } from './extensions/tag'
 
 function defaultUploadFunction(file: File) {
