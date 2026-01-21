@@ -4,76 +4,83 @@ import {
   mergeAttributes,
 } from '@tiptap/core'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
-import MediaNodeView from '../../components/MediaNodeView.vue'
+import MediaNodeView from '../components/MediaNodeView.vue'
 import { Plugin, Selection, Transaction, EditorState } from '@tiptap/pm/state'
 import { EditorView } from '@tiptap/pm/view'
 import { Node } from '@tiptap/pm/model'
-import { fileToBase64 } from '../../../../index'
-import { UploadedFile } from '../../../../utils/useFileUpload'
+import { fileToBase64 } from '../../../index'
+import { UploadedFile } from '../../../utils/useFileUpload'
 
-export interface ImageExtensionOptions {
+export interface VideoExtensionOptions {
   /**
-   * Function to handle image uploads
+   * Function to handle video uploads
    * @default null
    */
   uploadFunction: ((file: File) => Promise<UploadedFile>) | null
 
   /**
-   * HTML attributes to add to the image element
+   * HTML attributes to add to the video element
    * @default {}
    */
   HTMLAttributes: Record<string, any>
 }
 
-export interface SetImageOptions {
+export interface SetVideoOptions {
   src: string
   alt?: string
   title?: string
   width?: string | number | null
   height?: string | number | null
+  autoplay?: boolean
+  loop?: boolean
+  muted?: boolean
 }
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
-    image: {
+    video: {
       /**
-       * Insert an image
+       * Insert a video
        */
-      setImage: (options: SetImageOptions) => ReturnType
+      setVideo: (options: SetVideoOptions) => ReturnType
 
       /**
-       * Upload and insert an image
+       * Upload and insert a video
        */
-      uploadImage: (file: File) => ReturnType
+      uploadVideo: (file: File) => ReturnType
 
       /**
-       * Select an image file using the file picker and upload it
+       * Select a video file using the file picker and upload it
        */
-      selectAndUploadImage: () => ReturnType
+      selectAndUploadVideo: () => ReturnType
+
       /**
-       * Set image alignment
+       * Set video floating
        */
-      setImageAlign: (align: 'left' | 'center' | 'right') => ReturnType
-      /**
-       * Set image float for text wrapping
-       */
-      setImageFloat: (float: 'left' | 'right' | null) => ReturnType
+      setVideoFloat: (float: 'left' | 'right' | null) => ReturnType
     }
   }
 }
 
 /**
- * Matches markdown image syntax: ![alt](src "title")
+ * Matches markdown-style video syntax (custom): !video[alt](src "title")
  */
-const inputRegex = /(?:^|\s)(!\[(.+|:?)]\((\S+)(?:(?:\s+)["'](\S+)["'])?\))$/
+const inputRegex =
+  /(?:^|\s)(!video\[(.+|:?)]\((\S+)(?:(?:\s+)["'](\S+)["'])?\))$/
 
-export const ImageExtension = NodeExtension.create<ImageExtensionOptions>({
-  name: 'image',
-
-  group: 'inline',
-  inline: true,
-  draggable: true,
+export const VideoExtension = NodeExtension.create<VideoExtensionOptions>({
+  name: 'video',
+  group: 'block',
   selectable: true,
+  draggable: true,
+  atom: true,
+
+  addOptions() {
+    return {
+      uploadFunction: null,
+      HTMLAttributes: {},
+    }
+  },
 
   addAttributes() {
     return {
@@ -82,39 +89,27 @@ export const ImageExtension = NodeExtension.create<ImageExtensionOptions>({
       title: { default: null },
       width: { default: null },
       height: { default: null },
+      autoplay: { default: false },
+      loop: { default: false },
+      muted: { default: false },
       loading: {
         default: false,
         parseHTML: () => false,
       },
-      align: {
-        default: 'center',
-        parseHTML: (element) => {
-          const align = (
-            element.getAttribute('data-align') ||
-            element.getAttribute('align') ||
-            'left'
-          ).toLowerCase()
-
-          if (['left', 'center', 'right'].includes(align)) {
-            return align as 'left' | 'center' | 'right'
-          }
-          return 'left'
-        },
-        renderHTML: (attributes) => {
-          return {
-            'data-align': attributes.align || 'left',
-          }
-        },
-      },
       float: {
         default: null,
         parseHTML: (element) => {
-          return element.getAttribute('data-float') || null
+          const float =
+            element.getAttribute('data-float') || element.getAttribute('float')
+
+          if (['left', 'right', null].includes(float)) {
+            return float as 'left' | 'right' | null
+          }
+          return null
         },
         renderHTML: (attributes) => {
-          if (!attributes.float) return {}
           return {
-            'data-float': attributes.float,
+            'data-float': attributes.float || null,
           }
         },
       },
@@ -132,7 +127,7 @@ export const ImageExtension = NodeExtension.create<ImageExtensionOptions>({
   parseHTML() {
     return [
       {
-        tag: 'img[src]',
+        tag: 'video',
         getAttrs: (node) => {
           if (typeof node === 'string') return {}
           const element = node as HTMLElement
@@ -142,6 +137,9 @@ export const ImageExtension = NodeExtension.create<ImageExtensionOptions>({
             title: element.getAttribute('title'),
             width: element.getAttribute('width'),
             height: element.getAttribute('height'),
+            autoplay: element.hasAttribute('autoplay'),
+            loop: element.hasAttribute('loop'),
+            muted: element.hasAttribute('muted'),
           }
         },
       },
@@ -150,8 +148,10 @@ export const ImageExtension = NodeExtension.create<ImageExtensionOptions>({
 
   renderHTML({ HTMLAttributes }) {
     return [
-      'img',
-      mergeAttributes(this.options.HTMLAttributes || {}, HTMLAttributes),
+      'video',
+      mergeAttributes(this.options.HTMLAttributes, HTMLAttributes, {
+        controls: '',
+      }),
     ]
   },
 
@@ -159,28 +159,16 @@ export const ImageExtension = NodeExtension.create<ImageExtensionOptions>({
     return VueNodeViewRenderer(MediaNodeView)
   },
 
-  addOptions() {
-    return {
-      uploadFunction: null,
-      HTMLAttributes: {},
-    }
-  },
-
   addCommands() {
     return {
-      setImageAlign:
-        (align: 'left' | 'center' | 'right') =>
-        ({ commands }) => {
-          return commands.updateAttributes(this.name, { align })
-        },
-      setImageFloat:
+      setVideoFloat:
         (float: 'left' | 'right' | null) =>
         ({ commands }) => {
           return commands.updateAttributes(this.name, { float })
         },
 
-      setImage:
-        (attributes: SetImageOptions) =>
+      setVideo:
+        (attributes: SetVideoOptions) =>
         ({ commands, editor }) => {
           const result = commands.insertContent({
             type: this.name,
@@ -188,7 +176,7 @@ export const ImageExtension = NodeExtension.create<ImageExtensionOptions>({
           })
 
           if (result && attributes.src) {
-            findImageNodeBySource(editor.view, attributes.src, (node, pos) => {
+            findVideoNodeBySource(editor.view, attributes.src, (node, pos) => {
               updateNodeWithDimensions(attributes.src, editor.view, pos)
             })
           }
@@ -196,23 +184,23 @@ export const ImageExtension = NodeExtension.create<ImageExtensionOptions>({
           return result
         },
 
-      uploadImage:
+      uploadVideo:
         (file: File) =>
         ({ editor }) => {
-          return uploadImage(file, editor.view, null, this.options)
+          return uploadVideo(file, editor.view, null, this.options)
         },
 
-      selectAndUploadImage:
+      selectAndUploadVideo:
         () =>
         ({ editor }) => {
           const input = document.createElement('input')
           input.type = 'file'
-          input.accept = 'image/*'
+          input.accept = 'video/*'
           input.onchange = (event) => {
             const target = event.target as HTMLInputElement
             if (target.files && target.files.length) {
               const file = target.files[0]
-              editor.commands.uploadImage(file)
+              editor.commands.uploadVideo(file)
             }
           }
           input.click()
@@ -248,11 +236,11 @@ export const ImageExtension = NodeExtension.create<ImageExtensionOptions>({
                 return false
               }
 
-              const images = Array.from(event.dataTransfer.files).filter(
-                (file) => /image/i.test(file.type),
+              const videos = Array.from(event.dataTransfer.files).filter(
+                (file) => /video/i.test(file.type),
               )
 
-              if (images.length === 0) {
+              if (videos.length === 0) {
                 return false
               }
 
@@ -272,11 +260,11 @@ export const ImageExtension = NodeExtension.create<ImageExtensionOptions>({
                 view.dispatch(transaction)
               }
 
-              processMultipleImages(images, view, pos, extensionThis.options)
+              processMultipleVideos(videos, view, pos, extensionThis.options)
               return true
             },
 
-            handlePaste: (view, event) => {
+            paste: (view, event) => {
               if (!extensionThis.options.uploadFunction) {
                 return false
               }
@@ -286,27 +274,23 @@ export const ImageExtension = NodeExtension.create<ImageExtensionOptions>({
                 return false
               }
 
-              const images: File[] = []
+              const videos: File[] = []
 
               for (let i = 0; i < clipboardItems.length; i++) {
                 const item = clipboardItems[i]
                 if (
                   item.kind === 'file' &&
-                  item.type.indexOf('image/') !== -1
+                  item.type.indexOf('video/') !== -1
                 ) {
                   const file = item.getAsFile()
-                  if (file) {
-                    images.push(file)
-                  }
+                  if (file) videos.push(file)
                 }
               }
 
-              if (images.length === 0) {
-                return false
-              }
+              if (videos.length === 0) return false
 
               event.preventDefault()
-              processMultipleImages(images, view, null, extensionThis.options)
+              processMultipleVideos(videos, view, null, extensionThis.options)
               return true
             },
           },
@@ -317,24 +301,24 @@ export const ImageExtension = NodeExtension.create<ImageExtensionOptions>({
           oldState: EditorState,
           newState: EditorState,
         ): Transaction | null {
-          const newImageNodes: { node: Node; pos: number }[] = []
+          const newVideoNodes: { node: Node; pos: number }[] = []
 
           if (transactions.some((tr) => tr.docChanged)) {
             newState.doc.descendants((node, pos) => {
               if (
-                node.type.name === 'image' &&
+                node.type.name === 'video' &&
                 node.attrs.src &&
                 (!node.attrs.width || !node.attrs.height) &&
                 !node.attrs.loading
               ) {
-                newImageNodes.push({ node, pos })
+                newVideoNodes.push({ node, pos })
               }
             })
           }
 
-          if (newImageNodes.length === 0) return null
+          if (newVideoNodes.length === 0) return null
 
-          newImageNodes.forEach(({ node, pos }) => {
+          newVideoNodes.forEach(({ node, pos }) => {
             const editor = extensionThis.editor
             if (editor) {
               updateNodeWithDimensions(node.attrs.src, editor.view, pos)
@@ -359,7 +343,7 @@ function findInsertPosition(
   let insertPos = null
 
   view.state.doc.descendants((node, pos) => {
-    if (node.type.name === 'image' && node.attrs.uploadId === lastNodeId) {
+    if (node.type.name === 'video' && node.attrs.uploadId === lastNodeId) {
       insertPos = pos + node.nodeSize
       return false
     }
@@ -368,8 +352,8 @@ function findInsertPosition(
   return insertPos
 }
 
-// Base upload function shared by all image upload methods
-function uploadImageBase(
+// Base upload function shared by all video upload methods
+function uploadVideoBase(
   file: File,
   view: EditorView,
   pos: number | null | undefined,
@@ -379,7 +363,7 @@ function uploadImageBase(
   moveCursor = false,
 ): boolean {
   if (!options.uploadFunction) {
-    console.error('uploadFunction option is not provided')
+    console.error('uploadFunction option is not provided for videos.')
     return false
   }
 
@@ -387,7 +371,7 @@ function uploadImageBase(
 
   fileToBase64(file)
     .then((base64Result: string) => {
-      const node = view.state.schema.nodes.image.create({
+      const node = view.state.schema.nodes.video.create({
         loading: true,
         uploadId,
         src: base64Result,
@@ -417,7 +401,7 @@ function uploadImageBase(
           try {
             let nodePos = null
             view.state.doc.descendants((n, p) => {
-              if (n.type.name === 'image' && n.attrs.uploadId === uploadId) {
+              if (n.type.name === 'video' && n.attrs.uploadId === uploadId) {
                 nodePos = p
                 return false
               }
@@ -438,32 +422,32 @@ function uploadImageBase(
 
       return options.uploadFunction(file)
     })
-    .then((uploadedImage: UploadedFile) => {
-      return getImageDimensions(uploadedImage.file_url)
+    .then((uploadedVideo: UploadedFile) => {
+      return getVideoDimensions(uploadedVideo.file_url)
         .then((dimensions) => {
           return {
-            ...uploadedImage,
+            ...uploadedVideo,
             width: dimensions.width,
             height: dimensions.height,
           } as UploadedFile & { width: number; height: number }
         })
         .catch(() => {
-          return uploadedImage as UploadedFile & {
+          return uploadedVideo as UploadedFile & {
             width: number
             height: number
           }
         })
     })
-    .then((uploadedImage) => {
+    .then((uploadedVideo) => {
       const transaction = view.state.tr
 
       view.state.doc.descendants((node, pos) => {
-        if (node.type.name === 'image' && node.attrs.uploadId === uploadId) {
+        if (node.type.name === 'video' && node.attrs.uploadId === uploadId) {
           transaction.setNodeMarkup(pos, undefined, {
             ...node.attrs,
-            src: uploadedImage.file_url,
-            width: uploadedImage.width || node.attrs.width,
-            height: uploadedImage.height || node.attrs.height,
+            src: uploadedVideo.file_url,
+            width: uploadedVideo.width || node.attrs.width,
+            height: uploadedVideo.height || node.attrs.height,
             loading: false,
           })
           return false
@@ -475,17 +459,17 @@ function uploadImageBase(
       if (onComplete) onComplete(uploadId)
     })
     .catch((error: Error) => {
-      console.error('Image upload failed:', error)
+      console.error('Video upload failed:', error)
 
       try {
         const transaction = view.state.tr
 
         view.state.doc.descendants((node, pos) => {
-          if (node.type.name === 'image' && node.attrs.uploadId === uploadId) {
+          if (node.type.name === 'video' && node.attrs.uploadId === uploadId) {
             transaction.setNodeMarkup(pos, undefined, {
               ...node.attrs,
               loading: false,
-              error: error.message || 'Failed to upload image',
+              error: error.message || 'Failed to upload video',
             })
             return false
           }
@@ -502,32 +486,32 @@ function uploadImageBase(
   return true
 }
 
-function uploadImageWithTracking(
+function uploadVideoWithTracking(
   file: File,
   view: EditorView,
   pos: number | null | undefined,
   options: Record<string, any>,
   onComplete?: (nodeId: string) => void,
 ): boolean {
-  return uploadImageBase(file, view, pos, options, 'insert', onComplete, true)
+  return uploadVideoBase(file, view, pos, options, 'insert', onComplete, true)
 }
 
-function uploadImage(
+function uploadVideo(
   file: File,
   view: EditorView,
   pos: number | null | undefined,
   options: Record<string, any>,
 ): boolean {
-  return uploadImageBase(file, view, pos, options, 'replace')
+  return uploadVideoBase(file, view, pos, options, 'replace')
 }
 
-function findImageNodeBySource(
+function findVideoNodeBySource(
   view: EditorView,
   src: string,
   callback: (node: Node, pos: number) => void,
 ) {
   view.state.doc.descendants((node, pos) => {
-    if (node.type.name === 'image' && node.attrs.src === src) {
+    if (node.type.name === 'video' && node.attrs.src === src) {
       callback(node, pos)
       return false
     }
@@ -539,10 +523,10 @@ function updateNodeWithDimensions(
   view: EditorView,
   pos: number,
 ): void {
-  getImageDimensions(src)
+  getVideoDimensions(src)
     .then((dimensions) => {
       const node = view.state.doc.nodeAt(pos)
-      if (!node || node.type.name !== 'image') {
+      if (!node || node.type.name !== 'video') {
         return
       }
       const currentAttrs = node.attrs
@@ -557,57 +541,63 @@ function updateNodeWithDimensions(
       }
     })
     .catch((error) => {
-      // Don't log error if it's just about dimensions for an existing node
+      console.error('Could not upload video', error)
     })
 }
 
-function getImageDimensions(
+function getVideoDimensions(
   src: string,
 ): Promise<{ width: number; height: number }> {
   return new Promise((resolve, reject) => {
-    const img = new Image()
-    img.onload = () =>
+    const video = document.createElement('video')
+    video.preload = 'metadata'
+
+    video.onloadedmetadata = () => {
       resolve({
-        width: img.naturalWidth,
-        height: img.naturalHeight,
+        width: video.videoWidth,
+        height: video.videoHeight,
       })
-    img.onerror = reject
-    img.src = src
+      // Clean up
+      video.src = ''
+    }
+
+    video.onerror = reject
+    video.src = src
   })
 }
 
 /**
- * Process multiple image uploads sequentially
+ * Process multiple video uploads sequentially
  */
-export function processMultipleImages(
-  images: File[],
+export function processMultipleVideos(
+  videos: File[],
   view: EditorView,
   pos: number | null,
   options: Record<string, any>,
 ) {
-  if (images.length === 1) {
-    uploadImage(images[0], view, pos, options)
+  if (videos.length === 1) {
+    uploadVideo(videos[0], view, pos, options)
     return
   }
 
-  let imageQueue = [...images]
+  let videoQueue = [...videos]
   let lastInsertedNodeId: string | null = null
 
-  const processNextImage = () => {
-    if (imageQueue.length === 0) return
+  const processNextVideo = () => {
+    if (videoQueue.length === 0) return
 
-    const file = imageQueue.shift()
+    const file = videoQueue.shift()
     if (!file) return
 
     const currentPos = lastInsertedNodeId
       ? findInsertPosition(view, lastInsertedNodeId)
       : pos
 
-    uploadImageWithTracking(file, view, currentPos, options, (newNodeId) => {
+    uploadVideoWithTracking(file, view, currentPos, options, (newNodeId) => {
       lastInsertedNodeId = newNodeId
-      setTimeout(processNextImage, 100)
+      setTimeout(processNextVideo, 100)
     })
   }
 
-  processNextImage()
+  processNextVideo()
 }

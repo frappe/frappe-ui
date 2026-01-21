@@ -1,5 +1,6 @@
-import { Extension } from '@tiptap/core'
+import { Extension, Node } from '@tiptap/core'
 import { Plugin, PluginKey } from '@tiptap/pm/state'
+import { Slice, Fragment } from '@tiptap/pm/model'
 import { DOMParser } from '@tiptap/pm/model'
 import { EditorView } from '@tiptap/pm/view'
 import { detectMarkdown, markdownToHTML } from '../../../utils/markdown'
@@ -19,42 +20,18 @@ export const ContentPasteExtension = Extension.create<ContentPasteOptions>({
       uploadFunction: null,
     }
   },
-
   addProseMirrorPlugins() {
     const extensionThis = this
     return [
       new Plugin({
         key: new PluginKey('contentPaste'),
         props: {
-          handleDOMEvents: {
-            copy: (view, event) => {
-              const selection = window.getSelection()
-              if (!selection) return false
-
-              const container = document.createElement('div')
-              for (let i = 0; i < selection.rangeCount; i++) container.appendChild(selection.getRangeAt(i).cloneContents())
-
-              // Update relative image srcs
-              const images = container.querySelectorAll('img')
-              images.forEach((img) => {
-                const src = img.getAttribute('src')
-                if (src && src.startsWith('/')) {
-                  img.setAttribute('src', `${window.location.origin}${src}`)
-                }
-              })
-
-              // Override clipboard HTML
-              event.clipboardData?.setData('text/html', container.innerHTML)
-              event.clipboardData?.setData('text/plain', selection.toString())
-              event.preventDefault()
-              return true
-            },
+          transformCopied(slice) {
+            if (!slice) return slice
+            const newFragment = updateMediaSrcs(slice.content)
+            return new Slice(newFragment, slice.openStart, slice.openEnd)
           },
-          handlePaste: (
-            view: EditorView,
-            event: ClipboardEvent,
-            slice: any,
-          ) => {
+          handlePaste: (view: EditorView, event: ClipboardEvent) => {
             if (!this.options.enabled) return false
 
             // handle image pasting
@@ -108,7 +85,10 @@ async function processHTMLImages(
   extensionOptions: ContentPasteOptions,
 ): Promise<undefined> {
   const tempDiv = document.createElement('div')
-  tempDiv.innerHTML = html
+  tempDiv.innerHTML = html.replace(/font-size:\s*([\d.]+)pt/gi, (_, pt) => {
+    const px = Math.round((parseFloat(pt) * 96) / 72)
+    return `font-size:${px}px`
+  })
   const images = tempDiv.querySelectorAll('img')
 
   const parser = DOMParser.fromSchema(view.state.schema)
@@ -123,17 +103,14 @@ async function processHTMLImages(
     for (let img of images) {
       const src = img.getAttribute('src')
       if (node.type.name === 'image' && node.attrs['src'] === src) {
-        imageInfo.push([src, pos])
+        imageInfo.push({ src, pos })
       }
     }
   })
 
   // Process each image
-  const imagePromises = Array.from(imageInfo).map(async ([src, pos]) => {
-    if (
-      src.startsWith('data:') ||
-      src.startsWith('blob:') 
-    ) {
+  const imagePromises = Array.from(imageInfo).map(async ({ src, pos }) => {
+    if (src.startsWith('data:') || src.startsWith('blob:')) {
       try {
         const response = await fetch(src)
         const blob = await response.blob()
@@ -148,4 +125,35 @@ async function processHTMLImages(
   })
 
   await Promise.all(imagePromises)
+}
+
+function updateMediaSrcs(fragment: Fragment) {
+  const children: Node[] = []
+  fragment.forEach((node) => {
+    let newNode = node
+
+    // If it's an image node, modify attrs
+    if (node.type.name === 'image' || node.type.name === 'video') {
+      const src = node.attrs.src
+      if (src && src.startsWith('/')) {
+        newNode = node.type.create(
+          {
+            ...node.attrs,
+            src: `${window.location.origin}${src}`,
+          },
+          node.content,
+          node.marks,
+        )
+      }
+    }
+
+    // Recurse into children
+    if (node.content && node.content.size > 0) {
+      newNode = newNode.copy(updateMediaSrcs(node.content))
+    }
+
+    children.push(newNode)
+  })
+
+  return Fragment.fromArray(children)
 }

@@ -1,0 +1,6 @@
+export { default as TeamSelector } from './components/TeamSelector.vue'
+export { default as ShareDialog } from './components/ShareDialog.vue'
+export { default as MoveDialog } from './components/MoveDialog.vue'
+export { default as InfoDialog } from './components/InfoDialog.vue'
+export { default as RenameDialog } from './components/RenameDialog.vue'
+export { default as DriveLogo } from './components/DriveLogo.vue'

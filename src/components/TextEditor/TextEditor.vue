@@ -15,7 +15,10 @@
     <TextEditorFloatingMenu :buttons="floatingMenu" />
     <slot name="top" :editor />
     <slot name="editor" :editor="editor">
-      <EditorContent :editor="editor" />
+      <EditorContent
+        :editor="editor"
+        class="prose prose-sm prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:relative prose-th:relative prose-th:bg-surface-gray-2"
+      />
     </slot>
     <slot name="bottom" :editor />
   </div>
@@ -39,35 +42,39 @@ defineOptions({ inheritAttrs: false })
 
 import { Editor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
-import Placeholder from '@tiptap/extension-placeholder'
-import TextAlign from '@tiptap/extension-text-align'
-import Table from '@tiptap/extension-table'
-import TableCell from '@tiptap/extension-table-cell'
-import TableHeader from '@tiptap/extension-table-header'
-import TableRow from '@tiptap/extension-table-row'
-import { ImageExtension } from './extensions/image'
-import ImageViewerExtension from './image-viewer-extension'
-import VideoExtension from './video-extension'
-import { IframeExtension } from './extensions/iframe'
-import LinkExtension from './link-extension'
+import { Placeholder } from '@tiptap/extensions'
 import Typography from '@tiptap/extension-typography'
-import TextStyle from '@tiptap/extension-text-style'
-import TaskItem from '@tiptap/extension-task-item'
-import TaskList from '@tiptap/extension-task-list'
+import { TextStyleKit } from '@tiptap/extension-text-style'
+import { TaskList, TaskItem } from '@tiptap/extension-list'
+import TextAlign from '@tiptap/extension-text-align'
+import {
+  Table,
+  TableRow,
+  TableCell,
+  TableHeader,
+} from '@tiptap/extension-table'
+
+import { ImageExtension } from './extensions/image'
+import { VideoExtension } from './extensions/video-extension'
+import ImageViewerExtension from './extensions/image-viewer-extension'
+import { IframeExtension } from './extensions/iframe'
+import { TocNodeExtension } from './extensions/toc-node'
+import { LinkExtension } from './extensions/link/'
 import NamedColorExtension from './extensions/color'
 import NamedHighlightExtension from './extensions/highlight'
-import improvedList from './extensions/list-extension'
-
+import StyleClipboardExtension from './extensions/copy-styles'
 import { MentionExtension } from './extensions/mention'
-import TextEditorFixedMenu from './TextEditorFixedMenu.vue'
-import TextEditorBubbleMenu from './TextEditorBubbleMenu.vue'
-import TextEditorFloatingMenu from './TextEditorFloatingMenu.vue'
 import EmojiExtension from './extensions/emoji/emoji-extension'
 import SlashCommands from './extensions/slash-commands/slash-commands-extension'
 import { ContentPasteExtension } from './extensions/content-paste-extension'
 import { Heading } from './extensions/heading/heading'
 import { ImageGroup } from './extensions/image-group/image-group-extension'
 import { ExtendedCode, ExtendedCodeBlock } from './extensions/code-block'
+
+import TextEditorFixedMenu from './components/TextEditorFixedMenu.vue'
+import TextEditorBubbleMenu from './components/TextEditorBubbleMenu.vue'
+import TextEditorFloatingMenu from './components/TextEditorFloatingMenu.vue'
+
 import { useFileUpload } from '../../utils/useFileUpload'
 import { TextEditorEmits, TextEditorProps } from './types'
 import { getTagExtensions } from './extensions/tag'
@@ -110,10 +117,7 @@ const attrsWithoutClassStyle = computed(() => {
 const editorProps = computed(() => {
   return {
     attributes: {
-      class: normalizeClass([
-        'prose prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-outline-gray-2 prose-th:border-outline-gray-2 prose-td:relative prose-th:relative prose-th:bg-surface-gray-2',
-        props.editorClass,
-      ]),
+      class: normalizeClass(props.editorClass),
     },
   }
 })
@@ -163,12 +167,7 @@ onMounted(() => {
         code: false,
         codeBlock: false,
         heading: false,
-      }).extend({
-        addKeyboardShortcuts() {
-          return {
-            Backspace: () => improvedList(this.editor),
-          }
-        },
+        link: false,
       }),
       Heading.configure({
         ...(typeof props.starterkitOptions?.heading === 'object' &&
@@ -179,18 +178,21 @@ onMounted(() => {
       Table.configure({
         resizable: true,
       }),
+      TableRow,
+      TableHeader,
+      TableCell,
       TaskList,
       TaskItem.configure({
         nested: true,
       }),
-      TableRow,
-      TableHeader,
-      TableCell,
       Typography,
       TextAlign.configure({
         types: ['heading', 'paragraph'],
       }),
-      TextStyle,
+      TextStyleKit.configure({
+        backgroundColor: false,
+        color: false,
+      }),
       NamedColorExtension,
       NamedHighlightExtension,
       ExtendedCode,
@@ -206,6 +208,7 @@ onMounted(() => {
         uploadFunction: props.uploadFunction || defaultUploadFunction,
       }),
       IframeExtension,
+      TocNodeExtension,
       LinkExtension.configure({
         openOnClick: false,
       }),
@@ -231,6 +234,7 @@ onMounted(() => {
         enabled: true,
         uploadFunction: props.uploadFunction || defaultUploadFunction,
       }),
+      StyleClipboardExtension,
       ...(props.extensions || []),
     ],
     onUpdate: ({ editor }) => {
@@ -268,126 +272,5 @@ defineExpose({
 </script>
 
 <style>
-@import './extensions/color/color-styles.css';
-@import './extensions/highlight/highlight-styles.css';
-
-.ProseMirror {
-  outline: none;
-  caret-color: var(--ink-gray-9);
-  word-break: break-word;
-}
-
-/* Firefox */
-.ProseMirror-focused:focus-visible {
-  outline: none;
-}
-
-/* Placeholder */
-.ProseMirror:not(.ProseMirror-focused) p.is-editor-empty::before {
-  content: attr(data-placeholder);
-  float: left;
-  color: var(--ink-gray-4);
-  pointer-events: none;
-  height: 0;
-}
-
-.ProseMirror-selectednode video,
-img.ProseMirror-selectednode {
-  outline: 2px solid var(--outline-gray-2);
-}
-
-/* Table styles */
-.prose table p {
-  margin: 0;
-}
-
-/* Prosemirror specific table styles */
-.ProseMirror table .selectedCell:after {
-  z-index: 2;
-  position: absolute;
-  content: '';
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  pointer-events: none;
-  background: theme('colors.blue.200');
-  opacity: 0.3;
-}
-
-.ProseMirror table .column-resize-handle {
-  position: absolute;
-  right: -1px;
-  top: 0;
-  bottom: -2px;
-  width: 4px;
-  background-color: theme('colors.blue.200');
-  pointer-events: none;
-}
-
-.ProseMirror ul[data-type='taskList'] {
-  list-style: none;
-  padding: 0;
-
-  li {
-    align-items: flex-start;
-    display: flex;
-    margin: 0;
-
-    > label {
-      flex: 0 0 auto;
-      margin-right: 0.5rem;
-      margin-top: 0.25rem;
-      height: 1lh;
-      display: flex;
-      align-items: center;
-      user-select: none;
-    }
-
-    > div {
-      flex: 1 1 auto;
-      margin-bottom: 0;
-
-      > p {
-        margin: 0.25rem 0;
-      }
-    }
-  }
-  ul[data-type='taskList'] {
-    margin: 0;
-  }
-
-  input[type='checkbox'] {
-    cursor: pointer;
-    width: 14px;
-    height: 14px;
-    border-radius: 4px;
-    color: theme('colors.gray.900');
-  }
-}
-
-.resize-cursor {
-  cursor: ew-resize;
-  cursor: col-resize;
-}
-
-.tag-item,
-.tag-suggestion-active {
-  background-color: var(--surface-gray-1, #f8f8f8);
-  color: inherit;
-  border: 1px solid transparent;
-  padding: 0px 2px;
-  border-radius: 4px;
-  font-size: 1em;
-  white-space: nowrap;
-  cursor: default;
-}
-
-.tag-item.ProseMirror-selectednode {
-  border-color: var(--outline-gray-3, #c7c7c7);
-}
-
-.tag-suggestion-active {
-  background-color: var(--surface-gray-2, #f3f3f3);
-}
+@import './style.css';
 </style>

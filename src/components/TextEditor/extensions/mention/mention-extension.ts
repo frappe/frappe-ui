@@ -83,7 +83,7 @@ function createMentionNode(component?: Component) {
     },
     renderText({ node }: any) {
       return `@${node.attrs.label || node.attrs.id || ''}`
-    }
+    },
   }
 
   if (component) {
@@ -174,5 +174,26 @@ export const MentionExtension = Extension.create<{
         mentions: this.options.mentions,
       }),
     ]
+  },
+
+  addCommands() {
+    return {
+      getMentions:
+        () =>
+        ({ editor }) => {
+          const mentions: MentionSuggestionItem[] = []
+
+          editor.state.doc.descendants((node: Node) => {
+            if (node.type.name === 'mention') {
+              mentions.push({
+                id: node.attrs.id,
+                label: node.attrs.label,
+              })
+            }
+          })
+
+          return mentions
+        },
+    }
   },
 })

@@ -8,48 +8,25 @@
           </template>
           Edit
         </Button>
-        <Select
-          :options="selectOptions"
-          v-model="internalColumns"
-          size="sm"
-          variant="subtle"
-          class="w-28"
-        />
+        <Select :options="selectOptions" v-model="internalColumns" size="sm" variant="subtle" class="w-28" />
       </div>
       <div class="grid gap-px" :style="gridStyle">
-        <div
-          v-for="(img, idx) in images"
-          :key="img.attrs.src + idx"
-          class="relative aspect-square w-full h-full overflow-hidden bg-surface-white group"
-        >
-          <button
-            v-if="isEditable"
-            type="button"
+        <div v-for="(img, idx) in images" :key="img.attrs.src + idx"
+          class="relative aspect-square w-full h-full overflow-hidden bg-surface-white group">
+          <button v-if="isEditable" type="button"
             class="absolute top-1 right-1 z-10 bg-white/80 hover:bg-white rounded-full p-1 shadow transition-opacity opacity-0 group-hover:opacity-100 focus:opacity-100"
-            aria-label="Remove image"
-            @click.stop="removeImage(idx)"
-          >
+            aria-label="Remove image" @click.stop="removeImage(idx)">
             <LucideX class="w-4 h-4 text-gray-700" />
           </button>
-          <img
-            :src="img.attrs.src"
-            :alt="img.attrs.alt || ''"
-            class="object-cover w-full h-full not-prose cursor-pointer rounded-[2px]"
-            v-if="!isEditable"
-            @click="openViewer(idx)"
-          />
-          <img
-            v-else
-            :src="img.attrs.src"
-            :alt="img.attrs.alt || ''"
-            class="object-cover w-full h-full not-prose rounded-[2px]"
-          />
+          <img :src="img.attrs.src" :alt="img.attrs.alt || ''"
+            class="object-cover w-full h-full not-prose cursor-pointer rounded-[2px]" v-if="!isEditable"
+            @click="openViewer(idx)" />
+          <img v-else :src="img.attrs.src" :alt="img.attrs.alt || ''"
+            class="object-cover w-full h-full not-prose rounded-[2px]" />
 
           <!-- Caption overlay (visible when there's alt text) -->
-          <div
-            v-if="img.attrs.alt"
-            class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent rounded-b-[2px] opacity-0 group-hover:opacity-100 transition-opacity"
-          >
+          <div v-if="img.attrs.alt"
+            class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent rounded-b-[2px] opacity-0 group-hover:opacity-100 transition-opacity">
             <div class="p-2">
               <div class="text-white text-xs truncate" :title="img.attrs.alt">
                 {{ img.attrs.alt }}
@@ -58,23 +35,11 @@
           </div>
         </div>
       </div>
-      <ImageViewerModal
-        v-if="showViewer"
-        v-model:show="showViewer"
-        :images="viewerImages"
-        :initialIndex="viewerIndex"
-      />
-      <ImageGroupUploadDialog
-        v-if="showEditModal"
-        v-model="showEditModal"
-        :files="editFiles"
-        :editor="props.editor"
-        mode="edit"
-        :existingImages="existingImages"
-        :initialColumns="columns"
-        @close="handleEditModalClose"
-        @save="handleEditSave"
-      />
+      <ImageViewerModal v-if="showViewer" v-model:show="showViewer" :images="viewerImages"
+        :initialIndex="viewerIndex" />
+      <ImageGroupUploadDialog v-if="showEditModal" v-model="showEditModal" :files="editFiles" :editor="props.editor"
+        mode="edit" :existingImages="existingImages" :initialColumns="columns" @close="handleEditModalClose"
+        @save="handleEditSave" />
       <slot />
     </div>
   </NodeViewWrapper>
@@ -88,7 +53,7 @@ import LucideX from '~icons/lucide/x'
 import LucideEdit from '~icons/lucide/edit'
 import Button from '../../../Button/Button.vue'
 import Select from '../../../Select/Select.vue'
-import ImageViewerModal from '../../ImageViewerModal.vue'
+import ImageViewerModal from '../../components/ImageViewerModal.vue'
 import ImageGroupUploadDialog from './ImageGroupUploadDialog.vue'
 
 const props = defineProps<NodeViewProps & { editor: Editor }>()

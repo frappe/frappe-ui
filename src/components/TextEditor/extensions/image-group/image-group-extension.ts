@@ -30,6 +30,10 @@ declare module '@tiptap/core' {
         columns?: number
         images: { src: string; alt?: string }[]
       }) => ReturnType
+      /**
+       * Group selected images into an image group
+       */
+      groupSelectedImages: () => ReturnType
     }
   }
 }
@@ -110,6 +114,73 @@ export const ImageGroup = Node.create<ImageGroupOptions>({
             })),
           })
         },
+
+      groupSelectedImages:
+        () =>
+        ({ state, chain }) => {
+          const { selection } = state
+          const { from, to } = selection
+
+          // Collect all image nodes within the selection
+          const images: { src: string; alt?: string; pos: number }[] = []
+
+          state.doc.nodesBetween(from, to, (node, pos) => {
+            if (node.type.name === 'image') {
+              images.push({
+                src: node.attrs.src,
+                alt: node.attrs.alt,
+                pos,
+              })
+            }
+          })
+
+          // Need at least 2 images to create a group
+          if (images.length < 2) {
+            return false
+          }
+
+          // Sort by position (descending) for deletion
+          const sortedImages = [...images].sort((a, b) => b.pos - a.pos)
+
+          // Find the position to insert the group (start of selection)
+          const insertPos = Math.min(...images.map((img) => img.pos))
+
+          // Start a chain of commands
+          let cmd = chain()
+
+          // Delete all selected images (from end to start to maintain positions)
+          sortedImages.forEach((img) => {
+            const node = state.doc.nodeAt(img.pos)
+            if (node) {
+              cmd = cmd.deleteRange({
+                from: img.pos,
+                to: img.pos + node.nodeSize,
+              })
+            }
+          })
+
+          // Insert the image group at the start position
+          cmd = cmd
+            .insertContentAt(insertPos, {
+              type: this.name,
+              attrs: { columns: images.length },
+              content: images.map((img) => ({
+                type: 'image',
+                attrs: { src: img.src, alt: img.alt },
+              })),
+            })
+            .run()
+
+          return true
+        },
+    }
+  },
+
+  addKeyboardShortcuts() {
+    return {
+      'Mod-Shift-g': () => this.editor.commands.groupSelectedImages(),
     }
   },
 })
+
+export default ImageGroup
