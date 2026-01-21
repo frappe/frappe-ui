@@ -66,6 +66,12 @@
     "description": "Whether the popover width should match the target element",
     "required": false,
     "type": "boolean"
+  },
+  {
+    "name": "offset",
+    "description": "",
+    "required": false,
+    "type": "number"
   }
 ]'/> 
 

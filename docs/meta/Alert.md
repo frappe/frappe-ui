@@ -71,6 +71,11 @@
     "name": "update:modelValue",
     "description": "",
     "type": "[value: boolean]"
+  },
+  {
+    "name": "dismiss",
+    "description": "",
+    "type": "any[]"
   }
 ]'/> 
 

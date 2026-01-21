@@ -93,8 +93,8 @@
     "name": "tags",
     "description": "Tag / hashtag configuration",
     "required": false,
-    "type": "any[]",
-    "default": "[]"
+    "type": "any[] | null",
+    "default": "null"
   },
   {
     "name": "uploadFunction",
@@ -107,12 +107,6 @@
     "description": "Extra arguments passed to the upload function",
     "required": false,
     "type": "object"
-  },
-  {
-    "name": "modelValue",
-    "description": "",
-    "required": false,
-    "type": "any"
   }
 ]'/> 
 
@@ -137,11 +131,6 @@
 
 ## Emit Events 
  <EmitsTable :data='[
-  {
-    "name": "update:modelValue",
-    "description": "",
-    "type": "[value: any]"
-  },
   {
     "name": "change",
     "description": "",
