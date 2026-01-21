@@ -5,7 +5,7 @@ A popup that displays information related to an element when the element receive
 ## Default
 <ComponentPreview name="Tooltip-Examples"  />
 
-## WIth Slots
+## With Slots
 
 <ComponentPreview name="Tooltip-Slots"  />
 
