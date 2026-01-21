@@ -13,7 +13,7 @@
   </BubbleMenu>
 </template>
 <script>
-import { BubbleMenu } from '@tiptap/vue-3'
+import { BubbleMenu } from '@tiptap/vue-3/menus'
 import { createEditorButton } from './utils'
 import Menu from './Menu.vue'
 
