@@ -6,6 +6,7 @@ import LucideMoon from '~icons/lucide/moon-star'
 import LucideSearch from '~icons/lucide/search'
 import LucideMenu from '~icons/lucide/menu'
 import LucideSide from '~icons/lucide/panel-right'
+import LucideCommand from '~icons/lucide/command'
 import GithubIcon from './Icons/Github.vue'
 import SearchPopup from './Search/Popup.vue'
 
@@ -112,6 +113,13 @@ whenever(meta_k, (n) => {
             <LucideSearch class="size-4" />
           </template>
           Search
+
+          <template #suffix>
+            <span class="flex gap-1 items-center ml-auto text-xs text-ink-gray-5">
+              <LucideCommand class="size-3" />
+              K
+            </span>
+          </template>
         </Button>
 
         <Button @click="toggleTheme" class="rounded">
@@ -121,7 +129,7 @@ whenever(meta_k, (n) => {
           </template>
         </Button>
 
-        <a href="https://github.com/frappe/frappe-ui">
+        <a href="https://github.com/frappe/frappe-ui" target="_blank">
           <GithubIcon />
         </a>
       </div>
