@@ -35,15 +35,19 @@
               <ul
                 class="p-1.5 mt-2 rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
               >
-                <!-- fix: isDisabled hides here, and disables elsewhere -->
                 <li
                   v-for="option in button"
                   v-show="option.isDisabled ? !option.isDisabled(editor) : true"
                 >
                   <component
-                    v-if="option.component"
+                    v-if="option.component && option.isTableSizeSelector"
+                    :is="option.component"
+                    v-bind="{ editor, close }"
+                  />
+                  <component
+                    v-else-if="option.component && !button.some(b => b.isTableSizeSelector)"
                     :is="option.component || 'div'"
-                    v-bind="{ editor }"
+                    v-bind="{ editor, close }"
                   >
                     <template v-slot="componentSlotProps">
                       <button
@@ -74,7 +78,7 @@
                     </template>
                   </component>
                   <button
-                    v-else
+                    v-else-if="!button.some(b => b.isTableSizeSelector)"
                     class="w-full h-7 rounded px-2 text-base flex items-center gap-2 hover:bg-surface-gray-3"
                     @click="
                       () => {
@@ -168,10 +172,16 @@
               class="flex rounded p-1 text-ink-gray-8 transition-colors"
               :class="[
                 button.isDisabled?.(editor) && 'opacity-50 pointer-events-none',
-                'hover:bg-surface-gray-2',
+                button.isActive?.(editor) || componentSlotProps?.isActive
+                  ? 'bg-surface-gray-3'
+                  : 'hover:bg-surface-gray-2',
                 button.class,
               ]"
-              @click="onButtonClick(button)"
+              @click="
+                componentSlotProps?.onClick
+                  ? componentSlotProps.onClick(button)
+                  : onButtonClick(button)
+              "
               :title="button.label"
             >
               <component v-if="button.icon" :is="button.icon" class="h-4 w-4" />
@@ -189,7 +199,7 @@
   </div>
 </template>
 <script setup>
-import Popover from '../../Popover/Popover.vue'
+import Popover from '../Popover/Popover.vue'
 import { inject } from 'vue'
 
 const props = defineProps({
@@ -198,7 +208,9 @@ const props = defineProps({
 const editor = inject('editor')
 
 const onButtonClick = (button) => {
-  button.action(editor.value)
+  if (button.action && typeof button.action === 'function') {
+    button.action(editor.value)
+  }
 }
 const getActiveButton = (group) => {
   return group.find((b) => b.isActive?.(editor.value))

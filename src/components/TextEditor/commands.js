@@ -216,12 +216,8 @@ export default {
   InsertTable: {
     label: 'Insert Table',
     icon: Table,
-    action: (editor) =>
-      editor
-        .chain()
-        .focus()
-        .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
-        .run(),
+    component: defineAsyncComponent(() => import('./TableSizeSelector.vue')),
+    isTableSizeSelector: true,
     isActive: (editor) => editor.can().deleteTable(),
   },
   AddColumnBefore: {
