@@ -6,9 +6,6 @@ type Size = 'sm' | 'md' | 'md' | 'lg' | 'xl' | '2xl'
 type Variant = 'solid' | 'subtle' | 'outline' | 'ghost'
 
 export interface ButtonProps {
-  /** The element or component this should render as */
-  as?: string
-
   /** Visual color theme of the button */
   theme?: Theme
 
