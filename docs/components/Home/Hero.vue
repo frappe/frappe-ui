@@ -1,19 +1,15 @@
 <script setup lang="ts">
-import { Badge, Button } from 'frappe-ui'
+import { Button } from 'frappe-ui'
 import LucideRight from '~icons/lucide/arrow-right'
 
-import pkgJson from '../../../package.json'
 </script>
 
 <template>
   <div class="grid gap-5 max-w-7xl mx-auto">
-    <div class="mt-10 p-5 flex flex-col gap-5 text-center w-fit">
+    <div class="my-20 p-5 flex flex-col gap-5 text-center w-fit">
       <h1
-        class="text-[40px] font-semibold tracing-tight leading-tight !m-0 relative font-news"
+        class="text-[40px] font-semibold tracing-tight leading-tight font-news"
       >
-        <Badge class="absolute -top-8 font-sans" theme="green">
-          v{{ pkgJson.version }}
-        </Badge>
         Build Beautiful Interfaces Fast
       </h1>
 
