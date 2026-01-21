@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Button } from 'frappe-ui'
 import { state } from '../../state'
 import { useData, useRoute } from 'vitepress'
 
@@ -36,23 +35,27 @@ const nextLink = computed(() => {
 
   return linkInfos[index + 1]
 })
+
+const subtleMdLink =
+  'inline-flex items-center gap-2 ' +
+  'h-8 px-2.5 rounded ' +
+  'text-base font-medium ' +
+  'text-ink-gray-8 bg-surface-gray-2 ' +
+  'hover:bg-surface-gray-3 active:bg-surface-gray-4 ' +
+  'transition-colors ' +
+  'focus:outline-none focus-visible:ring focus-visible:ring-outline-gray-3'
 </script>
 
 <template>
   <div class="flex justify-between gap-5 mt-10" v-if="visible">
-    <Button v-if="prevLink" as="a" :href="prevLink?.link">
-      <template #prefix>
-        <LucideLeft class="size-4" />
-      </template>
+    <a v-if="prevLink" :href="prevLink.link" :class="subtleMdLink">
+      <LucideLeft class="h-4 w-4" />
+      {{ prevLink.text }}
+    </a>
 
-      {{ prevLink?.text }}
-    </Button>
-
-    <Button as="a" v-if="nextLink" :href="nextLink?.link">
-      {{ nextLink?.text }}
-      <template #suffix>
-        <LucideRight class="size-4" />
-      </template>
-    </Button>
+    <a v-if="nextLink" :href="nextLink.link" :class="subtleMdLink">
+      {{ nextLink.text }}
+      <LucideRight class="h-4 w-4" />
+    </a>
   </div>
 </template>

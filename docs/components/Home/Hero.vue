@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import { Button } from 'frappe-ui'
 import LucideRight from '~icons/lucide/arrow-right'
-
 </script>
 
 <template>
@@ -19,12 +17,13 @@ import LucideRight from '~icons/lucide/arrow-right'
       </p>
 
       <div class="flex gap-3 mt-2 mx-auto">
-        <Button href="/docs/getting-started" as="a" variant='solid' size='md'>
+        <a
+          href="/docs/getting-started"
+          class="inline-flex items-center gap-2 h-8 px-2.5 rounded text-base font-medium text-ink-white bg-surface-gray-7 hover:bg-surface-gray-6 active:bg-surface-gray-5 transition-colors focus:outline-none focus-visible:ring focus-visible:ring-outline-gray-3"
+        >
           Get Started
-          <template #suffix>
-            <LucideRight class="size-4" />
-          </template>
-        </Button>
+          <LucideRight class="h-4 w-4" />
+        </a>
       </div>
     </div>
   </div>
