@@ -1,7 +1,15 @@
 import { toast } from '../../../src'
-import { format } from 'date-fns'
 import slugify from 'slugify'
 import { useTimeAgo } from '@vueuse/core'
+
+import dayjs from 'dayjs'
+import localizedFormat from 'dayjs/plugin/localizedFormat'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
+dayjs.extend(utc)
+dayjs.extend(timezone)
+dayjs.extend(localizedFormat)
+
 export function dynamicList(k) {
   return k.filter((a) => typeof a !== 'object' || !('cond' in a) || a.cond)
 }
@@ -11,7 +19,7 @@ export function getFileLink(entity, copy = true) {
   if (entity.is_link) link = entity.path
   else if (entity.mime_type === 'frappe/slides') {
     link = `${window.location.origin}/slides/presentation/${entity.name}`
-  }else if (entity.mime_type === 'frappe_doc') {
+  } else if (entity.mime_type === 'frappe_doc') {
     link = `${window.location.origin}/writer/w/${entity.name}`
   } else {
     link = `${window.location.origin}/drive/${getLinkStem(entity)}`
@@ -84,16 +92,19 @@ export const prettyData = (entities) => {
 
 export const formatDate = (date) => {
   if (!date) return ''
-  const dateObj = new Date(date)
   const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
-  const hourCycle = navigator.language || 'en-US'
+  const locale = navigator.language || 'en-US'
 
-  const formattedDate = format(dateObj, 'MM/dd/yy', { timeZone })
+  const d = dayjs(date).tz(timeZone)
+
+  const formattedDate = d.format('MM/DD/YY')
+
   let formattedTime
-  if (hourCycle === 'en-US') {
-    formattedTime = format(dateObj, 'hh:mm a', { timeZone })
+  if (locale === 'en-US') {
+    formattedTime = d.format('hh:mm A')
   } else {
-    formattedTime = format(dateObj, 'hh:mm a', { timeZone })
+    formattedTime = d.format('HH:mm')
   }
+
   return `${formattedDate}, ${formattedTime}`
 }
