@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "jsx": "preserve",
+    "baseUrl": "..",
+    "types": ["cypress", "node"],
+    "paths": {
+      "@/*": ["src/*"]
+    },
+    "lib": ["esnext", "dom"],
+    "skipLibCheck": true
+  },
+  "include": ["**/*.ts", "../src/**/*.d.ts", "../src/**/*.cy.ts"]
+}
