@@ -21,11 +21,8 @@ defineProps<Props>()
 </script>
 
 <template>
-  <div
-    class="flex items-center gap-3 justify-between mt-5"
-    :class="{ '-mb-5': !tsToggled }"
-  >
-    <h2 id="props">Props</h2>
+  <div class="flex items-center gap-3 justify-between my-5">
+    <h2 id="props" class="my-auto">Props</h2>
 
     <Button size="sm" @click="tsToggled = !tsToggled">
       <template #prefix>

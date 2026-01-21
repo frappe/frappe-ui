@@ -107,7 +107,7 @@ whenever(meta_k, (n) => {
         class="gap-3 md:flex items-center w-full ml-auto md:w-auto"
         :class="{ flex: state.mobnavbar, hidden: !state.mobnavbar }"
       >
-        <a href="/docs" v-if="route.path == '/'">Docs</a>
+        <a href="/docs/getting-started" v-if="route.path == '/'">Docs</a>
 
         <Button class="hidden md:flex" @click="state.searchDialog = true">
           <template #prefix>

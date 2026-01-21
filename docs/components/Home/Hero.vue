@@ -19,7 +19,7 @@ import LucideRight from '~icons/lucide/arrow-right'
       </p>
 
       <div class="flex gap-3 mt-2 mx-auto">
-        <Button href="/docs" as="a" variant='solid' size='md'>
+        <Button href="/docs/getting-started" as="a" variant='solid' size='md'>
           Get Started
           <template #suffix>
             <LucideRight class="size-4" />
