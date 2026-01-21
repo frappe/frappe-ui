@@ -15,7 +15,10 @@
     <TextEditorFloatingMenu :buttons="floatingMenu" />
     <slot name="top" :editor />
     <slot name="editor" :editor="editor">
-      <EditorContent :editor="editor" class="prose prose-sm prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:relative prose-th:relative prose-th:bg-surface-gray-2" />
+      <EditorContent
+        :editor="editor"
+        class="prose prose-sm prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:relative prose-th:relative prose-th:bg-surface-gray-2"
+      />
     </slot>
     <slot name="bottom" :editor />
   </div>
@@ -44,26 +47,34 @@ import Typography from '@tiptap/extension-typography'
 import { TextStyleKit } from '@tiptap/extension-text-style'
 import { TaskList, TaskItem } from '@tiptap/extension-list'
 import TextAlign from '@tiptap/extension-text-align'
+import {
+  Table,
+  TableRow,
+  TableCell,
+  TableHeader,
+} from '@tiptap/extension-table'
+
 import { ImageExtension } from './extensions/image'
-import ImageViewerExtension from './extensions/image-viewer-extension'
 import { VideoExtension } from './extensions/video-extension'
+import ImageViewerExtension from './extensions/image-viewer-extension'
 import { IframeExtension } from './extensions/iframe'
 import { TocNodeExtension } from './extensions/toc-node'
 import { LinkExtension } from './extensions/link/'
-
 import NamedColorExtension from './extensions/color'
 import NamedHighlightExtension from './extensions/highlight'
 import StyleClipboardExtension from './extensions/copy-styles'
 import { MentionExtension } from './extensions/mention'
-import TextEditorFixedMenu from './components/TextEditorFixedMenu.vue'
-import TextEditorBubbleMenu from './components/TextEditorBubbleMenu.vue'
-import TextEditorFloatingMenu from './components/TextEditorFloatingMenu.vue'
 import EmojiExtension from './extensions/emoji/emoji-extension'
 import SlashCommands from './extensions/slash-commands/slash-commands-extension'
 import { ContentPasteExtension } from './extensions/content-paste-extension'
 import { Heading } from './extensions/heading/heading'
 import { ImageGroup } from './extensions/image-group/image-group-extension'
 import { ExtendedCode, ExtendedCodeBlock } from './extensions/code-block'
+
+import TextEditorFixedMenu from './components/TextEditorFixedMenu.vue'
+import TextEditorBubbleMenu from './components/TextEditorBubbleMenu.vue'
+import TextEditorFloatingMenu from './components/TextEditorFloatingMenu.vue'
+
 import { useFileUpload } from '../../utils/useFileUpload'
 import { TextEditorEmits, TextEditorProps } from './types'
 import {
@@ -230,9 +241,6 @@ onMounted(() => {
         uploadFunction: props.uploadFunction || defaultUploadFunction,
       }),
       StyleClipboardExtension,
-      // NodeRange.configure({
-      //   key: null,
-      // }),
       ...(props.extensions || []),
     ],
     onUpdate: ({ editor }) => {
