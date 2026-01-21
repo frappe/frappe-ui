@@ -1,16 +1,18 @@
 <template>
-  <div v-if="editor" class="relative w-full" :class="attrsClass" :style="attrsStyle" v-bind="attrsWithoutClassStyle"
-    ref="rootRef">
+  <div
+    v-if="editor"
+    class="relative w-full"
+    :class="attrsClass"
+    :style="attrsStyle"
+    v-bind="attrsWithoutClassStyle"
+    ref="rootRef"
+  >
     <TextEditorBubbleMenu :buttons="bubbleMenu" :options="bubbleMenuOptions" />
-    <TextEditorFixedMenu class="w-full overflow-x-auto rounded-t-lg border border-outline-gray-modals"
-      :buttons="fixedMenu" />
+    <TextEditorFixedMenu
+      class="w-full overflow-x-auto rounded-t-lg border border-outline-gray-modals"
+      :buttons="fixedMenu"
+    />
     <TextEditorFloatingMenu :buttons="floatingMenu" />
-    <TableBorderMenu :show="showTableBorderMenu" :axis="tableBorderAxis" :position="tableBorderMenuPos"
-      :cell-info="tableCellInfo" :can-merge-cells="canMergeCells" @add-row-before="addRowBefore"
-      @add-row-after="addRowAfter" @delete-row="deleteRow" @add-column-before="addColumnBefore"
-      @add-column-after="addColumnAfter" @delete-column="deleteColumn" @merge-cells="mergeCells"
-      @toggle-header="toggleHeader" @set-background-color="setBackgroundColor" @set-border-color="setBorderColor"
-      @set-border-width="setBorderWidth" />
     <slot name="top" :editor />
     <slot name="editor" :editor="editor">
       <EditorContent :editor="editor" />
@@ -52,7 +54,6 @@ import { LinkExtension } from './extensions/link/'
 import NamedColorExtension from './extensions/color'
 import NamedHighlightExtension from './extensions/highlight'
 import StyleClipboardExtension from './extensions/copy-styles'
-import TableExtension from './extensions/tables/table-extension'
 import { MentionExtension } from './extensions/mention'
 import TextEditorFixedMenu from './components/TextEditorFixedMenu.vue'
 import TextEditorBubbleMenu from './components/TextEditorBubbleMenu.vue'
@@ -65,6 +66,12 @@ import { ImageGroup } from './extensions/image-group/image-group-extension'
 import { ExtendedCode, ExtendedCodeBlock } from './extensions/code-block'
 import { useFileUpload } from '../../utils/useFileUpload'
 import { TextEditorEmits, TextEditorProps } from './types'
+import {
+  Table,
+  TableRow,
+  TableCell,
+  TableHeader,
+} from '@tiptap/extension-table'
 import { getTagExtensions } from './extensions/tag'
 
 function defaultUploadFunction(file: File) {
@@ -92,25 +99,6 @@ const props = withDefaults(defineProps<TextEditorProps>(), {
 const emit = defineEmits<TextEditorEmits>()
 
 const editor = ref<Editor | null>(null)
-
-const {
-  showTableBorderMenu,
-  tableBorderAxis,
-  tableBorderMenuPos,
-  tableCellInfo,
-  canMergeCells,
-  addRowBefore,
-  addRowAfter,
-  deleteRow,
-  addColumnBefore,
-  addColumnAfter,
-  deleteColumn,
-  mergeCells,
-  toggleHeader,
-  setBackgroundColor,
-  setBorderColor,
-  setBorderWidth,
-} = useTableMenu(editor)
 
 const attrs = useAttrs()
 const attrsClass = computed(() => normalizeClass(attrs.class))
@@ -181,17 +169,16 @@ onMounted(() => {
       }),
       Heading.configure({
         ...(typeof props.starterkitOptions?.heading === 'object' &&
-          props.starterkitOptions.heading !== null
+        props.starterkitOptions.heading !== null
           ? props.starterkitOptions.heading
           : {}),
       }),
-      TableExtension.configure({
-        resizable: false,
+      Table.configure({
+        resizable: true,
       }),
-      TableCellExtension,
-      TableHeaderExtension,
-      TableRowExtension,
-      TableCommandsExtension,
+      TableRow,
+      TableHeader,
+      TableCell,
       TaskList,
       TaskItem.configure({
         nested: true,
@@ -230,14 +217,14 @@ onMounted(() => {
             : () => props.placeholder as string,
       }),
       props.mentions &&
-      MentionExtension.configure(
-        Array.isArray(props.mentions)
-          ? { mentions: props.mentions }
-          : {
-            mentions: props.mentions.mentions,
-            component: props.mentions.component,
-          },
-      ),
+        MentionExtension.configure(
+          Array.isArray(props.mentions)
+            ? { mentions: props.mentions }
+            : {
+                mentions: props.mentions.mentions,
+                component: props.mentions.component,
+              },
+        ),
       EmojiExtension,
       SlashCommands,
       ...getTagExtensions(() => props.tags),
