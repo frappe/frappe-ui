@@ -41,6 +41,7 @@ export default {
           'FontColor',
           'Separator',
           'Image',
+          'Attach',
           'Video',
           'Iframe',
           'Link',
