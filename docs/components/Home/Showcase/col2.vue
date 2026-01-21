@@ -133,9 +133,9 @@ const resetState = () => {
       </FormControl>
 
       <FormControl
-        label="mail"
+        label="Email"
         :options="countryOptions"
-        placeholder="Enter mail"
+        placeholder="Enter email"
       >
         <template #prefix>
           <LucideMail class="size-4" />
