@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { SelectProps } from './types'
 import LucideChevronDown from '~icons/lucide/chevron-down'
+import type { SelectProps } from './types'
 
 import {
   SelectContent,
@@ -70,7 +70,7 @@ const selectClasses = computed(() => {
     fontSizeClasses.value,
     paddingClasses.value,
     variantClasses,
-    'transition-colors w-full data-[state=open]:ring-2 ring-outline-gray-2 ',
+    'transition-colors w-full focus:ring-2 data-[state=open]:ring-2 ring-outline-gray-3 ',
   ]
 })
 
@@ -84,23 +84,21 @@ const selectOptions = computed(() => {
 <template>
   <SelectRoot v-model="model">
     <SelectTrigger
-      class="inline-flex items-center gap-2 outline-none text-base data-[placeholder]:text-ink-gray-4 data-[disabled]:text-ink-gray-4"
+      class="inline-flex items-center gap-2 outline-none text-base text-ink-gray-7 data-[placeholder]:text-ink-gray-4 data-[disabled]:text-ink-gray-4"
       aria-label="Customise options"
-      :class="selectClasses"
-      :disabled="props.disabled"
+      :class="[selectClasses, $attrs.class]"
+      :disabled="disabled"
     >
       <slot name="prefix" />
-      <SelectValue :placeholder="props.placeholder" />
+      <SelectValue :placeholder="placeholder" class="truncate" />
       <slot name="suffix">
-        <LucideChevronDown class="size-4 text-ink-gray-4 ml-auto" />
+        <LucideChevronDown class="size-4 text-ink-gray-4 ml-auto shrink-0" />
       </slot>
     </SelectTrigger>
 
     <SelectPortal>
       <SelectContent
-        class="bg-surface-modal border rounded-lg shadow-lg will-change-[opacity,transform] z-[100] min-w-[--reka-select-trigger-width] max-h-[--reka-select-content-available-height] overflow-auto"
-        :side-offset="5"
-        position="popper"
+        class="bg-surface-modal border rounded-lg shadow-lg will-change-[opacity,transform] z-[100] overflow-hidden origin-center data-[state=open]:animate-[fadeInScale_150ms] data-[state=closed]:animate-[fadeOutScale_150ms]"
       >
         <SelectViewport class="p-1 flex flex-col">
           <SelectItem
@@ -109,13 +107,12 @@ const selectOptions = computed(() => {
             :key="option.value"
             :value="option.value"
             :class="[sizeClasses, paddingClasses, fontSizeClasses]"
-            class="text-base text-ink-gray-9 flex items-center relative data-[highlighted]:bg-surface-gray-2 border-0 [data-state=checked]:bg-surface-gray-2 data-[disabled]:text-ink-gray-4"
+            class="text-base text-ink-gray-9 flex items-center relative data-[highlighted]:bg-surface-gray-2 border-0 [data-state=checked]:bg-surface-gray-2 data-[disabled]:text-ink-gray-4 select-none"
           >
             <SelectItemText>
               <slot name="option" v-bind="{ option }">{{ option.label }}</slot>
             </SelectItemText>
           </SelectItem>
-
           <slot name="footer" />
         </SelectViewport>
       </SelectContent>
@@ -123,39 +120,33 @@ const selectOptions = computed(() => {
   </SelectRoot>
 </template>
 
-<style>
-@keyframes slideDownFade {
-  from {
-    opacity: 0;
-    transform: translateY(-4px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes slideUpFade {
-  from {
-    opacity: 0;
-    transform: translateY(4px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-[data-side='top'] {
-  animation: slideDownFade 280ms;
-}
-
-[data-side='bottom'] {
-  animation: slideUpFade 280ms;
-}
-
+<style scoped>
 [data-highlighted],
 [data-state='checked'] {
   outline: none !important;
+}
+</style>
+
+<style>
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fadeOutScale {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
 }
 </style>
