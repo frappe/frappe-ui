@@ -76,7 +76,9 @@ export function useDoctypeMeta(doctype: string) {
   const emailFields = computed(() => {
     if (!fields.value.length) return []
     const recipients = fields.value.filter(
-      (f) => f.type === 'Data' && f.options === 'Email',
+      (f) =>
+        (f.type === 'Data' && f.options === 'Email') ||
+        (f.type === 'Link' && f.options === 'User'),
     )
     return [
       {

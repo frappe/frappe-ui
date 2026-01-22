@@ -66,8 +66,19 @@ export interface AutomationState {
     | 'Minutes Before'
     | 'Days After'
     | 'Days Before'
+    | 'Scheduled'
   timerOffset?: number
   timeField?: string
+  eventFrequency?:
+    | 'Every 5 Minutes'
+    | 'Every 15 Minutes'
+    | 'Every 30 Minutes'
+    | 'Every Hour'
+    | 'Every 6 Hours'
+    | 'Every 12 Hours'
+    | 'Every Day'
+    | 'CRON Expression'
+  cronFormat?: string
   presets: any[]
   rule: any[]
 }

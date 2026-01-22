@@ -5,19 +5,11 @@
         <Select
           variant="outline"
           :options="events"
-          placeholder="Select Doctype"
+          placeholder="Select Event Type"
           v-model="state.eventType"
           key="1"
           class="!w-[150px]"
         />
-        <!-- <Select
-          v-if="state.eventType === 'time'"
-          variant="outline"
-          :options="timerOptions"
-          placeholder="Select Interval"
-          v-model="state.timerOffset"
-          key="2"
-        /> -->
         <FormControl
           v-if="isTimerEvent"
           type="number"
@@ -36,6 +28,56 @@
           v-model="state.timeField"
           class="!w-[150px]"
         />
+        <Select
+          v-if="state.eventType === 'Scheduled'"
+          variant="outline"
+          :options="eventFrequencyOptions"
+          placeholder="Select Interval"
+          v-model="state.eventFrequency"
+          class="!w-[150px]"
+        />
+        <div
+          v-if="
+            state.eventFrequency === 'CRON Expression' &&
+            state.eventType === 'Scheduled'
+          "
+          class="flex gap-1 items-center"
+        >
+          <FormControl
+            type="text"
+            variant="outline"
+            placeholder="Enter CRON Expression"
+            v-model="state.cronFormat"
+            class="!w-[150px]"
+          />
+          <!-- Popover to know more about CRON Jobs
+           
+                *  *  *  *  *
+                ┬  ┬  ┬  ┬  ┬
+                │  │  │  │  │
+                │  │  │  │  └ day of week (0 - 6) (0 is Sunday)
+                │  │  │  └───── month (1 - 12)
+                │  │  └────────── day of month (1 - 31)
+                │  └─────────────── hour (0 - 23)
+                └──────────────────── minute (0 - 59)
+          this inside <code> tags
+          -->
+
+          <Popover trigger="hover" :hoverDelay="0.25" placement="top-end">
+            <template #target>
+              <div class="text-sm text-ink-gray-6 flex gap-1 cursor-default">
+                <FeatherIcon name="info" class="size-4" />
+              </div>
+            </template>
+            <template #body-main>
+              <div
+                class="text-sm text-ink-gray-6 p-4 bg-white rounded-md text-wrap whitespace-pre-wrap leading-5"
+              >
+                <code>{{ CRON_INFO }}</code>
+              </div>
+            </template>
+          </Popover>
+        </div>
       </template>
       <template #action>
         <Button
@@ -61,6 +103,7 @@ import { computed, ref } from 'vue'
 import { useDoctypeMeta } from '../../src'
 import type { Option } from '../../src/components/Autocomplete/types'
 import FormControl from '../../src/components/FormControl/FormControl.vue'
+import Popover from '../../src/components/Popover/Popover.vue'
 import Select from '../../src/components/Select/Select.vue'
 import FilterIcon from '../Icons/FilterIcon.vue'
 import { useAutomationState } from './automation'
@@ -71,6 +114,19 @@ import { IconType } from './types'
 const state = useAutomationState()
 const conditionRef = ref<InstanceType<typeof ConditionBlock> | null>(null)
 
+const isTimerEvent = computed(() =>
+  ['Minutes After', 'Minutes Before', 'Days After', 'Days Before'].includes(
+    state.eventType,
+  ),
+)
+const icon = computed<IconType>(() =>
+  isTimerEvent.value || state.eventType === 'Scheduled' ? 'timer' : 'event',
+)
+
+const { timeBaseFields } = useDoctypeMeta(state.dt)
+
+const roundedClass = computed(() => (state.presets.length > 0 ? 'top' : 'all'))
+
 const events: Option[] = [
   { label: 'Created', value: 'created' },
   { label: 'Updated', value: 'updated' },
@@ -78,18 +134,29 @@ const events: Option[] = [
   { label: 'Minutes Before', value: 'Minutes Before' },
   { label: 'Days After', value: 'Days After' },
   { label: 'Days Before', value: 'Days Before' },
+  { label: 'Scheduled', value: 'Scheduled' },
 ]
 
-const isTimerEvent = computed(() =>
-  ['Minutes After', 'Minutes Before', 'Days After', 'Days Before'].includes(
-    state.eventType,
-  ),
-)
-const icon = computed<IconType>(() => (isTimerEvent.value ? 'timer' : 'event'))
+const eventFrequencyOptions = [
+  'Every 5 Minutes',
+  'Every 10 Minutes',
+  'Every 30 Minutes',
+  'Every Hour',
+  'Every 6 Hours',
+  'Every 12 Hours',
+  'Every Day',
+  'CRON Expression',
+]
 
-const { timeBaseFields } = useDoctypeMeta(state.dt)
-
-const roundedClass = computed(() => (state.presets.length > 0 ? 'top' : 'all'))
+const CRON_INFO = `CRON Expression Format:
+*  *  *  *  *
+┬  ┬  ┬  ┬  ┬
+│  │  │  │  │
+│  │  │  │  └ day of week (0 - 6) (0 is Sunday)
+│  │  │  └───── month (1 - 12)
+│  │  └────────── day of month (1 - 31)
+│  └─────────────── hour (0 - 23)
+└──────────────────── minute (0 - 59)`
 </script>
 
 <style scoped></style>

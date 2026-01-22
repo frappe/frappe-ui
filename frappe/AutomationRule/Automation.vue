@@ -94,30 +94,39 @@ const dependencyLabel = computed(() => {
 const eventMap = {
   created: 'On Creation',
   updated: 'On Update',
-  time: 'Timer',
   'Minutes Before': 'Minutes Before',
   'Minutes After': 'Minutes After',
   'Days Before': 'Days Before',
   'Days After': 'Days After',
+  Scheduled: 'Scheduled',
 }
 
 const reverseEventMap = {
   'On Creation': 'created',
   'On Update': 'updated',
-  Timer: 'time',
   'Minutes Before': 'Minutes Before',
   'Minutes After': 'Minutes After',
-  'Hours Before': 'Hours Before',
-  'Hours After': 'Hours After',
+  'Days Before': 'Days Before',
+  'Days After': 'Days After',
+  Scheduled: 'Scheduled',
 }
 
 const state = reactive({
   name: '',
   enabled: false,
   dt: '',
-  eventType: 'created' as 'created' | 'updated' | 'time',
+  eventType: 'created' as
+    | 'created'
+    | 'updated'
+    | 'Minutes After'
+    | 'Minutes Before'
+    | 'Days After'
+    | 'Days Before'
+    | 'Scheduled',
   timerOffset: 0,
   timeField: '',
+  eventFrequency: '',
+  cronFormat: '',
   presets: [],
   rule: [],
 })
@@ -185,7 +194,11 @@ function prepareDoc() {
     rule: parseRule(),
     enabled: state.enabled,
     time_field: state.timeField,
-    time_offset: state.timerOffset,
+    time_offset: Number(state.timerOffset),
+    event_frequency:
+      state.eventType === 'Scheduled' ? state.eventFrequency : null,
+    cron_format:
+      state.eventFrequency === 'CRON Expression' ? state.cronFormat : null,
   }
 }
 
