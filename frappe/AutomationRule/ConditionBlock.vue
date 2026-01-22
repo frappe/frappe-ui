@@ -1,0 +1,174 @@
+<template>
+  <div class="space-y-1">
+    <template v-for="(row, index) in conditionRows" :key="index">
+      <BaseBlock v-bind="getPropsToApply(index)">
+        <template #meta>
+          <!-- And/Or toggle for rows after the first -->
+          <Button
+            v-if="index > 0"
+            variant="subtle"
+            class="w-max min-w-[50px]"
+            @click="toggleConjunction"
+            icon-right="refresh-cw"
+            :disabled="index > 1"
+            :label="conjunction"
+            :tooltip="conjunctionTooltip"
+          />
+
+          <Combobox
+            variant="outline"
+            :open-on-click="true"
+            :open-on-focus="true"
+            :options="getFieldsForRow(row[0])"
+            placeholder="Select Field"
+            class="[&>div>div]:bg-surface-white !w-[120px] !min-w-[120px]"
+            :modelValue="row[0]"
+            @update:modelValue="(val) => handleFieldChange(row, val)"
+          />
+          <Select
+            v-if="row[0]"
+            placeholder="Select Operator"
+            :options="getOperatorsForRow(row)"
+            :modelValue="row[1]"
+            @update:modelValue="
+              (val: String | undefined) => handleOperatorChange(row, val)
+            "
+            variant="outline"
+            class="!w-[120px]"
+            :disabled="!row[0]"
+          />
+
+          <component
+            v-if="row[0]"
+            :is="getValueControlForRow(row)"
+            variant="outline"
+            :modelValue="row[2]"
+            @update:modelValue="(val: unknown) => handleValueChange(row, val)"
+            :disabled="!row[0]"
+            class="w-[160px]"
+            :class="
+              getFieldTypeFromRow(row) === 'Link' &&
+              '[&>div>div>div]:bg-surface-white'
+            "
+            placeholder="Select Value"
+          />
+        </template>
+        <template #action>
+          <DropdownOptions :options="rowOptions(index)" />
+        </template>
+      </BaseBlock>
+    </template>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ModelRef } from 'vue'
+import Button from '../../src/components/Button/Button.vue'
+import Combobox from '../../src/components/Combobox/Combobox.vue'
+import Select from '../../src/components/Select/Select.vue'
+import BaseBlock from './BaseBlock.vue'
+import DropdownOptions from './DropdownOptions.vue'
+import { useAutomationState, useDoctypeFilters } from './automation'
+import type { DropdownOption, IconType, RoundedType } from './types'
+
+type ConditionTuple = [string, string, string]
+type ConditionArray = (ConditionTuple | string)[]
+
+const props = withDefaults(
+  defineProps<{
+    label?: string
+    icon?: IconType
+    roundFirstBlock?: boolean
+    additionalActions?: DropdownOption[] | []
+  }>(),
+  {
+    label: 'Where',
+    icon: 'filter',
+    roundFirstBlock: false,
+    additionalActions: () => [],
+  },
+)
+
+const emit = defineEmits<{
+  (e: 'delete', index: number): void
+}>()
+
+const conditions = defineModel() as ModelRef<ConditionArray>
+const state = useAutomationState()
+
+const {
+  conditionRows,
+  conjunction,
+  conjunctionTooltip,
+  toggleConjunction,
+  handleFieldChange,
+  handleOperatorChange,
+  handleValueChange,
+  getFieldTypeFromRow,
+  getOperatorsForRow,
+  getValueControlForRow,
+  getFieldsForRow,
+  insertRow,
+  deleteRow,
+  canAddRow,
+} = useDoctypeFilters(state.dt, conditions)
+
+function getPropsToApply(idx: number): {
+  rounded: RoundedType
+  title: string
+  icon: IconType
+} {
+  const rounded = getRoundedStyle(idx)
+  const title = idx === 0 ? props.label : ''
+  const icon: IconType = idx === 0 ? props.icon : ''
+  return {
+    rounded,
+    title,
+    icon,
+  }
+}
+
+function getRoundedStyle(idx: number): RoundedType {
+  if (props.label === 'If') {
+    if (conditionRows.value.length === 1) {
+      return 'all'
+    }
+    if (idx === 0) {
+      return 'top'
+    }
+    return idx === conditionRows.value.length - 1 ? 'bottom' : 'none'
+  }
+  return idx === conditionRows.value.length - 1 ? 'bottom' : 'none'
+}
+
+function rowOptions(idx: number) {
+  const canAdd = canAddRow()
+
+  const deleteCondition = {
+    label: 'Delete Condition',
+    onClick: () => {
+      emit('delete', idx)
+      deleteRow(idx)
+    },
+    icon: 'trash',
+    theme: 'red' as const,
+  }
+  const isLastCondition = idx === conditionRows.value?.length - 1
+  if (!isLastCondition) {
+    return [deleteCondition]
+  }
+
+  return [
+    {
+      label: 'Add Condition',
+      onClick: canAdd ? () => insertRow() : undefined,
+      icon: 'plus',
+      disabled: !canAdd,
+    },
+    ...props.additionalActions,
+    { ...deleteCondition },
+  ]
+}
+
+defineExpose({ insertRow, deleteRow })
+</script>
