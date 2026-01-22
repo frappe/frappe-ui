@@ -1,4 +1,4 @@
-import TableHeader from '@tiptap/extension-table-header'
+import { TableHeader } from '@tiptap/extension-table'
 
 export const TableHeaderExtension = TableHeader.extend({
   addAttributes() {
@@ -47,10 +47,16 @@ export const TableHeaderExtension = TableHeader.extend({
           }
           const classList = element.classList
           const borderWidthClassMatch = Array.from(classList).find(
-            (cls) => typeof cls === 'string' && cls.startsWith('border-') && /^border-\d+$/.test(cls),
+            (cls) =>
+              typeof cls === 'string' &&
+              cls.startsWith('border-') &&
+              /^border-\d+$/.test(cls),
           )
           if (borderWidthClassMatch) {
-            const width = (borderWidthClassMatch as string).replace('border-', '')
+            const width = (borderWidthClassMatch as string).replace(
+              'border-',
+              '',
+            )
             return `${width}px`
           }
           return null
@@ -69,5 +75,3 @@ export const TableHeaderExtension = TableHeader.extend({
 })
 
 export default TableHeaderExtension
-
-

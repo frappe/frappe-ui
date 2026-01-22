@@ -1,4 +1,4 @@
-import TableRow from '@tiptap/extension-table-row'
+import { TableRow } from '@tiptap/extension-table'
 
 export const TableRowExtension = TableRow.extend({
   addAttributes() {
@@ -44,7 +44,10 @@ export const TableRowExtension = TableRow.extend({
           }
           const classList = element.classList
           const borderWidthClassMatch = Array.from(classList).find(
-            (cls) => typeof cls === 'string' && cls.startsWith('border-') && /^border-\d+$/.test(cls),
+            (cls) =>
+              typeof cls === 'string' &&
+              cls.startsWith('border-') &&
+              /^border-\d+$/.test(cls),
           )
           if (borderWidthClassMatch) {
             return (borderWidthClassMatch as string).replace('border-', '')
@@ -65,5 +68,3 @@ export const TableRowExtension = TableRow.extend({
 })
 
 export default TableRowExtension
-
-

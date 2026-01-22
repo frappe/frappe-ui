@@ -216,7 +216,9 @@ export default {
   InsertTable: {
     label: 'Insert Table',
     icon: Table,
-    component: defineAsyncComponent(() => import('./TableSizeSelector.vue')),
+    component: defineAsyncComponent(
+      () => import('./components/TableSizeSelector.vue'),
+    ),
     isTableSizeSelector: true,
     isActive: (editor) => editor.can().deleteTable(),
   },

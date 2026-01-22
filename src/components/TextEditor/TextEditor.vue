@@ -21,6 +21,24 @@
       />
     </slot>
     <slot name="bottom" :editor />
+    <TableBorderMenu
+      :show="showTableBorderMenu"
+      :axis="tableBorderAxis"
+      :position="tableBorderMenuPos"
+      :cell-info="tableCellInfo"
+      :can-merge-cells="canMergeCells"
+      @add-row-before="addRowBefore"
+      @add-row-after="addRowAfter"
+      @delete-row="deleteRow"
+      @add-column-before="addColumnBefore"
+      @add-column-after="addColumnAfter"
+      @delete-column="deleteColumn"
+      @merge-cells="mergeCells"
+      @toggle-header="toggleHeader"
+      @set-background-color="setBackgroundColor"
+      @set-border-color="setBorderColor"
+      @set-border-width="setBorderWidth"
+    />
   </div>
 </template>
 
@@ -47,12 +65,12 @@ import Typography from '@tiptap/extension-typography'
 import { TextStyleKit } from '@tiptap/extension-text-style'
 import { TaskList, TaskItem } from '@tiptap/extension-list'
 import TextAlign from '@tiptap/extension-text-align'
-import {
-  Table,
-  TableRow,
-  TableCell,
-  TableHeader,
-} from '@tiptap/extension-table'
+// import {
+//   Table,
+//   TableRow,
+//   TableCell,
+//   TableHeader,
+// } from '@tiptap/extension-table'
 
 import { ImageExtension } from './extensions/image'
 import { VideoExtension } from './extensions/video-extension'
@@ -70,6 +88,13 @@ import { ContentPasteExtension } from './extensions/content-paste-extension'
 import { Heading } from './extensions/heading/heading'
 import { ImageGroup } from './extensions/image-group/image-group-extension'
 import { ExtendedCode, ExtendedCodeBlock } from './extensions/code-block'
+import TableExtension from './extensions/tables/table-extension'
+import TableCellExtension from './extensions/tables/table-cell-extension'
+import TableHeaderExtension from './extensions/tables/table-header-extension'
+import TableRowExtension from './extensions/tables/table-row-extension'
+import TableBorderMenu from './extensions/tables/TableBorderMenu.vue'
+import { useTableMenu } from './extensions/tables/use-table-menu'
+import { TableCommandsExtension } from './extensions/tables/table-selection-extension'
 
 import TextEditorFixedMenu from './components/TextEditorFixedMenu.vue'
 import TextEditorBubbleMenu from './components/TextEditorBubbleMenu.vue'
@@ -175,12 +200,13 @@ onMounted(() => {
           ? props.starterkitOptions.heading
           : {}),
       }),
-      Table.configure({
-        resizable: true,
+      TableExtension.configure({
+        resizable: false,
       }),
-      TableRow,
-      TableHeader,
-      TableCell,
+      TableCellExtension,
+      TableHeaderExtension,
+      TableRowExtension,
+      TableCommandsExtension,
       TaskList,
       TaskItem.configure({
         nested: true,
@@ -269,6 +295,25 @@ defineExpose({
   editor,
   rootRef,
 })
+
+const {
+  showTableBorderMenu,
+  tableBorderAxis,
+  tableBorderMenuPos,
+  tableCellInfo,
+  canMergeCells,
+  addRowBefore,
+  addRowAfter,
+  deleteRow,
+  addColumnBefore,
+  addColumnAfter,
+  deleteColumn,
+  mergeCells,
+  toggleHeader,
+  setBackgroundColor,
+  setBorderColor,
+  setBorderWidth,
+} = useTableMenu(editor)
 </script>
 
 <style>

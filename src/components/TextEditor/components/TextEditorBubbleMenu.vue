@@ -15,8 +15,8 @@
   </BubbleMenu>
 </template>
 <script>
-import { BubbleMenu } from '@tiptap/vue-3'
-import { createEditorButton } from './utils'
+import { BubbleMenu } from '@tiptap/vue-3/menus'
+import { createEditorButton } from '../utils'
 import Menu from './Menu.vue'
 
 export default {
@@ -53,9 +53,9 @@ export default {
           'Separator',
           'Image',
           'Video',
-        'Blockquote',
-        'Code',
-        ['InsertTable'],
+          'Blockquote',
+          'Code',
+          ['InsertTable'],
         ]
       }
       return buttons.map(createEditorButton)

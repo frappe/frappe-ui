@@ -1,4 +1,4 @@
-import TableCell from '@tiptap/extension-table-cell'
+import { TableCell } from '@tiptap/extension-table'
 
 export const TableCellExtension = TableCell.extend({
   addAttributes() {
@@ -50,10 +50,16 @@ export const TableCellExtension = TableCell.extend({
           }
           const classList = element.classList
           const borderWidthClassMatch = Array.from(classList).find(
-            (cls) => typeof cls === 'string' && cls.startsWith('border-') && /^border-\d+$/.test(cls),
+            (cls) =>
+              typeof cls === 'string' &&
+              cls.startsWith('border-') &&
+              /^border-\d+$/.test(cls),
           )
           if (borderWidthClassMatch) {
-            const width = (borderWidthClassMatch as string).replace('border-', '')
+            const width = (borderWidthClassMatch as string).replace(
+              'border-',
+              '',
+            )
             return `${width}px`
           }
           return null
@@ -72,5 +78,3 @@ export const TableCellExtension = TableCell.extend({
 })
 
 export default TableCellExtension
-
-
