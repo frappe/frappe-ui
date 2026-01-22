@@ -1,4 +1,7 @@
-<script setup>
+<script setup lang="ts">
+import LucideCopy from '~icons/lucide/copy'
+import { Button } from 'frappe-ui'
+
 defineProps({
   data: {
     type: Array,
@@ -9,6 +12,10 @@ defineProps({
 const formatColor = (color) => {
   const arr = color.split('-')
   return arr.slice(2).join('-')
+}
+
+const copyToClipboard = (txt: string) => {
+  navigator.clipboard.writeText(txt)
 }
 </script>
 
@@ -32,11 +39,18 @@ const formatColor = (color) => {
           class="rounded size-20"
           :style="{ backgroundColor: color.value }"
         ></div>
-        <span
-          class="whitespace-nowrap bg-surface-gray-2 p-1 py-1.5 text-sm rounded-sm text-center w-20"
-        >
-          {{ formatColor(color.name) }}
-        </span>
+
+        <Button class="group relative" @click="copyToClipboard(color.name)">
+          <span
+            class="absolute flex items-center inset-0 justify-center gap-1 opacity-0 transition-opacity duration-150 group-hover:opacity-100"
+          >
+            <LucideCopy class="size-4" /> Copy
+          </span>
+
+          <span class="transition-opacity duration-150 group-hover:opacity-0">
+            {{ formatColor(color.name) }}
+          </span>
+        </Button>
       </div>
     </template>
   </div>
