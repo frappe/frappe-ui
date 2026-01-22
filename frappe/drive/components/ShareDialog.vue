@@ -197,8 +197,8 @@ import {
   LoadingIndicator,
   createResource,
   Switch,
-  Select,
 } from '../../../src'
+import Select from './Select/Select.vue'
 import TeamSelector from './TeamSelector.vue'
 import TagInput from './TagInput/TagInput.vue'
 import { getFileLink, dynamicList } from '../js/utils'
