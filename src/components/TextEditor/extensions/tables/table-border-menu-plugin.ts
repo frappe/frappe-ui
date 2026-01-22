@@ -15,6 +15,8 @@ export function tableBorderMenuPlugin(editor: Editor) {
   let hideTimeout: NodeJS.Timeout | null = null
   let cellTriggerTimeout: NodeJS.Timeout | null = null
   let isResizing = false
+  let rowColHandlerJustClicked = false
+  let cellTriggerJustClicked = false
 
   const clearHandles = () => {
     if (hideTimeout) clearTimeout(hideTimeout)
@@ -278,6 +280,12 @@ export function tableBorderMenuPlugin(editor: Editor) {
               e.preventDefault()
               e.stopPropagation()
 
+              // Set flag to prevent multi-cell menu from showing
+              rowColHandlerJustClicked = true
+              setTimeout(() => {
+                rowColHandlerJustClicked = false
+              }, 300)
+
               const cellEl = row.querySelector('td, th')
               if (!cellEl) return
 
@@ -309,6 +317,9 @@ export function tableBorderMenuPlugin(editor: Editor) {
                     element: cellEl,
                     rowIndex,
                     colIndex: 0,
+                    isFirstRow: rowIndex === 0,
+                    isIndividualCell: false,
+                    isMultiCellSelection: false,
                   },
                 },
               })
@@ -381,6 +392,12 @@ export function tableBorderMenuPlugin(editor: Editor) {
               e.preventDefault()
               e.stopPropagation()
 
+              // Set flag to prevent multi-cell menu from showing
+              rowColHandlerJustClicked = true
+              setTimeout(() => {
+                rowColHandlerJustClicked = false
+              }, 300)
+
               const cellRect = cell.getBoundingClientRect()
               const editorRect = editorElement.getBoundingClientRect()
               const menuHeight = 30
@@ -409,6 +426,9 @@ export function tableBorderMenuPlugin(editor: Editor) {
                     element: cell,
                     rowIndex,
                     colIndex,
+                    isFirstRow: rowIndex === 0,
+                    isIndividualCell: false,
+                    isMultiCellSelection: false,
                   },
                 },
               })
@@ -477,11 +497,27 @@ export function tableBorderMenuPlugin(editor: Editor) {
             currentCellTrigger.addEventListener('click', (e) => {
               e.preventDefault()
               e.stopPropagation()
+              
+              // Set flag to prevent menu position from changing
+              cellTriggerJustClicked = true
+              setTimeout(() => {
+                cellTriggerJustClicked = false
+              }, 300)
+              
               const { selection } = view.state
               const isCellSelection = selection instanceof CellSelection
               const cellPos = view.posAtDOM(cell as Node, 0)
               const $cellPos = view.state.doc.resolve(cellPos)
               const table = findTable($cellPos)
+              
+              // Store the initial position before selection changes
+              const triggerRect = currentCellTrigger!.getBoundingClientRect()
+              const editorScrollTop = editorElement.scrollTop
+              const editorScrollLeft = editorElement.scrollLeft
+              const initialPosition = { 
+                top: triggerRect.bottom - editorRect.top + editorScrollTop - 25, 
+                left: triggerRect.left - editorRect.left + editorScrollLeft 
+              }
               
               if (table) {
                 editor.commands.focus()
@@ -497,12 +533,12 @@ export function tableBorderMenuPlugin(editor: Editor) {
                 editor.commands.setTextSelection(cellPos)
               }
               
-              const triggerRect = currentCellTrigger!.getBoundingClientRect()
+              // Use the stored initial position
               const cellEvent = new CustomEvent('table-border-click', {
                 bubbles: true,
                 detail: {
                   axis: 'cell',
-                  position: { top: triggerRect.bottom - editorRect.top - 25, left: triggerRect.left - editorRect.left },
+                  position: initialPosition,
                   cellInfo: { element: cell, rowIndex, colIndex, isIndividualCell: !isCellSelection, isMultiCellSelection: isCellSelection },
                 },
               })
@@ -576,35 +612,62 @@ export function tableBorderMenuPlugin(editor: Editor) {
       }
 
       const showMultiCellMenu = () => {
-        const selectedCells = view.dom.querySelectorAll('.selectedCell')
+        // Check if row/column menu is currently showing - if so, don't show multi-cell menu
+        // This prevents menu switch when changing colors from row/column menu
+        const menuAxis = (window as any).__currentTableMenuAxis
+        if (menuAxis === 'row' || menuAxis === 'column') {
+          return
+        }
         
-        if (selectedCells.length < 1) return
+        const { selection } = view.state
+        if (!(selection instanceof CellSelection) || !selection.$anchorCell || !selection.$headCell) {
+          return
+        }
         
-        let minLeft = Infinity
-        let maxRight = -Infinity
-        let minTop = Infinity
-        let maxBottom = -Infinity
-        let firstCell: HTMLElement | null = null
+        const table = findTable(selection.$anchorCell)
+        if (!table) return
         
-        selectedCells.forEach((cell) => {
-          const cellEl = cell as HTMLElement
-          const rect = cellEl.getBoundingClientRect()
-          minLeft = Math.min(minLeft, rect.left)
-          maxRight = Math.max(maxRight, rect.right)
-          minTop = Math.min(minTop, rect.top)
-          maxBottom = Math.max(maxBottom, rect.bottom)
-          if (!firstCell) {
-            firstCell = cellEl
+        const map = TableMap.get(table.node)
+        const anchorRect = map.findCell(selection.$anchorCell.pos - table.start)
+        const headRect = map.findCell(selection.$headCell.pos - table.start)
+        
+        // Get all cells in the selection
+        const selectedRows = new Set<number>()
+        const selectedCols = new Set<number>()
+        
+        // Iterate through all cells in the selection rectangle
+        const minRow = Math.min(anchorRect.top, headRect.top)
+        const maxRow = Math.max(anchorRect.bottom - 1, headRect.bottom - 1)
+        const minCol = Math.min(anchorRect.left, headRect.left)
+        const maxCol = Math.max(anchorRect.right - 1, headRect.right - 1)
+        
+        // Collect all unique rows and columns in the selection
+        for (let row = minRow; row <= maxRow; row++) {
+          for (let col = minCol; col <= maxCol; col++) {
+            const cellIndex = row * map.width + col
+            if (cellIndex >= 0 && cellIndex < map.map.length) {
+              const cellPos = map.map[cellIndex]
+              if (cellPos !== undefined) {
+                selectedRows.add(row)
+                selectedCols.add(col)
+              }
+            }
           }
-        })
+        }
         
+        const totalRows = map.height
+        const totalCols = map.width
+        
+        // Get DOM element for anchor cell
+        const anchorCellDOM = view.nodeDOM(selection.$anchorCell.pos)
+        const firstCell = anchorCellDOM as HTMLElement
         if (!firstCell) return
         
-        const isMultiCellSelection = selectedCells.length > 1
+        const tableDOM = firstCell.closest('table') as HTMLTableElement | null
+        if (!tableDOM) return
         
-        const firstCellElement = firstCell as HTMLElement
-        const table = firstCellElement.closest('table') as HTMLTableElement | null
-        if (!table) return
+        const row = firstCell.closest('tr') as HTMLTableRowElement | null
+        if (!row) return
         
         let editorElement = view.dom.parentElement
         while (editorElement && getComputedStyle(editorElement).position === 'static') {
@@ -615,18 +678,91 @@ export function tableBorderMenuPlugin(editor: Editor) {
         }
         
         const editorRect = editorElement.getBoundingClientRect()
-        
-        const centerX = (minLeft + maxRight) / 2
+        const editorScrollTop = editorElement.scrollTop
+        const editorScrollLeft = editorElement.scrollLeft
+        const tableRect = tableDOM.getBoundingClientRect()
         const menuHeight = 30
         const gap = 12
         
-        const row = firstCell.closest('tr') as HTMLTableRowElement | null
-        if (!row) return
+        // Check if it's a full row selection (one row, all columns)
+        if (selectedRows.size === 1 && selectedCols.size === totalCols) {
+          // Full row selection - show row menu
+          const rowIndex = Array.from(selectedRows)[0]
+          const rowRect = row.getBoundingClientRect()
+          const rowHandleLeft = tableRect.left - editorRect.left - 7
+          const rowHandleCenter = rowHandleLeft + 6
+          const rowCenter = rowRect.top - editorRect.top + rowRect.height / 2 - menuHeight / 2
+          
+          const rowEvent = new CustomEvent('table-border-click', {
+            bubbles: true,
+            detail: {
+              axis: 'row',
+              position: {
+                top: rowCenter,
+                left: rowHandleCenter,
+              },
+              cellInfo: {
+                element: firstCell,
+                rowIndex,
+                colIndex: 0,
+                isFirstRow: rowIndex === 0,
+                isIndividualCell: false,
+                isMultiCellSelection: false,
+              },
+            },
+          })
+          editorElement.dispatchEvent(rowEvent)
+          window.dispatchEvent(rowEvent)
+          return
+        }
         
-        const colIndex = Array.from(row.querySelectorAll('td, th')).indexOf(firstCell as HTMLTableCellElement)
-        const rowIndex = Array.from(table.querySelectorAll('tr')).indexOf(row)
+        // Check if it's a full column selection (one column, all rows)
+        if (selectedCols.size === 1 && selectedRows.size === totalRows) {
+          // Full column selection - show column menu
+          const colIndex = Array.from(selectedCols)[0]
+          const cellRect = firstCell.getBoundingClientRect()
+          const tableTop = tableRect.top - editorRect.top
+          
+          const columnEvent = new CustomEvent('table-border-click', {
+            bubbles: true,
+            detail: {
+              axis: 'column',
+              position: {
+                top: tableTop - menuHeight - gap,
+                left: cellRect.left - editorRect.left + cellRect.width / 2,
+              },
+              cellInfo: {
+                element: firstCell,
+                rowIndex: 0,
+                colIndex,
+                isFirstRow: true,
+                isIndividualCell: false,
+                isMultiCellSelection: false,
+              },
+            },
+          })
+          editorElement.dispatchEvent(columnEvent)
+          window.dispatchEvent(columnEvent)
+          return
+        }
         
-        const tableRect = table.getBoundingClientRect()
+        // Partial selection - show multi-cell menu
+        const selectedCellsDOM = view.dom.querySelectorAll('.selectedCell')
+        let minLeft = Infinity
+        let maxRight = -Infinity
+        let minTop = Infinity
+        let maxBottom = -Infinity
+        
+        selectedCellsDOM.forEach((cell) => {
+          const cellEl = cell as HTMLElement
+          const rect = cellEl.getBoundingClientRect()
+          minLeft = Math.min(minLeft, rect.left)
+          maxRight = Math.max(maxRight, rect.right)
+          minTop = Math.min(minTop, rect.top)
+          maxBottom = Math.max(maxBottom, rect.bottom)
+        })
+        
+        const centerX = (minLeft + maxRight) / 2
         const spaceAbove = minTop - tableRect.top
         const spaceBelow = tableRect.bottom - maxBottom
         
@@ -641,20 +777,26 @@ export function tableBorderMenuPlugin(editor: Editor) {
         
         const finalLeft = centerX
         
+        // Convert viewport coordinates to editor-relative coordinates (accounting for scroll)
+        const editorRelativeTop = finalTop - editorRect.top + editorScrollTop
+        const editorRelativeLeft = finalLeft - editorRect.left + editorScrollLeft
+        
+        const isMultiCellSelection = selectedCellsDOM.length > 1
+        
         const cellEvent = new CustomEvent('table-border-click', {
           bubbles: true,
           detail: {
             axis: 'cell',
             position: {
-              top: finalTop,
-              left: finalLeft,
+              top: editorRelativeTop,
+              left: editorRelativeLeft,
             },
             cellInfo: {
               element: firstCell,
-              rowIndex,
-              colIndex,
+              rowIndex: minRow,
+              colIndex: minCol,
               isIndividualCell: !isMultiCellSelection,
-              isMultiCellSelection,
+              isMultiCellSelection: true,
             },
           },
         })
@@ -688,6 +830,8 @@ export function tableBorderMenuPlugin(editor: Editor) {
         }
 
         const editorRect = editorElement.getBoundingClientRect()
+        const editorScrollTop = editorElement.scrollTop
+        const editorScrollLeft = editorElement.scrollLeft
         const cellRect = cell.getBoundingClientRect()
 
         const row = cell.closest('tr') as HTMLTableRowElement | null
@@ -702,13 +846,17 @@ export function tableBorderMenuPlugin(editor: Editor) {
         const finalTop = cellRect.top - menuHeight - gap
         const finalLeft = centerX
 
+        // Convert viewport coordinates to editor-relative coordinates (accounting for scroll)
+        const editorRelativeTop = finalTop - editorRect.top + editorScrollTop
+        const editorRelativeLeft = finalLeft - editorRect.left + editorScrollLeft
+
         const cellEvent = new CustomEvent('table-border-click', {
           bubbles: true,
           detail: {
             axis: 'cell',
             position: {
-              top: finalTop,
-              left: finalLeft,
+              top: editorRelativeTop,
+              left: editorRelativeLeft,
             },
             cellInfo: {
               element: cell,
@@ -725,6 +873,11 @@ export function tableBorderMenuPlugin(editor: Editor) {
 
       const checkCellSelection = (forceCheck = false) => {
         if (isMouseDown && !forceCheck) return
+        
+        // Don't show multi-cell menu if row/column handler or cell trigger was just clicked
+        if (rowColHandlerJustClicked || cellTriggerJustClicked) {
+          return
+        }
         
         const { selection } = view.state
         const isCellSelection = selection instanceof CellSelection
@@ -743,7 +896,7 @@ export function tableBorderMenuPlugin(editor: Editor) {
             }
             
             cellSelectionTimeout = setTimeout(() => {
-              if (!isMouseDown && !isResizingHandles) {
+              if (!isMouseDown && !isResizingHandles && !rowColHandlerJustClicked && !cellTriggerJustClicked) {
                 showMultiCellMenu()
               }
             }, forceCheck ? 80 : 220)
@@ -753,7 +906,7 @@ export function tableBorderMenuPlugin(editor: Editor) {
             clearTimeout(cellSelectionTimeout)
             cellSelectionTimeout = null
           }
-          if (forceCheck && !isResizingHandles) {
+          if (forceCheck && !isResizingHandles && !cellTriggerJustClicked) {
             showSingleCellMenuFromSelection()
           }
         }
