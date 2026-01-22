@@ -4,7 +4,7 @@ import path from 'path'
 import { meta } from './meta'
 import { getComponentItems } from './utils'
 import { transformerStyleToClass } from '@shikijs/transformers'
-import componentPreview from './plugins/componentPreview'
+import componentTransformer from './plugins/componentTransformer'
 import fs from 'fs'
 
 // needed for transforming shiki inline styles to classes
@@ -25,7 +25,7 @@ export default defineConfig({
     },
     codeTransformers: [toClass],
     config(md) {
-      md.use(componentPreview)
+      md.use(componentTransformer)
     },
   },
   cleanUrls: true,
