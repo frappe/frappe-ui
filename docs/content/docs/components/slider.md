@@ -1,4 +1,4 @@
-# Rating
+# Slider
 
 Range slider
 
