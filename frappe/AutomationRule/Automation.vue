@@ -46,7 +46,7 @@
         <!-- ConditionBlock -->
         <!-- NotificationBlock -->
         <!-- ActionBlock -->
-        <AddBlock />
+        <AddBlock v-if="state.dt" />
       </div>
       <div v-else class="flex items-center justify-center h-full">
         <LoadingIndicator class="w-6" />
@@ -63,14 +63,14 @@ import {
   Switch,
   toast,
 } from 'frappe-ui'
-import { computed, onMounted, provide, reactive, ref } from 'vue'
+import { computed, onMounted, provide, reactive, ref, watch } from 'vue'
 import SettingsLayoutBase from '../../src/components/SettingsLayoutBase.vue'
 import AddBlock from './AddBlock.vue'
 import NameBlock from './NameBlock.vue'
 import RuleBlock from './RuleBlock.vue'
 import ScopeBlock from './ScopeBlock.vue'
 import WhenBlock from './WhenBlock.vue'
-import { AutomationStateSymbol } from './types'
+import { AutomationState, AutomationStateSymbol } from './types'
 
 const props = defineProps<{
   automationName?: string | null
@@ -111,7 +111,7 @@ const reverseEventMap = {
   Scheduled: 'Scheduled',
 }
 
-const state = reactive({
+const state = reactive<AutomationState>({
   name: '',
   enabled: false,
   dt: '',
@@ -246,6 +246,15 @@ onMounted(() => {
   if (isNew.value) return
   resource.reload()
 })
+watch(
+  () => state.dt,
+  (newVal, oldVal) => {
+    if (newVal === oldVal) return
+    if (!oldVal) return
+    state.presets = []
+    state.rule = []
+  },
+)
 
 provide(AutomationStateSymbol, state)
 </script>

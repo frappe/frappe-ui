@@ -86,20 +86,16 @@
           size="sm"
           :icon-left="FilterIcon"
           label="Add Filter"
-          @click="() => conditionRef?.insertRow()"
+          @click="addFilter"
         />
       </template>
     </BaseBlock>
-    <ConditionBlock
-      v-show="state.presets.length > 0"
-      v-model="state.presets"
-      ref="conditionRef"
-    />
+    <ConditionBlock v-if="state.presets.length > 0" v-model="state.presets" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { useDoctypeMeta } from '../../src'
 import type { Option } from '../../src/components/Autocomplete/types'
 import FormControl from '../../src/components/FormControl/FormControl.vue'
@@ -112,8 +108,11 @@ import ConditionBlock from './ConditionBlock.vue'
 import { IconType } from './types'
 
 const state = useAutomationState()
-const conditionRef = ref<InstanceType<typeof ConditionBlock> | null>(null)
-
+const addFilter = () => {
+  if (state.presets.length === 0) {
+    state.presets.push(['', '', ''])
+  }
+}
 const isTimerEvent = computed(() =>
   ['Minutes After', 'Minutes Before', 'Days After', 'Days Before'].includes(
     state.eventType,

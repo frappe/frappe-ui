@@ -78,6 +78,7 @@ export interface AutomationState {
     | 'Every 12 Hours'
     | 'Every Day'
     | 'CRON Expression'
+    | ''
   cronFormat?: string
   presets: any[]
   rule: any[]

@@ -127,7 +127,11 @@ function findAndDeleteElseBlock() {
     return acc
   }, 0)
   if (countIfBlock === 0) {
-    state.rule.splice(props.ruleIdx)
+    // find else block index and remove that
+    const elseIdx = state.rule.findIndex((r) => r.type === 'else')
+    if (elseIdx !== -1) {
+      state.rule.splice(elseIdx, 1)
+    }
   }
 }
 </script>
