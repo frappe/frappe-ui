@@ -1,0 +1,11 @@
+node_modules
+.DS_Store
+dist
+dist-ssr
+*.local
+coverage
+../<app-name>
+sites
+
+components.d.ts
+auto-imports.d.ts
