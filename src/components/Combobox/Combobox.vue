@@ -163,14 +163,14 @@ function getDisplayValue(selectedValue: string | null | undefined): string {
   const options = props.options.flatMap((opt) =>
     isGroup(opt) ? opt.options : opt,
   )
-  const selectedOption = options.find((opt) => getValue(opt) === selectedValue)
+  const selectedOption = options.find((opt) => getKey(opt) === selectedValue)
   return selectedOption ? getLabel(selectedOption) : selectedValue || ''
 }
 
 const selectedOption = computed(() => {
   if (!internalModelValue.value) return null
   return allOptionsFlat.value.find(
-    (opt) => getValue(opt) === internalModelValue.value,
+    (opt) => getKey(opt) === internalModelValue.value,
   )
 })
 
