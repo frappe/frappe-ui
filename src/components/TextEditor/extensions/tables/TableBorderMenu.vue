@@ -5,7 +5,10 @@
     :style="{
       top: position.top + 'px',
       left: position.left + 'px',
-      transform: axis === 'column' || cellInfo?.isMultiCellSelection ? 'translateX(-50%)' : undefined,
+      transform:
+        axis === 'column' || cellInfo?.isMultiCellSelection
+          ? 'translateX(-50%)'
+          : undefined,
     }"
     @click.stop
   >
@@ -37,7 +40,12 @@
 
       <Popover>
         <template #target="{ togglePopover }">
-          <Button class="!size-6" @click="togglePopover()" variant="ghost" tooltip="Color">
+          <Button
+            class="!size-6"
+            @click="togglePopover()"
+            variant="ghost"
+            tooltip="Color"
+          >
             <template #icon>
               <LucidePalette class="text-ink-gray-6 size-3.5" />
             </template>
@@ -84,18 +92,25 @@
       </Popover>
       <Popover>
         <template #target="{ togglePopover }">
-          <Button class="!size-6" @click="togglePopover()" variant="ghost" tooltip="Border Width">
+          <Button
+            class="!size-6"
+            @click="togglePopover()"
+            variant="ghost"
+            tooltip="Border Width"
+          >
             <template #icon>
               <LucideFrame class="text-ink-gray-6 size-3.5" />
             </template>
           </Button>
         </template>
         <template #body-main>
-          <div class="p-2"
-          @mousedown.stop
-          @click.stop
-          @pointerdown.stop
-            @touchstart.stop>
+          <div
+            class="p-2"
+            @mousedown.stop
+            @click.stop
+            @pointerdown.stop
+            @touchstart.stop
+          >
             <FormControl
               :type="'number'"
               :ref_for="true"
@@ -126,7 +141,7 @@ import LucideMerge from '~icons/lucide/merge'
 import LucideHeader from '~icons/lucide/panel-top'
 import LucidePalette from '~icons/lucide/palette'
 import LucideFrame from '~icons/lucide/frame'
-import { computed , ref, watch} from 'vue'
+import { computed, ref, watch } from 'vue'
 
 interface TableBorderMenuProps {
   show: boolean
@@ -186,6 +201,18 @@ const menuObjIndividual: MenuItem[] = [
 ]
 
 const menuObjMultiCell: MenuItem[] = [
+  { icon: LucideArrowUp, action: 'addRowBefore', tooltip: 'Add Row Before' },
+  { icon: LucideArrowDown, action: 'addRowAfter', tooltip: 'Add Row After' },
+  {
+    icon: LucideArrowLeft,
+    action: 'addColumnBefore',
+    tooltip: 'Add Column Before',
+  },
+  {
+    icon: LucideArrowRight,
+    action: 'addColumnAfter',
+    tooltip: 'Add Column After',
+  },
   { icon: LucideHeader, action: 'toggleHeader', tooltip: 'Make Header' },
 ]
 
