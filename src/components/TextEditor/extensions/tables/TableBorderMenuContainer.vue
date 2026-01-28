@@ -5,7 +5,15 @@
       :show="showTableBorderMenu"
       :axis="(tableBorderAxis === 'cell' ? null : tableBorderAxis) || null"
       :position="tableBorderMenuPos"
-      :cell-info="tableCellInfo ? { ...tableCellInfo, isIndividualCell: tableCellInfo.isIndividualCell ?? false, isMultiCellSelection: tableCellInfo.isMultiCellSelection ?? false } : null"
+      :cell-info="
+        tableCellInfo
+          ? {
+              ...tableCellInfo,
+              isIndividualCell: tableCellInfo.isIndividualCell ?? false,
+              isMultiCellSelection: tableCellInfo.isMultiCellSelection ?? false,
+            }
+          : null
+      "
       :can-merge-cells="canMergeCells"
       @add-row-before="addRowBefore"
       @add-row-after="addRowAfter"
@@ -33,7 +41,10 @@ const editor = inject<{ value: Editor | null }>('editor', { value: null })
 
 const showTableBorderMenu = ref(false)
 const tableBorderAxis = ref<'row' | 'column' | 'cell' | null>(null)
-const tableBorderMenuPos = ref<{ top: number; left: number }>({ top: 0, left: 0 })
+const tableBorderMenuPos = ref<{ top: number; left: number }>({
+  top: 0,
+  left: 0,
+})
 const tableCellInfo = ref<{
   element: HTMLElement | null
   rowIndex: number
@@ -52,26 +63,26 @@ const getViewportPosition = (
     element: HTMLElement | null
     isMultiCellSelection?: boolean
     isIndividualCell?: boolean
-  } | null
+  } | null,
 ) => {
   if (!editor.value?.view?.dom?.parentElement) {
     return editorRelativePos
   }
-  
+
   const editorElement = editor.value.view.dom.parentElement
   const editorRect = editorElement.getBoundingClientRect()
   const editorScrollTop = editorElement.scrollTop
   const editorScrollLeft = editorElement.scrollLeft
   let viewportTop = editorRect.top + editorRelativePos.top - editorScrollTop
   let viewportLeft = editorRect.left + editorRelativePos.left - editorScrollLeft
-  
+
   if (cellInfo?.element) {
     const table = cellInfo.element.closest('table')
     if (table) {
       const tableRect = table.getBoundingClientRect()
       const menuHeight = 30
       const gap = 12
-      
+
       if (axis === 'column') {
         // Position column menu above the table with some space
         const cellRect = cellInfo.element.getBoundingClientRect()
@@ -90,7 +101,7 @@ const getViewportPosition = (
       }
     }
   }
-  
+
   if (axis === 'cell' && cellInfo?.element) {
     // If coming from a selection-based menu (multi or single cell with isIndividualCell=false),
     // use the position calculated in the plugin (centered above selection/cell).
@@ -104,7 +115,7 @@ const getViewportPosition = (
       viewportTop = cellRect.top + cellRect.height / 2 - 12
     }
   }
-  
+
   return {
     top: viewportTop,
     left: viewportLeft,
@@ -130,16 +141,18 @@ const closeMenu = (e: MouseEvent) => {
   if (menuJustOpened) {
     return
   }
-  
+
   const target = e.target as HTMLElement
-  
+
   if (isMultiCellMenuOpen.value) {
-    const selectedCells = target.closest('.ProseMirror')?.querySelectorAll('.selectedCell')
+    const selectedCells = target
+      .closest('.ProseMirror')
+      ?.querySelectorAll('.selectedCell')
     if (selectedCells && selectedCells.length >= 2) {
       return
     }
   }
-  
+
   if (
     !target.closest('.table-border-menu') &&
     !target.closest('.table-row-handle-overlay') &&
@@ -175,7 +188,11 @@ const deleteRow = () => {
   setTimeout(() => {
     const editorElement = editor.value?.view?.dom?.parentElement
     if (editorElement) {
-      editorElement.querySelectorAll('.table-row-handle-overlay, .table-col-handle-overlay, .table-cell-trigger-overlay').forEach(el => el.remove())
+      editorElement
+        .querySelectorAll(
+          '.table-row-handle-overlay, .table-col-handle-overlay, .table-cell-trigger-overlay',
+        )
+        .forEach((el) => el.remove())
     }
   }, 0)
 }
@@ -198,7 +215,11 @@ const deleteColumn = () => {
   setTimeout(() => {
     const editorElement = editor.value?.view?.dom?.parentElement
     if (editorElement) {
-      editorElement.querySelectorAll('.table-row-handle-overlay, .table-col-handle-overlay, .table-cell-trigger-overlay').forEach(el => el.remove())
+      editorElement
+        .querySelectorAll(
+          '.table-row-handle-overlay, .table-col-handle-overlay, .table-cell-trigger-overlay',
+        )
+        .forEach((el) => el.remove())
     }
   }, 0)
 }
@@ -223,7 +244,11 @@ const setBorderColor = (color: string | null) => {
 
 const setBorderWidth = (width: number | null) => {
   const borderWidthValue = width ? `${width}px` : null
-  editor.value?.chain().focus().setCellAttribute('borderWidth', borderWidthValue).run()
+  editor.value
+    ?.chain()
+    .focus()
+    .setCellAttribute('borderWidth', borderWidthValue)
+    .run()
 }
 
 const canMergeCells = computed(() => {
@@ -250,7 +275,7 @@ watch(
       }
     }
   },
-  { deep: true }
+  { deep: true },
 )
 
 onMounted(() => {
@@ -258,9 +283,11 @@ onMounted(() => {
   window.addEventListener('table-hide-menu', onHideMenu)
   document.addEventListener('click', closeMenu)
   if (editor.value?.view?.dom?.parentElement) {
-    editor.value.view.dom.parentElement.addEventListener('table-hide-menu', onHideMenu)
+    editor.value.view.dom.parentElement.addEventListener(
+      'table-hide-menu',
+      onHideMenu,
+    )
   }
-  
 })
 
 onBeforeUnmount(() => {
@@ -268,8 +295,10 @@ onBeforeUnmount(() => {
   window.removeEventListener('table-hide-menu', onHideMenu)
   document.removeEventListener('click', closeMenu)
   if (editor.value?.view?.dom?.parentElement) {
-    editor.value.view.dom.parentElement.removeEventListener('table-hide-menu', onHideMenu)
+    editor.value.view.dom.parentElement.removeEventListener(
+      'table-hide-menu',
+      onHideMenu,
+    )
   }
 })
 </script>
-

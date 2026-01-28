@@ -1,20 +1,20 @@
 import { Table } from '@tiptap/extension-table'
-import { columnResizing, CellSelection } from '@tiptap/pm/tables'
-import { tableBorderMenuPlugin } from './table-border-menu-plugin';
-import { Plugin, PluginKey, TextSelection } from '@tiptap/pm/state'
-import { DecorationSet } from '@tiptap/pm/view'
+import { columnResizing } from '@tiptap/pm/tables'
+import { tableBorderMenuPlugin } from './table-border-menu-plugin'
 
 export const TableExtension = Table.extend({
   addAttributes() {
     return {
       backgroundColor: {
-        parseHTML: element => {
-          if (!element.closest('table') && element.tagName.toLowerCase() !== 'table') {
+        parseHTML: (element) => {
+          if (
+            !element.closest('table') &&
+            element.tagName.toLowerCase() !== 'table'
+          ) {
             return null
           }
-
         },
-        renderHTML(attributes){
+        renderHTML(attributes) {
           if (!attributes.backgroundColor) {
             return {}
           }
@@ -25,10 +25,8 @@ export const TableExtension = Table.extend({
       },
       borderColor: {
         default: null,
-        parseHTML: element => {
-
-        },
-        renderHTML(attributes){
+        parseHTML: (element) => {},
+        renderHTML(attributes) {
           if (!attributes.borderColor) {
             return {}
           }
@@ -38,18 +36,23 @@ export const TableExtension = Table.extend({
         },
       },
       borderWidth: {
-        parseHTML: element => {
-          if (!element.closest('table') && element.tagName.toLowerCase() !== 'table') {
+        parseHTML: (element) => {
+          if (
+            !element.closest('table') &&
+            element.tagName.toLowerCase() !== 'table'
+          ) {
             return null
           }
           const classList = element.classList
-          const borderWidthClassMatch = Array.from(classList).find(cls => cls.startsWith('border-') && /^border-\d+$/.test(cls))
+          const borderWidthClassMatch = Array.from(classList).find(
+            (cls) => cls.startsWith('border-') && /^border-\d+$/.test(cls),
+          )
           if (borderWidthClassMatch) {
             return borderWidthClassMatch.replace('border-', '')
           }
           return null
         },
-        renderHTML(attributes){
+        renderHTML(attributes) {
           if (!attributes.borderWidth) {
             return {}
           }
@@ -60,7 +63,7 @@ export const TableExtension = Table.extend({
       },
     }
   },
-  
+
   addProseMirrorPlugins() {
     return [
       tableBorderMenuPlugin(this.editor),

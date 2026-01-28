@@ -1,6 +1,6 @@
 import { ref, computed, onMounted, onBeforeUnmount, type Ref } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
-import { CellSelection } from '@tiptap/pm/tables'
+import { CellSelection, findTable, TableMap } from '@tiptap/pm/tables'
 
 export interface TableCellInfo {
   element: HTMLElement | null
@@ -22,30 +22,29 @@ export function useTableMenu(editor: Ref<Editor | null>) {
   let menuJustOpened = false
   let isChangingColor = false
 
-
   const onBorderClick = (e: Event) => {
     const { axis, position, cellInfo } = (e as CustomEvent).detail
-    
+
     // If we're currently changing colors, ignore new menu events
     if (isChangingColor) {
       return
     }
-    
+
     // If menu is already showing for a row or column, don't switch to cell menu
     // This prevents the menu from switching when changing colors from row/column menu
     if (
-      showTableBorderMenu.value && 
+      showTableBorderMenu.value &&
       (tableBorderAxis.value === 'row' || tableBorderAxis.value === 'column') &&
       axis === 'cell'
     ) {
       return
     }
-    
+
     // If menu is already showing for a cell and we receive another cell event for the same cell,
     // don't update the position (prevents position jumping when selection changes)
     if (
-      showTableBorderMenu.value && 
-      tableBorderAxis.value === 'cell' && 
+      showTableBorderMenu.value &&
+      tableBorderAxis.value === 'cell' &&
       axis === 'cell' &&
       tableCellInfo.value &&
       cellInfo &&
@@ -54,15 +53,15 @@ export function useTableMenu(editor: Ref<Editor | null>) {
     ) {
       return
     }
-    
+
     tableBorderAxis.value = axis
     tableBorderMenuPos.value = position
     tableCellInfo.value = cellInfo
     showTableBorderMenu.value = true
-    
+
     // Store current menu axis globally so plugin can check it
     ;(window as any).__currentTableMenuAxis = axis
-    
+
     // Prevent immediate closing when menu is just opened
     menuJustOpened = true
     setTimeout(() => {
@@ -75,7 +74,7 @@ export function useTableMenu(editor: Ref<Editor | null>) {
     if (menuJustOpened) {
       return
     }
-    
+
     const target = e.target as HTMLElement
     if (
       !target.closest('.table-border-menu') &&
@@ -108,13 +107,18 @@ export function useTableMenu(editor: Ref<Editor | null>) {
   }
 
   const addRowBefore = () => {
-    editor.value?.chain().focus().addRowBefore().run()
+    const rows = getSelectedRowCount(editor)
+    for (let i = 0; i < rows; i++)
+      editor.value?.chain().focus().addRowBefore().run()
+
     clearCellSelection()
     showTableBorderMenu.value = false
   }
 
   const addRowAfter = () => {
-    editor.value?.chain().focus().addRowAfter().run()
+    const rows = getSelectedRowCount(editor)
+    for (let i = 0; i < rows; i++)
+      editor.value?.chain().focus().addRowAfter().run()
     clearCellSelection()
     showTableBorderMenu.value = false
   }
@@ -126,13 +130,17 @@ export function useTableMenu(editor: Ref<Editor | null>) {
   }
 
   const addColumnBefore = () => {
-    editor.value?.chain().focus().addColumnBefore().run()
+    const columns = getSelectedColumnCount(editor)
+    for (let i = 0; i < columns; i++)
+      editor.value?.chain().focus().addColumnBefore().run()
     clearCellSelection()
     showTableBorderMenu.value = false
   }
 
   const addColumnAfter = () => {
-    editor.value?.chain().focus().addColumnAfter().run()
+    const columns = getSelectedColumnCount(editor)
+    for (let i = 0; i < columns; i++)
+      editor.value?.chain().focus().addColumnAfter().run()
     clearCellSelection()
     showTableBorderMenu.value = false
   }
@@ -157,14 +165,20 @@ export function useTableMenu(editor: Ref<Editor | null>) {
     // Preserve current menu state when changing colors from row/column menu
     const currentAxis = tableBorderAxis.value
     const currentPos = { ...tableBorderMenuPos.value }
-    const currentCellInfo = tableCellInfo.value ? { ...tableCellInfo.value } : null
-    
+    const currentCellInfo = tableCellInfo.value
+      ? { ...tableCellInfo.value }
+      : null
+
     // Set flag to prevent menu switch
     isChangingColor = true
     ;(window as any).__currentTableMenuAxis = currentAxis
-    
-    editor.value?.chain().focus().setCellAttribute('backgroundColor', color).run()
-    
+
+    editor.value
+      ?.chain()
+      .focus()
+      .setCellAttribute('backgroundColor', color)
+      .run()
+
     // Restore menu state if it was row or column
     if (currentAxis === 'row' || currentAxis === 'column') {
       // Use a longer delay to ensure all updates complete
@@ -182,19 +196,21 @@ export function useTableMenu(editor: Ref<Editor | null>) {
       isChangingColor = false
     }
   }
-  
+
   const setBorderColor = (color: string | null) => {
     // Preserve current menu state when changing colors from row/column menu
     const currentAxis = tableBorderAxis.value
     const currentPos = { ...tableBorderMenuPos.value }
-    const currentCellInfo = tableCellInfo.value ? { ...tableCellInfo.value } : null
-    
+    const currentCellInfo = tableCellInfo.value
+      ? { ...tableCellInfo.value }
+      : null
+
     // Set flag to prevent menu switch
     isChangingColor = true
     ;(window as any).__currentTableMenuAxis = currentAxis
-    
+
     editor.value?.chain().focus().setCellAttribute('borderColor', color).run()
-    
+
     // Restore menu state if it was row or column
     if (currentAxis === 'row' || currentAxis === 'column') {
       // Use a longer delay to ensure all updates complete
@@ -217,15 +233,21 @@ export function useTableMenu(editor: Ref<Editor | null>) {
     // Preserve current menu state when changing border width from row/column menu
     const currentAxis = tableBorderAxis.value
     const currentPos = { ...tableBorderMenuPos.value }
-    const currentCellInfo = tableCellInfo.value ? { ...tableCellInfo.value } : null
-    
+    const currentCellInfo = tableCellInfo.value
+      ? { ...tableCellInfo.value }
+      : null
+
     // Set flag to prevent menu switch
     isChangingColor = true
     ;(window as any).__currentTableMenuAxis = currentAxis
-    
+
     const borderWidthValue = width ? `${width}px` : null
-    editor.value?.chain().focus().setCellAttribute('borderWidth', borderWidthValue).run()
-    
+    editor.value
+      ?.chain()
+      .focus()
+      .setCellAttribute('borderWidth', borderWidthValue)
+      .run()
+
     // Restore menu state if it was row or column
     if (currentAxis === 'row' || currentAxis === 'column') {
       // Use a longer delay to ensure all updates complete
@@ -251,7 +273,7 @@ export function useTableMenu(editor: Ref<Editor | null>) {
   const handleBorderAttributeChanging = () => {
     borderAttributeChanging = true
   }
-  
+
   const handleBorderAttributeChanged = () => {
     borderAttributeChanging = false
   }
@@ -282,6 +304,59 @@ export function useTableMenu(editor: Ref<Editor | null>) {
     toggleHeader,
     setBackgroundColor,
     setBorderColor,
-    setBorderWidth
+    setBorderWidth,
   }
+}
+
+const getSelectedRowCount = (editor: Ref<Editor | null>) => {
+  if (!editor.value) return 0
+
+  const { state } = editor.value
+  const { selection } = state
+
+  if (selection instanceof CellSelection) {
+    const { $anchorCell, $headCell } = selection
+
+    // Get the table
+    const table = findTable($anchorCell)
+    if (!table) return 0
+
+    const map = TableMap.get(table.node)
+    const anchorRect = map.findCell($anchorCell.pos - table.start)
+    const headRect = map.findCell($headCell.pos - table.start)
+
+    // Calculate row span
+    const minRow = Math.min(anchorRect.top, headRect.top)
+    const maxRow = Math.max(anchorRect.bottom - 1, headRect.bottom - 1)
+
+    return maxRow - minRow + 1
+  }
+
+  return 1 // Single cell/row selected
+}
+const getSelectedColumnCount = (editor) => {
+  if (!editor.value) return 0
+
+  const { state } = editor.value
+  const { selection } = state
+
+  if (selection instanceof CellSelection) {
+    const { $anchorCell, $headCell } = selection
+
+    // Get the table
+    const table = findTable($anchorCell)
+    if (!table) return 0
+
+    const map = TableMap.get(table.node)
+    const anchorRect = map.findCell($anchorCell.pos - table.start)
+    const headRect = map.findCell($headCell.pos - table.start)
+
+    // Calculate column span
+    const minCol = Math.min(anchorRect.left, headRect.left)
+    const maxCol = Math.max(anchorRect.right - 1, headRect.right - 1)
+
+    return maxCol - minCol + 1
+  }
+
+  return 1 // Single cell/column selected
 }
