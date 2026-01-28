@@ -140,7 +140,7 @@ export const getValueControl = (row: StateRow) => {
   }
 
   if (typeSelect.includes(fieldType) || typeCheck.includes(fieldType)) {
-    let _options = options || ['yes', 'no']
+    let _options = options || ['Yes', 'No']
 
     return h(Select, { placeholder: 'Select Option', options: _options })
   }
@@ -225,9 +225,10 @@ export const parseFilters = (filters: any) => {
 
   return _filters.map(transformIn).reduce((acc, cur) => {
     if (['equals', '='].includes(cur.operator)) {
-      cur.value = cur.toBoolean ? 'Yes' : cur.value
-    } //
-    else if (cur.operator === 'between') cur.value = [...cur.value.split(',')]
+      cur.value = cur.value == 'Yes' ? true : cur.value == 'No' ? false : cur.value
+    } else if (cur.operator === 'between') {
+      cur.value = [...cur.value.split(',')]
+    }
 
     return [
       ...acc,

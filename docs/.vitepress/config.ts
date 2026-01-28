@@ -3,8 +3,14 @@ import { lucideIcons } from '../../vite/lucideIcons'
 import path from 'path'
 import { meta } from './meta'
 import { getComponentItems } from './utils'
+import { transformerStyleToClass } from '@shikijs/transformers'
+import componentTransformer from './plugins/componentTransformer'
+import fs from 'fs'
 
-import componentPreview from './plugins/componentPreview'
+// needed for transforming shiki inline styles to classes
+const toClass = transformerStyleToClass({
+  classPrefix: 's_',
+})
 
 export default defineConfig({
   srcDir: 'content',
@@ -12,18 +18,17 @@ export default defineConfig({
   title: meta.name,
   description: meta.description,
   titleTemplate: meta.name,
-
   markdown: {
     theme: {
-      dark: "tokyo-night",
-      light: "github-light",
+      dark: 'tokyo-night',
+      light: 'github-light',
     },
+    codeTransformers: [toClass],
     config(md) {
-      md.use(componentPreview)
+      md.use(componentTransformer)
     },
   },
   cleanUrls: true,
-
   head: [
     // newsreader font
     ['link', { rel: 'preconnect', href: 'https://fonts.googleapis.com' }],
@@ -38,7 +43,6 @@ export default defineConfig({
         rel: 'stylesheet',
       },
     ],
-
     // set data-theme attribute since vitepress uses just the dark class.
     [
       'script',
@@ -50,7 +54,6 @@ export default defineConfig({
       localStorage.theme = theme
     })()`,
     ],
-
     // ===== Open Graph =====
     ['meta', { property: 'og:type', content: 'website' }],
     ['meta', { property: 'og:site_name', content: meta.name }],
@@ -67,7 +70,6 @@ export default defineConfig({
     ['meta', { property: 'og:image:width', content: '1200' }],
     ['meta', { property: 'og:image:height', content: '630' }],
     ['meta', { property: 'og:image:alt', content: meta.description }],
-
     // ===== Twitter =====
     ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
     ['meta', { name: 'twitter:title', content: meta.name }],
@@ -80,7 +82,6 @@ export default defineConfig({
       },
     ],
   ],
-
   themeConfig: {
     componentList: getComponentItems(),
     outline: [2, 3],
@@ -95,15 +96,19 @@ export default defineConfig({
       { icon: 'github', link: 'https://github.com/frappe/frappe-ui' },
     ],
   },
-
   vite: {
     plugins: [lucideIcons()],
     resolve: {
       alias: {
         '@/components': path.resolve(__dirname, '../components/'),
         'frappe-ui': path.resolve(__dirname, '../../src'),
-        'dayjs/esm': 'dayjs'
+        'dayjs/esm': 'dayjs',
       },
     },
+  },
+  buildEnd: async () => {
+    const str = '/* Auto-generated on build-time */ \n\n ' + toClass.getCSS()
+    const cssPath = path.resolve(__dirname, '../css/shiki.css')
+    await fs.promises.writeFile(cssPath, str, 'utf-8')
   },
 })
