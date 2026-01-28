@@ -104,12 +104,14 @@ const anchorRef = ref<HTMLElement | null>(null)
 
 const isOpen = computed({
   get: () => (isShowPropPassed.value ? props.show : _isOpen.value),
-  set: (value: boolean) => {
-    if (!isShowPropPassed.value) {
-      _isOpen.value = value
-    }
-    emit('update:show', value)
-  },
+	set: (value: boolean) => {
+		if (!isShowPropPassed.value) {
+			if (value !== _isOpen.value) {
+				_isOpen.value = value
+				onUpdateOpen(value)
+			}
+		}
+	},
 })
 
 const isShowPropPassed = computed(() => {
