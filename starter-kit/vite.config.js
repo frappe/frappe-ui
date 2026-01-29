@@ -34,7 +34,7 @@ export default defineConfig({
 	},
 	optimizeDeps: {
 		include: [
-      "debug",
+      'debug',
 			"feather-icons",
 			"showdown",
 			"highlight.js/lib/core",
