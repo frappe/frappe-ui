@@ -1,7 +1,25 @@
 import Combobox from './Combobox.vue'
-import { h } from 'vue'
+import { h, ref } from 'vue'
 
 const options = ['Apple', 'Mango', 'Cherry']
+
+const VModelComponent = {
+  setup() {
+    const val = ref<string | null>(null)
+    return { val }
+  },
+
+  render() {
+    return h('div', {}, [
+      h('div', { id: 'val' }, this.val ?? 'null'),
+      h(Combobox, {
+        options,
+        modelValue: this.val,
+        'onUpdate:modelValue': (x: string | null) => (this.val = x),
+      }),
+    ])
+  },
+}
 
 describe('Combobox', () => {
   it('Renders', () => {
@@ -43,5 +61,16 @@ describe('Combobox', () => {
     })
 
     cy.get('[data-cy="prefix-icon"]').should('exist')
+  })
+
+  it('test v-model', () => {
+    cy.mount(VModelComponent)
+
+    cy.get('#val').should('have.text', 'null')
+
+    cy.get('[aria-label="Show popup"]').click()
+    cy.get('[role=option]:first').click()
+
+    cy.get('#val').should('have.text', 'Apple')
   })
 })
