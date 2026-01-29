@@ -14,7 +14,7 @@ function toggleTheme() {
 	document.documentElement.setAttribute("data-theme", newTheme);
 }
 
-const crmSidebar = reactive({
+const config = reactive({
 	header: {
 		title: "Frappe Starter",
 		subtitle: session.user,
@@ -45,5 +45,5 @@ const crmSidebar = reactive({
 </script>
 
 <template>
-	<Sidebar :header="crmSidebar.header" :sections="crmSidebar.sections" />
+	<Sidebar :header="config.header" :sections="config.sections" />
 </template>
