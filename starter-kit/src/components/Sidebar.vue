@@ -31,7 +31,7 @@ const crmSidebar = reactive({
 				label: "Logout",
 				to: "/logout",
 				icon: User,
-				onClick: () => alert("Logging out..."),
+				onClick: () => session.logout(),
 			},
 		],
 	},
