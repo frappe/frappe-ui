@@ -15,10 +15,7 @@
     <TextEditorFloatingMenu :buttons="floatingMenu" />
     <slot name="top" :editor />
     <slot name="editor" :editor="editor">
-      <EditorContent
-        :editor="editor"
-        class="prose prose-sm prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:relative prose-th:relative prose-th:bg-surface-gray-2"
-      />
+      <EditorContent :editor="editor" />
     </slot>
     <slot name="bottom" :editor />
   </div>
@@ -88,7 +85,7 @@ function defaultUploadFunction(file: File) {
 const props = withDefaults(defineProps<TextEditorProps>(), {
   content: null,
   placeholder: '',
-  editorClass: '',
+  editorClass: 'prose-sm',
   editable: true,
   autofocus: false,
   bubbleMenu: false,
@@ -117,7 +114,7 @@ const attrsWithoutClassStyle = computed(() => {
 const editorProps = computed(() => {
   return {
     attributes: {
-      class: normalizeClass(props.editorClass),
+      class: normalizeClass(['prose', props.editorClass]),
     },
   }
 })
