@@ -73,4 +73,32 @@ describe('Combobox', () => {
 
     cy.get('#val').should('have.text', 'Apple')
   })
+
+  it('emitted events', () => {
+    const onBlurSpy = cy.spy().as('onBlurSpy')
+    const onFocus = cy.spy().as('onFocus')
+    const onInput = cy.spy().as('onInput')
+    const onSelectedOption = cy.spy().as('onSelectedOption')
+
+    cy.mount(Combobox, {
+      props: {
+        options,
+        onBlur: onBlurSpy,
+        onFocus: onFocus,
+        onInput: onInput,
+        'onUpdate:selectedOption': onSelectedOption,
+      },
+    })
+
+    // type in input -> select 1st option -> outsideclick
+    cy.get('input').type('a')
+    cy.get('@onFocus').should('have.been.called')
+    cy.get('@onInput').should('have.been.called')
+
+    cy.get('[role=option]:first').click()
+    cy.get('@onSelectedOption').should('have.been.called')
+
+    cy.root().click(0, 0, { force: true })
+    cy.get('@onBlurSpy').should('have.been.called')
+  })
 })
