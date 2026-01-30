@@ -12,7 +12,7 @@
       class="absolute inset-x-0 bottom-6 mx-auto w-max text-base"
     >
       <div
-        class="flex min-w-[596px] items-center space-x-3 rounded-lg bg-surface-white px-4 py-2 shadow-2xl"
+        class="flex min-w-[596px] items-center gap-3 rounded-lg bg-surface-white px-4 py-2 shadow-2xl"
         :class="$attrs.class"
       >
         <slot
@@ -26,7 +26,7 @@
           <div
             class="flex flex-1 justify-between border-r border-outline-gray-2 text-ink-gray-9"
           >
-            <div class="flex items-center space-x-3">
+            <div class="flex items-center gap-3">
               <Checkbox
                 :modelValue="true"
                 :disabled="true"
@@ -34,7 +34,7 @@
               />
               <div>{{ selectedText }}</div>
             </div>
-            <div class="mr-3">
+            <div class="me-3">
               <slot
                 name="actions"
                 v-bind="{
@@ -46,7 +46,7 @@
               />
             </div>
           </div>
-          <div class="flex items-center space-x-1">
+          <div class="flex items-center gap-1">
             <Button
               class="w- text-ink-gray-7"
               :disabled="list.allRowsSelected"

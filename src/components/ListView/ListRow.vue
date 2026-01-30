@@ -22,7 +22,7 @@
       class="[all:unset] hover:[all:unset]"
     >
       <div
-        class="grid items-center space-x-4 px-2"
+        class="grid items-center gap-4 px-2"
         :style="{
           height: rowHeight,
           gridTemplateColumns: getGridTemplateColumns(
@@ -33,7 +33,7 @@
       >
         <div
           v-if="list.options.selectable"
-          class="w-fit pr-2 py-3 flex"
+          class="w-fit pe-2 py-3 flex"
           @click.stop.prevent
           @dblclick.stop
         >

@@ -1,6 +1,6 @@
 <template>
   <div
-    class="inline-flex space-x-2 rounded transition"
+    class="inline-flex gap-2 rounded transition"
     :class="{
       'px-2.5 py-1.5': padding && size === 'sm',
       'px-3 py-2': padding && size === 'md',
