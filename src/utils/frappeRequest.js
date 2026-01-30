@@ -100,12 +100,10 @@ export function frappeRequest(options) {
             ? [error._error_message]
             : ['Internal Server Error']
         }
-        options.onError && options.onError(e)
         throw e
       }
     },
     transformError: (error) => {
-      options.onError && options.onError(error)
       throw error
     },
   })
