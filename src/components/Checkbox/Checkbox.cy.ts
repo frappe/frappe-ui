@@ -1,24 +1,4 @@
 import Checkbox from './Checkbox.vue'
-import { h, ref } from 'vue'
-
-const VModelComponent = {
-  setup: () => {
-    const val = ref(false)
-    return { val }
-  },
-
-  render() {
-    return h('div', {}, [
-      h('div', { id: 'val' }, this.val),
-
-      h(Checkbox, {
-        label: 'abc',
-        'model-value': this.val,
-        'onUpdate:model-value': (x) => (this.val = x),
-      }),
-    ])
-  },
-}
 
 describe('Checkbox', () => {
   it('renders', () => {
@@ -38,10 +18,14 @@ describe('Checkbox', () => {
   })
 
   it('test v-model', () => {
-    cy.mount(VModelComponent)
+    cy.mount(Checkbox, {
+      props: {
+        'onUpdate:model-value': cy.spy().as('onUpdate'),
+      },
+    })
 
-    cy.get('#val').should('have.text', 'false')
+    cy.get('@onUpdate').should('not.have.been.called')
     cy.get('input[type="checkbox"]').click()
-    cy.get('#val').should('have.text', 'true')
+    cy.get('@onUpdate').should('have.been.calledWith', true)
   })
 })

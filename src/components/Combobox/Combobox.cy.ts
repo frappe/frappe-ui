@@ -1,25 +1,7 @@
 import Combobox from './Combobox.vue'
-import { h, ref } from 'vue'
+import { h } from 'vue'
 
 const options = ['Apple', 'Mango', 'Cherry']
-
-const VModelComponent = {
-  setup() {
-    const val = ref<string | null>(null)
-    return { val }
-  },
-
-  render() {
-    return h('div', {}, [
-      h('div', { id: 'val' }, this.val ?? 'null'),
-      h(Combobox, {
-        options,
-        modelValue: this.val,
-        'onUpdate:modelValue': (x: string | null) => (this.val = x),
-      }),
-    ])
-  },
-}
 
 describe('Combobox', () => {
   it('Renders', () => {
@@ -64,14 +46,21 @@ describe('Combobox', () => {
   })
 
   it('test v-model', () => {
-    cy.mount(VModelComponent)
+    cy.mount(Combobox, {
+      props: {
+        options,
+        'onUpdate:modelValue': cy.spy().as('onUpdate'),
+      },
+    })
 
-    cy.get('#val').should('have.text', 'null')
-
-    cy.get('[aria-label="Show popup"]').click()
+    cy.get('input').type('a')
     cy.get('[role=option]:first').click()
+    cy.get('@onUpdate').should('have.been.calledWith', 'Apple')
 
-    cy.get('#val').should('have.text', 'Apple')
+    cy.get('input').clear()
+    cy.get('input').type('ch')
+    cy.get('[role=option]:first').click()
+    cy.get('@onUpdate').should('have.been.calledWith', 'Cherry')
   })
 
   it('emitted events', () => {
