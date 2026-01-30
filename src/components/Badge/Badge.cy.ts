@@ -42,7 +42,7 @@ describe('<Badge />', () => {
       },
     })
     cy.get('.inline-flex.rounded-full').should('have.class', 'text-ink-blue-2')
-    cy.get('.inline-flex.rounded-full').should('have.class', 'bg-surface-blue-1')
+    cy.get('.inline-flex.rounded-full').should('have.class', 'bg-surface-blue-2')
 
     // Green
     cy.mount(Badge, {
@@ -72,7 +72,7 @@ describe('<Badge />', () => {
       },
     })
     cy.get('.inline-flex.rounded-full').should('have.class', 'text-ink-red-4')
-    cy.get('.inline-flex.rounded-full').should('have.class', 'bg-surface-red-1')
+    cy.get('.inline-flex.rounded-full').should('have.class', 'bg-surface-red-2')
   })
 
   it('renders different variants with gray theme', () => {
