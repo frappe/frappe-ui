@@ -59,7 +59,7 @@ const selectClasses = computed(() => {
     ghost:
       'bg-transparent border-transparent hover:bg-surface-gray-3 focus:bg-surface-gray-3',
     disabled: [
-      'border',
+      'border cursor-not-allowed',
       props.variant !== 'ghost' ? 'bg-surface-gray-1' : '',
       props.variant === 'outline'
         ? 'border-outline-gray-2'
