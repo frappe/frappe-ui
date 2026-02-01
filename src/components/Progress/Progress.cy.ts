@@ -18,16 +18,19 @@ describe('Progress', () => {
       .and('include', `width: ${val}%`)
   })
 
-  it('hint prop', () => {
+  it('hint prop & slot', () => {
     cy.mount(Progress, {
       props: {
         label: 'label',
         value: 20,
         hint: true,
       },
+      slots: {
+        hint: () => 'hint 20%',
+      },
     })
 
-    cy.get('div').should('contain.text', '20%')
+    cy.get('div').should('contain.text', 'hint 20%')
   })
 
   it('intervals', () => {
