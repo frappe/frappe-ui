@@ -121,7 +121,9 @@ export default {
         .catch((error) => {
           this.uploading = false
           let errorMessage = 'Error Uploading File'
-          if (error?._server_messages) {
+          if (error?.message) {
+            errorMessage = error.message
+          } else if (error?._server_messages) {
             errorMessage = JSON.parse(
               JSON.parse(error._server_messages)[0],
             ).message
