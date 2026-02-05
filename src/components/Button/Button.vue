@@ -5,7 +5,7 @@
       :class="buttonClasses"
       @click="handleClick"
       :disabled="isDisabled"
-      :ariaLabel="ariaLabel"
+      :ariaLabel="label"
       :type = "props.type"
       ref="rootRef"
     >
@@ -200,10 +200,6 @@ const slotClasses = computed(() => {
 
 const isDisabled = computed(() => {
   return props.disabled || props.loading
-})
-
-const ariaLabel = computed(() => {
-  return isIconButton.value ? props.label : null
 })
 
 const isIconButton = computed(() => {
