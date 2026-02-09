@@ -68,6 +68,7 @@
           </Button>
           <div class="flex items-center">
             <Button
+              label="previous"
               variant="ghost"
               icon="chevron-left"
               class="size-7"
@@ -81,6 +82,7 @@
               @click="() => handleTodayClick(togglePopover)"
             />
             <Button
+              label="next"
               variant="ghost"
               icon="chevron-right"
               class="size-7"

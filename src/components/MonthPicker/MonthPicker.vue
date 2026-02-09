@@ -74,9 +74,9 @@ const txtClass = computed(() => {
   <Popover
     popover-class="mt-2 shadow-xl rounded-lg border bg-surface-modal p-2"
   >
-    <template #target="{ togglePopover }">
+    <template #target="{ togglePopover, isOpen }">
       <Button @click="togglePopover" class="w-full justify-between border" :class="txtClass"
-				:disabled="disabled">
+				:disabled="disabled" aria-haspopup="dialog" :aria-expanded="isOpen">
         {{ model || props.placeholder }}
         <template #suffix> <LucideCalender class="size-4" /> </template>
       </Button>
@@ -84,12 +84,12 @@ const txtClass = computed(() => {
 
     <template #body>
       <div class="flex gap-2 justify-between">
-        <Button variant="ghost" @click="prevClick">
+        <Button variant="ghost" @click="prevClick" label='previous'>
           <LucideChevronLeft class="size-4 text-ink-gray-5" />
         </Button>
 
         <!-- view toggler -->
-        <Button @click="toggleViewMode">
+         <Button @click="toggleViewMode" label="Toggle view mode">
           <template v-if="viewMode == 'month'">
             {{ model.split(' ')[1] ?? currentYear }}
           </template>
@@ -98,7 +98,7 @@ const txtClass = computed(() => {
           </template>
         </Button>
 
-        <Button variant="ghost" @click="nextClick">
+        <Button variant="ghost" @click="nextClick" label='next'>
           <LucideChevronRight class="size-4 text-ink-gray-5" />
         </Button>
       </div>
@@ -113,6 +113,7 @@ const txtClass = computed(() => {
           :variant="model.includes(String(x)) ? 'solid' : 'ghost'"
           :key="x"
           class="text-sm text-ink-gray-9"
+          :label="String(formatBtn(x))"
         >
           {{ formatBtn(x) }}
         </Button>
