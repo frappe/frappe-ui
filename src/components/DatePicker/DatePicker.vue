@@ -57,6 +57,7 @@
             size="sm"
             class="text-sm font-medium text-ink-gray-7"
             @click="cycleView"
+            label="cycle-calendar-view"
           >
             <span v-if="view === 'date'">
               {{ months[currentMonth] }} {{ currentYear }}
