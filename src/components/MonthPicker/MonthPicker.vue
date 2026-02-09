@@ -114,6 +114,7 @@ const txtClass = computed(() => {
           :key="x"
           class="text-sm text-ink-gray-9"
           :label="String(formatBtn(x))"
+          role="gridcell"
         >
           {{ formatBtn(x) }}
         </Button>
