@@ -85,7 +85,7 @@ function defaultUploadFunction(file: File) {
 const props = withDefaults(defineProps<TextEditorProps>(), {
   content: null,
   placeholder: '',
-  editorClass: 'prose-sm',
+  editorClass: 'prose prose-sm',
   editable: true,
   autofocus: false,
   bubbleMenu: false,
@@ -114,7 +114,7 @@ const attrsWithoutClassStyle = computed(() => {
 const editorProps = computed(() => {
   return {
     attributes: {
-      class: normalizeClass(['prose', props.editorClass]),
+      class: normalizeClass(props.editorClass),
     },
   }
 })
