@@ -18,10 +18,16 @@ describe('defineDoctype controllerMethods', () => {
     let receivedBody: any = null
 
     server.use(
-      http.post(`${baseUrl}/api/v2/method/ToDo/send_email`, async ({ request }) => {
-        receivedBody = await request.json()
-        return HttpResponse.json({ sent: true, count: receivedBody.names.length })
-      }),
+      http.post(
+        `${baseUrl}/api/v2/method/ToDo/send_email`,
+        async ({ request }) => {
+          receivedBody = await request.json()
+          return HttpResponse.json({
+            sent: true,
+            count: receivedBody.names.length,
+          })
+        },
+      ),
     )
 
     const ToDo = defineDoctype<ToDoDocType>()('ToDo', {
@@ -35,17 +41,19 @@ describe('defineDoctype controllerMethods', () => {
     })
 
     expect(ToDo.sendEmail).toBeDefined()
-    expect(ToDo.sendEmail.loading).toBe(false)
-    expect(ToDo.sendEmail.data).toBe(null)
 
-    const promise = ToDo.sendEmail.submit(['task-1', 'task-2'])
+    const sendEmail = ToDo.sendEmail.create()
+    expect(sendEmail.loading).toBe(false)
+    expect(sendEmail.data).toBe(null)
 
-    expect(ToDo.sendEmail.loading).toBe(true)
+    const promise = sendEmail.submit(['task-1', 'task-2'])
+
+    expect(sendEmail.loading).toBe(true)
 
     await promise
 
-    expect(ToDo.sendEmail.loading).toBe(false)
-    expect(ToDo.sendEmail.data).toStrictEqual({ sent: true, count: 2 })
+    expect(sendEmail.loading).toBe(false)
+    expect(sendEmail.data).toStrictEqual({ sent: true, count: 2 })
     expect(receivedBody).toStrictEqual({ names: ['task-1', 'task-2'] })
   })
 
@@ -76,14 +84,16 @@ describe('defineDoctype controllerMethods', () => {
       },
     })
 
+    const failMethod = ToDo.failMethod.create()
+
     try {
-      await ToDo.failMethod.submit()
+      await failMethod.submit()
     } catch (e) {
       // Expected error
     }
 
-    expect(ToDo.failMethod.error).toBeTruthy()
-    expect(ToDo.failMethod.error.type).toBe('ServerError')
+    expect(failMethod.error).toBeTruthy()
+    expect(failMethod.error.type).toBe('ServerError')
   })
 
   it('supports GET requests in controller methods', async () => {
@@ -108,9 +118,10 @@ describe('defineDoctype controllerMethods', () => {
       },
     })
 
-    await ToDo.getInfo.submit('test-value')
+    const getInfo = ToDo.getInfo.create()
+    await getInfo.submit('test-value')
 
-    expect(ToDo.getInfo.data).toStrictEqual({
+    expect(getInfo.data).toStrictEqual({
       info: 'some info',
       param: 'test-value',
     })
@@ -119,10 +130,13 @@ describe('defineDoctype controllerMethods', () => {
   it('supports object parameters directly', async () => {
     let receivedBody: any = null
     server.use(
-      http.post(`${baseUrl}/api/v2/method/ToDo/complex_action`, async ({ request }) => {
-        receivedBody = await request.json()
-        return HttpResponse.json({ success: true })
-      }),
+      http.post(
+        `${baseUrl}/api/v2/method/ToDo/complex_action`,
+        async ({ request }) => {
+          receivedBody = await request.json()
+          return HttpResponse.json({ success: true })
+        },
+      ),
     )
 
     const ToDo = defineDoctype<ToDoDocType>()('ToDo', {
@@ -135,7 +149,9 @@ describe('defineDoctype controllerMethods', () => {
       },
     })
 
-    await ToDo.complexAction.submit({
+    const complexAction = ToDo.complexAction.create()
+
+    await complexAction.submit({
       names: ['a', 'b'],
       action: 'delete',
     })
@@ -167,11 +183,46 @@ describe('defineDoctype controllerMethods', () => {
       },
     })
 
-    await ToDo.typedMethod.submit()
+    const typedMethod = ToDo.typedMethod.create()
+
+    await typedMethod.submit()
 
     // @ts-expect-error
-    const val: string = ToDo.typedMethod.data?.result
+    const val: string = typedMethod.data?.result
 
-    expect(ToDo.typedMethod.data?.result).toBe(42)
+    expect(typedMethod.data?.result).toBe(42)
+  })
+
+  it('returns isolated handles per create call', async () => {
+    server.use(
+      http.post(
+        `${baseUrl}/api/v2/method/ToDo/send_email`,
+        async ({ request }) => {
+          const body = (await request.json()) as { names: string[] }
+          return HttpResponse.json({ sent: true, names: body.names })
+        },
+      ),
+    )
+
+    const ToDo = defineDoctype<ToDoDocType>()('ToDo', {
+      baseUrl,
+      controllerMethods: {
+        sendEmail: {
+          method: 'send_email',
+          args: (names: string[]) => ({ names }),
+        },
+      },
+    })
+
+    const first = ToDo.sendEmail.create()
+    const second = ToDo.sendEmail.create()
+
+    await first.submit(['a'])
+    expect(first.data).toStrictEqual({ sent: true, names: ['a'] })
+    expect(second.data).toBe(null)
+
+    await second.submit(['b'])
+    expect(second.data).toStrictEqual({ sent: true, names: ['b'] })
+    expect(first.data).toStrictEqual({ sent: true, names: ['a'] })
   })
 })

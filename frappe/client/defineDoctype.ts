@@ -31,6 +31,10 @@ export type MappedMethod<TMethod extends ControllerMethodDef> = {
   data: TMethod extends ControllerMethodDef<any, infer R> ? R : any
 }
 
+export type MappedControllerMethod<TMethod extends ControllerMethodDef> = {
+  create: () => MappedMethod<TMethod>
+}
+
 export type MappedDocMethod<TDoc, TMethod extends ControllerMethodDef> = {
   submit: (...args: Parameters<TMethod['args']>) => {
     optimistic: (fn: (doc: TDoc) => TDoc) => Promise<void>
@@ -51,7 +55,7 @@ export type MappedDocMethod<TDoc, TMethod extends ControllerMethodDef> = {
 export type MappedControllerMethods<
   TControllerMethods extends ControllerMethods,
 > = {
-  [K in keyof TControllerMethods]: MappedMethod<TControllerMethods[K]>
+  [K in keyof TControllerMethods]: MappedControllerMethod<TControllerMethods[K]>
 }
 
 export type MappedDocMethods<TDoc, TDocMethods extends ControllerMethods> = {
@@ -82,40 +86,41 @@ export function defineDoctype<TDoc extends { name: string }>() {
       for (const [key, methodDef] of Object.entries(controllerMethods)) {
         const { method, httpMethod = 'POST', args } = methodDef
 
-        // We need to reconstruct the object to properly bind the reactive properties from useFrappeFetch
+        const mappedMethod = {
+          create: () => {
+            const paramsRef = reactive<Record<string, any>>({})
 
-        const paramsRef = reactive<Record<string, any>>({})
+            const result = useFrappeFetch({
+              url: `/api/v2/method/${doctype}/${method}`,
+              method: httpMethod,
+              baseUrl,
+              immediate: false,
+              params: () => paramsRef,
+              onSuccess: async (json) => {
+                await syncFromDocs(json?.docs)
+              },
+            })
 
-        const result = useFrappeFetch({
-          url: `/api/v2/method/${doctype}/${method}`,
-          method: httpMethod,
-          baseUrl,
-          immediate: false,
-          params: () => paramsRef,
-          onSuccess: async (json) => {
-            await syncFromDocs(json?.docs)
-          },
-        })
+            return reactive({
+              submit: async (...fnArgs: any[]) => {
+                const newParams = args(...fnArgs)
+                for (const k in paramsRef) delete paramsRef[k]
+                Object.assign(paramsRef, newParams)
 
-        const mappedMethod = reactive({
-          submit: async (...fnArgs: any[]) => {
-            const newParams = args(...fnArgs)
-            // Clear previous keys
-            for (const k in paramsRef) delete paramsRef[k]
-            Object.assign(paramsRef, newParams)
-
-            await result.execute()
+                await result.execute()
+              },
+              get loading() {
+                return result.loading
+              },
+              get error() {
+                return result.error
+              },
+              get data() {
+                return result.json
+              },
+            }) as MappedMethod<typeof methodDef>
           },
-          get loading() {
-            return result.loading
-          },
-          get error() {
-            return result.error
-          },
-          get data() {
-            return result.json
-          },
-        })
+        }
 
         // @ts-ignore
         mappedControllerMethods[key] = mappedMethod

@@ -177,7 +177,8 @@ Custom controller methods are available on the ToDo object defined by
 
 ```ts
 // typesafe controller method call
-await ToDo.sendEmail.submit(['todo-1', 'todo-2'])
+const sendEmail = ToDo.sendEmail.create()
+await sendEmail.submit(['todo-1', 'todo-2'])
 ```
 
 ### Bulk Operations
