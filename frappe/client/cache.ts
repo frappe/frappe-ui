@@ -1,8 +1,54 @@
 import { get, set, del, clear, entries } from 'idb-keyval'
 
+interface CacheStorageAdapter {
+  get<T>(key: string): Promise<T | undefined>
+  set<T>(key: string, value: T): Promise<void>
+  del(key: string): Promise<void>
+  clear(): Promise<void>
+  entries(): Promise<[IDBValidKey, any][]>
+}
+
+function createIndexedDbAdapter(): CacheStorageAdapter {
+  return {
+    get,
+    set,
+    del,
+    clear,
+    entries,
+  }
+}
+
+function createNoopAdapter(): CacheStorageAdapter {
+  return {
+    async get<T>(_key: string) {
+      return undefined as T | undefined
+    },
+    async set<T>(_key: string, _value: T) {
+      return
+    },
+    async del(_key: string) {
+      return
+    },
+    async clear() {
+      return
+    },
+    async entries() {
+      return []
+    },
+  }
+}
+
+function isIndexedDbAvailable(): boolean {
+  return typeof globalThis !== 'undefined' && 'indexedDB' in globalThis
+}
+
+const cacheStorageAdapter: CacheStorageAdapter = isIndexedDbAvailable()
+  ? createIndexedDbAdapter()
+  : createNoopAdapter()
+
 export async function getCache<T>(key: string): Promise<T | null> {
   try {
-    const value = await get<T>(key)
+    const value = await cacheStorageAdapter.get<T>(key)
     return value ?? null
   } catch (e) {
     console.error('Failed to get cache:', e)
@@ -12,7 +58,7 @@ export async function getCache<T>(key: string): Promise<T | null> {
 
 export async function setCache<T>(key: string, value: T): Promise<void> {
   try {
-    await set(key, value)
+    await cacheStorageAdapter.set(key, value)
   } catch (e) {
     console.error('Failed to set cache:', e)
   }
@@ -20,7 +66,7 @@ export async function setCache<T>(key: string, value: T): Promise<void> {
 
 export async function deleteCache(key: string): Promise<void> {
   try {
-    await del(key)
+    await cacheStorageAdapter.del(key)
   } catch (e) {
     console.error('Failed to delete cache:', e)
   }
@@ -28,7 +74,7 @@ export async function deleteCache(key: string): Promise<void> {
 
 export async function clearCache(): Promise<void> {
   try {
-    await clear()
+    await cacheStorageAdapter.clear()
   } catch (e) {
     console.error('Failed to clear cache:', e)
   }
@@ -36,7 +82,7 @@ export async function clearCache(): Promise<void> {
 
 export async function getCacheEntries(): Promise<[IDBValidKey, any][]> {
   try {
-    return await entries()
+    return await cacheStorageAdapter.entries()
   } catch (e) {
     console.error('Failed to get cache entries:', e)
     return []

@@ -1,10 +1,15 @@
 import { server } from './mocks'
-import { beforeAll, afterEach, afterAll } from 'vitest'
+import { beforeAll, beforeEach, afterEach, afterAll } from 'vitest'
 import { watch } from 'vue'
+import { clearCache } from '../cache'
 
 beforeAll(() => {
   // Bypass unhandled requests to suppress MSW warnings while still intercepting our test routes
   server.listen({ onUnhandledRequest: 'bypass' })
+})
+
+beforeEach(async () => {
+  await clearCache()
 })
 
 afterEach(() => {
