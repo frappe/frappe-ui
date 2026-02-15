@@ -208,7 +208,13 @@ export function useFrappeFetch<T = any>(
       watch(
         watchSources,
         () => {
-          state.execute()
+          state.execute().catch((error) => {
+            console.warn('[useFrappeFetch] Auto-triggered request failed', {
+              url: toValue(urlOption),
+              method: toValue(methodOption),
+              error,
+            })
+          })
         },
         { deep: true, immediate: false },
       )
@@ -217,7 +223,13 @@ export function useFrappeFetch<T = any>(
 
   // Auto-execute on creation if immediate is true
   if (immediate) {
-    state.execute()
+    state.execute().catch((error) => {
+      console.warn('[useFrappeFetch] Auto-triggered request failed', {
+        url: toValue(urlOption),
+        method: toValue(methodOption),
+        error,
+      })
+    })
   }
 
   return state as UseFetchResult<T>
