@@ -36,8 +36,8 @@ export interface UseFetchOptions<T = any> {
   baseUrl?: string
   immediate?: boolean
   watch?: boolean
-  onSuccess?: (data: T) => void
-  onError?: (error: Error) => void
+  onSuccess?: (data: T) => void | Promise<void>
+  onError?: (error: Error) => void | Promise<void>
 }
 
 export interface UseFetchResult<T> {
@@ -151,7 +151,7 @@ export function useFrappeFetch<T = any>(
 
       // Call onSuccess callback if provided
       if (onSuccess) {
-        onSuccess(json)
+        await onSuccess(json)
       }
     } catch (e) {
       // Ignore abort errors
@@ -163,7 +163,7 @@ export function useFrappeFetch<T = any>(
 
       // Call onError callback if provided
       if (onError) {
-        onError(state.error)
+        await onError(state.error)
       }
       throw state.error
     } finally {
