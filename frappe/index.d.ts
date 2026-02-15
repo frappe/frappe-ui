@@ -1,6 +1,22 @@
 // Since the export is via JS file, we need to declare the module here
 declare module 'frappe-ui/frappe' {
   import type { Component, ComputedRef, Ref } from 'vue'
+  import type { defineDoctype } from './client'
+
+  export interface CreateClientOptions {
+    baseUrl?: string
+    realtime?: boolean
+  }
+
+  export interface ClientInstance {
+    baseUrl: string
+    realtime: boolean
+  }
+
+  export function createClient(options?: CreateClientOptions): {
+    defineDoctype: typeof defineDoctype
+    client: ClientInstance
+  }
 
   // Onboarding
   export interface OnboardingStep {

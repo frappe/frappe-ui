@@ -29,3 +29,6 @@ export { showHelpCenter } from './HelpCenter/helpCenter.js'
 
 // plugins
 export { default as telemetryPlugin, useTelemetry } from './telemetry/index.ts'
+
+// frappe client
+export { createClient, defineDoctype } from './client'

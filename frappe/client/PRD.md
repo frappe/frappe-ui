@@ -278,3 +278,34 @@ def send_email(names):
 ## Open Questions
 
 2.  **Validation**: Integration with Zod/ZSchema for client-side checks?
+
+## Progress checklist
+
+- [x] Client factory initialization via `createClient({ baseUrl, realtime })`
+- [ ] Generated DocType definition via `defineDoctype<T>()('Doctype', config)`
+- [ ] Type-safe schema inference from generated interfaces
+- [ ] `getDoc` with reactive `MaybeRefOrGetter` name support and auto-refetch
+- [ ] `getDoc` operation state (`doc`, `loading`, `error`, `reload`)
+- [ ] Standard document updates via `setValue.submit(...)`
+- [ ] Optimistic document updates via `.optimistic()`
+- [ ] Custom `docMethods` execution (`submit`, `loading`, `error`)
+- [ ] `getList` with reactive query inputs (`filters`, `orderBy`, `start`,
+      `limit`)
+- [ ] `getList` pagination (`next`, `previous`, `hasNextPage`,
+      `hasPreviousPage`)
+- [ ] `getList` page modes (`append` and `replace`)
+- [ ] New local draft documents via `newDoc(...)`
+- [ ] Draft insertion to server via `insert.submit()`
+- [ ] Custom `controllerMethods` with isolated handles via `.create()`
+- [ ] Bulk delete via `bulkDelete.submit(names)`
+- [ ] Bulk update via `bulkUpdate.submit(rows)`
+- [ ] Cache synchronization after bulk update/delete for doc/list consumers
+- [ ] File upload API via `File.new(...)` + `upload()`
+- [ ] File upload reactive state (`progress`, `doc`, `error`)
+- [ ] On-demand doc metadata fetch via `getDocInfo()`
+- [ ] DocInfo payload coverage (`permissions`, `attachments`, `assignments`,
+      `comments`)
+- [ ] Realtime integration toggle via `realtime: true`
+- [ ] Realtime `doc_update` handling and sync from socket payload docs
+- [ ] Realtime `doc_rename` handling and rename propagation
+- [ ] Realtime public hooks: `onUpdate` and `onRename`
