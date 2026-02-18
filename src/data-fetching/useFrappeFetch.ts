@@ -68,6 +68,10 @@ export const useFrappeFetch = createFetch({
         )
         return ctx
       }
+      if (ctx.error.message === 'Failed to fetch') {
+        ctx.error = 'Client is offline'
+        return ctx
+      }
 
       type FrappeError = {
         title: string
@@ -78,6 +82,7 @@ export const useFrappeFetch = createFetch({
       }
       try {
         let errorResponse = JSON.parse(ctx.data)
+
         let errors: Array<FrappeError> = errorResponse.errors
         let error = errors[0] // assuming only one error for now
         let errorDescription = error.message
