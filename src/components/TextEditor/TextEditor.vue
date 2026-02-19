@@ -125,7 +125,19 @@ watch(
     if (editor.value) {
       let currentHTML = editor.value.getHTML()
       if (currentHTML !== val) {
-        editor.value.commands.setContent(val)
+        // Check if there are any uploading images
+        let hasUploadingImages = false
+        editor.value.state.doc.descendants((node: any) => {
+          if (node.type.name === 'image' && node.attrs.loading) {
+            hasUploadingImages = true
+            return false
+          }
+        })
+
+        // Don't update content while images are uploading to preserve uploadId references
+        if (!hasUploadingImages) {
+          editor.value.commands.setContent(val)
+        }
       }
     }
   },
