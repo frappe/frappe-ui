@@ -10,6 +10,7 @@ import { EditorView } from '@tiptap/pm/view'
 import { Node } from '@tiptap/pm/model'
 import { fileToBase64 } from '../../../index'
 import { UploadedFile } from '../../../utils/useFileUpload'
+import { localFileMap } from './image/image-extension'
 
 export interface VideoExtensionOptions {
   /**
@@ -58,6 +59,11 @@ declare module '@tiptap/core' {
        * Set video floating
        */
       setVideoFloat: (float: 'left' | 'right' | null) => ReturnType
+
+      /**
+       * Re-upload a failed video using the file stored in localFileMap
+       */
+      reuploadVideo: (uploadId: string) => ReturnType
     }
   }
 }
@@ -206,6 +212,48 @@ export const VideoExtension = NodeExtension.create<VideoExtensionOptions>({
           input.click()
           return true
         },
+
+      reuploadVideo:
+        (uploadId: string) =>
+        ({ editor }) => {
+          const fileData = localFileMap.get(uploadId)
+          if (!fileData) {
+            console.error(
+              'reuploadVideo: no file found in localFileMap for uploadId',
+              uploadId,
+            )
+            return false
+          }
+
+          // Find the node position
+          let nodePos: number | null = null
+          editor.view.state.doc.descendants((node, pos) => {
+            if (
+              node.type.name === 'video' &&
+              node.attrs.uploadId === uploadId
+            ) {
+              nodePos = pos
+              return false
+            }
+          })
+
+          if (nodePos === null) {
+            console.error(
+              'reuploadVideo: could not find node with uploadId',
+              uploadId,
+            )
+            return false
+          }
+
+          // Re-run the upload using the stored file, replacing the node at its position
+          return uploadVideoBase(
+            fileData.file,
+            editor.view,
+            nodePos,
+            this.options,
+            'replace',
+          )
+        },
     }
   },
 
@@ -353,6 +401,8 @@ function findInsertPosition(
 }
 
 // Base upload function shared by all video upload methods
+type VideoDimensions = { width: number | null; height: number | null }
+
 function uploadVideoBase(
   file: File,
   view: EditorView,
@@ -371,10 +421,23 @@ function uploadVideoBase(
 
   fileToBase64(file)
     .then((base64Result: string) => {
+      localFileMap.set(uploadId, { b64: base64Result, file })
+
+      const objectUrl = URL.createObjectURL(file)
+      return getVideoDimensions(objectUrl)
+        .catch((): VideoDimensions => ({ width: null, height: null }))
+        .then((dimensions: VideoDimensions) => {
+          URL.revokeObjectURL(objectUrl)
+          return dimensions
+        })
+    })
+    .then((dimensions: VideoDimensions) => {
       const node = view.state.schema.nodes.video.create({
         loading: true,
         uploadId,
-        src: base64Result,
+        src: null,
+        width: dimensions.width,
+        height: dimensions.height,
       })
 
       const tr = view.state.tr
@@ -422,22 +485,6 @@ function uploadVideoBase(
 
       return options.uploadFunction(file)
     })
-    .then((uploadedVideo: UploadedFile) => {
-      return getVideoDimensions(uploadedVideo.file_url)
-        .then((dimensions) => {
-          return {
-            ...uploadedVideo,
-            width: dimensions.width,
-            height: dimensions.height,
-          } as UploadedFile & { width: number; height: number }
-        })
-        .catch(() => {
-          return uploadedVideo as UploadedFile & {
-            width: number
-            height: number
-          }
-        })
-    })
     .then((uploadedVideo) => {
       const transaction = view.state.tr
 
@@ -450,6 +497,7 @@ function uploadVideoBase(
             height: uploadedVideo.height || node.attrs.height,
             loading: false,
           })
+          localFileMap.delete(node.attrs.uploadId)
           return false
         }
       })
@@ -466,6 +514,7 @@ function uploadVideoBase(
 
         view.state.doc.descendants((node, pos) => {
           if (node.type.name === 'video' && node.attrs.uploadId === uploadId) {
+            // width/height are preserved from ...node.attrs (pre-fetched from local file)
             transaction.setNodeMarkup(pos, undefined, {
               ...node.attrs,
               loading: false,
@@ -541,7 +590,7 @@ function updateNodeWithDimensions(
       }
     })
     .catch((error) => {
-      console.error('Could not upload video', error)
+      console.error('Could not get video dimensions', error)
     })
 }
 
