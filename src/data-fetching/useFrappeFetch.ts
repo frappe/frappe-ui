@@ -31,6 +31,15 @@ export class FrappeResponseError extends Error {
   }
 }
 
+export class FrappeNetworkError extends Error {
+  constructor(
+    message: string = 'Client is offline'
+  ) {
+    super(message)
+  }
+}
+
+
 export const useFrappeFetch = createFetch({
   options: {
     fetch: (...args) => fetch(...args), // required for vitest
@@ -69,7 +78,7 @@ export const useFrappeFetch = createFetch({
         return ctx
       }
       if (ctx.error.message === 'Failed to fetch') {
-        ctx.error = 'Client is offline'
+        ctx.error = new FrappeNetworkError()
         return ctx
       }
 
