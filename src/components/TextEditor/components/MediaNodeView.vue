@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed, h } from 'vue'
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
 import LoadingIndicator from '../../LoadingIndicator.vue'
 import Tooltip from '../../Tooltip/Tooltip.vue'
+import { localFileMap } from '../extensions/image/image-extension'
 import { ErrorMessage } from '../../ErrorMessage'
 import LucideAlignLeft from '~icons/lucide/align-left'
 import LucideAlignCenter from '~icons/lucide/align-center'
@@ -13,6 +14,7 @@ import LucideFloatRight from '~icons/lucide/align-horizontal-justify-end'
 import LucideNoFloat from '~icons/lucide/align-vertical-space-around'
 import LucideCaptions from '~icons/lucide/captions'
 import LucideMoveDiagonal2 from '~icons/lucide/move-diagonal-2'
+import LucideRotateCw from '~icons/lucide/rotate-cw'
 
 const props = defineProps(nodeViewProps)
 
@@ -30,6 +32,8 @@ const floatButtonRef = ref<HTMLElement | null>(null)
 
 const showCaption = ref(props.node.attrs.alt ? true : false)
 const isVideo = computed(() => props.node.type.name === 'video')
+const isUploaded = computed(() => Boolean(props.node.attrs.src))
+const fileContent = computed(() => localFileMap.get(props.node.attrs.uploadId)?.b64)
 
 const currentAlignIcon = computed(() => {
   return (
@@ -273,14 +277,16 @@ const wrapperClasses = (float: string) => [
     ]" :style="{
       width: node.attrs.width ? `${node.attrs.width}px` : 'auto',
     }">
-      <div v-if="node.attrs.src" class="relative">
-        <img v-if="!isVideo" ref="mediaRef" class="rounded-[2px]" :src="node.attrs.src" :alt="node.attrs.alt || ''"
-          :width="node.attrs.width" :height="node.attrs.height" @click.stop="selectMedia" @load="handleMediaLoaded" />
-        <video v-else ref="mediaRef" class="rounded-[2px]" :src="node.attrs.src" :width="node.attrs.width"
-          :height="node.attrs.height" :autoplay="node.attrs.autoplay" :loop="node.attrs.loop" :muted="node.attrs.muted"
-          controls @click.stop="selectMedia" @loadedmetadata="handleMediaLoaded" />
+      <div v-if="isUploaded || fileContent" class="relative">
+        <img v-if="!isVideo" ref="mediaRef" class="rounded-[2px]" :class="!isUploaded && 'opacity-40'" :src="node.attrs.src || fileContent"
+          :alt="node.attrs.alt || ''" :width="node.attrs.width" :height="node.attrs.height"
+          @click.stop="selectMedia" @load="handleMediaLoaded" />
+        <video v-else ref="mediaRef" class="rounded-[2px]" :class="!isUploaded && 'opacity-40'" :src="node.attrs.src || fileContent"
+          :width="node.attrs.width" :height="node.attrs.height" :autoplay="node.attrs.autoplay"
+          :loop="node.attrs.loop" :muted="node.attrs.muted" :controls="isUploaded" @click.stop="selectMedia"
+          @loadedmetadata="handleMediaLoaded" />
 
-        <div class="absolute top-2 right-2 items-center bg-black/65 px-1.5 py-1 gap-2 rounded group-hover:flex"
+        <div v-if="isUploaded" class="absolute top-2 right-2 items-center bg-black/65 px-1.5 py-1 gap-2 rounded group-hover:flex"
           :class="selected && isEditable ? 'flex' : 'hidden'">
           <button>
             <LucideCaptions @click="toggleCaptions" class="size-4"
@@ -350,7 +356,16 @@ const wrapperClasses = (float: string) => [
           </div>
         </div>
 
-        <button v-if="selected && isEditable" class="absolute bottom-2 right-2 cursor-nw-resize bg-black/65 rounded p-1"
+        <Button
+          v-else
+          variant="solid"
+          class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+          :icon-left="h(LucideRotateCw, { class: 'size-4' })"
+          label="Try again"
+          @click="isVideo ? editor.commands.reuploadVideo(node.attrs.uploadId) : editor.commands.reuploadImage(node.attrs.uploadId)"
+        />
+
+        <button v-if="selected && isEditable && isUploaded" class="absolute bottom-2 right-2 cursor-nw-resize bg-black/65 rounded p-1"
           @mousedown.prevent="startResize">
           <LucideMoveDiagonal2 class="text-white size-4" />
         </button>
@@ -364,13 +379,17 @@ const wrapperClasses = (float: string) => [
           </div>
         </div>
       </div>
+      <div v-else class="flex flex-col items-center justify-center gap-2 border rounded text-ink-gray-6 text-sm py-5 max-w-full" :class="{ 'border-none': selected }" :style="{ width: node.attrs.width + 'px', aspectRatio: node.attrs.width && node.attrs.height ? `${node.attrs.width} / ${node.attrs.height}` : undefined,}">
+        <div class="text-ink-gray-8 text-base">This {{ isVideo ? 'video' : 'image' }} hasn't yet been uploaded.</div>
+        <div v-if="node.attrs.error" class="text-sm text-ink-red-4">Upload failed: {{ node.attrs.error }}</div>
+      </div>
 
       <input v-if="(node.attrs.alt || showCaption) && !node.attrs.error" v-model="caption"
         class="w-full text-center bg-transparent text-sm text-ink-gray-6 h-7 border-none focus:ring-0 placeholder-ink-gray-4"
         placeholder="Add caption" :disabled="!isEditable" @change="updateCaption" @keydown="handleKeydown" />
 
-      <div v-if="node.attrs.error" class="w-full py-1.5">
-        <ErrorMessage :message="`Upload Failed: ${node.attrs.error}`" />
+      <div v-if="node.attrs.error && fileContent" class="w-full py-1.5 text-center">
+        <ErrorMessage :message="`Upload failed: ${node.attrs.error}`" />
       </div>
     </div>
   </NodeViewWrapper>

@@ -35,6 +35,12 @@ export interface DocField {
   fieldname: string
   reqd: 0 | 1
   fieldtype: string
+  options?: string
+}
+
+export interface DocType {
+  name: string
+  fields: DocField[]
 }
 
 export interface File {
