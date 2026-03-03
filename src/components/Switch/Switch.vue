@@ -18,11 +18,9 @@
         </label>
       </div>
 
-      <span
-        v-if="props.description"
-        class="max-w-xs text-p-sm text-ink-gray-7"
-        >{{ props.description }}</span
-      >
+      <span v-if="props.description" class="text-p-sm text-ink-gray-7">
+        {{ props.description }}
+      </span>
     </div>
     <SwitchRoot
       :id
