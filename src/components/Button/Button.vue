@@ -34,7 +34,6 @@
           v-if="icon && typeof icon === 'string'"
           :name="icon"
           :class="slotClasses"
-          :aria-label="label"
         />
         <component v-else-if="icon" :is="icon" :class="slotClasses" />
         <slot name="icon" v-else-if="$slots.icon" />
