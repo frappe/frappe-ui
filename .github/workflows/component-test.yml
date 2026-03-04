@@ -1,5 +1,4 @@
 name: Component Tests
-
 on:
   pull_request:
   push:
@@ -7,12 +6,12 @@ on:
 
 permissions:
   contents: read
+  actions: write
 
 jobs:
   component-test:
     runs-on: ubuntu-latest
     name: Component Tests (Cypress)
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,3 +30,10 @@ jobs:
           component: true
           build: 'yarn build'
           start: 'yarn dev'
+
+      - name: Upload Cypress screenshots if tests fail
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
