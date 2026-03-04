@@ -44,23 +44,23 @@ describe('DateRangePicker', () => {
     cy.get('input').click()
     cy.get('input').click()
 
+    const currMonthIndex = monthsLabels.indexOf(currentMonth)
+    const prevMonthIndex = currentMonth == 'Jan' ? 11 : currMonthIndex - 1
+    const nextMonthIndex = currentMonth == 'Dec' ? 0 : currMonthIndex + 1
+    const prevYear = currentMonth == 'Jan' ? currentYear - 1 : currentYear
+    const nextYear = currentMonth == 'Dec' ? currentYear + 1 : currentYear
+
+    cy.get('[aria-label=previous]').click()
     cy.get('[aria-label=cycle-calendar-view]').should(
       'have.text',
-      currentMonth.slice(0, 3) + ' ' + currentYear,
+      monthsLabels[prevMonthIndex] + ' ' + prevYear,
     )
 
-    cy.get('[aria-label=previous]').click({ multiple: true })
+    cy.get('[aria-label=next]').dblclick()
 
     cy.get('[aria-label=cycle-calendar-view]').should(
       'have.text',
-      monthsLabels.at(-1) + ' ' + (currentYear - 1),
-    )
-
-    cy.get('[aria-label=next]').click({ multiple: true })
-
-    cy.get('[aria-label=cycle-calendar-view]').should(
-      'have.text',
-      monthsLabels[1] + ' ' + currentYear,
+      monthsLabels[nextMonthIndex] + ' ' + nextYear,
     )
   })
 
@@ -99,7 +99,7 @@ describe('DateRangePicker', () => {
     cy.get('input').should('have.value', '')
     cy.get('[aria-label="Today"]').click()
 
-    const todayStr =  getTodaysDate() + ' to ' + getTodaysDate()
+    const todayStr = getTodaysDate() + ' to ' + getTodaysDate()
     cy.get('input').should('have.value', todayStr)
   })
 })
