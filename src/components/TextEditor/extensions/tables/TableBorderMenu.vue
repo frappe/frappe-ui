@@ -203,6 +203,7 @@ const menuObjIndividual: MenuItem[] = [
 const menuObjMultiCell: MenuItem[] = [
   { icon: LucideArrowUp, action: 'addRowBefore', tooltip: 'Add Row Before' },
   { icon: LucideArrowDown, action: 'addRowAfter', tooltip: 'Add Row After' },
+  { icon: LucideTrash, action: 'deleteRow', tooltip: 'Delete Row' },
   {
     icon: LucideArrowLeft,
     action: 'addColumnBefore',

@@ -1,5 +1,5 @@
 <template>
-  <div class="p-2" @click.stop>
+  <div class="p-1 pb-0" @click.stop>
     <div class="grid grid-cols-6 gap-0.5 w-[120px] mx-auto">
       <div
         v-for="row in maxRows"
@@ -20,7 +20,7 @@
         />
       </div>
     </div>
-    <div class="text-center text-xs text-ink-gray-7 font-medium py-1 min-h-5">
+    <div class="text-center text-xs text-ink-gray-7 font-medium pt-1.5">
       {{ hoveredRows || selectedRows }} × {{ hoveredCols || selectedCols }}
     </div>
   </div>
