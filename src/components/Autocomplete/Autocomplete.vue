@@ -210,7 +210,7 @@ import {
   ComboboxOption,
   ComboboxOptions,
 } from '@headlessui/vue'
-import { computed, nextTick, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch, onMounted } from 'vue'
 import { Popover } from '../Popover'
 import { Button } from '../Button'
 import FeatherIcon from '../FeatherIcon.vue'
@@ -401,5 +401,17 @@ const togglePopover = () => {
 defineExpose({
   rootRef,
   togglePopover,
+})
+
+onMounted(() => {
+  const migrationUrl =
+    'https://github.com/frappe/frappe-ui/wiki/Guide-to-Migrate-Autocomplete-component-to-Combobox-&-MultiSelect'
+
+  console.warn(
+    'Autocomplete component is deprecated, Use Combobox or MultiSelect instead',
+    '\n',
+    '\n',
+    `Migration guide: ${migrationUrl}`,
+  )
 })
 </script>
