@@ -20,7 +20,6 @@
         />
       </div>
     </PopoverAnchor>
-    <PopoverPortal>
       <PopoverContent
         :side="placementSide"
         :align="placementAlign"
@@ -59,7 +58,6 @@
           </slot>
         </div>
       </PopoverContent>
-    </PopoverPortal>
   </PopoverRoot>
 </template>
 
