@@ -39,7 +39,7 @@
             class="flex gap-0.5 w-full flex-col items-center text-xs text-right"
           >
             <span
-              class="z-10 w-full flex justify-between items-center"
+              class="w-full flex justify-between items-center"
               :class="[
                 date.toDateString() === new Date().toDateString()
                   ? 'p-[3px] pb-0.5'
@@ -78,7 +78,7 @@
                 v-for="calendarEvent in timedEvents[parseDate(date)]"
                 :event="calendarEvent"
                 :date="date"
-                class="z-10 mb-2 cursor-pointer"
+                class="mb-2 cursor-pointer"
                 :key="calendarEvent.id"
                 :draggable="config.isEditMode"
                 @dragstart="onDragStart($event, calendarEvent.id)"
