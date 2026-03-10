@@ -33,7 +33,7 @@
       >
         <div
           class="flex justify-center font-normal"
-          :class="isCurrentMonth(date) ? 'text-gray-700' : 'text-gray-200'"
+          :class="isCurrentMonth(date) ? 'text-ink-gray-8' : 'text-ink-gray-3'"
         >
           <div
             class="flex gap-0.5 w-full flex-col items-center text-xs text-right"
