@@ -1,8 +1,6 @@
 name: Component Tests
 on:
-  pull_request:
   push:
-    branches: [main, develop]
 
 permissions:
   contents: read
