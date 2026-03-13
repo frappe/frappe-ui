@@ -80,7 +80,7 @@ export const IframeExtension = Node.create<IframeOptions>({
         }),
       },
       aspectRatio: {
-        default: 9/16, // Default 16:9 aspect ratio
+        default: 9 / 16, // Default 16:9 aspect ratio
         parseHTML: () => null, // Don't parse from HTML
         renderHTML: () => ({}), // Don't render to HTML
       },
@@ -155,7 +155,7 @@ export const IframeExtension = Node.create<IframeOptions>({
             width: width ? parseInt(width, 10) : null,
             height: height ? parseInt(height, 10) : null,
             title: title || null,
-            align: align || 'center'
+            align: align || 'center',
           }
         },
       },
@@ -210,7 +210,7 @@ export const IframeExtension = Node.create<IframeOptions>({
 
           return commands.insertContent({
             type: this.name,
-            attrs
+            attrs,
           })
         },
 
@@ -227,7 +227,7 @@ export const IframeExtension = Node.create<IframeOptions>({
           // Emit a custom event on the editor's view DOM element
           // This is more localized than document.dispatchEvent
           const event = new CustomEvent('iframe:open-dialog', {
-            detail: { editor }
+            detail: { editor },
           })
           editor.view.dom.dispatchEvent(event)
           return true
@@ -251,7 +251,14 @@ export const IframeExtension = Node.create<IframeOptions>({
             if (html) {
               const iframeData = parseIframeFromHTML(html)
               if (iframeData) {
-                return createIframeNode(view, extensionThis, iframeData.src, iframeData.width, iframeData.height, iframeData.title)
+                return createIframeNode(
+                  view,
+                  extensionThis,
+                  iframeData.src,
+                  iframeData.width,
+                  iframeData.height,
+                  iframeData.title,
+                )
               }
             }
 
@@ -259,14 +266,22 @@ export const IframeExtension = Node.create<IframeOptions>({
             if (text && text.includes('<iframe')) {
               const iframeData = parseIframeFromHTML(text)
               if (iframeData) {
-                return createIframeNode(view, extensionThis, iframeData.src, iframeData.width, iframeData.height, iframeData.title)
+                return createIframeNode(
+                  view,
+                  extensionThis,
+                  iframeData.src,
+                  iframeData.width,
+                  iframeData.height,
+                  iframeData.title,
+                )
               }
             }
 
             // Fallback to URL detection for plain text
             if (text) {
               // Check if pasted text is a supported embed URL
-              const urlPattern = /^https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=[\w-]+|youtu\.be\/[\w-]+|youtube\.com\/embed\/[\w-]+|vimeo\.com\/\d+|player\.vimeo\.com\/video\/\d+|codepen\.io\/[\w-]+\/pen\/[\w-]+|codesandbox\.io\/[\w\/.-]+|figma\.com\/[\w\/.-]+|embed\.figma\.com\/[\w\/.-]+)$/
+              const urlPattern =
+                /^https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=[\w-]+|youtu\.be\/[\w-]+|youtube\.com\/embed\/[\w-]+|vimeo\.com\/\d+|player\.vimeo\.com\/video\/\d+|codepen\.io\/[\w-]+\/pen\/[\w-]+|codesandbox\.io\/[\w\/.-]+|figma\.com\/[\w\/.-]+|embed\.figma\.com\/[\w\/.-]+)$/
 
               if (urlPattern.test(text.trim())) {
                 return createIframeNode(view, extensionThis, text.trim())
@@ -282,7 +297,9 @@ export const IframeExtension = Node.create<IframeOptions>({
 })
 
 // Helper function to parse iframe embed codes from pasted HTML content
-function parseIframeFromHTML(html: string): { src: string, width?: number, height?: number, title?: string } | null {
+function parseIframeFromHTML(
+  html: string,
+): { src: string; width?: number; height?: number; title?: string } | null {
   try {
     const parser = new DOMParser()
     const doc = parser.parseFromString(html, 'text/html')
@@ -301,7 +318,7 @@ function parseIframeFromHTML(html: string): { src: string, width?: number, heigh
           src,
           width: widthMatch ? parseInt(widthMatch[1], 10) : undefined,
           height: heightMatch ? parseInt(heightMatch[1], 10) : undefined,
-          title: titleMatch ? titleMatch[1] : undefined
+          title: titleMatch ? titleMatch[1] : undefined,
         }
       }
       return null
@@ -310,8 +327,12 @@ function parseIframeFromHTML(html: string): { src: string, width?: number, heigh
     const src = iframe.getAttribute('src')
     if (!src) return null
 
-    const width = iframe.getAttribute('width') ? parseInt(iframe.getAttribute('width')!, 10) : undefined
-    const height = iframe.getAttribute('height') ? parseInt(iframe.getAttribute('height')!, 10) : undefined
+    const width = iframe.getAttribute('width')
+      ? parseInt(iframe.getAttribute('width')!, 10)
+      : undefined
+    const height = iframe.getAttribute('height')
+      ? parseInt(iframe.getAttribute('height')!, 10)
+      : undefined
     const title = iframe.getAttribute('title') || undefined
 
     return { src, width, height, title }
@@ -321,9 +342,18 @@ function parseIframeFromHTML(html: string): { src: string, width?: number, heigh
 }
 
 // Helper function to create iframe node from parsed data
-function createIframeNode(view: any, extensionThis: any, src: string, width?: number, height?: number, title?: string) {
+function createIframeNode(
+  view: any,
+  extensionThis: any,
+  src: string,
+  width?: number,
+  height?: number,
+  title?: string,
+) {
   // Ask user for confirmation before creating iframe
-  const shouldCreateEmbed = confirm(`Do you want to embed this content?\n\nURL: ${src}\n\nClick "OK" to create an embed, or "Cancel" to paste as plain text.`)
+  const shouldCreateEmbed = confirm(
+    `Do you want to embed this content?\n\nURL: ${src}\n\nClick "OK" to create an embed, or "Cancel" to paste as plain text.`,
+  )
 
   if (!shouldCreateEmbed) {
     return false // Allow default paste behavior (paste as text)
@@ -348,7 +378,7 @@ function createIframeNode(view: any, extensionThis: any, src: string, width?: nu
     height: finalHeight,
     title: title,
     align: 'center' as const,
-    aspectRatio: finalHeight / finalWidth
+    aspectRatio: finalHeight / finalWidth,
   }
 
   const node = view.state.schema.nodes.iframe.create(attrs)

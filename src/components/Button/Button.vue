@@ -6,7 +6,7 @@
       @click="handleClick"
       :disabled="isDisabled"
       :ariaLabel="ariaLabel"
-      :type = "props.type"
+      :type="props.type"
       ref="rootRef"
     >
       <LoadingIndicator
@@ -53,11 +53,7 @@
           :class="slotClasses"
           aria-hidden="true"
         />
-          <component
-            v-else-if="iconRight"
-            :is="iconRight"
-            :class="slotClasses"
-          />
+        <component v-else-if="iconRight" :is="iconRight" :class="slotClasses" />
       </slot>
     </button>
   </Tooltip>
@@ -78,7 +74,7 @@ const props = withDefaults(defineProps<ButtonProps>(), {
   variant: 'subtle',
   loading: false,
   disabled: false,
-  type: "button"
+  type: 'button',
 })
 
 const slots = useSlots()
@@ -88,16 +84,14 @@ const buttonClasses = computed(() => {
   let solidClasses = {
     gray: 'text-ink-white bg-surface-gray-7 hover:bg-surface-gray-6 active:bg-surface-gray-5',
     blue: 'text-ink-white bg-blue-500 hover:bg-surface-blue-3 active:bg-blue-700',
-    green:
-      'text-ink-white bg-surface-green-3 hover:bg-green-700 active:bg-green-800',
+    green: 'text-ink-white bg-surface-green-3 hover:bg-green-700 active:bg-green-800',
     red: 'text-ink-white bg-surface-red-5 hover:bg-surface-red-6 active:bg-surface-red-7',
   }[props.theme]
 
   let subtleClasses = {
     gray: 'text-ink-gray-8 bg-surface-gray-2 hover:bg-surface-gray-3 active:bg-surface-gray-4',
     blue: 'text-ink-blue-3 bg-surface-blue-2 hover:bg-blue-200 active:bg-blue-300',
-    green:
-      'text-green-800 bg-surface-green-2 hover:bg-green-200 active:bg-green-300',
+    green: 'text-green-800 bg-surface-green-2 hover:bg-green-200 active:bg-green-300',
     red: 'text-red-700 bg-surface-red-2 hover:bg-surface-red-3 active:bg-surface-red-4',
   }[props.theme]
 
@@ -112,8 +106,7 @@ const buttonClasses = computed(() => {
   let ghostClasses = {
     gray: 'text-ink-gray-8 bg-transparent hover:bg-surface-gray-3 active:bg-surface-gray-4',
     blue: 'text-ink-blue-3 bg-transparent hover:bg-blue-200 active:bg-blue-300',
-    green:
-      'text-green-800 bg-transparent hover:bg-green-200 active:bg-green-300',
+    green: 'text-green-800 bg-transparent hover:bg-green-200 active:bg-green-300',
     red: 'text-red-700 bg-transparent hover:bg-surface-red-3 active:bg-surface-red-4',
   }[props.theme]
 
@@ -136,26 +129,22 @@ const buttonClasses = computed(() => {
   let disabledClassesMap: Record<ThemeVariant, string> = {
     'gray-solid': 'bg-surface-gray-2 text-ink-gray-4',
     'gray-subtle': 'bg-surface-gray-2 text-ink-gray-4',
-    'gray-outline':
-      'bg-surface-gray-2 text-ink-gray-4 border border-outline-gray-2',
+    'gray-outline': 'bg-surface-gray-2 text-ink-gray-4 border border-outline-gray-2',
     'gray-ghost': 'text-ink-gray-4',
 
     'blue-solid': 'bg-blue-300 text-ink-white',
     'blue-subtle': 'bg-surface-blue-2 text-ink-blue-link',
-    'blue-outline':
-      'bg-surface-blue-2 text-ink-blue-link border border-outline-blue-1',
+    'blue-outline': 'bg-surface-blue-2 text-ink-blue-link border border-outline-blue-1',
     'blue-ghost': 'text-ink-blue-link',
 
     'green-solid': 'bg-surface-green-2 text-ink-green-2',
     'green-subtle': 'bg-surface-green-2 text-ink-green-2',
-    'green-outline':
-      'bg-surface-green-2 text-ink-green-2 border border-outline-green-2',
+    'green-outline': 'bg-surface-green-2 text-ink-green-2 border border-outline-green-2',
     'green-ghost': 'text-ink-green-2',
 
     'red-solid': 'bg-surface-red-2 text-ink-red-2',
     'red-subtle': 'bg-surface-red-2 text-ink-red-2',
-    'red-outline':
-      'bg-surface-red-2 text-ink-red-2 border border-outline-red-1',
+    'red-outline': 'bg-surface-red-2 text-ink-red-2 border border-outline-red-1',
     'red-ghost': 'text-ink-red-2',
   }
   let disabledClasses = disabledClassesMap[themeVariant]
@@ -218,10 +207,7 @@ const hasLucideIconInDefaultSlot = computed(() => {
   // if the slot contains only one element and it's a lucide icon
   // render it as an icon button
   let firstVNode = slotContent[0]
-  if (
-    typeof firstVNode.type?.name == 'string' &&
-    firstVNode.type?.name?.startsWith('lucide-')
-  ) {
+  if (typeof firstVNode.type?.name == 'string' && firstVNode.type?.name?.startsWith('lucide-')) {
     return true
   }
   return false

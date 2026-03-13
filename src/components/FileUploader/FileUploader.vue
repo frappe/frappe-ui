@@ -1,12 +1,6 @@
 <template>
   <div>
-    <input
-      ref="input"
-      type="file"
-      :accept="fileTypes"
-      class="hidden"
-      @change="onFileAdd"
-    />
+    <input ref="input" type="file" :accept="fileTypes" class="hidden" @change="onFileAdd" />
     <slot
       v-bind="{
         file,
@@ -122,9 +116,7 @@ export default {
           this.uploading = false
           let errorMessage = 'Error Uploading File'
           if (error?._server_messages) {
-            errorMessage = JSON.parse(
-              JSON.parse(error._server_messages)[0],
-            ).message
+            errorMessage = JSON.parse(JSON.parse(error._server_messages)[0]).message
           } else if (error?.exc) {
             errorMessage = JSON.parse(error.exc)[0].split('\n').slice(-2, -1)[0]
           }

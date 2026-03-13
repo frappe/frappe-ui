@@ -4,7 +4,7 @@
       <div
         ref="anchorRef"
         :class="['flex', $attrs.class]"
-        :style="($attrs.style as StyleValue)"
+        :style="$attrs.style as StyleValue"
         @mouseover="onMouseover"
         @mouseleave="onMouseleave"
       >
@@ -26,9 +26,7 @@
         :align="placementAlign"
         :sideOffset="offset"
         :style="{
-          minWidth: matchTargetWidth
-            ? 'var(--reka-popover-trigger-width)'
-            : undefined,
+          minWidth: matchTargetWidth ? 'var(--reka-popover-trigger-width)' : undefined,
         }"
         :class="['PopoverContent', { 'has-transition': hasTransition }]"
         @mouseover="
@@ -40,10 +38,7 @@
         @interact-outside="onInteractOutside"
       >
         <div class="relative" :class="['body-container', popoverClass]">
-          <slot
-            name="body"
-            v-bind="{ togglePopover, updatePosition, open, close, isOpen }"
-          >
+          <slot name="body" v-bind="{ togglePopover, updatePosition, open, close, isOpen }">
             <div class="rounded-lg border bg-surface-modal shadow-xl">
               <slot
                 name="body-main"
@@ -65,12 +60,7 @@
 
 <script setup lang="ts">
 import { computed, ref, onUnmounted, type StyleValue } from 'vue'
-import {
-  PopoverAnchor,
-  PopoverContent,
-  PopoverPortal,
-  PopoverRoot,
-} from 'reka-ui'
+import { PopoverAnchor, PopoverContent, PopoverPortal, PopoverRoot } from 'reka-ui'
 import { PopoverProps, PopoverEmits } from './types'
 
 const props = withDefaults(defineProps<PopoverProps>(), {
@@ -222,10 +212,7 @@ function onInteractOutside(event: Event) {
 
   // Check if the click is on the trigger/anchor element
   const target = event.target as Element
-  if (
-    anchorRef.value &&
-    (anchorRef.value.contains(target) || anchorRef.value === target)
-  ) {
+  if (anchorRef.value && (anchorRef.value.contains(target) || anchorRef.value === target)) {
     event.preventDefault()
     return
   }

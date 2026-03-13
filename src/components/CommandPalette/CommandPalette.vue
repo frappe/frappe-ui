@@ -29,10 +29,7 @@
                 v-for="(group, index) in groups"
                 :key="group.title"
               >
-                <div
-                  class="mb-2.5 px-4.5 text-base text-ink-gray-5"
-                  v-if="!group.hideTitle"
-                >
+                <div class="mb-2.5 px-4.5 text-base text-ink-gray-5" v-if="!group.hideTitle">
                   {{ group.title }}
                 </div>
                 <ComboboxOption
@@ -43,11 +40,7 @@
                   class="px-2.5"
                   :disabled="item.disabled"
                 >
-                  <component
-                    :is="group.component"
-                    :item="item"
-                    :active="active"
-                  />
+                  <component :is="group.component" :item="item" :active="active" />
                 </ComboboxOption>
               </div>
             </ComboboxOptions>
@@ -59,12 +52,7 @@
 </template>
 
 <script setup>
-import {
-  Combobox,
-  ComboboxInput,
-  ComboboxOption,
-  ComboboxOptions,
-} from '@headlessui/vue'
+import { Combobox, ComboboxInput, ComboboxOption, ComboboxOptions } from '@headlessui/vue'
 import { computed, onBeforeUnmount, onMounted } from 'vue'
 
 const emit = defineEmits(['update:show', 'update:searchQuery', 'select'])
@@ -95,11 +83,7 @@ function keydownWatcher(e) {
     e.preventDefault()
   }
 
-  if (
-    e.key === 'k' &&
-    (e.ctrlKey || e.metaKey) &&
-    !e.target.classList.contains('ProseMirror')
-  ) {
+  if (e.key === 'k' && (e.ctrlKey || e.metaKey) && !e.target.classList.contains('ProseMirror')) {
     show.value = true
     e.preventDefault()
   }

@@ -31,10 +31,7 @@
     </SidebarSection>
 
     <div class="mt-auto flex flex-col gap-2">
-      <slot
-        name="footer-items"
-        v-bind="{ isCollapsed: shouldCollapse, isMobile }"
-      />
+      <slot name="footer-items" v-bind="{ isCollapsed: shouldCollapse, isMobile }" />
       <SidebarItem
         v-if="!props.disableCollapse"
         :label="shouldCollapse ? 'Expand' : 'Collapse'"

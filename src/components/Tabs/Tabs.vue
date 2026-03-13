@@ -1,11 +1,5 @@
 <script setup lang="ts">
-import {
-  TabsContent,
-  TabsIndicator,
-  TabsList,
-  TabsRoot,
-  TabsTrigger,
-} from 'reka-ui'
+import { TabsContent, TabsIndicator, TabsList, TabsRoot, TabsTrigger } from 'reka-ui'
 
 import type { TabProps } from './types'
 import { h } from 'vue'
@@ -62,8 +56,7 @@ defineSlots<{
             class="flex items-center gap-1.5 text-base text-ink-gray-5 duration-300 ease-in-out hover:text-ink-gray-9 data-[state=active]:text-ink-gray-9"
             :class="{ 'px-2.5': props.vertical, 'py-2.5': !props.vertical }"
           >
-            <component v-if="tab.icon" :is="tab.icon" class="size-4">
-            </component>
+            <component v-if="tab.icon" :is="tab.icon" class="size-4"> </component>
 
             {{ tab.label }}
           </component>
@@ -71,11 +64,7 @@ defineSlots<{
       </TabsTrigger>
     </TabsList>
 
-    <TabsContent
-      v-for="(tab, i) in props.tabs"
-      :value="i"
-      class="flex flex-col overflow-auto"
-    >
+    <TabsContent v-for="(tab, i) in props.tabs" :value="i" class="flex flex-col overflow-auto">
       <slot name="tab-panel" v-bind="{ tab }" />
     </TabsContent>
   </TabsRoot>

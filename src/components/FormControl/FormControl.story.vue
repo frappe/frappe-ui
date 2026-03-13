@@ -1,32 +1,24 @@
 <script setup lang="ts">
-import Story from "@/components/Story.vue";
-import { reactive, ref } from "vue";
+import Story from '@/components/Story.vue'
+import { reactive, ref } from 'vue'
 // import FeatherIcon from "../FeatherIcon.vue";
-import LucideSearch from "~icons/lucide/search";
-import { Avatar, FormControl } from "frappe-ui";
+import LucideSearch from '~icons/lucide/search'
+import { Avatar, FormControl } from 'frappe-ui'
 
 const state = reactive({
-  size: "sm",
-  variant: "subtle",
-  placeholder: "Placeholder",
+  size: 'sm',
+  variant: 'subtle',
+  placeholder: 'Placeholder',
   disabled: false,
-  label: "Label",
-});
+  label: 'Label',
+})
 
-const inputValue = ref("");
-const selectValue = ref(null);
-const autocompleteValue = ref(null);
-const checkboxValue = ref(false);
+const inputValue = ref('')
+const selectValue = ref(null)
+const autocompleteValue = ref(null)
+const checkboxValue = ref(false)
 
-const inputTypes = [
-  "text",
-  "number",
-  "email",
-  "date",
-  "password",
-  "search",
-  "textarea",
-];
+const inputTypes = ['text', 'number', 'email', 'date', 'password', 'search', 'textarea']
 </script>
 
 <template>
@@ -38,13 +30,11 @@ const inputTypes = [
     <Story title="Select Input" :layout="{ width: 250 }">
       <FormControl
         type="select"
-        :options='
-          [
-            { label: "One", value: "1" },
-            { label: "Two", value: "2" },
-            { label: "Three", value: "3" },
-          ]
-        '
+        :options="[
+          { label: 'One', value: '1' },
+          { label: 'Two', value: '2' },
+          { label: 'Three', value: '3' },
+        ]"
         v-bind="state"
         v-model="selectValue"
       />
@@ -53,13 +43,11 @@ const inputTypes = [
     <Story title="Combobox Input" :layout="{ width: 250 }">
       <FormControl
         type="combobox"
-        :options='
-          [
-            { label: "One", value: "1" },
-            { label: "Two", value: "2" },
-            { label: "Three", value: "3" },
-          ]
-        '
+        :options="[
+          { label: 'One', value: '1' },
+          { label: 'Two', value: '2' },
+          { label: 'Three', value: '3' },
+        ]"
         v-bind="state"
         v-model="autocompleteValue"
       />
@@ -88,10 +76,7 @@ const inputTypes = [
     <Story title="Prefix Avatar" :layout="{ width: 250 }">
       <FormControl type="text" label="Label">
         <template #prefix>
-          <Avatar
-            size="sm"
-            image="https://avatars.githubusercontent.com/u/499550?s=60&v=4"
-          />
+          <Avatar size="sm" image="https://avatars.githubusercontent.com/u/499550?s=60&v=4" />
         </template>
       </FormControl>
     </Story>

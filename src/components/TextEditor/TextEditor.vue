@@ -44,12 +44,7 @@ import Typography from '@tiptap/extension-typography'
 import { TextStyleKit } from '@tiptap/extension-text-style'
 import { TaskList, TaskItem } from '@tiptap/extension-list'
 import TextAlign from '@tiptap/extension-text-align'
-import {
-  Table,
-  TableRow,
-  TableCell,
-  TableHeader,
-} from '@tiptap/extension-table'
+import { Table, TableRow, TableCell, TableHeader } from '@tiptap/extension-table'
 
 import { ImageExtension } from './extensions/image'
 import { VideoExtension } from './extensions/video-extension'

@@ -43,7 +43,6 @@ defineSlots<{
    */
   content?: () => any
 }>()
-
 </script>
 
 <template>
@@ -61,9 +60,7 @@ defineSlots<{
           class="z-[100]"
         >
           <slot name="body">
-            <div
-              class="rounded bg-surface-gray-7 px-2 py-1 text-xs text-ink-white shadow-xl"
-            >
+            <div class="rounded bg-surface-gray-7 px-2 py-1 text-xs text-ink-white shadow-xl">
               <slot name="content">{{ props.text }}</slot>
             </div>
           </slot>

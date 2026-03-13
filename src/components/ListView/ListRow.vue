@@ -25,10 +25,7 @@
         class="grid items-center gap-4 px-2"
         :style="{
           height: rowHeight,
-          gridTemplateColumns: getGridTemplateColumns(
-            list.columns,
-            list.options.selectable,
-          ),
+          gridTemplateColumns: getGridTemplateColumns(list.columns, list.options.selectable),
         }"
       >
         <div
@@ -46,10 +43,7 @@
         <div
           v-for="(column, i) in list.columns"
           :key="column.key"
-          :class="[
-            alignmentMap[column.align],
-            i == 0 ? 'text-ink-gray-9' : 'text-ink-gray-7',
-          ]"
+          :class="[alignmentMap[column.align], i == 0 ? 'text-ink-gray-9' : 'text-ink-gray-7']"
         >
           <slot v-bind="{ idx: i, column, item: row[column.key], isActive }">
             <component
@@ -103,8 +97,7 @@ const list = inject('list')
 const isLastRow = computed(() => {
   if (!list.value.rows?.length) return false
   return (
-    list.value.rows[list.value.rows.length - 1][list.value.rowKey] ===
-    props.row[list.value.rowKey]
+    list.value.rows[list.value.rows.length - 1][list.value.rowKey] === props.row[list.value.rowKey]
   )
 })
 
@@ -112,9 +105,7 @@ const isSelected = computed(() => {
   return list.value.selections.has(props.row[list.value.rowKey])
 })
 const isActive = computed(
-  () =>
-    list.value.options.enableActive &&
-    list.value.activeRow.value === props.row.name,
+  () => list.value.options.enableActive && list.value.activeRow.value === props.row.name,
 )
 
 const isHoverable = computed(() => {
@@ -131,9 +122,7 @@ const rowHeight = computed(() => {
 const roundedClass = computed(() => {
   if (!isSelected.value) return 'rounded'
   const selections = [...list.value.selections]
-  let groups = list.value.rows[0]?.group
-    ? list.value.rows.map((k) => k.rows)
-    : [list.value.rows]
+  let groups = list.value.rows[0]?.group ? list.value.rows.map((k) => k.rows) : [list.value.rows]
 
   for (let rows of groups) {
     let currentIndex = rows.findIndex((k) => k == props.row)
@@ -145,8 +134,7 @@ const roundedClass = computed(() => {
 })
 
 const onRowClick = (event) => {
-  if (list.value.options.onRowClick)
-    list.value.options.onRowClick(props.row, event)
+  if (list.value.options.onRowClick) list.value.options.onRowClick(props.row, event)
   if (list.value.activeRow.value === props.row.name) {
     list.value.activeRow.value = null
   } else {
@@ -161,9 +149,7 @@ const handleCheckboxClick = (event) => {
     const rows = list.value.rows.find((k) => k.group)
       ? list.value.rows.reduce((acc, curr) => acc.concat(curr.rows), [])
       : list.value.rows
-    const lastIndex = rows.findIndex(
-      (k) => lastSelected === k[list.value.rowKey],
-    )
+    const lastIndex = rows.findIndex((k) => lastSelected === k[list.value.rowKey])
     const curIndex = rows.findIndex((k) => value === k[list.value.rowKey])
     const start = Math.min(lastIndex, curIndex)
     const end = Math.max(lastIndex, curIndex)

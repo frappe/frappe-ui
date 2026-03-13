@@ -30,11 +30,7 @@
         </div>
         <div
           class="flex flex-1 flex-col text-left duration-300 ease-in-out truncate"
-          :class="
-            isCollapsed
-              ? 'ml-0 w-0 overflow-hidden opacity-0'
-              : 'ml-2 w-auto opacity-100'
-          "
+          :class="isCollapsed ? 'ml-0 w-0 overflow-hidden opacity-0' : 'ml-2 w-auto opacity-100'"
         >
           <div class="text-base font-medium text-ink-gray-8 leading-none">
             {{ props.title }}
@@ -45,11 +41,7 @@
         </div>
         <div
           class="duration-300 ease-in-out"
-          :class="
-            isCollapsed
-              ? 'ml-0 w-0 overflow-hidden opacity-0'
-              : 'ml-2 w-auto opacity-100'
-          "
+          :class="isCollapsed ? 'ml-0 w-0 overflow-hidden opacity-0' : 'ml-2 w-auto opacity-100'"
         >
           <LucideChevronDown class="h-4 w-4 text-ink-gray-7" />
         </div>

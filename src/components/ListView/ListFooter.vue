@@ -9,11 +9,7 @@
       </slot>
       <slot name="right">
         <div class="flex items-center">
-          <Button
-            v-if="showLoadMore"
-            label="Load More"
-            @click="emit('loadMore')"
-          />
+          <Button v-if="showLoadMore" label="Load More" @click="emit('loadMore')" />
           <div v-if="showLoadMore" class="mx-3 h-[80%] border-l" />
           <div class="flex items-center gap-1 text-base text-ink-gray-5">
             <div>{{ options.rowCount || '0' }}</div>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed } from "vue";
-import { MultiSelectOption, MultiSelectProps } from "./types";
+import { computed } from 'vue'
+import { MultiSelectOption, MultiSelectProps } from './types'
 
 import {
   ComboboxContent,
@@ -10,34 +10,32 @@ import {
   ComboboxItemIndicator,
   ComboboxRoot,
   ComboboxViewport,
-} from "reka-ui";
+} from 'reka-ui'
 
-import LucideX from "~icons/lucide/x";
-import Button from "../Button/Button.vue";
-import Popover from "../Popover/Popover.vue";
-import LucideCheck from "~icons/lucide/check";
-import LoadingIndicator from "../LoadingIndicator.vue";
-import LucideChevronDown from "~icons/lucide/chevron-down";
+import LucideX from '~icons/lucide/x'
+import Button from '../Button/Button.vue'
+import Popover from '../Popover/Popover.vue'
+import LucideCheck from '~icons/lucide/check'
+import LoadingIndicator from '../LoadingIndicator.vue'
+import LucideChevronDown from '~icons/lucide/chevron-down'
 
 const props = withDefaults(defineProps<MultiSelectProps>(), {
-  placeholder: "Select option",
-});
+  placeholder: 'Select option',
+})
 
-const model = defineModel<String[]>({ default: [] });
+const model = defineModel<String[]>({ default: [] })
 
-const getValues = (arr: String[]) =>
-  arr.map((x) => props.options.find((y) => y.value === x)?.label);
+const getValues = (arr: String[]) => arr.map((x) => props.options.find((y) => y.value === x)?.label)
 
-const optionToStr = (options: MultiSelectOption[]) =>
-  options.map((x) => x.value);
+const optionToStr = (options: MultiSelectOption[]) => options.map((x) => x.value)
 
 const selectedOptions = computed(() => {
-  const values = getValues(model.value).join(", ");
-  return model.value.length > 0 ? values : props.placeholder;
-});
+  const values = getValues(model.value).join(', ')
+  return model.value.length > 0 ? values : props.placeholder
+})
 
-const clearAll = () => model.value = [];
-const selectAll = () => model.value = optionToStr(props.options);
+const clearAll = () => (model.value = [])
+const selectAll = () => (model.value = optionToStr(props.options))
 
 defineSlots<{
   /** Rendered for each option in the dropdown. Receives the option object. */
@@ -57,7 +55,7 @@ defineSlots<{
       <Button
         @click="togglePopover"
         class="w-full justify-between"
-        :class='{ "!text-ink-gray-4": model.length == 0 }'
+        :class="{ '!text-ink-gray-4': model.length == 0 }"
       >
         {{ selectedOptions }}
         <template #suffix>
@@ -67,42 +65,25 @@ defineSlots<{
     </template>
 
     <template #body>
-      <ComboboxRoot
-        :open="true"
-        class="relative p-2 pb-0"
-        v-model="model"
-        multiple
-      >
+      <ComboboxRoot :open="true" class="relative p-2 pb-0" v-model="model" multiple>
         <div
           v-if="!props.hideSearch"
-          class="
-            flex w-full items-center justify-between gap-2
-            rounded bg-surface-gray-2 px-2 py-1 ring-2 ring-outline-gray-2
-            transition-colors hover:bg-surface-gray-3 boder borer-transparent
-          "
+          class="flex w-full items-center justify-between gap-2 rounded bg-surface-gray-2 px-2 py-1 ring-2 ring-outline-gray-2 transition-colors hover:bg-surface-gray-3 boder borer-transparent"
         >
           <ComboboxInput
             placeholder="Search for..."
-            class="
-              bg-transparent p-0 focus:outline-0 border-0 focus:border-0 focus:ring-0
-              text-base text-ink-gray-8 h-full placeholder:text-ink-gray-4 w-full
-            "
+            class="bg-transparent p-0 focus:outline-0 border-0 focus:border-0 focus:ring-0 text-base text-ink-gray-8 h-full placeholder:text-ink-gray-4 w-full"
           />
 
           <div class="inline-flex gap-1">
-            <LoadingIndicator
-              v-if="props.loading"
-              class="size-4 text-ink-gray-5"
-            />
+            <LoadingIndicator v-if="props.loading" class="size-4 text-ink-gray-5" />
             <LucideX class="size-4 text-ink-gray-9" />
           </div>
         </div>
 
         <ComboboxContent class="z-10 overflow-hidden mt-2">
           <ComboboxViewport class="max-h-60 overflow-auto pb-1.5">
-            <ComboboxEmpty
-              class="text-ink-gray-5 text-base text-center py-1.5 px-2.5"
-            >
+            <ComboboxEmpty class="text-ink-gray-5 text-base text-center py-1.5 px-2.5">
               No results found
             </ComboboxEmpty>
 
@@ -111,11 +92,7 @@ defineSlots<{
               :key="item.value"
               :value="item.value"
               :disabled="item.disabled"
-              class="
-                text-base leading-none text-ink-gray-7 rounded flex items-center h-7 p-1.5
-                relative select-none data-[disabled]:opacity-50 data-[disabled]:pointer-events-none
-                data-[highlighted]:outline-none data-[highlighted]:bg-surface-gray-3
-              "
+              class="text-base leading-none text-ink-gray-7 rounded flex items-center h-7 p-1.5 relative select-none data-[disabled]:opacity-50 data-[disabled]:pointer-events-none data-[highlighted]:outline-none data-[highlighted]:bg-surface-gray-3"
             >
               <slot name="option" v-bind="{ item }">
                 {{ item.label }}

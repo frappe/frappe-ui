@@ -45,4 +45,3 @@ export interface DropdownProps {
   /** Offset in pixels between trigger and dropdown */
   offset?: number
 }
-

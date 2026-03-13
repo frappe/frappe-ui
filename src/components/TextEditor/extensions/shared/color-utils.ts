@@ -111,9 +111,7 @@ export function getClosestNamedColor(
     const namedHex = colorMap[colorName]
     if (!namedHex) continue
 
-    const namedHexClean = namedHex.startsWith('#')
-      ? namedHex.substring(1)
-      : namedHex
+    const namedHexClean = namedHex.startsWith('#') ? namedHex.substring(1) : namedHex
 
     if (namedHexClean.length !== 6) continue
 
@@ -122,9 +120,7 @@ export function getClosestNamedColor(
     const nb = parseInt(namedHexClean.substring(4, 6), 16)
 
     // Calculate Euclidean distance
-    const distance = Math.sqrt(
-      Math.pow(r - nr, 2) + Math.pow(g - ng, 2) + Math.pow(b - nb, 2),
-    )
+    const distance = Math.sqrt(Math.pow(r - nr, 2) + Math.pow(g - ng, 2) + Math.pow(b - nb, 2))
 
     if (distance < minDistance) {
       minDistance = distance
@@ -154,9 +150,7 @@ export function extractColorFromStyle(
   const allColorsInMap = Object.keys(colorMap)
 
   // Check for color in hex format
-  const hexColorMatch = new RegExp(`${property}:\\s*(#[0-9a-f]{6})`, 'i').exec(
-    style,
-  )
+  const hexColorMatch = new RegExp(`${property}:\\s*(#[0-9a-f]{6})`, 'i').exec(style)
   if (hexColorMatch && hexColorMatch[1]) {
     const closestOverallColor = getClosestNamedColor(
       hexColorMatch[1],
@@ -206,17 +200,8 @@ export function extractColorFromStyle(
 /**
  * Extracts text color from a style attribute
  */
-export function extractTextColorFromStyle(
-  style: string,
-  allowedColors: string[],
-): string | null {
-  return extractColorFromStyle(
-    style,
-    allowedColors,
-    textColorHexMap,
-    legacyTextColorMap,
-    'color',
-  )
+export function extractTextColorFromStyle(style: string, allowedColors: string[]): string | null {
+  return extractColorFromStyle(style, allowedColors, textColorHexMap, legacyTextColorMap, 'color')
 }
 
 /**

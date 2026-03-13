@@ -101,25 +101,19 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
 
   let result
   if (method === 'POST') {
-    result = useFrappeFetch<FrappeResponse<TResponse>>(
-      computedUrl,
-      fetchOptions,
-    ).post(computedParams)
+    result = useFrappeFetch<FrappeResponse<TResponse>>(computedUrl, fetchOptions).post(
+      computedParams,
+    )
   } else if (method === 'PUT') {
-    result = useFrappeFetch<FrappeResponse<TResponse>>(
-      computedUrl,
-      fetchOptions,
-    ).put(computedParams)
+    result = useFrappeFetch<FrappeResponse<TResponse>>(computedUrl, fetchOptions).put(
+      computedParams,
+    )
   } else if (method === 'DELETE') {
-    result = useFrappeFetch<FrappeResponse<TResponse>>(
-      computedUrl,
-      fetchOptions,
-    ).delete(computedParams)
+    result = useFrappeFetch<FrappeResponse<TResponse>>(computedUrl, fetchOptions).delete(
+      computedParams,
+    )
   } else {
-    result = useFrappeFetch<FrappeResponse<TResponse>>(
-      computedUrl,
-      fetchOptions,
-    ).get()
+    result = useFrappeFetch<FrappeResponse<TResponse>>(computedUrl, fetchOptions).get()
   }
 
   const {

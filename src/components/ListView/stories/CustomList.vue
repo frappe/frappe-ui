@@ -67,23 +67,14 @@ const custom_rows = [
     row-key="id"
   >
     <ListHeader>
-      <ListHeaderItem
-        v-for="column in custom_columns"
-        :key="column.key"
-        :item="column"
-      >
+      <ListHeaderItem v-for="column in custom_columns" :key="column.key" :item="column">
         <template #prefix="{ item }">
           <component :is="item.icon" class="size-4" />
         </template>
       </ListHeaderItem>
     </ListHeader>
     <ListRows>
-      <ListRow
-        v-for="row in custom_rows"
-        :key="row.id"
-        v-slot="{ column, item }"
-        :row="row"
-      >
+      <ListRow v-for="row in custom_rows" :key="row.id" v-slot="{ column, item }" :row="row">
         <ListRowItem :item="item" :align="column.align">
           <template #prefix>
             <div
@@ -91,12 +82,7 @@ const custom_rows = [
               class="h-3 w-3 rounded-full"
               :class="item.bg_color"
             />
-            <Avatar
-              v-if="column.key === 'name'"
-              shape="circle"
-              :image="item.image"
-              size="sm"
-            />
+            <Avatar v-if="column.key === 'name'" shape="circle" :image="item.image" size="sm" />
           </template>
           <Badge
             v-if="column.key === 'role'"

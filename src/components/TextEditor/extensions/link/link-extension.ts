@@ -50,10 +50,7 @@ export const LinkExtension = Link.extend({
             if (markRange) {
               range = markRange
               // Select the link text
-              editor
-                .chain()
-                .setTextSelection({ from: markRange.from, to: markRange.to })
-                .run()
+              editor.chain().setTextSelection({ from: markRange.from, to: markRange.to }).run()
               shouldDelayPopover = true
             } else {
               // No selection and not within a link, and cursor not in link
@@ -75,9 +72,7 @@ export const LinkExtension = Link.extend({
                   return
                 }
 
-                let chain = editor
-                  .chain()
-                  .focus(null, { scrollIntoView: false })
+                let chain = editor.chain().focus(null, { scrollIntoView: false })
 
                 if (href === '') {
                   chain
@@ -269,10 +264,7 @@ function openLinkEditor(href: string, anchor: HTMLElement): Promise<string> {
   })
 }
 
-function clearLinkOnBoundaryPlugin(options: {
-  editor: Editor
-  type: MarkType
-}) {
+function clearLinkOnBoundaryPlugin(options: { editor: Editor; type: MarkType }) {
   return new Plugin({
     key: new PluginKey('clearLinkMarkOnBoundary'),
     appendTransaction: (transactions, oldState, newState) => {
@@ -289,9 +281,7 @@ function clearLinkOnBoundaryPlugin(options: {
       }
 
       const linkMarkType = options.type
-      const hasStoredLinkMark = storedMarks.some(
-        (mark) => mark.type === linkMarkType,
-      )
+      const hasStoredLinkMark = storedMarks.some((mark) => mark.type === linkMarkType)
 
       if (!hasStoredLinkMark) {
         return null
@@ -299,9 +289,7 @@ function clearLinkOnBoundaryPlugin(options: {
 
       // Check if the cursor position itself has an active link mark in the document
       const marksAtCursor = $from.marks()
-      const activeLinkAtCursor = marksAtCursor.some(
-        (mark) => mark.type === linkMarkType,
-      )
+      const activeLinkAtCursor = marksAtCursor.some((mark) => mark.type === linkMarkType)
 
       if (activeLinkAtCursor) {
         // If there's an actual link mark active in the document at the cursor,

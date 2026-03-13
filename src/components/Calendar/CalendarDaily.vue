@@ -12,22 +12,16 @@
           :is="showCollapsable ? Button : 'div'"
           :class="{ '!pl-1.5 pr-1 py-1 !gap-1': showCollapsable }"
           variant="ghost"
-          :iconRight="
-            showCollapsable ? (isCollapsed ? 'chevron-down' : 'chevron-up') : ''
-          "
+          :iconRight="showCollapsable ? (isCollapsed ? 'chevron-down' : 'chevron-up') : ''"
           @click="showCollapsable && (isCollapsed = !isCollapsed)"
         >
-          <div class="text-sm text-ink-gray-6 h-7 inline-flex items-center">
-            All day
-          </div>
+          <div class="text-sm text-ink-gray-6 h-7 inline-flex items-center">All day</div>
         </component>
       </div>
       <div
         class="flex flex-wrap gap-1 py-1 w-full overflow-hidden"
         :data-date-attr="currentDate"
-        @click.prevent="
-          calendarActions.handleCellClick($event, currentDate, '', true)
-        "
+        @click.prevent="calendarActions.handleCellClick($event, currentDate, '', true)"
       >
         <CalendarEvent
           v-for="(calendarEvent, idx) in !showCollapsable || !isCollapsed
@@ -51,9 +45,7 @@
     <div class="h-full overflow-hidden">
       <div
         class="flex h-full w-full overflow-scroll border-outline-gray-1"
-        :class="[
-          config.noBorder ? 'border-t-[1px]' : 'border-[1px] border-r-0',
-        ]"
+        :class="[config.noBorder ? 'border-t-[1px]' : 'border-[1px] border-r-0']"
         ref="gridRef"
       >
         <!-- Left column -->
@@ -77,9 +69,7 @@
               v-for="(time, i) in timeArray"
               :key="time"
               :data-time-attr="i == 0 ? '' : time"
-              @click="
-                calendarActions.handleCellClick($event, currentDate, time)
-              "
+              @click="calendarActions.handleCellClick($event, currentDate, time)"
             >
               <div
                 class="w-full border-outline-gray-1"
@@ -88,9 +78,7 @@
               />
             </div>
             <CalendarEvent
-              v-for="(calendarEvent, idx) in timedEvents[
-                parseDate(currentDate)
-              ]"
+              v-for="(calendarEvent, idx) in timedEvents[parseDate(currentDate)]"
               class="absolute mb-2 cursor-pointer"
               :event="calendarEvent"
               :key="calendarEvent.id"
@@ -131,21 +119,15 @@ const props = defineProps({
     required: true,
   },
 })
-const timedEvents = computed(
-  () => useCalendarData(props.events).timedEvents.value,
-)
-const fullDayEvents = computed(
-  () => useCalendarData(props.events).fullDayEvents.value,
-)
+const timedEvents = computed(() => useCalendarData(props.events).timedEvents.value)
+const fullDayEvents = computed(() => useCalendarData(props.events).fullDayEvents.value)
 const gridRef = ref(null)
 const hourHeight = props.config.hourHeight
 const minuteHeight = hourHeight / 60
 
 const showCollapsable = ref(false)
 const isCollapsed = ref(true)
-const dayFullDayEvents = computed(
-  () => fullDayEvents.value?.[parseDate(props.currentDate)] || [],
-)
+const dayFullDayEvents = computed(() => fullDayEvents.value?.[parseDate(props.currentDate)] || [])
 
 function updateFullDayEventsState() {
   // Show collapsible if more than 4 events
@@ -157,8 +139,7 @@ function updateFullDayEventsState() {
 
 watch(dayFullDayEvents, updateFullDayEventsState, { immediate: true })
 
-const timeArray =
-  props.config.timeFormat == '24h' ? twentyFourHoursFormat : twelveHoursFormat
+const timeArray = props.config.timeFormat == '24h' ? twentyFourHoursFormat : twelveHoursFormat
 
 onMounted(() => {
   const currentHour = new Date().getHours()

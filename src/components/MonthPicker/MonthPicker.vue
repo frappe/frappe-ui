@@ -32,16 +32,10 @@ const months = [
 
 const currentYear = ref(new Date().getFullYear())
 
-const yearRangeStart = computed(
-  () => currentYear.value - (currentYear.value % 12),
-)
-const yearRange = computed(() =>
-  Array.from({ length: 12 }, (_, i) => yearRangeStart.value + i),
-)
+const yearRangeStart = computed(() => currentYear.value - (currentYear.value % 12))
+const yearRange = computed(() => Array.from({ length: 12 }, (_, i) => yearRangeStart.value + i))
 
-const pickerList = computed(() =>
-  viewMode.value == 'year' ? yearRange.value : months,
-)
+const pickerList = computed(() => (viewMode.value == 'year' ? yearRange.value : months))
 
 const toggleViewMode = () => {
   viewMode.value = viewMode.value == 'year' ? 'month' : 'year'
@@ -66,17 +60,19 @@ const formatBtn = (v: string | number) =>
   viewMode.value == 'month' ? (v as String).slice(0, 3) : v
 
 const txtClass = computed(() => {
-  return model.value || props.disabled ? '': '!text-ink-gray-5' 
+  return model.value || props.disabled ? '' : '!text-ink-gray-5'
 })
 </script>
 
 <template>
-  <Popover
-    popover-class="mt-2 shadow-xl rounded-lg border bg-surface-modal p-2"
-  >
+  <Popover popover-class="mt-2 shadow-xl rounded-lg border bg-surface-modal p-2">
     <template #target="{ togglePopover }">
-      <Button @click="togglePopover" class="w-full justify-between border" :class="txtClass"
-				:disabled="disabled">
+      <Button
+        @click="togglePopover"
+        class="w-full justify-between border"
+        :class="txtClass"
+        :disabled="disabled"
+      >
         {{ model || props.placeholder }}
         <template #suffix> <LucideCalender class="size-4" /> </template>
       </Button>
@@ -93,9 +89,7 @@ const txtClass = computed(() => {
           <template v-if="viewMode == 'month'">
             {{ model.split(' ')[1] ?? currentYear }}
           </template>
-          <template v-else>
-            {{ yearRangeStart }} - {{ yearRangeStart + 11 }}
-          </template>
+          <template v-else> {{ yearRangeStart }} - {{ yearRangeStart + 11 }} </template>
         </Button>
 
         <Button variant="ghost" @click="nextClick">

@@ -8,11 +8,7 @@
           :class="iconClasses"
           aria-hidden="true"
         />
-        <component
-          :class="iconClasses"
-          v-else-if="props.icon"
-          :is="props.icon"
-        />
+        <component :class="iconClasses" v-else-if="props.icon" :is="props.icon" />
         <label :class="switchLabelClasses" :for="id">
           {{ props.label }}
         </label>
@@ -90,9 +86,7 @@ const iconClasses = 'mr-2 h-4 w-4 flex-shrink-0 text-ink-gray-6'
 const switchLabelClasses = computed(() => {
   return [
     'font-medium leading-normal',
-    props.disabled && !props.description
-      ? 'text-ink-gray-4'
-      : 'text-ink-gray-8',
+    props.disabled && !props.description ? 'text-ink-gray-4' : 'text-ink-gray-8',
     props.size === 'md' ? 'text-lg' : 'text-base',
     props.labelClasses,
   ]
@@ -107,9 +101,7 @@ const switchGroupClasses = computed(() => {
     )
 
     classes.push(
-      props.disabled
-        ? 'cursor-not-allowed'
-        : 'hover:bg-surface-gray-3 active:bg-surface-gray-4',
+      props.disabled ? 'cursor-not-allowed' : 'hover:bg-surface-gray-3 active:bg-surface-gray-4',
     )
   } else {
     classes.push('items-start')

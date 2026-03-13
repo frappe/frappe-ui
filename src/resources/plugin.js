@@ -1,9 +1,6 @@
 import { reactive, watch } from 'vue'
 import { createResource, getCachedResource } from './resources'
-import {
-  createDocumentResource,
-  getCachedDocumentResource,
-} from './documentResource'
+import { createDocumentResource, getCachedDocumentResource } from './documentResource'
 import { createListResource, getCachedListResource } from './listResource'
 
 let createMixin = (mixinOptions) => ({
@@ -30,9 +27,7 @@ let createMixin = (mixinOptions) => ({
                 return
               }
 
-              let changed =
-                !oldOptions ||
-                JSON.stringify(options) !== JSON.stringify(oldOptions)
+              let changed = !oldOptions || JSON.stringify(options) !== JSON.stringify(oldOptions)
 
               if (!changed) return
               this._resources[key] = createResourceForOptions(options, this)

@@ -24,14 +24,10 @@ export function createListResource(options, vm) {
   }
 
   let defaultListUrl = getConfig('defaultListUrl') || 'frappe.client.get_list'
-  let defaultDocInsertUrl =
-    getConfig('defaultDocInsertUrl') || 'frappe.client.insert'
-  let defaultDocUpdateUrl =
-    getConfig('defaultDocUpdateUrl') || 'frappe.client.set_value'
-  let defaultDocDeleteUrl =
-    getConfig('defaultDocDeleteUrl') || 'frappe.client.delete'
-  let defaultRunDocMethodUrl =
-    getConfig('defaultRunDocMethodUrl') || 'run_doc_method'
+  let defaultDocInsertUrl = getConfig('defaultDocInsertUrl') || 'frappe.client.insert'
+  let defaultDocUpdateUrl = getConfig('defaultDocUpdateUrl') || 'frappe.client.set_value'
+  let defaultDocDeleteUrl = getConfig('defaultDocDeleteUrl') || 'frappe.client.delete'
+  let defaultRunDocMethodUrl = getConfig('defaultRunDocMethodUrl') || 'run_doc_method'
 
   let out = reactive({
     doctype: options.doctype,

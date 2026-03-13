@@ -1,31 +1,27 @@
 <script setup lang="ts">
-import Story from "@/components/Story.vue";
-import { Avatar, TextInput } from "frappe-ui";
-import LucideSearch from "~icons/lucide/search";
+import Story from '@/components/Story.vue'
+import { Avatar, TextInput } from 'frappe-ui'
+import LucideSearch from '~icons/lucide/search'
 
 const inputTypes = [
-  "text",
-  "number",
-  "email",
-  "date",
-  "datetime-local",
-  "password",
-  "search",
-  "tel",
-  "time",
-  "url",
-];
-const sizes = ["sm", "md", "lg", "xl"];
-const variants = ["subtle", "outline"];
+  'text',
+  'number',
+  'email',
+  'date',
+  'datetime-local',
+  'password',
+  'search',
+  'tel',
+  'time',
+  'url',
+]
+const sizes = ['sm', 'md', 'lg', 'xl']
+const variants = ['subtle', 'outline']
 </script>
 
 <template>
   <div class="grid grid-cols-2 gap-5">
-    <Story
-      v-for="inputType in inputTypes"
-      :key="inputType"
-      :title="inputType"
-    >
+    <Story v-for="inputType in inputTypes" :key="inputType" :title="inputType">
       <TextInput :type="inputType" placeholder="Enter input" />
     </Story>
 
@@ -48,10 +44,7 @@ const variants = ["subtle", "outline"];
     <Story title="prefix slot avatar">
       <TextInput placeholder="Enter Name">
         <template #prefix>
-          <Avatar
-            size="sm"
-            image="https://avatars.githubusercontent.com/u/499550?s=60&v=4"
-          />
+          <Avatar size="sm" image="https://avatars.githubusercontent.com/u/499550?s=60&v=4" />
         </template>
       </TextInput>
     </Story>
@@ -61,11 +54,7 @@ const variants = ["subtle", "outline"];
     </Story>
 
     <Story title="Variants" class="col-span-2" preview-css="flex gap-3">
-      <TextInput
-        v-for="variant in variants"
-        :variant="variant"
-        placeholder="Enter input"
-      />
+      <TextInput v-for="variant in variants" :variant="variant" placeholder="Enter input" />
     </Story>
   </div>
 </template>

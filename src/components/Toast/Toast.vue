@@ -10,18 +10,12 @@
     <div class="flex items-center gap-2 flex-grow overflow-hidden">
       <div>
         <component v-if="icon" :is="icon" class="flex-shrink-0 size-4" />
-        <CircleCheck
-          v-else-if="type == 'success'"
-          class="flex-shrink-0 size-4 text-ink-green-2"
-        />
+        <CircleCheck v-else-if="type == 'success'" class="flex-shrink-0 size-4 text-ink-green-2" />
         <LucideAlertTriangle
           v-else-if="type == 'warning'"
           class="flex-shrink-0 size-4 text-ink-amber-2"
         />
-        <LucideInfo
-          v-else-if="type == 'error'"
-          class="flex-shrink-0 size-4 text-ink-red-2"
-        />
+        <LucideInfo v-else-if="type == 'error'" class="flex-shrink-0 size-4 text-ink-red-2" />
       </div>
       <div class="flex flex-col flex-grow overflow-hidden">
         <ToastDescription
@@ -80,8 +74,7 @@ function handleAction() {
 <style>
 @keyframes KSlideIn {
   from {
-    transform: translateY(calc(100% + var(--viewport-padding, 32px)))
-      scale(0.95);
+    transform: translateY(calc(100% + var(--viewport-padding, 32px))) scale(0.95);
     opacity: 0;
   }
   to {

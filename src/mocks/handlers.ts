@@ -73,23 +73,20 @@ export const handlers = [
       },
     })
   }),
-  http.post(
-    url('/api/v2/document/User/user1/method/update_email'),
-    async ({ request }) => {
-      let body = await request.json()
-      return HttpResponse.json({
-        docs: [
-          {
-            doctype: 'User',
-            name: 'user1',
-            email: body['email'],
-            first_name: 'User',
-            last_name: '1',
-          },
-        ],
-      })
-    },
-  ),
+  http.post(url('/api/v2/document/User/user1/method/update_email'), async ({ request }) => {
+    let body = await request.json()
+    return HttpResponse.json({
+      docs: [
+        {
+          doctype: 'User',
+          name: 'user1',
+          email: body['email'],
+          first_name: 'User',
+          last_name: '1',
+        },
+      ],
+    })
+  }),
 ]
 
 function getUsers(listParams) {

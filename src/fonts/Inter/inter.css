@@ -13,11 +13,11 @@
     url('Inter.var.woff2?v=3.19') format('woff2');
   src: url('Inter.var.woff2?v=3.19') format('woff2') tech('variations');
   unicode-range:
-    U+0000-05FF, /* Latin, Greek, Cyrillic, Hebrew */
-    U+0700-1FFF, /* Extended Latin, Greek, Cyrillic, Armenian, Georgian */
-    U+2C00-2FFF, /* Additional scripts */
-    U+4E00-9FFF, /* CJK (Chinese, Japanese, Korean) */
-    U+AC00-D7AF; /* Hangul (Korean) */
+    U+0000-05FF,
+    /* Latin, Greek, Cyrillic, Hebrew */ U+0700-1FFF,
+    /* Extended Latin, Greek, Cyrillic, Armenian, Georgian */ U+2C00-2FFF,
+    /* Additional scripts */ U+4E00-9FFF,
+    /* CJK (Chinese, Japanese, Korean) */ U+AC00-D7AF; /* Hangul (Korean) */
 }
 @font-face {
   font-family: 'InterVar';
@@ -42,11 +42,11 @@
     url('Inter.var.woff2?v=3.19') format('woff2');
   src: url('Inter.var.woff2?v=3.19') format('woff2') tech('variations');
   unicode-range:
-    U+0000-05FF, /* Latin, Greek, Cyrillic, Hebrew */
-    U+0700-1FFF, /* Extended Latin, Greek, Cyrillic, Armenian, Georgian */
-    U+2C00-2FFF, /* Additional scripts */
-    U+4E00-9FFF, /* CJK (Chinese, Japanese, Korean) */
-    U+AC00-D7AF; /* Hangul (Korean) */
+    U+0000-05FF,
+    /* Latin, Greek, Cyrillic, Hebrew */ U+0700-1FFF,
+    /* Extended Latin, Greek, Cyrillic, Armenian, Georgian */ U+2C00-2FFF,
+    /* Additional scripts */ U+4E00-9FFF,
+    /* CJK (Chinese, Japanese, Korean) */ U+AC00-D7AF; /* Hangul (Korean) */
 }
 @font-face {
   font-family: 'Inter';

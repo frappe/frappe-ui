@@ -22,15 +22,10 @@ interface FrappeUIConfig {
 
 let config: FrappeUIConfig = {}
 
-export function setConfig<K extends keyof FrappeUIConfig>(
-  key: K,
-  value: FrappeUIConfig[K],
-): void {
+export function setConfig<K extends keyof FrappeUIConfig>(key: K, value: FrappeUIConfig[K]): void {
   config[key] = value
 }
 
-export function getConfig<K extends keyof FrappeUIConfig>(
-  key: K,
-): FrappeUIConfig[K] | null {
+export function getConfig<K extends keyof FrappeUIConfig>(key: K): FrappeUIConfig[K] | null {
   return config[key] ?? null
 }

@@ -40,15 +40,7 @@ function guessPrecision(number: number) {
   return Math.min(str.length - decimalIndex - 1, 2)
 }
 
-export type TimeGrain =
-  | 'second'
-  | 'minute'
-  | 'hour'
-  | 'day'
-  | 'week'
-  | 'month'
-  | 'quarter'
-  | 'year'
+export type TimeGrain = 'second' | 'minute' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year'
 export function formatDate(date: string, format?: string, grain: TimeGrain = 'day') {
   if (!date) return ''
 
@@ -74,33 +66,32 @@ export function formatDate(date: string, format?: string, grain: TimeGrain = 'da
   return dayjs(date).format(format)
 }
 
-
 export function isObject(item: any) {
   return item && typeof item === 'object' && !Array.isArray(item)
 }
 
 export function mergeDeep(target: any, ...sources: any[]) {
-  if (!sources.length) return target;
-  const source = sources.shift();
+  if (!sources.length) return target
+  const source = sources.shift()
 
   if (!source || !isObject(target) || !isObject(source)) {
     // Skip the current source if it's not a proper object
-    return mergeDeep(target, ...sources);
+    return mergeDeep(target, ...sources)
   }
 
-  let output = Object.assign({}, target);
+  let output = Object.assign({}, target)
 
   Object.keys(source).forEach((key) => {
     if (isObject(source[key])) {
       if (!(key in output)) {
-        output[key] = source[key];
+        output[key] = source[key]
       } else {
-        output[key] = mergeDeep(output[key], source[key]);
+        output[key] = mergeDeep(output[key], source[key])
       }
     } else {
-      output[key] = source[key];
+      output[key] = source[key]
     }
-  });
+  })
 
-  return mergeDeep(output, ...sources);
+  return mergeDeep(output, ...sources)
 }

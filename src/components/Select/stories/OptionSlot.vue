@@ -42,14 +42,12 @@ const options = [
   },
 ]
 
-const activeImg = computed(
-  () => options.find((x) => x.value === value.value)?.img,
-)
+const activeImg = computed(() => options.find((x) => x.value === value.value)?.img)
 </script>
 
 <template>
   <Select :options="options" v-model="value">
-    <template #prefix v-if='activeImg'>
+    <template #prefix v-if="activeImg">
       <Avatar size="sm" :image="activeImg" />
     </template>
     <template #option="{ option }">

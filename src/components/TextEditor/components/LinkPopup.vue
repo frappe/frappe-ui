@@ -1,7 +1,5 @@
 <template>
-  <div
-    class="p-2 w-72 flex items-center gap-2 bg-surface-white shadow-xl rounded"
-  >
+  <div class="p-2 w-72 flex items-center gap-2 bg-surface-white shadow-xl rounded">
     <TextInput
       v-if="edit"
       ref="input"
@@ -23,12 +21,7 @@
     </a>
     <div class="shrink-0 flex items-center gap-1.5 ml-auto">
       <template v-if="edit">
-        <Button
-          @click="submitLink"
-          tooltip="Submit"
-          :icon="LucideCheck"
-          variant="subtle"
-        />
+        <Button @click="submitLink" tooltip="Submit" :icon="LucideCheck" variant="subtle" />
         <Button
           @click="props.href ? (edit = false) : $emit('updateHref', '')"
           tooltip="Exit"
@@ -37,18 +30,8 @@
         />
       </template>
       <template v-else>
-        <Button
-          @click="copyLink"
-          tooltip="Copy"
-          :icon="LucideCopy"
-          variant="subtle"
-        />
-        <Button
-          @click="edit = true"
-          tooltip="Edit"
-          :icon="LucidePencil"
-          variant="subtle"
-        />
+        <Button @click="copyLink" tooltip="Copy" :icon="LucideCopy" variant="subtle" />
+        <Button @click="edit = true" tooltip="Edit" :icon="LucidePencil" variant="subtle" />
         <Button
           tooltip="Remove"
           variant="subtle"

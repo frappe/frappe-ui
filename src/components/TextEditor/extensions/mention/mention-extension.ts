@@ -44,8 +44,7 @@ function createMentionNode(component?: Component) {
         },
         label: {
           default: null,
-          parseHTML: (element: HTMLElement) =>
-            element.getAttribute('data-label'),
+          parseHTML: (element: HTMLElement) => element.getAttribute('data-label'),
           renderHTML: (attributes: any) => {
             if (!attributes.label) {
               return {}
@@ -95,64 +94,63 @@ function createMentionNode(component?: Component) {
   return Node.create(config)
 }
 
-const MentionSuggestionExtension =
-  createSuggestionExtension<MentionSuggestionItem>({
-    name: 'mentionSuggestion',
-    char: '@',
-    pluginKey: new PluginKey('mentionSuggestion'),
-    component: SuggestionList,
+const MentionSuggestionExtension = createSuggestionExtension<MentionSuggestionItem>({
+  name: 'mentionSuggestion',
+  char: '@',
+  pluginKey: new PluginKey('mentionSuggestion'),
+  component: SuggestionList,
 
-    addOptions() {
-      return {
-        mentions: [],
-      }
-    },
+  addOptions() {
+    return {
+      mentions: [],
+    }
+  },
 
-    items: ({ query, editor }) => {
-      const { mentions: _mentions } = editor.extensionManager.extensions.find(
-        (ext) => ext.name === 'mentionSuggestion',
-      )!.options
-      const mentions = toValue(_mentions)
+  items: ({ query, editor }) => {
+    const { mentions: _mentions } = editor.extensionManager.extensions.find(
+      (ext) => ext.name === 'mentionSuggestion',
+    )!.options
+    const mentions = toValue(_mentions)
 
-      const filtered = mentions
-        .filter((mention: MentionSuggestionItem) =>
-          mention.label.toLowerCase().startsWith(query.toLowerCase()),
-        )
-        .slice(0, 10)
-        .map((mention: MentionSuggestionItem) => ({
-          ...mention,
-          display: mention.label,
-        }))
+    const filtered = mentions
+      .filter((mention: MentionSuggestionItem) =>
+        mention.label.toLowerCase().startsWith(query.toLowerCase()),
+      )
+      .slice(0, 10)
+      .map((mention: MentionSuggestionItem) => ({
+        ...mention,
+        display: mention.label,
+      }))
 
-      return filtered
-    },
+    return filtered
+  },
 
-    command: ({ editor, range, props }) => {
-      const attributes = {
-        id: props.id || props.value,
-        label: props.label,
-      }
+  command: ({ editor, range, props }) => {
+    const attributes = {
+      id: props.id || props.value,
+      label: props.label,
+    }
 
-      editor
-        .chain()
-        .focus()
-        .insertContentAt(range, [
-          {
-            type: 'mention',
-            attrs: attributes,
-          },
-        ])
-        .run()
-    },
+    editor
+      .chain()
+      .focus()
+      .insertContentAt(range, [
+        {
+          type: 'mention',
+          attrs: attributes,
+        },
+      ])
+      .run()
+  },
 
-    tippyOptions: {
-      placement: 'bottom-start',
-      offset: [0, 8],
-    },
-    allowSpaces: false,
-    decorationTag: 'span',
-    decorationClass: 'mention-suggestion-active',
-  })
+  tippyOptions: {
+    placement: 'bottom-start',
+    offset: [0, 8],
+  },
+  allowSpaces: false,
+  decorationTag: 'span',
+  decorationClass: 'mention-suggestion-active',
+})
 
 export const MentionExtension = Extension.create<{
   mentions: MaybeRefOrGetter<MentionSuggestionItem[]>

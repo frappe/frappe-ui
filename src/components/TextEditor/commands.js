@@ -40,48 +40,42 @@ export default {
     label: 'Heading 1',
     text: 'H1',
     icon: H1,
-    action: (editor) =>
-      editor.chain().focus().toggleHeading({ level: 1 }).run(),
+    action: (editor) => editor.chain().focus().toggleHeading({ level: 1 }).run(),
     isActive: (editor) => editor.isActive('heading', { level: 1 }),
   },
   'Heading 2': {
     label: 'Heading 2',
     text: 'H2',
     icon: H2,
-    action: (editor) =>
-      editor.chain().focus().toggleHeading({ level: 2 }).run(),
+    action: (editor) => editor.chain().focus().toggleHeading({ level: 2 }).run(),
     isActive: (editor) => editor.isActive('heading', { level: 2 }),
   },
   'Heading 3': {
     label: 'Heading 3',
     text: 'H3',
     icon: H3,
-    action: (editor) =>
-      editor.chain().focus().toggleHeading({ level: 3 }).run(),
+    action: (editor) => editor.chain().focus().toggleHeading({ level: 3 }).run(),
     isActive: (editor) => editor.isActive('heading', { level: 3 }),
   },
   'Heading 4': {
     label: 'Heading 4',
     text: 'H4',
     icon: H4,
-    action: (editor) =>
-      editor.chain().focus().toggleHeading({ level: 4 }).run(),
+    action: (editor) => editor.chain().focus().toggleHeading({ level: 4 }).run(),
     isActive: (editor) => editor.isActive('heading', { level: 4 }),
   },
   'Heading 5': {
     label: 'Heading 5',
     text: 'H5',
     icon: H5,
-    action: (editor) =>
-      editor.chain().focus().toggleHeading({ level: 5 }).run(),
+    action: (editor) => editor.chain().focus().toggleHeading({ level: 5 }).run(),
     isActive: (editor) => editor.isActive('heading', { level: 5 }),
   },
   'Heading 6': {
     label: 'Heading 6',
     text: 'H6',
     icon: H6,
-    action: (editor) =>
-      editor.chain().focus().toggleHeading({ level: 6 }).run(),
+    action: (editor) => editor.chain().focus().toggleHeading({ level: 6 }).run(),
     isActive: (editor) => editor.isActive('heading', { level: 6 }),
   },
   Bold: {
@@ -147,8 +141,7 @@ export default {
   FontColor: {
     label: 'Font Color',
     icon: FontColor,
-    isActive: (editor) =>
-      editor.getAttributes('textStyle')?.color || editor.isActive('highlight'),
+    isActive: (editor) => editor.getAttributes('textStyle')?.color || editor.isActive('highlight'),
     component: defineAsyncComponent(() => import('./components/FontColor.vue')),
   },
   Blockquote: {
@@ -173,33 +166,25 @@ export default {
     label: 'Link',
     icon: Link,
     isActive: (editor) => editor.isActive('link'),
-    component: defineAsyncComponent(
-      () => import('./components/InsertLink.vue'),
-    ),
+    component: defineAsyncComponent(() => import('./components/InsertLink.vue')),
   },
   Image: {
     label: 'Image',
     icon: Image,
     isActive: (editor) => false,
-    component: defineAsyncComponent(
-      () => import('./components/InsertImage.vue'),
-    ),
+    component: defineAsyncComponent(() => import('./components/InsertImage.vue')),
   },
   Video: {
     label: 'Video',
     icon: Video,
     isActive: (editor) => false,
-    component: defineAsyncComponent(
-      () => import('./components/InsertVideo.vue'),
-    ),
+    component: defineAsyncComponent(() => import('./components/InsertVideo.vue')),
   },
   Iframe: {
     label: 'Embed',
     icon: GalleryVertical,
     isActive: (editor) => editor.isActive('iframe'),
-    component: defineAsyncComponent(
-      () => import('./extensions/iframe/InsertIframe.vue'),
-    ),
+    component: defineAsyncComponent(() => import('./extensions/iframe/InsertIframe.vue')),
   },
   Undo: {
     label: 'Undo',
@@ -217,11 +202,7 @@ export default {
     label: 'Insert Table',
     icon: Table,
     action: (editor) =>
-      editor
-        .chain()
-        .focus()
-        .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
-        .run(),
+      editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run(),
     isActive: (editor) => editor.can().deleteTable(),
   },
   AddColumnBefore: {
@@ -299,8 +280,7 @@ export default {
   TableOfContents: {
     label: 'Table of Contents',
     icon: TableOfContentsIcon,
-    action: (editor) =>
-      editor.chain().focus().insertTableOfContentsNode().run(),
+    action: (editor) => editor.chain().focus().insertTableOfContentsNode().run(),
     isActive: (editor) => editor.isActive('tocNode'),
   },
   Separator: {

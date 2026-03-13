@@ -104,10 +104,7 @@ let _options = computed(() => {
 const allRowsSelected = computed(() => {
   if (!props.rows.length) return false
   if (showGroupedRows.value) {
-    return (
-      selections.size ===
-      props.rows.reduce((acc, row) => acc + row.rows.length, 0)
-    )
+    return selections.size === props.rows.reduce((acc, row) => acc + row.rows.length, 0)
   }
   return selections.size === props.rows.length
 })
@@ -117,9 +114,7 @@ const selectable = computed(() => {
 })
 
 let showGroupedRows = computed(() => {
-  return props.rows.every(
-    (row) => row.group && row.rows && Array.isArray(row.rows)
-  )
+  return props.rows.every((row) => row.group && row.rows && Array.isArray(row.rows))
 })
 
 function toggleRow(row) {
@@ -155,7 +150,7 @@ provide(
     slots: slots,
     toggleRow,
     toggleAllRows,
-  }))
+  })),
 )
 
 defineExpose({

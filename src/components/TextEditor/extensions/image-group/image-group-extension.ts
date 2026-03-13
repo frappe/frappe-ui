@@ -70,9 +70,7 @@ export const ImageGroup = Node.create<ImageGroupOptions>({
           if (typeof element === 'string') return {}
           const el = element as HTMLElement
           return {
-            columns: el.getAttribute('data-columns')
-              ? Number(el.getAttribute('data-columns'))
-              : 4,
+            columns: el.getAttribute('data-columns') ? Number(el.getAttribute('data-columns')) : 4,
           }
         },
       },

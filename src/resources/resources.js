@@ -27,9 +27,7 @@ export function createResource(options, vm) {
     }
   }
 
-  let fetchFunction = options.debounce
-    ? debounce(fetch, options.debounce)
-    : fetch
+  let fetchFunction = options.debounce ? debounce(fetch, options.debounce) : fetch
 
   let out = reactive({
     method: options.method,
@@ -51,8 +49,7 @@ export function createResource(options, vm) {
   })
 
   async function fetch(params, tempOptions = {}) {
-    let resourceFetcher =
-      options.resourceFetcher || getConfig('resourceFetcher') || request
+    let resourceFetcher = options.resourceFetcher || getConfig('resourceFetcher') || request
 
     if (params instanceof Event) {
       params = null

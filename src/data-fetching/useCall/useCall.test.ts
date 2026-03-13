@@ -63,9 +63,7 @@ describe('useCall', () => {
 
     expect(errorCall.loading).toBe(false)
     expect(errorCall.error).toBeInstanceOf(Error)
-    expect(errorCall.error.message).toEqual(
-      'ServerError: Internal Server Error occurred',
-    )
+    expect(errorCall.error.message).toEqual('ServerError: Internal Server Error occurred')
     expect(errorCall.data).toBe(null)
     expect(onError).toHaveBeenCalledWith(errorCall.error)
   })

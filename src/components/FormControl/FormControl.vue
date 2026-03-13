@@ -1,38 +1,17 @@
 <template>
-  <div
-    v-if="type != 'checkbox'"
-    :class="['space-y-1.5', attrs.class]"
-    :style="attrs.style"
-  >
-    <FormLabel
-      v-if="label"
-      :label="label"
-      :size="size"
-      :id="id"
-      :required="required"
-    />
-    <Select
-      v-if="type === 'select'"
-      :id="id"
-      v-bind="{ ...controlAttrs, size, variant }"
-    >
+  <div v-if="type != 'checkbox'" :class="['space-y-1.5', attrs.class]" :style="attrs.style">
+    <FormLabel v-if="label" :label="label" :size="size" :id="id" :required="required" />
+    <Select v-if="type === 'select'" :id="id" v-bind="{ ...controlAttrs, size, variant }">
       <template #prefix v-if="$slots.prefix">
         <slot name="prefix" />
       </template>
     </Select>
-    <Combobox
-      v-else-if="type === 'combobox'"
-      :id="id"
-      v-bind="{ ...controlAttrs, variant }"
-    >
+    <Combobox v-else-if="type === 'combobox'" :id="id" v-bind="{ ...controlAttrs, variant }">
       <template #prefix v-if="$slots.prefix">
         <slot name="prefix" />
       </template>
     </Combobox>
-    <Autocomplete
-      v-else-if="type === 'autocomplete'"
-      v-bind="{ ...controlAttrs }"
-    >
+    <Autocomplete v-else-if="type === 'autocomplete'" v-bind="{ ...controlAttrs }">
       <template #prefix v-if="$slots.prefix">
         <slot name="prefix" />
       </template>
@@ -45,11 +24,7 @@
       :id="id"
       v-bind="{ ...controlAttrs, size, variant }"
     />
-    <TextInput
-      v-else
-      :id="id"
-      v-bind="{ ...controlAttrs, type, size, variant, required }"
-    >
+    <TextInput v-else :id="id" v-bind="{ ...controlAttrs, type, size, variant, required }">
       <template #prefix v-if="$slots.prefix">
         <slot name="prefix" />
       </template>
@@ -61,11 +36,7 @@
       <p v-if="description" :class="descriptionClasses">{{ description }}</p>
     </slot>
   </div>
-  <Checkbox
-    v-else
-    :id="id"
-    v-bind="{ ...controlAttrs, label, size, class: attrs.class }"
-  />
+  <Checkbox v-else :id="id" v-bind="{ ...controlAttrs, label, size, class: attrs.class }" />
 </template>
 <script setup lang="ts">
 import { useAttrs, computed } from 'vue'

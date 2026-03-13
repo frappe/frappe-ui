@@ -16,11 +16,7 @@
         @touchmove="handleActivity"
       >
         <!-- Dedicated Backdrop -->
-        <div
-          class="absolute inset-0 z-0"
-          ref="backdropElement"
-          @click="close"
-        ></div>
+        <div class="absolute inset-0 z-0" ref="backdropElement" @click="close"></div>
 
         <!-- Image Container -->
         <div class="relative z-10 flex flex-col items-center">
@@ -30,12 +26,7 @@
             class="max-w-screen max-h-screen object-contain block"
             :style="{
               transform: `scale(${zoomLevel / 100}) translate(${panPosition.x}px, ${panPosition.y}px)`,
-              cursor:
-                zoomLevel > 100
-                  ? isMousePanning
-                    ? 'grabbing'
-                    : 'grab'
-                  : 'default',
+              cursor: zoomLevel > 100 ? (isMousePanning ? 'grabbing' : 'grab') : 'default',
               transition:
                 isPanning || isPinching || isAnimatingPan
                   ? 'none'
@@ -132,9 +123,7 @@
               </button>
             </Tooltip>
 
-            <Tooltip
-              :text="isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'"
-            >
+            <Tooltip :text="isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'">
               <button
                 class="p-2 hover:bg-gray-900 rounded-r focus:outline-none hidden sm:block"
                 @click.stop="toggleFullscreen"
@@ -148,10 +137,7 @@
           <!-- Close button -->
           <div class="bg-black/65 rounded flex items-center">
             <Tooltip text="Close">
-              <button
-                class="p-2 hover:bg-gray-900 rounded focus:outline-none"
-                @click.stop="close"
-              >
+              <button class="p-2 hover:bg-gray-900 rounded focus:outline-none" @click.stop="close">
                 <LucideX class="size-4" />
               </button>
             </Tooltip>
@@ -163,15 +149,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  ref,
-  onMounted,
-  onUnmounted,
-  useTemplateRef,
-  computed,
-  toRef,
-  watch,
-} from 'vue'
+import { ref, onMounted, onUnmounted, useTemplateRef, computed, toRef, watch } from 'vue'
 import Tooltip from '../../Tooltip/Tooltip.vue'
 import { useTouchHandler } from '../../../composables/useTouchHandler'
 import { useImageNavigation } from '../../../composables/useImageNavigation'

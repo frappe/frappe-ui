@@ -22,9 +22,7 @@ import Minus from '~icons/lucide/minus'
 import Table from '~icons/lucide/table-2'
 import TableOfContents from '~icons/lucide/table-of-contents'
 
-export const SlashCommandSuggestionKey = new PluginKey<any>(
-  'slashCommandSuggestion',
-)
+export const SlashCommandSuggestionKey = new PluginKey<any>('slashCommandSuggestion')
 
 export interface CommandItem extends BaseSuggestionItem {
   title: string
@@ -42,24 +40,14 @@ const getCommands = (): CommandItem[] => [
     title: 'Heading 2',
     icon: Heading2,
     command: ({ editor, range }: CommandExecutionProps) => {
-      editor
-        .chain()
-        .focus()
-        .deleteRange(range)
-        .setNode('heading', { level: 2 })
-        .run()
+      editor.chain().focus().deleteRange(range).setNode('heading', { level: 2 }).run()
     },
   },
   {
     title: 'Heading 3',
     icon: Heading3,
     command: ({ editor, range }: CommandExecutionProps) => {
-      editor
-        .chain()
-        .focus()
-        .deleteRange(range)
-        .setNode('heading', { level: 3 })
-        .run()
+      editor.chain().focus().deleteRange(range).setNode('heading', { level: 3 }).run()
     },
   },
   {
@@ -148,12 +136,7 @@ const getCommands = (): CommandItem[] => [
     title: 'Table of Contents',
     icon: TableOfContents,
     command: ({ editor, range }: CommandExecutionProps) => {
-      editor
-        .chain()
-        .focus()
-        .deleteRange(range)
-        .insertTableOfContentsNode()
-        .run()
+      editor.chain().focus().deleteRange(range).insertTableOfContentsNode().run()
     },
   },
 ]
@@ -164,9 +147,7 @@ export const SlashCommands = createSuggestionExtension<CommandItem>({
   pluginKey: SlashCommandSuggestionKey,
   items: ({ query }) => {
     const commands = getCommands()
-    return commands.filter((item) =>
-      item.title.toLowerCase().startsWith(query.toLowerCase()),
-    )
+    return commands.filter((item) => item.title.toLowerCase().startsWith(query.toLowerCase()))
   },
   command: ({ editor, range, props: item }) => {
     if (item && typeof item.command === 'function') {

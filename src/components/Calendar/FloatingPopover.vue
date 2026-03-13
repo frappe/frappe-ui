@@ -1,10 +1,6 @@
 <template>
   <div ref="floating" :style="{ ...floatingStyles, zIndex: 100 }" v-if="opened">
-    <EventModalContent
-      :calendarEvent="calendarEvent"
-      :date="date"
-      @close="close"
-    />
+    <EventModalContent :calendarEvent="calendarEvent" :date="date" @close="close" />
   </div>
 </template>
 <script setup>

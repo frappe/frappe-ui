@@ -15,12 +15,7 @@ const customOptions = [
 </script>
 
 <template>
-  <TimePicker
-    v-model="val"
-    :interval="15"
-    :options="customOptions"
-    :allowCustom="true"
-  />
+  <TimePicker v-model="val" :interval="15" :options="customOptions" :allowCustom="true" />
 
   <div class="text-xs text-gray-500">Value: {{ val }}</div>
 </template>

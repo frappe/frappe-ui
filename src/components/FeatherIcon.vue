@@ -12,9 +12,7 @@ export default {
       validator(value) {
         const valid = validIcons.includes(value)
         if (!valid) {
-          console.groupCollapsed(
-            '[frappe-ui] name property for feather-icon must be one of ',
-          )
+          console.groupCollapsed('[frappe-ui] name property for feather-icon must be one of ')
           console.dir(validIcons)
           console.groupEnd()
         }

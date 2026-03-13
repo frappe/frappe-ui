@@ -24,12 +24,7 @@ export function useDatePicker() {
     const daysInMonth = getDaysInMonth(monthIndex, year)
     const datesInMonth = getDatesAfter(firstDayOfMonth, daysInMonth - 1)
 
-    let dates = [
-      ...leftPadding,
-      firstDayOfMonth,
-      ...datesInMonth,
-      ...rightPadding,
-    ]
+    let dates = [...leftPadding, firstDayOfMonth, ...datesInMonth, ...rightPadding]
 
     if (dates.length < 42) {
       const lastDate = dates.at(-1)

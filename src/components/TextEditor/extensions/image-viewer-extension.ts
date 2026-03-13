@@ -106,10 +106,7 @@ export default Extension.create({
                 if (node.type.name === 'image' && !foundImageNode) {
                   const domNode = view.nodeDOM(nodePos)
                   // Check if the event target is the DOM representation of this node or inside it
-                  if (
-                    domNode &&
-                    (domNode === event.target || domNode.contains(event.target))
-                  ) {
+                  if (domNode && (domNode === event.target || domNode.contains(event.target))) {
                     event.preventDefault()
                     extension.editor.commands.openImageViewer(node.attrs.src)
                     foundImageNode = true

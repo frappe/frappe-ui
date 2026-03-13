@@ -1,24 +1,13 @@
 <template>
-  <div
-    class="w-80 rounded bg-surface-modal text-ink-gray-8 p-4 shadow"
-    @click.stop
-  >
+  <div class="w-80 rounded bg-surface-modal text-ink-gray-8 p-4 shadow" @click.stop>
     <div class="flex flex-row-reverse gap-2">
       <span class="cursor-pointer" @click.stop="$emit('close')">
         <FeatherIcon name="x" class="h-4 w-4" />
       </span>
-      <span
-        v-if="isEditMode"
-        class="cursor-pointer"
-        @click.stop="$emit('edit')"
-      >
+      <span v-if="isEditMode" class="cursor-pointer" @click.stop="$emit('edit')">
         <FeatherIcon name="edit-2" class="h-4 w-4" />
       </span>
-      <span
-        v-if="isEditMode"
-        class="cursor-pointer"
-        @click.stop="$emit('delete')"
-      >
+      <span v-if="isEditMode" class="cursor-pointer" @click.stop="$emit('delete')">
         <FeatherIcon name="trash-2" class="h-4 w-4" />
       </span>
     </div>
@@ -39,10 +28,7 @@
             {{ calendarEvent.participant }}
           </span>
         </div>
-        <div
-          class="flex items-center gap-2"
-          v-if="calendarEvent.fromTime && calendarEvent.toTime"
-        >
+        <div class="flex items-center gap-2" v-if="calendarEvent.fromTime && calendarEvent.toTime">
           <FeatherIcon name="clock" class="h-4 w-4" />
           <span class="text-sm font-normal">
             {{ calendarEvent.fromTime }} - {{ calendarEvent.toTime }}

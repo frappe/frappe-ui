@@ -7,7 +7,7 @@ export function confirmDialog({ title = 'Untitled', message = '', onConfirm, onC
       title,
       message,
       onConfirm,
-      onCancel
+      onCancel,
     }),
   )
 }

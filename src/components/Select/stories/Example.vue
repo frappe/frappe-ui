@@ -37,6 +37,6 @@ const options = [
 </script>
 
 <template>
-    <Select :options="options" v-model="value" />
-    {{ value }}
+  <Select :options="options" v-model="value" />
+  {{ value }}
 </template>

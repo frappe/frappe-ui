@@ -4,10 +4,7 @@
     class="group relative flex items-center"
     :class="item.align ? alignmentMap[item.align] : 'justify-between'"
   >
-    <div
-      class="flex items-center gap-2 truncate text-sm text-ink-gray-5"
-      :class="$attrs.class"
-    >
+    <div class="flex items-center gap-2 truncate text-sm text-ink-gray-5" :class="$attrs.class">
       <slot name="prefix" v-bind="{ item }" />
       <slot>
         <div class="truncate">

@@ -9,8 +9,7 @@ const columns = reactive([
     key: 'name',
     width: 3,
     getLabel: ({ row }) => row.name,
-    prefix: ({ row }) =>
-      h(Avatar, { shape: 'circle', image: row.user_image, size: 'sm' }),
+    prefix: ({ row }) => h(Avatar, { shape: 'circle', image: row.user_image, size: 'sm' }),
   },
   { label: 'Email', key: 'email', width: '200px' },
   { label: 'Role', key: 'role' },

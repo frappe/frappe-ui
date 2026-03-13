@@ -24,11 +24,7 @@ export function monthStart(year: number, monthIndex: number): Dayjs {
 }
 
 // Build weeks grid for the calendar
-export function generateWeeks(
-  year: number,
-  monthIndex: number,
-  selected: string,
-): DateObj[][] {
+export function generateWeeks(year: number, monthIndex: number, selected: string): DateObj[][] {
   const start = monthStart(year, monthIndex).startOf('week')
   const end = monthStart(year, monthIndex).endOf('month').endOf('week')
   const days: DateObj[] = []
@@ -76,11 +72,7 @@ function getDatesAfter(date: Date, count: number) {
   const dates: Date[] = []
 
   while (count) {
-    date = getDate(
-      date.getFullYear(),
-      date.getMonth(),
-      date.getDate() + incrementer,
-    )
+    date = getDate(date.getFullYear(), date.getMonth(), date.getDate() + incrementer)
     dates.push(date)
     count--
   }

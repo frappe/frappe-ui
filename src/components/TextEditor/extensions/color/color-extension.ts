@@ -72,18 +72,13 @@ export const NamedColorExtension = Extension.create<ColorOptions>({
               // Check for CSS custom property format in style attribute
               const style = element.getAttribute('style')
               if (style) {
-                const colorMatch = style.match(
-                  /color:\s*var\(--prose-color-(\w+)\)/,
-                )
+                const colorMatch = style.match(/color:\s*var\(--prose-color-(\w+)\)/)
                 if (colorMatch && this.options.colors.includes(colorMatch[1])) {
                   return colorMatch[1]
                 }
 
                 // Fallback: try extracting from legacy formats
-                const extractedColor = extractTextColorFromStyle(
-                  style,
-                  this.options.colors,
-                )
+                const extractedColor = extractTextColorFromStyle(style, this.options.colors)
                 if (extractedColor) {
                   return extractedColor
                 }
@@ -92,10 +87,7 @@ export const NamedColorExtension = Extension.create<ColorOptions>({
               return null
             },
             renderHTML: (attributes) => {
-              if (
-                !attributes.color ||
-                !this.options.colors.includes(attributes.color)
-              ) {
+              if (!attributes.color || !this.options.colors.includes(attributes.color)) {
                 return {}
               }
               return {
@@ -115,9 +107,7 @@ export const NamedColorExtension = Extension.create<ColorOptions>({
         ({ chain, state, editor }) => {
           // Validate that the color name is allowed
           if (!this.options.colors.includes(colorName)) {
-            console.warn(
-              `Color "${colorName}" is not in the allowed colors list`,
-            )
+            console.warn(`Color "${colorName}" is not in the allowed colors list`)
             return false
           }
 
@@ -126,12 +116,10 @@ export const NamedColorExtension = Extension.create<ColorOptions>({
           let commandChain = chain().setMark('textStyle', { color: colorName })
 
           if (!empty) {
-            commandChain = commandChain
-              .setTextSelection(to)
-              .command(({ tr }) => {
-                tr.setStoredMarks([])
-                return true
-              })
+            commandChain = commandChain.setTextSelection(to).command(({ tr }) => {
+              tr.setStoredMarks([])
+              return true
+            })
           }
 
           return commandChain.focus().run()
@@ -139,10 +127,7 @@ export const NamedColorExtension = Extension.create<ColorOptions>({
       unsetColor:
         () =>
         ({ chain }) => {
-          return chain()
-            .setMark('textStyle', { color: null })
-            .removeEmptyTextStyle()
-            .run()
+          return chain().setMark('textStyle', { color: null }).removeEmptyTextStyle().run()
         },
     }
   },

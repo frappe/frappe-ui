@@ -25,10 +25,7 @@
         <span>{{ item.display || item.title || item.name }}</span>
       </slot>
     </button>
-    <div
-      v-if="!items.length && showNoResults"
-      class="px-3 py-1.5 text-sm text-ink-gray-5"
-    >
+    <div v-if="!items.length && showNoResults" class="px-3 py-1.5 text-sm text-ink-gray-5">
       No results
     </div>
   </div>
@@ -104,8 +101,7 @@ const onKeyDown = ({ event }: { event: KeyboardEvent }) => {
 }
 
 const upHandler = () => {
-  selectedIndex.value =
-    (selectedIndex.value + props.items.length - 1) % props.items.length
+  selectedIndex.value = (selectedIndex.value + props.items.length - 1) % props.items.length
   scrollIntoView()
 }
 

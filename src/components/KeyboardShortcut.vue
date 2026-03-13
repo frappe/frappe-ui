@@ -27,11 +27,9 @@
             class="w-3 h-3"
             :aria-label="part.display"
           />
-          <span
-            v-else
-            class="font-mono leading-none tracking-wide uppercase text-[10px]"
-            >{{ part.display }}</span
-          >
+          <span v-else class="font-mono leading-none tracking-wide uppercase text-[10px]">{{
+            part.display
+          }}</span>
         </span>
         <!-- + separator (visually): hidden from screen readers because ariaLabel combines sequence -->
         <span
@@ -48,9 +46,7 @@
         <LucideCommand v-if="isMac" class="w-3 h-3" aria-label="Command" />
         <span v-else class="font-mono text-[10px] leading-none">Ctrl</span>
       </span>
-      <span v-if="shift"
-        ><LucideShift class="w-3 h-3" aria-label="Shift"
-      /></span>
+      <span v-if="shift"><LucideShift class="w-3 h-3" aria-label="Shift" /></span>
       <span v-if="alt"><LucideAlt class="w-3 h-3" aria-label="Option" /></span>
       <slot></slot>
     </template>
@@ -85,8 +81,7 @@ import IconBackspace from '~icons/lucide/delete'
 // Robust mac detection (navigator.platform deprecated)
 const isMac = computed(() => {
   if (typeof navigator === 'undefined') return false
-  const p =
-    (navigator as any).userAgentData?.platform || navigator.platform || ''
+  const p = (navigator as any).userAgentData?.platform || navigator.platform || ''
   if (/Mac|iPod|iPhone|iPad/i.test(p)) return true
   return /Mac OS X|Macintosh|iPhone|iPad|iPod/i.test(navigator.userAgent)
 })
@@ -123,9 +118,7 @@ const showPlus = computed<boolean>(() => props.showPlus)
 
 // Dynamic root styling based on bg prop
 const rootClasses = computed(() =>
-  props.bg
-    ? 'bg-surface-gray-2 rounded-sm text-ink-gray-5 py-0.5 px-1'
-    : 'text-ink-gray-4',
+  props.bg ? 'bg-surface-gray-2 rounded-sm text-ink-gray-5 py-0.5 px-1' : 'text-ink-gray-4',
 )
 
 // Normalize one combo string (e.g. Mod+Shift+K)
@@ -232,9 +225,7 @@ const ariaLabel = computed(() => {
     '←': 'Left Arrow',
     '→': 'Right Arrow',
   }
-  const seq = parsedParts.value
-    .map((p) => wordMap[p.display] || p.display)
-    .join(' + ')
+  const seq = parsedParts.value.map((p) => wordMap[p.display] || p.display).join(' + ')
   return 'Shortcut ' + seq
 })
 

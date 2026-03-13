@@ -1,9 +1,5 @@
 <template>
-  <Popover
-    v-model:show="showOptions"
-    transition="default"
-    :placement="placement"
-  >
+  <Popover v-model:show="showOptions" transition="default" :placement="placement">
     <template #target="{ togglePopover, isOpen }">
       <TextInput
         ref="inputRef"
@@ -177,9 +173,7 @@ function normalize24(raw: string): string {
   if (/^\d{2}:\d{2}:\d{2}$/.test(raw)) return raw // keep seconds if present
   const parsed = parseFlexibleTime(raw)
   if (!parsed.valid) return ''
-  return parsed.ss
-    ? `${parsed.hh24}:${parsed.mm}:${parsed.ss}`
-    : `${parsed.hh24}:${parsed.mm}`
+  return parsed.ss ? `${parsed.hh24}:${parsed.mm}:${parsed.ss}` : `${parsed.hh24}:${parsed.mm}`
 }
 
 function formatDisplay(val24: string): string {
@@ -194,9 +188,7 @@ function formatDisplay(val24: string): string {
   if (!props.use12Hour) return base24
   const am = h < 12
   const hour12 = h % 12 === 0 ? 12 : h % 12
-  return `${hour12}:${m.toString().padStart(2, '0')}${s ? `:${s}` : ''} ${
-    am ? 'am' : 'pm'
-  }`
+  return `${hour12}:${m.toString().padStart(2, '0')}${s ? `:${s}` : ''} ${am ? 'am' : 'pm'}`
 }
 
 function parseFlexibleTime(input: string): ParsedTime {
@@ -252,9 +244,7 @@ function findNearestIndex(targetMinutes: number, list: Option[]): number {
   if (lo - 1 >= 0) candidates.push(lo - 1)
   if (!candidates.length) return -1
   return candidates.sort(
-    (a, b) =>
-      Math.abs(minutesArr[a] - targetMinutes) -
-      Math.abs(minutesArr[b] - targetMinutes),
+    (a, b) => Math.abs(minutesArr[a] - targetMinutes) - Math.abs(minutesArr[b] - targetMinutes),
   )[0]
 }
 
@@ -336,8 +326,7 @@ const selectedAndNearest = computed<{
         : `${parsedTyped.hh24}:${parsedTyped.mm}`
       : internalValue.value || null
   if (!candidate) return { selected: null, nearest: null }
-  const candidateCompare =
-    candidate && candidate.length === 8 ? candidate.slice(0, 5) : candidate
+  const candidateCompare = candidate && candidate.length === 8 ? candidate.slice(0, 5) : candidate
   const selected = list.find((o) => o.value === candidateCompare) || null
   if (selected) return { selected, nearest: null }
   const parsed = parseFlexibleTime(candidate)
@@ -350,14 +339,11 @@ function buttonClasses(opt: Option, idx: number): string {
   if (idx === highlightIndex.value) return 'bg-surface-gray-3 text-ink-gray-8'
   const { selected, nearest } = selectedAndNearest.value
   if (isTyping.value && !selected) {
-    if (nearest && nearest.value === opt.value)
-      return 'text-ink-gray-7 italic bg-surface-gray-2'
+    if (nearest && nearest.value === opt.value) return 'text-ink-gray-7 italic bg-surface-gray-2'
     return 'text-ink-gray-6 hover:bg-surface-gray-2 hover:text-ink-gray-8'
   }
-  if (selected && selected.value === opt.value)
-    return 'bg-surface-gray-3 text-ink-gray-8'
-  if (nearest && nearest.value === opt.value)
-    return 'text-ink-gray-7 italic bg-surface-gray-2'
+  if (selected && selected.value === opt.value) return 'bg-surface-gray-3 text-ink-gray-8'
+  if (nearest && nearest.value === opt.value) return 'text-ink-gray-7 italic bg-surface-gray-2'
   return 'text-ink-gray-6 hover:bg-surface-gray-2 hover:text-ink-gray-8'
 }
 
@@ -429,9 +415,7 @@ function moveHighlight(delta: number) {
   const list = displayedOptions.value
   if (!list.length) return
   if (highlightIndex.value === -1) initHighlight()
-  else
-    highlightIndex.value =
-      (highlightIndex.value + delta + list.length) % list.length
+  else highlightIndex.value = (highlightIndex.value + delta + list.length) % list.length
   const opt = list[highlightIndex.value]
   if (opt) {
     navUpdating = true
@@ -471,8 +455,7 @@ function onEnter() {
     : null
   const exists = normalized
     ? displayedOptions.value.some((o) => {
-        const base =
-          normalized.length === 8 ? normalized.slice(0, 5) : normalized
+        const base = normalized.length === 8 ? normalized.slice(0, 5) : normalized
         return o.value === base
       })
     : false
@@ -560,10 +543,6 @@ defineSlots<{
    * Slot rendered after the input value.
    * Exposes popover controls.
    */
-  suffix?: (props: {
-    togglePopover: () => void
-    isOpen: boolean
-  }) => any
+  suffix?: (props: { togglePopover: () => void; isOpen: boolean }) => any
 }>()
-
 </script>

@@ -8,11 +8,7 @@
     >
       <h3
         class="h-4 text-sm text-ink-gray-5 transition-all duration-300 ease-in-out"
-        :class="
-          isSidebarCollapsed
-            ? 'w-0 overflow-hidden opacity-0'
-            : 'w-auto opacity-100'
-        "
+        :class="isSidebarCollapsed ? 'w-0 overflow-hidden opacity-0' : 'w-auto opacity-100'"
       >
         {{ props.label }}
       </h3>

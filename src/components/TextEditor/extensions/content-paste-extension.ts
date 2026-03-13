@@ -35,12 +35,8 @@ export const ContentPasteExtension = Extension.create<ContentPasteOptions>({
             if (!this.options.enabled) return false
 
             // handle image pasting
-            const files: File[] | [] = Array.from(
-              event.clipboardData?.files || [],
-            )
-            const images = Array.from(files).filter((file) =>
-              file.type.startsWith('image/'),
-            )
+            const files: File[] | [] = Array.from(event.clipboardData?.files || [])
+            const images = Array.from(files).filter((file) => file.type.startsWith('image/'))
             if (images.length > 0) {
               processMultipleImages(images, view, null, extensionThis.options)
               return true

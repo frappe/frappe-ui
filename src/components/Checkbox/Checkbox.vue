@@ -15,10 +15,7 @@
       :disabled="disabled"
       :id="htmlId"
       :checked="Boolean(modelValue)"
-      @change="
-        (e) =>
-          $emit('update:modelValue', (e.target as HTMLInputElement).checked)
-      "
+      @change="(e) => $emit('update:modelValue', (e.target as HTMLInputElement).checked)"
       v-bind="attrs"
     />
     <label class="block" :class="labelClasses" v-if="label" :for="htmlId">

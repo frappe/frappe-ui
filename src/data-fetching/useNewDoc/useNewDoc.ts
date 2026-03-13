@@ -3,14 +3,9 @@ import { useCall } from '../useCall/useCall'
 import { UseCallOptions } from '../useCall/types'
 import { docStore } from '../docStore'
 
-type UseNewDocOptions = Omit<
-  UseCallOptions,
-  'url' | 'method' | 'params' | 'immediate'
->
+type UseNewDocOptions = Omit<UseCallOptions, 'url' | 'method' | 'params' | 'immediate'>
 
-type NewDoc<T> = Partial<
-  Omit<T, 'creation' | 'modified' | 'owner' | 'modified_by'>
->
+type NewDoc<T> = Partial<Omit<T, 'creation' | 'modified' | 'owner' | 'modified_by'>>
 
 export function useNewDoc<T extends object>(
   doctype: string,

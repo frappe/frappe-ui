@@ -1,9 +1,5 @@
 <template>
-  <GridLayout
-    v-model:layout="layout"
-    v-bind="options"
-    @layout-ready="() => (layoutReady = true)"
-  >
+  <GridLayout v-model:layout="layout" v-bind="options" @layout-ready="() => (layoutReady = true)">
     <GridItem
       v-for="(l, index) in layout"
       :key="l.i"

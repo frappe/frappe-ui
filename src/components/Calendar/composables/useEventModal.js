@@ -1,9 +1,5 @@
 import { ref, reactive } from 'vue'
-import {
-  parseDate,
-  convertMinutesToHours,
-  calculateMinutes,
-} from '../calendarUtils'
+import { parseDate, convertMinutesToHours, calculateMinutes } from '../calendarUtils'
 
 export default function useEventModal() {
   const showEventModal = ref(false)
@@ -18,19 +14,9 @@ export default function useEventModal() {
     title: '',
     isFullDay: false,
   })
-  function openNewEventModal(
-    e,
-    view,
-    date,
-    isEditMode,
-    fromTime = '',
-    isFullDay = false,
-  ) {
+  function openNewEventModal(e, view, date, isEditMode, fromTime = '', isFullDay = false) {
     if (!isEditMode) return
-    date =
-      view === 'Week'
-        ? e.target.parentNode.parentNode.getAttribute('data-date-attr')
-        : date
+    date = view === 'Week' ? e.target.parentNode.parentNode.getAttribute('data-date-attr') : date
     newEvent.date = parseDate(new Date(date))
     newEvent.fromDate = date
     newEvent.toDate = date
@@ -41,10 +27,7 @@ export default function useEventModal() {
       return
     }
 
-    let toTime = convertMinutesToHours(calculateMinutes(fromTime) + 60).slice(
-      0,
-      -3,
-    )
+    let toTime = convertMinutesToHours(calculateMinutes(fromTime) + 60).slice(0, -3)
 
     newEvent.fromTime = fromTime
     newEvent.toTime = toTime

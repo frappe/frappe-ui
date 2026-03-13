@@ -1,9 +1,6 @@
 <template>
   <!-- Current Tree Node -->
-  <slot
-    name="node"
-    v-bind="{ node, hasChildren, isCollapsed, toggleCollapsed }"
-  >
+  <slot name="node" v-bind="{ node, hasChildren, isCollapsed, toggleCollapsed }">
     <div
       class="flex items-center cursor-pointer gap-1"
       :style="{ height: options.rowHeight }"
@@ -12,16 +9,8 @@
       <div ref="iconRef">
         <!-- slot to only override the Icon -->
         <slot name="icon" v-bind="{ hasChildren, isCollapsed }">
-          <FeatherIcon
-            v-if="hasChildren && !isCollapsed"
-            name="chevron-down"
-            class="h-3.5"
-          />
-          <FeatherIcon
-            v-else-if="hasChildren"
-            name="chevron-right"
-            class="h-3.5"
-          />
+          <FeatherIcon v-if="hasChildren && !isCollapsed" name="chevron-down" class="h-3.5" />
+          <FeatherIcon v-else-if="hasChildren" name="chevron-right" class="h-3.5" />
         </slot>
       </div>
 
@@ -46,10 +35,7 @@
         <Tree :node="child" :nodeKey="nodeKey" :options="options">
           <!-- Pass the parent slots to the children of current node -->
           <template #node="{ node, hasChildren, isCollapsed, toggleCollapsed }">
-            <slot
-              name="node"
-              v-bind="{ node, hasChildren, isCollapsed, toggleCollapsed }"
-            />
+            <slot name="node" v-bind="{ node, hasChildren, isCollapsed, toggleCollapsed }" />
           </template>
 
           <template #icon="{ hasChildren, isCollapsed }">

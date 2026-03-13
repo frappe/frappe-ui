@@ -1,8 +1,4 @@
-export default function debounce(
-  func: Function,
-  wait: number,
-  immediate?: boolean,
-) {
+export default function debounce(func: Function, wait: number, immediate?: boolean) {
   var timeout: number | undefined
   return function () {
     var context = this,

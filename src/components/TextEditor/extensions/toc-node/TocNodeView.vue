@@ -1,8 +1,5 @@
 <template>
-  <NodeViewWrapper
-    class="table-of-contents-node group relative"
-    contenteditable="false"
-  >
+  <NodeViewWrapper class="table-of-contents-node group relative" contenteditable="false">
     <p v-if="anchorTree.length === 0" class="text-sm text-ink-gray-5 py-3">
       There are no headings in this document.
     </p>
@@ -30,16 +27,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  computed,
-  ref,
-  onMounted,
-  onBeforeUnmount,
-  nextTick,
-  watch,
-  defineComponent,
-  h,
-} from 'vue'
+import { computed, ref, onMounted, onBeforeUnmount, nextTick, watch, defineComponent, h } from 'vue'
 import type { PropType, VNode } from 'vue'
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
 import { TextSelection } from '@tiptap/pm/state'
@@ -63,12 +51,8 @@ const anchors = ref<HeadingAnchor[]>([])
 const anchorTree = computed(() => buildAnchorTree(anchors.value))
 const isEditable = ref(false)
 
-const orderedListHTMLAttrs = computed(
-  () => getExtensionHTMLAttributes('orderedList') ?? {},
-)
-const listItemHTMLAttrs = computed(
-  () => getExtensionHTMLAttributes('listItem') ?? {},
-)
+const orderedListHTMLAttrs = computed(() => getExtensionHTMLAttributes('orderedList') ?? {})
+const listItemHTMLAttrs = computed(() => getExtensionHTMLAttributes('listItem') ?? {})
 
 const removeNode = () => {
   if (!props.editor || !isEditable.value) return
@@ -112,13 +96,8 @@ const scrollToHeading = (heading: HeadingAnchor) => {
   }
 
   if (!element) {
-    const allHeadings = Array.from(
-      editorDom.querySelectorAll('h1, h2, h3, h4, h5, h6'),
-    )
-    element =
-      allHeadings.find(
-        (el) => el.textContent?.trim() === heading.textContent,
-      ) || null
+    const allHeadings = Array.from(editorDom.querySelectorAll('h1, h2, h3, h4, h5, h6'))
+    element = allHeadings.find((el) => el.textContent?.trim() === heading.textContent) || null
   }
 
   const tr = view.state.tr
@@ -132,8 +111,7 @@ const scrollToHeading = (heading: HeadingAnchor) => {
     const containerRect = editorContainer.getBoundingClientRect()
 
     const currentScrollTop = editorContainer.scrollTop
-    const elementTopRelativeToContainer =
-      elementRect.top - containerRect.top + currentScrollTop
+    const elementTopRelativeToContainer = elementRect.top - containerRect.top + currentScrollTop
 
     editorContainer.scrollTo({
       top: Math.max(0, elementTopRelativeToContainer - 20),
@@ -152,8 +130,7 @@ const scrollToHeading = (heading: HeadingAnchor) => {
         const nodeRect = node.getBoundingClientRect()
         const containerRect = editorContainer.getBoundingClientRect()
         const currentScrollTop = editorContainer.scrollTop
-        const nodeTopRelativeToContainer =
-          nodeRect.top - containerRect.top + currentScrollTop
+        const nodeTopRelativeToContainer = nodeRect.top - containerRect.top + currentScrollTop
 
         editorContainer.scrollTo({
           top: Math.max(0, nodeTopRelativeToContainer - 20),
@@ -201,9 +178,7 @@ const TocRecursiveItem = defineComponent({
             props.listAttrs?.class,
             'toc-item',
             props.node.isScrolledOver ? 'text-ink-gray-5' : 'text-ink-gray-8',
-            props.node.isActive && !props.node.isScrolledOver
-              ? 'font-medium'
-              : '',
+            props.node.isActive && !props.node.isScrolledOver ? 'font-medium' : '',
           ]
             .filter(Boolean)
             .join(' '),
@@ -240,9 +215,8 @@ const TocRecursiveItem = defineComponent({
 })
 
 const getExtensionHTMLAttributes = (name: string) => {
-  return props.editor?.extensionManager?.extensions.find(
-    (ext: any) => ext.name === name,
-  )?.options?.HTMLAttributes
+  return props.editor?.extensionManager?.extensions.find((ext: any) => ext.name === name)?.options
+    ?.HTMLAttributes
 }
 
 const buildAnchorTree = (items: HeadingAnchor[]): AnchorNode[] => {
@@ -321,13 +295,8 @@ const extractAnchors = (): HeadingAnchor[] => {
       const domPos = props.editor.view.domAtPos(pos)
       const domNode = domPos.node
       if (domNode?.nodeType === Node.ELEMENT_NODE) {
-        const headingEl = (domNode as Element).closest(
-          'h1, h2, h3, h4, h5, h6, [data-toc-id]',
-        )
-        id =
-          headingEl?.getAttribute('data-toc-id') ||
-          headingEl?.getAttribute('id') ||
-          undefined
+        const headingEl = (domNode as Element).closest('h1, h2, h3, h4, h5, h6, [data-toc-id]')
+        id = headingEl?.getAttribute('data-toc-id') || headingEl?.getAttribute('id') || undefined
       }
     }
 
@@ -339,21 +308,15 @@ const extractAnchors = (): HeadingAnchor[] => {
     })
   })
 
-  if (!headings.length || !scrollParent || !props.editor?.view?.dom)
-    return headings
+  if (!headings.length || !scrollParent || !props.editor?.view?.dom) return headings
 
   const scrollTop = scrollParent.scrollTop
   headings.forEach((heading) => {
-    const element = props.editor.view.dom.querySelector(
-      `[data-toc-id="${heading.id}"]`,
-    )
+    const element = props.editor.view.dom.querySelector(`[data-toc-id="${heading.id}"]`)
     if (element) {
       const relativeTop =
-        element.getBoundingClientRect().top -
-        scrollParent.getBoundingClientRect().top +
-        scrollTop
-      heading.isActive =
-        relativeTop >= scrollTop - 50 && relativeTop <= scrollTop + 100
+        element.getBoundingClientRect().top - scrollParent.getBoundingClientRect().top + scrollTop
+      heading.isActive = relativeTop >= scrollTop - 50 && relativeTop <= scrollTop + 100
       heading.isScrolledOver = relativeTop < scrollTop - 50
     }
   })

@@ -1,9 +1,6 @@
 import { Extension, Editor, Range } from '@tiptap/core'
 import { VueRenderer } from '@tiptap/vue-3'
-import Suggestion, {
-  SuggestionOptions,
-  SuggestionProps,
-} from '@tiptap/suggestion'
+import Suggestion, { SuggestionOptions, SuggestionProps } from '@tiptap/suggestion'
 import { PluginKey } from '@tiptap/pm/state'
 import tippy, { Instance as TippyInstance, Props as TippyProps } from 'tippy.js'
 import { Component as VueComponent } from 'vue'
@@ -14,16 +11,11 @@ export interface BaseSuggestionItem {
   [key: string]: any
 }
 
-export interface CreateSuggestionExtensionOptions<
-  TItem extends BaseSuggestionItem,
-> {
+export interface CreateSuggestionExtensionOptions<TItem extends BaseSuggestionItem> {
   name: string
   char: string
   pluginKey: PluginKey
-  items: (props: {
-    query: string
-    editor: Editor
-  }) => TItem[] | Promise<TItem[]>
+  items: (props: { query: string; editor: Editor }) => TItem[] | Promise<TItem[]>
   command: (props: { editor: Editor; range: Range; props: TItem }) => void
   component: VueComponent
   tippyOptions?: Partial<TippyProps>
@@ -45,9 +37,7 @@ export function createSuggestionExtension<TItem extends BaseSuggestionItem>(
     name: options.name,
 
     addOptions() {
-      const customOptions = options.addOptions
-        ? options.addOptions.call(this)
-        : {}
+      const customOptions = options.addOptions ? options.addOptions.call(this) : {}
 
       return {
         ...customOptions,

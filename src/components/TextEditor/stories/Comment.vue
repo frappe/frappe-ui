@@ -29,20 +29,12 @@ const customButtons = [
     placeholder="Write something amazing..."
   >
     <template v-slot:editor="{ editor }">
-      <EditorContent
-        class="max-h-[50vh] overflow-y-auto border rounded-lg p-4"
-        :editor="editor"
-      />
+      <EditorContent class="max-h-[50vh] overflow-y-auto border rounded-lg p-4" :editor="editor" />
     </template>
 
     <template v-slot:bottom>
-      <div
-        class="mt-2 flex flex-col justify-between sm:flex-row sm:items-center"
-      >
-        <TextEditorFixedMenu
-          class="-ml-1 overflow-x-auto"
-          :buttons="customButtons"
-        />
+      <div class="mt-2 flex flex-col justify-between sm:flex-row sm:items-center">
+        <TextEditorFixedMenu class="-ml-1 overflow-x-auto" :buttons="customButtons" />
         <div class="mt-2 flex items-center justify-end space-x-2 sm:mt-0">
           <Button>Cancel</Button>
           <Button variant="solid">Submit</Button>

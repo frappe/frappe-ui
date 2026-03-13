@@ -57,9 +57,7 @@
                             </div>
                             <DialogTitle as="header">
                               <slot name="body-title">
-                                <h3
-                                  class="text-2xl font-semibold leading-6 text-ink-gray-9"
-                                >
+                                <h3 class="text-2xl font-semibold leading-6 text-ink-gray-9">
                                   {{ options.title || 'Untitled' }}
                                 </h3>
                               </slot>
@@ -86,10 +84,7 @@
                   </div>
                 </div>
               </slot>
-              <div
-                class="px-4 pb-7 pt-4 sm:px-6"
-                v-if="actions.length || $slots.actions"
-              >
+              <div class="px-4 pb-7 pt-4 sm:px-6" v-if="actions.length || $slots.actions">
                 <slot name="actions" v-bind="{ close }">
                   <div class="space-y-2">
                     <Button
@@ -126,12 +121,7 @@ import { computed, reactive } from 'vue'
 import { Button } from '../Button'
 import FeatherIcon from '../FeatherIcon.vue'
 import LucideX from '~icons/lucide/x'
-import type {
-  DialogProps,
-  DialogIcon,
-  DialogAction,
-  DialogActionContext,
-} from './types'
+import type { DialogProps, DialogIcon, DialogAction, DialogActionContext } from './types'
 
 // Type for dialog action with reactive loading state
 type ReactiveDialogAction = DialogAction & {
@@ -170,8 +160,7 @@ const actions = computed((): ReactiveDialogAction[] => {
               if (action.onClick) {
                 // deprecated: uncomment this when we remove the backwards compatibility
                 // let context: DialogActionContext = { close }
-                type BackwardsCompatibleDialogActionContext = (() => void) &
-                  DialogActionContext
+                type BackwardsCompatibleDialogActionContext = (() => void) & DialogActionContext
 
                 let backwardsCompatibleContext = (() => {
                   console.warn(

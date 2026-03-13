@@ -18,9 +18,7 @@ export default createSuggestionExtension<EmojiItem>({
   char: ':',
   pluginKey: new PluginKey('emojiSuggestion'),
   items: ({ query }: { query: string }) => {
-    return EMOJIS.filter((item) =>
-      item.name.toLowerCase().includes(query.toLowerCase()),
-    )
+    return EMOJIS.filter((item) => item.name.toLowerCase().includes(query.toLowerCase()))
       .sort((a, b) => {
         const aName = a.name.toLowerCase()
         const bName = b.name.toLowerCase()
@@ -31,10 +29,8 @@ export default createSuggestionExtension<EmojiItem>({
         if (bName === queryLower && aName !== queryLower) return 1
 
         // Then names starting with the query
-        if (aName.startsWith(queryLower) && !bName.startsWith(queryLower))
-          return -1
-        if (bName.startsWith(queryLower) && !aName.startsWith(queryLower))
-          return 1
+        if (aName.startsWith(queryLower) && !bName.startsWith(queryLower)) return -1
+        if (bName.startsWith(queryLower) && !aName.startsWith(queryLower)) return 1
 
         // Then sort by name length (shorter first)
         return aName.length - bName.length

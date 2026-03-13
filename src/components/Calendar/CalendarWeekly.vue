@@ -32,16 +32,10 @@
           :is="showCollapsable ? Button : 'div'"
           :class="{ '!pl-1.5 pr-1 py-1 !gap-1': showCollapsable }"
           variant="ghost"
-          :iconRight="
-            showCollapsable ? (isCollapsed ? 'chevron-down' : 'chevron-up') : ''
-          "
+          :iconRight="showCollapsable ? (isCollapsed ? 'chevron-down' : 'chevron-up') : ''"
           @click="showCollapsable && (isCollapsed = !isCollapsed)"
         >
-          <div
-            class="text-sm text-ink-gray-6 h-[29px] inline-flex items-center"
-          >
-            All day
-          </div>
+          <div class="text-sm text-ink-gray-6 h-[29px] inline-flex items-center">All day</div>
         </component>
       </div>
       <div class="grid w-full grid-cols-7 overflow-hidden">
@@ -69,11 +63,7 @@
               @click.stop
             />
             <Button
-              v-if="
-                showCollapsable &&
-                isCollapsed &&
-                fullDayEvents[parseDate(date)]?.length > 2
-              "
+              v-if="showCollapsable && isCollapsed && fullDayEvents[parseDate(date)]?.length > 2"
               :label="fullDayEvents[parseDate(date)]?.length - 2 + ' more'"
               variant="ghost"
               class="w-fit text-sm !py-0.5 !h-5 !justify-start cursor-pointer"
@@ -113,9 +103,7 @@
               class="relative w-full border-outline-gray-1"
               :class="[
                 idx === 0 && 'calendar-column border-l-[1px]',
-                config.noBorder && idx === weeklyDates.length - 1
-                  ? ''
-                  : 'border-r-[1px]',
+                config.noBorder && idx === weeklyDates.length - 1 ? '' : 'border-r-[1px]',
                 isWeekend(date, config) && 'bg-surface-gray-1',
               ]"
               :data-date-attr="date"
@@ -126,9 +114,7 @@
                 v-for="(time, i) in timeArray"
                 :key="time"
                 :data-time-attr="i == 0 ? '' : time"
-                @click.prevent="
-                  calendarActions.handleCellClick($event, date, time)
-                "
+                @click.prevent="calendarActions.handleCellClick($event, date, time)"
               >
                 <div
                   class="border-outline-gray-1 w-full"
@@ -192,18 +178,12 @@ const isCollapsed = ref(true)
 const hourHeight = props.config.hourHeight
 const minuteHeight = hourHeight / 60
 
-const timeArray =
-  props.config.timeFormat == '24h' ? twentyFourHoursFormat : twelveHoursFormat
+const timeArray = props.config.timeFormat == '24h' ? twentyFourHoursFormat : twelveHoursFormat
 
-const timedEvents = computed(
-  () => useCalendarData(props.events).timedEvents.value,
-)
-const fullDayEvents = computed(
-  () => useCalendarData(props.events).fullDayEvents.value,
-)
+const timedEvents = computed(() => useCalendarData(props.events).timedEvents.value)
+const fullDayEvents = computed(() => useCalendarData(props.events).fullDayEvents.value)
 
-const isToday = (date) =>
-  new Date(date).toDateString() === new Date().toDateString()
+const isToday = (date) => new Date(date).toDateString() === new Date().toDateString()
 
 const currentTime = computed(() => {
   let d = new Date()
@@ -238,10 +218,7 @@ function getFullDayEventsCount(eventsObject) {
 }
 
 function setFullDayEventsHeight(eventsObject, weeklyDates) {
-  let currentWeekEvents = getFullDayEventsInCurrentWeek(
-    eventsObject,
-    weeklyDates,
-  )
+  let currentWeekEvents = getFullDayEventsInCurrentWeek(eventsObject, weeklyDates)
   let maxEvents = getFullDayEventsCount(currentWeekEvents)
   if (maxEvents > 3) {
     showCollapsable.value = true

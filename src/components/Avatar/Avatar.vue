@@ -1,8 +1,5 @@
 <template>
-  <div
-    class="relative inline-block shrink-0"
-    :class="[sizeClasses, shapeClasses]"
-  >
+  <div class="relative inline-block shrink-0" :class="[sizeClasses, shapeClasses]">
     <img
       v-if="image && !imgFetchError"
       :src="image"
@@ -136,5 +133,4 @@ defineSlots<{
   /** Small indicator shown at the bottom-right of the avatar */
   indicator?: () => any
 }>()
-
 </script>

@@ -54,16 +54,12 @@ const selectClasses = computed(() => {
   let variantClasses = {
     subtle:
       'border border-[--surface-gray-2] bg-surface-gray-2 hover:border-outline-gray-modals hover:bg-surface-gray-3',
-    outline:
-      'border border-outline-gray-2 bg-surface-white hover:border-outline-gray-3',
-    ghost:
-      'bg-transparent border-transparent hover:bg-surface-gray-3 focus:bg-surface-gray-3',
+    outline: 'border border-outline-gray-2 bg-surface-white hover:border-outline-gray-3',
+    ghost: 'bg-transparent border-transparent hover:bg-surface-gray-3 focus:bg-surface-gray-3',
     disabled: [
       'border',
       props.variant !== 'ghost' ? 'bg-surface-gray-1' : '',
-      props.variant === 'outline'
-        ? 'border-outline-gray-2'
-        : 'border-transparent',
+      props.variant === 'outline' ? 'border-outline-gray-2' : 'border-transparent',
     ],
   }[variant]
 
@@ -95,7 +91,6 @@ defineSlots<{
   /** Custom content at the bottom of the dropdown */
   footer?: () => any
 }>()
-
 </script>
 
 <template>

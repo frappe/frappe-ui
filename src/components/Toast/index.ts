@@ -4,17 +4,12 @@ import LoadingIndicator from '../LoadingIndicator.vue'
 import ToastComponent from './Toast.vue'
 import type { ToastProps } from './types'
 
-interface ToastOptions
-  extends Omit<Partial<ToastProps>, 'open' | 'message' | 'title'> {
+interface ToastOptions extends Omit<Partial<ToastProps>, 'open' | 'message' | 'title'> {
   id?: string
   message: string
 }
 
-interface ToastItem
-  extends Pick<
-    ToastProps,
-    'duration' | 'action' | 'type' | 'icon' | 'closable'
-  > {
+interface ToastItem extends Pick<ToastProps, 'duration' | 'action' | 'type' | 'icon' | 'closable'> {
   id: string
   open: boolean
   message: string
@@ -49,10 +44,7 @@ interface ToastPromiseOptions<TData = any, TError = any> {
 const toastsState: Ref<ToastItem[]> = ref([])
 let toastIdCounter = 0
 
-const updateToastInState = (
-  id: string,
-  updates: Partial<Omit<ToastItem, 'id'>>,
-) => {
+const updateToastInState = (id: string, updates: Partial<Omit<ToastItem, 'id'>>) => {
   const index = toastsState.value.findIndex((t) => t.id === id)
   if (index !== -1) {
     toastsState.value[index] = {
@@ -66,8 +58,7 @@ const updateToastInState = (
 export const toast = {
   create: (options: ToastOptions): string => {
     const id = `toast-${toastIdCounter++}`
-    const durationInMs =
-      options.duration != null ? options.duration * 1000 : 5000
+    const durationInMs = options.duration != null ? options.duration * 1000 : 5000
 
     const sanitizedMessage = DOMPurify.sanitize(options.message, {
       ALLOWED_TAGS: ['a', 'em', 'strong', 'i', 'b', 'u'],
@@ -110,12 +101,9 @@ export const toast = {
     try {
       const data = await promiseToResolve
       const successMessage =
-        typeof options.success === 'function'
-          ? options.success(data)
-          : options.success
+        typeof options.success === 'function' ? options.success(data) : options.success
 
-      const successToastDurationInSeconds =
-        options.successDuration ?? options.duration ?? 5
+      const successToastDurationInSeconds = options.successDuration ?? options.duration ?? 5
 
       updateToastInState(toastId, {
         message: successMessage,
@@ -123,17 +111,14 @@ export const toast = {
         duration: successToastDurationInSeconds * 1000,
         icon: undefined,
         closable: true,
-		action: options.successAction,
+        action: options.successAction,
       })
       return data
     } catch (error) {
       const errorMessage =
-        typeof options.error === 'function'
-          ? options.error(error as TError)
-          : options.error
+        typeof options.error === 'function' ? options.error(error as TError) : options.error
 
-      const errorToastDurationInSeconds =
-        options.errorDuration ?? options.duration ?? 5
+      const errorToastDurationInSeconds = options.errorDuration ?? options.duration ?? 5
 
       updateToastInState(toastId, {
         message: errorMessage,
@@ -141,28 +126,20 @@ export const toast = {
         duration: errorToastDurationInSeconds * 1000,
         icon: undefined,
         closable: true,
-		action: options.errorAction,
+        action: options.errorAction,
       })
       throw error
     }
   },
 
-  success: (
-    message: string,
-    options: Omit<ToastOptions, 'message' | 'type'> = {},
-  ) => toast.create({ message, type: 'success', ...options }),
-  error: (
-    message: string,
-    options: Omit<ToastOptions, 'message' | 'type'> = {},
-  ) => toast.create({ message, type: 'error', ...options }),
-  warning: (
-    message: string,
-    options: Omit<ToastOptions, 'message' | 'type'> = {},
-  ) => toast.create({ message, type: 'warning', ...options }),
-  info: (
-    message: string,
-    options: Omit<ToastOptions, 'message' | 'type'> = {},
-  ) => toast.create({ message, type: 'info', ...options }),
+  success: (message: string, options: Omit<ToastOptions, 'message' | 'type'> = {}) =>
+    toast.create({ message, type: 'success', ...options }),
+  error: (message: string, options: Omit<ToastOptions, 'message' | 'type'> = {}) =>
+    toast.create({ message, type: 'error', ...options }),
+  warning: (message: string, options: Omit<ToastOptions, 'message' | 'type'> = {}) =>
+    toast.create({ message, type: 'warning', ...options }),
+  info: (message: string, options: Omit<ToastOptions, 'message' | 'type'> = {}) =>
+    toast.create({ message, type: 'info', ...options }),
 }
 
 export const Toasts = defineComponent({

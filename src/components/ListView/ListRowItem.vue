@@ -3,11 +3,7 @@
     <slot name="prefix">
       <component
         v-if="column.prefix"
-        :is="
-          typeof column.prefix === 'function'
-            ? column.prefix({ row })
-            : column.prefix
-        "
+        :is="typeof column.prefix === 'function' ? column.prefix({ row }) : column.prefix"
       />
     </slot>
     <Tooltip
@@ -57,9 +53,7 @@ const label = computed(() => {
 
 const tooltip = computed(() => {
   if (!list.value.options.showTooltip) return ''
-  return props.column.getTooltip
-    ? props.column.getTooltip(props.row)
-    : getValue(props.item).label
+  return props.column.getTooltip ? props.column.getTooltip(props.row) : getValue(props.item).label
 })
 
 function getValue(value) {

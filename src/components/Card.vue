@@ -14,10 +14,7 @@
     <p class="mt-1.5 text-base text-gray-600" v-if="subtitle">
       {{ subtitle }}
     </p>
-    <div
-      v-if="loading"
-      class="mt-4 flex flex-auto flex-col items-center justify-center rounded-md"
-    >
+    <div v-if="loading" class="mt-4 flex flex-auto flex-col items-center justify-center rounded-md">
       <LoadingText />
     </div>
     <div class="mt-4 flex-auto overflow-auto" v-else-if="$slots['default']">

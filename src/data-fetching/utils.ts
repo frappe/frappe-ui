@@ -16,9 +16,7 @@ export function isEmptyObject(obj: any) {
   return Object.keys(obj).length === 0 && obj.constructor === Object
 }
 
-export function parseFilters(
-  _filters: MaybeRefOrGetter<Filters>,
-): Filters | null {
+export function parseFilters(_filters: MaybeRefOrGetter<Filters>): Filters | null {
   let filters = typeof _filters == 'function' ? _filters() : toValue(_filters)
   let parsedFilters: Filters = {}
   for (let key in filters) {
@@ -49,9 +47,7 @@ export function parseFilters(
   return parsedFilters
 }
 
-export function unrefObject(
-  obj: Record<string, MaybeRef<string | number | boolean>>,
-) {
+export function unrefObject(obj: Record<string, MaybeRef<string | number | boolean>>) {
   let newObj: Record<keyof typeof obj, any> = {}
   for (let key in obj) {
     newObj[key] = toValue(obj[key])

@@ -7,10 +7,7 @@ interface UseDoctypeOptions {
   baseUrl?: string
 }
 
-export function useDoctype<T>(
-  doctype: string,
-  options: UseDoctypeOptions = {},
-) {
+export function useDoctype<T>(doctype: string, options: UseDoctypeOptions = {}) {
   const insert = useInsert<T>(doctype, options)
   const delete_ = useDelete(doctype, options)
   const setValue = useSetValue<T>(doctype, options)
@@ -113,8 +110,7 @@ function useRunDocMethod(doctype: string, options: UseDoctypeOptions = {}) {
     },
     isLoading: (name: string, method: string) => {
       return (
-        runDocMethod.loading &&
-        url.value === `/api/v2/document/${doctype}/${name}/method/${method}`
+        runDocMethod.loading && url.value === `/api/v2/document/${doctype}/${name}/method/${method}`
       )
     },
   } as RunDocMethodReturnValue)
@@ -161,9 +157,7 @@ function useRunMethod(doctype: string, options: UseDoctypeOptions = {}) {
       return runMethod.submit(params)
     },
     isLoading: (method: string) => {
-      return (
-        runMethod.loading && url.value === `/api/v2/method/${doctype}/${method}`
-      )
+      return runMethod.loading && url.value === `/api/v2/method/${doctype}/${method}`
     },
   } as RunMethodReturnValue)
 }

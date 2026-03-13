@@ -27,11 +27,7 @@
             @update:modelValue="(val) => (columns = +val)"
           />
         </div>
-        <div
-          v-if="images && images.length"
-          class="grid gap-px mb-4"
-          :style="gridStyle"
-        >
+        <div v-if="images && images.length" class="grid gap-px mb-4" :style="gridStyle">
           <div
             v-for="(item, idx) in images"
             :key="item.id"
@@ -72,12 +68,7 @@
                 <div
                   v-if="editingCaption !== `${item.type}-${idx}`"
                   class="p-2 cursor-pointer"
-                  @click.stop="
-                    startEditingCaption(
-                      `${item.type}-${idx}`,
-                      item.existing?.alt || '',
-                    )
-                  "
+                  @click.stop="startEditingCaption(`${item.type}-${idx}`, item.existing?.alt || '')"
                 >
                   <div
                     class="text-white text-xs truncate"
@@ -91,9 +82,7 @@
                     :ref="(el) => (captionInputRef = el as HTMLInputElement)"
                     v-model="captionEditValue"
                     @blur="handleCaptionBlur(`${item.type}-${idx}`, idx)"
-                    @keydown.enter.prevent="
-                      saveCaption(`${item.type}-${idx}`, idx)
-                    "
+                    @keydown.enter.prevent="saveCaption(`${item.type}-${idx}`, idx)"
                     @keydown.escape="cancelEditingCaption"
                     class="w-full text-xs bg-white/90 text-gray-900 px-1 py-0.5 rounded-sm border-none outline-none"
                     placeholder="Add caption..."
@@ -135,9 +124,7 @@
                   <div
                     v-if="editingCaption !== `${item.type}-${idx}`"
                     class="p-2 cursor-pointer"
-                    @click.stop="
-                      startEditingCaption(`${item.type}-${idx}`, item.alt || '')
-                    "
+                    @click.stop="startEditingCaption(`${item.type}-${idx}`, item.alt || '')"
                   >
                     <div
                       class="text-white text-xs truncate"
@@ -151,9 +138,7 @@
                       ref="captionInput"
                       v-model="captionEditValue"
                       @blur="handleCaptionBlur(`${item.type}-${idx}`, idx)"
-                      @keydown.enter.prevent="
-                        saveCaption(`${item.type}-${idx}`, idx)
-                      "
+                      @keydown.enter.prevent="saveCaption(`${item.type}-${idx}`, idx)"
                       @keydown.escape="cancelEditingCaption"
                       class="w-full text-xs bg-white/90 text-gray-900 px-1 py-0.5 rounded border-none outline-none"
                       placeholder="Add caption..."
@@ -166,13 +151,10 @@
           </div>
         </div>
         <div v-if="images && images.length" class="text-p-sm text-ink-gray-5">
-          Upload more images by dropping them anywhere in this window. Reorder
-          images by dragging them. Hover over an image to edit caption.
+          Upload more images by dropping them anywhere in this window. Reorder images by dragging
+          them. Hover over an image to edit caption.
         </div>
-        <div
-          v-else
-          class="flex flex-col items-center justify-center min-h-[200px]"
-        >
+        <div v-else class="flex flex-col items-center justify-center min-h-[200px]">
           <div
             class="w-full flex flex-1 flex-col items-center justify-center border border-outline-gray-2 rounded-lg bg-surface-gray-1 h-full cursor-pointer transition hover:border-primary-400 hover:bg-primary-50 text-center"
             @click="triggerFileInput"
@@ -188,19 +170,14 @@
           </div>
         </div>
         <div v-if="uploading">
-          <div class="mb-2 text-sm">
-            Uploading: {{ uploadedCount }}/{{ totalCount }}
-          </div>
+          <div class="mb-2 text-sm">Uploading: {{ uploadedCount }}/{{ totalCount }}</div>
           <div class="w-full bg-gray-200 rounded h-2 overflow-hidden">
             <div
               class="bg-surface-gray-5 h-2 transition-all"
               :style="{ width: uploadProgress + '%' }"
             ></div>
           </div>
-          <div
-            v-if="uploadErrors && uploadErrors.some((e) => e)"
-            class="mt-2 text-red-500 text-xs"
-          >
+          <div v-if="uploadErrors && uploadErrors.some((e) => e)" class="mt-2 text-red-500 text-xs">
             Some files failed to upload.
           </div>
         </div>
@@ -208,9 +185,7 @@
     </template>
     <template #actions>
       <div class="flex justify-end gap-2">
-        <Button variant="ghost" :disabled="uploading" @click="handleCancel">
-          Cancel
-        </Button>
+        <Button variant="ghost" :disabled="uploading" @click="handleCancel"> Cancel </Button>
         <Button
           v-if="props.mode === 'edit'"
           variant="solid"
@@ -244,24 +219,14 @@
         v-if="isFileDragging"
         class="fixed inset-0 z-50 bg-gray-900/60 pointer-events-none flex items-center justify-center"
       >
-        <div class="text-ink-gray-1 text-base font-medium">
-          Drop images anywhere
-        </div>
+        <div class="text-ink-gray-1 text-base font-medium">Drop images anywhere</div>
       </div>
     </Transition>
   </Teleport>
 </template>
 
 <script setup lang="ts">
-import {
-  computed,
-  ref,
-  onMounted,
-  onUnmounted,
-  watch,
-  nextTick,
-  useTemplateRef,
-} from 'vue'
+import { computed, ref, onMounted, onUnmounted, watch, nextTick, useTemplateRef } from 'vue'
 import Dialog from '../../../Dialog/Dialog.vue'
 import Button from '../../../Button/Button.vue'
 import Select from '../../../Select/Select.vue'
@@ -336,9 +301,7 @@ watch(
   () => props.modelValue,
   (isOpen) => {
     if (isOpen && props.mode === 'edit') {
-      const existingItems = (props.existingImages || []).map(
-        createExistingImageItem,
-      )
+      const existingItems = (props.existingImages || []).map(createExistingImageItem)
       const fileItems = (props.files || []).map(createImageItem)
       images.value = [...existingItems, ...fileItems]
 
@@ -359,9 +322,7 @@ watch(
   () => props.existingImages,
   (newExistingImages) => {
     if (props.modelValue && props.mode === 'edit') {
-      const existingItems = (newExistingImages || []).map(
-        createExistingImageItem,
-      )
+      const existingItems = (newExistingImages || []).map(createExistingImageItem)
       const fileItems = (props.files || []).map(createImageItem)
       images.value = [...existingItems, ...fileItems]
     }
@@ -505,8 +466,7 @@ function addFiles(files: File[]) {
     .map((item) => `${item.file!.name}-${item.file!.size}`)
 
   const uniqueNewItems = newImageItems.filter(
-    (item) =>
-      !existingFileSignatures.includes(`${item.file!.name}-${item.file!.size}`),
+    (item) => !existingFileSignatures.includes(`${item.file!.name}-${item.file!.size}`),
   )
 
   images.value.push(...uniqueNewItems)
@@ -621,11 +581,7 @@ function onDragLeave(e: DragEvent, idx: number) {
 }
 
 function isDropTarget(idx: number) {
-  return (
-    overIndex.value === idx &&
-    draggedIndex.value !== null &&
-    draggedIndex.value !== idx
-  )
+  return overIndex.value === idx && draggedIndex.value !== null && draggedIndex.value !== idx
 }
 
 function onDragOverWindow(e: DragEvent) {
@@ -725,9 +681,7 @@ async function uploadFiles(files: File[]): Promise<UploadResult[]> {
       return { success: false, error: err }
     } finally {
       uploadedCount.value++
-      uploadProgress.value = Math.round(
-        (uploadedCount.value / totalCount.value) * 100,
-      )
+      uploadProgress.value = Math.round((uploadedCount.value / totalCount.value) * 100)
     }
   })
 

@@ -1,13 +1,5 @@
 <script setup lang="ts">
-import {
-  computed,
-  type Component,
-  type VNode,
-  ref,
-  watch,
-  h,
-  FunctionalComponent,
-} from 'vue'
+import { computed, type Component, type VNode, ref, watch, h, FunctionalComponent } from 'vue'
 import {
   ComboboxAnchor,
   ComboboxContent,
@@ -53,7 +45,6 @@ const emit = defineEmits<{
   /** Emitted when the user types in the input */
   input: (value: string) => void
 }>()
-
 
 const searchTerm = ref(getDisplayValue(props.modelValue))
 const internalModelValue = ref(props.modelValue)
@@ -160,32 +151,24 @@ const allOptionsFlat = computed(() => {
 
 function getDisplayValue(selectedValue: string | null | undefined): string {
   if (!selectedValue) return ''
-  const options = props.options.flatMap((opt) =>
-    isGroup(opt) ? opt.options : opt,
-  )
+  const options = props.options.flatMap((opt) => (isGroup(opt) ? opt.options : opt))
   const selectedOption = options.find((opt) => getKey(opt) === selectedValue)
   return selectedOption ? getLabel(selectedOption) : selectedValue || ''
 }
 
 const selectedOption = computed(() => {
   if (!internalModelValue.value) return null
-  return allOptionsFlat.value.find(
-    (opt) => getKey(opt) === internalModelValue.value,
-  )
+  return allOptionsFlat.value.find((opt) => getKey(opt) === internalModelValue.value)
 })
 
 const selectedOptionIcon = computed(() => {
   return selectedOption.value ? getIcon(selectedOption.value) : undefined
 })
 
-const RenderIcon: FunctionalComponent<{ icon?: string | Component }> = (
-  props,
-) => {
+const RenderIcon: FunctionalComponent<{ icon?: string | Component }> = (props) => {
   if (!props.icon) return null
   const iconContent =
-    typeof props.icon === 'string'
-      ? h('span', props.icon)
-      : h(props.icon, { class: 'w-4 h-4' })
+    typeof props.icon === 'string' ? h('span', props.icon) : h(props.icon, { class: 'w-4 h-4' })
 
   return h(
     'span',
@@ -313,7 +296,6 @@ defineSlots<{
   /** Custom slot for individual options, only used if the option has `slotName` */
   [slotName: string]: (props: { option: SimpleOption; searchTerm: string }) => any
 }>()
-
 </script>
 
 <template>
@@ -363,15 +345,10 @@ defineSlots<{
             class="max-h-60 overflow-auto pb-1.5"
             :class="{ 'px-1.5 pt-1.5': !isGroup(filteredOptions[0]) }"
           >
-            <ComboboxEmpty
-              class="text-ink-gray-5 text-base text-center py-1.5 px-2.5"
-            >
+            <ComboboxEmpty class="text-ink-gray-5 text-base text-center py-1.5 px-2.5">
               No results found for "{{ searchTerm }}"
             </ComboboxEmpty>
-            <template
-              v-for="(optionOrGroup, index) in filteredOptions"
-              :key="index"
-            >
+            <template v-for="(optionOrGroup, index) in filteredOptions" :key="index">
               <ComboboxGroup class="px-1.5" v-if="isGroup(optionOrGroup)">
                 <ComboboxLabel
                   class="px-2.5 pt-3 pb-1.5 text-sm font-medium text-ink-gray-5 sticky top-0 bg-surface-modal z-10"
@@ -427,10 +404,7 @@ defineSlots<{
                 />
                 <template v-else>
                   <span class="flex items-center gap-2 pr-6 flex-1">
-                    <RenderIcon
-                      v-if="getIcon(optionOrGroup)"
-                      :icon="getIcon(optionOrGroup)"
-                    />
+                    <RenderIcon v-if="getIcon(optionOrGroup)" :icon="getIcon(optionOrGroup)" />
                     {{ getLabel(optionOrGroup) }}
                   </span>
                   <ComboboxItemIndicator

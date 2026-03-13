@@ -11,12 +11,7 @@
       <slot name="target" v-bind="{ open }" />
     </PopoverButton>
     <div v-show="open">
-      <PopoverPanel
-        v-slot="{ open, close }"
-        ref="popover"
-        static
-        class="z-[100]"
-      >
+      <PopoverPanel v-slot="{ open, close }" ref="popover" static class="z-[100]">
         <slot name="body" v-bind="{ open, close }" />
       </PopoverPanel>
     </div>

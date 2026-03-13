@@ -27,8 +27,7 @@ export function useImageNavigation({
 
   function previousImage() {
     if (imageCount.value > 0) {
-      currentIndex.value =
-        (currentIndex.value - 1 + imageCount.value) % imageCount.value
+      currentIndex.value = (currentIndex.value - 1 + imageCount.value) % imageCount.value
       onNavigate?.()
     }
   }

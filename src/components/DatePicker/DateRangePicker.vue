@@ -7,10 +7,7 @@
     ref="popoverRef"
   >
     <template #target="{ togglePopover, isOpen }">
-      <slot
-        name="target"
-        v-bind="{ togglePopover, isOpen, displayLabel, inputValue }"
-      >
+      <slot name="target" v-bind="{ togglePopover, isOpen, displayLabel, inputValue }">
         <TextInput
           v-model="inputValue"
           type="text"
@@ -27,16 +24,10 @@
           @keydown.enter.prevent="onEnter(togglePopover)"
         >
           <template v-if="$slots.prefix" #prefix>
-            <slot
-              name="prefix"
-              v-bind="{ togglePopover, isOpen, displayLabel, inputValue }"
-            />
+            <slot name="prefix" v-bind="{ togglePopover, isOpen, displayLabel, inputValue }" />
           </template>
           <template #suffix>
-            <slot
-              name="suffix"
-              v-bind="{ togglePopover, isOpen, displayLabel, inputValue }"
-            >
+            <slot name="suffix" v-bind="{ togglePopover, isOpen, displayLabel, inputValue }">
               <FeatherIcon
                 name="chevron-down"
                 class="h-4 w-4 cursor-pointer"
@@ -60,40 +51,26 @@
             class="text-sm font-medium text-ink-gray-7"
             @click="cycleView"
           >
-            <span v-if="view === 'date'">
-              {{ months[currentMonth] }} {{ currentYear }}
-            </span>
+            <span v-if="view === 'date'"> {{ months[currentMonth] }} {{ currentYear }} </span>
             <span v-else-if="view === 'month'">{{ currentYear }}</span>
             <span v-else>{{ yearRangeStart }} - {{ yearRangeStart + 11 }}</span>
           </Button>
           <div class="flex items-center">
-            <Button
-              variant="ghost"
-              icon="chevron-left"
-              class="size-7"
-              @click="prev"
-            />
+            <Button variant="ghost" icon="chevron-left" class="size-7" @click="prev" />
             <Button
               variant="ghost"
               class="text-xs"
               :label="'Today'"
               @click="() => handleTodayClick(togglePopover)"
             />
-            <Button
-              variant="ghost"
-              icon="chevron-right"
-              class="size-7"
-              @click="next"
-            />
+            <Button variant="ghost" icon="chevron-right" class="size-7" @click="next" />
           </div>
         </div>
         <!-- Content -->
         <div class="p-2">
           <!-- Date Grid -->
           <div v-if="view === 'date'">
-            <div
-              class="flex items-center text-xs font-medium uppercase text-ink-gray-4 mb-1"
-            >
+            <div class="flex items-center text-xs font-medium uppercase text-ink-gray-4 mb-1">
               <div
                 v-for="d in ['S', 'M', 'T', 'W', 'T', 'F', 'S']"
                 :key="d"
@@ -116,23 +93,14 @@
                     : dateObj.inRange
                       ? 'bg-surface-gray-3 rounded-none'
                       : 'hover:bg-surface-gray-2',
-                  dateObj.isRangeStart && !dateObj.isRangeEnd
-                    ? 'rounded-l-md rounded-r-none'
-                    : '',
-                  dateObj.isRangeEnd && !dateObj.isRangeStart
-                    ? 'rounded-r-md rounded-l-none'
-                    : '',
-                  dateObj.isRangeStart && dateObj.isRangeEnd
-                    ? 'rounded-md'
-                    : '',
+                  dateObj.isRangeStart && !dateObj.isRangeEnd ? 'rounded-l-md rounded-r-none' : '',
+                  dateObj.isRangeEnd && !dateObj.isRangeStart ? 'rounded-r-md rounded-l-none' : '',
+                  dateObj.isRangeStart && dateObj.isRangeEnd ? 'rounded-md' : '',
                 ]"
                 role="gridcell"
-                :aria-selected="
-                  dateObj.isRangeStart || dateObj.isRangeEnd ? 'true' : 'false'
-                "
+                :aria-selected="dateObj.isRangeStart || dateObj.isRangeEnd ? 'true' : 'false'"
                 :aria-label="
-                  dateObj.date.format('YYYY-MM-DD') +
-                  (dateObj.isToday ? ' (Today)' : '')
+                  dateObj.date.format('YYYY-MM-DD') + (dateObj.isToday ? ' (Today)' : '')
                 "
                 @click="handleDateCellClick(dateObj.date, togglePopover)"
               >
@@ -153,8 +121,7 @@
               :key="m"
               class="py-2 text-sm rounded cursor-pointer text-center hover:bg-surface-gray-2 focus:outline-none focus:ring-2 focus:ring-brand-6"
               :class="{
-                'bg-surface-gray-6 text-ink-white hover:bg-surface-gray-6':
-                  i === currentMonth,
+                'bg-surface-gray-6 text-ink-white hover:bg-surface-gray-6': i === currentMonth,
               }"
               :aria-selected="i === currentMonth ? 'true' : 'false'"
               @click="selectMonth(i)"
@@ -163,20 +130,14 @@
             </button>
           </div>
           <!-- Year Grid -->
-          <div
-            v-else
-            class="grid grid-cols-3 gap-1"
-            role="grid"
-            aria-label="Select year"
-          >
+          <div v-else class="grid grid-cols-3 gap-1" role="grid" aria-label="Select year">
             <button
               v-for="y in yearRange"
               type="button"
               :key="y"
               class="py-2 text-sm rounded cursor-pointer text-center hover:bg-surface-gray-2 focus:outline-none focus:ring-2 focus:ring-brand-6"
               :class="{
-                'bg-surface-gray-6 text-ink-white hover:bg-surface-gray-6':
-                  y === currentYear,
+                'bg-surface-gray-6 text-ink-white hover:bg-surface-gray-6': y === currentYear,
               }"
               :aria-selected="y === currentYear ? 'true' : 'false'"
               @click="selectYear(y)"
@@ -185,10 +146,7 @@
             </button>
           </div>
         </div>
-        <div
-          v-if="fromDate && toDate"
-          class="flex justify-end gap-1 p-2 border-t"
-        >
+        <div v-if="fromDate && toDate" class="flex justify-end gap-1 p-2 border-t">
           <Button
             size="sm"
             variant="outline"
@@ -211,11 +169,7 @@ import FeatherIcon from '../FeatherIcon.vue'
 import { dayjs, dayjsLocal } from '../../utils/dayjs'
 import { months, monthStart, generateWeeks, getDateValue } from './utils'
 import type { Dayjs } from 'dayjs'
-import type {
-  DatePickerEmits,
-  DateRangePickerProps,
-  DatePickerViewMode as ViewMode,
-} from './types'
+import type { DatePickerEmits, DateRangePickerProps, DatePickerViewMode as ViewMode } from './types'
 
 const props = withDefaults(defineProps<DateRangePickerProps>(), {
   value: '',
@@ -255,9 +209,7 @@ function formatOne(dateStr: string): string {
   if (!d.isValid()) return dateStr
   return props.format ? d.format(props.format) : dateStr
 }
-const displayLabel = computed<string>(() =>
-  formatDisplay(fromDate.value, toDate.value),
-)
+const displayLabel = computed<string>(() => formatDisplay(fromDate.value, toDate.value))
 
 function coerceToDayjs(val?: string | null): Dayjs | null {
   if (!val) return null
@@ -401,10 +353,7 @@ const weeks = computed<RangeDateObj[][]>(() => {
       const isRangeStart = f.isValid() && d.date.isSame(f, 'day')
       const isRangeEnd = t.isValid() && d.date.isSame(t, 'day')
       const inRange =
-        f.isValid() &&
-        t.isValid() &&
-        d.date.isAfter(f, 'day') &&
-        d.date.isBefore(t, 'day')
+        f.isValid() && t.isValid() && d.date.isAfter(f, 'day') && d.date.isBefore(t, 'day')
       return {
         date: d.date,
         key: d.key,
@@ -442,10 +391,7 @@ function ensureOrder() {
   }
 }
 
-function handleDateCellClick(
-  date: string | Date | Dayjs,
-  togglePopover: () => void,
-) {
+function handleDateCellClick(date: string | Date | Dayjs, togglePopover: () => void) {
   selectDate(date)
   if (autoClose.value && fromDate.value && toDate.value) {
     emitIfComplete()
@@ -500,10 +446,7 @@ function selectYear(y: number): void {
 }
 function prev(): void {
   if (view.value === 'date') {
-    const m = monthStart(currentYear.value, currentMonth.value).subtract(
-      1,
-      'month',
-    )
+    const m = monthStart(currentYear.value, currentMonth.value).subtract(1, 'month')
     currentYear.value = m.year()
     currentMonth.value = m.month()
   } else if (view.value === 'month') {
@@ -536,9 +479,7 @@ function handleClose() {
   }
 }
 
-const yearRangeStart = computed(
-  () => currentYear.value - (currentYear.value % 12),
-)
+const yearRangeStart = computed(() => currentYear.value - (currentYear.value % 12))
 const yearRange = computed<number[]>(() =>
   Array.from({ length: 12 }, (_, i) => yearRangeStart.value + i),
 )

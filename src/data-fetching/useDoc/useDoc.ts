@@ -1,11 +1,4 @@
-import {
-  computed,
-  reactive,
-  readonly,
-  Ref,
-  MaybeRefOrGetter,
-  toValue,
-} from 'vue'
+import { computed, reactive, readonly, Ref, MaybeRefOrGetter, toValue } from 'vue'
 import { UseFetchOptions, AfterFetchContext } from '@vueuse/core'
 import { useFrappeFetch } from '../useFrappeFetch'
 import { useCall } from '../useCall/useCall'
@@ -24,8 +17,7 @@ type TransformMethods<T> = {
       : never
 }
 
-interface DocMethodOption<T = any>
-  extends Omit<UseCallOptions<T>, 'url' | 'baseUrl'> {
+interface DocMethodOption<T = any> extends Omit<UseCallOptions<T>, 'url' | 'baseUrl'> {
   name: string
 }
 
@@ -39,9 +31,7 @@ interface UseDocOptions<TDoc> {
   transform?: (doc: TDoc & { doctype: string }) => TDoc & { doctype: string }
 }
 
-export function useDoc<TDoc extends { name: string }, TMethods = {}>(
-  options: UseDocOptions<TDoc>,
-) {
+export function useDoc<TDoc extends { name: string }, TMethods = {}>(options: UseDocOptions<TDoc>) {
   const {
     baseUrl = '',
     doctype,
@@ -92,8 +82,10 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
     },
   }
 
-  const { error, isFetching, isFinished, canAbort, aborted, abort, execute } =
-    useFrappeFetch(url, fetchOptions).get()
+  const { error, isFetching, isFinished, canAbort, aborted, abort, execute } = useFrappeFetch(
+    url,
+    fetchOptions,
+  ).get()
 
   let docMethods: Record<string, ReturnType<typeof useCall>> = {}
   if (methods) {
@@ -113,10 +105,7 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
         method: 'POST',
         ...option,
         baseUrl,
-        url: computed(
-          () =>
-            `/api/v2/document/${doctype}/${toValue(name)}/method/${option.name}`,
-        ),
+        url: computed(() => `/api/v2/document/${doctype}/${toValue(name)}/method/${option.name}`),
       }
 
       docMethods[key] = readonly(useCall(callOptions))

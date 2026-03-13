@@ -2,10 +2,7 @@
   <div
     class="mb-2 grid items-center gap-4 rounded bg-surface-gray-2 p-2"
     :style="{
-      gridTemplateColumns: getGridTemplateColumns(
-        list.columns,
-        list.options.selectable,
-      ),
+      gridTemplateColumns: getGridTemplateColumns(list.columns, list.options.selectable),
     }"
   >
     <Checkbox

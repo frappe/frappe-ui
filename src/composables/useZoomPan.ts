@@ -85,10 +85,7 @@ export function useZoomPan({ containerRef, isEnabled }: UseZoomPanOptions) {
       const newZoom = Math.round(currentZoom + zoomChange)
       let clampedZoom = Math.max(25, Math.min(300, newZoom))
 
-      if (
-        (currentZoom > 100 && clampedZoom < 100) ||
-        (currentZoom < 100 && clampedZoom > 100)
-      ) {
+      if ((currentZoom > 100 && clampedZoom < 100) || (currentZoom < 100 && clampedZoom > 100)) {
         if (Math.abs(100 - clampedZoom) < Math.abs(zoomChange) * 1.5) {
           clampedZoom = 100
         }

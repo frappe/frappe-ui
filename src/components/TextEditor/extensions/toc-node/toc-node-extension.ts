@@ -43,8 +43,7 @@ export const TocNodeExtension = Node.create({
       if (this.editor?.commands?.getCurrentTab) {
         activeTabId = this.editor.commands.getCurrentTab() || null
       }
-    } catch (e) {
-    }
+    } catch (e) {}
 
     if (this.editor?.state?.doc) {
       const doc = this.editor.state.doc
@@ -123,7 +122,13 @@ export const TocNodeExtension = Node.create({
           {},
           ['p', { style: 'margin: 0' }, node.text],
           ...(node.children.length > 0
-            ? [['ol', { style: 'list-style-type: decimal; padding-left: 1.5em' }, ...convertToHTML(node.children)]]
+            ? [
+                [
+                  'ol',
+                  { style: 'list-style-type: decimal; padding-left: 1.5em' },
+                  ...convertToHTML(node.children),
+                ],
+              ]
             : []),
         ])
       }
@@ -136,7 +141,11 @@ export const TocNodeExtension = Node.create({
     return [
       'div',
       { ...HTMLAttributes, 'data-type': 'toc-node', class: 'table-of-contents-node' },
-      ['ol', { style: 'list-style-type: decimal; margin: 0.5em 0; padding-left: 1.5em' }, ...listItems],
+      [
+        'ol',
+        { style: 'list-style-type: decimal; margin: 0.5em 0; padding-left: 1.5em' },
+        ...listItems,
+      ],
     ]
   },
 
@@ -161,6 +170,3 @@ export const TocNodeExtension = Node.create({
 })
 
 export default TocNodeExtension
-
-
-
