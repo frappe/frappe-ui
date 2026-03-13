@@ -1,5 +1,5 @@
 <template>
-  <div class="flex items-center space-x-2" :class="alignmentMap[align]">
+  <div class="flex items-center gap-2" :class="alignmentMap[align]">
     <slot name="prefix">
       <component
         v-if="column.prefix"

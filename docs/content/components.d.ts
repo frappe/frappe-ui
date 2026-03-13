@@ -12,6 +12,7 @@ declare module 'vue' {
     LucideBolt: typeof import('~icons/lucide/bolt')['default']
     LucideDownload: typeof import('~icons/lucide/download')['default']
     LucideMail: typeof import('~icons/lucide/mail')['default']
+    LucideX: typeof import('~icons/lucide/x')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
   }

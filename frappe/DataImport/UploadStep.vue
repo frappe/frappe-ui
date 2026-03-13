@@ -153,7 +153,7 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import type { DataImports, DataImport, DocField } from './types'
+import type { DataImports, DataImport, DocField, DocType } from './types'
 import { toast } from "../../src/components/Toast/index"
 import { fieldsToIgnore, getChildTableName, getBadgeColor } from './dataImport'
 import Badge from '../../src/components/Badge/Badge.vue'
@@ -327,20 +327,39 @@ const getExportFields = (type: 'mandatory' | 'all') => {
 }
 
 const getMandatoryFields = () => {
-    let parentDoctype = props.fields.data?.docs.find((doc: any) => doc.name == props.doctype)
-    let exportableFields = parentDoctype.fields.filter((field: DocField) => {
+    let exportableFields: Record<string, string[]> = {}
+    let docs = props.fields.data?.docs || []
+    let referenceDoctype = props.doctype || props.data?.reference_doctype as string
+    let parentDoctype = docs.find((doc: DocType) => doc.name == referenceDoctype)
+
+    let parentFields = parentDoctype.fields.filter((field: DocField) => {
         return !fieldsToIgnore.includes(field.fieldtype) && field.reqd
     }).map((field: DocField) => field.fieldname)
-    exportableFields.unshift('name')
-    return {
-        [props.doctype || props.data?.reference_doctype as string]: exportableFields
-    }
+    parentFields.unshift('name')
+    exportableFields[referenceDoctype] = parentFields
+
+    let childDoctypes = parentDoctype.fields.filter((field: DocField) => {
+        return (field.fieldtype === 'Table' || field.fieldtype === 'Table MultiSelect') && field.reqd
+    })
+
+    childDoctypes.forEach((field: DocField) => {
+        let childDoctype = docs.find((doc: DocType) => doc.name == field.options)
+        if (childDoctype) {
+            let childFields = childDoctype.fields.filter((f: DocField) => {
+                return !fieldsToIgnore.includes(f.fieldtype) && f.reqd
+            }).map((f: DocField) => f.fieldname)
+            childFields.unshift('name')
+            exportableFields[field.fieldname] = childFields
+        }
+    })
+
+    return exportableFields
 }
 
 const getAllFields = () => {
     let doctypeMap: Record<string, string[]> = {}
     let docs = props.fields.data?.docs || []
-    docs.forEach((doc: any) => {
+    docs.forEach((doc: DocType) => {
         let exportableFields = doc.fields.filter((field: DocField) => {
             return !fieldsToIgnore.includes(field.fieldtype)
         }).map((field: DocField) => field.fieldname)
