@@ -29,6 +29,7 @@
 
 <script>
 import { Button } from '../Button'
+import { toast } from '../Toast'
 import FileUploadHandler from '../../utils/fileUploadHandler'
 
 export default {
@@ -121,7 +122,9 @@ export default {
         .catch((error) => {
           this.uploading = false
           let errorMessage = 'Error Uploading File'
-          if (error?._server_messages) {
+          if (error?.message) {
+            errorMessage = error.message
+          } else if (error?._server_messages) {
             errorMessage = JSON.parse(
               JSON.parse(error._server_messages)[0],
             ).message
@@ -129,6 +132,14 @@ export default {
             errorMessage = JSON.parse(error.exc)[0].split('\n').slice(-2, -1)[0]
           }
           this.error = errorMessage
+
+          // Show toast only for file size limit errors, console log others
+          if (error?.httpStatus === 413) {
+            toast.error(errorMessage)
+          } else {
+            console.error('File upload error:', errorMessage, error)
+          }
+
           this.$emit('failure', error)
         })
     },
