@@ -7,7 +7,8 @@
   "scripts": {
     "test": "vitest --run",
     "type-check": "tsc --noEmit",
-    "prettier": "prettier -w ./src",
+    "format": "prettier -w ./src",
+    "format-changed": "prettier $(git diff --cached --name-only --diff-filter=ACMR | sed 's| |\\ |g') --write --ignore-unknown",
     "bump-and-release": "yarn test && git pull --rebase origin main && yarn run release-patch",
     "release-patch": "yarn version --patch && git push && git push --tags",
     "dev": "vite",
@@ -16,7 +17,8 @@
     "docs:dev": "vitepress dev docs --host",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
-    "docs:gen": "node docs/scripts/propsgen.ts --trace-uncaught"
+    "docs:gen": "node docs/scripts/propsgen.ts --trace-uncaught",
+    "prepare": "husky"
   },
   "exports": {
     ".": {
@@ -132,6 +134,7 @@
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.0.0",
     "autoprefixer": "^10.4.13",
+    "husky": "^9.1.7",
     "jsdom": "^27.4.0",
     "lint-staged": ">=10",
     "msw": "^2.7.0",

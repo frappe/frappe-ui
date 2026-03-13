@@ -1,0 +1,2 @@
+yarn format-changed
+git update-index --again
