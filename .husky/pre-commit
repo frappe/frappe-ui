@@ -1,2 +1,4 @@
+#!/bin/sh
+STAGED=$(git diff --cached --name-only --diff-filter=ACMR)
 yarn format-changed
-git update-index --again
+git diff --exit-code $STAGED || (echo "Files were reformatted, please stage them and commit again" && exit 1)
