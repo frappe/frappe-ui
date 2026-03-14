@@ -1,6 +1,6 @@
 <template>
   <div class="inline-flex bg-surface-white p-1">
-    <div class="inline-flex items-center gap-1">
+    <div class="inline-flex items-center gap-1.5">
       <template
         v-for="(button, index) in buttons"
         :key="button?.label || button?.type || `btn-${index}`"
@@ -35,10 +35,9 @@
               <ul
                 class="p-1.5 mt-2 rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
               >
-                <!-- fix: isDisabled hides here, and disables elsewhere -->
                 <li
                   v-for="option in button"
-                  v-show="option.isDisabled ? !option.isDisabled(editor) : true"
+                  v-show="option.isHidden ? !option.isHidden(editor) : true"
                 >
                   <component
                     v-if="option.component"
@@ -48,6 +47,10 @@
                     <template v-slot="componentSlotProps">
                       <button
                         class="w-full h-7 rounded px-2 text-base flex items-center gap-2 hover:bg-surface-gray-3"
+                        :class="
+                          option.isDisabled?.(editor) &&
+                          'opacity-50 pointer-events-none'
+                        "
                         @click="
                           () => {
                             if (componentSlotProps?.onClick)
@@ -76,6 +79,10 @@
                   <button
                     v-else
                     class="w-full h-7 rounded px-2 text-base flex items-center gap-2 hover:bg-surface-gray-3"
+                    :class="
+                      option.isDisabled?.(editor) &&
+                      'opacity-50 pointer-events-none'
+                    "
                     @click="
                       () => {
                         if (!option.action) return
@@ -100,53 +107,80 @@
             </template>
           </Popover>
         </div>
-        <button
-          v-else-if="button && !button.component"
-          class="flex rounded text-ink-gray-8 transition-colors focus-within:ring-0"
-          :class="[
-            buttons.length > 1 ? 'p-1' : 'p-1.5 border',
-            button.isDisabled?.(editor) && 'opacity-50 pointer-events-none',
-            button.isActive?.(editor)
-              ? 'bg-surface-gray-3'
-              : 'hover:bg-surface-gray-2',
-            button.class,
-          ]"
-          @click="onButtonClick(button)"
-          :title="button.label || button.text"
-        >
-          <component v-if="button.icon" :is="button.icon" class="h-4 w-4" />
-          <span
-            class="inline-block h-4 min-w-[1rem] text-sm leading-4"
-            v-else-if="button.text"
+        <template v-else-if="button && !button.isHidden?.(editor)">
+          <button
+            v-if="!button.component"
+            class="flex rounded text-ink-gray-8 transition-colors focus-within:ring-0"
+            :class="[
+              buttons.length > 1 ? 'p-1' : 'p-1.5 border',
+              button.isDisabled?.(editor) && 'opacity-50 pointer-events-none',
+              button.isActive?.(editor)
+                ? 'bg-surface-gray-3'
+                : 'hover:bg-surface-gray-2',
+              button.class,
+            ]"
+            @click="onButtonClick(button)"
+            :title="button.label || button.text"
           >
-            {{ button.text }}
-          </span>
-          <span
-            class="inline-block h-4 min-w-[1rem] text-sm leading-4"
-            v-else-if="button.label"
-          >
-            {{ button.label }}
-          </span>
-        </button>
+            <component v-if="button.icon" :is="button.icon" class="h-4 w-4" />
+            <span
+              class="inline-block h-4 min-w-[1rem] text-sm leading-4"
+              v-else-if="button.text"
+            >
+              {{ button.text }}
+            </span>
+            <span
+              class="inline-block h-4 min-w-[1rem] text-sm leading-4"
+              v-else-if="button.label"
+            >
+              {{ button.label }}
+            </span>
+          </button>
 
-        <Suspense v-else-if="button && button.component">
-          <component :is="button.component || 'div'" v-bind="{ editor }">
-            <template v-slot="componentSlotProps">
+          <Suspense v-else-if="button.component">
+            <component :is="button.component || 'div'" v-bind="{ editor }">
+              <template v-slot="componentSlotProps">
+                <button
+                  class="flex rounded p-1 text-ink-gray-8 transition-colors"
+                  :class="[
+                    button.isDisabled?.(editor) &&
+                      'opacity-50 pointer-events-none',
+                    button.isActive?.(editor) || componentSlotProps?.isActive
+                      ? 'bg-surface-gray-3'
+                      : 'hover:bg-surface-gray-2',
+                    button.class,
+                  ]"
+                  @click="
+                    componentSlotProps?.onClick
+                      ? componentSlotProps.onClick(button)
+                      : onButtonClick(button)
+                  "
+                  :title="button.label"
+                >
+                  <component
+                    v-if="button.icon"
+                    :is="button.icon"
+                    class="h-4 w-4"
+                  />
+                  <span
+                    class="inline-block h-4 min-w-[1rem] text-sm leading-4"
+                    v-else
+                  >
+                    {{ button.text }}
+                  </span>
+                </button>
+              </template>
+            </component>
+            <template #fallback>
               <button
                 class="flex rounded p-1 text-ink-gray-8 transition-colors"
                 :class="[
                   button.isDisabled?.(editor) &&
                     'opacity-50 pointer-events-none',
-                  button.isActive?.(editor) || componentSlotProps?.isActive
-                    ? 'bg-surface-gray-3'
-                    : 'hover:bg-surface-gray-2',
+                  'hover:bg-surface-gray-2',
                   button.class,
                 ]"
-                @click="
-                  componentSlotProps?.onClick
-                    ? componentSlotProps.onClick(button)
-                    : onButtonClick(button)
-                "
+                @click="onButtonClick(button)"
                 :title="button.label"
               >
                 <component
@@ -160,30 +194,10 @@
                 >
                   {{ button.text }}
                 </span>
-              </button>
-            </template>
-          </component>
-          <template #fallback>
-            <button
-              class="flex rounded p-1 text-ink-gray-8 transition-colors"
-              :class="[
-                button.isDisabled?.(editor) && 'opacity-50 pointer-events-none',
-                'hover:bg-surface-gray-2',
-                button.class,
-              ]"
-              @click="onButtonClick(button)"
-              :title="button.label"
+              </button></template
             >
-              <component v-if="button.icon" :is="button.icon" class="h-4 w-4" />
-              <span
-                class="inline-block h-4 min-w-[1rem] text-sm leading-4"
-                v-else
-              >
-                {{ button.text }}
-              </span>
-            </button></template
-          >
-        </Suspense>
+          </Suspense>
+        </template>
       </template>
     </div>
   </div>

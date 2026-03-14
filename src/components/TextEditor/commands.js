@@ -17,6 +17,8 @@ import FontColor from '~icons/lucide/paint-bucket'
 import ListUnordered from '~icons/lucide/list'
 import ListOrdered from '~icons/lucide/list-ordered'
 import ListTask from '~icons/lucide/list-check'
+import IndentList from '~icons/lucide/list-indent-increase'
+import DedentList from '~icons/lucide/list-indent-decrease'
 import DoubleQuotes from '~icons/lucide/quote'
 import CodeView from '~icons/lucide/code'
 import Link from '~icons/lucide/link-2'
@@ -126,6 +128,18 @@ export default {
     action: (editor) => editor.chain().focus().toggleTaskList().run(),
     isActive: (editor) => editor.isActive('taskList'),
   },
+  IndentList: {
+    label: 'Indent List',
+    action: (editor) => editor.chain().focus().sinkListItem('listItem').run(),
+    icon: IndentList,
+    isHidden: (editor) => !editor.can().sinkListItem('listItem'),
+  },
+  DedentList: {
+    label: 'Dedent List',
+    action: (editor) => editor.chain().focus().liftListItem('listItem').run(),
+    icon: DedentList,
+    isHidden: (editor) => !editor.can().liftListItem('listItem'),
+  },
   'Align Center': {
     label: 'Align Center',
     icon: AlignCenter,
@@ -228,73 +242,73 @@ export default {
     label: 'Add Column Before',
     action: (editor) => editor.chain().focus().addColumnBefore().run(),
     isActive: (editor) => false,
-    isDisabled: (editor) => !editor.can().addColumnBefore(),
+    isHidden: (editor) => !editor.can().addColumnBefore(),
   },
   AddColumnAfter: {
     label: 'Add Column After',
     action: (editor) => editor.chain().focus().addColumnAfter().run(),
     isActive: (editor) => false,
-    isDisabled: (editor) => !editor.can().addColumnAfter(),
+    isHidden: (editor) => !editor.can().addColumnAfter(),
   },
   DeleteColumn: {
     label: 'Delete Column',
     action: (editor) => editor.chain().focus().deleteColumn().run(),
     isActive: (editor) => false,
-    isDisabled: (editor) => !editor.can().deleteColumn(),
+    isHidden: (editor) => !editor.can().deleteColumn(),
   },
   AddRowBefore: {
     label: 'Add Row Before',
     action: (editor) => editor.chain().focus().addRowBefore().run(),
     isActive: (editor) => false,
-    isDisabled: (editor) => !editor.can().addRowBefore(),
+    isHidden: (editor) => !editor.can().addRowBefore(),
   },
   AddRowAfter: {
     label: 'Add Row After',
     action: (editor) => editor.chain().focus().addRowAfter().run(),
     isActive: (editor) => false,
-    isDisabled: (editor) => !editor.can().addRowAfter(),
+    isHidden: (editor) => !editor.can().addRowAfter(),
   },
   DeleteRow: {
     label: 'Delete Row',
     action: (editor) => editor.chain().focus().deleteRow().run(),
     isActive: (editor) => false,
-    isDisabled: (editor) => !editor.can().deleteRow(),
+    isHidden: (editor) => !editor.can().deleteRow(),
   },
   DeleteTable: {
     label: 'Delete Table',
     action: (editor) => editor.chain().focus().deleteTable().run(),
     isActive: (editor) => false,
-    isDisabled: (editor) => !editor.can().deleteTable(),
+    isHidden: (editor) => !editor.can().deleteTable(),
   },
   MergeCells: {
     label: 'Merge Cells',
     action: (editor) => editor.chain().focus().mergeCells().run(),
     isActive: (editor) => false,
-    isDisabled: (editor) => !editor.can().mergeCells(),
+    isHidden: (editor) => !editor.can().mergeCells(),
   },
   SplitCell: {
     label: 'Split Cell',
     action: (editor) => editor.chain().focus().splitCell().run(),
     isActive: (editor) => false,
-    isDisabled: (editor) => !editor.can().splitCell(),
+    isHidden: (editor) => !editor.can().splitCell(),
   },
   ToggleHeaderColumn: {
     label: 'Toggle Header Column',
     action: (editor) => editor.chain().focus().toggleHeaderColumn().run(),
     isActive: (editor) => false,
-    isDisabled: (editor) => !editor.can().toggleHeaderColumn(),
+    isHidden: (editor) => !editor.can().toggleHeaderColumn(),
   },
   ToggleHeaderRow: {
     label: 'Toggle Header Row',
     action: (editor) => editor.chain().focus().toggleHeaderRow().run(),
     isActive: (editor) => false,
-    isDisabled: (editor) => !editor.can().toggleHeaderRow(),
+    isHidden: (editor) => !editor.can().toggleHeaderRow(),
   },
   ToggleHeaderCell: {
     label: 'Toggle Header Cell',
     action: (editor) => editor.chain().focus().toggleHeaderCell().run(),
     isActive: (editor) => false,
-    isDisabled: (editor) => !editor.can().toggleHeaderCell(),
+    isHidden: (editor) => !editor.can().toggleHeaderCell(),
   },
   TableOfContents: {
     label: 'Table of Contents',
