@@ -55,7 +55,7 @@ defineSlots<{
       </TabsIndicator>
 
       <TabsTrigger as="template" v-for="(tab, i) in props.tabs" :value="i">
-        <slot name="tab-item" v-bind="{ tab }">
+        <slot name="tab-item" v-bind="{ tab, selected: model === i }">
           <component
             :is="tab.route ? 'router-link' : Btn"
             :to="tab.route"

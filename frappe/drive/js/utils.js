@@ -52,7 +52,7 @@ function slugger(title) {
   })
 }
 
-const copyToClipboard = (str) => {
+export const copyToClipboard = (str) => {
   if (navigator && navigator.clipboard && navigator.clipboard.writeText) {
     return navigator.clipboard.writeText(str)
   } else {

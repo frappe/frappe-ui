@@ -366,7 +366,7 @@ defineSlots<{
             <ComboboxEmpty
               class="text-ink-gray-5 text-base text-center py-1.5 px-2.5"
             >
-              No results found for "{{ searchTerm }}"
+              {{ searchTerm ? `No results found for "${searchTerm}"` : "No results found" }}
             </ComboboxEmpty>
             <template
               v-for="(optionOrGroup, index) in filteredOptions"

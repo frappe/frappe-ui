@@ -1,7 +1,7 @@
 <template>
   <Dialog v-model="open" :options="{ size: 'lg' }">
     <template #body-main>
-      <div class="p-4 sm:px-6">
+      <div class="p-4">
         <!-- Header -->
         <div class="flex w-full justify-between gap-x-2 mb-4">
           <div class="font-semibold text-2xl flex text-nowrap overflow-hidden">
@@ -180,7 +180,7 @@
                 v-if="usersToAdd.length"
                 label="Invite"
                 variant="solid"
-                @click="addPermissions"
+                @click="inviteUsers"
               />
             </div>
           </div>
@@ -338,17 +338,20 @@ watch(
   { immediate: true },
 )
 
-const addPermissions = () => {
+const inviteUsers = () => {
   const access = getAccess(accessToAdd.value)
-  for (const user of usersToAdd.value) {
+  for (let user of usersToAdd.value) {
     const r = {
       entity_name: props.entity.name,
       user,
       ...access,
     }
     props.updateAccess.submit(r)
+    const userObj = filteredUsers.value.find((k) => k.value === user)
+    // For new records
+    if (!userObj.email) userObj.email = userObj.label
     props.usersWithAccess.data.push({
-      ...filteredUsers.value.find((k) => k.value === user),
+      ...userObj,
       ...access,
     })
   }

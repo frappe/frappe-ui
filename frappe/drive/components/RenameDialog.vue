@@ -49,7 +49,7 @@ const open = ref(true)
 const newTitle = ref('')
 const file_ext = ref('')
 
-if (props.entity.is_group || props.entity.document) {
+if (props.entity.is_group || props.entity.doc) {
   newTitle.value = props.entity.title
 } else {
   const parts = props.entity.title.split('.')

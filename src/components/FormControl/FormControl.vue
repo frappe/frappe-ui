@@ -101,8 +101,8 @@ const controlAttrs = computed(() => {
 const descriptionClasses = computed(() => {
   return [
     {
-      sm: 'text-xs',
-      md: 'text-base',
+      sm: 'text-p-xs',
+      md: 'text-p-base',
     }[props.size],
     'text-ink-gray-5',
   ]
