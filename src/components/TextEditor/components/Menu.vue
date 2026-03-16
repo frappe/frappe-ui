@@ -5,111 +5,113 @@
         v-for="(button, index) in buttons"
         :key="button?.label || button?.type || `btn-${index}`"
       >
-        <div
-          class="h-4 w-[2px] border-l"
-          v-if="button && button.type === 'separator'"
-        ></div>
-        <div class="shrink-0" v-else-if="button && button.map">
-          <Popover>
-            <template #target="{ togglePopover }">
-              <button
-                class="rounded p-1 text-base font-medium text-ink-gray-8 transition-colors"
-                @click="togglePopover"
-                :class="
-                  getActiveButton(button)
-                    ? 'bg-surface-gray-3'
-                    : 'hover:bg-surface-gray-2'
-                "
-              >
-                <component
-                  v-if="(getActiveButton(button) || button[0]).icon"
-                  :is="(getActiveButton(button) || button[0]).icon"
-                  class="h-4 w-4"
-                />
-                <span v-else>
-                  {{ (getActiveButton(button) || button[0]).label }}
-                </span>
-              </button>
-            </template>
-            <template #body="{ close }">
-              <ul
-                class="p-1.5 mt-2 rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
-              >
-                <li
-                  v-for="option in button"
-                  v-show="option.isHidden ? !option.isHidden(editor) : true"
+        <template
+          v-if="button && (!button.condition || button.condition(editor))"
+        >
+          <div
+            class="h-4 w-[2px] border-l"
+            v-if="button && button.type === 'separator'"
+          ></div>
+          <div class="shrink-0" v-else-if="button && button.map">
+            <Popover>
+              <template #target="{ togglePopover }">
+                <button
+                  class="rounded p-1 text-base font-medium text-ink-gray-8 transition-colors"
+                  @click="togglePopover"
+                  :class="
+                    getActiveButton(button)
+                      ? 'bg-surface-gray-3'
+                      : 'hover:bg-surface-gray-2'
+                  "
                 >
                   <component
-                    v-if="option.component"
-                    :is="option.component || 'div'"
-                    v-bind="{ editor }"
-                  >
-                    <template v-slot="componentSlotProps">
-                      <button
-                        class="w-full h-7 rounded px-2 text-base flex items-center gap-2 hover:bg-surface-gray-3"
-                        :class="
-                          option.isDisabled?.(editor) &&
-                          'opacity-50 pointer-events-none'
-                        "
-                        @click="
-                          () => {
-                            if (componentSlotProps?.onClick)
-                              componentSlotProps.onClick(option)
-                            else if (option.action) onButtonClick(option)
-
-                            close()
-                          }
-                        "
-                        :title="option.label"
-                      >
-                        <component
-                          v-if="option.icon"
-                          :is="option.icon"
-                          class="h-4 w-4"
-                        />
-                        <span
-                          class="whitespace-nowrap text-ink-gray-7"
-                          v-if="option.label"
-                        >
-                          {{ option.label }}
-                        </span>
-                      </button>
-                    </template>
-                  </component>
-                  <button
-                    v-else
-                    class="w-full h-7 rounded px-2 text-base flex items-center gap-2 hover:bg-surface-gray-3"
-                    :class="
-                      option.isDisabled?.(editor) &&
-                      'opacity-50 pointer-events-none'
-                    "
-                    @click="
-                      () => {
-                        if (!option.action) return
-                        onButtonClick(option)
-                        close()
-                      }
-                    "
+                    v-if="(getActiveButton(button) || button[0]).icon"
+                    :is="(getActiveButton(button) || button[0]).icon"
+                    class="h-4 w-4"
+                  />
+                  <span v-else>
+                    {{ (getActiveButton(button) || button[0]).label }}
+                  </span>
+                </button>
+              </template>
+              <template #body="{ close }">
+                <ul
+                  class="p-1.5 mt-2 rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
+                >
+                  <li
+                    v-for="option in button"
+                    v-show="option.condition ? option.condition(editor) : true"
                   >
                     <component
-                      v-if="option.icon"
-                      :is="option.icon"
-                      class="size-4 flex-shrink-0 text-ink-gray-6"
-                    />
-                    <span
-                      v-if="option.label"
-                      class="whitespace-nowrap text-ink-gray-7"
-                      >{{ option.label }}</span
+                      v-if="option.component"
+                      :is="option.component || 'div'"
+                      v-bind="{ editor }"
                     >
-                  </button>
-                </li>
-              </ul>
-            </template>
-          </Popover>
-        </div>
-        <template v-else-if="button && !button.isHidden?.(editor)">
+                      <template v-slot="componentSlotProps">
+                        <button
+                          class="w-full h-7 rounded px-2 text-base flex items-center gap-2 hover:bg-surface-gray-3"
+                          :class="
+                            option.isDisabled?.(editor) &&
+                            'opacity-50 pointer-events-none'
+                          "
+                          @click="
+                            () => {
+                              if (componentSlotProps?.onClick)
+                                componentSlotProps.onClick(option)
+                              else if (option.action) onButtonClick(option)
+
+                              close()
+                            }
+                          "
+                          :title="option.label"
+                        >
+                          <component
+                            v-if="option.icon"
+                            :is="option.icon"
+                            class="h-4 w-4"
+                          />
+                          <span
+                            class="whitespace-nowrap text-ink-gray-7"
+                            v-if="option.label"
+                          >
+                            {{ option.label }}
+                          </span>
+                        </button>
+                      </template>
+                    </component>
+                    <button
+                      v-else
+                      class="w-full h-7 rounded px-2 text-base flex items-center gap-2 hover:bg-surface-gray-3"
+                      :class="
+                        option.isDisabled?.(editor) &&
+                        'opacity-50 pointer-events-none'
+                      "
+                      @click="
+                        () => {
+                          if (!option.action) return
+                          onButtonClick(option)
+                          close()
+                        }
+                      "
+                    >
+                      <component
+                        v-if="option.icon"
+                        :is="option.icon"
+                        class="size-4 flex-shrink-0 text-ink-gray-6"
+                      />
+                      <span
+                        v-if="option.label"
+                        class="whitespace-nowrap text-ink-gray-7"
+                        >{{ option.label }}</span
+                      >
+                    </button>
+                  </li>
+                </ul>
+              </template>
+            </Popover>
+          </div>
           <button
-            v-if="!button.component"
+            v-else-if="!button.component"
             class="flex rounded text-ink-gray-8 transition-colors focus-within:ring-0"
             :class="[
               buttons.length > 1 ? 'p-1' : 'p-1.5 border',
@@ -136,7 +138,6 @@
               {{ button.label }}
             </span>
           </button>
-
           <Suspense v-else-if="button.component">
             <component :is="button.component || 'div'" v-bind="{ editor }">
               <template v-slot="componentSlotProps">
