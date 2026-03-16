@@ -141,6 +141,10 @@ const MentionSuggestionExtension =
             type: 'mention',
             attrs: attributes,
           },
+          {
+            type: 'text',
+            text: ' ',
+          },
         ])
         .run()
     },
