@@ -43,7 +43,7 @@ const doctypeFields = createResource({
     return options;
   },
   onSuccess(data) {
-	setFilters()
+    setFilters()
   }
 });
 
@@ -70,6 +70,10 @@ const setFilters = () => {
       let [fieldName, operator, value] = filter;
       const field = doctypeFields.data.find((f: any) => f.value === fieldName);
       if (!field) return null;
+
+      if (field.type === "Check") {
+        value = value ? "Yes" : "No"
+      }
 
       return {
         field: {
