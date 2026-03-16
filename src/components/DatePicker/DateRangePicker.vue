@@ -58,6 +58,7 @@
             variant="ghost"
             size="sm"
             class="text-sm font-medium text-ink-gray-7"
+            label="cycle-calendar-view"
             @click="cycleView"
           >
             <span v-if="view === 'date'">
@@ -71,6 +72,7 @@
               variant="ghost"
               icon="chevron-left"
               class="size-7"
+              label="previous"
               @click="prev"
             />
             <Button
@@ -83,6 +85,7 @@
               variant="ghost"
               icon="chevron-right"
               class="size-7"
+              label="next"
               @click="next"
             />
           </div>
