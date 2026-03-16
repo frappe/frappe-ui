@@ -4,3 +4,4 @@ export { default as TextEditorBubbleMenu } from './components/TextEditorBubbleMe
 export { default as TextEditorFixedMenu } from './components/TextEditorFixedMenu.vue'
 export { default as TextEditorFloatingMenu } from './components/TextEditorFloatingMenu.vue'
 export { EditorContent as TextEditorContent } from '@tiptap/vue-3'
+export { createEditorButton as createEditorButton } from './utils'
