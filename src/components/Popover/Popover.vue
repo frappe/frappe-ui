@@ -105,12 +105,10 @@ const anchorRef = ref<HTMLElement | null>(null)
 const isOpen = computed({
   get: () => (isShowPropPassed.value ? props.show : _isOpen.value),
   set: (value: boolean) => {
-    if (isShowPropPassed.value) {
-      emit('update:show', value)
-    } else {
+    if (!isShowPropPassed.value) {
       _isOpen.value = value
-      onUpdateOpen(value)
     }
+    emit('update:show', value)
   },
 })
 
@@ -273,6 +271,7 @@ defineSlots<{
     isOpen: boolean
   }) => any
 }>()
+
 </script>
 
 <style>
