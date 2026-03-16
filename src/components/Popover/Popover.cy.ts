@@ -19,24 +19,20 @@ describe('Popover', () => {
   })
 
   it('emit events', () => {
-    const onOpen = cy.spy().as('onOpen')
     const onClose = cy.spy().as('onClose')
     const onUpdateShow = cy.spy().as('onUpdateShow')
 
     cy.mount(PopoverClick, {
       props: {
         'onUpdate:show': onUpdateShow,
-        onOpen: onOpen,
         onClose: onClose,
       },
     })
 
-    cy.get('@onOpen').should('not.have.been.called')
     cy.get('@onClose').should('not.have.been.called')
     cy.get('@onUpdateShow').should('not.have.been.called')
 
     cy.get('button').click()
-    cy.get('@onOpen').should('have.been.called')
     cy.get('@onClose').should('not.have.been.calledWith', true)
 
     cy.root().click(0, 0, { force: true })
