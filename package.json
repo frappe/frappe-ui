@@ -132,6 +132,7 @@
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.0.0",
     "autoprefixer": "^10.4.13",
+    "cypress": "^15.8.2",
     "jsdom": "^27.4.0",
     "lint-staged": ">=10",
     "msw": "^2.7.0",
