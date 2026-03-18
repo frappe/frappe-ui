@@ -1,9 +1,16 @@
-import PopoverClick from './stories/Click.vue'
-import PopoverHover from './stories/Hover.vue'
+import { h } from 'vue'
+import Popover from './Popover.vue'
+import Button from '../Button/Button.vue'
+
+const PopoverSlots = {
+  target: ({ togglePopover }) =>
+    h(Button, { 'data-cy': 'trigger', onClick: togglePopover }, 'Click me'),
+  'body-main': h('div', { 'data-cy': 'popover-content' }, 'Popover content'),
+}
 
 describe('Popover', () => {
   it('trigger click', () => {
-    cy.mount(PopoverClick)
+    cy.mount(Popover, { slots: PopoverSlots })
 
     cy.get('.PopoverContent').should('not.exist')
     cy.get('button').click()
@@ -11,7 +18,10 @@ describe('Popover', () => {
   })
 
   it('trigger hover', () => {
-    cy.mount(PopoverHover)
+    cy.mount(Popover, {
+      slots: PopoverSlots,
+      props: { trigger: 'hover', hoverDelay: 0 },
+    })
 
     cy.get('.PopoverContent').should('not.exist')
     cy.get('button').trigger('mouseover')
@@ -22,7 +32,8 @@ describe('Popover', () => {
     const onClose = cy.spy().as('onClose')
     const onUpdateShow = cy.spy().as('onUpdateShow')
 
-    cy.mount(PopoverClick, {
+    cy.mount(Popover, {
+      slots: PopoverSlots,
       props: {
         'onUpdate:show': onUpdateShow,
         onClose: onClose,
@@ -38,5 +49,14 @@ describe('Popover', () => {
     cy.root().click(0, 0, { force: true })
     cy.get('@onClose').should('have.been.called')
     cy.get('@onUpdateShow').should('have.been.calledWith', false)
+  })
+
+  it('slots', () => {
+    cy.mount(Popover, { slots: PopoverSlots })
+
+    cy.get('[data-cy="trigger"]').should('exist')
+    cy.get('[data-cy="popover-content"]').should('not.exist')
+    cy.get('[data-cy="trigger"]').click()
+    cy.get('[data-cy="popover-content"]').should('exist')
   })
 })
