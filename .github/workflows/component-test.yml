@@ -9,7 +9,11 @@ permissions:
 jobs:
   component-test:
     runs-on: ubuntu-latest
-    name: Component Tests (Cypress)
+    name: Component Tests (Cypress) - ${{ matrix.containers }}
+    strategy:
+      fail-fast: false
+      matrix:
+        containers: [1, 2, 3]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -18,9 +22,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'yarn'
 
       - name: Install dependencies
-        run: yarn install
+        run: yarn install --frozen-lockfile
+
+      - name: Cache Cypress binary
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/Cypress
+          key: cypress-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
 
       - name: Run Component Tests
         uses: cypress-io/github-action@v6
@@ -28,10 +39,14 @@ jobs:
           component: true
           build: 'yarn build'
           start: 'yarn dev'
+          install: false
+        env:
+          SPLIT: ${{ strategy.job-total }}
+          SPLIT_INDEX: ${{ strategy.job-index }}
 
       - name: Upload Cypress screenshots if tests fail
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: cypress-screenshots
+          name: cypress-screenshots-${{ matrix.containers }}
           path: cypress/screenshots
