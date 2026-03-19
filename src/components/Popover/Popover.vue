@@ -25,6 +25,7 @@
         :side="placementSide"
         :align="placementAlign"
         :sideOffset="offset"
+        :collisionPadding="collisionPadding"
         :style="{
           minWidth: matchTargetWidth
             ? 'var(--reka-popover-trigger-width)'
@@ -82,6 +83,7 @@ const props = withDefaults(defineProps<PopoverProps>(), {
   popoverClass: '',
   transition: null,
   hideOnBlur: true,
+  collisionPadding: 10,
 })
 
 const emit = defineEmits<{

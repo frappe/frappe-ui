@@ -1,6 +1,6 @@
 {
   "name": "frappe-ui",
-  "version": "0.1.265",
+  "version": "0.1.267",
   "description": "A set of components and utilities for rapid UI development",
   "type": "module",
   "sideEffects": false,
@@ -132,6 +132,8 @@
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.0.0",
     "autoprefixer": "^10.4.13",
+    "cypress": "^15.8.2",
+    "cypress-split": "^1.24.28",
     "jsdom": "^27.4.0",
     "lint-staged": ">=10",
     "msw": "^2.7.0",

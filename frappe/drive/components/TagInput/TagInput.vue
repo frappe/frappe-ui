@@ -116,7 +116,7 @@ function removeTag(tag: string) {
     </TagsInputInput>
   </TagsInputRoot>
 </template>
-<style>
+<style scoped>
 [data-state='active'] {
   background: var(--surface-gray-1);
 }
