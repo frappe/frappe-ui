@@ -231,11 +231,14 @@ import { useRoute } from 'vue-router'
 
 import LucideBuilding2 from '~icons/lucide/building-2'
 import LucideChevronDown from '~icons/lucide/chevron-down'
+import LucideChevronRight from '~icons/lucide/chevron-right'
 import LucideFolder from '~icons/lucide/folder'
+import LucideFolderPlus from '~icons/lucide/folder-plus'
 import LucideFolderClosed from '~icons/lucide/folder-closed'
 import LucideHome from '~icons/lucide/home'
 import LucideX from '~icons/lucide/x'
 import LucideArrowLeftRight from '~icons/lucide/arrow-left-right'
+import LucideEllipsis from '~icons/lucide/ellipsis'
 import TeamSelector from './TeamSelector.vue'
 
 const props = defineProps({
