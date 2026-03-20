@@ -2,6 +2,8 @@ name: Publish on NPM
 on:
   push:
     branches: [main]
+    paths:
+      - 'package.json'
 
 permissions:
   id-token: write # Required for OIDC
@@ -12,13 +14,34 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Check if version changed
+        id: version_check
+        run: |
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          OLD_VERSION=$(git show HEAD~1:package.json | node -p "JSON.parse(require('fs').readFileSync('/dev/stdin','utf8')).version")
+          if [ "$NEW_VERSION" = "$OLD_VERSION" ]; then
+            echo "Version unchanged ($NEW_VERSION), skipping publish."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Version changed: $OLD_VERSION -> $NEW_VERSION"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: actions/setup-node@v4
+        if: steps.version_check.outputs.changed == 'true'
         with:
           node-version: 20
           registry-url: 'https://registry.npmjs.org'
 
       - name: Update npm
+        if: steps.version_check.outputs.changed == 'true'
         run: npm install -g npm@latest
-      - run: npm install
-      - run: npm test
-      - run: npm publish
+      - if: steps.version_check.outputs.changed == 'true'
+        run: npm install
+      - if: steps.version_check.outputs.changed == 'true'
+        run: npm test
+      - if: steps.version_check.outputs.changed == 'true'
+        run: npm publish
