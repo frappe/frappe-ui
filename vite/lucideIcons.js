@@ -44,7 +44,7 @@ function generateIconModule(icons, iconName) {
   if (!svg) return null
 
   const innerMatch = svg.match(/<svg[^>]*>([\s\S]*)<\/svg>/)
-  const innerHTML = innerMatch ? innerMatch[1] : ''
+  const innerHTML = innerMatch ? innerMatch[1].replace(/>\s+</g, '><').trim() : ''
 
   return `
 import { h } from 'vue'
