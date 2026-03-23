@@ -37,20 +37,16 @@ function frappeuiPlugin(options = {}) {
     plugins.push(buildConfig({ frontendRoute, ...buildOpts }))
   }
 
-  const DepsIncludePlugin = {
-    name: 'optimize-deps-include',
-    config(config) {
-      if (!config.optimizeDeps) config.optimizeDeps = {}
-
-      const includedDeps = config.optimizeDeps?.include || []
-      const moduleName = 'highlight.js/lib/core'
-
-      if (includedDeps.includes(moduleName)) return
-      config.optimizeDeps.include = [moduleName, ...includedDeps]
+  plugins.push({
+    name: 'frappeui-optimize-deps',
+    config() {
+      return {
+        optimizeDeps: {
+          include: ['highlight.js/lib/core', 'interactjs'],
+        },
+      }
     },
-  }
-
-  plugins.push(DepsIncludePlugin)
+  })
 
   if (frontendRoute) {
     plugins.push({
