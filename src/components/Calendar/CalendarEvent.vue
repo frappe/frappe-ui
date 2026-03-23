@@ -135,7 +135,7 @@
 import EventModalContent from './EventModalContent.vue'
 import NewEventModal from './NewEventModal.vue'
 import { useFloating, shift, flip, offset, autoUpdate } from '@floating-ui/vue'
-import { activeEvent } from './composables/useCalendarData.js'
+import { activeEvent, openEventId } from './composables/useCalendarData.js'
 
 import {
   ref,
@@ -173,19 +173,12 @@ const config = inject('config')
 const calendarActions = inject('calendarActions')
 
 onMounted(() => {
-  document.addEventListener('click', handleClickOutside)
+  document.addEventListener('click', close)
 })
 
 onBeforeUnmount(() => {
-  document.removeEventListener('click', handleClickOutside)
+  document.removeEventListener('click', close)
 })
-function handleClickOutside(e) {
-  const insidePopover = floating.value && floating.value.contains(e.target)
-  if (insidePopover) return
-  const insideTarget = eventRef.value && eventRef.value.contains(e.target)
-  if (insideTarget) return
-  close()
-}
 
 const calendarEvent = ref(props.event)
 
@@ -337,7 +330,6 @@ const { floatingStyles } = useFloating(eventRef, floating, {
   whileElementsMounted: autoUpdate,
 })
 
-const opened = ref(false)
 const resize = ref(null)
 const isResizing = ref(false)
 const isRepositioning = ref(false)
@@ -536,12 +528,20 @@ function handleTimeConstraints() {
   }
 }
 
-const toggle = () => (opened.value = !opened.value)
-const close = () => (opened.value = false)
+const opened = computed(() => openEventId.value === (props.event.id || props.event.name))
+
+const toggle = () => {
+  openEventId.value = opened.value ? null : (props.event.id || props.event.name)
+}
+
+const close = () => {
+  if (opened.value) openEventId.value = null
+}
+
 
 function handleDeleteShortcut(e) {
   if (e.key === 'Delete' || e.key === 'Backspace') {
-    opened.value = false
+    close()
     handleEventDelete()
   }
 }
