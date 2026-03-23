@@ -109,7 +109,7 @@
     ref="floating"
     :style="{ ...floatingStyles, zIndex: 100 }"
     v-if="opened"
-    class="rounded shadow-xl"
+	@click.stop
   >
     <slot
 	  name="event-popover-content"
@@ -124,7 +124,6 @@
         @close="close"
         @edit="handleEventEdit"
         @delete="handleEventDelete"
-        class="shadow-xl"
       />
     </slot>
   </div>
