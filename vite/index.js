@@ -4,7 +4,6 @@ import { frappeTypes } from './frappeTypes.js'
 import { jinjaBootData } from './jinjaBootData.js'
 import { buildConfig } from './buildConfig.js'
 import { siteBanner } from './siteBanner.js'
-import { highlightJsResolve } from './highlightJsResolve.js'
 
 function frappeuiPlugin(options = {}) {
   let plugins = []
@@ -38,10 +37,16 @@ function frappeuiPlugin(options = {}) {
     plugins.push(buildConfig({ frontendRoute, ...buildOpts }))
   }
 
-  const highlightPlugin = highlightJsResolve()
-  if (highlightPlugin) {
-    plugins.push(highlightPlugin)
-  }
+  plugins.push({
+    name: 'frappeui-optimize-deps',
+    config() {
+      return {
+        optimizeDeps: {
+          include: ['highlight.js/lib/core', 'interactjs'],
+        },
+      }
+    },
+  })
 
   if (frontendRoute) {
     plugins.push({
