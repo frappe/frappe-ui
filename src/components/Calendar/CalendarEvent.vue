@@ -107,7 +107,7 @@
 
   <div
     ref="floating"
-    :style="{ ...floatingStyles, zIndex: 100 }"
+    :style="{ ...floatingStyles }"
     v-if="opened"
 	@click.stop
   >
@@ -116,6 +116,7 @@
 	  :calendarEvent
 	  :date
 	  :isEditMode="config.isEditMode"
+	  :close
 	 >
       <EventModalContent
         :calendarEvent="calendarEvent"
@@ -171,12 +172,17 @@ const activeView = inject('activeView')
 const config = inject('config')
 const calendarActions = inject('calendarActions')
 
+function handleClickOutside(e) {
+  if (e.target.closest('[data-reka-popper-content-wrapper]')) return
+  close()
+}
+
 onMounted(() => {
-  document.addEventListener('click', close)
+  document.addEventListener('click', handleClickOutside)
 })
 
 onBeforeUnmount(() => {
-  document.removeEventListener('click', close)
+  document.removeEventListener('click', handleClickOutside)
 })
 
 const calendarEvent = ref(props.event)
