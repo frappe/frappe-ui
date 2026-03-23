@@ -38,7 +38,11 @@
           :key="calendarEvent.id"
           :date="currentDate"
           @click.stop
-        />
+        >
+          <template #event-popover-content="slotProps">
+            <slot name="event-popover-content" v-bind="slotProps" />
+          </template>
+        </CalendarEvent>
         <Button
           v-if="showCollapsable && isCollapsed && dayFullDayEvents.length > 4"
           :label="dayFullDayEvents.length - 4 + ' more'"

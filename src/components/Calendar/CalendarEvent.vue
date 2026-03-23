@@ -111,15 +111,22 @@
     v-if="opened"
     class="rounded shadow-xl"
   >
-    <EventModalContent
-      :calendarEvent="calendarEvent"
-      :date="date"
-      :isEditMode="config.isEditMode"
-      @close="close"
-      @edit="handleEventEdit"
-      @delete="handleEventDelete"
-      class="shadow-xl"
-    />
+    <slot
+	  name="event-popover-content"
+	  :calendarEvent
+	  :date
+	  :isEditMode="config.isEditMode"
+	 >
+      <EventModalContent
+        :calendarEvent="calendarEvent"
+        :date="date"
+        :isEditMode="config.isEditMode"
+        @close="close"
+        @edit="handleEventEdit"
+        @delete="handleEventDelete"
+        class="shadow-xl"
+      />
+    </slot>
   </div>
   <NewEventModal v-model="showEventModal" :event="updatedEvent" />
 </template>

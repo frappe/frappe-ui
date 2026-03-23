@@ -62,14 +62,22 @@
       :currentMonthDates="currentMonthDates"
       :config="overrideConfig"
       @setCurrentDate="(d) => updateCurrentDate(d)"
-    />
+    >
+      <template #event-popover-content="slotProps">
+        <slot name="event-popover-content" v-bind="slotProps" />
+      </template>
+    </CalendarMonthly>
 
     <CalendarWeekly
       v-else-if="activeView === 'Week'"
       :events="events"
       :weeklyDates="datesInWeeks[week]"
       :config="overrideConfig"
-    />
+    >
+      <template #event-popover-content="slotProps">
+        <slot name="event-popover-content" v-bind="slotProps" />
+      </template>
+    </CalendarWeekly>
 
     <CalendarDaily
       v-else-if="activeView === 'Day'"
@@ -82,6 +90,9 @@
           name="daily-header"
           v-bind="{ parseDateWithDay, currentDate, fullDay }"
         />
+      </template>
+      <template #event-popover-content="slotProps">
+        <slot name="event-popover-content" v-bind="slotProps" />
       </template>
     </CalendarDaily>
 

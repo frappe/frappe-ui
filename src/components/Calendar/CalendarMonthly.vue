@@ -84,7 +84,11 @@
                 @dragstart="onDragStart($event, calendarEvent.id)"
                 @dragend="$event.target.style.opacity = '1'"
                 @dragover.prevent
-              />
+              >
+			    <template #event-popover-content="slotProps">
+			      <slot name="event-popover-content" v-bind="slotProps" />
+			    </template>
+			  </CalendarEvent>
             </div>
             <div v-else class="flex w-full flex-col justify-between">
               <ShowMoreCalendarEvent
