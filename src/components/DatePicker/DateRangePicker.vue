@@ -189,13 +189,13 @@
           </div>
         </div>
         <div
-          v-if="fromDate && toDate"
-          class="flex justify-end gap-1 p-2 border-t"
+          class="flex justify-end gap-1 p-2 border-t dark:border-outline-gray-2"
         >
           <Button
             size="sm"
             variant="outline"
             :label="'Clear'"
+            :disabled="!fromDate || !toDate"
             @click="() => handleClearClick(togglePopover)"
           />
         </div>
