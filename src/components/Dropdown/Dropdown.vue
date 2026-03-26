@@ -7,7 +7,7 @@
       </Button>
     </DropdownMenuTrigger>
 
-    <DropdownMenuPortal>
+    <DropdownMenuPortal :to="portalTo">
       <DropdownMenuContent
         :class="[
           cssClasses.dropdownContent,
@@ -100,7 +100,7 @@
                       />
                     </button>
                   </DropdownMenuSubTrigger>
-                  <DropdownMenuPortal>
+                  <DropdownMenuPortal :to="portalTo">
                     <DropdownMenuSubContent
                       :class="cssClasses.dropdownContent"
                       :side-offset="4"
@@ -282,7 +282,6 @@ defineOptions({
 })
 
 const toggleState = ref(false)
-const test = ref(true)
 const router = useRouter()
 const attrs = useAttrs()
 
@@ -291,6 +290,7 @@ const props = withDefaults(defineProps<DropdownProps>(), {
   placement: 'left',
   side: 'bottom',
   offset: 4,
+  portalTo: 'body',
 })
 
 function close() {
@@ -434,7 +434,11 @@ const align = computed(() => {
 
 defineSlots<{
   /** Default slot for custom trigger content (receives `open`, `close`, and extra attrs) */
-  default?: (props: { open: boolean; close: () => void; [key: string]: any }) => any
+  default?: (props: {
+    open: boolean
+    close: () => void
+    [key: string]: any
+  }) => any
 
   /** Custom rendering for each dropdown item (receives `item` and `close`) */
   item?: (props: { item: DropdownOption; close: () => void }) => any
