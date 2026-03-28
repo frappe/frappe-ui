@@ -18,11 +18,9 @@
         </label>
       </div>
 
-      <span
-        v-if="props.description"
-        class="max-w-xs text-p-sm text-ink-gray-7"
-        >{{ props.description }}</span
-      >
+      <span v-if="props.description" class="text-p-sm text-ink-gray-7">
+        {{ props.description }}
+      </span>
     </div>
     <SwitchRoot
       :id
@@ -105,7 +103,7 @@ const switchGroupClasses = computed(() => {
   const classes = ['flex justify-between']
   if (!props.description) {
     classes.push(
-      'group items-center space-x-3 cursor-pointer rounded focus-visible:bg-surface-gray-2 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-outline-gray-3',
+      'group items-center space-x-3 py-1.5 cursor-pointer rounded focus-visible:bg-surface-gray-2 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-outline-gray-3',
     )
 
     classes.push(
@@ -113,13 +111,9 @@ const switchGroupClasses = computed(() => {
         ? 'cursor-not-allowed'
         : 'hover:bg-surface-gray-3 active:bg-surface-gray-4',
     )
-
-    classes.push(props.size === 'md' ? 'px-3 py-1.5' : 'px-2.5 py-1.5')
   } else {
     classes.push('items-start')
-    classes.push(
-      props.size === 'md' ? 'px-3 space-x-3.5' : 'px-2.5 space-x-2.5',
-    )
+    classes.push(props.size === 'md' ? 'space-x-3.5' : 'space-x-2.5')
   }
 
   return classes

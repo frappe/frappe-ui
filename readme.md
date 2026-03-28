@@ -31,6 +31,7 @@ In 2019, I began building [Frappe Books](https://github.com/frappe/books) which 
 ## Links
 
 - [Documentation](https://frappeui.com)
+- [Vite Plugins](vite/README.md)
 - [Frappe UI Starter Boilerplate](https://github.com/netchampfaris/frappe-ui-starter)
 - [Community](https://github.com/frappe/frappe-ui/discussions)
 

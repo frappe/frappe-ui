@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { computed, ref } from 'vue'
 import {
   TagsInputRoot,
+  TagsInputInput,
   TagsInputItem,
   TagsInputItemText,
   TagsInputItemDelete,
@@ -10,11 +11,13 @@ import Combobox from '../../../../src/components/Combobox/Combobox.vue'
 import { getLabel, getIcon, RenderIcon, getValue } from './utils'
 import { type SimpleOption } from '../../../../src/components/Combobox/types'
 import { TagInputProps } from './types'
+import LucideX from '~icons/lucide/x'
 
 const props = defineProps<TagInputProps>()
-const search = ref('')
 const options = defineModel<SimpleOption[]>('options', { default: [] })
 const modelValue = defineModel<SimpleOption[]>({ default: [] })
+const rerenderCombobox = ref(0)
+
 const optionsWithIcons = computed(() => {
   if (!props.renderIcon) return options.value
   return options.value.map((k) =>
@@ -64,7 +67,7 @@ const filteredOptions = computed(() => {
 function addTag(tag: string) {
   if (!tag) return
   if (!modelValue.value.includes(tag)) modelValue.value.push(tag)
-  search.value = ''
+  rerenderCombobox.value += 1
 }
 
 function removeTag(tag: string) {
@@ -81,33 +84,43 @@ function removeTag(tag: string) {
       v-for="item in selectedTags"
       :key="getValue(item)"
       :value="getValue(item)"
-      class="shadow-sm m-0.25 mr-0 p-1.5 text-sm bg-white flex items-center justify-center gap-1.5 rounded p-0.5 ring-1 ring-outline-gray-1 shadow-xs"
+      class="shadow-sm m-0.25 mr-0 p-1.5 text-sm bg-white flex items-center justify-center gap-1.5 rounded p-0.5 ring-1 ring-outline-gray-2 shadow-xs"
     >
       <RenderIcon :icon="getIcon(item)" />
       <TagsInputItemText class="text-xs text-ink-gray-8">{{
         getLabel(item)
       }}</TagsInputItemText>
       <TagsInputItemDelete
-        class="p-0.5 rounded bg-transparent hover:bg-blackA4"
+        class="p-0.5 rounded-sm bg-transparent hover:bg-surface-gray-1"
         @click="removeTag(getValue(item))"
       >
         <LucideX class="size-3 text-ink-gray-6" />
       </TagsInputItemDelete>
     </TagsInputItem>
-    <!-- fix: keyboard navigation doesn't work -->
-    <Combobox
-      :options="filteredOptions"
-      v-model="search"
-      :placeholder
-      class="flex-1 min-w-[100px] text-xs focus:outline-none"
-      @update:modelValue="addTag"
-      :open-on-click="true"
-      variant="ghost"
-      :hide-trigger="true"
-    >
-      <template #add-email="{ searchTerm }">
-        {{ searchTerm }}
-      </template>
-    </Combobox>
+    <TagsInputInput :as-child="true">
+      <!-- Explicitly set unset type as TagInput passes it in -->
+      <Combobox
+        :key="rerenderCombobox"
+        :options="filteredOptions"
+        type=""
+        :placeholder
+        class="flex-1 min-w-[100px] text-xs focus:outline-none"
+        @update:modelValue="addTag"
+        :open-on-click="true"
+        variant="ghost"
+      >
+        <template #add-email="{ searchTerm }">
+          {{ searchTerm }}
+        </template>
+      </Combobox>
+    </TagsInputInput>
   </TagsInputRoot>
 </template>
+<style scoped>
+[data-state='active'] {
+  background: var(--surface-gray-1);
+}
+[aria-label='Show popup'] {
+  display: none;
+}
+</style>

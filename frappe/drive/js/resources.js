@@ -68,7 +68,7 @@ export const usersWithAccess = createResource({
 })
 
 export const updateAccess = createResource({
-  url: 'drive.api.files.call_controller_method',
+  url: 'drive.api.files.update_access',
   makeParams: (params) => ({ ...params, method: params.method || 'share' }),
   onError: (error) => toast.error(error.messages[0]),
 })
@@ -96,11 +96,10 @@ export const getTeam = createResource({
 })
 
 export const rename = createResource({
-  url: 'drive.api.files.call_controller_method',
+  url: 'drive.api.files.rename',
   method: 'POST',
   makeParams: (data) => {
     return {
-      method: 'rename',
       ...data,
     }
   },

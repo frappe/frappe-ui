@@ -26,7 +26,7 @@
           >
             <div class="flex flex-1 items-center gap-2">
               <div
-                class="w-13 flex-shrink-0 pl-2 text-end text-base text-ink-gray-5"
+                class="w-13 flex-shrink-0 ps-2 text-end text-base text-ink-gray-5"
               >
                 {{ i == 0 ? 'Where' : 'And' }}
               </div>

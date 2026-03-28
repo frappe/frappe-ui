@@ -98,6 +98,7 @@ export function createResource(options, vm) {
     try {
       out.promise = resourceFetcher({
         ...options,
+        onError: undefined,
         params: params || options.params,
       })
       let data = await out.promise

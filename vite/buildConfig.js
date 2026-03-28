@@ -1,5 +1,6 @@
 import path from 'path'
 import fs from 'fs'
+import { findAppName } from './utils.js'
 
 export function buildConfig(options = {}) {
   let outDir = options.outDir || findOutputDir()
@@ -10,11 +11,20 @@ export function buildConfig(options = {}) {
     return
   }
 
+  let indexHtmlPath = options.indexHtmlPath
+  if (!indexHtmlPath && options.frontendRoute) {
+    const appName = findAppName()
+    if (appName) {
+      const htmlName = options.frontendRoute.replace(/^\//, '')
+      indexHtmlPath = `../${appName}/www/${htmlName}.html`
+    }
+  }
+
   const defaultOptions = {
     outDir,
     emptyOutDir: true,
     sourcemap: true,
-    indexHtmlPath: null,
+    indexHtmlPath: indexHtmlPath || null,
     baseUrl: options.baseUrl || getBaseUrl(outDir),
   }
 

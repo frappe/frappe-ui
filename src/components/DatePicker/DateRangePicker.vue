@@ -58,6 +58,7 @@
             variant="ghost"
             size="sm"
             class="text-sm font-medium text-ink-gray-7"
+            label="cycle-calendar-view"
             @click="cycleView"
           >
             <span v-if="view === 'date'">
@@ -71,6 +72,7 @@
               variant="ghost"
               icon="chevron-left"
               class="size-7"
+              label="previous"
               @click="prev"
             />
             <Button
@@ -83,6 +85,7 @@
               variant="ghost"
               icon="chevron-right"
               class="size-7"
+              label="next"
               @click="next"
             />
           </div>
@@ -186,13 +189,13 @@
           </div>
         </div>
         <div
-          v-if="fromDate && toDate"
-          class="flex justify-end gap-1 p-2 border-t"
+          class="flex justify-end gap-1 p-2 border-t dark:border-outline-gray-2"
         >
           <Button
             size="sm"
             variant="outline"
             :label="'Clear'"
+            :disabled="!fromDate || !toDate"
             @click="() => handleClearClick(togglePopover)"
           />
         </div>

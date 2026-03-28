@@ -5,7 +5,7 @@
       :class="buttonClasses"
       @click="handleClick"
       :disabled="isDisabled"
-      :ariaLabel="ariaLabel"
+      :ariaLabel="label"
       :type = "props.type"
       ref="rootRef"
     >
@@ -34,7 +34,6 @@
           v-if="icon && typeof icon === 'string'"
           :name="icon"
           :class="slotClasses"
-          :aria-label="label"
         />
         <component v-else-if="icon" :is="icon" :class="slotClasses" />
         <slot name="icon" v-else-if="$slots.icon" />
@@ -200,10 +199,6 @@ const slotClasses = computed(() => {
 
 const isDisabled = computed(() => {
   return props.disabled || props.loading
-})
-
-const ariaLabel = computed(() => {
-  return isIconButton.value ? props.label : null
 })
 
 const isIconButton = computed(() => {

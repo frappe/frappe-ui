@@ -25,6 +25,7 @@
         :side="placementSide"
         :align="placementAlign"
         :sideOffset="offset"
+        :collisionPadding="collisionPadding"
         :style="{
           minWidth: matchTargetWidth
             ? 'var(--reka-popover-trigger-width)'
@@ -82,6 +83,7 @@ const props = withDefaults(defineProps<PopoverProps>(), {
   popoverClass: '',
   transition: null,
   hideOnBlur: true,
+  collisionPadding: 10,
 })
 
 const emit = defineEmits<{
@@ -104,14 +106,12 @@ const anchorRef = ref<HTMLElement | null>(null)
 
 const isOpen = computed({
   get: () => (isShowPropPassed.value ? props.show : _isOpen.value),
-	set: (value: boolean) => {
-		if (!isShowPropPassed.value) {
-			if (value !== _isOpen.value) {
-				_isOpen.value = value
-				onUpdateOpen(value)
-			}
-		}
-	},
+  set: (value: boolean) => {
+    if (!isShowPropPassed.value) {
+      _isOpen.value = value
+    }
+    emit('update:show', value)
+  },
 })
 
 const isShowPropPassed = computed(() => {

@@ -2,7 +2,7 @@
   <div class="flex items-center">
     <button
       @click="toggleGroup"
-      class="ml-[3px] mr-[11px] rounded p-1 hover:bg-surface-gray-2"
+      class="ms-[3px] me-[11px] rounded p-1 hover:bg-surface-gray-2"
     >
       <DownSolid
         class="h-4 w-4 text-ink-gray-6 transition-transform duration-200"
@@ -10,7 +10,7 @@
       />
     </button>
     <slot>
-      <div class="w-full py-1.5 pr-2">
+      <div class="w-full py-1.5 pe-2">
         <component
           v-if="list.slots['group-header']"
           :is="list.slots['group-header']"
