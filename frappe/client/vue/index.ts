@@ -28,4 +28,20 @@ export {
   type InsertPosition,
 } from './vueListHandle'
 
+export {
+  createVueNewDocHandle,
+  type VueNewDocHandle,
+  type VueNewDocHandleOptions,
+} from './vueNewDocHandle'
+
+export {
+  createVueCountHandle,
+  type VueCountHandle,
+  type VueCountHandleOptions,
+  type GetCountOptions,
+} from './vueCountHandle'
+
+export { uploadFile, type UploadHandle, type UploadFileOptions } from './uploadFile'
+
 export { wrapOperation, type ReactiveOperation } from './ReactiveOperation'
+

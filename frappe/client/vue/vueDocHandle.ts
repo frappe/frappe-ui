@@ -95,10 +95,7 @@ export function createVueDocHandle<TDoc extends Doc>(
     loading.value = true
     error.value = null
     try {
-      const json = await requestManager.fetch({
-        url: `/api/v2/document/${doctype}/${n}`,
-        method: 'GET',
-      })
+      const json = await requestManager.fetchDoc(doctype, n)
       if (json?.data) {
         store.set({ doctype, ...json.data })
       }
@@ -113,8 +110,12 @@ export function createVueDocHandle<TDoc extends Doc>(
         }
       }
     } catch (e) {
-      error.value = e as FrappeResponseError
-      onError?.(e as FrappeResponseError)
+      const err = e as FrappeResponseError
+      if (onError) {
+        err._suppressGlobalError = true
+        onError(err)
+      }
+      error.value = err
     } finally {
       loading.value = false
       if (!promiseSettled) {
@@ -234,8 +235,8 @@ export function createVueDocHandle<TDoc extends Doc>(
     },
   }
 
-  const setValue = wrapOperation(setCoreOp)
-  const deleteOp = wrapOperation(deleteCoreOp)
+  const setValue = wrapOperation(setCoreOp, { onError })
+  const deleteOp = wrapOperation(deleteCoreOp, { onError })
 
   // Map docMethods to reactive operations
   const mappedMethods: Record<string, ReactiveOperation<any, any>> = {}
@@ -270,7 +271,7 @@ export function createVueDocHandle<TDoc extends Doc>(
           }
         },
       }
-      mappedMethods[key] = wrapOperation(coreOp)
+      mappedMethods[key] = wrapOperation(coreOp, { onError })
     }
   }
 
