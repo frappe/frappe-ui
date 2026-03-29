@@ -14,7 +14,7 @@ export interface Operation<TParams, TResult> {
    */
   callOptimistic(
     params: TParams,
-    updater: (store: DocStore) => void,
+    updater?: (store: DocStore) => void,
     rollback?: (store: DocStore) => void,
   ): Promise<TResult>
 }
