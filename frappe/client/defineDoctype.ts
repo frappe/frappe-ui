@@ -16,12 +16,19 @@ export interface ControllerMethodDef<
 export type ControllerMethods = Record<string, ControllerMethodDef>
 
 export interface DoctypeOptions<
-  TControllerMethods extends ControllerMethods = ControllerMethods,
-  TDocMethods extends ControllerMethods = ControllerMethods,
+  TControllerMethods extends ControllerMethods = {},
+  TDocMethods extends ControllerMethods = {},
 > {
   baseUrl?: string
   controllerMethods?: TControllerMethods
   docMethods?: TDocMethods
+}
+
+export type DoctypeDefinition<
+  TControllerMethods extends ControllerMethods = {},
+  TDocMethods extends ControllerMethods = {},
+> = DoctypeOptions<TControllerMethods, TDocMethods> & {
+  doctype: string
 }
 
 export type MappedMethod<TMethod extends ControllerMethodDef> = {
@@ -64,13 +71,10 @@ export type MappedDocMethods<TDoc, TDocMethods extends ControllerMethods> = {
 
 export function defineDoctype<TDoc extends { name: string }>() {
   return function <
-    TControllerMethods extends ControllerMethods = ControllerMethods,
-    TDocMethods extends ControllerMethods = ControllerMethods,
-  >(
-    doctype: string,
-    options: DoctypeOptions<TControllerMethods, TDocMethods> = {},
-  ) {
-    const { baseUrl = '', controllerMethods, docMethods } = options
+    TControllerMethods extends ControllerMethods = {},
+    TDocMethods extends ControllerMethods = {},
+  >(definition: DoctypeDefinition<TControllerMethods, TDocMethods>) {
+    const { doctype, baseUrl = '', controllerMethods, docMethods } = definition
 
     const getDoc = createGetDoc<TDoc, TDocMethods>({
       doctype,

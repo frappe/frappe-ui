@@ -47,7 +47,8 @@ export interface ToDoInterface {
   creation: string
 }
 
-export const ToDo = defineDoctype<ToDoInterface>()('ToDo', {
+export const ToDo = defineDoctype<ToDoInterface>()({
+  doctype: 'ToDo',
   // Document-level methods (operate on a specific instance)
   docMethods: {
     setStatus: {
@@ -282,7 +283,8 @@ def send_email(names):
 ## Progress checklist
 
 - [x] Client factory initialization via `createClient({ baseUrl, realtime })`
-- [ ] Generated DocType definition via `defineDoctype<T>()('Doctype', config)`
+- [ ] Generated DocType definition via
+      `defineDoctype<T>()({ doctype: 'Doctype', ...config })`
 - [ ] Type-safe schema inference from generated interfaces
 - [ ] `getDoc` with reactive `MaybeRefOrGetter` name support and auto-refetch
 - [ ] `getDoc` operation state (`doc`, `loading`, `error`, `reload`)

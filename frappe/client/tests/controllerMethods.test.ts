@@ -30,7 +30,8 @@ describe('defineDoctype controllerMethods', () => {
       ),
     )
 
-    const ToDo = defineDoctype<ToDoDocType>()('ToDo', {
+    const ToDo = defineDoctype<ToDoDocType>()({
+      doctype: 'ToDo',
       baseUrl,
       controllerMethods: {
         sendEmail: {
@@ -74,7 +75,8 @@ describe('defineDoctype controllerMethods', () => {
       }),
     )
 
-    const ToDo = defineDoctype<ToDoDocType>()('ToDo', {
+    const ToDo = defineDoctype<ToDoDocType>()({
+      doctype: 'ToDo',
       baseUrl,
       controllerMethods: {
         failMethod: {
@@ -107,7 +109,8 @@ describe('defineDoctype controllerMethods', () => {
       }),
     )
 
-    const ToDo = defineDoctype<ToDoDocType>()('ToDo', {
+    const ToDo = defineDoctype<ToDoDocType>()({
+      doctype: 'ToDo',
       baseUrl,
       controllerMethods: {
         getInfo: {
@@ -139,7 +142,8 @@ describe('defineDoctype controllerMethods', () => {
       ),
     )
 
-    const ToDo = defineDoctype<ToDoDocType>()('ToDo', {
+    const ToDo = defineDoctype<ToDoDocType>()({
+      doctype: 'ToDo',
       baseUrl,
       controllerMethods: {
         complexAction: {
@@ -173,7 +177,8 @@ describe('defineDoctype controllerMethods', () => {
       result: number
     }
 
-    const ToDo = defineDoctype<ToDoDocType>()('ToDo', {
+    const ToDo = defineDoctype<ToDoDocType>()({
+      doctype: 'ToDo',
       baseUrl,
       controllerMethods: {
         typedMethod: {
@@ -204,7 +209,8 @@ describe('defineDoctype controllerMethods', () => {
       ),
     )
 
-    const ToDo = defineDoctype<ToDoDocType>()('ToDo', {
+    const ToDo = defineDoctype<ToDoDocType>()({
+      doctype: 'ToDo',
       baseUrl,
       controllerMethods: {
         sendEmail: {

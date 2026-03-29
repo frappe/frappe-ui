@@ -34,7 +34,8 @@ describe('createClient', () => {
     expect(client.baseUrl).toBe(baseUrl)
     expect(client.realtime).toBe(true)
 
-    const ToDo = defineDoctype<ToDoDocType>()('ToDo', {
+    const ToDo = defineDoctype<ToDoDocType>()({
+      doctype: 'ToDo',
       controllerMethods: {
         sendEmail: {
           method: 'send_email',
@@ -68,7 +69,8 @@ describe('createClient', () => {
 
     const { defineDoctype } = createClient({ baseUrl })
 
-    const ToDo = defineDoctype<ToDoDocType>()('ToDo', {
+    const ToDo = defineDoctype<ToDoDocType>()({
+      doctype: 'ToDo',
       baseUrl: overrideBaseUrl,
       controllerMethods: {
         sendEmail: {

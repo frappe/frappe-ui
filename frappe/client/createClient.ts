@@ -1,7 +1,7 @@
 import {
   defineDoctype as baseDefineDoctype,
   type ControllerMethods,
-  type DoctypeOptions,
+  type DoctypeDefinition,
 } from './defineDoctype'
 
 export interface CreateClientOptions {
@@ -30,15 +30,12 @@ export function createClient(
     const defineForDoctype = baseDefineDoctype<TDoc>()
 
     return function <
-      TControllerMethods extends ControllerMethods = ControllerMethods,
-      TDocMethods extends ControllerMethods = ControllerMethods,
-    >(
-      doctype: string,
-      doctypeOptions: DoctypeOptions<TControllerMethods, TDocMethods> = {},
-    ) {
-      return defineForDoctype<TControllerMethods, TDocMethods>(doctype, {
-        ...doctypeOptions,
-        baseUrl: doctypeOptions.baseUrl ?? baseUrl,
+      TControllerMethods extends ControllerMethods = {},
+      TDocMethods extends ControllerMethods = {},
+    >(definition: DoctypeDefinition<TControllerMethods, TDocMethods>) {
+      return defineForDoctype<TControllerMethods, TDocMethods>({
+        ...definition,
+        baseUrl: definition.baseUrl ?? baseUrl,
       })
     }
   }

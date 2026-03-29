@@ -32,7 +32,8 @@ describe('docMethods', () => {
       }),
     )
 
-    const ToDo = defineDoctype<ToDoDocType>()('ToDo', {
+    const ToDo = defineDoctype<ToDoDocType>()({
+      doctype: 'ToDo',
       baseUrl,
       docMethods: {
         setStatus: {
@@ -76,7 +77,8 @@ describe('docMethods', () => {
       }),
     )
 
-    const ToDo = defineDoctype<ToDoDocType>()('ToDo', {
+    const ToDo = defineDoctype<ToDoDocType>()({
+      doctype: 'ToDo',
       baseUrl,
       docMethods: {
         setStatus: {
@@ -118,7 +120,8 @@ describe('docMethods', () => {
       }),
     )
 
-    const ToDo = defineDoctype<ToDoDocType>()('ToDo', {
+    const ToDo = defineDoctype<ToDoDocType>()({
+      doctype: 'ToDo',
       baseUrl,
       docMethods: {
         failMethod: {
@@ -157,7 +160,8 @@ describe('docMethods', () => {
       }),
     )
 
-    const ToDo = defineDoctype<ToDoDocType>()('ToDo', {
+    const ToDo = defineDoctype<ToDoDocType>()({
+      doctype: 'ToDo',
       baseUrl,
       docMethods: {
         setStatus: {
@@ -199,7 +203,8 @@ describe('docMethods', () => {
       }),
     )
 
-    const ToDo = defineDoctype<ToDoDocType>()('ToDo', {
+    const ToDo = defineDoctype<ToDoDocType>()({
+      doctype: 'ToDo',
       baseUrl,
       docMethods: {
         failMethod: {
@@ -248,7 +253,8 @@ describe('docMethods', () => {
       }),
     )
 
-    const ToDo = defineDoctype<ToDoDocType>()('ToDo', {
+    const ToDo = defineDoctype<ToDoDocType>()({
+      doctype: 'ToDo',
       baseUrl,
       docMethods: {
         batchUpdate: {

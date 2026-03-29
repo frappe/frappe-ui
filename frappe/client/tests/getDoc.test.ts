@@ -11,7 +11,7 @@ import './setup'
 
 describe('getDoc', () => {
   it('fetches a document and returns expected object', async () => {
-    const ToDo = defineDoctype<ToDoDocType>()('ToDo', { baseUrl })
+    const ToDo = defineDoctype<ToDoDocType>()({ doctype: 'ToDo', baseUrl })
 
     const todo = ToDo.getDoc('todo-1')
 
@@ -38,7 +38,7 @@ describe('getDoc', () => {
   })
 
   it('handles error when document is not found', async () => {
-    const ToDo = defineDoctype<ToDoDocType>()('ToDo', { baseUrl })
+    const ToDo = defineDoctype<ToDoDocType>()({ doctype: 'ToDo', baseUrl })
 
     const todo = ToDo.getDoc('non-existent')
 
@@ -50,7 +50,7 @@ describe('getDoc', () => {
   })
 
   it('can reload the document', async () => {
-    const ToDo = defineDoctype<ToDoDocType>()('ToDo', { baseUrl })
+    const ToDo = defineDoctype<ToDoDocType>()({ doctype: 'ToDo', baseUrl })
 
     const todo = ToDo.getDoc('todo-1')
 
@@ -69,7 +69,7 @@ describe('getDoc', () => {
   })
 
   it('fetches different document with different name', async () => {
-    const ToDo = defineDoctype<ToDoDocType>()('ToDo', { baseUrl })
+    const ToDo = defineDoctype<ToDoDocType>()({ doctype: 'ToDo', baseUrl })
 
     const todo1 = ToDo.getDoc('todo-1')
     const todo2 = ToDo.getDoc('todo-2')
@@ -85,7 +85,7 @@ describe('getDoc', () => {
   })
 
   it('refetches when reactive name changes', async () => {
-    const ToDo = defineDoctype<ToDoDocType>()('ToDo', { baseUrl })
+    const ToDo = defineDoctype<ToDoDocType>()({ doctype: 'ToDo', baseUrl })
 
     const todoName = ref('todo-1')
     const todo = ToDo.getDoc(todoName)
@@ -110,7 +110,7 @@ describe('getDoc', () => {
   })
 
   it('can update document fields with setValue', async () => {
-    const ToDo = defineDoctype<ToDoDocType>()('ToDo', { baseUrl })
+    const ToDo = defineDoctype<ToDoDocType>()({ doctype: 'ToDo', baseUrl })
 
     const todo = ToDo.getDoc('todo-1')
 
@@ -135,7 +135,7 @@ describe('getDoc', () => {
   })
 
   it('can delete a document', async () => {
-    const ToDo = defineDoctype<ToDoDocType>()('ToDo', { baseUrl })
+    const ToDo = defineDoctype<ToDoDocType>()({ doctype: 'ToDo', baseUrl })
 
     const todo = ToDo.getDoc('todo-1')
 
