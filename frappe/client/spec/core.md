@@ -14,8 +14,12 @@ consumers (getDoc, getList, socket updates).
 interface DocStore {
   get(doctype: string, name: string): Doc | null
   set(doc: Doc): void               // merges into existing, notifies subscribers
-  setMany(docs: Doc[]): void         // batch merge, notifies once per doc
+  setMany(docs: Doc[]): void        // batch merge, notifies once per doc
   remove(doctype: string, name: string): void
+
+  // Subscribe to every set/remove across all doctypes.
+  // Used by CacheAdapter to write-behind on every mutation.
+  subscribeAll(listener: (doc: Doc | null) => void): () => void
 
   // Subscribe to a specific document. Returns unsubscribe function.
   // Listener fires synchronously on set/remove — framework layer handles batching.
@@ -26,16 +30,16 @@ interface DocStore {
   ): () => void
 
   // Subscribe to any change for a doctype (used by lists to know when to check their items).
-  // Fires with the name of the changed doc.
+  // Fires with the name and doc of the changed entry.
   subscribeDoctype(
     doctype: string,
     listener: (name: string, doc: Doc | null) => void,
   ): () => void
 
-  // For cold-start hydration from IDB / SSR
+  // Cold-start hydration from IDB / SSR — does not notify subscribers.
   hydrate(docs: Doc[]): void
 
-  // Snapshot for debugging / devtools
+  // Snapshot all docs for a doctype.
   getAll(doctype: string): Doc[]
 }
 
@@ -43,7 +47,8 @@ type Doc = { doctype: string; name: string; [key: string]: any }
 ```
 
 Internal implementation: `Map<"DocType/name", Doc>` +
-`Map<"DocType/name", Set<Listener>>` + `Map<"DocType", Set<DoctypeListener>>`.
+`Map<"DocType/name", Set<Listener>>` + `Map<"DocType", Set<DoctypeListener>>` +
+`Set<GlobalListener>`.
 
 ### Merge semantics
 
@@ -66,7 +71,10 @@ Handles HTTP concerns: deduplication, CSRF, abort, global hooks.
 
 ```ts
 interface RequestManager {
-  fetch(config: RequestConfig): Promise<Response>
+  /** Executes an HTTP request and returns the parsed JSON body. */
+  fetch(config: RequestConfig): Promise<any>
+  /** Fetches a single document. Resolves with the raw API JSON (`.data` holds the doc). */
+  fetchDoc(doctype: string, name: string): Promise<any>
 }
 
 interface RequestConfig {
@@ -74,14 +82,14 @@ interface RequestConfig {
   method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
   body?: Record<string, any>
   // If true, concurrent requests to the same URL+method are deduplicated.
-  // Second caller gets the same Promise as the first.
+  // Defaults to true for GET, false for mutations.
   dedupe?: boolean
   signal?: AbortSignal
 }
 
 interface RequestManagerConfig {
-  baseUrl: string
-  // Called before every request. Return modified headers or add CSRF token.
+  baseUrl?: string
+  // Called before every request. Return a modified config to override it.
   onRequest?: (config: RequestConfig) => RequestConfig | void
   // Called on every error. Use for session expiry, global toasts, etc.
   onError?: (error: FrappeResponseError) => void
@@ -90,11 +98,11 @@ interface RequestManagerConfig {
 }
 ```
 
-Deduplication key: `${method}:${url}`. Only applies to GET requests by default.
-POST/PATCH/DELETE are never deduplicated.
+Deduplication key: `${method}:${fullUrlWithParams}`. Only GET requests are
+deduplicated by default. POST/PATCH/DELETE are never deduplicated.
 
-CSRF token: read from cookie `csrf_token` on every mutating request, send as
-`X-Frappe-CSRF-Token` header. Also send `credentials: 'include'` for
+CSRF token: read from cookie `csrf_token` on every mutating request, sent as
+`X-Frappe-CSRF-Token` header. Also sends `credentials: 'include'` for
 cookie-based auth.
 
 ---
@@ -106,43 +114,68 @@ hydration and background persistence.
 
 ```ts
 interface CacheAdapter {
-  // Called after DocStore.set() — writes to IDB in the background
   persist(doc: Doc): void
   persistMany(docs: Doc[]): void
-
-  // Called once on startup — loads all cached docs into DocStore
   loadAll(): Promise<Doc[]>
-
-  // Remove from persistent cache
   remove(doctype: string, name: string): void
   clear(): void
 }
 ```
 
-No `entries()` scans. No read-from-IDB on every mutation. On page load:
-`CacheAdapter.loadAll() → DocStore.hydrate(docs)`. After that, IDB is
-write-only until next page load.
+Three implementations are provided: `createMemoryCacheAdapter()` (tests),
+`createIDBCacheAdapter(dbName?)` (IndexedDB), and
+`createDefaultCacheAdapter(dbName?)` (IDB when available, memory fallback).
+
+Wire a cache to DocStore using `connectCache(store, cache)`:
+
+- Registers a `subscribeAll` listener before awaiting `loadAll()` so no writes
+  slip through during the initial IDB scan.
+- `loadAll()` → `store.hydrate(docs)` on startup.
+- After that, every `store.set()` triggers `cache.persist()` in the background.
 
 ---
 
 ## SocketManager
 
-Connects Socket.IO to DocStore. Fires on `doc_update`, `doc_rename`.
+Manages Socket.IO events and exposes typed subscription helpers.
 
 ```ts
 interface SocketManager {
   connect(): void
   disconnect(): void
   on(event: string, handler: (...args: any[]) => void): () => void
+  off(event: string, handler?: (...args: any[]) => void): void
+  /**
+   * Subscribe to list_update events for a specific doctype.
+   * Emits `doctype_subscribe` to the server on the first subscriber,
+   * and `doctype_unsubscribe` when the last subscriber is removed.
+   * Returns an unsubscribe function.
+   */
+  onDocUpdate(doctype: string, callback: (name: string) => void): () => void
+  /**
+   * Subscribe to doc_rename events for a specific doctype.
+   * Returns an unsubscribe function.
+   */
+  onDocRename(
+    doctype: string,
+    callback: (newName: string, oldName: string) => void,
+  ): () => void
 }
 ```
 
-On `doc_update`: extract `payload.docs` → `DocStore.setMany(docs)`. All
-subscribers (getDoc, getList) update automatically through DocStore
-notifications.
+**`list_update`** payload: `{ doctype, name, user }` — sent to the doctype
+room when any doc in that doctype is saved. No full doc data is included; the
+list handle fetches the changed doc individually (or refetches the whole page).
 
-On `doc_rename`: `DocStore.remove(doctype, oldName)` +
-`DocStore.set(newDoc)`.
+**`doc_rename`** payload: `{ doctype, old, new }` — sent to the doc room.
+Triggers `DocStore.remove(doctype, oldName)` and emits the event to local
+subscribers.
+
+Two factory functions are provided:
+- `createNoopSocketManager()` — all methods are no-ops; used when `realtime` is false.
+- `createSocketManager(store, socketIo)` — full implementation.
+- `createLazySocketManager(store, initFn)` — wraps `createSocketManager`; defers
+  `initFn()` until the first subscriber calls `onDocUpdate`/`onDocRename`.
 
 ---
 
@@ -156,14 +189,16 @@ Single verb: **`.call()`** — for all operations.
 ```ts
 interface Operation<TParams, TResult> {
   // Execute the operation. Updates DocStore on success.
+  // Rejects on error with FrappeResponseError.
   call(params: TParams): Promise<TResult>
 
-  // Execute with optimistic update. Applies `updater` to DocStore immediately,
-  // reverts on error.
+  // Execute with optional optimistic update. If `updater` is provided it is
+  // applied to DocStore immediately. On error, calls `rollback` or auto-reverts
+  // via a pre-update snapshot.
   callOptimistic(
     params: TParams,
-    updater: (store: DocStore) => void,     // apply optimistic change
-    rollback?: (store: DocStore) => void,   // optional explicit rollback; if omitted, auto-reverts
+    updater?: (store: DocStore) => void,
+    rollback?: (store: DocStore) => void,
   ): Promise<TResult>
 }
 ```
@@ -200,67 +235,22 @@ if (todo.setValue.error) { /* show inline error */ }
 
 ---
 
-## Core vs Framework Adapter Boundary
-
-The core layer is **imperative**. It provides functions that fetch data, write
-to DocStore, and return Promises. No reactivity, no auto-refetch, no watchers.
-
-```ts
-// Core: imperative, plain strings, returns dispose handle
-interface CoreDocHandle<TDoc> {
-  doc: TDoc | null                  // snapshot from DocStore (not reactive)
-  promise: Promise<void>            // resolves when fetch completes
-  reload(): Promise<void>           // refetch from server
-  dispose(): void                   // unsubscribe from DocStore, cancel in-flight
-  setValue: Operation<Partial<TDoc>, TDoc>
-  delete: Operation<void, void>
-  // + mapped docMethods as Operation
-}
-
-interface CoreListHandle<TDoc> {
-  data: TDoc[]                      // snapshot (not reactive)
-  promise: Promise<void>
-  reload(): Promise<void>
-  dispose(): void
-  next(): void
-  previous(): void
-  hasNextPage: boolean
-  hasPreviousPage: boolean
-  setValue: Operation<Partial<TDoc> & { name: string }, TDoc>
-  delete: Operation<string, void>
-  insert: Operation<Partial<TDoc>, TDoc>
-}
-```
-
-The **Vue adapter** wraps these with reactivity:
-
-- `name: MaybeRefOrGetter<string>` → watches, calls `dispose()` + creates new
-  core handle on change
-- `enabled: () => boolean` → delays core handle creation until truthy
-- `doc` / `data` → `shallowRef` updated via `DocStore.subscribe()`
-- `loading` / `error` → `ref()` wrappers
-- `tryOnScopeDispose()` → calls `dispose()` automatically
-
-Reactive filter values, auto-refetch on name change, debounce — all Vue adapter
-concerns. The core knows nothing about them.
-
----
-
 ## FrappeResponseError
 
 ```ts
 class FrappeResponseError extends Error {
   title: string
   type: string
-  messages: Array<{ type: string; message: string }>  // all errors, not just first
+  messages: Array<{ type: string; message: string }>
   exception?: string
   indicator?: string
   httpStatus: number
+  _suppressGlobalError: boolean  // set by local onError to prevent global handler
 
-  get isNotFound(): boolean
-  get isPermission(): boolean
-  get isValidation(): boolean
-  get isAuth(): boolean
+  get isNotFound(): boolean    // httpStatus === 404
+  get isPermission(): boolean  // httpStatus === 403
+  get isValidation(): boolean  // type === 'ValidationError'
+  get isAuth(): boolean        // httpStatus === 401
 }
 ```
 
@@ -268,11 +258,11 @@ class FrappeResponseError extends Error {
 
 ## Progress Checklist
 
-- [ ] DocStore: get/set/remove/subscribe/subscribeDoctype/hydrate
-- [ ] RequestManager: fetch with dedup + CSRF + abort + global hooks
-- [ ] CacheAdapter: IDB write-behind + loadAll
-- [ ] SocketManager: doc_update + doc_rename → DocStore
-- [ ] FrappeResponseError with structured error types
-- [ ] Operation shape with call/callOptimistic
-- [ ] CoreDocHandle with dispose
-- [ ] CoreListHandle with dispose
+- [x] DocStore: get/set/remove/subscribe/subscribeDoctype/subscribeAll/hydrate
+- [x] RequestManager: fetch + fetchDoc with dedup + CSRF + abort + global hooks
+- [x] CacheAdapter: IDB write-behind + loadAll + connectCache
+- [x] SocketManager: list_update + doc_rename with onDocUpdate/onDocRename helpers
+- [x] FrappeResponseError with structured error types
+- [x] Operation shape with call/callOptimistic
+- [x] CoreDocHandle with dispose
+- [x] CoreListHandle with dispose

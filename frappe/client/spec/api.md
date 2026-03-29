@@ -11,30 +11,28 @@ Typically called once in the app's client setup file (e.g., `src/client.ts`).
 
 ```ts
 // src/client.ts
-import { createClient } from 'frappe-ui/frappe'
+import { createClient, createDefaultCacheAdapter } from 'frappe-ui/frappe/vue'
 
 export const { defineDoctype, store, socket } = createClient({
   baseUrl: 'https://mysite.com',
   realtime: true,
-
-  // Global hooks — handle session expiry, logging, CSRF
-  onRequest(config) {
-    config.headers['X-Custom'] = 'value'
-  },
+  cache: createDefaultCacheAdapter('my-app-cache'),
   onError(error) {
     if (error.isAuth) router.push('/login')
-    if (error.isValidation) toast.error(error.message)
   },
 })
 ```
 
-Returns:
+Options:
 
-| Export          | Type                    | Purpose                                    |
-|-----------------|-------------------------|--------------------------------------------|
-| `defineDoctype` | curried generic factory | Define a DocType with methods              |
-| `store`         | `DocStore`              | Direct store access (rare, for power users)|
-| `socket`        | `SocketManager`         | Socket control (connect/disconnect/on)     |
+| Option | Type | Description |
+|---|---|---|
+| `baseUrl?` | `string` | Prepended to all API requests. Defaults to `''`. |
+| `realtime?` | `boolean` | Enable live `list_update` / `doc_rename` events via Socket.IO. |
+| `cache?` | `CacheAdapter` | Persistence adapter for cold-start hydration (e.g. `createDefaultCacheAdapter()`). |
+| `onRequest?` | `(config: RequestConfig) => RequestConfig \| void` | Interceptor called before every request. |
+| `onResponse?` | `(response: any) => void` | Called after every successful response. |
+| `onError?` | `(error: FrappeResponseError) => void` | Global error handler. |
 
 ---
 
@@ -139,10 +137,9 @@ resolve: {
 
 ```ts
 // src/client.ts
-import { createClient } from 'frappe-ui/frappe'
+import { createClient } from 'frappe-ui/frappe/vue'
 
 export const { defineDoctype, store, socket } = createClient({
-  baseUrl: 'https://mysite.com',
   realtime: true,
   onError(error) {
     if (error.isAuth) router.push('/login')
@@ -205,31 +202,31 @@ todo.doc           // Doc | null — reads from canonical DocStore
 todo.loading       // boolean — true during fetch
 todo.error         // FrappeResponseError | null
 todo.reload()      // refetch from server
+todo.dispose()     // unsubscribe; called automatically on scope cleanup
 todo.promise       // Promise<void> — resolves when first fetch completes (for await / Suspense)
 ```
 
 ### Standard mutations
 
 ```ts
-// setValue — object form
+// setValue — PATCH /api/v2/document/{doctype}/{name}
 await todo.setValue.call({ description: 'Updated' })
 
-// setValue — updater function (safer for concurrent updates)
-await todo.setValue.call((doc) => ({ priority: doc.priority + 1 }))
-
 // Optimistic: applies to DocStore immediately, reverts on error
-await todo.setValue.call({ status: 'Closed' }, { optimistic: true })
+await todo.setValue.callOptimistic({ status: 'Closed' })
 
-// Custom optimistic transform
-await todo.setValue.call({ status: 'Closed' }, {
-  optimistic: (doc) => ({ ...doc, status: 'Closed', closedAt: Date.now() })
-})
+// Custom optimistic: provide explicit store updater + rollback
+await todo.setValue.callOptimistic(
+  { status: 'Closed' },
+  (store) => store.set({ ...store.get('ToDo', todo.doc.name), status: 'Closed', closedAt: Date.now() }),
+)
 
 todo.setValue.loading   // boolean
 todo.setValue.error     // FrappeResponseError | null
 
-// Delete
+// Delete — DELETE /api/v2/document/{doctype}/{name}
 await todo.delete.call()
+await todo.delete.callOptimistic()  // removes from store immediately
 
 todo.delete.loading
 todo.delete.error
@@ -303,25 +300,33 @@ todos.hasPreviousPage  // boolean
 todos.reload()         // refetch current page
 todos.next()           // fetch next page (increments start by limit)
 todos.previous()       // fetch previous page
+todos.dispose()        // unsubscribe; called automatically on scope cleanup
 todos.promise          // Promise<void>
 ```
 
 ### List mutations
 
 ```ts
-// Update a row
+// Update a row — PATCH /api/v2/document/{doctype}/{name}
 await todos.setValue.call({ name: 'todo-1', status: 'Closed' })
-await todos.setValue.call({ name: 'todo-1', status: 'Closed' }, { optimistic: true })
+await todos.setValue.callOptimistic({ name: 'todo-1', status: 'Closed' })
 
-// Delete a row
+// Delete a row — DELETE /api/v2/document/{doctype}/{name}
 await todos.delete.call('todo-1')
-await todos.delete.call('todo-1', { optimistic: true })
+await todos.delete.callOptimistic('todo-1')  // removes from list + store immediately
 
-// Insert a new row
+// Insert a new row — POST /api/v2/document/{doctype}
 await todos.insert.call({ description: 'New task', status: 'Open' })
-await todos.insert.call(
+// Insert at end of list
+await todos.insert.call({ description: 'New task' }, { at: 'end' })
+// Insert at specific index
+await todos.insert.call({ description: 'New task' }, { at: 2 })
+
+// Optimistic insert — show a placeholder immediately, replace on success
+await todos.insert.callOptimistic(
   { description: 'New task' },
-  { optimistic: (items) => [{ name: 'temp', description: 'New task', ...defaults }, ...items] }
+  { name: 'temp', description: 'New task' },  // tempDoc shown in list during flight
+  { at: 'start' },
 )
 ```
 
@@ -379,10 +384,9 @@ const todo = ToDo.newDoc({
 todo.doc.description = 'Draft task'
 todo.doc.assigned_to = 'faris@frappe.io'
 
-// Persist to server
+// Persist to server — POST /api/v2/document/{doctype}
 await todo.insert.call()
-// → POST /api/v2/document/ToDo
-// → On success: doc added to DocStore, available to all getList/getDoc consumers
+// → On success: doc added to DocStore, merges server-assigned fields back into todo.doc
 
 todo.insert.loading
 todo.insert.error
@@ -444,20 +448,23 @@ await ToDo.exportCsv.call({ format: 'csv' })
 ## File Uploads
 
 ```ts
-import { uploadFile } from 'frappe-ui/frappe'
+import { uploadFile } from 'frappe-ui/frappe/vue'
 
 const upload = uploadFile({
   file: myBlob,
   doctype: 'ToDo',
   name: 'todo-1',
   fieldname: 'attachment',
-  isPrivate: true,
+  isPrivate: true,     // default: true
+  folder: 'Home/Attachments',  // default
+  baseUrl: '',         // default
 })
 
 upload.call()
 upload.progress    // 0–100
+upload.loading     // boolean
 upload.data        // File doc on success
-upload.error       // on failure
+upload.error       // FrappeResponseError | null on failure
 upload.abort()     // cancel upload
 ```
 
@@ -471,15 +478,19 @@ See [vue.md](./vue.md) for the full Vue adapter specification.
 
 ## Real-time Integration
 
-When `realtime: true`:
+When `realtime: true`, `createClient` connects to Frappe's Socket.IO server
+using the Frappe socket URL convention (injected via the frappe-ui Vite plugin).
+
+**`list_update`** — sent to the doctype room when any doc is saved. Each
+`getList` handle subscribes to this event via `socket.onDocUpdate()` and either:
+- refetches the changed doc individually (if its name is already in the list), or
+- refetches the whole page (if the name is new, indicating a potential insertion).
+
+**`doc_rename`** — sent to the doc room when a document is renamed.
+`DocStore.remove(doctype, oldName)` is called automatically.
 
 ```ts
-// Automatic — no code needed
-// Socket connects on createClient()
-// doc_update → DocStore.setMany(payload.docs) → all subscribers update
-// doc_rename → DocStore.remove(old) + DocStore.set(new)
-
-// Manual listening (rare)
+// Manual per-doctype listeners (no subscription to server room required)
 const unsub = ToDo.onUpdate((name) => {
   console.log(`${name} was updated remotely`)
 })
@@ -487,27 +498,31 @@ const unsub = ToDo.onUpdate((name) => {
 const unsub2 = ToDo.onRename((newName, oldName) => {
   console.log(`${oldName} renamed to ${newName}`)
 })
+
+// Unsubscribe
+unsub()
+unsub2()
 ```
 
 ---
 
 ## Progress Checklist
 
-- [ ] `createClient` with baseUrl, realtime, onRequest, onError
-- [ ] `defineDoctype<T>()()` — curried generic factory (internal, called by generated code)
-- [ ] `@/client` module — app's client setup file exporting defineDoctype
-- [ ] `getDoc` with enabled, transform, onSuccess/onError, promise
-- [ ] `getDoc` setValue (object + updater function), optimistic, delete — all via `.call()`
-- [ ] `getDoc` custom docMethods with `.call()`
-- [ ] `getDoc` reactive name + auto-refetch
-- [ ] `getList` with per-key reactive filters, debounce, enabled
-- [ ] `getList` pagination: next, previous, hasNextPage, hasPreviousPage
-- [ ] `getList` mutations: setValue, delete, insert (with optimistic)
-- [ ] `getList` cross-instance sync via DocStore
-- [ ] `newDoc` draft → insert flow
-- [ ] `getCount` with reactive filters
-- [ ] Bulk delete + bulk update
-- [ ] Controller methods with `.call()`
-- [ ] File upload with progress
-- [ ] Vue adapter (see [vue.md](./vue.md))
-- [ ] Real-time: onUpdate, onRename hooks
+- [x] `createClient` with baseUrl, realtime, cache, onRequest, onError, onResponse
+- [x] `defineDoctype<T>()()` — curried generic factory (internal, called by generated code)
+- [x] `@/client` module — app's client setup file exporting defineDoctype
+- [x] `getDoc` with enabled, transform, onSuccess/onError, promise
+- [x] `getDoc` setValue via `.call()` and `.callOptimistic()`, delete
+- [x] `getDoc` custom docMethods with `.call()`
+- [x] `getDoc` reactive name + auto-refetch
+- [x] `getList` with per-key and whole-object reactive filters, debounce, enabled
+- [x] `getList` pagination: next, previous, hasNextPage, hasPreviousPage
+- [x] `getList` mutations: setValue, delete, insert (with callOptimistic + position)
+- [x] `getList` cross-instance sync via DocStore
+- [x] `newDoc` draft → insert flow
+- [x] `getCount` with reactive filters
+- [x] Bulk delete + bulk update
+- [x] Controller methods with `.call()`
+- [x] File upload with progress via `uploadFile`
+- [x] Vue adapter (see [vue.md](./vue.md))
+- [x] Real-time: list_update auto-refetch in getList, onUpdate/onRename hooks
