@@ -296,11 +296,11 @@ export function createVueListHandle<TDoc extends Doc>(
           .then((json) => {
             if (json?.data) store.set({ doctype, ...json.data })
           })
-          .catch(() => fetchPage(currentStart))
+          .catch(() => triggerFetch())
       } else {
         // Unknown name — could be a new insert matching current filters.
-        // Reload so the list stays accurate.
-        fetchPage(currentStart)
+        // Use triggerFetch so the debounce config is respected.
+        triggerFetch()
       }
     })
   }
