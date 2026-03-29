@@ -32,3 +32,4 @@ export { default as telemetryPlugin, useTelemetry } from './telemetry/index.ts'
 
 // frappe client
 export { createClient, defineDoctype } from './client'
+export { initFrappeSocket } from './client/vue/frappe-socket'

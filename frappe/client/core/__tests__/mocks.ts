@@ -70,6 +70,18 @@ function notFound(name: string) {
 }
 
 export const handlers = [
+  // GET count
+  http.get(`${BASE_URL}/api/v2/doctype/ToDo/count`, ({ request }) => {
+    const url = new URL(request.url)
+    const filtersParam = url.searchParams.get('filters')
+    const filters: Record<string, any> = filtersParam ? JSON.parse(filtersParam) : {}
+    let todos = Object.values(mockTodos)
+    if (filters.status) {
+      todos = todos.filter((t) => t.status === filters.status)
+    }
+    return HttpResponse.json({ data: todos.length })
+  }),
+
   // GET single doc
   http.get(`${BASE_URL}/api/v2/document/ToDo/:name`, ({ params }) => {
     const { name } = params as { name: string }
@@ -143,6 +155,30 @@ export const handlers = [
       data: page,
       has_next_page: start + limit < todos.length,
     })
+  }),
+
+  // POST bulk_delete (body contains names array)
+  http.post(`${BASE_URL}/api/v2/document/ToDo/bulk_delete`, async ({ request }) => {
+    let body: any
+    try { body = await request.json() } catch { body = {} }
+    const names: string[] = body?.names ?? []
+    names.forEach((n) => delete mockTodos[n])
+    return HttpResponse.json({ data: null })
+  }),
+
+  // POST bulk_update (body contains docs array)
+  http.post(`${BASE_URL}/api/v2/document/ToDo/bulk_update`, async ({ request }) => {
+    const body = (await request.json()) as any
+    const rows: Array<{ name: string } & Record<string, any>> = body?.docs ?? []
+    const updated: Omit<TodoDoc, 'doctype'>[] = []
+    rows.forEach((row) => {
+      const { name, ...rest } = row
+      if (mockTodos[name]) {
+        Object.assign(mockTodos[name], rest)
+        updated.push(mockTodos[name])
+      }
+    })
+    return HttpResponse.json({ docs: updated.map((d) => ({ ...d, doctype: 'ToDo' })) })
   }),
 ]
 
