@@ -14,6 +14,7 @@ import type { DocStore } from '../core/DocStore'
 import type { RequestManager } from '../core/RequestManager'
 import type { FrappeResponseError } from '../core/FrappeResponseError'
 import type { Operation } from '../core/Operation'
+import type { SocketManager } from '../core/SocketManager'
 import { wrapOperation, type ReactiveOperation } from './ReactiveOperation'
 
 /**
@@ -44,6 +45,8 @@ export interface VueListHandleOptions<TDoc extends Doc> {
   /** Debounce filter changes by this many ms before refetching. */
   debounce?: number
   enabled?: MaybeRefOrGetter<boolean>
+  /** Socket manager injected by createVueClient for automatic realtime row updates. */
+  socket?: SocketManager
   transform?: (doc: TDoc) => TDoc
   onSuccess?: (docs: TDoc[]) => void
   onError?: (err: FrappeResponseError) => void
@@ -125,6 +128,7 @@ export function createVueListHandle<TDoc extends Doc>(
     start = 0,
     debounce: debounceMs,
     enabled,
+    socket,
     transform,
     onSuccess,
     onError,
@@ -141,6 +145,9 @@ export function createVueListHandle<TDoc extends Doc>(
 
   // Unsubscribe doctype listener when done
   let unsubscribeDoctype: () => void = () => {}
+
+  // Unsubscribe realtime list_update listener
+  let unsubscribeRealtime: () => void = () => {}
 
   // When any tracked doc changes in the store, the computed auto-re-derives
   // because `store.get()` is called inside `computed`. However DocStore is not
@@ -235,8 +242,12 @@ export function createVueListHandle<TDoc extends Doc>(
         }
       }
     } catch (e) {
-      error.value = e as FrappeResponseError
-      onError?.(e as FrappeResponseError)
+      const err = e as FrappeResponseError
+      if (onError) {
+        err._suppressGlobalError = true
+        onError(err)
+      }
+      error.value = err
     } finally {
       loading.value = false
       if (!promiseSettled) {
@@ -274,6 +285,25 @@ export function createVueListHandle<TDoc extends Doc>(
   })
 
   subscribeDoctype()
+
+  if (socket) {
+    unsubscribeRealtime = socket.onDocUpdate(doctype, (name) => {
+      if (names.value.includes(name)) {
+        // Only this specific doc changed — fetch it individually so the rest
+        // of the list stays stable (no flicker, no pagination reset).
+        requestManager
+          .fetchDoc(doctype, name)
+          .then((json) => {
+            if (json?.data) store.set({ doctype, ...json.data })
+          })
+          .catch(() => fetchPage(currentStart))
+      } else {
+        // Unknown name — could be a new insert matching current filters.
+        // Reload so the list stays accurate.
+        fetchPage(currentStart)
+      }
+    })
+  }
 
   // --- Operations ---
 
@@ -392,12 +422,12 @@ export function createVueListHandle<TDoc extends Doc>(
     names.value = arr
   }
 
-  const setValue = wrapOperation(setCoreOp)
-  const deleteOp = wrapOperation(deleteCoreOp)
+  const setValue = wrapOperation(setCoreOp, { onError })
+  const deleteOp = wrapOperation(deleteCoreOp, { onError })
 
   // Insert gets its own wrapper so callOptimistic can accept a tempDoc
   // placeholder instead of a raw store updater.
-  const _insertBase = wrapOperation(insertCoreOp)
+  const _insertBase = wrapOperation(insertCoreOp, { onError })
   const insertOp: InsertOperation<TDoc> = {
     loading: _insertBase.loading as unknown as boolean,
     error: _insertBase.error as unknown as FrappeResponseError | null,
@@ -439,6 +469,7 @@ export function createVueListHandle<TDoc extends Doc>(
 
   function dispose() {
     unsubscribeDoctype()
+    unsubscribeRealtime()
   }
 
   tryOnScopeDispose(dispose)

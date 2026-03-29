@@ -3,6 +3,11 @@ import type { Operation } from '../core/Operation'
 import type { FrappeResponseError } from '../core/FrappeResponseError'
 import type { DocStore } from '../core/DocStore'
 
+export interface ReactiveOperationOptions {
+  /** Called when the operation errors. When provided, suppresses the global onError handler. */
+  onError?: (err: FrappeResponseError) => void
+}
+
 export interface ReactiveOperation<TParams, TResult> {
   call(params: TParams): Promise<TResult>
   callOptimistic(
@@ -17,6 +22,7 @@ export interface ReactiveOperation<TParams, TResult> {
 
 export function wrapOperation<TParams, TResult>(
   op: Operation<TParams, TResult>,
+  options?: ReactiveOperationOptions,
 ): ReactiveOperation<TParams, TResult> {
   const loading = ref(false)
   const error = ref<FrappeResponseError | null>(null)
@@ -35,8 +41,13 @@ export function wrapOperation<TParams, TResult>(
         data.value = result as any
         return result
       } catch (e) {
-        error.value = e as FrappeResponseError
-        throw e
+        const err = e as FrappeResponseError
+        if (options?.onError) {
+          err._suppressGlobalError = true
+          options.onError(err)
+        }
+        error.value = err
+        throw err
       } finally {
         loading.value = false
       }
@@ -50,8 +61,13 @@ export function wrapOperation<TParams, TResult>(
         data.value = result as any
         return result
       } catch (e) {
-        error.value = e as FrappeResponseError
-        throw e
+        const err = e as FrappeResponseError
+        if (options?.onError) {
+          err._suppressGlobalError = true
+          options.onError(err)
+        }
+        error.value = err
+        throw err
       } finally {
         loading.value = false
       }
