@@ -43,11 +43,6 @@ export function createRequestManager(
       const dedupe = requestConfig.dedupe ?? !isMutation
 
       const fullUrl = baseUrl ? `${baseUrl}${url}` : url
-      const dedupeKey = `${method}:${fullUrl}`
-
-      if (dedupe && inflight.has(dedupeKey)) {
-        return inflight.get(dedupeKey)!
-      }
 
       const headers: Record<string, string> = {
         Accept: 'application/json',
@@ -85,6 +80,15 @@ export function createRequestManager(
         }
       } else if (isMutation && body) {
         fetchOptions.body = JSON.stringify(body)
+      }
+
+      // Dedup key includes the full URL with query params so that GET requests
+      // with different query strings (e.g. different filter values) are not
+      // incorrectly collapsed into a single in-flight request.
+      const dedupeKey = `${method}:${fetchUrl}`
+
+      if (dedupe && inflight.has(dedupeKey)) {
+        return inflight.get(dedupeKey)!
       }
 
       const promise = (async () => {
