@@ -32,10 +32,12 @@ import {
   type GetCountOptions,
 } from './vueCountHandle'
 import { initFrappeSocket } from './frappe-socket'
+import { connectCache, type CacheAdapter } from '../core/CacheAdapter'
 
 export interface CreateVueClientOptions {
   baseUrl?: string
   realtime?: boolean
+  cache?: CacheAdapter
   onRequest?: RequestManagerConfig['onRequest']
   onError?: (error: FrappeResponseError) => void
   onResponse?: (response: any) => void
@@ -108,9 +110,20 @@ export interface VueClientResult {
 export function createClient(
   options: CreateVueClientOptions = {},
 ): VueClientResult {
-  const { baseUrl = '', realtime, onRequest, onError, onResponse } = options
+  const {
+    baseUrl = '',
+    realtime,
+    cache,
+    onRequest,
+    onError,
+    onResponse,
+  } = options
 
   const store = createDocStore()
+
+  if (cache) {
+    connectCache(store, cache)
+  }
   const requestManager = createRequestManager({
     baseUrl,
     onRequest,

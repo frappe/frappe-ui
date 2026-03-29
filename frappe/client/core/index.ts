@@ -7,7 +7,12 @@ export type { FrappeErrorMessage } from './FrappeResponseError'
 export { createRequestManager } from './RequestManager'
 export type { RequestManager, RequestManagerConfig } from './RequestManager'
 
-export { createMemoryCacheAdapter, connectCache } from './CacheAdapter'
+export {
+  createMemoryCacheAdapter,
+  createIDBCacheAdapter,
+  createDefaultCacheAdapter,
+  connectCache,
+} from './CacheAdapter'
 export type { CacheAdapter } from './CacheAdapter'
 
 export { createNoopSocketManager, createSocketManager } from './SocketManager'

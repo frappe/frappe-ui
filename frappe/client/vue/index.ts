@@ -41,7 +41,18 @@ export {
   type GetCountOptions,
 } from './vueCountHandle'
 
-export { uploadFile, type UploadHandle, type UploadFileOptions } from './uploadFile'
+export {
+  uploadFile,
+  type UploadHandle,
+  type UploadFileOptions,
+} from './uploadFile'
 
 export { wrapOperation, type ReactiveOperation } from './ReactiveOperation'
 
+export {
+  createMemoryCacheAdapter,
+  createIDBCacheAdapter,
+  createDefaultCacheAdapter,
+  connectCache,
+  type CacheAdapter,
+} from '../core/CacheAdapter'

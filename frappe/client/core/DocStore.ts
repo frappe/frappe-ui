@@ -2,12 +2,19 @@ import type { Doc } from './types'
 
 type Listener = (doc: Doc | null) => void
 type DoctypeListener = (name: string, doc: Doc | null) => void
+type GlobalListener = (doc: Doc | null) => void
 
 export interface DocStore {
   get(doctype: string, name: string): Doc | null
   set(doc: Doc): void
   setMany(docs: Doc[]): void
   remove(doctype: string, name: string): void
+
+  /**
+   * Subscribe to every set/remove across all doctypes.
+   * Used by CacheAdapter to write-behind on every mutation.
+   */
+  subscribeAll(listener: GlobalListener): () => void
 
   /**
    * Subscribe to a specific document. Listener fires synchronously on
@@ -36,6 +43,7 @@ export function createDocStore(): DocStore {
   const docs = new Map<string, Doc>()
   const listeners = new Map<string, Set<Listener>>()
   const doctypeListeners = new Map<string, Set<DoctypeListener>>()
+  const globalListeners = new Set<GlobalListener>()
 
   function notify(doctype: string, name: string, doc: Doc | null) {
     const key = docKey(doctype, name)
@@ -52,6 +60,10 @@ export function createDocStore(): DocStore {
       for (const listener of dtListeners) {
         listener(name, doc)
       }
+    }
+
+    for (const listener of globalListeners) {
+      listener(doc)
     }
   }
 
@@ -116,6 +128,11 @@ export function createDocStore(): DocStore {
       return () => {
         doctypeListeners.get(doctype)?.delete(listener)
       }
+    },
+
+    subscribeAll(listener) {
+      globalListeners.add(listener)
+      return () => globalListeners.delete(listener)
     },
 
     hydrate(docList) {
