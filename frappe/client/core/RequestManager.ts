@@ -11,6 +11,8 @@ export interface RequestManagerConfig {
 export interface RequestManager {
   /** Executes an HTTP request and returns the parsed JSON body. */
   fetch(config: RequestConfig): Promise<any>
+  /** Fetches a single document. Resolves with the raw API JSON (`.data` holds the doc). */
+  fetchDoc(doctype: string, name: string): Promise<any>
 }
 
 function getCsrfToken(): string {
@@ -119,7 +121,11 @@ export function createRequestManager(
                 httpStatus: response.status,
               })
             }
-            onError?.(error)
+            // Defer so that a local onError handler in the call stack can
+            // set error._suppressGlobalError = true before this fires.
+            setTimeout(() => {
+              if (!error._suppressGlobalError) onError?.(error)
+            }, 0)
             throw error
           }
 
@@ -135,6 +141,13 @@ export function createRequestManager(
       }
 
       return promise
+    },
+
+    fetchDoc(doctype: string, name: string) {
+      return this.fetch({
+        url: `/api/v2/document/${doctype}/${encodeURIComponent(name)}`,
+        method: 'GET',
+      })
     },
   }
 }

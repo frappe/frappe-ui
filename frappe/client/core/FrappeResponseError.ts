@@ -10,6 +10,8 @@ export class FrappeResponseError extends Error {
   exception?: string
   indicator?: string
   httpStatus: number
+  /** Set by a local onError handler to prevent the global onError from firing. */
+  _suppressGlobalError = false
 
   constructor(options: {
     title: string
