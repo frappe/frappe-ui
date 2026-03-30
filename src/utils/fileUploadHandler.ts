@@ -43,16 +43,12 @@ class FileUploadHandler {
           })
         }
       })
-      xhr.upload.addEventListener('load', () => {
-        this.trigger('finish')
-      })
       xhr.addEventListener('error', () => {
         this.trigger('error')
         reject()
       })
       xhr.onreadystatechange = () => {
         if (xhr.readyState == XMLHttpRequest.DONE) {
-          let error
           if (xhr.status === 200) {
             let r = null
             try {
@@ -61,21 +57,36 @@ class FileUploadHandler {
               r = xhr.responseText
             }
             let out = r.message || r
+            this.trigger('finish')
             resolve(out)
-          } else if (xhr.status === 403) {
-            error = JSON.parse(xhr.responseText)
           } else {
             this.failed = true
-            try {
-              error = JSON.parse(xhr.responseText)
-            } catch (e) {
-              // pass
+            let error: {
+              message?: string
+              exc?: string
+              _server_messages?: string
+              httpStatus?: number
+            } = {}
+
+            if (xhr.status === 413 || xhr.status === 0) {
+              error = {
+                message: 'File size exceeds the maximum allowed limit',
+                httpStatus: 413,
+              }
+            } else {
+              try {
+                error = JSON.parse(xhr.responseText)
+              } catch (e) {
+                // pass
+              }
             }
+
+            if (error && error.exc) {
+              console.error(JSON.parse(error.exc)[0])
+            }
+            this.trigger('error', error)
+            reject(error)
           }
-          if (error && error.exc) {
-            console.error(JSON.parse(error.exc)[0])
-          }
-          reject(error)
         }
       }
 

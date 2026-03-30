@@ -83,11 +83,14 @@ describe('DateRangePicker', () => {
     cy.get('input').dblclick()
 
     cy.get('input').should('have.value', '')
+    cy.get('[aria-label="Clear"]').should('be.disabled')
     cy.contains('10').click()
+    cy.get('[aria-label="Clear"]').should('be.disabled')
     cy.contains('13').click()
     cy.get('input').should('not.have.value', '')
 
     cy.get('input').dblclick()
+    cy.get('[aria-label="Clear"]').should('not.be.disabled')
     cy.get('[aria-label="Clear"]').click()
     cy.get('input').should('have.text', '')
   })
