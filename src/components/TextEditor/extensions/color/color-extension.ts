@@ -112,7 +112,7 @@ export const NamedColorExtension = Extension.create<ColorOptions>({
     return {
       setColorByName:
         (colorName: string) =>
-        ({ chain, state, editor }) => {
+        ({ chain }) => {
           // Validate that the color name is allowed
           if (!this.options.colors.includes(colorName)) {
             console.warn(
@@ -121,18 +121,7 @@ export const NamedColorExtension = Extension.create<ColorOptions>({
             return false
           }
 
-          const { to, empty } = state.selection
-
           let commandChain = chain().setMark('textStyle', { color: colorName })
-
-          if (!empty) {
-            commandChain = commandChain
-              .setTextSelection(to)
-              .command(({ tr }) => {
-                tr.setStoredMarks([])
-                return true
-              })
-          }
 
           return commandChain.focus().run()
         },
