@@ -126,7 +126,7 @@ const scrollToHeading = (heading: HeadingAnchor) => {
   view.dispatch(tr)
   view.focus()
 
-  const editorContainer = document.querySelector('#editorScrollContainer')
+  const editorContainer = document.querySelector('#editor-scroll-container')
   if (element && editorContainer) {
     const elementRect = element.getBoundingClientRect()
     const containerRect = editorContainer.getBoundingClientRect()
@@ -147,7 +147,7 @@ const scrollToHeading = (heading: HeadingAnchor) => {
     const domPos = view.domAtPos(pos)
     if (domPos.node && domPos.node.nodeType === Node.ELEMENT_NODE) {
       const node = domPos.node as Element
-      const editorContainer = document.querySelector('#editorScrollContainer')
+      const editorContainer = document.querySelector('#editor-scroll-container')
       if (editorContainer) {
         const nodeRect = node.getBoundingClientRect()
         const containerRect = editorContainer.getBoundingClientRect()
@@ -277,7 +277,7 @@ const extractAnchors = (): HeadingAnchor[] => {
   if (!props.editor?.state?.doc) return []
 
   const headings: HeadingAnchor[] = []
-  const scrollParent = document.querySelector('#editorScrollContainer')
+  const scrollParent = document.querySelector('#editor-scroll-container')
 
   // Get the current active tab ID
   let activeTabId: string | null = null
@@ -366,7 +366,7 @@ const updateAnchors = () => {
 }
 
 let updateInterval: ReturnType<typeof setInterval> | null = null
-const scrollParent = document.querySelector('#editorScrollContainer')
+const scrollParent = document.querySelector('#editor-scroll-container')
 
 watch(() => props.editor?.state?.doc, updateAnchors, { deep: true })
 
