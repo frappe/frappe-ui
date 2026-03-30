@@ -107,7 +107,7 @@
 
   <div
     ref="floating"
-    :style="{ ...floatingStyles }"
+    :style="{ ...floatingStyles, zIndex: 100 }"
     v-if="opened"
 	@click.stop
   >
@@ -251,7 +251,7 @@ const setEventStyles = computed(() => {
   return {
     height,
     top: top + 'px',
-    zIndex: zIndex,
+    zIndex,
     left,
     width,
     transform: `translate(${state.xAxis}px, ${state.yAxis}px)`,

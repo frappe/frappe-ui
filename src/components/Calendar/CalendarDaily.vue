@@ -99,7 +99,11 @@
               :event="calendarEvent"
               :key="calendarEvent.id"
               :date="currentDate"
-            />
+            >
+			  <template #event-popover-content="slotProps">
+                <slot name="event-popover-content" v-bind="slotProps" />
+			  </template>
+            </CalendarEvent>
             <!-- Current time Marker -->
             <CalendarTimeMarker :date="currentDate" />
           </div>
