@@ -1,7 +1,7 @@
 import { Plugin, PluginKey, EditorState } from '@tiptap/pm/state'
 import { TextSelection } from '@tiptap/pm/state'
 import { Editor } from '@tiptap/core'
-import LucideGripVertical from '~icons/lucide/grip-vertical?raw'
+import LucideGripVertical from '~icons/lucide/grip-vertical'
 import { CellSelection, findTable, TableMap } from '@tiptap/pm/tables'
 import { Decoration, DecorationSet } from '@tiptap/pm/view'
 
