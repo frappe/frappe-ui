@@ -1,151 +1,136 @@
 <template>
-  <!-- Weekly and Daily Event Template  -->
-  <div
-    class="event min-h-6 mx-px shadow rounded transition-all duration-75 shrink-0"
-    ref="eventRef"
-    v-if="activeView !== 'Month'"
-    v-bind="$attrs"
-    :class="[
-      opened && '!z-20 drop-shadow-xl',
-      activeEvent == (props.event?.id || props.event?.name) && 'active',
-    ]"
-    :style="[setEventStyles, eventBgStyle]"
-    @dblclick.prevent="handleEventEdit($event)"
-    @click.prevent="handleEventClick($event)"
-    v-on="{
-      mousedown: config.isEditMode && handleRepositionMouseDown,
-    }"
-  >
-    <div class="flex gap-1.5 h-full p-[5px]" :class="isPastEvent && 'past'">
+  <Popover transition="default" @open="registerDeleteShortcut" @close="unregisterDeleteShortcut">
+    <template #target="{ togglePopover }">
+      <!-- Weekly and Daily Event Template  -->
       <div
-        v-if="props.event.fromTime"
-        class="event-border h-full w-[2px] rounded shrink-0"
-        :style="eventBorderStyle"
-      />
-      <div
-        class="relative flex h-full select-none items-start gap-2 overflow-hidden"
+        class="event min-h-6 mx-px shadow rounded transition-all duration-75 shrink-0"
+        ref="eventRef"
+        v-if="activeView !== 'Month'"
+        v-bind="$attrs"
+        :class="{ ' active': activeEvent == (props.event?.id || props.event?.name) }"
+        :style="[setEventStyles, eventBgStyle]"
+        @dblclick.prevent="handleEventEdit($event)"
+        @click.prevent="handleEventClick($event, togglePopover)"
+        @mousedown="handleRepositionMouseDown($event)"
       >
-        <div v-if="config.showIcon && eventIcons[props.event.type]">
-          <component
-            v-if="eventIcons[props.event.type]"
-            :is="eventIcons[props.event.type]"
-            class="h-4 w-4"
+        <div class="flex gap-1.5 h-full p-[5px]" :class="isPastEvent && 'past'">
+          <div
+            v-if="props.event.fromTime"
+            class="event-border h-full w-[2px] rounded shrink-0"
+            :style="eventBorderStyle"
           />
-        </div>
+          <div class="relative flex h-full select-none items-start gap-2 overflow-hidden">
+            <div v-if="config.showIcon && eventIcons[props.event.type]">
+              <component
+                v-if="eventIcons[props.event.type]"
+                :is="eventIcons[props.event.type]"
+                class="h-4 w-4"
+              />
+            </div>
 
-        <div class="flex w-fit flex-col gap-0.5 overflow-hidden">
-          <p
-            ref="eventTitleRef"
-            class="text-sm font-medium event-title"
-            :class="lineClampClass"
-          >
-            {{ props.event.title || '(No title)' }}
-          </p>
-          <p
-            ref="eventTimeRef"
-            class="text-xs font-normal event-subtitle"
-            v-if="!props.event.isFullDay"
-          >
-            {{
-              formattedDuration(
-                updatedEvent.fromTime,
-                updatedEvent.toTime,
-                config.timeFormat,
-              )
-            }}
-          </p>
+            <div class="flex w-fit flex-col gap-0.5 overflow-hidden">
+              <p
+                ref="eventTitleRef"
+                class="text-sm font-medium event-title"
+                :class="lineClampClass"
+              >
+                {{ props.event.title || '(No title)' }}
+              </p>
+              <p
+                ref="eventTimeRef"
+                class="text-xs font-normal event-subtitle"
+                v-if="!props.event.isFullDay"
+              >
+                {{
+                  formattedDuration(updatedEvent.fromTime, updatedEvent.toTime, config.timeFormat)
+                }}
+              </p>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-    <div
-      v-if="config.isEditMode && !event.isFullDay"
-      class="absolute -bottom-1 h-3 w-full cursor-ns-resize"
-      ref="resize"
-      @mousedown="handleResizeMouseDown"
-    />
-  </div>
-
-  <!-- Monthly Event Template -->
-  <div
-    v-else
-    class="event flex gap-1.5 min-h-6 mx-px rounded p-[5px] transition-all duration-75"
-    :class="[
-      activeEvent == (props.event?.id || props.event?.name) && 'active',
-      isPastEvent && 'past',
-    ]"
-    ref="eventRef"
-    v-bind="$attrs"
-    @dblclick.prevent="handleEventEdit($event)"
-    @click.stop="handleEventClick($event)"
-    :style="eventBgStyle"
-  >
-    <div
-      v-if="props.event.fromTime"
-      class="event-border w-[2px] rounded shrink-0"
-      :style="eventBorderStyle"
-    />
-    <div
-      class="relative flex h-full select-none items-start gap-2 overflow-hidden"
-    >
-      <div v-if="config.showIcon && eventIcons[props.event.type]">
-        <component
-          v-if="eventIcons[props.event.type]"
-          :is="eventIcons[props.event.type]"
-          class="h-4 w-4 text-black"
+        <div
+          v-if="config.isEditMode && !event.isFullDay"
+          class="absolute -bottom-1 h-3 w-full cursor-ns-resize"
+          ref="resize"
+          @mousedown="handleResizeMouseDown"
         />
       </div>
 
+      <!-- Monthly Event Template -->
       <div
-        class="flex w-fit flex-col text-start overflow-hidden whitespace-nowrap"
+        v-else
+        class="event flex gap-1.5 min-h-6 mx-px rounded p-[5px] transition-all duration-75 w-full"
+        :class="[
+          activeEvent == (props.event?.id || props.event?.name) && 'active',
+          isPastEvent && 'past',
+        ]"
+        ref="eventRef"
+        v-bind="$attrs"
+        @dblclick.prevent="handleEventEdit($event)"
+        @click.stop="handleEventClick($event, togglePopover)"
+        :style="eventBgStyle"
       >
-        <p class="text-sm font-medium truncate">
-          {{ props.event.title || 'New Event' }}
-        </p>
-      </div>
-    </div>
-  </div>
+        <div
+          v-if="props.event.fromTime"
+          class="event-border w-[2px] rounded shrink-0"
+          :style="eventBorderStyle"
+        />
+        <div class="relative flex h-full select-none items-start gap-2 overflow-hidden">
+          <div v-if="config.showIcon && eventIcons[props.event.type]">
+            <component
+              v-if="eventIcons[props.event.type]"
+              :is="eventIcons[props.event.type]"
+              class="h-4 w-4 text-black"
+            />
+          </div>
 
-  <div
-    ref="floating"
-    :style="{ ...floatingStyles, zIndex: 100 }"
-    v-if="opened"
-	@click.stop
-  >
-    <slot
-	  name="event-popover-content"
-	  :calendarEvent
-	  :date
-	  :isEditMode="config.isEditMode"
-	  :close
-	 >
-      <EventModalContent
-        :calendarEvent="calendarEvent"
-        :date="date"
+          <div class="flex w-fit flex-col text-start overflow-hidden whitespace-nowrap">
+            <p class="text-sm font-medium truncate">
+              {{ props.event.title || 'New Event' }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </template>
+    <template #body-main="{ close }">
+      <slot
+        name="event-popover-content"
+        :calendarEvent
+        :date
         :isEditMode="config.isEditMode"
-        @close="close"
-        @edit="handleEventEdit"
-        @delete="handleEventDelete"
-      />
-    </slot>
-  </div>
+        :close
+      >
+        <EventModalContent
+          :calendarEvent="calendarEvent"
+          :date="date"
+          :isEditMode="config.isEditMode"
+          @close="close"
+          @edit="
+            (e) => {
+              close()
+              handleEventEdit(e)
+            }
+          "
+          @delete="
+            () => {
+              close()
+              handleEventDelete()
+            }
+          "
+        />
+      </slot>
+    </template>
+  </Popover>
   <NewEventModal v-model="showEventModal" :event="updatedEvent" />
 </template>
 
 <script setup>
 import EventModalContent from './EventModalContent.vue'
 import NewEventModal from './NewEventModal.vue'
-import { useFloating, shift, flip, offset, autoUpdate } from '@floating-ui/vue'
-import { activeEvent, openEventId } from './composables/useCalendarData.js'
+import Popover from '../Popover/Popover.vue'
+import { activeEvent } from './composables/useCalendarData.js'
 
-import {
-  ref,
-  inject,
-  computed,
-  onMounted,
-  onBeforeUnmount,
-  watch,
-  reactive,
-} from 'vue'
+import { ref, inject, computed, watch, reactive } from 'vue'
 
 import {
   calculateMinutes,
@@ -171,19 +156,6 @@ const props = defineProps({
 const activeView = inject('activeView')
 const config = inject('config')
 const calendarActions = inject('calendarActions')
-
-function handleClickOutside(e) {
-  if (e.target.closest('[data-reka-popper-content-wrapper]')) return
-  close()
-}
-
-onMounted(() => {
-  document.addEventListener('click', handleClickOutside)
-})
-
-onBeforeUnmount(() => {
-  document.removeEventListener('click', handleClickOutside)
-})
 
 const calendarEvent = ref(props.event)
 
@@ -224,10 +196,7 @@ const setEventStyles = computed(() => {
     }
   }
 
-  let diff = calculateDiff(
-    calendarEvent.value.fromTime,
-    calendarEvent.value.toTime,
-  )
+  let diff = calculateDiff(calendarEvent.value.fromTime, calendarEvent.value.toTime)
   let height = diff * minuteHeight
   if (height < heightThreshold) {
     height = minimumHeight
@@ -237,16 +206,10 @@ const setEventStyles = computed(() => {
   let top = calculateMinutes(calendarEvent.value.fromTime) * minuteHeight
 
   let hallNumber = calendarEvent.value.hallNumber
-  let width =
-    isResizing.value || isRepositioning.value
-      ? '100%'
-      : `${93 - hallNumber * 20}%`
-  let left =
-    isResizing.value || isRepositioning.value ? '0' : `${hallNumber * 20}%`
+  let width = isResizing.value || isRepositioning.value ? '100%' : `${93 - hallNumber * 20}%`
+  let left = isResizing.value || isRepositioning.value ? '0' : `${hallNumber * 20}%`
   let zIndex =
-    isResizing.value || isRepositioning.value
-      ? 100
-      : (props.event.idx || 1) * hallNumber + 1
+    isResizing.value || isRepositioning.value ? 100 : (props.event.idx || 1) * hallNumber + 1
 
   return {
     height,
@@ -284,9 +247,7 @@ const getTheme = () => {
   const theme = document.documentElement.getAttribute('data-theme')
 
   if (theme) return theme
-  return document.documentElement.classList.contains('htw-dark')
-    ? 'dark'
-    : 'light'
+  return document.documentElement.classList.contains('htw-dark') ? 'dark' : 'light'
 }
 
 function color(color) {
@@ -327,23 +288,14 @@ const lineClampClass = computed(() => {
 })
 
 const eventRef = ref(null)
-// Popover Element Config
-const floating = ref(null)
-const { floatingStyles } = useFloating(eventRef, floating, {
-  placement: activeView.value === 'Day' ? 'top' : 'right',
-  middleware: [offset(10), flip(), shift()],
-  whileElementsMounted: autoUpdate,
-})
 
-const resize = ref(null)
 const isResizing = ref(false)
 const isRepositioning = ref(false)
 const isEventUpdated = ref(false)
 
 function newEventEndTime(newHeight) {
   let newEndTime =
-    parseFloat(newHeight) / minuteHeight +
-    calculateMinutes(calendarEvent.value.fromTime)
+    parseFloat(newHeight) / minuteHeight + calculateMinutes(calendarEvent.value.fromTime)
   newEndTime = Math.floor(newEndTime)
   if (newEndTime > 1440) {
     newEndTime = 1440
@@ -352,7 +304,7 @@ function newEventEndTime(newHeight) {
 }
 
 const preventClick = ref(false)
-function handleResizeMouseDown(e) {
+function handleResizeMouseDown() {
   isResizing.value = true
   isRepositioning.value = false
 
@@ -364,8 +316,7 @@ function handleResizeMouseDown(e) {
     preventClick.value = true
     // difference between where mouse is and where event's top is, to find the new height
     let diffX = e.clientY - eventRef.value.getBoundingClientRect().top
-    eventRef.value.style.height =
-      Math.round(diffX / height15Min) * height15Min + 'px'
+    eventRef.value.style.height = Math.round(diffX / height15Min) * height15Min + 'px'
 
     eventRef.value.style.width = '100%'
     updatedEvent.toTime = newEventEndTime(eventRef.value.style.height)
@@ -383,6 +334,8 @@ function handleResizeMouseDown(e) {
 }
 
 function handleRepositionMouseDown(e) {
+  if (!config.isEditMode) return
+
   e.preventDefault()
   let prevY = e.clientY
   const rect = eventRef.value.getBoundingClientRect()
@@ -396,7 +349,6 @@ function handleRepositionMouseDown(e) {
     isRepositioning.value = true
     preventClick.value = true
     if (!eventRef.value) return
-    close()
     eventRef.value.style.cursor = 'grabbing'
 
     // handle movement between days
@@ -433,10 +385,8 @@ function handleRepositionMouseDown(e) {
       calendarEvent.value.date = updatedEvent.date
       calendarEvent.value.fromDate = updatedEvent.date
       calendarEvent.value.toDate = updatedEvent.date
-      calendarEvent.value.fromDateTime =
-        updatedEvent.date + ' ' + updatedEvent.fromTime
-      calendarEvent.value.toDateTime =
-        updatedEvent.date + ' ' + updatedEvent.toTime
+      calendarEvent.value.fromDateTime = updatedEvent.date + ' ' + updatedEvent.fromTime
+      calendarEvent.value.toDateTime = updatedEvent.date + ' ' + updatedEvent.toTime
       calendarEvent.value.fromTime = updatedEvent.fromTime
       calendarEvent.value.toTime = updatedEvent.toTime
       calendarActions.updateEventState(calendarEvent.value)
@@ -451,18 +401,12 @@ function handleRepositionMouseDown(e) {
 }
 
 function getDate(date, nextDate = 0) {
-  let newDate = new Date(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate() + nextDate,
-  )
+  let newDate = new Date(date.getFullYear(), date.getMonth(), date.getDate() + nextDate)
   return newDate
 }
 
 function handleHorizontalMovement(clientX, rect) {
-  const currentDate = new Date(
-    eventRef.value.parentNode.getAttribute('data-date-attr'),
-  )
+  const currentDate = new Date(eventRef.value.parentNode.getAttribute('data-date-attr'))
 
   if (props.event.isFullDay) {
     eventRef.value.style.width = '100%'
@@ -508,12 +452,10 @@ function handleVerticalMovement(clientY, prevY, rect) {
   state.yAxis = diffY
 
   updatedEvent.fromTime = convertMinutesToHours(
-    calculateMinutes(calendarEvent.value.fromTime) +
-      Math.round(diffY / minuteHeight),
+    calculateMinutes(calendarEvent.value.fromTime) + Math.round(diffY / minuteHeight),
   )
   updatedEvent.toTime = convertMinutesToHours(
-    calculateMinutes(calendarEvent.value.toTime) +
-      Math.round(diffY / minuteHeight),
+    calculateMinutes(calendarEvent.value.toTime) + Math.round(diffY / minuteHeight),
   )
   handleTimeConstraints()
 }
@@ -533,37 +475,23 @@ function handleTimeConstraints() {
   }
 }
 
-const opened = computed(() => openEventId.value === (props.event.id || props.event.name))
-
-const toggle = () => {
-  openEventId.value = opened.value ? null : (props.event.id || props.event.name)
+function registerDeleteShortcut() {
+  if (!config.isEditMode || !config.enableShortcuts) return
+  document.addEventListener('keydown', handleDeleteShortcut)
 }
 
-const close = () => {
-  if (opened.value) openEventId.value = null
+function unregisterDeleteShortcut() {
+  document.removeEventListener('keydown', handleDeleteShortcut)
 }
-
 
 function handleDeleteShortcut(e) {
   if (e.key === 'Delete' || e.key === 'Backspace') {
-    close()
     handleEventDelete()
   }
 }
 
-watch(
-  () => opened.value,
-  (newVal) => {
-    if (newVal) {
-      if (!config.isEditMode) return
-      if (!config.enableShortcuts) return
-      document.addEventListener('keydown', handleDeleteShortcut, { once: true })
-    }
-  },
-)
-
 let clickTimer = null
-function handleEventClick(e) {
+function handleEventClick(e, togglePopover) {
   // hack to prevent event modal from opening when resizing or repositioning
   if (preventClick.value) {
     preventClick.value = false
@@ -578,7 +506,7 @@ function handleEventClick(e) {
             e,
             calendarEvent: calendarEvent.value,
           })
-        : toggle()
+        : togglePopover()
     }, 200)
   }
 }
@@ -596,13 +524,11 @@ function handleEventEdit(e = null) {
     return
   }
   if (!config.isEditMode) return
-  close()
   showEventModal.value = true
 }
 
 function handleEventDelete() {
   calendarActions.deleteEvent(calendarEvent.value.id)
-  close()
 }
 
 const isPastEvent = computed(() => {
@@ -619,8 +545,7 @@ const isPastEvent = computed(() => {
     if (!endDateStr) return false
     // If event has a toTime use it; else if full day, treat end as end of day; fallback 00:00:00
     let endTimeStr = '00:00:00'
-    if (calendarEvent.value.isFullDay || props.event.isFullDay)
-      endTimeStr = '23:59:59'
+    if (calendarEvent.value.isFullDay || props.event.isFullDay) endTimeStr = '23:59:59'
     else if (calendarEvent.value.toTime) endTimeStr = calendarEvent.value.toTime
 
     const end = new Date(`${endDateStr}T${endTimeStr}`.replace(' ', 'T'))

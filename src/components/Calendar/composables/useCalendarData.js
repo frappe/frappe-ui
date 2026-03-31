@@ -6,7 +6,6 @@ import {
 } from '../calendarUtils'
 
 export const activeEvent = ref('')
-export const openEventId = ref(null)
 
 export default function useCalendarData(events, view = '') {
   const timedEvents = computed(() => {
