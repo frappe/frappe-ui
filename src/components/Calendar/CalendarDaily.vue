@@ -73,6 +73,7 @@
           <div
             class="calendar-column relative border-l-[1px] border-outline-gray-1"
             :class="[config.noBorder ? '' : ' border-r-[1px]']"
+            data-time-grid
           >
             <!-- Day Grid -->
             <div

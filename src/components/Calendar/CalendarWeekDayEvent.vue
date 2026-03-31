@@ -250,7 +250,6 @@ function handleRepositionMouseDown(e) {
 		isRepositioning.value = true
 		preventClick.value = true
 		if (!eventRef.value) return
-		eventRef.value.style.cursor = 'grabbing'
 
 		if (activeView.value === 'Week') handleHorizontalMovement(e.clientX, rect)
 		if (!props.event.isFullDay) handleVerticalMovement(e.clientY, prevY, rect)
@@ -265,7 +264,6 @@ function handleRepositionMouseDown(e) {
 		isRepositioning.value = false
 		if (!eventRef.value) return
 
-		eventRef.value.style.cursor = 'pointer'
 		if (calendarEvent.value.isFullDay && activeView.value === 'Week') {
 			eventRef.value.style.width = '90%'
 		}
@@ -291,7 +289,7 @@ function handleRepositionMouseDown(e) {
 }
 
 function handleHorizontalMovement(clientX, rect) {
-	const currentDate = new Date(eventRef.value.parentNode.getAttribute('data-date-attr'))
+	const currentDate = new Date(props.event.date)
 	if (props.event.isFullDay) eventRef.value.style.width = '100%'
 
 	const eventWidth = eventRef.value.clientWidth
@@ -310,11 +308,9 @@ function handleHorizontalMovement(clientX, rect) {
 function handleVerticalMovement(clientY, prevY, rect) {
 	let diffY = clientY - prevY
 
-	const parentTop = eventRef.value.parentNode.getBoundingClientRect().top
-	const parentBottom = eventRef.value.parentNode.getBoundingClientRect().bottom
-
-	if (clientY < parentTop) diffY = parentTop - rect.top
-	if (clientY > parentBottom) diffY = parentBottom - rect.bottom
+	const parentRect = eventRef.value.closest('[data-time-grid]').getBoundingClientRect()
+	if (clientY < parentRect.top) diffY = parentRect.top - rect.top
+	if (clientY > parentRect.bottom) diffY = parentRect.bottom - rect.bottom
 
 	diffY = Math.round(diffY / height15Min) * height15Min
 	state.yAxis = diffY

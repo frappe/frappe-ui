@@ -118,6 +118,7 @@
                 isWeekend(date, config) && 'bg-surface-gray-1',
               ]"
               :data-date-attr="date"
+              data-time-grid
             >
               <!-- Time Grid -->
               <div
