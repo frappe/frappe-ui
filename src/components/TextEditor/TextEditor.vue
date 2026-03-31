@@ -174,6 +174,7 @@ onMounted(() => {
       }),
       Table.configure({
         resizable: true,
+        renderWrapper: true,
       }),
       TableRow,
       TableHeader,
