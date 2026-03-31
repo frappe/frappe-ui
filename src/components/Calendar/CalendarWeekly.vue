@@ -62,7 +62,6 @@
               v-for="(calendarEvent, idx) in !showCollapsable || !isCollapsed
                 ? fullDayEvents[parseDate(date)]
                 : fullDayEvents[parseDate(date)]?.slice(0, 2)"
-              class="w-[90%] cursor-pointer"
               :event="{ ...calendarEvent, idx }"
               :key="calendarEvent.id"
               :date="date"
@@ -140,7 +139,6 @@
               <!-- Calendar Events populations  -->
               <CalendarWeekDayEvent
                 v-for="(calendarEvent, idx) in timedEvents[parseDate(date)]"
-                class="absolute mb-2 w-[90%] cursor-pointer"
                 :event="calendarEvent"
                 :key="calendarEvent.id"
                 :date="date"

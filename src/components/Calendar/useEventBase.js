@@ -69,31 +69,6 @@ export function useEventBase(props) {
 		return { '--border': _color.border, '--border-active': _color.borderActive }
 	})
 
-	// ── Past-event detection ─────────────────────────────────────────────────
-
-	const isPastEvent = computed(() => {
-		try {
-			const endDateStr =
-				calendarEvent.value.toDate ||
-				calendarEvent.value.date ||
-				calendarEvent.value.fromDate ||
-				props.event.toDate ||
-				props.event.date ||
-				props.event.fromDate
-
-			if (!endDateStr) return false
-
-			let endTimeStr = '00:00:00'
-			if (calendarEvent.value.isFullDay || props.event.isFullDay) endTimeStr = '23:59:59'
-			else if (calendarEvent.value.toTime) endTimeStr = calendarEvent.value.toTime
-
-			const end = new Date(`${endDateStr}T${endTimeStr}`.replace(' ', 'T'))
-			return end.getTime() < new Date().getTime()
-		} catch {
-			return false
-		}
-	})
-
 	// ── Delete shortcut ──────────────────────────────────────────────────────
 
 	function registerDeleteShortcut() {
@@ -153,7 +128,6 @@ export function useEventBase(props) {
 		updatedEvent,
 		eventIcons: config.eventIcons,
 		showEventModal,
-		isPastEvent,
 		eventBgStyle,
 		eventBorderStyle,
 		preventClick,

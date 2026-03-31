@@ -27,14 +27,11 @@
           isWeekend(date, config) && 'bg-surface-gray-1',
         ]"
         @dragover.prevent
-        @drageneter.prevent
+        @dragenter.prevent
         @drop="onDrop($event, date)"
         @click="calendarActions.handleCellClick($event, date)"
       >
-        <div
-          class="flex justify-center font-normal"
-          :class="isCurrentMonth(date) ? 'text-ink-gray-8' : 'text-ink-gray-3'"
-        >
+        <div class="flex justify-center font-normal">
           <div class="flex gap-0.5 w-full flex-col items-center text-xs text-right">
             <span
               class="w-full flex justify-between items-center"

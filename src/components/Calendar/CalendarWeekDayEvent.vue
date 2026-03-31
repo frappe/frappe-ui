@@ -1,6 +1,5 @@
 <template>
 	<Popover
-		v-bind="$attrs"
 		:style="containerStyle"
 		transition="default"
 		@open="registerDeleteShortcut"
@@ -16,7 +15,7 @@
 				@dblclick.prevent="handleEventEdit($event)"
 				@mousedown="handleRepositionMouseDown($event)"
 			>
-				<div class="flex gap-1.5 h-full p-[5px]" :class="isPastEvent && 'past'">
+				<div class="flex gap-1.5 h-full p-[5px]">
 					<div
 						v-if="props.event.fromTime"
 						class="event-border h-full w-[2px] rounded shrink-0"
@@ -111,7 +110,6 @@ const {
 	updatedEvent,
 	eventIcons,
 	showEventModal,
-	isPastEvent,
 	eventBgStyle,
 	eventBorderStyle,
 	preventClick,

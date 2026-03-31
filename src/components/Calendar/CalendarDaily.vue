@@ -33,7 +33,6 @@
           v-for="(calendarEvent, idx) in !showCollapsable || !isCollapsed
             ? dayFullDayEvents
             : dayFullDayEvents.slice(0, 4)"
-          class="w-[21%] cursor-pointer"
           :event="{ ...calendarEvent, idx }"
           :key="calendarEvent.id"
           :date="currentDate"
@@ -95,7 +94,6 @@
               v-for="(calendarEvent, idx) in timedEvents[
                 parseDate(currentDate)
               ]"
-              class="absolute mb-2 cursor-pointer"
               :event="calendarEvent"
               :key="calendarEvent.id"
               :date="currentDate"

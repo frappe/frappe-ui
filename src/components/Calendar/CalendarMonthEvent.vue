@@ -2,13 +2,9 @@
 	<Popover transition="default" @open="registerDeleteShortcut" @close="unregisterDeleteShortcut">
 		<template #target="{ togglePopover }">
 			<div
-				ref="eventRef"
 				v-bind="$attrs"
-				class="event flex gap-1.5 min-h-6 mx-px rounded p-[5px] transition-all duration-75 w-full"
-				:class="[
-					activeEvent == (props.event?.id || props.event?.name) && 'active',
-					isPastEvent && 'past',
-				]"
+				class="event flex gap-1.5 min-h-6 mx-px rounded p-[5px] transition-all duration-75 w-full overflow-hidden"
+				:class="{ active: activeEvent == (props.event?.id || props.event?.name) }"
 				:style="eventBgStyle"
 				@click.stop="handleEventClick($event, togglePopover)"
 				@dblclick.prevent="handleEventEdit($event)"
@@ -22,11 +18,9 @@
 					<div v-if="config.showIcon && eventIcons[props.event.type]">
 						<component :is="eventIcons[props.event.type]" class="h-4 w-4 text-black" />
 					</div>
-					<div class="flex w-fit flex-col text-start overflow-hidden whitespace-nowrap">
-						<p class="text-sm font-medium truncate" :class="{ italic: !props.event.title }">
-							{{ props.event.title || '[No title]' }}
-						</p>
-					</div>
+					<p class="text-sm font-medium truncate" :class="{ italic: !props.event.title }">
+						{{ props.event.title || '[No title]' }}
+					</p>
 				</div>
 			</div>
 		</template>
@@ -65,15 +59,12 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
 import EventModalContent from './EventModalContent.vue'
 import NewEventModal from './NewEventModal.vue'
 import Popover from '../Popover/Popover.vue'
 import { eventProps, useEventBase } from './useEventBase.js'
 
 const props = defineProps(eventProps)
-
-const eventRef = ref(null)
 
 const {
 	activeEvent,
@@ -82,7 +73,6 @@ const {
 	updatedEvent,
 	eventIcons,
 	showEventModal,
-	isPastEvent,
 	eventBgStyle,
 	eventBorderStyle,
 	handleEventClick,
@@ -114,8 +104,5 @@ const {
 }
 .event:not(.active):hover {
 	background-color: var(--bg-hover);
-}
-.event.past:not(.active) {
-	opacity: 0.5;
 }
 </style>
