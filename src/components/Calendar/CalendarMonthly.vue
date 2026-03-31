@@ -35,15 +35,11 @@
           class="flex justify-center font-normal"
           :class="isCurrentMonth(date) ? 'text-ink-gray-8' : 'text-ink-gray-3'"
         >
-          <div
-            class="flex gap-0.5 w-full flex-col items-center text-xs text-right"
-          >
+          <div class="flex gap-0.5 w-full flex-col items-center text-xs text-right">
             <span
               class="w-full flex justify-between items-center"
               :class="[
-                date.toDateString() === new Date().toDateString()
-                  ? 'p-[3px] pb-0.5'
-                  : 'p-2',
+                date.toDateString() === new Date().toDateString() ? 'p-[3px] pb-0.5' : 'p-2',
               ]"
             >
               <div></div>
@@ -85,26 +81,28 @@
                 @dragend="$event.target.style.opacity = '1'"
                 @dragover.prevent
               >
-			    <template #event-popover-content="slotProps">
-			      <slot name="event-popover-content" v-bind="slotProps" />
-			    </template>
-			  </CalendarEvent>
+                <template #event-popover-content="slotProps">
+                  <slot name="event-popover-content" v-bind="slotProps" />
+                </template>
+              </CalendarEvent>
             </div>
             <div v-else class="flex w-full flex-col justify-between">
               <ShowMoreCalendarEvent
                 v-if="timedEvents[parseDate(date)]"
-                class="z-10 cursor-pointer"
+                class="cursor-pointer"
                 :draggable="config.isEditMode"
-                @dragstart="
-                  onDragStart($event, timedEvents[parseDate(date)][0].id)
-                "
+                @dragstart="onDragStart($event, timedEvents[parseDate(date)][0].id)"
                 @dragend="$event.target.style.opacity = '1'"
                 @dragover.prevent
                 :events="timedEvents[parseDate(date)]"
                 :date="date"
                 :totalEventsCount="timedEvents[parseDate(date)].length"
                 @showMoreEvents="emit('setCurrentDate', date)"
-              />
+              >
+                <template #event-popover-content="slotProps">
+                  <slot name="event-popover-content" v-bind="slotProps" />
+                </template>
+              </ShowMoreCalendarEvent>
             </div>
           </div>
         </div>
@@ -140,13 +138,9 @@ const props = defineProps({
 
 const emit = defineEmits(['setCurrentDate'])
 
-const timedEvents = computed(
-  () => useCalendarData(props.events, 'Month').timedEvents.value,
-)
+const timedEvents = computed(() => useCalendarData(props.events, 'Month').timedEvents.value)
 
-const maxEventsInCell = computed(() =>
-  props.currentMonthDates.length > 35 ? 1 : 2,
-)
+const maxEventsInCell = computed(() => (props.currentMonthDates.length > 35 ? 1 : 2))
 
 function isCurrentMonth(date) {
   return date.getMonth() === props.currentMonth

@@ -6,7 +6,11 @@
     :date="date"
     class="mb-1 cursor-pointer"
     v-bind="$attrs"
-  />
+  >
+    <template #event-popover-content="slotProps">
+      <slot name="event-popover-content" v-bind="slotProps" />
+    </template>
+  </CalendarEvent>
   <span
     v-if="totalEventsCount > 2"
     class="w-fit rounded-sm p-px px-2 mx-px text-base font-medium text-ink-gray-6 hover:cursor-pointer hover:bg-surface-gray-1"

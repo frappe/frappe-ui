@@ -3,14 +3,14 @@
     <template #target="{ togglePopover }">
       <!-- Weekly and Daily Event Template  -->
       <div
-        class="event min-h-6 mx-px shadow rounded transition-all duration-75 shrink-0"
-        ref="eventRef"
         v-if="activeView !== 'Month'"
+        ref="eventRef"
         v-bind="$attrs"
+        class="event min-h-6 mx-px shadow rounded transition-all duration-75 shrink-0"
         :class="{ ' active': activeEvent == (props.event?.id || props.event?.name) }"
         :style="[setEventStyles, eventBgStyle]"
-        @dblclick.prevent="handleEventEdit($event)"
         @click.prevent="handleEventClick($event, togglePopover)"
+        @dblclick.prevent="handleEventEdit($event)"
         @mousedown="handleRepositionMouseDown($event)"
       >
         <div class="flex gap-1.5 h-full p-[5px]" :class="isPastEvent && 'past'">
@@ -59,16 +59,16 @@
       <!-- Monthly Event Template -->
       <div
         v-else
+        ref="eventRef"
+        v-bind="$attrs"
         class="event flex gap-1.5 min-h-6 mx-px rounded p-[5px] transition-all duration-75 w-full"
         :class="[
           activeEvent == (props.event?.id || props.event?.name) && 'active',
           isPastEvent && 'past',
         ]"
-        ref="eventRef"
-        v-bind="$attrs"
-        @dblclick.prevent="handleEventEdit($event)"
-        @click.stop="handleEventClick($event, togglePopover)"
         :style="eventBgStyle"
+        @click.stop="handleEventClick($event, togglePopover)"
+        @dblclick.prevent="handleEventEdit($event)"
       >
         <div
           v-if="props.event.fromTime"
@@ -85,8 +85,8 @@
           </div>
 
           <div class="flex w-fit flex-col text-start overflow-hidden whitespace-nowrap">
-            <p class="text-sm font-medium truncate">
-              {{ props.event.title || 'New Event' }}
+            <p class="text-sm font-medium truncate" :class="{'italic': !props.event.title}">
+              {{ props.event.title || '[No title]' }}
             </p>
           </div>
         </div>
@@ -196,20 +196,18 @@ const setEventStyles = computed(() => {
     }
   }
 
-  let diff = calculateDiff(calendarEvent.value.fromTime, calendarEvent.value.toTime)
+  const diff = calculateDiff(calendarEvent.value.fromTime, calendarEvent.value.toTime)
   let height = diff * minuteHeight
   if (height < heightThreshold) {
     height = minimumHeight
   }
   height += 'px'
 
-  let top = calculateMinutes(calendarEvent.value.fromTime) * minuteHeight
-
-  let hallNumber = calendarEvent.value.hallNumber
-  let width = isResizing.value || isRepositioning.value ? '100%' : `${93 - hallNumber * 20}%`
-  let left = isResizing.value || isRepositioning.value ? '0' : `${hallNumber * 20}%`
-  let zIndex =
-    isResizing.value || isRepositioning.value ? 100 : (props.event.idx || 1) * hallNumber + 1
+  const top = calculateMinutes(calendarEvent.value.fromTime) * minuteHeight
+  const hallNumber = calendarEvent.value.hallNumber
+  const width = isResizing.value || isRepositioning.value ? '100%' : `${93 - hallNumber * 20}%`
+  const left = isResizing.value || isRepositioning.value ? '0' : `${hallNumber * 20}%`
+  const zIndex = isResizing.value || isRepositioning.value ? 100 : 0
 
   return {
     height,
