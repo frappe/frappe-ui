@@ -70,7 +70,7 @@
               class="flex w-full flex-col justify-between"
               v-if="timedEvents[parseDate(date)]?.length <= maxEventsInCell"
             >
-              <CalendarEvent
+              <CalendarMonthEvent
                 v-for="calendarEvent in timedEvents[parseDate(date)]"
                 :event="calendarEvent"
                 :date="date"
@@ -84,12 +84,11 @@
                 <template #event-popover-content="slotProps">
                   <slot name="event-popover-content" v-bind="slotProps" />
                 </template>
-              </CalendarEvent>
+              </CalendarMonthEvent>
             </div>
             <div v-else class="flex w-full flex-col justify-between">
               <ShowMoreCalendarEvent
                 v-if="timedEvents[parseDate(date)]"
-                class="cursor-pointer"
                 :draggable="config.isEditMode"
                 @dragstart="onDragStart($event, timedEvents[parseDate(date)][0].id)"
                 @dragend="$event.target.style.opacity = '1'"
@@ -114,10 +113,10 @@
 <script setup>
 import { daysList, parseDate, isWeekend } from './calendarUtils'
 import { inject } from 'vue'
-import CalendarEvent from './CalendarEvent.vue'
 import useCalendarData from './composables/useCalendarData'
 import { computed } from 'vue'
 import ShowMoreCalendarEvent from './ShowMoreCalendarEvent.vue'
+import CalendarMonthEvent from './CalendarMonthEvent.vue'
 const props = defineProps({
   events: {
     type: Object,

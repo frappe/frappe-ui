@@ -1,5 +1,5 @@
 <template>
-  <CalendarEvent
+  <CalendarMonthEvent
     v-for="event in events.slice(0, 2)"
     :key="event.id"
     :event="event"
@@ -10,7 +10,7 @@
     <template #event-popover-content="slotProps">
       <slot name="event-popover-content" v-bind="slotProps" />
     </template>
-  </CalendarEvent>
+  </CalendarMonthEvent>
   <span
     v-if="totalEventsCount > 2"
     class="w-fit rounded-sm p-px px-2 mx-px text-base font-medium text-ink-gray-6 hover:cursor-pointer hover:bg-surface-gray-1"
@@ -20,7 +20,7 @@
   </span>
 </template>
 <script setup>
-import CalendarEvent from './CalendarEvent.vue'
+import CalendarMonthEvent from './CalendarMonthEvent.vue';
 
 const props = defineProps({
   events: {

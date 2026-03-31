@@ -29,7 +29,7 @@
           calendarActions.handleCellClick($event, currentDate, '', true)
         "
       >
-        <CalendarEvent
+        <CalendarWeekDayEvent
           v-for="(calendarEvent, idx) in !showCollapsable || !isCollapsed
             ? dayFullDayEvents
             : dayFullDayEvents.slice(0, 4)"
@@ -42,7 +42,7 @@
           <template #event-popover-content="slotProps">
             <slot name="event-popover-content" v-bind="slotProps" />
           </template>
-        </CalendarEvent>
+        </CalendarWeekDayEvent>
         <Button
           v-if="showCollapsable && isCollapsed && dayFullDayEvents.length > 4"
           :label="dayFullDayEvents.length - 4 + ' more'"
@@ -91,7 +91,7 @@
                 :style="{ height: `${hourHeight}px` }"
               />
             </div>
-            <CalendarEvent
+            <CalendarWeekDayEvent
               v-for="(calendarEvent, idx) in timedEvents[
                 parseDate(currentDate)
               ]"
@@ -103,7 +103,7 @@
 			  <template #event-popover-content="slotProps">
                 <slot name="event-popover-content" v-bind="slotProps" />
 			  </template>
-            </CalendarEvent>
+            </CalendarWeekDayEvent>
             <!-- Current time Marker -->
             <CalendarTimeMarker :date="currentDate" />
           </div>
@@ -115,16 +115,15 @@
 
 <script setup>
 import { computed, inject, onMounted, ref, watch } from 'vue'
-import CalendarEvent from './CalendarEvent.vue'
 import CalendarTimeMarker from './CalendarTimeMarker.vue'
 import { Button } from '../Button'
 import {
   parseDate,
-  parseDateWithDay,
   twelveHoursFormat,
   twentyFourHoursFormat,
 } from './calendarUtils'
 import useCalendarData from './composables/useCalendarData'
+import CalendarWeekDayEvent from './CalendarWeekDayEvent.vue'
 
 const props = defineProps({
   events: {

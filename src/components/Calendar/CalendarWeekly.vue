@@ -58,7 +58,7 @@
               }
             "
           >
-            <CalendarEvent
+            <CalendarWeekDayEvent
               v-for="(calendarEvent, idx) in !showCollapsable || !isCollapsed
                 ? fullDayEvents[parseDate(date)]
                 : fullDayEvents[parseDate(date)]?.slice(0, 2)"
@@ -138,7 +138,7 @@
               </div>
 
               <!-- Calendar Events populations  -->
-              <CalendarEvent
+              <CalendarWeekDayEvent
                 v-for="(calendarEvent, idx) in timedEvents[parseDate(date)]"
                 class="absolute mb-2 w-[90%] cursor-pointer"
                 :event="calendarEvent"
@@ -148,7 +148,7 @@
 			    <template #event-popover-content="slotProps">
 			      <slot name="event-popover-content" v-bind="slotProps" />
 			    </template>
-			  </CalendarEvent>
+			  </CalendarWeekDayEvent>
 
               <!-- Current time Marker  -->
               <CalendarTimeMarker :date="date" />
@@ -161,7 +161,6 @@
 </template>
 <script setup>
 import { ref, onMounted, watch, computed, inject } from 'vue'
-import CalendarEvent from './CalendarEvent.vue'
 import CalendarTimeMarker from './CalendarTimeMarker.vue'
 import {
   twelveHoursFormat,
@@ -174,6 +173,7 @@ import {
 
 import { Button } from '../Button'
 import useCalendarData from './composables/useCalendarData'
+import CalendarWeekDayEvent from './CalendarWeekDayEvent.vue'
 
 const props = defineProps({
   events: {
