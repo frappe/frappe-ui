@@ -5,6 +5,7 @@ export type AxisChartConfig = {
   title: string
   subtitle?: string
   colors?: string[]
+  isRTL?: boolean
   xAxis: {
     key: string
     type: 'category' | 'time' | 'value'
