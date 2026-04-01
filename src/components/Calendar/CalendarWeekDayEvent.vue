@@ -5,7 +5,7 @@
 		@open="registerDeleteShortcut"
 		@close="unregisterDeleteShortcut"
 	>
-		<template #target="{ togglePopover }">
+		<template #target="{ togglePopover, isOpen, close }">
 			<div
 				ref="eventRef"
 				class="event min-h-6 mx-px shadow rounded transition-all duration-75 shrink-0"
@@ -13,7 +13,7 @@
 				:style="innerStyle"
 				@click.prevent="handleEventClick($event, togglePopover)"
 				@dblclick.prevent="handleEventEdit($event)"
-				@mousedown="handleRepositionMouseDown($event)"
+				@mousedown="handleRepositionMouseDown($event, isOpen, close)"
 			>
 				<div class="flex gap-1.5 h-full p-[5px]">
 					<div
@@ -234,7 +234,7 @@ function handleResizeMouseDown() {
 
 // ── Reposition ────────────────────────────────────────────────────────────
 
-function handleRepositionMouseDown(e) {
+function handleRepositionMouseDown(e, isPopoverOpen, closePopover) {
 	if (!config.isEditMode) return
 
 	e.preventDefault()
@@ -247,6 +247,7 @@ function handleRepositionMouseDown(e) {
 	window.addEventListener('mouseup', mouseup)
 
 	function mousemove(e) {
+		if (isPopoverOpen) closePopover()
 		isRepositioning.value = true
 		preventClick.value = true
 		if (!eventRef.value) return
