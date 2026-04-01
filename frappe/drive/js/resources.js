@@ -1,5 +1,6 @@
 import { createResource, toast } from '../../../src'
-import { prettyData } from '../js/utils'
+import { prettyData, openEntity } from '../js/utils'
+
 export const getTeams = createResource({
   url: 'drive.api.permissions.get_teams',
   params: {
