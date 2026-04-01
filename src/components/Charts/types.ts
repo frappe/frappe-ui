@@ -73,6 +73,7 @@ export type DonutChartConfig = {
   title: string
   subtitle?: string
   colors?: string[]
+  isRTL?: boolean
   categoryColumn: string
   valueColumn: string
   maxSliceCount?: number
