@@ -88,6 +88,7 @@ export type FunnelChartConfig = {
   title: string
   subtitle?: string
   colors?: string[]
+  isRTL?: boolean
   categoryColumn: string
   valueColumn: string
   showPercentages?: boolean

@@ -9,6 +9,7 @@ import { formatValue } from './helpers'
 import { FunnelChartConfig } from './types'
 
 export default function getFunnelChartOptions(config: FunnelChartConfig) {
+  const isRTL = config.isRTL
   let data = config.data || []
 
   const labelPosition = 'alternate'
@@ -37,7 +38,7 @@ export default function getFunnelChartOptions(config: FunnelChartConfig) {
     animationDuration: 700,
     color: colors,
     textStyle: { fontFamily: ['InterVar', 'sans-serif'] },
-    title: getTitleOptions(config.title, config.subtitle),
+    title: getTitleOptions(config.title, config.subtitle, isRTL),
     series: [
       {
         name: 'Funnel',
@@ -98,13 +99,14 @@ export default function getFunnelChartOptions(config: FunnelChartConfig) {
       confine: true,
       appendToBody: false,
       formatter: function (params: any) {
+        const dirAttr = isRTL ? ' dir="rtl"' : ''
         const p = params as any
         const value = p.value
         const percentage = total > 0 ? (value / total) * 100 : 0
         const formatted = isNaN(value) ? value : formatValue(value, 1, true)
         const formattedPercentage = percentage.toFixed(0)
         return `
-          <div class="flex items-center justify-between gap-5">
+          <div${dirAttr} class="flex items-center justify-between gap-5">
             <div>${p.name}</div>
             <div class="font-bold">
               ${formatted} (${formattedPercentage}%)
