@@ -11,6 +11,7 @@ export const SUBTITLE_HEIGHT = 18
 export const TITLE_BOTTOM = 24
 
 export default function useEchartsOptions(config: AxisChartConfig) {
+  const isRTL = config.isRTL
   const title = config.title
   const subtitle = config.subtitle
   const hasTitle = title ? 1 : 0
@@ -27,11 +28,11 @@ export default function useEchartsOptions(config: AxisChartConfig) {
     animation: true,
     animationDuration: 700,
     textStyle: { fontFamily: ['InterVar', 'sans-serif'] },
-    title: getTitleOptions(title, subtitle),
+    title: getTitleOptions(title, subtitle, isRTL),
     color: config.colors,
     grid: {
-      left: '1%',
-      right: config.swapXY ? '2.5%' : '1.5%',
+      left: isRTL ? (config.swapXY ? '2.5%' : '1.5%') : '1%',
+      right: isRTL ? '1%' : config.swapXY ? '2.5%' : '1.5%',
       top:
         PADDING_TOP +
         TITLE_HEIGHT * hasTitle +
@@ -47,6 +48,8 @@ export default function useEchartsOptions(config: AxisChartConfig) {
       show: true,
       trigger: 'axis',
       formatter: (params: Object | Array<Object>) => {
+        const dirAttr = isRTL ? ' dir="rtl"' : ''
+
         if (Array.isArray(params)) {
           params = params
             // remove zero values
@@ -60,7 +63,7 @@ export default function useEchartsOptions(config: AxisChartConfig) {
           const value = config.swapXY ? p.value[0] : p.value[1]
           const formatted = isNaN(value) ? value : formatValue(value)
           return `
-                <div class="flex items-center justify-between gap-5">
+                <div${dirAttr} class="flex items-center justify-between gap-5">
                   <div>${p.name}</div>
                   <div class="font-bold">${formatted}</div>
                 </div>
@@ -77,7 +80,7 @@ export default function useEchartsOptions(config: AxisChartConfig) {
                 : xValue
             const formattedY = isNaN(yValue) ? yValue : formatValue(yValue)
             return `
-              <div class="flex flex-col">
+              <div${dirAttr} class="flex flex-col">
                 ${idx == 0 ? `<div>${formattedX}</div>` : ''}
                 <div class="flex items-center justify-between gap-5">
                   <div class="flex gap-1 items-center">
@@ -130,13 +133,13 @@ export default function useEchartsOptions(config: AxisChartConfig) {
   }
 }
 
-export function getTitleOptions(title: string, subtitle?: string) {
+export function getTitleOptions(title: string, subtitle?: string, isRTL?: boolean) {
   return {
     top: '4px',
-    left: '0.8%',
+    left: isRTL ? 'right' : '0.8%',
+    padding: isRTL ? [0, 10, 0, 0] : 0,
     text: title,
     subtext: subtitle,
-    padding: 0,
     itemGap: -3,
     textStyle: {
       fontSize: 14,
@@ -154,6 +157,8 @@ export function getTitleOptions(title: string, subtitle?: string) {
 }
 
 function getXAxisOptions(config: AxisChartConfig) {
+  const isRTL = config.isRTL
+
   const options = config.swapXY
     ? {
         show: true,
@@ -161,12 +166,13 @@ function getXAxisOptions(config: AxisChartConfig) {
         z: 2,
         scale: false,
         boundaryGap: false,
+        inverse: isRTL,
         position: 'top',
-        name: `${config.yAxis.title} →`,
+        name: isRTL ? `← ${config.yAxis.title}` : `${config.yAxis.title} →`,
         nameGap: 6,
         nameLocation: 'end',
         nameTextStyle: {
-          align: 'right',
+          align: isRTL ? 'left' : 'right',
           verticalAlign: 'bottom',
           padding: [0, 0, 26, 0],
           backgroundColor: 'var(--surface-white)',
@@ -205,6 +211,7 @@ function getXAxisOptions(config: AxisChartConfig) {
         z: 2,
         type: config.xAxis.type,
         scale: true,
+        inverse: isRTL,
         splitLine: {
           show: false,
         },
@@ -228,6 +235,8 @@ function getXAxisOptions(config: AxisChartConfig) {
 }
 
 function getYAxisOptions(config: AxisChartConfig) {
+  const isRTL = config.isRTL
+
   let primaryYAxisOptions = config.swapXY
     ? {
         show: true,
@@ -235,6 +244,7 @@ function getYAxisOptions(config: AxisChartConfig) {
         z: 2,
         scale: true,
         inverse: 'true',
+        position: isRTL ? 'right' : 'left',
         splitLine: {
           show: false,
         },
@@ -256,14 +266,15 @@ function getYAxisOptions(config: AxisChartConfig) {
         type: 'value',
         z: 2,
         scale: false,
+        position: isRTL ? 'right' : 'left',
         boundaryGap: ['0%', '1%'],
         name: `↑ ${config.yAxis.title}`,
         nameGap: 6,
         nameLocation: 'end',
         nameTextStyle: {
-          align: 'left',
+          align: isRTL ? 'right' : 'left',
           verticalAlign: 'top',
-          padding: [0, 0, 0, -2],
+          padding: isRTL ? [0, -2, 0, 0] : [0, 0, 0, -2],
           backgroundColor: 'var(--surface-white)',
           borderColor: 'var(--surface-white)',
           color: 'var(--ink-gray-8)',
@@ -307,13 +318,14 @@ function getYAxisOptions(config: AxisChartConfig) {
     z: 2,
     alignTicks: true,
     scale: false,
+    position: isRTL ? 'left' : 'right',
     boundaryGap: ['0%', '1%'],
-    name: `${config.y2Axis?.title} ↑`,
+    name: isRTL ? `↑ ${config.y2Axis?.title}` : `${config.y2Axis?.title} ↑`,
     nameLocation: 'end',
     nameTextStyle: {
-      align: 'right',
+      align: isRTL ? 'left' : 'right',
       verticalAlign: 'top',
-      padding: [0, 5, 0, 0],
+      padding: isRTL ? [0, 0, 0, 5] : [0, 5, 0, 0],
       backgroundColor: 'var(--surface-white)',
       borderColor: 'var(--surface-white)',
       color: 'var(--ink-gray-8)',
@@ -341,7 +353,6 @@ function getYAxisOptions(config: AxisChartConfig) {
       formatter: function (value: number) {
         return formatValue(value, 1, true)
       },
-      // color: '#000',
     },
     min: config.y2Axis?.yMin,
     max: config.y2Axis?.yMax,
