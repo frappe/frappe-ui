@@ -59,6 +59,8 @@
 </template>
 
 <script setup>
+import './style.css'
+
 import EventModalContent from './EventModalContent.vue'
 import NewEventModal from './NewEventModal.vue'
 import Popover from '../Popover/Popover.vue'
@@ -82,27 +84,3 @@ const {
 	unregisterDeleteShortcut,
 } = useEventBase(props)
 </script>
-
-<style scoped>
-.event {
-	background-color: var(--bg);
-}
-.event .event-title {
-	color: var(--text);
-}
-.event .event-border {
-	background-color: var(--border);
-}
-.event.active {
-	background-color: var(--bg-active);
-}
-.event.active .event-title {
-	color: var(--text-active, #fff);
-}
-.event.active .event-border {
-	background-color: var(--border-active);
-}
-.event:not(.active):hover {
-	background-color: var(--bg-hover);
-}
-</style>

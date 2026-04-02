@@ -20,7 +20,7 @@
   </span>
 </template>
 <script setup>
-import CalendarMonthEvent from './CalendarMonthEvent.vue';
+import CalendarMonthEvent from './CalendarMonthEvent.vue'
 
 const props = defineProps({
   events: {
@@ -39,4 +39,3 @@ const props = defineProps({
 
 const emit = defineEmits(['showMoreEvents'])
 </script>
-<style></style>
