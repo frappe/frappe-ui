@@ -125,7 +125,7 @@ const getLinkBindings = () => {
     ? {
         href: rowRoute.value,
       }
-    : { to: route }
+    : { to: rowRoute.value }
 }
 
 const isLastRow = computed(() => {
