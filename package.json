@@ -16,7 +16,9 @@
     "docs:dev": "vitepress dev docs --host",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
-    "docs:gen": "node docs/scripts/propsgen.ts --trace-uncaught"
+    "docs:gen": "node docs/scripts/propsgen.ts --trace-uncaught",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "exports": {
     ".": {
@@ -145,7 +147,12 @@
     "vitest": "^2.1.8",
     "vue": "^3.3.0",
     "vue-component-meta": "^3.1.8",
-    "vue-router": "^4.1.6"
+    "vue-router": "^4.1.6",
+    "storybook": "^10.3.4",
+    "@storybook/vue3-vite": "^10.3.4",
+    "@storybook/addon-a11y": "^10.3.4",
+    "@storybook/addon-docs": "^10.3.4",
+    "@storybook/addon-onboarding": "^10.3.4"
   },
   "resolutions": {
     "prosemirror-model": "1.25.2",

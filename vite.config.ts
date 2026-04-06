@@ -8,6 +8,7 @@ export default defineConfig({
   plugins: [vue(), lucideIcons()],
   resolve: {
     alias: {
+      '@': path.resolve(__dirname, 'src'),
       'tailwind.config.js': path.resolve(__dirname, 'tailwind.config.js'),
     },
   },
