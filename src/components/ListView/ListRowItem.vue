@@ -34,11 +34,11 @@ import { alignmentMap } from './utils'
 const props = defineProps({
   column: {
     type: Object,
-    default: {},
+    default: () => ({}),
   },
   row: {
     type: Object,
-    default: {},
+    default: () => ({}),
   },
   item: {
     type: [String, Number, Object],

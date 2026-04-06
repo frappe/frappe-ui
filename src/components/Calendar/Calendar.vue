@@ -138,7 +138,7 @@ const props = defineProps({
   events: {
     type: Object,
     required: false,
-    default: [],
+    default: () => [],
   },
   config: {
     type: Object,

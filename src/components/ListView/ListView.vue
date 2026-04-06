@@ -32,11 +32,11 @@ defineOptions({
 const props = defineProps({
   columns: {
     type: Array,
-    default: [],
+    default: () => [],
   },
   rows: {
     type: Array,
-    default: [],
+    default: () => [],
   },
   rowKey: {
     type: String,
