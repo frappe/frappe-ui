@@ -1,66 +1,3 @@
-<template>
-  <Tooltip :text="tooltip" :disabled="!tooltip?.length">
-    <button
-      v-bind="$attrs"
-      :class="buttonClasses"
-      @click="handleClick"
-      :disabled="isDisabled"
-      :ariaLabel="label"
-      :type = "props.type"
-      ref="rootRef"
-    >
-      <LoadingIndicator
-        v-if="loading"
-        :class="{
-          'h-3 w-3': size == 'sm',
-          'h-[13.5px] w-[13.5px]': size == 'md',
-          'h-[15px] w-[15px]': size == 'lg',
-          'h-4.5 w-4.5': size == 'xl' || size == '2xl',
-        }"
-      />
-      <slot name="prefix" v-else-if="$slots['prefix'] || iconLeft">
-        <FeatherIcon
-          v-if="iconLeft && typeof iconLeft === 'string'"
-          :name="iconLeft"
-          :class="slotClasses"
-          aria-hidden="true"
-        />
-        <component v-else-if="iconLeft" :is="iconLeft" :class="slotClasses" />
-      </slot>
-
-      <template v-if="loading && loadingText">{{ loadingText }}</template>
-      <template v-else-if="isIconButton && !loading">
-        <FeatherIcon
-          v-if="icon && typeof icon === 'string'"
-          :name="icon"
-          :class="slotClasses"
-        />
-        <component v-else-if="icon" :is="icon" :class="slotClasses" />
-        <slot name="icon" v-else-if="$slots.icon" />
-        <div v-else-if="hasLucideIconInDefaultSlot" :class="slotClasses">
-          <slot>{{ label }}</slot>
-        </div>
-      </template>
-      <span v-else :class="{ 'sr-only': isIconButton }" class="truncate">
-        <slot>{{ label }}</slot>
-      </span>
-
-      <slot name="suffix">
-        <FeatherIcon
-          v-if="iconRight && typeof iconRight === 'string'"
-          :name="iconRight"
-          :class="slotClasses"
-          aria-hidden="true"
-        />
-          <component
-            v-else-if="iconRight"
-            :is="iconRight"
-            :class="slotClasses"
-          />
-      </slot>
-    </button>
-  </Tooltip>
-</template>
 <script lang="ts" setup>
 import { computed, useSlots, ref } from 'vue'
 import FeatherIcon from '../FeatherIcon.vue'
@@ -73,7 +10,7 @@ defineOptions({ inheritAttrs: false })
 
 const props = withDefaults(defineProps<ButtonProps>(), {
   theme: 'gray',
-  size: 'sm',
+  size: 'md',
   variant: 'subtle',
   loading: false,
   disabled: false,
@@ -87,32 +24,28 @@ const buttonClasses = computed(() => {
   let solidClasses = {
     gray: 'text-ink-white bg-surface-gray-7 hover:bg-surface-gray-6 active:bg-surface-gray-5',
     blue: 'text-ink-white bg-blue-500 hover:bg-surface-blue-3 active:bg-blue-700',
-    green:
-      'text-ink-white bg-surface-green-3 hover:bg-green-700 active:bg-green-800',
+    green: 'text-ink-white bg-surface-green-3 hover:bg-green-700 active:bg-green-800',
     red: 'text-ink-white bg-surface-red-5 hover:bg-surface-red-6 active:bg-surface-red-7',
   }[props.theme]
 
   let subtleClasses = {
     gray: 'text-ink-gray-8 bg-surface-gray-2 hover:bg-surface-gray-3 active:bg-surface-gray-4',
     blue: 'text-ink-blue-3 bg-surface-blue-2 hover:bg-blue-200 active:bg-blue-300',
-    green:
-      'text-green-800 bg-surface-green-2 hover:bg-green-200 active:bg-green-300',
+    green: 'text-green-800 bg-surface-green-2 hover:bg-green-200 active:bg-green-300',
     red: 'text-red-700 bg-surface-red-2 hover:bg-surface-red-3 active:bg-surface-red-4',
   }[props.theme]
 
   let outlineClasses = {
     gray: 'text-ink-gray-8 bg-surface-white bg-surface-white border border-outline-gray-2 hover:border-outline-gray-3 active:border-outline-gray-3 active:bg-surface-gray-4',
     blue: 'text-ink-blue-3 bg-surface-white border border-outline-blue-1 hover:border-blue-400 active:border-blue-400 active:bg-blue-300',
-    green:
-      'text-green-800 bg-surface-white border border-outline-green-2 hover:border-green-500 active:border-green-500 active:bg-green-300',
+    green: 'text-green-800 bg-surface-white border border-outline-green-2 hover:border-green-500 active:border-green-500 active:bg-green-300',
     red: 'text-red-700 bg-surface-white border border-outline-red-1 hover:border-outline-red-2 active:border-outline-red-2 active:bg-surface-red-3',
   }[props.theme]
 
   let ghostClasses = {
     gray: 'text-ink-gray-8 bg-transparent hover:bg-surface-gray-3 active:bg-surface-gray-4',
     blue: 'text-ink-blue-3 bg-transparent hover:bg-blue-200 active:bg-blue-300',
-    green:
-      'text-green-800 bg-transparent hover:bg-green-200 active:bg-green-300',
+    green: 'text-green-800 bg-transparent hover:bg-green-200 active:bg-green-300',
     red: 'text-red-700 bg-transparent hover:bg-surface-red-3 active:bg-surface-red-4',
   }[props.theme]
 
@@ -135,45 +68,41 @@ const buttonClasses = computed(() => {
   let disabledClassesMap: Record<ThemeVariant, string> = {
     'gray-solid': 'bg-surface-gray-2 text-ink-gray-4',
     'gray-subtle': 'bg-surface-gray-2 text-ink-gray-4',
-    'gray-outline':
-      'bg-surface-gray-2 text-ink-gray-4 border border-outline-gray-2',
+    'gray-outline': 'bg-surface-gray-2 text-ink-gray-4 border border-outline-gray-2',
     'gray-ghost': 'text-ink-gray-4',
 
     'blue-solid': 'bg-blue-300 text-ink-white',
     'blue-subtle': 'bg-surface-blue-2 text-ink-blue-link',
-    'blue-outline':
-      'bg-surface-blue-2 text-ink-blue-link border border-outline-blue-1',
+    'blue-outline': 'bg-surface-blue-2 text-ink-blue-link border border-outline-blue-1',
     'blue-ghost': 'text-ink-blue-link',
 
     'green-solid': 'bg-surface-green-2 text-ink-green-2',
     'green-subtle': 'bg-surface-green-2 text-ink-green-2',
-    'green-outline':
-      'bg-surface-green-2 text-ink-green-2 border border-outline-green-2',
+    'green-outline': 'bg-surface-green-2 text-ink-green-2 border border-outline-green-2',
     'green-ghost': 'text-ink-green-2',
 
     'red-solid': 'bg-surface-red-2 text-ink-red-2',
     'red-subtle': 'bg-surface-red-2 text-ink-red-2',
-    'red-outline':
-      'bg-surface-red-2 text-ink-red-2 border border-outline-red-1',
+    'red-outline': 'bg-surface-red-2 text-ink-red-2 border border-outline-red-1',
     'red-ghost': 'text-ink-red-2',
   }
   let disabledClasses = disabledClassesMap[themeVariant]
 
   let sizeClasses = {
-    sm: 'h-7 text-base px-2 rounded',
-    md: 'h-8 text-base font-medium px-2.5 rounded',
-    lg: 'h-10 text-lg font-medium px-3 rounded-md',
-    xl: 'h-11.5 text-xl font-medium px-3.5 rounded-lg',
-    '2xl': 'h-13 text-2xl font-medium px-3.5 rounded-xl',
+    sm: 'h-9 text-base px-2.5 rounded',
+    md: 'h-10 text-base font-medium px-3 rounded',
+    lg: 'h-11 text-lg font-medium px-3.5 rounded-md',
+    xl: 'h-13 text-xl font-medium px-4 rounded-lg',
+    '2xl': 'h-14 text-2xl font-medium px-4 rounded-xl',
   }[props.size]
 
   if (isIconButton.value) {
     sizeClasses = {
-      sm: 'h-7 w-7 rounded',
-      md: 'h-8 w-8 rounded',
-      lg: 'h-10 w-10 rounded-md',
-      xl: 'h-11.5 w-11.5 rounded-lg',
-      '2xl': 'h-13 w-13 rounded-xl',
+      sm: 'h-8 w-8 rounded',
+      md: 'h-9 w-9 rounded',
+      lg: 'h-11 w-11 rounded-md',
+      xl: 'h-12 w-12 rounded-lg',
+      '2xl': 'h-14 w-14 rounded-xl',
     }[props.size]
   }
 
@@ -247,3 +176,67 @@ defineSlots<{
   suffix?: () => any
 }>()
 </script>
+
+<template>
+  <Tooltip :text="tooltip" :disabled="!tooltip?.length">
+    <button
+      v-bind="$attrs"
+      :class="buttonClasses"
+      @click="handleClick"
+      :disabled="isDisabled"
+      :ariaLabel="label"
+      :type = "props.type"
+      ref="rootRef"
+    >
+      <LoadingIndicator
+        v-if="loading"
+        :class="{
+          'h-3 w-3': size == 'sm',
+          'h-[13.5px] w-[13.5px]': size == 'md',
+          'h-[15px] w-[15px]': size == 'lg',
+          'h-4.5 w-4.5': size == 'xl' || size == '2xl',
+        }"
+      />
+      <slot name="prefix" v-else-if="$slots['prefix'] || iconLeft">
+        <FeatherIcon
+          v-if="iconLeft && typeof iconLeft === 'string'"
+          :name="iconLeft"
+          :class="slotClasses"
+          aria-hidden="true"
+        />
+        <component v-else-if="iconLeft" :is="iconLeft" :class="slotClasses" />
+      </slot>
+
+      <template v-if="loading && loadingText">{{ loadingText }}</template>
+      <template v-else-if="isIconButton && !loading">
+        <FeatherIcon
+          v-if="icon && typeof icon === 'string'"
+          :name="icon"
+          :class="slotClasses"
+        />
+        <component v-else-if="icon" :is="icon" :class="slotClasses" />
+        <slot name="icon" v-else-if="$slots.icon" />
+        <div v-else-if="hasLucideIconInDefaultSlot" :class="slotClasses">
+          <slot>{{ label }}</slot>
+        </div>
+      </template>
+      <span v-else :class="{ 'sr-only': isIconButton }" class="truncate">
+        <slot>{{ label }}</slot>
+      </span>
+
+      <slot name="suffix">
+        <FeatherIcon
+          v-if="iconRight && typeof iconRight === 'string'"
+          :name="iconRight"
+          :class="slotClasses"
+          aria-hidden="true"
+        />
+          <component
+            v-else-if="iconRight"
+            :is="iconRight"
+            :class="slotClasses"
+          />
+      </slot>
+    </button>
+  </Tooltip>
+</template>
