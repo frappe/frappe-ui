@@ -1,6 +1,6 @@
 <template>
   <component
-    :is="list.options.getRowRoute ? 'router-link' : 'div'"
+    :is="getLinkComponent()"
     :class="[
       roundedClass,
       isSelected || isActive ? 'bg-surface-gray-2' : '',
@@ -13,7 +13,7 @@
     ]"
     class="flex flex-col transition-all duration-300 ease-in-out"
     v-bind="{
-      to: list.options.getRowRoute ? list.options.getRowRoute(row) : undefined,
+      ...getLinkBindings(),
       onClick: onRowClick,
     }"
   >
@@ -99,6 +99,34 @@ const props = defineProps({
 })
 
 const list = inject('list')
+
+const rowRoute = computed(
+  () =>
+    list.value.options.getRowRoute && list.value.options.getRowRoute(props.row)
+)
+
+const isExternalRoute = computed(() => {
+  if (!rowRoute.value) return false
+  // Check if it's a URL (string starting with http/https or /)
+  return (
+    typeof rowRoute.value === 'string' &&
+    (rowRoute.value.startsWith('http') || rowRoute.value.startsWith('/'))
+  )
+})
+
+const getLinkComponent = () => {
+  if (!rowRoute.value) return 'div'
+  return isExternalRoute.value ? 'a' : 'router-link'
+}
+
+const getLinkBindings = () => {
+  if (!rowRoute.value) return {}
+  return isExternalRoute.value
+    ? {
+        href: rowRoute.value,
+      }
+    : { to: route }
+}
 
 const isLastRow = computed(() => {
   if (!list.value.rows?.length) return false
