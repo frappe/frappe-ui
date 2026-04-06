@@ -51,8 +51,8 @@
       "import": "./src/components/TextEditor/style.css"
     },
     "./tsconfig.base.json": {
-      "default": "./tsconfig.base.json",
-      "types": "./tsconfig.base.json"
+      "types": "./tsconfig.base.json",
+      "default": "./tsconfig.base.json"
     }
   },
   "files": [
