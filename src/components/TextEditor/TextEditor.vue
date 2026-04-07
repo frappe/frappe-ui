@@ -67,7 +67,7 @@ import SlashCommands from './extensions/slash-commands/slash-commands-extension'
 import { getTagExtensions } from './extensions/tag'
 import { TocNodeExtension } from './extensions/toc-node'
 import { VideoExtension } from './extensions/video-extension'
-import { TextEditorEmits, TextEditorProps } from './types'
+import type { TextEditorEmits, TextEditorProps } from './types'
 
 function defaultUploadFunction(file: File) {
   // useFileUpload is frappe specific

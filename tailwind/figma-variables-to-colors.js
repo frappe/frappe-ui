@@ -40,11 +40,11 @@ function convertToJSON(variables) {
     },
   }
 
-  const lightPattern = /^light\/([^\/]+)\/([^\/]+)$/
-  const darkPattern = /^dark\/([^\/]+)\/([^\/]+)$/
-  const neutralPattern = /^neutral\/([^\/]+)$/
-  const whiteOverlayPattern = /^white overlay\/([^\/]+)$/
-  const blackOverlayPattern = /^black overlay\/([^\/]+)$/
+  const lightPattern = /^light\/([^/]+)\/([^/]+)$/
+  const darkPattern = /^dark\/([^/]+)\/([^/]+)$/
+  const neutralPattern = /^neutral\/([^/]+)$/
+  const whiteOverlayPattern = /^white overlay\/([^/]+)$/
+  const blackOverlayPattern = /^black overlay\/([^/]+)$/
 
   const colorMap = {}
 

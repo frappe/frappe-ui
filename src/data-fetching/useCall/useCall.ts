@@ -1,10 +1,10 @@
-import { AfterFetchContext, UseFetchOptions } from '@vueuse/core'
+import type { AfterFetchContext, UseFetchOptions } from '@vueuse/core'
 import { computed, reactive, readonly, ref, unref } from 'vue'
 
 import { idbStore } from '../idbStore'
 import { useFrappeFetch } from '../useFrappeFetch'
 import { unrefObject, makeGetParams, normalizeCacheKey } from '../utils'
-import { BasicParams, UseCallOptions } from './types'
+import type { BasicParams, UseCallOptions } from './types'
 
 export function useCall<TResponse, TParams extends BasicParams = undefined>(
   options: UseCallOptions<TResponse, TParams>,

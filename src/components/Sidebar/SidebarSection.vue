@@ -60,7 +60,7 @@ import { inject, ref } from 'vue'
 import LucideChevronRight from '~icons/lucide/chevron-right'
 
 import SidebarItem from './SidebarItem.vue'
-import { SidebarSectionProps } from './types'
+import type { SidebarSectionProps } from './types'
 
 const props = defineProps<SidebarSectionProps>()
 

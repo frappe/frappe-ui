@@ -6,14 +6,14 @@ import LucideChevronRight from '~icons/lucide/chevron-right'
 
 import Button from '../Button/Button.vue'
 import Popover from '../Popover/Popover.vue'
-import { MonthPickerProps } from './types'
+import type { MonthPickerProps } from './types'
 
 const props = withDefaults(defineProps<MonthPickerProps>(), {
   placeholder: 'Select month',
 })
 
 const viewMode = ref('month')
-const model = defineModel<String>({ default: '' })
+const model = defineModel<string>({ default: '' })
 
 const months = [
   'January',
@@ -57,7 +57,7 @@ const nextClick = () => {
 }
 
 const formatBtn = (v: string | number) =>
-  viewMode.value == 'month' ? (v as String).slice(0, 3) : v
+  viewMode.value == 'month' ? (v as string).slice(0, 3) : v
 
 const txtClass = computed(() => {
   return model.value || props.disabled ? '' : '!text-ink-gray-5'

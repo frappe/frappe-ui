@@ -9,7 +9,7 @@ import TextInput from '../../src/components/TextInput/TextInput.vue'
 import { Link } from '../Link'
 import type { Field, StateRow } from './types'
 
-const typeCheck = ['Check']
+const typeCheck = new Set(['Check'])
 const typeLink = ['Link', 'Dynamic Link']
 const typeNumber = ['Float', 'Int', 'Currency', 'Percent']
 const typeSelect = ['Select']
@@ -57,7 +57,7 @@ export const getOperators = (field: Field) => {
     return baseOperators
   }
 
-  if (typeCheck.includes(fieldType)) {
+  if (typeCheck.has(fieldType)) {
     return [{ label: 'Equals', value: 'equals' }]
   }
 
@@ -139,7 +139,7 @@ export const getValueControl = (row: StateRow) => {
     return h(TextInput, { placeholder: 'Enter value' })
   }
 
-  if (typeSelect.includes(fieldType) || typeCheck.includes(fieldType)) {
+  if (typeSelect.includes(fieldType) || typeCheck.has(fieldType)) {
     let _options = options || ['Yes', 'No']
 
     return h(Select, { placeholder: 'Select Option', options: _options })
@@ -224,7 +224,7 @@ export const parseFilters = (filters: any) => {
     if (['equals', '='].includes(cur.operator)) {
       cur.value = cur.value == 'Yes' ? true : cur.value == 'No' ? false : cur.value
     } else if (cur.operator === 'between') {
-      cur.value = [...cur.value.split(',')]
+      cur.value = cur.value.split(',')
     }
 
     return [...acc, [cur.field.fieldName, operatorMap[cur.operator.toLowerCase()], cur.value]]

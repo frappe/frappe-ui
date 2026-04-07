@@ -282,7 +282,7 @@ export const IframeExtension = Node.create<IframeOptions>({
             if (text) {
               // Check if pasted text is a supported embed URL
               const urlPattern =
-                /^https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=[\w-]+|youtu\.be\/[\w-]+|youtube\.com\/embed\/[\w-]+|vimeo\.com\/\d+|player\.vimeo\.com\/video\/\d+|codepen\.io\/[\w-]+\/pen\/[\w-]+|codesandbox\.io\/[\w\/.-]+|figma\.com\/[\w\/.-]+|embed\.figma\.com\/[\w\/.-]+)$/
+                /^https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=[\w-]+|youtu\.be\/[\w-]+|youtube\.com\/embed\/[\w-]+|vimeo\.com\/\d+|player\.vimeo\.com\/video\/\d+|codepen\.io\/[\w-]+\/pen\/[\w-]+|codesandbox\.io\/[\w/.-]+|figma\.com\/[\w/.-]+|embed\.figma\.com\/[\w/.-]+)$/
 
               if (urlPattern.test(text.trim())) {
                 return createIframeNode(view, extensionThis, text.trim())

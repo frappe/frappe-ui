@@ -16,15 +16,15 @@ import LucideX from '~icons/lucide/x'
 import Button from '../Button/Button.vue'
 import LoadingIndicator from '../LoadingIndicator.vue'
 import Popover from '../Popover/Popover.vue'
-import { MultiSelectOption, MultiSelectProps } from './types'
+import type { MultiSelectOption, MultiSelectProps } from './types'
 
 const props = withDefaults(defineProps<MultiSelectProps>(), {
   placeholder: 'Select option',
 })
 
-const model = defineModel<String[]>({ default: [] })
+const model = defineModel<string[]>({ default: [] })
 
-const getValues = (arr: String[]) => arr.map((x) => props.options.find((y) => y.value === x)?.label)
+const getValues = (arr: string[]) => arr.map((x) => props.options.find((y) => y.value === x)?.label)
 
 const optionToStr = (options: MultiSelectOption[]) => options.map((x) => x.value)
 

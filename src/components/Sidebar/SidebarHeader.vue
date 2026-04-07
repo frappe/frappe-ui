@@ -55,7 +55,7 @@ import { inject } from 'vue'
 import LucideChevronDown from '~icons/lucide/chevron-down'
 
 import Dropdown from '../Dropdown/Dropdown.vue'
-import { SidebarHeaderProps } from './types'
+import type { SidebarHeaderProps } from './types'
 
 const props = defineProps<SidebarHeaderProps>()
 const isCollapsed = inject('isSidebarCollapsed', false)

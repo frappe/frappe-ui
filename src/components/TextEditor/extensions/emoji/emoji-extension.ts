@@ -1,7 +1,8 @@
 import { PluginKey } from '@tiptap/pm/state'
 
+import type {
+  BaseSuggestionItem} from '../suggestion/createSuggestionExtension';
 import {
-  BaseSuggestionItem,
   createSuggestionExtension,
 } from '../suggestion/createSuggestionExtension'
 import EmojiList from './EmojiList.vue'
@@ -20,7 +21,7 @@ export default createSuggestionExtension<EmojiItem>({
   pluginKey: new PluginKey('emojiSuggestion'),
   items: ({ query }: { query: string }) => {
     return EMOJIS.filter((item) => item.name.toLowerCase().includes(query.toLowerCase()))
-      .sort((a, b) => {
+      .toSorted((a, b) => {
         const aName = a.name.toLowerCase()
         const bName = b.name.toLowerCase()
         const queryLower = query.toLowerCase()

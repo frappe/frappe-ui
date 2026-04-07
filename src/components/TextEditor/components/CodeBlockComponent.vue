@@ -49,7 +49,7 @@ export default {
           }
         })
         .concat([{ label: 'html', value: 'xml' }])
-        .sort((a, b) => a.label.localeCompare(b.label))
+        .toSorted((a, b) => a.label.localeCompare(b.label))
     },
   },
 }

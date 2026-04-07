@@ -49,7 +49,7 @@
 import { GridLayout, GridItem } from 'grid-layout-plus'
 import { computed, reactive, ref } from 'vue'
 
-import { Layout, GridLayoutProps } from './types'
+import type { Layout, GridLayoutProps } from './types'
 
 const props = defineProps<GridLayoutProps>()
 

@@ -1,7 +1,7 @@
 import { Node, mergeAttributes } from '@tiptap/core'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
 
-import { UploadedFile } from '../../../../utils/useFileUpload'
+import type { UploadedFile } from '../../../../utils/useFileUpload'
 import ImageGroupNodeView from './ImageGroupNodeView.vue'
 
 export interface ImageGroupOptions {
@@ -139,7 +139,7 @@ export const ImageGroup = Node.create<ImageGroupOptions>({
           }
 
           // Sort by position (descending) for deletion
-          const sortedImages = [...images].sort((a, b) => b.pos - a.pos)
+          const sortedImages = [...images].toSorted((a, b) => b.pos - a.pos)
 
           // Find the position to insert the group (start of selection)
           const insertPos = Math.min(...images.map((img) => img.pos))

@@ -1,4 +1,5 @@
-import { ref, onMounted, Ref } from 'vue'
+import type { Ref } from 'vue';
+import { ref, onMounted } from 'vue'
 
 export type Theme = 'light' | 'dark' | 'system'
 

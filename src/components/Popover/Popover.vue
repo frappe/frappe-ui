@@ -63,7 +63,8 @@
 import { PopoverAnchor, PopoverContent, PopoverPortal, PopoverRoot } from 'reka-ui'
 import { computed, ref, onUnmounted, type StyleValue } from 'vue'
 
-import { PopoverProps, PopoverEmits } from './types'
+import type { PopoverProps} from './types';
+import { PopoverEmits } from './types'
 
 const props = withDefaults(defineProps<PopoverProps>(), {
   show: undefined,

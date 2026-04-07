@@ -1,5 +1,6 @@
-import { AfterFetchContext, OnFetchErrorContext, UseFetchOptions } from '@vueuse/core'
-import { computed, MaybeRefOrGetter, reactive, readonly, Ref, ref, toValue } from 'vue'
+import type { AfterFetchContext, OnFetchErrorContext, UseFetchOptions } from '@vueuse/core'
+import type { Ref} from 'vue';
+import { computed, MaybeRefOrGetter, reactive, readonly, ref, toValue } from 'vue'
 
 import { docStore } from '../docStore'
 import { idbStore } from '../idbStore'
@@ -7,7 +8,7 @@ import { useCall } from '../useCall/useCall'
 import { useFrappeFetch } from '../useFrappeFetch'
 import { parseFilters, makeGetParams, normalizeCacheKey } from '../utils'
 import { listStore } from './listStore'
-import { UseListOptions, UseListResponse } from './types'
+import type { UseListOptions, UseListResponse } from './types'
 
 export function useList<T extends { name: string }>(options: UseListOptions<T>) {
   const {

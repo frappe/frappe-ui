@@ -11,7 +11,7 @@ import LucideX from '~icons/lucide/x'
 
 import Combobox from '../../../../src/components/Combobox/Combobox.vue'
 import { type SimpleOption } from '../../../../src/components/Combobox/types'
-import { TagInputProps } from './types'
+import type { TagInputProps } from './types'
 import { getLabel, getIcon, RenderIcon, getValue } from './utils'
 
 const props = defineProps<TagInputProps>()

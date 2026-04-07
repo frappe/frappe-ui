@@ -1,8 +1,9 @@
-import { Extension, Node } from '@tiptap/core'
+import type { Node } from '@tiptap/core';
+import { Extension } from '@tiptap/core'
 import { Slice, Fragment } from '@tiptap/pm/model'
 import { DOMParser } from '@tiptap/pm/model'
 import { Plugin, PluginKey } from '@tiptap/pm/state'
-import { EditorView } from '@tiptap/pm/view'
+import type { EditorView } from '@tiptap/pm/view'
 
 import { detectMarkdown, markdownToHTML } from '../../../utils/markdown'
 import { processMultipleImages } from './image/image-extension'

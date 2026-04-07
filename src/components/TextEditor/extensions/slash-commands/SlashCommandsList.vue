@@ -19,7 +19,7 @@
 import type { Editor, Range } from '@tiptap/core'
 import { ref, type PropType } from 'vue'
 
-import SuggestionList from '../suggestion/SuggestionList.vue'
+import type SuggestionList from '../suggestion/SuggestionList.vue'
 import type { CommandItem } from './slash-commands-extension'
 
 const props = defineProps({

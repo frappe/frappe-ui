@@ -1,5 +1,6 @@
 import DOMPurify from 'dompurify'
-import { defineComponent, h, ref, Ref } from 'vue'
+import type { Ref } from 'vue';
+import { defineComponent, h, ref } from 'vue'
 
 import LoadingIndicator from '../LoadingIndicator.vue'
 import ToastComponent from './Toast.vue'

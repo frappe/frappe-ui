@@ -2,10 +2,11 @@ import { Node, mergeAttributes, Range, Editor } from '@tiptap/core'
 import { PluginKey } from '@tiptap/pm/state'
 import { toValue } from 'vue'
 
-import { TextEditorProps } from '../../types'
+import type { TextEditorProps } from '../../types'
+import type {
+  BaseSuggestionItem} from '../suggestion/createSuggestionExtension';
 import {
-  createSuggestionExtension,
-  BaseSuggestionItem,
+  createSuggestionExtension
 } from '../suggestion/createSuggestionExtension'
 import SuggestionList from '../suggestion/SuggestionList.vue'
 

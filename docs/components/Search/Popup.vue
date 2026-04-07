@@ -126,7 +126,7 @@ const selectActive = () => {
 const formMarkRegex = (terms: Set<string>) => {
   return new RegExp(
     [...terms]
-      .sort((a, b) => b.length - a.length)
+      .toSorted((a, b) => b.length - a.length)
       .map((t) => `(${t.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&').replace(/-/g, '\\x2d')})`)
       .join('|'),
     'gi',

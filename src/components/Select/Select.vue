@@ -16,7 +16,7 @@ import LucideChevronDown from '~icons/lucide/chevron-down'
 
 import type { SelectProps, SelectOption } from './types'
 
-const model = defineModel<String>()
+const model = defineModel<string>()
 
 const props = withDefaults(defineProps<SelectProps>(), {
   size: 'sm',

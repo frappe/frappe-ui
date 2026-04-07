@@ -47,7 +47,7 @@ function slugger(title) {
   return slugify(title.split('.').join(' '), {
     lower: true,
     trim: true,
-    remove: /[^\w\s\']|_/,
+    remove: /[^\w\s']|_/,
   })
 }
 

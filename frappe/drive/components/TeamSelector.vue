@@ -5,7 +5,7 @@
 import { computed, watch } from 'vue'
 
 import Combobox from '../../../src/components/Combobox/Combobox.vue'
-import { DropdownItem } from '../../../src/components/Dropdown/types'
+import type { DropdownItem } from '../../../src/components/Dropdown/types'
 import icons from '../js/icons'
 import { getTeams } from '../js/resources'
 import { dynamicList } from '../js/utils'

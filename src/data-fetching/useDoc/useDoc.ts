@@ -1,8 +1,9 @@
-import { UseFetchOptions, AfterFetchContext } from '@vueuse/core'
-import { computed, reactive, readonly, Ref, MaybeRefOrGetter, toValue } from 'vue'
+import type { UseFetchOptions, AfterFetchContext } from '@vueuse/core'
+import type { Ref, MaybeRefOrGetter} from 'vue';
+import { computed, reactive, readonly, toValue } from 'vue'
 
 import { docStore } from '../docStore'
-import { UseCallOptions } from '../useCall/types'
+import type { UseCallOptions } from '../useCall/types'
 import { useCall } from '../useCall/useCall'
 import { useFrappeFetch } from '../useFrappeFetch'
 import { listStore } from '../useList/listStore'

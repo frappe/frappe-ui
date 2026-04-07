@@ -134,7 +134,7 @@ const columnsFromSystem = computed(() => {
   const docs = props.fields.data?.docs || []
 
   return docs
-    .map((doc: any) => {
+    .flatMap((doc: any) => {
       const isParent = doc.name === parent
 
       const columns = doc.fields
@@ -146,7 +146,6 @@ const columnsFromSystem = computed(() => {
 
       return [{ value: 'name', label: 'ID' }, ...columns]
     })
-    .flat()
 })
 
 const resetMapping = () => {

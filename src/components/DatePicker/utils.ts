@@ -79,7 +79,7 @@ function getDatesAfter(date: Date, count: number) {
   }
 
   if (incrementer === -1) {
-    return dates.reverse()
+    return dates.toReversed()
   }
   return dates
 }

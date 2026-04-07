@@ -16,7 +16,7 @@ import {
 import { computed } from 'vue'
 import LucideChevronDown from '~icons/lucide/chevron-down'
 
-import { SimpleOption } from '../TagInput/types'
+import type { SimpleOption } from '../TagInput/types'
 import {
   isGroup,
   getLabel,
@@ -26,7 +26,7 @@ import {
   RenderIcon,
   isDisabled,
 } from '../TagInput/utils'
-import { SelectProps, SelectValue as SelectValue_ } from './types'
+import type { SelectProps, SelectValue as SelectValue_ } from './types'
 
 const props = withDefaults(defineProps<SelectProps>(), {
   placeholder: 'Select an option',

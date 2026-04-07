@@ -7,7 +7,7 @@ import { computed, ref } from 'vue'
 
 import ECharts from './ECharts.vue'
 import useFunnelChartOptions from './funnelChartOptions'
-import { FunnelChartConfig } from './types'
+import type { FunnelChartConfig } from './types'
 
 const props = defineProps<{ config: FunnelChartConfig }>()
 

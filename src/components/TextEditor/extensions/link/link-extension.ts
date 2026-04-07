@@ -1,6 +1,7 @@
-import { getMarkRange, Range, Editor } from '@tiptap/core'
+import type { Range, Editor } from '@tiptap/core';
+import { getMarkRange } from '@tiptap/core'
 import Link from '@tiptap/extension-link'
-import { MarkType } from '@tiptap/pm/model'
+import type { MarkType } from '@tiptap/pm/model'
 import { Plugin, PluginKey } from '@tiptap/pm/state'
 import tippy, { type Instance as TippyInstance } from 'tippy.js'
 import { createApp, h } from 'vue'

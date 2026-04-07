@@ -181,7 +181,7 @@ import { dayjs, dayjsLocal } from '../../utils/dayjs'
 import { Button } from '../Button'
 // @ts-ignore - Vue SFC without explicit types
 import FeatherIcon from '../FeatherIcon.vue'
-import { Popover } from '../Popover'
+import type { Popover } from '../Popover'
 import { TextInput } from '../TextInput'
 import type { DatePickerEmits, DateRangePickerProps, DatePickerViewMode as ViewMode } from './types'
 import { months, monthStart, generateWeeks, getDateValue } from './utils'

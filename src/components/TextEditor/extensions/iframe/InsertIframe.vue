@@ -40,7 +40,7 @@
 </template>
 
 <script setup lang="ts">
-import { Editor } from '@tiptap/vue-3'
+import type { Editor } from '@tiptap/vue-3'
 import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue'
 
 import { Dialog, Button, TextInput, Textarea } from '../../../..'

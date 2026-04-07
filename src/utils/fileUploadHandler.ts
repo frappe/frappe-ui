@@ -1,4 +1,4 @@
-import { UploadOptions } from './useFileUpload'
+import type { UploadOptions } from './useFileUpload'
 
 type EventListenerOption = 'start' | 'progress' | 'finish' | 'error'
 

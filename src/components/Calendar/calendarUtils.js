@@ -25,7 +25,7 @@ export function getCalendarDates(month, year) {
 
   function getBeforeDates(firstDay, leftPadding) {
     let allDates = getDatesAfter(firstDay, 0, leftPadding, -1)
-    allDates = allDates.reverse()
+    allDates = allDates.toReversed()
     return allDates
   }
 
@@ -138,7 +138,7 @@ export function handleSeconds(time) {
 
 export function findOverlappingEventsCount(events) {
   // Sort events based on start time
-  events = events.sort((a, b) => a.startTime - b.startTime)
+  events = events.toSorted((a, b) => a.startTime - b.startTime)
 
   let hallNumber = 0
   const result = []
@@ -156,14 +156,13 @@ export function findOverlappingEventsCount(events) {
 
   // flattening halls and events
   return result
-    .map((hall, idx) =>
+    .flatMap((hall, idx) =>
       hall.map((event, eventIdx) => ({
         ...event,
         hallNumber: idx,
         idx: eventIdx,
       })),
     )
-    .flat()
 }
 
 // Helpers

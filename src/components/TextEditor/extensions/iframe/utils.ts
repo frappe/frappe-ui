@@ -1,4 +1,4 @@
-import { IframeOptions } from './iframe-extension'
+import type { IframeOptions } from './iframe-extension'
 
 export const ALLOWED_DOMAINS = [
   'youtube.com',
@@ -242,7 +242,7 @@ function convertToCodePenEmbed(url: string): string {
       return url
     }
 
-    const match = url.match(/codepen\.io\/([^\/]+)\/pen\/([^\/\?]+)/)
+    const match = url.match(/codepen\.io\/([^/]+)\/pen\/([^/?]+)/)
     if (match?.[1] && match?.[2]) {
       return `https://codepen.io/${match[1]}/embed/${match[2]}?default-tab=result`
     }

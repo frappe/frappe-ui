@@ -1,5 +1,5 @@
 import { formatDate, formatLabel, formatValue, mergeDeep } from './helpers'
-import { AxisChartConfig } from './types'
+import type { AxisChartConfig } from './types'
 
 export const PADDING_TOP = 0
 export const PADDING_BOTTOM = 10
@@ -42,13 +42,13 @@ export default function useEchartsOptions(config: AxisChartConfig) {
     tooltip: {
       show: true,
       trigger: 'axis',
-      formatter: (params: Object | Array<Object>) => {
+      formatter: (params: object | Array<object>) => {
         if (Array.isArray(params)) {
           params = params
             // remove zero values
             .filter((p) => p.value?.[1] !== 0)
             // sort in descending order by value
-            .sort((a, b) => b.value?.[1] - a.value?.[1])
+            .toSorted((a, b) => b.value?.[1] - a.value?.[1])
         }
 
         if (!Array.isArray(params)) {

@@ -146,14 +146,14 @@ const rowHeight = computed(() => {
 
 const roundedClass = computed(() => {
   if (!isSelected.value) return 'rounded'
-  const selections = [...list.value.selections]
+  const selections = new Set([...list.value.selections])
   let groups = list.value.rows[0]?.group ? list.value.rows.map((k) => k.rows) : [list.value.rows]
 
   for (let rows of groups) {
     let currentIndex = rows.findIndex((k) => k == props.row)
     if (currentIndex === -1) continue
-    let atBottom = !selections.includes(rows[currentIndex + 1]?.name)
-    let atTop = !selections.includes(rows[currentIndex - 1]?.name)
+    let atBottom = !selections.has(rows[currentIndex + 1]?.name)
+    let atTop = !selections.has(rows[currentIndex - 1]?.name)
     return (atBottom ? 'rounded-b ' : '') + (atTop ? 'rounded-t' : '')
   }
 })

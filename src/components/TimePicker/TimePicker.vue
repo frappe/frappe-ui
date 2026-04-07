@@ -244,7 +244,7 @@ function findNearestIndex(targetMinutes: number, list: Option[]): number {
   if (lo < minutesArr.length) candidates.push(lo)
   if (lo - 1 >= 0) candidates.push(lo - 1)
   if (!candidates.length) return -1
-  return candidates.sort(
+  return candidates.toSorted(
     (a, b) => Math.abs(minutesArr[a] - targetMinutes) - Math.abs(minutesArr[b] - targetMinutes),
   )[0]
 }

@@ -1,6 +1,6 @@
-import { Editor, Range } from '@tiptap/core'
+import type { Editor, Range } from '@tiptap/core'
 import { PluginKey } from '@tiptap/pm/state'
-import { Component as VueComponent } from 'vue'
+import type { Component as VueComponent } from 'vue'
 import Code from '~icons/lucide/code'
 import GalleryVertical from '~icons/lucide/gallery-vertical'
 import Heading2 from '~icons/lucide/heading-2'

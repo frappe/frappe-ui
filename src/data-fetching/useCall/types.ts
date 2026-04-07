@@ -1,4 +1,4 @@
-import { Ref } from 'vue'
+import type { Ref } from 'vue'
 
 export type BasicParams = Record<string, any> | undefined
 export type CacheKey = string | Array<string | number | boolean | object>
