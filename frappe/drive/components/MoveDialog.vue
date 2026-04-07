@@ -163,7 +163,7 @@
             >
               {{ '/' }}
             </span>
-            <div class="flex w-24 overflow-hidden">
+            <div class="flex w-48 overflow-scroll">
               <div
                 v-for="(crumb, index) in slicedBreadcrumbs"
                 :key="index"
