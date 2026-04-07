@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import { Button, Dialog, Dropdown } from 'frappe-ui'
+import { ref } from 'vue'
 import LucideChevronDown from '~icons/lucide/chevron-down'
 
 const open = ref(false)
@@ -32,7 +32,7 @@ const dropdownOptions = [
           </Button>
         </Dropdown>
 
-        <div class="bg-gray-50 p-4 rounded text-sm">
+        <div class="rounded bg-gray-50 p-4 text-sm">
           <strong>Selected:</strong> {{ selectedOption }}
         </div>
       </div>

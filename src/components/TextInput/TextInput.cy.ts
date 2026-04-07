@@ -1,5 +1,6 @@
-import TextInput from './TextInput.vue'
 import { h } from 'vue'
+
+import TextInput from './TextInput.vue'
 
 const inputTypes = [
   'text',

@@ -188,8 +188,7 @@ export function useTouchHandler(options: UseTouchHandlerOptions) {
       if (
         !isPanning.value &&
         zoomLevel.value > 100 &&
-        (Math.abs(deltaXFromStart) > panThreshold ||
-          Math.abs(deltaYFromStart) > panThreshold)
+        (Math.abs(deltaXFromStart) > panThreshold || Math.abs(deltaYFromStart) > panThreshold)
       ) {
         isPanning.value = true
         // Adjust start coords slightly to avoid jump if pan starts mid-movement
@@ -219,11 +218,7 @@ export function useTouchHandler(options: UseTouchHandlerOptions) {
     const finalVelocity = { ...panVelocity.value }
 
     // Handle Pan End and Inertia
-    if (
-      wasPanning &&
-      initialTouchPoints.value &&
-      touchesLeft < initialTouchPoints.value.length
-    ) {
+    if (wasPanning && initialTouchPoints.value && touchesLeft < initialTouchPoints.value.length) {
       isPanning.value = false // Set panning to false *before* starting animation
       if (onPanEnd) onPanEnd(event)
 
@@ -262,10 +257,7 @@ export function useTouchHandler(options: UseTouchHandlerOptions) {
           animVelocity.y *= dampingFactor
 
           // Stop animation if velocity is negligible or zoom changed back to <= 100%
-          if (
-            Math.hypot(animVelocity.x, animVelocity.y) < 0.01 ||
-            zoomLevel.value <= 100
-          ) {
+          if (Math.hypot(animVelocity.x, animVelocity.y) < 0.01 || zoomLevel.value <= 100) {
             cancelInertiaAnimation()
           } else {
             animationFrameId.value = requestAnimationFrame(animate)

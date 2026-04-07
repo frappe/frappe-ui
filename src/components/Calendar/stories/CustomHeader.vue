@@ -1,6 +1,6 @@
 <script setup>
+import { Button, Calendar, DatePicker, Select } from 'frappe-ui'
 import { ref } from 'vue'
-import { Button, Calendar, DatePicker, Select } from "frappe-ui";
 
 const config = {
   defaultMode: 'Month',
@@ -119,21 +119,9 @@ const events = ref([
           </DatePicker>
         </div>
         <div class="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            icon="chevron-left"
-            @click="headerProps.decrement"
-          />
-          <Button
-            label="Today"
-            variant="ghost"
-            @click="headerProps.setCalendarDate()"
-          />
-          <Button
-            variant="ghost"
-            icon="chevron-right"
-            @click="headerProps.increment"
-          />
+          <Button variant="ghost" icon="chevron-left" @click="headerProps.decrement" />
+          <Button label="Today" variant="ghost" @click="headerProps.setCalendarDate()" />
+          <Button variant="ghost" icon="chevron-right" @click="headerProps.increment" />
         </div>
         <div>
           <Select

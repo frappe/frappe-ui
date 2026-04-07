@@ -4,6 +4,7 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 </script>
+
 <PropsTable name="Dialog" :data='[
   {
     "name": "modelValue",
@@ -25,10 +26,11 @@
     "type": "boolean",
     "default": "false"
   }
-]'/> 
+]'/>
 
-## Slots 
- <SlotsTable :data='[
+## Slots
+
+<SlotsTable :data='[
   {
     "name": "body",
     "description": "Main body content of the dialog, overrides body-header and body-content",
@@ -54,10 +56,11 @@
     "description": "Actions section at the bottom of the dialog; exposes `{ close }`",
     "type": "{ close: () => void; }"
   }
-]'/> 
+]'/>
 
-## Emit Events 
- <EmitsTable :data='[
+## Emit Events
+
+<EmitsTable :data='[
   {
     "name": "update:modelValue",
     "description": "",
@@ -73,5 +76,4 @@
     "description": "",
     "type": "[]"
   }
-]'/> 
-
+]'/>

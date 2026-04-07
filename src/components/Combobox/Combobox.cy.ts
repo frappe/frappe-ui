@@ -1,5 +1,6 @@
-import Combobox from './Combobox.vue'
 import { h } from 'vue'
+
+import Combobox from './Combobox.vue'
 
 const options = ['Apple', 'Mango', 'Cherry']
 
@@ -72,9 +73,9 @@ describe('Combobox', () => {
     cy.mount(Combobox, {
       props: {
         options,
-        onBlur: onBlurSpy,
-        onFocus: onFocus,
-        onInput: onInput,
+        'onBlur': onBlurSpy,
+        'onFocus': onFocus,
+        'onInput': onInput,
         'onUpdate:selectedOption': onSelectedOption,
       },
     })

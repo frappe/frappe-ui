@@ -4,6 +4,7 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 </script>
+
 <PropsTable name="DatePicker" :data='[
   {
     "name": "value",
@@ -93,10 +94,11 @@
     "type": "boolean",
     "default": "true"
   }
-]'/> 
+]'/>
 
-## Slots 
- <SlotsTable :data='[
+## Slots
+
+<SlotsTable :data='[
   {
     "name": "target",
     "description": "",
@@ -112,10 +114,11 @@
     "description": "",
     "type": "{ togglePopover: () => void; isOpen: boolean; displayLabel: string; inputValue: string; }"
   }
-]'/> 
+]'/>
 
-## Emit Events 
- <EmitsTable :data='[
+## Emit Events
+
+<EmitsTable :data='[
   {
     "name": "update:modelValue",
     "description": "",
@@ -126,5 +129,4 @@
     "description": "",
     "type": "[value: string]"
   }
-]'/> 
-
+]'/>

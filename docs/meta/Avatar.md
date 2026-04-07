@@ -4,6 +4,7 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 </script>
+
 <PropsTable name="Avatar" :data='[
   {
     "name": "image",
@@ -31,10 +32,11 @@
     "type": "\"circle\" | \"square\"",
     "default": "\"circle\""
   }
-]'/> 
+]'/>
 
-## Slots 
- <SlotsTable :data='[
+## Slots
+
+<SlotsTable :data='[
   {
     "name": "default",
     "description": "Custom content shown inside the avatar (icon / initials replacement)",
@@ -45,5 +47,4 @@
     "description": "Small indicator shown at the bottom-right of the avatar",
     "type": "any"
   }
-]'/> 
-
+]'/>

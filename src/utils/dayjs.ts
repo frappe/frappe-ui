@@ -1,13 +1,14 @@
 import _dayjs, { Dayjs } from 'dayjs/esm'
-import relativeTime from 'dayjs/esm/plugin/relativeTime'
-import localizedFormat from 'dayjs/esm/plugin/localizedFormat'
-import updateLocale from 'dayjs/esm/plugin/updateLocale'
-import isToday from 'dayjs/esm/plugin/isToday'
-import duration from 'dayjs/esm/plugin/duration'
-import utc from 'dayjs/esm/plugin/utc'
-import timezone from 'dayjs/esm/plugin/timezone'
 import advancedFormat from 'dayjs/esm/plugin/advancedFormat'
 import customParseFormat from 'dayjs/esm/plugin/customParseFormat'
+import duration from 'dayjs/esm/plugin/duration'
+import isToday from 'dayjs/esm/plugin/isToday'
+import localizedFormat from 'dayjs/esm/plugin/localizedFormat'
+import relativeTime from 'dayjs/esm/plugin/relativeTime'
+import timezone from 'dayjs/esm/plugin/timezone'
+import updateLocale from 'dayjs/esm/plugin/updateLocale'
+import utc from 'dayjs/esm/plugin/utc'
+
 import { getConfig } from './config'
 
 _dayjs.extend(updateLocale)

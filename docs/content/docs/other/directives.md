@@ -46,10 +46,7 @@ and the second parameter to the function is the
 <template>
   <pre>visible: {{ visible }}</pre>
   <pre>intersectionRatio: {{ intersectionRatio }}</pre>
-  <div
-    class="mt-20 h-20 w-full rounded-lg bg-gray-100 p-8"
-    v-visibility="onVisibilityChange"
-  >
+  <div class="mt-20 h-20 w-full rounded-lg bg-gray-100 p-8" v-visibility="onVisibilityChange">
     <pre>target element</pre>
   </div>
 </template>

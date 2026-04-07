@@ -1,5 +1,6 @@
-import Button from './Button.vue'
 import { h } from 'vue'
+
+import Button from './Button.vue'
 
 describe('<Button />', () => {
   it('renders default button', () => {

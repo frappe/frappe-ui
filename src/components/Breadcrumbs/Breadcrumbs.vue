@@ -8,9 +8,7 @@
           </template>
         </Button>
       </Dropdown>
-      <span class="ml-1 mr-0.5 text-base text-ink-gray-4" aria-hidden="true">
-        /
-      </span>
+      <span class="ml-1 mr-0.5 text-base text-ink-gray-4" aria-hidden="true"> / </span>
     </template>
 
     <div class="flex min-w-0 items-center text-ellipsis whitespace-nowrap">
@@ -21,9 +19,7 @@
           @click="item.onClick ? item.onClick() : null"
           class="flex items-center rounded px-0.5 py-1 text-lg font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
           :class="[
-            i == crumbs.length - 1
-              ? 'text-ink-gray-9'
-              : 'text-ink-gray-5 hover:text-ink-gray-7',
+            i == crumbs.length - 1 ? 'text-ink-gray-9' : 'text-ink-gray-5 hover:text-ink-gray-7',
           ]"
         >
           <slot name="prefix" :item="item" />
@@ -38,9 +34,7 @@
           @click="item.onClick ? item.onClick() : null"
           class="flex items-center rounded px-0.5 py-1 text-lg font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
           :class="[
-            i == crumbs.length - 1
-              ? 'text-ink-gray-9'
-              : 'text-ink-gray-5 hover:text-ink-gray-7',
+            i == crumbs.length - 1 ? 'text-ink-gray-9' : 'text-ink-gray-5 hover:text-ink-gray-7',
           ]"
         >
           <slot name="prefix" :item="item" />
@@ -54,9 +48,7 @@
           @click="item.onClick ? item.onClick() : null"
           class="flex items-center rounded px-0.5 py-1 text-lg font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
           :class="[
-            i == crumbs.length - 1
-              ? 'text-ink-gray-9'
-              : 'text-ink-gray-5 hover:text-ink-gray-7',
+            i == crumbs.length - 1 ? 'text-ink-gray-9' : 'text-ink-gray-5 hover:text-ink-gray-7',
           ]"
         >
           <slot name="prefix" :item="item" />
@@ -78,13 +70,14 @@
 </template>
 
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
-import { Dropdown } from '../Dropdown'
-import { Button } from '../Button'
-import type { BreadcrumbsProps } from './types'
-import { ref, computed, nextTick, useTemplateRef } from 'vue'
 import { useResizeObserver } from '@vueuse/core'
+import { ref, computed, nextTick, useTemplateRef } from 'vue'
+import { useRouter } from 'vue-router'
 import LucideEllipsis from '~icons/lucide/ellipsis'
+
+import { Button } from '../Button'
+import { Dropdown } from '../Dropdown'
+import type { BreadcrumbsProps } from './types'
 import type { BreadcrumbItem } from './types'
 
 const crumbsEl = useTemplateRef<HTMLDivElement>('crumbsRef')

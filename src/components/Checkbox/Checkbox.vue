@@ -9,16 +9,13 @@
     }"
   >
     <input
-      class="rounded-sm mt-[1px] bg-surface-white"
+      class="mt-[1px] rounded-sm bg-surface-white"
       :class="inputClasses"
       type="checkbox"
       :disabled="disabled"
       :id="htmlId"
       :checked="Boolean(modelValue)"
-      @change="
-        (e) =>
-          $emit('update:modelValue', (e.target as HTMLInputElement).checked)
-      "
+      @change="(e) => $emit('update:modelValue', (e.target as HTMLInputElement).checked)"
       v-bind="attrs"
     />
     <label class="block" :class="labelClasses" v-if="label" :for="htmlId">
@@ -28,6 +25,7 @@
 </template>
 <script lang="ts" setup>
 import { computed, useAttrs } from 'vue'
+
 import { useId } from '../../utils/useId'
 import type { CheckboxProps } from './types'
 

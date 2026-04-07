@@ -1,25 +1,26 @@
 import tailwindColors from 'tailwindcss/colors'
+
 import colorsData from './colors.json'
 
 function generateColorPalette() {
   const colorPalette = {
-    inherit: tailwindColors.inherit,
-    current: tailwindColors.current,
-    transparent: tailwindColors.transparent,
-    black: tailwindColors.black,
-    white: tailwindColors.white,
-    gray: {},
-    blue: {},
-    green: {},
-    red: {},
-    orange: {},
-    yellow: {},
-    teal: {},
-    violet: {},
-    cyan: {},
-    amber: {},
-    pink: {},
-    purple: {},
+    'inherit': tailwindColors.inherit,
+    'current': tailwindColors.current,
+    'transparent': tailwindColors.transparent,
+    'black': tailwindColors.black,
+    'white': tailwindColors.white,
+    'gray': {},
+    'blue': {},
+    'green': {},
+    'red': {},
+    'orange': {},
+    'yellow': {},
+    'teal': {},
+    'violet': {},
+    'cyan': {},
+    'amber': {},
+    'pink': {},
+    'purple': {},
     'white-overlay': {},
     'black-overlay': {},
   }
@@ -64,26 +65,22 @@ function generateCSSVariables() {
 
   // Generate CSS variables for light mode
   Object.keys(colorsData.themedVariables.light).forEach((category) => {
-    Object.keys(colorsData.themedVariables.light[category]).forEach(
-      (colorName) => {
-        const variableName = `--${category}-${colorName}`
-        const reference = colorsData.themedVariables.light[category][colorName]
-        const lightValue = resolveColorReference(reference)
-        output[':root'][variableName] = lightValue
-      },
-    )
+    Object.keys(colorsData.themedVariables.light[category]).forEach((colorName) => {
+      const variableName = `--${category}-${colorName}`
+      const reference = colorsData.themedVariables.light[category][colorName]
+      const lightValue = resolveColorReference(reference)
+      output[':root'][variableName] = lightValue
+    })
   })
 
   // Generate CSS variables for dark mode
   Object.keys(colorsData.themedVariables.dark).forEach((category) => {
-    Object.keys(colorsData.themedVariables.dark[category]).forEach(
-      (colorName) => {
-        const variableName = `--${category}-${colorName}`
-        const reference = colorsData.themedVariables.dark[category][colorName]
-        const darkValue = resolveColorReference(reference)
-        output['[data-theme="dark"]'][variableName] = darkValue
-      },
-    )
+    Object.keys(colorsData.themedVariables.dark[category]).forEach((colorName) => {
+      const variableName = `--${category}-${colorName}`
+      const reference = colorsData.themedVariables.dark[category][colorName]
+      const darkValue = resolveColorReference(reference)
+      output['[data-theme="dark"]'][variableName] = darkValue
+    })
   })
 
   // Generate CSS variables for each color shade
@@ -115,14 +112,12 @@ function generateSemanticColors() {
 
   // Generate semantic colors
   Object.keys(colorsData.themedVariables.light).forEach((category) => {
-    Object.keys(colorsData.themedVariables.light[category]).forEach(
-      (colorName) => {
-        const variableName = `${category}-${colorName}`
-        const reference = colorsData.themedVariables.light[category][colorName]
-        const lightValue = resolveColorReference(reference)
-        output[category][colorName] = `var(--${variableName}, ${lightValue})`
-      },
-    )
+    Object.keys(colorsData.themedVariables.light[category]).forEach((colorName) => {
+      const variableName = `${category}-${colorName}`
+      const reference = colorsData.themedVariables.light[category][colorName]
+      const lightValue = resolveColorReference(reference)
+      output[category][colorName] = `var(--${variableName}, ${lightValue})`
+    })
   })
 
   return output

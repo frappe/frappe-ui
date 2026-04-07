@@ -12,7 +12,7 @@
       >
         <FeatherIcon
           name="star"
-          class="fill-gray-300 text-transparent mr-0.5"
+          class="mr-0.5 fill-gray-300 text-transparent"
           :class="iconClasses(index)"
           @click="markRating(index)"
         />
@@ -23,6 +23,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+
 import FeatherIcon from '../FeatherIcon.vue'
 import type { RatingProps } from './types'
 

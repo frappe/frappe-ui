@@ -69,19 +69,19 @@ describe('DatePicker', () => {
 
     cy.get('[role=dialog]').should('exist')
     cy.get('[aria-label="Today"]').click()
-    cy.get('[role=dialog]').should('not.exist') 
+    cy.get('[role=dialog]').should('not.exist')
     cy.get('input').should('have.value', getTodaysDate())
 
     cy.get('input').dblclick()
 
     cy.get('[aria-label="Tomorrow"]').click()
-    cy.get('[role=dialog]').should('not.exist') 
+    cy.get('[role=dialog]').should('not.exist')
     cy.get('input').should('have.value', getTomorrowsDate())
 
     cy.get('input').dblclick()
 
     cy.get('[aria-label="Clear"]').click()
-    cy.get('[role=dialog]').should('not.exist') 
+    cy.get('[role=dialog]').should('not.exist')
     cy.get('input').should('have.value', '')
 
     cy.get('[role=dialog]').should('not.exist')
@@ -110,7 +110,7 @@ describe('DatePicker', () => {
   it('v-model', () => {
     cy.mount(DatePicker, {
       props: {
-        onChange: cy.spy().as('onChange'),
+        'onChange': cy.spy().as('onChange'),
         'onUpdate:modelValue': cy.spy().as('onUpdate'),
       },
     })

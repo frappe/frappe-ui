@@ -46,11 +46,7 @@
           <Button @click="increment" variant="ghost" icon="chevron-right" />
 
           <!--  View change button, default is months or can be set via props!  -->
-          <TabButtons
-            :buttons="enabledModes"
-            class="ml-2"
-            v-model="activeView"
-          />
+          <TabButtons :buttons="enabledModes" class="ml-2" v-model="activeView" />
         </div>
       </div>
     </slot>
@@ -78,32 +74,22 @@
       :config="overrideConfig"
     >
       <template #header="{ parseDateWithDay, currentDate, fullDay }">
-        <slot
-          name="daily-header"
-          v-bind="{ parseDateWithDay, currentDate, fullDay }"
-        />
+        <slot name="daily-header" v-bind="{ parseDateWithDay, currentDate, fullDay }" />
       </template>
     </CalendarDaily>
 
-    <NewEventModal
-      v-if="showEventModal"
-      v-model="showEventModal"
-      :event="newEvent"
-    />
+    <NewEventModal v-if="showEventModal" v-model="showEventModal" :event="newEvent" />
   </div>
 </template>
 <script setup>
-import {
-  computed,
-  onMounted,
-  onUnmounted,
-  provide,
-  ref,
-  watch,
-  nextTick,
-} from 'vue'
+import { computed, onMounted, onUnmounted, provide, ref, watch, nextTick } from 'vue'
+
+import { dayjs } from '../../utils/dayjs'
 import { Button } from '../Button'
+import DatePicker from '../DatePicker/DatePicker.vue'
 import { TabButtons } from '../TabButtons'
+import CalendarDaily from './CalendarDaily.vue'
+import CalendarMonthly from './CalendarMonthly.vue'
 import {
   getCalendarDates,
   monthList,
@@ -111,16 +97,12 @@ import {
   formatMonthYear,
   getWeekMonthParts,
 } from './calendarUtils'
-import { dayjs } from '../../utils/dayjs'
-import DayIcon from './Icon/DayIcon.vue'
-import WeekIcon from './Icon/WeekIcon.vue'
-import MonthIcon from './Icon/MonthIcon.vue'
-import DatePicker from '../DatePicker/DatePicker.vue'
-import CalendarMonthly from './CalendarMonthly.vue'
 import CalendarWeekly from './CalendarWeekly.vue'
-import CalendarDaily from './CalendarDaily.vue'
-import NewEventModal from './NewEventModal.vue'
 import useEventModal from './composables/useEventModal'
+import DayIcon from './Icon/DayIcon.vue'
+import MonthIcon from './Icon/MonthIcon.vue'
+import WeekIcon from './Icon/WeekIcon.vue'
+import NewEventModal from './NewEventModal.vue'
 
 const props = defineProps({
   events: {
@@ -186,9 +168,7 @@ function syncSelectedMonth(year, month) {
   if (typeof year === 'number' && typeof month === 'number') {
     const currentDay = dayjs(selectedMonthDate.value).date()
 
-    let tentative = dayjs(
-      `${year}-${String(month + 1).padStart(2, '0')}-01`,
-    ).date(currentDay)
+    let tentative = dayjs(`${year}-${String(month + 1).padStart(2, '0')}-01`).date(currentDay)
 
     if (tentative.month() !== month) {
       // overflowed into next month, use last day of target month
@@ -342,9 +322,7 @@ const actionOptions = [
   { label: 'Week', value: 'Week', iconLeft: WeekIcon },
   { label: 'Month', value: 'Month', iconLeft: MonthIcon },
 ]
-let enabledModes = actionOptions.filter(
-  (mode) => !overrideConfig.disableModes.includes(mode.value),
-)
+let enabledModes = actionOptions.filter((mode) => !overrideConfig.disableModes.includes(mode.value))
 
 let currentYear = ref(new Date().getFullYear())
 let currentMonth = ref(new Date().getMonth())
@@ -442,9 +420,7 @@ function incrementWeek() {
   if (nextWeek < datesInWeeks.value.length) {
     week.value = nextWeek
     const weekDates = datesInWeeks.value[week.value]
-    const spansNextMonth = weekDates.some(
-      (d) => d.getMonth() !== currentMonth.value,
-    ) // overlap into next month
+    const spansNextMonth = weekDates.some((d) => d.getMonth() !== currentMonth.value) // overlap into next month
     if (spansNextMonth) {
       // cross boundary -> advance month
       incrementMonth()
@@ -474,9 +450,7 @@ function decrementWeek() {
   if (prevWeek >= 0) {
     week.value = prevWeek
     const weekDates = datesInWeeks.value[week.value]
-    const spansPrevMonth = weekDates.some(
-      (d) => d.getMonth() !== currentMonth.value,
-    ) // overlap into previous month
+    const spansPrevMonth = weekDates.some((d) => d.getMonth() !== currentMonth.value) // overlap into previous month
     if (spansPrevMonth) {
       // cross boundary -> go to previous month
       decrementMonth()
@@ -495,9 +469,7 @@ function decrementWeek() {
   decrementMonth()
   let targetIndex = datesInWeeks.value.length - 1 // start at last row
   const lastWeekDates = datesInWeeks.value[targetIndex]
-  const hasNextMonthDates = lastWeekDates.some(
-    (d) => d.getMonth() !== currentMonth.value,
-  ) // overlap into next month
+  const hasNextMonthDates = lastWeekDates.some((d) => d.getMonth() !== currentMonth.value) // overlap into next month
   if (hasNextMonthDates && targetIndex > 0) {
     targetIndex = targetIndex - 1 // skip overlap row
   }
@@ -519,10 +491,7 @@ function incrementDay() {
 
 function decrementDay() {
   date.value--
-  if (
-    date.value < 0 ||
-    !isCurrentMonthDate(currentMonthDates.value[date.value])
-  ) {
+  if (date.value < 0 || !isCurrentMonthDate(currentMonthDates.value[date.value])) {
     decrementMonth()
   }
 }
@@ -562,12 +531,10 @@ const currentMonthYear = computed(() => {
   }
 
   // Non-week views or empty week fallback
-  if (activeView.value !== 'Week')
-    return formatMonthYear(currentMonth.value, currentYear.value)
+  if (activeView.value !== 'Week') return formatMonthYear(currentMonth.value, currentYear.value)
 
   const weekDates = datesInWeeks.value[week.value] || []
-  if (!weekDates.length)
-    return formatMonthYear(currentMonth.value, currentYear.value)
+  if (!weekDates.length) return formatMonthYear(currentMonth.value, currentYear.value)
 
   const parts = getWeekMonthParts(weekDates)
   if (parts.length === 1) return formatMonthYear(parts[0].month, parts[0].year)
@@ -630,12 +597,8 @@ function getVisibleRange() {
     }
   }
 
-  const start = dayjs(
-    new Date(currentYear.value, currentMonth.value, 1),
-  ).startOf('day')
-  const end = dayjs(
-    new Date(currentYear.value, currentMonth.value + 1, 0),
-  ).endOf('day')
+  const start = dayjs(new Date(currentYear.value, currentMonth.value, 1)).startOf('day')
+  const end = dayjs(new Date(currentYear.value, currentMonth.value + 1, 0)).endOf('day')
   return {
     startDate: toDateString(start),
     endDate: toDateString(end),

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { EChartsOption, init } from 'echarts'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+
 import debounce from '../../utils/debounce'
 
 const props = defineProps<{
@@ -16,8 +17,7 @@ let chart: echarts.ECharts
 const chartDiv = ref<HTMLDivElement>()
 
 const chartClass = computed(() => {
-  const defaults =
-    'h-full w-full min-w-[300px] md:min-w-[400px] min-h-[300px] px-4 py-2'
+  const defaults = 'h-full w-full min-w-[300px] md:min-w-[400px] min-h-[300px] px-4 py-2'
   return props.class || defaults
 })
 

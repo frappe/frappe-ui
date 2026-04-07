@@ -4,7 +4,7 @@
     <div class="grid w-full grid-cols-7">
       <span
         v-for="day in daysList"
-        class="inline-flex items-center justify-center text-base text-ink-gray-6 h-8"
+        class="inline-flex h-8 items-center justify-center text-base text-ink-gray-6"
       >
         {{ day }}
       </span>
@@ -22,7 +22,7 @@
         v-for="(date, i) in currentMonthDates"
         class="overflow-y-auto"
         :class="[
-          config.noBorder ? 'border-l border-t border-0' : 'border-[0.5px]',
+          config.noBorder ? 'border-0 border-l border-t' : 'border-[0.5px]',
           config.noBorder && i % 7 === 0 && 'border-l-0',
           isWeekend(date, config) && 'bg-surface-gray-1',
         ]"
@@ -35,15 +35,11 @@
           class="flex justify-center font-normal"
           :class="isCurrentMonth(date) ? 'text-gray-700' : 'text-gray-200'"
         >
-          <div
-            class="flex gap-0.5 w-full flex-col items-center text-xs text-right"
-          >
+          <div class="flex w-full flex-col items-center gap-0.5 text-right text-xs">
             <span
-              class="z-10 w-full flex justify-between items-center"
+              class="z-10 flex w-full items-center justify-between"
               :class="[
-                date.toDateString() === new Date().toDateString()
-                  ? 'p-[3px] pb-0.5'
-                  : 'p-2',
+                date.toDateString() === new Date().toDateString() ? 'p-[3px] pb-0.5' : 'p-2',
               ]"
             >
               <div></div>
@@ -51,8 +47,8 @@
                 class="cursor-pointer"
                 :class="[
                   date.toDateString() === new Date().toDateString()
-                    ? 'flex items-center justify-center bg-surface-gray-7 text-ink-white rounded size-[25px]'
-                    : 'bg-surface-white ',
+                    ? 'flex size-[25px] items-center justify-center rounded bg-surface-gray-7 text-ink-white'
+                    : 'bg-surface-white',
                   isCurrentMonth(date) ? 'text-ink-gray-6' : 'text-ink-gray-4',
                 ]"
                 @click.stop="
@@ -91,9 +87,7 @@
                 v-if="timedEvents[parseDate(date)]"
                 class="z-10 cursor-pointer"
                 :draggable="config.isEditMode"
-                @dragstart="
-                  onDragStart($event, timedEvents[parseDate(date)][0].id)
-                "
+                @dragstart="onDragStart($event, timedEvents[parseDate(date)][0].id)"
                 @dragend="$event.target.style.opacity = '1'"
                 @dragover.prevent
                 :events="timedEvents[parseDate(date)]"
@@ -110,11 +104,12 @@
 </template>
 
 <script setup>
-import { daysList, parseDate, isWeekend } from './calendarUtils'
 import { inject } from 'vue'
-import CalendarEvent from './CalendarEvent.vue'
-import useCalendarData from './composables/useCalendarData'
 import { computed } from 'vue'
+
+import CalendarEvent from './CalendarEvent.vue'
+import { daysList, parseDate, isWeekend } from './calendarUtils'
+import useCalendarData from './composables/useCalendarData'
 import ShowMoreCalendarEvent from './ShowMoreCalendarEvent.vue'
 const props = defineProps({
   events: {
@@ -136,13 +131,9 @@ const props = defineProps({
 
 const emit = defineEmits(['setCurrentDate'])
 
-const timedEvents = computed(
-  () => useCalendarData(props.events, 'Month').timedEvents.value,
-)
+const timedEvents = computed(() => useCalendarData(props.events, 'Month').timedEvents.value)
 
-const maxEventsInCell = computed(() =>
-  props.currentMonthDates.length > 35 ? 1 : 2,
-)
+const maxEventsInCell = computed(() => (props.currentMonthDates.length > 35 ? 1 : 2))
 
 function isCurrentMonth(date) {
   return date.getMonth() === props.currentMonth

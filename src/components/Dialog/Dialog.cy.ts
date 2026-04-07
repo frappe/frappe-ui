@@ -1,6 +1,7 @@
 import { ref, h } from 'vue'
-import Dialog from './Dialog.vue'
+
 import Button from '../Button/Button.vue'
+import Dialog from './Dialog.vue'
 
 describe('Dialog', () => {
   it('test modal', () => {
@@ -15,23 +16,19 @@ describe('Dialog', () => {
       render() {
         return [
           h('main', [
-            h(
-              Button,
-              { onClick: () => (this.open = true) },
-              () => 'Show Modal Dialog',
-            ),
+            h(Button, { onClick: () => (this.open = true) }, () => 'Show Modal Dialog'),
 
             h(Dialog, {
               onClose,
               onAfterLeave,
-              modelValue: this.open,
+              'modelValue': this.open,
               'onUpdate:modelValue': (value) => {
                 this.open = value
                 onUpdate(value)
               },
-              disableOutsideClickToClose: false,
+              'disableOutsideClickToClose': false,
 
-              options: {
+              'options': {
                 title: 'Modal Dialog',
                 message: 'This dialog cannot be closed by clicking outside.',
                 actions: [{ label: 'Close', variant: 'solid' }],
@@ -67,19 +64,11 @@ describe('Dialog', () => {
         modelValue: true,
       },
       slots: {
-        'body-header': h(
-          'div',
-          { 'data-cy': 'body-header' },
-          'some body header',
-        ),
+        'body-header': h('div', { 'data-cy': 'body-header' }, 'some body header'),
 
-        'body-content': h(
-          'div',
-          { 'data-cy': 'body-content' },
-          'some body content',
-        ),
+        'body-content': h('div', { 'data-cy': 'body-content' }, 'some body content'),
 
-        actions: h('div', { 'data-cy': 'actions' }, 'some actions'),
+        'actions': h('div', { 'data-cy': 'actions' }, 'some actions'),
       },
     })
 

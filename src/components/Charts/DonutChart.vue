@@ -4,6 +4,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+
 import useDonutChartOptions from './donutChartOptions'
 import ECharts from './ECharts.vue'
 import { DonutChartConfig } from './types'

@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { reactive } from 'vue'
 import { Tabs } from 'frappe-ui'
+import { reactive } from 'vue'
 import LucideGithub from '~icons/lucide/github'
-import LucideTwitter from '~icons/lucide/twitter'
 import LucideLinkedin from '~icons/lucide/linkedin'
+import LucideTwitter from '~icons/lucide/twitter'
 
 const state = reactive({
   index: 0,
@@ -32,7 +32,7 @@ const state = reactive({
 </script>
 
 <template>
-  <Tabs class="border rounded" v-model="state.index" :tabs="state.tabs">
+  <Tabs class="rounded border" v-model="state.index" :tabs="state.tabs">
     <template #tab-panel="{ tab }">
       <div class="p-5">{{ tab.content }}</div>
     </template>

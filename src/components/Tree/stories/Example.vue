@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { reactive } from 'vue'
 import { Tree } from 'frappe-ui'
+import { reactive } from 'vue'
 
 const state = reactive({
   showIndentationGuides: true,

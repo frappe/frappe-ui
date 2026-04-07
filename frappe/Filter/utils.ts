@@ -1,12 +1,12 @@
 import { h } from 'vue'
-import Select from '../../src/components/Select/Select.vue'
-import TextInput from '../../src/components/TextInput/TextInput.vue'
-import Rating from '../../src/components/Rating/Rating.vue'
+
 import DatePicker from '../../src/components/DatePicker/DatePicker.vue'
 import DateRangePicker from '../../src/components/DatePicker/DateRangePicker.vue'
 import DateTimePicker from '../../src/components/DatePicker/DateTimePicker.vue'
+import Rating from '../../src/components/Rating/Rating.vue'
+import Select from '../../src/components/Select/Select.vue'
+import TextInput from '../../src/components/TextInput/TextInput.vue'
 import { Link } from '../Link'
-
 import type { Field, StateRow } from './types'
 
 const typeCheck = ['Check']
@@ -186,10 +186,7 @@ export const getValueControl = (row: StateRow) => {
   return h(TextInput, { placeholder: 'Enter Value' })
 }
 
-export const getDefaultOperator = (field: {
-  fieldType: string
-  fieldName: string
-}) => {
+export const getDefaultOperator = (field: { fieldType: string; fieldName: string }) => {
   const operators = getOperators(field)
   return operators[0].value
 }
@@ -202,22 +199,22 @@ const transformIn = (row: StateRow) => {
 }
 
 const operatorMap = {
-  is: 'is',
+  'is': 'is',
   'is not': 'is not',
-  in: 'in',
+  'in': 'in',
   'not in': 'not in',
-  equals: '=',
+  'equals': '=',
   'not equals': '!=',
-  yes: true,
-  no: false,
-  like: 'LIKE',
+  'yes': true,
+  'no': false,
+  'like': 'LIKE',
   'not like': 'NOT LIKE',
   '>': '>',
   '<': '<',
   '>=': '>=',
   '<=': '<=',
-  between: 'between',
-  timespan: 'timespan',
+  'between': 'between',
+  'timespan': 'timespan',
 }
 
 export const parseFilters = (filters: any) => {
@@ -230,9 +227,6 @@ export const parseFilters = (filters: any) => {
       cur.value = [...cur.value.split(',')]
     }
 
-    return [
-      ...acc,
-      [cur.field.fieldName, operatorMap[cur.operator.toLowerCase()], cur.value],
-    ]
+    return [...acc, [cur.field.fieldName, operatorMap[cur.operator.toLowerCase()], cur.value]]
   }, [])
 }

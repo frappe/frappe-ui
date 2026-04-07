@@ -1,5 +1,6 @@
-import ConfirmDialog from '../components/ConfirmDialog.vue'
 import { h, ref } from 'vue'
+
+import ConfirmDialog from '../components/ConfirmDialog.vue'
 
 export function confirmDialog({ title = 'Untitled', message = '', onConfirm, onCancel }) {
   renderDialog(
@@ -7,7 +8,7 @@ export function confirmDialog({ title = 'Untitled', message = '', onConfirm, onC
       title,
       message,
       onConfirm,
-      onCancel
+      onCancel,
     }),
   )
 }

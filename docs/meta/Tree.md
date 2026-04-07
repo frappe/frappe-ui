@@ -4,6 +4,7 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 </script>
+
 <PropsTable name="Tree" :data='[
   {
     "name": "node",
@@ -24,10 +25,11 @@
     "type": "TreeOptions",
     "default": "{\n    rowHeight: \"25px\",\n    indentWidth: \"20px\",\n    showIndentationGuides: true,\n    defaultCollapsed: true,\n}"
   }
-]'/> 
+]'/>
 
-## Slots 
- <SlotsTable :data='[
+## Slots
+
+<SlotsTable :data='[
   {
     "name": "node",
     "description": "Slot to fully override how a tree node renders",
@@ -43,5 +45,4 @@
     "description": "Slot to override only the node label/content",
     "type": "any"
   }
-]'/> 
-
+]'/>

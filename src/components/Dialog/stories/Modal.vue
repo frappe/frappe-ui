@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import { Button, Dialog } from "frappe-ui";
+import { Button, Dialog } from 'frappe-ui'
+import { ref } from 'vue'
 
-const open = ref(false);
+const open = ref(false)
 </script>
 
 <template>
@@ -13,8 +13,7 @@ const open = ref(false);
     :disable-outside-click-to-close="true"
     :options="{
       title: 'Modal Dialog',
-      message:
-        'This dialog cannot be closed by clicking outside.',
+      message: 'This dialog cannot be closed by clicking outside.',
       actions: [{ label: 'Close', variant: 'solid' }],
     }"
   />

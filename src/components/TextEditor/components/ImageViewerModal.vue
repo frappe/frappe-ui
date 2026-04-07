@@ -9,33 +9,24 @@
     >
       <div
         v-if="props.show"
-        class="fixed top-0 left-0 w-full h-full bg-black sm:bg-black/90 z-[50] flex flex-col justify-center items-center overflow-hidden touch-none"
+        class="fixed left-0 top-0 z-[50] flex h-full w-full touch-none flex-col items-center justify-center overflow-hidden bg-black sm:bg-black/90"
         ref="imageContainer"
         @mousemove="handleActivity"
         @touchstart="handleActivity"
         @touchmove="handleActivity"
       >
         <!-- Dedicated Backdrop -->
-        <div
-          class="absolute inset-0 z-0"
-          ref="backdropElement"
-          @click="close"
-        ></div>
+        <div class="absolute inset-0 z-0" ref="backdropElement" @click="close"></div>
 
         <!-- Image Container -->
         <div class="relative z-10 flex flex-col items-center">
           <img
             :src="currentImage.src"
             :alt="currentImage.alt || 'Image preview'"
-            class="max-w-screen max-h-screen object-contain block"
+            class="max-w-screen block max-h-screen object-contain"
             :style="{
               transform: `scale(${zoomLevel / 100}) translate(${panPosition.x}px, ${panPosition.y}px)`,
-              cursor:
-                zoomLevel > 100
-                  ? isMousePanning
-                    ? 'grabbing'
-                    : 'grab'
-                  : 'default',
+              cursor: zoomLevel > 100 ? (isMousePanning ? 'grabbing' : 'grab') : 'default',
               transition:
                 isPanning || isPinching || isAnimatingPan
                   ? 'none'
@@ -49,8 +40,8 @@
         <!-- Caption -->
         <div
           v-if="currentImage.alt"
-          class="absolute bottom-4 p-2 text-center rounded-sm text-white text-sm bg-black/65 z-10 transition-opacity duration-300 ease-in-out"
-          :class="{ 'opacity-0 pointer-events-none': !isControlsVisible }"
+          class="absolute bottom-4 z-10 rounded-sm bg-black/65 p-2 text-center text-sm text-white transition-opacity duration-300 ease-in-out"
+          :class="{ 'pointer-events-none opacity-0': !isControlsVisible }"
         >
           {{ currentImage.alt }}
         </div>
@@ -58,8 +49,8 @@
         <!-- Controls bar -->
         <div
           ref="controlsBar"
-          class="absolute top-4 flex items-center space-x-3 p-2 text-white z-20 transition-opacity duration-300 ease-in-out"
-          :class="{ 'opacity-0 pointer-events-none': !isControlsVisible }"
+          class="absolute top-4 z-20 flex items-center space-x-3 p-2 text-white transition-opacity duration-300 ease-in-out"
+          :class="{ 'pointer-events-none opacity-0': !isControlsVisible }"
           @touchstart.stop
           @touchmove.stop
           @touchend.stop
@@ -67,23 +58,23 @@
           @wheel.stop
         >
           <!-- Navigation controls -->
-          <div class="bg-black/65 rounded flex items-center">
+          <div class="flex items-center rounded bg-black/65">
             <Tooltip text="Previous image">
               <button
-                class="p-2 hover:bg-gray-900 rounded-l focus:outline-none"
+                class="rounded-l p-2 hover:bg-gray-900 focus:outline-none"
                 @click.stop="previousImage"
               >
                 <LucideChevronLeft class="size-4" />
               </button>
             </Tooltip>
 
-            <span class="px-2 text-sm tabular-nums text-gray-400 select-none">
+            <span class="select-none px-2 text-sm tabular-nums text-gray-400">
               {{ currentIndex + 1 }}/{{ props.images.length }}
             </span>
 
             <Tooltip text="Next image">
               <button
-                class="p-2 hover:bg-gray-900 rounded-r focus:outline-none"
+                class="rounded-r p-2 hover:bg-gray-900 focus:outline-none"
                 @click.stop="nextImage"
               >
                 <LucideChevronRight class="size-4" />
@@ -92,10 +83,10 @@
           </div>
 
           <!-- Zoom controls -->
-          <div class="bg-black/65 rounded flex items-center">
+          <div class="flex items-center rounded bg-black/65">
             <Tooltip text="Zoom out">
               <button
-                class="p-2 hover:bg-gray-900 rounded-l focus:outline-none"
+                class="rounded-l p-2 hover:bg-gray-900 focus:outline-none"
                 @click.stop="zoomOut"
               >
                 <LucideMinus class="size-4" />
@@ -104,7 +95,7 @@
 
             <Tooltip text="Reset zoom">
               <button
-                class="p-2 hover:bg-gray-900 text-sm text-gray-400 focus:outline-none"
+                class="p-2 text-sm text-gray-400 hover:bg-gray-900 focus:outline-none"
                 @click.stop="resetZoom"
               >
                 {{ zoomLevel }}%
@@ -113,7 +104,7 @@
 
             <Tooltip text="Zoom in">
               <button
-                class="p-2 hover:bg-gray-900 rounded-r focus:outline-none"
+                class="rounded-r p-2 hover:bg-gray-900 focus:outline-none"
                 @click.stop="zoomIn"
               >
                 <LucidePlus class="size-4" />
@@ -122,21 +113,19 @@
           </div>
 
           <!-- Action controls -->
-          <div class="bg-black/65 rounded flex items-center">
+          <div class="flex items-center rounded bg-black/65">
             <Tooltip text="Download image">
               <button
-                class="p-2 hover:bg-gray-900 rounded-l focus:outline-none"
+                class="rounded-l p-2 hover:bg-gray-900 focus:outline-none"
                 @click.stop="downloadImage"
               >
                 <LucideDownload class="size-4" />
               </button>
             </Tooltip>
 
-            <Tooltip
-              :text="isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'"
-            >
+            <Tooltip :text="isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'">
               <button
-                class="p-2 hover:bg-gray-900 rounded-r focus:outline-none hidden sm:block"
+                class="hidden rounded-r p-2 hover:bg-gray-900 focus:outline-none sm:block"
                 @click.stop="toggleFullscreen"
               >
                 <LucideMaximize v-if="!isFullscreen" class="size-4" />
@@ -146,12 +135,9 @@
           </div>
 
           <!-- Close button -->
-          <div class="bg-black/65 rounded flex items-center">
+          <div class="flex items-center rounded bg-black/65">
             <Tooltip text="Close">
-              <button
-                class="p-2 hover:bg-gray-900 rounded focus:outline-none"
-                @click.stop="close"
-              >
+              <button class="rounded p-2 hover:bg-gray-900 focus:outline-none" @click.stop="close">
                 <LucideX class="size-4" />
               </button>
             </Tooltip>
@@ -163,28 +149,20 @@
 </template>
 
 <script setup lang="ts">
-import {
-  ref,
-  onMounted,
-  onUnmounted,
-  useTemplateRef,
-  computed,
-  toRef,
-  watch,
-} from 'vue'
-import Tooltip from '../../Tooltip/Tooltip.vue'
-import { useTouchHandler } from '../../../composables/useTouchHandler'
-import { useImageNavigation } from '../../../composables/useImageNavigation'
-import { useZoomPan } from '../../../composables/useZoomPan'
-
+import { ref, onMounted, onUnmounted, useTemplateRef, computed, toRef, watch } from 'vue'
+import LucideChevronLeft from '~icons/lucide/chevron-left'
+import LucideChevronRight from '~icons/lucide/chevron-right'
 import LucideDownload from '~icons/lucide/download'
 import LucideMaximize from '~icons/lucide/maximize'
 import LucideMinimize from '~icons/lucide/minimize'
-import LucideChevronLeft from '~icons/lucide/chevron-left'
-import LucideChevronRight from '~icons/lucide/chevron-right'
-import LucidePlus from '~icons/lucide/plus'
 import LucideMinus from '~icons/lucide/minus'
+import LucidePlus from '~icons/lucide/plus'
 import LucideX from '~icons/lucide/x'
+
+import { useImageNavigation } from '../../../composables/useImageNavigation'
+import { useTouchHandler } from '../../../composables/useTouchHandler'
+import { useZoomPan } from '../../../composables/useZoomPan'
+import Tooltip from '../../Tooltip/Tooltip.vue'
 
 interface ImageInfo {
   src: string

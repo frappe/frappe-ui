@@ -5,14 +5,15 @@
     v-if="new Date(date).toDateString() === new Date().toDateString()"
   >
     <Tooltip :text="dayjs().format('ddd, MMM D, YYYY h:mm a')">
-      <div class="current-time relative h-0.5 bg-[#E03636] rounded" />
+      <div class="current-time relative h-0.5 rounded bg-[#E03636]" />
     </Tooltip>
   </div>
 </template>
 <script setup>
-import Tooltip from '../Tooltip/Tooltip.vue'
-import { dayjs } from '../../utils/dayjs'
 import { computed, inject } from 'vue'
+
+import { dayjs } from '../../utils/dayjs'
+import Tooltip from '../Tooltip/Tooltip.vue'
 
 const props = defineProps({
   date: {

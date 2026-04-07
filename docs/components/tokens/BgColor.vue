@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import LucideCopy from '~icons/lucide/copy'
 import { Button } from 'frappe-ui'
+import LucideCopy from '~icons/lucide/copy'
 
 defineProps({
   data: {
@@ -21,28 +21,27 @@ const copyToClipboard = (txt: string) => {
 
 <template>
   <p class="text-bsae">
-    Background colors in Frappe UI are prefixed with "surface", for example:
-    surface-gray2
+    Background colors in Frappe UI are prefixed with "surface", for example: surface-gray2
     <br />
     classes would be: bg-surface-gray-2, bg-surface-cards etc
   </p>
 
   <div class="flex flex-wrap gap-5">
     <template v-for="color in data" :key="color.name">
-      <h2 :id="color.name" v-if="!color.value" class="capitalize w-full">
+      <h2 :id="color.name" v-if="!color.value" class="w-full capitalize">
         {{ color.name }}
       </h2>
 
       <div class="grid gap-3" v-else>
         <div
           v-if="color.value"
-          class="rounded size-20"
+          class="size-20 rounded"
           :style="{ backgroundColor: color.value }"
         ></div>
 
         <Button class="group relative" @click="copyToClipboard(color.name)">
           <span
-            class="absolute flex items-center inset-0 justify-center gap-1 opacity-0 transition-opacity duration-150 group-hover:opacity-100"
+            class="absolute inset-0 flex items-center justify-center gap-1 opacity-0 transition-opacity duration-150 group-hover:opacity-100"
           >
             <LucideCopy class="size-4" /> Copy
           </span>

@@ -1,4 +1,5 @@
 import resolveConfig from 'tailwindcss/resolveConfig'
+
 import config from '../../../../tailwind.config'
 
 const designTokens = resolveConfig(config).theme
@@ -71,26 +72,20 @@ const fontSize = Object.entries(designTokens.fontSize).map(([name, value]) => ({
   value,
 }))
 
-const fontWeight = Object.entries(designTokens.fontWeight).map(
-  ([name, value]) => ({
-    name,
-    value,
-  }),
-)
+const fontWeight = Object.entries(designTokens.fontWeight).map(([name, value]) => ({
+  name,
+  value,
+}))
 
-const letterSpacing = Object.entries(designTokens.letterSpacing).map(
-  ([name, value]) => ({
-    name,
-    value,
-  }),
-)
+const letterSpacing = Object.entries(designTokens.letterSpacing).map(([name, value]) => ({
+  name,
+  value,
+}))
 
-const lineHeight = Object.entries(designTokens.lineHeight).map(
-  ([name, value]) => ({
-    name,
-    value,
-  }),
-)
+const lineHeight = Object.entries(designTokens.lineHeight).map(([name, value]) => ({
+  name,
+  value,
+}))
 
 // const dropShadow = Object.entries(designTokens.dropShadow).map(
 //   ([name, value]) => ({
@@ -99,12 +94,10 @@ const lineHeight = Object.entries(designTokens.lineHeight).map(
 //   }),
 // )
 
-const borderRadius = Object.entries(designTokens.borderRadius).map(
-  ([name, value]) => ({
-    name,
-    value,
-  }),
-)
+const borderRadius = Object.entries(designTokens.borderRadius).map(([name, value]) => ({
+  name,
+  value,
+}))
 
 export default {
   paths() {

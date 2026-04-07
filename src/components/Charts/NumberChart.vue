@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex max-h-[140px] items-center gap-2 overflow-hidden bg-surface-white text-ink-gray-8 px-6 pt-5"
+    class="flex max-h-[140px] items-center gap-2 overflow-hidden bg-surface-white px-6 pt-5 text-ink-gray-8"
     :class="config.delta ? 'pb-6' : 'pb-3'"
   >
     <slot name="body">
@@ -12,13 +12,9 @@
         </slot>
         <slot name="subtitle" v-bind="{ formatValue }">
           <div
-            class="flex flex-1 items-center gap-0.5 flex-shrink-0 truncate text-[24px] text-ink-gray-6 font-semibold leading-10"
+            class="flex flex-1 flex-shrink-0 items-center gap-0.5 truncate text-[24px] font-semibold leading-10 text-ink-gray-6"
           >
-            <div
-              v-if="config.prefix"
-              v-html="config.prefix"
-              class="size-4 table"
-            />
+            <div v-if="config.prefix" v-html="config.prefix" class="table size-4" />
             {{ formatValue(config.value, 1, true) }}{{ config.suffix }}
           </div>
         </slot>

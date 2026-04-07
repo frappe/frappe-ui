@@ -14,5 +14,6 @@
     "newlinesBetween": true,
     "groups": [["builtin"], "external", ["parent", "sibling", "index"], "unknown"]
   },
+  "sortTailwindcss": true,
   "ignorePatterns": ["node_modules/**", "dist/**"]
 }

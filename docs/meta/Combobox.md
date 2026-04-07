@@ -4,6 +4,7 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 </script>
+
 <PropsTable name="Combobox" :data='[
   {
     "name": "variant",
@@ -55,19 +56,21 @@
     "required": false,
     "type": "\"start\" | \"center\" | \"end\""
   }
-]'/> 
+]'/>
 
-## Slots 
- <SlotsTable :data='[
+## Slots
+
+<SlotsTable :data='[
   {
     "name": "prefix",
     "description": "Custom content rendered before the input (left side)",
     "type": "any"
   }
-]'/> 
+]'/>
 
-## Emit Events 
- <EmitsTable :data='[
+## Emit Events
+
+<EmitsTable :data='[
   {
     "name": "update:modelValue",
     "description": "",
@@ -93,5 +96,4 @@
     "description": "",
     "type": "[]"
   }
-]'/> 
-
+]'/>

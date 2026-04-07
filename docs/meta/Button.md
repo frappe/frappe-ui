@@ -4,6 +4,7 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 </script>
+
 <PropsTable name="Button" :data='[
   {
     "name": "theme",
@@ -95,10 +96,11 @@
     "type": "\"button\" | \"submit\" | \"reset\"",
     "default": "\"button\""
   }
-]'/> 
+]'/>
 
-## Slots 
- <SlotsTable :data='[
+## Slots
+
+<SlotsTable :data='[
   {
     "name": "prefix",
     "description": "Content shown before the button label (left icon / custom content)",
@@ -119,5 +121,4 @@
     "description": "Content shown after the button label (right icon / custom content)",
     "type": "any"
   }
-]'/> 
-
+]'/>

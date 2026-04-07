@@ -1,5 +1,6 @@
-import MultiSelect from './MultiSelect.vue'
 import { h } from 'vue'
+
+import MultiSelect from './MultiSelect.vue'
 
 const options = [
   { label: 'Apple', value: 'apple' },
@@ -26,10 +27,7 @@ describe('MultiSelect', () => {
     cy.get('[role=option]').eq(0).click()
     cy.get('[role=option]').eq(1).click()
 
-    cy.get('button:first').should(
-      'have.text',
-      options[0].label + ', ' + options[1].label + ' ',
-    )
+    cy.get('button:first').should('have.text', options[0].label + ', ' + options[1].label + ' ')
   })
 
   it('input', () => {

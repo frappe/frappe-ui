@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import { MonthPicker } from "frappe-ui";
+import { MonthPicker } from 'frappe-ui'
+import { ref } from 'vue'
 
-const val = ref("");
+const val = ref('')
 </script>
 
 <template>

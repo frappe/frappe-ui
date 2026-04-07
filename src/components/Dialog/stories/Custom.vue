@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import { Button, Dialog } from "frappe-ui";
+import { Button, Dialog } from 'frappe-ui'
+import { ref } from 'vue'
 
-const open = ref(false);
+const open = ref(false)
 </script>
 
 <template>
@@ -10,17 +10,13 @@ const open = ref(false);
 
   <Dialog v-model="open">
     <template #body-title>
-      <h3 class="text-2xl font-semibold text-blue-600">
-        Custom Title with Styling
-      </h3>
+      <h3 class="text-2xl font-semibold text-blue-600">Custom Title with Styling</h3>
     </template>
 
     <template #body-content>
       <div class="space-y-4">
-        <p class="text-gray-700">
-          This dialog uses custom slots for flexible content layout.
-        </p>
-        <div class="bg-blue-50 p-4 rounded-lg">
+        <p class="text-gray-700">This dialog uses custom slots for flexible content layout.</p>
+        <div class="rounded-lg bg-blue-50 p-4">
           <p class="text-blue-800">
             You can put any content here including forms or other components.
           </p>

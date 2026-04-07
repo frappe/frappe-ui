@@ -31,12 +31,12 @@ describe('TimePicker', () => {
     cy.mount(TimePicker, {
       props: {
         'onUpdate:modelValue': onUpdate,
-        onChange: onChange,
-        onInputInvalid: onInputInvalid,
-        onInvalidChange: onInvalidChange,
-        onOpen: onOpen,
-        onClose: onClose,
-        use12Hour: false,
+        'onChange': onChange,
+        'onInputInvalid': onInputInvalid,
+        'onInvalidChange': onInvalidChange,
+        'onOpen': onOpen,
+        'onClose': onClose,
+        'use12Hour': false,
       },
     })
 

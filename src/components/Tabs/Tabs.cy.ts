@@ -1,5 +1,6 @@
-import Tabs from './Tabs.vue'
 import { h } from 'vue'
+
+import Tabs from './Tabs.vue'
 
 const tabs = [
   {
@@ -21,11 +22,7 @@ describe('Tabs', () => {
 
     cy.get('[role=tablist]').should('exist')
     cy.get('[role=tab]').should('have.length', tabs.length)
-    cy.get('[role=tablist]').should(
-      'have.attr',
-      'aria-orientation',
-      'horizontal',
-    )
+    cy.get('[role=tablist]').should('have.attr', 'aria-orientation', 'horizontal')
   })
 
   it('Horizontal', () => {
@@ -45,8 +42,7 @@ describe('Tabs', () => {
 
       slots: {
         'tab-item': ({ tab }) => h('div', { 'data-cy': tab.label }, tab.label),
-        'tab-panel': ({ tab }) =>
-          h('div', { 'data-cy': tab.content }, tab.content),
+        'tab-panel': ({ tab }) => h('div', { 'data-cy': tab.content }, tab.content),
       },
     })
 
@@ -59,18 +55,14 @@ describe('Tabs', () => {
       props: { tabs, 'onUpdate:modelValue': cy.spy().as('onUpdate') },
 
       slots: {
-        'tab-panel': ({ tab }) =>
-          h('div', { 'data-cy': tab.content }, tab.content),
+        'tab-panel': ({ tab }) => h('div', { 'data-cy': tab.content }, tab.content),
       },
     })
 
     cy.get('@onUpdate').should('not.have.been.called')
     cy.get('[role=tab]').eq(1).should('have.attr', 'aria-selected', 'false')
 
-    cy.get('[role=tab]')
-      .eq(1)
-      .should('have.attr', 'aria-selected', 'false')
-      .click()
+    cy.get('[role=tab]').eq(1).should('have.attr', 'aria-selected', 'false').click()
 
     cy.get('@onUpdate').should('have.been.calledWith', 1)
     cy.get('[role=tab]').eq(1).should('have.attr', 'aria-selected', 'true')

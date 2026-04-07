@@ -4,6 +4,7 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 </script>
+
 <PropsTable name="FormControl" :data='[
   {
     "name": "label",
@@ -44,10 +45,11 @@
     "required": false,
     "type": "boolean"
   }
-]'/> 
+]'/>
 
-## Slots 
- <SlotsTable :data='[
+## Slots
+
+<SlotsTable :data='[
   {
     "name": "prefix",
     "description": "Custom content rendered before the input (prefix icon/content)",
@@ -73,5 +75,4 @@
     "description": "Default slot override for full input rendering",
     "type": "any"
   }
-]'/> 
-
+]'/>

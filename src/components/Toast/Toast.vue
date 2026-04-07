@@ -4,34 +4,28 @@
     :duration="closable ? duration : 0"
     :class="[
       'toast-root-animatable',
-      'bg-surface-gray-6 border-none rounded-md px-4 py-1.5 shadow-lg flex items-center justify-between gap-3 min-w-[280px] max-w-[400px] pointer-events-auto list-none',
+      'pointer-events-auto flex min-w-[280px] max-w-[400px] list-none items-center justify-between gap-3 rounded-md border-none bg-surface-gray-6 px-4 py-1.5 shadow-lg',
     ]"
   >
-    <div class="flex items-center gap-2 flex-grow overflow-hidden">
+    <div class="flex flex-grow items-center gap-2 overflow-hidden">
       <div>
-        <component v-if="icon" :is="icon" class="flex-shrink-0 size-4" />
-        <CircleCheck
-          v-else-if="type == 'success'"
-          class="flex-shrink-0 size-4 text-ink-green-2"
-        />
+        <component v-if="icon" :is="icon" class="size-4 flex-shrink-0" />
+        <CircleCheck v-else-if="type == 'success'" class="size-4 flex-shrink-0 text-ink-green-2" />
         <LucideAlertTriangle
           v-else-if="type == 'warning'"
-          class="flex-shrink-0 size-4 text-ink-amber-2"
+          class="size-4 flex-shrink-0 text-ink-amber-2"
         />
-        <LucideInfo
-          v-else-if="type == 'error'"
-          class="flex-shrink-0 size-4 text-ink-red-2"
-        />
+        <LucideInfo v-else-if="type == 'error'" class="size-4 flex-shrink-0 text-ink-red-2" />
       </div>
-      <div class="flex flex-col flex-grow overflow-hidden">
+      <div class="flex flex-grow flex-col overflow-hidden">
         <ToastDescription
           v-if="message"
-          class="text-p-sm break-words text-ink-white"
+          class="break-words text-p-sm text-ink-white"
           v-html="message"
         />
       </div>
     </div>
-    <div class="flex items-center gap-2 h-7">
+    <div class="flex h-7 items-center gap-2">
       <ToastAction
         v-if="action"
         class="flex-shrink-0 rounded px-2 py-1 text-sm text-ink-blue-link hover:text-ink-gray-3 focus:outline-none focus-visible:ring focus-visible:ring-outline-gray-4"
@@ -51,11 +45,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
 import { ToastAction, ToastClose, ToastDescription, ToastRoot } from 'reka-ui'
-import LucideInfo from '~icons/lucide/info'
+import { computed } from 'vue'
 import LucideAlertTriangle from '~icons/lucide/alert-triangle'
+import LucideInfo from '~icons/lucide/info'
 import LucideX from '~icons/lucide/x'
+
 import CircleCheck from '../../../icons/CircleCheckIcon.vue'
 import type { ToastProps } from './types'
 
@@ -80,8 +75,7 @@ function handleAction() {
 <style>
 @keyframes KSlideIn {
   from {
-    transform: translateY(calc(100% + var(--viewport-padding, 32px)))
-      scale(0.95);
+    transform: translateY(calc(100% + var(--viewport-padding, 32px))) scale(0.95);
     opacity: 0;
   }
   to {

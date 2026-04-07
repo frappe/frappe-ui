@@ -1,5 +1,6 @@
-import type { MarkdownEnv, MarkdownRenderer } from 'vitepress'
 import { dirname, resolve } from 'node:path'
+
+import type { MarkdownEnv, MarkdownRenderer } from 'vitepress'
 
 export default function (md: MarkdownRenderer) {
   md.core.ruler.after('inline', 'component-preview', (state) => {
@@ -22,9 +23,10 @@ export default function (md: MarkdownRenderer) {
         token.content = `<script setup>\n${importStr}\n</script>\n`
         state.tokens.unshift(token)
       } else {
-        state.tokens[scriptIdx].content = state.tokens[
-          scriptIdx
-        ].content.replace('</script>', `${importStr}\n</script>`)
+        state.tokens[scriptIdx].content = state.tokens[scriptIdx].content.replace(
+          '</script>',
+          `${importStr}\n</script>`,
+        )
       }
 
       const idx = state.tokens.findIndex((i) => i.content.match(previewRegex))
@@ -48,8 +50,7 @@ export default function (md: MarkdownRenderer) {
     })
 
     // Handle PropsTable
-    const propsRegex =
-      /<PropsTable\s+name=["']([^"']+)["']\s+:data='([^']+)'\/>/g
+    const propsRegex = /<PropsTable\s+name=["']([^"']+)["']\s+:data='([^']+)'\/>/g
 
     state.src = state.src.replace(propsRegex, (match, name, data) => {
       const typesPath = `../../../../src/components/${name}/types.ts`
@@ -58,8 +59,7 @@ export default function (md: MarkdownRenderer) {
       if (idx !== -1) {
         const { realPath, path: _path } = state.env as MarkdownEnv
 
-        state.tokens[idx].content =
-          `<PropsTable name="${name}" :data='${data}'><template #code>`
+        state.tokens[idx].content = `<PropsTable name="${name}" :data='${data}'><template #code>`
 
         const code = new state.Token('fence', 'code', 0)
         code.info = 'typescript'

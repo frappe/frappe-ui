@@ -4,7 +4,7 @@
       <div
         ref="anchorRef"
         :class="['flex', $attrs.class]"
-        :style="($attrs.style as StyleValue)"
+        :style="$attrs.style as StyleValue"
         @mouseover="onMouseover"
         @mouseleave="onMouseleave"
       >
@@ -27,9 +27,7 @@
         :sideOffset="offset"
         :collisionPadding="collisionPadding"
         :style="{
-          minWidth: matchTargetWidth
-            ? 'var(--reka-popover-trigger-width)'
-            : undefined,
+          minWidth: matchTargetWidth ? 'var(--reka-popover-trigger-width)' : undefined,
         }"
         :class="['PopoverContent', { 'has-transition': hasTransition }]"
         @mouseover="
@@ -41,10 +39,7 @@
         @interact-outside="onInteractOutside"
       >
         <div class="relative" :class="['body-container', popoverClass]">
-          <slot
-            name="body"
-            v-bind="{ togglePopover, updatePosition, open, close, isOpen }"
-          >
+          <slot name="body" v-bind="{ togglePopover, updatePosition, open, close, isOpen }">
             <div class="rounded-lg border bg-surface-modal shadow-xl">
               <slot
                 name="body-main"
@@ -65,13 +60,9 @@
 </template>
 
 <script setup lang="ts">
+import { PopoverAnchor, PopoverContent, PopoverPortal, PopoverRoot } from 'reka-ui'
 import { computed, ref, onUnmounted, type StyleValue } from 'vue'
-import {
-  PopoverAnchor,
-  PopoverContent,
-  PopoverPortal,
-  PopoverRoot,
-} from 'reka-ui'
+
 import { PopoverProps, PopoverEmits } from './types'
 
 const props = withDefaults(defineProps<PopoverProps>(), {
@@ -222,10 +213,7 @@ function onInteractOutside(event: Event) {
 
   // Check if the click is on the trigger/anchor element
   const target = event.target as Element
-  if (
-    anchorRef.value &&
-    (anchorRef.value.contains(target) || anchorRef.value === target)
-  ) {
+  if (anchorRef.value && (anchorRef.value.contains(target) || anchorRef.value === target)) {
     event.preventDefault()
     return
   }
@@ -247,7 +235,7 @@ onUnmounted(() => {
 
 defineSlots<{
   /** Content of the trigger/anchor element */
-  target?: (props: {
+  'target'?: (props: {
     togglePopover: () => void
     updatePosition: () => void
     open: () => void
@@ -256,7 +244,7 @@ defineSlots<{
   }) => any
 
   /** Main content of the popover body */
-  body?: (props: {
+  'body'?: (props: {
     togglePopover: () => void
     updatePosition: () => void
     open: () => void
@@ -273,7 +261,6 @@ defineSlots<{
     isOpen: boolean
   }) => any
 }>()
-
 </script>
 
 <style>

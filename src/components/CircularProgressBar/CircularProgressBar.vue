@@ -17,6 +17,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+
 import FeatherIcon from '../FeatherIcon.vue'
 import type { CircularProgressBarProps, Size, SizeProps } from './types'
 

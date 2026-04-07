@@ -1,5 +1,6 @@
-import Password from './Password.vue'
 import { h } from 'vue'
+
+import Password from './Password.vue'
 
 describe('Password', () => {
   it('Renders & password toggle ', () => {
@@ -14,7 +15,7 @@ describe('Password', () => {
   it('v-model', () => {
     cy.mount(Password, {
       props: {
-        value: '123456',
+        'value': '123456',
         'onUpdate:modelValue': cy.spy().as('onUpdate'),
       },
     })

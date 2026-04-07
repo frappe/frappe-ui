@@ -7,10 +7,7 @@ describe('Rating', () => {
     cy.get('label').should('have.text', 'abc')
 
     cy.get('svg').each((x, i) => {
-      cy.wrap(x).should(
-        'have.class',
-        i < 2 ? '!fill-yellow-500' : 'fill-gray-300',
-      )
+      cy.wrap(x).should('have.class', i < 2 ? '!fill-yellow-500' : 'fill-gray-300')
     })
   })
 
@@ -19,7 +16,7 @@ describe('Rating', () => {
     const rating = 3
 
     cy.mount(Rating, {
-      props: { modelValue: rating, 'onUpdate:modelValue': onUpdate },
+      props: { 'modelValue': rating, 'onUpdate:modelValue': onUpdate },
     })
 
     cy.get('svg')
@@ -35,7 +32,7 @@ describe('Rating', () => {
 
   it('readonly', () => {
     cy.mount(Rating, {
-      props: { 'onUpdate:modelValue': cy.spy().as('onUpdate'), readonly: true },
+      props: { 'onUpdate:modelValue': cy.spy().as('onUpdate'), 'readonly': true },
     })
 
     cy.get('svg').eq(1).click()

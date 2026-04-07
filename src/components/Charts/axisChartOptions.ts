@@ -1,11 +1,6 @@
 import useEchartsOptions from './eChartOptions'
 import { formatValue, mergeDeep } from './helpers'
-import {
-  AreaSeriesConfig,
-  AxisChartConfig,
-  BarSeriesConfig,
-  LineSeriesConfig,
-} from './types'
+import { AreaSeriesConfig, AxisChartConfig, BarSeriesConfig, LineSeriesConfig } from './types'
 
 export default function useAxisChartOptions(config: AxisChartConfig) {
   const data = config.data || []
@@ -15,10 +10,7 @@ export default function useAxisChartOptions(config: AxisChartConfig) {
     throw new Error('Swap axes is not supported for time series data')
   }
 
-  if (
-    config.series.find((s) => s.axis === 'y2' || s.type !== 'bar') &&
-    config.swapXY
-  ) {
+  if (config.series.find((s) => s.axis === 'y2' || s.type !== 'bar') && config.swapXY) {
     throw new Error('Swap axes is not supported for non-bar series or y2 axis')
   }
 
@@ -103,19 +95,12 @@ function getBarSeriesOptions(config: AxisChartConfig, series: BarSeriesConfig) {
     stack: config.stacked ? 'stack' : undefined,
     barMaxWidth: 60,
     itemStyle: {
-      borderRadius: config.stacked
-        ? isLastBar
-          ? roundedCorners
-          : 0
-        : roundedCorners,
+      borderRadius: config.stacked ? (isLastBar ? roundedCorners : 0) : roundedCorners,
     },
   }
 }
 
-function getLineSeriesOptions(
-  config: AxisChartConfig,
-  series: LineSeriesConfig,
-) {
+function getLineSeriesOptions(config: AxisChartConfig, series: LineSeriesConfig) {
   const showSymbol = series.showDataPoints || series.showDataLabels
   return {
     connectNulls: true,
@@ -130,10 +115,7 @@ function getLineSeriesOptions(
   }
 }
 
-function getAreaSeriesOptions(
-  config: AxisChartConfig,
-  series: AreaSeriesConfig,
-) {
+function getAreaSeriesOptions(config: AxisChartConfig, series: AreaSeriesConfig) {
   return {
     type: 'line',
     showSymbol: series.showDataPoints,

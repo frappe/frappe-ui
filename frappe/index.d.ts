@@ -22,15 +22,9 @@ declare module 'frappe-ui/frappe' {
           skipped?: boolean,
           callback?: ((step: string, skipped: boolean) => void) | null,
         ) => void
-        skip: (
-          step: string,
-          callback?: ((step: string, skipped: boolean) => void) | null,
-        ) => void
+        skip: (step: string, callback?: ((step: string, skipped: boolean) => void) | null) => void
         skipAll: (callback?: ((value: boolean) => void) | null) => void
-        reset: (
-          step: string,
-          callback?: ((step: string, skipped: boolean) => void) | null,
-        ) => void
+        reset: (step: string, callback?: ((step: string, skipped: boolean) => void) | null) => void
         resetAll: (callback?: ((value: boolean) => void) | null) => void
         setUp: (steps: OnboardingStep[]) => void
         syncStatus: () => void

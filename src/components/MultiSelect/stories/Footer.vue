@@ -1,29 +1,26 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import { Button, MultiSelect } from "frappe-ui";
-import LucideCheck from "~icons/lucide/check-check";
-import LucideTrash from "~icons/lucide/trash-2";
+import { Button, MultiSelect } from 'frappe-ui'
+import { ref } from 'vue'
+import LucideCheck from '~icons/lucide/check-check'
+import LucideTrash from '~icons/lucide/trash-2'
 
-const state = ref();
+const state = ref()
 
 const options = [
-  { value: "red-apple", label: "Red Apple" },
-  { value: "blueberry-burst", label: "Blueberry Burst" },
-  { value: "orange-grove", label: "Orange Grove" },
-  { value: "banana-split", label: "Banana Split" },
-  { value: "grapes-cluster", label: "Grapes Cluster" },
-  { value: "kiwi-slice", label: "Kiwi Slice" },
-  { value: "mango-fusion", label: "Mango Fusion" },
-];
+  { value: 'red-apple', label: 'Red Apple' },
+  { value: 'blueberry-burst', label: 'Blueberry Burst' },
+  { value: 'orange-grove', label: 'Orange Grove' },
+  { value: 'banana-split', label: 'Banana Split' },
+  { value: 'grapes-cluster', label: 'Grapes Cluster' },
+  { value: 'kiwi-slice', label: 'Kiwi Slice' },
+  { value: 'mango-fusion', label: 'Mango Fusion' },
+]
 </script>
 
 <template>
-  <MultiSelect
-    :options="options"
-    v-model="state"
-  >
+  <MultiSelect :options="options" v-model="state">
     <template #footer="{ clearAll, selectAll }">
-      <div class="flex justify-between my-2">
+      <div class="my-2 flex justify-between">
         <Button theme="red" @click="clearAll">
           <template #prefix>
             <LucideTrash class="size-4" />

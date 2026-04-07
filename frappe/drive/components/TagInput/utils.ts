@@ -1,10 +1,6 @@
-import type {
-  CustomOption,
-  SimpleOption,
-  GroupedOption,
-  ComboboxOption,
-} from './types'
 import { type Component, type FunctionalComponent, h } from 'vue'
+
+import type { CustomOption, SimpleOption, GroupedOption, ComboboxOption } from './types'
 
 export function isCustomOption(option: SimpleOption): option is CustomOption {
   return typeof option === 'object' && option.type === 'custom'
@@ -44,14 +40,10 @@ export function getIcon(option: SimpleOption): string | Component | undefined {
   return typeof option === 'object' ? option.icon : undefined
 }
 
-export const RenderIcon: FunctionalComponent<{ icon?: string | Component }> = (
-  props,
-) => {
+export const RenderIcon: FunctionalComponent<{ icon?: string | Component }> = (props) => {
   if (!props.icon) return null
   const iconContent =
-    typeof props.icon === 'string'
-      ? h('span', props.icon)
-      : h(props.icon, { class: 'w-4 h-4' })
+    typeof props.icon === 'string' ? h('span', props.icon) : h(props.icon, { class: 'w-4 h-4' })
 
   return h(
     'span',

@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, nextTick } from 'vue'
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
-import { detectPlatform, calculateAspectRatio } from './utils'
-import LucideMoveDiagonal2 from '~icons/lucide/move-diagonal-2'
-import LucideAlignLeft from '~icons/lucide/align-left'
+import { ref, onMounted, computed, nextTick } from 'vue'
 import LucideAlignCenter from '~icons/lucide/align-center'
+import LucideAlignLeft from '~icons/lucide/align-left'
 import LucideAlignRight from '~icons/lucide/align-right'
+import LucideMoveDiagonal2 from '~icons/lucide/move-diagonal-2'
+
+import { detectPlatform, calculateAspectRatio } from './utils'
 
 const props = defineProps(nodeViewProps)
 
@@ -14,7 +15,7 @@ const containerRef = ref<HTMLDivElement | null>(null)
 const isResizing = ref(false)
 const startDragX = ref(0)
 const startWidth = ref(0)
-const originalAspectRatio = ref(9/16) // Default 16:9
+const originalAspectRatio = ref(9 / 16) // Default 16:9
 const isEditable = ref(false)
 
 function selectIframe() {
@@ -28,19 +29,19 @@ const platformInfo = computed(() => {
     const aspectInfo = calculateAspectRatio(props.node.attrs.src)
     return {
       platform: platform?.name || 'Generic',
-      aspectRatio: aspectInfo.ratio
+      aspectRatio: aspectInfo.ratio,
     }
   }
-  return { platform: 'Generic', aspectRatio: 9/16 }
+  return { platform: 'Generic', aspectRatio: 9 / 16 }
 })
 
 const iframeStyles = computed(() => {
   const width = props.node.attrs.width || 640
-  const height = props.node.attrs.height || (width * originalAspectRatio.value)
+  const height = props.node.attrs.height || width * originalAspectRatio.value
 
   return {
     width: `${width}px`,
-    height: `${height}px`
+    height: `${height}px`,
   }
 })
 
@@ -75,7 +76,7 @@ function startResize(event: MouseEvent) {
     originalAspectRatio.value = props.node.attrs.aspectRatio
   } else {
     const width = props.node.attrs.width || startWidth.value
-    const height = props.node.attrs.height || (width * originalAspectRatio.value)
+    const height = props.node.attrs.height || width * originalAspectRatio.value
     if (width && height) {
       originalAspectRatio.value = height / width
     }
@@ -125,7 +126,7 @@ function stopResize() {
     props.updateAttributes({
       width: finalWidth,
       height: finalHeight,
-      aspectRatio: originalAspectRatio.value
+      aspectRatio: originalAspectRatio.value,
     })
 
     // Clear temporary styles immediately (like image extension)
@@ -185,16 +186,16 @@ function setCursorBeforeIframe() {
   <NodeViewWrapper>
     <div
       ref="containerRef"
-      class="relative overflow-hidden not-prose my-6 rounded-lg block max-w-full focus:outline-none"
+      class="not-prose relative my-6 block max-w-full overflow-hidden rounded-lg focus:outline-none"
       :class="[
         { 'ring-2 ring-outline-gray-3 ring-offset-2': selected },
         node.attrs.align === 'center' ? 'mx-auto' : '',
         node.attrs.align === 'right' ? 'ml-auto mr-0' : '',
-        node.attrs.align === 'left' ? 'mr-auto ml-0' : '',
+        node.attrs.align === 'left' ? 'ml-0 mr-auto' : '',
       ]"
       :style="{
         width: node.attrs.width ? `${node.attrs.width}px` : 'auto',
-        maxWidth: '100%'
+        maxWidth: '100%',
       }"
       @keydown="handleKeydown"
       tabindex="0"
@@ -203,7 +204,7 @@ function setCursorBeforeIframe() {
         <iframe
           v-if="node.attrs.src"
           ref="iframeRef"
-          class="rounded-lg border-0 block max-w-full h-auto"
+          class="block h-auto max-w-full rounded-lg border-0"
           :class="{
             'pointer-events-none': isEditable && !props.node.attrs.interactive,
           }"
@@ -221,22 +222,22 @@ function setCursorBeforeIframe() {
         <!-- Transparent overlay for selection in edit mode -->
         <div
           v-if="isEditable && !props.node.attrs.interactive"
-          class="absolute inset-0 cursor-pointer z-10"
+          class="absolute inset-0 z-10 cursor-pointer"
           @click.stop="selectIframe"
         ></div>
 
         <!-- Controls overlay -->
-        <div class="absolute bottom-2 right-2 flex items-center gap-2 z-20">
+        <div class="absolute bottom-2 right-2 z-20 flex items-center gap-2">
           <!-- Alignment Controls -->
           <div
             v-if="selected && isEditable"
-            class="flex divide-x divide-ink-gray-6 rounded-md bg-black/65"
+            class="divide-ink-gray-6 flex divide-x rounded-md bg-black/65"
           >
             <button
               @click.stop="setAlignment('left')"
               :class="[
-                'px-1.5 py-1 text-ink-gray-4 hover:text-white transition-colors duration-150',
-                { 'text-white': node.attrs.align === 'left' }
+                'px-1.5 py-1 text-ink-gray-4 transition-colors duration-150 hover:text-white',
+                { 'text-white': node.attrs.align === 'left' },
               ]"
               title="Align Left"
             >
@@ -245,8 +246,8 @@ function setCursorBeforeIframe() {
             <button
               @click.stop="setAlignment('center')"
               :class="[
-                'px-1.5 py-1 text-ink-gray-4 hover:text-white transition-colors duration-150',
-                { 'text-white': node.attrs.align === 'center' }
+                'px-1.5 py-1 text-ink-gray-4 transition-colors duration-150 hover:text-white',
+                { 'text-white': node.attrs.align === 'center' },
               ]"
               title="Align Center"
             >
@@ -255,8 +256,8 @@ function setCursorBeforeIframe() {
             <button
               @click.stop="setAlignment('right')"
               :class="[
-                'px-1.5 py-1 text-ink-gray-4 hover:text-white transition-colors duration-150',
-                { 'text-white': node.attrs.align === 'right' }
+                'px-1.5 py-1 text-ink-gray-4 transition-colors duration-150 hover:text-white',
+                { 'text-white': node.attrs.align === 'right' },
               ]"
               title="Align Right"
             >
@@ -267,22 +268,21 @@ function setCursorBeforeIframe() {
           <!-- Resize Handle -->
           <button
             v-if="selected && isEditable"
-            class="cursor-nw-resize bg-black/65 rounded-md p-1"
+            class="cursor-nw-resize rounded-md bg-black/65 p-1"
             @mousedown.prevent="startResize"
             title="Resize"
           >
-            <LucideMoveDiagonal2 class="text-white size-4" />
+            <LucideMoveDiagonal2 class="size-4 text-white" />
           </button>
         </div>
-
 
         <!-- Loading state for new embeds -->
         <div
           v-if="!node.attrs.src"
-          class="flex items-center justify-center bg-surface-gray-1 rounded-lg w-[640px] h-[360px]"
+          class="flex h-[360px] w-[640px] items-center justify-center rounded-lg bg-surface-gray-1"
         >
-          <div class="text-ink-gray-5 text-center">
-            <div class="text-lg mb-1">🔗</div>
+          <div class="text-center text-ink-gray-5">
+            <div class="mb-1 text-lg">🔗</div>
             <div class="text-sm">Loading embed...</div>
           </div>
         </div>
@@ -292,7 +292,7 @@ function setCursorBeforeIframe() {
       <input
         v-if="(isEditable || node.attrs.title) && node.attrs.src"
         :value="node.attrs.title"
-        class="w-full text-center bg-transparent text-sm text-ink-gray-6 h-7 border-0 mt-2 focus:outline-none focus:ring-0 placeholder-ink-gray-4 disabled:opacity-60"
+        class="mt-2 h-7 w-full border-0 bg-transparent text-center text-sm text-ink-gray-6 placeholder-ink-gray-4 focus:outline-none focus:ring-0 disabled:opacity-60"
         placeholder="Add caption"
         :disabled="!isEditable"
         @input="(e) => props.updateAttributes({ title: (e.target as HTMLInputElement).value })"

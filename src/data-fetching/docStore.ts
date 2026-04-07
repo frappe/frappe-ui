@@ -1,4 +1,5 @@
 import { Ref, ref, MaybeRefOrGetter, toValue } from 'vue'
+
 import { idbStore } from './idbStore'
 
 type Doc = {
@@ -70,11 +71,7 @@ class DocStore {
     return this.docs.get(key)!
   }
 
-  private async loadDoc(
-    key: DocKey,
-    isFirstLoad: boolean,
-    transform: (doc: Doc) => Doc,
-  ) {
+  private async loadDoc(key: DocKey, isFirstLoad: boolean, transform: (doc: Doc) => Doc) {
     try {
       if (!isFirstLoad && this.isStale(key)) {
         await this.cleanup(key)
@@ -146,9 +143,7 @@ class DocStore {
   async clearAll() {
     try {
       const allKeys = await idbStore.keys()
-      const docKeys = allKeys.filter((key: string) =>
-        key.startsWith(this.storePrefix),
-      )
+      const docKeys = allKeys.filter((key: string) => key.startsWith(this.storePrefix))
       await Promise.all(docKeys.map((key: string) => idbStore.delete(key)))
       this.docs.clear()
       this.lastFetched.clear()

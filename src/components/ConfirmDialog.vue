@@ -2,11 +2,7 @@
   <Dialog v-model="showDialog" :options="{ title }" @close="closeDialog">
     <template #body-content>
       <div class="space-y-4">
-        <p
-          class="text-p-base text-ink-gray-6"
-          v-if="message"
-          v-html="message"
-        />
+        <p class="text-p-base text-ink-gray-6" v-if="message" v-html="message" />
       </div>
     </template>
     <template #actions>

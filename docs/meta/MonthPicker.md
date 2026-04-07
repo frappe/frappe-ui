@@ -4,6 +4,7 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 </script>
+
 <PropsTable name="MonthPicker" :data='[
   {
     "name": "placeholder",
@@ -25,14 +26,14 @@
     "type": "String",
     "default": "\"\""
   }
-]'/> 
+]'/>
 
-## Emit Events 
- <EmitsTable :data='[
+## Emit Events
+
+<EmitsTable :data='[
   {
     "name": "update:modelValue",
     "description": "",
     "type": "[value: String]"
   }
-]'/> 
-
+]'/>

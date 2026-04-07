@@ -3,6 +3,7 @@
 <img src="https://github.com/user-attachments/assets/0a81cdc1-d957-47a9-b151-f5571be0d038" width="80" />
 
 # Frappe UI
+
 **Rapidly build modern frontends for Frappe apps**
 
 <img alt="NPM Downloads" src="https://img.shields.io/npm/dm/frappe-ui.svg?style=flat"/>
@@ -17,8 +18,8 @@
 Frappe UI provides a set of components and utilities for rapid UI development. Components are built using Vue 3 and Tailwind.
 Along with generic components like Button, Link, Dialog, etc., it also contains utilities for handling server-side data fetching, directives and utilities.
 
-
 ### Motivation
+
 In 2019, I began building [Frappe Books](https://github.com/frappe/books) which had a new design. This led to the creation of small reusable components like Button, Dialog, and Card. Moving on to [Frappe Cloud](https://github.com/frappe/press) in 2020, I reused and evolved these components in the Frappe Cloud UI. In 2022, while starting a new project, I decided to extract these components into a standalone package to avoid repeating the copy-paste process. This package is now being developed alongside the [Gameplan](https://github.com/frappe/gameplan), continually adding generic components and utilities for frontend development.
 
 ### Under the Hood

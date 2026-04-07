@@ -4,6 +4,7 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 </script>
+
 <PropsTable name="Alert" :data='[
   {
     "name": "title",
@@ -44,10 +45,11 @@
     "type": "boolean",
     "default": "true"
   }
-]'/> 
+]'/>
 
-## Slots 
- <SlotsTable :data='[
+## Slots
+
+<SlotsTable :data='[
   {
     "name": "icon",
     "description": "Custom icon shown before the content",
@@ -63,10 +65,11 @@
     "description": "Footer content shown at the bottom of the alert",
     "type": "any"
   }
-]'/> 
+]'/>
 
-## Emit Events 
- <EmitsTable :data='[
+## Emit Events
+
+<EmitsTable :data='[
   {
     "name": "update:modelValue",
     "description": "",
@@ -77,5 +80,4 @@
     "description": "",
     "type": "any[]"
   }
-]'/> 
-
+]'/>

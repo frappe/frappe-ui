@@ -1,10 +1,11 @@
 import { h } from 'vue'
-import Popover from './Popover.vue'
+
 import Button from '../Button/Button.vue'
+import Popover from './Popover.vue'
 
 const PopoverSlots = {
-  target: ({ togglePopover }) =>
-    h(Button, { 'data-cy': 'trigger', onClick: togglePopover }, 'Click me'),
+  'target': ({ togglePopover }) =>
+    h(Button, { 'data-cy': 'trigger', 'onClick': togglePopover }, 'Click me'),
   'body-main': h('div', { 'data-cy': 'popover-content' }, 'Popover content'),
 }
 
@@ -36,7 +37,7 @@ describe('Popover', () => {
       slots: PopoverSlots,
       props: {
         'onUpdate:show': onUpdateShow,
-        onClose: onClose,
+        'onClose': onClose,
       },
     })
 

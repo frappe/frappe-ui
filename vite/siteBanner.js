@@ -31,9 +31,7 @@ export function siteBanner({ frontendRoute } = {}) {
           }
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error)
-          console.warn(
-            `Failed to list installed sites for ${appName}: ${message}`,
-          )
+          console.warn(`Failed to list installed sites for ${appName}: ${message}`)
         }
       })
     },

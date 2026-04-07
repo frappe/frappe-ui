@@ -10,7 +10,7 @@ export function frappeRequest(options) {
       }
       let headers = Object.assign(
         {
-          Accept: 'application/json',
+          'Accept': 'application/json',
           'Content-Type': 'application/json; charset=utf-8',
           'X-Frappe-Site-Name': window.location.hostname,
         },
@@ -66,9 +66,7 @@ export function frappeRequest(options) {
           // eslint-disable-next-line no-empty
         } catch (e) {}
         let errorParts = [
-          [options.url, error?.exc_type, error?._error_message]
-            .filter(Boolean)
-            .join(' '),
+          [options.url, error?.exc_type, error?._error_message].filter(Boolean).join(' '),
         ]
         if (error.exc) {
           exception = error.exc
@@ -83,9 +81,7 @@ export function frappeRequest(options) {
         e.exc = exception
         e.response = response
         e.status = errorResponse.status
-        e.messages = error._server_messages
-          ? JSON.parse(error._server_messages)
-          : []
+        e.messages = error._server_messages ? JSON.parse(error._server_messages) : []
         e.messages = e.messages.concat(error.message)
         e.messages = e.messages.map((m) => {
           try {
@@ -96,9 +92,7 @@ export function frappeRequest(options) {
         })
         e.messages = e.messages.filter(Boolean)
         if (!e.messages.length) {
-          e.messages = error._error_message
-            ? [error._error_message]
-            : ['Internal Server Error']
+          e.messages = error._error_message ? [error._error_message] : ['Internal Server Error']
         }
         options.onError && options.onError(e)
         throw e

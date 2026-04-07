@@ -28,7 +28,7 @@ describe('Switch', () => {
     cy.mount(Switch, {
       props: {
         'onUpdate:modelValue': cy.spy().as('onUpdate'),
-        onChange: cy.spy().as('onChange'),
+        'onChange': cy.spy().as('onChange'),
       },
     })
 

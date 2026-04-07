@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
 import { Avatar, Select } from 'frappe-ui'
+import { computed, ref } from 'vue'
 
 const value = ref('')
 const options = [
@@ -42,18 +42,16 @@ const options = [
   },
 ]
 
-const activeImg = computed(
-  () => options.find((x) => x.value === value.value)?.img,
-)
+const activeImg = computed(() => options.find((x) => x.value === value.value)?.img)
 </script>
 
 <template>
   <Select :options="options" v-model="value">
-    <template #prefix v-if='activeImg'>
+    <template #prefix v-if="activeImg">
       <Avatar size="sm" :image="activeImg" />
     </template>
     <template #option="{ option }">
-      <div class="inline-flex gap-2 items-center">
+      <div class="inline-flex items-center gap-2">
         <Avatar size="sm" :image="option.img" />
         {{ option.label }}
       </div>

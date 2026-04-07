@@ -37,44 +37,37 @@ import {
 
 defineOptions({ inheritAttrs: false })
 
-import { Editor, EditorContent } from '@tiptap/vue-3'
-import StarterKit from '@tiptap/starter-kit'
-import { Placeholder } from '@tiptap/extensions'
-import Typography from '@tiptap/extension-typography'
-import { TextStyleKit } from '@tiptap/extension-text-style'
 import { TaskList, TaskItem } from '@tiptap/extension-list'
+import { Table, TableRow, TableCell, TableHeader } from '@tiptap/extension-table'
 import TextAlign from '@tiptap/extension-text-align'
-import {
-  Table,
-  TableRow,
-  TableCell,
-  TableHeader,
-} from '@tiptap/extension-table'
-
-import { ImageExtension } from './extensions/image'
-import { VideoExtension } from './extensions/video-extension'
-import ImageViewerExtension from './extensions/image-viewer-extension'
-import { IframeExtension } from './extensions/iframe'
-import { TocNodeExtension } from './extensions/toc-node'
-import { LinkExtension } from './extensions/link/'
-import NamedColorExtension from './extensions/color'
-import NamedHighlightExtension from './extensions/highlight'
-import StyleClipboardExtension from './extensions/copy-styles'
-import { MentionExtension } from './extensions/mention'
-import EmojiExtension from './extensions/emoji/emoji-extension'
-import SlashCommands from './extensions/slash-commands/slash-commands-extension'
-import { ContentPasteExtension } from './extensions/content-paste-extension'
-import { Heading } from './extensions/heading/heading'
-import { ImageGroup } from './extensions/image-group/image-group-extension'
-import { ExtendedCode, ExtendedCodeBlock } from './extensions/code-block'
-
-import TextEditorFixedMenu from './components/TextEditorFixedMenu.vue'
-import TextEditorBubbleMenu from './components/TextEditorBubbleMenu.vue'
-import TextEditorFloatingMenu from './components/TextEditorFloatingMenu.vue'
+import { TextStyleKit } from '@tiptap/extension-text-style'
+import Typography from '@tiptap/extension-typography'
+import { Placeholder } from '@tiptap/extensions'
+import StarterKit from '@tiptap/starter-kit'
+import { Editor, EditorContent } from '@tiptap/vue-3'
 
 import { useFileUpload } from '../../utils/useFileUpload'
-import { TextEditorEmits, TextEditorProps } from './types'
+import TextEditorBubbleMenu from './components/TextEditorBubbleMenu.vue'
+import TextEditorFixedMenu from './components/TextEditorFixedMenu.vue'
+import TextEditorFloatingMenu from './components/TextEditorFloatingMenu.vue'
+import { ExtendedCode, ExtendedCodeBlock } from './extensions/code-block'
+import NamedColorExtension from './extensions/color'
+import { ContentPasteExtension } from './extensions/content-paste-extension'
+import StyleClipboardExtension from './extensions/copy-styles'
+import EmojiExtension from './extensions/emoji/emoji-extension'
+import { Heading } from './extensions/heading/heading'
+import NamedHighlightExtension from './extensions/highlight'
+import { IframeExtension } from './extensions/iframe'
+import { ImageExtension } from './extensions/image'
+import { ImageGroup } from './extensions/image-group/image-group-extension'
+import ImageViewerExtension from './extensions/image-viewer-extension'
+import { LinkExtension } from './extensions/link/'
+import { MentionExtension } from './extensions/mention'
+import SlashCommands from './extensions/slash-commands/slash-commands-extension'
 import { getTagExtensions } from './extensions/tag'
+import { TocNodeExtension } from './extensions/toc-node'
+import { VideoExtension } from './extensions/video-extension'
+import { TextEditorEmits, TextEditorProps } from './types'
 
 function defaultUploadFunction(file: File) {
   // useFileUpload is frappe specific

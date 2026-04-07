@@ -1,6 +1,6 @@
 <script>
-import { h, mergeProps } from 'vue'
 import feather from 'feather-icons'
+import { h, mergeProps } from 'vue'
 
 const validIcons = Object.keys(feather.icons)
 
@@ -12,9 +12,7 @@ export default {
       validator(value) {
         const valid = validIcons.includes(value)
         if (!valid) {
-          console.groupCollapsed(
-            '[frappe-ui] name property for feather-icon must be one of ',
-          )
+          console.groupCollapsed('[frappe-ui] name property for feather-icon must be one of ')
           console.dir(validIcons)
           console.groupEnd()
         }
@@ -40,16 +38,16 @@ export default {
       mergeProps(
         icon.attrs,
         {
-          fill: 'none',
-          stroke: 'currentColor',
-          color: this.color,
+          'fill': 'none',
+          'stroke': 'currentColor',
+          'color': this.color,
           'stroke-linecap': 'round',
           'stroke-linejoin': 'round',
           'stroke-width': this.strokeWidth,
-          width: null,
-          height: null,
-          class: [icon.attrs.class, 'shrink-0'],
-          innerHTML: icon.contents,
+          'width': null,
+          'height': null,
+          'class': [icon.attrs.class, 'shrink-0'],
+          'innerHTML': icon.contents,
         },
         this.$attrs,
       ),

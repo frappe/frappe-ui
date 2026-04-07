@@ -2,14 +2,14 @@
   <Dialog v-model="open" :options="{ size: 'lg' }" @close="dialogType = ''">
     <template #body-main>
       <div class="p-4 sm:px-6">
-        <div class="flex w-full justify-between gap-x-15 mb-4">
-          <div class="font-semibold text-2xl flex text-nowrap overflow-hidden">
+        <div class="mb-4 flex w-full justify-between gap-x-15">
+          <div class="flex overflow-hidden text-nowrap text-2xl font-semibold">
             <template v-if="props.entities.length > 1">
               Moving {{ props.entities.length }} items
             </template>
             <template v-else>
               Moving "
-              <div class="truncate max-w-[80%]">
+              <div class="max-w-[80%] truncate">
                 {{ props.entities[0].title }}
               </div>
               "
@@ -23,23 +23,12 @@
         </div>
         <Tabs v-model="tabIndex" as="div" :tabs="tabs">
           <template #tab-panel>
-            <div class="py-1 h-64 overflow-auto flex flex-col">
-              <TeamSelector
-                v-if="tabIndex === 1"
-                v-model="chosenTeam"
-                class="py-2 px-1"
-              />
-              <Tree
-                v-for="k in tree.children"
-                :key="k.value"
-                node-key="value"
-                :node="k"
-              >
-                <template
-                  #node="{ node, hasChildren, isCollapsed, toggleCollapsed }"
-                >
+            <div class="flex h-64 flex-col overflow-auto py-1">
+              <TeamSelector v-if="tabIndex === 1" v-model="chosenTeam" class="px-1 py-2" />
+              <Tree v-for="k in tree.children" :key="k.value" node-key="value" :node="k">
+                <template #node="{ node, hasChildren, isCollapsed, toggleCollapsed }">
                   <div
-                    class="flex items-center cursor-pointer select-none gap-1 h-7 shrink-0"
+                    class="flex h-7 shrink-0 cursor-pointer select-none items-center gap-1"
                     @click="openEntity(node)"
                   >
                     <div
@@ -48,41 +37,26 @@
                         (e) => {
                           if (isCollapsed)
                             node.children.forEach((k) =>
-                              fetchFolderContents(
-                                k,
-                                { entity_name: k.value },
-                                true,
-                              ),
+                              fetchFolderContents(k, { entity_name: k.value }, true),
                             )
                           toggleCollapsed(e)
                         }
                       "
                     >
-                      <LucideChevronDown
-                        v-if="hasChildren && !isCollapsed"
-                        class="size-3.5"
-                      />
-                      <LucideChevronRight
-                        v-else-if="hasChildren"
-                        class="size-3.5"
-                      />
+                      <LucideChevronDown v-if="hasChildren && !isCollapsed" class="size-3.5" />
+                      <LucideChevronRight v-else-if="hasChildren" class="size-3.5" />
                       <div v-else class="ps-3.5" />
                     </div>
                     <div
-                      class="flex-grow rounded-sm text-base truncate h-full flex items-center pl-1"
+                      class="flex h-full flex-grow items-center truncate rounded-sm pl-1 text-base"
                       :class="[
-                        selected === node.value
-                          ? 'bg-surface-gray-3'
-                          : 'hover:bg-surface-gray-2',
+                        selected === node.value ? 'bg-surface-gray-3' : 'hover:bg-surface-gray-2',
                         entities[0].parent_entity === node.value
                           ? 'cursor-not-allowed hover:bg-surface-white'
                           : 'group',
                       ]"
                     >
-                      <LucideFolderClosed
-                        v-if="isCollapsed"
-                        class="mr-1 size-4"
-                      />
+                      <LucideFolderClosed v-if="isCollapsed" class="mr-1 size-4" />
                       <LucideFolder v-else class="mr-1 size-4" />
                       <div v-if="node.value === null" class="overflow-visible">
                         <Input
@@ -103,7 +77,7 @@
                         ></span
                       >
                       <Button
-                        class="shrink hidden group-hover:block ml-auto"
+                        class="ml-auto hidden shrink group-hover:block"
                         :class="{
                           '!bg-surface-gray-3': selected === node.value,
                         }"
@@ -125,19 +99,11 @@
                   </div>
                 </template>
               </Tree>
-              <div
-                v-if="tree.loading"
-                class="text-base flex justify-center flex-1"
-              >
+              <div v-if="tree.loading" class="flex flex-1 justify-center text-base">
                 <LoadingIndicator class="w-4.5" />
               </div>
-              <div
-                v-else-if="!tree.children.length"
-                class="flex justify-center flex-1"
-              >
-                <div
-                  class="self-center text-sm text-ink-gray-6 flex flex-col gap-2"
-                >
+              <div v-else-if="!tree.children.length" class="flex flex-1 justify-center">
+                <div class="flex flex-col gap-2 self-center text-sm text-ink-gray-6">
                   <LucideFolderClosed class="size-5 self-center" />
                   No folders found
                 </div>
@@ -146,21 +112,14 @@
           </template>
         </Tabs>
         <div class="flex items-center justify-between pt-4">
-          <div class="flex items-center my-auto justify-start">
-            <p class="text-sm pr-0.5 shrink-0">Moving to:</p>
-            <Dropdown
-              v-if="dropDownBreadcrumbs.length"
-              class="h-7"
-              :options="dropDownBreadcrumbs"
-            >
+          <div class="my-auto flex items-center justify-start">
+            <p class="shrink-0 pr-0.5 text-sm">Moving to:</p>
+            <Dropdown v-if="dropDownBreadcrumbs.length" class="h-7" :options="dropDownBreadcrumbs">
               <Button variant="ghost">
                 <LucideEllipsis class="size-3.5" />
               </Button>
             </Dropdown>
-            <span
-              v-if="dropDownBreadcrumbs.length"
-              class="text-ink-gray-5 mx-0.5"
-            >
+            <span v-if="dropDownBreadcrumbs.length" class="mx-0.5 text-ink-gray-5">
               {{ '/' }}
             </span>
             <div class="flex w-48 overflow-scroll">
@@ -169,19 +128,16 @@
                 :key="index"
                 class="flex items-center"
               >
-                <span
-                  v-if="breadcrumbs.length > 1 && index > 0"
-                  class="text-ink-gray-5 mx-0.5"
-                >
+                <span v-if="breadcrumbs.length > 1 && index > 0" class="mx-0.5 text-ink-gray-5">
                   {{ '/' }}
                 </span>
                 <button
-                  class="text-base cursor-pointer truncate max-w-20"
+                  class="max-w-20 cursor-pointer truncate text-base"
                   :title="crumb.title"
                   :class="
                     index === slicedBreadcrumbs.length - 1
-                      ? 'text-ink-gray-9 text-base font-medium p-1'
-                      : 'text-ink-gray-5 text-base rounded-[6px] hover:bg-surface-gray-2 p-1'
+                      ? 'p-1 text-base font-medium text-ink-gray-9'
+                      : 'rounded-[6px] p-1 text-base text-ink-gray-5 hover:bg-surface-gray-2'
                   "
                   @click="closeEntity(crumb.name)"
                 >
@@ -194,10 +150,7 @@
             variant="solid"
             class="ml-auto"
             size="sm"
-            :disabled="
-              entities[0].parent_entity !== selected &&
-              chosenTeam === entities[0].team
-            "
+            :disabled="entities[0].parent_entity !== selected && chosenTeam === entities[0].team"
             :loading="move.loading"
             @click="moveFile"
           >
@@ -213,6 +166,17 @@
 </template>
 <script setup>
 import { watch, computed, h, ref, reactive } from 'vue'
+import { useRoute } from 'vue-router'
+import LucideArrowLeftRight from '~icons/lucide/arrow-left-right'
+import LucideBuilding2 from '~icons/lucide/building-2'
+import LucideChevronDown from '~icons/lucide/chevron-down'
+import LucideChevronRight from '~icons/lucide/chevron-right'
+import LucideEllipsis from '~icons/lucide/ellipsis'
+import LucideFolder from '~icons/lucide/folder'
+import LucideFolderClosed from '~icons/lucide/folder-closed'
+import LucideFolderPlus from '~icons/lucide/folder-plus'
+import LucideHome from '~icons/lucide/home'
+import LucideX from '~icons/lucide/x'
 
 import {
   createResource,
@@ -226,19 +190,6 @@ import {
   toast,
 } from '../../../src'
 import { move, getTeams } from '../js/resources'
-
-import { useRoute } from 'vue-router'
-
-import LucideBuilding2 from '~icons/lucide/building-2'
-import LucideChevronDown from '~icons/lucide/chevron-down'
-import LucideChevronRight from '~icons/lucide/chevron-right'
-import LucideFolder from '~icons/lucide/folder'
-import LucideFolderPlus from '~icons/lucide/folder-plus'
-import LucideFolderClosed from '~icons/lucide/folder-closed'
-import LucideHome from '~icons/lucide/home'
-import LucideX from '~icons/lucide/x'
-import LucideArrowLeftRight from '~icons/lucide/arrow-left-right'
-import LucideEllipsis from '~icons/lucide/ellipsis'
 import TeamSelector from './TeamSelector.vue'
 
 const props = defineProps({
@@ -267,9 +218,7 @@ const tree = reactive({
 
 // State variables
 const selected = ref('')
-const breadcrumbs = ref([
-  { name: '', title: tabIndex.value === 0 ? 'Home' : 'Team' },
-])
+const breadcrumbs = ref([{ name: '', title: tabIndex.value === 0 ? 'Home' : 'Team' }])
 
 const tabs = [
   {
@@ -309,12 +258,7 @@ const fetchFolderContents = (tree, params = {}, nested = false) => {
         })
         node.isCollapsed = true
         tree.children.push(node)
-        if (!nested)
-          fetchFolderContents(
-            node,
-            { ...params, entity_name: node.value },
-            true,
-          )
+        if (!nested) fetchFolderContents(node, { ...params, entity_name: node.value }, true)
       })
       tree.loading = false
     },
@@ -343,8 +287,7 @@ watch(
   ([newValue, team], [prev, _]) => {
     selected.value = ''
     tree.loading = true
-    if ((newValue === 1 && !team) || (newValue === 0 && prev == newValue))
-      return
+    if ((newValue === 1 && !team) || (newValue === 0 && prev == newValue)) return
     tree.children = []
     switch (newValue) {
       case 0:

@@ -36,9 +36,7 @@ export default {
       return
     }
 
-    isEnabled.value = await silentCall<boolean>(
-      'frappe.utils.telemetry.pulse.client.is_enabled',
-    )
+    isEnabled.value = await silentCall<boolean>('frappe.utils.telemetry.pulse.client.is_enabled')
     if (!isEnabled.value) return
 
     pulseProvider = pulse_provider

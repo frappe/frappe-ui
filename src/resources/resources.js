@@ -1,8 +1,9 @@
 import { reactive } from 'vue'
+
+import { getConfig } from '../utils/config'
 import debounce from '../utils/debounce'
 import { request } from '../utils/request'
 import { getLocal, saveLocal } from './local'
-import { getConfig } from '../utils/config'
 
 let cached = {}
 
@@ -27,9 +28,7 @@ export function createResource(options, vm) {
     }
   }
 
-  let fetchFunction = options.debounce
-    ? debounce(fetch, options.debounce)
-    : fetch
+  let fetchFunction = options.debounce ? debounce(fetch, options.debounce) : fetch
 
   let out = reactive({
     method: options.method,
@@ -51,8 +50,7 @@ export function createResource(options, vm) {
   })
 
   async function fetch(params, tempOptions = {}) {
-    let resourceFetcher =
-      options.resourceFetcher || getConfig('resourceFetcher') || request
+    let resourceFetcher = options.resourceFetcher || getConfig('resourceFetcher') || request
 
     if (params instanceof Event) {
       params = null

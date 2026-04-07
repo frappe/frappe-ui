@@ -1,6 +1,7 @@
-import { RouterLinkProps } from 'vue-router'
-import { ButtonProps } from '../Button'
 import { type Component } from 'vue'
+import { RouterLinkProps } from 'vue-router'
+
+import { ButtonProps } from '../Button'
 
 export type DropdownOption = {
   label: string
@@ -48,4 +49,3 @@ export interface DropdownProps {
   /** Teleport target for dropdown portal content */
   portalTo?: string | HTMLElement
 }
-

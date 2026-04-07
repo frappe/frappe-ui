@@ -1,5 +1,6 @@
-import Alert from './Alert.vue'
 import { h } from 'vue'
+
+import Alert from './Alert.vue'
 
 const titleTxt = 'some title'
 const description = 'some description'

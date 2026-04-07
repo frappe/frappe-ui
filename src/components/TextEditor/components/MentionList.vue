@@ -59,8 +59,7 @@ export default {
       return false
     },
     upHandler() {
-      this.selectedIndex =
-        (this.selectedIndex + this.items.length - 1) % this.items.length
+      this.selectedIndex = (this.selectedIndex + this.items.length - 1) % this.items.length
     },
     downHandler() {
       this.selectedIndex = (this.selectedIndex + 1) % this.items.length

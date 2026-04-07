@@ -1,17 +1,13 @@
 <template>
   <div ref="floating" :style="{ ...floatingStyles, zIndex: 100 }" v-if="opened">
-    <EventModalContent
-      :calendarEvent="calendarEvent"
-      :date="date"
-      @close="close"
-    />
+    <EventModalContent :calendarEvent="calendarEvent" :date="date" @close="close" />
   </div>
 </template>
 <script setup>
-import { onMounted } from 'vue'
-import EventModalContent from './EventModalContent.vue'
-
 import { useFloating, shift, flip, offset, autoUpdate } from '@floating-ui/vue'
+import { onMounted } from 'vue'
+
+import EventModalContent from './EventModalContent.vue'
 
 const props = defineProps({
   targetElement: { type: Object, required: true },

@@ -21,11 +21,9 @@ export class LRUCache {
 
   set(key, val) {
     // refresh key
-    if (this.cache.has(key))
-      this.cache.delete(key)
-      // evict oldest
-    else if (this.cache.size === this.max)
-      this.cache.delete(this.first())
+    if (this.cache.has(key)) this.cache.delete(key)
+    // evict oldest
+    else if (this.cache.size === this.max) this.cache.delete(this.first())
     this.cache.set(key, val)
   }
 

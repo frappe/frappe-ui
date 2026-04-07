@@ -18,12 +18,8 @@ the fields of the document. Along with this, you get `todo.setValue` and
       # {{ todo.description }}
       <Badge>{{ todo.status }}</Badge>
     </div>
-    <Button @click="todo.setValue.submit({ status: 'Closed' })">
-      Mark as Closed
-    </Button>
-    <Button @click="todo.sendEmail.submit({ email: todo.owner })">
-      Send email
-    </Button>
+    <Button @click="todo.setValue.submit({ status: 'Closed' })"> Mark as Closed </Button>
+    <Button @click="todo.sendEmail.submit({ email: todo.owner })"> Send email </Button>
   </div>
 </template>
 <script setup>

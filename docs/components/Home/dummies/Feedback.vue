@@ -1,34 +1,32 @@
 <template>
-  <div
-    class="p-5 flex justify-center"
-  >
+  <div class="flex justify-center p-5">
     <div class="flex flex-col gap-3">
       <div
-        class="shadow-lg dark:shadow-none bg-surface-cards border border-outline-gray-3 rounded p-2 w-32 flex items-center gap-2"
+        class="flex w-32 items-center gap-2 rounded border border-outline-gray-3 bg-surface-cards p-2 shadow-lg dark:shadow-none"
       >
         <div class="flex w-full">
-          <span class="h-1.5 w-1/2 bg-gray-500 rounded-l mb-1" />
-          <span class="h-1.5 w-full bg-surface-gray-4 rounded-r mb-1" />
+          <span class="mb-1 h-1.5 w-1/2 rounded-l bg-gray-500" />
+          <span class="mb-1 h-1.5 w-full rounded-r bg-surface-gray-4" />
         </div>
       </div>
 
       <div
-        class="shadow-lg dark:shadow-none bg-surface-cards border border-surface-gray-3 rounded p-2 w-32 flex items-center gap-2"
+        class="border-surface-gray-3 flex w-32 items-center gap-2 rounded border bg-surface-cards p-2 shadow-lg dark:shadow-none"
       >
-        <div class="h-2 w-2 bg-green-400/40 rounded-full flex-shrink-0" />
+        <div class="h-2 w-2 flex-shrink-0 rounded-full bg-green-400/40" />
         <div class="flex-1">
-          <div class="h-1.5 w-full bg-surface-gray-3 rounded mb-1" />
-          <div class="h-1.5 w-3/4 bg-surface-gray-3 rounded" />
+          <div class="mb-1 h-1.5 w-full rounded bg-surface-gray-3" />
+          <div class="h-1.5 w-3/4 rounded bg-surface-gray-3" />
         </div>
       </div>
 
       <div
-        class="shadow-lg dark:shadow-none  bg-surface-cards border border-surface-gray-3 rounded p-2 w-32 flex items-center gap-2"
+        class="border-surface-gray-3 flex w-32 items-center gap-2 rounded border bg-surface-cards p-2 shadow-lg dark:shadow-none"
       >
-        <div class="h-2 w-2 bg-red-400/40 rounded-full flex-shrink-0" />
+        <div class="h-2 w-2 flex-shrink-0 rounded-full bg-red-400/40" />
         <div class="flex-1">
-          <div class="h-1.5 w-full bg-surface-gray-3 rounded mb-1" />
-          <div class="h-1.5 w-2/3 bg-surface-gray-3 rounded" />
+          <div class="mb-1 h-1.5 w-full rounded bg-surface-gray-3" />
+          <div class="h-1.5 w-2/3 rounded bg-surface-gray-3" />
         </div>
       </div>
     </div>

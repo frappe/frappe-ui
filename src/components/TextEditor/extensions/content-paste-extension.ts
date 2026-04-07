@@ -1,8 +1,9 @@
 import { Extension, Node } from '@tiptap/core'
-import { Plugin, PluginKey } from '@tiptap/pm/state'
 import { Slice, Fragment } from '@tiptap/pm/model'
 import { DOMParser } from '@tiptap/pm/model'
+import { Plugin, PluginKey } from '@tiptap/pm/state'
 import { EditorView } from '@tiptap/pm/view'
+
 import { detectMarkdown, markdownToHTML } from '../../../utils/markdown'
 import { processMultipleImages } from './image/image-extension'
 
@@ -35,12 +36,8 @@ export const ContentPasteExtension = Extension.create<ContentPasteOptions>({
             if (!this.options.enabled) return false
 
             // handle image pasting
-            const files: File[] | [] = Array.from(
-              event.clipboardData?.files || [],
-            )
-            const images = Array.from(files).filter((file) =>
-              file.type.startsWith('image/'),
-            )
+            const files: File[] | [] = Array.from(event.clipboardData?.files || [])
+            const images = Array.from(files).filter((file) => file.type.startsWith('image/'))
             if (images.length > 0) {
               processMultipleImages(images, view, null, extensionThis.options)
               return true

@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex h-full flex-col flex-shrink-0 overflow-y-auto overflow-x-hidden border-r border-outline-gray-1 bg-surface-menu-bar transition-all duration-300 ease-in-out p-2"
+    class="flex h-full flex-shrink-0 flex-col overflow-y-auto overflow-x-hidden border-r border-outline-gray-1 bg-surface-menu-bar p-2 transition-all duration-300 ease-in-out"
     :class="shouldCollapse ? 'w-12' : 'w-60'"
   >
     <slot name="header">
@@ -31,10 +31,7 @@
     </SidebarSection>
 
     <div class="mt-auto flex flex-col gap-2">
-      <slot
-        name="footer-items"
-        v-bind="{ isCollapsed: shouldCollapse, isMobile }"
-      />
+      <slot name="footer-items" v-bind="{ isCollapsed: shouldCollapse, isMobile }" />
       <SidebarItem
         v-if="!props.disableCollapse"
         :label="shouldCollapse ? 'Expand' : 'Collapse'"
@@ -55,12 +52,12 @@
 <script setup lang="ts">
 import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
 import { provide, computed } from 'vue'
+import LucidePanelRightOpen from '~icons/lucide/panel-right-open'
+
 import SidebarHeader from './SidebarHeader.vue'
 import SidebarItem from './SidebarItem.vue'
-import { SidebarProps } from './types'
-
-import LucidePanelRightOpen from '~icons/lucide/panel-right-open'
 import SidebarSection from './SidebarSection.vue'
+import { SidebarProps } from './types'
 
 const props = defineProps<SidebarProps>()
 

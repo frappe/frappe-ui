@@ -1,9 +1,5 @@
 <template>
-  <GridLayout
-    v-model:layout="layout"
-    v-bind="options"
-    @layout-ready="() => (layoutReady = true)"
-  >
+  <GridLayout v-model:layout="layout" v-bind="options" @layout-ready="() => (layoutReady = true)">
     <GridItem
       v-for="(l, index) in layout"
       :key="l.i"
@@ -51,8 +47,9 @@
 
 <script setup lang="ts">
 import { GridLayout, GridItem } from 'grid-layout-plus'
-import { Layout, GridLayoutProps } from './types'
 import { computed, reactive, ref } from 'vue'
+
+import { Layout, GridLayoutProps } from './types'
 
 const props = defineProps<GridLayoutProps>()
 

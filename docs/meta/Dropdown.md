@@ -4,6 +4,7 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 </script>
+
 <PropsTable name="Dropdown" :data='[
   {
     "name": "button",
@@ -39,10 +40,11 @@
     "type": "number",
     "default": "4"
   }
-]'/> 
+]'/>
 
-## Slots 
- <SlotsTable :data='[
+## Slots
+
+<SlotsTable :data='[
   {
     "name": "default",
     "description": "Default slot for custom trigger content (receives `open`, `close`, and extra attrs)",
@@ -53,5 +55,4 @@
     "description": "Custom rendering for each dropdown item (receives `item` and `close`)",
     "type": "{ item: DropdownOption; close: () => void; }"
   }
-]'/> 
-
+]'/>

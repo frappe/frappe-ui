@@ -4,6 +4,7 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 </script>
+
 <PropsTable name="ErrorMessage" :data='[
   {
     "name": "message",
@@ -11,5 +12,4 @@
     "required": false,
     "type": "string | Error"
   }
-]'/> 
-
+]'/>

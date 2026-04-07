@@ -61,20 +61,11 @@
                 class="data-[disabled]:cursor-not-allowed"
               >
                 <slot v-if="$slots.item" name="item" v-bind="{ item, close }" />
-                <component
-                  v-else-if="item.component"
-                  :is="item.component"
-                  :active="false"
-                />
+                <component v-else-if="item.component" :is="item.component" :active="false" />
 
                 <DropdownMenuSub v-else-if="item.submenu">
                   <DropdownMenuSubTrigger as-child>
-                    <button
-                      :class="[
-                        cssClasses.submenuTrigger,
-                        getSubmenuBackgroundColor(item),
-                      ]"
-                    >
+                    <button :class="[cssClasses.submenuTrigger, getSubmenuBackgroundColor(item)]">
                       <FeatherIcon
                         v-if="item.icon && typeof item.icon === 'string'"
                         :name="item.icon"
@@ -101,10 +92,7 @@
                     </button>
                   </DropdownMenuSubTrigger>
                   <DropdownMenuPortal :to="portalTo">
-                    <DropdownMenuSubContent
-                      :class="cssClasses.dropdownContent"
-                      :side-offset="4"
-                    >
+                    <DropdownMenuSubContent :class="cssClasses.dropdownContent" :side-offset="4">
                       <div
                         v-for="submenuGroup in getSubmenuGroups(item.submenu)"
                         :key="submenuGroup.key"
@@ -116,39 +104,20 @@
                         >
                           {{ submenuGroup.group }}
                         </DropdownMenuLabel>
-                        <template
-                          v-for="subItem in submenuGroup.items"
-                          :key="subItem.label"
-                        >
-                          <div
-                            v-if="subItem.switch"
-                            :class="cssClasses.itemButton"
-                          >
+                        <template v-for="subItem in submenuGroup.items" :key="subItem.label">
+                          <div v-if="subItem.switch" :class="cssClasses.itemButton">
                             <FeatherIcon
-                              v-if="
-                                subItem.icon && typeof subItem.icon === 'string'
-                              "
+                              v-if="subItem.icon && typeof subItem.icon === 'string'"
                               :name="subItem.icon"
-                              :class="[
-                                cssClasses.itemIcon,
-                                getIconColor(subItem),
-                              ]"
+                              :class="[cssClasses.itemIcon, getIconColor(subItem)]"
                               aria-hidden="true"
                             />
                             <component
-                              :class="[
-                                cssClasses.itemIcon,
-                                getIconColor(subItem),
-                              ]"
+                              :class="[cssClasses.itemIcon, getIconColor(subItem)]"
                               v-else-if="subItem.icon"
                               :is="subItem.icon"
                             />
-                            <span
-                              :class="[
-                                cssClasses.itemLabel,
-                                getTextColor(subItem),
-                              ]"
-                            >
+                            <span :class="[cssClasses.itemLabel, getTextColor(subItem)]">
                               {{ subItem.label }}
                             </span>
                             <Switch
@@ -162,10 +131,7 @@
                           <DropdownMenuItem
                             v-else
                             as-child
-                            @select="
-                              (event: PointerEvent) =>
-                                handleItemClick(subItem, event)
-                            "
+                            @select="(event: PointerEvent) => handleItemClick(subItem, event)"
                             :disabled="subItem.disabled"
                             class="data-[disabled]:cursor-not-allowed"
                           >
@@ -176,28 +142,16 @@
                             />
                             <button
                               v-else
-                              :class="[
-                                cssClasses.itemButton,
-                                getBackgroundColor(subItem),
-                              ]"
+                              :class="[cssClasses.itemButton, getBackgroundColor(subItem)]"
                             >
                               <FeatherIcon
-                                v-if="
-                                  subItem.icon &&
-                                  typeof subItem.icon === 'string'
-                                "
+                                v-if="subItem.icon && typeof subItem.icon === 'string'"
                                 :name="subItem.icon"
-                                :class="[
-                                  cssClasses.itemIcon,
-                                  getIconColor(subItem),
-                                ]"
+                                :class="[cssClasses.itemIcon, getIconColor(subItem)]"
                                 aria-hidden="true"
                               />
                               <component
-                                :class="[
-                                  cssClasses.itemIcon,
-                                  getIconColor(subItem),
-                                ]"
+                                :class="[cssClasses.itemIcon, getIconColor(subItem)]"
                                 v-else-if="subItem.icon"
                                 :is="subItem.icon"
                               />
@@ -205,12 +159,7 @@
                                 v-else-if="groupHasIcons(submenuGroup)"
                                 :class="cssClasses.itemIconPlaceholder"
                               />
-                              <span
-                                :class="[
-                                  cssClasses.itemLabel,
-                                  getTextColor(subItem),
-                                ]"
-                              >
+                              <span :class="[cssClasses.itemLabel, getTextColor(subItem)]">
                                 {{ subItem.label }}
                               </span>
                             </button>
@@ -220,10 +169,7 @@
                     </DropdownMenuSubContent>
                   </DropdownMenuPortal>
                 </DropdownMenuSub>
-                <button
-                  v-else
-                  :class="[cssClasses.itemButton, getBackgroundColor(item)]"
-                >
+                <button v-else :class="[cssClasses.itemButton, getBackgroundColor(item)]">
                   <FeatherIcon
                     v-if="item.icon && typeof item.icon === 'string'"
                     :name="item.icon"
@@ -235,13 +181,8 @@
                     v-else-if="item.icon"
                     :is="item.icon"
                   />
-                  <div
-                    v-else-if="groupHasIcons(group)"
-                    :class="cssClasses.itemIconPlaceholder"
-                  />
-                  <span :class="[cssClasses.itemLabel, getTextColor(item)]"
-                    >{{ item.label }}
-                  </span>
+                  <div v-else-if="groupHasIcons(group)" :class="cssClasses.itemIconPlaceholder" />
+                  <span :class="[cssClasses.itemLabel, getTextColor(item)]">{{ item.label }} </span>
                 </button>
               </DropdownMenuItem>
             </template>
@@ -264,10 +205,12 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuSubContent,
 } from 'reka-ui'
-import { Button } from '../Button'
-import FeatherIcon from '../FeatherIcon.vue'
 import { ref, computed, useAttrs } from 'vue'
 import { useRouter } from 'vue-router'
+
+import { Button } from '../Button'
+import FeatherIcon from '../FeatherIcon.vue'
+import Switch from '../Switch/Switch.vue'
 import type {
   DropdownProps,
   DropdownOption,
@@ -275,7 +218,6 @@ import type {
   DropdownOptions,
   DropdownItem,
 } from './types'
-import Switch from '../Switch/Switch.vue'
 
 defineOptions({
   inheritAttrs: false,
@@ -338,9 +280,7 @@ const getSubmenuBackgroundColor = (item: DropdownItem) =>
   (item.theme === 'red' ? 'red-3' : 'gray-3')
 
 // Unified group processing for both main options and submenu options
-const processOptionsIntoGroups = (
-  options: DropdownOptions,
-): DropdownGroupOption[] => {
+const processOptionsIntoGroups = (options: DropdownOptions): DropdownGroupOption[] => {
   let groups: DropdownGroupOption[] = []
   let currentGroup: DropdownGroupOption | null = null
   let i = 0
@@ -415,8 +355,7 @@ const cssClasses = {
   chevronIcon: 'ml-auto h-4 w-4 flex-shrink-0',
 
   // Button classes
-  itemButton:
-    'group flex h-7 w-full items-center rounded px-2 text-base focus:outline-none',
+  itemButton: 'group flex h-7 w-full items-center rounded px-2 text-base focus:outline-none',
   submenuTrigger:
     'group flex h-7 w-full items-center rounded px-2 text-base text-ink-gray-6 focus:outline-none',
 }
@@ -434,11 +373,7 @@ const align = computed(() => {
 
 defineSlots<{
   /** Default slot for custom trigger content (receives `open`, `close`, and extra attrs) */
-  default?: (props: {
-    open: boolean
-    close: () => void
-    [key: string]: any
-  }) => any
+  default?: (props: { open: boolean; close: () => void; [key: string]: any }) => any
 
   /** Custom rendering for each dropdown item (receives `item` and `close`) */
   item?: (props: { item: DropdownOption; close: () => void }) => any

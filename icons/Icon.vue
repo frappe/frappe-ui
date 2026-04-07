@@ -1,13 +1,11 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { onMounted } from 'vue'
 
 const props = defineProps<{ name: string }>()
 
 onMounted(() => {
   if (!document.getElementById('lucide-sprite')) {
-    console.warn(
-      'Lucide sprite not found! Make sure to use the spritePlugin.'
-    )
+    console.warn('Lucide sprite not found! Make sure to use the spritePlugin.')
   }
 })
 </script>

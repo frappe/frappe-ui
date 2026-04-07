@@ -15,16 +15,14 @@ defineProps<Props>()
 </script>
 
 <template>
-  <table class="overflow-auto scrollbar not-prose w-full">
+  <table class="scrollbar not-prose w-full overflow-auto">
     <colgroup>
       <col class="w-[50%]" />
       <col class="w-[50%]" />
     </colgroup>
 
-    <tbody
-      class="[&_td]:px-3 [&_th]:px-3 [&_td]:p-2 [&_th]:p-2 [&_td]:align-top"
-    >
-      <tr class="text-left *:bg-surface-gray-2 text-ink-gray-6 *:font-semibold">
+    <tbody class="[&_td]:p-2 [&_td]:px-3 [&_td]:align-top [&_th]:p-2 [&_th]:px-3">
+      <tr class="text-left text-ink-gray-6 *:bg-surface-gray-2 *:font-semibold">
         <th class="rounded-l">Event</th>
         <th class="rounded-r">Payload</th>
       </tr>
@@ -36,12 +34,12 @@ defineProps<Props>()
           </Badge>
         </td>
 
-        <td class="flex flex-wrap h-fit gap-2">
+        <td class="flex h-fit flex-wrap gap-2">
           <span class="text-sm font-semibold">
             {{ x.type }}
           </span>
 
-          <p class="text-sm text-ink-gray-5 leading-relaxed w-full">
+          <p class="w-full text-sm leading-relaxed text-ink-gray-5">
             {{ x.description }}
           </p>
         </td>

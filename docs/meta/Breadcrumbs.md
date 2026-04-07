@@ -4,6 +4,7 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 </script>
+
 <PropsTable name="Breadcrumbs" :data='[
   {
     "name": "items",
@@ -11,10 +12,11 @@
     "required": true,
     "type": "BreadcrumbItem[]"
   }
-]'/> 
+]'/>
 
-## Slots 
- <SlotsTable :data='[
+## Slots
+
+<SlotsTable :data='[
   {
     "name": "prefix",
     "description": "Content shown before each breadcrumb label",
@@ -25,5 +27,4 @@
     "description": "Content shown after each breadcrumb label",
     "type": "{ item: BreadcrumbItem; }"
   }
-]'/> 
-
+]'/>

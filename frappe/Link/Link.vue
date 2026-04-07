@@ -12,7 +12,7 @@
       :variant="props.variant"
     >
       <template #create-new="{ searchTerm }">
-        <LucidePlus class="size-4 mr-2" />
+        <LucidePlus class="mr-2 size-4" />
         <span class="font-medium"> Create new {{ doctype }}</span>
       </template>
     </Combobox>
@@ -21,14 +21,15 @@
 
 <script setup lang="ts">
 import { watch, useAttrs, computed } from 'vue'
+import LucidePlus from '~icons/lucide/plus'
+
 import { Combobox, type ComboboxOption } from '../../src/components/Combobox'
 import FormLabel from '../../src/components/FormLabel.vue'
-import debounce from '../../src/utils/debounce'
 // @ts-ignore - Vue SFC without explicit types
 import { createResource } from '../../src/resources'
+import debounce from '../../src/utils/debounce'
 import { frappeRequest } from '../../src/utils/frappeRequest'
 import type { LinkProps, SelectOption } from './types'
-import LucidePlus from '~icons/lucide/plus'
 
 const props = withDefaults(defineProps<LinkProps>(), {
   label: '',

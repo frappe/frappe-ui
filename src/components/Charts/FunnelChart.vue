@@ -4,8 +4,9 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import useFunnelChartOptions from './funnelChartOptions'
+
 import ECharts from './ECharts.vue'
+import useFunnelChartOptions from './funnelChartOptions'
 import { FunnelChartConfig } from './types'
 
 const props = defineProps<{ config: FunnelChartConfig }>()

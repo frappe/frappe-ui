@@ -2,6 +2,7 @@
  * @vitest-environment node
  */
 import { ref } from 'vue'
+
 import { baseUrl, waitUntilValueChanges } from '../../mocks/utils'
 import { useCall, useDoc } from '../index'
 

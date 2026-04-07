@@ -1,16 +1,15 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import LucideCheck from '~icons/lucide/circle-check'
+import LucideCircleX from '~icons/lucide/circle-x'
+import LucideInfo from '~icons/lucide/info'
+import LucideWarning from '~icons/lucide/triangle-alert'
+import LucideX from '~icons/lucide/x'
 
-import type { AlertProps } from "./types";
-
-import LucideX from "~icons/lucide/x";
-import LucideInfo from "~icons/lucide/info";
-import LucideCircleX from "~icons/lucide/circle-x";
-import LucideCheck from "~icons/lucide/circle-check";
-import LucideWarning from "~icons/lucide/triangle-alert";
+import type { AlertProps } from './types'
 
 /** Controls the visibility of the alert for dismissing or toggling it */
-const visible = defineModel({ default: true });
+const visible = defineModel({ default: true })
 
 const emit = defineEmits(['dismiss'])
 
@@ -21,16 +20,16 @@ const dismissAlert = () => {
 
 const classes = computed(() => {
   const subtleBgs = {
-    yellow: "bg-surface-amber-2",
-    blue: "bg-surface-blue-2",
-    red: "bg-surface-red-2",
-    green: "bg-surface-green-2",
-  };
+    yellow: 'bg-surface-amber-2',
+    blue: 'bg-surface-blue-2',
+    red: 'bg-surface-red-2',
+    green: 'bg-surface-green-2',
+  }
 
-  if (props.variant == "outline") return "border border-outline-gray-3";
+  if (props.variant == 'outline') return 'border border-outline-gray-3'
 
-  return props.theme ? subtleBgs[props.theme] : "bg-surface-gray-2";
-});
+  return props.theme ? subtleBgs[props.theme] : 'bg-surface-gray-2'
+})
 
 const icon = computed(() => {
   const data = {
@@ -43,9 +42,9 @@ const icon = computed(() => {
 })
 
 const props = withDefaults(defineProps<AlertProps>(), {
-  variant: "subtle",
+  variant: 'subtle',
   dismissable: true,
-});
+})
 
 defineSlots<{
   /** Custom icon shown before the content */
@@ -64,22 +63,17 @@ defineSlots<{
     v-if="visible"
     role="alert"
     :class="classes"
-    class="grid grid-cols-[auto_1fr_auto] gap-3 rounded-md px-4 py-3.5 text-base items-start"
+    class="grid grid-cols-[auto_1fr_auto] items-start gap-3 rounded-md px-4 py-3.5 text-base"
   >
     <slot name="icon">
-      <component
-        :is="icon.component"
-        class="size-4"
-        v-if="icon"
-        :class="icon.css"
-      />
+      <component :is="icon.component" class="size-4" v-if="icon" :class="icon.css" />
     </slot>
 
-    <div class="grid gap-2" :class='{ "col-span-2": !$slots.icon && !icon }'>
+    <div class="grid gap-2" :class="{ 'col-span-2': !$slots.icon && !icon }">
       <span class="text-ink-gray-9"> {{ props.title }} </span>
 
       <slot name="description">
-        <p v-if="props.description" class="text-ink-gray-6 prose-sm">
+        <p v-if="props.description" class="prose-sm text-ink-gray-6">
           {{ props.description }}
         </p>
       </slot>

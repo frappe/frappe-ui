@@ -4,6 +4,7 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 </script>
+
 <PropsTable name="Toast" :data='[
   {
     "name": "open",
@@ -47,10 +48,11 @@
     "required": false,
     "type": "{ label: string; altText?: string; onClick: () => void; } | undefined"
   }
-]'/> 
+]'/>
 
-## Emit Events 
- <EmitsTable :data='[
+## Emit Events
+
+<EmitsTable :data='[
   {
     "name": "action",
     "description": "",
@@ -61,5 +63,4 @@
     "description": "",
     "type": "[value: boolean]"
   }
-]'/> 
-
+]'/>

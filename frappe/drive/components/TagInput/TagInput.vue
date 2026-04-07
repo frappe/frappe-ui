@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
 import {
   TagsInputRoot,
   TagsInputInput,
@@ -7,11 +6,13 @@ import {
   TagsInputItemText,
   TagsInputItemDelete,
 } from 'reka-ui'
+import { computed, ref } from 'vue'
+import LucideX from '~icons/lucide/x'
+
 import Combobox from '../../../../src/components/Combobox/Combobox.vue'
-import { getLabel, getIcon, RenderIcon, getValue } from './utils'
 import { type SimpleOption } from '../../../../src/components/Combobox/types'
 import { TagInputProps } from './types'
-import LucideX from '~icons/lucide/x'
+import { getLabel, getIcon, RenderIcon, getValue } from './utils'
 
 const props = defineProps<TagInputProps>()
 const options = defineModel<SimpleOption[]>('options', { default: [] })
@@ -20,9 +21,7 @@ const rerenderCombobox = ref(0)
 
 const optionsWithIcons = computed(() => {
   if (!props.renderIcon) return options.value
-  return options.value.map((k) =>
-    getIcon(k) ? k : { ...k, icon: props.renderIcon(k) },
-  )
+  return options.value.map((k) => (getIcon(k) ? k : { ...k, icon: props.renderIcon(k) }))
 })
 const selectedTags = computed(() => {
   return modelValue.value.map((k) => {
@@ -47,9 +46,7 @@ const filteredOptions = computed(() => {
       condition: ({ searchTerm }: any) => {
         if (!searchTerm) return false
         const lower = searchTerm.toLowerCase()
-        const matches = options.value.filter((opt) =>
-          getLabel(opt).toLowerCase().includes(lower),
-        )
+        const matches = options.value.filter((opt) => getLabel(opt).toLowerCase().includes(lower))
         return matches.length === 0
       },
       onClick: ({ searchTerm }: any) => {
@@ -78,20 +75,18 @@ function removeTag(tag: string) {
 <template>
   <TagsInputRoot
     v-model="modelValue"
-    class="flex flex-wrap p-1.5 gap-1.5 w-full items-center justify-start rounded-md bg-surface-gray-2"
+    class="flex w-full flex-wrap items-center justify-start gap-1.5 rounded-md bg-surface-gray-2 p-1.5"
   >
     <TagsInputItem
       v-for="item in selectedTags"
       :key="getValue(item)"
       :value="getValue(item)"
-      class="shadow-sm m-0.25 mr-0 p-1.5 text-sm bg-white flex items-center justify-center gap-1.5 rounded p-0.5 ring-1 ring-outline-gray-2 shadow-xs"
+      class="m-0.25 shadow-xs mr-0 flex items-center justify-center gap-1.5 rounded bg-white p-0.5 p-1.5 text-sm shadow-sm ring-1 ring-outline-gray-2"
     >
       <RenderIcon :icon="getIcon(item)" />
-      <TagsInputItemText class="text-xs text-ink-gray-8">{{
-        getLabel(item)
-      }}</TagsInputItemText>
+      <TagsInputItemText class="text-xs text-ink-gray-8">{{ getLabel(item) }}</TagsInputItemText>
       <TagsInputItemDelete
-        class="p-0.5 rounded-sm bg-transparent hover:bg-surface-gray-1"
+        class="rounded-sm bg-transparent p-0.5 hover:bg-surface-gray-1"
         @click="removeTag(getValue(item))"
       >
         <LucideX class="size-3 text-ink-gray-6" />
@@ -104,7 +99,7 @@ function removeTag(tag: string) {
         :options="filteredOptions"
         type=""
         :placeholder
-        class="flex-1 min-w-[100px] text-xs focus:outline-none"
+        class="min-w-[100px] flex-1 text-xs focus:outline-none"
         @update:modelValue="addTag"
         :open-on-click="true"
         variant="ghost"

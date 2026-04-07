@@ -15,4 +15,3 @@ export interface BadgeProps {
   /** Content displayed inside the badge */
   label?: Label | string | number
 }
-

@@ -1,12 +1,13 @@
 import { Node, mergeAttributes, Range, Editor } from '@tiptap/core'
 import { PluginKey } from '@tiptap/pm/state'
+import { toValue } from 'vue'
+
+import { TextEditorProps } from '../../types'
 import {
   createSuggestionExtension,
   BaseSuggestionItem,
 } from '../suggestion/createSuggestionExtension'
 import SuggestionList from '../suggestion/SuggestionList.vue'
-import { toValue } from 'vue'
-import { TextEditorProps } from '../../types'
 
 export const TagNode = Node.create({
   name: 'tagItem',
@@ -43,9 +44,7 @@ export const TagNode = Node.create({
           const element = dom as HTMLElement
           return {
             tagId: element.getAttribute('data-tag-id'),
-            tagLabel:
-              element.getAttribute('data-tag-label') ||
-              element.innerText.replace(/^#/, ''),
+            tagLabel: element.getAttribute('data-tag-label') || element.innerText.replace(/^#/, ''),
           }
         },
       },
@@ -61,7 +60,7 @@ export const TagNode = Node.create({
     ]
   },
   renderText({ node }: any) {
-    return `#${node.attrs.tagLabel ||  ''}`
+    return `#${node.attrs.tagLabel || ''}`
   },
   addCommands() {
     return {
@@ -103,17 +102,12 @@ export const TagExtension = createSuggestionExtension<TagSuggestionItem>({
 
     // Filter existing tags based on the query
     let filteredTags = tags
-      .filter((tag: TagSuggestionItem) =>
-        tag.label.toLowerCase().startsWith(query.toLowerCase()),
-      )
+      .filter((tag: TagSuggestionItem) => tag.label.toLowerCase().startsWith(query.toLowerCase()))
       .map((tag: TagSuggestionItem) => ({ ...tag, display: tag.label }))
 
     if (
       query.length > 0 &&
-      !tags.some(
-        (tag: TagSuggestionItem) =>
-          tag.label.toLowerCase() === query.toLowerCase(),
-      )
+      !tags.some((tag: TagSuggestionItem) => tag.label.toLowerCase() === query.toLowerCase())
     ) {
       filteredTags.push({
         display: `New tag: "${query}"`,

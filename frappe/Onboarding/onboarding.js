@@ -1,9 +1,10 @@
-import call from '../../src/utils/call'
-import { createResource } from '../../src/resources'
-import { minimize, showHelpModal } from '../Help/help'
-import { sessionUser } from '../session'
 import { useStorage } from '@vueuse/core'
 import { computed, reactive } from 'vue'
+
+import { createResource } from '../../src/resources'
+import call from '../../src/utils/call'
+import { minimize, showHelpModal } from '../Help/help'
+import { sessionUser } from '../session'
 
 const onboardings = reactive({})
 const onboardingStatus = useStorage('onboardingStatus', {})
@@ -19,8 +20,7 @@ export function useOnboarding(appName) {
   )
 
   const onboardingSteps = computed(
-    () =>
-      onboardingStatus.value?.[user]?.[appName + '_onboarding_status'] || [],
+    () => onboardingStatus.value?.[user]?.[appName + '_onboarding_status'] || [],
   )
 
   if (!onboardingSteps.value.length && !isOnboardingStepsCompleted.value) {
@@ -60,22 +60,18 @@ export function useOnboarding(appName) {
     updateAll(false, callback)
   }
 
-  function updateOnboardingStep(
-    step,
-    value = true,
-    skipped = false,
-    callback = null,
-  ) {
+  function updateOnboardingStep(step, value = true, skipped = false, callback = null) {
     if (isOnboardingStepsCompleted.value) return
 
     if (!onboardingSteps.value.length) {
       if (!onboardingStatus.value[user]) {
         onboardingStatus.value[user] = {}
       }
-      onboardingStatus.value[user][appName + '_onboarding_status'] =
-        onboardings[appName].map((s) => {
+      onboardingStatus.value[user][appName + '_onboarding_status'] = onboardings[appName].map(
+        (s) => {
           return { name: s.name, completed: false }
-        })
+        },
+      )
     }
 
     let index = onboardingSteps.value.findIndex((s) => s.name === step)
@@ -99,10 +95,11 @@ export function useOnboarding(appName) {
         onboardingStatus.value[user] = {}
       }
 
-      onboardingStatus.value[user][appName + '_onboarding_status'] =
-        onboardings[appName].map((s) => {
+      onboardingStatus.value[user][appName + '_onboarding_status'] = onboardings[appName].map(
+        (s) => {
           return { name: s.name, completed: value }
-        })
+        },
+      )
     } else {
       onboardingSteps.value.forEach((step) => {
         step.completed = value

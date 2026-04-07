@@ -1,21 +1,19 @@
 <script setup lang="ts">
-import Navbar from "./Navbar.vue";
-import Sidebar from "./Docs/Sidebar.vue";
-import Home from "./Home/index.vue";
+import { useData } from 'vitepress'
 
-import OnThisPage from "./Docs/OnThisPage.vue";
-import PrevNextBtns from "./Docs/PrevNextBtns.vue";
-
-import { state } from "../state.ts";
-
-import { useData } from "vitepress";
-const { frontmatter } = useData();
+import { state } from '../state.ts'
+import OnThisPage from './Docs/OnThisPage.vue'
+import PrevNextBtns from './Docs/PrevNextBtns.vue'
+import Sidebar from './Docs/Sidebar.vue'
+import Home from './Home/index.vue'
+import Navbar from './Navbar.vue'
+const { frontmatter } = useData()
 </script>
 
 <template>
   <div
-    v-if='frontmatter.layout === "home"'
-    class="h-full flex flex-col justify-between flex-1 w-full"
+    v-if="frontmatter.layout === 'home'"
+    class="flex h-full w-full flex-1 flex-col justify-between"
   >
     <Navbar />
     <Home />
@@ -29,8 +27,8 @@ const { frontmatter } = useData();
         <Navbar :isDocs="true" />
         <Sidebar v-if="state.mobsidebar" class="lg:hidden" />
 
-        <div class="p-5 lg:p-10 flex gap-5">
-          <main class="mx-auto lg:max-w-[740px] flex-1">
+        <div class="flex gap-5 p-5 lg:p-10">
+          <main class="mx-auto flex-1 lg:max-w-[740px]">
             <Content as="article" class="prose prose-sm !max-w-none" />
             <PrevNextBtns />
           </main>

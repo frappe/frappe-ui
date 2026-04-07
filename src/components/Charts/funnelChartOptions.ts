@@ -44,11 +44,7 @@ export default function getFunnelChartOptions(config: FunnelChartConfig) {
         type: 'funnel',
         orient: 'vertical',
         funnelAlign: 'center',
-        top:
-          PADDING_TOP +
-          TITLE_HEIGHT +
-          SUBTITLE_HEIGHT * hasSubtitle +
-          TITLE_BOTTOM,
+        top: PADDING_TOP + TITLE_HEIGHT + SUBTITLE_HEIGHT * hasSubtitle + TITLE_BOTTOM,
         left: 'center',
         width: '60%',
         height: '75%',

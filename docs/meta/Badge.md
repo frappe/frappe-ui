@@ -4,6 +4,7 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 </script>
+
 <PropsTable name="Badge" :data='[
   {
     "name": "theme",
@@ -32,10 +33,11 @@
     "required": false,
     "type": "string | number | Label"
   }
-]'/> 
+]'/>
 
-## Slots 
- <SlotsTable :data='[
+## Slots
+
+<SlotsTable :data='[
   {
     "name": "prefix",
     "description": "Content shown before the badge label",
@@ -51,5 +53,4 @@
     "description": "Content shown after the badge label",
     "type": "any"
   }
-]'/> 
-
+]'/>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ErrorMessage } from "frappe-ui";
+import { ErrorMessage } from 'frappe-ui'
 
-const error = new Error("There was an error");
+const error = new Error('There was an error')
 </script>
 
 <template>

@@ -3,6 +3,7 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+
 import { PulseProvider } from './pulse'
 
 vi.mock('frappe-ui', () => ({
@@ -61,10 +62,9 @@ describe('PulseProvider', () => {
 
     await provider['sendEvents'](testEvents)
 
-    expect(mockCall).toHaveBeenCalledWith(
-      'frappe.utils.telemetry.pulse.client.bulk_capture',
-      { events: testEvents },
-    )
+    expect(mockCall).toHaveBeenCalledWith('frappe.utils.telemetry.pulse.client.bulk_capture', {
+      events: testEvents,
+    })
   })
 
   it('batches events before sending', () => {

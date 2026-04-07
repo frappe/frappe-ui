@@ -4,6 +4,7 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 </script>
+
 <PropsTable name="TimePicker" :data='[
   {
     "name": "value",
@@ -103,10 +104,11 @@
     "type": "string",
     "default": "\"\""
   }
-]'/> 
+]'/>
 
-## Slots 
- <SlotsTable :data='[
+## Slots
+
+<SlotsTable :data='[
   {
     "name": "prefix",
     "description": "Slot rendered before the input value.\nUseful for icons or indicators.",
@@ -117,10 +119,11 @@
     "description": "Slot rendered after the input value.\nExposes popover controls.",
     "type": "{ togglePopover: () => void; isOpen: boolean; }"
   }
-]'/> 
+]'/>
 
-## Emit Events 
- <EmitsTable :data='[
+## Emit Events
+
+<EmitsTable :data='[
   {
     "name": "update:modelValue",
     "description": "",
@@ -151,5 +154,4 @@
     "description": "",
     "type": "[invalid: boolean]"
   }
-]'/> 
-
+]'/>

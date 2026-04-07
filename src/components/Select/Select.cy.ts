@@ -1,5 +1,6 @@
-import Select from './Select.vue'
 import { h } from 'vue'
+
+import Select from './Select.vue'
 
 const options = ['abc', 'def', 'xyz']
 

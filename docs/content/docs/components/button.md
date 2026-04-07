@@ -10,7 +10,7 @@ An interactive element used to trigger actions, submit forms, or navigate betwee
 
 <ComponentPreview name='Button-Themes'  />
 
-## Sizes    
+## Sizes
 
 <ComponentPreview name='Button-Sizes'  />
 

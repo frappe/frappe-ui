@@ -1,11 +1,11 @@
-import { toast } from '../../../src'
-import slugify from 'slugify'
 import { useTimeAgo } from '@vueuse/core'
-
 import dayjs from 'dayjs'
 import localizedFormat from 'dayjs/plugin/localizedFormat'
-import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
+import utc from 'dayjs/plugin/utc'
+import slugify from 'slugify'
+
+import { toast } from '../../../src'
 dayjs.extend(utc)
 dayjs.extend(timezone)
 dayjs.extend(localizedFormat)
@@ -38,8 +38,7 @@ function getLinkStem(entity) {
     {
       true: 'f',
       [new Boolean(entity.is_group)]: 'd',
-      [new Boolean(entity.document || entity.mime_type === 'text/markdown')]:
-        'w',
+      [new Boolean(entity.document || entity.mime_type === 'text/markdown')]: 'w',
     }[true]
   }/${entity.name}/${slugger(entity.title)}`
 }

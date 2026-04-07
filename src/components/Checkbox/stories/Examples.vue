@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Checkbox } from "frappe-ui";
+import { Checkbox } from 'frappe-ui'
 </script>
 
 <template>

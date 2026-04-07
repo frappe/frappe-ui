@@ -1,5 +1,5 @@
-import TiptapHeading from '@tiptap/extension-heading'
 import { textblockTypeInputRule } from '@tiptap/core'
+import TiptapHeading from '@tiptap/extension-heading'
 
 // This custom Heading extension modifies the default input rule behavior.
 // The default Tiptap heading input rule converts text to a heading when '#' is followed by any whitespace (including Enter).

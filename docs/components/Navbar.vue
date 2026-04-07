@@ -1,18 +1,18 @@
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { useMagicKeys, whenever } from '@vueuse/core'
 import { Button, Breadcrumbs } from 'frappe-ui'
-import LucideSun from '~icons/lucide/sun'
-import LucideMoon from '~icons/lucide/moon-star'
-import LucideSearch from '~icons/lucide/search'
-import LucideMenu from '~icons/lucide/menu'
-import LucideSide from '~icons/lucide/panel-right'
+import { useRoute } from 'vitepress'
+import { computed, onMounted, ref, watch } from 'vue'
 import LucideCommand from '~icons/lucide/command'
-import GithubIcon from './Icons/Github.vue'
-import SearchPopup from './Search/Popup.vue'
+import LucideMenu from '~icons/lucide/menu'
+import LucideMoon from '~icons/lucide/moon-star'
+import LucideSide from '~icons/lucide/panel-right'
+import LucideSearch from '~icons/lucide/search'
+import LucideSun from '~icons/lucide/sun'
 
 import { state } from '../state'
-import { useMagicKeys, whenever } from '@vueuse/core'
-import { useRoute } from 'vitepress'
+import GithubIcon from './Icons/Github.vue'
+import SearchPopup from './Search/Popup.vue'
 
 const theme = ref()
 
@@ -43,7 +43,7 @@ const routes = computed(() => {
   for (const x of state.sidebarList) {
     if (!x.items) {
       routelabels.push({ label: x.text, link: x.link })
-    } //
+    }  //
     else {
       const tmp = x.items.map((nested) => ({
         label: x.text + '/' + nested.text,
@@ -70,25 +70,19 @@ whenever(meta_k, (n) => {
 </script>
 
 <template>
-  <nav class="border-b sticky top-0 bg-surface-white !z-50">
-    <SearchPopup
-      v-if="state.searchDialog"
-      @close="state.searchDialog = false"
-    />
+  <nav class="sticky top-0 !z-50 border-b bg-surface-white">
+    <SearchPopup v-if="state.searchDialog" @close="state.searchDialog = false" />
 
     <div
-      class="py-2.5 px-5 flex items-center gap-3 flex-wrap"
-      :class="{ 'max-w-[1440px] mx-auto': !isDocs }"
+      class="flex flex-wrap items-center gap-3 px-5 py-2.5"
+      :class="{ 'mx-auto max-w-[1440px]': !isDocs }"
     >
-      <span
-        class="flex gap-2 items-center mr-auto md:mr-0"
-        :class="{ 'md:hidden': isDocs }"
-      >
+      <span class="mr-auto flex items-center gap-2 md:mr-0" :class="{ 'md:hidden': isDocs }">
         <img src="/logo.svg" class="w-6" />
         <a href="/" class="font-medium">Frappe UI</a>
       </span>
 
-      <Breadcrumbs :items="routes" class="[&_span]:capitalize hidden md:flex" />
+      <Breadcrumbs :items="routes" class="hidden md:flex [&_span]:capitalize" />
 
       <Button v-if="isDocs" @click="toggleMobSidebar" class="md:hidden">
         <template #icon>
@@ -103,7 +97,7 @@ whenever(meta_k, (n) => {
       </Button>
 
       <div
-        class="gap-3 md:flex items-center w-full ml-auto md:w-auto"
+        class="ml-auto w-full items-center gap-3 md:flex md:w-auto"
         :class="{ flex: state.mobnavbar, hidden: !state.mobnavbar }"
       >
         <a href="/docs/getting-started" v-if="route.path == '/'">Docs</a>
@@ -115,7 +109,7 @@ whenever(meta_k, (n) => {
           Search
 
           <template #suffix>
-            <span class="flex gap-1 items-center ml-auto text-xs text-ink-gray-5">
+            <span class="ml-auto flex items-center gap-1 text-xs text-ink-gray-5">
               <LucideCommand class="size-3" />
               K
             </span>

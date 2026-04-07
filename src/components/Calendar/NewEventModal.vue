@@ -74,34 +74,25 @@
               />
             </template>
           </FormControl>
-          <FormControl
-            type="checkbox"
-            label="Full Day Event?"
-            v-model="newEvent.isFullDay"
-          />
+          <FormControl type="checkbox" label="Full Day Event?" v-model="newEvent.isFullDay" />
           <ErrorMessage :message="errorMessage" v-if="errorMessage" />
         </div>
       </div>
     </template>
     <template #actions="{ close }">
       <div class="flex flex-row-reverse gap-2">
-        <Button
-          class="w-full"
-          variant="solid"
-          @click="submitEvent(close)"
-          label="Submit"
-        />
+        <Button class="w-full" variant="solid" @click="submitEvent(close)" label="Submit" />
       </div>
     </template>
   </Dialog>
 </template>
 <script setup>
 import { computed, inject, reactive, ref } from 'vue'
-import { Dialog } from '../Dialog'
-import { FormControl } from '../FormControl'
-import { ErrorMessage } from '../ErrorMessage'
-import { Button } from '../Button'
 
+import { Button } from '../Button'
+import { Dialog } from '../Dialog'
+import { ErrorMessage } from '../ErrorMessage'
+import { FormControl } from '../FormControl'
 import { calculateDiff, colorMap, handleSeconds } from './calendarUtils'
 const show = ref(false)
 
@@ -155,10 +146,7 @@ function validateFields() {
   } else {
     errorMessage.value = ''
   }
-  if (
-    newEvent.hasOwnProperty('fromTime') &&
-    newEvent.hasOwnProperty('toTime')
-  ) {
+  if (newEvent.hasOwnProperty('fromTime') && newEvent.hasOwnProperty('toTime')) {
     validateStartEndTime()
   }
 }

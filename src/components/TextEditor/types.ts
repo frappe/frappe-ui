@@ -1,4 +1,5 @@
 import { type Component } from 'vue'
+
 import { type UploadedFile } from '../../utils/useFileUpload'
 import { type MentionSuggestionItem } from './extensions/mention/mention-extension'
 

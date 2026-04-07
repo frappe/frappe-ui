@@ -3,6 +3,7 @@
  */
 
 import { ref } from 'vue'
+
 import { baseUrl, waitUntilValueChanges } from '../../mocks/utils'
 import { useList } from '../index'
 
@@ -88,15 +89,11 @@ describe('useList', () => {
     })
 
     await waitUntilValueChanges(() => users.data)
-    expect(users.data).toStrictEqual([
-      { name: 'User1', email: 'user1@example.com' },
-    ])
+    expect(users.data).toStrictEqual([{ name: 'User1', email: 'user1@example.com' }])
 
     query.value = 'user2'
     await waitUntilValueChanges(() => users.data)
-    expect(users.data).toStrictEqual([
-      { name: 'User2', email: 'user2@example.com' },
-    ])
+    expect(users.data).toStrictEqual([{ name: 'User2', email: 'user2@example.com' }])
   })
 
   it('params are parsed and sent to server correctly', async () => {
@@ -129,9 +126,7 @@ describe('useList', () => {
     })
 
     expect(fetchSpy).toHaveBeenCalledWith(
-      expect.stringContaining(
-        `${baseUrl}/api/v2/document/User?${searchParams.toString()}`,
-      ),
+      expect.stringContaining(`${baseUrl}/api/v2/document/User?${searchParams.toString()}`),
       expect.any(Object),
     )
 

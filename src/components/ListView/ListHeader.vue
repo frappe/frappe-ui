@@ -2,10 +2,7 @@
   <div
     class="mb-2 grid items-center gap-4 rounded bg-surface-gray-2 p-2"
     :style="{
-      gridTemplateColumns: getGridTemplateColumns(
-        list.columns,
-        list.options.selectable,
-      ),
+      gridTemplateColumns: getGridTemplateColumns(list.columns, list.options.selectable),
     }"
   >
     <Checkbox
@@ -26,10 +23,11 @@
 </template>
 
 <script setup>
+import { inject } from 'vue'
+
 import Checkbox from '../Checkbox/Checkbox.vue'
 import ListHeaderItem from './ListHeaderItem.vue'
 import { getGridTemplateColumns } from './utils'
-import { inject } from 'vue'
 
 const emit = defineEmits(['columnWidthUpdated'])
 

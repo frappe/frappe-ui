@@ -1,9 +1,6 @@
 import { ref, computed } from 'vue'
-import {
-  groupBy,
-  calculateMinutes,
-  findOverlappingEventsCount,
-} from '../calendarUtils'
+
+import { groupBy, calculateMinutes, findOverlappingEventsCount } from '../calendarUtils'
 
 export const activeEvent = ref('')
 

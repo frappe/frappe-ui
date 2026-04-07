@@ -10,6 +10,7 @@ import {
   ComboboxViewport,
 } from 'reka-ui'
 import { computed, onMounted, ref, watch } from 'vue'
+
 import Icon from './Icon.vue'
 
 export interface IconPickerProps {
@@ -94,9 +95,7 @@ const handleInputChange = (event: Event) => {
 const handleOpenChange = (open: boolean) => {
   isOpen.value = open
   if (!open) {
-    searchTerm.value = internalModelValue.value
-      ? getLabel(internalModelValue.value)
-      : ''
+    searchTerm.value = internalModelValue.value ? getLabel(internalModelValue.value) : ''
   }
 }
 
@@ -155,22 +154,19 @@ defineExpose({
       <ComboboxAnchor
         class="flex h-7 w-full items-center justify-between gap-2 rounded px-2 py-1 transition-colors"
         :class="{
-          'opacity-50 pointer-events-none': disabled,
+          'pointer-events-none opacity-50': disabled,
           [variantClasses]: true,
         }"
         @click="handleClick"
       >
-        <div class="flex items-center gap-2 flex-1 overflow-hidden">
-          <Icon
-            :name="internalModelValue || 'circle-dashed'"
-            class="w-4 h-4 flex-shrink-0"
-          />
+        <div class="flex flex-1 items-center gap-2 overflow-hidden">
+          <Icon :name="internalModelValue || 'circle-dashed'" class="h-4 w-4 flex-shrink-0" />
           <ComboboxInput
             :value="searchTerm"
             @input="handleInputChange"
             @focus="handleFocus"
             @blur="handleBlur"
-            class="bg-transparent p-0 focus:outline-0 border-0 focus:border-0 focus:ring-0 text-base text-ink-gray-8 h-full placeholder:text-ink-gray-4 w-full"
+            class="h-full w-full border-0 bg-transparent p-0 text-base text-ink-gray-8 placeholder:text-ink-gray-4 focus:border-0 focus:outline-0 focus:ring-0"
             :placeholder="placeholder || 'Select an icon...'"
             :disabled="disabled"
             autocomplete="off"
@@ -182,7 +178,7 @@ defineExpose({
       </ComboboxAnchor>
       <ComboboxPortal>
         <ComboboxContent
-          class="z-10 w-60 mt-1 bg-surface-modal overflow-hidden rounded-lg shadow-2xl"
+          class="z-10 mt-1 w-60 overflow-hidden rounded-lg bg-surface-modal shadow-2xl"
           position="popper"
           @openAutoFocus.prevent
           @closeAutoFocus.prevent
@@ -191,11 +187,9 @@ defineExpose({
           <ComboboxViewport class="max-h-60 overflow-auto p-2">
             <ComboboxEmpty
               v-if="filteredIcons.length === 0"
-              class="text-ink-gray-5 text-base text-center py-1.5 px-2.5"
+              class="px-2.5 py-1.5 text-center text-base text-ink-gray-5"
             >
-              <template v-if="searchTerm">
-                No icons found for "{{ searchTerm }}"
-              </template>
+              <template v-if="searchTerm"> No icons found for "{{ searchTerm }}" </template>
               <template v-else> No icons available. </template>
             </ComboboxEmpty>
             <div v-if="filteredIcons.length > 0" class="flex flex-wrap">
@@ -204,13 +198,13 @@ defineExpose({
                 :key="iconName"
                 @click="handleIconClick(iconName)"
                 type="button"
-                class="w-8 h-8 flex items-center justify-center rounded hover:bg-surface-gray-3 transition-colors"
+                class="flex h-8 w-8 items-center justify-center rounded transition-colors hover:bg-surface-gray-3"
                 :class="{
                   'bg-surface-gray-3': internalModelValue === iconName,
                 }"
                 :title="getLabel(iconName)"
               >
-                <Icon :name="iconName" class="w-4 h-4" />
+                <Icon :name="iconName" class="h-4 w-4" />
               </button>
             </div>
           </ComboboxViewport>

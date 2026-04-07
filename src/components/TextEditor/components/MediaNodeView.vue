@@ -1,20 +1,21 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed, h } from 'vue'
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
-import LoadingIndicator from '../../LoadingIndicator.vue'
-import Tooltip from '../../Tooltip/Tooltip.vue'
-import { localFileMap } from '../extensions/image/image-extension'
-import { ErrorMessage } from '../../ErrorMessage'
-import LucideAlignLeft from '~icons/lucide/align-left'
+import { ref, onMounted, onUnmounted, computed, h } from 'vue'
 import LucideAlignCenter from '~icons/lucide/align-center'
-import LucideAlignRight from '~icons/lucide/align-right'
-import LucideWrapText from '~icons/lucide/wrap-text'
-import LucideFloatLeft from '~icons/lucide/align-horizontal-justify-start'
 import LucideFloatRight from '~icons/lucide/align-horizontal-justify-end'
+import LucideFloatLeft from '~icons/lucide/align-horizontal-justify-start'
+import LucideAlignLeft from '~icons/lucide/align-left'
+import LucideAlignRight from '~icons/lucide/align-right'
 import LucideNoFloat from '~icons/lucide/align-vertical-space-around'
 import LucideCaptions from '~icons/lucide/captions'
 import LucideMoveDiagonal2 from '~icons/lucide/move-diagonal-2'
 import LucideRotateCw from '~icons/lucide/rotate-cw'
+import LucideWrapText from '~icons/lucide/wrap-text'
+
+import { ErrorMessage } from '../../ErrorMessage'
+import LoadingIndicator from '../../LoadingIndicator.vue'
+import Tooltip from '../../Tooltip/Tooltip.vue'
+import { localFileMap } from '../extensions/image/image-extension'
 
 const props = defineProps(nodeViewProps)
 
@@ -266,90 +267,141 @@ const wrapperClasses = (float: string) => [
 
 <template>
   <NodeViewWrapper as="div" :class="node.attrs.float ? wrapperClasses(node.attrs.float) : 'my-2'">
-    <div ref="containerRef" class="group relative overflow-hidden not-prose rounded-[2px]" :class="[
-      {
-        'ring-2 ring-outline-gray-3 ring-offset-2': selected,
-      },
-      node.attrs.align === 'center' || !node.attrs.align ? 'mx-auto' : '',
-      node.attrs.align === 'right' ? 'ml-auto mr-0' : '',
-      node.attrs.align === 'left' ? 'mr-auto ml-0' : '',
-      !node.attrs.float && 'block max-w-full',
-    ]" :style="{
-      width: node.attrs.width ? `${node.attrs.width}px` : 'auto',
-    }">
+    <div
+      ref="containerRef"
+      class="not-prose group relative overflow-hidden rounded-[2px]"
+      :class="[
+        {
+          'ring-2 ring-outline-gray-3 ring-offset-2': selected,
+        },
+        node.attrs.align === 'center' || !node.attrs.align ? 'mx-auto' : '',
+        node.attrs.align === 'right' ? 'ml-auto mr-0' : '',
+        node.attrs.align === 'left' ? 'ml-0 mr-auto' : '',
+        !node.attrs.float && 'block max-w-full',
+      ]"
+      :style="{
+        width: node.attrs.width ? `${node.attrs.width}px` : 'auto',
+      }"
+    >
       <div v-if="isUploaded || fileContent" class="relative">
-        <img v-if="!isVideo" ref="mediaRef" class="rounded-[2px]" :class="!isUploaded && 'opacity-40'" :src="node.attrs.src || fileContent"
-          :alt="node.attrs.alt || ''" :width="node.attrs.width" :height="node.attrs.height"
-          @click.stop="selectMedia" @load="handleMediaLoaded" />
-        <video v-else ref="mediaRef" class="rounded-[2px]" :class="!isUploaded && 'opacity-40'" :src="node.attrs.src || fileContent"
-          :width="node.attrs.width" :height="node.attrs.height" :autoplay="node.attrs.autoplay"
-          :loop="node.attrs.loop" :muted="node.attrs.muted" :controls="isUploaded" @click.stop="selectMedia"
-          @loadedmetadata="handleMediaLoaded" />
+        <img
+          v-if="!isVideo"
+          ref="mediaRef"
+          class="rounded-[2px]"
+          :class="!isUploaded && 'opacity-40'"
+          :src="node.attrs.src || fileContent"
+          :alt="node.attrs.alt || ''"
+          :width="node.attrs.width"
+          :height="node.attrs.height"
+          @click.stop="selectMedia"
+          @load="handleMediaLoaded"
+        />
+        <video
+          v-else
+          ref="mediaRef"
+          class="rounded-[2px]"
+          :class="!isUploaded && 'opacity-40'"
+          :src="node.attrs.src || fileContent"
+          :width="node.attrs.width"
+          :height="node.attrs.height"
+          :autoplay="node.attrs.autoplay"
+          :loop="node.attrs.loop"
+          :muted="node.attrs.muted"
+          :controls="isUploaded"
+          @click.stop="selectMedia"
+          @loadedmetadata="handleMediaLoaded"
+        />
 
-        <div v-if="isUploaded" class="absolute top-2 right-2 items-center bg-black/65 px-1.5 py-1 gap-2 rounded group-hover:flex"
-          :class="selected && isEditable ? 'flex' : 'hidden'">
+        <div
+          v-if="isUploaded"
+          class="absolute right-2 top-2 items-center gap-2 rounded bg-black/65 px-1.5 py-1 group-hover:flex"
+          :class="selected && isEditable ? 'flex' : 'hidden'"
+        >
           <button>
-            <LucideCaptions @click="toggleCaptions" class="size-4"
-              :class="[showCaption ? 'text-ink-white' : 'text-ink-gray-4']" />
+            <LucideCaptions
+              @click="toggleCaptions"
+              class="size-4"
+              :class="[showCaption ? 'text-ink-white' : 'text-ink-gray-4']"
+            />
           </button>
-          <button v-if="!node.attrs.float && !isVideo" @click.stop="toggleAlignPopper"
-            class="hover:text-ink-white text-ink-gray-4"
-            :class="[node.attrs.align ? 'text-ink-white' : 'text-ink-gray-4']">
+          <button
+            v-if="!node.attrs.float && !isVideo"
+            @click.stop="toggleAlignPopper"
+            class="text-ink-gray-4 hover:text-ink-white"
+            :class="[node.attrs.align ? 'text-ink-white' : 'text-ink-gray-4']"
+          >
             <component :is="currentAlignIcon" class="size-4" />
           </button>
-          <button @click.stop="toggleFloatPopper" class="hover:text-ink-white text-ink-gray-4"
-            :class="[node.attrs.float ? 'text-ink-white' : 'text-ink-gray-4']">
+          <button
+            @click.stop="toggleFloatPopper"
+            class="text-ink-gray-4 hover:text-ink-white"
+            :class="[node.attrs.float ? 'text-ink-white' : 'text-ink-gray-4']"
+          >
             <component :is="currentFloatIcon" class="size-4" />
           </button>
 
-          <div ref="alignButtonRef" v-if="showAlignPopper && !isVideo"
-            class="absolute top-full mt-1 right-6 bg-black/65 rounded shadow-lg px-1.5 py-1 z-50 gap-2.5 flex items-center">
+          <div
+            ref="alignButtonRef"
+            v-if="showAlignPopper && !isVideo"
+            class="absolute right-6 top-full z-50 mt-1 flex items-center gap-2.5 rounded bg-black/65 px-1.5 py-1 shadow-lg"
+          >
             <Tooltip text="Align left" class="h-5">
-              <button @click="setAlignment('left')" class="text-ink-gray-4 hover:text-ink-white" :class="node.attrs.align === 'left'
-                ? 'text-ink-white'
-                : 'text-ink-gray-4'
-                ">
+              <button
+                @click="setAlignment('left')"
+                class="text-ink-gray-4 hover:text-ink-white"
+                :class="node.attrs.align === 'left' ? 'text-ink-white' : 'text-ink-gray-4'"
+              >
                 <LucideAlignLeft class="size-4" />
               </button>
             </Tooltip>
             <Tooltip text="Align center" class="h-5">
-              <button @click="setAlignment('center')" class="text-ink-gray-4 hover:text-ink-white" :class="node.attrs.align === 'center'
-                ? 'text-ink-white'
-                : 'text-ink-gray-4'
-                ">
+              <button
+                @click="setAlignment('center')"
+                class="text-ink-gray-4 hover:text-ink-white"
+                :class="node.attrs.align === 'center' ? 'text-ink-white' : 'text-ink-gray-4'"
+              >
                 <LucideAlignCenter class="size-4" />
               </button>
             </Tooltip>
             <Tooltip text="Align right" class="h-5">
-              <button @click="setAlignment('right')" class="text-ink-gray-4 hover:text-ink-white" :class="node.attrs.align === 'right'
-                ? 'text-ink-white'
-                : 'text-ink-gray-4'
-                ">
+              <button
+                @click="setAlignment('right')"
+                class="text-ink-gray-4 hover:text-ink-white"
+                :class="node.attrs.align === 'right' ? 'text-ink-white' : 'text-ink-gray-4'"
+              >
                 <LucideAlignRight class="size-4" />
               </button>
             </Tooltip>
           </div>
 
-          <div v-if="showFloatPopper" ref="floatButtonRef"
-            class="absolute top-full mt-1 right-0 bg-black/65 rounded shadow-lg px-1.5 py-1 z-50 gap-2.5 flex items-center">
+          <div
+            v-if="showFloatPopper"
+            ref="floatButtonRef"
+            class="absolute right-0 top-full z-50 mt-1 flex items-center gap-2.5 rounded bg-black/65 px-1.5 py-1 shadow-lg"
+          >
             <Tooltip text="Float left" class="h-5">
-              <button @click="setFloat('left')" class="text-ink-gray-4 hover:text-ink-white" :class="node.attrs.float === 'left'
-                ? 'text-ink-white'
-                : 'text-ink-gray-4'
-                ">
+              <button
+                @click="setFloat('left')"
+                class="text-ink-gray-4 hover:text-ink-white"
+                :class="node.attrs.float === 'left' ? 'text-ink-white' : 'text-ink-gray-4'"
+              >
                 <LucideFloatLeft class="size-4" />
               </button>
             </Tooltip>
             <Tooltip text="Float right" class="h-5">
-              <button @click="setFloat('right')" class="text-ink-gray-4 hover:text-ink-white" :class="node.attrs.float === 'right'
-                ? 'text-ink-white'
-                : 'text-ink-gray-4'
-                ">
+              <button
+                @click="setFloat('right')"
+                class="text-ink-gray-4 hover:text-ink-white"
+                :class="node.attrs.float === 'right' ? 'text-ink-white' : 'text-ink-gray-4'"
+              >
                 <LucideFloatRight class="size-4" />
               </button>
             </Tooltip>
             <Tooltip v-if="node.attrs.float" text="Remove float" class="h-5">
-              <button @click="setFloat(null)" class="text-ink-gray-4 hover:text-ink-white hover:bg-transparent">
+              <button
+                @click="setFloat(null)"
+                class="text-ink-gray-4 hover:bg-transparent hover:text-ink-white"
+              >
                 <LucideNoFloat class="size-4" />
               </button>
             </Tooltip>
@@ -359,34 +411,66 @@ const wrapperClasses = (float: string) => [
         <Button
           v-else
           variant="solid"
-          class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+          class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
           :icon-left="h(LucideRotateCw, { class: 'size-4' })"
           label="Try again"
-          @click="isVideo ? editor.commands.reuploadVideo(node.attrs.uploadId) : editor.commands.reuploadImage(node.attrs.uploadId)"
+          @click="
+            isVideo
+              ? editor.commands.reuploadVideo(node.attrs.uploadId)
+              : editor.commands.reuploadImage(node.attrs.uploadId)
+          "
         />
 
-        <button v-if="selected && isEditable && isUploaded" class="absolute bottom-2 right-2 cursor-nw-resize bg-black/65 rounded p-1"
-          @mousedown.prevent="startResize">
-          <LucideMoveDiagonal2 class="text-white size-4" />
+        <button
+          v-if="selected && isEditable && isUploaded"
+          class="absolute bottom-2 right-2 cursor-nw-resize rounded bg-black/65 p-1"
+          @mousedown.prevent="startResize"
+        >
+          <LucideMoveDiagonal2 class="size-4 text-white" />
         </button>
-        <div v-if="node.attrs.loading" class="inset-0 absolute flex items-center justify-center z-10">
+        <div
+          v-if="node.attrs.loading"
+          class="absolute inset-0 z-10 flex items-center justify-center"
+        >
           <div
-            class="bg-gray-900/80 p-2 inset-0 leading-none rounded-sm flex flex-col items-center justify-center gap-2">
+            class="inset-0 flex flex-col items-center justify-center gap-2 rounded-sm bg-gray-900/80 p-2 leading-none"
+          >
             <div class="flex items-center gap-2">
-              <LoadingIndicator class="text-gray-100 size-4" />
+              <LoadingIndicator class="size-4 text-gray-100" />
               <span class="text-gray-100">Uploading {{ isVideo ? 'video' : 'image' }}...</span>
             </div>
           </div>
         </div>
       </div>
-      <div v-else class="flex flex-col items-center justify-center gap-2 border rounded text-ink-gray-6 text-sm py-5 max-w-full" :class="{ 'border-none': selected }" :style="{ width: node.attrs.width + 'px', aspectRatio: node.attrs.width && node.attrs.height ? `${node.attrs.width} / ${node.attrs.height}` : undefined,}">
-        <div class="text-ink-gray-8 text-base">This {{ isVideo ? 'video' : 'image' }} hasn't yet been uploaded.</div>
-        <div v-if="node.attrs.error" class="text-sm text-ink-red-4">Upload failed: {{ node.attrs.error }}</div>
+      <div
+        v-else
+        class="flex max-w-full flex-col items-center justify-center gap-2 rounded border py-5 text-sm text-ink-gray-6"
+        :class="{ 'border-none': selected }"
+        :style="{
+          width: node.attrs.width + 'px',
+          aspectRatio:
+            node.attrs.width && node.attrs.height
+              ? `${node.attrs.width} / ${node.attrs.height}`
+              : undefined,
+        }"
+      >
+        <div class="text-base text-ink-gray-8">
+          This {{ isVideo ? 'video' : 'image' }} hasn't yet been uploaded.
+        </div>
+        <div v-if="node.attrs.error" class="text-sm text-ink-red-4">
+          Upload failed: {{ node.attrs.error }}
+        </div>
       </div>
 
-      <input v-if="(node.attrs.alt || showCaption) && !node.attrs.error" v-model="caption"
-        class="w-full text-center bg-transparent text-sm text-ink-gray-6 h-7 border-none focus:ring-0 placeholder-ink-gray-4"
-        placeholder="Add caption" :disabled="!isEditable" @change="updateCaption" @keydown="handleKeydown" />
+      <input
+        v-if="(node.attrs.alt || showCaption) && !node.attrs.error"
+        v-model="caption"
+        class="h-7 w-full border-none bg-transparent text-center text-sm text-ink-gray-6 placeholder-ink-gray-4 focus:ring-0"
+        placeholder="Add caption"
+        :disabled="!isEditable"
+        @change="updateCaption"
+        @keydown="handleKeydown"
+      />
 
       <div v-if="node.attrs.error && fileContent" class="w-full py-1.5 text-center">
         <ErrorMessage :message="`Upload failed: ${node.attrs.error}`" />

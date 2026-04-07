@@ -1,4 +1,4 @@
-import { UploadOptions } from "./useFileUpload"
+import { UploadOptions } from './useFileUpload'
 
 type EventListenerOption = 'start' | 'progress' | 'finish' | 'error'
 
@@ -90,8 +90,7 @@ class FileUploadHandler {
         }
       }
 
-      const uploadEndpoint =
-        options.upload_endpoint || '/api/method/upload_file'
+      const uploadEndpoint = options.upload_endpoint || '/api/method/upload_file'
       xhr.open('POST', uploadEndpoint, true)
       xhr.setRequestHeader('Accept', 'application/json')
 
@@ -133,10 +132,10 @@ class FileUploadHandler {
       if (options.optimize) {
         form_data.append('optimize', '1')
         if (options.max_width) {
-            form_data.append('max_width', options.max_width.toString())
+          form_data.append('max_width', options.max_width.toString())
         }
         if (options.max_height) {
-            form_data.append('max_height', options.max_height.toString())
+          form_data.append('max_height', options.max_height.toString())
         }
       }
 
