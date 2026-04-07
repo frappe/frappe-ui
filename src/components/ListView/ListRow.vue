@@ -27,7 +27,7 @@
           height: rowHeight,
           gridTemplateColumns: getGridTemplateColumns(
             list.columns,
-            list.options.selectable,
+            list.options.selectable
           ),
         }"
       >
@@ -108,10 +108,7 @@ const rowRoute = computed(
 const isExternalRoute = computed(() => {
   if (!rowRoute.value) return false
   // Check if it's a URL (string starting with http/https or /)
-  return (
-    typeof rowRoute.value === 'string' &&
-    (rowRoute.value.startsWith('http') || rowRoute.value.startsWith('/'))
-  )
+  return typeof rowRoute.value === 'string' && rowRoute.value.startsWith('http')
 })
 
 const getLinkComponent = () => {
@@ -142,7 +139,7 @@ const isSelected = computed(() => {
 const isActive = computed(
   () =>
     list.value.options.enableActive &&
-    list.value.activeRow.value === props.row.name,
+    list.value.activeRow.value === props.row.name
 )
 
 const isHoverable = computed(() => {
@@ -190,7 +187,7 @@ const handleCheckboxClick = (event) => {
       ? list.value.rows.reduce((acc, curr) => acc.concat(curr.rows), [])
       : list.value.rows
     const lastIndex = rows.findIndex(
-      (k) => lastSelected === k[list.value.rowKey],
+      (k) => lastSelected === k[list.value.rowKey]
     )
     const curIndex = rows.findIndex((k) => value === k[list.value.rowKey])
     const start = Math.min(lastIndex, curIndex)
