@@ -1,0 +1,34 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "oxc"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn",
+    "perf": "warn"
+  },
+  "env": {
+    "builtin": true
+  },
+  "rules": {
+    "no-empty": ["warn", { "allowEmptyCatch": true }],
+    "unicorn/no-array-for-each": "off",
+    "unicorn/no-null": "off",
+    "typescript/no-explicit-any": "warn",
+    "typescript/consistent-type-imports": ["warn", { "prefer": "type-imports" }]
+  },
+  // Relax rules that are overly strict in test code:
+  //  - no-shadow: callback params like (q) => and (doc) => shadow outer imports — unavoidable
+  //  - no-explicit-any: catch (e: any) and controller hook stubs legitimately need any
+  //  - consistent-function-scoping: helper closures inside describe blocks are fine
+  "overrides": [
+    {
+      "files": ["tests/**/*.ts"],
+      "rules": {
+        "no-shadow": "off",
+        "typescript/no-explicit-any": "off",
+        "unicorn/consistent-function-scoping": "off"
+      }
+    }
+  ],
+  "ignorePatterns": ["node_modules", "dist"]
+}
