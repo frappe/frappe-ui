@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-1 flex-col overflow-y-auto">
+  <div class="flex flex-1 flex-col overflow-y-auto isolate">
     <!-- Day List -->
     <div class="flex border-b-[1px]">
       <div class="w-20"></div>
@@ -89,12 +89,12 @@
         </div>
 
         <!-- Grid -->
-        <div class="relative flex w-full flex-col">
+        <div class="relative z-0 flex w-full flex-col">
           <!-- time events => not full day events => overflow-scroll here -->
-          <!-- <div
+          <div
             class="w-[calc(100%-4px)] h-px z-[2] left-0.5 mt-[0.5px] bg-[#F79596] absolute"
             :style="currentTime"
-          /> -->
+          />
           <div class="grid w-full grid-cols-7">
             <!-- 7 Columns -->
             <div

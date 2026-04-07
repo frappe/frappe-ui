@@ -1,7 +1,8 @@
 <template>
   <Popover
-    :style="containerStyle"
+    :placement="activeView === 'Week' ? 'left' : 'center'"
     transition="default"
+    :style="containerStyle"
     @open="registerDeleteShortcut"
     @close="unregisterDeleteShortcut"
   >

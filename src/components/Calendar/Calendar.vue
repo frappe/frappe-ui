@@ -132,6 +132,7 @@ import CalendarWeekly from './CalendarWeekly.vue'
 import CalendarDaily from './CalendarDaily.vue'
 import NewEventModal from './NewEventModal.vue'
 import useEventModal from './composables/useEventModal'
+import { isAnyPopoverOpen } from './useEventBase.js'
 
 const props = defineProps({
   events: {
@@ -332,6 +333,11 @@ function openModal(data) {
 }
 
 function handleCellClick(e, date, time = '', isFullDay = false) {
+  if (isAnyPopoverOpen.value) {
+	isAnyPopoverOpen.value = false
+    return
+  }
+
   const data = {
     e,
     view: activeView.value,
