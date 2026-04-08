@@ -60,12 +60,13 @@
     "format": "oxfmt",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
-    "lint-and-format": " yarn lint:fix && yarn format",
+    "lint-and-format": "yarn format && yarn lint:fix",
     "bump-and-release": "yarn test && git pull --rebase origin main && yarn run release-patch",
     "release-patch": "yarn version --patch && git push && git push --tags",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "prepare": "chmod +x ./scripts/setup-pre-commit.sh && ./scripts/setup-pre-commit.sh",
     "docs:dev": "vitepress dev docs --host",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
@@ -157,8 +158,5 @@
     "prosemirror-state": "1.4.3",
     "prosemirror-transform": "1.10.4",
     "prosemirror-view": "1.40.0"
-  },
-  "lint-staged": {
-    "*.{js,css,md,vue}": "prettier --write"
   }
 }
