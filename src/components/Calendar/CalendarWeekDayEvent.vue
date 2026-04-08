@@ -196,7 +196,15 @@ const lineClampClass = computed(() => {
   const computedStyle = getComputedStyle(eventTitleRef.value)
   const lineHeight = parseFloat(computedStyle.lineHeight)
   const maxLines = Math.max(1, Math.floor(availableHeightForTitle / lineHeight))
-  return `line-clamp-${Math.min(maxLines, 6)}`
+  const clampMap = {
+    1: 'line-clamp-1',
+    2: 'line-clamp-2',
+    3: 'line-clamp-3',
+    4: 'line-clamp-4',
+    5: 'line-clamp-5',
+    6: 'line-clamp-6',
+  }
+  return clampMap[Math.min(maxLines, 6)]
 })
 
 // ── Resize ────────────────────────────────────────────────────────────────

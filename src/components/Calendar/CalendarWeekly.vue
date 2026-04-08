@@ -60,7 +60,11 @@
               :key="calendarEvent.id"
               :date="date"
               @click.stop
-            />
+			  >
+                <template #event-popover-content="slotProps">
+                  <slot name="event-popover-content" v-bind="slotProps" />
+                </template>
+              </CalendarWeekDayEvent>
             <Button
               v-if="showCollapsable && isCollapsed && fullDayEvents[parseDate(date)]?.length > 2"
               :label="fullDayEvents[parseDate(date)]?.length - 2 + ' more'"

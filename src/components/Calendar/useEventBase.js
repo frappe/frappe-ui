@@ -83,7 +83,10 @@ export function useEventBase(props) {
   }
 
   function handleDeleteShortcut(e) {
-    if (e.key === 'Delete' || e.key === 'Backspace') handleEventDelete()
+    if (e.key === 'Delete' || e.key === 'Backspace') {
+      e.preventDefault()
+      handleEventDelete()
+    }
   }
 
   // ── Click / edit / delete ────────────────────────────────────────────────
