@@ -27,23 +27,16 @@
           isWeekend(date, config) && 'bg-surface-gray-1',
         ]"
         @dragover.prevent
-        @drageneter.prevent
+        @dragenter.prevent
         @drop="onDrop($event, date)"
         @click="calendarActions.handleCellClick($event, date)"
       >
-        <div
-          class="flex justify-center font-normal"
-          :class="isCurrentMonth(date) ? 'text-gray-700' : 'text-gray-200'"
-        >
-          <div
-            class="flex gap-0.5 w-full flex-col items-center text-xs text-right"
-          >
+        <div class="flex justify-center font-normal">
+          <div class="flex gap-0.5 w-full flex-col items-center text-xs text-right">
             <span
-              class="z-10 w-full flex justify-between items-center"
+              class="w-full flex justify-between items-center"
               :class="[
-                date.toDateString() === new Date().toDateString()
-                  ? 'p-[3px] pb-0.5'
-                  : 'p-2',
+                date.toDateString() === new Date().toDateString() ? 'p-[3px] pb-0.5' : 'p-2',
               ]"
             >
               <div></div>
@@ -74,33 +67,38 @@
               class="flex w-full flex-col justify-between"
               v-if="timedEvents[parseDate(date)]?.length <= maxEventsInCell"
             >
-              <CalendarEvent
+              <CalendarMonthEvent
                 v-for="calendarEvent in timedEvents[parseDate(date)]"
                 :event="calendarEvent"
                 :date="date"
-                class="z-10 mb-2 cursor-pointer"
+                class="mb-2 cursor-pointer"
                 :key="calendarEvent.id"
                 :draggable="config.isEditMode"
                 @dragstart="onDragStart($event, calendarEvent.id)"
                 @dragend="$event.target.style.opacity = '1'"
                 @dragover.prevent
-              />
+              >
+                <template #event-popover-content="slotProps">
+                  <slot name="event-popover-content" v-bind="slotProps" />
+                </template>
+              </CalendarMonthEvent>
             </div>
             <div v-else class="flex w-full flex-col justify-between">
               <ShowMoreCalendarEvent
                 v-if="timedEvents[parseDate(date)]"
-                class="z-10 cursor-pointer"
                 :draggable="config.isEditMode"
-                @dragstart="
-                  onDragStart($event, timedEvents[parseDate(date)][0].id)
-                "
+                @dragstart="onDragStart($event, timedEvents[parseDate(date)][0].id)"
                 @dragend="$event.target.style.opacity = '1'"
                 @dragover.prevent
                 :events="timedEvents[parseDate(date)]"
                 :date="date"
                 :totalEventsCount="timedEvents[parseDate(date)].length"
                 @showMoreEvents="emit('setCurrentDate', date)"
-              />
+              >
+                <template #event-popover-content="slotProps">
+                  <slot name="event-popover-content" v-bind="slotProps" />
+                </template>
+              </ShowMoreCalendarEvent>
             </div>
           </div>
         </div>
@@ -112,10 +110,10 @@
 <script setup>
 import { daysList, parseDate, isWeekend } from './calendarUtils'
 import { inject } from 'vue'
-import CalendarEvent from './CalendarEvent.vue'
 import useCalendarData from './composables/useCalendarData'
 import { computed } from 'vue'
 import ShowMoreCalendarEvent from './ShowMoreCalendarEvent.vue'
+import CalendarMonthEvent from './CalendarMonthEvent.vue'
 const props = defineProps({
   events: {
     type: Object,
@@ -136,13 +134,9 @@ const props = defineProps({
 
 const emit = defineEmits(['setCurrentDate'])
 
-const timedEvents = computed(
-  () => useCalendarData(props.events, 'Month').timedEvents.value,
-)
+const timedEvents = computed(() => useCalendarData(props.events, 'Month').timedEvents.value)
 
-const maxEventsInCell = computed(() =>
-  props.currentMonthDates.length > 35 ? 1 : 2,
-)
+const maxEventsInCell = computed(() => (props.currentMonthDates.length > 35 ? 1 : 2))
 
 function isCurrentMonth(date) {
   return date.getMonth() === props.currentMonth

@@ -25,7 +25,7 @@
             type="Date"
             v-model="newEvent.date"
             label="Date"
-            required="true"
+            :required="true"
             @blur="validateFields()"
           />
 
