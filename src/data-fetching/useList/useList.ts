@@ -1,5 +1,5 @@
 import type { AfterFetchContext, OnFetchErrorContext, UseFetchOptions } from '@vueuse/core'
-import type { Ref} from 'vue';
+import type { Ref } from 'vue'
 import { computed, MaybeRefOrGetter, reactive, readonly, ref, toValue } from 'vue'
 
 import { docStore } from '../docStore'

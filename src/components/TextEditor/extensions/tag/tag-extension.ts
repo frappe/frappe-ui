@@ -3,11 +3,8 @@ import { PluginKey } from '@tiptap/pm/state'
 import { toValue } from 'vue'
 
 import type { TextEditorProps } from '../../types'
-import type {
-  BaseSuggestionItem} from '../suggestion/createSuggestionExtension';
-import {
-  createSuggestionExtension
-} from '../suggestion/createSuggestionExtension'
+import type { BaseSuggestionItem } from '../suggestion/createSuggestionExtension'
+import { createSuggestionExtension } from '../suggestion/createSuggestionExtension'
 import SuggestionList from '../suggestion/SuggestionList.vue'
 
 export const TagNode = Node.create({

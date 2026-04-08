@@ -1,4 +1,4 @@
-import type { MaybeRef, MaybeRefOrGetter } from 'vue';
+import type { MaybeRef, MaybeRefOrGetter } from 'vue'
 import { toValue } from 'vue'
 
 import type { Filters } from './useList/types'

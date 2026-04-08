@@ -1,4 +1,4 @@
-import type { Range, Editor } from '@tiptap/core';
+import type { Range, Editor } from '@tiptap/core'
 import { getMarkRange } from '@tiptap/core'
 import Link from '@tiptap/extension-link'
 import type { MarkType } from '@tiptap/pm/model'

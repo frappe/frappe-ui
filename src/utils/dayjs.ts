@@ -1,4 +1,4 @@
-import type { Dayjs } from 'dayjs/esm';
+import type { Dayjs } from 'dayjs/esm'
 import _dayjs from 'dayjs/esm'
 import advancedFormat from 'dayjs/esm/plugin/advancedFormat'
 import customParseFormat from 'dayjs/esm/plugin/customParseFormat'

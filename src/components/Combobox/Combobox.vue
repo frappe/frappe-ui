@@ -13,7 +13,7 @@ import {
   ComboboxTrigger,
   ComboboxViewport,
 } from 'reka-ui'
-import type { FunctionalComponent } from 'vue';
+import type { FunctionalComponent } from 'vue'
 import { computed, type Component, type VNode, ref, watch, h } from 'vue'
 import LucideCheck from '~icons/lucide/check'
 import LucideChevronDown from '~icons/lucide/chevron-down'

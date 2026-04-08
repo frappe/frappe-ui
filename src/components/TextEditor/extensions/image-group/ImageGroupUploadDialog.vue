@@ -462,9 +462,11 @@ function addFiles(files: File[]) {
   const imageFiles = files.filter((file) => file.type.startsWith('image/'))
   const newImageItems = imageFiles.map(createImageItem)
 
-  const existingFileSignatures = new Set(images.value
-    .filter((item) => item.type === 'file' && item.file)
-    .map((item) => `${item.file!.name}-${item.file!.size}`))
+  const existingFileSignatures = new Set(
+    images.value
+      .filter((item) => item.type === 'file' && item.file)
+      .map((item) => `${item.file!.name}-${item.file!.size}`),
+  )
 
   const uniqueNewItems = newImageItems.filter(
     (item) => !existingFileSignatures.has(`${item.file!.name}-${item.file!.size}`),

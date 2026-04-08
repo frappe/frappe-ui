@@ -1,6 +1,6 @@
 import { Node as NodeExtension, nodeInputRule, mergeAttributes } from '@tiptap/core'
 import type { Node } from '@tiptap/pm/model'
-import type { Transaction, EditorState } from '@tiptap/pm/state';
+import type { Transaction, EditorState } from '@tiptap/pm/state'
 import { Plugin, Selection } from '@tiptap/pm/state'
 import type { EditorView } from '@tiptap/pm/view'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'

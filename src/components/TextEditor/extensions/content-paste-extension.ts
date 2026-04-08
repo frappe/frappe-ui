@@ -1,4 +1,4 @@
-import type { Node } from '@tiptap/core';
+import type { Node } from '@tiptap/core'
 import { Extension } from '@tiptap/core'
 import { Slice, Fragment } from '@tiptap/pm/model'
 import { DOMParser } from '@tiptap/pm/model'

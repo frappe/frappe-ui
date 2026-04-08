@@ -1,5 +1,5 @@
 import type { UseFetchOptions, AfterFetchContext } from '@vueuse/core'
-import type { Ref, MaybeRefOrGetter} from 'vue';
+import type { Ref, MaybeRefOrGetter } from 'vue'
 import { computed, reactive, readonly, toValue } from 'vue'
 
 import { docStore } from '../docStore'

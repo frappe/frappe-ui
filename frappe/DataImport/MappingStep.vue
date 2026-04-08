@@ -133,19 +133,18 @@ const columnsFromSystem = computed(() => {
   const parent = props.data!.reference_doctype
   const docs = props.fields.data?.docs || []
 
-  return docs
-    .flatMap((doc: any) => {
-      const isParent = doc.name === parent
+  return docs.flatMap((doc: any) => {
+    const isParent = doc.name === parent
 
-      const columns = doc.fields
-        .filter((f: any) => !fieldsToIgnore.includes(f.fieldtype))
-        .map((f: any) => ({
-          value: f.fieldname,
-          label: isParent ? f.label : `${f.label} (${getChildTableName(parent, doc.name)})`,
-        }))
+    const columns = doc.fields
+      .filter((f: any) => !fieldsToIgnore.includes(f.fieldtype))
+      .map((f: any) => ({
+        value: f.fieldname,
+        label: isParent ? f.label : `${f.label} (${getChildTableName(parent, doc.name)})`,
+      }))
 
-      return [{ value: 'name', label: 'ID' }, ...columns]
-    })
+    return [{ value: 'name', label: 'ID' }, ...columns]
+  })
 })
 
 const resetMapping = () => {

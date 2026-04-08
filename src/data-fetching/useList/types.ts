@@ -1,4 +1,4 @@
-import type { MaybeRefOrGetter} from 'vue';
+import type { MaybeRefOrGetter } from 'vue'
 import { Reactive, Ref } from 'vue'
 
 import type { CacheKey } from '../useCall/types'

@@ -1,6 +1,6 @@
 import { reactive, readonly, ref, type App } from 'vue'
 
-import type { PulseProvider } from './pulse.ts';
+import type { PulseProvider } from './pulse.ts'
 import { pulse_provider } from './pulse.ts'
 import { silentCall } from './utils.ts'
 

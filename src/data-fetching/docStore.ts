@@ -1,4 +1,4 @@
-import type { Ref, MaybeRefOrGetter} from 'vue';
+import type { Ref, MaybeRefOrGetter } from 'vue'
 import { ref, toValue } from 'vue'
 
 import { idbStore } from './idbStore'

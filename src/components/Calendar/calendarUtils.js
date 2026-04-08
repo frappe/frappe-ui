@@ -155,14 +155,13 @@ export function findOverlappingEventsCount(events) {
   }
 
   // flattening halls and events
-  return result
-    .flatMap((hall, idx) =>
-      hall.map((event, eventIdx) => ({
-        ...event,
-        hallNumber: idx,
-        idx: eventIdx,
-      })),
-    )
+  return result.flatMap((hall, idx) =>
+    hall.map((event, eventIdx) => ({
+      ...event,
+      hallNumber: idx,
+      idx: eventIdx,
+    })),
+  )
 }
 
 // Helpers
