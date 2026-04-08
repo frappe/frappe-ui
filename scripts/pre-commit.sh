@@ -1,4 +1,4 @@
-STAGED=$(git diff --name-only --diff-filter=ACMR)
+STAGED=$(git diff --cached --name-only --diff-filter=ACMR)
 yarn format
 
 git diff --exit-code $STAGED || {
