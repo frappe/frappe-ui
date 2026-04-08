@@ -15,6 +15,7 @@
     "type-check:tsc": "tsc --noEmit",
     "prettier": "yarn run prettier -w ./src",
     "format": "oxfmt",
+    "format:check": "oxfmt --check",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "lint-and-format": "yarn format && yarn lint:fix",
