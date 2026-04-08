@@ -68,6 +68,8 @@ import { eventProps, useEventBase } from './useEventBase.js'
 
 const props = defineProps(eventProps)
 
+defineOptions({ inheritAttrs: false })
+
 const {
   activeEvent,
   config,
