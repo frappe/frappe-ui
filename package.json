@@ -58,7 +58,7 @@
     "test": "vitest --run",
     "type-check": "tsc --noEmit",
     "format": "oxfmt",
-      "format:check": "oxfmt --check",
+    "format:check": "oxfmt --check",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "lint-and-format": "yarn format && yarn lint:fix",
@@ -71,7 +71,7 @@
     "docs:dev": "vitepress dev docs --host",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
-      "docs:gen": "node docs/scripts/propsgen.ts --trace-uncaught"
+    "docs:gen": "node docs/scripts/propsgen.ts --trace-uncaught"
   },
   "dependencies": {
     "@floating-ui/dom": "^1.7.4",
