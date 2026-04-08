@@ -4,6 +4,7 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 </script>
+
 <PropsTable name="Tabs" :data='[
   {
     "name": "as",
@@ -30,10 +31,11 @@
     "type": "string | number",
     "default": "0"
   }
-]'/> 
+]'/>
 
-## Slots 
- <SlotsTable :data='[
+## Slots
+
+<SlotsTable :data='[
   {
     "name": "tab-item",
     "description": "Custom renderer for a tab trigger (icon + label / router-link).",
@@ -44,14 +46,14 @@
     "description": "Content rendered for each tab panel.",
     "type": "{ tab: { label: string; icon?: string | undefined; route?: string | undefined; }; }"
   }
-]'/> 
+]'/>
 
-## Emit Events 
- <EmitsTable :data='[
+## Emit Events
+
+<EmitsTable :data='[
   {
     "name": "update:modelValue",
     "description": "",
     "type": "[value: string | number]"
   }
-]'/> 
-
+]'/>

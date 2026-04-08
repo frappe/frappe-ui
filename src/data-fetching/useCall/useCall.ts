@@ -1,9 +1,10 @@
+import type { AfterFetchContext, UseFetchOptions } from '@vueuse/core'
 import { computed, reactive, readonly, ref, unref } from 'vue'
-import { AfterFetchContext, UseFetchOptions } from '@vueuse/core'
+
+import { idbStore } from '../idbStore'
 import { useFrappeFetch } from '../useFrappeFetch'
 import { unrefObject, makeGetParams, normalizeCacheKey } from '../utils'
-import { idbStore } from '../idbStore'
-import { BasicParams, UseCallOptions } from './types'
+import type { BasicParams, UseCallOptions } from './types'
 
 export function useCall<TResponse, TParams extends BasicParams = undefined>(
   options: UseCallOptions<TResponse, TParams>,
@@ -101,25 +102,19 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
 
   let result
   if (method === 'POST') {
-    result = useFrappeFetch<FrappeResponse<TResponse>>(
-      computedUrl,
-      fetchOptions,
-    ).post(computedParams)
+    result = useFrappeFetch<FrappeResponse<TResponse>>(computedUrl, fetchOptions).post(
+      computedParams,
+    )
   } else if (method === 'PUT') {
-    result = useFrappeFetch<FrappeResponse<TResponse>>(
-      computedUrl,
-      fetchOptions,
-    ).put(computedParams)
+    result = useFrappeFetch<FrappeResponse<TResponse>>(computedUrl, fetchOptions).put(
+      computedParams,
+    )
   } else if (method === 'DELETE') {
-    result = useFrappeFetch<FrappeResponse<TResponse>>(
-      computedUrl,
-      fetchOptions,
-    ).delete(computedParams)
+    result = useFrappeFetch<FrappeResponse<TResponse>>(computedUrl, fetchOptions).delete(
+      computedParams,
+    )
   } else {
-    result = useFrappeFetch<FrappeResponse<TResponse>>(
-      computedUrl,
-      fetchOptions,
-    ).get()
+    result = useFrappeFetch<FrappeResponse<TResponse>>(computedUrl, fetchOptions).get()
   }
 
   const {

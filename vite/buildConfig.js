@@ -1,5 +1,6 @@
-import path from 'path'
 import fs from 'fs'
+import path from 'path'
+
 import { findAppName } from './utils.js'
 
 export function buildConfig(options = {}) {
@@ -78,10 +79,7 @@ export function buildConfig(options = {}) {
             )
           }
         } catch (error) {
-          console.error(
-            '[frappeui-build-config-plugin] Error copying index.html:',
-            error,
-          )
+          console.error('[frappeui-build-config-plugin] Error copying index.html:', error)
         }
       }
     },
@@ -127,10 +125,7 @@ function getBaseUrl(outputDir) {
     // fallback
     return '/'
   } catch (error) {
-    console.error(
-      '[frappeui-build-config-plugin] Error calculating base URL:',
-      error,
-    )
+    console.error('[frappeui-build-config-plugin] Error calculating base URL:', error)
     // fallback on error
     return '/'
   }
@@ -162,10 +157,7 @@ function findAppDir() {
       }
     }
   } catch (error) {
-    console.error(
-      '[frappeui-build-config-plugin] Error finding app directory:',
-      error,
-    )
+    console.error('[frappeui-build-config-plugin] Error finding app directory:', error)
   }
 
   return null

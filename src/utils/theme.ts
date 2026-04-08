@@ -1,4 +1,5 @@
-import { ref, onMounted, Ref } from 'vue'
+import type { Ref } from 'vue'
+import { ref, onMounted } from 'vue'
 
 export type Theme = 'light' | 'dark' | 'system'
 
@@ -6,9 +7,7 @@ export function useTheme() {
   const currentTheme: Ref<Theme> = ref('light')
 
   const getSystemTheme = (): 'light' | 'dark' => {
-    return window.matchMedia('(prefers-color-scheme: dark)').matches
-      ? 'dark'
-      : 'light'
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
   }
 
   const toggleTheme = (): void => {

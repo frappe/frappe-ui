@@ -3,14 +3,11 @@
     <slot v-bind="{ onClick: openIframeDialog }"></slot>
 
     <!-- Iframe URL Input Dialog -->
-    <Dialog
-      v-model="showDialog"
-      :options="{ title: 'Insert Embed', size: 'md' }"
-    >
+    <Dialog v-model="showDialog" :options="{ title: 'Insert Embed', size: 'md' }">
       <template #body-content>
         <div class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-ink-gray-7 mb-2">
+            <label class="mb-2 block text-sm font-medium text-ink-gray-7">
               URL or Embed Code
             </label>
             <Textarea
@@ -20,13 +17,10 @@
               @keydown.enter="insertIframe"
               @input="validateUrl"
             />
-            <p v-if="urlError" class="text-red-500 text-sm mt-1">
+            <p v-if="urlError" class="mt-1 text-sm text-red-500">
               {{ urlError }}
             </p>
-            <p
-              v-else-if="embedUrl && isValidUrl"
-              class="text-ink-green-3 text-sm mt-1"
-            >
+            <p v-else-if="embedUrl && isValidUrl" class="mt-1 text-sm text-ink-green-3">
               ✓ Valid {{ platformInfo.platform }} URL
             </p>
           </div>
@@ -36,11 +30,7 @@
       <template #actions>
         <div class="flex justify-end space-x-2">
           <Button variant="subtle" @click="showDialog = false">Cancel</Button>
-          <Button
-            variant="solid"
-            :disabled="!embedUrl || !isValidUrl"
-            @click="insertIframe"
-          >
+          <Button variant="solid" :disabled="!embedUrl || !isValidUrl" @click="insertIframe">
             Insert Embed
           </Button>
         </div>
@@ -50,19 +40,18 @@
 </template>
 
 <script setup lang="ts">
+import type { Editor } from '@tiptap/vue-3'
 import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue'
-import { Editor } from '@tiptap/vue-3'
-import { Dialog, Button, TextInput, Textarea } from '../../../..'
 
+import { Dialog, Button, TextInput, Textarea } from '../../../..'
 import {
   validateURL,
   processURL,
   detectPlatform,
   calculateAspectRatio,
   getOptimalDimensions,
-  ALLOWED_DOMAINS
+  ALLOWED_DOMAINS,
 } from './utils'
-
 
 const props = defineProps<{
   editor: Editor
@@ -88,7 +77,7 @@ const isValidUrl = computed(() => {
       if (srcMatch?.[1]) {
         return validateURL(srcMatch[1], {
           allowedDomains: ALLOWED_DOMAINS,
-          HTMLAttributes: {}
+          HTMLAttributes: {},
         })
       }
       return false
@@ -97,7 +86,7 @@ const isValidUrl = computed(() => {
     // Handle direct URLs
     return validateURL(embedUrl.value, {
       allowedDomains: ALLOWED_DOMAINS,
-      HTMLAttributes: {}
+      HTMLAttributes: {},
     })
   } catch {
     return false
@@ -120,14 +109,14 @@ const processedUrl = computed(() => {
 })
 
 const platformInfo = computed(() => {
-  if (!embedUrl.value || !isValidUrl.value) return { platform: 'Generic', aspectRatio: 9/16 }
+  if (!embedUrl.value || !isValidUrl.value) return { platform: 'Generic', aspectRatio: 9 / 16 }
 
   const platform = detectPlatform(processedUrl.value)
   const aspectInfo = calculateAspectRatio(processedUrl.value)
 
   return {
     platform: platform?.name || 'Generic',
-    aspectRatio: aspectInfo.ratio
+    aspectRatio: aspectInfo.ratio,
   }
 })
 
@@ -180,7 +169,7 @@ function insertIframe() {
     width: customWidth.value,
     height: customHeight.value,
     title: title.value,
-    align: alignment.value
+    align: alignment.value,
   })
 
   if (success) {
@@ -198,12 +187,18 @@ function handleSlashCommandInsert(event: CustomEvent) {
 }
 
 onMounted(() => {
-  props.editor.view.dom.addEventListener('iframe:open-dialog', handleSlashCommandInsert as EventListener)
+  props.editor.view.dom.addEventListener(
+    'iframe:open-dialog',
+    handleSlashCommandInsert as EventListener,
+  )
 })
 
 onUnmounted(() => {
   try {
-  props.editor.view.dom.removeEventListener('iframe:open-dialog', handleSlashCommandInsert as EventListener)
+    props.editor.view.dom.removeEventListener(
+      'iframe:open-dialog',
+      handleSlashCommandInsert as EventListener,
+    )
   } catch {}
 })
 </script>

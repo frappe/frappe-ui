@@ -1,5 +1,4 @@
-import { IframeOptions } from './iframe-extension'
-
+import type { IframeOptions } from './iframe-extension'
 
 export const ALLOWED_DOMAINS = [
   'youtube.com',
@@ -36,45 +35,45 @@ export interface PlatformConfig {
 const PLATFORM_CONFIGS: PlatformConfig[] = [
   {
     name: 'YouTube',
-    ratio: 9/16, // 16:9 aspect ratio
+    ratio: 9 / 16, // 16:9 aspect ratio
     defaultWidth: 640,
-    urlPatterns: ['youtube.com', 'youtu.be', 'youtube-nocookie.com']
+    urlPatterns: ['youtube.com', 'youtu.be', 'youtube-nocookie.com'],
   },
   {
     name: 'Vimeo',
-    ratio: 9/16, // 16:9 aspect ratio
+    ratio: 9 / 16, // 16:9 aspect ratio
     defaultWidth: 640,
-    urlPatterns: ['vimeo.com', 'player.vimeo.com']
+    urlPatterns: ['vimeo.com', 'player.vimeo.com'],
   },
   {
     name: 'CodePen',
-    ratio: 3/2, // 2:3 aspect ratio (taller for code demos)
+    ratio: 3 / 2, // 2:3 aspect ratio (taller for code demos)
     defaultWidth: 500,
-    urlPatterns: ['codepen.io']
+    urlPatterns: ['codepen.io'],
   },
   {
     name: 'CodeSandbox',
-    ratio: 3/2, // 2:3 aspect ratio
+    ratio: 3 / 2, // 2:3 aspect ratio
     defaultWidth: 500,
-    urlPatterns: ['codesandbox.io']
+    urlPatterns: ['codesandbox.io'],
   },
   {
     name: 'Figma',
-    ratio: 9/16, // 16:9 default for design embeds
+    ratio: 9 / 16, // 16:9 default for design embeds
     defaultWidth: 800,
-    urlPatterns: ['figma.com', 'www.figma.com', 'embed.figma.com']
+    urlPatterns: ['figma.com', 'www.figma.com', 'embed.figma.com'],
   },
   {
     name: 'Google Docs',
-    ratio: 4/3, // 4:3 for documents
+    ratio: 4 / 3, // 4:3 for documents
     defaultWidth: 600,
-    urlPatterns: ['docs.google.com', 'drive.google.com']
+    urlPatterns: ['docs.google.com', 'drive.google.com'],
   },
   {
     name: 'Notion',
-    ratio: 4/3, // 4:3 for pages
+    ratio: 4 / 3, // 4:3 for pages
     defaultWidth: 600,
-    urlPatterns: ['notion.so', 'www.notion.so']
+    urlPatterns: ['notion.so', 'www.notion.so'],
   },
 ]
 
@@ -83,9 +82,11 @@ export function detectPlatform(url: string): PlatformConfig | null {
     const urlObj = new URL(url)
     const domain = urlObj.hostname.toLowerCase()
 
-    return PLATFORM_CONFIGS.find(config =>
-      config.urlPatterns.some(pattern => domain.includes(pattern))
-    ) || null
+    return (
+      PLATFORM_CONFIGS.find((config) =>
+        config.urlPatterns.some((pattern) => domain.includes(pattern)),
+      ) || null
+    )
   } catch {
     return null
   }
@@ -99,20 +100,23 @@ export function calculateAspectRatio(url: string): AspectRatioInfo {
       ratio: platform.ratio,
       width: platform.defaultWidth,
       height: Math.round(platform.defaultWidth * platform.ratio),
-      platform: platform.name
+      platform: platform.name,
     }
   }
 
   // Default to 16:9 for unknown platforms
   return {
-    ratio: 9/16,
+    ratio: 9 / 16,
     width: 640,
     height: 360,
-    platform: 'Generic'
+    platform: 'Generic',
   }
 }
 
-export function getOptimalDimensions(url: string, containerWidth?: number): { width: number, height: number } {
+export function getOptimalDimensions(
+  url: string,
+  containerWidth?: number,
+): { width: number; height: number } {
   const aspectInfo = calculateAspectRatio(url)
 
   // If container width is provided, scale to fit
@@ -121,13 +125,13 @@ export function getOptimalDimensions(url: string, containerWidth?: number): { wi
     const maxWidth = Math.min(containerWidth - CONTAINER_PADDING, aspectInfo.width)
     return {
       width: maxWidth,
-      height: Math.round(maxWidth * aspectInfo.ratio)
+      height: Math.round(maxWidth * aspectInfo.ratio),
     }
   }
 
   return {
     width: aspectInfo.width,
-    height: aspectInfo.height
+    height: aspectInfo.height,
   }
 }
 
@@ -144,9 +148,7 @@ export function validateURL(url: string, options: IframeOptions): boolean {
 
     // If allowedDomains is specified, check if domain is allowed
     if (options.allowedDomains?.length) {
-      return options.allowedDomains.some((allowed) =>
-        domain.includes(allowed.toLowerCase())
-      )
+      return options.allowedDomains.some((allowed) => domain.includes(allowed.toLowerCase()))
     }
 
     // If no allowedDomains specified, allow all except blocked
@@ -240,7 +242,7 @@ function convertToCodePenEmbed(url: string): string {
       return url
     }
 
-    const match = url.match(/codepen\.io\/([^\/]+)\/pen\/([^\/\?]+)/)
+    const match = url.match(/codepen\.io\/([^/]+)\/pen\/([^/?]+)/)
     if (match?.[1] && match?.[2]) {
       return `https://codepen.io/${match[1]}/embed/${match[2]}?default-tab=result`
     }

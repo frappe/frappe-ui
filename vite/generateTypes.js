@@ -1,7 +1,8 @@
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { findAppsFolder } from './utils.js'
+
 import { DocTypeInterfaceGenerator } from './doctypeInterfaceGenerator.js'
+import { findAppsFolder } from './utils.js'
 
 // Handle termination signals to exit cleanly
 process.on('SIGINT', () => process.exit(0))
@@ -37,11 +38,7 @@ async function main() {
       return
     }
 
-    const generator = new DocTypeInterfaceGenerator(
-      appsFolder,
-      options.input,
-      outputPath,
-    )
+    const generator = new DocTypeInterfaceGenerator(appsFolder, options.input, outputPath)
     await generator.generate()
   } catch (error) {
     console.error('Error generating DocType interfaces:', error)

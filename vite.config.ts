@@ -1,6 +1,8 @@
 import path from 'path'
-import { defineConfig } from 'vite'
+
 import vue from '@vitejs/plugin-vue'
+import { defineConfig } from 'vite'
+
 import { lucideIcons } from './vite/lucideIcons'
 
 // https://vitejs.dev/config/

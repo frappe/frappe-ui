@@ -1,18 +1,26 @@
 <template>
   <header
-		class="sticky flex items-center justify-between space-x-28 top-0 z-10 border-b bg-surface-white px-3 py-2.5 sm:px-5"
-    >
-      <Breadcrumbs :items="breadcrumbs" />
-      <ImportSteps class="flex-1 hidden lg:flex" v-if="step != 'list'" :data="data" :step="step" @updateStep="updateStep" />
-  </header>
-  <div>
-      <ImportSteps class="flex-1 lg:hidden w-[90%] mx-auto mt-5" v-if="step != 'list'" :data="data" :step="step" @updateStep="updateStep" />
-
-    <DataImportList
-      v-if="step === 'list'"
-      :dataImports="dataImports"
+    class="sticky top-0 z-10 flex items-center justify-between space-x-28 border-b bg-surface-white px-3 py-2.5 sm:px-5"
+  >
+    <Breadcrumbs :items="breadcrumbs" />
+    <ImportSteps
+      class="hidden flex-1 lg:flex"
+      v-if="step != 'list'"
+      :data="data"
+      :step="step"
       @updateStep="updateStep"
     />
+  </header>
+  <div>
+    <ImportSteps
+      class="mx-auto mt-5 w-[90%] flex-1 lg:hidden"
+      v-if="step != 'list'"
+      :data="data"
+      :step="step"
+      @updateStep="updateStep"
+    />
+
+    <DataImportList v-if="step === 'list'" :dataImports="dataImports" @updateStep="updateStep" />
 
     <UploadStep
       v-else-if="step === 'upload'"
@@ -36,21 +44,24 @@
       :dataImports="dataImports"
       :data="data as DataImport"
       :fields="fields"
-      :doctypeMap="doctypeMap as Record<string, { title: string; listRoute?: string; pageRoute?: string }>"
+      :doctypeMap="
+        doctypeMap as Record<string, { title: string; listRoute?: string; pageRoute?: string }>
+      "
       @updateStep="updateStep"
     />
   </div>
 </template>
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
-import type { DataImportProps, DataImport } from './types'
-import { createListResource, createResource } from '../../src/resources'
 import { useRoute } from 'vue-router'
+
 import Breadcrumbs from '../../src/components/Breadcrumbs/Breadcrumbs.vue'
+import { createListResource, createResource } from '../../src/resources'
 import DataImportList from './DataImportList.vue'
 import ImportSteps from './ImportSteps.vue'
 import MappingStep from './MappingStep.vue'
 import PreviewStep from './PreviewStep.vue'
+import type { DataImportProps, DataImport } from './types'
 import UploadStep from './UploadStep.vue'
 
 const route = useRoute()
@@ -59,7 +70,7 @@ const data = ref<DataImport | null>(null)
 
 const props = defineProps<Partial<DataImportProps>>()
 
-  const dataImports = createListResource({
+const dataImports = createListResource({
   doctype: 'Data Import',
   fields: [
     'name',
@@ -70,14 +81,14 @@ const props = defineProps<Partial<DataImportProps>>()
     'mute_emails',
     'import_file',
     'google_sheets_url',
-    'template_options'
+    'template_options',
   ],
   auto: true,
   orderBy: 'modified desc',
 })
 
 const fields = createResource({
-  url: "frappe.desk.form.load.getdoctype",
+  url: 'frappe.desk.form.load.getdoctype',
   makeParams: (values: { doctype: string }) => {
     return {
       doctype: values.doctype,
@@ -87,11 +98,8 @@ const fields = createResource({
   auto: false,
 })
 
-
 const updateData = () => {
-  data.value = dataImports.data?.find(
-    (di: DataImport) => di.name === props.importName,
-    ) || null
+  data.value = dataImports.data?.find((di: DataImport) => di.name === props.importName) || null
 }
 
 watch(
@@ -121,11 +129,14 @@ watch(
   { immediate: true },
 )
 
-watch(() => route.query, () => {
-  if (route.query.step == 'list') {
-    step.value = 'list'
-  }
-})
+watch(
+  () => route.query,
+  () => {
+    if (route.query.step == 'list') {
+      step.value = 'list'
+    }
+  },
+)
 
 const updateStep = (newStep: 'list' | 'upload' | 'map' | 'preview', newData: DataImport) => {
   step.value = newStep
@@ -143,11 +154,11 @@ const breadcrumbs = computed(() => {
   let crumbs = [
     {
       label: 'Data Import',
-      route: { 
-        name: 'DataImportList', 
+      route: {
+        name: 'DataImportList',
         query: {
-          step: 'list'
-        } 
+          step: 'list',
+        },
       },
     },
   ]
@@ -160,6 +171,4 @@ const breadcrumbs = computed(() => {
 
   return crumbs
 })
-
-
 </script>

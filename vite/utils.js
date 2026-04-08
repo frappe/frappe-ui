@@ -1,5 +1,5 @@
-import path from 'path'
 import fs from 'fs'
+import path from 'path'
 
 export function getConfig() {
   let configPath = path.join(process.cwd(), 'frappeui.json')
@@ -93,10 +93,7 @@ export async function getInstalledAppSites(appName) {
       stdout
         .split('\n')
         .map((line) => line.trim())
-        .filter(
-          (line) =>
-            Boolean(line) && sitePattern.test(line) && line.includes('.'),
-        ),
+        .filter((line) => Boolean(line) && sitePattern.test(line) && line.includes('.')),
     ),
   )
 }

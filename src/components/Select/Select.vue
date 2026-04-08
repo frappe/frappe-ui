@@ -1,9 +1,4 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import type { SelectProps, SelectOption } from './types'
-import LucideChevronDown from '~icons/lucide/chevron-down'
-import LucideCheck from '~icons/lucide/check'
-
 import {
   SelectContent,
   SelectItem,
@@ -15,8 +10,13 @@ import {
   SelectValue,
   SelectViewport,
 } from 'reka-ui'
+import { computed } from 'vue'
+import LucideCheck from '~icons/lucide/check'
+import LucideChevronDown from '~icons/lucide/chevron-down'
 
-const model = defineModel<String>()
+import type { SelectProps, SelectOption } from './types'
+
+const model = defineModel<string>()
 
 const props = withDefaults(defineProps<SelectProps>(), {
   size: 'sm',
@@ -54,16 +54,12 @@ const selectClasses = computed(() => {
   let variantClasses = {
     subtle:
       'border border-[--surface-gray-2] bg-surface-gray-2 hover:border-outline-gray-modals hover:bg-surface-gray-3',
-    outline:
-      'border border-outline-gray-2 bg-surface-white hover:border-outline-gray-3',
-    ghost:
-      'bg-transparent border-transparent hover:bg-surface-gray-3 focus:bg-surface-gray-3',
+    outline: 'border border-outline-gray-2 bg-surface-white hover:border-outline-gray-3',
+    ghost: 'bg-transparent border-transparent hover:bg-surface-gray-3 focus:bg-surface-gray-3',
     disabled: [
       'border cursor-not-allowed',
       props.variant !== 'ghost' ? 'bg-surface-gray-1' : '',
-      props.variant === 'outline'
-        ? 'border-outline-gray-2'
-        : 'border-transparent',
+      props.variant === 'outline' ? 'border-outline-gray-2' : 'border-transparent',
     ],
   }[variant]
 
@@ -95,13 +91,12 @@ defineSlots<{
   /** Custom content at the bottom of the dropdown */
   footer?: () => any
 }>()
-
 </script>
 
 <template>
   <SelectRoot v-model="model">
     <SelectTrigger
-      class="inline-flex items-center gap-2 outline-none text-base text-ink-gray-7 data-[placeholder]:text-ink-gray-4 data-[disabled]:text-ink-gray-4"
+      class="inline-flex items-center gap-2 text-base text-ink-gray-7 outline-none data-[disabled]:text-ink-gray-4 data-[placeholder]:text-ink-gray-4"
       aria-label="Customise options"
       :class="[selectClasses, $attrs.class]"
       :disabled="disabled"
@@ -109,27 +104,27 @@ defineSlots<{
       <slot name="prefix" />
       <SelectValue :placeholder="placeholder" class="truncate" />
       <slot name="suffix">
-        <LucideChevronDown class="size-4 text-ink-gray-4 ml-auto shrink-0" />
+        <LucideChevronDown class="ml-auto size-4 shrink-0 text-ink-gray-4" />
       </slot>
     </SelectTrigger>
 
     <SelectPortal>
       <SelectContent
-        class="bg-surface-modal ring-1 ring-black ring-opacity-5 rounded-lg shadow-2xl will-change-[opacity,transform] z-[100] overflow-hidden origin-center data-[state=open]:animate-[fadeInScale_100ms] data-[state=closed]:animate-[fadeOutScale_100ms]"
+        class="z-[100] origin-center overflow-hidden rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5 will-change-[opacity,transform] data-[state=closed]:animate-[fadeOutScale_100ms] data-[state=open]:animate-[fadeInScale_100ms]"
       >
-        <SelectViewport class="p-1 flex flex-col">
+        <SelectViewport class="flex flex-col p-1">
           <SelectItem
             v-for="option in selectOptions"
             :disabled="option.disabled"
             :key="option.value"
             :value="option.value"
             :class="[sizeClasses, paddingClasses, fontSizeClasses]"
-            class="text-base text-ink-gray-9 flex items-center data-[highlighted]:bg-surface-gray-2 border-0 data-[state=checked]:bg-surface-gray-2 data-[disabled]:text-ink-gray-4 select-none"
+            class="flex select-none items-center border-0 text-base text-ink-gray-9 data-[highlighted]:bg-surface-gray-2 data-[state=checked]:bg-surface-gray-2 data-[disabled]:text-ink-gray-4"
           >
             <SelectItemText>
               <slot name="option" v-bind="{ option }">{{ option.label }}</slot>
             </SelectItemText>
-            <SelectItemIndicator :as="LucideCheck" class="size-4 ml-auto" />
+            <SelectItemIndicator :as="LucideCheck" class="ml-auto size-4" />
           </SelectItem>
           <slot name="footer" />
         </SelectViewport>

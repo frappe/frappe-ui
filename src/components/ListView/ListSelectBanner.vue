@@ -7,10 +7,7 @@
     leave-from-class="opacity-100"
     leave-to-class="transform opacity-0"
   >
-    <div
-      v-if="list.selections.size"
-      class="absolute inset-x-0 bottom-6 mx-auto w-max text-base"
-    >
+    <div v-if="list.selections.size" class="absolute inset-x-0 bottom-6 mx-auto w-max text-base">
       <div
         class="flex min-w-[596px] items-center gap-3 rounded-lg bg-surface-white px-4 py-2 shadow-2xl"
         :class="$attrs.class"
@@ -23,15 +20,9 @@
             unselectAll: () => list.toggleAllRows(false),
           }"
         >
-          <div
-            class="flex flex-1 justify-between border-r border-outline-gray-2 text-ink-gray-9"
-          >
+          <div class="flex flex-1 justify-between border-r border-outline-gray-2 text-ink-gray-9">
             <div class="flex items-center gap-3">
-              <Checkbox
-                :modelValue="true"
-                :disabled="true"
-                class="text-ink-gray-9"
-              />
+              <Checkbox :modelValue="true" :disabled="true" class="text-ink-gray-9" />
               <div>{{ selectedText }}</div>
             </div>
             <div class="me-3">
@@ -56,11 +47,7 @@
             >
               Select all
             </Button>
-            <Button
-              icon="x"
-              variant="ghost"
-              @click="list.toggleAllRows(false)"
-            />
+            <Button icon="x" variant="ghost" @click="list.toggleAllRows(false)" />
           </div>
         </slot>
       </div>
@@ -69,9 +56,10 @@
 </template>
 
 <script setup>
-import Checkbox from '../Checkbox/Checkbox.vue'
-import { Button } from '../Button'
 import { computed, inject } from 'vue'
+
+import { Button } from '../Button'
+import Checkbox from '../Checkbox/Checkbox.vue'
 
 defineOptions({
   inheritAttrs: false,

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { h, ref } from 'vue'
 import { Combobox } from 'frappe-ui'
+import { h, ref } from 'vue'
 import LucideSettings from '~icons/lucide/settings'
 
 const value = ref('')

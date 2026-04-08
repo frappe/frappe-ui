@@ -1,4 +1,4 @@
-import { TimeGrain } from './helpers'
+import type { TimeGrain } from './helpers'
 
 export type AxisChartConfig = {
   data: Record<string, any>[]

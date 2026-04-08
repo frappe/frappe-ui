@@ -1,5 +1,5 @@
-import { type RouterLinkProps } from 'vue-router'
 import { type Component } from 'vue'
+import { type RouterLinkProps } from 'vue-router'
 
 type Theme = 'gray' | 'blue' | 'green' | 'red'
 type Size = 'sm' | 'md' | 'md' | 'lg' | 'xl' | '2xl'

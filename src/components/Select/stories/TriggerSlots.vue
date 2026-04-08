@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import { Select } from 'frappe-ui'
 import { ref } from 'vue'
 import LucideUser from '~icons/lucide/user'
-import { Select } from 'frappe-ui'
 
 const value = ref('')
 const options = [
@@ -45,7 +45,7 @@ const options = [
 
   <Select :options="options" v-model="value">
     <template #suffix>
-      <LucideUser class="size-4 ml-auto text-ink-gray-9" />
+      <LucideUser class="ml-auto size-4 text-ink-gray-9" />
     </template>
   </Select>
 </template>

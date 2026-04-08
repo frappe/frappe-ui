@@ -18,12 +18,13 @@
   </div>
 </template>
 <script setup>
+import { ref, reactive, computed, provide, watch, useSlots } from 'vue'
+
 import ListEmptyState from './ListEmptyState.vue'
+import ListGroups from './ListGroups.vue'
 import ListHeader from './ListHeader.vue'
 import ListRows from './ListRows.vue'
-import ListGroups from './ListGroups.vue'
 import ListSelectBanner from './ListSelectBanner.vue'
-import { ref, reactive, computed, provide, watch, useSlots } from 'vue'
 
 defineOptions({
   inheritAttrs: false,
@@ -104,10 +105,7 @@ let _options = computed(() => {
 const allRowsSelected = computed(() => {
   if (!props.rows.length) return false
   if (showGroupedRows.value) {
-    return (
-      selections.size ===
-      props.rows.reduce((acc, row) => acc + row.rows.length, 0)
-    )
+    return selections.size === props.rows.reduce((acc, row) => acc + row.rows.length, 0)
   }
   return selections.size === props.rows.length
 })
@@ -117,9 +115,7 @@ const selectable = computed(() => {
 })
 
 let showGroupedRows = computed(() => {
-  return props.rows.every(
-    (row) => row.group && row.rows && Array.isArray(row.rows)
-  )
+  return props.rows.every((row) => row.group && row.rows && Array.isArray(row.rows))
 })
 
 function toggleRow(row) {
@@ -155,7 +151,7 @@ provide(
     slots: slots,
     toggleRow,
     toggleAllRows,
-  }))
+  })),
 )
 
 defineExpose({

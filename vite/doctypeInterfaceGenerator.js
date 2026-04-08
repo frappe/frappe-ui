@@ -34,10 +34,9 @@ export class DocTypeInterfaceGenerator {
 
     if (this.updatedInterfaces > 0) {
       const baseInterfaces = this.generateBaseInterfaces()
-      const interfacesString = [
-        baseInterfaces,
-        ...Object.values(this.existingInterfaces),
-      ].join('\n')
+      const interfacesString = [baseInterfaces, ...Object.values(this.existingInterfaces)].join(
+        '\n',
+      )
 
       await fs.mkdir(path.dirname(this.outputPath), { recursive: true })
       await fs.writeFile(this.outputPath, interfacesString)
@@ -102,10 +101,7 @@ export class DocTypeInterfaceGenerator {
 
     const interfaceName = jsonData.name.replace(/\s+/g, '')
     const existingInterface = this.existingInterfaces[interfaceName]
-    if (
-      existingInterface &&
-      existingInterface.includes(`// Last updated: ${lastModified}`)
-    ) {
+    if (existingInterface && existingInterface.includes(`// Last updated: ${lastModified}`)) {
       this.summary.skipped++
       this.summary.details.push(`${doctypeName}: skipped (no changes)`)
       return
@@ -114,25 +110,25 @@ export class DocTypeInterfaceGenerator {
     const fields = jsonData.fields
 
     const typeMapping = {
-      Data: 'string',
+      'Data': 'string',
       'Text Editor': 'string',
-      Link: 'string',
-      Table: 'any[]',
+      'Link': 'string',
+      'Table': 'any[]',
       'Table MultiSelect': 'any[]',
-      Percent: 'number',
-      Int: 'number',
-      Float: 'number',
-      Datetime: 'string', // "YYYY-MM-DD HH:MM:SS"
-      Date: 'string', // "YYYY-MM-DD"
-      Check: '0 | 1',
+      'Percent': 'number',
+      'Int': 'number',
+      'Float': 'number',
+      'Datetime': 'string', // "YYYY-MM-DD HH:MM:SS"
+      'Date': 'string', // "YYYY-MM-DD"
+      'Check': '0 | 1',
       'Attach Image': 'string',
       'Dynamic Link': 'string',
       'Small Text': 'string',
-      Color: 'string',
-      Text: 'string',
-      Autocomplete: 'string',
-      Password: 'string',
-      Code: 'string',
+      'Color': 'string',
+      'Text': 'string',
+      'Autocomplete': 'string',
+      'Password': 'string',
+      'Code': 'string',
       'Read Only': 'string',
     }
 
@@ -140,13 +136,7 @@ export class DocTypeInterfaceGenerator {
 
     for (const field of fields) {
       if (
-        [
-          'Section Break',
-          'Column Break',
-          'Tab Break',
-          'HTML',
-          'Button',
-        ].includes(field.fieldtype)
+        ['Section Break', 'Column Break', 'Tab Break', 'HTML', 'Button'].includes(field.fieldtype)
       ) {
         continue
       }
@@ -157,32 +147,21 @@ export class DocTypeInterfaceGenerator {
           .map((option) => `'${option}'`)
           .join(' | ')
         tsType = options
-      } else if (
-        ['Table', 'Table MultiSelect'].includes(field.fieldtype) &&
-        field.options
-      ) {
+      } else if (['Table', 'Table MultiSelect'].includes(field.fieldtype) && field.options) {
         const relatedDoctype = field.options
         tsType = `${relatedDoctype.replace(/\s+/g, '')}[]`
-        await this.processDoctype(
-          appName,
-          relatedDoctype.toLowerCase().replace(/ /g, '_'),
-        )
+        await this.processDoctype(appName, relatedDoctype.toLowerCase().replace(/ /g, '_'))
       }
       let description = `/** ${field.label}: ${field.fieldtype}`
       if (
-        ['Table', 'Table MultiSelect', 'Link', 'Dynamic Link'].includes(
-          field.fieldtype,
-        ) &&
+        ['Table', 'Table MultiSelect', 'Link', 'Dynamic Link'].includes(field.fieldtype) &&
         field.options
       ) {
         description += ` (${field.options})`
       }
       description += ' */'
       let optional =
-        field.reqd ||
-        ['Check', 'Table', 'Table MultiSelect'].includes(field.fieldtype)
-          ? ''
-          : '?'
+        field.reqd || ['Check', 'Table', 'Table MultiSelect'].includes(field.fieldtype) ? '' : '?'
       interfaceString += `  ${description}\n  ${field.fieldname}${optional}: ${tsType};\n`
     }
 
@@ -199,11 +178,7 @@ export class DocTypeInterfaceGenerator {
       return this.jsonFileCache.get(cacheKey)
     }
 
-    const targetPattern = path.join(
-      'doctype',
-      doctypeName,
-      `${doctypeName}.json`,
-    )
+    const targetPattern = path.join('doctype', doctypeName, `${doctypeName}.json`)
     let foundPath = null
 
     const searchDirectory = async (directory) => {

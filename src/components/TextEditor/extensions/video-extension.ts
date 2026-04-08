@@ -1,15 +1,13 @@
-import {
-  Node as NodeExtension,
-  nodeInputRule,
-  mergeAttributes,
-} from '@tiptap/core'
+import { Node as NodeExtension, nodeInputRule, mergeAttributes } from '@tiptap/core'
+import type { Node } from '@tiptap/pm/model'
+import type { Transaction, EditorState } from '@tiptap/pm/state'
+import { Plugin, Selection } from '@tiptap/pm/state'
+import type { EditorView } from '@tiptap/pm/view'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
-import MediaNodeView from '../components/MediaNodeView.vue'
-import { Plugin, Selection, Transaction, EditorState } from '@tiptap/pm/state'
-import { EditorView } from '@tiptap/pm/view'
-import { Node } from '@tiptap/pm/model'
+
 import { fileToBase64 } from '../../../index'
-import { UploadedFile } from '../../../utils/useFileUpload'
+import type { UploadedFile } from '../../../utils/useFileUpload'
+import MediaNodeView from '../components/MediaNodeView.vue'
 import { localFileMap } from './image/image-extension'
 
 export interface VideoExtensionOptions {
@@ -71,8 +69,7 @@ declare module '@tiptap/core' {
 /**
  * Matches markdown-style video syntax (custom): !video[alt](src "title")
  */
-const inputRegex =
-  /(?:^|\s)(!video\[(.+|:?)]\((\S+)(?:(?:\s+)["'](\S+)["'])?\))$/
+const inputRegex = /(?:^|\s)(!video\[(.+|:?)]\((\S+)(?:(?:\s+)["'](\S+)["'])?\))$/
 
 export const VideoExtension = NodeExtension.create<VideoExtensionOptions>({
   name: 'video',
@@ -105,8 +102,7 @@ export const VideoExtension = NodeExtension.create<VideoExtensionOptions>({
       float: {
         default: null,
         parseHTML: (element) => {
-          const float =
-            element.getAttribute('data-float') || element.getAttribute('float')
+          const float = element.getAttribute('data-float') || element.getAttribute('float')
 
           if (['left', 'right', null].includes(float)) {
             return float as 'left' | 'right' | null
@@ -218,41 +214,26 @@ export const VideoExtension = NodeExtension.create<VideoExtensionOptions>({
         ({ editor }) => {
           const fileData = localFileMap.get(uploadId)
           if (!fileData) {
-            console.error(
-              'reuploadVideo: no file found in localFileMap for uploadId',
-              uploadId,
-            )
+            console.error('reuploadVideo: no file found in localFileMap for uploadId', uploadId)
             return false
           }
 
           // Find the node position
           let nodePos: number | null = null
           editor.view.state.doc.descendants((node, pos) => {
-            if (
-              node.type.name === 'video' &&
-              node.attrs.uploadId === uploadId
-            ) {
+            if (node.type.name === 'video' && node.attrs.uploadId === uploadId) {
               nodePos = pos
               return false
             }
           })
 
           if (nodePos === null) {
-            console.error(
-              'reuploadVideo: could not find node with uploadId',
-              uploadId,
-            )
+            console.error('reuploadVideo: could not find node with uploadId', uploadId)
             return false
           }
 
           // Re-run the upload using the stored file, replacing the node at its position
-          return uploadVideoBase(
-            fileData.file,
-            editor.view,
-            nodePos,
-            this.options,
-            'replace',
-          )
+          return uploadVideoBase(fileData.file, editor.view, nodePos, this.options, 'replace')
         },
     }
   },
@@ -284,8 +265,8 @@ export const VideoExtension = NodeExtension.create<VideoExtensionOptions>({
                 return false
               }
 
-              const videos = Array.from(event.dataTransfer.files).filter(
-                (file) => /video/i.test(file.type),
+              const videos = Array.from(event.dataTransfer.files).filter((file) =>
+                /video/i.test(file.type),
               )
 
               if (videos.length === 0) {
@@ -326,10 +307,7 @@ export const VideoExtension = NodeExtension.create<VideoExtensionOptions>({
 
               for (let i = 0; i < clipboardItems.length; i++) {
                 const item = clipboardItems[i]
-                if (
-                  item.kind === 'file' &&
-                  item.type.indexOf('video/') !== -1
-                ) {
+                if (item.kind === 'file' && item.type.indexOf('video/') !== -1) {
                   const file = item.getAsFile()
                   if (file) videos.push(file)
                 }
@@ -380,10 +358,7 @@ export const VideoExtension = NodeExtension.create<VideoExtensionOptions>({
   },
 })
 
-function findInsertPosition(
-  view: EditorView,
-  lastNodeId: string | null,
-): number | null {
+function findInsertPosition(view: EditorView, lastNodeId: string | null): number | null {
   if (!lastNodeId) {
     return null
   }
@@ -567,11 +542,7 @@ function findVideoNodeBySource(
   })
 }
 
-function updateNodeWithDimensions(
-  src: string,
-  view: EditorView,
-  pos: number,
-): void {
+function updateNodeWithDimensions(src: string, view: EditorView, pos: number): void {
   getVideoDimensions(src)
     .then((dimensions) => {
       const node = view.state.doc.nodeAt(pos)
@@ -594,9 +565,7 @@ function updateNodeWithDimensions(
     })
 }
 
-function getVideoDimensions(
-  src: string,
-): Promise<{ width: number; height: number }> {
+function getVideoDimensions(src: string): Promise<{ width: number; height: number }> {
   return new Promise((resolve, reject) => {
     const video = document.createElement('video')
     video.preload = 'metadata'
@@ -638,9 +607,7 @@ export function processMultipleVideos(
     const file = videoQueue.shift()
     if (!file) return
 
-    const currentPos = lastInsertedNodeId
-      ? findInsertPosition(view, lastInsertedNodeId)
-      : pos
+    const currentPos = lastInsertedNodeId ? findInsertPosition(view, lastInsertedNodeId) : pos
 
     uploadVideoWithTracking(file, view, currentPos, options, (newNodeId) => {
       lastInsertedNodeId = newNodeId

@@ -1,0 +1,1 @@
+cp ./scripts/pre-commit.sh "$(git rev-parse --git-dir)/hooks/pre-commit" && chmod +x "$(git rev-parse --git-dir)/hooks/pre-commit"

@@ -10,18 +10,11 @@ defineProps({
     class="flex w-full min-w-0 items-center rounded px-2 py-2 text-base font-medium text-ink-gray-8"
     :class="{ 'bg-surface-gray-3': active }"
   >
-    <component
-      :is="item.icon"
-      v-if="item.icon"
-      class="mr-3 h-4 w-4 text-ink-gray-7"
-    />
+    <component :is="item.icon" v-if="item.icon" class="mr-3 h-4 w-4 text-ink-gray-7" />
     <span class="overflow-hidden text-ellipsis whitespace-nowrap">
       {{ item.title }}
     </span>
-    <span
-      v-if="item.description"
-      class="ml-auto whitespace-nowrap pl-2 text-ink-gray-5"
-    >
+    <span v-if="item.description" class="ml-auto whitespace-nowrap pl-2 text-ink-gray-5">
       {{ item.description }}
     </span>
   </div>

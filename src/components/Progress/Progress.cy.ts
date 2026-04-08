@@ -13,9 +13,7 @@ describe('Progress', () => {
 
     cy.get('span').should('have.text', 'label')
 
-    cy.get('[role=progressbar] div')
-      .should('have.attr', 'style')
-      .and('include', `width: ${val}%`)
+    cy.get('[role=progressbar] div').should('have.attr', 'style').and('include', `width: ${val}%`)
   })
 
   it('hint prop & slot', () => {

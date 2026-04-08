@@ -4,8 +4,10 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 </script>
-## Slots 
- <SlotsTable :data='[
+
+## Slots
+
+<SlotsTable :data='[
   {
     "name": "target",
     "description": "",
@@ -36,5 +38,4 @@
     "description": "",
     "type": "{ togglePopover: () => void; }"
   }
-]'/> 
-
+]'/>

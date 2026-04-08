@@ -71,8 +71,7 @@ export class PulseProvider {
   private sendBeacon(events: PulseEvent[]) {
     try {
       if (navigator.sendBeacon) {
-        const url =
-          '/api/method/frappe.utils.telemetry.pulse.client.bulk_capture'
+        const url = '/api/method/frappe.utils.telemetry.pulse.client.bulk_capture'
         const data = new FormData()
         data.append('events', JSON.stringify(events))
         navigator.sendBeacon(url, data)

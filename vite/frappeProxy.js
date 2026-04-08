@@ -1,14 +1,10 @@
 import { getCommonSiteConfig } from './utils.js'
 
-export function frappeProxy({
-  port,
-  source = '^/(desk|app|login|api|assets|files|private)',
-} = {}) {
+export function frappeProxy({ port, source = '^/(desk|app|login|api|assets|files|private)' } = {}) {
   const commonSiteConfig = getCommonSiteConfig()
   const env_web_server_port = process.env.FRAPPE_WEB_SERVER_PORT
   const webserver_port =
-    env_web_server_port ||
-    (commonSiteConfig ? commonSiteConfig.webserver_port : 8000)
+    env_web_server_port || (commonSiteConfig ? commonSiteConfig.webserver_port : 8000)
 
   // Calculate Vite dev server port based on webserver port
   // If webserver_port is 8000, vite port is 8080
@@ -21,9 +17,7 @@ export function frappeProxy({
   }
 
   if (env_web_server_port) {
-    console.log(
-      `Using web server port from environment: ${env_web_server_port}`,
-    )
+    console.log(`Using web server port from environment: ${env_web_server_port}`)
   }
 
   if (!commonSiteConfig) {

@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col mt-2">
+  <div class="mt-2 flex flex-col">
     <div
       v-if="props.label"
       class="relative flex items-center gap-1 px-2 py-1.5"
@@ -8,27 +8,23 @@
     >
       <h3
         class="h-4 text-sm text-ink-gray-5 transition-all duration-300 ease-in-out"
-        :class="
-          isSidebarCollapsed
-            ? 'w-0 overflow-hidden opacity-0'
-            : 'w-auto opacity-100'
-        "
+        :class="isSidebarCollapsed ? 'w-0 overflow-hidden opacity-0' : 'w-auto opacity-100'"
       >
         {{ props.label }}
       </h3>
       <div v-if="props.collapsible">
         <LucideChevronRight
           v-if="!isSidebarCollapsed"
-          class="w-4 h-4 text-ink-gray-5 transition-all duration-300 ease-in-out"
+          class="h-4 w-4 text-ink-gray-5 transition-all duration-300 ease-in-out"
           :class="{ 'rotate-90': !isCollapsed }"
         />
       </div>
       <div
         v-if="isSidebarCollapsed"
-        class="absolute top-0 left-0 flex h-full w-full items-center justify-center transition-all duration-300 ease-in-out"
+        class="absolute left-0 top-0 flex h-full w-full items-center justify-center transition-all duration-300 ease-in-out"
         :class="isSidebarCollapsed ? 'opacity-100' : 'opacity-0'"
       >
-        <hr class="w-full border-t border-ink-gray-3" />
+        <hr class="border-ink-gray-3 w-full border-t" />
       </div>
     </div>
     <transition
@@ -61,9 +57,10 @@
 
 <script setup lang="ts">
 import { inject, ref } from 'vue'
-import SidebarItem from './SidebarItem.vue'
-import { SidebarSectionProps } from './types'
 import LucideChevronRight from '~icons/lucide/chevron-right'
+
+import SidebarItem from './SidebarItem.vue'
+import type { SidebarSectionProps } from './types'
 
 const props = defineProps<SidebarSectionProps>()
 

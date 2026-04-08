@@ -1,9 +1,7 @@
 <template>
   <Popover transition="default">
     <template #target="{ togglePopover, isOpen }">
-      <slot
-        v-bind="{ onClick: () => togglePopover(), isActive: isOpen }"
-      ></slot>
+      <slot v-bind="{ onClick: () => togglePopover(), isActive: isOpen }"></slot>
     </template>
     <template #body-main>
       <div class="p-2">
@@ -48,8 +46,8 @@
   </Popover>
 </template>
 <script>
-import Popover from '../../Popover/Popover.vue'
 import { Tooltip } from '../../../index'
+import Popover from '../../Popover/Popover.vue'
 
 export default {
   name: 'FontColor',
@@ -58,22 +56,14 @@ export default {
   methods: {
     setBackgroundColor(color) {
       if (color.name != 'Default') {
-        this.editor
-          .chain()
-          .focus()
-          .toggleHighlightByName(color.name.toLowerCase())
-          .run()
+        this.editor.chain().focus().toggleHighlightByName(color.name.toLowerCase()).run()
       } else {
         this.editor.chain().focus().unsetHighlight().run()
       }
     },
     setForegroundColor(color) {
       if (color.name != 'Default') {
-        this.editor
-          .chain()
-          .focus()
-          .setColorByName(color.name.toLowerCase())
-          .run()
+        this.editor.chain().focus().setColorByName(color.name.toLowerCase()).run()
       } else {
         this.editor.chain().focus().unsetColor().run()
       }

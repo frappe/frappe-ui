@@ -4,6 +4,7 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 </script>
+
 <PropsTable name="Sidebar" :data='[
   {
     "name": "header",
@@ -30,10 +31,11 @@
     "type": "boolean",
     "default": "null"
   }
-]'/> 
+]'/>
 
-## Slots 
- <SlotsTable :data='[
+## Slots
+
+<SlotsTable :data='[
   {
     "name": "header-logo",
     "description": "",
@@ -49,14 +51,14 @@
     "description": "",
     "type": "{ isCollapsed: boolean; isMobile: boolean; }"
   }
-]'/> 
+]'/>
 
-## Emit Events 
- <EmitsTable :data='[
+## Emit Events
+
+<EmitsTable :data='[
   {
     "name": "update:collapsed",
     "description": "",
     "type": "[value: boolean]"
   }
-]'/> 
-
+]'/>

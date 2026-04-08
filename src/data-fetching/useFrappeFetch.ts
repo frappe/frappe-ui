@@ -1,4 +1,5 @@
 import { createFetch } from '@vueuse/core'
+
 import { docStore } from './docStore'
 import { listStore } from './useList/listStore'
 
@@ -62,10 +63,7 @@ export const useFrappeFetch = createFetch({
     onFetchError(ctx) {
       if (ctx.response?.ok && ctx.error) {
         // if response is ok and there is an error, it's a client side programming error
-        console.error(
-          'Fetch request succeeded but there was a programming error:\n\n',
-          ctx.error,
-        )
+        console.error('Fetch request succeeded but there was a programming error:\n\n', ctx.error)
         return ctx
       }
 
@@ -85,15 +83,12 @@ export const useFrappeFetch = createFetch({
           : error.exception
             ? ` (Traceback)`
             : ''
-        let frappeError = new FrappeResponseError(
-          `${error.type}${errorDescription}`,
-          {
-            title: error.title,
-            type: error.type,
-            exception: error.exception,
-            indicator: error.indicator,
-          },
-        )
+        let frappeError = new FrappeResponseError(`${error.type}${errorDescription}`, {
+          title: error.title,
+          type: error.type,
+          exception: error.exception,
+          indicator: error.indicator,
+        })
 
         if (import.meta.env.DEV && error.exception) {
           console.log(error.exception)
@@ -115,12 +110,11 @@ function setHeaders(headers: HeadersInit) {
   let csrfToken = null
   if (typeof window !== 'undefined') {
     siteName = window.location.hostname
-    csrfToken =
-      window.csrf_token !== '{{ csrf_token }}' ? window.csrf_token : null
+    csrfToken = window.csrf_token !== '{{ csrf_token }}' ? window.csrf_token : null
   }
 
   const defaultHeaders: Record<string, string> = {
-    Accept: 'application/json',
+    'Accept': 'application/json',
     'Content-Type': 'application/json; charset=utf-8',
   }
   if (siteName) {

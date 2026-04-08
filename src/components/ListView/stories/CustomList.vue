@@ -1,10 +1,4 @@
 <script setup>
-import { reactive } from 'vue'
-import LucideAtSign from '~icons/lucide/at-sign'
-import LucideCheckCircle from '~icons/lucide/check-circle'
-import LucideUsers from '~icons/lucide/users'
-import LucideUser from '~icons/lucide/user'
-
 import {
   Avatar,
   Badge,
@@ -17,6 +11,11 @@ import {
   ListSelectBanner,
   ListView,
 } from 'frappe-ui'
+import { reactive } from 'vue'
+import LucideAtSign from '~icons/lucide/at-sign'
+import LucideCheckCircle from '~icons/lucide/check-circle'
+import LucideUser from '~icons/lucide/user'
+import LucideUsers from '~icons/lucide/users'
 
 const custom_columns = reactive([
   // { label: "Name", key: "name", width: 3, icon: "user" },
@@ -67,23 +66,14 @@ const custom_rows = [
     row-key="id"
   >
     <ListHeader>
-      <ListHeaderItem
-        v-for="column in custom_columns"
-        :key="column.key"
-        :item="column"
-      >
+      <ListHeaderItem v-for="column in custom_columns" :key="column.key" :item="column">
         <template #prefix="{ item }">
           <component :is="item.icon" class="size-4" />
         </template>
       </ListHeaderItem>
     </ListHeader>
     <ListRows>
-      <ListRow
-        v-for="row in custom_rows"
-        :key="row.id"
-        v-slot="{ column, item }"
-        :row="row"
-      >
+      <ListRow v-for="row in custom_rows" :key="row.id" v-slot="{ column, item }" :row="row">
         <ListRowItem :item="item" :align="column.align">
           <template #prefix>
             <div
@@ -91,12 +81,7 @@ const custom_rows = [
               class="h-3 w-3 rounded-full"
               :class="item.bg_color"
             />
-            <Avatar
-              v-if="column.key === 'name'"
-              shape="circle"
-              :image="item.image"
-              size="sm"
-            />
+            <Avatar v-if="column.key === 'name'" shape="circle" :image="item.image" size="sm" />
           </template>
           <Badge
             v-if="column.key === 'role'"

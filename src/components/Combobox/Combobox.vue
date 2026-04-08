@@ -1,14 +1,5 @@
 <script setup lang="ts">
 import {
-  computed,
-  type Component,
-  type VNode,
-  ref,
-  watch,
-  h,
-  FunctionalComponent,
-} from 'vue'
-import {
   ComboboxAnchor,
   ComboboxContent,
   ComboboxEmpty,
@@ -22,8 +13,11 @@ import {
   ComboboxTrigger,
   ComboboxViewport,
 } from 'reka-ui'
+import type { FunctionalComponent } from 'vue'
+import { computed, type Component, type VNode, ref, watch, h } from 'vue'
 import LucideCheck from '~icons/lucide/check'
 import LucideChevronDown from '~icons/lucide/chevron-down'
+
 import type {
   CustomOption,
   SimpleOption,
@@ -45,15 +39,14 @@ const emit = defineEmits<{
   'update:selectedOption': (option: SimpleOption | null) => void
 
   /** Emitted when the input receives focus */
-  focus: (event: FocusEvent) => void
+  'focus': (event: FocusEvent) => void
 
   /** Emitted when the input loses focus */
-  blur: (event: FocusEvent) => void
+  'blur': (event: FocusEvent) => void
 
   /** Emitted when the user types in the input */
-  input: (value: string) => void
+  'input': (value: string) => void
 }>()
-
 
 const searchTerm = ref(getDisplayValue(props.modelValue))
 const internalModelValue = ref(props.modelValue)
@@ -160,32 +153,24 @@ const allOptionsFlat = computed(() => {
 
 function getDisplayValue(selectedValue: string | null | undefined): string {
   if (!selectedValue) return ''
-  const options = props.options.flatMap((opt) =>
-    isGroup(opt) ? opt.options : opt,
-  )
+  const options = props.options.flatMap((opt) => (isGroup(opt) ? opt.options : opt))
   const selectedOption = options.find((opt) => getKey(opt) === selectedValue)
   return selectedOption ? getLabel(selectedOption) : selectedValue || ''
 }
 
 const selectedOption = computed(() => {
   if (!internalModelValue.value) return null
-  return allOptionsFlat.value.find(
-    (opt) => getKey(opt) === internalModelValue.value,
-  )
+  return allOptionsFlat.value.find((opt) => getKey(opt) === internalModelValue.value)
 })
 
 const selectedOptionIcon = computed(() => {
   return selectedOption.value ? getIcon(selectedOption.value) : undefined
 })
 
-const RenderIcon: FunctionalComponent<{ icon?: string | Component }> = (
-  props,
-) => {
+const RenderIcon: FunctionalComponent<{ icon?: string | Component }> = (props) => {
   if (!props.icon) return null
   const iconContent =
-    typeof props.icon === 'string'
-      ? h('span', props.icon)
-      : h(props.icon, { class: 'w-4 h-4' })
+    typeof props.icon === 'string' ? h('span', props.icon) : h(props.icon, { class: 'w-4 h-4' })
 
   return h(
     'span',
@@ -313,7 +298,6 @@ defineSlots<{
   /** Custom slot for individual options, only used if the option has `slotName` */
   [slotName: string]: (props: { option: SimpleOption; searchTerm: string }) => any
 }>()
-
 </script>
 
 <template>
@@ -328,12 +312,12 @@ defineSlots<{
       <ComboboxAnchor
         class="flex h-7 w-full items-center justify-between gap-2 rounded px-2 py-1 transition-colors"
         :class="{
-          'opacity-50 pointer-events-none': disabled,
+          'pointer-events-none opacity-50': disabled,
           [variantClasses]: true,
         }"
         @click="handleClick"
       >
-        <div class="flex items-center gap-2 flex-1 overflow-hidden">
+        <div class="flex flex-1 items-center gap-2 overflow-hidden">
           <slot name="prefix" />
           <RenderIcon v-if="selectedOptionIcon" :icon="selectedOptionIcon" />
           <ComboboxInput
@@ -341,7 +325,7 @@ defineSlots<{
             @input="handleInputChange"
             @focus="handleFocus"
             @blur="handleBlur"
-            class="bg-transparent p-0 focus:outline-0 border-0 focus:border-0 focus:ring-0 text-base text-ink-gray-8 h-full placeholder:text-ink-gray-4 w-full"
+            class="h-full w-full border-0 bg-transparent p-0 text-base text-ink-gray-8 placeholder:text-ink-gray-4 focus:border-0 focus:outline-0 focus:ring-0"
             :placeholder="placeholder || ''"
             :disabled="disabled"
             autocomplete="off"
@@ -353,7 +337,7 @@ defineSlots<{
       </ComboboxAnchor>
       <ComboboxPortal>
         <ComboboxContent
-          class="z-10 min-w-[--reka-combobox-trigger-width] mt-1 bg-surface-modal overflow-hidden rounded-lg shadow-2xl"
+          class="z-10 mt-1 min-w-[--reka-combobox-trigger-width] overflow-hidden rounded-lg bg-surface-modal shadow-2xl"
           position="popper"
           @openAutoFocus.prevent
           @closeAutoFocus.prevent
@@ -363,18 +347,13 @@ defineSlots<{
             class="max-h-60 overflow-auto pb-1.5"
             :class="{ 'px-1.5 pt-1.5': !isGroup(filteredOptions[0]) }"
           >
-            <ComboboxEmpty
-              class="text-ink-gray-5 text-base text-center py-1.5 px-2.5"
-            >
-              {{ searchTerm ? `No results found for "${searchTerm}"` : "No results found" }}
+            <ComboboxEmpty class="px-2.5 py-1.5 text-center text-base text-ink-gray-5">
+              {{ searchTerm ? `No results found for "${searchTerm}"` : 'No results found' }}
             </ComboboxEmpty>
-            <template
-              v-for="(optionOrGroup, index) in filteredOptions"
-              :key="index"
-            >
+            <template v-for="(optionOrGroup, index) in filteredOptions" :key="index">
               <ComboboxGroup class="px-1.5" v-if="isGroup(optionOrGroup)">
                 <ComboboxLabel
-                  class="px-2.5 pt-3 pb-1.5 text-sm font-medium text-ink-gray-5 sticky top-0 bg-surface-modal z-10"
+                  class="sticky top-0 z-10 bg-surface-modal px-2.5 pb-1.5 pt-3 text-sm font-medium text-ink-gray-5"
                 >
                   {{ optionOrGroup.group }}
                 </ComboboxLabel>
@@ -383,7 +362,7 @@ defineSlots<{
                   :key="`${index}-${idx}`"
                   :value="getKey(option)"
                   :disabled="isDisabled(option)"
-                  class="text-base leading-none text-ink-gray-7 rounded flex items-center h-7 px-2.5 py-1.5 relative select-none data-[disabled]:opacity-50 data-[disabled]:pointer-events-none data-[highlighted]:outline-none data-[highlighted]:bg-surface-gray-3"
+                  class="relative flex h-7 select-none items-center rounded px-2.5 py-1.5 text-base leading-none text-ink-gray-7 data-[disabled]:pointer-events-none data-[highlighted]:bg-surface-gray-3 data-[disabled]:opacity-50 data-[highlighted]:outline-none"
                 >
                   <slot
                     v-if="getSlotName(option)"
@@ -396,12 +375,12 @@ defineSlots<{
                     :is="getRenderFunction(option)"
                   />
                   <template v-else>
-                    <span class="flex items-center gap-2 pr-6 flex-1">
+                    <span class="flex flex-1 items-center gap-2 pr-6">
                       <RenderIcon :icon="getIcon(option)" />
                       {{ getLabel(option) }}
                     </span>
                     <ComboboxItemIndicator
-                      class="absolute right-0 w-6 inline-flex items-center justify-center"
+                      class="absolute right-0 inline-flex w-6 items-center justify-center"
                     >
                       <LucideCheck class="size-4" />
                     </ComboboxItemIndicator>
@@ -413,7 +392,7 @@ defineSlots<{
                 :key="index"
                 :value="getKey(optionOrGroup)"
                 :disabled="isDisabled(optionOrGroup)"
-                class="text-base leading-none text-ink-gray-7 rounded flex items-center h-7 px-2.5 py-1.5 relative select-none data-[disabled]:opacity-50 data-[disabled]:pointer-events-none data-[highlighted]:outline-none data-[highlighted]:bg-surface-gray-3"
+                class="relative flex h-7 select-none items-center rounded px-2.5 py-1.5 text-base leading-none text-ink-gray-7 data-[disabled]:pointer-events-none data-[highlighted]:bg-surface-gray-3 data-[disabled]:opacity-50 data-[highlighted]:outline-none"
               >
                 <slot
                   v-if="getSlotName(optionOrGroup)"
@@ -426,15 +405,12 @@ defineSlots<{
                   :is="getRenderFunction(optionOrGroup)"
                 />
                 <template v-else>
-                  <span class="flex items-center gap-2 pr-6 flex-1">
-                    <RenderIcon
-                      v-if="getIcon(optionOrGroup)"
-                      :icon="getIcon(optionOrGroup)"
-                    />
+                  <span class="flex flex-1 items-center gap-2 pr-6">
+                    <RenderIcon v-if="getIcon(optionOrGroup)" :icon="getIcon(optionOrGroup)" />
                     {{ getLabel(optionOrGroup) }}
                   </span>
                   <ComboboxItemIndicator
-                    class="absolute right-0 w-6 inline-flex items-center justify-center"
+                    class="absolute right-0 inline-flex w-6 items-center justify-center"
                   >
                     <LucideCheck class="h-4 w-4" />
                   </ComboboxItemIndicator>

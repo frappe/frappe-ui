@@ -13,11 +13,7 @@ backend so there is no need to specify the url. Instead you only define
 ```vue
 <template>
   <div class="space-y-4">
-    <div
-      class="flex items-center justify-between"
-      v-for="todo in todos.data"
-      :key="todo.name"
-    >
+    <div class="flex items-center justify-between" v-for="todo in todos.data" :key="todo.name">
       <div>
         {{ todo.description }}
       </div>

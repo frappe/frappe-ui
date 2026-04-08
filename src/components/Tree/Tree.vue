@@ -1,33 +1,22 @@
 <template>
   <!-- Current Tree Node -->
-  <slot
-    name="node"
-    v-bind="{ node, hasChildren, isCollapsed, toggleCollapsed }"
-  >
+  <slot name="node" v-bind="{ node, hasChildren, isCollapsed, toggleCollapsed }">
     <div
-      class="flex items-center cursor-pointer gap-1"
+      class="flex cursor-pointer items-center gap-1"
       :style="{ height: options.rowHeight }"
       @click="toggleCollapsed"
     >
       <div ref="iconRef">
         <!-- slot to only override the Icon -->
         <slot name="icon" v-bind="{ hasChildren, isCollapsed }">
-          <FeatherIcon
-            v-if="hasChildren && !isCollapsed"
-            name="chevron-down"
-            class="h-3.5"
-          />
-          <FeatherIcon
-            v-else-if="hasChildren"
-            name="chevron-right"
-            class="h-3.5"
-          />
+          <FeatherIcon v-if="hasChildren && !isCollapsed" name="chevron-down" class="h-3.5" />
+          <FeatherIcon v-else-if="hasChildren" name="chevron-right" class="h-3.5" />
         </slot>
       </div>
 
       <!-- slot to only override the label -->
       <slot name="label" v-bind="{ node, hasChildren, isCollapsed }">
-        <div class="text-base truncate" :class="hasChildren ? '' : 'pl-3.5'">
+        <div class="truncate text-base" :class="hasChildren ? '' : 'pl-3.5'">
           {{ node.label }}
         </div>
       </slot>
@@ -46,10 +35,7 @@
         <Tree :node="child" :nodeKey="nodeKey" :options="options">
           <!-- Pass the parent slots to the children of current node -->
           <template #node="{ node, hasChildren, isCollapsed, toggleCollapsed }">
-            <slot
-              name="node"
-              v-bind="{ node, hasChildren, isCollapsed, toggleCollapsed }"
-            />
+            <slot name="node" v-bind="{ node, hasChildren, isCollapsed, toggleCollapsed }" />
           </template>
 
           <template #icon="{ hasChildren, isCollapsed }">
@@ -67,6 +53,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+
 import FeatherIcon from '../FeatherIcon.vue'
 import type { TreeNode, TreeProps } from './types'
 

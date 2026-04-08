@@ -3,8 +3,9 @@
  */
 
 import { ref } from 'vue'
-import { useCall } from '../index'
+
 import { url, waitUntilValueChanges } from '../../mocks/utils'
+import { useCall } from '../index'
 
 describe('msw works', () => {
   it('ping responds with pong', async () => {
@@ -63,9 +64,7 @@ describe('useCall', () => {
 
     expect(errorCall.loading).toBe(false)
     expect(errorCall.error).toBeInstanceOf(Error)
-    expect(errorCall.error.message).toEqual(
-      'ServerError: Internal Server Error occurred',
-    )
+    expect(errorCall.error.message).toEqual('ServerError: Internal Server Error occurred')
     expect(errorCall.data).toBe(null)
     expect(onError).toHaveBeenCalledWith(errorCall.error)
   })

@@ -1,6 +1,6 @@
 <script setup>
-import { ref } from 'vue'
 import { Calendar } from 'frappe-ui'
+import { ref } from 'vue'
 
 const config = {
   defaultMode: 'Month',

@@ -1,15 +1,15 @@
 <template>
   <div
     v-if="!isSidebarCollapsed"
-    class="flex flex-col gap-3 shadow-sm rounded-lg py-2.5 px-3 bg-surface-white text-base"
+    class="flex flex-col gap-3 rounded-lg bg-surface-white px-3 py-2.5 text-base shadow-sm"
   >
     <div class="flex flex-col gap-1">
       <slot>
-        <div class="inline-flex gap-2 items-center font-medium">
+        <div class="inline-flex items-center gap-2 font-medium">
           <FeatherIcon class="h-4" name="info" />
           Loved the demo?
         </div>
-        <div class="text-ink-gray-7 text-p-sm">
+        <div class="text-p-sm text-ink-gray-7">
           {{ `Try ${appName} for free with a 14-day trial.` }}
         </div>
       </slot>
@@ -21,7 +21,7 @@
     </Button>
   </div>
   <Button v-else @click="signupNow">
-    <LightningIcon class="h-4 my-0.5 shrink-0" />
+    <LightningIcon class="my-0.5 h-4 shrink-0" />
   </Button>
 </template>
 <script setup>

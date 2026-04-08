@@ -2,7 +2,7 @@
   <DialogRoot v-model:open="isOpen" @update:open="handleOpenChange">
     <DialogPortal>
       <DialogOverlay
-        class="fixed inset-0 bg-black-overlay-200 dark:bg-black-overlay-700 overflow-y-auto dialog-overlay outline-none"
+        class="dialog-overlay fixed inset-0 overflow-y-auto bg-black-overlay-200 outline-none dark:bg-black-overlay-700"
         :data-dialog="options.title"
         @after-leave="$emit('after-leave')"
       >
@@ -12,7 +12,7 @@
           :style="dialogPositionStyles"
         >
           <DialogContent
-            class="my-8 inline-block w-full transform overflow-hidden rounded-xl bg-surface-modal text-left align-middle shadow-xl dialog-content focus-visible:outline-none"
+            class="dialog-content my-8 inline-block w-full transform overflow-hidden rounded-xl bg-surface-modal text-left align-middle shadow-xl focus-visible:outline-none"
             :class="{
               'max-w-7xl': options.size === '7xl',
               'max-w-6xl': options.size === '6xl',
@@ -57,9 +57,7 @@
                             </div>
                             <DialogTitle as="header">
                               <slot name="body-title">
-                                <h3
-                                  class="text-2xl font-semibold leading-6 text-ink-gray-9"
-                                >
+                                <h3 class="text-2xl font-semibold leading-6 text-ink-gray-9">
                                   {{ options.title || 'Untitled' }}
                                 </h3>
                               </slot>
@@ -86,10 +84,7 @@
                   </div>
                 </div>
               </slot>
-              <div
-                class="px-4 pb-7 pt-4 sm:px-6"
-                v-if="actions.length || $slots.actions"
-              >
+              <div class="px-4 pb-7 pt-4 sm:px-6" v-if="actions.length || $slots.actions">
                 <slot name="actions" v-bind="{ close }">
                   <div class="space-y-2">
                     <Button
@@ -123,15 +118,11 @@ import {
   DialogClose,
 } from 'reka-ui'
 import { computed, reactive } from 'vue'
+import LucideX from '~icons/lucide/x'
+
 import { Button } from '../Button'
 import FeatherIcon from '../FeatherIcon.vue'
-import LucideX from '~icons/lucide/x'
-import type {
-  DialogProps,
-  DialogIcon,
-  DialogAction,
-  DialogActionContext,
-} from './types'
+import type { DialogProps, DialogIcon, DialogAction, DialogActionContext } from './types'
 
 // Type for dialog action with reactive loading state
 type ReactiveDialogAction = DialogAction & {
@@ -170,8 +161,7 @@ const actions = computed((): ReactiveDialogAction[] => {
               if (action.onClick) {
                 // deprecated: uncomment this when we remove the backwards compatibility
                 // let context: DialogActionContext = { close }
-                type BackwardsCompatibleDialogActionContext = (() => void) &
-                  DialogActionContext
+                type BackwardsCompatibleDialogActionContext = (() => void) & DialogActionContext
 
                 let backwardsCompatibleContext = (() => {
                   console.warn(
@@ -265,7 +255,7 @@ const dialogIconClasses = computed(() => {
 
 const slots = defineSlots<{
   /** Main body content of the dialog, overrides body-header and body-content */
-  body?: () => any
+  'body'?: () => any
 
   /** Header section inside the dialog body */
   'body-header'?: () => any
@@ -277,7 +267,7 @@ const slots = defineSlots<{
   'body-content'?: () => any
 
   /** Actions section at the bottom of the dialog; exposes `{ close }` */
-  actions?: (scope: { close: () => void }) => any
+  'actions'?: (scope: { close: () => void }) => any
 }>()
 </script>
 

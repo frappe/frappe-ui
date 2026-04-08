@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { state } from '../../state'
 import { useData, useRoute } from 'vitepress'
-
+import { computed } from 'vue'
 import LucideLeft from '~icons/lucide/arrow-left'
 import LucideRight from '~icons/lucide/arrow-right'
+
+import { state } from '../../state'
 
 const route = useRoute()
 const { frontmatter } = useData()
@@ -47,7 +47,7 @@ const subtleMdLink =
 </script>
 
 <template>
-  <div class="flex justify-between gap-5 mt-10" v-if="visible">
+  <div class="mt-10 flex justify-between gap-5" v-if="visible">
     <a v-if="prevLink" :href="prevLink.link" :class="subtleMdLink">
       <LucideLeft class="h-4 w-4" />
       {{ prevLink.text }}

@@ -49,7 +49,7 @@ export default {
           }
         })
         .concat([{ label: 'html', value: 'xml' }])
-        .sort((a, b) => a.label.localeCompare(b.label))
+        .toSorted((a, b) => a.label.localeCompare(b.label))
     },
   },
 }
@@ -100,9 +100,10 @@ export default {
 .ProseMirror pre {
   background: #0d0d0d;
   color: #fff;
-  font-family: ui-monospace, Menlo, Monaco, 'Cascadia Mono', 'Segoe UI Mono',
-    'Roboto Mono', 'Oxygen Mono', 'Ubuntu Mono', 'Source Code Pro', 'Fira Mono',
-    'Droid Sans Mono', 'Consolas', 'Courier New', monospace;
+  font-family:
+    ui-monospace, Menlo, Monaco, 'Cascadia Mono', 'Segoe UI Mono', 'Roboto Mono', 'Oxygen Mono',
+    'Ubuntu Mono', 'Source Code Pro', 'Fira Mono', 'Droid Sans Mono', 'Consolas', 'Courier New',
+    monospace;
   padding: 0.75rem 1rem;
   border-radius: 0.75rem;
   caret-color: #fff;

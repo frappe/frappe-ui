@@ -11,27 +11,25 @@
       <template v-for="(part, idx) in parsedParts" :key="idx + '-' + part.raw">
         <!-- Explicit modifier icons -->
         <span v-if="part.type === 'cmd'">
-          <LucideCommand class="w-3 h-3" aria-label="Command" />
+          <LucideCommand class="h-3 w-3" aria-label="Command" />
         </span>
         <span v-else-if="part.type === 'shift'">
-          <LucideShift class="w-3 h-3" aria-label="Shift" />
+          <LucideShift class="h-3 w-3" aria-label="Shift" />
         </span>
         <span v-else-if="part.type === 'alt'">
-          <LucideAlt class="w-3 h-3" aria-label="Option" />
+          <LucideAlt class="h-3 w-3" aria-label="Option" />
         </span>
         <!-- Non-modifier key -->
         <span v-else>
           <component
             v-if="iconFor(part)"
             :is="iconFor(part)"
-            class="w-3 h-3"
+            class="h-3 w-3"
             :aria-label="part.display"
           />
-          <span
-            v-else
-            class="font-mono leading-none tracking-wide uppercase text-[10px]"
-            >{{ part.display }}</span
-          >
+          <span v-else class="font-mono text-[10px] uppercase leading-none tracking-wide">{{
+            part.display
+          }}</span>
         </span>
         <!-- + separator (visually): hidden from screen readers because ariaLabel combines sequence -->
         <span
@@ -45,23 +43,21 @@
     <!-- Backward compatibility path (legacy boolean props + slot) -->
     <template v-else>
       <span v-if="ctrl || meta">
-        <LucideCommand v-if="isMac" class="w-3 h-3" aria-label="Command" />
+        <LucideCommand v-if="isMac" class="h-3 w-3" aria-label="Command" />
         <span v-else class="font-mono text-[10px] leading-none">Ctrl</span>
       </span>
-      <span v-if="shift"
-        ><LucideShift class="w-3 h-3" aria-label="Shift"
-      /></span>
-      <span v-if="alt"><LucideAlt class="w-3 h-3" aria-label="Option" /></span>
+      <span v-if="shift"><LucideShift class="h-3 w-3" aria-label="Shift" /></span>
+      <span v-if="alt"><LucideAlt class="h-3 w-3" aria-label="Option" /></span>
       <slot></slot>
     </template>
   </div>
   <!-- Alternative combos (equivalents) rendered alongside -->
   <template v-if="altCombos && altCombos.length">
-    <span class="inline-flex items-center gap-1 ml-1">
+    <span class="ml-1 inline-flex items-center gap-1">
       <div
         v-for="(alt, i) in altCombos"
         :key="'alt-' + i + alt"
-        class="inline-flex items-center gap-0.5 text-sm bg-surface-gray-2 rounded-sm text-ink-gray-5 py-0.5 px-1"
+        class="inline-flex items-center gap-0.5 rounded-sm bg-surface-gray-2 px-1 py-0.5 text-sm text-ink-gray-5"
         :aria-label="'Alternative shortcut ' + alt"
       >
         <!-- Pass primitive boolean, not Ref -->
@@ -72,21 +68,20 @@
 </template>
 <script setup lang="ts">
 import { computed } from 'vue'
-import LucideCommand from '~icons/lucide/command'
 import LucideShift from '~icons/lucide/arrow-big-up'
-import LucideAlt from '~icons/lucide/option'
-import IconArrowUp from '~icons/lucide/arrow-up'
 import IconArrowDown from '~icons/lucide/arrow-down'
 import IconArrowLeft from '~icons/lucide/arrow-left'
 import IconArrowRight from '~icons/lucide/arrow-right'
+import IconArrowUp from '~icons/lucide/arrow-up'
+import LucideCommand from '~icons/lucide/command'
 import IconEnter from '~icons/lucide/corner-down-left'
 import IconBackspace from '~icons/lucide/delete'
+import LucideAlt from '~icons/lucide/option'
 
 // Robust mac detection (navigator.platform deprecated)
 const isMac = computed(() => {
   if (typeof navigator === 'undefined') return false
-  const p =
-    (navigator as any).userAgentData?.platform || navigator.platform || ''
+  const p = (navigator as any).userAgentData?.platform || navigator.platform || ''
   if (/Mac|iPod|iPhone|iPad/i.test(p)) return true
   return /Mac OS X|Macintosh|iPhone|iPad|iPod/i.test(navigator.userAgent)
 })
@@ -123,9 +118,7 @@ const showPlus = computed<boolean>(() => props.showPlus)
 
 // Dynamic root styling based on bg prop
 const rootClasses = computed(() =>
-  props.bg
-    ? 'bg-surface-gray-2 rounded-sm text-ink-gray-5 py-0.5 px-1'
-    : 'text-ink-gray-4',
+  props.bg ? 'bg-surface-gray-2 rounded-sm text-ink-gray-5 py-0.5 px-1' : 'text-ink-gray-4',
 )
 
 // Normalize one combo string (e.g. Mod+Shift+K)
@@ -133,45 +126,45 @@ function parseCombo(raw?: string): Part[] {
   if (!raw) return []
   // Maps input token (lowercased) to a canonical type (modifier) or leaves as key.
   const aliasMap: Record<string, string> = {
-    mod: isMac.value ? 'cmd' : 'ctrl',
-    command: 'cmd',
-    cmd: 'cmd',
+    'mod': isMac.value ? 'cmd' : 'ctrl',
+    'command': 'cmd',
+    'cmd': 'cmd',
     '⌘': 'cmd',
-    control: 'ctrl',
-    ctrl: 'ctrl',
-    option: 'alt',
-    opt: 'alt',
-    alt: 'alt',
+    'control': 'ctrl',
+    'ctrl': 'ctrl',
+    'option': 'alt',
+    'opt': 'alt',
+    'alt': 'alt',
     '⌥': 'alt',
-    shift: 'shift',
+    'shift': 'shift',
     '⇧': 'shift',
-    meta: isMac.value ? 'cmd' : 'win',
-    win: 'win',
-    windows: 'win',
+    'meta': isMac.value ? 'cmd' : 'win',
+    'win': 'win',
+    'windows': 'win',
   }
   const keyMap: Record<string, string> = {
-    esc: 'Esc',
-    escape: 'Esc',
-    enter: '↵',
-    return: '↵',
-    space: 'Space',
+    'esc': 'Esc',
+    'escape': 'Esc',
+    'enter': '↵',
+    'return': '↵',
+    'space': 'Space',
     ' ': 'Space',
-    tab: 'Tab',
-    backspace: '⌫',
-    delete: '⌦',
-    del: '⌦',
-    up: '↑',
-    arrowup: '↑',
-    down: '↓',
-    arrowdown: '↓',
-    left: '←',
-    arrowleft: '←',
-    right: '→',
-    arrowright: '→',
-    pageup: 'PgUp',
-    pagedown: 'PgDn',
-    home: 'Home',
-    end: 'End',
+    'tab': 'Tab',
+    'backspace': '⌫',
+    'delete': '⌦',
+    'del': '⌦',
+    'up': '↑',
+    'arrowup': '↑',
+    'down': '↓',
+    'arrowdown': '↓',
+    'left': '←',
+    'arrowleft': '←',
+    'right': '→',
+    'arrowright': '→',
+    'pageup': 'PgUp',
+    'pagedown': 'PgDn',
+    'home': 'Home',
+    'end': 'End',
   }
 
   const result: Part[] = raw
@@ -222,8 +215,8 @@ const ariaLabel = computed(() => {
     '⌘': 'Command',
     '⇧': 'Shift',
     '⌥': 'Option',
-    Ctrl: 'Control',
-    Win: 'Windows',
+    'Ctrl': 'Control',
+    'Win': 'Windows',
     '↵': 'Enter',
     '⌫': 'Backspace',
     '⌦': 'Delete',
@@ -232,9 +225,7 @@ const ariaLabel = computed(() => {
     '←': 'Left Arrow',
     '→': 'Right Arrow',
   }
-  const seq = parsedParts.value
-    .map((p) => wordMap[p.display] || p.display)
-    .join(' + ')
+  const seq = parsedParts.value.map((p) => wordMap[p.display] || p.display).join(' + ')
   return 'Shortcut ' + seq
 })
 

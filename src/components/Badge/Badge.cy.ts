@@ -1,5 +1,6 @@
-import Badge from './Badge.vue'
 import { h } from 'vue'
+
+import Badge from './Badge.vue'
 
 describe('<Badge />', () => {
   it('renders default badge', () => {
@@ -239,7 +240,7 @@ describe('<Badge />', () => {
   it('renders prefix slot with correct size constraints', () => {
     const TestIcon = {
       render() {
-        return h('svg', { 'data-cy': 'prefix-icon', class: 'w-4 h-4' })
+        return h('svg', { 'data-cy': 'prefix-icon', 'class': 'w-4 h-4' })
       },
     }
 

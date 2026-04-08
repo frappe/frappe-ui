@@ -4,6 +4,7 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 </script>
+
 <PropsTable name="Switch" :data='[
   {
     "name": "size",
@@ -53,10 +54,11 @@
     "type": "boolean",
     "default": "false"
   }
-]'/> 
+]'/>
 
-## Emit Events 
- <EmitsTable :data='[
+## Emit Events
+
+<EmitsTable :data='[
   {
     "name": "update:modelValue",
     "description": "",
@@ -67,5 +69,4 @@
     "description": "",
     "type": "[value: boolean]"
   }
-]'/> 
-
+]'/>

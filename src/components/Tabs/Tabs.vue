@@ -1,14 +1,8 @@
 <script setup lang="ts">
-import {
-  TabsContent,
-  TabsIndicator,
-  TabsList,
-  TabsRoot,
-  TabsTrigger,
-} from 'reka-ui'
+import { TabsContent, TabsIndicator, TabsList, TabsRoot, TabsTrigger } from 'reka-ui'
+import { h } from 'vue'
 
 import type { TabProps } from './types'
-import { h } from 'vue'
 
 const props = defineProps<TabProps>()
 const model = defineModel<string | number>({ default: 0 })
@@ -35,13 +29,13 @@ defineSlots<{
 <template>
   <TabsRoot
     :as="props.as"
-    class="flex flex-1 overflow-hidden flex-col data-[orientation=vertical]:flex-row"
+    class="flex flex-1 flex-col overflow-hidden data-[orientation=vertical]:flex-row"
     :orientation="props.vertical ? 'vertical' : 'horizontal'"
     :default-value="props.tabs[0].label"
     v-model="model"
   >
     <TabsList
-      class="relative min-h-fit flex data-[orientation=vertical]:flex-col p-1 border-b data-[orientation=vertical]:border-e gap-5"
+      class="relative flex min-h-fit gap-5 border-b p-1 data-[orientation=vertical]:flex-col data-[orientation=vertical]:border-e"
       :class="{
         'overflow-x-auto overflow-y-hidden px-5': !props.vertical,
         'py-3': props.vertical,
@@ -51,7 +45,7 @@ defineSlots<{
         class="absolute rounded-full duration-300"
         :class="props.vertical ? indicatorYCss : indicatorXCss"
       >
-        <div class="w-full h-full bg-surface-gray-7" />
+        <div class="h-full w-full bg-surface-gray-7" />
       </TabsIndicator>
 
       <TabsTrigger as="template" v-for="(tab, i) in props.tabs" :value="i">
@@ -62,8 +56,7 @@ defineSlots<{
             class="flex items-center gap-1.5 text-base text-ink-gray-5 duration-300 ease-in-out hover:text-ink-gray-9 data-[state=active]:text-ink-gray-9"
             :class="{ 'px-2.5': props.vertical, 'py-2.5': !props.vertical }"
           >
-            <component v-if="tab.icon" :is="tab.icon" class="size-4">
-            </component>
+            <component v-if="tab.icon" :is="tab.icon" class="size-4"> </component>
 
             {{ tab.label }}
           </component>
@@ -71,11 +64,7 @@ defineSlots<{
       </TabsTrigger>
     </TabsList>
 
-    <TabsContent
-      v-for="(tab, i) in props.tabs"
-      :value="i"
-      class="flex flex-col overflow-auto"
-    >
+    <TabsContent v-for="(tab, i) in props.tabs" :value="i" class="flex flex-col overflow-auto">
       <slot name="tab-panel" v-bind="{ tab }" />
     </TabsContent>
   </TabsRoot>

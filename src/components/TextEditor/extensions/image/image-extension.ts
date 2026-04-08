@@ -1,15 +1,13 @@
-import {
-  Node as NodeExtension,
-  nodeInputRule,
-  mergeAttributes,
-} from '@tiptap/core'
+import { Node as NodeExtension, nodeInputRule, mergeAttributes } from '@tiptap/core'
+import type { Node } from '@tiptap/pm/model'
+import type { Transaction, EditorState } from '@tiptap/pm/state'
+import { Plugin, Selection } from '@tiptap/pm/state'
+import type { EditorView } from '@tiptap/pm/view'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
-import MediaNodeView from '../../components/MediaNodeView.vue'
-import { Plugin, Selection, Transaction, EditorState } from '@tiptap/pm/state'
-import { EditorView } from '@tiptap/pm/view'
-import { Node } from '@tiptap/pm/model'
+
 import { fileToBase64 } from '../../../../index'
-import { UploadedFile } from '../../../../utils/useFileUpload'
+import type { UploadedFile } from '../../../../utils/useFileUpload'
+import MediaNodeView from '../../components/MediaNodeView.vue'
 
 export const localFileMap = new Map()
 
@@ -155,10 +153,7 @@ export const ImageExtension = NodeExtension.create<ImageExtensionOptions>({
   },
 
   renderHTML({ HTMLAttributes }) {
-    return [
-      'img',
-      mergeAttributes(this.options.HTMLAttributes || {}, HTMLAttributes),
-    ]
+    return ['img', mergeAttributes(this.options.HTMLAttributes || {}, HTMLAttributes)]
   },
 
   addNodeView() {
@@ -237,31 +232,19 @@ export const ImageExtension = NodeExtension.create<ImageExtensionOptions>({
           // Find the node position
           let nodePos: number | null = null
           editor.view.state.doc.descendants((node, pos) => {
-            if (
-              node.type.name === 'image' &&
-              node.attrs.uploadId === uploadId
-            ) {
+            if (node.type.name === 'image' && node.attrs.uploadId === uploadId) {
               nodePos = pos
               return false
             }
           })
 
           if (nodePos === null) {
-            console.error(
-              'reuploadImage: could not find node with uploadId',
-              uploadId,
-            )
+            console.error('reuploadImage: could not find node with uploadId', uploadId)
             return false
           }
 
           // Re-run the upload using the stored file, replacing the node at its position
-          return uploadImageBase(
-            fileData.file,
-            editor.view,
-            nodePos,
-            this.options,
-            'replace',
-          )
+          return uploadImageBase(fileData.file, editor.view, nodePos, this.options, 'replace')
         },
     }
   },
@@ -293,8 +276,8 @@ export const ImageExtension = NodeExtension.create<ImageExtensionOptions>({
                 return false
               }
 
-              const images = Array.from(event.dataTransfer.files).filter(
-                (file) => /image/i.test(file.type),
+              const images = Array.from(event.dataTransfer.files).filter((file) =>
+                /image/i.test(file.type),
               )
 
               if (images.length === 0) {
@@ -335,10 +318,7 @@ export const ImageExtension = NodeExtension.create<ImageExtensionOptions>({
 
               for (let i = 0; i < clipboardItems.length; i++) {
                 const item = clipboardItems[i]
-                if (
-                  item.kind === 'file' &&
-                  item.type.indexOf('image/') !== -1
-                ) {
+                if (item.kind === 'file' && item.type.indexOf('image/') !== -1) {
                   const file = item.getAsFile()
                   if (file) {
                     images.push(file)
@@ -393,10 +373,7 @@ export const ImageExtension = NodeExtension.create<ImageExtensionOptions>({
   },
 })
 
-function findInsertPosition(
-  view: EditorView,
-  lastNodeId: string | null,
-): number | null {
+function findInsertPosition(view: EditorView, lastNodeId: string | null): number | null {
   if (!lastNodeId) {
     return null
   }
@@ -574,11 +551,7 @@ function findImageNodeBySource(
   })
 }
 
-function updateNodeWithDimensions(
-  src: string,
-  view: EditorView,
-  pos: number,
-): void {
+function updateNodeWithDimensions(src: string, view: EditorView, pos: number): void {
   getImageDimensions(src)
     .then((dimensions) => {
       const node = view.state.doc.nodeAt(pos)
@@ -601,9 +574,7 @@ function updateNodeWithDimensions(
     })
 }
 
-function getImageDimensions(
-  src: string,
-): Promise<{ width: number; height: number }> {
+function getImageDimensions(src: string): Promise<{ width: number; height: number }> {
   return new Promise((resolve, reject) => {
     const img = new Image()
     img.onload = () =>
@@ -639,9 +610,7 @@ export function processMultipleImages(
     const file = imageQueue.shift()
     if (!file) return
 
-    const currentPos = lastInsertedNodeId
-      ? findInsertPosition(view, lastInsertedNodeId)
-      : pos
+    const currentPos = lastInsertedNodeId ? findInsertPosition(view, lastInsertedNodeId) : pos
 
     uploadImageWithTracking(file, view, currentPos, options, (newNodeId) => {
       lastInsertedNodeId = newNodeId

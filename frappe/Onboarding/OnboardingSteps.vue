@@ -1,6 +1,6 @@
 <template>
-  <div class="flex flex-col justify-center items-center gap-1 mt-4 mb-7">
-    <component :is="logo" class="size-10 shrink-0 rounded mb-4" />
+  <div class="mb-7 mt-4 flex flex-col items-center justify-center gap-1">
+    <component :is="logo" class="mb-4 size-10 shrink-0 rounded" />
     <div class="text-base font-medium">
       {{ 'Welcome to ' + title }}
     </div>
@@ -9,7 +9,7 @@
     </div>
   </div>
   <div class="flex flex-col gap-2.5 overflow-hidden">
-    <div class="flex justify-between items-center py-0.5">
+    <div class="flex items-center justify-between py-0.5">
       <Badge
         :label="`${completedPercentage}% completed`"
         :theme="completedPercentage == 100 ? 'green' : 'orange'"
@@ -34,17 +34,12 @@
       <div
         v-for="step in steps"
         :key="step.title"
-        class="group w-full flex gap-2 justify-between items-center hover:bg-surface-gray-1 rounded px-2 py-1.5 cursor-pointer"
-        @click.stop="
-          () => !step.completed && !isDependent(step) && step.onClick()
-        "
+        class="group flex w-full cursor-pointer items-center justify-between gap-2 rounded px-2 py-1.5 hover:bg-surface-gray-1"
+        @click.stop="() => !step.completed && !isDependent(step) && step.onClick()"
       >
-        <component
-          :is="isDependent(step) ? Tooltip : 'div'"
-          :text="dependsOnTooltip(step)"
-        >
+        <component :is="isDependent(step) ? Tooltip : 'div'" :text="dependsOnTooltip(step)">
           <div
-            class="flex gap-2 items-center"
+            class="flex items-center gap-2"
             :class="[
               step.completed
                 ? 'text-ink-gray-5'
@@ -62,13 +57,13 @@
         <Button
           v-if="!step.completed && !isDependent(step)"
           :label="'Skip'"
-          class="!h-4 text-xs !text-ink-gray-6 hidden group-hover:flex"
+          class="hidden !h-4 text-xs !text-ink-gray-6 group-hover:flex"
           @click="() => skip(step.name, afterSkip)"
         />
         <Button
           v-else-if="!isDependent(step)"
           :label="'Reset'"
-          class="!h-4 text-xs !text-ink-gray-6 hidden group-hover:flex"
+          class="hidden !h-4 text-xs !text-ink-gray-6 group-hover:flex"
           @click.stop="() => reset(step.name, afterReset)"
         />
       </div>
@@ -76,10 +71,10 @@
   </div>
 </template>
 <script setup>
-import { useOnboarding } from './onboarding'
-import Tooltip from '../../src/components/Tooltip/Tooltip.vue'
-import Button from '../../src/components/Button/Button.vue'
 import Badge from '../../src/components/Badge/Badge.vue'
+import Button from '../../src/components/Button/Button.vue'
+import Tooltip from '../../src/components/Tooltip/Tooltip.vue'
+import { useOnboarding } from './onboarding'
 
 const props = defineProps({
   appName: {
@@ -132,14 +127,6 @@ function dependsOnTooltip(step) {
   return ''
 }
 
-const {
-  steps,
-  stepsCompleted,
-  totalSteps,
-  completedPercentage,
-  skip,
-  skipAll,
-  reset,
-  resetAll,
-} = useOnboarding(props.appName)
+const { steps, stepsCompleted, totalSteps, completedPercentage, skip, skipAll, reset, resetAll } =
+  useOnboarding(props.appName)
 </script>

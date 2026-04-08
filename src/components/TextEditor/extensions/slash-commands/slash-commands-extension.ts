@@ -1,30 +1,28 @@
-import { Editor, Range } from '@tiptap/core'
+import type { Editor, Range } from '@tiptap/core'
 import { PluginKey } from '@tiptap/pm/state'
+import type { Component as VueComponent } from 'vue'
+import Code from '~icons/lucide/code'
+import GalleryVertical from '~icons/lucide/gallery-vertical'
+import Heading2 from '~icons/lucide/heading-2'
+import Heading3 from '~icons/lucide/heading-3'
+import Image from '~icons/lucide/image'
+import Link from '~icons/lucide/link'
+import List from '~icons/lucide/list'
+import ListTask from '~icons/lucide/list-checks'
+import ListOrdered from '~icons/lucide/list-ordered'
+import Minus from '~icons/lucide/minus'
+import Quote from '~icons/lucide/quote'
+import Table from '~icons/lucide/table-2'
+import TableOfContents from '~icons/lucide/table-of-contents'
+import Video from '~icons/lucide/video'
+
 import {
   createSuggestionExtension,
   type BaseSuggestionItem,
 } from '../suggestion/createSuggestionExtension'
 import SlashCommandsList from './SlashCommandsList.vue'
-import { Component as VueComponent } from 'vue'
 
-import Heading2 from '~icons/lucide/heading-2'
-import Heading3 from '~icons/lucide/heading-3'
-import List from '~icons/lucide/list'
-import ListOrdered from '~icons/lucide/list-ordered'
-import ListTask from '~icons/lucide/list-checks'
-import Code from '~icons/lucide/code'
-import Quote from '~icons/lucide/quote'
-import Image from '~icons/lucide/image'
-import Video from '~icons/lucide/video'
-import GalleryVertical from '~icons/lucide/gallery-vertical'
-import Link from '~icons/lucide/link'
-import Minus from '~icons/lucide/minus'
-import Table from '~icons/lucide/table-2'
-import TableOfContents from '~icons/lucide/table-of-contents'
-
-export const SlashCommandSuggestionKey = new PluginKey<any>(
-  'slashCommandSuggestion',
-)
+export const SlashCommandSuggestionKey = new PluginKey<any>('slashCommandSuggestion')
 
 export interface CommandItem extends BaseSuggestionItem {
   title: string
@@ -42,24 +40,14 @@ const getCommands = (): CommandItem[] => [
     title: 'Heading 2',
     icon: Heading2,
     command: ({ editor, range }: CommandExecutionProps) => {
-      editor
-        .chain()
-        .focus()
-        .deleteRange(range)
-        .setNode('heading', { level: 2 })
-        .run()
+      editor.chain().focus().deleteRange(range).setNode('heading', { level: 2 }).run()
     },
   },
   {
     title: 'Heading 3',
     icon: Heading3,
     command: ({ editor, range }: CommandExecutionProps) => {
-      editor
-        .chain()
-        .focus()
-        .deleteRange(range)
-        .setNode('heading', { level: 3 })
-        .run()
+      editor.chain().focus().deleteRange(range).setNode('heading', { level: 3 }).run()
     },
   },
   {
@@ -148,12 +136,7 @@ const getCommands = (): CommandItem[] => [
     title: 'Table of Contents',
     icon: TableOfContents,
     command: ({ editor, range }: CommandExecutionProps) => {
-      editor
-        .chain()
-        .focus()
-        .deleteRange(range)
-        .insertTableOfContentsNode()
-        .run()
+      editor.chain().focus().deleteRange(range).insertTableOfContentsNode().run()
     },
   },
 ]
@@ -164,9 +147,7 @@ export const SlashCommands = createSuggestionExtension<CommandItem>({
   pluginKey: SlashCommandSuggestionKey,
   items: ({ query }) => {
     const commands = getCommands()
-    return commands.filter((item) =>
-      item.title.toLowerCase().startsWith(query.toLowerCase()),
-    )
+    return commands.filter((item) => item.title.toLowerCase().startsWith(query.toLowerCase()))
   },
   command: ({ editor, range, props: item }) => {
     if (item && typeof item.command === 'function') {

@@ -1,30 +1,17 @@
 <script setup lang="ts">
-import type { Ref } from 'vue'
-import type { SearchResult } from 'minisearch'
-
-import MiniSearch from 'minisearch'
-import Mark from 'mark.js'
-
-import { useData } from 'vitepress'
 import { computedAsync, debouncedWatch } from '@vueuse/core'
-
-import {
-  markRaw,
-  nextTick,
-  onMounted,
-  ref,
-  shallowRef,
-  watch,
-  useTemplateRef,
-} from 'vue'
-
-import LucideX from '~icons/lucide/x'
-import LucideSearch from '~icons/lucide/search'
-import LucideCommand from '~icons/lucide/command'
+import Mark from 'mark.js'
+import type { SearchResult } from 'minisearch'
+import MiniSearch from 'minisearch'
+import { useData } from 'vitepress'
+import type { Ref } from 'vue'
+import { markRaw, nextTick, onMounted, ref, shallowRef, watch, useTemplateRef } from 'vue'
 import LucideArrowDown from '~icons/lucide/arrow-down'
-import LucideEnter from '~icons/lucide/corner-down-left'
-
 import LucideChevronRight from '~icons/lucide/chevron-right'
+import LucideCommand from '~icons/lucide/command'
+import LucideEnter from '~icons/lucide/corner-down-left'
+import LucideSearch from '~icons/lucide/search'
+import LucideX from '~icons/lucide/x'
 
 import { LRUCache } from './cache'
 
@@ -64,18 +51,15 @@ const mark = computedAsync(async () => {
 
 const searchIndex = computedAsync(async () =>
   markRaw(
-    MiniSearch.loadJSON<Result>(
-      (await searchIndexData.value?.[localeIndex.value]?.())?.default,
-      {
-        fields: ['title', 'titles', 'text'],
-        storeFields: ['title', 'titles'],
-        searchOptions: {
-          fuzzy: 0.2,
-          prefix: true,
-          boost: { title: 4, text: 2, titles: 1 },
-        },
+    MiniSearch.loadJSON<Result>((await searchIndexData.value?.[localeIndex.value]?.())?.default, {
+      fields: ['title', 'titles', 'text'],
+      storeFields: ['title', 'titles'],
+      searchOptions: {
+        fuzzy: 0.2,
+        prefix: true,
+        boost: { title: 4, text: 2, titles: 1 },
       },
-    ),
+    }),
   ),
 )
 
@@ -129,8 +113,7 @@ watch(filterText, () => {
 
 const move = (delta: number) => {
   if (!results.value.length) return
-  activeIndex.value =
-    (activeIndex.value + delta + results.value.length) % results.value.length
+  activeIndex.value = (activeIndex.value + delta + results.value.length) % results.value.length
 }
 
 const selectActive = () => {
@@ -143,11 +126,8 @@ const selectActive = () => {
 const formMarkRegex = (terms: Set<string>) => {
   return new RegExp(
     [...terms]
-      .sort((a, b) => b.length - a.length)
-      .map(
-        (t) =>
-          `(${t.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&').replace(/-/g, '\\x2d')})`,
-      )
+      .toSorted((a, b) => b.length - a.length)
+      .map((t) => `(${t.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&').replace(/-/g, '\\x2d')})`)
       .join('|'),
     'gi',
   )
@@ -172,7 +152,7 @@ const vScrollActive = {
 
 <template>
   <div
-    class="fixed inset-0 z-100 flex items-start justify-center bg-black/50 backdrop-blur-sm"
+    class="z-100 fixed inset-0 flex items-start justify-center bg-black/50 backdrop-blur-sm"
     @click.self="emits('close')"
   >
     <div
@@ -180,14 +160,14 @@ const vScrollActive = {
       @keydown.esc.prevent="emits('close')"
     >
       <!-- input -->
-      <div class="flex gap-2 items-center border-b border-outline-gray-2 p-3">
+      <div class="flex items-center gap-2 border-b border-outline-gray-2 p-3">
         <LucideSearch class="size-4" />
 
         <input
           ref="inputRef"
           v-model="filterText"
           placeholder="Search documentation"
-          class="w-full bg-transparent !outline-none !border-0 text-sm p-0 !ring-0"
+          class="w-full !border-0 bg-transparent p-0 text-sm !outline-none !ring-0"
           @keydown.down.prevent="move(1)"
           @keydown.up.prevent="move(-1)"
           @keydown.enter.prevent="selectActive"
@@ -206,7 +186,7 @@ const vScrollActive = {
       <!-- results -->
       <ul
         ref="resultsEl"
-        class="max-h-[55vh] overflow-auto scrollbar"
+        class="scrollbar max-h-[55vh] overflow-auto"
         :class="{ 'border-b p-2': results.length > 0 }"
       >
         <a
@@ -214,9 +194,9 @@ const vScrollActive = {
           :key="p.id"
           :aria-selected="i === activeIndex"
           :href="p.id"
-          class="flex gap-1 items-center text-ink-gray-6"
+          class="flex items-center gap-1 text-ink-gray-6"
           :class="[
-            'p-2 cursor-pointer text-sm rounded',
+            'cursor-pointer rounded p-2 text-sm',
             i === activeIndex ? 'bg-surface-gray-2 text-ink-gray-9' : '',
           ]"
           @mouseenter="activeIndex = i"
@@ -232,17 +212,14 @@ const vScrollActive = {
         </a>
       </ul>
 
-      <div
-        v-if="filterText && !results.length && showNoResults"
-        class="my-8 text-center text-sm"
-      >
+      <div v-if="filterText && !results.length && showNoResults" class="my-8 text-center text-sm">
         No results for "<b>{{ filterText }}</b
         >"
       </div>
 
       <!-- kb helpers -->
       <div
-        class="flex items-center gap-2 text-ink-gray-6 [&>kbd]:bg-surface-gray-2 [&>kbd]:p-1 [&>kbd]:rounded-sm p-2"
+        class="flex items-center gap-2 p-2 text-ink-gray-6 [&>kbd]:rounded-sm [&>kbd]:bg-surface-gray-2 [&>kbd]:p-1"
       >
         <kbd> <LucideArrowDown class="size-4 text-ink-gray-5" /> </kbd>
         <kbd>
@@ -254,7 +231,7 @@ const vScrollActive = {
         <span class="mr-3">to select</span>
         <kbd> esc </kbd>
         <span> to close</span>
-        <kbd class="flex gap-1 items-center ml-auto">
+        <kbd class="ml-auto flex items-center gap-1">
           <LucideCommand class="size-4 text-ink-gray-5" />
           K
         </kbd>

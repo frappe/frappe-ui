@@ -1,6 +1,7 @@
-import Sidebar from './Sidebar.vue'
 import { h } from 'vue'
 import LucideBox from '~icons/lucide/box'
+
+import Sidebar from './Sidebar.vue'
 import SidebarHeader from './SidebarHeader.vue'
 
 const header = {

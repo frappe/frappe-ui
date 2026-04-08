@@ -31,7 +31,7 @@ export function isValidUrl(url: string): boolean {
   // (alphanumeric, -, _, ., /, #, ?, =, &, %).
   // This prevents colons (avoiding 'javascript:' like schemes) and other problematic
   // characters like spaces, (, ), !, {, }.
-  if (/^[\w\-]([\w\-./#?=&%]*)$/i.test(url)) {
+  if (/^[\w-]([\w\-./#?=&%]*)$/i.test(url)) {
     return true
   }
 

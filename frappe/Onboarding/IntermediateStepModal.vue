@@ -5,15 +5,9 @@
     </template>
     <template #body-content>
       <slot>
-        <div class="flex flex-col gap-2 text-ink-gray-9 text-base">
+        <div class="flex flex-col gap-2 text-base text-ink-gray-9">
           <div v-if="currentStep.message">{{ currentStep.message }}</div>
-          <video
-            v-if="currentStep.videoURL"
-            class="w-full rounded"
-            controls
-            autoplay
-            muted
-          >
+          <video v-if="currentStep.videoURL" class="w-full rounded" controls autoplay muted>
             <source :src="currentStep.videoURL" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
@@ -26,8 +20,9 @@
   </Dialog>
 </template>
 <script setup>
-import { Dialog } from '../../src/components/Dialog'
 import { computed } from 'vue'
+
+import { Dialog } from '../../src/components/Dialog'
 
 const props = defineProps({
   currentStep: {

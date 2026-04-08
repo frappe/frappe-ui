@@ -1,10 +1,4 @@
-import {
-  watch,
-  getCurrentInstance,
-  onBeforeUnmount,
-  type App,
-  type WatchStopHandle,
-} from 'vue'
+import { watch, getCurrentInstance, onBeforeUnmount, type App, type WatchStopHandle } from 'vue'
 
 interface PageMeta {
   title?: string

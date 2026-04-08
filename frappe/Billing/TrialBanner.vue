@@ -1,14 +1,14 @@
 <template>
   <div
     v-if="!isSidebarCollapsed && showBanner"
-    class="flex flex-col gap-3 shadow-sm rounded-lg py-2.5 px-3 bg-surface-modal text-base"
+    class="flex flex-col gap-3 rounded-lg bg-surface-modal px-3 py-2.5 text-base shadow-sm"
   >
     <div class="flex flex-col gap-1">
-      <div class="inline-flex text-ink-gray-9 gap-2 items-center font-medium">
+      <div class="inline-flex items-center gap-2 font-medium text-ink-gray-9">
         <FeatherIcon class="h-4" name="info" />
         {{ trialTitle }}
       </div>
-      <div class="text-ink-gray-7 text-p-sm">
+      <div class="text-p-sm text-ink-gray-7">
         {{ trialMessage }}
       </div>
     </div>
@@ -19,15 +19,16 @@
     </Button>
   </div>
   <Button v-else-if="isSidebarCollapsed && showBanner" @click="upgradePlan">
-    <LightningIcon class="h-4 my-0.5 shrink-0" />
+    <LightningIcon class="my-0.5 h-4 shrink-0" />
   </Button>
 </template>
 <script setup>
-import LightningIcon from '../../icons/LightningIcon.vue'
-import FeatherIcon from '../../src/components/FeatherIcon.vue'
-import { Button } from '../../src/components/Button'
-import { createResource } from '../../src/resources'
 import { ref, computed } from 'vue'
+
+import LightningIcon from '../../icons/LightningIcon.vue'
+import { Button } from '../../src/components/Button'
+import FeatherIcon from '../../src/components/FeatherIcon.vue'
+import { createResource } from '../../src/resources'
 
 const props = defineProps({
   isSidebarCollapsed: {
@@ -76,10 +77,7 @@ function calculateTrialEndDays(trialEndDate) {
 }
 
 function upgradePlan() {
-  window.open(
-    `${baseEndpoint.value}/dashboard/sites/${siteName.value}`,
-    '_blank',
-  )
+  window.open(`${baseEndpoint.value}/dashboard/sites/${siteName.value}`, '_blank')
   props.afterUpgrade?.()
 }
 </script>

@@ -1,11 +1,11 @@
 import { getTitleOptions } from './eChartOptions'
 import { formatValue } from './helpers'
-import { DonutChartConfig } from './types'
+import type { DonutChartConfig } from './types'
 
 export default function useDonutChartOptions(config: DonutChartConfig) {
   let data = config.data || []
 
-  data = data.sort((a, b) => {
+  data = data.toSorted((a, b) => {
     const aValue = a[config.valueColumn]
     const bValue = b[config.valueColumn]
     if (aValue === bValue) {
@@ -88,8 +88,7 @@ export default function useDonutChartOptions(config: DonutChartConfig) {
           itemGap: 12,
           formatter: function (name: string) {
             const labelIndex = labels.indexOf(name)
-            const percentage =
-              total > 0 ? (values[labelIndex] / total) * 100 : 0
+            const percentage = total > 0 ? (values[labelIndex] / total) * 100 : 0
             return `${name} (${percentage.toFixed(0)}%)`
           },
           textStyle: {

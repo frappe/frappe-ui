@@ -114,11 +114,7 @@ describe('<TextEditor />', () => {
     cy.get('.ProseMirror').type('{enter}')
 
     // Check insertion
-    cy.get('.ProseMirror span.mention').should(
-      'have.attr',
-      'data-label',
-      'John Doe',
-    )
+    cy.get('.ProseMirror span.mention').should('have.attr', 'data-label', 'John Doe')
     cy.get('.ProseMirror').should('contain.text', '@John Doe')
 
     // Verify suggestion list is hidden
@@ -145,11 +141,7 @@ describe('<TextEditor />', () => {
     cy.get('.ProseMirror').type('{enter}')
 
     // Verify insertion
-    cy.get('.ProseMirror span.tag-item').should(
-      'have.attr',
-      'data-tag-label',
-      'NewTag',
-    )
+    cy.get('.ProseMirror span.tag-item').should('have.attr', 'data-tag-label', 'NewTag')
     cy.get('.ProseMirror').should('contain.text', '#NewTag')
 
     // Verify list is hidden

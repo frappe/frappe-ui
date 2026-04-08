@@ -9,7 +9,7 @@
   />
   <span
     v-if="totalEventsCount > 2"
-    class="w-fit rounded-sm p-px px-2 mx-px text-base font-medium text-ink-gray-6 hover:cursor-pointer hover:bg-surface-gray-1"
+    class="mx-px w-fit rounded-sm p-px px-2 text-base font-medium text-ink-gray-6 hover:cursor-pointer hover:bg-surface-gray-1"
     @click="emit('showMoreEvents')"
   >
     {{ totalEventsCount - 2 }} more

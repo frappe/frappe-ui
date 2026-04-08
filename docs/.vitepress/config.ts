@@ -1,11 +1,13 @@
-import { defineConfig } from 'vitepress'
-import { lucideIcons } from '../../vite/lucideIcons'
-import path from 'path'
-import { meta } from './meta'
-import { getComponentItems } from './utils'
-import { transformerStyleToClass } from '@shikijs/transformers'
-import componentTransformer from './plugins/componentTransformer'
 import fs from 'fs'
+import path from 'path'
+
+import { transformerStyleToClass } from '@shikijs/transformers'
+import { defineConfig } from 'vitepress'
+
+import { lucideIcons } from '../../vite/lucideIcons'
+import { meta } from './meta'
+import componentTransformer from './plugins/componentTransformer'
+import { getComponentItems } from './utils'
 
 // needed for transforming shiki inline styles to classes
 const toClass = transformerStyleToClass({
@@ -32,10 +34,7 @@ export default defineConfig({
   head: [
     // newsreader font
     ['link', { rel: 'preconnect', href: 'https://fonts.googleapis.com' }],
-    [
-      'link',
-      { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
-    ],
+    ['link', { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' }],
     [
       'link',
       {
@@ -92,9 +91,7 @@ export default defineConfig({
       { text: 'Blog', link: '/blog' },
     ],
     // sidebar: sidebarConfig,
-    socialLinks: [
-      { icon: 'github', link: 'https://github.com/frappe/frappe-ui' },
-    ],
+    socialLinks: [{ icon: 'github', link: 'https://github.com/frappe/frappe-ui' }],
   },
   vite: {
     plugins: [lucideIcons()],

@@ -1,19 +1,13 @@
 <template>
   <div
-    class="inline-flex select-none items-center gap-1 rounded-full whitespace-nowrap"
+    class="inline-flex select-none items-center gap-1 whitespace-nowrap rounded-full"
     :class="classes"
   >
-    <div
-      :class="[props.size == 'lg' ? 'max-h-6' : 'max-h-4']"
-      v-if="$slots.prefix"
-    >
+    <div :class="[props.size == 'lg' ? 'max-h-6' : 'max-h-4']" v-if="$slots.prefix">
       <slot name="prefix"></slot>
     </div>
     <slot>{{ props.label?.toString() }}</slot>
-    <div
-      :class="[props.size == 'lg' ? 'max-h-6' : 'max-h-4']"
-      v-if="$slots.suffix"
-    >
+    <div :class="[props.size == 'lg' ? 'max-h-6' : 'max-h-4']" v-if="$slots.suffix">
       <slot name="suffix"></slot>
     </div>
   </div>
@@ -21,6 +15,7 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
+
 import type { BadgeProps } from './types'
 
 const props = withDefaults(defineProps<BadgeProps>(), {
@@ -73,7 +68,7 @@ const classes = computed(() => {
     sm: 'h-4 text-xs px-1.5',
     md: 'h-5 text-xs px-1.5',
     lg: 'h-6 text-sm px-2',
-		xl: 'h-7 text-base px-2',
+    xl: 'h-7 text-base px-2',
   }[props.size]
 
   return [variantClasses, sizeClasses]

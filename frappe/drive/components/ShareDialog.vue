@@ -3,10 +3,10 @@
     <template #body-main>
       <div class="p-4">
         <!-- Header -->
-        <div class="flex w-full justify-between gap-x-2 mb-4">
-          <div class="font-semibold text-2xl flex text-nowrap overflow-hidden">
+        <div class="mb-4 flex w-full justify-between gap-x-2">
+          <div class="flex overflow-hidden text-nowrap text-2xl font-semibold">
             Sharing "
-            <div class="truncate max-w-[80%]">
+            <div class="max-w-[80%] truncate">
               {{ entity?.title }}
             </div>
             "
@@ -22,7 +22,7 @@
             <Button
               v-else
               variant="ghost"
-              class="flex text-sm gap-1 items-center mb-3 cursor-pointer"
+              class="mb-3 flex cursor-pointer items-center gap-1 text-sm"
               label="Back"
               :icon-left="h(LucideArrowLeft, { class: 'size-4' })"
               @click="advanced = false"
@@ -39,49 +39,34 @@
         </div>
         <div v-else>
           <!-- General section -->
-          <div class="border-b pb-4 mb-4">
-            <div class="mb-2 text-ink-gray-5 font-medium text-base">
-              General Access
-            </div>
-            <div class="flex justify-between mt-3">
+          <div class="mb-4 border-b pb-4">
+            <div class="mb-2 text-base font-medium text-ink-gray-5">General Access</div>
+            <div class="mt-3 flex justify-between">
               <div class="flex flex-col gap-2">
                 <Select
                   v-model="generalAccessLevel"
                   :options="levelOptions"
-                  @update:model-value="
-                    (val) => updateGeneralAccess(val, generalPerms)
-                  "
+                  @update:model-value="(val) => updateGeneralAccess(val, generalPerms)"
                 >
                   <template #prefix>
-                    <component
-                      :is="generalAccessLevel.icon"
-                      class="mr-2 size-4 text-ink-gray-6"
-                    />
+                    <component :is="generalAccessLevel.icon" class="mr-2 size-4 text-ink-gray-6" />
                   </template>
                   <template #item-prefix="{ option }">
-                    <component
-                      :is="option.icon"
-                      class="size-4 text-ink-gray-6"
-                    />
+                    <component :is="option.icon" class="size-4 text-ink-gray-6" />
                   </template>
                 </Select>
-                <TeamSelector
-                  v-if="generalAccessLevel == 'team'"
-                  v-model="chosenTeam"
-                />
+                <TeamSelector v-if="generalAccessLevel == 'team'" v-model="chosenTeam" />
               </div>
               <Select
                 v-if="generalAccessLevel !== 'restricted'"
                 v-model="generalPerms"
                 :options="accessOptions"
-                @update:model-value="
-                  (val) => updateGeneralAccess(generalAccessLevel, val)
-                "
+                @update:model-value="(val) => updateGeneralAccess(generalAccessLevel, val)"
               />
             </div>
           </div>
           <!-- Members section -->
-          <div class="text-ink-gray-5 font-medium text-base mb-2">Members</div>
+          <div class="mb-2 text-base font-medium text-ink-gray-5">Members</div>
           <div class="flex gap-3 pb-2">
             <TagInput
               v-model="usersToAdd"
@@ -96,63 +81,44 @@
               "
               placeholder="Add people..."
             />
-            <Select
-              v-if="usersToAdd.length"
-              v-model="accessToAdd"
-              :options="accessOptions"
-            />
+            <Select v-if="usersToAdd.length" v-model="accessToAdd" :options="accessOptions" />
           </div>
 
           <div
             v-if="usersWithAccess.data"
-            class="flex flex-col gap-4 overflow-y-auto text-base max-h-64 py-4 mb-3 overflow-auto"
+            class="mb-3 flex max-h-64 flex-col gap-4 overflow-auto overflow-y-auto py-4 text-base"
           >
             <div
               v-for="(user, idx) in usersWithAccess.data"
               :key="user.name"
               class="flex items-center gap-3 pr-1"
             >
-              <Avatar
-                size="xl"
-                :label="user.user || user.email"
-                :image="user.user_image"
-              />
+              <Avatar size="xl" :label="user.user || user.email" :image="user.user_image" />
 
-              <div class="flex items-start flex-col gap-1">
-                <span class="font-medium text-base text-ink-gray-9">{{
+              <div class="flex flex-col items-start gap-1">
+                <span class="text-base font-medium text-ink-gray-9">{{
                   user.full_name || user.user || user.email
                 }}</span>
-                <span class="text-ink-gray-7 text-sm">{{
+                <span class="text-sm text-ink-gray-7">{{
                   user.full_name ? user.user || user.email : ''
                 }}</span>
               </div>
               <div class="ml-auto">
-                <span
-                  v-if="user.user == $store.state.user.id"
-                  class="mr-1 text-ink-gray-7"
-                >
-                  <div v-if="user.user === entity.owner" class="flex gap-1">
-                    Owner (you)
-                  </div>
+                <span v-if="user.user == $store.state.user.id" class="mr-1 text-ink-gray-7">
+                  <div v-if="user.user === entity.owner" class="flex gap-1">Owner (you)</div>
                   <template v-else>You</template>
                 </span>
                 <Select
                   v-else-if="user.user !== entity.owner"
-                  :modelValue="
-                    user.write ? 'editor' : user.upload ? 'uploader' : 'reader'
-                  "
+                  :modelValue="user.write ? 'editor' : user.upload ? 'uploader' : 'reader'"
                   :options="[
                     ...accessOptions,
                     {
                       group: true,
-                      options: [
-                        { value: 'remove', label: 'Remove', theme: 'red' },
-                      ],
+                      options: [{ value: 'remove', label: 'Remove', theme: 'red' }],
                     },
                   ]"
-                  @update:model-value="
-                    (val) => updatePermissions(user, val, entity.name, idx)
-                  "
+                  @update:model-value="(val) => updatePermissions(user, val, entity.name, idx)"
                 />
                 <span v-else class="flex items-center gap-1 text-ink-gray-5">
                   Owner
@@ -162,15 +128,11 @@
             </div>
           </div>
           <div v-else class="flex min-h-[19.2vh] w-full">
-            <LoadingIndicator class="w-7 h-auto text-ink-gray-7 mx-auto" />
+            <LoadingIndicator class="mx-auto h-auto w-7 text-ink-gray-7" />
           </div>
-          <div class="w-full flex items-center justify-end">
+          <div class="flex w-full items-center justify-end">
             <div class="flex gap-2">
-              <Button
-                class="text-base"
-                variant="outline"
-                @click="getFileLink(entity)"
-              >
+              <Button class="text-base" variant="outline" @click="getFileLink(entity)">
                 <template #prefix>
                   <LucideLink2 class="w-4 text-ink-gray-6" />
                 </template>
@@ -191,31 +153,24 @@
 </template>
 <script setup>
 import { ref, computed, watch, markRaw, h } from 'vue'
-import {
-  Avatar,
-  Dialog,
-  LoadingIndicator,
-  createResource,
-  Switch,
-} from '../../../src'
-import Select from './Select/Select.vue'
-import TeamSelector from './TeamSelector.vue'
-import TagInput from './TagInput/TagInput.vue'
-import { getFileLink, dynamicList } from '../js/utils'
-
-import { usersWithAccess, updateAccess, allUsers } from '../js/resources'
-
+import LucideArrowLeft from '~icons/lucide/arrow-left'
 import LucideBuilding2 from '~icons/lucide/building-2'
 import LucideDiamond from '~icons/lucide/diamond'
-import LucideX from '~icons/lucide/x'
-import LucideLock from '~icons/lucide/lock'
-import LucideSettings from '~icons/lucide/settings'
-import LucideArrowLeft from '~icons/lucide/arrow-left'
-import LucideGlobe2 from '~icons/lucide/globe-2'
 import LucideEye from '~icons/lucide/eye'
-import LucideUpload from '~icons/lucide/upload'
-import LucidePencil from '~icons/lucide/pencil'
+import LucideGlobe2 from '~icons/lucide/globe-2'
 import LucideLink2 from '~icons/lucide/link-2'
+import LucideLock from '~icons/lucide/lock'
+import LucidePencil from '~icons/lucide/pencil'
+import LucideSettings from '~icons/lucide/settings'
+import LucideUpload from '~icons/lucide/upload'
+import LucideX from '~icons/lucide/x'
+
+import { Avatar, Dialog, LoadingIndicator, createResource, Switch } from '../../../src'
+import { usersWithAccess, updateAccess, allUsers } from '../js/resources'
+import { getFileLink, dynamicList } from '../js/utils'
+import Select from './Select/Select.vue'
+import TagInput from './TagInput/TagInput.vue'
+import TeamSelector from './TeamSelector.vue'
 
 const open = defineModel()
 const props = defineProps({
@@ -274,17 +229,12 @@ const getGeneralAccess = createResource({
   }),
   onSuccess: (data) => {
     if (!data || !data.read) {
-      if (getGeneralAccess.params.user === 'Guest')
-        getGeneralAccess.fetch({ team: 1 })
+      if (getGeneralAccess.params.user === 'Guest') getGeneralAccess.fetch({ team: 1 })
       return
     }
     generalAccessLevel.value = getGeneralAccess.params.team ? 'team' : 'public'
     chosenTeam.value = data.team
-    generalPerms.value = data.write
-      ? 'editor'
-      : data.upload
-        ? 'upload'
-        : 'reader'
+    generalPerms.value = data.write ? 'editor' : data.upload ? 'upload' : 'reader'
   },
 })
 getGeneralAccess.fetch({ user: 'Guest' })
@@ -319,8 +269,7 @@ const updateGeneralAccess = (level, perms) => {
 watch(
   chosenTeam,
   (now, prev) =>
-    (prev || selectingTeam) &&
-    updateGeneralAccess(generalAccessLevel.value, generalPerms.value),
+    (prev || selectingTeam) && updateGeneralAccess(generalAccessLevel.value, generalPerms.value),
 )
 
 // Invite specific users
@@ -331,9 +280,7 @@ watch(
   [() => props.users.data, () => props.usersWithAccess.data],
   ([users, existingUsers]) => {
     if (!existingUsers || !users) return []
-    filteredUsers.value = users.filter(
-      (k) => !existingUsers.find(({ user }) => user === k.name),
-    )
+    filteredUsers.value = users.filter((k) => !existingUsers.find(({ user }) => user === k.name))
   },
   { immediate: true },
 )

@@ -2,7 +2,7 @@
   <label class="block" :class="labelClasses" :for="id">
     {{ label }}
     <template v-if="required">
-      <span class="text-ink-red-3 select-none" aria-hidden="true">*</span>
+      <span class="select-none text-ink-red-3" aria-hidden="true">*</span>
       <span class="sr-only">(required)</span>
     </template>
   </label>

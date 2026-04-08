@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import { Alert, Button } from 'frappe-ui'
+import { ref } from 'vue'
 
 const visible = ref(true)
 </script>

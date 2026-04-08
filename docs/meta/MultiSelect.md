@@ -4,6 +4,7 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 </script>
+
 <PropsTable name="MultiSelect" :data='[
   {
     "name": "placeholder",
@@ -43,10 +44,11 @@
     "type": "String[]",
     "default": "[]"
   }
-]'/> 
+]'/>
 
-## Slots 
- <SlotsTable :data='[
+## Slots
+
+<SlotsTable :data='[
   {
     "name": "option",
     "description": "Rendered for each option in the dropdown. Receives the option object.",
@@ -57,14 +59,14 @@
     "description": "Footer slot at the bottom of the dropdown. Receives helper functions `clearAll` and `selectAll`.",
     "type": "{ clearAll: () => void; selectAll: () => void; }"
   }
-]'/> 
+]'/>
 
-## Emit Events 
- <EmitsTable :data='[
+## Emit Events
+
+<EmitsTable :data='[
   {
     "name": "update:modelValue",
     "description": "",
     "type": "[value: String[]]"
   }
-]'/> 
-
+]'/>

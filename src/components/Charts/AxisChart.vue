@@ -4,9 +4,10 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+
 import useAxisChartOptions from './axisChartOptions'
 import ECharts from './ECharts.vue'
-import { AxisChartConfig } from './types'
+import type { AxisChartConfig } from './types'
 
 const props = defineProps<{ config: AxisChartConfig }>()
 

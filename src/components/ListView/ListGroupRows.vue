@@ -11,8 +11,9 @@
   </div>
 </template>
 <script setup>
-import ListRow from './ListRow.vue'
 import { inject } from 'vue'
+
+import ListRow from './ListRow.vue'
 
 const props = defineProps({
   group: {

@@ -1,6 +1,7 @@
 import { Extension } from '@tiptap/core'
 import { Plugin, PluginKey } from '@tiptap/pm/state'
 import { createApp, h } from 'vue'
+
 import ImageViewerModal from '../components/ImageViewerModal.vue'
 
 interface ImageInfo {
@@ -106,10 +107,7 @@ export default Extension.create({
                 if (node.type.name === 'image' && !foundImageNode) {
                   const domNode = view.nodeDOM(nodePos)
                   // Check if the event target is the DOM representation of this node or inside it
-                  if (
-                    domNode &&
-                    (domNode === event.target || domNode.contains(event.target))
-                  ) {
+                  if (domNode && (domNode === event.target || domNode.contains(event.target))) {
                     event.preventDefault()
                     extension.editor.commands.openImageViewer(node.attrs.src)
                     foundImageNode = true
@@ -139,7 +137,7 @@ function openImageViewerModal(images: ImageInfo[], initialIndex: number) {
   const app = createApp({
     render() {
       return h(ImageViewerModal, {
-        show: true,
+        'show': true,
         images, // Pass the collected image data
         initialIndex, // Pass the starting index
         'onUpdate:show': (value: boolean) => {

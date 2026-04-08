@@ -4,6 +4,7 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 </script>
+
 <PropsTable name="TextEditor" :data='[
   {
     "name": "content",
@@ -108,10 +109,11 @@
     "required": false,
     "type": "object"
   }
-]'/> 
+]'/>
 
-## Slots 
- <SlotsTable :data='[
+## Slots
+
+<SlotsTable :data='[
   {
     "name": "top",
     "description": "",
@@ -127,10 +129,11 @@
     "description": "",
     "type": "{ editor: { contentComponent: { uid: number; type: FunctionalComponent<{}, {}, any, {}> | { [x: stri"
   }
-]'/> 
+]'/>
 
-## Emit Events 
- <EmitsTable :data='[
+## Emit Events
+
+<EmitsTable :data='[
   {
     "name": "change",
     "description": "",
@@ -151,5 +154,4 @@
     "description": "",
     "type": "[editor: object]"
   }
-]'/> 
-
+]'/>

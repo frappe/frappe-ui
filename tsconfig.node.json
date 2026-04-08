@@ -5,10 +5,5 @@
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true
   },
-  "include": [
-    "vite.config.ts",
-    "vitest.config.ts",
-    "vitest.setup.ts",
-    "src/mocks/**/*"
-  ]
+  "include": ["vite.config.ts", "vitest.config.ts", "vitest.setup.ts", "src/mocks/**/*"]
 }

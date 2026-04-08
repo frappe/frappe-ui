@@ -1,15 +1,7 @@
 <template>
-  <div
-    class="relative flex items-center"
-    :class="attrs.class"
-    :style="attrs.style"
-  >
+  <div class="relative flex items-center" :class="attrs.class" :style="attrs.style">
     <div
-      :class="[
-        'absolute inset-y-0 left-0 flex items-center',
-        textColor,
-        prefixClasses,
-      ]"
+      :class="['absolute inset-y-0 left-0 flex items-center', textColor, prefixClasses]"
       v-if="$slots.prefix"
     >
       <slot name="prefix"> </slot>
@@ -28,11 +20,7 @@
       v-bind="attrsWithoutClassStyle"
     />
     <div
-      :class="[
-        'absolute inset-y-0 right-0 flex items-center',
-        textColor,
-        suffixClasses,
-      ]"
+      :class="['absolute inset-y-0 right-0 flex items-center', textColor, suffixClasses]"
       v-if="$slots.suffix"
     >
       <slot name="suffix"> </slot>
@@ -42,6 +30,7 @@
 
 <script setup lang="ts">
 import { computed, useSlots, useAttrs, ref } from 'vue'
+
 import debounce from '../../utils/debounce'
 import type { TextInputProps } from './types'
 
@@ -92,26 +81,10 @@ const inputClasses = computed(() => {
   }[props.size]
 
   let paddingClasses = {
-    sm: [
-      'py-1.5',
-      slots.prefix ? 'pl-8' : 'pl-2',
-      slots.suffix ? 'pr-8' : 'pr-2',
-    ],
-    md: [
-      'py-1.5',
-      slots.prefix ? 'pl-9' : 'pl-2.5',
-      slots.suffix ? 'pr-9' : 'pr-2.5',
-    ],
-    lg: [
-      'py-1.5',
-      slots.prefix ? 'pl-10' : 'pl-3',
-      slots.suffix ? 'pr-10' : 'pr-3',
-    ],
-    xl: [
-      'py-1.5',
-      slots.prefix ? 'pl-10' : 'pl-3',
-      slots.suffix ? 'pr-10' : 'pr-3',
-    ],
+    sm: ['py-1.5', slots.prefix ? 'pl-8' : 'pl-2', slots.suffix ? 'pr-8' : 'pr-2'],
+    md: ['py-1.5', slots.prefix ? 'pl-9' : 'pl-2.5', slots.suffix ? 'pr-9' : 'pr-2.5'],
+    lg: ['py-1.5', slots.prefix ? 'pl-10' : 'pl-3', slots.suffix ? 'pr-10' : 'pr-3'],
+    xl: ['py-1.5', slots.prefix ? 'pl-10' : 'pl-3', slots.suffix ? 'pr-10' : 'pr-3'],
   }[props.size]
 
   let variant = props.disabled ? 'disabled' : props.variant
@@ -122,9 +95,7 @@ const inputClasses = computed(() => {
       'border border-outline-gray-2 bg-surface-white placeholder-ink-gray-4 hover:border-outline-gray-3 hover:shadow-sm focus:bg-surface-white focus:border-outline-gray-4 focus:shadow-sm focus:ring-0 focus-visible:ring-2 focus-visible:ring-outline-gray-3',
     disabled: [
       'border bg-surface-gray-1 placeholder-ink-gray-3',
-      props.variant === 'outline'
-        ? 'border-outline-gray-2'
-        : 'border-transparent',
+      props.variant === 'outline' ? 'border-outline-gray-2' : 'border-transparent',
     ],
     ghost: 'border-0 focus:ring-0 focus-visible:ring-0',
   }[variant]

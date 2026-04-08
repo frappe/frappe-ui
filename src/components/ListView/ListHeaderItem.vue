@@ -4,10 +4,7 @@
     class="group relative flex items-center"
     :class="item.align ? alignmentMap[item.align] : 'justify-between'"
   >
-    <div
-      class="flex items-center gap-2 truncate text-sm text-ink-gray-5"
-      :class="$attrs.class"
-    >
+    <div class="flex items-center gap-2 truncate text-sm text-ink-gray-5" :class="$attrs.class">
       <slot name="prefix" v-bind="{ item }" />
       <slot>
         <div class="truncate">
@@ -18,7 +15,7 @@
     </div>
     <slot v-if="list.options.resizeColumn" name="resizer" v-bind="{ item }">
       <div
-        class="flex h-4 absolute -right-2 w-2 cursor-col-resize justify-center"
+        class="absolute -right-2 flex h-4 w-2 cursor-col-resize justify-center"
         @mousedown="startResizing"
       >
         <div
@@ -31,9 +28,10 @@
 </template>
 
 <script setup>
-import { alignmentMap } from './utils'
 import { useDebounceFn } from '@vueuse/core'
 import { ref, computed, inject } from 'vue'
+
+import { alignmentMap } from './utils'
 
 const props = defineProps({
   item: {

@@ -18,8 +18,9 @@
   />
 </template>
 <script setup lang="ts">
-import { ref, useTemplateRef } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
+import { ref, useTemplateRef } from 'vue'
+
 import ImageGroupUploadDialog from '../extensions/image-group/ImageGroupUploadDialog.vue'
 
 const props = defineProps<{

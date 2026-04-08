@@ -1,10 +1,6 @@
 <script setup lang="ts">
 import { AxisChart, DonutChart, FunnelChart, NumberChart } from 'frappe-ui'
-
-import {
-  AxisChartConfig,
-  DonutChartConfig,
-} from 'frappe-ui/src/components/Charts/types'
+import type { AxisChartConfig, DonutChartConfig } from 'frappe-ui/src/components/Charts/types'
 
 import Story from '@/components/Story.vue'
 

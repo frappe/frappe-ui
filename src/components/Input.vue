@@ -1,15 +1,9 @@
 <template>
   <label :class="[type == 'checkbox' ? 'flex' : 'block', $attrs.class]" :style="$attrs.style">
-    <span
-      v-if="label && type != 'checkbox'"
-      class="mb-2 block text-sm leading-4 text-gray-700"
-    >
+    <span v-if="label && type != 'checkbox'" class="mb-2 block text-sm leading-4 text-gray-700">
       {{ label }}
     </span>
-    <div
-      class="relative flex"
-      :class="{ 'items-center': isNormalInput || type == 'select' }"
-    >
+    <div class="relative flex" :class="{ 'items-center': isNormalInput || type == 'select' }">
       <FeatherIcon
         v-if="iconLeft && type != 'checkbox'"
         :name="iconLeft"
@@ -70,10 +64,7 @@
         </option>
       </select>
     </div>
-    <span
-      v-if="label && type == 'checkbox'"
-      class="ml-2 inline-block text-base leading-4"
-    >
+    <span v-if="label && type == 'checkbox'" class="ml-2 inline-block text-base leading-4">
       {{ label }}
     </span>
   </label>
@@ -195,14 +186,7 @@ export default {
         .filter(Boolean)
     },
     isNormalInput() {
-      return [
-        'text',
-        'number',
-        'checkbox',
-        'email',
-        'password',
-        'date',
-      ].includes(this.type)
+      return ['text', 'number', 'checkbox', 'email', 'password', 'date'].includes(this.type)
     },
   },
 }

@@ -68,8 +68,7 @@ export function useFileUpload() {
   const result = computed(() => state.result)
 
   return {
-    upload: (file: File, options: UploadOptions = {}) =>
-      upload(file, options, state, reset),
+    upload: (file: File, options: UploadOptions = {}) => upload(file, options, state, reset),
     reset,
     state,
     isUploading,
@@ -141,9 +140,7 @@ async function upload(
 
         if (error) {
           let exception
-          let errorParts = [
-            [error.exc_type, error._error_message].filter(Boolean).join(' '),
-          ]
+          let errorParts = [[error.exc_type, error._error_message].filter(Boolean).join(' ')]
           if (error.exc) {
             exception = error.exc
             try {
@@ -153,9 +150,7 @@ async function upload(
             } catch (e) {}
           }
           let e = new Error(errorParts.join('\n'))
-          let messages = error._server_messages
-            ? JSON.parse(error._server_messages)
-            : []
+          let messages = error._server_messages ? JSON.parse(error._server_messages) : []
           messages = messages
             .map((m: string) => {
               try {
@@ -166,9 +161,7 @@ async function upload(
             })
             .filter(Boolean)
           if (!messages.length) {
-            messages = error._error_message
-              ? [error._error_message]
-              : ['Internal Server Error']
+            messages = error._error_message ? [error._error_message] : ['Internal Server Error']
           }
           e.message = messages.join('\n')
           state.error = e

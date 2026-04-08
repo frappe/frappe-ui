@@ -1,11 +1,10 @@
-import Tooltip from './Tooltip.vue'
-import Button from '../Button/Button.vue'
 import { h } from 'vue'
 
+import Button from '../Button/Button.vue'
+import Tooltip from './Tooltip.vue'
+
 const Comp = () =>
-  h(Tooltip, { text: 'some tooltip', hoverDelay: 0, placement: 'top' }, [
-    h(Button, {}, 'k'),
-  ])
+  h(Tooltip, { text: 'some tooltip', hoverDelay: 0, placement: 'top' }, [h(Button, {}, 'k')])
 
 describe('Tooltip', () => {
   it('Renders', () => {
@@ -22,10 +21,7 @@ describe('Tooltip', () => {
   })
 
   it('disabled prop', () => {
-    cy.mount(
-      h(Tooltip, { text: 'abc', disabled: true }, [h(Button, {}, 'k')]),
-      { disabled: true },
-    )
+    cy.mount(h(Tooltip, { text: 'abc', disabled: true }, [h(Button, {}, 'k')]), { disabled: true })
 
     cy.get('button').trigger('focus')
     cy.get('[role=tooltip]').should('not.exist')
@@ -55,9 +51,7 @@ describe('Tooltip', () => {
 
   it('arrowClass prop', () => {
     cy.mount(
-      h(Tooltip, { text: 'abc', hoverDelay: 0, arrowClass: 'fill-red-500' }, [
-        h(Button, {}, 'k'),
-      ]),
+      h(Tooltip, { text: 'abc', hoverDelay: 0, arrowClass: 'fill-red-500' }, [h(Button, {}, 'k')]),
     )
 
     cy.get('button').trigger('focus')

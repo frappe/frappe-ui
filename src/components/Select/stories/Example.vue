@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import { Select } from 'frappe-ui'
+import { ref } from 'vue'
 
 const value = ref('')
 const options = [
@@ -37,6 +37,6 @@ const options = [
 </script>
 
 <template>
-    <Select :options="options" v-model="value" />
-    {{ value }}
+  <Select :options="options" v-model="value" />
+  {{ value }}
 </template>

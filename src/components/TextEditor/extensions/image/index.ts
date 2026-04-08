@@ -1,5 +1,1 @@
-export {
-  ImageExtension,
-  type ImageExtensionOptions,
-  type SetImageOptions,
-} from './image-extension'
+export { ImageExtension, type ImageExtensionOptions, type SetImageOptions } from './image-extension'

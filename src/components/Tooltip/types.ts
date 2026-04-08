@@ -1,5 +1,5 @@
-import { type HTMLAttributes } from 'vue'
 import { type TooltipContentProps } from 'reka-ui'
+import { type HTMLAttributes } from 'vue'
 
 export interface TooltipProps {
   /**
@@ -28,4 +28,3 @@ export interface TooltipProps {
    */
   disabled?: boolean
 }
-

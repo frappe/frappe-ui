@@ -25,13 +25,12 @@ export function getCalendarDates(month, year) {
 
   function getBeforeDates(firstDay, leftPadding) {
     let allDates = getDatesAfter(firstDay, 0, leftPadding, -1)
-    allDates = allDates.reverse()
+    allDates = allDates.toReversed()
     return allDates
   }
 
   function getNextMonthDates(currentAndPreviousMonthDates) {
-    const numberofDaysInCalendar =
-      currentAndPreviousMonthDates.length > 35 ? 42 : 35
+    const numberofDaysInCalendar = currentAndPreviousMonthDates.length > 35 ? 42 : 35
     let lengthOfDates = currentAndPreviousMonthDates.length
     let lastDate = currentAndPreviousMonthDates[lengthOfDates - 1]
     let diff = numberofDaysInCalendar - lengthOfDates + 1
@@ -40,13 +39,7 @@ export function getCalendarDates(month, year) {
     return allDates
   }
 
-  function getDatesAfter(
-    date,
-    startIndex,
-    counter,
-    stepper = 1,
-    getNextMonthDates = false,
-  ) {
+  function getDatesAfter(date, startIndex, counter, stepper = 1, getNextMonthDates = false) {
     let allDates = []
     for (let index = startIndex; index < counter; index++) {
       let tempDate = new Date(
@@ -145,15 +138,13 @@ export function handleSeconds(time) {
 
 export function findOverlappingEventsCount(events) {
   // Sort events based on start time
-  events = events.sort((a, b) => a.startTime - b.startTime)
+  events = events.toSorted((a, b) => a.startTime - b.startTime)
 
   let hallNumber = 0
   const result = []
 
   for (const event of events) {
-    const availableHall = result.find(
-      (hall) => hall[hall.length - 1].endTime <= event.startTime,
-    )
+    const availableHall = result.find((hall) => hall[hall.length - 1].endTime <= event.startTime)
 
     if (availableHall) {
       availableHall.push(event)
@@ -164,15 +155,13 @@ export function findOverlappingEventsCount(events) {
   }
 
   // flattening halls and events
-  return result
-    .map((hall, idx) =>
-      hall.map((event, eventIdx) => ({
-        ...event,
-        hallNumber: idx,
-        idx: eventIdx,
-      })),
-    )
-    .flat()
+  return result.flatMap((hall, idx) =>
+    hall.map((event, eventIdx) => ({
+      ...event,
+      hallNumber: idx,
+      idx: eventIdx,
+    })),
+  )
 }
 
 // Helpers
@@ -471,8 +460,7 @@ export function getWeekendDays(config) {
       if (typeof d === 'number') return d
       if (typeof d === 'string') {
         const key = d.trim().toLowerCase()
-        if (_weekdayNameToIndex.hasOwnProperty(key))
-          return _weekdayNameToIndex[key]
+        if (_weekdayNameToIndex.hasOwnProperty(key)) return _weekdayNameToIndex[key]
       }
       return null
     })
@@ -498,8 +486,7 @@ export function getWeekMonthParts(weekDates) {
     const m = dt.getMonth()
     const y = dt.getFullYear()
     const key = `${y}-${m}`
-    if (!parts.find((p) => p.key === key))
-      parts.push({ key, month: m, year: y })
+    if (!parts.find((p) => p.key === key)) parts.push({ key, month: m, year: y })
   }
   return parts
 }

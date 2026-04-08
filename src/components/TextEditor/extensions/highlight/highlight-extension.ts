@@ -1,4 +1,5 @@
 import { Mark, mergeAttributes } from '@tiptap/core'
+
 import {
   getClosestNamedColor,
   highlightColorHexMap,
@@ -88,13 +89,8 @@ export const NamedHighlightExtension = Mark.create<HighlightOptions>({
           // Check for CSS custom property format in style attribute
           const style = element.getAttribute('style')
           if (style) {
-            const highlightMatch = style.match(
-              /background-color:\s*var\(--prose-highlight-(\w+)\)/,
-            )
-            if (
-              highlightMatch &&
-              this.options.colors.includes(highlightMatch[1])
-            ) {
+            const highlightMatch = style.match(/background-color:\s*var\(--prose-highlight-(\w+)\)/)
+            if (highlightMatch && this.options.colors.includes(highlightMatch[1])) {
               return highlightMatch[1]
             }
           }
@@ -115,10 +111,7 @@ export const NamedHighlightExtension = Mark.create<HighlightOptions>({
 
           // Try extracting from style attribute as fallback
           if (style) {
-            const extractedColor = extractHighlightColorFromStyle(
-              style,
-              this.options.colors,
-            )
+            const extractedColor = extractHighlightColorFromStyle(style, this.options.colors)
             if (extractedColor) {
               return extractedColor
             }
@@ -127,10 +120,7 @@ export const NamedHighlightExtension = Mark.create<HighlightOptions>({
           return null
         },
         renderHTML: (attributes) => {
-          if (
-            !attributes.color ||
-            !this.options.colors.includes(attributes.color)
-          ) {
+          if (!attributes.color || !this.options.colors.includes(attributes.color)) {
             return {}
           }
 
@@ -151,11 +141,7 @@ export const NamedHighlightExtension = Mark.create<HighlightOptions>({
   },
 
   renderHTML({ HTMLAttributes }) {
-    return [
-      'mark',
-      mergeAttributes(this.options.HTMLAttributes, HTMLAttributes),
-      0,
-    ]
+    return ['mark', mergeAttributes(this.options.HTMLAttributes, HTMLAttributes), 0]
   },
 
   addCommands() {
@@ -165,9 +151,7 @@ export const NamedHighlightExtension = Mark.create<HighlightOptions>({
         ({ chain, commands, editor, state }) => {
           // Validate that the color name is allowed
           if (!this.options.colors.includes(colorName)) {
-            console.warn(
-              `Highlight color "${colorName}" is not in the allowed colors list`,
-            )
+            console.warn(`Highlight color "${colorName}" is not in the allowed colors list`)
             return false
           }
 
@@ -181,12 +165,10 @@ export const NamedHighlightExtension = Mark.create<HighlightOptions>({
           }
 
           if (!empty) {
-            commandChain = commandChain
-              .setTextSelection(to)
-              .command(({ tr }) => {
-                tr.setStoredMarks([])
-                return true
-              })
+            commandChain = commandChain.setTextSelection(to).command(({ tr }) => {
+              tr.setStoredMarks([])
+              return true
+            })
           }
 
           return commandChain.focus().run()
@@ -196,35 +178,26 @@ export const NamedHighlightExtension = Mark.create<HighlightOptions>({
         ({ chain, commands, editor, state }) => {
           // Validate that the color name is allowed
           if (!this.options.colors.includes(colorName)) {
-            console.warn(
-              `Highlight color "${colorName}" is not in the allowed colors list`,
-            )
+            console.warn(`Highlight color "${colorName}" is not in the allowed colors list`)
             return false
           }
 
           const { to, empty } = state.selection // Get original selection details
-          const highlightAttributes = this.options.multicolor
-            ? { color: colorName }
-            : undefined
+          const highlightAttributes = this.options.multicolor ? { color: colorName } : undefined
 
           // Check if the mark is currently active with the given attributes *before* toggling
           // This helps determine if the toggle action will be setting or unsetting the mark.
-          const isCurrentlyActive = editor.isActive(
-            this.name,
-            highlightAttributes,
-          )
+          const isCurrentlyActive = editor.isActive(this.name, highlightAttributes)
 
           let commandChain = chain().toggleMark(this.name, highlightAttributes)
 
           // If the selection was not empty AND the toggle action is about to *set* the mark
           // (i.e., it wasn't active before)
           if (!empty && !isCurrentlyActive) {
-            commandChain = commandChain
-              .setTextSelection(to)
-              .command(({ tr }) => {
-                tr.setStoredMarks([])
-                return true
-              })
+            commandChain = commandChain.setTextSelection(to).command(({ tr }) => {
+              tr.setStoredMarks([])
+              return true
+            })
           }
 
           return commandChain.focus().run()

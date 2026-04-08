@@ -6,24 +6,15 @@ interface VisibilityElement extends Element {
 }
 
 export default {
-  beforeMount(
-    el: VisibilityElement,
-    binding: DirectiveBinding,
-    vnode: VNode,
-  ): void {
-    const fn = binding.value as (
-      visible: boolean,
-      entry: IntersectionObserverEntry,
-    ) => void
+  beforeMount(el: VisibilityElement, binding: DirectiveBinding, vnode: VNode): void {
+    const fn = binding.value as (visible: boolean, entry: IntersectionObserverEntry) => void
     if (!fn) return
 
-    const observer = new IntersectionObserver(
-      (entries: IntersectionObserverEntry[]) => {
-        const entry = entries[0]
-        const visible = entry.isIntersecting && entry.intersectionRatio > 0
-        fn(visible, entry)
-      },
-    )
+    const observer = new IntersectionObserver((entries: IntersectionObserverEntry[]) => {
+      const entry = entries[0]
+      const visible = entry.isIntersecting && entry.intersectionRatio > 0
+      fn(visible, entry)
+    })
 
     nextTick(() => {
       observer.observe(el)

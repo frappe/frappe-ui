@@ -1,8 +1,6 @@
 <template>
   <RadioGroup v-model="value">
-    <div
-      class="flex space-x-0.5 rounded-md bg-surface-gray-2 h-7 items-center px-[1px] text-sm"
-    >
+    <div class="flex h-7 items-center space-x-0.5 rounded-md bg-surface-gray-2 px-[1px] text-sm">
       <RadioGroupOption
         as="div"
         v-for="button in buttons"
@@ -18,11 +16,7 @@
           :class="[
             active ? 'ring-outline-gray-2 focus-visible:ring' : '',
             checked && '!bg-surface-white',
-            button.disabled
-              ? ''
-              : checked
-                ? ' text-ink-gray-8 shadow'
-                : '!text-ink-gray-5',
+            button.disabled ? '' : checked ? 'text-ink-gray-8 shadow' : '!text-ink-gray-5',
           ]"
         >
           <RadioGroupLabel
@@ -38,8 +32,9 @@
 </template>
 <script>
 import { RadioGroup, RadioGroupLabel, RadioGroupOption } from '@headlessui/vue'
-import FeatherIcon from '../FeatherIcon.vue'
+
 import Button from '../Button/Button.vue'
+import FeatherIcon from '../FeatherIcon.vue'
 
 export default {
   name: 'TabButtons',

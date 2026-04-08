@@ -1,7 +1,6 @@
 <script setup>
-import { h, reactive } from 'vue'
-
 import { Avatar, ListView } from 'frappe-ui'
+import { h, reactive } from 'vue'
 
 const columns = reactive([
   {
@@ -9,8 +8,7 @@ const columns = reactive([
     key: 'name',
     width: 3,
     getLabel: ({ row }) => row.name,
-    prefix: ({ row }) =>
-      h(Avatar, { shape: 'circle', image: row.user_image, size: 'sm' }),
+    prefix: ({ row }) => h(Avatar, { shape: 'circle', image: row.user_image, size: 'sm' }),
   },
   { label: 'Email', key: 'email', width: '200px' },
   { label: 'Role', key: 'role' },

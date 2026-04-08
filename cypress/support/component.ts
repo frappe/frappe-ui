@@ -16,7 +16,6 @@
 // Import commands.js using ES2015 syntax:
 import './commands'
 import './setup'
-
 import { mount } from 'cypress/vue'
 
 // Augment the Cypress namespace to include type definitions for

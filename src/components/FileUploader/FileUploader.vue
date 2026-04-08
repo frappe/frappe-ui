@@ -1,12 +1,6 @@
 <template>
   <div>
-    <input
-      ref="input"
-      type="file"
-      :accept="fileTypes"
-      class="hidden"
-      @change="onFileAdd"
-    />
+    <input ref="input" type="file" :accept="fileTypes" class="hidden" @change="onFileAdd" />
     <slot
       v-bind="{
         file,
@@ -28,8 +22,8 @@
 </template>
 
 <script>
-import { Button } from '../Button'
 import FileUploadHandler from '../../utils/fileUploadHandler'
+import { Button } from '../Button'
 
 export default {
   name: 'FileUploader',
@@ -124,9 +118,7 @@ export default {
           if (error?.message) {
             errorMessage = error.message
           } else if (error?._server_messages) {
-            errorMessage = JSON.parse(
-              JSON.parse(error._server_messages)[0],
-            ).message
+            errorMessage = JSON.parse(JSON.parse(error._server_messages)[0]).message
           } else if (error?.exc) {
             errorMessage = JSON.parse(error.exc)[0].split('\n').slice(-2, -1)[0]
           }

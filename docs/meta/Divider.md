@@ -4,6 +4,7 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 </script>
+
 <PropsTable name="Divider" :data='[
   {
     "name": "orientation",
@@ -31,5 +32,4 @@
     "required": false,
     "type": "DividerAction"
   }
-]'/> 
-
+]'/>

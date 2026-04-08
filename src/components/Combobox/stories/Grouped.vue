@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import { Combobox } from 'frappe-ui'
+import { ref } from 'vue'
 
 const value = ref('')
 

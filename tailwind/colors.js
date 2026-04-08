@@ -337,18 +337,7 @@ function withOpacity(color) {
 function getDefaultColorMap(color) {
   let defaultColors = lightModeColors
   let obj = {}
-  let keys = [
-    '50',
-    '100',
-    '200',
-    '300',
-    '400',
-    '500',
-    '600',
-    '700',
-    '800',
-    '900',
-  ]
+  let keys = ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900']
   keys.forEach((key) => {
     let rgbString = defaultColors[color][key]
     if (color) {
@@ -534,7 +523,7 @@ let semanticColors = {
     'red-2': withOpacity('var(--outline-red-2)'),
     'red-3': withOpacity('var(--outline-red-3)'),
     'red-4': withOpacity('var(--outline-red-4)'),
-    white: withOpacity('var(--outline-white)'),
+    'white': withOpacity('var(--outline-white)'),
   },
   // for background color
   surface: {
@@ -542,7 +531,7 @@ let semanticColors = {
     'amber-2': withOpacity('var(--surface-amber-2)'),
     'blue-1': withOpacity('var(--surface-blue-1)'),
     'blue-2': withOpacity('var(--surface-blue-2)'),
-    cards: withOpacity('var(--surface-cards)'),
+    'cards': withOpacity('var(--surface-cards)'),
     'cyan-1': withOpacity('var(--surface-cyan-1)'),
     'gray-1': withOpacity('var(--surface-gray-1)'),
     'gray-2': withOpacity('var(--surface-gray-2)'),
@@ -555,7 +544,7 @@ let semanticColors = {
     'green-2': withOpacity('var(--surface-green-2)'),
     'green-3': withOpacity('var(--surface-green-3)'),
     'menu-bar': withOpacity('var(--surface-menu-bar)'),
-    modal: withOpacity('var(--surface-modal)'),
+    'modal': withOpacity('var(--surface-modal)'),
     'orange-1': withOpacity('var(--surface-orange-1)'),
     'pink-1': withOpacity('var(--surface-pink-1)'),
     'red-1': withOpacity('var(--surface-red-1)'),
@@ -564,9 +553,9 @@ let semanticColors = {
     'red-4': withOpacity('var(--surface-red-4)'),
     'red-5': withOpacity('var(--surface-red-5)'),
     'red-6': withOpacity('var(--surface-red-6)'),
-    selected: withOpacity('var(--surface-selected)'),
+    'selected': withOpacity('var(--surface-selected)'),
     'violet-1': withOpacity('var(--surface-violet-1)'),
-    white: withOpacity('var(--surface-white)'),
+    'white': withOpacity('var(--surface-white)'),
   },
   // for text color and svg stroke/fill
   ink: {
@@ -595,29 +584,29 @@ let semanticColors = {
     'red-3': withOpacity('var(--text-ink-red-3)'),
     'red-4': withOpacity('var(--text-ink-red-4)'),
     'violet-1': withOpacity('var(--text-ink-violet-1)'),
-    white: withOpacity('var(--text-ink-white)'),
+    'white': withOpacity('var(--text-ink-white)'),
   },
 }
 
 function colorPalette({ colors }) {
   return {
-    inherit: colors.inherit,
-    current: colors.current,
-    transparent: colors.transparent,
-    black: colors.black,
-    white: colors.white,
-    gray: getDefaultColorMap('gray'),
-    blue: getDefaultColorMap('blue'),
-    green: getDefaultColorMap('green'),
-    red: getDefaultColorMap('red'),
-    orange: getDefaultColorMap('orange'),
-    yellow: getDefaultColorMap('yellow'),
-    teal: getDefaultColorMap('teal'),
-    violet: getDefaultColorMap('violet'),
-    cyan: getDefaultColorMap('cyan'),
-    amber: getDefaultColorMap('amber'),
-    pink: getDefaultColorMap('pink'),
-    purple: getDefaultColorMap('purple'),
+    'inherit': colors.inherit,
+    'current': colors.current,
+    'transparent': colors.transparent,
+    'black': colors.black,
+    'white': colors.white,
+    'gray': getDefaultColorMap('gray'),
+    'blue': getDefaultColorMap('blue'),
+    'green': getDefaultColorMap('green'),
+    'red': getDefaultColorMap('red'),
+    'orange': getDefaultColorMap('orange'),
+    'yellow': getDefaultColorMap('yellow'),
+    'teal': getDefaultColorMap('teal'),
+    'violet': getDefaultColorMap('violet'),
+    'cyan': getDefaultColorMap('cyan'),
+    'amber': getDefaultColorMap('amber'),
+    'pink': getDefaultColorMap('pink'),
+    'purple': getDefaultColorMap('purple'),
     'white-overlay': (() => {
       let obj = {}
       for (let shade in whiteOverlay) {

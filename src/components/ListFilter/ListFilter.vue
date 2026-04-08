@@ -13,9 +13,7 @@
       </Button>
     </template>
     <template #body="{ close }">
-      <div
-        class="my-2 rounded-lg border border-gray-100 bg-surface-white shadow-xl"
-      >
+      <div class="my-2 rounded-lg border border-gray-100 bg-surface-white shadow-xl">
         <div class="min-w-[400px] p-2">
           <div
             v-if="filters.length"
@@ -25,9 +23,7 @@
             class="mb-3 flex items-center justify-between gap-2"
           >
             <div class="flex flex-1 items-center gap-2">
-              <div
-                class="w-13 flex-shrink-0 ps-2 text-end text-base text-ink-gray-5"
-              >
+              <div class="w-13 flex-shrink-0 ps-2 text-end text-base text-ink-gray-5">
                 {{ i == 0 ? 'Where' : 'And' }}
               </div>
               <div id="fieldname" class="!min-w-[140px] flex-1">
@@ -60,12 +56,7 @@
                 />
                 <component
                   v-else
-                  :is="
-                    getValueSelector(
-                      filter.field.fieldtype,
-                      filter.field.options,
-                    )
-                  "
+                  :is="getValueSelector(filter.field.fieldtype, filter.field.options)"
                   v-model="filter.value"
                   placeholder="Value"
                 />
@@ -75,10 +66,7 @@
               <Button variant="ghost" icon="x" @click="removeFilter(i)" />
             </div>
           </div>
-          <div
-            v-else
-            class="mb-3 flex h-7 items-center px-3 text-sm text-ink-gray-5"
-          >
+          <div v-else class="mb-3 flex h-7 items-center px-3 text-sm text-ink-gray-5">
             Empty - Choose a field to filter by
           </div>
           <div class="flex items-center justify-between gap-2">
@@ -116,25 +104,18 @@
 </template>
 
 <script setup>
-import { Autocomplete, FeatherIcon, FormControl } from '../../index'
 import { computed, h } from 'vue'
+
+import { Autocomplete, FeatherIcon, FormControl } from '../../index'
 import FilterIcon from './FilterIcon.vue'
 import NestedPopover from './NestedPopover.vue'
 import SearchComplete from './SearchComplete.vue'
 
-const typeCheck = ['Check']
+const typeCheck = new Set(['Check'])
 const typeLink = ['Link']
 const typeNumber = ['Float', 'Int']
 const typeSelect = ['Select']
-const typeString = [
-  'Data',
-  'Long Text',
-  'Small Text',
-  'Text Editor',
-  'Text',
-  'JSON',
-  'Code',
-]
+const typeString = ['Data', 'Long Text', 'Small Text', 'Text Editor', 'Text', 'JSON', 'Code']
 
 const emits = defineEmits(['update:modelValue'])
 const props = defineProps({
@@ -153,7 +134,7 @@ const fields = computed(() => {
     .filter((field) => {
       return (
         !field.is_virtual &&
-        (typeCheck.includes(field.fieldtype) ||
+        (typeCheck.has(field.fieldtype) ||
           typeLink.includes(field.fieldtype) ||
           typeNumber.includes(field.fieldtype) ||
           typeSelect.includes(field.fieldtype) ||
@@ -232,7 +213,7 @@ function getOperators(fieldtype) {
       ],
     )
   }
-  if (typeCheck.includes(fieldtype)) {
+  if (typeCheck.has(fieldtype)) {
     options.push(...[{ label: 'Equals', value: '=' }])
   }
   return options
@@ -242,7 +223,7 @@ function getDefaultOperator(fieldtype) {
   if (
     typeSelect.includes(fieldtype) ||
     typeLink.includes(fieldtype) ||
-    typeCheck.includes(fieldtype) ||
+    typeCheck.has(fieldtype) ||
     typeNumber.includes(fieldtype)
   ) {
     return '='
@@ -251,9 +232,8 @@ function getDefaultOperator(fieldtype) {
 }
 
 function getValueSelector(fieldtype, options) {
-  if (typeSelect.includes(fieldtype) || typeCheck.includes(fieldtype)) {
-    const _options =
-      fieldtype == 'Check' ? ['Yes', 'No'] : getSelectOptions(options)
+  if (typeSelect.includes(fieldtype) || typeCheck.has(fieldtype)) {
+    const _options = fieldtype == 'Check' ? ['Yes', 'No'] : getSelectOptions(options)
     return h(FormControl, {
       type: 'select',
       options: _options,
@@ -267,7 +247,7 @@ function getDefaultValue(field) {
   if (typeSelect.includes(field.fieldtype)) {
     return getSelectOptions(field.options)[0]
   }
-  if (typeCheck.includes(field.fieldtype)) {
+  if (typeCheck.has(field.fieldtype)) {
     return 'Yes'
   }
   return ''

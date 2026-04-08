@@ -1,14 +1,13 @@
 <script setup lang="ts">
-import { reactive } from 'vue'
 import { Tabs } from 'frappe-ui'
+import { reactive } from 'vue'
 
 const state = reactive({
   index: 0,
   tabs: [
     {
       label: 'Github',
-      content:
-        'Github is a code hosting platform for version control and collaboration',
+      content: 'Github is a code hosting platform for version control and collaboration',
     },
     {
       label: 'Twitter',
@@ -17,26 +16,20 @@ const state = reactive({
     },
     {
       label: 'Linkedin',
-      content:
-        'LinkedIn is an American business and employment-oriented online service',
+      content: 'LinkedIn is an American business and employment-oriented online service',
     },
   ],
 })
 </script>
 
 <template>
-  <Tabs class="border rounded" v-model="state.index" :tabs="state.tabs">
+  <Tabs class="rounded border" v-model="state.index" :tabs="state.tabs">
     <template #tab-panel="{ tab }">
       <div class="p-5">{{ tab.content }}</div>
     </template>
   </Tabs>
 
-  <Tabs
-    class="border rounded"
-    v-model="state.index"
-    :tabs="state.tabs"
-    :vertical="true"
-  >
+  <Tabs class="rounded border" v-model="state.index" :tabs="state.tabs" :vertical="true">
     <template #tab-panel="{ tab }">
       <div class="p-5">{{ tab.content }}</div>
     </template>

@@ -12,13 +12,13 @@ const _data = props.data.slice(0, props.data.length - 2)
 <template>
   <div class="grid grid-cols-3 gap-5">
     <template v-for="color in _data" :key="color.name">
-      <h2 :id="color.name" v-if="!color.value" class="capitalize col-span-full">
+      <h2 :id="color.name" v-if="!color.value" class="col-span-full capitalize">
         {{ color.name }}
       </h2>
 
       <div v-else class="grid gap-2">
         <div
-          class="rounded border-2 flex items-end p-5"
+          class="flex items-end rounded border-2 p-5"
           :style="{ borderColor: color.value }"
         ></div>
         <span>{{ color.name }}</span>

@@ -1,7 +1,8 @@
 import { Node, mergeAttributes } from '@tiptap/core'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
+
+import type { UploadedFile } from '../../../../utils/useFileUpload'
 import ImageGroupNodeView from './ImageGroupNodeView.vue'
-import { UploadedFile } from '../../../../utils/useFileUpload'
 
 export interface ImageGroupOptions {
   /**
@@ -70,9 +71,7 @@ export const ImageGroup = Node.create<ImageGroupOptions>({
           if (typeof element === 'string') return {}
           const el = element as HTMLElement
           return {
-            columns: el.getAttribute('data-columns')
-              ? Number(el.getAttribute('data-columns'))
-              : 4,
+            columns: el.getAttribute('data-columns') ? Number(el.getAttribute('data-columns')) : 4,
           }
         },
       },
@@ -140,7 +139,7 @@ export const ImageGroup = Node.create<ImageGroupOptions>({
           }
 
           // Sort by position (descending) for deletion
-          const sortedImages = [...images].sort((a, b) => b.pos - a.pos)
+          const sortedImages = [...images].toSorted((a, b) => b.pos - a.pos)
 
           // Find the position to insert the group (start of selection)
           const insertPos = Math.min(...images.map((img) => img.pos))

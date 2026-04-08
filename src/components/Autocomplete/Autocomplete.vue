@@ -13,9 +13,7 @@
       :placement="placement"
       :match-target-width="true"
     >
-      <template
-        #target="{ open: openPopover, togglePopover, close: closePopover }"
-      >
+      <template #target="{ open: openPopover, togglePopover, close: closePopover }">
         <slot
           name="target"
           v-bind="{
@@ -30,16 +28,13 @@
               {{ props.label }}
             </label>
             <button
-              class="flex h-7 w-full items-center justify-between gap-2 rounded bg-surface-gray-2 px-2 py-1 transition-colors hover:bg-surface-gray-3 border border-transparent focus:border-outline-gray-4 focus:outline-none focus:ring-2 focus:ring-outline-gray-3"
+              class="flex h-7 w-full items-center justify-between gap-2 rounded border border-transparent bg-surface-gray-2 px-2 py-1 transition-colors hover:bg-surface-gray-3 focus:border-outline-gray-4 focus:outline-none focus:ring-2 focus:ring-outline-gray-3"
               :class="{ 'bg-surface-gray-3': isComboboxOpen }"
               @click="() => togglePopover()"
             >
               <div class="flex items-center overflow-hidden">
                 <slot name="prefix" />
-                <span
-                  class="truncate text-base leading-5 text-ink-gray-8"
-                  v-if="displayValue"
-                >
+                <span class="truncate text-base leading-5 text-ink-gray-8" v-if="displayValue">
                   {{ displayValue }}
                 </span>
                 <span class="text-base leading-5 text-ink-gray-4" v-else>
@@ -47,11 +42,7 @@
                 </span>
                 <slot name="suffix" />
               </div>
-              <FeatherIcon
-                name="chevron-down"
-                class="h-4 w-4 text-ink-gray-5"
-                aria-hidden="true"
-              />
+              <FeatherIcon name="chevron-down" class="h-4 w-4 text-ink-gray-5" aria-hidden="true" />
             </button>
           </div>
         </slot>
@@ -74,31 +65,22 @@
                 <div class="relative w-full">
                   <ComboboxInput
                     ref="searchInput"
-                    class="form-input w-full focus:bg-surface-gray-3 hover:bg-surface-gray-4 text-ink-gray-8"
+                    class="form-input w-full text-ink-gray-8 hover:bg-surface-gray-4 focus:bg-surface-gray-3"
                     type="text"
                     :value="query"
                     @change="query = $event.target.value"
                     autocomplete="off"
                     placeholder="Search"
                   />
-                  <div
-                    class="absolute right-0 inline-flex h-7 w-7 items-center justify-center"
-                  >
-                    <LoadingIndicator
-                      v-if="props.loading"
-                      class="h-4 w-4 text-ink-gray-5"
-                    />
+                  <div class="absolute right-0 inline-flex h-7 w-7 items-center justify-center">
+                    <LoadingIndicator v-if="props.loading" class="h-4 w-4 text-ink-gray-5" />
                     <button v-else @click="clearAll">
                       <FeatherIcon name="x" class="w-4 text-ink-gray-8" />
                     </button>
                   </div>
                 </div>
               </div>
-              <div
-                v-for="group in groups"
-                :key="group.key"
-                v-show="group.items.length > 0"
-              >
+              <div v-for="group in groups" :key="group.key" v-show="group.items.length > 0">
                 <div
                   v-if="group.group && !group.hideLabel"
                   class="sticky top-10 truncate bg-surface-modal px-2.5 py-1.5 text-sm font-medium text-ink-gray-5"
@@ -107,10 +89,7 @@
                 </div>
                 <ComboboxOption
                   as="template"
-                  v-for="(option, idx) in group.items.slice(
-                    0,
-                    props.maxOptions,
-                  )"
+                  v-for="(option, idx) in group.items.slice(0, props.maxOptions)"
                   :key="idx"
                   :value="option"
                   :disabled="option.disabled"
@@ -125,15 +104,12 @@
                       },
                     ]"
                   >
-                    <div class="flex flex-1 gap-2 overflow-hidden items-center">
+                    <div class="flex flex-1 items-center gap-2 overflow-hidden">
                       <div
                         v-if="$slots['item-prefix'] || props.multiple"
                         class="flex flex-shrink-0"
                       >
-                        <slot
-                          name="item-prefix"
-                          v-bind="{ active, selected, option }"
-                        >
+                        <slot name="item-prefix" v-bind="{ active, selected, option }">
                           <FeatherIcon
                             name="check"
                             v-if="isOptionSelected(option)"
@@ -151,14 +127,8 @@
                       v-if="$slots['item-suffix'] || option?.description"
                       class="ml-2 flex-shrink-0"
                     >
-                      <slot
-                        name="item-suffix"
-                        v-bind="{ active, selected, option }"
-                      >
-                        <div
-                          v-if="option?.description"
-                          class="text-sm text-ink-gray-5"
-                        >
+                      <slot name="item-suffix" v-bind="{ active, selected, option }">
+                        <div v-if="option?.description" class="text-sm text-ink-gray-5">
                           {{ option.description }}
                         </div>
                       </slot>
@@ -174,10 +144,7 @@
               </li>
             </ComboboxOptions>
 
-            <div
-              v-if="$slots.footer || props.showFooter || multiple"
-              class="border-t p-1"
-            >
+            <div v-if="$slots.footer || props.showFooter || multiple" class="border-t p-1">
               <slot name="footer" v-bind="{ togglePopover }">
                 <div v-if="multiple" class="flex items-center justify-end">
                   <Button
@@ -185,11 +152,7 @@
                     label="Select All"
                     @click.stop="selectAll"
                   />
-                  <Button
-                    v-if="areAllOptionsSelected"
-                    label="Clear All"
-                    @click.stop="clearAll"
-                  />
+                  <Button v-if="areAllOptionsSelected" label="Clear All" @click.stop="clearAll" />
                 </div>
                 <div v-else class="flex items-center justify-end">
                   <Button label="Clear" @click.stop="clearAll" />
@@ -204,17 +167,13 @@
 </template>
 
 <script setup lang="ts">
-import {
-  Combobox,
-  ComboboxInput,
-  ComboboxOption,
-  ComboboxOptions,
-} from '@headlessui/vue'
+import { Combobox, ComboboxInput, ComboboxOption, ComboboxOptions } from '@headlessui/vue'
 import { computed, nextTick, ref, watch } from 'vue'
-import { Popover } from '../Popover'
+
 import { Button } from '../Button'
 import FeatherIcon from '../FeatherIcon.vue'
 import LoadingIndicator from '../LoadingIndicator.vue'
+import { Popover } from '../Popover'
 import type {
   AutocompleteOptionGroup,
   AutocompleteOption,
@@ -270,9 +229,7 @@ const sanitizeOptions = (options: AutocompleteOption[]) => {
   if (!options) return []
   // in case the options are just values, convert them to objects
   return options.map((option) => {
-    return isOption(option)
-      ? option
-      : { label: option.toString(), value: option }
+    return isOption(option) ? option : { label: option.toString(), value: option }
   })
 }
 
@@ -281,10 +238,7 @@ const filterOptions = (options: Option[]) => {
   return options.filter((option) => {
     return (
       option.label.toLowerCase().includes(query.value.trim().toLowerCase()) ||
-      option.value
-        .toString()
-        .toLowerCase()
-        .includes(query.value.trim().toLowerCase())
+      option.value.toString().toLowerCase().includes(query.value.trim().toLowerCase())
     )
   })
 }
@@ -302,9 +256,7 @@ const selectedValue = computed({
     // in case of `multiple`, modelValue is an array of values
     // if the modelValue is a list of values, convert them to options
     const values = (props.modelValue || []) as AutocompleteOption[]
-    return isOption(values[0])
-      ? values
-      : values.map((v) => findOption(v) || makeOption(v))
+    return isOption(values[0]) ? values : values.map((v) => findOption(v) || makeOption(v))
   },
   set(val) {
     query.value = ''
@@ -336,9 +288,7 @@ const displayValue = computed(() => {
   if (!props.multiple) {
     return getLabel(selectedValue.value as AutocompleteOption)
   }
-  return (selectedValue.value as AutocompleteOption[])
-    .map((v) => getLabel(v))
-    .join(', ')
+  return (selectedValue.value as AutocompleteOption[]).map((v) => getLabel(v)).join(', ')
 })
 
 const isOptionSelected = (option: AutocompleteOption) => {
@@ -354,10 +304,7 @@ const isOptionSelected = (option: AutocompleteOption) => {
 
 const areAllOptionsSelected = computed(() => {
   if (!props.multiple) return false
-  return (
-    allOptions.value.length ===
-    (selectedValue.value as AutocompleteOption[])?.length
-  )
+  return allOptions.value.length === (selectedValue.value as AutocompleteOption[])?.length
 })
 
 const selectAll = () => {

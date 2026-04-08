@@ -4,6 +4,7 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 </script>
+
 <PropsTable name="TextInput" :data='[
   {
     "name": "type",
@@ -62,10 +63,11 @@
     "required": false,
     "type": "boolean"
   }
-]'/> 
+]'/>
 
-## Slots 
- <SlotsTable :data='[
+## Slots
+
+<SlotsTable :data='[
   {
     "name": "prefix",
     "description": "Content rendered before the input (left side)",
@@ -76,14 +78,14 @@
     "description": "Content rendered after the input (right side)",
     "type": "any"
   }
-]'/> 
+]'/>
 
-## Emit Events 
- <EmitsTable :data='[
+## Emit Events
+
+<EmitsTable :data='[
   {
     "name": "update:modelValue",
     "description": "",
     "type": "any[]"
   }
-]'/> 
-
+]'/>

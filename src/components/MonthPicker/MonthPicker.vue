@@ -1,19 +1,19 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { MonthPickerProps } from './types'
-
-import Button from '../Button/Button.vue'
-import Popover from '../Popover/Popover.vue'
 import LucideCalender from '~icons/lucide/calendar'
 import LucideChevronLeft from '~icons/lucide/chevron-left'
 import LucideChevronRight from '~icons/lucide/chevron-right'
+
+import Button from '../Button/Button.vue'
+import Popover from '../Popover/Popover.vue'
+import type { MonthPickerProps } from './types'
 
 const props = withDefaults(defineProps<MonthPickerProps>(), {
   placeholder: 'Select month',
 })
 
 const viewMode = ref('month')
-const model = defineModel<String>({ default: '' })
+const model = defineModel<string>({ default: '' })
 
 const months = [
   'January',
@@ -32,16 +32,10 @@ const months = [
 
 const currentYear = ref(new Date().getFullYear())
 
-const yearRangeStart = computed(
-  () => currentYear.value - (currentYear.value % 12),
-)
-const yearRange = computed(() =>
-  Array.from({ length: 12 }, (_, i) => yearRangeStart.value + i),
-)
+const yearRangeStart = computed(() => currentYear.value - (currentYear.value % 12))
+const yearRange = computed(() => Array.from({ length: 12 }, (_, i) => yearRangeStart.value + i))
 
-const pickerList = computed(() =>
-  viewMode.value == 'year' ? yearRange.value : months,
-)
+const pickerList = computed(() => (viewMode.value == 'year' ? yearRange.value : months))
 
 const toggleViewMode = () => {
   viewMode.value = viewMode.value == 'year' ? 'month' : 'year'
@@ -63,42 +57,44 @@ const nextClick = () => {
 }
 
 const formatBtn = (v: string | number) =>
-  viewMode.value == 'month' ? (v as String).slice(0, 3) : v
+  viewMode.value == 'month' ? (v as string).slice(0, 3) : v
 
 const txtClass = computed(() => {
-  return model.value || props.disabled ? '': '!text-ink-gray-5' 
+  return model.value || props.disabled ? '' : '!text-ink-gray-5'
 })
 </script>
 
 <template>
-  <Popover
-    popover-class="mt-2 shadow-xl rounded-lg border bg-surface-modal p-2"
-  >
+  <Popover popover-class="mt-2 shadow-xl rounded-lg border bg-surface-modal p-2">
     <template #target="{ togglePopover, isOpen }">
-      <Button @click="togglePopover" class="w-full justify-between border" :class="txtClass"
-				:disabled="disabled" aria-haspopup="dialog" :aria-expanded="isOpen">
+      <Button
+        @click="togglePopover"
+        class="w-full justify-between border"
+        :class="txtClass"
+        :disabled="disabled"
+        aria-haspopup="dialog"
+        :aria-expanded="isOpen"
+      >
         {{ model || props.placeholder }}
         <template #suffix> <LucideCalender class="size-4" /> </template>
       </Button>
     </template>
 
     <template #body>
-      <div class="flex gap-2 justify-between">
-        <Button variant="ghost" @click="prevClick" label='previous'>
+      <div class="flex justify-between gap-2">
+        <Button variant="ghost" @click="prevClick" label="previous">
           <LucideChevronLeft class="size-4 text-ink-gray-5" />
         </Button>
 
         <!-- view toggler -->
-         <Button @click="toggleViewMode" label="Toggle view mode">
+        <Button @click="toggleViewMode" label="Toggle view mode">
           <template v-if="viewMode == 'month'">
             {{ model.split(' ')[1] ?? currentYear }}
           </template>
-          <template v-else>
-            {{ yearRangeStart }} - {{ yearRangeStart + 11 }}
-          </template>
+          <template v-else> {{ yearRangeStart }} - {{ yearRangeStart + 11 }} </template>
         </Button>
 
-        <Button variant="ghost" @click="nextClick" label='next'>
+        <Button variant="ghost" @click="nextClick" label="next">
           <LucideChevronRight class="size-4 text-ink-gray-5" />
         </Button>
       </div>

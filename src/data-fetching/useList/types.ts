@@ -1,5 +1,7 @@
-import { MaybeRefOrGetter, Reactive, Ref } from 'vue'
-import { CacheKey } from '../useCall/types'
+import type { MaybeRefOrGetter } from 'vue'
+import { Reactive, Ref } from 'vue'
+
+import type { CacheKey } from '../useCall/types'
 
 export type Field = string
 export type LinkField = `${Field}.${Field}` | `${Field}.${Field} as ${string}`
@@ -17,11 +19,7 @@ export interface Filters {
   [key: Field]: FilterValue | undefined
 }
 
-export type OrderBy =
-  | `${Field} ASC`
-  | `${Field} DESC`
-  | `${Field} asc`
-  | `${Field} desc`
+export type OrderBy = `${Field} ASC` | `${Field} DESC` | `${Field} asc` | `${Field} desc`
 
 export interface UseListOptions<T> {
   doctype: string

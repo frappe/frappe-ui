@@ -1,7 +1,7 @@
 <template>
   <div
     v-show="show"
-    class="fixed z-50 right-0 w-80 h-[calc(100%_-_80px)] text-ink-gray-9 m-5 mt-[62px] p-3 flex gap-2 flex-col justify-between rounded-lg bg-surface-modal shadow-2xl"
+    class="fixed right-0 z-50 m-5 mt-[62px] flex h-[calc(100%_-_80px)] w-80 flex-col justify-between gap-2 rounded-lg bg-surface-modal p-3 text-ink-gray-9 shadow-2xl"
     :class="{ 'top-[calc(100%_-_120px)] border': minimize }"
     @click.stop
   >
@@ -14,17 +14,14 @@
           <Button variant="ghost" icon="more-horizontal" />
         </Dropdown>
         <Button @click="minimize = !minimize" variant="ghost">
-          <component
-            :is="minimize ? MaximizeIcon : MinimizeIcon"
-            class="h-3.5"
-          />
+          <component :is="minimize ? MaximizeIcon : MinimizeIcon" class="h-3.5" />
         </Button>
         <Button variant="ghost" @click="show = false">
           <FeatherIcon name="x" class="h-3.5" />
         </Button>
       </div>
     </div>
-    <div class="h-full overflow-hidden flex flex-col">
+    <div class="flex h-full flex-col overflow-hidden">
       <OnboardingSteps
         v-if="!isOnboardingStepsCompleted && !showHelpCenter"
         :title="title"
@@ -35,15 +32,11 @@
         :afterResetAll="afterResetAll"
         :appName="appName"
       />
-      <HelpCenter
-        v-else-if="showHelpCenter"
-        v-model="articles"
-        :docsLink="docsLink"
-      />
+      <HelpCenter v-else-if="showHelpCenter" v-model="articles" :docsLink="docsLink" />
     </div>
     <div v-for="item in footerItems" class="flex flex-col gap-1.5">
       <div
-        class="w-full flex gap-2 items-center hover:bg-surface-gray-1 text-ink-gray-8 rounded px-2 py-1.5 cursor-pointer"
+        class="flex w-full cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-ink-gray-8 hover:bg-surface-gray-1"
         @click="item.onClick"
       >
         <component :is="item.icon" class="h-4" />
@@ -53,19 +46,20 @@
   </div>
 </template>
 <script setup>
-import Dropdown from '../../src/components/Dropdown/Dropdown.vue'
-import Button from '../../src/components/Button/Button.vue'
-import StepsIcon from '../../icons/StepsIcon.vue'
-import MinimizeIcon from '../../icons/MinimizeIcon.vue'
-import MaximizeIcon from '../../icons/MaximizeIcon.vue'
+import { onMounted, computed } from 'vue'
+
 import HelpIcon from '../../icons/HelpIcon.vue'
-import OnboardingSteps from '../Onboarding/OnboardingSteps.vue'
+import MaximizeIcon from '../../icons/MaximizeIcon.vue'
+import MinimizeIcon from '../../icons/MinimizeIcon.vue'
+import StepsIcon from '../../icons/StepsIcon.vue'
+import Button from '../../src/components/Button/Button.vue'
+import Dropdown from '../../src/components/Dropdown/Dropdown.vue'
+import FeatherIcon from '../../src/components/FeatherIcon.vue'
+import { minimize } from '../Help/help'
+import { showHelpCenter } from '../HelpCenter/helpCenter'
 import HelpCenter from '../HelpCenter/HelpCenter.vue'
 import { useOnboarding } from '../Onboarding/onboarding'
-import { showHelpCenter } from '../HelpCenter/helpCenter'
-import { minimize } from '../Help/help'
-import { onMounted, computed } from 'vue'
-import FeatherIcon from '../../src/components/FeatherIcon.vue'
+import OnboardingSteps from '../Onboarding/OnboardingSteps.vue'
 
 const props = defineProps({
   appName: {
@@ -102,9 +96,7 @@ const props = defineProps({
   },
 })
 
-const { syncStatus, resetAll, isOnboardingStepsCompleted } = useOnboarding(
-  props.appName,
-)
+const { syncStatus, resetAll, isOnboardingStepsCompleted } = useOnboarding(props.appName)
 
 const show = defineModel()
 const articles = defineModel('articles')

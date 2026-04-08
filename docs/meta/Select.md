@@ -4,6 +4,7 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 </script>
+
 <PropsTable name="Select" :data='[
   {
     "name": "size",
@@ -50,10 +51,11 @@
     "required": false,
     "type": "SelectOption[]"
   }
-]'/> 
+]'/>
 
-## Slots 
- <SlotsTable :data='[
+## Slots
+
+<SlotsTable :data='[
   {
     "name": "prefix",
     "description": "Content rendered before the selected value (e.g., left icon or custom content)",
@@ -74,14 +76,14 @@
     "description": "Custom content at the bottom of the dropdown",
     "type": "any"
   }
-]'/> 
+]'/>
 
-## Emit Events 
- <EmitsTable :data='[
+## Emit Events
+
+<EmitsTable :data='[
   {
     "name": "update:modelValue",
     "description": "",
     "type": "[value: String | undefined]"
   }
-]'/> 
-
+]'/>

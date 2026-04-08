@@ -1,19 +1,14 @@
 <template>
-  <Combobox
-    v-model="team"
-    placeholder="Select a team"
-    :options
-    :disabled
-    :open-on-click="true"
-  />
+  <Combobox v-model="team" placeholder="Select a team" :options :disabled :open-on-click="true" />
 </template>
 <script setup lang="ts">
-import { getTeams } from '../js/resources'
-import icons from '../js/icons'
-import { dynamicList } from '../js/utils'
 import { computed, watch } from 'vue'
+
 import Combobox from '../../../src/components/Combobox/Combobox.vue'
-import { DropdownItem } from '../../../src/components/Dropdown/types'
+import type { DropdownItem } from '../../../src/components/Dropdown/types'
+import icons from '../js/icons'
+import { getTeams } from '../js/resources'
+import { dynamicList } from '../js/utils'
 
 getTeams.fetch()
 const team = defineModel<string>()

@@ -1,7 +1,7 @@
 import * as LucideIcons from 'lucide-static'
 import AutoImport from 'unplugin-auto-import/vite'
-import Components from 'unplugin-vue-components/vite'
 import IconsResolver from 'unplugin-icons/resolver'
+import Components from 'unplugin-vue-components/vite'
 
 const VIRTUAL_PREFIX = '~icons/lucide/'
 const RESOLVED_PREFIX = '\0~icons/lucide/'
@@ -16,11 +16,7 @@ export function lucideIcons() {
     ],
   }
   const icons = getIcons()
-  return [
-    AutoImport(resolverObj),
-    Components(resolverObj),
-    LucideIconsPlugin(icons),
-  ]
+  return [AutoImport(resolverObj), Components(resolverObj), LucideIconsPlugin(icons)]
 }
 
 function LucideIconsPlugin(icons) {

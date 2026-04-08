@@ -9,8 +9,9 @@
 </template>
 
 <script setup>
-import { Autocomplete, createListResource } from '../../index'
 import { computed, ref, watch } from 'vue'
+
+import { Autocomplete, createListResource } from '../../index'
 
 const props = defineProps({
   value: {
@@ -59,9 +60,7 @@ const r = createListResource({
   auto: true,
   fields: [props.labelField, props.searchField, props.valueField],
   onSuccess: () => {
-    selection.value = props.value
-      ? options.value.find((o) => o.value === props.value)
-      : null
+    selection.value = props.value ? options.value.find((o) => o.value === props.value) : null
   },
 })
 const options = computed(

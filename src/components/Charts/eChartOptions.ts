@@ -1,5 +1,5 @@
 import { formatDate, formatLabel, formatValue, mergeDeep } from './helpers'
-import { AxisChartConfig } from './types'
+import type { AxisChartConfig } from './types'
 
 export const PADDING_TOP = 0
 export const PADDING_BOTTOM = 10
@@ -32,11 +32,7 @@ export default function useEchartsOptions(config: AxisChartConfig) {
     grid: {
       left: '1%',
       right: config.swapXY ? '2.5%' : '1.5%',
-      top:
-        PADDING_TOP +
-        TITLE_HEIGHT * hasTitle +
-        SUBTITLE_HEIGHT * hasSubtitle +
-        TITLE_BOTTOM,
+      top: PADDING_TOP + TITLE_HEIGHT * hasTitle + SUBTITLE_HEIGHT * hasSubtitle + TITLE_BOTTOM,
       bottom: PADDING_BOTTOM + LEGEND_HEIGHT * hasLegend,
       containLabel: true,
     },
@@ -46,13 +42,13 @@ export default function useEchartsOptions(config: AxisChartConfig) {
     tooltip: {
       show: true,
       trigger: 'axis',
-      formatter: (params: Object | Array<Object>) => {
+      formatter: (params: object | Array<object>) => {
         if (Array.isArray(params)) {
           params = params
             // remove zero values
             .filter((p) => p.value?.[1] !== 0)
             // sort in descending order by value
-            .sort((a, b) => b.value?.[1] - a.value?.[1])
+            .toSorted((a, b) => b.value?.[1] - a.value?.[1])
         }
 
         if (!Array.isArray(params)) {
@@ -218,8 +214,7 @@ function getXAxisOptions(config: AxisChartConfig) {
         axisLabel: {
           show: true,
           hideOverlap: true,
-          showMaxLabel:
-            config.xAxis.type === 'category' || config.xAxis.type === 'value',
+          showMaxLabel: config.xAxis.type === 'category' || config.xAxis.type === 'value',
           margin: 8,
         },
       }
@@ -298,7 +293,7 @@ function getYAxisOptions(config: AxisChartConfig) {
 
   primaryYAxisOptions = mergeDeep(
     primaryYAxisOptions,
-    config.swapXY ? config.xAxis.echartOptions : config.yAxis.echartOptions
+    config.swapXY ? config.xAxis.echartOptions : config.yAxis.echartOptions,
   )
 
   let secondaryYAxisOptions = {
@@ -349,10 +344,8 @@ function getYAxisOptions(config: AxisChartConfig) {
 
   secondaryYAxisOptions = mergeDeep(
     secondaryYAxisOptions,
-    config.swapXY ? config.y2Axis?.echartOptions : config.y2Axis?.echartOptions
+    config.swapXY ? config.y2Axis?.echartOptions : config.y2Axis?.echartOptions,
   )
 
-  return config.swapXY
-    ? [primaryYAxisOptions]
-    : [primaryYAxisOptions, secondaryYAxisOptions]
+  return config.swapXY ? [primaryYAxisOptions] : [primaryYAxisOptions, secondaryYAxisOptions]
 }

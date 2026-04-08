@@ -1,5 +1,6 @@
 import { reactive, watch } from 'vue'
-import { getCacheKey, createResource } from './resources'
+
+import { getConfig } from '../utils/config'
 import {
   updateRowInListResource,
   deleteRowInListResource,
@@ -7,7 +8,7 @@ import {
 } from './listResource'
 import { getLocal, saveLocal, deleteLocal } from './local'
 import { onDocUpdate } from './realtime'
-import { getConfig } from '../utils/config'
+import { getCacheKey, createResource } from './resources'
 
 let documentCache = reactive({})
 
@@ -24,12 +25,9 @@ export function createDocumentResource(options, vm) {
   }
 
   let defaultDocGetUrl = getConfig('defaultDocGetUrl') || 'frappe.client.get'
-  let defaultDocUpdateUrl =
-    getConfig('defaultDocUpdateUrl') || 'frappe.client.set_value'
-  let defaultDocDeleteUrl =
-    getConfig('defaultDocDeleteUrl') || 'frappe.client.delete'
-  let defaultRunDocMethodUrl =
-    getConfig('defaultRunDocMethodUrl') || 'run_doc_method'
+  let defaultDocUpdateUrl = getConfig('defaultDocUpdateUrl') || 'frappe.client.set_value'
+  let defaultDocDeleteUrl = getConfig('defaultDocDeleteUrl') || 'frappe.client.delete'
+  let defaultRunDocMethodUrl = getConfig('defaultRunDocMethodUrl') || 'run_doc_method'
 
   let setValueOptions = {
     url: defaultDocUpdateUrl,
@@ -162,13 +160,7 @@ export function createDocumentResource(options, vm) {
       }
     }
 
-    let {
-      method,
-      onSuccess,
-      makeParams,
-      transform: _transform,
-      ...otherOptions
-    } = methodOptions
+    let { method, onSuccess, makeParams, transform: _transform, ...otherOptions } = methodOptions
 
     out[methodKey] = createResource(
       {
@@ -194,10 +186,7 @@ export function createDocumentResource(options, vm) {
         onSuccess(data) {
           if (data.docs) {
             for (let doc of data.docs) {
-              if (
-                doc.doctype === out.doctype &&
-                doc.name.toString() === out.name.toString()
-              ) {
+              if (doc.doctype === out.doctype && doc.name.toString() === out.name.toString()) {
                 out.doc = transform(doc)
                 // update data in list resources
                 updateRowInListResource(out.doctype, out.doc)

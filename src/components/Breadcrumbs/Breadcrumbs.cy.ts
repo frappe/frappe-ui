@@ -25,10 +25,7 @@ describe('Breadcrumbs', () => {
     const childrenLen = items.length * 2 - 1
 
     const el = '.flex.min-w-0.items-center.text-ellipsis.whitespace-nowrap > *'
-    cy.get(el)
-      .should('have.length', childrenLen)
-      .eq(0)
-      .should('have.text', 'Home')
+    cy.get(el).should('have.length', childrenLen).eq(0).should('have.text', 'Home')
   })
 
   it('Test dropdown', () => {

@@ -1,9 +1,10 @@
-import { common, createLowlight } from 'lowlight'
-import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
-import Code from '@tiptap/extension-code'
-import CodeBlockComponent from '../components/CodeBlockComponent.vue'
-import { VueNodeViewRenderer } from '@tiptap/vue-3'
 import { markInputRule } from '@tiptap/core'
+import Code from '@tiptap/extension-code'
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
+import { VueNodeViewRenderer } from '@tiptap/vue-3'
+import { common, createLowlight } from 'lowlight'
+
+import CodeBlockComponent from '../components/CodeBlockComponent.vue'
 
 const INDENT = ' '.repeat(4)
 export const inputRegex = /(?<=^|[^`])`([^`]+)`(?!`)$/
@@ -46,7 +47,7 @@ export const ExtendedCodeBlock = CodeBlockLowlight.extend({
   },
   addKeyboardShortcuts() {
     return {
-      Tab: () => {
+      'Tab': () => {
         const { state, dispatch } = this.editor.view
         const ctx = getCodeBlockCtx(state)
         if (!ctx) return false

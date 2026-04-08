@@ -1,4 +1,5 @@
 import plugin from 'tailwindcss/plugin'
+
 import {
   generateColorPalette,
   generateSemanticColors,
@@ -10,7 +11,7 @@ let semanticColors = generateSemanticColors()
 let cssVariables = generateCSSVariables()
 
 let globalStyles = (theme) => ({
-  html: {
+  'html': {
     'font-family': `InterVar, ${theme('fontFamily.sans')}`,
     'font-optical-sizing': 'auto',
   },
@@ -19,7 +20,7 @@ let globalStyles = (theme) => ({
     WebkitFontSmoothing: 'antialiased',
     MozOsxFontSmoothing: 'grayscale',
   },
-  select: {
+  'select': {
     backgroundImage:
       'url(\'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="%237C7C7C" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" aria-hidden="true" viewBox="0 0 24 24" ><path d="m6 9 6 6 6-6" /></svg>\')',
     backgroundSize: '1.13em',
@@ -33,8 +34,7 @@ let componentStyles = {
       {},
   },
   '.form-checkbox': {
-    '@apply rounded-md bg-surface-gray-2 text-ink-blue-2 focus:ring-0 focus-visible:ring-1':
-      {},
+    '@apply rounded-md bg-surface-gray-2 text-ink-blue-2 focus:ring-0 focus-visible:ring-1': {},
   },
   "[data-theme='dark'] [type='checkbox']:checked": {
     'background-image': `url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='%230F0F0F' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e")`,
@@ -53,25 +53,24 @@ export default plugin(
     theme: {
       colors: colorPalette,
       borderRadius: {
-        none: '0px', // 0
-        sm: '0.25rem', // 4px
-        DEFAULT: '0.5rem', // 8px
-        md: '0.625rem', // 10px
-        lg: '0.75rem', // 12px
-        xl: '1rem', // 16px
+        'none': '0px', // 0
+        'sm': '0.25rem', // 4px
+        'DEFAULT': '0.5rem', // 8px
+        'md': '0.625rem', // 10px
+        'lg': '0.75rem', // 12px
+        'xl': '1rem', // 16px
         '2xl': '1.25rem', // 20px
-        full: '9999px', // 9999px
+        'full': '9999px', // 9999px
       },
       boxShadow: {
-        sm: '0px 1px 2px rgba(0, 0, 0, 0.1)',
-        DEFAULT:
-          '0px 0px 1px rgba(0, 0, 0, 0.45), 0px 1px 2px rgba(0, 0, 0, 0.1)',
-        md: '0px 0px 1px rgba(0, 0, 0, 0.12), 0px 0.5px 2px rgba(0, 0, 0, 0.15), 0px 2px 3px rgba(0, 0, 0, 0.16)',
-        lg: '0px 0px 1px rgba(0, 0, 0, 0.35), 0px 6px 8px -4px rgba(0, 0, 0, 0.1)',
-        xl: '0px 0px 1px rgba(0, 0, 0, 0.19), 0px 1px 2px rgba(0, 0, 0, 0.07), 0px 6px 15px -5px rgba(0, 0, 0, 0.11)',
+        'sm': '0px 1px 2px rgba(0, 0, 0, 0.1)',
+        'DEFAULT': '0px 0px 1px rgba(0, 0, 0, 0.45), 0px 1px 2px rgba(0, 0, 0, 0.1)',
+        'md': '0px 0px 1px rgba(0, 0, 0, 0.12), 0px 0.5px 2px rgba(0, 0, 0, 0.15), 0px 2px 3px rgba(0, 0, 0, 0.16)',
+        'lg': '0px 0px 1px rgba(0, 0, 0, 0.35), 0px 6px 8px -4px rgba(0, 0, 0, 0.1)',
+        'xl': '0px 0px 1px rgba(0, 0, 0, 0.19), 0px 1px 2px rgba(0, 0, 0, 0.07), 0px 6px 15px -5px rgba(0, 0, 0, 0.11)',
         '2xl':
           '0px 0px 1px rgba(0, 0, 0, 0.2), 0px 1px 3px rgba(0, 0, 0, 0.05), 0px 10px 24px -3px rgba(0, 0, 0, 0.1)',
-        none: 'none',
+        'none': 'none',
       },
       container: {
         padding: {
@@ -87,7 +86,7 @@ export default plugin(
             fontWeight: '420',
           },
         ],
-        xs: [
+        'xs': [
           '12px',
           {
             lineHeight: '1.15',
@@ -95,7 +94,7 @@ export default plugin(
             fontWeight: '420',
           },
         ],
-        sm: [
+        'sm': [
           '13px',
           {
             lineHeight: '1.15',
@@ -103,7 +102,7 @@ export default plugin(
             fontWeight: '420',
           },
         ],
-        base: [
+        'base': [
           '14px',
           {
             lineHeight: '1.15',
@@ -111,7 +110,7 @@ export default plugin(
             fontWeight: '420',
           },
         ],
-        lg: [
+        'lg': [
           '16px',
           {
             lineHeight: '1.15',
@@ -119,7 +118,7 @@ export default plugin(
             fontWeight: '400',
           },
         ],
-        xl: [
+        'xl': [
           '18px',
           {
             lineHeight: '1.15',
@@ -293,19 +292,19 @@ export default plugin(
               '--tw-prose-pre-bg': 'var(--ink-gray-8)',
               '--tw-prose-th-borders': 'var(--ink-gray-2)',
               '--tw-prose-td-borders': 'var(--ink-gray-1)',
-              h1: {
+              'h1': {
                 fontWeight: 600,
               },
-              h2: {
+              'h2': {
                 fontWeight: 600,
               },
-              h3: {
+              'h3': {
                 fontWeight: 600,
               },
-              h4: {
+              'h4': {
                 fontWeight: 600,
               },
-              h5: {
+              'h5': {
                 fontWeight: 600,
               },
               'h1 strong': {
@@ -335,31 +334,31 @@ export default plugin(
           },
           sm: {
             css: {
-              fontSize: '14px',
-              fontWeight: 420,
-              lineHeight: 1.5,
-              letterSpacing: '0.02em',
-              h1: {
+              'fontSize': '14px',
+              'fontWeight': 420,
+              'lineHeight': 1.5,
+              'letterSpacing': '0.02em',
+              'h1': {
                 fontSize: em(20, 14),
               },
-              h2: {
+              'h2': {
                 fontSize: em(18, 14),
               },
-              h3: {
+              'h3': {
                 fontSize: em(16, 14),
               },
-              h4: {
+              'h4': {
                 fontSize: em(14, 14),
               },
-              h5: {
+              'h5': {
                 fontSize: em(13, 14),
               },
-              p: {
+              'p': {
                 marginTop: '0.5rem',
                 marginBottom: '0.5rem',
               },
               'ul > li': {
-                margin: '0.5rem 0',
+                'margin': '0.5rem 0',
                 '> p': {
                   margin: '0.5rem 0',
                 },
@@ -374,7 +373,7 @@ export default plugin(
                 },
               },
               'ol > li': {
-                margin: '0.5rem 0',
+                'margin': '0.5rem 0',
                 '> p': {
                   margin: '0.5rem 0',
                 },
@@ -393,7 +392,7 @@ export default plugin(
         }),
       },
     },
-  }
+  },
 )
 
 function em(pixels, base = 16) {

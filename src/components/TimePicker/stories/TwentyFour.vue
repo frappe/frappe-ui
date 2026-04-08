@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import { TimePicker } from 'frappe-ui'
+import { ref } from 'vue'
 
 const val = ref('13:30')
 </script>

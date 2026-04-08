@@ -40,11 +40,11 @@ function convertToJSON(variables) {
     },
   }
 
-  const lightPattern = /^light\/([^\/]+)\/([^\/]+)$/
-  const darkPattern = /^dark\/([^\/]+)\/([^\/]+)$/
-  const neutralPattern = /^neutral\/([^\/]+)$/
-  const whiteOverlayPattern = /^white overlay\/([^\/]+)$/
-  const blackOverlayPattern = /^black overlay\/([^\/]+)$/
+  const lightPattern = /^light\/([^/]+)\/([^/]+)$/
+  const darkPattern = /^dark\/([^/]+)\/([^/]+)$/
+  const neutralPattern = /^neutral\/([^/]+)$/
+  const whiteOverlayPattern = /^white overlay\/([^/]+)$/
+  const blackOverlayPattern = /^black overlay\/([^/]+)$/
 
   const colorMap = {}
 
@@ -66,8 +66,7 @@ function convertToJSON(variables) {
                 output.lightMode[color] = {}
               }
               output.lightMode[color][shade] = variable.value
-              colorMap[`light/${color}/${shade}`] =
-                `lightMode/${color}/${shade}`
+              colorMap[`light/${color}/${shade}`] = `lightMode/${color}/${shade}`
             }
           } else if ((match = name.match(darkPattern))) {
             const [_, color, shade] = match
@@ -106,23 +105,15 @@ function convertToJSON(variables) {
             const value = variable.value.name
             const [category, colorName] = name.split('/')
             const targetCategory = category === 'text-icons' ? 'ink' : category
-            if (
-              mode.name === 'Light' &&
-              output.themedVariables.light[targetCategory]
-            ) {
+            if (mode.name === 'Light' && output.themedVariables.light[targetCategory]) {
               if (colorMap[value]) {
-                output.themedVariables.light[targetCategory][colorName] =
-                  colorMap[value]
+                output.themedVariables.light[targetCategory][colorName] = colorMap[value]
               } else {
                 console.warn(`Reference not found for value: ${value}`)
               }
-            } else if (
-              mode.name === 'Dark' &&
-              output.themedVariables.dark[targetCategory]
-            ) {
+            } else if (mode.name === 'Dark' && output.themedVariables.dark[targetCategory]) {
               if (colorMap[value]) {
-                output.themedVariables.dark[targetCategory][colorName] =
-                  colorMap[value]
+                output.themedVariables.dark[targetCategory][colorName] = colorMap[value]
               } else {
                 console.warn(`Reference not found for value: ${value}`)
               }

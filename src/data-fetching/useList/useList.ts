@@ -1,28 +1,16 @@
-import {
-  computed,
-  MaybeRefOrGetter,
-  reactive,
-  readonly,
-  Ref,
-  ref,
-  toValue,
-} from 'vue'
-import {
-  AfterFetchContext,
-  OnFetchErrorContext,
-  UseFetchOptions,
-} from '@vueuse/core'
-import { useFrappeFetch } from '../useFrappeFetch'
-import { useCall } from '../useCall/useCall'
-import { parseFilters, makeGetParams, normalizeCacheKey } from '../utils'
-import { UseListOptions, UseListResponse } from './types'
-import { idbStore } from '../idbStore'
-import { listStore } from './listStore'
-import { docStore } from '../docStore'
+import type { AfterFetchContext, OnFetchErrorContext, UseFetchOptions } from '@vueuse/core'
+import type { Ref } from 'vue'
+import { computed, MaybeRefOrGetter, reactive, readonly, ref, toValue } from 'vue'
 
-export function useList<T extends { name: string }>(
-  options: UseListOptions<T>,
-) {
+import { docStore } from '../docStore'
+import { idbStore } from '../idbStore'
+import { useCall } from '../useCall/useCall'
+import { useFrappeFetch } from '../useFrappeFetch'
+import { parseFilters, makeGetParams, normalizeCacheKey } from '../utils'
+import { listStore } from './listStore'
+import type { UseListOptions, UseListResponse } from './types'
+
+export function useList<T extends { name: string }>(options: UseListOptions<T>) {
   const {
     doctype,
     fields,
@@ -86,18 +74,9 @@ export function useList<T extends { name: string }>(
     onFetchError: handleFetchError<T>(options),
   }
 
-  const {
-    data,
-    error,
-    isFetching,
-    isFinished,
-    canAbort,
-    aborted,
-    abort,
-    execute,
-  } = useFrappeFetch<UseListResponse<T>>(_url, fetchOptions).get()
-
-
+  const { data, error, isFetching, isFinished, canAbort, aborted, abort, execute } = useFrappeFetch<
+    UseListResponse<T>
+  >(_url, fetchOptions).get()
 
   const result = computed(() => {
     if (normalizedCacheKey && (out.loading || !out.isFinished)) {
@@ -133,9 +112,7 @@ export function useList<T extends { name: string }>(
     if (!refetch) execute()
   }
 
-  const updateRow = (
-    doc: Partial<{ name: string }> & Record<string, unknown>,
-  ) => {
+  const updateRow = (doc: Partial<{ name: string }> & Record<string, unknown>) => {
     if (allData.value == null) return
     let changed = false
     for (let row of allData.value) {

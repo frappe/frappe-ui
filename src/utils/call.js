@@ -5,7 +5,7 @@ export default async function call(method, args, options = {}) {
 
   let headers = Object.assign(
     {
-      Accept: 'application/json',
+      'Accept': 'application/json',
       'Content-Type': 'application/json; charset=utf-8',
       'X-Frappe-Site-Name': window.location.hostname,
     },
@@ -50,9 +50,7 @@ export default async function call(method, args, options = {}) {
       error = JSON.parse(response)
       // eslint-disable-next-line no-empty
     } catch (e) {}
-    let errorParts = [
-      [method, error.exc_type, error._error_message].filter(Boolean).join(' '),
-    ]
+    let errorParts = [[method, error.exc_type, error._error_message].filter(Boolean).join(' ')]
     if (error.exc) {
       exception = error.exc
       try {
@@ -65,9 +63,7 @@ export default async function call(method, args, options = {}) {
     e.exc_type = error.exc_type
     e.exc = exception
     e.status = res.status
-    e.messages = error._server_messages
-      ? JSON.parse(error._server_messages)
-      : []
+    e.messages = error._server_messages ? JSON.parse(error._server_messages) : []
     e.messages = e.messages.concat(error.message)
     e.messages = e.messages.map((m) => {
       try {
@@ -78,9 +74,7 @@ export default async function call(method, args, options = {}) {
     })
     e.messages = e.messages.filter(Boolean)
     if (!e.messages.length) {
-      e.messages = error._error_message
-        ? [error._error_message]
-        : ['Internal Server Error']
+      e.messages = error._error_message ? [error._error_message] : ['Internal Server Error']
     }
 
     if (options.onError) {

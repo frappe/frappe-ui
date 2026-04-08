@@ -8,19 +8,11 @@ describe('MonthPicker', () => {
     cy.mount(MonthPicker)
 
     cy.get('[role=dialog]').should('not.exist')
-    cy.get('[aria-haspopup="dialog"]').should(
-      'have.attr',
-      'aria-expanded',
-      'false',
-    )
+    cy.get('[aria-haspopup="dialog"]').should('have.attr', 'aria-expanded', 'false')
 
     cy.get('button').click()
 
-    cy.get('[aria-haspopup="dialog"]').should(
-      'have.attr',
-      'aria-expanded',
-      'true',
-    )
+    cy.get('[aria-haspopup="dialog"]').should('have.attr', 'aria-expanded', 'true')
     cy.get('[role=dialog]').should('exist')
   })
 
@@ -32,10 +24,7 @@ describe('MonthPicker', () => {
 
     cy.get('[aria-label="previous"]').click()
 
-    cy.get('[aria-label="Toggle view mode"]').should(
-      'have.text',
-      currentYear - 1,
-    )
+    cy.get('[aria-label="Toggle view mode"]').should('have.text', currentYear - 1)
 
     cy.get('[aria-label="next"]').click()
 

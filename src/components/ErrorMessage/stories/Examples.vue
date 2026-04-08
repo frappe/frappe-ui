@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import { ErrorMessage } from 'frappe-ui'
+import { ref } from 'vue'
 
 const message = ref('Invalid value')
 </script>

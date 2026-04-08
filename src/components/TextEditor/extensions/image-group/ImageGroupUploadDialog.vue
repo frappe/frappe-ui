@@ -27,30 +27,26 @@
             @update:modelValue="(val) => (columns = +val)"
           />
         </div>
-        <div
-          v-if="images && images.length"
-          class="grid gap-px mb-4"
-          :style="gridStyle"
-        >
+        <div v-if="images && images.length" class="mb-4 grid gap-px" :style="gridStyle">
           <div
             v-for="(item, idx) in images"
             :key="item.id"
-            class="relative aspect-square w-full h-full overflow-hidden group bg-surface-white"
+            class="group relative aspect-square h-full w-full overflow-hidden bg-surface-white"
             :draggable="true"
             @dragstart="onDragStart(idx)"
             @dragover="onDragOver($event, idx)"
             @drop="onDrop($event)"
             @dragend="onDragEnd"
             @dragleave="onDragLeave($event, idx)"
-            :class="{ 'ring-2 ring-primary-400 z-10': isDropTarget(idx) }"
+            :class="{ 'ring-primary-400 z-10 ring-2': isDropTarget(idx) }"
           >
             <button
               type="button"
-              class="absolute top-1 right-1 z-10 bg-white/80 hover:bg-white rounded-full p-1 shadow transition-opacity opacity-0 group-hover:opacity-100 focus:opacity-100"
+              class="absolute right-1 top-1 z-10 rounded-full bg-white/80 p-1 opacity-0 shadow transition-opacity hover:bg-white focus:opacity-100 group-hover:opacity-100"
               aria-label="Remove image"
               @click.stop="removeImage(idx)"
             >
-              <LucideX class="w-4 h-4 text-gray-700" />
+              <LucideX class="h-4 w-4 text-gray-700" />
             </button>
 
             <!-- Existing images from edit mode -->
@@ -58,11 +54,11 @@
               <img
                 :src="item.existing?.src"
                 :alt="item.existing?.alt || ''"
-                class="object-cover w-full h-full rounded-[2px]"
+                class="h-full w-full rounded-[2px] object-cover"
               />
               <!-- Caption overlay -->
               <div
-                class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent rounded-b-[2px] transition-opacity"
+                class="absolute bottom-0 left-0 right-0 rounded-b-[2px] bg-gradient-to-t from-black/60 to-transparent transition-opacity"
                 :class="
                   editingCaption === `${item.type}-${idx}`
                     ? 'opacity-100'
@@ -71,16 +67,11 @@
               >
                 <div
                   v-if="editingCaption !== `${item.type}-${idx}`"
-                  class="p-2 cursor-pointer"
-                  @click.stop="
-                    startEditingCaption(
-                      `${item.type}-${idx}`,
-                      item.existing?.alt || '',
-                    )
-                  "
+                  class="cursor-pointer p-2"
+                  @click.stop="startEditingCaption(`${item.type}-${idx}`, item.existing?.alt || '')"
                 >
                   <div
-                    class="text-white text-xs truncate"
+                    class="truncate text-xs text-white"
                     :title="item.existing?.alt || 'Click to add caption'"
                   >
                     {{ item.existing?.alt || 'Add caption...' }}
@@ -91,11 +82,9 @@
                     :ref="(el) => (captionInputRef = el as HTMLInputElement)"
                     v-model="captionEditValue"
                     @blur="handleCaptionBlur(`${item.type}-${idx}`, idx)"
-                    @keydown.enter.prevent="
-                      saveCaption(`${item.type}-${idx}`, idx)
-                    "
+                    @keydown.enter.prevent="saveCaption(`${item.type}-${idx}`, idx)"
                     @keydown.escape="cancelEditingCaption"
-                    class="w-full text-xs bg-white/90 text-gray-900 px-1 py-0.5 rounded-sm border-none outline-none"
+                    class="w-full rounded-sm border-none bg-white/90 px-1 py-0.5 text-xs text-gray-900 outline-none"
                     placeholder="Add caption..."
                     maxlength="200"
                   />
@@ -107,10 +96,10 @@
             <template v-else-if="item.type === 'file' && item.file">
               <template v-if="!isImageSupported(item.file)">
                 <div
-                  class="flex flex-col items-center justify-center w-full h-full text-ink-gray-4 bg-surface-gray-1 rounded-[2px]"
+                  class="flex h-full w-full flex-col items-center justify-center rounded-[2px] bg-surface-gray-1 text-ink-gray-4"
                 >
                   <span
-                    class="text-p-xs text-ink-gray-4 w-full text-center px-2 mt-1"
+                    class="mt-1 w-full px-2 text-center text-p-xs text-ink-gray-4"
                     :title="item.file.name"
                   >
                     {{ item.file.name }}
@@ -120,12 +109,12 @@
               <template v-else-if="item.file.type.startsWith('image/')">
                 <img
                   :src="filePreview(item.file)"
-                  class="object-cover w-full h-full rounded-[2px]"
+                  class="h-full w-full rounded-[2px] object-cover"
                   :alt="item.alt || ''"
                 />
                 <!-- Caption overlay -->
                 <div
-                  class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent rounded-b-[2px] transition-opacity"
+                  class="absolute bottom-0 left-0 right-0 rounded-b-[2px] bg-gradient-to-t from-black/60 to-transparent transition-opacity"
                   :class="
                     editingCaption === `${item.type}-${idx}`
                       ? 'opacity-100'
@@ -134,13 +123,11 @@
                 >
                   <div
                     v-if="editingCaption !== `${item.type}-${idx}`"
-                    class="p-2 cursor-pointer"
-                    @click.stop="
-                      startEditingCaption(`${item.type}-${idx}`, item.alt || '')
-                    "
+                    class="cursor-pointer p-2"
+                    @click.stop="startEditingCaption(`${item.type}-${idx}`, item.alt || '')"
                   >
                     <div
-                      class="text-white text-xs truncate"
+                      class="truncate text-xs text-white"
                       :title="item.alt || 'Click to add caption'"
                     >
                       {{ item.alt || 'Add caption...' }}
@@ -151,11 +138,9 @@
                       ref="captionInput"
                       v-model="captionEditValue"
                       @blur="handleCaptionBlur(`${item.type}-${idx}`, idx)"
-                      @keydown.enter.prevent="
-                        saveCaption(`${item.type}-${idx}`, idx)
-                      "
+                      @keydown.enter.prevent="saveCaption(`${item.type}-${idx}`, idx)"
                       @keydown.escape="cancelEditingCaption"
-                      class="w-full text-xs bg-white/90 text-gray-900 px-1 py-0.5 rounded border-none outline-none"
+                      class="w-full rounded border-none bg-white/90 px-1 py-0.5 text-xs text-gray-900 outline-none"
                       placeholder="Add caption..."
                       maxlength="200"
                     />
@@ -166,41 +151,33 @@
           </div>
         </div>
         <div v-if="images && images.length" class="text-p-sm text-ink-gray-5">
-          Upload more images by dropping them anywhere in this window. Reorder
-          images by dragging them. Hover over an image to edit caption.
+          Upload more images by dropping them anywhere in this window. Reorder images by dragging
+          them. Hover over an image to edit caption.
         </div>
-        <div
-          v-else
-          class="flex flex-col items-center justify-center min-h-[200px]"
-        >
+        <div v-else class="flex min-h-[200px] flex-col items-center justify-center">
           <div
-            class="w-full flex flex-1 flex-col items-center justify-center border border-outline-gray-2 rounded-lg bg-surface-gray-1 h-full cursor-pointer transition hover:border-primary-400 hover:bg-primary-50 text-center"
+            class="hover:border-primary-400 hover:bg-primary-50 flex h-full w-full flex-1 cursor-pointer flex-col items-center justify-center rounded-lg border border-outline-gray-2 bg-surface-gray-1 text-center transition"
             @click="triggerFileInput"
             @dragover.prevent
             @drop.prevent="onDrop"
           >
-            <div class="text-ink-gray-4 mb-2">
+            <div class="mb-2 text-ink-gray-4">
               <LucideImagePlus class="size-6" />
             </div>
-            <div class="text-ink-gray-5 text-sm font-medium">
+            <div class="text-sm font-medium text-ink-gray-5">
               Drag & drop images here or click to select
             </div>
           </div>
         </div>
         <div v-if="uploading">
-          <div class="mb-2 text-sm">
-            Uploading: {{ uploadedCount }}/{{ totalCount }}
-          </div>
-          <div class="w-full bg-gray-200 rounded h-2 overflow-hidden">
+          <div class="mb-2 text-sm">Uploading: {{ uploadedCount }}/{{ totalCount }}</div>
+          <div class="h-2 w-full overflow-hidden rounded bg-gray-200">
             <div
-              class="bg-surface-gray-5 h-2 transition-all"
+              class="h-2 bg-surface-gray-5 transition-all"
               :style="{ width: uploadProgress + '%' }"
             ></div>
           </div>
-          <div
-            v-if="uploadErrors && uploadErrors.some((e) => e)"
-            class="mt-2 text-red-500 text-xs"
-          >
+          <div v-if="uploadErrors && uploadErrors.some((e) => e)" class="mt-2 text-xs text-red-500">
             Some files failed to upload.
           </div>
         </div>
@@ -208,9 +185,7 @@
     </template>
     <template #actions>
       <div class="flex justify-end gap-2">
-        <Button variant="ghost" :disabled="uploading" @click="handleCancel">
-          Cancel
-        </Button>
+        <Button variant="ghost" :disabled="uploading" @click="handleCancel"> Cancel </Button>
         <Button
           v-if="props.mode === 'edit'"
           variant="solid"
@@ -242,33 +217,24 @@
     >
       <div
         v-if="isFileDragging"
-        class="fixed inset-0 z-50 bg-gray-900/60 pointer-events-none flex items-center justify-center"
+        class="pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60"
       >
-        <div class="text-ink-gray-1 text-base font-medium">
-          Drop images anywhere
-        </div>
+        <div class="text-base font-medium text-ink-gray-1">Drop images anywhere</div>
       </div>
     </Transition>
   </Teleport>
 </template>
 
 <script setup lang="ts">
-import {
-  computed,
-  ref,
-  onMounted,
-  onUnmounted,
-  watch,
-  nextTick,
-  useTemplateRef,
-} from 'vue'
-import Dialog from '../../../Dialog/Dialog.vue'
-import Button from '../../../Button/Button.vue'
-import Select from '../../../Select/Select.vue'
 import type { Editor } from '@tiptap/vue-3'
-import type { UploadedFile } from '../../../../utils/useFileUpload'
-import LucideX from '~icons/lucide/x'
+import { computed, ref, onMounted, onUnmounted, watch, nextTick, useTemplateRef } from 'vue'
 import LucideImagePlus from '~icons/lucide/image-plus'
+import LucideX from '~icons/lucide/x'
+
+import type { UploadedFile } from '../../../../utils/useFileUpload'
+import Button from '../../../Button/Button.vue'
+import Dialog from '../../../Dialog/Dialog.vue'
+import Select from '../../../Select/Select.vue'
 
 interface UploadResult {
   success: boolean
@@ -336,9 +302,7 @@ watch(
   () => props.modelValue,
   (isOpen) => {
     if (isOpen && props.mode === 'edit') {
-      const existingItems = (props.existingImages || []).map(
-        createExistingImageItem,
-      )
+      const existingItems = (props.existingImages || []).map(createExistingImageItem)
       const fileItems = (props.files || []).map(createImageItem)
       images.value = [...existingItems, ...fileItems]
 
@@ -359,9 +323,7 @@ watch(
   () => props.existingImages,
   (newExistingImages) => {
     if (props.modelValue && props.mode === 'edit') {
-      const existingItems = (newExistingImages || []).map(
-        createExistingImageItem,
-      )
+      const existingItems = (newExistingImages || []).map(createExistingImageItem)
       const fileItems = (props.files || []).map(createImageItem)
       images.value = [...existingItems, ...fileItems]
     }
@@ -500,13 +462,14 @@ function addFiles(files: File[]) {
   const imageFiles = files.filter((file) => file.type.startsWith('image/'))
   const newImageItems = imageFiles.map(createImageItem)
 
-  const existingFileSignatures = images.value
-    .filter((item) => item.type === 'file' && item.file)
-    .map((item) => `${item.file!.name}-${item.file!.size}`)
+  const existingFileSignatures = new Set(
+    images.value
+      .filter((item) => item.type === 'file' && item.file)
+      .map((item) => `${item.file!.name}-${item.file!.size}`),
+  )
 
   const uniqueNewItems = newImageItems.filter(
-    (item) =>
-      !existingFileSignatures.includes(`${item.file!.name}-${item.file!.size}`),
+    (item) => !existingFileSignatures.has(`${item.file!.name}-${item.file!.size}`),
   )
 
   images.value.push(...uniqueNewItems)
@@ -621,11 +584,7 @@ function onDragLeave(e: DragEvent, idx: number) {
 }
 
 function isDropTarget(idx: number) {
-  return (
-    overIndex.value === idx &&
-    draggedIndex.value !== null &&
-    draggedIndex.value !== idx
-  )
+  return overIndex.value === idx && draggedIndex.value !== null && draggedIndex.value !== idx
 }
 
 function onDragOverWindow(e: DragEvent) {
@@ -725,9 +684,7 @@ async function uploadFiles(files: File[]): Promise<UploadResult[]> {
       return { success: false, error: err }
     } finally {
       uploadedCount.value++
-      uploadProgress.value = Math.round(
-        (uploadedCount.value / totalCount.value) * 100,
-      )
+      uploadProgress.value = Math.round((uploadedCount.value / totalCount.value) * 100)
     }
   })
 

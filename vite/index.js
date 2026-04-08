@@ -1,8 +1,8 @@
-import { lucideIcons } from './lucideIcons.js'
+import { buildConfig } from './buildConfig.js'
 import { frappeProxy } from './frappeProxy.js'
 import { frappeTypes } from './frappeTypes.js'
 import { jinjaBootData } from './jinjaBootData.js'
-import { buildConfig } from './buildConfig.js'
+import { lucideIcons } from './lucideIcons.js'
 import { siteBanner } from './siteBanner.js'
 
 function frappeuiPlugin(options = {}) {
