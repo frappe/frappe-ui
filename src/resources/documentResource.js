@@ -1,4 +1,4 @@
-import { reactive, watch } from 'vue'
+import { reactive, watch, effectScope } from 'vue'
 import { getCacheKey, createResource } from './resources'
 import {
   updateRowInListResource,
@@ -143,16 +143,20 @@ export function createDocumentResource(options, vm) {
     setDoc,
   })
 
-  // keep track of isDirty as doc changes
-  watch(
-    () => out.doc,
-    () => {
-      out.isDirty = JSON.stringify(out.doc) !== JSON.stringify(out.originalDoc)
-    },
-    {
-      deep: true,
-    },
-  )
+  // keep track of isDirty as doc changes, use effectScope to handle isDirty state reactivity for cached data
+  const scope = effectScope(true)
+  scope.run(() => {
+    watch(
+      () => out.doc,
+      () => {
+        out.isDirty =
+          JSON.stringify(out.doc) !== JSON.stringify(out.originalDoc)
+      },
+      {
+        deep: true,
+      },
+    )
+  })
 
   for (let methodKey in options.whitelistedMethods) {
     let methodOptions = options.whitelistedMethods[methodKey]
