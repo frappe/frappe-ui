@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import type { FilterProps, StateRow } from "./types";
 
 import {
@@ -7,6 +7,7 @@ import {
   getOperators,
   getValueControl,
   parseFilters,
+  reverseOperatorMap,
 } from "./utils";
 
 import Badge from "../../src/components/Badge/Badge.vue";
@@ -19,13 +20,13 @@ import { createResource } from "../../src/resources";
 import FilterIcon from "../Icons/FilterIcon.vue";
 
 let props = defineProps<FilterProps>();
+const model = defineModel<any[]>();
 
 const doctypeFields = createResource({
   url: "frappe.desk.form.load.getdoctype",
   method: "GET",
   params: { doctype: props.doctype },
   auto: true,
-
   transform(data) {
     const options = data.docs[0].fields.map((x) => {
       return {
@@ -41,6 +42,9 @@ const doctypeFields = createResource({
 
     return options;
   },
+  onSuccess(data) {
+    setFilters()
+  }
 });
 
 const dummyObj = () => ({
@@ -51,6 +55,40 @@ const dummyObj = () => ({
 
 const rows = ref([dummyObj()]);
 const insertRow = () => rows.value.push(dummyObj());
+
+watch(
+  () => model.value,
+  () => setFilters(),
+  { deep: true }
+);
+
+const setFilters = () => {
+  if (!doctypeFields.data?.length || !model.value?.length) return;
+
+  const _filters = model.value
+    .map((filter: any) => {
+      let [fieldName, operator, value] = filter;
+      const field = doctypeFields.data.find((f: any) => f.value === fieldName);
+      if (!field) return null;
+
+      if (field.type === "Check") {
+        value = value ? "Yes" : "No"
+      }
+
+      return {
+        field: {
+          fieldName: field.value,
+          fieldType: field.type,
+          options: field.options,
+        },
+        operator: reverseOperatorMap[operator] || operator,
+        value: value,
+      };
+    })
+    .filter((row) => row !== null) as StateRow[];
+
+  rows.value = _filters as typeof rows.value;
+}
 
 const clearRows = (closePopup: () => void) => {
   rows.value = [dummyObj()];
@@ -84,7 +122,6 @@ const updateFilter = (val: string, index: number) => {
   apply();
 };
 
-const model = defineModel();
 const apply = () => {
   model.value = parseFilters(rows.value);
 };
