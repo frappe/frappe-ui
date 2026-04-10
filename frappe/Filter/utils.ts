@@ -220,6 +220,10 @@ const operatorMap = {
   timespan: 'timespan',
 }
 
+export const reverseOperatorMap = Object.fromEntries(
+  Object.entries(operatorMap).map(([key, value]) => [value, key])
+);
+
 export const parseFilters = (filters: any) => {
   const _filters = JSON.parse(JSON.stringify(filters))
 

@@ -5,6 +5,7 @@ export type AxisChartConfig = {
   title: string
   subtitle?: string
   colors?: string[]
+  isRTL?: boolean
   xAxis: {
     key: string
     type: 'category' | 'time' | 'value'
@@ -72,6 +73,7 @@ export type DonutChartConfig = {
   title: string
   subtitle?: string
   colors?: string[]
+  isRTL?: boolean
   categoryColumn: string
   valueColumn: string
   maxSliceCount?: number
@@ -86,6 +88,7 @@ export type FunnelChartConfig = {
   title: string
   subtitle?: string
   colors?: string[]
+  isRTL?: boolean
   categoryColumn: string
   valueColumn: string
   showPercentages?: boolean

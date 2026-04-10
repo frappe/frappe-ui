@@ -1,0 +1,44 @@
+.calendar-column {
+  position: relative;
+}
+
+.calendar-column ::before {
+  content: attr(data-time-attr);
+  position: absolute;
+  left: -45px;
+  top: -9px;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.event {
+  background-color: var(--bg);
+}
+.event .event-title {
+  color: var(--text);
+}
+.event .event-subtitle {
+  color: var(--subtext);
+}
+.event .event-border {
+  background-color: var(--border);
+}
+.event.active {
+  background-color: var(--bg-active);
+}
+.event.active .event-title {
+  color: var(--text-active, #fff);
+}
+.event.active .event-subtitle {
+  color: var(--subtext-active);
+}
+.event.active .event-border {
+  background-color: var(--border-active);
+}
+.event:not(.active):hover {
+  background-color: var(--bg-hover);
+}
+.event:not(.active) .past,
+.event.past:not(.active) {
+  opacity: 0.5;
+}

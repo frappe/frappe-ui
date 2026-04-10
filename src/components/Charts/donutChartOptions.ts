@@ -3,6 +3,7 @@ import { formatValue } from './helpers'
 import { DonutChartConfig } from './types'
 
 export default function useDonutChartOptions(config: DonutChartConfig) {
+  const isRTL = config.isRTL
   let data = config.data || []
 
   data = data.sort((a, b) => {
@@ -44,7 +45,7 @@ export default function useDonutChartOptions(config: DonutChartConfig) {
     animationDuration: 700,
     color: config.colors,
     textStyle: { fontFamily: ['InterVar', 'sans-serif'] },
-    title: getTitleOptions(config.title, config.subtitle),
+    title: getTitleOptions(config.title, config.subtitle, isRTL),
     dataset: {
       source: [
         [config.categoryColumn, config.valueColumn],
@@ -117,13 +118,14 @@ export default function useDonutChartOptions(config: DonutChartConfig) {
       confine: true,
       appendToBody: false,
       formatter: function (params: any) {
+        const dirAttr = isRTL ? ' dir="rtl"' : ''
         const p = params as any
         const value = p.value[1]
         const percentage = total > 0 ? (value / total) * 100 : 0
         const formatted = isNaN(value) ? value : formatValue(value, 1, true)
         const formattedPercentage = percentage.toFixed(0)
         return `
-          <div class="flex items-center justify-between gap-5">
+          <div${dirAttr} class="flex items-center justify-between gap-5">
             <div>${p.name}</div>
             <div class="font-bold">
               ${formatted} (${formattedPercentage}%)

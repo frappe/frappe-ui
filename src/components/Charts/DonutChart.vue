@@ -13,7 +13,11 @@ const props = defineProps<{ config: DonutChartConfig }>()
 const error = ref('')
 const options = computed(() => {
   try {
-    return useDonutChartOptions(props.config)
+    const config = {
+      ...props.config,
+      isRTL: props.config.isRTL ?? document.documentElement.dir === 'rtl',
+    }
+    return useDonutChartOptions(config)
   } catch (e: any) {
     error.value = e.message
     return {}

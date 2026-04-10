@@ -62,14 +62,22 @@
       :currentMonthDates="currentMonthDates"
       :config="overrideConfig"
       @setCurrentDate="(d) => updateCurrentDate(d)"
-    />
+    >
+      <template #event-popover-content="slotProps">
+        <slot name="event-popover-content" v-bind="slotProps" />
+      </template>
+    </CalendarMonthly>
 
     <CalendarWeekly
       v-else-if="activeView === 'Week'"
       :events="events"
       :weeklyDates="datesInWeeks[week]"
       :config="overrideConfig"
-    />
+    >
+      <template #event-popover-content="slotProps">
+        <slot name="event-popover-content" v-bind="slotProps" />
+      </template>
+    </CalendarWeekly>
 
     <CalendarDaily
       v-else-if="activeView === 'Day'"
@@ -82,6 +90,9 @@
           name="daily-header"
           v-bind="{ parseDateWithDay, currentDate, fullDay }"
         />
+      </template>
+      <template #event-popover-content="slotProps">
+        <slot name="event-popover-content" v-bind="slotProps" />
       </template>
     </CalendarDaily>
 
@@ -121,6 +132,7 @@ import CalendarWeekly from './CalendarWeekly.vue'
 import CalendarDaily from './CalendarDaily.vue'
 import NewEventModal from './NewEventModal.vue'
 import useEventModal from './composables/useEventModal'
+import { isAnyPopoverOpen } from './useEventBase.js'
 
 const props = defineProps({
   events: {
@@ -321,6 +333,11 @@ function openModal(data) {
 }
 
 function handleCellClick(e, date, time = '', isFullDay = false) {
+  if (isAnyPopoverOpen.value) {
+	isAnyPopoverOpen.value = false
+    return
+  }
+
   const data = {
     e,
     view: activeView.value,
@@ -623,6 +640,7 @@ function getVisibleRange() {
     const weekDates = datesInWeeks.value[week.value] || []
     if (!weekDates.length) return null
     const orderedWeek = [...weekDates].sort((a, b) => a - b)
+    const start = dayjs(orderedWeek[0]).startOf('day')
     const end = dayjs(orderedWeek[orderedWeek.length - 1]).endOf('day')
     return {
       startDate: toDateString(start),

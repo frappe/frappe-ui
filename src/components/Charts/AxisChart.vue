@@ -13,7 +13,11 @@ const props = defineProps<{ config: AxisChartConfig }>()
 const error = ref('')
 const options = computed(() => {
   try {
-    return useAxisChartOptions(props.config)
+    const config = {
+      ...props.config,
+      isRTL: props.config.isRTL ?? document.documentElement.dir === 'rtl',
+    }
+    return useAxisChartOptions(config)
   } catch (e: any) {
     error.value = e.message
     return {}
