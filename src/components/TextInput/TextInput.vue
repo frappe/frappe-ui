@@ -6,7 +6,7 @@
   >
     <div
       :class="[
-        'absolute inset-y-0 left-0 flex items-center',
+        'absolute inset-y-0 start-0 flex items-center',
         textColor,
         prefixClasses,
       ]"
@@ -29,7 +29,7 @@
     />
     <div
       :class="[
-        'absolute inset-y-0 right-0 flex items-center',
+        'absolute inset-y-0 end-0 flex items-center',
         textColor,
         suffixClasses,
       ]"
@@ -94,23 +94,23 @@ const inputClasses = computed(() => {
   let paddingClasses = {
     sm: [
       'py-1.5',
-      slots.prefix ? 'pl-8' : 'pl-2',
-      slots.suffix ? 'pr-8' : 'pr-2',
+      slots.prefix ? 'ps-8' : 'ps-2',
+      slots.suffix ? 'pe-8' : 'pe-2',
     ],
     md: [
       'py-1.5',
-      slots.prefix ? 'pl-9' : 'pl-2.5',
-      slots.suffix ? 'pr-9' : 'pr-2.5',
+      slots.prefix ? 'ps-9' : 'ps-2.5',
+      slots.suffix ? 'pe-9' : 'pe-2.5',
     ],
     lg: [
       'py-1.5',
-      slots.prefix ? 'pl-10' : 'pl-3',
-      slots.suffix ? 'pr-10' : 'pr-3',
+      slots.prefix ? 'ps-10' : 'ps-3',
+      slots.suffix ? 'pe-10' : 'pe-3',
     ],
     xl: [
       'py-1.5',
-      slots.prefix ? 'pl-10' : 'pl-3',
-      slots.suffix ? 'pr-10' : 'pr-3',
+      slots.prefix ? 'ps-10' : 'ps-3',
+      slots.suffix ? 'pe-10' : 'pe-3',
     ],
   }[props.size]
 
@@ -140,19 +140,19 @@ const inputClasses = computed(() => {
 
 let prefixClasses = computed(() => {
   return {
-    sm: 'pl-2',
-    md: 'pl-2.5',
-    lg: 'pl-3',
-    xl: 'pl-3',
+    sm: 'ps-2',
+    md: 'ps-2.5',
+    lg: 'ps-3',
+    xl: 'ps-3',
   }[props.size]
 })
 
 let suffixClasses = computed(() => {
   return {
-    sm: 'pr-2',
-    md: 'pr-2.5',
-    lg: 'pr-3',
-    xl: 'pr-3',
+    sm: 'pe-2',
+    md: 'pe-2.5',
+    lg: 'pe-3',
+    xl: 'pe-3',
   }[props.size]
 })
 

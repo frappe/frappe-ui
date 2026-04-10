@@ -22,6 +22,7 @@ export default function useAxisChartOptions(config: AxisChartConfig) {
     throw new Error('Swap axes is not supported for non-bar series or y2 axis')
   }
 
+  const isRTL = config.isRTL
   const swapXY = config.swapXY
   const lastBarSeriesIdx = config.series
     .slice()
@@ -39,7 +40,7 @@ export default function useAxisChartOptions(config: AxisChartConfig) {
       labelPosition = idx == lastBarSeriesIdx ? 'top' : 'inside'
     }
     if (s.type == 'bar' && swapXY) {
-      labelPosition = 'right'
+      labelPosition = isRTL ? 'left' : 'right'
     }
 
     const standardSeriesOptions = {
@@ -90,7 +91,11 @@ export default function useAxisChartOptions(config: AxisChartConfig) {
 }
 
 function getBarSeriesOptions(config: AxisChartConfig, series: BarSeriesConfig) {
-  const roundedCorners = config.swapXY ? [0, 2, 2, 0] : [2, 2, 0, 0]
+  const isRTL = config.isRTL
+  let roundedCorners = config.swapXY ? [0, 2, 2, 0] : [2, 2, 0, 0]
+  if (config.swapXY && isRTL) {
+    roundedCorners = [2, 0, 0, 2]
+  }
   const idx = config.series.findIndex((s) => s.name === series.name)
   const lastBarSeriesIdx = config.series
     .slice()

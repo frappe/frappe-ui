@@ -13,7 +13,11 @@ const props = defineProps<{ config: FunnelChartConfig }>()
 const error = ref('')
 const options = computed(() => {
   try {
-    return useFunnelChartOptions(props.config)
+    const config = {
+      ...props.config,
+      isRTL: props.config.isRTL ?? document.documentElement.dir === 'rtl',
+    }
+    return useFunnelChartOptions(config)
   } catch (e: any) {
     error.value = e.message
     return {}
