@@ -123,7 +123,7 @@ let showGroupedRows = computed(() => {
 })
 
 function toggleRow(row) {
-  if (!selections.delete(row)) {
+  if (!selections.delete(row) && !row.disabled) {
     selections.add(row)
   }
 }
@@ -135,11 +135,19 @@ function toggleAllRows(select) {
   }
   if (showGroupedRows.value) {
     props.rows.forEach((row) => {
-      row.rows.forEach((r) => selections.add(r[props.rowKey]))
+     row.rows.forEach((r) => {
+        if (!r.disabled) {
+          selections.add(r[props.rowKey])
+        }
+      })
     })
     return
   }
-  props.rows.forEach((row) => selections.add(row[props.rowKey]))
+  props.rows.forEach((row) => {
+    if (!row.disabled) {
+      selections.add(row[props.rowKey])
+    }
+  })
 }
 
 provide(

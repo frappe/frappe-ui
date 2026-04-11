@@ -23,6 +23,10 @@
     >
       <div
         class="grid items-center gap-4 px-2"
+        :class="{
+          'cursor-not-allowed': props.row.disabled,
+          'opacity-50': props.row.disabled,
+        }"
         :style="{
           height: rowHeight,
           gridTemplateColumns: getGridTemplateColumns(
@@ -39,6 +43,7 @@
         >
           <Checkbox
             :modelValue="isSelected"
+            :disabled="props.row.disabled"
             class="cursor-pointer duration-300"
             @click.stop="handleCheckboxClick"
           />
@@ -193,9 +198,11 @@ const handleCheckboxClick = (event) => {
     const start = Math.min(lastIndex, curIndex)
     const end = Math.max(lastIndex, curIndex)
     for (let i = start; i <= end; i++) {
+      if (rows[i].disabled) continue
       list.value.selections.add(rows[i][list.value.rowKey])
     }
   } else {
+    if (props.row.disabled) return
     list.value.toggleRow(value)
   }
 }
