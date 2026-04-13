@@ -13,9 +13,14 @@ const props = defineProps<{ config: AxisChartConfig }>()
 const error = ref('')
 const options = computed(() => {
   try {
-    const config = {
+    const config: AxisChartConfig = {
       ...props.config,
-      isRTL: props.config.isRTL ?? document.documentElement.dir === 'rtl',
+      dir:
+        props.config.dir ??
+        (typeof document !== 'undefined' &&
+        document.documentElement.dir === 'rtl'
+          ? 'rtl'
+          : 'ltr'),
     }
     return useAxisChartOptions(config)
   } catch (e: any) {

@@ -8,10 +8,18 @@ import {
 } from 'reka-ui'
 
 import type { TabProps } from './types'
-import { h } from 'vue'
+import { computed, h } from 'vue'
 
 const props = defineProps<TabProps>()
 const model = defineModel<string | number>({ default: 0 })
+
+const dir = computed<'rtl' | 'ltr'>(
+  () =>
+    props.dir ??
+    (typeof document !== 'undefined' && document.documentElement.dir === 'rtl'
+      ? 'rtl'
+      : 'ltr'),
+)
 
 const indicatorXCss = `left-0 bottom-0 h-[2px] w-[--reka-tabs-indicator-size] transition-[width,transform]
                           translate-x-[--reka-tabs-indicator-position] translate-y-[1px]`
@@ -25,16 +33,21 @@ const Btn = h('button')
 
 defineSlots<{
   /** Custom renderer for a tab trigger (icon + label / router-link). */
-  'tab-item'?: (props: { tab: { label: string; icon?: string; route?: string } }) => any
+  'tab-item'?: (props: {
+    tab: { label: string; icon?: string; route?: string }
+  }) => any
 
   /** Content rendered for each tab panel. */
-  'tab-panel'?: (props: { tab: { label: string; icon?: string; route?: string } }) => any
+  'tab-panel'?: (props: {
+    tab: { label: string; icon?: string; route?: string }
+  }) => any
 }>()
 </script>
 
 <template>
   <TabsRoot
     :as="props.as"
+    :dir="dir"
     class="flex flex-1 overflow-hidden flex-col data-[orientation=vertical]:flex-row"
     :orientation="props.vertical ? 'vertical' : 'horizontal'"
     :default-value="props.tabs[0].label"

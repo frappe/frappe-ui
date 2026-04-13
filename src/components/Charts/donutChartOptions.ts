@@ -3,7 +3,7 @@ import { formatValue } from './helpers'
 import { DonutChartConfig } from './types'
 
 export default function useDonutChartOptions(config: DonutChartConfig) {
-  const isRTL = config.isRTL
+  const isRTL = config.dir === 'rtl'
   let data = config.data || []
 
   data = data.sort((a, b) => {
