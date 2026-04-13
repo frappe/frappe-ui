@@ -18,4 +18,7 @@ export interface TabProps {
 
   /** Renders tabs vertically instead of horizontally */
   vertical?: boolean
+
+  /** Forces layout direction; defaults to document.documentElement.dir */
+  dir?: 'rtl' | 'ltr'
 }

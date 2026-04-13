@@ -86,7 +86,7 @@ const switchCircleClasses = computed(() => {
   ]
 })
 
-const iconClasses = 'mr-2 h-4 w-4 flex-shrink-0 text-ink-gray-6'
+const iconClasses = 'me-2 h-4 w-4 flex-shrink-0 text-ink-gray-6'
 const switchLabelClasses = computed(() => {
   return [
     'font-medium leading-normal',
@@ -103,7 +103,7 @@ const switchGroupClasses = computed(() => {
   const classes = ['flex justify-between']
   if (!props.description) {
     classes.push(
-      'group items-center space-x-3 py-1.5 cursor-pointer rounded focus-visible:bg-surface-gray-2 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-outline-gray-3',
+      'group items-center gap-x-3 py-1.5 cursor-pointer rounded focus-visible:bg-surface-gray-2 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-outline-gray-3',
     )
 
     classes.push(
@@ -113,7 +113,7 @@ const switchGroupClasses = computed(() => {
     )
   } else {
     classes.push('items-start')
-    classes.push(props.size === 'md' ? 'space-x-3.5' : 'space-x-2.5')
+    classes.push(props.size === 'md' ? 'gap-x-3.5' : 'gap-x-2.5')
   }
 
   return classes
