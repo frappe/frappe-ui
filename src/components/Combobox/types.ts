@@ -51,4 +51,7 @@ export interface ComboboxProps {
 
   /** Dropdown placement relative to the input */
   placement?: 'start' | 'center' | 'end'
+
+  /** Custom Value if no results found & based on searchterm*/
+  allowCustomValue?: boolean
 }
