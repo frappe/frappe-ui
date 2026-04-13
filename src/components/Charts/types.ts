@@ -5,7 +5,8 @@ export type AxisChartConfig = {
   title: string
   subtitle?: string
   colors?: string[]
-  isRTL?: boolean
+  /** Forces layout direction; defaults to document.documentElement.dir */
+  dir?: 'rtl' | 'ltr'
   xAxis: {
     key: string
     type: 'category' | 'time' | 'value'
@@ -73,7 +74,8 @@ export type DonutChartConfig = {
   title: string
   subtitle?: string
   colors?: string[]
-  isRTL?: boolean
+  /** Forces layout direction; defaults to document.documentElement.dir */
+  dir?: 'rtl' | 'ltr'
   categoryColumn: string
   valueColumn: string
   maxSliceCount?: number
@@ -88,7 +90,8 @@ export type FunnelChartConfig = {
   title: string
   subtitle?: string
   colors?: string[]
-  isRTL?: boolean
+  /** Forces layout direction; defaults to document.documentElement.dir */
+  dir?: 'rtl' | 'ltr'
   categoryColumn: string
   valueColumn: string
   showPercentages?: boolean
