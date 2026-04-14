@@ -8,7 +8,7 @@
         {
           label: 'Confirm',
           variant: 'solid',
-          disabled: !newTitle || newTitle === entity.title,
+          disabled: !newTitle || newTitle === entity.title || rename.loading,
           onClick: submit,
         },
       ],
@@ -42,7 +42,7 @@ import { Dialog } from '../../../src'
 import { rename } from '../js/resources'
 
 const props = defineProps({ entity: Object, modelValue: String })
-const emit = defineEmits(['update:modelValue', 'success'])
+const emit = defineEmits(['success', 'complete'])
 const dialogType = defineModel()
 const open = ref(true)
 
@@ -64,10 +64,18 @@ if (props.entity.is_group || props.entity.doc || props.entity.is_link) {
 const submit = () => {
   const formattedTitle =
     newTitle.value + (file_ext.value ? '.' + file_ext.value : '')
-  rename.submit({
-    entity_name: props.entity.name,
-    new_title: formattedTitle,
-  })
+  rename.submit(
+    {
+      entity_name: props.entity.name,
+      new_title: formattedTitle,
+    },
+    {
+      onSuccess: () => {
+        open.value = false
+        emit('complete')
+      },
+    },
+  )
   emit('success', {
     name: props.entity.name,
     title: formattedTitle,

@@ -443,13 +443,13 @@ function closeEntity(name) {
 }
 
 const moveFile = async () => {
-  open.value = false
   emit('success')
   await move.submit({
     entity_names: props.entities.map((obj) => obj.name),
     new_parent: selected.value,
     team: chosenTeam.value,
   })
+  open.value = false
   emit('complete')
 }
 </script>
