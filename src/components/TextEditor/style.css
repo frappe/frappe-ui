@@ -144,7 +144,6 @@ img.ProseMirror-selectednode {
    Stored HTML uses <p></p>, Tiptap editor uses <p><br></p> as a cursor placeholder. */
 .prose-v3 p:empty,
 .prose-v3 p:has(> br:only-child) {
-  height: 20px;
   line-height: 20px;
 }
 
