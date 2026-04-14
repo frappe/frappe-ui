@@ -120,7 +120,7 @@ function removeTag(tag: string) {
 [data-state='active'] {
   background: var(--surface-gray-1);
 }
-[aria-label='Show popup'] {
+:deep([aria-label='Show popup']) {
   display: none;
 }
 </style>
