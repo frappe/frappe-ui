@@ -26,7 +26,7 @@ export function getFileLink(entity, copy = true) {
   }
   if (!copy) return link
   try {
-    copyToClipboard(link).then(() => toast.success('Copied to your clipboard!'))
+    copyToClipboard(link).then(() => toast.success('Copied to your clipboard.'))
   } catch (err) {
     console.error('Failed to copy link:', err)
   }
