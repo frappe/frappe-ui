@@ -108,3 +108,34 @@ export const formatDate = (date) => {
 
   return `${formattedDate}, ${formattedTime}`
 }
+
+
+export const openEntity = (entity, new_tab = false) => {
+  if (new_tab) {
+    return window.open(getFileLink(entity, false), '_blank')
+  }
+
+  if (entity.name === '') {
+    if (entity.is_private) window.location.href = '/drive/'
+    else window.location.href = '/drive/t/' + entity.team
+  } else if (entity.is_group) {
+    window.location.href = '/drive/d/' + entity.name
+  } else if (entity.is_link) {
+    const origin = new URL(entity.path).origin
+    if (
+      confirm(
+        `This will open an external link to ${origin} - are you sure you want to open?`,
+      )
+    )
+      window.open(entity.path, '_blank')
+  } else if (entity.mime_type === 'frappe/slides') {
+    window.location.href = '/slides/presentation/' + entity.path
+  } else if (
+    entity.mime_type === 'frappe_doc' ||
+    entity.mime_type === 'text/markdown'
+  ) {
+    window.location.href = '/writer/w/' + entity.name
+  } else {
+    window.location.href = '/drive/f/' + entity.name
+  }
+}
