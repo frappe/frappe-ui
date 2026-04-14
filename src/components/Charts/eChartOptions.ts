@@ -11,7 +11,7 @@ export const SUBTITLE_HEIGHT = 18
 export const TITLE_BOTTOM = 24
 
 export default function useEchartsOptions(config: AxisChartConfig) {
-  const isRTL = config.isRTL
+  const isRTL = config.dir === 'rtl'
   const title = config.title
   const subtitle = config.subtitle
   const hasTitle = title ? 1 : 0
@@ -157,7 +157,7 @@ export function getTitleOptions(title: string, subtitle?: string, isRTL?: boolea
 }
 
 function getXAxisOptions(config: AxisChartConfig) {
-  const isRTL = config.isRTL
+  const isRTL = config.dir === 'rtl'
 
   const options = config.swapXY
     ? {
@@ -235,7 +235,7 @@ function getXAxisOptions(config: AxisChartConfig) {
 }
 
 function getYAxisOptions(config: AxisChartConfig) {
-  const isRTL = config.isRTL
+  const isRTL = config.dir === 'rtl'
 
   let primaryYAxisOptions = config.swapXY
     ? {

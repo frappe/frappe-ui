@@ -40,9 +40,10 @@ export const updateMoved = (team, new_parent, special) => {
 export const move = createResource({
   url: 'drive.api.files.move',
   onSuccess(data) {
+    console.log(data)
     toast.success('Moved to ' + data.title, {
       action: {
-        label: 'Go',
+        label: 'Go to folder',
         onClick: () => {
           if (!data.special)
             openEntity({

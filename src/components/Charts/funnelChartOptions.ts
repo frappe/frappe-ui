@@ -9,7 +9,7 @@ import { formatValue } from './helpers'
 import { FunnelChartConfig } from './types'
 
 export default function getFunnelChartOptions(config: FunnelChartConfig) {
-  const isRTL = config.isRTL
+  const isRTL = config.dir === 'rtl'
   let data = config.data || []
 
   const labelPosition = 'alternate'

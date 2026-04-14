@@ -26,7 +26,7 @@ export function getFileLink(entity, copy = true) {
   }
   if (!copy) return link
   try {
-    copyToClipboard(link).then(() => toast.success('Copied to your clipboard!'))
+    copyToClipboard(link).then(() => toast.success('Copied to your clipboard.'))
   } catch (err) {
     console.error('Failed to copy link:', err)
   }
@@ -115,29 +115,16 @@ export const openEntity = (entity, new_tab = false) => {
     return window.open(getFileLink(entity, false), '_blank')
   }
 
-  if (!entity.breadcrumbs?.length)
-    store.state.breadcrumbs.push({
-      label: entity.title,
-      name: entity.name,
-      route: null,
-    })
-  else setBreadCrumbs(entity)
-
   if (entity.name === '') {
-    router.push({
-      name: entity.is_private ? 'Home' : 'Team',
-      params: { team },
-    })
+    if (entity.is_private) window.location.href = '/drive/'
+    else window.location.href = '/drive/t/' + entity.team
   } else if (entity.is_group) {
-    router.push({
-      name: 'Folder',
-      params: { entityName: entity.name },
-    })
+    window.location.href = '/drive/d/' + entity.name
   } else if (entity.is_link) {
     const origin = new URL(entity.path).origin
     if (
       confirm(
-        `This will open an external link to ${origin} - are you sure you want to open?`
+        `This will open an external link to ${origin} - are you sure you want to open?`,
       )
     )
       window.open(entity.path, '_blank')
@@ -149,9 +136,6 @@ export const openEntity = (entity, new_tab = false) => {
   ) {
     window.location.href = '/writer/w/' + entity.name
   } else {
-    router.push({
-      name: 'File',
-      params: { entityName: entity.name },
-    })
+    window.location.href = '/drive/f/' + entity.name
   }
 }
