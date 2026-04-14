@@ -49,6 +49,7 @@
           :class="[
             alignmentMap[column.align],
             i == 0 ? 'text-ink-gray-9' : 'text-ink-gray-7',
+            'overflow-x-hidden',
           ]"
         >
           <slot v-bind="{ idx: i, column, item: row[column.key], isActive }">
