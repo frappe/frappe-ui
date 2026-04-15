@@ -1,10 +1,6 @@
 <template>
   <div class="relative flex w-full flex-1 flex-col overflow-x-auto">
-    <div
-      class="flex w-max min-w-full flex-col overflow-y-hidden"
-      :class="$attrs.class"
-      :style="$attrs.style"
-    >
+    <div class="flex w-max min-w-full flex-col overflow-y-hidden" :class="$attrs.class" :style="$attrs.style">
       <slot v-bind="{ showGroupedRows, selectable }">
         <ListHeader />
         <template v-if="props.rows.length">
@@ -17,6 +13,7 @@
     </div>
   </div>
 </template>
+
 <script setup>
 import ListEmptyState from './ListEmptyState.vue'
 import ListHeader from './ListHeader.vue'
@@ -103,13 +100,14 @@ let _options = computed(() => {
 
 const allRowsSelected = computed(() => {
   if (!props.rows.length) return false
-  if (showGroupedRows.value) {
-    return (
-      selections.size ===
-      props.rows.reduce((acc, row) => acc + row.rows.length, 0)
-    )
-  }
-  return selections.size === props.rows.length
+
+  const rows = showGroupedRows.value
+    ? props.rows.flatMap(r => r.rows)
+    : props.rows
+
+  const total = rows.filter(r => !r.disabled).length
+
+  return total > 0 && selections.size === total
 })
 
 const selectable = computed(() => {
@@ -135,7 +133,7 @@ function toggleAllRows(select) {
   }
   if (showGroupedRows.value) {
     props.rows.forEach((row) => {
-     row.rows.forEach((r) => {
+      row.rows.forEach((r) => {
         if (!r.disabled) {
           selections.add(r[props.rowKey])
         }
