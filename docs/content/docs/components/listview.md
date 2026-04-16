@@ -17,3 +17,6 @@ Displays data in a structured, scrollable list with support for columns, groups,
 
 ## Empty List
 <ComponentPreview name="ListView-Empty"  />
+
+## Disabled Rows
+<ComponentPreview name="ListView-Disabled"  />

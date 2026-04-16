@@ -4,17 +4,21 @@
     :class="[
       roundedClass,
       isSelected || isActive ? 'bg-surface-gray-2' : '',
-      isHoverable ? 'cursor-pointer' : '',
-      isHoverable
+      isHoverable && !row.disabled ? 'cursor-pointer' : '',
+      isHoverable && !row.disabled
         ? isSelected || isActive
           ? 'hover:bg-surface-gray-3'
           : 'hover:bg-surface-menu-bar'
         : '',
+      row.disabled ? 'pointer-events-none' : '',
     ]"
     class="flex flex-col transition-all duration-300 ease-in-out"
     v-bind="{
       ...getLinkBindings(),
       onClick: onRowClick,
+      ...(row.disabled
+        ? { 'aria-disabled': 'true', tabindex: -1 }
+        : {}),
     }"
   >
     <component
@@ -23,6 +27,10 @@
     >
       <div
         class="grid items-center gap-4 px-2"
+        :class="{
+          'cursor-not-allowed': row.disabled,
+          'opacity-50': row.disabled,
+        }"
         :style="{
           height: rowHeight,
           gridTemplateColumns: getGridTemplateColumns(
@@ -39,10 +47,12 @@
         >
           <Checkbox
             :modelValue="isSelected"
+            :disabled="row.disabled"
             class="cursor-pointer duration-300"
             @click.stop="handleCheckboxClick"
           />
         </div>
+
         <div
           v-for="(column, i) in list.columns"
           :key="column.key"
@@ -73,6 +83,7 @@
           </slot>
         </div>
       </div>
+
       <div
         v-if="!isLastRow"
         class="h-px border-t"
@@ -108,17 +119,16 @@ const rowRoute = computed(
 
 const isExternalRoute = computed(() => {
   if (!rowRoute.value) return false
-  // Check if it's a URL (string starting with http/https or /)
   return typeof rowRoute.value === 'string' && rowRoute.value.startsWith('http')
 })
 
 const getLinkComponent = () => {
-  if (!rowRoute.value) return 'div'
+  if (!rowRoute.value || props.row.disabled) return 'div'
   return isExternalRoute.value ? 'a' : 'router-link'
 }
 
 const getLinkBindings = () => {
-  if (!rowRoute.value) return {}
+  if (!rowRoute.value || props.row.disabled) return {}
   return isExternalRoute.value
     ? {
         href: rowRoute.value,
@@ -137,6 +147,7 @@ const isLastRow = computed(() => {
 const isSelected = computed(() => {
   return list.value.selections.has(props.row[list.value.rowKey])
 })
+
 const isActive = computed(
   () =>
     list.value.options.enableActive &&
@@ -156,6 +167,7 @@ const rowHeight = computed(() => {
 
 const roundedClass = computed(() => {
   if (!isSelected.value) return 'rounded'
+
   const selections = [...list.value.selections]
   let groups = list.value.rows[0]?.group
     ? list.value.rows.map((k) => k.rows)
@@ -164,15 +176,20 @@ const roundedClass = computed(() => {
   for (let rows of groups) {
     let currentIndex = rows.findIndex((k) => k == props.row)
     if (currentIndex === -1) continue
+
     let atBottom = !selections.includes(rows[currentIndex + 1]?.name)
     let atTop = !selections.includes(rows[currentIndex - 1]?.name)
+
     return (atBottom ? 'rounded-b ' : '') + (atTop ? 'rounded-t' : '')
   }
 })
 
 const onRowClick = (event) => {
+  if (props.row.disabled) return
+
   if (list.value.options.onRowClick)
     list.value.options.onRowClick(props.row, event)
+
   if (list.value.activeRow.value === props.row.name) {
     list.value.activeRow.value = null
   } else {
@@ -181,22 +198,31 @@ const onRowClick = (event) => {
 }
 
 const handleCheckboxClick = (event) => {
+  if (props.row.disabled) return
+
   const value = props.row[list.value.rowKey]
+
   if (event.shiftKey && !list.value.selections.has(value)) {
     const lastSelected = Array.from(list.value.selections).pop()
+
     const rows = list.value.rows.find((k) => k.group)
       ? list.value.rows.reduce((acc, curr) => acc.concat(curr.rows), [])
       : list.value.rows
+
     const lastIndex = rows.findIndex(
       (k) => lastSelected === k[list.value.rowKey]
     )
     const curIndex = rows.findIndex((k) => value === k[list.value.rowKey])
+
     const start = Math.min(lastIndex, curIndex)
     const end = Math.max(lastIndex, curIndex)
+
     for (let i = start; i <= end; i++) {
+      if (rows[i].disabled) continue
       list.value.selections.add(rows[i][list.value.rowKey])
     }
   } else {
+    if (props.row.disabled) return
     list.value.toggleRow(value)
   }
 }

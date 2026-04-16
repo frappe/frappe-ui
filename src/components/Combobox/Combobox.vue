@@ -54,7 +54,6 @@ const emit = defineEmits<{
   input: (value: string) => void
 }>()
 
-
 const searchTerm = ref(getDisplayValue(props.modelValue))
 const internalModelValue = ref(props.modelValue)
 const isOpen = ref(false)
@@ -76,9 +75,12 @@ watch(
 )
 
 const onUpdateModelValue = (value: string | null) => {
-  const selectedOpt = value
+  let selectedOpt = value
     ? allOptionsFlat.value.find((opt) => getKey(opt) === value) || null
     : null
+
+  selectedOpt =
+    !selectedOpt && props.allowCustomValue && value ? value : selectedOpt
 
   if (selectedOpt && isCustomOption(selectedOpt)) {
     const context = { searchTerm: lastSearchTerm.value }
@@ -311,9 +313,11 @@ defineSlots<{
   prefix?: () => any
 
   /** Custom slot for individual options, only used if the option has `slotName` */
-  [slotName: string]: (props: { option: SimpleOption; searchTerm: string }) => any
+  [slotName: string]: (props: {
+    option: SimpleOption
+    searchTerm: string
+  }) => any
 }>()
-
 </script>
 
 <template>
@@ -363,11 +367,29 @@ defineSlots<{
             class="max-h-60 overflow-auto pb-1.5"
             :class="{ 'px-1.5 pt-1.5': !isGroup(filteredOptions[0]) }"
           >
+            <ComboboxItem
+              v-if="
+                filteredOptions?.length == 0 && allowCustomValue && searchTerm
+              "
+              :value="searchTerm"
+              class="text-base leading-none text-ink-gray-7 rounded flex items-center h-7 px-2.5 py-1.5 select-none data-[highlighted]:bg-surface-gray-3"
+            >
+              <span class="flex items-center gap-2">
+                Create "{{ searchTerm }}"
+              </span>
+            </ComboboxItem>
+
             <ComboboxEmpty
               class="text-ink-gray-5 text-base text-center py-1.5 px-2.5"
+              v-else
             >
-              {{ searchTerm ? `No results found for "${searchTerm}"` : "No results found" }}
+              {{
+                searchTerm
+                  ? `No results found for "${searchTerm}"`
+                  : 'No results found'
+              }}
             </ComboboxEmpty>
+
             <template
               v-for="(optionOrGroup, index) in filteredOptions"
               :key="index"

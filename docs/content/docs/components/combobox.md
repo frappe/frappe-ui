@@ -17,5 +17,9 @@ Lets users choose from available options or type their own. Provides clear, resp
 ## Custom Option Slots
 <ComponentPreview name="Combobox-OptionSlots" css='justify-center !py-20 grid' />
 
+## Custom Value
+Provides creatable option if no results found
+
+<ComponentPreview name="Combobox-CustomValue" css='justify-center !py-20 grid' />
 
 <!-- @include: ../../../meta/Combobox.md -->

@@ -90,4 +90,25 @@ describe('Combobox', () => {
     cy.root().click(0, 0, { force: true })
     cy.get('@onBlurSpy').should('have.been.called')
   })
+
+  it('custom value', () => {
+    cy.mount(Combobox, {
+      props: {
+        options,
+        allowCustomValue: true,
+        openOnFocus: true,
+        'onUpdate:modelValue': cy.spy().as('onUpdate'),
+      },
+    })
+
+    cy.get('[role=option]').should('have.length', 0)
+    cy.get('input').focus()
+    cy.get('[role=option]').should('have.length', options.length)
+
+    cy.get('input').type('..')
+    cy.get('[role=option]').should('have.length', 1)
+    cy.get('[role=option]:first').should('contain.text', 'Create ".."')
+    cy.get('[role=option]:first').click()
+    cy.get('@onUpdate').should('have.been.calledWith', '..')
+  })
 })
