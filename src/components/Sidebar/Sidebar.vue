@@ -70,7 +70,7 @@ const isCollapsed = defineModel('collapsed', {
 })
 provide('isSidebarCollapsed', isCollapsed)
 const shouldCollapse = computed(
-  () => (isCollapsed.value || isMobile.value) && !props.disableCollapse,
+  () => (isCollapsed.value ?? isMobile.value) && !props.disableCollapse,
 )
 
 const breakpoints = useBreakpoints(breakpointsTailwind)
