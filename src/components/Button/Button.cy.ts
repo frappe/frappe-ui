@@ -49,7 +49,7 @@ describe('<Button />', () => {
     cy.get('svg').should('exist') // Loading Spinner
   })
 
-  it('handles prefix and suffix slots (replacing deprecated icon props)', () => {
+  it('handles prefix and suffix slots', () => {
     const TestIcon = {
       render() {
         return h('svg', { 'data-cy': 'test-icon' })

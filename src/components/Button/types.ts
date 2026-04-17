@@ -18,13 +18,25 @@ export interface ButtonProps {
   /** Text label displayed inside the button */
   label?: string
 
-  /** Icon shown when no left or right icon is specified */
+  /**
+   * Icon shown when no left or right icon is specified.
+   * Static literals like `icon="menu"` are rewritten to per-icon Lucide imports
+   * when using `frappe-ui/vite`.
+   */
   icon?: string | Component
 
-  /** Icon shown before the label */
+  /**
+   * Icon shown before the label.
+   * Static literals like `icon-left="menu"` are rewritten to per-icon Lucide
+   * imports when using `frappe-ui/vite`.
+   */
   iconLeft?: string | Component
 
-  /** Icon shown after the label */
+  /**
+   * Icon shown after the label.
+   * Static literals like `icon-right="menu"` are rewritten to per-icon Lucide
+   * imports when using `frappe-ui/vite`.
+   */
   iconRight?: string | Component
 
   /** Tooltip text shown on hover */

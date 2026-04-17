@@ -2,12 +2,12 @@
   <Tooltip :text="tooltip" :disabled="!tooltip?.length">
     <button
       v-bind="$attrs"
-      :class="buttonClasses"
-      @click="handleClick"
-      :disabled="isDisabled"
-      :ariaLabel="label"
-      :type = "props.type"
       ref="rootRef"
+      :class="buttonClasses"
+      :disabled="isDisabled"
+      :aria-label="label"
+      :type="props.type"
+      @click="handleClick"
     >
       <LoadingIndicator
         v-if="loading"
@@ -18,24 +18,22 @@
           'h-4.5 w-4.5': size == 'xl' || size == '2xl',
         }"
       />
-      <slot name="prefix" v-else-if="$slots['prefix'] || iconLeft">
-        <FeatherIcon
-          v-if="iconLeft && typeof iconLeft === 'string'"
-          :name="iconLeft"
+      <slot name="prefix" v-else-if="$slots.prefix || iconLeftComponent">
+        <component
+          v-if="iconLeftComponent"
+          :is="iconLeftComponent"
           :class="slotClasses"
           aria-hidden="true"
         />
-        <component v-else-if="iconLeft" :is="iconLeft" :class="slotClasses" />
       </slot>
 
       <template v-if="loading && loadingText">{{ loadingText }}</template>
       <template v-else-if="isIconButton && !loading">
-        <FeatherIcon
-          v-if="icon && typeof icon === 'string'"
-          :name="icon"
+        <component
+          v-if="iconComponent"
+          :is="iconComponent"
           :class="slotClasses"
         />
-        <component v-else-if="icon" :is="icon" :class="slotClasses" />
         <slot name="icon" v-else-if="$slots.icon" />
         <div v-else-if="hasLucideIconInDefaultSlot" :class="slotClasses">
           <slot>{{ label }}</slot>
@@ -46,28 +44,25 @@
       </span>
 
       <slot name="suffix">
-        <FeatherIcon
-          v-if="iconRight && typeof iconRight === 'string'"
-          :name="iconRight"
+        <component
+          v-if="iconRightComponent"
+          :is="iconRightComponent"
           :class="slotClasses"
           aria-hidden="true"
         />
-          <component
-            v-else-if="iconRight"
-            :is="iconRight"
-            :class="slotClasses"
-          />
       </slot>
     </button>
   </Tooltip>
 </template>
+
 <script lang="ts" setup>
-import { computed, useSlots, ref } from 'vue'
-import FeatherIcon from '../FeatherIcon.vue'
-import LoadingIndicator from '../LoadingIndicator.vue'
+import { computed, ref, useSlots, watchEffect } from 'vue'
 import { useRouter } from 'vue-router'
-import type { ButtonProps, ThemeVariant } from './types'
+import LoadingIndicator from '../LoadingIndicator.vue'
 import Tooltip from '../Tooltip/Tooltip.vue'
+import type { ButtonProps, ThemeVariant } from './types'
+
+const warnedRuntimeStringIcons = new Set<string>()
 
 defineOptions({ inheritAttrs: false })
 
@@ -77,14 +72,14 @@ const props = withDefaults(defineProps<ButtonProps>(), {
   variant: 'subtle',
   loading: false,
   disabled: false,
-  type: "button"
+  type: 'button',
 })
 
 const slots = useSlots()
 const router = useRouter()
 
 const buttonClasses = computed(() => {
-  let solidClasses = {
+  const solidClasses = {
     gray: 'text-ink-white bg-surface-gray-7 hover:bg-surface-gray-6 active:bg-surface-gray-5',
     blue: 'text-ink-white bg-blue-500 hover:bg-surface-blue-3 active:bg-blue-700',
     green:
@@ -92,7 +87,7 @@ const buttonClasses = computed(() => {
     red: 'text-ink-white bg-surface-red-5 hover:bg-surface-red-6 active:bg-surface-red-7',
   }[props.theme]
 
-  let subtleClasses = {
+  const subtleClasses = {
     gray: 'text-ink-gray-8 bg-surface-gray-2 hover:bg-surface-gray-3 active:bg-surface-gray-4',
     blue: 'text-ink-blue-3 bg-surface-blue-2 hover:bg-blue-200 active:bg-blue-300',
     green:
@@ -100,7 +95,7 @@ const buttonClasses = computed(() => {
     red: 'text-red-700 bg-surface-red-2 hover:bg-surface-red-3 active:bg-surface-red-4',
   }[props.theme]
 
-  let outlineClasses = {
+  const outlineClasses = {
     gray: 'text-ink-gray-8 bg-surface-white bg-surface-white border border-outline-gray-2 hover:border-outline-gray-3 active:border-outline-gray-3 active:bg-surface-gray-4',
     blue: 'text-ink-blue-3 bg-surface-white border border-outline-blue-1 hover:border-blue-400 active:border-blue-400 active:bg-blue-300',
     green:
@@ -108,7 +103,7 @@ const buttonClasses = computed(() => {
     red: 'text-red-700 bg-surface-white border border-outline-red-1 hover:border-outline-red-2 active:border-outline-red-2 active:bg-surface-red-3',
   }[props.theme]
 
-  let ghostClasses = {
+  const ghostClasses = {
     gray: 'text-ink-gray-8 bg-transparent hover:bg-surface-gray-3 active:bg-surface-gray-4',
     blue: 'text-ink-blue-3 bg-transparent hover:bg-blue-200 active:bg-blue-300',
     green:
@@ -116,23 +111,23 @@ const buttonClasses = computed(() => {
     red: 'text-red-700 bg-transparent hover:bg-surface-red-3 active:bg-surface-red-4',
   }[props.theme]
 
-  let focusClasses = {
+  const focusClasses = {
     gray: 'focus-visible:ring focus-visible:ring-outline-gray-3',
     blue: 'focus-visible:ring focus-visible:ring-blue-400',
     green: 'focus-visible:ring focus-visible:ring-outline-green-2',
     red: 'focus-visible:ring focus-visible:ring-outline-red-2',
   }[props.theme]
 
-  let variantClasses = {
+  const variantClasses = {
     subtle: subtleClasses,
     solid: solidClasses,
     outline: outlineClasses,
     ghost: ghostClasses,
   }[props.variant]
 
-  let themeVariant: ThemeVariant = `${props.theme}-${props.variant}`
+  const themeVariant: ThemeVariant = `${props.theme}-${props.variant}`
 
-  let disabledClassesMap: Record<ThemeVariant, string> = {
+  const disabledClassesMap: Record<ThemeVariant, string> = {
     'gray-solid': 'bg-surface-gray-2 text-ink-gray-4',
     'gray-subtle': 'bg-surface-gray-2 text-ink-gray-4',
     'gray-outline':
@@ -157,7 +152,7 @@ const buttonClasses = computed(() => {
       'bg-surface-red-2 text-ink-red-2 border border-outline-red-1',
     'red-ghost': 'text-ink-red-2',
   }
-  let disabledClasses = disabledClassesMap[themeVariant]
+  const disabledClasses = disabledClassesMap[themeVariant]
 
   let sizeClasses = {
     sm: 'h-7 text-base px-2 rounded',
@@ -186,23 +181,27 @@ const buttonClasses = computed(() => {
 })
 
 const slotClasses = computed(() => {
-  let classes = {
+  return {
     sm: 'h-4',
     md: 'h-4.5',
     lg: 'h-5',
     xl: 'h-6',
     '2xl': 'h-6',
   }[props.size]
-
-  return classes
 })
 
 const isDisabled = computed(() => {
   return props.disabled || props.loading
 })
 
+const iconComponent = computed(() => getRenderableIcon(props.icon))
+const iconLeftComponent = computed(() => getRenderableIcon(props.iconLeft))
+const iconRightComponent = computed(() => getRenderableIcon(props.iconRight))
+
 const isIconButton = computed(() => {
-  return props.icon || slots.icon || hasLucideIconInDefaultSlot.value
+  return Boolean(
+    iconComponent.value || slots.icon || hasLucideIconInDefaultSlot.value,
+  )
 })
 
 const hasLucideIconInDefaultSlot = computed(() => {
@@ -210,27 +209,53 @@ const hasLucideIconInDefaultSlot = computed(() => {
 
   const slotContent = slots.default()
   if (!Array.isArray(slotContent)) return false
-  // if the slot contains only one element and it's a lucide icon
-  // render it as an icon button
-  let firstVNode = slotContent[0]
-  if (
-    typeof firstVNode.type?.name == 'string' &&
-    firstVNode.type?.name?.startsWith('lucide-')
-  ) {
-    return true
-  }
-  return false
+
+  const firstVNode = slotContent[0]
+  return (
+    typeof firstVNode.type?.name === 'string' &&
+    firstVNode.type.name.startsWith('lucide-')
+  )
 })
 
-const handleClick = () => {
+if (import.meta.env.DEV) {
+  watchEffect(() => {
+    warnForRuntimeStringIcon('icon', props.icon)
+    warnForRuntimeStringIcon('iconLeft', props.iconLeft)
+    warnForRuntimeStringIcon('iconRight', props.iconRight)
+  })
+}
+
+function getRenderableIcon(icon?: ButtonProps['icon']) {
+  if (!icon || typeof icon === 'string') return null
+  return icon
+}
+
+function warnForRuntimeStringIcon(
+  propName: 'icon' | 'iconLeft' | 'iconRight',
+  icon?: string | ButtonProps['icon'],
+) {
+  if (!icon || typeof icon !== 'string') return
+
+  const key = `${propName}:${icon}`
+  if (warnedRuntimeStringIcons.has(key)) return
+
+  warnedRuntimeStringIcons.add(key)
+  console.warn(
+    `[frappe-ui] Button ${propName}="${icon}" requires the frappe-ui/vite transform or a component binding like :${propName}="LucideX".`,
+  )
+}
+
+function handleClick() {
   if (props.route) {
     return router.push(props.route)
-  } else if (props.link) {
+  }
+
+  if (props.link) {
     return window.open(props.link, '_blank')
   }
 }
 
-const rootRef = ref()
+const rootRef = ref<HTMLElement | null>(null)
 defineExpose({ rootRef })
 
 defineSlots<{
