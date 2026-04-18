@@ -85,7 +85,7 @@ function defaultUploadFunction(file: File) {
 const props = withDefaults(defineProps<TextEditorProps>(), {
   content: null,
   placeholder: '',
-  editorClass: 'prose-v3',
+  editorClass: 'prose-sm',
   editable: true,
   autofocus: false,
   bubbleMenu: false,
