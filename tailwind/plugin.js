@@ -15,7 +15,7 @@ let globalStyles = (theme) => ({
     'font-optical-sizing': 'auto',
   },
   'html, body, button, p, span, div': {
-    fontVariationSettings: "'opsz' 24",
+    fontVariationSettings: "'opsz' 24, 'cv11' 1",
     WebkitFontSmoothing: 'antialiased',
     MozOsxFontSmoothing: 'grayscale',
   },
@@ -392,7 +392,7 @@ export default plugin(
           },
           // prose-v3: zero paragraph margins, user controls spacing with Enter
           // all spacing on 8px grid: 4, 8, 16, 24, 32px
-          // empty <p> = 14px × 1.6 line-height ≈ 22.4px (the user's spacing unit)
+          // empty <p> = 14px × 1.7 line-height ≈ 23.8px (the user's spacing unit)
           v3: {
             css: [
               {
@@ -605,6 +605,20 @@ export default plugin(
                 },
               },
             ],
+          },
+          // prose-p-spacing: restores paragraph margins for content authored before prose-v3.
+          // Apply alongside prose-v3 for pre-migration content:
+          //   new content: "prose prose-v3"
+          //   old content: "prose prose-v3 prose-p-spacing"
+          // Must be defined after v3 in this config so its rules come later in
+          // the generated CSS and override v3's zero paragraph margins.
+          'p-spacing': {
+            css: {
+              p: {
+                marginTop: '0.5rem',
+                marginBottom: '0.5rem',
+              },
+            },
           },
         }),
       },
