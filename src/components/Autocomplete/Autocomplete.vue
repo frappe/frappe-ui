@@ -226,14 +226,7 @@ const props = withDefaults(defineProps<AutocompleteProps>(), {
   multiple: false,
   maxOptions: 50,
   hideSearch: false,
-  compareFn: (a, b) => {
-    if (a == null || b == null) return a === b
-    const left =
-      typeof a === 'object' && 'value' in a && a.value !== undefined ? a.value : a
-    const right =
-      typeof b === 'object' && 'value' in b && b.value !== undefined ? b.value : b
-    return left === right
-  },
+  compareFn: (a, b) => a.value === b.value,
 })
 const emit = defineEmits(['update:modelValue', 'update:query', 'change'])
 
@@ -328,6 +321,7 @@ const findOption = (option: AutocompleteOption) => {
 }
 
 const makeOption = (option: AutocompleteOption) => {
+  if (option == null) return { label: '', value: '' }
   return isOption(option) ? option : { label: option, value: option }
 }
 
