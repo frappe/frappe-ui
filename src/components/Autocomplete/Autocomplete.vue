@@ -226,7 +226,14 @@ const props = withDefaults(defineProps<AutocompleteProps>(), {
   multiple: false,
   maxOptions: 50,
   hideSearch: false,
-  compareFn: (a, b) => a.value === b.value,
+  compareFn: (a, b) => {
+    if (a == null || b == null) return a === b
+    const left =
+      typeof a === 'object' && 'value' in a && a.value !== undefined ? a.value : a
+    const right =
+      typeof b === 'object' && 'value' in b && b.value !== undefined ? b.value : b
+    return left === right
+  },
 })
 const emit = defineEmits(['update:modelValue', 'update:query', 'change'])
 
