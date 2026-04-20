@@ -171,3 +171,20 @@ img.ProseMirror-selectednode {
     margin: 2.25em 0;
   }
 }
+
+/* Empty paragraph height in prose-v3.
+   ProseMirror always renders empty paragraphs as <p><br class="ProseMirror-trailingBreak"></p>
+   even in readonly mode, so p:empty never matches.
+   Edit mode:    no override — natural 14px × 1.7 = 23.8px, avoids jump when typing
+   Readonly mode: scoped via [contenteditable=false] + ProseMirror-trailingBreak class
+   to precisely target empty paragraphs (not inline <br> in content) */
+.ProseMirror[contenteditable='false'] .prose-v3 p:has(> br.ProseMirror-trailingBreak:only-child),
+.prose-v3.ProseMirror[contenteditable='false'] p:has(> br.ProseMirror-trailingBreak:only-child) {
+  line-height: 20px;
+}
+
+/* prose-v3 blockquote: 2px left border — overrides Tailwind Typography's 0.25rem
+   using element specificity (0,1,1) to beat the plugin's :where() (0,1,0) */
+.prose-v3 blockquote {
+  border-inline-start-width: 2px;
+}
