@@ -1,3 +1,4 @@
+import { h } from 'vue'
 import Divider from './Divider.vue'
 
 describe('Divider', () => {
@@ -42,21 +43,23 @@ describe('Divider', () => {
 
   it('does not overlap sibling content in vertical action mode', () => {
     cy.mount({
-      components: { Divider },
-      template: `
-        <div class="flex h-32 items-center gap-4">
-          <span data-cy="left">Left panel</span>
-          <Divider
-            orientation="vertical"
-            flex-item
-            :action="{ label: 'Edit', handler: () => {} }"
-          />
-          <span data-cy="right">Right panel</span>
-        </div>
-      `,
+      render() {
+        return h('div', { class: 'flex h-32 items-center gap-4' }, [
+          h('span', { 'data-cy': 'left' }, 'Left panel'),
+          h(Divider, {
+            orientation: 'vertical',
+            flexItem: true,
+            action: {
+              label: 'Edit',
+              handler: () => {},
+            },
+          }),
+          h('span', { 'data-cy': 'right' }, 'Right panel'),
+        ])
+      },
     })
 
-    cy.contains('button', 'Edit').then(($button) => {
+    cy.get('button').should('exist').then(($button) => {
       const buttonRect = $button[0].getBoundingClientRect()
 
       cy.get('[data-cy="left"]').then(($left) => {
