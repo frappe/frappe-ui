@@ -9,6 +9,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     Action: typeof import('./src/components/Divider/stories/Action.vue')['default']
+    Actions: typeof import('./src/components/Toast/stories/Actions.vue')['default']
     Alert: typeof import('./src/components/Alert/Alert.vue')['default']
     'Alert.story': typeof import('./src/components/Alert/Alert.story.vue')['default']
     AlignCenter: typeof import('./src/components/TextEditor/icons/align-center.vue')['default']
