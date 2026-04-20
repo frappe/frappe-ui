@@ -7,45 +7,45 @@
 <PropsTable name="Toast" :data='[
   {
     "name": "open",
-    "description": "",
+    "description": "Controls whether the toast is visible (required)",
     "required": true,
     "type": "boolean"
   },
   {
     "name": "message",
-    "description": "",
+    "description": "Message content rendered inside the toast",
     "required": false,
     "type": "string"
   },
   {
     "name": "type",
-    "description": "",
+    "description": "Visual tone of the toast",
     "required": false,
     "type": "\"info\" | \"success\" | \"warning\" | \"error\""
   },
   {
     "name": "duration",
-    "description": "",
+    "description": "Auto-dismiss duration in milliseconds",
     "required": false,
     "type": "number"
   },
   {
     "name": "icon",
-    "description": "",
+    "description": "Optional custom icon rendered before the message",
     "required": false,
     "type": "Component"
   },
   {
     "name": "closable",
-    "description": "",
+    "description": "Whether the close button is shown",
     "required": false,
     "type": "boolean"
   },
   {
     "name": "action",
-    "description": "",
+    "description": "Optional action rendered on the right side of the toast",
     "required": false,
-    "type": "{ label: string; altText?: string; onClick: () => void; } | undefined"
+    "type": "ToastAction"
   }
 ]'/> 
 
