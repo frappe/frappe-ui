@@ -286,21 +286,21 @@ const wrapperClasses = (float: string) => [
           :loop="node.attrs.loop" :muted="node.attrs.muted" :controls="isUploaded" @click.stop="selectMedia"
           @loadedmetadata="handleMediaLoaded" />
 
-        <div v-if="isUploaded" class="absolute top-2 right-2 items-center bg-black/65 px-1.5 py-1 gap-2 rounded group-hover:flex"
+        <div v-if="isUploaded" class="absolute top-2 right-2 items-center bg-black/65 px-1.5 py-1 gap-2 rounded"
           :class="selected && isEditable ? 'flex' : 'hidden'">
           <button>
             <LucideCaptions @click="toggleCaptions" class="size-4"
               :class="[showCaption ? 'text-ink-white' : 'text-ink-gray-4']" />
           </button>
-          <button v-if="!node.attrs.float && !isVideo" @click.stop="toggleAlignPopper"
+          <button v-if="!isVideo" @click.stop="toggleAlignPopper"
             class="hover:text-ink-white text-ink-gray-4"
             :class="[node.attrs.align ? 'text-ink-white' : 'text-ink-gray-4']">
             <component :is="currentAlignIcon" class="size-4" />
           </button>
-          <button @click.stop="toggleFloatPopper" class="hover:text-ink-white text-ink-gray-4"
+          <!-- <button @click.stop="toggleFloatPopper" class="hover:text-ink-white text-ink-gray-4"
             :class="[node.attrs.float ? 'text-ink-white' : 'text-ink-gray-4']">
             <component :is="currentFloatIcon" class="size-4" />
-          </button>
+          </button> -->
 
           <div ref="alignButtonRef" v-if="showAlignPopper && !isVideo"
             class="absolute top-full mt-1 right-6 bg-black/65 rounded shadow-lg px-1.5 py-1 z-50 gap-2.5 flex items-center">
