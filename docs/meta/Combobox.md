@@ -4,6 +4,8 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 </script>
+## API Reference
+
 <PropsTable name="Combobox" :data='[
   {
     "name": "variant",
@@ -57,8 +59,7 @@
   }
 ]'/> 
 
-## Slots 
- <SlotsTable :data='[
+<SlotsTable :data='[
   {
     "name": "prefix",
     "description": "Custom content rendered before the input (left side)",
@@ -66,8 +67,7 @@
   }
 ]'/> 
 
-## Emit Events 
- <EmitsTable :data='[
+<EmitsTable :data='[
   {
     "name": "update:modelValue",
     "description": "",

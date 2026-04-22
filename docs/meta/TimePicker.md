@@ -4,6 +4,8 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 </script>
+## API Reference
+
 <PropsTable name="TimePicker" :data='[
   {
     "name": "value",
@@ -105,8 +107,7 @@
   }
 ]'/> 
 
-## Slots 
- <SlotsTable :data='[
+<SlotsTable :data='[
   {
     "name": "prefix",
     "description": "Slot rendered before the input value.\nUseful for icons or indicators.",
@@ -119,8 +120,7 @@
   }
 ]'/> 
 
-## Emit Events 
- <EmitsTable :data='[
+<EmitsTable :data='[
   {
     "name": "update:modelValue",
     "description": "",

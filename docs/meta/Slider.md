@@ -4,6 +4,8 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 </script>
+## API Reference
+
 <PropsTable name="Slider" :data='[
   {
     "name": "step",
@@ -34,8 +36,7 @@
   }
 ]'/> 
 
-## Emit Events 
- <EmitsTable :data='[
+<EmitsTable :data='[
   {
     "name": "update:modelValue",
     "description": "",

@@ -4,6 +4,8 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 </script>
+## API Reference
+
 <PropsTable name="Password" :data='[
   {
     "name": "modelValue",
@@ -19,8 +21,7 @@
   }
 ]'/> 
 
-## Slots 
- <SlotsTable :data='[
+<SlotsTable :data='[
   {
     "name": "prefix",
     "description": "Content shown before the input field (left icon / custom content)",

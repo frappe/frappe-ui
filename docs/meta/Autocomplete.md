@@ -4,8 +4,9 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 </script>
-## Slots 
- <SlotsTable :data='[
+## API Reference
+
+<SlotsTable :data='[
   {
     "name": "target",
     "description": "",

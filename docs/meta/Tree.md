@@ -4,6 +4,8 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 </script>
+## API Reference
+
 <PropsTable name="Tree" :data='[
   {
     "name": "node",
@@ -26,8 +28,7 @@
   }
 ]'/> 
 
-## Slots 
- <SlotsTable :data='[
+<SlotsTable :data='[
   {
     "name": "node",
     "description": "Slot to fully override how a tree node renders",

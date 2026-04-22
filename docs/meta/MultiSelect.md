@@ -4,6 +4,8 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 </script>
+## API Reference
+
 <PropsTable name="MultiSelect" :data='[
   {
     "name": "placeholder",
@@ -45,8 +47,7 @@
   }
 ]'/> 
 
-## Slots 
- <SlotsTable :data='[
+<SlotsTable :data='[
   {
     "name": "option",
     "description": "Rendered for each option in the dropdown. Receives the option object.",
@@ -59,8 +60,7 @@
   }
 ]'/> 
 
-## Emit Events 
- <EmitsTable :data='[
+<EmitsTable :data='[
   {
     "name": "update:modelValue",
     "description": "",

@@ -4,6 +4,8 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 </script>
+## API Reference
+
 <PropsTable name="Tooltip" :data='[
   {
     "name": "text",
@@ -42,8 +44,7 @@
   }
 ]'/> 
 
-## Slots 
- <SlotsTable :data='[
+<SlotsTable :data='[
   {
     "name": "default",
     "description": "Default trigger slot.\nWraps the element that the tooltip is attached to.",

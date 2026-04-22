@@ -4,6 +4,8 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 </script>
+## API Reference
+
 <PropsTable name="Sidebar" :data='[
   {
     "name": "header",
@@ -32,8 +34,7 @@
   }
 ]'/> 
 
-## Slots 
- <SlotsTable :data='[
+<SlotsTable :data='[
   {
     "name": "header-logo",
     "description": "",
@@ -51,8 +52,7 @@
   }
 ]'/> 
 
-## Emit Events 
- <EmitsTable :data='[
+<EmitsTable :data='[
   {
     "name": "update:collapsed",
     "description": "",

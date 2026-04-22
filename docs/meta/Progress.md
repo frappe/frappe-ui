@@ -4,6 +4,8 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 </script>
+## API Reference
+
 <PropsTable name="Progress" :data='[
   {
     "name": "value",
@@ -48,8 +50,7 @@
   }
 ]'/> 
 
-## Slots 
- <SlotsTable :data='[
+<SlotsTable :data='[
   {
     "name": "hint",
     "description": "Custom content for the hint area (usually displays the progress value). \nIf not provided, defaults to showing `props.value` followed by `%`.",

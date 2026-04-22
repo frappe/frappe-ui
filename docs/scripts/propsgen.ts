@@ -92,20 +92,12 @@ function genMetaTable(name: string, data: any) {
     default: x.default,
   }))
 
-  if (arrProps.length > 0) {
-    markupStr += `<PropsTable name="${name}" :data='${arrToStr(arrProps)}'/> \n\n`
-  }
-
   const slots = data.slots.filter((x: any) => !x.global)
   const arrSlots = slots.map((x: any) => ({
     name: x.name,
     description: x.description,
     type: x.type.slice(0, 100),
   }))
-
-  if (arrSlots.length > 0) {
-    markupStr += `## Slots \n <SlotsTable :data='${arrToStr(arrSlots)}'/> \n\n`
-  }
 
   const emits = data.events.filter((x: any) => !x.global)
   const arrEmits = emits.map((x: any) => ({
@@ -114,8 +106,20 @@ function genMetaTable(name: string, data: any) {
     type: x.type,
   }))
 
+  if (arrProps.length || arrSlots.length || arrEmits.length) {
+    markupStr += `## API Reference\n\n`
+  }
+
+  if (arrProps.length > 0) {
+    markupStr += `<PropsTable name="${name}" :data='${arrToStr(arrProps)}'/> \n\n`
+  }
+
+  if (arrSlots.length > 0) {
+    markupStr += `<SlotsTable :data='${arrToStr(arrSlots)}'/> \n\n`
+  }
+
   if (arrEmits.length > 0) {
-    markupStr += `## Emit Events \n <EmitsTable :data='${arrToStr(arrEmits)}'/> \n\n`
+    markupStr += `<EmitsTable :data='${arrToStr(arrEmits)}'/> \n\n`
   }
 
   return markupStr

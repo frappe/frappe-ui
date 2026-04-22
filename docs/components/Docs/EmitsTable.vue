@@ -1,51 +1,48 @@
 <script setup lang="ts">
-import { Badge } from 'frappe-ui'
-
-interface itemProp {
+interface ItemProp {
   name: string
   description: string
   type: string
 }
 
 interface Props {
-  data: itemProp[]
+  data: ItemProp[]
 }
 
 defineProps<Props>()
 </script>
 
 <template>
-  <table class="overflow-auto scrollbar not-prose w-full">
-    <colgroup>
-      <col class="w-[50%]" />
-      <col class="w-[50%]" />
-    </colgroup>
+  <div class="not-prose mt-8 overflow-x-auto whitespace-nowrap">
+    <table class="scrollbar w-full min-w-[640px] border-collapse border-b border-outline-gray-2 text-left">
+      <thead>
+        <tr class="border-b border-outline-gray-2">
+          <th class="w-[24%] py-2.5 pr-2 text-sm font-semibold text-ink-gray-9">Event</th>
+          <th class="w-[76%] px-2 py-2.5 text-sm font-semibold text-ink-gray-9">Payload</th>
+        </tr>
+      </thead>
 
-    <tbody
-      class="[&_td]:px-3 [&_th]:px-3 [&_td]:p-2 [&_th]:p-2 [&_td]:align-top"
-    >
-      <tr class="text-left *:bg-surface-gray-2 text-ink-gray-6 *:font-semibold">
-        <th class="rounded-l">Event</th>
-        <th class="rounded-r">Payload</th>
-      </tr>
+      <tbody>
+        <tr v-for="x in data" :key="x.name" class="border-b border-outline-gray-2 last:border-b-0">
+          <td class="py-2 pr-2 align-top">
+            <div class="font-mono text-xs font-medium leading-6 text-ink-gray-9">
+              {{ x.name }}
+            </div>
+          </td>
 
-      <tr v-for="x in data" :key="x.name" class="border-b last:border-0">
-        <td>
-          <Badge class="w-fit !rounded-sm font-mono">
-            {{ x.name }}
-          </Badge>
-        </td>
-
-        <td class="flex flex-wrap h-fit gap-2">
-          <span class="text-sm font-semibold">
-            {{ x.type }}
-          </span>
-
-          <p class="text-sm text-ink-gray-5 leading-relaxed w-full">
-            {{ x.description }}
-          </p>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+          <td class="px-2 py-2 align-top">
+            <div class="whitespace-normal break-words font-mono text-xs leading-6 text-ink-gray-8">
+              {{ x.type || '—' }}
+            </div>
+            <p
+              v-if="x.description"
+              class="mt-1 whitespace-pre-wrap font-mono text-xs leading-6 text-ink-gray-5"
+            >
+              {{ x.description }}
+            </p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </template>

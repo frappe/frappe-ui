@@ -4,6 +4,8 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 </script>
+## API Reference
+
 
 <PropsTable name="Dropdown" :data='[
   {
@@ -56,8 +58,6 @@
   }
 ]'/>
 
-## Slots
-
 <SlotsTable :data='[
   {
     "name": "default",
@@ -100,8 +100,6 @@
     "type": "any"
   }
 ]'/>
-
-## Emit Events
 
 <EmitsTable :data='[
   {
