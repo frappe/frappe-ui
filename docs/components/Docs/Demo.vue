@@ -17,16 +17,16 @@ const previewTabs = [
 </script>
 
 <template>
-  <div class="grid not-prose -mx-1">
-    <div class="p-1">
+  <div class="grid not-prose">
+    <div class="">
       <TabButtons :buttons="previewTabs" v-model="activeTab" />
     </div>
-    <div class="mt-2 rounded-xl bg-surface-gray-1 p-1">
+    <div class="mt-2 rounded-xl overflow-hidden border border-outline-gray-1">
       <div v-if="activeTab === 'preview'">
         <div class="">
           <div
             :class="[
-              'rounded-lg border border-outline-gray-2 bg-surface-white p-8 overflow-auto scrollbar flex gap-3 items-center',
+              'bg-surface-white p-8 overflow-auto scrollbar flex gap-3 items-center',
               css,
             ]"
           >
