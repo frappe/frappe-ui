@@ -4,6 +4,7 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 </script>
+
 <PropsTable name="Dropdown" :data='[
   {
     "name": "button",
@@ -19,17 +20,24 @@
     "default": "[]"
   },
   {
+    "name": "open",
+    "description": "Controls the visibility of the dropdown",
+    "required": false,
+    "type": "boolean",
+    "default": "false"
+  },
+  {
     "name": "placement",
     "description": "Placement of the dropdown relative to the trigger",
     "required": false,
-    "type": "string",
+    "type": "\"left\" | \"right\" | \"center\"",
     "default": "\"left\""
   },
   {
     "name": "side",
     "description": "Side of the trigger the dropdown appears on",
     "required": false,
-    "type": "\"top\" | \"bottom\" | \"right\" | \"left\"",
+    "type": "\"left\" | \"bottom\" | \"top\" | \"right\"",
     "default": "\"bottom\""
   },
   {
@@ -38,20 +46,67 @@
     "required": false,
     "type": "number",
     "default": "4"
+  },
+  {
+    "name": "portalTo",
+    "description": "Teleport target for dropdown portal content",
+    "required": false,
+    "type": "string | HTMLElement",
+    "default": "\"body\""
   }
-]'/> 
+]'/>
 
-## Slots 
- <SlotsTable :data='[
+## Slots
+
+<SlotsTable :data='[
   {
     "name": "default",
-    "description": "Default slot for custom trigger content (receives `open`, `close`, and extra attrs)",
-    "type": "{ [key: string]: any; open: boolean; close: () => void; }"
+    "description": "",
+    "type": "{ [key: string]: any; open: boolean; close: () => void; disabled: boolean; }"
+  },
+  {
+    "name": "trigger",
+    "description": "",
+    "type": "{ [key: string]: any; open: boolean; close: () => void; disabled: boolean; }"
   },
   {
     "name": "item",
-    "description": "Custom rendering for each dropdown item (receives `item` and `close`)",
-    "type": "{ item: DropdownOption; close: () => void; }"
+    "description": "",
+    "type": "{ item: DropdownOption; close: () => void; selected: boolean; }"
+  },
+  {
+    "name": "item-prefix",
+    "description": "",
+    "type": "{ item: DropdownOption; close: () => void; selected: boolean; }"
+  },
+  {
+    "name": "item-label",
+    "description": "",
+    "type": "{ item: DropdownOption; close: () => void; selected: boolean; }"
+  },
+  {
+    "name": "item-suffix",
+    "description": "",
+    "type": "{ item: DropdownOption; close: () => void; selected: boolean; }"
+  },
+  {
+    "name": "group-label",
+    "description": "",
+    "type": "{ group: DropdownGroupOption; }"
+  },
+  {
+    "name": "empty",
+    "description": "",
+    "type": "any"
   }
-]'/> 
+]'/>
 
+## Emit Events
+
+<EmitsTable :data='[
+  {
+    "name": "update:open",
+    "description": "",
+    "type": "[value: boolean]"
+  }
+]'/>
