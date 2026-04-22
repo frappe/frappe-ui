@@ -1,0 +1,146 @@
+# yaml-language-server: $schema=https://schema.coderabbit.ai/schema.v2.json
+language: en-US
+
+knowledge_base:
+  code_guidelines:
+    enabled: true
+    file_patterns:
+      - ".github/copilot-instructions.md"
+      - "v1-release/plan.md"
+      - "v1-release/04-components-audit.md"
+      - "v1-release/08-selection-and-menu-api-spec.md"
+      - "v1-release/changelog.md"
+  learnings:
+    scope: local
+
+reviews:
+  profile: chill
+  high_level_summary: true
+  review_status: false
+  review_details: false
+  collapse_walkthrough: true
+  changed_files_summary: false
+  sequence_diagrams: false
+  estimate_code_review_effort: false
+  assess_linked_issues: false
+  related_issues: false
+  related_prs: false
+  suggested_labels: false
+  suggested_reviewers: false
+  poem: false
+  enable_prompt_for_ai_agents: false
+
+  auto_review:
+    enabled: true
+    drafts: false
+    auto_incremental_review: false
+    ignore_title_keywords:
+      - "WIP"
+      - "[skip review]"
+    ignore_usernames:
+      - "dependabot[bot]"
+      - "renovate[bot]"
+      - "github-actions[bot]"
+
+  path_filters:
+    - "!/node_modules/"
+    - "!/dist/"
+    - "!/yarn.lock"
+    - "!/docs/.vitepress/cache/"
+    - "!/docs/meta/"
+    - "!/docs/content/auto-imports.d.ts"
+    - "!/docs/content/components.d.ts"
+    - "!/cypress/screenshots/"
+
+  path_instructions:
+    - path: "/**/*.{vue,ts,js}"
+      instructions: |
+        This repository is frappe-ui, a reusable Vue 3 component library and utility package, not an app codebase.
+
+        Focus review comments on:
+        - real bugs and regressions
+        - public API stability and backwards compatibility
+        - Vue 3 Composition API correctness
+        - TypeScript safety
+        - accessibility, focus management, and keyboard interactions
+        - consistency with existing frappe-ui patterns
+
+        Avoid noise:
+        - do not comment on formatting, Tailwind class ordering, or subjective style unless it hides a bug
+        - do not suggest app-level patterns like state management, route architecture, or page composition
+        - do not suggest backend changes unless the file is under /frappe/
+
+    - path: "/src/components/**/*.{vue,ts}"
+      instructions: |
+        Review as a component-library maintainer.
+
+        Prioritize:
+        - props, emits, slots, and exposed API consistency
+        - correct v-model patterns where applicable
+        - accessibility semantics, focus handling, and keyboard support
+        - preserving existing public APIs unless the PR clearly intends a breaking change
+        - accurate public types because docs are generated from component types and JSDoc
+
+        Prefer high-signal comments over speculative refactors.
+
+    - path: "/src/data-fetching/**/*.{ts,js}"
+      instructions: |
+        Focus on reactive correctness, API contracts, caching behavior, loading and error states, and side effects.
+
+        Flag:
+        - stale reactive dependencies
+        - cache invalidation mistakes
+        - race conditions
+        - API shape or type regressions
+
+        Avoid suggesting generic fetch or axios patterns when existing frappe-ui composable patterns are intentional.
+
+    - path: "/src/resources/**/*.{ts,js}"
+      instructions: |
+        This is legacy resource-layer code kept for compatibility.
+        Be conservative with suggestions.
+        Prefer comments only for real bugs, compatibility risks, or unsafe side effects.
+        Do not push large rewrites just to modernize style.
+
+    - path: "/frappe/**/*.{vue,ts,js}"
+      instructions: |
+        This folder contains higher-level Frappe-specific components and helpers built on top of the library.
+
+        Focus on:
+        - integration correctness
+        - backwards compatibility for consuming apps
+        - API boundary clarity between generic library code and Frappe-specific code
+
+        Be conservative with suggestions that would force wide downstream app changes unless the PR is clearly doing that intentionally.
+
+    - path: "/docs/**"
+      instructions: |
+        Only comment when docs are wrong, outdated, misleading, or missing important usage or accessibility guidance.
+        Ignore wording-only, tone-only, or formatting-only suggestions.
+
+    - path: "/v1-release/**"
+      instructions: |
+        These files are planning and release-support docs, not implementation code.
+
+        Focus on:
+        - contradictions between planning docs
+        - outdated status, blockers, or migration notes
+        - missing consumer-facing deprecation or migration guidance
+        - accepted-direction docs drifting into speculation without making status clear
+
+        Ignore editorial wording tweaks unless they change meaning.
+
+    - path: "/src/components/**/stories/**"
+      instructions: |
+        Review stories for misleading examples, missing important states, or missing accessibility-relevant coverage.
+        Ignore presentation-only nits.
+
+  pre_merge_checks:
+    docstrings:
+      mode: off
+    issue_assessment:
+      mode: off
+
+tools:
+  languagetool:
+    enabled: false

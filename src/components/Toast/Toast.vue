@@ -42,6 +42,7 @@
       </ToastAction>
       <ToastClose
         v-if="closable"
+        aria-label="Close"
         class="flex-shrink-0 rounded p-1 text-ink-white hover:text-ink-gray-3 focus:outline-none focus-visible:ring focus-visible:ring-outline-gray-4"
       >
         <LucideX class="size-4" />

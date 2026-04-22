@@ -79,6 +79,10 @@ import { Combobox } from '../Combobox'
 import FormLabel from '../FormLabel.vue'
 import type { FormControlProps } from './types'
 
+defineOptions({
+  inheritAttrs: false,
+})
+
 const id = useId()
 const props = withDefaults(defineProps<FormControlProps>(), {
   type: 'text',
@@ -120,9 +124,4 @@ defineSlots<{
   /** Default slot override for full input rendering */
   default?: () => any
 }>()
-</script>
-<script lang="ts">
-export default {
-  inheritAttrs: false,
-}
 </script>
