@@ -83,10 +83,10 @@ const emptyOptions = [
       <Dropdown :options="emptyOptions">
         <template #empty>
           <div
-            class="m-1.5 flex w-64 flex-col items-center gap-2 rounded-lg bg-surface-gray-1 px-4 py-6 text-center"
+            class="flex w-64 flex-col items-center gap-2 rounded-lg px-4 py-6 text-center"
           >
             <div
-              class="flex size-9 items-center justify-center rounded-full bg-surface-gray-2"
+              class="flex size-8 items-center justify-center rounded-full bg-surface-gray-2"
             >
               <LucideSearchX class="size-4 text-ink-gray-5" />
             </div>
