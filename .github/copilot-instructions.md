@@ -1,6 +1,6 @@
 ---
-description: 'Frappe UI library development standards and best practices'
-applyTo: 'src/**, docs/**, vite/**, tailwind/**, icons/**, frappe/**'
+description: 'frappe-ui library development standards and best practices'
+applyTo: 'src/**, docs/**, vite/**, tailwind/**, icons/**, frappe/**, v1-release/**'
 ---
 
 # Project Name: frappe-ui
@@ -10,856 +10,453 @@ rapid development of modern Frappe-based web applications.
 
 ## Overview
 
-frappe-ui provides a comprehensive set of Vue 3 components, data-fetching
-composables, Vite plugins, and utilities optimized for building frontend
-applications that integrate with Frappe Framework backends.
+frappe-ui provides a broad set of Vue 3 components, utility layers,
+Frappe-oriented integrations, docs tooling, and styling primitives used across
+multiple Frappe products.
 
-The library is used across multiple Frappe ecosystem products including Frappe
-Cloud, Gameplan, Helpdesk, Insights, Drive, and Builder.
+This file defines the **general development guidance for the repository**.
+
+## How to use v1-release docs
+
+The docs in `v1-release/` are important **planning and direction documents**.
+They should **inform** implementation decisions in areas they cover, but they
+should not replace this file as the general repo-wide guidance.
+
+Use them primarily when working on:
+
+- core component stabilization
+- component API consistency
+- selection/menu family APIs
+- deprecation and migration decisions
+- TextEditor narrowing and stabilization
+- release-facing docs and changelog updates
+
+Especially relevant files:
+
+- `v1-release/plan.md`
+- `v1-release/04-components-audit.md`
+- `v1-release/08-selection-and-menu-api-spec.md`
+- `v1-release/changelog.md`
+
+If you are working outside those topics, follow the normal repo guidance in this
+file.
 
 ## Tech Stack & Architecture
 
 - **Frontend Framework**: Vue 3 with Composition API and `<script setup>` syntax
-- **Language**: TypeScript for type safety
-- **Build Tool**: Vite for fast development and optimized builds
-- **Styling**: TailwindCSS v3 with custom semantic color system
-- **UI Primitives**: Reka UI for accessible, unstyled components - we are
-  actively migrating from Headless UI to Reka UI
-- **Rich Text**: TipTap v3 (ProseMirror) for rich-text editing
-- **Date Utilities**: dayjs for date manipulation
-- **Testing**: Vitest for unit and component testing
-- **Documentation**: VitePress for component docs and guides
+- **Language**: TypeScript-first authoring for public APIs and modern components
+- **Build Tool**: Vite
+- **Styling**: TailwindCSS v3 with semantic color tokens
+- **UI Primitives**: Reka UI / accessible headless primitives
+- **Rich Text**: TipTap v3
+- **Date Utilities**: dayjs
+- **Testing**: Vitest
+- **Documentation**: VitePress
 
 ## Project Structure
 
 ```bash
 frappe-ui/
-├── src/                          # Main library source code
-│   ├── components/               # Vue components (Button, Dialog, etc.)
-│   ├── data-fetching/            # v2 composables (useDoc, useList, useCall) - TypeScript-first, Vue 3 Composition API, works with Frappe API v2
-│   ├── resources/                # v1 utilities (createResource, createListResource, createDocumentResource) - Vue 2 Options API compatible, works with Frappe API v1
-│   ├── mocks/                    # Mock service worker (MSW) handlers for testing
+├── src/
+│   ├── components/               # Main library source code
+│   ├── data-fetching/            # Vue 3 composables for Frappe API access
+│   ├── resources/                # Older resource APIs kept for compatibility
+│   ├── mocks/                    # Mock service worker handlers and test helpers
 │   ├── composables/              # Reusable Vue composables
-│   ├── directives/               # Custom Vue directives
-│   ├── utils/                    # Utility functions and helpers
-│   └── index.ts                  # Main entry point with exports
-├── vite/                         # Vite plugins for easier Frappe project integration
-│   ├── frappeProxy.js            # Dev server proxy configuration
-│   ├── frappeTypes.js            # Auto-generate TypeScript types from doctypes
-│   ├── lucideIcons.js            # Lucide icon auto-import
-│   ├── jinjaBootData.js          # Boot data injection from Jinja templates
-│   └── buildConfig.js            # Production build optimization
-├── tailwind/                     # Tailwind CSS configuration
-│   ├── preset.js                 # Tailwind preset for consumers
-│   ├── plugin.js                 # Custom theme plugin
-│   └── colors.js                 # Semantic color palette
-├── frappe/                       # High-level components and utilities that assume a Frappe backend
-│   ├── index.js                  # Session management, API helpers
-│   └── [modules]/                # Feature-specific modules (Drive, Billing, etc.)
-├── icons/                        # Custom SVG icon components
-└── docs/                         # VitePress documentation site
+│   ├── directives/               # Vue directives
+│   ├── utils/                    # Shared utilities
+│   └── index.ts                  # Main export surface
+├── docs/                         # VitePress docs site
+├── icons/                        # Custom icon components
+├── tailwind/                     # Tailwind preset/plugin/colors
+├── vite/                         # Vite plugins and helpers
+├── frappe/                       # Frappe-specific components and utilities
+└── v1-release/                   # Planning docs for v1 stabilization work
 ```
 
 ## Development Standards
 
-### Component Authoring Guidelines
+### General engineering principles
 
-This section covers everything related to creating new components or editing
-existing ones.
+- Treat frappe-ui as a **reusable library**, not an app codebase
+- Prefer stable, high-signal public APIs over clever internal abstractions
+- Optimize for maintainability, consistency, and migration safety
+- Keep component responsibilities narrow and composable
+- Avoid growing components into do-everything abstractions
+- Prefer small, requirement-driven changes over speculative rewrites
+- When a behavior is public, preserve backwards compatibility unless the task
+  explicitly involves a planned breaking change or deprecation path
 
-#### Component Structure & API Design
+## Component Authoring Guidelines
 
-All components must follow this directory structure and API conventions:
+### Component structure and API design
 
-**File Organization:**
-
-```bash
-src/components/ComponentName/
-├── ComponentName.vue        # Main component
-├── types.ts                 # TypeScript types/interfaces (required)
-├── utils.ts                 # Component-specific utilities (if needed)
-└── index.ts                 # Public exports
-```
-
-**TypeScript Requirements:**
-
-**Critical Requirement - Strict Naming Conventions:**
-
-Every prop, emit event, and slot must have a JSDoc description. Use consistent
-naming patterns for all type definitions:
-
-- **Props**: `ComponentNameProps`
-- **Emits**: `ComponentNameEmits`
-- **Slots**: `ComponentNameSlots`
-- **Exposed Methods**: `ComponentNameExposed`
-- **Union Types**: `ComponentNameSize`, `ComponentNameTheme`,
-  `ComponentNameVariant`, etc.
-
-**These strict naming conventions are mandatory** because they are used to
-auto-generate documentation in the `docs/meta/` folder. Deviating from these
-patterns will break the documentation generation pipeline.
-
-**JSDoc is required for:**
-
-- Documentation generation (auto-generated in `docs/meta/`)
-- Better developer experience with IntelliSense
-- Clear API contracts for component consumers
-
-**Example Component:**
-
-```typescript
-// src/components/MyComponent/types.ts
-export interface MyComponentProps {
-  /** The label text displayed in the component */
-  label?: string
-
-  /** Whether the component is disabled */
-  disabled?: boolean
-}
-
-export interface MyComponentEmits {
-  /** Emitted when the component value changes */
-  (event: 'change', value: string): void
-
-  /** Emitted when the component is submitted */
-  (event: 'submit'): void
-}
-
-export interface MyComponentSlots {
-  /** Main content slot */
-  default?: () => any
-
-  /** Header slot for custom titles */
-  header?: () => any
-}
-
-export interface MyComponentExposed {
-  /** Programmatically focus the component */
-  focus: () => void
-}
-```
-
-```vue
-<!-- src/components/MyComponent/MyComponent.vue -->
-<template>
-  <!-- Simple, semantic HTML structure -->
-</template>
-
-<script lang="ts" setup>
-import { computed, ref } from 'vue'
-import type {
-  MyComponentProps,
-  MyComponentEmits,
-  MyComponentSlots,
-  MyComponentExposed,
-} from './types'
-
-const props = withDefaults(defineProps<MyComponentProps>(), {
-  label: '',
-  disabled: false,
-})
-
-const emit = defineEmits<MyComponentEmits>()
-
-defineSlots<MyComponentSlots>()
-
-// Component logic using Composition API
-const isActive = ref(false)
-const computedValue = computed(() => {
-  return props.label.toUpperCase()
-})
-
-// Expose public methods/refs for parent access
-defineExpose<MyComponentExposed>({
-  focus: () => {
-    // implementation
-  },
-})
-</script>
-```
-
-```typescript
-// src/components/MyComponent/index.ts
-export { default as MyComponent } from './MyComponent.vue'
-export type {
-  MyComponentProps,
-  MyComponentEmits,
-  MyComponentSlots,
-  MyComponentExposed,
-} from './types'
-```
-
-**TypeScript Best Practices:**
-
-- Use `interface` for object types, `type` for unions, intersections, and
-  primitives
-- Prefer `defineProps<PropsInterface>()` over runtime prop validation
-- Use `PropType<T>` only when mixing runtime and type-level validation
-- Document all public types with JSDoc comments
-- Use `readonly` for props that should not be mutated
-- Leverage TypeScript's utility types: `Partial<T>`, `Required<T>`, `Pick<T>`,
-  `Omit<T>`
-
-**Component API Guidelines:**
-
-**Props:**
-
-- Provide sensible defaults with `withDefaults()`
-- Use descriptive prop names that align with the component's purpose
-- Support both controlled and uncontrolled patterns via `v-model`
-- Document all props with JSDoc comments
-- Prefer primitive types (string, number, boolean) over complex objects or
-  arrays
-  - Forces you to think about the actual interface
-  - Keeps components portable and decoupled
-  - Better data flow and composition
-  - For complex data (charts, tables), be explicit with TypeScript types and
-    document clearly
-
-**Events:**
-
-- Emit semantic event names: `update:modelValue`, `change`, `submit`, `cancel`
-- Pass relevant event data as payloads
-- Use TypeScript for emit type safety
-- Prefer naming by behavior (change, open, close) rather than interaction
-  (toggle, click, blur)
-- Maintain consistency across similar components (e.g., all form inputs should
-  emit `change`)
-
-**Slots:**
-
-- Provide slots for flexible composition: `default`, `header`, `footer`,
-  `prefix`, `suffix`
-- Use scoped slots to expose internal state
-- Document slots with `defineSlots<>`
-
-**Exposed Methods:**
-
-- Expose imperative methods via `defineExpose()` when necessary
-- Examples: `focus()`, `reset()`, `validate()`
-
-#### Design Principles
-
-##### Component API Consistency
-
-If you look at components like `<TextInput>`, `<Switch>`, and `<Checkbox>`,
-you'll notice small inconsistencies in their props, events, and slots. These
-differences make the library harder to learn and use.
-
-We should strive for consistent APIs so that components feel predictable. When
-used together—especially in forms—consistency builds intuition.
-
-```vue
-<!-- Example 1: technically fine -->
-<TextInput @change="" />
-<Switch @toggle="" />
-
-<!-- Example 2: better, consistent -->
-<TextInput @change="" />
-<Switch @change="" />
-```
-
-Even though the first example is not "wrong," the second one is one less API to
-learn. Consistency reduces cognitive load. Prefer naming APIs by behavior
-(change, open, close, submit) rather than by internal interaction (toggle,
-click, blur).
-
-We can expand this guideline for events and slot naming as well.
-
----
-
-##### Prefer v-model for Inputs, Controls, and Interactive Components
-
-In Vue 2, `:value` + `@input` was the convention for two-way binding. In Vue 3,
-we now have `modelValue` and `update:modelValue`, which may look verbose but
-give us clarity and consistency. It also plays well with v-bind, ref, and
-Composition API.
-
-If a component manages multiple reactive values, use Vue's named v-model syntax:
-
-```vue
-<Dialog v-model="show" v-model:marginTop="marginTop" />
-```
-
----
-
-##### Split Components Instead of Overloading Them
-
-It's tempting to make "do-it-all" components—like
-AutocompleteDropdownSelect—that handle multiple use cases. This leads to complex
-props, edge cases, and harder maintenance.
-
-Instead, prefer small, focused components that can be composed together.
-
-Avoid:
-
-```vue
-<Autocomplete
-  :fetch-options="fetchUsers"
-  :multi-select="true"
-  :searchable="true"
-  :creatable="true"
-/>
-```
-
-Prefer:
-
-```vue
-<Dropdown />
-<Autocomplete />
-<MultiSelect />
-<Select />
-```
-
-When you feel the need for a prop like `type="multi"` or `mode="searchable"`,
-it's a hint the component might need to be split or needs better composability.
-
-#### Icons
-
-**Lucide Icons (Primary):**
-
-```vue
-<template>
-  <!-- Direct usage in template (auto-imported) -->
-  <LucideCheck class="size-4" />
-  <LucideChevronDown class="size-5 text-ink-gray-6" />
-</template>
-
-<script setup lang="ts">
-// Usage in script (ignore TypeScript errors)
-import LucideCheck from '~icons/lucide/check'
-import LucideChevronDown from '~icons/lucide/chevron-down'
-
-const checkIcon = LucideCheck
-</script>
-```
-
-**FeatherIcon (Deprecated):**
-
-- Do not use `<FeatherIcon>` component in new code
-- Migrate existing uses to Lucide icons when possible
-
-**Custom Icons:**
-
-- Place in `icons/` directory as `.vue` files
-- Follow same component structure as library components
-- Export from `icons/index.ts`
-
-### Styling Standards
-
-**Semantic Color System:**
-
-Always use semantic color classes instead of hardcoded colors:
-
-```vue
-<!-- Background colors -->
-<div class="bg-surface-white">
-  <!-- Text colors -->
-  <h1 class="text-ink-gray-9">Heading</h1>
-  <p class="text-ink-gray-7 text-p-base">Paragraph text</p>
-
-  <!-- Border colors -->
-  <div class="border border-outline-gray-3 p-4">
-    Content with border
-  </div>
-</div>
-```
-
-**Available semantic color scales:**
-
-- Surface: `bg-surface-{white|gray-1|gray-2|...|gray-9|black}`
-- Ink (text/fill): `text-ink-{white|gray-1|...|gray-9|black}`
-- Outline (borders): `border-outline-{white|gray-1|...|gray-5|black}`
-- Support colors: `bg-surface-{red|green|blue|yellow}-{1|2|3|...}` (use
-  sparingly)
-
-**Typography:**
-
-```vue
-<!-- Font sizes -->
-<div class="text-xs">Extra small</div>
-<div class="text-sm">Small</div>
-<div class="text-base">Base</div>
-<div class="text-lg">Large</div>
-<div class="text-xl">Extra large</div>
-
-<!-- Multiline text -->
-<p class="text-p-sm">Lorem ipsum dolor sit amet.</p>
-<p class="text-p-base">Lorem ipsum dolor sit amet.</p>
-```
-
-**Spacing and Layout:**
-
-- Use Tailwind's standard spacing scale: `p-2`, `px-4`, `gap-3`, etc.
-- Mobile-first responsive design: `sm:`, `md:`, `lg:`, `xl:` prefixes
-- Flexbox for most layouts: `flex items-center justify-between gap-2`
-- CSS Grid for complex layouts: `grid grid-cols-3 gap-4`
-
-**Scoped Styles:**
-
-Only use `<style scoped>` when:
-
-- Tailwind cannot express the styling
-- Complex pseudo-selectors are needed
-- Third-party component styling override
-
-```vue
-<style scoped>
-/* Prefer deep selectors for child component styling */
-:deep(.child-component) {
-  color: var(--gray-900);
-}
-</style>
-```
-
-## Data Fetching
-
-### v1 vs v2 Data Fetching
-
-frappe-ui provides two generations of data fetching utilities:
-
-**v1 (Legacy)** - `src/resources/`
-
-- Functions: `createResource`, `createListResource`, `createDocumentResource`
-- Designed for Vue 2 Options API
-- Works with Frappe Framework API v1 endpoints
-- Still widely used in production applications
-- Mature and stable API
-
-**v2 (Current)** - `src/data-fetching/`
-
-- Composables: `useDoc`, `useList`, `useCall`
-- TypeScript-first, designed for Vue 3 Composition API
-- Works **strictly** with Frappe Framework API v2 endpoints only
-- Work in progress (WIP) - API may evolve
-- Recommended for new projects using Vue 3
-
-**For new projects:** Use v2 composables (`useDoc`, `useList`, `useCall`) if
-you're building with Vue 3 and Composition API and your backend supports API v2.
-
-**For existing projects:** v1 utilities continue to be supported and are stable
-for production use. If you are already using v1 in Vue 3 projects and it works
-for you, don't migrate to v2 utilities yet - we are working on a better data
-fetching API (v3) that will supersede both v1 and v2.
-
----
-
-### Data Fetching Composables (v2)
-
-frappe-ui provides three core v2 composables for Frappe API integration:
-
-**`useDoc` - Single document operations:**
-
-```typescript
-const item = useDoc<MyDoctype>({
-  doctype: 'My Doctype',
-  name: 'DOC-001',
-  methods: {
-    approve: 'approve_document', // Server method name
-  },
-  immediate: true, // Fetch on mount
-})
-
-// Access document data
-item.doc.title
-item.doc.status
-
-// Update fields
-item.setValue.submit({ title: 'New Title' })
-
-// Call server methods
-item.approve.submit({ reason: 'Approved by manager' })
-
-// Delete document
-item.delete.submit()
-
-// Refetch
-item.reload()
-```
-
-**`useList` - Document list operations:**
-
-```typescript
-const items = useList<MyDoctype>({
-  doctype: 'My Doctype',
-  fields: ['name', 'title', 'modified'],
-  filters: () => ({ status: 'Active' }),
-  orderBy: 'modified desc',
-  limit: 20,
-  cacheKey: 'active-items-list',
-  immediate: true,
-})
-
-// Access list data
-items.data // Current page data
-items.allData // All fetched data (if auto-load enabled)
-
-// Pagination
-items.next()
-items.previous()
-items.hasNextPage
-
-// Update a row by name
-items.setValue.submit({ name: 'DOC-001', title: 'Updated Title' })
-
-// Insert new row
-items.insert.submit({ title: 'New Item' })
-
-// Delete a row
-items.delete.submit({ name: 'DOC-001' })
-
-// Reload list
-items.reload()
-```
-
-**`useCall` - Generic API calls:**
-
-```typescript
-const apiCall = useCall<ResponseType, ParamsType>({
-  url: '/api/method/my_method',
-  onSuccess: (data) => {
-    console.log('Success:', data)
-  },
-  onError: (error) => {
-    console.error('Error:', error)
-  },
-})
-
-// Make the call
-apiCall.submit({ param1: 'value' })
-
-// Access state
-apiCall.loading
-apiCall.error
-apiCall.data
-```
-
-### Best Practices
-
-- Always provide TypeScript generics for type safety
-- Use reactive filters with arrow functions: `filters: () => ({ field: value })`
-- Provide meaningful `cacheKey` for better performance
-- Handle loading and error states in components
-- Use `onSuccess` callbacks for side effects
-- Prefer `useDoc`/`useList` over direct `useCall` for standard CRUD
-
-## Vite Plugins
-
-frappe-ui provides a unified Vite plugin that bundles multiple features for
-easier Frappe project integration.
-
-### Basic Setup
-
-Import and configure the plugin in your `vite.config.js`:
-
-```javascript
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
-import frappeui from 'frappe-ui/vite'
-
-export default defineConfig({
-  plugins: [
-    frappeui({
-      frappeProxy: true,
-      lucideIcons: true,
-      jinjaBootData: true,
-      frappeTypes: {
-        input: {
-          gameplan: ['gp_project', 'gp_team', 'gp_discussion'],
-        },
-      },
-      buildConfig: {
-        indexHtmlPath: '../gameplan/www/g.html',
-      },
-    }),
-    vue(),
-  ],
-})
-```
-
-### Configuration Options
-
-**`frappeProxy`** - Dev server proxy configuration
-
-```javascript
-frappeProxy: true // Enable with defaults
-// or
-frappeProxy: {
-  port: 8080 // Custom Vite dev server port
-}
-```
-
-Automatically configures the dev server to proxy requests to your Frappe
-backend.
-
-**`lucideIcons`** - Auto-import Lucide icons
-
-```javascript
-lucideIcons: true
-```
-
-Enables auto-importing of Lucide icons as Vue components. Use them directly in
-templates without explicit imports:
-
-```vue
-<template>
-  <LucideCheck class="size-4" />
-</template>
-```
-
-**`jinjaBootData`** - Boot data injection
-
-```javascript
-jinjaBootData: true
-```
-
-Injects boot data from Jinja templates into your Vue app, making it available
-via `window.boot_data`.
-
-**`frappeTypes`** - TypeScript type generation
-
-```javascript
-frappeTypes: {
-  input: {
-    app_name: ['DocType1', 'DocType2'],
-    another_app: ['DocType3'],
-  },
-}
-```
-
-Auto-generates TypeScript interfaces from Frappe doctypes. Organize doctypes by
-app name for better structure.
-
-**`buildConfig`** - Production build settings
-
-```javascript
-buildConfig: {
-  indexHtmlPath: '../path/to/output.html',  // Where to output the built index.html
-}
-```
-
-### Documentation
-
-**Component Documentation:**
-
-- All components should have corresponding documentation in
-  `docs/content/docs/components/ComponentName.md`
-- Use VitePress markdown with embedded Vue component examples
-- Include:
-  - Component description and use cases
-  - Props table (auto-generated from TypeScript)
-  - Events table
-  - Slots table
-  - Interactive examples with code snippets
-  - Accessibility notes
-
-**JSDoc Comments:**
-
-````typescript
-/**
- * A versatile button component with multiple variants and sizes.
- *
- * @example
- * ```vue
- * <Button label="Click me" theme="blue" @click="handleClick" />
- * ```
- */
-interface ButtonProps {
-  /** The text displayed on the button */
-  label?: string
-
-  /**
-   * Visual theme of the button
-   * @default 'gray'
-   */
-  theme?: 'gray' | 'blue' | 'red' | 'green'
-}
-````
-
-**Component Stories:**
-
-Every component should have story files for visual documentation and testing.
-Stories are displayed in the frappe-ui documentation site and help developers
-see component variations.
-
-**File Location:**
-
-Create a `stories/` folder inside the component directory with separate files
-for each story:
+When creating or modernizing a component, prefer this structure:
 
 ```bash
 src/components/ComponentName/
 ├── ComponentName.vue
 ├── types.ts
-├── index.ts
-└── stories/
-    ├── Sizes.vue
-    ├── Variants.vue
-    ├── Themes.vue
-    └── CustomExample.vue
+├── utils.ts           # optional
+├── stories/           # optional but preferred for public components
+└── index.ts
 ```
 
-**Story File Structure:**
+For small legacy components that do not yet match this structure, prefer moving
+incrementally toward it instead of forcing a large rewrite unless the task calls
+for one.
 
-Each story file should be a simple, focused example. No need for the `<Story>`
-wrapper - just demonstrate the component variations directly.
+### TypeScript requirements
+
+For public component APIs, use consistent naming:
+
+- `ComponentNameProps`
+- `ComponentNameEmits`
+- `ComponentNameSlots`
+- `ComponentNameExposed`
+- `ComponentNameSize`, `ComponentNameVariant`, `ComponentNameTheme`, etc.
+
+These names matter because public types and JSDoc are used to generate
+component documentation metadata.
+
+### JSDoc expectations
+
+Every public prop, emit, and slot should have a JSDoc description.
+
+Use JSDoc for:
+
+- generated docs
+- IntelliSense quality
+- clear API contracts for consumers
+
+### Vue authoring conventions
+
+Prefer:
+
+- `<script setup lang="ts">`
+- `defineProps<Props>()`
+- `defineEmits<Emits>()`
+- `defineSlots<Slots>()`
+- `defineExpose<Exposed>()` when truly needed
+- `withDefaults()` for sensible defaults
+- `computed` instead of `watch` when deriving state
+- small, focused composables for reusable logic
+
+Avoid:
+
+- Options API for new component work unless there is a compelling migration reason
+- runtime prop validation when TypeScript is enough
+- broad watchers when a narrower reactive dependency would do
+- imperative DOM access unless necessary
+
+### Public API design rules
+
+Prefer:
+
+- narrow and predictable component boundaries
+- props and slots as the default customization mechanism
+- `v-model` / `modelValue` for the primary value state
+- `v-model:open` for visibility state where relevant
+- semantic event names like `change`, `open`, `close`, `submit`
+- slots over render functions for normal customization
+- limited, requirement-driven escape hatches
+
+Avoid:
+
+- giant multi-mode components with too many flags
+- exposing low-level composition as the default user story
+- breaking or renaming public APIs casually
+- proliferating one-off event and slot names across similar components
+
+### Component consistency
+
+Consistency matters a lot in a UI library.
+
+When working across related components, try to align:
+
+- prop names
+- event names
+- slot vocabulary
+- size / variant naming
+- controlled / uncontrolled behavior
+- visibility APIs (`open`, `v-model:open`)
+- positioning vocabulary (`side`, `align`, `placement`, `offset`)
+
+## Strategic direction currently influencing the repo
+
+These are **important directional signals**, not hard rules for every file.
+
+### 1. Core component quality bar is rising
+
+Many public components are being pushed toward a stronger baseline:
+
+- TypeScript
+- `<script setup>`
+- `types.ts`
+- docs
+- stories
+- tests
+
+When touching a public component that is still legacy, prefer nudging it toward
+that baseline if the change is local and safe.
+
+### 2. Selection/menu family needs consistent APIs
+
+When working on:
+
+- `Dropdown`
+- `Select`
+- `Combobox`
+- `MultiSelect`
+- related shells and shared list primitives
+
+use `v1-release/08-selection-and-menu-api-spec.md` as guidance.
+
+Broad preferred direction:
+
+- keep each component narrowly scoped
+- do not turn `Dropdown` into a generic value picker
+- prefer shared item slot vocabulary like:
+  - `#trigger`
+  - `#item-prefix`
+  - `#item-label`
+  - `#item-suffix`
+  - `#empty`
+  - `#footer`
+- prefer shell-owned row structure over forcing consumers to rebuild rows
+- support `v-model:open` where appropriate
+- prefer `@update:query` for searchable components when relevant
+
+### 3. Some APIs are compatibility layers, not the preferred path
+
+These areas still matter and should be maintained carefully, but should not be
+presented as the ideal API for new work unless the task is specifically about
+legacy compatibility:
+
+- `src/resources/*`
+- older resource-style APIs
+- older compatibility components like `Resource.vue`, `Input.vue`,
+  `Autocomplete`, and `FeatherIcon`
+
+If you touch them:
+
+- preserve compatibility unless the task is explicitly a migration/deprecation task
+- prefer conservative bug fixes and migration-safe improvements
+- avoid expanding their scope unnecessarily
+
+### 4. TextEditor should be stabilized thoughtfully
+
+When touching `TextEditor`, prioritize:
+
+- internal simplification
+- public API stability
+- safe defaults
+- docs / stories / tests alignment
+
+Use `v1-release/plan.md` for the current planning direction in that area.
+
+## Icons
+
+### Lucide icons
+
+Prefer Lucide icons for new work.
 
 ```vue
-<script setup>
-import { ComponentName } from 'frappe-ui'
-</script>
-
 <template>
-  <ComponentName size="sm">Small</ComponentName>
-  <ComponentName size="md">Medium</ComponentName>
-  <ComponentName size="lg">Large</ComponentName>
+  <LucideCheck class="size-4" />
 </template>
 ```
 
-**Story Guidelines:**
-
-- **One story per file**: Each file demonstrates a single aspect (sizes,
-  variants, themes, etc.)
-- **Descriptive filenames**: Use PascalCase names that clearly describe what's
-  being shown (e.g., `Sizes.vue`, `Variants.vue`, `WithIcons.vue`)
-- **Keep it simple**: No complex layouts or wrappers - just show the component
-  variations
-- **Common story types**:
-  - `Sizes.vue` - Different size options
-  - `Variants.vue` - Visual style variants (solid, outline, ghost, etc.)
-  - `Themes.vue` - Color themes
-  - `WithIcons.vue` or `Icons.vue` - Icon slot usage
-  - `States.vue` - Different states (disabled, loading, error, etc.)
-  - `Interactive.vue` - Examples with v-model and state
-
-**Example Story Files:**
-
-```vue
-<!-- stories/Sizes.vue -->
-<script setup>
-import { Button } from 'frappe-ui'
-</script>
-
-<template>
-  <Button size="sm">Button</Button>
-  <Button size="md">Button</Button>
-  <Button size="lg">Button</Button>
-</template>
+```ts
+import LucideCheck from '~icons/lucide/check'
 ```
 
-```vue
-<!-- stories/Variants.vue -->
-<script setup>
-import { Button } from 'frappe-ui'
-</script>
+### FeatherIcon
 
-<template>
-  <Button variant="solid">Solid</Button>
-  <Button variant="subtle">Subtle</Button>
-  <Button variant="outline">Outline</Button>
-  <Button variant="ghost">Ghost</Button>
-</template>
-```
+`FeatherIcon` still exists and is used in parts of the repo, so do not break it
+casually. But for new component work, prefer Lucide.
 
-```vue
-<!-- stories/WithIcons.vue -->
-<script setup>
-import { Button } from 'frappe-ui'
-</script>
+If you are already modifying a small area that uses `FeatherIcon`, it is usually
+reasonable to migrate it if the change stays low-risk.
 
-<template>
-  <Button>
-    <template #prefix>
-      <LucideDownload class="size-4" />
-    </template>
-    Download
-  </Button>
+## Styling Standards
 
-  <Button>
-    <template #suffix>
-      <LucideArrowRight class="size-4" />
-    </template>
-    Next
-  </Button>
-</template>
-```
+### Semantic color system
 
-```vue
-<!-- stories/Interactive.vue -->
-<script setup>
-import { ref } from 'vue'
-import { TextInput } from 'frappe-ui'
+Always prefer semantic design tokens over hardcoded colors.
 
-const value = ref('')
-</script>
+Examples:
 
-<template>
-  <div>
-    <TextInput v-model="value" label="Name" />
-    <p>Value: {{ value }}</p>
-  </div>
-</template>
-```
+- `bg-surface-*`
+- `text-ink-*`
+- `border-outline-*`
+- `fill-ink-*`
+- `placeholder-ink-*`
 
-### Performance Optimization
+### Layout and spacing
 
-**Bundle Size:**
+Prefer Tailwind utility classes for layout and spacing.
 
-- Tree-shakeable exports in `src/index.ts`
-- Lazy-load heavy components when possible
-- Externalize peer dependencies (Vue, Vue Router)
+Use:
 
-**Runtime Performance:**
+- `size-*` for square elements
+- flex and grid utilities for layout
+- responsive utilities when needed
 
-- Prefer `computed` over `watch` when deriving state
-- Debounce expensive operations (search, validation)
+### Stable styling hooks
+
+When a component owns its shell, prefer stable styling and testing hooks such as:
+
+- `data-slot`
+- `data-state`
+- `data-size`
+- `data-variant`
+- `data-disabled`
+
+These reduce the need for fragile DOM assumptions and full markup replacement.
+
+### Scoped styles
+
+Use `<style scoped>` only when utility classes and stable hooks are not enough.
+
+## Data Fetching Guidance
+
+frappe-ui currently contains multiple generations of data APIs.
+
+### `src/resources/`
+
+This is an older compatibility layer. Treat it as mature and compatibility
+sensitive.
+
+When working here:
+
+- favor conservative fixes
+- preserve existing behavior when possible
+- avoid broad redesigns unless explicitly asked
+
+### `src/data-fetching/`
+
+This contains newer composable-based data APIs.
+
+When working here, focus on:
+
+- reactive correctness
+- cache behavior
+- loading and error state handling
+- API contract clarity
+- mutation ergonomics
+- type safety
+
+Avoid opportunistic migration work unless the task is explicitly about data API
+migration or modernization.
+
+## Documentation
+
+### Docs philosophy
+
+Public components should be documented in a way that matches how consumers are
+expected to use them, not just how the internals currently happen to work.
+
+Docs should prioritize:
+
+- intended API shape
+- examples of normal usage
+- slots and customization points
+- accessibility guidance where relevant
+- migration notes when behavior changes matter to consumers
+
+### Generated metadata
+
+`docs/meta/` is generated output.
+
+Do not treat it as the source of truth. If docs metadata looks wrong, fix the
+underlying component types, JSDoc, or docs generation inputs.
+
+### Stories
+
+Stories should be:
+
+- focused
+- representative
+- easy to scan
+- based on public APIs
+
+Common story types:
+
+- `Sizes.vue`
+- `Variants.vue`
+- `States.vue`
+- `WithIcons.vue`
+- `Interactive.vue`
+
+## Testing Guidance
+
+For public components, tests should focus on behavior that consumers rely on:
+
+- rendering states
+- keyboard interaction
+- focus behavior
+- ARIA semantics
+- emitted events
+- controlled and uncontrolled usage
+- slot behavior when it affects output
+
+Avoid shallow tests that only assert implementation trivia.
+
+## Accessibility
+
+Accessibility is part of component quality, not a later polish pass.
+
+Prioritize:
+
+- semantic structure
+- keyboard navigation
+- focus management
+- accessible labels and relationships
+- overlay trigger/content semantics
+- disabled state behavior
 
 ## Code Quality
 
-**Linting and Formatting:**
+### Comments
 
-- ESLint with Vue 3 recommended rules
-- Prettier for consistent code formatting
-- Pre-commit hooks via Husky and lint-staged
+- explain **why**, not **what**
+- use JSDoc/TSDoc for public APIs and non-obvious logic
+- avoid noisy inline comments
 
-**Code Review Checklist:**
+### Review priorities
 
-- [ ] TypeScript types are accurate and complete
-- [ ] Component is accessible (keyboard, screen reader, ARIA)
-- [ ] Semantic color classes used instead of hardcoded colors
-- [ ] Props, events, and slots are documented
-- [ ] Tests cover key functionality
-- [ ] No console logs or debug code
-- [ ] Works in both light and dark modes (if applicable)
-- [ ] Responsive design implemented (mobile-first)
+When reviewing or implementing changes in this repo, prioritize:
 
-## Release Process
+- real bugs and regressions
+- API consistency
+- backwards compatibility risks
+- TypeScript correctness
+- accessibility
+- docs/story/test drift
+- maintainability of public library code
 
-```bash
-# Run tests
-yarn test
+Avoid over-indexing on:
 
-# Bump minor version and push to github
-yarn bump-and-release
-```
+- formatting-only feedback
+- Tailwind class ordering nits
+- speculative refactors with unclear user value
+- app-level architectural advice that does not fit a reusable library
 
-The CI/CD pipeline automatically publishes to npm when tags are pushed.
+## Release-facing docs in `v1-release/`
 
-## Additional Resources
+The files in `v1-release/` are planning and release-support docs.
 
-- [Official Documentation](https://ui.frappe.io)
-- [GitHub Repository](https://github.com/frappe/frappe-ui)
-- [Frappe Framework Docs](https://docs.frappe.io/framework)
+When editing them:
 
-## Code Comments
-
-- Only add comments that explain **why** something is done, not **what** is done
-- Use JSDoc/TSDoc for documenting functions, components, and types
-- Don't add unnecessary comments for self-explanatory code
-- Use inline comments sparingly, only when code complexity requires explanation
+- keep `plan.md` focused on scope, blockers, and direction
+- keep `changelog.md` consumer-facing
+- keep audits concrete and evidence-based
+- do not mix speculative ideas into accepted-direction docs without making that
+  status clear
 
 ## Miscellaneous
 
-- Ignore newline errors in all files
-- Use `size-{number}` instead of `w-{number} h-{number}` for square elements
-  (e.g., `size-4` instead of `w-4 h-4`)
+- ignore newline-only errors
+- prefer small, focused edits over repository-wide churn
+- preserve migration safety in legacy areas unless explicitly asked to change it
