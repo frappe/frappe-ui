@@ -1,31 +1,47 @@
 <template>
   <div v-if="props.action" :class="actionContainerClasses">
-    <div aria-hidden="true" class="absolute border-0 border-outline-gray-2" :class="actionLineClasses" />
+    <div
+      role="separator"
+      :aria-orientation="props.orientation"
+      class="absolute border-0 border-outline-gray-2"
+      :class="actionLineClasses"
+    />
     <Button
       :label="props.action.label"
       :loading="props.action.loading"
       class="relative z-10"
       size="sm"
       variant="outline"
-      @click="props.action.handler"
+      @click="actionOnClick"
     />
   </div>
 
-  <hr
-    v-else
-    class="border-0 border-outline-gray-2"
-    :class="dividerClasses"
-  />
+  <hr v-else class="border-0 border-outline-gray-2" :class="dividerClasses" />
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
 import { Button } from '../../index'
 import type { DividerProps } from './types'
 
 const props = withDefaults(defineProps<DividerProps>(), {
   orientation: 'horizontal',
   position: 'center',
+})
+
+const hasWarnedAboutDeprecatedHandler = ref(false)
+
+watchEffect(() => {
+  if (props.action?.handler && !hasWarnedAboutDeprecatedHandler.value) {
+    console.warn(
+      '`Divider.action.handler` is deprecated. Use `Divider.action.onClick` instead.',
+    )
+    hasWarnedAboutDeprecatedHandler.value = true
+  }
+})
+
+const actionOnClick = computed(() => {
+  return props.action?.onClick ?? props.action?.handler
 })
 
 const dividerClasses = computed(() => {
@@ -40,7 +56,9 @@ const dividerClasses = computed(() => {
 })
 
 const actionContainerClasses = computed(() => {
-  let baseClasses = ['relative whitespace-nowrap border-0 border-outline-gray-2']
+  let baseClasses = [
+    'relative whitespace-nowrap border-0 border-outline-gray-2',
+  ]
 
   if (props.orientation === 'horizontal') {
     let positionClasses = {

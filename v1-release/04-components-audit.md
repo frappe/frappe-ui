@@ -31,11 +31,11 @@ findings should be layered on top in follow-up passes.
 | MonthPicker  | `src/components/MonthPicker/MonthPicker.vue`   |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Good baseline                                                   |
 | TimePicker   | `src/components/TimePicker/TimePicker.vue`     |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Good baseline                                                   |
 | Dialog       | `src/components/Dialog/Dialog.vue`             |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Overlay/floating blocker                                        |
-| Divider      | `src/components/Divider/Divider.vue`           |           ✅ |  ✅ |       ✅ |      ❌ |    ❌ |   ❌ | Missing full baseline coverage                                  |
+| Divider      | `src/components/Divider/Divider.vue`           |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Baseline coverage added; action mode semantics reviewed         |
 | Dropdown     | `src/components/Dropdown/Dropdown.vue`         |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Part of critical selection/floating cluster                     |
 | ErrorMessage | `src/components/ErrorMessage/ErrorMessage.vue` |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Good baseline                                                   |
 | FileUploader | `src/components/FileUploader/FileUploader.vue` |           ❌ |  ❌ |       ❌ |      ✅ |    ❌ |   ✅ | Legacy public component; modernization blocker                  |
-| FormControl  | `src/components/FormControl/FormControl.vue`   |           ✅ |  ✅ |       ✅ |      ✅ |    ❌ |   ✅ | Critical blocker; needs test baseline                           |
+| FormControl  | `src/components/FormControl/FormControl.vue`   |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Baseline present; part of critical selection/input cluster      |
 | ListView     | `src/components/ListView/ListView.vue`         |           ✅ |  ❌ |       ❌ |      ✅ |    ❌ |   ✅ | Script setup but not TS; missing types/test baseline            |
 | MultiSelect  | `src/components/MultiSelect/MultiSelect.vue`   |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Critical blocker                                                |
 | Password     | `src/components/Password/Password.vue`         |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Depends on FormControl quality                                  |
@@ -44,14 +44,14 @@ findings should be layered on top in follow-up passes.
 | Rating       | `src/components/Rating/Rating.vue`             |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Still uses internal `FeatherIcon`                               |
 | Select       | `src/components/Select/Select.vue`             |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Selection/floating cluster                                      |
 | Sidebar      | `src/components/Sidebar/Sidebar.vue`           |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Good baseline                                                   |
-| Slider       | `src/components/Slider/Slider.vue`             |           ✅ |  ✅ |       ✅ |      ✅ |    ❌ |   ✅ | Missing test baseline                                           |
+| Slider       | `src/components/Slider/Slider.vue`             |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Baseline present                                                |
 | Switch       | `src/components/Switch/Switch.vue`             |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Critical blocker; still uses internal `FeatherIcon`             |
 | TabButtons   | `src/components/TabButtons/TabButtons.vue`     |           ❌ |  ❌ |       ❌ |      ✅ |    ❌ |   ✅ | Legacy public component; modernization blocker                  |
 | Tabs         | `src/components/Tabs/Tabs.vue`                 |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Good baseline                                                   |
 | TextEditor   | `src/components/TextEditor/TextEditor.vue`     |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Public component baseline exists; internals still need refactor |
 | TextInput    | `src/components/TextInput/TextInput.vue`       |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Good baseline                                                   |
-| Textarea     | `src/components/Textarea/Textarea.vue`         |           ✅ |  ✅ |       ✅ |      ✅ |    ❌ |   ✅ | Missing test baseline                                           |
-| Toast        | `src/components/Toast/Toast.vue`               |           ✅ |  ✅ |       ✅ |      ❌ |    ❌ |   ❌ | Missing full baseline coverage                                  |
+| Textarea     | `src/components/Textarea/Textarea.vue`         |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Baseline present                                                |
+| Toast        | `src/components/Toast/Toast.vue`               |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Baseline coverage added in this pass                            |
 | Tooltip      | `src/components/Tooltip/Tooltip.vue`           |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Good baseline                                                   |
 | Tree         | `src/components/Tree/Tree.vue`                 |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Still uses internal `FeatherIcon`                               |
 
@@ -77,24 +77,17 @@ does not expose a typed component baseline.
 
 #### Missing docs
 
-- Divider
-- Toast
+- None in the current core set
 
 #### Missing stories
 
-- Divider
-- Toast
+- None in the current core set
 
 #### Missing tests
 
-- Divider
 - FileUploader
-- FormControl
 - ListView
-- Slider
 - TabButtons
-- Textarea
-- Toast
 
 ### 4. Public core components missing `types.ts`
 
@@ -123,7 +116,8 @@ as:
 - structurally present enough to document/test now
 - still requiring dedicated internal refactor work before v1
 
-This matches the agreed plan: stabilize and simplify, but do not expand scope. Detailed editor-specific v1 decisions now live in [`plan.md`](./plan.md).
+This matches the agreed plan: stabilize and simplify, but do not expand scope.
+Detailed editor-specific v1 decisions now live in [`plan.md`](./plan.md).
 
 ## Selection/input family note
 
@@ -151,8 +145,6 @@ Address the components that clearly fail the baseline standard:
 - FileUploader
 - TabButtons
 - ListView
-- Divider
-- Toast
 
 ### Target outcomes
 
@@ -190,7 +182,9 @@ After the hard blockers are removed:
 
 ## Follow-up audit tasks
 
-Use [`plan.md`](./plan.md) for the agreed broad v1 direction, and [`08-selection-and-menu-api-spec.md`](./08-selection-and-menu-api-spec.md) for the selection/menu family-specific API pass.
+Use [`plan.md`](./plan.md) for the agreed broad v1 direction, and
+[`08-selection-and-menu-api-spec.md`](./08-selection-and-menu-api-spec.md) for
+the selection/menu family-specific API pass.
 
 This first pass does **not** yet answer:
 

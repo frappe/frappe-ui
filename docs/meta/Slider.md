@@ -7,21 +7,21 @@
 <PropsTable name="Slider" :data='[
   {
     "name": "step",
-    "description": "Step interval between slider values",
+    "description": "Step interval between slider values.",
     "required": false,
     "type": "number",
     "default": "1"
   },
   {
     "name": "max",
-    "description": "Maximum allowed slider value",
+    "description": "Maximum allowed slider value.",
     "required": false,
     "type": "number",
     "default": "100"
   },
   {
     "name": "min",
-    "description": "Minimum allowed slider value",
+    "description": "Minimum allowed slider value.",
     "required": false,
     "type": "number",
     "default": "0"
@@ -30,8 +30,7 @@
     "name": "modelValue",
     "description": "",
     "required": false,
-    "type": "SliderValue",
-    "default": "[]"
+    "type": "SliderValue"
   }
 ]'/> 
 
@@ -40,7 +39,7 @@
   {
     "name": "update:modelValue",
     "description": "",
-    "type": "[value: SliderValue]"
+    "type": "[value: SliderValue | undefined]"
   }
 ]'/> 
 

@@ -65,6 +65,8 @@ describe('Textarea', () => {
     cy.get('@updateModelValue').should('not.have.been.called')
 
     cy.tick(300)
-    cy.get('@updateModelValue').should('have.been.called')
+    cy.get('@updateModelValue')
+      .should('have.been.calledOnce')
+      .and('have.been.calledWith', 'Delayed update')
   })
 })

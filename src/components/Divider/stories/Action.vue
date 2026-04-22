@@ -3,7 +3,7 @@
     <Variant title="Action button">
       <div class="space-y-3">
         <p class="text-base text-ink-gray-7">Older items</p>
-        <Divider :action="{ label: 'Load more', handler: onClick }" />
+        <Divider :action="{ label: 'Load more', onClick }" />
         <p class="text-base text-ink-gray-7">Newer items</p>
       </div>
     </Variant>
@@ -15,7 +15,7 @@
           orientation="vertical"
           flex-item
           position="center"
-          :action="{ label: 'Edit', handler: onClick }"
+          :action="{ label: 'Edit', onClick }"
         />
         <span class="text-base text-ink-gray-7">Panel B</span>
       </div>

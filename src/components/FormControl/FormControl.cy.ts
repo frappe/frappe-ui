@@ -56,7 +56,11 @@ describe('FormControl', () => {
       },
     })
 
-    cy.get('[data-cy="prefix"]').should('exist')
-    cy.get('[data-cy="suffix"]').should('exist')
+    cy.get('input')
+      .parent()
+      .within(() => {
+        cy.get('[data-cy="prefix"]').should('exist')
+        cy.get('[data-cy="suffix"]').should('exist')
+      })
   })
 })

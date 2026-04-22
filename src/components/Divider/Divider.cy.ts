@@ -24,8 +24,29 @@ describe('Divider', () => {
       .and('not.have.class', 'w-full')
   })
 
-  it('renders an action button and calls its handler', () => {
+  it('renders an action button and calls its onClick handler', () => {
+    const onClick = cy.stub().as('actionOnClick')
+
+    cy.mount(Divider, {
+      props: {
+        action: {
+          label: 'Load more',
+          onClick,
+        },
+      },
+    })
+
+    cy.contains('button', 'Load more').click()
+    cy.get('@actionOnClick').should('have.been.calledOnce')
+    cy.get('div').should('exist')
+  })
+
+  it('supports deprecated handler and warns once', () => {
     const handler = cy.stub().as('actionHandler')
+
+    cy.window().then((win) => {
+      cy.stub(win.console, 'warn').as('consoleWarn')
+    })
 
     cy.mount(Divider, {
       props: {
@@ -36,9 +57,20 @@ describe('Divider', () => {
       },
     })
 
+    cy.get('@consoleWarn').then((consoleWarn) => {
+      const matchingCalls = (consoleWarn as sinon.SinonStub)
+        .getCalls()
+        .filter(
+          (call) =>
+            call.args[0] ===
+            '`Divider.action.handler` is deprecated. Use `Divider.action.onClick` instead.',
+        )
+
+      expect(matchingCalls).to.have.length(1)
+    })
+
     cy.contains('button', 'Load more').click()
     cy.get('@actionHandler').should('have.been.calledOnce')
-    cy.get('div').should('exist')
   })
 
   it('does not overlap sibling content in vertical action mode', () => {
@@ -51,7 +83,7 @@ describe('Divider', () => {
             flexItem: true,
             action: {
               label: 'Edit',
-              handler: () => {},
+              onClick: () => {},
             },
           }),
           h('span', { 'data-cy': 'right' }, 'Right panel'),
@@ -59,18 +91,20 @@ describe('Divider', () => {
       },
     })
 
-    cy.get('button').should('exist').then(($button) => {
-      const buttonRect = $button[0].getBoundingClientRect()
+    cy.get('button')
+      .should('exist')
+      .then(($button) => {
+        const buttonRect = $button[0].getBoundingClientRect()
 
-      cy.get('[data-cy="left"]').then(($left) => {
-        const leftRect = $left[0].getBoundingClientRect()
-        expect(leftRect.right).to.be.lessThan(buttonRect.left)
-      })
+        cy.get('[data-cy="left"]').then(($left) => {
+          const leftRect = $left[0].getBoundingClientRect()
+          expect(leftRect.right).to.be.lessThan(buttonRect.left)
+        })
 
-      cy.get('[data-cy="right"]').then(($right) => {
-        const rightRect = $right[0].getBoundingClientRect()
-        expect(rightRect.left).to.be.greaterThan(buttonRect.right)
+        cy.get('[data-cy="right"]').then(($right) => {
+          const rightRect = $right[0].getBoundingClientRect()
+          expect(rightRect.left).to.be.greaterThan(buttonRect.right)
+        })
       })
-    })
   })
 })

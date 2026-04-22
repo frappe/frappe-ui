@@ -20,5 +20,29 @@ describe('Slider', () => {
     })
 
     cy.get('[aria-label="Volume"]').should('have.length', 2)
+    cy.get('[role="slider"]').should('have.length', 2)
+  })
+
+  it('renders one thumb at the default minimum value when uncontrolled', () => {
+    cy.mount(Slider)
+
+    cy.get('[aria-label="Volume"]').should('have.length', 1)
+    cy.get('[role="slider"]')
+      .should('have.length', 1)
+      .first()
+      .should('have.attr', 'aria-valuenow', '0')
+  })
+
+  it('renders one thumb at the provided minimum value when uncontrolled', () => {
+    cy.mount(Slider, {
+      props: {
+        min: 10,
+      },
+    })
+
+    cy.get('[role="slider"]')
+      .should('have.length', 1)
+      .first()
+      .should('have.attr', 'aria-valuenow', '10')
   })
 })

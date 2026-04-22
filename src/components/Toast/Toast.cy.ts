@@ -40,7 +40,7 @@ describe('Toast', () => {
       onAction,
     })
 
-    cy.get('.text-ink-blue-link').click({ force: true })
+    cy.contains('button', 'Undo').click({ force: true })
 
     cy.get('@actionHandler').should('have.been.calledOnce')
     cy.get('@actionEvent').should('have.been.calledOnce')
@@ -53,6 +53,6 @@ describe('Toast', () => {
       closable: false,
     })
 
-    cy.get('button').should('have.length', 0)
+    cy.get('[aria-label="Close"]').should('not.exist')
   })
 })
