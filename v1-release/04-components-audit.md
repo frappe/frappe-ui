@@ -123,7 +123,7 @@ as:
 - structurally present enough to document/test now
 - still requiring dedicated internal refactor work before v1
 
-This matches the agreed plan: stabilize and simplify, but do not expand scope.
+This matches the agreed plan: stabilize and simplify, but do not expand scope. Detailed editor-specific v1 decisions now live in [`plan.md`](./plan.md).
 
 ## Selection/input family note
 
@@ -170,12 +170,15 @@ Audit and stabilize together:
 - FormControl / Switch / MultiSelect / TabButtons
 - deprecations: Input / Autocomplete / FeatherIcon usage
 
-## Wave 3 — TextEditor internals
+## Wave 3 — TextEditor stabilization
+
+See [`plan.md`](./plan.md).
 
 - simplify structure
 - identify duplicated code
 - migrate remaining internals that still use legacy patterns
 - stabilize public API boundaries
+- implement the default-off policy for font family and font size
 
 ## Wave 4 — consistency pass across the rest of core
 
@@ -186,6 +189,8 @@ After the hard blockers are removed:
 - verify docs/stories/tests remain representative of the frozen API
 
 ## Follow-up audit tasks
+
+Use [`plan.md`](./plan.md) for the agreed broad v1 direction, and [`08-selection-and-menu-api-spec.md`](./08-selection-and-menu-api-spec.md) for the selection/menu family-specific API pass.
 
 This first pass does **not** yet answer:
 
