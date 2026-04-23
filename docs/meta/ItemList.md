@@ -3,85 +3,89 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+
+  const propsData = [
+  {
+    name: 'items',
+    description: 'Flat items to render when grouped data is not provided.',
+    required: false,
+    type: 'ItemListItem[]',
+    default: '[]'
+  },
+  {
+    name: 'groups',
+    description: 'Explicit grouped data. Takes precedence over `items`.',
+    required: false,
+    type: 'ItemListGroup<ItemListItem>[]',
+    default: '[]'
+  },
+  {
+    name: 'size',
+    description: 'Shared row density applied to every item.',
+    required: false,
+    type: 'ItemListSize',
+    default: '"sm"'
+  },
+  {
+    name: 'emptyText',
+    description: 'Fallback text rendered when the list is empty.',
+    required: false,
+    type: 'string',
+    default: '"No items"'
+  }
+]
+
+  const slotsData = [
+  {
+    name: 'item-prefix',
+    description: 'Content rendered before the standard item label.',
+    type: 'ItemListItemSlotProps<ItemListItem>'
+  },
+  {
+    name: 'item-label',
+    description: 'Content rendered for the standard item label area.',
+    type: 'ItemListItemSlotProps<ItemListItem>'
+  },
+  {
+    name: 'item-suffix',
+    description: 'Content rendered after the standard item label.',
+    type: 'ItemListItemSlotProps<ItemListItem>'
+  },
+  {
+    name: 'item',
+    description: 'Replaces the entire item row.',
+    type: 'ItemListItemSlotProps<ItemListItem>'
+  },
+  {
+    name: 'empty',
+    description: 'Fallback content rendered when there are no items.',
+    type: 'any'
+  },
+  {
+    name: 'footer',
+    description: 'Content rendered below the item list.',
+    type: 'any'
+  },
+  {
+    name: 'group-label',
+    description: 'Custom renderer for group labels.',
+    type: 'ItemListGroupSlotProps<ItemListItem>'
+  }
+]
+
+  const emitsData = [
+  {
+    name: 'item-click',
+    description: 'Fired when an enabled item is clicked.',
+    type: '[item: ItemListItem]'
+  }
+]
 </script>
 ## API Reference
 
-## API Reference
+<PropsTable name="ItemList" :data="propsData"/> 
 
-<PropsTable name="ItemList" :data='[
-  {
-    "name": "items",
-    "description": "",
-    "required": false,
-    "type": "ItemListItem[]",
-    "default": "[]"
-  },
-  {
-    "name": "groups",
-    "description": "",
-    "required": false,
-    "type": "ItemListGroup<ItemListItem>[]",
-    "default": "[]"
-  },
-  {
-    "name": "size",
-    "description": "",
-    "required": false,
-    "type": "ItemListSize",
-    "default": "\"sm\""
-  },
-  {
-    "name": "emptyText",
-    "description": "",
-    "required": false,
-    "type": "string",
-    "default": "\"No items\""
-  }
-]'/> 
+<SlotsTable :data="slotsData"/> 
 
-<SlotsTable :data='[
-  {
-    "name": "item-prefix",
-    "description": "",
-    "type": "{ item: ItemListItem; group: ItemListGroup<ItemListItem>; }"
-  },
-  {
-    "name": "item-label",
-    "description": "",
-    "type": "{ item: ItemListItem; group: ItemListGroup<ItemListItem>; }"
-  },
-  {
-    "name": "item-suffix",
-    "description": "",
-    "type": "{ item: ItemListItem; group: ItemListGroup<ItemListItem>; }"
-  },
-  {
-    "name": "item",
-    "description": "",
-    "type": "{ item: ItemListItem; group: ItemListGroup<ItemListItem>; }"
-  },
-  {
-    "name": "empty",
-    "description": "",
-    "type": "any"
-  },
-  {
-    "name": "footer",
-    "description": "",
-    "type": "any"
-  },
-  {
-    "name": "group-label",
-    "description": "",
-    "type": "{ group: ItemListGroup<ItemListItem>; }"
-  }
-]'/> 
-
-<EmitsTable :data='[
-  {
-    "name": "item-click",
-    "description": "",
-    "type": "[item: ItemListItem]"
-  }
-]'/> 
+<EmitsTable :data="emitsData"/> 
 

@@ -3,76 +3,83 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+
+  const propsData = [
+  {
+    name: 'label',
+    description: 'Label text displayed above the input',
+    required: false,
+    type: 'string',
+    default: undefined
+  },
+  {
+    name: 'description',
+    description: 'Optional description or helper text shown below the input',
+    required: false,
+    type: 'string',
+    default: undefined
+  },
+  {
+    name: 'type',
+    description: 'Type of input to render',
+    required: false,
+    type: '"select" | TextInputTypes | "textarea" | "checkbox" | "autocomplete" | "combobox"',
+    default: '"text"'
+  },
+  {
+    name: 'size',
+    description: 'Size of the input',
+    required: false,
+    type: '"md" | "sm"',
+    default: '"sm"'
+  },
+  {
+    name: 'variant',
+    description: 'Visual variant of the input',
+    required: false,
+    type: '"subtle" | "outline"',
+    default: '"subtle"'
+  },
+  {
+    name: 'required',
+    description: 'Whether the input is required',
+    required: false,
+    type: 'boolean',
+    default: undefined
+  }
+]
+
+  const slotsData = [
+  {
+    name: 'prefix',
+    description: 'Custom content rendered before the input (prefix icon/content)',
+    type: 'any'
+  },
+  {
+    name: 'suffix',
+    description: 'Custom content rendered after the input (suffix icon/content)',
+    type: 'any'
+  },
+  {
+    name: 'description',
+    description: 'Custom description slot (replaces description prop)',
+    type: 'any'
+  },
+  {
+    name: 'item-prefix',
+    description: 'Custom slot for autocomplete items prefix (if using Autocomplete type)',
+    type: '{ item: any; }'
+  },
+  {
+    name: 'default',
+    description: 'Default slot override for full input rendering',
+    type: 'any'
+  }
+]
 </script>
 ## API Reference
 
-<PropsTable name="FormControl" :data='[
-  {
-    "name": "label",
-    "description": "Label text displayed above the input",
-    "required": false,
-    "type": "string"
-  },
-  {
-    "name": "description",
-    "description": "Optional description or helper text shown below the input",
-    "required": false,
-    "type": "string"
-  },
-  {
-    "name": "type",
-    "description": "Type of input to render",
-    "required": false,
-    "type": "\"autocomplete\" | \"select\" | TextInputTypes | \"textarea\" | \"checkbox\" | \"combobox\"",
-    "default": "\"text\""
-  },
-  {
-    "name": "size",
-    "description": "Size of the input",
-    "required": false,
-    "type": "\"sm\" | \"md\"",
-    "default": "\"sm\""
-  },
-  {
-    "name": "variant",
-    "description": "Visual variant of the input",
-    "required": false,
-    "type": "\"subtle\" | \"outline\"",
-    "default": "\"subtle\""
-  },
-  {
-    "name": "required",
-    "description": "Whether the input is required",
-    "required": false,
-    "type": "boolean"
-  }
-]'/> 
+<PropsTable name="FormControl" :data="propsData"/> 
 
-<SlotsTable :data='[
-  {
-    "name": "prefix",
-    "description": "Custom content rendered before the input (prefix icon/content)",
-    "type": "any"
-  },
-  {
-    "name": "suffix",
-    "description": "Custom content rendered after the input (suffix icon/content)",
-    "type": "any"
-  },
-  {
-    "name": "description",
-    "description": "Custom description slot (replaces description prop)",
-    "type": "any"
-  },
-  {
-    "name": "item-prefix",
-    "description": "Custom slot for autocomplete items prefix (if using Autocomplete type)",
-    "type": "{ item: any; }"
-  },
-  {
-    "name": "default",
-    "description": "Default slot override for full input rendering",
-    "type": "any"
-  }
-]'/> 
+<SlotsTable :data="slotsData"/> 
 

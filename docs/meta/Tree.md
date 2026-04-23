@@ -3,46 +3,52 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+
+  const propsData = [
+  {
+    name: 'node',
+    description: 'Root tree node to render.\nCan contain nested children to form the tree structure.',
+    required: true,
+    type: 'TreeNode',
+    default: undefined
+  },
+  {
+    name: 'nodeKey',
+    description: 'Unique key used to identify each node.\nUsually an id-like property present on every node.',
+    required: true,
+    type: 'string',
+    default: undefined
+  },
+  {
+    name: 'options',
+    description: 'Optional configuration for tree layout and behavior.',
+    required: false,
+    type: 'TreeOptions',
+    default: '{\n    rowHeight: "25px",\n    indentWidth: "20px",\n    showIndentationGuides: true,\n    defaultCollapsed: true,\n}'
+  }
+]
+
+  const slotsData = [
+  {
+    name: 'node',
+    description: 'Slot to fully override how a tree node renders',
+    type: 'any'
+  },
+  {
+    name: 'icon',
+    description: 'Slot to override only the node expand/collapse icon',
+    type: 'any'
+  },
+  {
+    name: 'label',
+    description: 'Slot to override only the node label/content',
+    type: 'any'
+  }
+]
 </script>
 ## API Reference
 
-<PropsTable name="Tree" :data='[
-  {
-    "name": "node",
-    "description": "Root tree node to render.\nCan contain nested children to form the tree structure.",
-    "required": true,
-    "type": "TreeNode"
-  },
-  {
-    "name": "nodeKey",
-    "description": "Unique key used to identify each node.\nUsually an id-like property present on every node.",
-    "required": true,
-    "type": "string"
-  },
-  {
-    "name": "options",
-    "description": "Optional configuration for tree layout and behavior.",
-    "required": false,
-    "type": "TreeOptions",
-    "default": "{\n    rowHeight: \"25px\",\n    indentWidth: \"20px\",\n    showIndentationGuides: true,\n    defaultCollapsed: true,\n}"
-  }
-]'/> 
+<PropsTable name="Tree" :data="propsData"/> 
 
-<SlotsTable :data='[
-  {
-    "name": "node",
-    "description": "Slot to fully override how a tree node renders",
-    "type": "any"
-  },
-  {
-    "name": "icon",
-    "description": "Slot to override only the node expand/collapse icon",
-    "type": "any"
-  },
-  {
-    "name": "label",
-    "description": "Slot to override only the node label/content",
-    "type": "any"
-  }
-]'/> 
+<SlotsTable :data="slotsData"/> 
 

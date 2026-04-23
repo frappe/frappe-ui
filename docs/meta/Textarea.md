@@ -3,74 +3,84 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+
+  const propsData = [
+  {
+    name: 'size',
+    description: 'Controls the visual size of the textarea.',
+    required: false,
+    type: '"md" | "sm" | "lg" | "xl"',
+    default: '"sm"'
+  },
+  {
+    name: 'variant',
+    description: 'Visual style variant.',
+    required: false,
+    type: '"subtle" | "outline"',
+    default: '"subtle"'
+  },
+  {
+    name: 'placeholder',
+    description: 'Placeholder text shown when empty.',
+    required: false,
+    type: 'string',
+    default: undefined
+  },
+  {
+    name: 'disabled',
+    description: 'Disables user interaction.',
+    required: false,
+    type: 'boolean',
+    default: undefined
+  },
+  {
+    name: 'id',
+    description: 'HTML id attribute.',
+    required: false,
+    type: 'string',
+    default: undefined
+  },
+  {
+    name: 'modelValue',
+    description: 'Bound value of the textarea.',
+    required: false,
+    type: 'string',
+    default: undefined
+  },
+  {
+    name: 'debounce',
+    description: 'Debounce delay (ms) before emitting value updates.',
+    required: false,
+    type: 'number',
+    default: undefined
+  },
+  {
+    name: 'rows',
+    description: 'Number of visible text rows.',
+    required: false,
+    type: 'number',
+    default: '3'
+  },
+  {
+    name: 'label',
+    description: 'Optional label text.',
+    required: false,
+    type: 'string',
+    default: undefined
+  }
+]
+
+  const emitsData = [
+  {
+    name: 'update:modelValue',
+    description: 'Fired when the model value changes.',
+    type: '[value: string]'
+  }
+]
 </script>
 ## API Reference
 
-<PropsTable name="Textarea" :data='[
-  {
-    "name": "size",
-    "description": "Controls the visual size of the textarea",
-    "required": false,
-    "type": "\"sm\" | \"md\" | \"lg\" | \"xl\"",
-    "default": "\"sm\""
-  },
-  {
-    "name": "variant",
-    "description": "Visual style variant",
-    "required": false,
-    "type": "\"subtle\" | \"outline\"",
-    "default": "\"subtle\""
-  },
-  {
-    "name": "placeholder",
-    "description": "Placeholder text shown when empty",
-    "required": false,
-    "type": "string"
-  },
-  {
-    "name": "disabled",
-    "description": "Disables user interaction",
-    "required": false,
-    "type": "boolean"
-  },
-  {
-    "name": "id",
-    "description": "HTML id attribute",
-    "required": false,
-    "type": "string"
-  },
-  {
-    "name": "modelValue",
-    "description": "Bound value of the textarea",
-    "required": false,
-    "type": "string"
-  },
-  {
-    "name": "debounce",
-    "description": "Debounce delay (ms) before emitting value updates",
-    "required": false,
-    "type": "number"
-  },
-  {
-    "name": "rows",
-    "description": "Number of visible text rows",
-    "required": false,
-    "type": "number",
-    "default": "3"
-  },
-  {
-    "name": "label",
-    "description": "Optional label text",
-    "required": false,
-    "type": "string"
-  }
-]'/> 
+<PropsTable name="Textarea" :data="propsData"/> 
 
-<EmitsTable :data='[
-  {
-    "name": "update:modelValue",
-    "description": "",
-    "type": "any[]"
-  }
-]'/> 
+<EmitsTable :data="emitsData"/> 
 

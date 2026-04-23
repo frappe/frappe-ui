@@ -75,9 +75,9 @@ export default function (md: MarkdownRenderer) {
 
     // Handle PropsTable
     const propsRegex =
-      /<PropsTable\s+name=["']([^"']+)["']\s+:data='([^']+)'\/>/g
+      /<PropsTable\s+name=["']([^"']+)["']\s+:data="([^"]+)"\/>/g
 
-    state.src = state.src.replace(propsRegex, (match, name, data) => {
+    state.src = state.src.replace(propsRegex, (match, name, dataExpression) => {
       const typesPath = `../../../../src/components/${name}/types.ts`
       const idx = state.tokens.findIndex((i) => i.content.includes(match))
 
@@ -85,7 +85,7 @@ export default function (md: MarkdownRenderer) {
         const { realPath, path: _path } = state.env as MarkdownEnv
 
         state.tokens[idx].content =
-          `<PropsTable name="${name}" :data='${data}'><template #code>`
+          `<PropsTable name="${name}" :data="${dataExpression}"><template #code>`
 
         const code = new state.Token('fence', 'code', 0)
         code.info = 'typescript'

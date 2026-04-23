@@ -3,122 +3,134 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+
+  const propsData = [
+  {
+    name: 'theme',
+    description: 'Visual color theme of the button',
+    required: false,
+    type: 'Theme',
+    default: '"gray"'
+  },
+  {
+    name: 'size',
+    description: 'Controls the button size',
+    required: false,
+    type: 'Size',
+    default: '"sm"'
+  },
+  {
+    name: 'variant',
+    description: 'Visual style of the button',
+    required: false,
+    type: 'Variant',
+    default: '"subtle"'
+  },
+  {
+    name: 'label',
+    description: 'Text label displayed inside the button',
+    required: false,
+    type: 'string',
+    default: undefined
+  },
+  {
+    name: 'icon',
+    description: 'Icon shown when no left or right icon is specified',
+    required: false,
+    type: 'string | Component',
+    default: undefined
+  },
+  {
+    name: 'iconLeft',
+    description: 'Icon shown before the label',
+    required: false,
+    type: 'string | Component',
+    default: undefined
+  },
+  {
+    name: 'iconRight',
+    description: 'Icon shown after the label',
+    required: false,
+    type: 'string | Component',
+    default: undefined
+  },
+  {
+    name: 'tooltip',
+    description: 'Tooltip text shown on hover',
+    required: false,
+    type: 'string',
+    default: undefined
+  },
+  {
+    name: 'loading',
+    description: 'Shows a loading state and disables interaction',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  },
+  {
+    name: 'loadingText',
+    description: 'Text shown while the button is loading',
+    required: false,
+    type: 'string',
+    default: undefined
+  },
+  {
+    name: 'disabled',
+    description: 'Disables the button',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  },
+  {
+    name: 'route',
+    description: 'Router destination when used as a link',
+    required: false,
+    type: 'string | kt | Tt',
+    default: undefined
+  },
+  {
+    name: 'link',
+    description: 'External link URL',
+    required: false,
+    type: 'string',
+    default: undefined
+  },
+  {
+    name: 'type',
+    description: 'Native button type',
+    required: false,
+    type: '"button" | "submit" | "reset"',
+    default: '"button"'
+  }
+]
+
+  const slotsData = [
+  {
+    name: 'prefix',
+    description: 'Content shown before the button label (left icon / custom content)',
+    type: 'any'
+  },
+  {
+    name: 'icon',
+    description: 'Icon-only content for icon buttons',
+    type: 'any'
+  },
+  {
+    name: 'default',
+    description: 'Main button content (overrides `label`)',
+    type: 'any'
+  },
+  {
+    name: 'suffix',
+    description: 'Content shown after the button label (right icon / custom content)',
+    type: 'any'
+  }
+]
 </script>
 ## API Reference
 
-<PropsTable name="Button" :data='[
-  {
-    "name": "theme",
-    "description": "Visual color theme of the button",
-    "required": false,
-    "type": "Theme",
-    "default": "\"gray\""
-  },
-  {
-    "name": "size",
-    "description": "Controls the button size",
-    "required": false,
-    "type": "Size",
-    "default": "\"sm\""
-  },
-  {
-    "name": "variant",
-    "description": "Visual style of the button",
-    "required": false,
-    "type": "Variant",
-    "default": "\"subtle\""
-  },
-  {
-    "name": "label",
-    "description": "Text label displayed inside the button",
-    "required": false,
-    "type": "string"
-  },
-  {
-    "name": "icon",
-    "description": "Icon shown when no left or right icon is specified",
-    "required": false,
-    "type": "string | Component"
-  },
-  {
-    "name": "iconLeft",
-    "description": "Icon shown before the label",
-    "required": false,
-    "type": "string | Component"
-  },
-  {
-    "name": "iconRight",
-    "description": "Icon shown after the label",
-    "required": false,
-    "type": "string | Component"
-  },
-  {
-    "name": "tooltip",
-    "description": "Tooltip text shown on hover",
-    "required": false,
-    "type": "string"
-  },
-  {
-    "name": "loading",
-    "description": "Shows a loading state and disables interaction",
-    "required": false,
-    "type": "boolean",
-    "default": "false"
-  },
-  {
-    "name": "loadingText",
-    "description": "Text shown while the button is loading",
-    "required": false,
-    "type": "string"
-  },
-  {
-    "name": "disabled",
-    "description": "Disables the button",
-    "required": false,
-    "type": "boolean",
-    "default": "false"
-  },
-  {
-    "name": "route",
-    "description": "Router destination when used as a link",
-    "required": false,
-    "type": "string | kt | Tt"
-  },
-  {
-    "name": "link",
-    "description": "External link URL",
-    "required": false,
-    "type": "string"
-  },
-  {
-    "name": "type",
-    "description": "Native button type",
-    "required": false,
-    "type": "\"button\" | \"submit\" | \"reset\"",
-    "default": "\"button\""
-  }
-]'/> 
+<PropsTable name="Button" :data="propsData"/> 
 
-<SlotsTable :data='[
-  {
-    "name": "prefix",
-    "description": "Content shown before the button label (left icon / custom content)",
-    "type": "any"
-  },
-  {
-    "name": "icon",
-    "description": "Icon-only content for icon buttons",
-    "type": "any"
-  },
-  {
-    "name": "default",
-    "description": "Main button content (overrides `label`)",
-    "type": "any"
-  },
-  {
-    "name": "suffix",
-    "description": "Content shown after the button label (right icon / custom content)",
-    "type": "any"
-  }
-]'/> 
+<SlotsTable :data="slotsData"/> 
 

@@ -3,75 +3,82 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+
+  const propsData = [
+  {
+    name: 'modelValue',
+    description: 'Controls whether the dialog is open (v-model)',
+    required: true,
+    type: 'boolean',
+    default: undefined
+  },
+  {
+    name: 'options',
+    description: 'Configuration options for title, message, size, icon, actions, etc.',
+    required: false,
+    type: 'DialogOptions',
+    default: '{}'
+  },
+  {
+    name: 'disableOutsideClickToClose',
+    description: 'Prevents closing the dialog when clicking outside',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  }
+]
+
+  const slotsData = [
+  {
+    name: 'body',
+    description: 'Main body content of the dialog, overrides body-header and body-content',
+    type: 'any'
+  },
+  {
+    name: 'body-header',
+    description: 'Header section inside the dialog body',
+    type: 'any'
+  },
+  {
+    name: 'body-title',
+    description: 'Title section inside the header',
+    type: 'any'
+  },
+  {
+    name: 'body-content',
+    description: 'Main content section inside the body',
+    type: 'any'
+  },
+  {
+    name: 'actions',
+    description: 'Actions section at the bottom of the dialog; exposes `{ close }`',
+    type: '{ close: () => void; }'
+  }
+]
+
+  const emitsData = [
+  {
+    name: 'update:modelValue',
+    description: 'Fired when the model value changes.',
+    type: '[value: boolean]'
+  },
+  {
+    name: 'close',
+    description: 'Fired when the component closes.',
+    type: '[]'
+  },
+  {
+    name: 'after-leave',
+    description: '',
+    type: '[]'
+  }
+]
 </script>
 ## API Reference
 
-<PropsTable name="Dialog" :data='[
-  {
-    "name": "modelValue",
-    "description": "Controls whether the dialog is open (v-model)",
-    "required": true,
-    "type": "boolean"
-  },
-  {
-    "name": "options",
-    "description": "Configuration options for title, message, size, icon, actions, etc.",
-    "required": false,
-    "type": "DialogOptions",
-    "default": "{}"
-  },
-  {
-    "name": "disableOutsideClickToClose",
-    "description": "Prevents closing the dialog when clicking outside",
-    "required": false,
-    "type": "boolean",
-    "default": "false"
-  }
-]'/> 
+<PropsTable name="Dialog" :data="propsData"/> 
 
-<SlotsTable :data='[
-  {
-    "name": "body",
-    "description": "Main body content of the dialog, overrides body-header and body-content",
-    "type": "any"
-  },
-  {
-    "name": "body-header",
-    "description": "Header section inside the dialog body",
-    "type": "any"
-  },
-  {
-    "name": "body-title",
-    "description": "Title section inside the header",
-    "type": "any"
-  },
-  {
-    "name": "body-content",
-    "description": "Main content section inside the body",
-    "type": "any"
-  },
-  {
-    "name": "actions",
-    "description": "Actions section at the bottom of the dialog; exposes `{ close }`",
-    "type": "{ close: () => void; }"
-  }
-]'/> 
+<SlotsTable :data="slotsData"/> 
 
-<EmitsTable :data='[
-  {
-    "name": "update:modelValue",
-    "description": "",
-    "type": "[value: boolean]"
-  },
-  {
-    "name": "close",
-    "description": "",
-    "type": "[]"
-  },
-  {
-    "name": "after-leave",
-    "description": "",
-    "type": "[]"
-  }
-]'/> 
+<EmitsTable :data="emitsData"/> 
 

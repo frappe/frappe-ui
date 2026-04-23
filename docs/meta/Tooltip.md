@@ -3,62 +3,66 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+
+  const propsData = [
+  {
+    name: 'text',
+    description: 'Text content shown inside the tooltip.\nIgnored if a default slot is provided.',
+    required: false,
+    type: 'string',
+    default: '""'
+  },
+  {
+    name: 'hoverDelay',
+    description: 'Delay (in ms) before showing the tooltip on hover.',
+    required: false,
+    type: 'number',
+    default: '0.5'
+  },
+  {
+    name: 'placement',
+    description: 'Position of the tooltip relative to the trigger.',
+    required: false,
+    type: '"left" | "bottom" | "right" | "top"',
+    default: '"top"'
+  },
+  {
+    name: 'arrowClass',
+    description: 'Custom classes applied to the tooltip arrow.',
+    required: false,
+    type: 'any',
+    default: '"fill-surface-gray-7"'
+  },
+  {
+    name: 'disabled',
+    description: 'Disables the tooltip entirely.',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  }
+]
+
+  const slotsData = [
+  {
+    name: 'default',
+    description: 'Default trigger slot.\nWraps the element that the tooltip is attached to.',
+    type: 'any'
+  },
+  {
+    name: 'body',
+    description: 'Slot for fully custom tooltip body.\nReplaces the default tooltip container entirely.',
+    type: 'any'
+  },
+  {
+    name: 'content',
+    description: 'Slot for tooltip content text.\nUsed inside the default tooltip body.',
+    type: 'any'
+  }
+]
 </script>
 ## API Reference
 
-<PropsTable name="Tooltip" :data='[
-  {
-    "name": "text",
-    "description": "Text content shown inside the tooltip.\nIgnored if a default slot is provided.",
-    "required": false,
-    "type": "string",
-    "default": "\"\""
-  },
-  {
-    "name": "hoverDelay",
-    "description": "Delay (in ms) before showing the tooltip on hover.",
-    "required": false,
-    "type": "number",
-    "default": "0.5"
-  },
-  {
-    "name": "placement",
-    "description": "Position of the tooltip relative to the trigger.",
-    "required": false,
-    "type": "\"top\" | \"bottom\" | \"right\" | \"left\"",
-    "default": "\"top\""
-  },
-  {
-    "name": "arrowClass",
-    "description": "Custom classes applied to the tooltip arrow.",
-    "required": false,
-    "type": "any",
-    "default": "\"fill-surface-gray-7\""
-  },
-  {
-    "name": "disabled",
-    "description": "Disables the tooltip entirely.",
-    "required": false,
-    "type": "boolean",
-    "default": "false"
-  }
-]'/> 
+<PropsTable name="Tooltip" :data="propsData"/> 
 
-<SlotsTable :data='[
-  {
-    "name": "default",
-    "description": "Default trigger slot.\nWraps the element that the tooltip is attached to.",
-    "type": "any"
-  },
-  {
-    "name": "body",
-    "description": "Slot for fully custom tooltip body.\nReplaces the default tooltip container entirely.",
-    "type": "any"
-  },
-  {
-    "name": "content",
-    "description": "Slot for tooltip content text.\nUsed inside the default tooltip body.",
-    "type": "any"
-  }
-]'/> 
+<SlotsTable :data="slotsData"/> 
 

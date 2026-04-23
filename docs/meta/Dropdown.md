@@ -3,108 +3,115 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+
+  const propsData = [
+  {
+    name: 'button',
+    description: 'Button configuration (label, icon, size, variant, etc.)',
+    required: false,
+    type: 'ButtonProps',
+    default: undefined
+  },
+  {
+    name: 'options',
+    description: 'Array of dropdown options or grouped options.',
+    required: false,
+    type: 'DropdownOptions',
+    default: '[]'
+  },
+  {
+    name: 'open',
+    description: 'Controls the visibility of the dropdown.',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  },
+  {
+    name: 'placement',
+    description: 'Placement of the dropdown relative to the trigger.',
+    required: false,
+    type: 'DropdownPlacement',
+    default: '"left"'
+  },
+  {
+    name: 'side',
+    description: 'Side of the trigger the dropdown appears on.',
+    required: false,
+    type: 'DropdownSide',
+    default: '"bottom"'
+  },
+  {
+    name: 'offset',
+    description: 'Offset in pixels between trigger and dropdown.',
+    required: false,
+    type: 'number',
+    default: '4'
+  },
+  {
+    name: 'portalTo',
+    description: 'Teleport target for dropdown portal content.',
+    required: false,
+    type: 'string | HTMLElement',
+    default: '"body"'
+  }
+]
+
+  const slotsData = [
+  {
+    name: 'default',
+    description: 'Alternate trigger renderer.',
+    type: 'DropdownTriggerSlotProps'
+  },
+  {
+    name: 'trigger',
+    description: 'Explicit trigger slot renderer.',
+    type: 'DropdownTriggerSlotProps'
+  },
+  {
+    name: 'item',
+    description: 'Replaces the entire item row.',
+    type: 'DropdownItemSlotProps'
+  },
+  {
+    name: 'item-prefix',
+    description: 'Content rendered before the standard item label.',
+    type: 'DropdownItemSlotProps'
+  },
+  {
+    name: 'item-label',
+    description: 'Content rendered for the standard item label area.',
+    type: 'DropdownItemSlotProps'
+  },
+  {
+    name: 'item-suffix',
+    description: 'Content rendered after the standard item label.',
+    type: 'DropdownItemSlotProps'
+  },
+  {
+    name: 'group-label',
+    description: 'Custom renderer for group labels.',
+    type: 'DropdownGroupSlotProps'
+  },
+  {
+    name: 'empty',
+    description: 'Fallback content rendered when no items are available.',
+    type: 'any'
+  }
+]
+
+  const emitsData = [
+  {
+    name: 'update:open',
+    description: 'Fired when the open state changes.',
+    type: '[value: boolean]'
+  }
+]
 </script>
 ## API Reference
 
+<PropsTable name="Dropdown" :data="propsData"/> 
 
-<PropsTable name="Dropdown" :data='[
-  {
-    "name": "button",
-    "description": "Button configuration (label, icon, size, variant, etc.)",
-    "required": false,
-    "type": "ButtonProps"
-  },
-  {
-    "name": "options",
-    "description": "Array of dropdown options or grouped options",
-    "required": false,
-    "type": "DropdownOptions",
-    "default": "[]"
-  },
-  {
-    "name": "open",
-    "description": "Controls the visibility of the dropdown",
-    "required": false,
-    "type": "boolean",
-    "default": "false"
-  },
-  {
-    "name": "placement",
-    "description": "Placement of the dropdown relative to the trigger",
-    "required": false,
-    "type": "\"left\" | \"right\" | \"center\"",
-    "default": "\"left\""
-  },
-  {
-    "name": "side",
-    "description": "Side of the trigger the dropdown appears on",
-    "required": false,
-    "type": "\"left\" | \"bottom\" | \"top\" | \"right\"",
-    "default": "\"bottom\""
-  },
-  {
-    "name": "offset",
-    "description": "Offset in pixels between trigger and dropdown",
-    "required": false,
-    "type": "number",
-    "default": "4"
-  },
-  {
-    "name": "portalTo",
-    "description": "Teleport target for dropdown portal content",
-    "required": false,
-    "type": "string | HTMLElement",
-    "default": "\"body\""
-  }
-]'/>
+<SlotsTable :data="slotsData"/> 
 
-<SlotsTable :data='[
-  {
-    "name": "default",
-    "description": "",
-    "type": "{ [key: string]: any; open: boolean; close: () => void; disabled: boolean; }"
-  },
-  {
-    "name": "trigger",
-    "description": "",
-    "type": "{ [key: string]: any; open: boolean; close: () => void; disabled: boolean; }"
-  },
-  {
-    "name": "item",
-    "description": "",
-    "type": "{ item: DropdownOption; close: () => void; selected: boolean; }"
-  },
-  {
-    "name": "item-prefix",
-    "description": "",
-    "type": "{ item: DropdownOption; close: () => void; selected: boolean; }"
-  },
-  {
-    "name": "item-label",
-    "description": "",
-    "type": "{ item: DropdownOption; close: () => void; selected: boolean; }"
-  },
-  {
-    "name": "item-suffix",
-    "description": "",
-    "type": "{ item: DropdownOption; close: () => void; selected: boolean; }"
-  },
-  {
-    "name": "group-label",
-    "description": "",
-    "type": "{ group: DropdownGroupOption; }"
-  },
-  {
-    "name": "empty",
-    "description": "",
-    "type": "any"
-  }
-]'/>
+<EmitsTable :data="emitsData"/> 
 
-<EmitsTable :data='[
-  {
-    "name": "update:open",
-    "description": "",
-    "type": "[value: boolean]"
-  }
-]'/>

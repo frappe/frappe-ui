@@ -3,70 +3,75 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+
+  const propsData = [
+  {
+    name: 'size',
+    description: 'Size of the switch control',
+    required: false,
+    type: '"md" | "sm"',
+    default: '"sm"'
+  },
+  {
+    name: 'label',
+    description: 'Label text displayed next to the switch',
+    required: false,
+    type: 'string',
+    default: '""'
+  },
+  {
+    name: 'description',
+    description: 'Helper or descriptive text shown below the label',
+    required: false,
+    type: 'string',
+    default: '""'
+  },
+  {
+    name: 'disabled',
+    description: 'Disables the switch and prevents interaction',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  },
+  {
+    name: 'icon',
+    description: 'Optional icon rendered inside or alongside the switch',
+    required: false,
+    type: 'any',
+    default: undefined
+  },
+  {
+    name: 'labelClasses',
+    description: 'Custom classes applied to the label element',
+    required: false,
+    type: 'string',
+    default: '""'
+  },
+  {
+    name: 'modelValue',
+    description: '',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  }
+]
+
+  const emitsData = [
+  {
+    name: 'update:modelValue',
+    description: 'Fired when the model value changes.',
+    type: '[value: boolean]'
+  },
+  {
+    name: 'change',
+    description: 'Fired after the value is committed.',
+    type: '[value: boolean]'
+  }
+]
 </script>
 ## API Reference
 
-<PropsTable name="Switch" :data='[
-  {
-    "name": "size",
-    "description": "Size of the switch control",
-    "required": false,
-    "type": "\"sm\" | \"md\"",
-    "default": "\"sm\""
-  },
-  {
-    "name": "label",
-    "description": "Label text displayed next to the switch",
-    "required": false,
-    "type": "string",
-    "default": "\"\""
-  },
-  {
-    "name": "description",
-    "description": "Helper or descriptive text shown below the label",
-    "required": false,
-    "type": "string",
-    "default": "\"\""
-  },
-  {
-    "name": "disabled",
-    "description": "Disables the switch and prevents interaction",
-    "required": false,
-    "type": "boolean",
-    "default": "false"
-  },
-  {
-    "name": "icon",
-    "description": "Optional icon rendered inside or alongside the switch",
-    "required": false,
-    "type": "any"
-  },
-  {
-    "name": "labelClasses",
-    "description": "Custom classes applied to the label element",
-    "required": false,
-    "type": "string",
-    "default": "\"\""
-  },
-  {
-    "name": "modelValue",
-    "description": "",
-    "required": false,
-    "type": "boolean",
-    "default": "false"
-  }
-]'/> 
+<PropsTable name="Switch" :data="propsData"/> 
 
-<EmitsTable :data='[
-  {
-    "name": "update:modelValue",
-    "description": "",
-    "type": "[value: boolean]"
-  },
-  {
-    "name": "change",
-    "description": "",
-    "type": "[value: boolean]"
-  }
-]'/> 
+<EmitsTable :data="emitsData"/> 
 

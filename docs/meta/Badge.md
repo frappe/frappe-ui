@@ -3,54 +3,59 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+
+  const propsData = [
+  {
+    name: 'theme',
+    description: 'Visual color theme of the badge',
+    required: false,
+    type: '"blue" | "red" | "green" | "gray" | "orange"',
+    default: '"gray"'
+  },
+  {
+    name: 'size',
+    description: 'Controls the size of the badge',
+    required: false,
+    type: '"md" | "sm" | "lg"',
+    default: '"md"'
+  },
+  {
+    name: 'variant',
+    description: 'Visual style of the badge',
+    required: false,
+    type: '"subtle" | "outline" | "solid" | "ghost"',
+    default: '"subtle"'
+  },
+  {
+    name: 'label',
+    description: 'Content displayed inside the badge',
+    required: false,
+    type: 'string | number | Label',
+    default: undefined
+  }
+]
+
+  const slotsData = [
+  {
+    name: 'prefix',
+    description: 'Content shown before the badge label',
+    type: 'any'
+  },
+  {
+    name: 'default',
+    description: 'Main badge content (overrides `label` prop)',
+    type: 'any'
+  },
+  {
+    name: 'suffix',
+    description: 'Content shown after the badge label',
+    type: 'any'
+  }
+]
 </script>
 ## API Reference
 
-<PropsTable name="Badge" :data='[
-  {
-    "name": "theme",
-    "description": "Visual color theme of the badge",
-    "required": false,
-    "type": "\"blue\" | \"red\" | \"green\" | \"gray\" | \"orange\"",
-    "default": "\"gray\""
-  },
-  {
-    "name": "size",
-    "description": "Controls the size of the badge",
-    "required": false,
-    "type": "\"sm\" | \"md\" | \"lg\"",
-    "default": "\"md\""
-  },
-  {
-    "name": "variant",
-    "description": "Visual style of the badge",
-    "required": false,
-    "type": "\"subtle\" | \"outline\" | \"solid\" | \"ghost\"",
-    "default": "\"subtle\""
-  },
-  {
-    "name": "label",
-    "description": "Content displayed inside the badge",
-    "required": false,
-    "type": "string | number | Label"
-  }
-]'/> 
+<PropsTable name="Badge" :data="propsData"/> 
 
-<SlotsTable :data='[
-  {
-    "name": "prefix",
-    "description": "Content shown before the badge label",
-    "type": "any"
-  },
-  {
-    "name": "default",
-    "description": "Main badge content (overrides `label` prop)",
-    "type": "any"
-  },
-  {
-    "name": "suffix",
-    "description": "Content shown after the badge label",
-    "type": "any"
-  }
-]'/> 
+<SlotsTable :data="slotsData"/> 
 

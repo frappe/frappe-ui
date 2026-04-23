@@ -3,95 +3,114 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+
+  const propsData = [
+  {
+    name: 'variant',
+    description: 'Visual style of the combobox',
+    required: false,
+    type: 'ComboboxVariant',
+    default: '"subtle"'
+  },
+  {
+    name: 'options',
+    description: 'List of options to display',
+    required: true,
+    type: 'ComboboxOption[]',
+    default: '[]'
+  },
+  {
+    name: 'modelValue',
+    description: 'Currently selected value (v-model)',
+    required: false,
+    type: 'string | null',
+    default: undefined
+  },
+  {
+    name: 'placeholder',
+    description: 'Placeholder text shown when no value is selected',
+    required: false,
+    type: 'string',
+    default: undefined
+  },
+  {
+    name: 'disabled',
+    description: 'Disables the combobox',
+    required: false,
+    type: 'boolean',
+    default: undefined
+  },
+  {
+    name: 'openOnFocus',
+    description: 'Opens the dropdown when the input is focused',
+    required: false,
+    type: 'boolean',
+    default: undefined
+  },
+  {
+    name: 'openOnClick',
+    description: 'Opens the dropdown when the input is clicked',
+    required: false,
+    type: 'boolean',
+    default: undefined
+  },
+  {
+    name: 'placement',
+    description: 'Dropdown placement relative to the input',
+    required: false,
+    type: '"start" | "center" | "end"',
+    default: undefined
+  },
+  {
+    name: 'allowCustomValue',
+    description: 'Custom Value if no results found & based on searchterm',
+    required: false,
+    type: 'boolean',
+    default: undefined
+  }
+]
+
+  const slotsData = [
+  {
+    name: 'prefix',
+    description: 'Custom content rendered before the input (left side)',
+    type: 'any'
+  }
+]
+
+  const emitsData = [
+  {
+    name: 'update:modelValue',
+    description: 'Fired when the model value changes.',
+    type: '[]'
+  },
+  {
+    name: 'update:selectedOption',
+    description: 'Fired when the selected option changes.',
+    type: '[]'
+  },
+  {
+    name: 'focus',
+    description: '',
+    type: '[]'
+  },
+  {
+    name: 'blur',
+    description: '',
+    type: '[]'
+  },
+  {
+    name: 'input',
+    description: '',
+    type: '[]'
+  }
+]
 </script>
 ## API Reference
 
-<PropsTable name="Combobox" :data='[
-  {
-    "name": "variant",
-    "description": "Visual style of the combobox",
-    "required": false,
-    "type": "ComboboxVariant",
-    "default": "\"subtle\""
-  },
-  {
-    "name": "options",
-    "description": "List of options to display",
-    "required": false,
-    "type": "ComboboxOption[]",
-    "default": "[]"
-  },
-  {
-    "name": "modelValue",
-    "description": "Currently selected value (v-model)",
-    "required": false,
-    "type": "string | null"
-  },
-  {
-    "name": "placeholder",
-    "description": "Placeholder text shown when no value is selected",
-    "required": false,
-    "type": "string"
-  },
-  {
-    "name": "disabled",
-    "description": "Disables the combobox",
-    "required": false,
-    "type": "boolean"
-  },
-  {
-    "name": "openOnFocus",
-    "description": "Opens the dropdown when the input is focused",
-    "required": false,
-    "type": "boolean"
-  },
-  {
-    "name": "openOnClick",
-    "description": "Opens the dropdown when the input is clicked",
-    "required": false,
-    "type": "boolean"
-  },
-  {
-    "name": "placement",
-    "description": "Dropdown placement relative to the input",
-    "required": false,
-    "type": "\"start\" | \"center\" | \"end\""
-  }
-]'/> 
+<PropsTable name="Combobox" :data="propsData"/> 
 
-<SlotsTable :data='[
-  {
-    "name": "prefix",
-    "description": "Custom content rendered before the input (left side)",
-    "type": "any"
-  }
-]'/> 
+<SlotsTable :data="slotsData"/> 
 
-<EmitsTable :data='[
-  {
-    "name": "update:modelValue",
-    "description": "",
-    "type": "[]"
-  },
-  {
-    "name": "update:selectedOption",
-    "description": "",
-    "type": "[]"
-  },
-  {
-    "name": "focus",
-    "description": "",
-    "type": "[]"
-  },
-  {
-    "name": "blur",
-    "description": "",
-    "type": "[]"
-  },
-  {
-    "name": "input",
-    "description": "",
-    "type": "[]"
-  }
-]'/> 
+<EmitsTable :data="emitsData"/> 
 

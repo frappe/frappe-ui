@@ -3,37 +3,42 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+
+  const propsData = [
+  {
+    name: 'placeholder',
+    description: 'Placeholder text shown when no value is selected',
+    required: false,
+    type: 'string',
+    default: '"Select month"'
+  },
+  {
+    name: 'disabled',
+    description: 'Disables the month picker',
+    required: false,
+    type: 'boolean',
+    default: undefined
+  },
+  {
+    name: 'modelValue',
+    description: '',
+    required: false,
+    type: 'String',
+    default: '""'
+  }
+]
+
+  const emitsData = [
+  {
+    name: 'update:modelValue',
+    description: 'Fired when the model value changes.',
+    type: '[value: String]'
+  }
+]
 </script>
 ## API Reference
 
-<PropsTable name="MonthPicker" :data='[
-  {
-    "name": "placeholder",
-    "description": "Placeholder text shown when no value is selected",
-    "required": false,
-    "type": "string",
-    "default": "\"Select month\""
-  },
-  {
-    "name": "disabled",
-    "description": "Disables the month picker",
-    "required": false,
-    "type": "boolean"
-  },
-  {
-    "name": "modelValue",
-    "description": "",
-    "required": false,
-    "type": "String",
-    "default": "\"\""
-  }
-]'/> 
+<PropsTable name="MonthPicker" :data="propsData"/> 
 
-<EmitsTable :data='[
-  {
-    "name": "update:modelValue",
-    "description": "",
-    "type": "[value: String]"
-  }
-]'/> 
+<EmitsTable :data="emitsData"/> 
 

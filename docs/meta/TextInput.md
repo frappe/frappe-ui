@@ -3,87 +3,99 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+
+  const propsData = [
+  {
+    name: 'type',
+    description: 'HTML input type (text, email, number, password, etc.).',
+    required: false,
+    type: 'TextInputTypes',
+    default: '"text"'
+  },
+  {
+    name: 'size',
+    description: 'Visual size of the input.',
+    required: false,
+    type: '"md" | "sm" | "lg" | "xl"',
+    default: '"sm"'
+  },
+  {
+    name: 'variant',
+    description: 'Style variant of the input.',
+    required: false,
+    type: '"subtle" | "outline" | "ghost"',
+    default: '"subtle"'
+  },
+  {
+    name: 'placeholder',
+    description: 'Placeholder text shown when the input is empty.',
+    required: false,
+    type: 'string',
+    default: undefined
+  },
+  {
+    name: 'disabled',
+    description: 'Disables the input when true.',
+    required: false,
+    type: 'boolean',
+    default: undefined
+  },
+  {
+    name: 'id',
+    description: 'ID attribute for the input element.',
+    required: false,
+    type: 'string',
+    default: undefined
+  },
+  {
+    name: 'modelValue',
+    description: 'Bound value of the input.',
+    required: false,
+    type: 'string | number',
+    default: undefined
+  },
+  {
+    name: 'debounce',
+    description: 'Debounce delay (in ms) before emitting value updates.',
+    required: false,
+    type: 'number',
+    default: undefined
+  },
+  {
+    name: 'required',
+    description: 'Marks the input as required.',
+    required: false,
+    type: 'boolean',
+    default: undefined
+  }
+]
+
+  const slotsData = [
+  {
+    name: 'prefix',
+    description: 'Content rendered before the input (left side)',
+    type: 'any'
+  },
+  {
+    name: 'suffix',
+    description: 'Content rendered after the input (right side)',
+    type: 'any'
+  }
+]
+
+  const emitsData = [
+  {
+    name: 'update:modelValue',
+    description: 'Fired when the model value changes.',
+    type: '[value: string]'
+  }
+]
 </script>
 ## API Reference
 
-<PropsTable name="TextInput" :data='[
-  {
-    "name": "type",
-    "description": "HTML input type (text, email, number, password, etc.)",
-    "required": false,
-    "type": "TextInputTypes",
-    "default": "\"text\""
-  },
-  {
-    "name": "size",
-    "description": "Visual size of the input",
-    "required": false,
-    "type": "\"sm\" | \"md\" | \"lg\" | \"xl\"",
-    "default": "\"sm\""
-  },
-  {
-    "name": "variant",
-    "description": "Style variant of the input",
-    "required": false,
-    "type": "\"subtle\" | \"outline\" | \"ghost\"",
-    "default": "\"subtle\""
-  },
-  {
-    "name": "placeholder",
-    "description": "Placeholder text shown when the input is empty",
-    "required": false,
-    "type": "string"
-  },
-  {
-    "name": "disabled",
-    "description": "Disables the input when true",
-    "required": false,
-    "type": "boolean"
-  },
-  {
-    "name": "id",
-    "description": "ID attribute for the input element",
-    "required": false,
-    "type": "string"
-  },
-  {
-    "name": "modelValue",
-    "description": "Bound value of the input",
-    "required": false,
-    "type": "string | number"
-  },
-  {
-    "name": "debounce",
-    "description": "Debounce delay (in ms) before emitting value updates",
-    "required": false,
-    "type": "number"
-  },
-  {
-    "name": "required",
-    "description": "Marks the input as required",
-    "required": false,
-    "type": "boolean"
-  }
-]'/> 
+<PropsTable name="TextInput" :data="propsData"/> 
 
-<SlotsTable :data='[
-  {
-    "name": "prefix",
-    "description": "Content rendered before the input (left side)",
-    "type": "any"
-  },
-  {
-    "name": "suffix",
-    "description": "Content rendered after the input (right side)",
-    "type": "any"
-  }
-]'/> 
+<SlotsTable :data="slotsData"/> 
 
-<EmitsTable :data='[
-  {
-    "name": "update:modelValue",
-    "description": "",
-    "type": "any[]"
-  }
-]'/> 
+<EmitsTable :data="emitsData"/> 
 

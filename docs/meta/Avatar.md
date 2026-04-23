@@ -3,48 +3,54 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+
+  const propsData = [
+  {
+    name: 'image',
+    description: 'Image URL used for the avatar',
+    required: false,
+    type: 'string',
+    default: undefined
+  },
+  {
+    name: 'label',
+    description: 'Fallback text shown when the image is missing',
+    required: false,
+    type: 'string',
+    default: undefined
+  },
+  {
+    name: 'size',
+    description: 'Controls the overall size of the avatar',
+    required: false,
+    type: '"md" | "xs" | "sm" | "lg" | "xl" | "2xl" | "3xl"',
+    default: '"md"'
+  },
+  {
+    name: 'shape',
+    description: 'Defines the avatar shape',
+    required: false,
+    type: '"circle" | "square"',
+    default: '"circle"'
+  }
+]
+
+  const slotsData = [
+  {
+    name: 'default',
+    description: 'Custom content shown inside the avatar (icon / initials replacement)',
+    type: 'any'
+  },
+  {
+    name: 'indicator',
+    description: 'Small indicator shown at the bottom-right of the avatar',
+    type: 'any'
+  }
+]
 </script>
 ## API Reference
 
-<PropsTable name="Avatar" :data='[
-  {
-    "name": "image",
-    "description": "Image URL used for the avatar",
-    "required": false,
-    "type": "string"
-  },
-  {
-    "name": "label",
-    "description": "Fallback text shown when the image is missing",
-    "required": false,
-    "type": "string"
-  },
-  {
-    "name": "size",
-    "description": "Controls the overall size of the avatar",
-    "required": false,
-    "type": "\"sm\" | \"md\" | \"lg\" | \"xl\" | \"2xl\" | \"xs\" | \"3xl\"",
-    "default": "\"md\""
-  },
-  {
-    "name": "shape",
-    "description": "Defines the avatar shape",
-    "required": false,
-    "type": "\"circle\" | \"square\"",
-    "default": "\"circle\""
-  }
-]'/> 
+<PropsTable name="Avatar" :data="propsData"/> 
 
-<SlotsTable :data='[
-  {
-    "name": "default",
-    "description": "Custom content shown inside the avatar (icon / initials replacement)",
-    "type": "any"
-  },
-  {
-    "name": "indicator",
-    "description": "Small indicator shown at the bottom-right of the avatar",
-    "type": "any"
-  }
-]'/> 
+<SlotsTable :data="slotsData"/> 
 

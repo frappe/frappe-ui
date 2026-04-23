@@ -3,29 +3,35 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+
+  const propsData = [
+  {
+    name: 'modelValue',
+    description: 'The current value of the password input (v-model)',
+    required: false,
+    type: 'string | null',
+    default: undefined
+  },
+  {
+    name: 'value',
+    description: 'Alternate way to set the password value',
+    required: false,
+    type: 'string | null',
+    default: undefined
+  }
+]
+
+  const slotsData = [
+  {
+    name: 'prefix',
+    description: 'Content shown before the input field (left icon / custom content)',
+    type: 'any'
+  }
+]
 </script>
 ## API Reference
 
-<PropsTable name="Password" :data='[
-  {
-    "name": "modelValue",
-    "description": "The current value of the password input (v-model)",
-    "required": false,
-    "type": "string | null"
-  },
-  {
-    "name": "value",
-    "description": "Alternate way to set the password value",
-    "required": false,
-    "type": "string | null"
-  }
-]'/> 
+<PropsTable name="Password" :data="propsData"/> 
 
-<SlotsTable :data='[
-  {
-    "name": "prefix",
-    "description": "Content shown before the input field (left icon / custom content)",
-    "type": "any"
-  }
-]'/> 
+<SlotsTable :data="slotsData"/> 
 

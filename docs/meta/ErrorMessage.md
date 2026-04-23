@@ -3,15 +3,18 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+
+  const propsData = [
+  {
+    name: 'message',
+    description: 'The error message to display. Can be a string or an Error object',
+    required: false,
+    type: 'string | Error',
+    default: undefined
+  }
+]
 </script>
 ## API Reference
 
-<PropsTable name="ErrorMessage" :data='[
-  {
-    "name": "message",
-    "description": "The error message to display. Can be a string or an Error object",
-    "required": false,
-    "type": "string | Error"
-  }
-]'/> 
+<PropsTable name="ErrorMessage" :data="propsData"/> 
 

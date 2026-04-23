@@ -3,123 +3,132 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
-</script>
 
+  const propsData = [
+  {
+    name: 'size',
+    description: 'Size of the select input.',
+    required: false,
+    type: '"md" | "sm" | "lg" | "xl"',
+    default: '"sm"'
+  },
+  {
+    name: 'variant',
+    description: 'Visual style of the select input.',
+    required: false,
+    type: '"subtle" | "outline" | "ghost"',
+    default: '"subtle"'
+  },
+  {
+    name: 'placeholder',
+    description: 'Placeholder text displayed when no option is selected.',
+    required: false,
+    type: 'string',
+    default: '"Select option"'
+  },
+  {
+    name: 'disabled',
+    description: 'If true, disables the select input.',
+    required: false,
+    type: 'boolean',
+    default: undefined
+  },
+  {
+    name: 'id',
+    description: 'Optional HTML id for the select element.',
+    required: false,
+    type: 'string',
+    default: undefined
+  },
+  {
+    name: 'modelValue',
+    description: 'The currently selected value.',
+    required: false,
+    type: 'SelectOptionValue',
+    default: undefined
+  },
+  {
+    name: 'open',
+    description: 'Controls the visibility of the select menu.',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  },
+  {
+    name: 'options',
+    description: 'Options to display in the dropdown.',
+    required: false,
+    type: 'SelectOption[]',
+    default: '[]'
+  }
+]
+
+  const slotsData = [
+  {
+    name: 'trigger',
+    description: 'Fully custom trigger renderer.',
+    type: 'SelectTriggerSlotProps'
+  },
+  {
+    name: 'prefix',
+    description: 'Content rendered before the trigger value.',
+    type: 'any'
+  },
+  {
+    name: 'suffix',
+    description: 'Content rendered after the trigger value.',
+    type: 'any'
+  },
+  {
+    name: 'option',
+    description: 'Shared renderer for option labels.',
+    type: 'SelectItemSlotProps'
+  },
+  {
+    name: 'item-prefix',
+    description: 'Content rendered before the standard option label.',
+    type: 'SelectItemSlotProps'
+  },
+  {
+    name: 'item-label',
+    description: 'Content rendered for the standard option label area.',
+    type: 'SelectItemSlotProps'
+  },
+  {
+    name: 'item-suffix',
+    description: 'Content rendered after the standard option label.',
+    type: 'SelectItemSlotProps'
+  },
+  {
+    name: 'empty',
+    description: 'Fallback content rendered when no options are available.',
+    type: 'any'
+  },
+  {
+    name: 'footer',
+    description: 'Content rendered below the option list.',
+    type: 'any'
+  }
+]
+
+  const emitsData = [
+  {
+    name: 'update:modelValue',
+    description: 'Fired when the model value changes.',
+    type: '[value: SelectOptionValue | undefined]'
+  },
+  {
+    name: 'update:open',
+    description: 'Fired when the open state changes.',
+    type: '[value: boolean]'
+  }
+]
+</script>
 ## API Reference
 
-<PropsTable name="Select" :data='[
-  {
-    "name": "size",
-    "description": "Size of the select input",
-    "required": false,
-    "type": "\"sm\" | \"md\" | \"lg\" | \"xl\"",
-    "default": "\"sm\""
-  },
-  {
-    "name": "variant",
-    "description": "Visual style of the select input",
-    "required": false,
-    "type": "\"subtle\" | \"outline\" | \"ghost\"",
-    "default": "\"subtle\""
-  },
-  {
-    "name": "placeholder",
-    "description": "Placeholder text displayed when no option is selected",
-    "required": false,
-    "type": "string",
-    "default": "\"Select option\""
-  },
-  {
-    "name": "disabled",
-    "description": "If true, disables the select input",
-    "required": false,
-    "type": "boolean"
-  },
-  {
-    "name": "id",
-    "description": "Optional HTML id for the select element",
-    "required": false,
-    "type": "string"
-  },
-  {
-    "name": "modelValue",
-    "description": "The currently selected value (controlled)",
-    "required": false,
-    "type": "SelectOptionValue"
-  },
-  {
-    "name": "open",
-    "description": "Controls the visibility of the select menu",
-    "required": false,
-    "type": "boolean",
-    "default": "false"
-  },
-  {
-    "name": "options",
-    "description": "Options to display in the dropdown",
-    "required": false,
-    "type": "SelectOption[]",
-    "default": "[]"
-  }
-]'/>
+<PropsTable name="Select" :data="propsData"/> 
 
-<SlotsTable :data='[
-  {
-    "name": "trigger",
-    "description": "Advanced trigger customization",
-    "type": "{ open: boolean; disabled: boolean; selectedOption: SelectNormalizedOption | null; displayValue: string; }"
-  },
-  {
-    "name": "prefix",
-    "description": "Content rendered before the selected value inside the default trigger",
-    "type": "any"
-  },
-  {
-    "name": "suffix",
-    "description": "Content rendered after the selected value inside the default trigger",
-    "type": "any"
-  },
-  {
-    "name": "item-prefix",
-    "description": "Custom content for the option prefix region",
-    "type": "{ option: SelectNormalizedOption; }"
-  },
-  {
-    "name": "item-label",
-    "description": "Preferred label-region customization for the standard option row",
-    "type": "{ option: SelectNormalizedOption; }"
-  },
-  {
-    "name": "item-suffix",
-    "description": "Custom content for the option suffix region",
-    "type": "{ option: SelectNormalizedOption; }"
-  },
-  {
-    "name": "option",
-    "description": "Compatibility alias for label-region customization",
-    "type": "{ option: SelectNormalizedOption; }"
-  },
-  {
-    "name": "empty",
-    "description": "Custom empty state rendered when there are no normalized options",
-    "type": "any"
-  },
-  {
-    "name": "footer",
-    "description": "Custom content at the bottom of the dropdown",
-    "type": "any"
-  }
-]'/>
+<SlotsTable :data="slotsData"/> 
 
-<EmitsTable :data='[
-  {
-    "name": "update:modelValue",
-    "description": "",
-    "type": "[value: SelectOptionValue | undefined]"
-  },
-  {
-    "name": "update:open",
-    "description": "",
-    "type": "[value: boolean]"
-  }
-]'/>
+<EmitsTable :data="emitsData"/> 
+
