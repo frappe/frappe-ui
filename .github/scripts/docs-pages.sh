@@ -8,9 +8,9 @@ PAGES_DOMAIN="${PAGES_DOMAIN:-ui.frappe.io}"
 
 prepare_pages_worktree() {
   rm -rf "$PAGES_DIR"
-  git fetch origin "$PAGES_BRANCH:refs/remotes/origin/$PAGES_BRANCH" || true
 
-  if git show-ref --verify --quiet "refs/remotes/origin/$PAGES_BRANCH"; then
+  if git ls-remote --exit-code origin "$PAGES_BRANCH" >/dev/null 2>&1; then
+    git fetch origin "$PAGES_BRANCH:refs/remotes/origin/$PAGES_BRANCH"
     git worktree add -B "$PAGES_BRANCH" "$PAGES_DIR" "origin/$PAGES_BRANCH"
     return
   fi
