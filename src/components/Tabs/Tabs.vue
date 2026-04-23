@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, h } from 'vue'
+import { computed, h, ref, watch } from 'vue'
 import {
   TabsContent,
   TabsIndicator,
@@ -13,9 +13,24 @@ import type { TabsEmits, TabsProps } from './types'
 const props = defineProps<TabsProps>()
 const emit = defineEmits<TabsEmits>()
 
+const internalModel = ref<string | number>(props.modelValue ?? 0)
+
+watch(
+  () => props.modelValue,
+  (value) => {
+    if (value !== undefined) {
+      internalModel.value = value
+    }
+  },
+  { immediate: true },
+)
+
 const model = computed({
-  get: () => props.modelValue ?? 0,
-  set: (value: string | number) => emit('update:modelValue', value),
+  get: () => props.modelValue ?? internalModel.value,
+  set: (value: string | number) => {
+    internalModel.value = value
+    emit('update:modelValue', value)
+  },
 })
 
 const dir = computed<'rtl' | 'ltr'>(
