@@ -51,7 +51,7 @@ const typeDefinition = computed(() => {
       </summary>
 
       <div
-        class="mt-1 overflow-hidden rounded-lg border border-outline-gray-2 bg-surface-gray-1"
+        class="mt-1 overflow-hidden rounded-xl border border-outline-gray-2 bg-surface-gray-1"
       >
         <slot v-if="hasCustomCodeSlot" name="code" />
         <pre
