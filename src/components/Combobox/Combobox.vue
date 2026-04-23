@@ -1,471 +1,539 @@
 <script setup lang="ts">
+import { useVModel } from '@vueuse/core'
 import {
   computed,
-  type Component,
-  type VNode,
+  nextTick,
   ref,
+  useAttrs,
+  useSlots,
   watch,
-  h,
-  FunctionalComponent,
 } from 'vue'
 import {
   ComboboxAnchor,
   ComboboxContent,
-  ComboboxEmpty,
-  ComboboxGroup,
   ComboboxInput,
-  ComboboxItem,
-  ComboboxItemIndicator,
-  ComboboxLabel,
   ComboboxPortal,
   ComboboxRoot,
   ComboboxTrigger,
-  ComboboxViewport,
 } from 'reka-ui'
-import LucideCheck from '~icons/lucide/check'
 import LucideChevronDown from '~icons/lucide/chevron-down'
+import ComboboxResults from './ComboboxResults.vue'
+import { usePopoverMotion } from '../../composables/usePopoverMotion'
 import type {
-  CustomOption,
-  SimpleOption,
-  GroupedOption,
-  ComboboxOption,
+  ComboboxEmits,
+  ComboboxExposed,
   ComboboxProps,
+  ComboboxSelectableOption,
+  ComboboxSlots,
 } from './types'
+import {
+  buildCustomOptionContext,
+  hiddenTriggerInputClasses,
+  inputClasses,
+  inputFontSizeClasses,
+  isSelectableOption,
+  matchesCustomOption,
+  matchesSelectableOption,
+  normalizeComboboxOptions,
+  triggerBaseClasses,
+  triggerSizeClasses,
+  triggerVariantClasses,
+  EMPTY_SELECTABLE_VALUE_PREFIX,
+} from './utils'
+import type {
+  NormalizedCustomOption,
+  NormalizedSelectableOption,
+} from './utils'
+
+defineOptions({
+  inheritAttrs: false,
+})
 
 const props = withDefaults(defineProps<ComboboxProps>(), {
-  variant: 'subtle',
   options: () => [],
+  variant: 'subtle',
+  size: 'sm',
+  placeholder: 'Select option',
+  disabled: false,
+  openOnFocus: false,
+  openOnClick: false,
+  side: 'bottom',
+  offset: 4,
+  portalTo: 'body',
+  allowCustomValue: false,
+  loading: false,
+  emptyText: 'No results',
 })
 
-const emit = defineEmits<{
-  /** Emitted when the selected value changes (v-model binding) */
-  'update:modelValue': (value: string | null) => void
+const emit = defineEmits<ComboboxEmits>()
+const attrs = useAttrs()
+const slots = useSlots()
 
-  /** Emitted when the selected option object changes */
-  'update:selectedOption': (option: SimpleOption | null) => void
+const model = useVModel(props, 'modelValue', emit, {
+  defaultValue: null,
+  passive: (props.modelValue === undefined) as false,
+})
 
-  /** Emitted when the input receives focus */
-  focus: (event: FocusEvent) => void
+const open = ref(props.open ?? false)
 
-  /** Emitted when the input loses focus */
-  blur: (event: FocusEvent) => void
+const rootRef = ref<{ highlightFirstItem?: () => void } | null>(null)
+const query = ref('')
+const hasTypedSinceOpen = ref(false)
+const hasWarnedPlacement = ref(false)
 
-  /** Emitted when the user types in the input */
-  input: (value: string) => void
-}>()
+const { motion: contentMotion, onPointerDown: markPointerDown } =
+  usePopoverMotion(open)
 
-const searchTerm = ref(getDisplayValue(props.modelValue))
-const internalModelValue = ref(props.modelValue)
-const isOpen = ref(false)
-const userHasTyped = ref(false)
-const lastSearchTerm = ref('') // Preserve search context for custom option onClick handlers
+const inputAttrs = computed(() => {
+  const { class: _class, style: _style, autocomplete, ...rest } = attrs
+  return { autocomplete: autocomplete ?? 'off', ...rest }
+})
 
-watch(
-  () => props.modelValue,
-  (newValue) => {
-    internalModelValue.value = newValue
-    searchTerm.value = getDisplayValue(newValue)
-  },
+const normalizedGroups = computed(() =>
+  normalizeComboboxOptions(props.options),
 )
-watch(
-  () => getDisplayValue(props.modelValue),
-  (newDisplay) => {
-    if (!userHasTyped.value) searchTerm.value = newDisplay
-  },
+
+const allSelectableOptions = computed(() =>
+  normalizedGroups.value.flatMap((group) =>
+    group.options.filter(isSelectableOption),
+  ),
 )
 
-const onUpdateModelValue = (value: string | null) => {
-  let selectedOpt = value
-    ? allOptionsFlat.value.find((opt) => getKey(opt) === value) || null
-    : null
-
-  selectedOpt =
-    !selectedOpt && props.allowCustomValue && value ? value : selectedOpt
-
-  if (selectedOpt && isCustomOption(selectedOpt)) {
-    const context = { searchTerm: lastSearchTerm.value }
-    selectedOpt.onClick(context)
-
-    if (selectedOpt.keepOpen) {
-      // Defer opening to prevent interference with default close behavior
-      setTimeout(() => {
-        isOpen.value = true
-      }, 0)
-    } else {
-      isOpen.value = false
-      searchTerm.value = getDisplayValue(internalModelValue.value)
-      lastSearchTerm.value = ''
-      userHasTyped.value = false
-    }
-
-    return
-  }
-  internalModelValue.value = value
-  emit('update:modelValue', value)
-  searchTerm.value = getDisplayValue(value)
-  lastSearchTerm.value = ''
-  userHasTyped.value = false
-  emit('update:selectedOption', selectedOpt)
+function getSelectableInternalValue(item: NormalizedSelectableOption) {
+  if (item.value !== '') return item.value
+  return `${EMPTY_SELECTABLE_VALUE_PREFIX}${allSelectableOptions.value.indexOf(item)}`
 }
 
-function isGroup(option: ComboboxOption): option is GroupedOption {
-  return typeof option === 'object' && 'group' in option
-}
-
-function isCustomOption(option: SimpleOption): option is CustomOption {
-  return typeof option === 'object' && option.type === 'custom'
-}
-
-function getLabel(option: SimpleOption): string {
-  return typeof option === 'string' ? option : option.label
-}
-
-function getValue(option: SimpleOption): string | undefined {
-  if (typeof option === 'string') return option
-  if (isCustomOption(option)) return undefined
-  return option.value
-}
-
-function getKey(option: SimpleOption): string {
-  if (typeof option === 'string') return option
-  if (isCustomOption(option)) return option.key
-  return option.value
-}
-
-function isDisabled(option: SimpleOption): boolean {
-  return typeof option === 'object' && !!option.disabled
-}
-
-function getIcon(option: SimpleOption): string | Component | undefined {
-  return typeof option === 'object' ? option.icon : undefined
-}
-
-function getSlotName(option: SimpleOption): string | undefined {
-  return isCustomOption(option) ? option.slotName : undefined
-}
-
-function getRenderFunction(option: SimpleOption): (() => VNode) | undefined {
-  return isCustomOption(option) ? option.render : undefined
-}
-
-const allOptionsFlat = computed(() => {
-  const flatOptions: SimpleOption[] = []
-  props.options.forEach((optionOrGroup) => {
-    if (isGroup(optionOrGroup)) {
-      flatOptions.push(...optionOrGroup.options)
-    } else {
-      flatOptions.push(optionOrGroup)
-    }
-  })
-  return flatOptions
-})
-
-function getDisplayValue(selectedValue: string | null | undefined): string {
-  if (!selectedValue) return ''
-  const options = props.options.flatMap((opt) =>
-    isGroup(opt) ? opt.options : opt,
-  )
-  const selectedOption = options.find((opt) => getKey(opt) === selectedValue)
-  return selectedOption ? getLabel(selectedOption) : selectedValue || ''
-}
-
-const selectedOption = computed(() => {
-  if (!internalModelValue.value) return null
-  return allOptionsFlat.value.find(
-    (opt) => getKey(opt) === internalModelValue.value,
-  )
-})
-
-const selectedOptionIcon = computed(() => {
-  return selectedOption.value ? getIcon(selectedOption.value) : undefined
-})
-
-const RenderIcon: FunctionalComponent<{ icon?: string | Component }> = (
-  props,
-) => {
-  if (!props.icon) return null
-  const iconContent =
-    typeof props.icon === 'string'
-      ? h('span', props.icon)
-      : h(props.icon, { class: 'w-4 h-4' })
-
-  return h(
-    'span',
-    {
-      class: 'flex-shrink-0 w-4 h-4 inline-flex items-center justify-center',
-    },
-    [iconContent],
+function toExternalSelectableValue(value: string) {
+  return (
+    allSelectableOptions.value.find(
+      (item) => getSelectableInternalValue(item) === value,
+    )?.value ?? value
   )
 }
 
-const shouldShowOption = (
-  option: SimpleOption,
-  search: string,
-  context: { searchTerm: string },
-) => {
-  if (isCustomOption(option)) {
-    if (option.condition) {
-      return option.condition(context)
-    }
-    if (!search) return true
-    return getLabel(option).toLowerCase().includes(search.toLowerCase())
-  }
+const internalModelValue = computed(() => {
+  if (model.value === null || model.value === undefined) return undefined
 
-  if (!search) return true
-  const label = getLabel(option).toLowerCase()
-  const value = getValue(option)?.toLowerCase() || ''
-  const lowerSearch = search.toLowerCase()
-  return label.includes(lowerSearch) || value.includes(lowerSearch)
-}
+  const selectableOption = allSelectableOptions.value.find(
+    (option) => option.value === model.value,
+  )
 
-const filterFunction = (options: ComboboxOption[], search: string) => {
-  const context = { searchTerm: search }
-  const filtered: ComboboxOption[] = []
+  return selectableOption
+    ? getSelectableInternalValue(selectableOption)
+    : model.value
+})
 
-  options.forEach((optionOrGroup) => {
-    if (isGroup(optionOrGroup)) {
-      const filteredGroupOptions = optionOrGroup.options.filter((opt) =>
-        shouldShowOption(opt, search, context),
+const selectedOption = computed<ComboboxSelectableOption | null>(() => {
+  if (model.value === null || model.value === undefined) return null
+  return (
+    allSelectableOptions.value.find((option) => option.value === model.value) ??
+    null
+  )
+})
+
+const displayValue = computed(() => {
+  if (selectedOption.value) return selectedOption.value.label
+  return model.value ?? ''
+})
+
+const resolvedAlign = computed(() => {
+  if (props.align !== undefined) {
+    if (
+      import.meta.env.DEV &&
+      props.placement &&
+      !hasWarnedPlacement.value
+    ) {
+      console.warn(
+        '[Combobox] `placement` is deprecated and ignored when `align` is provided. Use `align` instead.',
       )
-      if (filteredGroupOptions.length > 0) {
-        filtered.push({ ...optionOrGroup, options: filteredGroupOptions })
-      }
-    } else if (shouldShowOption(optionOrGroup, search, context)) {
-      filtered.push(optionOrGroup)
+      hasWarnedPlacement.value = true
     }
-  })
-
-  return filtered
-}
-
-const filteredOptions = computed(() => {
-  if (isOpen.value && !userHasTyped.value && internalModelValue.value) {
-    return props.options
+    return props.align
   }
-  return filterFunction(props.options, searchTerm.value)
+  return props.placement ?? 'start'
 })
 
-const handleInputChange = (event: Event) => {
-  const target = event.target as HTMLInputElement
-  searchTerm.value = target.value
-  lastSearchTerm.value = target.value
-  userHasTyped.value = true
+const triggerClasses = computed(() => [
+  triggerBaseClasses,
+  triggerSizeClasses(props.size),
+  inputFontSizeClasses(props.size),
+  triggerVariantClasses(props.variant, Boolean(props.disabled)),
+])
 
-  if (searchTerm.value === '') {
-    internalModelValue.value = null
-    emit('update:modelValue', null)
+const resolvedInputClasses = computed(() => [
+  inputClasses,
+  inputFontSizeClasses(props.size),
+])
+
+const filteredGroups = computed(() => {
+  if (!open.value || !hasTypedSinceOpen.value) {
+    return normalizedGroups.value
   }
-  emit('input', searchTerm.value)
-}
 
-const handleOpenChange = (open: boolean) => {
-  isOpen.value = open
-  if (!open) {
-    searchTerm.value = getDisplayValue(internalModelValue.value)
-    userHasTyped.value = false
-  } else {
-    userHasTyped.value = false
-  }
-}
+  return normalizedGroups.value
+    .map((group) => ({
+      ...group,
+      options: group.options.filter((item) =>
+        item.type === 'custom'
+          ? matchesCustomOption(item, query.value)
+          : matchesSelectableOption(item, query.value),
+      ),
+    }))
+    .filter((group) => group.options.length > 0)
+})
 
-const handleFocus = (event: FocusEvent) => {
-  if (props.openOnFocus) {
-    isOpen.value = true
-  }
-  emit('focus', event)
-}
+const hasVisibleItems = computed(() => filteredGroups.value.length > 0)
 
-const handleBlur = (event: FocusEvent) => {
-  emit('blur', event)
-}
+const showCreateOption = computed(
+  () =>
+    props.allowCustomValue &&
+    !props.loading &&
+    hasTypedSinceOpen.value &&
+    query.value.length > 0 &&
+    !hasVisibleItems.value,
+)
 
-const handleClick = () => {
-  if (props.openOnClick) {
-    isOpen.value = true
-  }
-}
+const showEmpty = computed(
+  () => !props.loading && !showCreateOption.value && !hasVisibleItems.value,
+)
 
-const reset = () => {
-  searchTerm.value = ''
-  userHasTyped.value = false
-  internalModelValue.value = null
-  emit('update:modelValue', null)
+function clearSelection() {
+  model.value = null
   emit('update:selectedOption', null)
 }
 
-const variantClasses = computed(() => {
-  const borderCss =
-    'border focus-within:border-outline-gray-4 focus-within:ring-2 focus-within:ring-outline-gray-3'
+function commitSelectableOption(value: string) {
+  const option =
+    allSelectableOptions.value.find((item) => item.value === value) ?? null
 
-  return {
-    subtle: `${borderCss} bg-surface-gray-2 hover:bg-surface-gray-3 border-transparent`,
-    outline: `${borderCss} border-outline-gray-2`,
-    ghost: '',
-  }[props.variant]
+  model.value = value
+  emit('update:selectedOption', option)
+  query.value = option?.label ?? value
+  hasTypedSinceOpen.value = false
+}
+
+function commitCustomValue(value: string) {
+  if (!value) return
+
+  model.value = value
+  emit('update:selectedOption', null)
+  query.value = value
+  hasTypedSinceOpen.value = false
+  open.value = false
+}
+
+function handleRootModelValueChange(value: string | null | undefined) {
+  if (value == null) {
+    clearSelection()
+    return
+  }
+
+  const externalValue = toExternalSelectableValue(value)
+  const selectableOption = allSelectableOptions.value.find(
+    (item) => item.value === externalValue,
+  )
+
+  if (selectableOption) {
+    commitSelectableOption(selectableOption.value)
+    return
+  }
+
+  if (props.allowCustomValue && !props.loading) {
+    commitCustomValue(externalValue)
+  }
+}
+
+function handleRootOpenChange(value: boolean) {
+  open.value = value
+}
+
+function handleInputChange(event: Event) {
+  const target = event.target as HTMLInputElement
+  const value = target.value
+
+  query.value = value
+  hasTypedSinceOpen.value = true
+  emit('update:query', value)
+  emit('input', value)
+
+  if (value === '') clearSelection()
+
+  nextTick(() => rootRef.value?.highlightFirstItem?.())
+}
+
+function handleInputEnter(event: KeyboardEvent) {
+  if (!showCreateOption.value) return
+  event.preventDefault()
+  commitCustomValue(query.value)
+}
+
+function handleCustomItemSelect(item: NormalizedCustomOption, event: Event) {
+  event.preventDefault()
+  if (item.disabled) return
+
+  item.onClick(buildCustomOptionContext(query.value))
+
+  if (!item.keepOpen) open.value = false
+}
+
+function handleCreateOptionSelect(event: Event) {
+  event.preventDefault()
+  commitCustomValue(query.value)
+}
+
+function handleTriggerSlotClick() {
+  if (!slots.trigger || props.disabled || open.value) return
+  open.value = true
+}
+
+function reset() {
+  query.value = ''
+  hasTypedSinceOpen.value = false
+  model.value = null
+  emit('update:selectedOption', null)
+}
+
+
+watch(
+  () => props.open,
+  (value) => {
+    if (value === undefined) return
+    open.value = value
+  },
+)
+
+watch(open, (value, previousValue) => {
+  if (value === previousValue) return
+  emit('update:open', value)
 })
 
-defineExpose({
-  reset,
+watch(
+  () => displayValue.value,
+  (value) => {
+    if (!open.value || !hasTypedSinceOpen.value) query.value = value
+  },
+  { immediate: true },
+)
+
+watch(open, (isOpen, wasOpen) => {
+  if (isOpen === wasOpen) return
+  if (!isOpen) {
+    hasTypedSinceOpen.value = false
+    query.value = displayValue.value
+  }
 })
 
-defineSlots<{
-  /** Custom content rendered before the input (left side) */
-  prefix?: () => any
-
-  /** Custom slot for individual options, only used if the option has `slotName` */
-  [slotName: string]: (props: {
-    option: SimpleOption
-    searchTerm: string
-  }) => any
-}>()
+defineExpose<ComboboxExposed>({ reset })
+defineSlots<ComboboxSlots>()
 </script>
 
 <template>
-  <div class="relative">
-    <ComboboxRoot
-      :model-value="internalModelValue"
-      @update:modelValue="onUpdateModelValue"
-      @update:open="handleOpenChange"
-      :ignore-filter="true"
-      :open="isOpen"
+  <ComboboxRoot
+    ref="rootRef"
+    :model-value="internalModelValue"
+    :open="open"
+    :disabled="disabled"
+    :ignore-filter="true"
+    :open-on-focus="openOnFocus"
+    :open-on-click="openOnClick"
+    @update:modelValue="handleRootModelValueChange"
+    @update:open="handleRootOpenChange"
+  >
+    <ComboboxAnchor
+      data-slot="trigger"
+      :data-state="open ? 'open' : 'closed'"
+      :data-disabled="disabled ? '' : undefined"
+      :data-variant="variant"
+      :data-size="size"
+      :class="[triggerClasses, attrs.class]"
+      :style="attrs.style"
+      @click="handleTriggerSlotClick"
+      @pointerdown="markPointerDown"
     >
-      <ComboboxAnchor
-        class="flex h-7 w-full items-center justify-between gap-2 rounded px-2 py-1 transition-colors"
-        :class="{
-          'opacity-50 pointer-events-none': disabled,
-          [variantClasses]: true,
-        }"
-        @click="handleClick"
-      >
-        <div class="flex items-center gap-2 flex-1 overflow-hidden">
-          <slot name="prefix" />
-          <RenderIcon v-if="selectedOptionIcon" :icon="selectedOptionIcon" />
-          <ComboboxInput
-            :value="searchTerm"
-            @input="handleInputChange"
-            @focus="handleFocus"
-            @blur="handleBlur"
-            class="bg-transparent p-0 focus:outline-0 border-0 focus:border-0 focus:ring-0 text-base text-ink-gray-8 h-full placeholder:text-ink-gray-4 w-full"
-            :placeholder="placeholder || ''"
-            :disabled="disabled"
-            autocomplete="off"
+      <template v-if="$slots.trigger">
+        <div aria-hidden="true" class="pointer-events-none min-w-0 flex-1">
+          <slot
+            name="trigger"
+            v-bind="{
+              open,
+              disabled: !!disabled,
+              query,
+              selectedOption,
+              displayValue,
+            }"
           />
         </div>
-        <ComboboxTrigger :disabled="disabled">
-          <LucideChevronDown class="h-4 w-4 text-ink-gray-5" />
-        </ComboboxTrigger>
-      </ComboboxAnchor>
-      <ComboboxPortal>
-        <ComboboxContent
-          class="z-10 min-w-[--reka-combobox-trigger-width] mt-1 bg-surface-modal overflow-hidden rounded-lg shadow-2xl"
-          position="popper"
-          @openAutoFocus.prevent
-          @closeAutoFocus.prevent
-          :align="props.placement || 'start'"
+
+        <ComboboxInput
+          :id="id"
+          v-bind="inputAttrs"
+          data-slot="input"
+          :data-variant="variant"
+          :data-size="size"
+          :value="query"
+          :disabled="disabled"
+          :class="hiddenTriggerInputClasses"
+          :placeholder="placeholder"
+          @input="handleInputChange"
+          @focus="emit('focus', $event)"
+          @blur="emit('blur', $event)"
+          @keydown.enter="handleInputEnter"
+        />
+      </template>
+
+      <template v-else>
+        <slot name="prefix" />
+
+        <ComboboxInput
+          :id="id"
+          v-bind="inputAttrs"
+          data-slot="input"
+          :data-variant="variant"
+          :data-size="size"
+          :value="query"
+          :disabled="disabled"
+          :placeholder="placeholder"
+          :class="resolvedInputClasses"
+          @input="handleInputChange"
+          @focus="emit('focus', $event)"
+          @blur="emit('blur', $event)"
+          @keydown.enter="handleInputEnter"
+        />
+
+        <ComboboxTrigger
+          :disabled="disabled"
+          data-slot="chevron"
+          class="ml-auto inline-flex shrink-0 items-center justify-center text-ink-gray-4 outline-none transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] data-[state=open]:rotate-180"
         >
-          <ComboboxViewport
-            class="max-h-60 overflow-auto pb-1.5"
-            :class="{ 'px-1.5 pt-1.5': !isGroup(filteredOptions[0]) }"
-          >
-            <ComboboxItem
-              v-if="
-                filteredOptions?.length == 0 && allowCustomValue && searchTerm
-              "
-              :value="searchTerm"
-              class="text-base leading-none text-ink-gray-7 rounded flex items-center h-7 px-2.5 py-1.5 select-none data-[highlighted]:bg-surface-gray-3"
-            >
-              <span class="flex items-center gap-2">
-                Create "{{ searchTerm }}"
-              </span>
-            </ComboboxItem>
+          <LucideChevronDown class="size-4" />
+        </ComboboxTrigger>
+      </template>
+    </ComboboxAnchor>
 
-            <ComboboxEmpty
-              class="text-ink-gray-5 text-base text-center py-1.5 px-2.5"
-              v-else
-            >
-              {{
-                searchTerm
-                  ? `No results found for "${searchTerm}"`
-                  : 'No results found'
-              }}
-            </ComboboxEmpty>
-
-            <template
-              v-for="(optionOrGroup, index) in filteredOptions"
-              :key="index"
-            >
-              <ComboboxGroup class="px-1.5" v-if="isGroup(optionOrGroup)">
-                <ComboboxLabel
-                  class="px-2.5 pt-3 pb-1.5 text-sm font-medium text-ink-gray-5 sticky top-0 bg-surface-modal z-10"
-                >
-                  {{ optionOrGroup.group }}
-                </ComboboxLabel>
-                <ComboboxItem
-                  v-for="(option, idx) in optionOrGroup.options"
-                  :key="`${index}-${idx}`"
-                  :value="getKey(option)"
-                  :disabled="isDisabled(option)"
-                  class="text-base leading-none text-ink-gray-7 rounded flex items-center h-7 px-2.5 py-1.5 relative select-none data-[disabled]:opacity-50 data-[disabled]:pointer-events-none data-[highlighted]:outline-none data-[highlighted]:bg-surface-gray-3"
-                >
-                  <slot
-                    v-if="getSlotName(option)"
-                    :name="getSlotName(option)"
-                    :option="option"
-                    :searchTerm="searchTerm"
-                  />
-                  <component
-                    v-else-if="getRenderFunction(option)"
-                    :is="getRenderFunction(option)"
-                  />
-                  <template v-else>
-                    <span class="flex items-center gap-2 pr-6 flex-1">
-                      <RenderIcon :icon="getIcon(option)" />
-                      {{ getLabel(option) }}
-                    </span>
-                    <ComboboxItemIndicator
-                      class="absolute right-0 w-6 inline-flex items-center justify-center"
-                    >
-                      <LucideCheck class="size-4" />
-                    </ComboboxItemIndicator>
-                  </template>
-                </ComboboxItem>
-              </ComboboxGroup>
-              <ComboboxItem
-                v-else
-                :key="index"
-                :value="getKey(optionOrGroup)"
-                :disabled="isDisabled(optionOrGroup)"
-                class="text-base leading-none text-ink-gray-7 rounded flex items-center h-7 px-2.5 py-1.5 relative select-none data-[disabled]:opacity-50 data-[disabled]:pointer-events-none data-[highlighted]:outline-none data-[highlighted]:bg-surface-gray-3"
-              >
-                <slot
-                  v-if="getSlotName(optionOrGroup)"
-                  :name="getSlotName(optionOrGroup)"
-                  :option="optionOrGroup"
-                  :searchTerm="searchTerm"
-                />
-                <component
-                  v-else-if="getRenderFunction(optionOrGroup)"
-                  :is="getRenderFunction(optionOrGroup)"
-                />
-                <template v-else>
-                  <span class="flex items-center gap-2 pr-6 flex-1">
-                    <RenderIcon
-                      v-if="getIcon(optionOrGroup)"
-                      :icon="getIcon(optionOrGroup)"
-                    />
-                    {{ getLabel(optionOrGroup) }}
-                  </span>
-                  <ComboboxItemIndicator
-                    class="absolute right-0 w-6 inline-flex items-center justify-center"
-                  >
-                    <LucideCheck class="h-4 w-4" />
-                  </ComboboxItemIndicator>
-                </template>
-              </ComboboxItem>
-            </template>
-          </ComboboxViewport>
-        </ComboboxContent>
-      </ComboboxPortal>
-    </ComboboxRoot>
-  </div>
+    <ComboboxPortal :to="portalTo">
+      <ComboboxContent
+        data-slot="content"
+        :data-variant="variant"
+        :data-size="size"
+        class="z-[100] min-w-[--reka-combobox-trigger-width]"
+        position="popper"
+        :side="side"
+        :align="resolvedAlign"
+        :side-offset="offset"
+        @openAutoFocus.prevent
+        @closeAutoFocus.prevent
+      >
+        <div
+          data-slot="content-body"
+          :data-motion="contentMotion"
+          class="overflow-hidden rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5"
+        >
+          <ComboboxResults
+            :groups="filteredGroups"
+            :size="size"
+            :query="query"
+            :model="model ?? null"
+            :loading="loading"
+            :empty-text="emptyText"
+            :show-create-option="showCreateOption"
+            :show-empty="showEmpty"
+            :slot-fns="slots"
+            :all-selectable-options="allSelectableOptions"
+            @select-custom="handleCustomItemSelect"
+            @select-create="handleCreateOptionSelect"
+          />
+        </div>
+      </ComboboxContent>
+    </ComboboxPortal>
+  </ComboboxRoot>
 </template>
+
+<style scoped>
+[data-highlighted],
+[data-state='checked'] {
+  outline: none !important;
+}
+
+[data-slot='content-body'] {
+  animation-fill-mode: both;
+}
+
+[data-slot='content-body'][data-motion='animated'] {
+  backface-visibility: hidden;
+  transform-origin: var(--reka-combobox-content-transform-origin);
+}
+
+[data-slot='content'][data-state='open']
+  [data-slot='content-body'][data-motion='animated'] {
+  animation: combobox-content-enter 180ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+[data-slot='content'][data-state='closed']
+  [data-slot='content-body'][data-motion='animated'] {
+  animation: combobox-content-exit 140ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/*
+ * Keyboard-opens skip the scale + translate enter animation, but a tiny
+ * opacity fade still runs — it masks the 1-frame position-settle reka
+ * performs after mount. ~80ms is below the perception threshold for
+ * motion (feels instant) but long enough to hide the jump.
+ */
+[data-slot='content'][data-state='open']
+  [data-slot='content-body'][data-motion='instant'] {
+  animation: combobox-content-instant-fade 80ms linear;
+}
+
+[data-slot='content'][data-state='closed']
+  [data-slot='content-body'][data-motion='instant'] {
+  animation: none;
+}
+
+@keyframes combobox-content-instant-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+[data-slot='content'][data-state='closed'] {
+  pointer-events: none;
+}
+
+@keyframes combobox-content-enter {
+  from {
+    opacity: 0;
+    transform: translateY(2px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes combobox-content-exit {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(1px) scale(0.985);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-slot='content-body'] {
+    animation-duration: 0ms !important;
+  }
+
+  [data-slot='chevron'] {
+    transition-duration: 0ms !important;
+  }
+}
+</style>

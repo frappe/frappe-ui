@@ -23,7 +23,7 @@
     name: 'placement',
     description: 'Position of the tooltip relative to the trigger.',
     required: false,
-    type: '"left" | "bottom" | "right" | "top"',
+    type: '"bottom" | "top" | "right" | "left"',
     default: '"top"'
   },
   {

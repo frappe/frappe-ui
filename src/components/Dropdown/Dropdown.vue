@@ -1,6 +1,6 @@
 <template>
   <DropdownMenuRoot v-model:open="openModel" v-slot="{ open }">
-    <DropdownMenuTrigger as-child>
+    <DropdownMenuTrigger as-child @pointerdown="markPointerDown">
       <slot
         v-if="$slots.trigger"
         name="trigger"
@@ -18,6 +18,7 @@
     <DropdownMenuPortal :to="portalTo">
       <DropdownMenuContent
         data-slot="content"
+        :data-motion="contentMotion"
         :class="[
           dropdownClasses.content,
           {
@@ -53,6 +54,7 @@ import { Button } from '../Button'
 import DropdownMenuList from './DropdownMenuList.vue'
 import type { DropdownProps, DropdownSlots } from './types'
 import { dropdownClasses, normalizeDropdownOptions } from './utils'
+import { usePopoverMotion } from '../../composables/usePopoverMotion'
 
 defineOptions({
   inheritAttrs: false,
@@ -61,6 +63,9 @@ defineOptions({
 const openModel = defineModel<boolean>('open', { default: false })
 const attrs = useAttrs()
 const slots = useSlots()
+
+const { motion: contentMotion, onPointerDown: markPointerDown } =
+  usePopoverMotion(openModel)
 
 const props = withDefaults(defineProps<DropdownProps>(), {
   options: () => [],
@@ -117,11 +122,40 @@ defineSlots<DropdownSlots>()
   }
 }
 
-:global(.dropdown-content[data-state='open']) {
+:global(.dropdown-content[data-motion='animated'][data-state='open']) {
   animation: dropdown-in 100ms ease-out;
 }
 
-:global(.dropdown-content[data-state='closed']) {
+:global(.dropdown-content[data-motion='animated'][data-state='closed']) {
   animation: dropdown-out 75ms ease-in;
+}
+
+/*
+ * Keyboard opens skip the scale entrance, but a tiny opacity fade still
+ * runs — it masks the 1-frame position-settle reka performs after mount.
+ * ~80ms is below the perception threshold for motion but long enough to
+ * hide the jump.
+ */
+:global(.dropdown-content[data-motion='instant'][data-state='open']) {
+  animation: dropdown-instant-fade 80ms linear;
+}
+
+:global(.dropdown-content[data-motion='instant'][data-state='closed']) {
+  animation: none;
+}
+
+@keyframes dropdown-instant-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :global(.dropdown-content) {
+    animation-duration: 0ms !important;
+  }
 }
 </style>

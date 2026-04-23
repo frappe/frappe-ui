@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, useAttrs, useSlots, watch } from 'vue'
+import { computed, ref, useAttrs, useSlots } from 'vue'
+import { usePopoverMotion } from '../../composables/usePopoverMotion'
 import type {
   SelectNormalizedOption,
   SelectOption,
@@ -41,11 +42,10 @@ const attrs = useAttrs()
 const slots = useSlots()
 
 const formAttrKeys = ['name', 'required', 'autocomplete'] as const
-const keyboardOpenKeys = new Set(['Enter', ' ', 'ArrowDown', 'ArrowUp'])
 const emptyValuePrefix = '__frappe_ui_select_empty__'
 
-const contentMotion = ref<'animated' | 'instant'>('animated')
-let resetContentMotionTimeout: number | undefined
+const { motion: contentMotion, onPointerDown: markPointerDown } =
+  usePopoverMotion(open)
 
 const rootAttrs = computed(() => {
   return Object.fromEntries(
@@ -212,39 +212,6 @@ function getOptionKey(option: SelectNormalizedOption, index: number) {
   return `${index}:${typeof option.value}:${String(option.value)}`
 }
 
-function clearContentMotionResetTimeout() {
-  if (resetContentMotionTimeout) {
-    window.clearTimeout(resetContentMotionTimeout)
-    resetContentMotionTimeout = undefined
-  }
-}
-
-function handlePointerInteraction() {
-  clearContentMotionResetTimeout()
-  contentMotion.value = 'animated'
-}
-
-function handleTriggerKeydown(event: KeyboardEvent) {
-  if (!keyboardOpenKeys.has(event.key)) return
-
-  clearContentMotionResetTimeout()
-  contentMotion.value = 'instant'
-}
-
-watch(open, (isOpen) => {
-  if (isOpen || contentMotion.value !== 'instant') return
-
-  clearContentMotionResetTimeout()
-  resetContentMotionTimeout = window.setTimeout(() => {
-    contentMotion.value = 'animated'
-    resetContentMotionTimeout = undefined
-  }, 200)
-})
-
-onBeforeUnmount(() => {
-  clearContentMotionResetTimeout()
-})
-
 defineSlots<SelectSlots>()
 </script>
 
@@ -257,9 +224,7 @@ defineSlots<SelectSlots>()
       :class="[triggerClasses, attrs.class]"
       :style="attrs.style"
       :disabled="disabled"
-      @keydown="handleTriggerKeydown"
-      @pointerdown="handlePointerInteraction"
-      @pointerup="handlePointerInteraction"
+      @pointerdown="markPointerDown"
     >
       <template v-if="$slots.trigger">
         <slot
@@ -437,12 +402,33 @@ defineSlots<SelectSlots>()
   animation: select-content-exit 140ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-[data-slot='content-body'][data-motion='instant'] {
+/*
+ * Keyboard opens skip the scale + translate entrance, but a tiny opacity
+ * fade still runs — it masks the 1-frame position-settle reka performs
+ * after mount. ~80ms is below the perception threshold for motion but
+ * long enough to hide the jump.
+ */
+[data-slot='content'][data-state='open']
+  [data-slot='content-body'][data-motion='instant'] {
+  animation: select-content-instant-fade 80ms linear;
+}
+
+[data-slot='content'][data-state='closed']
+  [data-slot='content-body'][data-motion='instant'] {
   animation: none;
 }
 
 [data-slot='content'][data-state='closed'] {
   pointer-events: none;
+}
+
+@keyframes select-content-instant-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes select-content-enter {
@@ -470,11 +456,8 @@ defineSlots<SelectSlots>()
 }
 
 @media (prefers-reduced-motion: reduce) {
-  [data-slot='content'][data-state='open']
-    [data-slot='content-body'][data-motion='animated'],
-  [data-slot='content'][data-state='closed']
-    [data-slot='content-body'][data-motion='animated'] {
-    animation-duration: 0ms;
+  [data-slot='content-body'] {
+    animation-duration: 0ms !important;
   }
 }
 </style>

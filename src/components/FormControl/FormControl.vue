@@ -23,7 +23,7 @@
     <Combobox
       v-else-if="type === 'combobox'"
       :id="id"
-      v-bind="{ ...controlAttrs, variant }"
+      v-bind="{ ...controlAttrs, size, variant }"
     >
       <template #prefix v-if="$slots.prefix">
         <slot name="prefix" />

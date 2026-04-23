@@ -130,13 +130,13 @@
     type: '[value: string]'
   },
   {
-    name: 'close',
-    description: 'Fired when the component closes.',
+    name: 'open',
+    description: 'Fired when the component opens.',
     type: '[]'
   },
   {
-    name: 'open',
-    description: 'Fired when the component opens.',
+    name: 'close',
+    description: 'Fired when the component closes.',
     type: '[]'
   },
   {

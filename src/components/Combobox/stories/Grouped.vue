@@ -23,18 +23,13 @@ const options = [
       { label: 'Lettuce', value: 'lettuce', icon: '🥬' },
     ],
   },
-  {
-    group: 'Proteins',
-    options: [
-      { label: 'Chicken', value: 'chicken', icon: '🍗' },
-      { label: 'Fish', value: 'fish', icon: '🐟' },
-      { label: 'Beef', value: 'beef', icon: '🥩' },
-      { label: 'Tofu', value: 'tofu', icon: '🪤', disabled: true },
-    ],
-  },
 ]
 </script>
 
 <template>
-  <Combobox v-model="value" :options="options" placeholder="Pick an item" />
+  <Combobox v-model="value" :options="options" placeholder="Pick an item" open-on-focus class="w-72">
+    <template #item-prefix="{ item }">
+      <span class="text-base">{{ item.icon }}</span>
+    </template>
+  </Combobox>
 </template>
