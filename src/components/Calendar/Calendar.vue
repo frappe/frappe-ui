@@ -182,6 +182,9 @@ function updateActiveView(value, d, isPreviousMonth, isNextMonth) {
     isPreviousMonth && decrementMonth()
     isNextMonth && incrementMonth()
   }
+  if (value === 'Week') {
+    week.value = findCurrentWeek(currentMonthDates.value[date.value])
+  }
 }
 
 const selectedMonthDate = ref(dayjs().format('YYYY-MM-DD'))
@@ -250,6 +253,12 @@ function handleShortcuts(e) {
 
 provide('activeView', activeView)
 provide('config', overrideConfig)
+
+watch(activeView, (value) => {
+  if (value === 'Week') {
+    week.value = findCurrentWeek(currentMonthDates.value[date.value])
+  }
+})
 
 const parseEvents = computed(() => {
   return (
@@ -400,6 +409,34 @@ let date = ref(
   ),
 )
 let selectedDay = computed(() => currentMonthDates.value[date.value])
+
+function computeCurrentDay() {
+  if (activeView.value === 'Week') {
+    const weekDates = datesInWeeks.value[week.value] || []
+    return weekDates[0] ? weekDates[0].getDate() : null
+  }
+  if (activeView.value === 'Day') {
+    const day = selectedDay.value
+    return day ? new Date(day).getDate() : null
+  }
+  return 1
+}
+
+let currentDay = ref(computeCurrentDay())
+let _lastInternalDay = currentDay.value
+
+watch([activeView, week, date], () => {
+  const val = computeCurrentDay()
+  _lastInternalDay = val
+  currentDay.value = val
+})
+
+watch(currentDay, (newVal) => {
+  if (newVal == null) return
+  if (newVal === _lastInternalDay) return
+  const target = new Date(currentYear.value, currentMonth.value, newVal)
+  setCalendarDate(target)
+})
 
 function updateCurrentDate(d) {
   activeView.value = 'Day'
@@ -685,6 +722,7 @@ defineExpose({
   currentMonthYear,
   currentYear,
   currentMonth,
+  currentDay,
   enabledModes,
   activeView,
   decrement,
