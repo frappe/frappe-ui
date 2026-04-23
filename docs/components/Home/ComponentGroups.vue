@@ -7,6 +7,7 @@ import Overlays from "./dummies/Overlays.vue";
 import Feedback from "./dummies/Feedback.vue";
 import Charts from "./dummies/Charts.vue";
 import { Badge } from "frappe-ui";
+import { withBase } from 'vitepress'
 
 const componentGroups = {
   "Data Display": {
@@ -86,7 +87,7 @@ const componentGroups = {
           <a
             v-for="x in components.list"
             :key="x"
-            :href='"/docs/components/" + x.toLowerCase()'
+            :href='withBase("/docs/components/" + x.toLowerCase())'
           >
             <Badge size="lg" class="hover:bg-surface-gray-4">
               {{ x }}
