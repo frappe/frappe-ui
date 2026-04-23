@@ -4,6 +4,7 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 </script>
+
 ## API Reference
 
 <PropsTable name="Select" :data='[
@@ -11,7 +12,7 @@
     "name": "size",
     "description": "Size of the select input",
     "required": false,
-    "type": "\"sm\" | \"md\" | \"lg\"",
+    "type": "\"sm\" | \"md\" | \"lg\" | \"xl\"",
     "default": "\"sm\""
   },
   {
@@ -44,44 +45,81 @@
     "name": "modelValue",
     "description": "The currently selected value (controlled)",
     "required": false,
-    "type": "((string | number) & String)"
+    "type": "SelectOptionValue"
+  },
+  {
+    "name": "open",
+    "description": "Controls the visibility of the select menu",
+    "required": false,
+    "type": "boolean",
+    "default": "false"
   },
   {
     "name": "options",
     "description": "Options to display in the dropdown",
     "required": false,
-    "type": "SelectOption[]"
+    "type": "SelectOption[]",
+    "default": "[]"
   }
-]'/> 
+]'/>
 
 <SlotsTable :data='[
   {
+    "name": "trigger",
+    "description": "Advanced trigger customization",
+    "type": "{ open: boolean; disabled: boolean; selectedOption: SelectNormalizedOption | null; displayValue: string; }"
+  },
+  {
     "name": "prefix",
-    "description": "Content rendered before the selected value (e.g., left icon or custom content)",
+    "description": "Content rendered before the selected value inside the default trigger",
     "type": "any"
   },
   {
     "name": "suffix",
-    "description": "Content rendered after the selected value (e.g., right icon or custom content)",
+    "description": "Content rendered after the selected value inside the default trigger",
     "type": "any"
   },
   {
+    "name": "item-prefix",
+    "description": "Custom content for the option prefix region",
+    "type": "{ option: SelectNormalizedOption; }"
+  },
+  {
+    "name": "item-label",
+    "description": "Preferred label-region customization for the standard option row",
+    "type": "{ option: SelectNormalizedOption; }"
+  },
+  {
+    "name": "item-suffix",
+    "description": "Custom content for the option suffix region",
+    "type": "{ option: SelectNormalizedOption; }"
+  },
+  {
     "name": "option",
-    "description": "Custom rendering for each dropdown option",
-    "type": "{ option: SelectOption; }"
+    "description": "Compatibility alias for label-region customization",
+    "type": "{ option: SelectNormalizedOption; }"
+  },
+  {
+    "name": "empty",
+    "description": "Custom empty state rendered when there are no normalized options",
+    "type": "any"
   },
   {
     "name": "footer",
     "description": "Custom content at the bottom of the dropdown",
     "type": "any"
   }
-]'/> 
+]'/>
 
 <EmitsTable :data='[
   {
     "name": "update:modelValue",
     "description": "",
-    "type": "[value: String | undefined]"
+    "type": "[value: SelectOptionValue | undefined]"
+  },
+  {
+    "name": "update:open",
+    "description": "",
+    "type": "[value: boolean]"
   }
-]'/> 
-
+]'/>

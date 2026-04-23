@@ -1,51 +1,107 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import LucideChevronDown from '~icons/lucide/chevron-down'
 import LucideUser from '~icons/lucide/user'
+import LucideUsers from '~icons/lucide/users'
 import { Select } from 'frappe-ui'
 
-const value = ref('')
+const assignee = ref('faris')
+const reviewer = ref('mariam')
+
 const options = [
   {
-    label: 'Matcha Tiramisu',
-    value: 'matcha-tiramisu',
+    label: 'Faris',
+    value: 'faris',
   },
   {
-    label: 'Strawberry Cheesecake',
-    value: 'strawberry-cheesecake',
+    label: 'Aakvatech',
+    value: 'aakvatech',
   },
   {
-    label: 'Chocolate Lava Cake',
-    value: 'chocolate-lava-cake',
+    label: 'Hadi',
+    value: 'hadi',
   },
   {
-    label: 'Mango Sticky Rice',
-    value: 'mango-sticky-rice',
+    label: 'Mariam',
+    value: 'mariam',
   },
   {
-    label: 'Pistachio Baklava',
-    value: 'pistachio-baklava',
-  },
-  {
-    label: 'Ube Ice Cream',
-    value: 'ube-ice-cream',
-  },
-  {
-    label: 'Salted Caramel Tart',
-    value: 'salted-caramel-tart',
+    label: 'Suhail',
+    value: 'suhail',
   },
 ]
 </script>
 
 <template>
-  <Select :options="options" v-model="value">
-    <template #prefix>
-      <LucideUser class="size-4 text-ink-gray-9" />
-    </template>
-  </Select>
+  <div
+    class="grid w-full max-w-4xl divide-y divide-outline-gray-2 md:grid-cols-2 md:divide-x md:divide-y-0"
+  >
+    <div class="py-4 md:pr-8">
+      <div class="text-sm font-medium text-ink-gray-7">Prefix and suffix</div>
+      <div class="mt-1 text-p-sm text-ink-gray-5">
+        Use the default trigger shell when you only need light customization.
+      </div>
 
-  <Select :options="options" v-model="value">
-    <template #suffix>
-      <LucideUser class="size-4 ml-auto text-ink-gray-9" />
-    </template>
-  </Select>
+      <div class="mt-4">
+        <Select v-model="assignee" :options="options" variant="outline">
+          <template #prefix>
+            <LucideUser class="size-4 text-ink-gray-6" />
+          </template>
+
+          <template #suffix>
+            <div class="ml-auto flex items-center gap-2 text-ink-gray-5">
+              <span
+                class="rounded bg-surface-gray-2 px-1.5 py-0.5 text-sm text-ink-gray-6"
+              >
+                5
+              </span>
+              <LucideChevronDown class="size-4" />
+            </div>
+          </template>
+        </Select>
+      </div>
+    </div>
+
+    <div class="py-4 md:pl-8">
+      <div class="text-sm font-medium text-ink-gray-7">Custom trigger</div>
+      <div class="mt-1 text-p-sm text-ink-gray-5">
+        Replace the trigger content entirely when you need richer layout.
+      </div>
+
+      <div class="mt-4 w-[320px] max-w-full">
+        <Select
+          v-model="reviewer"
+          :options="options"
+          variant="outline"
+          class="w-full"
+        >
+          <template #trigger="{ displayValue, open }">
+            <div class="flex w-full items-center gap-3">
+              <div
+                class="flex size-7 shrink-0 items-center justify-center rounded-full bg-surface-gray-2"
+              >
+                <LucideUsers class="size-4 text-ink-gray-6" />
+              </div>
+
+              <div class="min-w-0 flex-1 py-1.5">
+                <div class="truncate">
+                  {{ displayValue || 'Choose reviewer' }}
+                </div>
+                <div class="truncate text-p-sm text-ink-gray-5">
+                  Design review queue
+                </div>
+              </div>
+
+              <LucideChevronDown
+                :class="[
+                  'size-4 shrink-0 text-ink-gray-4 transition-transform duration-150 ease-[cubic-bezier(0.23,1,0.32,1)]',
+                  open ? 'rotate-180' : '',
+                ]"
+              />
+            </div>
+          </template>
+        </Select>
+      </div>
+    </div>
+  </div>
 </template>
