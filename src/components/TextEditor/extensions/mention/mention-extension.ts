@@ -1,10 +1,10 @@
-import { Extension, Node, mergeAttributes } from '@tiptap/core'
-import { PluginKey } from '@tiptap/pm/state'
-import { VueNodeViewRenderer } from '@tiptap/vue-3'
 import { MaybeRefOrGetter, toValue, type Component } from 'vue'
+import { Extension, Node, mergeAttributes } from '@tiptap/core'
+import { VueNodeViewRenderer } from '@tiptap/vue-3'
+import { PluginKey } from '@tiptap/pm/state'
 import {
-  BaseSuggestionItem,
   createSuggestionExtension,
+  BaseSuggestionItem,
 } from '../suggestion/createSuggestionExtension'
 import SuggestionList from '../suggestion/SuggestionList.vue'
 import './style.css'
