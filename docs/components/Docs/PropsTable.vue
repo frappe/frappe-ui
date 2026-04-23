@@ -70,7 +70,7 @@ const typeDefinition = computed(() => {
             <th
               class="w-[24%] py-2.5 pr-2 text-sm font-semibold text-ink-gray-9"
             >
-              Prop <span class="text-ink-gray-5">(* required)</span>
+              Prop
             </th>
             <th
               class="w-[20%] px-2 py-2.5 text-sm font-semibold text-ink-gray-9"
