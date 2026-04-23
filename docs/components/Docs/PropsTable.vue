@@ -3,10 +3,10 @@ import { computed, useSlots } from 'vue'
 
 interface ItemProp {
   name: string
-  description: string
-  type: string
+  description?: string
+  type?: string
   required: boolean
-  default: string
+  default?: string
 }
 
 interface Props {
@@ -40,7 +40,7 @@ const typeDefinition = computed(() => {
 
 <template>
   <div class="not-prose mt-2">
-    <details class="group border-outline-gray-2 pb-3">
+    <details class="group">
       <summary
         class="flex rounded cursor-pointer list-none items-center gap-2 py-2 text-sm font-medium text-ink-gray-6 transition-colors hover:text-ink-gray-9"
       >
@@ -61,7 +61,7 @@ const typeDefinition = computed(() => {
       </div>
     </details>
 
-    <div class="overflow-x-auto whitespace-nowrap">
+    <div class="mt-4 overflow-x-auto whitespace-nowrap">
       <table
         class="scrollbar w-full min-w-[720px] border-collapse border-b border-outline-gray-2 text-left"
       >
@@ -70,7 +70,7 @@ const typeDefinition = computed(() => {
             <th
               class="w-[24%] py-2.5 pr-2 text-sm font-semibold text-ink-gray-9"
             >
-              Prop
+              Prop <span class="text-ink-gray-5">(* required)</span>
             </th>
             <th
               class="w-[20%] px-2 py-2.5 text-sm font-semibold text-ink-gray-9"
@@ -96,18 +96,20 @@ const typeDefinition = computed(() => {
                 class="font-mono text-xs font-medium leading-6 text-ink-gray-9"
               >
                 {{ x.name
-                }}<span v-if="x.required" class="text-ink-gray-5">*</span>
+                }}<span
+                  v-if="x.required"
+                  class="text-ink-gray-5"
+                  title="Required"
+                  aria-label="required"
+                  >*</span
+                >
               </div>
             </td>
 
             <td class="px-2 py-2 align-top">
               <div
-                v-if="x.default?.includes('{')"
                 class="whitespace-pre-wrap break-words font-mono text-xs leading-6 text-ink-gray-6"
               >
-                {{ x.default }}
-              </div>
-              <div v-else class="font-mono text-xs leading-6 text-ink-gray-6">
                 {{ x.default || '—' }}
               </div>
             </td>

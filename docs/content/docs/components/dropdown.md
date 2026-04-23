@@ -1,35 +1,23 @@
 # Dropdown
 
-A flexible menu component for selecting actions or options. Easily handles
-lists, groups, and nested items in a clean. Supports switches, disabled items,
-custom triggers.
+A flexible menu component for selecting actions or options. It handles lists,
+groups, nested items, switches, disabled items, and custom triggers.
 
 <!-- AUTO-GENERATED STORIES START -->
-
 ## Basic
-
 <ComponentPreview name="Dropdown-01_Basic" />
 
 ## Menu Patterns
-
 <ComponentPreview name="Dropdown-02_MenuPatterns" />
 
 ## Trigger Patterns
-
 <ComponentPreview name="Dropdown-03_TriggerPatterns" />
 
-## Content Customization
-
-<ComponentPreview name="Dropdown-04_ContentCustomization" />
-
 ## User Menu
-
 <ComponentPreview name="Dropdown-04_UserMenu" />
 
-## Content Customization
-
-<ComponentPreview name="Dropdown-05_ContentCustomization" />
-
+## Item Slots And Empty State
+<ComponentPreview name="Dropdown-05_ItemSlotsAndEmptyState" />
 <!-- AUTO-GENERATED STORIES END -->
 
 ## Notes
