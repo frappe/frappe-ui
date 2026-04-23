@@ -3,56 +3,60 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
-</script>
-<PropsTable name="CircularProgressBar" :data='[
+
+  const propsData = [
   {
-    "name": "step",
-    "description": "Current step or progress value",
-    "required": false,
-    "type": "number",
-    "default": "1"
+    name: 'step',
+    description: 'Current step or progress value',
+    required: true,
+    type: 'number',
+    default: '1'
   },
   {
-    "name": "totalSteps",
-    "description": "Total steps for completion",
-    "required": false,
-    "type": "number",
-    "default": "4"
+    name: 'totalSteps',
+    description: 'Total steps for completion',
+    required: true,
+    type: 'number',
+    default: '4'
   },
   {
-    "name": "showPercentage",
-    "description": "Show numeric percentage inside the circle",
-    "required": false,
-    "type": "boolean",
-    "default": "false"
+    name: 'showPercentage',
+    description: 'Show numeric percentage inside the circle',
+    required: false,
+    type: 'boolean',
+    default: 'false'
   },
   {
-    "name": "variant",
-    "description": "Visual style of the progress bar",
-    "required": false,
-    "type": "\"outline\" | \"solid\"",
-    "default": "\"solid\""
+    name: 'variant',
+    description: 'Visual style of the progress bar',
+    required: false,
+    type: '"outline" | "solid"',
+    default: '"solid"'
   },
   {
-    "name": "theme",
-    "description": "Theme used for the progress bar (predefined or custom colors)",
-    "required": false,
-    "type": "\"blue\" | \"red\" | \"green\" | \"orange\" | \"black\" | { primary: string; secondary: string; }",
-    "default": "\"black\""
+    name: 'theme',
+    description: 'Theme used for the progress bar (predefined or custom colors)',
+    required: false,
+    type: '"blue" | "red" | "green" | "orange" | "black" | { primary: string; secondary: string; }',
+    default: '"black"'
   },
   {
-    "name": "size",
-    "description": "Size of the progress bar",
-    "required": false,
-    "type": "\"sm\" | \"md\" | \"lg\" | \"xl\" | \"xs\"",
-    "default": "\"md\""
+    name: 'size',
+    description: 'Size of the progress bar',
+    required: false,
+    type: '"md" | "xs" | "sm" | "lg" | "xl"',
+    default: '"md"'
   },
   {
-    "name": "themeComplete",
-    "description": "Color used when the progress completes",
-    "required": false,
-    "type": "string",
-    "default": "\"lightgreen\""
+    name: 'themeComplete',
+    description: 'Color used when the progress completes',
+    required: false,
+    type: 'string',
+    default: '"lightgreen"'
   }
-]'/> 
+]
+</script>
+## API Reference
+
+<PropsTable name="CircularProgressBar" :data="propsData"/> 
 

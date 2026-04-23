@@ -3,60 +3,74 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+
+  const propsData = [
+  {
+    name: 'header',
+    description: '',
+    required: false,
+    type: 'SidebarHeaderProps',
+    default: undefined
+  },
+  {
+    name: 'sections',
+    description: '',
+    required: false,
+    type: 'SidebarSectionProps[]',
+    default: undefined
+  },
+  {
+    name: 'disableCollapse',
+    description: '',
+    required: false,
+    type: 'boolean',
+    default: undefined
+  },
+  {
+    name: 'collapsed',
+    description: '',
+    required: false,
+    type: 'boolean',
+    default: 'null'
+  }
+]
+
+  const slotsData = [
+  {
+    name: 'header',
+    description: '',
+    type: '{}'
+  },
+  {
+    name: 'header-logo',
+    description: '',
+    type: '{}'
+  },
+  {
+    name: 'sidebar-item',
+    description: '',
+    type: '{ item: SidebarItemProps; isCollapsed: false; }'
+  },
+  {
+    name: 'footer-items',
+    description: '',
+    type: '{ isCollapsed: boolean; isMobile: boolean; }'
+  }
+]
+
+  const emitsData = [
+  {
+    name: 'update:collapsed',
+    description: 'Fired when the collapsed changes.',
+    type: '[value: boolean]'
+  }
+]
 </script>
-<PropsTable name="Sidebar" :data='[
-  {
-    "name": "header",
-    "description": "",
-    "required": false,
-    "type": "SidebarHeaderProps"
-  },
-  {
-    "name": "sections",
-    "description": "",
-    "required": false,
-    "type": "SidebarSectionProps[]"
-  },
-  {
-    "name": "disableCollapse",
-    "description": "",
-    "required": false,
-    "type": "boolean"
-  },
-  {
-    "name": "collapsed",
-    "description": "",
-    "required": false,
-    "type": "boolean",
-    "default": "null"
-  }
-]'/> 
+## API Reference
 
-## Slots 
- <SlotsTable :data='[
-  {
-    "name": "header-logo",
-    "description": "",
-    "type": "{}"
-  },
-  {
-    "name": "sidebar-item",
-    "description": "",
-    "type": "{ item: SidebarItemProps; isCollapsed: false; }"
-  },
-  {
-    "name": "footer-items",
-    "description": "",
-    "type": "{ isCollapsed: boolean; isMobile: boolean; }"
-  }
-]'/> 
+<PropsTable name="Sidebar" :data="propsData"/> 
 
-## Emit Events 
- <EmitsTable :data='[
-  {
-    "name": "update:collapsed",
-    "description": "",
-    "type": "[value: boolean]"
-  }
-]'/> 
+<SlotsTable :data="slotsData"/> 
+
+<EmitsTable :data="emitsData"/> 
 

@@ -41,9 +41,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, useSlots, useAttrs, ref } from 'vue'
+import { computed, ref, useAttrs, useSlots } from 'vue'
 import debounce from '../../utils/debounce'
-import type { TextInputProps } from './types'
+import type { TextInputEmits, TextInputProps } from './types'
 
 defineOptions({
   inheritAttrs: false,
@@ -55,7 +55,7 @@ const props = withDefaults(defineProps<TextInputProps>(), {
   variant: 'subtle',
 })
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits<TextInputEmits>()
 const slots = useSlots()
 
 defineSlots<{

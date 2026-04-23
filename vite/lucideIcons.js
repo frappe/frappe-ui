@@ -6,7 +6,7 @@ import IconsResolver from 'unplugin-icons/resolver'
 const VIRTUAL_PREFIX = '~icons/lucide/'
 const RESOLVED_PREFIX = '\0~icons/lucide/'
 
-export function lucideIcons() {
+export function lucideIcons(options = {}) {
   const resolverObj = {
     resolvers: [
       IconsResolver({
@@ -16,9 +16,16 @@ export function lucideIcons() {
     ],
   }
   const icons = getIcons()
+  const componentOptions = options.componentGlobs
+    ? {
+        ...resolverObj,
+        globs: options.componentGlobs,
+      }
+    : resolverObj
+
   return [
     AutoImport(resolverObj),
-    Components(resolverObj),
+    Components(componentOptions),
     LucideIconsPlugin(icons),
   ]
 }
@@ -44,7 +51,9 @@ function generateIconModule(icons, iconName) {
   if (!svg) return null
 
   const innerMatch = svg.match(/<svg[^>]*>([\s\S]*)<\/svg>/)
-  const innerHTML = innerMatch ? innerMatch[1].replace(/>\s+</g, '><').trim() : ''
+  const innerHTML = innerMatch
+    ? innerMatch[1].replace(/>\s+</g, '><').trim()
+    : ''
 
   return `
 import { h } from 'vue'

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { state } from '../../state'
-import { useData, useRoute } from 'vitepress'
+import { useData, useRoute, withBase } from 'vitepress'
 
 import LucidePalette from '~icons/lucide/palette'
 import LucideRows from '~icons/lucide/rows-3'
@@ -134,7 +134,7 @@ const linkClass = 'p-2 rounded'
   >
     <a
       class="hidden lg:flex items-center gap-2 p-2 py-3 mb-3"
-      href="/"
+      :href="withBase('/')"
     >
       <img src="/logo.svg" class="w-8" />
       <div class="flex flex-col gap-1 *:leading-none">
@@ -153,7 +153,7 @@ const linkClass = 'p-2 rounded'
           <template v-for="(item, i) in list" :key="item.text">
             <a
               v-if="!item.items"
-              :href="item.link"
+              :href="withBase(item.link)"
               :class="[
                 linkClass,
                 activeLink(item.link),
@@ -177,7 +177,7 @@ const linkClass = 'p-2 rounded'
 
               <div class="flex flex-col mb-6">
                 <a
-                  :href="child.link"
+                  :href="withBase(child.link)"
                   v-for="child in item.items"
                   :key="child.text"
                   class="inline-flex gap-2 items-center"

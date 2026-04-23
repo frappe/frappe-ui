@@ -5,7 +5,7 @@ import type { SearchResult } from 'minisearch'
 import MiniSearch from 'minisearch'
 import Mark from 'mark.js'
 
-import { useData } from 'vitepress'
+import { useData, withBase } from 'vitepress'
 import { computedAsync, debouncedWatch } from '@vueuse/core'
 
 import {
@@ -136,7 +136,7 @@ const move = (delta: number) => {
 const selectActive = () => {
   const item = results.value[activeIndex.value]
   if (!item) return
-  window.location.href = item.id
+  window.location.href = withBase(item.id)
   emits('close')
 }
 
@@ -213,7 +213,7 @@ const vScrollActive = {
           v-for="(p, i) in results"
           :key="p.id"
           :aria-selected="i === activeIndex"
-          :href="p.id"
+          :href="withBase(p.id)"
           class="flex gap-1 items-center text-ink-gray-6"
           :class="[
             'p-2 cursor-pointer text-sm rounded',

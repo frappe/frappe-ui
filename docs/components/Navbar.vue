@@ -12,7 +12,7 @@ import SearchPopup from './Search/Popup.vue'
 
 import { state } from '../state'
 import { useMagicKeys, whenever } from '@vueuse/core'
-import { useRoute } from 'vitepress'
+import { useRoute, withBase } from 'vitepress'
 
 const theme = ref()
 
@@ -85,7 +85,7 @@ whenever(meta_k, (n) => {
         :class="{ 'md:hidden': isDocs }"
       >
         <img src="/logo.svg" class="w-6" />
-        <a href="/" class="font-medium">Frappe UI</a>
+        <a :href="withBase('/')" class="font-medium">Frappe UI</a>
       </span>
 
       <Breadcrumbs :items="routes" class="[&_span]:capitalize hidden md:flex" />
@@ -106,7 +106,9 @@ whenever(meta_k, (n) => {
         class="gap-3 md:flex items-center w-full ml-auto md:w-auto"
         :class="{ flex: state.mobnavbar, hidden: !state.mobnavbar }"
       >
-        <a href="/docs/getting-started" v-if="route.path == '/'">Docs</a>
+        <a :href="withBase('/docs/getting-started')" v-if="route.path == '/'">
+          Docs
+        </a>
 
         <Button class="hidden md:flex" @click="state.searchDialog = true">
           <template #prefix>

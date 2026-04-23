@@ -43,7 +43,7 @@ code {
       border-color 0.25s ease 0s,
       background-color 0.25s ease 0s,
       opacity 0.25s ease 0s;
-    @apply absolute top-0 right-2 w-9 h-9 bg-inherit;
+    @apply absolute top-2 right-2 h-8 w-8 bg-inherit;
   }
 
   .copied {
@@ -69,7 +69,7 @@ code {
   color: var(--shiki-light, inherit);
 }
 
-[data-theme='dark']  .shiki span {
+[data-theme='dark'] .shiki span {
   color: var(--shiki-dark, inherit);
 }
 

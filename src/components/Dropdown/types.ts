@@ -1,51 +1,208 @@
-import { RouterLinkProps } from 'vue-router'
-import { ButtonProps } from '../Button'
-import { type Component } from 'vue'
+import type { Component } from 'vue'
+import type { RouteLocationRaw } from 'vue-router'
+import type { ButtonProps } from '../Button'
 
-export type DropdownOption = {
-  label: string
+export type DropdownTheme = 'gray' | 'red'
+export type DropdownPlacement = 'left' | 'right' | 'center'
+export type DropdownSide = 'top' | 'right' | 'bottom' | 'left'
+
+export interface DropdownBaseOption {
+  /** Leading icon shown for the item row. */
   icon?: string | Component | null
-  switch?: boolean
+
+  /** Secondary text shown below the label. */
+  description?: string
+
+  /** Marks the item as currently selected. */
+  selected?: boolean
+
+  /** Disables interaction for the item. */
   disabled?: boolean
-  switchValue?: boolean
-  theme?: 'gray' | 'red'
-  component?: any
-  onClick?: (val: any) => void
-  route?: RouterLinkProps['to']
+
+  /** Visual theme applied to the item row. */
+  theme?: DropdownTheme
+
+  /** Named slot suffix used to resolve `item-*` slots dynamically. */
+  slot?: string
+
+  /** Condition used to omit an item from the final menu. */
   condition?: () => boolean
-  submenu?: DropdownOptions
+
+  [key: string]: any
 }
 
-export type DropdownGroupOption = {
-  key?: number
+export interface DropdownActionOption extends DropdownBaseOption {
+  /** Primary label shown for the action item. */
+  label: string
+
+  /** Router destination to navigate to when the item is clicked. */
+  route?: RouteLocationRaw
+
+  /** Click handler invoked when the action item is selected. */
+  onClick?: (event: PointerEvent) => void
+
+  submenu?: never
+  switch?: never
+  switchValue?: never
+  component?: never
+}
+
+export interface DropdownSwitchOption extends DropdownBaseOption {
+  /** Primary label shown for the switch item. */
+  label: string
+
+  /** Renders the item with a switch control. */
+  switch: true
+
+  /** Current boolean value for the switch item. */
+  switchValue?: boolean
+
+  /** Change handler invoked with the next switch value. */
+  onClick?: (value: boolean) => void
+
+  route?: never
+  submenu?: never
+  component?: never
+}
+
+export interface DropdownSubmenuOption extends DropdownBaseOption {
+  /** Primary label shown for the submenu trigger. */
+  label: string
+
+  /** Nested menu items rendered in the submenu. */
+  submenu: DropdownOptions
+
+  route?: never
+  onClick?: never
+  switch?: never
+  switchValue?: never
+  component?: never
+}
+
+export interface DropdownComponentOption extends DropdownBaseOption {
+  /** Custom component rendered in place of the standard menu row. */
+  component: any
+
+  /** Optional label used by custom renderers. */
+  label?: string
+
+  route?: never
+  submenu?: never
+  switch?: never
+  switchValue?: never
+}
+
+export interface DropdownGroupOption {
+  /** Stable key for the group wrapper. */
+  key?: string | number
+
+  /** Label rendered above the grouped items. */
   group: string
-  items: DropdownOption[]
-  hideLabel?: boolean
-  theme?: 'gray' | 'red'
-}
-export type DropdownItem = DropdownOption | DropdownGroupOption
 
+  /** Items rendered inside the group. */
+  items: DropdownOption[]
+
+  /** Hides the group heading while preserving grouping. */
+  hideLabel?: boolean
+
+  /** Theme inherited by items in the group. */
+  theme?: DropdownTheme
+}
+
+export type DropdownOption =
+  | DropdownActionOption
+  | DropdownSwitchOption
+  | DropdownSubmenuOption
+  | DropdownComponentOption
+
+export type DropdownItem = DropdownOption | DropdownGroupOption
 export type DropdownOptions = Array<DropdownItem>
-/**
- * Props for the Dropdown component
- */
+
 export interface DropdownProps {
   /** Button configuration (label, icon, size, variant, etc.) */
   button?: ButtonProps
 
-  /** Array of dropdown options or grouped options */
+  /** Array of dropdown options or grouped options. */
   options?: DropdownOptions
 
-  /** Placement of the dropdown relative to the trigger */
-  placement?: string
+  /** Controls the visibility of the dropdown. */
+  open?: boolean
 
-  /** Side of the trigger the dropdown appears on */
-  side?: 'top' | 'right' | 'bottom' | 'left'
+  /** Placement of the dropdown relative to the trigger. */
+  placement?: DropdownPlacement
 
-  /** Offset in pixels between trigger and dropdown */
+  /** Side of the trigger the dropdown appears on. */
+  side?: DropdownSide
+
+  /** Offset in pixels between trigger and dropdown. */
   offset?: number
 
-  /** Teleport target for dropdown portal content */
+  /** Teleport target for dropdown portal content. */
   portalTo?: string | HTMLElement
 }
 
+export interface DropdownSlotProps {
+  /** Closes the dropdown menu. */
+  close: () => void
+}
+
+export interface DropdownTriggerSlotProps extends DropdownSlotProps {
+  /** Whether the dropdown menu is currently open. */
+  open: boolean
+
+  /** Whether the trigger should render as disabled. */
+  disabled: boolean
+
+  [key: string]: any
+}
+
+export interface DropdownItemSlotProps extends DropdownSlotProps {
+  /** Item currently being rendered. */
+  item: DropdownOption
+
+  /** Whether the item is currently selected. */
+  selected: boolean
+}
+
+export interface DropdownGroupSlotProps {
+  /** Group currently being rendered. */
+  group: DropdownGroupOption
+}
+
+export interface DropdownSlots {
+  /** Alternate trigger renderer. */
+  default?: (props: DropdownTriggerSlotProps) => any
+
+  /** Explicit trigger slot renderer. */
+  trigger?: (props: DropdownTriggerSlotProps) => any
+
+  /** Replaces the entire item row. */
+  item?: (props: DropdownItemSlotProps) => any
+
+  /** Content rendered before the standard item label. */
+  'item-prefix'?: (props: DropdownItemSlotProps) => any
+
+  /** Content rendered for the standard item label area. */
+  'item-label'?: (props: DropdownItemSlotProps) => any
+
+  /** Content rendered after the standard item label. */
+  'item-suffix'?: (props: DropdownItemSlotProps) => any
+
+  /** Custom renderer for group labels. */
+  'group-label'?: (props: DropdownGroupSlotProps) => any
+
+  /** Fallback content rendered when no items are available. */
+  empty?: () => any
+
+  [slotName: string]: ((props: any) => any) | undefined
+}
+
+export interface DropdownEmits {
+  /** Fired when the dropdown open state changes. */
+  'update:open': [value: boolean]
+}
+
+export interface DropdownExposed {
+  /** Closes the dropdown menu. */
+  close: () => void
+}

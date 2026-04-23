@@ -22,7 +22,7 @@ const { frontmatter } = useData()
   </div>
 
   <template v-else>
-    <div class="grid lg:grid-cols-[auto_1fr]">
+    <div class="grid lg:grid-cols-[220px_1fr]">
       <Sidebar class="hidden lg:flex" />
 
       <div class="w-full">
@@ -33,7 +33,7 @@ const { frontmatter } = useData()
           <main class="mx-auto lg:max-w-[740px] flex-1">
             <Content
               as="article"
-              class="prose prose-v3 prose-p:mb-4 !max-w-none"
+              class="prose prose-v3 prose-p:mb-4 text-[15px] !max-w-none"
             />
             <PrevNextBtns />
           </main>

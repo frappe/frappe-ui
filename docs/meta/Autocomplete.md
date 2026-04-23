@@ -4,37 +4,3 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 </script>
-## Slots 
- <SlotsTable :data='[
-  {
-    "name": "target",
-    "description": "",
-    "type": "{ open: () => void; close: () => void; togglePopover: () => void; isOpen: any; }"
-  },
-  {
-    "name": "prefix",
-    "description": "",
-    "type": "{}"
-  },
-  {
-    "name": "suffix",
-    "description": "",
-    "type": "{}"
-  },
-  {
-    "name": "item-prefix",
-    "description": "",
-    "type": "{ active: any; selected: any; option: Option; }"
-  },
-  {
-    "name": "item-suffix",
-    "description": "",
-    "type": "{ active: any; selected: any; option: Option; }"
-  },
-  {
-    "name": "footer",
-    "description": "",
-    "type": "{ togglePopover: () => void; }"
-  }
-]'/> 
-

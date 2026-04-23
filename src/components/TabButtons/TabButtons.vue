@@ -1,74 +1,216 @@
-<template>
-  <RadioGroup v-model="value">
-    <div
-      class="flex space-x-0.5 rounded-md bg-surface-gray-2 h-7 items-center px-[1px] text-sm"
-    >
-      <RadioGroupOption
-        as="div"
-        v-for="button in buttons"
-        :key="button.label"
-        :disabled="button.disabled"
-        :value="button.value ?? button.label"
-        v-slot="{ active, checked }"
-      >
-        <Button
-          @click="button.onClick"
-          v-bind="button"
-          class="!h-6.5"
-          :class="[
-            active ? 'ring-outline-gray-2 focus-visible:ring' : '',
-            checked && '!bg-surface-white',
-            button.disabled
-              ? ''
-              : checked
-                ? ' text-ink-gray-8 shadow'
-                : '!text-ink-gray-5',
-          ]"
-        >
-          <RadioGroupLabel
-            as="span"
-            class="flex h-4 items-center"
-            v-show="button.label && !button.hideLabel"
-            >{{ button.label }}</RadioGroupLabel
-          >
-        </Button>
-      </RadioGroupOption>
-    </div>
-  </RadioGroup>
-</template>
-<script>
-import { RadioGroup, RadioGroupLabel, RadioGroupOption } from '@headlessui/vue'
+<script setup lang="ts">
+import { computed, watch, type Component } from 'vue'
+import { RadioGroupItem, RadioGroupRoot } from 'reka-ui'
+import { Button, type ButtonProps } from '../Button'
 import FeatherIcon from '../FeatherIcon.vue'
-import Button from '../Button/Button.vue'
 
-export default {
+defineOptions({
   name: 'TabButtons',
-  props: {
-    buttons: {
-      type: Array,
-      required: true,
-    },
-    modelValue: {
-      type: [String, Boolean, Number],
-    },
-  },
-  emits: ['update:modelValue'],
-  components: {
-    Button,
-    FeatherIcon,
-    RadioGroup,
-    RadioGroupOption,
-    RadioGroupLabel,
-  },
-  computed: {
-    value: {
-      get() {
-        return this.modelValue
+  inheritAttrs: false,
+})
+
+type TabButtonValue = string | number | boolean
+
+type TabButtonIcon = string | Component
+
+type NativeButtonClass = string | string[] | Record<string, boolean>
+
+interface TabButton extends Omit<
+  ButtonProps,
+  'label' | 'icon' | 'iconLeft' | 'iconRight'
+> {
+  label?: string | number
+  value?: TabButtonValue
+  icon?: TabButtonIcon
+  iconLeft?: TabButtonIcon
+  iconRight?: TabButtonIcon
+  hideLabel?: boolean
+  active?: boolean
+  class?: NativeButtonClass
+  onClick?: (event: MouseEvent) => void
+}
+
+const props = defineProps<{
+  buttons: TabButton[]
+  modelValue?: TabButtonValue
+}>()
+
+const emit = defineEmits<{
+  'update:modelValue': [value: TabButtonValue | undefined]
+}>()
+
+const resolvedButtons = computed(() => {
+  return props.buttons.map((button, index) => {
+    const {
+      value,
+      label,
+      icon,
+      iconLeft,
+      iconRight,
+      hideLabel = false,
+      active = false,
+      class: customClass,
+      onClick,
+      tooltip,
+      ...buttonProps
+    } = button
+
+    const leadingIcon = iconLeft ?? icon
+    const trailingIcon = iconRight
+    const visibleLabel = hasLabel(label) && !hideLabel
+    const useIconProp = Boolean(leadingIcon) && !trailingIcon && !visibleLabel
+    const accessibleLabel = hasLabel(label) ? String(label) : tooltip
+
+    return {
+      key: `tab-button-${index}`,
+      label,
+      hideLabel,
+      active,
+      customClass,
+      onClick,
+      leadingIcon,
+      trailingIcon,
+      visibleLabel,
+      useIconProp,
+      accessibleLabel,
+      modelValue: value ?? label ?? index,
+      buttonProps: {
+        theme: 'gray' as const,
+        variant: 'subtle' as const,
+        size: 'sm' as const,
+        tooltip,
+        ...buttonProps,
+        label: accessibleLabel,
+        icon: useIconProp ? leadingIcon : undefined,
       },
-      set(value) {
-        this.$emit('update:modelValue', value)
-      },
-    },
+    }
+  })
+})
+
+watch(
+  [resolvedButtons, () => props.modelValue],
+  ([buttons]) => {
+    const selectedButton = buttons.find((button) =>
+      Object.is(button.modelValue, props.modelValue),
+    )
+
+    if (selectedButton) return
+
+    const fallbackButton = buttons.find((button) => button.active)
+    if (
+      fallbackButton &&
+      !Object.is(fallbackButton.modelValue, props.modelValue)
+    ) {
+      emit('update:modelValue', fallbackButton.modelValue)
+    }
   },
+  { immediate: true },
+)
+
+const selectedButtonKey = computed({
+  get: () => {
+    const selectedButton = resolvedButtons.value.find((button) =>
+      Object.is(button.modelValue, props.modelValue),
+    )
+
+    if (selectedButton) {
+      return selectedButton.key
+    }
+
+    return resolvedButtons.value.find((button) => button.active)?.key
+  },
+  set: (nextKey) => {
+    const selectedButton = resolvedButtons.value.find(
+      (button) => button.key === nextKey,
+    )
+    emit('update:modelValue', selectedButton?.modelValue)
+  },
+})
+
+function hasLabel(label: TabButton['label']) {
+  return label !== undefined && label !== null && label !== ''
 }
 </script>
+
+<template>
+  <RadioGroupRoot v-model="selectedButtonKey" v-bind="$attrs">
+    <div
+      class="inline-flex min-h-7 items-center gap-0.5 rounded-md bg-surface-gray-2 p-px ring-1 ring-inset ring-outline-gray-1"
+    >
+      <RadioGroupItem
+        v-for="button in resolvedButtons"
+        :key="button.key"
+        v-slot="{ checked, disabled }"
+        as="template"
+        :disabled="button.buttonProps.disabled || button.buttonProps.loading"
+        :value="button.key"
+      >
+        <Button
+          v-bind="button.buttonProps"
+          data-slot="tab-button"
+          :data-state="checked ? 'checked' : 'unchecked'"
+          :data-disabled="disabled ? '' : undefined"
+          :aria-label="
+            button.accessibleLabel && !button.visibleLabel
+              ? button.accessibleLabel
+              : undefined
+          "
+          :title="
+            button.accessibleLabel && !button.visibleLabel
+              ? button.accessibleLabel
+              : undefined
+          "
+          :class="[
+            '!h-6.5 shrink-0 !rounded-[9px] transition-[transform,background-color,color,box-shadow,border-color] duration-150 ease-out motion-safe:active:scale-[0.98] motion-reduce:transform-none motion-reduce:transition-none',
+            button.hideLabel ? '!w-7 !px-0' : '',
+            checked
+              ? '!border-outline-gray-1 !bg-surface-white !text-ink-gray-8 shadow-sm'
+              : disabled
+                ? '!bg-transparent !text-ink-gray-4'
+                : '!bg-transparent !text-ink-gray-5 hover:!bg-surface-gray-3/80 hover:!text-ink-gray-7',
+            button.customClass,
+          ]"
+          @click="button.onClick?.($event)"
+        >
+          <template v-if="button.leadingIcon && !button.useIconProp" #prefix>
+            <FeatherIcon
+              v-if="typeof button.leadingIcon === 'string'"
+              :name="button.leadingIcon"
+              class="h-4 w-4 shrink-0"
+              aria-hidden="true"
+            />
+            <component
+              :is="button.leadingIcon"
+              v-else
+              class="h-4 w-4 shrink-0"
+              aria-hidden="true"
+            />
+          </template>
+
+          <span
+            v-if="hasLabel(button.label)"
+            class="flex min-w-0 items-center truncate"
+            :class="button.hideLabel ? 'sr-only' : undefined"
+          >
+            {{ button.label }}
+          </span>
+
+          <template v-if="button.trailingIcon" #suffix>
+            <FeatherIcon
+              v-if="typeof button.trailingIcon === 'string'"
+              :name="button.trailingIcon"
+              class="h-4 w-4 shrink-0"
+              aria-hidden="true"
+            />
+            <component
+              :is="button.trailingIcon"
+              v-else
+              class="h-4 w-4 shrink-0"
+              aria-hidden="true"
+            />
+          </template>
+        </Button>
+      </RadioGroupItem>
+    </div>
+  </RadioGroupRoot>
+</template>

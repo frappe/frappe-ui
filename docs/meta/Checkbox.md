@@ -3,45 +3,53 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
-</script>
-<PropsTable name="Checkbox" :data='[
+
+  const propsData = [
   {
-    "name": "size",
-    "description": "Controls the size of the checkbox",
-    "required": false,
-    "type": "\"sm\" | \"md\"",
-    "default": "\"sm\""
+    name: 'size',
+    description: 'Controls the size of the checkbox',
+    required: false,
+    type: '"md" | "sm"',
+    default: '"sm"'
   },
   {
-    "name": "label",
-    "description": "Text label shown next to the checkbox",
-    "required": false,
-    "type": "string"
+    name: 'label',
+    description: 'Text label shown next to the checkbox',
+    required: false,
+    type: 'string',
+    default: undefined
   },
   {
-    "name": "disabled",
-    "description": "Disables the checkbox interaction",
-    "required": false,
-    "type": "boolean"
+    name: 'disabled',
+    description: 'Disables the checkbox interaction',
+    required: false,
+    type: 'boolean',
+    default: undefined
   },
   {
-    "name": "padding",
-    "description": "Adds padding around the checkbox",
-    "required": false,
-    "type": "boolean",
-    "default": "false"
+    name: 'padding',
+    description: 'Adds padding around the checkbox',
+    required: false,
+    type: 'boolean',
+    default: 'false'
   },
   {
-    "name": "modelValue",
-    "description": "Checked state of the checkbox",
-    "required": false,
-    "type": "boolean | 0 | 1"
+    name: 'modelValue',
+    description: 'Checked state of the checkbox',
+    required: false,
+    type: 'boolean | 0 | 1',
+    default: undefined
   },
   {
-    "name": "id",
-    "description": "HTML id attribute for the input element",
-    "required": false,
-    "type": "string"
+    name: 'id',
+    description: 'HTML id attribute for the input element',
+    required: false,
+    type: 'string',
+    default: undefined
   }
-]'/> 
+]
+</script>
+## API Reference
+
+<PropsTable name="Checkbox" :data="propsData"/> 
 

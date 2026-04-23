@@ -3,79 +3,88 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+
+  const propsData = [
+  {
+    name: 'title',
+    description: 'Main heading text of the alert',
+    required: true,
+    type: 'string',
+    default: undefined
+  },
+  {
+    name: 'theme',
+    description: 'Color theme of the alert',
+    required: false,
+    type: 'Theme',
+    default: undefined
+  },
+  {
+    name: 'variant',
+    description: 'Visual style of the alert container',
+    required: false,
+    type: '"subtle" | "outline"',
+    default: '"subtle"'
+  },
+  {
+    name: 'description',
+    description: 'Optional supporting text shown below the title',
+    required: false,
+    type: 'string',
+    default: undefined
+  },
+  {
+    name: 'dismissable',
+    description: 'Whether the alert can be closed by the user',
+    required: false,
+    type: 'boolean',
+    default: 'true'
+  },
+  {
+    name: 'modelValue',
+    description: 'Controls the visibility of the alert for dismissing or toggling it',
+    required: false,
+    type: 'boolean',
+    default: 'true'
+  }
+]
+
+  const slotsData = [
+  {
+    name: 'icon',
+    description: 'Custom icon shown before the content',
+    type: 'any'
+  },
+  {
+    name: 'description',
+    description: 'Custom description content',
+    type: 'any'
+  },
+  {
+    name: 'footer',
+    description: 'Footer content shown at the bottom of the alert',
+    type: 'any'
+  }
+]
+
+  const emitsData = [
+  {
+    name: 'update:modelValue',
+    description: 'Fired when the model value changes.',
+    type: '[value: boolean]'
+  },
+  {
+    name: 'dismiss',
+    description: 'Fired when the component is dismissed.',
+    type: 'any[]'
+  }
+]
 </script>
-<PropsTable name="Alert" :data='[
-  {
-    "name": "title",
-    "description": "Main heading text of the alert",
-    "required": true,
-    "type": "string"
-  },
-  {
-    "name": "theme",
-    "description": "Color theme of the alert",
-    "required": false,
-    "type": "Theme"
-  },
-  {
-    "name": "variant",
-    "description": "Visual style of the alert container",
-    "required": false,
-    "type": "\"subtle\" | \"outline\"",
-    "default": "\"subtle\""
-  },
-  {
-    "name": "description",
-    "description": "Optional supporting text shown below the title",
-    "required": false,
-    "type": "string"
-  },
-  {
-    "name": "dismissable",
-    "description": "Whether the alert can be closed by the user",
-    "required": false,
-    "type": "boolean",
-    "default": "true"
-  },
-  {
-    "name": "modelValue",
-    "description": "Controls the visibility of the alert for dismissing or toggling it",
-    "required": false,
-    "type": "boolean",
-    "default": "true"
-  }
-]'/> 
+## API Reference
 
-## Slots 
- <SlotsTable :data='[
-  {
-    "name": "icon",
-    "description": "Custom icon shown before the content",
-    "type": "any"
-  },
-  {
-    "name": "description",
-    "description": "Custom description content",
-    "type": "any"
-  },
-  {
-    "name": "footer",
-    "description": "Footer content shown at the bottom of the alert",
-    "type": "any"
-  }
-]'/> 
+<PropsTable name="Alert" :data="propsData"/> 
 
-## Emit Events 
- <EmitsTable :data='[
-  {
-    "name": "update:modelValue",
-    "description": "",
-    "type": "[value: boolean]"
-  },
-  {
-    "name": "dismiss",
-    "description": "",
-    "type": "any[]"
-  }
-]'/> 
+<SlotsTable :data="slotsData"/> 
+
+<EmitsTable :data="emitsData"/> 
 

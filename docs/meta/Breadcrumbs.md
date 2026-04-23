@@ -3,27 +3,33 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
-</script>
-<PropsTable name="Breadcrumbs" :data='[
-  {
-    "name": "items",
-    "description": "Ordered list of breadcrumb items",
-    "required": true,
-    "type": "BreadcrumbItem[]"
-  }
-]'/> 
 
-## Slots 
- <SlotsTable :data='[
+  const propsData = [
   {
-    "name": "prefix",
-    "description": "Content shown before each breadcrumb label",
-    "type": "{ item: BreadcrumbItem; }"
+    name: 'items',
+    description: 'Ordered list of breadcrumb items',
+    required: true,
+    type: 'BreadcrumbItem[]',
+    default: undefined
+  }
+]
+
+  const slotsData = [
+  {
+    name: 'prefix',
+    description: 'Content shown before each breadcrumb label',
+    type: '{ item: BreadcrumbItem; }'
   },
   {
-    "name": "suffix",
-    "description": "Content shown after each breadcrumb label",
-    "type": "{ item: BreadcrumbItem; }"
+    name: 'suffix',
+    description: 'Content shown after each breadcrumb label',
+    type: '{ item: BreadcrumbItem; }'
   }
-]'/> 
+]
+</script>
+## API Reference
+
+<PropsTable name="Breadcrumbs" :data="propsData"/> 
+
+<SlotsTable :data="slotsData"/> 
 

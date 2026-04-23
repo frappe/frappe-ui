@@ -3,68 +3,78 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+
+  const propsData = [
+  {
+    name: 'placeholder',
+    description: 'Placeholder text shown when no item is selected',
+    required: false,
+    type: 'string',
+    default: '"Select option"'
+  },
+  {
+    name: 'options',
+    description: 'Options available to select from',
+    required: true,
+    type: 'MultiSelectOption[]',
+    default: undefined
+  },
+  {
+    name: 'hideSearch',
+    description: 'Hides the search input if true',
+    required: false,
+    type: 'boolean',
+    default: undefined
+  },
+  {
+    name: 'loading',
+    description: 'Shows a loading state',
+    required: false,
+    type: 'boolean',
+    default: undefined
+  },
+  {
+    name: 'compareFn',
+    description: 'Custom comparison function to check equality of options',
+    required: false,
+    type: '((a: MultiSelectOption, b: MultiSelectOption) => boolean)',
+    default: undefined
+  },
+  {
+    name: 'modelValue',
+    description: '',
+    required: false,
+    type: 'String[]',
+    default: '[]'
+  }
+]
+
+  const slotsData = [
+  {
+    name: 'option',
+    description: 'Rendered for each option in the dropdown. Receives the option object.',
+    type: '{ item: MultiSelectOption; }'
+  },
+  {
+    name: 'footer',
+    description: 'Footer slot at the bottom of the dropdown. Receives helper functions `clearAll` and `selectAll`.',
+    type: '{ clearAll: () => void; selectAll: () => void; }'
+  }
+]
+
+  const emitsData = [
+  {
+    name: 'update:modelValue',
+    description: 'Fired when the model value changes.',
+    type: '[value: String[]]'
+  }
+]
 </script>
-<PropsTable name="MultiSelect" :data='[
-  {
-    "name": "placeholder",
-    "description": "Placeholder text shown when no item is selected",
-    "required": false,
-    "type": "string",
-    "default": "\"Select option\""
-  },
-  {
-    "name": "options",
-    "description": "Options available to select from",
-    "required": true,
-    "type": "MultiSelectOption[]"
-  },
-  {
-    "name": "hideSearch",
-    "description": "Hides the search input if true",
-    "required": false,
-    "type": "boolean"
-  },
-  {
-    "name": "loading",
-    "description": "Shows a loading state",
-    "required": false,
-    "type": "boolean"
-  },
-  {
-    "name": "compareFn",
-    "description": "Custom comparison function to check equality of options",
-    "required": false,
-    "type": "((a: MultiSelectOption, b: MultiSelectOption) => boolean)"
-  },
-  {
-    "name": "modelValue",
-    "description": "",
-    "required": false,
-    "type": "String[]",
-    "default": "[]"
-  }
-]'/> 
+## API Reference
 
-## Slots 
- <SlotsTable :data='[
-  {
-    "name": "option",
-    "description": "Rendered for each option in the dropdown. Receives the option object.",
-    "type": "{ item: MultiSelectOption; }"
-  },
-  {
-    "name": "footer",
-    "description": "Footer slot at the bottom of the dropdown. Receives helper functions `clearAll` and `selectAll`.",
-    "type": "{ clearAll: () => void; selectAll: () => void; }"
-  }
-]'/> 
+<PropsTable name="MultiSelect" :data="propsData"/> 
 
-## Emit Events 
- <EmitsTable :data='[
-  {
-    "name": "update:modelValue",
-    "description": "",
-    "type": "[value: String[]]"
-  }
-]'/> 
+<SlotsTable :data="slotsData"/> 
+
+<EmitsTable :data="emitsData"/> 
 

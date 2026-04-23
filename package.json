@@ -7,7 +7,7 @@
   "scripts": {
     "test": "vitest --run",
     "type-check": "tsc --noEmit",
-    "prettier": "yarn prettier -w ./src",
+    "prettier": "yarn run prettier -w ./src",
     "bump-and-release": "yarn test && git pull --rebase origin main && yarn run release-patch",
     "release-patch": "yarn version --patch && git push && git push --tags",
     "dev": "vite",
@@ -16,7 +16,8 @@
     "docs:dev": "vitepress dev docs --host",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
-    "docs:gen": "node docs/scripts/propsgen.ts --trace-uncaught"
+    "docs:gen": "tsx docs/scripts/propsgen.ts",
+    "docs:gen:all": "yarn docs:gen --all"
   },
   "exports": {
     ".": {
@@ -49,8 +50,8 @@
       "import": "./src/components/TextEditor/style.css"
     },
     "./tsconfig.base.json": {
-      "default": "./tsconfig.base.json",
-      "types": "./tsconfig.base.json"
+      "types": "./tsconfig.base.json",
+      "default": "./tsconfig.base.json"
     }
   },
   "files": [
@@ -140,6 +141,7 @@
     "postcss": "^8.4.21",
     "prettier-plugin-tailwindcss": "^0.1.13",
     "tailwindcss": "^3.2.7",
+    "tsx": "^4.20.6",
     "vite": "^5.1.8",
     "vitepress": "^2.0.0-alpha.15",
     "vitest": "^2.1.8",

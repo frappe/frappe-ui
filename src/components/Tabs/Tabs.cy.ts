@@ -1,5 +1,5 @@
 import Tabs from './Tabs.vue'
-import { h } from 'vue'
+import { defineComponent, h, ref } from 'vue'
 
 const tabs = [
   {
@@ -54,10 +54,9 @@ describe('Tabs', () => {
     cy.get(`[data-cy="${tabs[0].content}"]`).should('exist')
   })
 
-  it('v-model', () => {
+  it('supports uncontrolled selection fallback', () => {
     cy.mount(Tabs, {
       props: { tabs, 'onUpdate:modelValue': cy.spy().as('onUpdate') },
-
       slots: {
         'tab-panel': ({ tab }) =>
           h('div', { 'data-cy': tab.content }, tab.content),
@@ -67,12 +66,43 @@ describe('Tabs', () => {
     cy.get('@onUpdate').should('not.have.been.called')
     cy.get('[role=tab]').eq(1).should('have.attr', 'aria-selected', 'false')
 
-    cy.get('[role=tab]')
-      .eq(1)
-      .should('have.attr', 'aria-selected', 'false')
-      .click()
+    cy.get('[role=tab]').eq(1).click()
 
     cy.get('@onUpdate').should('have.been.calledWith', 1)
+    cy.get('[role=tab]').eq(1).should('have.attr', 'aria-selected', 'true')
+  })
+
+  it('supports controlled v-model round-trip', () => {
+    const Harness = defineComponent({
+      setup() {
+        const value = ref(0)
+
+        return () =>
+          h(
+            Tabs,
+            {
+              tabs,
+              modelValue: value.value,
+              'onUpdate:modelValue': (nextValue: string | number) => {
+                value.value = nextValue
+              },
+            },
+            {
+              'tab-panel': ({ tab }) =>
+                h('div', { 'data-cy': tab.content }, tab.content),
+            },
+          )
+      },
+    })
+
+    cy.mount(Harness)
+
+    cy.get('[role=tab]').eq(0).should('have.attr', 'aria-selected', 'true')
+    cy.get('[role=tab]').eq(1).should('have.attr', 'aria-selected', 'false')
+
+    cy.get('[role=tab]').eq(1).click()
+
+    cy.get('[role=tab]').eq(0).should('have.attr', 'aria-selected', 'false')
     cy.get('[role=tab]').eq(1).should('have.attr', 'aria-selected', 'true')
   })
 })

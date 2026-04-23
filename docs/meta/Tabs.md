@@ -3,55 +3,71 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+
+  const propsData = [
+  {
+    name: 'as',
+    description: 'Element/component used to render the tab container.',
+    required: false,
+    type: 'string',
+    default: undefined
+  },
+  {
+    name: 'tabs',
+    description: 'List of tabs to render.',
+    required: true,
+    type: 'Tab[]',
+    default: undefined
+  },
+  {
+    name: 'vertical',
+    description: 'Renders tabs vertically instead of horizontally.',
+    required: false,
+    type: 'boolean',
+    default: undefined
+  },
+  {
+    name: 'modelValue',
+    description: 'Currently selected tab value.',
+    required: false,
+    type: 'string | number',
+    default: undefined
+  },
+  {
+    name: 'dir',
+    description: 'Forces layout direction; defaults to `document.documentElement.dir`.',
+    required: false,
+    type: '"rtl" | "ltr"',
+    default: undefined
+  }
+]
+
+  const slotsData = [
+  {
+    name: 'tab-item',
+    description: 'Custom renderer for a tab trigger (icon + label / router-link).',
+    type: '{ tab: { label: string; icon?: string | undefined; route?: string | undefined; }; }'
+  },
+  {
+    name: 'tab-panel',
+    description: 'Content rendered for each tab panel.',
+    type: '{ tab: { label: string; icon?: string | undefined; route?: string | undefined; }; }'
+  }
+]
+
+  const emitsData = [
+  {
+    name: 'update:modelValue',
+    description: 'Fired when the model value changes.',
+    type: '[value: string | number]'
+  }
+]
 </script>
-<PropsTable name="Tabs" :data='[
-  {
-    "name": "as",
-    "description": "Element/component used to render the tab container",
-    "required": false,
-    "type": "string"
-  },
-  {
-    "name": "tabs",
-    "description": "List of tabs to render",
-    "required": true,
-    "type": "Tab[]"
-  },
-  {
-    "name": "vertical",
-    "description": "Renders tabs vertically instead of horizontally",
-    "required": false,
-    "type": "boolean"
-  },
-  {
-    "name": "modelValue",
-    "description": "",
-    "required": false,
-    "type": "string | number",
-    "default": "0"
-  }
-]'/> 
+## API Reference
 
-## Slots 
- <SlotsTable :data='[
-  {
-    "name": "tab-item",
-    "description": "Custom renderer for a tab trigger (icon + label / router-link).",
-    "type": "{ tab: { label: string; icon?: string | undefined; route?: string | undefined; }; }"
-  },
-  {
-    "name": "tab-panel",
-    "description": "Content rendered for each tab panel.",
-    "type": "{ tab: { label: string; icon?: string | undefined; route?: string | undefined; }; }"
-  }
-]'/> 
+<PropsTable name="Tabs" :data="propsData"/> 
 
-## Emit Events 
- <EmitsTable :data='[
-  {
-    "name": "update:modelValue",
-    "description": "",
-    "type": "[value: string | number]"
-  }
-]'/> 
+<SlotsTable :data="slotsData"/> 
+
+<EmitsTable :data="emitsData"/> 
 

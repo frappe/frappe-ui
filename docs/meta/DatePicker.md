@@ -3,128 +3,137 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+
+  const propsData = [
+  {
+    name: 'value',
+    description: 'Uncontrolled initial value for the picker.',
+    required: false,
+    type: 'string',
+    default: '""'
+  },
+  {
+    name: 'modelValue',
+    description: 'Controlled value for the picker.',
+    required: false,
+    type: 'string',
+    default: '""'
+  },
+  {
+    name: 'placement',
+    description: 'Preferred popover placement relative to the trigger.',
+    required: false,
+    type: 'DatePickerPlacement',
+    default: '"bottom-start"'
+  },
+  {
+    name: 'format',
+    description: 'Display format used for the input text.',
+    required: false,
+    type: 'string',
+    default: undefined
+  },
+  {
+    name: 'variant',
+    description: 'Visual style variant passed through to the input.',
+    required: false,
+    type: '"subtle" | "outline" | "ghost"',
+    default: '"subtle"'
+  },
+  {
+    name: 'readonly',
+    description: 'Prevents manual typing while keeping the picker interactive.',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  },
+  {
+    name: 'placeholder',
+    description: 'Placeholder text shown when no value is selected.',
+    required: false,
+    type: 'string',
+    default: '"Select date"'
+  },
+  {
+    name: 'inputClass',
+    description: 'Additional classes applied to the trigger input.',
+    required: false,
+    type: 'string | string[] | Record<string, boolean>',
+    default: undefined
+  },
+  {
+    name: 'allowCustom',
+    description: 'Allows users to type custom date text into the input.',
+    required: false,
+    type: 'boolean',
+    default: 'true'
+  },
+  {
+    name: 'autoClose',
+    description: 'Closes the popover after a value is picked.',
+    required: false,
+    type: 'boolean',
+    default: 'true'
+  },
+  {
+    name: 'disabled',
+    description: 'Disables the trigger input and calendar interactions.',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  },
+  {
+    name: 'label',
+    description: 'Optional label forwarded to the trigger input.',
+    required: false,
+    type: 'string',
+    default: undefined
+  },
+  {
+    name: 'clearable',
+    description: 'Shows clear and quick-action controls when enabled.',
+    required: false,
+    type: 'boolean',
+    default: 'true'
+  }
+]
+
+  const slotsData = [
+  {
+    name: 'target',
+    description: 'Custom trigger renderer for the date picker.',
+    type: '{ togglePopover: () => void; isOpen: boolean; displayLabel: string; inputValue: string; }'
+  },
+  {
+    name: 'prefix',
+    description: 'Content rendered before the trigger input value.',
+    type: '{ togglePopover: () => void; isOpen: boolean; displayLabel: string; inputValue: string; }'
+  },
+  {
+    name: 'suffix',
+    description: 'Content rendered after the trigger input value.',
+    type: '{ togglePopover: () => void; isOpen: boolean; displayLabel: string; inputValue: string; }'
+  }
+]
+
+  const emitsData = [
+  {
+    name: 'update:modelValue',
+    description: 'Fired when the model value changes.',
+    type: '[value: string]'
+  },
+  {
+    name: 'change',
+    description: 'Fired after the value is committed.',
+    type: '[value: string]'
+  }
+]
 </script>
-<PropsTable name="DatePicker" :data='[
-  {
-    "name": "value",
-    "description": "",
-    "required": false,
-    "type": "string",
-    "default": "\"\""
-  },
-  {
-    "name": "modelValue",
-    "description": "",
-    "required": false,
-    "type": "string",
-    "default": "\"\""
-  },
-  {
-    "name": "placement",
-    "description": "",
-    "required": false,
-    "type": "DatePickerPlacement",
-    "default": "\"bottom-start\""
-  },
-  {
-    "name": "format",
-    "description": "",
-    "required": false,
-    "type": "string"
-  },
-  {
-    "name": "variant",
-    "description": "",
-    "required": false,
-    "type": "\"subtle\" | \"outline\" | \"ghost\"",
-    "default": "\"subtle\""
-  },
-  {
-    "name": "readonly",
-    "description": "",
-    "required": false,
-    "type": "boolean",
-    "default": "false"
-  },
-  {
-    "name": "placeholder",
-    "description": "",
-    "required": false,
-    "type": "string",
-    "default": "\"Select date\""
-  },
-  {
-    "name": "inputClass",
-    "description": "",
-    "required": false,
-    "type": "string | string[] | Record<string, boolean>"
-  },
-  {
-    "name": "allowCustom",
-    "description": "",
-    "required": false,
-    "type": "boolean",
-    "default": "true"
-  },
-  {
-    "name": "autoClose",
-    "description": "",
-    "required": false,
-    "type": "boolean",
-    "default": "true"
-  },
-  {
-    "name": "disabled",
-    "description": "",
-    "required": false,
-    "type": "boolean",
-    "default": "false"
-  },
-  {
-    "name": "label",
-    "description": "",
-    "required": false,
-    "type": "string"
-  },
-  {
-    "name": "clearable",
-    "description": "",
-    "required": false,
-    "type": "boolean",
-    "default": "true"
-  }
-]'/> 
+## API Reference
 
-## Slots 
- <SlotsTable :data='[
-  {
-    "name": "target",
-    "description": "",
-    "type": "{ togglePopover: () => void; isOpen: boolean; displayLabel: string; inputValue: string; }"
-  },
-  {
-    "name": "prefix",
-    "description": "",
-    "type": "{ togglePopover: () => void; isOpen: boolean; displayLabel: string; inputValue: string; }"
-  },
-  {
-    "name": "suffix",
-    "description": "",
-    "type": "{ togglePopover: () => void; isOpen: boolean; displayLabel: string; inputValue: string; }"
-  }
-]'/> 
+<PropsTable name="DatePicker" :data="propsData"/> 
 
-## Emit Events 
- <EmitsTable :data='[
-  {
-    "name": "update:modelValue",
-    "description": "",
-    "type": "[value: string]"
-  },
-  {
-    "name": "change",
-    "description": "",
-    "type": "[value: string]"
-  }
-]'/> 
+<SlotsTable :data="slotsData"/> 
+
+<EmitsTable :data="emitsData"/> 
 

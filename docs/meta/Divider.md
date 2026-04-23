@@ -3,33 +3,39 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
-</script>
-<PropsTable name="Divider" :data='[
+
+  const propsData = [
   {
-    "name": "orientation",
-    "description": "",
-    "required": false,
-    "type": "\"horizontal\" | \"vertical\"",
-    "default": "\"horizontal\""
+    name: 'orientation',
+    description: '',
+    required: false,
+    type: '"horizontal" | "vertical"',
+    default: '"horizontal"'
   },
   {
-    "name": "position",
-    "description": "",
-    "required": false,
-    "type": "\"start\" | \"center\" | \"end\"",
-    "default": "\"center\""
+    name: 'position',
+    description: '',
+    required: false,
+    type: '"start" | "center" | "end"',
+    default: '"center"'
   },
   {
-    "name": "flexItem",
-    "description": "",
-    "required": false,
-    "type": "boolean"
+    name: 'flexItem',
+    description: '',
+    required: false,
+    type: 'boolean',
+    default: undefined
   },
   {
-    "name": "action",
-    "description": "",
-    "required": false,
-    "type": "DividerAction"
+    name: 'action',
+    description: '',
+    required: false,
+    type: 'DividerAction',
+    default: undefined
   }
-]'/> 
+]
+</script>
+## API Reference
+
+<PropsTable name="Divider" :data="propsData"/> 
 

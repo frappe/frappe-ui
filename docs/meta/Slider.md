@@ -3,43 +3,49 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
-</script>
-<PropsTable name="Slider" :data='[
-  {
-    "name": "step",
-    "description": "Step interval between slider values.",
-    "required": false,
-    "type": "number",
-    "default": "1"
-  },
-  {
-    "name": "max",
-    "description": "Maximum allowed slider value.",
-    "required": false,
-    "type": "number",
-    "default": "100"
-  },
-  {
-    "name": "min",
-    "description": "Minimum allowed slider value.",
-    "required": false,
-    "type": "number",
-    "default": "0"
-  },
-  {
-    "name": "modelValue",
-    "description": "",
-    "required": false,
-    "type": "SliderValue"
-  }
-]'/> 
 
-## Emit Events 
- <EmitsTable :data='[
+  const propsData = [
   {
-    "name": "update:modelValue",
-    "description": "",
-    "type": "[value: SliderValue | undefined]"
+    name: 'step',
+    description: 'Step interval between slider values.',
+    required: false,
+    type: 'number',
+    default: '1'
+  },
+  {
+    name: 'max',
+    description: 'Maximum allowed slider value.',
+    required: false,
+    type: 'number',
+    default: '100'
+  },
+  {
+    name: 'min',
+    description: 'Minimum allowed slider value.',
+    required: false,
+    type: 'number',
+    default: '0'
+  },
+  {
+    name: 'modelValue',
+    description: '',
+    required: false,
+    type: 'SliderValue',
+    default: undefined
   }
-]'/> 
+]
+
+  const emitsData = [
+  {
+    name: 'update:modelValue',
+    description: 'Fired when the model value changes.',
+    type: '[value: SliderValue | undefined]'
+  }
+]
+</script>
+## API Reference
+
+<PropsTable name="Slider" :data="propsData"/> 
+
+<EmitsTable :data="emitsData"/> 
 
