@@ -12,7 +12,10 @@ const toClass = transformerStyleToClass({
   classPrefix: 's_',
 })
 
+const base = process.env.VITEPRESS_BASE || '/'
+
 export default defineConfig({
+  base,
   srcDir: 'content',
   lastUpdated: true,
   title: meta.name,
