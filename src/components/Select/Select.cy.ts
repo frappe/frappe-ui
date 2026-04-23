@@ -108,6 +108,22 @@ describe('Select', () => {
     cy.contains('[role=option]', 'Sort by').should('exist')
   })
 
+  it('preserves real values that share the empty sentinel prefix', () => {
+    const sentinelLikeValue = '__frappe_ui_select_empty__real-value'
+
+    cy.mount(Select, {
+      props: {
+        options: [
+          { label: 'Empty', value: '' },
+          { label: 'Sentinel-like', value: sentinelLikeValue },
+        ],
+        modelValue: sentinelLikeValue,
+      },
+    })
+
+    cy.get('[role=combobox]').should('contain.text', 'Sentinel-like')
+  })
+
   it('sizes the trigger to the widest option by default', () => {
     const WidthHarness = defineComponent({
       setup() {
@@ -269,7 +285,8 @@ describe('Select', () => {
     cy.get('select').should('have.attr', 'required')
     cy.get('select').should('have.attr', 'autocomplete', 'organization-title')
 
-    cy.get('body').type('{esc}')
+    cy.get('[role="combobox"]').type('{esc}', { force: true })
+    cy.get('[data-slot="content"]').should('not.exist')
     cy.contains('button', 'Submit').click()
 
     cy.get('@onSubmit').should('have.been.calledWithMatch', {

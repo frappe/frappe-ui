@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { Comment, Fragment, Text, computed, type VNode } from 'vue'
+import { computed } from 'vue'
+import { hasRenderableContent } from '../../utils/vnode'
 import type { ItemListRowProps } from './types'
 
 const props = withDefaults(defineProps<ItemListRowProps>(), {
@@ -39,26 +40,6 @@ defineSlots<{
   label?: () => any
   suffix?: () => any
 }>()
-
-function hasRenderableContent(nodes?: VNode[]): boolean {
-  if (!nodes?.length) return false
-
-  return nodes.some((node) => {
-    if (node.type === Comment) return false
-
-    if (node.type === Text) {
-      return String(node.children ?? '').trim().length > 0
-    }
-
-    if (node.type === Fragment) {
-      return hasRenderableContent(
-        Array.isArray(node.children) ? (node.children as VNode[]) : [],
-      )
-    }
-
-    return true
-  })
-}
 </script>
 
 <template>

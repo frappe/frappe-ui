@@ -4,11 +4,11 @@
       <slot
         v-if="$slots.trigger"
         name="trigger"
-        v-bind="{ open, close, disabled: triggerDisabled, ...attrs }"
+        v-bind="{ ...attrs, open, close, disabled: triggerDisabled }"
       />
       <slot
         v-else-if="$slots.default"
-        v-bind="{ open, close, disabled: triggerDisabled, ...attrs }"
+        v-bind="{ ...attrs, open, close, disabled: triggerDisabled }"
       />
       <Button v-else :active="false" v-bind="{ ...button, ...attrs }">
         {{ button?.label || 'Options' }}
@@ -51,11 +51,7 @@ import {
 } from 'reka-ui'
 import { Button } from '../Button'
 import DropdownMenuList from './DropdownMenuList.vue'
-import type {
-  DropdownGroupOption,
-  DropdownOption,
-  DropdownProps,
-} from './types'
+import type { DropdownProps, DropdownSlots } from './types'
 import { dropdownClasses, normalizeDropdownOptions } from './utils'
 
 defineOptions({
@@ -89,46 +85,13 @@ const align = computed(() => {
 })
 
 const triggerDisabled = computed(() => {
-  return Boolean(props.button?.disabled || attrs.disabled)
+  return (
+    props.button?.disabled === true ||
+    (attrs.disabled !== undefined && attrs.disabled !== false)
+  )
 })
 
-defineSlots<{
-  default?: (props: {
-    open: boolean
-    close: () => void
-    disabled: boolean
-    [key: string]: any
-  }) => any
-  trigger?: (props: {
-    open: boolean
-    close: () => void
-    disabled: boolean
-    [key: string]: any
-  }) => any
-  item?: (props: {
-    item: DropdownOption
-    close: () => void
-    selected: boolean
-  }) => any
-  'item-prefix'?: (props: {
-    item: DropdownOption
-    close: () => void
-    selected: boolean
-  }) => any
-  'item-label'?: (props: {
-    item: DropdownOption
-    close: () => void
-    selected: boolean
-  }) => any
-  'item-suffix'?: (props: {
-    item: DropdownOption
-    close: () => void
-    selected: boolean
-  }) => any
-  'group-label'?: (props: { group: DropdownGroupOption }) => any
-  empty?: () => any
-  [slotName: string]: ((props: any) => any) | undefined
-}>()
+defineSlots<DropdownSlots>()
 </script>
 
 <style scoped>

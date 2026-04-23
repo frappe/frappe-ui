@@ -79,13 +79,13 @@ const switchActions = [
     icon: 'lock',
     switch: true,
     switchValue: true,
-    onClick: (value) => console.log('Lock comments:', value),
+    onClick: (value: boolean) => console.log('Lock comments:', value),
   },
   {
     label: 'Collaborative editing',
     icon: 'users',
     switch: true,
-    onClick: (value) => console.log('Collaborative editing:', value),
+    onClick: (value: boolean) => console.log('Collaborative editing:', value),
   },
 ]
 </script>

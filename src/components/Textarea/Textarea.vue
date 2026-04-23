@@ -19,9 +19,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, useAttrs, ref } from 'vue'
+import { computed, ref, useAttrs } from 'vue'
 import debounce from '../../utils/debounce'
-import type { TextareaProps } from './types'
+import type { TextareaEmits, TextareaProps } from './types'
 
 const props = withDefaults(defineProps<TextareaProps>(), {
   type: 'text',
@@ -30,7 +30,7 @@ const props = withDefaults(defineProps<TextareaProps>(), {
   rows: 3,
 })
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits<TextareaEmits>()
 const attrs = useAttrs()
 const textareaRef = ref<HTMLTextAreaElement | null>(null)
 

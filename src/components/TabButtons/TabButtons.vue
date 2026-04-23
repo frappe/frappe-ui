@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, type Component } from 'vue'
-import { RadioGroupRoot, RadioGroupItem } from 'reka-ui'
+import { computed, watch, type Component } from 'vue'
+import { RadioGroupItem, RadioGroupRoot } from 'reka-ui'
+import { Button, type ButtonProps } from '../Button'
 import FeatherIcon from '../FeatherIcon.vue'
 
 defineOptions({
@@ -14,16 +15,17 @@ type TabButtonIcon = string | Component
 
 type NativeButtonClass = string | string[] | Record<string, boolean>
 
-interface TabButton {
+interface TabButton extends Omit<
+  ButtonProps,
+  'label' | 'icon' | 'iconLeft' | 'iconRight'
+> {
   label?: string | number
   value?: TabButtonValue
   icon?: TabButtonIcon
   iconLeft?: TabButtonIcon
   iconRight?: TabButtonIcon
   hideLabel?: boolean
-  disabled?: boolean
   active?: boolean
-  type?: 'button' | 'submit' | 'reset'
   class?: NativeButtonClass
   onClick?: (event: MouseEvent) => void
 }
@@ -46,28 +48,64 @@ const resolvedButtons = computed(() => {
       iconLeft,
       iconRight,
       hideLabel = false,
-      disabled = false,
       active = false,
-      type = 'button',
       class: customClass,
       onClick,
+      tooltip,
+      ...buttonProps
     } = button
+
+    const leadingIcon = iconLeft ?? icon
+    const trailingIcon = iconRight
+    const visibleLabel = hasLabel(label) && !hideLabel
+    const useIconProp = Boolean(leadingIcon) && !trailingIcon && !visibleLabel
+    const accessibleLabel = hasLabel(label) ? String(label) : tooltip
 
     return {
       key: `tab-button-${index}`,
       label,
       hideLabel,
-      disabled,
       active,
-      type,
       customClass,
       onClick,
+      leadingIcon,
+      trailingIcon,
+      visibleLabel,
+      useIconProp,
+      accessibleLabel,
       modelValue: value ?? label ?? index,
-      leadingIcon: iconLeft ?? icon,
-      trailingIcon: iconRight,
+      buttonProps: {
+        theme: 'gray' as const,
+        variant: 'subtle' as const,
+        size: 'sm' as const,
+        tooltip,
+        ...buttonProps,
+        label: accessibleLabel,
+        icon: useIconProp ? leadingIcon : undefined,
+      },
     }
   })
 })
+
+watch(
+  [resolvedButtons, () => props.modelValue],
+  ([buttons]) => {
+    const selectedButton = buttons.find((button) =>
+      Object.is(button.modelValue, props.modelValue),
+    )
+
+    if (selectedButton) return
+
+    const fallbackButton = buttons.find((button) => button.active)
+    if (
+      fallbackButton &&
+      !Object.is(fallbackButton.modelValue, props.modelValue)
+    ) {
+      emit('update:modelValue', fallbackButton.modelValue)
+    }
+  },
+  { immediate: true },
+)
 
 const selectedButtonKey = computed({
   get: () => {
@@ -104,46 +142,50 @@ function hasLabel(label: TabButton['label']) {
         :key="button.key"
         v-slot="{ checked, disabled }"
         as="template"
-        :disabled="button.disabled"
+        :disabled="button.buttonProps.disabled || button.buttonProps.loading"
         :value="button.key"
       >
-        <button
-          :type="button.type"
-          :disabled="disabled"
+        <Button
+          v-bind="button.buttonProps"
+          data-slot="tab-button"
+          :data-state="checked ? 'checked' : 'unchecked'"
+          :data-disabled="disabled ? '' : undefined"
           :aria-label="
-            button.hideLabel && hasLabel(button.label)
-              ? String(button.label)
+            button.accessibleLabel && !button.visibleLabel
+              ? button.accessibleLabel
               : undefined
           "
           :title="
-            button.hideLabel && hasLabel(button.label)
-              ? String(button.label)
+            button.accessibleLabel && !button.visibleLabel
+              ? button.accessibleLabel
               : undefined
           "
-          class="inline-flex h-7 shrink-0 items-center justify-center gap-2 rounded-[9px] border border-transparent text-base transition-[transform,background-color,color,box-shadow,border-color] duration-150 ease-out motion-safe:active:scale-[0.98] motion-reduce:transform-none motion-reduce:transition-none"
           :class="[
-            button.hideLabel ? 'w-7 px-0' : 'px-2.5',
+            '!h-6.5 shrink-0 !rounded-[9px] transition-[transform,background-color,color,box-shadow,border-color] duration-150 ease-out motion-safe:active:scale-[0.98] motion-reduce:transform-none motion-reduce:transition-none',
+            button.hideLabel ? '!w-7 !px-0' : '',
             checked
-              ? 'border-outline-gray-1 bg-surface-white text-ink-gray-8 shadow-sm'
+              ? '!border-outline-gray-1 !bg-surface-white !text-ink-gray-8 shadow-sm'
               : disabled
-                ? 'bg-transparent text-ink-gray-4'
-                : 'bg-transparent text-ink-gray-5 hover:bg-surface-gray-3/80 hover:text-ink-gray-7',
+                ? '!bg-transparent !text-ink-gray-4'
+                : '!bg-transparent !text-ink-gray-5 hover:!bg-surface-gray-3/80 hover:!text-ink-gray-7',
             button.customClass,
           ]"
           @click="button.onClick?.($event)"
         >
-          <FeatherIcon
-            v-if="button.leadingIcon && typeof button.leadingIcon === 'string'"
-            :name="button.leadingIcon"
-            class="h-4 w-4 shrink-0"
-            aria-hidden="true"
-          />
-          <component
-            :is="button.leadingIcon"
-            v-else-if="button.leadingIcon"
-            class="h-4 w-4 shrink-0"
-            aria-hidden="true"
-          />
+          <template v-if="button.leadingIcon && !button.useIconProp" #prefix>
+            <FeatherIcon
+              v-if="typeof button.leadingIcon === 'string'"
+              :name="button.leadingIcon"
+              class="h-4 w-4 shrink-0"
+              aria-hidden="true"
+            />
+            <component
+              :is="button.leadingIcon"
+              v-else
+              class="h-4 w-4 shrink-0"
+              aria-hidden="true"
+            />
+          </template>
 
           <span
             v-if="hasLabel(button.label)"
@@ -153,21 +195,21 @@ function hasLabel(label: TabButton['label']) {
             {{ button.label }}
           </span>
 
-          <FeatherIcon
-            v-if="
-              button.trailingIcon && typeof button.trailingIcon === 'string'
-            "
-            :name="button.trailingIcon"
-            class="h-4 w-4 shrink-0"
-            aria-hidden="true"
-          />
-          <component
-            :is="button.trailingIcon"
-            v-else-if="button.trailingIcon"
-            class="h-4 w-4 shrink-0"
-            aria-hidden="true"
-          />
-        </button>
+          <template v-if="button.trailingIcon" #suffix>
+            <FeatherIcon
+              v-if="typeof button.trailingIcon === 'string'"
+              :name="button.trailingIcon"
+              class="h-4 w-4 shrink-0"
+              aria-hidden="true"
+            />
+            <component
+              :is="button.trailingIcon"
+              v-else
+              class="h-4 w-4 shrink-0"
+              aria-hidden="true"
+            />
+          </template>
+        </Button>
       </RadioGroupItem>
     </div>
   </RadioGroupRoot>

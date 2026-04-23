@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { Comment, Fragment, Text, computed, type VNode } from 'vue'
+import { computed } from 'vue'
+import { hasRenderableContent } from '../../utils/vnode'
 import FeatherIcon from '../FeatherIcon.vue'
 import ItemListRow from '../ItemList/ItemListRow.vue'
 import Switch from '../Switch/Switch.vue'
@@ -86,26 +87,6 @@ const hasUserSuffix = computed(() => {
 function handleSwitchChange(value: boolean) {
   ;(props.item.onClick as ((value: boolean) => void) | undefined)?.(value)
 }
-
-function hasRenderableContent(nodes?: VNode[]): boolean {
-  if (!nodes?.length) return false
-
-  return nodes.some((node) => {
-    if (node.type === Comment) return false
-
-    if (node.type === Text) {
-      return String(node.children ?? '').trim().length > 0
-    }
-
-    if (node.type === Fragment) {
-      return hasRenderableContent(
-        Array.isArray(node.children) ? (node.children as VNode[]) : [],
-      )
-    }
-
-    return true
-  })
-}
 </script>
 
 <template>
@@ -157,7 +138,7 @@ function hasRenderableContent(nodes?: VNode[]): boolean {
         :content="userSuffixContent"
       />
       <Switch
-        v-if="trailing === 'switch'"
+        v-else-if="trailing === 'switch'"
         class="ml-auto"
         label-classes="cursor-pointer font-normal"
         :disabled="item.disabled"

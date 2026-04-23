@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, useAttrs, useSlots, watch } from 'vue'
 import type {
-  SelectItemSlotProps,
   SelectNormalizedOption,
   SelectOption,
   SelectOptionValue,
   SelectProps,
-  SelectTriggerSlotProps,
+  SelectSlots,
 } from './types'
 import type { ItemListSize } from '../ItemList'
 import LucideCheck from '~icons/lucide/check'
@@ -175,11 +174,10 @@ function toInternalValue(value: SelectOptionValue | undefined) {
 }
 
 function toExternalValue(value: SelectOptionValue | undefined) {
-  if (typeof value === 'string' && value.startsWith(emptyValuePrefix)) {
-    return ''
-  }
-
-  return value
+  return (
+    internalOptions.value.find((option) => option.internalValue === value)
+      ?.option.value ?? value
+  )
 }
 
 const internalModel = computed<SelectOptionValue | undefined>({
@@ -208,6 +206,10 @@ const selectSizingText = computed(() => {
 
 function getOptionSlotName(option: SelectNormalizedOption) {
   return option.slot ? `item-${option.slot}` : undefined
+}
+
+function getOptionKey(option: SelectNormalizedOption, index: number) {
+  return `${index}:${typeof option.value}:${String(option.value)}`
 }
 
 function clearContentMotionResetTimeout() {
@@ -243,18 +245,7 @@ onBeforeUnmount(() => {
   clearContentMotionResetTimeout()
 })
 
-defineSlots<{
-  trigger?: (props: SelectTriggerSlotProps) => any
-  prefix?: () => any
-  suffix?: () => any
-  option?: (props: SelectItemSlotProps) => any
-  'item-prefix'?: (props: SelectItemSlotProps) => any
-  'item-label'?: (props: SelectItemSlotProps) => any
-  'item-suffix'?: (props: SelectItemSlotProps) => any
-  empty?: () => any
-  footer?: () => any
-  [slotName: string]: ((props: any) => any) | undefined
-}>()
+defineSlots<SelectSlots>()
 </script>
 
 <template>
@@ -331,8 +322,8 @@ defineSlots<{
 
             <template v-else>
               <SelectItem
-                v-for="internalOption in internalOptions"
-                :key="String(internalOption.internalValue)"
+                v-for="(internalOption, index) in internalOptions"
+                :key="getOptionKey(internalOption.option, index)"
                 :disabled="internalOption.option.disabled"
                 :value="internalOption.internalValue"
                 data-slot="item"

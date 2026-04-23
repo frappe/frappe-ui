@@ -4,10 +4,9 @@ import ItemListRow from './ItemListRow.vue'
 import type {
   ItemListEmits,
   ItemListGroup,
-  ItemListGroupSlotProps,
   ItemListItem,
-  ItemListItemSlotProps,
   ItemListProps,
+  ItemListSlots,
 } from './types'
 
 const props = withDefaults(defineProps<ItemListProps>(), {
@@ -60,16 +59,7 @@ function handleItemClick(item: ItemListItem) {
   emit('item-click', item)
 }
 
-defineSlots<{
-  'item-prefix'?: (props: ItemListItemSlotProps) => any
-  'item-label'?: (props: ItemListItemSlotProps) => any
-  'item-suffix'?: (props: ItemListItemSlotProps) => any
-  item?: (props: ItemListItemSlotProps) => any
-  empty?: () => any
-  footer?: () => any
-  'group-label'?: (props: ItemListGroupSlotProps) => any
-  [slotName: string]: ((props: any) => any) | undefined
-}>()
+defineSlots<ItemListSlots>()
 </script>
 
 <template>
@@ -77,7 +67,7 @@ defineSlots<{
     <template v-if="hasItems">
       <div
         v-for="(group, groupIndex) in normalizedGroups"
-        :key="group.key ?? group.group ?? groupIndex"
+        :key="group.key ?? `${group.group ?? 'group'}-${groupIndex}`"
         data-slot="group"
         class="flex flex-col"
       >

@@ -1,28 +1,33 @@
 export interface TextareaProps {
-  /** Controls the visual size of the textarea */
+  /** Controls the visual size of the textarea. */
   size?: 'sm' | 'md' | 'lg' | 'xl'
 
-  /** Visual style variant */
+  /** Visual style variant. */
   variant?: 'subtle' | 'outline'
 
-  /** Placeholder text shown when empty */
+  /** Placeholder text shown when empty. */
   placeholder?: string
 
-  /** Disables user interaction */
+  /** Disables user interaction. */
   disabled?: boolean
 
-  /** HTML id attribute */
+  /** HTML id attribute. */
   id?: string
 
-  /** Bound value of the textarea */
+  /** Bound value of the textarea. */
   modelValue?: string
 
-  /** Debounce delay (ms) before emitting value updates */
+  /** Debounce delay (ms) before emitting value updates. */
   debounce?: number
 
-  /** Number of visible text rows */
+  /** Number of visible text rows. */
   rows?: number
 
-  /** Optional label text */
+  /** Optional label text. */
   label?: string
+}
+
+export interface TextareaEmits {
+  /** Fired when the textarea value changes. */
+  'update:modelValue': [value: string]
 }

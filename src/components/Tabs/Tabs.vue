@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed, h } from 'vue'
 import {
   TabsContent,
   TabsIndicator,
@@ -7,11 +8,15 @@ import {
   TabsTrigger,
 } from 'reka-ui'
 
-import type { TabProps } from './types'
-import { computed, h } from 'vue'
+import type { TabsEmits, TabsProps } from './types'
 
-const props = defineProps<TabProps>()
-const model = defineModel<string | number>({ default: 0 })
+const props = defineProps<TabsProps>()
+const emit = defineEmits<TabsEmits>()
+
+const model = computed({
+  get: () => props.modelValue ?? 0,
+  set: (value: string | number) => emit('update:modelValue', value),
+})
 
 const dir = computed<'rtl' | 'ltr'>(
   () =>

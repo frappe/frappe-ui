@@ -231,6 +231,32 @@ const props = withDefaults(defineProps<DatePickerProps>(), {
 })
 const emit = defineEmits<DatePickerEmits>()
 
+defineSlots<{
+  /** Custom trigger renderer for the date picker. */
+  target?: (props: {
+    togglePopover: () => void
+    isOpen: boolean
+    displayLabel: string
+    inputValue: string
+  }) => any
+
+  /** Content rendered before the trigger input value. */
+  prefix?: (props: {
+    togglePopover: () => void
+    isOpen: boolean
+    displayLabel: string
+    inputValue: string
+  }) => any
+
+  /** Content rendered after the trigger input value. */
+  suffix?: (props: {
+    togglePopover: () => void
+    isOpen: boolean
+    displayLabel: string
+    inputValue: string
+  }) => any
+}>()
+
 const { autoClose } = toRefs(props)
 
 const view = ref<ViewMode>('date')

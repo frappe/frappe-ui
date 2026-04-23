@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { ItemList } from 'frappe-ui'
+import LucidePlus from '~icons/lucide/plus'
+import LucideSearch from '~icons/lucide/search'
 
 const recentDrafts = [
   {
