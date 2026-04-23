@@ -446,11 +446,19 @@ export default plugin(
                   'border-inline-start-width': '2px',
                   borderInlineStartColor: 'var(--ink-gray-3)',
                   borderInlineStartStyle: 'solid',
+                  marginTop: '16px',
+                  marginBottom: '16px',
+                  paddingInlineStart: '1em',
                   fontStyle: 'normal',
                   color: 'var(--ink-gray-6)',
+                  quotes: 'none',
                 },
                 'blockquote p:first-of-type::before': { content: 'none' },
                 'blockquote p:last-of-type::after': { content: 'none' },
+                'blockquote p': {
+                  marginTop: '0',
+                  marginBottom: '0',
+                },
 
                 // paragraphs: zero margin — user controls spacing with empty paragraphs
                 p: {
@@ -521,19 +529,6 @@ export default plugin(
                 'ul ul, ul ol, ol ul, ol ol': {
                   marginTop: '4px',
                   marginBottom: '4px',
-                },
-
-                // blockquote: breathing room (16px), no italic, no quotes
-                blockquote: {
-                  marginTop: '16px',
-                  marginBottom: '16px',
-                  paddingInlineStart: '1em',
-                  fontStyle: 'normal',
-                  quotes: 'none',
-                },
-                'blockquote p': {
-                  marginTop: '0',
-                  marginBottom: '0',
                 },
 
                 // code blocks: breathing room (16px)
