@@ -321,6 +321,7 @@ const findOption = (option: AutocompleteOption) => {
 }
 
 const makeOption = (option: AutocompleteOption) => {
+  if (option == null) return { label: '', value: '' }
   return isOption(option) ? option : { label: option, value: option }
 }
 
