@@ -18,6 +18,7 @@ import {
 } from 'reka-ui'
 import LucideChevronDown from '~icons/lucide/chevron-down'
 import LucideSearch from '~icons/lucide/search'
+import Button from '../Button/Button.vue'
 import ComboboxResults from './ComboboxResults.vue'
 import { usePopoverMotion } from '../../composables/usePopoverMotion'
 import type {
@@ -399,56 +400,43 @@ defineSlots<ComboboxSlots>()
           }"
         />
 
-        <button
+        <Button
           v-else
-          type="button"
+          :variant="variant"
+          :size="size"
+          :disabled="disabled"
+          :icon-left="selectedOption?.icon"
+          :class="attrs.class as any"
+          :style="attrs.style as any"
           data-slot="trigger"
           :data-state="open ? 'open' : 'closed'"
-          :data-disabled="disabled ? '' : undefined"
           :data-variant="variant"
           :data-size="size"
-          :disabled="disabled"
-          :class="[triggerClasses, attrs.class]"
-          :style="attrs.style as any"
           aria-haspopup="listbox"
           :aria-expanded="open"
         >
-          <!--
-            Prefix priority when trigger="button":
-              1. selected + #item-prefix → reuse the per-row prefix slot
-              2. selected + option.icon → render the icon component
-              3. no selection + #prefix → consumer's placeholder icon
-          -->
-          <slot
-            v-if="selectedOption && $slots['item-prefix']"
-            name="item-prefix"
-            v-bind="{
-              item: selectedOption,
-              query: '',
-              selected: true,
-            }"
-          />
-          <component
-            v-else-if="selectedOption?.icon"
-            :is="selectedOption.icon"
-            class="size-4"
-          />
-          <slot v-else-if="!selectedOption && $slots.prefix" name="prefix" />
+          <template v-if="!selectedOption && $slots.prefix" #prefix>
+            <slot name="prefix" />
+          </template>
 
           <span
             :class="[
-              'min-w-0 flex-1 truncate text-left',
+              'min-w-0 flex-1 truncate text-left font-normal',
               !selectedOption && 'text-ink-gray-4',
             ]"
           >
             {{ selectedOption?.label ?? placeholder }}
           </span>
 
-          <LucideChevronDown
-            class="ml-auto size-4 shrink-0 text-ink-gray-4 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] data-[state=open]:rotate-180"
-            :data-state="open ? 'open' : 'closed'"
-          />
-        </button>
+          <template #suffix>
+            <LucideChevronDown
+              :class="[
+                'size-4 shrink-0 text-ink-gray-4 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)]',
+                open && 'rotate-180',
+              ]"
+            />
+          </template>
+        </Button>
       </ComboboxAnchor>
     </template>
 

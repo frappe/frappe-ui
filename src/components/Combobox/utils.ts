@@ -259,7 +259,7 @@ export function triggerVariantClasses(
 }
 
 export const triggerBaseClasses =
-  'relative inline-flex items-center gap-2 text-left text-ink-gray-7 outline-none transition-[background-color,border-color,box-shadow,transform] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] focus-within:ring-2 data-[state=open]:ring-2 ring-outline-gray-3 enabled:active:scale-[0.99]'
+  'relative inline-flex items-center gap-2 text-left text-ink-gray-7 outline-none transition-[background-color,border-color,box-shadow] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] focus-within:ring-2 data-[state=open]:ring-2 ring-outline-gray-3'
 
 export const inputClasses =
   'min-w-0 flex-1 border-0 bg-transparent p-0 text-ink-gray-8 outline-none ring-0 placeholder:text-ink-gray-4 focus:border-0 focus:outline-none focus:ring-0'
