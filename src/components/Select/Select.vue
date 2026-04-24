@@ -40,6 +40,7 @@ const props = withDefaults(defineProps<SelectProps>(), {
   variant: 'subtle',
   placeholder: 'Select option',
   options: () => [],
+  emptyText: 'No options',
 })
 
 const attrs = useAttrs()
@@ -317,7 +318,7 @@ defineSlots<SelectSlots>()
               data-slot="empty"
               class="px-2 py-1.5 text-base text-ink-gray-5"
             >
-              <slot name="empty">No options</slot>
+              <slot name="empty">{{ emptyText }}</slot>
             </div>
 
             <template v-else>
