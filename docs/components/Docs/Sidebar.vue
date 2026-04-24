@@ -1,18 +1,7 @@
 <script setup lang="ts">
 import { state } from '../../state'
-import { useData, useRoute, withBase } from 'vitepress'
-
-import LucidePalette from '~icons/lucide/palette'
-import LucideRows from '~icons/lucide/rows-3'
-import LucideJson from '~icons/lucide/braces'
-import LucideSquare from '~icons/lucide/square'
-import LucideDb from '~icons/lucide/database-zap'
-import LucideSettings from '~icons/lucide/settings'
-import LucideBaseline from '~icons/lucide/baseline'
-import LucideBlend from '~icons/lucide/blend'
-import LucideRadius from '~icons/lucide/radius'
-import ChevronRight from '~icons/lucide/chevron-right'
-import LucideBox from '~icons/lucide/box'
+import { useRoute, withBase } from 'vitepress'
+import { useData } from 'vitepress'
 import pkgJson from '../../../package.json'
 
 import {
@@ -24,179 +13,121 @@ import {
 
 const curVersion = pkgJson.version
 const componentList = useData().theme.value.componentList
-const componentItems = componentList.map((name) => ({
+const componentItems = componentList.map((name: string) => ({
   text: name,
-  icon: LucideBox,
   link: `/docs/components/${name.toLowerCase()}`,
 }))
 
 const list = [
   {
-    text: 'Introduction',
-    link: '/docs/introduction',
-  },
-  {
     text: 'Getting Started',
-    link: '/docs/getting-started',
+    items: [
+      { text: 'Overview', link: '/' },
+      { text: 'Introduction', link: '/docs/introduction' },
+      { text: 'Getting Started', link: '/docs/getting-started' },
+    ],
   },
-
   {
     text: 'Design System',
-    collapsed: false,
     items: [
       {
         text: 'Background Color',
-        icon: LucidePalette,
         link: '/docs/design-system/background-color',
       },
-      {
-        text: 'Text Design',
-        icon: LucideBaseline,
-        link: '/docs/design-system/text',
-      },
-      {
-        text: 'Border Color',
-        icon: LucideSquare,
-        link: '/docs/design-system/border-color',
-      },
-
-      {
-        text: 'Drop Shadow',
-        icon: LucideBlend,
-        link: '/docs/design-system/drop-shadow',
-      },
-      {
-        text: 'Border Radius',
-        icon: LucideRadius,
-        link: '/docs/design-system/border-radius',
-      },
+      { text: 'Text Design', link: '/docs/design-system/text' },
+      { text: 'Border Color', link: '/docs/design-system/border-color' },
+      { text: 'Drop Shadow', link: '/docs/design-system/drop-shadow' },
+      { text: 'Border Radius', link: '/docs/design-system/border-radius' },
     ],
   },
-
   {
     text: 'Components',
-    collapsed: false,
     items: componentItems,
   },
-
   {
     text: 'Data Fetching',
-    collapsed: false,
     items: [
-      {
-        text: 'Resource',
-        icon: LucideDb,
-        link: '/docs/data-fetching/resource',
-      },
-      {
-        text: 'List Resource',
-        icon: LucideRows,
-        link: '/docs/data-fetching/list-resource',
-      },
+      { text: 'Resource', link: '/docs/data-fetching/resource' },
+      { text: 'List Resource', link: '/docs/data-fetching/list-resource' },
       {
         text: 'Document Resource',
-        icon: LucideJson,
         link: '/docs/data-fetching/document-resource',
       },
     ],
   },
-
   {
     text: 'Other',
     items: [
-      {
-        text: 'Utilities',
-        icon: LucideSettings,
-        link: '/docs/other/utilities',
-      },
-      {
-        text: 'Directives',
-        icon: LucideSettings,
-        link: '/docs/other/directives',
-      },
+      { text: 'Utilities', link: '/docs/other/utilities' },
+      { text: 'Directives', link: '/docs/other/directives' },
     ],
   },
 ]
 
 state.sidebarList = list
 
-const activeLink = (link: string) =>
-  useRoute().path === link
-    ? 'bg-surface-white dark:bg-surface-gray-1 shadow-sm'
-    : 'text-ink-gray-8'
-
-const linkClass = 'p-2 rounded'
+const route = useRoute()
+const isActive = (link: string) => {
+  if (link === '/') return route.path === '/' || route.path === '/index.html'
+  return route.path === link
+}
 </script>
 
 <template>
   <aside
-    class="bg-surface-gray-1 dark:bg-surface-white border-r flex flex-col p-3 h-screen pr-0 pt-1 min-w-fit sticky top-0 w-full"
+    class="flex h-screen w-full min-w-fit flex-col border-r bg-surface-gray-1 pt-1 sticky top-0"
   >
-    <a
-      class="hidden lg:flex items-center gap-2 p-2 py-3 mb-3"
-      :href="withBase('/')"
-    >
-      <img src="/logo.svg" class="w-8" />
-      <div class="flex flex-col gap-1 *:leading-none">
-        <span class="text-base font-medium text-ink-gray-8">Frappe UI</span>
-        <span class="text-sm text-ink-gray-6">v{{ curVersion }}</span>
-      </div>
-    </a>
+    <div class="px-1">
+      <a
+        class="hidden items-center gap-2.5 px-2 py-2 lg:flex hover:bg-surface-gray-2 rounded transition-colors"
+        :href="withBase('/')"
+      >
+        <img src="/logo.svg" class="w-7" />
+        <div class="flex flex-col gap-1 *:leading-none">
+          <span class="text-base font-medium text-ink-gray-8">Frappe UI</span>
+          <span class="text-sm text-ink-gray-5">v{{ curVersion }}</span>
+        </div>
+      </a>
+    </div>
 
     <ScrollAreaRoot
       class="relative overflow-hidden"
       style="--scrollbar-size: 10px"
       :scroll-hide-delay="0"
     >
-      <ScrollAreaViewport class="w-full h-full">
-        <nav class="flex flex-col pr-2">
-          <template v-for="(item, i) in list" :key="item.text">
-            <a
-              v-if="!item.items"
-              :href="withBase(item.link)"
-              :class="[
-                linkClass,
-                activeLink(item.link),
-                list[i + 1].items ? 'mb-6' : '',
-              ]"
-            >
-              {{ item.text }}
-            </a>
+      <ScrollAreaViewport class="h-full w-full">
+        <nav class="flex flex-col gap-7 px-2 pb-10 pt-2">
+          <div v-for="section in list" :key="section.text">
+            <div class="px-2 text-sm flex items-center h-7 text-ink-gray-5">
+              <!-- <span class="lucide-component mr-2"></span> -->
+              {{ section.text }}
+            </div>
 
-            <details v-else class="group" :open="!item.collapsed">
-              <summary
-                class="list-none w-full flex items-center justify-between gap-2 whitespace-nowrap font-medium
-                text-ink-gray-600 border-t p-3 pr-1 pl-2 group-open:text-ink-gray-800 cursor-pointer"
+            <div class="flex flex-col gap-0.5">
+              <a
+                v-for="item in section.items"
+                :key="item.text"
+                :href="withBase(item.link)"
+                class="pl-2 flex h-7 items-center rounded text-sm transition-colors"
+                :class="
+                  isActive(item.link)
+                    ? 'bg-surface-white shadow-sm text-ink-gray-8'
+                    : 'text-ink-gray-6 hover:bg-surface-gray-2 hover:text-ink-gray-8'
+                "
               >
                 {{ item.text }}
-
-                <ChevronRight
-                  class="size-4 shrink-0 ml-5 transition-transform duration-200 group-open:rotate-90"
-                />
-              </summary>
-
-              <div class="flex flex-col mb-6">
-                <a
-                  :href="withBase(child.link)"
-                  v-for="child in item.items"
-                  :key="child.text"
-                  class="inline-flex gap-2 items-center"
-                  :class="[linkClass, activeLink(child.link)]"
-                >
-                  <component :is="child.icon" class="size-4" /> {{ child.text }}
-                </a>
-              </div>
-            </details>
-          </template>
+              </a>
+            </div>
+          </div>
         </nav>
       </ScrollAreaViewport>
 
       <ScrollAreaScrollbar
-        class="flex select-none touch-none p-0.5 z-20 transition-colors duration-[160ms] ease-out data-[orientation=vertical]:w-2.5"
+        class="z-20 flex touch-none select-none p-0.5 transition-colors duration-[160ms] ease-out data-[orientation=vertical]:w-2.5"
         orientation="vertical"
       >
         <ScrollAreaThumb
-          class="flex-1 bg-surface-gray-3 rounded-[10px] relative before:content-[''] before:absolute before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:w-full before:h-full before:min-w-[44px] before:min-h-[44px]"
+          class="relative flex-1 rounded-[10px] bg-surface-gray-3 before:absolute before:left-1/2 before:top-1/2 before:h-full before:min-h-[44px] before:w-full before:min-w-[44px] before:-translate-x-1/2 before:-translate-y-1/2 before:content-['']"
         />
       </ScrollAreaScrollbar>
     </ScrollAreaRoot>
