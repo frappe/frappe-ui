@@ -329,3 +329,16 @@ Keep working, but deprecate for ordinary customization:
   </template>
 </Select>
 ```
+
+## Changelog
+
+### 2026-04-24
+
+- **`option.icon` is auto-rendered in the prefix region.** Setting `icon` on
+  an option now shows that icon automatically — no `#item-prefix` slot needed
+  for the common case. Precedence: `#item-prefix` slot → `option.slots.prefix`
+  → `option.icon` → empty. Existing prefix slots are unaffected.
+
+- **`option.icon` accepts `lucide-*` strings.** Pass `icon: 'lucide-user'`
+  directly in an option definition — rendered via the Tailwind CSS-mask plugin,
+  no import needed. Component values also work.

@@ -523,3 +523,16 @@ const options = users.map((user) => ({
 `slots.prefix` / `slots.label` / `slots.suffix` for ordinary
 icon/label/check/suffix customization authored in JS; use `slots.item`
 when the whole row needs to be taken over.
+
+## Changelog
+
+### 2026-04-24
+
+- **`item.icon` accepts `lucide-*` strings.** Pass `icon: 'lucide-pen'`
+  directly in an item definition — no component import needed. Strings
+  starting with `lucide-` are rendered as a `<span>` styled via the Tailwind
+  CSS-mask plugin. Other strings still route to FeatherIcon (back-compat).
+  Component values continue to work unchanged.
+
+- **Group labels toned to `text-ink-gray-4`.** Separator group headings are
+  now visually quieter so they recede behind the action items.

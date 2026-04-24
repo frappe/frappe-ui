@@ -14,6 +14,42 @@ unless they affect consumers.
 
 ## Unreleased
 
+### 2026-04-24
+
+#### Tailwind — `lucide-*` CSS utility classes
+
+A new Tailwind plugin registers one utility class per lucide-static icon
+(~1800 icons). Each class renders as an inline-block square masked with the
+icon SVG and tinted with `currentColor`, so it participates in `size-*`,
+`text-*`, and layout classes without any import:
+
+```html
+<span class="lucide-menu size-4 text-ink-gray-6" />
+```
+
+The plugin reads SVGs at build time and inlines them as data URIs. Tailwind's
+JIT scanner ensures only classes actually referenced in source make it into the
+output CSS. SVGs are emitted at `stroke-width="1.5"` (overriding Lucide's
+default of 2) for a lighter, more balanced look.
+
+Classes live in the components layer so that utility classes like `size-4`,
+`w-*`, `h-*` always win the cascade without `!important`.
+
+#### Button — `lucide-*` strings for `icon` / `iconLeft` / `iconRight`
+
+The `icon`, `iconLeft`, and `iconRight` props now accept `lucide-*` strings in
+addition to components and FeatherIcon names:
+
+```vue
+<Button icon="lucide-more-horizontal" variant="ghost" />
+<Button icon-left="lucide-plus" label="Add item" />
+```
+
+When the value starts with `lucide-`, the prop renders a `<span>` styled via
+the Tailwind plugin instead of routing through `FeatherIcon`. Other strings
+continue to fall through to FeatherIcon (back-compat). Component values are
+unchanged.
+
 ### Breaking
 
 - None.

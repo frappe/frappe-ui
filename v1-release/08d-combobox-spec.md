@@ -773,3 +773,22 @@ wanted:
 The old function-form `render` is aliased to `slots.item` and the old
 object-form `render` is aliased one-to-one to `slots`, so existing code
 continues to work unchanged through `v1.x`.
+
+## Changelog
+
+### 2026-04-24
+
+- **Added `trigger="button"` mode.** When `trigger="button"`, the combobox
+  renders a Button-shaped trigger instead of a bare input. The closed state
+  shows the selected label (or placeholder); opening swaps the face for an
+  input. Keyboard focus and native tab order work as expected. Useful for
+  pickers that should not look like a text field when closed.
+
+- **`item.icon` is auto-rendered in the prefix region.** Setting `icon` on an
+  option now shows that icon automatically — no `#item-prefix` slot needed for
+  the common case. Precedence: `#item-prefix` slot → `item.slots.prefix` →
+  `item.icon` → empty. Existing prefix slots are unaffected.
+
+- **`item.icon` accepts `lucide-*` strings.** Pass `icon: 'lucide-user-plus'`
+  directly in an item definition — rendered via the Tailwind CSS-mask plugin,
+  no import needed. Component values also work.
