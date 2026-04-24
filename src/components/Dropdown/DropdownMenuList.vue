@@ -16,7 +16,6 @@ import type { DropdownGroupOption, DropdownOption } from './types'
 import {
   dropdownClasses,
   getDropdownBackgroundColor,
-  getDropdownTextColor,
   groupHasIcons,
   isDropdownComponentOption,
   isDropdownSubmenuOption,
@@ -70,7 +69,7 @@ async function handleItemSelect(item: DropdownOption, event: Event) {
       <DropdownMenuLabel
         v-if="group.group && !group.hideLabel"
         data-slot="group-label"
-        :class="[dropdownClasses.groupLabel, getDropdownTextColor(group)]"
+        :class="dropdownClasses.groupLabel"
       >
         <DropdownRenderContent
           v-if="slotFns?.['group-label']"

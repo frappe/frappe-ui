@@ -10,10 +10,7 @@ import {
 import LucideCheck from '~icons/lucide/check'
 import ItemListRow from '../ItemList/ItemListRow.vue'
 import LoadingIndicator from '../LoadingIndicator.vue'
-import type {
-  ComboboxItemSlotProps,
-  ComboboxSize,
-} from './types'
+import type { ComboboxItemSlotProps, ComboboxSize } from './types'
 import {
   CREATE_OPTION_VALUE,
   EMPTY_SELECTABLE_VALUE_PREFIX,
@@ -192,7 +189,7 @@ function handleSelect(item: NormalizedItem, event: Event) {
             <ComboboxLabel
               v-if="group.group && !group.hideLabel"
               data-slot="group-label"
-              class="flex h-7 items-center px-2 text-sm font-medium text-ink-gray-7"
+              class="flex h-7 items-center px-2 text-sm font-medium text-ink-gray-4"
             >
               <component
                 :is="ItemSlotRender"

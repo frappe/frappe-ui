@@ -10,7 +10,7 @@ export const dropdownClasses = {
   content:
     'dropdown-content min-w-40 divide-y divide-outline-gray-modals rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none',
   group: 'p-1.5',
-  groupLabel: 'flex h-7 items-center px-2 text-sm font-medium',
+  groupLabel: 'flex h-7 items-center px-2 text-sm font-medium text-ink-gray-4',
   itemIcon: 'size-4 shrink-0',
   itemIconPlaceholder: 'size-4 shrink-0',
   chevronIcon: 'size-4 shrink-0',

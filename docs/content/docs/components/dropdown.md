@@ -18,6 +18,11 @@ groups, nested items, switches, disabled items, and custom triggers.
 
 ## Item Slots And Empty State
 <ComponentPreview name="Dropdown-05_ItemSlotsAndEmptyState" />
+
+## Kebab Menu
+A classic row-actions pattern — a ghost icon button that opens a grouped menu. Use `#trigger` to swap in the `LucideMoreHorizontal` icon button, and rely on the `open` slot prop to flip the button into its `active` state while the menu is open.
+
+<ComponentPreview name="Dropdown-06_KebabMenu" />
 <!-- AUTO-GENERATED STORIES END -->
 
 ## Notes

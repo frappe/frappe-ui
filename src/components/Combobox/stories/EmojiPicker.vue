@@ -53,7 +53,10 @@ const emojis: { group: string; options: Emoji[] }[] = [
     </template>
 
     <template #item-prefix="{ item }">
-      <span class="leading-none">{{ (item as Emoji).emoji }}</span>
+      <span
+        class="leading-none inline-flex items-center justify-center size-4"
+        >{{ (item as Emoji).emoji }}</span
+      >
     </template>
   </Combobox>
 </template>

@@ -74,7 +74,7 @@ defineSlots<ItemListSlots>()
         <div
           v-if="group.group && !group.hideLabel"
           data-slot="group-label"
-          class="flex h-7 items-center px-2 text-sm font-medium text-ink-gray-7"
+          class="flex h-7 items-center px-2 text-sm font-medium text-ink-gray-4"
         >
           <slot name="group-label" v-bind="{ group }">
             {{ group.group }}
