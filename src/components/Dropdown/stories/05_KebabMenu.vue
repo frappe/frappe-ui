@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { Button, Dropdown, type DropdownOptions } from 'frappe-ui'
-import LucideMoreHorizontal from '~icons/lucide/more-horizontal'
 
 type Task = { title: string; meta: string }
 
@@ -68,7 +67,7 @@ function rowActions(task: Task): DropdownOptions {
         <template #trigger="{ open }">
           <Button
             variant="ghost"
-            :icon="LucideMoreHorizontal"
+            icon="lucide-more-horizontal"
             :active="open"
             aria-label="Row actions"
           />

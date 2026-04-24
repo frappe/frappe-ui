@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { Avatar, Combobox } from 'frappe-ui'
-import LucideUserPlus from '~icons/lucide/user-plus'
 
 type Member = {
   label: string
@@ -99,7 +98,7 @@ const selected = computed(
           v-else
           class="flex size-6 items-center justify-center rounded-full bg-surface-blue-2 text-ink-blue-600"
         >
-          <LucideUserPlus class="size-3.5" />
+          <span class="lucide-user-plus size-3.5" />
         </div>
       </template>
 

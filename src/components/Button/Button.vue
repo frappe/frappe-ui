@@ -30,8 +30,13 @@
         }"
       />
       <slot name="prefix" v-else-if="$slots['prefix'] || iconLeft">
+        <span
+          v-if="iconLeft && typeof iconLeft === 'string' && iconLeft.startsWith('lucide-')"
+          :class="[iconLeft, lucideSlotClasses]"
+          aria-hidden="true"
+        />
         <FeatherIcon
-          v-if="iconLeft && typeof iconLeft === 'string'"
+          v-else-if="iconLeft && typeof iconLeft === 'string'"
           :name="iconLeft"
           :class="slotClasses"
           aria-hidden="true"
@@ -41,8 +46,13 @@
 
       <template v-if="loading && loadingText">{{ loadingText }}</template>
       <template v-else-if="isIconButton && !loading">
+        <span
+          v-if="icon && typeof icon === 'string' && icon.startsWith('lucide-')"
+          :class="[icon, lucideSlotClasses]"
+          aria-hidden="true"
+        />
         <FeatherIcon
-          v-if="icon && typeof icon === 'string'"
+          v-else-if="icon && typeof icon === 'string'"
           :name="icon"
           :class="slotClasses"
         />
@@ -57,17 +67,22 @@
       </span>
 
       <slot name="suffix">
+        <span
+          v-if="iconRight && typeof iconRight === 'string' && iconRight.startsWith('lucide-')"
+          :class="[iconRight, lucideSlotClasses]"
+          aria-hidden="true"
+        />
         <FeatherIcon
-          v-if="iconRight && typeof iconRight === 'string'"
+          v-else-if="iconRight && typeof iconRight === 'string'"
           :name="iconRight"
           :class="slotClasses"
           aria-hidden="true"
         />
-          <component
-            v-else-if="iconRight"
-            :is="iconRight"
-            :class="slotClasses"
-          />
+        <component
+          v-else-if="iconRight"
+          :is="iconRight"
+          :class="slotClasses"
+        />
       </slot>
         </button>
       </TooltipTrigger>
@@ -210,6 +225,16 @@ const slotClasses = computed(() => {
   }[props.size]
 
   return classes
+})
+
+const lucideSlotClasses = computed(() => {
+  return {
+    sm: 'size-4',
+    md: 'size-4.5',
+    lg: 'size-5',
+    xl: 'size-6',
+    '2xl': 'size-6',
+  }[props.size]
 })
 
 const isDisabled = computed(() => {

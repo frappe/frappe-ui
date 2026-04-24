@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Combobox } from 'frappe-ui'
-import LucideSmile from '~icons/lucide/smile'
 
 type Emoji = { label: string; value: string; emoji: string }
 
@@ -49,7 +48,7 @@ const emojis: { group: string; options: Emoji[] }[] = [
     placeholder="Pick a reaction"
   >
     <template #prefix>
-      <LucideSmile class="size-4 text-ink-gray-6" />
+      <span class="lucide-smile size-4 text-ink-gray-6" />
     </template>
 
     <template #item-prefix="{ item }">
