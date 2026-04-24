@@ -1,5 +1,13 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, useAttrs, useSlots, watch } from 'vue'
+import {
+  computed,
+  nextTick,
+  ref,
+  useAttrs,
+  useSlots,
+  watch,
+  watchEffect,
+} from 'vue'
 import {
   ComboboxAnchor,
   ComboboxContent,
@@ -126,17 +134,24 @@ const displayValue = computed(() => {
 })
 
 const resolvedAlign = computed(() => {
-  if (props.align !== undefined) {
-    if (import.meta.env.DEV && props.placement && !hasWarnedPlacement.value) {
+  if (props.align !== undefined) return props.align
+  return props.placement ?? 'start'
+})
+
+if (import.meta.env.DEV) {
+  watchEffect(() => {
+    if (
+      props.align !== undefined &&
+      props.placement &&
+      !hasWarnedPlacement.value
+    ) {
       console.warn(
         '[Combobox] `placement` is deprecated and ignored when `align` is provided. Use `align` instead.',
       )
       hasWarnedPlacement.value = true
     }
-    return props.align
-  }
-  return props.placement ?? 'start'
-})
+  })
+}
 
 const triggerClasses = computed(() => [
   triggerBaseClasses,
