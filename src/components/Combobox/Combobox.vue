@@ -270,7 +270,10 @@ function handleInputChange(event: Event) {
   emit('update:query', value)
   emit('input', value)
 
-  if (value === '') clearSelection()
+  // In input mode the input IS the selected-value display, so clearing it
+  // clears the model. In button mode the input lives in the popover and is
+  // only a filter — emptying it must not wipe the selection.
+  if (value === '' && !isButtonMode.value) clearSelection()
 
   nextTick(() => rootRef.value?.highlightFirstItem?.())
 }
@@ -334,6 +337,9 @@ watch(open, (value, previousValue) => {
 watch(
   () => displayValue.value,
   (value) => {
+    // Button mode keeps query decoupled — input is just a filter, the trigger
+    // shows the selected value independently.
+    if (isButtonMode.value) return
     if (!open.value || !hasTypedSinceOpen.value) query.value = value
   },
   { immediate: true },
@@ -341,10 +347,14 @@ watch(
 
 watch(open, (isOpen, wasOpen) => {
   if (isOpen === wasOpen) return
-  if (!isOpen) {
-    hasTypedSinceOpen.value = false
-    query.value = displayValue.value
+  if (isOpen) {
+    // On open in button mode, start the filter fresh — no leftover label
+    // like "In Progress" in the search input.
+    if (isButtonMode.value) query.value = ''
+    return
   }
+  hasTypedSinceOpen.value = false
+  query.value = isButtonMode.value ? '' : displayValue.value
 })
 
 defineExpose<ComboboxExposed>({ reset })
@@ -505,7 +515,7 @@ defineSlots<ComboboxSlots>()
             data-slot="content-search"
             class="flex items-center gap-2 border-b border-outline-gray-1 px-2"
           >
-            <LucideSearch class="size-4 shrink-0 text-ink-gray-4" />
+            <!-- <LucideSearch class="size-4 shrink-0 text-ink-gray-4" /> -->
             <ComboboxInput
               :id="id"
               ref="popoverInputRef"
