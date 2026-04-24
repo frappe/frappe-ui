@@ -3,11 +3,12 @@
 Lets users select one option from a list. Ideal for forms, settings, or any
 interface where a single choice is required.
 
-<!-- AUTO-GENERATED STORIES START -->
 ## Example
 <ComponentPreview name="Select-Example" />
 
-## Option Slot
+## Custom Option Layout
+Use `#item-prefix` and `#item-label` to tailor the standard row — for example, an avatar plus a two-line label with a secondary description. `#prefix` on the trigger reuses the selected option's accessory.
+
 <ComponentPreview name="Select-OptionSlot" />
 
 ## States
@@ -15,7 +16,6 @@ interface where a single choice is required.
 
 ## Trigger Slots
 <ComponentPreview name="Select-TriggerSlots" />
-<!-- AUTO-GENERATED STORIES END -->
 
 ## Notes
 
