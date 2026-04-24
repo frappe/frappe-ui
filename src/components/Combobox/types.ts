@@ -93,9 +93,6 @@ export type GroupedOption = ComboboxGroupedOption
 export type ComboboxOption = ComboboxSimpleOption | ComboboxGroupedOption
 
 export interface ComboboxProps {
-  /** Currently selected value (v-model). */
-  modelValue?: string | null
-
   /** Options rendered in the popover. */
   options?: ComboboxOption[]
 
@@ -229,9 +226,6 @@ export interface ComboboxSlots {
 }
 
 export interface ComboboxEmits {
-  /** Fired when the committed value changes. */
-  'update:modelValue': [value: string | null]
-
   /** Fired when the open state changes. */
   'update:open': [value: boolean]
 

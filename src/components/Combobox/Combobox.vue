@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useVModel } from '@vueuse/core'
 import { computed, nextTick, ref, useAttrs, useSlots, watch } from 'vue'
 import {
   ComboboxAnchor,
@@ -63,16 +62,7 @@ const emit = defineEmits<ComboboxEmits>()
 const attrs = useAttrs()
 const slots = useSlots()
 
-// `passive: true` is used unconditionally so the return type stays a plain
-// Ref regardless of whether the consumer binds `v-model`. The earlier
-// `passive: (props.modelValue === undefined) as false` variant tried to
-// switch between computed-ref and plain-ref at runtime but leaked a
-// misleading type cast; treating the model as a local proxy here is fine
-// because the controlled case still syncs via useVModel's internal watcher.
-const model = useVModel(props, 'modelValue', emit, {
-  defaultValue: null,
-  passive: true,
-})
+const model = defineModel<string | null>({ default: null })
 
 const open = ref(props.open ?? false)
 
