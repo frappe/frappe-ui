@@ -138,7 +138,13 @@ export function getDropdownTextColor(item: {
 }
 
 export function getDropdownBackgroundColor(item: { theme?: DropdownTheme }) {
-  return item.theme === 'red'
-    ? 'focus:bg-surface-red-3 data-[highlighted]:bg-surface-red-3 data-[state=open]:bg-surface-red-3'
-    : 'focus:bg-surface-gray-2 data-[highlighted]:bg-surface-gray-2 data-[state=open]:bg-surface-gray-2'
+  if (item.theme === 'red') {
+    return 'focus:bg-surface-red-3 data-[highlighted]:bg-surface-red-3 data-[state=open]:bg-surface-red-3'
+  }
+
+  return [
+    'focus:bg-surface-gray-2 data-[highlighted]:bg-surface-gray-2 data-[state=open]:bg-surface-gray-2',
+    'data-[state=checked]:bg-surface-gray-3',
+    'data-[highlighted]:data-[state=checked]:bg-surface-gray-4',
+  ].join(' ')
 }

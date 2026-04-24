@@ -167,6 +167,7 @@ async function handleItemSelect(item: DropdownOption, event: Event) {
           v-else
           data-slot="item"
           :data-disabled="item.disabled ? '' : undefined"
+          :data-state="item.selected ? 'checked' : undefined"
           :disabled="item.disabled"
           class="data-[disabled]:cursor-not-allowed"
           :class="[dropdownClasses.menuItem, getDropdownBackgroundColor(item)]"

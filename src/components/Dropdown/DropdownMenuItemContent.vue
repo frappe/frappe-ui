@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { hasRenderableContent } from '../../utils/vnode'
+import { isEmojiIconString, isLucideIconString } from '../../utils/iconString'
 import FeatherIcon from '../FeatherIcon.vue'
 import ItemListRow from '../ItemList/ItemListRow.vue'
 import Switch from '../Switch/Switch.vue'
@@ -88,13 +89,6 @@ function handleSwitchChange(value: boolean) {
   ;(props.item.onClick as ((value: boolean) => void) | undefined)?.(value)
 }
 
-// `lucide-*` strings route through the Tailwind plugin's mask-based
-// utility (see tailwind/lucideIconsPlugin.js). Everything else that's a
-// string falls back to FeatherIcon for back-compat with existing call
-// sites that pass feather names like `edit` / `copy`.
-function isLucideIconString(icon: unknown): icon is string {
-  return typeof icon === 'string' && icon.startsWith('lucide-')
-}
 </script>
 
 <template>
@@ -109,6 +103,15 @@ function isLucideIconString(icon: unknown): icon is string {
         :class="[item.icon, dropdownClasses.itemIcon, getDropdownIconColor(item)]"
         aria-hidden="true"
       />
+      <span
+        v-else-if="isEmojiIconString(item.icon)"
+        :class="[
+          dropdownClasses.itemIcon,
+          'inline-flex items-center justify-center text-base leading-none',
+        ]"
+        aria-hidden="true"
+        >{{ item.icon }}</span
+      >
       <FeatherIcon
         v-else-if="item.icon && typeof item.icon === 'string'"
         :name="item.icon"
@@ -167,3 +170,15 @@ function isLucideIconString(icon: unknown): icon is string {
     </template>
   </ItemListRow>
 </template>
+
+<style scoped>
+/*
+ * The outer DropdownMenuItem paints the row background via
+ * data-[highlighted] / data-[state=checked] utilities — including the
+ * combined hover+selected state. Clear ItemListRow's own bg so the outer
+ * color always shows through; text emphasis on selected stays.
+ */
+[data-slot='item-list-row'] {
+  background-color: transparent;
+}
+</style>
