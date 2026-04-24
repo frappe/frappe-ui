@@ -9,7 +9,7 @@
     name: 'size',
     description: 'Size of the select input.',
     required: false,
-    type: '"md" | "sm" | "lg" | "xl"',
+    type: '"sm" | "md" | "lg" | "xl"',
     default: '"sm"'
   },
   {
@@ -30,22 +30,19 @@
     name: 'disabled',
     description: 'If true, disables the select input.',
     required: false,
-    type: 'boolean',
-    default: undefined
+    type: 'boolean'
   },
   {
     name: 'id',
     description: 'Optional HTML id for the select element.',
     required: false,
-    type: 'string',
-    default: undefined
+    type: 'string'
   },
   {
     name: 'modelValue',
     description: 'The currently selected value.',
     required: false,
-    type: 'SelectOptionValue',
-    default: undefined
+    type: 'SelectOptionValue'
   },
   {
     name: 'open',
@@ -60,6 +57,13 @@
     required: false,
     type: 'SelectOption[]',
     default: '[]'
+  },
+  {
+    name: 'emptyText',
+    description: 'Fallback empty-state copy rendered when no options are available.',
+    required: false,
+    type: 'string',
+    default: '"No options"'
   }
 ]
 
@@ -82,7 +86,8 @@
   {
     name: 'option',
     description: 'Shared renderer for option labels.',
-    type: 'SelectItemSlotProps'
+    type: 'SelectItemSlotProps',
+    deprecated: 'use `#item-label` for per-row label customization. `#option` remains as a back-compat alias through v1.x.'
   },
   {
     name: 'item-prefix',

@@ -1,14 +1,25 @@
 <template>
-  <Tooltip :text="tooltip" :disabled="!tooltip?.length">
-    <button
-      v-bind="$attrs"
-      :class="buttonClasses"
-      @click="handleClick"
-      :disabled="isDisabled"
-      :ariaLabel="label"
-      :type = "props.type"
-      ref="rootRef"
-    >
+  <!--
+    The <button> is the effective DOM root. reka's Tooltip primitives
+    (TooltipProvider/TooltipRoot/TooltipTrigger) are renderless / pass-
+    through, so consumers wrapping <Button> in their own reka primitives
+    (e.g. ComboboxTrigger as-child) see a native <button> element with
+    all forwarded attrs — tabindex, aria-expanded, role — intact. Using
+    the separate <Tooltip> component as a wrapper dropped those attrs
+    because it's a Vue component with `inheritAttrs: false`.
+  -->
+  <TooltipProvider>
+    <TooltipRoot>
+      <TooltipTrigger as-child>
+        <button
+          v-bind="$attrs"
+          :class="buttonClasses"
+          @click="handleClick"
+          :disabled="isDisabled"
+          :aria-label="label"
+          :type="props.type"
+          ref="rootRef"
+        >
       <LoadingIndicator
         v-if="loading"
         :class="{
@@ -19,8 +30,13 @@
         }"
       />
       <slot name="prefix" v-else-if="$slots['prefix'] || iconLeft">
+        <span
+          v-if="iconLeft && typeof iconLeft === 'string' && iconLeft.startsWith('lucide-')"
+          :class="[iconLeft, lucideSlotClasses]"
+          aria-hidden="true"
+        />
         <FeatherIcon
-          v-if="iconLeft && typeof iconLeft === 'string'"
+          v-else-if="iconLeft && typeof iconLeft === 'string'"
           :name="iconLeft"
           :class="slotClasses"
           aria-hidden="true"
@@ -30,8 +46,13 @@
 
       <template v-if="loading && loadingText">{{ loadingText }}</template>
       <template v-else-if="isIconButton && !loading">
+        <span
+          v-if="icon && typeof icon === 'string' && icon.startsWith('lucide-')"
+          :class="[icon, lucideSlotClasses]"
+          aria-hidden="true"
+        />
         <FeatherIcon
-          v-if="icon && typeof icon === 'string'"
+          v-else-if="icon && typeof icon === 'string'"
           :name="icon"
           :class="slotClasses"
         />
@@ -46,28 +67,37 @@
       </span>
 
       <slot name="suffix">
+        <span
+          v-if="iconRight && typeof iconRight === 'string' && iconRight.startsWith('lucide-')"
+          :class="[iconRight, lucideSlotClasses]"
+          aria-hidden="true"
+        />
         <FeatherIcon
-          v-if="iconRight && typeof iconRight === 'string'"
+          v-else-if="iconRight && typeof iconRight === 'string'"
           :name="iconRight"
           :class="slotClasses"
           aria-hidden="true"
         />
-          <component
-            v-else-if="iconRight"
-            :is="iconRight"
-            :class="slotClasses"
-          />
+        <component
+          v-else-if="iconRight"
+          :is="iconRight"
+          :class="slotClasses"
+        />
       </slot>
-    </button>
-  </Tooltip>
+        </button>
+      </TooltipTrigger>
+      <TooltipBubble v-if="tooltip?.length" :text="tooltip" />
+    </TooltipRoot>
+  </TooltipProvider>
 </template>
 <script lang="ts" setup>
 import { computed, useSlots, ref } from 'vue'
+import { TooltipProvider, TooltipRoot, TooltipTrigger } from 'reka-ui'
 import FeatherIcon from '../FeatherIcon.vue'
 import LoadingIndicator from '../LoadingIndicator.vue'
+import TooltipBubble from '../Tooltip/TooltipBubble.vue'
 import { useRouter } from 'vue-router'
 import type { ButtonProps, ThemeVariant } from './types'
-import Tooltip from '../Tooltip/Tooltip.vue'
 
 defineOptions({ inheritAttrs: false })
 
@@ -195,6 +225,16 @@ const slotClasses = computed(() => {
   }[props.size]
 
   return classes
+})
+
+const lucideSlotClasses = computed(() => {
+  return {
+    sm: 'size-4',
+    md: 'size-4.5',
+    lg: 'size-5',
+    xl: 'size-6',
+    '2xl': 'size-6',
+  }[props.size]
 })
 
 const isDisabled = computed(() => {

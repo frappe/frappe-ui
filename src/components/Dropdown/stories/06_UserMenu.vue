@@ -1,26 +1,17 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { Dropdown } from 'frappe-ui'
-import LucideCheck from '~icons/lucide/check'
-import LucideChevronDown from '~icons/lucide/chevron-down'
-import LucideInfo from '~icons/lucide/info'
-import LucideLayoutGrid from '~icons/lucide/layout-grid'
-import LucideListRestart from '~icons/lucide/list-restart'
-import LucideLogOut from '~icons/lucide/log-out'
-import LucideMoon from '~icons/lucide/moon'
-import LucideSettings from '~icons/lucide/settings'
-import LucideUser from '~icons/lucide/user'
 
 const theme = ref<'light' | 'dark' | 'system'>('system')
 
 const userMenuItems = computed(() => [
   {
-    icon: LucideUser,
+    icon: 'lucide-user',
     label: 'My Profile',
     onClick: () => console.log('My Profile clicked'),
   },
   {
-    icon: LucideLayoutGrid,
+    icon: 'lucide-layout-grid',
     label: 'Apps',
     submenu: [
       {
@@ -39,12 +30,12 @@ const userMenuItems = computed(() => [
     ],
   },
   {
-    icon: LucideSettings,
+    icon: 'lucide-settings',
     label: 'Settings & Members',
     onClick: () => console.log('Settings & Members clicked'),
   },
   {
-    icon: LucideMoon,
+    icon: 'lucide-moon',
     label: 'Theme',
     submenu: [
       {
@@ -74,17 +65,17 @@ const userMenuItems = computed(() => [
     group: 'Account',
     items: [
       {
-        icon: LucideListRestart,
+        icon: 'lucide-list-restart',
         label: 'Clear cache',
         onClick: () => console.log('Clear cache clicked'),
       },
       {
-        icon: LucideInfo,
+        icon: 'lucide-info',
         label: 'About',
         onClick: () => console.log('About clicked'),
       },
       {
-        icon: LucideLogOut,
+        icon: 'lucide-log-out',
         label: 'Log out',
         onClick: () => console.log('Log out clicked'),
       },
@@ -131,15 +122,19 @@ const userMenuItems = computed(() => [
               Faris
             </div>
           </div>
-          <LucideChevronDown
-            class="ml-auto size-4 text-ink-gray-6 transition-transform"
+          <span
+            class="lucide-chevron-down ml-auto size-4 text-ink-gray-6 transition-transform"
             :class="open ? 'rotate-180' : ''"
           />
         </button>
       </template>
 
       <template #item-suffix="{ selected }">
-        <LucideCheck v-if="selected" class="size-4 text-ink-gray-7" />
+        <span
+          v-if="selected"
+          class="lucide-check size-4 text-ink-gray-7"
+          aria-hidden="true"
+        />
       </template>
     </Dropdown>
 

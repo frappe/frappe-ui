@@ -9,8 +9,7 @@
     name: 'button',
     description: 'Button configuration (label, icon, size, variant, etc.)',
     required: false,
-    type: 'ButtonProps',
-    default: undefined
+    type: 'ButtonProps'
   },
   {
     name: 'options',
@@ -27,11 +26,17 @@
     default: 'false'
   },
   {
+    name: 'align',
+    description: 'Alignment of the dropdown content along the trigger edge.',
+    required: false,
+    type: 'DropdownAlign'
+  },
+  {
     name: 'placement',
     description: 'Placement of the dropdown relative to the trigger.',
     required: false,
     type: 'DropdownPlacement',
-    default: '"left"'
+    deprecated: 'use `align` instead; `placement` remains as a back-compat alias through v1.x'
   },
   {
     name: 'side',

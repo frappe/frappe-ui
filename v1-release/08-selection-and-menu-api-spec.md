@@ -22,6 +22,20 @@ It is based on:
 This RFC is meant to guide v1 implementation and cleanup. It does not authorize
 breaking removals in `1.0.0`.
 
+The shared design rules, goals, non-goals, component boundaries, deprecation
+policy, and implementation order live in this document. The detailed
+per-component specs live in sibling sub-spec files:
+
+- [`08a-itemlist-spec.md`](./08a-itemlist-spec.md) — `ItemList` and
+  `ItemListRow`
+- [`08b-dropdown-spec.md`](./08b-dropdown-spec.md) — `Dropdown`
+- [`08c-select-spec.md`](./08c-select-spec.md) — `Select`
+- [`08d-combobox-spec.md`](./08d-combobox-spec.md) — `Combobox`
+- [`08e-multiselect-spec.md`](./08e-multiselect-spec.md) — `MultiSelect`
+
+Each sub-spec inherits the shared design rules defined here and only restates
+rules where it narrows or specializes them for that component.
+
 ## Decision summary
 
 - add `ItemList` as the shared styled list surface for option and menu rows
@@ -232,7 +246,312 @@ The better API should be:
 - focused sub-slots
 - predictable state and styling hooks
 
-### 7. Deprecation policy for this family
+### 7. Popover positioning conventions
+
+Every component in this family that opens a popover over a trigger should use
+the same positioning vocabulary. Today, `Dropdown` and `Combobox` disagree
+(`placement: 'left' | 'center' | 'right'` vs `placement: 'start' | 'center' |
+'end'`), and `Select` / `MultiSelect` don't expose positioning props at all.
+
+For v1, the canonical positioning props across `Dropdown`, `Select`,
+`Combobox`, and `MultiSelect` are:
+
+```ts
+type PopoverSide = 'top' | 'right' | 'bottom' | 'left'
+type PopoverAlign = 'start' | 'center' | 'end'
+
+interface PopoverPositioningProps {
+  side?: PopoverSide
+  align?: PopoverAlign
+  offset?: number
+  portalTo?: string | HTMLElement
+}
+```
+
+Shared defaults:
+
+- `side = 'bottom'`
+- `align = 'start'`
+- `offset = 4`
+- `portalTo = 'body'`
+
+Rules:
+
+- `side` and `align` are logical and direction-aware; `start` / `end` flip with
+  `dir="rtl"`
+- components that don't currently expose positioning (`Select`, `MultiSelect`)
+  should add `side`, `align`, `offset`, and `portalTo` in v1.x as additive
+  props
+- components that currently expose positioning under different names keep the
+  old names working as compatibility aliases through `v1.x`
+
+Compatibility mapping:
+
+- `Dropdown.placement` (old: `'left' | 'center' | 'right'`) maps to `align`:
+  - `'left'` → `align: 'start'`
+  - `'center'` → `align: 'center'`
+  - `'right'` → `align: 'end'`
+- `Dropdown.side` keeps its current meaning; no rename needed
+- `Combobox.placement` (old: `'start' | 'center' | 'end'`) maps one-to-one to
+  `align` and should be accepted as an alias through `v1.x`
+
+Rules for old names in `v1.x`:
+
+- if both the new and the old name are provided, the new name wins and a dev
+  warning is emitted
+- if only the old name is provided, it is silently mapped to the new name
+- docs should show `side` + `align` in the primary examples; `placement`
+  continues to appear only in the deprecation table
+
+### 8. Uniform disabled-option handling
+
+Disabled items should behave the same way across `ItemList`, `Dropdown`,
+`Select`, `Combobox`, and `MultiSelect`:
+
+- disabled items are skipped during keyboard navigation (arrow keys, typeahead,
+  home/end)
+- disabled items cannot be clicked into selection or activated
+- disabled items apply the shared `ItemListRow` disabled styling (muted text,
+  `not-allowed` cursor) and carry the `data-disabled` attribute
+- disabled items never emit `update:modelValue`, `update:selectedOption`, or
+  `item-click`
+- `Dropdown` route/submenu/switch rows also respect `disabled`: no navigation,
+  no submenu open, no toggle
+- `MultiSelect` `selectAll` skips disabled options
+- `Combobox` never uses a disabled option as the `allowCustomValue` target
+- if an option becomes disabled while already selected, it stays in
+  `modelValue`; it only stops being interactable
+
+This rule is the default behavior from the underlying primitives, but each
+component spec should state it explicitly so apps can rely on it.
+
+### 9. Per-item inline slots
+
+Templates (`#item-prefix`, `#item-label`, `#item-suffix`, `#item-<slot>`,
+`#item`) are the primary customization path. They are only usable where the
+app has a Vue template around the component.
+
+Some apps build option lists in JavaScript — in a composable, a config
+module, a remote API response, or a shared data layer — and therefore
+cannot reach a template. Historically this is why `Dropdown` grew
+`item.component` and `Combobox` grew `item.render`. Both are coarse: they
+replace the entire row and skip the shell-owned prefix/label/suffix
+regions.
+
+For v1, every item-accepting component in this family accepts a `slots`
+field on an item object. It matches the shape you already pass to Vue
+render functions — `h(Component, props, slots)` — so the same mental model
+applies at the item level:
+
+```ts
+type SlotFn<TProps> = (props: TProps) => VNodeChild
+
+interface ItemSlots<TProps> {
+  prefix?: SlotFn<TProps>
+  label?: SlotFn<TProps>
+  suffix?: SlotFn<TProps>
+  /** Full-row replacement; mutually exclusive with prefix/label/suffix */
+  item?: SlotFn<TProps>
+}
+
+// on any item object:
+slots?: ItemSlots<ItemSlotProps>
+```
+
+Key names mirror the template slot names one-to-one, with the redundant
+`item-` prefix stripped because we're already scoped to an item:
+
+| template slot     | `slots.*` key |
+| ----------------- | ------------- |
+| `#item-prefix`    | `prefix`      |
+| `#item-label`     | `label`       |
+| `#item-suffix`    | `suffix`      |
+| `#item`           | `item`        |
+
+Rules:
+
+- each key in `slots` is a function with the same slot props as the
+  corresponding template slot (see per-component table below)
+- `slots.item` is an escape hatch; when provided alongside `slots.prefix` /
+  `slots.label` / `slots.suffix` on the same object, `slots.item` wins and
+  a dev warning is emitted
+- `slots` never replaces the outer `ItemListRow` shell unless `slots.item`
+  is set — `slots.prefix` / `label` / `suffix` keep all other shell
+  behavior intact (spacing, hover, selected styling, `data-*` hooks)
+
+Slot-prop context per component:
+
+- `ItemList`: `{ item, group }`
+- `Dropdown`: `{ item, close, selected }`
+- `Select`: `{ option }`
+- `Combobox`: `{ item, query, selected }`
+- `MultiSelect`: `{ item, query, selected }`
+
+Region precedence (per row):
+
+1. template slot on the parent component (`#item-prefix`, `#item-<slot>`,
+   `#item-label`, `#item-suffix`, `#item`) — templates always win so local
+   overrides stay possible
+2. matching `item.slots.*` function
+3. default shell rendering (icon placeholder, `label` + `description`,
+   checkmark, etc.)
+
+Authoring example (options built in JS, shell-owned row preserved):
+
+```ts
+import { h } from 'vue'
+import LucideCheck from '~icons/lucide/check'
+import Avatar from '@/components/Avatar.vue'
+
+const options = users.map((user) => ({
+  label: user.name,
+  value: user.id,
+  slots: {
+    prefix: ({ item }) => h(Avatar, { image: item.image, class: 'size-4' }),
+    suffix: ({ selected }) =>
+      selected ? h(LucideCheck, { class: 'size-4' }) : null,
+  },
+}))
+```
+
+Full-row escape hatch:
+
+```ts
+const options = [
+  {
+    label: 'Danger zone',
+    value: 'danger',
+    slots: {
+      item: ({ item }) =>
+        h('div', { class: 'text-ink-red-5 px-2 py-1' }, item.label),
+    },
+  },
+]
+```
+
+#### Relationship to `slot: string`
+
+These are deliberately adjacent, singular vs plural:
+
+- `slot?: string` picks which `#item-<slot>` template slot on the parent
+  should render this item's **label** region (template-side dispatch)
+- `slots?: ItemSlots<...>` provides inline slot implementations for one or
+  more regions of this item (JS-side inline)
+
+The two can coexist on the same item. If both target the label region,
+normal region precedence applies: `#item-<slot>` template wins over
+`slots.label`.
+
+#### Backward compatibility
+
+Nothing existing breaks.
+
+- `Dropdown.item.component` keeps working as a deprecated alias of
+  `slots.item`. If both are present, `slots.item` wins and a dev warning
+  fires.
+- `Combobox.item.render` keeps working as a deprecated alias:
+  - if `render` is a function → treated as `slots.item = render`
+  - if `render` is an object (undocumented in older versions but tolerated
+    by some apps) → treated as `slots = render`
+- Apps that pass both `render` and `slots` see a dev warning and `slots`
+  wins.
+
+### 10. Popover motion conventions
+
+All components in this family that render a popover (`Dropdown`, `Select`,
+`Combobox`, `MultiSelect`) share one motion contract.
+
+Entry:
+
+- the popover content scales in from the trigger, not from the viewport
+  center — the element that actually scales should set
+  `transform-origin: var(--reka-<component>-content-transform-origin)`
+  (or the equivalent primitive-provided CSS variable)
+- strong ease-out curve `cubic-bezier(0.23, 1, 0.32, 1)`
+- enter duration 150–200ms, exit duration 130–160ms
+- enter from `scale(0.97)` + small `translateY(2px)` + `opacity: 0` —
+  never from `scale(0)`
+- `prefers-reduced-motion: reduce` disables the animation
+
+Keyboard-driven opens skip the enter/exit animation entirely:
+
+- when the popover is opened via keyboard — Enter / Space / ArrowUp /
+  ArrowDown on the trigger, typing in a searchable input, or tab-focus
+  with `openOnFocus` — the content appears and disappears without
+  transition
+- pointer-driven opens (click / tap) play the full animation
+- the mechanism: the component records the timestamp of each `pointerdown`
+  on the trigger, and when the popover transitions from closed → open it
+  classifies the open as pointer-driven only if a `pointerdown` fired
+  within a short window (~300ms) before the transition; anything else
+  defaults to keyboard
+- the resolved mode is exposed as `data-motion="animated" | "instant"` on
+  the content element and CSS gates the animation on that attribute
+- `data-motion="instant"` still runs a very short opacity-only fade
+  (~80ms, linear, no transform) on open. This is below the perception
+  threshold for motion — it feels instant — but long enough to mask the
+  1-frame position-settle the underlying popper performs on mount.
+  Without it, keyboard opens show an abrupt jump as the popper corrects
+  its position from the default frame to the measured frame. Close
+  uses `animation: none`.
+
+Rationale: pickers in this family are opened tens to hundreds of times a
+day. For keyboard users, any enter/exit motion is latency the system added
+between their keystroke and the next action. Pointer users open less
+frequently and benefit from the entrance cue.
+
+Tracking `keydown` alone isn't enough because tab-focus (combined with
+`openOnFocus`) emits no key on the trigger itself. The pointer-recency
+check catches every non-pointer path — tab-focus, typing, Enter, Space,
+arrow keys — as "keyboard" by exclusion.
+
+The pointer-recency check is factored into a shared composable
+(`usePopoverMotion(open)` → `{ motion, onPointerDown }`) so every
+component in this family wires the same ~10 lines of logic:
+`@pointerdown="onPointerDown"` on the trigger, `:data-motion="motion"` on
+the content, CSS that reads `[data-motion='animated']`. `Combobox`,
+`Select`, and `Dropdown` use it today; `MultiSelect` should adopt the
+same composable when it lands.
+
+### 11. String-based icons (`lucide-*`)
+
+Selection components in this family (`Select`, `Combobox`, `MultiSelect`,
+`Dropdown`) accept `item.icon` as either a Vue `Component` **or** a
+string. For strings, the family standardizes on the `lucide-<name>`
+convention powered by the shared Tailwind plugin
+(`tailwind/lucideIconsPlugin.js`):
+
+- `icon: 'lucide-edit'` / `'lucide-trash-2'` / `'lucide-more-horizontal'`
+  — the literal class name
+- auto-rendered as `<span :class="item.icon">` inside the prefix region
+  when no consumer slot (`#item-prefix` or `item.slots.prefix`) claims
+  that region
+- sizing (`size-4`), color (`text-ink-gray-6` by default, `text-ink-red-3`
+  for `theme: 'red'` in `Dropdown`) are applied by the component
+
+Benefits:
+
+- no per-call-site `import` for every icon
+- `item.icon` stays serialisable (survives JSON round-trips, server-
+  driven menus, feature-flag configs)
+- Tailwind's JIT scanner finds literal `lucide-*` strings in source and
+  only emits CSS for the icons actually referenced
+
+Limitations (worth documenting where consumers trip over them):
+
+- dynamic construction (`` `lucide-${action}` ``) bypasses the JIT
+  scanner and won't emit the class; consumers need either literal
+  strings or an explicit whitelist
+- consumer apps need `frappe-ui/src/**/*.vue` in their Tailwind
+  `content` paths so references inside frappe-ui itself are picked up
+
+Passing a Vue `Component` still works for cases where the plugin isn't
+desired (icons outside Lucide, dynamic icon composition, etc.).
+Consumer-authored prefix slots always take precedence — if the caller
+wants custom rendering, they wire `#item-prefix` or `item.slots.prefix`
+and the auto-icon branch is skipped.
+
+### 12. Deprecation policy for this family
 
 For v1.x:
 
@@ -253,1231 +572,161 @@ Harder-to-warn cases like `Dropdown #item` can be deprecated in docs first.
 
 ---
 
-## ItemList proposed spec
-
-### Role
-
-`ItemList` is the shared styled list surface behind menu rows and option rows.
-
-It should be used internally by:
-
-- `Dropdown`
-- `Select`
-- `Combobox`
-- `MultiSelect`
-
-It should also be public for advanced app code that needs custom layout around
-the list but still wants the shared row styling, grouping, empty state, and slot
-model.
-
-`ItemListRow` is the single-row shell used by `ItemList` and by higher-level
-components that need the same row presentation.
-
-### Scope
-
-`ItemList` is not responsible for:
-
-- trigger rendering
-- popover or dropdown positioning
-- search input behavior
-- fetching data
-- value ownership
-- form semantics
-- routing semantics
-- menu semantics
-
-It is responsible for:
-
-- rendering grouped and ungrouped lists
-- rendering a consistent item row shell by default
-- rendering empty and footer regions
-- exposing item customization through focused sub-slots
-- exposing stable layout and state hooks
-- emitting click intent for enabled items
-
-`ItemListRow` is responsible for:
-
-- spacing
-- alignment
-- prefix / label / suffix regions
-- active / selected / disabled presentation
-- row-level styling hooks
-
-### Exact public API for v1
-
-#### Shared types
-
-```ts
-type ItemListSize = 'sm' | 'md' | 'lg' | 'xl'
-
-interface ItemListItem {
-  label?: string
-  value?: string | number | boolean
-  icon?: string | Component
-  description?: string
-  disabled?: boolean
-  selected?: boolean
-  active?: boolean
-  slot?: string
-  [key: string]: any
-}
-
-interface ItemListGroup<TItem extends ItemListItem = ItemListItem> {
-  key?: string | number
-  group?: string
-  hideLabel?: boolean
-  items: TItem[]
-}
-```
-
-#### ItemList props
-
-```ts
-interface ItemListProps<TItem extends ItemListItem = ItemListItem> {
-  items?: TItem[]
-  groups?: Array<ItemListGroup<TItem>>
-  size?: ItemListSize
-  emptyText?: string
-}
-```
-
-Defaults:
-
-- `items = []`
-- `groups = []`
-- `size = 'sm'`
-- `emptyText = 'No items'`
-
-Rules:
-
-- `ItemList` does not expose `v-model`
-- `ItemList` does not own selected state; `selected` is input data only
-- `ItemList` does not own active state; `active` is input data only
-- explicit `groups` is the grouped API for `ItemList`; higher-level components
-  may accept mixed item/group arrays and normalize them before rendering
-- if `groups.length > 0`, grouped rendering is used and `items` is ignored
-- if `groups.length === 0`, `items` is rendered as one implicit unlabeled group
-
-#### ItemList emits
-
-```ts
-interface ItemListEmits<TItem extends ItemListItem = ItemListItem> {
-  'item-click': [item: TItem]
-}
-```
-
-Rules:
-
-- `item-click` fires only for enabled items
-- clicking a disabled item does nothing
-- `item-click` does not mutate `selected` or `active`
-
-#### ItemList slots
-
-```ts
-type ItemListItemSlotProps<TItem extends ItemListItem = ItemListItem> = {
-  item: TItem
-  group: ItemListGroup<TItem>
-}
-
-type ItemListGroupSlotProps<TItem extends ItemListItem = ItemListItem> = {
-  group: ItemListGroup<TItem>
-}
-```
-
-Supported slots:
-
-- `#item-prefix="{ item, group }"`
-- `#item-label="{ item, group }"`
-- `#item-suffix="{ item, group }"`
-- `#item="{ item, group }"`
-- `#item-<slot>="{ item, group }"`
-- `#group-label="{ group }"`
-- `#empty`
-- `#footer`
-
-Exact slot rules:
-
-- `#item` replaces the standard `ItemListRow` rendering for every item
-- `#item` is an escape hatch; when used, `#item-prefix`, `#item-label`,
-  `#item-suffix`, and `#item-<slot>` are not used
-- `item.slot` maps to `#item-<slot>`
-- `#item-<slot>` overrides the label region only
-- `#item-label` is the fallback label-region customization when no matching
-  `#item-<slot>` exists
-- `#item-prefix` and `#item-suffix` customize only those regions of the standard
-  row shell
-- `#group-label` overrides the default group label text
-- `#empty` is rendered when there are no visible items after normalization
-- `#footer` is rendered once after the list content
-
-#### ItemList rendering and behavior
-
-Normalization rules:
-
-- explicit groups with empty `items` are omitted
-- implicit ungrouped items are wrapped in a group with `hideLabel = true`
-- if no groups remain after normalization, render the empty region
-
-Default row behavior:
-
-- each item renders inside a component-owned clickable wrapper
-- enabled items emit `item-click` on click
-- disabled items set `disabled` on the clickable wrapper and emit nothing
-- default label rendering is `label` plus optional `description`
-- `item.icon` is allowed in the item shape but is **not** rendered by `ItemList`
-  by default; consumers should use `#item-prefix` if they want icon rendering
-- `ItemList` does **not** render a built-in checkmark; selection-specific
-  affordances belong in higher-level components or `#item-suffix`
-
-State rules:
-
-- `selected` affects row styling only
-- `active` affects row styling only
-- `ItemList` does not implement menu roving-focus or picker semantics in v1
-- keyboard semantics beyond native focus/click are the responsibility of the
-  higher-level container component
-
-#### ItemList styling hooks
-
-`ItemList` should expose these stable hooks:
-
-- `data-slot="item-list"`
-- `data-slot="group"`
-- `data-slot="group-label"`
-- `data-slot="item"`
-- `data-slot="empty"`
-- `data-slot="footer"`
-- `data-size`
-
-Each item wrapper should expose:
-
-- `data-slot="item"`
-- `data-state="active|inactive"`
-- `data-disabled`
-- `data-size`
-
-The standard row shell should come from `ItemListRow`, which exposes:
-
-- `data-slot="item-list-row"`
-- `data-slot="item-prefix"`
-- `data-slot="item-label"`
-- `data-slot="item-suffix"`
-
-### ItemListRow exact public API for v1
-
-#### Props
-
-```ts
-interface ItemListRowProps {
-  as?: string | Component
-  size?: ItemListSize
-  active?: boolean
-  selected?: boolean
-  disabled?: boolean
-}
-```
-
-Defaults:
-
-- `as = 'div'`
-- `size = 'sm'`
-- `active = false`
-- `selected = false`
-- `disabled = false`
-
-#### Slots
-
-- default slot
-- `#prefix`
-- `#label`
-- `#suffix`
-
-Rules:
-
-- `#label` overrides the default slot for the label region
-- prefix and suffix regions are omitted when they have no renderable content
-- `selected` and `active` share the same emphasized visual treatment in v1
-- `disabled` applies muted text and not-allowed cursor styling
-
-#### Styling hooks
-
-`ItemListRow` should expose:
-
-- `data-slot="item-list-row"`
-- `data-slot="item-prefix"`
-- `data-slot="item-label"`
-- `data-slot="item-suffix"`
-- `data-size`
-- `data-state="active|inactive"`
-- `data-disabled`
-
-### Relationship to the higher-level components
-
-- `Dropdown` should compose `ItemList` / `ItemListRow` for action rows
-- `Select` should compose `ItemList` / `ItemListRow` for option rows
-- `Combobox` should compose `ItemList` / `ItemListRow` for search results rows
-- `MultiSelect` should compose `ItemList` / `ItemListRow` for multi-select
-  option rows
-
-This is the key architectural decision for this family.
-
-### v1 stance
-
-`ItemList` and `ItemListRow` should both be public in v1.
-
-They are intentionally advanced APIs, but they are worth exposing because:
-
-- the styling is shared
-- the structure is shared
-- advanced app cases clearly exist
-- higher-level components can build on them without duplicating row markup
-- app authors should not have to rebuild the shell to get the design system
-  behavior
+## Per-component specs
+
+The exact public APIs, behaviors, slots, styling hooks, and migration paths for
+the shared list surface and the single-choice pickers live in their own files:
+
+- [`08a-itemlist-spec.md`](./08a-itemlist-spec.md) — `ItemList` and
+  `ItemListRow`
+- [`08b-dropdown-spec.md`](./08b-dropdown-spec.md) — `Dropdown`
+- [`08c-select-spec.md`](./08c-select-spec.md) — `Select`
+- [`08d-combobox-spec.md`](./08d-combobox-spec.md) — `Combobox`
+- [`08e-multiselect-spec.md`](./08e-multiselect-spec.md) — `MultiSelect`
 
 ---
 
-## Dropdown proposed spec
-
-### Role
-
-`Dropdown` is the action menu component.
-
-It should continue to support:
-
-- simple action lists
-- grouped actions
-- submenus
-- switch/toggle rows
-- route-based actions
-- occasional advanced custom rows
-- menu-style “choose one of a few actions” cases where the app marks the current
-  choice
-
-Important boundary:
-
-- if the UI is semantically choosing a form value or picker value, use `Select`
-- if the UI is a menu of actions or view/filter/sort modes and one is currently
-  active, `Dropdown` is still acceptable
-
-So `Dropdown` can support checkmarks and active menu items, but it should not
-become the generic replacement for `Select`.
-
-### Exact public API for v1
-
-#### Props
-
-```ts
-type DropdownPlacement = 'left' | 'center' | 'right'
-type DropdownSide = 'top' | 'right' | 'bottom' | 'left'
-
-interface DropdownProps {
-  button?: ButtonProps
-  options?: DropdownOptions
-  open?: boolean
-  placement?: DropdownPlacement
-  side?: DropdownSide
-  offset?: number
-  portalTo?: string | HTMLElement
-}
-```
-
-Defaults:
-
-- `options = []`
-- `open = false`
-- `placement = 'left'`
-- `side = 'bottom'`
-- `offset = 4`
-- `portalTo = 'body'`
-
-State conventions:
-
-- visibility is controlled with `v-model:open`
-- `Dropdown` does **not** expose `v-model` for a selected value
-- `Dropdown` does **not** own query state
-
-`button` is only used when no custom trigger slot is provided.
-
-#### Emits
-
-```ts
-interface DropdownEmits {
-  'update:open': [value: boolean]
-}
-```
-
-There is no component-level `select` event in v1. Action handling stays
-item-owned through `route` and `onClick`.
-
-#### Slots
-
-Guaranteed slot props:
-
-```ts
-type DropdownTriggerSlotProps = {
-  open: boolean
-  close: () => void
-  disabled: boolean
-}
-
-type DropdownItemSlotProps = {
-  item: DropdownOption
-  close: () => void
-  selected: boolean
-}
-
-type DropdownGroupLabelSlotProps = {
-  group: DropdownGroupOption
-}
-```
-
-Supported slots:
-
-- `#trigger="{ open, close, disabled }"`
-  - preferred advanced trigger slot
-- default slot
-  - supported trigger slot with the same contract as `#trigger`
-  - especially ergonomic when trigger customization is the only customization
-    needed
-- `#item-prefix="{ item, close, selected }"`
-  - custom leading content for all item rows, including submenu and switch rows
-- `#item-label="{ item, close, selected }"`
-  - custom label/content region for all item rows
-- `#item-suffix="{ item, close, selected }"`
-  - custom trailing content for all item rows
-- `#item="{ item, close, selected }"`
-  - full-row escape hatch for leaf action rows only
-- `#item-<slot>="{ item, close, selected }"`
-  - dynamic named label slot selected via `item.slot`
-- `#group-label="{ group }"`
-  - optional custom group label rendering
-- `#empty`
-  - empty state for any menu level with no visible items
-
-Exact slot rules:
-
-- `#trigger` wins over the default slot
-- the default slot wins over the generated `button` trigger
-- `close()` closes the whole dropdown, not just the current submenu
-- `selected` is always `Boolean(item.selected)`
-- `#item-<slot>` overrides the label region only; it does not replace the full
-  row shell
-- `#item` is an escape hatch for leaf action rows only
-- submenu and switch rows keep their shell-owned structure even when `#item`
-  exists
-- `#item-prefix`, `#item-label`, and `#item-suffix` apply at every menu depth
-- on submenu rows, `#item-suffix` renders before the built-in submenu chevron
-- on switch rows, `#item-suffix` renders before the built-in switch control
-
-### Exact option shape for v1
-
-```ts
-type DropdownTheme = 'gray' | 'red'
-
-interface DropdownBaseOption {
-  icon?: string | Component | null
-  description?: string
-  selected?: boolean
-  disabled?: boolean
-  theme?: DropdownTheme
-  slot?: string
-  condition?: () => boolean
-  [key: string]: any
-}
-
-interface DropdownActionOption extends DropdownBaseOption {
-  label: string
-  route?: RouteLocationRaw
-  onClick?: (event: PointerEvent) => void
-  submenu?: never
-  switch?: never
-  switchValue?: never
-  component?: never
-}
-
-interface DropdownSwitchOption extends DropdownBaseOption {
-  label: string
-  switch: true
-  switchValue?: boolean
-  onClick?: (value: boolean) => void
-  route?: never
-  submenu?: never
-  component?: never
-}
-
-interface DropdownSubmenuOption extends DropdownBaseOption {
-  label: string
-  submenu: DropdownOptions
-  route?: never
-  onClick?: never
-  switch?: never
-  switchValue?: never
-  component?: never
-}
-
-interface DropdownComponentOption extends DropdownBaseOption {
-  component: any
-  label?: string
-  route?: never
-  submenu?: never
-  switch?: never
-  switchValue?: never
-}
-
-interface DropdownGroupOption {
-  key?: string | number
-  group: string
-  hideLabel?: boolean
-  theme?: DropdownTheme
-  items: DropdownOption[]
-}
-
-type DropdownOption =
-  | DropdownActionOption
-  | DropdownSwitchOption
-  | DropdownSubmenuOption
-  | DropdownComponentOption
-
-type DropdownOptions = Array<DropdownOption | DropdownGroupOption>
-```
-
-Notes:
-
-- `label` is required for every standard action, switch, and submenu row
-- `label` is optional only for `component` escape-hatch rows
-- `submenu`, `switch`, and `component` are mutually exclusive item modes
-- app-defined extra fields like `value`, `id`, `image`, `shortcut`, and
-  analytics metadata are allowed and must be passed through unchanged to slot
-  props
-- `slot` is the preferred name for dynamic label slot selection
-- keep `onClick` and `condition` as canonical names
-
-### Rendering and behavior rules
-
-#### Grouping and visibility
-
-- `options` may mix plain items and explicit groups
-- plain items are rendered as implicit unlabeled groups in source order
-- each menu level should normalize its `DropdownOptions` input into an explicit
-  grouped structure before row rendering
-- that normalized structure should be equivalent to
-  `ItemListGroup<DropdownOption>[]`, even if the implementation does not
-  literally render the `ItemList` component
-- `condition()` is evaluated before rendering at every menu depth
-- items whose `condition()` returns false are omitted
-- groups with zero visible items are omitted
-- if a menu or submenu level has no visible items, render `#empty`
-
-#### Trigger behavior
-
-- if `#trigger` is provided, use it
-- else if the default slot is provided, use it as the compatibility trigger slot
-- else render the generated `Button` from `button`
-- trigger disabled state is derived from `button.disabled` or a forwarded
-  `disabled` attribute
-
-#### Item behavior
-
-- `selected` is visual-only state owned by the app
-- `Dropdown` does not infer selection and does not emit selection changes
-- selected rows receive shell-owned selected styling, but `Dropdown` does
-  **not** render a trailing checkmark automatically
-- if any visible item in a group has an icon, items without icons in that same
-  group should reserve the same prefix space for alignment
-- `route` takes precedence over `onClick` on leaf action rows
-- leaf action rows close the dropdown on selection through menu semantics
-- switch rows do not auto-close on toggle
-- submenu rows open nested menu content and do not call `onClick`
-- `component` rows are escape hatches for exceptional content and do not receive
-  shell-owned prefix/label/suffix regions
-
-#### Rendering precedence
-
-For each visible item:
-
-1. if `item.submenu` exists, render a submenu row
-2. else if `item.switch === true`, render a switch row
-3. else if `#item` exists, render the full-row escape hatch
-4. else if `item.component` exists, render the exceptional custom component row
-5. else render the standard shell-owned row with `#item-prefix`, `#item-label`,
-   `#item-suffix`, and `#item-<slot>` support
-
-For standard shell-owned rows:
-
-- use `item.slot` to map to `#item-<slot>` before falling back to `#item-label`
-- default label rendering is `label` plus optional `description`
-- default prefix rendering is `icon` plus group-level alignment placeholder
-  behavior
-- default suffix rendering is empty for leaf action rows
-
-### Styling hooks
-
-Stable hooks for `Dropdown` should include:
-
-- `data-slot="content"`
-- `data-slot="group"`
-- `data-slot="group-label"`
-- `data-slot="item"`
-- `data-slot="empty"`
-
-Standard rows inside `Dropdown` should use `ItemListRow`, which provides:
-
-- `data-slot="item-list-row"`
-- `data-slot="item-prefix"`
-- `data-slot="item-label"`
-- `data-slot="item-suffix"`
-
-State hooks should include, where relevant:
-
-- `data-state="open|closed"` on menu content via the menu primitive
-- `data-disabled`
-- row-level selected/active styling hooks inherited from `ItemListRow`
-
-### Accessibility and semantics
-
-`Dropdown` should follow the menu button pattern, not the listbox/select
-pattern.
-
-That means:
-
-- trigger uses menu-trigger semantics
-- leaf actions are menu actions, not form options
-- submenu items expose submenu semantics
-- keyboard navigation, escape handling, typeahead, and submenu arrow-key
-  behavior are delegated to the underlying menu primitive
-- `selected` is visual state only; it does not change the component into a
-  single-select control
-
-### Keep supported in v1.x
-
-These stay supported:
-
-- `button`
-- `options`
-- `placement`
-- `side`
-- `offset`
-- `portalTo`
-- grouped items
-- `submenu`
-- `switch`
-- `switchValue`
-- `component`
-- `#item`
-- current default trigger slot behavior
-
-### Deprecate
-
-Keep working, but deprecate for ordinary row customization:
-
-- `#item` as the default recommendation
-- `item.component` for normal icon/label/check/suffix customization
-
-Keep as escape hatches:
-
-- deeply custom rows
-- destructive full-width special rows
-- embedded app selectors or similar exceptional content
-
-Do **not** deprecate:
-
-- `onClick`
-- `condition`
-- `route`
-- `submenu`
-- `switch`
-
-### Migration path
-
-#### Old
-
-```vue
-<Dropdown :options="items">
-  <template #item="{ item }">
-    <button class="flex h-7 w-full items-center justify-between rounded px-2 hover:bg-surface-gray-3">
-      <span>{{ item.label }}</span>
-      <LucideCheck v-if="active === item.value" class="size-4" />
-    </button>
-  </template>
-</Dropdown>
-```
-
-#### New
-
-```vue
-<Dropdown :options="items">
-  <template #item-suffix="{ item }">
-    <LucideCheck v-if="item.selected" class="size-4" />
-  </template>
-</Dropdown>
-```
-
-#### Old exceptional custom row
-
-```ts
-{
-  label: 'Delete',
-  component: h(Button, { ... })
-}
-```
-
-#### v1.x stance
-
-Still supported. Keep it for exceptional content, but do not recommend it for
-normal icon/label/check/suffix customization.
-
----
-
-## Select proposed spec
-
-### Role
-
-`Select` is the simple single-choice picker for small static lists.
-
-It should stay narrow:
-
-- single selection only
-- local static options
-- no search input
-- no action-menu semantics
-- no grouped option support in v1
-
-If the UI needs search, use `Combobox`. If the UI is choosing actions, use
-`Dropdown`.
-
-### Exact public API for v1
-
-#### Types
-
-```ts
-type SelectOptionValue = string | number | bigint | Record<string, any>
-
-type SelectOption =
-  | string
-  | {
-      label: string
-      value: SelectOptionValue
-      disabled?: boolean
-      icon?: string | Component
-      description?: string
-      slot?: string
-      [key: string]: any
-    }
-
-interface SelectProps {
-  size?: 'sm' | 'md' | 'lg' | 'xl'
-  variant?: 'subtle' | 'outline' | 'ghost'
-  placeholder?: string
-  disabled?: boolean
-  id?: string
-  modelValue?: SelectOptionValue
-  open?: boolean
-  options?: SelectOption[]
-}
-```
-
-Defaults:
-
-- `size = 'sm'`
-- `variant = 'subtle'`
-- `placeholder = 'Select option'`
-- `open = false`
-- `options = []`
-
-State conventions:
-
-- selected value uses `v-model` / `modelValue`
-- menu visibility uses `v-model:open`
-- `Select` does not own query state
-- `Select` accepts flat options only in v1
-
-#### Emits
-
-```ts
-interface SelectEmits {
-  'update:modelValue': [value: SelectOptionValue | undefined]
-  'update:open': [value: boolean]
-}
-```
-
-There is no separate component-level `select` event in v1.
-
-#### Slots
-
-Guaranteed slot props:
-
-```ts
-type SelectTriggerSlotProps = {
-  open: boolean
-  disabled: boolean
-  selectedOption: Exclude<SelectOption, string> | null
-  displayValue: string
-}
-
-type SelectOptionSlotProps = {
-  option: Exclude<SelectOption, string>
-}
-```
-
-Supported slots:
-
-- `#trigger="{ open, disabled, selectedOption, displayValue }"`
-  - advanced trigger customization
-- `#prefix`
-  - convenience slot inside the default trigger shell
-- `#suffix`
-  - convenience slot inside the default trigger shell
-- `#item-prefix="{ option }"`
-- `#item-label="{ option }"`
-- `#item-suffix="{ option }"`
-- `#item-<slot>="{ option }"`
-- `#option="{ option }"`
-  - compatibility alias for item label customization through `v1.x`
-- `#empty`
-- `#footer`
-
-Exact slot rules:
-
-- if `#trigger` is provided, it replaces the default trigger content
-- when `#trigger` is used, `#prefix` and `#suffix` are ignored
-- if `option.slot` is set, it maps to `#item-<slot>` and overrides the label
-  region
-- `#item-label` is the preferred label-region slot
-- `#option` remains supported as the compatibility fallback for the label region
-  when `#item-label` is not used
-- `#item-prefix` and `#item-suffix` customize only those regions of the standard
-  option row shell
-- `#item-suffix` renders before the built-in selected checkmark indicator
-- `#footer` is rendered once after the option list
-- `#empty` is rendered when there are no normalized options
-
-### Option normalization and behavior
-
-Normalization rules:
-
-- `Select` accepts flat `options` only in v1; it does not accept grouped options
-- string options normalize to `{ label: option, value: option }`
-- nullish options are ignored
-- options whose `value` is `undefined` or `null` are omitted
-- selected option lookup uses strict equality against `modelValue`
-
-Display rules:
-
-- if a selected option exists, its `label` is the default display value
-- otherwise the trigger shows `placeholder`
-- `displayValue` exposed to `#trigger` is the selected option label or `''`
-- `selectedOption` exposed to `#trigger` is the normalized object option or
-  `null`
-
-Row behavior:
-
-- option rows should use the shared `ItemListRow` shell
-- `selected` state is derived from `option.value === modelValue`
-- disabled options are not selectable
-- selecting an enabled option updates `modelValue` and closes the list through
-  select semantics
-- selected rows render a built-in trailing checkmark indicator
-- `option.icon` is allowed in the item shape but is **not** rendered by default;
-  consumers should use `#item-prefix` or trigger slots when they want icon
-  rendering
-- default label rendering is `label` plus optional `description`
-
-### Styling hooks
-
-Stable hooks for `Select` should include:
-
-- `data-slot="trigger"`
-- `data-slot="content"`
-- `data-slot="item"`
-- `data-slot="empty"`
-- `data-slot="footer"`
-
-Select rows should use `ItemListRow`, which provides:
-
-- `data-slot="item-list-row"`
-- `data-slot="item-prefix"`
-- `data-slot="item-label"`
-- `data-slot="item-suffix"`
-
-State hooks should include, where relevant:
-
-- `data-state="open|closed"` on trigger/content via the select primitive
-- `data-state="checked|unchecked"` on option items via the select primitive
-- `data-disabled`
-- row-level selected styling inherited from `ItemListRow`
-
-### Accessibility and semantics
-
-`Select` should follow the select/listbox pattern, not the menu button pattern.
-
-That means:
-
-- trigger and content use select semantics
-- items are options, not actions
-- keyboard navigation, typeahead, highlighted state, and selection behavior are
-  delegated to the underlying select primitive
-- selected state is semantic component state, not just visual decoration
-
-### Keep supported in v1.x
-
-These stay supported:
-
-- `v-model`
-- `v-model:open`
-- `size`
-- `variant`
-- `placeholder`
-- `disabled`
-- `id`
-- `options`
-- `#trigger`
-- `#prefix`
-- `#suffix`
-- `#option`
-- `#footer`
-- string options
-
-### Deprecate
-
-Keep working, but deprecate for ordinary customization:
-
-- `#option` as the primary documented customization API once `#item-label`
-  exists
-
-`#option` should remain as an alias/fallback for the label region through
-`v1.x`.
-
-### Migration path
-
-#### Old
-
-```vue
-<Select v-model="chartType" :options="options">
-  <template #option="{ option }">
-    <div class="flex items-center gap-2">
-      <component :is="option.icon" class="size-4" />
-      <span>{{ option.label }}</span>
-    </div>
-  </template>
-</Select>
-```
-
-#### New
-
-```vue
-<Select v-model="chartType" :options="options">
-  <template #item-prefix="{ option }">
-    <component :is="option.icon" class="size-4" />
-  </template>
-
-  <template #item-label="{ option }">
-    {{ option.label }}
-  </template>
-</Select>
-```
-
----
-
-## Combobox proposed spec
-
-### Role
-
-`Combobox` is the canonical searchable single-choice picker.
-
-It should become the recommended path for new searchable single-select work.
-
-### Keep supported in v1.x
-
-Current API stays supported:
-
-- `v-model`
-- `variant`
-- `options`
-- `placeholder`
-- `disabled`
-- `openOnFocus`
-- `openOnClick`
-- `placement`
-- `allowCustomValue`
-- `update:selectedOption`
-- `focus`
-- `blur`
-- `input`
-- `slotName`
-- `render`
-- `type: 'custom'`
-- `#prefix`
-- current dynamic slot behavior for custom items
-
-### Add / prefer
-
-#### Advanced state
-
-- `v-model:open`
-
-#### Query event
-
-- `@update:query`
-
-Keep `input` working as a compatibility alias in v1.x, but document
-`update:query` as the preferred event.
-
-#### Preferred trigger API
-
-- `#trigger`
-- keep `#prefix` as a convenience slot
-
-#### Preferred item slots
-
-- `#item-prefix`
-- `#item-label`
-- `#item-suffix`
-- `#empty`
-- `#footer`
-- `#item` as the full takeover escape hatch
-
-#### Preferred item schema
-
-Simple selectable items can keep their current shape, but richer object items
-should converge on:
-
-```ts
-{
-  label: string
-  value: string
-  icon?: string | Component
-  description?: string
-  disabled?: boolean
-  slot?: string
-}
-```
-
-For custom action-style rows, keep the current capability and preserve the
-existing naming convention:
-
-```ts
-{
-  type: 'custom'
-  key: string
-  label: string
-  icon?: string | Component
-  disabled?: boolean
-  slot?: string
-  onClick?: (context: { query: string }) => void
-  keepOpen?: boolean
-  condition?: (context: { query: string }) => boolean
-  render?: () => VNode
-}
-```
-
-Preferred change here should be limited to:
-
-- `slot` over `slotName`
-
-Keep these existing names as canonical because they already match broader
-library convention:
-
-- `onClick`
-- `condition`
-
-Dynamic custom item slots should be namespaced as:
-
-- `#item-<slot>`
-
-### Deprecate
-
-Keep working, but deprecate in favor of the new names only where the change is
-clearly worth it:
-
-- `slotName`
-- `input` for query updates
-- `render` as the default customization story
-
-`render` should remain an escape hatch only.
-
-Do not deprecate:
-
-- `onClick`
-- `condition`
-
-### Migration path
-
-#### Old
-
-```ts
-{
-  type: 'custom',
-  key: 'create-new',
-  label: 'Create new',
-  slotName: 'create-new',
-  onClick: ({ searchTerm }) => createItem(searchTerm),
-  condition: ({ searchTerm }) => Boolean(searchTerm),
-}
-```
-
-```vue
-<Combobox v-model="value" :options="options">
-  <template #create-new="{ option, searchTerm }">
-    Create "{{ searchTerm }}"
-  </template>
-</Combobox>
-```
-
-#### New
-
-```ts
-{
-  type: 'custom',
-  key: 'create-new',
-  label: 'Create new',
-  slot: 'create-new',
-  onClick: ({ query }) => createItem(query),
-  condition: ({ query }) => Boolean(query),
-}
-```
-
-```vue
-<Combobox v-model="value" :options="options" @update:query="query = $event">
-  <template #item-create-new="{ item, query }">
-    Create "{{ query }}"
-  </template>
-</Combobox>
-```
-
-#### Query event migration
-
-Old:
-
-```vue
-<Combobox @input="onQueryChange" />
-```
-
-New:
-
-```vue
-<Combobox @update:query="onQueryChange" />
-```
-
----
-
-## MultiSelect proposed spec
-
-### Role
-
-`MultiSelect` is the canonical searchable multi-choice picker.
-
-It should stay narrower than a full people-picker or chips input, but it should
-inherit the same item-slot model as `Combobox` and `Select`.
-
-### Keep supported in v1.x
-
-Current API stays supported:
-
-- `v-model`
-- `placeholder`
-- `options`
-- `hideSearch`
-- `loading`
-- `compareFn`
-- `#option`
-- `#footer`
-
-### Add / prefer
-
-#### Advanced state
-
-- `v-model:open`
-
-#### Query event
-
-- `@update:query`
-
-Query should stay internal otherwise.
-
-#### Preferred trigger API
-
-- `#trigger`
-- keep trigger convenience behavior built in by default
-
-#### Preferred item slots
-
-- `#item-prefix`
-- `#item-label`
-- `#item-suffix`
-- `#empty`
-- `#footer`
-- `#item` as the full takeover escape hatch
-
-#### Option shape expansion
-
-Support a richer non-breaking option object:
-
-```ts
-{
-  label: string
-  value: string
-  disabled?: boolean
-  icon?: string | Component
-  description?: string
-  slot?: string
-}
-```
-
-Grouped options should also be supported so apps do not keep building richer
-local multi-select variants just for grouped pickers.
-
-### Deprecate
-
-- `#option` as the primary documented customization API once `#item-label`
-  exists
-
-Keep `#option` as an alias in v1.x.
-
-### Migration path
-
-#### Old
-
-```vue
-<MultiSelect v-model="values" :options="options">
-  <template #option="{ item }">
-    <div class="flex items-center gap-2">
-      <Avatar :image="item.image" class="size-4" />
-      <span>{{ item.label }}</span>
-    </div>
-  </template>
-</MultiSelect>
-```
-
-#### New
-
-```vue
-<MultiSelect v-model="values" :options="options">
-  <template #item-prefix="{ item }">
-    <Avatar :image="item.image" class="size-4" />
-  </template>
-
-  <template #item-label="{ item }">
-    {{ item.label }}
-  </template>
-</MultiSelect>
-```
-
-### Scope guard
-
-Do not force every richer multi-picker need into the base component.
-
-If apps need all of these together:
-
-- chips in the trigger
-- avatars everywhere
-- grouped async remote results
-- custom selected summary behavior
-- create-new actions
-- person-specific affordances
-
-that may justify a separate future component such as `MultiCombobox` or
-`PeoplePicker`.
+## Cohesion opportunities
+
+Prop and behavior inconsistencies across `Dropdown`, `Select`, `Combobox`, and
+`MultiSelect` that this RFC resolves. None require breaking changes; every
+change is additive or alias-based.
+
+This section tracks status: what the per-component specs now integrate, what
+is intentionally deferred, and what is explicitly out of scope.
+
+### Integrated into the per-component specs
+
+#### 1. Popover positioning
+
+- `side` + `align` + `offset` + `portalTo` are now documented on `Dropdown`,
+  `Select`, `Combobox`, and `MultiSelect`.
+- `Dropdown.placement` (`'left' | 'center' | 'right'`) and
+  `Combobox.placement` (`'start' | 'center' | 'end'`) remain supported as
+  deprecated aliases for `align`. Old → new mapping and precedence rules are
+  defined in shared design rule 7.
+- `Select` and `MultiSelect` had no prior positioning props; they gain the
+  four props purely additively.
+
+#### 2. `id` prop for form-label association
+
+- `Select`, `Combobox`, and `MultiSelect` all accept `id?: string` and
+  forward it to the focusable trigger/input so `<label for="...">`
+  associates correctly.
+- `Dropdown` is a menu button, not a form field, and does not take `id`.
+
+#### 3. Loading state
+
+- `Combobox` and `MultiSelect` both accept `loading?: boolean`.
+- When `true`: the popover shows a loading indicator, suspends `#empty`, and
+  on `Combobox` disables the create-new path for `allowCustomValue`.
+- `Select` does not get `loading` because its option set is static by
+  definition.
+
+#### 4. Empty state parity
+
+- `Dropdown`, `Select`, `Combobox`, and `MultiSelect` all accept:
+  - `emptyText?: string` with a sensible default per component
+  - a `#empty` slot that overrides the default empty rendering
+- Component defaults: `Dropdown` / `Select` use `'No options'`;
+  `Combobox` / `MultiSelect` use `'No results'`.
+
+#### 5. Uniform disabled-option handling
+
+- Defined once as shared design rule 8 and referenced from each
+  per-component spec: keyboard skip, no click activation, no emits, shared
+  `ItemListRow` disabled styling, `data-disabled`.
+- Component-specific extensions (e.g. `Dropdown` submenu/switch rows,
+  `Combobox` `allowCustomValue` skip, `MultiSelect` `selectAll` skip) are
+  called out in each spec.
+
+#### 6. `update:query` parity
+
+- `Combobox` emits `update:query` with `input` kept as a compatibility
+  alias.
+- `MultiSelect` emits `update:query` from v1 onward. The old `MultiSelect`
+  did not expose a public search event, so no alias is needed.
+
+#### 7. Item context field: `searchTerm` → `query`
+
+- `Combobox` custom-option `onClick` / `condition` now receive
+  `{ query }` as the canonical context.
+- For compatibility, the context also carries `searchTerm` with the same
+  value through `v1.x`, so existing handlers destructuring
+  `({ searchTerm })` keep working unchanged.
+- `searchTerm` is typed as `@deprecated` and will be removed in a future
+  major.
+
+#### 8. `onClick` / `condition` keep their names
+
+- These match broader library convention and stay canonical. No rename.
+
+#### 9. Per-item inline slots
+
+- All item-accepting components (`ItemList`, `Dropdown`, `Select`,
+  `Combobox`, `MultiSelect`) now accept a `slots` field on item objects
+  whose shape matches Vue's render-function slots object.
+- Keys mirror the template slot names without the `item-` prefix:
+  `{ prefix, label, suffix, item }`.
+- This gives apps the same customization depth as `#item-prefix` /
+  `#item-label` / `#item-suffix` / `#item` template slots when options are
+  built in JavaScript and a template is not available.
+- Template slots always win over `item.slots.*` for the same region, so
+  local template overrides remain possible.
+- Compatibility: `Dropdown.item.component` remains a deprecated alias for
+  `item.slots.item`; `Combobox.item.render` remains a deprecated alias —
+  a function maps to `slots.item`, an object maps to `slots`.
+
+#### 10. Option object convergence (shared fields)
+
+- The canonical shared option body for selectable options is:
+
+  ```ts
+  {
+    label: string
+    value?: string | number | boolean
+    disabled?: boolean
+    icon?: string | Component
+    description?: string
+    slot?: string
+  }
+  ```
+
+- Per-component extensions are allowed only where they carry real semantics
+  (`Dropdown`: `submenu`, `switch`, `component`, `route`; `Combobox`:
+  `type: 'custom'`).
+- Non-breaking; current shapes are supersets or subsets of this set.
+
+### Deferred to a later `v1.x` minor
+
+#### Size and variant parity
+
+- `Select` has `size` + `variant`; `Combobox` now documents both in its
+  spec; `MultiSelect` now documents both in its spec. Implementation for
+  `MultiSelect` can land in a later `v1.x` minor since its current trigger
+  is a plain `Button`.
+- `Dropdown` continues to defer trigger sizing to its `button` prop; no
+  change planned.
+
+#### Grouped options for `Select`
+
+- `Select` explicitly does not accept grouped options in the initial v1
+  cut. `Combobox` and `MultiSelect` do.
+- Consider adding grouped support to `Select` in a later `v1.x` minor using
+  the same `ItemListGroup`-shaped input. Additive whenever it lands.
+
+### Non-goals for cohesion work
+
+- do not unify option value types (`string | number | bigint | object` for
+  `Select` vs `string` for `Combobox` / `MultiSelect`) — that divergence
+  has real semantics
+- do not merge `Dropdown`'s `button` trigger shape into the listbox trigger
+  shape used by `Select` / `Combobox` / `MultiSelect` — menu vs listbox is
+  a meaningful semantic boundary
+- do not remove `openOnFocus` / `openOnClick` from `Combobox` — they
+  describe combobox-specific input behavior that doesn't generalize
+- do not collapse `hideSearch` into a generic flag shared with `Select` —
+  `Select` does not have search; `Combobox` is always searchable
 
 ---
 

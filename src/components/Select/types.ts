@@ -40,6 +40,9 @@ export interface SelectProps {
 
   /** Options to display in the dropdown. */
   options?: SelectOption[]
+
+  /** Fallback empty-state copy rendered when no options are available. */
+  emptyText?: string
 }
 
 export interface SelectTriggerSlotProps {
@@ -71,7 +74,10 @@ export interface SelectSlots {
   /** Content rendered after the trigger value. */
   suffix?: () => any
 
-  /** Shared renderer for option labels. */
+  /**
+   * Shared renderer for option labels.
+   * @deprecated use `#item-label` for per-row label customization. `#option` remains as a back-compat alias through v1.x.
+   */
   option?: (props: SelectItemSlotProps) => any
 
   /** Content rendered before the standard option label. */

@@ -7,6 +7,7 @@ interface ItemProp {
   type?: string
   required: boolean
   default?: string
+  deprecated?: string | boolean
 }
 
 interface Props {
@@ -95,8 +96,10 @@ const typeDefinition = computed(() => {
               <div
                 class="font-mono text-xs font-medium leading-6 text-ink-gray-9"
               >
-                {{ x.name
-                }}<span
+                <span :class="{ 'line-through': x.deprecated }">{{
+                  x.name
+                }}</span
+                ><span
                   v-if="x.required"
                   class="text-ink-gray-5"
                   title="Required"
@@ -116,12 +119,17 @@ const typeDefinition = computed(() => {
 
             <td class="px-2 py-2 align-top">
               <div
+                v-if="!x.deprecated"
                 class="whitespace-normal break-words font-mono text-xs leading-6 text-ink-gray-8"
               >
                 {{ x.type || '—' }}
               </div>
               <p
-                v-if="x.description"
+                v-if="typeof x.deprecated === 'string'"
+                class="whitespace-pre-wrap text-p-sm text-ink-gray-6"
+              >Deprecated — {{ x.deprecated }}</p>
+              <p
+                v-else-if="x.description"
                 class="mt-1 whitespace-pre-wrap text-p-sm leading-6 text-ink-gray-6"
               >
                 {{ x.description }}

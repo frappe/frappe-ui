@@ -10,7 +10,7 @@ export const dropdownClasses = {
   content:
     'dropdown-content min-w-40 divide-y divide-outline-gray-modals rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none',
   group: 'p-1.5',
-  groupLabel: 'flex h-7 items-center px-2 text-sm font-medium',
+  groupLabel: 'flex h-7 items-center px-2 text-sm font-medium text-ink-gray-4',
   itemIcon: 'size-4 shrink-0',
   itemIconPlaceholder: 'size-4 shrink-0',
   chevronIcon: 'size-4 shrink-0',
@@ -138,7 +138,13 @@ export function getDropdownTextColor(item: {
 }
 
 export function getDropdownBackgroundColor(item: { theme?: DropdownTheme }) {
-  return item.theme === 'red'
-    ? 'focus:bg-surface-red-3 data-[highlighted]:bg-surface-red-3 data-[state=open]:bg-surface-red-3'
-    : 'focus:bg-surface-gray-3 data-[highlighted]:bg-surface-gray-3 data-[state=open]:bg-surface-gray-3'
+  if (item.theme === 'red') {
+    return 'focus:bg-surface-red-3 data-[highlighted]:bg-surface-red-3 data-[state=open]:bg-surface-red-3'
+  }
+
+  return [
+    'focus:bg-surface-gray-2 data-[highlighted]:bg-surface-gray-2 data-[state=open]:bg-surface-gray-2',
+    'data-[state=checked]:bg-surface-gray-3',
+    'data-[highlighted]:data-[state=checked]:bg-surface-gray-4',
+  ].join(' ')
 }

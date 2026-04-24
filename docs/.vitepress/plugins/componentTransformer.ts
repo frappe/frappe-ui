@@ -27,10 +27,28 @@ function getStoryImportName(storyFileName: string) {
 
 export default function (md: MarkdownRenderer) {
   md.core.ruler.after('inline', 'component-preview', (state) => {
-    const previewRegex =
-      /<ComponentPreview\s+name=["']([^"']+)["'](?:\s+csr=["'](true|false)["'])?(?:\s+css=["']([^"']+)["'])?\s*\/>/g
+    // Match `<ComponentPreview ... />` and capture the entire attribute
+    // blob so callers can pass arbitrary props (layout, css, csr, future
+    // additions) without needing this plugin to know about each one.
+    const previewRegex = /<ComponentPreview\s+([^>]*?)\s*\/>/g
 
-    state.src = state.src.replace(previewRegex, (_, name, csr, css) => {
+    function parseAttrs(raw: string): Record<string, string> {
+      const attrRegex = /([a-zA-Z_:][\w:.-]*)\s*=\s*(?:"([^"]*)"|'([^']*)')/g
+      const out: Record<string, string> = {}
+      let match: RegExpExecArray | null
+      while ((match = attrRegex.exec(raw)) !== null) {
+        out[match[1]] = match[2] ?? match[3] ?? ''
+      }
+      return out
+    }
+
+    state.src = state.src.replace(previewRegex, (_, attrBlob: string) => {
+      const attrs = parseAttrs(attrBlob)
+      const name = attrs.name
+      if (!name) return _
+
+      const csr = attrs.csr === 'true'
+
       const { componentName, storyFileName } = getPreviewParts(name)
       const storyImportName = getStoryImportName(storyFileName)
 
@@ -56,9 +74,14 @@ export default function (md: MarkdownRenderer) {
       const { realPath, path: _path } = state.env as MarkdownEnv
 
       const open = csr ? '<ClientOnly>' : ''
-      const cssAttr = css ? ` css="${css}"` : ''
+      // Forward every attribute except `csr`, which this plugin consumes
+      // itself (it's not a Vue prop).
+      const forwardedAttrs = Object.entries(attrs)
+        .filter(([key]) => key !== 'csr')
+        .map(([key, value]) => ` ${key}="${value}"`)
+        .join('')
       state.tokens[idx].content =
-        `${open}<ComponentPreview name="${name}"${cssAttr}><${storyImportName} /><template #code>`
+        `${open}<ComponentPreview${forwardedAttrs}><${storyImportName} /><template #code>`
 
       const code = new state.Token('fence', 'code', 0)
       code.info = 'vue'

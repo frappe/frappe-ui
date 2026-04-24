@@ -16,7 +16,6 @@ import type { DropdownGroupOption, DropdownOption } from './types'
 import {
   dropdownClasses,
   getDropdownBackgroundColor,
-  getDropdownTextColor,
   groupHasIcons,
   isDropdownComponentOption,
   isDropdownSubmenuOption,
@@ -70,7 +69,7 @@ async function handleItemSelect(item: DropdownOption, event: Event) {
       <DropdownMenuLabel
         v-if="group.group && !group.hideLabel"
         data-slot="group-label"
-        :class="[dropdownClasses.groupLabel, getDropdownTextColor(group)]"
+        :class="dropdownClasses.groupLabel"
       >
         <DropdownRenderContent
           v-if="slotFns?.['group-label']"
@@ -153,6 +152,22 @@ async function handleItemSelect(item: DropdownOption, event: Event) {
         </DropdownMenuItem>
 
         <DropdownMenuItem
+          v-else-if="item.slots?.item"
+          as-child
+          data-slot="item"
+          :data-disabled="item.disabled ? '' : undefined"
+          :disabled="item.disabled"
+          class="data-[disabled]:cursor-not-allowed"
+          @select="(event) => handleItemSelect(item, event)"
+        >
+          <DropdownRenderContentAsChild
+            :content="
+              item.slots.item({ item, close, selected: !!item.selected })
+            "
+          />
+        </DropdownMenuItem>
+
+        <DropdownMenuItem
           v-else-if="isDropdownComponentOption(item)"
           as-child
           data-slot="item"
@@ -168,6 +183,7 @@ async function handleItemSelect(item: DropdownOption, event: Event) {
           v-else
           data-slot="item"
           :data-disabled="item.disabled ? '' : undefined"
+          :data-state="item.selected ? 'checked' : undefined"
           :disabled="item.disabled"
           class="data-[disabled]:cursor-not-allowed"
           :class="[dropdownClasses.menuItem, getDropdownBackgroundColor(item)]"

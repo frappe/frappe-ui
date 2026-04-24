@@ -37,7 +37,7 @@
     name: 'placement',
     description: 'Placement of the popover relative to the target',
     required: false,
-    type: '"bottom-start" | "top-start" | "top-end" | "bottom-end" | "right-start" | "right-end" | "left-start" | "left-end" | "left" | "bottom" | "right" | "top"',
+    type: '"bottom" | "top" | "right" | "left" | "bottom-start" | "top-start" | "top-end" | "bottom-end" | "right-start" | "right-end" | "left-start" | "left-end"',
     default: '"bottom-start"'
   },
   {
@@ -104,6 +104,11 @@
 
   const emitsData = [
   {
+    name: 'open',
+    description: 'Fired when the component opens.',
+    type: '[]'
+  },
+  {
     name: 'update:show',
     description: 'Fired when the show changes.',
     type: '[value: boolean]'
@@ -111,11 +116,6 @@
   {
     name: 'close',
     description: 'Fired when the component closes.',
-    type: '[]'
-  },
-  {
-    name: 'open',
-    description: 'Fired when the component opens.',
     type: '[]'
   }
 ]

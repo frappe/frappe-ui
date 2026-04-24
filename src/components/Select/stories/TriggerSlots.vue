@@ -1,8 +1,5 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import LucideChevronDown from '~icons/lucide/chevron-down'
-import LucideUser from '~icons/lucide/user'
-import LucideUsers from '~icons/lucide/users'
 import { Select } from 'frappe-ui'
 
 const assignee = ref('faris')
@@ -45,7 +42,7 @@ const options = [
       <div class="mt-4">
         <Select v-model="assignee" :options="options" variant="outline">
           <template #prefix>
-            <LucideUser class="size-4 text-ink-gray-6" />
+            <span class="lucide-user size-4 text-ink-gray-6" />
           </template>
 
           <template #suffix>
@@ -55,7 +52,7 @@ const options = [
               >
                 5
               </span>
-              <LucideChevronDown class="size-4" />
+              <span class="lucide-chevron-down size-4" />
             </div>
           </template>
         </Select>
@@ -80,7 +77,7 @@ const options = [
               <div
                 class="flex size-7 shrink-0 items-center justify-center rounded-full bg-surface-gray-2"
               >
-                <LucideUsers class="size-4 text-ink-gray-6" />
+                <span class="lucide-users size-4 text-ink-gray-6" />
               </div>
 
               <div class="min-w-0 flex-1 py-1.5">
@@ -92,9 +89,9 @@ const options = [
                 </div>
               </div>
 
-              <LucideChevronDown
+              <span
                 :class="[
-                  'size-4 shrink-0 text-ink-gray-4 transition-transform duration-150 ease-[cubic-bezier(0.23,1,0.32,1)]',
+                  'lucide-chevron-down size-4 shrink-0 text-ink-gray-4 transition-transform duration-150 ease-[cubic-bezier(0.23,1,0.32,1)]',
                   open ? 'rotate-180' : '',
                 ]"
               />

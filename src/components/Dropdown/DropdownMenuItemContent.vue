@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { hasRenderableContent } from '../../utils/vnode'
+import { isEmojiIconString, isLucideIconString } from '../../utils/iconString'
 import FeatherIcon from '../FeatherIcon.vue'
 import ItemListRow from '../ItemList/ItemListRow.vue'
 import Switch from '../Switch/Switch.vue'
@@ -68,8 +69,30 @@ const userSuffixContent = computed(() => {
   })
 })
 
+const itemSlotsContext = computed(() => ({
+  item: props.item,
+  close: props.close,
+  selected: isSelected.value,
+}))
+
+const itemSlotsPrefixContent = computed(() => {
+  return props.item.slots?.prefix?.(itemSlotsContext.value)
+})
+
+const itemSlotsLabelContent = computed(() => {
+  return props.item.slots?.label?.(itemSlotsContext.value)
+})
+
+const itemSlotsSuffixContent = computed(() => {
+  return props.item.slots?.suffix?.(itemSlotsContext.value)
+})
+
 const hasUserPrefix = computed(() => {
   return hasRenderableContent(userPrefixContent.value)
+})
+
+const hasItemSlotsPrefix = computed(() => {
+  return hasRenderableContent(itemSlotsPrefixContent.value)
 })
 
 const hasDynamicLabel = computed(() => {
@@ -80,13 +103,22 @@ const hasUserLabel = computed(() => {
   return hasRenderableContent(userLabelContent.value)
 })
 
+const hasItemSlotsLabel = computed(() => {
+  return hasRenderableContent(itemSlotsLabelContent.value)
+})
+
 const hasUserSuffix = computed(() => {
   return hasRenderableContent(userSuffixContent.value)
+})
+
+const hasItemSlotsSuffix = computed(() => {
+  return hasRenderableContent(itemSlotsSuffixContent.value)
 })
 
 function handleSwitchChange(value: boolean) {
   ;(props.item.onClick as ((value: boolean) => void) | undefined)?.(value)
 }
+
 </script>
 
 <template>
@@ -96,6 +128,24 @@ function handleSwitchChange(value: boolean) {
         v-if="hasUserPrefix"
         :content="userPrefixContent"
       />
+      <DropdownRenderContent
+        v-else-if="hasItemSlotsPrefix"
+        :content="itemSlotsPrefixContent"
+      />
+      <span
+        v-else-if="isLucideIconString(item.icon)"
+        :class="[item.icon, dropdownClasses.itemIcon, getDropdownIconColor(item)]"
+        aria-hidden="true"
+      />
+      <span
+        v-else-if="isEmojiIconString(item.icon)"
+        :class="[
+          dropdownClasses.itemIcon,
+          'inline-flex items-center justify-center text-base leading-none',
+        ]"
+        aria-hidden="true"
+        >{{ item.icon }}</span
+      >
       <FeatherIcon
         v-else-if="item.icon && typeof item.icon === 'string'"
         :name="item.icon"
@@ -122,6 +172,10 @@ function handleSwitchChange(value: boolean) {
         v-else-if="hasUserLabel"
         :content="userLabelContent"
       />
+      <DropdownRenderContent
+        v-else-if="hasItemSlotsLabel"
+        :content="itemSlotsLabelContent"
+      />
       <div v-else class="min-w-0">
         <div :class="['truncate', getDropdownTextColor(item)]">
           {{ item.label }}
@@ -136,6 +190,10 @@ function handleSwitchChange(value: boolean) {
       <DropdownRenderContent
         v-if="hasUserSuffix"
         :content="userSuffixContent"
+      />
+      <DropdownRenderContent
+        v-else-if="hasItemSlotsSuffix"
+        :content="itemSlotsSuffixContent"
       />
       <Switch
         v-else-if="trailing === 'switch'"
@@ -154,3 +212,15 @@ function handleSwitchChange(value: boolean) {
     </template>
   </ItemListRow>
 </template>
+
+<style scoped>
+/*
+ * The outer DropdownMenuItem paints the row background via
+ * data-[highlighted] / data-[state=checked] utilities — including the
+ * combined hover+selected state. Clear ItemListRow's own bg so the outer
+ * color always shows through; text emphasis on selected stays.
+ */
+[data-slot='item-list-row'] {
+  background-color: transparent;
+}
+</style>

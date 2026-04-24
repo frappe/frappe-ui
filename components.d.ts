@@ -28,6 +28,7 @@ declare module 'vue' {
     'CircularProgressBar.story': typeof import('./src/components/CircularProgressBar/CircularProgressBar.story.vue')['default']
     CodeBlockComponent: typeof import('./src/components/TextEditor/components/CodeBlockComponent.vue')['default']
     Combobox: typeof import('./src/components/Combobox/Combobox.vue')['default']
+    ComboboxResults: typeof import('./src/components/Combobox/ComboboxResults.vue')['default']
     CommandPalette: typeof import('./src/components/CommandPalette/CommandPalette.vue')['default']
     CommandPaletteItem: typeof import('./src/components/CommandPalette/CommandPaletteItem.vue')['default']
     ConfirmDialog: typeof import('./src/components/ConfirmDialog.vue')['default']
@@ -130,6 +131,7 @@ declare module 'vue' {
     ToastProvider: typeof import('./src/components/Toast/ToastProvider.vue')['default']
     TocNodeView: typeof import('./src/components/TextEditor/extensions/toc-node/TocNodeView.vue')['default']
     Tooltip: typeof import('./src/components/Tooltip/Tooltip.vue')['default']
+    TooltipBubble: typeof import('./src/components/Tooltip/TooltipBubble.vue')['default']
     Tree: typeof import('./src/components/Tree/Tree.vue')['default']
     WeekIcon: typeof import('./src/components/Calendar/Icon/WeekIcon.vue')['default']
   }

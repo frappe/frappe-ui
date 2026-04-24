@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, useAttrs, useSlots, watch } from 'vue'
+import { computed, useAttrs, useSlots } from 'vue'
+import { usePopoverMotion } from '../../composables/usePopoverMotion'
 import type {
   SelectNormalizedOption,
   SelectOption,
@@ -22,6 +23,10 @@ import {
   SelectValue,
   SelectViewport,
 } from 'reka-ui'
+import {
+  isEmojiIconString,
+  isLucideIconString,
+} from '../../utils/iconString'
 
 defineOptions({
   inheritAttrs: false,
@@ -35,17 +40,17 @@ const props = withDefaults(defineProps<SelectProps>(), {
   variant: 'subtle',
   placeholder: 'Select option',
   options: () => [],
+  emptyText: 'No options',
 })
 
 const attrs = useAttrs()
 const slots = useSlots()
 
 const formAttrKeys = ['name', 'required', 'autocomplete'] as const
-const keyboardOpenKeys = new Set(['Enter', ' ', 'ArrowDown', 'ArrowUp'])
 const emptyValuePrefix = '__frappe_ui_select_empty__'
 
-const contentMotion = ref<'animated' | 'instant'>('animated')
-let resetContentMotionTimeout: number | undefined
+const { motion: contentMotion, onPointerDown: markPointerDown } =
+  usePopoverMotion(open)
 
 const rootAttrs = computed(() => {
   return Object.fromEntries(
@@ -93,14 +98,7 @@ const triggerContentPaddingClasses = computed(() => {
   }[props.size]
 })
 
-const itemSize = computed<ItemListSize>(() => {
-  return {
-    sm: 'sm',
-    md: 'md',
-    lg: 'lg',
-    xl: 'xl',
-  }[props.size]
-})
+const itemSize = computed<ItemListSize>(() => props.size)
 
 const itemRootSizeClasses = computed(() => {
   return {
@@ -130,7 +128,7 @@ const triggerClasses = computed(() => {
   }[variant]
 
   return [
-    'relative inline-flex items-center gap-2 text-left outline-none transition-[background-color,border-color,box-shadow,transform] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-2 data-[state=open]:ring-2 ring-outline-gray-3 text-ink-gray-7 data-[placeholder]:text-ink-gray-4 data-[disabled]:text-ink-gray-4 enabled:active:scale-[0.99]',
+    'relative inline-flex items-center gap-2 text-left outline-none transition-[background-color,border-color,box-shadow] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-2 data-[state=open]:ring-2 ring-outline-gray-3 text-ink-gray-7 data-[placeholder]:text-ink-gray-4 data-[disabled]:text-ink-gray-4',
     triggerSizeClasses.value,
     triggerFontSizeClasses.value,
     variantClasses,
@@ -212,39 +210,6 @@ function getOptionKey(option: SelectNormalizedOption, index: number) {
   return `${index}:${typeof option.value}:${String(option.value)}`
 }
 
-function clearContentMotionResetTimeout() {
-  if (resetContentMotionTimeout) {
-    window.clearTimeout(resetContentMotionTimeout)
-    resetContentMotionTimeout = undefined
-  }
-}
-
-function handlePointerInteraction() {
-  clearContentMotionResetTimeout()
-  contentMotion.value = 'animated'
-}
-
-function handleTriggerKeydown(event: KeyboardEvent) {
-  if (!keyboardOpenKeys.has(event.key)) return
-
-  clearContentMotionResetTimeout()
-  contentMotion.value = 'instant'
-}
-
-watch(open, (isOpen) => {
-  if (isOpen || contentMotion.value !== 'instant') return
-
-  clearContentMotionResetTimeout()
-  resetContentMotionTimeout = window.setTimeout(() => {
-    contentMotion.value = 'animated'
-    resetContentMotionTimeout = undefined
-  }, 200)
-})
-
-onBeforeUnmount(() => {
-  clearContentMotionResetTimeout()
-})
-
 defineSlots<SelectSlots>()
 </script>
 
@@ -257,9 +222,7 @@ defineSlots<SelectSlots>()
       :class="[triggerClasses, attrs.class]"
       :style="attrs.style"
       :disabled="disabled"
-      @keydown="handleTriggerKeydown"
-      @pointerdown="handlePointerInteraction"
-      @pointerup="handlePointerInteraction"
+      @pointerdown="markPointerDown"
     >
       <template v-if="$slots.trigger">
         <slot
@@ -277,17 +240,55 @@ defineSlots<SelectSlots>()
           <SelectValue
             :placeholder="placeholder"
             class="max-w-full truncate opacity-0"
-          />
+          >
+            <template v-if="selectedOption">{{
+              selectedOption.label
+            }}</template>
+          </SelectValue>
         </div>
       </template>
       <template v-else>
-        <slot name="prefix" />
+        <!--
+          Prefix precedence on the trigger:
+            1. selected + `#item-prefix` slot → reuse the list's per-item
+               prefix renderer so the trigger matches the dropdown row
+               without a second slot definition.
+            2. selected + `option.icon` → auto-render the icon (lucide
+               string / emoji / component).
+            3. not selected + `#prefix` slot → user's placeholder affordance.
+        -->
+        <template v-if="selectedOption && slots['item-prefix']">
+          <slot name="item-prefix" v-bind="{ option: selectedOption }" />
+        </template>
+        <template v-else-if="selectedOption?.icon">
+          <span
+            v-if="isLucideIconString(selectedOption.icon)"
+            :class="[selectedOption.icon, 'size-4 shrink-0 text-ink-gray-6']"
+            aria-hidden="true"
+          />
+          <span
+            v-else-if="isEmojiIconString(selectedOption.icon)"
+            class="inline-flex size-4 shrink-0 items-center justify-center text-base leading-none"
+            aria-hidden="true"
+            >{{ selectedOption.icon }}</span
+          >
+          <component
+            v-else-if="typeof selectedOption.icon !== 'string'"
+            :is="selectedOption.icon"
+            class="size-4 shrink-0 text-ink-gray-6"
+          />
+        </template>
+        <slot v-else name="prefix" />
 
         <div class="grid min-w-0 text-left">
           <SelectValue
             :placeholder="placeholder"
             class="col-start-1 row-start-1 max-w-full truncate"
-          />
+          >
+            <template v-if="selectedOption">{{
+              selectedOption.label
+            }}</template>
+          </SelectValue>
           <span
             aria-hidden="true"
             class="select-trigger-sizer col-start-1 row-start-1"
@@ -317,7 +318,7 @@ defineSlots<SelectSlots>()
               data-slot="empty"
               class="px-2 py-1.5 text-base text-ink-gray-5"
             >
-              <slot name="empty">No options</slot>
+              <slot name="empty">{{ emptyText }}</slot>
             </div>
 
             <template v-else>
@@ -328,12 +329,8 @@ defineSlots<SelectSlots>()
                 :value="internalOption.internalValue"
                 data-slot="item"
                 :class="itemRootSizeClasses"
-                class="select-none rounded border-0 text-base text-ink-gray-9 data-[disabled]:text-ink-gray-4 data-[highlighted]:bg-surface-gray-2 data-[state=checked]:bg-surface-gray-2"
+                class="select-none rounded border-0 text-base text-ink-gray-9 data-[disabled]:text-ink-gray-4 data-[highlighted]:bg-surface-gray-2 data-[state=checked]:bg-surface-gray-3 data-[highlighted]:data-[state=checked]:bg-surface-gray-4"
               >
-                <SelectItemText class="sr-only">
-                  {{ internalOption.option.label }}
-                </SelectItemText>
-
                 <ItemListRow
                   :size="itemSize"
                   :selected="internalOption.option.value === model"
@@ -344,27 +341,63 @@ defineSlots<SelectSlots>()
                       name="item-prefix"
                       v-bind="{ option: internalOption.option }"
                     />
+                    <!--
+                      Auto-render `option.icon` when the consumer doesn't
+                      provide an `#item-prefix`. `lucide-*` strings route
+                      through the Tailwind plugin; component values render
+                      directly.
+                    -->
+                    <template v-if="!slots['item-prefix']">
+                      <span
+                        v-if="isLucideIconString(internalOption.option.icon)"
+                        :class="[
+                          internalOption.option.icon,
+                          'size-4 shrink-0 text-ink-gray-6',
+                        ]"
+                        aria-hidden="true"
+                      />
+                      <span
+                        v-else-if="isEmojiIconString(internalOption.option.icon)"
+                        class="inline-flex size-4 shrink-0 items-center justify-center text-base leading-none"
+                        aria-hidden="true"
+                        >{{ internalOption.option.icon }}</span
+                      >
+                      <component
+                        v-else-if="
+                          internalOption.option.icon &&
+                          typeof internalOption.option.icon !== 'string'
+                        "
+                        :is="internalOption.option.icon"
+                        class="size-4 shrink-0 text-ink-gray-6"
+                      />
+                    </template>
                   </template>
 
                   <template #label>
-                    <slot
-                      v-if="
-                        getOptionSlotName(internalOption.option) &&
-                        slots[getOptionSlotName(internalOption.option)!]
-                      "
-                      :name="getOptionSlotName(internalOption.option)!"
-                      v-bind="{ option: internalOption.option }"
-                    />
-                    <slot
-                      v-else
-                      name="item-label"
-                      v-bind="{ option: internalOption.option }"
-                    >
+                    <!--
+                      SelectItemText must wrap the visible label so reka's
+                      item-aligned positioning uses the on-screen label rect.
+                      Previously rendered as `sr-only`, which gave a 1x1 rect
+                      and mis-anchored the popup (prefix not covered).
+                    -->
+                    <SelectItemText as="div" class="min-w-0">
                       <slot
-                        name="option"
+                        v-if="
+                          getOptionSlotName(internalOption.option) &&
+                          slots[getOptionSlotName(internalOption.option)!]
+                        "
+                        :name="getOptionSlotName(internalOption.option)!"
+                        v-bind="{ option: internalOption.option }"
+                      />
+                      <slot
+                        v-else
+                        name="item-label"
                         v-bind="{ option: internalOption.option }"
                       >
-                        <div class="min-w-0">
+                        <slot
+                          name="option"
+                          v-bind="{ option: internalOption.option }"
+                        >
                           <div class="truncate">
                             {{ internalOption.option.label }}
                           </div>
@@ -374,9 +407,9 @@ defineSlots<SelectSlots>()
                           >
                             {{ internalOption.option.description }}
                           </div>
-                        </div>
+                        </slot>
                       </slot>
-                    </slot>
+                    </SelectItemText>
                   </template>
 
                   <template #suffix>
@@ -410,6 +443,16 @@ defineSlots<SelectSlots>()
   outline: none !important;
 }
 
+/*
+ * The outer item row paints its own bg via data-[highlighted] /
+ * data-[state=checked] utilities — including the combined hover+selected
+ * state. Clear ItemListRow's own bg so the outer color always shows
+ * through; text emphasis on selected stays.
+ */
+[data-slot='item'] [data-slot='item-list-row'] {
+  background-color: transparent;
+}
+
 .select-trigger-sizer::after {
   content: attr(data-width-text);
   display: block;
@@ -437,12 +480,33 @@ defineSlots<SelectSlots>()
   animation: select-content-exit 140ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-[data-slot='content-body'][data-motion='instant'] {
+/*
+ * Keyboard opens skip the scale + translate entrance, but a tiny opacity
+ * fade still runs — it masks the 1-frame position-settle reka performs
+ * after mount. ~80ms is below the perception threshold for motion but
+ * long enough to hide the jump.
+ */
+[data-slot='content'][data-state='open']
+  [data-slot='content-body'][data-motion='instant'] {
+  animation: select-content-instant-fade 80ms linear;
+}
+
+[data-slot='content'][data-state='closed']
+  [data-slot='content-body'][data-motion='instant'] {
   animation: none;
 }
 
 [data-slot='content'][data-state='closed'] {
   pointer-events: none;
+}
+
+@keyframes select-content-instant-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes select-content-enter {
@@ -470,11 +534,8 @@ defineSlots<SelectSlots>()
 }
 
 @media (prefers-reduced-motion: reduce) {
-  [data-slot='content'][data-state='open']
-    [data-slot='content-body'][data-motion='animated'],
-  [data-slot='content'][data-state='closed']
-    [data-slot='content-body'][data-motion='animated'] {
-    animation-duration: 0ms;
+  [data-slot='content-body'] {
+    animation-duration: 0ms !important;
   }
 }
 </style>

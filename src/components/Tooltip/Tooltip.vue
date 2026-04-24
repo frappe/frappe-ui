@@ -1,12 +1,6 @@
 <script setup lang="ts">
-import {
-  TooltipProvider,
-  TooltipRoot,
-  TooltipPortal,
-  TooltipTrigger,
-  TooltipContent,
-  TooltipArrow,
-} from 'reka-ui'
+import { TooltipProvider, TooltipRoot, TooltipTrigger } from 'reka-ui'
+import TooltipBubble from './TooltipBubble.vue'
 import { computed } from 'vue'
 import type { TooltipProps } from './types'
 
@@ -53,23 +47,19 @@ defineSlots<{
       <TooltipTrigger as-child>
         <slot />
       </TooltipTrigger>
-      <TooltipPortal>
-        <TooltipContent
-          v-if="props.text || $slots.body || $slots.content"
-          :side="props.placement"
-          :side-offset="4"
-          class="z-[100]"
-        >
-          <slot name="body">
-            <div
-              class="rounded bg-surface-gray-7 px-2 py-1 text-xs text-ink-white shadow-xl"
-            >
-              <slot name="content">{{ props.text }}</slot>
-            </div>
-          </slot>
-          <TooltipArrow :class="props.arrowClass" :width="8" :height="4" />
-        </TooltipContent>
-      </TooltipPortal>
+      <TooltipBubble
+        v-if="props.text || $slots.body || $slots.content"
+        :side="props.placement"
+        :text="props.text"
+        :arrow-class="props.arrowClass"
+      >
+        <template v-if="$slots.body" #body>
+          <slot name="body" />
+        </template>
+        <template v-if="$slots.content" #content>
+          <slot name="content" />
+        </template>
+      </TooltipBubble>
     </TooltipRoot>
   </TooltipProvider>
 </template>

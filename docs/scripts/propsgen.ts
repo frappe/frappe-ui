@@ -30,6 +30,26 @@ function parseTypeStr(type: string) {
   return type
 }
 
+// Return the `@deprecated` message, `true` if the tag is present without
+// a message, or `undefined` if the prop/slot/emit is not deprecated.
+// Callers should omit the field when this returns `undefined` so the
+// generated data stays clean.
+function getDeprecation(
+  tags: { name: string; text?: string }[] | undefined,
+): string | true | undefined {
+  const tag = tags?.find((t) => t.name === 'deprecated')
+  if (!tag) return undefined
+  return tag.text?.trim() || true
+}
+
+function withOptional<T extends Record<string, unknown>>(obj: T): T {
+  const result: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(obj)) {
+    if (value !== undefined) result[key] = value
+  }
+  return result as T
+}
+
 function formatObjectKey(key: string) {
   return /^[A-Za-z_$][\w$]*$/.test(key) ? key : `'${key}'`
 }
@@ -168,27 +188,36 @@ function genMetaTable(name: string, data: any) {
   ]
 
   const props = data.props.filter((x: any) => !x.global)
-  const arrProps = props.map((x: any) => ({
-    name: x.name,
-    description: x.description,
-    required: x.required,
-    type: parseTypeStr(x.type),
-    default: x.default,
-  }))
+  const arrProps = props.map((x: any) =>
+    withOptional({
+      name: x.name,
+      description: x.description,
+      required: x.required,
+      type: parseTypeStr(x.type),
+      default: x.default,
+      deprecated: getDeprecation(x.tags),
+    }),
+  )
 
   const slots = data.slots.filter((x: any) => !x.global)
-  const arrSlots = slots.map((x: any) => ({
-    name: x.name,
-    description: x.description,
-    type: x.type.slice(0, 100),
-  }))
+  const arrSlots = slots.map((x: any) =>
+    withOptional({
+      name: x.name,
+      description: x.description,
+      type: x.type.slice(0, 100),
+      deprecated: getDeprecation(x.tags),
+    }),
+  )
 
   const emits = data.events.filter((x: any) => !x.global)
-  const arrEmits = emits.map((x: any) => ({
-    name: x.name,
-    description: getEventDescription(x.name, x.description),
-    type: x.type,
-  }))
+  const arrEmits = emits.map((x: any) =>
+    withOptional({
+      name: x.name,
+      description: getEventDescription(x.name, x.description),
+      type: x.type,
+      deprecated: getDeprecation(x.tags),
+    }),
+  )
 
   if (arrProps.length > 0) {
     scriptLines.push(`\n  const propsData = ${arrToExpression(arrProps)}`)

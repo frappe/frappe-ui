@@ -2,39 +2,50 @@
 import { ref } from 'vue'
 import { Combobox } from 'frappe-ui'
 
-const value = ref('')
+type Space = { label: string; value: string; accent: string }
 
-const options = [
+const value = ref<string>('platform-infra')
+
+const spaces: { group: string; options: Space[] }[] = [
   {
-    group: 'Fruits',
+    group: 'Engineering',
     options: [
-      { label: 'Apple', value: 'apple', icon: '🍎' },
-      { label: 'Banana', value: 'banana', icon: '🍌' },
-      { label: 'Orange', value: 'orange', icon: '🍊' },
-      { label: 'Grape', value: 'grape', icon: '🍇' },
+      { label: 'Platform Infra', value: 'platform-infra', accent: 'bg-blue-500' },
+      { label: 'Mobile 2.0', value: 'mobile-2', accent: 'bg-red-500' },
+      { label: 'Growth', value: 'growth', accent: 'bg-amber-500' },
     ],
   },
   {
-    group: 'Vegetables',
+    group: 'Product',
     options: [
-      { label: 'Carrot', value: 'carrot', icon: '🥕' },
-      { label: 'Broccoli', value: 'broccoli', icon: '🥦' },
-      { label: 'Tomato', value: 'tomato', icon: '🍅' },
-      { label: 'Lettuce', value: 'lettuce', icon: '🥬' },
+      { label: 'Discovery', value: 'discovery', accent: 'bg-cyan-500' },
+      { label: 'Roadmap', value: 'roadmap', accent: 'bg-green-500' },
+      { label: 'Feedback', value: 'feedback', accent: 'bg-violet-500' },
     ],
   },
   {
-    group: 'Proteins',
+    group: 'Design',
     options: [
-      { label: 'Chicken', value: 'chicken', icon: '🍗' },
-      { label: 'Fish', value: 'fish', icon: '🐟' },
-      { label: 'Beef', value: 'beef', icon: '🥩' },
-      { label: 'Tofu', value: 'tofu', icon: '🪤', disabled: true },
+      { label: 'System', value: 'system', accent: 'bg-teal-500' },
+      { label: 'Research', value: 'research', accent: 'bg-pink-500' },
+      { label: 'Brand', value: 'brand', accent: 'bg-orange-500' },
     ],
   },
 ]
 </script>
 
 <template>
-  <Combobox v-model="value" :options="options" placeholder="Pick an item" />
+  <Combobox
+    v-model="value"
+    :options="spaces"
+    placeholder="Move to space…"
+    class="w-72"
+  >
+    <template #item-prefix="{ item }">
+      <div
+        :class="['size-2.5 rounded-[3px]', (item as Space).accent]"
+        aria-hidden="true"
+      />
+    </template>
+  </Combobox>
 </template>

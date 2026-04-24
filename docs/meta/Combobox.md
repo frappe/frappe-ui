@@ -6,103 +6,220 @@
 
   const propsData = [
   {
+    name: 'options',
+    description: 'Options rendered in the popover.',
+    required: false,
+    type: 'ComboboxOption[]',
+    default: '[]'
+  },
+  {
+    name: 'trigger',
+    description: 'Shape of the trigger.\n- `\'input\'` (default): user types directly into the trigger\n- `\'button\'`: render a button trigger; search input moves into the\n  popover header. Label + prefix auto-derive from the selected option.',
+    required: false,
+    type: '"input" | "button"',
+    default: '"input"'
+  },
+  {
     name: 'variant',
-    description: 'Visual style of the combobox',
+    description: 'Visual style of the combobox.',
     required: false,
     type: 'ComboboxVariant',
     default: '"subtle"'
   },
   {
-    name: 'options',
-    description: 'List of options to display',
-    required: true,
-    type: 'ComboboxOption[]',
-    default: '[]'
-  },
-  {
-    name: 'modelValue',
-    description: 'Currently selected value (v-model)',
+    name: 'size',
+    description: 'Size of the trigger and option rows.',
     required: false,
-    type: 'string | null',
-    default: undefined
+    type: 'ComboboxSize',
+    default: '"sm"'
   },
   {
     name: 'placeholder',
-    description: 'Placeholder text shown when no value is selected',
+    description: 'Placeholder text shown when no value is selected.',
     required: false,
     type: 'string',
-    default: undefined
+    default: '"Select option"'
   },
   {
     name: 'disabled',
-    description: 'Disables the combobox',
+    description: 'Disables the combobox.',
     required: false,
     type: 'boolean',
-    default: undefined
+    default: 'false'
+  },
+  {
+    name: 'id',
+    description: 'Optional HTML id forwarded to the input element.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'open',
+    description: 'Controls the popover visibility.',
+    required: false,
+    type: 'boolean'
   },
   {
     name: 'openOnFocus',
-    description: 'Opens the dropdown when the input is focused',
+    description: 'Opens the popover when the input receives focus.',
     required: false,
     type: 'boolean',
-    default: undefined
+    default: 'false'
   },
   {
     name: 'openOnClick',
-    description: 'Opens the dropdown when the input is clicked',
+    description: 'Opens the popover when the input is clicked.',
     required: false,
     type: 'boolean',
-    default: undefined
+    default: 'false'
   },
   {
-    name: 'placement',
-    description: 'Dropdown placement relative to the input',
+    name: 'side',
+    description: 'Preferred popover side.',
     required: false,
-    type: '"start" | "center" | "end"',
-    default: undefined
+    type: 'PopoverSide',
+    default: '"bottom"'
+  },
+  {
+    name: 'align',
+    description: 'Preferred popover alignment.',
+    required: false,
+    type: 'PopoverAlign'
+  },
+  {
+    name: 'offset',
+    description: 'Gap between trigger and content.',
+    required: false,
+    type: 'number',
+    default: '4'
+  },
+  {
+    name: 'portalTo',
+    description: 'Teleport target for the popover content.',
+    required: false,
+    type: 'string | HTMLElement',
+    default: '"body"'
   },
   {
     name: 'allowCustomValue',
-    description: 'Custom Value if no results found & based on searchterm',
+    description: 'Accepts the typed query as the value when nothing matches.',
     required: false,
     type: 'boolean',
-    default: undefined
+    default: 'false'
+  },
+  {
+    name: 'loading',
+    description: 'Replaces the results with a loading state.',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  },
+  {
+    name: 'emptyText',
+    description: 'Fallback empty-state copy.',
+    required: false,
+    type: 'string',
+    default: '"No results"'
+  },
+  {
+    name: 'placement',
+    description: 'Alignment of the popover along the trigger edge.',
+    required: false,
+    type: 'PopoverAlign',
+    deprecated: 'use `align` instead; `placement` is kept as a back-compat alias'
+  },
+  {
+    name: 'modelValue',
+    description: '',
+    required: false,
+    type: 'string | null',
+    default: 'null'
   }
 ]
 
   const slotsData = [
   {
+    name: 'trigger',
+    description: 'Fully custom trigger renderer.',
+    type: 'ComboboxTriggerSlotProps'
+  },
+  {
     name: 'prefix',
-    description: 'Custom content rendered before the input (left side)',
+    description: 'Content rendered before the default input.',
+    type: 'any'
+  },
+  {
+    name: 'item-prefix',
+    description: 'Shared content rendered before the standard row label.',
+    type: 'ComboboxItemSlotProps'
+  },
+  {
+    name: 'item-label',
+    description: 'Shared content rendered for the standard row label area.',
+    type: 'ComboboxItemSlotProps'
+  },
+  {
+    name: 'item-suffix',
+    description: 'Shared content rendered after the standard row label area.',
+    type: 'ComboboxItemSlotProps'
+  },
+  {
+    name: 'item',
+    description: 'Replaces the entire row.',
+    type: 'ComboboxItemSlotProps'
+  },
+  {
+    name: 'group-label',
+    description: 'Custom renderer for group labels.',
+    type: 'ComboboxGroupLabelSlotProps'
+  },
+  {
+    name: 'empty',
+    description: 'Fallback content rendered when there are no results.',
+    type: 'ComboboxEmptySlotProps'
+  },
+  {
+    name: 'footer',
+    description: 'Content rendered after the list.',
     type: 'any'
   }
 ]
 
   const emitsData = [
   {
+    name: 'input',
+    description: '',
+    type: '[value: string]'
+  },
+  {
     name: 'update:modelValue',
     description: 'Fired when the model value changes.',
-    type: '[]'
+    type: '[value: string | null]'
+  },
+  {
+    name: 'update:open',
+    description: 'Fired when the open state changes.',
+    type: '[value: boolean]'
+  },
+  {
+    name: 'update:query',
+    description: 'Fired when the query changes.',
+    type: '[value: string]'
   },
   {
     name: 'update:selectedOption',
     description: 'Fired when the selected option changes.',
-    type: '[]'
+    type: '[option: ComboboxSelectableOption | ComboboxCustomOption | null]'
   },
   {
     name: 'focus',
     description: '',
-    type: '[]'
+    type: '[event: FocusEvent]'
   },
   {
     name: 'blur',
     description: '',
-    type: '[]'
-  },
-  {
-    name: 'input',
-    description: '',
-    type: '[]'
+    type: '[event: FocusEvent]'
   }
 ]
 </script>
