@@ -11,7 +11,6 @@ import {
 } from 'reka-ui'
 import LucideChevronDown from '~icons/lucide/chevron-down'
 import LucideSearch from '~icons/lucide/search'
-import Button from '../Button/Button.vue'
 import ComboboxResults from './ComboboxResults.vue'
 import { usePopoverMotion } from '../../composables/usePopoverMotion'
 import type {
@@ -366,63 +365,82 @@ defineSlots<ComboboxSlots>()
            popover; the search input moves into the popover header.
     -->
     <template v-if="isButtonMode">
+      <!--
+        ComboboxTrigger already renders a native <button> by default —
+        use it directly rather than wrapping a `<Button>` (which goes
+        through Tooltip with inheritAttrs:false and would drop reka's
+        `tabindex`/`aria-expanded` before they reach the real element).
+
+        ComboboxAnchor `as-child` pins the popover's positioning
+        reference to the trigger element itself, so we don't need a
+        separate DOM node for anchoring.
+
+        For `#trigger` slot callers we additionally flip ComboboxTrigger
+        to `as-child` so their own button-like element becomes the DOM
+        root.
+      -->
       <ComboboxAnchor as-child>
-        <!--
-          `as-child` forwards trigger behavior to the child element
-          instead of wrapping it in ComboboxTrigger's default <button>.
-          Without this, the built-in <Button> below (and any consumer-
-          supplied <button>-like trigger slot) would nest inside another
-          <button>, which is invalid HTML and breaks a11y.
-        -->
         <ComboboxTrigger
-          as-child
           data-slot="trigger"
           :data-state="open ? 'open' : 'closed'"
           :data-disabled="disabled ? '' : undefined"
           :data-variant="variant"
           :data-size="size"
           :disabled="disabled"
-          :class="attrs.class"
+          :class="[triggerClasses, attrs.class]"
           :style="attrs.style"
+          :as-child="$slots.trigger ? true : undefined"
           @pointerdown="markPointerDown"
         >
+        <slot
+          v-if="$slots.trigger"
+          name="trigger"
+          v-bind="{
+            open,
+            disabled: !!disabled,
+            query: typedQuery,
+            selectedOption,
+            displayValue,
+          }"
+        />
+
+        <template v-else>
+          <!--
+            Prefix priority when trigger="button":
+              1. selected + #item-prefix → reuse the per-row prefix slot
+              2. selected + option.icon → render the icon component
+              3. no selection + #prefix → consumer's placeholder icon
+          -->
           <slot
-            v-if="$slots.trigger"
-            name="trigger"
+            v-if="selectedOption && $slots['item-prefix']"
+            name="item-prefix"
             v-bind="{
-              open,
-              disabled: !!disabled,
-              query: typedQuery,
-              selectedOption,
-              displayValue,
+              item: selectedOption,
+              query: '',
+              selected: true,
             }"
           />
+          <component
+            v-else-if="selectedOption?.icon"
+            :is="selectedOption.icon"
+            class="size-4"
+          />
+          <slot v-else-if="!selectedOption && $slots.prefix" name="prefix" />
 
-          <Button v-else :variant="variant" :size="size" :disabled="disabled">
-            <!--
-              Prefix priority when trigger="button":
-                1. selected + #item-prefix → reuse the per-row prefix slot
-                2. selected + option.icon → render the icon component
-                3. no selection + #prefix → consumer's placeholder icon
-            -->
-            <template v-if="selectedOption && $slots['item-prefix']" #prefix>
-              <slot
-                name="item-prefix"
-                v-bind="{
-                  item: selectedOption,
-                  query: '',
-                  selected: true,
-                }"
-              />
-            </template>
-            <template v-else-if="selectedOption?.icon" #prefix>
-              <component :is="selectedOption.icon" class="size-4" />
-            </template>
-            <template v-else-if="!selectedOption && $slots.prefix" #prefix>
-              <slot name="prefix" />
-            </template>
+          <span
+            :class="[
+              'min-w-0 flex-1 truncate text-left',
+              !selectedOption && 'text-ink-gray-4',
+            ]"
+          >
             {{ selectedOption?.label ?? placeholder }}
-          </Button>
+          </span>
+
+          <LucideChevronDown
+            class="ml-auto size-4 shrink-0 text-ink-gray-4 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] data-[state=open]:rotate-180"
+            :data-state="open ? 'open' : 'closed'"
+          />
+        </template>
         </ComboboxTrigger>
       </ComboboxAnchor>
     </template>

@@ -574,6 +574,19 @@ describe('Combobox', () => {
       cy.get('[data-slot="trigger"] button').should('not.exist')
       cy.get('[data-slot="trigger"]').should('contain.text', 'Mango')
     })
+
+    it('trigger="button" is keyboard-focusable and opens on Enter', () => {
+      cy.mount(Combobox, {
+        props: { options: fruits, trigger: 'button', placeholder: 'Pick' },
+      })
+
+      cy.get('[data-slot="trigger"]')
+        .focus()
+        .should('be.focused')
+        .type('{enter}')
+
+      cy.get('[data-slot="content-search"]').should('exist')
+    })
   })
 
   describe('imperative API', () => {
