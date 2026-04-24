@@ -300,7 +300,7 @@ defineSlots<SelectSlots>()
                 :value="internalOption.internalValue"
                 data-slot="item"
                 :class="itemRootSizeClasses"
-                class="select-none rounded border-0 text-base text-ink-gray-9 data-[disabled]:text-ink-gray-4 data-[highlighted]:bg-surface-gray-2 data-[state=checked]:bg-surface-gray-2"
+                class="select-none rounded border-0 text-base text-ink-gray-9 data-[disabled]:text-ink-gray-4 data-[highlighted]:bg-surface-gray-2 data-[state=checked]:bg-surface-gray-3"
               >
                 <SelectItemText class="sr-only">
                   {{ internalOption.option.label }}

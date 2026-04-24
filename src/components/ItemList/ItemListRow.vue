@@ -30,7 +30,7 @@ const stateClasses = computed(() => {
   }
 
   return isEmphasized.value
-    ? 'bg-surface-gray-2 text-ink-gray-8'
+    ? 'bg-surface-gray-3 text-ink-gray-8'
     : 'text-ink-gray-7'
 })
 
