@@ -15,22 +15,18 @@ const { frontmatter } = useData()
 
 <template>
   <FrappeUIProvider>
-    <div
-      v-if="frontmatter.layout === 'home'"
-      class="h-full flex flex-col justify-between flex-1 w-full"
-    >
-      <Navbar />
-      <Home />
-    </div>
+    <div class="grid lg:grid-cols-[220px_1fr]">
+      <Sidebar class="hidden lg:flex" />
 
-    <template v-else>
-      <div class="grid lg:grid-cols-[220px_1fr]">
-        <Sidebar class="hidden lg:flex" />
+      <div class="min-w-0 w-full">
+        <Navbar :isDocs="true" />
+        <Sidebar v-if="state.mobsidebar" class="lg:hidden" />
 
-        <div class="w-full">
-          <Navbar :isDocs="true" />
-          <Sidebar v-if="state.mobsidebar" class="lg:hidden" />
+        <template v-if="frontmatter.layout === 'home'">
+          <Home />
+        </template>
 
+        <template v-else>
           <div class="p-5 lg:p-10 flex gap-5">
             <main class="mx-auto lg:max-w-[740px] flex-1">
               <Content
@@ -41,8 +37,8 @@ const { frontmatter } = useData()
             </main>
             <OnThisPage />
           </div>
-        </div>
+        </template>
       </div>
-    </template>
+    </div>
   </FrappeUIProvider>
 </template>

@@ -108,10 +108,6 @@ const devBranch = typeof __DEV_BRANCH__ !== 'undefined' ? __DEV_BRANCH__ : ''
         class="gap-3 md:flex items-center w-full ml-auto md:w-auto"
         :class="{ flex: state.mobnavbar, hidden: !state.mobnavbar }"
       >
-        <a :href="withBase('/docs/getting-started')" v-if="route.path == '/'">
-          Docs
-        </a>
-
         <Badge
           v-if="devBranch"
           :title="`git branch: ${devBranch}`"
