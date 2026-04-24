@@ -3,6 +3,7 @@ interface ItemProp {
   name: string
   description?: string
   type?: string
+  deprecated?: string | boolean
 }
 
 interface Props {
@@ -38,7 +39,14 @@ defineProps<Props>()
             <div
               class="font-mono text-xs font-medium leading-6 text-ink-gray-9"
             >
-              {{ x.name }}
+              <span :class="{ 'line-through opacity-70': x.deprecated }">
+                {{ x.name }}
+              </span>
+              <span
+                v-if="x.deprecated"
+                class="ml-1 rounded bg-surface-amber-1 px-1 py-0.5 font-sans text-[10px] font-medium text-ink-amber-3"
+                >deprecated</span
+              >
             </div>
           </td>
 
@@ -53,6 +61,12 @@ defineProps<Props>()
               class="mt-1 whitespace-pre-wrap font-mono text-xs leading-6 text-ink-gray-6"
             >
               {{ x.description }}
+            </p>
+            <p
+              v-if="typeof x.deprecated === 'string'"
+              class="mt-1 whitespace-pre-wrap font-mono text-xs leading-6 text-ink-amber-3"
+            >
+              Deprecated — {{ x.deprecated }}
             </p>
           </td>
         </tr>
