@@ -1,26 +1,23 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Dropdown } from 'frappe-ui'
-import LucidePen from '~icons/lucide/pen'
-import LucideCopy from '~icons/lucide/copy'
-import LucideTrash2 from '~icons/lucide/trash-2'
+import { Dropdown, type DropdownOptions } from 'frappe-ui'
 
 const lastAction = ref('')
 
-const actions = [
+const actions: DropdownOptions = [
   {
     label: 'Edit',
-    icon: LucidePen,
+    icon: 'lucide-pen',
     onClick: () => (lastAction.value = 'Edited'),
   },
   {
     label: 'Duplicate',
-    icon: LucideCopy,
+    icon: 'lucide-copy',
     onClick: () => (lastAction.value = 'Duplicated'),
   },
   {
     label: 'Delete',
-    icon: LucideTrash2,
+    icon: 'lucide-trash-2',
     theme: 'red',
     onClick: () => (lastAction.value = 'Deleted'),
   },

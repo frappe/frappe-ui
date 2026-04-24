@@ -87,6 +87,14 @@ const hasUserSuffix = computed(() => {
 function handleSwitchChange(value: boolean) {
   ;(props.item.onClick as ((value: boolean) => void) | undefined)?.(value)
 }
+
+// `lucide-*` strings route through the Tailwind plugin's mask-based
+// utility (see tailwind/lucideIconsPlugin.js). Everything else that's a
+// string falls back to FeatherIcon for back-compat with existing call
+// sites that pass feather names like `edit` / `copy`.
+function isLucideIconString(icon: unknown): icon is string {
+  return typeof icon === 'string' && icon.startsWith('lucide-')
+}
 </script>
 
 <template>
@@ -95,6 +103,11 @@ function handleSwitchChange(value: boolean) {
       <DropdownRenderContent
         v-if="hasUserPrefix"
         :content="userPrefixContent"
+      />
+      <span
+        v-else-if="isLucideIconString(item.icon)"
+        :class="[item.icon, dropdownClasses.itemIcon, getDropdownIconColor(item)]"
+        aria-hidden="true"
       />
       <FeatherIcon
         v-else-if="item.icon && typeof item.icon === 'string'"

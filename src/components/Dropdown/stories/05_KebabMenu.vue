@@ -1,11 +1,6 @@
 <script setup lang="ts">
-import { Button, Dropdown } from 'frappe-ui'
+import { Button, Dropdown, type DropdownOptions } from 'frappe-ui'
 import LucideMoreHorizontal from '~icons/lucide/more-horizontal'
-import LucidePen from '~icons/lucide/pen'
-import LucideCopy from '~icons/lucide/copy'
-import LucideShare2 from '~icons/lucide/share-2'
-import LucideArchive from '~icons/lucide/archive'
-import LucideTrash2 from '~icons/lucide/trash-2'
 
 type Task = { title: string; meta: string }
 
@@ -15,24 +10,24 @@ const tasks: Task[] = [
   { title: 'Audit selection components', meta: 'Backlog · Platform' },
 ]
 
-function rowActions(task: Task) {
+function rowActions(task: Task): DropdownOptions {
   return [
     {
       group: 'Manage',
       items: [
         {
           label: 'Rename',
-          icon: LucidePen,
+          icon: 'lucide-pen',
           onClick: () => console.log('rename', task.title),
         },
         {
           label: 'Duplicate',
-          icon: LucideCopy,
+          icon: 'lucide-copy',
           onClick: () => console.log('duplicate', task.title),
         },
         {
           label: 'Share',
-          icon: LucideShare2,
+          icon: 'lucide-share-2',
           onClick: () => console.log('share', task.title),
         },
       ],
@@ -42,12 +37,12 @@ function rowActions(task: Task) {
       items: [
         {
           label: 'Archive',
-          icon: LucideArchive,
+          icon: 'lucide-archive',
           onClick: () => console.log('archive', task.title),
         },
         {
           label: 'Delete',
-          icon: LucideTrash2,
+          icon: 'lucide-trash-2',
           theme: 'red',
           onClick: () => console.log('delete', task.title),
         },

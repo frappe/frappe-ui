@@ -1,40 +1,31 @@
 <script setup lang="ts">
-import { Dropdown } from 'frappe-ui'
-import LucideShare2 from '~icons/lucide/share-2'
-import LucideLink from '~icons/lucide/link'
-import LucideUserPlus from '~icons/lucide/user-plus'
-import LucideMail from '~icons/lucide/mail'
-import LucideMessageCircle from '~icons/lucide/message-circle'
-import LucideFolderInput from '~icons/lucide/folder-input'
-import LucideInbox from '~icons/lucide/inbox'
-import LucideCheckCircle from '~icons/lucide/check-circle'
-import LucideTrash2 from '~icons/lucide/trash-2'
+import { Dropdown, type DropdownOptions } from 'frappe-ui'
 
-const actions = [
+const actions: DropdownOptions = [
   {
     group: 'Manage',
     items: [
       {
         label: 'Share',
-        icon: LucideShare2,
+        icon: 'lucide-share-2',
         submenu: [
           {
             label: 'Copy link',
-            icon: LucideLink,
+            icon: 'lucide-link',
             onClick: () => console.log('copy link'),
           },
           {
             label: 'Invite people',
-            icon: LucideUserPlus,
+            icon: 'lucide-user-plus',
             submenu: [
               {
                 label: 'By email',
-                icon: LucideMail,
+                icon: 'lucide-mail',
                 onClick: () => console.log('invite by email'),
               },
               {
                 label: 'Send to Slack',
-                icon: LucideMessageCircle,
+                icon: 'lucide-message-circle',
                 onClick: () => console.log('send to slack'),
               },
             ],
@@ -43,16 +34,16 @@ const actions = [
       },
       {
         label: 'Move to',
-        icon: LucideFolderInput,
+        icon: 'lucide-folder-input',
         submenu: [
           {
             label: 'Backlog',
-            icon: LucideInbox,
+            icon: 'lucide-inbox',
             onClick: () => console.log('move to backlog'),
           },
           {
             label: 'Done',
-            icon: LucideCheckCircle,
+            icon: 'lucide-check-circle',
             onClick: () => console.log('move to done'),
           },
         ],
@@ -64,7 +55,7 @@ const actions = [
     items: [
       {
         label: 'Delete',
-        icon: LucideTrash2,
+        icon: 'lucide-trash-2',
         theme: 'red',
         onClick: () => console.log('delete'),
       },

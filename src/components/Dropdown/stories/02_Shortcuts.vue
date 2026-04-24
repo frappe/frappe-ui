@@ -1,23 +1,24 @@
 <script setup lang="ts">
 import { Dropdown } from 'frappe-ui'
-import LucidePlus from '~icons/lucide/plus'
-import LucidePen from '~icons/lucide/pen'
-import LucideCopy from '~icons/lucide/copy'
-import LucideTrash2 from '~icons/lucide/trash-2'
 
 type FileAction = {
   label: string
-  icon: any
+  icon: string
   shortcut: string[]
   theme?: 'red'
   onClick?: () => void
 }
 
 const actions: FileAction[] = [
-  { label: 'New document', icon: LucidePlus, shortcut: ['⌘', 'N'] },
-  { label: 'Rename', icon: LucidePen, shortcut: ['F2'] },
-  { label: 'Duplicate', icon: LucideCopy, shortcut: ['⌘', 'D'] },
-  { label: 'Delete', icon: LucideTrash2, shortcut: ['⌫'], theme: 'red' },
+  { label: 'New document', icon: 'lucide-plus', shortcut: ['⌘', 'N'] },
+  { label: 'Rename', icon: 'lucide-pen', shortcut: ['F2'] },
+  { label: 'Duplicate', icon: 'lucide-copy', shortcut: ['⌘', 'D'] },
+  {
+    label: 'Delete',
+    icon: 'lucide-trash-2',
+    shortcut: ['⌫'],
+    theme: 'red',
+  },
 ]
 </script>
 

@@ -1,10 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { Dropdown } from 'frappe-ui'
-import LucideBell from '~icons/lucide/bell'
-import LucideEye from '~icons/lucide/eye'
-import LucideZap from '~icons/lucide/zap'
-import LucideSave from '~icons/lucide/save'
 
 const notifications = ref(true)
 const readReceipts = ref(true)
@@ -14,28 +10,28 @@ const autoSave = ref(true)
 const preferences = computed(() => [
   {
     label: 'Notifications',
-    icon: LucideBell,
+    icon: 'lucide-bell',
     switch: true,
     switchValue: notifications.value,
     onClick: (value: boolean) => (notifications.value = value),
   },
   {
     label: 'Read receipts',
-    icon: LucideEye,
+    icon: 'lucide-eye',
     switch: true,
     switchValue: readReceipts.value,
     onClick: (value: boolean) => (readReceipts.value = value),
   },
   {
     label: 'Focus mode',
-    icon: LucideZap,
+    icon: 'lucide-zap',
     switch: true,
     switchValue: focusMode.value,
     onClick: (value: boolean) => (focusMode.value = value),
   },
   {
     label: 'Auto-save drafts',
-    icon: LucideSave,
+    icon: 'lucide-save',
     switch: true,
     switchValue: autoSave.value,
     onClick: (value: boolean) => (autoSave.value = value),
