@@ -69,8 +69,30 @@ const userSuffixContent = computed(() => {
   })
 })
 
+const itemSlotsContext = computed(() => ({
+  item: props.item,
+  close: props.close,
+  selected: isSelected.value,
+}))
+
+const itemSlotsPrefixContent = computed(() => {
+  return props.item.slots?.prefix?.(itemSlotsContext.value)
+})
+
+const itemSlotsLabelContent = computed(() => {
+  return props.item.slots?.label?.(itemSlotsContext.value)
+})
+
+const itemSlotsSuffixContent = computed(() => {
+  return props.item.slots?.suffix?.(itemSlotsContext.value)
+})
+
 const hasUserPrefix = computed(() => {
   return hasRenderableContent(userPrefixContent.value)
+})
+
+const hasItemSlotsPrefix = computed(() => {
+  return hasRenderableContent(itemSlotsPrefixContent.value)
 })
 
 const hasDynamicLabel = computed(() => {
@@ -81,8 +103,16 @@ const hasUserLabel = computed(() => {
   return hasRenderableContent(userLabelContent.value)
 })
 
+const hasItemSlotsLabel = computed(() => {
+  return hasRenderableContent(itemSlotsLabelContent.value)
+})
+
 const hasUserSuffix = computed(() => {
   return hasRenderableContent(userSuffixContent.value)
+})
+
+const hasItemSlotsSuffix = computed(() => {
+  return hasRenderableContent(itemSlotsSuffixContent.value)
 })
 
 function handleSwitchChange(value: boolean) {
@@ -97,6 +127,10 @@ function handleSwitchChange(value: boolean) {
       <DropdownRenderContent
         v-if="hasUserPrefix"
         :content="userPrefixContent"
+      />
+      <DropdownRenderContent
+        v-else-if="hasItemSlotsPrefix"
+        :content="itemSlotsPrefixContent"
       />
       <span
         v-else-if="isLucideIconString(item.icon)"
@@ -138,6 +172,10 @@ function handleSwitchChange(value: boolean) {
         v-else-if="hasUserLabel"
         :content="userLabelContent"
       />
+      <DropdownRenderContent
+        v-else-if="hasItemSlotsLabel"
+        :content="itemSlotsLabelContent"
+      />
       <div v-else class="min-w-0">
         <div :class="['truncate', getDropdownTextColor(item)]">
           {{ item.label }}
@@ -152,6 +190,10 @@ function handleSwitchChange(value: boolean) {
       <DropdownRenderContent
         v-if="hasUserSuffix"
         :content="userSuffixContent"
+      />
+      <DropdownRenderContent
+        v-else-if="hasItemSlotsSuffix"
+        :content="itemSlotsSuffixContent"
       />
       <Switch
         v-else-if="trailing === 'switch'"

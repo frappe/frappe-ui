@@ -6,13 +6,6 @@
 
   const propsData = [
   {
-    name: 'modelValue',
-    description: 'Currently selected value (v-model).',
-    required: false,
-    type: 'string | null',
-    default: undefined
-  },
-  {
     name: 'options',
     description: 'Options rendered in the popover.',
     required: false,
@@ -23,7 +16,7 @@
     name: 'trigger',
     description: 'Shape of the trigger.\n- `\'input\'` (default): user types directly into the trigger\n- `\'button\'`: render a button trigger; search input moves into the\n  popover header. Label + prefix auto-derive from the selected option.',
     required: false,
-    type: '"button" | "input"',
+    type: '"input" | "button"',
     default: '"input"'
   },
   {
@@ -58,15 +51,13 @@
     name: 'id',
     description: 'Optional HTML id forwarded to the input element.',
     required: false,
-    type: 'string',
-    default: undefined
+    type: 'string'
   },
   {
     name: 'open',
     description: 'Controls the popover visibility.',
     required: false,
-    type: 'boolean',
-    default: undefined
+    type: 'boolean'
   },
   {
     name: 'openOnFocus',
@@ -93,8 +84,7 @@
     name: 'align',
     description: 'Preferred popover alignment.',
     required: false,
-    type: 'PopoverAlign',
-    default: undefined
+    type: 'PopoverAlign'
   },
   {
     name: 'offset',
@@ -136,7 +126,14 @@
     description: 'Alignment of the popover along the trigger edge.',
     required: false,
     type: 'PopoverAlign',
-    default: undefined
+    deprecated: 'use `align` instead; `placement` is kept as a back-compat alias'
+  },
+  {
+    name: 'modelValue',
+    description: '',
+    required: false,
+    type: 'string | null',
+    default: 'null'
   }
 ]
 
@@ -190,24 +187,24 @@
 
   const emitsData = [
   {
-    name: 'update:modelValue',
-    description: 'Fired when the model value changes.',
-    type: '[value: string | null]'
-  },
-  {
-    name: 'update:query',
-    description: 'Fired when the query changes.',
-    type: '[value: string]'
-  },
-  {
     name: 'input',
     description: '',
     type: '[value: string]'
   },
   {
+    name: 'update:modelValue',
+    description: 'Fired when the model value changes.',
+    type: '[value: string | null]'
+  },
+  {
     name: 'update:open',
     description: 'Fired when the open state changes.',
     type: '[value: boolean]'
+  },
+  {
+    name: 'update:query',
+    description: 'Fired when the query changes.',
+    type: '[value: string]'
   },
   {
     name: 'update:selectedOption',

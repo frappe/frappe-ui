@@ -6,59 +6,163 @@
 
   const propsData = [
   {
+    name: 'modelValue',
+    description: 'Array of selected option values.',
+    required: false,
+    type: 'string[]',
+    default: '[]'
+  },
+  {
+    name: 'options',
+    description: 'Options rendered in the popover.',
+    required: false,
+    type: 'MultiSelectOptions',
+    default: '[]'
+  },
+  {
+    name: 'variant',
+    description: 'Visual style of the trigger.',
+    required: false,
+    type: 'MultiSelectVariant',
+    default: '"subtle"'
+  },
+  {
+    name: 'size',
+    description: 'Size of the trigger and option rows.',
+    required: false,
+    type: 'MultiSelectSize',
+    default: '"sm"'
+  },
+  {
     name: 'placeholder',
-    description: 'Placeholder text shown when no item is selected',
+    description: 'Placeholder text shown when no value is selected.',
     required: false,
     type: 'string',
     default: '"Select option"'
   },
   {
-    name: 'options',
-    description: 'Options available to select from',
-    required: true,
-    type: 'MultiSelectOption[]',
-    default: undefined
+    name: 'disabled',
+    description: 'Disables the multi-select.',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  },
+  {
+    name: 'id',
+    description: 'Optional HTML id forwarded to the trigger.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'open',
+    description: 'Controls the popover visibility.',
+    required: false,
+    type: 'boolean',
+    default: 'false'
   },
   {
     name: 'hideSearch',
-    description: 'Hides the search input if true',
+    description: 'Hides the in-popover search input.',
     required: false,
     type: 'boolean',
-    default: undefined
+    default: 'false'
   },
   {
     name: 'loading',
-    description: 'Shows a loading state',
+    description: 'Replaces the results with a loading state.',
     required: false,
     type: 'boolean',
-    default: undefined
+    default: 'false'
+  },
+  {
+    name: 'emptyText',
+    description: 'Fallback empty-state copy.',
+    required: false,
+    type: 'string',
+    default: '"No results"'
+  },
+  {
+    name: 'side',
+    description: 'Preferred popover side.',
+    required: false,
+    type: 'PopoverSide',
+    default: '"bottom"'
+  },
+  {
+    name: 'align',
+    description: 'Preferred popover alignment.',
+    required: false,
+    type: 'PopoverAlign',
+    default: '"start"'
+  },
+  {
+    name: 'offset',
+    description: 'Gap between trigger and content.',
+    required: false,
+    type: 'number',
+    default: '4'
+  },
+  {
+    name: 'portalTo',
+    description: 'Teleport target for the popover content.',
+    required: false,
+    type: 'string | HTMLElement',
+    default: '"body"'
   },
   {
     name: 'compareFn',
-    description: 'Custom comparison function to check equality of options',
+    description: 'Custom equality function used to resolve which options are currently\nselected for display and rendering. When omitted, the component uses\nstrict equality on `option.value` against entries in `modelValue`.',
     required: false,
-    type: '((a: MultiSelectOption, b: MultiSelectOption) => boolean)',
-    default: undefined
-  },
-  {
-    name: 'modelValue',
-    description: '',
-    required: false,
-    type: 'String[]',
-    default: '[]'
+    type: '((a: MultiSelectOption, b: MultiSelectOption) => boolean)'
   }
 ]
 
   const slotsData = [
   {
-    name: 'option',
-    description: 'Rendered for each option in the dropdown. Receives the option object.',
-    type: '{ item: MultiSelectOption; }'
+    name: 'trigger',
+    description: 'Fully custom trigger renderer.',
+    type: 'MultiSelectTriggerSlotProps'
+  },
+  {
+    name: 'item-prefix',
+    description: 'Shared content rendered before the standard row label.',
+    type: 'MultiSelectItemSlotProps'
+  },
+  {
+    name: 'item-label',
+    description: 'Shared content rendered for the standard row label area.',
+    type: 'MultiSelectItemSlotProps'
+  },
+  {
+    name: 'item-suffix',
+    description: 'Shared content rendered after the standard row label area.',
+    type: 'MultiSelectItemSlotProps'
+  },
+  {
+    name: 'item',
+    description: 'Replaces the entire row.',
+    type: 'MultiSelectItemSlotProps'
+  },
+  {
+    name: 'group-label',
+    description: 'Custom renderer for group labels.',
+    type: 'MultiSelectGroupLabelSlotProps'
+  },
+  {
+    name: 'empty',
+    description: 'Fallback content rendered when there are no results.',
+    type: 'MultiSelectEmptySlotProps'
   },
   {
     name: 'footer',
-    description: 'Footer slot at the bottom of the dropdown. Receives helper functions `clearAll` and `selectAll`.',
-    type: '{ clearAll: () => void; selectAll: () => void; }'
+    description: 'Replaces the default Clear All / Select All footer.',
+    type: 'MultiSelectFooterSlotProps'
+  },
+  {
+    name: 'option',
+    description: '',
+    type: '{ item: MultiSelectOption; }',
+    deprecated: 'compatibility alias for `#item-label`.'
   }
 ]
 
@@ -66,7 +170,17 @@
   {
     name: 'update:modelValue',
     description: 'Fired when the model value changes.',
-    type: '[value: String[]]'
+    type: 'unknown[]'
+  },
+  {
+    name: 'update:open',
+    description: 'Fired when the open state changes.',
+    type: 'unknown[]'
+  },
+  {
+    name: 'update:query',
+    description: 'Fired when the query changes.',
+    type: '[value: string]'
   }
 ]
 </script>

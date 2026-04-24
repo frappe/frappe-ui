@@ -152,6 +152,22 @@ async function handleItemSelect(item: DropdownOption, event: Event) {
         </DropdownMenuItem>
 
         <DropdownMenuItem
+          v-else-if="item.slots?.item"
+          as-child
+          data-slot="item"
+          :data-disabled="item.disabled ? '' : undefined"
+          :disabled="item.disabled"
+          class="data-[disabled]:cursor-not-allowed"
+          @select="(event) => handleItemSelect(item, event)"
+        >
+          <DropdownRenderContentAsChild
+            :content="
+              item.slots.item({ item, close, selected: !!item.selected })
+            "
+          />
+        </DropdownMenuItem>
+
+        <DropdownMenuItem
           v-else-if="isDropdownComponentOption(item)"
           as-child
           data-slot="item"

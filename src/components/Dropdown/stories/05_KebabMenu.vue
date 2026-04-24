@@ -63,7 +63,7 @@ function rowActions(task: Task): DropdownOptions {
         <div class="truncate text-p-sm text-ink-gray-5">{{ task.meta }}</div>
       </div>
 
-      <Dropdown placement="right" :options="rowActions(task)">
+      <Dropdown align="end" :options="rowActions(task)">
         <template #trigger="{ open }">
           <Button
             variant="ghost"

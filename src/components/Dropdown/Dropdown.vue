@@ -22,9 +22,9 @@
         :class="[
           dropdownClasses.content,
           {
-            'origin-top-left': placement === 'left',
-            'origin-top-right': placement === 'right',
-            'origin-top': placement === 'center',
+            'origin-top-left': align === 'start',
+            'origin-top-right': align === 'end',
+            'origin-top': align === 'center',
           },
         ]"
         :side="side"
@@ -69,7 +69,6 @@ const { motion: contentMotion, onPointerDown: markPointerDown } =
 
 const props = withDefaults(defineProps<DropdownProps>(), {
   options: () => [],
-  placement: 'left',
   side: 'bottom',
   offset: 4,
   portalTo: 'body',
@@ -84,6 +83,7 @@ const groups = computed(() => {
 })
 
 const align = computed(() => {
+  if (props.align !== undefined) return props.align
   if (props.placement === 'right') return 'end' as const
   if (props.placement === 'center') return 'center' as const
   return 'start' as const

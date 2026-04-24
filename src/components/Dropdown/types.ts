@@ -1,10 +1,27 @@
-import type { Component } from 'vue'
+import type { Component, VNodeChild } from 'vue'
 import type { RouteLocationRaw } from 'vue-router'
 import type { ButtonProps } from '../Button'
 
 export type DropdownTheme = 'gray' | 'red'
 export type DropdownPlacement = 'left' | 'right' | 'center'
 export type DropdownSide = 'top' | 'right' | 'bottom' | 'left'
+export type DropdownAlign = 'start' | 'center' | 'end'
+
+export type DropdownSlotFn<TProps> = (props: TProps) => VNodeChild
+
+export interface DropdownItemSlots<TProps> {
+  /** Replaces the prefix region of the standard row shell. */
+  prefix?: DropdownSlotFn<TProps>
+
+  /** Replaces the label region of the standard row shell. */
+  label?: DropdownSlotFn<TProps>
+
+  /** Replaces the suffix region of the standard row shell. */
+  suffix?: DropdownSlotFn<TProps>
+
+  /** Replaces the entire row; mutually exclusive with `prefix` / `label` / `suffix`. */
+  item?: DropdownSlotFn<TProps>
+}
 
 export interface DropdownBaseOption {
   /** Leading icon shown for the item row. */
@@ -24,6 +41,9 @@ export interface DropdownBaseOption {
 
   /** Named slot suffix used to resolve `item-*` slots dynamically. */
   slot?: string
+
+  /** Per-item inline slot implementations for the row shell. */
+  slots?: DropdownItemSlots<DropdownItemSlotProps>
 
   /** Condition used to omit an item from the final menu. */
   condition?: () => boolean
@@ -80,7 +100,10 @@ export interface DropdownSubmenuOption extends DropdownBaseOption {
 }
 
 export interface DropdownComponentOption extends DropdownBaseOption {
-  /** Custom component rendered in place of the standard menu row. */
+  /**
+   * Custom component rendered in place of the standard menu row.
+   * @deprecated use `slots.item` for the full-row escape hatch instead
+   */
   component: any
 
   /** Optional label used by custom renderers. */
@@ -128,7 +151,13 @@ export interface DropdownProps {
   /** Controls the visibility of the dropdown. */
   open?: boolean
 
-  /** Placement of the dropdown relative to the trigger. */
+  /** Alignment of the dropdown content along the trigger edge. */
+  align?: DropdownAlign
+
+  /**
+   * Placement of the dropdown relative to the trigger.
+   * @deprecated use `align` instead; `placement` remains as a back-compat alias through v1.x
+   */
   placement?: DropdownPlacement
 
   /** Side of the trigger the dropdown appears on. */
