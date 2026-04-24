@@ -356,32 +356,22 @@ defineSlots<ComboboxSlots>()
     -->
     <template v-if="isButtonMode">
       <!--
-        ComboboxTrigger already renders a native <button> by default —
-        use it directly rather than wrapping a `<Button>` (which goes
-        through Tooltip with inheritAttrs:false and would drop reka's
-        `tabindex`/`aria-expanded` before they reach the real element).
+        reka's `ComboboxTrigger` hardcodes `tabindex="-1"` — it assumes
+        the ComboboxInput is the tab-stop and the trigger is just a
+        mouse-clickable chevron. That's wrong for button mode where
+        there's no visible input to focus. Use `ComboboxAnchor`
+        (positioning only, no tabindex meddling) with a real <button>
+        as the child, and wire the open toggle ourselves.
 
-        ComboboxAnchor `as-child` pins the popover's positioning
-        reference to the trigger element itself, so we don't need a
-        separate DOM node for anchoring.
-
-        For `#trigger` slot callers we additionally flip ComboboxTrigger
-        to `as-child` so their own button-like element becomes the DOM
-        root.
+        Click + pointerdown are attached on the anchor so they forward
+        to the child via `as-child` — this makes consumer-supplied
+        `#trigger` elements "just work" without wiring handlers.
       -->
-      <ComboboxAnchor as-child>
-        <ComboboxTrigger
-          data-slot="trigger"
-          :data-state="open ? 'open' : 'closed'"
-          :data-disabled="disabled ? '' : undefined"
-          :data-variant="variant"
-          :data-size="size"
-          :disabled="disabled"
-          :class="[triggerClasses, attrs.class]"
-          :style="attrs.style"
-          :as-child="$slots.trigger ? true : undefined"
-          @pointerdown="markPointerDown"
-        >
+      <ComboboxAnchor
+        as-child
+        @click="open = !open"
+        @pointerdown="markPointerDown"
+      >
         <slot
           v-if="$slots.trigger"
           name="trigger"
@@ -394,7 +384,20 @@ defineSlots<ComboboxSlots>()
           }"
         />
 
-        <template v-else>
+        <button
+          v-else
+          type="button"
+          data-slot="trigger"
+          :data-state="open ? 'open' : 'closed'"
+          :data-disabled="disabled ? '' : undefined"
+          :data-variant="variant"
+          :data-size="size"
+          :disabled="disabled"
+          :class="[triggerClasses, attrs.class]"
+          :style="attrs.style as any"
+          aria-haspopup="listbox"
+          :aria-expanded="open"
+        >
           <!--
             Prefix priority when trigger="button":
               1. selected + #item-prefix → reuse the per-row prefix slot
@@ -430,8 +433,7 @@ defineSlots<ComboboxSlots>()
             class="ml-auto size-4 shrink-0 text-ink-gray-4 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] data-[state=open]:rotate-180"
             :data-state="open ? 'open' : 'closed'"
           />
-        </template>
-        </ComboboxTrigger>
+        </button>
       </ComboboxAnchor>
     </template>
 

@@ -575,10 +575,20 @@ describe('Combobox', () => {
       cy.get('[data-slot="trigger"]').should('contain.text', 'Mango')
     })
 
-    it('trigger="button" is keyboard-focusable and opens on Enter', () => {
+    it('trigger="button" is in the native tab order and opens on Enter', () => {
       cy.mount(Combobox, {
         props: { options: fruits, trigger: 'button', placeholder: 'Pick' },
       })
+
+      // Native <button> without a negative tabindex — browser includes it
+      // in the default tab order. If reka's ComboboxTrigger ever creeps
+      // back into this path it will set tabindex=-1 and this will fail.
+      cy.get('[data-slot="trigger"]')
+        .should('have.prop', 'tagName', 'BUTTON')
+        .should(($btn) => {
+          const ti = $btn.attr('tabindex')
+          expect(ti === undefined || parseInt(ti, 10) >= 0).to.be.true
+        })
 
       cy.get('[data-slot="trigger"]')
         .focus()
