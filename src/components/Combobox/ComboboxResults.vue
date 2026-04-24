@@ -223,10 +223,15 @@ function handleSelect(item: NormalizedItem, event: Event) {
             >
               <!--
                 Full-row takeover precedence:
-                  1. template #item slot
-                  2. item.slots.item (or legacy function-form item.render)
-                  3. legacy per-item direct slot (#<slotName>)
-                  4. default row shell
+                  1. item.slot matches a `#item-<slot>` template slot →
+                     default row shell with the named slot filling the
+                     label region (handled below). Per-item slot dispatch
+                     is intentionally more specific than the generic
+                     `#item` fallback.
+                  2. global `#item` template slot
+                  3. item.slots.item (or legacy function-form item.render)
+                  4. legacy per-item direct slot (`#<slotName>`)
+                  5. default row shell
               -->
               <component
                 :is="ItemSlotRender"

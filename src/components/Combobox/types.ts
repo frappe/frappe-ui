@@ -152,7 +152,10 @@ export interface ComboboxProps {
   /** Fallback empty-state copy. */
   emptyText?: string
 
-  /** @deprecated alias for `align` */
+  /**
+   * Alignment of the popover along the trigger edge.
+   * @deprecated use `align` instead; `placement` is kept as a back-compat alias
+   */
   placement?: ComboboxPlacement
 }
 

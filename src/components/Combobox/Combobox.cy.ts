@@ -558,6 +558,22 @@ describe('Combobox', () => {
 
       cy.get('[role="option"]').should('have.length', 1).and('contain.text', 'Mango')
     })
+
+    it('renders built-in button when trigger="button" is set and avoids nested <button>', () => {
+      cy.mount(Combobox, {
+        props: {
+          options: fruits,
+          modelValue: 'Mango',
+          trigger: 'button',
+          placeholder: 'Pick a fruit',
+        },
+      })
+
+      // Exactly one <button> renders for the trigger — no nested buttons.
+      cy.get('[data-slot="trigger"]').should('have.prop', 'tagName', 'BUTTON')
+      cy.get('[data-slot="trigger"] button').should('not.exist')
+      cy.get('[data-slot="trigger"]').should('contain.text', 'Mango')
+    })
   })
 
   describe('imperative API', () => {
@@ -568,6 +584,7 @@ describe('Combobox', () => {
           options: fruits,
           'onUpdate:modelValue': cy.spy().as('onUpdate'),
           'onUpdate:selectedOption': cy.spy().as('onSelectedOption'),
+          'onUpdate:query': cy.spy().as('onUpdateQuery'),
         },
       }).then((mounted: any) => {
         // cypress-vue returns { wrapper, component }; `component` is the VM.
@@ -577,6 +594,7 @@ describe('Combobox', () => {
 
       cy.get('@onUpdate').should('have.been.calledWith', null)
       cy.get('@onSelectedOption').should('have.been.calledWith', null)
+      cy.get('@onUpdateQuery').should('have.been.calledWith', '')
     })
   })
 })

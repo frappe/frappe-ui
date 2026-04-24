@@ -20,6 +20,13 @@
     default: '[]'
   },
   {
+    name: 'trigger',
+    description: 'Shape of the trigger.\n- `\'input\'` (default): user types directly into the trigger\n- `\'button\'`: render a button trigger; search input moves into the\n  popover header. Label + prefix auto-derive from the selected option.',
+    required: false,
+    type: '"button" | "input"',
+    default: '"input"'
+  },
+  {
     name: 'variant',
     description: 'Visual style of the combobox.',
     required: false,
@@ -126,7 +133,7 @@
   },
   {
     name: 'placement',
-    description: '',
+    description: 'Alignment of the popover along the trigger edge.',
     required: false,
     type: 'PopoverAlign',
     default: undefined
@@ -193,6 +200,11 @@
     type: '[value: string]'
   },
   {
+    name: 'input',
+    description: '',
+    type: '[value: string]'
+  },
+  {
     name: 'update:open',
     description: 'Fired when the open state changes.',
     type: '[value: boolean]'
@@ -211,11 +223,6 @@
     name: 'blur',
     description: '',
     type: '[event: FocusEvent]'
-  },
-  {
-    name: 'input',
-    description: '',
-    type: '[value: string]'
   }
 ]
 </script>

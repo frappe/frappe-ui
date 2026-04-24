@@ -64,9 +64,15 @@ const emit = defineEmits<ComboboxEmits>()
 const attrs = useAttrs()
 const slots = useSlots()
 
+// `passive: true` is used unconditionally so the return type stays a plain
+// Ref regardless of whether the consumer binds `v-model`. The earlier
+// `passive: (props.modelValue === undefined) as false` variant tried to
+// switch between computed-ref and plain-ref at runtime but leaked a
+// misleading type cast; treating the model as a local proxy here is fine
+// because the controlled case still syncs via useVModel's internal watcher.
 const model = useVModel(props, 'modelValue', emit, {
   defaultValue: null,
-  passive: (props.modelValue === undefined) as false,
+  passive: true,
 })
 
 const open = ref(props.open ?? false)
@@ -303,6 +309,7 @@ function reset() {
   query.value = ''
   hasTypedSinceOpen.value = false
   model.value = null
+  emit('update:query', '')
   emit('update:selectedOption', null)
 }
 
@@ -360,7 +367,15 @@ defineSlots<ComboboxSlots>()
     -->
     <template v-if="isButtonMode">
       <ComboboxAnchor as-child>
+        <!--
+          `as-child` forwards trigger behavior to the child element
+          instead of wrapping it in ComboboxTrigger's default <button>.
+          Without this, the built-in <Button> below (and any consumer-
+          supplied <button>-like trigger slot) would nest inside another
+          <button>, which is invalid HTML and breaks a11y.
+        -->
         <ComboboxTrigger
+          as-child
           data-slot="trigger"
           :data-state="open ? 'open' : 'closed'"
           :data-disabled="disabled ? '' : undefined"
@@ -369,7 +384,6 @@ defineSlots<ComboboxSlots>()
           :disabled="disabled"
           :class="attrs.class"
           :style="attrs.style"
-          :as-child="$slots.trigger ? true : undefined"
           @pointerdown="markPointerDown"
         >
           <slot
