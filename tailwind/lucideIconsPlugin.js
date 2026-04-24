@@ -61,11 +61,17 @@ function readAvailableIconNames() {
  * 1800-icon registration is a lookup table — the generated CSS stays
  * minimal.
  */
-export default plugin(({ matchUtilities }) => {
+export default plugin(({ matchComponents }) => {
   const names = readAvailableIconNames()
   const values = Object.fromEntries(names.map((n) => [n, n]))
 
-  matchUtilities(
+  // Registered via `matchComponents` (not `matchUtilities`) so Tailwind
+  // puts these rules in the components layer. Regular utility classes
+  // like `size-4`, `w-5`, `h-6`, `text-ink-gray-6` live in the utilities
+  // layer which comes after — so they always win over the plugin's
+  // 1em/1em defaults without needing `!important` or source-order tricks
+  // at the call site.
+  matchComponents(
     {
       lucide: (value) => {
         const uri = encodeSvgAsDataUri(value)
