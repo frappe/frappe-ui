@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, useAttrs, useSlots } from 'vue'
+import { computed, useAttrs, useSlots } from 'vue'
 import { usePopoverMotion } from '../../composables/usePopoverMotion'
 import type {
   SelectNormalizedOption,
@@ -93,14 +93,7 @@ const triggerContentPaddingClasses = computed(() => {
   }[props.size]
 })
 
-const itemSize = computed<ItemListSize>(() => {
-  return {
-    sm: 'sm',
-    md: 'md',
-    lg: 'lg',
-    xl: 'xl',
-  }[props.size]
-})
+const itemSize = computed<ItemListSize>(() => props.size)
 
 const itemRootSizeClasses = computed(() => {
   return {
@@ -249,7 +242,11 @@ defineSlots<SelectSlots>()
           <SelectValue
             :placeholder="placeholder"
             class="max-w-full truncate opacity-0"
-          />
+          >
+            <template v-if="selectedOption">{{
+              selectedOption.label
+            }}</template>
+          </SelectValue>
         </div>
       </template>
       <template v-else>
@@ -259,7 +256,11 @@ defineSlots<SelectSlots>()
           <SelectValue
             :placeholder="placeholder"
             class="col-start-1 row-start-1 max-w-full truncate"
-          />
+          >
+            <template v-if="selectedOption">{{
+              selectedOption.label
+            }}</template>
+          </SelectValue>
           <span
             aria-hidden="true"
             class="select-trigger-sizer col-start-1 row-start-1"
@@ -302,10 +303,6 @@ defineSlots<SelectSlots>()
                 :class="itemRootSizeClasses"
                 class="select-none rounded border-0 text-base text-ink-gray-9 data-[disabled]:text-ink-gray-4 data-[highlighted]:bg-surface-gray-2 data-[state=checked]:bg-surface-gray-3"
               >
-                <SelectItemText class="sr-only">
-                  {{ internalOption.option.label }}
-                </SelectItemText>
-
                 <ItemListRow
                   :size="itemSize"
                   :selected="internalOption.option.value === model"
@@ -325,7 +322,10 @@ defineSlots<SelectSlots>()
                     <template v-if="!slots['item-prefix']">
                       <span
                         v-if="isLucideIconString(internalOption.option.icon)"
-                        :class="[internalOption.option.icon, 'size-4 shrink-0 text-ink-gray-6']"
+                        :class="[
+                          internalOption.option.icon,
+                          'size-4 shrink-0 text-ink-gray-6',
+                        ]"
                         aria-hidden="true"
                       />
                       <component
@@ -340,24 +340,30 @@ defineSlots<SelectSlots>()
                   </template>
 
                   <template #label>
-                    <slot
-                      v-if="
-                        getOptionSlotName(internalOption.option) &&
-                        slots[getOptionSlotName(internalOption.option)!]
-                      "
-                      :name="getOptionSlotName(internalOption.option)!"
-                      v-bind="{ option: internalOption.option }"
-                    />
-                    <slot
-                      v-else
-                      name="item-label"
-                      v-bind="{ option: internalOption.option }"
-                    >
+                    <!--
+                      SelectItemText must wrap the visible label so reka's
+                      item-aligned positioning uses the on-screen label rect.
+                      Previously rendered as `sr-only`, which gave a 1x1 rect
+                      and mis-anchored the popup (prefix not covered).
+                    -->
+                    <SelectItemText as="div" class="min-w-0">
                       <slot
-                        name="option"
+                        v-if="
+                          getOptionSlotName(internalOption.option) &&
+                          slots[getOptionSlotName(internalOption.option)!]
+                        "
+                        :name="getOptionSlotName(internalOption.option)!"
+                        v-bind="{ option: internalOption.option }"
+                      />
+                      <slot
+                        v-else
+                        name="item-label"
                         v-bind="{ option: internalOption.option }"
                       >
-                        <div class="min-w-0">
+                        <slot
+                          name="option"
+                          v-bind="{ option: internalOption.option }"
+                        >
                           <div class="truncate">
                             {{ internalOption.option.label }}
                           </div>
@@ -367,9 +373,9 @@ defineSlots<SelectSlots>()
                           >
                             {{ internalOption.option.description }}
                           </div>
-                        </div>
+                        </slot>
                       </slot>
-                    </slot>
+                    </SelectItemText>
                   </template>
 
                   <template #suffix>
