@@ -376,8 +376,14 @@ Row behavior:
 - selectable option rows render a built-in trailing checkmark indicator when
   their `value === modelValue`
 - custom option rows do not render a checkmark
-- `item.icon` is allowed in the item shape but is **not** rendered by default;
-  consumers should use `#item-prefix` when they want icon rendering
+- `item.icon` is auto-rendered in the prefix region when no consumer
+  slot (`#item-prefix` or `item.slots.prefix`) overrides it:
+  - strings starting with `lucide-` render through the shared Lucide
+    Tailwind plugin (see the main RFC) — e.g. `icon: 'lucide-edit'`
+  - Vue `Component` values render directly as `<component :is>`
+  - other strings are ignored (back-compat with FeatherIcon strings
+    is not provided here — consumers that need FeatherIcon should use
+    the prefix slot explicitly)
 - default label rendering is `label` plus optional `description`
 
 ## Disabled handling
@@ -411,8 +417,9 @@ Prefix region:
 
 1. `#item-prefix` slot
 2. `item.slots.prefix`
-3. default: empty (consumers use `item.icon` + `#item-prefix` or
-   `slots.prefix` explicitly if they want an icon in this region)
+3. `item.icon` auto-rendered (`lucide-*` string → Tailwind plugin,
+   Component → rendered directly)
+4. default: empty
 
 Label region:
 

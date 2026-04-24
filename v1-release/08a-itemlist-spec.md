@@ -199,8 +199,11 @@ Default row behavior:
 - enabled items emit `item-click` on click
 - disabled items set `disabled` on the clickable wrapper and emit nothing
 - default label rendering is `label` plus optional `description`
-- `item.icon` is allowed in the item shape but is **not** rendered by `ItemList`
-  by default; consumers should use `#item-prefix` if they want icon rendering
+- `item.icon` is auto-rendered in the prefix region when no consumer
+  `#item-prefix` slot overrides it:
+  - strings starting with `lucide-` render through the shared Lucide
+    Tailwind plugin (see shared design rule 11)
+  - Vue `Component` values render directly
 - `ItemList` does **not** render a built-in checkmark; selection-specific
   affordances belong in higher-level components or `#item-suffix`
 

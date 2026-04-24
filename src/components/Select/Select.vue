@@ -208,6 +208,13 @@ function getOptionSlotName(option: SelectNormalizedOption) {
   return option.slot ? `item-${option.slot}` : undefined
 }
 
+// `lucide-*` strings route through the Tailwind plugin's mask-based
+// utility class. Any other string falls through so consumers using a
+// custom prefix slot control rendering themselves.
+function isLucideIconString(icon: unknown): icon is string {
+  return typeof icon === 'string' && icon.startsWith('lucide-')
+}
+
 function getOptionKey(option: SelectNormalizedOption, index: number) {
   return `${index}:${typeof option.value}:${String(option.value)}`
 }
@@ -309,6 +316,27 @@ defineSlots<SelectSlots>()
                       name="item-prefix"
                       v-bind="{ option: internalOption.option }"
                     />
+                    <!--
+                      Auto-render `option.icon` when the consumer doesn't
+                      provide an `#item-prefix`. `lucide-*` strings route
+                      through the Tailwind plugin; component values render
+                      directly.
+                    -->
+                    <template v-if="!slots['item-prefix']">
+                      <span
+                        v-if="isLucideIconString(internalOption.option.icon)"
+                        :class="[internalOption.option.icon, 'size-4 shrink-0 text-ink-gray-6']"
+                        aria-hidden="true"
+                      />
+                      <component
+                        v-else-if="
+                          internalOption.option.icon &&
+                          typeof internalOption.option.icon !== 'string'
+                        "
+                        :is="internalOption.option.icon"
+                        class="size-4 shrink-0 text-ink-gray-6"
+                      />
+                    </template>
                   </template>
 
                   <template #label>

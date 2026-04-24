@@ -160,8 +160,9 @@ Exact slot rules:
 
 Per-region precedence for each option row (following shared design rule 9):
 
-- Prefix: `#item-prefix` slot > `option.slots.prefix` > default (empty;
-  consumers use `option.icon` + `#item-prefix` if they want icon rendering)
+- Prefix: `#item-prefix` slot > `option.slots.prefix` > `option.icon`
+  auto-rendered (`lucide-*` string → Tailwind plugin, Component →
+  rendered directly) > default (empty)
 - Label: `#item-<slot>` slot (for `option.slot`) > `#item-label` slot >
   `#option` slot (compatibility) > `option.slots.label` > default
   (`label` + optional `description`)

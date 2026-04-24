@@ -513,7 +513,45 @@ the content, CSS that reads `[data-motion='animated']`. `Combobox`,
 `Select`, and `Dropdown` use it today; `MultiSelect` should adopt the
 same composable when it lands.
 
-### 11. Deprecation policy for this family
+### 11. String-based icons (`lucide-*`)
+
+Selection components in this family (`Select`, `Combobox`, `MultiSelect`,
+`Dropdown`) accept `item.icon` as either a Vue `Component` **or** a
+string. For strings, the family standardizes on the `lucide-<name>`
+convention powered by the shared Tailwind plugin
+(`tailwind/lucideIconsPlugin.js`):
+
+- `icon: 'lucide-edit'` / `'lucide-trash-2'` / `'lucide-more-horizontal'`
+  — the literal class name
+- auto-rendered as `<span :class="item.icon">` inside the prefix region
+  when no consumer slot (`#item-prefix` or `item.slots.prefix`) claims
+  that region
+- sizing (`size-4`), color (`text-ink-gray-6` by default, `text-ink-red-3`
+  for `theme: 'red'` in `Dropdown`) are applied by the component
+
+Benefits:
+
+- no per-call-site `import` for every icon
+- `item.icon` stays serialisable (survives JSON round-trips, server-
+  driven menus, feature-flag configs)
+- Tailwind's JIT scanner finds literal `lucide-*` strings in source and
+  only emits CSS for the icons actually referenced
+
+Limitations (worth documenting where consumers trip over them):
+
+- dynamic construction (`` `lucide-${action}` ``) bypasses the JIT
+  scanner and won't emit the class; consumers need either literal
+  strings or an explicit whitelist
+- consumer apps need `frappe-ui/src/**/*.vue` in their Tailwind
+  `content` paths so references inside frappe-ui itself are picked up
+
+Passing a Vue `Component` still works for cases where the plugin isn't
+desired (icons outside Lucide, dynamic icon composition, etc.).
+Consumer-authored prefix slots always take precedence — if the caller
+wants custom rendering, they wire `#item-prefix` or `item.slots.prefix`
+and the auto-icon branch is skipped.
+
+### 12. Deprecation policy for this family
 
 For v1.x:
 

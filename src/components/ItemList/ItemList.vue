@@ -50,6 +50,12 @@ const normalizedGroups = computed<ItemListGroup[]>(() => {
 
 const hasItems = computed(() => normalizedGroups.value.length > 0)
 
+// `lucide-*` strings route through the shared Tailwind plugin's
+// mask-based utility class (see tailwind/lucideIconsPlugin.js).
+function isLucideIconString(icon: unknown): icon is string {
+  return typeof icon === 'string' && icon.startsWith('lucide-')
+}
+
 function getItemSlotName(item: ItemListItem) {
   return item.slot ? `item-${item.slot}` : undefined
 }
@@ -101,8 +107,21 @@ defineSlots<ItemListSlots>()
             :selected="item.selected"
             :disabled="item.disabled"
           >
-            <template v-if="$slots['item-prefix']" #prefix>
-              <slot name="item-prefix" v-bind="{ item, group }" />
+            <template
+              v-if="$slots['item-prefix'] || item.icon"
+              #prefix
+            >
+              <slot v-if="$slots['item-prefix']" name="item-prefix" v-bind="{ item, group }" />
+              <span
+                v-else-if="isLucideIconString(item.icon)"
+                :class="[item.icon, 'size-4 shrink-0 text-ink-gray-6']"
+                aria-hidden="true"
+              />
+              <component
+                v-else-if="item.icon && typeof item.icon !== 'string'"
+                :is="item.icon"
+                class="size-4 shrink-0 text-ink-gray-6"
+              />
             </template>
 
             <template #label>

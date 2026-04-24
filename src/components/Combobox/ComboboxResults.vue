@@ -135,6 +135,13 @@ function getItemTextValue(item: NormalizedItem) {
 function handleSelect(item: NormalizedItem, event: Event) {
   if (isCustomOption(item)) emit('selectCustom', item, event)
 }
+
+// `lucide-*` strings route through the Tailwind plugin's mask-based
+// utility class. Any other string falls through so consumers using
+// custom prefix slots still control rendering themselves.
+function isLucideIconString(icon: unknown): icon is string {
+  return typeof icon === 'string' && icon.startsWith('lucide-')
+}
 </script>
 
 <template>
@@ -269,6 +276,21 @@ function handleSelect(item: NormalizedItem, event: Event) {
                     v-else-if="item.resolvedSlots.prefix"
                     :render="item.resolvedSlots.prefix"
                     :slot-props="getItemSlotProps(item)"
+                  />
+                  <!--
+                    Auto-render `item.icon`: `lucide-*` strings go through
+                    the Tailwind plugin; component values render directly.
+                    Consumer slots above still win.
+                  -->
+                  <span
+                    v-else-if="isLucideIconString(item.icon)"
+                    :class="[item.icon, 'size-4 shrink-0 text-ink-gray-6']"
+                    aria-hidden="true"
+                  />
+                  <component
+                    v-else-if="item.icon && typeof item.icon !== 'string'"
+                    :is="item.icon"
+                    class="size-4 shrink-0 text-ink-gray-6"
                   />
                 </template>
 

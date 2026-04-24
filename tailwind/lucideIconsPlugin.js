@@ -22,7 +22,14 @@ function encodeSvgAsDataUri(name) {
     return null
   }
 
-  const svg = fs.readFileSync(filePath, 'utf8').replace(/\s+/g, ' ').trim()
+  // Lucide ships every icon at stroke-width="2". Override to 1.5 for a
+  // lighter, more balanced look that matches the rest of the design
+  // system's iconography density.
+  const svg = fs
+    .readFileSync(filePath, 'utf8')
+    .replace(/stroke-width="[^"]+"/, 'stroke-width="1.5"')
+    .replace(/\s+/g, ' ')
+    .trim()
   const uri = `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`
   svgDataUriCache.set(name, uri)
   return uri
