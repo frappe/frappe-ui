@@ -23,6 +23,10 @@ import {
   SelectValue,
   SelectViewport,
 } from 'reka-ui'
+import {
+  isEmojiIconString,
+  isLucideIconString,
+} from '../../utils/iconString'
 
 defineOptions({
   inheritAttrs: false,
@@ -201,13 +205,6 @@ function getOptionSlotName(option: SelectNormalizedOption) {
   return option.slot ? `item-${option.slot}` : undefined
 }
 
-// `lucide-*` strings route through the Tailwind plugin's mask-based
-// utility class. Any other string falls through so consumers using a
-// custom prefix slot control rendering themselves.
-function isLucideIconString(icon: unknown): icon is string {
-  return typeof icon === 'string' && icon.startsWith('lucide-')
-}
-
 function getOptionKey(option: SelectNormalizedOption, index: number) {
   return `${index}:${typeof option.value}:${String(option.value)}`
 }
@@ -250,7 +247,37 @@ defineSlots<SelectSlots>()
         </div>
       </template>
       <template v-else>
-        <slot name="prefix" />
+        <!--
+          Prefix precedence on the trigger:
+            1. selected + `#item-prefix` slot → reuse the list's per-item
+               prefix renderer so the trigger matches the dropdown row
+               without a second slot definition.
+            2. selected + `option.icon` → auto-render the icon (lucide
+               string / emoji / component).
+            3. not selected + `#prefix` slot → user's placeholder affordance.
+        -->
+        <template v-if="selectedOption && slots['item-prefix']">
+          <slot name="item-prefix" v-bind="{ option: selectedOption }" />
+        </template>
+        <template v-else-if="selectedOption?.icon">
+          <span
+            v-if="isLucideIconString(selectedOption.icon)"
+            :class="[selectedOption.icon, 'size-4 shrink-0 text-ink-gray-6']"
+            aria-hidden="true"
+          />
+          <span
+            v-else-if="isEmojiIconString(selectedOption.icon)"
+            class="inline-flex size-4 shrink-0 items-center justify-center text-base leading-none"
+            aria-hidden="true"
+            >{{ selectedOption.icon }}</span
+          >
+          <component
+            v-else-if="typeof selectedOption.icon !== 'string'"
+            :is="selectedOption.icon"
+            class="size-4 shrink-0 text-ink-gray-6"
+          />
+        </template>
+        <slot v-else name="prefix" />
 
         <div class="grid min-w-0 text-left">
           <SelectValue
@@ -301,7 +328,7 @@ defineSlots<SelectSlots>()
                 :value="internalOption.internalValue"
                 data-slot="item"
                 :class="itemRootSizeClasses"
-                class="select-none rounded border-0 text-base text-ink-gray-9 data-[disabled]:text-ink-gray-4 data-[highlighted]:bg-surface-gray-2 data-[state=checked]:bg-surface-gray-3"
+                class="select-none rounded border-0 text-base text-ink-gray-9 data-[disabled]:text-ink-gray-4 data-[highlighted]:bg-surface-gray-2 data-[state=checked]:bg-surface-gray-3 data-[highlighted]:data-[state=checked]:bg-surface-gray-4"
               >
                 <ItemListRow
                   :size="itemSize"
@@ -328,6 +355,12 @@ defineSlots<SelectSlots>()
                         ]"
                         aria-hidden="true"
                       />
+                      <span
+                        v-else-if="isEmojiIconString(internalOption.option.icon)"
+                        class="inline-flex size-4 shrink-0 items-center justify-center text-base leading-none"
+                        aria-hidden="true"
+                        >{{ internalOption.option.icon }}</span
+                      >
                       <component
                         v-else-if="
                           internalOption.option.icon &&
@@ -407,6 +440,16 @@ defineSlots<SelectSlots>()
 [data-highlighted],
 [data-state='checked'] {
   outline: none !important;
+}
+
+/*
+ * The outer item row paints its own bg via data-[highlighted] /
+ * data-[state=checked] utilities — including the combined hover+selected
+ * state. Clear ItemListRow's own bg so the outer color always shows
+ * through; text emphasis on selected stays.
+ */
+[data-slot='item'] [data-slot='item-list-row'] {
+  background-color: transparent;
 }
 
 .select-trigger-sizer::after {
