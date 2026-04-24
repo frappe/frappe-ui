@@ -71,35 +71,16 @@
       </slot>
         </button>
       </TooltipTrigger>
-      <TooltipPortal v-if="tooltip?.length">
-        <TooltipContent :side-offset="4" class="z-[100]">
-          <div
-            class="rounded bg-surface-gray-7 px-2 py-1 text-xs text-ink-white shadow-xl"
-          >
-            {{ tooltip }}
-          </div>
-          <TooltipArrow
-            class="fill-surface-gray-7"
-            :width="8"
-            :height="4"
-          />
-        </TooltipContent>
-      </TooltipPortal>
+      <TooltipBubble v-if="tooltip?.length" :text="tooltip" />
     </TooltipRoot>
   </TooltipProvider>
 </template>
 <script lang="ts" setup>
 import { computed, useSlots, ref } from 'vue'
-import {
-  TooltipArrow,
-  TooltipContent,
-  TooltipPortal,
-  TooltipProvider,
-  TooltipRoot,
-  TooltipTrigger,
-} from 'reka-ui'
+import { TooltipProvider, TooltipRoot, TooltipTrigger } from 'reka-ui'
 import FeatherIcon from '../FeatherIcon.vue'
 import LoadingIndicator from '../LoadingIndicator.vue'
+import TooltipBubble from '../Tooltip/TooltipBubble.vue'
 import { useRouter } from 'vue-router'
 import type { ButtonProps, ThemeVariant } from './types'
 

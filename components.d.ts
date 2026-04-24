@@ -131,6 +131,7 @@ declare module 'vue' {
     ToastProvider: typeof import('./src/components/Toast/ToastProvider.vue')['default']
     TocNodeView: typeof import('./src/components/TextEditor/extensions/toc-node/TocNodeView.vue')['default']
     Tooltip: typeof import('./src/components/Tooltip/Tooltip.vue')['default']
+    TooltipBubble: typeof import('./src/components/Tooltip/TooltipBubble.vue')['default']
     Tree: typeof import('./src/components/Tree/Tree.vue')['default']
     WeekIcon: typeof import('./src/components/Calendar/Icon/WeekIcon.vue')['default']
   }
