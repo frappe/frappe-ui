@@ -26,7 +26,10 @@ const actions: DropdownOptions = [
 
 <template>
   <div class="grid gap-3">
-    <Dropdown :options="actions" :button="{ label: 'Options' }" />
+    <Dropdown
+      :options="actions"
+      :button="{ icon: 'lucide-more-horizontal', label: 'Options' }"
+    />
 
     <div class="text-sm text-ink-gray-5">
       {{ lastAction || 'Pick an action' }}

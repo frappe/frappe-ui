@@ -80,6 +80,9 @@ export default plugin(({ matchComponents }) => {
           display: 'inline-block',
           width: '1em',
           height: '1em',
+          // Default to ink-gray-6 — tints via `text-*` utilities still win
+          // because they sit in the utilities layer (components < utilities).
+          color: 'var(--ink-gray-6)',
           'background-color': 'currentColor',
           '-webkit-mask-image': `url("${uri}")`,
           'mask-image': `url("${uri}")`,
