@@ -102,6 +102,7 @@ Notes:
 interface ComboboxProps {
   modelValue?: string | null
   options?: ComboboxOption[]
+  trigger?: 'input' | 'button'
   variant?: ComboboxVariant
   size?: ComboboxSize
   placeholder?: string
@@ -125,6 +126,7 @@ interface ComboboxProps {
 Defaults:
 
 - `options = []`
+- `trigger = 'input'`
 - `variant = 'subtle'`
 - `size = 'sm'`
 - `placeholder = 'Select option'`
@@ -148,6 +150,28 @@ Loading behavior:
 - when `loading` is `true`, the popover shows a loading indicator in place
   of the empty/result list, suspends `#empty`, and disables the create-new
   path for `allowCustomValue`
+
+Trigger modes:
+
+- `trigger = 'input'` (default): the trigger IS the search input. User
+  types directly into it.
+- `trigger = 'button'`: the trigger is a Button. The search input moves
+  into the popover header and auto-focuses on open. The button's label
+  is the selected option's `label` or the `placeholder`. The button's
+  prefix resolves by priority:
+    1. selected + consumer's `#item-prefix` slot → reused with the
+       selected option, so the same slot that renders each row's prefix
+       also renders the selected-state prefix
+    2. selected + `selectedOption.icon` → rendered as a `<component>`
+    3. no selection + consumer's `#prefix` slot → used as the
+       placeholder prefix (e.g. a generic icon shown before anything is
+       picked)
+    4. nothing
+  For richer custom triggers, use the `#trigger` slot directly.
+
+Providing a `#trigger` slot implicitly activates button mode regardless
+of the `trigger` prop value, since the caller is replacing the trigger
+shell wholesale.
 
 Positioning follows the shared popover positioning conventions in
 [`08-selection-and-menu-api-spec.md`](./08-selection-and-menu-api-spec.md).
@@ -242,7 +266,11 @@ type ComboboxEmptySlotProps = {
 Supported slots:
 
 - `#trigger="{ open, disabled, query, selectedOption, displayValue }"`
-  - preferred advanced trigger slot; replaces the default input shell
+  - renders a custom button-like trigger in place of the default input
+    shell. When present, `Combobox` moves the search input **into the
+    popover header** instead of using the trigger as the input. Use this
+    for assignee pickers, status pills, emoji reactions, and any other
+    button-initiated search flow.
 - `#prefix`
   - convenience slot rendered inside the default input shell, before the input
 - `#item-prefix="{ item, query, selected }"`
@@ -264,8 +292,14 @@ Supported slots:
 
 Exact slot rules:
 
-- `#trigger` wins over the default input shell; when `#trigger` is used,
-  `#prefix` is ignored
+- `#trigger` wins over the default input shell; when `#trigger` is used:
+  - the caller-provided content is wrapped in the underlying primitive's
+    trigger element, so it behaves as a real button (click / Enter /
+    Space toggles the popover, `aria-expanded` is managed)
+  - `#prefix` is ignored (it only applies inside the default input shell)
+  - the search input is rendered at the top of the popover content and
+    receives auto-focus on open so the user can start typing immediately
+  - the popover does not constrain itself to the trigger's width
 - if `item.slot` is set, it maps to `#item-<slot>` and overrides the label
   region only
 - `#item-label` is the preferred label-region slot and is used as the fallback

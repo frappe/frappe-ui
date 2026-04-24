@@ -2,19 +2,31 @@
 import { ref } from 'vue'
 import { Combobox } from 'frappe-ui'
 
-const value = ref('')
-const options = ['John Doe', 'Jane Doe', 'John Smith', 'Jane Smith']
+const value = ref('frappe-ui')
+
+const repos = [
+  'gameplan',
+  'frappe-ui',
+  'frappe',
+  'erpnext',
+  'helpdesk',
+  'crm',
+  'wiki',
+  'insights',
+]
 </script>
 
 <template>
   <div class="grid gap-3">
     <Combobox
       v-model="value"
-      :options="options"
-      placeholder="Select an option"
+      :options="repos"
+      placeholder="Pick a repo"
       class="w-64"
     />
 
-    <div class="text-sm text-gray-600">Selected: {{ value || 'None' }}</div>
+    <div class="text-sm text-ink-gray-5">
+      Selected: <code class="text-ink-gray-7">{{ value || 'None' }}</code>
+    </div>
   </div>
 </template>

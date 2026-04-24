@@ -523,6 +523,43 @@ describe('Combobox', () => {
     })
   })
 
+  describe('custom trigger (button mode)', () => {
+    it('renders the #trigger slot in place of the input, and moves search into the popover', () => {
+      cy.mount(Combobox, {
+        props: { options: fruits, open: true },
+        slots: {
+          trigger: ({ displayValue }: any) =>
+            h(
+              'button',
+              { type: 'button', 'data-cy': 'custom-btn' },
+              displayValue || 'Pick a fruit',
+            ),
+        },
+      })
+
+      cy.get('[data-cy="custom-btn"]').should('contain.text', 'Pick a fruit')
+      cy.get('[data-slot="content-search"]').should('exist')
+      cy.get('[data-slot="content-search"] [role="combobox"]').should('exist')
+    })
+
+    it('focuses the popover search input on open and filters from there', () => {
+      cy.mount(Combobox, {
+        props: { options: fruits },
+        slots: {
+          trigger: () =>
+            h('button', { type: 'button', 'data-cy': 'btn' }, 'Pick'),
+        },
+      })
+
+      cy.get('[data-cy="btn"]').click()
+      cy.get('[data-slot="content-search"] [role="combobox"]')
+        .should('be.focused')
+        .type('ma')
+
+      cy.get('[role="option"]').should('have.length', 1).and('contain.text', 'Mango')
+    })
+  })
+
   describe('imperative API', () => {
     it('exposes `reset()` which clears query and selection', () => {
       cy.mount(Combobox, {

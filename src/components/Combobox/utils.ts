@@ -264,8 +264,5 @@ export const triggerBaseClasses =
 export const inputClasses =
   'min-w-0 flex-1 border-0 bg-transparent p-0 text-ink-gray-8 outline-none ring-0 placeholder:text-ink-gray-4 focus:border-0 focus:outline-none focus:ring-0'
 
-export const hiddenTriggerInputClasses =
-  'absolute inset-0 h-full w-full rounded bg-transparent text-transparent outline-none [caret-color:transparent]'
-
 export const itemClasses =
   'select-none rounded border-0 text-base text-ink-gray-9 transition-colors duration-100 ease-out data-[disabled]:text-ink-gray-4 data-[highlighted]:bg-surface-gray-2 data-[state=checked]:bg-surface-gray-2'

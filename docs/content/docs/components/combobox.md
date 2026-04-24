@@ -3,9 +3,18 @@
 Lets users choose from available options or type their own. Provides clear, responsive feedback for every interaction.
 
 ## Simple
-<ComponentPreview name="Combobox-Simple"  css='justify-center !py-20 grid'  />
+A plain repo picker — just pass `options` as an array of strings.
+
+<ComponentPreview name="Combobox-Simple" layout="stacked" css='justify-center !py-20 grid' />
+
+## Emoji Picker
+Button-triggered combobox via `trigger="button"`. The search input moves into the popover header. The button's label and prefix auto-derive from the selected option — `#item-prefix` doubles as the selected-state prefix, and `#prefix` is the placeholder icon shown before anything is picked.
+
+<ComponentPreview name="Combobox-EmojiPicker" layout="stacked" css='justify-center !py-20 grid' />
 
 ## Grouped Options
+Options split into named groups. `#item-prefix` renders a colored swatch per row.
+
 <ComponentPreview name="Combobox-Grouped" css='justify-center !py-20 grid' />
 
 ## Custom Value
@@ -19,18 +28,8 @@ Dotted indicator aligned to the first line, with supporting description text.
 <ComponentPreview name="Combobox-StatusPicker" css='justify-center !py-20 grid' />
 
 ## Member Picker
-Avatar rows with presence rings, and a contextual invite action.
+Avatar rows with a contextual invite action authored through a template slot.
 
 <ComponentPreview name="Combobox-MemberPicker" css='justify-center !py-20 grid' />
-
-## Command Bar
-Grouped commands with icon prefixes and keyboard-shortcut suffixes — authored through the per-item `slots` API.
-
-<ComponentPreview name="Combobox-CommandBar" css='justify-center !py-20 grid' />
-
-## Emoji Picker
-Custom `#trigger` renderer combined with grouped emoji results.
-
-<ComponentPreview name="Combobox-EmojiPicker" css='justify-center !py-20 grid' />
 
 <!-- @include: ../../../meta/Combobox.md -->

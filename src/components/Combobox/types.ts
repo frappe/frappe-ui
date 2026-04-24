@@ -99,6 +99,14 @@ export interface ComboboxProps {
   /** Options rendered in the popover. */
   options?: ComboboxOption[]
 
+  /**
+   * Shape of the trigger.
+   * - `'input'` (default): user types directly into the trigger
+   * - `'button'`: render a button trigger; search input moves into the
+   *   popover header. Label + prefix auto-derive from the selected option.
+   */
+  trigger?: 'input' | 'button'
+
   /** Visual style of the combobox. */
   variant?: ComboboxVariant
 
@@ -169,7 +177,7 @@ export interface ComboboxItemSlotProps {
   /** Item currently being rendered. */
   item: ComboboxSelectableOption | ComboboxCustomOption
 
-  /** Current input query. */
+  /** Current search query — empty when the user hasn't typed since opening. */
   query: string
 
   /** Whether the item is selected. */
@@ -182,7 +190,7 @@ export interface ComboboxGroupLabelSlotProps {
 }
 
 export interface ComboboxEmptySlotProps {
-  /** Current input query. */
+  /** Current search query — empty when the user hasn't typed since opening. */
   query: string
 }
 
