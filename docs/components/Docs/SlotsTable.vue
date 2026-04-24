@@ -39,34 +39,28 @@ defineProps<Props>()
             <div
               class="font-mono text-xs font-medium leading-6 text-ink-gray-9"
             >
-              <span :class="{ 'line-through opacity-70': x.deprecated }">
-                {{ x.name }}
-              </span>
-              <span
-                v-if="x.deprecated"
-                class="ml-1 rounded bg-surface-amber-1 px-1 py-0.5 font-sans text-[10px] font-medium text-ink-amber-3"
-                >deprecated</span
-              >
+              <span :class="{ 'line-through': x.deprecated }">{{
+                x.name
+              }}</span>
             </div>
           </td>
 
           <td class="px-2 py-2 align-top">
             <div
+              v-if="!x.deprecated"
               class="whitespace-normal break-words font-mono text-xs leading-6 text-ink-gray-8"
             >
               {{ x.type === 'any' ? '—' : x.type || '—' }}
             </div>
             <p
-              v-if="x.description"
+              v-if="typeof x.deprecated === 'string'"
+              class="whitespace-pre-wrap font-mono text-xs text-ink-gray-6"
+            >Deprecated — {{ x.deprecated }}</p>
+            <p
+              v-else-if="x.description"
               class="mt-1 whitespace-pre-wrap font-mono text-xs leading-6 text-ink-gray-6"
             >
               {{ x.description }}
-            </p>
-            <p
-              v-if="typeof x.deprecated === 'string'"
-              class="mt-1 whitespace-pre-wrap font-mono text-xs leading-6 text-ink-amber-3"
-            >
-              Deprecated — {{ x.deprecated }}
             </p>
           </td>
         </tr>
