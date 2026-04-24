@@ -17,8 +17,10 @@ import {
   ComboboxTrigger,
 } from 'reka-ui'
 import LucideChevronDown from '~icons/lucide/chevron-down'
-import LucideSearch from '~icons/lucide/search'
-import Button from '../Button/Button.vue'
+import {
+  isEmojiIconString,
+  isLucideIconString,
+} from '../../utils/iconString'
 import ComboboxResults from './ComboboxResults.vue'
 import { usePopoverMotion } from '../../composables/usePopoverMotion'
 import type {
@@ -410,24 +412,71 @@ defineSlots<ComboboxSlots>()
           }"
         />
 
-        <Button
+        <!--
+          Rendered as a raw `<button>` (not the `<Button>` component) so
+          the prefix / label / chevron are direct flex children and
+          `justify-between` + label `flex-1` align cleanly. Wrapping in
+          `<Button>` would put the label inside Button's own default-slot
+          `<span>`, which is content-sized and would center the label in
+          `w-full` buttons.
+        -->
+        <button
           v-else
-          :variant="variant"
-          :size="size"
-          :disabled="disabled"
-          :icon-left="selectedOption?.icon"
-          :class="attrs.class as any"
+          type="button"
+          :class="[
+            triggerClasses,
+            'justify-between',
+            disabled && 'cursor-not-allowed',
+            attrs.class,
+          ]"
           :style="attrs.style as any"
+          :disabled="disabled"
           data-slot="trigger"
           :data-state="open ? 'open' : 'closed'"
           :data-variant="variant"
           :data-size="size"
+          :id="id"
           aria-haspopup="listbox"
           :aria-expanded="open"
         >
-          <template v-if="!selectedOption && $slots.prefix" #prefix>
-            <slot name="prefix" />
+          <!--
+            Prefix precedence on the trigger:
+              1. selected + `#item-prefix` slot → reuse the list's per-item
+                 prefix renderer so the trigger matches the dropdown row
+                 without a second slot definition.
+              2. selected + `option.icon` → auto-render the icon (lucide
+                 string / emoji / component).
+              3. not selected + `#prefix` slot → user's placeholder affordance.
+          -->
+          <template v-if="selectedOption && $slots['item-prefix']">
+            <slot
+              name="item-prefix"
+              v-bind="{
+                item: selectedOption,
+                query: '',
+                selected: true,
+              }"
+            />
           </template>
+          <template v-else-if="selectedOption?.icon">
+            <span
+              v-if="isLucideIconString(selectedOption.icon)"
+              :class="[selectedOption.icon, 'size-4 shrink-0 text-ink-gray-6']"
+              aria-hidden="true"
+            />
+            <span
+              v-else-if="isEmojiIconString(selectedOption.icon)"
+              class="inline-flex size-4 shrink-0 items-center justify-center text-base leading-none"
+              aria-hidden="true"
+              >{{ selectedOption.icon }}</span
+            >
+            <component
+              v-else-if="typeof selectedOption.icon !== 'string'"
+              :is="selectedOption.icon"
+              class="size-4 shrink-0 text-ink-gray-6"
+            />
+          </template>
+          <slot v-else-if="!selectedOption && $slots.prefix" name="prefix" />
 
           <span
             :class="[
@@ -438,15 +487,13 @@ defineSlots<ComboboxSlots>()
             {{ selectedOption?.label ?? placeholder }}
           </span>
 
-          <template #suffix>
-            <LucideChevronDown
-              :class="[
-                'size-4 shrink-0 text-ink-gray-4 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)]',
-                open && 'rotate-180',
-              ]"
-            />
-          </template>
-        </Button>
+          <LucideChevronDown
+            :class="[
+              'size-4 shrink-0 text-ink-gray-4 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)]',
+              open && 'rotate-180',
+            ]"
+          />
+        </button>
       </ComboboxAnchor>
     </template>
 
@@ -461,7 +508,36 @@ defineSlots<ComboboxSlots>()
         :style="attrs.style"
         @pointerdown="markPointerDown"
       >
-        <slot name="prefix" />
+        <!--
+          Prefix precedence matches button mode: selected option's
+          `#item-prefix` → selected option's icon auto-render →
+          user's `#prefix` slot.
+        -->
+        <template v-if="selectedOption && $slots['item-prefix']">
+          <slot
+            name="item-prefix"
+            v-bind="{ item: selectedOption, query: '', selected: true }"
+          />
+        </template>
+        <template v-else-if="selectedOption?.icon">
+          <span
+            v-if="isLucideIconString(selectedOption.icon)"
+            :class="[selectedOption.icon, 'size-4 shrink-0 text-ink-gray-6']"
+            aria-hidden="true"
+          />
+          <span
+            v-else-if="isEmojiIconString(selectedOption.icon)"
+            class="inline-flex size-4 shrink-0 items-center justify-center text-base leading-none"
+            aria-hidden="true"
+            >{{ selectedOption.icon }}</span
+          >
+          <component
+            v-else-if="typeof selectedOption.icon !== 'string'"
+            :is="selectedOption.icon"
+            class="size-4 shrink-0 text-ink-gray-6"
+          />
+        </template>
+        <slot v-else name="prefix" />
 
         <ComboboxInput
           :id="id"
@@ -513,9 +589,8 @@ defineSlots<ComboboxSlots>()
           <div
             v-if="isButtonMode"
             data-slot="content-search"
-            class="flex items-center gap-2 border-b border-outline-gray-1 px-2"
+            class="flex items-center gap-2 border-b border-outline-gray-1 px-3"
           >
-            <!-- <LucideSearch class="size-4 shrink-0 text-ink-gray-4" /> -->
             <ComboboxInput
               :id="id"
               ref="popoverInputRef"

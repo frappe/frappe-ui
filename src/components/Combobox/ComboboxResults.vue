@@ -10,6 +10,7 @@ import {
 import LucideCheck from '~icons/lucide/check'
 import ItemListRow from '../ItemList/ItemListRow.vue'
 import LoadingIndicator from '../LoadingIndicator.vue'
+import { isEmojiIconString, isLucideIconString } from '../../utils/iconString'
 import type { ComboboxItemSlotProps, ComboboxSize } from './types'
 import {
   CREATE_OPTION_VALUE,
@@ -136,12 +137,6 @@ function handleSelect(item: NormalizedItem, event: Event) {
   if (isCustomOption(item)) emit('selectCustom', item, event)
 }
 
-// `lucide-*` strings route through the Tailwind plugin's mask-based
-// utility class. Any other string falls through so consumers using
-// custom prefix slots still control rendering themselves.
-function isLucideIconString(icon: unknown): icon is string {
-  return typeof icon === 'string' && icon.startsWith('lucide-')
-}
 </script>
 
 <template>
@@ -254,7 +249,7 @@ function isLucideIconString(icon: unknown): icon is string {
               <component
                 :is="ItemSlotRender"
                 v-else-if="shouldUseLegacyDirectSlot(item)"
-                :render="slotFns[getLegacyDirectSlotName(item)!]"
+                :render="slotFns[getLegacyDirectSlotName(item)!]!"
                 :slot-props="getLegacySlotProps(item)"
               />
 
@@ -279,14 +274,21 @@ function isLucideIconString(icon: unknown): icon is string {
                   />
                   <!--
                     Auto-render `item.icon`: `lucide-*` strings go through
-                    the Tailwind plugin; component values render directly.
-                    Consumer slots above still win.
+                    the Tailwind plugin; emoji/symbol strings render as
+                    text; component values render directly. Consumer slots
+                    above still win.
                   -->
                   <span
                     v-else-if="isLucideIconString(item.icon)"
                     :class="[item.icon, 'size-4 shrink-0 text-ink-gray-6']"
                     aria-hidden="true"
                   />
+                  <span
+                    v-else-if="isEmojiIconString(item.icon)"
+                    class="inline-flex size-4 shrink-0 items-center justify-center text-base leading-none"
+                    aria-hidden="true"
+                    >{{ item.icon }}</span
+                  >
                   <component
                     v-else-if="item.icon && typeof item.icon !== 'string'"
                     :is="item.icon"
@@ -298,7 +300,7 @@ function isLucideIconString(icon: unknown): icon is string {
                   <component
                     :is="ItemSlotRender"
                     v-if="shouldUseDynamicItemSlot(item)"
-                    :render="slotFns[getDynamicItemSlotName(item)!]"
+                    :render="slotFns[getDynamicItemSlotName(item)!]!"
                     :slot-props="getItemSlotProps(item)"
                   />
 
@@ -364,3 +366,15 @@ function isLucideIconString(icon: unknown): icon is string {
     </div>
   </ComboboxViewport>
 </template>
+
+<style scoped>
+/*
+ * The outer item row paints its own bg via data-[highlighted] /
+ * data-[state=checked] utilities — including the combined hover+selected
+ * state. Clear ItemListRow's own bg so the outer color always shows
+ * through; text emphasis on selected stays.
+ */
+[data-slot='item'] [data-slot='item-list-row'] {
+  background-color: transparent;
+}
+</style>

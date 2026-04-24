@@ -2,39 +2,37 @@
 import { ref } from 'vue'
 import { Combobox } from 'frappe-ui'
 
-type Emoji = { label: string; value: string; emoji: string }
-
 const value = ref<string>('')
 
-const emojis: { group: string; options: Emoji[] }[] = [
+const emojis = [
   {
     group: 'Smileys',
     options: [
-      { label: 'Grinning', value: 'grinning', emoji: '😀' },
-      { label: 'Laughing', value: 'laughing', emoji: '😂' },
-      { label: 'Heart Eyes', value: 'heart-eyes', emoji: '😍' },
-      { label: 'Thinking', value: 'thinking', emoji: '🤔' },
-      { label: 'Mind Blown', value: 'mind-blown', emoji: '🤯' },
+      { label: 'Grinning', value: 'grinning', icon: '😀' },
+      { label: 'Laughing', value: 'laughing', icon: '😂' },
+      { label: 'Heart Eyes', value: 'heart-eyes', icon: '😍' },
+      { label: 'Thinking', value: 'thinking', icon: '🤔' },
+      { label: 'Mind Blown', value: 'mind-blown', icon: '🤯' },
     ],
   },
   {
     group: 'Gestures',
     options: [
-      { label: 'Thumbs Up', value: 'thumbs-up', emoji: '👍' },
-      { label: 'Clap', value: 'clap', emoji: '👏' },
-      { label: 'Party', value: 'party', emoji: '🎉' },
-      { label: 'Rocket', value: 'rocket', emoji: '🚀' },
-      { label: 'Fire', value: 'fire', emoji: '🔥' },
+      { label: 'Thumbs Up', value: 'thumbs-up', icon: '👍' },
+      { label: 'Clap', value: 'clap', icon: '👏' },
+      { label: 'Party', value: 'party', icon: '🎉' },
+      { label: 'Rocket', value: 'rocket', icon: '🚀' },
+      { label: 'Fire', value: 'fire', icon: '🔥' },
     ],
   },
   {
     group: 'Objects',
     options: [
-      { label: 'Sparkles', value: 'sparkles', emoji: '✨' },
-      { label: 'Bulb', value: 'bulb', emoji: '💡' },
-      { label: 'Warning', value: 'warning', emoji: '⚠️' },
-      { label: 'Check', value: 'check', emoji: '✅' },
-      { label: 'Cross', value: 'cross', emoji: '❌' },
+      { label: 'Sparkles', value: 'sparkles', icon: '✨' },
+      { label: 'Bulb', value: 'bulb', icon: '💡' },
+      { label: 'Warning', value: 'warning', icon: '⚠️' },
+      { label: 'Check', value: 'check', icon: '✅' },
+      { label: 'Cross', value: 'cross', icon: '❌' },
     ],
   },
 ]
@@ -49,13 +47,6 @@ const emojis: { group: string; options: Emoji[] }[] = [
   >
     <template #prefix>
       <span class="lucide-smile size-4 text-ink-gray-6" />
-    </template>
-
-    <template #item-prefix="{ item }">
-      <span
-        class="leading-none inline-flex items-center justify-center size-4"
-        >{{ (item as Emoji).emoji }}</span
-      >
     </template>
   </Combobox>
 </template>
