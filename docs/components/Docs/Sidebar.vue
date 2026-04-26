@@ -13,6 +13,7 @@ import LucideBlend from '~icons/lucide/blend'
 import LucideRadius from '~icons/lucide/radius'
 import ChevronRight from '~icons/lucide/chevron-right'
 import LucideBox from '~icons/lucide/box'
+import LucideShapes from '~icons/lucide/shapes'
 import pkgJson from '../../../package.json'
 
 import {
@@ -104,6 +105,11 @@ const list = [
   {
     text: 'Other',
     items: [
+      {
+        text: 'Icons',
+        icon: LucideShapes,
+        link: '/docs/other/icons',
+      },
       {
         text: 'Utilities',
         icon: LucideSettings,
