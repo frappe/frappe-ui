@@ -29,7 +29,7 @@
           <span
             v-show="showEye"
             :class="show ? 'lucide-eye-off' : 'lucide-eye'"
-            class="h-3 cursor-pointer mr-1"
+            class="size-3 cursor-pointer mr-1"
             @click="show = !show"
           />
         </div>

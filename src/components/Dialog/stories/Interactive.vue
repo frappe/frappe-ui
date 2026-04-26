@@ -26,7 +26,7 @@ const dropdownOptions = [
           <Button variant="outline">
             {{ selectedOption }}
             <template #suffix>
-              <span class="lucide-chevron-down h-4 w-4 text-gray-500" />
+              <span class="lucide-chevron-down size-4 text-ink-gray-5" />
             </template>
           </Button>
         </Dropdown>

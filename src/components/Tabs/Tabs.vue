@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, h, ref, watch } from 'vue'
+import { computed, h, ref, watch, type Component } from 'vue'
 import {
   TabsContent,
   TabsIndicator,
@@ -54,12 +54,12 @@ const Btn = h('button')
 defineSlots<{
   /** Custom renderer for a tab trigger (icon + label / router-link). */
   'tab-item'?: (props: {
-    tab: { label: string; icon?: string; route?: string }
+    tab: { label: string; icon?: string | Component; route?: string }
   }) => any
 
   /** Content rendered for each tab panel. */
   'tab-panel'?: (props: {
-    tab: { label: string; icon?: string; route?: string }
+    tab: { label: string; icon?: string | Component; route?: string }
   }) => any
 }>()
 </script>

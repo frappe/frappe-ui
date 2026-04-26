@@ -4,7 +4,7 @@
       <Dropdown class="h-7" :options="dropdownItems">
         <Button variant="ghost">
           <template #icon>
-            <span class="lucide-ellipsis w-4 text-ink-gray-5" />
+            <span class="lucide-ellipsis size-4 text-ink-gray-5" />
           </template>
         </Button>
       </Dropdown>

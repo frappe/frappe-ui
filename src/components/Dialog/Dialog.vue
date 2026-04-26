@@ -68,7 +68,7 @@
                           <DialogClose as-child>
                             <Button variant="ghost" @click="close">
                               <template #icon>
-                                <span class="lucide-x h-4 w-4 text-ink-gray-9" />
+                                <span class="lucide-x size-4 text-ink-gray-9" />
                               </template>
                             </Button>
                           </DialogClose>

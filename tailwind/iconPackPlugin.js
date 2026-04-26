@@ -4,9 +4,10 @@ import path from 'node:path'
 
 /**
  * Builds a Tailwind plugin that exposes every SVG in `iconsDir` as a
- * `<prefix>-<name>` utility class. Each class renders as an inline-block
- * square that masks the icon SVG with the current text color — size with
- * `size-*`, tint with `text-*`:
+ * `<prefix>-<name>` utility class. Each class renders as a block-level
+ * square (matching Tailwind preflight's `svg { display: block }`) that
+ * masks the icon SVG with the current text color — size with `size-*`,
+ * tint with `text-*`:
  *
  *   <span class="lucide-menu size-4 text-ink-gray-6" />
  *
@@ -44,7 +45,7 @@ export function iconPackPlugin({
     let svg = fs.readFileSync(filePath, 'utf8')
     if (normalizeStrokeWidth != null) {
       svg = svg.replace(
-        /stroke-width="[^"]+"/,
+        /stroke-width="[^"]+"/g,
         `stroke-width="${normalizeStrokeWidth}"`,
       )
     }

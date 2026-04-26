@@ -16,10 +16,7 @@ import {
   ComboboxRoot,
   ComboboxTrigger,
 } from 'reka-ui'
-import {
-  isEmojiIconString,
-  isLucideIconString,
-} from '../../utils/iconString'
+import { isEmojiIconString, isLucideIconString } from '../../utils/iconString'
 import ComboboxResults from './ComboboxResults.vue'
 import { usePopoverMotion } from '../../composables/usePopoverMotion'
 import type {

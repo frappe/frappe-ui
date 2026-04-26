@@ -78,8 +78,13 @@ defineSlots<{
       </slot>
     </div>
 
-    <button v-if="props.dismissable" @click="dismissAlert">
-      <span class="lucide-x size-4 text-ink-gray-6" />
+    <button
+      v-if="props.dismissable"
+      type="button"
+      aria-label="Dismiss"
+      @click="dismissAlert"
+    >
+      <span class="lucide-x size-4 text-ink-gray-6" aria-hidden="true" />
     </button>
     <slot name="footer"> </slot>
   </div>

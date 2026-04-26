@@ -19,7 +19,7 @@
       <div v-if="props.collapsible">
         <span
           v-if="!isSidebarCollapsed"
-          class="lucide-chevron-right w-4 h-4 text-ink-gray-5 transition-all duration-300 ease-in-out"
+          class="lucide-chevron-right size-4 text-ink-gray-5 transition-all duration-300 ease-in-out"
           :class="{ 'rotate-90': !isCollapsed }"
         />
       </div>
