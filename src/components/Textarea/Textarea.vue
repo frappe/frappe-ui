@@ -1,19 +1,44 @@
 <template>
   <div class="space-y-1.5">
-    <label class="block" :class="labelClasses" v-if="label" :for="id">
-      {{ label }}
-    </label>
+    <InputLabel
+      v-if="props.label || $slots.label"
+      :id="labelId"
+      :for-id="inputId"
+      :label="props.label"
+      :required="props.required"
+    >
+      <template v-if="$slots.label" #default="slotProps">
+        <slot name="label" v-bind="slotProps" />
+      </template>
+    </InputLabel>
     <textarea
       ref="textareaRef"
       :placeholder="placeholder"
       :class="inputClasses"
       :disabled="disabled"
-      :id="id"
+      :id="inputId"
       :value="modelValue"
       :rows="rows"
+      :required="required"
+      :aria-required="required || undefined"
+      :aria-invalid="hasError || undefined"
+      :aria-errormessage="hasError ? errorMessageId : undefined"
+      :aria-describedby="describedBy"
       @input="handleChange"
       @change="handleChange"
       v-bind="attrs"
+    />
+    <InputDescription
+      v-if="showDescription || $slots.description"
+      :id="descriptionId"
+      :description="props.description"
+    >
+      <slot v-if="$slots.description" name="description" />
+    </InputDescription>
+    <InputError
+      v-if="hasError"
+      :id="errorMessageId"
+      :lines="errorLines"
     />
   </div>
 </template>
@@ -21,10 +46,13 @@
 <script setup lang="ts">
 import { computed, ref, useAttrs } from 'vue'
 import debounce from '../../utils/debounce'
+import { useInputLabeling } from '../../composables/useInputLabeling'
+import InputLabel from '../InputLabeling/InputLabel.vue'
+import InputDescription from '../InputLabeling/InputDescription.vue'
+import InputError from '../InputLabeling/InputError.vue'
 import type { TextareaEmits, TextareaProps } from './types'
 
 const props = withDefaults(defineProps<TextareaProps>(), {
-  type: 'text',
   size: 'sm',
   variant: 'subtle',
   rows: 3,
@@ -33,6 +61,29 @@ const props = withDefaults(defineProps<TextareaProps>(), {
 const emit = defineEmits<TextareaEmits>()
 const attrs = useAttrs()
 const textareaRef = ref<HTMLTextAreaElement | null>(null)
+
+defineSlots<{
+  /** Overrides the rendered label content. Receives `{ required }`. */
+  label?: (props: { required: boolean }) => any
+
+  /** Overrides the rendered description content. */
+  description?: () => any
+}>()
+
+const {
+  inputId,
+  labelId,
+  descriptionId,
+  errorMessageId,
+  describedBy,
+  hasError,
+  errorLines,
+  showDescription,
+} = useInputLabeling(props, {
+  size: () => props.size,
+  variant: () => props.variant,
+  disabled: () => props.disabled,
+})
 
 const inputClasses = computed(() => {
   let sizeClasses = {
@@ -61,6 +112,7 @@ const inputClasses = computed(() => {
         ? 'border-outline-gray-2'
         : 'border-transparent',
     ],
+    ghost: 'border-0 focus:ring-0 focus-visible:ring-0',
   }[variant]
 
   return [
@@ -69,18 +121,6 @@ const inputClasses = computed(() => {
     variantClasses,
     props.disabled ? 'text-ink-gray-5' : 'text-ink-gray-8',
     'transition-colors w-full block',
-  ]
-})
-
-const labelClasses = computed(() => {
-  return [
-    {
-      sm: 'text-xs',
-      md: 'text-base',
-      lg: 'text-lg',
-      xl: 'text-xl',
-    }[props.size],
-    'text-ink-gray-5',
   ]
 })
 

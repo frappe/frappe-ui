@@ -84,4 +84,60 @@ describe('Textinput', () => {
     cy.get(`input[type=text]`).type('abc')
     cy.get('@onUpdate').should('have.been.calledWith', 'abc')
   })
+
+  describe('shared labeling contract', () => {
+    it('renders label, description, and links them via aria-describedby', () => {
+      cy.mount(TextInput, {
+        props: {
+          label: 'Email',
+          description: 'We never share your email.',
+        },
+      })
+      cy.contains('label', 'Email').should('exist')
+      cy.get('input').then(($input) => {
+        const id = $input.attr('id')!
+        const describedBy = $input.attr('aria-describedby')!
+        expect(describedBy).to.equal(`${id}-description`)
+        cy.get(`#${id}-description`).should('contain.text', 'We never share')
+        cy.get(`label[for="${id}"]`).should('exist')
+      })
+    })
+
+    it('renders error state with aria-invalid and aria-errormessage, suppresses description', () => {
+      cy.mount(TextInput, {
+        props: {
+          label: 'Email',
+          description: 'helper',
+          error: 'Required',
+        },
+      })
+      cy.get('input')
+        .should('have.attr', 'aria-invalid', 'true')
+        .then(($input) => {
+          const id = $input.attr('id')!
+          expect($input.attr('aria-errormessage')).to.equal(`${id}-error`)
+          cy.get(`#${id}-error`).should('contain.text', 'Required')
+          cy.get(`#${id}-description`).should('not.exist')
+        })
+    })
+
+    it('renders required indicator and forwards aria-required', () => {
+      cy.mount(TextInput, {
+        props: { label: 'Name', required: true },
+      })
+      cy.get('input').should('have.attr', 'aria-required', 'true')
+      cy.contains('label', 'Name').within(() => {
+        cy.get('span[aria-hidden="true"]').should('contain.text', '*')
+        cy.get('span.sr-only').should('contain.text', '(required)')
+      })
+    })
+
+    it('honors an explicit id over the generated one', () => {
+      cy.mount(TextInput, {
+        props: { id: 'my-explicit-id', label: 'Email' },
+      })
+      cy.get('input').should('have.attr', 'id', 'my-explicit-id')
+      cy.get('label[for="my-explicit-id"]').should('exist')
+    })
+  })
 })

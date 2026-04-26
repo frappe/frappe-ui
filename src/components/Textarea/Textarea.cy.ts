@@ -69,4 +69,40 @@ describe('Textarea', () => {
       .should('have.been.calledOnce')
       .and('have.been.calledWith', 'Delayed update')
   })
+
+  describe('shared labeling contract', () => {
+    it('wires aria-describedby to the description region', () => {
+      cy.mount(Textarea, {
+        props: { label: 'Notes', description: 'Optional notes' },
+      })
+      cy.get('textarea').then(($el) => {
+        const id = $el.attr('id')!
+        expect($el.attr('aria-describedby')).to.equal(`${id}-description`)
+      })
+    })
+
+    it('renders error state and suppresses description', () => {
+      cy.mount(Textarea, {
+        props: { description: 'helper', error: 'Cannot be empty' },
+      })
+      cy.get('textarea').should('have.attr', 'aria-invalid', 'true')
+      cy.contains('Cannot be empty').should('exist')
+    })
+
+    it('renders required indicator and forwards required + aria-required', () => {
+      cy.mount(Textarea, {
+        props: { label: 'Bio', required: true },
+      })
+      cy.get('textarea').should('have.attr', 'required')
+      cy.get('textarea').should('have.attr', 'aria-required', 'true')
+      cy.contains('label', 'Bio').within(() => {
+        cy.get('span[aria-hidden="true"]').should('contain.text', '*')
+      })
+    })
+
+    it('renders ghost variant', () => {
+      cy.mount(Textarea, { props: { variant: 'ghost' } })
+      cy.get('textarea').should('have.class', 'border-0')
+    })
+  })
 })

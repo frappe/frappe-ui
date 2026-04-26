@@ -11,16 +11,52 @@ describe('Password', () => {
     cy.get('input[type=text]').should('exist')
   })
 
-  it('v-model', () => {
+  it('v-model with modelValue', () => {
     cy.mount(Password, {
       props: {
-        value: '123456',
+        modelValue: '123456',
         'onUpdate:modelValue': cy.spy().as('onUpdate'),
       },
     })
 
     cy.get('input').type('a')
     cy.get('@onUpdate').should('have.been.calledWith', '123456a')
+  })
+
+  it('typing updates v-model from empty', () => {
+    cy.mount(Password, {
+      props: {
+        'onUpdate:modelValue': cy.spy().as('onUpdate'),
+      },
+    })
+
+    cy.get('input').type('abc')
+    cy.get('@onUpdate').should('have.been.calledWith', 'abc')
+  })
+
+  it('warns once when the deprecated `value` prop is used', () => {
+    cy.window().then((win) => {
+      cy.spy(win.console, 'warn').as('consoleWarn')
+    })
+    cy.mount(Password, {
+      props: { value: 'abc' },
+    })
+    cy.get('@consoleWarn').should(
+      'have.been.calledWithMatch',
+      /Password\.value is deprecated/,
+    )
+  })
+
+  it('shared labeling contract', () => {
+    cy.mount(Password, {
+      props: { label: 'Password', description: 'min 8 chars', required: true },
+    })
+    cy.contains('label', 'Password').should('exist')
+    cy.get('input').then(($input) => {
+      const id = $input.attr('id')!
+      expect($input.attr('aria-describedby')).to.equal(`${id}-description`)
+      expect($input.attr('aria-required')).to.equal('true')
+    })
   })
 
   it('Prefix slot', () => {

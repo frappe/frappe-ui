@@ -1,18 +1,18 @@
-export interface TextareaProps {
+import type { InputSize, InputVariant } from '../../composables/inputTypes'
+import type { InputLabelingProps } from '../../composables/useInputLabeling'
+
+export interface TextareaProps extends InputLabelingProps {
   /** Controls the visual size of the textarea. */
-  size?: 'sm' | 'md' | 'lg' | 'xl'
+  size?: InputSize
 
   /** Visual style variant. */
-  variant?: 'subtle' | 'outline'
+  variant?: InputVariant
 
   /** Placeholder text shown when empty. */
   placeholder?: string
 
   /** Disables user interaction. */
   disabled?: boolean
-
-  /** HTML id attribute. */
-  id?: string
 
   /** Bound value of the textarea. */
   modelValue?: string
@@ -22,9 +22,6 @@ export interface TextareaProps {
 
   /** Number of visible text rows. */
   rows?: number
-
-  /** Optional label text. */
-  label?: string
 }
 
 export interface TextareaEmits {
