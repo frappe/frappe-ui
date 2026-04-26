@@ -418,7 +418,7 @@ defineSlots<SelectSlots>()
                     <SelectItemIndicator
                       class="ml-1 inline-flex items-center justify-center"
                     >
-                      <span class="lucide-check size-4" />
+                      <span class="lucide-check size-4 text-ink-gray-6" />
                     </SelectItemIndicator>
                   </template>
                 </ItemListRow>

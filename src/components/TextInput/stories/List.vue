@@ -31,7 +31,7 @@ const variants = ["subtle", "outline"];
     <Story title="prefix slot icon">
       <TextInput placeholder="Enter Input">
         <template #prefix>
-          <span class="lucide-search w-4" />
+          <span class="lucide-search w-4 text-ink-gray-6" />
         </template>
       </TextInput>
     </Story>
@@ -39,7 +39,7 @@ const variants = ["subtle", "outline"];
     <Story title="suffix slot icon">
       <TextInput placeholder="Enter Input">
         <template #suffix>
-          <span class="lucide-search w-4" />
+          <span class="lucide-search w-4 text-ink-gray-6" />
         </template>
       </TextInput>
     </Story>

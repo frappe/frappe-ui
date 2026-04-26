@@ -559,7 +559,7 @@ defineSlots<ComboboxSlots>()
           data-slot="chevron"
           class="ml-auto inline-flex shrink-0 items-center justify-center text-ink-gray-4 outline-none transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] data-[state=open]:rotate-180"
         >
-          <span class="lucide-chevron-down size-4" />
+          <span class="lucide-chevron-down size-4 text-ink-gray-6" />
         </ComboboxTrigger>
       </ComboboxAnchor>
     </template>

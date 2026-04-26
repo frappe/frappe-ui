@@ -52,7 +52,7 @@ const options = [
               >
                 5
               </span>
-              <span class="lucide-chevron-down size-4" />
+              <span class="lucide-chevron-down size-4 text-ink-gray-6" />
             </div>
           </template>
         </Select>

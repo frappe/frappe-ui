@@ -71,7 +71,7 @@ const inputTypes = [
     <Story title="Prefix Icon" :layout="{ width: 250 }">
       <FormControl type="text" label="Label">
         <template #prefix>
-          <span class="lucide-search size-4" />
+          <span class="lucide-search size-4 text-ink-gray-6" />
         </template>
       </FormControl>
     </Story>
@@ -79,7 +79,7 @@ const inputTypes = [
     <Story title="Suffix Icon" :layout="{ width: 250 }">
       <FormControl type="text" label="Label">
         <template #suffix>
-          <span class="lucide-search size-4" />
+          <span class="lucide-search size-4 text-ink-gray-6" />
         </template>
       </FormControl>
     </Story>

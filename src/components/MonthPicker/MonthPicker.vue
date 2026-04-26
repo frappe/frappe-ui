@@ -75,7 +75,7 @@ const txtClass = computed(() => {
       <Button @click="togglePopover" class="w-full justify-between border" :class="txtClass"
 				:disabled="disabled" aria-haspopup="dialog" :aria-expanded="isOpen">
         {{ model || props.placeholder }}
-        <template #suffix> <span class="lucide-calendar size-4" /> </template>
+        <template #suffix> <span class="lucide-calendar size-4 text-ink-gray-6" /> </template>
       </Button>
     </template>
 

@@ -27,7 +27,7 @@ import { ItemListRow } from 'frappe-ui'
 
     <ItemListRow disabled>
       <template #suffix>
-        <span class="lucide-chevron-right size-4" />
+        <span class="lucide-chevron-right size-4 text-ink-gray-6" />
       </template>
       Disabled row with suffix only
     </ItemListRow>

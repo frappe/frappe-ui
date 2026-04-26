@@ -9,7 +9,7 @@ import { Alert, Button } from 'frappe-ui'
     description="Upgrade to keep enjoying features and future technical support."
   >
     <template #icon>
-      <span class="lucide-badge-info size-4" />
+      <span class="lucide-badge-info size-4 text-ink-gray-6" />
     </template>
 
     <template #footer>
