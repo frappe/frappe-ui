@@ -12,9 +12,12 @@ const ICONS_DIR = path.join(
 
 // Lucide ships every icon at stroke-width="2". Override to 1.5 for a lighter,
 // more balanced look that matches the rest of the design system.
+//
+// No `defaultColor` — icons inherit the parent's text color the same way an
+// inline <svg stroke="currentColor"> would. Add `text-ink-*` at the call
+// site when a specific tint is needed.
 export default iconPackPlugin({
   prefix: 'lucide',
   iconsDir: ICONS_DIR,
   normalizeStrokeWidth: 1.5,
-  defaultColor: 'var(--ink-gray-6)',
 })
