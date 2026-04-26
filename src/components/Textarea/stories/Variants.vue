@@ -1,16 +1,9 @@
 <script setup lang="ts">
 import { Textarea } from 'frappe-ui'
-import type { InputVariant } from '../../../composables/inputTypes'
-
-const variants: InputVariant[] = ['subtle', 'outline', 'ghost']
 </script>
 
 <template>
-  <Textarea
-    v-for="variant in variants"
-    :key="variant"
-    :variant="variant"
-    :label="variant"
-    placeholder="Write something..."
-  />
+  <Textarea variant="subtle" label="Subtle" placeholder="Write something..." />
+  <Textarea variant="outline" label="Outline" placeholder="Write something..." />
+  <Textarea variant="ghost" label="Ghost" placeholder="Write something..." />
 </template>
