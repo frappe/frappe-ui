@@ -23,6 +23,21 @@ No imports, no component registration, no auto-import magic. Icon names match
 Lucide's own kebab-case names — search them at
 [lucide.dev/icons](https://lucide.dev/icons).
 
+### How it works
+
+A Tailwind plugin (`tailwind/iconPackPlugin.js`) reads every SVG from the
+`lucide-static` package at build time and registers each one as a Tailwind
+component class via `matchComponents`. The generated rule sets
+`mask-image` to a data-URI of the icon's SVG and `background-color` to
+`currentColor`, so the icon paints in whatever color the element inherits
+and crops to whatever size you give it.
+
+Tailwind's JIT only emits CSS for classes it can find as literal strings in
+your source — so even though ~1800 icons are registered, only the ones you
+actually use end up in the output bundle. That's why a dynamic class like
+`` `lucide-${name}` `` produces no CSS: the JIT scanner can't see what to
+emit.
+
 ### Sizing and color
 
 The icon defaults to `1em × 1em` (it scales with surrounding text) and uses
@@ -84,6 +99,16 @@ reference:
 <Button :icon-left="LucideMenu" />
 ```
 
+### How it works
+
+`~icons/lucide/*` is a virtual module backed by a Vite plugin
+(`vite/lucideIcons.js`). When Vite resolves an import like
+`~icons/lucide/menu`, the plugin reads the matching SVG from
+`lucide-static` and synthesizes a small Vue component that renders the
+icon as an inline `<svg>` element. The component is bundled into your JS
+like any other module, so each icon you import adds a few hundred bytes
+to the bundle.
+
 ## Also supported: auto-imported `<LucideName />`
 
 For convenience, every Lucide icon is also available as a global Vue
@@ -98,6 +123,14 @@ component named `<Lucide<PascalName> />` — no import needed.
 
 This is functionally identical to the `~icons/lucide/*` import form; pick
 whichever reads better in context.
+
+### How it works
+
+`unplugin-vue-components` scans your templates and, when it sees a tag
+like `<LucideMenu />`, automatically inserts an import for
+`~icons/lucide/menu` at compile time. From there it's the same path as
+the manual-import form above — a virtual-module Vue component rendered as
+an inline `<svg>`.
 
 ## Which one should I use?
 
