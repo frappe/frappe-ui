@@ -4,12 +4,14 @@ Status: accepted direction for `frappe-ui` v1 planning.
 
 This document defines the intended public API direction for:
 
-- `ItemList`
 - `ItemListRow`
 - `Dropdown`
 - `Select`
 - `Combobox`
 - `MultiSelect`
+
+The `ItemList` container is **not** part of the v1 public surface. See
+[`08a-itemlist-spec.md`](./08a-itemlist-spec.md) for the rationale.
 
 It is based on:
 
@@ -26,8 +28,7 @@ The shared design rules, goals, non-goals, component boundaries, deprecation
 policy, and implementation order live in this document. The detailed
 per-component specs live in sibling sub-spec files:
 
-- [`08a-itemlist-spec.md`](./08a-itemlist-spec.md) — `ItemList` and
-  `ItemListRow`
+- [`08a-itemlist-spec.md`](./08a-itemlist-spec.md) — `ItemListRow`
 - [`08b-dropdown-spec.md`](./08b-dropdown-spec.md) — `Dropdown`
 - [`08c-select-spec.md`](./08c-select-spec.md) — `Select`
 - [`08d-combobox-spec.md`](./08d-combobox-spec.md) — `Combobox`
@@ -38,8 +39,8 @@ rules where it narrows or specializes them for that component.
 
 ## Decision summary
 
-- add `ItemList` as the shared styled list surface for option and menu rows
-- add `ItemListRow` as the shared row shell for item rendering
+- add `ItemListRow` as the shared row shell for item rendering across the
+  selection/menu family
 - keep `Dropdown`, `Select`, `Combobox`, and `MultiSelect` as separate
   higher-level components with clear boundaries
 - treat `Dropdown` as an action menu, not as the generic value picker
@@ -63,7 +64,7 @@ rules where it narrows or specializes them for that component.
 - standardize slot vocabulary, state vocabulary, and styling hooks
 - keep the component shell responsible for spacing, hover, selected, disabled,
   and layout states
-- reuse one styled list foundation across selection and menu components instead
+- reuse one styled row primitive across selection and menu components instead
   of duplicating row markup and classes
 
 ## Non-goals
@@ -78,7 +79,6 @@ rules where it narrows or specializes them for that component.
 
 These boundaries should stay clear.
 
-- `ItemList` = the shared styled list surface for option and menu rows
 - `ItemListRow` = the shared row shell for item rendering
 - `Dropdown` = action menus
 - `Select` = small static choice lists
@@ -87,8 +87,9 @@ These boundaries should stay clear.
 
 This means:
 
-- `ItemList` is the reusable base layer, not the default recommendation for
-  ordinary app code
+- `ItemListRow` is an internal-leaning row primitive; each higher-level
+  component owns its own listbox shell (keyboard nav, grouping, empty/footer
+  slots) and composes `ItemListRow` for row presentation
 - do not grow `Dropdown` into a value picker
 - do not treat `Select` as the searchable story
 - do not keep `Autocomplete` as the long-term canonical public API once
@@ -120,8 +121,6 @@ Use one advanced trigger slot name across this family where a trigger exists:
 
 - `#trigger`
 
-`ItemList` itself does not need a trigger. It is the content/list layer.
-
 Slot props should be component-specific but predictable. At minimum:
 
 - `open`
@@ -150,9 +149,10 @@ trigger-only customization because it is a common and ergonomic use case.
 
 This is the most important API decision.
 
-`ItemList` should be the place where this shell is defined once and reused.
+`ItemListRow` is the shared row primitive that defines this shell once and is
+composed by every higher-level component in this family.
 
-The component should own the item shell, including:
+The higher-level component should own the item shell, including:
 
 - spacing
 - row height
@@ -233,8 +233,6 @@ Notes:
 These remain supported in v1.x, but should be documented as advanced or
 deprecated depending on the component:
 
-- direct `ItemList` usage for advanced cases
-
 - full `#item` takeover
 - per-item `component`
 - per-item `render`
@@ -305,8 +303,8 @@ Rules for old names in `v1.x`:
 
 ### 8. Uniform disabled-option handling
 
-Disabled items should behave the same way across `ItemList`, `Dropdown`,
-`Select`, `Combobox`, and `MultiSelect`:
+Disabled items should behave the same way across `Dropdown`, `Select`,
+`Combobox`, and `MultiSelect`:
 
 - disabled items are skipped during keyboard navigation (arrow keys, typeahead,
   home/end)
@@ -381,7 +379,6 @@ Rules:
 
 Slot-prop context per component:
 
-- `ItemList`: `{ item, group }`
 - `Dropdown`: `{ item, close, selected }`
 - `Select`: `{ option }`
 - `Combobox`: `{ item, query, selected }`
@@ -572,9 +569,6 @@ Rules:
 - `Combobox` and `MultiSelect` always used `{ group, options }`; they do
   not accept an `items` alias because that shape was never part of their
   public API.
-- `ItemList` is the exception — it uses `items` everywhere because it is
-  the generic primitive, not a selection component. `ItemListGroup` keeps
-  `{ group, items }` as its native shape.
 
 Rationale:
 
@@ -615,8 +609,7 @@ Harder-to-warn cases like `Dropdown #item` can be deprecated in docs first.
 The exact public APIs, behaviors, slots, styling hooks, and migration paths for
 the shared list surface and the single-choice pickers live in their own files:
 
-- [`08a-itemlist-spec.md`](./08a-itemlist-spec.md) — `ItemList` and
-  `ItemListRow`
+- [`08a-itemlist-spec.md`](./08a-itemlist-spec.md) — `ItemListRow`
 - [`08b-dropdown-spec.md`](./08b-dropdown-spec.md) — `Dropdown`
 - [`08c-select-spec.md`](./08c-select-spec.md) — `Select`
 - [`08d-combobox-spec.md`](./08d-combobox-spec.md) — `Combobox`
@@ -646,9 +639,7 @@ is intentionally deferred, and what is explicitly out of scope.
   map if only `items` is given).
 - `Combobox` and `MultiSelect` always used `{ group, options }` — no
   alias is added there because `items` was never part of their public API.
-- Top-level prop names are unchanged (`options` on all four). `ItemList`'s
-  `ItemListGroup` continues to use `{ group, items }` natively because
-  `ItemList` is a generic primitive, not a selection component.
+- Top-level prop names are unchanged (`options` on all four).
 - See shared design rule 12 for the full rule.
 
 #### 1. Popover positioning
@@ -717,8 +708,8 @@ is intentionally deferred, and what is explicitly out of scope.
 
 #### 9. Per-item inline slots
 
-- All item-accepting components (`ItemList`, `Dropdown`, `Select`,
-  `Combobox`, `MultiSelect`) now accept a `slots` field on item objects
+- All item-accepting components (`Dropdown`, `Select`, `Combobox`,
+  `MultiSelect`) now accept a `slots` field on item objects
   whose shape matches Vue's render-function slots object.
 - Keys mirror the template slot names without the `item-` prefix:
   `{ prefix, label, suffix, item }`.
@@ -767,7 +758,8 @@ is intentionally deferred, and what is explicitly out of scope.
 - `Select` explicitly does not accept grouped options in the initial v1
   cut. `Combobox` and `MultiSelect` do.
 - Consider adding grouped support to `Select` in a later `v1.x` minor using
-  the same `ItemListGroup`-shaped input. Additive whenever it lands.
+  the same `{ group, options }` shape used by `Combobox` and `MultiSelect`.
+  Additive whenever it lands.
 
 ### Non-goals for cohesion work
 
@@ -810,22 +802,20 @@ This should be a long migration, not an abrupt rename.
 
 ## Implementation order
 
-1. **ItemList / ItemListRow**
-   - build the shared styled list surface
-   - build the shared row shell
-   - add grouped list support
-   - add shared item slots and styling hooks
-   - make it usable directly by app authors for advanced cases
+1. **ItemListRow**
+   - finalize the shared row shell (prefix/label/suffix regions, size,
+     active/selected/disabled states, styling hooks)
+   - keep its surface narrow; not promoted to a top-level public component
 
 2. **Dropdown**
-   - compose `ItemList` / `ItemListRow`
+   - compose `ItemListRow`
    - add shell-owned item slots
    - add `selected` support
    - add `v-model:open`
    - keep `#item` and `component`, but move them to escape-hatch status
 
 3. **Combobox**
-   - compose `ItemList` / `ItemListRow`
+   - compose `ItemListRow`
    - add `update:query`
    - add `v-model:open`
    - add preferred alias: `slot`
@@ -833,13 +823,13 @@ This should be a long migration, not an abrupt rename.
    - preserve current custom item API while warning on old names where needed
 
 4. **Select**
-   - compose `ItemList` / `ItemListRow`
+   - compose `ItemListRow`
    - add `v-model:open`
    - add `#item-prefix`, `#item-label`, `#item-suffix`
    - keep `#option` as alias
 
 5. **MultiSelect**
-   - compose `ItemList` / `ItemListRow`
+   - compose `ItemListRow`
    - align with the same slot model as `Select` and `Combobox`
    - add `v-model:open`
    - add `update:query`
@@ -853,5 +843,5 @@ For v1, this RFC means:
 - clear preferred APIs for new work
 - explicit deprecations for awkward legacy customization patterns
 - migration paths for existing apps
-- a more consistent mental model across `ItemList`, `Dropdown`, `Select`,
-  `Combobox`, and `MultiSelect`
+- a more consistent mental model across `Dropdown`, `Select`, `Combobox`,
+  and `MultiSelect`

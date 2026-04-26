@@ -274,9 +274,8 @@ Notes:
 - plain items are rendered as implicit unlabeled groups in source order
 - each menu level should normalize its `DropdownOptions` input into an explicit
   grouped structure before row rendering
-- that normalized structure should be equivalent to
-  `ItemListGroup<DropdownOption>[]`, even if the implementation does not
-  literally render the `ItemList` component
+- the normalization shape is internal to `Dropdown`; only the
+  `{ group, options }` external API contract is part of the public surface
 - `condition()` is evaluated before rendering at every menu depth
 - items whose `condition()` returns false are omitted
 - groups with zero visible items are omitted

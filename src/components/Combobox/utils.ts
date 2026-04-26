@@ -10,7 +10,7 @@ import type {
   ComboboxSize,
   ComboboxVariant,
 } from './types'
-import type { ItemListSize } from '../ItemList'
+import type { ItemListSize } from '../ItemListRow'
 
 /** Sentinel values used internally — never exposed to consumers. */
 export const EMPTY_SELECTABLE_VALUE_PREFIX = '__frappe_ui_combobox_empty__:'

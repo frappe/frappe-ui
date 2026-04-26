@@ -8,7 +8,7 @@ import {
   ComboboxViewport,
 } from 'reka-ui'
 import LucideCheck from '~icons/lucide/check'
-import ItemListRow from '../ItemList/ItemListRow.vue'
+import ItemListRow from '../ItemListRow/ItemListRow.vue'
 import LoadingIndicator from '../LoadingIndicator.vue'
 import { isEmojiIconString, isLucideIconString } from '../../utils/iconString'
 import type { MultiSelectItemSlotProps, MultiSelectSize } from './types'

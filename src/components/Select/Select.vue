@@ -8,10 +8,10 @@ import type {
   SelectProps,
   SelectSlots,
 } from './types'
-import type { ItemListSize } from '../ItemList'
+import type { ItemListSize } from '../ItemListRow'
 import LucideCheck from '~icons/lucide/check'
 import LucideChevronDown from '~icons/lucide/chevron-down'
-import ItemListRow from '../ItemList/ItemListRow.vue'
+import ItemListRow from '../ItemListRow/ItemListRow.vue'
 import {
   SelectContent,
   SelectItem,

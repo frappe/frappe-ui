@@ -116,12 +116,14 @@ We have only agreed on a small set of broad component decisions so far.
 
 ### Important exception
 
-For the selection/menu family, `ItemList` and `ItemListRow` are the intentional advanced base layer behind:
+For the selection/menu family, `ItemListRow` is the intentional shared row primitive used internally by:
 
 - `Dropdown`
 - `Select`
 - `Combobox`
 - `MultiSelect`
+
+The `ItemList` container is **not** part of the v1 public surface. Each higher-level component owns its own listbox shell (keyboard nav, grouping, empty/footer slots, etc.); only the row presentation is shared.
 
 Use [`08-selection-and-menu-api-spec.md`](./08-selection-and-menu-api-spec.md) as the source of truth for that family.
 
@@ -255,7 +257,7 @@ See [`08-selection-and-menu-api-spec.md`](./08-selection-and-menu-api-spec.md).
 Key items:
 
 - deprecate `Autocomplete` in favor of separate higher-level components
-- add/finalize `ItemList` and `ItemListRow`
+- finalize `ItemListRow` as the shared row primitive (no public `ItemList` container in v1)
 - finalize `Select`, `Combobox`, `Dropdown`, `MultiSelect`, `FormControl`, and `Switch`
 - align the family on `v-model`, `v-model:open`, shared trigger/item slot vocabulary, and `@update:query`
 - deprecate `Input.vue`
@@ -368,7 +370,7 @@ v1 should not ship before all of these are done:
 More specifically, the selection/input family blocker set includes:
 
 - `Autocomplete` deprecated in favor of separate higher-level components
-- `ItemList` and `ItemListRow` finalized as the shared styled foundation for menu/option rows
+- `ItemListRow` finalized as the shared styled row primitive used by `Dropdown`, `Select`, `Combobox`, and `MultiSelect`
 - `Select`, `Combobox`, `Dropdown`, and `MultiSelect` finalized on top of that foundation
 - `FormControl` finalized
 - `Switch` finalized

@@ -1,4 +1,4 @@
-import type { ItemListSize } from '../ItemList'
+import type { ItemListSize } from '../ItemListRow'
 import type {
   MultiSelectGroupedOption,
   MultiSelectItemSlotProps,
