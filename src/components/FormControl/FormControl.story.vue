@@ -2,7 +2,6 @@
 import Story from "@/components/Story.vue";
 import { reactive, ref } from "vue";
 // import FeatherIcon from "../FeatherIcon.vue";
-import LucideSearch from "~icons/lucide/search";
 import { Avatar, FormControl } from "frappe-ui";
 
 const state = reactive({
@@ -72,7 +71,7 @@ const inputTypes = [
     <Story title="Prefix Icon" :layout="{ width: 250 }">
       <FormControl type="text" label="Label">
         <template #prefix>
-          <LucideSearch class="size-4" />
+          <span class="lucide-search size-4 text-ink-gray-6" />
         </template>
       </FormControl>
     </Story>
@@ -80,7 +79,7 @@ const inputTypes = [
     <Story title="Suffix Icon" :layout="{ width: 250 }">
       <FormControl type="text" label="Label">
         <template #suffix>
-          <LucideSearch class="size-4" />
+          <span class="lucide-search size-4 text-ink-gray-6" />
         </template>
       </FormControl>
     </Story>

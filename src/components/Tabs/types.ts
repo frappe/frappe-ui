@@ -1,9 +1,14 @@
+import type { Component } from 'vue'
+
 export interface Tab {
   /** Text shown for the tab. */
   label: string
 
-  /** Optional icon name displayed with the label. */
-  icon?: string
+  /**
+   * Optional icon shown with the label. Pass a `lucide-*` class string for
+   * the recommended class-based form, or a Vue component for custom icons.
+   */
+  icon?: string | Component
 
   /** Optional route to navigate to when the tab is clicked. */
   route?: string

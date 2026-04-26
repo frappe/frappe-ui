@@ -4,7 +4,7 @@
       <Dropdown class="h-7" :options="dropdownItems">
         <Button variant="ghost">
           <template #icon>
-            <LucideEllipsis class="w-4 text-ink-gray-5" />
+            <span class="lucide-ellipsis size-4 text-ink-gray-5" />
           </template>
         </Button>
       </Dropdown>
@@ -84,7 +84,6 @@ import { Button } from '../Button'
 import type { BreadcrumbsProps } from './types'
 import { ref, computed, nextTick, useTemplateRef } from 'vue'
 import { useResizeObserver } from '@vueuse/core'
-import LucideEllipsis from '~icons/lucide/ellipsis'
 import type { BreadcrumbItem } from './types'
 
 const crumbsEl = useTemplateRef<HTMLDivElement>('crumbsRef')

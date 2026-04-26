@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, h, ref, watch } from 'vue'
+import { computed, h, ref, watch, type Component } from 'vue'
 import {
   TabsContent,
   TabsIndicator,
@@ -54,12 +54,12 @@ const Btn = h('button')
 defineSlots<{
   /** Custom renderer for a tab trigger (icon + label / router-link). */
   'tab-item'?: (props: {
-    tab: { label: string; icon?: string; route?: string }
+    tab: { label: string; icon?: string | Component; route?: string }
   }) => any
 
   /** Content rendered for each tab panel. */
   'tab-panel'?: (props: {
-    tab: { label: string; icon?: string; route?: string }
+    tab: { label: string; icon?: string | Component; route?: string }
   }) => any
 }>()
 </script>
@@ -95,8 +95,16 @@ defineSlots<{
             class="flex items-center gap-1.5 text-base text-ink-gray-5 duration-300 ease-in-out hover:text-ink-gray-9 data-[state=active]:text-ink-gray-9"
             :class="{ 'px-2.5': props.vertical, 'py-2.5': !props.vertical }"
           >
-            <component v-if="tab.icon" :is="tab.icon" class="size-4">
-            </component>
+            <span
+              v-if="tab.icon && typeof tab.icon === 'string' && tab.icon.startsWith('lucide-')"
+              class="size-4"
+              :class="tab.icon"
+            />
+            <component
+              v-else-if="tab.icon"
+              :is="tab.icon"
+              class="size-4"
+            />
 
             {{ tab.label }}
           </component>

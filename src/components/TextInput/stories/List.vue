@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import Story from "@/components/Story.vue";
 import { Avatar, TextInput } from "frappe-ui";
-import LucideSearch from "~icons/lucide/search";
 
 const inputTypes = [
   "text",
@@ -32,7 +31,7 @@ const variants = ["subtle", "outline"];
     <Story title="prefix slot icon">
       <TextInput placeholder="Enter Input">
         <template #prefix>
-          <LucideSearch class="w-4" name="search" />
+          <span class="lucide-search size-4 text-ink-gray-6" />
         </template>
       </TextInput>
     </Story>
@@ -40,7 +39,7 @@ const variants = ["subtle", "outline"];
     <Story title="suffix slot icon">
       <TextInput placeholder="Enter Input">
         <template #suffix>
-          <LucideSearch class="w-4" name="search" />
+          <span class="lucide-search size-4 text-ink-gray-6" />
         </template>
       </TextInput>
     </Story>

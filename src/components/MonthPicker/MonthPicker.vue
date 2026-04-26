@@ -4,9 +4,6 @@ import { MonthPickerProps } from './types'
 
 import Button from '../Button/Button.vue'
 import Popover from '../Popover/Popover.vue'
-import LucideCalender from '~icons/lucide/calendar'
-import LucideChevronLeft from '~icons/lucide/chevron-left'
-import LucideChevronRight from '~icons/lucide/chevron-right'
 
 const props = withDefaults(defineProps<MonthPickerProps>(), {
   placeholder: 'Select month',
@@ -78,14 +75,14 @@ const txtClass = computed(() => {
       <Button @click="togglePopover" class="w-full justify-between border" :class="txtClass"
 				:disabled="disabled" aria-haspopup="dialog" :aria-expanded="isOpen">
         {{ model || props.placeholder }}
-        <template #suffix> <LucideCalender class="size-4" /> </template>
+        <template #suffix> <span class="lucide-calendar size-4 text-ink-gray-6" /> </template>
       </Button>
     </template>
 
     <template #body>
       <div class="flex gap-2 justify-between">
         <Button variant="ghost" @click="prevClick" label='previous'>
-          <LucideChevronLeft class="size-4 text-ink-gray-5" />
+          <span class="lucide-chevron-left size-4 text-ink-gray-5" />
         </Button>
 
         <!-- view toggler -->
@@ -99,7 +96,7 @@ const txtClass = computed(() => {
         </Button>
 
         <Button variant="ghost" @click="nextClick" label='next'>
-          <LucideChevronRight class="size-4 text-ink-gray-5" />
+          <span class="lucide-chevron-right size-4 text-ink-gray-5" />
         </Button>
       </div>
 

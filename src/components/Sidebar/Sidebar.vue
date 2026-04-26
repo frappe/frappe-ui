@@ -42,8 +42,8 @@
         @click="isCollapsed = !isCollapsed"
       >
         <template #icon>
-          <LucidePanelRightOpen
-            class="size-4 text-ink-gray-6 duration-300 ease-in-out"
+          <span
+            class="lucide-panel-right-open size-4 text-ink-gray-6 duration-300 ease-in-out"
             :class="{ 'rotate-180': shouldCollapse }"
           />
         </template>
@@ -59,7 +59,6 @@ import SidebarHeader from './SidebarHeader.vue'
 import SidebarItem from './SidebarItem.vue'
 import { SidebarProps } from './types'
 
-import LucidePanelRightOpen from '~icons/lucide/panel-right-open'
 import SidebarSection from './SidebarSection.vue'
 
 const props = defineProps<SidebarProps>()

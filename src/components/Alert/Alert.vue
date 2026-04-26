@@ -3,12 +3,6 @@ import { computed } from 'vue'
 
 import type { AlertProps } from "./types";
 
-import LucideX from "~icons/lucide/x";
-import LucideInfo from "~icons/lucide/info";
-import LucideCircleX from "~icons/lucide/circle-x";
-import LucideCheck from "~icons/lucide/circle-check";
-import LucideWarning from "~icons/lucide/triangle-alert";
-
 /** Controls the visibility of the alert for dismissing or toggling it */
 const visible = defineModel({ default: true });
 
@@ -34,10 +28,10 @@ const classes = computed(() => {
 
 const icon = computed(() => {
   const data = {
-    yellow: { component: LucideWarning, css: 'text-ink-amber-3' },
-    blue: { component: LucideInfo, css: 'text-ink-blue-3' },
-    red: { component: LucideCircleX, css: 'text-ink-red-3' },
-    green: { component: LucideCheck, css: 'text-ink-green-3' },
+    yellow: { class: 'lucide-triangle-alert', css: 'text-ink-amber-3' },
+    blue: { class: 'lucide-info', css: 'text-ink-blue-3' },
+    red: { class: 'lucide-circle-x', css: 'text-ink-red-3' },
+    green: { class: 'lucide-circle-check', css: 'text-ink-green-3' },
   }
   return props.theme ? data[props.theme] : null
 })
@@ -67,11 +61,10 @@ defineSlots<{
     class="grid grid-cols-[auto_1fr_auto] gap-3 rounded-md px-4 py-3.5 text-base items-start"
   >
     <slot name="icon">
-      <component
-        :is="icon.component"
-        class="size-4"
+      <span
         v-if="icon"
-        :class="icon.css"
+        class="size-4"
+        :class="[icon.class, icon.css]"
       />
     </slot>
 
@@ -85,8 +78,13 @@ defineSlots<{
       </slot>
     </div>
 
-    <button v-if="props.dismissable" @click="dismissAlert">
-      <LucideX class="size-4" />
+    <button
+      v-if="props.dismissable"
+      type="button"
+      aria-label="Dismiss"
+      @click="dismissAlert"
+    >
+      <span class="lucide-x size-4 text-ink-gray-6" aria-hidden="true" />
     </button>
     <slot name="footer"> </slot>
   </div>

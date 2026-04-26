@@ -68,7 +68,7 @@
                           <DialogClose as-child>
                             <Button variant="ghost" @click="close">
                               <template #icon>
-                                <LucideX class="h-4 w-4 text-ink-gray-9" />
+                                <span class="lucide-x size-4 text-ink-gray-9" />
                               </template>
                             </Button>
                           </DialogClose>
@@ -125,7 +125,6 @@ import {
 import { computed, reactive } from 'vue'
 import { Button } from '../Button'
 import FeatherIcon from '../FeatherIcon.vue'
-import LucideX from '~icons/lucide/x'
 import type {
   DialogProps,
   DialogIcon,

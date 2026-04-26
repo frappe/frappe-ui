@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Badge, MultiSelect } from 'frappe-ui'
-import LucideChevronDown from '~icons/lucide/chevron-down'
-import LucideX from '~icons/lucide/x'
 
 type Tag = {
   label: string
@@ -54,7 +52,7 @@ function removeTag(value: string) {
                 @click.stop="removeTag(option.value)"
                 @pointerdown.stop
               >
-                <LucideX class="size-3" />
+                <span class="lucide-x size-3" />
               </span>
             </template>
           </Badge>
@@ -67,9 +65,9 @@ function removeTag(value: string) {
           </span>
         </div>
 
-        <LucideChevronDown
+        <span
           :class="[
-            'size-4 shrink-0 text-ink-gray-4 transition-transform',
+            'lucide-chevron-down size-4 shrink-0 text-ink-gray-4 transition-transform',
             open && 'rotate-180',
           ]"
         />

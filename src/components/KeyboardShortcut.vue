@@ -11,20 +11,21 @@
       <template v-for="(part, idx) in parsedParts" :key="idx + '-' + part.raw">
         <!-- Explicit modifier icons -->
         <span v-if="part.type === 'cmd'">
-          <LucideCommand class="w-3 h-3" aria-label="Command" />
+          <span class="lucide-command size-3" role="img" aria-label="Command" />
         </span>
         <span v-else-if="part.type === 'shift'">
-          <LucideShift class="w-3 h-3" aria-label="Shift" />
+          <span class="lucide-arrow-big-up size-3" role="img" aria-label="Shift" />
         </span>
         <span v-else-if="part.type === 'alt'">
-          <LucideAlt class="w-3 h-3" aria-label="Option" />
+          <span class="lucide-option size-3" role="img" aria-label="Option" />
         </span>
         <!-- Non-modifier key -->
         <span v-else>
-          <component
+          <span
             v-if="iconFor(part)"
-            :is="iconFor(part)"
-            class="w-3 h-3"
+            :class="iconFor(part)"
+            class="size-3"
+            role="img"
             :aria-label="part.display"
           />
           <span
@@ -45,13 +46,20 @@
     <!-- Backward compatibility path (legacy boolean props + slot) -->
     <template v-else>
       <span v-if="ctrl || meta">
-        <LucideCommand v-if="isMac" class="w-3 h-3" aria-label="Command" />
+        <span
+          v-if="isMac"
+          class="lucide-command size-3"
+          role="img"
+          aria-label="Command"
+        />
         <span v-else class="font-mono text-[10px] leading-none">Ctrl</span>
       </span>
-      <span v-if="shift"
-        ><LucideShift class="w-3 h-3" aria-label="Shift"
-      /></span>
-      <span v-if="alt"><LucideAlt class="w-3 h-3" aria-label="Option" /></span>
+      <span v-if="shift">
+        <span class="lucide-arrow-big-up size-3" role="img" aria-label="Shift" />
+      </span>
+      <span v-if="alt">
+        <span class="lucide-option size-3" role="img" aria-label="Option" />
+      </span>
       <slot></slot>
     </template>
   </div>
@@ -72,15 +80,6 @@
 </template>
 <script setup lang="ts">
 import { computed } from 'vue'
-import LucideCommand from '~icons/lucide/command'
-import LucideShift from '~icons/lucide/arrow-big-up'
-import LucideAlt from '~icons/lucide/option'
-import IconArrowUp from '~icons/lucide/arrow-up'
-import IconArrowDown from '~icons/lucide/arrow-down'
-import IconArrowLeft from '~icons/lucide/arrow-left'
-import IconArrowRight from '~icons/lucide/arrow-right'
-import IconEnter from '~icons/lucide/corner-down-left'
-import IconBackspace from '~icons/lucide/delete'
 
 // Robust mac detection (navigator.platform deprecated)
 const isMac = computed(() => {
@@ -240,17 +239,18 @@ const ariaLabel = computed(() => {
 
 defineOptions({ name: 'KeyboardShortcut' })
 
-// Icon mapping for non-modifier keys when useIcons enabled
-const keyIconMap: Record<string, any> = {
-  '↑': IconArrowUp,
-  '↓': IconArrowDown,
-  '←': IconArrowLeft,
-  '→': IconArrowRight,
-  '↵': IconEnter,
-  '⌫': IconBackspace,
+// Icon mapping for non-modifier keys when useIcons enabled.
+// Values are lucide-* class names consumed by the iconPackPlugin masking rules.
+const keyIconMap: Record<string, string> = {
+  '↑': 'lucide-arrow-up',
+  '↓': 'lucide-arrow-down',
+  '←': 'lucide-arrow-left',
+  '→': 'lucide-arrow-right',
+  '↵': 'lucide-corner-down-left',
+  '⌫': 'lucide-delete',
 }
 
-function iconFor(part: Part) {
+function iconFor(part: Part): string | null {
   if (!props.useIcons) return null
   if (['cmd', 'shift', 'alt'].includes(part.type)) return null // modifier icons handled separately
   return keyIconMap[part.display] || null
