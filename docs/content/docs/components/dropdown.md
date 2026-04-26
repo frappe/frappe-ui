@@ -14,7 +14,7 @@ Keyboard shortcuts rendered in the row suffix. Use the `#item-suffix` slot and a
 <ComponentPreview name="Dropdown-02_Shortcuts" layout="stacked" />
 
 ## Submenus
-Grouped actions with nested submenus — the "Share" path recurses into "Invite people" which recurses into channel targets. Groups are just `{ group, items }` entries in the options array.
+Grouped actions with nested submenus — the "Share" path recurses into "Invite people" which recurses into channel targets. Groups are just `{ group, options }` entries in the options array.
 
 <ComponentPreview name="Dropdown-03_Submenus" />
 

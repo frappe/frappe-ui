@@ -63,7 +63,7 @@ const userMenuItems = computed(() => [
   },
   {
     group: 'Account',
-    items: [
+    options: [
       {
         icon: 'lucide-list-restart',
         label: 'Clear cache',

@@ -6,6 +6,14 @@ import type {
   DropdownTheme,
 } from './types'
 
+/**
+ * Group object after normalization. `options` is guaranteed to be present
+ * (the deprecated `items` alias has been resolved into it).
+ */
+export type NormalizedDropdownGroup = DropdownGroupOption & {
+  options: DropdownOption[]
+}
+
 export const dropdownClasses = {
   content:
     'dropdown-content min-w-40 divide-y divide-outline-gray-modals rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none',
@@ -21,7 +29,17 @@ export const dropdownClasses = {
 export function isDropdownGroupOption(
   item: DropdownItem,
 ): item is DropdownGroupOption {
-  return 'items' in item && 'group' in item
+  return 'group' in item && ('options' in item || 'items' in item)
+}
+
+function resolveGroupChildren(group: DropdownGroupOption): DropdownOption[] {
+  if (import.meta.env.DEV && group.options && group.items) {
+    console.warn(
+      '[Dropdown] grouped entry has both `options` and `items`. `options` wins; `items` is the deprecated alias.',
+    )
+  }
+
+  return group.options ?? group.items ?? []
 }
 
 export function isDropdownSwitchOption(item: DropdownOption) {
@@ -63,13 +81,13 @@ function normalizeGroupItems(items: DropdownOption[]) {
 
 export function normalizeDropdownOptions(
   options: DropdownOptions = [],
-): DropdownGroupOption[] {
-  const groups: DropdownGroupOption[] = []
-  let currentGroup: DropdownGroupOption | null = null
+): NormalizedDropdownGroup[] {
+  const groups: NormalizedDropdownGroup[] = []
+  let currentGroup: NormalizedDropdownGroup | null = null
   let implicitGroupIndex = 0
 
   function flushCurrentGroup() {
-    if (!currentGroup || !currentGroup.items.length) {
+    if (!currentGroup || !currentGroup.options.length) {
       currentGroup = null
       return
     }
@@ -84,14 +102,16 @@ export function normalizeDropdownOptions(
     if (isDropdownGroupOption(item)) {
       flushCurrentGroup()
 
-      const visibleItems = normalizeGroupItems(item.items)
+      const visibleItems = normalizeGroupItems(resolveGroupChildren(item))
 
       if (!visibleItems.length) continue
 
+      const { items: _legacyItems, ...rest } = item
+
       groups.push({
-        ...item,
+        ...rest,
         key: item.key ?? index,
-        items: visibleItems,
+        options: visibleItems,
       })
       continue
     }
@@ -105,11 +125,11 @@ export function normalizeDropdownOptions(
         key: `implicit-${implicitGroupIndex++}`,
         group: '',
         hideLabel: true,
-        items: [],
+        options: [],
       }
     }
 
-    currentGroup.items.push(normalizeDropdownOption(item))
+    currentGroup.options.push(normalizeDropdownOption(item))
   }
 
   flushCurrentGroup()
@@ -117,8 +137,8 @@ export function normalizeDropdownOptions(
   return groups
 }
 
-export function groupHasIcons(group: DropdownGroupOption) {
-  return group.items.some((item) => Boolean(item.icon))
+export function groupHasIcons(group: NormalizedDropdownGroup) {
+  return group.options.some((item) => Boolean(item.icon))
 }
 
 export function getDropdownIconColor(item: {

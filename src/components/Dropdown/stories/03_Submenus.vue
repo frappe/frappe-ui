@@ -4,7 +4,7 @@ import { Dropdown, type DropdownOptions } from 'frappe-ui'
 const actions: DropdownOptions = [
   {
     group: 'Manage',
-    items: [
+    options: [
       {
         label: 'Share',
         icon: 'lucide-share-2',
@@ -52,7 +52,7 @@ const actions: DropdownOptions = [
   },
   {
     group: 'Danger',
-    items: [
+    options: [
       {
         label: 'Delete',
         icon: 'lucide-trash-2',

@@ -231,7 +231,9 @@ interface DropdownGroupOption {
   group: string
   hideLabel?: boolean
   theme?: DropdownTheme
-  items: DropdownOption[]
+  options: DropdownOption[]
+  /** @deprecated alias for `options` (Dropdown previously used `items`) */
+  items?: DropdownOption[]
 }
 
 type DropdownOption =
@@ -242,6 +244,16 @@ type DropdownOption =
 
 type DropdownOptions = Array<DropdownOption | DropdownGroupOption>
 ```
+
+Compatibility rule for the group field:
+
+- the canonical group entry is `{ group, options }`, matching `Combobox`,
+  `MultiSelect`, and `Select`
+- `{ group, items }` (the previous Dropdown shape) keeps working through
+  `v1.x` as a deprecated alias
+- if both `options` and `items` are provided on the same group entry,
+  `options` wins and a dev warning is emitted
+- if only `items` is provided, it is silently mapped to `options`
 
 Notes:
 
@@ -419,7 +431,7 @@ These stay supported:
 - `side`
 - `offset`
 - `portalTo`
-- grouped items
+- grouped items, including the legacy `{ group, items }` shape
 - `submenu`
 - `switch`
 - `switchValue`
@@ -436,6 +448,8 @@ Keep working, but deprecate for ordinary row customization:
   full-row escape hatch; use `slots.prefix` / `slots.label` /
   `slots.suffix` for per-region customization)
 - `placement` prop in favor of `align`
+- `{ group, items }` group entries in favor of `{ group, options }` (for
+  symmetry with `Combobox` / `MultiSelect` / `Select`)
 
 Keep as escape hatches:
 
@@ -475,6 +489,39 @@ Do **not** deprecate:
   </template>
 </Dropdown>
 ```
+
+### `{ group, items }` → `{ group, options }` rename
+
+Old:
+
+```ts
+const actions = [
+  {
+    group: 'Edit',
+    items: [
+      { label: 'Rename', onClick: rename },
+      { label: 'Duplicate', onClick: duplicate },
+    ],
+  },
+]
+```
+
+New:
+
+```ts
+const actions = [
+  {
+    group: 'Edit',
+    options: [
+      { label: 'Rename', onClick: rename },
+      { label: 'Duplicate', onClick: duplicate },
+    ],
+  },
+]
+```
+
+`{ group, items }` keeps working through `v1.x`; a dev warning fires if
+both `options` and `items` are provided on the same group entry.
 
 ### Old: full-row escape hatch via `component`
 

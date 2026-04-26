@@ -551,7 +551,42 @@ Consumer-authored prefix slots always take precedence — if the caller
 wants custom rendering, they wire `#item-prefix` or `item.slots.prefix`
 and the auto-icon branch is skipped.
 
-### 12. Deprecation policy for this family
+### 12. Group field naming
+
+Across the selection family (`Dropdown`, `Select`, `Combobox`,
+`MultiSelect`), the canonical field name inside a grouped entry is
+`options`:
+
+```ts
+{ group: 'Active', options: [...] }
+```
+
+Rules:
+
+- the grouped-entry field on every selection component is `options`
+- the top-level prop on each component is `options`
+- `Dropdown` previously used `{ group, items }`; it accepts `items` as a
+  deprecated alias on grouped entries through `v1.x`. If both are
+  provided, `options` wins and a dev warning is emitted; if only `items`
+  is provided, it is silently mapped to `options`.
+- `Combobox` and `MultiSelect` always used `{ group, options }`; they do
+  not accept an `items` alias because that shape was never part of their
+  public API.
+- `ItemList` is the exception — it uses `items` everywhere because it is
+  the generic primitive, not a selection component. `ItemListGroup` keeps
+  `{ group, items }` as its native shape.
+
+Rationale:
+
+- the original real-world inconsistency was Dropdown using `{ group, items }`
+  while Combobox / MultiSelect used `{ group, options }`. Selection
+  components agreeing on `options` matches form-control language
+  (`<select><option>`) and avoids renaming Combobox / MultiSelect.
+- Dropdown's group field changes from `items` → `options` to align. Old
+  `{ group, items }` shapes still work as the deprecated alias on Dropdown
+  only.
+
+### 13. Deprecation policy for this family
 
 For v1.x:
 
@@ -567,6 +602,9 @@ Good candidates for deprecation warnings:
 - `Combobox` query listeners using `input` instead of `update:query`
 - `Dropdown` items using `component` for ordinary row customization
 - `Select` / `MultiSelect` usage of `#option` once `#item-label` exists
+- any selection component receiving `{ group, items }` group entries
+  instead of `{ group, options }` (the deprecated alias for cross-component
+  symmetry)
 
 Harder-to-warn cases like `Dropdown #item` can be deprecated in docs first.
 
@@ -596,6 +634,22 @@ This section tracks status: what the per-component specs now integrate, what
 is intentionally deferred, and what is explicitly out of scope.
 
 ### Integrated into the per-component specs
+
+#### 0. Grouped-entry field name
+
+- Every selection component (`Dropdown`, `Select`, `Combobox`,
+  `MultiSelect`) uses `{ group, options }` as the canonical grouped-entry
+  shape.
+- `Dropdown` previously used `{ group, items }`; its canonical group field
+  is now `options`. `items` remains accepted as a deprecated alias on the
+  group entry through `v1.x` (warning fires if both are provided; silent
+  map if only `items` is given).
+- `Combobox` and `MultiSelect` always used `{ group, options }` — no
+  alias is added there because `items` was never part of their public API.
+- Top-level prop names are unchanged (`options` on all four). `ItemList`'s
+  `ItemListGroup` continues to use `{ group, items }` natively because
+  `ItemList` is a generic primitive, not a selection component.
+- See shared design rule 12 for the full rule.
 
 #### 1. Popover positioning
 

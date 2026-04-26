@@ -13,7 +13,7 @@ function rowActions(task: Task): DropdownOptions {
   return [
     {
       group: 'Manage',
-      items: [
+      options: [
         {
           label: 'Rename',
           icon: 'lucide-pen',
@@ -33,7 +33,7 @@ function rowActions(task: Task): DropdownOptions {
     },
     {
       group: 'Move',
-      items: [
+      options: [
         {
           label: 'Archive',
           icon: 'lucide-archive',

@@ -122,8 +122,18 @@ export interface DropdownGroupOption {
   /** Label rendered above the grouped items. */
   group: string
 
-  /** Items rendered inside the group. */
-  items: DropdownOption[]
+  /**
+   * Items rendered inside the group. Optional in the type so the
+   * deprecated `items` alias still typechecks; provide one of
+   * `options` or `items`.
+   */
+  options?: DropdownOption[]
+
+  /**
+   * @deprecated use `options`. Accepted only as a back-compat alias for
+   * Dropdown's previous `{ group, items }` shape.
+   */
+  items?: DropdownOption[]
 
   /** Hides the group heading while preserving grouping. */
   hideLabel?: boolean

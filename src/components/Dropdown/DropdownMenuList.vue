@@ -12,7 +12,7 @@ import {
 import DropdownMenuItemContent from './DropdownMenuItemContent.vue'
 import DropdownRenderContent from './DropdownRenderContent.vue'
 import DropdownRenderContentAsChild from './DropdownRenderContentAsChild.vue'
-import type { DropdownGroupOption, DropdownOption } from './types'
+import type { DropdownOption } from './types'
 import {
   dropdownClasses,
   getDropdownBackgroundColor,
@@ -21,6 +21,7 @@ import {
   isDropdownSubmenuOption,
   isDropdownSwitchOption,
   normalizeDropdownOptions,
+  type NormalizedDropdownGroup,
 } from './utils'
 
 defineOptions({
@@ -29,7 +30,7 @@ defineOptions({
 
 const props = withDefaults(
   defineProps<{
-    groups?: DropdownGroupOption[]
+    groups?: NormalizedDropdownGroup[]
     portalTo?: string | HTMLElement
     close: () => void
     slotFns?: Record<string, ((props?: any) => any) | undefined>
@@ -43,7 +44,7 @@ const props = withDefaults(
 const router = useRouter()
 
 const hasVisibleItems = computed(() => {
-  return props.groups.some((group) => group.items.length)
+  return props.groups.some((group) => group.options.length)
 })
 
 async function handleItemSelect(item: DropdownOption, event: Event) {
@@ -81,7 +82,7 @@ async function handleItemSelect(item: DropdownOption, event: Event) {
       </DropdownMenuLabel>
 
       <template
-        v-for="(item, itemIndex) in group.items"
+        v-for="(item, itemIndex) in group.options"
         :key="item.value ?? item.label ?? itemIndex"
       >
         <DropdownMenuSub v-if="isDropdownSubmenuOption(item)">
