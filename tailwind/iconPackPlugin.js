@@ -79,13 +79,13 @@ export function iconPackPlugin({
           const uri = encodeSvgAsDataUri(value)
           if (!uri) return {}
           const rules = {
-            display: 'inline-block',
+            // Match Tailwind preflight's `svg { display: block }` so a
+            // class-based icon behaves identically to the inline-svg form
+            // it replaces — no phantom line-box height in the parent, no
+            // baseline drift next to text in flex containers.
+            display: 'block',
             width: '1em',
             height: '1em',
-            // Nudge the box down so it sits on the visual mid-line of
-            // surrounding text — matches where an inline <svg> icon
-            // lands. Ignored in flex/grid contexts.
-            'vertical-align': '-0.125em',
             'background-color': 'currentColor',
             '-webkit-mask-image': `url("${uri}")`,
             'mask-image': `url("${uri}")`,

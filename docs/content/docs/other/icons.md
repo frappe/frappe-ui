@@ -45,13 +45,17 @@ The icon defaults to `1em × 1em` (it scales with surrounding text) and uses
 
 ```vue
 <!-- Inherits the parent's text color and font-size -->
-<p class="text-base text-ink-gray-7">
+<div class="flex items-center gap-1 text-base text-ink-gray-7">
   <span class="lucide-info" /> heads up
-</p>
+</div>
 
 <!-- Or set both explicitly -->
 <span class="lucide-info size-5 text-ink-blue-6" />
 ```
+
+Icons render as `display: block` (matching Tailwind's preflight default
+for `<svg>`), so put them inside a flex container — `flex` /
+`inline-flex` / `grid` — when you want them to sit next to text.
 
 ### Always write the full class name
 
