@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Button, MultiSelect } from 'frappe-ui'
-import LucideCheck from '~icons/lucide/check-check'
-import LucideTrash from '~icons/lucide/trash-2'
 
 const state = ref<string[]>([])
 
@@ -25,14 +23,14 @@ const options = [
       >
         <Button theme="red" variant="ghost" @click="clearAll">
           <template #prefix>
-            <LucideTrash class="size-4" />
+            <span class="lucide-trash-2 size-4" />
           </template>
           Clear ({{ selectedOptions.length }})
         </Button>
 
         <Button variant="ghost" @click="selectAll">
           <template #prefix>
-            <LucideCheck class="size-4" />
+            <span class="lucide-check-check size-4" />
           </template>
           Select All
         </Button>

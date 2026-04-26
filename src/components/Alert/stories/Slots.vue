@@ -1,6 +1,5 @@
 <script setup>
 import { Alert, Button } from 'frappe-ui'
-import LucideBadge from '~icons/lucide/badge-info'
 </script>
 
 <template>
@@ -10,7 +9,7 @@ import LucideBadge from '~icons/lucide/badge-info'
     description="Upgrade to keep enjoying features and future technical support."
   >
     <template #icon>
-      <LucideBadge class="size-4" />
+      <span class="lucide-badge-info size-4" />
     </template>
 
     <template #footer>
