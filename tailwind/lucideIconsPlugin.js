@@ -1,7 +1,6 @@
-import plugin from 'tailwindcss/plugin'
-import fs from 'node:fs'
 import path from 'node:path'
 import { createRequire } from 'node:module'
+import { iconPackPlugin } from './iconPackPlugin.js'
 
 // Resolve lucide-static's icons directory once per plugin init. Works whether
 // frappe-ui is consumed locally or installed as a dependency of another app.
@@ -11,91 +10,11 @@ const ICONS_DIR = path.join(
   'icons',
 )
 
-const svgDataUriCache = new Map()
-
-function encodeSvgAsDataUri(name) {
-  if (svgDataUriCache.has(name)) return svgDataUriCache.get(name)
-
-  const filePath = path.join(ICONS_DIR, `${name}.svg`)
-  if (!fs.existsSync(filePath)) {
-    svgDataUriCache.set(name, null)
-    return null
-  }
-
-  // Lucide ships every icon at stroke-width="2". Override to 1.5 for a
-  // lighter, more balanced look that matches the rest of the design
-  // system's iconography density.
-  const svg = fs
-    .readFileSync(filePath, 'utf8')
-    .replace(/stroke-width="[^"]+"/, 'stroke-width="1.5"')
-    .replace(/\s+/g, ' ')
-    .trim()
-  const uri = `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`
-  svgDataUriCache.set(name, uri)
-  return uri
-}
-
-function readAvailableIconNames() {
-  try {
-    return fs
-      .readdirSync(ICONS_DIR)
-      .filter((f) => f.endsWith('.svg'))
-      .map((f) => f.replace(/\.svg$/, ''))
-  } catch {
-    return []
-  }
-}
-
-/**
- * Generates `lucide-<name>` utility classes for every icon shipped by
- * lucide-static (~1800 icons). Each class renders as an inline-block
- * square that masks the icon SVG with the current text color — so you
- * can size it with `size-*`, tint it with `text-*`, and drop it into
- * any template without an import:
- *
- *   <span class="lucide-menu size-4 text-ink-gray-6" />
- *
- * Under the hood each class emits a `mask-image` data URI pointing at
- * the raw lucide SVG, plus `background-color: currentColor`. Tailwind's
- * JIT only emits CSS for classes actually referenced in source, so the
- * 1800-icon registration is a lookup table — the generated CSS stays
- * minimal.
- */
-export default plugin(({ matchComponents }) => {
-  const names = readAvailableIconNames()
-  const values = Object.fromEntries(names.map((n) => [n, n]))
-
-  // Registered via `matchComponents` (not `matchUtilities`) so Tailwind
-  // puts these rules in the components layer. Regular utility classes
-  // like `size-4`, `w-5`, `h-6`, `text-ink-gray-6` live in the utilities
-  // layer which comes after — so they always win over the plugin's
-  // 1em/1em defaults without needing `!important` or source-order tricks
-  // at the call site.
-  matchComponents(
-    {
-      lucide: (value) => {
-        const uri = encodeSvgAsDataUri(value)
-        if (!uri) return {}
-        return {
-          display: 'inline-block',
-          width: '1em',
-          height: '1em',
-          // Default to ink-gray-6 — tints via `text-*` utilities still win
-          // because they sit in the utilities layer (components < utilities).
-          color: 'var(--ink-gray-6)',
-          'background-color': 'currentColor',
-          '-webkit-mask-image': `url("${uri}")`,
-          'mask-image': `url("${uri}")`,
-          '-webkit-mask-repeat': 'no-repeat',
-          'mask-repeat': 'no-repeat',
-          '-webkit-mask-position': 'center',
-          'mask-position': 'center',
-          '-webkit-mask-size': 'contain',
-          'mask-size': 'contain',
-          'flex-shrink': '0',
-        }
-      },
-    },
-    { values, type: 'any' },
-  )
+// Lucide ships every icon at stroke-width="2". Override to 1.5 for a lighter,
+// more balanced look that matches the rest of the design system.
+export default iconPackPlugin({
+  prefix: 'lucide',
+  iconsDir: ICONS_DIR,
+  normalizeStrokeWidth: 1.5,
+  defaultColor: 'var(--ink-gray-6)',
 })
