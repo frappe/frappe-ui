@@ -6,7 +6,8 @@
   "sideEffects": false,
   "scripts": {
     "test": "vitest --run",
-    "type-check": "tsc --noEmit",
+    "type-check": "vue-tsc --noEmit",
+    "type-check:tsc": "tsc --noEmit",
     "prettier": "yarn run prettier -w ./src",
     "bump-and-release": "yarn test && git pull --rebase origin main && yarn run release-patch",
     "release-patch": "yarn version --patch && git push && git push --tags",
@@ -147,7 +148,8 @@
     "vitest": "^2.1.8",
     "vue": "^3.3.0",
     "vue-component-meta": "^3.1.8",
-    "vue-router": "^4.1.6"
+    "vue-router": "^4.1.6",
+    "vue-tsc": "^3.2.7"
   },
   "resolutions": {
     "prosemirror-model": "1.25.2",

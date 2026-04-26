@@ -1,14 +1,12 @@
 <template>
   <label class="block" :class="labelClasses" :for="id">
     {{ label }}
-    <template v-if="required">
-      <span class="text-ink-red-3 select-none" aria-hidden="true">*</span>
-      <span class="sr-only">(required)</span>
-    </template>
+    <RequiredIndicator :required="required" />
   </label>
 </template>
 <script setup lang="ts">
 import { computed } from 'vue'
+import RequiredIndicator from './InputLabeling/RequiredIndicator.vue'
 
 interface FormLabelProps {
   label: string

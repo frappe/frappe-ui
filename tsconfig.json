@@ -17,6 +17,7 @@
   "references": [{ "path": "./tsconfig.node.json" }],
   "compilerOptions": {
     "baseUrl": ".",
+    "ignoreDeprecations": "5.0",
     "paths": {
       "@/*": ["src/*"]
     }
