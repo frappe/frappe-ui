@@ -144,3 +144,85 @@ an inline `<svg>`.
 | Quick prototyping in a template             | `<LucideName />` auto-import |
 
 In most components you write, the class form is the right answer.
+
+## Using icons in Frappe UI components
+
+Most Frappe UI components that take an icon accept either a `lucide-*`
+class string, a Vue component reference, or a slot. The class string is
+the recommended form — keep using imports when the icon is genuinely
+dynamic or you need a real SVG node.
+
+### Button
+
+`Button` exposes `iconLeft`, `iconRight`, and `icon` props, plus matching
+`prefix` / `suffix` / `icon` slots. All three props accept a `lucide-*`
+class string or a component reference.
+
+```vue
+<!-- ✅ Class form (recommended) -->
+<Button icon-left="lucide-plus" label="New task" />
+<Button icon-right="lucide-arrow-right" label="Continue" />
+<Button icon="lucide-settings" />  <!-- icon-only -->
+
+<!-- Component form — for dynamic icons or pass-through cases -->
+<script setup>
+import LucidePlus from '~icons/lucide/plus'
+</script>
+<Button :icon-left="LucidePlus" label="New task" />
+
+<!-- Slot form — when you need full control over the icon markup -->
+<Button label="New task">
+  <template #prefix>
+    <span class="lucide-plus size-4" />
+  </template>
+</Button>
+```
+
+### Dropdown
+
+`Dropdown` items take an `icon` field on each option. It accepts the same
+shapes as `Button.iconLeft`:
+
+```vue
+<script setup>
+const options = [
+  { label: 'Profile',  icon: 'lucide-user',     onClick: () => {} },
+  { label: 'Settings', icon: 'lucide-settings', onClick: () => {} },
+  { label: 'Sign out', icon: 'lucide-log-out',  onClick: () => {} },
+]
+</script>
+
+<template>
+  <Dropdown :options="options">
+    <Button icon-left="lucide-circle-user" label="Account" />
+  </Dropdown>
+</template>
+```
+
+Because each option's `icon` is a complete literal string in your source,
+Tailwind's JIT picks it up correctly. If you build an options array
+dynamically — say, from a server response — and the icon names aren't
+known at build time, fall back to importing components:
+
+```vue
+<script setup>
+import LucideUser from '~icons/lucide/user'
+import LucideSettings from '~icons/lucide/settings'
+
+const options = computed(() =>
+  serverItems.value.map((item) => ({
+    label: item.label,
+    icon: item.kind === 'user' ? LucideUser : LucideSettings,
+    onClick: () => open(item),
+  })),
+)
+</script>
+```
+
+### Other components
+
+`Input`, `FormControl`, `Tabs`, `Tooltip`, `Alert`, `Sidebar` and similar
+components either accept the same `icon` / `iconLeft` / `iconRight` props
+or expose a slot where you can drop a `<span class="lucide-..." />`
+directly. Check each component's reference page for the exact prop
+names — the icon API conventions are consistent across the library.
