@@ -6,6 +6,7 @@ Keep separate docs only where that genuinely helps:
 
 - [`04-components-audit.md`](./04-components-audit.md) for the component audit matrix
 - [`08-selection-and-menu-api-spec.md`](./08-selection-and-menu-api-spec.md) for the accepted menu/selection API direction
+- [`09-input-components-spec.md`](./09-input-components-spec.md) for the accepted input-family API direction (TextInput, Textarea, Password, Checkbox, Switch, Rating, Slider, ErrorMessage; FileUploader covered separately)
 
 ## What v1 means
 

@@ -14,9 +14,13 @@ This directory contains the active planning docs for `frappe-ui` v1.
 - [`04-components-audit.md`](./04-components-audit.md)
   - Core component audit matrix for TS, `<script setup>`, docs, stories, and tests.
 - [`08-selection-and-menu-api-spec.md`](./08-selection-and-menu-api-spec.md)
-  - Accepted API direction for Dropdown, Select, Combobox, MultiSelect, ItemList, and ItemListRow.
+  - Accepted API direction for Dropdown, Select, Combobox, MultiSelect, and ItemListRow.
+- [`09-input-components-spec.md`](./09-input-components-spec.md)
+  - Accepted API direction for the input family: TextInput, Textarea, Password, Checkbox, Switch, Rating, Slider, and ErrorMessage. Covers the shared labeling contract, size/variant scales, `defineModel` pattern, deprecation warnings, and a wave-by-wave implementation plan. FileUploader is out of scope and addressed in a separate spec.
 
 ## Research
 
 - [`research/07-real-world-component-usage-audit.md`](./research/07-real-world-component-usage-audit.md)
   - Bench-wide usage audit that informed the selection/menu API spec.
+- [`research/09-input-components-usage-audit.md`](./research/09-input-components-usage-audit.md)
+  - Bench-wide usage audit that locked the parked decisions in the input-components spec.
