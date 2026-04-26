@@ -82,6 +82,10 @@ export function iconPackPlugin({
             display: 'inline-block',
             width: '1em',
             height: '1em',
+            // Nudge the box down so it sits on the visual mid-line of
+            // surrounding text — matches where an inline <svg> icon
+            // lands. Ignored in flex/grid contexts.
+            'vertical-align': '-0.125em',
             'background-color': 'currentColor',
             '-webkit-mask-image': `url("${uri}")`,
             'mask-image': `url("${uri}")`,
