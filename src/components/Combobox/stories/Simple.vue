@@ -23,6 +23,7 @@ const repos = [
       :options="repos"
       placeholder="Pick a repo"
       class="w-64"
+      open-on-focus
     />
 
     <div class="text-sm text-ink-gray-5">

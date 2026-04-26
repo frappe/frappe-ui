@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Button, MultiSelect } from 'frappe-ui'
-import LucideUsers from '~icons/lucide/users'
-import LucideChevronDown from '~icons/lucide/chevron-down'
 
 const state = ref<string[]>(['alice'])
 
@@ -18,19 +16,16 @@ const options = [
 <template>
   <MultiSelect v-model="state" :options="options" placeholder="Assign to">
     <template #trigger="{ selectedOptions, open }">
-      <Button>
-        <template #prefix>
-          <LucideUsers class="size-4" />
-        </template>
+      <Button icon-left="lucide-users">
         {{
           selectedOptions.length
             ? `${selectedOptions.length} assigned`
             : 'Assign to'
         }}
         <template #suffix>
-          <LucideChevronDown
+          <span
             :class="[
-              'size-4 transition-transform',
+              'lucide-chevron-down size-4 transition-transform',
               open && 'rotate-180',
             ]"
           />

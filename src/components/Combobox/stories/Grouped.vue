@@ -10,7 +10,11 @@ const spaces: { group: string; options: Space[] }[] = [
   {
     group: 'Engineering',
     options: [
-      { label: 'Platform Infra', value: 'platform-infra', accent: 'bg-blue-500' },
+      {
+        label: 'Platform Infra',
+        value: 'platform-infra',
+        accent: 'bg-blue-500',
+      },
       { label: 'Mobile 2.0', value: 'mobile-2', accent: 'bg-red-500' },
       { label: 'Growth', value: 'growth', accent: 'bg-amber-500' },
     ],
