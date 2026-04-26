@@ -26,9 +26,9 @@
           </div>
         </template>
         <div>
-          <component
+          <span
             v-show="showEye"
-            :is="show ? LucideEyeOff : LucideEye"
+            :class="show ? 'lucide-eye-off' : 'lucide-eye'"
             class="h-3 cursor-pointer mr-1"
             @click="show = !show"
           />
@@ -38,8 +38,6 @@
   </FormControl>
 </template>
 <script setup lang="ts">
-import LucideEye from "~icons/lucide/eye";
-import LucideEyeOff from "~icons/lucide/eye-off";
 import KeyboardShortcut from "../KeyboardShortcut.vue";
 import FormControl from "../FormControl/FormControl.vue";
 import Tooltip from "../Tooltip/Tooltip.vue";

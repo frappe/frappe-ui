@@ -9,8 +9,6 @@ import type {
   SelectSlots,
 } from './types'
 import type { ItemListSize } from '../ItemListRow'
-import LucideCheck from '~icons/lucide/check'
-import LucideChevronDown from '~icons/lucide/chevron-down'
 import ItemListRow from '../ItemListRow/ItemListRow.vue'
 import {
   SelectContent,
@@ -297,7 +295,7 @@ defineSlots<SelectSlots>()
         </div>
 
         <slot name="suffix">
-          <LucideChevronDown class="ml-auto size-4 shrink-0 text-ink-gray-4" />
+          <span class="lucide-chevron-down ml-auto size-4 shrink-0 text-ink-gray-4" />
         </slot>
       </template>
     </SelectTrigger>
@@ -420,7 +418,7 @@ defineSlots<SelectSlots>()
                     <SelectItemIndicator
                       class="ml-1 inline-flex items-center justify-center"
                     >
-                      <LucideCheck class="size-4" />
+                      <span class="lucide-check size-4" />
                     </SelectItemIndicator>
                   </template>
                 </ItemListRow>

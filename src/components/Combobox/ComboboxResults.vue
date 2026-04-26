@@ -7,7 +7,6 @@ import {
   ComboboxLabel,
   ComboboxViewport,
 } from 'reka-ui'
-import LucideCheck from '~icons/lucide/check'
 import ItemListRow from '../ItemListRow/ItemListRow.vue'
 import LoadingIndicator from '../LoadingIndicator.vue'
 import { isEmojiIconString, isLucideIconString } from '../../utils/iconString'
@@ -347,7 +346,7 @@ function handleSelect(item: NormalizedItem, event: Event) {
                     v-if="isSelectableOption(item)"
                     class="ml-1 inline-flex items-center justify-center"
                   >
-                    <LucideCheck class="size-4" />
+                    <span class="lucide-check size-4" />
                   </ComboboxItemIndicator>
                 </template>
               </ItemListRow>

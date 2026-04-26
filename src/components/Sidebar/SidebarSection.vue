@@ -17,9 +17,9 @@
         {{ props.label }}
       </h3>
       <div v-if="props.collapsible">
-        <LucideChevronRight
+        <span
           v-if="!isSidebarCollapsed"
-          class="w-4 h-4 text-ink-gray-5 transition-all duration-300 ease-in-out"
+          class="lucide-chevron-right w-4 h-4 text-ink-gray-5 transition-all duration-300 ease-in-out"
           :class="{ 'rotate-90': !isCollapsed }"
         />
       </div>
@@ -63,7 +63,6 @@
 import { inject, ref } from 'vue'
 import SidebarItem from './SidebarItem.vue'
 import { SidebarSectionProps } from './types'
-import LucideChevronRight from '~icons/lucide/chevron-right'
 
 const props = defineProps<SidebarSectionProps>()
 

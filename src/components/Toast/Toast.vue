@@ -14,13 +14,13 @@
           v-else-if="type == 'success'"
           class="flex-shrink-0 size-4 text-ink-green-2"
         />
-        <LucideAlertTriangle
+        <span
           v-else-if="type == 'warning'"
-          class="flex-shrink-0 size-4 text-ink-amber-2"
+          class="lucide-alert-triangle flex-shrink-0 size-4 text-ink-amber-2"
         />
-        <LucideInfo
+        <span
           v-else-if="type == 'error'"
-          class="flex-shrink-0 size-4 text-ink-red-2"
+          class="lucide-info flex-shrink-0 size-4 text-ink-red-2"
         />
       </div>
       <div class="flex flex-col flex-grow overflow-hidden">
@@ -45,7 +45,7 @@
         aria-label="Close"
         class="flex-shrink-0 rounded p-1 text-ink-white hover:text-ink-gray-3 focus:outline-none focus-visible:ring focus-visible:ring-outline-gray-4"
       >
-        <LucideX class="size-4" />
+        <span class="lucide-x size-4" />
       </ToastClose>
     </div>
   </ToastRoot>
@@ -54,9 +54,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { ToastAction, ToastClose, ToastDescription, ToastRoot } from 'reka-ui'
-import LucideInfo from '~icons/lucide/info'
-import LucideAlertTriangle from '~icons/lucide/alert-triangle'
-import LucideX from '~icons/lucide/x'
 import CircleCheck from '../../../icons/CircleCheckIcon.vue'
 import type { ToastProps } from './types'
 

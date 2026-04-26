@@ -16,7 +16,6 @@ import {
   ComboboxRoot,
   ComboboxTrigger,
 } from 'reka-ui'
-import LucideChevronDown from '~icons/lucide/chevron-down'
 import {
   isEmojiIconString,
   isLucideIconString,
@@ -487,9 +486,9 @@ defineSlots<ComboboxSlots>()
             {{ selectedOption?.label ?? placeholder }}
           </span>
 
-          <LucideChevronDown
+          <span
             :class="[
-              'size-4 shrink-0 text-ink-gray-4 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)]',
+              'lucide-chevron-down size-4 shrink-0 text-ink-gray-4 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)]',
               open && 'rotate-180',
             ]"
           />
@@ -560,7 +559,7 @@ defineSlots<ComboboxSlots>()
           data-slot="chevron"
           class="ml-auto inline-flex shrink-0 items-center justify-center text-ink-gray-4 outline-none transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] data-[state=open]:rotate-180"
         >
-          <LucideChevronDown class="size-4" />
+          <span class="lucide-chevron-down size-4" />
         </ComboboxTrigger>
       </ComboboxAnchor>
     </template>

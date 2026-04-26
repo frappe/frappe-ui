@@ -1,7 +1,3 @@
-<script setup>
-import LucideLoaderCircle from '~icons/lucide/loader-circle'
-</script>
-
 <template>
-  <LucideLoaderCircle class='animate-spin size-4' />
+  <span class="lucide-loader-circle animate-spin size-4" />
 </template>

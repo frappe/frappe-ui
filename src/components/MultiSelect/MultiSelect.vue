@@ -7,7 +7,6 @@ import {
   ComboboxPortal,
   ComboboxRoot,
 } from 'reka-ui'
-import LucideChevronDown from '~icons/lucide/chevron-down'
 import Button from '../Button/Button.vue'
 import LoadingIndicator from '../LoadingIndicator.vue'
 import MultiSelectResults from './MultiSelectResults.vue'
@@ -333,9 +332,9 @@ defineSlots<MultiSelectSlots>()
           />
         </span>
 
-        <LucideChevronDown
+        <span
           :class="[
-            'size-4 shrink-0 text-ink-gray-4 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)]',
+            'lucide-chevron-down size-4 shrink-0 text-ink-gray-4 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)]',
             open && 'rotate-180',
           ]"
         />
