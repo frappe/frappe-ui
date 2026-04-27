@@ -70,7 +70,7 @@
   },
   {
     name: 'modelValue',
-    description: '',
+    description: 'The current password value (controlled).',
     required: false,
     type: 'string'
   }

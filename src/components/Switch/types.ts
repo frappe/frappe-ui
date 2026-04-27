@@ -23,10 +23,3 @@ export interface SwitchProps extends InputLabelingProps {
   labelClasses?: string
 }
 
-export interface SwitchEmits {
-  /**
-   * Fired when the switch value changes.
-   * @deprecated Use `v-model` / `update:modelValue` instead.
-   */
-  change: [value: boolean]
-}

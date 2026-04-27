@@ -17,6 +17,7 @@ const props = withDefaults(defineProps<SliderProps>(), {
 })
 
 const emit = defineEmits<SliderEmits>()
+/** The current slider value (controlled). */
 const model = defineModel<SliderValue>()
 const slots = useSlots()
 

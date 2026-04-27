@@ -65,6 +65,7 @@ const props = withDefaults(defineProps<PasswordProps>(), {
   variant: 'subtle',
 })
 
+/** The current password value (controlled). */
 const model = defineModel<string>()
 
 watchEffect(() => {

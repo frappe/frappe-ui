@@ -72,7 +72,7 @@
   },
   {
     name: 'modelValue',
-    description: '',
+    description: 'The current slider value (controlled).',
     required: false,
     type: 'SliderValue'
   }
@@ -99,7 +99,7 @@
   },
   {
     name: 'value-commit',
-    description: '',
+    description: 'Fired once when the user finishes committing the value.',
     type: '[value: SliderValue]'
   }
 ]

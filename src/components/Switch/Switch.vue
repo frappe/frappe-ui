@@ -30,7 +30,6 @@
       <SwitchRoot
         :id="inputId"
         v-model="model"
-        @keyup.space.self="model = !model"
         :class="switchClasses"
         :disabled="props.disabled"
         :aria-required="props.required || undefined"
@@ -166,9 +165,11 @@ const switchLabelClasses = computed(() => {
 })
 
 const switchGroupClasses = computed(() => {
-  if (!props.label && !slots.label) return undefined
+  const hasLabel = props.label || slots.label
+  const hasDescription = props.description || slots.description
+  if (!hasLabel && !hasDescription) return undefined
   const classes = ['flex justify-between']
-  if (!props.description) {
+  if (!hasDescription) {
     classes.push(
       'group items-center gap-x-3 py-1.5 cursor-pointer rounded focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-outline-gray-3',
     )

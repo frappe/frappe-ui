@@ -68,13 +68,14 @@
   />
 </template>
 <script setup lang="ts">
-import { useAttrs, computed, watchEffect } from 'vue'
+import { useAttrs, computed, provide, watchEffect } from 'vue'
 import { useId } from '../../utils/useId'
 import { TextInput } from '../TextInput'
 import { Select } from '../Select'
 import { Textarea } from '../Textarea'
 import { Checkbox } from '../Checkbox'
 import { Autocomplete } from '../Autocomplete'
+import { autocompleteDeprecationSuppressed } from '../Autocomplete/deprecationKey'
 import { Combobox } from '../Combobox'
 import FormLabel from '../FormLabel.vue'
 import { warnDeprecated } from '../../utils/warnDeprecated'
@@ -90,6 +91,8 @@ const props = withDefaults(defineProps<FormControlProps>(), {
   size: 'sm',
   variant: 'subtle',
 })
+
+provide(autocompleteDeprecationSuppressed, true)
 
 watchEffect(() => {
   if (props.type === 'autocomplete') {

@@ -53,7 +53,7 @@ describe('Slider', () => {
       props: { id: 'sl-disabled', modelValue: [25], disabled: true },
     })
     cy.get('#sl-disabled').should('have.attr', 'aria-disabled', 'true')
-    cy.get('[role="slider"]').should('have.attr', 'data-disabled')
+    cy.get('#sl-disabled').should('have.attr', 'data-disabled', '')
   })
 
   describe('shared labeling contract', () => {

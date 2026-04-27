@@ -88,7 +88,7 @@
   {
     name: 'update:modelValue',
     description: 'Fired when the model value changes.',
-    type: 'unknown[]'
+    type: '[value: number]'
   }
 ]
 </script>

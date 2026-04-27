@@ -74,10 +74,10 @@ describe('Switch', () => {
       })
       cy.mount(Switch, { attrs: { onChange: cy.spy().as('onChange') } })
       cy.get('[role="switch"]').click()
-      cy.get('@consoleWarn').should(
-        'have.been.calledWithMatch',
-        /Switch\.change is deprecated/,
-      )
+      cy.get('[role="switch"]').click()
+      cy.get('@consoleWarn')
+        .should('have.been.calledOnce')
+        .and('have.been.calledWithMatch', /Switch\.change is deprecated/)
     })
 
     it('warns once when labelClasses is set', () => {

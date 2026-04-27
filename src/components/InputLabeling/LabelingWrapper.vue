@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import type { HTMLAttributes, StyleValue } from 'vue'
+
 defineProps<{
   enabled: boolean
-  wrapperClass?: any
-  wrapperStyle?: any
+  wrapperClass?: HTMLAttributes['class']
+  wrapperStyle?: StyleValue
 }>()
 
 defineOptions({ inheritAttrs: false })

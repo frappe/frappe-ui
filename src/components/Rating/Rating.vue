@@ -3,7 +3,6 @@
     <InputLabel
       v-if="props.label || $slots.label"
       :id="labelId"
-      :for-id="inputId"
       :label="props.label"
       :required="props.required"
       class="text-p-sm font-medium text-ink-gray-7"
@@ -65,14 +64,13 @@ import InputLabel from '../InputLabeling/InputLabel.vue'
 import InputDescription from '../InputLabeling/InputDescription.vue'
 import InputError from '../InputLabeling/InputError.vue'
 import LabelingWrapper from '../InputLabeling/LabelingWrapper.vue'
-import type { RatingEmits, RatingProps } from './types'
+import type { RatingProps } from './types'
 
 const props = withDefaults(defineProps<RatingProps>(), {
   size: 'md',
   readonly: false,
 })
 
-defineEmits<RatingEmits>()
 const model = defineModel<number>({ default: 0 })
 const slots = useSlots()
 

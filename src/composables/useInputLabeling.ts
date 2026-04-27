@@ -80,7 +80,7 @@ export function useInputLabeling(
     const e = props.error
     if (!e) return []
     if (typeof e === 'string') return [e]
-    if (e.messages && e.messages.length) return e.messages
+    if (e.messages && e.messages.length) return e.messages.slice()
     return e.message ? [e.message] : []
   })
 

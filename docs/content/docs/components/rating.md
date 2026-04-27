@@ -25,8 +25,8 @@ Lets users rate items using stars in a simple, interactive way. Provides immedia
 ## Deprecated `rating_from` prop
 
 The `rating_from` prop is kept for backwards compatibility and fires a
-dev-mode `[frappe-ui] Rating.rating_from is deprecated` warning. Use
-`max` instead.
+dev-mode `[frappe-ui] Rating.rating_from is deprecated. Use max instead.`
+warning. Use `max` instead.
 
 <ComponentPreview name="Rating-LegacyRatingFrom" />
 
