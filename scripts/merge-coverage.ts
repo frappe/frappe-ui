@@ -36,7 +36,7 @@ execSync(`npx nyc merge ${merged} ${join(merged, 'coverage-final.json')}`, {
 })
 
 execSync(
-  `npx nyc report --reporter=lcov --reporter=text --reporter=text-summary -t ${merged} --report-dir ${final}`,
+  `npx nyc report --reporter=lcov --reporter=text --reporter=text-summary --reporter=json-summary -t ${merged} --report-dir ${final}`,
   { stdio: 'inherit' },
 )
 
