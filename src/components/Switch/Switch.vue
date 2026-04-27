@@ -170,14 +170,10 @@ const switchGroupClasses = computed(() => {
   const classes = ['flex justify-between']
   if (!props.description) {
     classes.push(
-      'group items-center gap-x-3 py-1.5 cursor-pointer rounded focus-visible:bg-surface-gray-2 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-outline-gray-3',
+      'group items-center gap-x-3 py-1.5 cursor-pointer rounded focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-outline-gray-3',
     )
 
-    classes.push(
-      props.disabled
-        ? 'cursor-not-allowed'
-        : 'hover:bg-surface-gray-3 active:bg-surface-gray-4',
-    )
+    if (props.disabled) classes.push('cursor-not-allowed')
   } else {
     classes.push('items-start')
     classes.push(props.size === 'md' ? 'gap-x-3.5' : 'gap-x-2.5')
