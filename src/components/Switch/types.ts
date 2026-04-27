@@ -1,19 +1,32 @@
-export interface SwitchProps {
+import type { Component } from 'vue'
+import type { ToggleSize } from '../../composables/inputTypes'
+import type { InputLabelingProps } from '../../composables/useInputLabeling'
+
+export interface SwitchProps extends InputLabelingProps {
   /** Size of the switch control */
-  size?: 'sm' | 'md'
-
-  /** Label text displayed next to the switch */
-  label?: string
-
-  /** Helper or descriptive text shown below the label */
-  description?: string
+  size?: ToggleSize
 
   /** Disables the switch and prevents interaction */
   disabled?: boolean
 
-  /** Optional icon rendered inside or alongside the switch */
-  icon?: any
+  /**
+   * Optional icon rendered alongside the label.
+   * Strings starting with `lucide-` are rendered via the shared Lucide
+   * Tailwind utility; component values are rendered with `<component :is>`.
+   */
+  icon?: string | Component
 
-  /** Custom classes applied to the label element */
+  /**
+   * Custom classes applied to the label element.
+   * @deprecated Use `data-*` styling hooks instead.
+   */
   labelClasses?: string
+}
+
+export interface SwitchEmits {
+  /**
+   * Fired when the switch value changes.
+   * @deprecated Use `v-model` / `update:modelValue` instead.
+   */
+  change: [value: boolean]
 }

@@ -13,3 +13,8 @@ export function warnDeprecated(
     `[frappe-ui] ${name} is deprecated. Use ${replacement} instead.${suffix}`,
   )
 }
+
+/** Test-only: clear the dedup set so each test sees a fresh warning surface. */
+export function _resetWarnDeprecated() {
+  warned.clear()
+}

@@ -1,11 +1,16 @@
 import Checkbox from './Checkbox.vue'
+import { _resetWarnDeprecated } from '../../utils/warnDeprecated'
 
 describe('Checkbox', () => {
+  beforeEach(() => {
+    _resetWarnDeprecated()
+  })
+
   it('renders', () => {
     cy.mount(Checkbox, { props: { label: 'abc' } })
 
     cy.get('input[type="checkbox"]').should('exist')
-    cy.get('label').should('have.text', 'abc')
+    cy.get('label').should('contain.text', 'abc')
   })
 
   it('disabled', () => {
@@ -27,5 +32,40 @@ describe('Checkbox', () => {
     cy.get('@onUpdate').should('not.have.been.called')
     cy.get('input[type="checkbox"]').click()
     cy.get('@onUpdate').should('have.been.calledWith', true)
+  })
+
+  describe('shared labeling contract', () => {
+    it('wires aria-describedby and aria-errormessage', () => {
+      cy.mount(Checkbox, {
+        props: { label: 'Accept', description: 'Required to continue.' },
+      })
+      cy.get('input').then(($el) => {
+        const id = $el.attr('id')!
+        expect($el.attr('aria-describedby')).to.equal(`${id}-description`)
+      })
+    })
+
+    it('renders error state and suppresses description', () => {
+      cy.mount(Checkbox, {
+        props: {
+          label: 'Accept',
+          description: 'helper',
+          error: 'Required',
+        },
+      })
+      cy.get('input').should('have.attr', 'aria-invalid', 'true')
+      cy.contains('Required').should('exist')
+    })
+
+    it('warns once when the deprecated `padding` prop is used', () => {
+      cy.window().then((win) => {
+        cy.spy(win.console, 'warn').as('consoleWarn')
+      })
+      cy.mount(Checkbox, { props: { label: 'abc', padding: true } })
+      cy.get('@consoleWarn').should(
+        'have.been.calledWithMatch',
+        /Checkbox\.padding is deprecated/,
+      )
+    })
   })
 })

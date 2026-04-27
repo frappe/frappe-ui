@@ -1,7 +1,12 @@
 import Password from './Password.vue'
 import { h } from 'vue'
+import { _resetWarnDeprecated } from '../../utils/warnDeprecated'
 
 describe('Password', () => {
+  beforeEach(() => {
+    _resetWarnDeprecated()
+  })
+
   it('Renders & password toggle ', () => {
     cy.mount(Password)
     cy.get('input[type=password]').should('exist')

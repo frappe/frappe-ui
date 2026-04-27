@@ -1,65 +1,128 @@
 <template>
-  <div :class="switchGroupClasses">
-    <div class="flex flex-col gap-1">
-      <div class="flex items-center">
-        <FeatherIcon
-          v-if="props.icon && typeof props.icon === 'string'"
-          :name="props.icon"
-          :class="iconClasses"
-          aria-hidden="true"
-        />
-        <component
-          :class="iconClasses"
-          v-else-if="props.icon"
-          :is="props.icon"
-        />
-        <label :class="switchLabelClasses" :for="id">
-          {{ props.label }}
-        </label>
+  <div class="flex flex-col">
+    <div :class="switchGroupClasses">
+      <div class="flex flex-col gap-1">
+        <div class="flex items-center">
+          <span
+            v-if="props.icon && typeof props.icon === 'string'"
+            :class="[props.icon, iconClasses]"
+            aria-hidden="true"
+          />
+          <component
+            v-else-if="props.icon"
+            :is="props.icon"
+            :class="iconClasses"
+          />
+          <InputLabel
+            v-if="props.label || $slots.label"
+            :id="labelId"
+            :for-id="inputId"
+            :label="props.label"
+            :required="props.required"
+            :class="switchLabelClasses"
+          >
+            <template v-if="$slots.label" #default="slotProps">
+              <slot name="label" v-bind="slotProps" />
+            </template>
+          </InputLabel>
+        </div>
       </div>
-
-      <span v-if="props.description" class="text-p-sm text-ink-gray-7">
-        {{ props.description }}
-      </span>
+      <SwitchRoot
+        :id="inputId"
+        v-model="model"
+        @keyup.space.self="model = !model"
+        :class="switchClasses"
+        :disabled="props.disabled"
+        :aria-required="props.required || undefined"
+        :aria-invalid="hasError || undefined"
+        :aria-errormessage="hasError ? errorMessageId : undefined"
+        :aria-describedby="describedBy"
+      >
+        <SwitchThumb :class="switchCircleClasses" />
+      </SwitchRoot>
     </div>
-    <SwitchRoot
-      :id
-      v-model="model"
-      @keyup.space.self="model = !model"
-      :class="switchClasses"
-      :disabled="props.disabled"
+    <div
+      v-if="showDescription || hasError || $slots.description"
+      class="mt-1"
     >
-      <SwitchThumb :class="switchCircleClasses" />
-    </SwitchRoot>
+      <InputDescription
+        v-if="showDescription || $slots.description"
+        :id="descriptionId"
+        :description="props.description"
+      >
+        <slot v-if="$slots.description" name="description" />
+      </InputDescription>
+      <InputError
+        v-if="hasError"
+        :id="errorMessageId"
+        :lines="errorLines"
+      />
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, watch } from 'vue'
-import { useId } from '../../utils/useId'
-import FeatherIcon from '../FeatherIcon.vue'
+import { computed, useAttrs, useSlots, watch, watchEffect } from 'vue'
 import { SwitchRoot, SwitchThumb } from 'reka-ui'
+import { useInputLabeling } from '../../composables/useInputLabeling'
+import { warnDeprecated } from '../../utils/warnDeprecated'
+import InputLabel from '../InputLabeling/InputLabel.vue'
+import InputDescription from '../InputLabeling/InputDescription.vue'
+import InputError from '../InputLabeling/InputError.vue'
 import type { SwitchProps } from './types'
 
 const props = withDefaults(defineProps<SwitchProps>(), {
   size: 'sm',
-  label: '',
-  description: '',
   disabled: false,
   labelClasses: '',
 })
 
 const model = defineModel<boolean>({ default: false })
-const emit = defineEmits<{
-  /** Fired when the switch value changes */
-  change: [value: boolean]
+const attrs = useAttrs()
+const slots = useSlots()
+
+defineSlots<{
+  /** Overrides the rendered label content. Receives `{ required }`. */
+  label?: (props: { required: boolean }) => any
+  /** Overrides the rendered description content. */
+  description?: () => any
 }>()
 
 watch(model, (val) => {
-  emit('change', val)
+  const onChange = attrs.onChange as
+    | ((value: boolean) => void)
+    | ((value: boolean) => void)[]
+    | undefined
+  if (!onChange) return
+  warnDeprecated('Switch.change', 'update:modelValue / v-model')
+  if (Array.isArray(onChange)) {
+    onChange.forEach((h) => h(val))
+  } else {
+    onChange(val)
+  }
 })
 
-const id = useId()
+watchEffect(() => {
+  if (props.labelClasses) {
+    warnDeprecated('Switch.labelClasses', 'data-* styling hooks')
+  }
+})
+
+const {
+  inputId,
+  labelId,
+  descriptionId,
+  errorMessageId,
+  describedBy,
+  hasError,
+  errorLines,
+  showDescription,
+} = useInputLabeling(props, {
+  size: () => props.size,
+  disabled: () => props.disabled,
+  state: () => (model.value ? 'checked' : 'unchecked'),
+})
+
 const switchClasses = computed(() => {
   return [
     'relative inline-flex flex-shrink-0 cursor-pointer rounded-full border-transparent transition-colors duration-100 ease-in-out items-center',
@@ -86,7 +149,8 @@ const switchCircleClasses = computed(() => {
   ]
 })
 
-const iconClasses = 'me-2 h-4 w-4 flex-shrink-0 text-ink-gray-6'
+const iconClasses = 'me-2 size-4 flex-shrink-0 text-ink-gray-6'
+
 const switchLabelClasses = computed(() => {
   return [
     'font-medium leading-normal',
@@ -99,7 +163,7 @@ const switchLabelClasses = computed(() => {
 })
 
 const switchGroupClasses = computed(() => {
-  if (!props.label) return
+  if (!props.label && !slots.label) return undefined
   const classes = ['flex justify-between']
   if (!props.description) {
     classes.push(

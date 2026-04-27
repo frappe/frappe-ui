@@ -1,11 +1,5 @@
 <template>
-  <label
-    v-if="hasLabel"
-    :id="id"
-    :for="forId"
-    data-slot="label"
-    class="block text-p-sm font-medium text-ink-gray-7"
-  >
+  <label v-if="hasLabel" :id="id" :for="forId" data-slot="label" class="block">
     <slot v-if="slots.default" :required="!!required" />
     <template v-else>
       {{ label }}

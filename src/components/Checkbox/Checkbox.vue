@@ -1,54 +1,127 @@
 <template>
-  <div
-    class="inline-flex gap-2 rounded transition"
-    :class="{
-      'px-2.5 py-1.5': padding && size === 'sm',
-      'px-3 py-2': padding && size === 'md',
-      'focus-within:bg-surface-gray-2 focus-within:ring-2 focus-within:ring-outline-gray-3 hover:bg-surface-gray-3 active:bg-surface-gray-4':
-        padding && !disabled,
-    }"
-  >
-    <input
-      class="rounded-sm mt-[1px] bg-surface-white"
-      :class="inputClasses"
-      type="checkbox"
-      :disabled="disabled"
-      :id="htmlId"
-      :checked="Boolean(modelValue)"
-      @change="
-        (e) =>
-          $emit('update:modelValue', (e.target as HTMLInputElement).checked)
-      "
-      v-bind="attrs"
-    />
-    <label class="block" :class="labelClasses" v-if="label" :for="htmlId">
-      {{ label }}
-    </label>
+  <div class="inline-flex flex-col">
+    <div
+      class="inline-flex gap-2 rounded transition"
+      :class="rowClasses"
+    >
+      <input
+        class="rounded-sm mt-[1px] bg-surface-white"
+        :class="inputClasses"
+        type="checkbox"
+        :disabled="disabled"
+        :id="inputId"
+        :checked="checked"
+        :required="required"
+        :aria-required="required || undefined"
+        :aria-invalid="hasError || undefined"
+        :aria-errormessage="hasError ? errorMessageId : undefined"
+        :aria-describedby="describedBy"
+        @change="onChange"
+        v-bind="attrs"
+      />
+      <InputLabel
+        v-if="props.label || $slots.label"
+        :id="labelId"
+        :for-id="inputId"
+        :label="props.label"
+        :required="props.required"
+        :class="labelClasses"
+      >
+        <template v-if="$slots.label" #default="slotProps">
+          <slot name="label" v-bind="slotProps" />
+        </template>
+      </InputLabel>
+    </div>
+    <div v-if="showDescription || hasError" class="ps-6 mt-1">
+      <InputDescription
+        v-if="showDescription || $slots.description"
+        :id="descriptionId"
+        :description="props.description"
+      >
+        <slot v-if="$slots.description" name="description" />
+      </InputDescription>
+      <InputError
+        v-if="hasError"
+        :id="errorMessageId"
+        :lines="errorLines"
+      />
+    </div>
   </div>
 </template>
+
 <script lang="ts" setup>
-import { computed, useAttrs } from 'vue'
-import { useId } from '../../utils/useId'
-import type { CheckboxProps } from './types'
+import { computed, useAttrs, watchEffect } from 'vue'
+import { useInputLabeling } from '../../composables/useInputLabeling'
+import { warnDeprecated } from '../../utils/warnDeprecated'
+import InputLabel from '../InputLabeling/InputLabel.vue'
+import InputDescription from '../InputLabeling/InputDescription.vue'
+import InputError from '../InputLabeling/InputError.vue'
+import type { CheckboxEmits, CheckboxProps } from './types'
 
 const props = withDefaults(defineProps<CheckboxProps>(), {
   size: 'sm',
   padding: false,
 })
 
+const emit = defineEmits<CheckboxEmits>()
+const model = defineModel<boolean | 1 | 0>()
 const attrs = useAttrs()
 
-const htmlId = props.id ?? useId()
+watchEffect(() => {
+  if (props.padding) {
+    warnDeprecated('Checkbox.padding', 'data-* styling hooks')
+  }
+})
+
+const checked = computed(() => Boolean(model.value))
+
+function onChange(e: Event) {
+  const next = (e.target as HTMLInputElement).checked
+  model.value = next
+  emit('update:modelValue', next)
+}
+
+defineSlots<{
+  /** Overrides the rendered label content. Receives `{ required }`. */
+  label?: (props: { required: boolean }) => any
+  /** Overrides the rendered description content. */
+  description?: () => any
+}>()
+
+const {
+  inputId,
+  labelId,
+  descriptionId,
+  errorMessageId,
+  describedBy,
+  hasError,
+  errorLines,
+  showDescription,
+} = useInputLabeling(props, {
+  size: () => props.size,
+  disabled: () => props.disabled,
+  state: () => (checked.value ? 'checked' : 'unchecked'),
+})
 
 const labelClasses = computed(() => {
   return [
     {
-      sm: 'text-base font-medium',
-      md: 'text-lg font-medium',
+      sm: 'text-base',
+      md: 'text-lg',
     }[props.size],
+    'font-medium',
     props.disabled ? 'text-ink-gray-4' : 'text-ink-gray-8',
     'select-none',
   ]
+})
+
+const rowClasses = computed(() => {
+  return {
+    'px-2.5 py-1.5': props.padding && props.size === 'sm',
+    'px-3 py-2': props.padding && props.size === 'md',
+    'focus-within:bg-surface-gray-2 focus-within:ring-2 focus-within:ring-outline-gray-3 hover:bg-surface-gray-3 active:bg-surface-gray-4':
+      props.padding && !props.disabled,
+  }
 })
 
 const inputClasses = computed(() => {
