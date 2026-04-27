@@ -6,18 +6,73 @@
 
   const propsData = [
   {
-    name: 'modelValue',
-    description: 'The current value of the password input (v-model)',
+    name: 'size',
+    description: 'Visual size of the input.',
     required: false,
-    type: 'string | null',
-    default: undefined
+    type: 'InputSize',
+    default: '"sm"'
+  },
+  {
+    name: 'variant',
+    description: 'Style variant of the input.',
+    required: false,
+    type: 'InputVariant',
+    default: '"subtle"'
+  },
+  {
+    name: 'placeholder',
+    description: 'Placeholder text shown when the input is empty.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'disabled',
+    description: 'Disables the input when true.',
+    required: false,
+    type: 'boolean'
   },
   {
     name: 'value',
-    description: 'Alternate way to set the password value',
+    description: 'Alternate way to set the password value.',
     required: false,
     type: 'string | null',
-    default: undefined
+    deprecated: 'Use `v-model` / `modelValue` instead.'
+  },
+  {
+    name: 'label',
+    description: 'Label rendered above (or beside, for binary controls) the input.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'description',
+    description: 'Helper text rendered below the input.\nHidden when `error` is set.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'error',
+    description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
+    required: false,
+    type: 'string | FrappeUIError'
+  },
+  {
+    name: 'required',
+    description: 'Marks the field as required. Renders an asterisk next to the label and\nforwards `required` / `aria-required` to the underlying control.',
+    required: false,
+    type: 'boolean'
+  },
+  {
+    name: 'id',
+    description: 'HTML id of the underlying control. Auto-generated via `useId()` if omitted.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'modelValue',
+    description: '',
+    required: false,
+    type: 'string'
   }
 ]
 
@@ -26,6 +81,24 @@
     name: 'prefix',
     description: 'Content shown before the input field (left icon / custom content)',
     type: 'any'
+  },
+  {
+    name: 'label',
+    description: 'Overrides the rendered label content. Receives `{ required }`.',
+    type: '{ required: boolean; }'
+  },
+  {
+    name: 'description',
+    description: 'Overrides the rendered description content.',
+    type: 'any'
+  }
+]
+
+  const emitsData = [
+  {
+    name: 'update:modelValue',
+    description: 'Fired when the model value changes.',
+    type: '[value: string | undefined]'
   }
 ]
 </script>
@@ -34,4 +107,6 @@
 <PropsTable name="Password" :data="propsData"/> 
 
 <SlotsTable :data="slotsData"/> 
+
+<EmitsTable :data="emitsData"/> 
 
