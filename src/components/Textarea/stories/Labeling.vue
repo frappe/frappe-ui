@@ -17,7 +17,7 @@ const required = ref(true)
       :required="required"
       placeholder="Write something..."
     />
-    <div class="flex gap-3 items-center">
+    <div class="flex flex-col gap-2 items-start">
       <Checkbox v-model="required" label="required" />
       <Button
         size="sm"
