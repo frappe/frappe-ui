@@ -14,6 +14,7 @@ import LucideRadius from '~icons/lucide/radius'
 import ChevronRight from '~icons/lucide/chevron-right'
 import LucideBox from '~icons/lucide/box'
 import LucideShapes from '~icons/lucide/shapes'
+import LucideArchive from '~icons/lucide/archive'
 import pkgJson from '../../../package.json'
 
 import {
@@ -25,11 +26,18 @@ import {
 
 const curVersion = pkgJson.version
 const componentList = useData().theme.value.componentList
-const componentItems = componentList.map((name) => ({
-  text: name,
-  icon: LucideBox,
-  link: `/docs/components/${name.toLowerCase()}`,
-}))
+const componentItems = [
+  ...componentList.map((name) => ({
+    text: name,
+    icon: LucideBox,
+    link: `/docs/components/${name.toLowerCase()}`,
+  })),
+  {
+    text: 'Legacy components',
+    icon: LucideArchive,
+    link: '/docs/components/legacy',
+  },
+]
 
 const list = [
   {

@@ -215,12 +215,15 @@ import { Popover } from '../Popover'
 import { Button } from '../Button'
 import FeatherIcon from '../FeatherIcon.vue'
 import LoadingIndicator from '../LoadingIndicator.vue'
+import { warnDeprecated } from '../../utils/warnDeprecated'
 import type {
   AutocompleteOptionGroup,
   AutocompleteOption,
   AutocompleteProps,
   Option,
 } from './types'
+
+warnDeprecated('Autocomplete', 'Combobox or MultiSelect')
 
 const props = withDefaults(defineProps<AutocompleteProps>(), {
   multiple: false,

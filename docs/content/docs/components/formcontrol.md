@@ -12,8 +12,10 @@ Use `FormControl` when you want a convenient default wrapper around the library'
 - `textarea`
 - `select`
 - `combobox`
-- `autocomplete`
 - `checkbox`
+
+> `type="autocomplete"` is deprecated. See
+> [Legacy components](./legacy#formcontrol-with-type-autocomplete).
 
 ## Attribute forwarding
 
@@ -27,7 +29,6 @@ Available slots depend on the rendered control type:
 
 - `prefix` and `suffix` are useful for text-like inputs and select-like controls
 - `description` replaces the description text block below the control
-- `item-prefix` is only relevant when `type="autocomplete"`
 
 ## Usage notes
 
