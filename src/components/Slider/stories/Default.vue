@@ -6,5 +6,7 @@ const value = ref([25])
 </script>
 
 <template>
-  <Slider v-model="value" label="Volume" />
+  <div class="grid place-content-center w-full gap-5">
+    <Slider v-model="value" />
+  </div>
 </template>

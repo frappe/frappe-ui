@@ -14,7 +14,7 @@ describe('Rating', () => {
     cy.get('.lucide-star').each(($el, i) => {
       cy.wrap($el).should(
         'have.class',
-        i < 2 ? '!fill-yellow-500' : 'fill-gray-300',
+        i < 2 ? 'text-yellow-500' : 'text-gray-300',
       )
     })
   })

@@ -33,7 +33,7 @@
         :aria-checked="index === model"
       >
         <span
-          class="lucide-star block fill-gray-300 text-transparent"
+          class="lucide-star block"
           :class="iconClasses(index)"
           aria-hidden="true"
         />
@@ -100,22 +100,21 @@ const {
 })
 
 const iconClasses = (index: number) => {
-  let classes = [
-    {
-      sm: 'size-4',
-      md: 'size-5',
-      lg: 'size-6',
-      xl: 'size-7',
-    }[props.size],
-  ]
+  const sizeClass = {
+    sm: 'size-4',
+    md: 'size-5',
+    lg: 'size-6',
+    xl: 'size-7',
+  }[props.size]
 
+  let colorClass = 'text-gray-300'
   if (index <= hoveredRating.value && index > model.value) {
-    classes.push('!fill-yellow-200')
+    colorClass = 'text-yellow-200'
   } else if (index <= model.value) {
-    classes.push('!fill-yellow-500')
+    colorClass = 'text-yellow-500'
   }
 
-  return classes.join(' ')
+  return [sizeClass, colorClass]
 }
 
 const markRating = (index: number) => {
