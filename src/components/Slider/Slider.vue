@@ -80,7 +80,7 @@ const onValueCommit = (value: SliderValue) => {
 </script>
 
 <template>
-  <div class="space-y-1.5 w-full">
+  <div class="space-y-1.5 w-full min-w-48">
     <InputLabel
       v-if="props.label || $slots.label"
       :id="labelId"
