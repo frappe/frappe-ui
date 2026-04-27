@@ -95,5 +95,20 @@ describe('Rating', () => {
       cy.get('[role="radiogroup"]').should('have.attr', 'aria-invalid', 'true')
       cy.contains('Please rate.').should('exist')
     })
+
+    it('renders the canonical data-* hooks on the control', () => {
+      cy.mount(Rating, {
+        props: { label: 'Quality', size: 'lg', required: true, modelValue: 3 },
+      })
+      cy.get('[role="radiogroup"]').should('have.attr', 'data-slot', 'control')
+      cy.get('[role="radiogroup"]').should('have.attr', 'data-size', 'lg')
+      cy.get('[role="radiogroup"]').should('have.attr', 'data-state', 'valid')
+      cy.get('[role="radiogroup"]').should('have.attr', 'data-required', 'true')
+    })
+
+    it('exposes data-disabled when readonly', () => {
+      cy.mount(Rating, { props: { label: 'Quality', readonly: true } })
+      cy.get('[role="radiogroup"]').should('have.attr', 'data-disabled', 'true')
+    })
   })
 })

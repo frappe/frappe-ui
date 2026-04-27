@@ -152,5 +152,33 @@ describe('Textinput', () => {
         cy.get('span.sr-only').should('not.exist')
       })
     })
+
+    it('renders the canonical data-* hooks on the control', () => {
+      cy.mount(TextInput, {
+        props: {
+          label: 'Email',
+          size: 'lg',
+          variant: 'outline',
+          required: true,
+        },
+      })
+      cy.get('input').should('have.attr', 'data-slot', 'control')
+      cy.get('input').should('have.attr', 'data-size', 'lg')
+      cy.get('input').should('have.attr', 'data-variant', 'outline')
+      cy.get('input').should('have.attr', 'data-state', 'valid')
+      cy.get('input').should('have.attr', 'data-required', 'true')
+    })
+
+    it('flips data-state to invalid when error is set', () => {
+      cy.mount(TextInput, {
+        props: { label: 'Email', error: 'Required' },
+      })
+      cy.get('input').should('have.attr', 'data-state', 'invalid')
+    })
+
+    it('exposes data-disabled when disabled', () => {
+      cy.mount(TextInput, { props: { disabled: true } })
+      cy.get('input').should('have.attr', 'data-disabled', 'true')
+    })
   })
 })

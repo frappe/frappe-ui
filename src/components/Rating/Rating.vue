@@ -21,6 +21,8 @@
       :aria-errormessage="hasError ? errorMessageId : undefined"
       :aria-required="props.required || undefined"
       :aria-invalid="hasError || undefined"
+      data-slot="control"
+      v-bind="dataAttrs"
     >
       <div
         v-for="index in starCount"
@@ -101,6 +103,7 @@ const {
   hasError,
   errorLines,
   showDescription,
+  dataAttrs,
 } = useInputLabeling(props, {
   size: () => props.size,
   disabled: () => props.readonly,

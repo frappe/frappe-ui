@@ -37,6 +37,8 @@
         :aria-invalid="hasError || undefined"
         :aria-errormessage="hasError ? errorMessageId : undefined"
         :aria-describedby="describedBy"
+        data-slot="control"
+        v-bind="dataAttrs"
       >
         <SwitchThumb :class="switchCircleClasses" />
       </SwitchRoot>
@@ -117,6 +119,7 @@ const {
   hasError,
   errorLines,
   showDescription,
+  dataAttrs,
 } = useInputLabeling(props, {
   size: () => props.size,
   disabled: () => props.disabled,

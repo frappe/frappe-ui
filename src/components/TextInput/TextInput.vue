@@ -44,9 +44,10 @@
         :aria-invalid="hasError || undefined"
         :aria-errormessage="hasError ? errorMessageId : undefined"
         :aria-describedby="describedBy"
+        data-slot="control"
+        v-bind="{ ...dataAttrs, ...attrsWithoutClassStyle }"
         @input="handleChange"
         @change="handleChange"
-        v-bind="attrsWithoutClassStyle"
       />
       <div
         :class="[
@@ -128,6 +129,7 @@ const {
   hasError,
   errorLines,
   showDescription,
+  dataAttrs,
 } = useInputLabeling(props, {
   size: () => props.size,
   variant: () => props.variant,

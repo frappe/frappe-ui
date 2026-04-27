@@ -46,6 +46,7 @@ const {
   hasError,
   errorLines,
   showDescription,
+  dataAttrs,
 } = useInputLabeling(props, {
   size: () => props.size,
   disabled: () => props.disabled,
@@ -118,6 +119,8 @@ const hasLabeling = computed(() => {
       :aria-describedby="describedBy"
       :aria-errormessage="hasError ? errorMessageId : undefined"
       :aria-invalid="hasError || undefined"
+      data-slot="control"
+      v-bind="dataAttrs"
       @value-commit="onValueCommit"
     >
       <SliderTrack :class="trackClasses">

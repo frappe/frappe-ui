@@ -92,5 +92,20 @@ describe('Switch', () => {
         /Switch\.labelClasses is deprecated/,
       )
     })
+
+    it('renders the canonical data-* hooks on the control', () => {
+      cy.mount(Switch, {
+        props: { label: 'abc', size: 'md', required: true, modelValue: true },
+      })
+      cy.get('[role="switch"]').should('have.attr', 'data-slot', 'control')
+      cy.get('[role="switch"]').should('have.attr', 'data-size', 'md')
+      cy.get('[role="switch"]').should('have.attr', 'data-state', 'checked')
+      cy.get('[role="switch"]').should('have.attr', 'data-required', 'true')
+    })
+
+    it('exposes data-disabled when disabled', () => {
+      cy.mount(Switch, { props: { disabled: true } })
+      cy.get('[role="switch"]').should('have.attr', 'data-disabled', 'true')
+    })
   })
 })

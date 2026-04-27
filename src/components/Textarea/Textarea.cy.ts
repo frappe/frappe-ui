@@ -104,5 +104,31 @@ describe('Textarea', () => {
       cy.mount(Textarea, { props: { variant: 'ghost' } })
       cy.get('textarea').should('have.class', 'border-0')
     })
+
+    it('renders the canonical data-* hooks on the control', () => {
+      cy.mount(Textarea, {
+        props: {
+          label: 'Notes',
+          size: 'md',
+          variant: 'outline',
+          required: true,
+        },
+      })
+      cy.get('textarea').should('have.attr', 'data-slot', 'control')
+      cy.get('textarea').should('have.attr', 'data-size', 'md')
+      cy.get('textarea').should('have.attr', 'data-variant', 'outline')
+      cy.get('textarea').should('have.attr', 'data-state', 'valid')
+      cy.get('textarea').should('have.attr', 'data-required', 'true')
+    })
+
+    it('flips data-state to invalid when error is set', () => {
+      cy.mount(Textarea, { props: { error: 'Cannot be empty' } })
+      cy.get('textarea').should('have.attr', 'data-state', 'invalid')
+    })
+
+    it('exposes data-disabled when disabled', () => {
+      cy.mount(Textarea, { props: { disabled: true } })
+      cy.get('textarea').should('have.attr', 'data-disabled', 'true')
+    })
   })
 })

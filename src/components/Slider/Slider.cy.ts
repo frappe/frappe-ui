@@ -78,5 +78,28 @@ describe('Slider', () => {
       })
       cy.contains('Required').should('exist')
     })
+
+    it('renders the canonical data-* hooks on the control', () => {
+      cy.mount(Slider, {
+        props: {
+          id: 'sl-data',
+          label: 'Volume',
+          size: 'md',
+          required: true,
+          modelValue: [25],
+        },
+      })
+      cy.get('#sl-data').should('have.attr', 'data-slot', 'control')
+      cy.get('#sl-data').should('have.attr', 'data-size', 'md')
+      cy.get('#sl-data').should('have.attr', 'data-state', 'valid')
+      cy.get('#sl-data').should('have.attr', 'data-required', 'true')
+    })
+
+    it('flips data-state to invalid when error is set', () => {
+      cy.mount(Slider, {
+        props: { id: 'sl-err', label: 'Volume', error: 'Required' },
+      })
+      cy.get('#sl-err').should('have.attr', 'data-state', 'invalid')
+    })
   })
 })
