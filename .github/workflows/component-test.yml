@@ -41,6 +41,7 @@ jobs:
           start: 'yarn dev'
           install: false
         env:
+          COVERAGE: 'true'
           SPLIT: ${{ strategy.job-total }}
           SPLIT_INDEX: ${{ strategy.job-index }}
 
@@ -50,3 +51,11 @@ jobs:
         with:
           name: cypress-screenshots-${{ matrix.containers }}
           path: cypress/screenshots
+
+      - name: Upload Cypress coverage shard
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-cypress-${{ matrix.containers }}
+          path: coverage/cypress
+          if-no-files-found: ignore
