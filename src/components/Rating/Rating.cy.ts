@@ -11,7 +11,7 @@ describe('Rating', () => {
 
     cy.get('label').should('contain.text', 'abc')
 
-    cy.get('.lucide-star').each(($el, i) => {
+    cy.get('[role="radio"] svg').each(($el, i) => {
       cy.wrap($el).should(
         'have.class',
         i < 2 ? 'text-yellow-500' : 'text-gray-300',
@@ -51,7 +51,7 @@ describe('Rating', () => {
       cy.mount(Rating, {
         props: { modelValue: 2, size: size as keyof typeof sizes },
       })
-      cy.get('.lucide-star').first().should('have.class', sizes[size as keyof typeof sizes])
+      cy.get('[role="radio"] svg').first().should('have.class', sizes[size as keyof typeof sizes])
     }
   })
 

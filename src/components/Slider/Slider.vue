@@ -96,7 +96,7 @@ const onValueCommit = (value: SliderValue) => {
     <SliderRoot
       :id="inputId"
       v-model="sliderValue"
-      class="relative flex select-none touch-none items-center"
+      class="relative flex w-full select-none touch-none items-center"
       :max="props.max"
       :min="props.min"
       :step="props.step"
