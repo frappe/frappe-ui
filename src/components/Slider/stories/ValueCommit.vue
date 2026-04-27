@@ -16,7 +16,7 @@ function onValueCommit(committed: number[]) {
 -->
 
 <template>
-  <div class="flex flex-col gap-3">
+  <div class="flex flex-col gap-3 w-full max-w-md">
     <Slider
       v-model="value"
       label="Drag and release to commit"
