@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { TextInput } from 'frappe-ui'
+import { Button, Checkbox, TextInput } from 'frappe-ui'
 
 const email = ref('')
 const error = ref('')
@@ -17,18 +17,14 @@ const required = ref(true)
       :required="required"
       placeholder="you@example.com"
     />
-    <div class="flex gap-3 items-center text-p-sm text-ink-gray-6">
-      <label class="flex items-center gap-1">
-        <input type="checkbox" v-model="required" />
-        required
-      </label>
-      <button
-        type="button"
-        class="underline"
+    <div class="flex gap-3 items-center">
+      <Checkbox v-model="required" label="required" />
+      <Button
+        size="sm"
         @click="error = error ? '' : 'Email is required.'"
       >
-        toggle error
-      </button>
+        Toggle error
+      </Button>
     </div>
   </div>
 </template>

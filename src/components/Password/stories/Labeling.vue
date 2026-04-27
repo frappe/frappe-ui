@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Password } from 'frappe-ui'
+import { Button, Checkbox, Password } from 'frappe-ui'
 
 const value = ref('')
 const error = ref('')
@@ -17,18 +17,14 @@ const required = ref(true)
       :required="required"
       placeholder="Enter password"
     />
-    <div class="flex gap-3 items-center text-p-sm text-ink-gray-6">
-      <label class="flex items-center gap-1">
-        <input type="checkbox" v-model="required" />
-        required
-      </label>
-      <button
-        type="button"
-        class="underline"
+    <div class="flex gap-3 items-center">
+      <Checkbox v-model="required" label="required" />
+      <Button
+        size="sm"
         @click="error = error ? '' : 'Password is too short.'"
       >
-        toggle error
-      </button>
+        Toggle error
+      </Button>
     </div>
   </div>
 </template>
