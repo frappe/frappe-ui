@@ -22,7 +22,6 @@ const repos = [
       v-model="value"
       :options="repos"
       placeholder="Pick a repo"
-      class="w-64"
       open-on-focus
     />
 

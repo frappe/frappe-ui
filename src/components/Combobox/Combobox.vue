@@ -362,6 +362,7 @@ defineSlots<ComboboxSlots>()
 <template>
   <ComboboxRoot
     ref="rootRef"
+    class="contents"
     :model-value="internalModelValue"
     :open="open"
     :disabled="disabled"
