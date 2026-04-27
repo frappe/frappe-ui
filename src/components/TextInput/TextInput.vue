@@ -1,7 +1,8 @@
 <template>
-  <div
-    :class="[hasLabeling ? 'space-y-1.5' : '', attrs.class]"
-    :style="attrs.style as any"
+  <LabelingWrapper
+    :enabled="hasLabeling"
+    :wrapper-class="['space-y-1.5', attrs.class]"
+    :wrapper-style="attrs.style"
   >
     <InputLabel
       v-if="props.label || $slots.label"
@@ -15,7 +16,11 @@
         <slot name="label" v-bind="slotProps" />
       </template>
     </InputLabel>
-    <div class="relative flex items-center">
+    <div
+      class="relative flex items-center"
+      :class="hasLabeling ? null : (attrs.class as any)"
+      :style="hasLabeling ? null : (attrs.style as any)"
+    >
       <div
         :class="[
           'absolute inset-y-0 start-0 flex items-center',
@@ -66,7 +71,7 @@
       :id="errorMessageId"
       :lines="errorLines"
     />
-  </div>
+  </LabelingWrapper>
 </template>
 
 <script setup lang="ts">
@@ -76,6 +81,7 @@ import { useInputLabeling } from '../../composables/useInputLabeling'
 import InputLabel from '../InputLabeling/InputLabel.vue'
 import InputDescription from '../InputLabeling/InputDescription.vue'
 import InputError from '../InputLabeling/InputError.vue'
+import LabelingWrapper from '../InputLabeling/LabelingWrapper.vue'
 import type { TextInputEmits, TextInputProps } from './types'
 
 defineOptions({

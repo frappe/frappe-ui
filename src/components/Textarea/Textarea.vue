@@ -1,5 +1,9 @@
 <template>
-  <div class="space-y-1.5">
+  <LabelingWrapper
+    :enabled="hasLabeling"
+    :wrapper-class="['space-y-1.5', attrs.class]"
+    :wrapper-style="attrs.style"
+  >
     <InputLabel
       v-if="props.label || $slots.label"
       :id="labelId"
@@ -15,7 +19,8 @@
     <textarea
       ref="textareaRef"
       :placeholder="placeholder"
-      :class="inputClasses"
+      :class="[inputClasses, hasLabeling ? null : (attrs.class as any)]"
+      :style="hasLabeling ? null : (attrs.style as any)"
       :disabled="disabled"
       :id="inputId"
       :value="modelValue"
@@ -27,7 +32,7 @@
       :aria-describedby="describedBy"
       @input="handleChange"
       @change="handleChange"
-      v-bind="attrs"
+      v-bind="attrsWithoutClassStyle"
     />
     <InputDescription
       v-if="showDescription || $slots.description"
@@ -41,17 +46,22 @@
       :id="errorMessageId"
       :lines="errorLines"
     />
-  </div>
+  </LabelingWrapper>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, useAttrs } from 'vue'
+import { computed, ref, useAttrs, useSlots } from 'vue'
 import debounce from '../../utils/debounce'
 import { useInputLabeling } from '../../composables/useInputLabeling'
 import InputLabel from '../InputLabeling/InputLabel.vue'
 import InputDescription from '../InputLabeling/InputDescription.vue'
 import InputError from '../InputLabeling/InputError.vue'
+import LabelingWrapper from '../InputLabeling/LabelingWrapper.vue'
 import type { TextareaEmits, TextareaProps } from './types'
+
+defineOptions({
+  inheritAttrs: false,
+})
 
 const props = withDefaults(defineProps<TextareaProps>(), {
   size: 'sm',
@@ -61,6 +71,7 @@ const props = withDefaults(defineProps<TextareaProps>(), {
 
 const emit = defineEmits<TextareaEmits>()
 const attrs = useAttrs()
+const slots = useSlots()
 const textareaRef = ref<HTMLTextAreaElement | null>(null)
 
 defineSlots<{
@@ -84,6 +95,22 @@ const {
   size: () => props.size,
   variant: () => props.variant,
   disabled: () => props.disabled,
+})
+
+const hasLabeling = computed(() => {
+  return Boolean(
+    props.label ||
+      slots.label ||
+      showDescription.value ||
+      slots.description ||
+      hasError.value,
+  )
+})
+
+const attrsWithoutClassStyle = computed(() => {
+  return Object.fromEntries(
+    Object.entries(attrs).filter(([key]) => key !== 'class' && key !== 'style'),
+  )
 })
 
 const inputClasses = computed(() => {

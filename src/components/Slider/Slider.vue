@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, useSlots } from 'vue'
 import { SliderRange, SliderRoot, SliderThumb, SliderTrack } from 'reka-ui'
 import { useInputLabeling } from '../../composables/useInputLabeling'
 import InputLabel from '../InputLabeling/InputLabel.vue'
 import InputDescription from '../InputLabeling/InputDescription.vue'
 import InputError from '../InputLabeling/InputError.vue'
+import LabelingWrapper from '../InputLabeling/LabelingWrapper.vue'
 import type { SliderEmits, SliderProps, SliderValue } from './types'
 
 const props = withDefaults(defineProps<SliderProps>(), {
@@ -17,6 +18,7 @@ const props = withDefaults(defineProps<SliderProps>(), {
 
 const emit = defineEmits<SliderEmits>()
 const model = defineModel<SliderValue>()
+const slots = useSlots()
 
 defineSlots<{
   /** Overrides the rendered label content. Receives `{ required }`. */
@@ -77,10 +79,20 @@ const thumbClasses = computed(() => {
 const onValueCommit = (value: SliderValue) => {
   emit('value-commit', value)
 }
+
+const hasLabeling = computed(() => {
+  return Boolean(
+    props.label ||
+      slots.label ||
+      showDescription.value ||
+      slots.description ||
+      hasError.value,
+  )
+})
 </script>
 
 <template>
-  <div class="space-y-1.5 w-full">
+  <LabelingWrapper :enabled="hasLabeling" wrapper-class="space-y-1.5 w-full">
     <InputLabel
       v-if="props.label || $slots.label"
       :id="labelId"
@@ -126,5 +138,5 @@ const onValueCommit = (value: SliderValue) => {
       <slot v-if="$slots.description" name="description" />
     </InputDescription>
     <InputError v-if="hasError" :id="errorMessageId" :lines="errorLines" />
-  </div>
+  </LabelingWrapper>
 </template>
