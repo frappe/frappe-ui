@@ -139,5 +139,18 @@ describe('Textinput', () => {
       cy.get('input').should('have.attr', 'id', 'my-explicit-id')
       cy.get('label[for="my-explicit-id"]').should('exist')
     })
+
+    it('does not render its own required indicator when #label slot is used', () => {
+      cy.mount(TextInput, {
+        props: { required: true },
+        slots: {
+          label: '<span class="custom">Custom</span>',
+        },
+      })
+      cy.get('label').within(() => {
+        cy.get('span[aria-hidden="true"]').should('not.exist')
+        cy.get('span.sr-only').should('not.exist')
+      })
+    })
   })
 })

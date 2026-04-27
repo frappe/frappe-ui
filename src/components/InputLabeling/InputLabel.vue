@@ -6,8 +6,11 @@
     data-slot="label"
     class="block text-p-sm font-medium text-ink-gray-7"
   >
-    <slot :required="!!required">{{ label }}</slot>
-    <RequiredIndicator :required="required" />
+    <slot v-if="slots.default" :required="!!required" />
+    <template v-else>
+      {{ label }}
+      <RequiredIndicator :required="required" />
+    </template>
   </label>
 </template>
 <script setup lang="ts">
