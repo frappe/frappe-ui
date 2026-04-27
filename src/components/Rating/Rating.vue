@@ -1,41 +1,103 @@
 <template>
   <div class="space-y-1">
-    <label class="block text-xs text-ink-gray-5" v-if="label">
-      {{ label }}
-    </label>
-    <div class="flex text-center">
+    <InputLabel
+      v-if="props.label || $slots.label"
+      :id="labelId"
+      :for-id="inputId"
+      :label="props.label"
+      :required="props.required"
+      class="text-p-sm font-medium text-ink-gray-7"
+    >
+      <template v-if="$slots.label" #default="slotProps">
+        <slot name="label" v-bind="slotProps" />
+      </template>
+    </InputLabel>
+    <div
+      :id="inputId"
+      class="flex"
+      role="radiogroup"
+      :aria-labelledby="labelledBy"
+      :aria-describedby="describedBy"
+      :aria-errormessage="hasError ? errorMessageId : undefined"
+      :aria-required="props.required || undefined"
+      :aria-invalid="hasError || undefined"
+    >
       <div
-        v-for="index in rating_from"
+        v-for="index in starCount"
         :key="index"
-        @mouseover="() => !readonly && (hoveredRating = index)"
-        @mouseleave="() => !readonly && (hoveredRating = 0)"
+        :class="['mr-0.5', props.readonly ? '' : 'cursor-pointer']"
+        @mouseover="() => !props.readonly && (hoveredRating = index)"
+        @mouseleave="() => !props.readonly && (hoveredRating = 0)"
+        @click="markRating(index)"
+        role="radio"
+        :aria-checked="index === model"
       >
-        <FeatherIcon
-          name="star"
-          class="fill-gray-300 text-transparent mr-0.5"
+        <span
+          class="lucide-star block fill-gray-300 text-transparent"
           :class="iconClasses(index)"
-          @click="markRating(index)"
+          aria-hidden="true"
         />
       </div>
     </div>
+    <InputDescription
+      v-if="showDescription || $slots.description"
+      :id="descriptionId"
+      :description="props.description"
+    >
+      <slot v-if="$slots.description" name="description" />
+    </InputDescription>
+    <InputError v-if="hasError" :id="errorMessageId" :lines="errorLines" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
-import FeatherIcon from '../FeatherIcon.vue'
-import type { RatingProps } from './types'
+import { computed, ref, watchEffect } from 'vue'
+import { useInputLabeling } from '../../composables/useInputLabeling'
+import { warnDeprecated } from '../../utils/warnDeprecated'
+import InputLabel from '../InputLabeling/InputLabel.vue'
+import InputDescription from '../InputLabeling/InputDescription.vue'
+import InputError from '../InputLabeling/InputError.vue'
+import type { RatingEmits, RatingProps } from './types'
 
 const props = withDefaults(defineProps<RatingProps>(), {
-  modelValue: 0,
-  rating_from: 5,
   size: 'md',
   readonly: false,
 })
 
-const emit = defineEmits(['update:modelValue'])
-const rating = ref(props.modelValue)
+defineEmits<RatingEmits>()
+const model = defineModel<number>({ default: 0 })
+
+watchEffect(() => {
+  if (props.rating_from != null) {
+    warnDeprecated('Rating.rating_from', 'max')
+  }
+})
+
+defineSlots<{
+  /** Overrides the rendered label content. Receives `{ required }`. */
+  label?: (props: { required: boolean }) => any
+  /** Overrides the rendered description content. */
+  description?: () => any
+}>()
+
+const starCount = computed(() => props.max ?? props.rating_from ?? 5)
+
 const hoveredRating = ref(0)
+
+const {
+  inputId,
+  labelId,
+  labelledBy,
+  descriptionId,
+  errorMessageId,
+  describedBy,
+  hasError,
+  errorLines,
+  showDescription,
+} = useInputLabeling(props, {
+  size: () => props.size,
+  disabled: () => props.readonly,
+})
 
 const iconClasses = (index: number) => {
   let classes = [
@@ -47,32 +109,17 @@ const iconClasses = (index: number) => {
     }[props.size],
   ]
 
-  if (index <= hoveredRating.value && index > rating.value) {
+  if (index <= hoveredRating.value && index > model.value) {
     classes.push('!fill-yellow-200')
-  } else if (index <= rating.value) {
+  } else if (index <= model.value) {
     classes.push('!fill-yellow-500')
   }
 
-  if (!props.readonly) {
-    classes.push('cursor-pointer')
-  }
   return classes.join(' ')
-}
-
-const emitChange = (value: number) => {
-  emit('update:modelValue', value)
 }
 
 const markRating = (index: number) => {
   if (props.readonly) return
-  emitChange(index)
-  rating.value = index
+  model.value = index
 }
-
-watch(
-  () => props.modelValue,
-  (newVal) => {
-    rating.value = newVal
-  },
-)
 </script>

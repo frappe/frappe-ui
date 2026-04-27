@@ -27,11 +27,67 @@
     default: '0'
   },
   {
+    name: 'size',
+    description: 'Visual size of the slider.',
+    required: false,
+    type: 'ToggleSize',
+    default: '"sm"'
+  },
+  {
+    name: 'disabled',
+    description: 'Disables the slider.',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  },
+  {
+    name: 'label',
+    description: 'Label rendered above (or beside, for binary controls) the input.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'description',
+    description: 'Helper text rendered below the input.\nHidden when `error` is set.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'error',
+    description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
+    required: false,
+    type: 'string | FrappeUIError'
+  },
+  {
+    name: 'required',
+    description: 'Marks the field as required. Renders an asterisk next to the label and\nforwards `required` / `aria-required` to the underlying control.',
+    required: false,
+    type: 'boolean'
+  },
+  {
+    name: 'id',
+    description: 'HTML id of the underlying control. Auto-generated via `useId()` if omitted.',
+    required: false,
+    type: 'string'
+  },
+  {
     name: 'modelValue',
     description: '',
     required: false,
-    type: 'SliderValue',
-    default: undefined
+    type: 'SliderValue'
+  }
+]
+
+  const slotsData = [
+  {
+    name: 'label',
+    description: 'Overrides the rendered label content. Receives `{ required }`.',
+    type: '{ required: boolean; }'
+  },
+  {
+    name: 'description',
+    description: 'Overrides the rendered description content.',
+    type: 'any'
   }
 ]
 
@@ -40,12 +96,19 @@
     name: 'update:modelValue',
     description: 'Fired when the model value changes.',
     type: '[value: SliderValue | undefined]'
+  },
+  {
+    name: 'value-commit',
+    description: '',
+    type: '[value: SliderValue]'
   }
 ]
 </script>
 ## API Reference
 
 <PropsTable name="Slider" :data="propsData"/> 
+
+<SlotsTable :data="slotsData"/> 
 
 <EmitsTable :data="emitsData"/> 
 

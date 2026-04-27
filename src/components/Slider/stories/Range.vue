@@ -2,10 +2,12 @@
 import { ref } from 'vue'
 import { Badge, Slider } from 'frappe-ui'
 
-const val = ref([10, 50])
+const value = ref([20, 80])
 </script>
 
 <template>
-  <Slider v-model="val" />
-  <Badge class="w-fit !rounded-sm"> {{ val.join(' - ') }}</Badge>
+  <div class="flex flex-col gap-3">
+    <Slider v-model="value" label="Price range" />
+    <Badge class="w-fit !rounded-sm">{{ value.join(' – ') }}</Badge>
+  </div>
 </template>
