@@ -9,22 +9,8 @@
     name: 'size',
     description: 'Size of the switch control',
     required: false,
-    type: '"md" | "sm"',
+    type: 'ToggleSize',
     default: '"sm"'
-  },
-  {
-    name: 'label',
-    description: 'Label text displayed next to the switch',
-    required: false,
-    type: 'string',
-    default: '""'
-  },
-  {
-    name: 'description',
-    description: 'Helper or descriptive text shown below the label',
-    required: false,
-    type: 'string',
-    default: '""'
   },
   {
     name: 'disabled',
@@ -35,17 +21,47 @@
   },
   {
     name: 'icon',
-    description: 'Optional icon rendered inside or alongside the switch',
+    description: 'Optional icon rendered alongside the label.\nStrings starting with `lucide-` are rendered via the shared Lucide\nTailwind utility; component values are rendered with `<component :is>`.',
     required: false,
-    type: 'any',
-    default: undefined
+    type: 'string | Component'
   },
   {
     name: 'labelClasses',
-    description: 'Custom classes applied to the label element',
+    description: 'Custom classes applied to the label element.',
     required: false,
     type: 'string',
-    default: '""'
+    default: '""',
+    deprecated: 'Use `data-*` styling hooks instead.'
+  },
+  {
+    name: 'label',
+    description: 'Label rendered above (or beside, for binary controls) the input.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'description',
+    description: 'Helper text rendered below the input.\nHidden when `error` is set.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'error',
+    description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
+    required: false,
+    type: 'string | FrappeUIError'
+  },
+  {
+    name: 'required',
+    description: 'Marks the field as required. Renders an asterisk next to the label and\nforwards `required` / `aria-required` to the underlying control.',
+    required: false,
+    type: 'boolean'
+  },
+  {
+    name: 'id',
+    description: 'HTML id of the underlying control. Auto-generated via `useId()` if omitted.',
+    required: false,
+    type: 'string'
   },
   {
     name: 'modelValue',
@@ -56,15 +72,23 @@
   }
 ]
 
+  const slotsData = [
+  {
+    name: 'label',
+    description: 'Overrides the rendered label content. Receives `{ required }`.',
+    type: '{ required: boolean; }'
+  },
+  {
+    name: 'description',
+    description: 'Overrides the rendered description content.',
+    type: 'any'
+  }
+]
+
   const emitsData = [
   {
     name: 'update:modelValue',
     description: 'Fired when the model value changes.',
-    type: '[value: boolean]'
-  },
-  {
-    name: 'change',
-    description: 'Fired after the value is committed.',
     type: '[value: boolean]'
   }
 ]
@@ -72,6 +96,8 @@
 ## API Reference
 
 <PropsTable name="Switch" :data="propsData"/> 
+
+<SlotsTable :data="slotsData"/> 
 
 <EmitsTable :data="emitsData"/> 
 

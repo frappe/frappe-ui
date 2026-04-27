@@ -9,47 +9,87 @@
     name: 'size',
     description: 'Controls the size of the checkbox',
     required: false,
-    type: '"md" | "sm"',
+    type: 'ToggleSize',
     default: '"sm"'
-  },
-  {
-    name: 'label',
-    description: 'Text label shown next to the checkbox',
-    required: false,
-    type: 'string',
-    default: undefined
   },
   {
     name: 'disabled',
     description: 'Disables the checkbox interaction',
     required: false,
-    type: 'boolean',
-    default: undefined
+    type: 'boolean'
   },
   {
     name: 'padding',
-    description: 'Adds padding around the checkbox',
+    description: 'Adds padding around the checkbox.',
     required: false,
     type: 'boolean',
-    default: 'false'
+    default: 'false',
+    deprecated: 'Use `data-*` styling hooks instead.'
   },
   {
     name: 'modelValue',
-    description: 'Checked state of the checkbox',
+    description: 'Checked state of the checkbox. `boolean` is canonical; `1`/`0` are kept for v1 backwards compatibility.',
     required: false,
-    type: 'boolean | 0 | 1',
-    default: undefined
+    type: 'boolean | 0 | 1'
+  },
+  {
+    name: 'label',
+    description: 'Label rendered above (or beside, for binary controls) the input.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'description',
+    description: 'Helper text rendered below the input.\nHidden when `error` is set.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'error',
+    description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
+    required: false,
+    type: 'string | FrappeUIError'
+  },
+  {
+    name: 'required',
+    description: 'Marks the field as required. Renders an asterisk next to the label and\nforwards `required` / `aria-required` to the underlying control.',
+    required: false,
+    type: 'boolean'
   },
   {
     name: 'id',
-    description: 'HTML id attribute for the input element',
+    description: 'HTML id of the underlying control. Auto-generated via `useId()` if omitted.',
     required: false,
-    type: 'string',
-    default: undefined
+    type: 'string'
+  }
+]
+
+  const slotsData = [
+  {
+    name: 'label',
+    description: 'Overrides the rendered label content. Receives `{ required }`.',
+    type: '{ required: boolean; }'
+  },
+  {
+    name: 'description',
+    description: 'Overrides the rendered description content.',
+    type: 'any'
+  }
+]
+
+  const emitsData = [
+  {
+    name: 'update:modelValue',
+    description: 'Fired when the model value changes.',
+    type: 'unknown[]'
   }
 ]
 </script>
 ## API Reference
 
 <PropsTable name="Checkbox" :data="propsData"/> 
+
+<SlotsTable :data="slotsData"/> 
+
+<EmitsTable :data="emitsData"/> 
 
