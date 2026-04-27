@@ -1,14 +1,16 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { Button, Checkbox, Textarea } from 'frappe-ui'
+import { computed, ref } from 'vue'
+import { Checkbox, Textarea } from 'frappe-ui'
 
 const bio = ref('')
-const error = ref('')
 const required = ref(true)
+const showError = ref(false)
+
+const error = computed(() => (showError.value ? 'Bio cannot be empty.' : ''))
 </script>
 
 <template>
-  <div class="flex flex-col gap-3 max-w-sm">
+  <div class="flex gap-8 items-start">
     <Textarea
       v-model="bio"
       label="Bio"
@@ -16,15 +18,13 @@ const required = ref(true)
       :error="error"
       :required="required"
       placeholder="Write something..."
+      class="w-72"
     />
-    <div class="flex flex-col gap-2 items-start">
+    <div
+      class="flex flex-col gap-2 items-start border-l border-outline-gray-2 pl-6"
+    >
       <Checkbox v-model="required" label="required" />
-      <Button
-        size="sm"
-        @click="error = error ? '' : 'Bio cannot be empty.'"
-      >
-        Toggle error
-      </Button>
+      <Checkbox v-model="showError" label="show error" />
     </div>
   </div>
 </template>
