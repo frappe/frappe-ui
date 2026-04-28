@@ -82,12 +82,16 @@
 <script>
 import debounce from '../utils/debounce.ts'
 import FeatherIcon from './FeatherIcon.vue'
+import { warnDeprecated } from '../utils/warnDeprecated.ts'
 
 export default {
   name: 'Input',
   inheritAttrs: false,
   expose: ['getInputValue'],
   components: { FeatherIcon },
+  created() {
+    warnDeprecated('Input', 'TextInput')
+  },
   props: {
     label: {
       type: String,

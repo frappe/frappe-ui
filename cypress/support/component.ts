@@ -16,6 +16,7 @@
 // Import commands.js using ES2015 syntax:
 import './commands'
 import './setup'
+import '@cypress/code-coverage/support'
 
 import { mount } from 'cypress/vue'
 

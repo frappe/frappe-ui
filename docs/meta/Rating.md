@@ -7,38 +7,80 @@
   const propsData = [
   {
     name: 'modelValue',
-    description: 'The current rating value (controlled)',
+    description: 'The current rating value (controlled).',
     required: false,
     type: 'number',
     default: '0'
   },
   {
-    name: 'rating_from',
-    description: 'Minimum rating value (default is 0 or 1 depending on implementation)',
+    name: 'max',
+    description: 'Number of stars to render. Defaults to 5.',
     required: false,
-    type: 'number',
-    default: '5'
+    type: 'number'
   },
   {
-    name: 'label',
-    description: 'Optional label displayed alongside the rating',
+    name: 'rating_from',
+    description: 'Number of stars to render.',
     required: false,
-    type: 'string',
-    default: undefined
+    type: 'number',
+    deprecated: 'Use `max` instead.'
   },
   {
     name: 'readonly',
-    description: 'If true, disables interaction and makes the rating read-only',
+    description: 'If true, disables interaction and makes the rating read-only.',
     required: false,
     type: 'boolean',
     default: 'false'
   },
   {
     name: 'size',
-    description: 'Size of the rating component',
+    description: 'Size of the rating component.',
     required: false,
-    type: '"md" | "sm" | "lg" | "xl"',
+    type: 'InputSize',
     default: '"md"'
+  },
+  {
+    name: 'label',
+    description: 'Label rendered above (or beside, for binary controls) the input.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'description',
+    description: 'Helper text rendered below the input.\nHidden when `error` is set.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'error',
+    description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
+    required: false,
+    type: 'string | FrappeUIError'
+  },
+  {
+    name: 'required',
+    description: 'Marks the field as required. Renders an asterisk next to the label and\nforwards `required` / `aria-required` to the underlying control.',
+    required: false,
+    type: 'boolean'
+  },
+  {
+    name: 'id',
+    description: 'HTML id of the underlying control. Auto-generated via `useId()` if omitted.',
+    required: false,
+    type: 'string'
+  }
+]
+
+  const slotsData = [
+  {
+    name: 'label',
+    description: 'Overrides the rendered label content. Receives `{ required }`.',
+    type: '{ required: boolean; }'
+  },
+  {
+    name: 'description',
+    description: 'Overrides the rendered description content.',
+    type: 'any'
   }
 ]
 
@@ -46,13 +88,15 @@
   {
     name: 'update:modelValue',
     description: 'Fired when the model value changes.',
-    type: 'any[]'
+    type: '[value: number]'
   }
 ]
 </script>
 ## API Reference
 
 <PropsTable name="Rating" :data="propsData"/> 
+
+<SlotsTable :data="slotsData"/> 
 
 <EmitsTable :data="emitsData"/> 
 

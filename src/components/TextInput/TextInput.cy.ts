@@ -84,4 +84,101 @@ describe('Textinput', () => {
     cy.get(`input[type=text]`).type('abc')
     cy.get('@onUpdate').should('have.been.calledWith', 'abc')
   })
+
+  describe('shared labeling contract', () => {
+    it('renders label, description, and links them via aria-describedby', () => {
+      cy.mount(TextInput, {
+        props: {
+          label: 'Email',
+          description: 'We never share your email.',
+        },
+      })
+      cy.contains('label', 'Email').should('exist')
+      cy.get('input').then(($input) => {
+        const id = $input.attr('id')!
+        const describedBy = $input.attr('aria-describedby')!
+        expect(describedBy).to.equal(`${id}-description`)
+        cy.get(`#${id}-description`).should('contain.text', 'We never share')
+        cy.get(`label[for="${id}"]`).should('exist')
+      })
+    })
+
+    it('renders error state with aria-invalid and aria-errormessage, suppresses description', () => {
+      cy.mount(TextInput, {
+        props: {
+          label: 'Email',
+          description: 'helper',
+          error: 'Required',
+        },
+      })
+      cy.get('input')
+        .should('have.attr', 'aria-invalid', 'true')
+        .then(($input) => {
+          const id = $input.attr('id')!
+          expect($input.attr('aria-errormessage')).to.equal(`${id}-error`)
+          cy.get(`#${id}-error`).should('contain.text', 'Required')
+          cy.get(`#${id}-description`).should('not.exist')
+        })
+    })
+
+    it('renders required indicator and forwards aria-required', () => {
+      cy.mount(TextInput, {
+        props: { label: 'Name', required: true },
+      })
+      cy.get('input').should('have.attr', 'aria-required', 'true')
+      cy.contains('label', 'Name').within(() => {
+        cy.get('span[aria-hidden="true"]').should('contain.text', '*')
+        cy.get('span.sr-only').should('contain.text', '(required)')
+      })
+    })
+
+    it('honors an explicit id over the generated one', () => {
+      cy.mount(TextInput, {
+        props: { id: 'my-explicit-id', label: 'Email' },
+      })
+      cy.get('input').should('have.attr', 'id', 'my-explicit-id')
+      cy.get('label[for="my-explicit-id"]').should('exist')
+    })
+
+    it('does not render its own required indicator when #label slot is used', () => {
+      cy.mount(TextInput, {
+        props: { required: true },
+        slots: {
+          label: '<span class="custom">Custom</span>',
+        },
+      })
+      cy.get('label').within(() => {
+        cy.get('span[aria-hidden="true"]').should('not.exist')
+        cy.get('span.sr-only').should('not.exist')
+      })
+    })
+
+    it('renders the canonical data-* hooks on the control', () => {
+      cy.mount(TextInput, {
+        props: {
+          label: 'Email',
+          size: 'lg',
+          variant: 'outline',
+          required: true,
+        },
+      })
+      cy.get('input').should('have.attr', 'data-slot', 'control')
+      cy.get('input').should('have.attr', 'data-size', 'lg')
+      cy.get('input').should('have.attr', 'data-variant', 'outline')
+      cy.get('input').should('have.attr', 'data-state', 'valid')
+      cy.get('input').should('have.attr', 'data-required', 'true')
+    })
+
+    it('flips data-state to invalid when error is set', () => {
+      cy.mount(TextInput, {
+        props: { label: 'Email', error: 'Required' },
+      })
+      cy.get('input').should('have.attr', 'data-state', 'invalid')
+    })
+
+    it('exposes data-disabled when disabled', () => {
+      cy.mount(TextInput, { props: { disabled: true } })
+      cy.get('input').should('have.attr', 'data-disabled', 'true')
+    })
+  })
 })

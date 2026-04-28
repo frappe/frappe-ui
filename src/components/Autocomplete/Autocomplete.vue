@@ -210,17 +210,23 @@ import {
   ComboboxOption,
   ComboboxOptions,
 } from '@headlessui/vue'
-import { computed, nextTick, ref, watch } from 'vue'
+import { computed, inject, nextTick, ref, watch } from 'vue'
 import { Popover } from '../Popover'
 import { Button } from '../Button'
 import FeatherIcon from '../FeatherIcon.vue'
 import LoadingIndicator from '../LoadingIndicator.vue'
+import { warnDeprecated } from '../../utils/warnDeprecated'
+import { autocompleteDeprecationSuppressed } from './deprecationKey'
 import type {
   AutocompleteOptionGroup,
   AutocompleteOption,
   AutocompleteProps,
   Option,
 } from './types'
+
+if (!inject(autocompleteDeprecationSuppressed, false)) {
+  warnDeprecated('Autocomplete', 'Combobox or MultiSelect')
+}
 
 const props = withDefaults(defineProps<AutocompleteProps>(), {
   multiple: false,

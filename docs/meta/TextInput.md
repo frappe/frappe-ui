@@ -16,57 +16,69 @@
     name: 'size',
     description: 'Visual size of the input.',
     required: false,
-    type: '"md" | "sm" | "lg" | "xl"',
+    type: 'InputSize',
     default: '"sm"'
   },
   {
     name: 'variant',
     description: 'Style variant of the input.',
     required: false,
-    type: '"subtle" | "outline" | "ghost"',
+    type: 'InputVariant',
     default: '"subtle"'
   },
   {
     name: 'placeholder',
     description: 'Placeholder text shown when the input is empty.',
     required: false,
-    type: 'string',
-    default: undefined
+    type: 'string'
   },
   {
     name: 'disabled',
     description: 'Disables the input when true.',
     required: false,
-    type: 'boolean',
-    default: undefined
-  },
-  {
-    name: 'id',
-    description: 'ID attribute for the input element.',
-    required: false,
-    type: 'string',
-    default: undefined
+    type: 'boolean'
   },
   {
     name: 'modelValue',
     description: 'Bound value of the input.',
     required: false,
-    type: 'string | number',
-    default: undefined
+    type: 'string | number'
   },
   {
     name: 'debounce',
     description: 'Debounce delay (in ms) before emitting value updates.',
     required: false,
-    type: 'number',
-    default: undefined
+    type: 'number'
+  },
+  {
+    name: 'label',
+    description: 'Label rendered above (or beside, for binary controls) the input.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'description',
+    description: 'Helper text rendered below the input.\nHidden when `error` is set.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'error',
+    description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
+    required: false,
+    type: 'string | FrappeUIError'
   },
   {
     name: 'required',
-    description: 'Marks the input as required.',
+    description: 'Marks the field as required. Renders an asterisk next to the label and\nforwards `required` / `aria-required` to the underlying control.',
     required: false,
-    type: 'boolean',
-    default: undefined
+    type: 'boolean'
+  },
+  {
+    name: 'id',
+    description: 'HTML id of the underlying control. Auto-generated via `useId()` if omitted.',
+    required: false,
+    type: 'string'
   }
 ]
 
@@ -79,6 +91,16 @@
   {
     name: 'suffix',
     description: 'Content rendered after the input (right side)',
+    type: 'any'
+  },
+  {
+    name: 'label',
+    description: 'Overrides the rendered label content. Receives `{ required }`.',
+    type: '{ required: boolean; }'
+  },
+  {
+    name: 'description',
+    description: 'Overrides the rendered description content.',
     type: 'any'
   }
 ]

@@ -1,7 +1,12 @@
 import FormControl from './FormControl.vue'
 import { h } from 'vue'
+import { _resetWarnDeprecated } from '../../utils/warnDeprecated'
 
 describe('FormControl', () => {
+  beforeEach(() => {
+    _resetWarnDeprecated()
+  })
+
   it('renders a text input with label and description', () => {
     cy.mount(FormControl, {
       props: {
@@ -62,5 +67,32 @@ describe('FormControl', () => {
         cy.get('[data-cy="prefix"]').should('exist')
         cy.get('[data-cy="suffix"]').should('exist')
       })
+  })
+
+  it('warns when type="autocomplete" is used', () => {
+    cy.window().then((win) => {
+      cy.spy(win.console, 'warn').as('consoleWarn')
+    })
+    cy.mount(FormControl, {
+      props: {
+        type: 'autocomplete',
+        options: [
+          { label: 'One', value: 1 },
+          { label: 'Two', value: 2 },
+        ],
+      },
+    })
+    cy.get('@consoleWarn').should(
+      'have.been.calledWithMatch',
+      /FormControl type="autocomplete" is deprecated.*Combobox/,
+    )
+  })
+
+  it('does not warn for non-autocomplete types', () => {
+    cy.window().then((win) => {
+      cy.spy(win.console, 'warn').as('consoleWarn')
+    })
+    cy.mount(FormControl, { props: { label: 'Title' } })
+    cy.get('@consoleWarn').should('not.have.been.calledWithMatch', /FormControl/)
   })
 })

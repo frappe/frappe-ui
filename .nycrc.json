@@ -1,0 +1,16 @@
+{
+  "all": false,
+  "report-dir": "coverage/cypress",
+  "temp-dir": ".nyc_output/cypress",
+  "reporter": ["json", "lcov", "text-summary"],
+  "include": ["src/**/*.{ts,vue}"],
+  "exclude": [
+    "src/**/*.cy.ts",
+    "src/**/*.spec.ts",
+    "src/**/*.test.ts",
+    "src/**/stories/**",
+    "src/**/types.ts",
+    "src/**/types/**",
+    "src/**/index.ts"
+  ]
+}

@@ -1,19 +1,24 @@
-export interface CheckboxProps {
-  /** Controls the size of the checkbox */
-  size?: 'sm' | 'md'
+import type { ToggleSize } from '../../composables/inputTypes'
+import type { InputLabelingProps } from '../../composables/useInputLabeling'
 
-  /** Text label shown next to the checkbox */
-  label?: string
+export interface CheckboxProps extends InputLabelingProps {
+  /** Controls the size of the checkbox */
+  size?: ToggleSize
 
   /** Disables the checkbox interaction */
   disabled?: boolean
 
-  /** Adds padding around the checkbox */
+  /**
+   * Adds padding around the checkbox.
+   * @deprecated Use `data-*` styling hooks instead.
+   */
   padding?: boolean
 
-  /** Checked state of the checkbox */
+  /** Checked state of the checkbox. `boolean` is canonical; `1`/`0` are kept for v1 backwards compatibility. */
   modelValue?: boolean | 1 | 0
+}
 
-  /** HTML id attribute for the input element */
-  id?: string
+export interface CheckboxEmits {
+  /** Fired when the checkbox value changes. */
+  'update:modelValue': [value: boolean]
 }

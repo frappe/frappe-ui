@@ -9,50 +9,39 @@
     name: 'size',
     description: 'Controls the visual size of the textarea.',
     required: false,
-    type: '"md" | "sm" | "lg" | "xl"',
+    type: 'InputSize',
     default: '"sm"'
   },
   {
     name: 'variant',
     description: 'Visual style variant.',
     required: false,
-    type: '"subtle" | "outline"',
+    type: 'InputVariant',
     default: '"subtle"'
   },
   {
     name: 'placeholder',
     description: 'Placeholder text shown when empty.',
     required: false,
-    type: 'string',
-    default: undefined
+    type: 'string'
   },
   {
     name: 'disabled',
     description: 'Disables user interaction.',
     required: false,
-    type: 'boolean',
-    default: undefined
-  },
-  {
-    name: 'id',
-    description: 'HTML id attribute.',
-    required: false,
-    type: 'string',
-    default: undefined
+    type: 'boolean'
   },
   {
     name: 'modelValue',
     description: 'Bound value of the textarea.',
     required: false,
-    type: 'string',
-    default: undefined
+    type: 'string'
   },
   {
     name: 'debounce',
     description: 'Debounce delay (ms) before emitting value updates.',
     required: false,
-    type: 'number',
-    default: undefined
+    type: 'number'
   },
   {
     name: 'rows',
@@ -63,10 +52,46 @@
   },
   {
     name: 'label',
-    description: 'Optional label text.',
+    description: 'Label rendered above (or beside, for binary controls) the input.',
     required: false,
-    type: 'string',
-    default: undefined
+    type: 'string'
+  },
+  {
+    name: 'description',
+    description: 'Helper text rendered below the input.\nHidden when `error` is set.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'error',
+    description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
+    required: false,
+    type: 'string | FrappeUIError'
+  },
+  {
+    name: 'required',
+    description: 'Marks the field as required. Renders an asterisk next to the label and\nforwards `required` / `aria-required` to the underlying control.',
+    required: false,
+    type: 'boolean'
+  },
+  {
+    name: 'id',
+    description: 'HTML id of the underlying control. Auto-generated via `useId()` if omitted.',
+    required: false,
+    type: 'string'
+  }
+]
+
+  const slotsData = [
+  {
+    name: 'label',
+    description: 'Overrides the rendered label content. Receives `{ required }`.',
+    type: '{ required: boolean; }'
+  },
+  {
+    name: 'description',
+    description: 'Overrides the rendered description content.',
+    type: 'any'
   }
 ]
 
@@ -81,6 +106,8 @@
 ## API Reference
 
 <PropsTable name="Textarea" :data="propsData"/> 
+
+<SlotsTable :data="slotsData"/> 
 
 <EmitsTable :data="emitsData"/> 
 

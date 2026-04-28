@@ -141,6 +141,7 @@ function getEventDescription(name: string, description?: string) {
       close: 'Fired when the component closes.',
       dismiss: 'Fired when the component is dismissed.',
       'item-click': 'Fired when an enabled item is clicked.',
+      'value-commit': 'Fired once when the user finishes committing the value.',
     }[name] ?? ''
   )
 }

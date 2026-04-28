@@ -8,7 +8,6 @@ describe('Slider', () => {
       },
     })
 
-    cy.get('[aria-label="Volume"]').should('have.length', 1)
     cy.get('[role="slider"]').should('have.length', 1)
   })
 
@@ -19,14 +18,12 @@ describe('Slider', () => {
       },
     })
 
-    cy.get('[aria-label="Volume"]').should('have.length', 2)
     cy.get('[role="slider"]').should('have.length', 2)
   })
 
   it('renders one thumb at the default minimum value when uncontrolled', () => {
     cy.mount(Slider)
 
-    cy.get('[aria-label="Volume"]').should('have.length', 1)
     cy.get('[role="slider"]')
       .should('have.length', 1)
       .first()
@@ -44,5 +41,65 @@ describe('Slider', () => {
       .should('have.length', 1)
       .first()
       .should('have.attr', 'aria-valuenow', '10')
+  })
+
+  it('does not bake in a hardcoded aria-label', () => {
+    cy.mount(Slider, { props: { modelValue: [25] } })
+    cy.get('[role="slider"]').should('not.have.attr', 'aria-label')
+  })
+
+  it('forwards disabled to aria-disabled and SliderRoot', () => {
+    cy.mount(Slider, {
+      props: { id: 'sl-disabled', modelValue: [25], disabled: true },
+    })
+    cy.get('#sl-disabled').should('have.attr', 'aria-disabled', 'true')
+    cy.get('#sl-disabled').should('have.attr', 'data-disabled', '')
+  })
+
+  describe('shared labeling contract', () => {
+    it('wires aria-labelledby and aria-describedby', () => {
+      cy.mount(Slider, {
+        props: { label: 'Volume', description: 'Adjust volume.' },
+      })
+      cy.get('[role="slider"]')
+        .parents('[aria-labelledby]')
+        .first()
+        .then(($root) => {
+          const labelledBy = $root.attr('aria-labelledby')!
+          const describedBy = $root.attr('aria-describedby')!
+          cy.get(`#${labelledBy}`).should('contain.text', 'Volume')
+          cy.get(`#${describedBy}`).should('contain.text', 'Adjust volume.')
+        })
+    })
+
+    it('renders error state', () => {
+      cy.mount(Slider, {
+        props: { label: 'Volume', error: 'Required' },
+      })
+      cy.contains('Required').should('exist')
+    })
+
+    it('renders the canonical data-* hooks on the control', () => {
+      cy.mount(Slider, {
+        props: {
+          id: 'sl-data',
+          label: 'Volume',
+          size: 'md',
+          required: true,
+          modelValue: [25],
+        },
+      })
+      cy.get('#sl-data').should('have.attr', 'data-slot', 'control')
+      cy.get('#sl-data').should('have.attr', 'data-size', 'md')
+      cy.get('#sl-data').should('have.attr', 'data-state', 'valid')
+      cy.get('#sl-data').should('have.attr', 'data-required', 'true')
+    })
+
+    it('flips data-state to invalid when error is set', () => {
+      cy.mount(Slider, {
+        props: { id: 'sl-err', label: 'Volume', error: 'Required' },
+      })
+      cy.get('#sl-err').should('have.attr', 'data-state', 'invalid')
+    })
   })
 })

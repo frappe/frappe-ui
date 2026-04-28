@@ -1,11 +1,25 @@
 <template>
-  <FormControl
-    :type='show ? "text" : "password"'
-    :value="modelValue || value"
-    v-bind="$attrs"
+  <TextInput
+    v-model="model"
+    :type="show ? 'text' : 'password'"
+    :label="label"
+    :description="description"
+    :error="error"
+    :required="required"
+    :size="size"
+    :variant="variant"
+    :disabled="disabled"
+    :placeholder="placeholder"
+    :id="id"
     @keydown.meta.i.prevent="show = !show"
     @keydown.ctrl.i.prevent="show = !show"
   >
+    <template v-if="$slots.label" #label="slotProps">
+      <slot name="label" v-bind="slotProps" />
+    </template>
+    <template v-if="$slots.description" #description>
+      <slot name="description" />
+    </template>
     <template #prefix v-if="$slots.prefix">
       <slot name="prefix" />
     </template>
@@ -16,7 +30,7 @@
             class="rounded bg-surface-gray-7 py-1.5 px-2 text-xs text-ink-white shadow-xl"
           >
             <span class="flex items-center gap-1">
-              {{ show ? "Hide Password" : "Show Password" }}
+              {{ show ? 'Hide Password' : 'Show Password' }}
               <KeyboardShortcut
                 bg
                 combo="Mod+I"
@@ -35,25 +49,46 @@
         </div>
       </Tooltip>
     </template>
-  </FormControl>
+  </TextInput>
 </template>
+
 <script setup lang="ts">
-import KeyboardShortcut from "../KeyboardShortcut.vue";
-import FormControl from "../FormControl/FormControl.vue";
-import Tooltip from "../Tooltip/Tooltip.vue";
-import type { PasswordProps } from "./types";
-import { computed, ref } from "vue";
+import KeyboardShortcut from '../KeyboardShortcut.vue'
+import TextInput from '../TextInput/TextInput.vue'
+import Tooltip from '../Tooltip/Tooltip.vue'
+import { warnDeprecated } from '../../utils/warnDeprecated'
+import type { PasswordProps } from './types'
+import { computed, ref, watchEffect } from 'vue'
 
-const props = defineProps<PasswordProps>();
+const props = withDefaults(defineProps<PasswordProps>(), {
+  size: 'sm',
+  variant: 'subtle',
+})
 
-const show = ref(false);
+/** The current password value (controlled). */
+const model = defineModel<string>()
+
+watchEffect(() => {
+  if (props.value != null) {
+    warnDeprecated('Password.value', 'v-model / modelValue')
+    if (model.value == null || model.value === '') {
+      model.value = props.value ?? ''
+    }
+  }
+})
+
+const show = ref(false)
 const showEye = computed(() => {
-  let v = props.modelValue || props.value;
-  return !v?.includes("*");
-});
+  let v = model.value || props.value
+  return !v?.includes('*')
+})
 
 defineSlots<{
   /** Content shown before the input field (left icon / custom content) */
-  prefix?: () => any;
-}>();
+  prefix?: () => any
+  /** Overrides the rendered label content. Receives `{ required }`. */
+  label?: (props: { required: boolean }) => any
+  /** Overrides the rendered description content. */
+  description?: () => any
+}>()
 </script>
