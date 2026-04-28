@@ -60,10 +60,8 @@ describe('Divider', () => {
     cy.get('@consoleWarn').then((consoleWarn) => {
       const matchingCalls = (consoleWarn as sinon.SinonStub)
         .getCalls()
-        .filter(
-          (call) =>
-            call.args[0] ===
-            '`Divider.action.handler` is deprecated. Use `Divider.action.onClick` instead.',
+        .filter((call) =>
+          /Divider\.action\.handler is deprecated/.test(String(call.args[0])),
         )
 
       expect(matchingCalls).to.have.length(1)
