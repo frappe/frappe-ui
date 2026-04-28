@@ -115,16 +115,9 @@ We have only agreed on a small set of broad component decisions so far.
 - keep escape hatches limited and requirement-driven
 - keep polymorphism limited to real needs, such as `Button` rendering as an anchor or router link
 
-### Important exception
+### Selection/menu family
 
-For the selection/menu family, `ItemListRow` is the intentional shared row primitive used internally by:
-
-- `Dropdown`
-- `Select`
-- `Combobox`
-- `MultiSelect`
-
-The `ItemList` container is **not** part of the v1 public surface. Each higher-level component owns its own listbox shell (keyboard nav, grouping, empty/footer slots, etc.); only the row presentation is shared.
+For the selection/menu family, `ItemListRow` is the shared row primitive used internally by `Dropdown`, `Select`, `Combobox`, and `MultiSelect`. Each higher-level component owns its own listbox shell (keyboard nav, grouping, empty/footer slots, etc.); only the row presentation is shared.
 
 Use [`08-selection-and-menu-api-spec.md`](./08-selection-and-menu-api-spec.md) as the source of truth for that family.
 
@@ -258,7 +251,7 @@ See [`08-selection-and-menu-api-spec.md`](./08-selection-and-menu-api-spec.md).
 Key items:
 
 - deprecate `Autocomplete` in favor of separate higher-level components
-- finalize `ItemListRow` as the shared row primitive (no public `ItemList` container in v1)
+- finalize `ItemListRow` as the shared row primitive
 - finalize `Select`, `Combobox`, `Dropdown`, `MultiSelect`, `FormControl`, and `Switch`
 - align the family on `v-model`, `v-model:open`, shared trigger/item slot vocabulary, and `@update:query`
 - deprecate `Input.vue`

@@ -31,9 +31,8 @@ This spec answers:
 - which existing per-component issues must be resolved before v1
 - which deprecations must be wired with dev warnings
 
-All previously parked decisions are now resolved against codebase usage data
-in [`research/09-input-components-usage-audit.md`](./research/09-input-components-usage-audit.md).
-The decisions are inlined below.
+Decisions involving real-world usage data are backed by
+[`research/09-input-components-usage-audit.md`](./research/09-input-components-usage-audit.md).
 
 ## Decision summary
 
@@ -389,9 +388,9 @@ Per the v1 plan:
   `Autocomplete` (removing the route now would break consumers; removal is
   a post-v1 step)
 
-## Resolved decisions
+## Decisions backed by the usage audit
 
-Both decisions previously parked here are resolved against the audit at
+The two decisions below are backed by data in
 [`research/09-input-components-usage-audit.md`](./research/09-input-components-usage-audit.md).
 
 ### 1. `FormControl` stays a router for v1
@@ -437,41 +436,41 @@ The audit found:
 
 Migration load: zero apps affected.
 
-## Wave order
+## Implementation notes
 
-Execution proceeds in these waves; earlier waves unblock later ones. Each
-wave is one PR. Per-wave file lists, acceptance gates, and component
-behavior are defined in the **Implementation plan** below — that is the
-single source of truth for the coding agent.
+The per-component changes above are the source of truth for behavior. This
+section captures the cross-cutting infrastructure, acceptance gates, and
+test/story expectations that apply to every input in scope.
 
-- **Wave A** — labeling primitives (composable, types, `warnDeprecated`)
-- **Wave B** — text inputs (`TextInput`, `Textarea`, `Password`)
-- **Wave C** — binary controls (`Checkbox`, `Switch`)
-- **Wave D** — numeric (`Rating`, `Slider`)
-- **Wave E** — deprecation enforcement on legacy components
-- **Wave F** — `data-*` styling hooks family-wide
+### Shared infrastructure
 
-## Implementation plan
-
-Handoff package for the coding agent. Each wave is one PR; PRs land in
-order. Don't open Wave N+1 until Wave N is merged — later waves depend on
-the primitives from earlier ones.
+- `src/utils/warnDeprecated.ts` — dev-mode warning utility (see
+  "Deprecations").
+- `src/composables/useInputLabeling.ts` — returns `{ inputId, labelledBy,
+  describedBy, errorMessageId, dataAttrs, hasError }`. Also exports the
+  shared `InputLabelingProps` and `InputLabelingSlots` interfaces from the
+  same module.
+- `src/composables/inputTypes.ts` — exports `InputSize`, `ToggleSize`,
+  `InputVariant` (shared types live next to composables; no separate
+  `src/types/` directory).
+- `src/components/FormLabel.vue` — required-indicator markup is extracted
+  here so every input reuses the same DOM.
 
 ### Repo conventions
 
-- All input components live under `src/components/<Component>/` with
+- Input components live under `src/components/<Component>/` with
   `<Component>.vue`, `index.ts`, `types.ts`, `<Component>.cy.ts`, and a
-  `stories/` directory. Match this shape for every touched component.
-- Use existing `src/utils/useId.ts` instead of re-implementing.
+  `stories/` directory.
+- Use the existing `src/utils/useId.ts` instead of re-implementing.
 - Use `<script setup lang="ts">` everywhere; never the Options API.
 - Lucide icons go through the shared Tailwind utility (see `Button.icon`
   precedent).
 - Stories regenerate `meta/<Component>.md` via `propsgen` — don't hand-edit
   meta files.
 
-### Wave-level acceptance gates
+### Acceptance gates
 
-For every wave PR, all of the following must pass before merge:
+Every change against this spec must pass:
 
 - `yarn typecheck` clean
 - `yarn test` (Cypress component tests) clean for touched components
@@ -510,7 +509,7 @@ Each touched component must ship updated/new Cypress tests
   asserts `console.warn` fires once with the expected message; when the
   modern API is used, the test asserts no warning fires
 
-Stories must cover the same surface visually so consumers can see the new
+Stories must cover the same surface visually so consumers can see the
 labeling contract in action.
 
 ### Stories for manual testing
@@ -544,7 +543,7 @@ component gets:
 
 Stories should be runnable with `yarn dev` against the local frappe-ui
 copy, so the reviewer can manually exercise every code path the spec
-introduces before merging the wave.
+introduces.
 
 **Rewrite existing stories where it makes sense.** Don't preserve old
 stories out of inertia. If a current story:
@@ -564,98 +563,30 @@ Deprecated APIs still need their own dedicated story per the list above —
 that's separate from rewriting the *primary* examples to use the new
 contract.
 
-### Wave A — labeling primitives (foundation)
+### Deprecation wiring
 
-**New files:**
-- `src/utils/warnDeprecated.ts` — utility from the Deprecations section
-- `src/composables/useInputLabeling.ts` — returns `{ inputId, labelledBy,
-  describedBy, errorMessageId, dataAttrs, hasError }`; also exports the
-  shared `InputLabelingProps` and `InputLabelingSlots` interfaces alongside
-  the composable so consumers import from a single module
-- `src/composables/inputTypes.ts` — exports `InputSize`, `ToggleSize`,
-  `InputVariant` (no separate `src/types/` directory; matches existing repo
-  layout where shared types live next to composables)
-
-**Modified files:**
-- `src/components/FormLabel.vue` — extract required-indicator markup so
-  every input can reuse the exact same DOM
-- `src/components/Divider/Divider.vue` — replace ad-hoc deprecation log
-  with `warnDeprecated('Divider.action.handler', 'Divider.action.onClick')`
-
-**Done when:** the composable + utility + types + extracted required
-indicator are in `dist/` and importable from a no-op test component.
-
-### Wave B — text inputs
-
-**Files:** `src/components/TextInput/`, `src/components/Textarea/`,
-`src/components/Password/`.
-
-Apply the per-component changes from "Per-component changes". Specifically:
-
-- TextInput: confirm baseline; wire shared labeling
-- Textarea: add `'ghost'` to variants, drop dead `type: 'text'` default,
-  consolidate the local `label` prop into the shared labeling contract
-  (same prop name; non-breaking), add `required`, wire shared labeling
-- Password: add `defineModel<string>()` (fixes existing v-model bug),
-  `warnDeprecated` on the `value` prop, add explicit `size`, `variant`,
-  `disabled`, `placeholder`, `id`, `required` props, wire shared labeling
-
-**Done when:** all three components pass new Cypress tests covering label,
-description, error, required, and `aria-*` wiring.
-
-### Wave C — binary controls
-
-**Files:** `src/components/Checkbox/`, `src/components/Switch/`.
-
-- Checkbox: keep `modelValue` typed as `boolean | 1 | 0` (no narrowing —
-  that would be breaking), coerce internally, type emits via
-  `CheckboxEmits`, switch to `defineModel`, wire shared labeling in
-  inline-row layout, **deprecate `padding` prop with `warnDeprecated`
-  (still functional)**
-- Switch: drop `FeatherIcon` import (internal refactor), retype
-  `icon: string | Component`, **deprecate `change` emit with
-  `warnDeprecated` (still fires)**, switch to `defineModel<boolean>()`,
-  wire shared labeling in inline-row layout, **deprecate `labelClasses`
-  prop with `warnDeprecated` (still applied)**
-
-All deprecations keep the old call site working through `v1.x`. Removal is
-post-v1.
-
-### Wave D — numeric
-
-**Files:** `src/components/Rating/`, `src/components/Slider/`.
-
-- Rating: drop `FeatherIcon`, default icon to `lucide-star`, rename
-  `rating_from` → `max` with `warnDeprecated` alias, type `RatingEmits`,
-  switch to `defineModel<number>()`, wire shared labeling
-- Slider: add `disabled` prop, add `size: ToggleSize` (default `'sm'`,
-  `'md'` increases track and thumb proportionally), remove hardcoded
-  `aria-label="Volume"`, add `SliderEmits` with
-  `'value-commit': [value: SliderValue]`, wire shared labeling
-
-### Wave E — deprecation enforcement
-
-Wire `warnDeprecated(...)` calls (per the Deprecations table):
+`warnDeprecated(...)` is wired in the following files (matching the
+Deprecations table):
 
 - `src/components/Input.vue` — warn on mount: `Input` → `TextInput`
 - `src/components/Autocomplete/Autocomplete.vue` — warn on mount:
   `Autocomplete` → `Combobox` or `MultiSelect`
 - `src/components/FormControl/FormControl.vue` — warn when
   `props.type === 'autocomplete'`: → `Combobox` standalone
-- `src/components/Password/Password.vue` — already wired in Wave B
-- `src/components/Rating/Rating.vue` — already wired in Wave D
-- `src/components/Switch/Switch.vue` — already wired in Wave C
-  (`change` emit, `labelClasses` prop)
-- `src/components/Checkbox/Checkbox.vue` — already wired in Wave C
-  (`padding` prop)
+- `src/components/Password/Password.vue` — `value` prop
+- `src/components/Rating/Rating.vue` — `rating_from` prop
+- `src/components/Switch/Switch.vue` — `change` emit, `labelClasses` prop
+- `src/components/Checkbox/Checkbox.vue` — `padding` prop
+- `src/components/Divider/Divider.vue` — `Divider.action.handler` (replaces
+  the prior ad-hoc deprecation log)
 
-**Docs:** move `Input`, `Autocomplete`, and `FormControl type='autocomplete'`
-out of standard component docs onto a single "legacy components" docs page.
-Update the v1 migration guide to point at the new APIs.
+`Input`, `Autocomplete`, and `FormControl type='autocomplete'` move out of
+standard component docs onto the single legacy-components docs page; the
+v1 migration guide points at the new APIs.
 
-### Wave F — `data-*` styling hooks
+### `data-*` styling hooks
 
-For every input shell, render the canonical `data-*` vocabulary:
+Every input shell renders the canonical `data-*` vocabulary:
 
 - `data-slot` — element role inside the component (e.g. `"label"`,
   `"control"`, `"description"`, `"error"`)
@@ -666,17 +597,15 @@ For every input shell, render the canonical `data-*` vocabulary:
 - `data-required` — `"true"` when required, absent otherwise
 
 The `useInputLabeling` composable returns a `dataAttrs` object that
-components spread onto their root element; centralize this so the
-vocabulary stays consistent.
+components spread onto their root element so the vocabulary stays
+consistent.
 
-`Switch.labelClasses` and `Checkbox.padding` continue to work alongside the
-new `data-*` hooks. They are deprecated, not removed in v1.
+`Switch.labelClasses` and `Checkbox.padding` continue to work alongside
+the `data-*` hooks. They are deprecated, not removed in v1.
 
-### Out-of-scope checklist (do not silently expand)
+### Out of scope (do not silently expand)
 
-The coding agent should refuse, not absorb, any of these:
-
-- `FileUploader` (covered in a separate spec — do not touch in these waves)
+- `FileUploader` (covered in a separate spec)
 - removing the `FormControl type='autocomplete'` route (warn only — gated
   on post-v1 `FormControl` scope decision)
 - removing `Switch.labelClasses`, `Checkbox.padding`, `Switch.change` emit,

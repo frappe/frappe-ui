@@ -10,14 +10,11 @@ This document defines the intended public API direction for:
 - `Combobox`
 - `MultiSelect`
 
-The `ItemList` container is **not** part of the v1 public surface. See
-[`08a-itemlist-spec.md`](./08a-itemlist-spec.md) for the rationale.
-
 It is based on:
 
 - the v1 component philosophy
 - the real-world usage audit in
-  [`research/07-real-world-component-usage-audit.md`](./research/07-real-world-component-usage-audit.md)
+  [`research/07-selection-components-usage-audit.md`](./research/07-selection-components-usage-audit.md)
 - the decision to prefer higher-level components with props and slots over
   publicly exposing compound primitive families
 

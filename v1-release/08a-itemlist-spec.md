@@ -6,40 +6,6 @@ This document defines the exact public API for `ItemListRow`. It is a sub-spec
 of [`08-selection-and-menu-api-spec.md`](./08-selection-and-menu-api-spec.md)
 and inherits the shared design rules from that document.
 
-## Background: why no `ItemList` container in v1
-
-Earlier drafts of this spec proposed shipping a public `ItemList` container
-alongside `ItemListRow` as the "advanced base layer" for the selection/menu
-family.
-
-In practice the family did not use it. `Dropdown`, `Select`, `Combobox`, and
-`MultiSelect` each ended up owning their own listbox shell because each had
-distinct requirements that a single generic container could not satisfy
-without becoming the do-everything component this RFC explicitly rules out:
-
-- different keyboard navigation models (menu vs listbox vs combobox)
-- different open/close ownership and trigger relationships
-- different empty/loading/footer composition
-- different grouping normalization rules
-- different interaction with a search input
-
-Across the four high-level components, the only piece that was actually
-shared was the row presentation itself — spacing, prefix/label/suffix
-regions, and the active/selected/disabled visual states. That is exactly
-what `ItemListRow` covers.
-
-Decision for v1:
-
-- ship `ItemListRow` as the shared row primitive
-- do **not** ship a public `ItemList` container
-- each higher-level component owns its own listbox shell and composes
-  `ItemListRow` for row rendering
-- if a real need for a public list container emerges later, it can be added
-  additively in a future minor without breaking the row contract
-
-This keeps the v1 public surface honest: we only freeze APIs that have at
-least one validated consumer.
-
 ## Role
 
 `ItemListRow` is the single-row shell used internally by the selection/menu
@@ -138,18 +104,11 @@ Rules:
 - `Combobox` composes `ItemListRow` for search-results rows
 - `MultiSelect` composes `ItemListRow` for multi-select option rows
 
-This is the key architectural decision for this family: the row shell is
-shared, but the listbox container is owned by each higher-level component.
+The row shell is shared; each higher-level component owns its own listbox
+container.
 
 ## v1 stance
 
-`ItemListRow` is public in v1.
-
-It is intentionally a small primitive, but it is worth exposing because:
-
-- the row styling is shared
-- the row structure is shared
-- advanced app cases for custom listboxes clearly exist
-- higher-level components can build on it without duplicating row markup
-- app authors should not have to rebuild the row shell to get the design
-  system behavior
+`ItemListRow` is public in v1. It is a small primitive, but worth exposing
+so that app code building advanced or custom listboxes can match the
+design system row styling without copying markup.

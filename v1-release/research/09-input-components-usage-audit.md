@@ -1,6 +1,6 @@
 # Input components real-world usage audit
 
-Sibling of [`07-real-world-component-usage-audit.md`](./07-real-world-component-usage-audit.md).
+Sibling of [`07-selection-components-usage-audit.md`](./07-selection-components-usage-audit.md).
 Locks down the parked decisions in
 [`../09-input-components-spec.md`](../09-input-components-spec.md) and quantifies
 the migration cost of every wired deprecation in that spec.
