@@ -31,6 +31,7 @@ export function request(_options) {
     method: options.method || 'GET',
     headers: options.headers,
     body,
+    signal: options.signal,
   })
     .then((response) => {
       if (options.transformResponse) {
