@@ -8,11 +8,14 @@
       <TextInput
         ref="inputRef"
         v-model="displayValue"
+        :id="props.inputId"
+        :size="props.size"
         :variant="variant"
         type="text"
         class="text-sm w-full cursor-text"
         :placeholder="placeholder"
         :disabled="disabled"
+        :required="required"
         :readonly="!props.allowCustom"
         @focus="onFocus"
         @click="onClickInput(isOpen, togglePopover)"
@@ -86,11 +89,13 @@ const props = withDefaults(defineProps<TimePickerProps>(), {
   options: () => [],
   placement: 'bottom-start' as Placement,
   placeholder: 'Select time',
+  size: 'sm',
   variant: 'subtle' as Variant,
   allowCustom: true,
   autoClose: true,
   use12Hour: true,
   disabled: false,
+  required: false,
   scrollMode: 'center' as const,
   minTime: '',
   maxTime: '',
@@ -497,12 +502,14 @@ function onClickInput(isOpen: boolean | undefined, togglePopover: () => void) {
   if (props.allowCustom) selectAll()
 }
 
-function onFocus() {
+function onFocus(event: FocusEvent) {
+  emit('focus', event)
   isFocused.value = true
   if (props.allowCustom && !hasSelectedOnFirstClick.value) selectAll()
 }
 
-function onBlur() {
+function onBlur(event: FocusEvent) {
+  emit('blur', event)
   if (showOptions.value) {
     isFocused.value = false
     return
@@ -560,10 +567,6 @@ defineSlots<{
    * Slot rendered after the input value.
    * Exposes popover controls.
    */
-  suffix?: (props: {
-    togglePopover: () => void
-    isOpen: boolean
-  }) => any
+  suffix?: (props: { togglePopover: () => void; isOpen: boolean }) => any
 }>()
-
 </script>

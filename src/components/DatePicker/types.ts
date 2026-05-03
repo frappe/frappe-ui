@@ -1,4 +1,5 @@
 import type { Dayjs } from 'dayjs'
+import type { InputSize } from '../../composables/inputTypes'
 
 // Shared props for both single date and range pickers
 export interface CommonDatePickerProps {
@@ -10,6 +11,9 @@ export interface CommonDatePickerProps {
 
   /** Visual style variant passed through to the input. */
   variant?: 'subtle' | 'ghost' | 'outline'
+
+  /** Size passed through to the trigger input. */
+  size?: InputSize
 
   /** Prevents manual typing while keeping the picker interactive. */
   readonly?: boolean
@@ -31,6 +35,12 @@ export interface CommonDatePickerProps {
 
   /** Optional label forwarded to the trigger input. */
   label?: string
+
+  /** HTML id forwarded to the trigger input. */
+  inputId?: string
+
+  /** Marks the trigger input as required. */
+  required?: boolean
 
   /** Shows clear and quick-action controls when enabled. */
   clearable?: boolean
@@ -58,6 +68,12 @@ export type DatePickerEmits = {
 
   /** Fired after the picker commits a normalized value. */
   (event: 'change', value: string): void
+
+  /** Fired when the trigger input receives focus. */
+  (event: 'focus', value: FocusEvent): void
+
+  /** Fired when the trigger input loses focus. */
+  (event: 'blur', value: FocusEvent): void
 }
 
 export type DatePickerPlacement =

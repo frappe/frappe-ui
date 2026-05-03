@@ -13,14 +13,17 @@
         <TextInput
           v-model="inputValue"
           type="text"
+          :id="props.inputId"
           class="cursor-text w-full"
           :class="props.inputClass"
           :label="props.label"
+          :size="props.size"
           :variant="props.variant"
           :placeholder="props.placeholder || 'Select date & time'"
           :disabled="props.disabled"
+          :required="props.required"
           :readonly="props.readonly || !props.allowCustom"
-          @focus="activateInput(isOpen, togglePopover)"
+          @focus="activateInput(isOpen, togglePopover, $event)"
           @click="activateInput(isOpen, togglePopover)"
           @blur="onBlur"
           @keydown.enter.prevent="onEnter(togglePopover)"
@@ -250,12 +253,14 @@ const props = withDefaults(
     value: '',
     modelValue: '',
     placement: 'bottom-start',
+    size: 'sm',
     variant: 'subtle',
     placeholder: 'Select date & time',
     readonly: false,
     allowCustom: true,
     autoClose: true,
     disabled: false,
+    required: false,
     clearable: true,
     allowCustomTime: true,
   },
@@ -396,6 +401,7 @@ function commitInput(close = false, togglePopover?: () => void): void {
 
 const popoverContentRef = ref<HTMLElement | null>(null)
 function onBlur(e: FocusEvent) {
+  emit('blur', e)
   const next = e.relatedTarget as Node | null
   if (next && popoverContentRef.value?.contains(next)) return
   commitInput()
@@ -405,7 +411,12 @@ function onEnter(togglePopover: () => void) {
   commitInput(true, togglePopover)
   isTyping.value = false
 }
-function activateInput(isOpen: boolean | undefined, togglePopover: () => void) {
+function activateInput(
+  isOpen: boolean | undefined,
+  togglePopover: () => void,
+  event?: FocusEvent,
+) {
+  if (event) emit('focus', event)
   isTyping.value = true
   if (!isOpen) togglePopover()
 }

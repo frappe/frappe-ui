@@ -1,4 +1,5 @@
 // Shared type definitions for TimePicker component
+import type { InputSize } from '../../composables/inputTypes'
 
 export type Placement =
   | 'bottom-start'
@@ -31,6 +32,9 @@ export interface ParsedTimeInvalid {
 export type ParsedTime = ParsedTimeValid | ParsedTimeInvalid
 
 export interface TimePickerProps {
+  /** HTML id forwarded to the trigger input. */
+  inputId?: string
+
   /** Selected time (uncontrolled) */
   value?: string
 
@@ -52,6 +56,9 @@ export interface TimePickerProps {
   /** Visual style variant */
   variant?: Variant
 
+  /** Size passed through to the trigger input. */
+  size?: InputSize
+
   /** Allow entering custom time values */
   allowCustom?: boolean
 
@@ -63,6 +70,9 @@ export interface TimePickerProps {
 
   /** Disable the time picker */
   disabled?: boolean
+
+  /** Marks the trigger input as required. */
+  required?: boolean
 
   /** Scroll behavior when opening the list */
   scrollMode?: 'center' | 'start' | 'nearest'
@@ -92,4 +102,10 @@ export type TimePickerEmits = {
 
   /** Emitted when the picker is closed */
   (e: 'close'): void
+
+  /** Emitted when the trigger input receives focus */
+  (e: 'focus', event: FocusEvent): void
+
+  /** Emitted when the trigger input loses focus */
+  (e: 'blur', event: FocusEvent): void
 }

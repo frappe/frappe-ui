@@ -69,6 +69,72 @@ describe('FormControl', () => {
       })
   })
 
+  it('uses DatePicker for date controls without dropping input props or slots', () => {
+    cy.mount(FormControl, {
+      props: {
+        type: 'date',
+        label: 'Posting Date',
+        placeholder: 'Select a date',
+        required: true,
+      },
+      slots: {
+        prefix: () => h('span', { 'data-cy': 'prefix' }, 'P'),
+        suffix: () => h('span', { 'data-cy': 'suffix' }, 'S'),
+      },
+    })
+
+    cy.contains('label', 'Posting Date')
+      .invoke('attr', 'for')
+      .then((id) => {
+        cy.get('input')
+          .should('have.attr', 'id', id)
+          .and('have.attr', 'placeholder', 'Select a date')
+          .and('have.attr', 'required')
+      })
+
+    cy.get('[data-cy="prefix"]').should('exist')
+    cy.get('[data-cy="suffix"]').should('exist')
+  })
+
+  it('uses TimePicker for time controls while preserving focus and blur listeners', () => {
+    cy.mount(FormControl, {
+      props: {
+        type: 'time',
+        label: 'Start Time',
+        required: true,
+        onFocus: cy.spy().as('onFocus'),
+        onBlur: cy.spy().as('onBlur'),
+      },
+    })
+
+    cy.contains('label', 'Start Time')
+      .invoke('attr', 'for')
+      .then((id) => {
+        cy.get('input')
+          .should('have.attr', 'id', id)
+          .and('have.attr', 'required')
+      })
+
+    cy.get('input').focus().blur()
+    cy.get('@onFocus').should('have.been.called')
+    cy.get('@onBlur').should('have.been.called')
+  })
+
+  it('normalizes datetime-local updates to the native input value shape', () => {
+    cy.mount(FormControl, {
+      props: {
+        type: 'datetime-local',
+        label: 'Starts At',
+        'onUpdate:modelValue': cy.spy().as('onUpdate'),
+        onChange: cy.spy().as('onChange'),
+      },
+    })
+
+    cy.get('input').type('2025-01-02T14:30{enter}')
+    cy.get('@onUpdate').should('have.been.calledWith', '2025-01-02T14:30')
+    cy.get('@onChange').should('have.been.calledWith', '2025-01-02T14:30')
+  })
+
   it('warns when type="autocomplete" is used', () => {
     cy.window().then((win) => {
       cy.spy(win.console, 'warn').as('consoleWarn')
@@ -93,6 +159,9 @@ describe('FormControl', () => {
       cy.spy(win.console, 'warn').as('consoleWarn')
     })
     cy.mount(FormControl, { props: { label: 'Title' } })
-    cy.get('@consoleWarn').should('not.have.been.calledWithMatch', /FormControl/)
+    cy.get('@consoleWarn').should(
+      'not.have.been.calledWithMatch',
+      /FormControl/,
+    )
   })
 })
