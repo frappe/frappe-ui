@@ -8,7 +8,6 @@ import type {
   SelectProps,
   SelectSlots,
 } from './types'
-import type { ItemListSize } from '../ItemListRow'
 import ItemListRow from '../ItemListRow/ItemListRow.vue'
 import {
   SelectContent,
@@ -25,6 +24,16 @@ import {
   isEmojiIconString,
   isLucideIconString,
 } from '../../utils/iconString'
+import {
+  EMPTY_VALUE_PREFIX,
+  inputFontSizeClasses,
+  itemRootSizeClasses,
+  toItemListSize,
+  triggerBaseClasses,
+  triggerContentPaddingClasses,
+  triggerSizeClasses,
+  triggerVariantClasses,
+} from './utils'
 
 defineOptions({
   inheritAttrs: false,
@@ -45,7 +54,6 @@ const attrs = useAttrs()
 const slots = useSlots()
 
 const formAttrKeys = ['name', 'required', 'autocomplete'] as const
-const emptyValuePrefix = '__frappe_ui_select_empty__'
 
 const { motion: contentMotion, onPointerDown: markPointerDown } =
   usePopoverMotion(open)
@@ -69,69 +77,20 @@ const triggerAttrs = computed(() => {
   return rest
 })
 
-const triggerSizeClasses = computed(() => {
-  return {
-    sm: 'min-h-7 rounded px-2',
-    md: 'min-h-8 rounded px-2.5',
-    lg: 'min-h-10 rounded-md px-3',
-    xl: 'min-h-10 rounded-md px-3',
-  }[props.size]
-})
+const itemSize = computed(() => toItemListSize(props.size))
 
-const triggerFontSizeClasses = computed(() => {
-  return {
-    sm: 'text-base',
-    md: 'text-base',
-    lg: 'text-lg',
-    xl: 'text-xl',
-  }[props.size]
-})
+const itemRootClasses = computed(() => itemRootSizeClasses(props.size))
 
-const triggerContentPaddingClasses = computed(() => {
-  return {
-    sm: 'px-2',
-    md: 'px-2.5',
-    lg: 'px-3',
-    xl: 'px-3',
-  }[props.size]
-})
+const triggerContentPadding = computed(() =>
+  triggerContentPaddingClasses(props.size),
+)
 
-const itemSize = computed<ItemListSize>(() => props.size)
-
-const itemRootSizeClasses = computed(() => {
-  return {
-    sm: 'min-h-7',
-    md: 'min-h-8',
-    lg: 'min-h-10',
-    xl: 'min-h-10',
-  }[props.size]
-})
-
-const triggerClasses = computed(() => {
-  const variant = props.disabled ? 'disabled' : props.variant
-  const variantClasses = {
-    subtle:
-      'border border-[--surface-gray-2] bg-surface-gray-2 hover:border-outline-gray-modals hover:bg-surface-gray-3',
-    outline:
-      'border border-outline-gray-2 bg-surface-white hover:border-outline-gray-3',
-    ghost:
-      'border border-transparent bg-transparent hover:bg-surface-gray-3 focus:bg-surface-gray-3',
-    disabled: [
-      'cursor-not-allowed border',
-      props.variant !== 'ghost' ? 'bg-surface-gray-1' : '',
-      props.variant === 'outline'
-        ? 'border-outline-gray-2'
-        : 'border-transparent',
-    ].join(' '),
-  }[variant]
-
-  return [
-    'relative inline-flex items-center gap-2 text-left outline-none transition-[background-color,border-color,box-shadow] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-2 data-[state=open]:ring-2 ring-outline-gray-3 text-ink-gray-7 data-[placeholder]:text-ink-gray-4 data-[disabled]:text-ink-gray-4',
-    triggerSizeClasses.value,
-    triggerFontSizeClasses.value,
-    variantClasses,
-  ]
-})
+const triggerClasses = computed(() => [
+  triggerBaseClasses,
+  triggerSizeClasses(props.size),
+  inputFontSizeClasses(props.size),
+  triggerVariantClasses(props.variant, Boolean(props.disabled)),
+])
 
 function normalizeOption(option: SelectOption): SelectNormalizedOption | null {
   if (!option) return null
@@ -156,7 +115,7 @@ const internalOptions = computed(() => {
   return selectOptions.value.map((option, index) => ({
     option,
     internalValue:
-      option.value === '' ? `${emptyValuePrefix}${index}` : option.value,
+      option.value === '' ? `${EMPTY_VALUE_PREFIX}${index}` : option.value,
   }))
 })
 
@@ -231,7 +190,7 @@ defineSlots<SelectSlots>()
           data-slot="trigger-value"
           :class="[
             'pointer-events-none absolute inset-0 flex items-center overflow-hidden',
-            triggerContentPaddingClasses,
+            triggerContentPadding,
           ]"
           aria-hidden="true"
         >
@@ -326,7 +285,7 @@ defineSlots<SelectSlots>()
                 :disabled="internalOption.option.disabled"
                 :value="internalOption.internalValue"
                 data-slot="item"
-                :class="itemRootSizeClasses"
+                :class="itemRootClasses"
                 class="select-none rounded border-0 text-base text-ink-gray-9 data-[disabled]:text-ink-gray-4 data-[highlighted]:bg-surface-gray-2 data-[state=checked]:bg-surface-gray-3 data-[highlighted]:data-[state=checked]:bg-surface-gray-4"
               >
                 <ItemListRow
