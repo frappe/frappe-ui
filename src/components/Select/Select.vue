@@ -22,6 +22,7 @@ import {
   SelectViewport,
 } from 'reka-ui'
 import OptionIcon from '../shared/selection/OptionIcon.vue'
+import '../shared/selection/popoverMotion.css'
 import {
   EMPTY_VALUE_PREFIX,
   inputFontSizeClasses,
@@ -381,80 +382,4 @@ defineSlots<SelectSlots>()
   visibility: hidden;
 }
 
-[data-slot='content-body'] {
-  animation-fill-mode: both;
-}
-
-[data-slot='content-body'][data-motion='animated'] {
-  backface-visibility: hidden;
-}
-
-[data-slot='content'][data-state='open']
-  [data-slot='content-body'][data-motion='animated'] {
-  animation: select-content-enter 180ms cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-[data-slot='content'][data-state='closed']
-  [data-slot='content-body'][data-motion='animated'] {
-  animation: select-content-exit 140ms cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-/*
- * Keyboard opens skip the scale + translate entrance, but a tiny opacity
- * fade still runs — it masks the 1-frame position-settle reka performs
- * after mount. ~80ms is below the perception threshold for motion but
- * long enough to hide the jump.
- */
-[data-slot='content'][data-state='open']
-  [data-slot='content-body'][data-motion='instant'] {
-  animation: select-content-instant-fade 80ms linear;
-}
-
-[data-slot='content'][data-state='closed']
-  [data-slot='content-body'][data-motion='instant'] {
-  animation: none;
-}
-
-[data-slot='content'][data-state='closed'] {
-  pointer-events: none;
-}
-
-@keyframes select-content-instant-fade {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes select-content-enter {
-  from {
-    opacity: 0;
-    transform: translateY(2px) scale(0.97);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes select-content-exit {
-  from {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-
-  to {
-    opacity: 0;
-    transform: translateY(1px) scale(0.985);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  [data-slot='content-body'] {
-    animation-duration: 0ms !important;
-  }
-}
 </style>
