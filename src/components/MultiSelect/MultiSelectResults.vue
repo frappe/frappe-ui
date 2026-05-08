@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { defineComponent } from 'vue'
 import {
   ComboboxGroup,
   ComboboxItem,
@@ -11,6 +10,7 @@ import ItemListRow from '../ItemListRow/ItemListRow.vue'
 import LoadingIndicator from '../LoadingIndicator.vue'
 import OptionIcon from '../shared/selection/OptionIcon.vue'
 import type { MultiSelectItemSlotProps, MultiSelectSize } from './types'
+import { createItemSlotRender } from '../shared/selection/createItemSlotRender'
 import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
 import {
   EMPTY_VALUE_PREFIX,
@@ -37,19 +37,7 @@ const props = defineProps<{
   allOptions: NormalizedOption[]
 }>()
 
-// Defined once at setup so Vue sees a stable component reference across
-// renders; passing the slot-fn inline would remount the wrapper every tick.
-const ItemSlotRender = defineComponent({
-  name: 'MultiSelectItemSlotRender',
-  props: {
-    render: { type: Function, required: true },
-    slotProps: { type: Object, required: true },
-  },
-  setup(innerProps) {
-    return () =>
-      (innerProps.render as (p: any) => any)(innerProps.slotProps)
-  },
-})
+const ItemSlotRender = createItemSlotRender('MultiSelectItemSlotRender')
 
 function isItemSelected(item: NormalizedOption) {
   return props.selectedValues.includes(item.value)

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { defineComponent } from 'vue'
 import {
   ComboboxGroup,
   ComboboxItem,
@@ -10,6 +9,7 @@ import {
 import ItemListRow from '../ItemListRow/ItemListRow.vue'
 import LoadingIndicator from '../LoadingIndicator.vue'
 import OptionIcon from '../shared/selection/OptionIcon.vue'
+import { createItemSlotRender } from '../shared/selection/createItemSlotRender'
 import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
 import type { ComboboxItemSlotProps, ComboboxSize } from './types'
 import {
@@ -53,21 +53,7 @@ const emit = defineEmits<{
   selectCreate: [event: Event]
 }>()
 
-// Defined once at setup so Vue sees a stable component reference across
-// renders; passing the slot-fn inline would remount the wrapper every tick.
-const ItemSlotRender = defineComponent({
-  name: 'ComboboxItemSlotRender',
-  props: {
-    render: { type: Function, required: true },
-    slotProps: { type: Object, required: true },
-  },
-  setup(innerProps) {
-    return () =>
-      (innerProps.render as (p: ComboboxItemSlotProps) => any)(
-        innerProps.slotProps as ComboboxItemSlotProps,
-      )
-  },
-})
+const ItemSlotRender = createItemSlotRender('ComboboxItemSlotRender')
 
 function isItemSelected(item: NormalizedItem) {
   return isSelectableOption(item) && item.value === props.model

@@ -12,6 +12,7 @@ import LoadingIndicator from '../LoadingIndicator.vue'
 import MultiSelectResults from './MultiSelectResults.vue'
 import { usePopoverMotion } from '../../composables/usePopoverMotion'
 import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
+import { useFilteredGroups } from '../shared/selection/useFilteredGroups'
 import OptionIcon from '../shared/selection/OptionIcon.vue'
 import type {
   MultiSelectEmits,
@@ -133,17 +134,12 @@ const triggerSizingText = computed(() => {
 
 const typedQuery = computed(() => (hasTypedSinceOpen.value ? query.value : ''))
 
-const filteredGroups = computed(() => {
-  if (!open.value || !hasTypedSinceOpen.value) {
-    return normalizedGroups.value
-  }
-
-  return normalizedGroups.value
-    .map((group) => ({
-      ...group,
-      options: group.options.filter((item) => matchesOption(item, query.value)),
-    }))
-    .filter((group) => group.options.length > 0)
+const filteredGroups = useFilteredGroups({
+  groups: normalizedGroups,
+  open,
+  hasTypedSinceOpen,
+  query,
+  matches: matchesOption,
 })
 
 const hasVisibleItems = computed(() =>

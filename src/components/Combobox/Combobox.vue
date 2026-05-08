@@ -20,6 +20,7 @@ import OptionIcon from '../shared/selection/OptionIcon.vue'
 import ComboboxResults from './ComboboxResults.vue'
 import { usePopoverMotion } from '../../composables/usePopoverMotion'
 import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
+import { useFilteredGroups } from '../shared/selection/useFilteredGroups'
 import type {
   ComboboxEmits,
   ComboboxExposed,
@@ -170,21 +171,15 @@ const isButtonMode = computed(
   () => Boolean(slots.trigger) || props.trigger === 'button',
 )
 
-const filteredGroups = computed(() => {
-  if (!open.value || !hasTypedSinceOpen.value) {
-    return normalizedGroups.value
-  }
-
-  return normalizedGroups.value
-    .map((group) => ({
-      ...group,
-      options: group.options.filter((item) =>
-        item.type === 'custom'
-          ? matchesCustomOption(item, query.value)
-          : matchesSelectableOption(item, query.value),
-      ),
-    }))
-    .filter((group) => group.options.length > 0)
+const filteredGroups = useFilteredGroups({
+  groups: normalizedGroups,
+  open,
+  hasTypedSinceOpen,
+  query,
+  matches: (item, q) =>
+    item.type === 'custom'
+      ? matchesCustomOption(item, q)
+      : matchesSelectableOption(item, q),
 })
 
 const hasVisibleItems = computed(() => filteredGroups.value.length > 0)
