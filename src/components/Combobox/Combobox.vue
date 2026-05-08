@@ -19,6 +19,7 @@ import {
 import { isEmojiIconString, isLucideIconString } from '../../utils/iconString'
 import ComboboxResults from './ComboboxResults.vue'
 import { usePopoverMotion } from '../../composables/usePopoverMotion'
+import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
 import type {
   ComboboxEmits,
   ComboboxExposed,
@@ -94,18 +95,10 @@ const allSelectableOptions = computed(() =>
   ),
 )
 
-function getSelectableInternalValue(item: NormalizedSelectableOption) {
-  if (item.value !== '') return item.value
-  return `${EMPTY_SELECTABLE_VALUE_PREFIX}${allSelectableOptions.value.indexOf(item)}`
-}
-
-function toExternalSelectableValue(value: string) {
-  return (
-    allSelectableOptions.value.find(
-      (item) => getSelectableInternalValue(item) === value,
-    )?.value ?? value
-  )
-}
+const {
+  toInternal: getSelectableInternalValue,
+  toExternal: toExternalSelectableValue,
+} = useEmptyValueMapping(allSelectableOptions, EMPTY_SELECTABLE_VALUE_PREFIX)
 
 const internalModelValue = computed(() => {
   if (model.value === null || model.value === undefined) return undefined

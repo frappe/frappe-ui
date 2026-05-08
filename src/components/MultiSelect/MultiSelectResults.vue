@@ -11,6 +11,7 @@ import ItemListRow from '../ItemListRow/ItemListRow.vue'
 import LoadingIndicator from '../LoadingIndicator.vue'
 import { isEmojiIconString, isLucideIconString } from '../../utils/iconString'
 import type { MultiSelectItemSlotProps, MultiSelectSize } from './types'
+import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
 import {
   EMPTY_VALUE_PREFIX,
   itemClasses,
@@ -75,10 +76,10 @@ function getGroupKey(group: NormalizedGroup, index: number) {
   return group.key ?? `${group.group || 'group'}-${index}`
 }
 
-function getInternalValue(item: NormalizedOption) {
-  if (item.value !== '') return item.value
-  return `${EMPTY_VALUE_PREFIX}${props.allOptions.indexOf(item)}`
-}
+const { toInternal: getInternalValue } = useEmptyValueMapping(
+  () => props.allOptions,
+  EMPTY_VALUE_PREFIX,
+)
 
 function getItemTextValue(item: NormalizedOption) {
   return `${item.label} ${item.value}`.trim()

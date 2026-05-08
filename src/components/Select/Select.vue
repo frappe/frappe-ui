@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, useAttrs, useSlots } from 'vue'
 import { usePopoverMotion } from '../../composables/usePopoverMotion'
+import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
 import type {
   SelectNormalizedOption,
   SelectOption,
@@ -111,28 +112,26 @@ const selectOptions = computed(() => {
     .filter((option): option is SelectNormalizedOption => Boolean(option))
 })
 
-const internalOptions = computed(() => {
-  return selectOptions.value.map((option, index) => ({
+const { toInternal, toExternal } = useEmptyValueMapping(
+  selectOptions,
+  EMPTY_VALUE_PREFIX,
+)
+
+const internalOptions = computed(() =>
+  selectOptions.value.map((option) => ({
     option,
-    internalValue:
-      option.value === '' ? `${EMPTY_VALUE_PREFIX}${index}` : option.value,
-  }))
-})
+    internalValue: toInternal(option),
+  })),
+)
 
 function toInternalValue(value: SelectOptionValue | undefined) {
   if (value !== '') return value
-
-  return (
-    internalOptions.value.find((option) => option.option.value === '')
-      ?.internalValue ?? value
-  )
+  const empty = selectOptions.value.find((option) => option.value === '')
+  return empty ? toInternal(empty) : value
 }
 
 function toExternalValue(value: SelectOptionValue | undefined) {
-  return (
-    internalOptions.value.find((option) => option.internalValue === value)
-      ?.option.value ?? value
-  )
+  return toExternal(value)
 }
 
 const internalModel = computed<SelectOptionValue | undefined>({

@@ -10,6 +10,7 @@ import {
 import ItemListRow from '../ItemListRow/ItemListRow.vue'
 import LoadingIndicator from '../LoadingIndicator.vue'
 import { isEmojiIconString, isLucideIconString } from '../../utils/iconString'
+import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
 import type { ComboboxItemSlotProps, ComboboxSize } from './types'
 import {
   CREATE_OPTION_VALUE,
@@ -116,11 +117,10 @@ function getItemKey(item: NormalizedItem) {
   return isSelectableOption(item) ? item.value : item.key
 }
 
-function getSelectableInternalValue(item: NormalizedSelectableOption) {
-  if (item.value !== '') return item.value
-
-  return `${EMPTY_SELECTABLE_VALUE_PREFIX}${props.allSelectableOptions.indexOf(item)}`
-}
+const { toInternal: getSelectableInternalValue } = useEmptyValueMapping(
+  () => props.allSelectableOptions,
+  EMPTY_SELECTABLE_VALUE_PREFIX,
+)
 
 function getComboboxItemValue(item: NormalizedItem) {
   return isSelectableOption(item) ? getSelectableInternalValue(item) : item.key

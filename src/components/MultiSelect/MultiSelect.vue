@@ -11,6 +11,7 @@ import Button from '../Button/Button.vue'
 import LoadingIndicator from '../LoadingIndicator.vue'
 import MultiSelectResults from './MultiSelectResults.vue'
 import { usePopoverMotion } from '../../composables/usePopoverMotion'
+import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
 import {
   isEmojiIconString,
   isLucideIconString,
@@ -73,17 +74,8 @@ const allOptions = computed<NormalizedOption[]>(() =>
   normalizedGroups.value.flatMap((group) => group.options),
 )
 
-function getInternalValue(option: NormalizedOption) {
-  if (option.value !== '') return option.value
-  return `${EMPTY_VALUE_PREFIX}${allOptions.value.indexOf(option)}`
-}
-
-function toExternalValue(value: string) {
-  return (
-    allOptions.value.find((option) => getInternalValue(option) === value)
-      ?.value ?? value
-  )
-}
+const { toInternal: getInternalValue, toExternal: toExternalValue } =
+  useEmptyValueMapping(allOptions, EMPTY_VALUE_PREFIX)
 
 const safeModel = computed<string[]>(() =>
   Array.isArray(model.value) ? model.value : [],
