@@ -21,10 +21,7 @@ import {
   SelectValue,
   SelectViewport,
 } from 'reka-ui'
-import {
-  isEmojiIconString,
-  isLucideIconString,
-} from '../../utils/iconString'
+import OptionIcon from '../shared/selection/OptionIcon.vue'
 import {
   EMPTY_VALUE_PREFIX,
   inputFontSizeClasses,
@@ -216,24 +213,10 @@ defineSlots<SelectSlots>()
         <template v-if="selectedOption && slots['item-prefix']">
           <slot name="item-prefix" v-bind="{ option: selectedOption }" />
         </template>
-        <template v-else-if="selectedOption?.icon">
-          <span
-            v-if="isLucideIconString(selectedOption.icon)"
-            :class="[selectedOption.icon, 'size-4 shrink-0 text-ink-gray-6']"
-            aria-hidden="true"
-          />
-          <span
-            v-else-if="isEmojiIconString(selectedOption.icon)"
-            class="inline-flex size-4 shrink-0 items-center justify-center text-base leading-none"
-            aria-hidden="true"
-            >{{ selectedOption.icon }}</span
-          >
-          <component
-            v-else-if="typeof selectedOption.icon !== 'string'"
-            :is="selectedOption.icon"
-            class="size-4 shrink-0 text-ink-gray-6"
-          />
-        </template>
+        <OptionIcon
+          v-else-if="selectedOption?.icon"
+          :icon="selectedOption.icon"
+        />
         <slot v-else name="prefix" />
 
         <div class="grid min-w-0 text-left">
@@ -303,30 +286,10 @@ defineSlots<SelectSlots>()
                       through the Tailwind plugin; component values render
                       directly.
                     -->
-                    <template v-if="!slots['item-prefix']">
-                      <span
-                        v-if="isLucideIconString(internalOption.option.icon)"
-                        :class="[
-                          internalOption.option.icon,
-                          'size-4 shrink-0 text-ink-gray-6',
-                        ]"
-                        aria-hidden="true"
-                      />
-                      <span
-                        v-else-if="isEmojiIconString(internalOption.option.icon)"
-                        class="inline-flex size-4 shrink-0 items-center justify-center text-base leading-none"
-                        aria-hidden="true"
-                        >{{ internalOption.option.icon }}</span
-                      >
-                      <component
-                        v-else-if="
-                          internalOption.option.icon &&
-                          typeof internalOption.option.icon !== 'string'
-                        "
-                        :is="internalOption.option.icon"
-                        class="size-4 shrink-0 text-ink-gray-6"
-                      />
-                    </template>
+                    <OptionIcon
+                      v-if="!slots['item-prefix']"
+                      :icon="internalOption.option.icon"
+                    />
                   </template>
 
                   <template #label>

@@ -9,7 +9,7 @@ import {
 } from 'reka-ui'
 import ItemListRow from '../ItemListRow/ItemListRow.vue'
 import LoadingIndicator from '../LoadingIndicator.vue'
-import { isEmojiIconString, isLucideIconString } from '../../utils/iconString'
+import OptionIcon from '../shared/selection/OptionIcon.vue'
 import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
 import type { ComboboxItemSlotProps, ComboboxSize } from './types'
 import {
@@ -277,22 +277,7 @@ function handleSelect(item: NormalizedItem, event: Event) {
                     text; component values render directly. Consumer slots
                     above still win.
                   -->
-                  <span
-                    v-else-if="isLucideIconString(item.icon)"
-                    :class="[item.icon, 'size-4 shrink-0 text-ink-gray-6']"
-                    aria-hidden="true"
-                  />
-                  <span
-                    v-else-if="isEmojiIconString(item.icon)"
-                    class="inline-flex size-4 shrink-0 items-center justify-center text-base leading-none"
-                    aria-hidden="true"
-                    >{{ item.icon }}</span
-                  >
-                  <component
-                    v-else-if="item.icon && typeof item.icon !== 'string'"
-                    :is="item.icon"
-                    class="size-4 shrink-0 text-ink-gray-6"
-                  />
+                  <OptionIcon v-else-if="item.icon" :icon="item.icon" />
                 </template>
 
                 <template #label>

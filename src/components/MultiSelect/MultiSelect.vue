@@ -12,10 +12,7 @@ import LoadingIndicator from '../LoadingIndicator.vue'
 import MultiSelectResults from './MultiSelectResults.vue'
 import { usePopoverMotion } from '../../composables/usePopoverMotion'
 import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
-import {
-  isEmojiIconString,
-  isLucideIconString,
-} from '../../utils/iconString'
+import OptionIcon from '../shared/selection/OptionIcon.vue'
 import type {
   MultiSelectEmits,
   MultiSelectProps,
@@ -286,27 +283,10 @@ defineSlots<MultiSelectSlots>()
             }"
           />
         </template>
-        <template v-else-if="singleSelectedOption?.icon">
-          <span
-            v-if="isLucideIconString(singleSelectedOption.icon)"
-            :class="[
-              singleSelectedOption.icon,
-              'size-4 shrink-0 text-ink-gray-6',
-            ]"
-            aria-hidden="true"
-          />
-          <span
-            v-else-if="isEmojiIconString(singleSelectedOption.icon)"
-            class="inline-flex size-4 shrink-0 items-center justify-center text-base leading-none"
-            aria-hidden="true"
-            >{{ singleSelectedOption.icon }}</span
-          >
-          <component
-            v-else-if="typeof singleSelectedOption.icon !== 'string'"
-            :is="singleSelectedOption.icon"
-            class="size-4 shrink-0 text-ink-gray-6"
-          />
-        </template>
+        <OptionIcon
+          v-else-if="singleSelectedOption?.icon"
+          :icon="singleSelectedOption.icon"
+        />
 
         <span class="grid min-w-0 flex-1 text-left font-normal">
           <span
