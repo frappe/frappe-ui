@@ -149,4 +149,52 @@ describe('MultiSelect', () => {
     cy.get('[role=option]').eq(0).click({ force: true })
     cy.get('@onUpdate').should('not.have.been.called')
   })
+
+  // Regression: prevent a future change from re-introducing the
+  // phantom prefix container described in Select's matching block.
+  describe('item-prefix container', () => {
+    it('omits the prefix container when no icon and no #item-prefix slot', () => {
+      cy.mount(MultiSelect, { props: { options } })
+
+      cy.get('[data-slot="trigger"]').click()
+      cy.get('[role=option]')
+        .first()
+        .find('[data-slot="item-prefix"]')
+        .should('not.exist')
+    })
+
+    it('renders the prefix container when option has an icon', () => {
+      cy.mount(MultiSelect, {
+        props: {
+          options: [{ label: 'Apple', value: 'apple', icon: 'lucide-apple' }],
+        },
+      })
+
+      cy.get('[data-slot="trigger"]').click()
+      cy.get('[role=option]')
+        .first()
+        .find('[data-slot="item-prefix"]')
+        .should('exist')
+      cy.get('[role=option]').first().find('.lucide-apple').should('exist')
+    })
+
+    it('renders the prefix container when consumer provides #item-prefix', () => {
+      cy.mount(MultiSelect, {
+        props: { options },
+        slots: {
+          'item-prefix': () => h('span', { 'data-cy': 'tpl-prefix' }, 'P'),
+        },
+      })
+
+      cy.get('[data-slot="trigger"]').click()
+      cy.get('[role=option]')
+        .first()
+        .find('[data-slot="item-prefix"]')
+        .should('exist')
+      cy.get('[role=option]')
+        .first()
+        .find('[data-cy="tpl-prefix"]')
+        .should('exist')
+    })
+  })
 })

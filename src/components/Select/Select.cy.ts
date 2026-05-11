@@ -313,4 +313,55 @@ describe('Select', () => {
 
     cy.get('button').should('have.class', 'cursor-not-allowed')
   })
+
+  // Regression: ItemListRow's `hasRenderableContent` treats any component
+  // vnode as renderable, so a fallback `<OptionIcon>` left in the slot
+  // tree (even when `icon` is falsy and OptionIcon itself renders nothing)
+  // was enough to keep ItemListRow painting an empty prefix container —
+  // visible as a stray left gap from the parent's `flex gap-2`.
+  describe('item-prefix container', () => {
+    it('omits the prefix container when no icon and no #item-prefix slot', () => {
+      cy.mount(Select, { props: { options } })
+
+      cy.get('[role=combobox]').click()
+      cy.get('[role=option]')
+        .first()
+        .find('[data-slot="item-prefix"]')
+        .should('not.exist')
+    })
+
+    it('renders the prefix container when option has an icon', () => {
+      cy.mount(Select, {
+        props: {
+          options: [{ label: 'Apple', value: 'apple', icon: 'lucide-apple' }],
+        },
+      })
+
+      cy.get('[role=combobox]').click()
+      cy.get('[role=option]')
+        .first()
+        .find('[data-slot="item-prefix"]')
+        .should('exist')
+      cy.get('[role=option]').first().find('.lucide-apple').should('exist')
+    })
+
+    it('renders the prefix container when consumer provides #item-prefix', () => {
+      cy.mount(Select, {
+        props: { options },
+        slots: {
+          'item-prefix': () => h('span', { 'data-cy': 'tpl-prefix' }, 'P'),
+        },
+      })
+
+      cy.get('[role=combobox]').click()
+      cy.get('[role=option]')
+        .first()
+        .find('[data-slot="item-prefix"]')
+        .should('exist')
+      cy.get('[role=option]')
+        .first()
+        .find('[data-cy="tpl-prefix"]')
+        .should('exist')
+    })
+  })
 })

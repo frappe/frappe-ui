@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, useAttrs, useSlots } from 'vue'
 import { usePopoverMotion } from '../../composables/usePopoverMotion'
+import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
 import type {
   SelectNormalizedOption,
   SelectOption,
@@ -8,7 +9,6 @@ import type {
   SelectProps,
   SelectSlots,
 } from './types'
-import type { ItemListSize } from '../ItemListRow'
 import ItemListRow from '../ItemListRow/ItemListRow.vue'
 import {
   SelectContent,
@@ -21,10 +21,18 @@ import {
   SelectValue,
   SelectViewport,
 } from 'reka-ui'
+import OptionIcon from '../shared/selection/OptionIcon.vue'
+import '../shared/selection/popoverMotion.css'
 import {
-  isEmojiIconString,
-  isLucideIconString,
-} from '../../utils/iconString'
+  EMPTY_VALUE_PREFIX,
+  inputFontSizeClasses,
+  itemRootSizeClasses,
+  toItemListSize,
+  triggerBaseClasses,
+  triggerContentPaddingClasses,
+  triggerSizeClasses,
+  triggerVariantClasses,
+} from './utils'
 
 defineOptions({
   inheritAttrs: false,
@@ -45,7 +53,6 @@ const attrs = useAttrs()
 const slots = useSlots()
 
 const formAttrKeys = ['name', 'required', 'autocomplete'] as const
-const emptyValuePrefix = '__frappe_ui_select_empty__'
 
 const { motion: contentMotion, onPointerDown: markPointerDown } =
   usePopoverMotion(open)
@@ -69,69 +76,20 @@ const triggerAttrs = computed(() => {
   return rest
 })
 
-const triggerSizeClasses = computed(() => {
-  return {
-    sm: 'min-h-7 rounded px-2',
-    md: 'min-h-8 rounded px-2.5',
-    lg: 'min-h-10 rounded-md px-3',
-    xl: 'min-h-10 rounded-md px-3',
-  }[props.size]
-})
+const itemSize = computed(() => toItemListSize(props.size))
 
-const triggerFontSizeClasses = computed(() => {
-  return {
-    sm: 'text-base',
-    md: 'text-base',
-    lg: 'text-lg',
-    xl: 'text-xl',
-  }[props.size]
-})
+const itemRootClasses = computed(() => itemRootSizeClasses(props.size))
 
-const triggerContentPaddingClasses = computed(() => {
-  return {
-    sm: 'px-2',
-    md: 'px-2.5',
-    lg: 'px-3',
-    xl: 'px-3',
-  }[props.size]
-})
+const triggerContentPadding = computed(() =>
+  triggerContentPaddingClasses(props.size),
+)
 
-const itemSize = computed<ItemListSize>(() => props.size)
-
-const itemRootSizeClasses = computed(() => {
-  return {
-    sm: 'min-h-7',
-    md: 'min-h-8',
-    lg: 'min-h-10',
-    xl: 'min-h-10',
-  }[props.size]
-})
-
-const triggerClasses = computed(() => {
-  const variant = props.disabled ? 'disabled' : props.variant
-  const variantClasses = {
-    subtle:
-      'border border-[--surface-gray-2] bg-surface-gray-2 hover:border-outline-gray-modals hover:bg-surface-gray-3',
-    outline:
-      'border border-outline-gray-2 bg-surface-white hover:border-outline-gray-3',
-    ghost:
-      'border border-transparent bg-transparent hover:bg-surface-gray-3 focus:bg-surface-gray-3',
-    disabled: [
-      'cursor-not-allowed border',
-      props.variant !== 'ghost' ? 'bg-surface-gray-1' : '',
-      props.variant === 'outline'
-        ? 'border-outline-gray-2'
-        : 'border-transparent',
-    ].join(' '),
-  }[variant]
-
-  return [
-    'relative inline-flex items-center gap-2 text-left outline-none transition-[background-color,border-color,box-shadow] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-2 data-[state=open]:ring-2 ring-outline-gray-3 text-ink-gray-7 data-[placeholder]:text-ink-gray-4 data-[disabled]:text-ink-gray-4',
-    triggerSizeClasses.value,
-    triggerFontSizeClasses.value,
-    variantClasses,
-  ]
-})
+const triggerClasses = computed(() => [
+  triggerBaseClasses,
+  triggerSizeClasses(props.size),
+  inputFontSizeClasses(props.size),
+  triggerVariantClasses(props.variant, Boolean(props.disabled)),
+])
 
 function normalizeOption(option: SelectOption): SelectNormalizedOption | null {
   if (!option) return null
@@ -152,28 +110,26 @@ const selectOptions = computed(() => {
     .filter((option): option is SelectNormalizedOption => Boolean(option))
 })
 
-const internalOptions = computed(() => {
-  return selectOptions.value.map((option, index) => ({
+const { toInternal, toExternal } = useEmptyValueMapping(
+  selectOptions,
+  EMPTY_VALUE_PREFIX,
+)
+
+const internalOptions = computed(() =>
+  selectOptions.value.map((option) => ({
     option,
-    internalValue:
-      option.value === '' ? `${emptyValuePrefix}${index}` : option.value,
-  }))
-})
+    internalValue: toInternal(option),
+  })),
+)
 
 function toInternalValue(value: SelectOptionValue | undefined) {
   if (value !== '') return value
-
-  return (
-    internalOptions.value.find((option) => option.option.value === '')
-      ?.internalValue ?? value
-  )
+  const empty = selectOptions.value.find((option) => option.value === '')
+  return empty ? toInternal(empty) : value
 }
 
 function toExternalValue(value: SelectOptionValue | undefined) {
-  return (
-    internalOptions.value.find((option) => option.internalValue === value)
-      ?.option.value ?? value
-  )
+  return toExternal(value)
 }
 
 const internalModel = computed<SelectOptionValue | undefined>({
@@ -231,7 +187,7 @@ defineSlots<SelectSlots>()
           data-slot="trigger-value"
           :class="[
             'pointer-events-none absolute inset-0 flex items-center overflow-hidden',
-            triggerContentPaddingClasses,
+            triggerContentPadding,
           ]"
           aria-hidden="true"
         >
@@ -258,24 +214,10 @@ defineSlots<SelectSlots>()
         <template v-if="selectedOption && slots['item-prefix']">
           <slot name="item-prefix" v-bind="{ option: selectedOption }" />
         </template>
-        <template v-else-if="selectedOption?.icon">
-          <span
-            v-if="isLucideIconString(selectedOption.icon)"
-            :class="[selectedOption.icon, 'size-4 shrink-0 text-ink-gray-6']"
-            aria-hidden="true"
-          />
-          <span
-            v-else-if="isEmojiIconString(selectedOption.icon)"
-            class="inline-flex size-4 shrink-0 items-center justify-center text-base leading-none"
-            aria-hidden="true"
-            >{{ selectedOption.icon }}</span
-          >
-          <component
-            v-else-if="typeof selectedOption.icon !== 'string'"
-            :is="selectedOption.icon"
-            class="size-4 shrink-0 text-ink-gray-6"
-          />
-        </template>
+        <OptionIcon
+          v-else-if="selectedOption?.icon"
+          :icon="selectedOption.icon"
+        />
         <slot v-else name="prefix" />
 
         <div class="grid min-w-0 text-left">
@@ -303,6 +245,7 @@ defineSlots<SelectSlots>()
     <SelectPortal>
       <SelectContent
         data-slot="content"
+        data-selection
         class="z-[100] origin-[var(--reka-select-content-transform-origin)]"
       >
         <div
@@ -326,7 +269,7 @@ defineSlots<SelectSlots>()
                 :disabled="internalOption.option.disabled"
                 :value="internalOption.internalValue"
                 data-slot="item"
-                :class="itemRootSizeClasses"
+                :class="itemRootClasses"
                 class="select-none rounded border-0 text-base text-ink-gray-9 data-[disabled]:text-ink-gray-4 data-[highlighted]:bg-surface-gray-2 data-[state=checked]:bg-surface-gray-3 data-[highlighted]:data-[state=checked]:bg-surface-gray-4"
               >
                 <ItemListRow
@@ -335,40 +278,30 @@ defineSlots<SelectSlots>()
                   :disabled="internalOption.option.disabled"
                 >
                   <template #prefix>
-                    <slot
-                      name="item-prefix"
-                      v-bind="{ option: internalOption.option }"
-                    />
                     <!--
+                      v-if chain (not unconditional slot + v-if icon) so that
+                      with neither a consumer `#item-prefix` slot nor an
+                      `option.icon`, the prefix template renders only
+                      comment vnodes. Otherwise the unconditional `<slot>` /
+                      `<OptionIcon>` leaves a real vnode in the tree,
+                      `hasRenderableContent` returns true, and ItemListRow
+                      paints an empty prefix container — visible as a
+                      stray left gap from the parent's `gap-2`.
+
                       Auto-render `option.icon` when the consumer doesn't
-                      provide an `#item-prefix`. `lucide-*` strings route
+                      provide `#item-prefix`. `lucide-*` strings route
                       through the Tailwind plugin; component values render
                       directly.
                     -->
-                    <template v-if="!slots['item-prefix']">
-                      <span
-                        v-if="isLucideIconString(internalOption.option.icon)"
-                        :class="[
-                          internalOption.option.icon,
-                          'size-4 shrink-0 text-ink-gray-6',
-                        ]"
-                        aria-hidden="true"
-                      />
-                      <span
-                        v-else-if="isEmojiIconString(internalOption.option.icon)"
-                        class="inline-flex size-4 shrink-0 items-center justify-center text-base leading-none"
-                        aria-hidden="true"
-                        >{{ internalOption.option.icon }}</span
-                      >
-                      <component
-                        v-else-if="
-                          internalOption.option.icon &&
-                          typeof internalOption.option.icon !== 'string'
-                        "
-                        :is="internalOption.option.icon"
-                        class="size-4 shrink-0 text-ink-gray-6"
-                      />
-                    </template>
+                    <slot
+                      v-if="slots['item-prefix']"
+                      name="item-prefix"
+                      v-bind="{ option: internalOption.option }"
+                    />
+                    <OptionIcon
+                      v-else-if="internalOption.option.icon"
+                      :icon="internalOption.option.icon"
+                    />
                   </template>
 
                   <template #label>
@@ -460,80 +393,4 @@ defineSlots<SelectSlots>()
   visibility: hidden;
 }
 
-[data-slot='content-body'] {
-  animation-fill-mode: both;
-}
-
-[data-slot='content-body'][data-motion='animated'] {
-  backface-visibility: hidden;
-}
-
-[data-slot='content'][data-state='open']
-  [data-slot='content-body'][data-motion='animated'] {
-  animation: select-content-enter 180ms cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-[data-slot='content'][data-state='closed']
-  [data-slot='content-body'][data-motion='animated'] {
-  animation: select-content-exit 140ms cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-/*
- * Keyboard opens skip the scale + translate entrance, but a tiny opacity
- * fade still runs — it masks the 1-frame position-settle reka performs
- * after mount. ~80ms is below the perception threshold for motion but
- * long enough to hide the jump.
- */
-[data-slot='content'][data-state='open']
-  [data-slot='content-body'][data-motion='instant'] {
-  animation: select-content-instant-fade 80ms linear;
-}
-
-[data-slot='content'][data-state='closed']
-  [data-slot='content-body'][data-motion='instant'] {
-  animation: none;
-}
-
-[data-slot='content'][data-state='closed'] {
-  pointer-events: none;
-}
-
-@keyframes select-content-instant-fade {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes select-content-enter {
-  from {
-    opacity: 0;
-    transform: translateY(2px) scale(0.97);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes select-content-exit {
-  from {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-
-  to {
-    opacity: 0;
-    transform: translateY(1px) scale(0.985);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  [data-slot='content-body'] {
-    animation-duration: 0ms !important;
-  }
-}
 </style>

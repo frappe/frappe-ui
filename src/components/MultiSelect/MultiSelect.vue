@@ -11,10 +11,10 @@ import Button from '../Button/Button.vue'
 import LoadingIndicator from '../LoadingIndicator.vue'
 import MultiSelectResults from './MultiSelectResults.vue'
 import { usePopoverMotion } from '../../composables/usePopoverMotion'
-import {
-  isEmojiIconString,
-  isLucideIconString,
-} from '../../utils/iconString'
+import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
+import { useFilteredGroups } from '../shared/selection/useFilteredGroups'
+import OptionIcon from '../shared/selection/OptionIcon.vue'
+import '../shared/selection/popoverMotion.css'
 import type {
   MultiSelectEmits,
   MultiSelectProps,
@@ -73,17 +73,8 @@ const allOptions = computed<NormalizedOption[]>(() =>
   normalizedGroups.value.flatMap((group) => group.options),
 )
 
-function getInternalValue(option: NormalizedOption) {
-  if (option.value !== '') return option.value
-  return `${EMPTY_VALUE_PREFIX}${allOptions.value.indexOf(option)}`
-}
-
-function toExternalValue(value: string) {
-  return (
-    allOptions.value.find((option) => getInternalValue(option) === value)
-      ?.value ?? value
-  )
-}
+const { toInternal: getInternalValue, toExternal: toExternalValue } =
+  useEmptyValueMapping(allOptions, EMPTY_VALUE_PREFIX)
 
 const safeModel = computed<string[]>(() =>
   Array.isArray(model.value) ? model.value : [],
@@ -144,17 +135,12 @@ const triggerSizingText = computed(() => {
 
 const typedQuery = computed(() => (hasTypedSinceOpen.value ? query.value : ''))
 
-const filteredGroups = computed(() => {
-  if (!open.value || !hasTypedSinceOpen.value) {
-    return normalizedGroups.value
-  }
-
-  return normalizedGroups.value
-    .map((group) => ({
-      ...group,
-      options: group.options.filter((item) => matchesOption(item, query.value)),
-    }))
-    .filter((group) => group.options.length > 0)
+const filteredGroups = useFilteredGroups({
+  groups: normalizedGroups,
+  open,
+  hasTypedSinceOpen,
+  query,
+  matches: matchesOption,
 })
 
 const hasVisibleItems = computed(() =>
@@ -294,27 +280,10 @@ defineSlots<MultiSelectSlots>()
             }"
           />
         </template>
-        <template v-else-if="singleSelectedOption?.icon">
-          <span
-            v-if="isLucideIconString(singleSelectedOption.icon)"
-            :class="[
-              singleSelectedOption.icon,
-              'size-4 shrink-0 text-ink-gray-6',
-            ]"
-            aria-hidden="true"
-          />
-          <span
-            v-else-if="isEmojiIconString(singleSelectedOption.icon)"
-            class="inline-flex size-4 shrink-0 items-center justify-center text-base leading-none"
-            aria-hidden="true"
-            >{{ singleSelectedOption.icon }}</span
-          >
-          <component
-            v-else-if="typeof singleSelectedOption.icon !== 'string'"
-            :is="singleSelectedOption.icon"
-            class="size-4 shrink-0 text-ink-gray-6"
-          />
-        </template>
+        <OptionIcon
+          v-else-if="singleSelectedOption?.icon"
+          :icon="singleSelectedOption.icon"
+        />
 
         <span class="grid min-w-0 flex-1 text-left font-normal">
           <span
@@ -344,6 +313,7 @@ defineSlots<MultiSelectSlots>()
     <ComboboxPortal :to="portalTo">
       <ComboboxContent
         data-slot="content"
+        data-selection
         :data-variant="variant"
         :data-size="size"
         :data-loading="loading ? '' : undefined"
@@ -440,80 +410,9 @@ defineSlots<MultiSelectSlots>()
   visibility: hidden;
 }
 
-[data-slot='content-body'] {
-  animation-fill-mode: both;
-}
-
+/* Component-specific transform-origin; the rest of the motion lives in
+   shared/selection/popoverMotion.css. */
 [data-slot='content-body'][data-motion='animated'] {
-  backface-visibility: hidden;
   transform-origin: var(--reka-combobox-content-transform-origin);
-}
-
-[data-slot='content'][data-state='open']
-  [data-slot='content-body'][data-motion='animated'] {
-  animation: multiselect-content-enter 180ms cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-[data-slot='content'][data-state='closed']
-  [data-slot='content-body'][data-motion='animated'] {
-  animation: multiselect-content-exit 140ms cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-/*
- * Keyboard-opens skip the scale + translate enter animation, but a tiny
- * opacity fade still runs — it masks the 1-frame position-settle reka
- * performs after mount.
- */
-[data-slot='content'][data-state='open']
-  [data-slot='content-body'][data-motion='instant'] {
-  animation: multiselect-content-instant-fade 80ms linear;
-}
-
-[data-slot='content'][data-state='closed']
-  [data-slot='content-body'][data-motion='instant'] {
-  animation: none;
-}
-
-[data-slot='content'][data-state='closed'] {
-  pointer-events: none;
-}
-
-@keyframes multiselect-content-instant-fade {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes multiselect-content-enter {
-  from {
-    opacity: 0;
-    transform: translateY(2px) scale(0.97);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes multiselect-content-exit {
-  from {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-
-  to {
-    opacity: 0;
-    transform: translateY(1px) scale(0.985);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  [data-slot='content-body'] {
-    animation-duration: 0ms !important;
-  }
 }
 </style>

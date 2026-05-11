@@ -16,9 +16,12 @@ import {
   ComboboxRoot,
   ComboboxTrigger,
 } from 'reka-ui'
-import { isEmojiIconString, isLucideIconString } from '../../utils/iconString'
+import OptionIcon from '../shared/selection/OptionIcon.vue'
+import '../shared/selection/popoverMotion.css'
 import ComboboxResults from './ComboboxResults.vue'
 import { usePopoverMotion } from '../../composables/usePopoverMotion'
+import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
+import { useFilteredGroups } from '../shared/selection/useFilteredGroups'
 import type {
   ComboboxEmits,
   ComboboxExposed,
@@ -94,18 +97,10 @@ const allSelectableOptions = computed(() =>
   ),
 )
 
-function getSelectableInternalValue(item: NormalizedSelectableOption) {
-  if (item.value !== '') return item.value
-  return `${EMPTY_SELECTABLE_VALUE_PREFIX}${allSelectableOptions.value.indexOf(item)}`
-}
-
-function toExternalSelectableValue(value: string) {
-  return (
-    allSelectableOptions.value.find(
-      (item) => getSelectableInternalValue(item) === value,
-    )?.value ?? value
-  )
-}
+const {
+  toInternal: getSelectableInternalValue,
+  toExternal: toExternalSelectableValue,
+} = useEmptyValueMapping(allSelectableOptions, EMPTY_SELECTABLE_VALUE_PREFIX)
 
 const internalModelValue = computed(() => {
   if (model.value === null || model.value === undefined) return undefined
@@ -177,21 +172,15 @@ const isButtonMode = computed(
   () => Boolean(slots.trigger) || props.trigger === 'button',
 )
 
-const filteredGroups = computed(() => {
-  if (!open.value || !hasTypedSinceOpen.value) {
-    return normalizedGroups.value
-  }
-
-  return normalizedGroups.value
-    .map((group) => ({
-      ...group,
-      options: group.options.filter((item) =>
-        item.type === 'custom'
-          ? matchesCustomOption(item, query.value)
-          : matchesSelectableOption(item, query.value),
-      ),
-    }))
-    .filter((group) => group.options.length > 0)
+const filteredGroups = useFilteredGroups({
+  groups: normalizedGroups,
+  open,
+  hasTypedSinceOpen,
+  query,
+  matches: (item, q) =>
+    item.type === 'custom'
+      ? matchesCustomOption(item, q)
+      : matchesSelectableOption(item, q),
 })
 
 const hasVisibleItems = computed(() => filteredGroups.value.length > 0)
@@ -455,24 +444,10 @@ defineSlots<ComboboxSlots>()
               }"
             />
           </template>
-          <template v-else-if="selectedOption?.icon">
-            <span
-              v-if="isLucideIconString(selectedOption.icon)"
-              :class="[selectedOption.icon, 'size-4 shrink-0 text-ink-gray-6']"
-              aria-hidden="true"
-            />
-            <span
-              v-else-if="isEmojiIconString(selectedOption.icon)"
-              class="inline-flex size-4 shrink-0 items-center justify-center text-base leading-none"
-              aria-hidden="true"
-              >{{ selectedOption.icon }}</span
-            >
-            <component
-              v-else-if="typeof selectedOption.icon !== 'string'"
-              :is="selectedOption.icon"
-              class="size-4 shrink-0 text-ink-gray-6"
-            />
-          </template>
+          <OptionIcon
+            v-else-if="selectedOption?.icon"
+            :icon="selectedOption.icon"
+          />
           <slot v-else-if="!selectedOption && $slots.prefix" name="prefix" />
 
           <span
@@ -516,24 +491,10 @@ defineSlots<ComboboxSlots>()
             v-bind="{ item: selectedOption, query: '', selected: true }"
           />
         </template>
-        <template v-else-if="selectedOption?.icon">
-          <span
-            v-if="isLucideIconString(selectedOption.icon)"
-            :class="[selectedOption.icon, 'size-4 shrink-0 text-ink-gray-6']"
-            aria-hidden="true"
-          />
-          <span
-            v-else-if="isEmojiIconString(selectedOption.icon)"
-            class="inline-flex size-4 shrink-0 items-center justify-center text-base leading-none"
-            aria-hidden="true"
-            >{{ selectedOption.icon }}</span
-          >
-          <component
-            v-else-if="typeof selectedOption.icon !== 'string'"
-            :is="selectedOption.icon"
-            class="size-4 shrink-0 text-ink-gray-6"
-          />
-        </template>
+        <OptionIcon
+          v-else-if="selectedOption?.icon"
+          :icon="selectedOption.icon"
+        />
         <slot v-else name="prefix" />
 
         <ComboboxInput
@@ -565,6 +526,7 @@ defineSlots<ComboboxSlots>()
     <ComboboxPortal :to="portalTo">
       <ComboboxContent
         data-slot="content"
+        data-selection
         :data-variant="variant"
         :data-size="size"
         :class="[
@@ -630,83 +592,13 @@ defineSlots<ComboboxSlots>()
   outline: none !important;
 }
 
-[data-slot='content-body'] {
-  animation-fill-mode: both;
-}
-
+/* Component-specific transform-origin; the rest of the motion lives in
+   shared/selection/popoverMotion.css. */
 [data-slot='content-body'][data-motion='animated'] {
-  backface-visibility: hidden;
   transform-origin: var(--reka-combobox-content-transform-origin);
 }
 
-[data-slot='content'][data-state='open']
-  [data-slot='content-body'][data-motion='animated'] {
-  animation: combobox-content-enter 180ms cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-[data-slot='content'][data-state='closed']
-  [data-slot='content-body'][data-motion='animated'] {
-  animation: combobox-content-exit 140ms cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-/*
- * Keyboard-opens skip the scale + translate enter animation, but a tiny
- * opacity fade still runs — it masks the 1-frame position-settle reka
- * performs after mount. ~80ms is below the perception threshold for
- * motion (feels instant) but long enough to hide the jump.
- */
-[data-slot='content'][data-state='open']
-  [data-slot='content-body'][data-motion='instant'] {
-  animation: combobox-content-instant-fade 80ms linear;
-}
-
-[data-slot='content'][data-state='closed']
-  [data-slot='content-body'][data-motion='instant'] {
-  animation: none;
-}
-
-@keyframes combobox-content-instant-fade {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-[data-slot='content'][data-state='closed'] {
-  pointer-events: none;
-}
-
-@keyframes combobox-content-enter {
-  from {
-    opacity: 0;
-    transform: translateY(2px) scale(0.97);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes combobox-content-exit {
-  from {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-
-  to {
-    opacity: 0;
-    transform: translateY(1px) scale(0.985);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  [data-slot='content-body'] {
-    animation-duration: 0ms !important;
-  }
-
   [data-slot='chevron'] {
     transition-duration: 0ms !important;
   }

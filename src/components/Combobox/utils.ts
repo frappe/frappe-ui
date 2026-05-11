@@ -1,3 +1,7 @@
+import {
+  matchesByLabelOrValue,
+  resolveItemSlotsFromRaw as resolveItemSlotsFromRawShared,
+} from '../shared/selection/utils'
 import type {
   ComboboxCustomOption,
   ComboboxCustomOptionContext,
@@ -7,10 +11,18 @@ import type {
   ComboboxOption,
   ComboboxSelectableOption,
   ComboboxSimpleOption,
-  ComboboxSize,
-  ComboboxVariant,
 } from './types'
-import type { ItemListSize } from '../ItemListRow'
+
+export {
+  inputFontSizeClasses,
+  itemClasses,
+  itemRootSizeClasses,
+  toItemListSize,
+  triggerSizeClasses,
+  triggerVariantClasses,
+} from '../shared/selection/utils'
+
+export { triggerBaseClassesFocusWithin as triggerBaseClasses } from '../shared/selection/utils'
 
 /** Sentinel values used internally — never exposed to consumers. */
 export const EMPTY_SELECTABLE_VALUE_PREFIX = '__frappe_ui_combobox_empty__:'
@@ -52,37 +64,10 @@ export function isSelectableOption(
   return item.type === 'option'
 }
 
-/** Resolve the deprecated `render` alias into a normalized `slots` object. */
 export function resolveItemSlotsFromRaw(
   raw: ComboboxSelectableOption | ComboboxCustomOption,
 ): ResolvedItemSlots {
-  // Legacy `render` alias: function form → slots.item (full-row takeover);
-  // object form → merged one-to-one into slots.
-  const legacy = raw.render
-  let legacySlots: ResolvedItemSlots | undefined
-
-  if (typeof legacy === 'function') {
-    legacySlots = { item: () => legacy() }
-  } else if (legacy && typeof legacy === 'object') {
-    legacySlots = legacy as ResolvedItemSlots
-  }
-
-  const resolved: ResolvedItemSlots = {
-    ...(legacySlots ?? {}),
-    ...(raw.slots ?? {}),
-  }
-
-  if (
-    import.meta.env.DEV &&
-    resolved.item &&
-    (resolved.prefix || resolved.label || resolved.suffix)
-  ) {
-    console.warn(
-      '[Combobox] `slots.item` is mutually exclusive with `slots.prefix` / `slots.label` / `slots.suffix`. `slots.item` wins.',
-    )
-  }
-
-  return resolved
+  return resolveItemSlotsFromRawShared<ResolvedItemSlots>(raw, 'Combobox')
 }
 
 export function normalizeSimpleOption(
@@ -174,14 +159,7 @@ export function matchesSelectableOption(
   item: NormalizedSelectableOption,
   currentQuery: string,
 ) {
-  const normalizedQuery = currentQuery.toLowerCase()
-
-  if (!normalizedQuery) return true
-
-  return (
-    item.label.toLowerCase().includes(normalizedQuery) ||
-    item.value.toLowerCase().includes(normalizedQuery)
-  )
+  return matchesByLabelOrValue(item, currentQuery)
 }
 
 export function matchesCustomOption(
@@ -205,64 +183,5 @@ export function buildCustomOptionContext(
   return { query, searchTerm: query }
 }
 
-export function triggerSizeClasses(size: ComboboxSize) {
-  return {
-    sm: 'min-h-7 rounded px-2',
-    md: 'min-h-8 rounded px-2.5',
-    lg: 'min-h-10 rounded-md px-3',
-    xl: 'min-h-10 rounded-md px-3',
-  }[size]
-}
-
-export function inputFontSizeClasses(size: ComboboxSize) {
-  return {
-    sm: 'text-base',
-    md: 'text-base',
-    lg: 'text-lg',
-    xl: 'text-xl',
-  }[size]
-}
-
-export function itemRootSizeClasses(size: ComboboxSize) {
-  return {
-    sm: 'min-h-7',
-    md: 'min-h-8',
-    lg: 'min-h-10',
-    xl: 'min-h-10',
-  }[size]
-}
-
-export function toItemListSize(size: ComboboxSize): ItemListSize {
-  return size
-}
-
-export function triggerVariantClasses(
-  variant: ComboboxVariant,
-  disabled: boolean,
-) {
-  if (disabled) {
-    return [
-      'cursor-not-allowed border text-ink-gray-4',
-      variant !== 'ghost' ? 'bg-surface-gray-1' : '',
-      variant === 'outline' ? 'border-outline-gray-2' : 'border-transparent',
-    ].join(' ')
-  }
-
-  return {
-    subtle:
-      'border border-[--surface-gray-2] bg-surface-gray-2 hover:border-outline-gray-modals hover:bg-surface-gray-3',
-    outline:
-      'border border-outline-gray-2 bg-surface-white hover:border-outline-gray-3',
-    ghost:
-      'border border-transparent bg-transparent hover:bg-surface-gray-3 focus-within:bg-surface-gray-3',
-  }[variant]
-}
-
-export const triggerBaseClasses =
-  'relative inline-flex items-center gap-2 text-left text-ink-gray-7 outline-none transition-[background-color,border-color,box-shadow] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] focus-within:ring-2 data-[state=open]:ring-2 ring-outline-gray-3'
-
 export const inputClasses =
   'min-w-0 flex-1 border-0 bg-transparent p-0 text-ink-gray-8 outline-none ring-0 placeholder:text-ink-gray-4 focus:border-0 focus:outline-none focus:ring-0'
-
-export const itemClasses =
-  'select-none rounded border-0 text-base text-ink-gray-9 transition-colors duration-100 ease-out data-[disabled]:text-ink-gray-4 data-[highlighted]:bg-surface-gray-2 data-[state=checked]:bg-surface-gray-3 data-[highlighted]:data-[state=checked]:bg-surface-gray-4'
