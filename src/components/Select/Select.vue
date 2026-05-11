@@ -277,18 +277,28 @@ defineSlots<SelectSlots>()
                   :disabled="internalOption.option.disabled"
                 >
                   <template #prefix>
-                    <slot
-                      name="item-prefix"
-                      v-bind="{ option: internalOption.option }"
-                    />
                     <!--
+                      v-if chain (not unconditional slot + v-if icon) so that
+                      with neither a consumer `#item-prefix` slot nor an
+                      `option.icon`, the prefix template renders only
+                      comment vnodes. Otherwise the unconditional `<slot>` /
+                      `<OptionIcon>` leaves a real vnode in the tree,
+                      `hasRenderableContent` returns true, and ItemListRow
+                      paints an empty prefix container — visible as a
+                      stray left gap from the parent's `gap-2`.
+
                       Auto-render `option.icon` when the consumer doesn't
-                      provide an `#item-prefix`. `lucide-*` strings route
+                      provide `#item-prefix`. `lucide-*` strings route
                       through the Tailwind plugin; component values render
                       directly.
                     -->
+                    <slot
+                      v-if="slots['item-prefix']"
+                      name="item-prefix"
+                      v-bind="{ option: internalOption.option }"
+                    />
                     <OptionIcon
-                      v-if="!slots['item-prefix']"
+                      v-else-if="internalOption.option.icon"
                       :icon="internalOption.option.icon"
                     />
                   </template>
