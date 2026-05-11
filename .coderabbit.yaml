@@ -12,6 +12,13 @@ knowledge_base:
       - "v1-release/changelog.md"
   learnings:
     scope: local
+  linked_repositories:
+    - repository: "frappe/gameplan"
+    - repository: "frappe/crm"
+    - repository: "frappe/lms"
+    - repository: "frappe/builder"
+    - repository: "frappe/drive"
+    - repository: "frappe/insights"
 
 reviews:
   profile: chill
@@ -140,7 +147,38 @@ reviews:
       mode: off
     issue_assessment:
       mode: off
+    custom_checks:
+      - name: changelog
+        mode: error
+        instructions: |
+          The PR description must include a `## Changelog` section.
 
-tools:
-  languagetool:
-    enabled: false
+          The section must contain one of:
+          - A short (one or two sentences) description of the user-facing change,
+            written so it could be pasted into v1-release/changelog.md under the
+            Unreleased heading. Phrase it for consumers of the library, not
+            contributors. Mention the component or API surface affected.
+          - The literal text `None — <reason>` where `<reason>` briefly states
+            why the PR has no user-facing impact (examples: "internal refactor",
+            "test only", "docs only", "build config only").
+
+          Fail the check when:
+          - The `## Changelog` heading is missing entirely.
+          - The section is empty or contains only placeholder text
+            (e.g. "TBD", "TODO", "n/a", the HTML comment from the PR template).
+          - The section says "None" but lacks a reason.
+
+          Pass the check when the section contains either a real consumer-facing
+          entry or an explicit `None — <reason>` declaration.
+
+          Reference v1-release/changelog.md for the existing entry style. The
+          changelog's own guidance says NOT to log internal refactors, tests, or
+          planning/doc maintenance unless they affect consumers — so `None — ...`
+          is the correct choice for those PRs, not a fabricated entry.
+
+  tools:
+    semgrep:
+      enabled: true
+      config_file: ".semgrep.yml"
+    languagetool:
+      enabled: false
