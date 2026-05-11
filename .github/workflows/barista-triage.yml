@@ -68,6 +68,7 @@ jobs:
           esac
 
       - name: Run Barista
+        id: run-barista
         uses: anthropics/claude-code-action@v1
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
@@ -82,3 +83,12 @@ jobs:
           github_token: ${{ steps.app-token.outputs.token }}
           allowed_non_write_users: "*"
           prompt: "/barista-triage REPO: ${{ github.repository }} ISSUE_NUMBER: ${{ steps.issue.outputs.number }} EVENT: ${{ github.event_name }}"
+
+      - name: Append run-stats footer to barista's comment
+        if: always() && steps.run-barista.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          EXECUTION_FILE: ${{ steps.run-barista.outputs.execution_file }}
+          ISSUE_NUMBER: ${{ steps.issue.outputs.number }}
+          REPO: ${{ github.repository }}
+        run: ./.github/barista/scripts/append-stats.sh
