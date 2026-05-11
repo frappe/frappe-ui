@@ -1,0 +1,83 @@
+name: Barista — Issue Triage
+
+on:
+  issues:
+    types: [opened]
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: Issue number to (re)triage
+        required: true
+        type: number
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: barista-${{ github.event.issue.number || inputs.issue_number }}
+  cancel-in-progress: false
+
+jobs:
+  triage:
+    # Kill switch: set repo variable BARISTA_ENABLED=true to enable.
+    # Comment-trigger gating: only run on @barista mentions from maintainers, on issues (not PRs).
+    if: >-
+      vars.BARISTA_ENABLED == 'true' && (
+        github.event_name == 'issues' ||
+        github.event_name == 'workflow_dispatch' ||
+        (
+          github.event_name == 'issue_comment' &&
+          !github.event.issue.pull_request &&
+          contains(github.event.comment.body, '@barista') &&
+          (
+            github.event.comment.author_association == 'OWNER' ||
+            github.event.comment.author_association == 'MEMBER' ||
+            github.event.comment.author_association == 'COLLABORATOR'
+          )
+        )
+      )
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Mint barista app token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.BARISTA_APP_ID }}
+          private-key: ${{ secrets.BARISTA_PRIVATE_KEY }}
+
+      - name: Resolve issue number
+        id: issue
+        run: |
+          case "${{ github.event_name }}" in
+            issues|issue_comment)
+              echo "number=${{ github.event.issue.number }}" >> "$GITHUB_OUTPUT"
+              ;;
+            workflow_dispatch)
+              echo "number=${{ inputs.issue_number }}" >> "$GITHUB_OUTPUT"
+              ;;
+          esac
+
+      - name: Run Barista
+        uses: anthropics/claude-code-action@v1
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          BARISTA_ISSUE: ${{ steps.issue.outputs.number }}
+          BARISTA_EVENT: ${{ github.event_name }}
+          BARISTA_COMMENT_BODY: ${{ github.event.comment.body }}
+          BARISTA_COMMENT_AUTHOR: ${{ github.event.comment.user.login }}
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ steps.app-token.outputs.token }}
+          allowed_non_write_users: "*"
+          prompt: "/barista-triage REPO: ${{ github.repository }} ISSUE_NUMBER: ${{ steps.issue.outputs.number }} EVENT: ${{ github.event_name }}"
