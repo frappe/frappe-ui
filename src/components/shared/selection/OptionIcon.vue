@@ -39,5 +39,6 @@ defineProps<{
     v-else-if="icon && typeof icon !== 'string'"
     :is="icon"
     class="size-4 shrink-0 text-ink-gray-6"
+    aria-hidden="true"
   />
 </template>

@@ -245,6 +245,7 @@ defineSlots<SelectSlots>()
     <SelectPortal>
       <SelectContent
         data-slot="content"
+        data-selection
         class="z-[100] origin-[var(--reka-select-content-transform-origin)]"
       >
         <div

@@ -3,8 +3,11 @@
  * Combobox). Imported once per component from `<script setup>` so it is
  * deduped at build time.
  *
- * Targets `data-slot="content-body"` driven by `usePopoverMotion`'s
- * `data-motion` attribute. Each component still owns:
+ * All selectors are gated on `[data-selection]` (set on each component's
+ * content element) so this stylesheet cannot leak onto other popovers
+ * sharing the same `data-slot` hooks (e.g. Dropdown).
+ *
+ * Each component still owns:
  *   - its own `transform-origin` (Select uses the reka-select var via a
  *     Tailwind class on the element; MultiSelect/Combobox set the
  *     reka-combobox var via their own scoped rule),
@@ -15,20 +18,21 @@
  * scale-only (no translateY) — a different visual rhythm by design.
  */
 
-[data-slot='content-body'] {
+[data-slot='content'][data-selection] [data-slot='content-body'] {
   animation-fill-mode: both;
 }
 
-[data-slot='content-body'][data-motion='animated'] {
+[data-slot='content'][data-selection]
+  [data-slot='content-body'][data-motion='animated'] {
   backface-visibility: hidden;
 }
 
-[data-slot='content'][data-state='open']
+[data-slot='content'][data-selection][data-state='open']
   [data-slot='content-body'][data-motion='animated'] {
   animation: selection-content-enter 180ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-[data-slot='content'][data-state='closed']
+[data-slot='content'][data-selection][data-state='closed']
   [data-slot='content-body'][data-motion='animated'] {
   animation: selection-content-exit 140ms cubic-bezier(0.23, 1, 0.32, 1);
 }
@@ -39,17 +43,17 @@
  * after mount. ~80ms is below the perception threshold for motion but
  * long enough to hide the jump.
  */
-[data-slot='content'][data-state='open']
+[data-slot='content'][data-selection][data-state='open']
   [data-slot='content-body'][data-motion='instant'] {
   animation: selection-content-instant-fade 80ms linear;
 }
 
-[data-slot='content'][data-state='closed']
+[data-slot='content'][data-selection][data-state='closed']
   [data-slot='content-body'][data-motion='instant'] {
   animation: none;
 }
 
-[data-slot='content'][data-state='closed'] {
+[data-slot='content'][data-selection][data-state='closed'] {
   pointer-events: none;
 }
 
@@ -85,7 +89,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  [data-slot='content-body'] {
+  [data-slot='content'][data-selection] [data-slot='content-body'] {
     animation-duration: 0ms !important;
   }
 }

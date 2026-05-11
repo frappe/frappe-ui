@@ -313,6 +313,7 @@ defineSlots<MultiSelectSlots>()
     <ComboboxPortal :to="portalTo">
       <ComboboxContent
         data-slot="content"
+        data-selection
         :data-variant="variant"
         :data-size="size"
         :data-loading="loading ? '' : undefined"

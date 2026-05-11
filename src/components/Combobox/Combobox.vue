@@ -526,6 +526,7 @@ defineSlots<ComboboxSlots>()
     <ComboboxPortal :to="portalTo">
       <ComboboxContent
         data-slot="content"
+        data-selection
         :data-variant="variant"
         :data-size="size"
         :class="[
