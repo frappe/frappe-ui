@@ -34,6 +34,19 @@ DURATION_MS=$(jq 'first(.. | objects | (.duration_ms? // empty))' "$EXECUTION_FI
 
 MODEL=$(jq -r 'first(.. | objects | (.model? // empty)) // "claude"' "$EXECUTION_FILE" 2>/dev/null || echo claude)
 
+# Format token counts as k (1000s): <1000 → as-is, 1000-9999 → X.Xk, ≥10000 → Xk
+fmt_k() {
+  local n="${1:-0}"
+  [[ "$n" =~ ^[0-9]+$ ]] || { echo "0"; return; }
+  if   (( n < 1000 ));  then echo "$n"
+  elif (( n < 10000 )); then awk -v n="$n" 'BEGIN { printf "%.1fk", n/1000 }'
+  else                       awk -v n="$n" 'BEGIN { printf "%dk", int((n + 500) / 1000) }'
+  fi
+}
+INPUT_FMT=$(fmt_k "$INPUT_TOKENS")
+OUTPUT_FMT=$(fmt_k "$OUTPUT_TOKENS")
+CACHE_READ_FMT=$(fmt_k "$CACHE_READ")
+
 # Format duration
 if [[ "$DURATION_MS" =~ ^[0-9]+$ ]] && (( DURATION_MS > 0 )); then
   DURATION_S=$(( DURATION_MS / 1000 ))
@@ -72,7 +85,7 @@ STRIPPED=$(printf '%s' "$STRIPPED" | sed -e 's/[[:space:]]*$//')
 FOOTER=$(cat <<EOF
 
 <!-- barista-stats -->
-<sub><i>barista · ${MODEL} · ${INPUT_TOKENS} in / ${OUTPUT_TOKENS} out · ${CACHE_READ} cached · ${DURATION_FMT} · ${COST_FMT}</i></sub>
+<sub><i>barista · ${MODEL} · ${INPUT_FMT} in / ${OUTPUT_FMT} out · ${CACHE_READ_FMT} cached · ${DURATION_FMT} · ${COST_FMT}</i></sub>
 EOF
 )
 
