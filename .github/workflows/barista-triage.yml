@@ -40,12 +40,13 @@ jobs:
         )
       )
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          # Need history so barista can inspect recent commits near suspected files.
+          fetch-depth: 200
 
       - name: Mint barista app token
         id: app-token
