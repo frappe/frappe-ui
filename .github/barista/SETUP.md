@@ -1,6 +1,6 @@
 # Barista — Issue Triage Bot Setup
 
-Barista is a GitHub Actions workflow that uses Claude (via the official `anthropics/claude-code-action`) to triage incoming issues on `frappe/frappe-ui`. It applies labels, occasionally asks the reporter for missing info, and never overrides human-set labels.
+Barista is a GitHub Actions workflow that uses Claude (via the official `anthropics/claude-code-action`) to triage incoming issues on `frappe/frappe-ui`. It investigates the codebase, applies labels, and posts a comment with its findings. Asking the reporter for more info is a last resort.
 
 It posts as **`barista[bot]`** (a custom GitHub App), and bills Claude API calls against a maintainer's Claude Max subscription.
 
@@ -8,8 +8,8 @@ It posts as **`barista[bot]`** (a custom GitHub App), and bills Claude API calls
 
 | Trigger | Action |
 | --- | --- |
-| `issues.opened` | Read issue → choose labels → apply them → maybe comment if info is missing |
-| `issue_comment.created` (only if comment contains `/barista` AND author is a maintainer) | Re-triage based on the maintainer's directive |
+| `issues.opened` | Read issue → investigate the code (grep, read files, check git history, search past issues) → apply labels → post a comment with findings or hypothesis |
+| `issue_comment.created` (only if comment contains `/barista` AND author is a maintainer) | Re-investigate based on the maintainer's directive |
 | `workflow_dispatch` (manual) | Re-triage a specific issue number for debugging |
 
 ## One-time setup
