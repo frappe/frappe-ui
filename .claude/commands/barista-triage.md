@@ -9,7 +9,7 @@ Inputs from the workflow:
 
 - `REPO`: `${{ github.repository }}`
 - `ISSUE_NUMBER`: `${{ github.event.issue.number }}`
-- `EVENT`: one of `issues` (new issue), `issue_comment` (a maintainer mentioned `@barista`), or `workflow_dispatch` (manual re-triage).
+- `EVENT`: one of `issues` (new issue), `issue_comment` (a maintainer ran a `/barista` command), or `workflow_dispatch` (manual re-triage).
 - `$BARISTA_COMMENT_BODY` and `$BARISTA_COMMENT_AUTHOR` are set when EVENT=issue_comment.
 
 # Tools you can run
@@ -30,7 +30,7 @@ Nothing else is permitted. Do not attempt edits, pushes, or any other gh subcomm
 2. **Read the issue.** Run `./.github/barista/scripts/gh.sh issue view <ISSUE_NUMBER> --comments`.
 3. **Branch on EVENT:**
    - `issues` → first-time triage. Continue to step 4.
-   - `issue_comment` → re-triage prompted by a maintainer. The comment body is in `$BARISTA_COMMENT_BODY`; treat any directives there (e.g. "this is a bug, not a question", "remove the invalid label", "look again") as authoritative. Continue to step 4 with that context.
+   - `issue_comment` → re-triage prompted by a maintainer. The comment body is in `$BARISTA_COMMENT_BODY` and starts with (or contains) `/barista …`. Treat any directives in that comment (e.g. "/barista retriage", "/barista label bug", "/barista this is a question") as authoritative. Continue to step 4 with that context.
    - `workflow_dispatch` → manual re-triage; behave like `issues` but you may overwrite your own prior labels if you now disagree with them.
 4. **Decide labels.** See the rubric below.
 5. **Apply labels.** One call to `edit-issue-labels.sh` with all desired `--add-label`/`--remove-label` flags.
@@ -75,7 +75,7 @@ Post a comment **only** in these cases:
 
 1. EVENT=`issues` and you applied `needs-repro` or `needs-info` — ask politely for the missing info. Keep it short (2–4 sentences). Mention which fields are missing.
 2. EVENT=`issues` and you applied `duplicate` — link the original issue with `#NNN` and explain in one sentence.
-3. EVENT=`issue_comment` — always acknowledge the maintainer's directive with a one-line summary of what you changed (e.g. "Relabeled as `bug` and removed `question`, per @${BARISTA_COMMENT_AUTHOR}.").
+3. EVENT=`issue_comment` — always acknowledge the maintainer's directive with a one-line summary of what you changed (e.g. "Relabeled as `bug` and removed `question`, per @$BARISTA_COMMENT_AUTHOR.").
 
 Do **not** comment when:
 

@@ -9,7 +9,7 @@ It posts as **`barista[bot]`** (a custom GitHub App), and bills Claude API calls
 | Trigger | Action |
 | --- | --- |
 | `issues.opened` | Read issue → choose labels → apply them → maybe comment if info is missing |
-| `issue_comment.created` (only if comment contains `@barista` AND author is a maintainer) | Re-triage based on the maintainer's directive |
+| `issue_comment.created` (only if comment contains `/barista` AND author is a maintainer) | Re-triage based on the maintainer's directive |
 | `workflow_dispatch` (manual) | Re-triage a specific issue number for debugging |
 
 ## One-time setup
@@ -82,7 +82,7 @@ The `BARISTA_ENABLED` variable is the kill switch. Set it to anything other than
 ## How maintainers interact with it
 
 - **Disagree with a label?** Just change it. Barista treats human labels as sacred and won't re-apply its choice.
-- **Want it to look again?** Comment `@barista please retriage` (or anything containing `@barista`) on the issue.
+- **Want it to look again?** Comment `/barista retriage` (or anything containing `/barista`) on the issue. Example commands: `/barista retriage`, `/barista label bug`, `/barista this is a question not a bug`.
 - **Want to silence it on one issue?** Add the `triaged` label manually before opening — barista will still run on `issues.opened` but will respect existing labels.
 - **Want to silence it globally?** Set `BARISTA_ENABLED` variable to `false`.
 
@@ -111,4 +111,4 @@ The sandbox scripts intentionally restrict what Claude can do. Even if the promp
 
 ## Phase 2 (not implemented yet)
 
-Auto-opening PRs for narrow issue classes (typos, doc fixes). The current GitHub App already has `pull-requests: write`, so the only missing piece is a separate workflow gated on a maintainer command like `@barista open a PR`. Keep that out of phase 1 until barista's labeling accuracy is proven.
+Auto-opening PRs for narrow issue classes (typos, doc fixes). The current GitHub App already has `pull-requests: write`, so the only missing piece is a separate workflow gated on a maintainer command like `/barista open a PR`. Keep that out of phase 1 until barista's labeling accuracy is proven.
