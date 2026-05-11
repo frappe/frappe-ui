@@ -611,7 +611,7 @@ defineSlots<ComboboxSlots>()
               class="flex items-center gap-2 border-b border-outline-gray-1 px-3"
             >
               <ComboboxInput
-                :id="id"
+                :id="id ? `${id}-search-input` : undefined"
                 v-bind="inputAttrs"
                 data-slot="input"
                 :value="query"
