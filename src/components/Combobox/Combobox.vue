@@ -597,7 +597,6 @@ defineSlots<ComboboxSlots>()
         -->
         <FocusScope
           as-child
-          loop
           @mount-auto-focus="handleFocusScopeMountAutoFocus"
           @unmount-auto-focus.prevent
         >
