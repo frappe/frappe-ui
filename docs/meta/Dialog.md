@@ -9,13 +9,15 @@
     name: 'open',
     description: 'Controls whether the dialog is open (v-model:open). Canonical.',
     required: false,
-    type: 'boolean'
+    type: 'boolean',
+    default: 'undefined'
   },
   {
     name: 'modelValue',
     description: 'Controls whether the dialog is open (v-model). Also supported.',
     required: false,
-    type: 'boolean'
+    type: 'boolean',
+    default: 'undefined'
   },
   {
     name: 'title',
@@ -40,14 +42,14 @@
     description: 'Max-width size of the dialog. Default `\'lg\'`.',
     required: false,
     type: 'DialogSize',
-    default: '"lg"'
+    default: 'undefined'
   },
   {
     name: 'position',
     description: 'Vertical placement. Default `\'center\'`.',
     required: false,
     type: 'DialogPosition',
-    default: '"center"'
+    default: 'undefined'
   },
   {
     name: 'paddingTop',
@@ -87,6 +89,7 @@
     description: '',
     required: false,
     type: 'boolean',
+    default: 'undefined',
     deprecated: 'Use `dismissable` (inverted) instead.'
   },
   {
@@ -101,24 +104,24 @@
   const slotsData = [
   {
     name: 'default',
-    description: 'Main content rendered inside the padded card.',
-    type: 'any'
+    description: 'Main content rendered inside the padded card. Exposes `{ close }`.',
+    type: 'DialogSlotProps'
   },
   {
     name: 'title',
-    description: 'Title area; accepts arbitrary content.',
-    type: 'any'
+    description: 'Title area; accepts arbitrary content (extra buttons next to title, etc.). Exposes `{ close }`.',
+    type: 'DialogSlotProps'
   },
   {
     name: 'actions',
     description: 'Footer override; exposes `{ close, actions }`.',
-    type: '{ close: () => void; actions: ReactiveDialogAction[]; }'
+    type: 'DialogActionsSlotProps'
   },
   {
     name: 'body',
     description: '',
     type: 'any',
-    deprecated: 'Use `#default` + `bare`.'
+    deprecated: 'Use `#default` + `bare` prop.'
   },
   {
     name: 'body-main',
@@ -130,7 +133,7 @@
     name: 'body-header',
     description: '',
     type: 'any',
-    deprecated: 'Use `#title` for extras.'
+    deprecated: 'Use `#title` for extras (no direct replacement).'
   },
   {
     name: 'body-title',
