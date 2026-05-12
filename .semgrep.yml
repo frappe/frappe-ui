@@ -1,0 +1,57 @@
+rules:
+  - id: no-resources-import-outside-resources
+    message: |
+      Importing from `src/resources/` pulls in legacy resource-layer code.
+      Prefer composables under `src/data-fetching/` for new work. If this
+      import is intentional (e.g. fixing a bug in the legacy layer), ignore
+      this warning.
+    severity: WARNING
+    languages: [ts, js]
+    paths:
+      exclude:
+        - "src/resources/**"
+    pattern-regex: 'from\s+[''"][^''"]*\/resources[\/''"]'
+
+  - id: no-console-log-in-source
+    message: |
+      `console.log` left in source. Use `console.warn` / `console.error` for
+      real diagnostics, or remove before merge. Story and Cypress files are
+      excluded from this rule.
+    severity: WARNING
+    languages: [ts, js]
+    paths:
+      include:
+        - "src/**/*.ts"
+        - "src/**/*.js"
+        - "frappe/**/*.ts"
+        - "frappe/**/*.js"
+      exclude:
+        - "**/*.cy.ts"
+        - "**/*.story.ts"
+        - "**/*.spec.ts"
+        - "**/*.test.ts"
+        - "src/stories/**"
+        - "src/mocks/**"
+    pattern: console.log(...)
+
+  - id: prefer-lucide-over-feather-icon
+    message: |
+      `FeatherIcon` is being migrated out of frappe-ui. New code should use
+      `lucide-*` icon strings via the shared Tailwind plugin (see Rating,
+      Switch, Slider for examples). Existing usages can stay until the
+      migration reaches that component.
+    severity: INFO
+    languages: [generic]
+    paths:
+      include:
+        - "src/**/*.vue"
+        - "src/**/*.ts"
+        - "src/**/*.js"
+        - "frappe/**/*.vue"
+        - "frappe/**/*.ts"
+        - "frappe/**/*.js"
+      exclude:
+        - "src/components/FeatherIcon.vue"
+        - "src/utils/iconString.ts"
+        - "src/index.ts"
+    pattern-regex: 'FeatherIcon'
