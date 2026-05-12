@@ -14,6 +14,9 @@ A flexible overlay for showing messages, forms, or actions. Keeps focus on conte
 ## Single-CTA form
 <ComponentPreview name="Dialog-Interactive" />
 
+## Auto-focus a field
+<ComponentPreview name="Dialog-Autofocus" />
+
 ## Full-canvas (`bare`)
 <ComponentPreview name="Dialog-Bare" />
 

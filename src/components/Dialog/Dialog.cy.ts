@@ -286,4 +286,62 @@ describe('Dialog', () => {
     cy.get('body').type('{esc}')
     cy.get('[role=dialog]').should('exist')
   })
+
+  // ---- Autofocus -------------------------------------------------------------
+
+  it('focuses a descendant marked with `autofocus` on open', () => {
+    cy.mount(Dialog, {
+      props: { open: true, title: 'Rename' },
+      slots: {
+        default: () =>
+          h('input', {
+            'data-cy': 'name-input',
+            autofocus: '',
+            value: 'untitled',
+          }),
+      },
+    })
+
+    cy.get('[data-cy=name-input]').should('be.focused')
+    // Inputs/textareas get their value selected so the user can type-to-replace.
+    cy.window().then((win) => {
+      const el = win.document.querySelector(
+        '[data-cy=name-input]',
+      ) as HTMLInputElement
+      expect(el.selectionStart).to.equal(0)
+      expect(el.selectionEnd).to.equal('untitled'.length)
+    })
+  })
+
+  it('walks into a non-focusable `[autofocus]` wrapper and focuses the first focusable inside', () => {
+    cy.mount(Dialog, {
+      props: { open: true, title: 'Preferences' },
+      slots: {
+        default: () =>
+          h('div', { autofocus: '' }, [
+            h('span', 'label'),
+            h(
+              'button',
+              { 'data-cy': 'toggle', type: 'button' },
+              'Toggle',
+            ),
+            h('button', { 'data-cy': 'second', type: 'button' }, 'Other'),
+          ]),
+      },
+    })
+
+    cy.get('[data-cy=toggle]').should('be.focused')
+  })
+
+  it('falls back to Reka default focus when nothing is marked', () => {
+    cy.mount(Dialog, {
+      props: { open: true, title: 'Plain', message: 'No marker here.' },
+    })
+
+    // No `[autofocus]` → our handler is a no-op and Reka's FocusScope
+    // takes over. The important contract is that focus lands somewhere
+    // inside the dialog (not on the body or a sibling).
+    cy.get('[role=dialog]').should('exist')
+    cy.focused().closest('[role=dialog]').should('exist')
+  })
 })

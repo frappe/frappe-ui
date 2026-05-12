@@ -15,6 +15,7 @@
           <DialogContent
             class="my-8 inline-block w-full transform overflow-hidden rounded-xl bg-surface-modal text-start align-middle shadow-xl dialog-content focus-visible:outline-none"
             :class="sizeClass"
+            @open-auto-focus="handleOpenAutoFocus"
             @escape-key-down="
               (e: Event) => {
                 if (!isDismissable) e.preventDefault()
@@ -432,6 +433,46 @@ const showHeader = computed(() => {
 
 function isLucide(name: string | undefined) {
   return isLucideIconString(name)
+}
+
+// Honor a descendant `[autofocus]` element on open. Reka's FocusScope
+// otherwise focuses the content wrapper (or the first tabbable element),
+// which is good for screen readers but inconvenient for form dialogs.
+// Marking the input opts in.
+//
+// Components that don't forward attrs onto a focusable DOM node (Switch,
+// Combobox, Select, …) can still opt in by wrapping the slot with a
+// marker — `<div autofocus>…</div>` — and we walk into it to find the
+// first focusable descendant.
+const FOCUSABLE_SELECTOR = [
+  'input:not([disabled]):not([type="hidden"])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  'button:not([disabled])',
+  'a[href]',
+  '[tabindex]:not([tabindex="-1"])',
+  '[contenteditable="true"]',
+  '[contenteditable=""]',
+].join(',')
+
+function handleOpenAutoFocus(event: Event) {
+  const container = event.target as HTMLElement | null
+  const marker = container?.querySelector<HTMLElement>('[autofocus]')
+  if (!marker) return
+  const target = marker.matches(FOCUSABLE_SELECTOR)
+    ? marker
+    : marker.querySelector<HTMLElement>(FOCUSABLE_SELECTOR)
+  if (!target) return
+  event.preventDefault()
+  target.focus()
+  if (
+    target instanceof HTMLInputElement ||
+    target instanceof HTMLTextAreaElement
+  ) {
+    try {
+      target.select()
+    } catch {}
+  }
 }
 </script>
 
