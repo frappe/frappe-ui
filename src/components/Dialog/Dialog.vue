@@ -28,7 +28,7 @@
             "
           >
             <!-- bare: no chrome, render default slot directly -->
-            <slot v-if="resolved.bare" />
+            <slot v-if="resolved.bare" :close="close" />
 
             <!-- legacy `#body` slot: full layout override (deprecated) -->
             <slot v-else-if="$slots.body" name="body" />
@@ -68,7 +68,7 @@
                           />
                         </div>
                         <DialogTitle as="header">
-                          <slot name="title">
+                          <slot name="title" :close="close">
                             <slot name="body-title">
                               <h3
                                 v-if="resolved.title"
@@ -93,7 +93,7 @@
                     </div>
 
                     <slot name="body-content">
-                      <slot>
+                      <slot :close="close">
                         <DialogDescription as-child v-if="resolved.message">
                           <p class="text-p-base text-ink-gray-7">
                             {{ resolved.message }}

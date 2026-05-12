@@ -114,11 +114,14 @@ export interface DialogEmits {
   'after-leave': []
 }
 
-/** Scoped payload for the `#actions` slot. */
-export interface DialogActionsSlotProps {
+/** Scoped payload exposed to every Dialog slot. */
+export interface DialogSlotProps {
   /** Closes the dialog. */
   close: () => void
+}
 
+/** Scoped payload for the `#actions` slot. */
+export interface DialogActionsSlotProps extends DialogSlotProps {
   /** Reactive list of resolved actions (with `loading` state) for re-laying-out auto-rendered buttons. */
   actions: DialogReactiveAction[]
 }
@@ -129,11 +132,11 @@ export interface DialogExposed {
 }
 
 export interface DialogSlots {
-  /** Main content rendered inside the padded card. */
-  default?: () => any
+  /** Main content rendered inside the padded card. Exposes `{ close }`. */
+  default?: (props: DialogSlotProps) => any
 
-  /** Title area; accepts arbitrary content (extra buttons next to title, etc.). */
-  title?: () => any
+  /** Title area; accepts arbitrary content (extra buttons next to title, etc.). Exposes `{ close }`. */
+  title?: (props: DialogSlotProps) => any
 
   /** Footer override; exposes `{ close, actions }`. */
   actions?: (props: DialogActionsSlotProps) => any
