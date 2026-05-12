@@ -32,4 +32,9 @@ Avatar rows with a contextual invite action authored through a template slot.
 
 <ComponentPreview name="Combobox-MemberPicker" css='justify-center !py-20 grid' />
 
+## In Dialog
+Combobox rendered inside a Dialog. Verifies focus restores to the trigger after the popover closes, even when wrapped by the Dialog's focus scope.
+
+<ComponentPreview name="Combobox-InDialog" layout="stacked" css='justify-center !py-20 grid' />
+
 <!-- @include: ../../../meta/Combobox.md -->
