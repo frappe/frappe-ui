@@ -71,7 +71,7 @@ const createNewOption = {
   label: 'Create New',
   slotName: 'create-new',
   condition: () => true,
-  onClick: ({ searchTerm }) => emit('create', searchTerm),
+  onClick: ({ query }) => emit('create', query),
 } as ComboboxOption
 
 const linkOptions = computed(() => {

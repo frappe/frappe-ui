@@ -38,9 +38,7 @@ export type ComboboxSelectableOption = {
   /** @deprecated use `slot` */
   slotName?: string
   /** @deprecated use `slots` — function form maps to `slots.item`, object form to `slots` */
-  render?:
-    | (() => VNode | VNode[])
-    | ComboboxItemSlots<ComboboxItemSlotProps>
+  render?: (() => VNode | VNode[]) | ComboboxItemSlots<ComboboxItemSlotProps>
   [key: string]: any
 }
 
@@ -66,9 +64,7 @@ export type ComboboxCustomOption = {
   keepOpen?: boolean
   condition?: (context: ComboboxCustomOptionContext) => boolean
   /** @deprecated use `slots` — function form maps to `slots.item`, object form to `slots` */
-  render?:
-    | (() => VNode | VNode[])
-    | ComboboxItemSlots<ComboboxItemSlotProps>
+  render?: (() => VNode | VNode[]) | ComboboxItemSlots<ComboboxItemSlotProps>
   [key: string]: any
 }
 
