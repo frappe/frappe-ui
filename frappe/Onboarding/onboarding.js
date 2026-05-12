@@ -128,10 +128,13 @@ export function useOnboarding(appName) {
   function syncStatus() {
     if (isOnboardingStepsCompleted.value) return
 
-    if (onboardingSteps.value.length) {
+    if (onboardingSteps.value.length && onboardings[appName]) {
       let _steps = onboardingSteps.value
-      _steps.forEach((step, index) => {
-        onboardings[appName][index].completed = step.completed
+      _steps.forEach((step) => {
+        const stepExists = onboardings[appName].find(
+          (s) => s.name === step.name,
+        )
+        if (stepExists) stepExists.completed = step.completed
       })
       isOnboardingStepsCompleted.value = _steps.every((step) => step.completed)
     } else {
