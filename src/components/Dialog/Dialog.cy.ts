@@ -235,6 +235,44 @@ describe('Dialog', () => {
     cy.get('[data-cy=body-content]').should('have.text', 'legacy content')
   })
 
+  it('honors `options.size` when the `size` prop is omitted', () => {
+    cy.mount(Dialog, {
+      props: {
+        modelValue: true,
+        options: { title: 'Wide', size: 'xl' },
+      },
+    })
+
+    cy.get('[role=dialog]').should('have.class', 'max-w-xl')
+  })
+
+  it('honors `options.position` when the `position` prop is omitted', () => {
+    cy.mount(Dialog, {
+      props: {
+        modelValue: true,
+        options: { title: 'Top', position: 'top' },
+      },
+    })
+
+    cy.get('[data-position=top]').should('exist')
+  })
+
+  it('does not render the fallback close button when `#body-header` is used', () => {
+    cy.mount(Dialog, {
+      props: { modelValue: true },
+      slots: {
+        'body-header': h(
+          'div',
+          { 'data-cy': 'body-header' },
+          'legacy header',
+        ),
+      },
+    })
+
+    cy.get('[data-cy=body-header]').should('exist')
+    cy.get('[role=dialog] [aria-label=Close]').should('not.exist')
+  })
+
   it('inverts `disableOutsideClickToClose` into `dismissable`', () => {
     cy.mount(Dialog, {
       props: {

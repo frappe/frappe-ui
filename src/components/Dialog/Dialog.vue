@@ -128,8 +128,15 @@
             </template>
 
             <!-- close button when auto-header is suppressed but caller still wants a close affordance -->
+            <!-- Suppressed for legacy slots that own their own header chrome: `#body` is a full override, `#body-header` replaced the header (incl. close) in v0. -->
             <DialogClose
-              v-if="resolved.showCloseButton && !showHeader && !resolved.bare"
+              v-if="
+                resolved.showCloseButton &&
+                !showHeader &&
+                !resolved.bare &&
+                !$slots['body'] &&
+                !$slots['body-header']
+              "
               as-child
             >
               <Button
@@ -187,8 +194,11 @@ const props = withDefaults(defineProps<DialogProps>(), {
   open: undefined,
   modelValue: undefined,
   disableOutsideClickToClose: undefined,
-  size: 'lg',
-  position: 'center',
+  // `size`/`position` intentionally left undefined so legacy `options.size`
+  // and `options.position` still take effect when the top-level prop is omitted.
+  // Defaults are applied inside `resolved`.
+  size: undefined,
+  position: undefined,
   dismissable: true,
   showCloseButton: true,
   bare: false,
