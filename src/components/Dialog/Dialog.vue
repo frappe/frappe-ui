@@ -83,7 +83,7 @@
                         v-if="resolved.showCloseButton"
                         as-child
                       >
-                        <Button variant="ghost" @click="close">
+                        <Button variant="ghost" label="Close" @click="close">
                           <template #icon>
                             <span class="lucide-x size-4 text-ink-gray-9" />
                           </template>
@@ -135,7 +135,7 @@
               <Button
                 class="absolute right-4 top-4 z-10"
                 variant="ghost"
-                aria-label="Close"
+                label="Close"
                 @click="close"
               >
                 <template #icon>
@@ -181,6 +181,12 @@ import type {
 } from './types'
 
 const props = withDefaults(defineProps<DialogProps>(), {
+  // Boolean props default to `undefined` so we can detect "not passed" — Vue
+  // otherwise casts absent boolean props to `false`, which would defeat the
+  // `open` vs `modelValue` precedence below.
+  open: undefined,
+  modelValue: undefined,
+  disableOutsideClickToClose: undefined,
   size: 'lg',
   position: 'center',
   dismissable: true,
