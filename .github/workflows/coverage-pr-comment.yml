@@ -1,0 +1,68 @@
+name: Coverage PR comment
+
+# Runs after the Tests workflow finishes. workflow_run executes in the base
+# repo's context with a write-capable GITHUB_TOKEN, so it can edit PRs from
+# forks (which the Tests workflow itself cannot). It never checks out PR code,
+# only consumes artifacts.
+on:
+  workflow_run:
+    workflows: [Tests]
+    types: [completed]
+
+permissions:
+  pull-requests: write
+  actions: read
+  contents: read
+
+jobs:
+  comment:
+    if: >
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Download HEAD coverage summary
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-summary
+          path: coverage/final
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download PR info
+        uses: actions/download-artifact@v4
+        with:
+          name: pr-info
+          path: pr-info
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Resolve PR number
+        run: echo "PR_NUMBER=$(cat pr-info/pr-number.txt)" >> "$GITHUB_ENV"
+
+      - name: Download main baseline coverage summary
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          workflow: tests.yml
+          branch: main
+          event: push
+          name: coverage-summary
+          path: coverage-baseline
+          if_no_artifact_found: warn
+        continue-on-error: true
+
+      - name: Update PR description with coverage
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: yarn tsx scripts/update-pr-coverage.ts

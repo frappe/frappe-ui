@@ -137,21 +137,16 @@ jobs:
           name: coverage-summary
           path: coverage/final/coverage-summary.json
 
-      - name: Download main baseline coverage summary
+      # PR description edits run in a separate workflow_run-triggered workflow
+      # (see coverage-pr-comment.yml). That workflow has write access to the
+      # base repo even for fork PRs, which this one does not.
+      - name: Record PR number for follow-up workflow
         if: github.event_name == 'pull_request'
-        uses: dawidd6/action-download-artifact@v6
-        with:
-          workflow: tests.yml
-          branch: main
-          event: push
-          name: coverage-summary
-          path: coverage-baseline
-          if_no_artifact_found: warn
-        continue-on-error: true
+        run: echo "${{ github.event.pull_request.number }}" > pr-number.txt
 
-      - name: Update PR description with coverage
+      - name: Upload PR info artifact
         if: github.event_name == 'pull_request'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: yarn tsx scripts/update-pr-coverage.ts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-info
+          path: pr-number.txt

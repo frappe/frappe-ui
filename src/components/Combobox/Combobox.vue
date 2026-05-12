@@ -15,6 +15,7 @@ import {
   ComboboxPortal,
   ComboboxRoot,
   ComboboxTrigger,
+  FocusScope,
 } from 'reka-ui'
 import OptionIcon from '../shared/selection/OptionIcon.vue'
 import '../shared/selection/popoverMotion.css'
@@ -285,19 +286,16 @@ function handleCreateOptionSelect(event: Event) {
   commitCustomValue(query.value)
 }
 
-// When a custom trigger is used, move focus to the search input inside the
-// popover as it opens. reka's default `openAutoFocus` would put focus on
-// the first item; we want the user typing to filter, not navigate.
-const popoverInputRef = ref<{ $el?: HTMLElement } | null>(null)
-
-function handleContentOpenAutoFocus(event: Event) {
-  event.preventDefault()
-  if (!isButtonMode.value) return
-
-  nextTick(() => {
-    const el = popoverInputRef.value?.$el as HTMLElement | undefined
-    el?.focus()
-  })
+function handleFocusScopeMountAutoFocus(event: Event) {
+  // In input mode the trigger is the search input — keep focus there so the
+  // user can keep typing. FocusScope's default would yank focus to the first
+  // tabbable inside the popover (an item).
+  // In button mode, let FocusScope's default run: it focuses the first
+  // tabbable inside the popover (our search input). Critically, this fires
+  // AFTER FocusScope adds itself to the focus-scope stack, so it works even
+  // when the Combobox is rendered inside a Dialog whose FocusScope is
+  // trapping focus.
+  if (!isButtonMode.value) event.preventDefault()
 }
 
 function reset() {
@@ -537,50 +535,74 @@ defineSlots<ComboboxSlots>()
         :side="side"
         :align="resolvedAlign"
         :side-offset="offset"
-        @openAutoFocus="handleContentOpenAutoFocus"
-        @closeAutoFocus.prevent
       >
-        <div
-          data-slot="content-body"
-          :data-motion="contentMotion"
-          class="overflow-hidden rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5"
+        <!--
+          Why FocusScope lives here (inside ComboboxContent) and not around it:
+
+          ComboboxContent is a <Presence> wrapper — it renders null when the
+          popover is closed. Placing FocusScope outside with `as-child` means
+          its container is null while closed, so it never registers on reka's
+          global focus-scope stack, and the fix has no effect.
+
+          By sitting on the always-present content-body div, FocusScope mounts
+          the moment the popover opens. It pushes itself onto the stack, which
+          pauses any parent Dialog's trapped FocusScope. That allows focus to
+          move freely into the portaled popover.
+
+          Why we don't prevent mountAutoFocus (in button mode):
+          ComboboxContentImpl.onMounted synchronously calls inputElement.focus()
+          before our FocusScope has had a chance to register — the dialog trap
+          immediately reverts it. FocusScope's own auto-focus fires after the
+          stack push, so it re-focuses the first tabbable (the search input)
+          once the dialog trap is paused. In input mode we prevent it so the
+          trigger input keeps focus while the list opens.
+        -->
+        <FocusScope
+          as-child
+          @mount-auto-focus="handleFocusScopeMountAutoFocus"
+          @unmount-auto-focus.prevent
         >
           <div
-            v-if="isButtonMode"
-            data-slot="content-search"
-            class="flex items-center gap-2 border-b border-outline-gray-1 px-3"
+            data-slot="content-body"
+            :data-motion="contentMotion"
+            class="overflow-hidden rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5"
           >
-            <ComboboxInput
-              :id="id"
-              ref="popoverInputRef"
-              v-bind="inputAttrs"
-              data-slot="input"
-              :value="query"
-              :disabled="disabled"
-              :placeholder="placeholder"
-              class="min-w-0 flex-1 px-0 border-0 bg-transparent py-2 text-base text-ink-gray-8 outline-none placeholder:text-ink-gray-4 focus:ring-0"
-              @input="handleInputChange"
-              @focus="emit('focus', $event)"
-              @blur="emit('blur', $event)"
-              @keydown.enter="handleInputEnter"
+            <div
+              v-if="isButtonMode"
+              data-slot="content-search"
+              class="flex items-center gap-2 border-b border-outline-gray-1 px-3"
+            >
+              <ComboboxInput
+                :id="id ? `${id}-search-input` : undefined"
+                v-bind="inputAttrs"
+                data-slot="input"
+                :value="query"
+                :disabled="disabled"
+                :placeholder="placeholder"
+                class="min-w-0 flex-1 px-0 border-0 bg-transparent py-2 text-base text-ink-gray-8 outline-none placeholder:text-ink-gray-4 focus:ring-0"
+                @input="handleInputChange"
+                @focus="emit('focus', $event)"
+                @blur="emit('blur', $event)"
+                @keydown.enter="handleInputEnter"
+              />
+            </div>
+
+            <ComboboxResults
+              :groups="filteredGroups"
+              :size="size"
+              :query="typedQuery"
+              :model="model ?? null"
+              :loading="loading"
+              :empty-text="emptyText"
+              :show-create-option="showCreateOption"
+              :show-empty="showEmpty"
+              :slot-fns="slots"
+              :all-selectable-options="allSelectableOptions"
+              @select-custom="handleCustomItemSelect"
+              @select-create="handleCreateOptionSelect"
             />
           </div>
-
-          <ComboboxResults
-            :groups="filteredGroups"
-            :size="size"
-            :query="typedQuery"
-            :model="model ?? null"
-            :loading="loading"
-            :empty-text="emptyText"
-            :show-create-option="showCreateOption"
-            :show-empty="showEmpty"
-            :slot-fns="slots"
-            :all-selectable-options="allSelectableOptions"
-            @select-custom="handleCustomItemSelect"
-            @select-create="handleCreateOptionSelect"
-          />
-        </div>
+        </FocusScope>
       </ComboboxContent>
     </ComboboxPortal>
   </ComboboxRoot>
