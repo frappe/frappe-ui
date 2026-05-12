@@ -1,7 +1,11 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, watchEffect } from 'vue'
 import { hasRenderableContent } from '../../utils/vnode'
-import { isEmojiIconString, isLucideIconString } from '../../utils/iconString'
+import {
+  isEmojiIconString,
+  isLucideIconString,
+  warnFeatherIconUsage,
+} from '../../utils/iconString'
 import FeatherIcon from '../FeatherIcon.vue'
 import ItemListRow from '../ItemListRow/ItemListRow.vue'
 import Switch from '../Switch/Switch.vue'
@@ -33,6 +37,10 @@ const itemSlotName = computed(() => {
 
 const isSelected = computed(() => {
   return Boolean(props.item.selected)
+})
+
+watchEffect(() => {
+  warnFeatherIconUsage('Dropdown', 'item.icon', props.item.icon)
 })
 
 const userPrefixContent = computed(() => {
@@ -203,10 +211,9 @@ function handleSwitchChange(value: boolean) {
         :model-value="item.switchValue || false"
         @change="handleSwitchChange"
       />
-      <FeatherIcon
+      <span
         v-else-if="trailing === 'submenu'"
-        name="chevron-right"
-        :class="[dropdownClasses.chevronIcon, getDropdownIconColor(item)]"
+        :class="['lucide-chevron-right', dropdownClasses.chevronIcon, getDropdownIconColor(item)]"
         aria-hidden="true"
       />
     </template>

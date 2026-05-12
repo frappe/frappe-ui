@@ -122,9 +122,10 @@ import {
   DialogDescription,
   DialogClose,
 } from 'reka-ui'
-import { computed, reactive } from 'vue'
+import { computed, reactive, watchEffect } from 'vue'
 import { Button } from '../Button'
 import FeatherIcon from '../FeatherIcon.vue'
+import { warnFeatherIconUsage } from '../../utils/iconString'
 import type {
   DialogProps,
   DialogIcon,
@@ -218,6 +219,10 @@ const icon = computed(() => {
     icon = { name: icon }
   }
   return icon as DialogIcon
+})
+
+watchEffect(() => {
+  warnFeatherIconUsage('Dialog', 'options.icon', icon.value?.name)
 })
 
 const dialogPositionClasses = computed(() => {

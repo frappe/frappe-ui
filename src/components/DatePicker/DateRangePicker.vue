@@ -37,9 +37,9 @@
               name="suffix"
               v-bind="{ togglePopover, isOpen, displayLabel, inputValue }"
             >
-              <FeatherIcon
-                name="chevron-down"
-                class="h-4 w-4 cursor-pointer"
+              <span
+                class="lucide-chevron-down size-4 cursor-pointer"
+                aria-hidden="true"
                 @mousedown.prevent="togglePopover"
               />
             </slot>
@@ -209,8 +209,6 @@ import { ref, computed, watch, toRefs } from 'vue'
 import { Popover } from '../Popover'
 import { Button } from '../Button'
 import { TextInput } from '../TextInput'
-// @ts-ignore - Vue SFC without explicit types
-import FeatherIcon from '../FeatherIcon.vue'
 import { dayjs, dayjsLocal } from '../../utils/dayjs'
 import { months, monthStart, generateWeeks, getDateValue } from './utils'
 import type { Dayjs } from 'dayjs'

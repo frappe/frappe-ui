@@ -227,7 +227,7 @@ Keep exported for migration:
 - `Resource.vue`: deprecated and hidden from standard docs
 - `Input.vue`: deprecated in favor of the modern input/control stack
 - `Autocomplete`: deprecated in favor of the split selection/menu components
-- `FeatherIcon`: export retained, but internal core usage should be removed and docs should strongly discourage adoption
+- `FeatherIcon`: export retained for back-compat. Components that accept icon-name props (e.g. `Button.icon`, `Dialog.icon`, `Dropdown` item icons) continue to render feather names through `FeatherIcon` so existing call sites do not break. Internal **hardcoded** icon usages migrate to `lucide-*` strings via the shared Tailwind plugin. Docs recommend `lucide-*` (or a passed `Component`) for new code.
 
 ## Main workstreams
 
@@ -358,7 +358,7 @@ v1 should not ship before all of these are done:
 - v3 is finalized enough for production use
 - Gameplan is fully migrated to v3
 - deprecation warnings and legacy docs exist
-- internal core `FeatherIcon` usage is removed
+- internal **hardcoded** `FeatherIcon` usage is migrated to `lucide-*` (prop-driven icon-name paths kept for back-compat)
 - migration guide and release candidate validation are complete
 
 More specifically, the selection/input family blocker set includes:

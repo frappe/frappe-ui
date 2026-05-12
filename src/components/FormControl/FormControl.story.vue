@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import Story from "@/components/Story.vue";
 import { reactive, ref } from "vue";
-// import FeatherIcon from "../FeatherIcon.vue";
 import { Avatar, FormControl } from "frappe-ui";
 
 const state = reactive({
