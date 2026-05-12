@@ -149,6 +149,13 @@ const hasVisibleItems = computed(() =>
 
 const showEmpty = computed(() => !props.loading && !hasVisibleItems.value)
 
+const allSelected = computed(() => {
+  const selectable = allOptions.value.filter((option) => !option.disabled)
+  if (selectable.length === 0) return false
+  const selected = new Set(safeModel.value)
+  return selectable.every((option) => selected.has(option.value))
+})
+
 function clearAll() {
   model.value = []
 }
@@ -382,10 +389,21 @@ defineSlots<MultiSelectSlots>()
             data-slot="footer"
             class="flex items-center justify-between gap-2 border-t border-outline-gray-1 px-2 py-1.5"
           >
-            <Button variant="ghost" size="sm" @click="clearAll">
+            <Button
+              v-if="safeModel.length > 0"
+              variant="ghost"
+              size="sm"
+              @click="clearAll"
+            >
               Clear All
             </Button>
-            <Button variant="ghost" size="sm" @click="selectAll">
+            <Button
+              v-if="!allSelected"
+              variant="ghost"
+              size="sm"
+              class="ml-auto"
+              @click="selectAll"
+            >
               Select All
             </Button>
           </div>
