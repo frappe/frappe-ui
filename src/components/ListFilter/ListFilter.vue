@@ -72,7 +72,7 @@
               </div>
             </div>
             <div class="flex-shrink-0">
-              <Button variant="ghost" icon="x" @click="removeFilter(i)" />
+              <Button variant="ghost" icon="lucide-x" @click="removeFilter(i)" />
             </div>
           </div>
           <div
@@ -96,7 +96,7 @@
                   label="Add filter"
                 >
                   <template #prefix>
-                    <FeatherIcon name="plus" class="h-4" />
+                    <span class="lucide-plus size-4" aria-hidden="true" />
                   </template>
                 </Button>
               </template>
@@ -116,7 +116,7 @@
 </template>
 
 <script setup>
-import { Autocomplete, FeatherIcon, FormControl } from '../../index'
+import { Autocomplete, FormControl } from '../../index'
 import { computed, h } from 'vue'
 import FilterIcon from './FilterIcon.vue'
 import NestedPopover from './NestedPopover.vue'

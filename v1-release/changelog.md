@@ -96,6 +96,32 @@ The following emit a one-time dev-mode warning when used:
 The legacy components and the `type='autocomplete'` route continue to
 function in v1.x.
 
+### FeatherIcon — deprecated; `lucide-*` recommended
+
+`FeatherIcon` remains exported. Existing call sites — including feather-name
+strings passed to `Button.icon` / `iconLeft` / `iconRight`, `Dialog.options.icon`,
+`Dropdown` item icons, and `TabButtons` leading/trailing icons — continue to
+render via `FeatherIcon`. Passing a feather-name string to any of these props
+now emits a one-time dev-mode deprecation warning recommending the `lucide-*`
+equivalent.
+
+Recommended path for new code is the `lucide-*` icon string vocabulary,
+rendered through the shared Tailwind plugin:
+
+```vue
+<!-- preferred -->
+<Button icon="lucide-plus" />
+<span class="lucide-search size-4" aria-hidden="true" />
+
+<!-- still works -->
+<Button icon="plus" />
+```
+
+Hardcoded internal `FeatherIcon` usages across core components
+(date/time pickers, tree, calendar event modal, command palette, list filter,
+circular progress, dropdown submenu chevron) were migrated to `lucide-*` in
+this release. No consumer-visible behavior change.
+
 ### Dropdown — group field standardized on `options`
 
 `Dropdown`'s grouped-entry field is now `options`, matching `Combobox`,

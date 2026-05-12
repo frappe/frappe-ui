@@ -27,9 +27,9 @@
         </template>
         <template #suffix>
           <slot name="suffix" v-bind="{ togglePopover, isOpen }">
-            <FeatherIcon
-              name="chevron-down"
-              class="h-4 w-4 cursor-pointer"
+            <span
+              class="lucide-chevron-down size-4 cursor-pointer"
+              aria-hidden="true"
               @mousedown.prevent="togglePopover"
             />
           </slot>
@@ -68,7 +68,6 @@
 <script setup lang="ts">
 import Popover from '../Popover/Popover.vue'
 import TextInput from '../TextInput/TextInput.vue'
-import FeatherIcon from '../FeatherIcon.vue'
 import { ref, computed, watch, nextTick } from 'vue'
 import type {
   Option,

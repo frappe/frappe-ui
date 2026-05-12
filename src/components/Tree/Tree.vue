@@ -12,15 +12,15 @@
       <div ref="iconRef">
         <!-- slot to only override the Icon -->
         <slot name="icon" v-bind="{ hasChildren, isCollapsed }">
-          <FeatherIcon
+          <span
             v-if="hasChildren && !isCollapsed"
-            name="chevron-down"
-            class="h-3.5"
+            class="lucide-chevron-down size-3.5"
+            aria-hidden="true"
           />
-          <FeatherIcon
+          <span
             v-else-if="hasChildren"
-            name="chevron-right"
-            class="h-3.5"
+            class="lucide-chevron-right size-3.5"
+            aria-hidden="true"
           />
         </slot>
       </div>
@@ -67,7 +67,6 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import FeatherIcon from '../FeatherIcon.vue'
 import type { TreeNode, TreeProps } from './types'
 
 const props = withDefaults(defineProps<TreeProps>(), {

@@ -57,7 +57,7 @@
               Select all
             </Button>
             <Button
-              icon="x"
+              icon="lucide-x"
               variant="ghost"
               @click="list.toggleAllRows(false)"
             />

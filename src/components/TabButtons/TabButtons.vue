@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { computed, watch, type Component } from 'vue'
+import { computed, watch, watchEffect, type Component } from 'vue'
 import { RadioGroupItem, RadioGroupRoot } from 'reka-ui'
 import { Button, type ButtonProps } from '../Button'
 import FeatherIcon from '../FeatherIcon.vue'
+import { warnFeatherIconUsage } from '../../utils/iconString'
 
 defineOptions({
   name: 'TabButtons',
@@ -38,6 +39,14 @@ const props = defineProps<{
 const emit = defineEmits<{
   'update:modelValue': [value: TabButtonValue | undefined]
 }>()
+
+watchEffect(() => {
+  for (const button of props.buttons) {
+    warnFeatherIconUsage('TabButtons', 'button.icon', button.icon)
+    warnFeatherIconUsage('TabButtons', 'button.iconLeft', button.iconLeft)
+    warnFeatherIconUsage('TabButtons', 'button.iconRight', button.iconRight)
+  }
+})
 
 const resolvedButtons = computed(() => {
   return props.buttons.map((button, index) => {

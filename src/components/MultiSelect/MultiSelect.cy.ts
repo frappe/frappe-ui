@@ -153,14 +153,21 @@ describe('MultiSelect', () => {
   // Regression: prevent a future change from re-introducing the
   // phantom prefix container described in Select's matching block.
   describe('item-prefix container', () => {
-    it('omits the prefix container when no icon and no #item-prefix slot', () => {
+    // MultiSelect always renders a checkbox in the prefix area, so the
+    // container is always present — even when there is no icon and no
+    // consumer-provided #item-prefix slot.
+    it('renders the prefix container with only the checkbox when no icon and no #item-prefix slot', () => {
       cy.mount(MultiSelect, { props: { options } })
 
       cy.get('[data-slot="trigger"]').click()
       cy.get('[role=option]')
         .first()
         .find('[data-slot="item-prefix"]')
-        .should('not.exist')
+        .should('exist')
+      cy.get('[role=option]')
+        .first()
+        .find('[data-slot="item-prefix"] input[type="checkbox"]')
+        .should('exist')
     })
 
     it('renders the prefix container when option has an icon', () => {

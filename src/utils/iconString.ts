@@ -23,3 +23,29 @@ export function isEmojiIconString(icon: unknown): icon is string {
   if (icon.startsWith('lucide-')) return false
   return !/[a-zA-Z0-9]/.test(icon)
 }
+
+export function isFeatherIconString(icon: unknown): icon is string {
+  if (typeof icon !== 'string' || !icon) return false
+  if (isLucideIconString(icon)) return false
+  if (isEmojiIconString(icon)) return false
+  return true
+}
+
+import { warnDeprecated } from './warnDeprecated'
+
+/**
+ * Emit a one-time dev-mode warning when a component receives a legacy
+ * feather-name string in an icon-name prop. Dedups per (component, prop)
+ * pair so a single migration message fires for each call site.
+ */
+export function warnFeatherIconUsage(
+  component: string,
+  prop: string,
+  value: unknown,
+) {
+  if (!isFeatherIconString(value)) return
+  warnDeprecated(
+    `${component}.${prop} feather-name icon`,
+    `a lucide-* string (e.g. "lucide-${value}") or a passed Component`,
+  )
+}

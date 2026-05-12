@@ -24,7 +24,7 @@ findings should be layered on top in follow-up passes.
 | Avatar       | `src/components/Avatar/Avatar.vue`             |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Good baseline                                                   |
 | Badge        | `src/components/Badge/Badge.vue`               |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | API audit still needed                                          |
 | Breadcrumbs  | `src/components/Breadcrumbs/Breadcrumbs.vue`   |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Good baseline                                                   |
-| Button       | `src/components/Button/Button.vue`             |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Still uses internal `FeatherIcon`                               |
+| Button       | `src/components/Button/Button.vue`             |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Renders feather-name icon prop via `FeatherIcon` for back-compat (kept)                               |
 | Checkbox     | `src/components/Checkbox/Checkbox.vue`         |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Good baseline                                                   |
 | Combobox     | `src/components/Combobox/Combobox.vue`         |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Part of critical selection cluster                              |
 | DatePicker   | `src/components/DatePicker/DatePicker.vue`     |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Good baseline                                                   |
@@ -41,7 +41,7 @@ findings should be layered on top in follow-up passes.
 | Password     | `src/components/Password/Password.vue`         |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Depends on FormControl quality                                  |
 | Popover      | `src/components/Popover/Popover.vue`           |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Overlay/floating blocker                                        |
 | Progress     | `src/components/Progress/Progress.vue`         |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Good baseline                                                   |
-| Rating       | `src/components/Rating/Rating.vue`             |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Still uses internal `FeatherIcon`                               |
+| Rating       | `src/components/Rating/Rating.vue`             |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Renders feather-name icon prop via `FeatherIcon` for back-compat (kept)                               |
 | Select       | `src/components/Select/Select.vue`             |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Selection/floating cluster                                      |
 | Sidebar      | `src/components/Sidebar/Sidebar.vue`           |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Good baseline                                                   |
 | Slider       | `src/components/Slider/Slider.vue`             |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Baseline present                                                |
@@ -53,7 +53,7 @@ findings should be layered on top in follow-up passes.
 | Textarea     | `src/components/Textarea/Textarea.vue`         |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Baseline present                                                |
 | Toast        | `src/components/Toast/Toast.vue`               |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Baseline coverage added in this pass                            |
 | Tooltip      | `src/components/Tooltip/Tooltip.vue`           |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Good baseline                                                   |
-| Tree         | `src/components/Tree/Tree.vue`                 |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Still uses internal `FeatherIcon`                               |
+| Tree         | `src/components/Tree/Tree.vue`                 |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Renders feather-name icon prop via `FeatherIcon` for back-compat (kept)                               |
 
 ## Highest-priority structural gaps
 
@@ -95,17 +95,26 @@ does not expose a typed component baseline.
 - ListView
 - TabButtons
 
-### 5. Core components still using internal `FeatherIcon`
+### 5. Internal `FeatherIcon` usage — scoped down
 
-At minimum confirmed in:
+`FeatherIcon` stays exported. Components with icon-name props (e.g.
+`Button.icon`, `Dialog.icon`, `Dropdown` item icons, `TabButtons.leadingIcon`)
+keep rendering feather names through `FeatherIcon` so existing call sites do
+not break.
 
-- Button
-- Rating
-- Switch
-- Tree
+Only **hardcoded** internal usages migrate to `lucide-*` strings via the
+shared Tailwind plugin. Affected files:
 
-There are likely more usages across related components and internals. This needs
-a broader removal pass as part of the v1 deprecation strategy.
+- `Tree/Tree.vue` (chevron-down, chevron-right)
+- `TimePicker/TimePicker.vue` (chevron-down)
+- `DatePicker/DatePicker.vue`, `DateRangePicker.vue`, `DateTimePicker.vue` (chevron-down)
+- `Dropdown/DropdownMenuItemContent.vue` (submenu trailing chevron-right)
+- `ListFilter/ListFilter.vue` (plus)
+- `CommandPalette/CommandPalette.vue` (search)
+- `CircularProgressBar/CircularProgressBar.vue` (check)
+- `Calendar/EventModalContent.vue` (x, edit-2, trash-2, calendar, user, clock, map-pin)
+
+`Input.vue` and `Autocomplete.vue` are deprecated and intentionally not migrated.
 
 ## TextEditor-specific note
 

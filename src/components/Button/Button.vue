@@ -91,12 +91,13 @@
   </TooltipProvider>
 </template>
 <script lang="ts" setup>
-import { computed, useSlots, ref } from 'vue'
+import { computed, useSlots, ref, watchEffect } from 'vue'
 import { TooltipProvider, TooltipRoot, TooltipTrigger } from 'reka-ui'
 import FeatherIcon from '../FeatherIcon.vue'
 import LoadingIndicator from '../LoadingIndicator.vue'
 import TooltipBubble from '../Tooltip/TooltipBubble.vue'
 import { useRouter } from 'vue-router'
+import { warnFeatherIconUsage } from '../../utils/iconString'
 import type { ButtonProps, ThemeVariant } from './types'
 
 defineOptions({ inheritAttrs: false })
@@ -108,6 +109,12 @@ const props = withDefaults(defineProps<ButtonProps>(), {
   loading: false,
   disabled: false,
   type: "button"
+})
+
+watchEffect(() => {
+  warnFeatherIconUsage('Button', 'icon', props.icon)
+  warnFeatherIconUsage('Button', 'iconLeft', props.iconLeft)
+  warnFeatherIconUsage('Button', 'iconRight', props.iconRight)
 })
 
 const slots = useSlots()

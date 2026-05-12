@@ -112,7 +112,7 @@ const events = ref([
                 variant="ghost"
                 class="text-lg font-medium text-ink-gray-7"
                 :label="headerProps.currentMonthYear"
-                iconRight="chevron-down"
+                iconRight="lucide-chevron-down"
                 @click="togglePopover"
               />
             </template>
@@ -121,7 +121,7 @@ const events = ref([
         <div class="flex items-center gap-2">
           <Button
             variant="ghost"
-            icon="chevron-left"
+            icon="lucide-chevron-left"
             @click="headerProps.decrement"
           />
           <Button
@@ -131,7 +131,7 @@ const events = ref([
           />
           <Button
             variant="ghost"
-            icon="chevron-right"
+            icon="lucide-chevron-right"
             @click="headerProps.increment"
           />
         </div>
