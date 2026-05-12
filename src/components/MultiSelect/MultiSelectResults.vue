@@ -2,10 +2,10 @@
 import {
   ComboboxGroup,
   ComboboxItem,
-  ComboboxItemIndicator,
   ComboboxLabel,
   ComboboxViewport,
 } from 'reka-ui'
+import Checkbox from '../Checkbox/Checkbox.vue'
 import ItemListRow from '../ItemListRow/ItemListRow.vue'
 import LoadingIndicator from '../LoadingIndicator.vue'
 import OptionIcon from '../shared/selection/OptionIcon.vue'
@@ -164,19 +164,29 @@ function getItemTextValue(item: NormalizedOption) {
                 :disabled="item.disabled"
               >
                 <template #prefix>
-                  <component
-                    :is="ItemSlotRender"
-                    v-if="slotFns['item-prefix']"
-                    :render="slotFns['item-prefix']"
-                    :slot-props="getItemSlotProps(item)"
-                  />
-                  <component
-                    :is="ItemSlotRender"
-                    v-else-if="item.resolvedSlots.prefix"
-                    :render="item.resolvedSlots.prefix"
-                    :slot-props="getItemSlotProps(item)"
-                  />
-                  <OptionIcon v-else-if="item.icon" :icon="item.icon" />
+                  <span class="flex items-center gap-2">
+                    <Checkbox
+                      :model-value="isItemSelected(item)"
+                      :disabled="item.disabled"
+                      size="sm"
+                      tabindex="-1"
+                      aria-hidden="true"
+                      class="pointer-events-none"
+                    />
+                    <component
+                      :is="ItemSlotRender"
+                      v-if="slotFns['item-prefix']"
+                      :render="slotFns['item-prefix']"
+                      :slot-props="getItemSlotProps(item)"
+                    />
+                    <component
+                      :is="ItemSlotRender"
+                      v-else-if="item.resolvedSlots.prefix"
+                      :render="item.resolvedSlots.prefix"
+                      :slot-props="getItemSlotProps(item)"
+                    />
+                    <OptionIcon v-else-if="item.icon" :icon="item.icon" />
+                  </span>
                 </template>
 
                 <template #label>
@@ -232,12 +242,6 @@ function getItemTextValue(item: NormalizedOption) {
                     :render="item.resolvedSlots.suffix"
                     :slot-props="getItemSlotProps(item)"
                   />
-
-                  <ComboboxItemIndicator
-                    class="ml-1 inline-flex items-center justify-center"
-                  >
-                    <span class="lucide-check size-4 text-ink-gray-6" />
-                  </ComboboxItemIndicator>
                 </template>
               </ItemListRow>
             </ComboboxItem>
