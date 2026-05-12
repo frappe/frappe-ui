@@ -70,7 +70,7 @@
           <div class="flex items-center">
             <Button
               variant="ghost"
-              icon="chevron-left"
+              icon="lucide-chevron-left"
               class="size-7"
               label="previous"
               @click="prev"
@@ -83,7 +83,7 @@
             />
             <Button
               variant="ghost"
-              icon="chevron-right"
+              icon="lucide-chevron-right"
               class="size-7"
               label="next"
               @click="next"

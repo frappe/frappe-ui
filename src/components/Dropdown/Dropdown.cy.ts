@@ -2,10 +2,10 @@ import Dropdown from './Dropdown.vue'
 import { defineComponent, h } from 'vue'
 
 const options = [
-  { label: 'Edit', icon: 'edit' },
+  { label: 'Edit', icon: 'lucide-edit' },
   {
     label: 'Delete',
-    icon: 'trash-2',
+    icon: 'lucide-trash-2',
     theme: 'red',
   },
 ]
@@ -13,23 +13,23 @@ const options = [
 const submenuActions = [
   {
     label: 'New',
-    icon: 'plus',
+    icon: 'lucide-plus',
     submenu: [
       {
         label: 'New Document',
-        icon: 'file-plus',
+        icon: 'lucide-file-plus',
         onClick: () => console.log('New Document clicked'),
       },
       {
         label: 'New Template',
-        icon: 'file-text',
+        icon: 'lucide-file-text',
         onClick: () => console.log('New Template clicked'),
       },
     ],
   },
   {
     label: 'Edit',
-    icon: 'edit',
+    icon: 'lucide-edit',
     onClick: () => console.log('Edit clicked'),
   },
 ]
@@ -37,25 +37,25 @@ const submenuActions = [
 const nestedSubmenuActions = [
   {
     label: 'Share',
-    icon: 'share',
+    icon: 'lucide-share',
     submenu: [
       {
         label: 'Copy link',
-        icon: 'link',
+        icon: 'lucide-link',
         onClick: () => console.log('Copy link clicked'),
       },
       {
         label: 'Invite people',
-        icon: 'user-plus',
+        icon: 'lucide-user-plus',
         submenu: [
           {
             label: 'Invite by email',
-            icon: 'mail',
+            icon: 'lucide-mail',
             onClick: () => console.log('Invite by email clicked'),
           },
           {
             label: 'Share in Slack',
-            icon: 'message-circle',
+            icon: 'lucide-message-circle',
             onClick: () => console.log('Share in Slack clicked'),
           },
         ],

@@ -71,7 +71,7 @@
             <Button
               label="previous"
               variant="ghost"
-              icon="chevron-left"
+              icon="lucide-chevron-left"
               class="size-7"
               @click="prev"
             />
@@ -85,7 +85,7 @@
             <Button
               label="next"
               variant="ghost"
-              icon="chevron-right"
+              icon="lucide-chevron-right"
               class="size-7"
               @click="next"
             />

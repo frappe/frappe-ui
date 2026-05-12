@@ -30,7 +30,7 @@
                 variant="ghost"
                 class="text-lg font-medium text-ink-gray-7"
                 :label="currentMonthYear"
-                iconRight="chevron-down"
+                iconRight="lucide-chevron-down"
                 @click="togglePopover"
               />
             </template>
@@ -41,9 +41,9 @@
         <div class="flex gap-x-1">
           <!-- Increment and Decrement Button-->
 
-          <Button @click="decrement" variant="ghost" icon="chevron-left" />
+          <Button @click="decrement" variant="ghost" icon="lucide-chevron-left" />
           <Button label="Today" @click="setCalendarDate()" variant="ghost" />
-          <Button @click="increment" variant="ghost" icon="chevron-right" />
+          <Button @click="increment" variant="ghost" icon="lucide-chevron-right" />
 
           <!--  View change button, default is months or can be set via props!  -->
           <TabButtons

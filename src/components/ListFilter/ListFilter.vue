@@ -72,7 +72,7 @@
               </div>
             </div>
             <div class="flex-shrink-0">
-              <Button variant="ghost" icon="x" @click="removeFilter(i)" />
+              <Button variant="ghost" icon="lucide-x" @click="removeFilter(i)" />
             </div>
           </div>
           <div
