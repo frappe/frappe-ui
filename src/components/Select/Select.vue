@@ -45,6 +45,7 @@ const props = withDefaults(defineProps<SelectProps>(), {
   size: 'sm',
   variant: 'subtle',
   placeholder: 'Select option',
+  position: 'popper',
   options: () => [],
   emptyText: 'No options',
 })
@@ -246,6 +247,8 @@ defineSlots<SelectSlots>()
       <SelectContent
         data-slot="content"
         data-selection
+        :position="position"
+        :side-offset="4"
         class="z-[100] origin-[var(--reka-select-content-transform-origin)]"
       >
         <div

@@ -43,6 +43,9 @@ export interface SelectProps {
 
   /** Fallback empty-state copy rendered when no options are available. */
   emptyText?: string
+
+  /** Dropdown positioning `popper` anchors the menu below the trigger. */
+  position?: 'item-aligned' | 'popper'
 }
 
 export interface SelectTriggerSlotProps {
