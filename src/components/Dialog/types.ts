@@ -123,6 +123,11 @@ export interface DialogActionsSlotProps {
   actions: DialogReactiveAction[]
 }
 
+export interface DialogExposed {
+  /** Closes the dialog. */
+  close: () => void
+}
+
 export interface DialogSlots {
   /** Main content rendered inside the padded card. */
   default?: () => any

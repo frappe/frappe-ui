@@ -143,15 +143,15 @@ type LifecycleState = {
   loading: boolean
 }
 
-function makeClose(state: LifecycleState, id: () => number) {
+// Flips the dialog's `open` flag (idempotent). The instance is removed from
+// the active list by the Dialog overlay's `after-leave` callback.
+function makeClose(state: LifecycleState) {
   let closed = false
   return () => {
     if (closed) return
     closed = true
     state.open = false
     state.loading = false
-    // after-leave on the Dialog overlay removes the instance from the list
-    void id
   }
 }
 
@@ -162,7 +162,7 @@ export function confirm(args: ConfirmArgs): Promise<ConfirmResult> {
     const state = reactive<LifecycleState>({ open: true, loading: false })
     let resolved = false
     let assignedId = -1
-    const close = makeClose(state, () => assignedId)
+    const close = makeClose(state)
 
     const onConfirm = () => {
       if (resolved) return
@@ -237,7 +237,7 @@ export function alert(args: AlertArgs): Promise<AlertResult> {
     const state = reactive<LifecycleState>({ open: true, loading: false })
     let resolved = false
     let assignedId = -1
-    const close = makeClose(state, () => assignedId)
+    const close = makeClose(state)
 
     const onClick = () => {
       if (resolved) return
@@ -295,7 +295,7 @@ export function prompt(args: PromptArgs): Promise<PromptResult> {
     const state = reactive<LifecycleState>({ open: true, loading: false })
     let resolved = false
     let assignedId = -1
-    const close = makeClose(state, () => assignedId)
+    const close = makeClose(state)
 
     const values = reactive<Record<string, any>>(
       Object.fromEntries(

@@ -1,5 +1,5 @@
 <template>
-  <DialogRoot v-model:open="isOpen" @update:open="handleOpenChange">
+  <DialogRoot v-model:open="isOpen">
     <DialogPortal>
       <DialogOverlay
         class="fixed inset-0 bg-black-overlay-200 dark:bg-black-overlay-700 overflow-y-auto dialog-overlay outline-none"
@@ -83,7 +83,7 @@
                         v-if="resolved.showCloseButton"
                         as-child
                       >
-                        <Button variant="ghost" label="Close" @click="close">
+                        <Button variant="ghost" label="Close">
                           <template #icon>
                             <span class="lucide-x size-4 text-ink-gray-9" />
                           </template>
@@ -136,7 +136,6 @@
                 class="absolute right-4 top-4 z-10"
                 variant="ghost"
                 label="Close"
-                @click="close"
               >
                 <template #icon>
                   <span class="lucide-x size-4 text-ink-gray-9" />
@@ -172,6 +171,7 @@ import type {
   DialogProps,
   DialogEmits,
   DialogSlots,
+  DialogExposed,
   DialogIcon,
   DialogActionContext,
   DialogOptions,
@@ -286,15 +286,11 @@ const isOpen = computed({
   },
 })
 
-function handleOpenChange(open: boolean) {
-  isOpen.value = open
-}
-
 function close() {
   isOpen.value = false
 }
 
-defineExpose({ close })
+defineExpose({ close } satisfies DialogExposed)
 
 // Resolved icon — also maps deprecated `appearance` to `theme`.
 const resolvedIcon = computed<DialogIcon | null>(() => {

@@ -5,6 +5,7 @@ export type {
   DialogProps,
   DialogEmits,
   DialogSlots,
+  DialogExposed,
   DialogActionsSlotProps,
   DialogAction,
   DialogReactiveAction,

@@ -40,7 +40,7 @@ A non-dismissable Dialog is still `role="dialog"` — "must respond" is expresse
 **Imperative dialog API**:
 A `dialog` namespace exporting Promise-based helpers: `dialog.confirm()`, `dialog.alert()`, `dialog.prompt()`. Each helper mounts a `<Dialog>` with `dismissable: false` and resolves on the user's chosen action. Replaces the legacy `confirmDialog()` helper.
 
-Mounting is handled by a Vue plugin: `app.use(DialogsPlugin)` in `main.ts`. The plugin installs a hidden `<Dialogs />` mount into the app tree so imperative dialogs inherit `provide/inject` (router, Pinia, theme, etc.) from the host app. The `<Dialogs />` component remains exported for callers who want to mount it manually instead.
+Mounting is handled by `<FrappeUIProvider>`, which renders a hidden `<Dialogs />` next to `<Toasts />` so imperative dialogs inherit `provide/inject` (router, Pinia, theme, etc.) from the host app. The `<Dialogs />` component remains exported for callers who don't use the provider and want to mount it manually.
 
 - `dialog.confirm({...})` → `Promise<{ ok: boolean, close: () => void }>`
 - `dialog.alert({...})` → `Promise<{ close: () => void }>`

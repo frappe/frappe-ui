@@ -85,6 +85,6 @@ async function newFolder() {
     <Button @click="savedAlert">dialog.alert</Button>
     <Button @click="newFolder">dialog.prompt</Button>
   </div>
-  <!-- In real apps DialogsPlugin auto-mounts this. -->
+  <!-- In real apps <FrappeUIProvider> auto-mounts <Dialogs />. -->
   <Dialogs />
 </template>
