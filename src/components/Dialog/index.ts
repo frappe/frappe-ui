@@ -1,6 +1,21 @@
 import DialogMain from './Dialog.vue'
 import { DialogTitle, DialogDescription } from 'reka-ui'
-export type { DialogProps } from './types'
+
+export type {
+  DialogProps,
+  DialogEmits,
+  DialogSlots,
+  DialogActionsSlotProps,
+  DialogAction,
+  DialogReactiveAction,
+  DialogActionContext,
+  DialogIcon,
+  DialogIconAppearance,
+  DialogOptions,
+  DialogPosition,
+  DialogSize,
+  DialogTheme,
+} from './types'
 
 type DialogExport = typeof DialogMain & {
   Title: typeof DialogTitle

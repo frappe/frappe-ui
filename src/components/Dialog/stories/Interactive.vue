@@ -1,47 +1,64 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { Button, Dialog, Dropdown } from 'frappe-ui'
+// Adapted from gameplan/NewTaskDialog.vue — a "new task" form with a
+// single full-width primary action that owns the submit. Demonstrates
+// using `dismissable` from a dirty-form flag, the canonical `#default`
+// slot for the form, and an `#actions` slot that's a single CTA.
+import { computed, ref } from 'vue'
+import { Button, Dialog, FormControl, KeyboardShortcut } from 'frappe-ui'
 
 const open = ref(false)
-const selectedOption = ref('Option 1')
+const task = ref({ title: '', description: '', assignee: '' })
 
-const dropdownOptions = [
-  { label: 'Option 1', onClick: () => (selectedOption.value = 'Option 1') },
-  { label: 'Option 2', onClick: () => (selectedOption.value = 'Option 2') },
-  { label: 'Option 3', onClick: () => (selectedOption.value = 'Option 3') },
-]
+const isDirty = computed(
+  () => !!(task.value.title || task.value.description || task.value.assignee),
+)
+
+async function createTask(close: () => void) {
+  await new Promise((r) => setTimeout(r, 500))
+  task.value = { title: '', description: '', assignee: '' }
+  close()
+}
 </script>
 
 <template>
-  <Button @click="open = true">Show Settings Dialog</Button>
+  <Button @click="open = true">New task</Button>
 
-  <Dialog v-model="open">
-    <template #body-title>
-      <h3 class="text-2xl font-semibold text-ink-gray-9">Settings Dialog</h3>
-    </template>
-
-    <template #body-content>
-      <div class="space-y-4">
-        <Dropdown :options="dropdownOptions" placement="left">
-          <Button variant="outline">
-            {{ selectedOption }}
-            <template #suffix>
-              <span class="lucide-chevron-down size-4 text-ink-gray-5" />
-            </template>
-          </Button>
-        </Dropdown>
-
-        <div class="bg-gray-50 p-4 rounded text-sm">
-          <strong>Selected:</strong> {{ selectedOption }}
-        </div>
-      </div>
-    </template>
+  <Dialog
+    v-model:open="open"
+    title="New task"
+    :dismissable="!isDirty"
+  >
+    <div class="space-y-4">
+      <FormControl
+        label="Title"
+        v-model="task.title"
+        placeholder="What needs to happen?"
+        required
+      />
+      <FormControl
+        label="Description"
+        type="textarea"
+        v-model="task.description"
+      />
+      <FormControl
+        label="Assignee"
+        v-model="task.assignee"
+        placeholder="@username"
+      />
+    </div>
 
     <template #actions="{ close }">
-      <div class="flex gap-2">
-        <Button variant="solid" @click="close">Save</Button>
-        <Button variant="outline" @click="close">Cancel</Button>
-      </div>
+      <Button
+        class="w-full"
+        variant="solid"
+        :disabled="!task.title"
+        @click="createTask(close)"
+      >
+        Create
+        <template #suffix>
+          <KeyboardShortcut ctrl>Enter</KeyboardShortcut>
+        </template>
+      </Button>
     </template>
   </Dialog>
 </template>

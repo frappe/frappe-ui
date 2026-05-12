@@ -30,7 +30,7 @@ Apps reach for the imperative `dialog.*` helpers when they need a one-off confir
 | Color vocabulary | `theme` with color names (`'yellow' \| 'blue' \| 'red' \| 'green'`), matching `Alert.theme`. No semantic axis. |
 | Slots | Canonical: `#default`, `#title`, `#actions`. Legacy slots deprecated with internal forwarding. |
 | Imperative API | Promise-based `dialog.confirm/alert/prompt`. Promise resolves on click; caller calls `close()`. Auto-loading on the action button until `close()`. |
-| Mount mechanism | `app.use(DialogsPlugin)`; `<Dialogs />` component still exported for explicit mount. |
+| Mount mechanism | `<FrappeUIProvider>` renders `<Dialogs />` next to `<Toasts />`. `<Dialogs />` is still exported for callers who don't use the provider. |
 
 ## Exact public API for v1
 
@@ -163,18 +163,24 @@ The `dialog` namespace exports three Promise-based helpers. All resolve when the
 
 ### Mount
 
-```ts
-// main.ts
-import { createApp } from 'vue'
-import { DialogsPlugin } from 'frappe-ui'
-import App from './App.vue'
+Wrap the app once with `<FrappeUIProvider>` — it already hosts the toast
+viewport and now also renders `<Dialogs />` for the imperative API:
 
-createApp(App).use(DialogsPlugin).mount('#app')
+```vue
+<!-- App.vue -->
+<FrappeUIProvider>
+  <RouterView />
+</FrappeUIProvider>
 ```
 
-The plugin installs a hidden `<Dialogs />` mount into the app's root so imperative dialogs inherit `provide/inject` (router, Pinia, theme).
+That's the entire setup. Imperative `dialog.*` calls work from anywhere
+in the app and inherit `provide/inject` (router, Pinia, theme) from the
+host app — no separate Vue instance, no internal-API touches.
 
-For apps that prefer explicit mounting, the `<Dialogs />` component remains exported and can be placed in `App.vue`. The plugin no-ops if `<Dialogs />` is already mounted.
+Apps that don't use `FrappeUIProvider` can mount `<Dialogs />` directly
+in their root template instead. There is no `DialogsPlugin` — keeping
+mounts in the component tree avoids the `createApp` + `_context` shim
+pattern used by some other libraries.
 
 ### Types
 
@@ -317,7 +323,7 @@ Each deprecated surface keeps working in v1, emits a one-time dev-mode console w
 | `confirmDialog()` helper | `dialog.confirm()` |
 | `ConfirmDialog.vue` component | mounted internally by `dialog.confirm()`; not part of v1 public surface |
 
-`<Dialogs />` is **not** deprecated — it remains exported and is used by `DialogsPlugin` internally. Apps that already mount it in their template continue to work; the plugin no-ops in that case.
+`<Dialogs />` is **not** deprecated — it remains exported and is now rendered by `<FrappeUIProvider>` alongside `<Toasts />`. Apps that already mount it in their template continue to work; rendering it twice is safe (the second mount has no extra effect, but the imperative dialog stack lives in a shared module-level ref so the same stack drives both).
 
 ## Migration notes
 
