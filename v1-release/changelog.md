@@ -16,6 +16,39 @@ unless they affect consumers.
 
 ## Unreleased
 
+### Dialog — v1 spec implemented
+
+- Flat top-level props (`title`, `message`, `icon`, `size`, `position`,
+  `paddingTop`, `actions`) are now canonical; the legacy `options` blob
+  still works but warns once per instance.
+- `v-model:open` is canonical; `v-model` (bound to `modelValue`) still
+  works without a warning.
+- New behavior props: `dismissable` (default `true`, replaces
+  `disableOutsideClickToClose`), `bare` (suppresses chrome), and
+  `showCloseButton` (default `true`, independent of the auto-header).
+- New canonical slots: `#default`, `#title`, `#actions` (scoped with
+  `{ close, actions }`). Legacy slots `#body`, `#body-main`,
+  `#body-header`, `#body-title`, `#body-content` keep working and emit
+  deprecation warnings.
+- `icon.theme` (`yellow | blue | red | green`) replaces
+  `icon.appearance`; the legacy form is auto-mapped and warns.
+- Auto-header no longer renders an "Untitled" fallback when no title /
+  `#title` is provided.
+
+### Dialog — imperative `dialog.*` API
+
+- New Promise-based helpers: `dialog.confirm()`, `dialog.alert()`,
+  `dialog.prompt()`. Each resolves on click and exposes `close()` so the
+  caller controls when the dialog actually closes; the action button
+  shows a loading state from click until `close()`.
+- `<FrappeUIProvider>` now renders `<Dialogs />` next to `<Toasts />`, so
+  apps that already wrap with the provider get the imperative dialog
+  stack for free — no separate plugin, no `createApp` / `_context`
+  shim. The `<Dialogs />` component is still exported for callers who
+  don't use the provider.
+- Legacy `confirmDialog()` keeps working and now emits a deprecation
+  warning pointing at `dialog.confirm()`.
+
 ### Input family — shared labeling contract
 
 Every input that has a labelable role now accepts the same four props:

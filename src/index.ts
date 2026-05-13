@@ -16,6 +16,15 @@ export * from './components/DatePicker'
 export * from './components/MonthPicker'
 export * from './components/Dialog'
 export { default as Dialogs } from './components/Dialogs.vue'
+export {
+  dialog,
+  type ConfirmArgs,
+  type PromptArgs,
+  type PromptField,
+  type ConfirmResult,
+  type PromptResult,
+  type DialogNamespace,
+} from './utils/dialog'
 export * from './components/Divider'
 export * from './components/Dropdown'
 export * from './components/ErrorMessage'

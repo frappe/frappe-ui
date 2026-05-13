@@ -1,101 +1,122 @@
 <template>
-  <DialogRoot v-model:open="isOpen" @update:open="handleOpenChange">
+  <DialogRoot v-model:open="isOpen">
     <DialogPortal>
       <DialogOverlay
         class="fixed inset-0 bg-black-overlay-200 dark:bg-black-overlay-700 overflow-y-auto dialog-overlay outline-none"
-        :data-dialog="options.title"
+        :data-dialog="resolved.title"
         @after-leave="$emit('after-leave')"
       >
         <div
           class="flex min-h-screen flex-col items-center px-4 py-4 text-center"
           :class="dialogPositionClasses"
           :style="dialogPositionStyles"
+          :data-position="resolved.position || 'center'"
         >
           <DialogContent
+            ref="contentRef"
             class="my-8 inline-block w-full transform overflow-hidden rounded-xl bg-surface-modal text-start align-middle shadow-xl dialog-content focus-visible:outline-none"
-            :class="{
-              'max-w-7xl': options.size === '7xl',
-              'max-w-6xl': options.size === '6xl',
-              'max-w-5xl': options.size === '5xl',
-              'max-w-4xl': options.size === '4xl',
-              'max-w-3xl': options.size === '3xl',
-              'max-w-2xl': options.size === '2xl',
-              'max-w-xl': options.size === 'xl',
-              'max-w-lg': options.size === 'lg' || !options.size,
-              'max-w-md': options.size === 'md',
-              'max-w-sm': options.size === 'sm',
-              'max-w-xs': options.size === 'xs',
-            }"
-            @escape-key-down="close()"
+            :class="sizeClass"
+            @open-auto-focus="handleOpenAutoFocus"
+            @escape-key-down="
+              (e: Event) => {
+                if (!isDismissable) e.preventDefault()
+              }
+            "
             @interact-outside="
               (e: Event) => {
-                if (props.disableOutsideClickToClose) {
-                  e.preventDefault()
-                }
+                if (!isDismissable) e.preventDefault()
               }
             "
           >
-            <slot name="body">
-              <slot name="body-main">
-                <div class="bg-surface-modal px-4 pb-6 pt-5 sm:px-6">
-                  <div class="flex">
-                    <div class="w-full flex-1">
-                      <slot name="body-header">
-                        <div class="mb-6 flex items-center justify-between">
-                          <div class="flex items-center space-x-2">
-                            <div
-                              v-if="icon"
-                              class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full"
-                              :class="dialogIconBgClasses"
-                            >
-                              <FeatherIcon
-                                :name="icon.name"
-                                class="h-4 w-4"
-                                :class="dialogIconClasses"
-                                aria-hidden="true"
-                              />
-                            </div>
-                            <DialogTitle as="header">
-                              <slot name="body-title">
-                                <h3
-                                  class="text-2xl font-semibold leading-6 text-ink-gray-9"
-                                >
-                                  {{ options.title || 'Untitled' }}
-                                </h3>
-                              </slot>
-                            </DialogTitle>
-                          </div>
-                          <DialogClose as-child>
-                            <Button variant="ghost" @click="close">
-                              <template #icon>
-                                <span class="lucide-x size-4 text-ink-gray-9" />
-                              </template>
-                            </Button>
-                          </DialogClose>
-                        </div>
-                      </slot>
+            <!-- bare: no chrome, render default slot directly -->
+            <slot v-if="resolved.bare" :close="close" />
 
-                      <slot name="body-content">
-                        <DialogDescription as-child v-if="options.message">
+            <!-- legacy `#body` slot: full layout override (deprecated) -->
+            <slot v-else-if="$slots.body" name="body" />
+
+            <template v-else>
+              <!-- legacy `#body-main`: full middle override (deprecated) -->
+              <slot v-if="$slots['body-main']" name="body-main" />
+              <div v-else class="bg-surface-modal px-4 pb-6 pt-5 sm:px-6">
+                <div class="flex">
+                  <div class="w-full flex-1">
+                    <!-- legacy `#body-header` (deprecated, warns + renders nothing if used; preserved for back-compat by rendering header) -->
+                    <slot v-if="$slots['body-header']" name="body-header" />
+                    <div
+                      v-else-if="showHeader"
+                      class="mb-6 flex items-center justify-between"
+                    >
+                      <div class="flex items-center space-x-2">
+                        <div
+                          v-if="resolvedIcon"
+                          class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full"
+                          :class="dialogIconBgClasses"
+                        >
+                          <span
+                            v-if="isLucide(resolvedIcon.name)"
+                            :class="[
+                              resolvedIcon.name,
+                              'size-4',
+                              dialogIconClasses,
+                            ]"
+                            aria-hidden="true"
+                          />
+                          <FeatherIcon
+                            v-else
+                            :name="resolvedIcon.name"
+                            class="h-4 w-4"
+                            :class="dialogIconClasses"
+                            aria-hidden="true"
+                          />
+                        </div>
+                        <DialogTitle as="header">
+                          <slot name="title" :close="close">
+                            <slot name="body-title">
+                              <h3
+                                v-if="resolved.title"
+                                class="text-2xl font-semibold leading-6 text-ink-gray-9"
+                              >
+                                {{ resolved.title }}
+                              </h3>
+                            </slot>
+                          </slot>
+                        </DialogTitle>
+                      </div>
+                      <DialogClose v-if="resolved.showCloseButton" as-child>
+                        <Button variant="ghost" label="Close">
+                          <template #icon>
+                            <span class="lucide-x size-4 text-ink-gray-9" />
+                          </template>
+                        </Button>
+                      </DialogClose>
+                    </div>
+
+                    <slot name="body-content">
+                      <slot :close="close">
+                        <DialogDescription as-child v-if="resolved.message">
                           <p class="text-p-base text-ink-gray-7">
-                            {{ options.message }}
+                            {{ resolved.message }}
                           </p>
                         </DialogDescription>
                       </slot>
-                    </div>
+                    </slot>
                   </div>
                 </div>
-              </slot>
+              </div>
+
               <div
+                v-if="reactiveActions.length || $slots.actions"
                 class="px-4 pb-7 pt-4 sm:px-6"
-                v-if="actions.length || $slots.actions"
               >
-                <slot name="actions" v-bind="{ close }">
-                  <div class="space-y-2">
+                <slot
+                  name="actions"
+                  v-bind="{ close, actions: reactiveActions }"
+                >
+                  <div :class="isSingleActionFullWidth ? '' : 'flex justify-end gap-2'">
                     <Button
-                      class="w-full"
-                      v-for="action in actions"
+                      v-for="action in reactiveActions"
                       :key="action.label"
+                      :class="isSingleActionFullWidth ? 'w-full' : ''"
                       :disabled="action.disabled"
                       v-bind="action"
                     >
@@ -104,7 +125,30 @@
                   </div>
                 </slot>
               </div>
-            </slot>
+            </template>
+
+            <!-- close button when auto-header is suppressed but caller still wants a close affordance -->
+            <!-- Suppressed for legacy slots that own their own header chrome: `#body` is a full override, `#body-header` replaced the header (incl. close) in v0. -->
+            <DialogClose
+              v-if="
+                resolved.showCloseButton &&
+                !showHeader &&
+                !resolved.bare &&
+                !$slots['body'] &&
+                !$slots['body-header']
+              "
+              as-child
+            >
+              <Button
+                class="absolute right-4 top-4 z-10"
+                variant="ghost"
+                label="Close"
+              >
+                <template #icon>
+                  <span class="lucide-x size-4 text-ink-gray-9" />
+                </template>
+              </Button>
+            </DialogClose>
           </DialogContent>
         </div>
       </DialogOverlay>
@@ -122,44 +166,236 @@ import {
   DialogDescription,
   DialogClose,
 } from 'reka-ui'
-import { computed, reactive, watchEffect } from 'vue'
+import { computed, reactive, ref, useSlots, watchEffect } from 'vue'
+import type { ComponentPublicInstance } from 'vue'
+import { useAutofocusOnOpen } from '../../composables/useAutofocusOnOpen'
 import { Button } from '../Button'
 import FeatherIcon from '../FeatherIcon.vue'
-import { warnFeatherIconUsage } from '../../utils/iconString'
+import {
+  warnFeatherIconUsage,
+  isLucideIconString,
+} from '../../utils/iconString'
+import { warnDeprecated } from '../../utils/warnDeprecated'
 import type {
   DialogProps,
+  DialogEmits,
+  DialogSlots,
+  DialogExposed,
   DialogIcon,
-  DialogAction,
   DialogActionContext,
+  DialogOptions,
+  DialogTheme,
+  DialogIconAppearance,
+  DialogReactiveAction,
 } from './types'
 
-// Type for dialog action with reactive loading state
-type ReactiveDialogAction = DialogAction & {
-  loading: boolean
-}
-
 const props = withDefaults(defineProps<DialogProps>(), {
-  options: () => ({}),
-  disableOutsideClickToClose: false,
+  // Boolean props default to `undefined` so we can detect "not passed" — Vue
+  // otherwise casts absent boolean props to `false`, which would defeat the
+  // `open` vs `modelValue` precedence below.
+  open: undefined,
+  modelValue: undefined,
+  disableOutsideClickToClose: undefined,
+  // `size`/`position` intentionally left undefined so legacy `options.size`
+  // and `options.position` still take effect when the top-level prop is omitted.
+  // Defaults are applied inside `resolved`.
+  size: undefined,
+  position: undefined,
+  dismissable: true,
+  showCloseButton: true,
+  bare: false,
 })
 
-const emit = defineEmits<{
-  /** Fired when the dialog `v-model:open` changes */
-  (event: 'update:modelValue', value: boolean): void
+const emit = defineEmits<DialogEmits>()
 
-  /** Fired when the dialog closes */
-  (event: 'close'): void
+const slots = defineSlots<DialogSlots>()
 
-  /** Fired after the dialog overlay finishes leaving */
-  (event: 'after-leave'): void
-}>()
+// Deprecation warnings for legacy surfaces.
+watchEffect(() => {
+  if (props.options !== undefined) {
+    warnDeprecated('Dialog `options` prop', 'flat top-level props')
+  }
+  if (props.disableOutsideClickToClose !== undefined) {
+    warnDeprecated(
+      'Dialog `disableOutsideClickToClose` prop',
+      '`dismissable` (inverted)',
+    )
+  }
+})
 
-const actions = computed((): ReactiveDialogAction[] => {
-  let actions = props.options.actions
-  if (!actions?.length) return []
+const allSlots = useSlots()
+watchEffect(() => {
+  if (allSlots['body-content']) {
+    warnDeprecated('Dialog `#body-content` slot', '`#default`')
+  }
+  if (allSlots['body-main']) {
+    warnDeprecated('Dialog `#body-main` slot', '`#default`')
+  }
+  if (allSlots['body-title']) {
+    warnDeprecated('Dialog `#body-title` slot', '`#title`')
+  }
+  if (allSlots['body-header']) {
+    warnDeprecated(
+      'Dialog `#body-header` slot',
+      '`#title` (no direct replacement)',
+    )
+  }
+  if (allSlots['body']) {
+    warnDeprecated('Dialog `#body` slot', '`#default` + `bare` prop')
+  }
+})
 
-  return actions.map((action) => {
-    let _action = reactive({
+// Flatten props: top-level props win over `options` keys.
+const resolved = computed(() => {
+  const o = props.options || ({} as DialogOptions)
+  return {
+    title: props.title ?? o.title,
+    message: props.message ?? o.message,
+    icon: props.icon ?? o.icon,
+    size: props.size ?? o.size ?? 'lg',
+    position: props.position ?? o.position ?? 'center',
+    paddingTop: props.paddingTop ?? o.paddingTop,
+    actions: props.actions ?? o.actions ?? [],
+    showCloseButton: props.showCloseButton,
+    bare: props.bare,
+  }
+})
+
+const isDismissable = computed(() => {
+  if (props.disableOutsideClickToClose) return false
+  return props.dismissable !== false
+})
+
+const sizeClass = computed(() => {
+  const size = resolved.value.size
+  const map: Record<string, string> = {
+    xs: 'max-w-xs',
+    sm: 'max-w-sm',
+    md: 'max-w-md',
+    lg: 'max-w-lg',
+    xl: 'max-w-xl',
+    '2xl': 'max-w-2xl',
+    '3xl': 'max-w-3xl',
+    '4xl': 'max-w-4xl',
+    '5xl': 'max-w-5xl',
+    '6xl': 'max-w-6xl',
+    '7xl': 'max-w-7xl',
+  }
+  return map[size] || 'max-w-lg'
+})
+
+// Visibility model.
+// `open` is canonical and wins if both bindings are present.
+const isOpen = computed({
+  get() {
+    if (props.open !== undefined) return !!props.open
+    return !!props.modelValue
+  },
+  set(val: boolean) {
+    emit('update:open', val)
+    emit('update:modelValue', val)
+    if (!val) emit('close')
+  },
+})
+
+function close() {
+  isOpen.value = false
+}
+
+defineExpose({ close } satisfies DialogExposed)
+
+// Resolved icon — also maps deprecated `appearance` to `theme`.
+const resolvedIcon = computed<DialogIcon | null>(() => {
+  const raw = resolved.value.icon
+  if (!raw) return null
+  if (typeof raw === 'string') return { name: raw }
+  return raw
+})
+
+watchEffect(() => {
+  warnFeatherIconUsage('Dialog', 'icon', resolvedIcon.value?.name)
+  if (resolvedIcon.value?.appearance) {
+    warnDeprecated(
+      'Dialog `icon.appearance`',
+      "`icon.theme` ('yellow' | 'blue' | 'red' | 'green')",
+    )
+  }
+  if (props.bare && (props.title || resolvedIcon.value)) {
+    // soft warning — props become no-ops when bare
+    warnDeprecated(
+      'Dialog `title`/`icon` props with `bare: true`',
+      'render the title yourself inside `#default`',
+    )
+  }
+  if (props.bare && (props.actions || props.options?.actions)) {
+    warnDeprecated(
+      'Dialog `actions` prop with `bare: true`',
+      'render actions inside `#default`',
+    )
+  }
+})
+
+const iconTheme = computed<DialogTheme | null>(() => {
+  const icon = resolvedIcon.value
+  if (!icon) return null
+  if (icon.theme) return icon.theme
+  // Back-compat: map `appearance` to `theme`.
+  const map: Record<DialogIconAppearance, DialogTheme> = {
+    warning: 'yellow',
+    info: 'blue',
+    danger: 'red',
+    success: 'green',
+  }
+  return icon.appearance ? map[icon.appearance] : null
+})
+
+const dialogIconBgClasses = computed(() => {
+  const theme = iconTheme.value
+  if (!theme) return 'bg-surface-gray-2'
+  const map: Record<DialogTheme, string> = {
+    yellow: 'bg-surface-amber-2',
+    blue: 'bg-surface-blue-2',
+    red: 'bg-surface-red-2',
+    green: 'bg-surface-green-2',
+  }
+  return map[theme]
+})
+
+const dialogIconClasses = computed(() => {
+  const theme = iconTheme.value
+  if (!theme) return 'text-ink-gray-5'
+  const map: Record<DialogTheme, string> = {
+    yellow: 'text-ink-amber-3',
+    blue: 'text-ink-blue-3',
+    red: 'text-ink-red-4',
+    green: 'text-ink-green-3',
+  }
+  return map[theme]
+})
+
+const dialogPositionClasses = computed(() => {
+  if (resolved.value.paddingTop) return ''
+  const position = resolved.value.position
+  const map: Record<string, string> = {
+    center: 'justify-center',
+    top: 'pt-[20vh]',
+  }
+  return map[position] || 'justify-center'
+})
+
+const dialogPositionStyles = computed(() => {
+  if (resolved.value.paddingTop) {
+    return { paddingTop: resolved.value.paddingTop }
+  }
+  return {}
+})
+
+const reactiveActions = computed((): DialogReactiveAction[] => {
+  if (resolved.value.bare) return []
+  const list = resolved.value.actions
+  if (!list?.length) return []
+  return list.map((action) => {
+    const _action = reactive({
       ...action,
       loading: false,
       onClick: !action.onClick
@@ -167,21 +403,17 @@ const actions = computed((): ReactiveDialogAction[] => {
         : async () => {
             _action.loading = true
             try {
-              if (action.onClick) {
-                // deprecated: uncomment this when we remove the backwards compatibility
-                // let context: DialogActionContext = { close }
-                type BackwardsCompatibleDialogActionContext = (() => void) &
-                  DialogActionContext
-
-                let backwardsCompatibleContext = (() => {
-                  console.warn(
-                    'Value passed to onClick is a context object. Please use context.close() instead of context() to close the dialog.',
-                  )
-                  close()
-                }) as BackwardsCompatibleDialogActionContext
-                backwardsCompatibleContext.close = close
-                await action.onClick(backwardsCompatibleContext)
-              }
+              // Back-compat: callable context shim — `context()` still closes.
+              type LegacyContext = (() => void) & DialogActionContext
+              const ctx = (() => {
+                warnDeprecated(
+                  'Dialog action.onClick(callableContext)',
+                  'action.onClick({ close })',
+                )
+                close()
+              }) as LegacyContext
+              ctx.close = close
+              await action.onClick!(ctx)
             } finally {
               _action.loading = false
             }
@@ -191,98 +423,49 @@ const actions = computed((): ReactiveDialogAction[] => {
   })
 })
 
-const isOpen = computed({
-  get() {
-    return props.modelValue
-  },
-  set(val: boolean) {
-    emit('update:modelValue', val)
-    if (!val) {
-      emit('close')
-    }
-  },
+const isSingleActionFullWidth = computed(() => {
+  const smallSizes = ['xs', 'sm', 'md']
+  return (
+    reactiveActions.value.length === 1 &&
+    smallSizes.includes(resolved.value.size)
+  )
 })
 
-function handleOpenChange(open: boolean) {
-  isOpen.value = open
+// Whether the auto-header should render at all. Per spec, the header
+// is title/slot-driven only — the close button lives independently.
+const showHeader = computed(() => {
+  if (resolved.value.bare) return false
+  if (allSlots.title || allSlots['body-title']) return true
+  if (resolved.value.title) return true
+  return false
+})
+
+function isLucide(name: string | undefined) {
+  return isLucideIconString(name)
 }
 
-function close() {
-  isOpen.value = false
+// Honor a descendant `[autofocus]` element on open. Reka's FocusScope
+// otherwise focuses the content wrapper (or the first tabbable element),
+// which is good for screen readers but inconvenient for form dialogs.
+// Marking an element opts in. Components that don't forward attrs to a
+// focusable DOM node can wrap their slot with `<div autofocus>…</div>` —
+// the composable walks into it to find the first focusable descendant.
+const contentRef = ref<ComponentPublicInstance | null>(null)
+useAutofocusOnOpen(
+  isOpen,
+  () => contentRef.value?.$el as HTMLElement | undefined,
+)
+
+function handleOpenAutoFocus(event: Event) {
+  // If the caller marked an element with `[autofocus]`, we own initial
+  // focus — preventDefault so Reka's FocusScope doesn't yank focus to the
+  // first tabbable; `useAutofocusOnOpen` does the actual focus. Otherwise,
+  // let Reka focus the first tabbable as usual.
+  const container = event.target as HTMLElement | null
+  if (container?.querySelector('[autofocus]')) {
+    event.preventDefault()
+  }
 }
-
-const icon = computed(() => {
-  if (!props.options?.icon) return null
-
-  let icon = props.options.icon
-  if (typeof icon === 'string') {
-    icon = { name: icon }
-  }
-  return icon as DialogIcon
-})
-
-watchEffect(() => {
-  warnFeatherIconUsage('Dialog', 'options.icon', icon.value?.name)
-})
-
-const dialogPositionClasses = computed(() => {
-  if (props.options?.paddingTop) return ''
-
-  const position = props.options?.position || 'center'
-  const classMap: Record<string, string> = {
-    center: 'justify-center',
-    top: 'pt-[20vh]',
-  }
-  return classMap[position]
-})
-
-const dialogPositionStyles = computed(() => {
-  if (props.options?.paddingTop) {
-    return { paddingTop: props.options.paddingTop }
-  }
-  return {}
-})
-
-const dialogIconBgClasses = computed(() => {
-  const appearance = icon.value?.appearance
-  if (!appearance) return 'bg-surface-gray-2'
-  const classMap: Record<string, string> = {
-    warning: 'bg-surface-amber-2',
-    info: 'bg-surface-blue-2',
-    danger: 'bg-surface-red-2',
-    success: 'bg-surface-green-2',
-  }
-  return classMap[appearance]
-})
-
-const dialogIconClasses = computed(() => {
-  const appearance = icon.value?.appearance
-  if (!appearance) return 'text-ink-gray-5'
-  const classMap: Record<string, string> = {
-    warning: 'text-ink-amber-3',
-    info: 'text-ink-blue-3',
-    danger: 'text-ink-red-4',
-    success: 'text-ink-green-3',
-  }
-  return classMap[appearance]
-})
-
-const slots = defineSlots<{
-  /** Main body content of the dialog, overrides body-header and body-content */
-  body?: () => any
-
-  /** Header section inside the dialog body */
-  'body-header'?: () => any
-
-  /** Title section inside the header */
-  'body-title'?: () => any
-
-  /** Main content section inside the body */
-  'body-content'?: () => any
-
-  /** Actions section at the bottom of the dialog; exposes `{ close }` */
-  actions?: (scope: { close: () => void }) => any
-}>()
 </script>
 
 <style scoped>

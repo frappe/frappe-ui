@@ -6,57 +6,155 @@
 
   const propsData = [
   {
-    name: 'modelValue',
-    description: 'Controls whether the dialog is open (v-model)',
-    required: true,
-    type: 'boolean',
-    default: undefined
-  },
-  {
-    name: 'options',
-    description: 'Configuration options for title, message, size, icon, actions, etc.',
+    name: 'open',
+    description: 'Controls whether the dialog is open (v-model:open). Canonical.',
     required: false,
-    type: 'DialogOptions',
-    default: '{}'
+    type: 'boolean',
+    default: 'undefined'
   },
   {
-    name: 'disableOutsideClickToClose',
-    description: 'Prevents closing the dialog when clicking outside',
+    name: 'modelValue',
+    description: 'Controls whether the dialog is open (v-model). Also supported.',
+    required: false,
+    type: 'boolean',
+    default: 'undefined'
+  },
+  {
+    name: 'title',
+    description: 'Dialog title. Renders the auto-header.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'message',
+    description: 'Description text rendered below the title.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'icon',
+    description: 'Icon shown next to the title in the auto-header.',
+    required: false,
+    type: 'string | DialogIcon'
+  },
+  {
+    name: 'size',
+    description: 'Max-width size of the dialog. Default `\'lg\'`.',
+    required: false,
+    type: 'DialogSize',
+    default: 'undefined'
+  },
+  {
+    name: 'position',
+    description: 'Vertical placement. Default `\'center\'`.',
+    required: false,
+    type: 'DialogPosition',
+    default: 'undefined'
+  },
+  {
+    name: 'paddingTop',
+    description: 'Overrides the position-based top padding (escape hatch).',
+    required: false,
+    type: 'string | number'
+  },
+  {
+    name: 'actions',
+    description: 'Footer action buttons.',
+    required: false,
+    type: 'DialogAction[]'
+  },
+  {
+    name: 'dismissable',
+    description: 'Allow outside-click and Escape to close. Default `true`.',
+    required: false,
+    type: 'boolean',
+    default: 'true'
+  },
+  {
+    name: 'showCloseButton',
+    description: 'Show the top-right close button. Default `true`.',
+    required: false,
+    type: 'boolean',
+    default: 'true'
+  },
+  {
+    name: 'bare',
+    description: 'Drop the chrome: no padded card, no auto-header, no auto-actions. Default `false`.',
     required: false,
     type: 'boolean',
     default: 'false'
+  },
+  {
+    name: 'disableOutsideClickToClose',
+    description: '',
+    required: false,
+    type: 'boolean',
+    default: 'undefined',
+    deprecated: 'Use `dismissable` (inverted) instead.'
+  },
+  {
+    name: 'options',
+    description: '',
+    required: false,
+    type: 'DialogOptions',
+    deprecated: 'Use flat top-level props instead.'
   }
 ]
 
   const slotsData = [
   {
-    name: 'body',
-    description: 'Main body content of the dialog, overrides body-header and body-content',
-    type: 'any'
+    name: 'default',
+    description: 'Main content rendered inside the padded card. Exposes `{ close }`.',
+    type: 'DialogSlotProps'
   },
   {
-    name: 'body-header',
-    description: 'Header section inside the dialog body',
-    type: 'any'
-  },
-  {
-    name: 'body-title',
-    description: 'Title section inside the header',
-    type: 'any'
-  },
-  {
-    name: 'body-content',
-    description: 'Main content section inside the body',
-    type: 'any'
+    name: 'title',
+    description: 'Title area; accepts arbitrary content (extra buttons next to title, etc.). Exposes `{ close }`.',
+    type: 'DialogSlotProps'
   },
   {
     name: 'actions',
-    description: 'Actions section at the bottom of the dialog; exposes `{ close }`',
-    type: '{ close: () => void; }'
+    description: 'Footer override; exposes `{ close, actions }`.',
+    type: 'DialogActionsSlotProps'
+  },
+  {
+    name: 'body',
+    description: '',
+    type: 'any',
+    deprecated: 'Use `#default` + `bare` prop.'
+  },
+  {
+    name: 'body-main',
+    description: '',
+    type: 'any',
+    deprecated: 'Use `#default`.'
+  },
+  {
+    name: 'body-header',
+    description: '',
+    type: 'any',
+    deprecated: 'Use `#title` for extras (no direct replacement).'
+  },
+  {
+    name: 'body-title',
+    description: '',
+    type: 'any',
+    deprecated: 'Use `#title`.'
+  },
+  {
+    name: 'body-content',
+    description: '',
+    type: 'any',
+    deprecated: 'Use `#default`.'
   }
 ]
 
   const emitsData = [
+  {
+    name: 'update:open',
+    description: 'Fired when the open state changes.',
+    type: '[value: boolean]'
+  },
   {
     name: 'update:modelValue',
     description: 'Fired when the model value changes.',

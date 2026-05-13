@@ -1,38 +1,44 @@
 <script setup lang="ts">
+// Adapted from gameplan/SpaceOptions.vue — "Delete space" confirm.
+// Uses declarative `actions` with a `{ close }` context, `theme: 'red'`,
+// `dismissable: false` so the user must pick an action, and a loading
+// flag wired to the in-flight delete.
 import { ref } from 'vue'
 import { Button, Dialog } from 'frappe-ui'
 
 const open = ref(false)
+const deleting = ref(false)
+
+async function deleteSpace({ close }: { close: () => void }) {
+  deleting.value = true
+  try {
+    await new Promise((r) => setTimeout(r, 800))
+  } finally {
+    deleting.value = false
+    close()
+  }
+}
 </script>
 
 <template>
-  <Button @click="open = true">Show Custom Dialog</Button>
+  <Button @click="open = true">Delete space…</Button>
 
-  <Dialog v-model="open">
-    <template #body-title>
-      <h3 class="text-2xl font-semibold text-blue-600">
-        Custom Title with Styling
-      </h3>
-    </template>
-
-    <template #body-content>
-      <div class="space-y-4">
-        <p class="text-gray-700">
-          This dialog uses custom slots for flexible content layout.
-        </p>
-        <div class="bg-blue-50 p-4 rounded-lg">
-          <p class="text-blue-800">
-            You can put any content here including forms or other components.
-          </p>
-        </div>
-      </div>
-    </template>
-
-    <template #actions="{ close }">
-      <div class="flex flex-row-reverse gap-2">
-        <Button variant="solid" @click="close">Save Changes</Button>
-        <Button variant="outline" @click="close">Cancel</Button>
-      </div>
-    </template>
-  </Dialog>
+  <Dialog
+    v-model:open="open"
+    title="Delete space"
+    message="This will permanently delete the space along with 12 discussions and 4 tasks. This action cannot be undone."
+    :icon="{ name: 'lucide-alert-triangle', theme: 'red' }"
+    :dismissable="false"
+    :show-close-button="false"
+    :actions="[
+      { label: 'Cancel' },
+      {
+        label: 'Delete',
+        theme: 'red',
+        variant: 'solid',
+        loading: deleting,
+        onClick: deleteSpace,
+      },
+    ]"
+  />
 </template>

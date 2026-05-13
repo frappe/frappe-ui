@@ -14,21 +14,29 @@
     <Select
       v-if="type === 'select'"
       :id="id"
+      class="w-full"
       v-bind="{ ...controlAttrs, size, variant }"
     >
       <template #prefix v-if="$slots.prefix">
         <slot name="prefix" />
       </template>
     </Select>
-    <Combobox
-      v-else-if="type === 'combobox'"
-      :id="id"
-      v-bind="{ ...controlAttrs, size, variant }"
-    >
-      <template #prefix v-if="$slots.prefix">
-        <slot name="prefix" />
-      </template>
-    </Combobox>
+    <!--
+      Wrap Combobox in a div so the surrounding `space-y-1.5` has a real
+      box to attach `margin-top` to. ComboboxRoot uses `display: contents`,
+      which lets selectors match it but drops any margins applied to it.
+    -->
+    <div v-else-if="type === 'combobox'">
+      <Combobox
+        :id="id"
+        class="w-full"
+        v-bind="{ ...controlAttrs, size, variant }"
+      >
+        <template #prefix v-if="$slots.prefix">
+          <slot name="prefix" />
+        </template>
+      </Combobox>
+    </div>
     <Autocomplete
       v-else-if="type === 'autocomplete'"
       v-bind="{ ...controlAttrs }"
