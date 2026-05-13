@@ -162,6 +162,47 @@ function dangerWithActions() {
     ],
   })
 }
+
+// Close-behavior matrix for `onConfirm`:
+//   • resolves        → auto-closes (close() runs after the await)
+//   • throws / rejects → stays open, thrown message rendered inline
+//   • calls close()    → closes immediately (the trailing auto-close is a no-op)
+//
+// Note: calling `ctx.setError(msg)` from inside `onConfirm` without throwing
+// does NOT keep the dialog open — the auto-close still fires after the
+// handler resolves. Use `throw` to stay open with an inline error.
+function optimisticClose() {
+  // Closes the dialog right away, then finishes the work in the background —
+  // useful when the user has already committed and the UI shouldn't block.
+  dialog.confirm({
+    title: 'Send report',
+    message: 'Send the weekly report to your team? The dialog will close immediately.',
+    confirmLabel: 'Send',
+    onConfirm: async ({ close }) => {
+      close()
+      await new Promise((r) => setTimeout(r, 1500))
+      // eslint-disable-next-line no-console
+      console.log('report sent in background')
+    },
+  })
+}
+
+// Stay open after an async call by throwing. The thrown message flows through
+// `extractErrorMessage` and is rendered inline; the confirm button re-enables
+// so the user can retry, edit, or cancel. This is the canonical pattern for
+// server-side validation failures (e.g., username taken, quota exceeded).
+function keepOpenAfterAsync() {
+  dialog.confirm({
+    title: 'Claim username',
+    message: 'Claim the username "frappe-fan"? This pretends to call the server.',
+    confirmLabel: 'Claim',
+    onConfirm: async () => {
+      await new Promise((r) => setTimeout(r, 700))
+      // Server says no — throw to keep the dialog open with the reason.
+      throw new Error('That username is already taken. Try a different one.')
+    },
+  })
+}
 </script>
 
 <template>
@@ -189,6 +230,11 @@ function dangerWithActions() {
       <Button theme="red" variant="subtle" @click="dangerWithActions">
         dialog.danger + actions[]
       </Button>
+    </div>
+
+    <div class="flex flex-wrap gap-2">
+      <Button @click="optimisticClose">close() before await</Button>
+      <Button @click="keepOpenAfterAsync">stay open after async (throw)</Button>
     </div>
   </div>
   <!-- In real apps <FrappeUIProvider> auto-mounts <Dialogs />. -->
