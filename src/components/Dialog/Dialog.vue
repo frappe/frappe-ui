@@ -13,6 +13,7 @@
           :data-position="resolved.position || 'center'"
         >
           <DialogContent
+            ref="contentRef"
             class="my-8 inline-block w-full transform overflow-hidden rounded-xl bg-surface-modal text-start align-middle shadow-xl dialog-content focus-visible:outline-none"
             :class="sizeClass"
             @open-auto-focus="handleOpenAutoFocus"
@@ -40,10 +41,7 @@
                 <div class="flex">
                   <div class="w-full flex-1">
                     <!-- legacy `#body-header` (deprecated, warns + renders nothing if used; preserved for back-compat by rendering header) -->
-                    <slot
-                      v-if="$slots['body-header']"
-                      name="body-header"
-                    />
+                    <slot v-if="$slots['body-header']" name="body-header" />
                     <div
                       v-else-if="showHeader"
                       class="mb-6 flex items-center justify-between"
@@ -56,7 +54,11 @@
                         >
                           <span
                             v-if="isLucide(resolvedIcon.name)"
-                            :class="[resolvedIcon.name, 'size-4', dialogIconClasses]"
+                            :class="[
+                              resolvedIcon.name,
+                              'size-4',
+                              dialogIconClasses,
+                            ]"
                             aria-hidden="true"
                           />
                           <FeatherIcon
@@ -80,10 +82,7 @@
                           </slot>
                         </DialogTitle>
                       </div>
-                      <DialogClose
-                        v-if="resolved.showCloseButton"
-                        as-child
-                      >
+                      <DialogClose v-if="resolved.showCloseButton" as-child>
                         <Button variant="ghost" label="Close">
                           <template #icon>
                             <span class="lucide-x size-4 text-ink-gray-9" />
@@ -167,7 +166,9 @@ import {
   DialogDescription,
   DialogClose,
 } from 'reka-ui'
-import { computed, reactive, useSlots, watchEffect } from 'vue'
+import { computed, reactive, ref, useSlots, watchEffect } from 'vue'
+import type { ComponentPublicInstance } from 'vue'
+import { useAutofocusOnOpen } from '../../composables/useAutofocusOnOpen'
 import { Button } from '../Button'
 import FeatherIcon from '../FeatherIcon.vue'
 import {
@@ -438,40 +439,20 @@ function isLucide(name: string | undefined) {
 // Honor a descendant `[autofocus]` element on open. Reka's FocusScope
 // otherwise focuses the content wrapper (or the first tabbable element),
 // which is good for screen readers but inconvenient for form dialogs.
-// Marking the input opts in.
-//
-// Components that don't forward attrs onto a focusable DOM node (Switch,
-// Combobox, Select, …) can still opt in by wrapping the slot with a
-// marker — `<div autofocus>…</div>` — and we walk into it to find the
-// first focusable descendant.
-const FOCUSABLE_SELECTOR = [
-  'input:not([disabled]):not([type="hidden"])',
-  'select:not([disabled])',
-  'textarea:not([disabled])',
-  'button:not([disabled])',
-  'a[href]',
-  '[tabindex]:not([tabindex="-1"])',
-  '[contenteditable="true"]',
-  '[contenteditable=""]',
-].join(',')
+// Marking an element opts in. Components that don't forward attrs to a
+// focusable DOM node can wrap their slot with `<div autofocus>…</div>` —
+// the composable walks into it to find the first focusable descendant.
+const contentRef = ref<ComponentPublicInstance | null>(null)
+useAutofocusOnOpen(isOpen, () => contentRef.value?.$el as HTMLElement | undefined)
 
 function handleOpenAutoFocus(event: Event) {
+  // If the caller marked an element with `[autofocus]`, we own initial
+  // focus — preventDefault so Reka's FocusScope doesn't yank focus to the
+  // first tabbable; `useAutofocusOnOpen` does the actual focus. Otherwise,
+  // let Reka focus the first tabbable as usual.
   const container = event.target as HTMLElement | null
-  const marker = container?.querySelector<HTMLElement>('[autofocus]')
-  if (!marker) return
-  const target = marker.matches(FOCUSABLE_SELECTOR)
-    ? marker
-    : marker.querySelector<HTMLElement>(FOCUSABLE_SELECTOR)
-  if (!target) return
-  event.preventDefault()
-  target.focus()
-  if (
-    target instanceof HTMLInputElement ||
-    target instanceof HTMLTextAreaElement
-  ) {
-    try {
-      target.select()
-    } catch {}
+  if (container?.querySelector('[autofocus]')) {
+    event.preventDefault()
   }
 }
 </script>
