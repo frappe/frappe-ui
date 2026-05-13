@@ -1,5 +1,6 @@
-import { h } from 'vue'
+import { defineComponent, h, ref } from 'vue'
 import Combobox from './Combobox.vue'
+import Dialog from '../Dialog/Dialog.vue'
 
 const fruits = ['Apple', 'Mango', 'Cherry']
 
@@ -666,6 +667,47 @@ describe('Combobox', () => {
         .first()
         .find('[data-cy="tpl-prefix"]')
         .should('exist')
+    })
+  })
+
+  // Regression: a Dialog's trapped FocusScope used to steal focus from the
+  // portaled popover, so the in-popover search input couldn't be focused or
+  // typed into. The FocusScope inside ComboboxContent pushes onto reka's
+  // focus-scope stack on open and pauses the dialog's trap.
+  describe('inside a Dialog', () => {
+    it('focuses and accepts typing in the popover search input (button mode)', () => {
+      const Wrapper = defineComponent({
+        setup() {
+          return { open: ref(true) }
+        },
+        render() {
+          return h(
+            Dialog,
+            { open: this.open, title: 'Pick' },
+            {
+              default: () =>
+                h(Combobox, {
+                  options: fruits,
+                  trigger: 'button',
+                  placeholder: 'Pick',
+                }),
+            },
+          )
+        },
+      })
+
+      cy.mount(Wrapper)
+
+      cy.get('[role=dialog]').should('exist')
+      cy.get('[data-slot="trigger"]').click()
+
+      cy.get('[data-slot="content-search"] [role="combobox"]')
+        .should('be.focused')
+        .type('ma')
+
+      cy.get('[role="option"]')
+        .should('have.length', 1)
+        .and('contain.text', 'Mango')
     })
   })
 })

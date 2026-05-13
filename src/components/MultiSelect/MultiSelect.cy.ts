@@ -1,5 +1,6 @@
 import MultiSelect from './MultiSelect.vue'
-import { h } from 'vue'
+import Dialog from '../Dialog/Dialog.vue'
+import { defineComponent, h, ref } from 'vue'
 
 const options = [
   { label: 'Apple', value: 'apple' },
@@ -202,6 +203,41 @@ describe('MultiSelect', () => {
         .first()
         .find('[data-cy="tpl-prefix"]')
         .should('exist')
+    })
+  })
+
+  // Regression: a Dialog's trapped FocusScope used to steal focus from the
+  // portaled popover, so the search input couldn't be focused or typed into.
+  // The fix wraps the popover body in its own FocusScope so it pushes onto
+  // reka's focus-scope stack and pauses the dialog's trap.
+  describe('inside a Dialog', () => {
+    it('focuses and accepts typing in the popover search input', () => {
+      const Wrapper = defineComponent({
+        setup() {
+          return { open: ref(true) }
+        },
+        render() {
+          return h(
+            Dialog,
+            { open: this.open, title: 'Pick fruits' },
+            { default: () => h(MultiSelect, { options }) },
+          )
+        },
+      })
+
+      cy.mount(Wrapper)
+
+      cy.get('[role=dialog]').should('exist')
+      cy.get('[data-slot="trigger"]').click()
+      cy.get('[data-slot="content"]').should('exist')
+
+      cy.get('[data-slot="search"] [data-slot="input"]')
+        .should('be.focused')
+        .type(options[1].label.slice(0, 2))
+
+      cy.get('[role=option]')
+        .should('have.length', 1)
+        .and('contain.text', options[1].label)
     })
   })
 })

@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, useAttrs, useSlots, watch } from 'vue'
+import { computed, ref, useAttrs, useSlots, watch } from 'vue'
 import {
   ComboboxAnchor,
   ComboboxContent,
   ComboboxInput,
   ComboboxPortal,
   ComboboxRoot,
+  FocusScope,
 } from 'reka-ui'
 import Button from '../Button/Button.vue'
 import LoadingIndicator from '../LoadingIndicator.vue'
@@ -62,8 +63,6 @@ const hasTypedSinceOpen = ref(false)
 
 const { motion: contentMotion, onPointerDown: markPointerDown } =
   usePopoverMotion(open)
-
-const popoverInputRef = ref<{ $el?: HTMLElement } | null>(null)
 
 const normalizedGroups = computed(() =>
   normalizeMultiSelectOptions(props.options),
@@ -188,16 +187,6 @@ function handleInputChange(event: Event) {
   query.value = value
   hasTypedSinceOpen.value = true
   emit('update:query', value)
-}
-
-function handleContentOpenAutoFocus(event: Event) {
-  event.preventDefault()
-  if (props.hideSearch) return
-
-  nextTick(() => {
-    const el = popoverInputRef.value?.$el as HTMLElement | undefined
-    el?.focus()
-  })
 }
 
 const triggerClasses = computed(() => [
@@ -329,85 +318,93 @@ defineSlots<MultiSelectSlots>()
         :side="side"
         :align="align"
         :side-offset="offset"
-        @openAutoFocus="handleContentOpenAutoFocus"
-        @closeAutoFocus.prevent
       >
-        <div
-          data-slot="content-body"
-          :data-motion="contentMotion"
-          class="overflow-hidden rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5"
-        >
+        <!--
+          FocusScope sits on the always-present content-body div (inside
+          ComboboxContent, which is a <Presence> wrapper that renders null
+          while closed). Mounting it here pushes a new entry onto reka's
+          focus-scope stack the moment the popover opens, pausing any parent
+          Dialog's trapped FocusScope so focus can move into the portaled
+          popover (e.g. the search input). See Combobox.vue for the same
+          fix and a longer rationale.
+        -->
+        <FocusScope as-child @unmount-auto-focus.prevent>
           <div
-            v-if="!hideSearch"
-            data-slot="search"
-            class="flex items-center gap-2 border-b border-outline-gray-1 px-3"
+            data-slot="content-body"
+            :data-motion="contentMotion"
+            class="overflow-hidden rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5"
           >
-            <ComboboxInput
-              ref="popoverInputRef"
-              data-slot="input"
-              :value="query"
-              :disabled="disabled"
-              :placeholder="placeholder"
-              autocomplete="off"
-              class="min-w-0 flex-1 border-0 bg-transparent px-0 py-2 text-base text-ink-gray-8 outline-none placeholder:text-ink-gray-4 focus:ring-0"
-              @input="handleInputChange"
-            />
-            <LoadingIndicator
-              v-if="loading"
-              class="size-4 shrink-0 text-ink-gray-5"
-            />
-          </div>
-
-          <MultiSelectResults
-            :groups="filteredGroups"
-            :size="size"
-            :query="typedQuery"
-            :selected-values="safeModel"
-            :loading="loading"
-            :hide-search="hideSearch"
-            :empty-text="emptyText"
-            :show-empty="showEmpty"
-            :slot-fns="slots"
-            :all-options="allOptions"
-          />
-
-          <template v-if="$slots.footer">
-            <div data-slot="footer">
-              <slot
-                name="footer"
-                v-bind="{
-                  clearAll,
-                  selectAll,
-                  selectedOptions,
-                  query: typedQuery,
-                }"
+            <div
+              v-if="!hideSearch"
+              data-slot="search"
+              class="flex items-center gap-2 border-b border-outline-gray-1 px-3"
+            >
+              <ComboboxInput
+                data-slot="input"
+                :value="query"
+                :disabled="disabled"
+                :placeholder="placeholder"
+                autocomplete="off"
+                class="min-w-0 flex-1 border-0 bg-transparent px-0 py-2 text-base text-ink-gray-8 outline-none placeholder:text-ink-gray-4 focus:ring-0"
+                @input="handleInputChange"
+              />
+              <LoadingIndicator
+                v-if="loading"
+                class="size-4 shrink-0 text-ink-gray-5"
               />
             </div>
-          </template>
-          <div
-            v-else
-            data-slot="footer"
-            class="flex items-center justify-between gap-2 border-t border-outline-gray-1 px-2 py-1.5"
-          >
-            <Button
-              v-if="safeModel.length > 0"
-              variant="ghost"
-              size="sm"
-              @click="clearAll"
+
+            <MultiSelectResults
+              :groups="filteredGroups"
+              :size="size"
+              :query="typedQuery"
+              :selected-values="safeModel"
+              :loading="loading"
+              :hide-search="hideSearch"
+              :empty-text="emptyText"
+              :show-empty="showEmpty"
+              :slot-fns="slots"
+              :all-options="allOptions"
+            />
+
+            <template v-if="$slots.footer">
+              <div data-slot="footer">
+                <slot
+                  name="footer"
+                  v-bind="{
+                    clearAll,
+                    selectAll,
+                    selectedOptions,
+                    query: typedQuery,
+                  }"
+                />
+              </div>
+            </template>
+            <div
+              v-else
+              data-slot="footer"
+              class="flex items-center justify-between gap-2 border-t border-outline-gray-1 px-2 py-1.5"
             >
-              Clear All
-            </Button>
-            <Button
-              v-if="!allSelected"
-              variant="ghost"
-              size="sm"
-              class="ml-auto"
-              @click="selectAll"
-            >
-              Select All
-            </Button>
+              <Button
+                v-if="safeModel.length > 0"
+                variant="ghost"
+                size="sm"
+                @click="clearAll"
+              >
+                Clear All
+              </Button>
+              <Button
+                v-if="!allSelected"
+                variant="ghost"
+                size="sm"
+                class="ml-auto"
+                @click="selectAll"
+              >
+                Select All
+              </Button>
+            </div>
           </div>
-        </div>
+        </FocusScope>
       </ComboboxContent>
     </ComboboxPortal>
   </ComboboxRoot>
