@@ -443,7 +443,10 @@ function isLucide(name: string | undefined) {
 // focusable DOM node can wrap their slot with `<div autofocus>…</div>` —
 // the composable walks into it to find the first focusable descendant.
 const contentRef = ref<ComponentPublicInstance | null>(null)
-useAutofocusOnOpen(isOpen, () => contentRef.value?.$el as HTMLElement | undefined)
+useAutofocusOnOpen(
+  isOpen,
+  () => contentRef.value?.$el as HTMLElement | undefined,
+)
 
 function handleOpenAutoFocus(event: Event) {
   // If the caller marked an element with `[autofocus]`, we own initial

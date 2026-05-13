@@ -1,5 +1,5 @@
 import DialogMain from './Dialog.vue'
-import { DialogTitle, DialogDescription } from 'reka-ui'
+import { DialogTitle, DialogDescription, DialogClose } from 'reka-ui'
 
 export type {
   DialogProps,
@@ -21,10 +21,12 @@ export type {
 type DialogExport = typeof DialogMain & {
   Title: typeof DialogTitle
   Description: typeof DialogDescription
+  Close: typeof DialogClose
 }
 
 const Dialog = DialogMain as DialogExport
 Dialog.Title = DialogTitle
 Dialog.Description = DialogDescription
+Dialog.Close = DialogClose
 
 export { Dialog }
