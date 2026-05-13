@@ -1,89 +1,195 @@
 <script setup lang="ts">
-// Real-world imperative patterns drawn from gameplan/SpaceOptions and
-// insights/workbooks.ts:
-// - Destructive confirm with `theme: 'red'` and async work between
-//   resolve and `close()` (so the action button keeps its loading state).
-// - Minimal "import workbook?" confirm — just title + message.
-// - One-shot alert after a save.
-// - Prompt with required field + select.
-// In real apps `<Dialogs />` is rendered by `FrappeUIProvider`, the same
+// Imperative `dialog.*` API — the full confirm-family surface in one place.
+//
+// Covers:
+// - `dialog.confirm`     — basic + destructive (`theme: 'red'`) + async `onConfirm`.
+// - `dialog.confirm({ actions })` — flows with more than the default
+//   confirm + cancel pair (paste/replace/cancel, save/discard/cancel,
+//   inline error from a throwing handler).
+// - `dialog.danger`      — preset for irreversible actions; forces
+//   `theme: 'red'` + warning icon, defaults `confirmLabel` to 'Delete',
+//   and composes with `actions[]` for "delete with options" flows.
+//
+// In real apps `<Dialogs />` is mounted by `FrappeUIProvider`, the same
 // component that hosts the toast viewport. No extra setup needed.
 import { Button, dialog, Dialogs } from 'frappe-ui'
 
-async function deleteSpace() {
-  const { ok, close } = await dialog.confirm({
+function destructiveConfirm() {
+  dialog.confirm({
     title: 'Delete space',
     message:
       'This will permanently delete the space along with 12 discussions and 4 tasks.',
     confirmLabel: 'Delete',
     theme: 'red',
+    onConfirm: async () => {
+      await new Promise((r) => setTimeout(r, 900))
+    },
   })
-  if (ok) {
-    await new Promise((r) => setTimeout(r, 900)) // pretend API call
-  }
-  close()
 }
 
-async function importWorkbook() {
-  const { ok, close } = await dialog.confirm({
+function minimalConfirm() {
+  dialog.confirm({
     title: 'Import workbook',
     message: 'Are you sure you want to import this workbook?',
+    onConfirm: async () => {
+      await new Promise((r) => setTimeout(r, 500))
+    },
   })
-  if (ok) await new Promise((r) => setTimeout(r, 500))
-  close()
 }
 
-async function savedAlert() {
-  const { close } = await dialog.alert({
-    title: 'Changes saved',
-    message: 'Your changes are saved.',
-    theme: 'green',
-  })
-  close()
-}
-
-async function newFolder() {
-  const { values, close } = await dialog.prompt({
-    title: 'New folder',
-    fields: [
+// Each action's button props (theme, variant, icon, …) flow through to the
+// underlying `Button`. Each action's `onClick` is awaited independently —
+// the clicked button shows a loading spinner while its handler is pending,
+// and every other button is disabled until it settles.
+function pastePage() {
+  dialog.confirm({
+    title: 'Paste page',
+    message:
+      'A page with this name already exists. Create a new copy or replace the current page?',
+    actions: [
+      { label: 'Cancel', variant: 'outline' },
       {
-        name: 'name',
-        label: 'Folder name',
-        type: 'text',
-        required: true,
-        placeholder: 'e.g. Q4 Plans',
+        label: 'Create copy',
+        onClick: async () => {
+          await new Promise((r) => setTimeout(r, 600))
+        },
       },
       {
-        name: 'visibility',
-        label: 'Visibility',
-        type: 'select',
-        defaultValue: 'private',
-        options: [
-          { label: 'Private', value: 'private' },
-          { label: 'Team', value: 'team' },
-          { label: 'Public', value: 'public' },
-        ],
+        label: 'Replace',
+        theme: 'red',
+        variant: 'solid',
+        onClick: async () => {
+          await new Promise((r) => setTimeout(r, 900))
+        },
       },
     ],
-    confirmLabel: 'Create',
   })
-  if (values) {
-    await new Promise((r) => setTimeout(r, 500))
-    // eslint-disable-next-line no-console
-    console.log('created folder', values)
-  }
-  close()
+}
+
+function navigateAway() {
+  dialog.confirm({
+    title: 'Unsaved changes',
+    message: 'You have unsaved changes. Save before leaving?',
+    actions: [
+      { label: 'Cancel', variant: 'outline' },
+      {
+        label: 'Discard',
+        theme: 'red',
+        variant: 'subtle',
+        onClick: () => {
+          // eslint-disable-next-line no-console
+          console.log('discarded')
+        },
+      },
+      {
+        label: 'Save and leave',
+        variant: 'solid',
+        onClick: async () => {
+          await new Promise((r) => setTimeout(r, 700))
+        },
+      },
+    ],
+  })
+}
+
+// Throwing inside `onClick` is caught and rendered as an inline error,
+// and every button re-enables so the user can retry or cancel.
+function actionThatFails() {
+  dialog.confirm({
+    title: 'Send invitation',
+    message: 'Send an invite to jane@example.com?',
+    actions: [
+      { label: 'Cancel', variant: 'outline' },
+      {
+        label: 'Send',
+        variant: 'solid',
+        onClick: async () => {
+          await new Promise((r) => setTimeout(r, 500))
+          throw new Error('Server rejected the invitation: rate limit hit.')
+        },
+      },
+    ],
+  })
+}
+
+function dangerDelete() {
+  dialog.danger({
+    title: 'Delete comment',
+    message: 'Are you sure you want to delete this comment?',
+    onConfirm: async () => {
+      await new Promise((r) => setTimeout(r, 500))
+    },
+  })
+}
+
+function dangerCustomLabel() {
+  // `confirmLabel` overrides the default 'Delete' when the action isn't a
+  // delete in the literal sense.
+  dialog.danger({
+    title: 'Revoke invitation',
+    message: 'This will revoke jane@example.com\'s pending invitation.',
+    confirmLabel: 'Revoke',
+    onConfirm: async () => {
+      await new Promise((r) => setTimeout(r, 500))
+    },
+  })
+}
+
+function dangerWithActions() {
+  // `actions[]` composes with `danger` — useful for "delete with options"
+  // (e.g., delete only this occurrence vs the whole series).
+  dialog.danger({
+    title: 'Delete recurring task',
+    message: 'How would you like to delete this task?',
+    actions: [
+      { label: 'Cancel', variant: 'outline' },
+      {
+        label: 'This occurrence',
+        variant: 'subtle',
+        theme: 'red',
+        onClick: async () => {
+          await new Promise((r) => setTimeout(r, 400))
+        },
+      },
+      {
+        label: 'Entire series',
+        variant: 'solid',
+        theme: 'red',
+        onClick: async () => {
+          await new Promise((r) => setTimeout(r, 400))
+        },
+      },
+    ],
+  })
 }
 </script>
 
 <template>
-  <div class="flex flex-wrap gap-2">
-    <Button theme="red" variant="subtle" @click="deleteSpace">
-      dialog.confirm (destructive)
-    </Button>
-    <Button @click="importWorkbook">dialog.confirm (minimal)</Button>
-    <Button @click="savedAlert">dialog.alert</Button>
-    <Button @click="newFolder">dialog.prompt</Button>
+  <div class="flex flex-col gap-3">
+    <div class="flex flex-wrap gap-2">
+      <Button theme="red" variant="subtle" @click="destructiveConfirm">
+        dialog.confirm (destructive)
+      </Button>
+      <Button @click="minimalConfirm">dialog.confirm (minimal)</Button>
+    </div>
+
+    <div class="flex flex-wrap gap-2">
+      <Button @click="pastePage">3 actions (paste page)</Button>
+      <Button @click="navigateAway">3 actions (save/discard/cancel)</Button>
+      <Button @click="actionThatFails">Action that throws</Button>
+    </div>
+
+    <div class="flex flex-wrap gap-2">
+      <Button theme="red" variant="subtle" @click="dangerDelete">
+        dialog.danger (delete)
+      </Button>
+      <Button theme="red" variant="subtle" @click="dangerCustomLabel">
+        dialog.danger (custom label)
+      </Button>
+      <Button theme="red" variant="subtle" @click="dangerWithActions">
+        dialog.danger + actions[]
+      </Button>
+    </div>
   </div>
   <!-- In real apps <FrappeUIProvider> auto-mounts <Dialogs />. -->
   <Dialogs />

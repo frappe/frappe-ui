@@ -19,11 +19,9 @@ export { default as Dialogs } from './components/Dialogs.vue'
 export {
   dialog,
   type ConfirmArgs,
-  type AlertArgs,
   type PromptArgs,
   type PromptField,
   type ConfirmResult,
-  type AlertResult,
   type PromptResult,
   type DialogNamespace,
 } from './utils/dialog'
