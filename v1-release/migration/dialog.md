@@ -211,44 +211,71 @@ Each key of `confirm.options` (`title`, `message`, `actions`, …) becomes a
 top-level prop via `v-bind`. The fallback `|| {}` keeps `v-bind` happy
 when the options haven't been set yet.
 
-### 7. The imperative API — `dialog.confirm` / `alert` / `prompt`
+### 7. The imperative API — `dialog.confirm` / `dialog.danger` / `dialog.prompt`
 
 If your app still uses `$dialog({ … })` or a homegrown `createDialog`
-helper, the v1 imperative API is Promise-based:
+helper, the v1 imperative API is callback-based:
 
 ```ts
-// Before — callback style
+// Before — callback style with hideDialog
 $dialog({
   title: 'Delete',
   message: 'Are you sure?',
   actions: [
     { label: 'Delete', variant: 'solid', theme: 'red',
-      onClick: (close) => item.delete().then(close) },
+      onClick: ({ hideDialog }) => item.delete().then(hideDialog) },
   ],
 })
 
-// After — Promise style
+// After — destructive preset
 import { dialog } from 'frappe-ui'
 
-const { ok, close } = await dialog.confirm({
+dialog.danger({
   title: 'Delete',
   message: 'Are you sure?',
-  confirmLabel: 'Delete',
-  theme: 'red',
+  onConfirm: async () => {
+    await item.delete()
+    // dialog auto-closes when onConfirm resolves
+  },
 })
-if (ok) {
-  await item.delete()
-  close()
-}
 ```
 
-Two contract changes worth knowing:
+The lifecycle contract:
 
-1. The Promise resolves **on click**, not on dismiss. Cancel resolves with
-   `ok: false`.
-2. The caller calls `close()` when ready. The confirm button shows a
-   loading spinner automatically until `close()` runs — perfect for
-   awaiting an API call before dismissing.
+| `onConfirm` outcome | Result |
+|---|---|
+| Resolves | Dialog auto-closes |
+| Throws / rejects | Dialog stays open; thrown message rendered inline; buttons re-enabled |
+| Calls `ctx.close()` early | Dialog closes immediately (the trailing auto-close is a no-op) |
+
+Three helpers in the `dialog` namespace:
+
+- **`dialog.confirm(args)`** — generic confirm with `confirmLabel`/`cancelLabel`/optional `theme`.
+- **`dialog.danger(args)`** — destructive preset; forces `theme: 'red'`, defaults `confirmLabel` to `'Delete'`, defaults the icon to `lucide-alert-triangle`. Use for delete/revoke/discard flows.
+- **`dialog.prompt(args)`** — form dialog with typed `fields[]` (`text`, `textarea`, `select`, `checkbox`, `combobox`) and optional per-field `validate` callbacks. `onConfirm` receives `{ values, close, setError }`.
+
+All three return a synchronous `DialogHandle` (`{ close }`) so callers can dismiss the dialog programmatically — e.g., from a socket event:
+
+```ts
+const handle = dialog.confirm({ title: 'Waiting…', dismissable: false })
+socket.once('done', () => handle.close())
+```
+
+For custom button layouts (paste / replace / cancel, save / discard / cancel, …), pass `actions[]` instead of relying on the default confirm + cancel pair:
+
+```ts
+dialog.confirm({
+  title: 'Unsaved changes',
+  message: 'Save before leaving?',
+  actions: [
+    { label: 'Cancel', variant: 'outline' },
+    { label: 'Discard', theme: 'red', variant: 'subtle', onClick: () => { /* … */ } },
+    { label: 'Save', variant: 'solid', onClick: async () => { await save() } },
+  ],
+})
+```
+
+Each action's `onClick` is awaited independently — the clicked button shows a loading spinner, every other button disables until it settles, and throwing surfaces inline.
 
 To use the imperative helpers, wrap your app root once:
 
@@ -261,6 +288,13 @@ To use the imperative helpers, wrap your app root once:
 
 `FrappeUIProvider` also hosts toasts. Apps that don't use the provider can
 mount `<Dialogs />` directly in their root template.
+
+> **Note**: an older version of this guide described a Promise-based contract
+> (`const { ok, close } = await dialog.confirm(...)`). That design was
+> evaluated in [ADR-0002](../adr/0002-imperative-dialog-caller-closes.md)
+> but reversed in implementation — see
+> [ADR-0003](../adr/0003-imperative-dialog-onconfirm.md) for why the
+> callback-based shape above won.
 
 ## Step-by-step recipe for a codebase sweep
 

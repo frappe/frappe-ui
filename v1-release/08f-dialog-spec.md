@@ -2,12 +2,13 @@
 
 Status: accepted direction for `frappe-ui` v1.
 
-This document defines the exact public API for `Dialog` and the imperative `dialog` namespace (`dialog.confirm`, `dialog.alert`, `dialog.prompt`). It is part of the overlay/floating stabilization workstream listed in [`plan.md`](./plan.md).
+This document defines the exact public API for `Dialog` and the imperative `dialog` namespace (`dialog.confirm`, `dialog.danger`, `dialog.prompt`). It is part of the overlay/floating stabilization workstream listed in [`plan.md`](./plan.md).
 
-Two architectural calls in this spec are recorded as ADRs:
+Architectural calls in this spec are recorded as ADRs:
 
 - [`adr/0001-single-dialog-component.md`](./adr/0001-single-dialog-component.md) — why we ship one `<Dialog>` and not `<Dialog>` + `<AlertDialog>`.
-- [`adr/0002-imperative-dialog-caller-closes.md`](./adr/0002-imperative-dialog-caller-closes.md) — why the imperative API resolves on click and lets the caller call `close()`.
+- [`adr/0002-imperative-dialog-caller-closes.md`](./adr/0002-imperative-dialog-caller-closes.md) — *superseded.* Original plan: imperative API resolves on click, caller calls `close()`.
+- [`adr/0003-imperative-dialog-onconfirm.md`](./adr/0003-imperative-dialog-onconfirm.md) — why the imperative API ended up callback-based (`onConfirm` with auto-close, throw to stay open), reversing ADR-0002.
 
 ## Role
 
@@ -29,7 +30,7 @@ Apps reach for the imperative `dialog.*` helpers when they need a one-off confir
 | Size scale | All 11 sizes kept (`xs` → `7xl`); maps to Tailwind `max-w-*` |
 | Color vocabulary | `theme` with color names (`'yellow' \| 'blue' \| 'red' \| 'green'`), matching `Alert.theme`. No semantic axis. |
 | Slots | Canonical: `#default`, `#title`, `#actions`. Legacy slots deprecated with internal forwarding. |
-| Imperative API | Promise-based `dialog.confirm/alert/prompt`. Promise resolves on click; caller calls `close()`. Auto-loading on the action button until `close()`. |
+| Imperative API | Callback-based `dialog.confirm`, `dialog.danger`, `dialog.prompt`. `onConfirm` resolving auto-closes; throwing keeps the dialog open with the thrown message rendered inline. Each helper returns a synchronous `DialogHandle` for programmatic dismissal. |
 | Mount mechanism | `<FrappeUIProvider>` renders `<Dialogs />` next to `<Toasts />`. `<Dialogs />` is still exported for callers who don't use the provider. |
 
 ## Exact public API for v1
@@ -159,7 +160,9 @@ interface DialogProps {
 
 ## Imperative API
 
-The `dialog` namespace exports three Promise-based helpers. All resolve when the user picks an action; the caller calls `close()` when ready.
+The `dialog` namespace exports three callback-based helpers: `dialog.confirm`, `dialog.danger`, and `dialog.prompt`. Each mounts a `<Dialog>` from non-component code (stores, route guards, utilities) and returns a synchronous `DialogHandle` so the caller can dismiss programmatically.
+
+The lifecycle is driven by `onConfirm` / `onCancel` callbacks. `onConfirm` resolving auto-closes the dialog; throwing keeps it open with the thrown message rendered inline. See [ADR-0003](./adr/0003-imperative-dialog-onconfirm.md) for the rationale (which supersedes ADR-0002).
 
 ### Mount
 
@@ -185,24 +188,52 @@ pattern used by some other libraries.
 ### Types
 
 ```ts
+interface DialogControl {
+  /** Manually dismiss the dialog. Idempotent. */
+  close: () => void
+  /**
+   * Show an inline error and reset loading. Pass `null`/`''` to clear.
+   * Note: calling this from inside `onConfirm` without throwing does NOT
+   * prevent the auto-close — throw to stay open with an error.
+   */
+  setError: (message: string | null | undefined) => void
+}
+
+interface PromptControl extends DialogControl {
+  values: Record<string, any>
+}
+
+/** A button in `actions[]`. Extends `ButtonProps` (theme, variant, icon, …). */
+type DialogAction = Omit<ButtonProps, 'onClick' | 'loading'> & {
+  label: string
+  onClick?: (ctx: DialogControl) => void | Promise<void>
+}
+
 interface ConfirmArgs {
   title?: string
   message?: string
-  confirmLabel?: string          // default 'Confirm'
-  cancelLabel?: string           // default 'Cancel'
+  confirmLabel?: string          // default 'Confirm'; ignored when actions[] is set
+  cancelLabel?: string           // default 'Cancel';  ignored when actions[] is set
   theme?: DialogTheme            // colors the confirm button + picks default icon
   icon?: string | DialogIcon     // overrides theme-derived default icon
   size?: DialogSize              // default 'md'
+  dismissable?: boolean          // default true
+  onConfirm?: (ctx: DialogControl) => void | Promise<void>
+  onCancel?: () => void | Promise<void>
+  /**
+   * Override the default confirm+cancel pair. Each action is rendered as a
+   * Button; its onClick is awaited independently and shows a loading spinner
+   * while pending. When set, confirmLabel/cancelLabel/onConfirm are ignored.
+   */
+  actions?: DialogAction[]
 }
 
-interface AlertArgs {
-  title?: string
-  message?: string
-  label?: string                 // default 'OK'
-  theme?: DialogTheme
-  icon?: string | DialogIcon
-  size?: DialogSize              // default 'md'
-}
+/**
+ * Destructive preset for `dialog.danger`. Forces `theme: 'red'`, defaults
+ * `confirmLabel` to 'Delete', defaults the icon to `lucide-alert-triangle`.
+ * Everything else (actions[], dismissable, onCancel, …) works as in confirm.
+ */
+type DangerArgs = Omit<ConfirmArgs, 'theme' | 'icon'>
 
 interface PromptArgs {
   title?: string
@@ -213,45 +244,61 @@ interface PromptArgs {
   theme?: DialogTheme
   icon?: string | DialogIcon
   size?: DialogSize              // default 'md'
+  dismissable?: boolean          // default true
+  onConfirm: (ctx: PromptControl) => void | Promise<void>
+  onCancel?: () => void | Promise<void>
 }
 
-type PromptField = {
+/**
+ * Per-field validator. Return a non-empty string to mark the field invalid;
+ * `null`/`undefined`/empty-string for valid. May be async — submit stays in
+ * its loading state until all validators settle. Runs after `required`.
+ */
+type PromptFieldValidator = (
+  value: any,
+  allValues: Record<string, any>,
+) => string | null | undefined | Promise<string | null | undefined>
+
+interface BasePromptField {
   name: string
   label?: string
-  type?: 'text' | 'textarea' | 'select' | 'checkbox'   // default 'text'
-  defaultValue?: string | boolean
   placeholder?: string
   required?: boolean
-  options?: Array<{ label: string; value: string }>    // for 'select'
   description?: string
+  validate?: PromptFieldValidator
 }
 
-interface ConfirmResult { ok: boolean; close: () => void }
-interface AlertResult { close: () => void }
-interface PromptResult {
-  values: Record<string, any> | null    // null on cancel
-  close: () => void
-}
+type PromptField =
+  | (BasePromptField & { type?: 'text' | 'textarea'; defaultValue?: string })
+  | (BasePromptField & { type: 'select'; defaultValue?: string;
+                         options: Array<{ label: string; value: string }> })
+  | (BasePromptField & { type: 'checkbox'; defaultValue?: boolean })
+  | (BasePromptField & { type: 'combobox'; defaultValue?: string;
+                         options: ComboboxOption[]; allowCreate?: boolean })
+
+interface DialogHandle { close: () => void }
 
 declare const dialog: {
-  confirm(args: ConfirmArgs): Promise<ConfirmResult>
-  alert(args: AlertArgs): Promise<AlertResult>
-  prompt(args: PromptArgs): Promise<PromptResult>
+  confirm(args: ConfirmArgs): DialogHandle
+  danger(args: DangerArgs): DialogHandle
+  prompt(args: PromptArgs): DialogHandle
 }
 ```
 
 ### Lifecycle contract
 
-- Each helper mounts a `<Dialog>` with `dismissable: false`.
-- The Promise resolves the instant the user picks an action:
-  - `confirm` → `{ ok: true, close }` on confirm, `{ ok: false, close }` on cancel.
-  - `alert` → `{ close }` (single button; resolves on click).
-  - `prompt` → `{ values: { ... }, close }` on submit, `{ values: null, close }` on cancel.
-- The dialog **does not auto-close on confirm**. The caller calls `close()` when their work is done.
-- The confirm/submit button automatically shows a loading state from the moment of click until `close()` is called or the dialog is cancelled.
-- On cancel, the dialog auto-closes and the promise resolves. Calling `close()` after a cancel is a no-op.
+| `onConfirm` outcome | Result |
+|---|---|
+| Resolves | Dialog auto-closes |
+| Throws / rejects | Dialog stays open. Thrown message is extracted via the internal `extractErrorMessage` (Frappe `messages[]`, `Error.message`, plain string, generic fallback) and rendered inline. Buttons re-enable. |
+| Calls `ctx.close()` before/during the await | Dialog closes immediately; the trailing auto-close is an idempotent no-op |
+| Calls `ctx.setError(msg)` without throwing | Inline error is set, but the dialog **still auto-closes** when `onConfirm` resolves. To stay open with an error, throw instead. |
 
-See ADR-0002 for why we chose caller-controlled close over auto-close.
+The confirm/submit button shows a loading spinner for as long as the `onConfirm` promise is pending. When `actions[]` is supplied, each action tracks its own loading state — the clicked button spins; every other button disables until it settles.
+
+`onCancel` fires on Cancel click, Escape, outside-click, or close-button click (whenever the dialog's `open` flag flips to `false` via dismissal). Set `dismissable: false` to disable Escape / outside-click / close-button.
+
+Each helper returns `{ close }` synchronously, so callers can dismiss the dialog from outside the callback chain — e.g., from a socket event or route change.
 
 ### `theme` → default icon mapping
 
@@ -260,50 +307,96 @@ When `theme` is set without an explicit `icon`, the helper uses these defaults (
 | `theme` | Default icon | Confirm button color |
 |---|---|---|
 | `red` | `lucide-alert-triangle` | red solid |
-| `yellow` | `lucide-alert-triangle` | yellow solid |
+| `yellow` | `lucide-alert-triangle` | default solid (Button doesn't have a `yellow` theme — icon theme is honored, button falls back) |
 | `blue` | `lucide-info` | blue solid |
 | `green` | `lucide-check-circle` | green solid |
 | *(unset)* | none | default solid |
 
+`dialog.danger` pins `theme: 'red'` and inherits the alert-triangle default.
+
 ### Examples
 
 ```ts
-// Simple confirm
-const { ok, close } = await dialog.confirm({
-  title: 'Delete file?',
-  message: 'This cannot be undone.',
-  confirmLabel: 'Delete',
-  theme: 'red',
+// Simple confirm — auto-closes when onConfirm resolves.
+dialog.confirm({
+  title: 'Import workbook',
+  message: 'Continue with the import?',
+  onConfirm: async () => {
+    await api.import()
+  },
 })
-if (ok) {
-  await api.deleteFile(id)
-}
-close()
 ```
 
 ```ts
-// Alert
-const { close } = await dialog.alert({
-  title: 'Saved',
-  message: 'Your changes are saved.',
-  theme: 'green',
+// Destructive flow — dialog.danger is sugar for theme: 'red' + Delete label.
+dialog.danger({
+  title: 'Delete space',
+  message: 'This will permanently delete the space and all its content.',
+  onConfirm: async () => {
+    await spaces.delete.submit({ name: spaceId })
+  },
 })
-close()
 ```
 
 ```ts
-// Prompt
-const { values, close } = await dialog.prompt({
-  title: 'New folder',
-  fields: [
-    { name: 'name', label: 'Folder name', type: 'text', required: true },
-    { name: 'description', label: 'Description', type: 'textarea' },
+// Stay open after async — throw to surface a validation message.
+dialog.confirm({
+  title: 'Claim username',
+  confirmLabel: 'Claim',
+  onConfirm: async () => {
+    await api.checkAvailable()
+    throw new Error('That username is already taken.')
+  },
+})
+```
+
+```ts
+// Custom buttons via actions[]. Each onClick is awaited independently.
+dialog.confirm({
+  title: 'Paste page',
+  message: 'A page with this name already exists. Create a copy or replace?',
+  actions: [
+    { label: 'Cancel', variant: 'outline' },
+    { label: 'Create copy', onClick: async () => { await api.copy() } },
+    {
+      label: 'Replace',
+      variant: 'solid', theme: 'red',
+      onClick: async () => { await api.replace() },
+    },
   ],
 })
-if (values) {
-  await api.createFolder(values)
-}
-close()
+```
+
+```ts
+// Prompt with per-field async validation.
+dialog.prompt({
+  title: 'New folder',
+  fields: [
+    {
+      name: 'name',
+      label: 'Folder name',
+      type: 'text',
+      required: true,
+      validate: async (value) => {
+        const taken = await api.exists(value)
+        return taken ? 'A folder with that name already exists' : null
+      },
+    },
+    { name: 'description', label: 'Description', type: 'textarea' },
+  ],
+  onConfirm: async ({ values }) => {
+    await api.createFolder(values)
+  },
+})
+```
+
+```ts
+// Programmatic dismissal via the returned handle.
+const handle = dialog.confirm({
+  title: 'Waiting for upload…',
+  dismissable: false,
+})
+socket.once('upload:done', () => handle.close())
 ```
 
 ## Deprecations
@@ -359,10 +452,10 @@ The flat props win over `options` keys, so partial migration (changing some keys
 
 This is the canonical migration for the ~30 in-the-wild apps using `#body` for full-canvas layouts (gameplan/Settings, helpdesk/SettingsModal, drive/SearchPopup, command palettes, etc.).
 
-### From `confirmDialog()` to `dialog.confirm()`
+### From `confirmDialog()` to `dialog.confirm()` / `dialog.danger()`
 
 ```js
-// before
+// before — manual hideDialog after the work completes
 confirmDialog({
   title: 'Delete?',
   message: 'Cannot be undone.',
@@ -372,24 +465,25 @@ confirmDialog({
   },
 })
 
-// after
-const { ok, close } = await dialog.confirm({
+// after — destructive preset; auto-closes when onConfirm resolves
+dialog.danger({
   title: 'Delete?',
   message: 'Cannot be undone.',
+  onConfirm: async () => {
+    await api.deleteFile()
+  },
 })
-if (ok) {
-  await api.deleteFile()
-}
-close()
 ```
+
+For non-destructive flows, use `dialog.confirm` with the same `onConfirm` shape. Throw from `onConfirm` to keep the dialog open with an inline error (e.g., for server-side validation failures).
 
 ## Out of scope for v1
 
 These are intentionally not in this spec; revisit in `1.x`:
 
 - Cross-component rollout of `dismissable` to Popover, Dropdown, Tooltip.
-- Custom `validate` callbacks on `PromptField`.
-- Additional `PromptField` types (`date`, `number`, `autocomplete`, etc.).
-- `dialog.message()` or other named imperative helpers beyond confirm/alert/prompt.
+- Additional `PromptField` types beyond `text` / `textarea` / `select` / `checkbox` / `combobox` (`date`, `number`, `autocomplete`, multi-step wizards, etc.).
+- A `dialog.alert()` helper. The same affordance is achieved today with `dialog.confirm({ actions: [{ label: 'OK', variant: 'solid' }] })` or by passing only `cancelLabel`; not worth a dedicated entry point in v1.
+- `dialog.message()` or other named imperative helpers beyond `confirm` / `danger` / `prompt`.
 - A reactive imperative API that exposes the underlying Dialog instance for further mutation.
 - Custom `position` offsets beyond the existing `'center' | 'top'` + `paddingTop` surface.

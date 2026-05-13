@@ -1,6 +1,6 @@
 # Imperative dialog API resolves on click; caller calls `close()`
 
-**Status**: accepted
+**Status**: superseded by [ADR-0003](./0003-imperative-dialog-onconfirm.md). The decision below was the planned design; implementation reversed it in favor of an `onConfirm` callback with auto-close. This ADR is preserved for historical context.
 
 ## Context
 
