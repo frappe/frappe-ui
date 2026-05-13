@@ -333,6 +333,65 @@ describe('Dialog', () => {
     cy.get('[data-cy=toggle]').should('be.focused')
   })
 
+  // ---- Action layout ---------------------------------------------------------
+
+  it('renders a single action full-width when size is md or smaller', () => {
+    cy.mount(Dialog, {
+      props: {
+        open: true,
+        size: 'md',
+        title: 'Subscription updated',
+        actions: [{ label: 'Got it', variant: 'solid' }],
+      },
+    })
+
+    cy.get('[role=dialog]')
+      .contains('button', 'Got it')
+      .should('have.class', 'w-full')
+      .parent()
+      .should('not.have.class', 'flex')
+  })
+
+  it('renders multiple actions side-by-side at natural width on a small dialog', () => {
+    cy.mount(Dialog, {
+      props: {
+        open: true,
+        size: 'md',
+        title: 'Discard changes?',
+        actions: [
+          { label: 'Keep editing' },
+          { label: 'Discard', variant: 'solid' },
+        ],
+      },
+    })
+
+    cy.get('[role=dialog]')
+      .contains('button', 'Discard')
+      .should('not.have.class', 'w-full')
+      .parent()
+      .should('have.class', 'flex')
+      .and('have.class', 'justify-end')
+      .and('have.class', 'gap-2')
+  })
+
+  it('does not stretch a single action when the dialog is larger than md', () => {
+    cy.mount(Dialog, {
+      props: {
+        open: true,
+        size: 'xl',
+        title: 'Report generated',
+        actions: [{ label: 'Download', variant: 'solid' }],
+      },
+    })
+
+    cy.get('[role=dialog]')
+      .contains('button', 'Download')
+      .should('not.have.class', 'w-full')
+      .parent()
+      .should('have.class', 'flex')
+      .and('have.class', 'justify-end')
+  })
+
   it('falls back to Reka default focus when nothing is marked', () => {
     cy.mount(Dialog, {
       props: { open: true, title: 'Plain', message: 'No marker here.' },

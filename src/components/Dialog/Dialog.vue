@@ -112,11 +112,11 @@
                   name="actions"
                   v-bind="{ close, actions: reactiveActions }"
                 >
-                  <div class="space-y-2">
+                  <div :class="isSingleActionFullWidth ? '' : 'flex justify-end gap-2'">
                     <Button
-                      class="w-full"
                       v-for="action in reactiveActions"
                       :key="action.label"
+                      :class="isSingleActionFullWidth ? 'w-full' : ''"
                       :disabled="action.disabled"
                       v-bind="action"
                     >
@@ -421,6 +421,14 @@ const reactiveActions = computed((): DialogReactiveAction[] => {
     })
     return _action
   })
+})
+
+const isSingleActionFullWidth = computed(() => {
+  const smallSizes = ['xs', 'sm', 'md']
+  return (
+    reactiveActions.value.length === 1 &&
+    smallSizes.includes(resolved.value.size)
+  )
 })
 
 // Whether the auto-header should render at all. Per spec, the header

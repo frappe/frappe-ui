@@ -11,6 +11,14 @@ A flexible overlay for showing messages, forms, or actions. Keeps focus on conte
 ## State-driven actions
 <ComponentPreview name="Dialog-Modal" />
 
+## Action layout
+
+A single action on a small dialog (`xs`, `sm`, `md`) renders full-width.
+Everything else sits side-by-side at natural width, right-aligned. Using the
+`#actions` slot opts out — you own the layout.
+
+<ComponentPreview name="Dialog-ActionsLayout" />
+
 ## Single-CTA form
 <ComponentPreview name="Dialog-Interactive" />
 
