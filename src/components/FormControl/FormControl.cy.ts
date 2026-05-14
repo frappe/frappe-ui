@@ -178,5 +178,51 @@ describe('FormControl', () => {
       })
       cy.get('label').should('have.length', 1)
     })
+
+    it('renders bare select with w-full so it fills its container (ListFilter pattern)', () => {
+      // Mirrors how ListFilter renders FormControl in a min-width column:
+      //   <div class="min-w-[140px]"><FormControl type="select" options /></div>
+      // Old template hard-coded `class="w-full"` on Select; ensure the
+      // dispatcher still produces a full-width trigger even without label.
+      cy.mount({
+        components: { FormControl },
+        data: () => ({ options }),
+        template: `
+          <div style="width: 240px; padding: 16px;">
+            <div data-cy="col" style="min-width: 140px;">
+              <FormControl type="select" :options="options" />
+            </div>
+          </div>
+        `,
+      })
+      cy.get('[data-cy="col"]').then(($col) => {
+        const colWidth = $col[0].getBoundingClientRect().width
+        cy.get('[data-slot="trigger"]').then(($trigger) => {
+          const triggerWidth = $trigger[0].getBoundingClientRect().width
+          expect(triggerWidth).to.be.closeTo(colWidth, 1)
+        })
+      })
+    })
+
+    it('renders bare combobox with w-full so it fills its container', () => {
+      cy.mount({
+        components: { FormControl },
+        data: () => ({ options }),
+        template: `
+          <div style="width: 240px; padding: 16px;">
+            <div data-cy="col" style="min-width: 140px;">
+              <FormControl type="combobox" :options="options" />
+            </div>
+          </div>
+        `,
+      })
+      cy.get('[data-cy="col"]').then(($col) => {
+        const colWidth = $col[0].getBoundingClientRect().width
+        cy.get('[data-slot="trigger"]').then(($trigger) => {
+          const triggerWidth = $trigger[0].getBoundingClientRect().width
+          expect(triggerWidth).to.be.closeTo(colWidth, 1)
+        })
+      })
+    })
   })
 })

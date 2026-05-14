@@ -3,7 +3,7 @@
     :is="resolvedComponent"
     :id="id"
     v-bind="forwardedAttrs"
-    :class="attrs.class"
+    :class="[fillWidth ? 'w-full' : null, attrs.class]"
     :style="attrs.style"
   >
     <template v-for="name in slotNames" :key="name" #[name]="slotProps">
@@ -49,6 +49,17 @@ const attrs = useAttrs()
 const slots = useSlots()
 
 const slotNames = computed(() => Object.keys(slots))
+
+// FormControl represents "form context = full width" — the legacy template
+// hard-coded `class="w-full"` on Select/Combobox. Preserve that contract for
+// all select-like dispatched types (including bare uses with no label, e.g.
+// ListFilter's operator picker placed inside a min-width column). Standalone
+// Select/Combobox/MultiSelect retain their own hasLabeling heuristic.
+const fillWidth = computed(() =>
+  new Set(['select', 'combobox', 'multiselect', 'autocomplete']).has(
+    props.type as string,
+  ),
+)
 
 const resolvedComponent = computed(() => {
   switch (props.type) {
