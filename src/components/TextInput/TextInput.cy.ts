@@ -73,6 +73,16 @@ describe('Textinput', () => {
     }
   })
 
+  it('sets autocomplete=off by default and allows override via attrs', () => {
+    cy.mount(TextInput)
+    cy.get('input').should('have.attr', 'autocomplete', 'off')
+
+    cy.mount(TextInput, {
+      attrs: { autocomplete: 'email' },
+    })
+    cy.get('input').should('have.attr', 'autocomplete', 'email')
+  })
+
   it('v-model', () => {
     cy.mount(TextInput, {
       props: {
