@@ -1,82 +1,19 @@
 <template>
-  <div
-    v-if="type != 'checkbox'"
-    :class="['space-y-1.5', attrs.class]"
+  <component
+    :is="resolvedComponent"
+    :id="id"
+    v-bind="forwardedAttrs"
+    :class="attrs.class"
     :style="attrs.style"
   >
-    <FormLabel
-      v-if="label"
-      :label="label"
-      :size="size"
-      :id="id"
-      :required="required"
-    />
-    <Select
-      v-if="type === 'select'"
-      :id="id"
-      class="w-full"
-      v-bind="{ ...controlAttrs, size, variant }"
-    >
-      <template #prefix v-if="$slots.prefix">
-        <slot name="prefix" />
-      </template>
-    </Select>
-    <!--
-      Wrap Combobox in a div so the surrounding `space-y-1.5` has a real
-      box to attach `margin-top` to. ComboboxRoot uses `display: contents`,
-      which lets selectors match it but drops any margins applied to it.
-    -->
-    <div v-else-if="type === 'combobox'">
-      <Combobox
-        :id="id"
-        class="w-full"
-        v-bind="{ ...controlAttrs, size, variant }"
-      >
-        <template #prefix v-if="$slots.prefix">
-          <slot name="prefix" />
-        </template>
-      </Combobox>
-    </div>
-    <Autocomplete
-      v-else-if="type === 'autocomplete'"
-      v-bind="{ ...controlAttrs }"
-    >
-      <template #prefix v-if="$slots.prefix">
-        <slot name="prefix" />
-      </template>
-      <template #item-prefix="itemPrefixProps" v-if="$slots['item-prefix']">
-        <slot name="item-prefix" v-bind="itemPrefixProps" />
-      </template>
-    </Autocomplete>
-    <Textarea
-      v-else-if="type === 'textarea'"
-      :id="id"
-      v-bind="{ ...controlAttrs, size, variant }"
-    />
-    <TextInput
-      v-else
-      :id="id"
-      v-bind="{ ...controlAttrs, type, size, variant, required }"
-    >
-      <template #prefix v-if="$slots.prefix">
-        <slot name="prefix" />
-      </template>
-      <template #suffix v-if="$slots.suffix">
-        <slot name="suffix" />
-      </template>
-    </TextInput>
-    <slot name="description">
-      <p v-if="description" :class="descriptionClasses">{{ description }}</p>
-    </slot>
-  </div>
-  <Checkbox
-    v-else
-    :id="id"
-    v-bind="{ ...controlAttrs, label, size, class: attrs.class }"
-  />
+    <template v-for="name in slotNames" :key="name" #[name]="slotProps">
+      <!-- @vue-ignore -->
+      <slot :name="name" v-bind="slotProps" />
+    </template>
+  </component>
 </template>
 <script setup lang="ts">
-import { useAttrs, computed, provide, watchEffect } from 'vue'
+import { useAttrs, computed, provide, watchEffect, useSlots } from 'vue'
 import { useId } from '../../utils/useId'
 import { TextInput } from '../TextInput'
 import { Select } from '../Select'
@@ -85,7 +22,7 @@ import { Checkbox } from '../Checkbox'
 import { Autocomplete } from '../Autocomplete'
 import { autocompleteDeprecationSuppressed } from '../Autocomplete/deprecationKey'
 import { Combobox } from '../Combobox'
-import FormLabel from '../FormLabel.vue'
+import { MultiSelect } from '../MultiSelect'
 import { warnDeprecated } from '../../utils/warnDeprecated'
 import type { FormControlProps } from './types'
 
@@ -109,25 +46,60 @@ watchEffect(() => {
 })
 
 const attrs = useAttrs()
-const controlAttrs = computed(() => {
-  // pass everything except class and style
-  let _attrs: typeof attrs = {}
-  for (let key in attrs) {
-    if (key !== 'class' && key !== 'style') {
-      _attrs[key] = attrs[key]
-    }
+const slots = useSlots()
+
+const slotNames = computed(() => Object.keys(slots))
+
+const resolvedComponent = computed(() => {
+  switch (props.type) {
+    case 'select':
+      return Select
+    case 'combobox':
+      return Combobox
+    case 'multiselect':
+      return MultiSelect
+    case 'autocomplete':
+      return Autocomplete
+    case 'textarea':
+      return Textarea
+    case 'checkbox':
+      return Checkbox
+    default:
+      return TextInput
   }
-  return _attrs
 })
 
-const descriptionClasses = computed(() => {
-  return [
-    {
-      sm: 'text-p-xs',
-      md: 'text-p-base',
-    }[props.size],
-    'text-ink-gray-5',
-  ]
+const forwardedAttrs = computed(() => {
+  // attrs minus class/style (applied separately on the rendered child)
+  const out: Record<string, unknown> = {}
+  for (const key in attrs) {
+    if (key !== 'class' && key !== 'style') out[key] = attrs[key]
+  }
+
+  out.size = props.size
+  out.variant = props.variant
+
+  if (props.label !== undefined) out.label = props.label
+  if (props.description !== undefined) out.description = props.description
+  if (props.error !== undefined) out.error = props.error
+  if (props.required !== undefined) out.required = props.required
+
+  // TextInput needs the html input `type`; the dispatcher consumes the
+  // composite types (select/combobox/multiselect/textarea/checkbox/autocomplete)
+  // and lets the rest fall through to <TextInput :type="...">.
+  const composite = new Set([
+    'select',
+    'combobox',
+    'multiselect',
+    'autocomplete',
+    'textarea',
+    'checkbox',
+  ])
+  if (!composite.has(props.type as string)) {
+    out.type = props.type
+  }
+
+  return out
 })
 
 defineSlots<{
@@ -137,6 +109,8 @@ defineSlots<{
   suffix?: () => any
   /** Custom description slot (replaces description prop) */
   description?: () => any
+  /** Custom label slot (replaces label prop). Receives `{ required }`. */
+  label?: (props: { required: boolean }) => any
   /** Custom slot for autocomplete items prefix (if using Autocomplete type) */
   'item-prefix'?: (props: { item: any }) => any
   /** Default slot override for full input rendering */

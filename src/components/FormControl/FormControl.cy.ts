@@ -95,4 +95,88 @@ describe('FormControl', () => {
     cy.mount(FormControl, { props: { label: 'Title' } })
     cy.get('@consoleWarn').should('not.have.been.calledWithMatch', /FormControl/)
   })
+
+  describe('dispatcher delegation', () => {
+    const options = [
+      { label: 'One', value: '1' },
+      { label: 'Two', value: '2' },
+    ]
+
+    it('forwards label/description/error/required to Select', () => {
+      cy.mount(FormControl, {
+        props: {
+          type: 'select',
+          options,
+          label: 'Pick',
+          description: 'helper',
+          required: true,
+        },
+      })
+      cy.contains('label', 'Pick').should('exist')
+      cy.get('[data-slot="trigger"]').should(
+        'have.attr',
+        'aria-required',
+        'true',
+      )
+      cy.contains('helper').should('exist')
+    })
+
+    it('forwards error to Select and suppresses description', () => {
+      cy.mount(FormControl, {
+        props: {
+          type: 'select',
+          options,
+          label: 'Pick',
+          description: 'helper',
+          error: 'Required',
+        },
+      })
+      cy.get('[data-slot="trigger"]').should(
+        'have.attr',
+        'aria-invalid',
+        'true',
+      )
+      cy.contains('Required').should('exist')
+      cy.contains('helper').should('not.exist')
+    })
+
+    it('renders Combobox via type="combobox" with labeling', () => {
+      cy.mount(FormControl, {
+        props: {
+          type: 'combobox',
+          options,
+          label: 'Pick',
+          error: 'Required',
+        },
+      })
+      cy.contains('label', 'Pick').should('exist')
+      cy.get('[role="combobox"]').should('have.attr', 'aria-invalid', 'true')
+    })
+
+    it('renders MultiSelect via type="multiselect" with labeling', () => {
+      cy.mount(FormControl, {
+        props: {
+          type: 'multiselect',
+          options,
+          label: 'Pick many',
+          description: 'Pick as many as you like.',
+          required: true,
+        },
+      })
+      cy.contains('label', 'Pick many').should('exist')
+      cy.get('[data-slot="trigger"]').should(
+        'have.attr',
+        'aria-required',
+        'true',
+      )
+      cy.contains('Pick as many as you like.').should('exist')
+    })
+
+    it('renders only one label even though child also self-shells (no duplication)', () => {
+      cy.mount(FormControl, {
+        props: { type: 'select', options, label: 'Pick' },
+      })
+      cy.get('label').should('have.length', 1)
+    })
+  })
 })

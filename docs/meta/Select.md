@@ -9,7 +9,7 @@
     name: 'size',
     description: 'Size of the select input.',
     required: false,
-    type: '"sm" | "md" | "lg" | "xl"',
+    type: '"md" | "sm" | "lg" | "xl"',
     default: '"sm"'
   },
   {
@@ -31,12 +31,6 @@
     description: 'If true, disables the select input.',
     required: false,
     type: 'boolean'
-  },
-  {
-    name: 'id',
-    description: 'Optional HTML id for the select element.',
-    required: false,
-    type: 'string'
   },
   {
     name: 'modelValue',
@@ -64,6 +58,36 @@
     required: false,
     type: 'string',
     default: '"No options"'
+  },
+  {
+    name: 'label',
+    description: 'Label rendered above (or beside, for binary controls) the input.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'description',
+    description: 'Helper text rendered below the input.\nHidden when `error` is set.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'error',
+    description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
+    required: false,
+    type: 'string | FrappeUIError'
+  },
+  {
+    name: 'required',
+    description: 'Marks the field as required. Renders an asterisk next to the label and\nforwards `required` / `aria-required` to the underlying control.',
+    required: false,
+    type: 'boolean'
+  },
+  {
+    name: 'id',
+    description: 'HTML id of the underlying control. Auto-generated via `useId()` if omitted.',
+    required: false,
+    type: 'string'
   }
 ]
 
@@ -72,6 +96,16 @@
     name: 'trigger',
     description: 'Fully custom trigger renderer.',
     type: 'SelectTriggerSlotProps'
+  },
+  {
+    name: 'label',
+    description: 'Overrides the rendered label content. Receives `{ required }`.',
+    type: '{ required: boolean; }'
+  },
+  {
+    name: 'description',
+    description: 'Overrides the rendered description content.',
+    type: 'any'
   },
   {
     name: 'prefix',

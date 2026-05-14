@@ -9,8 +9,7 @@
     name: 'items',
     description: 'Ordered list of breadcrumb items',
     required: true,
-    type: 'BreadcrumbItem[]',
-    default: undefined
+    type: 'BreadcrumbItem[]'
   }
 ]
 

@@ -240,4 +240,79 @@ describe('MultiSelect', () => {
         .and('contain.text', options[1].label)
     })
   })
+
+  describe('shared labeling contract', () => {
+    it('renders label and links it to the trigger via for/id', () => {
+      cy.mount(MultiSelect, {
+        props: { options, label: 'Fruits' },
+      })
+      cy.get('[data-slot="trigger"]').then(($trigger) => {
+        const id = $trigger.attr('id')!
+        cy.get(`label[for="${id}"]`).should('contain.text', 'Fruits')
+      })
+    })
+
+    it('renders description and wires aria-describedby on trigger', () => {
+      cy.mount(MultiSelect, {
+        props: {
+          options,
+          label: 'Fruits',
+          description: 'Pick as many as you like.',
+        },
+      })
+      cy.get('[data-slot="trigger"]').then(($trigger) => {
+        const id = $trigger.attr('id')!
+        const describedBy = $trigger.attr('aria-describedby')!
+        expect(describedBy).to.equal(`${id}-description`)
+        cy.get(`#${id}-description`).should(
+          'contain.text',
+          'Pick as many as you like.',
+        )
+      })
+    })
+
+    it('renders error with aria-invalid + aria-errormessage and suppresses description', () => {
+      cy.mount(MultiSelect, {
+        props: {
+          options,
+          label: 'Fruits',
+          description: 'helper',
+          error: 'Pick at least one.',
+        },
+      })
+      cy.get('[data-slot="trigger"]')
+        .should('have.attr', 'aria-invalid', 'true')
+        .then(($trigger) => {
+          const id = $trigger.attr('id')!
+          expect($trigger.attr('aria-errormessage')).to.equal(`${id}-error`)
+          cy.get(`#${id}-error`).should('contain.text', 'Pick at least one.')
+          cy.get(`#${id}-description`).should('not.exist')
+        })
+    })
+
+    it('renders required indicator and forwards aria-required', () => {
+      cy.mount(MultiSelect, {
+        props: { options, label: 'Fruits', required: true },
+      })
+      cy.get('[data-slot="trigger"]').should(
+        'have.attr',
+        'aria-required',
+        'true',
+      )
+      cy.contains('label', 'Fruits').within(() => {
+        cy.get('span[aria-hidden="true"]').should('contain.text', '*')
+      })
+    })
+
+    it('flips data-invalid on the trigger when error is set', () => {
+      cy.mount(MultiSelect, {
+        props: { options, label: 'Fruits', error: 'Required' },
+      })
+      cy.get('[data-slot="trigger"]').should(
+        'have.attr',
+        'data-invalid',
+        'true',
+      )
+    })
+  })
 })

@@ -9,21 +9,25 @@
     name: 'label',
     description: 'Label text displayed above the input',
     required: false,
-    type: 'string',
-    default: undefined
+    type: 'string'
   },
   {
     name: 'description',
     description: 'Optional description or helper text shown below the input',
     required: false,
-    type: 'string',
-    default: undefined
+    type: 'string'
+  },
+  {
+    name: 'error',
+    description: 'Error message shown below the input. Sets aria-invalid on the control.',
+    required: false,
+    type: 'string | FrappeUIError'
   },
   {
     name: 'type',
     description: 'Type of input to render',
     required: false,
-    type: '"select" | TextInputTypes | "textarea" | "checkbox" | "autocomplete" | "combobox"',
+    type: '"select" | TextInputTypes | "textarea" | "checkbox" | "autocomplete" | "combobox" | "multiselect"',
     default: '"text"'
   },
   {
@@ -44,8 +48,7 @@
     name: 'required',
     description: 'Whether the input is required',
     required: false,
-    type: 'boolean',
-    default: undefined
+    type: 'boolean'
   }
 ]
 
@@ -64,6 +67,11 @@
     name: 'description',
     description: 'Custom description slot (replaces description prop)',
     type: 'any'
+  },
+  {
+    name: 'label',
+    description: 'Custom label slot (replaces label prop). Receives `{ required }`.',
+    type: '{ required: boolean; }'
   },
   {
     name: 'item-prefix',

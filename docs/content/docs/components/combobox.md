@@ -37,4 +37,9 @@ Combobox rendered inside a Dialog. Verifies focus restores to the trigger after 
 
 <ComponentPreview name="Combobox-InDialog" layout="stacked" css='justify-center !py-20 grid' />
 
+## Label, Description, Error
+`Combobox` supports `label`, `description`, `error`, and `required` directly — no `FormControl` wrapper needed. The error suppresses the description and wires `aria-invalid` + `aria-errormessage` onto the input.
+
+<ComponentPreview name="Combobox-Labeling" />
+
 <!-- @include: ../../../meta/Combobox.md -->

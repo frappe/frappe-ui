@@ -23,15 +23,13 @@
     name: 'flexItem',
     description: '',
     required: false,
-    type: 'boolean',
-    default: undefined
+    type: 'boolean'
   },
   {
     name: 'action',
     description: '',
     required: false,
-    type: 'DividerAction',
-    default: undefined
+    type: 'DividerAction'
   }
 ]
 </script>

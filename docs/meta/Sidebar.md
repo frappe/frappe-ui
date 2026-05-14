@@ -9,22 +9,19 @@
     name: 'header',
     description: '',
     required: false,
-    type: 'SidebarHeaderProps',
-    default: undefined
+    type: 'SidebarHeaderProps'
   },
   {
     name: 'sections',
     description: '',
     required: false,
-    type: 'SidebarSectionProps[]',
-    default: undefined
+    type: 'SidebarSectionProps[]'
   },
   {
     name: 'disableCollapse',
     description: '',
     required: false,
-    type: 'boolean',
-    default: undefined
+    type: 'boolean'
   },
   {
     name: 'collapsed',

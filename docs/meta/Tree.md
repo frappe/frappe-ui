@@ -9,15 +9,13 @@
     name: 'node',
     description: 'Root tree node to render.\nCan contain nested children to form the tree structure.',
     required: true,
-    type: 'TreeNode',
-    default: undefined
+    type: 'TreeNode'
   },
   {
     name: 'nodeKey',
     description: 'Unique key used to identify each node.\nUsually an id-like property present on every node.',
     required: true,
-    type: 'string',
-    default: undefined
+    type: 'string'
   },
   {
     name: 'options',

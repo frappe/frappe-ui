@@ -9,15 +9,13 @@
     name: 'title',
     description: 'Main heading text of the alert',
     required: true,
-    type: 'string',
-    default: undefined
+    type: 'string'
   },
   {
     name: 'theme',
     description: 'Color theme of the alert',
     required: false,
-    type: 'Theme',
-    default: undefined
+    type: 'Theme'
   },
   {
     name: 'variant',
@@ -30,8 +28,7 @@
     name: 'description',
     description: 'Optional supporting text shown below the title',
     required: false,
-    type: 'string',
-    default: undefined
+    type: 'string'
   },
   {
     name: 'dismissable',

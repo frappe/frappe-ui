@@ -30,8 +30,7 @@
     name: 'label',
     description: 'Content displayed inside the badge',
     required: false,
-    type: 'string | number | Label',
-    default: undefined
+    type: 'string | number | Label'
   }
 ]
 
