@@ -185,15 +185,12 @@ describe('FormControl', () => {
       // Old template hard-coded `class="w-full"` on Select; ensure the
       // dispatcher still produces a full-width trigger even without label.
       cy.mount({
-        components: { FormControl },
-        data: () => ({ options }),
-        template: `
-          <div style="width: 240px; padding: 16px;">
-            <div data-cy="col" style="min-width: 140px;">
-              <FormControl type="select" :options="options" />
-            </div>
-          </div>
-        `,
+        render: () =>
+          h('div', { style: 'width: 240px; padding: 16px;' }, [
+            h('div', { 'data-cy': 'col', style: 'min-width: 140px;' }, [
+              h(FormControl, { type: 'select', options }),
+            ]),
+          ]),
       })
       cy.get('[data-cy="col"]').then(($col) => {
         const colWidth = $col[0].getBoundingClientRect().width
@@ -206,15 +203,12 @@ describe('FormControl', () => {
 
     it('renders bare combobox with w-full so it fills its container', () => {
       cy.mount({
-        components: { FormControl },
-        data: () => ({ options }),
-        template: `
-          <div style="width: 240px; padding: 16px;">
-            <div data-cy="col" style="min-width: 140px;">
-              <FormControl type="combobox" :options="options" />
-            </div>
-          </div>
-        `,
+        render: () =>
+          h('div', { style: 'width: 240px; padding: 16px;' }, [
+            h('div', { 'data-cy': 'col', style: 'min-width: 140px;' }, [
+              h(FormControl, { type: 'combobox', options }),
+            ]),
+          ]),
       })
       cy.get('[data-cy="col"]').then(($col) => {
         const colWidth = $col[0].getBoundingClientRect().width
