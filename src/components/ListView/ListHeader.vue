@@ -19,7 +19,7 @@
         v-for="column in list.columns"
         :key="column.key"
         :item="column"
-        @columnWidthUpdated="emit('columnWidthUpdated', column)"
+        @columnWidthUpdated="(payload) => emit('columnWidthUpdated', payload)"
       />
     </slot>
   </div>

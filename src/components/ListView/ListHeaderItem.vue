@@ -63,6 +63,8 @@ const widthInPx = computed(() => {
   return columnRef.value.offsetWidth
 })
 
+const list = inject('list')
+
 const startResizing = (e) => {
   const initialX = e.clientX
   const initialWidth = widthInPx.value
@@ -72,8 +74,9 @@ const startResizing = (e) => {
     resizer.value.style.backgroundColor = 'rgb(199 199 199)'
     let newWidth = initialWidth + (e.clientX - initialX)
 
-    props.item.width = `${newWidth < 50 ? 50 : newWidth}px`
-    updateWidth(props.item.width)
+    const w = `${newWidth < 50 ? 50 : newWidth}px`
+    emit('columnWidthUpdated', { key: props.item.key, width: w, save: false })
+    triggerSave({ key: props.item.key, width: w })
   }
   const onMouseUp = () => {
     document.body.classList.remove('select-none')
@@ -86,10 +89,7 @@ const startResizing = (e) => {
   window.addEventListener('mouseup', onMouseUp)
 }
 
-const updateWidth = useDebounceFn((width) => {
-  props.item.width = width
-  emit('columnWidthUpdated')
+const triggerSave = useDebounceFn((payload) => {
+  emit('columnWidthUpdated', { ...payload, save: true })
 }, props.debounce)
-
-const list = inject('list')
 </script>
