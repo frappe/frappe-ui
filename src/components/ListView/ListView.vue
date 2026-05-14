@@ -1,6 +1,10 @@
 <template>
   <div class="relative flex w-full flex-1 flex-col overflow-x-auto">
-    <div class="flex w-max min-w-full flex-col overflow-y-hidden" :class="$attrs.class" :style="$attrs.style">
+    <div
+      class="flex w-max min-w-full flex-col overflow-y-hidden"
+      :class="$attrs.class"
+      :style="$attrs.style"
+    >
       <slot v-bind="{ showGroupedRows, selectable }">
         <ListHeader />
         <template v-if="props.rows.length">
@@ -102,10 +106,10 @@ const allRowsSelected = computed(() => {
   if (!props.rows.length) return false
 
   const rows = showGroupedRows.value
-    ? props.rows.flatMap(r => r.rows)
+    ? props.rows.flatMap((r) => r.rows)
     : props.rows
 
-  const total = rows.filter(r => !r.disabled).length
+  const total = rows.filter((r) => !r.disabled).length
 
   return total > 0 && selections.size === total
 })
@@ -116,7 +120,7 @@ const selectable = computed(() => {
 
 let showGroupedRows = computed(() => {
   return props.rows.every(
-    (row) => row.group && row.rows && Array.isArray(row.rows)
+    (row) => row.group && row.rows && Array.isArray(row.rows),
   )
 })
 
@@ -161,7 +165,7 @@ provide(
     slots: slots,
     toggleRow,
     toggleAllRows,
-  }))
+  })),
 )
 
 defineExpose({
