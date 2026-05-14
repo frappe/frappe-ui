@@ -710,4 +710,86 @@ describe('Combobox', () => {
         .and('contain.text', 'Mango')
     })
   })
+
+  describe('shared labeling contract', () => {
+    it('renders label and links it to the input via for/id', () => {
+      cy.mount(Combobox, {
+        props: { options: fruits, label: 'Fruit' },
+      })
+      cy.get('[role="combobox"]').then(($input) => {
+        const id = $input.attr('id')!
+        cy.get(`label[for="${id}"]`).should('contain.text', 'Fruit')
+      })
+    })
+
+    it('renders description and wires aria-describedby on input', () => {
+      cy.mount(Combobox, {
+        props: {
+          options: fruits,
+          label: 'Fruit',
+          description: 'Type to filter.',
+        },
+      })
+      cy.get('[role="combobox"]').then(($input) => {
+        const id = $input.attr('id')!
+        const describedBy = $input.attr('aria-describedby')!
+        expect(describedBy).to.equal(`${id}-description`)
+        cy.get(`#${id}-description`).should('contain.text', 'Type to filter.')
+      })
+    })
+
+    it('renders error with aria-invalid + aria-errormessage and suppresses description', () => {
+      cy.mount(Combobox, {
+        props: {
+          options: fruits,
+          label: 'Fruit',
+          description: 'helper',
+          error: 'Required',
+        },
+      })
+      cy.get('[role="combobox"]')
+        .should('have.attr', 'aria-invalid', 'true')
+        .then(($input) => {
+          const id = $input.attr('id')!
+          expect($input.attr('aria-errormessage')).to.equal(`${id}-error`)
+          cy.get(`#${id}-error`).should('contain.text', 'Required')
+          cy.get(`#${id}-description`).should('not.exist')
+        })
+    })
+
+    it('renders required indicator and forwards aria-required', () => {
+      cy.mount(Combobox, {
+        props: { options: fruits, label: 'Fruit', required: true },
+      })
+      cy.get('[role="combobox"]').should('have.attr', 'aria-required', 'true')
+      cy.contains('label', 'Fruit').within(() => {
+        cy.get('span[aria-hidden="true"]').should('contain.text', '*')
+      })
+    })
+
+    it('flips data-invalid on the trigger when error is set', () => {
+      cy.mount(Combobox, {
+        props: { options: fruits, label: 'Fruit', error: 'Required' },
+      })
+      cy.get('[data-slot="trigger"]').should(
+        'have.attr',
+        'data-invalid',
+        'true',
+      )
+    })
+
+    it('button-mode trigger gets aria-invalid + data-invalid on error', () => {
+      cy.mount(Combobox, {
+        props: {
+          options: fruits,
+          label: 'Fruit',
+          error: 'Required',
+          trigger: 'button',
+        },
+      })
+      cy.get('[data-slot="trigger"]')
+        .should('have.attr', 'aria-invalid', 'true')
+        .and('have.attr', 'data-invalid', 'true')
+    })
+  })
 })

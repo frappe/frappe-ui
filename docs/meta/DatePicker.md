@@ -30,8 +30,7 @@
     name: 'format',
     description: 'Display format used for the input text.',
     required: false,
-    type: 'string',
-    default: undefined
+    type: 'string'
   },
   {
     name: 'variant',
@@ -58,8 +57,7 @@
     name: 'inputClass',
     description: 'Additional classes applied to the trigger input.',
     required: false,
-    type: 'string | string[] | Record<string, boolean>',
-    default: undefined
+    type: 'string | string[] | Record<string, boolean>'
   },
   {
     name: 'allowCustom',
@@ -86,8 +84,7 @@
     name: 'label',
     description: 'Optional label forwarded to the trigger input.',
     required: false,
-    type: 'string',
-    default: undefined
+    type: 'string'
   },
   {
     name: 'clearable',

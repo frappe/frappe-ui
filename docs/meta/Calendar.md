@@ -16,29 +16,25 @@
     name: 'config',
     description: '',
     required: false,
-    type: 'Record<string, any>',
-    default: undefined
+    type: 'Record<string, any>'
   },
   {
     name: 'onClick',
     description: '',
     required: false,
-    type: 'Function',
-    default: undefined
+    type: 'Function'
   },
   {
     name: 'onDblClick',
     description: '',
     required: false,
-    type: 'Function',
-    default: undefined
+    type: 'Function'
   },
   {
     name: 'onCellClick',
     description: '',
     required: false,
-    type: 'Function',
-    default: undefined
+    type: 'Function'
   }
 ]
 

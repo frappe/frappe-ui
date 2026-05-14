@@ -16,15 +16,13 @@
     name: 'fileTypes',
     description: '',
     required: false,
-    type: 'string | unknown[]',
-    default: undefined
+    type: 'string | unknown[]'
   },
   {
     name: 'uploadArgs',
     description: '',
     required: false,
-    type: 'Record<string, any>',
-    default: undefined
+    type: 'Record<string, any>'
   }
 ]
 </script>

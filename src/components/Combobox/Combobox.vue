@@ -21,8 +21,15 @@ import OptionIcon from '../shared/selection/OptionIcon.vue'
 import '../shared/selection/popoverMotion.css'
 import ComboboxResults from './ComboboxResults.vue'
 import { usePopoverMotion } from '../../composables/usePopoverMotion'
+import { useInputLabeling } from '../../composables/useInputLabeling'
 import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
 import { useFilteredGroups } from '../shared/selection/useFilteredGroups'
+import {
+  InputDescription,
+  InputError,
+  InputLabel,
+  LabelingWrapper,
+} from '../InputLabeling'
 import type {
   ComboboxEmits,
   ComboboxExposed,
@@ -84,6 +91,38 @@ const hasWarnedPlacement = ref(false)
 
 const { motion: contentMotion, onPointerDown: markPointerDown } =
   usePopoverMotion(open)
+
+const {
+  inputId,
+  labelId,
+  descriptionId,
+  errorMessageId,
+  describedBy,
+  hasError,
+  errorLines,
+  showDescription,
+} = useInputLabeling(props, {
+  size: () => props.size,
+  variant: () => props.variant,
+  disabled: () => props.disabled,
+})
+
+const hasLabeling = computed(() => {
+  return Boolean(
+    props.label ||
+      props.description ||
+      hasError.value ||
+      slots.label ||
+      slots.description,
+  )
+})
+
+const inputAriaAttrs = computed(() => ({
+  'aria-invalid': hasError.value || undefined,
+  'aria-errormessage': hasError.value ? errorMessageId.value : undefined,
+  'aria-describedby': describedBy.value,
+  'aria-required': props.required || undefined,
+}))
 
 const inputAttrs = computed(() => {
   const { class: _class, style: _style, autocomplete, ...rest } = attrs
@@ -347,6 +386,31 @@ defineSlots<ComboboxSlots>()
 </script>
 
 <template>
+  <LabelingWrapper
+    :enabled="hasLabeling"
+    :wrapper-class="['space-y-1.5', attrs.class as any]"
+    :wrapper-style="attrs.style as any"
+  >
+    <InputLabel
+      v-if="label || $slots.label"
+      :id="labelId"
+      :for-id="inputId"
+      :label="label"
+      :required="required"
+      class="text-p-sm font-medium text-ink-gray-7"
+    >
+      <template v-if="$slots.label" #default="slotProps">
+        <slot name="label" v-bind="slotProps" />
+      </template>
+    </InputLabel>
+    <!--
+      ComboboxRoot uses `display: contents` so it's invisible to layout —
+      space-y-1.5 on LabelingWrapper would try to attach margin-top to it
+      and the rule gets dropped, collapsing the gap between label and
+      trigger. Wrap in a div that drops back to `display: contents` when
+      there's no labeling, so bare usage keeps its flattened layout.
+    -->
+    <div :class="hasLabeling ? null : 'contents'">
   <ComboboxRoot
     ref="rootRef"
     class="contents"
@@ -411,17 +475,21 @@ defineSlots<ComboboxSlots>()
             triggerClasses,
             'justify-between',
             disabled && 'cursor-not-allowed',
-            attrs.class,
+            hasLabeling ? 'w-full' : null,
+            hasLabeling ? null : (attrs.class as any),
           ]"
-          :style="attrs.style as any"
+          :style="hasLabeling ? null : (attrs.style as any)"
           :disabled="disabled"
           data-slot="trigger"
           :data-state="open ? 'open' : 'closed'"
           :data-variant="variant"
           :data-size="size"
-          :id="id"
+          :data-invalid="hasError ? 'true' : undefined"
+          :data-required="required ? 'true' : undefined"
+          :id="inputId"
           aria-haspopup="listbox"
           :aria-expanded="open"
+          v-bind="inputAriaAttrs"
         >
           <!--
             Prefix precedence on the trigger:
@@ -474,8 +542,14 @@ defineSlots<ComboboxSlots>()
         :data-disabled="disabled ? '' : undefined"
         :data-variant="variant"
         :data-size="size"
-        :class="[triggerClasses, attrs.class]"
-        :style="attrs.style"
+        :data-invalid="hasError ? 'true' : undefined"
+        :data-required="required ? 'true' : undefined"
+        :class="[
+          triggerClasses,
+          hasLabeling ? 'w-full' : null,
+          hasLabeling ? null : (attrs.class as any),
+        ]"
+        :style="hasLabeling ? null : (attrs.style as any)"
         @pointerdown="markPointerDown"
       >
         <!--
@@ -496,8 +570,8 @@ defineSlots<ComboboxSlots>()
         <slot v-else name="prefix" />
 
         <ComboboxInput
-          :id="id"
-          v-bind="inputAttrs"
+          :id="inputId"
+          v-bind="{ ...inputAttrs, ...inputAriaAttrs }"
           data-slot="input"
           :data-variant="variant"
           :data-size="size"
@@ -573,7 +647,7 @@ defineSlots<ComboboxSlots>()
               class="flex items-center gap-2 border-b border-outline-gray-1 px-3"
             >
               <ComboboxInput
-                :id="id ? `${id}-search-input` : undefined"
+                :id="`${inputId}-search-input`"
                 v-bind="inputAttrs"
                 data-slot="input"
                 :value="query"
@@ -606,6 +680,16 @@ defineSlots<ComboboxSlots>()
       </ComboboxContent>
     </ComboboxPortal>
   </ComboboxRoot>
+    </div>
+    <InputDescription
+      v-if="showDescription || $slots.description"
+      :id="descriptionId"
+      :description="description"
+    >
+      <slot v-if="$slots.description" name="description" />
+    </InputDescription>
+    <InputError v-if="hasError" :id="errorMessageId" :lines="errorLines" />
+  </LabelingWrapper>
 </template>
 
 <style scoped>

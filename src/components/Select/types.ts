@@ -1,4 +1,5 @@
 import type { Component } from 'vue'
+import type { InputLabelingProps } from '../../composables/useInputLabeling'
 
 export type SelectOptionValue = string | number | bigint | Record<string, any>
 
@@ -16,7 +17,7 @@ export type SelectOption =
 
 export type SelectNormalizedOption = Exclude<SelectOption, string>
 
-export interface SelectProps {
+export interface SelectProps extends InputLabelingProps {
   /** Size of the select input. */
   size?: 'sm' | 'md' | 'lg' | 'xl'
 
@@ -28,9 +29,6 @@ export interface SelectProps {
 
   /** If true, disables the select input. */
   disabled?: boolean
-
-  /** Optional HTML id for the select element. */
-  id?: string
 
   /** The currently selected value. */
   modelValue?: SelectOptionValue
@@ -67,6 +65,12 @@ export interface SelectItemSlotProps {
 export interface SelectSlots {
   /** Fully custom trigger renderer. */
   trigger?: (props: SelectTriggerSlotProps) => any
+
+  /** Overrides the rendered label content. Receives `{ required }`. */
+  label?: (props: { required: boolean }) => any
+
+  /** Overrides the rendered description content. */
+  description?: () => any
 
   /** Content rendered before the trigger value. */
   prefix?: () => any

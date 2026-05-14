@@ -1,4 +1,5 @@
 import type { Component, VNode, VNodeChild } from 'vue'
+import type { InputLabelingProps } from '../../composables/useInputLabeling'
 
 export type ComboboxVariant = 'subtle' | 'outline' | 'ghost'
 export type ComboboxSize = 'sm' | 'md' | 'lg' | 'xl'
@@ -88,7 +89,7 @@ export interface ComboboxGroupedOption {
 export type GroupedOption = ComboboxGroupedOption
 export type ComboboxOption = ComboboxSimpleOption | ComboboxGroupedOption
 
-export interface ComboboxProps {
+export interface ComboboxProps extends InputLabelingProps {
   /** Options rendered in the popover. */
   options?: ComboboxOption[]
 
@@ -111,9 +112,6 @@ export interface ComboboxProps {
 
   /** Disables the combobox. */
   disabled?: boolean
-
-  /** Optional HTML id forwarded to the input element. */
-  id?: string
 
   /** Controls the popover visibility. */
   open?: boolean
@@ -193,6 +191,12 @@ export interface ComboboxEmptySlotProps {
 export interface ComboboxSlots {
   /** Fully custom trigger renderer. */
   trigger?: (props: ComboboxTriggerSlotProps) => any
+
+  /** Overrides the rendered label content. Receives `{ required }`. */
+  label?: (props: { required: boolean }) => any
+
+  /** Overrides the rendered description content. */
+  description?: () => any
 
   /** Content rendered before the default input. */
   prefix?: () => any

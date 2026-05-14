@@ -100,15 +100,13 @@
     name: 'uploadFunction',
     description: 'Async file upload handler (used for images, files, etc.)',
     required: false,
-    type: '((file: File) => Promise<UploadedFile>)',
-    default: undefined
+    type: '((file: File) => Promise<UploadedFile>)'
   },
   {
     name: 'uploadArgs',
     description: 'Extra arguments passed to the upload function',
     required: false,
-    type: 'object',
-    default: undefined
+    type: 'object'
   }
 ]
 

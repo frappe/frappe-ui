@@ -9,8 +9,7 @@
     name: 'value',
     description: 'Current progress value',
     required: true,
-    type: 'number',
-    default: undefined
+    type: 'number'
   },
   {
     name: 'size',
