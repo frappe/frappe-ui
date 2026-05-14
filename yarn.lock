@@ -4696,10 +4696,10 @@ lru-cache@^5.1.1:
   dependencies:
     yallist "^3.0.2"
 
-lucide-static@^0.545.0:
-  version "0.545.0"
-  resolved "https://registry.yarnpkg.com/lucide-static/-/lucide-static-0.545.0.tgz#69dad91d1bbd53b70df6c21f0877c16a1e69cea0"
-  integrity sha512-2i81WNw3y+sN17gG75DKZbd43pGJREyoAQRK5IG8djCWhISoK6Ri1ovbKwOjFR+St2LHTQhu+EJygmUIWMotew==
+lucide-static@^1.16.0:
+  version "1.16.0"
+  resolved "https://registry.yarnpkg.com/lucide-static/-/lucide-static-1.16.0.tgz#64109c8d8b7dbed159a808546b4d752f0d9ebf8a"
+  integrity sha512-/EH96rDLRLNKaxuhqHHbmUPx3+qHS/kQRzI1ZGZqnxmh6ljX9yX0xC2UZlQSfBE/n84eNIaxKsv9P8sMiOdCww==
 
 magic-string@^0.30.12, magic-string@^0.30.17, magic-string@^0.30.21:
   version "0.30.21"
