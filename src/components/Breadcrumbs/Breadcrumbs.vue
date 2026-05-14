@@ -27,7 +27,7 @@
           ]"
         >
           <slot name="prefix" :item="item" />
-          <span>
+          <span :class="i == crumbs.length - 1 && 'min-w-0 truncate'">
             {{ item.label }}
           </span>
           <slot name="suffix" :item="item" />
@@ -44,7 +44,7 @@
           ]"
         >
           <slot name="prefix" :item="item" />
-          <span>
+          <span :class="i == crumbs.length - 1 && 'min-w-0 truncate'">
             {{ item.label }}
           </span>
           <slot name="suffix" :item="item" />
@@ -60,7 +60,7 @@
           ]"
         >
           <slot name="prefix" :item="item" />
-          <span>
+          <span :class="i == crumbs.length - 1 && 'min-w-0 truncate'">
             {{ item.label }}
           </span>
           <slot name="suffix" :item="item" />
