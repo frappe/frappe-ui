@@ -27,7 +27,10 @@
           ]"
         >
           <slot name="prefix" :item="item" />
-          <span :class="i == crumbs.length - 1 && 'truncate'">
+          <span
+            :class="i == crumbs.length - 1 && 'min-w-0 truncate'"
+            :title="i == crumbs.length - 1 ? item.label : undefined"
+          >
             {{ item.label }}
           </span>
           <slot name="suffix" :item="item" />
@@ -44,7 +47,10 @@
           ]"
         >
           <slot name="prefix" :item="item" />
-          <span :class="i == crumbs.length - 1 && 'truncate'">
+          <span
+            :class="i == crumbs.length - 1 && 'min-w-0 truncate'"
+            :title="i == crumbs.length - 1 ? item.label : undefined"
+          >
             {{ item.label }}
           </span>
           <slot name="suffix" :item="item" />
@@ -60,7 +66,10 @@
           ]"
         >
           <slot name="prefix" :item="item" />
-          <span :class="i == crumbs.length - 1 && 'truncate'">
+          <span
+            :class="i == crumbs.length - 1 && 'min-w-0 truncate'"
+            :title="i == crumbs.length - 1 ? item.label : undefined"
+          >
             {{ item.label }}
           </span>
           <slot name="suffix" :item="item" />
