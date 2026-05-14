@@ -205,7 +205,8 @@ defineSlots<SelectSlots>()
         >
           <SelectValue
             :placeholder="placeholder"
-            class="max-w-full truncate opacity-0 data-[placeholder]:text-ink-gray-4"
+            class="max-w-full truncate opacity-0"
+            :class="{ 'text-ink-gray-4': showPlaceholderForSelected }"
           >
             <template v-if="selectedOption">
               {{
@@ -237,7 +238,8 @@ defineSlots<SelectSlots>()
         <div class="grid min-w-0 text-left truncate">
           <SelectValue
             :placeholder="placeholder"
-            class="col-start-1 row-start-1 max-w-full truncate data-[placeholder]:text-ink-gray-4"
+            class="col-start-1 row-start-1 max-w-full truncate"
+            :class="{ 'text-ink-gray-4': showPlaceholderForSelected }"
           >
             <template v-if="selectedOption">
               {{
