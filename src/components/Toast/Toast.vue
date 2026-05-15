@@ -4,11 +4,12 @@
     :duration="closable ? duration : 0"
     :class="[
       'toast-root-animatable',
-      'bg-surface-gray-6 border-none rounded-md px-4 py-1.5 shadow-lg flex items-center justify-between gap-3 min-w-[280px] max-w-[400px] pointer-events-auto list-none',
+      'bg-surface-gray-6 border-none rounded-md px-4 shadow-lg flex items-center justify-between gap-3 min-w-[280px] max-w-[400px] pointer-events-auto list-none',
+       message && message.length > 60 ? 'py-3' : 'py-1.5',
     ]"
   >
     <div class="flex items-center gap-2 flex-grow overflow-hidden">
-      <div>
+      <div class="mb-auto mt-0.5">
         <component v-if="icon" :is="icon" class="flex-shrink-0 size-4" />
         <CircleCheck
           v-else-if="type == 'success'"
