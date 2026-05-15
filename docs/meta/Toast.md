@@ -9,50 +9,43 @@
     name: 'open',
     description: 'Controls whether the toast is visible (required)',
     required: true,
-    type: 'boolean',
-    default: undefined
+    type: 'boolean'
   },
   {
     name: 'message',
     description: 'Message content rendered inside the toast',
     required: false,
-    type: 'string',
-    default: undefined
+    type: 'string'
   },
   {
     name: 'type',
     description: 'Visual tone of the toast',
     required: false,
-    type: '"success" | "error" | "info" | "warning"',
-    default: undefined
+    type: '"error" | "success" | "info" | "warning"'
   },
   {
     name: 'duration',
     description: 'Auto-dismiss duration in milliseconds',
     required: false,
-    type: 'number',
-    default: undefined
+    type: 'number'
   },
   {
     name: 'icon',
     description: 'Optional custom icon rendered before the message',
     required: false,
-    type: 'Component',
-    default: undefined
+    type: 'Component'
   },
   {
     name: 'closable',
     description: 'Whether the close button is shown',
     required: false,
-    type: 'boolean',
-    default: undefined
+    type: 'boolean'
   },
   {
     name: 'action',
     description: 'Optional action rendered on the right side of the toast',
     required: false,
-    type: 'ToastAction',
-    default: undefined
+    type: 'ToastAction'
   }
 ]
 

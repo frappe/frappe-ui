@@ -9,15 +9,13 @@
     name: 'buttons',
     description: '',
     required: true,
-    type: 'TabButton[]',
-    default: undefined
+    type: 'TabButton[]'
   },
   {
     name: 'modelValue',
     description: '',
     required: false,
-    type: 'TabButtonValue',
-    default: undefined
+    type: 'TabButtonValue'
   }
 ]
 

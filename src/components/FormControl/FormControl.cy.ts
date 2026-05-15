@@ -95,4 +95,128 @@ describe('FormControl', () => {
     cy.mount(FormControl, { props: { label: 'Title' } })
     cy.get('@consoleWarn').should('not.have.been.calledWithMatch', /FormControl/)
   })
+
+  describe('dispatcher delegation', () => {
+    const options = [
+      { label: 'One', value: '1' },
+      { label: 'Two', value: '2' },
+    ]
+
+    it('forwards label/description/error/required to Select', () => {
+      cy.mount(FormControl, {
+        props: {
+          type: 'select',
+          options,
+          label: 'Pick',
+          description: 'helper',
+          required: true,
+        },
+      })
+      cy.contains('label', 'Pick').should('exist')
+      cy.get('[data-slot="trigger"]').should(
+        'have.attr',
+        'aria-required',
+        'true',
+      )
+      cy.contains('helper').should('exist')
+    })
+
+    it('forwards error to Select and suppresses description', () => {
+      cy.mount(FormControl, {
+        props: {
+          type: 'select',
+          options,
+          label: 'Pick',
+          description: 'helper',
+          error: 'Required',
+        },
+      })
+      cy.get('[data-slot="trigger"]').should(
+        'have.attr',
+        'aria-invalid',
+        'true',
+      )
+      cy.contains('Required').should('exist')
+      cy.contains('helper').should('not.exist')
+    })
+
+    it('renders Combobox via type="combobox" with labeling', () => {
+      cy.mount(FormControl, {
+        props: {
+          type: 'combobox',
+          options,
+          label: 'Pick',
+          error: 'Required',
+        },
+      })
+      cy.contains('label', 'Pick').should('exist')
+      cy.get('[role="combobox"]').should('have.attr', 'aria-invalid', 'true')
+    })
+
+    it('renders MultiSelect via type="multiselect" with labeling', () => {
+      cy.mount(FormControl, {
+        props: {
+          type: 'multiselect',
+          options,
+          label: 'Pick many',
+          description: 'Pick as many as you like.',
+          required: true,
+        },
+      })
+      cy.contains('label', 'Pick many').should('exist')
+      cy.get('[data-slot="trigger"]').should(
+        'have.attr',
+        'aria-required',
+        'true',
+      )
+      cy.contains('Pick as many as you like.').should('exist')
+    })
+
+    it('renders only one label even though child also self-shells (no duplication)', () => {
+      cy.mount(FormControl, {
+        props: { type: 'select', options, label: 'Pick' },
+      })
+      cy.get('label').should('have.length', 1)
+    })
+
+    it('renders bare select with w-full so it fills its container (ListFilter pattern)', () => {
+      // Mirrors how ListFilter renders FormControl in a min-width column:
+      //   <div class="min-w-[140px]"><FormControl type="select" options /></div>
+      // Old template hard-coded `class="w-full"` on Select; ensure the
+      // dispatcher still produces a full-width trigger even without label.
+      cy.mount({
+        render: () =>
+          h('div', { style: 'width: 240px; padding: 16px;' }, [
+            h('div', { 'data-cy': 'col', style: 'min-width: 140px;' }, [
+              h(FormControl, { type: 'select', options }),
+            ]),
+          ]),
+      })
+      cy.get('[data-cy="col"]').then(($col) => {
+        const colWidth = $col[0].getBoundingClientRect().width
+        cy.get('[data-slot="trigger"]').then(($trigger) => {
+          const triggerWidth = $trigger[0].getBoundingClientRect().width
+          expect(triggerWidth).to.be.closeTo(colWidth, 1)
+        })
+      })
+    })
+
+    it('renders bare combobox with w-full so it fills its container', () => {
+      cy.mount({
+        render: () =>
+          h('div', { style: 'width: 240px; padding: 16px;' }, [
+            h('div', { 'data-cy': 'col', style: 'min-width: 140px;' }, [
+              h(FormControl, { type: 'combobox', options }),
+            ]),
+          ]),
+      })
+      cy.get('[data-cy="col"]').then(($col) => {
+        const colWidth = $col[0].getBoundingClientRect().width
+        cy.get('[data-slot="trigger"]').then(($trigger) => {
+          const triggerWidth = $trigger[0].getBoundingClientRect().width
+          expect(triggerWidth).to.be.closeTo(colWidth, 1)
+        })
+      })
+    })
+  })
 })

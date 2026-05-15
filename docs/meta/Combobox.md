@@ -16,7 +16,7 @@
     name: 'trigger',
     description: 'Shape of the trigger.\n- `\'input\'` (default): user types directly into the trigger\n- `\'button\'`: render a button trigger; search input moves into the\n  popover header. Label + prefix auto-derive from the selected option.',
     required: false,
-    type: '"input" | "button"',
+    type: '"button" | "input"',
     default: '"input"'
   },
   {
@@ -46,12 +46,6 @@
     required: false,
     type: 'boolean',
     default: 'false'
-  },
-  {
-    name: 'id',
-    description: 'Optional HTML id forwarded to the input element.',
-    required: false,
-    type: 'string'
   },
   {
     name: 'open',
@@ -129,6 +123,36 @@
     deprecated: 'use `align` instead; `placement` is kept as a back-compat alias'
   },
   {
+    name: 'label',
+    description: 'Label rendered above (or beside, for binary controls) the input.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'description',
+    description: 'Helper text rendered below the input.\nHidden when `error` is set.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'error',
+    description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
+    required: false,
+    type: 'string | FrappeUIError'
+  },
+  {
+    name: 'required',
+    description: 'Marks the field as required. Renders an asterisk next to the label and\nforwards `required` / `aria-required` to the underlying control.',
+    required: false,
+    type: 'boolean'
+  },
+  {
+    name: 'id',
+    description: 'HTML id of the underlying control. Auto-generated via `useId()` if omitted.',
+    required: false,
+    type: 'string'
+  },
+  {
     name: 'modelValue',
     description: '',
     required: false,
@@ -142,6 +166,16 @@
     name: 'trigger',
     description: 'Fully custom trigger renderer.',
     type: 'ComboboxTriggerSlotProps'
+  },
+  {
+    name: 'label',
+    description: 'Overrides the rendered label content. Receives `{ required }`.',
+    type: '{ required: boolean; }'
+  },
+  {
+    name: 'description',
+    description: 'Overrides the rendered description content.',
+    type: 'any'
   },
   {
     name: 'prefix',
@@ -187,24 +221,24 @@
 
   const emitsData = [
   {
-    name: 'input',
-    description: '',
-    type: '[value: string]'
-  },
-  {
     name: 'update:modelValue',
     description: 'Fired when the model value changes.',
     type: '[value: string | null]'
   },
   {
-    name: 'update:open',
-    description: 'Fired when the open state changes.',
-    type: '[value: boolean]'
-  },
-  {
     name: 'update:query',
     description: 'Fired when the query changes.',
     type: '[value: string]'
+  },
+  {
+    name: 'input',
+    description: '',
+    type: '[value: string]'
+  },
+  {
+    name: 'update:open',
+    description: 'Fired when the open state changes.',
+    type: '[value: boolean]'
   },
   {
     name: 'update:selectedOption',

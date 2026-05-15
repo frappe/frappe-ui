@@ -9,36 +9,31 @@
     name: 'as',
     description: 'Element/component used to render the tab container.',
     required: false,
-    type: 'string',
-    default: undefined
+    type: 'string'
   },
   {
     name: 'tabs',
     description: 'List of tabs to render.',
     required: true,
-    type: 'Tab[]',
-    default: undefined
+    type: 'Tab[]'
   },
   {
     name: 'vertical',
     description: 'Renders tabs vertically instead of horizontally.',
     required: false,
-    type: 'boolean',
-    default: undefined
+    type: 'boolean'
   },
   {
     name: 'modelValue',
     description: 'Currently selected tab value.',
     required: false,
-    type: 'string | number',
-    default: undefined
+    type: 'string | number'
   },
   {
     name: 'dir',
     description: 'Forces layout direction; defaults to `document.documentElement.dir`.',
     required: false,
-    type: '"rtl" | "ltr"',
-    default: undefined
+    type: '"rtl" | "ltr"'
   }
 ]
 
@@ -46,12 +41,12 @@
   {
     name: 'tab-item',
     description: 'Custom renderer for a tab trigger (icon + label / router-link).',
-    type: '{ tab: { label: string; icon?: string | undefined; route?: string | undefined; }; }'
+    type: '{ tab: { label: string; icon?: string | Component | undefined; route?: string | undefined; }; }'
   },
   {
     name: 'tab-panel',
     description: 'Content rendered for each tab panel.',
-    type: '{ tab: { label: string; icon?: string | undefined; route?: string | undefined; }; }'
+    type: '{ tab: { label: string; icon?: string | Component | undefined; route?: string | undefined; }; }'
   }
 ]
 

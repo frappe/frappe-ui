@@ -9,15 +9,13 @@
     name: 'image',
     description: 'Image URL used for the avatar',
     required: false,
-    type: 'string',
-    default: undefined
+    type: 'string'
   },
   {
     name: 'label',
     description: 'Fallback text shown when the image is missing',
     required: false,
-    type: 'string',
-    default: undefined
+    type: 'string'
   },
   {
     name: 'size',

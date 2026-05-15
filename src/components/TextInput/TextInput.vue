@@ -45,6 +45,7 @@
         :aria-errormessage="hasError ? errorMessageId : undefined"
         :aria-describedby="describedBy"
         data-slot="control"
+        autocomplete="off"
         v-bind="{ ...dataAttrs, ...attrsWithoutClassStyle }"
         @input="handleChange"
         @change="handleChange"

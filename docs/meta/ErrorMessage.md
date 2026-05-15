@@ -9,8 +9,7 @@
     name: 'message',
     description: 'The error message to display. Can be a string or an Error object',
     required: false,
-    type: 'string | Error',
-    default: undefined
+    type: 'string | Error'
   }
 ]
 </script>

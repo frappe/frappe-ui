@@ -30,8 +30,7 @@
     name: 'rowKey',
     description: '',
     required: true,
-    type: 'string',
-    default: undefined
+    type: 'string'
   }
 ]
 

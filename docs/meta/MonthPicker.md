@@ -16,8 +16,7 @@
     name: 'disabled',
     description: 'Disables the month picker',
     required: false,
-    type: 'boolean',
-    default: undefined
+    type: 'boolean'
   },
   {
     name: 'modelValue',

@@ -364,4 +364,90 @@ describe('Select', () => {
         .should('exist')
     })
   })
+
+  describe('shared labeling contract', () => {
+    it('renders label and links it to the trigger via for/id', () => {
+      cy.mount(Select, {
+        props: { options, label: 'Fruit' },
+      })
+      cy.get('[data-slot="trigger"]').then(($trigger) => {
+        const id = $trigger.attr('id')!
+        cy.get(`label[for="${id}"]`).should('contain.text', 'Fruit')
+      })
+    })
+
+    it('renders description and wires aria-describedby on trigger', () => {
+      cy.mount(Select, {
+        props: {
+          options,
+          label: 'Fruit',
+          description: 'Pick one fruit.',
+        },
+      })
+      cy.get('[data-slot="trigger"]').then(($trigger) => {
+        const id = $trigger.attr('id')!
+        const describedBy = $trigger.attr('aria-describedby')!
+        expect(describedBy).to.equal(`${id}-description`)
+        cy.get(`#${id}-description`).should('contain.text', 'Pick one fruit.')
+      })
+    })
+
+    it('renders error with aria-invalid + aria-errormessage and suppresses description', () => {
+      cy.mount(Select, {
+        props: {
+          options,
+          label: 'Fruit',
+          description: 'helper',
+          error: 'Required',
+        },
+      })
+      cy.get('[data-slot="trigger"]')
+        .should('have.attr', 'aria-invalid', 'true')
+        .then(($trigger) => {
+          const id = $trigger.attr('id')!
+          expect($trigger.attr('aria-errormessage')).to.equal(`${id}-error`)
+          cy.get(`#${id}-error`).should('contain.text', 'Required')
+          cy.get(`#${id}-description`).should('not.exist')
+        })
+    })
+
+    it('renders required indicator and forwards aria-required', () => {
+      cy.mount(Select, {
+        props: { options, label: 'Fruit', required: true },
+      })
+      cy.get('[data-slot="trigger"]').should(
+        'have.attr',
+        'aria-required',
+        'true',
+      )
+      cy.contains('label', 'Fruit').within(() => {
+        cy.get('span[aria-hidden="true"]').should('contain.text', '*')
+      })
+    })
+
+    it('honors an explicit id over the generated one', () => {
+      cy.mount(Select, {
+        props: { options, id: 'my-select-id', label: 'Fruit' },
+      })
+      cy.get('[data-slot="trigger"]').should('have.attr', 'id', 'my-select-id')
+      cy.get('label[for="my-select-id"]').should('exist')
+    })
+
+    it('flips data-invalid on the trigger when error is set', () => {
+      cy.mount(Select, {
+        props: { options, label: 'Fruit', error: 'Required' },
+      })
+      cy.get('[data-slot="trigger"]').should(
+        'have.attr',
+        'data-invalid',
+        'true',
+      )
+    })
+
+    it('renders without a labeling wrapper when no labeling props are set', () => {
+      cy.mount(Select, { props: { options } })
+      cy.get('[data-slot="trigger"]').should('exist')
+      cy.get('label').should('not.exist')
+    })
+  })
 })

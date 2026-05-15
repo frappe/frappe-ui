@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, useAttrs, useSlots } from 'vue'
 import { usePopoverMotion } from '../../composables/usePopoverMotion'
+import { useInputLabeling } from '../../composables/useInputLabeling'
 import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
 import type {
   SelectNormalizedOption,
@@ -10,6 +11,12 @@ import type {
   SelectSlots,
 } from './types'
 import ItemListRow from '../ItemListRow/ItemListRow.vue'
+import {
+  InputDescription,
+  InputError,
+  InputLabel,
+  LabelingWrapper,
+} from '../InputLabeling'
 import {
   SelectContent,
   SelectItem,
@@ -52,15 +59,42 @@ const props = withDefaults(defineProps<SelectProps>(), {
 const attrs = useAttrs()
 const slots = useSlots()
 
-const formAttrKeys = ['name', 'required', 'autocomplete'] as const
+const {
+  inputId,
+  labelId,
+  descriptionId,
+  errorMessageId,
+  describedBy,
+  hasError,
+  errorLines,
+  showDescription,
+} = useInputLabeling(props, {
+  size: () => props.size,
+  variant: () => props.variant,
+  disabled: () => props.disabled,
+})
+
+const hasLabeling = computed(() => {
+  return Boolean(
+    props.label ||
+      props.description ||
+      hasError.value ||
+      slots.label ||
+      slots.description,
+  )
+})
+
+const formAttrKeys = ['name', 'autocomplete'] as const
 
 const { motion: contentMotion, onPointerDown: markPointerDown } =
   usePopoverMotion(open)
 
 const rootAttrs = computed(() => {
-  return Object.fromEntries(
+  const out: Record<string, unknown> = Object.fromEntries(
     formAttrKeys.filter((key) => key in attrs).map((key) => [key, attrs[key]]),
   )
+  if (props.required) out.required = true
+  return out
 })
 
 const triggerAttrs = computed(() => {
@@ -68,7 +102,6 @@ const triggerAttrs = computed(() => {
     class: _class,
     style: _style,
     name: _name,
-    required: _required,
     autocomplete: _autocomplete,
     ...rest
   } = attrs
@@ -180,14 +213,41 @@ defineSlots<SelectSlots>()
 </script>
 
 <template>
-  <SelectRoot v-model="internalModel" v-model:open="open" v-bind="rootAttrs">
+  <LabelingWrapper
+    :enabled="hasLabeling"
+    :wrapper-class="['space-y-1.5', attrs.class as any]"
+    :wrapper-style="attrs.style as any"
+  >
+    <InputLabel
+      v-if="label || $slots.label"
+      :id="labelId"
+      :for-id="inputId"
+      :label="label"
+      :required="required"
+      class="text-p-sm font-medium text-ink-gray-7"
+    >
+      <template v-if="$slots.label" #default="slotProps">
+        <slot name="label" v-bind="slotProps" />
+      </template>
+    </InputLabel>
+    <SelectRoot v-model="internalModel" v-model:open="open" v-bind="rootAttrs">
     <SelectTrigger
-      :id="id"
+      :id="inputId"
       data-slot="trigger"
       v-bind="triggerAttrs"
-      :class="[triggerClasses, attrs.class]"
-      :style="attrs.style"
+      :class="[
+        triggerClasses,
+        hasLabeling ? 'w-full' : null,
+        hasLabeling ? null : (attrs.class as any),
+      ]"
+      :style="hasLabeling ? null : (attrs.style as any)"
       :disabled="disabled"
+      :aria-invalid="hasError || undefined"
+      :aria-errormessage="hasError ? errorMessageId : undefined"
+      :aria-describedby="describedBy"
+      :aria-required="required || undefined"
+      :data-invalid="hasError ? 'true' : undefined"
+      :data-required="required ? 'true' : undefined"
       @pointerdown="markPointerDown"
     >
       <template v-if="$slots.trigger">
@@ -386,6 +446,15 @@ defineSlots<SelectSlots>()
       </SelectContent>
     </SelectPortal>
   </SelectRoot>
+    <InputDescription
+      v-if="showDescription || $slots.description"
+      :id="descriptionId"
+      :description="description"
+    >
+      <slot v-if="$slots.description" name="description" />
+    </InputDescription>
+    <InputError v-if="hasError" :id="errorMessageId" :lines="errorLines" />
+  </LabelingWrapper>
 </template>
 
 <style scoped>

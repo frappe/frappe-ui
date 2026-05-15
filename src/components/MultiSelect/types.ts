@@ -1,4 +1,5 @@
 import type { Component, VNode, VNodeChild } from 'vue'
+import type { InputLabelingProps } from '../../composables/useInputLabeling'
 
 export type MultiSelectVariant = 'subtle' | 'outline' | 'ghost'
 export type MultiSelectSize = 'sm' | 'md' | 'lg' | 'xl'
@@ -51,7 +52,7 @@ export type MultiSelectOptions = Array<
   MultiSelectOption | MultiSelectGroupedOption
 >
 
-export interface MultiSelectProps {
+export interface MultiSelectProps extends InputLabelingProps {
   /** Array of selected option values. */
   modelValue?: string[]
 
@@ -69,9 +70,6 @@ export interface MultiSelectProps {
 
   /** Disables the multi-select. */
   disabled?: boolean
-
-  /** Optional HTML id forwarded to the trigger. */
-  id?: string
 
   /** Controls the popover visibility. */
   open?: boolean
@@ -163,6 +161,12 @@ export interface MultiSelectFooterSlotProps {
 export interface MultiSelectSlots {
   /** Fully custom trigger renderer. */
   trigger?: (props: MultiSelectTriggerSlotProps) => any
+
+  /** Overrides the rendered label content. Receives `{ required }`. */
+  label?: (props: { required: boolean }) => any
+
+  /** Overrides the rendered description content. */
+  description?: () => any
 
   /** Shared content rendered before the standard row label. */
   'item-prefix'?: (props: MultiSelectItemSlotProps) => any

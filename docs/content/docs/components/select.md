@@ -17,6 +17,11 @@ Use `#item-prefix` and `#item-label` to tailor the standard row — for example,
 ## Trigger Slots
 <ComponentPreview name="Select-TriggerSlots" />
 
+## Label, Description, Error
+`Select` supports `label`, `description`, `error`, and `required` directly — no `FormControl` wrapper needed. The error suppresses the description and wires `aria-invalid` + `aria-errormessage` onto the trigger.
+
+<ComponentPreview name="Select-Labeling" />
+
 ## Notes
 
 - Prefer `#item-prefix`, `#item-label`, and `#item-suffix` when you want to

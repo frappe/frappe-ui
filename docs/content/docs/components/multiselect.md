@@ -32,4 +32,9 @@ A chips-style trigger: each selected option renders as a removable `Badge`, with
 
 <ComponentPreview name="MultiSelect-TagsTrigger" css='justify-center !py-20' />
 
+## Label, Description, Error
+`MultiSelect` supports `label`, `description`, `error`, and `required` directly — no `FormControl` wrapper needed. The error suppresses the description and wires `aria-invalid` + `aria-errormessage` onto the trigger.
+
+<ComponentPreview name="MultiSelect-Labeling" />
+
 <!-- @include: ../../../meta/MultiSelect.md -->

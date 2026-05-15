@@ -30,36 +30,31 @@
     name: 'label',
     description: 'Text label displayed inside the button',
     required: false,
-    type: 'string',
-    default: undefined
+    type: 'string'
   },
   {
     name: 'icon',
     description: 'Icon shown when no left or right icon is specified',
     required: false,
-    type: 'string | Component',
-    default: undefined
+    type: 'string | Component'
   },
   {
     name: 'iconLeft',
     description: 'Icon shown before the label',
     required: false,
-    type: 'string | Component',
-    default: undefined
+    type: 'string | Component'
   },
   {
     name: 'iconRight',
     description: 'Icon shown after the label',
     required: false,
-    type: 'string | Component',
-    default: undefined
+    type: 'string | Component'
   },
   {
     name: 'tooltip',
     description: 'Tooltip text shown on hover',
     required: false,
-    type: 'string',
-    default: undefined
+    type: 'string'
   },
   {
     name: 'loading',
@@ -72,8 +67,7 @@
     name: 'loadingText',
     description: 'Text shown while the button is loading',
     required: false,
-    type: 'string',
-    default: undefined
+    type: 'string'
   },
   {
     name: 'disabled',
@@ -86,15 +80,13 @@
     name: 'route',
     description: 'Router destination when used as a link',
     required: false,
-    type: 'string | kt | Tt',
-    default: undefined
+    type: 'string | kt | Tt'
   },
   {
     name: 'link',
     description: 'External link URL',
     required: false,
-    type: 'string',
-    default: undefined
+    type: 'string'
   },
   {
     name: 'type',
