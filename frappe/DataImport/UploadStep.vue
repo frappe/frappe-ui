@@ -189,6 +189,20 @@ const uploadProgress = computed(() => {
     return Math.floor((uploaded.value / total.value) * 100)
 })
 
+const CSV_MIME_TYPES = [
+    'text/csv',
+    'application/csv',
+    'application/vnd.ms-excel',
+    'text/plain',
+]
+
+function isValidCsvFile(file: File): boolean {
+    if (file.type && CSV_MIME_TYPES.includes(file.type)) {
+        return true
+    }
+    return !file.type && file.name.toLowerCase().endsWith('.csv')
+}
+
 const extractFile = (e: Event): File | null => {
     const inputFiles = (e.target as HTMLInputElement)?.files
     const dt = (e as DragEvent).dataTransfer?.files
@@ -199,8 +213,7 @@ const extractFile = (e: Event): File | null => {
 const uploadFile = (e: Event) => {
     const file = extractFile(e)
     if (!file) return;
-
-    if (file.type !== 'text/csv') {
+    if (!isValidCsvFile(file)) {
         toast.error('Please upload a valid CSV file.')
         console.error('Please upload a valid CSV file.')
         return;
