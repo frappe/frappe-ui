@@ -40,12 +40,17 @@ export function frappeProxy({
     },
   }
 
+  const socketioPort = commonSiteConfig?.socketio_port ?? 9000
+
   return {
     name: 'frappeui-proxy-plugin',
     config: () => ({
       server: {
         port: port,
         proxy: proxy,
+      },
+      define: {
+        __FRAPPE_SOCKETIO_PORT__: socketioPort,
       },
     }),
   }

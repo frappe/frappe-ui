@@ -33,6 +33,10 @@
     "./frappe": {
       "import": "./frappe/index.js"
     },
+    "./frappe/vue": {
+      "import": "./frappe/client/vue/index.ts",
+      "types": "./frappe/client/vue/index.ts"
+    },
     "./drive": {
       "import": "./frappe/drive/index.js"
     },
