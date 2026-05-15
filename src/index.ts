@@ -66,7 +66,7 @@ export { default as ListGroupRows } from './components/ListView/ListGroupRows.vu
 export { default as ListSelectBanner } from './components/ListView/ListSelectBanner.vue'
 export { default as ListFooter } from './components/ListView/ListFooter.vue'
 export { default as Toast } from './components/Toast/Toast.vue'
-export { toast } from './components/Toast/index'
+export { toast, Toaster } from 'vue-sonner'
 export * from './components/Tooltip'
 export { default as CommandPalette } from './components/CommandPalette/CommandPalette.vue'
 export { default as CommandPaletteItem } from './components/CommandPalette/CommandPaletteItem.vue'

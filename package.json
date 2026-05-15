@@ -76,6 +76,7 @@
   "author": "Frappe Technologies Pvt. Ltd.",
   "license": "MIT",
   "dependencies": {
+    "vue-sonner": "^2.0.9",
     "@floating-ui/dom": "^1.7.4",
     "@floating-ui/vue": "^1.1.6",
     "@headlessui/vue": "^1.7.14",
