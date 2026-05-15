@@ -1,13 +1,22 @@
 <template>
   <FrappeUIProvider>
     <Story title="Toast Actions" :layout="{ width: 420 }">
-      <Variant title="Action, persistent, and stacked examples">
+      <Variant title="Action button">
         <div class="flex flex-wrap gap-2">
-          <Button label="Show action toast" @click="showActionToast" />
-          <Button label="Show persistent toast" @click="showPersistentToast" />
-          <Button label="Show promise toast" @click="showPromiseToast" />
-          <Button label="Show stacked toasts" @click="showStackedToasts" />
+          <Button label="With action button" @click="showActionToast" />
+          <Button label="Persistent + action" @click="showPersistentActionToast" />
         </div>
+      </Variant>
+
+      <Variant title="Promise">
+        <div class="flex flex-wrap gap-2">
+          <Button label="Resolve" @click="showResolvePromise" />
+          <Button label="Reject" @click="showRejectPromise" />
+        </div>
+      </Variant>
+
+      <Variant title="Update in place (id-keyed)">
+        <Button label="Loading → success" @click="showUpdateInPlace" />
       </Variant>
     </Story>
   </FrappeUIProvider>
@@ -16,12 +25,7 @@
 <script setup lang="ts">
 import { Button, FrappeUIProvider, toast } from 'frappe-ui'
 
-function resetToasts() {
-  toast.removeAll()
-}
-
 function showActionToast() {
-  resetToasts()
   toast.success('Post archived', {
     action: {
       label: 'Undo',
@@ -32,20 +36,19 @@ function showActionToast() {
   })
 }
 
-function showPersistentToast() {
-  resetToasts()
+function showPersistentActionToast() {
   toast.info('Background sync in progress', {
-    duration: 0,
-    closable: false,
+    duration: Infinity,
+    action: {
+      label: 'Cancel',
+      onClick: () => toast.dismiss(),
+    },
   })
 }
 
-function showPromiseToast() {
-  resetToasts()
-  void toast.promise(
-    new Promise<string>((resolve) => {
-      setTimeout(() => resolve('done'), 1000)
-    }),
+function showResolvePromise() {
+  toast.promise(
+    new Promise<string>((resolve) => setTimeout(() => resolve('done'), 1500)),
     {
       loading: 'Saving changes…',
       success: 'Changes saved',
@@ -54,12 +57,23 @@ function showPromiseToast() {
   )
 }
 
-async function showStackedToasts() {
-  resetToasts()
-  toast.info('First notification', { duration: 0 })
-  await new Promise((resolve) => setTimeout(resolve, 500))
-  toast.success('Second notification', { duration: 0 })
-  await new Promise((resolve) => setTimeout(resolve, 700))
-  toast.warning('Third notification', { duration: 0 })
+function showRejectPromise() {
+  toast.promise(
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Network error')), 1500),
+    ),
+    {
+      loading: 'Saving changes…',
+      success: 'Changes saved',
+      error: (err: Error) => err.message,
+    },
+  )
+}
+
+function showUpdateInPlace() {
+  const id = toast.loading('Uploading file…')
+  setTimeout(() => {
+    toast.success('Upload complete', { id })
+  }, 2000)
 }
 </script>
