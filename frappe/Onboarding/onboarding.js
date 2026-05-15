@@ -131,7 +131,11 @@ export function useOnboarding(appName) {
     if (onboardingSteps.value.length) {
       let _steps = onboardingSteps.value
       _steps.forEach((step, index) => {
-        onboardings[appName][index].completed = step.completed
+        const onboardingExists =
+          onboardings[appName] && onboardings[appName][index]
+        if (onboardingExists) {
+          onboardings[appName][index].completed = step.completed
+        }
       })
       isOnboardingStepsCompleted.value = _steps.every((step) => step.completed)
     } else {
