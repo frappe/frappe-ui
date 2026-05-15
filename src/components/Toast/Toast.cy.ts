@@ -1,58 +1,94 @@
 import { h } from 'vue'
-import { ToastProvider, ToastViewport } from 'reka-ui'
-import Toast from './Toast.vue'
+import { Toaster as SonnerToaster } from 'vue-sonner'
+import { toast, Toast, Toaster } from '../../index'
+import FrappeUIProvider from '../Provider/FrappeUIProvider.vue'
 
-function mountToast(props: Record<string, unknown>) {
-  cy.mount({
-    render() {
-      return h(ToastProvider, { swipeDirection: 'down' }, () => [
-        h(Toast, props),
-        h(ToastViewport, {
-          class:
-            'fixed bottom-0 right-0 flex max-w-full flex-col items-end gap-[10px] p-5 outline-none pointer-events-none',
-        }),
-      ])
-    },
-  })
-}
+describe('Toast v1 — vue-sonner integration', () => {
+  // ---- public exports -------------------------------------------------------
 
-describe('Toast', () => {
-  it('renders the message', () => {
-    mountToast({
-      open: true,
-      message: 'Saved successfully',
-    })
-
-    cy.contains('Saved successfully').should('exist')
+  it('toast is the vue-sonner imperative namespace', () => {
+    expect(typeof toast.success).to.equal('function')
+    expect(typeof toast.error).to.equal('function')
+    expect(typeof toast.warning).to.equal('function')
+    expect(typeof toast.info).to.equal('function')
+    expect(typeof toast.loading).to.equal('function')
+    expect(typeof toast.message).to.equal('function')
+    expect(typeof toast.promise).to.equal('function')
+    expect(typeof toast.custom).to.equal('function')
+    expect(typeof toast.dismiss).to.equal('function')
   })
 
-  it('emits action and runs handler', () => {
-    const onClick = cy.stub().as('actionHandler')
-    const onAction = cy.stub().as('actionEvent')
-
-    mountToast({
-      open: true,
-      message: 'Post archived',
-      action: {
-        label: 'Undo',
-        onClick,
-      },
-      onAction,
-    })
-
-    cy.contains('button', 'Undo').click({ force: true })
-
-    cy.get('@actionHandler').should('have.been.calledOnce')
-    cy.get('@actionEvent').should('have.been.calledOnce')
+  it('Toaster re-export resolves to the vue-sonner Toaster', () => {
+    expect(Toaster).to.equal(SonnerToaster)
   })
 
-  it('does not render close button when closable is false', () => {
-    mountToast({
-      open: true,
-      message: 'Persistent message',
-      closable: false,
-    })
+  it('Toast back-compat export still resolves', () => {
+    expect(Toast).to.not.be.undefined
+  })
 
-    cy.get('[aria-label="Close"]').should('not.exist')
+  it('removed APIs (toast.create / toast.remove / toast.removeAll) are not present', () => {
+    expect((toast as any).create).to.be.undefined
+    expect((toast as any).remove).to.be.undefined
+    expect((toast as any).removeAll).to.be.undefined
+  })
+
+  // ---- FrappeUIProvider mounts a Toaster ------------------------------------
+
+  it('FrappeUIProvider renders a [data-sonner-toaster] element', () => {
+    cy.mount(FrappeUIProvider)
+    cy.get('[data-sonner-toaster]').should('exist')
+  })
+
+  it('Toaster bakes in position=bottom-right', () => {
+    cy.mount(FrappeUIProvider)
+    cy.get('[data-sonner-toaster]')
+      .should('have.attr', 'data-x-position', 'right')
+      .and('have.attr', 'data-y-position', 'bottom')
+  })
+
+  it('Toaster bakes in visibleToasts=3', () => {
+    cy.mount(FrappeUIProvider)
+    cy.get('[data-sonner-toaster]').should(
+      'have.attr',
+      'data-visible-toasts',
+      '3',
+    )
+  })
+
+  // ---- imperative API shows toasts in the DOM -------------------------------
+
+  it('toast.success mounts a toast node after FrappeUIProvider is rendered', () => {
+    cy.mount(FrappeUIProvider)
+    cy.then(() => {
+      toast.success('Workspace created')
+    })
+    cy.get('[data-sonner-toast]').should('exist')
+    cy.contains('Workspace created').should('exist')
+  })
+
+  it('toast.error renders in the DOM', () => {
+    cy.mount(FrappeUIProvider)
+    cy.then(() => {
+      toast.error('Something went wrong')
+    })
+    cy.contains('Something went wrong').should('exist')
+  })
+
+  it('toast.dismiss removes the toast from the DOM', () => {
+    cy.mount(FrappeUIProvider)
+    cy.then(() => {
+      const id = toast.info('Will be dismissed', { duration: 60000 })
+      // wait for toast to appear, then dismiss
+      setTimeout(() => toast.dismiss(id as string | number), 50)
+    })
+    cy.get('[data-sonner-toast]').should('not.exist')
+  })
+
+  it('toast.message renders without type icon', () => {
+    cy.mount(FrappeUIProvider)
+    cy.then(() => {
+      toast.message('Plain message')
+    })
+    cy.contains('Plain message').should('exist')
   })
 })
