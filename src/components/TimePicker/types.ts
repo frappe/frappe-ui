@@ -1,4 +1,8 @@
-// Shared type definitions for TimePicker component
+/**
+ * TimePicker is a thin wrapper around Combobox that adds time-aware parsing,
+ * generated options, and a 12/24-hour display toggle. Canonical value is
+ * always 24-hour `HH:mm` (or `HH:mm:ss` if seconds were typed).
+ */
 
 export type PopoverSide = 'top' | 'right' | 'bottom' | 'left'
 export type PopoverAlign = 'start' | 'center' | 'end'
@@ -13,53 +17,35 @@ export type Placement =
   | 'left-start'
   | 'left-end'
 
-// Variant aligns with TextInput variants (ghost not supported there)
 export type Variant = 'outline' | 'subtle'
 
-export interface Option {
-  value: string
-  label: string
-}
-
-export interface ParsedTimeValid {
-  valid: true
-  hh24: string
-  mm: string
-  ss?: string
-  total: number
-}
-export interface ParsedTimeInvalid {
-  valid: false
-}
-export type ParsedTime = ParsedTimeValid | ParsedTimeInvalid
-
 export interface TimePickerProps {
+  /** Controlled value, canonical `HH:mm` (or `HH:mm:ss`). */
+  modelValue?: string
+
   /**
-   * Uncontrolled initial value for the picker.
+   * Uncontrolled initial value.
    * @deprecated Use `modelValue` with `v-model` instead.
    */
   value?: string
 
-  /** Controlled value for the picker. */
-  modelValue?: string
-
-  /** Minute interval between options. */
+  /** Minute interval between generated options. */
   interval?: number
 
-  /** Custom time options. */
+  /** Caller-provided option values; bypasses the generated grid. */
   options?: Array<{ value: string; label?: string }>
 
-  /** Preferred popover side relative to the trigger. */
+  /** Preferred popover side. */
   side?: PopoverSide
 
   /** Alignment of the popover along the trigger edge. */
   align?: PopoverAlign
 
-  /** Gap between the trigger and popover content in pixels. */
+  /** Gap between trigger and popover in pixels. */
   offset?: number
 
   /**
-   * Preferred popover placement relative to the trigger.
+   * Combined side+align placement.
    * @deprecated Use `side` and `align` instead.
    */
   placement?: Placement
@@ -74,52 +60,50 @@ export interface TimePickerProps {
   readonly?: boolean
 
   /**
-   * Allows users to type custom time values into the input.
-   * @deprecated Use `readonly` instead (inverse semantics: `allowCustom: false` → `readonly: true`).
+   * Allows users to type custom time values.
+   * @deprecated Use `readonly` (inverse semantics).
    */
   allowCustom?: boolean
 
-  /** Keeps the popover open after a time is selected. Default: false. */
+  /** Keeps the popover open after a time is selected. */
   keepOpen?: boolean
 
   /**
    * Closes the popover after a value is picked.
-   * @deprecated Use `keepOpen` instead (inverse semantics: `autoClose: false` → `keepOpen: true`).
+   * @deprecated Use `keepOpen` (inverse semantics).
    */
   autoClose?: boolean
 
-  /** Use 12-hour (AM/PM) format. */
+  /** Use 12-hour (am/pm) format for display. */
   use12Hour?: boolean
 
   /** Disable the time picker. */
   disabled?: boolean
 
-  /** Scroll behavior when opening the list. */
-  scrollMode?: 'center' | 'start' | 'nearest'
+  /** Opens the popover when the input receives focus. Default: false. */
+  openOnFocus?: boolean
 
-  /** Minimum selectable time. */
+  /** Opens the popover when the input is clicked. Default: true. */
+  openOnClick?: boolean
+
+  /** Minimum selectable time as `HH:mm[:ss]`. */
   minTime?: string
 
-  /** Maximum selectable time. */
+  /** Maximum selectable time as `HH:mm[:ss]`. */
   maxTime?: string
+
+  /**
+   * Scroll behavior when opening the list.
+   * @deprecated Scrolling is always centered now.
+   */
+  scrollMode?: 'center' | 'start' | 'nearest'
 }
 
 export type TimePickerEmits = {
-  /** Emitted when v-model value changes */
   (e: 'update:modelValue', value: string): void
-
-  /** Emitted when the time value changes */
   (e: 'change', value: string): void
-
-  /** Emitted when user input is invalid */
   (e: 'input-invalid', input: string): void
-
-  /** Emitted when invalid state changes */
   (e: 'invalid-change', invalid: boolean): void
-
-  /** Emitted when the picker is opened */
   (e: 'open'): void
-
-  /** Emitted when the picker is closed */
   (e: 'close'): void
 }

@@ -13,10 +13,11 @@ describe('TimePicker', () => {
     cy.mount(TimePicker)
 
     cy.get('input').click()
-    cy.get('[data-index="2"]')
+    cy.get('[role=option]')
+      .eq(2)
       .invoke('text')
       .then((label) => {
-        cy.get('[data-index="2"]').click()
+        cy.get('[role=option]').eq(2).click()
         cy.get('input').should('have.value', label.trim())
       })
   })
@@ -24,8 +25,6 @@ describe('TimePicker', () => {
   it('emit events', () => {
     const onUpdate = cy.spy().as('onUpdate')
     const onChange = cy.spy().as('onChange')
-    const onInputInvalid = cy.spy().as('onInputInvalid')
-    const onInvalidChange = cy.spy().as('onInvalidChange')
     const onOpen = cy.spy().as('onOpen')
     const onClose = cy.spy().as('onClose')
 
@@ -33,8 +32,6 @@ describe('TimePicker', () => {
       props: {
         'onUpdate:modelValue': onUpdate,
         onChange: onChange,
-        onInputInvalid: onInputInvalid,
-        onInvalidChange: onInvalidChange,
         onOpen: onOpen,
         onClose: onClose,
         use12Hour: false,
@@ -44,15 +41,12 @@ describe('TimePicker', () => {
     cy.get('@onOpen').should('not.have.been.called')
     cy.get('input').click()
     cy.get('@onOpen').should('have.been.called')
-    cy.get('[data-index="0"]').click()
+    cy.get('[role=option]').eq(0).click()
 
     cy.get('@onClose').should('have.been.called')
 
-    cy.get('input').then((x) => {
-      const tm = x.val()
-      cy.get('@onUpdate').should('have.been.calledWith', tm)
-      cy.get('@onChange').should('have.been.calledWith', tm)
-    })
+    cy.get('@onUpdate').should('have.been.calledWith', '00:00')
+    cy.get('@onChange').should('have.been.calledWith', '00:00')
   })
 
   it('custom options', () => {
@@ -137,9 +131,6 @@ describe('TimePicker', () => {
   })
 
   it('side and align props are accepted (smoke test)', () => {
-    // Reka resolves data-side via collision detection, so we don't assert
-    // a specific axis here — just that the popover renders with valid
-    // side/align props.
     cy.mount(TimePicker, { props: { side: 'bottom', align: 'end' } })
     cy.get('input').click()
     cy.get('[role=dialog]')
@@ -160,5 +151,20 @@ describe('TimePicker', () => {
     cy.get('input').should('have.attr', 'readonly')
     cy.get('input').click()
     cy.get('[role=dialog]').should('exist')
+  })
+
+  it('parses flexible time input like "3pm"', () => {
+    cy.mount(TimePicker, { props: { use12Hour: true } })
+    cy.get('input').click()
+    cy.get('input').type('3pm{enter}')
+    // Figure space (U+2007) pads single-digit hours for column alignment.
+    cy.get('input').should('have.value', '03:00 pm')
+  })
+
+  it('off-grid typed time gets a formatted label', () => {
+    cy.mount(TimePicker, { props: { use12Hour: true, interval: 15 } })
+    cy.get('input').click()
+    cy.get('input').type('3:07pm{enter}')
+    cy.get('input').should('have.value', '03:07 pm')
   })
 })
