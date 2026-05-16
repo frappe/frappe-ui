@@ -7,98 +7,130 @@
   const propsData = [
   {
     name: 'value',
-    description: 'Selected time (uncontrolled)',
+    description: 'Uncontrolled initial value for the picker.',
     required: false,
     type: 'string',
-    default: '""'
+    deprecated: 'Use `modelValue` with `v-model` instead.'
   },
   {
     name: 'modelValue',
-    description: 'Selected time (v-model)',
+    description: 'Controlled value for the picker.',
     required: false,
     type: 'string',
     default: '""'
   },
   {
     name: 'interval',
-    description: 'Minute interval between options',
+    description: 'Minute interval between options.',
     required: false,
     type: 'number',
     default: '15'
   },
   {
     name: 'options',
-    description: 'Custom time options',
+    description: 'Custom time options.',
     required: false,
     type: '{ value: string; label?: string; }[] | undefined',
     default: '[]'
   },
   {
+    name: 'side',
+    description: 'Preferred popover side relative to the trigger.',
+    required: false,
+    type: 'PopoverSide'
+  },
+  {
+    name: 'align',
+    description: 'Alignment of the popover along the trigger edge.',
+    required: false,
+    type: 'PopoverAlign'
+  },
+  {
+    name: 'offset',
+    description: 'Gap between the trigger and popover content in pixels.',
+    required: false,
+    type: 'number'
+  },
+  {
     name: 'placement',
-    description: 'Popover placement',
+    description: 'Preferred popover placement relative to the trigger.',
     required: false,
     type: 'Placement',
-    default: '"bottom-start" as Placement'
+    deprecated: 'Use `side` and `align` instead.'
   },
   {
     name: 'placeholder',
-    description: 'Placeholder text when no value is selected',
+    description: 'Placeholder text when no value is selected.',
     required: false,
     type: 'string',
     default: '"Select time"'
   },
   {
     name: 'variant',
-    description: 'Visual style variant',
+    description: 'Visual style variant.',
     required: false,
     type: 'Variant',
     default: '"subtle" as Variant'
   },
   {
-    name: 'allowCustom',
-    description: 'Allow entering custom time values',
+    name: 'readonly',
+    description: 'Prevents manual typing while keeping the picker interactive.',
     required: false,
     type: 'boolean',
-    default: 'true'
+    default: 'false'
+  },
+  {
+    name: 'allowCustom',
+    description: 'Allows users to type custom time values into the input.',
+    required: false,
+    type: 'boolean',
+    deprecated: 'Use `readonly` instead (inverse semantics: `allowCustom: false` → `readonly: true`).'
+  },
+  {
+    name: 'keepOpen',
+    description: 'Keeps the popover open after a time is selected. Default: false.',
+    required: false,
+    type: 'boolean'
   },
   {
     name: 'autoClose',
-    description: 'Close picker automatically after selection',
+    description: 'Closes the popover after a value is picked.',
     required: false,
     type: 'boolean',
-    default: 'true'
+    default: 'true',
+    deprecated: 'Use `keepOpen` instead (inverse semantics: `autoClose: false` → `keepOpen: true`).'
   },
   {
     name: 'use12Hour',
-    description: 'Use 12-hour (AM/PM) format',
+    description: 'Use 12-hour (AM/PM) format.',
     required: false,
     type: 'boolean',
     default: 'true'
   },
   {
     name: 'disabled',
-    description: 'Disable the time picker',
+    description: 'Disable the time picker.',
     required: false,
     type: 'boolean',
     default: 'false'
   },
   {
     name: 'scrollMode',
-    description: 'Scroll behavior when opening the list',
+    description: 'Scroll behavior when opening the list.',
     required: false,
     type: '"start" | "center" | "nearest"',
     default: '"center" as const'
   },
   {
     name: 'minTime',
-    description: 'Minimum selectable time',
+    description: 'Minimum selectable time.',
     required: false,
     type: 'string',
     default: '""'
   },
   {
     name: 'maxTime',
-    description: 'Maximum selectable time',
+    description: 'Maximum selectable time.',
     required: false,
     type: 'string',
     default: '""'

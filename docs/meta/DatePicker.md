@@ -52,10 +52,16 @@
     type: 'string'
   },
   {
+    name: 'size',
+    description: 'Size of the trigger input.',
+    required: false,
+    type: 'InputSize'
+  },
+  {
     name: 'variant',
     description: 'Visual style variant passed through to the input.',
     required: false,
-    type: '"subtle" | "ghost" | "outline"',
+    type: 'InputVariant',
     default: '"subtle"'
   },
   {
@@ -66,10 +72,10 @@
     default: '"Select date"'
   },
   {
-    name: 'label',
-    description: 'Optional label forwarded to the trigger input.',
+    name: 'open',
+    description: 'Controls popover open state (for controlled usage).',
     required: false,
-    type: 'string'
+    type: 'boolean'
   },
   {
     name: 'readonly',
@@ -103,6 +109,7 @@
     description: 'Closes the popover after a value is picked.',
     required: false,
     type: 'boolean',
+    default: 'true',
     deprecated: 'Use `keepOpen` instead (inverse semantics: `autoClose: false` → `keepOpen: true`).'
   },
   {
@@ -137,24 +144,65 @@
     required: false,
     type: 'string | string[] | Record<string, boolean>',
     deprecated: 'Apply `class` directly to the DatePicker component element to control width.'
+  },
+  {
+    name: 'label',
+    description: 'Label rendered above (or beside, for binary controls) the input.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'description',
+    description: 'Helper text rendered below the input.\nHidden when `error` is set.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'error',
+    description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
+    required: false,
+    type: 'string | FrappeUIError'
+  },
+  {
+    name: 'required',
+    description: 'Marks the field as required. Renders an asterisk next to the label and\nforwards `required` / `aria-required` to the underlying control.',
+    required: false,
+    type: 'boolean'
+  },
+  {
+    name: 'id',
+    description: 'HTML id of the underlying control. Auto-generated via `useId()` if omitted.',
+    required: false,
+    type: 'string'
   }
 ]
 
   const slotsData = [
   {
+    name: 'trigger',
+    description: 'Custom trigger renderer for the picker.',
+    type: 'DatePickerTriggerSlotProps'
+  },
+  {
     name: 'target',
-    description: 'Custom trigger renderer for the date picker.',
-    type: '{ togglePopover: () => void; isOpen: boolean; displayLabel: string; inputValue: string; }'
+    description: 'Custom trigger renderer for the picker.',
+    type: 'DatePickerTriggerSlotProps',
+    deprecated: 'Use `#trigger` instead. `#target` remains as a back-compat alias through v1.x.'
   },
   {
     name: 'prefix',
     description: 'Content rendered before the trigger input value.',
-    type: '{ togglePopover: () => void; isOpen: boolean; displayLabel: string; inputValue: string; }'
+    type: 'DatePickerTriggerSlotProps'
   },
   {
     name: 'suffix',
     description: 'Content rendered after the trigger input value.',
-    type: '{ togglePopover: () => void; isOpen: boolean; displayLabel: string; inputValue: string; }'
+    type: 'DatePickerTriggerSlotProps'
+  },
+  {
+    name: 'actions',
+    description: 'Custom action buttons in the popover footer (e.g. Tomorrow, Next Week).',
+    type: 'DatePickerActionsSlotProps'
   }
 ]
 
@@ -168,6 +216,11 @@
     name: 'change',
     description: 'Fired after the value is committed.',
     type: '[value: string]'
+  },
+  {
+    name: 'update:open',
+    description: 'Fired when the open state changes.',
+    type: '[value: boolean]'
   }
 ]
 </script>

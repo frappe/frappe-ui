@@ -37,7 +37,7 @@
     name: 'placement',
     description: 'Placement of the popover relative to the target',
     required: false,
-    type: '"bottom" | "top" | "right" | "left" | "bottom-start" | "top-start" | "top-end" | "bottom-end" | "right-start" | "right-end" | "left-start" | "left-end"',
+    type: '"bottom" | "top" | "right" | "left" | "top-start" | "top-end" | "bottom-start" | "bottom-end" | "right-start" | "right-end" | "left-start" | "left-end"',
     default: '"bottom-start"'
   },
   {
