@@ -163,4 +163,123 @@ describe('DatePicker', () => {
       cy.get('[role=dialog]').should('exist')
     })
   })
+
+  it('disabled prop disables the trigger', () => {
+    cy.mount(DatePicker, { props: { disabled: true } })
+    cy.get('input').should('have.attr', 'disabled')
+  })
+
+  it('re-clicking the input keeps the popover open', () => {
+    // Regression guard for commit 89668bb8 — clicking the same input that
+    // already has the popover open used to toggle it closed.
+    cy.mount(DatePicker)
+    cy.get('input').click()
+    cy.get('[role=dialog]').should('exist')
+    cy.get('input').click()
+    cy.get('[role=dialog]').should('exist')
+  })
+
+  it('typed input commits on Enter', () => {
+    cy.mount(DatePicker, {
+      props: {
+        'onUpdate:modelValue': cy.spy().as('onUpdate'),
+      },
+    })
+    cy.get('input').click()
+    cy.get('input').type('2025-06-15{enter}')
+    cy.get('input').should('have.value', '2025-06-15')
+    cy.get('@onUpdate').should('have.been.calledWith', '2025-06-15')
+  })
+
+  it('typed unavailable date is rejected and reverts', () => {
+    cy.mount(DatePicker, {
+      props: {
+        modelValue: '2025-06-15',
+        minDate: '2025-06-10',
+        maxDate: '2025-06-20',
+      },
+    })
+    cy.get('input').should('have.value', '2025-06-15')
+    cy.get('input').click()
+    cy.get('input').clear().type('2025-06-25{enter}')
+    cy.get('input').should('have.value', '2025-06-15')
+  })
+
+  describe('keyboard navigation', () => {
+    it('arrow-down on the input opens popover and moves focus into the grid', () => {
+      cy.mount(DatePicker, { props: { modelValue: '2025-06-15' } })
+      cy.get('input').focus().type('{downArrow}')
+      cy.get('[role=dialog]').should('exist')
+      cy.focused().should('have.attr', 'data-value', '2025-06-15')
+    })
+
+    it('arrow keys move focus by ±1 day and ±1 week', () => {
+      cy.mount(DatePicker, { props: { modelValue: '2025-06-15' } })
+      cy.get('input').focus().type('{downArrow}')
+      cy.focused().trigger('keydown', { key: 'ArrowRight' })
+      cy.focused().should('have.attr', 'data-value', '2025-06-16')
+      cy.focused().trigger('keydown', { key: 'ArrowDown' })
+      cy.focused().should('have.attr', 'data-value', '2025-06-23')
+      cy.focused().trigger('keydown', { key: 'ArrowLeft' })
+      cy.focused().should('have.attr', 'data-value', '2025-06-22')
+      cy.focused().trigger('keydown', { key: 'ArrowUp' })
+      cy.focused().should('have.attr', 'data-value', '2025-06-15')
+    })
+
+    it('Home/End jump to week edges', () => {
+      // 2025-06-15 is a Sunday → Home stays on 06-15, End jumps to 06-21 (Saturday)
+      cy.mount(DatePicker, { props: { modelValue: '2025-06-18' } })
+      cy.get('input').focus().type('{downArrow}')
+      cy.focused().trigger('keydown', { key: 'End' })
+      cy.focused().should('have.attr', 'data-value', '2025-06-21')
+      cy.focused().trigger('keydown', { key: 'Home' })
+      cy.focused().should('have.attr', 'data-value', '2025-06-15')
+    })
+
+    it('PageUp/PageDown shift by one month, Shift+PageDown shifts by one year', () => {
+      cy.mount(DatePicker, { props: { modelValue: '2025-06-15' } })
+      cy.get('input').focus().type('{downArrow}')
+      cy.focused().trigger('keydown', { key: 'PageDown' })
+      cy.focused().should('have.attr', 'data-value', '2025-07-15')
+      cy.focused().trigger('keydown', { key: 'PageUp' })
+      cy.focused().should('have.attr', 'data-value', '2025-06-15')
+      cy.focused().trigger('keydown', { key: 'PageDown', shiftKey: true })
+      cy.focused().should('have.attr', 'data-value', '2026-06-15')
+    })
+
+    it('Enter and Space select the focused cell', () => {
+      cy.mount(DatePicker, {
+        props: {
+          modelValue: '2025-06-15',
+          'onUpdate:modelValue': cy.spy().as('onUpdate'),
+        },
+      })
+      cy.get('input').focus().type('{downArrow}')
+      cy.focused().trigger('keydown', { key: 'ArrowRight' })
+      cy.focused().trigger('keydown', { key: 'Enter' })
+      cy.get('@onUpdate').should('have.been.calledWith', '2025-06-16')
+    })
+
+    it('arrow navigation skips disabled dates', () => {
+      cy.mount(DatePicker, {
+        props: {
+          modelValue: '2025-06-15',
+          // Disable 2025-06-16 only — pressing → from 15 should skip to 17.
+          isDateUnavailable: (d: any) => d.format('YYYY-MM-DD') === '2025-06-16',
+        },
+      })
+      cy.get('input').focus().type('{downArrow}')
+      cy.focused().trigger('keydown', { key: 'ArrowRight' })
+      cy.focused().should('have.attr', 'data-value', '2025-06-17')
+    })
+
+    it('crossing month boundary advances the view', () => {
+      // 2025-06-30 is the last day of June; → should land on 2025-07-01 in July's grid.
+      cy.mount(DatePicker, { props: { modelValue: '2025-06-30' } })
+      cy.get('input').focus().type('{downArrow}')
+      cy.focused().trigger('keydown', { key: 'ArrowRight' })
+      cy.focused().should('have.attr', 'data-value', '2025-07-01')
+      cy.get('[aria-label=cycle-calendar-view]').should('contain.text', 'Jul 2025')
+    })
+  })
 })

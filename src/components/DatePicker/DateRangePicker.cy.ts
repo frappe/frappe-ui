@@ -170,4 +170,109 @@ describe('DateRangePicker', () => {
       cy.get('[role=dialog]').should('exist')
     })
   })
+
+  it('picking end before start auto-reorders the range', () => {
+    // Seed an empty range but a modelValue so the view lands on June 2025;
+    // then pick the later date first and the earlier one second.
+    cy.mount(DateRangePicker, {
+      props: {
+        modelValue: ['2025-06-15', '2025-06-15'],
+        'onUpdate:modelValue': cy.spy().as('onUpdate'),
+      },
+    })
+    cy.get('input').dblclick()
+    cy.get('[aria-label="2025-06-20"]').click()
+    cy.get('[aria-label="2025-06-10"]').click()
+    cy.get('@onUpdate').should((spy: any) => {
+      const last = spy.lastCall.args[0]
+      expect(last).to.deep.equal(['2025-06-10', '2025-06-20'])
+    })
+  })
+
+  it('typed "from to to" parses both ends', () => {
+    cy.mount(DateRangePicker, {
+      props: {
+        'onUpdate:modelValue': cy.spy().as('onUpdate'),
+      },
+    })
+    cy.get('input').click()
+    cy.get('input').type('2025-06-10 to 2025-06-15{enter}')
+    cy.get('@onUpdate').should((spy: any) => {
+      const last = spy.lastCall.args[0]
+      expect(last).to.deep.equal(['2025-06-10', '2025-06-15'])
+    })
+  })
+
+  describe('dual-pane mode', () => {
+    it('renders two side-by-side calendar grids', () => {
+      cy.mount(DateRangePicker, { props: { dualPane: true } })
+      cy.get('input').dblclick()
+      cy.get('[role=grid][aria-label="Calendar dates"]').should('have.length', 2)
+    })
+
+    it('shows the centered header (no cycle button) in dual-pane', () => {
+      // Regression guard for commit 0ee292c2 — dual-pane uses the slim
+      // centered header instead of the single-pane cycle-view button.
+      cy.mount(DateRangePicker, { props: { dualPane: true } })
+      cy.get('input').dblclick()
+      cy.get('[aria-label=cycle-calendar-view]').should('not.exist')
+    })
+
+    it('hides the Today button on the right pane (only left has it)', () => {
+      cy.mount(DateRangePicker, { props: { dualPane: true } })
+      cy.get('input').dblclick()
+      // In dual-pane, today-label is empty for left pane too (per DateRangePicker.vue),
+      // so neither pane should render the Today action button.
+      cy.get('[aria-label="Today"]').should('not.exist')
+    })
+  })
+
+  describe('keyboard navigation', () => {
+    it('arrow-down on input opens popover and focuses range start', () => {
+      cy.mount(DateRangePicker, {
+        props: { modelValue: ['2025-06-10', '2025-06-15'] },
+      })
+      cy.get('input').focus().type('{downArrow}')
+      cy.get('[role=dialog]').should('exist')
+      cy.focused().should('have.attr', 'data-value', '2025-06-10')
+    })
+
+    it('Enter on a focused cell selects the range start, then end', () => {
+      cy.mount(DateRangePicker, {
+        props: {
+          'onUpdate:modelValue': cy.spy().as('onUpdate'),
+        },
+      })
+      cy.get('input').dblclick()
+      cy.get('[aria-label="2025-06-10"]').focus()
+      cy.focused().trigger('keydown', { key: 'Enter' })
+      cy.focused().trigger('keydown', { key: 'ArrowRight' })
+      cy.focused().trigger('keydown', { key: 'ArrowRight' })
+      cy.focused().trigger('keydown', { key: 'ArrowRight' })
+      cy.focused().trigger('keydown', { key: 'Enter' })
+      cy.get('@onUpdate').should((spy: any) => {
+        const last = spy.lastCall.args[0]
+        expect(last).to.deep.equal(['2025-06-10', '2025-06-13'])
+      })
+    })
+
+    it('arrow keys cross between panes without advancing the view (dual-pane)', () => {
+      cy.mount(DateRangePicker, {
+        props: {
+          dualPane: true,
+          modelValue: ['2025-06-28', '2025-06-28'],
+        },
+      })
+      cy.get('input').focus().type('{downArrow}')
+      cy.focused().should('have.attr', 'data-value', '2025-06-28')
+      // Push past the end of June into July — sibling pane already shows it.
+      cy.focused().trigger('keydown', { key: 'ArrowRight' })
+      cy.focused().trigger('keydown', { key: 'ArrowRight' })
+      cy.focused().trigger('keydown', { key: 'ArrowRight' })
+      cy.focused().should('have.attr', 'data-value', '2025-07-01')
+      // Both panes still rendered — view didn't advance to hide June.
+      cy.get('[role=grid][aria-label="Calendar dates"]').should('have.length', 2)
+      cy.get('[aria-label="2025-06-28"]').should('exist')
+    })
+  })
 })
