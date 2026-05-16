@@ -49,6 +49,7 @@
         :align="resolvedAlign"
         :side-offset="resolvedOffset"
         @open-auto-focus.prevent
+        @interact-outside="onInteractOutside"
       >
         <div
           ref="popoverContentRef"
@@ -142,6 +143,8 @@ const props = withDefaults(defineProps<DatePickerProps>(), {
   allowCustom: true,
   disabled: false,
   clearable: true,
+  openOnFocus: true,
+  openOnClick: true,
   // Legacy default kept; see `useKeepOpen` for why.
   autoClose: true,
 })
@@ -160,6 +163,19 @@ const anchorEl = computed(() => {
   return textInputRef.value?.el ?? undefined
 })
 
+// Reka treats anything outside `PopoverContent` as "outside" — including our
+// own trigger — so a click on the input fires interact-outside and closes the
+// popover, then the click handler reopens it. Suppress the close when the
+// pointerdown originated inside the input's row (which holds the input and
+// any suffix like the chevron); those elements have their own click logic.
+function onInteractOutside(event: Event) {
+  const target = event.target as Node | null
+  const triggerRow = textInputRef.value?.el?.parentElement
+  if (target && triggerRow?.contains(target)) {
+    event.preventDefault()
+  }
+}
+
 // ── Popover open state ───────────────────────────────────────────────────────
 
 const isOpen = ref(false)
@@ -174,13 +190,8 @@ watch(
   },
 )
 
-// When the popover closes and Reka returns focus to the input, the focus event
-// would immediately reopen the popover. justClosed blocks one focus-reopen.
-let justClosed = false
-
 function onPointerDown() {
   recordPointerDown()
-  justClosed = false
 }
 
 function togglePopover() {
@@ -196,11 +207,9 @@ defineExpose({
 watch(isOpen, (open, wasOpen) => {
   emit('update:open', open)
   if (open && !wasOpen) {
-    justClosed = false
     initFromValue()
   }
   if (!open && wasOpen) {
-    justClosed = true
     handleClose()
   }
 })
@@ -331,17 +340,13 @@ function onEnter() {
   isTyping.value = false
 }
 function onFocus() {
-  if (justClosed) {
-    justClosed = false
-    return
-  }
   isTyping.value = true
-  if (!isOpen.value) isOpen.value = true
+  if (props.openOnFocus && !isOpen.value) isOpen.value = true
 }
 
 function onClick() {
   isTyping.value = true
-  if (!isOpen.value) isOpen.value = true
+  if (props.openOnClick && !isOpen.value) isOpen.value = true
 }
 
 function clearSelection() {

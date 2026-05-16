@@ -40,6 +40,12 @@ export interface CommonDatePickerProps extends InputLabelingProps {
   /** Controls popover open state (for controlled usage). */
   open?: boolean
 
+  /** Opens the popover when the input receives focus. Default: true. */
+  openOnFocus?: boolean
+
+  /** Opens the popover when the input is clicked. Default: true. */
+  openOnClick?: boolean
+
   /** Prevents manual typing while keeping the picker interactive. */
   readonly?: boolean
 
