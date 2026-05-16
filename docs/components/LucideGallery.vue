@@ -8,18 +8,21 @@ import { TooltipProvider, TooltipRoot, TooltipTrigger } from 'reka-ui'
 // Every lucide-static export is a full <svg>…</svg> string. The class
 // attribute already encodes the kebab-case name (e.g. `lucide lucide-house`),
 // so we read the name from there rather than reinventing PascalCase→kebab.
-const icons = Object.values(LucideIcons as Record<string, unknown>)
-  .filter((value): value is string => typeof value === 'string')
-  .map((svg) => {
-    const nameMatch = svg.match(/lucide lucide-([\w-]+)/)
-    const name = nameMatch ? nameMatch[1] : 'unknown'
-    // Match the rest of the design system's lighter stroke weight.
-    const normalized = svg.replace(
-      /stroke-width="[^"]+"/g,
-      'stroke-width="1.5"',
-    )
-    return { name, svg: normalized }
-  })
+// Multiple PascalCase exports can alias the same icon (e.g. `Home` → `House`),
+// so dedupe by kebab name to keep v-for keys unique.
+const iconsByName = new Map<string, string>()
+for (const value of Object.values(LucideIcons as Record<string, unknown>)) {
+  if (typeof value !== 'string') continue
+  const nameMatch = value.match(/lucide lucide-([\w-]+)/)
+  if (!nameMatch) continue
+  const name = nameMatch[1]
+  if (iconsByName.has(name)) continue
+  // Match the rest of the design system's lighter stroke weight.
+  const svg = value.replace(/stroke-width="[^"]+"/g, 'stroke-width="1.5"')
+  iconsByName.set(name, svg)
+}
+const icons = [...iconsByName.entries()]
+  .map(([name, svg]) => ({ name, svg }))
   .sort((a, b) => a.name.localeCompare(b.name))
 
 const query = ref('')
@@ -27,7 +30,15 @@ const query = ref('')
 const filteredIcons = computed(() => {
   const q = query.value.trim().toLowerCase()
   if (!q) return icons
-  return icons.filter((icon) => icon.name.includes(q))
+  const exact: typeof icons = []
+  const prefix: typeof icons = []
+  const contains: typeof icons = []
+  for (const icon of icons) {
+    if (icon.name === q) exact.push(icon)
+    else if (icon.name.startsWith(q)) prefix.push(icon)
+    else if (icon.name.includes(q)) contains.push(icon)
+  }
+  return [...exact, ...prefix, ...contains]
 })
 </script>
 
