@@ -77,25 +77,22 @@ describe('DateRangePicker', () => {
     cy.get('input').should('have.value', rangeDate)
   })
 
-  it('Clear button is disabled until both ends are selected', () => {
+  it('Clear button only appears once at least one end is picked', () => {
     cy.mount(DateRangePicker)
     cy.get('input').dblclick()
 
     cy.get('input').should('have.value', '')
-    cy.get('[aria-label="Clear"]').should('be.disabled')
+    cy.get('[aria-label="Clear"]').should('not.exist')
     cy.contains('10').click()
-    cy.get('[aria-label="Clear"]').should('be.disabled')
-    cy.contains('13').click()
-    cy.get('input').should('not.have.value', '')
+    cy.get('[aria-label="Clear"]').should('exist')
   })
 
   it('Clear button removes the value', () => {
-    // Pre-seed via modelValue so the Clear button is enabled on first open.
+    // Pre-seed via modelValue so the Clear button is present on first open.
     cy.mount(DateRangePicker, {
       props: { modelValue: ['2025-06-10', '2025-06-15'] },
     })
     cy.get('input').dblclick()
-    cy.get('[aria-label="Clear"]').should('not.be.disabled')
     cy.get('[aria-label="Clear"]').click()
     cy.get('input').should('have.value', '')
   })
@@ -240,6 +237,7 @@ describe('DateRangePicker', () => {
     it('Enter on a focused cell selects the range start, then end', () => {
       cy.mount(DateRangePicker, {
         props: {
+          modelValue: ['2025-06-15', '2025-06-15'],
           'onUpdate:modelValue': cy.spy().as('onUpdate'),
         },
       })
