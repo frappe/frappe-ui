@@ -1,12 +1,8 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { DateRangePicker, Button } from 'frappe-ui'
 import { dayjs } from '../../../utils/dayjs'
 import type { Dayjs } from 'dayjs'
-import LucidePalmtree from '~icons/lucide/palmtree'
-import LucideHotel from '~icons/lucide/hotel'
-import LucideChartLine from '~icons/lucide/chart-line'
-import LucideTimerReset from '~icons/lucide/timer-reset'
 
 const today = dayjs().format('YYYY-MM-DD')
 const oneYearOut = dayjs().add(1, 'year').format('YYYY-MM-DD')
@@ -56,6 +52,16 @@ function isWeekend(date: Dayjs) {
   const d = date.day()
   return d === 0 || d === 6
 }
+
+// 5. Flight booking — custom #trigger renders two side-by-side inputs
+// that share one popover, so the calendar still visualizes the range.
+const flight = ref<string[]>([])
+const depart = computed(() =>
+  flight.value[0] ? dayjs(flight.value[0]).format('ddd, MMM D') : '',
+)
+const ret = computed(() =>
+  flight.value[1] ? dayjs(flight.value[1]).format('ddd, MMM D') : '',
+)
 </script>
 
 <template>
@@ -68,7 +74,10 @@ function isWeekend(date: Dayjs) {
       :min-date="today"
     >
       <template #prefix>
-        <LucidePalmtree class="size-4 text-ink-gray-5" />
+        <span
+          class="lucide-palmtree size-4 text-ink-gray-5"
+          aria-hidden="true"
+        />
       </template>
       <template #actions="{ setDate }">
         <Button
@@ -94,7 +103,10 @@ function isWeekend(date: Dayjs) {
       :max-date="oneYearOut"
     >
       <template #prefix>
-        <LucideHotel class="size-4 text-ink-gray-5" />
+        <span
+          class="lucide-hotel size-4 text-ink-gray-5"
+          aria-hidden="true"
+        />
       </template>
     </DateRangePicker>
 
@@ -107,7 +119,10 @@ function isWeekend(date: Dayjs) {
       :max-date="today"
     >
       <template #prefix>
-        <LucideChartLine class="size-4 text-ink-gray-5" />
+        <span
+          class="lucide-chart-line size-4 text-ink-gray-5"
+          aria-hidden="true"
+        />
       </template>
       <template #actions="{ setDate }">
         <Button size="sm" label="7d" @click="setLastNDays(7, setDate)" />
@@ -126,7 +141,57 @@ function isWeekend(date: Dayjs) {
       :is-date-unavailable="isWeekend"
     >
       <template #prefix>
-        <LucideTimerReset class="size-4 text-ink-gray-5" />
+        <span
+          class="lucide-timer-reset size-4 text-ink-gray-5"
+          aria-hidden="true"
+        />
+      </template>
+    </DateRangePicker>
+
+    <!-- 5. Flight booking — split trigger over one shared popover -->
+    <DateRangePicker v-model="flight" dual-pane :min-date="today">
+      <template #trigger="{ togglePopover, isOpen }">
+        <div
+          class="grid grid-cols-2 divide-x divide-outline-gray-2 rounded border bg-surface-white text-sm transition-colors"
+          :class="
+            isOpen
+              ? 'border-outline-gray-4 ring-2 ring-outline-gray-2'
+              : 'border-outline-gray-2 hover:border-outline-gray-3'
+          "
+        >
+          <button
+            type="button"
+            class="flex items-center gap-2 rounded-l px-3 py-2 text-left hover:bg-surface-gray-1"
+            @click="togglePopover"
+          >
+            <span
+              class="lucide-plane-takeoff size-4 text-ink-gray-5"
+              aria-hidden="true"
+            />
+            <div class="flex flex-col leading-tight">
+              <span class="text-xs text-ink-gray-5">Depart</span>
+              <span class="text-ink-gray-9">
+                {{ depart || 'Add date' }}
+              </span>
+            </div>
+          </button>
+          <button
+            type="button"
+            class="flex items-center gap-2 rounded-r px-3 py-2 text-left hover:bg-surface-gray-1"
+            @click="togglePopover"
+          >
+            <span
+              class="lucide-plane-landing size-4 text-ink-gray-5"
+              aria-hidden="true"
+            />
+            <div class="flex flex-col leading-tight">
+              <span class="text-xs text-ink-gray-5">Return</span>
+              <span class="text-ink-gray-9">
+                {{ ret || 'Add date' }}
+              </span>
+            </div>
+          </button>
+        </div>
       </template>
     </DateRangePicker>
   </div>
