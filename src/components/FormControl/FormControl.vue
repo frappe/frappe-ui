@@ -23,6 +23,8 @@ import { Autocomplete } from '../Autocomplete'
 import { autocompleteDeprecationSuppressed } from '../Autocomplete/deprecationKey'
 import { Combobox } from '../Combobox'
 import { MultiSelect } from '../MultiSelect'
+import { DatePicker, DateRangePicker, DateTimePicker } from '../DatePicker'
+import { TimePicker } from '../TimePicker'
 import { warnDeprecated } from '../../utils/warnDeprecated'
 import type { FormControlProps } from './types'
 
@@ -56,9 +58,16 @@ const slotNames = computed(() => Object.keys(slots))
 // ListFilter's operator picker placed inside a min-width column). Standalone
 // Select/Combobox/MultiSelect retain their own hasLabeling heuristic.
 const fillWidth = computed(() =>
-  new Set(['select', 'combobox', 'multiselect', 'autocomplete']).has(
-    props.type as string,
-  ),
+  new Set([
+    'select',
+    'combobox',
+    'multiselect',
+    'autocomplete',
+    'date',
+    'daterange',
+    'datetime',
+    'time',
+  ]).has(props.type as string),
 )
 
 const resolvedComponent = computed(() => {
@@ -75,6 +84,14 @@ const resolvedComponent = computed(() => {
       return Textarea
     case 'checkbox':
       return Checkbox
+    case 'date':
+      return DatePicker
+    case 'daterange':
+      return DateRangePicker
+    case 'datetime':
+      return DateTimePicker
+    case 'time':
+      return TimePicker
     default:
       return TextInput
   }
@@ -105,6 +122,10 @@ const forwardedAttrs = computed(() => {
     'autocomplete',
     'textarea',
     'checkbox',
+    'date',
+    'daterange',
+    'datetime',
+    'time',
   ])
   if (!composite.has(props.type as string)) {
     out.type = props.type

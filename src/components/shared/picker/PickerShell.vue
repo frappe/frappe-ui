@@ -1,7 +1,7 @@
 <template>
   <PopoverRoot v-model:open="open">
     <PopoverAnchor :reference="anchorEl" as-child>
-      <div class="inline-block" @keydown.down.prevent="onArrowDown">
+      <div @keydown.down.prevent="onArrowDown">
         <slot name="trigger" v-bind="triggerSlotProps">
           <slot name="target" v-bind="triggerSlotProps">
             <TextInput

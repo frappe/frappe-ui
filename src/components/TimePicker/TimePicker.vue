@@ -1,7 +1,7 @@
 <template>
   <PopoverRoot v-model:open="isOpen">
     <PopoverAnchor :reference="anchorEl" as-child>
-      <div class="inline-block w-full">
+      <div>
         <TextInput
           ref="inputRef"
           v-model="displayValue"
