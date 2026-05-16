@@ -1,23 +1,12 @@
 <template>
-  <!--
-    The <button> is the effective DOM root. reka's Tooltip primitives
-    (TooltipProvider/TooltipRoot/TooltipTrigger) are renderless / pass-
-    through, so consumers wrapping <Button> in their own reka primitives
-    (e.g. ComboboxTrigger as-child) see a native <button> element with
-    all forwarded attrs — tabindex, aria-expanded, role — intact. Using
-    the separate <Tooltip> component as a wrapper dropped those attrs
-    because it's a Vue component with `inheritAttrs: false`.
-  -->
   <TooltipProvider>
     <TooltipRoot>
       <TooltipTrigger as-child>
-        <button
+        <component
+          :is="Root"
           v-bind="$attrs"
           :class="buttonClasses"
-          @click="handleClick"
-          :disabled="isDisabled"
           :aria-label="label"
-          :type="props.type"
           ref="rootRef"
         >
       <LoadingIndicator
@@ -84,19 +73,19 @@
           :class="slotClasses"
         />
       </slot>
-        </button>
+        </component>
       </TooltipTrigger>
       <TooltipBubble v-if="tooltip?.length" :text="tooltip" />
     </TooltipRoot>
   </TooltipProvider>
 </template>
 <script lang="ts" setup>
-import { computed, useSlots, ref, watchEffect } from 'vue'
+import { computed, h, ref, useSlots, watchEffect } from 'vue'
 import { TooltipProvider, TooltipRoot, TooltipTrigger } from 'reka-ui'
 import FeatherIcon from '../FeatherIcon.vue'
 import LoadingIndicator from '../LoadingIndicator.vue'
 import TooltipBubble from '../Tooltip/TooltipBubble.vue'
-import { useRouter } from 'vue-router'
+import { RouterLink } from 'vue-router'
 import { warnFeatherIconUsage } from '../../utils/iconString'
 import type { ButtonProps, ThemeVariant } from './types'
 
@@ -108,7 +97,7 @@ const props = withDefaults(defineProps<ButtonProps>(), {
   variant: 'subtle',
   loading: false,
   disabled: false,
-  type: "button"
+  type: 'button',
 })
 
 watchEffect(() => {
@@ -118,7 +107,6 @@ watchEffect(() => {
 })
 
 const slots = useSlots()
-const router = useRouter()
 
 const buttonClasses = computed(() => {
   let solidClasses = {
@@ -248,6 +236,26 @@ const isDisabled = computed(() => {
   return props.disabled || props.loading
 })
 
+// Avoid "Maximum call stack size exceeded" error
+// when using <component is='button' /> inside <Button /> component
+// by using "render" function here to avoid conflicting html "button" component with
+// globally registered "Button" component in consumer apps
+const Root = computed(() => {
+  if (!isDisabled.value && props.route) {
+    return h(RouterLink, { to: props.route })
+  }
+
+  if (!isDisabled.value && props.link) {
+    return h('a', {
+      href: props.link,
+      target: '_blank',
+      rel: 'noreferrer noopener',
+    })
+  }
+
+  return h('button', { type: props.type, disabled: isDisabled.value })
+})
+
 const isIconButton = computed(() => {
   return props.icon || slots.icon || hasLucideIconInDefaultSlot.value
 })
@@ -268,14 +276,6 @@ const hasLucideIconInDefaultSlot = computed(() => {
   }
   return false
 })
-
-const handleClick = () => {
-  if (props.route) {
-    return router.push(props.route)
-  } else if (props.link) {
-    return window.open(props.link, '_blank')
-  }
-}
 
 const rootRef = ref()
 defineExpose({ rootRef })
