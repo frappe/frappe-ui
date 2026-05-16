@@ -169,18 +169,18 @@ export function useDateCoercion(getFormat: () => string | undefined) {
   }
 }
 
-// Build an `isDateUnavailable` checker from minDate/maxDate/isDateUnavailable props.
+// Build an `isDateUnavailable` checker from min/max/isDateUnavailable props.
 export function makeUnavailableCheck(
-  getMinDate: () => string | undefined,
-  getMaxDate: () => string | undefined,
+  getMin: () => string | undefined,
+  getMax: () => string | undefined,
   getIsUnavailable: () => ((d: Dayjs) => boolean) | undefined,
 ) {
   return function checkUnavailable(d: Dayjs): boolean {
-    const minDate = getMinDate()
-    const maxDate = getMaxDate()
+    const min = getMin()
+    const max = getMax()
     const isUnavailable = getIsUnavailable()
-    if (minDate && d.isBefore(dayjs(minDate), 'day')) return true
-    if (maxDate && d.isAfter(dayjs(maxDate), 'day')) return true
+    if (min && d.isBefore(dayjs(min), 'day')) return true
+    if (max && d.isAfter(dayjs(max), 'day')) return true
     if (isUnavailable?.(d)) return true
     return false
   }
@@ -194,6 +194,10 @@ export type LegacyDatePickerProps = {
   allowCustom?: boolean
   readonly?: boolean
   inputClass?: string | Array<string> | Record<string, boolean>
+  /** DateTimePicker only — replaced by `min`. */
+  minDateTime?: string
+  /** DateTimePicker only — replaced by `max`. */
+  maxDateTime?: string
 }
 
 export function useDeprecationWarnings(
@@ -211,6 +215,8 @@ export function useDeprecationWarnings(
     readonly: false,
     inputClass: false,
     targetSlot: false,
+    minDateTime: false,
+    maxDateTime: false,
   }
 
   const hasTargetSlot = options.hasTargetSlot
@@ -261,6 +267,18 @@ export function useDeprecationWarnings(
         `[${componentName}] \`inputClass\` is deprecated. Apply \`class\` directly to the component element to control width.`,
       )
       warned.inputClass = true
+    }
+    if (legacy.minDateTime && !warned.minDateTime) {
+      console.warn(
+        `[${componentName}] \`minDateTime\` is deprecated. Use \`min\` instead.`,
+      )
+      warned.minDateTime = true
+    }
+    if (legacy.maxDateTime && !warned.maxDateTime) {
+      console.warn(
+        `[${componentName}] \`maxDateTime\` is deprecated. Use \`max\` instead.`,
+      )
+      warned.maxDateTime = true
     }
   })
 }

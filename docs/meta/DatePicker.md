@@ -78,11 +78,33 @@
     type: 'boolean'
   },
   {
+    name: 'openOnFocus',
+    description: 'Opens the popover when the input receives focus. Default: false.',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  },
+  {
+    name: 'openOnClick',
+    description: 'Opens the popover when the input is clicked. Default: true.',
+    required: false,
+    type: 'boolean',
+    default: 'true'
+  },
+  {
+    name: 'typeable',
+    description: 'Whether the trigger input accepts typed input. When `false` the user can\nstill open the popover and pick a date, but cannot type a date manually.\nDefault: `true`.',
+    required: false,
+    type: 'boolean',
+    default: 'true'
+  },
+  {
     name: 'readonly',
     description: 'Prevents manual typing while keeping the picker interactive.',
     required: false,
     type: 'boolean',
-    default: 'false'
+    default: 'false',
+    deprecated: 'Use `typeable: false` instead.'
   },
   {
     name: 'disabled',
@@ -113,20 +135,20 @@
     deprecated: 'Use `keepOpen` instead (inverse semantics: `autoClose: false` → `keepOpen: true`).'
   },
   {
-    name: 'minDate',
-    description: 'Earliest selectable date in YYYY-MM-DD format.',
+    name: 'min',
+    description: 'Earliest selectable date. Accepts `YYYY-MM-DD` (or, for `DateTimePicker`,\n`YYYY-MM-DD HH:mm:ss` for second-level granularity).',
     required: false,
     type: 'string'
   },
   {
-    name: 'maxDate',
-    description: 'Latest selectable date in YYYY-MM-DD format.',
+    name: 'max',
+    description: 'Latest selectable date. Accepts `YYYY-MM-DD` (or, for `DateTimePicker`,\n`YYYY-MM-DD HH:mm:ss` for second-level granularity).',
     required: false,
     type: 'string'
   },
   {
     name: 'isDateUnavailable',
-    description: 'Return true to prevent a date from being selected. Combined with minDate/maxDate.',
+    description: 'Return true to prevent a date from being selected. Combined with `min`/`max`.',
     required: false,
     type: '((date: Dayjs) => boolean)'
   },
@@ -136,7 +158,7 @@
     required: false,
     type: 'boolean',
     default: 'true',
-    deprecated: 'Use `readonly` instead.'
+    deprecated: 'Use `typeable: false` instead.'
   },
   {
     name: 'inputClass',
@@ -201,7 +223,7 @@
   },
   {
     name: 'actions',
-    description: 'Custom action buttons in the popover footer (e.g. Tomorrow, Next Week).',
+    description: 'Sidebar rendered to the left of the calendar. Use for date shortcuts\n("Today", "Tomorrow", "Last 7 days") and other preset actions. When\nomitted, the popover shows the calendar only.',
     type: 'DatePickerActionsSlotProps'
   }
 ]
@@ -305,11 +327,33 @@
     type: 'boolean'
   },
   {
+    name: 'openOnFocus',
+    description: 'Opens the popover when the input receives focus. Default: false.',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  },
+  {
+    name: 'openOnClick',
+    description: 'Opens the popover when the input is clicked. Default: true.',
+    required: false,
+    type: 'boolean',
+    default: 'true'
+  },
+  {
+    name: 'typeable',
+    description: 'Whether the trigger input accepts typed input. When `false` the user can\nstill open the popover and pick a date, but cannot type a date manually.\nDefault: `true`.',
+    required: false,
+    type: 'boolean',
+    default: 'true'
+  },
+  {
     name: 'readonly',
     description: 'Prevents manual typing while keeping the picker interactive.',
     required: false,
     type: 'boolean',
-    default: 'false'
+    default: 'false',
+    deprecated: 'Use `typeable: false` instead.'
   },
   {
     name: 'disabled',
@@ -340,20 +384,20 @@
     deprecated: 'Use `keepOpen` instead (inverse semantics: `autoClose: false` → `keepOpen: true`).'
   },
   {
-    name: 'minDate',
-    description: 'Earliest selectable date in YYYY-MM-DD format.',
+    name: 'min',
+    description: 'Earliest selectable date. Accepts `YYYY-MM-DD` (or, for `DateTimePicker`,\n`YYYY-MM-DD HH:mm:ss` for second-level granularity).',
     required: false,
     type: 'string'
   },
   {
-    name: 'maxDate',
-    description: 'Latest selectable date in YYYY-MM-DD format.',
+    name: 'max',
+    description: 'Latest selectable date. Accepts `YYYY-MM-DD` (or, for `DateTimePicker`,\n`YYYY-MM-DD HH:mm:ss` for second-level granularity).',
     required: false,
     type: 'string'
   },
   {
     name: 'isDateUnavailable',
-    description: 'Return true to prevent a date from being selected. Combined with minDate/maxDate.',
+    description: 'Return true to prevent a date from being selected. Combined with `min`/`max`.',
     required: false,
     type: '((date: Dayjs) => boolean)'
   },
@@ -363,7 +407,7 @@
     required: false,
     type: 'boolean',
     default: 'true',
-    deprecated: 'Use `readonly` instead.'
+    deprecated: 'Use `typeable: false` instead.'
   },
   {
     name: 'inputClass',
@@ -428,7 +472,7 @@
   },
   {
     name: 'actions',
-    description: '',
+    description: 'Sidebar rendered to the left of the calendar. Use for range shortcuts\n("Last 7 days", "Last 12 months") and other preset actions. When\nomitted, the popover shows the calendar only.',
     type: 'DateRangePickerActionsSlotProps'
   }
 ]
@@ -469,15 +513,17 @@
   },
   {
     name: 'minDateTime',
-    description: 'Earliest selectable date-time in `YYYY-MM-DD HH:mm:ss` format. Overrides `minDate` when set.',
+    description: 'Earliest selectable date-time in `YYYY-MM-DD HH:mm:ss` format.',
     required: false,
-    type: 'string'
+    type: 'string',
+    deprecated: 'Use `min` instead.'
   },
   {
     name: 'maxDateTime',
-    description: 'Latest selectable date-time in `YYYY-MM-DD HH:mm:ss` format. Overrides `maxDate` when set.',
+    description: 'Latest selectable date-time in `YYYY-MM-DD HH:mm:ss` format.',
     required: false,
-    type: 'string'
+    type: 'string',
+    deprecated: 'Use `max` instead.'
   },
   {
     name: 'allowCustomTime',
@@ -544,11 +590,33 @@
     type: 'boolean'
   },
   {
+    name: 'openOnFocus',
+    description: 'Opens the popover when the input receives focus. Default: false.',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  },
+  {
+    name: 'openOnClick',
+    description: 'Opens the popover when the input is clicked. Default: true.',
+    required: false,
+    type: 'boolean',
+    default: 'true'
+  },
+  {
+    name: 'typeable',
+    description: 'Whether the trigger input accepts typed input. When `false` the user can\nstill open the popover and pick a date, but cannot type a date manually.\nDefault: `true`.',
+    required: false,
+    type: 'boolean',
+    default: 'true'
+  },
+  {
     name: 'readonly',
     description: 'Prevents manual typing while keeping the picker interactive.',
     required: false,
     type: 'boolean',
-    default: 'false'
+    default: 'false',
+    deprecated: 'Use `typeable: false` instead.'
   },
   {
     name: 'disabled',
@@ -579,20 +647,20 @@
     deprecated: 'Use `keepOpen` instead (inverse semantics: `autoClose: false` → `keepOpen: true`).'
   },
   {
-    name: 'minDate',
-    description: 'Earliest selectable date in YYYY-MM-DD format.',
+    name: 'min',
+    description: 'Earliest selectable date. Accepts `YYYY-MM-DD` (or, for `DateTimePicker`,\n`YYYY-MM-DD HH:mm:ss` for second-level granularity).',
     required: false,
     type: 'string'
   },
   {
-    name: 'maxDate',
-    description: 'Latest selectable date in YYYY-MM-DD format.',
+    name: 'max',
+    description: 'Latest selectable date. Accepts `YYYY-MM-DD` (or, for `DateTimePicker`,\n`YYYY-MM-DD HH:mm:ss` for second-level granularity).',
     required: false,
     type: 'string'
   },
   {
     name: 'isDateUnavailable',
-    description: 'Return true to prevent a date from being selected. Combined with minDate/maxDate.',
+    description: 'Return true to prevent a date from being selected. Combined with `min`/`max`.',
     required: false,
     type: '((date: Dayjs) => boolean)'
   },
@@ -602,7 +670,7 @@
     required: false,
     type: 'boolean',
     default: 'true',
-    deprecated: 'Use `readonly` instead.'
+    deprecated: 'Use `typeable: false` instead.'
   },
   {
     name: 'inputClass',
@@ -667,7 +735,7 @@
   },
   {
     name: 'actions',
-    description: '',
+    description: 'Sidebar rendered to the left of the calendar. Use for date-time\nshortcuts ("Now", "Tomorrow 9am") and other preset actions. When\nomitted, the popover shows the calendar and time picker only.',
     type: 'DateTimePickerActionsSlotProps'
   }
 ]

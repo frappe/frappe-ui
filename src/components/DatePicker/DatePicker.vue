@@ -63,8 +63,8 @@
           :year-range="yearRange"
           :weeks="weeks"
           today-label="Today"
-          :min-date="props.minDate"
-          :max-date="props.maxDate"
+          :min="props.min"
+          :max="props.max"
           v-model:focused-date="focusedDate"
           @prev="prev"
           @next="next"
@@ -239,8 +239,8 @@ const selected = ref<string>('')
 const initialValue = ref(props.modelValue || props.value || '')
 
 const checkUnavailable = makeUnavailableCheck(
-  () => props.minDate,
-  () => props.maxDate,
+  () => props.min,
+  () => props.max,
   () => props.isDateUnavailable,
 )
 

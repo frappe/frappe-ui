@@ -17,8 +17,8 @@ const shiftEnd = ref('17:00')
         <span class="text-xs text-ink-gray-6">From</span>
         <TimePicker
           v-model="shiftStart"
-          minTime="06:00"
-          :maxTime="shiftEnd"
+          min="06:00"
+          :max="shiftEnd"
           :interval="15"
         >
           <template #prefix>
@@ -30,8 +30,8 @@ const shiftEnd = ref('17:00')
         <span class="text-xs text-ink-gray-6">To</span>
         <TimePicker
           v-model="shiftEnd"
-          :minTime="shiftStart"
-          maxTime="22:00"
+          :min="shiftStart"
+          max="22:00"
           :interval="15"
         >
           <template #prefix>

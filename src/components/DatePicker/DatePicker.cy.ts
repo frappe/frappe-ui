@@ -155,12 +155,12 @@ describe('DatePicker', () => {
     cy.get('[role=dialog]').should('exist')
   })
 
-  it('minDate and maxDate disable out-of-range cells', () => {
+  it('min and max disable out-of-range cells', () => {
     cy.mount(DatePicker, {
       props: {
         modelValue: '2025-06-15',
-        minDate: '2025-06-10',
-        maxDate: '2025-06-20',
+        min: '2025-06-10',
+        max: '2025-06-20',
       },
     })
     cy.get('input').dblclick()
@@ -224,8 +224,8 @@ describe('DatePicker', () => {
     cy.mount(DatePicker, {
       props: {
         modelValue: '2025-06-15',
-        minDate: '2025-06-10',
-        maxDate: '2025-06-20',
+        min: '2025-06-10',
+        max: '2025-06-20',
       },
     })
     cy.get('input').should('have.value', '2025-06-15')

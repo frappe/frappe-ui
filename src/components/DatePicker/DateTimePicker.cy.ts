@@ -54,12 +54,12 @@ describe('DateTimePicker', () => {
     cy.get('input').first().should('have.value', '')
   })
 
-  it('minDate disables out-of-range cells', () => {
+  it('min and max disable out-of-range cells', () => {
     cy.mount(DateTimePicker, {
       props: {
         modelValue: '2025-06-15 12:00:00',
-        minDate: '2025-06-10',
-        maxDate: '2025-06-20',
+        min: '2025-06-10',
+        max: '2025-06-20',
       },
     })
     cy.get('input').first().dblclick()
@@ -130,12 +130,12 @@ describe('DateTimePicker', () => {
     })
   })
 
-  it('minDateTime constrains the time picker for the boundary day', () => {
+  it('min constrains the time picker for the boundary day', () => {
     cy.mount(DateTimePicker, {
       props: {
         modelValue: '2025-06-15 14:00:00',
-        minDateTime: '2025-06-15 12:00:00',
-        maxDateTime: '2025-06-20 18:00:00',
+        min: '2025-06-15 12:00:00',
+        max: '2025-06-20 18:00:00',
       },
     })
     cy.get('input').first().dblclick()
@@ -146,6 +146,19 @@ describe('DateTimePicker', () => {
       .first()
       .invoke('text')
       .should('match', /^12[:0]/)
+  })
+
+  it('back-compat: minDateTime/maxDateTime still constrain selection', () => {
+    cy.mount(DateTimePicker, {
+      props: {
+        modelValue: '2025-06-15 14:00:00',
+        minDateTime: '2025-06-10 00:00:00',
+        maxDateTime: '2025-06-20 23:59:59',
+      },
+    })
+    cy.get('input').first().dblclick()
+    cy.get('[aria-label="2025-06-09"]').should('have.attr', 'aria-disabled', 'true')
+    cy.get('[aria-label="2025-06-21"]').should('have.attr', 'aria-disabled', 'true')
   })
 
   describe('keyboard navigation', () => {

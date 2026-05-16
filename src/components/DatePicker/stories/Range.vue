@@ -43,7 +43,7 @@ function lastNDays(days: number): [Dayjs, Dayjs] {
 const rowCls =
   'w-full rounded px-2 py-1.5 text-left text-base hover:bg-surface-gray-2'
 
-// 4. Project sprint — weekdays only, span limited to ~2 weeks via maxDate
+// 4. Project sprint — weekdays only, span limited to ~2 weeks via `max`
 const sprint = ref<string[]>([])
 const sprintEnd = dayjs().add(60, 'day').format('YYYY-MM-DD')
 function isWeekend(date: Dayjs) {
@@ -69,7 +69,7 @@ const ret = computed(() =>
       v-model="timeOff"
       label="Time off"
       placeholder="Pick your dates"
-      :min-date="today"
+      :min="today"
     >
       <template #prefix>
         <span
@@ -111,8 +111,8 @@ const ret = computed(() =>
       label="Check-in / Check-out"
       placeholder="Select your stay"
       dual-pane
-      :min-date="today"
-      :max-date="oneYearOut"
+      :min="today"
+      :max="oneYearOut"
     >
       <template #prefix>
         <span class="lucide-hotel size-4 text-ink-gray-5" aria-hidden="true" />
@@ -125,7 +125,7 @@ const ret = computed(() =>
       label="Report range"
       description="Defaults to the last 30 days."
       format="MMM D"
-      :max-date="today"
+      :max="today"
     >
       <template #prefix>
         <span
@@ -216,8 +216,8 @@ const ret = computed(() =>
       v-model="sprint"
       label="Sprint window"
       description="Pick start and end. Weekends are skipped."
-      :min-date="today"
-      :max-date="sprintEnd"
+      :min="today"
+      :max="sprintEnd"
       :is-date-unavailable="isWeekend"
     >
       <template #prefix>
@@ -229,7 +229,7 @@ const ret = computed(() =>
     </DateRangePicker>
 
     <!-- 5. Flight booking — split trigger over one shared popover -->
-    <DateRangePicker v-model="flight" dual-pane :min-date="today">
+    <DateRangePicker v-model="flight" dual-pane :min="today">
       <template #trigger="{ togglePopover, isOpen }">
         <div
           class="grid grid-cols-2 divide-x divide-outline-gray-2 rounded border bg-surface-white text-sm transition-colors"

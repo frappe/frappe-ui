@@ -100,9 +100,21 @@ export interface TimePickerProps {
   openOnClick?: boolean
 
   /** Minimum selectable time as `HH:mm[:ss]`. */
-  minTime?: string
+  min?: string
 
   /** Maximum selectable time as `HH:mm[:ss]`. */
+  max?: string
+
+  /**
+   * Minimum selectable time as `HH:mm[:ss]`.
+   * @deprecated Use `min` instead.
+   */
+  minTime?: string
+
+  /**
+   * Maximum selectable time as `HH:mm[:ss]`.
+   * @deprecated Use `max` instead.
+   */
   maxTime?: string
 
   /**

@@ -75,13 +75,19 @@ export interface CommonDatePickerProps extends InputLabelingProps {
   autoClose?: boolean
 
   // Constraints
-  /** Earliest selectable date in YYYY-MM-DD format. */
-  minDate?: string
+  /**
+   * Earliest selectable date. Accepts `YYYY-MM-DD` (or, for `DateTimePicker`,
+   * `YYYY-MM-DD HH:mm:ss` for second-level granularity).
+   */
+  min?: string
 
-  /** Latest selectable date in YYYY-MM-DD format. */
-  maxDate?: string
+  /**
+   * Latest selectable date. Accepts `YYYY-MM-DD` (or, for `DateTimePicker`,
+   * `YYYY-MM-DD HH:mm:ss` for second-level granularity).
+   */
+  max?: string
 
-  /** Return true to prevent a date from being selected. Combined with minDate/maxDate. */
+  /** Return true to prevent a date from being selected. Combined with `min`/`max`. */
   isDateUnavailable?: (date: Dayjs) => boolean
 
   // Deprecated
@@ -164,10 +170,16 @@ export interface DateTimePickerProps extends CommonDatePickerProps {
   /** Controlled value for the picker. */
   modelValue?: string
 
-  /** Earliest selectable date-time in `YYYY-MM-DD HH:mm:ss` format. Overrides `minDate` when set. */
+  /**
+   * Earliest selectable date-time in `YYYY-MM-DD HH:mm:ss` format.
+   * @deprecated Use `min` instead.
+   */
   minDateTime?: string
 
-  /** Latest selectable date-time in `YYYY-MM-DD HH:mm:ss` format. Overrides `maxDate` when set. */
+  /**
+   * Latest selectable date-time in `YYYY-MM-DD HH:mm:ss` format.
+   * @deprecated Use `max` instead.
+   */
   maxDateTime?: string
 
   /** Allows typing a custom time into the embedded time picker. */

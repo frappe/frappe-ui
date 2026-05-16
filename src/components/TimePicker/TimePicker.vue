@@ -172,6 +172,8 @@ if (import.meta.env.DEV) {
     allowCustom: false,
     readonly: false,
     scrollMode: false,
+    minTime: false,
+    maxTime: false,
   }
   watchEffect(() => {
     if (props.value && !warned.value) {
@@ -209,6 +211,18 @@ if (import.meta.env.DEV) {
         '[TimePicker] `scrollMode` is deprecated. Scrolling is always centered now.',
       )
       warned.scrollMode = true
+    }
+    if (props.minTime !== undefined && !warned.minTime) {
+      console.warn(
+        '[TimePicker] `minTime` is deprecated. Use `min` instead.',
+      )
+      warned.minTime = true
+    }
+    if (props.maxTime !== undefined && !warned.maxTime) {
+      console.warn(
+        '[TimePicker] `maxTime` is deprecated. Use `max` instead.',
+      )
+      warned.maxTime = true
     }
   })
 }
@@ -259,8 +273,12 @@ const activeDescendantId = computed<string | undefined>(() =>
 
 // ── Options ──
 
-const minMinutes = computed(() => minutesFromHHMM(props.minTime ?? ''))
-const maxMinutes = computed(() => minutesFromHHMM(props.maxTime ?? ''))
+const minMinutes = computed(() =>
+  minutesFromHHMM(props.min ?? props.minTime ?? ''),
+)
+const maxMinutes = computed(() =>
+  minutesFromHHMM(props.max ?? props.maxTime ?? ''),
+)
 
 const displayedOptions = computed<TimeOption[]>(() => {
   if (props.options?.length) {

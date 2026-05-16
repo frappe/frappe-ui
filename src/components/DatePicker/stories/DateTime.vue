@@ -13,7 +13,7 @@ const nextSlot = now
   .second(0)
   .format('YYYY-MM-DD HH:mm:ss')
 const meeting = ref(nextSlot)
-const minDateTime = now.format('YYYY-MM-DD HH:mm:ss')
+const minMeetingTime = now.format('YYYY-MM-DD HH:mm:ss')
 
 // 2. Server maintenance window — must be at least 24h out, max 60 days
 const maintenance = ref('')
@@ -46,7 +46,7 @@ const rowCls =
       v-model="meeting"
       label="Meeting time"
       placeholder="When should we meet?"
-      :min-date-time="minDateTime"
+      :min="minMeetingTime"
       format="ddd, MMM D · h:mm A"
     >
       <template #prefix>
@@ -60,8 +60,8 @@ const rowCls =
       label="Maintenance window"
       description="Must be scheduled at least 24 hours in advance."
       placeholder="Pick a low-traffic time"
-      :min-date-time="tomorrow"
-      :max-date-time="sixtyDaysOut"
+      :min="tomorrow"
+      :max="sixtyDaysOut"
     >
       <template #prefix>
         <LucideServer class="size-4 text-ink-gray-5" />

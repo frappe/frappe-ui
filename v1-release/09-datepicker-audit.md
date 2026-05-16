@@ -297,8 +297,8 @@ interface CommonDatePickerProps {
   autoClose?: boolean
 
   // Constraints
-  minDate?: string               // YYYY-MM-DD — earliest selectable date
-  maxDate?: string               // YYYY-MM-DD — latest selectable date
+  min?: string                   // YYYY-MM-DD — earliest selectable date
+  max?: string                   // YYYY-MM-DD — latest selectable date
   isDateUnavailable?: (date: Dayjs) => boolean  // return true to block a date
 
   // Deprecated
@@ -371,10 +371,13 @@ interface DateTimePickerProps extends CommonDatePickerProps {
   modelValue?: string
   /** @deprecated use modelValue */
   value?: string
-  // minDate/maxDate/isDateUnavailable are inherited from CommonDatePickerProps
-  // minDateTime/maxDateTime additionally constrain the time portion on the selected day
-  minDateTime?: string       // YYYY-MM-DD HH:mm:ss — overrides minDate when set
-  maxDateTime?: string       // YYYY-MM-DD HH:mm:ss — overrides maxDate when set
+  // min/max/isDateUnavailable are inherited from CommonDatePickerProps.
+  // `min`/`max` accept either YYYY-MM-DD or YYYY-MM-DD HH:mm:ss; date-only
+  // values get day-level granularity, datetime values second-level.
+  /** @deprecated use `min` */
+  minDateTime?: string
+  /** @deprecated use `max` */
+  maxDateTime?: string
   allowCustomTime?: boolean
 }
 ```
@@ -450,13 +453,17 @@ interface TimePickerProps {
   // Options / constraints
   interval?: number
   options?: Array<{ value: string; label?: string }>
-  minTime?: string
-  maxTime?: string
+  min?: string             // HH:mm[:ss] — minimum selectable time
+  max?: string             // HH:mm[:ss] — maximum selectable time
   scrollMode?: 'center' | 'start' | 'nearest'
 
   // Deprecated
   /** @deprecated use readonly */
   allowCustom?: boolean
+  /** @deprecated use `min` */
+  minTime?: string
+  /** @deprecated use `max` */
+  maxTime?: string
 }
 
 type TimePickerEmits = {
@@ -512,17 +519,17 @@ shadcn-vue supports 13 calendar systems (Persian, Hebrew, Japanese, etc.) and RT
 
 ### What to add for v1
 
-**`minDate` / `maxDate` on `DatePicker` and `DateRangePicker`.** This is a common enough need that it should be in the v1 frozen API. Add to `CommonDatePickerProps`:
+**`min` / `max` on `DatePicker` and `DateRangePicker`.** This is a common enough need that it should be in the v1 frozen API. Naming aligns with `Rating` and numeric `TextInput`, which already use `min`/`max`. Add to `CommonDatePickerProps`:
 
 ```ts
-/** Earliest selectable date in YYYY-MM-DD format. */
-minDate?: string
+/** Earliest selectable date (YYYY-MM-DD, or YYYY-MM-DD HH:mm:ss for DateTimePicker). */
+min?: string
 
-/** Latest selectable date in YYYY-MM-DD format. */
-maxDate?: string
+/** Latest selectable date (YYYY-MM-DD, or YYYY-MM-DD HH:mm:ss for DateTimePicker). */
+max?: string
 ```
 
-Internally, derive a `dateDisabled` function from these (same pattern as `DateTimePicker`).
+Internally, derive a `dateDisabled` function from these (same pattern as `DateTimePicker`). On `DateTimePicker`, `min`/`max` subsume the legacy `minDateTime`/`maxDateTime`, which remain as deprecated aliases. Likewise on `TimePicker`, `min`/`max` replace `minTime`/`maxTime`.
 
 **`isDateUnavailable` callback on all three pickers.** A single predicate is more composable than min/max alone and covers cases they cannot (weekends, holidays, custom business logic):
 
@@ -531,7 +538,7 @@ Internally, derive a `dateDisabled` function from these (same pattern as `DateTi
 isDateUnavailable?: (date: Dayjs) => boolean
 ```
 
-If both `minDate`/`maxDate` and `isDateUnavailable` are provided, the internal disabled check combines them (`minDate`/`maxDate` constraints OR `isDateUnavailable(date)`).
+If both `min`/`max` and `isDateUnavailable` are provided, the internal disabled check combines them (`min`/`max` constraints OR `isDateUnavailable(date)`).
 
 ### What is explicitly post-v1
 
@@ -597,7 +604,7 @@ interface DateTimePickerActionsSlotProps extends DatePickerActionsSlotProps {
 
 ### Behavior
 
-- `setDate` / `setRange` respect `minDate` / `maxDate` / `isDateUnavailable` — calls with unavailable dates silently no-op.
+- `setDate` / `setRange` respect `min` / `max` / `isDateUnavailable` — calls with unavailable dates silently no-op.
 - `close()` closes the popover unconditionally (ignores `keepOpen`). A consumer calling `close()` is making an explicit choice.
 - No internal arrow-key navigation inside the sidebar. Consumer-rendered `<button>`s sit in normal Tab order, before the calendar grid. The grid keeps its own arrow-key navigation.
 - `data-slot="actions"` set on the `<aside>` for styling hooks (P10).
@@ -643,9 +650,9 @@ interface DateTimePickerActionsSlotProps extends DatePickerActionsSlotProps {
 - [ ] Deprecate `inputClass`; document `class` on the component element as the replacement
 
 **Constraints**
-- [ ] Add `minDate` / `maxDate` to `CommonDatePickerProps` (all three pickers)
-- [ ] Add `isDateUnavailable?: (date: Dayjs) => boolean` to `CommonDatePickerProps`
-- [ ] Lift date-disabling logic from `DateTimePicker` into a shared util; wire it into `DatePicker` and `DateRangePicker`
+- [x] Add `min` / `max` to `CommonDatePickerProps` (all three pickers). On `DateTimePicker`, deprecate `minDateTime`/`maxDateTime` as aliases.
+- [x] Add `isDateUnavailable?: (date: Dayjs) => boolean` to `CommonDatePickerProps`
+- [x] Lift date-disabling logic from `DateTimePicker` into a shared util; wire it into `DatePicker` and `DateRangePicker`
 
 **Structural fixes**
 - [ ] Replace `FeatherIcon` with `LucideChevronDown` in all three pickers
@@ -667,6 +674,7 @@ interface DateTimePickerActionsSlotProps extends DatePickerActionsSlotProps {
 - [ ] Add `readonly` prop; deprecate `allowCustom`; internal trigger reads `props.readonly || props.allowCustom === false`
 - [ ] Add `@deprecated` warning for `value` prop (dev-mode warn)
 - [ ] Update `DateTimePicker`'s internal `TimePicker` call site to use `side`/`align`/`readonly` instead of `placement`/`allowCustom`
+- [x] Add `min`/`max` props; deprecate `minTime`/`maxTime` with internal fallback
 
 **`#actions` slot relocation**
 - [ ] Move `#actions` rendering from footer to left sidebar in `DatePicker`, `DateRangePicker`, `DateTimePicker`

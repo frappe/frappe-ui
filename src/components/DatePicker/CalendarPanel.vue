@@ -240,9 +240,9 @@ interface Props {
    */
   centerHeader?: boolean
   /** Earliest selectable date in YYYY-MM-DD format. Used to bound keyboard nav. */
-  minDate?: string
+  min?: string
   /** Latest selectable date in YYYY-MM-DD format. Used to bound keyboard nav. */
-  maxDate?: string
+  max?: string
   /**
    * The date that currently holds the roving tabindex. Controlled — parent
    * owns the state, panel emits `update:focusedDate` when arrow keys land on
@@ -349,11 +349,11 @@ function shiftFocus(
   retried = false,
   steps = 0,
 ) {
-  // Bounds check first — if the target is outside [minDate, maxDate], the
-  // arrow press is a no-op rather than trying to navigate into nothing.
-  // Matches Reka's CalendarCellTrigger behavior.
-  if (props.minDate && target.isBefore(props.minDate, 'day')) return
-  if (props.maxDate && target.isAfter(props.maxDate, 'day')) return
+  // Bounds check first — if the target is outside [min, max], the arrow
+  // press is a no-op rather than trying to navigate into nothing. Matches
+  // Reka's CalendarCellTrigger behavior.
+  if (props.min && target.isBefore(props.min, 'day')) return
+  if (props.max && target.isAfter(props.max, 'day')) return
   if (steps > MAX_SKIP_DISABLED_STEPS) return
 
   const key = target.format('YYYY-MM-DD')

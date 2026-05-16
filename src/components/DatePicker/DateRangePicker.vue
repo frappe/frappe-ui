@@ -72,8 +72,8 @@
             :hide-next="isDualPaneActive"
             :hide-out-of-month="isDualPaneActive"
             :center-header="isDualPaneActive"
-            :min-date="props.minDate"
-            :max-date="props.maxDate"
+            :min="props.min"
+            :max="props.max"
             v-model:focused-date="focusedDate"
             @prev="prev"
             @next="next"
@@ -98,8 +98,8 @@
             hide-today
             hide-out-of-month
             center-header
-            :min-date="props.minDate"
-            :max-date="props.maxDate"
+            :min="props.min"
+            :max="props.max"
             v-model:focused-date="focusedDate"
             @next="next"
             @cycle-view="cycleView"
@@ -305,8 +305,8 @@ const toDate = ref<string>('')
 const hoverDate = ref<Dayjs | null>(null)
 
 const checkUnavailable = makeUnavailableCheck(
-  () => props.minDate,
-  () => props.maxDate,
+  () => props.min,
+  () => props.max,
   () => props.isDateUnavailable,
 )
 

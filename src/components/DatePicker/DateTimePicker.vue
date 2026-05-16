@@ -65,8 +65,8 @@
             :year-range="yearRange"
             :weeks="weeks"
             today-label="Now"
-            :min-date="props.minDate"
-            :max-date="props.maxDate"
+            :min="resolvedMin"
+            :max="resolvedMax"
             v-model:focused-date="focusedDate"
             @prev="prev"
             @next="next"
@@ -85,8 +85,8 @@
               side="bottom"
               align="start"
               placeholder="Select time"
-              :minTime="computedMinTime"
-              :maxTime="computedMaxTime"
+              :min="computedMinTime"
+              :max="computedMaxTime"
               @change="onTimeChange"
             />
           </div>
@@ -110,7 +110,6 @@ import {
   useTypeable,
   useDateCoercion,
   useDeprecationWarnings,
-  makeUnavailableCheck,
   type LegacyDatePickerProps,
 } from './composables'
 import type { Dayjs } from 'dayjs/esm'
@@ -256,21 +255,26 @@ const coerceToDayjs = useDateCoercion(() => props.format)
 
 // ── Constraints ──────────────────────────────────────────────────────────────
 
-const minDT = computed<Dayjs | null>(() =>
-  props.minDateTime ? coerceToDayjs(props.minDateTime) : null,
+// `min`/`max` accept either a date (`YYYY-MM-DD`) or a date-time
+// (`YYYY-MM-DD HH:mm:ss`); date-only values parse as midnight, which gives
+// day-level semantics for free under the second-level check below.
+// `minDateTime`/`maxDateTime` are legacy aliases retained for back-compat.
+const resolvedMin = computed<string | undefined>(
+  () => props.min ?? dp.minDateTime,
 )
-const maxDT = computed<Dayjs | null>(() =>
-  props.maxDateTime ? coerceToDayjs(props.maxDateTime) : null,
+const resolvedMax = computed<string | undefined>(
+  () => props.max ?? dp.maxDateTime,
 )
 
-const baseCheckUnavailable = makeUnavailableCheck(
-  () => props.minDate,
-  () => props.maxDate,
-  () => props.isDateUnavailable,
+const minDT = computed<Dayjs | null>(() =>
+  resolvedMin.value ? coerceToDayjs(resolvedMin.value) : null,
+)
+const maxDT = computed<Dayjs | null>(() =>
+  resolvedMax.value ? coerceToDayjs(resolvedMax.value) : null,
 )
 
 function checkUnavailable(d: Dayjs): boolean {
-  if (baseCheckUnavailable(d)) return true
+  if (props.isDateUnavailable?.(d)) return true
   if (minDT.value && d.endOf('day').isBefore(minDT.value)) return true
   if (maxDT.value && d.startOf('day').isAfter(maxDT.value)) return true
   return false

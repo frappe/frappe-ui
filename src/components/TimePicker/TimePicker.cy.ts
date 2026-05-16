@@ -99,7 +99,17 @@ describe('TimePicker', () => {
     cy.get('[role=option]').eq(0).should('not.contain.text', 'am')
   })
 
-  it('minTime and maxTime props', () => {
+  it('min and max props', () => {
+    cy.mount(TimePicker, {
+      props: { min: '09:00', max: '11:00', use12Hour: false },
+    })
+
+    cy.get('input').click()
+    cy.get('[role=option]:first').should('have.text', '09:00')
+    cy.get('[role=option]:last').should('have.text', '11:00')
+  })
+
+  it('back-compat: minTime/maxTime aliases still work', () => {
     cy.mount(TimePicker, {
       props: { minTime: '09:00', maxTime: '11:00', use12Hour: false },
     })

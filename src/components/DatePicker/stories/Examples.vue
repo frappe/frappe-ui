@@ -71,8 +71,8 @@ const rowCls =
       label="Departure"
       placeholder="When are you flying?"
       format="ddd, MMM D"
-      :min-date="today"
-      :max-date="oneYearOut"
+      :min="today"
+      :max="oneYearOut"
     >
       <template #prefix>
         <LucidePlane class="size-4 text-ink-gray-5" />
@@ -85,8 +85,8 @@ const rowCls =
       label="Date of birth"
       placeholder="MM/DD/YYYY"
       format="MMM D, YYYY"
-      :min-date="longAgo"
-      :max-date="today"
+      :min="longAgo"
+      :max="today"
       :clearable="false"
     >
       <template #prefix>
@@ -99,7 +99,7 @@ const rowCls =
       v-model="delivery"
       label="Delivery date"
       placeholder="Weekdays only"
-      :min-date="today"
+      :min="today"
       :is-date-unavailable="isWeekend"
     >
       <template #prefix>
@@ -139,8 +139,8 @@ const rowCls =
       label="Book appointment"
       description="Next 30 days. Greyed-out slots are full."
       placeholder="Pick a slot"
-      :min-date="today"
-      :max-date="inThirtyDays"
+      :min="today"
+      :max="inThirtyDays"
       :is-date-unavailable="isFullyBooked"
     >
       <template #prefix>
@@ -169,8 +169,8 @@ const rowCls =
       placeholder="When to?"
       format="[Stardate] YYYY.MM.DD"
       variant="outline"
-      :min-date="stardateFloor"
-      :max-date="stardateCeil"
+      :min="stardateFloor"
+      :max="stardateCeil"
     >
       <template #prefix>
         <LucideRocket class="size-4 text-ink-gray-5" />
