@@ -4,7 +4,7 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 
-  const propsData = [
+  const datePickerProps = [
   {
     name: 'value',
     description: 'Uncontrolled initial value for the picker.',
@@ -177,7 +177,7 @@
   }
 ]
 
-  const slotsData = [
+  const datePickerSlots = [
   {
     name: 'trigger',
     description: 'Custom trigger renderer for the picker.',
@@ -206,29 +206,513 @@
   }
 ]
 
-  const emitsData = [
+  const datePickerEmits = [
   {
     name: 'update:modelValue',
     description: 'Fired when the model value changes.',
     type: '[value: string]'
   },
   {
+    name: 'update:open',
+    description: 'Fired when the open state changes.',
+    type: '[value: boolean]'
+  },
+  {
     name: 'change',
     description: 'Fired after the value is committed.',
+    type: '[value: string]'
+  }
+]
+
+  const dateRangePickerProps = [
+  {
+    name: 'value',
+    description: 'Uncontrolled initial range value as `[from, to]` in `YYYY-MM-DD` format.',
+    required: false,
+    type: 'string[]',
+    default: '[]',
+    deprecated: 'Use `modelValue` with `v-model` instead.'
+  },
+  {
+    name: 'modelValue',
+    description: 'Controlled range value as `[from, to]` in `YYYY-MM-DD` format, or `[]` for no selection.',
+    required: false,
+    type: 'string[]',
+    default: '[]'
+  },
+  {
+    name: 'dualPane',
+    description: 'Render two calendar panels side by side (current month + next month).',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  },
+  {
+    name: 'side',
+    description: 'Preferred popover side relative to the trigger.',
+    required: false,
+    type: 'PopoverSide'
+  },
+  {
+    name: 'align',
+    description: 'Alignment of the popover along the trigger edge.',
+    required: false,
+    type: 'PopoverAlign'
+  },
+  {
+    name: 'offset',
+    description: 'Gap between the trigger and popover content in pixels.',
+    required: false,
+    type: 'number'
+  },
+  {
+    name: 'placement',
+    description: 'Preferred popover placement relative to the trigger.',
+    required: false,
+    type: 'DatePickerPlacement',
+    deprecated: 'Use `side` and `align` instead.'
+  },
+  {
+    name: 'format',
+    description: 'Display format used for the input text.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'size',
+    description: 'Size of the trigger input.',
+    required: false,
+    type: 'InputSize'
+  },
+  {
+    name: 'variant',
+    description: 'Visual style variant passed through to the input.',
+    required: false,
+    type: 'InputVariant',
+    default: '"subtle"'
+  },
+  {
+    name: 'placeholder',
+    description: 'Placeholder text shown when no value is selected.',
+    required: false,
+    type: 'string',
+    default: '"Select range"'
+  },
+  {
+    name: 'open',
+    description: 'Controls popover open state (for controlled usage).',
+    required: false,
+    type: 'boolean'
+  },
+  {
+    name: 'readonly',
+    description: 'Prevents manual typing while keeping the picker interactive.',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  },
+  {
+    name: 'disabled',
+    description: 'Disables the trigger input and calendar interactions.',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  },
+  {
+    name: 'clearable',
+    description: 'Shows clear and quick-action controls when enabled.',
+    required: false,
+    type: 'boolean',
+    default: 'true'
+  },
+  {
+    name: 'keepOpen',
+    description: 'Keeps the popover open after a date is selected. Default: false.',
+    required: false,
+    type: 'boolean'
+  },
+  {
+    name: 'autoClose',
+    description: 'Closes the popover after a value is picked.',
+    required: false,
+    type: 'boolean',
+    default: 'true',
+    deprecated: 'Use `keepOpen` instead (inverse semantics: `autoClose: false` → `keepOpen: true`).'
+  },
+  {
+    name: 'minDate',
+    description: 'Earliest selectable date in YYYY-MM-DD format.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'maxDate',
+    description: 'Latest selectable date in YYYY-MM-DD format.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'isDateUnavailable',
+    description: 'Return true to prevent a date from being selected. Combined with minDate/maxDate.',
+    required: false,
+    type: '((date: Dayjs) => boolean)'
+  },
+  {
+    name: 'allowCustom',
+    description: 'Allows users to type custom date text into the input.',
+    required: false,
+    type: 'boolean',
+    default: 'true',
+    deprecated: 'Use `readonly` instead.'
+  },
+  {
+    name: 'inputClass',
+    description: 'Additional classes applied to the trigger input.',
+    required: false,
+    type: 'string | string[] | Record<string, boolean>',
+    deprecated: 'Apply `class` directly to the DatePicker component element to control width.'
+  },
+  {
+    name: 'label',
+    description: 'Label rendered above (or beside, for binary controls) the input.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'description',
+    description: 'Helper text rendered below the input.\nHidden when `error` is set.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'error',
+    description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
+    required: false,
+    type: 'string | FrappeUIError'
+  },
+  {
+    name: 'required',
+    description: 'Marks the field as required. Renders an asterisk next to the label and\nforwards `required` / `aria-required` to the underlying control.',
+    required: false,
+    type: 'boolean'
+  },
+  {
+    name: 'id',
+    description: 'HTML id of the underlying control. Auto-generated via `useId()` if omitted.',
+    required: false,
+    type: 'string'
+  }
+]
+
+  const dateRangePickerSlots = [
+  {
+    name: 'trigger',
+    description: '',
+    type: 'DatePickerTriggerSlotProps'
+  },
+  {
+    name: 'target',
+    description: '',
+    type: 'DatePickerTriggerSlotProps',
+    deprecated: 'Use `#trigger` instead.'
+  },
+  {
+    name: 'prefix',
+    description: '',
+    type: 'DatePickerTriggerSlotProps'
+  },
+  {
+    name: 'suffix',
+    description: '',
+    type: 'DatePickerTriggerSlotProps'
+  },
+  {
+    name: 'actions',
+    description: '',
+    type: 'DateRangePickerActionsSlotProps'
+  }
+]
+
+  const dateRangePickerEmits = [
+  {
+    name: 'update:modelValue',
+    description: 'Fired when the model value changes.',
+    type: '[value: DateRangeValue]'
+  },
+  {
+    name: 'update:open',
+    description: 'Fired when the open state changes.',
+    type: '[value: boolean]'
+  },
+  {
+    name: 'change',
+    description: 'Fired after the value is committed.',
+    type: '[value: DateRangeValue]'
+  }
+]
+
+  const dateTimePickerProps = [
+  {
+    name: 'value',
+    description: 'Uncontrolled initial value for the picker.',
+    required: false,
+    type: 'string',
+    default: '""',
+    deprecated: 'Use `modelValue` with `v-model` instead.'
+  },
+  {
+    name: 'modelValue',
+    description: 'Controlled value for the picker.',
+    required: false,
+    type: 'string',
+    default: '""'
+  },
+  {
+    name: 'minDateTime',
+    description: 'Earliest selectable date-time in `YYYY-MM-DD HH:mm:ss` format. Overrides `minDate` when set.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'maxDateTime',
+    description: 'Latest selectable date-time in `YYYY-MM-DD HH:mm:ss` format. Overrides `maxDate` when set.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'allowCustomTime',
+    description: 'Allows typing a custom time into the embedded time picker.',
+    required: false,
+    type: 'boolean',
+    default: 'true'
+  },
+  {
+    name: 'side',
+    description: 'Preferred popover side relative to the trigger.',
+    required: false,
+    type: 'PopoverSide'
+  },
+  {
+    name: 'align',
+    description: 'Alignment of the popover along the trigger edge.',
+    required: false,
+    type: 'PopoverAlign'
+  },
+  {
+    name: 'offset',
+    description: 'Gap between the trigger and popover content in pixels.',
+    required: false,
+    type: 'number'
+  },
+  {
+    name: 'placement',
+    description: 'Preferred popover placement relative to the trigger.',
+    required: false,
+    type: 'DatePickerPlacement',
+    deprecated: 'Use `side` and `align` instead.'
+  },
+  {
+    name: 'format',
+    description: 'Display format used for the input text.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'size',
+    description: 'Size of the trigger input.',
+    required: false,
+    type: 'InputSize'
+  },
+  {
+    name: 'variant',
+    description: 'Visual style variant passed through to the input.',
+    required: false,
+    type: 'InputVariant',
+    default: '"subtle"'
+  },
+  {
+    name: 'placeholder',
+    description: 'Placeholder text shown when no value is selected.',
+    required: false,
+    type: 'string',
+    default: '"Select date & time"'
+  },
+  {
+    name: 'open',
+    description: 'Controls popover open state (for controlled usage).',
+    required: false,
+    type: 'boolean'
+  },
+  {
+    name: 'readonly',
+    description: 'Prevents manual typing while keeping the picker interactive.',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  },
+  {
+    name: 'disabled',
+    description: 'Disables the trigger input and calendar interactions.',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  },
+  {
+    name: 'clearable',
+    description: 'Shows clear and quick-action controls when enabled.',
+    required: false,
+    type: 'boolean',
+    default: 'true'
+  },
+  {
+    name: 'keepOpen',
+    description: 'Keeps the popover open after a date is selected. Default: false.',
+    required: false,
+    type: 'boolean'
+  },
+  {
+    name: 'autoClose',
+    description: 'Closes the popover after a value is picked.',
+    required: false,
+    type: 'boolean',
+    default: 'true',
+    deprecated: 'Use `keepOpen` instead (inverse semantics: `autoClose: false` → `keepOpen: true`).'
+  },
+  {
+    name: 'minDate',
+    description: 'Earliest selectable date in YYYY-MM-DD format.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'maxDate',
+    description: 'Latest selectable date in YYYY-MM-DD format.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'isDateUnavailable',
+    description: 'Return true to prevent a date from being selected. Combined with minDate/maxDate.',
+    required: false,
+    type: '((date: Dayjs) => boolean)'
+  },
+  {
+    name: 'allowCustom',
+    description: 'Allows users to type custom date text into the input.',
+    required: false,
+    type: 'boolean',
+    default: 'true',
+    deprecated: 'Use `readonly` instead.'
+  },
+  {
+    name: 'inputClass',
+    description: 'Additional classes applied to the trigger input.',
+    required: false,
+    type: 'string | string[] | Record<string, boolean>',
+    deprecated: 'Apply `class` directly to the DatePicker component element to control width.'
+  },
+  {
+    name: 'label',
+    description: 'Label rendered above (or beside, for binary controls) the input.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'description',
+    description: 'Helper text rendered below the input.\nHidden when `error` is set.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'error',
+    description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
+    required: false,
+    type: 'string | FrappeUIError'
+  },
+  {
+    name: 'required',
+    description: 'Marks the field as required. Renders an asterisk next to the label and\nforwards `required` / `aria-required` to the underlying control.',
+    required: false,
+    type: 'boolean'
+  },
+  {
+    name: 'id',
+    description: 'HTML id of the underlying control. Auto-generated via `useId()` if omitted.',
+    required: false,
+    type: 'string'
+  }
+]
+
+  const dateTimePickerSlots = [
+  {
+    name: 'trigger',
+    description: '',
+    type: 'DatePickerTriggerSlotProps'
+  },
+  {
+    name: 'target',
+    description: '',
+    type: 'DatePickerTriggerSlotProps',
+    deprecated: 'Use `#trigger` instead.'
+  },
+  {
+    name: 'prefix',
+    description: '',
+    type: 'DatePickerTriggerSlotProps'
+  },
+  {
+    name: 'suffix',
+    description: '',
+    type: 'DatePickerTriggerSlotProps'
+  },
+  {
+    name: 'actions',
+    description: '',
+    type: 'DateTimePickerActionsSlotProps'
+  }
+]
+
+  const dateTimePickerEmits = [
+  {
+    name: 'update:modelValue',
+    description: 'Fired when the model value changes.',
     type: '[value: string]'
   },
   {
     name: 'update:open',
     description: 'Fired when the open state changes.',
     type: '[value: boolean]'
+  },
+  {
+    name: 'change',
+    description: 'Fired after the value is committed.',
+    type: '[value: string]'
   }
 ]
 </script>
 ## API Reference
 
-<PropsTable name="DatePicker" :data="propsData"/> 
+### DatePicker
 
-<SlotsTable :data="slotsData"/> 
+<PropsTable name="DatePicker" :data="datePickerProps"/> 
 
-<EmitsTable :data="emitsData"/> 
+<SlotsTable :data="datePickerSlots"/> 
+
+<EmitsTable :data="datePickerEmits"/> 
+
+### DateRangePicker
+
+<PropsTable folder="DatePicker" name="DateRangePicker" :data="dateRangePickerProps"/> 
+
+<SlotsTable :data="dateRangePickerSlots"/> 
+
+<EmitsTable :data="dateRangePickerEmits"/> 
+
+### DateTimePicker
+
+<PropsTable folder="DatePicker" name="DateTimePicker" :data="dateTimePickerProps"/> 
+
+<SlotsTable :data="dateTimePickerSlots"/> 
+
+<EmitsTable :data="dateTimePickerEmits"/> 
 

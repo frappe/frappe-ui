@@ -97,32 +97,40 @@ export default function (md: MarkdownRenderer) {
     })
 
     // Handle PropsTable
+    // The optional `folder` attribute lets a sub-component (e.g.
+    // DateTimePicker, which lives inside the DatePicker folder) point at
+    // the correct `types.ts`. When omitted, the folder is assumed to match
+    // `name` — the common single-component case.
     const propsRegex =
-      /<PropsTable\s+name=["']([^"']+)["']\s+:data="([^"]+)"\/>/g
+      /<PropsTable\s+(?:folder=["']([^"']+)["']\s+)?name=["']([^"']+)["']\s+:data="([^"]+)"\/>/g
 
-    state.src = state.src.replace(propsRegex, (match, name, dataExpression) => {
-      const typesPath = `../../../../src/components/${name}/types.ts`
-      const idx = state.tokens.findIndex((i) => i.content.includes(match))
+    state.src = state.src.replace(
+      propsRegex,
+      (match, folder, name, dataExpression) => {
+        const componentFolder = folder || name
+        const typesPath = `../../../../src/components/${componentFolder}/types.ts`
+        const idx = state.tokens.findIndex((i) => i.content.includes(match))
 
-      if (idx !== -1) {
-        const { realPath, path: _path } = state.env as MarkdownEnv
+        if (idx !== -1) {
+          const { realPath, path: _path } = state.env as MarkdownEnv
 
-        state.tokens[idx].content =
-          `<PropsTable name="${name}" :data="${dataExpression}"><template #code>`
+          state.tokens[idx].content =
+            `<PropsTable name="${name}" :data="${dataExpression}"><template #code>`
 
-        const code = new state.Token('fence', 'code', 0)
-        code.info = 'typescript'
-        code.content = `<<< ${typesPath}`
-        // @ts-expect-error snippets plugin
-        code.src = [resolve(dirname(realPath ?? _path), typesPath)]
+          const code = new state.Token('fence', 'code', 0)
+          code.info = 'typescript'
+          code.content = `<<< ${typesPath}`
+          // @ts-expect-error snippets plugin
+          code.src = [resolve(dirname(realPath ?? _path), typesPath)]
 
-        const close = new state.Token('html_inline', '', 0)
-        close.content = `</template></PropsTable>`
+          const close = new state.Token('html_inline', '', 0)
+          close.content = `</template></PropsTable>`
 
-        state.tokens.splice(idx + 1, 0, code, close)
-      }
+          state.tokens.splice(idx + 1, 0, code, close)
+        }
 
-      return ''
-    })
+        return ''
+      },
+    )
   })
 }
