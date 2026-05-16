@@ -1,5 +1,8 @@
 // Shared type definitions for TimePicker component
 
+export type PopoverSide = 'top' | 'right' | 'bottom' | 'left'
+export type PopoverAlign = 'start' | 'center' | 'end'
+
 export type Placement =
   | 'bottom-start'
   | 'top-start'
@@ -31,46 +34,73 @@ export interface ParsedTimeInvalid {
 export type ParsedTime = ParsedTimeValid | ParsedTimeInvalid
 
 export interface TimePickerProps {
-  /** Selected time (uncontrolled) */
+  /**
+   * Uncontrolled initial value for the picker.
+   * @deprecated Use `modelValue` with `v-model` instead.
+   */
   value?: string
 
-  /** Selected time (v-model) */
+  /** Controlled value for the picker. */
   modelValue?: string
 
-  /** Minute interval between options */
+  /** Minute interval between options. */
   interval?: number
 
-  /** Custom time options */
+  /** Custom time options. */
   options?: Array<{ value: string; label?: string }>
 
-  /** Popover placement */
+  /** Preferred popover side relative to the trigger. */
+  side?: PopoverSide
+
+  /** Alignment of the popover along the trigger edge. */
+  align?: PopoverAlign
+
+  /** Gap between the trigger and popover content in pixels. */
+  offset?: number
+
+  /**
+   * Preferred popover placement relative to the trigger.
+   * @deprecated Use `side` and `align` instead.
+   */
   placement?: Placement
 
-  /** Placeholder text when no value is selected */
+  /** Placeholder text when no value is selected. */
   placeholder?: string
 
-  /** Visual style variant */
+  /** Visual style variant. */
   variant?: Variant
 
-  /** Allow entering custom time values */
+  /** Prevents manual typing while keeping the picker interactive. */
+  readonly?: boolean
+
+  /**
+   * Allows users to type custom time values into the input.
+   * @deprecated Use `readonly` instead (inverse semantics: `allowCustom: false` → `readonly: true`).
+   */
   allowCustom?: boolean
 
-  /** Close picker automatically after selection */
+  /** Keeps the popover open after a time is selected. Default: false. */
+  keepOpen?: boolean
+
+  /**
+   * Closes the popover after a value is picked.
+   * @deprecated Use `keepOpen` instead (inverse semantics: `autoClose: false` → `keepOpen: true`).
+   */
   autoClose?: boolean
 
-  /** Use 12-hour (AM/PM) format */
+  /** Use 12-hour (AM/PM) format. */
   use12Hour?: boolean
 
-  /** Disable the time picker */
+  /** Disable the time picker. */
   disabled?: boolean
 
-  /** Scroll behavior when opening the list */
+  /** Scroll behavior when opening the list. */
   scrollMode?: 'center' | 'start' | 'nearest'
 
-  /** Minimum selectable time */
+  /** Minimum selectable time. */
   minTime?: string
 
-  /** Maximum selectable time */
+  /** Maximum selectable time. */
   maxTime?: string
 }
 

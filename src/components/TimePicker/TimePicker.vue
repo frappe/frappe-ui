@@ -1,101 +1,179 @@
 <template>
-  <Popover
-    v-model:show="showOptions"
-    transition="default"
-    :placement="placement"
-  >
-    <template #target="{ togglePopover, isOpen }">
-      <TextInput
-        ref="inputRef"
-        v-model="displayValue"
-        :variant="variant"
-        type="text"
-        class="text-sm w-full cursor-text"
-        :placeholder="placeholder"
-        :disabled="disabled"
-        :readonly="!props.allowCustom"
-        @focus="onFocus"
-        @click="onClickInput(isOpen, togglePopover)"
-        @keydown.enter.prevent="onEnter"
-        @blur="onBlur"
-        @keydown.down.prevent="onArrowDown(togglePopover, isOpen)"
-        @keydown.up.prevent="onArrowUp(togglePopover, isOpen)"
-        @keydown.esc.prevent="onEscape"
-      >
-        <template v-if="$slots.prefix" #prefix>
-          <slot name="prefix" />
-        </template>
-        <template #suffix>
-          <slot name="suffix" v-bind="{ togglePopover, isOpen }">
-            <span
-              class="lucide-chevron-down size-4 cursor-pointer"
-              aria-hidden="true"
-              @mousedown.prevent="togglePopover"
-            />
-          </slot>
-        </template>
-      </TextInput>
-    </template>
-    <template #body="{ isOpen }">
-      <div
-        v-show="isOpen"
-        ref="panelRef"
-        class="mt-2 max-h-48 w-44 overflow-y-auto rounded-lg bg-surface-modal p-1 text-base shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
-        role="listbox"
-        :aria-activedescendant="activeDescendantId"
-      >
-        <button
-          v-for="(opt, idx) in displayedOptions"
-          :key="opt.value"
-          :data-value="opt.value"
-          :data-index="idx"
-          type="button"
-          class="group flex h-7 w-full items-center rounded px-2 text-left"
-          :class="buttonClasses(opt, idx)"
-          @click="select(opt.value)"
-          @mouseenter="highlightIndex = idx"
-          role="option"
-          :id="optionId(idx)"
-          :aria-selected="internalValue === opt.value"
+  <PopoverRoot v-model:open="showOptions">
+    <PopoverAnchor :reference="anchorEl" as-child>
+      <div class="inline-block w-full">
+        <TextInput
+          ref="inputRef"
+          v-model="displayValue"
+          :variant="variant"
+          type="text"
+          class="text-sm w-full cursor-text"
+          :placeholder="placeholder"
+          :disabled="disabled"
+          :readonly="isReadonly"
+          @focus="onFocus"
+          @click="onClickInput"
+          @keydown.enter.prevent="onEnter"
+          @blur="onBlur"
+          @keydown.down.prevent="onArrowDown"
+          @keydown.up.prevent="onArrowUp"
+          @keydown.esc.prevent="onEscape"
         >
-          <span class="truncate">{{ opt.label }}</span>
-        </button>
+          <template v-if="$slots.prefix" #prefix>
+            <slot name="prefix" />
+          </template>
+          <template #suffix>
+            <slot
+              name="suffix"
+              v-bind="{ togglePopover, isOpen: showOptions }"
+            >
+              <span
+                class="lucide-chevron-down size-4 cursor-pointer"
+                aria-hidden="true"
+                @mousedown.prevent="togglePopover"
+              />
+            </slot>
+          </template>
+        </TextInput>
       </div>
-    </template>
-  </Popover>
+    </PopoverAnchor>
+    <PopoverPortal>
+      <PopoverContent
+        class="z-[100]"
+        :side="resolvedSide"
+        :align="resolvedAlign"
+        :side-offset="resolvedOffset"
+        @open-auto-focus.prevent
+      >
+        <div
+          ref="panelRef"
+          class="max-h-48 w-44 overflow-y-auto rounded-lg bg-surface-modal p-1 text-base shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
+          role="listbox"
+          :aria-activedescendant="activeDescendantId"
+        >
+          <button
+            v-for="(opt, idx) in displayedOptions"
+            :key="opt.value"
+            :data-value="opt.value"
+            :data-index="idx"
+            type="button"
+            class="group flex h-7 w-full items-center rounded px-2 text-left"
+            :class="buttonClasses(opt, idx)"
+            @click="select(opt.value)"
+            @mouseenter="highlightIndex = idx"
+            role="option"
+            :id="optionId(idx)"
+            :aria-selected="internalValue === opt.value"
+          >
+            <span class="truncate">{{ opt.label }}</span>
+          </button>
+        </div>
+      </PopoverContent>
+    </PopoverPortal>
+  </PopoverRoot>
 </template>
 
 <script setup lang="ts">
-import Popover from '../Popover/Popover.vue'
+import {
+  PopoverAnchor,
+  PopoverContent,
+  PopoverPortal,
+  PopoverRoot,
+} from 'reka-ui'
 import TextInput from '../TextInput/TextInput.vue'
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref, computed, watch, watchEffect, nextTick } from 'vue'
 import type {
   Option,
   ParsedTime,
   TimePickerProps,
-  Placement,
+  PopoverSide,
+  PopoverAlign,
   Variant,
   TimePickerEmits,
 } from './types'
 
 const props = withDefaults(defineProps<TimePickerProps>(), {
-  value: '',
   modelValue: '',
   interval: 15,
   options: () => [],
-  placement: 'bottom-start' as Placement,
   placeholder: 'Select time',
   variant: 'subtle' as Variant,
-  allowCustom: true,
-  autoClose: true,
   use12Hour: true,
   disabled: false,
+  readonly: false,
+  // Legacy default kept so back-compat works correctly with Vue's Boolean
+  // prop coercion (omitted boolean props read as `false`, indistinguishable
+  // from explicit `false` — so we anchor on the legacy default).
+  autoClose: true,
   scrollMode: 'center' as const,
   minTime: '',
   maxTime: '',
 })
 
 const emit = defineEmits<TimePickerEmits>()
+
+// ── Vocab alignment: resolve new/deprecated prop pairs ───────────────────────
+
+const resolvedSide = computed<PopoverSide>(
+  () =>
+    props.side ?? ((props.placement?.split('-')[0] as PopoverSide) ?? 'bottom'),
+)
+const resolvedAlign = computed<PopoverAlign>(() => {
+  if (props.align !== undefined) return props.align
+  const fromPlacement = props.placement?.split('-')[1] as
+    | PopoverAlign
+    | undefined
+  return fromPlacement ?? 'start'
+})
+const resolvedOffset = computed(() => props.offset ?? 4)
+
+// `keepOpen: true` (new API) wins. Otherwise fall back to the legacy
+// `autoClose: false` signal. The `autoClose` default of `true` (above)
+// makes the absence-vs-explicit-false distinction work despite Vue's
+// Boolean prop coercion.
+const shouldKeepOpen = computed(
+  () => props.keepOpen === true || props.autoClose === false,
+)
+
+// `readonly` (new) and `allowCustom: false` (legacy) both block typing.
+const isReadonly = computed(
+  () => props.readonly === true || props.allowCustom === false,
+)
+
+if (import.meta.env.DEV) {
+  const warned = {
+    value: false,
+    placement: false,
+    autoClose: false,
+    allowCustom: false,
+  }
+  watchEffect(() => {
+    if (props.value && !warned.value) {
+      console.warn(
+        '[TimePicker] `value` is deprecated. Use `v-model` / `modelValue` instead.',
+      )
+      warned.value = true
+    }
+    if (props.placement !== undefined && !warned.placement) {
+      console.warn(
+        '[TimePicker] `placement` is deprecated. Use `side` and `align` instead.',
+      )
+      warned.placement = true
+    }
+    if (props.autoClose === false && !warned.autoClose) {
+      console.warn(
+        '[TimePicker] `autoClose: false` is deprecated. Use `keepOpen: true` instead.',
+      )
+      warned.autoClose = true
+    }
+    if (props.allowCustom === false && !warned.allowCustom) {
+      console.warn(
+        '[TimePicker] `allowCustom: false` is deprecated. Use `readonly: true` instead.',
+      )
+      warned.allowCustom = true
+    }
+  })
+}
 
 const panelRef = ref<HTMLElement | null>(null)
 const isFocused = ref(false)
@@ -106,7 +184,9 @@ const isTyping = ref(false)
 let navUpdating = false
 let invalidState = false
 
-const inputRef = ref<any>(null)
+const inputRef = ref<{ el: HTMLElement | null } | null>(null)
+const anchorEl = computed(() => inputRef.value?.el ?? undefined)
+
 const initial = props.modelValue || props.value || ''
 const internalValue = ref<string>(initial)
 const displayValue = ref<string>('')
@@ -117,6 +197,10 @@ const activeDescendantId = computed<string | undefined>(() =>
 )
 function optionId(idx: number): string {
   return `tp-${uid}-${idx}`
+}
+
+function togglePopover() {
+  showOptions.value = !showOptions.value
 }
 
 function minutesFromHHMM(str: string): number | null {
@@ -292,7 +376,7 @@ function commitInput() {
     ? `${parsed.hh24}:${parsed.mm}:${parsed.ss}`
     : `${parsed.hh24}:${parsed.mm}`
   if (
-    !props.allowCustom &&
+    isReadonly.value &&
     !displayedOptions.value.some((o) => {
       const base = normalized.length === 8 ? normalized.slice(0, 5) : normalized
       return o.value === base
@@ -318,7 +402,7 @@ function select(val: string, forceChange = false) {
   if (forceChange && prev === internalValue.value) {
     emit('change', internalValue.value)
   }
-  if (props.autoClose) showOptions.value = false
+  if (!shouldKeepOpen.value) showOptions.value = false
 }
 
 const selectedAndNearest = computed<{
@@ -447,12 +531,12 @@ function moveHighlight(delta: number) {
   scheduleScroll()
 }
 
-function onArrowDown(togglePopover: () => void, isOpen?: boolean) {
-  if (!isOpen) togglePopover()
+function onArrowDown() {
+  if (!showOptions.value) showOptions.value = true
   else moveHighlight(1)
 }
-function onArrowUp(togglePopover: () => void, isOpen?: boolean) {
-  if (!isOpen) togglePopover()
+function onArrowUp() {
+  if (!showOptions.value) showOptions.value = true
   else moveHighlight(-1)
 }
 
@@ -477,7 +561,7 @@ function onEnter() {
     : false
   if (parsed.valid && (!exists || isTyping.value)) {
     commitInput()
-    if (props.autoClose) showOptions.value = false
+    if (!shouldKeepOpen.value) showOptions.value = false
     blurInput()
     return
   }
@@ -486,19 +570,19 @@ function onEnter() {
     if (opt) select(opt.value, true)
   } else {
     commitInput()
-    if (props.autoClose) showOptions.value = false
+    if (!shouldKeepOpen.value) showOptions.value = false
   }
   blurInput()
 }
 
-function onClickInput(isOpen: boolean | undefined, togglePopover: () => void) {
-  if (!isOpen) togglePopover()
-  if (props.allowCustom) selectAll()
+function onClickInput() {
+  if (!showOptions.value) showOptions.value = true
+  if (!isReadonly.value) selectAll()
 }
 
 function onFocus() {
   isFocused.value = true
-  if (props.allowCustom && !hasSelectedOnFirstClick.value) selectAll()
+  if (!isReadonly.value && !hasSelectedOnFirstClick.value) selectAll()
 }
 
 function onBlur() {
@@ -512,12 +596,12 @@ function onBlur() {
 
 function selectAll() {
   nextTick(() => {
-    const el = inputRef.value?.el || inputRef.value
+    const el = inputRef.value?.el || (inputRef.value as any)
     if (el && el.querySelector) {
       const input: HTMLInputElement | any = el.querySelector('input') || el
       input?.select?.()
-    } else if (el?.select) {
-      el.select()
+    } else if ((el as any)?.select) {
+      ;(el as any).select()
     }
     hasSelectedOnFirstClick.value = true
   })
@@ -525,12 +609,12 @@ function selectAll() {
 
 function blurInput() {
   nextTick(() => {
-    const el = inputRef.value?.el || inputRef.value
+    const el = inputRef.value?.el || (inputRef.value as any)
     if (el && el.querySelector) {
       const input: HTMLInputElement | any = el.querySelector('input') || el
       input?.blur?.()
-    } else if (el?.blur) {
-      el.blur()
+    } else if ((el as any)?.blur) {
+      ;(el as any).blur()
     }
     isFocused.value = false
   })
@@ -559,10 +643,6 @@ defineSlots<{
    * Slot rendered after the input value.
    * Exposes popover controls.
    */
-  suffix?: (props: {
-    togglePopover: () => void
-    isOpen: boolean
-  }) => any
+  suffix?: (props: { togglePopover: () => void; isOpen: boolean }) => any
 }>()
-
 </script>

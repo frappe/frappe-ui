@@ -9,7 +9,8 @@ const valueBasic = ref('')
   <TimePicker
     v-model="valueBasic"
     placeholder="Select time"
-    placement="bottom-start"
+    side="bottom"
+    align="start"
   />
   <div class="mt-2 text-xs text-gray-500">Value: {{ valueBasic || '—' }}</div>
 </template>

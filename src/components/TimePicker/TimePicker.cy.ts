@@ -13,11 +13,12 @@ describe('TimePicker', () => {
     cy.mount(TimePicker)
 
     cy.get('input').click()
-    cy.get('[data-index="2"]').click()
-
-    cy.get('[data-index="2"]').then((x) => {
-      cy.get('input').should('have.value', x.text())
-    })
+    cy.get('[data-index="2"]')
+      .invoke('text')
+      .then((label) => {
+        cy.get('[data-index="2"]').click()
+        cy.get('input').should('have.value', label.trim())
+      })
   })
 
   it('emit events', () => {
@@ -72,16 +73,17 @@ describe('TimePicker', () => {
     cy.get('[role=option]').should('have.length', options.length)
   })
 
-  it('autoclose prop', () => {
+  it('autoclose default closes popover after selection', () => {
     cy.mount(TimePicker)
     cy.get('input').click()
     cy.get('[role=option]').eq(0).click()
     cy.get('[role=dialog]').should('not.exist')
+  })
 
+  it('back-compat: autoClose=false keeps popover open after selection', () => {
     cy.mount(TimePicker, {
       props: { autoClose: false },
     })
-
     cy.get('input').click()
     cy.get('[role=option]').eq(0).click()
     cy.get('[role=dialog]').should('exist')
@@ -118,5 +120,45 @@ describe('TimePicker', () => {
       props: { disabled: true },
     })
     cy.get('input').should('have.attr', 'disabled')
+  })
+
+  it('keepOpen prop keeps popover open after selection', () => {
+    cy.mount(TimePicker, { props: { keepOpen: true } })
+    cy.get('input').click()
+    cy.get('[role=option]').eq(0).click()
+    cy.get('[role=dialog]').should('exist')
+  })
+
+  it('readonly prop prevents typing but still opens popover', () => {
+    cy.mount(TimePicker, { props: { readonly: true } })
+    cy.get('input').should('have.attr', 'readonly')
+    cy.get('input').click()
+    cy.get('[role=dialog]').should('exist')
+  })
+
+  it('side and align props are accepted (smoke test)', () => {
+    // Reka resolves data-side via collision detection, so we don't assert
+    // a specific axis here — just that the popover renders with valid
+    // side/align props.
+    cy.mount(TimePicker, { props: { side: 'bottom', align: 'end' } })
+    cy.get('input').click()
+    cy.get('[role=dialog]')
+      .should('exist')
+      .should('have.attr', 'data-align', 'end')
+  })
+
+  it('back-compat: placement is accepted in lieu of side+align', () => {
+    cy.mount(TimePicker, { props: { placement: 'bottom-end' } })
+    cy.get('input').click()
+    cy.get('[role=dialog]')
+      .should('exist')
+      .should('have.attr', 'data-align', 'end')
+  })
+
+  it('back-compat: allowCustom=false behaves like readonly', () => {
+    cy.mount(TimePicker, { props: { allowCustom: false } })
+    cy.get('input').should('have.attr', 'readonly')
+    cy.get('input').click()
+    cy.get('[role=dialog]').should('exist')
   })
 })

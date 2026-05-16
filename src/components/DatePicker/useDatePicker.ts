@@ -1,7 +1,21 @@
 import { computed, ref } from 'vue'
 import { getDate, getDatesAfter, getDaysInMonth } from './utils'
 
+let warned = false
+
+/**
+ * @deprecated Not used by any of the picker components. Will be removed after v1.x.
+ * Uses a 1-based month index and raw `Date` objects — a different model from the
+ * `dayjs`-based pickers. If you need calendar grid helpers, use `generateWeeks` from
+ * `./utils` instead.
+ */
 export function useDatePicker() {
+  if (import.meta.env.DEV && !warned) {
+    console.warn(
+      '[useDatePicker] is deprecated and will be removed after v1.x. Use `generateWeeks` from frappe-ui DatePicker utils instead.',
+    )
+    warned = true
+  }
   const currentYear = ref<number>(0)
   const currentMonth = ref<number>(0)
 

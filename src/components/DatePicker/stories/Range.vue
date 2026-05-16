@@ -2,11 +2,25 @@
 import { ref } from 'vue'
 import { DateRangePicker } from 'frappe-ui'
 
-const value = ref('')
+const value = ref<string[]>([])
+const dualValue = ref<string[]>([])
 </script>
 
 <template>
-  <DateRangePicker v-model="value" placeholder="Select Range" label="Label" />
+  <div class="flex flex-col gap-6">
+    <DateRangePicker v-model="value" placeholder="Select Range" label="Label" />
+    <div class="text-sm text-gray-600">
+      Selected: {{ value.length ? value.join(' to ') : 'None' }}
+    </div>
 
-  <div class="mt-2 text-sm text-gray-600">Selected: {{ value || 'None' }}</div>
+    <DateRangePicker
+      v-model="dualValue"
+      placeholder="Select Range"
+      label="Dual pane"
+      dual-pane
+    />
+    <div class="text-sm text-gray-600">
+      Selected: {{ dualValue.length ? dualValue.join(' to ') : 'None' }}
+    </div>
+  </div>
 </template>

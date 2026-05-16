@@ -10,7 +10,8 @@
     description: 'Uncontrolled initial value for the picker.',
     required: false,
     type: 'string',
-    default: '""'
+    default: '""',
+    deprecated: 'Use `modelValue` with `v-model` instead.'
   },
   {
     name: 'modelValue',
@@ -20,11 +21,29 @@
     default: '""'
   },
   {
+    name: 'side',
+    description: 'Preferred popover side relative to the trigger.',
+    required: false,
+    type: 'PopoverSide'
+  },
+  {
+    name: 'align',
+    description: 'Alignment of the popover along the trigger edge.',
+    required: false,
+    type: 'PopoverAlign'
+  },
+  {
+    name: 'offset',
+    description: 'Gap between the trigger and popover content in pixels.',
+    required: false,
+    type: 'number'
+  },
+  {
     name: 'placement',
     description: 'Preferred popover placement relative to the trigger.',
     required: false,
     type: 'DatePickerPlacement',
-    default: '"bottom-start"'
+    deprecated: 'Use `side` and `align` instead.'
   },
   {
     name: 'format',
@@ -36,15 +55,8 @@
     name: 'variant',
     description: 'Visual style variant passed through to the input.',
     required: false,
-    type: '"subtle" | "outline" | "ghost"',
+    type: '"subtle" | "ghost" | "outline"',
     default: '"subtle"'
-  },
-  {
-    name: 'readonly',
-    description: 'Prevents manual typing while keeping the picker interactive.',
-    required: false,
-    type: 'boolean',
-    default: 'false'
   },
   {
     name: 'placeholder',
@@ -54,24 +66,17 @@
     default: '"Select date"'
   },
   {
-    name: 'inputClass',
-    description: 'Additional classes applied to the trigger input.',
+    name: 'label',
+    description: 'Optional label forwarded to the trigger input.',
     required: false,
-    type: 'string | string[] | Record<string, boolean>'
+    type: 'string'
   },
   {
-    name: 'allowCustom',
-    description: 'Allows users to type custom date text into the input.',
+    name: 'readonly',
+    description: 'Prevents manual typing while keeping the picker interactive.',
     required: false,
     type: 'boolean',
-    default: 'true'
-  },
-  {
-    name: 'autoClose',
-    description: 'Closes the popover after a value is picked.',
-    required: false,
-    type: 'boolean',
-    default: 'true'
+    default: 'false'
   },
   {
     name: 'disabled',
@@ -81,17 +86,57 @@
     default: 'false'
   },
   {
-    name: 'label',
-    description: 'Optional label forwarded to the trigger input.',
-    required: false,
-    type: 'string'
-  },
-  {
     name: 'clearable',
     description: 'Shows clear and quick-action controls when enabled.',
     required: false,
     type: 'boolean',
     default: 'true'
+  },
+  {
+    name: 'keepOpen',
+    description: 'Keeps the popover open after a date is selected. Default: false.',
+    required: false,
+    type: 'boolean'
+  },
+  {
+    name: 'autoClose',
+    description: 'Closes the popover after a value is picked.',
+    required: false,
+    type: 'boolean',
+    deprecated: 'Use `keepOpen` instead (inverse semantics: `autoClose: false` → `keepOpen: true`).'
+  },
+  {
+    name: 'minDate',
+    description: 'Earliest selectable date in YYYY-MM-DD format.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'maxDate',
+    description: 'Latest selectable date in YYYY-MM-DD format.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'isDateUnavailable',
+    description: 'Return true to prevent a date from being selected. Combined with minDate/maxDate.',
+    required: false,
+    type: '((date: Dayjs) => boolean)'
+  },
+  {
+    name: 'allowCustom',
+    description: 'Allows users to type custom date text into the input.',
+    required: false,
+    type: 'boolean',
+    default: 'true',
+    deprecated: 'Use `readonly` instead.'
+  },
+  {
+    name: 'inputClass',
+    description: 'Additional classes applied to the trigger input.',
+    required: false,
+    type: 'string | string[] | Record<string, boolean>',
+    deprecated: 'Apply `class` directly to the DatePicker component element to control width.'
   }
 ]
 
