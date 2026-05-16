@@ -39,8 +39,8 @@
       enter-from-class="max-h-0 overflow-hidden"
       leave-to-class="max-h-0 overflow-hidden"
     >
-      <nav v-if="!isCollapsed" class="space-y-0.5">
-        <template v-for="item in props.items" :key="item.label">
+      <nav v-if="!isCollapsed" class="flex flex-col gap-0.5">
+        <template v-for="item in visibleItems" :key="item.label">
           <slot name="sidebar-item" :item="item" :isCollapsed="isSidebarCollapsed">
             <SidebarItem
               :label="item.label"
@@ -49,7 +49,6 @@
               :suffix="item.suffix"
               :to="item.to"
               :isActive="item.isActive"
-              :isCollapsed="isSidebarCollapsed"
               :onClick="item.onClick"
             />
           </slot>
@@ -60,12 +59,15 @@
 </template>
 
 <script setup lang="ts">
-import { inject, ref } from 'vue'
+import { computed, inject, ref, toValue } from 'vue'
 import SidebarItem from './SidebarItem.vue'
-import { SidebarSectionProps } from './types'
+import { SidebarSectionProps, sidebarCollapsedKey } from './types'
 
 const props = defineProps<SidebarSectionProps>()
 
-const isSidebarCollapsed = inject('isSidebarCollapsed', false)
+const isSidebarCollapsed = inject(sidebarCollapsedKey, computed(() => false))
 const isCollapsed = ref(false)
+const visibleItems = computed(() =>
+  props.items.filter((item) => toValue(item.condition) !== false),
+)
 </script>

@@ -1,7 +1,7 @@
 import Sidebar from './Sidebar.vue'
 import { h } from 'vue'
+import { createMemoryHistory, createRouter } from 'vue-router'
 import LucideBox from '~icons/lucide/box'
-import SidebarHeader from './SidebarHeader.vue'
 
 const header = {
   title: 'Sidebar',
@@ -57,9 +57,20 @@ const testComponent = () => {
   return h('div', {}, [h(Sidebar, { header, sections, class: 'w-fit' })])
 }
 
+const router = createRouter({
+  history: createMemoryHistory(),
+  routes: [{ path: '/:pathMatch(.*)*', component: { template: '<div />' } }],
+})
+
 describe('Sidebar', () => {
   it('renders the sidebar header', () => {
-    cy.mount(testComponent)
+    cy.viewport(1280, 720)
+    cy.wrap(router.push('/')).then(() => router.isReady())
+    cy.mount(testComponent, {
+      global: {
+        plugins: [router],
+      },
+    })
 
     cy.get('img').should('exist')
 
@@ -83,7 +94,8 @@ describe('Sidebar', () => {
     })
 
     cy.get("[aria-label='Leads']").should('not.have.attr', 'isCollapsed')
-    cy.get('[aria-label=Expand]').click()
-    cy.get("[aria-label='Leads']").should('have.attr', 'isCollapsed')
+    cy.contains('Collapse').click()
+    cy.get("[aria-label='Leads']").should('not.have.attr', 'isCollapsed')
+    cy.contains('Expand').should('exist')
   })
 })
