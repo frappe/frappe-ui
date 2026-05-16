@@ -67,7 +67,7 @@ const props = withDefaults(defineProps<ComboboxProps>(), {
   placeholder: 'Select option',
   disabled: false,
   openOnFocus: false,
-  openOnClick: false,
+  openOnClick: true,
   side: 'bottom',
   offset: 4,
   portalTo: 'body',

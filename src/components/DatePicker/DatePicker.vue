@@ -1,295 +1,256 @@
 <template>
-  <Popover
-    class="inline-block"
-    :placement="placement"
-    @open="initFromValue"
-    @close="handleClose"
+  <PickerShell
+    ref="shellRef"
+    v-model:open="isOpen"
+    v-model:input-value="inputValue"
+    v-model:typing="isTyping"
+    :side="resolvedSide"
+    :align="resolvedAlign"
+    :offset="resolvedOffset"
+    :open-on-focus="props.openOnFocus"
+    :open-on-click="props.openOnClick"
+    :id="props.id"
+    :label="props.label"
+    :description="props.description"
+    :error="props.error"
+    :required="props.required"
+    :size="props.size"
+    :variant="props.variant"
+    :placeholder="props.placeholder"
+    :disabled="props.disabled"
+    :readonly="inputReadonly"
+    :input-class="dp.inputClass"
+    :display-label="displayLabel"
+    :content-class="contentClass"
+    @blur="commitInput()"
+    @enter="commitInput(true)"
+    @open="onShellOpen"
+    @close="onShellClose"
+    @request-focus="onShellRequestFocus"
   >
-    <template #target="{ togglePopover, isOpen }">
-      <slot
-        name="target"
-        v-bind="{ togglePopover, isOpen, displayLabel, inputValue }"
-      >
-        <TextInput
-          v-model="inputValue"
-          type="text"
-          class="cursor-text w-full"
-          :class="props.inputClass"
-          :label="props.label"
-          :variant="props.variant"
-          :placeholder="props.placeholder"
-          :disabled="props.disabled"
-          :readonly="props.readonly || !props.allowCustom"
-          @focus="activateInput(isOpen, togglePopover)"
-          @click="activateInput(isOpen, togglePopover)"
-          @blur="onBlur"
-          @keydown.enter.prevent="onEnter(togglePopover)"
-        >
-          <template v-if="$slots.prefix" #prefix>
-            <slot
-              name="prefix"
-              v-bind="{ togglePopover, isOpen, displayLabel, inputValue }"
-            />
-          </template>
-          <template #suffix>
-            <slot
-              name="suffix"
-              v-bind="{ togglePopover, isOpen, displayLabel, inputValue }"
-            >
-              <span
-                class="lucide-chevron-down size-4 cursor-pointer"
-                aria-hidden="true"
-                @mousedown.prevent="togglePopover"
-              />
-            </slot>
-          </template>
-        </TextInput>
-      </slot>
-    </template>
-    <template #body="{ togglePopover }">
+    <template v-if="$slots.trigger" #trigger="ts"><slot name="trigger" v-bind="ts" /></template>
+    <template v-if="$slots.target" #target="ts"><slot name="target" v-bind="ts" /></template>
+    <template v-if="$slots.prefix" #prefix="ts"><slot name="prefix" v-bind="ts" /></template>
+    <template v-if="$slots.suffix" #suffix="ts"><slot name="suffix" v-bind="ts" /></template>
+
+    <template #default="{ close }">
       <div
-        ref="popoverContentRef"
-        class="w-fit min-w-60 select-none text-base text-ink-gray-9 rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5 mt-2"
+        class="flex"
+        :class="$slots.actions ? 'divide-x divide-outline-gray-2' : ''"
       >
-        <div class="flex items-center justify-between p-2 pb-0 gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            class="text-sm font-medium text-ink-gray-7"
-            @click="cycleView"
-            label="cycle-calendar-view"
-          >
-            <span v-if="view === 'date'">
-              {{ months[currentMonth] }} {{ currentYear }}
-            </span>
-            <span v-else-if="view === 'month'">{{ currentYear }}</span>
-            <span v-else>
-              {{ yearRangeStart }} - {{ yearRangeStart + 11 }}
-            </span>
-          </Button>
-          <div class="flex items-center">
-            <Button
-              label="previous"
-              variant="ghost"
-              icon="lucide-chevron-left"
-              class="size-7"
-              @click="prev"
-            />
-            <Button
-              v-if="!clearable"
-              variant="ghost"
-              class="text-xs"
-              :label="'Today'"
-              @click="() => handleTodayClick(togglePopover)"
-            />
-            <Button
-              label="next"
-              variant="ghost"
-              icon="lucide-chevron-right"
-              class="size-7"
-              @click="next"
-            />
-          </div>
-        </div>
-        <div class="p-2">
-          <div v-if="view === 'date'" role="grid" aria-label="Calendar dates">
-            <div
-              class="flex items-center text-xs font-medium uppercase text-ink-gray-4 mb-1"
-            >
-              <div
-                v-for="d in ['S', 'M', 'T', 'W', 'T', 'F', 'S']"
-                :key="d"
-                class="flex h-6 w-8 items-center justify-center"
-              >
-                {{ d }}
-              </div>
-            </div>
-            <div v-for="(week, wi) in weeks" :key="wi" class="flex" role="row">
-              <button
-                v-for="dateObj in week"
-                type="button"
-                :key="dateObj.key"
-                class="flex h-8 w-8 items-center justify-center rounded cursor-pointer text-sm focus:outline-none focus:ring-2 focus:ring-outline-gray-2"
-                :class="[
-                  dateObj.inMonth ? 'text-ink-gray-8' : 'text-ink-gray-3',
-                  dateObj.isToday ? 'font-extrabold text-ink-gray-9' : '',
-                  dateObj.isSelected
-                    ? 'bg-surface-gray-6 text-ink-white hover:bg-surface-gray-6'
-                    : 'hover:bg-surface-gray-2',
-                ]"
-                role="gridcell"
-                :aria-selected="dateObj.isSelected ? 'true' : 'false'"
-                :aria-label="
-                  dateObj.date.format('YYYY-MM-DD') +
-                  (dateObj.isToday ? ' (Today)' : '')
-                "
-                @click="handleDateCellClick(dateObj.date, togglePopover)"
-              >
-                {{ dateObj.date.date() }}
-              </button>
-            </div>
-          </div>
-          <div
-            v-else-if="view === 'month'"
-            class="grid grid-cols-3 gap-1"
-            role="grid"
-            aria-label="Select month"
-          >
-            <button
-              v-for="(m, i) in months"
-              type="button"
-              :key="m"
-              class="py-2 text-sm rounded cursor-pointer text-center hover:bg-surface-gray-2 focus:outline-none focus:ring-2 focus:ring-brand-6"
-              :class="{
-                'bg-surface-gray-6 text-ink-white hover:bg-surface-gray-6':
-                  i === currentMonth,
-              }"
-              :aria-selected="i === currentMonth ? 'true' : 'false'"
-              @click="selectMonth(i)"
-            >
-              {{ m.slice(0, 3) }}
-            </button>
-          </div>
-          <div
-            v-else
-            class="grid grid-cols-3 gap-1"
-            role="grid"
-            aria-label="Select year"
-          >
-            <button
-              v-for="y in yearRange"
-              type="button"
-              :key="y"
-              class="py-2 text-sm rounded cursor-pointer text-center hover:bg-surface-gray-2 focus:outline-none focus:ring-2 focus:ring-brand-6"
-              :class="{
-                'bg-surface-gray-6 text-ink-white hover:bg-surface-gray-6':
-                  y === currentYear,
-              }"
-              :aria-selected="y === currentYear ? 'true' : 'false'"
-              @click="selectYear(y)"
-            >
-              {{ y }}
-            </button>
-          </div>
-        </div>
-        <div
-          v-if="props.clearable"
-          class="flex items-center justify-between gap-1 p-2 border-t"
+        <aside
+          v-if="$slots.actions"
+          data-slot="actions"
+          aria-label="Shortcuts"
+          class="flex flex-col p-2 gap-0.5"
         >
-          <div class="flex gap-1">
-            <Button
-              variant="outline"
-              :label="'Today'"
-              @click="() => handleTodayClick(togglePopover)"
-            />
-            <Button
-              variant="outline"
-              :label="'Tomorrow'"
-              @click="() => handleTomorrowClick(togglePopover)"
-            />
-          </div>
-          <Button
-            v-if="selected"
-            size="sm"
-            variant="outline"
-            :label="'Clear'"
-            @click="() => handleClearClick(togglePopover)"
+          <slot
+            name="actions"
+            v-bind="{
+              selected,
+              setDate: handleDateCellClick,
+              clear: handleClearClick,
+              close,
+            }"
           />
-        </div>
+        </aside>
+        <CalendarPanel
+          ref="panelRef"
+          :view="view"
+          :current-year="currentYear"
+          :current-month="currentMonth"
+          :year-range-start="yearRangeStart"
+          :year-range="yearRange"
+          :weeks="weeks"
+          today-label="Today"
+          :min="props.min"
+          :max="props.max"
+          v-model:focused-date="focusedDate"
+          @prev="prev"
+          @next="next"
+          @today="handleTodayClick"
+          @cycle-view="cycleView"
+          @select-month="selectMonth"
+          @select-year="selectYear"
+          @select-date="handleDateCellClick"
+          @navigate="onPanelNavigate"
+        />
       </div>
     </template>
-  </Popover>
+  </PickerShell>
 </template>
+
 <script setup lang="ts">
-import { ref, computed, watch, toRefs } from 'vue'
-import { Popover } from '../Popover'
-import { Button } from '../Button'
-import { TextInput } from '../TextInput'
-// @ts-ignore - Vue SFC without explicit types
+import { ref, computed, nextTick, watch } from 'vue'
 import { dayjs, dayjsLocal } from '../../utils/dayjs'
-import { months, monthStart, generateWeeks, getDateValue } from './utils'
-import type { Dayjs } from 'dayjs'
+import { generateWeeks } from './utils'
+import CalendarPanel, { type CalendarPanelCell } from './CalendarPanel.vue'
+import PickerShell from '../shared/picker/PickerShell.vue'
+import {
+  useCalendarView,
+  usePopoverPositioning,
+  useKeepOpen,
+  useTypeable,
+  useDateCoercion,
+  useDeprecationWarnings,
+  makeUnavailableCheck,
+  type LegacyDatePickerProps,
+} from './composables'
+import type { Dayjs } from 'dayjs/esm'
 import type {
   DatePickerProps,
   DatePickerEmits,
-  DatePickerViewMode as ViewMode,
-  DatePickerDateObj as DateObj,
+  DatePickerSlots,
 } from './types'
 
 const props = withDefaults(defineProps<DatePickerProps>(), {
   value: '',
   modelValue: '',
-  placement: 'bottom-start',
   variant: 'subtle',
   placeholder: 'Select date',
+  typeable: true,
   readonly: false,
   allowCustom: true,
-  autoClose: true,
   disabled: false,
   clearable: true,
+  openOnFocus: false,
+  openOnClick: true,
+  // Legacy default kept; see `useKeepOpen` for why.
+  autoClose: true,
 })
 const emit = defineEmits<DatePickerEmits>()
 
-defineSlots<{
-  /** Custom trigger renderer for the date picker. */
-  target?: (props: {
-    togglePopover: () => void
-    isOpen: boolean
-    displayLabel: string
-    inputValue: string
-  }) => any
+const slots = defineSlots<DatePickerSlots>()
 
-  /** Content rendered before the trigger input value. */
-  prefix?: (props: {
-    togglePopover: () => void
-    isOpen: boolean
-    displayLabel: string
-    inputValue: string
-  }) => any
+const POPOVER_CLASSES =
+  'rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5'
+const contentClass = computed(() =>
+  slots.actions ? `w-fit ${POPOVER_CLASSES}` : `w-56 ${POPOVER_CLASSES}`,
+)
 
-  /** Content rendered after the trigger input value. */
-  suffix?: (props: {
-    togglePopover: () => void
-    isOpen: boolean
-    displayLabel: string
-    inputValue: string
-  }) => any
-}>()
+// Cast strips @deprecated markers so internal back-compat reads don't trigger TS6385.
+const dp = props as unknown as LegacyDatePickerProps
 
-const { autoClose } = toRefs(props)
+// ── Popover open state ───────────────────────────────────────────────────────
 
-const view = ref<ViewMode>('date')
-const currentYear = ref<number>(dayjs().year())
-const currentMonth = ref<number>(dayjs().month()) // 0-index
+const shellRef = ref<{ open: () => void } | null>(null)
+const isOpen = ref(false)
+
+watch(
+  () => props.open,
+  (val) => {
+    if (typeof val === 'boolean' && val !== isOpen.value) {
+      isOpen.value = val
+    }
+  },
+)
+
+watch(isOpen, (val) => {
+  emit('update:open', val)
+})
+
+function onShellOpen() {
+  initFromValue()
+  seedFocusedDate()
+}
+
+function onShellClose() {
+  resetView()
+  if (isTyping.value) {
+    commitInput()
+    isTyping.value = false
+  }
+  // Drop the focused-date so the next open re-seeds it from today/selected
+  // rather than resuming on a stale arrow-key target.
+  focusedDate.value = null
+}
+
+const panelRef = ref<{ focusInitialCell: () => void } | null>(null)
+const focusedDate = ref<Dayjs | null>(null)
+
+function seedFocusedDate() {
+  if (focusedDate.value) return
+  if (selected.value) {
+    const d = dayjs(selected.value)
+    if (!checkUnavailable(d)) {
+      focusedDate.value = d
+      return
+    }
+  }
+  const today = dayjsLocal()
+  if (!checkUnavailable(today)) {
+    focusedDate.value = today
+    return
+  }
+  const first = weeks.value.flat().find((c) => c.inMonth && !c.isUnavailable)
+  if (first) focusedDate.value = first.date
+}
+
+function onShellRequestFocus() {
+  // Seed synchronously *before* the reactive flush so the CalendarPanel
+  // mounts with `props.focusedDate` already set — that way the focused cell
+  // has `tabindex=0` on first render and `focusInitialCell` (queued for
+  // next tick) finds it.
+  seedFocusedDate()
+  nextTick(() => panelRef.value?.focusInitialCell())
+}
+
+function onPanelNavigate(target: Dayjs) {
+  // Single-pane: target dictates the view. focusedDate stays in sync via
+  // CalendarPanel's `update:focusedDate` (already wired via v-model).
+  focusOn(target)
+}
+
+defineExpose({
+  open: () => shellRef.value?.open(),
+})
+
+// ── Positioning / keepOpen / deprecations ────────────────────────────────────
+
+const { resolvedSide, resolvedAlign, resolvedOffset } = usePopoverPositioning(
+  props,
+  dp,
+)
+const shouldKeepOpen = useKeepOpen(props, dp)
+const inputReadonly = useTypeable(props, dp)
+useDeprecationWarnings('DatePicker', dp, {
+  hasTargetSlot: computed(() => !!slots.target),
+})
+
+// ── Calendar state ───────────────────────────────────────────────────────────
+
+const {
+  view,
+  currentYear,
+  currentMonth,
+  yearRangeStart,
+  yearRange,
+  prev,
+  next,
+  cycleView,
+  selectMonth,
+  selectYear,
+  focusOn,
+  resetView,
+} = useCalendarView()
+
 const DATE_FORMAT = 'YYYY-MM-DD'
-
 const selected = ref<string>('')
 const initialValue = ref(props.modelValue || props.value || '')
 
-function coerceToDayjs(val?: string | null): Dayjs | null {
-  if (!val) return null
-  const raw = String(val).trim()
-  if (!raw) return null
-  if (props.format) {
-    const dStrict = dayjs(raw, props.format, true)
-    if (dStrict.isValid()) return dStrict
-  }
-  const dLoose = dayjs(raw)
-  if (dLoose.isValid()) return dLoose
-  const normalized = getDateValue(raw)
-  if (normalized) {
-    const dNorm = dayjs(normalized)
-    if (dNorm.isValid()) return dNorm
-  }
-  return null
-}
+const checkUnavailable = makeUnavailableCheck(
+  () => props.min,
+  () => props.max,
+  () => props.isDateUnavailable,
+)
+
+const coerceToDayjs = useDateCoercion(() => props.format)
 
 function syncFromValue(val?: string): void {
   if (!val) {
     if (!props.clearable) {
       const today = dayjsLocal()
-      currentYear.value = today.year()
-      currentMonth.value = today.month()
+      focusOn(today)
       selected.value = today.format(DATE_FORMAT)
     } else {
       selected.value = ''
@@ -301,8 +262,7 @@ function syncFromValue(val?: string): void {
     selected.value = ''
     return
   }
-  currentYear.value = d.year()
-  currentMonth.value = d.month()
+  focusOn(d)
   selected.value = d.format(DATE_FORMAT)
 }
 
@@ -315,10 +275,11 @@ function initFromValue(): void {
 watch(
   () => [props.modelValue, props.value],
   ([m, v]) => {
-    const val = m || v
-    syncFromValue(val)
+    syncFromValue(m || v)
   },
 )
+
+// ── Display ──────────────────────────────────────────────────────────────────
 
 const displayLabel = computed<string>(() =>
   props.format ? formatter(selected.value, props.format) : selected.value,
@@ -337,9 +298,19 @@ watch(displayLabel, (val) => {
   if (!isTyping.value) inputValue.value = val
 })
 
-function maybeClose(togglePopover?: () => void, condition = true) {
-  if (condition && autoClose.value && togglePopover) togglePopover()
-}
+// ── Calendar grid ────────────────────────────────────────────────────────────
+
+const weeks = computed<CalendarPanelCell[][]>(() =>
+  generateWeeks(currentYear.value, currentMonth.value, selected.value).map(
+    (week) =>
+      week.map((d) => ({
+        ...d,
+        isUnavailable: checkUnavailable(d.date),
+      })),
+  ),
+)
+
+// ── Input commit / selection ─────────────────────────────────────────────────
 
 function clearSelection() {
   if (!selected.value) return
@@ -350,52 +321,34 @@ function clearSelection() {
   inputValue.value = ''
 }
 
-function commitInput(close = false, togglePopover?: () => void): void {
+function commitInput(close = false): void {
   const raw = inputValue.value.trim()
   if (!raw) {
     if (!props.clearable) {
       selectDate(dayjsLocal())
-      maybeClose(togglePopover, close)
+      if (close && !shouldKeepOpen.value) isOpen.value = false
     } else {
       clearSelection()
-      maybeClose(togglePopover, close)
+      if (close && !shouldKeepOpen.value) isOpen.value = false
     }
     return
   }
   const d = coerceToDayjs(raw)
-  if (d) {
+  if (d && !checkUnavailable(d)) {
     selectDate(d)
-    maybeClose(togglePopover, close)
+    if (close && !shouldKeepOpen.value) isOpen.value = false
+  } else {
+    inputValue.value = displayLabel.value
   }
 }
-
-const popoverContentRef = ref<HTMLElement | null>(null)
-
-function onBlur(e: FocusEvent) {
-  const next = e.relatedTarget as Node | null
-  if (next && popoverContentRef.value?.contains(next)) return
-  commitInput()
-  isTyping.value = false
-}
-function onEnter(togglePopover: () => void) {
-  commitInput(true, togglePopover)
-  isTyping.value = false
-}
-function activateInput(isOpen: boolean | undefined, togglePopover: () => void) {
-  isTyping.value = true
-  if (!isOpen) togglePopover()
-}
-const weeks = computed<DateObj[][]>(() =>
-  generateWeeks(currentYear.value, currentMonth.value, selected.value),
-)
 
 function selectDate(date: string | Date | Dayjs): void {
   const d = dayjs(date as any)
   if (!d.isValid()) return
+  if (checkUnavailable(d)) return
   const prev = selected.value
   selected.value = d.format(DATE_FORMAT)
-  currentYear.value = d.year()
-  currentMonth.value = d.month()
+  focusOn(d)
 
   if (selected.value !== initialValue.value) {
     emit('update:modelValue', selected.value)
@@ -403,91 +356,28 @@ function selectDate(date: string | Date | Dayjs): void {
     initialValue.value = selected.value
   }
 
-  // Reflect new value in input immediately if not typing
   if (!isTyping.value) {
     inputValue.value = props.format
       ? formatter(selected.value, props.format)
       : selected.value
   }
-  view.value = 'date'
+  resetView()
 }
-function selectMonth(i: number): void {
-  currentMonth.value = i
-  view.value = 'date'
-}
-function selectYear(y: number): void {
-  currentYear.value = y
-  view.value = 'month'
-}
-function prev(): void {
-  if (view.value === 'date') {
-    const m = monthStart(currentYear.value, currentMonth.value).subtract(
-      1,
-      'month',
-    )
-    currentYear.value = m.year()
-    currentMonth.value = m.month()
-  } else if (view.value === 'month') {
-    currentYear.value -= 1
-  } else {
-    currentYear.value -= 12
-  }
-}
-function next(): void {
-  if (view.value === 'date') {
-    const m = monthStart(currentYear.value, currentMonth.value).add(1, 'month')
-    currentYear.value = m.year()
-    currentMonth.value = m.month()
-  } else if (view.value === 'month') {
-    currentYear.value += 1
-  } else {
-    currentYear.value += 12
-  }
-}
-function handleDateCellClick(
-  date: string | Date | Dayjs,
-  togglePopover: () => void,
-) {
+
+function handleDateCellClick(date: string | Date | Dayjs) {
   selectDate(date)
-  if (autoClose.value) togglePopover()
+  if (!shouldKeepOpen.value) isOpen.value = false
   isTyping.value = false
 }
 
-function selectOffset(days = 0, togglePopover: () => void) {
-  handleDateCellClick(dayjsLocal().add(days, 'day'), togglePopover)
-}
-function handleTodayClick(togglePopover: () => void) {
-  selectOffset(0, togglePopover)
-}
-function handleTomorrowClick(togglePopover: () => void) {
-  selectOffset(1, togglePopover)
+function handleTodayClick() {
+  handleDateCellClick(dayjsLocal())
 }
 
-function handleClearClick(togglePopover: () => void) {
+function handleClearClick() {
   clearSelection()
-  maybeClose(togglePopover)
+  if (!shouldKeepOpen.value) isOpen.value = false
   isTyping.value = false
-  view.value = 'date'
+  resetView()
 }
-
-function cycleView(): void {
-  if (view.value === 'date') view.value = 'month'
-  else if (view.value === 'month') view.value = 'year'
-  else view.value = 'date'
-}
-
-function handleClose() {
-  view.value = 'date'
-  if (isTyping.value) {
-    commitInput()
-    isTyping.value = false
-  }
-}
-
-const yearRangeStart = computed(
-  () => currentYear.value - (currentYear.value % 12),
-)
-const yearRange = computed<number[]>(() =>
-  Array.from({ length: 12 }, (_, i) => yearRangeStart.value + i),
-)
 </script>

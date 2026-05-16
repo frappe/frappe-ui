@@ -49,6 +49,172 @@ unless they affect consumers.
 - Legacy `confirmDialog()` keeps working and now emits a deprecation
   warning pointing at `dialog.confirm()`.
 
+### DatePicker family — v1 spec implemented
+
+`DatePicker`, `DateRangePicker`, and `DateTimePicker` now share the v1
+popover-trigger vocabulary used by the selection family
+(`Combobox`/`Dropdown`/`Select`).
+
+- Positioning: `side` (`top | right | bottom | left`, default `'bottom'`)
+  + `align` (`start | center | end`, default `'start'`) + `offset`
+  (default `4`) replace the compound `placement` string. `placement`
+  remains as a deprecated alias and is mapped internally.
+- `keepOpen: boolean` (default `false`) replaces `autoClose: boolean`
+  (default `true`). Semantics are inverted; the old prop is mapped
+  internally and warns once per instance.
+- `typeable: boolean` (default `true`) replaces the previous overload
+  between picker-level `readonly` and `allowCustom`. Setting
+  `:typeable="false"` prevents typing while keeping the popover
+  interactive. Picker-level `readonly` and `allowCustom` are deprecated
+  and continue to function via internal mapping.
+- New constraint props on all three pickers:
+  `minDate?: string` and `maxDate?: string` (both `YYYY-MM-DD`), and
+  `isDateUnavailable?: (date: Dayjs) => boolean` for arbitrary
+  disabling (weekends, holidays, business rules). Min/max and the
+  predicate compose — a date is disabled if any check rejects it.
+- `v-model:open` is now supported on all three pickers via the
+  `open` prop + `update:open` emit.
+- New `openOnFocus` (default `false`) and `openOnClick` (default
+  `true`) props let consumers opt out of either trigger path. The
+  same defaults are now applied to `Combobox` for parity.
+- `#trigger` is the canonical slot for a custom trigger renderer;
+  `#target` is kept as a deprecated alias.
+- `DateRangePicker` `clearable` now defaults to `true` and the
+  footer is hidden entirely when there is no value to clear,
+  matching `DatePicker`. Live hover preview while picking the end
+  date and a stable trigger width derived from `format` were added
+  in the same pass.
+- Public type surface: `DateTimePickerProps`, `DateRangePickerEmits`,
+  `DateTimePickerEmits`, and `DateRangeValue` are now exported from
+  the public entrypoint. `defineSlots`/`defineExpose({ open })` are
+  consistent across all three components.
+- Internal: a shared `CalendarPanel` and a `PickerShell` wrapper now
+  drive all four pickers (including `TimePicker`); no consumer-visible
+  behavior change beyond the unified open/close animation.
+
+### DatePicker family — `DateRangePicker` emit shape (breaking)
+
+`DateRangePicker` now emits `update:modelValue` and `change` as a
+`[from, to]` tuple (`DateRangeValue = [string, string] | []`) instead
+of a comma-joined `"YYYY-MM-DD,YYYY-MM-DD"` string. The `modelValue`
+prop already accepted `string[]`; the emit shape is what changes.
+
+```ts
+// before — v0
+function onChange(v: string) {
+  const [from, to] = v.split(',')
+}
+
+// after — v1
+function onChange(v: DateRangeValue) {
+  const [from, to] = v // tuple, or [] when cleared
+}
+```
+
+`v-model`-bound call sites that previously stored a comma-joined
+string need to migrate to an array. Reactive forms that pass the
+value through unchanged are unaffected.
+
+### TimePicker — v1 refresh
+
+`TimePicker` adopts the same vocabulary as the DatePicker family
+and gains a flexible parser.
+
+- `side` / `align` / `offset` replace `placement` (deprecated alias).
+- `keepOpen` (default `false`) replaces `autoClose` (deprecated
+  alias, inverse semantics).
+- `typeable` (default `true`) replaces picker-level `readonly` and
+  `allowCustom` (both deprecated).
+- `v-model:open` parity via `open` prop + `update:open` emit; new
+  `openOnFocus` (default `false`) and `openOnClick` (default `true`)
+  props.
+- Flexible typed input: `"3pm"`, `"3.30pm"`, `"1500"`,
+  `"9:30:15 am"` parse to the canonical `HH:mm[:ss]` shape.
+- Open/close animation matches `DatePicker`.
+- `scrollMode` is deprecated; the list is always centered on the
+  selected option.
+
+### DatePicker family — legacy composable and utils deprecated
+
+`useDatePicker` and the helpers it depends on (`getDate`,
+`getDatesAfter`, `getDaysInMonth`, `isLeapYear`) were not used by any
+of the picker components and are not part of the v1 API. They remain
+exported through v1.x and emit a one-time dev-mode warning. New code
+should use the components directly.
+
+### DatePicker family — keyboard navigation
+
+All three pickers (`DatePicker`, `DateRangePicker`, `DateTimePicker`)
+now support full keyboard navigation inside the calendar grid. Pattern
+follows the WAI-ARIA APG Date Picker Dialog spec.
+
+- `↓` on the trigger input opens the popover and moves focus to the
+  selected/today cell. Focus moves out of the input.
+- Inside the grid: `←` / `→` for ±1 day, `↑` / `↓` for ±1 week,
+  `Home` / `End` for week edges, `PageUp` / `PageDown` for ±1 month,
+  `Shift+PageUp` / `Shift+PageDown` for ±1 year.
+- `Enter` or `Space` selects the focused cell.
+- `Esc` closes the popover and returns focus to the trigger input.
+- Disabled dates (via `minDate` / `maxDate` / `isDateUnavailable`)
+  are skipped during arrow navigation.
+- Cross-month navigation auto-advances the view: pressing `→` on the
+  last day of the visible month focuses the 1st of the next month.
+- `DateRangePicker` dual-pane: arrow keys cross between the two
+  panes without advancing the view; the range-hover shading also
+  tracks the keyboard-focused cell (same preview as mouse hover).
+
+Roving tabindex is used throughout the grid — exactly one cell at a
+time is in the tab order, so `Tab` enters and leaves the grid as a
+single unit rather than cycling through all 42 cells.
+
+Custom `#trigger` slots automatically opt in: any open path
+(`click` / `Space` / `Enter` / `↓`) moves focus into the grid, since
+a non-`TextInput` trigger has no typing context to keep focus on.
+
+### DatePicker family — `#actions` slot moved to sidebar (breaking)
+
+The `#actions` slot on `DatePicker`, `DateRangePicker`, and
+`DateTimePicker` now renders as a **left sidebar** inside the popover
+instead of a footer row. The dedicated footer block has been removed.
+
+- The slot keeps its name (`#actions`) and existing slot-prop shapes,
+  with one addition: `DateRangePicker`'s `#actions` slot now also
+  receives `setRange([from, to])`, which commits both endpoints
+  atomically and normalizes order. Use it for fixed-window presets
+  ("Last 7 days") that previously had to call `setDate` twice.
+- The auto-rendered Clear button (rendered when `clearable && hasValue`
+  and no slot was provided) is gone. Consumers who want an in-popover
+  Clear render one inside `#actions` using the `clear` slot prop.
+  `clearable` remains as a prop and continues to govern any input-level
+  clear affordance.
+- The popover content width switches to `w-fit` when the slot is
+  provided so the calendar layout doesn't have to share a fixed width
+  with the consumer's button list. With no `#actions` slot, sizing is
+  unchanged.
+- A `data-slot="actions"` attribute is set on the sidebar `<aside>` for
+  CSS targeting hooks.
+
+Migration: callers who used the short-lived footer `#actions` slot
+should restyle their buttons for the vertical sidebar layout
+(left-aligned text rows work well). Callers who relied on the
+auto-rendered Clear button should add an explicit Clear row inside
+their `#actions` template — see the picker stories for the canonical
+pattern.
+
+### DateTimePicker — date selection keeps popover open
+
+Selecting a date in `DateTimePicker` no longer auto-closes the
+popover. Auto-closing after date-only selection stranded the embedded
+`TimePicker` — users had to reopen to set the time. Now the popover
+stays open and focus moves into the `TimePicker` input, so callers
+get a continuous date → time selection flow (keyboard or mouse).
+
+The popover closes on `Esc`, click-outside, programmatic close, or
+when the consumer explicitly calls `close()` from a slot scope. This
+is a behavior change for existing callers who relied on the implicit
+date-click close; affected callers should bind `v-model:open` or call
+`close()` from the `actions` slot if they need the old behavior.
+
 ### Input family — shared labeling contract
 
 Every input that has a labelable role now accepts the same four props:
@@ -191,7 +357,14 @@ preserves separator semantics for assistive technologies.
 
 ### Breaking
 
-- None.
+- `DateRangePicker` emits `update:modelValue` / `change` as a
+  `[from, to]` tuple (`DateRangeValue`) instead of a comma-joined
+  string. See the DateRangePicker section above for migration.
+- `DateTimePicker` no longer auto-closes the popover after a date is
+  selected. The popover stays open so the user can also pick a time.
+  Callers that relied on the auto-close should bind `v-model:open`
+  or call `close()` from the `actions` slot. See the DateTimePicker
+  section above.
 
 ### Deprecated
 
@@ -205,6 +378,24 @@ preserves separator semantics for assistive technologies.
 - `Input.vue` → `TextInput`
 - `Autocomplete` → `Combobox` or `MultiSelect`
 - `FormControl type='autocomplete'` → `Combobox` standalone
+- `DatePicker` / `DateRangePicker` / `DateTimePicker` / `TimePicker`:
+  `placement` → `side` + `align` + `offset`
+- `DatePicker` / `DateRangePicker` / `DateTimePicker` / `TimePicker`:
+  `autoClose` → `keepOpen` (inverse semantics)
+- `DatePicker` / `DateRangePicker` / `DateTimePicker` / `TimePicker`:
+  picker-level `readonly` and `allowCustom` → `typeable: false`
+- `DatePicker` / `DateRangePicker` / `DateTimePicker`: `inputClass` →
+  `class` on the component element
+- `DatePicker` / `DateRangePicker` / `DateTimePicker` / `TimePicker`:
+  `value` prop → `v-model` / `modelValue`
+- `DatePicker` / `DateRangePicker` / `DateTimePicker`: `change` emit →
+  `update:modelValue` / `v-model`
+- `DatePicker` / `DateRangePicker` / `DateTimePicker`: `#target` slot →
+  `#trigger`
+- `TimePicker.scrollMode` prop → no replacement (always centered)
+- `useDatePicker` composable (and its `getDate` / `getDatesAfter` /
+  `getDaysInMonth` / `isLeapYear` helpers) → use the picker
+  components directly
 
 All deprecations preserve backwards compatibility in v1.x and emit a
 one-time dev-mode warning. Removal is post-v1.
@@ -224,6 +415,34 @@ one-time dev-mode warning. Removal is post-v1.
   `MultiSelect` (multi-select).
 - `FormControl type='autocomplete'` consumers: switch to `Combobox`
   standalone.
+- DatePicker family — positioning: replace
+  `:placement="'bottom-end'"` with `:side="'bottom'" :align="'end'"`
+  (and `:offset` if you were relying on a non-default gap).
+- DatePicker family — `autoClose`: invert and rename. `autoClose: false`
+  becomes `keepOpen: true`; the default (close after pick) is now the
+  silent default and needs no prop.
+- DatePicker family — `allowCustom` / picker-level `readonly`: replace
+  with `:typeable="false"`. The HTML-level `readonly` attribute on the
+  inner input is unchanged.
+- DatePicker family — `inputClass`: drop it and put the class directly
+  on the component element (`<DatePicker class="w-48" />`).
+- DatePicker family — custom triggers: rename `#target` to `#trigger`.
+- DatePicker family — `change` listeners: bind via `v-model` /
+  `@update:modelValue` instead.
+- `DateRangePicker` — emit shape: switch from
+  `(v: string) => v.split(',')` to
+  `(v: DateRangeValue) => v` (tuple, `[]` when cleared).
+- `TimePicker.scrollMode`: drop the prop.
+- `useDatePicker`: replace ad-hoc usage with `<DatePicker>` /
+  `<DateRangePicker>` / `<DateTimePicker>`.
+- `DateTimePicker` — close-on-date-select: if you relied on the
+  popover closing after the user picked a date, switch to
+  `v-model:open` and close it explicitly from `@update:modelValue`,
+  or render an "Apply" / "Done" button in the `#actions` slot
+  (`close` is available in the slot scope). For most callers no
+  migration is needed — the new behavior (pick date → pick time →
+  close on Esc/outside-click) is what users expect from a combined
+  date-time picker.
 
 ## Deprecation log
 
@@ -239,3 +458,14 @@ one-time dev-mode warning. Removal is post-v1.
 | `Input.vue`                        | Deprecated | `TextInput`                          | Warning on mount                       |
 | `Autocomplete`                     | Deprecated | `Combobox` or `MultiSelect`          | Warning on mount                       |
 | `FormControl type='autocomplete'`  | Deprecated | `Combobox` standalone                | Warning when type is set               |
+| DatePicker family `placement` prop | Deprecated | `side` + `align` + `offset`          | Mapped internally; warning fires       |
+| DatePicker family `autoClose` prop | Deprecated | `keepOpen` (inverse)                 | Mapped internally; warning fires       |
+| DatePicker family `allowCustom`    | Deprecated | `typeable: false`                    | Mapped internally; warning fires       |
+| DatePicker family `readonly` prop  | Deprecated | `typeable: false`                    | Picker-level only; warning fires       |
+| DatePicker family `inputClass`     | Deprecated | `class` on the component element     | Warning fires when set                 |
+| DatePicker family `value` prop     | Deprecated | `v-model` / `modelValue`             | Warning fires when set                 |
+| DatePicker family `change` emit    | Deprecated | `update:modelValue` / `v-model`      | Warning fires when bound               |
+| DatePicker family `#target` slot   | Deprecated | `#trigger`                           | Silent alias; warning fires            |
+| `TimePicker.scrollMode` prop       | Deprecated | none (always centered)               | Warning fires when set                 |
+| `useDatePicker` composable         | Deprecated | use picker components directly       | Warning fires on call                  |
+| `getDate` / `getDatesAfter` / etc. | Deprecated | use picker components directly       | JSDoc deprecated; no runtime warning   |

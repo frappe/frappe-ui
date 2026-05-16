@@ -1,427 +1,472 @@
 <template>
-  <Popover
-    class="inline-block"
-    :placement="placement"
-    @open="initFromValue"
-    @close="handleClose"
-    ref="popoverRef"
+  <PickerShell
+    ref="shellRef"
+    v-model:open="isOpen"
+    v-model:input-value="inputValue"
+    v-model:typing="isTyping"
+    :side="resolvedSide"
+    :align="resolvedAlign"
+    :offset="resolvedOffset"
+    :open-on-focus="props.openOnFocus"
+    :open-on-click="props.openOnClick"
+    :id="props.id"
+    :label="props.label"
+    :description="props.description"
+    :error="props.error"
+    :required="props.required"
+    :size="props.size"
+    :variant="props.variant"
+    :placeholder="props.placeholder"
+    :disabled="props.disabled"
+    :readonly="inputReadonly"
+    :input-class="dp.inputClass"
+    :display-label="displayLabel"
+    content-class="w-fit rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5"
+    @blur="commitInput()"
+    @enter="commitInput(true)"
+    @open="onShellOpen"
+    @close="onShellClose"
+    @request-focus="onShellRequestFocus"
   >
-    <template #target="{ togglePopover, isOpen }">
-      <slot
-        name="target"
-        v-bind="{ togglePopover, isOpen, displayLabel, inputValue }"
-      >
-        <TextInput
-          v-model="inputValue"
-          type="text"
-          class="cursor-text w-full"
-          :class="props.inputClass"
-          :label="props.label"
-          :variant="props.variant"
-          :placeholder="props.placeholder"
-          :disabled="props.disabled"
-          :readonly="props.readonly || !props.allowCustom"
-          @focus="activateInput(isOpen, togglePopover)"
-          @click="activateInput(isOpen, togglePopover)"
-          @blur="onBlur"
-          @keydown.enter.prevent="onEnter(togglePopover)"
-        >
-          <template v-if="$slots.prefix" #prefix>
-            <slot
-              name="prefix"
-              v-bind="{ togglePopover, isOpen, displayLabel, inputValue }"
-            />
-          </template>
-          <template #suffix>
-            <slot
-              name="suffix"
-              v-bind="{ togglePopover, isOpen, displayLabel, inputValue }"
-            >
-              <span
-                class="lucide-chevron-down size-4 cursor-pointer"
-                aria-hidden="true"
-                @mousedown.prevent="togglePopover"
-              />
-            </slot>
-          </template>
-        </TextInput>
-      </slot>
-    </template>
-    <template #body="{ togglePopover }">
+    <template v-if="$slots.trigger" #trigger="ts"><slot name="trigger" v-bind="ts" /></template>
+    <template v-if="$slots.target" #target="ts"><slot name="target" v-bind="ts" /></template>
+    <template v-if="$slots.prefix" #prefix="ts"><slot name="prefix" v-bind="ts" /></template>
+    <template v-if="$slots.suffix" #suffix="ts"><slot name="suffix" v-bind="ts" /></template>
+
+    <template #default="{ close }">
       <div
-        ref="popoverContentRef"
-        class="w-fit min-w-60 select-none text-base text-ink-gray-9 rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5 mt-2"
+        class="flex"
+        :class="$slots.actions ? 'divide-x divide-outline-gray-2' : ''"
       >
-        <!-- Header / Navigation -->
-        <div class="flex items-center justify-between p-2 pb-0 gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            class="text-sm font-medium text-ink-gray-7"
-            label="cycle-calendar-view"
-            @click="cycleView"
-          >
-            <span v-if="view === 'date'">
-              {{ months[currentMonth] }} {{ currentYear }}
-            </span>
-            <span v-else-if="view === 'month'">{{ currentYear }}</span>
-            <span v-else>{{ yearRangeStart }} - {{ yearRangeStart + 11 }}</span>
-          </Button>
-          <div class="flex items-center">
-            <Button
-              variant="ghost"
-              icon="lucide-chevron-left"
-              class="size-7"
-              label="previous"
-              @click="prev"
-            />
-            <Button
-              variant="ghost"
-              class="text-xs"
-              :label="'Today'"
-              @click="() => handleTodayClick(togglePopover)"
-            />
-            <Button
-              variant="ghost"
-              icon="lucide-chevron-right"
-              class="size-7"
-              label="next"
-              @click="next"
-            />
-          </div>
-        </div>
-        <!-- Content -->
-        <div class="p-2">
-          <!-- Date Grid -->
-          <div v-if="view === 'date'">
-            <div
-              class="flex items-center text-xs font-medium uppercase text-ink-gray-4 mb-1"
-            >
-              <div
-                v-for="d in ['S', 'M', 'T', 'W', 'T', 'F', 'S']"
-                :key="d"
-                class="flex h-6 w-8 items-center justify-center"
-              >
-                {{ d }}
-              </div>
-            </div>
-            <div v-for="(week, wi) in weeks" :key="wi" class="flex" role="row">
-              <button
-                v-for="dateObj in week"
-                type="button"
-                :key="dateObj.key"
-                class="flex h-8 w-8 items-center justify-center rounded cursor-pointer text-sm focus:outline-none focus:ring-2 focus:ring-outline-gray-2"
-                :class="[
-                  dateObj.inMonth ? 'text-ink-gray-8' : 'text-ink-gray-3',
-                  dateObj.isToday ? 'font-extrabold text-ink-gray-9' : '',
-                  dateObj.isRangeStart || dateObj.isRangeEnd
-                    ? 'bg-surface-gray-6 text-ink-white hover:bg-surface-gray-6'
-                    : dateObj.inRange
-                      ? 'bg-surface-gray-3 rounded-none'
-                      : 'hover:bg-surface-gray-2',
-                  dateObj.isRangeStart && !dateObj.isRangeEnd
-                    ? 'rounded-l-md rounded-r-none'
-                    : '',
-                  dateObj.isRangeEnd && !dateObj.isRangeStart
-                    ? 'rounded-r-md rounded-l-none'
-                    : '',
-                  dateObj.isRangeStart && dateObj.isRangeEnd
-                    ? 'rounded-md'
-                    : '',
-                ]"
-                role="gridcell"
-                :aria-selected="
-                  dateObj.isRangeStart || dateObj.isRangeEnd ? 'true' : 'false'
-                "
-                :aria-label="
-                  dateObj.date.format('YYYY-MM-DD') +
-                  (dateObj.isToday ? ' (Today)' : '')
-                "
-                @click="handleDateCellClick(dateObj.date, togglePopover)"
-              >
-                {{ dateObj.date.date() }}
-              </button>
-            </div>
-          </div>
-          <!-- Month Grid -->
-          <div
-            v-else-if="view === 'month'"
-            class="grid grid-cols-3 gap-1"
-            role="grid"
-            aria-label="Select month"
-          >
-            <button
-              v-for="(m, i) in months"
-              type="button"
-              :key="m"
-              class="py-2 text-sm rounded cursor-pointer text-center hover:bg-surface-gray-2 focus:outline-none focus:ring-2 focus:ring-brand-6"
-              :class="{
-                'bg-surface-gray-6 text-ink-white hover:bg-surface-gray-6':
-                  i === currentMonth,
-              }"
-              :aria-selected="i === currentMonth ? 'true' : 'false'"
-              @click="selectMonth(i)"
-            >
-              {{ m.slice(0, 3) }}
-            </button>
-          </div>
-          <!-- Year Grid -->
-          <div
-            v-else
-            class="grid grid-cols-3 gap-1"
-            role="grid"
-            aria-label="Select year"
-          >
-            <button
-              v-for="y in yearRange"
-              type="button"
-              :key="y"
-              class="py-2 text-sm rounded cursor-pointer text-center hover:bg-surface-gray-2 focus:outline-none focus:ring-2 focus:ring-brand-6"
-              :class="{
-                'bg-surface-gray-6 text-ink-white hover:bg-surface-gray-6':
-                  y === currentYear,
-              }"
-              :aria-selected="y === currentYear ? 'true' : 'false'"
-              @click="selectYear(y)"
-            >
-              {{ y }}
-            </button>
-          </div>
-        </div>
-        <div
-          class="flex justify-end gap-1 p-2 border-t dark:border-outline-gray-2"
+        <aside
+          v-if="$slots.actions"
+          data-slot="actions"
+          aria-label="Shortcuts"
+          class="flex flex-col p-2 gap-0.5"
         >
-          <Button
-            size="sm"
-            variant="outline"
-            :label="'Clear'"
-            :disabled="!fromDate || !toDate"
-            @click="() => handleClearClick(togglePopover)"
+          <slot
+            name="actions"
+            v-bind="{
+              fromDate,
+              toDate,
+              setDate: handleDateCellClick,
+              setRange: handleSetRange,
+              clear: handleClearClick,
+              close,
+            }"
+          />
+        </aside>
+        <div
+          class="flex"
+          :class="isDualPaneActive ? 'divide-x divide-outline-gray-2' : ''"
+        >
+          <CalendarPanel
+            ref="leftPanelRef"
+            :view="view"
+            :current-year="currentYear"
+            :current-month="currentMonth"
+            :year-range-start="yearRangeStart"
+            :year-range="yearRange"
+            :weeks="weeks"
+            :today-label="isDualPaneActive ? '' : 'Today'"
+            :hide-next="isDualPaneActive"
+            :hide-out-of-month="isDualPaneActive"
+            :center-header="isDualPaneActive"
+            :min="props.min"
+            :max="props.max"
+            v-model:focused-date="focusedDate"
+            @prev="prev"
+            @next="next"
+            @today="handleTodayClick"
+            @cycle-view="cycleView"
+            @select-month="selectMonth"
+            @select-year="selectYear"
+            @select-date="handleDateCellClick"
+            @hover-cell="onCellHover"
+            @navigate="onPanelNavigate"
+          />
+          <CalendarPanel
+            v-if="isDualPaneActive"
+            ref="rightPanelRef"
+            :view="view"
+            :current-year="rightYear"
+            :current-month="rightMonth"
+            :year-range-start="yearRangeStart"
+            :year-range="yearRange"
+            :weeks="rightWeeks"
+            hide-prev
+            hide-today
+            hide-out-of-month
+            center-header
+            :min="props.min"
+            :max="props.max"
+            v-model:focused-date="focusedDate"
+            @next="next"
+            @cycle-view="cycleView"
+            @select-date="handleDateCellClick"
+            @hover-cell="onCellHover"
+            @navigate="onPanelNavigate"
           />
         </div>
       </div>
     </template>
-  </Popover>
+  </PickerShell>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, toRefs } from 'vue'
-import { Popover } from '../Popover'
-import { Button } from '../Button'
-import { TextInput } from '../TextInput'
+import { ref, computed, nextTick, watch } from 'vue'
 import { dayjs, dayjsLocal } from '../../utils/dayjs'
-import { months, monthStart, generateWeeks, getDateValue } from './utils'
-import type { Dayjs } from 'dayjs'
+import { generateWeeks } from './utils'
+import CalendarPanel, { type CalendarPanelCell } from './CalendarPanel.vue'
+import PickerShell from '../shared/picker/PickerShell.vue'
+import {
+  useCalendarView,
+  usePopoverPositioning,
+  useKeepOpen,
+  useTypeable,
+  useDateCoercion,
+  useDeprecationWarnings,
+  makeUnavailableCheck,
+  type LegacyDatePickerProps,
+} from './composables'
+import type { Dayjs } from 'dayjs/esm'
 import type {
-  DatePickerEmits,
   DateRangePickerProps,
-  DatePickerViewMode as ViewMode,
+  DateRangePickerEmits,
+  DateRangePickerSlots,
+  DateRangeValue,
 } from './types'
 
 const props = withDefaults(defineProps<DateRangePickerProps>(), {
-  value: '',
-  modelValue: '',
-  placement: 'bottom-start',
+  value: () => [],
+  modelValue: () => [],
   variant: 'subtle',
   placeholder: 'Select range',
+  typeable: true,
   readonly: false,
   allowCustom: true,
-  autoClose: true,
   disabled: false,
+  clearable: true,
+  dualPane: false,
+  openOnFocus: false,
+  openOnClick: true,
+  // Legacy default kept; see `useKeepOpen` for why.
+  autoClose: true,
 })
-const emit = defineEmits<DatePickerEmits>()
+const emit = defineEmits<DateRangePickerEmits>()
 
-const { autoClose } = toRefs(props)
+const slots = defineSlots<DateRangePickerSlots>()
 
-const view = ref<ViewMode>('date')
-const currentYear = ref<number>(dayjs().year())
-const currentMonth = ref<number>(dayjs().month()) // 0-index
+const dp = props as unknown as LegacyDatePickerProps
+
+// ── Popover open state ───────────────────────────────────────────────────────
+
+const shellRef = ref<{ open: () => void } | null>(null)
+const isOpen = ref(false)
+
+watch(
+  () => props.open,
+  (val) => {
+    if (typeof val === 'boolean' && val !== isOpen.value) {
+      isOpen.value = val
+    }
+  },
+)
+
+watch(isOpen, (val) => {
+  emit('update:open', val)
+})
+
+function onShellOpen() {
+  initFromValue()
+  seedFocusedDate()
+}
+
+function onShellClose() {
+  resetView()
+  hoverDate.value = null
+  if (isTyping.value) {
+    commitInput()
+    isTyping.value = false
+  }
+  focusedDate.value = null
+}
+
+defineExpose({
+  open: () => shellRef.value?.open(),
+})
+
+// ── Keyboard focus management ────────────────────────────────────────────────
+
+const leftPanelRef = ref<{ focusInitialCell: () => void } | null>(null)
+const rightPanelRef = ref<{ focusInitialCell: () => void } | null>(null)
+const focusedDate = ref<Dayjs | null>(null)
+
+function seedFocusedDate() {
+  if (focusedDate.value) return
+  // Prefer the existing range start, then today, then first available cell
+  // in the left pane, then in the right pane (dual-pane fallback).
+  if (fromDate.value) {
+    const d = dayjs(fromDate.value)
+    if (!checkUnavailable(d)) {
+      focusedDate.value = d
+      return
+    }
+  }
+  const today = dayjsLocal().startOf('day')
+  if (!checkUnavailable(today)) {
+    focusedDate.value = today
+    return
+  }
+  const leftFirst = weeks.value
+    .flat()
+    .find((c) => c.inMonth && !c.isUnavailable)
+  if (leftFirst) {
+    focusedDate.value = leftFirst.date
+    return
+  }
+  if (props.dualPane) {
+    const rightFirst = rightWeeks.value
+      .flat()
+      .find((c) => c.inMonth && !c.isUnavailable)
+    if (rightFirst) focusedDate.value = rightFirst.date
+  }
+}
+
+function onShellRequestFocus() {
+  // Seed synchronously so panels mount with `props.focusedDate` already
+  // set — important for dual-pane, where two panels otherwise race to seed
+  // and the wrong one wins. Then queue the actual `.focus()` call for
+  // after the popover has rendered.
+  seedFocusedDate()
+  nextTick(() => {
+    leftPanelRef.value?.focusInitialCell()
+    rightPanelRef.value?.focusInitialCell()
+  })
+}
+
+function onPanelNavigate(target: Dayjs) {
+  // In dual-pane mode, the target may already be visible in the sibling
+  // panel (right pane = currentMonth + 1). In that case we don't advance the
+  // view — instead, just push the focused date so the sibling panel's watch
+  // picks it up and focuses its own matching cell.
+  if (props.dualPane) {
+    const inLeft =
+      target.month() === currentMonth.value &&
+      target.year() === currentYear.value
+    const inRight =
+      target.month() === rightMonth.value &&
+      target.year() === rightYear.value
+    if (inLeft || inRight) {
+      focusedDate.value = target
+      return
+    }
+  }
+  // Single-pane (or dual-pane crossing beyond the right edge): advance the
+  // view. After the parent re-renders, the originating panel's shiftFocus
+  // retry will find the cell and emit `update:focusedDate`.
+  focusOn(target)
+}
+
+// ── Positioning / keepOpen / deprecations ────────────────────────────────────
+
+const { resolvedSide, resolvedAlign, resolvedOffset } = usePopoverPositioning(
+  props,
+  dp,
+)
+const shouldKeepOpen = useKeepOpen(props, dp)
+const inputReadonly = useTypeable(props, dp)
+useDeprecationWarnings('DateRangePicker', dp, {
+  hasTargetSlot: computed(() => !!slots.target),
+})
+
+// ── Calendar state ───────────────────────────────────────────────────────────
+
+const {
+  view,
+  currentYear,
+  currentMonth,
+  yearRangeStart,
+  yearRange,
+  prev,
+  next,
+  cycleView,
+  selectMonth,
+  selectYear,
+  focusOn,
+  resetView,
+} = useCalendarView()
+
 const DATE_FORMAT = 'YYYY-MM-DD'
-
 const fromDate = ref<string>('')
 const toDate = ref<string>('')
-// Track whether user typed
-const isTyping = ref(false)
-const inputValue = ref('')
+// Tracks the date under the cursor while the user is mid-selection
+// (start picked, end not yet) so we can preview the in-progress range.
+const hoverDate = ref<Dayjs | null>(null)
 
-// Display label helpers (placed early so functions below can use them safely)
-function formatDisplay(from: string, to: string): string {
-  if (!from && !to) return ''
-  if (from && !to) return formatOne(from)
-  return `${formatOne(from)} to ${formatOne(to)}`
+const checkUnavailable = makeUnavailableCheck(
+  () => props.min,
+  () => props.max,
+  () => props.isDateUnavailable,
+)
+
+const coerceToDayjs = useDateCoercion(() => props.format)
+
+// ── Value parsing ────────────────────────────────────────────────────────────
+
+function normalizeIncoming(val?: string[] | null): [string, string] {
+  if (!val || !val.length) return ['', '']
+  const from = coerceToDayjs(val[0] || '')
+  const to = coerceToDayjs(val[1] || '')
+  return [from?.format(DATE_FORMAT) || '', to?.format(DATE_FORMAT) || '']
 }
+
+function parseRangeInput(raw: string): [Dayjs | null, Dayjs | null] {
+  if (!raw.trim()) return [null, null]
+  const normalized = raw.replace(/\s+to\s+/i, ',').replace(/\s+-\s+/g, ',')
+  const parts = normalized
+    .split(',')
+    .map((p) => p.trim())
+    .filter(Boolean)
+  if (!parts.length) return [null, null]
+  return [coerceToDayjs(parts[0]), coerceToDayjs(parts[1])]
+}
+
+function pickIncoming(): string[] {
+  if (props.modelValue && props.modelValue.length) return props.modelValue
+  if (props.value && props.value.length) return props.value
+  return []
+}
+
+function syncFromValue(val?: string[]): void {
+  const [f, t] = normalizeIncoming(val)
+  fromDate.value = f
+  toDate.value = t
+  if (f) focusOn(dayjs(f))
+}
+
+const initialValue = ref<string>('')
+syncFromValue(pickIncoming())
+initialValue.value = serialize(fromDate.value, toDate.value)
+
+function initFromValue(): void {
+  syncFromValue(pickIncoming())
+}
+
+watch(
+  () => [props.modelValue, props.value],
+  () => {
+    syncFromValue(pickIncoming())
+  },
+)
+
+// ── Display ──────────────────────────────────────────────────────────────────
+
+const displayLabel = computed<string>(() =>
+  formatDisplay(fromDate.value, toDate.value),
+)
+
 function formatOne(dateStr: string): string {
   if (!dateStr) return ''
   const d = dayjs(dateStr)
   if (!d.isValid()) return dateStr
   return props.format ? d.format(props.format) : dateStr
 }
-const displayLabel = computed<string>(() =>
-  formatDisplay(fromDate.value, toDate.value),
-)
-
-function coerceToDayjs(val?: string | null): Dayjs | null {
-  if (!val) return null
-  const raw = String(val).trim()
-  if (!raw) return null
-  if (props.format) {
-    const dStrict = dayjs(raw, props.format, true)
-    if (dStrict.isValid()) return dStrict
-  }
-  const dLoose = dayjs(raw)
-  if (dLoose.isValid()) return dLoose
-  const normalized = getDateValue(raw)
-  if (normalized) {
-    const dNorm = dayjs(normalized)
-    if (dNorm.isValid()) return dNorm
-  }
-  return null
+function formatDisplay(from: string, to: string): string {
+  if (!from && !to) return ''
+  if (from && !to) return formatOne(from)
+  return `${formatOne(from)} to ${formatOne(to)}`
 }
 
-function normalizeIncoming(val?: string | string[] | null) {
-  if (!val) return ['', '']
-  let parts: string[] = []
-  if (Array.isArray(val)) parts = val
-  else if (typeof val === 'string') {
-    const cleaned = val.replace(/ to /i, ',').replace(/ - /g, ',')
-    parts = cleaned
-      .split(',')
-      .map((p) => p.trim())
-      .filter(Boolean)
-  }
-  const from = coerceToDayjs(parts[0] || '')
-  const to = coerceToDayjs(parts[1] || '')
-  return [from?.format(DATE_FORMAT) || '', to?.format(DATE_FORMAT) || '']
-}
-
-function syncFromValue(val?: string | string[]) {
-  const [f, t] = normalizeIncoming(val as any)
-  fromDate.value = f
-  toDate.value = t
-  if (f) {
-    const d = dayjs(f)
-    currentYear.value = d.year()
-    currentMonth.value = d.month()
-  }
-  // reflect in input if not typing
-  if (!isTyping.value) updateInputValue()
-}
-
-const initialValue = props.modelValue || props.value || ''
-syncFromValue(initialValue as any)
-
-function initFromValue(): void {
-  syncFromValue(props.modelValue || props.value || '')
-}
-
-watch(
-  () => [props.modelValue, props.value],
-  ([m, v]) => {
-    const val = (m || v) as any
-    syncFromValue(val)
-  },
-)
-
-function updateInputValue() {
-  inputValue.value = displayLabel.value
-}
-updateInputValue()
-
+const inputValue = ref<string>(displayLabel.value)
+const isTyping = ref(false)
 watch(displayLabel, (val) => {
   if (!isTyping.value) inputValue.value = val
 })
 
-function parseRangeInput(raw: string): [Dayjs | null, Dayjs | null] {
-  if (!raw.trim()) return [null, null]
-  let normalized = raw.replace(/\s+to\s+/i, ',').replace(/\s+-\s+/g, ',')
-  const parts = normalized
-    .split(',')
-    .map((p) => p.trim())
-    .filter(Boolean)
-  if (!parts.length) return [null, null]
-  const first = coerceToDayjs(parts[0])
-  const second = coerceToDayjs(parts[1])
-  return [first, second]
-}
+// ── Calendar grid (with range markers) ───────────────────────────────────────
 
-function maybeClose(togglePopover?: () => void, condition = true) {
-  if (condition && autoClose.value && togglePopover) togglePopover()
-}
-
-function commitInput(close = false, togglePopover?: () => void) {
-  const raw = inputValue.value.trim()
-  if (!raw) {
-    clearSelection()
-    maybeClose(togglePopover, close)
-    return
-  }
-  const [f, t] = parseRangeInput(raw)
-  if (f) fromDate.value = f.format(DATE_FORMAT)
-  if (t) toDate.value = t.format(DATE_FORMAT)
-  if (!t) toDate.value = ''
-  ensureOrder()
-  emitIfComplete()
-  updateInputValue()
-  maybeClose(togglePopover, close && !!fromDate.value && !!toDate.value)
-}
-
-const popoverContentRef = ref<HTMLElement | null>(null)
-
-function onBlur(e: FocusEvent) {
-  const next = e.relatedTarget as Node | null
-  if (next && popoverContentRef.value?.contains(next)) return
-  commitInput()
-  isTyping.value = false
-}
-function onEnter(togglePopover: () => void) {
-  commitInput(true, togglePopover)
-  isTyping.value = false
-}
-function activateInput(isOpen: boolean | undefined, togglePopover: () => void) {
-  isTyping.value = true
-  if (!isOpen) togglePopover()
-}
-
-// Weeks with range annotations
-interface RangeDateObj {
-  date: Dayjs
-  key: string
-  inMonth: boolean
-  isToday: boolean
-  isRangeStart: boolean
-  isRangeEnd: boolean
-  inRange: boolean
-}
-
-const weeks = computed<RangeDateObj[][]>(() => {
-  const raw = generateWeeks(currentYear.value, currentMonth.value, '')
-  const f = dayjs(fromDate.value)
-  const t = dayjs(toDate.value)
+function buildRangeWeeks(year: number, month: number): CalendarPanelCell[][] {
+  const raw = generateWeeks(year, month, '')
+  const f = fromDate.value ? dayjs(fromDate.value) : null
+  const t = toDate.value ? dayjs(toDate.value) : null
+  // While picking the end date, the hovered cell and everything between
+  // `from` and it render as in-range (light gray) — only committed endpoints
+  // get the dark "selected" treatment. Mouse hover and keyboard focus both
+  // act as the preview anchor; mouse wins when both exist.
+  const previewAnchor = hoverDate.value ?? focusedDate.value
+  const hovering = !t && f && previewAnchor ? previewAnchor : null
+  const hoverEnd = hovering && hovering.isAfter(f!, 'day') ? hovering : null
+  const hoverStart = hovering && hovering.isBefore(f!, 'day') ? hovering : null
   return raw.map((week) =>
     week.map((d) => {
-      const isRangeStart = f.isValid() && d.date.isSame(f, 'day')
-      const isRangeEnd = t.isValid() && d.date.isSame(t, 'day')
-      const inRange =
-        f.isValid() &&
-        t.isValid() &&
-        d.date.isAfter(f, 'day') &&
-        d.date.isBefore(t, 'day')
+      const isRangeStart = !!(f && d.date.isSame(f, 'day'))
+      const isRangeEnd = !!(t && d.date.isSame(t, 'day'))
+      let inRange = false
+      if (f && t) {
+        inRange = d.date.isAfter(f, 'day') && d.date.isBefore(t, 'day')
+      } else if (hoverEnd && f) {
+        inRange =
+          d.date.isAfter(f, 'day') && !d.date.isAfter(hoverEnd, 'day')
+      } else if (hoverStart && f) {
+        inRange =
+          !d.date.isBefore(hoverStart, 'day') && d.date.isBefore(f, 'day')
+      }
       return {
-        date: d.date,
-        key: d.key,
-        inMonth: d.inMonth,
-        isToday: d.isToday,
+        ...d,
+        isSelected: false,
+        isUnavailable: checkUnavailable(d.date),
         isRangeStart,
         isRangeEnd,
         inRange,
       }
     }),
   )
-})
+}
+
+const weeks = computed<CalendarPanelCell[][]>(() =>
+  buildRangeWeeks(currentYear.value, currentMonth.value),
+)
+
+// ── Dual-pane (right side) ───────────────────────────────────────────────────
+// Dual pane only renders for the day-grid view; cycling to month/year falls
+// back to a single panel to avoid duplicate selectors.
+
+const isDualPaneActive = computed(() => props.dualPane && view.value === 'date')
+
+const rightAnchor = computed(() =>
+  dayjs().year(currentYear.value).month(currentMonth.value).add(1, 'month'),
+)
+const rightYear = computed(() => rightAnchor.value.year())
+const rightMonth = computed(() => rightAnchor.value.month())
+const rightWeeks = computed<CalendarPanelCell[][]>(() =>
+  buildRangeWeeks(rightYear.value, rightMonth.value),
+)
+
+// ── Input commit / selection ─────────────────────────────────────────────────
+
+function commitInput(close = false): void {
+  const raw = inputValue.value.trim()
+  if (!raw) {
+    clearSelection()
+    if (close && !shouldKeepOpen.value) isOpen.value = false
+    return
+  }
+  const [f, t] = parseRangeInput(raw)
+  if (f && !checkUnavailable(f)) fromDate.value = f.format(DATE_FORMAT)
+  if (t && !checkUnavailable(t)) toDate.value = t.format(DATE_FORMAT)
+  else if (!t) toDate.value = ''
+  ensureOrder()
+  emitIfChanged()
+  inputValue.value = displayLabel.value
+  if (close && !shouldKeepOpen.value && fromDate.value && toDate.value) {
+    isOpen.value = false
+  }
+}
 
 function selectDate(date: string | Date | Dayjs): void {
   const d = dayjs(date as any)
-  if (!d.isValid()) return
+  if (!d.isValid() || checkUnavailable(d)) return
   if (fromDate.value && toDate.value) {
     fromDate.value = d.format(DATE_FORMAT)
     toDate.value = ''
@@ -431,7 +476,6 @@ function selectDate(date: string | Date | Dayjs): void {
     fromDate.value = d.format(DATE_FORMAT)
   }
   ensureOrder()
-  updateInputValue()
 }
 function ensureOrder() {
   if (fromDate.value && toDate.value) {
@@ -443,111 +487,76 @@ function ensureOrder() {
   }
 }
 
-function handleDateCellClick(
-  date: string | Date | Dayjs,
-  togglePopover: () => void,
-) {
+function handleDateCellClick(date: string | Date | Dayjs) {
   selectDate(date)
-  if (autoClose.value && fromDate.value && toDate.value) {
-    emitIfComplete()
-    maybeClose(togglePopover, true)
+  if (fromDate.value && toDate.value) {
+    hoverDate.value = null
+    emitIfChanged()
+    if (!shouldKeepOpen.value) isOpen.value = false
   }
   isTyping.value = false
 }
 
-function emitIfComplete() {
-  if (fromDate.value && toDate.value) {
-    const val = `${fromDate.value},${toDate.value}`
-    emit('update:modelValue', val)
-    emit('change', val)
-  }
-  if (!fromDate.value && !toDate.value) {
-    emit('update:modelValue', '')
-    emit('change', '')
-  }
+function onCellHover(d: Dayjs | null) {
+  hoverDate.value = fromDate.value && !toDate.value ? d : null
+}
+
+function serialize(from: string, to: string): string {
+  if (!from && !to) return ''
+  return `${from},${to}`
+}
+
+function emitIfChanged() {
+  const next = serialize(fromDate.value, toDate.value)
+  if (next === initialValue.value) return
+  const payload: DateRangeValue =
+    fromDate.value && toDate.value ? [fromDate.value, toDate.value] : []
+  emit('update:modelValue', payload)
+  emit('change', payload)
+  initialValue.value = next
 }
 
 function clearSelection() {
+  if (!fromDate.value && !toDate.value) return
   fromDate.value = ''
   toDate.value = ''
-  emitIfComplete()
-  updateInputValue()
+  hoverDate.value = null
+  emitIfChanged()
+  inputValue.value = ''
 }
-function handleClearClick(togglePopover: () => void) {
+
+function handleClearClick() {
   clearSelection()
-  maybeClose(togglePopover)
+  if (!shouldKeepOpen.value) isOpen.value = false
   isTyping.value = false
-  view.value = 'date'
+  resetView()
 }
-// Backwards compatibility helper (maps to preset)
-function handleTodayClick(togglePopover?: () => void) {
+
+function handleTodayClick() {
   const now = dayjsLocal().startOf('day')
+  if (checkUnavailable(now)) return
   fromDate.value = now.format(DATE_FORMAT)
   toDate.value = now.format(DATE_FORMAT)
-  emitIfComplete()
-  updateInputValue()
-  if (autoClose.value && togglePopover) togglePopover()
-  view.value = 'date'
+  emitIfChanged()
+  if (!shouldKeepOpen.value) isOpen.value = false
   isTyping.value = false
+  resetView()
 }
 
-function selectMonth(i: number): void {
-  currentMonth.value = i
-  view.value = 'date'
+function handleSetRange(
+  range: [string | Date | Dayjs, string | Date | Dayjs],
+) {
+  const a = dayjs(range[0])
+  const b = dayjs(range[1])
+  if (!a.isValid() || !b.isValid()) return
+  if (checkUnavailable(a) || checkUnavailable(b)) return
+  fromDate.value = a.format(DATE_FORMAT)
+  toDate.value = b.format(DATE_FORMAT)
+  ensureOrder()
+  hoverDate.value = null
+  emitIfChanged()
+  focusOn(dayjs(fromDate.value))
+  isTyping.value = false
+  resetView()
 }
-function selectYear(y: number): void {
-  currentYear.value = y
-  view.value = 'month'
-}
-function prev(): void {
-  if (view.value === 'date') {
-    const m = monthStart(currentYear.value, currentMonth.value).subtract(
-      1,
-      'month',
-    )
-    currentYear.value = m.year()
-    currentMonth.value = m.month()
-  } else if (view.value === 'month') {
-    currentYear.value -= 1
-  } else {
-    currentYear.value -= 12
-  }
-}
-function next(): void {
-  if (view.value === 'date') {
-    const m = monthStart(currentYear.value, currentMonth.value).add(1, 'month')
-    currentYear.value = m.year()
-    currentMonth.value = m.month()
-  } else if (view.value === 'month') {
-    currentYear.value += 1
-  } else {
-    currentYear.value += 12
-  }
-}
-function cycleView(): void {
-  if (view.value === 'date') view.value = 'month'
-  else if (view.value === 'month') view.value = 'year'
-  else view.value = 'date'
-}
-function handleClose() {
-  view.value = 'date'
-  if (isTyping.value) {
-    commitInput()
-    isTyping.value = false
-  }
-}
-
-const yearRangeStart = computed(
-  () => currentYear.value - (currentYear.value % 12),
-)
-const yearRange = computed<number[]>(() =>
-  Array.from({ length: 12 }, (_, i) => yearRangeStart.value + i),
-)
-
-defineExpose({
-  open: () => popoverRef.value?.open(),
-})
-
-// Popover ref for external open
-const popoverRef = ref<InstanceType<typeof Popover> | null>(null)
 </script>

@@ -1,0 +1,105 @@
+name: Barista — PR Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: PR number to (re)review
+        required: true
+        type: number
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: barista-review-${{ github.event.pull_request.number || github.event.issue.number || inputs.pr_number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    # Kill switch: set repo variable BARISTA_ENABLED=true to enable.
+    # Skip drafts. Skip fork PRs (no access to bot token by design — keep PR
+    # head out of a privileged context).
+    # Comment-trigger gating: only run on /barista review from maintainers, on PRs.
+    if: >-
+      vars.BARISTA_ENABLED == 'true' && (
+        (
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.draft == false &&
+          github.event.pull_request.head.repo.full_name == github.repository
+        ) ||
+        github.event_name == 'workflow_dispatch' ||
+        (
+          github.event_name == 'issue_comment' &&
+          github.event.issue.pull_request != null &&
+          contains(github.event.comment.body, '/barista review') &&
+          (
+            github.event.comment.author_association == 'OWNER' ||
+            github.event.comment.author_association == 'MEMBER' ||
+            github.event.comment.author_association == 'COLLABORATOR'
+          )
+        )
+      )
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # History so barista can inspect recent commits near changed files.
+          fetch-depth: 200
+
+      - name: Mint barista app token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.BARISTA_APP_ID }}
+          private-key: ${{ secrets.BARISTA_PRIVATE_KEY }}
+
+      - name: Resolve PR number
+        id: pr
+        run: |
+          case "${{ github.event_name }}" in
+            pull_request)
+              echo "number=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+              ;;
+            issue_comment)
+              echo "number=${{ github.event.issue.number }}" >> "$GITHUB_OUTPUT"
+              ;;
+            workflow_dispatch)
+              echo "number=${{ inputs.pr_number }}" >> "$GITHUB_OUTPUT"
+              ;;
+          esac
+
+      - name: Run Barista (review mode)
+        id: run-barista
+        uses: anthropics/claude-code-action@v1
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          BARISTA_ISSUE: ${{ steps.pr.outputs.number }}
+          BARISTA_EVENT: ${{ github.event_name }}
+          BARISTA_COMMENT_BODY: ${{ github.event.comment.body }}
+          BARISTA_COMMENT_AUTHOR: ${{ github.event.comment.user.login }}
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ steps.app-token.outputs.token }}
+          allowed_non_write_users: "*"
+          display_report: "true"
+          prompt: "/barista-review REPO: ${{ github.repository }} PR_NUMBER: ${{ steps.pr.outputs.number }} EVENT: ${{ github.event_name }}"
+
+      - name: Append run-stats footer to barista's comment
+        if: always() && steps.run-barista.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          EXECUTION_FILE: ${{ steps.run-barista.outputs.execution_file }}
+          ISSUE_NUMBER: ${{ steps.pr.outputs.number }}
+          REPO: ${{ github.repository }}
+        run: ./.github/barista/scripts/append-stats.sh

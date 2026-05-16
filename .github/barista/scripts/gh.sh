@@ -10,6 +10,9 @@
 #   ./gh.sh issue list --state open --limit 20
 #   ./gh.sh search issues "query" --limit 10
 #   ./gh.sh label list --limit 100
+#   ./gh.sh pr view 123
+#   ./gh.sh pr view 123 --comments
+#   ./gh.sh pr diff 123
 
 set -euo pipefail
 
@@ -29,10 +32,10 @@ SUB1="${1:-}"
 SUB2="${2:-}"
 CMD="$SUB1 $SUB2"
 case "$CMD" in
-  "issue view"|"issue list"|"search issues"|"label list")
+  "issue view"|"issue list"|"search issues"|"label list"|"pr view"|"pr diff")
     ;;
   *)
-    echo "Error: only 'issue view', 'issue list', 'search issues', 'label list' are allowed" >&2
+    echo "Error: only 'issue view', 'issue list', 'search issues', 'label list', 'pr view', 'pr diff' are allowed" >&2
     exit 1
     ;;
 esac
@@ -81,9 +84,9 @@ if [[ "$CMD" == "search issues" ]]; then
     exit 1
   fi
   gh "$SUB1" "$SUB2" "$QUERY" --repo "$REPO" "${FLAGS[@]}"
-elif [[ "$CMD" == "issue view" ]]; then
+elif [[ "$CMD" == "issue view" || "$CMD" == "pr view" || "$CMD" == "pr diff" ]]; then
   if [[ ${#POSITIONAL[@]} -ne 1 ]] || ! [[ "${POSITIONAL[0]}" =~ ^[0-9]+$ ]]; then
-    echo "Error: issue view requires exactly one numeric issue number" >&2
+    echo "Error: $CMD requires exactly one numeric number" >&2
     exit 1
   fi
   gh "$SUB1" "$SUB2" "${POSITIONAL[0]}" "${FLAGS[@]}"

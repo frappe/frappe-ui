@@ -4,7 +4,7 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 
-  const propsData = [
+  const tooltipProps = [
   {
     name: 'text',
     description: 'Text content shown inside the tooltip.\nIgnored if a default slot is provided.',
@@ -23,7 +23,7 @@
     name: 'placement',
     description: 'Position of the tooltip relative to the trigger.',
     required: false,
-    type: '"bottom" | "top" | "right" | "left"',
+    type: '"top" | "right" | "bottom" | "left"',
     default: '"top"'
   },
   {
@@ -42,7 +42,7 @@
   }
 ]
 
-  const slotsData = [
+  const tooltipSlots = [
   {
     name: 'default',
     description: 'Default trigger slot.\nWraps the element that the tooltip is attached to.',
@@ -59,10 +59,59 @@
     type: 'any'
   }
 ]
+
+  const tooltipBubbleProps = [
+  {
+    name: 'side',
+    description: 'Preferred popover side relative to the trigger.',
+    required: false,
+    type: '"top" | "right" | "bottom" | "left"',
+    default: '"top"'
+  },
+  {
+    name: 'text',
+    description: 'Text content when neither `#content` nor `#body` is provided.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'arrowClass',
+    description: 'Fill class for the arrow — defaults to match the bubble shell.',
+    required: false,
+    type: 'string',
+    default: '"fill-surface-gray-7"'
+  }
+]
+
+  const tooltipBubbleSlots = [
+  {
+    name: 'default',
+    description: 'Replaces just the text inside the standard bubble.',
+    type: 'any'
+  },
+  {
+    name: 'content',
+    description: 'Replaces just the text inside the standard bubble.',
+    type: 'any'
+  },
+  {
+    name: 'body',
+    description: 'Replaces the entire bubble (including its shell) — arrow still renders.',
+    type: 'any'
+  }
+]
 </script>
 ## API Reference
 
-<PropsTable name="Tooltip" :data="propsData"/> 
+### Tooltip
 
-<SlotsTable :data="slotsData"/> 
+<PropsTable name="Tooltip" :data="tooltipProps"/> 
+
+<SlotsTable :data="tooltipSlots"/> 
+
+### TooltipBubble
+
+<PropsTable folder="Tooltip" name="TooltipBubble" :data="tooltipBubbleProps"/> 
+
+<SlotsTable :data="tooltipBubbleSlots"/> 
 
