@@ -50,6 +50,16 @@ declare module 'frappe-ui/frappe' {
   //   Components
   export const Link: Component
   export type { LinkProps } from './Link/types'
+
+  // Telemetry
+  export function useTelemetry(): {
+    isEnabled: { readonly value: boolean }
+    disable: () => void
+    capture: (event_name: string, data?: Record<string, any>) => void
+  }
+  export const telemetryPlugin: {
+    install: (app: import('vue').App, options: { app_name: string }) => Promise<void>
+  }
 }
 
 // Data Import
