@@ -3,159 +3,178 @@ import { ref } from 'vue'
 import { DatePicker, Button } from 'frappe-ui'
 import { dayjs } from '../../../utils/dayjs'
 import type { Dayjs } from 'dayjs'
+import LucidePlane from '~icons/lucide/plane'
+import LucideCake from '~icons/lucide/cake'
+import LucideTruck from '~icons/lucide/truck'
+import LucideStethoscope from '~icons/lucide/stethoscope'
+import LucideGhost from '~icons/lucide/ghost'
+import LucideRocket from '~icons/lucide/rocket'
+import LucideCalendarPlus from '~icons/lucide/calendar-plus'
 
-const basic = ref('')
-const controlled = ref('2026-01-15')
-const formatted = ref('')
-const constrained = ref('')
-const noWeekends = ref('')
-const keepOpen = ref('')
-const ghost = ref('')
-const outline = ref('')
-const readonlyValue = ref('2026-03-10')
-const withCustomActions = ref('')
-const sizeSm = ref('')
-const sizeLg = ref('')
-const withError = ref('')
-const withDescription = ref('')
-const requiredValue = ref('')
-const externallyOpen = ref(false)
-const externallyOpenValue = ref('')
-
+// 1. Flight booking — can't fly into the past
+const departure = ref('')
 const today = dayjs().format('YYYY-MM-DD')
-const inThirtyDays = dayjs().add(30, 'day').format('YYYY-MM-DD')
+const oneYearOut = dayjs().add(1, 'year').format('YYYY-MM-DD')
 
+// 2. Date of birth — can't be born in the future
+const dob = ref('1995-08-14')
+const longAgo = dayjs().subtract(120, 'year').format('YYYY-MM-DD')
+
+// 3. Delivery — weekdays only with custom quick actions
+const delivery = ref('')
 function isWeekend(date: Dayjs) {
   const day = date.day()
   return day === 0 || day === 6
 }
+function nextMonday(from: Dayjs = dayjs()) {
+  const diff = (8 - from.day()) % 7 || 7
+  return from.add(diff, 'day')
+}
+
+// 4. Appointment — bookable in next 30 days, doc unavailable on a few dates
+const appointment = ref('')
+const inThirtyDays = dayjs().add(30, 'day').format('YYYY-MM-DD')
+const fullyBooked = new Set([
+  dayjs().add(2, 'day').format('YYYY-MM-DD'),
+  dayjs().add(5, 'day').format('YYYY-MM-DD'),
+  dayjs().add(11, 'day').format('YYYY-MM-DD'),
+  dayjs().add(18, 'day').format('YYYY-MM-DD'),
+])
+function isFullyBooked(date: Dayjs) {
+  return fullyBooked.has(date.format('YYYY-MM-DD'))
+}
+
+// 5. Fun — only Friday the 13ths are pickable
+const spookyDate = ref('')
+function notFridayThe13th(date: Dayjs) {
+  return !(date.day() === 5 && date.date() === 13)
+}
+
+// 6. Fun — pick a Stardate for a time-travel destination
+const stardate = ref('')
+const stardateFloor = dayjs('1800-01-01').format('YYYY-MM-DD')
+const stardateCeil = dayjs('2300-12-31').format('YYYY-MM-DD')
+
+// 7. Custom trigger — "Add due date" button on a task card
+const dueDate = ref('')
 </script>
 
 <template>
-  <div class="grid grid-cols-2 gap-4">
+  <div class="grid w-full max-w-3xl grid-cols-1 gap-6 sm:grid-cols-2">
+    <!-- 1. Flight booking -->
     <DatePicker
-      v-model="basic"
-      placeholder="Pick a date"
-      label="Basic"
-      open-on-focus
-    />
-
-    <DatePicker
-      v-model="controlled"
-      label="Pre-filled value"
-      placeholder="Select a date"
-      open-on-focus
-    />
-
-    <DatePicker
-      v-model="formatted"
-      label="Custom display format"
-      placeholder="MMM D, YYYY"
-      format="MMM D, YYYY"
-    />
-
-    <DatePicker
-      v-model="constrained"
-      label="Within next 30 days"
-      placeholder="minDate / maxDate"
+      v-model="departure"
+      label="Departure"
+      placeholder="When are you flying?"
+      format="ddd, MMM D"
       :min-date="today"
-      :max-date="inThirtyDays"
-    />
-
-    <DatePicker
-      v-model="noWeekends"
-      label="Weekdays only"
-      placeholder="isDateUnavailable"
-      :is-date-unavailable="isWeekend"
-    />
-
-    <DatePicker
-      v-model="keepOpen"
-      label="keepOpen"
-      placeholder="Stays open after pick"
-      keep-open
-    />
-
-    <DatePicker
-      v-model="outline"
-      label="Outline variant"
-      placeholder="outline"
-      variant="outline"
-    />
-
-    <DatePicker
-      v-model="readonlyValue"
-      label="Readonly"
-      placeholder="Calendar only"
-      readonly
-    />
-
-    <DatePicker label="Disabled" placeholder="Disabled picker" disabled />
-
-    <DatePicker
-      label="Not clearable"
-      placeholder="No clear/today/tomorrow"
-      :clearable="false"
-    />
-
-    <DatePicker
-      v-model="sizeSm"
-      size="sm"
-      label="Small size"
-      placeholder="size=sm"
-    />
-
-    <DatePicker
-      v-model="sizeLg"
-      size="lg"
-      label="Large size"
-      placeholder="size=lg"
-    />
-
-    <DatePicker
-      v-model="withDescription"
-      label="With description"
-      description="Helper text appears under the input."
-      placeholder="Pick a date"
-    />
-
-    <DatePicker
-      v-model="requiredValue"
-      label="Required field"
-      required
-      placeholder="An asterisk marks it required"
-    />
-
-    <DatePicker
-      v-model="withError"
-      label="With validation error"
-      error="Please select a valid date."
-      placeholder="error state"
-    />
-
-    <div class="flex flex-col gap-2">
-      <Button
-        label="Open picker"
-        :disabled="externallyOpen"
-        @click="externallyOpen = true"
-      />
-      <DatePicker
-        v-model="externallyOpenValue"
-        v-model:open="externallyOpen"
-        label="Controlled open state"
-        :placeholder="externallyOpen ? 'Picker is open' : 'Picker is closed'"
-      />
-    </div>
-
-    <DatePicker
-      v-model="withCustomActions"
-      label="Custom footer actions"
-      placeholder="Tomorrow / Next week"
+      :max-date="oneYearOut"
     >
-      <template #actions="{ selected, setDate, clear }">
-        <Button label="Tomorrow" @click="setDate(dayjs().add(1, 'day'))" />
-        <Button label="Next week" @click="setDate(dayjs().add(7, 'day'))" />
+      <template #prefix>
+        <LucidePlane class="size-4 text-ink-gray-5" />
       </template>
     </DatePicker>
+
+    <!-- 2. Date of birth -->
+    <DatePicker
+      v-model="dob"
+      label="Date of birth"
+      placeholder="MM/DD/YYYY"
+      format="MMM D, YYYY"
+      :min-date="longAgo"
+      :max-date="today"
+      :clearable="false"
+    >
+      <template #prefix>
+        <LucideCake class="size-4 text-ink-gray-5" />
+      </template>
+    </DatePicker>
+
+    <!-- 3. Delivery scheduling -->
+    <DatePicker
+      v-model="delivery"
+      label="Delivery date"
+      placeholder="Weekdays only"
+      :min-date="today"
+      :is-date-unavailable="isWeekend"
+    >
+      <template #prefix>
+        <LucideTruck class="size-4 text-ink-gray-5" />
+      </template>
+      <template #actions="{ setDate }">
+        <Button
+          size="sm"
+          label="Tomorrow"
+          @click="setDate(dayjs().add(1, 'day'))"
+        />
+        <Button
+          size="sm"
+          label="Next Monday"
+          @click="setDate(nextMonday())"
+        />
+      </template>
+    </DatePicker>
+
+    <!-- 4. Doctor's appointment -->
+    <DatePicker
+      v-model="appointment"
+      label="Book appointment"
+      description="Next 30 days. Greyed-out slots are full."
+      placeholder="Pick a slot"
+      :min-date="today"
+      :max-date="inThirtyDays"
+      :is-date-unavailable="isFullyBooked"
+    >
+      <template #prefix>
+        <LucideStethoscope class="size-4 text-ink-gray-5" />
+      </template>
+    </DatePicker>
+
+    <!-- 5. Fun: Friday the 13th -->
+    <DatePicker
+      v-model="spookyDate"
+      label="Spooky date"
+      description="Only Friday the 13ths qualify."
+      placeholder="Pick if you dare"
+      format="dddd, MMM D, YYYY"
+      :is-date-unavailable="notFridayThe13th"
+    >
+      <template #prefix>
+        <LucideGhost class="size-4 text-ink-gray-5" />
+      </template>
+    </DatePicker>
+
+    <!-- 6. Fun: Time-travel destination -->
+    <DatePicker
+      v-model="stardate"
+      label="Time-travel destination"
+      placeholder="When to?"
+      format="[Stardate] YYYY.MM.DD"
+      variant="outline"
+      :min-date="stardateFloor"
+      :max-date="stardateCeil"
+    >
+      <template #prefix>
+        <LucideRocket class="size-4 text-ink-gray-5" />
+      </template>
+    </DatePicker>
+
+    <!-- 7. Custom trigger — feels like a task-card affordance -->
+    <div class="flex flex-col gap-1.5 sm:col-span-2">
+      <span class="text-sm text-ink-gray-7">Task card affordance</span>
+      <DatePicker v-model="dueDate" format="MMM D">
+        <template #trigger="{ togglePopover, displayLabel }">
+          <Button
+            :variant="dueDate ? 'subtle' : 'ghost'"
+            @click="togglePopover"
+          >
+            <template #prefix>
+              <LucideCalendarPlus class="size-4" />
+            </template>
+            {{ dueDate ? `Due ${displayLabel}` : 'Add due date' }}
+          </Button>
+        </template>
+      </DatePicker>
+    </div>
   </div>
 </template>
