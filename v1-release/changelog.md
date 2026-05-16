@@ -142,6 +142,49 @@ of the picker components and are not part of the v1 API. They remain
 exported through v1.x and emit a one-time dev-mode warning. New code
 should use the components directly.
 
+### DatePicker family — keyboard navigation
+
+All three pickers (`DatePicker`, `DateRangePicker`, `DateTimePicker`)
+now support full keyboard navigation inside the calendar grid. Pattern
+follows the WAI-ARIA APG Date Picker Dialog spec.
+
+- `↓` on the trigger input opens the popover and moves focus to the
+  selected/today cell. Focus moves out of the input.
+- Inside the grid: `←` / `→` for ±1 day, `↑` / `↓` for ±1 week,
+  `Home` / `End` for week edges, `PageUp` / `PageDown` for ±1 month,
+  `Shift+PageUp` / `Shift+PageDown` for ±1 year.
+- `Enter` or `Space` selects the focused cell.
+- `Esc` closes the popover and returns focus to the trigger input.
+- Disabled dates (via `minDate` / `maxDate` / `isDateUnavailable`)
+  are skipped during arrow navigation.
+- Cross-month navigation auto-advances the view: pressing `→` on the
+  last day of the visible month focuses the 1st of the next month.
+- `DateRangePicker` dual-pane: arrow keys cross between the two
+  panes without advancing the view; the range-hover shading also
+  tracks the keyboard-focused cell (same preview as mouse hover).
+
+Roving tabindex is used throughout the grid — exactly one cell at a
+time is in the tab order, so `Tab` enters and leaves the grid as a
+single unit rather than cycling through all 42 cells.
+
+Custom `#trigger` slots automatically opt in: any open path
+(`click` / `Space` / `Enter` / `↓`) moves focus into the grid, since
+a non-`TextInput` trigger has no typing context to keep focus on.
+
+### DateTimePicker — date selection keeps popover open
+
+Selecting a date in `DateTimePicker` no longer auto-closes the
+popover. Auto-closing after date-only selection stranded the embedded
+`TimePicker` — users had to reopen to set the time. Now the popover
+stays open and focus moves into the `TimePicker` input, so callers
+get a continuous date → time selection flow (keyboard or mouse).
+
+The popover closes on `Esc`, click-outside, programmatic close, or
+when the consumer explicitly calls `close()` from a slot scope. This
+is a behavior change for existing callers who relied on the implicit
+date-click close; affected callers should bind `v-model:open` or call
+`close()` from the `actions` slot if they need the old behavior.
+
 ### Input family — shared labeling contract
 
 Every input that has a labelable role now accepts the same four props:
@@ -287,6 +330,11 @@ preserves separator semantics for assistive technologies.
 - `DateRangePicker` emits `update:modelValue` / `change` as a
   `[from, to]` tuple (`DateRangeValue`) instead of a comma-joined
   string. See the DateRangePicker section above for migration.
+- `DateTimePicker` no longer auto-closes the popover after a date is
+  selected. The popover stays open so the user can also pick a time.
+  Callers that relied on the auto-close should bind `v-model:open`
+  or call `close()` from the `actions` slot. See the DateTimePicker
+  section above.
 
 ### Deprecated
 
@@ -357,6 +405,14 @@ one-time dev-mode warning. Removal is post-v1.
 - `TimePicker.scrollMode`: drop the prop.
 - `useDatePicker`: replace ad-hoc usage with `<DatePicker>` /
   `<DateRangePicker>` / `<DateTimePicker>`.
+- `DateTimePicker` — close-on-date-select: if you relied on the
+  popover closing after the user picked a date, switch to
+  `v-model:open` and close it explicitly from `@update:modelValue`,
+  or render an "Apply" / "Done" button in the `#actions` slot
+  (`close` is available in the slot scope). For most callers no
+  migration is needed — the new behavior (pick date → pick time →
+  close on Esc/outside-click) is what users expect from a combined
+  date-time picker.
 
 ## Deprecation log
 
