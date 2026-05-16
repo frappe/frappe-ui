@@ -272,7 +272,10 @@ defineSlots<SelectSlots>()
             3. not selected + `#prefix` slot → user's placeholder affordance.
         -->
         <template v-if="selectedOption && slots['item-prefix']">
-          <slot name="item-prefix" v-bind="{ option: selectedOption }" />
+          <slot
+            name="item-prefix"
+            v-bind="{ item: selectedOption, option: selectedOption }"
+          />
         </template>
         <OptionIcon
           v-else-if="selectedOption?.icon"
@@ -356,7 +359,7 @@ defineSlots<SelectSlots>()
                     <slot
                       v-if="slots['item-prefix']"
                       name="item-prefix"
-                      v-bind="{ option: internalOption.option }"
+                      v-bind="{ item: internalOption.option, option: internalOption.option }"
                     />
                     <OptionIcon
                       v-else-if="internalOption.option.icon"
@@ -378,16 +381,16 @@ defineSlots<SelectSlots>()
                           slots[getOptionSlotName(internalOption.option)!]
                         "
                         :name="getOptionSlotName(internalOption.option)!"
-                        v-bind="{ option: internalOption.option }"
+                        v-bind="{ item: internalOption.option, option: internalOption.option }"
                       />
                       <slot
                         v-else
                         name="item-label"
-                        v-bind="{ option: internalOption.option }"
+                        v-bind="{ item: internalOption.option, option: internalOption.option }"
                       >
                         <slot
                           name="option"
-                          v-bind="{ option: internalOption.option }"
+                          v-bind="{ item: internalOption.option, option: internalOption.option }"
                         >
                           <div class="truncate">
                             {{ internalOption.option.label }}
@@ -406,7 +409,7 @@ defineSlots<SelectSlots>()
                   <template #suffix>
                     <slot
                       name="item-suffix"
-                      v-bind="{ option: internalOption.option }"
+                      v-bind="{ item: internalOption.option, option: internalOption.option }"
                     />
                     <SelectItemIndicator
                       class="ml-1 inline-flex items-center justify-center"

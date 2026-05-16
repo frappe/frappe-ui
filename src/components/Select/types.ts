@@ -58,7 +58,13 @@ export interface SelectTriggerSlotProps {
 }
 
 export interface SelectItemSlotProps {
-  /** Option currently being rendered. */
+  /** Item currently being rendered. */
+  item: SelectNormalizedOption
+
+  /**
+   * @deprecated Use `item`. Retained as a silent alias through v1.x for
+   * back-compat with the pre-v1 `{ option }` slot-prop shape.
+   */
   option: SelectNormalizedOption
 }
 
