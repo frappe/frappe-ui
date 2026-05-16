@@ -7,22 +7,22 @@ const state = reactive({
 
   tabs: [
     {
-      label: 'Github',
+      label: 'Home',
       content:
-        'Github is a code hosting platform for version control and collaboration. It lets you and others work together on projects from anywhere.',
-      icon: 'lucide-github',
+        'Welcome to the home tab. This is a simple example showing how tabs can be paired with icons to give each section a clear, scannable identity.',
+      icon: 'lucide-house',
     },
     {
-      label: 'Twitter',
+      label: 'Messages',
       content:
-        'Twitter is an American microblogging and social networking service on which users post and interact with messages known as "tweets".',
-      icon: 'lucide-twitter',
+        'The messages tab groups all your conversations in one place. Use it to keep track of unread threads and pick up where you left off.',
+      icon: 'lucide-message-circle',
     },
     {
-      label: 'Linkedin',
+      label: 'Settings',
       content:
-        'LinkedIn is an American business and employment-oriented online service that operates via websites and mobile apps.',
-      icon: 'lucide-linkedin',
+        'Adjust your preferences in the settings tab — change your theme, manage notifications, and configure how the app behaves.',
+      icon: 'lucide-settings',
     },
   ],
 })
