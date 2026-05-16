@@ -42,6 +42,7 @@
     <PopoverPortal>
       <PopoverContent
         data-slot="content"
+        data-selection
         class="z-[100]"
         :side="resolvedSide"
         :align="resolvedAlign"
@@ -54,6 +55,7 @@
           data-slot="content-body"
           :data-motion="motion"
           class="time-picker-panel max-h-48 w-44 overflow-y-auto rounded-lg bg-surface-modal p-1 text-base shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
+          style="transform-origin: var(--reka-popover-content-transform-origin)"
           role="listbox"
           :aria-activedescendant="activeDescendantId"
         >
@@ -88,6 +90,7 @@ import {
 } from 'reka-ui'
 import { TextInput } from '../TextInput'
 import { usePopoverMotion } from '../../composables/usePopoverMotion'
+import '../shared/selection/popoverMotion.css'
 import {
   findNearestIndex,
   formatTime,
@@ -114,6 +117,7 @@ const props = withDefaults(defineProps<TimePickerProps>(), {
   variant: 'subtle' as Variant,
   use12Hour: true,
   disabled: false,
+  typeable: true,
   readonly: false,
   openOnFocus: false,
   openOnClick: true,
@@ -154,7 +158,10 @@ const shouldKeepOpen = computed(
 )
 
 const isReadonly = computed(
-  () => props.readonly === true || props.allowCustom === false,
+  () =>
+    props.typeable === false ||
+    props.readonly === true ||
+    props.allowCustom === false,
 )
 
 if (import.meta.env.DEV) {
@@ -163,6 +170,7 @@ if (import.meta.env.DEV) {
     placement: false,
     autoClose: false,
     allowCustom: false,
+    readonly: false,
     scrollMode: false,
   }
   watchEffect(() => {
@@ -186,9 +194,15 @@ if (import.meta.env.DEV) {
     }
     if (props.allowCustom === false && !warned.allowCustom) {
       console.warn(
-        '[TimePicker] `allowCustom: false` is deprecated. Use `readonly: true` instead.',
+        '[TimePicker] `allowCustom: false` is deprecated. Use `typeable: false` instead.',
       )
       warned.allowCustom = true
+    }
+    if (props.readonly === true && !warned.readonly) {
+      console.warn(
+        '[TimePicker] picker-level `readonly: true` is deprecated. Use `typeable: false` instead.',
+      )
+      warned.readonly = true
     }
     if (props.scrollMode !== undefined && !warned.scrollMode) {
       console.warn(
@@ -523,6 +537,7 @@ function scrollOnOpen() {
 }
 
 watch(isOpen, (open) => {
+  emit('update:open', open)
   if (open) {
     emit('open')
     highlightIndex.value = -1
@@ -532,58 +547,14 @@ watch(isOpen, (open) => {
     isTyping.value = false
   }
 })
+
+watch(
+  () => props.open,
+  (val) => {
+    if (typeof val === 'boolean' && val !== isOpen.value) {
+      isOpen.value = val
+    }
+  },
+)
 </script>
 
-<style>
-[data-slot='content'] {
-  animation-fill-mode: both;
-}
-
-[data-slot='content'][data-state='open']
-  [data-slot='content-body'][data-motion='animated'] {
-  animation: datepicker-enter 180ms cubic-bezier(0.23, 1, 0.32, 1);
-  transform-origin: var(--reka-popover-content-transform-origin);
-}
-
-[data-slot='content'][data-state='closed']
-  [data-slot='content-body'][data-motion='animated'] {
-  animation: datepicker-exit 140ms cubic-bezier(0.23, 1, 0.32, 1);
-  transform-origin: var(--reka-popover-content-transform-origin);
-}
-
-[data-slot='content'][data-state='open']
-  [data-slot='content-body'][data-motion='instant'] {
-  animation: datepicker-instant-fade 80ms linear;
-}
-
-@keyframes datepicker-enter {
-  from {
-    opacity: 0;
-    transform: scale(0.96) translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-@keyframes datepicker-exit {
-  from {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-  to {
-    opacity: 0;
-    transform: scale(0.96) translateY(4px);
-  }
-}
-
-@keyframes datepicker-instant-fade {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-</style>

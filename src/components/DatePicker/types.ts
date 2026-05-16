@@ -40,13 +40,23 @@ export interface CommonDatePickerProps extends InputLabelingProps {
   /** Controls popover open state (for controlled usage). */
   open?: boolean
 
-  /** Opens the popover when the input receives focus. Default: true. */
+  /** Opens the popover when the input receives focus. Default: false. */
   openOnFocus?: boolean
 
   /** Opens the popover when the input is clicked. Default: true. */
   openOnClick?: boolean
 
-  /** Prevents manual typing while keeping the picker interactive. */
+  /**
+   * Whether the trigger input accepts typed input. When `false` the user can
+   * still open the popover and pick a date, but cannot type a date manually.
+   * Default: `true`.
+   */
+  typeable?: boolean
+
+  /**
+   * Prevents manual typing while keeping the picker interactive.
+   * @deprecated Use `typeable: false` instead.
+   */
   readonly?: boolean
 
   /** Disables the trigger input and calendar interactions. */
@@ -77,7 +87,7 @@ export interface CommonDatePickerProps extends InputLabelingProps {
   // Deprecated
   /**
    * Allows users to type custom date text into the input.
-   * @deprecated Use `readonly` instead.
+   * @deprecated Use `typeable: false` instead.
    */
   allowCustom?: boolean
 

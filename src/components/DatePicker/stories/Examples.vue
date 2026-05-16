@@ -33,12 +33,18 @@ function isWeekend(date: Dayjs) {
 
 <template>
   <div class="grid grid-cols-2 gap-4">
-    <DatePicker v-model="basic" placeholder="Pick a date" label="Basic" />
+    <DatePicker
+      v-model="basic"
+      placeholder="Pick a date"
+      label="Basic"
+      open-on-focus
+    />
 
     <DatePicker
       v-model="controlled"
       label="Pre-filled value"
       placeholder="Select a date"
+      open-on-focus
     />
 
     <DatePicker

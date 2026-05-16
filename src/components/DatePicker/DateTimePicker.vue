@@ -1,140 +1,107 @@
 <template>
-  <PopoverRoot v-model:open="isOpen">
-    <PopoverAnchor :reference="anchorEl" as-child>
-      <div class="inline-block">
-        <slot name="trigger" v-bind="triggerSlotProps">
-          <slot name="target" v-bind="triggerSlotProps">
-            <TextInput
-              ref="textInputRef"
-              v-model="inputValue"
-              type="text"
-              :class="dp.inputClass"
-              :id="props.id"
-              :label="props.label"
-              :description="props.description"
-              :error="props.error"
-              :required="props.required"
-              :size="props.size"
-              :variant="props.variant"
-              :placeholder="props.placeholder"
-              :disabled="props.disabled"
-              :readonly="props.readonly || dp.allowCustom === false"
-              @pointerdown="onPointerDown"
-              @focus="onFocus"
-              @click="onClick"
-              @blur="onBlur"
-              @keydown.enter.prevent="onEnter"
-            >
-              <template v-if="$slots.prefix" #prefix>
-                <slot name="prefix" v-bind="triggerSlotProps" />
-              </template>
-              <template #suffix>
-                <slot name="suffix" v-bind="triggerSlotProps">
-                  <LucideChevronDown
-                    class="h-4 w-4 cursor-pointer"
-                    @mousedown.prevent="togglePopover"
-                  />
-                </slot>
-              </template>
-            </TextInput>
-          </slot>
-        </slot>
+  <PickerShell
+    ref="shellRef"
+    v-model:open="isOpen"
+    v-model:input-value="inputValue"
+    v-model:typing="isTyping"
+    :side="resolvedSide"
+    :align="resolvedAlign"
+    :offset="resolvedOffset"
+    :open-on-focus="props.openOnFocus"
+    :open-on-click="props.openOnClick"
+    :id="props.id"
+    :label="props.label"
+    :description="props.description"
+    :error="props.error"
+    :required="props.required"
+    :size="props.size"
+    :variant="props.variant"
+    :placeholder="props.placeholder"
+    :disabled="props.disabled"
+    :readonly="inputReadonly"
+    :input-class="dp.inputClass"
+    :display-label="displayLabel"
+    content-class="w-56 rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5"
+    @blur="commitInput()"
+    @enter="commitInput(true)"
+    @open="onShellOpen"
+    @close="onShellClose"
+  >
+    <template v-if="$slots.trigger" #trigger="ts"><slot name="trigger" v-bind="ts" /></template>
+    <template v-if="$slots.target" #target="ts"><slot name="target" v-bind="ts" /></template>
+    <template v-if="$slots.prefix" #prefix="ts"><slot name="prefix" v-bind="ts" /></template>
+    <template v-if="$slots.suffix" #suffix="ts"><slot name="suffix" v-bind="ts" /></template>
+
+    <template #default="{ close }">
+      <CalendarPanel
+        :view="view"
+        :current-year="currentYear"
+        :current-month="currentMonth"
+        :year-range-start="yearRangeStart"
+        :year-range="yearRange"
+        :weeks="weeks"
+        today-label="Now"
+        @prev="prev"
+        @next="next"
+        @today="handleNowClick"
+        @cycle-view="cycleView"
+        @select-month="selectMonth"
+        @select-year="selectYear"
+        @select-date="handleDateCellClick"
+      />
+      <div class="flex flex-col gap-2 p-2 pt-0">
+        <TimePicker
+          :modelValue="timeValue"
+          :typeable="props.allowCustomTime"
+          side="bottom"
+          align="start"
+          placeholder="Select time"
+          :minTime="computedMinTime"
+          :maxTime="computedMaxTime"
+          @change="onTimeChange"
+        />
       </div>
-    </PopoverAnchor>
-    <PopoverPortal>
-      <PopoverContent
-        data-slot="content"
-        class="z-[100]"
-        :side="resolvedSide"
-        :align="resolvedAlign"
-        :side-offset="resolvedOffset"
-        @open-auto-focus.prevent
-        @interact-outside="onInteractOutside"
+      <div
+        v-if="$slots.actions || (props.clearable && selectedDate)"
+        class="flex flex-wrap items-center gap-1 p-2 border-t"
       >
-        <div
-          ref="popoverContentRef"
-          data-slot="content-body"
-          :data-motion="motion"
-          class="w-56 rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5"
-        >
-          <CalendarPanel
-            :view="view"
-            :current-year="currentYear"
-            :current-month="currentMonth"
-            :year-range-start="yearRangeStart"
-            :year-range="yearRange"
-            :weeks="weeks"
-            today-label="Now"
-            @prev="prev"
-            @next="next"
-            @today="handleNowClick"
-            @cycle-view="cycleView"
-            @select-month="selectMonth"
-            @select-year="selectYear"
-            @select-date="handleDateCellClick"
-          />
-          <div class="flex flex-col gap-2 p-2 pt-0">
-            <TimePicker
-              :modelValue="timeValue"
-              :readonly="props.allowCustomTime === false"
-              side="bottom"
-              align="start"
-              placeholder="Select time"
-              :minTime="computedMinTime"
-              :maxTime="computedMaxTime"
-              @change="onTimeChange"
-            />
-          </div>
-          <div
-            v-if="$slots.actions || (props.clearable && selectedDate)"
-            class="flex flex-wrap items-center gap-1 p-2 border-t"
-          >
-            <slot
-              v-if="$slots.actions"
-              name="actions"
-              v-bind="{
-                selected: selectedDate,
-                time: timeValue,
-                setDate: handleDateCellClick,
-                clear: handleClearClick,
-                close: closePopover,
-              }"
-            />
-            <Button
-              v-else-if="props.clearable && selectedDate"
-              size="sm"
-              variant="outline"
-              class="ml-auto"
-              :label="'Clear'"
-              @click="handleClearClick"
-            />
-          </div>
-        </div>
-      </PopoverContent>
-    </PopoverPortal>
-  </PopoverRoot>
+        <slot
+          v-if="$slots.actions"
+          name="actions"
+          v-bind="{
+            selected: selectedDate,
+            time: timeValue,
+            setDate: handleDateCellClick,
+            clear: handleClearClick,
+            close,
+          }"
+        />
+        <Button
+          v-else-if="props.clearable && selectedDate"
+          size="sm"
+          variant="outline"
+          class="ml-auto"
+          :label="'Clear'"
+          @click="handleClearClick"
+        />
+      </div>
+    </template>
+  </PickerShell>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import {
-  PopoverAnchor,
-  PopoverContent,
-  PopoverPortal,
-  PopoverRoot,
-} from 'reka-ui'
 import { Button } from '../Button'
-import { TextInput } from '../TextInput'
 import TimePicker from '../TimePicker/TimePicker.vue'
-import LucideChevronDown from '~icons/lucide/chevron-down'
-import { usePopoverMotion } from '../../composables/usePopoverMotion'
 import { dayjs, dayjsLocal, dayjsSystem } from '../../utils/dayjs'
 import { generateWeeks } from './utils'
 import CalendarPanel, { type CalendarPanelCell } from './CalendarPanel.vue'
+import PickerShell from '../shared/picker/PickerShell.vue'
 import {
   useCalendarView,
   usePopoverPositioning,
   useKeepOpen,
+  useTypeable,
   useDateCoercion,
   useDeprecationWarnings,
   makeUnavailableCheck,
@@ -145,7 +112,6 @@ import type {
   DateTimePickerProps,
   DateTimePickerEmits,
   DateTimePickerSlots,
-  DatePickerTriggerSlotProps,
 } from './types'
 
 const props = withDefaults(defineProps<DateTimePickerProps>(), {
@@ -153,12 +119,13 @@ const props = withDefaults(defineProps<DateTimePickerProps>(), {
   modelValue: '',
   variant: 'subtle',
   placeholder: 'Select date & time',
+  typeable: true,
   readonly: false,
   allowCustom: true,
   disabled: false,
   clearable: true,
   allowCustomTime: true,
-  openOnFocus: true,
+  openOnFocus: false,
   openOnClick: true,
   // Legacy default kept; see `useKeepOpen` for why.
   autoClose: true,
@@ -169,29 +136,10 @@ const slots = defineSlots<DateTimePickerSlots>()
 
 const dp = props as unknown as LegacyDatePickerProps
 
-const textInputRef = ref<{ el: HTMLElement | null } | null>(null)
-const anchorEl = computed(() => {
-  if (slots.trigger || slots.target) return undefined
-  return textInputRef.value?.el ?? undefined
-})
-
-// Reka treats anything outside `PopoverContent` as "outside" — including our
-// own trigger — so a click on the input fires interact-outside and closes the
-// popover, then the click handler reopens it. Suppress the close when the
-// pointerdown originated inside the input's row (which holds the input and
-// any suffix like the chevron); those elements have their own click logic.
-function onInteractOutside(event: Event) {
-  const target = event.target as Node | null
-  const triggerRow = textInputRef.value?.el?.parentElement
-  if (target && triggerRow?.contains(target)) {
-    event.preventDefault()
-  }
-}
-
 // ── Popover open state ───────────────────────────────────────────────────────
 
+const shellRef = ref<{ open: () => void } | null>(null)
 const isOpen = ref(false)
-const { motion, onPointerDown: recordPointerDown } = usePopoverMotion(isOpen)
 
 watch(
   () => props.open,
@@ -202,28 +150,24 @@ watch(
   },
 )
 
-function onPointerDown() {
-  recordPointerDown()
+watch(isOpen, (val) => {
+  emit('update:open', val)
+})
+
+function onShellOpen() {
+  initFromValue()
 }
 
-function togglePopover() {
-  isOpen.value = !isOpen.value
+function onShellClose() {
+  resetView()
+  if (isTyping.value) {
+    commitInput()
+    isTyping.value = false
+  }
 }
 
 defineExpose({
-  open: () => {
-    isOpen.value = true
-  },
-})
-
-watch(isOpen, (open, wasOpen) => {
-  emit('update:open', open)
-  if (open && !wasOpen) {
-    initFromValue()
-  }
-  if (!open && wasOpen) {
-    handleClose()
-  }
+  open: () => shellRef.value?.open(),
 })
 
 // ── Positioning / keepOpen / deprecations ────────────────────────────────────
@@ -233,6 +177,7 @@ const { resolvedSide, resolvedAlign, resolvedOffset } = usePopoverPositioning(
   dp,
 )
 const shouldKeepOpen = useKeepOpen(props, dp)
+const inputReadonly = useTypeable(props, dp)
 useDeprecationWarnings('DateTimePicker', dp, {
   hasTargetSlot: computed(() => !!slots.target),
 })
@@ -347,13 +292,6 @@ watch(displayLabel, (val) => {
   if (!isTyping.value) inputValue.value = val
 })
 
-const triggerSlotProps = computed<DatePickerTriggerSlotProps>(() => ({
-  togglePopover,
-  isOpen: isOpen.value,
-  displayLabel: displayLabel.value,
-  inputValue: inputValue.value,
-}))
-
 // ── Calendar grid ────────────────────────────────────────────────────────────
 
 const weeks = computed<CalendarPanelCell[][]>(() =>
@@ -388,29 +326,7 @@ watch([computedMinTime, computedMaxTime, timeValue, selectedDate], () => {
     timeValue.value = computedMaxTime.value || timeValue.value
 })
 
-// ── Input handling ───────────────────────────────────────────────────────────
-
-const popoverContentRef = ref<HTMLElement | null>(null)
-
-function onBlur(e: FocusEvent) {
-  const next = e.relatedTarget as Node | null
-  if (next && popoverContentRef.value?.contains(next)) return
-  commitInput()
-  isTyping.value = false
-}
-function onEnter() {
-  commitInput(true)
-  isTyping.value = false
-}
-function onFocus() {
-  isTyping.value = true
-  if (props.openOnFocus && !isOpen.value) isOpen.value = true
-}
-
-function onClick() {
-  isTyping.value = true
-  if (props.openOnClick && !isOpen.value) isOpen.value = true
-}
+// ── Input commit / selection ─────────────────────────────────────────────────
 
 function commitInput(close = false): void {
   const raw = inputValue.value.trim()
@@ -436,8 +352,6 @@ function commitInput(close = false): void {
     inputValue.value = displayLabel.value
   }
 }
-
-// ── Date selection ───────────────────────────────────────────────────────────
 
 function selectDate(date: string | Date | Dayjs): void {
   const d = dayjs(date as any)
@@ -503,39 +417,4 @@ function handleClearClick() {
   isTyping.value = false
   resetView()
 }
-
-function closePopover() {
-  isOpen.value = false
-}
-
-function handleClose() {
-  resetView()
-  if (isTyping.value) {
-    commitInput()
-    isTyping.value = false
-  }
-}
 </script>
-
-<style>
-[data-slot='content'] {
-  animation-fill-mode: both;
-}
-
-[data-slot='content'][data-state='open']
-  [data-slot='content-body'][data-motion='animated'] {
-  animation: datepicker-enter 180ms cubic-bezier(0.23, 1, 0.32, 1);
-  transform-origin: var(--reka-popover-content-transform-origin);
-}
-
-[data-slot='content'][data-state='closed']
-  [data-slot='content-body'][data-motion='animated'] {
-  animation: datepicker-exit 140ms cubic-bezier(0.23, 1, 0.32, 1);
-  transform-origin: var(--reka-popover-content-transform-origin);
-}
-
-[data-slot='content'][data-state='open']
-  [data-slot='content-body'][data-motion='instant'] {
-  animation: datepicker-instant-fade 80ms linear;
-}
-</style>

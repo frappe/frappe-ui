@@ -56,12 +56,22 @@ export interface TimePickerProps {
   /** Visual style variant. */
   variant?: Variant
 
-  /** Prevents manual typing while keeping the picker interactive. */
+  /**
+   * Whether the trigger input accepts typed input. When `false` the user can
+   * still open the popover and pick a time, but cannot type a time manually.
+   * Default: `true`.
+   */
+  typeable?: boolean
+
+  /**
+   * Prevents manual typing while keeping the picker interactive.
+   * @deprecated Use `typeable: false` instead.
+   */
   readonly?: boolean
 
   /**
    * Allows users to type custom time values.
-   * @deprecated Use `readonly` (inverse semantics).
+   * @deprecated Use `typeable: false` instead.
    */
   allowCustom?: boolean
 
@@ -79,6 +89,9 @@ export interface TimePickerProps {
 
   /** Disable the time picker. */
   disabled?: boolean
+
+  /** Controlled popover open state. Use with `v-model:open` for two-way binding. */
+  open?: boolean
 
   /** Opens the popover when the input receives focus. Default: false. */
   openOnFocus?: boolean
@@ -101,6 +114,7 @@ export interface TimePickerProps {
 
 export type TimePickerEmits = {
   (e: 'update:modelValue', value: string): void
+  (e: 'update:open', value: boolean): void
   (e: 'change', value: string): void
   (e: 'input-invalid', input: string): void
   (e: 'invalid-change', invalid: boolean): void

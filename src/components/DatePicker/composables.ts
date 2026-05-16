@@ -114,6 +114,24 @@ export function usePopoverPositioning(
   return { resolvedSide, resolvedAlign, resolvedOffset }
 }
 
+// `typeable` resolution: new prop wins; legacy `readonly: true` and
+// `allowCustom: false` both map to `typeable: false`.
+//
+// Returns the readonly state to apply to the underlying TextInput (the inverse
+// of typeable). HTML `readonly` is still the correct attribute on the trigger
+// element — `typeable` is the picker-level vocabulary that wraps it.
+export function useTypeable(
+  props: { typeable?: boolean },
+  legacy: { readonly?: boolean; allowCustom?: boolean },
+) {
+  return computed<boolean>(
+    () =>
+      props.typeable === false ||
+      legacy.readonly === true ||
+      legacy.allowCustom === false,
+  )
+}
+
 // `keepOpen` resolution with legacy `autoClose` inverse fallback.
 //
 // Vue coerces omitted Boolean props to `false` (indistinguishable from an
@@ -174,6 +192,7 @@ export type LegacyDatePickerProps = {
   placement?: DatePickerPlacement
   autoClose?: boolean
   allowCustom?: boolean
+  readonly?: boolean
   inputClass?: string | Array<string> | Record<string, boolean>
 }
 
@@ -189,6 +208,7 @@ export function useDeprecationWarnings(
     placement: false,
     autoClose: false,
     allowCustom: false,
+    readonly: false,
     inputClass: false,
     targetSlot: false,
   }
@@ -226,9 +246,15 @@ export function useDeprecationWarnings(
     }
     if (legacy.allowCustom === false && !warned.allowCustom) {
       console.warn(
-        `[${componentName}] \`allowCustom: false\` is deprecated. Use \`readonly: true\` instead.`,
+        `[${componentName}] \`allowCustom: false\` is deprecated. Use \`typeable: false\` instead.`,
       )
       warned.allowCustom = true
+    }
+    if (legacy.readonly === true && !warned.readonly) {
+      console.warn(
+        `[${componentName}] picker-level \`readonly: true\` is deprecated. Use \`typeable: false\` instead.`,
+      )
+      warned.readonly = true
     }
     if (legacy.inputClass && !warned.inputClass) {
       console.warn(

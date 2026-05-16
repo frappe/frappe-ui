@@ -104,6 +104,7 @@ declare module 'vue' {
     NumberChart: typeof import('./src/components/Charts/NumberChart.vue')['default']
     OptionIcon: typeof import('./src/components/shared/selection/OptionIcon.vue')['default']
     Password: typeof import('./src/components/Password/Password.vue')['default']
+    PickerShell: typeof import('./src/components/shared/picker/PickerShell.vue')['default']
     Popover: typeof import('./src/components/Popover/Popover.vue')['default']
     Progress: typeof import('./src/components/Progress/Progress.vue')['default']
     Rating: typeof import('./src/components/Rating/Rating.vue')['default']

@@ -1,151 +1,118 @@
 <template>
-  <PopoverRoot v-model:open="isOpen">
-    <PopoverAnchor :reference="anchorEl" as-child>
-      <div class="inline-block" :style="triggerStyle">
-        <slot name="trigger" v-bind="triggerSlotProps">
-          <slot name="target" v-bind="triggerSlotProps">
-            <TextInput
-              ref="textInputRef"
-              v-model="inputValue"
-              type="text"
-              :class="dp.inputClass"
-              :id="props.id"
-              :label="props.label"
-              :description="props.description"
-              :error="props.error"
-              :required="props.required"
-              :size="props.size"
-              :variant="props.variant"
-              :placeholder="props.placeholder"
-              :disabled="props.disabled"
-              :readonly="props.readonly || dp.allowCustom === false"
-              @pointerdown="onPointerDown"
-              @focus="onFocus"
-              @click="onClick"
-              @blur="onBlur"
-              @keydown.enter.prevent="onEnter"
-            >
-              <template v-if="$slots.prefix" #prefix>
-                <slot name="prefix" v-bind="triggerSlotProps" />
-              </template>
-              <template #suffix>
-                <slot name="suffix" v-bind="triggerSlotProps">
-                  <LucideChevronDown
-                    class="h-4 w-4 cursor-pointer"
-                    @mousedown.prevent="togglePopover"
-                  />
-                </slot>
-              </template>
-            </TextInput>
-          </slot>
-        </slot>
-      </div>
-    </PopoverAnchor>
-    <PopoverPortal>
-      <PopoverContent
-        data-slot="content"
-        class="z-[100]"
-        :side="resolvedSide"
-        :align="resolvedAlign"
-        :side-offset="resolvedOffset"
-        @open-auto-focus.prevent
-        @interact-outside="onInteractOutside"
+  <PickerShell
+    ref="shellRef"
+    v-model:open="isOpen"
+    v-model:input-value="inputValue"
+    v-model:typing="isTyping"
+    :side="resolvedSide"
+    :align="resolvedAlign"
+    :offset="resolvedOffset"
+    :open-on-focus="props.openOnFocus"
+    :open-on-click="props.openOnClick"
+    :id="props.id"
+    :label="props.label"
+    :description="props.description"
+    :error="props.error"
+    :required="props.required"
+    :size="props.size"
+    :variant="props.variant"
+    :placeholder="props.placeholder"
+    :disabled="props.disabled"
+    :readonly="inputReadonly"
+    :input-class="dp.inputClass"
+    :display-label="displayLabel"
+    content-class="w-fit rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5"
+    @blur="commitInput()"
+    @enter="commitInput(true)"
+    @open="onShellOpen"
+    @close="onShellClose"
+  >
+    <template v-if="$slots.trigger" #trigger="ts"><slot name="trigger" v-bind="ts" /></template>
+    <template v-if="$slots.target" #target="ts"><slot name="target" v-bind="ts" /></template>
+    <template v-if="$slots.prefix" #prefix="ts"><slot name="prefix" v-bind="ts" /></template>
+    <template v-if="$slots.suffix" #suffix="ts"><slot name="suffix" v-bind="ts" /></template>
+
+    <template #default="{ close }">
+      <div
+        class="flex"
+        :class="isDualPaneActive ? 'divide-x divide-outline-gray-2' : ''"
       >
-        <div
-          ref="popoverContentRef"
-          data-slot="content-body"
-          :data-motion="motion"
-          class="w-fit rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5"
-        >
-          <div
-            class="flex"
-            :class="isDualPaneActive ? 'divide-x divide-outline-gray-2' : ''"
-          >
-            <CalendarPanel
-              :view="view"
-              :current-year="currentYear"
-              :current-month="currentMonth"
-              :year-range-start="yearRangeStart"
-              :year-range="yearRange"
-              :weeks="weeks"
-              :today-label="isDualPaneActive ? '' : 'Today'"
-              :hide-next="isDualPaneActive"
-              :hide-out-of-month="isDualPaneActive"
-              @prev="prev"
-              @next="next"
-              @today="handleTodayClick"
-              @cycle-view="cycleView"
-              @select-month="selectMonth"
-              @select-year="selectYear"
-              @select-date="handleDateCellClick"
-              @hover-cell="onCellHover"
-            />
-            <CalendarPanel
-              v-if="isDualPaneActive"
-              :view="view"
-              :current-year="rightYear"
-              :current-month="rightMonth"
-              :year-range-start="yearRangeStart"
-              :year-range="yearRange"
-              :weeks="rightWeeks"
-              hide-prev
-              hide-today
-              hide-out-of-month
-              @next="next"
-              @cycle-view="cycleView"
-              @select-date="handleDateCellClick"
-              @hover-cell="onCellHover"
-            />
-          </div>
-          <div
-            v-if="$slots.actions || (props.clearable && (fromDate || toDate))"
-            class="flex flex-wrap items-center gap-1 p-2 border-t"
-          >
-            <slot
-              v-if="$slots.actions"
-              name="actions"
-              v-bind="{
-                fromDate,
-                toDate,
-                setDate: handleDateCellClick,
-                clear: handleClearClick,
-                close: closePopover,
-              }"
-            />
-            <Button
-              v-else-if="props.clearable && (fromDate || toDate)"
-              size="sm"
-              variant="outline"
-              class="ml-auto"
-              :label="'Clear'"
-              @click="handleClearClick"
-            />
-          </div>
-        </div>
-      </PopoverContent>
-    </PopoverPortal>
-  </PopoverRoot>
+        <CalendarPanel
+          :view="view"
+          :current-year="currentYear"
+          :current-month="currentMonth"
+          :year-range-start="yearRangeStart"
+          :year-range="yearRange"
+          :weeks="weeks"
+          :today-label="isDualPaneActive ? '' : 'Today'"
+          :hide-next="isDualPaneActive"
+          :hide-out-of-month="isDualPaneActive"
+          @prev="prev"
+          @next="next"
+          @today="handleTodayClick"
+          @cycle-view="cycleView"
+          @select-month="selectMonth"
+          @select-year="selectYear"
+          @select-date="handleDateCellClick"
+          @hover-cell="onCellHover"
+        />
+        <CalendarPanel
+          v-if="isDualPaneActive"
+          :view="view"
+          :current-year="rightYear"
+          :current-month="rightMonth"
+          :year-range-start="yearRangeStart"
+          :year-range="yearRange"
+          :weeks="rightWeeks"
+          hide-prev
+          hide-today
+          hide-out-of-month
+          @next="next"
+          @cycle-view="cycleView"
+          @select-date="handleDateCellClick"
+          @hover-cell="onCellHover"
+        />
+      </div>
+      <div
+        v-if="$slots.actions || (props.clearable && (fromDate || toDate))"
+        class="flex flex-wrap items-center gap-1 p-2 border-t"
+      >
+        <slot
+          v-if="$slots.actions"
+          name="actions"
+          v-bind="{
+            fromDate,
+            toDate,
+            setDate: handleDateCellClick,
+            clear: handleClearClick,
+            close,
+          }"
+        />
+        <Button
+          v-else-if="props.clearable && (fromDate || toDate)"
+          size="sm"
+          variant="outline"
+          class="ml-auto"
+          :label="'Clear'"
+          @click="handleClearClick"
+        />
+      </div>
+    </template>
+  </PickerShell>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import {
-  PopoverAnchor,
-  PopoverContent,
-  PopoverPortal,
-  PopoverRoot,
-} from 'reka-ui'
 import { Button } from '../Button'
-import { TextInput } from '../TextInput'
-import LucideChevronDown from '~icons/lucide/chevron-down'
-import { usePopoverMotion } from '../../composables/usePopoverMotion'
 import { dayjs, dayjsLocal } from '../../utils/dayjs'
 import { generateWeeks } from './utils'
 import CalendarPanel, { type CalendarPanelCell } from './CalendarPanel.vue'
+import PickerShell from '../shared/picker/PickerShell.vue'
 import {
   useCalendarView,
   usePopoverPositioning,
   useKeepOpen,
+  useTypeable,
   useDateCoercion,
   useDeprecationWarnings,
   makeUnavailableCheck,
@@ -157,7 +124,6 @@ import type {
   DateRangePickerEmits,
   DateRangePickerSlots,
   DateRangeValue,
-  DatePickerTriggerSlotProps,
 } from './types'
 
 const props = withDefaults(defineProps<DateRangePickerProps>(), {
@@ -165,12 +131,13 @@ const props = withDefaults(defineProps<DateRangePickerProps>(), {
   modelValue: () => [],
   variant: 'subtle',
   placeholder: 'Select range',
+  typeable: true,
   readonly: false,
   allowCustom: true,
   disabled: false,
   clearable: true,
   dualPane: false,
-  openOnFocus: true,
+  openOnFocus: false,
   openOnClick: true,
   // Legacy default kept; see `useKeepOpen` for why.
   autoClose: true,
@@ -181,29 +148,10 @@ const slots = defineSlots<DateRangePickerSlots>()
 
 const dp = props as unknown as LegacyDatePickerProps
 
-const textInputRef = ref<{ el: HTMLElement | null } | null>(null)
-const anchorEl = computed(() => {
-  if (slots.trigger || slots.target) return undefined
-  return textInputRef.value?.el ?? undefined
-})
-
-// Reka treats anything outside `PopoverContent` as "outside" — including our
-// own trigger — so a click on the input fires interact-outside and closes the
-// popover, then the click handler reopens it. Suppress the close when the
-// pointerdown originated inside the input's row (which holds the input and
-// any suffix like the chevron); those elements have their own click logic.
-function onInteractOutside(event: Event) {
-  const target = event.target as Node | null
-  const triggerRow = textInputRef.value?.el?.parentElement
-  if (target && triggerRow?.contains(target)) {
-    event.preventDefault()
-  }
-}
-
 // ── Popover open state ───────────────────────────────────────────────────────
 
+const shellRef = ref<{ open: () => void } | null>(null)
 const isOpen = ref(false)
-const { motion, onPointerDown: recordPointerDown } = usePopoverMotion(isOpen)
 
 watch(
   () => props.open,
@@ -214,28 +162,25 @@ watch(
   },
 )
 
-function onPointerDown() {
-  recordPointerDown()
+watch(isOpen, (val) => {
+  emit('update:open', val)
+})
+
+function onShellOpen() {
+  initFromValue()
 }
 
-function togglePopover() {
-  isOpen.value = !isOpen.value
+function onShellClose() {
+  resetView()
+  hoverDate.value = null
+  if (isTyping.value) {
+    commitInput()
+    isTyping.value = false
+  }
 }
 
 defineExpose({
-  open: () => {
-    isOpen.value = true
-  },
-})
-
-watch(isOpen, (open, wasOpen) => {
-  emit('update:open', open)
-  if (open && !wasOpen) {
-    initFromValue()
-  }
-  if (!open && wasOpen) {
-    handleClose()
-  }
+  open: () => shellRef.value?.open(),
 })
 
 // ── Positioning / keepOpen / deprecations ────────────────────────────────────
@@ -245,6 +190,7 @@ const { resolvedSide, resolvedAlign, resolvedOffset } = usePopoverPositioning(
   dp,
 )
 const shouldKeepOpen = useKeepOpen(props, dp)
+const inputReadonly = useTypeable(props, dp)
 useDeprecationWarnings('DateRangePicker', dp, {
   hasTargetSlot: computed(() => !!slots.target),
 })
@@ -280,16 +226,6 @@ const checkUnavailable = makeUnavailableCheck(
 )
 
 const coerceToDayjs = useDateCoercion(() => props.format)
-
-// Reserve trigger width based on the formatted range pattern (e.g.
-// `YYYY-MM-DD to YYYY-MM-DD`) so the input stays the same size whether it
-// shows the placeholder or a selected range. `ch` scales with the input's
-// own font, so the reservation tracks the format prop without hardcoding.
-const triggerStyle = computed(() => {
-  const fmt = props.format || 'YYYY-MM-DD'
-  const chars = fmt.length * 2 + 4 // `<fmt> to <fmt>`
-  return { minWidth: `calc(${chars}ch + 3rem)` }
-})
 
 // ── Value parsing ────────────────────────────────────────────────────────────
 
@@ -363,13 +299,6 @@ watch(displayLabel, (val) => {
   if (!isTyping.value) inputValue.value = val
 })
 
-const triggerSlotProps = computed<DatePickerTriggerSlotProps>(() => ({
-  togglePopover,
-  isOpen: isOpen.value,
-  displayLabel: displayLabel.value,
-  inputValue: inputValue.value,
-}))
-
 // ── Calendar grid (with range markers) ───────────────────────────────────────
 
 function buildRangeWeeks(year: number, month: number): CalendarPanelCell[][] {
@@ -427,29 +356,7 @@ const rightWeeks = computed<CalendarPanelCell[][]>(() =>
   buildRangeWeeks(rightYear.value, rightMonth.value),
 )
 
-// ── Input handling ───────────────────────────────────────────────────────────
-
-const popoverContentRef = ref<HTMLElement | null>(null)
-
-function onBlur(e: FocusEvent) {
-  const next = e.relatedTarget as Node | null
-  if (next && popoverContentRef.value?.contains(next)) return
-  commitInput()
-  isTyping.value = false
-}
-function onEnter() {
-  commitInput(true)
-  isTyping.value = false
-}
-function onFocus() {
-  isTyping.value = true
-  if (props.openOnFocus && !isOpen.value) isOpen.value = true
-}
-
-function onClick() {
-  isTyping.value = true
-  if (props.openOnClick && !isOpen.value) isOpen.value = true
-}
+// ── Input commit / selection ─────────────────────────────────────────────────
 
 function commitInput(close = false): void {
   const raw = inputValue.value.trim()
@@ -469,8 +376,6 @@ function commitInput(close = false): void {
     isOpen.value = false
   }
 }
-
-// ── Range selection ──────────────────────────────────────────────────────────
 
 function selectDate(date: string | Date | Dayjs): void {
   const d = dayjs(date as any)
@@ -550,40 +455,4 @@ function handleTodayClick() {
   isTyping.value = false
   resetView()
 }
-
-function closePopover() {
-  isOpen.value = false
-}
-
-function handleClose() {
-  resetView()
-  hoverDate.value = null
-  if (isTyping.value) {
-    commitInput()
-    isTyping.value = false
-  }
-}
 </script>
-
-<style>
-[data-slot='content'] {
-  animation-fill-mode: both;
-}
-
-[data-slot='content'][data-state='open']
-  [data-slot='content-body'][data-motion='animated'] {
-  animation: datepicker-enter 180ms cubic-bezier(0.23, 1, 0.32, 1);
-  transform-origin: var(--reka-popover-content-transform-origin);
-}
-
-[data-slot='content'][data-state='closed']
-  [data-slot='content-body'][data-motion='animated'] {
-  animation: datepicker-exit 140ms cubic-bezier(0.23, 1, 0.32, 1);
-  transform-origin: var(--reka-popover-content-transform-origin);
-}
-
-[data-slot='content'][data-state='open']
-  [data-slot='content-body'][data-motion='instant'] {
-  animation: datepicker-instant-fade 80ms linear;
-}
-</style>
