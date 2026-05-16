@@ -26,6 +26,7 @@
     @enter="commitInput(true)"
     @open="onShellOpen"
     @close="onShellClose"
+    @request-focus="onShellRequestFocus"
   >
     <template v-if="$slots.trigger" #trigger="ts"><slot name="trigger" v-bind="ts" /></template>
     <template v-if="$slots.target" #target="ts"><slot name="target" v-bind="ts" /></template>
@@ -34,6 +35,7 @@
 
     <template #default="{ close }">
       <CalendarPanel
+        ref="panelRef"
         :view="view"
         :current-year="currentYear"
         :current-month="currentMonth"
@@ -41,6 +43,9 @@
         :year-range="yearRange"
         :weeks="weeks"
         today-label="Today"
+        :min-date="props.minDate"
+        :max-date="props.maxDate"
+        v-model:focused-date="focusedDate"
         @prev="prev"
         @next="next"
         @today="handleTodayClick"
@@ -48,6 +53,7 @@
         @select-month="selectMonth"
         @select-year="selectYear"
         @select-date="handleDateCellClick"
+        @navigate="onPanelNavigate"
       />
       <div
         v-if="$slots.actions || (props.clearable && selected)"
@@ -77,7 +83,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, nextTick, watch } from 'vue'
 import { Button } from '../Button'
 import { dayjs, dayjsLocal } from '../../utils/dayjs'
 import { generateWeeks } from './utils'
@@ -142,6 +148,7 @@ watch(isOpen, (val) => {
 
 function onShellOpen() {
   initFromValue()
+  seedFocusedDate()
 }
 
 function onShellClose() {
@@ -150,6 +157,45 @@ function onShellClose() {
     commitInput()
     isTyping.value = false
   }
+  // Drop the focused-date so the next open re-seeds it from today/selected
+  // rather than resuming on a stale arrow-key target.
+  focusedDate.value = null
+}
+
+const panelRef = ref<{ focusInitialCell: () => void } | null>(null)
+const focusedDate = ref<Dayjs | null>(null)
+
+function seedFocusedDate() {
+  if (focusedDate.value) return
+  if (selected.value) {
+    const d = dayjs(selected.value)
+    if (!checkUnavailable(d)) {
+      focusedDate.value = d
+      return
+    }
+  }
+  const today = dayjsLocal()
+  if (!checkUnavailable(today)) {
+    focusedDate.value = today
+    return
+  }
+  const first = weeks.value.flat().find((c) => c.inMonth && !c.isUnavailable)
+  if (first) focusedDate.value = first.date
+}
+
+function onShellRequestFocus() {
+  // Seed synchronously *before* the reactive flush so the CalendarPanel
+  // mounts with `props.focusedDate` already set — that way the focused cell
+  // has `tabindex=0` on first render and `focusInitialCell` (queued for
+  // next tick) finds it.
+  seedFocusedDate()
+  nextTick(() => panelRef.value?.focusInitialCell())
+}
+
+function onPanelNavigate(target: Dayjs) {
+  // Single-pane: target dictates the view. focusedDate stays in sync via
+  // CalendarPanel's `update:focusedDate` (already wired via v-model).
+  focusOn(target)
 }
 
 defineExpose({

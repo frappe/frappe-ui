@@ -26,6 +26,7 @@
     @enter="commitInput(true)"
     @open="onShellOpen"
     @close="onShellClose"
+    @request-focus="onShellRequestFocus"
   >
     <template v-if="$slots.trigger" #trigger="ts"><slot name="trigger" v-bind="ts" /></template>
     <template v-if="$slots.target" #target="ts"><slot name="target" v-bind="ts" /></template>
@@ -38,6 +39,7 @@
         :class="isDualPaneActive ? 'divide-x divide-outline-gray-2' : ''"
       >
         <CalendarPanel
+          ref="leftPanelRef"
           :view="view"
           :current-year="currentYear"
           :current-month="currentMonth"
@@ -48,6 +50,9 @@
           :hide-next="isDualPaneActive"
           :hide-out-of-month="isDualPaneActive"
           :center-header="isDualPaneActive"
+          :min-date="props.minDate"
+          :max-date="props.maxDate"
+          v-model:focused-date="focusedDate"
           @prev="prev"
           @next="next"
           @today="handleTodayClick"
@@ -56,9 +61,11 @@
           @select-year="selectYear"
           @select-date="handleDateCellClick"
           @hover-cell="onCellHover"
+          @navigate="onPanelNavigate"
         />
         <CalendarPanel
           v-if="isDualPaneActive"
+          ref="rightPanelRef"
           :view="view"
           :current-year="rightYear"
           :current-month="rightMonth"
@@ -69,10 +76,14 @@
           hide-today
           hide-out-of-month
           center-header
+          :min-date="props.minDate"
+          :max-date="props.maxDate"
+          v-model:focused-date="focusedDate"
           @next="next"
           @cycle-view="cycleView"
           @select-date="handleDateCellClick"
           @hover-cell="onCellHover"
+          @navigate="onPanelNavigate"
         />
       </div>
       <div
@@ -104,7 +115,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, nextTick, watch } from 'vue'
 import { Button } from '../Button'
 import { dayjs, dayjsLocal } from '../../utils/dayjs'
 import { generateWeeks } from './utils'
@@ -170,6 +181,7 @@ watch(isOpen, (val) => {
 
 function onShellOpen() {
   initFromValue()
+  seedFocusedDate()
 }
 
 function onShellClose() {
@@ -179,11 +191,84 @@ function onShellClose() {
     commitInput()
     isTyping.value = false
   }
+  focusedDate.value = null
 }
 
 defineExpose({
   open: () => shellRef.value?.open(),
 })
+
+// ── Keyboard focus management ────────────────────────────────────────────────
+
+const leftPanelRef = ref<{ focusInitialCell: () => void } | null>(null)
+const rightPanelRef = ref<{ focusInitialCell: () => void } | null>(null)
+const focusedDate = ref<Dayjs | null>(null)
+
+function seedFocusedDate() {
+  if (focusedDate.value) return
+  // Prefer the existing range start, then today, then first available cell
+  // in the left pane, then in the right pane (dual-pane fallback).
+  if (fromDate.value) {
+    const d = dayjs(fromDate.value)
+    if (!checkUnavailable(d)) {
+      focusedDate.value = d
+      return
+    }
+  }
+  const today = dayjsLocal().startOf('day')
+  if (!checkUnavailable(today)) {
+    focusedDate.value = today
+    return
+  }
+  const leftFirst = weeks.value
+    .flat()
+    .find((c) => c.inMonth && !c.isUnavailable)
+  if (leftFirst) {
+    focusedDate.value = leftFirst.date
+    return
+  }
+  if (props.dualPane) {
+    const rightFirst = rightWeeks.value
+      .flat()
+      .find((c) => c.inMonth && !c.isUnavailable)
+    if (rightFirst) focusedDate.value = rightFirst.date
+  }
+}
+
+function onShellRequestFocus() {
+  // Seed synchronously so panels mount with `props.focusedDate` already
+  // set — important for dual-pane, where two panels otherwise race to seed
+  // and the wrong one wins. Then queue the actual `.focus()` call for
+  // after the popover has rendered.
+  seedFocusedDate()
+  nextTick(() => {
+    leftPanelRef.value?.focusInitialCell()
+    rightPanelRef.value?.focusInitialCell()
+  })
+}
+
+function onPanelNavigate(target: Dayjs) {
+  // In dual-pane mode, the target may already be visible in the sibling
+  // panel (right pane = currentMonth + 1). In that case we don't advance the
+  // view — instead, just push the focused date so the sibling panel's watch
+  // picks it up and focuses its own matching cell.
+  if (props.dualPane) {
+    const inLeft =
+      target.month() === currentMonth.value &&
+      target.year() === currentYear.value
+    const inRight =
+      target.month() === rightMonth.value &&
+      target.year() === rightYear.value
+    if (inLeft || inRight) {
+      focusedDate.value = target
+      return
+    }
+  }
+  // Single-pane (or dual-pane crossing beyond the right edge): advance the
+  // view. After the parent re-renders, the originating panel's shiftFocus
+  // retry will find the cell and emit `update:focusedDate`.
+  focusOn(target)
+}
 
 // ── Positioning / keepOpen / deprecations ────────────────────────────────────
 
@@ -309,8 +394,10 @@ function buildRangeWeeks(year: number, month: number): CalendarPanelCell[][] {
   const t = toDate.value ? dayjs(toDate.value) : null
   // While picking the end date, the hovered cell and everything between
   // `from` and it render as in-range (light gray) — only committed endpoints
-  // get the dark "selected" treatment.
-  const hovering = !t && f && hoverDate.value ? hoverDate.value : null
+  // get the dark "selected" treatment. Mouse hover and keyboard focus both
+  // act as the preview anchor; mouse wins when both exist.
+  const previewAnchor = hoverDate.value ?? focusedDate.value
+  const hovering = !t && f && previewAnchor ? previewAnchor : null
   const hoverEnd = hovering && hovering.isAfter(f!, 'day') ? hovering : null
   const hoverStart = hovering && hovering.isBefore(f!, 'day') ? hovering : null
   return raw.map((week) =>

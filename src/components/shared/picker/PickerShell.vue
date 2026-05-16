@@ -1,7 +1,7 @@
 <template>
   <PopoverRoot v-model:open="open">
     <PopoverAnchor :reference="anchorEl" as-child>
-      <div class="inline-block">
+      <div class="inline-block" @keydown.down.prevent="onArrowDown">
         <slot name="trigger" v-bind="triggerSlotProps">
           <slot name="target" v-bind="triggerSlotProps">
             <TextInput
@@ -67,7 +67,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import {
   PopoverAnchor,
   PopoverContent,
@@ -128,6 +128,13 @@ const emit = defineEmits<{
   (e: 'enter'): void
   (e: 'open'): void
   (e: 'close'): void
+  /** Signal that the parent should move keyboard focus into the popover
+   *  content (e.g. into a calendar grid). Fired:
+   *  - When the user presses ↓ on the trigger.
+   *  - When the popover opens with a custom trigger (no `TextInput` to type
+   *    into, so focus should jump straight into the content).
+   *  The default trigger keeps focus on the `TextInput` for typing. */
+  (e: 'requestFocus'): void
 }>()
 
 const slots = defineSlots<{
@@ -211,6 +218,11 @@ function onEnter() {
   typing.value = false
 }
 
+function onArrowDown() {
+  if (!open.value) open.value = true
+  emit('requestFocus')
+}
+
 const triggerSlotProps = computed<TriggerSlotProps>(() => ({
   togglePopover,
   isOpen: open.value,
@@ -218,10 +230,30 @@ const triggerSlotProps = computed<TriggerSlotProps>(() => ({
   inputValue: inputValue.value,
 }))
 
+const hasCustomTrigger = computed(() => !!(slots.trigger || slots.target))
+
 watch(open, (val, prev) => {
   if (val === prev) return
-  if (val) emit('open')
-  else emit('close')
+  if (val) {
+    emit('open')
+    // Custom triggers (e.g. a button) have no typing context — once the
+    // popover is open the user wants to interact with the content. Signal
+    // the parent to move focus there. The default `TextInput` trigger
+    // keeps its focus so the user can type, and only the explicit ↓
+    // handler emits `requestFocus`.
+    if (hasCustomTrigger.value) emit('requestFocus')
+  } else {
+    // Restore focus to the trigger input if the popover content had focus
+    // (Esc, date selection in auto-close mode). Click-outside leaves focus
+    // on the clicked element, so we skip in that case.
+    const hadFocusInside = popoverContentRef.value?.contains(
+      document.activeElement,
+    )
+    emit('close')
+    if (hadFocusInside) {
+      nextTick(() => textInputRef.value?.el?.focus())
+    }
+  }
 })
 
 defineExpose({

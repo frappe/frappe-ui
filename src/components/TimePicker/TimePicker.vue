@@ -18,7 +18,7 @@
           @keydown.enter.prevent="onEnter"
           @keydown.down.prevent="onArrowDown"
           @keydown.up.prevent="onArrowUp"
-          @keydown.esc.prevent="onEscape"
+          @keydown.esc="onEscape"
         >
           <template v-if="$slots.prefix" #prefix>
             <slot name="prefix" />
@@ -484,9 +484,15 @@ function moveHighlight(delta: number) {
   scrollHighlightedIntoView()
 }
 
-function onEscape() {
-  if (isOpen.value) isOpen.value = false
-  blurInput()
+function onEscape(e: KeyboardEvent) {
+  // Only consume Esc if our own popover (the time-options list) is open.
+  // Otherwise, let the event bubble so a wrapping picker (e.g. DateTimePicker)
+  // can close its outer popover.
+  if (isOpen.value) {
+    e.preventDefault()
+    isOpen.value = false
+    blurInput()
+  }
 }
 
 function selectAll() {
@@ -556,5 +562,13 @@ watch(
     }
   },
 )
+
+defineExpose({
+  /** Focus the trigger input. Used by DateTimePicker to flow keyboard focus
+   *  from the calendar grid into the time picker after a date is picked. */
+  focus: () => {
+    inputRef.value?.el?.focus?.()
+  },
+})
 </script>
 

@@ -67,6 +67,7 @@
     <div class="p-2">
       <div
         v-if="view === 'date'"
+        ref="gridRef"
         role="grid"
         aria-label="Calendar dates"
         @mouseleave="emit('hoverCell', null)"
@@ -105,8 +106,44 @@
                 :aria-disabled="cell.isUnavailable ? 'true' : undefined"
                 :aria-label="ariaLabel(cell)"
                 :disabled="cell.isUnavailable"
+                :data-value="cell.key"
+                :data-outside-view="cell.inMonth ? undefined : ''"
+                :data-disabled="cell.isUnavailable ? '' : undefined"
+                :tabindex="isFocusedCell(cell) ? 0 : -1"
                 @mouseenter="emit('hoverCell', cell.date)"
                 @click="!cell.isUnavailable && emit('selectDate', cell.date)"
+                @keydown.left.prevent="shiftFocus(cell.date.subtract(1, 'day'), -1)"
+                @keydown.right.prevent="shiftFocus(cell.date.add(1, 'day'), 1)"
+                @keydown.up.prevent="shiftFocus(cell.date.subtract(7, 'day'), -1)"
+                @keydown.down.prevent="shiftFocus(cell.date.add(7, 'day'), 1)"
+                @keydown.home.prevent="
+                  shiftFocus(cell.date.subtract(cell.date.day(), 'day'), -1)
+                "
+                @keydown.end.prevent="
+                  shiftFocus(cell.date.add(6 - cell.date.day(), 'day'), 1)
+                "
+                @keydown.page-up.prevent="
+                  shiftFocus(
+                    $event.shiftKey
+                      ? cell.date.subtract(1, 'year')
+                      : cell.date.subtract(1, 'month'),
+                    -1,
+                  )
+                "
+                @keydown.page-down.prevent="
+                  shiftFocus(
+                    $event.shiftKey
+                      ? cell.date.add(1, 'year')
+                      : cell.date.add(1, 'month'),
+                    1,
+                  )
+                "
+                @keydown.enter.prevent="
+                  !cell.isUnavailable && emit('selectDate', cell.date)
+                "
+                @keydown.space.prevent="
+                  !cell.isUnavailable && emit('selectDate', cell.date)
+                "
               >
                 {{ cell.date.date() }}
               </button>
@@ -161,6 +198,7 @@
 </template>
 
 <script setup lang="ts">
+import { nextTick, ref, watch } from 'vue'
 import type { Dayjs } from 'dayjs/esm'
 import { Button } from '../Button'
 import { months } from './utils'
@@ -201,9 +239,21 @@ interface Props {
    * `< First Month | Second Month >`.
    */
   centerHeader?: boolean
+  /** Earliest selectable date in YYYY-MM-DD format. Used to bound keyboard nav. */
+  minDate?: string
+  /** Latest selectable date in YYYY-MM-DD format. Used to bound keyboard nav. */
+  maxDate?: string
+  /**
+   * The date that currently holds the roving tabindex. Controlled — parent
+   * owns the state, panel emits `update:focusedDate` when arrow keys land on
+   * a new cell. Multiple panels (e.g. dual-pane DateRangePicker) can share
+   * the same value; each panel only renders `tabindex=0` if the date falls
+   * inside its own visible weeks.
+   */
+  focusedDate?: Dayjs | null
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   todayLabel: '',
   hidePrev: false,
   hideNext: false,
@@ -221,7 +271,138 @@ const emit = defineEmits<{
   (e: 'selectYear', y: number): void
   (e: 'selectDate', d: Dayjs): void
   (e: 'hoverCell', d: Dayjs | null): void
+  /** Request that the parent make this date visible. The parent decides
+   *  whether to advance its own month (single-pane) or to leave the view
+   *  alone because the date is already visible in a sibling panel
+   *  (dual-pane). */
+  (e: 'navigate', d: Dayjs): void
+  /** Roving tabindex moved — parent should update its `focusedDate` ref so
+   *  every panel that shares it stays in sync. */
+  (e: 'update:focusedDate', d: Dayjs): void
 }>()
+
+// ── Roving tabindex (Reka Calendar pattern) ──────────────────────────────────
+// The focused date is *controlled* — the parent owns the value and feeds it
+// in via `props.focusedDate`. Arrow keys compute a target, emit
+// `update:focusedDate`, and a watch on the prop drives the actual DOM focus.
+// Multiple panels can share the same `focusedDate`; only the panel whose
+// visible weeks contain the date renders the `tabindex=0` cell, and the
+// matching panel's watch handler calls `.focus()` on its own cell.
+
+const gridRef = ref<HTMLElement | null>(null)
+
+function isFocusedCell(cell: CalendarPanelCell): boolean {
+  return !!props.focusedDate && cell.date.isSame(props.focusedDate, 'day')
+}
+
+function pickInitialFocusDate(
+  weeks: CalendarPanelCell[][],
+): Dayjs | null {
+  const flat = weeks.flat()
+  const selected = flat.find(
+    (c) =>
+      (c.isSelected || c.isRangeStart || c.isRangeEnd) &&
+      !c.isUnavailable &&
+      c.inMonth,
+  )
+  if (selected) return selected.date
+  const today = flat.find((c) => c.isToday && c.inMonth && !c.isUnavailable)
+  if (today) return today.date
+  const firstAvailable = flat.find((c) => c.inMonth && !c.isUnavailable)
+  return firstAvailable?.date ?? null
+}
+
+// (Seeding `focusedDate` is the parent's responsibility — it knows the full
+// picture: selected/from value, whether dual-pane is active, etc. CalendarPanel
+// stays purely controlled so multiple panels sharing one focused-date can't
+// race each other on mount.)
+
+// When the focused date changes, move DOM focus to the matching cell — but
+// only if the cell is in *our* grid and focus is already inside a calendar
+// panel. The "already inside a panel" guard avoids stealing focus from the
+// trigger input on every parent state change.
+watch(
+  () => props.focusedDate,
+  (val) => {
+    if (!val) return
+    nextTick(() => {
+      const key = val.format('YYYY-MM-DD')
+      const el = gridRef.value?.querySelector(
+        `[data-value='${key}']:not([data-outside-view])`,
+      ) as HTMLButtonElement | null
+      if (!el) return
+      const active = document.activeElement
+      const focusInSomePanel = active?.hasAttribute('data-value')
+      if (focusInSomePanel) el.focus()
+    })
+  },
+)
+
+// Defense-in-depth ceiling for the skip-disabled recursion: even with the
+// min/max bounds check, an `isDateUnavailable` predicate that returns true
+// for an unbounded run of dates would otherwise spin forever.
+const MAX_SKIP_DISABLED_STEPS = 366
+
+function shiftFocus(
+  target: Dayjs,
+  dir: 1 | -1,
+  retried = false,
+  steps = 0,
+) {
+  // Bounds check first — if the target is outside [minDate, maxDate], the
+  // arrow press is a no-op rather than trying to navigate into nothing.
+  // Matches Reka's CalendarCellTrigger behavior.
+  if (props.minDate && target.isBefore(props.minDate, 'day')) return
+  if (props.maxDate && target.isAfter(props.maxDate, 'day')) return
+  if (steps > MAX_SKIP_DISABLED_STEPS) return
+
+  const key = target.format('YYYY-MM-DD')
+  const el = gridRef.value?.querySelector(
+    `[data-value='${key}']:not([data-outside-view])`,
+  ) as HTMLButtonElement | null
+
+  if (!el) {
+    // Target isn't in *our* grid. Tell the parent so it can either advance
+    // its month (single-pane) or just update focusedDate (dual-pane, where
+    // the date is already visible in a sibling panel). Then retry once —
+    // by then either our grid has the cell (parent advanced our month) or
+    // a sibling panel does (its watch handler picks it up).
+    if (retried) return
+    emit('navigate', target)
+    nextTick(() => shiftFocus(target, dir, true, steps))
+    return
+  }
+
+  if (el.hasAttribute('data-disabled')) {
+    // Skip disabled by stepping one more day in the same direction. Reset
+    // `retried` (we may cross another month boundary) but bump `steps`.
+    shiftFocus(target.add(dir, 'day'), dir, false, steps + 1)
+    return
+  }
+
+  emit('update:focusedDate', target)
+  el.focus()
+}
+
+/**
+ * Move keyboard focus into the grid (used when the parent opens the popover
+ * via ↓ on the trigger input). Falls back to today/selected/first-available
+ * when the parent hasn't seeded a focused date yet.
+ */
+function focusInitialCell() {
+  const target = props.focusedDate ?? pickInitialFocusDate(props.weeks)
+  if (!target) return
+  emit('update:focusedDate', target)
+  nextTick(() => {
+    const key = target.format('YYYY-MM-DD')
+    const el = gridRef.value?.querySelector(
+      `[data-value='${key}']:not([data-outside-view])`,
+    ) as HTMLButtonElement | null
+    el?.focus()
+  })
+}
+
+defineExpose({ focusInitialCell })
 
 const WEEKDAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
 

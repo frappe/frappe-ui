@@ -26,6 +26,7 @@
     @enter="commitInput(true)"
     @open="onShellOpen"
     @close="onShellClose"
+    @request-focus="onShellRequestFocus"
   >
     <template v-if="$slots.trigger" #trigger="ts"><slot name="trigger" v-bind="ts" /></template>
     <template v-if="$slots.target" #target="ts"><slot name="target" v-bind="ts" /></template>
@@ -34,6 +35,7 @@
 
     <template #default="{ close }">
       <CalendarPanel
+        ref="panelRef"
         :view="view"
         :current-year="currentYear"
         :current-month="currentMonth"
@@ -41,6 +43,9 @@
         :year-range="yearRange"
         :weeks="weeks"
         today-label="Now"
+        :min-date="props.minDate"
+        :max-date="props.maxDate"
+        v-model:focused-date="focusedDate"
         @prev="prev"
         @next="next"
         @today="handleNowClick"
@@ -48,9 +53,11 @@
         @select-month="selectMonth"
         @select-year="selectYear"
         @select-date="handleDateCellClick"
+        @navigate="onPanelNavigate"
       />
       <div class="flex flex-col gap-2 p-2 pt-0">
         <TimePicker
+          ref="timePickerRef"
           :modelValue="timeValue"
           :typeable="props.allowCustomTime"
           side="bottom"
@@ -90,7 +97,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, nextTick, watch } from 'vue'
 import { Button } from '../Button'
 import TimePicker from '../TimePicker/TimePicker.vue'
 import { dayjs, dayjsLocal, dayjsSystem } from '../../utils/dayjs'
@@ -156,6 +163,7 @@ watch(isOpen, (val) => {
 
 function onShellOpen() {
   initFromValue()
+  seedFocusedDate()
 }
 
 function onShellClose() {
@@ -164,11 +172,43 @@ function onShellClose() {
     commitInput()
     isTyping.value = false
   }
+  focusedDate.value = null
 }
 
 defineExpose({
   open: () => shellRef.value?.open(),
 })
+
+const panelRef = ref<{ focusInitialCell: () => void } | null>(null)
+const timePickerRef = ref<{ focus: () => void } | null>(null)
+const focusedDate = ref<Dayjs | null>(null)
+
+function seedFocusedDate() {
+  if (focusedDate.value) return
+  if (selectedDate.value) {
+    const d = dayjs(selectedDate.value)
+    if (!checkUnavailable(d)) {
+      focusedDate.value = d
+      return
+    }
+  }
+  const today = dayjsLocal()
+  if (!checkUnavailable(today)) {
+    focusedDate.value = today
+    return
+  }
+  const first = weeks.value.flat().find((c) => c.inMonth && !c.isUnavailable)
+  if (first) focusedDate.value = first.date
+}
+
+function onShellRequestFocus() {
+  seedFocusedDate()
+  nextTick(() => panelRef.value?.focusInitialCell())
+}
+
+function onPanelNavigate(target: Dayjs) {
+  focusOn(target)
+}
 
 // ── Positioning / keepOpen / deprecations ────────────────────────────────────
 
@@ -363,9 +403,13 @@ function selectDate(date: string | Date | Dayjs): void {
 function handleDateCellClick(date: string | Date | Dayjs) {
   selectDate(date)
   emitChange()
-  if (!shouldKeepOpen.value) isOpen.value = false
+  // Keep the popover open — DateTimePicker is a two-step selection (date
+  // then time). Auto-close on date alone strands the embedded TimePicker.
   isTyping.value = false
   resetView()
+  // Move keyboard focus to the time input so the user can immediately
+  // continue with the time. Harmless for mouse users.
+  nextTick(() => timePickerRef.value?.focus?.())
 }
 
 function onTimeChange(val: string) {
