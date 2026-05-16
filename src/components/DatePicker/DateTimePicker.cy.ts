@@ -1,4 +1,21 @@
+import { h } from 'vue'
 import DateTimePicker from './DateTimePicker.vue'
+import type { DateTimePickerActionsSlotProps } from './types'
+
+const clearSlot = {
+  actions: (props: DateTimePickerActionsSlotProps) =>
+    h(
+      'button',
+      {
+        'aria-label': 'Clear',
+        onClick: () => {
+          props.clear()
+          props.close()
+        },
+      },
+      'Clear',
+    ),
+}
 
 describe('DateTimePicker', () => {
   it('renders', () => {
@@ -26,11 +43,10 @@ describe('DateTimePicker', () => {
     cy.get('input').first().should('not.have.value', '')
   })
 
-  it('Clear button resets the value', () => {
-    // Pre-seed a value so the Clear button is rendered immediately
-    // (the footer Clear button is gated on selectedDate being truthy).
+  it('Clear from #actions slot resets the value', () => {
     cy.mount(DateTimePicker, {
       props: { modelValue: '2025-06-15 12:00:00' },
+      slots: clearSlot,
     })
     cy.get('input').first().should('not.have.value', '')
     cy.get('input').first().dblclick()

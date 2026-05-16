@@ -208,7 +208,18 @@ export interface DatePickerActionsSlotProps {
 export interface DateRangePickerActionsSlotProps {
   fromDate: string
   toDate: string
+  /**
+   * Commits one endpoint, mirroring a calendar cell click:
+   * first call sets `from`, second call sets `to`.
+   */
   setDate: (date: string | Date | Dayjs) => void
+  /**
+   * Commits both endpoints atomically. Normalizes order so the earlier
+   * date becomes `from`. Use for fixed-window presets ("Last 7 days").
+   */
+  setRange: (
+    range: [string | Date | Dayjs, string | Date | Dayjs],
+  ) => void
   clear: () => void
   close: () => void
 }
@@ -238,7 +249,11 @@ export interface DatePickerSlots {
   /** Content rendered after the trigger input value. */
   suffix?: (props: DatePickerTriggerSlotProps) => any
 
-  /** Custom action buttons in the popover footer (e.g. Tomorrow, Next Week). */
+  /**
+   * Sidebar rendered to the left of the calendar. Use for date shortcuts
+   * ("Today", "Tomorrow", "Last 7 days") and other preset actions. When
+   * omitted, the popover shows the calendar only.
+   */
   actions?: (props: DatePickerActionsSlotProps) => any
 }
 
@@ -251,6 +266,11 @@ export interface DateRangePickerSlots {
   prefix?: (props: DatePickerTriggerSlotProps) => any
   suffix?: (props: DatePickerTriggerSlotProps) => any
 
+  /**
+   * Sidebar rendered to the left of the calendar. Use for range shortcuts
+   * ("Last 7 days", "Last 12 months") and other preset actions. When
+   * omitted, the popover shows the calendar only.
+   */
   actions?: (props: DateRangePickerActionsSlotProps) => any
 }
 
@@ -263,6 +283,11 @@ export interface DateTimePickerSlots {
   prefix?: (props: DatePickerTriggerSlotProps) => any
   suffix?: (props: DatePickerTriggerSlotProps) => any
 
+  /**
+   * Sidebar rendered to the left of the calendar. Use for date-time
+   * shortcuts ("Now", "Tomorrow 9am") and other preset actions. When
+   * omitted, the popover shows the calendar and time picker only.
+   */
   actions?: (props: DateTimePickerActionsSlotProps) => any
 }
 

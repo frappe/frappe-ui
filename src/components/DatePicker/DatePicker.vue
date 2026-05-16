@@ -21,7 +21,7 @@
     :readonly="inputReadonly"
     :input-class="dp.inputClass"
     :display-label="displayLabel"
-    content-class="w-56 rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5"
+    :content-class="contentClass"
     @blur="commitInput()"
     @enter="commitInput(true)"
     @open="onShellOpen"
@@ -34,48 +34,46 @@
     <template v-if="$slots.suffix" #suffix="ts"><slot name="suffix" v-bind="ts" /></template>
 
     <template #default="{ close }">
-      <CalendarPanel
-        ref="panelRef"
-        :view="view"
-        :current-year="currentYear"
-        :current-month="currentMonth"
-        :year-range-start="yearRangeStart"
-        :year-range="yearRange"
-        :weeks="weeks"
-        today-label="Today"
-        :min-date="props.minDate"
-        :max-date="props.maxDate"
-        v-model:focused-date="focusedDate"
-        @prev="prev"
-        @next="next"
-        @today="handleTodayClick"
-        @cycle-view="cycleView"
-        @select-month="selectMonth"
-        @select-year="selectYear"
-        @select-date="handleDateCellClick"
-        @navigate="onPanelNavigate"
-      />
       <div
-        v-if="$slots.actions || (props.clearable && selected)"
-        class="flex flex-wrap items-center gap-1 p-2 border-t"
+        class="flex"
+        :class="$slots.actions ? 'divide-x divide-outline-gray-2' : ''"
       >
-        <slot
+        <aside
           v-if="$slots.actions"
-          name="actions"
-          v-bind="{
-            selected,
-            setDate: handleDateCellClick,
-            clear: handleClearClick,
-            close,
-          }"
-        />
-        <Button
-          v-else-if="props.clearable && selected"
-          size="sm"
-          variant="outline"
-          class="ml-auto"
-          :label="'Clear'"
-          @click="handleClearClick"
+          data-slot="actions"
+          aria-label="Shortcuts"
+          class="flex flex-col p-2 gap-0.5"
+        >
+          <slot
+            name="actions"
+            v-bind="{
+              selected,
+              setDate: handleDateCellClick,
+              clear: handleClearClick,
+              close,
+            }"
+          />
+        </aside>
+        <CalendarPanel
+          ref="panelRef"
+          :view="view"
+          :current-year="currentYear"
+          :current-month="currentMonth"
+          :year-range-start="yearRangeStart"
+          :year-range="yearRange"
+          :weeks="weeks"
+          today-label="Today"
+          :min-date="props.minDate"
+          :max-date="props.maxDate"
+          v-model:focused-date="focusedDate"
+          @prev="prev"
+          @next="next"
+          @today="handleTodayClick"
+          @cycle-view="cycleView"
+          @select-month="selectMonth"
+          @select-year="selectYear"
+          @select-date="handleDateCellClick"
+          @navigate="onPanelNavigate"
         />
       </div>
     </template>
@@ -84,7 +82,6 @@
 
 <script setup lang="ts">
 import { ref, computed, nextTick, watch } from 'vue'
-import { Button } from '../Button'
 import { dayjs, dayjsLocal } from '../../utils/dayjs'
 import { generateWeeks } from './utils'
 import CalendarPanel, { type CalendarPanelCell } from './CalendarPanel.vue'
@@ -124,6 +121,12 @@ const props = withDefaults(defineProps<DatePickerProps>(), {
 const emit = defineEmits<DatePickerEmits>()
 
 const slots = defineSlots<DatePickerSlots>()
+
+const POPOVER_CLASSES =
+  'rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5'
+const contentClass = computed(() =>
+  slots.actions ? `w-fit ${POPOVER_CLASSES}` : `w-56 ${POPOVER_CLASSES}`,
+)
 
 // Cast strips @deprecated markers so internal back-compat reads don't trigger TS6385.
 const dp = props as unknown as LegacyDatePickerProps

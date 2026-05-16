@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { DateRangePicker, Button } from 'frappe-ui'
+import { DateRangePicker } from 'frappe-ui'
 import { dayjs } from '../../../utils/dayjs'
-import type { Dayjs } from 'dayjs'
+import type { Dayjs } from 'dayjs/esm'
 
 const today = dayjs().format('YYYY-MM-DD')
 const oneYearOut = dayjs().add(1, 'year').format('YYYY-MM-DD')
@@ -19,24 +19,14 @@ const analyticsRange = ref<string[]>([
   dayjs().format('YYYY-MM-DD'),
 ])
 
-type SetDate = (d: Dayjs) => void
-
-function setLastNDays(days: number, setDate: SetDate) {
-  const end = dayjs()
-  setDate(end.subtract(days - 1, 'day'))
-  setDate(end)
-}
-
-function setLongWeekend(setDate: SetDate) {
+function longWeekend(): [Dayjs, Dayjs] {
   const fri = upcomingDay(5)
-  setDate(fri)
-  setDate(fri.add(2, 'day'))
+  return [fri, fri.add(2, 'day')]
 }
 
-function setWorkWeek(setDate: SetDate) {
+function workWeek(): [Dayjs, Dayjs] {
   const mon = upcomingDay(1)
-  setDate(mon)
-  setDate(mon.add(4, 'day'))
+  return [mon, mon.add(4, 'day')]
 }
 
 function upcomingDay(weekday: number) {
@@ -44,6 +34,14 @@ function upcomingDay(weekday: number) {
   const diff = (weekday - t.day() + 7) % 7 || 7
   return t.add(diff, 'day')
 }
+
+function lastNDays(days: number): [Dayjs, Dayjs] {
+  return [dayjs().subtract(days - 1, 'day'), dayjs()]
+}
+
+// Canonical sidebar row styling.
+const rowCls =
+  'w-full rounded px-2 py-1.5 text-left text-base hover:bg-surface-gray-2'
 
 // 4. Project sprint — weekdays only, span limited to ~2 weeks via maxDate
 const sprint = ref<string[]>([])
@@ -79,17 +77,31 @@ const ret = computed(() =>
           aria-hidden="true"
         />
       </template>
-      <template #actions="{ setDate }">
-        <Button
-          size="sm"
-          label="Long weekend"
-          @click="setLongWeekend(setDate)"
-        />
-        <Button
-          size="sm"
-          label="Next week"
-          @click="setWorkWeek(setDate)"
-        />
+      <template #actions="{ setRange, close }">
+        <button
+          type="button"
+          :class="rowCls"
+          @click="
+            () => {
+              setRange(longWeekend())
+              close()
+            }
+          "
+        >
+          Long weekend
+        </button>
+        <button
+          type="button"
+          :class="rowCls"
+          @click="
+            () => {
+              setRange(workWeek())
+              close()
+            }
+          "
+        >
+          Next week
+        </button>
       </template>
     </DateRangePicker>
 
@@ -103,10 +115,7 @@ const ret = computed(() =>
       :max-date="oneYearOut"
     >
       <template #prefix>
-        <span
-          class="lucide-hotel size-4 text-ink-gray-5"
-          aria-hidden="true"
-        />
+        <span class="lucide-hotel size-4 text-ink-gray-5" aria-hidden="true" />
       </template>
     </DateRangePicker>
 
@@ -124,10 +133,81 @@ const ret = computed(() =>
           aria-hidden="true"
         />
       </template>
-      <template #actions="{ setDate }">
-        <Button size="sm" label="7d" @click="setLastNDays(7, setDate)" />
-        <Button size="sm" label="30d" @click="setLastNDays(30, setDate)" />
-        <Button size="sm" label="90d" @click="setLastNDays(90, setDate)" />
+      <template #actions="{ fromDate, toDate, setRange, clear, close }">
+        <button
+          type="button"
+          :class="rowCls"
+          @click="
+            () => {
+              setRange([dayjs(), dayjs()])
+              close()
+            }
+          "
+        >
+          Today
+        </button>
+        <button
+          type="button"
+          :class="rowCls"
+          @click="
+            () => {
+              setRange(lastNDays(7))
+              close()
+            }
+          "
+        >
+          Last 7 days
+        </button>
+        <button
+          type="button"
+          :class="rowCls"
+          @click="
+            () => {
+              setRange(lastNDays(28))
+              close()
+            }
+          "
+        >
+          Last 4 weeks
+        </button>
+        <button
+          type="button"
+          :class="rowCls"
+          @click="
+            () => {
+              setRange(lastNDays(90))
+              close()
+            }
+          "
+        >
+          Last 3 months
+        </button>
+        <button
+          type="button"
+          :class="rowCls"
+          @click="
+            () => {
+              setRange(lastNDays(365))
+              close()
+            }
+          "
+        >
+          Last 12 months
+        </button>
+        <hr class="my-1 border-outline-gray-2" />
+        <button
+          v-if="fromDate || toDate"
+          type="button"
+          :class="rowCls"
+          @click="
+            () => {
+              clear()
+              close()
+            }
+          "
+        >
+          Clear
+        </button>
       </template>
     </DateRangePicker>
 

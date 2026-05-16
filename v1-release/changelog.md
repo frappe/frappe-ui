@@ -171,6 +171,36 @@ Custom `#trigger` slots automatically opt in: any open path
 (`click` / `Space` / `Enter` / `↓`) moves focus into the grid, since
 a non-`TextInput` trigger has no typing context to keep focus on.
 
+### DatePicker family — `#actions` slot moved to sidebar (breaking)
+
+The `#actions` slot on `DatePicker`, `DateRangePicker`, and
+`DateTimePicker` now renders as a **left sidebar** inside the popover
+instead of a footer row. The dedicated footer block has been removed.
+
+- The slot keeps its name (`#actions`) and existing slot-prop shapes,
+  with one addition: `DateRangePicker`'s `#actions` slot now also
+  receives `setRange([from, to])`, which commits both endpoints
+  atomically and normalizes order. Use it for fixed-window presets
+  ("Last 7 days") that previously had to call `setDate` twice.
+- The auto-rendered Clear button (rendered when `clearable && hasValue`
+  and no slot was provided) is gone. Consumers who want an in-popover
+  Clear render one inside `#actions` using the `clear` slot prop.
+  `clearable` remains as a prop and continues to govern any input-level
+  clear affordance.
+- The popover content width switches to `w-fit` when the slot is
+  provided so the calendar layout doesn't have to share a fixed width
+  with the consumer's button list. With no `#actions` slot, sizing is
+  unchanged.
+- A `data-slot="actions"` attribute is set on the sidebar `<aside>` for
+  CSS targeting hooks.
+
+Migration: callers who used the short-lived footer `#actions` slot
+should restyle their buttons for the vertical sidebar layout
+(left-aligned text rows work well). Callers who relied on the
+auto-rendered Clear button should add an explicit Clear row inside
+their `#actions` template — see the picker stories for the canonical
+pattern.
+
 ### DateTimePicker — date selection keeps popover open
 
 Selecting a date in `DateTimePicker` no longer auto-closes the

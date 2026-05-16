@@ -21,7 +21,7 @@
     :readonly="inputReadonly"
     :input-class="dp.inputClass"
     :display-label="displayLabel"
-    content-class="w-56 rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5"
+    :content-class="contentClass"
     @blur="commitInput()"
     @enter="commitInput(true)"
     @open="onShellOpen"
@@ -34,63 +34,63 @@
     <template v-if="$slots.suffix" #suffix="ts"><slot name="suffix" v-bind="ts" /></template>
 
     <template #default="{ close }">
-      <CalendarPanel
-        ref="panelRef"
-        :view="view"
-        :current-year="currentYear"
-        :current-month="currentMonth"
-        :year-range-start="yearRangeStart"
-        :year-range="yearRange"
-        :weeks="weeks"
-        today-label="Now"
-        :min-date="props.minDate"
-        :max-date="props.maxDate"
-        v-model:focused-date="focusedDate"
-        @prev="prev"
-        @next="next"
-        @today="handleNowClick"
-        @cycle-view="cycleView"
-        @select-month="selectMonth"
-        @select-year="selectYear"
-        @select-date="handleDateCellClick"
-        @navigate="onPanelNavigate"
-      />
-      <div class="flex flex-col gap-2 p-2 pt-0">
-        <TimePicker
-          ref="timePickerRef"
-          :modelValue="timeValue"
-          :typeable="props.allowCustomTime"
-          side="bottom"
-          align="start"
-          placeholder="Select time"
-          :minTime="computedMinTime"
-          :maxTime="computedMaxTime"
-          @change="onTimeChange"
-        />
-      </div>
       <div
-        v-if="$slots.actions || (props.clearable && selectedDate)"
-        class="flex flex-wrap items-center gap-1 p-2 border-t"
+        class="flex"
+        :class="$slots.actions ? 'divide-x divide-outline-gray-2' : ''"
       >
-        <slot
+        <aside
           v-if="$slots.actions"
-          name="actions"
-          v-bind="{
-            selected: selectedDate,
-            time: timeValue,
-            setDate: handleDateCellClick,
-            clear: handleClearClick,
-            close,
-          }"
-        />
-        <Button
-          v-else-if="props.clearable && selectedDate"
-          size="sm"
-          variant="outline"
-          class="ml-auto"
-          :label="'Clear'"
-          @click="handleClearClick"
-        />
+          data-slot="actions"
+          aria-label="Shortcuts"
+          class="flex flex-col p-2 gap-0.5"
+        >
+          <slot
+            name="actions"
+            v-bind="{
+              selected: selectedDate,
+              time: timeValue,
+              setDate: handleDateCellClick,
+              clear: handleClearClick,
+              close,
+            }"
+          />
+        </aside>
+        <div class="flex flex-col">
+          <CalendarPanel
+            ref="panelRef"
+            :view="view"
+            :current-year="currentYear"
+            :current-month="currentMonth"
+            :year-range-start="yearRangeStart"
+            :year-range="yearRange"
+            :weeks="weeks"
+            today-label="Now"
+            :min-date="props.minDate"
+            :max-date="props.maxDate"
+            v-model:focused-date="focusedDate"
+            @prev="prev"
+            @next="next"
+            @today="handleNowClick"
+            @cycle-view="cycleView"
+            @select-month="selectMonth"
+            @select-year="selectYear"
+            @select-date="handleDateCellClick"
+            @navigate="onPanelNavigate"
+          />
+          <div class="flex flex-col gap-2 p-2 pt-0">
+            <TimePicker
+              ref="timePickerRef"
+              :modelValue="timeValue"
+              :typeable="props.allowCustomTime"
+              side="bottom"
+              align="start"
+              placeholder="Select time"
+              :minTime="computedMinTime"
+              :maxTime="computedMaxTime"
+              @change="onTimeChange"
+            />
+          </div>
+        </div>
       </div>
     </template>
   </PickerShell>
@@ -98,7 +98,6 @@
 
 <script setup lang="ts">
 import { ref, computed, nextTick, watch } from 'vue'
-import { Button } from '../Button'
 import TimePicker from '../TimePicker/TimePicker.vue'
 import { dayjs, dayjsLocal, dayjsSystem } from '../../utils/dayjs'
 import { generateWeeks } from './utils'
@@ -140,6 +139,12 @@ const props = withDefaults(defineProps<DateTimePickerProps>(), {
 const emit = defineEmits<DateTimePickerEmits>()
 
 const slots = defineSlots<DateTimePickerSlots>()
+
+const POPOVER_CLASSES =
+  'rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5'
+const contentClass = computed(() =>
+  slots.actions ? `w-fit ${POPOVER_CLASSES}` : `w-56 ${POPOVER_CLASSES}`,
+)
 
 const dp = props as unknown as LegacyDatePickerProps
 

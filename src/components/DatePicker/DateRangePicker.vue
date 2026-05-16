@@ -36,79 +36,78 @@
     <template #default="{ close }">
       <div
         class="flex"
-        :class="isDualPaneActive ? 'divide-x divide-outline-gray-2' : ''"
+        :class="$slots.actions ? 'divide-x divide-outline-gray-2' : ''"
       >
-        <CalendarPanel
-          ref="leftPanelRef"
-          :view="view"
-          :current-year="currentYear"
-          :current-month="currentMonth"
-          :year-range-start="yearRangeStart"
-          :year-range="yearRange"
-          :weeks="weeks"
-          :today-label="isDualPaneActive ? '' : 'Today'"
-          :hide-next="isDualPaneActive"
-          :hide-out-of-month="isDualPaneActive"
-          :center-header="isDualPaneActive"
-          :min-date="props.minDate"
-          :max-date="props.maxDate"
-          v-model:focused-date="focusedDate"
-          @prev="prev"
-          @next="next"
-          @today="handleTodayClick"
-          @cycle-view="cycleView"
-          @select-month="selectMonth"
-          @select-year="selectYear"
-          @select-date="handleDateCellClick"
-          @hover-cell="onCellHover"
-          @navigate="onPanelNavigate"
-        />
-        <CalendarPanel
-          v-if="isDualPaneActive"
-          ref="rightPanelRef"
-          :view="view"
-          :current-year="rightYear"
-          :current-month="rightMonth"
-          :year-range-start="yearRangeStart"
-          :year-range="yearRange"
-          :weeks="rightWeeks"
-          hide-prev
-          hide-today
-          hide-out-of-month
-          center-header
-          :min-date="props.minDate"
-          :max-date="props.maxDate"
-          v-model:focused-date="focusedDate"
-          @next="next"
-          @cycle-view="cycleView"
-          @select-date="handleDateCellClick"
-          @hover-cell="onCellHover"
-          @navigate="onPanelNavigate"
-        />
-      </div>
-      <div
-        v-if="$slots.actions || (props.clearable && (fromDate || toDate))"
-        class="flex flex-wrap items-center gap-1 p-2 border-t"
-      >
-        <slot
+        <aside
           v-if="$slots.actions"
-          name="actions"
-          v-bind="{
-            fromDate,
-            toDate,
-            setDate: handleDateCellClick,
-            clear: handleClearClick,
-            close,
-          }"
-        />
-        <Button
-          v-else-if="props.clearable && (fromDate || toDate)"
-          size="sm"
-          variant="outline"
-          class="ml-auto"
-          :label="'Clear'"
-          @click="handleClearClick"
-        />
+          data-slot="actions"
+          aria-label="Shortcuts"
+          class="flex flex-col p-2 gap-0.5"
+        >
+          <slot
+            name="actions"
+            v-bind="{
+              fromDate,
+              toDate,
+              setDate: handleDateCellClick,
+              setRange: handleSetRange,
+              clear: handleClearClick,
+              close,
+            }"
+          />
+        </aside>
+        <div
+          class="flex"
+          :class="isDualPaneActive ? 'divide-x divide-outline-gray-2' : ''"
+        >
+          <CalendarPanel
+            ref="leftPanelRef"
+            :view="view"
+            :current-year="currentYear"
+            :current-month="currentMonth"
+            :year-range-start="yearRangeStart"
+            :year-range="yearRange"
+            :weeks="weeks"
+            :today-label="isDualPaneActive ? '' : 'Today'"
+            :hide-next="isDualPaneActive"
+            :hide-out-of-month="isDualPaneActive"
+            :center-header="isDualPaneActive"
+            :min-date="props.minDate"
+            :max-date="props.maxDate"
+            v-model:focused-date="focusedDate"
+            @prev="prev"
+            @next="next"
+            @today="handleTodayClick"
+            @cycle-view="cycleView"
+            @select-month="selectMonth"
+            @select-year="selectYear"
+            @select-date="handleDateCellClick"
+            @hover-cell="onCellHover"
+            @navigate="onPanelNavigate"
+          />
+          <CalendarPanel
+            v-if="isDualPaneActive"
+            ref="rightPanelRef"
+            :view="view"
+            :current-year="rightYear"
+            :current-month="rightMonth"
+            :year-range-start="yearRangeStart"
+            :year-range="yearRange"
+            :weeks="rightWeeks"
+            hide-prev
+            hide-today
+            hide-out-of-month
+            center-header
+            :min-date="props.minDate"
+            :max-date="props.maxDate"
+            v-model:focused-date="focusedDate"
+            @next="next"
+            @cycle-view="cycleView"
+            @select-date="handleDateCellClick"
+            @hover-cell="onCellHover"
+            @navigate="onPanelNavigate"
+          />
+        </div>
       </div>
     </template>
   </PickerShell>
@@ -116,7 +115,6 @@
 
 <script setup lang="ts">
 import { ref, computed, nextTick, watch } from 'vue'
-import { Button } from '../Button'
 import { dayjs, dayjsLocal } from '../../utils/dayjs'
 import { generateWeeks } from './utils'
 import CalendarPanel, { type CalendarPanelCell } from './CalendarPanel.vue'
@@ -541,6 +539,23 @@ function handleTodayClick() {
   toDate.value = now.format(DATE_FORMAT)
   emitIfChanged()
   if (!shouldKeepOpen.value) isOpen.value = false
+  isTyping.value = false
+  resetView()
+}
+
+function handleSetRange(
+  range: [string | Date | Dayjs, string | Date | Dayjs],
+) {
+  const a = dayjs(range[0])
+  const b = dayjs(range[1])
+  if (!a.isValid() || !b.isValid()) return
+  if (checkUnavailable(a) || checkUnavailable(b)) return
+  fromDate.value = a.format(DATE_FORMAT)
+  toDate.value = b.format(DATE_FORMAT)
+  ensureOrder()
+  hoverDate.value = null
+  emitIfChanged()
+  focusOn(dayjs(fromDate.value))
   isTyping.value = false
   resetView()
 }

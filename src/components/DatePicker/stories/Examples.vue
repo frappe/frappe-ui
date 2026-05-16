@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { DatePicker, Button } from 'frappe-ui'
 import { dayjs } from '../../../utils/dayjs'
-import type { Dayjs } from 'dayjs'
+import type { Dayjs } from 'dayjs/esm'
 import LucidePlane from '~icons/lucide/plane'
 import LucideCake from '~icons/lucide/cake'
 import LucideTruck from '~icons/lucide/truck'
@@ -57,6 +57,10 @@ const stardateCeil = dayjs('2300-12-31').format('YYYY-MM-DD')
 
 // 7. Custom trigger — "Add due date" button on a task card
 const dueDate = ref('')
+
+// Canonical sidebar row styling for #actions.
+const rowCls =
+  'w-full rounded px-2 py-1.5 text-left text-base hover:bg-surface-gray-2'
 </script>
 
 <template>
@@ -101,17 +105,31 @@ const dueDate = ref('')
       <template #prefix>
         <LucideTruck class="size-4 text-ink-gray-5" />
       </template>
-      <template #actions="{ setDate }">
-        <Button
-          size="sm"
-          label="Tomorrow"
-          @click="setDate(dayjs().add(1, 'day'))"
-        />
-        <Button
-          size="sm"
-          label="Next Monday"
-          @click="setDate(nextMonday())"
-        />
+      <template #actions="{ setDate, close }">
+        <button
+          type="button"
+          :class="rowCls"
+          @click="
+            () => {
+              setDate(dayjs().add(1, 'day'))
+              close()
+            }
+          "
+        >
+          Tomorrow
+        </button>
+        <button
+          type="button"
+          :class="rowCls"
+          @click="
+            () => {
+              setDate(nextMonday())
+              close()
+            }
+          "
+        >
+          Next Monday
+        </button>
       </template>
     </DatePicker>
 

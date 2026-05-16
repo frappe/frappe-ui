@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { DateTimePicker, Button } from 'frappe-ui'
+import { DateTimePicker } from 'frappe-ui'
 import { dayjs } from '../../../utils/dayjs'
 import LucideCalendarClock from '~icons/lucide/calendar-clock'
 import LucideServer from '~icons/lucide/server'
@@ -34,6 +34,9 @@ function nextFridayMidnight() {
   const diff = (5 - today.day() + 7) % 7 || 7
   return today.add(diff, 'day').hour(0).minute(0).second(0)
 }
+
+const rowCls =
+  'w-full rounded px-2 py-1.5 text-left text-base hover:bg-surface-gray-2'
 </script>
 
 <template>
@@ -76,22 +79,43 @@ function nextFridayMidnight() {
       <template #prefix>
         <LucideRocket class="size-4 text-ink-gray-5" />
       </template>
-      <template #actions="{ setDate }">
-        <Button
-          size="sm"
-          label="High noon"
-          @click="setDate(dayjs().add(1, 'day').hour(12).minute(0))"
-        />
-        <Button
-          size="sm"
-          label="Midnight Friday"
-          @click="setDate(nextFridayMidnight())"
-        />
-        <Button
-          size="sm"
-          label="Sunrise"
-          @click="setDate(dayjs().add(1, 'day').hour(6).minute(15))"
-        />
+      <template #actions="{ setDate, close }">
+        <button
+          type="button"
+          :class="rowCls"
+          @click="
+            () => {
+              setDate(dayjs().add(1, 'day').hour(12).minute(0))
+              close()
+            }
+          "
+        >
+          High noon
+        </button>
+        <button
+          type="button"
+          :class="rowCls"
+          @click="
+            () => {
+              setDate(nextFridayMidnight())
+              close()
+            }
+          "
+        >
+          Midnight Friday
+        </button>
+        <button
+          type="button"
+          :class="rowCls"
+          @click="
+            () => {
+              setDate(dayjs().add(1, 'day').hour(6).minute(15))
+              close()
+            }
+          "
+        >
+          Sunrise
+        </button>
       </template>
     </DateTimePicker>
   </div>

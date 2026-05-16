@@ -540,6 +540,100 @@ If both `minDate`/`maxDate` and `isDateUnavailable` are provided, the internal d
 
 ---
 
+## `#actions` slot — sidebar of shortcuts
+
+The current `#actions` slot renders as a ~40px footer at the bottom of the popover. In practice it fits one button and a label, which is not enough for the real shortcut lists callers want to build ("Today", "Last 7 days", "Last 12 months"). The dominant industry pattern (Linear, Notion, GitHub, Asana) puts these in a left sidebar with ~6–8 rows of vertical room.
+
+The current footer `#actions` was added during the v1 refactor and has no published consumers, so it can be repurposed without a deprecation window.
+
+### Decisions
+
+| Decision | Direction |
+|---|---|
+| Slot name | `#actions` — kept, matches `Dialog` |
+| Location | Left sidebar inside the popover, divided from the calendar by `divide-x divide-outline-gray-2` |
+| Visibility | Rendered only when the slot is provided. Calendar layout unchanged otherwise. |
+| Styling | Unstyled. Consumer renders their own button list inside `<aside class="flex flex-col p-2 gap-0.5">`. |
+| Popover width | Fixed widths (`w-56` on `DatePicker`) switch to `w-fit` when the sidebar is present. |
+| Footer block | **Removed** from all three components. |
+| Auto Clear button | **Removed.** Consumers who want an in-popover Clear write it inside `#actions` using the `clear` slot prop. |
+| `clearable` prop | Survives. Reduced to an input-level affordance — controls the trigger input's clear `×`, not a popover button. |
+| Migration | None. Behavior-change changelog entry only. |
+
+### Slot props
+
+`DatePicker` and `DateTimePicker` reuse their existing slot-prop shapes. `DateRangePickerActionsSlotProps` gains a `setRange` method.
+
+```ts
+interface DatePickerActionsSlotProps {
+  selected: string                                     // 'YYYY-MM-DD' or ''
+  setDate: (date: string | Date | Dayjs) => void
+  clear: () => void
+  close: () => void
+}
+
+interface DateRangePickerActionsSlotProps {
+  fromDate: string
+  toDate: string
+
+  /** Mirrors a cell click — sets one endpoint at a time. */
+  setDate: (date: string | Date | Dayjs) => void
+
+  /** Commits both endpoints atomically; normalizes order. */
+  setRange: (
+    range: [string | Date | Dayjs, string | Date | Dayjs],
+  ) => void
+
+  clear: () => void
+  close: () => void
+}
+
+interface DateTimePickerActionsSlotProps extends DatePickerActionsSlotProps {
+  time: string                                         // 'HH:mm:ss' or ''
+}
+```
+
+`setRange` is the only new internal helper. Implementation: parse both inputs through `coerceToDayjs`, validate against `checkUnavailable`, write `fromDate.value` / `toDate.value`, call `ensureOrder()`, then `emitIfChanged()`. Without it, fixed-window presets ("Last 7 days") would have to call `setDate` twice and rely on internal state ordering.
+
+### Behavior
+
+- `setDate` / `setRange` respect `minDate` / `maxDate` / `isDateUnavailable` — calls with unavailable dates silently no-op.
+- `close()` closes the popover unconditionally (ignores `keepOpen`). A consumer calling `close()` is making an explicit choice.
+- No internal arrow-key navigation inside the sidebar. Consumer-rendered `<button>`s sit in normal Tab order, before the calendar grid. The grid keeps its own arrow-key navigation.
+- `data-slot="actions"` set on the `<aside>` for styling hooks (P10).
+
+### Example
+
+```vue
+<DateRangePicker v-model="range">
+  <template #actions="{ fromDate, toDate, setRange, clear, close }">
+    <button @click="setRange([dayjs(), dayjs()]); close()">Today</button>
+    <button @click="setRange([dayjs().subtract(7, 'day'), dayjs()]); close()">
+      Last 7 days
+    </button>
+    <button @click="setRange([dayjs().subtract(28, 'day'), dayjs()]); close()">
+      Last 4 weeks
+    </button>
+    <button @click="setRange([dayjs().subtract(3, 'month'), dayjs()]); close()">
+      Last 3 months
+    </button>
+    <button @click="setRange([dayjs().subtract(12, 'month'), dayjs()]); close()">
+      Last 12 months
+    </button>
+    <hr class="my-1 border-outline-gray-2" />
+    <button v-if="fromDate || toDate" @click="clear(); close()">Clear</button>
+  </template>
+</DateRangePicker>
+```
+
+### Open / deferred
+
+- Sidebar a11y as a roving-focus menu — add behind a future opt-in if a real consumer needs it.
+- `<ShortcutButton>` helper component — extract post-v1 if consumer patterns converge.
+- `#footer` slot for non-shortcut affordances (Apply / Cancel) — purely additive, ship when asked.
+
+---
+
 ## Execution checklist
 
 **Vocab alignment**
@@ -573,6 +667,17 @@ If both `minDate`/`maxDate` and `isDateUnavailable` are provided, the internal d
 - [ ] Add `readonly` prop; deprecate `allowCustom`; internal trigger reads `props.readonly || props.allowCustom === false`
 - [ ] Add `@deprecated` warning for `value` prop (dev-mode warn)
 - [ ] Update `DateTimePicker`'s internal `TimePicker` call site to use `side`/`align`/`readonly` instead of `placement`/`allowCustom`
+
+**`#actions` slot relocation**
+- [ ] Move `#actions` rendering from footer to left sidebar in `DatePicker`, `DateRangePicker`, `DateTimePicker`
+- [ ] Delete the footer `<div v-if="$slots.actions || (clearable && …)">` block from all three components
+- [ ] Switch fixed-width popovers to `w-fit` when `$slots.actions` is present
+- [ ] Add `setRange(range)` to `DateRangePicker`; expose via the `#actions` slot props
+- [ ] Add `data-slot="actions"` to the sidebar `<aside>`
+- [ ] Reduce `clearable` to an input-level affordance (no popover Clear button)
+- [ ] Update / replace `WithActions` story per picker to show the canonical shortcut list pattern
+- [ ] Cypress: slot renders to the left of calendar; click commits via `setDate` / `setRange` + `close`; `setRange` normalizes reversed input; no auto Clear in footer
+- [ ] Changelog entry: behavior change — `#actions` moved to sidebar, footer removed, in-popover auto Clear removed
 
 **Docs**
 - [ ] Regenerate `docs/meta/DatePicker.md` after API changes

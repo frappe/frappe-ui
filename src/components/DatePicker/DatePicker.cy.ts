@@ -1,4 +1,24 @@
+import { h } from 'vue'
 import DatePicker from './DatePicker.vue'
+import type { DatePickerActionsSlotProps } from './types'
+
+// Slot factory used by tests that need a sidebar Clear button.
+// The new #actions slot renders to the left of the calendar; consumers
+// who want an in-popover Clear render one inside it via `clear()`.
+const clearSlot = {
+  actions: (props: DatePickerActionsSlotProps) =>
+    h(
+      'button',
+      {
+        'aria-label': 'Clear',
+        onClick: () => {
+          props.clear()
+          props.close()
+        },
+      },
+      'Clear',
+    ),
+}
 
 const monthsLabels = [
   'Jan',
@@ -66,14 +86,23 @@ describe('DatePicker', () => {
     cy.get('input').should('have.value', getTodaysDate())
   })
 
-  it('clear button removes the value', () => {
-    // Pre-seed via modelValue so the Clear footer button is rendered on first open.
-    cy.mount(DatePicker, { props: { modelValue: '2025-06-15' } })
+  it('clear slot prop removes the value', () => {
+    // Consumer renders Clear in the #actions sidebar; verifies clear() + close() wiring.
+    cy.mount(DatePicker, {
+      props: { modelValue: '2025-06-15' },
+      slots: clearSlot,
+    })
     cy.get('input').should('have.value', '2025-06-15')
     cy.get('input').dblclick()
     cy.get('[aria-label="Clear"]').click()
     cy.get('[role=dialog]').should('not.exist')
     cy.get('input').should('have.value', '')
+  })
+
+  it('renders #actions slot to the left of the calendar', () => {
+    cy.mount(DatePicker, { slots: clearSlot })
+    cy.get('input').dblclick()
+    cy.get('[data-slot="actions"]').should('exist')
   })
 
   it('autoclose', () => {

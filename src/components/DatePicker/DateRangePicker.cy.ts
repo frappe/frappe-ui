@@ -1,4 +1,49 @@
+import { h } from 'vue'
 import DateRangePicker from './DateRangePicker.vue'
+import type { DateRangePickerActionsSlotProps } from './types'
+
+// Slot factory: renders a Clear button when there is a value, and exposes
+// a Last-7-days preset that exercises setRange.
+const sidebarSlot = {
+  actions: (props: DateRangePickerActionsSlotProps) => {
+    const children = [
+      h(
+        'button',
+        {
+          'aria-label': 'Last 7 days',
+          onClick: () => {
+            const fmt = (d: Date) => {
+              const p = (n: number) => String(n).padStart(2, '0')
+              return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`
+            }
+            const today = new Date()
+            const start = new Date()
+            start.setDate(today.getDate() - 6)
+            props.setRange([fmt(start), fmt(today)])
+            props.close()
+          },
+        },
+        'Last 7 days',
+      ),
+    ]
+    if (props.fromDate || props.toDate) {
+      children.push(
+        h(
+          'button',
+          {
+            'aria-label': 'Clear',
+            onClick: () => {
+              props.clear()
+              props.close()
+            },
+          },
+          'Clear',
+        ),
+      )
+    }
+    return children
+  },
+}
 
 const monthsLabels = [
   'Jan',
@@ -77,8 +122,8 @@ describe('DateRangePicker', () => {
     cy.get('input').should('have.value', rangeDate)
   })
 
-  it('Clear button only appears once at least one end is picked', () => {
-    cy.mount(DateRangePicker)
+  it('Slot-rendered Clear appears once at least one end is picked', () => {
+    cy.mount(DateRangePicker, { slots: sidebarSlot })
     cy.get('input').dblclick()
 
     cy.get('input').should('have.value', '')
@@ -87,10 +132,10 @@ describe('DateRangePicker', () => {
     cy.get('[aria-label="Clear"]').should('exist')
   })
 
-  it('Clear button removes the value', () => {
-    // Pre-seed via modelValue so the Clear button is present on first open.
+  it('Clear from #actions slot removes the value', () => {
     cy.mount(DateRangePicker, {
       props: { modelValue: ['2025-06-10', '2025-06-15'] },
+      slots: sidebarSlot,
     })
     cy.get('input').dblclick()
     cy.get('[aria-label="Clear"]').click()
@@ -130,6 +175,7 @@ describe('DateRangePicker', () => {
         modelValue: ['2025-06-10', '2025-06-15'],
         'onUpdate:modelValue': cy.spy().as('onUpdate'),
       },
+      slots: sidebarSlot,
     })
     cy.get('input').dblclick()
     cy.get('[aria-label="Clear"]').click()
@@ -139,11 +185,52 @@ describe('DateRangePicker', () => {
     })
   })
 
-  it('clearable=false hides footer', () => {
-    cy.mount(DateRangePicker, { props: { clearable: false } })
+  it('#actions sidebar renders to the left of the calendar', () => {
+    cy.mount(DateRangePicker, { slots: sidebarSlot })
     cy.get('input').dblclick()
-    cy.get('[role=dialog]').should('exist')
-    cy.get('[aria-label="Clear"]').should('not.exist')
+    cy.get('[data-slot="actions"]').should('exist')
+  })
+
+  it('setRange commits both endpoints atomically', () => {
+    cy.mount(DateRangePicker, {
+      props: { 'onUpdate:modelValue': cy.spy().as('onUpdate') },
+      slots: sidebarSlot,
+    })
+    cy.get('input').dblclick()
+    cy.get('[aria-label="Last 7 days"]').click()
+    cy.get('@onUpdate').should((spy: any) => {
+      const last = spy.lastCall.args[0]
+      expect(last).to.have.length(2)
+      // setRange normalizes order: from <= to
+      expect(last[0] <= last[1]).to.be.true
+    })
+  })
+
+  it('setRange normalizes reversed input', () => {
+    const reversedSlot = {
+      actions: (props: DateRangePickerActionsSlotProps) =>
+        h(
+          'button',
+          {
+            'aria-label': 'Reversed',
+            onClick: () => {
+              props.setRange(['2025-06-20', '2025-06-10'])
+              props.close()
+            },
+          },
+          'Reversed',
+        ),
+    }
+    cy.mount(DateRangePicker, {
+      props: { 'onUpdate:modelValue': cy.spy().as('onUpdate') },
+      slots: reversedSlot,
+    })
+    cy.get('input').dblclick()
+    cy.get('[aria-label="Reversed"]').click()
+    cy.get('@onUpdate').should((spy: any) => {
+      const last = spy.lastCall.args[0]
+      expect(last).to.deep.equal(['2025-06-10', '2025-06-20'])
+    })
   })
 
   it('minDate and maxDate disable out-of-range cells', () => {
