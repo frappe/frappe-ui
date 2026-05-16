@@ -1,6 +1,32 @@
 <template>
   <div class="select-none text-base text-ink-gray-9">
-    <div class="flex items-center justify-between p-2 pb-0 gap-1">
+    <div
+      v-if="centerHeader"
+      class="flex items-center justify-between p-2 pb-0 gap-1"
+    >
+      <Button
+        :class="{ invisible: hidePrev }"
+        label="previous"
+        variant="ghost"
+        icon="lucide-chevron-left"
+        @click="emit('prev')"
+      />
+      <span class="text-sm font-medium text-ink-gray-7">
+        <span v-if="view === 'date'">
+          {{ months[currentMonth] }} {{ currentYear }}
+        </span>
+        <span v-else-if="view === 'month'">{{ currentYear }}</span>
+        <span v-else>{{ yearRangeStart }} - {{ yearRangeStart + 11 }}</span>
+      </span>
+      <Button
+        :class="{ invisible: hideNext }"
+        label="next"
+        variant="ghost"
+        icon="lucide-chevron-right"
+        @click="emit('next')"
+      />
+    </div>
+    <div v-else class="flex items-center justify-between p-2 pb-0 gap-1">
       <Button
         variant="ghost"
         size="sm"
@@ -169,6 +195,12 @@ interface Props {
   hideToday?: boolean
   /** Render out-of-month cells as empty placeholders — used in dual-pane to avoid showing the same date in both panes. */
   hideOutOfMonth?: boolean
+  /**
+   * Render a slim header with prev/next flanking a centered, non-clickable
+   * month label. Used in dual-pane so the two panels read as
+   * `< First Month | Second Month >`.
+   */
+  centerHeader?: boolean
 }
 
 withDefaults(defineProps<Props>(), {
@@ -177,6 +209,7 @@ withDefaults(defineProps<Props>(), {
   hideNext: false,
   hideToday: false,
   hideOutOfMonth: false,
+  centerHeader: false,
 })
 
 const emit = defineEmits<{

@@ -47,6 +47,7 @@
           :today-label="isDualPaneActive ? '' : 'Today'"
           :hide-next="isDualPaneActive"
           :hide-out-of-month="isDualPaneActive"
+          :center-header="isDualPaneActive"
           @prev="prev"
           @next="next"
           @today="handleTodayClick"
@@ -67,6 +68,7 @@
           hide-prev
           hide-today
           hide-out-of-month
+          center-header
           @next="next"
           @cycle-view="cycleView"
           @select-date="handleDateCellClick"
