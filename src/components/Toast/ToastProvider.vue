@@ -18,7 +18,7 @@
         actionButton:
           'flex text-ink-blue-link font-medium py-1.5 px-2 h-7 text-base mr-2 ml-auto bg-transparent hover:bg-surface-gray-5 rounded !transition-colors',
         cancelButton:
-          'flex text-ink-blue-link font-medium py-1.5 px-2 text-base hover:bg-bg-surface-gray-4 transition-colors',
+          'flex text-ink-blue-link font-medium py-1.5 px-2 text-base hover:bg-surface-gray-5 transition-colors',
         error: '[&_[data-icon]]:text-ink-red-2',
         warning: '[&_[data-icon]]:text-ink-amber-2',
       },

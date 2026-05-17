@@ -33,10 +33,13 @@ Bolting both onto the reka-based implementation would essentially re-implement s
 // Imperative API — sonner's `toast`, re-exported as-is.
 import { toast } from 'frappe-ui'
 
-// Viewport — sonner's `<Toaster>`, re-exported as-is.
-import { Toaster } from 'frappe-ui'
+// Viewport — our styled wrapper around sonner's `<Toaster>`, with the
+// frappe-ui defaults baked in. Raw `<Toaster>` is intentionally *not*
+// re-exported; consumers either mount `<FrappeUIProvider>` or
+// `<ToastProvider>` directly.
+import { ToastProvider } from 'frappe-ui'
 
-// One-stop provider — mounts <Toaster> with our defaults next to <Dialogs />.
+// One-stop provider — mounts <ToastProvider> with our defaults next to <Dialogs />.
 import { FrappeUIProvider } from 'frappe-ui'
 
 // Vestigial back-compat export. Not documented; not promoted.
@@ -46,7 +49,7 @@ import { Toast } from 'frappe-ui'
 
 That's the entire surface.
 
-**Removed exports:** `Toasts` (apps migrate to `<FrappeUIProvider>` or `<Toaster />`), `ToastProvider` (internal-only sonner viewport handles this).
+**Removed exports:** `Toasts` (apps migrate to `<FrappeUIProvider>` or `<ToastProvider />`), raw `Toaster` (the styled `<ToastProvider>` is the only supported viewport surface).
 
 ## Mount
 
@@ -65,7 +68,7 @@ Apps that don't use the provider can mount the viewport themselves:
 ```vue
 <template>
   <RouterView />
-  <Toaster position="bottom-right" :duration="5000" close-button />
+  <ToastProvider />
 </template>
 ```
 

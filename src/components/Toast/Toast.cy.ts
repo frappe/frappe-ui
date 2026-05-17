@@ -74,11 +74,13 @@ describe('Toast v1 — vue-sonner integration', () => {
 
   it('toast.dismiss removes the toast from the DOM', () => {
     cy.mount(FrappeUIProvider)
+    let toastId: string | number
     cy.then(() => {
-      const id = toast.info('Will be dismissed', { duration: 60000 })
-      // wait for toast to appear, then dismiss
-      setTimeout(() => toast.dismiss(id as string | number), 50)
+      toastId = toast.info('Will be dismissed', { duration: 60000 })
     })
+    cy.get('[data-sonner-toast]').should('exist')
+    cy.contains('Will be dismissed').should('exist')
+    cy.then(() => toast.dismiss(toastId))
     cy.get('[data-sonner-toast]').should('not.exist')
   })
 
