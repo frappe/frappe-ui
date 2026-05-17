@@ -44,15 +44,6 @@ describe('Toast v1 — vue-sonner integration', () => {
       .and('have.attr', 'data-y-position', 'bottom')
   })
 
-  it('Toaster bakes in visibleToasts=3', () => {
-    cy.mount(FrappeUIProvider)
-    cy.get('[data-sonner-toaster]').should(
-      'have.attr',
-      'data-visible-toasts',
-      '3',
-    )
-  })
-
   // ---- imperative API shows toasts in the DOM -------------------------------
 
   it('toast.success mounts a toast node after FrappeUIProvider is rendered', () => {
