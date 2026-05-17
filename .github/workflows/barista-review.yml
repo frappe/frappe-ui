@@ -2,7 +2,10 @@ name: Barista — PR Review
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
+    # Intentionally no `synchronize` — re-reviews on every push were getting
+    # cancelled by the next push. Use `/barista review` in a PR comment to
+    # request a fresh review after pushing fixes.
+    types: [opened, reopened, ready_for_review]
     paths-ignore:
       - '**/*.md'
       - 'docs/**'
