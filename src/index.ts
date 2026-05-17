@@ -65,6 +65,7 @@ export { default as ListGroupHeader } from './components/ListView/ListGroupHeade
 export { default as ListGroupRows } from './components/ListView/ListGroupRows.vue'
 export { default as ListSelectBanner } from './components/ListView/ListSelectBanner.vue'
 export { default as ListFooter } from './components/ListView/ListFooter.vue'
+/** @deprecated Use the imperative `toast(...)` API instead. The `<Toast />` SFC will be removed in a future major. */
 export { default as Toast } from './components/Toast/Toast.vue'
 export { toast } from './components/Toast/toast'
 export { default as ToastProvider } from './components/Toast/ToastProvider.vue'
