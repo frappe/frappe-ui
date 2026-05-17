@@ -2,6 +2,14 @@
 import { useData, useRoute, useRouter, withBase } from 'vitepress'
 import { computed, ref, watch } from 'vue'
 import fuzzysort from 'fuzzysort'
+import {
+  ListboxContent,
+  ListboxFilter,
+  ListboxGroup,
+  ListboxGroupLabel,
+  ListboxItem,
+  ListboxRoot,
+} from 'reka-ui'
 
 import { Dialog } from 'frappe-ui'
 import { getSidebarList, type SidebarItem } from '../Docs/sidebarList'
@@ -13,7 +21,6 @@ const route = useRoute()
 const router = useRouter()
 
 const filterText = ref('')
-const activeIndex = ref(0)
 
 const sidebarList = getSidebarList(theme.value.componentList ?? [])
 const allItems = sidebarList.flatMap((section) =>
@@ -22,15 +29,11 @@ const allItems = sidebarList.flatMap((section) =>
 const sectionOrder = sidebarList.map((s) => s.text)
 
 watch(open, (isOpen) => {
-  if (!isOpen) {
-    filterText.value = ''
-    activeIndex.value = 0
-  }
+  if (!isOpen) filterText.value = ''
 })
 
 const groupedResults = computed(() => {
   const query = filterText.value.trim()
-
   if (!query) return sidebarList
 
   const matches = fuzzysort.go(query, allItems, {
@@ -51,25 +54,9 @@ const groupedResults = computed(() => {
     .map((name) => ({ text: name, items: bySection.get(name)! }))
 })
 
-const flatItems = computed(() =>
-  groupedResults.value.flatMap((section) => section.items),
+const hasResults = computed(() =>
+  groupedResults.value.some((g) => g.items.length > 0),
 )
-
-watch(filterText, () => {
-  activeIndex.value = 0
-})
-
-watch(groupedResults, () => {
-  if (activeIndex.value >= flatItems.value.length) {
-    activeIndex.value = flatItems.value.length ? 0 : -1
-  }
-})
-
-const move = (delta: number) => {
-  const len = flatItems.value.length
-  if (!len) return
-  activeIndex.value = (activeIndex.value + delta + len) % len
-}
 
 const navigate = (item: SidebarItem, newTab = false) => {
   const url = withBase(item.link)
@@ -81,90 +68,97 @@ const navigate = (item: SidebarItem, newTab = false) => {
   open.value = false
 }
 
-const onEnter = (e: KeyboardEvent) => {
-  const item = flatItems.value[activeIndex.value]
-  if (!item) return
-  navigate(item, e.metaKey || e.ctrlKey)
+// Reka fires `select` for click + Enter on the highlighted item. For
+// click (mouse/touch) the original event carries the modifier flags we
+// need to detect "open in new tab" intent. For keyboard Enter, Reka
+// synthesises a click without modifiers — we intercept that case in
+// `onFilterKeydown` below.
+const onItemSelect = (e: Event, item: SidebarItem) => {
+  e.preventDefault()
+  const original = (e as CustomEvent).detail?.originalEvent as
+    | MouseEvent
+    | undefined
+  const newTab = !!(
+    original &&
+    (original.metaKey ||
+      original.ctrlKey ||
+      original.shiftKey ||
+      original.button === 1)
+  )
+  // Modifier-clicks on the anchor are handled natively by the browser
+  // (Cmd/Ctrl-click opens in a new tab). Don't double-open.
+  if (newTab && original instanceof MouseEvent) return
+  navigate(item, newTab)
 }
 
-const onItemClick = (e: MouseEvent, item: SidebarItem) => {
-  if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return
+const onFilterKeydown = (e: KeyboardEvent) => {
+  if (e.key !== 'Enter') return
+  if (!(e.metaKey || e.ctrlKey)) return
+  const el = document.querySelector(
+    '[data-search-results] [data-highlighted][role="option"]',
+  ) as HTMLElement | null
+  const link = el?.getAttribute('data-link')
+  if (!link) return
+  const item = allItems.find((i) => i.link === link)
+  if (!item) return
   e.preventDefault()
-  navigate(item)
+  e.stopImmediatePropagation()
+  navigate(item, true)
 }
 
 const isCurrent = (item: SidebarItem) => {
   const norm = (p: string) => p.replace(/\/+$/, '') || '/'
   return norm(route.path) === norm(withBase(item.link))
 }
-
-const indexOf = (item: SidebarItem) =>
-  flatItems.value.findIndex((i) => i.link === item.link)
-
-const vScrollActive = {
-  updated(el: HTMLElement, { value }: { value: boolean }) {
-    if (!value) return
-
-    const container = el.closest('[data-results-scroll]') as HTMLElement | null
-    if (!container) return
-
-    const elRect = el.getBoundingClientRect()
-    const cRect = container.getBoundingClientRect()
-
-    const isVisible = elRect.top >= cRect.top && elRect.bottom <= cRect.bottom
-
-    if (!isVisible) el.scrollIntoView({ block: 'nearest' })
-  },
-}
 </script>
 
 <template>
   <Dialog v-model:open="open" bare size="xl" position="top" padding-top="10vh">
-    <template #default="{ close }">
-      <div class="flex flex-col">
+    <template #default>
+      <ListboxRoot
+        class="flex flex-col"
+        highlight-on-hover
+        :model-value="null"
+      >
         <!-- input -->
         <div class="relative">
           <div class="absolute inset-y-0 left-0 flex items-center pl-4.5">
             <span class="lucide-search h-4 w-4 text-ink-gray-6" />
           </div>
-          <input
+          <ListboxFilter
             v-model="filterText"
-            type="text"
+            auto-focus
             placeholder="Search documentation"
             class="w-full border-none bg-transparent py-3 pl-11.5 pr-4.5 text-base text-ink-gray-7 placeholder-ink-gray-4 focus:ring-0"
-            @keydown.down.prevent="move(1)"
-            @keydown.up.prevent="move(-1)"
-            @keydown.enter.prevent="onEnter"
             autocomplete="off"
-            autofocus
+            @keydown="onFilterKeydown"
           />
         </div>
 
         <!-- results -->
-        <div
-          data-results-scroll
+        <ListboxContent
+          data-search-results
           class="max-h-96 overflow-auto border-t border-outline-gray-1 dark:border-outline-gray-2"
         >
-          <div
+          <ListboxGroup
             v-for="group in groupedResults"
             :key="group.text"
             class="mb-2 mt-4.5 first:mt-3"
           >
-            <div class="mb-2.5 px-4.5 text-base text-ink-gray-5">
+            <ListboxGroupLabel
+              class="mb-2.5 block px-4.5 text-base text-ink-gray-5"
+            >
               {{ group.text }}
-            </div>
+            </ListboxGroupLabel>
 
             <div v-for="item in group.items" :key="item.link" class="px-2.5">
-              <a
+              <ListboxItem
+                as="a"
+                :value="item.link"
                 :href="withBase(item.link)"
-                :aria-selected="indexOf(item) === activeIndex"
-                class="flex w-full min-w-0 items-center rounded px-2 py-2 text-base font-medium text-ink-gray-7"
-                :class="
-                  indexOf(item) === activeIndex ? 'bg-surface-gray-3' : ''
-                "
-                @mouseenter="activeIndex = indexOf(item)"
-                @click="onItemClick($event, item)"
-                v-scroll-active="indexOf(item) === activeIndex"
+                :data-link="item.link"
+                class="flex w-full min-w-0 items-center rounded px-2 py-2 text-base font-medium text-ink-gray-7 outline-none data-[highlighted]:bg-surface-gray-3"
+                @select="onItemSelect($event, item)"
               >
                 <span class="overflow-hidden text-ellipsis whitespace-nowrap">
                   {{ item.text }}
@@ -176,18 +170,18 @@ const vScrollActive = {
                 >
                   Current
                 </span>
-              </a>
+              </ListboxItem>
             </div>
-          </div>
+          </ListboxGroup>
 
           <div
-            v-if="filterText && !flatItems.length"
+            v-if="filterText && !hasResults"
             class="my-8 text-center text-base text-ink-gray-6"
           >
             No results for "<b class="text-ink-gray-9">{{ filterText }}</b
             >"
           </div>
-        </div>
+        </ListboxContent>
 
         <!-- footer -->
         <div
@@ -243,7 +237,7 @@ const vScrollActive = {
             <span class="ml-1">to open</span>
           </div>
         </div>
-      </div>
+      </ListboxRoot>
     </template>
   </Dialog>
 </template>
