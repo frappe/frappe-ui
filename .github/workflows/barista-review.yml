@@ -3,6 +3,10 @@ name: Barista — PR Review
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - '.changeset/**'
   issue_comment:
     types: [created]
   workflow_dispatch:

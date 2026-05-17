@@ -1,5 +1,5 @@
 ---
-allowed-tools: Bash(./.github/barista/scripts/gh.sh:*),Bash(./.github/barista/scripts/add-comment.sh:*),Bash(git log:*),Bash(git show:*),Bash(git blame:*),Bash(git diff:*),Read,Glob,Grep
+allowed-tools: Bash(./.github/barista/scripts/gh.sh:*),Bash(./.github/barista/scripts/add-comment.sh:*),Bash(git log:*),Bash(git show:*),Bash(git blame:*),Bash(git diff:*),Bash(git rev-parse:*),Bash(git merge-base:*),Bash(git ls-files:*),Bash(jq:*),Read,Glob,Grep
 description: Review a frappe-ui pull request and post one concise comment with findings.
 ---
 
@@ -21,7 +21,12 @@ You have **the repository checked out at the base branch.** Read the diff and th
 - `Read`, `Glob`, `Grep` — explore the codebase.
 - `./.github/barista/scripts/gh.sh pr view <N>` / `--comments` — read the PR title, body, status, recent comments.
 - `./.github/barista/scripts/gh.sh pr diff <N>` — full unified diff for the PR.
+- `./.github/barista/scripts/gh.sh pr checks <N>` — see CI status. If checks are failing, mention it; don't re-derive failures the runner already surfaced.
+- `./.github/barista/scripts/gh.sh pr status` — mergeable state and review counts for the current branch context.
+- `./.github/barista/scripts/gh.sh release list --limit 5` / `release view <tag>` — recent releases. Useful for "is this a breaking change since the last published version?".
 - `Bash(git log:*)`, `Bash(git show:*)`, `Bash(git blame:*)`, `Bash(git diff:*)` — inspect history near changed files.
+- `Bash(git merge-base:*)`, `Bash(git rev-parse:*)`, `Bash(git ls-files:*)` — locate the base commit, resolve refs, enumerate files (e.g. `git ls-files 'src/components/Toast/**'`).
+- `Bash(jq:*)` — parse JSON output from `gh.sh ... --json …` when grepping prose is awkward.
 - `./.github/barista/scripts/gh.sh search issues "<query>"` — find related open issues (no `repo:`/`org:`/`user:` qualifiers).
 
 **Write (one call, at the end):**
