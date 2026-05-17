@@ -117,6 +117,10 @@ const devBranch = typeof __DEV_BRANCH__ !== 'undefined' ? __DEV_BRANCH__ : ''
           {{ devBranch }}
         </Badge>
 
+        <a :href="withBase('/docs/getting-started')" v-if="route.path == '/'">
+          Docs
+        </a>
+
         <Button class="hidden md:flex" @click="state.searchDialog = true">
           <template #prefix>
             <LucideSearch class="size-4" />

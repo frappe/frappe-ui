@@ -108,8 +108,10 @@ const notifs = [
 </script>
 
 <template>
-
-    <div class="break-inside-avoid mb-5 rounded border p-5 h-fit">
+  <section
+    class="grid gap-5 *:rounded *:border [&_label]:text-ink-gray-9 [&_label]:mb-2 [&_label]:text-base h-fit"
+  >
+    <div class="p-5 bg-urface-cards h-fit">
       <Tree
         :options="
           {
@@ -142,7 +144,7 @@ const notifs = [
       </Tree>
     </div>
 
-    <div class="break-inside-avoid mb-5 rounded border prose prose-sm p-5 pt-3 grid gap-3">
+    <div class="prose prose-sm p-5 pt-3 grid gap-3">
       <h3 class="flex items-center gap-2 border-b pb-3">
         <LucideShield class="size-5" />
         Create Password
@@ -167,7 +169,7 @@ const notifs = [
         class="[&_label]:text-ink-gray-5 mt-3"
         :value="strengthScore < 3 ? strengthScore * 30 : 100"
         :hint="true"
-        size="sm"
+        size="md"
       >
         <template #hint>
           <span class="text-sm" :class="strengthLabel.class">
@@ -188,12 +190,12 @@ const notifs = [
         </li>
       </div>
 
-      <Button variant="solid" size="sm" class="w-full">
+      <Button variant="solid" class="w-full py-4">
         Create password
       </Button>
     </div>
 
-    <div class="break-inside-avoid mb-5 rounded border">
+    <div>
       <div class="flex gap-3 p-4 border-b">
         <LucideBell class="size-4" />
 
@@ -207,7 +209,7 @@ const notifs = [
         class="flex gap-4 p-4"
         :class='{ "border-b": i < notifs.length - 1 }'
       >
-        <Avatar size="sm" :image="x.img" />
+        <Avatar size="xl" :image="x.img" />
 
         <div class="flex flex-wrap gap-x-2 gap-y-2">
           <span class="w-full">{{ x.name }}</span>
@@ -217,8 +219,8 @@ const notifs = [
           <span class="w-full text-ink-gray-4"> {{ x.time }}</span>
 
           <template v-if="x.type">
-            <Button size="sm">Accept</Button>
-            <Button size="sm" variant="outline">Reject</Button>
+            <Button>Accept</Button>
+            <Button variant="outline">Reject</Button>
           </template>
         </div>
 
@@ -228,4 +230,5 @@ const notifs = [
         ></span>
       </div>
     </div>
+  </section>
 </template>

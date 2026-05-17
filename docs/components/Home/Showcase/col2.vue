@@ -43,8 +43,10 @@ const resetState = () => {
 </script>
 
 <template>
-
-    <div class="break-inside-avoid mb-5 rounded border h-fit">
+  <section
+    class="grid gap-5 *:rounded *:border [&_label]:text-ink-gray-9 [&_label]:mb-2 [&_label]:text-base h-fit"
+  >
+    <div class="h-fit">
       <Tabs :tabs v-model="val" class='[&>[role=tablist]]:px-4'>
         <template #tab-panel="{ tab }">
           <div v-if="tab.label == 'Profile'" class="p-5">
@@ -61,7 +63,7 @@ const resetState = () => {
               </div>
 
               <Button
-                size="sm"
+                size="md"
                 :variant="followed ? 'outline' : 'solid'"
                 @click="followed = !followed"
               >
@@ -96,7 +98,7 @@ const resetState = () => {
             />
 
             <div class="flex items-center justify-between -mb-2">
-              <Button theme="red" size="sm" @click="resetState"> Reset</Button>
+              <Button theme="red" @click="resetState"> Reset</Button>
               <Switch
                 label="Followers"
                 v-model="state.followers"
@@ -108,8 +110,8 @@ const resetState = () => {
       </Tabs>
     </div>
 
-    <div class="break-inside-avoid mb-5 rounded border p-5 grid gap-5 h-fit">
-      <Progress :value="20" label="Daily Progress" size="sm" :hint="true" />
+    <div class="p-5 grid gap-5 h-fit">
+      <Progress :value="20" label="Daily Progress" size="lg" :hint="true" />
 
       <div class="flex gap-3">
         <span class="p-3 px-4 rounded bg-surface-gray-2 flex items-center">
@@ -123,7 +125,7 @@ const resetState = () => {
       </div>
     </div>
 
-    <div class="break-inside-avoid mb-5 rounded border p-5 grid grid-cols-2 *:col-span-2 gap-y-5">
+    <div class="p-5 grid grid-cols-2 *:col-span-2 gap-y-5">
       <FormControl label="Username" placeholder="Enter username">
         <template #prefix>
           <LucideUser class="size-4" />
@@ -150,7 +152,7 @@ const resetState = () => {
       </div>
     </div>
 
-    <div class="break-inside-avoid mb-5 rounded border p-2 grid h-full [&_label]:!m-0 *:rounded *:cursor-pointer">
+    <div class="p-2 grid h-full [&_label]:!m-0 *:rounded *:cursor-pointer">
       <div class="flex items-center gap-2 boder-b p-2 px-2 pb-3 !rounded-none">
         <span class="text-ink-gray-5"> Settings </span>
         <LucideRight class="size-4 text-ink-gray-5" />
@@ -214,4 +216,5 @@ const resetState = () => {
         />
       </label>
     </div>
+  </section>
 </template>

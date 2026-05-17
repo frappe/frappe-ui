@@ -21,7 +21,6 @@ export function getSidebarList(componentList: string[]): SidebarSection[] {
     {
       text: 'Getting Started',
       items: [
-        { text: 'Overview', link: '/' },
         { text: 'Introduction', link: '/docs/introduction' },
         { text: 'Getting Started', link: '/docs/getting-started' },
       ],

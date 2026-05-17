@@ -43,7 +43,10 @@ const selOpts = ["Admin", "Editor", "Viewer", "Guest"]
 </script>
 
 <template>
-    <div class="break-inside-avoid mb-5 rounded border grid p-5 grid-cols-2 gap-y-5 gap-x-4 h-fit">
+  <section
+    class="grid gap-5 *:rounded *:border [&_label]:text-ink-gray-9 [&_label]:mb-2 [&_label]:text-base h-fit"
+  >
+    <div class="grid p-5 grid-cols-2 gap-y-5 gap-x-4 h-fit">
       <FormControl
         label="Billing name"
         placeholder="Enter your name"
@@ -109,7 +112,7 @@ const selOpts = ["Admin", "Editor", "Viewer", "Guest"]
         "
       />
 
-      <Button variant="solid" size="sm" class="col-span-2 -mt-1">
+      <Button variant="solid" class="col-span-2 -mt-1">
         Next
         <template #suffix>
           <LucideRight class="size-4" />
@@ -117,7 +120,7 @@ const selOpts = ["Admin", "Editor", "Viewer", "Guest"]
       </Button>
     </div>
 
-    <div class="break-inside-avoid mb-5 rounded border p-5 grid gap-5">
+    <div class="p-5 grid gap-5">
       <h1 class="font-semibold text-lg">Create Project</h1>
       <FormControl
         label="Title"
@@ -139,7 +142,7 @@ const selOpts = ["Admin", "Editor", "Viewer", "Guest"]
         <Switch />
       </div>
 
-      <Select placeholder="Add people or emails" size="sm" variant="outline" :options="users">
+      <Select placeholder="Add people or emails" variant="outline" :options="users">
         <template #prefix>
           <LucideSearch class="size-4" />
         </template>
@@ -148,7 +151,7 @@ const selOpts = ["Admin", "Editor", "Viewer", "Guest"]
       <label class="!m-0">Members</label>
 
       <div v-for="x in users" class="flex gap-3">
-        <Avatar size="sm" label="S" class="my-auto" :image="x.img" />
+        <Avatar size="xl" label="S" class="my-auto" :image="x.img" />
 
         <div class="grid gap-1">
           <span>{{ x.name }}</span>
@@ -158,7 +161,6 @@ const selOpts = ["Admin", "Editor", "Viewer", "Guest"]
         <Select
           :options='selOpts'
           class="my-auto ml-auto !w-fit"
-          size="sm"
           variant="ghost"
           placeholder="Select"
           :defaultValue="selOpts[Math.floor(Math.random() * selOpts.length)]"
@@ -166,7 +168,7 @@ const selOpts = ["Admin", "Editor", "Viewer", "Guest"]
       </div>
 
       <div class="flex gap-3 justify-between items-center">
-        <Button size="sm">
+        <Button>
           <template #prefix>
             <LucideLink class="size-4" />
           </template>
@@ -183,10 +185,11 @@ const selOpts = ["Admin", "Editor", "Viewer", "Guest"]
         </Tooltip>
       </div>
 
-      <Button variant="solid" size="sm">
+      <Button variant="solid">
         <template #prefix>
           <LucideCircle class="size-4" />
         </template>
         Create project</Button>
     </div>
+  </section>
 </template>
