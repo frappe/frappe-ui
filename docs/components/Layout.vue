@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FrappeUIProvider } from '../../src/index.ts'
 import Navbar from './Navbar.vue'
 import Sidebar from './Docs/Sidebar.vue'
 import Home from './Home/index.vue'
@@ -13,33 +14,35 @@ const { frontmatter } = useData()
 </script>
 
 <template>
-  <div
-    v-if="frontmatter.layout === 'home'"
-    class="h-full flex flex-col justify-between flex-1 w-full"
-  >
-    <Navbar />
-    <Home />
-  </div>
+  <FrappeUIProvider>
+    <div
+      v-if="frontmatter.layout === 'home'"
+      class="h-full flex flex-col justify-between flex-1 w-full"
+    >
+      <Navbar />
+      <Home />
+    </div>
 
-  <template v-else>
-    <div class="grid lg:grid-cols-[220px_1fr]">
-      <Sidebar class="hidden lg:flex" />
+    <template v-else>
+      <div class="grid lg:grid-cols-[220px_1fr]">
+        <Sidebar class="hidden lg:flex" />
 
-      <div class="w-full">
-        <Navbar :isDocs="true" />
-        <Sidebar v-if="state.mobsidebar" class="lg:hidden" />
+        <div class="w-full">
+          <Navbar :isDocs="true" />
+          <Sidebar v-if="state.mobsidebar" class="lg:hidden" />
 
-        <div class="p-5 lg:p-10 flex gap-5">
-          <main class="mx-auto lg:max-w-[740px] flex-1">
-            <Content
-              as="article"
-              class="prose prose-v3 prose-p:mb-4 text-[15px] !max-w-none"
-            />
-            <PrevNextBtns />
-          </main>
-          <OnThisPage />
+          <div class="p-5 lg:p-10 flex gap-5">
+            <main class="mx-auto lg:max-w-[740px] flex-1">
+              <Content
+                as="article"
+                class="prose prose-v3 prose-p:mb-4 text-[15px] !max-w-none"
+              />
+              <PrevNextBtns />
+            </main>
+            <OnThisPage />
+          </div>
         </div>
       </div>
-    </div>
-  </template>
+    </template>
+  </FrappeUIProvider>
 </template>
