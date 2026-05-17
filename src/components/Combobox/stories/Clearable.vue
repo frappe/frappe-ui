@@ -47,12 +47,6 @@ const sizeDot: Record<string, string> = {
   xl: 'size-3',
 }
 
-const styleIcon: Record<string, string> = {
-  subtle: 'lucide-square',
-  outline: 'lucide-square-dashed',
-  ghost: 'lucide-circle-dashed',
-}
-
 const fontSizePx: Record<string, number> = {
   '12': 8,
   '14': 10,
@@ -105,13 +99,17 @@ function clear(key: string, event: Event) {
               ]"
             />
 
-            <span
-              v-else-if="field.key === 'style'"
-              :class="[
-                'size-4 text-ink-gray-6',
-                styleIcon[getOptionValue(item)] ?? 'lucide-square',
-              ]"
-            />
+            <template v-else-if="field.key === 'style'">
+              <span
+                v-if="getOptionValue(item) === 'outline'"
+                class="lucide-square-dashed size-4 text-ink-gray-6"
+              />
+              <span
+                v-else-if="getOptionValue(item) === 'ghost'"
+                class="lucide-circle-dashed size-4 text-ink-gray-6"
+              />
+              <span v-else class="lucide-square size-4 text-ink-gray-6" />
+            </template>
 
             <span
               v-else-if="field.key === 'fontSize'"
