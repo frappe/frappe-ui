@@ -104,8 +104,10 @@ export interface MultiSelectProps extends InputLabelingProps {
 }
 
 /**
- * Shared shape for `#trigger` and `#suffix`. `#trigger` extends this with
- * imperative `clearAll` / `toggleOpen` helpers (see `MultiSelectTriggerSlotProps`).
+ * Shared shape for `#trigger`, `#prefix`, `#suffix`, and (with an added
+ * `summary` field) `#summary`. The imperative helpers `clearAll` and
+ * `toggleOpen` are exposed on every slot so consumers don't need to hoist
+ * into `#trigger` just to clear the selection.
  */
 export interface MultiSelectSlotProps {
   /** Whether the popover is open. */
@@ -122,9 +124,7 @@ export interface MultiSelectSlotProps {
 
   /** Comma-joined labels of the selected options, or `''` when nothing is selected. */
   displayValue: string
-}
 
-export interface MultiSelectTriggerSlotProps extends MultiSelectSlotProps {
   /** Clears all selected values. */
   clearAll: () => void
 
@@ -132,6 +132,7 @@ export interface MultiSelectTriggerSlotProps extends MultiSelectSlotProps {
   toggleOpen: () => void
 }
 
+export type MultiSelectTriggerSlotProps = MultiSelectSlotProps
 export type MultiSelectPrefixSlotProps = MultiSelectSlotProps
 export type MultiSelectSuffixSlotProps = MultiSelectSlotProps
 

@@ -144,21 +144,22 @@ Emit rules:
 Guaranteed slot props:
 
 ```ts
-// Shared shape for `#trigger` and `#suffix`. `#trigger` extends this with
-// imperative `clearAll` / `toggleOpen` helpers.
+// Shared shape for `#trigger`, `#prefix`, `#suffix`, and `#summary`
+// (the latter adds `summary`). `clearAll` / `toggleOpen` are exposed
+// on every slot so consumers don't need to hoist into `#trigger` just
+// to clear the selection or toggle the popover.
 type MultiSelectSlotProps = {
   open: boolean
   disabled: boolean
   query: string
   selectedOptions: MultiSelectOption[]
   displayValue: string
-}
-
-type MultiSelectTriggerSlotProps = MultiSelectSlotProps & {
   clearAll: () => void
   toggleOpen: () => void
 }
 
+type MultiSelectTriggerSlotProps = MultiSelectSlotProps
+type MultiSelectPrefixSlotProps = MultiSelectSlotProps
 type MultiSelectSuffixSlotProps = MultiSelectSlotProps
 
 type MultiSelectSummarySlotProps = MultiSelectSlotProps & {
@@ -192,13 +193,13 @@ Supported slots:
 
 - `#trigger="{ open, disabled, query, selectedOptions, displayValue, clearAll, toggleOpen }"`
   - preferred advanced trigger slot; replaces the default button trigger
-- `#prefix="{ open, disabled, query, selectedOptions, displayValue }"`
+- `#prefix="{ open, disabled, query, selectedOptions, displayValue, clearAll, toggleOpen }"`
   - convenience slot rendered before the trigger label. When provided,
     it owns the entire prefix area regardless of selection count — use
     it for aggregate visuals like stacked avatars across multiple
     selections. If omitted, the trigger auto-renders the selected
     option's `#item-prefix` / `icon` when exactly one is selected
-- `#summary="{ open, disabled, query, selectedOptions, displayValue, summary }"`
+- `#summary="{ open, disabled, query, selectedOptions, displayValue, clearAll, toggleOpen, summary }"`
   - overrides the trigger's label region. Receives the default summary
     text as `summary` — placeholder, single label, or `"N selected"` —
     so the consumer can fall back to it or replace entirely (e.g. with
@@ -206,11 +207,12 @@ Supported slots:
     default phantom-sizer (which only knows the default summary's
     worst-case width), so the trigger is content-sized — pin a width
     on the trigger (or wrap with one) if you need a stable layout
-- `#suffix="{ open, disabled, query, selectedOptions, displayValue }"`
+- `#suffix="{ open, disabled, query, selectedOptions, displayValue, clearAll, toggleOpen }"`
   - convenience slot rendered after the trigger label. **Replaces the
     default chevron** — render an explicit chevron fallback when your
     slot content is conditional. Use `@click.stop` / `@pointerdown.stop`
-    so the press doesn't toggle the popover
+    so the press doesn't toggle the popover. Canonical home for a
+    clear-all button — call `clearAll` from the slot prop
 - `#item-prefix="{ item, query, selected }"`
 - `#item-label="{ item, query, selected }"`
 - `#item-suffix="{ item, query, selected }"`

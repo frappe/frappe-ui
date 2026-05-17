@@ -338,6 +338,8 @@ defineSlots<MultiSelectSlots>()
             query: typedQuery,
             selectedOptions,
             displayValue,
+            clearAll,
+            toggleOpen,
           }"
         />
         <template
@@ -372,6 +374,8 @@ defineSlots<MultiSelectSlots>()
                 query: typedQuery,
                 selectedOptions,
                 displayValue,
+                clearAll,
+                toggleOpen,
                 summary: triggerSummary,
               }"
             >{{ triggerSummary }}</slot>
@@ -392,6 +396,8 @@ defineSlots<MultiSelectSlots>()
             query: typedQuery,
             selectedOptions,
             displayValue,
+            clearAll,
+            toggleOpen,
           }"
         >
           <span
