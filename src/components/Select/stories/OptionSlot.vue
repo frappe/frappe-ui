@@ -57,18 +57,18 @@ const activeOption = computed(() => {
         />
       </template>
 
-      <template #item-prefix="{ option }">
-        <Avatar size="sm" :image="option.image" :label="option.label" />
+      <template #item-prefix="{ item }">
+        <Avatar size="sm" :image="item.image" :label="item.label" />
       </template>
 
-      <template #item-label="{ option }">
+      <template #item-label="{ item }">
         <div class="min-w-0">
-          <div class="truncate">{{ option.label }}</div>
+          <div class="truncate">{{ item.label }}</div>
           <div
             class="truncate text-p-sm text-ink-gray-5"
-            :class="option.disabled ? 'opacity-65' : ''"
+            :class="item.disabled ? 'opacity-65' : ''"
           >
-            {{ option.description }}
+            {{ item.description }}
           </div>
         </div>
       </template>

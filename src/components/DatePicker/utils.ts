@@ -1,5 +1,5 @@
 import { dayjs, dayjsLocal } from '../../utils/dayjs'
-import type { Dayjs } from 'dayjs'
+import type { Dayjs } from 'dayjs/esm'
 import type { DatePickerDateObj as DateObj } from './types'
 
 // Constant list of month labels
@@ -29,18 +29,20 @@ export function generateWeeks(
   monthIndex: number,
   selected: string,
 ): DateObj[][] {
+  // Always emit 6 rows × 7 days so the calendar height stays constant — both
+  // across months in a single pane (no jiggle when navigating) and between
+  // panes in dual-pane mode (where one month may span 5 weeks and the other 6).
   const start = monthStart(year, monthIndex).startOf('week')
-  const end = monthStart(year, monthIndex).endOf('month').endOf('week')
   const days: DateObj[] = []
   let d: Dayjs = start
-  while (d.isBefore(end) || d.isSame(end)) {
-    const inMonth = d.month() === monthIndex
-    const sel = dayjs(selected)
+  const sel = dayjs(selected)
+  const today = dayjsLocal().format('YYYY-MM-DD')
+  for (let i = 0; i < 42; i++) {
     days.push({
       date: d,
       key: d.format('YYYY-MM-DD'),
-      inMonth,
-      isToday: d.isSame(dayjsLocal().format('YYYY-MM-DD'), 'day'),
+      inMonth: d.month() === monthIndex,
+      isToday: d.isSame(today, 'day'),
       isSelected: sel.isValid() && d.isSame(sel, 'day'),
     })
     d = d.add(1, 'day')
@@ -50,13 +52,7 @@ export function generateWeeks(
   return chunked
 }
 
-type DateConstructorParam = string | number | Date
-
-function getDate(...args: DateConstructorParam[]): Date {
-  return new Date(...(args as [DateConstructorParam]))
-}
-
-function getDateValue(date: Date | string) {
+export function getDateValue(date: Date | string) {
   if (!date || date.toString() === 'Invalid Date') return ''
 
   return dayjs(date)
@@ -67,7 +63,21 @@ function getDateValue(date: Date | string) {
     .format('YYYY-MM-DD')
 }
 
-function getDatesAfter(date: Date, count: number) {
+type DateConstructorParam = string | number | Date
+
+/**
+ * @deprecated Legacy helper used by the deprecated {@link useDatePicker} composable.
+ * Will be removed after v1.x. Use `dayjs` directly.
+ */
+export function getDate(...args: DateConstructorParam[]): Date {
+  return new Date(...(args as [DateConstructorParam]))
+}
+
+/**
+ * @deprecated Legacy helper used by the deprecated {@link useDatePicker} composable.
+ * Will be removed after v1.x. Use `dayjs().add(n, 'day')` instead.
+ */
+export function getDatesAfter(date: Date, count: number) {
   let incrementer = 1
   if (count < 0) {
     incrementer = -1
@@ -91,7 +101,11 @@ function getDatesAfter(date: Date, count: number) {
   return dates
 }
 
-function getDaysInMonth(monthIndex: number, year: number) {
+/**
+ * @deprecated Legacy helper used by the deprecated {@link useDatePicker} composable.
+ * Will be removed after v1.x. Use `dayjs(...).daysInMonth()` instead.
+ */
+export function getDaysInMonth(monthIndex: number, year: number) {
   const daysInMonthMap = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
   const daysInMonth = daysInMonthMap[monthIndex]
   if (monthIndex === 1 && isLeapYear(year)) {
@@ -100,11 +114,13 @@ function getDaysInMonth(monthIndex: number, year: number) {
   return daysInMonth
 }
 
-function isLeapYear(year: number) {
+/**
+ * @deprecated Legacy helper used by the deprecated {@link useDatePicker} composable.
+ * Will be removed after v1.x.
+ */
+export function isLeapYear(year: number) {
   if (year % 400 === 0) return true
   if (year % 100 === 0) return false
   if (year % 4 === 0) return true
   return false
 }
-
-export { getDate, getDateValue, getDatesAfter, getDaysInMonth, isLeapYear }

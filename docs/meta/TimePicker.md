@@ -6,138 +6,211 @@
 
   const propsData = [
   {
-    name: 'value',
-    description: 'Selected time (uncontrolled)',
+    name: 'modelValue',
+    description: 'Controlled value, canonical `HH:mm` (or `HH:mm:ss`).',
     required: false,
     type: 'string',
     default: '""'
   },
   {
-    name: 'modelValue',
-    description: 'Selected time (v-model)',
+    name: 'value',
+    description: 'Uncontrolled initial value.',
     required: false,
     type: 'string',
-    default: '""'
+    deprecated: 'Use `modelValue` with `v-model` instead.'
   },
   {
     name: 'interval',
-    description: 'Minute interval between options',
+    description: 'Minute interval between generated options.',
     required: false,
     type: 'number',
     default: '15'
   },
   {
     name: 'options',
-    description: 'Custom time options',
+    description: 'Caller-provided option values; bypasses the generated grid.',
     required: false,
     type: '{ value: string; label?: string; }[] | undefined',
     default: '[]'
   },
   {
+    name: 'side',
+    description: 'Preferred popover side.',
+    required: false,
+    type: 'PopoverSide'
+  },
+  {
+    name: 'align',
+    description: 'Alignment of the popover along the trigger edge.',
+    required: false,
+    type: 'PopoverAlign'
+  },
+  {
+    name: 'offset',
+    description: 'Gap between trigger and popover in pixels.',
+    required: false,
+    type: 'number'
+  },
+  {
     name: 'placement',
-    description: 'Popover placement',
+    description: 'Combined side+align placement.',
     required: false,
     type: 'Placement',
-    default: '"bottom-start" as Placement'
+    deprecated: 'Use `side` and `align` instead.'
   },
   {
     name: 'placeholder',
-    description: 'Placeholder text when no value is selected',
+    description: 'Placeholder text when no value is selected.',
     required: false,
     type: 'string',
     default: '"Select time"'
   },
   {
     name: 'variant',
-    description: 'Visual style variant',
+    description: 'Visual style variant.',
     required: false,
     type: 'Variant',
     default: '"subtle" as Variant'
   },
   {
-    name: 'allowCustom',
-    description: 'Allow entering custom time values',
+    name: 'typeable',
+    description: 'Whether the trigger input accepts typed input. When `false` the user can\nstill open the popover and pick a time, but cannot type a time manually.\nDefault: `true`.',
     required: false,
     type: 'boolean',
     default: 'true'
+  },
+  {
+    name: 'readonly',
+    description: 'Prevents manual typing while keeping the picker interactive.',
+    required: false,
+    type: 'boolean',
+    default: 'false',
+    deprecated: 'Use `typeable: false` instead.'
+  },
+  {
+    name: 'allowCustom',
+    description: 'Allows users to type custom time values.',
+    required: false,
+    type: 'boolean',
+    default: 'true',
+    deprecated: 'Use `typeable: false` instead.'
+  },
+  {
+    name: 'keepOpen',
+    description: 'Keeps the popover open after a time is selected.',
+    required: false,
+    type: 'boolean'
   },
   {
     name: 'autoClose',
-    description: 'Close picker automatically after selection',
+    description: 'Closes the popover after a value is picked.',
     required: false,
     type: 'boolean',
-    default: 'true'
+    default: 'true',
+    deprecated: 'Use `keepOpen` (inverse semantics).'
   },
   {
     name: 'use12Hour',
-    description: 'Use 12-hour (AM/PM) format',
+    description: 'Use 12-hour (am/pm) format for display.',
     required: false,
     type: 'boolean',
     default: 'true'
   },
   {
     name: 'disabled',
-    description: 'Disable the time picker',
+    description: 'Disable the time picker.',
     required: false,
     type: 'boolean',
     default: 'false'
   },
   {
-    name: 'scrollMode',
-    description: 'Scroll behavior when opening the list',
+    name: 'open',
+    description: 'Controlled popover open state. Use with `v-model:open` for two-way binding.',
     required: false,
-    type: '"start" | "center" | "nearest"',
-    default: '"center" as const'
+    type: 'boolean'
+  },
+  {
+    name: 'openOnFocus',
+    description: 'Opens the popover when the input receives focus. Default: false.',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  },
+  {
+    name: 'openOnClick',
+    description: 'Opens the popover when the input is clicked. Default: true.',
+    required: false,
+    type: 'boolean',
+    default: 'true'
+  },
+  {
+    name: 'min',
+    description: 'Minimum selectable time as `HH:mm[:ss]`.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'max',
+    description: 'Maximum selectable time as `HH:mm[:ss]`.',
+    required: false,
+    type: 'string'
   },
   {
     name: 'minTime',
-    description: 'Minimum selectable time',
+    description: 'Minimum selectable time as `HH:mm[:ss]`.',
     required: false,
     type: 'string',
-    default: '""'
+    deprecated: 'Use `min` instead.'
   },
   {
     name: 'maxTime',
-    description: 'Maximum selectable time',
+    description: 'Maximum selectable time as `HH:mm[:ss]`.',
     required: false,
     type: 'string',
-    default: '""'
+    deprecated: 'Use `max` instead.'
+  },
+  {
+    name: 'scrollMode',
+    description: 'Scroll behavior when opening the list.',
+    required: false,
+    type: '"start" | "center" | "nearest"',
+    deprecated: 'Scrolling is always centered now.'
   }
 ]
 
   const slotsData = [
   {
     name: 'prefix',
-    description: 'Slot rendered before the input value.\nUseful for icons or indicators.',
+    description: 'Rendered inside the trigger input, before the typed value.',
     type: 'any'
   },
   {
     name: 'suffix',
-    description: 'Slot rendered after the input value.\nExposes popover controls.',
+    description: 'Rendered inside the trigger input, after the typed value. Defaults to a\nchevron-down that toggles the popover.',
     type: '{ togglePopover: () => void; isOpen: boolean; }'
   }
 ]
 
   const emitsData = [
   {
-    name: 'update:modelValue',
-    description: 'Fired when the model value changes.',
-    type: '[value: string]'
-  },
-  {
-    name: 'change',
-    description: 'Fired after the value is committed.',
-    type: '[value: string]'
-  },
-  {
     name: 'open',
     description: 'Fired when the component opens.',
     type: '[]'
   },
   {
-    name: 'close',
-    description: 'Fired when the component closes.',
-    type: '[]'
+    name: 'update:modelValue',
+    description: 'Fired when the model value changes.',
+    type: '[value: string]'
+  },
+  {
+    name: 'update:open',
+    description: 'Fired when the open state changes.',
+    type: '[value: boolean]'
+  },
+  {
+    name: 'change',
+    description: 'Fired after the value is committed.',
+    type: '[value: string]'
   },
   {
     name: 'input-invalid',
@@ -148,6 +221,11 @@
     name: 'invalid-change',
     description: '',
     type: '[invalid: boolean]'
+  },
+  {
+    name: 'close',
+    description: 'Fired when the component closes.',
+    type: '[]'
   }
 ]
 </script>

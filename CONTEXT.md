@@ -2,6 +2,8 @@
 
 A Vue 3 component library for Frappe-based apps. This document captures the vocabulary used inside the library so that component APIs, docs, and stories stay aligned with the language used in the v1 plan and spec docs.
 
+The cross-cutting **design rules** that govern API shape live in [`PHILOSOPHY.md`](./PHILOSOPHY.md) (cite as `P1`–`P13`). This doc is the vocabulary the rules use.
+
 Planning artifacts live under [`v1-release/`](./v1-release/) — specs in `v1-release/*.md` and architecture decision records in [`v1-release/adr/`](./v1-release/adr/). The user-facing documentation in `docs/` is the published vitepress site and intentionally does not host ADRs or specs.
 
 ## Language

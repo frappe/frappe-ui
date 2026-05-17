@@ -9,6 +9,8 @@ const form = reactive({
   role: '',
   team: '',
   skills: [] as string[],
+  startDate: '',
+  availability: '',
   bio: '',
   acceptTerms: false,
 })
@@ -28,6 +30,7 @@ const errors = computed(() => {
   if (!form.role) e.role = 'Pick a role.'
   if (!form.team) e.team = 'Pick a team.'
   if (form.skills.length === 0) e.skills = 'Pick at least one skill.'
+  if (!form.startDate) e.startDate = 'Pick a start date.'
   if (!form.acceptTerms) e.acceptTerms = 'You must accept the terms.'
   return e
 })
@@ -70,6 +73,8 @@ function reset() {
     role: '',
     team: '',
     skills: [],
+    startDate: '',
+    availability: '',
     bio: '',
     acceptTerms: false,
   })
@@ -147,6 +152,23 @@ function reset() {
       :options="skillOptions"
       :error="errors.skills"
       required
+    />
+
+    <FormControl
+      v-model="form.startDate"
+      type="date"
+      label="Start date"
+      placeholder="Pick a start date"
+      :error="errors.startDate"
+      required
+    />
+
+    <FormControl
+      v-model="form.availability"
+      type="daterange"
+      label="Availability window"
+      description="When are you free for onboarding?"
+      placeholder="Pick a range"
     />
 
     <FormControl

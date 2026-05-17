@@ -5,6 +5,20 @@ three ways to use an icon in your templates. Pick the first one that fits —
 they all render the same icon, but the recommended path keeps your code
 simpler and your bundle smaller.
 
+## Browse all icons
+
+Every icon below is keyed by its kebab-case name — use that name directly as
+`lucide-<name>` in the Tailwind class form, or import it from
+`~icons/lucide/<name>`.
+
+<script setup>
+import LucideGallery from '../../../components/LucideGallery.vue'
+</script>
+
+<ClientOnly>
+  <LucideGallery />
+</ClientOnly>
+
 ## Recommended: class-based icons
 
 Every Lucide icon is exposed as a Tailwind utility class named

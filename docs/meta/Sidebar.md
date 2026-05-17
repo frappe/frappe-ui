@@ -4,7 +4,7 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 
-  const propsData = [
+  const sidebarProps = [
   {
     name: 'header',
     description: '',
@@ -32,7 +32,7 @@
   }
 ]
 
-  const slotsData = [
+  const sidebarSlots = [
   {
     name: 'header',
     description: '',
@@ -55,19 +55,161 @@
   }
 ]
 
-  const emitsData = [
+  const sidebarEmits = [
   {
     name: 'update:collapsed',
     description: 'Fired when the collapsed changes.',
     type: '[value: boolean]'
   }
 ]
+
+  const sidebarHeaderProps = [
+  {
+    name: 'title',
+    description: '',
+    required: true,
+    type: 'string'
+  },
+  {
+    name: 'subtitle',
+    description: '',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'logo',
+    description: '',
+    required: false,
+    type: 'any'
+  },
+  {
+    name: 'menuItems',
+    description: '',
+    required: false,
+    type: '{ label: string; icon: any; onClick?: (() => void); }[] | undefined'
+  }
+]
+
+  const sidebarHeaderSlots = [
+  {
+    name: 'logo',
+    description: '',
+    type: '{}'
+  }
+]
+
+  const sidebarItemProps = [
+  {
+    name: 'label',
+    description: '',
+    required: true,
+    type: 'string'
+  },
+  {
+    name: 'accessKey',
+    description: '',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'icon',
+    description: '',
+    required: false,
+    type: 'any'
+  },
+  {
+    name: 'suffix',
+    description: '',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'to',
+    description: '',
+    required: false,
+    type: 'string | kt | Tt'
+  },
+  {
+    name: 'isActive',
+    description: '',
+    required: false,
+    type: 'boolean'
+  },
+  {
+    name: 'onClick',
+    description: '',
+    required: false,
+    type: '(() => void)'
+  }
+]
+
+  const sidebarItemSlots = [
+  {
+    name: 'icon',
+    description: '',
+    type: '{}'
+  },
+  {
+    name: 'suffix',
+    description: '',
+    type: '{}'
+  }
+]
+
+  const sidebarSectionProps = [
+  {
+    name: 'label',
+    description: '',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'items',
+    description: '',
+    required: true,
+    type: 'SidebarItemProps[]'
+  },
+  {
+    name: 'collapsible',
+    description: '',
+    required: false,
+    type: 'boolean'
+  }
+]
+
+  const sidebarSectionSlots = [
+  {
+    name: 'sidebar-item',
+    description: '',
+    type: '{ item: SidebarItemProps; isCollapsed: false; }'
+  }
+]
 </script>
 ## API Reference
 
-<PropsTable name="Sidebar" :data="propsData"/> 
+### Sidebar
 
-<SlotsTable :data="slotsData"/> 
+<PropsTable name="Sidebar" :data="sidebarProps"/> 
 
-<EmitsTable :data="emitsData"/> 
+<SlotsTable :data="sidebarSlots"/> 
+
+<EmitsTable :data="sidebarEmits"/> 
+
+### SidebarHeader
+
+<PropsTable folder="Sidebar" name="SidebarHeader" :data="sidebarHeaderProps"/> 
+
+<SlotsTable :data="sidebarHeaderSlots"/> 
+
+### SidebarItem
+
+<PropsTable folder="Sidebar" name="SidebarItem" :data="sidebarItemProps"/> 
+
+<SlotsTable :data="sidebarItemSlots"/> 
+
+### SidebarSection
+
+<PropsTable folder="Sidebar" name="SidebarSection" :data="sidebarSectionProps"/> 
+
+<SlotsTable :data="sidebarSectionSlots"/> 
 

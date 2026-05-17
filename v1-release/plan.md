@@ -160,38 +160,57 @@ Examples:
 Status for v1:
 
 - still exported
-- deprecated
-- not recommended
-- should warn in dev mode
-- documented only on the legacy page and migration guide
+- **not** deprecated for 1.0 — supported
+- recommended for Frappe v15 and for codebases not yet on v3
+- no dev-mode deprecation warnings
+- documented in main docs
+
+Rationale: v3 ships in 1.0 but is recommended only for Frappe v16+. v2 remains
+the supported path for v15 users and existing codebases. v2's eventual fate
+is a post-v1 decision tied to v3 adoption and v15 backport status.
 
 ### v3 data APIs
 
-Examples:
+Implemented in PR #610 (`frappe/client/`). Exports from
+`frappe-ui/frappe/vue`:
 
 - `createClient`
-- generated doctype handles
-- `getDoc`
-- `getList`
-- `newDoc`
-- `getCount`
-- doctype-level operations
+- `createDefaultCacheAdapter`
+- `defineDoctype` (returned from `createClient`)
+- doctype handles: doc / list / count / newDoc
 
 Status for v1:
 
-- recommended path
-- documented as the default data API for new work
-- refined through full Gameplan migration
-- recommended primarily for Frappe v16+
+- ships in 1.0 (merged from PR #610)
+- recommended path for new code on Frappe v16+
+- **frozen public import surface** — `createClient` and the public types/exports above are stable for the 1.x line
+- **internal signatures may evolve** in 1.x minors via deprecation cycles only — no breaking changes
+- partial Gameplan migration provides the stress-test signal; full migration is post-v1
+
+### v3 frozen surface contract
+
+What is frozen for 1.0:
+
+- import path `frappe-ui/frappe/vue`
+- `createClient` exists and returns `{ defineDoctype, store }` plus the client object
+- `createDefaultCacheAdapter(name: string)` exists
+- doctype handles for doc / list / count / newDoc exist and are reactive
+- public type exports (props, return types of `createClient`, handle types)
+
+What may evolve (only via deprecation cycle in 1.x):
+
+- specific method names on handles
+- option keys on `createClient`
+- ergonomic additions (new methods, new options)
+- cache adapter contract internals
 
 ### v3 requirements before v1
 
-- public import surface finalized
-- public handle semantics finalized
-- missing ergonomic operations added where needed during migration
-- `.submit`, `.cancel`, and similar high-value parity gaps resolved where needed
-- migration path from v1 and v2 documented
-- Gameplan fully migrated to v3
+- PR #610 self-reviewed against `frappe/client/spec/*.md`
+- smoke-tested against the partial Gameplan v3 migration
+- merged with a one-time dev-mode notice on `createClient` (e.g. "v3 is recommended for Frappe v16+")
+- frozen surface contract documented (see section above)
+- migration path from v1 resources documented on the legacy page (v2 → v3 deferred to post-v1)
 
 ### Frappe Framework compatibility
 
@@ -266,59 +285,43 @@ Key items:
 
 ### 4. TextEditor stabilization
 
-v1 stance:
+**v1 carve-out:** TextEditor's public API is **not** frozen for 1.0. The
+component ships in 1.0 as-is. A full refactor (internals + public API
+redesign + the open behavioral fixes) lands in **1.1** with a documented
+migration path. Until then, the existing TextEditor surface is supported
+unchanged.
 
-- font family disabled by default
-- font size disabled by default
-- apps must explicitly opt in to both
+Required for 1.0:
 
-Required work:
+- no changes to `TextEditor.vue` public API
+- release notes explicitly state the carve-out
 
-- internal simplification/refactor
-- public API stabilization
+Deferred to 1.1 (bundled into a single refactor effort):
+
+- default-off font family / font size policy
 - backtick block highlighting fix
 - line-height cleanup
-- docs/stories/tests updated as needed for the default-off behavior
-
-Not a blocker:
-
-- richer table editing UX
-- broader formatting expansion
-- major new editor features
+- internal modernization (TS + `<script setup>` for sub-components)
+- public API redesign with deprecation cycle / migration path
+- table editing UX improvements
+- collapsible section / additional editor features
 
 ### 5. v3 finalization and Gameplan migration
 
-Use Gameplan as the proving ground for v3.
+**v1 scope:** v3 ships in 1.0 via PR #610 with a frozen public import
+surface (see "Data API strategy" above). Full Gameplan migration is
+**post-v1**.
 
-Required outcomes:
+Required for 1.0:
 
-- v3 is production-viable in a real app
-- Gameplan frontend is fully migrated to v3 data APIs
-- legacy resource usage is removed from `frontend/src`
-- no new v2 usage remains in the frontend
-- migration findings are folded back into v3 API improvements and docs
+- PR #610 self-reviewed and merged
+- partial Gameplan migration used as the stress-test signal
+- frozen surface contract documented
+- one-time dev-mode notice on `createClient` ("v3 is recommended for Frappe v16+")
 
-Suggested migration order:
-
-1. client/bootstrap layer
-2. small and isolated data modules
-3. list-heavy pages
-4. form-heavy and mutation-heavy flows
-5. remaining legacy edge cases
-6. final cleanup
-
-Gameplan migration acceptance criteria:
-
-- `frontend/src` no longer uses:
-  - `resources: {}`
-  - `$resources`
-  - `$getResource`
-  - `createResource`
-  - `createListResource`
-  - `createDocumentResource`
-  - v2 composables in active app codepaths
-- Gameplan boots and works correctly on v3 data APIs
-- key data flows are exercised in manual QA and RC validation
+Post-v1 umbrella: full Gameplan migration off v1 resources, eventual v2
+deprecation decision, Frappe v15 backport, DocType Meta composable, related
+ergonomics. Tracked as a single post-v1 umbrella issue.
 
 ### 6. Docs, legacy page, warnings, and RC
 
@@ -338,26 +341,25 @@ Legacy page should include at minimum:
 - `createListResource`
 - `Resource.vue`
 - `resourcesPlugin`
-- `useCall`
-- `useDoc`
-- `useList`
-- `useDoctype`
-- `useNewDoc`
 - `Input.vue`
 - `Autocomplete`
 - `FeatherIcon`
+
+v2 composables (`useCall`, `useDoc`, `useList`, `useDoctype`, `useNewDoc`)
+stay in the **main** docs — they are not deprecated for 1.0.
 
 ## Release blockers
 
 v1 should not ship before all of these are done:
 
 - release contract and quality gates are defined
-- core components are migrated to TypeScript and `<script setup>` and have docs/stories/tests baselines
+- core components are migrated to TypeScript and `<script setup>` and have docs/stories/tests baselines (FileUploader, TabButtons, ListView remaining)
 - selection/input family stabilization is complete enough for v1
 - Dialog/floating stabilization is complete enough for v1
-- `TextEditor` default-off font family and font size policy is implemented
-- v3 is finalized enough for production use
-- Gameplan is fully migrated to v3
+- TextEditor 1.0 carve-out documented (public API unchanged; refactor in 1.1)
+- v3 PR #610 merged with frozen surface contract documented
+- file uploads default to `is_private: true` (security #206)
+- color tokens aligned with Figma
 - deprecation warnings and legacy docs exist
 - internal **hardcoded** `FeatherIcon` usage is migrated to `lucide-*` (prop-driven icon-name paths kept for back-compat)
 - migration guide and release candidate validation are complete
