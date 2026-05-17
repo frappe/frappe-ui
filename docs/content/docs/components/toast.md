@@ -18,6 +18,12 @@ Add an `action` to give the user a way to respond. Combine with `duration: Infin
 
 <ComponentPreview name="Toast-Actions" css="flex-wrap" />
 
+## Custom icon
+
+Pass a Vue component to `icon` to replace the default type icon — handy for branding moments, custom imagery, or domain-specific glyphs.
+
+<ComponentPreview name="Toast-CustomIcon" css="flex-wrap" />
+
 ## Asynchronous
 
 Use `toast.promise` to wire a single toast to a promise lifecycle, or pass an `id` to update an existing toast in place — useful for multi-step progress.

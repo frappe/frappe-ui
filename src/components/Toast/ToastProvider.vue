@@ -12,7 +12,7 @@
           'group py-2.5 flex items-center px-4 bg-surface-gray-6 rounded-md shadow-xl w-[360px] after:bg-transparent',
         title: 'text-p-base font-medium text-ink-white',
         description: 'text-p-base text-ink-white',
-        icon: 'mr-2 text-ink-white',
+        icon: 'mr-2 text-ink-white [&_svg]:size-4',
         closeButton:
           'order-1 ml-auto group-has-[[data-action]]:ml-0 grid place-items-center rounded-sm text-ink-white hover:bg-surface-gray-5 size-5 !transition-colors [&_svg]:size-4',
         actionButton:
