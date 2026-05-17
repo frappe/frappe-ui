@@ -1,6 +1,5 @@
 import { h, isVNode, type Component, type VNode } from 'vue'
 import { toast as sonnerToast } from 'vue-sonner'
-import FeatherIcon from '../FeatherIcon.vue'
 import { warnDeprecated } from '../../utils/warnDeprecated'
 
 type ToastType = 'success' | 'error' | 'warning' | 'info'
@@ -40,7 +39,10 @@ function resolveIcon(
 ): Component | undefined {
   if (icon == null) return undefined
   if (typeof icon === 'string') {
-    return () => h(FeatherIcon, { name: icon, class: iconClasses })
+    const className = ['lucide-' + icon, 'size-4', iconClasses]
+      .filter(Boolean)
+      .join(' ')
+    return () => h('span', { class: className })
   }
   if (isVNode(icon)) {
     return () => icon

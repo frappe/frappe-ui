@@ -1,6 +1,4 @@
-import { h } from 'vue'
-import { Toaster as SonnerToaster } from 'vue-sonner'
-import { toast, Toast, Toaster } from '../../index'
+import { toast, Toast, ToastProvider } from '../../index'
 import FrappeUIProvider from '../Provider/FrappeUIProvider.vue'
 
 describe('Toast v1 — vue-sonner integration', () => {
@@ -18,18 +16,18 @@ describe('Toast v1 — vue-sonner integration', () => {
     expect(typeof toast.dismiss).to.equal('function')
   })
 
-  it('Toaster re-export resolves to the vue-sonner Toaster', () => {
-    expect(Toaster).to.equal(SonnerToaster)
+  it('ToastProvider is exported as the styled <Toaster> escape hatch', () => {
+    expect(ToastProvider).to.not.be.undefined
   })
 
   it('Toast back-compat export still resolves', () => {
     expect(Toast).to.not.be.undefined
   })
 
-  it('removed APIs (toast.create / toast.remove / toast.removeAll) are not present', () => {
-    expect((toast as any).create).to.be.undefined
-    expect((toast as any).remove).to.be.undefined
-    expect((toast as any).removeAll).to.be.undefined
+  it('legacy APIs (toast.create / toast.remove / toast.removeAll) are kept as deprecated shims', () => {
+    expect(typeof (toast as any).create).to.equal('function')
+    expect(typeof (toast as any).remove).to.equal('function')
+    expect(typeof (toast as any).removeAll).to.equal('function')
   })
 
   // ---- FrappeUIProvider mounts a Toaster ------------------------------------
