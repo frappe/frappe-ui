@@ -5,6 +5,9 @@ import { meta } from './meta'
 import { getComponentItems } from './utils'
 import { transformerStyleToClass } from '@shikijs/transformers'
 import componentTransformer from './plugins/componentTransformer'
+import colocatedComponentDocs, {
+  syncColocatedComponentDocs,
+} from './plugins/colocatedComponentDocs'
 import fs from 'fs'
 import { execSync } from 'child_process'
 
@@ -27,6 +30,10 @@ if (isDev) {
   } catch {}
 }
 const devTitle = devBranch ? `[${devBranch}] ${meta.name}` : meta.name
+
+// Generate proxy files for colocated component docs before VitePress
+// scans srcDir. The Vite plugin below keeps them in sync during dev.
+syncColocatedComponentDocs()
 
 export default defineConfig({
   base,
@@ -114,7 +121,7 @@ export default defineConfig({
     ],
   },
   vite: {
-    plugins: [lucideIcons()],
+    plugins: [lucideIcons(), colocatedComponentDocs()],
     define: {
       __DEV_BRANCH__: JSON.stringify(devBranch),
     },

@@ -28,5 +28,10 @@ docs/.vitepress/cache
 docs/.vitepress/dist
 components.d.ts
 
+# Auto-generated proxies for colocated component docs.
+# Keep legacy.md (the only hand-written file in this dir).
+docs/content/docs/components/*.md
+!docs/content/docs/components/legacy.md
+
 coverage
 .nyc_output
