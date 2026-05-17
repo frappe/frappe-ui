@@ -1,7 +1,7 @@
 import { h, isVNode, type Component, type VNode } from 'vue'
 import { toast as sonnerToast } from 'vue-sonner'
-import FeatherIcon from '../components/FeatherIcon.vue'
-import { warnDeprecated } from './warnDeprecated'
+import FeatherIcon from '../FeatherIcon.vue'
+import { warnDeprecated } from '../../utils/warnDeprecated'
 
 type ToastType = 'success' | 'error' | 'warning' | 'info'
 
