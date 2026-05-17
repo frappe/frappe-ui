@@ -1,65 +1,39 @@
-<template>
-  <FrappeUIProvider>
-    <Story title="Toast Actions" :layout="{ width: 420 }">
-      <Variant title="Action, persistent, and stacked examples">
-        <div class="flex flex-wrap gap-2">
-          <Button label="Show action toast" @click="showActionToast" />
-          <Button label="Show persistent toast" @click="showPersistentToast" />
-          <Button label="Show promise toast" @click="showPromiseToast" />
-          <Button label="Show stacked toasts" @click="showStackedToasts" />
-        </div>
-      </Variant>
-    </Story>
-  </FrappeUIProvider>
-</template>
-
 <script setup lang="ts">
-import { Button, FrappeUIProvider, toast } from 'frappe-ui'
+import { Button, toast } from 'frappe-ui'
 
-function resetToasts() {
-  toast.removeAll()
-}
-
-function showActionToast() {
-  resetToasts()
+function postArchived() {
   toast.success('Post archived', {
     action: {
       label: 'Undo',
-      onClick() {
-        toast.info('Archive undone')
-      },
+      onClick: () => toast.info('Archive undone'),
     },
   })
 }
 
-function showPersistentToast() {
-  resetToasts()
+function newVersion() {
+  toast.info('A new version is available', {
+    description: 'Refresh to get the latest features.',
+    duration: Infinity,
+    action: {
+      label: 'Refresh',
+      onClick: () => toast.loading('Refreshing…'),
+    },
+  })
+}
+
+function backgroundSync() {
   toast.info('Background sync in progress', {
-    duration: 0,
-    closable: false,
-  })
-}
-
-function showPromiseToast() {
-  resetToasts()
-  void toast.promise(
-    new Promise<string>((resolve) => {
-      setTimeout(() => resolve('done'), 1000)
-    }),
-    {
-      loading: 'Saving changes…',
-      success: 'Changes saved',
-      error: 'Failed to save changes',
+    duration: Infinity,
+    action: {
+      label: 'Cancel',
+      onClick: () => toast.dismiss(),
     },
-  )
-}
-
-async function showStackedToasts() {
-  resetToasts()
-  toast.info('First notification', { duration: 0 })
-  await new Promise((resolve) => setTimeout(resolve, 500))
-  toast.success('Second notification', { duration: 0 })
-  await new Promise((resolve) => setTimeout(resolve, 700))
-  toast.warning('Third notification', { duration: 0 })
+  })
 }
 </script>
+
+<template>
+  <Button label="Post archived" @click="postArchived" />
+  <Button label="New version" @click="newVersion" />
+  <Button label="Background sync" @click="backgroundSync" />
+</template>

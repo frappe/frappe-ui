@@ -6,6 +6,7 @@ import { getComponentItems } from './utils'
 import { transformerStyleToClass } from '@shikijs/transformers'
 import componentTransformer from './plugins/componentTransformer'
 import fs from 'fs'
+import { execSync } from 'child_process'
 
 // needed for transforming shiki inline styles to classes
 const toClass = transformerStyleToClass({
@@ -14,13 +15,26 @@ const toClass = transformerStyleToClass({
 
 const base = process.env.VITEPRESS_BASE || '/'
 
+const isDev = process.env.NODE_ENV !== 'production'
+let devBranch = ''
+if (isDev) {
+  try {
+    devBranch = execSync('git rev-parse --abbrev-ref HEAD', {
+      cwd: path.resolve(__dirname, '../..'),
+    })
+      .toString()
+      .trim()
+  } catch {}
+}
+const devTitle = devBranch ? `[${devBranch}] ${meta.name}` : meta.name
+
 export default defineConfig({
   base,
   srcDir: 'content',
   lastUpdated: true,
-  title: meta.name,
+  title: devTitle,
   description: meta.description,
-  titleTemplate: meta.name,
+  titleTemplate: devTitle,
   markdown: {
     theme: {
       dark: 'tokyo-night',
@@ -101,6 +115,9 @@ export default defineConfig({
   },
   vite: {
     plugins: [lucideIcons()],
+    define: {
+      __DEV_BRANCH__: JSON.stringify(devBranch),
+    },
     resolve: {
       alias: {
         '@/components': path.resolve(__dirname, '../components/'),
