@@ -59,14 +59,29 @@ describe('Toast v1 — backwards-compat shim', () => {
     expect(typeof (toast as any).removeAll).toBe('function')
   })
 
-  it('toast.create({ closable: false }) makes the toast persistent', () => {
-    // Old reka-ui contract: closable=false drove duration=0 which reka
-    // treated as persistent. Sonner would auto-dismiss after 5s without
-    // this remap — breaking the helpdesk loading-indicator pattern.
+  it('toast.create({ closable: false }) locks the toast (persistent + no × + not swipe-dismissible)', () => {
+    // Old reka-ui contract: closable=false made the toast fully locked.
+    // Sonner splits that into three flags — duration (auto-dismiss),
+    // closeButton (× visibility), and dismissible (swipe / pointer).
+    // Mapping closable → closeButton alone would let the helpdesk
+    // loading-indicator pattern still get swiped away.
     ;(toast as any).create({ message: 'Loading…', closable: false })
     const [, data] = sonnerSpy.mock.calls[0]!
     expect(data.duration).toBe(Infinity)
     expect(data.closeButton).toBe(false)
+    expect(data.dismissible).toBe(false)
+  })
+
+  it('toast.create({ closable: true }) keeps the toast dismissible', () => {
+    ;(toast as any).create({ message: 'OK', closable: true })
+    const [, data] = sonnerSpy.mock.calls[0]!
+    expect(data.dismissible).toBe(true)
+  })
+
+  it('toast.create with closable omitted is dismissible by default', () => {
+    ;(toast as any).create({ message: 'Default' })
+    const [, data] = sonnerSpy.mock.calls[0]!
+    expect(data.dismissible).toBe(true)
   })
 
   it('toast.create({ duration: 0 }) is persistent, not instant-dismiss', () => {

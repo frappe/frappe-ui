@@ -117,17 +117,17 @@ function create(options: LegacyCreateOptions) {
     TOAST_DOCS,
   )
   const { message, type, icon, duration, action, closable, id } = options
-  // closable: false had dual semantics in the reka-ui Toast — it both
-  // hid the close button *and* made the toast persistent (Toast.vue:4:
-  // `:duration="closable ? duration : 0"`). Preserve both halves so the
-  // loading-indicator pattern used across helpdesk still pins until the
-  // caller explicitly dismisses it.
+  // closable: false in reka-ui meant fully locked: no × button, no
+  // auto-dismiss, no user interaction. Sonner splits those into three
+  // separate flags — preserve all three so the helpdesk loading-indicator
+  // pattern can't be swiped away or click-dismissed.
   return dispatch(type, message, {
     id,
     duration: closable === false ? Infinity : toMs(duration),
     action,
     icon: resolveIcon(icon),
     closeButton: closable,
+    dismissible: closable !== false,
   })
 }
 
