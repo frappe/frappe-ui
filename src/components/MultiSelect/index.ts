@@ -9,9 +9,13 @@ export type {
   MultiSelectItemSlots,
   MultiSelectOption,
   MultiSelectOptions,
+  MultiSelectPrefixSlotProps,
   MultiSelectProps,
   MultiSelectSize,
+  MultiSelectSlotProps,
   MultiSelectSlots,
+  MultiSelectSuffixSlotProps,
+  MultiSelectSummarySlotProps,
   MultiSelectTriggerSlotProps,
   MultiSelectVariant,
 } from './types'

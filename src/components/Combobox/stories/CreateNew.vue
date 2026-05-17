@@ -36,18 +36,17 @@ const options = computed(() => [
 ])
 
 function getBgClass(item: { label: string }) {
-  let options = [
+  const palette = [
     'bg-surface-amber-3',
     'bg-surface-blue-3',
     'bg-surface-green-3',
     'bg-surface-gray-3',
   ]
-  // return a color based on item.label hash
   const hash = item.label
     .toLowerCase()
     .split('')
     .reduce((a, b) => a + b.charCodeAt(0), 0)
-  return options[hash % options.length]
+  return palette[hash % palette.length]
 }
 </script>
 
