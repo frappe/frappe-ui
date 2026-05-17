@@ -35,6 +35,7 @@ jobs:
       vars.BARISTA_ENABLED == 'true' && (
         (
           github.event_name == 'pull_request' &&
+          github.event.pull_request.state == 'open' &&
           github.event.pull_request.draft == false &&
           github.event.pull_request.head.repo.full_name == github.repository
         ) ||
@@ -42,6 +43,7 @@ jobs:
         (
           github.event_name == 'issue_comment' &&
           github.event.issue.pull_request != null &&
+          github.event.issue.state == 'open' &&
           contains(github.event.comment.body, '/barista review') &&
           (
             github.event.comment.author_association == 'OWNER' ||
