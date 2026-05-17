@@ -2,6 +2,7 @@
 import { state } from '../../state'
 import { useData, useRoute, withBase } from 'vitepress'
 import pkgJson from '../../../package.json'
+import { getSidebarList } from './sidebarList'
 
 import {
   ScrollAreaRoot,
@@ -11,64 +12,7 @@ import {
 } from 'reka-ui'
 
 const curVersion = pkgJson.version
-const componentList = useData().theme.value.componentList
-const componentItems = [
-  ...componentList.map((name: string) => ({
-    text: name,
-    link: `/docs/components/${name.toLowerCase()}`,
-  })),
-  {
-    text: 'Legacy components',
-    link: '/docs/components/legacy',
-  },
-]
-
-const list = [
-  {
-    text: 'Getting Started',
-    items: [
-      { text: 'Overview', link: '/' },
-      { text: 'Introduction', link: '/docs/introduction' },
-      { text: 'Getting Started', link: '/docs/getting-started' },
-    ],
-  },
-  {
-    text: 'Design System',
-    items: [
-      {
-        text: 'Background Color',
-        link: '/docs/design-system/background-color',
-      },
-      { text: 'Text Design', link: '/docs/design-system/text' },
-      { text: 'Border Color', link: '/docs/design-system/border-color' },
-      { text: 'Drop Shadow', link: '/docs/design-system/drop-shadow' },
-      { text: 'Border Radius', link: '/docs/design-system/border-radius' },
-    ],
-  },
-  {
-    text: 'Components',
-    items: componentItems,
-  },
-  {
-    text: 'Data Fetching',
-    items: [
-      { text: 'Resource', link: '/docs/data-fetching/resource' },
-      { text: 'List Resource', link: '/docs/data-fetching/list-resource' },
-      {
-        text: 'Document Resource',
-        link: '/docs/data-fetching/document-resource',
-      },
-    ],
-  },
-  {
-    text: 'Other',
-    items: [
-      { text: 'Icons', link: '/docs/other/icons' },
-      { text: 'Utilities', link: '/docs/other/utilities' },
-      { text: 'Directives', link: '/docs/other/directives' },
-    ],
-  },
-]
+const list = getSidebarList(useData().theme.value.componentList)
 
 state.sidebarList = list
 
