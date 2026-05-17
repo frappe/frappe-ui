@@ -25,20 +25,22 @@ const state = reactive({
 </script>
 
 <template>
-  <Tabs class="border rounded" v-model="state.index" :tabs="state.tabs">
-    <template #tab-panel="{ tab }">
-      <div class="p-5">{{ tab.content }}</div>
-    </template>
-  </Tabs>
+  <div class="grid gap-5">
+    <Tabs class="border rounded" v-model="state.index" :tabs="state.tabs">
+      <template #tab-panel="{ tab }">
+        <div class="p-5">{{ tab.content }}</div>
+      </template>
+    </Tabs>
 
-  <Tabs
-    class="border rounded"
-    v-model="state.index"
-    :tabs="state.tabs"
-    :vertical="true"
-  >
-    <template #tab-panel="{ tab }">
-      <div class="p-5">{{ tab.content }}</div>
-    </template>
-  </Tabs>
+    <Tabs
+      class="border rounded"
+      v-model="state.index"
+      :tabs="state.tabs"
+      :vertical="true"
+    >
+      <template #tab-panel="{ tab }">
+        <div class="p-5">{{ tab.content }}</div>
+      </template>
+    </Tabs>
+  </div>
 </template>

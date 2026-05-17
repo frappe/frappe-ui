@@ -51,42 +51,44 @@ function getBgClass(item: { label: string }) {
 </script>
 
 <template>
-  <div class="grid gap-3 shrink-0">
-    <Combobox
-      v-model="value"
-      :options="options"
-      placeholder="Search or create a tag"
-      open-on-focus
-      class="w-64"
-    >
-      <template #item-prefix="{ item }">
-        <span
-          v-if="item.key !== 'create'"
-          :class="getBgClass(item)"
-          class="size-3 rounded-sm"
-        />
-        <span
-          v-if="item.key === 'create'"
-          class="rounded-sm bg-surface-gray-5 lucide-tag"
-        />
-      </template>
-      <template #item-create="{ query }">
-        <div class="flex">
-          <span class="truncate">
-            Create
-            <span v-if="query" class="font-medium text-ink-gray-8">
-              {{ query }}
+  <div class="justify-center !py-20 grid">
+    <div class="grid gap-3 shrink-0">
+      <Combobox
+        v-model="value"
+        :options="options"
+        placeholder="Search or create a tag"
+        open-on-focus
+        class="w-64"
+      >
+        <template #item-prefix="{ item }">
+          <span
+            v-if="item.key !== 'create'"
+            :class="getBgClass(item)"
+            class="size-3 rounded-sm"
+          />
+          <span
+            v-if="item.key === 'create'"
+            class="rounded-sm bg-surface-gray-5 lucide-tag"
+          />
+        </template>
+        <template #item-create="{ query }">
+          <div class="flex">
+            <span class="truncate">
+              Create
+              <span v-if="query" class="font-medium text-ink-gray-8">
+                {{ query }}
+              </span>
             </span>
-          </span>
-        </div>
-      </template>
-    </Combobox>
+          </div>
+        </template>
+      </Combobox>
 
-    <div class="text-sm text-ink-gray-5">
-      Selected: <code class="text-ink-gray-7">{{ value || 'None' }}</code>
-    </div>
-    <div class="text-sm text-ink-gray-5">
-      Tags: <code class="text-ink-gray-7">{{ tags.join(', ') }}</code>
+      <div class="text-sm text-ink-gray-5">
+        Selected: <code class="text-ink-gray-7">{{ value || 'None' }}</code>
+      </div>
+      <div class="text-sm text-ink-gray-5">
+        Tags: <code class="text-ink-gray-7">{{ tags.join(', ') }}</code>
+      </div>
     </div>
   </div>
 </template>

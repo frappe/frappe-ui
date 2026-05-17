@@ -4,10 +4,10 @@ Separates content visually, either horizontally or vertically. It can also host 
 
 ## Examples
 
-<ComponentPreview name="Divider-Examples" css='grid gap-6 !p-6' />
+<ComponentPreview name="Divider-Examples" />
 
 ## Action
 
-<ComponentPreview name="Divider-Action" css='grid gap-6 !p-6' />
+<ComponentPreview name="Divider-Action" />
 
 <!-- @include: ./Divider.api.md -->

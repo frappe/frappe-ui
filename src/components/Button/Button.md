@@ -4,18 +4,18 @@ An interactive element used to trigger actions, submit forms, or navigate betwee
 
 ## Variants
 
-<ComponentPreview name='Button-Variants'  />
+<ComponentPreview name='Button-Variants' />
 
 ## Themes
 
-<ComponentPreview name='Button-Themes'  />
+<ComponentPreview name='Button-Themes' />
 
 ## Sizes
 
-<ComponentPreview name='Button-Sizes'  />
+<ComponentPreview name='Button-Sizes' />
 
 ## Icons
 
-<ComponentPreview name='Button-Icons'  />
+<ComponentPreview name='Button-Icons' />
 
 <!-- @include: ./Button.api.md -->

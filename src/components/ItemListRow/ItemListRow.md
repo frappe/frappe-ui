@@ -9,6 +9,6 @@ active/selected/disabled states.
 
 ## Row states
 
-<ComponentPreview name="ItemListRow-RowStates" css='justify-center !py-20 grid' />
+<ComponentPreview name="ItemListRow-RowStates" />
 
 <!-- @include: ./ItemListRow.api.md -->

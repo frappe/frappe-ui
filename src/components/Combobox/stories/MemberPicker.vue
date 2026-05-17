@@ -75,55 +75,57 @@ const selected = computed(
 </script>
 
 <template>
-  <div class="grid gap-3">
-    <Combobox
-      v-model="value"
-      :options="options"
-      placeholder="Assign to…"
-      open-on-focus
-      class="w-80"
-    >
-      <template #prefix>
-        <Avatar v-if="selected" :image="selected.image" size="sm" />
-      </template>
+  <div class="justify-center !py-20 grid">
+    <div class="grid gap-3">
+      <Combobox
+        v-model="value"
+        :options="options"
+        placeholder="Assign to…"
+        open-on-focus
+        class="w-80"
+      >
+        <template #prefix>
+          <Avatar v-if="selected" :image="selected.image" size="sm" />
+        </template>
 
-      <template #item-prefix="{ item }">
-        <Avatar
-          v-if="item.type !== 'custom'"
-          :image="(item as Member).image"
-          :label="item.label"
-          size="sm"
-        />
-        <div
-          v-else
-          class="flex size-6 items-center justify-center rounded-full bg-surface-blue-2 text-ink-blue-600"
-        >
-          <span class="lucide-user-plus size-3.5" />
-        </div>
-      </template>
-
-      <template #item-label="{ item }">
-        <div v-if="item.type !== 'custom'" class="min-w-0">
-          <div class="truncate">{{ item.label }}</div>
-          <div class="truncate text-p-sm text-ink-gray-5">
-            {{ (item as Member).email }}
+        <template #item-prefix="{ item }">
+          <Avatar
+            v-if="item.type !== 'custom'"
+            :image="(item as Member).image"
+            :label="item.label"
+            size="sm"
+          />
+          <div
+            v-else
+            class="flex size-6 items-center justify-center rounded-full bg-surface-blue-2 text-ink-blue-600"
+          >
+            <span class="lucide-user-plus size-3.5" />
           </div>
-        </div>
-      </template>
+        </template>
 
-      <template #item-invite="{ query }">
-        <span class="truncate text-ink-blue-600">
-          {{ query ? `Invite "${query}"` : 'Invite new member' }}
-        </span>
-      </template>
-    </Combobox>
+        <template #item-label="{ item }">
+          <div v-if="item.type !== 'custom'" class="min-w-0">
+            <div class="truncate">{{ item.label }}</div>
+            <div class="truncate text-p-sm text-ink-gray-5">
+              {{ (item as Member).email }}
+            </div>
+          </div>
+        </template>
 
-    <div class="text-sm text-ink-gray-5">
-      {{
-        selected
-          ? `Assigned to ${selected.label}`
-          : lastAction || 'No one assigned'
-      }}
+        <template #item-invite="{ query }">
+          <span class="truncate text-ink-blue-600">
+            {{ query ? `Invite "${query}"` : 'Invite new member' }}
+          </span>
+        </template>
+      </Combobox>
+
+      <div class="text-sm text-ink-gray-5">
+        {{
+          selected
+            ? `Assigned to ${selected.label}`
+            : lastAction || 'No one assigned'
+        }}
+      </div>
     </div>
   </div>
 </template>

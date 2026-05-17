@@ -6,6 +6,6 @@ A visual representation of a user, typically shown as an image, initials, or an 
 <ComponentPreview name="Avatar-Shapes" />
 
 ## Controlled state
-<ComponentPreview name="Avatar-Sizes"  />
+<ComponentPreview name="Avatar-Sizes" />
 
 <!-- @include: ./Avatar.api.md -->
