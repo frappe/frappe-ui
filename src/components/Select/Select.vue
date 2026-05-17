@@ -281,7 +281,16 @@ defineSlots<SelectSlots>()
           v-else-if="selectedOption?.icon"
           :icon="selectedOption.icon"
         />
-        <slot v-else name="prefix" />
+        <slot
+          v-else
+          name="prefix"
+          v-bind="{
+            open,
+            disabled: !!disabled,
+            selectedOption,
+            displayValue,
+          }"
+        />
 
         <div class="grid min-w-0 text-left">
           <SelectValue
@@ -299,7 +308,15 @@ defineSlots<SelectSlots>()
           />
         </div>
 
-        <slot name="suffix">
+        <slot
+          name="suffix"
+          v-bind="{
+            open,
+            disabled: !!disabled,
+            selectedOption,
+            displayValue,
+          }"
+        >
           <span class="lucide-chevron-down ml-auto size-4 shrink-0 text-ink-gray-4" />
         </slot>
       </template>

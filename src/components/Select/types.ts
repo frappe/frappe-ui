@@ -57,6 +57,16 @@ export interface SelectTriggerSlotProps {
   displayValue: string
 }
 
+/**
+ * Shared shape for `#trigger`, `#prefix`, and `#suffix`. `selectedOption`
+ * is always `null` in `#prefix` because the prefix only renders before a
+ * selection — the field is still exposed for slot-prop symmetry across
+ * the trio.
+ */
+export type SelectSlotProps = SelectTriggerSlotProps
+export type SelectPrefixSlotProps = SelectSlotProps
+export type SelectSuffixSlotProps = SelectSlotProps
+
 export interface SelectItemSlotProps {
   /** Item currently being rendered. */
   item: SelectNormalizedOption
@@ -78,11 +88,16 @@ export interface SelectSlots {
   /** Overrides the rendered description content. */
   description?: () => any
 
-  /** Content rendered before the trigger value. */
-  prefix?: () => any
+  /** Content rendered before the trigger value. Receives the same shape
+   * as `#trigger` and `#suffix` (`SelectSlotProps`). */
+  prefix?: (props: SelectPrefixSlotProps) => any
 
-  /** Content rendered after the trigger value. */
-  suffix?: () => any
+  /**
+   * Content rendered after the trigger value. Providing this slot
+   * **replaces the default chevron** — render your own fallback when
+   * your slot content is conditional.
+   */
+  suffix?: (props: SelectSuffixSlotProps) => any
 
   /**
    * Shared renderer for option labels.
