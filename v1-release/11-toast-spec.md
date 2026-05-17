@@ -188,8 +188,8 @@ Audit: ~6 callsites pass a numeric `duration`. Each needs `× 1000`.
 | `toast.create({ message, ... })` | `toast(message, { ... })` or `toast.message(message, { ... })` | 5 (helpdesk) |
 | `toast.remove(id)` | `toast.dismiss(id)` | 0 |
 | `toast.removeAll()` | `toast.dismiss()` | 0 |
-| `import { Toasts } from 'frappe-ui'`<br>`<Toasts />` | `<FrappeUIProvider>` wrap, **or** `import { Toaster } from 'frappe-ui'`; `<Toaster />` | 2 (crm, hrms) |
-| `<ToastProvider>` SFC | `<FrappeUIProvider>` (internal-only now) | 0 |
+| `import { Toasts } from 'frappe-ui'`<br>`<Toasts />` | `<FrappeUIProvider>` wrap, **or** `import { ToastProvider } from 'frappe-ui'`; `<ToastProvider />` | 2 (crm, hrms) |
+| `<ToastProvider>` SFC | `import { ToastProvider } from 'frappe-ui'` (styled wrapper around sonner's `<Toaster>`) | 0 |
 | Options field: `message` | `title` | several (all `toast.create` callsites) |
 | Options field: `closable` | `closeButton` (sonner global) or `dismissible` (per-toast) | several |
 | Options field: `type` (on raw options) | use the type helper instead (`toast.success`, etc.) | n/a |

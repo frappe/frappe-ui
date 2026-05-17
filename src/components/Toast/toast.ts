@@ -30,6 +30,10 @@ const TOAST_DOCS = 'https://ui.frappe.io/docs/components/toast'
 
 function toMs(seconds?: number): number | undefined {
   if (seconds == null) return undefined
+  // Legacy "no timeout" idiom: duration/timeout: 0 meant persistent in
+  // reka-ui's Toast.vue (`:duration="closable ? duration : 0"`). Sonner
+  // treats 0 as "close immediately", so map it to Infinity.
+  if (seconds === 0) return Infinity
   return seconds * 1000
 }
 
@@ -113,9 +117,14 @@ function create(options: LegacyCreateOptions) {
     TOAST_DOCS,
   )
   const { message, type, icon, duration, action, closable, id } = options
+  // closable: false had dual semantics in the reka-ui Toast — it both
+  // hid the close button *and* made the toast persistent (Toast.vue:4:
+  // `:duration="closable ? duration : 0"`). Preserve both halves so the
+  // loading-indicator pattern used across helpdesk still pins until the
+  // caller explicitly dismisses it.
   return dispatch(type, message, {
     id,
-    duration: toMs(duration),
+    duration: closable === false ? Infinity : toMs(duration),
     action,
     icon: resolveIcon(icon),
     closeButton: closable,
