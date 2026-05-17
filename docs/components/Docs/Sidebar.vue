@@ -146,19 +146,17 @@ const linkClass = 'p-2 rounded'
   <aside
     class="bg-surface-gray-1 dark:bg-surface-white border-r flex flex-col p-3 h-screen pr-0 pt-1 min-w-fit sticky top-0 w-full"
   >
-    <a
-      class="hidden lg:flex items-center gap-2 p-2 py-3 mb-3"
-      :href="withBase('/')"
-    >
+    <a class="hidden lg:flex items-center gap-2 p-2 py-3" :href="withBase('/')">
       <img src="/logo.svg" class="w-8" />
       <div class="flex flex-col gap-1 *:leading-none">
         <span class="text-base font-medium text-ink-gray-8">Frappe UI</span>
-        <span class="text-sm text-ink-gray-6">v{{ curVersion }}</span>
+        <span class="text-sm text-ink-gray-6 inline-flex items-center gap-1.5">
+          v{{ curVersion }}
+        </span>
       </div>
     </a>
-
     <ScrollAreaRoot
-      class="relative overflow-hidden"
+      class="relative overflow-hidden mt-3"
       style="--scrollbar-size: 10px"
       :scroll-hide-delay="0"
     >
@@ -179,8 +177,7 @@ const linkClass = 'p-2 rounded'
 
             <details v-else class="group" :open="!item.collapsed">
               <summary
-                class="list-none w-full flex items-center justify-between gap-2 whitespace-nowrap font-medium
-                text-ink-gray-600 border-t p-3 pr-1 pl-2 group-open:text-ink-gray-800 cursor-pointer"
+                class="list-none w-full flex items-center justify-between gap-2 whitespace-nowrap font-medium text-ink-gray-600 border-t p-3 pr-1 pl-2 group-open:text-ink-gray-800 cursor-pointer"
               >
                 {{ item.text }}
 
