@@ -103,24 +103,42 @@ export interface MultiSelectProps extends InputLabelingProps {
   compareFn?: (a: MultiSelectOption, b: MultiSelectOption) => boolean
 }
 
-export interface MultiSelectTriggerSlotProps {
+/**
+ * Shared shape for `#trigger` and `#suffix`. `#trigger` extends this with
+ * imperative `clearAll` / `toggleOpen` helpers (see `MultiSelectTriggerSlotProps`).
+ */
+export interface MultiSelectSlotProps {
   /** Whether the popover is open. */
   open: boolean
 
   /** Whether the multi-select is disabled. */
   disabled: boolean
 
+  /** Current search query — empty when the user hasn't typed since opening. */
+  query: string
+
   /** Resolved option objects for the selected values, in `modelValue` order. */
   selectedOptions: MultiSelectOption[]
 
   /** Comma-joined labels of the selected options, or `''` when nothing is selected. */
   displayValue: string
+}
 
+export interface MultiSelectTriggerSlotProps extends MultiSelectSlotProps {
   /** Clears all selected values. */
   clearAll: () => void
 
   /** Toggles the popover open state. */
   toggleOpen: () => void
+}
+
+export type MultiSelectPrefixSlotProps = MultiSelectSlotProps
+export type MultiSelectSuffixSlotProps = MultiSelectSlotProps
+
+export interface MultiSelectSummarySlotProps extends MultiSelectSlotProps {
+  /** Default label text the trigger would render (e.g. placeholder,
+   * single selected label, or `"N selected"`). Use it as a fallback. */
+  summary: string
 }
 
 export interface MultiSelectItemSlotProps {
@@ -161,6 +179,31 @@ export interface MultiSelectFooterSlotProps {
 export interface MultiSelectSlots {
   /** Fully custom trigger renderer. */
   trigger?: (props: MultiSelectTriggerSlotProps) => any
+
+  /**
+   * Content rendered before the trigger label. When provided, this slot
+   * owns the entire prefix area regardless of selection count — useful
+   * for aggregate visuals like stacked avatars. If omitted, the trigger
+   * auto-renders the selected option's `#item-prefix` / `icon` when
+   * exactly one is selected, and nothing otherwise.
+   */
+  prefix?: (props: MultiSelectPrefixSlotProps) => any
+
+  /**
+   * Overrides the trigger label region. Receives the default summary
+   * text as `summary` — use it as a fallback. Useful when you want to
+   * show comma-separated labels (or any other format) instead of the
+   * default `"N selected"` for multi-selection states.
+   */
+  summary?: (props: MultiSelectSummarySlotProps) => any
+
+  /**
+   * Content rendered after the trigger label. Providing this slot
+   * **replaces the default chevron** — render your own fallback when
+   * your slot content is conditional. Use `@click.stop` and
+   * `@pointerdown.stop` so the press doesn't toggle the popover.
+   */
+  suffix?: (props: MultiSelectSuffixSlotProps) => any
 
   /** Overrides the rendered label content. Receives `{ required }`. */
   label?: (props: { required: boolean }) => any

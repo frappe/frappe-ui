@@ -275,6 +275,7 @@ defineSlots<MultiSelectSlots>()
         v-bind="{
           open,
           disabled: !!disabled,
+          query: typedQuery,
           selectedOptions,
           displayValue,
           clearAll,
@@ -317,12 +318,31 @@ defineSlots<MultiSelectSlots>()
         :aria-required="required || undefined"
       >
         <!--
-          For exactly one selection, reuse `#item-prefix` (or auto-render
-          `option.icon`) so the trigger matches the dropdown row without
-          a separate prefix slot. For 0 or 2+ selected, show placeholder
-          / "N selected" without a prefix.
+          Prefix precedence on the trigger:
+            1. `#prefix` slot, when provided, owns the entire prefix area
+               regardless of selection count. Use it for aggregate
+               visuals like stacked avatars across multiple selections.
+            2. otherwise: exactly one selected + `#item-prefix` → reuse
+               the list's per-item prefix renderer so the trigger
+               matches the dropdown row.
+            3. otherwise: exactly one selected + `option.icon` → auto-render
+               the icon.
+            4. otherwise: nothing.
         -->
-        <template v-if="singleSelectedOption && $slots['item-prefix']">
+        <slot
+          v-if="$slots.prefix"
+          name="prefix"
+          v-bind="{
+            open,
+            disabled: !!disabled,
+            query: typedQuery,
+            selectedOptions,
+            displayValue,
+          }"
+        />
+        <template
+          v-else-if="singleSelectedOption && $slots['item-prefix']"
+        >
           <slot
             name="item-prefix"
             v-bind="{
@@ -344,21 +364,43 @@ defineSlots<MultiSelectSlots>()
               !selectedOptions.length && 'text-ink-gray-4',
             ]"
           >
-            {{ triggerSummary }}
+            <slot
+              name="summary"
+              v-bind="{
+                open,
+                disabled: !!disabled,
+                query: typedQuery,
+                selectedOptions,
+                displayValue,
+                summary: triggerSummary,
+              }"
+            >{{ triggerSummary }}</slot>
           </span>
           <span
+            v-if="!$slots.summary"
             aria-hidden="true"
             class="multi-select-trigger-sizer col-start-1 row-start-1"
             :data-width-text="triggerSizingText"
           />
         </span>
 
-        <span
-          :class="[
-            'lucide-chevron-down size-4 shrink-0 text-ink-gray-4 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)]',
-            open && 'rotate-180',
-          ]"
-        />
+        <slot
+          name="suffix"
+          v-bind="{
+            open,
+            disabled: !!disabled,
+            query: typedQuery,
+            selectedOptions,
+            displayValue,
+          }"
+        >
+          <span
+            :class="[
+              'lucide-chevron-down size-4 shrink-0 text-ink-gray-4 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)]',
+              open && 'rotate-180',
+            ]"
+          />
+        </slot>
       </button>
     </ComboboxAnchor>
 

@@ -18,9 +18,19 @@ Options split into named groups. `#item-prefix` renders a colored swatch per row
 <ComponentPreview name="Combobox-Grouped" css='justify-center !py-20 grid' />
 
 ## Custom Value
-Provides a creatable option if no results match the current query.
+Free-form acceptance via `allowCustomValue`: the typed query becomes the model value when nothing matches, and unknown external values are preserved. The component renders a built-in "Create X" row as a click affordance. Use this when you want a "text input with autocomplete" feel. For richer create-new UX (custom label, icon, persistence callback), see [Create New](#create-new) below.
 
 <ComponentPreview name="Combobox-CustomValue" css='justify-center !py-20 grid' />
+
+## Clearable
+Uses the `#trigger` slot to compose a custom trigger with an inline clear button. The X clears `v-model` via `@click.stop` so the popover doesn't toggle, and `@pointerdown.stop` keeps the anchor from intercepting the press.
+
+<ComponentPreview name="Combobox-Clearable" css='justify-center !py-20 grid' />
+
+## Create New
+"Create new" is just a `type: 'custom'` option. `condition` hides the row when the query is empty or already matches an existing item, and `onClick` receives the typed `query` so you can persist the new value.
+
+<ComponentPreview name="Combobox-CreateNew" css='justify-center !py-20 grid' />
 
 ## Status Picker
 Dotted indicator aligned to the first line, with supporting description text.

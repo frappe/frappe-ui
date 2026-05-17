@@ -217,10 +217,14 @@ const filteredGroups = useFilteredGroups({
   open,
   hasTypedSinceOpen,
   query,
+  // Selectable rows: query-driven substring match. Custom rows: skip here
+  // and let `alwaysMatch` consult `condition` so the row's visibility is
+  // bespoke (works even before the user types, when the typed-query path
+  // is otherwise bypassed).
   matches: (item, q) =>
-    item.type === 'custom'
-      ? matchesCustomOption(item, q)
-      : matchesSelectableOption(item, q),
+    item.type === 'custom' ? true : matchesSelectableOption(item, q),
+  alwaysMatch: (item) =>
+    item.type !== 'custom' || matchesCustomOption(item, typedQuery.value),
 })
 
 const hasVisibleItems = computed(() => filteredGroups.value.length > 0)
@@ -514,7 +518,17 @@ defineSlots<ComboboxSlots>()
             v-else-if="selectedOption?.icon"
             :icon="selectedOption.icon"
           />
-          <slot v-else-if="!selectedOption && $slots.prefix" name="prefix" />
+          <slot
+            v-else-if="!selectedOption && $slots.prefix"
+            name="prefix"
+            v-bind="{
+              open,
+              disabled: !!disabled,
+              query: typedQuery,
+              selectedOption,
+              displayValue,
+            }"
+          />
 
           <span
             :class="[
@@ -525,12 +539,23 @@ defineSlots<ComboboxSlots>()
             {{ selectedOption?.label ?? placeholder }}
           </span>
 
-          <span
-            :class="[
-              'lucide-chevron-down size-4 shrink-0 text-ink-gray-4 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)]',
-              open && 'rotate-180',
-            ]"
-          />
+          <slot
+            name="suffix"
+            v-bind="{
+              open,
+              disabled: !!disabled,
+              query: typedQuery,
+              selectedOption,
+              displayValue,
+            }"
+          >
+            <span
+              :class="[
+                'lucide-chevron-down size-4 shrink-0 text-ink-gray-4 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)]',
+                open && 'rotate-180',
+              ]"
+            />
+          </slot>
         </button>
       </ComboboxAnchor>
     </template>
@@ -567,7 +592,17 @@ defineSlots<ComboboxSlots>()
           v-else-if="selectedOption?.icon"
           :icon="selectedOption.icon"
         />
-        <slot v-else name="prefix" />
+        <slot
+          v-else
+          name="prefix"
+          v-bind="{
+            open,
+            disabled: !!disabled,
+            query: typedQuery,
+            selectedOption,
+            displayValue,
+          }"
+        />
 
         <ComboboxInput
           :id="inputId"
@@ -585,13 +620,24 @@ defineSlots<ComboboxSlots>()
           @keydown.enter="handleInputEnter"
         />
 
-        <ComboboxTrigger
-          :disabled="disabled"
-          data-slot="chevron"
-          class="ml-auto inline-flex shrink-0 items-center justify-center text-ink-gray-4 outline-none transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] data-[state=open]:rotate-180"
+        <slot
+          name="suffix"
+          v-bind="{
+            open,
+            disabled: !!disabled,
+            query: typedQuery,
+            selectedOption,
+            displayValue,
+          }"
         >
-          <span class="lucide-chevron-down size-4 text-ink-gray-6" />
-        </ComboboxTrigger>
+          <ComboboxTrigger
+            :disabled="disabled"
+            data-slot="chevron"
+            class="inline-flex shrink-0 items-center justify-center text-ink-gray-4 outline-none transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] data-[state=open]:rotate-180"
+          >
+            <span class="lucide-chevron-down size-4 text-ink-gray-6" />
+          </ComboboxTrigger>
+        </slot>
       </ComboboxAnchor>
     </template>
 

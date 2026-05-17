@@ -12,6 +12,11 @@ Use `#item-prefix` to render avatars, icons, or indicators next to each option l
 
 <ComponentPreview name="MultiSelect-Options" css='justify-center !py-20' />
 
+## Members
+Use `#prefix` to render an aggregate visual across the current selection — here, a stack of avatars capped at three with a "+N" overflow badge. When `#prefix` is provided it owns the entire prefix area regardless of selection count, so the same template handles 0 / 1 / many.
+
+<ComponentPreview name="MultiSelect-Members" css='justify-center !py-20' />
+
 ## Grouped Options
 Options can be split into named groups. Group labels render above each group's items.
 
