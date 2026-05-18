@@ -6,7 +6,7 @@ const visible = ref(true)
 </script>
 
 <template>
-  <div class="grid">
+  <div class="w-full gap-3 items-center grid">
     <Button variant="solid" @click="visible = !visible"> Toggle Alert </Button>
 
     <Alert

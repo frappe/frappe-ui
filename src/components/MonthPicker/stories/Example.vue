@@ -8,7 +8,7 @@ const reportPeriod = ref('')
 </script>
 
 <template>
-  <div class="flex flex-wrap gap-3 items-center justify-center !py-20">
+  <div class="w-full flex flex-wrap gap-3 items-center justify-center !py-20">
     <div class="grid w-full max-w-xl grid-cols-1 gap-6 sm:grid-cols-2">
       <div class="flex flex-col gap-1.5">
         <span class="text-sm text-ink-gray-7">Billing statement</span>

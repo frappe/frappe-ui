@@ -85,7 +85,7 @@ const userMenuItems = computed(() => [
 </script>
 
 <template>
-  <div class="flex flex-col items-start gap-4">
+  <div class="w-full flex flex-col items-start gap-4">
     <Dropdown :options="userMenuItems">
       <template #default="{ open }">
         <button

@@ -192,7 +192,7 @@ const funnelConfig = {
 </script>
 
 <template>
-  <div class="!border-0 !p-0 grid">
+  <div class="w-full gap-3 items-center !border-0 !p-0 grid">
     <div class="grid gap-12">
       <Story title="Number Chart" preview-css="flex gap-3">
         <NumberChart :config="numberChart1Config" />

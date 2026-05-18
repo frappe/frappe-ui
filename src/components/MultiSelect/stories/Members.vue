@@ -66,7 +66,7 @@ const overflowCount = computed(() =>
 </script>
 
 <template>
-  <div class="flex flex-wrap gap-3 items-center justify-center !py-20">
+  <div class="w-full flex flex-wrap gap-3 items-center justify-center !py-20">
     <MultiSelect
       v-model="value"
       :options="members"

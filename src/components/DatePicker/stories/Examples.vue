@@ -64,7 +64,7 @@ const rowCls =
 </script>
 
 <template>
-  <div class="grid *:w-fit justify-center !py-20 !gap-1">
+  <div class="w-full items-center grid *:w-fit justify-center !py-20 !gap-1">
     <div class="grid w-full max-w-3xl grid-cols-1 gap-6 sm:grid-cols-2">
       <!-- 1. Flight booking -->
       <DatePicker

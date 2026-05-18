@@ -92,7 +92,7 @@ const events = ref([
 </script>
 
 <template>
-  <div class="flex flex-wrap gap-3 items-center h-screen overflow-hidden">
+  <div class="w-full flex flex-wrap gap-3 items-center h-screen overflow-hidden">
     <Calendar
       :config="config"
       :events="events"

@@ -51,7 +51,7 @@ function getBgClass(item: { label: string }) {
 </script>
 
 <template>
-  <div class="justify-center !py-20 grid">
+  <div class="w-full gap-3 items-center justify-center !py-20 grid">
     <div class="grid gap-3 shrink-0">
       <Combobox
         v-model="value"

@@ -13,7 +13,7 @@ const wide = ref(false)
 </script>
 
 <template>
-  <div class="flex flex-wrap gap-2">
+  <div class="w-full flex flex-wrap gap-2">
     <Button @click="single = true">Single (md)</Button>
     <Button @click="multi = true">Two actions (md)</Button>
     <Button @click="wide = true">Single (xl)</Button>

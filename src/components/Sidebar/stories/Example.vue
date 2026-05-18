@@ -70,7 +70,7 @@ const crmSidebar = reactive({
 </script>
 
 <template>
-  <div class="flex flex-wrap gap-3 items-center !p-0">
+  <div class="w-full !-m-8">
     <Sidebar :header="crmSidebar.header" :sections="crmSidebar.sections" />
   </div>
 </template>

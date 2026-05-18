@@ -1,5 +1,5 @@
 <template>
-  <div class="grid gap-6 !p-6">
+  <div class="w-full items-center grid gap-6 !p-6">
     <Story title="Divider Examples" :layout="{ width: 480 }">
       <Variant title="Default">
         <div class="space-y-3">

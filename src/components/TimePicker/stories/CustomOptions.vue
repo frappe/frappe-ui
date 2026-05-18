@@ -17,7 +17,7 @@ const classOptions = [
 </script>
 
 <template>
-  <div class="grid justify-center py-20">
+  <div class="w-full gap-3 items-center grid justify-center py-20">
     <div class="flex w-80 flex-col gap-1.5">
       <span class="text-sm text-ink-gray-7">Book a class</span>
       <TimePicker v-model="classTime" :options="classOptions">

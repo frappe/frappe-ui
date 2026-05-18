@@ -4,7 +4,7 @@ const themes = ['green', 'yellow', 'red', 'blue']
 </script>
 
 <template>
-  <div class="grid grid-cols-2">
+  <div class="w-full gap-3 items-center grid grid-cols-2">
     <Alert
       v-for="theme in themes"
       title="Source successfully added"

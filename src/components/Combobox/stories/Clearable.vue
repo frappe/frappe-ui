@@ -66,7 +66,7 @@ function clear(key: string, event: Event) {
 </script>
 
 <template>
-  <div class="justify-center !py-20 grid">
+  <div class="w-full gap-3 items-center justify-center !py-20 grid">
     <div class="grid w-[420px] gap-2">
       <div
         v-for="field in fields"

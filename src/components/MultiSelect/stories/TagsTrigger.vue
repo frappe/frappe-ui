@@ -28,7 +28,7 @@ function removeTag(value: string) {
 </script>
 
 <template>
-  <div class="flex flex-wrap gap-3 items-center justify-center !py-20">
+  <div class="w-full flex flex-wrap gap-3 items-center justify-center !py-20">
     <MultiSelect v-model="tags" :options="tagOptions">
       <template #trigger="{ open, selectedOptions, toggleOpen }">
         <button

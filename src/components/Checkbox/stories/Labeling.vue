@@ -12,7 +12,7 @@ const error = computed(() =>
 </script>
 
 <template>
-  <div class="flex gap-8 items-start">
+  <div class="w-full flex gap-8 items-start">
     <Checkbox
       v-model="accepted"
       label="Accept terms"

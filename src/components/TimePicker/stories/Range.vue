@@ -10,7 +10,7 @@ const shiftEnd = ref('17:00')
 </script>
 
 <template>
-  <div class="grid justify-center py-20">
+  <div class="w-full gap-3 items-center grid justify-center py-20">
     <div class="flex w-full max-w-md flex-col gap-3">
       <span class="text-sm font-medium text-ink-gray-7">Shift hours</span>
       <div class="grid grid-cols-2 gap-3">

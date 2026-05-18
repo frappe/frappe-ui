@@ -8,7 +8,7 @@ const cronTime = ref('02:00')
 </script>
 
 <template>
-  <div class="grid justify-center py-20">
+  <div class="w-full gap-3 items-center grid justify-center py-20">
     <div class="flex w-72 flex-col gap-1.5">
       <span class="text-sm text-ink-gray-7">Nightly backup runs at</span>
       <TimePicker

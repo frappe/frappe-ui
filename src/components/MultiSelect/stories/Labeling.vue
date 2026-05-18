@@ -19,7 +19,7 @@ const options = [
 </script>
 
 <template>
-  <div class="flex gap-8 items-start">
+  <div class="w-full flex gap-8 items-start">
     <MultiSelect
       v-model="value"
       :options="options"
