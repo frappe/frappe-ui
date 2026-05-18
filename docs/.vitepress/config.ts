@@ -54,6 +54,8 @@ export default defineConfig({
   },
   cleanUrls: true,
   head: [
+    // LLM-friendly docs index — https://llmstxt.org
+    ['link', { rel: 'alternate', type: 'text/markdown', href: '/llms.txt' }],
     // newsreader font
     ['link', { rel: 'preconnect', href: 'https://fonts.googleapis.com' }],
     [

@@ -83,6 +83,18 @@ Now, you can import needed components and start using it:
 </script>
 ```
 
+## Claude Code skill
+
+For AI coding agents (Claude Code, Cursor, Codex, etc.), Frappe UI ships an agent skill that teaches the agent the library's conventions — semantic Tailwind tokens, the `variant` + `theme` color axes, the `useCall` data-fetching composable, common UI recipes, and anti-patterns to avoid.
+
+Install with [Vercel's `skills` CLI](https://github.com/vercel-labs/skills):
+
+```sh
+npx skills add https://github.com/frappe/frappe-ui/tree/main/skills/frappe-ui
+```
+
+The skill lives in [`skills/frappe-ui/`](./skills/frappe-ui/) and is updated alongside the library.
+
 ## Used By
 
 Frappe UI is being used in a lot of products by
