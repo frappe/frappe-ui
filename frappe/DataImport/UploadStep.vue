@@ -10,8 +10,8 @@
                         {{ data?.status }}
                     </Badge>
                 </div>
-                <Button 
-                    variant="solid" 
+                <Button
+                    variant="solid"
                     @click="saveImport"
                     :disabled="disableContinueButton"
                 >
@@ -27,7 +27,7 @@
             <div
                 v-if="showFileSelector && !importFile"
                 @dragover.prevent
-                @drop.prevent="(e) =>  uploadFile(e)" 
+                @drop.prevent="(e) =>  uploadFile(e)"
                 class="h-[300px] flex items-center justify-center bg-surface-gray-1 border border-dashed border-outline-gray-3 rounded-md">
                 <div v-if="showFileSelector && !uploading" class="w-4/5 lg:w-2/5 text-center">
                     <FeatherIcon name="upload-cloud" class="size-6 stroke-1.5 text-ink-gray-6 mx-auto mb-2.5" />
@@ -39,11 +39,11 @@
                         @change="(e) => uploadFile(e)"
                     />
                     <div class="leading-5 text-ink-gray-9">
-                        Drag and drop a CSV file, or upload from your 
-                        <span @click="openFileSelector" class="cursor-pointer font-semibold hover:underline">Device</span> 
-                        or 
-                        <span @click="openSheetSelector" class="cursor-pointer font-semibold hover:underline"> 
-                            Google Sheet 
+                        Drag and drop a CSV file, or upload from your
+                        <span @click="openFileSelector" class="cursor-pointer font-semibold hover:underline">Device</span>
+                        or
+                        <span @click="openSheetSelector" class="cursor-pointer font-semibold hover:underline">
+                            Google Sheet
                         </span>
                     </div>
                 </div>
@@ -57,7 +57,7 @@
                         </div>
                     </div>
                     <div class="w-full bg-surface-gray-1 h-1 rounded-full mt-3">
-                        <div 
+                        <div
                             class="bg-surface-gray-7 h-1 rounded-full transition-all duration-500 ease-in-out"
                             :style="`width: ${uploadProgress}%`"
                         ></div>
@@ -74,8 +74,8 @@
                             {{ convertToKB(importFile.file_size) }}
                         </div>
                     </div>
-                    <FeatherIcon 
-                        name="trash-2" 
+                    <FeatherIcon
+                        name="trash-2"
                         class="size-4 stroke-1.5 text-ink-red-3 cursor-pointer"
                         @click="deleteFile"
                     />
@@ -154,7 +154,7 @@
 import { computed, nextTick, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import type { DataImports, DataImport, DocField, DocType } from './types'
-import { toast } from "../../src/components/Toast/index"
+import { toast } from "../../src/components/Toast/toast"
 import { fieldsToIgnore, getChildTableName, getBadgeColor } from './dataImport'
 import Badge from '../../src/components/Badge/Badge.vue'
 import Button from '../../src/components/Button/Button.vue'
@@ -199,7 +199,7 @@ const extractFile = (e: Event): File | null => {
 const uploadFile = (e: Event) => {
     const file = extractFile(e)
     if (!file) return;
-    
+
     if (file.type !== 'text/csv') {
         toast.error('Please upload a valid CSV file.')
         console.error('Please upload a valid CSV file.')
@@ -309,7 +309,7 @@ const exportTemplate = async (type: 'mandatory' | 'all') => {
 const getExportURL = (type: 'mandatory' | 'all') => {
     if (!props.doctype && !props.data?.reference_doctype) return ''
     let exportFields = getExportFields(type)
-    
+
     return `/api/method/frappe.core.doctype.data_import.data_import.download_template
         ?doctype=${encodeURIComponent(props.doctype || props.data?.reference_doctype as string)}
         &export_fields=${encodeURIComponent(JSON.stringify(exportFields))}

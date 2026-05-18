@@ -1,4 +1,4 @@
-import { toast } from "../../src/components/Toast/index"
+import { toast } from "../../src/components/Toast/toast"
 import type { DataImportStatus } from './types'
 import call from '../../src/utils/call';
 
