@@ -42,6 +42,7 @@ const name = ref('')
 
 ## Reference files
 
+- [SETUP.md](SETUP.md) — scaffolding a fresh Vite + Vue 3 + frappe-ui project: version pinning, `vite.config.js`, Tailwind, PostCSS, CSS entry, plugin vs provider. Read this first when bootstrapping from scratch.
 - [COMPONENTS.md](COMPONENTS.md) — component catalog: when to reach for each one, key props, common pitfalls.
 - [TOKENS.md](TOKENS.md) — semantic color tokens (`ink-*`, `surface-*`, `outline-*`), typography, spacing, radii.
 - [PATTERNS.md](PATTERNS.md) — recipes: form pages, list pages, settings panels, empty states, confirmation flows.
@@ -56,6 +57,11 @@ Prefer the upstream `llms.txt` over guessing — it lists every component's docs
 
 ## Anti-patterns to flag
 
+- Scaffolding a fresh project with `npm create vite` and using whatever versions it gives you — current defaults (Vite 8 + Tailwind v4) are incompatible with frappe-ui 0.1.x. See [SETUP.md](SETUP.md).
+- Importing `'frappe-ui/tailwind/preset'` or `'frappe-ui/src/style.css'` — these paths are not in the package's `exports` map. Use `'frappe-ui/tailwind'` and `'frappe-ui/style.css'`.
+- Omitting `optimizeDeps.exclude: ['frappe-ui']` — esbuild's prebundler will choke on the package's `~icons/lucide/*` virtual imports before any Vite plugin runs.
+- Forgetting `app.use(FrappeUI)` because you only saw `<FrappeUIProvider>` mentioned — both are required. Plugin handles app-level injections; provider mounts the imperative dialog/toast portals.
+- Skipping `vue-router` for single-page prototypes — `<Button>` injects `Symbol(router)` and warns on every render without it.
 - Hand-rolled `<button class="bg-blue-500 ...">` instead of `<Button>`.
 - Raw Tailwind palette colors (`gray-`, `blue-`) outside the semantic tokens.
 - `intent="warning"` / `appearance="primary"` / `kind="success"` props — collapse to `variant` + `theme`.
