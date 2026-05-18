@@ -6,11 +6,13 @@ const visible = ref(true)
 </script>
 
 <template>
-  <Button variant="solid" @click="visible = !visible"> Toggle Alert </Button>
+  <div class="w-full gap-3 items-center grid">
+    <Button variant="solid" @click="visible = !visible"> Toggle Alert </Button>
 
-  <Alert
-    v-model="visible"
-    title="Source successfully added"
-    description="Discover the new feature to enhance your experience."
-  />
+    <Alert
+      v-model="visible"
+      title="Source successfully added"
+      description="Discover the new feature to enhance your experience."
+    />
+  </div>
 </template>

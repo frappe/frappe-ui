@@ -63,216 +63,218 @@ const ret = computed(() =>
 </script>
 
 <template>
-  <div class="grid w-full max-w-3xl grid-cols-1 gap-6">
-    <!-- 1. PTO request -->
-    <DateRangePicker
-      v-model="timeOff"
-      label="Time off"
-      placeholder="Pick your dates"
-      :min="today"
-    >
-      <template #prefix>
-        <span
-          class="lucide-palmtree size-4 text-ink-gray-5"
-          aria-hidden="true"
-        />
-      </template>
-      <template #actions="{ setRange, close }">
-        <button
-          type="button"
-          :class="rowCls"
-          @click="
-            () => {
-              setRange(longWeekend())
-              close()
-            }
-          "
-        >
-          Long weekend
-        </button>
-        <button
-          type="button"
-          :class="rowCls"
-          @click="
-            () => {
-              setRange(workWeek())
-              close()
-            }
-          "
-        >
-          Next week
-        </button>
-      </template>
-    </DateRangePicker>
-
-    <!-- 2. Hotel booking — dual pane shines for >1 month stays -->
-    <DateRangePicker
-      v-model="stay"
-      label="Check-in / Check-out"
-      placeholder="Select your stay"
-      dual-pane
-      :min="today"
-      :max="oneYearOut"
-    >
-      <template #prefix>
-        <span class="lucide-hotel size-4 text-ink-gray-5" aria-hidden="true" />
-      </template>
-    </DateRangePicker>
-
-    <!-- 3. Analytics date range filter -->
-    <DateRangePicker
-      v-model="analyticsRange"
-      label="Report range"
-      description="Defaults to the last 30 days."
-      format="MMM D"
-      :max="today"
-    >
-      <template #prefix>
-        <span
-          class="lucide-chart-line size-4 text-ink-gray-5"
-          aria-hidden="true"
-        />
-      </template>
-      <template #actions="{ fromDate, toDate, setRange, clear, close }">
-        <button
-          type="button"
-          :class="rowCls"
-          @click="
-            () => {
-              setRange([dayjs(), dayjs()])
-              close()
-            }
-          "
-        >
-          Today
-        </button>
-        <button
-          type="button"
-          :class="rowCls"
-          @click="
-            () => {
-              setRange(lastNDays(7))
-              close()
-            }
-          "
-        >
-          Last 7 days
-        </button>
-        <button
-          type="button"
-          :class="rowCls"
-          @click="
-            () => {
-              setRange(lastNDays(28))
-              close()
-            }
-          "
-        >
-          Last 4 weeks
-        </button>
-        <button
-          type="button"
-          :class="rowCls"
-          @click="
-            () => {
-              setRange(lastNDays(90))
-              close()
-            }
-          "
-        >
-          Last 3 months
-        </button>
-        <button
-          type="button"
-          :class="rowCls"
-          @click="
-            () => {
-              setRange(lastNDays(365))
-              close()
-            }
-          "
-        >
-          Last 12 months
-        </button>
-        <hr class="my-1 border-outline-gray-2" />
-        <button
-          v-if="fromDate || toDate"
-          type="button"
-          :class="rowCls"
-          @click="
-            () => {
-              clear()
-              close()
-            }
-          "
-        >
-          Clear
-        </button>
-      </template>
-    </DateRangePicker>
-
-    <!-- 4. Sprint window — weekdays only -->
-    <DateRangePicker
-      v-model="sprint"
-      label="Sprint window"
-      description="Pick start and end. Weekends are skipped."
-      :min="today"
-      :max="sprintEnd"
-      :is-date-unavailable="isWeekend"
-    >
-      <template #prefix>
-        <span
-          class="lucide-timer-reset size-4 text-ink-gray-5"
-          aria-hidden="true"
-        />
-      </template>
-    </DateRangePicker>
-
-    <!-- 5. Flight booking — split trigger over one shared popover -->
-    <DateRangePicker v-model="flight" dual-pane :min="today">
-      <template #trigger="{ togglePopover, isOpen }">
-        <div
-          class="grid grid-cols-2 divide-x divide-outline-gray-2 rounded border bg-surface-white text-sm transition-colors"
-          :class="
-            isOpen
-              ? 'border-outline-gray-4 ring-2 ring-outline-gray-2'
-              : 'border-outline-gray-2 hover:border-outline-gray-3'
-          "
-        >
+  <div class="w-full items-center grid *:w-fit justify-center !py-20 !gap-1">
+    <div class="grid w-full max-w-3xl grid-cols-1 gap-6">
+      <!-- 1. PTO request -->
+      <DateRangePicker
+        v-model="timeOff"
+        label="Time off"
+        placeholder="Pick your dates"
+        :min="today"
+      >
+        <template #prefix>
+          <span
+            class="lucide-palmtree size-4 text-ink-gray-5"
+            aria-hidden="true"
+          />
+        </template>
+        <template #actions="{ setRange, close }">
           <button
             type="button"
-            class="flex items-center gap-2 rounded-l px-3 py-2 text-left hover:bg-surface-gray-1"
-            @click="togglePopover"
+            :class="rowCls"
+            @click="
+              () => {
+                setRange(longWeekend())
+                close()
+              }
+            "
           >
-            <span
-              class="lucide-plane-takeoff size-4 text-ink-gray-5"
-              aria-hidden="true"
-            />
-            <div class="flex flex-col leading-tight">
-              <span class="text-xs text-ink-gray-5">Depart</span>
-              <span class="text-ink-gray-9">
-                {{ depart || 'Add date' }}
-              </span>
-            </div>
+            Long weekend
           </button>
           <button
             type="button"
-            class="flex items-center gap-2 rounded-r px-3 py-2 text-left hover:bg-surface-gray-1"
-            @click="togglePopover"
+            :class="rowCls"
+            @click="
+              () => {
+                setRange(workWeek())
+                close()
+              }
+            "
           >
-            <span
-              class="lucide-plane-landing size-4 text-ink-gray-5"
-              aria-hidden="true"
-            />
-            <div class="flex flex-col leading-tight">
-              <span class="text-xs text-ink-gray-5">Return</span>
-              <span class="text-ink-gray-9">
-                {{ ret || 'Add date' }}
-              </span>
-            </div>
+            Next week
           </button>
-        </div>
-      </template>
-    </DateRangePicker>
+        </template>
+      </DateRangePicker>
+
+      <!-- 2. Hotel booking — dual pane shines for >1 month stays -->
+      <DateRangePicker
+        v-model="stay"
+        label="Check-in / Check-out"
+        placeholder="Select your stay"
+        dual-pane
+        :min="today"
+        :max="oneYearOut"
+      >
+        <template #prefix>
+          <span class="lucide-hotel size-4 text-ink-gray-5" aria-hidden="true" />
+        </template>
+      </DateRangePicker>
+
+      <!-- 3. Analytics date range filter -->
+      <DateRangePicker
+        v-model="analyticsRange"
+        label="Report range"
+        description="Defaults to the last 30 days."
+        format="MMM D"
+        :max="today"
+      >
+        <template #prefix>
+          <span
+            class="lucide-chart-line size-4 text-ink-gray-5"
+            aria-hidden="true"
+          />
+        </template>
+        <template #actions="{ fromDate, toDate, setRange, clear, close }">
+          <button
+            type="button"
+            :class="rowCls"
+            @click="
+              () => {
+                setRange([dayjs(), dayjs()])
+                close()
+              }
+            "
+          >
+            Today
+          </button>
+          <button
+            type="button"
+            :class="rowCls"
+            @click="
+              () => {
+                setRange(lastNDays(7))
+                close()
+              }
+            "
+          >
+            Last 7 days
+          </button>
+          <button
+            type="button"
+            :class="rowCls"
+            @click="
+              () => {
+                setRange(lastNDays(28))
+                close()
+              }
+            "
+          >
+            Last 4 weeks
+          </button>
+          <button
+            type="button"
+            :class="rowCls"
+            @click="
+              () => {
+                setRange(lastNDays(90))
+                close()
+              }
+            "
+          >
+            Last 3 months
+          </button>
+          <button
+            type="button"
+            :class="rowCls"
+            @click="
+              () => {
+                setRange(lastNDays(365))
+                close()
+              }
+            "
+          >
+            Last 12 months
+          </button>
+          <hr class="my-1 border-outline-gray-2" />
+          <button
+            v-if="fromDate || toDate"
+            type="button"
+            :class="rowCls"
+            @click="
+              () => {
+                clear()
+                close()
+              }
+            "
+          >
+            Clear
+          </button>
+        </template>
+      </DateRangePicker>
+
+      <!-- 4. Sprint window — weekdays only -->
+      <DateRangePicker
+        v-model="sprint"
+        label="Sprint window"
+        description="Pick start and end. Weekends are skipped."
+        :min="today"
+        :max="sprintEnd"
+        :is-date-unavailable="isWeekend"
+      >
+        <template #prefix>
+          <span
+            class="lucide-timer-reset size-4 text-ink-gray-5"
+            aria-hidden="true"
+          />
+        </template>
+      </DateRangePicker>
+
+      <!-- 5. Flight booking — split trigger over one shared popover -->
+      <DateRangePicker v-model="flight" dual-pane :min="today">
+        <template #trigger="{ togglePopover, isOpen }">
+          <div
+            class="grid grid-cols-2 divide-x divide-outline-gray-2 rounded border bg-surface-white text-sm transition-colors"
+            :class="
+              isOpen
+                ? 'border-outline-gray-4 ring-2 ring-outline-gray-2'
+                : 'border-outline-gray-2 hover:border-outline-gray-3'
+            "
+          >
+            <button
+              type="button"
+              class="flex items-center gap-2 rounded-l px-3 py-2 text-left hover:bg-surface-gray-1"
+              @click="togglePopover"
+            >
+              <span
+                class="lucide-plane-takeoff size-4 text-ink-gray-5"
+                aria-hidden="true"
+              />
+              <div class="flex flex-col leading-tight">
+                <span class="text-xs text-ink-gray-5">Depart</span>
+                <span class="text-ink-gray-9">
+                  {{ depart || 'Add date' }}
+                </span>
+              </div>
+            </button>
+            <button
+              type="button"
+              class="flex items-center gap-2 rounded-r px-3 py-2 text-left hover:bg-surface-gray-1"
+              @click="togglePopover"
+            >
+              <span
+                class="lucide-plane-landing size-4 text-ink-gray-5"
+                aria-hidden="true"
+              />
+              <div class="flex flex-col leading-tight">
+                <span class="text-xs text-ink-gray-5">Return</span>
+                <span class="text-ink-gray-9">
+                  {{ ret || 'Add date' }}
+                </span>
+              </div>
+            </button>
+          </div>
+        </template>
+      </DateRangePicker>
+    </div>
   </div>
 </template>

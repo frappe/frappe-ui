@@ -192,39 +192,41 @@ const funnelConfig = {
 </script>
 
 <template>
-  <div class="grid gap-12">
-    <Story title="Number Chart" preview-css="flex gap-3">
-      <NumberChart :config="numberChart1Config" />
-      <NumberChart :config="numberChart2Config" />
-      <NumberChart :config="numberChart3Config" />
-    </Story>
+  <div class="w-full gap-3 items-center !border-0 !p-0 grid">
+    <div class="grid gap-12">
+      <Story title="Number Chart" preview-css="flex gap-3">
+        <NumberChart :config="numberChart1Config" />
+        <NumberChart :config="numberChart2Config" />
+        <NumberChart :config="numberChart3Config" />
+      </Story>
 
-    <Story title="Simple Bar Chart">
-      <AxisChart :config="simpleConfig" />
-    </Story>
+      <Story title="Simple Bar Chart">
+        <AxisChart :config="simpleConfig" />
+      </Story>
 
-    <Story title="Stacked Bar Chart">
-      <AxisChart :config="stackedConfig" />
-    </Story>
+      <Story title="Stacked Bar Chart">
+        <AxisChart :config="stackedConfig" />
+      </Story>
 
-    <Story title="Bar & Line Combo">
-      <AxisChart :config="comboConfig" />
-    </Story>
+      <Story title="Bar & Line Combo">
+        <AxisChart :config="comboConfig" />
+      </Story>
 
-    <Story title="Horizontal Bar Chart">
-      <AxisChart :config="horizontalConfig" />
-    </Story>
+      <Story title="Horizontal Bar Chart">
+        <AxisChart :config="horizontalConfig" />
+      </Story>
 
-    <Story title="Area Chart">
-      <AxisChart :config="areaConfig" />
-    </Story>
+      <Story title="Area Chart">
+        <AxisChart :config="areaConfig" />
+      </Story>
 
-    <Story title="Donut Chart">
-      <DonutChart :config="donutConfig" />
-    </Story>
+      <Story title="Donut Chart">
+        <DonutChart :config="donutConfig" />
+      </Story>
 
-    <Story title="Funnel Chart">
-      <FunnelChart :config="funnelConfig" />
-    </Story>
+      <Story title="Funnel Chart">
+        <FunnelChart :config="funnelConfig" />
+      </Story>
+    </div>
   </div>
 </template>

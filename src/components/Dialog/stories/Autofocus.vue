@@ -18,7 +18,7 @@ const prefs = ref({ notify: false, digest: true })
 </script>
 
 <template>
-  <div class="flex gap-2">
+  <div class="w-full flex gap-2">
     <Button @click="inviteOpen = true">Invite teammate</Button>
     <Button @click="prefsOpen = true">Edit preferences</Button>
   </div>

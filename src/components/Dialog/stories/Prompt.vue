@@ -178,7 +178,7 @@ function createAccount() {
 </script>
 
 <template>
-  <div class="flex flex-wrap gap-2">
+  <div class="w-full flex flex-wrap gap-2">
     <Button @click="newFolder">Basic (text + select)</Button>
     <Button @click="moveDiscussion">Combobox (single field)</Button>
     <Button @click="newSpaceWithCategory">

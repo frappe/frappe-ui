@@ -27,7 +27,7 @@ const { frontmatter } = useData()
       <div class="grid lg:grid-cols-[220px_1fr]">
         <Sidebar class="hidden lg:flex" />
 
-        <div class="w-full">
+        <div class="min-w-0 w-full isolate">
           <Navbar :isDocs="true" />
           <Sidebar v-if="state.mobsidebar" class="lg:hidden" />
 

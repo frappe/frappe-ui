@@ -16,25 +16,27 @@ const options = [
 </script>
 
 <template>
-  <MultiSelect v-model="state" :options="options" class="w-64">
-    <template #footer="{ clearAll, selectAll, selectedOptions }">
-      <div
-        class="flex items-center justify-between gap-2 border-t border-outline-gray-1 px-2 py-1.5"
-      >
-        <Button theme="red" variant="ghost" @click="clearAll">
-          <template #prefix>
-            <span class="lucide-trash-2 size-4" />
-          </template>
-          Clear ({{ selectedOptions.length }})
-        </Button>
+  <div class="w-full flex flex-wrap gap-3 items-center justify-center !py-20">
+    <MultiSelect v-model="state" :options="options" class="w-64">
+      <template #footer="{ clearAll, selectAll, selectedOptions }">
+        <div
+          class="flex items-center justify-between gap-2 border-t border-outline-gray-1 px-2 py-1.5"
+        >
+          <Button theme="red" variant="ghost" @click="clearAll">
+            <template #prefix>
+              <span class="lucide-trash-2 size-4" />
+            </template>
+            Clear ({{ selectedOptions.length }})
+          </Button>
 
-        <Button variant="ghost" @click="selectAll">
-          <template #prefix>
-            <span class="lucide-check-check size-4" />
-          </template>
-          Select All
-        </Button>
-      </div>
-    </template>
-  </MultiSelect>
+          <Button variant="ghost" @click="selectAll">
+            <template #prefix>
+              <span class="lucide-check-check size-4" />
+            </template>
+            Select All
+          </Button>
+        </div>
+      </template>
+    </MultiSelect>
+  </div>
 </template>

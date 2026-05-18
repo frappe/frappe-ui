@@ -10,7 +10,7 @@ const error = computed(() => (showError.value ? 'Password is too short.' : ''))
 </script>
 
 <template>
-  <div class="flex gap-8 items-start">
+  <div class="w-full flex gap-8 items-start">
     <Password
       v-model="value"
       label="Password"

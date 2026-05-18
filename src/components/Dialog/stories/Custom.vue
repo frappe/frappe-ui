@@ -20,7 +20,7 @@ const title = computed(() => (editMode.value ? 'Edit task' : 'Create task'))
 </script>
 
 <template>
-  <div class="flex gap-2">
+  <div class="w-full flex gap-2">
     <Button @click="(editMode = false), (open = true)">New task</Button>
     <Button
       variant="outline"

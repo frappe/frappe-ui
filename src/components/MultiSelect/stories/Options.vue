@@ -19,14 +19,16 @@ const options = [
 </script>
 
 <template>
-  <MultiSelect
-    v-model="state"
-    :options="options"
-    placeholder="Select fruit"
-    class="w-64"
-  >
-    <template #item-prefix="{ item }">
-      <Avatar :image="(item as any).img" size="sm" />
-    </template>
-  </MultiSelect>
+  <div class="w-full flex flex-wrap gap-3 items-center justify-center !py-20">
+    <MultiSelect
+      v-model="state"
+      :options="options"
+      placeholder="Select fruit"
+      class="w-64"
+    >
+      <template #item-prefix="{ item }">
+        <Avatar :image="(item as any).img" size="sm" />
+      </template>
+    </MultiSelect>
+  </div>
 </template>

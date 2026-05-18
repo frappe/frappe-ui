@@ -92,11 +92,13 @@ const events = ref([
 </script>
 
 <template>
-  <Calendar
-    :config="config"
-    :events="events"
-    @create="(event) => console.log('createEvent', event)"
-    @update="(event) => console.log('updateEvent', event)"
-    @delete="(eventID) => console.log('deleteEvent', eventID)"
-  />
+  <div class="w-full flex flex-wrap gap-3 items-center h-screen overflow-hidden">
+    <Calendar
+      :config="config"
+      :events="events"
+      @create="(event) => console.log('createEvent', event)"
+      @update="(event) => console.log('updateEvent', event)"
+      @delete="(eventID) => console.log('deleteEvent', eventID)"
+    />
+  </div>
 </template>

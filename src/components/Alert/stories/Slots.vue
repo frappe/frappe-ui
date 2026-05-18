@@ -3,17 +3,19 @@ import { Alert, Button } from 'frappe-ui'
 </script>
 
 <template>
-  <Alert
-    title="Your trial ends soon!"
-    variant="outline"
-    description="Upgrade to keep enjoying features and future technical support."
-  >
-    <template #icon>
-      <span class="lucide-badge-info size-4 text-ink-gray-6" />
-    </template>
+  <div class="w-full gap-3 items-center grid">
+    <Alert
+      title="Your trial ends soon!"
+      variant="outline"
+      description="Upgrade to keep enjoying features and future technical support."
+    >
+      <template #icon>
+        <span class="lucide-badge-info size-4 text-ink-gray-6" />
+      </template>
 
-    <template #footer>
-      <Button class="col-span-full" variant="solid"> Update now </Button>
-    </template>
-  </Alert>
+      <template #footer>
+        <Button class="col-span-full" variant="solid"> Update now </Button>
+      </template>
+    </Alert>
+  </div>
 </template>

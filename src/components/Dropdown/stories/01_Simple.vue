@@ -25,7 +25,7 @@ const actions: DropdownOptions = [
 </script>
 
 <template>
-  <div class="grid gap-3">
+  <div class="w-full grid gap-3">
     <Dropdown
       :options="actions"
       :button="{ icon: 'lucide-more-horizontal', label: 'Options' }"

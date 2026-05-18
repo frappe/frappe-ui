@@ -1,273 +1,212 @@
 <script setup lang="ts">
-import type { Ref } from 'vue'
-import type { SearchResult } from 'minisearch'
-
-import MiniSearch from 'minisearch'
-import Mark from 'mark.js'
-
-import { useData, withBase } from 'vitepress'
-import { computedAsync, debouncedWatch } from '@vueuse/core'
-
+import { useData, useRouter, withBase } from 'vitepress'
+import { computed, ref, watch } from 'vue'
+import fuzzysort from 'fuzzysort'
 import {
-  markRaw,
-  nextTick,
-  onMounted,
-  ref,
-  shallowRef,
-  watch,
-  useTemplateRef,
-} from 'vue'
+  ListboxContent,
+  ListboxFilter,
+  ListboxGroup,
+  ListboxGroupLabel,
+  ListboxItem,
+  ListboxRoot,
+} from 'reka-ui'
 
-import LucideX from '~icons/lucide/x'
-import LucideSearch from '~icons/lucide/search'
-import LucideCommand from '~icons/lucide/command'
-import LucideArrowDown from '~icons/lucide/arrow-down'
-import LucideEnter from '~icons/lucide/corner-down-left'
+import { Dialog } from 'frappe-ui'
+import { getSidebarList, type SidebarItem } from '../Docs/sidebarList'
 
-import LucideChevronRight from '~icons/lucide/chevron-right'
+const open = defineModel<boolean>('open', { default: true })
 
-import { LRUCache } from './cache'
-
-const emits = defineEmits<{ close: [] }>()
-
-const { localeIndex } = useData()
+const { theme } = useData()
+const router = useRouter()
 
 const filterText = ref('')
-const showNoResults = ref(false)
-const inputRef = useTemplateRef<HTMLInputElement>('inputRef')
 
-const resultsEl = shallowRef<HTMLElement>()
-const searchIndexData = shallowRef<any>()
-const results: Ref<(SearchResult & Result)[]> = shallowRef([])
+const sidebarList = getSidebarList(theme.value.componentList ?? [])
+const allItems = sidebarList.flatMap((section) =>
+  section.items.map((item) => ({ ...item, section: section.text })),
+)
+const sectionOrder = sidebarList.map((s) => s.text)
 
-const activeIndex = ref(-1)
+watch(open, (isOpen) => {
+  if (!isOpen) filterText.value = ''
+})
 
-interface Result {
-  title: string
-  titles: string[]
-  text?: string
-}
+const groupedResults = computed(() => {
+  const query = filterText.value.trim()
+  if (!query) return sidebarList
 
-onMounted(() => {
-  inputRef.value?.focus()
-
-  // @ts-expect-error vitepress internal
-  import('@localSearchIndex').then((m) => {
-    searchIndexData.value = m.default
+  const matches = fuzzysort.go(query, allItems, {
+    key: 'text',
+    threshold: 0.3,
+    limit: 50,
   })
+
+  const bySection = new Map<string, SidebarItem[]>()
+  for (const m of matches) {
+    const item = m.obj
+    if (!bySection.has(item.section)) bySection.set(item.section, [])
+    bySection.get(item.section)!.push(item)
+  }
+
+  return sectionOrder
+    .filter((name) => bySection.has(name))
+    .map((name) => ({ text: name, items: bySection.get(name)! }))
 })
 
-const mark = computedAsync(async () => {
-  if (!resultsEl.value) return
-  return markRaw(new Mark(resultsEl.value))
-}, null)
-
-const searchIndex = computedAsync(async () =>
-  markRaw(
-    MiniSearch.loadJSON<Result>(
-      (await searchIndexData.value?.[localeIndex.value]?.())?.default,
-      {
-        fields: ['title', 'titles', 'text'],
-        storeFields: ['title', 'titles'],
-        searchOptions: {
-          fuzzy: 0.2,
-          prefix: true,
-          boost: { title: 4, text: 2, titles: 1 },
-        },
-      },
-    ),
-  ),
+const hasResults = computed(() =>
+  groupedResults.value.some((g) => g.items.length > 0),
 )
 
-const cache = new LRUCache(16)
-
-debouncedWatch(
-  () => [searchIndex.value, filterText.value] as const,
-  async ([index, query], old, onCleanup) => {
-    if (old?.[0] !== index) cache.clear()
-
-    let canceled = false
-    onCleanup(() => (canceled = true))
-
-    if (!index) return
-
-    results.value = index.search(query).slice(0, 16) as any
-    if (canceled) return
-
-    const terms = new Set<string>()
-
-    results.value = results.value.map((r) => {
-      const [id, anchor] = r.id.split('#')
-      const map = cache.get(id)
-      const text = map?.get(anchor) ?? ''
-      for (const term in r.match) terms.add(term)
-      return { ...r, text }
-    })
-
-    await nextTick()
-    if (canceled) return
-
-    await new Promise<void>((resolve) => {
-      mark.value?.unmark({
-        done: () => {
-          mark.value?.markRegExp(formMarkRegex(terms), { done: resolve })
-        },
-      })
-    })
-
-    showNoResults.value = true
-
-    activeIndex.value = results.value.length ? 0 : -1
-  },
-  { debounce: 200, immediate: true },
-)
-
-watch(filterText, () => {
-  showNoResults.value = false
-  activeIndex.value = -1
-})
-
-const move = (delta: number) => {
-  if (!results.value.length) return
-  activeIndex.value =
-    (activeIndex.value + delta + results.value.length) % results.value.length
+const highlightedLink = ref<string | null>(null)
+const onHighlight = (payload: { value: unknown } | undefined) => {
+  highlightedLink.value = typeof payload?.value === 'string' ? payload.value : null
 }
 
-const selectActive = () => {
-  const item = results.value[activeIndex.value]
-  if (!item) return
-  window.location.href = withBase(item.id)
-  emits('close')
+const navigateTo = (item: SidebarItem) => {
+  router.go(withBase(item.link))
+  open.value = false
 }
 
-const formMarkRegex = (terms: Set<string>) => {
-  return new RegExp(
-    [...terms]
-      .sort((a, b) => b.length - a.length)
-      .map(
-        (t) =>
-          `(${t.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&').replace(/-/g, '\\x2d')})`,
-      )
-      .join('|'),
-    'gi',
-  )
+// Native click on the anchor: let the browser handle modifier-clicks
+// (Cmd/Ctrl/Shift/middle-click) via the `href`; only intercept plain
+// clicks to do SPA navigation. Keyboard Enter on the highlighted item
+// reaches here too — Reka synthesises a `.click()` on the element,
+// which has no modifiers, so it falls through to `navigateTo`.
+const onItemClick = (e: MouseEvent, item: SidebarItem) => {
+  if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return
+  e.preventDefault()
+  navigateTo(item)
 }
 
-const vScrollActive = {
-  updated(el, { value }) {
-    if (!value) return
-
-    const container = el.parentElement
-    if (!container) return
-
-    const elRect = el.getBoundingClientRect()
-    const cRect = container.getBoundingClientRect()
-
-    const isVisible = elRect.top >= cRect.top && elRect.bottom <= cRect.bottom
-
-    if (!isVisible) el.scrollIntoView({ block: 'nearest' })
-  },
+const onFilterKeydown = (e: KeyboardEvent) => {
+  if (e.key !== 'Enter') return
+  if (!(e.metaKey || e.ctrlKey)) return
+  const link = highlightedLink.value
+  if (!link) return
+  e.preventDefault()
+  e.stopImmediatePropagation()
+  window.open(withBase(link), '_blank', 'noopener')
 }
 </script>
 
 <template>
-  <div
-    class="fixed inset-0 z-100 flex items-start justify-center bg-black/50 backdrop-blur-sm"
-    @click.self="emits('close')"
-  >
-    <div
-      class="mt-[10vh] w-full max-w-2xl overflow-hidden rounded bg-surface-cards shadow-lg"
-      @keydown.esc.prevent="emits('close')"
-    >
-      <!-- input -->
-      <div class="flex gap-2 items-center border-b border-outline-gray-2 p-3">
-        <LucideSearch class="size-4" />
+  <Dialog v-model:open="open" bare size="xl" position="top" padding-top="10vh">
+    <template #default>
+      <ListboxRoot
+        class="flex flex-col"
+        highlight-on-hover
+        :model-value="null"
+        @highlight="onHighlight"
+      >
+        <!-- input -->
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 flex items-center pl-4.5">
+            <span class="lucide-search h-4 w-4 text-ink-gray-6" />
+          </div>
+          <ListboxFilter
+            v-model="filterText"
+            auto-focus
+            placeholder="Search documentation"
+            class="w-full border-none bg-transparent py-3 pl-11.5 pr-4.5 text-base text-ink-gray-7 placeholder-ink-gray-4 focus:ring-0"
+            autocomplete="off"
+            @keydown="onFilterKeydown"
+          />
+        </div>
 
-        <input
-          ref="inputRef"
-          v-model="filterText"
-          placeholder="Search documentation"
-          class="w-full bg-transparent !outline-none !border-0 text-sm p-0 !ring-0"
-          @keydown.down.prevent="move(1)"
-          @keydown.up.prevent="move(-1)"
-          @keydown.enter.prevent="selectActive"
-          autofocus
-        />
-
-        <button
-          class="text-muted-foreground hover:text-foreground"
-          aria-label="Close"
-          @click="emits('close')"
+        <!-- results -->
+        <ListboxContent
+          class="max-h-96 overflow-auto border-t border-outline-gray-1 dark:border-outline-gray-2"
         >
-          <LucideX class="size-4" />
-        </button>
-      </div>
+          <ListboxGroup
+            v-for="group in groupedResults"
+            :key="group.text"
+            class="mb-2 mt-4.5 first:mt-3"
+          >
+            <ListboxGroupLabel
+              class="mb-2.5 block px-4.5 text-base text-ink-gray-5"
+            >
+              {{ group.text }}
+            </ListboxGroupLabel>
 
-      <!-- results -->
-      <ul
-        ref="resultsEl"
-        class="max-h-[55vh] overflow-auto scrollbar"
-        :class="{ 'border-b p-2': results.length > 0 }"
-      >
-        <a
-          v-for="(p, i) in results"
-          :key="p.id"
-          :aria-selected="i === activeIndex"
-          :href="withBase(p.id)"
-          class="flex gap-1 items-center text-ink-gray-6"
-          :class="[
-            'p-2 cursor-pointer text-sm rounded',
-            i === activeIndex ? 'bg-surface-gray-2 text-ink-gray-9' : '',
-          ]"
-          @mouseenter="activeIndex = i"
-          @click="emits('close')"
-          v-scroll-active="i === activeIndex"
+            <div v-for="item in group.items" :key="item.link" class="px-2.5">
+              <ListboxItem
+                as="a"
+                :value="item.link"
+                :href="withBase(item.link)"
+                class="flex w-full min-w-0 items-center rounded px-2 py-2 text-base font-medium text-ink-gray-7 outline-none data-[highlighted]:bg-surface-gray-3"
+                @click="onItemClick($event, item)"
+              >
+                <span class="overflow-hidden text-ellipsis whitespace-nowrap">
+                  {{ item.text }}
+                </span>
+              </ListboxItem>
+            </div>
+          </ListboxGroup>
+
+          <div
+            v-if="filterText && !hasResults"
+            class="my-8 text-center text-base text-ink-gray-6"
+          >
+            No results for "<b class="text-ink-gray-9">{{ filterText }}</b
+            >"
+          </div>
+        </ListboxContent>
+
+        <!-- footer -->
+        <div
+          class="mt-2 flex items-center justify-between border-t border-outline-gray-1 px-2.5 py-2 text-xs text-ink-gray-6 dark:border-outline-gray-2"
         >
-          <template v-for="(t, index) in p.titles" :key="index">
-            <span v-html="t" />
-            <LucideChevronRight class="size-4" />
-          </template>
-
-          <span v-html="p.title" />
-        </a>
-      </ul>
-
-      <div
-        v-if="filterText && !results.length && showNoResults"
-        class="my-8 text-center text-sm"
-      >
-        No results for "<b>{{ filterText }}</b
-        >"
-      </div>
-
-      <!-- kb helpers -->
-      <div
-        class="flex items-center gap-2 text-ink-gray-6 [&>kbd]:bg-surface-gray-2 [&>kbd]:p-1 [&>kbd]:rounded-sm p-2"
-      >
-        <kbd> <LucideArrowDown class="size-4 text-ink-gray-5" /> </kbd>
-        <kbd>
-          <LucideArrowDown class="size-4 rotate-180 text-ink-gray-5" />
-        </kbd>
-
-        <span class="mr-3"> to navigate </span>
-        <kbd> <LucideEnter class="size-4 text-ink-gray-5" /> </kbd>
-        <span class="mr-3">to select</span>
-        <kbd> esc </kbd>
-        <span> to close</span>
-        <kbd class="flex gap-1 items-center ml-auto">
-          <LucideCommand class="size-4 text-ink-gray-5" />
-          K
-        </kbd>
-        <span> to open</span>
-      </div>
-    </div>
-  </div>
+          <div class="flex items-center gap-4">
+            <div class="flex items-center gap-1">
+              <kbd
+                class="inline-flex items-center gap-0.5 whitespace-nowrap rounded-sm bg-surface-gray-2 p-0.5 font-[inherit] text-[11px] font-medium leading-normal tracking-[0.02em] text-ink-gray-5"
+              >
+                <span class="lucide-arrow-down size-4" />
+              </kbd>
+              <kbd
+                class="inline-flex items-center gap-0.5 whitespace-nowrap rounded-sm bg-surface-gray-2 p-0.5 font-[inherit] text-[11px] font-medium leading-normal tracking-[0.02em] text-ink-gray-5"
+              >
+                <span class="lucide-arrow-up size-4" />
+              </kbd>
+              <span class="ml-1">to navigate</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <kbd
+                class="inline-flex items-center gap-0.5 whitespace-nowrap rounded-sm bg-surface-gray-2 p-0.5 font-[inherit] text-[11px] font-medium leading-normal tracking-[0.02em] text-ink-gray-5"
+              >
+                <span class="lucide-corner-down-left size-4" />
+              </kbd>
+              <span class="ml-1">to select</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <kbd
+                class="inline-flex items-center gap-0.5 whitespace-nowrap rounded-sm bg-surface-gray-2 p-0.5 font-[inherit] text-[11px] font-medium leading-normal tracking-[0.02em] text-ink-gray-5"
+              >
+                <span class="lucide-command w-3 h-3" />
+                <span class="lucide-corner-down-left size-4" />
+              </kbd>
+              <span class="ml-1">new tab</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <kbd
+                class="inline-flex items-center gap-0.5 whitespace-nowrap rounded-sm bg-surface-gray-2 p-0.5 px-1 font-[inherit] font-medium leading-normal tracking-[0.02em] text-sm text-ink-gray-5"
+              >
+                esc
+              </kbd>
+              <span class="ml-1">to close</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-1">
+            <kbd
+              class="inline-flex items-center gap-0.5 whitespace-nowrap rounded-sm bg-surface-gray-2 p-0.5 font-[inherit] text-[11px] font-medium leading-normal tracking-[0.02em] text-ink-gray-5"
+            >
+              <span class="lucide-command w-3 h-3" />
+              <span class="text-sm">K</span>
+            </kbd>
+            <span class="ml-1">to open</span>
+          </div>
+        </div>
+      </ListboxRoot>
+    </template>
+  </Dialog>
 </template>
-
-<style scoped>
-:deep(mark) {
-  color: var(--ink-gray-9);
-  font-weight: bold;
-  background-color: transparent;
-}
-</style>

@@ -33,10 +33,12 @@ const options = [
 </script>
 
 <template>
-  <MultiSelect
-    v-model="state"
-    :options="options"
-    placeholder="Select spaces"
-    class="w-72"
-  />
+  <div class="w-full flex flex-wrap gap-3 items-center justify-center !py-20">
+    <MultiSelect
+      v-model="state"
+      :options="options"
+      placeholder="Select spaces"
+      class="w-72"
+    />
+  </div>
 </template>

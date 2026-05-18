@@ -1,13 +1,63 @@
 import type { MarkdownEnv, MarkdownRenderer } from 'vitepress'
+import type StateCore from 'markdown-it/lib/rules_core/state_core'
 import { dirname, resolve } from 'node:path'
+import {
+  baseParse,
+  NodeTypes,
+  type AttributeNode,
+  type DirectiveNode,
+  type ElementNode,
+  type SimpleExpressionNode,
+  type TextNode,
+} from '@vue/compiler-dom'
+
+interface ParsedTag {
+  /** Static attributes: `foo="bar"` */
+  attrs: Record<string, string>
+  /** Bound attributes: `:foo="expr"` — value is the expression text */
+  binds: Record<string, string>
+}
+
+function parseSingleTag(source: string, tagName: string): ParsedTag | null {
+  let ast
+  try {
+    ast = baseParse(source)
+  } catch {
+    return null
+  }
+  for (const child of ast.children) {
+    if (child.type !== NodeTypes.ELEMENT) continue
+    const element = child as ElementNode
+    if (element.tag !== tagName) continue
+
+    const attrs: Record<string, string> = {}
+    const binds: Record<string, string> = {}
+    for (const prop of element.props) {
+      if (prop.type === NodeTypes.ATTRIBUTE) {
+        const attr = prop as AttributeNode
+        attrs[attr.name] = (attr.value as TextNode | undefined)?.content ?? ''
+      } else if (prop.type === NodeTypes.DIRECTIVE) {
+        const dir = prop as DirectiveNode
+        if (
+          dir.name === 'bind' &&
+          dir.arg?.type === NodeTypes.SIMPLE_EXPRESSION
+        ) {
+          const argName = (dir.arg as SimpleExpressionNode).content
+          const expr = (dir.exp as SimpleExpressionNode | undefined)?.content
+          binds[argName] = expr ?? ''
+        }
+      }
+    }
+    return { attrs, binds }
+  }
+  return null
+}
 
 function getPreviewParts(name: string) {
   const separatorIndex = name.indexOf('-')
-
   if (separatorIndex === -1) {
     return { componentName: name, storyFileName: name }
   }
-
   return {
     componentName: name.slice(0, separatorIndex),
     storyFileName: name.slice(separatorIndex + 1),
@@ -15,122 +65,137 @@ function getPreviewParts(name: string) {
 }
 
 function getStoryImportName(storyFileName: string) {
-  const normalizedName = storyFileName.replace(/[^a-zA-Z0-9_$]+/g, ' ')
-  const pascalName = normalizedName
+  const normalized = storyFileName.replace(/[^a-zA-Z0-9_$]+/g, ' ')
+  const pascal = normalized
     .split(' ')
     .filter(Boolean)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join('')
-
-  return /^[A-Za-z_$]/.test(pascalName) ? pascalName : `Story${pascalName}`
+  return /^[A-Za-z_$]/.test(pascal) ? pascal : `Story${pascal}`
 }
 
-export default function (md: MarkdownRenderer) {
-  md.core.ruler.after('inline', 'component-preview', (state) => {
-    // Match `<ComponentPreview ... />` and capture the entire attribute
-    // blob so callers can pass arbitrary props (layout, css, csr, future
-    // additions) without needing this plugin to know about each one.
-    const previewRegex = /<ComponentPreview\s+([^>]*?)\s*\/>/g
+function applyImports(state: StateCore, imports: string[]) {
+  if (imports.length === 0) return
+  const combined = imports.join('\n')
+  const scriptIdx = state.tokens.findIndex(
+    (t) => t.type === 'html_block' && /<script\s+setup>/.test(t.content),
+  )
+  if (scriptIdx === -1) {
+    const token = new state.Token('html_block', '', 0)
+    token.content = `<script setup>\n${combined}\n</script>\n`
+    // Unshifting earlier would shift every other token's index — do it
+    // after the main transform loop so its `tokenIdx` values stay valid.
+    state.tokens.unshift(token)
+  } else {
+    state.tokens[scriptIdx].content = state.tokens[scriptIdx].content.replace(
+      '</script>',
+      `${combined}\n</script>`,
+    )
+  }
+}
 
-    function parseAttrs(raw: string): Record<string, string> {
-      const attrRegex = /([a-zA-Z_:][\w:.-]*)\s*=\s*(?:"([^"]*)"|'([^']*)')/g
-      const out: Record<string, string> = {}
-      let match: RegExpExecArray | null
-      while ((match = attrRegex.exec(raw)) !== null) {
-        out[match[1]] = match[2] ?? match[3] ?? ''
+function transformPreview(
+  state: StateCore,
+  tokenIdx: number,
+  tag: ParsedTag,
+  mdDir: string,
+): string | null {
+  const name = tag.attrs.name
+  if (!name) return null
+
+  const csr = tag.attrs.csr === 'true'
+  const { componentName, storyFileName } = getPreviewParts(name)
+  const storyImportName = getStoryImportName(storyFileName)
+  const componentPath = `../../../../src/components/${componentName}/stories/${storyFileName}.vue`
+
+  // Forward every static attr except `csr`, which this plugin consumes
+  // itself (it's not a Vue prop). `name` is still a prop on the Demo
+  // component so it gets forwarded along with the rest.
+  const forwardedStatic = Object.entries(tag.attrs)
+    .filter(([key]) => key !== 'csr')
+    .map(([key, value]) => ` ${key}="${value}"`)
+    .join('')
+  const forwardedBinds = Object.entries(tag.binds)
+    .map(([key, expr]) => ` :${key}="${expr}"`)
+    .join('')
+
+  const openWrap = csr ? '<ClientOnly>' : ''
+  const closeWrap = csr ? '</ClientOnly>' : ''
+
+  state.tokens[tokenIdx].content =
+    `${openWrap}<ComponentPreview${forwardedStatic}${forwardedBinds}><${storyImportName} /><template #code>`
+
+  const code = new state.Token('fence', 'code', 0)
+  code.info = 'vue'
+  code.content = `<<< ${componentPath}`
+  // @ts-expect-error snippets plugin reads `src` for the absolute path
+  code.src = [resolve(mdDir, componentPath)]
+
+  const close = new state.Token('html_inline', '', 0)
+  close.content = `</template></ComponentPreview>${closeWrap}`
+
+  state.tokens.splice(tokenIdx + 1, 0, code, close)
+
+  return `import ${storyImportName} from '${componentPath}'`
+}
+
+function transformPropsTable(
+  state: StateCore,
+  tokenIdx: number,
+  tag: ParsedTag,
+  mdDir: string,
+) {
+  const name = tag.attrs.name
+  const dataExpr = tag.binds.data
+  if (!name || !dataExpr) return
+
+  // The optional `folder` attribute lets a sub-component (e.g.
+  // DateTimePicker, which lives inside the DatePicker folder) point at
+  // the correct `types.ts`. When omitted, the folder matches `name`.
+  const componentFolder = tag.attrs.folder || name
+  const typesPath = `../../../../src/components/${componentFolder}/types.ts`
+
+  state.tokens[tokenIdx].content =
+    `<PropsTable name="${name}" :data="${dataExpr}"><template #code>`
+
+  const code = new state.Token('fence', 'code', 0)
+  code.info = 'typescript'
+  code.content = `<<< ${typesPath}`
+  // @ts-expect-error snippets plugin reads `src` for the absolute path
+  code.src = [resolve(mdDir, typesPath)]
+
+  const close = new state.Token('html_inline', '', 0)
+  close.content = `</template></PropsTable>`
+
+  state.tokens.splice(tokenIdx + 1, 0, code, close)
+}
+
+export default function componentTransformer(md: MarkdownRenderer) {
+  md.core.ruler.after('inline', 'component-preview', (state) => {
+    const env = state.env as MarkdownEnv
+    const mdDir = dirname(env.realPath ?? env.path)
+    const imports: string[] = []
+
+    // Walk in reverse so splicing in new tokens doesn't shift indices
+    // we haven't visited yet.
+    for (let i = state.tokens.length - 1; i >= 0; i--) {
+      const token = state.tokens[i]
+      if (token.type !== 'html_block' && token.type !== 'html_inline') continue
+
+      // Cheap text prefilter — Vue's parser is fast but no point invoking
+      // it on tokens that clearly don't contain our tags.
+      if (token.content.includes('<ComponentPreview')) {
+        const tag = parseSingleTag(token.content, 'ComponentPreview')
+        if (tag) {
+          const importStmt = transformPreview(state, i, tag, mdDir)
+          if (importStmt) imports.push(importStmt)
+        }
+      } else if (token.content.includes('<PropsTable')) {
+        const tag = parseSingleTag(token.content, 'PropsTable')
+        if (tag) transformPropsTable(state, i, tag, mdDir)
       }
-      return out
     }
 
-    state.src = state.src.replace(previewRegex, (_, attrBlob: string) => {
-      const attrs = parseAttrs(attrBlob)
-      const name = attrs.name
-      if (!name) return _
-
-      const csr = attrs.csr === 'true'
-
-      const { componentName, storyFileName } = getPreviewParts(name)
-      const storyImportName = getStoryImportName(storyFileName)
-
-      const componentPath = `../../../../src/components/${componentName}/stories/${storyFileName}.vue`
-
-      const scriptIdx = state.tokens.findIndex(
-        (i) => i.type === 'html_block' && /<script setup>/.test(i.content),
-      )
-
-      const importStr = `import ${storyImportName} from '${componentPath}'`
-
-      if (scriptIdx === -1) {
-        const token = new state.Token('html_block', '', 0)
-        token.content = `<script setup>\n${importStr}\n</script>\n`
-        state.tokens.unshift(token)
-      } else {
-        state.tokens[scriptIdx].content = state.tokens[
-          scriptIdx
-        ].content.replace('</script>', `${importStr}\n</script>`)
-      }
-
-      const idx = state.tokens.findIndex((i) => i.content.match(previewRegex))
-      const { realPath, path: _path } = state.env as MarkdownEnv
-
-      const open = csr ? '<ClientOnly>' : ''
-      // Forward every attribute except `csr`, which this plugin consumes
-      // itself (it's not a Vue prop).
-      const forwardedAttrs = Object.entries(attrs)
-        .filter(([key]) => key !== 'csr')
-        .map(([key, value]) => ` ${key}="${value}"`)
-        .join('')
-      state.tokens[idx].content =
-        `${open}<ComponentPreview${forwardedAttrs}><${storyImportName} /><template #code>`
-
-      const code = new state.Token('fence', 'code', 0)
-      code.info = 'vue'
-      code.content = `<<< ${componentPath}`
-      // @ts-expect-error snippets plugin
-      code.src = [resolve(dirname(realPath ?? _path), componentPath)]
-
-      const close = new state.Token('html_inline', '', 0)
-      close.content = `</template></ComponentPreview>${csr ? '</ClientOnly>' : ''}`
-
-      state.tokens.splice(idx + 1, 0, code, close)
-      return ''
-    })
-
-    // Handle PropsTable
-    // The optional `folder` attribute lets a sub-component (e.g.
-    // DateTimePicker, which lives inside the DatePicker folder) point at
-    // the correct `types.ts`. When omitted, the folder is assumed to match
-    // `name` — the common single-component case.
-    const propsRegex =
-      /<PropsTable\s+(?:folder=["']([^"']+)["']\s+)?name=["']([^"']+)["']\s+:data="([^"]+)"\/>/g
-
-    state.src = state.src.replace(
-      propsRegex,
-      (match, folder, name, dataExpression) => {
-        const componentFolder = folder || name
-        const typesPath = `../../../../src/components/${componentFolder}/types.ts`
-        const idx = state.tokens.findIndex((i) => i.content.includes(match))
-
-        if (idx !== -1) {
-          const { realPath, path: _path } = state.env as MarkdownEnv
-
-          state.tokens[idx].content =
-            `<PropsTable name="${name}" :data="${dataExpression}"><template #code>`
-
-          const code = new state.Token('fence', 'code', 0)
-          code.info = 'typescript'
-          code.content = `<<< ${typesPath}`
-          // @ts-expect-error snippets plugin
-          code.src = [resolve(dirname(realPath ?? _path), typesPath)]
-
-          const close = new state.Token('html_inline', '', 0)
-          close.content = `</template></PropsTable>`
-
-          state.tokens.splice(idx + 1, 0, code, close)
-        }
-
-        return ''
-      },
-    )
+    applyImports(state, imports)
   })
 }

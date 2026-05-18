@@ -92,60 +92,62 @@ const events = ref([
 </script>
 
 <template>
-  <Calendar
-    :config="config"
-    :events="events"
-    @create="(event) => console.log('createEvent', event)"
-    @update="(event) => console.log('updateEvent', event)"
-    @delete="(eventID) => console.log('deleteEvent', eventID)"
-  >
-    <template #header="headerProps">
-      <div class="mb-2 flex items-center justify-between gap-3">
-        <div class="flex items-center gap-2">
-          <DatePicker
-            :modelValue="headerProps.selectedMonthDate"
-            @update:modelValue="(val) => headerProps.onMonthYearChange(val)"
-            :clearable="false"
-          >
-            <template #target="{ togglePopover }">
-              <Button
-                variant="ghost"
-                class="text-lg font-medium text-ink-gray-7"
-                :label="headerProps.currentMonthYear"
-                iconRight="lucide-chevron-down"
-                @click="togglePopover"
-              />
-            </template>
-          </DatePicker>
+  <div class="w-full flex flex-wrap gap-3 items-center h-screen overflow-hidden">
+    <Calendar
+      :config="config"
+      :events="events"
+      @create="(event) => console.log('createEvent', event)"
+      @update="(event) => console.log('updateEvent', event)"
+      @delete="(eventID) => console.log('deleteEvent', eventID)"
+    >
+      <template #header="headerProps">
+        <div class="mb-2 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <DatePicker
+              :modelValue="headerProps.selectedMonthDate"
+              @update:modelValue="(val) => headerProps.onMonthYearChange(val)"
+              :clearable="false"
+            >
+              <template #target="{ togglePopover }">
+                <Button
+                  variant="ghost"
+                  class="text-lg font-medium text-ink-gray-7"
+                  :label="headerProps.currentMonthYear"
+                  iconRight="lucide-chevron-down"
+                  @click="togglePopover"
+                />
+              </template>
+            </DatePicker>
+          </div>
+          <div class="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              icon="lucide-chevron-left"
+              @click="headerProps.decrement"
+            />
+            <Button
+              label="Today"
+              variant="ghost"
+              @click="headerProps.setCalendarDate()"
+            />
+            <Button
+              variant="ghost"
+              icon="lucide-chevron-right"
+              @click="headerProps.increment"
+            />
+          </div>
+          <div>
+            <Select
+              class="!w-20"
+              size="sm"
+              variant="ghost"
+              :options="headerProps.enabledModes"
+              :modelValue="headerProps.activeView"
+              @update:modelValue="(v) => headerProps.updateActiveView(v)"
+            />
+          </div>
         </div>
-        <div class="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            icon="lucide-chevron-left"
-            @click="headerProps.decrement"
-          />
-          <Button
-            label="Today"
-            variant="ghost"
-            @click="headerProps.setCalendarDate()"
-          />
-          <Button
-            variant="ghost"
-            icon="lucide-chevron-right"
-            @click="headerProps.increment"
-          />
-        </div>
-        <div>
-          <Select
-            class="!w-20"
-            size="sm"
-            variant="ghost"
-            :options="headerProps.enabledModes"
-            :modelValue="headerProps.activeView"
-            @update:modelValue="(v) => headerProps.updateActiveView(v)"
-          />
-        </div>
-      </div>
-    </template>
-  </Calendar>
+      </template>
+    </Calendar>
+  </div>
 </template>

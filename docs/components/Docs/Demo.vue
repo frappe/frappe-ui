@@ -4,7 +4,6 @@ import { TabButtons } from 'frappe-ui'
 
 interface ComponentPreviewProps {
   name: string
-  css?: string
   /**
    * `tabs` (default): preview and code in a tab switcher.
    * `stacked`: preview on top, code directly below — shown together.
@@ -12,7 +11,7 @@ interface ComponentPreviewProps {
   layout?: 'tabs' | 'stacked'
 }
 
-const props = withDefaults(defineProps<ComponentPreviewProps>(), {
+withDefaults(defineProps<ComponentPreviewProps>(), {
   layout: 'tabs',
 })
 
@@ -26,15 +25,12 @@ const previewTabs = [
 
 <template>
   <div class="grid not-prose">
-    <template v-if="props.layout === 'stacked'">
+    <template v-if="layout === 'stacked'">
       <div
         class="rounded-xl overflow-hidden border border-outline-gray-1 divide-y divide-outline-gray-1"
       >
         <div
-          :class="[
-            'bg-surface-white p-8 overflow-auto scrollbar flex gap-3 items-center',
-            css,
-          ]"
+          class="bg-surface-white p-8 overflow-auto scrollbar flex flex-wrap gap-3 items-center"
         >
           <slot />
         </div>
@@ -50,10 +46,7 @@ const previewTabs = [
       <div class="mt-2 rounded-xl overflow-hidden border border-outline-gray-1">
         <div v-if="activeTab === 'preview'">
           <div
-            :class="[
-              'bg-surface-white p-8 overflow-auto scrollbar flex gap-3 items-center',
-              css,
-            ]"
+            class="bg-surface-white p-8 overflow-auto scrollbar flex flex-wrap gap-3 items-center"
           >
             <slot />
           </div>

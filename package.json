@@ -76,7 +76,6 @@
   "author": "Frappe Technologies Pvt. Ltd.",
   "license": "MIT",
   "dependencies": {
-    "vue-sonner": "^2.0.9",
     "@headlessui/vue": "^1.7.14",
     "@popperjs/core": "^2.11.2",
     "@tailwindcss/forms": "^0.5.3",
@@ -112,6 +111,7 @@
     "dompurify": "^3.2.6",
     "echarts": "^5.6.0",
     "feather-icons": "^4.28.0",
+    "fuzzysort": "^3.1.0",
     "grid-layout-plus": "^1.1.0",
     "highlight.js": "^11.11.1",
     "idb-keyval": "^6.2.0",
@@ -128,7 +128,8 @@
     "typescript": "^5.0.2",
     "unplugin-auto-import": "^19.3.0",
     "unplugin-icons": "^22.1.0",
-    "unplugin-vue-components": "^28.4.1"
+    "unplugin-vue-components": "^28.4.1",
+    "vue-sonner": "^2.0.9"
   },
   "peerDependencies": {
     "vue": ">=3.5.0",

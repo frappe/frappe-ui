@@ -10,7 +10,7 @@ const error = computed(() => (showError.value ? 'Bio cannot be empty.' : ''))
 </script>
 
 <template>
-  <div class="flex gap-8 items-start">
+  <div class="w-full flex gap-8 items-start">
     <Textarea
       v-model="bio"
       label="Bio"

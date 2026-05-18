@@ -206,7 +206,7 @@ function keepOpenAfterAsync() {
 </script>
 
 <template>
-  <div class="flex flex-col gap-3">
+  <div class="w-full flex flex-col gap-3">
     <div class="flex flex-wrap gap-2">
       <Button theme="red" variant="subtle" @click="destructiveConfirm">
         dialog.confirm (destructive)
