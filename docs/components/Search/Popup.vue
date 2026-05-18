@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useData, useRoute, useRouter, withBase } from 'vitepress'
+import { useData, useRouter, withBase } from 'vitepress'
 import { computed, ref, watch } from 'vue'
 import fuzzysort from 'fuzzysort'
 import {
@@ -17,7 +17,6 @@ import { getSidebarList, type SidebarItem } from '../Docs/sidebarList'
 const open = defineModel<boolean>('open', { default: true })
 
 const { theme } = useData()
-const route = useRoute()
 const router = useRouter()
 
 const filterText = ref('')
@@ -58,57 +57,35 @@ const hasResults = computed(() =>
   groupedResults.value.some((g) => g.items.length > 0),
 )
 
-const navigate = (item: SidebarItem, newTab = false) => {
-  const url = withBase(item.link)
-  if (newTab) {
-    window.open(url, '_blank', 'noopener')
-    return
-  }
-  router.go(url)
+const highlightedLink = ref<string | null>(null)
+const onHighlight = (payload: { value: unknown } | undefined) => {
+  highlightedLink.value = typeof payload?.value === 'string' ? payload.value : null
+}
+
+const navigateTo = (item: SidebarItem) => {
+  router.go(withBase(item.link))
   open.value = false
 }
 
-// Reka fires `select` for click + Enter on the highlighted item. For
-// click (mouse/touch) the original event carries the modifier flags we
-// need to detect "open in new tab" intent. For keyboard Enter, Reka
-// synthesises a click without modifiers — we intercept that case in
-// `onFilterKeydown` below.
-const onItemSelect = (e: Event, item: SidebarItem) => {
+// Native click on the anchor: let the browser handle modifier-clicks
+// (Cmd/Ctrl/Shift/middle-click) via the `href`; only intercept plain
+// clicks to do SPA navigation. Keyboard Enter on the highlighted item
+// reaches here too — Reka synthesises a `.click()` on the element,
+// which has no modifiers, so it falls through to `navigateTo`.
+const onItemClick = (e: MouseEvent, item: SidebarItem) => {
+  if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return
   e.preventDefault()
-  const original = (e as CustomEvent).detail?.originalEvent as
-    | MouseEvent
-    | undefined
-  const newTab = !!(
-    original &&
-    (original.metaKey ||
-      original.ctrlKey ||
-      original.shiftKey ||
-      original.button === 1)
-  )
-  // Modifier-clicks on the anchor are handled natively by the browser
-  // (Cmd/Ctrl-click opens in a new tab). Don't double-open.
-  if (newTab && original instanceof MouseEvent) return
-  navigate(item, newTab)
+  navigateTo(item)
 }
 
 const onFilterKeydown = (e: KeyboardEvent) => {
   if (e.key !== 'Enter') return
   if (!(e.metaKey || e.ctrlKey)) return
-  const el = document.querySelector(
-    '[data-search-results] [data-highlighted][role="option"]',
-  ) as HTMLElement | null
-  const link = el?.getAttribute('data-link')
+  const link = highlightedLink.value
   if (!link) return
-  const item = allItems.find((i) => i.link === link)
-  if (!item) return
   e.preventDefault()
   e.stopImmediatePropagation()
-  navigate(item, true)
-}
-
-const isCurrent = (item: SidebarItem) => {
-  const norm = (p: string) => p.replace(/\/+$/, '') || '/'
-  return norm(route.path) === norm(withBase(item.link))
+  window.open(withBase(link), '_blank', 'noopener')
 }
 </script>
 
@@ -119,6 +96,7 @@ const isCurrent = (item: SidebarItem) => {
         class="flex flex-col"
         highlight-on-hover
         :model-value="null"
+        @highlight="onHighlight"
       >
         <!-- input -->
         <div class="relative">
@@ -137,7 +115,6 @@ const isCurrent = (item: SidebarItem) => {
 
         <!-- results -->
         <ListboxContent
-          data-search-results
           class="max-h-96 overflow-auto border-t border-outline-gray-1 dark:border-outline-gray-2"
         >
           <ListboxGroup
@@ -156,19 +133,11 @@ const isCurrent = (item: SidebarItem) => {
                 as="a"
                 :value="item.link"
                 :href="withBase(item.link)"
-                :data-link="item.link"
                 class="flex w-full min-w-0 items-center rounded px-2 py-2 text-base font-medium text-ink-gray-7 outline-none data-[highlighted]:bg-surface-gray-3"
-                @select="onItemSelect($event, item)"
+                @click="onItemClick($event, item)"
               >
                 <span class="overflow-hidden text-ellipsis whitespace-nowrap">
                   {{ item.text }}
-                </span>
-
-                <span
-                  v-if="isCurrent(item)"
-                  class="ml-2 text-xs font-normal text-ink-gray-5"
-                >
-                  Current
                 </span>
               </ListboxItem>
             </div>
