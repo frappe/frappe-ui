@@ -1,5 +1,16 @@
 import Button from './Button.vue'
 import { h } from 'vue'
+import { createMemoryHistory, createRouter } from 'vue-router'
+
+function createTestRouter() {
+  return createRouter({
+    history: createMemoryHistory(),
+    routes: [
+      { path: '/', component: { template: '<div />' } },
+      { path: '/reports', component: { template: '<div />' } },
+    ],
+  })
+}
 
 describe('<Button />', () => {
   it('renders default button', () => {
@@ -116,6 +127,46 @@ describe('<Button />', () => {
     cy.get('@onClickSpy').should('have.been.called')
   })
 
+  it('renders a router link when route is provided', () => {
+    const router = createTestRouter()
+
+    cy.mount(Button, {
+      props: {
+        route: '/reports',
+        label: 'Reports',
+      },
+      attrs: {
+        'data-test-id': 'reports-link',
+        'aria-current': 'page',
+      },
+      global: {
+        plugins: [router],
+      },
+    })
+
+    cy.get('a[data-test-id="reports-link"]')
+      .should('have.attr', 'href', '/reports')
+      .and('have.attr', 'aria-current', 'page')
+      .and('contain.text', 'Reports')
+    cy.get('button').should('not.exist')
+  })
+
+  it('renders an anchor when link is provided', () => {
+    cy.mount(Button, {
+      props: {
+        link: 'https://frappe.io/docs',
+        label: 'Docs',
+      },
+    })
+
+    cy.get('a')
+      .should('have.attr', 'href', 'https://frappe.io/docs')
+      .and('have.attr', 'target', '_blank')
+      .and('have.attr', 'rel', 'noreferrer noopener')
+      .and('contain.text', 'Docs')
+    cy.get('button').should('not.exist')
+  })
+
   it('is disabled', () => {
     cy.mount(Button, {
       props: {
@@ -124,5 +175,33 @@ describe('<Button />', () => {
       },
     })
     cy.get('button').should('be.disabled')
+  })
+
+  it('falls back to a disabled button when route or link is blocked', () => {
+    const router = createTestRouter()
+
+    cy.mount(Button, {
+      props: {
+        route: '/reports',
+        disabled: true,
+        label: 'Disabled route',
+      },
+      global: {
+        plugins: [router],
+      },
+    })
+    cy.get('button').should('be.disabled').and('contain.text', 'Disabled route')
+    cy.get('a').should('not.exist')
+
+    cy.mount(Button, {
+      props: {
+        link: 'https://frappe.io/docs',
+        loading: true,
+        loadingText: 'Loading docs',
+        label: 'Docs',
+      },
+    })
+    cy.get('button').should('be.disabled').and('contain.text', 'Loading docs')
+    cy.get('a').should('not.exist')
   })
 })
