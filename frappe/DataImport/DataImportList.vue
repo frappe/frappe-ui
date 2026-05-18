@@ -41,8 +41,8 @@
                         Status
                     </div>
                 </div>
-                <div 
-                    v-for="dataImport in dataImports.data" 
+                <div
+                    v-for="dataImport in dataImports.data"
                     @click="() => redirectToImport(dataImport.name!)"
                     class="grid grid-cols-[75%,20%] lg:grid-cols-[85%,20%] items-center cursor-pointer py-2.5 px-1 mx-2"
                 >
@@ -84,7 +84,7 @@
         >
             <template #body-content>
                 <div>
-                    <Link 
+                    <Link
                         v-model="doctypeForImport"
                         doctype="DocType"
                         :filters="{
@@ -105,7 +105,7 @@ import { dayjs } from "../../src/utils/dayjs"
 import { getBadgeColor } from "./dataImport"
 import Badge from '../../src/components/Badge/Badge.vue'
 import type { BadgeProps } from '../../src/components/Badge/types'
-import { toast } from "../../src/components/Toast/index"
+import { toast } from "../../src/components/Toast/toast"
 import Button from '../../src/components/Button/Button.vue'
 import Dialog from '../../src/components/Dialog/Dialog.vue'
 import FeatherIcon from '../../src/components/FeatherIcon.vue'
