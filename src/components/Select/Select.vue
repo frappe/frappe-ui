@@ -178,7 +178,19 @@ const selectedOption = computed(() => {
   )
 })
 
+function isBlank(value: unknown) {
+  return value === '' || value === null || value === undefined
+}
+
+const showPlaceholderForSelected = computed(() => {
+  if (!selectedOption.value) return false
+  return (
+    isBlank(selectedOption.value.value) && isBlank(selectedOption.value.label)
+  )
+})
+
 const displayValue = computed(() => {
+  if (showPlaceholderForSelected.value) return props.placeholder
   return selectedOption.value?.label || ''
 })
 
@@ -254,10 +266,13 @@ defineSlots<SelectSlots>()
           <SelectValue
             :placeholder="placeholder"
             class="max-w-full truncate opacity-0"
+            :class="{ 'text-ink-gray-4': showPlaceholderForSelected }"
           >
-            <template v-if="selectedOption">{{
-              selectedOption.label
-            }}</template>
+            <template v-if="selectedOption">
+              {{
+                showPlaceholderForSelected ? placeholder : selectedOption.label
+              }}
+            </template>
           </SelectValue>
         </div>
       </template>
@@ -292,14 +307,17 @@ defineSlots<SelectSlots>()
           }"
         />
 
-        <div class="grid min-w-0 text-left">
+        <div class="grid min-w-0 text-left truncate">
           <SelectValue
             :placeholder="placeholder"
             class="col-start-1 row-start-1 max-w-full truncate"
+            :class="{ 'text-ink-gray-4': showPlaceholderForSelected }"
           >
-            <template v-if="selectedOption">{{
-              selectedOption.label
-            }}</template>
+            <template v-if="selectedOption">
+              {{
+                showPlaceholderForSelected ? placeholder : selectedOption.label
+              }}
+            </template>
           </SelectValue>
           <span
             aria-hidden="true"
@@ -481,5 +499,4 @@ defineSlots<SelectSlots>()
   white-space: pre;
   visibility: hidden;
 }
-
 </style>
