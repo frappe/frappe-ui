@@ -248,6 +248,13 @@ type ComboboxTriggerSlotProps = {
   displayValue: string
 }
 
+// `#trigger`, `#prefix`, and `#suffix` all receive the same shape. `selectedOption`
+// is always `null` inside `#prefix` since the prefix slot only renders before
+// a selection — the field is still exposed for symmetry.
+type ComboboxSlotProps = ComboboxTriggerSlotProps
+type ComboboxPrefixSlotProps = ComboboxSlotProps
+type ComboboxSuffixSlotProps = ComboboxSlotProps
+
 type ComboboxItemSlotProps = {
   item: ComboboxSelectableOption | ComboboxCustomOption
   query: string
@@ -271,8 +278,17 @@ Supported slots:
     popover header** instead of using the trigger as the input. Use this
     for assignee pickers, status pills, emoji reactions, and any other
     button-initiated search flow.
-- `#prefix`
-  - convenience slot rendered inside the default input shell, before the input
+- `#prefix="{ open, disabled, query, selectedOption, displayValue }"`
+  - convenience slot rendered inside the default input shell, before the input.
+    Receives the same shape as `#trigger` and `#suffix`. `selectedOption` is
+    always `null` here because the prefix only renders pre-selection
+- `#suffix="{ open, disabled, query, selectedOption, displayValue }"`
+  - convenience slot rendered after the input (input mode) or after the
+    label (button mode). **Replaces the default chevron** when provided —
+    render an explicit chevron fallback when your slot content is
+    conditional. Typical use: an inline clear button. The slot's button
+    should call `@click.stop` and `@pointerdown.stop` so the press does
+    not toggle the popover
 - `#item-prefix="{ item, query, selected }"`
   - custom leading content for the standard option row shell
 - `#item-label="{ item, query, selected }"`
@@ -334,8 +350,13 @@ Filtering rules:
 - for custom options, `condition({ query })` is evaluated when present and
   controls visibility; if `condition` is absent, custom options match the same
   case-insensitive rule against `label`
-- filtering is not applied when the popover just opened and the user has not
-  yet typed, so the full list is shown with the current selection focused
+- `condition` is **authoritative**: it is consulted even before the user
+  has typed since opening, so a `type: 'custom'` row can fully gate its
+  own visibility (e.g. "show only when the typed query is non-empty and
+  doesn't already match an existing option"). The `query` passed in is
+  the typed-since-open query — empty when the user hasn't typed yet
+- the "show the full list before the user has typed" bypass applies only
+  to selectable options; custom options always go through `condition`
 
 Selection behavior:
 
@@ -354,11 +375,24 @@ Selection behavior:
 
 `allowCustomValue` behavior:
 
+`allowCustomValue` is the **free-form acceptance** flag — it lets the combobox
+behave like a text input with autocomplete, where any typed-or-programmatically-set
+string is a valid model value.
+
 - when `true` and no option matches the current query on commit, the free-form
   query itself is accepted as the value
 - `update:modelValue` fires with the raw query string in that case
+- external `modelValue` updates with unknown strings are preserved; without
+  `allowCustomValue`, an unmatched external value is dropped
+- the combobox also renders a built-in "Create X" row as a click affordance
+  when typing has no matches
 - custom options still take precedence over free-form acceptance when they
   match and are chosen explicitly
+
+For **richer create-new UX** — custom label, icon, persistence callback, or
+"create only when the query isn't already a known value" — prefer a
+`type: 'custom'` option with `condition` (see the Create New story). The two
+mechanisms are independent and can be combined.
 
 Display rules:
 
@@ -775,6 +809,52 @@ object-form `render` is aliased one-to-one to `slots`, so existing code
 continues to work unchanged through `v1.x`.
 
 ## Changelog
+
+### 2026-05-17
+
+- **Added `#suffix` slot.** Rendered after the input (input mode) or label
+  (button mode). Providing the slot replaces the default chevron — consumers
+  render their own fallback for the unselected/closed state. Canonical use
+  is an inline clear button; the slot's button must `stopPropagation` on
+  `click` and `pointerdown` so the press does not toggle the popover.
+
+- **`condition` is now authoritative for custom rows.** A `type: 'custom'`
+  row's `condition({ query })` is consulted even before the user types
+  since opening, so it can fully gate its own visibility based on selection
+  state and the typed query. Selectable rows are unchanged — they still
+  skip query filtering until the user types.
+
+- **Decided against a dedicated `clearable` prop (#658).** The `#suffix`
+  slot plus `v-model` already cover the clear-button pattern with no
+  loss of expressiveness. The story at `stories/Clearable.vue` is the
+  canonical example.
+
+- **Decided against a dedicated `createOption` prop (#661).** The
+  existing `type: 'custom'` option shape, combined with the authoritative
+  `condition`, expresses the "create new" pattern in ~15 lines of consumer
+  code. A `createOption` prop would be pure sugar over the same primitive.
+  The story at `stories/CreateNew.vue` is the canonical example.
+
+- **`#659` deferred.** Suppressing the popover-header search input when
+  `#trigger` already contains an input still requires a Combobox-level
+  change (a `hideSearchInput` prop or similar). Will revisit when a
+  concrete consumer needs it.
+
+- **Slot-prop symmetry across `#trigger` / `#prefix` / `#suffix`.** All
+  three slots now receive the same shape (`ComboboxSlotProps`). `#prefix`
+  previously received no props; it now gets `{ open, disabled, query,
+  selectedOption, displayValue }` for parity. `selectedOption` is always
+  `null` inside `#prefix` because the prefix only renders pre-selection,
+  but the field is exposed for symmetry. The matching change was made on
+  `MultiSelect` (added `query` to `#trigger`; aligned `#suffix`) and
+  `Select` (added the shared shape to `#prefix` / `#suffix`).
+
+- **`allowCustomValue` reframed as the free-form-acceptance flag.** The
+  prop docs and spec now lead with its distinctive behavior — accepting
+  arbitrary typed-or-set strings into the model — rather than the
+  "creatable option" framing. For richer create-new UX, prefer
+  `type: 'custom'` with `condition` (Create New story). The two are
+  independent.
 
 ### 2026-04-24
 

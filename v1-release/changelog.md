@@ -276,6 +276,30 @@ so editors hint at the rename. The legacy `#option` slot still passes
 Root renders as a transparent layout box so the trigger sizes like
 `Select` in flex/grid containers. Query decoupled from model in button mode.
 
+### Combobox / MultiSelect — `#suffix` slot replaces the chevron
+
+New `#suffix` slot on `Combobox` (input and button modes) and `MultiSelect`,
+mirroring the existing slot on `Select`. Providing the slot replaces the
+default chevron — render an explicit chevron fallback when your content is
+conditional. Canonical use is an inline clear button. See
+`Combobox/stories/Clearable.vue`.
+
+### Combobox — `condition` authoritative for `type: 'custom'` rows
+
+A custom row's `condition({ query })` is now consulted even before the user
+types since opening, so it can fully gate its own visibility based on
+selection state and the typed query. Selectable rows are unchanged. This
+makes "create new" patterns expressible directly via `condition`, with no
+need for a dedicated `createOption` prop. See `Combobox/stories/CreateNew.vue`.
+
+### MultiSelect — `#summary` suppresses the phantom sizer
+
+The trigger's default behavior pins a minimum width derived from the
+worst-case default summary (`placeholder` vs `"N selected"`) so the
+trigger doesn't jitter as the count changes. That sizer can't predict
+custom text, so it's now skipped when `#summary` is provided — the
+trigger becomes content-sized and the consumer owns the width.
+
 ### InputLabel — slot polish
 
 The default required indicator is not rendered when `#label` is used

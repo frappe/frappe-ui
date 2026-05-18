@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
-import { Button, Breadcrumbs } from 'frappe-ui'
+import { Button, Badge, Breadcrumbs } from 'frappe-ui'
 import LucideSun from '~icons/lucide/sun'
 import LucideMoon from '~icons/lucide/moon-star'
 import LucideSearch from '~icons/lucide/search'
@@ -67,6 +67,8 @@ const { meta_k } = useMagicKeys()
 whenever(meta_k, (n) => {
   if (n) state.searchDialog = true
 })
+
+const devBranch = typeof __DEV_BRANCH__ !== 'undefined' ? __DEV_BRANCH__ : ''
 </script>
 
 <template>
@@ -110,6 +112,18 @@ whenever(meta_k, (n) => {
           Docs
         </a>
 
+        <Badge
+          v-if="devBranch"
+          :title="`git branch: ${devBranch}`"
+          theme="orange"
+          variant="outline"
+        >
+          <template #prefix>
+            <span class="lucide-git-branch" />
+          </template>
+          {{ devBranch }}
+        </Badge>
+
         <Button class="hidden md:flex" @click="state.searchDialog = true">
           <template #prefix>
             <LucideSearch class="size-4" />
@@ -117,7 +131,9 @@ whenever(meta_k, (n) => {
           Search
 
           <template #suffix>
-            <span class="flex gap-1 items-center ml-auto text-xs text-ink-gray-5">
+            <span
+              class="flex gap-1 items-center ml-auto text-xs text-ink-gray-5"
+            >
               <LucideCommand class="size-3" />
               K
             </span>

@@ -52,12 +52,21 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { ToastAction, ToastClose, ToastDescription, ToastRoot } from 'reka-ui'
 import CircleCheck from '../../../icons/CircleCheckIcon.vue'
+import { warnDeprecated } from '../../utils/warnDeprecated'
 import type { ToastProps } from './types'
 
 const props = defineProps<ToastProps>()
+
+onMounted(() => {
+  warnDeprecated(
+    `<Toast />`,
+    `the imperative toast(...) API mounted via <FrappeUIProvider />`,
+    'https://ui.frappe.io/docs/components/toast',
+  )
+})
 
 const emit = defineEmits<{
   (e: 'update:open', value: boolean): void

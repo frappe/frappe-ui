@@ -1,42 +1,40 @@
-<template>
-  <FrappeUIProvider>
-    <Story title="Toast Examples" :layout="{ width: 420 }">
-      <Variant title="Info / Success / Warning / Error">
-        <div class="flex flex-wrap gap-2">
-          <Button label="Info" @click="showInfo" />
-          <Button label="Success" @click="showSuccess" />
-          <Button label="Warning" @click="showWarning" />
-          <Button label="Error" @click="showError" />
-        </div>
-      </Variant>
-    </Story>
-  </FrappeUIProvider>
-</template>
-
 <script setup lang="ts">
-import { Button, FrappeUIProvider, toast } from 'frappe-ui'
-
-function resetToasts() {
-  toast.removeAll()
-}
-
-function showInfo() {
-  resetToasts()
-  toast.info('Saved successfully')
-}
-
-function showSuccess() {
-  resetToasts()
-  toast.success('Workspace created')
-}
-
-function showWarning() {
-  resetToasts()
-  toast.warning('You have unsaved changes')
-}
-
-function showError() {
-  resetToasts()
-  toast.error('Failed to save changes')
-}
+import { Button, toast } from 'frappe-ui'
 </script>
+
+<template>
+  <Button label="Workspace created" @click="toast.success('Workspace created')" />
+  <Button label="Link copied" @click="toast.info('Link copied to clipboard')" />
+  <Button
+    label="Comment posted"
+    @click="
+      toast.message('Comment posted', {
+        description: '“Looks good — shipping it!”',
+      })
+    "
+  />
+  <Button
+    label="Profile updated"
+    @click="
+      toast.success('Profile updated', {
+        description: 'Your changes have been saved.',
+      })
+    "
+  />
+  <Button
+    label="Payment failed"
+    @click="
+      toast.error('Payment failed', {
+        description: 'Your card was declined. Try a different one.',
+      })
+    "
+  />
+  <Button
+    label="Storage almost full"
+    @click="
+      toast.warning('Storage almost full', {
+        description: 'You have used 9.2 GB of 10 GB. Upgrade to keep syncing.',
+      })
+    "
+  />
+</template>

@@ -121,6 +121,11 @@ type SelectTriggerSlotProps = {
   displayValue: string
 }
 
+// `#trigger`, `#prefix`, and `#suffix` all receive the same shape.
+type SelectSlotProps = SelectTriggerSlotProps
+type SelectPrefixSlotProps = SelectSlotProps
+type SelectSuffixSlotProps = SelectSlotProps
+
 type SelectOptionSlotProps = {
   option: Exclude<SelectOption, string>
 }
@@ -130,10 +135,13 @@ Supported slots:
 
 - `#trigger="{ open, disabled, selectedOption, displayValue }"`
   - advanced trigger customization
-- `#prefix`
-  - convenience slot inside the default trigger shell
-- `#suffix`
-  - convenience slot inside the default trigger shell
+- `#prefix="{ open, disabled, selectedOption, displayValue }"`
+  - convenience slot inside the default trigger shell. `selectedOption`
+    is always `null` here (prefix renders pre-selection)
+- `#suffix="{ open, disabled, selectedOption, displayValue }"`
+  - convenience slot inside the default trigger shell. **Replaces the
+    default chevron** — render an explicit chevron fallback when your
+    slot content is conditional
 - `#item-prefix="{ option }"`
 - `#item-label="{ option }"`
 - `#item-suffix="{ option }"`

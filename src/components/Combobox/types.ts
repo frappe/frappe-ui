@@ -134,7 +134,16 @@ export interface ComboboxProps extends InputLabelingProps {
   /** Teleport target for the popover content. */
   portalTo?: string | HTMLElement
 
-  /** Accepts the typed query as the value when nothing matches. */
+  /**
+   * Free-form acceptance: the typed query is accepted as the model value
+   * when nothing matches, and external `modelValue` updates with unknown
+   * strings are preserved. The combobox also renders a built-in "Create X"
+   * row as a click affordance.
+   *
+   * For richer create-new UX (custom label / icon / persistence callback),
+   * prefer a `type: 'custom'` option with `condition` instead — see the
+   * Create New story. The two are independent and can be combined.
+   */
   allowCustomValue?: boolean
 
   /** Replaces the results with a loading state. */
@@ -167,6 +176,16 @@ export interface ComboboxTriggerSlotProps {
   displayValue: string
 }
 
+/**
+ * Shared shape for `#trigger`, `#prefix`, and `#suffix`. `selectedOption`
+ * is always `null` in `#prefix` because the prefix only renders before a
+ * selection — the field is still exposed for slot-prop symmetry across
+ * the trio.
+ */
+export type ComboboxSlotProps = ComboboxTriggerSlotProps
+export type ComboboxPrefixSlotProps = ComboboxSlotProps
+export type ComboboxSuffixSlotProps = ComboboxSlotProps
+
 export interface ComboboxItemSlotProps {
   /** Item currently being rendered. */
   item: ComboboxSelectableOption | ComboboxCustomOption
@@ -198,8 +217,18 @@ export interface ComboboxSlots {
   /** Overrides the rendered description content. */
   description?: () => any
 
-  /** Content rendered before the default input. */
-  prefix?: () => any
+  /** Content rendered before the default input. Receives the same shape
+   * as `#trigger` and `#suffix` (`ComboboxSlotProps`). */
+  prefix?: (props: ComboboxPrefixSlotProps) => any
+
+  /**
+   * Content rendered after the input (input mode) or label (button mode).
+   * Providing this slot **replaces the default chevron** — render your
+   * own fallback (e.g. the chevron) when your slot content is conditional.
+   * Common use: an inline clear button. Use `@click.stop` and
+   * `@pointerdown.stop` so the press doesn't toggle the popover.
+   */
+  suffix?: (props: ComboboxSuffixSlotProps) => any
 
   /** Shared content rendered before the standard row label. */
   'item-prefix'?: (props: ComboboxItemSlotProps) => any

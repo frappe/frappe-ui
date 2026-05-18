@@ -2,7 +2,14 @@ name: Barista — PR Review
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
+    # Intentionally no `synchronize` — re-reviews on every push were getting
+    # cancelled by the next push. Use `/barista review` in a PR comment to
+    # request a fresh review after pushing fixes.
+    types: [opened, reopened, ready_for_review]
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - '.changeset/**'
   issue_comment:
     types: [created]
   workflow_dispatch:
@@ -31,6 +38,7 @@ jobs:
       vars.BARISTA_ENABLED == 'true' && (
         (
           github.event_name == 'pull_request' &&
+          github.event.pull_request.state == 'open' &&
           github.event.pull_request.draft == false &&
           github.event.pull_request.head.repo.full_name == github.repository
         ) ||
@@ -38,6 +46,7 @@ jobs:
         (
           github.event_name == 'issue_comment' &&
           github.event.issue.pull_request != null &&
+          github.event.issue.state == 'open' &&
           contains(github.event.comment.body, '/barista review') &&
           (
             github.event.comment.author_association == 'OWNER' ||

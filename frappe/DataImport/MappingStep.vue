@@ -14,7 +14,7 @@
                     Change the mapping of columns from your file to fields in the system
                 </div>
             </div>
-            
+
             <div class="flex flex-col lg:flex-row space-y-2 lg:space-x-2 lg:space-y-0">
                 <Button v-if="mappingUpdated" label="Reset Mapping" @click="resetMapping" />
                 <Button label="Continue" variant="solid" @click="$emit('updateStep', 'preview')" />
@@ -36,7 +36,7 @@
                     <Autocomplete
                         :model-value="columnMappings[columnsFromFile[i - 1]]"
                         :options="columnsFromSystem"
-                        placeholder="Select field" 
+                        placeholder="Select field"
                         @update:model-value="(val: any) => updateColumnMappings(i, val)"
                     />
                 </template>
@@ -48,7 +48,7 @@
 import type { DataImport, DataImports } from './types';
 import { fieldsToIgnore, getBadgeColor, getPreviewData } from './dataImport'
 import { computed, nextTick, onMounted, ref } from 'vue';
-import { toast } from "../../src/components/Toast/index"
+import { toast } from "../../src/components/Toast/toast"
 import Autocomplete from '../../src/components/Autocomplete/Autocomplete.vue';
 import Badge from '../../src/components/Badge/Badge.vue';
 import Button from '../../src/components/Button/Button.vue';
@@ -180,7 +180,7 @@ const resetMapping = () => {
 
 const getChildTableName = (parent: string, child: string) => {
     let parentFields = props.fields.data?.docs.find((doc: any) => doc.name == parent)?.fields || [];
-    
+
     let childField = parentFields.filter((field: any) => field.options == child)[0]
     return childField?.label || child;
 }

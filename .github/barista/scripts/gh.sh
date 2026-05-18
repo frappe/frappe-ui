@@ -13,6 +13,10 @@
 #   ./gh.sh pr view 123
 #   ./gh.sh pr view 123 --comments
 #   ./gh.sh pr diff 123
+#   ./gh.sh pr checks 123
+#   ./gh.sh pr status
+#   ./gh.sh release list --limit 5
+#   ./gh.sh release view <tag>
 
 set -euo pipefail
 
@@ -32,10 +36,10 @@ SUB1="${1:-}"
 SUB2="${2:-}"
 CMD="$SUB1 $SUB2"
 case "$CMD" in
-  "issue view"|"issue list"|"search issues"|"label list"|"pr view"|"pr diff")
+  "issue view"|"issue list"|"search issues"|"label list"|"pr view"|"pr diff"|"pr checks"|"pr status"|"release list"|"release view")
     ;;
   *)
-    echo "Error: only 'issue view', 'issue list', 'search issues', 'label list', 'pr view', 'pr diff' are allowed" >&2
+    echo "Error: only 'issue view', 'issue list', 'search issues', 'label list', 'pr view', 'pr diff', 'pr checks', 'pr status', 'release list', 'release view' are allowed" >&2
     exit 1
     ;;
 esac
@@ -84,9 +88,15 @@ if [[ "$CMD" == "search issues" ]]; then
     exit 1
   fi
   gh "$SUB1" "$SUB2" "$QUERY" --repo "$REPO" "${FLAGS[@]}"
-elif [[ "$CMD" == "issue view" || "$CMD" == "pr view" || "$CMD" == "pr diff" ]]; then
+elif [[ "$CMD" == "issue view" || "$CMD" == "pr view" || "$CMD" == "pr diff" || "$CMD" == "pr checks" ]]; then
   if [[ ${#POSITIONAL[@]} -ne 1 ]] || ! [[ "${POSITIONAL[0]}" =~ ^[0-9]+$ ]]; then
     echo "Error: $CMD requires exactly one numeric number" >&2
+    exit 1
+  fi
+  gh "$SUB1" "$SUB2" "${POSITIONAL[0]}" "${FLAGS[@]}"
+elif [[ "$CMD" == "release view" ]]; then
+  if [[ ${#POSITIONAL[@]} -ne 1 ]] || ! [[ "${POSITIONAL[0]}" =~ ^[A-Za-z0-9._-]+$ ]]; then
+    echo "Error: $CMD requires exactly one tag (alphanumerics, dot, dash, underscore)" >&2
     exit 1
   fi
   gh "$SUB1" "$SUB2" "${POSITIONAL[0]}" "${FLAGS[@]}"
