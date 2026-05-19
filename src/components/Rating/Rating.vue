@@ -58,7 +58,8 @@
           :data-state="halfState(index - 0.5)"
           aria-hidden="true"
         >
-          <LucideStar
+          <component
+            :is="props.icon"
             fill="currentColor"
             :class="['rating-icon', sizeClass]"
           />
@@ -68,7 +69,8 @@
           :data-state="halfState(index)"
           aria-hidden="true"
         >
-          <LucideStar
+          <component
+            :is="props.icon"
             fill="currentColor"
             :class="['rating-icon', sizeClass]"
           />
@@ -101,6 +103,7 @@ const props = withDefaults(defineProps<RatingProps>(), {
   size: 'md',
   readonly: false,
   step: 1,
+  icon: () => LucideStar,
 })
 
 const model = defineModel<number>({ default: 0 })
