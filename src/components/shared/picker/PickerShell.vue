@@ -123,7 +123,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{
   (e: 'focus'): void
-  (e: 'click'): void
+  (e: 'click', event: MouseEvent): void
   (e: 'blur'): void
   (e: 'enter'): void
   (e: 'open'): void
@@ -199,10 +199,10 @@ function onFocus() {
   emit('focus')
 }
 
-function onClick() {
+function onClick(e: MouseEvent) {
   typing.value = true
   if (props.openOnClick && !open.value) open.value = true
-  emit('click')
+  emit('click', e)
 }
 
 function onBlur(e: FocusEvent) {
