@@ -21,16 +21,24 @@
       class="rating-stars inline-flex shrink-0 gap-0.5 leading-none focus:outline-none"
       :class="hasLabeling ? null : (attrs.class as any)"
       :style="hasLabeling ? null : (attrs.style as any)"
-      role="radiogroup"
+      :role="isSliderMode ? 'slider' : 'radiogroup'"
+      :tabindex="rootTabindex"
       :aria-labelledby="labelledBy"
       :aria-describedby="describedBy"
       :aria-errormessage="hasError ? errorMessageId : undefined"
       :aria-required="props.required || undefined"
       :aria-invalid="hasError || undefined"
       :aria-readonly="props.readonly || undefined"
+      :aria-orientation="isSliderMode ? 'horizontal' : undefined"
+      :aria-valuemin="isSliderMode ? 0 : undefined"
+      :aria-valuemax="isSliderMode ? starCount : undefined"
+      :aria-valuenow="isSliderMode ? savedValue : undefined"
+      :aria-valuetext="isSliderMode ? formatValue(savedValue) : undefined"
+      :data-readonly="props.readonly || undefined"
       data-slot="control"
       v-bind="dataAttrs"
       @mouseleave="onLeave"
+      @keydown="onKeydown"
     >
       <button
         v-for="index in starCount"
@@ -45,13 +53,14 @@
         :data-index="index"
         :data-state="starState(index)"
         :tabindex="starTabindex(index)"
-        role="radio"
-        :aria-checked="index === savedValue"
-        :aria-posinset="index"
-        :aria-setsize="starCount"
-        :aria-label="`${index} of ${starCount}`"
+        :role="isSliderMode ? undefined : 'radio'"
+        :aria-checked="isSliderMode ? undefined : index === savedValue"
+        :aria-posinset="isSliderMode ? undefined : index"
+        :aria-setsize="isSliderMode ? undefined : starCount"
+        :aria-label="isSliderMode ? undefined : `${index} of ${starCount}`"
         @mousemove="onStarMove($event, index)"
         @click="onStarClick($event, index)"
+        @focus="focusedIndex = index"
       >
         <span
           class="rating-half rating-half-left"
@@ -89,7 +98,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, useAttrs, useSlots, watchEffect } from 'vue'
+import { computed, ref, useAttrs, useSlots, watchEffect, nextTick } from 'vue'
 import { useInputLabeling } from '../../composables/useInputLabeling'
 import { warnDeprecated } from '../../utils/warnDeprecated'
 import InputLabel from '../InputLabeling/InputLabel.vue'
@@ -124,8 +133,10 @@ defineSlots<{
 }>()
 
 const starCount = computed(() => props.max ?? props.rating_from ?? 5)
+const isSliderMode = computed(() => props.step === 0.5)
 
 const hoveredValue = ref<number | null>(null)
+const focusedIndex = ref<number>(0)
 const rootRef = ref<HTMLElement>()
 
 const {
@@ -180,6 +191,11 @@ function starState(index: number) {
   return halfState(index)
 }
 
+function formatValue(v: number) {
+  if (v == null) return ''
+  return v % 1 === 0 ? String(v) : v.toFixed(1)
+}
+
 function hitTestValue(event: MouseEvent, index: number) {
   if (props.step !== 0.5) return index
   const rect = (event.currentTarget as HTMLElement).getBoundingClientRect()
@@ -206,11 +222,107 @@ function onStarClick(event: MouseEvent, index: number) {
   commit(hitTestValue(event, index))
 }
 
+// In radiogroup mode the currently-selected star (or the first one when no
+// value is set) is the only tabbable button. In slider mode the root is the
+// tabstop and individual buttons are removed from the tab order.
 function starTabindex(index: number) {
+  if (isSliderMode.value) return -1
   if (props.readonly) return -1
   const selected = Math.ceil(savedValue.value)
   const tabbable = selected > 0 ? selected : 1
   return index === tabbable ? 0 : -1
+}
+
+const rootTabindex = computed(() => {
+  if (!isSliderMode.value) return undefined
+  return props.readonly ? -1 : 0
+})
+
+function onKeydown(e: KeyboardEvent) {
+  if (props.readonly) return
+  const max = starCount.value
+  const step = props.step ?? 1
+
+  if (isSliderMode.value) {
+    let next: number | null = null
+    switch (e.key) {
+      case 'ArrowRight':
+      case 'ArrowUp':
+        next = Math.min(max, savedValue.value + step)
+        break
+      case 'ArrowLeft':
+      case 'ArrowDown':
+        next = Math.max(0, savedValue.value - step)
+        break
+      case 'Home':
+        next = 0
+        break
+      case 'End':
+        next = max
+        break
+      case 'PageUp':
+        next = Math.min(max, savedValue.value + 1)
+        break
+      case 'PageDown':
+        next = Math.max(0, savedValue.value - 1)
+        break
+      default:
+        if (/^[0-9]$/.test(e.key)) {
+          next = Math.min(max, parseInt(e.key, 10))
+        }
+    }
+    if (next !== null) {
+      e.preventDefault()
+      model.value = next
+    }
+    return
+  }
+
+  // Radiogroup mode — arrows move focus AND selection (WAI-ARIA "automatic"
+  // pattern), Home/End jump to ends, Space/Enter selects the focused star.
+  const current =
+    focusedIndex.value ||
+    Math.max(1, Math.min(max, Math.ceil(savedValue.value) || 1))
+  let next: number | null = null
+  switch (e.key) {
+    case 'ArrowRight':
+    case 'ArrowDown':
+      next = Math.min(max, current + 1)
+      break
+    case 'ArrowLeft':
+    case 'ArrowUp':
+      next = Math.max(1, current - 1)
+      break
+    case 'Home':
+      next = 1
+      break
+    case 'End':
+      next = max
+      break
+    case ' ':
+    case 'Enter':
+      next = current
+      break
+    default:
+      if (/^[0-9]$/.test(e.key)) {
+        const n = parseInt(e.key, 10)
+        if (n === 0) {
+          return
+        }
+        next = Math.min(max, n)
+      }
+  }
+  if (next !== null) {
+    e.preventDefault()
+    model.value = next
+    focusedIndex.value = next
+    nextTick(() => {
+      const btn = rootRef.value?.querySelector(
+        `[data-index="${next}"]`,
+      ) as HTMLButtonElement | null
+      btn?.focus()
+    })
+  }
 }
 
 const hasLabeling = computed(() => {
