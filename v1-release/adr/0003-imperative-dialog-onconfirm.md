@@ -55,4 +55,4 @@ Additional considerations the implementation surfaced:
 
 - Implementation: `src/utils/dialog.ts` — `makeClose`, `makeSetError`, the `try { await onConfirm(...); close() } catch { setError(...) }` shape in `confirm()`, `prompt()`, and `makeActionRunner()`.
 - Story: `src/components/Dialog/stories/Imperative.vue` — covers auto-close, optimistic close, throw-to-stay-open, custom `actions[]`, `danger` preset, and the close-behaviour matrix in a single comment block.
-- User-facing docs: `v1-release/migration/dialog.md` Section 7, `v1-release/08f-dialog-spec.md` "Imperative API".
+- User-facing docs: `v1-release/migration.md` Dialog section walkthrough 7, `v1-release/08f-dialog-spec.md` "Imperative API".
