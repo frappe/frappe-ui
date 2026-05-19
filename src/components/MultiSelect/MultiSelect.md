@@ -22,6 +22,11 @@ Options can be split into named groups. Group labels render above each group's i
 
 <ComponentPreview name="MultiSelect-Grouped" />
 
+## Async Options
+Fetch options from a server as the user types. Listen to `@update:query`, debounce the request, and feed the results back into `:options`. The `:loading` prop swaps the result body for a loading state. Two things to watch for: drop stale responses with a request id so a slower earlier query can't overwrite the latest results, and merge currently-selected items into the options array so chips stay resolvable after the query narrows the list.
+
+<ComponentPreview name="MultiSelect-AsyncOptions" />
+
 ## Custom Footer
 Replace the default Clear All / Select All footer with a custom one. The slot receives `clearAll`, `selectAll`, `selectedOptions`, and `query`.
 
