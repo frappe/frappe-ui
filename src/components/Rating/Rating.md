@@ -23,23 +23,25 @@ role to `slider` so screen readers can announce non-integer values.
 
 ## Value tooltip
 
-`showValueTooltip` renders a tooltip with the current (or previewed) value
-on hover, formatted as `"{value} / {max}"`.
+`showTooltip` renders a tooltip with the current (or previewed) value
+on hover, formatted as `"{value} / {max}"`. The tooltip side can be set
+with `side` (defaults to `"right"`).
 
 <ComponentPreview name="Rating-Tooltip" />
 
 ## Clearable
 
-`allowClear` lets users clear the rating by clicking the currently-selected
+`clearable` lets users clear the rating by clicking the currently-selected
 value. The `0` digit on the keyboard also clears the value.
 
 <ComponentPreview name="Rating-Clearable" />
 
 ## Custom icon
 
-`icon` accepts a Vue component — typically an auto-imported lucide icon
-(`import LucideHeart from '~icons/lucide/heart'`). String names aren't
-supported, to keep the prop consistent with other frappe-ui icon props.
+`icon` accepts either a Vue component — typically an auto-imported lucide
+icon (`import LucideHeart from '~icons/lucide/heart'`) — or a string
+class name (e.g. `"lucide-zap"`) that is rendered on a `<span>` for use
+with the shared Lucide Tailwind utility.
 
 <ComponentPreview name="Rating-CustomIcon" />
 

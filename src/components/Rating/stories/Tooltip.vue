@@ -9,7 +9,7 @@ const value = ref(3.5)
   <Rating
     v-model="value"
     :step="0.5"
-    showValueTooltip
+    showTooltip
     label="Hover for the value"
   />
 </template>

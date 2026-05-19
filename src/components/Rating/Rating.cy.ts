@@ -117,13 +117,13 @@ describe('Rating', () => {
     })
   })
 
-  describe('allowClear', () => {
-    it('clicking the same value clears to 0 when allowClear is set', () => {
+  describe('clearable', () => {
+    it('clicking the same value clears to 0 when clearable is set', () => {
       const onUpdate = cy.spy().as('onUpdate')
       cy.mount(Rating, {
         props: {
           modelValue: 3,
-          allowClear: true,
+          clearable: true,
           'onUpdate:modelValue': onUpdate,
         },
       })
@@ -131,7 +131,7 @@ describe('Rating', () => {
       cy.get('@onUpdate').should('have.been.calledWith', 0)
     })
 
-    it('clicking the same value keeps it when allowClear is false', () => {
+    it('clicking the same value keeps it when clearable is false', () => {
       const onUpdate = cy.spy().as('onUpdate')
       cy.mount(Rating, {
         props: { modelValue: 3, 'onUpdate:modelValue': onUpdate },
@@ -146,16 +146,16 @@ describe('Rating', () => {
     })
   })
 
-  describe('showValueTooltip', () => {
+  describe('showTooltip', () => {
     it('renders the tooltip when hovering over a star', () => {
       cy.mount(Rating, {
-        props: { modelValue: 0, showValueTooltip: true, max: 5 },
+        props: { modelValue: 0, showTooltip: true, max: 5 },
       })
       cy.get('[role="radio"]').eq(2).trigger('pointermove')
       cy.contains('3 / 5').should('be.visible')
     })
 
-    it('does not render the tooltip when showValueTooltip is false', () => {
+    it('does not render the tooltip when showTooltip is false', () => {
       cy.mount(Rating, { props: { modelValue: 0, max: 5 } })
       cy.get('[role="radio"]').eq(2).trigger('mousemove')
       cy.contains('3 / 5').should('not.exist')
@@ -175,6 +175,14 @@ describe('Rating', () => {
       cy.get('[data-slot="star"]')
         .first()
         .find('[data-test-icon="heart"]')
+        .should('exist')
+    })
+
+    it('renders a string icon class on a span for each star', () => {
+      cy.mount(Rating, { props: { modelValue: 3, icon: 'lucide-zap' } })
+      cy.get('[data-slot="star"]')
+        .first()
+        .find('span.lucide-zap')
         .should('exist')
     })
 

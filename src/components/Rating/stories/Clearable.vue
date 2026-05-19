@@ -8,7 +8,7 @@ const value = ref(3)
 <template>
   <Rating
     v-model="value"
-    allowClear
+    clearable
     label="Click the selected star to clear"
   />
 </template>
