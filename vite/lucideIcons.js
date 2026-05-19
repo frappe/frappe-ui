@@ -4,7 +4,7 @@ import Components from 'unplugin-vue-components/vite'
 import IconsResolver from 'unplugin-icons/resolver'
 
 const VIRTUAL_PREFIX = '~icons/lucide/'
-const RESOLVED_PREFIX = '\0~icons/lucide/'
+const RESOLVED_PREFIX = 'virtual:frappe-ui-lucide/'
 
 export function lucideIcons(options = {}) {
   const resolverObj = {
@@ -47,8 +47,9 @@ function LucideIconsPlugin(icons) {
       }
     },
     load(id) {
-      if (!id.startsWith(RESOLVED_PREFIX)) return
-      const iconName = id.slice(RESOLVED_PREFIX.length)
+      const normalizedId = id.split('?', 1)[0]
+      if (!normalizedId.startsWith(RESOLVED_PREFIX)) return
+      const iconName = normalizedId.slice(RESOLVED_PREFIX.length)
       const svg = icons[iconName]
       if (!svg) {
         if (!warnedIcons.has(iconName)) {
