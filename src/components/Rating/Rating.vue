@@ -250,21 +250,25 @@ const hasLabeling = computed(() => {
   clip-path: inset(0 0 0 50%);
 }
 
+/* Defaults are passed as the var() fallback rather than set on
+   `.rating-stars` — that way callers can override the color tokens by
+   setting them on any ancestor (e.g. inline style on <Rating>), and
+   inheritance wins instead of being defeated by a direct rule. */
 .rating-half[data-state='filled'] {
-  color: #eab308;
+  color: var(--rating-filled, #eab308); /* yellow-500 */
 }
 .rating-half[data-state='preview'] {
-  color: #fde68a;
+  color: var(--rating-preview, #fde68a); /* yellow-200 */
 }
 .rating-half[data-state='removing'] {
-  color: #fcd34d;
+  color: var(--rating-removing, #fcd34d); /* yellow-300 */
 }
 .rating-half[data-state='empty'] {
-  color: #d1d5db;
+  color: var(--rating-empty, #d1d5db); /* gray-300 */
 }
 
 :global([data-theme='dark']) .rating-half[data-state='empty'] {
-  color: #4b5563;
+  color: var(--rating-empty, #4b5563); /* gray-600 — visible on dark surfaces */
 }
 
 .rating-icon {
