@@ -14,6 +14,7 @@ export default defineConfig({
         'src/**/*.cy.ts',
         'src/**/*.spec.ts',
         'src/**/*.test.ts',
+        'src/**/*.story.vue',
         'src/**/stories/**',
         'src/**/types.ts',
         'src/**/types/**',
