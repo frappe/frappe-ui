@@ -12,7 +12,7 @@ Two cross-cutting conventions to know before reading anything else:
 ## Design principles
 
 - [PHILOSOPHY.md](https://raw.githubusercontent.com/frappe/frappe-ui/main/PHILOSOPHY.md): the 13 rules (P1–P13) that govern API shape across the library — naming, prop design, slots, composition, styling, a11y, deprecation policy.
-- [CONTEXT.md](https://raw.githubusercontent.com/frappe/frappe-ui/main/CONTEXT.md): canonical vocabulary (`open`, `variant`, `theme`, `dismissable`, `bare`, `chrome`, `action`, …). Reference for prop and slot names.
+- [CONTEXT.md](https://raw.githubusercontent.com/frappe/frappe-ui/main/CONTEXT.md): canonical vocabulary (`open`, `variant`, `theme`, `dismissible`, `bare`, `chrome`, `action`, …). Reference for prop and slot names.
 
 ## Getting started
 
@@ -32,7 +32,7 @@ Two cross-cutting conventions to know before reading anything else:
 - [CircularProgressBar](https://ui.frappe.io/docs/components/circularprogressbar): radial progress indicator.
 - [Combobox](https://ui.frappe.io/docs/components/combobox): single-select with search; `v-model` value + `v-model:query`.
 - [DatePicker](https://ui.frappe.io/docs/components/datepicker): date input; also DateRangePicker (range is `string[]`).
-- [Dialog](https://ui.frappe.io/docs/components/dialog): modal overlay; `v-model:open`, `title`/`message`/`icon`/`theme`/`actions`/`dismissable`/`bare`. Imperative API: `dialog.confirm`, `dialog.alert`, `dialog.prompt`.
+- [Dialog](https://ui.frappe.io/docs/components/dialog): modal overlay; `v-model:open`, `title`/`message`/`icon`/`theme`/`actions`/`dismissible`/`bare`. Imperative API: `dialog.confirm`, `dialog.alert`, `dialog.prompt`.
 - [Divider](https://ui.frappe.io/docs/components/divider): horizontal/vertical rule.
 - [Dropdown](https://ui.frappe.io/docs/components/dropdown): action menu anchored to a trigger; takes `options` (flat or grouped).
 - [ErrorMessage](https://ui.frappe.io/docs/components/errormessage): inline error display.
