@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // Adapted from gameplan/NewTaskDialog.vue — a "new task" form with a
 // single full-width primary action that owns the submit. Demonstrates
-// using `dismissable` from a dirty-form flag, the canonical `#default`
+// using `dismissible` from a dirty-form flag, the canonical `#default`
 // slot for the form, and an `#actions` slot that's a single CTA.
 import { computed, ref } from 'vue'
 import { Button, Dialog, FormControl, KeyboardShortcut } from 'frappe-ui'
@@ -26,7 +26,7 @@ async function createTask(close: () => void) {
   <Dialog
     v-model:open="open"
     title="New task"
-    :dismissable="!isDirty"
+    :dismissible="!isDirty"
   >
     <div class="space-y-4">
       <FormControl

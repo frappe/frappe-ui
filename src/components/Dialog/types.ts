@@ -84,7 +84,7 @@ export interface DialogProps {
 
   // Behavior.
   /** Allow outside-click and Escape to close. Default `true`. */
-  dismissable?: boolean
+  dismissible?: boolean
 
   /** Show the top-right close button. Default `true`. */
   showCloseButton?: boolean
@@ -93,7 +93,7 @@ export interface DialogProps {
   bare?: boolean
 
   // Deprecated.
-  /** @deprecated Use `dismissable` (inverted) instead. */
+  /** @deprecated Use `dismissible` (inverted) instead. */
   disableOutsideClickToClose?: boolean
 
   /** @deprecated Use flat top-level props instead. */

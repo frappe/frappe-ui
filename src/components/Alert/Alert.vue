@@ -38,7 +38,7 @@ const icon = computed(() => {
 
 const props = withDefaults(defineProps<AlertProps>(), {
   variant: "subtle",
-  dismissable: true,
+  dismissible: true,
 });
 
 defineSlots<{
@@ -79,7 +79,7 @@ defineSlots<{
     </div>
 
     <button
-      v-if="props.dismissable"
+      v-if="props.dismissible"
       type="button"
       aria-label="Dismiss"
       @click="dismissAlert"

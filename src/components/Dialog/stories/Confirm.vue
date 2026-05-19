@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // Adapted from gameplan/SpaceOptions.vue — "Delete space" confirm.
 // Uses declarative `actions` with a `{ close }` context, `theme: 'red'`,
-// `dismissable: false` so the user must pick an action, and a loading
+// `dismissible: false` so the user must pick an action, and a loading
 // flag wired to the in-flight delete.
 import { ref } from 'vue'
 import { Button, Dialog } from 'frappe-ui'
@@ -28,7 +28,7 @@ async function deleteSpace({ close }: { close: () => void }) {
     title="Delete space"
     message="This will permanently delete the space along with 12 discussions and 4 tasks. This action cannot be undone."
     :icon="{ name: 'lucide-alert-triangle', theme: 'red' }"
-    :dismissable="false"
+    :dismissible="false"
     :show-close-button="false"
     :actions="[
       { label: 'Cancel' },

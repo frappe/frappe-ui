@@ -30,5 +30,5 @@ export interface AlertProps {
    * Whether the alert can be closed by the user
    * @default false
    */
-  dismissable?: boolean
+  dismissible?: boolean
 }

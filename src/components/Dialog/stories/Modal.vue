@@ -2,7 +2,7 @@
 // Adapted from insights/ConnectPostgreSQLDialog.vue — a multi-state form
 // dialog where the primary action's label/theme transitions as the
 // connection is tested. Demonstrates state-driven action buttons inside
-// a non-dismissable dialog.
+// a non-dismissible dialog.
 import { computed, reactive, ref } from 'vue'
 import { Button, Dialog, FormControl } from 'frappe-ui'
 
@@ -34,7 +34,7 @@ const testButton = computed(() => {
   <Dialog
     v-model:open="open"
     title="Connect to PostgreSQL"
-    :dismissable="false"
+    :dismissible="false"
   >
     <div class="flex flex-col gap-4">
       <FormControl label="Host" v-model="db.host" />

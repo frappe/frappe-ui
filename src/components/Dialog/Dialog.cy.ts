@@ -86,13 +86,13 @@ describe('Dialog', () => {
 
   // ---- New behavior props ----------------------------------------------------
 
-  it('dismissable=false blocks outside click and Escape from closing', () => {
+  it('dismissible=false blocks outside click and Escape from closing', () => {
     cy.mount(Dialog, {
       props: {
         open: true,
         title: 'Locked',
         message: 'Cannot dismiss',
-        dismissable: false,
+        dismissible: false,
       },
     })
 
@@ -273,7 +273,7 @@ describe('Dialog', () => {
     cy.get('[role=dialog] [aria-label=Close]').should('not.exist')
   })
 
-  it('inverts `disableOutsideClickToClose` into `dismissable`', () => {
+  it('inverts `disableOutsideClickToClose` into `dismissible`', () => {
     cy.mount(Dialog, {
       props: {
         open: true,

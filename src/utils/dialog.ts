@@ -67,7 +67,7 @@ export interface ConfirmArgs {
    * Whether the dialog can be dismissed via Esc / outside-click / close button.
    * @default true
    */
-  dismissable?: boolean
+  dismissible?: boolean
   /**
    * Invoked when the user clicks the confirm button. Loading state is held
    * for as long as the returned promise is pending. Resolving auto-closes;
@@ -163,7 +163,7 @@ export interface PromptArgs {
    * Whether the dialog can be dismissed via Esc / outside-click / close button.
    * @default true
    */
-  dismissable?: boolean
+  dismissible?: boolean
   /**
    * Invoked when the user submits and required fields pass validation.
    * Promise behavior matches `confirm.onConfirm`.
@@ -346,7 +346,7 @@ export function confirm(args: ConfirmArgs): DialogHandle {
     args.onCancel?.()
   }
 
-  const dismissable = args.dismissable !== false
+  const dismissible = args.dismissible !== false
 
   const resolvedIcon = resolveIcon(args.theme, args.icon)
   const buttonTheme = themeToButtonTheme(args.theme)
@@ -409,8 +409,8 @@ export function confirm(args: ConfirmArgs): DialogHandle {
             title: args.title,
             icon: resolvedIcon,
             size: args.size || 'md',
-            dismissable,
-            showCloseButton: dismissable,
+            dismissible,
+            showCloseButton: dismissible,
             onAfterLeave: () => remove(assignedId),
           },
           {
@@ -530,7 +530,7 @@ export function prompt(args: PromptArgs): DialogHandle {
     args.onCancel?.()
   }
 
-  const dismissable = args.dismissable !== false
+  const dismissible = args.dismissible !== false
 
   const resolvedIcon = resolveIcon(args.theme, args.icon)
   const buttonTheme = themeToButtonTheme(args.theme)
@@ -586,8 +586,8 @@ export function prompt(args: PromptArgs): DialogHandle {
             title: args.title,
             icon: resolvedIcon,
             size: args.size || 'md',
-            dismissable,
-            showCloseButton: dismissable,
+            dismissible,
+            showCloseButton: dismissible,
             onAfterLeave: () => remove(assignedId),
           },
           {
@@ -642,7 +642,7 @@ export type DangerArgs = Omit<ConfirmArgs, 'theme' | 'icon'>
  * `lucide-alert-triangle`, and defaults `confirmLabel` to `'Delete'`. Use
  * for irreversible actions like deleting, revoking, or discarding data.
  *
- * Everything else (actions[], dismissable, onCancel, …) works identically
+ * Everything else (actions[], dismissible, onCancel, …) works identically
  * to `confirm`.
  */
 export function danger(args: DangerArgs): DialogHandle {

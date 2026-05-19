@@ -81,7 +81,7 @@ The "done" components have already converged on these names. A new component or 
 - Form/labeling (`P5`): `label`, `description`, `error`, `required` — via `InputLabelingProps` from `src/composables/useInputLabeling.ts`. Don't redefine.
 - Content: `icon` (`string | Component`, lucide-namespaced strings — `P11`), `placeholder`, `options`.
 - Bounds (any axis — date, number, length, count): `min`, `max`, `step`. Never `minDate`/`maxDate`/`minLength`/`maxLength`/`minValue` — the type already says what's being bounded. Used today by `Slider` and `DatePicker`/`DateTimePicker`/`DateRangePicker`; a new component bounding a numeric or temporal axis must reuse these names.
-- Dismiss/close: `dismissable` (outside click + Esc, default `true`). Not `closable`, `dismissible`, `closeable`, `disableOutsideClickToClose`.
+- Dismiss/close: `dismissible` (outside click + Esc, default `true`). Not `closable`, `closeable`, `disableOutsideClickToClose`.
 - Picker typing: `typeable` (default `true`). Not `allowCustom`, `readonly`, `allowCustomValue`.
 - Open-after-select: `keepOpen` (default `false`). Not `autoClose`.
 
@@ -100,7 +100,7 @@ The "done" components have already converged on these names. A new component or 
 Any one of these is a `Concerns`-level finding. Suggest the canonical-vocabulary alternative inline.
 
 1. **A new boolean flag that adds a UI affordance.** `allowClear`, `showCloseButton`, `clearable`, `hideSearch`, `withFooter`, `hasIcon`. Almost always a slot (`#suffix`, `#footer`, `#header`) covers it without growing the prop surface. Ask: "could a caller build this with `#suffix` + a Button?" If yes, the prop shouldn't exist.
-2. **A new prop that renames an existing one for this component.** E.g. `closable` instead of `dismissable`, `show` instead of `open`, `title` instead of `label`, `iconLeft`/`iconRight` instead of `#prefix`/`#suffix`. Cite the canonical name and the component(s) already using it.
+2. **A new prop that renames an existing one for this component.** E.g. `closable` instead of `dismissible`, `show` instead of `open`, `title` instead of `label`, `iconLeft`/`iconRight` instead of `#prefix`/`#suffix`. Cite the canonical name and the component(s) already using it.
 3. **A new size/variant/theme enum that doesn't import the shared union.** Inline `'sm' | 'md' | 'lg' | 'xl'` instead of `InputSize`; inline `'subtle' | 'outline' | 'ghost'` instead of `InputVariant`. The shared types live in `src/composables/inputTypes.ts`. Re-declaration is drift, not "explicit".
 4. **A boolean that switches the component's contract** (value type, emitted shape, what kind of options it takes). That's a split (`P8`) — `Select` vs `MultiSelect` vs `Combobox`. Don't add `multi` / `searchable` / `creatable`.
 5. **A config-blob prop** that bundles unrelated fields into one object (`P3`). The Dialog `options` blob is a known wart kept for back-compat — don't propagate it.
@@ -123,7 +123,7 @@ The test is: *could three other components plausibly want this?* If yes, push fo
 
 If no caller beyond this component could ever want it (it's truly domain-bound), the new name is fine — but it should still match the **shape** rules (primitive types, named axis, no config blob, no semantic color axis).
 
-**Positive signal**: if the PR *renames* a domain-prefixed prop to the generic name (e.g. `minDate` → `min`, `iconLeft` → `#prefix`, `closable` → `dismissable`), call it out approvingly in the verdict. That's the direction the library should be moving.
+**Positive signal**: if the PR *renames* a domain-prefixed prop to the generic name (e.g. `minDate` → `min`, `iconLeft` → `#prefix`, `closable` → `dismissible`), call it out approvingly in the verdict. That's the direction the library should be moving.
 
 ## What to cite
 
@@ -182,7 +182,7 @@ Then post a fresh verdict + bullets.
 **Good — concerns (API drift):**
 > **Concerns** — public surface grows where existing vocabulary covers it.
 >
-> - `src/components/Toast/types.ts:31` — new `closable` prop. Alert and Dialog already spell this `dismissable` (`Alert/types.ts:33`, `Dialog/types.ts:87`). Rename to `dismissable` to keep the v1 vocabulary tight (`P13` + canonical-vocab list).
+> - `src/components/Toast/types.ts:31` — new `closable` prop. Alert and Dialog already spell this `dismissible` (`Alert/types.ts:33`, `Dialog/types.ts:87`). Rename to `dismissible` to keep the v1 vocabulary tight (`P13` + canonical-vocab list).
 > - `src/components/Combobox/types.ts:147` — `allowClear: boolean`. A clear button is `#suffix` + a `<Button icon="lucide-x">`; the prop hard-codes a UI affordance the slot already supports (`P6`, smell #1). Drop the prop, document the `#suffix` recipe in stories.
 > - `src/components/Combobox/types.ts:5` — inline `'sm' | 'md' | 'lg' | 'xl'` redeclares `InputSize` from `src/composables/inputTypes.ts`. Import the shared type so the four picker sizes stay locked together.
 >
