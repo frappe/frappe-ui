@@ -15,9 +15,15 @@
         <slot name="label" v-bind="slotProps" />
       </template>
     </InputLabel>
-    <div
-      :id="inputId"
-      ref="rootRef"
+    <Tooltip
+      :text="tooltipText ?? ''"
+      :disabled="!props.showValueTooltip || !tooltipText"
+      :hoverDelay="0"
+      :placement="placement"
+    >
+      <div
+        :id="inputId"
+        ref="rootRef"
       class="rating-stars inline-flex shrink-0 gap-0.5 leading-none focus:outline-none"
       :class="hasLabeling ? null : (attrs.class as any)"
       :style="hasLabeling ? null : (attrs.style as any)"
@@ -86,6 +92,7 @@
         </span>
       </button>
     </div>
+    </Tooltip>
     <InputDescription
       v-if="showDescription || $slots.description"
       :id="descriptionId"
@@ -105,6 +112,7 @@ import InputLabel from '../InputLabeling/InputLabel.vue'
 import InputDescription from '../InputLabeling/InputDescription.vue'
 import InputError from '../InputLabeling/InputError.vue'
 import LabelingWrapper from '../InputLabeling/LabelingWrapper.vue'
+import Tooltip from '../Tooltip/Tooltip.vue'
 import LucideStar from '~icons/lucide/star'
 import type { RatingProps } from './types'
 
@@ -112,6 +120,9 @@ const props = withDefaults(defineProps<RatingProps>(), {
   size: 'md',
   readonly: false,
   step: 1,
+  allowClear: false,
+  showValueTooltip: false,
+  placement: 'right',
   icon: () => LucideStar,
 })
 
@@ -212,8 +223,15 @@ function onLeave() {
   hoveredValue.value = null
 }
 
+const tooltipText = computed(() => {
+  const display = props.readonly ? savedValue.value : hoveredValue.value
+  if (!display) return null
+  return `${formatValue(display)} / ${starCount.value}`
+})
+
 function commit(next: number) {
-  const value = Math.max(0, Math.min(starCount.value, roundToStep(next)))
+  let value = Math.max(0, Math.min(starCount.value, roundToStep(next)))
+  if (props.allowClear && value === savedValue.value) value = 0
   model.value = value
 }
 
@@ -307,6 +325,10 @@ function onKeydown(e: KeyboardEvent) {
       if (/^[0-9]$/.test(e.key)) {
         const n = parseInt(e.key, 10)
         if (n === 0) {
+          if (props.allowClear) {
+            e.preventDefault()
+            model.value = 0
+          }
           return
         }
         next = Math.min(max, n)
