@@ -16,7 +16,7 @@ spec. This document is the practical checklist.
 | `:options="{ title: 'X' }"`                | `title="X"`                                 | Flatten every key in `options` to a top-level prop.    |
 | `:options="{ size: 'sm' }"`                | `size="sm"`                                 | Same scale (`xs` → `7xl`).                             |
 | `:options="{ actions: [...] }"`            | `:actions="[...]"`                          | Array-of-`{label, variant, theme, onClick}` unchanged. |
-| `disableOutsideClickToClose`               | `:dismissable="false"`                      | Inverted boolean. Default is `true`.                   |
+| `disableOutsideClickToClose`               | `:dismissible="false"`                      | Inverted boolean. Default is `true`.                   |
 | `<template #body-content>…</template>`     | `…` (default slot)                          | Drop the wrapper — content goes in the default slot.   |
 | `<template #body-title>…</template>`       | `<template #title>…</template>`             | Renamed.                                               |
 | `<template #body>…</template>`             | `bare` prop + default slot                  | `bare` opts out of the chrome (no padded card, no auto-header, no auto-actions). |
@@ -185,10 +185,10 @@ into the wrapper to find the first focusable descendant.
 <Dialog :disableOutsideClickToClose="isSubmitting" v-model="show">…</Dialog>
 
 <!-- After -->
-<Dialog :dismissable="!isSubmitting" v-model:open="show">…</Dialog>
+<Dialog :dismissible="!isSubmitting" v-model:open="show">…</Dialog>
 ```
 
-`dismissable` covers both outside-click and Escape; the default is `true`.
+`dismissible` covers both outside-click and Escape; the default is `true`.
 Set it to `false` while a form is submitting or whenever you want to trap
 the user until they pick an action.
 
@@ -257,7 +257,7 @@ Three helpers in the `dialog` namespace:
 All three return a synchronous `DialogHandle` (`{ close }`) so callers can dismiss the dialog programmatically — e.g., from a socket event:
 
 ```ts
-const handle = dialog.confirm({ title: 'Waiting…', dismissable: false })
+const handle = dialog.confirm({ title: 'Waiting…', dismissible: false })
 socket.once('done', () => handle.close())
 ```
 

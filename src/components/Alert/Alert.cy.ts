@@ -42,8 +42,8 @@ describe('Alert', () => {
     cy.get(el).should('not.exist')
   })
 
-  it('Non Dismissable', () => {
-    cy.mount(Alert, { props: { dismissable: false } })
+  it('Non Dismissible', () => {
+    cy.mount(Alert, { props: { dismissible: false } })
     cy.get(`${el} button`).should('not.exist')
   })
 

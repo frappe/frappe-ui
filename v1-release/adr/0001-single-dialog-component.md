@@ -13,19 +13,19 @@ When designing the v1 Dialog API and the imperative `dialog.confirm/alert/prompt
 
 ## Decision
 
-Ship **one** public component, `<Dialog>`, with `role="dialog"` always. There is no `<AlertDialog>` component in the public surface. Forced-response semantics are expressed via `dismissable: false` + explicit actions, not via a different ARIA role.
+Ship **one** public component, `<Dialog>`, with `role="dialog"` always. There is no `<AlertDialog>` component in the public surface. Forced-response semantics are expressed via `dismissible: false` + explicit actions, not via a different ARIA role.
 
-The imperative `dialog.*` helpers internally mount the same `<Dialog>` with `dismissable: false`.
+The imperative `dialog.*` helpers internally mount the same `<Dialog>` with `dismissible: false`.
 
 ## Rationale
 
-- A separate `<AlertDialog>` would mostly be a thin wrapper of `<Dialog>` with `dismissable: false` + focused cancel button. The duplication adds API surface (a second component to document, story, test, and freeze for v1) for a small semantic gain.
-- An attempted heuristic to auto-derive `role="alertdialog"` (e.g. "set role when `dismissable: false`") gives the wrong role for legitimate non-dismissable modals like multi-step wizards or mandatory-completion forms. The signal "must respond" isn't structurally distinguishable from "must complete this step."
+- A separate `<AlertDialog>` would mostly be a thin wrapper of `<Dialog>` with `dismissible: false` + focused cancel button. The duplication adds API surface (a second component to document, story, test, and freeze for v1) for a small semantic gain.
+- An attempted heuristic to auto-derive `role="alertdialog"` (e.g. "set role when `dismissible: false`") gives the wrong role for legitimate non-dismissible modals like multi-step wizards or mandatory-completion forms. The signal "must respond" isn't structurally distinguishable from "must complete this step."
 - Screen readers in practice surface `dialog` and `alertdialog` very similarly. The accessibility win is marginal.
 - "One Dialog" is consistent with the plan's principle of keeping component boundaries narrow and avoiding API breadth before freeze.
 
 ## Consequences
 
-- App authors reaching for a destructive-confirm pattern set `dismissable: false` and label their actions clearly. They do not get `role="alertdialog"`.
+- App authors reaching for a destructive-confirm pattern set `dismissible: false` and label their actions clearly. They do not get `role="alertdialog"`.
 - Imperative helpers (`dialog.confirm/alert/prompt`) always render `role="dialog"`. This is a deliberate accessibility trade-off.
 - If we later need `role="alertdialog"` semantics — e.g. for compliance with a specific audit — we can add a `role` prop additively without breaking callers. Reversal is non-destructive.

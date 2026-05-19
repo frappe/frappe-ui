@@ -64,7 +64,7 @@
     type: 'DialogAction[]'
   },
   {
-    name: 'dismissable',
+    name: 'dismissible',
     description: 'Allow outside-click and Escape to close. Default `true`.',
     required: false,
     type: 'boolean',
@@ -90,7 +90,7 @@
     required: false,
     type: 'boolean',
     default: 'undefined',
-    deprecated: 'Use `dismissable` (inverted) instead.'
+    deprecated: 'Use `dismissible` (inverted) instead.'
   },
   {
     name: 'options',

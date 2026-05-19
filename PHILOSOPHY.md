@@ -10,7 +10,7 @@ This is the rulebook that governs API design across `frappe-ui`. Every principle
 - When a principle stops being generative — when it forces a clearly wrong answer in a real case — propose an edit, don't carve a quiet exception.
 
 **Relationship to other docs:**
-- **`CONTEXT.md`** is the *vocabulary*: what `open`, `variant`, `theme`, `dismissable` mean. PHILOSOPHY is the *rules* that use the vocabulary.
+- **`CONTEXT.md`** is the *vocabulary*: what `open`, `variant`, `theme`, `dismissible` mean. PHILOSOPHY is the *rules* that use the vocabulary.
 - **`v1-release/adr/`** are *decisions* — specific applications of principles to specific design questions. ADRs cite principles; principles don't cite ADRs.
 - **`v1-release/*-spec.md`** are *component-family specs* that implement principles for a family (Dialog, inputs, selection).
 
@@ -434,20 +434,20 @@ When in doubt, deprecate. The carve-out is for things you'd otherwise spend the 
 ```ts
 // Bad — outright rename, breaks every existing call site
 - props: ['disableOutsideClickToClose']
-+ props: ['dismissable']
++ props: ['dismissible']
 
 // Good — add the new prop, deprecate the old, keep both working
 const props = defineProps<{
-  dismissable?: boolean
-  /** @deprecated use `dismissable` */
+  dismissible?: boolean
+  /** @deprecated use `dismissible` */
   disableOutsideClickToClose?: boolean
 }>()
 
-const isDismissable = computed(() => {
+const isDismissible = computed(() => {
   if (props.disableOutsideClickToClose !== undefined) {
-    warnDeprecated('Dialog', 'disableOutsideClickToClose', 'dismissable')
+    warnDeprecated('Dialog', 'disableOutsideClickToClose', 'dismissible')
     return !props.disableOutsideClickToClose
   }
-  return props.dismissable ?? true
+  return props.dismissible ?? true
 })
 ```

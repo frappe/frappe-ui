@@ -18,7 +18,7 @@ _Avoid_: visible, show, isOpen (as a public API; internal refs are fine)
 Reserved for the **primary value** a component represents (selected option, text content, etc.). For overlay components, `modelValue` is *not* the visibility — visibility is `open`.
 _Avoid_: using `v-model` (bare) for visibility on overlay components
 
-**dismissable**:
+**dismissible**:
 Whether the overlay closes via user-initiated dismiss channels — outside click and Escape. Default `true`. When `false`, the overlay can only be closed programmatically or via an explicit close control (e.g. a close button or an action). The name is chosen with cross-overlay reuse in mind (Popover, Dropdown), but in v1 it ships **only on Dialog**. Replaces `disableOutsideClickToClose`, which remains a deprecated alias on Dialog with a one-time warning.
 _Avoid_: `disableOutsideClickToClose`, `closeOnOutsideClick` (in new code)
 
@@ -37,10 +37,10 @@ The single modal overlay component. Traps focus, blocks interaction with the pag
 - `aria-labelledby` ← `title` (or the custom `#body-title` slot's container, when used)
 - `aria-describedby` ← `message`
 
-A non-dismissable Dialog is still `role="dialog"` — "must respond" is expressed by `dismissable: false` and explicit actions, not by a different role.
+A non-dismissible Dialog is still `role="dialog"` — "must respond" is expressed by `dismissible: false` and explicit actions, not by a different role.
 
 **Imperative dialog API**:
-A `dialog` namespace exporting Promise-based helpers: `dialog.confirm()`, `dialog.alert()`, `dialog.prompt()`. Each helper mounts a `<Dialog>` with `dismissable: false` and resolves on the user's chosen action. Replaces the legacy `confirmDialog()` helper.
+A `dialog` namespace exporting Promise-based helpers: `dialog.confirm()`, `dialog.alert()`, `dialog.prompt()`. Each helper mounts a `<Dialog>` with `dismissible: false` and resolves on the user's chosen action. Replaces the legacy `confirmDialog()` helper.
 
 Mounting is handled by `<FrappeUIProvider>`, which renders a hidden `<Dialogs />` next to `<Toasts />` so imperative dialogs inherit `provide/inject` (router, Pinia, theme, etc.) from the host app. The `<Dialogs />` component remains exported for callers who don't use the provider and want to mount it manually.
 
