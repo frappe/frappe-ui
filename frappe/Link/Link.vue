@@ -20,12 +20,14 @@
     </template>
 
     <template v-if="!disabled && (showClear || showRedirect)" #suffix>
-      <div class="group-hover:inline-flex gap-0.5 hidden items-center">
+      <div
+        class="group-hover:inline-flex group-focus:inline-flex group-focus-within:inline-flex gap-0.5 hidden items-center"
+      >
         <button
           v-if="showClear"
           type="button"
           aria-label="Clear"
-          class="grid size-4 place-items-center rounded-sm text-ink-gray-5 hover:bg-surface-gray-3 hover:text-ink-gray-7"
+          class="grid size-4 place-items-center rounded-sm text-ink-gray-5 hover:bg-surface-gray-3 hover:text-ink-gray-7 focus:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
           @click="clearValue"
           @pointerdown.stop
         >
@@ -35,7 +37,7 @@
           v-if="showRedirect"
           type="button"
           aria-label="Redirect"
-          class="grid size-4 place-items-center rounded-sm text-ink-gray-5 hover:bg-surface-gray-3 hover:text-ink-gray-7"
+          class="grid size-4 place-items-center rounded-sm text-ink-gray-5 hover:bg-surface-gray-3 hover:text-ink-gray-7 focus:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
           @click="handleRedirect"
           @pointerdown.stop
         >
