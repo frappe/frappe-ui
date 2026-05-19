@@ -1,5 +1,9 @@
 <template>
-  <LabelingWrapper :enabled="hasLabeling" wrapper-class="space-y-1">
+  <LabelingWrapper
+    :enabled="hasLabeling"
+    :wrapper-class="['space-y-1', attrs.class]"
+    :wrapper-style="attrs.style"
+  >
     <InputLabel
       v-if="props.label || $slots.label"
       :id="labelId"
@@ -13,37 +17,63 @@
     </InputLabel>
     <div
       :id="inputId"
-      class="flex"
+      ref="rootRef"
+      class="rating-stars inline-flex shrink-0 gap-0.5 leading-none focus:outline-none"
+      :class="hasLabeling ? null : (attrs.class as any)"
+      :style="hasLabeling ? null : (attrs.style as any)"
       role="radiogroup"
       :aria-labelledby="labelledBy"
       :aria-describedby="describedBy"
       :aria-errormessage="hasError ? errorMessageId : undefined"
       :aria-required="props.required || undefined"
       :aria-invalid="hasError || undefined"
+      :aria-readonly="props.readonly || undefined"
       data-slot="control"
       v-bind="dataAttrs"
+      @mouseleave="onLeave"
     >
-      <div
+      <button
         v-for="index in starCount"
         :key="index"
-        :class="['mr-0.5', props.readonly ? '' : 'cursor-pointer']"
-        @mouseover="() => !props.readonly && (hoveredRating = index)"
-        @mouseleave="() => !props.readonly && (hoveredRating = 0)"
-        @click="markRating(index)"
+        type="button"
+        class="rating-star relative inline-flex shrink-0 focus:outline-none focus-visible:ring focus-visible:ring-outline-gray-3 rounded-sm"
+        :class="[
+          sizeClass,
+          props.readonly ? 'cursor-default' : 'cursor-pointer',
+        ]"
+        data-slot="star"
+        :data-index="index"
+        :data-state="starState(index)"
+        :tabindex="starTabindex(index)"
         role="radio"
-        :aria-checked="index === model"
+        :aria-checked="index === savedValue"
+        :aria-posinset="index"
+        :aria-setsize="starCount"
+        :aria-label="`${index} of ${starCount}`"
+        @mousemove="onStarMove($event, index)"
+        @click="onStarClick($event, index)"
       >
-        <svg
-          :class="iconClasses(index)"
-          viewBox="0 0 24 24"
-          fill="currentColor"
+        <span
+          class="rating-half rating-half-left"
+          :data-state="halfState(index - 0.5)"
           aria-hidden="true"
         >
-          <path
-            d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"
+          <LucideStar
+            fill="currentColor"
+            :class="['rating-icon', sizeClass]"
           />
-        </svg>
-      </div>
+        </span>
+        <span
+          class="rating-half rating-half-right"
+          :data-state="halfState(index)"
+          aria-hidden="true"
+        >
+          <LucideStar
+            fill="currentColor"
+            :class="['rating-icon', sizeClass]"
+          />
+        </span>
+      </button>
     </div>
     <InputDescription
       v-if="showDescription || $slots.description"
@@ -57,22 +87,25 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, useSlots, watchEffect } from 'vue'
+import { computed, ref, useAttrs, useSlots, watchEffect } from 'vue'
 import { useInputLabeling } from '../../composables/useInputLabeling'
 import { warnDeprecated } from '../../utils/warnDeprecated'
 import InputLabel from '../InputLabeling/InputLabel.vue'
 import InputDescription from '../InputLabeling/InputDescription.vue'
 import InputError from '../InputLabeling/InputError.vue'
 import LabelingWrapper from '../InputLabeling/LabelingWrapper.vue'
+import LucideStar from '~icons/lucide/star'
 import type { RatingProps } from './types'
 
 const props = withDefaults(defineProps<RatingProps>(), {
   size: 'md',
   readonly: false,
+  step: 1,
 })
 
 const model = defineModel<number>({ default: 0 })
 const slots = useSlots()
+const attrs = useAttrs()
 
 watchEffect(() => {
   if (props.rating_from != null) {
@@ -89,7 +122,8 @@ defineSlots<{
 
 const starCount = computed(() => props.max ?? props.rating_from ?? 5)
 
-const hoveredRating = ref(0)
+const hoveredValue = ref<number | null>(null)
+const rootRef = ref<HTMLElement>()
 
 const {
   inputId,
@@ -107,36 +141,131 @@ const {
   disabled: () => props.readonly,
 })
 
-const iconClasses = (index: number) => {
-  const sizeClass = {
-    sm: 'size-4',
-    md: 'size-5',
-    lg: 'size-6',
-    xl: 'size-7',
-  }[props.size]
+const sizeClass = computed(
+  () =>
+    ({
+      sm: 'size-4',
+      md: 'size-5',
+      lg: 'size-6',
+      xl: 'size-7',
+    })[props.size],
+)
 
-  let colorClass = 'text-gray-300'
-  if (index <= hoveredRating.value && index > model.value) {
-    colorClass = 'text-yellow-200'
-  } else if (index <= model.value) {
-    colorClass = 'text-yellow-500'
-  }
-
-  return [sizeClass, colorClass]
+function roundToStep(v: number) {
+  const s = props.step ?? 1
+  return Math.round(v / s) * s
 }
 
-const markRating = (index: number) => {
+const savedValue = computed(() => {
+  const v = Math.max(0, Math.min(starCount.value, model.value ?? 0))
+  return roundToStep(v)
+})
+
+function halfState(half: number): 'filled' | 'preview' | 'removing' | 'empty' {
+  const saved = savedValue.value
+  const hovered = hoveredValue.value
+  if (hovered === null) {
+    return half <= saved ? 'filled' : 'empty'
+  }
+  if (half <= Math.min(saved, hovered)) return 'filled'
+  if (half <= hovered) return 'preview'
+  if (half <= saved) return 'removing'
+  return 'empty'
+}
+
+function starState(index: number) {
+  return halfState(index)
+}
+
+function hitTestValue(event: MouseEvent, index: number) {
+  if (props.step !== 0.5) return index
+  const rect = (event.currentTarget as HTMLElement).getBoundingClientRect()
+  const isLeftHalf = event.clientX - rect.left < rect.width / 2
+  return isLeftHalf ? index - 0.5 : index
+}
+
+function onStarMove(event: MouseEvent, index: number) {
   if (props.readonly) return
-  model.value = index
+  hoveredValue.value = hitTestValue(event, index)
+}
+
+function onLeave() {
+  hoveredValue.value = null
+}
+
+function commit(next: number) {
+  const value = Math.max(0, Math.min(starCount.value, roundToStep(next)))
+  model.value = value
+}
+
+function onStarClick(event: MouseEvent, index: number) {
+  if (props.readonly) return
+  commit(hitTestValue(event, index))
+}
+
+function starTabindex(index: number) {
+  if (props.readonly) return -1
+  const selected = Math.ceil(savedValue.value)
+  const tabbable = selected > 0 ? selected : 1
+  return index === tabbable ? 0 : -1
 }
 
 const hasLabeling = computed(() => {
   return Boolean(
     props.label ||
-      slots.label ||
-      showDescription.value ||
-      slots.description ||
-      hasError.value,
+    slots.label ||
+    showDescription.value ||
+    slots.description ||
+    hasError.value,
   )
 })
 </script>
+
+<style scoped>
+.rating-star {
+  background: transparent;
+  padding: 0;
+  border: 0;
+}
+
+.rating-half {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rating-half-left {
+  clip-path: inset(0 50% 0 0);
+}
+
+.rating-half-right {
+  clip-path: inset(0 0 0 50%);
+}
+
+.rating-half[data-state='filled'] {
+  color: #eab308;
+}
+.rating-half[data-state='preview'] {
+  color: #fde68a;
+}
+.rating-half[data-state='removing'] {
+  color: #fcd34d;
+}
+.rating-half[data-state='empty'] {
+  color: #d1d5db;
+}
+
+:global([data-theme='dark']) .rating-half[data-state='empty'] {
+  color: #4b5563;
+}
+
+.rating-icon {
+  width: 100%;
+  height: 100%;
+}
+</style>
