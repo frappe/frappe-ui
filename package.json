@@ -108,7 +108,7 @@
     "@tiptap/vue-3": "^3.11.0",
     "@vueuse/core": "^10.4.1",
     "dayjs": "^1.11.13",
-    "dompurify": "^3.2.6",
+    "dompurify": "^3.4.0",
     "echarts": "^5.6.0",
     "feather-icons": "^4.28.0",
     "fuzzysort": "^3.1.0",
@@ -147,7 +147,7 @@
     "lint-staged": ">=10",
     "msw": "^2.7.0",
     "nyc": "^17.1.0",
-    "postcss": "^8.4.21",
+    "postcss": "^8.5.10",
     "prettier-plugin-tailwindcss": "^0.1.13",
     "tailwindcss": "^3.2.7",
     "tsx": "^4.20.6",
@@ -164,7 +164,17 @@
     "prosemirror-model": "1.25.2",
     "prosemirror-state": "1.4.3",
     "prosemirror-view": "1.40.0",
-    "prosemirror-transform": "1.10.4"
+    "prosemirror-transform": "1.10.4",
+    "defu": "^6.1.5",
+    "esbuild": "^0.25.0",
+    "lodash": "^4.18.0",
+    "markdown-it": "^14.1.1",
+    "qs": "^6.14.2",
+    "rollup": "^4.59.0",
+    "socket.io-parser": "^4.2.6",
+    "systeminformation": "^5.31.6",
+    "ws": "^8.20.1",
+    "postcss": "^8.5.10"
   },
   "lint-staged": {
     "*.{js,css,md,vue}": "prettier --write"
