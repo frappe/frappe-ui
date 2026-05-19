@@ -86,6 +86,19 @@ jobs:
               ;;
           esac
 
+      - name: Acknowledge /barista review with reaction
+        if: github.event_name == 'issue_comment'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          REPO: ${{ github.repository }}
+          COMMENT_ID: ${{ github.event.comment.id }}
+        run: |
+          gh api \
+            --method POST \
+            -H "Accept: application/vnd.github+json" \
+            "/repos/$REPO/issues/comments/$COMMENT_ID/reactions" \
+            -f content=eyes
+
       - name: Run Barista (review mode)
         id: run-barista
         uses: anthropics/claude-code-action@v1
