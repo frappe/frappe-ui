@@ -19,11 +19,8 @@
       <slot :name="name" v-bind="slotProps" />
     </template>
 
-    <template #suffix>
-      <div
-        v-if="!disabled && (showClear || showRedirect)"
-        class="group-hover:inline-flex gap-0.5 hidden items-center"
-      >
+    <template v-if="!disabled && (showClear || showRedirect)" #suffix>
+      <div class="group-hover:inline-flex gap-0.5 hidden items-center">
         <button
           v-if="showClear"
           type="button"
@@ -37,7 +34,7 @@
         <button
           v-if="showRedirect"
           type="button"
-          aria-label="Clear"
+          aria-label="Redirect"
           class="grid size-4 place-items-center rounded-sm text-ink-gray-5 hover:bg-surface-gray-3 hover:text-ink-gray-7"
           @click="handleRedirect"
           @pointerdown.stop
@@ -69,6 +66,7 @@ import type {
 } from '../../src/components/Combobox/types'
 import debounce from '../../src/utils/debounce'
 import { createResource } from '../../src/resources'
+import { frappeRequest } from '../../src/utils/frappeRequest'
 import type { LinkProps, LinkOption } from './types'
 
 const props = withDefaults(defineProps<LinkProps>(), {
@@ -120,6 +118,7 @@ const options = createResource({
     filters: props.filters,
   },
   method: 'POST',
+  resourceFetcher: frappeRequest,
   transform: (data: LinkOption[]): LinkOption[] =>
     data.map((doc: any) => ({
       label: doc.label || doc.value,
@@ -168,7 +167,7 @@ const handleInputChange = debounce((value: string) => {
 }, 300)
 
 const clearValue = () => {
-  model.value = ''
+  model.value = null
   emit('clear')
   comboboxRef.value?.focus()
 }
