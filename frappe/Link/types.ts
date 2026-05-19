@@ -1,6 +1,8 @@
-export interface LinkProps {
+import type { InputLabelingProps } from '../../src/composables/useInputLabeling'
+
+export interface LinkProps extends InputLabelingProps {
   doctype: string
-  filters?: Record<string, any> | Array<any> | string
+  filters?: Record<string, unknown> | Array<unknown> | string
   allowCreate?: boolean
   allowClear?: boolean
   allowRedirect?: boolean
