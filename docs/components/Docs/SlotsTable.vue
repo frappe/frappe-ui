@@ -55,7 +55,9 @@ defineProps<Props>()
             <p
               v-if="typeof x.deprecated === 'string'"
               class="whitespace-pre-wrap font-mono text-xs text-ink-gray-6"
-            >Deprecated — {{ x.deprecated }}</p>
+            >
+              Deprecated — {{ x.deprecated }}
+            </p>
             <p
               v-else-if="x.description"
               class="mt-1 whitespace-pre-wrap font-mono text-xs leading-6 text-ink-gray-6"

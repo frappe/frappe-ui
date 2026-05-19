@@ -84,9 +84,9 @@ export function iconPackPlugin({
             // class-based icon behaves identically to the inline-svg form
             // it replaces — no phantom line-box height in the parent, no
             // baseline drift next to text in flex containers.
-            display: 'block',
-            width: '1em',
-            height: '1em',
+            'display': 'block',
+            'width': '1em',
+            'height': '1em',
             'background-color': 'currentColor',
             '-webkit-mask-image': `url("${uri}")`,
             'mask-image': `url("${uri}")`,

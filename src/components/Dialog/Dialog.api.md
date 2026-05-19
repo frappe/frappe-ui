@@ -172,11 +172,11 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="Dialog" :data="propsData"/> 
+<PropsTable name="Dialog" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
+<SlotsTable :data="slotsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

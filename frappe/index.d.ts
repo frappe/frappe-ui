@@ -58,7 +58,10 @@ declare module 'frappe-ui/frappe' {
     capture: (event_name: string, data?: Record<string, any>) => void
   }
   export const telemetryPlugin: {
-    install: (app: import('vue').App, options: { app_name: string }) => Promise<void>
+    install: (
+      app: import('vue').App,
+      options: { app_name: string },
+    ) => Promise<void>
   }
 }
 

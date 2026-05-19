@@ -28,7 +28,10 @@ export function getSidebarList(componentList: string[]): SidebarSection[] {
     {
       text: 'Design System',
       items: [
-        { text: 'Background Color', link: '/docs/design-system/background-color' },
+        {
+          text: 'Background Color',
+          link: '/docs/design-system/background-color',
+        },
         { text: 'Text Design', link: '/docs/design-system/text' },
         { text: 'Border Color', link: '/docs/design-system/border-color' },
         { text: 'Drop Shadow', link: '/docs/design-system/drop-shadow' },
@@ -44,7 +47,10 @@ export function getSidebarList(componentList: string[]): SidebarSection[] {
       items: [
         { text: 'Resource', link: '/docs/data-fetching/resource' },
         { text: 'List Resource', link: '/docs/data-fetching/list-resource' },
-        { text: 'Document Resource', link: '/docs/data-fetching/document-resource' },
+        {
+          text: 'Document Resource',
+          link: '/docs/data-fetching/document-resource',
+        },
       ],
     },
     {

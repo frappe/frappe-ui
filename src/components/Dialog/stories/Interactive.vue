@@ -23,11 +23,7 @@ async function createTask(close: () => void) {
 <template>
   <Button @click="open = true">New task</Button>
 
-  <Dialog
-    v-model:open="open"
-    title="New task"
-    :dismissible="!isDirty"
-  >
+  <Dialog v-model:open="open" title="New task" :dismissible="!isDirty">
     <div class="space-y-4">
       <FormControl
         label="Title"

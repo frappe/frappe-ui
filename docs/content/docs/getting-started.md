@@ -10,7 +10,7 @@ You can quickly setup `frappe-ui` using
 you already have a Frappe app for which you want to build a frontend you can
 start with **Step 2**.
 
-###  Create your Frappe app
+### Create your Frappe app
 
 ```sh
 bench new-app todo

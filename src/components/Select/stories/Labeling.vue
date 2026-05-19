@@ -6,9 +6,7 @@ const value = ref('')
 const required = ref(true)
 const showError = ref(false)
 
-const error = computed(() =>
-  showError.value ? 'Please choose a fruit.' : '',
-)
+const error = computed(() => (showError.value ? 'Please choose a fruit.' : ''))
 
 const options = [
   { label: 'Apple', value: 'apple' },

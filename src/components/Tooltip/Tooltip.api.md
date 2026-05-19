@@ -101,17 +101,17 @@
   }
 ]
 </script>
+
 ## API Reference
 
 ### Tooltip
 
-<PropsTable name="Tooltip" :data="tooltipProps"/> 
+<PropsTable name="Tooltip" :data="tooltipProps"/>
 
-<SlotsTable :data="tooltipSlots"/> 
+<SlotsTable :data="tooltipSlots"/>
 
 ### TooltipBubble
 
-<PropsTable folder="Tooltip" name="TooltipBubble" :data="tooltipBubbleProps"/> 
+<PropsTable folder="Tooltip" name="TooltipBubble" :data="tooltipBubbleProps"/>
 
-<SlotsTable :data="tooltipBubbleSlots"/> 
-
+<SlotsTable :data="tooltipBubbleSlots"/>

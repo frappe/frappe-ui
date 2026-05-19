@@ -6,7 +6,7 @@ import {
   TITLE_HEIGHT,
 } from './eChartOptions'
 import { formatValue } from './helpers'
-import { FunnelChartConfig } from './types'
+import type { FunnelChartConfig } from './types'
 
 export default function getFunnelChartOptions(config: FunnelChartConfig) {
   const isRTL = config.dir === 'rtl'

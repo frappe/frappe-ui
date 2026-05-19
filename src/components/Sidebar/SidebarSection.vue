@@ -41,7 +41,11 @@
     >
       <nav v-if="!isCollapsed" class="space-y-0.5">
         <template v-for="item in props.items" :key="item.label">
-          <slot name="sidebar-item" :item="item" :isCollapsed="isSidebarCollapsed">
+          <slot
+            name="sidebar-item"
+            :item="item"
+            :isCollapsed="isSidebarCollapsed"
+          >
             <SidebarItem
               :label="item.label"
               :accessKey="item.accessKey"

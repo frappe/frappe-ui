@@ -1,7 +1,5 @@
 <template>
-  <div
-    class="p-5 px-9"
-  >
+  <div class="p-5 px-9">
     <div class="mx-auto grid gap-2 relative w-1/2">
       <div
         class="absolute bottom-3 -left-6 bg-surface-cards rounded shadow-md border border-outline-gray-2 p-1.5 w-20"

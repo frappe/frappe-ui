@@ -29,7 +29,13 @@ export interface CircularProgressBarProps {
   variant?: 'solid' | 'outline'
 
   /** Theme used for the progress bar (predefined or custom colors) */
-  theme?: 'black' | 'red' | 'green' | 'blue' | 'orange' | { primary: string; secondary: string }
+  theme?:
+    | 'black'
+    | 'red'
+    | 'green'
+    | 'blue'
+    | 'orange'
+    | { primary: string; secondary: string }
 
   /** Size of the progress bar */
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'

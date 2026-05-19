@@ -16,9 +16,7 @@
     v-bind="{
       ...getLinkBindings(),
       onClick: onRowClick,
-      ...(row.disabled
-        ? { 'aria-disabled': 'true', tabindex: -1 }
-        : {}),
+      ...(row.disabled ? { 'aria-disabled': 'true', 'tabindex': -1 } : {}),
     }"
   >
     <component
@@ -35,7 +33,7 @@
           height: rowHeight,
           gridTemplateColumns: getGridTemplateColumns(
             list.columns,
-            list.options.selectable
+            list.options.selectable,
           ),
         }"
       >
@@ -114,7 +112,7 @@ const list = inject('list')
 
 const rowRoute = computed(
   () =>
-    list.value.options.getRowRoute && list.value.options.getRowRoute(props.row)
+    list.value.options.getRowRoute && list.value.options.getRowRoute(props.row),
 )
 
 const isExternalRoute = computed(() => {
@@ -151,7 +149,7 @@ const isSelected = computed(() => {
 const isActive = computed(
   () =>
     list.value.options.enableActive &&
-    list.value.activeRow.value === props.row.name
+    list.value.activeRow.value === props.row.name,
 )
 
 const isHoverable = computed(() => {
@@ -168,7 +166,7 @@ const rowHeight = computed(() => {
 const roundedClass = computed(() => {
   if (!isSelected.value) return 'rounded'
 
-  const selections = [...list.value.selections]
+  const selections = new Set([...list.value.selections])
   let groups = list.value.rows[0]?.group
     ? list.value.rows.map((k) => k.rows)
     : [list.value.rows]
@@ -177,8 +175,8 @@ const roundedClass = computed(() => {
     let currentIndex = rows.findIndex((k) => k == props.row)
     if (currentIndex === -1) continue
 
-    let atBottom = !selections.includes(rows[currentIndex + 1]?.name)
-    let atTop = !selections.includes(rows[currentIndex - 1]?.name)
+    let atBottom = !selections.has(rows[currentIndex + 1]?.name)
+    let atTop = !selections.has(rows[currentIndex - 1]?.name)
 
     return (atBottom ? 'rounded-b ' : '') + (atTop ? 'rounded-t' : '')
   }
@@ -210,7 +208,7 @@ const handleCheckboxClick = (event) => {
       : list.value.rows
 
     const lastIndex = rows.findIndex(
-      (k) => lastSelected === k[list.value.rowKey]
+      (k) => lastSelected === k[list.value.rowKey],
     )
     const curIndex = rows.findIndex((k) => value === k[list.value.rowKey])
 

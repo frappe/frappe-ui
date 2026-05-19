@@ -38,16 +38,16 @@ from [`./README.md`](./README.md).
 
 Behavior changes that affect your code even if you don't touch it.
 
-| Change                                                       | Where                                  | Action                                                                 |
-| ------------------------------------------------------------ | -------------------------------------- | ---------------------------------------------------------------------- |
-| `DateRangePicker` emits `[from, to]` tuple                   | `update:modelValue` / `change`         | Update `onChange` handlers that called `.split(',')`.                  |
-| `DateTimePicker` keeps popover open after date click         | Date click no longer auto-closes       | Close from `@update:modelValue`, or add an `#actions` Apply button.    |
-| DatePicker family — footer + auto Clear button removed       | Popover footer                         | Render explicit Clear inside `#actions` if you relied on it.           |
-| `DateRangePicker.clearable` default flipped to `true`        | Prop default                           | Pass `:clearable="false"` if you don't want the clear affordance.      |
-| `Slider` — hardcoded `aria-label="Volume"` removed           | A11y output                            | Pass `label` explicitly (every non-volume site was announced wrong).   |
-| `Slider` — uncontrolled init from `min`                      | Initial render                         | Was rendering with no thumb. No code change needed if you `v-model`.   |
-| `Password.v-model` now works                                 | Two-way binding                        | If you were working around the bug with `:value` + `@input`, simplify. |
-| `Rating` filled stars now render visibly                     | Visual                                 | No code change. Confirm screenshots in tests.                          |
+| Change                                                 | Where                            | Action                                                                 |
+| ------------------------------------------------------ | -------------------------------- | ---------------------------------------------------------------------- |
+| `DateRangePicker` emits `[from, to]` tuple             | `update:modelValue` / `change`   | Update `onChange` handlers that called `.split(',')`.                  |
+| `DateTimePicker` keeps popover open after date click   | Date click no longer auto-closes | Close from `@update:modelValue`, or add an `#actions` Apply button.    |
+| DatePicker family — footer + auto Clear button removed | Popover footer                   | Render explicit Clear inside `#actions` if you relied on it.           |
+| `DateRangePicker.clearable` default flipped to `true`  | Prop default                     | Pass `:clearable="false"` if you don't want the clear affordance.      |
+| `Slider` — hardcoded `aria-label="Volume"` removed     | A11y output                      | Pass `label` explicitly (every non-volume site was announced wrong).   |
+| `Slider` — uncontrolled init from `min`                | Initial render                   | Was rendering with no thumb. No code change needed if you `v-model`.   |
+| `Password.v-model` now works                           | Two-way binding                  | If you were working around the bug with `:value` + `@input`, simplify. |
+| `Rating` filled stars now render visibly               | Visual                           | No code change. Confirm screenshots in tests.                          |
 
 ## Vocabulary cheatsheet
 
@@ -55,16 +55,16 @@ v1 unifies the prop names used across popover-trigger components
 (`Combobox`, `Dropdown`, `Select`, `DatePicker`, `TimePicker`, etc).
 If you've used any of them, the rest will feel familiar.
 
-| Concept                          | v1 vocabulary                              |
-| -------------------------------- | ------------------------------------------ |
-| Popover position                 | `side` + `align` + `offset`                |
-| Close-on-select                  | `keepOpen` (boolean, default `false`)      |
-| Allow typing into the trigger    | `typeable` (boolean, default `true`)       |
-| Constraint range                 | `min` / `max`                              |
-| Two-way bound open state         | `v-model:open`                             |
-| Custom trigger slot              | `#trigger`                                 |
-| Trailing slot (replaces chevron) | `#suffix`                                  |
-| Dismiss via outside click / Esc  | `dismissible` (boolean, default `true`)    |
+| Concept                          | v1 vocabulary                           |
+| -------------------------------- | --------------------------------------- |
+| Popover position                 | `side` + `align` + `offset`             |
+| Close-on-select                  | `keepOpen` (boolean, default `false`)   |
+| Allow typing into the trigger    | `typeable` (boolean, default `true`)    |
+| Constraint range                 | `min` / `max`                           |
+| Two-way bound open state         | `v-model:open`                          |
+| Custom trigger slot              | `#trigger`                              |
+| Trailing slot (replaces chevron) | `#suffix`                               |
+| Dismiss via outside click / Esc  | `dismissible` (boolean, default `true`) |
 
 ---
 
@@ -75,19 +75,19 @@ Migrating existing `Dialog` usages to the flat-prop API. See
 
 ### TL;DR — the migration table
 
-| Before                                     | After                                       | Notes                                                  |
-| ------------------------------------------ | ------------------------------------------- | ------------------------------------------------------ |
-| `v-model="show"`                           | `v-model:open="show"`                       | `:open` is the canonical model name.                   |
-| `:options="{ title: 'X' }"`                | `title="X"`                                 | Flatten every key in `options` to a top-level prop.    |
-| `:options="{ size: 'sm' }"`                | `size="sm"`                                 | Same scale (`xs` → `7xl`).                             |
-| `:options="{ actions: [...] }"`            | `:actions="[...]"`                          | Array-of-`{label, variant, theme, onClick}` unchanged. |
-| `disableOutsideClickToClose`               | `:dismissible="false"`                      | Inverted boolean. Default is `true`.                   |
-| `<template #body-content>…</template>`     | `…` (default slot)                          | Drop the wrapper — content goes in the default slot.   |
-| `<template #body-title>…</template>`       | `<template #title>…</template>`             | Renamed.                                               |
-| `<template #body>…</template>`             | `bare` prop + default slot                  | `bare` opts out of the chrome (no padded card, no auto-header, no auto-actions). |
-| `<template #body-header>…</template>`      | `<template #title>…</template>`             | No direct replacement — put extras in `#title`.        |
-| `onClick: (close) => …`                    | `onClick: ({ close }) => …`                 | Action callbacks now receive an object, not a bare fn. |
-| Manual focus (`ref` + `setTimeout`, `v-focus`, `focus()` in `onMounted`) | `autofocus` attribute on a descendant       | Dialog focuses any `[autofocus]` element on open.       |
+| Before                                                                   | After                                 | Notes                                                                            |
+| ------------------------------------------------------------------------ | ------------------------------------- | -------------------------------------------------------------------------------- |
+| `v-model="show"`                                                         | `v-model:open="show"`                 | `:open` is the canonical model name.                                             |
+| `:options="{ title: 'X' }"`                                              | `title="X"`                           | Flatten every key in `options` to a top-level prop.                              |
+| `:options="{ size: 'sm' }"`                                              | `size="sm"`                           | Same scale (`xs` → `7xl`).                                                       |
+| `:options="{ actions: [...] }"`                                          | `:actions="[...]"`                    | Array-of-`{label, variant, theme, onClick}` unchanged.                           |
+| `disableOutsideClickToClose`                                             | `:dismissible="false"`                | Inverted boolean. Default is `true`.                                             |
+| `<template #body-content>…</template>`                                   | `…` (default slot)                    | Drop the wrapper — content goes in the default slot.                             |
+| `<template #body-title>…</template>`                                     | `<template #title>…</template>`       | Renamed.                                                                         |
+| `<template #body>…</template>`                                           | `bare` prop + default slot            | `bare` opts out of the chrome (no padded card, no auto-header, no auto-actions). |
+| `<template #body-header>…</template>`                                    | `<template #title>…</template>`       | No direct replacement — put extras in `#title`.                                  |
+| `onClick: (close) => …`                                                  | `onClick: ({ close }) => …`           | Action callbacks now receive an object, not a bare fn.                           |
+| Manual focus (`ref` + `setTimeout`, `v-focus`, `focus()` in `onMounted`) | `autofocus` attribute on a descendant | Dialog focuses any `[autofocus]` element on open.                                |
 
 ### Walkthroughs
 
@@ -221,7 +221,8 @@ it. This replaces three common patterns:
 <FormControl ref="titleInput" />
 <script setup>
 watch(show, (val) => {
-  if (val) setTimeout(() => titleInput.value.$el?.querySelector('input')?.focus(), 100)
+  if (val)
+    setTimeout(() => titleInput.value.$el?.querySelector('input')?.focus(), 100)
 })
 </script>
 
@@ -286,8 +287,12 @@ $dialog({
   title: 'Delete',
   message: 'Are you sure?',
   actions: [
-    { label: 'Delete', variant: 'solid', theme: 'red',
-      onClick: ({ hideDialog }) => item.delete().then(hideDialog) },
+    {
+      label: 'Delete',
+      variant: 'solid',
+      theme: 'red',
+      onClick: ({ hideDialog }) => item.delete().then(hideDialog),
+    },
   ],
 })
 
@@ -306,11 +311,11 @@ dialog.danger({
 
 The lifecycle contract:
 
-| `onConfirm` outcome | Result |
-|---|---|
-| Resolves | Dialog auto-closes |
-| Throws / rejects | Dialog stays open; thrown message rendered inline; buttons re-enabled |
-| Calls `ctx.close()` early | Dialog closes immediately (the trailing auto-close is a no-op) |
+| `onConfirm` outcome       | Result                                                                |
+| ------------------------- | --------------------------------------------------------------------- |
+| Resolves                  | Dialog auto-closes                                                    |
+| Throws / rejects          | Dialog stays open; thrown message rendered inline; buttons re-enabled |
+| Calls `ctx.close()` early | Dialog closes immediately (the trailing auto-close is a no-op)        |
 
 Three helpers in the `dialog` namespace:
 
@@ -333,8 +338,21 @@ dialog.confirm({
   message: 'Save before leaving?',
   actions: [
     { label: 'Cancel', variant: 'outline' },
-    { label: 'Discard', theme: 'red', variant: 'subtle', onClick: () => { /* … */ } },
-    { label: 'Save', variant: 'solid', onClick: async () => { await save() } },
+    {
+      label: 'Discard',
+      theme: 'red',
+      variant: 'subtle',
+      onClick: () => {
+        /* … */
+      },
+    },
+    {
+      label: 'Save',
+      variant: 'solid',
+      onClick: async () => {
+        await save()
+      },
+    },
   ],
 })
 ```
@@ -488,6 +506,7 @@ mount `<Dialogs />` directly in their root template.
 ## Legacy components
 
 > ⏳ **TODO.** Replacements:
+>
 > - `Input.vue` → `TextInput`
 > - `Autocomplete` → `Combobox` (single-select) or `MultiSelect`
 > - `FormControl type='autocomplete'` → `Combobox` standalone
@@ -502,6 +521,7 @@ Where structure changed, components expose `data-*` hooks (`data-slot`,
 or class, audit those selectors.
 
 **What about Popover, Toast, and Autocomplete?**
+
 - `Autocomplete` → `Combobox` (single-select) or `MultiSelect`.
 - `Popover` → component-level popovers are owned by the component
   (Combobox, Dropdown, Select, DatePicker). No standalone replacement

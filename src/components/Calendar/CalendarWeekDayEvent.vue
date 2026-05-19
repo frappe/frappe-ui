@@ -10,7 +10,9 @@
       <div
         ref="eventRef"
         class="event min-h-6 mx-px shadow rounded transition-all duration-75 shrink-0"
-        :class="{ active: activeEvent == (props.event?.id || props.event?.name) }"
+        :class="{
+          active: activeEvent == (props.event?.id || props.event?.name),
+        }"
         :style="innerStyle"
         @click.prevent="handleEventClick($event, togglePopover)"
         @dblclick.prevent="handleEventEdit($event)"
@@ -22,7 +24,9 @@
             class="event-border h-full w-[2px] rounded shrink-0"
             :style="eventBorderStyle"
           />
-          <div class="relative flex h-full select-none items-start gap-2 overflow-hidden">
+          <div
+            class="relative flex h-full select-none items-start gap-2 overflow-hidden"
+          >
             <div v-if="config.showIcon && eventIcons[props.event.type]">
               <component :is="eventIcons[props.event.type]" class="h-4 w-4" />
             </div>
@@ -40,7 +44,11 @@
                 class="text-xs font-normal event-subtitle"
               >
                 {{
-                  formattedDuration(updatedEvent.fromTime, updatedEvent.toTime, config.timeFormat)
+                  formattedDuration(
+                    updatedEvent.fromTime,
+                    updatedEvent.toTime,
+                    config.timeFormat,
+                  )
                 }}
               </p>
             </div>
@@ -153,15 +161,22 @@ const containerStyle = computed(() => {
     }
   }
 
-  const diff = calculateDiff(calendarEvent.value.fromTime, calendarEvent.value.toTime)
+  const diff = calculateDiff(
+    calendarEvent.value.fromTime,
+    calendarEvent.value.toTime,
+  )
   let height = diff * minuteHeight
   if (height < heightThreshold) height = minimumHeight
 
   const top = calculateMinutes(calendarEvent.value.fromTime) * minuteHeight
   const hallNumber = calendarEvent.value.hallNumber || 0
 
-  const width = isResizing.value || isRepositioning.value ? '100%' : `${93 - hallNumber * 20}%`
-  const left = isResizing.value || isRepositioning.value ? '0' : `${hallNumber * 20}%`
+  const width =
+    isResizing.value || isRepositioning.value
+      ? '100%'
+      : `${93 - hallNumber * 20}%`
+  const left =
+    isResizing.value || isRepositioning.value ? '0' : `${hallNumber * 20}%`
 
   return {
     position: 'absolute',
@@ -171,7 +186,8 @@ const containerStyle = computed(() => {
     height: `${height}px`,
     zIndex: isResizing.value || isRepositioning.value ? 100 : 0,
     transform: `translate(${state.xAxis}px, ${state.yAxis}px)`,
-    transition: isResizing.value || isRepositioning.value ? 'none' : 'all 0.1s ease',
+    transition:
+      isResizing.value || isRepositioning.value ? 'none' : 'all 0.1s ease',
   }
 })
 
@@ -211,7 +227,8 @@ const lineClampClass = computed(() => {
 
 function newEventEndTime(newHeight) {
   let newEndTime =
-    parseFloat(newHeight) / minuteHeight + calculateMinutes(calendarEvent.value.fromTime)
+    parseFloat(newHeight) / minuteHeight +
+    calculateMinutes(calendarEvent.value.fromTime)
   newEndTime = Math.floor(newEndTime)
   if (newEndTime > 1440) newEndTime = 1440
   return convertMinutesToHours(newEndTime)
@@ -228,7 +245,8 @@ function handleResizeMouseDown() {
   function resize(e) {
     preventClick.value = true
     const diffX = e.clientY - eventRef.value.getBoundingClientRect().top
-    eventRef.value.style.height = Math.round(diffX / height15Min) * height15Min + 'px'
+    eventRef.value.style.height =
+      Math.round(diffX / height15Min) * height15Min + 'px'
     eventRef.value.style.width = '100%'
     updatedEvent.toTime = newEventEndTime(eventRef.value.style.height)
     calendarEvent.value.toTime = newEventEndTime(eventRef.value.style.height)
@@ -279,14 +297,17 @@ function handleRepositionMouseDown(e, isPopoverOpen, closePopover) {
     if (calendarEvent.value.isFullDay && activeView.value === 'Week') {
       eventRef.value.style.width = '90%'
     }
-    if (calendarEvent.value.date !== updatedEvent.date) isEventUpdated.value = true
+    if (calendarEvent.value.date !== updatedEvent.date)
+      isEventUpdated.value = true
 
     if (isEventUpdated.value) {
       calendarEvent.value.date = updatedEvent.date
       calendarEvent.value.fromDate = updatedEvent.date
       calendarEvent.value.toDate = updatedEvent.date
-      calendarEvent.value.fromDateTime = updatedEvent.date + ' ' + updatedEvent.fromTime
-      calendarEvent.value.toDateTime = updatedEvent.date + ' ' + updatedEvent.toTime
+      calendarEvent.value.fromDateTime =
+        updatedEvent.date + ' ' + updatedEvent.fromTime
+      calendarEvent.value.toDateTime =
+        updatedEvent.date + ' ' + updatedEvent.toTime
       calendarEvent.value.fromTime = updatedEvent.fromTime
       calendarEvent.value.toTime = updatedEvent.toTime
       calendarActions.updateEventState(calendarEvent.value)
@@ -313,14 +334,20 @@ function handleHorizontalMovement(clientX, rect) {
 
   state.xAxis = Math.ceil(diff * eventWidth)
   updatedEvent.date = parseDate(
-    new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + diff),
+    new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      currentDate.getDate() + diff,
+    ),
   )
 }
 
 function handleVerticalMovement(clientY, prevY, rect) {
   let diffY = clientY - prevY
 
-  const parentRect = eventRef.value.closest('[data-time-grid]').getBoundingClientRect()
+  const parentRect = eventRef.value
+    .closest('[data-time-grid]')
+    .getBoundingClientRect()
   if (clientY < parentRect.top) diffY = parentRect.top - rect.top
   if (clientY > parentRect.bottom) diffY = parentRect.bottom - rect.bottom
 
@@ -328,10 +355,12 @@ function handleVerticalMovement(clientY, prevY, rect) {
   state.yAxis = diffY
 
   updatedEvent.fromTime = convertMinutesToHours(
-    calculateMinutes(calendarEvent.value.fromTime) + Math.round(diffY / minuteHeight),
+    calculateMinutes(calendarEvent.value.fromTime) +
+      Math.round(diffY / minuteHeight),
   )
   updatedEvent.toTime = convertMinutesToHours(
-    calculateMinutes(calendarEvent.value.toTime) + Math.round(diffY / minuteHeight),
+    calculateMinutes(calendarEvent.value.toTime) +
+      Math.round(diffY / minuteHeight),
   )
 
   for (const key of ['fromTime', 'toTime']) {

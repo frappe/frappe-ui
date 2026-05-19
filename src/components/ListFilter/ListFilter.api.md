@@ -29,9 +29,9 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="ListFilter" :data="propsData"/> 
+<PropsTable name="ListFilter" :data="propsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

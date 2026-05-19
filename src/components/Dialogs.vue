@@ -7,11 +7,7 @@
       :key="legacy.id ?? legacy"
     />
     <!-- v1 imperative `dialog.*` stack. -->
-    <component
-      v-for="d in imperativeDialogs"
-      :is="d.component"
-      :key="d.id"
-    />
+    <component v-for="d in imperativeDialogs" :is="d.component" :key="d.id" />
   </div>
 </template>
 

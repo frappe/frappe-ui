@@ -112,11 +112,11 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="Dropdown" :data="propsData"/> 
+<PropsTable name="Dropdown" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
+<SlotsTable :data="slotsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

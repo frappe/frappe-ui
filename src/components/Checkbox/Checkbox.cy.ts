@@ -59,7 +59,12 @@ describe('Checkbox', () => {
 
     it('renders the canonical data-* hooks on the control', () => {
       cy.mount(Checkbox, {
-        props: { label: 'Accept', size: 'md', required: true, modelValue: true },
+        props: {
+          label: 'Accept',
+          size: 'md',
+          required: true,
+          modelValue: true,
+        },
       })
       cy.get('input').should('have.attr', 'data-slot', 'control')
       cy.get('input').should('have.attr', 'data-size', 'md')

@@ -23,7 +23,8 @@ function onValueCommit(committed: number[]) {
       @value-commit="onValueCommit"
     />
     <p class="text-p-sm text-ink-gray-6">
-      Commits: {{ commits.length ? commits.map((c) => c.join(',')).join(' · ') : '—' }}
+      Commits:
+      {{ commits.length ? commits.map((c) => c.join(',')).join(' · ') : '—' }}
     </p>
   </div>
 </template>

@@ -11,7 +11,10 @@ describe('<Badge />', () => {
     cy.get('.inline-flex.rounded-full').should('contain.text', 'Default')
     // Default theme is gray, variant is subtle
     cy.get('.inline-flex.rounded-full').should('have.class', 'text-ink-gray-6')
-    cy.get('.inline-flex.rounded-full').should('have.class', 'bg-surface-gray-2')
+    cy.get('.inline-flex.rounded-full').should(
+      'have.class',
+      'bg-surface-gray-2',
+    )
   })
 
   it('renders label prop', () => {
@@ -32,7 +35,10 @@ describe('<Badge />', () => {
       },
     })
     cy.get('.inline-flex.rounded-full').should('have.class', 'text-ink-gray-6')
-    cy.get('.inline-flex.rounded-full').should('have.class', 'bg-surface-gray-2')
+    cy.get('.inline-flex.rounded-full').should(
+      'have.class',
+      'bg-surface-gray-2',
+    )
 
     // Blue
     cy.mount(Badge, {
@@ -42,7 +48,10 @@ describe('<Badge />', () => {
       },
     })
     cy.get('.inline-flex.rounded-full').should('have.class', 'text-ink-blue-2')
-    cy.get('.inline-flex.rounded-full').should('have.class', 'bg-surface-blue-2')
+    cy.get('.inline-flex.rounded-full').should(
+      'have.class',
+      'bg-surface-blue-2',
+    )
 
     // Green
     cy.mount(Badge, {
@@ -52,7 +61,10 @@ describe('<Badge />', () => {
       },
     })
     cy.get('.inline-flex.rounded-full').should('have.class', 'text-ink-green-3')
-    cy.get('.inline-flex.rounded-full').should('have.class', 'bg-surface-green-2')
+    cy.get('.inline-flex.rounded-full').should(
+      'have.class',
+      'bg-surface-green-2',
+    )
 
     // Orange
     cy.mount(Badge, {
@@ -62,7 +74,10 @@ describe('<Badge />', () => {
       },
     })
     cy.get('.inline-flex.rounded-full').should('have.class', 'text-ink-amber-3')
-    cy.get('.inline-flex.rounded-full').should('have.class', 'bg-surface-amber-1')
+    cy.get('.inline-flex.rounded-full').should(
+      'have.class',
+      'bg-surface-amber-1',
+    )
 
     // Red
     cy.mount(Badge, {
@@ -84,7 +99,10 @@ describe('<Badge />', () => {
       },
     })
     cy.get('.inline-flex.rounded-full').should('have.class', 'text-ink-white')
-    cy.get('.inline-flex.rounded-full').should('have.class', 'bg-surface-gray-7')
+    cy.get('.inline-flex.rounded-full').should(
+      'have.class',
+      'bg-surface-gray-7',
+    )
 
     // Subtle (default)
     cy.mount(Badge, {
@@ -94,7 +112,10 @@ describe('<Badge />', () => {
       },
     })
     cy.get('.inline-flex.rounded-full').should('have.class', 'text-ink-gray-6')
-    cy.get('.inline-flex.rounded-full').should('have.class', 'bg-surface-gray-2')
+    cy.get('.inline-flex.rounded-full').should(
+      'have.class',
+      'bg-surface-gray-2',
+    )
 
     // Outline
     cy.mount(Badge, {
@@ -105,7 +126,10 @@ describe('<Badge />', () => {
     })
     cy.get('.inline-flex.rounded-full').should('have.class', 'text-ink-gray-6')
     cy.get('.inline-flex.rounded-full').should('have.class', 'bg-transparent')
-    cy.get('.inline-flex.rounded-full').should('have.class', 'border-outline-gray-1')
+    cy.get('.inline-flex.rounded-full').should(
+      'have.class',
+      'border-outline-gray-1',
+    )
 
     // Ghost
     cy.mount(Badge, {
@@ -233,13 +257,16 @@ describe('<Badge />', () => {
     cy.get('.inline-flex.rounded-full').should('have.class', 'inline-flex')
     cy.get('.inline-flex.rounded-full').should('have.class', 'items-center')
     cy.get('.inline-flex.rounded-full').should('have.class', 'rounded-full')
-    cy.get('.inline-flex.rounded-full').should('have.class', 'whitespace-nowrap')
+    cy.get('.inline-flex.rounded-full').should(
+      'have.class',
+      'whitespace-nowrap',
+    )
   })
 
   it('renders prefix slot with correct size constraints', () => {
     const TestIcon = {
       render() {
-        return h('svg', { 'data-cy': 'prefix-icon', class: 'w-4 h-4' })
+        return h('svg', { 'data-cy': 'prefix-icon', 'class': 'w-4 h-4' })
       },
     }
 

@@ -229,9 +229,7 @@ export interface DateRangePickerActionsSlotProps {
    * Commits both endpoints atomically. Normalizes order so the earlier
    * date becomes `from`. Use for fixed-window presets ("Last 7 days").
    */
-  setRange: (
-    range: [string | Date | Dayjs, string | Date | Dayjs],
-  ) => void
+  setRange: (range: [string | Date | Dayjs, string | Date | Dayjs]) => void
   clear: () => void
   close: () => void
 }

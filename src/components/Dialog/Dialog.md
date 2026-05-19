@@ -3,12 +3,15 @@
 A flexible overlay for showing messages, forms, or actions. Keeps focus on content while allowing clear, user-friendly interactions.
 
 ## Destructive confirm
+
 <ComponentPreview name="Dialog-Confirm" />
 
 ## Create / edit form
+
 <ComponentPreview name="Dialog-Custom" />
 
 ## State-driven actions
+
 <ComponentPreview name="Dialog-Modal" />
 
 ## Action layout
@@ -20,15 +23,19 @@ Everything else sits side-by-side at natural width, right-aligned. Using the
 <ComponentPreview name="Dialog-ActionsLayout" />
 
 ## Single-CTA form
+
 <ComponentPreview name="Dialog-Interactive" />
 
 ## Auto-focus a field
+
 <ComponentPreview name="Dialog-Autofocus" />
 
 ## Full-canvas (`bare`)
+
 <ComponentPreview name="Dialog-Bare" />
 
 ## Master / detail browser
+
 <ComponentPreview name="Dialog-Browse" />
 
 ## Imperative API
@@ -67,6 +74,5 @@ current value, so validators can reference siblings. The submit button keeps
 its loading state while async validators settle.
 
 <ComponentPreview name="Dialog-Prompt" />
-
 
 <!-- @include: ./Dialog.api.md -->

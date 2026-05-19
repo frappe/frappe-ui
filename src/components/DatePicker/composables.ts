@@ -101,7 +101,9 @@ export function usePopoverPositioning(
 ) {
   const resolvedSide = computed<PopoverSide>(
     () =>
-      props.side ?? ((legacy.placement?.split('-')[0] as PopoverSide) ?? 'bottom'),
+      props.side ??
+      (legacy.placement?.split('-')[0] as PopoverSide) ??
+      'bottom',
   )
   const resolvedAlign = computed<PopoverAlign>(() => {
     if (props.align !== undefined) return props.align
@@ -142,9 +144,7 @@ export function useKeepOpen(
   props: CommonDatePickerProps,
   legacy: { autoClose?: boolean },
 ) {
-  return computed(
-    () => props.keepOpen === true || legacy.autoClose === false,
-  )
+  return computed(() => props.keepOpen === true || legacy.autoClose === false)
 }
 
 // Coerce arbitrary string input to a Dayjs, respecting an optional explicit format.

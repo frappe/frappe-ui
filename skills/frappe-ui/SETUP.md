@@ -26,10 +26,10 @@ npm install frappe-ui
 
 frappe-ui's `package.json` exposes only a handful of subpaths. The two most common mistakes:
 
-| Mistake | Use this instead |
-|---|---|
+| Mistake                                                  | Use this instead                                  |
+| -------------------------------------------------------- | ------------------------------------------------- |
 | `import frappeUIPreset from 'frappe-ui/tailwind/preset'` | `import frappeUIPreset from 'frappe-ui/tailwind'` |
-| `@import 'frappe-ui/src/style.css'` | `@import 'frappe-ui/style.css'` |
+| `@import 'frappe-ui/src/style.css'`                      | `@import 'frappe-ui/style.css'`                   |
 
 Anything not in the `exports` map (like `frappe-ui/src/*`) will fail with `Package subpath '…' is not defined by "exports"`.
 
@@ -120,7 +120,7 @@ import './style.css'
 import App from './App.vue'
 
 const app = createApp(App)
-app.use(router)   // required — frappe-ui's <Button> injects Symbol(router)
+app.use(router) // required — frappe-ui's <Button> injects Symbol(router)
 app.use(FrappeUI) // installs the plugin (resource provider, etc.)
 app.mount('#app')
 ```
@@ -151,7 +151,11 @@ import { createRouter, createWebHistory } from 'vue-router'
 export const router = createRouter({
   history: createWebHistory(),
   routes: [
-    { path: '/', name: 'Home', component: () => import('./pages/HomeScreen.vue') },
+    {
+      path: '/',
+      name: 'Home',
+      component: () => import('./pages/HomeScreen.vue'),
+    },
   ],
 })
 ```

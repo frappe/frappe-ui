@@ -95,15 +95,15 @@ const state = reactive({
 
     <Variant title="Disabled State">
       <div class="p-4">
-        <label class="block text-sm font-medium mb-2">Disabled Icon Picker</label>
+        <label class="block text-sm font-medium mb-2"
+          >Disabled Icon Picker</label
+        >
         <IconPicker
           v-model="disabledValue"
           placeholder="This is disabled"
           :disabled="true"
         />
-        <div class="mt-2 text-sm text-gray-600">
-          Icon picker is disabled
-        </div>
+        <div class="mt-2 text-sm text-gray-600">Icon picker is disabled</div>
       </div>
     </Variant>
 
@@ -118,7 +118,7 @@ const state = reactive({
         :options="[
           { value: 'start', label: 'Start' },
           { value: 'center', label: 'Center' },
-          { value: 'end', label: 'End' }
+          { value: 'end', label: 'End' },
         ]"
       />
     </template>

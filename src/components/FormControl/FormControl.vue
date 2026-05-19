@@ -6,7 +6,11 @@
     :class="[fillWidth ? 'w-full' : null, attrs.class]"
     :style="attrs.style"
   >
-    <template v-for="name in Object.keys($slots)" :key="name" #[name]="slotProps">
+    <template
+      v-for="name in Object.keys($slots)"
+      :key="name"
+      #[name]="slotProps"
+    >
       <!-- @vue-ignore -->
       <slot :name="name" v-bind="slotProps" />
     </template>
@@ -133,16 +137,16 @@ const forwardedAttrs = computed(() => {
 
 defineSlots<{
   /** Custom content rendered before the input (prefix icon/content) */
-  prefix?: () => any
+  'prefix'?: () => any
   /** Custom content rendered after the input (suffix icon/content) */
-  suffix?: () => any
+  'suffix'?: () => any
   /** Custom description slot (replaces description prop) */
-  description?: () => any
+  'description'?: () => any
   /** Custom label slot (replaces label prop). Receives `{ required }`. */
-  label?: (props: { required: boolean }) => any
+  'label'?: (props: { required: boolean }) => any
   /** Custom slot for autocomplete items prefix (if using Autocomplete type) */
   'item-prefix'?: (props: { item: any }) => any
   /** Default slot override for full input rendering */
-  default?: () => any
+  'default'?: () => any
 }>()
 </script>

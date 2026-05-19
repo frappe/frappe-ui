@@ -356,12 +356,12 @@ slots?: ItemSlots<ItemSlotProps>
 Key names mirror the template slot names one-to-one, with the redundant
 `item-` prefix stripped because we're already scoped to an item:
 
-| template slot     | `slots.*` key |
-| ----------------- | ------------- |
-| `#item-prefix`    | `prefix`      |
-| `#item-label`     | `label`       |
-| `#item-suffix`    | `suffix`      |
-| `#item`           | `item`        |
+| template slot  | `slots.*` key |
+| -------------- | ------------- |
+| `#item-prefix` | `prefix`      |
+| `#item-label`  | `label`       |
+| `#item-suffix` | `suffix`      |
+| `#item`        | `item`        |
 
 Rules:
 

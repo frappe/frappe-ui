@@ -40,7 +40,11 @@ const crmSidebar = reactive({
         { label: 'Leads', icon: 'lucide-users', to: '/leads' },
         { label: 'Deals', icon: 'lucide-briefcase', to: '/deals' },
         { label: 'Contacts', icon: 'lucide-user-check', to: '/contacts' },
-        { label: 'Organizations', icon: 'lucide-building', to: '/organizations' },
+        {
+          label: 'Organizations',
+          icon: 'lucide-building',
+          to: '/organizations',
+        },
         { label: 'Notes', icon: 'lucide-clipboard', to: '/notes' },
         { label: 'Tasks', icon: 'lucide-check-square', to: '/tasks' },
         { label: 'Call Logs', icon: 'lucide-phone', to: '/call-logs' },
@@ -56,8 +60,16 @@ const crmSidebar = reactive({
       collapsible: true,
       items: [
         { label: 'My Open Deals', icon: 'lucide-link', to: '/my-open-deals' },
-        { label: 'Partnership Deals', icon: 'lucide-link', to: '/partnership-deals' },
-        { label: 'Unassigned Deals', icon: 'lucide-link', to: '/unassigned-deals' },
+        {
+          label: 'Partnership Deals',
+          icon: 'lucide-link',
+          to: '/partnership-deals',
+        },
+        {
+          label: 'Unassigned Deals',
+          icon: 'lucide-link',
+          to: '/unassigned-deals',
+        },
         {
           label: 'Enterprise Pipeline',
           icon: 'lucide-link',

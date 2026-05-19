@@ -130,13 +130,13 @@ describe('Select', () => {
         return () =>
           h('div', { class: 'flex items-start gap-6' }, [
             h(Select, {
-              options: ['Short'],
-              modelValue: 'Short',
+              'options': ['Short'],
+              'modelValue': 'Short',
               'data-cy': 'short-select',
             }),
             h(Select, {
-              options: ['Short', 'A much longer option label'],
-              modelValue: 'Short',
+              'options': ['Short', 'A much longer option label'],
+              'modelValue': 'Short',
               'data-cy': 'long-select',
             }),
           ])
@@ -162,13 +162,13 @@ describe('Select', () => {
           h('div', { class: 'w-[320px] space-y-4' }, [
             h(Select, {
               options,
-              modelValue: 'abc',
+              'modelValue': 'abc',
               'data-cy': 'auto-width-select',
             }),
             h(Select, {
               options,
-              modelValue: 'abc',
-              class: 'w-full',
+              'modelValue': 'abc',
+              'class': 'w-full',
               'data-cy': 'full-width-select',
             }),
           ])
@@ -263,13 +263,13 @@ describe('Select', () => {
         return () =>
           h('form', { onSubmit: handleSubmit }, [
             h(Select, {
-              modelValue: value.value,
+              'modelValue': value.value,
               'onUpdate:modelValue': (nextValue) => {
                 value.value = nextValue
               },
-              name: 'status',
-              required: true,
-              autocomplete: 'organization-title',
+              'name': 'status',
+              'required': true,
+              'autocomplete': 'organization-title',
               options,
             }),
             h('button', { type: 'submit' }, 'Submit'),

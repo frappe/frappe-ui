@@ -5,20 +5,20 @@ knowledge_base:
   code_guidelines:
     enabled: true
     file_patterns:
-      - ".github/copilot-instructions.md"
-      - "v1-release/plan.md"
-      - "v1-release/04-components-audit.md"
-      - "v1-release/08-selection-and-menu-api-spec.md"
-      - "v1-release/changelog.md"
+      - '.github/copilot-instructions.md'
+      - 'v1-release/plan.md'
+      - 'v1-release/04-components-audit.md'
+      - 'v1-release/08-selection-and-menu-api-spec.md'
+      - 'v1-release/changelog.md'
   learnings:
     scope: local
   linked_repositories:
-    - repository: "frappe/gameplan"
-    - repository: "frappe/crm"
-    - repository: "frappe/lms"
-    - repository: "frappe/builder"
-    - repository: "frappe/drive"
-    - repository: "frappe/insights"
+    - repository: 'frappe/gameplan'
+    - repository: 'frappe/crm'
+    - repository: 'frappe/lms'
+    - repository: 'frappe/builder'
+    - repository: 'frappe/drive'
+    - repository: 'frappe/insights'
 
 reviews:
   profile: chill
@@ -42,25 +42,25 @@ reviews:
     drafts: false
     auto_incremental_review: false
     ignore_title_keywords:
-      - "WIP"
-      - "[skip review]"
+      - 'WIP'
+      - '[skip review]'
     ignore_usernames:
-      - "dependabot[bot]"
-      - "renovate[bot]"
-      - "github-actions[bot]"
+      - 'dependabot[bot]'
+      - 'renovate[bot]'
+      - 'github-actions[bot]'
 
   path_filters:
-    - "!/node_modules/"
-    - "!/dist/"
-    - "!/yarn.lock"
-    - "!/docs/.vitepress/cache/"
-    - "!/docs/meta/"
-    - "!/docs/content/auto-imports.d.ts"
-    - "!/docs/content/components.d.ts"
-    - "!/cypress/screenshots/"
+    - '!/node_modules/'
+    - '!/dist/'
+    - '!/yarn.lock'
+    - '!/docs/.vitepress/cache/'
+    - '!/docs/meta/'
+    - '!/docs/content/auto-imports.d.ts'
+    - '!/docs/content/components.d.ts'
+    - '!/cypress/screenshots/'
 
   path_instructions:
-    - path: "/**/*.{vue,ts,js}"
+    - path: '/**/*.{vue,ts,js}'
       instructions: |
         This repository is frappe-ui, a reusable Vue 3 component library and utility package, not an app codebase.
 
@@ -77,7 +77,7 @@ reviews:
         - do not suggest app-level patterns like state management, route architecture, or page composition
         - do not suggest backend changes unless the file is under /frappe/
 
-    - path: "/src/components/**/*.{vue,ts}"
+    - path: '/src/components/**/*.{vue,ts}'
       instructions: |
         Review as a component-library maintainer.
 
@@ -90,7 +90,7 @@ reviews:
 
         Prefer high-signal comments over speculative refactors.
 
-    - path: "/src/data-fetching/**/*.{ts,js}"
+    - path: '/src/data-fetching/**/*.{ts,js}'
       instructions: |
         Focus on reactive correctness, API contracts, caching behavior, loading and error states, and side effects.
 
@@ -102,14 +102,14 @@ reviews:
 
         Avoid suggesting generic fetch or axios patterns when existing frappe-ui composable patterns are intentional.
 
-    - path: "/src/resources/**/*.{ts,js}"
+    - path: '/src/resources/**/*.{ts,js}'
       instructions: |
         This is legacy resource-layer code kept for compatibility.
         Be conservative with suggestions.
         Prefer comments only for real bugs, compatibility risks, or unsafe side effects.
         Do not push large rewrites just to modernize style.
 
-    - path: "/frappe/**/*.{vue,ts,js}"
+    - path: '/frappe/**/*.{vue,ts,js}'
       instructions: |
         This folder contains higher-level Frappe-specific components and helpers built on top of the library.
 
@@ -120,12 +120,12 @@ reviews:
 
         Be conservative with suggestions that would force wide downstream app changes unless the PR is clearly doing that intentionally.
 
-    - path: "/docs/**"
+    - path: '/docs/**'
       instructions: |
         Only comment when docs are wrong, outdated, misleading, or missing important usage or accessibility guidance.
         Ignore wording-only, tone-only, or formatting-only suggestions.
 
-    - path: "/v1-release/**"
+    - path: '/v1-release/**'
       instructions: |
         These files are planning and release-support docs, not implementation code.
 
@@ -137,7 +137,7 @@ reviews:
 
         Ignore editorial wording tweaks unless they change meaning.
 
-    - path: "/src/components/**/stories/**"
+    - path: '/src/components/**/stories/**'
       instructions: |
         Review stories for misleading examples, missing important states, or missing accessibility-relevant coverage.
         Ignore presentation-only nits.
@@ -179,6 +179,6 @@ reviews:
   tools:
     semgrep:
       enabled: true
-      config_file: ".semgrep.yml"
+      config_file: '.semgrep.yml'
     languagetool:
       enabled: false

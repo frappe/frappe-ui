@@ -1,11 +1,11 @@
 <script setup>
-import { CircularProgressBar } from "frappe-ui";
-import Story from "@/components/Story.vue";
+import { CircularProgressBar } from 'frappe-ui'
+import Story from '@/components/Story.vue'
 
 // 'black' | 'red' | 'green' | 'blue' | 'orange'
 
-const themes = ["black", "red", "green", "blue", "orange"];
-const sizes = ["xs", "sm", "md", "lg", "xl"];
+const themes = ['black', 'red', 'green', 'blue', 'orange']
+const sizes = ['xs', 'sm', 'md', 'lg', 'xl']
 </script>
 
 <template>
@@ -36,7 +36,7 @@ const sizes = ["xs", "sm", "md", "lg", "xl"];
       <CircularProgressBar
         :step="2"
         :totalSteps="6"
-        :theme='{ primary: "#2376f5", secondary: "#ddd5d5" }'
+        :theme="{ primary: '#2376f5', secondary: '#ddd5d5' }"
       />
     </Story>
 

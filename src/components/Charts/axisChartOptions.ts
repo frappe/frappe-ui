@@ -1,6 +1,6 @@
 import useEchartsOptions from './eChartOptions'
 import { formatValue, mergeDeep } from './helpers'
-import {
+import type {
   AreaSeriesConfig,
   AxisChartConfig,
   BarSeriesConfig,
@@ -26,7 +26,7 @@ export default function useAxisChartOptions(config: AxisChartConfig) {
   const swapXY = config.swapXY
   const lastBarSeriesIdx = config.series
     .slice()
-    .reverse()
+    .toReversed()
     .findIndex((s) => s.type === 'bar')
   const hasY2 = config.series.some((s) => s.axis === 'y2')
 
@@ -99,7 +99,7 @@ function getBarSeriesOptions(config: AxisChartConfig, series: BarSeriesConfig) {
   const idx = config.series.findIndex((s) => s.name === series.name)
   const lastBarSeriesIdx = config.series
     .slice()
-    .reverse()
+    .toReversed()
     .findIndex((s) => s.type === 'bar')
 
   const isLastBar = lastBarSeriesIdx === idx

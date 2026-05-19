@@ -8,8 +8,10 @@ export const silentCall = <T>(method: string): Promise<T> => {
   console.error = () => {}
   console.log = () => {}
 
-  return call(method).catch(() => {}).finally(() => {
-    console.log = originalLog
-    console.error = originalError
-  })
+  return call(method)
+    .catch(() => {})
+    .finally(() => {
+      console.log = originalLog
+      console.error = originalError
+    })
 }

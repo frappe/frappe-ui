@@ -54,10 +54,7 @@ const prefs = ref({ notify: false, digest: true })
   <Dialog v-model:open="prefsOpen" title="Notification preferences">
     <div class="space-y-4">
       <div autofocus>
-        <Switch
-          label="Email me on every reply"
-          v-model="prefs.notify"
-        />
+        <Switch label="Email me on every reply" v-model="prefs.notify" />
       </div>
       <Switch label="Weekly digest" v-model="prefs.digest" />
     </div>

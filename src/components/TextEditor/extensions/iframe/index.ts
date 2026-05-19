@@ -6,6 +6,6 @@ export {
   getOptimalDimensions,
   validateURL,
   processURL,
-  ALLOWED_DOMAINS
+  ALLOWED_DOMAINS,
 } from './utils'
 export type { AspectRatioInfo, PlatformConfig } from './utils'

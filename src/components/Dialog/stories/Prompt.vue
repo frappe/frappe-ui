@@ -148,7 +148,7 @@ function createAccount() {
         placeholder: 'jane@example.com',
         // Sync validator — runs in the same parallel pass as `username`.
         validate: (value: string) => {
-          if (!value.includes('@')) return 'That doesn\'t look like an email.'
+          if (!value.includes('@')) return "That doesn't look like an email."
           return null
         },
       },
@@ -160,7 +160,10 @@ function createAccount() {
         // Cross-field validation via the second argument.
         validate: (value: string, all) => {
           if (value.length < 8) return 'Use at least 8 characters.'
-          if (typeof all.username === 'string' && value.includes(all.username)) {
+          if (
+            typeof all.username === 'string' &&
+            value.includes(all.username)
+          ) {
             return 'Password must not contain your username.'
           }
           return null

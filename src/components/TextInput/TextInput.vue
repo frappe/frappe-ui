@@ -68,11 +68,7 @@
     >
       <slot v-if="$slots.description" name="description" />
     </InputDescription>
-    <InputError
-      v-if="hasError"
-      :id="errorMessageId"
-      :lines="errorLines"
-    />
+    <InputError v-if="hasError" :id="errorMessageId" :lines="errorLines" />
   </LabelingWrapper>
 </template>
 
@@ -140,10 +136,10 @@ const {
 const hasLabeling = computed(() => {
   return Boolean(
     props.label ||
-      props.description ||
-      hasError.value ||
-      slots.label ||
-      slots.description,
+    props.description ||
+    hasError.value ||
+    slots.label ||
+    slots.description,
   )
 })
 

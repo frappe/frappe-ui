@@ -72,7 +72,11 @@
               </div>
             </div>
             <div class="flex-shrink-0">
-              <Button variant="ghost" icon="lucide-x" @click="removeFilter(i)" />
+              <Button
+                variant="ghost"
+                icon="lucide-x"
+                @click="removeFilter(i)"
+              />
             </div>
           </div>
           <div
@@ -122,7 +126,7 @@ import FilterIcon from './FilterIcon.vue'
 import NestedPopover from './NestedPopover.vue'
 import SearchComplete from './SearchComplete.vue'
 
-const typeCheck = ['Check']
+const typeCheck = new Set(['Check'])
 const typeLink = ['Link']
 const typeNumber = ['Float', 'Int']
 const typeSelect = ['Select']
@@ -153,7 +157,7 @@ const fields = computed(() => {
     .filter((field) => {
       return (
         !field.is_virtual &&
-        (typeCheck.includes(field.fieldtype) ||
+        (typeCheck.has(field.fieldtype) ||
           typeLink.includes(field.fieldtype) ||
           typeNumber.includes(field.fieldtype) ||
           typeSelect.includes(field.fieldtype) ||
@@ -232,7 +236,7 @@ function getOperators(fieldtype) {
       ],
     )
   }
-  if (typeCheck.includes(fieldtype)) {
+  if (typeCheck.has(fieldtype)) {
     options.push(...[{ label: 'Equals', value: '=' }])
   }
   return options
@@ -242,7 +246,7 @@ function getDefaultOperator(fieldtype) {
   if (
     typeSelect.includes(fieldtype) ||
     typeLink.includes(fieldtype) ||
-    typeCheck.includes(fieldtype) ||
+    typeCheck.has(fieldtype) ||
     typeNumber.includes(fieldtype)
   ) {
     return '='
@@ -251,7 +255,7 @@ function getDefaultOperator(fieldtype) {
 }
 
 function getValueSelector(fieldtype, options) {
-  if (typeSelect.includes(fieldtype) || typeCheck.includes(fieldtype)) {
+  if (typeSelect.includes(fieldtype) || typeCheck.has(fieldtype)) {
     const _options =
       fieldtype == 'Check' ? ['Yes', 'No'] : getSelectOptions(options)
     return h(FormControl, {
@@ -267,7 +271,7 @@ function getDefaultValue(field) {
   if (typeSelect.includes(field.fieldtype)) {
     return getSelectOptions(field.options)[0]
   }
-  if (typeCheck.includes(field.fieldtype)) {
+  if (typeCheck.has(field.fieldtype)) {
     return 'Yes'
   }
   return ''

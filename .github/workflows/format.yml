@@ -1,7 +1,7 @@
 name: Format Check
 
 on:
- pull_request:
+  pull_request:
   push:
     branches: [main]
 
@@ -19,4 +19,4 @@ jobs:
       - run: yarn install --frozen-lockfile
 
       - name: Check formatting
-        run: yarn oxfmt:check
+        run: yarn format:check

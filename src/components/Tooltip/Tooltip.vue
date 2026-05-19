@@ -37,7 +37,6 @@ defineSlots<{
    */
   content?: () => any
 }>()
-
 </script>
 
 <template>

@@ -47,10 +47,10 @@ placement?: DatePickerPlacement
 
 DatePicker has `autoClose: boolean` (default `true`). The selection family uses `keepOpen` on individual items as the escape hatch. At the component level there is no direct equivalent — but the naming `keepOpen` is the established direction. These are inverse booleans of each other:
 
-| Current | v1 equivalent |
-|---|---|
+| Current                     | v1 equivalent               |
+| --------------------------- | --------------------------- |
 | `autoClose: true` (default) | `keepOpen: false` (default) |
-| `autoClose: false` | `keepOpen: true` |
+| `autoClose: false`          | `keepOpen: true`            |
 
 **Fix:** Rename `autoClose` to `keepOpen` with default `false`. Deprecate `autoClose` with a mapping.
 
@@ -115,7 +115,7 @@ All three pickers accept both `value` and `modelValue` with an `||` fallback:
 
 ```ts
 interface DatePickerProps extends CommonDatePickerProps {
-  value?: string      // uncontrolled
+  value?: string // uncontrolled
   modelValue?: string // controlled
 }
 ```
@@ -169,6 +169,7 @@ But the actual emitted value is a comma-separated string like `"2025-01-01,2025-
 **Fix:** Define a separate `DateRangePickerEmits` that makes the format explicit, and document the output format. Consider whether the emitted value should be `string[]` instead of a comma-joined string for a cleaner v1 API.
 
 Option A (keep string, document it):
+
 ```ts
 export type DateRangePickerEmits = {
   /** Emits a comma-separated "YYYY-MM-DD,YYYY-MM-DD" string, or "" when cleared. */
@@ -178,6 +179,7 @@ export type DateRangePickerEmits = {
 ```
 
 Option B (emit array — breaking change from current):
+
 ```ts
 export type DateRangePickerEmits = {
   /** Emits [fromDate, toDate] in YYYY-MM-DD format, or [] when cleared. */
@@ -207,6 +209,7 @@ The `modelValue` prop already accepts `string | string[]`, which suggests Option
 The legacy utility functions it depends on (`getDate`, `getDatesAfter`, `getDaysInMonth`, `isLeapYear`) are also exported from `utils.ts` but are only used by this composable.
 
 **Fix:**
+
 - Mark `useDatePicker` as `@deprecated` in its JSDoc and add a dev-mode warning.
 - Mark the legacy util exports (`getDate`, `getDatesAfter`, `getDaysInMonth`, `isLeapYear`) as `@deprecated`.
 - Keep them exported for the v1 migration window, consistent with the broader deprecation policy.
@@ -227,7 +230,7 @@ The legacy utility functions it depends on (`getDate`, `getDatesAfter`, `getDays
 
 ```html
 <!-- DateTimePicker.vue — missing label -->
-<Button variant="ghost" size="sm" @click="cycleView">
+<button variant="ghost" size="sm" @click="cycleView"></button>
 ```
 
 **Fix:** Add `label="cycle-calendar-view"` to the cycle-view button in `DateTimePicker`.
@@ -276,9 +279,9 @@ type PopoverAlign = 'start' | 'center' | 'end'
 
 interface CommonDatePickerProps {
   // Positioning — aligned with Combobox/Dropdown/Select vocabulary
-  side?: PopoverSide             // default: 'bottom'
-  align?: PopoverAlign           // default: 'start'
-  offset?: number                // default: 4
+  side?: PopoverSide // default: 'bottom'
+  align?: PopoverAlign // default: 'start'
+  offset?: number // default: 4
   /** @deprecated use side + align */
   placement?: DatePickerPlacement
 
@@ -289,17 +292,17 @@ interface CommonDatePickerProps {
   label?: string
 
   // Interaction
-  readonly?: boolean             // prevents typing; popover still opens
-  disabled?: boolean             // prevents all interaction
+  readonly?: boolean // prevents typing; popover still opens
+  disabled?: boolean // prevents all interaction
   clearable?: boolean
-  keepOpen?: boolean             // default: false (closes after selection)
+  keepOpen?: boolean // default: false (closes after selection)
   /** @deprecated use keepOpen: true */
   autoClose?: boolean
 
   // Constraints
-  min?: string                   // YYYY-MM-DD — earliest selectable date
-  max?: string                   // YYYY-MM-DD — latest selectable date
-  isDateUnavailable?: (date: Dayjs) => boolean  // return true to block a date
+  min?: string // YYYY-MM-DD — earliest selectable date
+  max?: string // YYYY-MM-DD — latest selectable date
+  isDateUnavailable?: (date: Dayjs) => boolean // return true to block a date
 
   // Deprecated
   /** @deprecated use readonly instead */
@@ -359,6 +362,7 @@ Slots: `target`, `prefix`, `suffix` (same shape as DatePicker).
 Exposed: `open(): void`
 
 **`dualPane` rendering rules:**
+
 - Only renders the second panel when `view === 'date'` — cycling to month/year falls back to a single panel to avoid duplicate selectors.
 - Right panel always shows the month following `currentMonth` and hides its own prev/Today nav (left panel hides its next nav, so chrome isn't duplicated).
 
@@ -398,12 +402,12 @@ Exposed: `open(): void`
 
 Same four issues as the DatePicker family:
 
-| Current | v1 |
-|---|---|
-| `placement: 'bottom-start' \| ...` | `side` + `align` + `offset` (deprecate `placement`) |
-| `autoClose: boolean` (default `true`) | `keepOpen: boolean` (default `false`); deprecate `autoClose` |
+| Current                                 | v1                                                             |
+| --------------------------------------- | -------------------------------------------------------------- |
+| `placement: 'bottom-start' \| ...`      | `side` + `align` + `offset` (deprecate `placement`)            |
+| `autoClose: boolean` (default `true`)   | `keepOpen: boolean` (default `false`); deprecate `autoClose`   |
 | `allowCustom: boolean` (default `true`) | `readonly: boolean` (default `false`); deprecate `allowCustom` |
-| `value?: string` (uncontrolled) | use `modelValue` / `v-model`; deprecate `value` |
+| `value?: string` (uncontrolled)         | use `modelValue` / `v-model`; deprecate `value`                |
 
 `TimePicker` has no `inputClass` prop, so that fix is N/A.
 
@@ -432,9 +436,9 @@ interface TimePickerProps {
   value?: string
 
   // Positioning
-  side?: PopoverSide       // default: 'bottom'
-  align?: PopoverAlign     // default: 'start'
-  offset?: number          // default: 4
+  side?: PopoverSide // default: 'bottom'
+  align?: PopoverAlign // default: 'start'
+  offset?: number // default: 4
   /** @deprecated use side + align */
   placement?: TimePickerPlacement
 
@@ -444,17 +448,17 @@ interface TimePickerProps {
   use12Hour?: boolean
 
   // Interaction
-  readonly?: boolean       // default: false — prevents typing; popover still opens
+  readonly?: boolean // default: false — prevents typing; popover still opens
   disabled?: boolean
-  keepOpen?: boolean       // default: false (closes after selection)
+  keepOpen?: boolean // default: false (closes after selection)
   /** @deprecated use keepOpen (inverse) */
   autoClose?: boolean
 
   // Options / constraints
   interval?: number
   options?: Array<{ value: string; label?: string }>
-  min?: string             // HH:mm[:ss] — minimum selectable time
-  max?: string             // HH:mm[:ss] — maximum selectable time
+  min?: string // HH:mm[:ss] — minimum selectable time
+  max?: string // HH:mm[:ss] — maximum selectable time
   scrollMode?: 'center' | 'start' | 'nearest'
 
   // Deprecated
@@ -555,17 +559,17 @@ The current footer `#actions` was added during the v1 refactor and has no publis
 
 ### Decisions
 
-| Decision | Direction |
-|---|---|
-| Slot name | `#actions` — kept, matches `Dialog` |
-| Location | Left sidebar inside the popover, divided from the calendar by `divide-x divide-outline-gray-2` |
-| Visibility | Rendered only when the slot is provided. Calendar layout unchanged otherwise. |
-| Styling | Unstyled. Consumer renders their own button list inside `<aside class="flex flex-col p-2 gap-0.5">`. |
-| Popover width | Fixed widths (`w-56` on `DatePicker`) switch to `w-fit` when the sidebar is present. |
-| Footer block | **Removed** from all three components. |
-| Auto Clear button | **Removed.** Consumers who want an in-popover Clear write it inside `#actions` using the `clear` slot prop. |
-| `clearable` prop | Survives. Reduced to an input-level affordance — controls the trigger input's clear `×`, not a popover button. |
-| Migration | None. Behavior-change changelog entry only. |
+| Decision          | Direction                                                                                                      |
+| ----------------- | -------------------------------------------------------------------------------------------------------------- |
+| Slot name         | `#actions` — kept, matches `Dialog`                                                                            |
+| Location          | Left sidebar inside the popover, divided from the calendar by `divide-x divide-outline-gray-2`                 |
+| Visibility        | Rendered only when the slot is provided. Calendar layout unchanged otherwise.                                  |
+| Styling           | Unstyled. Consumer renders their own button list inside `<aside class="flex flex-col p-2 gap-0.5">`.           |
+| Popover width     | Fixed widths (`w-56` on `DatePicker`) switch to `w-fit` when the sidebar is present.                           |
+| Footer block      | **Removed** from all three components.                                                                         |
+| Auto Clear button | **Removed.** Consumers who want an in-popover Clear write it inside `#actions` using the `clear` slot prop.    |
+| `clearable` prop  | Survives. Reduced to an input-level affordance — controls the trigger input's clear `×`, not a popover button. |
+| Migration         | None. Behavior-change changelog entry only.                                                                    |
 
 ### Slot props
 
@@ -573,7 +577,7 @@ The current footer `#actions` was added during the v1 refactor and has no publis
 
 ```ts
 interface DatePickerActionsSlotProps {
-  selected: string                                     // 'YYYY-MM-DD' or ''
+  selected: string // 'YYYY-MM-DD' or ''
   setDate: (date: string | Date | Dayjs) => void
   clear: () => void
   close: () => void
@@ -587,16 +591,14 @@ interface DateRangePickerActionsSlotProps {
   setDate: (date: string | Date | Dayjs) => void
 
   /** Commits both endpoints atomically; normalizes order. */
-  setRange: (
-    range: [string | Date | Dayjs, string | Date | Dayjs],
-  ) => void
+  setRange: (range: [string | Date | Dayjs, string | Date | Dayjs]) => void
 
   clear: () => void
   close: () => void
 }
 
 interface DateTimePickerActionsSlotProps extends DatePickerActionsSlotProps {
-  time: string                                         // 'HH:mm:ss' or ''
+  time: string // 'HH:mm:ss' or ''
 }
 ```
 
@@ -644,17 +646,20 @@ interface DateTimePickerActionsSlotProps extends DatePickerActionsSlotProps {
 ## Execution checklist
 
 **Vocab alignment**
+
 - [ ] Replace `placement` with `side` + `align` + `offset`; deprecate `placement` with internal mapping
 - [ ] Rename `autoClose` → `keepOpen` (default `false`); deprecate `autoClose`
 - [ ] Deprecate `allowCustom`; document `readonly` as the replacement
 - [ ] Deprecate `inputClass`; document `class` on the component element as the replacement
 
 **Constraints**
+
 - [x] Add `min` / `max` to `CommonDatePickerProps` (all three pickers). On `DateTimePicker`, deprecate `minDateTime`/`maxDateTime` as aliases.
 - [x] Add `isDateUnavailable?: (date: Dayjs) => boolean` to `CommonDatePickerProps`
 - [x] Lift date-disabling logic from `DateTimePicker` into a shared util; wire it into `DatePicker` and `DateRangePicker`
 
 **Structural fixes**
+
 - [ ] Replace `FeatherIcon` with `LucideChevronDown` in all three pickers
 - [ ] Add `DateTimePickerProps` to `types.ts` and export it
 - [ ] Define and export `DateRangePickerEmits`; decide comma-string vs `string[]` before freeze
@@ -664,11 +669,13 @@ interface DateTimePickerActionsSlotProps extends DatePickerActionsSlotProps {
 - [ ] Add `defineExpose({ open })` to `DatePicker` and `DateTimePicker`
 
 **Deprecations**
+
 - [ ] Add `@deprecated` warning for `value` prop (dev-mode warn, all three pickers)
 - [ ] Deprecate `useDatePicker` composable (JSDoc + dev-mode warning)
 - [ ] Deprecate legacy util exports: `getDate`, `getDatesAfter`, `getDaysInMonth`, `isLeapYear`
 
 **TimePicker**
+
 - [ ] Add `side` / `align` / `offset` to `TimePickerProps`; deprecate `placement` with internal mapping
 - [ ] Add `keepOpen` (default `false`); deprecate `autoClose` with inverse mapping
 - [ ] Add `readonly` prop; deprecate `allowCustom`; internal trigger reads `props.readonly || props.allowCustom === false`
@@ -677,6 +684,7 @@ interface DateTimePickerActionsSlotProps extends DatePickerActionsSlotProps {
 - [x] Add `min`/`max` props; deprecate `minTime`/`maxTime` with internal fallback
 
 **`#actions` slot relocation**
+
 - [ ] Move `#actions` rendering from footer to left sidebar in `DatePicker`, `DateRangePicker`, `DateTimePicker`
 - [ ] Delete the footer `<div v-if="$slots.actions || (clearable && …)">` block from all three components
 - [ ] Switch fixed-width popovers to `w-fit` when `$slots.actions` is present
@@ -688,5 +696,6 @@ interface DateTimePickerActionsSlotProps extends DatePickerActionsSlotProps {
 - [ ] Changelog entry: behavior change — `#actions` moved to sidebar, footer removed, in-popover auto Clear removed
 
 **Docs**
+
 - [ ] Regenerate `docs/meta/DatePicker.md` after API changes
 - [ ] Regenerate `docs/meta/TimePicker.md` after API changes

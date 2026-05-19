@@ -1,9 +1,6 @@
 <template>
   <div class="inline-flex flex-col">
-    <div
-      class="inline-flex gap-2 rounded transition"
-      :class="rowClasses"
-    >
+    <div class="inline-flex gap-2 rounded transition" :class="rowClasses">
       <input
         class="rounded-sm mt-[1px] bg-surface-white"
         :class="inputClasses"
@@ -41,11 +38,7 @@
       >
         <slot v-if="$slots.description" name="description" />
       </InputDescription>
-      <InputError
-        v-if="hasError"
-        :id="errorMessageId"
-        :lines="errorLines"
-      />
+      <InputError v-if="hasError" :id="errorMessageId" :lines="errorLines" />
     </div>
   </div>
 </template>

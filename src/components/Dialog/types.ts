@@ -108,7 +108,7 @@ export interface DialogEmits {
   'update:modelValue': [value: boolean]
 
   /** Fired when the dialog transitions to closed. */
-  close: []
+  'close': []
 
   /** Fired after the close animation finishes. */
   'after-leave': []
@@ -133,16 +133,16 @@ export interface DialogExposed {
 
 export interface DialogSlots {
   /** Main content rendered inside the padded card. Exposes `{ close }`. */
-  default?: (props: DialogSlotProps) => any
+  'default'?: (props: DialogSlotProps) => any
 
   /** Title area; accepts arbitrary content (extra buttons next to title, etc.). Exposes `{ close }`. */
-  title?: (props: DialogSlotProps) => any
+  'title'?: (props: DialogSlotProps) => any
 
   /** Footer override; exposes `{ close, actions }`. */
-  actions?: (props: DialogActionsSlotProps) => any
+  'actions'?: (props: DialogActionsSlotProps) => any
 
   /** @deprecated Use `#default` + `bare` prop. */
-  body?: () => any
+  'body'?: () => any
 
   /** @deprecated Use `#default`. */
   'body-main'?: () => any

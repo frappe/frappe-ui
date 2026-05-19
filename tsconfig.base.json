@@ -15,6 +15,6 @@
     "noEmit": true,
     "types": ["vitest/globals", "unplugin-icons/types/vue"],
     "declaration": true,
-    "emitDeclarationOnly": true,
+    "emitDeclarationOnly": true
   }
 }

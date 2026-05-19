@@ -103,11 +103,11 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="Textarea" :data="propsData"/> 
+<PropsTable name="Textarea" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
+<SlotsTable :data="slotsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

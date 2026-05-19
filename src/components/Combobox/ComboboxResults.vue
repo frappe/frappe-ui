@@ -121,7 +121,6 @@ function getItemTextValue(item: NormalizedItem) {
 function handleSelect(item: NormalizedItem, event: Event) {
   if (isCustomOption(item)) emit('selectCustom', item, event)
 }
-
 </script>
 
 <template>

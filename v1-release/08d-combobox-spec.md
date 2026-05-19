@@ -159,15 +159,15 @@ Trigger modes:
   into the popover header and auto-focuses on open. The button's label
   is the selected option's `label` or the `placeholder`. The button's
   prefix resolves by priority:
-    1. selected + consumer's `#item-prefix` slot → reused with the
-       selected option, so the same slot that renders each row's prefix
-       also renders the selected-state prefix
-    2. selected + `selectedOption.icon` → rendered as a `<component>`
-    3. no selection + consumer's `#prefix` slot → used as the
-       placeholder prefix (e.g. a generic icon shown before anything is
-       picked)
-    4. nothing
-  For richer custom triggers, use the `#trigger` slot directly.
+  1. selected + consumer's `#item-prefix` slot → reused with the
+     selected option, so the same slot that renders each row's prefix
+     also renders the selected-state prefix
+  2. selected + `selectedOption.icon` → rendered as a `<component>`
+  3. no selection + consumer's `#prefix` slot → used as the
+     placeholder prefix (e.g. a generic icon shown before anything is
+     picked)
+  4. nothing
+     For richer custom triggers, use the `#trigger` slot directly.
 
 Providing a `#trigger` slot implicitly activates button mode regardless
 of the `trigger` prop value, since the caller is replacing the trigger
@@ -203,9 +203,9 @@ interface ComboboxEmits {
   'update:selectedOption': [
     option: ComboboxSelectableOption | ComboboxCustomOption | null,
   ]
-  focus: [event: FocusEvent]
-  blur: [event: FocusEvent]
-  input: [value: string]
+  'focus': [event: FocusEvent]
+  'blur': [event: FocusEvent]
+  'input': [value: string]
 }
 ```
 
@@ -717,11 +717,7 @@ Do not deprecate:
 ```
 
 ```vue
-<Combobox
-  v-model="value"
-  :options="options"
-  @update:query="query = $event"
->
+<Combobox v-model="value" :options="options" @update:query="query = $event">
   <template #item-create-new="{ item, query }">
     Create "{{ query }}"
   </template>
@@ -782,8 +778,7 @@ const users = fetchedUsers.map((user) => ({
   label: user.name,
   value: user.id,
   slots: {
-    prefix: ({ item }) =>
-      h(Avatar, { image: item.image, class: 'size-4' }),
+    prefix: ({ item }) => h(Avatar, { image: item.image, class: 'size-4' }),
   },
 }))
 ```
@@ -843,7 +838,7 @@ continues to work unchanged through `v1.x`.
 - **Slot-prop symmetry across `#trigger` / `#prefix` / `#suffix`.** All
   three slots now receive the same shape (`ComboboxSlotProps`). `#prefix`
   previously received no props; it now gets `{ open, disabled, query,
-  selectedOption, displayValue }` for parity. `selectedOption` is always
+selectedOption, displayValue }` for parity. `selectedOption` is always
   `null` inside `#prefix` because the prefix only renders pre-selection,
   but the field is exposed for symmetry. The matching change was made on
   `MultiSelect` (added `query` to `#trigger`; aligned `#suffix`) and

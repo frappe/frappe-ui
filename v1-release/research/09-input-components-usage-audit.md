@@ -28,18 +28,18 @@ frontends.
 Call-site counts per component, per app. Counts are usage in real app code
 (not stories/tests/docs).
 
-| App         | FormControl | Input (legacy) | Autocomplete | Switch | Checkbox | TextInput | Textarea | ErrorMessage | FileUploader |
-| ----------- | ----------- | -------------- | ------------ | ------ | -------- | --------- | -------- | ------------ | ------------ |
-| gameplan    | 16          | 0              | 2            | 1      | 3        | 7         | 0        | 26           | 3            |
-| helpdesk    | 44          | 1              | 8            | 10     | 7        | 2         | 0        | 20           | 7            |
-| crm         | 15          | 0              | 4            | 0      | 0        | 3         | 0        | 6            | 4            |
-| insights    | 86          | 10             | 48           | 4      | 16       | 3         | 1        | 3            | 2            |
-| drive       | 10          | 1              | 0            | 1      | 0        | 1         | 0        | 3            | 2            |
-| builder     | 2           | 0              | 6            | 6      | 0        | 0         | 1        | 0            | 4            |
-| meet        | 8           | 0              | 0            | 3      | 0        | 0         | 0        | 0            | 0            |
-| slides      | 2           | 0              | 0            | 1      | 1        | 0         | 0        | 0            | 2            |
-| hrms        | 2           | 0              | 4            | 1      | 0        | 0         | 0        | 4            | 1            |
-| **TOTAL**   | **185**     | **12**         | **72**       | **27** | **27**   | **16**    | **2**    | **62**       | **25**       |
+| App       | FormControl | Input (legacy) | Autocomplete | Switch | Checkbox | TextInput | Textarea | ErrorMessage | FileUploader |
+| --------- | ----------- | -------------- | ------------ | ------ | -------- | --------- | -------- | ------------ | ------------ |
+| gameplan  | 16          | 0              | 2            | 1      | 3        | 7         | 0        | 26           | 3            |
+| helpdesk  | 44          | 1              | 8            | 10     | 7        | 2         | 0        | 20           | 7            |
+| crm       | 15          | 0              | 4            | 0      | 0        | 3         | 0        | 6            | 4            |
+| insights  | 86          | 10             | 48           | 4      | 16       | 3         | 1        | 3            | 2            |
+| drive     | 10          | 1              | 0            | 1      | 0        | 1         | 0        | 3            | 2            |
+| builder   | 2           | 0              | 6            | 6      | 0        | 0         | 1        | 0            | 4            |
+| meet      | 8           | 0              | 0            | 3      | 0        | 0         | 0        | 0            | 0            |
+| slides    | 2           | 0              | 0            | 1      | 1        | 0         | 0        | 0            | 2            |
+| hrms      | 2           | 0              | 4            | 1      | 0        | 0         | 0        | 4            | 1            |
+| **TOTAL** | **185**     | **12**         | **72**       | **27** | **27**   | **16**    | **2**    | **62**       | **25**       |
 
 `Rating` had zero call sites across all audited apps.
 `Slider` had ~5 call sites concentrated in `builder` settings panes; not
@@ -53,15 +53,15 @@ through `FormControl type="password"` (1 site).
 
 **Distinct `type=` values in the wild:**
 
-| `type` value     | call sites |
-| ---------------- | ---------- |
-| (implicit text)  | ~35        |
-| `select`         | 39         |
-| `number`         | 18         |
-| `checkbox`       | 16         |
-| `autocomplete`   | 7          |
-| `textarea`       | 6          |
-| `password`       | 1          |
+| `type` value               | call sites                                            |
+| -------------------------- | ----------------------------------------------------- |
+| (implicit text)            | ~35                                                   |
+| `select`                   | 39                                                    |
+| `number`                   | 18                                                    |
+| `checkbox`                 | 16                                                    |
+| `autocomplete`             | 7                                                     |
+| `textarea`                 | 6                                                     |
+| `password`                 | 1                                                     |
 | dynamic (`type=fieldType`) | several — Frappe field introspection in CRM, Helpdesk |
 
 **Wrapper vs router pattern:** every observed call site treats `FormControl`
@@ -247,18 +247,18 @@ straining the API.
 
 ## Summary of locked decisions
 
-| Decision                                  | Data                                              | Locked v1 stance                                        | Migration load |
-| ----------------------------------------- | ------------------------------------------------- | ------------------------------------------------------- | -------------- |
-| `FormControl` scope                       | 185 router uses; 0 wrapper uses; 7 `type='autocomplete'` | Keep router; warn `type='autocomplete'` only           | 2 files (meet, insights) — trivial |
-| `Switch.labelClasses` / `Checkbox.padding`| Both 0 uses on frappe-ui components               | Drop both without a deprecation cycle; standardize on `data-*` hooks | 0 apps |
-| `Input.vue` deprecation                   | 12 call sites, 83% in insights                    | Wire warning; keep functional through `v1.x`            | Mechanical migration |
-| `Autocomplete` direct deprecation         | 72 call sites, 3 stable patterns, app-local wrappers | Wire warning; treat as long-lived legacy through `v1.x` | Defer push to `Combobox` to post-v1 |
-| `Password.value` deprecation              | 0 uses                                            | Wire warning; trivial                                   | 0 apps |
-| `Rating.rating_from` rename               | 0 uses                                            | Ship rename + alias for completeness                    | 0 apps |
-| `Textarea.label` removal                  | 0 uses                                            | Absorb into shared labeling contract                    | 0 apps |
-| `ErrorMessage` `v-html` removal           | 62 uses, all plain string / `Error`               | Safe to drop                                            | 0 apps |
-| `FileUploader` API freeze                 | 25 uses, single universal pattern                 | Confirm freeze; modernize structurally only             | 0 apps |
-| Shared labeling contract on Checkbox      | ~11 uses already passing `label`                  | Implement; usage is already forward-compatible          | 0 apps |
+| Decision                                   | Data                                                     | Locked v1 stance                                                     | Migration load                      |
+| ------------------------------------------ | -------------------------------------------------------- | -------------------------------------------------------------------- | ----------------------------------- |
+| `FormControl` scope                        | 185 router uses; 0 wrapper uses; 7 `type='autocomplete'` | Keep router; warn `type='autocomplete'` only                         | 2 files (meet, insights) — trivial  |
+| `Switch.labelClasses` / `Checkbox.padding` | Both 0 uses on frappe-ui components                      | Drop both without a deprecation cycle; standardize on `data-*` hooks | 0 apps                              |
+| `Input.vue` deprecation                    | 12 call sites, 83% in insights                           | Wire warning; keep functional through `v1.x`                         | Mechanical migration                |
+| `Autocomplete` direct deprecation          | 72 call sites, 3 stable patterns, app-local wrappers     | Wire warning; treat as long-lived legacy through `v1.x`              | Defer push to `Combobox` to post-v1 |
+| `Password.value` deprecation               | 0 uses                                                   | Wire warning; trivial                                                | 0 apps                              |
+| `Rating.rating_from` rename                | 0 uses                                                   | Ship rename + alias for completeness                                 | 0 apps                              |
+| `Textarea.label` removal                   | 0 uses                                                   | Absorb into shared labeling contract                                 | 0 apps                              |
+| `ErrorMessage` `v-html` removal            | 62 uses, all plain string / `Error`                      | Safe to drop                                                         | 0 apps                              |
+| `FileUploader` API freeze                  | 25 uses, single universal pattern                        | Confirm freeze; modernize structurally only                          | 0 apps                              |
+| Shared labeling contract on Checkbox       | ~11 uses already passing `label`                         | Implement; usage is already forward-compatible                       | 0 apps                              |
 
 The audit produced **no surprises against the spec** and **no signals to
 redesign**. Every parked decision now has data behind it and can be promoted

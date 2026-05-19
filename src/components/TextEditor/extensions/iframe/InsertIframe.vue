@@ -60,9 +60,8 @@ import {
   detectPlatform,
   calculateAspectRatio,
   getOptimalDimensions,
-  ALLOWED_DOMAINS
+  ALLOWED_DOMAINS,
 } from './utils'
-
 
 const props = defineProps<{
   editor: Editor
@@ -88,7 +87,7 @@ const isValidUrl = computed(() => {
       if (srcMatch?.[1]) {
         return validateURL(srcMatch[1], {
           allowedDomains: ALLOWED_DOMAINS,
-          HTMLAttributes: {}
+          HTMLAttributes: {},
         })
       }
       return false
@@ -97,7 +96,7 @@ const isValidUrl = computed(() => {
     // Handle direct URLs
     return validateURL(embedUrl.value, {
       allowedDomains: ALLOWED_DOMAINS,
-      HTMLAttributes: {}
+      HTMLAttributes: {},
     })
   } catch {
     return false
@@ -120,14 +119,15 @@ const processedUrl = computed(() => {
 })
 
 const platformInfo = computed(() => {
-  if (!embedUrl.value || !isValidUrl.value) return { platform: 'Generic', aspectRatio: 9/16 }
+  if (!embedUrl.value || !isValidUrl.value)
+    return { platform: 'Generic', aspectRatio: 9 / 16 }
 
   const platform = detectPlatform(processedUrl.value)
   const aspectInfo = calculateAspectRatio(processedUrl.value)
 
   return {
     platform: platform?.name || 'Generic',
-    aspectRatio: aspectInfo.ratio
+    aspectRatio: aspectInfo.ratio,
   }
 })
 
@@ -180,14 +180,15 @@ function insertIframe() {
     width: customWidth.value,
     height: customHeight.value,
     title: title.value,
-    align: alignment.value
+    align: alignment.value,
   })
 
   if (success) {
     showDialog.value = false
     props.editor.commands.focus()
   } else {
-    urlError.value = 'Failed to insert embed. Please check the URL and try again.'
+    urlError.value =
+      'Failed to insert embed. Please check the URL and try again.'
   }
 }
 
@@ -198,12 +199,18 @@ function handleSlashCommandInsert(event: CustomEvent) {
 }
 
 onMounted(() => {
-  props.editor.view.dom.addEventListener('iframe:open-dialog', handleSlashCommandInsert as EventListener)
+  props.editor.view.dom.addEventListener(
+    'iframe:open-dialog',
+    handleSlashCommandInsert as EventListener,
+  )
 })
 
 onUnmounted(() => {
   try {
-  props.editor.view.dom.removeEventListener('iframe:open-dialog', handleSlashCommandInsert as EventListener)
+    props.editor.view.dom.removeEventListener(
+      'iframe:open-dialog',
+      handleSlashCommandInsert as EventListener,
+    )
   } catch {}
 })
 </script>

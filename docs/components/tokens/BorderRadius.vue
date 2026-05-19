@@ -1,24 +1,19 @@
 <script setup lang="ts">
-
 type BorderRadiusToken = {
-  name: string;
-  value: string;
-};
+  name: string
+  value: string
+}
 
 const props = defineProps<{
-  data: BorderRadiusToken[];
-}>();
+  data: BorderRadiusToken[]
+}>()
 
-const data = props.data.slice(0, props.data.length - 1);
+const data = props.data.slice(0, props.data.length - 1)
 </script>
 
 <template>
   <div class="grid grid-cols-3 gap-5 my-10">
-    <div
-      v-for="radius in data"
-      :key="radius.name"
-      class="grid gap-3"
-    >
+    <div v-for="radius in data" :key="radius.name" class="grid gap-3">
       <div class="text-sm justify-between flex">
         <span class="font-medium">
           {{ 'rounded-' + radius.name }}
@@ -30,12 +25,7 @@ const data = props.data.slice(0, props.data.length - 1);
 
       <!-- card -->
       <div
-        class="
-          border grid gap-3
-          border-outline-gray-2
-          bg-surface-cards
-          p-4
-        "
+        class="border grid gap-3 border-outline-gray-2 bg-surface-cards p-4"
         :style="{ borderRadius: radius.value }"
       >
         <div class="flex items-center gap-3 borer-b">
@@ -54,9 +44,7 @@ const data = props.data.slice(0, props.data.length - 1);
         </div>
 
         <div class="flex items-center justify-between">
-          <span class="text-xs text-ink-gray-4">
-            8 items
-          </span>
+          <span class="text-xs text-ink-gray-4"> 8 items </span>
 
           <button
             class="px-3 py-1 text-xs border bg-surface-white"

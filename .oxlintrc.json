@@ -22,13 +22,34 @@
   //  - consistent-function-scoping: helper closures inside describe blocks are fine
   "overrides": [
     {
-      "files": ["tests/**/*.ts"],
+      "files": [
+        "**/*.cy.ts",
+        "**/*.cy.js",
+        "**/*.test.ts",
+        "**/*.spec.ts",
+        "cypress/**",
+        "tests/**/*.ts"
+      ],
       "rules": {
         "no-shadow": "off",
         "typescript/no-explicit-any": "off",
         "unicorn/consistent-function-scoping": "off"
       }
+    },
+    {
+      "files": ["frappe/**"],
+      "rules": {
+        "typescript/no-explicit-any": "off",
+        "no-unused-vars": "off"
+      }
     }
   ],
-  "ignorePatterns": ["node_modules", "dist"]
+  "ignorePatterns": [
+    "node_modules",
+    "dist",
+    "auto-imports.d.ts",
+    "components.d.ts",
+    ".nyc_output",
+    "coverage"
+  ]
 }

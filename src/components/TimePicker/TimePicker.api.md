@@ -229,11 +229,11 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="TimePicker" :data="propsData"/> 
+<PropsTable name="TimePicker" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
+<SlotsTable :data="slotsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

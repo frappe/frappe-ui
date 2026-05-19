@@ -96,15 +96,15 @@ defineSlots<{
             :class="{ 'px-2.5': props.vertical, 'py-2.5': !props.vertical }"
           >
             <span
-              v-if="tab.icon && typeof tab.icon === 'string' && tab.icon.startsWith('lucide-')"
+              v-if="
+                tab.icon &&
+                typeof tab.icon === 'string' &&
+                tab.icon.startsWith('lucide-')
+              "
               class="size-4"
               :class="tab.icon"
             />
-            <component
-              v-else-if="tab.icon"
-              :is="tab.icon"
-              class="size-4"
-            />
+            <component v-else-if="tab.icon" :is="tab.icon" class="size-4" />
 
             {{ tab.label }}
           </component>

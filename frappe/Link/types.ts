@@ -1,4 +1,4 @@
-import { ComboboxVariant } from '../../src/components/Combobox/types'
+import type { ComboboxVariant } from '../../src/components/Combobox/types'
 
 export interface LinkProps {
   doctype: string

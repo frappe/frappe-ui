@@ -105,8 +105,7 @@ describe('dialog.ts — imperative API', () => {
   })
 
   it('extracts frappe-style messages[] from a rejection payload', () => {
-    const onConfirm = () =>
-      Promise.reject({ messages: ['Server says no'] })
+    const onConfirm = () => Promise.reject({ messages: ['Server says no'] })
     cy.mount(DialogManager)
     cy.then(() => {
       confirm({ title: 't', onConfirm })
@@ -225,10 +224,7 @@ describe('dialog.ts — imperative API', () => {
       confirm({ title: 'Danger', theme: 'red' })
     })
     cy.get('[role=dialog] .lucide-alert-triangle').should('exist')
-    cy.contains('button', 'Confirm').should(
-      'have.class',
-      'bg-surface-red-5',
-    )
+    cy.contains('button', 'Confirm').should('have.class', 'bg-surface-red-5')
   })
 
   it('a string icon overrides the theme default', () => {
@@ -322,9 +318,7 @@ describe('dialog.ts — imperative API', () => {
     cy.contains('button', 'Save').click()
     cy.get('[role=dialog]').contains('Save failed').should('exist')
     cy.get('[role=dialog]').should('exist')
-    cy.contains('button', 'Save')
-      .find('svg.animate-spin')
-      .should('not.exist')
+    cy.contains('button', 'Save').find('svg.animate-spin').should('not.exist')
   })
 
   // ---- danger -------------------------------------------------------------
@@ -440,8 +434,7 @@ describe('dialog.ts — imperative API', () => {
             name: 'email',
             label: 'Email',
             defaultValue: 'bad',
-            validate: (v: string) =>
-              v === 'bad' ? 'Invalid email' : null,
+            validate: (v: string) => (v === 'bad' ? 'Invalid email' : null),
           },
         ],
         onConfirm,
@@ -450,9 +443,7 @@ describe('dialog.ts — imperative API', () => {
     cy.contains('button', 'Submit').click()
     cy.get('[role=dialog]').contains('Invalid email').should('exist')
     cy.get('@onConfirm').should('not.have.been.called')
-    cy.contains('button', 'Submit')
-      .find('svg.animate-spin')
-      .should('not.exist')
+    cy.contains('button', 'Submit').find('svg.animate-spin').should('not.exist')
   })
 
   it('prompt clears a stale field error as soon as the user edits it', () => {

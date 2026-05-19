@@ -21,9 +21,17 @@ async function testConnection({ close }: { close: () => void }) {
 const testButton = computed(() => {
   if (state.value === 'testing') return { label: 'Testing…', loading: true }
   if (state.value === 'connected')
-    return { label: 'Connected', theme: 'green' as const, variant: 'outline' as const }
+    return {
+      label: 'Connected',
+      theme: 'green' as const,
+      variant: 'outline' as const,
+    }
   if (state.value === 'failed')
-    return { label: 'Failed, retry?', theme: 'red' as const, variant: 'outline' as const }
+    return {
+      label: 'Failed, retry?',
+      theme: 'red' as const,
+      variant: 'outline' as const,
+    }
   return { label: 'Test connection', variant: 'outline' as const }
 })
 </script>

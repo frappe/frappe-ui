@@ -23,7 +23,7 @@ describe('Rating', () => {
     const onUpdate = cy.spy().as('onUpdate')
 
     cy.mount(Rating, {
-      props: { modelValue: 0, 'onUpdate:modelValue': onUpdate },
+      props: { 'modelValue': 0, 'onUpdate:modelValue': onUpdate },
     })
 
     cy.get('[role="radio"]').eq(2).click()
@@ -32,7 +32,10 @@ describe('Rating', () => {
 
   it('readonly', () => {
     cy.mount(Rating, {
-      props: { 'onUpdate:modelValue': cy.spy().as('onUpdate'), readonly: true },
+      props: {
+        'onUpdate:modelValue': cy.spy().as('onUpdate'),
+        'readonly': true,
+      },
     })
 
     cy.get('[role="radio"]').eq(1).click()
@@ -51,7 +54,9 @@ describe('Rating', () => {
       cy.mount(Rating, {
         props: { modelValue: 2, size: size as keyof typeof sizes },
       })
-      cy.get('[role="radio"] svg').first().should('have.class', sizes[size as keyof typeof sizes])
+      cy.get('[role="radio"] svg')
+        .first()
+        .should('have.class', sizes[size as keyof typeof sizes])
     }
   })
 

@@ -21,17 +21,17 @@ const title = computed(() => (editMode.value ? 'Edit task' : 'Create task'))
 
 <template>
   <div class="w-full flex gap-2">
-    <Button @click="(editMode = false), (open = true)">New task</Button>
+    <Button @click="((editMode = false), (open = true))">New task</Button>
     <Button
       variant="outline"
       @click="
-        (editMode = true),
-          (task = {
-            title: 'Wire up release notes',
-            status: 'In Progress',
-            description: 'Pull v1.x highlights into the public changelog.',
-          }),
-          (open = true)
+        ((editMode = true),
+        (task = {
+          title: 'Wire up release notes',
+          status: 'In Progress',
+          description: 'Pull v1.x highlights into the public changelog.',
+        }),
+        (open = true))
       "
     >
       Edit task

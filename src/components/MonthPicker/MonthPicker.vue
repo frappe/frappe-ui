@@ -10,7 +10,7 @@ const props = withDefaults(defineProps<MonthPickerProps>(), {
 })
 
 const viewMode = ref('month')
-const model = defineModel<String>({ default: '' })
+const model = defineModel<string>({ default: '' })
 
 const months = [
   'January',
@@ -60,10 +60,10 @@ const nextClick = () => {
 }
 
 const formatBtn = (v: string | number) =>
-  viewMode.value == 'month' ? (v as String).slice(0, 3) : v
+  viewMode.value == 'month' ? (v as string).slice(0, 3) : v
 
 const txtClass = computed(() => {
-  return model.value || props.disabled ? '': '!text-ink-gray-5' 
+  return model.value || props.disabled ? '' : '!text-ink-gray-5'
 })
 </script>
 
@@ -72,21 +72,29 @@ const txtClass = computed(() => {
     popover-class="mt-2 shadow-xl rounded-lg border bg-surface-modal p-2"
   >
     <template #target="{ togglePopover, isOpen }">
-      <Button @click="togglePopover" class="w-full justify-between border" :class="txtClass"
-				:disabled="disabled" aria-haspopup="dialog" :aria-expanded="isOpen">
+      <Button
+        @click="togglePopover"
+        class="w-full justify-between border"
+        :class="txtClass"
+        :disabled="disabled"
+        aria-haspopup="dialog"
+        :aria-expanded="isOpen"
+      >
         {{ model || props.placeholder }}
-        <template #suffix> <span class="lucide-calendar size-4 text-ink-gray-6" /> </template>
+        <template #suffix>
+          <span class="lucide-calendar size-4 text-ink-gray-6" />
+        </template>
       </Button>
     </template>
 
     <template #body>
       <div class="flex gap-2 justify-between">
-        <Button variant="ghost" @click="prevClick" label='previous'>
+        <Button variant="ghost" @click="prevClick" label="previous">
           <span class="lucide-chevron-left size-4 text-ink-gray-5" />
         </Button>
 
         <!-- view toggler -->
-         <Button @click="toggleViewMode" label="Toggle view mode">
+        <Button @click="toggleViewMode" label="Toggle view mode">
           <template v-if="viewMode == 'month'">
             {{ model.split(' ')[1] ?? currentYear }}
           </template>
@@ -95,7 +103,7 @@ const txtClass = computed(() => {
           </template>
         </Button>
 
-        <Button variant="ghost" @click="nextClick" label='next'>
+        <Button variant="ghost" @click="nextClick" label="next">
           <span class="lucide-chevron-right size-4 text-ink-gray-5" />
         </Button>
       </div>

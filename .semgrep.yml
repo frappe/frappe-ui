@@ -9,7 +9,7 @@ rules:
     languages: [ts, js]
     paths:
       exclude:
-        - "src/resources/**"
+        - 'src/resources/**'
     pattern-regex: 'from\s+[''"][^''"]*\/resources[\/''"]'
 
   - id: no-console-log-in-source
@@ -21,17 +21,17 @@ rules:
     languages: [ts, js]
     paths:
       include:
-        - "src/**/*.ts"
-        - "src/**/*.js"
-        - "frappe/**/*.ts"
-        - "frappe/**/*.js"
+        - 'src/**/*.ts'
+        - 'src/**/*.js'
+        - 'frappe/**/*.ts'
+        - 'frappe/**/*.js'
       exclude:
-        - "**/*.cy.ts"
-        - "**/*.story.ts"
-        - "**/*.spec.ts"
-        - "**/*.test.ts"
-        - "src/stories/**"
-        - "src/mocks/**"
+        - '**/*.cy.ts'
+        - '**/*.story.ts'
+        - '**/*.spec.ts'
+        - '**/*.test.ts'
+        - 'src/stories/**'
+        - 'src/mocks/**'
     pattern: console.log(...)
 
   - id: prefer-lucide-over-feather-icon
@@ -44,14 +44,14 @@ rules:
     languages: [generic]
     paths:
       include:
-        - "src/**/*.vue"
-        - "src/**/*.ts"
-        - "src/**/*.js"
-        - "frappe/**/*.vue"
-        - "frappe/**/*.ts"
-        - "frappe/**/*.js"
+        - 'src/**/*.vue'
+        - 'src/**/*.ts'
+        - 'src/**/*.js'
+        - 'frappe/**/*.vue'
+        - 'frappe/**/*.ts'
+        - 'frappe/**/*.js'
       exclude:
-        - "src/components/FeatherIcon.vue"
-        - "src/utils/iconString.ts"
-        - "src/index.ts"
+        - 'src/components/FeatherIcon.vue'
+        - 'src/utils/iconString.ts'
+        - 'src/index.ts'
     pattern-regex: 'FeatherIcon'

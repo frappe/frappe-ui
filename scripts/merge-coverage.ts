@@ -22,13 +22,17 @@ mkdirSync(merged, { recursive: true })
 if (existsSync(vitestReport)) {
   copyFileSync(vitestReport, join(merged, 'vitest.json'))
 } else {
-  console.warn('Vitest coverage missing — merged report will reflect Cypress only.')
+  console.warn(
+    'Vitest coverage missing — merged report will reflect Cypress only.',
+  )
 }
 
 if (existsSync(cypressReport)) {
   copyFileSync(cypressReport, join(merged, 'cypress.json'))
 } else {
-  console.warn('Cypress coverage missing — merged report will reflect Vitest only.')
+  console.warn(
+    'Cypress coverage missing — merged report will reflect Vitest only.',
+  )
 }
 
 execSync(`npx nyc merge ${merged} ${join(merged, 'coverage-final.json')}`, {

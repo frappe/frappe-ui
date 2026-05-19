@@ -28,4 +28,3 @@ export interface TooltipProps {
    */
   disabled?: boolean
 }
-

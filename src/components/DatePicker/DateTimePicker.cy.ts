@@ -8,7 +8,7 @@ const clearSlot = {
       'button',
       {
         'aria-label': 'Clear',
-        onClick: () => {
+        'onClick': () => {
           props.clear()
           props.close()
         },
@@ -63,8 +63,16 @@ describe('DateTimePicker', () => {
       },
     })
     cy.get('input').first().dblclick()
-    cy.get('[aria-label="2025-06-09"]').should('have.attr', 'aria-disabled', 'true')
-    cy.get('[aria-label="2025-06-21"]').should('have.attr', 'aria-disabled', 'true')
+    cy.get('[aria-label="2025-06-09"]').should(
+      'have.attr',
+      'aria-disabled',
+      'true',
+    )
+    cy.get('[aria-label="2025-06-21"]').should(
+      'have.attr',
+      'aria-disabled',
+      'true',
+    )
     cy.get('[aria-label="2025-06-15"]').should('not.have.attr', 'aria-disabled')
   })
 
@@ -116,7 +124,7 @@ describe('DateTimePicker', () => {
     it('selecting a date emits update:modelValue with combined date+time', () => {
       cy.mount(DateTimePicker, {
         props: {
-          modelValue: '2025-06-15 12:00:00',
+          'modelValue': '2025-06-15 12:00:00',
           'onUpdate:modelValue': cy.spy().as('onUpdate'),
         },
       })
@@ -157,8 +165,16 @@ describe('DateTimePicker', () => {
       },
     })
     cy.get('input').first().dblclick()
-    cy.get('[aria-label="2025-06-09"]').should('have.attr', 'aria-disabled', 'true')
-    cy.get('[aria-label="2025-06-21"]').should('have.attr', 'aria-disabled', 'true')
+    cy.get('[aria-label="2025-06-09"]').should(
+      'have.attr',
+      'aria-disabled',
+      'true',
+    )
+    cy.get('[aria-label="2025-06-21"]').should(
+      'have.attr',
+      'aria-disabled',
+      'true',
+    )
   })
 
   describe('keyboard navigation', () => {
@@ -172,7 +188,7 @@ describe('DateTimePicker', () => {
     it('Enter on a focused cell selects it and keeps popover open', () => {
       cy.mount(DateTimePicker, {
         props: {
-          modelValue: '2025-06-15 12:00:00',
+          'modelValue': '2025-06-15 12:00:00',
           'onUpdate:modelValue': cy.spy().as('onUpdate'),
         },
       })

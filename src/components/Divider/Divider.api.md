@@ -33,7 +33,7 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="Divider" :data="propsData"/> 
-
+<PropsTable name="Divider" :data="propsData"/>

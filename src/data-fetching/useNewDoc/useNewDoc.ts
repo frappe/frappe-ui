@@ -1,6 +1,6 @@
 import { reactive, unref } from 'vue'
 import { useCall } from '../useCall/useCall'
-import { UseCallOptions } from '../useCall/types'
+import type { UseCallOptions } from '../useCall/types'
 import { docStore } from '../docStore'
 
 type UseNewDocOptions = Omit<

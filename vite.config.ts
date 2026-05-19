@@ -10,7 +10,10 @@ export default defineConfig({
   plugins: [
     vue(),
     lucideIcons({
-      componentGlobs: ['src/components/**/*.vue', '!src/components/**/stories/*.vue'],
+      componentGlobs: [
+        'src/components/**/*.vue',
+        '!src/components/**/stories/*.vue',
+      ],
     }),
     coverageEnabled &&
       istanbul({

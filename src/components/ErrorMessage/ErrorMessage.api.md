@@ -13,7 +13,7 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="ErrorMessage" :data="propsData"/> 
-
+<PropsTable name="ErrorMessage" :data="propsData"/>

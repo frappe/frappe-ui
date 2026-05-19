@@ -110,10 +110,10 @@ const {
 const hasLabeling = computed(() => {
   return Boolean(
     props.label ||
-      props.description ||
-      hasError.value ||
-      slots.label ||
-      slots.description,
+    props.description ||
+    hasError.value ||
+    slots.label ||
+    slots.description,
   )
 })
 
@@ -415,27 +415,27 @@ defineSlots<ComboboxSlots>()
       there's no labeling, so bare usage keeps its flattened layout.
     -->
     <div :class="hasLabeling ? null : 'contents'">
-  <ComboboxRoot
-    ref="rootRef"
-    class="contents"
-    :model-value="internalModelValue"
-    :open="open"
-    :disabled="disabled"
-    :ignore-filter="true"
-    :open-on-focus="openOnFocus"
-    :open-on-click="openOnClick"
-    @update:modelValue="handleRootModelValueChange"
-    @update:open="handleRootOpenChange"
-  >
-    <!--
+      <ComboboxRoot
+        ref="rootRef"
+        class="contents"
+        :model-value="internalModelValue"
+        :open="open"
+        :disabled="disabled"
+        :ignore-filter="true"
+        :open-on-focus="openOnFocus"
+        :open-on-click="openOnClick"
+        @update:modelValue="handleRootModelValueChange"
+        @update:open="handleRootOpenChange"
+      >
+        <!--
       Two trigger modes, picked automatically:
         1. Default (`trigger="input"`): the trigger IS the search input.
         2. Button mode (`trigger="button"` or `#trigger` slot provided):
            caller's button — or the built-in auto-wired Button — opens the
            popover; the search input moves into the popover header.
     -->
-    <template v-if="isButtonMode">
-      <!--
+        <template v-if="isButtonMode">
+          <!--
         reka's `ComboboxTrigger` hardcodes `tabindex="-1"` — it assumes
         the ComboboxInput is the tab-stop and the trigger is just a
         mouse-clickable chevron. That's wrong for button mode where
@@ -447,24 +447,24 @@ defineSlots<ComboboxSlots>()
         to the child via `as-child` — this makes consumer-supplied
         `#trigger` elements "just work" without wiring handlers.
       -->
-      <ComboboxAnchor
-        as-child
-        @click="open = !open"
-        @pointerdown="markPointerDown"
-      >
-        <slot
-          v-if="$slots.trigger"
-          name="trigger"
-          v-bind="{
-            open,
-            disabled: !!disabled,
-            query: typedQuery,
-            selectedOption,
-            displayValue,
-          }"
-        />
+          <ComboboxAnchor
+            as-child
+            @click="open = !open"
+            @pointerdown="markPointerDown"
+          >
+            <slot
+              v-if="$slots.trigger"
+              name="trigger"
+              v-bind="{
+                open,
+                disabled: !!disabled,
+                query: typedQuery,
+                selectedOption,
+                displayValue,
+              }"
+            />
 
-        <!--
+            <!--
           Rendered as a raw `<button>` (not the `<Button>` component) so
           the prefix / label / chevron are direct flex children and
           `justify-between` + label `flex-1` align cleanly. Wrapping in
@@ -472,30 +472,30 @@ defineSlots<ComboboxSlots>()
           `<span>`, which is content-sized and would center the label in
           `w-full` buttons.
         -->
-        <button
-          v-else
-          type="button"
-          :class="[
-            triggerClasses,
-            'justify-between',
-            disabled && 'cursor-not-allowed',
-            hasLabeling ? 'w-full' : null,
-            hasLabeling ? null : (attrs.class as any),
-          ]"
-          :style="hasLabeling ? null : (attrs.style as any)"
-          :disabled="disabled"
-          data-slot="trigger"
-          :data-state="open ? 'open' : 'closed'"
-          :data-variant="variant"
-          :data-size="size"
-          :data-invalid="hasError ? 'true' : undefined"
-          :data-required="required ? 'true' : undefined"
-          :id="inputId"
-          aria-haspopup="listbox"
-          :aria-expanded="open"
-          v-bind="inputAriaAttrs"
-        >
-          <!--
+            <button
+              v-else
+              type="button"
+              :class="[
+                triggerClasses,
+                'justify-between',
+                disabled && 'cursor-not-allowed',
+                hasLabeling ? 'w-full' : null,
+                hasLabeling ? null : (attrs.class as any),
+              ]"
+              :style="hasLabeling ? null : (attrs.style as any)"
+              :disabled="disabled"
+              data-slot="trigger"
+              :data-state="open ? 'open' : 'closed'"
+              :data-variant="variant"
+              :data-size="size"
+              :data-invalid="hasError ? 'true' : undefined"
+              :data-required="required ? 'true' : undefined"
+              :id="inputId"
+              aria-haspopup="listbox"
+              :aria-expanded="open"
+              v-bind="inputAriaAttrs"
+            >
+              <!--
             Prefix precedence on the trigger:
               1. selected + `#item-prefix` slot → reuse the list's per-item
                  prefix renderer so the trigger matches the dropdown row
@@ -504,159 +504,159 @@ defineSlots<ComboboxSlots>()
                  string / emoji / component).
               3. not selected + `#prefix` slot → user's placeholder affordance.
           -->
-          <template v-if="selectedOption && $slots['item-prefix']">
-            <slot
-              name="item-prefix"
-              v-bind="{
-                item: selectedOption,
-                query: '',
-                selected: true,
-              }"
-            />
-          </template>
-          <OptionIcon
-            v-else-if="selectedOption?.icon"
-            :icon="selectedOption.icon"
-          />
-          <slot
-            v-else-if="!selectedOption && $slots.prefix"
-            name="prefix"
-            v-bind="{
-              open,
-              disabled: !!disabled,
-              query: typedQuery,
-              selectedOption,
-              displayValue,
-            }"
-          />
+              <template v-if="selectedOption && $slots['item-prefix']">
+                <slot
+                  name="item-prefix"
+                  v-bind="{
+                    item: selectedOption,
+                    query: '',
+                    selected: true,
+                  }"
+                />
+              </template>
+              <OptionIcon
+                v-else-if="selectedOption?.icon"
+                :icon="selectedOption.icon"
+              />
+              <slot
+                v-else-if="!selectedOption && $slots.prefix"
+                name="prefix"
+                v-bind="{
+                  open,
+                  disabled: !!disabled,
+                  query: typedQuery,
+                  selectedOption,
+                  displayValue,
+                }"
+              />
 
-          <span
+              <span
+                :class="[
+                  'min-w-0 flex-1 truncate text-left font-normal',
+                  !selectedOption && 'text-ink-gray-4',
+                ]"
+              >
+                {{ selectedOption?.label ?? placeholder }}
+              </span>
+
+              <slot
+                name="suffix"
+                v-bind="{
+                  open,
+                  disabled: !!disabled,
+                  query: typedQuery,
+                  selectedOption,
+                  displayValue,
+                }"
+              >
+                <span
+                  :class="[
+                    'lucide-chevron-down size-4 shrink-0 text-ink-gray-4 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)]',
+                    open && 'rotate-180',
+                  ]"
+                />
+              </slot>
+            </button>
+          </ComboboxAnchor>
+        </template>
+
+        <template v-else>
+          <ComboboxAnchor
+            data-slot="trigger"
+            :data-state="open ? 'open' : 'closed'"
+            :data-disabled="disabled ? '' : undefined"
+            :data-variant="variant"
+            :data-size="size"
+            :data-invalid="hasError ? 'true' : undefined"
+            :data-required="required ? 'true' : undefined"
             :class="[
-              'min-w-0 flex-1 truncate text-left font-normal',
-              !selectedOption && 'text-ink-gray-4',
+              triggerClasses,
+              hasLabeling ? 'w-full' : null,
+              hasLabeling ? null : (attrs.class as any),
             ]"
+            :style="hasLabeling ? null : (attrs.style as any)"
+            @pointerdown="markPointerDown"
           >
-            {{ selectedOption?.label ?? placeholder }}
-          </span>
-
-          <slot
-            name="suffix"
-            v-bind="{
-              open,
-              disabled: !!disabled,
-              query: typedQuery,
-              selectedOption,
-              displayValue,
-            }"
-          >
-            <span
-              :class="[
-                'lucide-chevron-down size-4 shrink-0 text-ink-gray-4 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)]',
-                open && 'rotate-180',
-              ]"
-            />
-          </slot>
-        </button>
-      </ComboboxAnchor>
-    </template>
-
-    <template v-else>
-      <ComboboxAnchor
-        data-slot="trigger"
-        :data-state="open ? 'open' : 'closed'"
-        :data-disabled="disabled ? '' : undefined"
-        :data-variant="variant"
-        :data-size="size"
-        :data-invalid="hasError ? 'true' : undefined"
-        :data-required="required ? 'true' : undefined"
-        :class="[
-          triggerClasses,
-          hasLabeling ? 'w-full' : null,
-          hasLabeling ? null : (attrs.class as any),
-        ]"
-        :style="hasLabeling ? null : (attrs.style as any)"
-        @pointerdown="markPointerDown"
-      >
-        <!--
+            <!--
           Prefix precedence matches button mode: selected option's
           `#item-prefix` → selected option's icon auto-render →
           user's `#prefix` slot.
         -->
-        <template v-if="selectedOption && $slots['item-prefix']">
-          <slot
-            name="item-prefix"
-            v-bind="{ item: selectedOption, query: '', selected: true }"
-          />
+            <template v-if="selectedOption && $slots['item-prefix']">
+              <slot
+                name="item-prefix"
+                v-bind="{ item: selectedOption, query: '', selected: true }"
+              />
+            </template>
+            <OptionIcon
+              v-else-if="selectedOption?.icon"
+              :icon="selectedOption.icon"
+            />
+            <slot
+              v-else
+              name="prefix"
+              v-bind="{
+                open,
+                disabled: !!disabled,
+                query: typedQuery,
+                selectedOption,
+                displayValue,
+              }"
+            />
+
+            <ComboboxInput
+              :id="inputId"
+              v-bind="{ ...inputAttrs, ...inputAriaAttrs }"
+              data-slot="input"
+              :data-variant="variant"
+              :data-size="size"
+              :value="query"
+              :disabled="disabled"
+              :placeholder="placeholder"
+              :class="resolvedInputClasses"
+              @input="handleInputChange"
+              @focus="emit('focus', $event)"
+              @blur="emit('blur', $event)"
+              @keydown.enter="handleInputEnter"
+            />
+
+            <slot
+              name="suffix"
+              v-bind="{
+                open,
+                disabled: !!disabled,
+                query: typedQuery,
+                selectedOption,
+                displayValue,
+              }"
+            >
+              <ComboboxTrigger
+                :disabled="disabled"
+                data-slot="chevron"
+                class="inline-flex shrink-0 items-center justify-center text-ink-gray-4 outline-none transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] data-[state=open]:rotate-180"
+              >
+                <span class="lucide-chevron-down size-4 text-ink-gray-6" />
+              </ComboboxTrigger>
+            </slot>
+          </ComboboxAnchor>
         </template>
-        <OptionIcon
-          v-else-if="selectedOption?.icon"
-          :icon="selectedOption.icon"
-        />
-        <slot
-          v-else
-          name="prefix"
-          v-bind="{
-            open,
-            disabled: !!disabled,
-            query: typedQuery,
-            selectedOption,
-            displayValue,
-          }"
-        />
 
-        <ComboboxInput
-          :id="inputId"
-          v-bind="{ ...inputAttrs, ...inputAriaAttrs }"
-          data-slot="input"
-          :data-variant="variant"
-          :data-size="size"
-          :value="query"
-          :disabled="disabled"
-          :placeholder="placeholder"
-          :class="resolvedInputClasses"
-          @input="handleInputChange"
-          @focus="emit('focus', $event)"
-          @blur="emit('blur', $event)"
-          @keydown.enter="handleInputEnter"
-        />
-
-        <slot
-          name="suffix"
-          v-bind="{
-            open,
-            disabled: !!disabled,
-            query: typedQuery,
-            selectedOption,
-            displayValue,
-          }"
-        >
-          <ComboboxTrigger
-            :disabled="disabled"
-            data-slot="chevron"
-            class="inline-flex shrink-0 items-center justify-center text-ink-gray-4 outline-none transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] data-[state=open]:rotate-180"
+        <ComboboxPortal :to="portalTo">
+          <ComboboxContent
+            data-slot="content"
+            data-selection
+            :data-variant="variant"
+            :data-size="size"
+            :class="[
+              'z-[100]',
+              !isButtonMode && 'min-w-[--reka-combobox-trigger-width]',
+            ]"
+            position="popper"
+            :side="side"
+            :align="resolvedAlign"
+            :side-offset="offset"
           >
-            <span class="lucide-chevron-down size-4 text-ink-gray-6" />
-          </ComboboxTrigger>
-        </slot>
-      </ComboboxAnchor>
-    </template>
-
-    <ComboboxPortal :to="portalTo">
-      <ComboboxContent
-        data-slot="content"
-        data-selection
-        :data-variant="variant"
-        :data-size="size"
-        :class="[
-          'z-[100]',
-          !isButtonMode && 'min-w-[--reka-combobox-trigger-width]',
-        ]"
-        position="popper"
-        :side="side"
-        :align="resolvedAlign"
-        :side-offset="offset"
-      >
-        <!--
+            <!--
           Why FocusScope lives here (inside ComboboxContent) and not around it:
 
           ComboboxContent is a <Presence> wrapper — it renders null when the
@@ -677,55 +677,55 @@ defineSlots<ComboboxSlots>()
           once the dialog trap is paused. In input mode we prevent it so the
           trigger input keeps focus while the list opens.
         -->
-        <FocusScope
-          as-child
-          @mount-auto-focus="handleFocusScopeMountAutoFocus"
-          @unmount-auto-focus.prevent
-        >
-          <div
-            data-slot="content-body"
-            :data-motion="contentMotion"
-            class="overflow-hidden rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5"
-          >
-            <div
-              v-if="isButtonMode"
-              data-slot="content-search"
-              class="flex items-center gap-2 border-b border-outline-gray-1 px-3"
+            <FocusScope
+              as-child
+              @mount-auto-focus="handleFocusScopeMountAutoFocus"
+              @unmount-auto-focus.prevent
             >
-              <ComboboxInput
-                :id="`${inputId}-search-input`"
-                v-bind="inputAttrs"
-                data-slot="input"
-                :value="query"
-                :disabled="disabled"
-                :placeholder="placeholder"
-                class="min-w-0 flex-1 px-0 border-0 bg-transparent py-2 text-base text-ink-gray-8 outline-none placeholder:text-ink-gray-4 focus:ring-0"
-                @input="handleInputChange"
-                @focus="emit('focus', $event)"
-                @blur="emit('blur', $event)"
-                @keydown.enter="handleInputEnter"
-              />
-            </div>
+              <div
+                data-slot="content-body"
+                :data-motion="contentMotion"
+                class="overflow-hidden rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5"
+              >
+                <div
+                  v-if="isButtonMode"
+                  data-slot="content-search"
+                  class="flex items-center gap-2 border-b border-outline-gray-1 px-3"
+                >
+                  <ComboboxInput
+                    :id="`${inputId}-search-input`"
+                    v-bind="inputAttrs"
+                    data-slot="input"
+                    :value="query"
+                    :disabled="disabled"
+                    :placeholder="placeholder"
+                    class="min-w-0 flex-1 px-0 border-0 bg-transparent py-2 text-base text-ink-gray-8 outline-none placeholder:text-ink-gray-4 focus:ring-0"
+                    @input="handleInputChange"
+                    @focus="emit('focus', $event)"
+                    @blur="emit('blur', $event)"
+                    @keydown.enter="handleInputEnter"
+                  />
+                </div>
 
-            <ComboboxResults
-              :groups="filteredGroups"
-              :size="size"
-              :query="typedQuery"
-              :model="model ?? null"
-              :loading="loading"
-              :empty-text="emptyText"
-              :show-create-option="showCreateOption"
-              :show-empty="showEmpty"
-              :slot-fns="slots"
-              :all-selectable-options="allSelectableOptions"
-              @select-custom="handleCustomItemSelect"
-              @select-create="handleCreateOptionSelect"
-            />
-          </div>
-        </FocusScope>
-      </ComboboxContent>
-    </ComboboxPortal>
-  </ComboboxRoot>
+                <ComboboxResults
+                  :groups="filteredGroups"
+                  :size="size"
+                  :query="typedQuery"
+                  :model="model ?? null"
+                  :loading="loading"
+                  :empty-text="emptyText"
+                  :show-create-option="showCreateOption"
+                  :show-empty="showEmpty"
+                  :slot-fns="slots"
+                  :all-selectable-options="allSelectableOptions"
+                  @select-custom="handleCustomItemSelect"
+                  @select-create="handleCreateOptionSelect"
+                />
+              </div>
+            </FocusScope>
+          </ComboboxContent>
+        </ComboboxPortal>
+      </ComboboxRoot>
     </div>
     <InputDescription
       v-if="showDescription || $slots.description"

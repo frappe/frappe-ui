@@ -73,10 +73,10 @@ instance.
 - Proxies routes like `/api`, `/app`, `/assets`, `/files`, etc.
 - Auto-detects the Frappe port from `common_site_config.json`
 
-| Option   | Description                                    | Default                                          |
-| -------- | ---------------------------------------------- | ------------------------------------------------ |
-| `port`   | Vite dev server port                           | Auto-calculated from `webserver_port`            |
-| `source` | Regex for routes to proxy                      | `'^/(app\|login\|api\|assets\|files\|private)'`  |
+| Option   | Description               | Default                                         |
+| -------- | ------------------------- | ----------------------------------------------- |
+| `port`   | Vite dev server port      | Auto-calculated from `webserver_port`           |
+| `source` | Regex for routes to proxy | `'^/(app\|login\|api\|assets\|files\|private)'` |
 
 ```javascript
 frappeui({
@@ -111,10 +111,10 @@ import LucideArrowRight from '~icons/lucide/arrow-right'
 Auto-generates TypeScript interfaces from Frappe DocType JSON files. Interfaces
 are regenerated only when the source DocType changes.
 
-| Option   | Description                                | Default                  |
-| -------- | ------------------------------------------ | ------------------------ |
-| `input`  | Map of `app_name` → array of doctype names | *(required)*             |
-| `output` | Output file path for generated types       | `src/types/doctypes.ts`  |
+| Option   | Description                                | Default                 |
+| -------- | ------------------------------------------ | ----------------------- |
+| `input`  | Map of `app_name` → array of doctype names | _(required)_            |
+| `output` | Output file path for generated types       | `src/types/doctypes.ts` |
 
 ```javascript
 frappeui({
@@ -166,13 +166,13 @@ directory structure.
 - Sets correct base URLs for Frappe's asset serving
 - Copies the built `index.html` to the specified location (typically in `www/`)
 
-| Option          | Description                          | Default                                   |
-| --------------- | ------------------------------------ | ----------------------------------------- |
-| `outDir`        | Build output directory               | `'../app_name/public/frontend'` (auto)    |
-| `baseUrl`       | Base URL for assets                  | `'/assets/app_name/frontend/'` (auto)     |
-| `indexHtmlPath` | Where to copy built `index.html`     | Inferred from `frontendRoute`             |
-| `emptyOutDir`   | Clear output directory before build  | `true`                                    |
-| `sourcemap`     | Generate source maps                 | `true`                                    |
+| Option          | Description                         | Default                                |
+| --------------- | ----------------------------------- | -------------------------------------- |
+| `outDir`        | Build output directory              | `'../app_name/public/frontend'` (auto) |
+| `baseUrl`       | Base URL for assets                 | `'/assets/app_name/frontend/'` (auto)  |
+| `indexHtmlPath` | Where to copy built `index.html`    | Inferred from `frontendRoute`          |
+| `emptyOutDir`   | Clear output directory before build | `true`                                 |
+| `sourcemap`     | Generate source maps                | `true`                                 |
 
 ```javascript
 frappeui({

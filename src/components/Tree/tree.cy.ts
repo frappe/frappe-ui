@@ -93,9 +93,7 @@ describe('Tree', () => {
       },
     })
 
-    cy.contains('Root')
-      .parent()
-      .should('have.css', 'height', '40px')
+    cy.contains('Root').parent().should('have.css', 'height', '40px')
 
     // indentation line
     cy.get('.border-r').should('exist')
@@ -118,8 +116,7 @@ describe('Tree', () => {
             `label-${node.label}`,
           ),
 
-        icon: () =>
-          h('span', { 'data-cy': 'icon' }, 'icon'),
+        icon: () => h('span', { 'data-cy': 'icon' }, 'icon'),
       },
     })
 

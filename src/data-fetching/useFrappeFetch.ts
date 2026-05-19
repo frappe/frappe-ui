@@ -120,7 +120,7 @@ function setHeaders(headers: HeadersInit) {
   }
 
   const defaultHeaders: Record<string, string> = {
-    Accept: 'application/json',
+    'Accept': 'application/json',
     'Content-Type': 'application/json; charset=utf-8',
   }
   if (siteName) {

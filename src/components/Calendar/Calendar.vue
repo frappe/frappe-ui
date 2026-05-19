@@ -41,9 +41,17 @@
         <div class="flex gap-x-1">
           <!-- Increment and Decrement Button-->
 
-          <Button @click="decrement" variant="ghost" icon="lucide-chevron-left" />
+          <Button
+            @click="decrement"
+            variant="ghost"
+            icon="lucide-chevron-left"
+          />
           <Button label="Today" @click="setCalendarDate()" variant="ghost" />
-          <Button @click="increment" variant="ghost" icon="lucide-chevron-right" />
+          <Button
+            @click="increment"
+            variant="ghost"
+            icon="lucide-chevron-right"
+          />
 
           <!--  View change button, default is months or can be set via props!  -->
           <TabButtons
@@ -343,7 +351,7 @@ function openModal(data) {
 
 function handleCellClick(e, date, time = '', isFullDay = false) {
   if (isAnyPopoverOpen.value) {
-	isAnyPopoverOpen.value = false
+    isAnyPopoverOpen.value = false
     return
   }
 
@@ -676,7 +684,7 @@ function getVisibleRange() {
   if (activeView.value === 'Week') {
     const weekDates = datesInWeeks.value[week.value] || []
     if (!weekDates.length) return null
-    const orderedWeek = [...weekDates].sort((a, b) => a - b)
+    const orderedWeek = [...weekDates].toSorted((a, b) => a - b)
     const start = dayjs(orderedWeek[0]).startOf('day')
     const end = dayjs(orderedWeek[orderedWeek.length - 1]).endOf('day')
     return {

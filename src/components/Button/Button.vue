@@ -9,70 +9,84 @@
           :aria-label="label"
           ref="rootRef"
         >
-      <LoadingIndicator
-        v-if="loading"
-        :class="{
-          'h-3 w-3': size == 'sm',
-          'h-[13.5px] w-[13.5px]': size == 'md',
-          'h-[15px] w-[15px]': size == 'lg',
-          'h-4.5 w-4.5': size == 'xl' || size == '2xl',
-        }"
-      />
-      <slot name="prefix" v-else-if="$slots['prefix'] || iconLeft">
-        <span
-          v-if="iconLeft && typeof iconLeft === 'string' && iconLeft.startsWith('lucide-')"
-          :class="[iconLeft, lucideSlotClasses]"
-          aria-hidden="true"
-        />
-        <FeatherIcon
-          v-else-if="iconLeft && typeof iconLeft === 'string'"
-          :name="iconLeft"
-          :class="slotClasses"
-          aria-hidden="true"
-        />
-        <component v-else-if="iconLeft" :is="iconLeft" :class="slotClasses" />
-      </slot>
+          <LoadingIndicator
+            v-if="loading"
+            :class="{
+              'h-3 w-3': size == 'sm',
+              'h-[13.5px] w-[13.5px]': size == 'md',
+              'h-[15px] w-[15px]': size == 'lg',
+              'h-4.5 w-4.5': size == 'xl' || size == '2xl',
+            }"
+          />
+          <slot name="prefix" v-else-if="$slots['prefix'] || iconLeft">
+            <span
+              v-if="
+                iconLeft &&
+                typeof iconLeft === 'string' &&
+                iconLeft.startsWith('lucide-')
+              "
+              :class="[iconLeft, lucideSlotClasses]"
+              aria-hidden="true"
+            />
+            <FeatherIcon
+              v-else-if="iconLeft && typeof iconLeft === 'string'"
+              :name="iconLeft"
+              :class="slotClasses"
+              aria-hidden="true"
+            />
+            <component
+              v-else-if="iconLeft"
+              :is="iconLeft"
+              :class="slotClasses"
+            />
+          </slot>
 
-      <template v-if="loading && loadingText">{{ loadingText }}</template>
-      <template v-else-if="isIconButton && !loading">
-        <span
-          v-if="icon && typeof icon === 'string' && icon.startsWith('lucide-')"
-          :class="[icon, lucideSlotClasses]"
-          aria-hidden="true"
-        />
-        <FeatherIcon
-          v-else-if="icon && typeof icon === 'string'"
-          :name="icon"
-          :class="slotClasses"
-        />
-        <component v-else-if="icon" :is="icon" :class="slotClasses" />
-        <slot name="icon" v-else-if="$slots.icon" />
-        <div v-else-if="hasLucideIconInDefaultSlot" :class="slotClasses">
-          <slot>{{ label }}</slot>
-        </div>
-      </template>
-      <span v-else :class="{ 'sr-only': isIconButton }" class="truncate">
-        <slot>{{ label }}</slot>
-      </span>
+          <template v-if="loading && loadingText">{{ loadingText }}</template>
+          <template v-else-if="isIconButton && !loading">
+            <span
+              v-if="
+                icon && typeof icon === 'string' && icon.startsWith('lucide-')
+              "
+              :class="[icon, lucideSlotClasses]"
+              aria-hidden="true"
+            />
+            <FeatherIcon
+              v-else-if="icon && typeof icon === 'string'"
+              :name="icon"
+              :class="slotClasses"
+            />
+            <component v-else-if="icon" :is="icon" :class="slotClasses" />
+            <slot name="icon" v-else-if="$slots.icon" />
+            <div v-else-if="hasLucideIconInDefaultSlot" :class="slotClasses">
+              <slot>{{ label }}</slot>
+            </div>
+          </template>
+          <span v-else :class="{ 'sr-only': isIconButton }" class="truncate">
+            <slot>{{ label }}</slot>
+          </span>
 
-      <slot name="suffix">
-        <span
-          v-if="iconRight && typeof iconRight === 'string' && iconRight.startsWith('lucide-')"
-          :class="[iconRight, lucideSlotClasses]"
-          aria-hidden="true"
-        />
-        <FeatherIcon
-          v-else-if="iconRight && typeof iconRight === 'string'"
-          :name="iconRight"
-          :class="slotClasses"
-          aria-hidden="true"
-        />
-        <component
-          v-else-if="iconRight"
-          :is="iconRight"
-          :class="slotClasses"
-        />
-      </slot>
+          <slot name="suffix">
+            <span
+              v-if="
+                iconRight &&
+                typeof iconRight === 'string' &&
+                iconRight.startsWith('lucide-')
+              "
+              :class="[iconRight, lucideSlotClasses]"
+              aria-hidden="true"
+            />
+            <FeatherIcon
+              v-else-if="iconRight && typeof iconRight === 'string'"
+              :name="iconRight"
+              :class="slotClasses"
+              aria-hidden="true"
+            />
+            <component
+              v-else-if="iconRight"
+              :is="iconRight"
+              :class="slotClasses"
+            />
+          </slot>
         </component>
       </TooltipTrigger>
       <TooltipBubble v-if="tooltip?.length" :text="tooltip" />
@@ -185,19 +199,19 @@ const buttonClasses = computed(() => {
   let disabledClasses = disabledClassesMap[themeVariant]
 
   let sizeClasses = {
-    sm: 'h-7 text-base px-2 rounded',
-    md: 'h-8 text-base font-medium px-2.5 rounded',
-    lg: 'h-10 text-lg font-medium px-3 rounded-md',
-    xl: 'h-11.5 text-xl font-medium px-3.5 rounded-lg',
+    'sm': 'h-7 text-base px-2 rounded',
+    'md': 'h-8 text-base font-medium px-2.5 rounded',
+    'lg': 'h-10 text-lg font-medium px-3 rounded-md',
+    'xl': 'h-11.5 text-xl font-medium px-3.5 rounded-lg',
     '2xl': 'h-13 text-2xl font-medium px-3.5 rounded-xl',
   }[props.size]
 
   if (isIconButton.value) {
     sizeClasses = {
-      sm: 'h-7 w-7 rounded',
-      md: 'h-8 w-8 rounded',
-      lg: 'h-10 w-10 rounded-md',
-      xl: 'h-11.5 w-11.5 rounded-lg',
+      'sm': 'h-7 w-7 rounded',
+      'md': 'h-8 w-8 rounded',
+      'lg': 'h-10 w-10 rounded-md',
+      'xl': 'h-11.5 w-11.5 rounded-lg',
       '2xl': 'h-13 w-13 rounded-xl',
     }[props.size]
   }
@@ -212,10 +226,10 @@ const buttonClasses = computed(() => {
 
 const slotClasses = computed(() => {
   let classes = {
-    sm: 'h-4',
-    md: 'h-4.5',
-    lg: 'h-5',
-    xl: 'h-6',
+    'sm': 'h-4',
+    'md': 'h-4.5',
+    'lg': 'h-5',
+    'xl': 'h-6',
     '2xl': 'h-6',
   }[props.size]
 
@@ -224,10 +238,10 @@ const slotClasses = computed(() => {
 
 const lucideSlotClasses = computed(() => {
   return {
-    sm: 'size-4',
-    md: 'size-4.5',
-    lg: 'size-5',
-    xl: 'size-6',
+    'sm': 'size-4',
+    'md': 'size-4.5',
+    'lg': 'size-5',
+    'xl': 'size-6',
     '2xl': 'size-6',
   }[props.size]
 })

@@ -1,11 +1,10 @@
-import { MaybeRefOrGetter, toValue, type Component } from 'vue'
+import type { MaybeRefOrGetter } from 'vue'
+import { toValue, type Component } from 'vue'
 import { Extension, Node, mergeAttributes } from '@tiptap/core'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
 import { PluginKey } from '@tiptap/pm/state'
-import {
-  createSuggestionExtension,
-  BaseSuggestionItem,
-} from '../suggestion/createSuggestionExtension'
+import type { BaseSuggestionItem } from '../suggestion/createSuggestionExtension'
+import { createSuggestionExtension } from '../suggestion/createSuggestionExtension'
 import SuggestionList from '../suggestion/SuggestionList.vue'
 import './style.css'
 
@@ -75,7 +74,7 @@ function createMentionNode(component?: Component) {
       return [
         'span',
         mergeAttributes(HTMLAttributes, {
-          class: 'mention',
+          'class': 'mention',
           'data-type': 'mention',
         }),
         `@${HTMLAttributes['data-label'] || HTMLAttributes.id || ''}`,

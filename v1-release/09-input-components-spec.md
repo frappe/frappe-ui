@@ -172,15 +172,15 @@ export type InputVariant = 'subtle' | 'outline' | 'ghost'
 
 Apply per component:
 
-| Component      | Size type   | Variant type       |
-| -------------- | ----------- | ------------------ |
-| `TextInput`    | `InputSize` | `InputVariant`     |
-| `Textarea`     | `InputSize` | `InputVariant`     |
-| `Password`     | `InputSize` | `InputVariant`     |
-| `Rating`       | `InputSize` | n/a                |
-| `Checkbox`     | `ToggleSize`| n/a                |
-| `Switch`       | `ToggleSize`| n/a                |
-| `Slider`       | `ToggleSize`| n/a                |
+| Component   | Size type    | Variant type   |
+| ----------- | ------------ | -------------- |
+| `TextInput` | `InputSize`  | `InputVariant` |
+| `Textarea`  | `InputSize`  | `InputVariant` |
+| `Password`  | `InputSize`  | `InputVariant` |
+| `Rating`    | `InputSize`  | n/a            |
+| `Checkbox`  | `ToggleSize` | n/a            |
+| `Switch`    | `ToggleSize` | n/a            |
+| `Slider`    | `ToggleSize` | n/a            |
 
 Rationale: `lg` and `xl` produce useful visual range for text inputs and
 trigger surfaces but produce oversized chunky controls for binary
@@ -192,11 +192,11 @@ not API symmetry.
 Every input uses `defineModel<T>()` for the primary value:
 
 ```ts
-const model = defineModel<string>()             // TextInput, Textarea, Password
-const model = defineModel<boolean>()            // Switch
-const model = defineModel<boolean | 1 | 0>()    // Checkbox (union retained for v1; coerce internally)
-const model = defineModel<number>()             // Rating
-const model = defineModel<SliderValue>()        // Slider
+const model = defineModel<string>() // TextInput, Textarea, Password
+const model = defineModel<boolean>() // Switch
+const model = defineModel<boolean | 1 | 0>() // Checkbox (union retained for v1; coerce internally)
+const model = defineModel<number>() // Rating
+const model = defineModel<SliderValue>() // Slider
 ```
 
 Typed `*Emits` interfaces are added only when a component emits non-model
@@ -361,17 +361,17 @@ Rules:
 
 ### Wired warnings for v1
 
-| Component / API                     | Warning name                       | Replacement                  |
-| ----------------------------------- | ---------------------------------- | ---------------------------- |
-| `Input.vue`                         | `Input`                            | `TextInput`                  |
-| `Autocomplete`                      | `Autocomplete`                     | `Combobox` or `MultiSelect`  |
-| `FormControl type='autocomplete'`   | `FormControl type="autocomplete"`  | Use `Combobox` standalone    |
-| `Password.value` prop               | `Password.value`                   | `v-model` / `modelValue`     |
-| `Rating.rating_from` prop           | `Rating.rating_from`               | `max`                        |
-| `Switch.change` emit                | `Switch.change`                    | `update:modelValue` / `v-model` |
-| `Switch.labelClasses` prop          | `Switch.labelClasses`              | `data-*` styling hooks       |
-| `Checkbox.padding` prop             | `Checkbox.padding`                 | `data-*` styling hooks       |
-| `Divider.action.handler` (existing) | `Divider.action.handler`           | `Divider.action.onClick`     |
+| Component / API                     | Warning name                      | Replacement                     |
+| ----------------------------------- | --------------------------------- | ------------------------------- |
+| `Input.vue`                         | `Input`                           | `TextInput`                     |
+| `Autocomplete`                      | `Autocomplete`                    | `Combobox` or `MultiSelect`     |
+| `FormControl type='autocomplete'`   | `FormControl type="autocomplete"` | Use `Combobox` standalone       |
+| `Password.value` prop               | `Password.value`                  | `v-model` / `modelValue`        |
+| `Rating.rating_from` prop           | `Rating.rating_from`              | `max`                           |
+| `Switch.change` emit                | `Switch.change`                   | `update:modelValue` / `v-model` |
+| `Switch.labelClasses` prop          | `Switch.labelClasses`             | `data-*` styling hooks          |
+| `Checkbox.padding` prop             | `Checkbox.padding`                | `data-*` styling hooks          |
+| `Divider.action.handler` (existing) | `Divider.action.handler`          | `Divider.action.onClick`        |
 
 `FeatherIcon` removal is tracked in the broader v1 plan and uses the same
 utility once finalized.
@@ -447,7 +447,7 @@ test/story expectations that apply to every input in scope.
 - `src/utils/warnDeprecated.ts` — dev-mode warning utility (see
   "Deprecations").
 - `src/composables/useInputLabeling.ts` — returns `{ inputId, labelledBy,
-  describedBy, errorMessageId, dataAttrs, hasError }`. Also exports the
+describedBy, errorMessageId, dataAttrs, hasError }`. Also exports the
   shared `InputLabelingProps` and `InputLabelingSlots` interfaces from the
   same module.
 - `src/composables/inputTypes.ts` — exports `InputSize`, `ToggleSize`,
@@ -560,7 +560,7 @@ replace it with the v1 equivalent rather than keeping both. Keep an old
 story only when it covers a real scenario the new stories don't (e.g. an
 integration with another component, a non-obvious prop combination).
 Deprecated APIs still need their own dedicated story per the list above —
-that's separate from rewriting the *primary* examples to use the new
+that's separate from rewriting the _primary_ examples to use the new
 contract.
 
 ### Deprecation wiring

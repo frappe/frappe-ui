@@ -32,7 +32,7 @@ import Table from '~icons/lucide/table-properties'
 import TableOfContentsIcon from '~icons/lucide/square-menu'
 
 export default {
-  Paragraph: {
+  'Paragraph': {
     label: 'Paragraph',
     icon: Text,
     action: (editor) => editor.chain().focus().setParagraph().run(),
@@ -93,28 +93,28 @@ export default {
     shortcut: 'Meta-Alt-6',
     isActive: (editor) => editor.isActive('heading', { level: 6 }),
   },
-  Bold: {
+  'Bold': {
     label: 'Bold',
     icon: Bold,
     action: (editor) => editor.chain().focus().toggleBold().run(),
     shortcut: 'Meta-B',
     isActive: (editor) => editor.isActive('bold'),
   },
-  Italic: {
+  'Italic': {
     label: 'Italic',
     icon: Italic,
     action: (editor) => editor.chain().focus().toggleItalic().run(),
     shortcut: 'Meta-I',
     isActive: (editor) => editor.isActive('italic'),
   },
-  Underline: {
+  'Underline': {
     label: 'Underline',
     icon: Underline,
     action: (editor) => editor.chain().focus().toggleUnderline().run(),
     shortcut: 'Meta-U',
     isActive: (editor) => editor.isActive('underline'),
   },
-  Strikethrough: {
+  'Strikethrough': {
     label: 'Strikethrough',
     icon: Strikethrough,
     action: (editor) => editor.chain().focus().toggleStrike().run(),
@@ -142,13 +142,13 @@ export default {
     shortcut: 'Meta-Shift-9',
     isActive: (editor) => editor.isActive('taskList'),
   },
-  IndentList: {
+  'IndentList': {
     label: 'Indent List',
     action: (editor) => editor.chain().focus().sinkListItem('listItem').run(),
     icon: IndentList,
     condition: (editor) => editor.can().sinkListItem('listItem'),
   },
-  DedentList: {
+  'DedentList': {
     label: 'Dedent List',
     action: (editor) => editor.chain().focus().liftListItem('listItem').run(),
     icon: DedentList,
@@ -175,21 +175,21 @@ export default {
     shortcut: 'Meta-Shift-R',
     isActive: (editor) => editor.isActive({ textAlign: 'right' }),
   },
-  FontColor: {
+  'FontColor': {
     label: 'Font Color',
     icon: FontColor,
     isActive: (editor) =>
       editor.getAttributes('textStyle')?.color || editor.isActive('highlight'),
     component: defineAsyncComponent(() => import('./components/FontColor.vue')),
   },
-  Blockquote: {
+  'Blockquote': {
     label: 'Blockquote',
     icon: DoubleQuotes,
     action: (editor) => editor.chain().focus().toggleBlockquote().run(),
     shortcut: 'Meta-Shift-B',
     isActive: (editor) => editor.isActive('blockquote'),
   },
-  Code: {
+  'Code': {
     label: 'Code',
     icon: CodeView,
     action: (editor) => editor.chain().focus().toggleCodeBlock().run(),
@@ -202,7 +202,7 @@ export default {
     action: (editor) => editor.chain().focus().setHorizontalRule().run(),
     isActive: (editor) => false,
   },
-  Link: {
+  'Link': {
     label: 'Link',
     icon: Link,
     isActive: (editor) => editor.isActive('link'),
@@ -210,7 +210,7 @@ export default {
       () => import('./components/InsertLink.vue'),
     ),
   },
-  Image: {
+  'Image': {
     label: 'Image',
     icon: Image,
     isActive: (editor) => false,
@@ -218,7 +218,7 @@ export default {
       () => import('./components/InsertImage.vue'),
     ),
   },
-  Video: {
+  'Video': {
     label: 'Video',
     icon: Video,
     isActive: (editor) => false,
@@ -226,7 +226,7 @@ export default {
       () => import('./components/InsertVideo.vue'),
     ),
   },
-  Iframe: {
+  'Iframe': {
     label: 'Embed',
     icon: GalleryVertical,
     isActive: (editor) => editor.isActive('iframe'),
@@ -234,21 +234,21 @@ export default {
       () => import('./extensions/iframe/InsertIframe.vue'),
     ),
   },
-  Undo: {
+  'Undo': {
     label: 'Undo',
     icon: Undo,
     action: (editor) => editor.chain().focus().undo().run(),
     shortcut: 'Meta-Z',
     isDisabled: (editor) => !editor.can().chain().focus().undo().run(),
   },
-  Redo: {
+  'Redo': {
     label: 'Redo',
     icon: Redo,
     action: (editor) => editor.chain().focus().redo().run(),
     shortcut: 'Meta-Shift-Z',
     isDisabled: (editor) => !editor.can().chain().focus().redo().run(),
   },
-  InsertTable: {
+  'InsertTable': {
     label: 'Insert Table',
     icon: Table,
     action: (editor) =>
@@ -259,86 +259,86 @@ export default {
         .run(),
     isActive: (editor) => editor.can().deleteTable(),
   },
-  AddColumnBefore: {
+  'AddColumnBefore': {
     label: 'Add Column Before',
     action: (editor) => editor.chain().focus().addColumnBefore().run(),
     isActive: (editor) => false,
     condition: (editor) => editor.can().addColumnBefore(),
   },
-  AddColumnAfter: {
+  'AddColumnAfter': {
     label: 'Add Column After',
     action: (editor) => editor.chain().focus().addColumnAfter().run(),
     isActive: (editor) => false,
     condition: (editor) => editor.can().addColumnAfter(),
   },
-  DeleteColumn: {
+  'DeleteColumn': {
     label: 'Delete Column',
     action: (editor) => editor.chain().focus().deleteColumn().run(),
     isActive: (editor) => false,
     condition: (editor) => editor.can().deleteColumn(),
   },
-  AddRowBefore: {
+  'AddRowBefore': {
     label: 'Add Row Before',
     action: (editor) => editor.chain().focus().addRowBefore().run(),
     isActive: (editor) => false,
     condition: (editor) => editor.can().addRowBefore(),
   },
-  AddRowAfter: {
+  'AddRowAfter': {
     label: 'Add Row After',
     action: (editor) => editor.chain().focus().addRowAfter().run(),
     isActive: (editor) => false,
     condition: (editor) => editor.can().addRowAfter(),
   },
-  DeleteRow: {
+  'DeleteRow': {
     label: 'Delete Row',
     action: (editor) => editor.chain().focus().deleteRow().run(),
     isActive: (editor) => false,
     condition: (editor) => editor.can().deleteRow(),
   },
-  DeleteTable: {
+  'DeleteTable': {
     label: 'Delete Table',
     action: (editor) => editor.chain().focus().deleteTable().run(),
     isActive: (editor) => false,
     condition: (editor) => editor.can().deleteTable(),
   },
-  MergeCells: {
+  'MergeCells': {
     label: 'Merge Cells',
     action: (editor) => editor.chain().focus().mergeCells().run(),
     isActive: (editor) => false,
     condition: (editor) => editor.can().mergeCells(),
   },
-  SplitCell: {
+  'SplitCell': {
     label: 'Split Cell',
     action: (editor) => editor.chain().focus().splitCell().run(),
     isActive: (editor) => false,
     condition: (editor) => editor.can().splitCell(),
   },
-  ToggleHeaderColumn: {
+  'ToggleHeaderColumn': {
     label: 'Toggle Header Column',
     action: (editor) => editor.chain().focus().toggleHeaderColumn().run(),
     isActive: (editor) => false,
     condition: (editor) => editor.can().toggleHeaderColumn(),
   },
-  ToggleHeaderRow: {
+  'ToggleHeaderRow': {
     label: 'Toggle Header Row',
     action: (editor) => editor.chain().focus().toggleHeaderRow().run(),
     isActive: (editor) => false,
     condition: (editor) => editor.can().toggleHeaderRow(),
   },
-  ToggleHeaderCell: {
+  'ToggleHeaderCell': {
     label: 'Toggle Header Cell',
     action: (editor) => editor.chain().focus().toggleHeaderCell().run(),
     isActive: (editor) => false,
     condition: (editor) => editor.can().toggleHeaderCell(),
   },
-  TableOfContents: {
+  'TableOfContents': {
     label: 'Table of Contents',
     icon: TableOfContentsIcon,
     action: (editor) =>
       editor.chain().focus().insertTableOfContentsNode().run(),
     isActive: (editor) => editor.isActive('tocNode'),
   },
-  Separator: {
+  'Separator': {
     type: 'separator',
   },
 }

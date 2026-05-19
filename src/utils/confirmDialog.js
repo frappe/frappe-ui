@@ -5,14 +5,19 @@ import { warnDeprecated } from './warnDeprecated'
 /**
  * @deprecated Use `dialog.confirm()` from `frappe-ui` instead.
  */
-export function confirmDialog({ title = 'Untitled', message = '', onConfirm, onCancel }) {
+export function confirmDialog({
+  title = 'Untitled',
+  message = '',
+  onConfirm,
+  onCancel,
+}) {
   warnDeprecated('confirmDialog()', 'dialog.confirm()')
   renderDialog(
     h(ConfirmDialog, {
       title,
       message,
       onConfirm,
-      onCancel
+      onCancel,
     }),
   )
 }

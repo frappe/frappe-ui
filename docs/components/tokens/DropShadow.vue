@@ -1,12 +1,12 @@
 <script setup lang="ts">
 const classNames = [
-  "shadow-none",
-  "shadow-sm",
-  "shadow-md",
-  "shadow-lg",
-  "shadow-xl",
-  "shadow-2xl",
-];
+  'shadow-none',
+  'shadow-sm',
+  'shadow-md',
+  'shadow-lg',
+  'shadow-xl',
+  'shadow-2xl',
+]
 </script>
 
 <template>
@@ -17,8 +17,7 @@ const classNames = [
       <div
         :class="item"
         class="rounded border grid gap-3 p-3 bg-surface-cards h-20"
-      >
-      </div>
+      ></div>
     </div>
   </div>
 </template>

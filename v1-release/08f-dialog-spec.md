@@ -7,7 +7,7 @@ This document defines the exact public API for `Dialog` and the imperative `dial
 Architectural calls in this spec are recorded as ADRs:
 
 - [`adr/0001-single-dialog-component.md`](./adr/0001-single-dialog-component.md) — why we ship one `<Dialog>` and not `<Dialog>` + `<AlertDialog>`.
-- [`adr/0002-imperative-dialog-caller-closes.md`](./adr/0002-imperative-dialog-caller-closes.md) — *superseded.* Original plan: imperative API resolves on click, caller calls `close()`.
+- [`adr/0002-imperative-dialog-caller-closes.md`](./adr/0002-imperative-dialog-caller-closes.md) — _superseded._ Original plan: imperative API resolves on click, caller calls `close()`.
 - [`adr/0003-imperative-dialog-onconfirm.md`](./adr/0003-imperative-dialog-onconfirm.md) — why the imperative API ended up callback-based (`onConfirm` with auto-close, throw to stay open), reversing ADR-0002.
 
 ## Role
@@ -18,20 +18,20 @@ Apps reach for the imperative `dialog.*` helpers when they need a one-off confir
 
 ## Decisions at a glance
 
-| Decision | Direction |
-|---|---|
-| Component count | One `<Dialog>` only — no `<AlertDialog>` |
-| ARIA role | `role="dialog"` always |
-| Visibility model | `v-model:open` (canonical) **and** `v-model` (also supported) |
-| Prop surface | Flat top-level props; `options` blob retained as deprecated alias |
-| Dismiss control | `dismissible: boolean` (default `true`); replaces `disableOutsideClickToClose` |
-| Chrome control | `bare: boolean` (default `false`); replaces the legacy `#body` slot |
-| Close button | `showCloseButton: boolean` (default `true`); independent of header |
-| Size scale | All 11 sizes kept (`xs` → `7xl`); maps to Tailwind `max-w-*` |
-| Color vocabulary | `theme` with color names (`'yellow' \| 'blue' \| 'red' \| 'green'`), matching `Alert.theme`. No semantic axis. |
-| Slots | Canonical: `#default`, `#title`, `#actions`. Legacy slots deprecated with internal forwarding. |
-| Imperative API | Callback-based `dialog.confirm`, `dialog.danger`, `dialog.prompt`. `onConfirm` resolving auto-closes; throwing keeps the dialog open with the thrown message rendered inline. Each helper returns a synchronous `DialogHandle` for programmatic dismissal. |
-| Mount mechanism | `<FrappeUIProvider>` renders `<Dialogs />` next to `<Toasts />`. `<Dialogs />` is still exported for callers who don't use the provider. |
+| Decision         | Direction                                                                                                                                                                                                                                                  |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Component count  | One `<Dialog>` only — no `<AlertDialog>`                                                                                                                                                                                                                   |
+| ARIA role        | `role="dialog"` always                                                                                                                                                                                                                                     |
+| Visibility model | `v-model:open` (canonical) **and** `v-model` (also supported)                                                                                                                                                                                              |
+| Prop surface     | Flat top-level props; `options` blob retained as deprecated alias                                                                                                                                                                                          |
+| Dismiss control  | `dismissible: boolean` (default `true`); replaces `disableOutsideClickToClose`                                                                                                                                                                             |
+| Chrome control   | `bare: boolean` (default `false`); replaces the legacy `#body` slot                                                                                                                                                                                        |
+| Close button     | `showCloseButton: boolean` (default `true`); independent of header                                                                                                                                                                                         |
+| Size scale       | All 11 sizes kept (`xs` → `7xl`); maps to Tailwind `max-w-*`                                                                                                                                                                                               |
+| Color vocabulary | `theme` with color names (`'yellow' \| 'blue' \| 'red' \| 'green'`), matching `Alert.theme`. No semantic axis.                                                                                                                                             |
+| Slots            | Canonical: `#default`, `#title`, `#actions`. Legacy slots deprecated with internal forwarding.                                                                                                                                                             |
+| Imperative API   | Callback-based `dialog.confirm`, `dialog.danger`, `dialog.prompt`. `onConfirm` resolving auto-closes; throwing keeps the dialog open with the thrown message rendered inline. Each helper returns a synchronous `DialogHandle` for programmatic dismissal. |
+| Mount mechanism  | `<FrappeUIProvider>` renders `<Dialogs />` next to `<Toasts />`. `<Dialogs />` is still exported for callers who don't use the provider.                                                                                                                   |
 
 ## Exact public API for v1
 
@@ -39,8 +39,17 @@ Apps reach for the imperative `dialog.*` helpers when they need a one-off confir
 
 ```ts
 type DialogSize =
-  | 'xs' | 'sm' | 'md' | 'lg' | 'xl'
-  | '2xl' | '3xl' | '4xl' | '5xl' | '6xl' | '7xl'
+  | 'xs'
+  | 'sm'
+  | 'md'
+  | 'lg'
+  | 'xl'
+  | '2xl'
+  | '3xl'
+  | '4xl'
+  | '5xl'
+  | '6xl'
+  | '7xl'
 
 type DialogTheme = 'yellow' | 'blue' | 'red' | 'green'
 
@@ -84,17 +93,17 @@ interface DialogProps {
   icon?: string | DialogIcon
 
   // Layout.
-  size?: DialogSize                 // default 'lg'
-  position?: DialogPosition         // default 'center'
+  size?: DialogSize // default 'lg'
+  position?: DialogPosition // default 'center'
   paddingTop?: string | number
 
   // Actions.
   actions?: DialogAction[]
 
   // Behavior.
-  dismissible?: boolean             // default true
-  showCloseButton?: boolean         // default true
-  bare?: boolean                    // default false
+  dismissible?: boolean // default true
+  showCloseButton?: boolean // default true
+  bare?: boolean // default false
 
   // Deprecated (still supported, warn once).
   disableOutsideClickToClose?: boolean
@@ -113,10 +122,10 @@ interface DialogProps {
 
 ### Slots
 
-| Slot | Scope | Purpose |
-|---|---|---|
-| `#default` | — | Main content, rendered inside the padded card. |
-| `#title` | — | Title area; accepts arbitrary content (extra buttons next to title, etc.). |
+| Slot       | Scope                | Purpose                                                                                                                      |
+| ---------- | -------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `#default` | —                    | Main content, rendered inside the padded card.                                                                               |
+| `#title`   | —                    | Title area; accepts arbitrary content (extra buttons next to title, etc.).                                                   |
 | `#actions` | `{ close, actions }` | Footer override; `actions` is the reactive action list (with `loading`) so callers can re-lay-out the auto-rendered buttons. |
 
 **Slot precedence rules:**
@@ -128,22 +137,22 @@ interface DialogProps {
 
 **Deprecated slots** (warn once, internally forwarded to the canonical slot):
 
-| Legacy slot | Forwards to | Notes |
-|---|---|---|
-| `#body-content` | `#default` | Most-common legacy slot (~85% of legacy usage). |
-| `#body-main` | `#default` | Auto-header conditional on title makes these equivalent. |
-| `#body-title` | `#title` | Direct rename. |
-| `#body-header` | — | No replacement — extras go in `#title`. Warns + renders nothing. |
-| `#body` | `#default` + `bare` | Apps using `#body` for full layout control migrate to `bare` + `#default`. Codemod-able. |
+| Legacy slot     | Forwards to         | Notes                                                                                    |
+| --------------- | ------------------- | ---------------------------------------------------------------------------------------- |
+| `#body-content` | `#default`          | Most-common legacy slot (~85% of legacy usage).                                          |
+| `#body-main`    | `#default`          | Auto-header conditional on title makes these equivalent.                                 |
+| `#body-title`   | `#title`            | Direct rename.                                                                           |
+| `#body-header`  | —                   | No replacement — extras go in `#title`. Warns + renders nothing.                         |
+| `#body`         | `#default` + `bare` | Apps using `#body` for full layout control migrate to `bare` + `#default`. Codemod-able. |
 
 ### Events
 
-| Event | Payload | Notes |
-|---|---|---|
-| `update:open` | `boolean` | Fires for `v-model:open`. |
-| `update:modelValue` | `boolean` | Fires for `v-model` (bare). Same value as `update:open`. |
-| `close` | — | Fires when the dialog transitions to closed. |
-| `after-leave` | — | Fires after the close animation finishes. Used heavily in apps for form-reset patterns. |
+| Event               | Payload   | Notes                                                                                   |
+| ------------------- | --------- | --------------------------------------------------------------------------------------- |
+| `update:open`       | `boolean` | Fires for `v-model:open`.                                                               |
+| `update:modelValue` | `boolean` | Fires for `v-model` (bare). Same value as `update:open`.                                |
+| `close`             | —         | Fires when the dialog transitions to closed.                                            |
+| `after-leave`       | —         | Fires after the close animation finishes. Used heavily in apps for form-reset patterns. |
 
 ### ARIA
 
@@ -212,12 +221,12 @@ type DialogAction = Omit<ButtonProps, 'onClick' | 'loading'> & {
 interface ConfirmArgs {
   title?: string
   message?: string
-  confirmLabel?: string          // default 'Confirm'; ignored when actions[] is set
-  cancelLabel?: string           // default 'Cancel';  ignored when actions[] is set
-  theme?: DialogTheme            // colors the confirm button + picks default icon
-  icon?: string | DialogIcon     // overrides theme-derived default icon
-  size?: DialogSize              // default 'md'
-  dismissible?: boolean          // default true
+  confirmLabel?: string // default 'Confirm'; ignored when actions[] is set
+  cancelLabel?: string // default 'Cancel';  ignored when actions[] is set
+  theme?: DialogTheme // colors the confirm button + picks default icon
+  icon?: string | DialogIcon // overrides theme-derived default icon
+  size?: DialogSize // default 'md'
+  dismissible?: boolean // default true
   onConfirm?: (ctx: DialogControl) => void | Promise<void>
   onCancel?: () => void | Promise<void>
   /**
@@ -239,12 +248,12 @@ interface PromptArgs {
   title?: string
   message?: string
   fields: PromptField[]
-  confirmLabel?: string          // default 'Submit'
-  cancelLabel?: string           // default 'Cancel'
+  confirmLabel?: string // default 'Submit'
+  cancelLabel?: string // default 'Cancel'
   theme?: DialogTheme
   icon?: string | DialogIcon
-  size?: DialogSize              // default 'md'
-  dismissible?: boolean          // default true
+  size?: DialogSize // default 'md'
+  dismissible?: boolean // default true
   onConfirm: (ctx: PromptControl) => void | Promise<void>
   onCancel?: () => void | Promise<void>
 }
@@ -270,13 +279,22 @@ interface BasePromptField {
 
 type PromptField =
   | (BasePromptField & { type?: 'text' | 'textarea'; defaultValue?: string })
-  | (BasePromptField & { type: 'select'; defaultValue?: string;
-                         options: Array<{ label: string; value: string }> })
+  | (BasePromptField & {
+      type: 'select'
+      defaultValue?: string
+      options: Array<{ label: string; value: string }>
+    })
   | (BasePromptField & { type: 'checkbox'; defaultValue?: boolean })
-  | (BasePromptField & { type: 'combobox'; defaultValue?: string;
-                         options: ComboboxOption[]; allowCreate?: boolean })
+  | (BasePromptField & {
+      type: 'combobox'
+      defaultValue?: string
+      options: ComboboxOption[]
+      allowCreate?: boolean
+    })
 
-interface DialogHandle { close: () => void }
+interface DialogHandle {
+  close: () => void
+}
 
 declare const dialog: {
   confirm(args: ConfirmArgs): DialogHandle
@@ -287,12 +305,12 @@ declare const dialog: {
 
 ### Lifecycle contract
 
-| `onConfirm` outcome | Result |
-|---|---|
-| Resolves | Dialog auto-closes |
-| Throws / rejects | Dialog stays open. Thrown message is extracted via the internal `extractErrorMessage` (Frappe `messages[]`, `Error.message`, plain string, generic fallback) and rendered inline. Buttons re-enable. |
-| Calls `ctx.close()` before/during the await | Dialog closes immediately; the trailing auto-close is an idempotent no-op |
-| Calls `ctx.setError(msg)` without throwing | Inline error is set, but the dialog **still auto-closes** when `onConfirm` resolves. To stay open with an error, throw instead. |
+| `onConfirm` outcome                         | Result                                                                                                                                                                                               |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Resolves                                    | Dialog auto-closes                                                                                                                                                                                   |
+| Throws / rejects                            | Dialog stays open. Thrown message is extracted via the internal `extractErrorMessage` (Frappe `messages[]`, `Error.message`, plain string, generic fallback) and rendered inline. Buttons re-enable. |
+| Calls `ctx.close()` before/during the await | Dialog closes immediately; the trailing auto-close is an idempotent no-op                                                                                                                            |
+| Calls `ctx.setError(msg)` without throwing  | Inline error is set, but the dialog **still auto-closes** when `onConfirm` resolves. To stay open with an error, throw instead.                                                                      |
 
 The confirm/submit button shows a loading spinner for as long as the `onConfirm` promise is pending. When `actions[]` is supplied, each action tracks its own loading state — the clicked button spins; every other button disables until it settles.
 
@@ -304,13 +322,13 @@ Each helper returns `{ close }` synchronously, so callers can dismiss the dialog
 
 When `theme` is set without an explicit `icon`, the helper uses these defaults (all overridable):
 
-| `theme` | Default icon | Confirm button color |
-|---|---|---|
-| `red` | `lucide-alert-triangle` | red solid |
-| `yellow` | `lucide-alert-triangle` | default solid (Button doesn't have a `yellow` theme — icon theme is honored, button falls back) |
-| `blue` | `lucide-info` | blue solid |
-| `green` | `lucide-check-circle` | green solid |
-| *(unset)* | none | default solid |
+| `theme`   | Default icon            | Confirm button color                                                                            |
+| --------- | ----------------------- | ----------------------------------------------------------------------------------------------- |
+| `red`     | `lucide-alert-triangle` | red solid                                                                                       |
+| `yellow`  | `lucide-alert-triangle` | default solid (Button doesn't have a `yellow` theme — icon theme is honored, button falls back) |
+| `blue`    | `lucide-info`           | blue solid                                                                                      |
+| `green`   | `lucide-check-circle`   | green solid                                                                                     |
+| _(unset)_ | none                    | default solid                                                                                   |
 
 `dialog.danger` pins `theme: 'red'` and inherits the alert-triangle default.
 
@@ -357,11 +375,19 @@ dialog.confirm({
   message: 'A page with this name already exists. Create a copy or replace?',
   actions: [
     { label: 'Cancel', variant: 'outline' },
-    { label: 'Create copy', onClick: async () => { await api.copy() } },
+    {
+      label: 'Create copy',
+      onClick: async () => {
+        await api.copy()
+      },
+    },
     {
       label: 'Replace',
-      variant: 'solid', theme: 'red',
-      onClick: async () => { await api.replace() },
+      variant: 'solid',
+      theme: 'red',
+      onClick: async () => {
+        await api.replace()
+      },
     },
   ],
 })
@@ -403,18 +429,18 @@ socket.once('upload:done', () => handle.close())
 
 Each deprecated surface keeps working in v1, emits a one-time dev-mode console warning (per instance / per session), and includes the canonical replacement in the message.
 
-| Deprecated | Replacement |
-|---|---|
-| `options` blob prop | Flat top-level props |
-| `disableOutsideClickToClose` | `dismissible` (inverted) |
-| `icon: { appearance: 'warning' \| 'info' \| 'danger' \| 'success' }` | `icon: { theme: 'yellow' \| 'blue' \| 'red' \| 'green' }` |
-| `#body-content`, `#body-main` slots | `#default` |
-| `#body-title` slot | `#title` |
-| `#body-header` slot | (no replacement — use `#title` for extras) |
-| `#body` slot | `#default` + `bare` prop |
-| `action.onClick(callableContext)` shim | `action.onClick({ close })` |
-| `confirmDialog()` helper | `dialog.confirm()` |
-| `ConfirmDialog.vue` component | mounted internally by `dialog.confirm()`; not part of v1 public surface |
+| Deprecated                                                           | Replacement                                                             |
+| -------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `options` blob prop                                                  | Flat top-level props                                                    |
+| `disableOutsideClickToClose`                                         | `dismissible` (inverted)                                                |
+| `icon: { appearance: 'warning' \| 'info' \| 'danger' \| 'success' }` | `icon: { theme: 'yellow' \| 'blue' \| 'red' \| 'green' }`               |
+| `#body-content`, `#body-main` slots                                  | `#default`                                                              |
+| `#body-title` slot                                                   | `#title`                                                                |
+| `#body-header` slot                                                  | (no replacement — use `#title` for extras)                              |
+| `#body` slot                                                         | `#default` + `bare` prop                                                |
+| `action.onClick(callableContext)` shim                               | `action.onClick({ close })`                                             |
+| `confirmDialog()` helper                                             | `dialog.confirm()`                                                      |
+| `ConfirmDialog.vue` component                                        | mounted internally by `dialog.confirm()`; not part of v1 public surface |
 
 `<Dialogs />` is **not** deprecated — it remains exported and is now rendered by `<FrappeUIProvider>` alongside `<Toasts />`. Apps that already mount it in their template continue to work; rendering it twice is safe (the second mount has no extra effect, but the imperative dialog stack lives in a shared module-level ref so the same stack drives both).
 

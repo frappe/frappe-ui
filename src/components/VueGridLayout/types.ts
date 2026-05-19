@@ -22,5 +22,5 @@ export type Layout = Array<LayoutItem>
 export interface GridLayoutProps {
   cols?: number
   rowHeight?: number
-  disabled?: Boolean
+  disabled?: boolean
 }

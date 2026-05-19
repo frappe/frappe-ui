@@ -185,31 +185,31 @@
   }
 ]
 </script>
+
 ## API Reference
 
 ### Sidebar
 
-<PropsTable name="Sidebar" :data="sidebarProps"/> 
+<PropsTable name="Sidebar" :data="sidebarProps"/>
 
-<SlotsTable :data="sidebarSlots"/> 
+<SlotsTable :data="sidebarSlots"/>
 
-<EmitsTable :data="sidebarEmits"/> 
+<EmitsTable :data="sidebarEmits"/>
 
 ### SidebarHeader
 
-<PropsTable folder="Sidebar" name="SidebarHeader" :data="sidebarHeaderProps"/> 
+<PropsTable folder="Sidebar" name="SidebarHeader" :data="sidebarHeaderProps"/>
 
-<SlotsTable :data="sidebarHeaderSlots"/> 
+<SlotsTable :data="sidebarHeaderSlots"/>
 
 ### SidebarItem
 
-<PropsTable folder="Sidebar" name="SidebarItem" :data="sidebarItemProps"/> 
+<PropsTable folder="Sidebar" name="SidebarItem" :data="sidebarItemProps"/>
 
-<SlotsTable :data="sidebarItemSlots"/> 
+<SlotsTable :data="sidebarItemSlots"/>
 
 ### SidebarSection
 
-<PropsTable folder="Sidebar" name="SidebarSection" :data="sidebarSectionProps"/> 
+<PropsTable folder="Sidebar" name="SidebarSection" :data="sidebarSectionProps"/>
 
-<SlotsTable :data="sidebarSectionSlots"/> 
-
+<SlotsTable :data="sidebarSectionSlots"/>

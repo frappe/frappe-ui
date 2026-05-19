@@ -4,20 +4,25 @@ Lets users select one option from a list. Ideal for forms, settings, or any
 interface where a single choice is required.
 
 ## Example
+
 <ComponentPreview name="Select-Example" />
 
 ## Custom Option Layout
+
 Use `#item-prefix` and `#item-label` to tailor the standard row — for example, an avatar plus a two-line label with a secondary description. `#prefix` on the trigger reuses the selected option's accessory.
 
 <ComponentPreview name="Select-OptionSlot" />
 
 ## States
+
 <ComponentPreview name="Select-States" />
 
 ## Trigger Slots
+
 <ComponentPreview name="Select-TriggerSlots" />
 
 ## Label, Description, Error
+
 `Select` supports `label`, `description`, `error`, and `required` directly — no `FormControl` wrapper needed. The error suppresses the description and wires `aria-invalid` + `aria-errormessage` onto the trigger.
 
 <ComponentPreview name="Select-Labeling" />

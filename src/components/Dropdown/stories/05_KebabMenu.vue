@@ -52,7 +52,9 @@ function rowActions(task: Task): DropdownOptions {
 </script>
 
 <template>
-  <div class="w-full w-80 divide-y divide-outline-gray-1 rounded-lg border border-outline-gray-1 bg-surface-white">
+  <div
+    class="w-full w-80 divide-y divide-outline-gray-1 rounded-lg border border-outline-gray-1 bg-surface-white"
+  >
     <div
       v-for="task in tasks"
       :key="task.title"

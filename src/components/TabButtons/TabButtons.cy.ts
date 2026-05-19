@@ -5,11 +5,11 @@ describe('<TabButtons />', () => {
   it('updates the selected value', () => {
     cy.mount(TabButtons, {
       props: {
-        buttons: [
+        'buttons': [
           { label: 'Day', value: 'day' },
           { label: 'Week', value: 'week' },
         ],
-        modelValue: 'day',
+        'modelValue': 'day',
         'onUpdate:modelValue': cy.spy().as('onUpdate'),
       },
     })
@@ -37,11 +37,11 @@ describe('<TabButtons />', () => {
   it('syncs the model with the active fallback', () => {
     cy.mount(TabButtons, {
       props: {
-        buttons: [
+        'buttons': [
           { label: 'Day', value: 'day' },
           { label: 'Week', value: 'week', active: true },
         ],
-        modelValue: 'month',
+        'modelValue': 'month',
         'onUpdate:modelValue': cy.spy().as('onUpdate'),
       },
     })

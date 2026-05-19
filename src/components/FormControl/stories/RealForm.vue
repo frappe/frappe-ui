@@ -25,8 +25,7 @@ const errors = computed(() => {
   else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
     e.email = 'Enter a valid email.'
   if (!form.password) e.password = 'Pick a password.'
-  else if (form.password.length < 8)
-    e.password = 'Use at least 8 characters.'
+  else if (form.password.length < 8) e.password = 'Use at least 8 characters.'
   if (!form.role) e.role = 'Pick a role.'
   if (!form.team) e.team = 'Pick a team.'
   if (form.skills.length === 0) e.skills = 'Pick at least one skill.'
@@ -83,10 +82,7 @@ function reset() {
 </script>
 
 <template>
-  <form
-    class="w-full max-w-lg space-y-4 py-4"
-    @submit.prevent="submit"
-  >
+  <form class="w-full max-w-lg space-y-4 py-4" @submit.prevent="submit">
     <div class="space-y-1">
       <h2 class="text-lg font-semibold text-ink-gray-9">Create account</h2>
       <p class="text-p-sm text-ink-gray-6">

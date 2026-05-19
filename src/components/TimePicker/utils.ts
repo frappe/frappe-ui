@@ -167,7 +167,7 @@ export function findNearestIndex(
   if (lo < minutes.length) candidates.push(lo)
   if (lo - 1 >= 0) candidates.push(lo - 1)
   if (!candidates.length) return -1
-  return candidates.sort(
+  return candidates.toSorted(
     (a, b) =>
       Math.abs(minutes[a] - targetMinutes) -
       Math.abs(minutes[b] - targetMinutes),

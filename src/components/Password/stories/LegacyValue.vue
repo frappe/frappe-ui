@@ -8,9 +8,5 @@ import { Password } from 'frappe-ui'
 -->
 
 <template>
-  <Password
-    label="Legacy field"
-    value="hunter2"
-    placeholder="Enter password"
-  />
+  <Password label="Legacy field" value="hunter2" placeholder="Enter password" />
 </template>

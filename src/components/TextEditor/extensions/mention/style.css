@@ -6,6 +6,7 @@
   display: inline-block;
 }
 
-.mention.ProseMirror-selectednode, .mention:hover {
+.mention.ProseMirror-selectednode,
+.mention:hover {
   background-color: var(--surface-gray-1, #f8f8f8);
 }

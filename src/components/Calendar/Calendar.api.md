@@ -79,11 +79,11 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="Calendar" :data="propsData"/> 
+<PropsTable name="Calendar" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
+<SlotsTable :data="slotsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

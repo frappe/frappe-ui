@@ -72,7 +72,6 @@ const { toInternal: getInternalValue } = useEmptyValueMapping(
 function getItemTextValue(item: NormalizedOption) {
   return `${item.label} ${item.value}`.trim()
 }
-
 </script>
 
 <template>

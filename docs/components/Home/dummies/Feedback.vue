@@ -1,7 +1,5 @@
 <template>
-  <div
-    class="p-5 flex justify-center"
-  >
+  <div class="p-5 flex justify-center">
     <div class="flex flex-col gap-3">
       <div
         class="shadow-lg dark:shadow-none bg-surface-cards border border-outline-gray-3 rounded p-2 w-32 flex items-center gap-2"
@@ -23,7 +21,7 @@
       </div>
 
       <div
-        class="shadow-lg dark:shadow-none  bg-surface-cards border border-surface-gray-3 rounded p-2 w-32 flex items-center gap-2"
+        class="shadow-lg dark:shadow-none bg-surface-cards border border-surface-gray-3 rounded p-2 w-32 flex items-center gap-2"
       >
         <div class="h-2 w-2 bg-red-400/40 rounded-full flex-shrink-0" />
         <div class="flex-1">

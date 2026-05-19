@@ -62,9 +62,9 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="Toast" :data="propsData"/> 
+<PropsTable name="Toast" :data="propsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

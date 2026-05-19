@@ -24,10 +24,7 @@
             <slot name="prefix" />
           </template>
           <template #suffix>
-            <slot
-              name="suffix"
-              v-bind="{ togglePopover, isOpen }"
-            >
+            <slot name="suffix" v-bind="{ togglePopover, isOpen }">
               <span
                 class="lucide-chevron-down size-4 cursor-pointer"
                 aria-hidden="true"
@@ -145,7 +142,7 @@ defineSlots<{
 
 const resolvedSide = computed<PopoverSide>(
   () =>
-    props.side ?? ((props.placement?.split('-')[0] as PopoverSide) ?? 'bottom'),
+    props.side ?? (props.placement?.split('-')[0] as PopoverSide) ?? 'bottom',
 )
 const resolvedAlign = computed<PopoverAlign>(() => {
   if (props.align !== undefined) return props.align
@@ -213,15 +210,11 @@ if (import.meta.env.DEV) {
       warned.scrollMode = true
     }
     if (props.minTime !== undefined && !warned.minTime) {
-      console.warn(
-        '[TimePicker] `minTime` is deprecated. Use `min` instead.',
-      )
+      console.warn('[TimePicker] `minTime` is deprecated. Use `min` instead.')
       warned.minTime = true
     }
     if (props.maxTime !== undefined && !warned.maxTime) {
-      console.warn(
-        '[TimePicker] `maxTime` is deprecated. Use `max` instead.',
-      )
+      console.warn('[TimePicker] `maxTime` is deprecated. Use `max` instead.')
       warned.maxTime = true
     }
   })
@@ -257,7 +250,9 @@ const canonicalValue = ref<string>(
 
 // What the user sees / can edit in the trigger input. Synced from
 // canonicalValue when not actively typing.
-const displayValue = ref<string>(formatTime(canonicalValue.value, props.use12Hour))
+const displayValue = ref<string>(
+  formatTime(canonicalValue.value, props.use12Hour),
+)
 
 const isTyping = ref(false)
 const highlightIndex = ref<number>(-1)
@@ -300,7 +295,10 @@ const displayedOptions = computed<TimeOption[]>(() => {
  * typed text, or the option nearest to it in minutes. Drives both the
  * highlighted row and the scroll-into-view target.
  */
-const typingTarget = computed<{ exact: TimeOption | null; nearest: TimeOption | null }>(() => {
+const typingTarget = computed<{
+  exact: TimeOption | null
+  nearest: TimeOption | null
+}>(() => {
   const list = displayedOptions.value
   if (!list.length) return { exact: null, nearest: null }
   const parsed = parseFlexibleTime(displayValue.value)
@@ -496,7 +494,8 @@ function moveHighlight(delta: number) {
     const idx = seed ? list.findIndex((o) => o.value === seed) : -1
     highlightIndex.value = idx > -1 ? idx : 0
   } else {
-    highlightIndex.value = (highlightIndex.value + delta + list.length) % list.length
+    highlightIndex.value =
+      (highlightIndex.value + delta + list.length) % list.length
   }
   isTyping.value = false
   scrollHighlightedIntoView()
@@ -551,9 +550,7 @@ function scrollOnOpen() {
     const target =
       typingTarget.value.exact?.value ??
       typingTarget.value.nearest?.value ??
-      (canonicalValue.value
-        ? baseCompare(canonicalValue.value)
-        : null)
+      (canonicalValue.value ? baseCompare(canonicalValue.value) : null)
     if (!target) return
     const el = panel.querySelector<HTMLElement>(`[data-value="${target}"]`)
     el?.scrollIntoView({ block: 'center' })
@@ -589,4 +586,3 @@ defineExpose({
   },
 })
 </script>
-

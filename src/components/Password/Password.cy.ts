@@ -19,7 +19,7 @@ describe('Password', () => {
   it('v-model with modelValue', () => {
     cy.mount(Password, {
       props: {
-        modelValue: '123456',
+        'modelValue': '123456',
         'onUpdate:modelValue': cy.spy().as('onUpdate'),
       },
     })

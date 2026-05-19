@@ -22,12 +22,12 @@ describe('Dialog', () => {
             { default: () => 'Show' },
           ),
           h(Dialog, {
-            open: this.open,
+            'open': this.open,
             'onUpdate:open': (v: boolean) => (this.open = v),
             onClose,
-            title: 'Modal Dialog',
-            message: 'A simple modal.',
-            actions: [
+            'title': 'Modal Dialog',
+            'message': 'A simple modal.',
+            'actions': [
               {
                 label: 'Close',
                 variant: 'solid',
@@ -71,9 +71,9 @@ describe('Dialog', () => {
             { default: () => 'Show' },
           ),
           h(Dialog, {
-            modelValue: this.open,
+            'modelValue': this.open,
             'onUpdate:modelValue': (v: boolean) => (this.open = v),
-            title: 'Legacy v-model',
+            'title': 'Legacy v-model',
           }),
         ]
       },
@@ -109,9 +109,9 @@ describe('Dialog', () => {
       },
       render() {
         return h(Dialog, {
-          open: this.open,
+          'open': this.open,
           'onUpdate:open': (v: boolean) => (this.open = v),
-          title: 'With X',
+          'title': 'With X',
         })
       },
     })
@@ -141,7 +141,7 @@ describe('Dialog', () => {
       slots: {
         default: h(
           'div',
-          { 'data-cy': 'bare-content', class: 'p-6' },
+          { 'data-cy': 'bare-content', 'class': 'p-6' },
           'bare content',
         ),
       },
@@ -218,11 +218,7 @@ describe('Dialog', () => {
     cy.mount(Dialog, {
       props: { modelValue: true },
       slots: {
-        'body-header': h(
-          'div',
-          { 'data-cy': 'body-header' },
-          'legacy header',
-        ),
+        'body-header': h('div', { 'data-cy': 'body-header' }, 'legacy header'),
         'body-content': h(
           'div',
           { 'data-cy': 'body-content' },
@@ -261,11 +257,7 @@ describe('Dialog', () => {
     cy.mount(Dialog, {
       props: { modelValue: true },
       slots: {
-        'body-header': h(
-          'div',
-          { 'data-cy': 'body-header' },
-          'legacy header',
-        ),
+        'body-header': h('div', { 'data-cy': 'body-header' }, 'legacy header'),
       },
     })
 
@@ -296,8 +288,8 @@ describe('Dialog', () => {
         default: () =>
           h('input', {
             'data-cy': 'name-input',
-            autofocus: '',
-            value: 'untitled',
+            'autofocus': '',
+            'value': 'untitled',
           }),
       },
     })
@@ -320,12 +312,8 @@ describe('Dialog', () => {
         default: () =>
           h('div', { autofocus: '' }, [
             h('span', 'label'),
-            h(
-              'button',
-              { 'data-cy': 'toggle', type: 'button' },
-              'Toggle',
-            ),
-            h('button', { 'data-cy': 'second', type: 'button' }, 'Other'),
+            h('button', { 'data-cy': 'toggle', 'type': 'button' }, 'Toggle'),
+            h('button', { 'data-cy': 'second', 'type': 'button' }, 'Other'),
           ]),
       },
     })

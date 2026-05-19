@@ -4,7 +4,7 @@ defineProps({
     type: Array,
     required: true,
   },
-});
+})
 </script>
 
 <template>
@@ -15,9 +15,7 @@ defineProps({
       </h2>
 
       <div v-else class="grid gap-2">
-        <span :style='{ color: color.value, fontSize: "50px" }'>
-          Aa
-        </span>
+        <span :style="{ color: color.value, fontSize: '50px' }"> Aa </span>
         <span>{{ color.name }}</span>
         <span class="text-sm text-ink-gray-5">{{ color.value }}</span>
       </div>

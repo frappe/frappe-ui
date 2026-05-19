@@ -183,16 +183,16 @@ Audit: ~6 callsites pass a numeric `duration`. Each needs `× 1000`.
 
 ### Renamed / removed APIs
 
-| 0.1.x | v1 | Audited callsites |
-|---|---|---|
-| `toast.create({ message, ... })` | `toast(message, { ... })` or `toast.message(message, { ... })` | 5 (helpdesk) |
-| `toast.remove(id)` | `toast.dismiss(id)` | 0 |
-| `toast.removeAll()` | `toast.dismiss()` | 0 |
-| `import { Toasts } from 'frappe-ui'`<br>`<Toasts />` | `<FrappeUIProvider>` wrap, **or** `import { ToastProvider } from 'frappe-ui'`; `<ToastProvider />` | 2 (crm, hrms) |
-| `<ToastProvider>` SFC | `import { ToastProvider } from 'frappe-ui'` (styled wrapper around sonner's `<Toaster>`) | 0 |
-| Options field: `message` | `title` | several (all `toast.create` callsites) |
-| Options field: `closable` | `closeButton` (sonner global) or `dismissible` (per-toast) | several |
-| Options field: `type` (on raw options) | use the type helper instead (`toast.success`, etc.) | n/a |
+| 0.1.x                                                | v1                                                                                                 | Audited callsites                      |
+| ---------------------------------------------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| `toast.create({ message, ... })`                     | `toast(message, { ... })` or `toast.message(message, { ... })`                                     | 5 (helpdesk)                           |
+| `toast.remove(id)`                                   | `toast.dismiss(id)`                                                                                | 0                                      |
+| `toast.removeAll()`                                  | `toast.dismiss()`                                                                                  | 0                                      |
+| `import { Toasts } from 'frappe-ui'`<br>`<Toasts />` | `<FrappeUIProvider>` wrap, **or** `import { ToastProvider } from 'frappe-ui'`; `<ToastProvider />` | 2 (crm, hrms)                          |
+| `<ToastProvider>` SFC                                | `import { ToastProvider } from 'frappe-ui'` (styled wrapper around sonner's `<Toaster>`)           | 0                                      |
+| Options field: `message`                             | `title`                                                                                            | several (all `toast.create` callsites) |
+| Options field: `closable`                            | `closeButton` (sonner global) or `dismissible` (per-toast)                                         | several                                |
+| Options field: `type` (on raw options)               | use the type helper instead (`toast.success`, etc.)                                                | n/a                                    |
 
 ### Dropped `toast.promise` extensions
 
@@ -223,7 +223,7 @@ import { toast } from 'frappe-ui'
 export function createToast({ title, message, variant = 'info', duration }) {
   return (toast[variant] ?? toast.info)(title, {
     description: message,
-    duration: duration,  // already in ms in legacy createToast — no conversion
+    duration: duration, // already in ms in legacy createToast — no conversion
   })
 }
 ```

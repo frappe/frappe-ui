@@ -1,5 +1,6 @@
-import { MaybeRef, toValue, MaybeRefOrGetter } from 'vue'
-import { Filters } from './useList/types'
+import type { MaybeRef, MaybeRefOrGetter } from 'vue'
+import { toValue } from 'vue'
+import type { Filters } from './useList/types'
 
 export function makeGetParams(params: Record<string, any>) {
   let url = new URLSearchParams()

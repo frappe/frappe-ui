@@ -11,7 +11,7 @@ const clearSlot = {
       'button',
       {
         'aria-label': 'Clear',
-        onClick: () => {
+        'onClick': () => {
           props.clear()
           props.close()
         },
@@ -128,7 +128,7 @@ describe('DatePicker', () => {
   it('v-model', () => {
     cy.mount(DatePicker, {
       props: {
-        onChange: cy.spy().as('onChange'),
+        'onChange': cy.spy().as('onChange'),
         'onUpdate:modelValue': cy.spy().as('onUpdate'),
       },
     })
@@ -165,8 +165,16 @@ describe('DatePicker', () => {
     })
     cy.get('input').dblclick()
     cy.get('[role=dialog]').should('exist')
-    cy.get('[aria-label="2025-06-09"]').should('have.attr', 'aria-disabled', 'true')
-    cy.get('[aria-label="2025-06-21"]').should('have.attr', 'aria-disabled', 'true')
+    cy.get('[aria-label="2025-06-09"]').should(
+      'have.attr',
+      'aria-disabled',
+      'true',
+    )
+    cy.get('[aria-label="2025-06-21"]').should(
+      'have.attr',
+      'aria-disabled',
+      'true',
+    )
     cy.get('[aria-label="2025-06-15"]').should('not.have.attr', 'aria-disabled')
   })
 
@@ -180,8 +188,16 @@ describe('DatePicker', () => {
     })
     cy.get('input').dblclick()
     // 2025-06-14 is a Saturday, 2025-06-15 is a Sunday, 2025-06-16 is a Monday
-    cy.get('[aria-label="2025-06-14"]').should('have.attr', 'aria-disabled', 'true')
-    cy.get('[aria-label="2025-06-15"]').should('have.attr', 'aria-disabled', 'true')
+    cy.get('[aria-label="2025-06-14"]').should(
+      'have.attr',
+      'aria-disabled',
+      'true',
+    )
+    cy.get('[aria-label="2025-06-15"]').should(
+      'have.attr',
+      'aria-disabled',
+      'true',
+    )
     cy.get('[aria-label="2025-06-16"]').should('not.have.attr', 'aria-disabled')
   })
 
@@ -279,7 +295,7 @@ describe('DatePicker', () => {
     it('Enter and Space select the focused cell', () => {
       cy.mount(DatePicker, {
         props: {
-          modelValue: '2025-06-15',
+          'modelValue': '2025-06-15',
           'onUpdate:modelValue': cy.spy().as('onUpdate'),
         },
       })
@@ -294,7 +310,8 @@ describe('DatePicker', () => {
         props: {
           modelValue: '2025-06-15',
           // Disable 2025-06-16 only — pressing → from 15 should skip to 17.
-          isDateUnavailable: (d: any) => d.format('YYYY-MM-DD') === '2025-06-16',
+          isDateUnavailable: (d: any) =>
+            d.format('YYYY-MM-DD') === '2025-06-16',
         },
       })
       cy.get('input').focus().type('{downArrow}')
@@ -308,7 +325,10 @@ describe('DatePicker', () => {
       cy.get('input').focus().type('{downArrow}')
       cy.focused().trigger('keydown', { key: 'ArrowRight' })
       cy.focused().should('have.attr', 'data-value', '2025-07-01')
-      cy.get('[aria-label=cycle-calendar-view]').should('contain.text', 'Jul 2025')
+      cy.get('[aria-label=cycle-calendar-view]').should(
+        'contain.text',
+        'Jul 2025',
+      )
     })
   })
 })

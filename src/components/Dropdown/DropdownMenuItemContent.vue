@@ -126,7 +126,6 @@ const hasItemSlotsSuffix = computed(() => {
 function handleSwitchChange(value: boolean) {
   ;(props.item.onClick as ((value: boolean) => void) | undefined)?.(value)
 }
-
 </script>
 
 <template>
@@ -142,7 +141,11 @@ function handleSwitchChange(value: boolean) {
       />
       <span
         v-else-if="isLucideIconString(item.icon)"
-        :class="[item.icon, dropdownClasses.itemIcon, getDropdownIconColor(item)]"
+        :class="[
+          item.icon,
+          dropdownClasses.itemIcon,
+          getDropdownIconColor(item),
+        ]"
         aria-hidden="true"
       />
       <span
@@ -213,7 +216,11 @@ function handleSwitchChange(value: boolean) {
       />
       <span
         v-else-if="trailing === 'submenu'"
-        :class="['lucide-chevron-right', dropdownClasses.chevronIcon, getDropdownIconColor(item)]"
+        :class="[
+          'lucide-chevron-right',
+          dropdownClasses.chevronIcon,
+          getDropdownIconColor(item),
+        ]"
         aria-hidden="true"
       />
     </template>

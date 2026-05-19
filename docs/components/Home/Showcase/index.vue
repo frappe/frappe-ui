@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import Col1 from "./col1.vue";
-import Col2 from "./col2.vue";
-import Col3 from "./col3.vue";
-import Col4 from "./col4.vue";
+import Col1 from './col1.vue'
+import Col2 from './col2.vue'
+import Col3 from './col3.vue'
+import Col4 from './col4.vue'
 </script>
 
 <template>

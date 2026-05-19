@@ -4,5 +4,5 @@ export const state = reactive({
   mobsidebar: false,
   mobnavbar: false,
   searchDialog: false,
-  sidebarList: []
+  sidebarList: [],
 })

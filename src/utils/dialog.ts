@@ -402,16 +402,16 @@ export function confirm(args: ConfirmArgs): DialogHandle {
         h(
           Dialog,
           {
-            open: state.open,
+            'open': state.open,
             'onUpdate:open': (val: boolean) => {
               if (!val) onCancel()
             },
-            title: args.title,
-            icon: resolvedIcon,
-            size: args.size || 'md',
+            'title': args.title,
+            'icon': resolvedIcon,
+            'size': args.size || 'md',
             dismissible,
-            showCloseButton: dismissible,
-            onAfterLeave: () => remove(assignedId),
+            'showCloseButton': dismissible,
+            'onAfterLeave': () => remove(assignedId),
           },
           {
             default: () =>
@@ -550,15 +550,17 @@ export function prompt(args: PromptArgs): DialogHandle {
         : null
 
     const modelValue =
-      field.type === 'combobox' ? values[field.name] || null : values[field.name]
+      field.type === 'combobox'
+        ? values[field.name] || null
+        : values[field.name]
 
     const fieldNode = h(FormControl, {
-      label: field.label,
-      description: field.description,
-      type: (field.type as any) || 'text',
-      required: field.required,
-      placeholder: field.placeholder,
-      options: (field as any).options,
+      'label': field.label,
+      'description': field.description,
+      'type': (field.type as any) || 'text',
+      'required': field.required,
+      'placeholder': field.placeholder,
+      'options': (field as any).options,
       modelValue,
       'onUpdate:modelValue': onUpdate,
       ...comboboxAttrs,
@@ -579,16 +581,16 @@ export function prompt(args: PromptArgs): DialogHandle {
         h(
           Dialog,
           {
-            open: state.open,
+            'open': state.open,
             'onUpdate:open': (val: boolean) => {
               if (!val) onCancel()
             },
-            title: args.title,
-            icon: resolvedIcon,
-            size: args.size || 'md',
+            'title': args.title,
+            'icon': resolvedIcon,
+            'size': args.size || 'md',
             dismissible,
-            showCloseButton: dismissible,
-            onAfterLeave: () => remove(assignedId),
+            'showCloseButton': dismissible,
+            'onAfterLeave': () => remove(assignedId),
           },
           {
             default: () =>

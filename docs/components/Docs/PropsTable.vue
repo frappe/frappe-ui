@@ -127,7 +127,9 @@ const typeDefinition = computed(() => {
               <p
                 v-if="typeof x.deprecated === 'string'"
                 class="whitespace-pre-wrap text-p-sm text-ink-gray-6"
-              >Deprecated — {{ x.deprecated }}</p>
+              >
+                Deprecated — {{ x.deprecated }}
+              </p>
               <p
                 v-else-if="x.description"
                 class="mt-1 whitespace-pre-wrap text-p-sm leading-6 text-ink-gray-6"

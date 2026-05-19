@@ -27,6 +27,7 @@ Grep across all audited apps finds zero direct calls to `Switch.labelClasses` or
 finding stands.
 
 The implementation wires both via `warnDeprecated()` in dev mode:
+
 - `Checkbox.vue:72-74`: `watchEffect(() => { if (props.padding) warnDeprecated(...) })`
 - `Switch.vue:107-110`: `watchEffect(() => { if (props.labelClasses) warnDeprecated(...) })`
 
@@ -55,17 +56,18 @@ on the control element and wrapping label/description/error regions.
 
 Spot-checked across components:
 
-| Component | Control slot | Label slot | Description slot | Error slot | All slots rendered |
-| --------- | ------------ | ---------- | ---------------- | ---------- | ------------------- |
-| TextInput | `data-slot="control"` | `data-slot="label"` (InputLabel) | `data-slot="description"` (InputDescription) | `data-slot="error"` (InputError) | Yes, via LabelingWrapper |
-| Textarea | `data-slot="control"` | `data-slot="label"` | `data-slot="description"` | `data-slot="error"` | Yes |
-| Password | (delegates to TextInput) | — | — | — | Yes, inherited |
-| Checkbox | `data-slot="control"` | `data-slot="label"` | `data-slot="description"` | `data-slot="error"` | Yes, inline-row layout |
-| Switch | `data-slot="control"` | `data-slot="label"` | `data-slot="description"` | `data-slot="error"` | Yes, inline-row layout |
-| Rating | `data-slot="control"` | `data-slot="label"` | `data-slot="description"` | `data-slot="error"` | Yes |
-| Slider | `data-slot="control"` | `data-slot="label"` | `data-slot="description"` | `data-slot="error"` | Yes |
+| Component | Control slot             | Label slot                       | Description slot                             | Error slot                       | All slots rendered       |
+| --------- | ------------------------ | -------------------------------- | -------------------------------------------- | -------------------------------- | ------------------------ |
+| TextInput | `data-slot="control"`    | `data-slot="label"` (InputLabel) | `data-slot="description"` (InputDescription) | `data-slot="error"` (InputError) | Yes, via LabelingWrapper |
+| Textarea  | `data-slot="control"`    | `data-slot="label"`              | `data-slot="description"`                    | `data-slot="error"`              | Yes                      |
+| Password  | (delegates to TextInput) | —                                | —                                            | —                                | Yes, inherited           |
+| Checkbox  | `data-slot="control"`    | `data-slot="label"`              | `data-slot="description"`                    | `data-slot="error"`              | Yes, inline-row layout   |
+| Switch    | `data-slot="control"`    | `data-slot="label"`              | `data-slot="description"`                    | `data-slot="error"`              | Yes, inline-row layout   |
+| Rating    | `data-slot="control"`    | `data-slot="label"`              | `data-slot="description"`                    | `data-slot="error"`              | Yes                      |
+| Slider    | `data-slot="control"`    | `data-slot="label"`              | `data-slot="description"`                    | `data-slot="error"`              | Yes                      |
 
 Data attributes present on control elements:
+
 - `data-state` (always) — `"valid"` (default) or `"invalid"` (when `error` is set); for
   Checkbox/Switch/Rating, also `"checked"` / `"unchecked"` / custom state.
 - `data-size` (when `size` prop is set) — renders from `options.size()` callback in
@@ -78,10 +80,17 @@ Data attributes present on control elements:
 The vocabulary is consistent across all components. No component omits or deviates.
 
 **Consumer expectation:** apps can now write Tailwind selectors like
+
 ```css
-[data-state="invalid"] { @apply ring-red-300; }
-[data-size="lg"] { @apply text-lg; }
-[data-required="true"] { /* required-field styling */ }
+[data-state='invalid'] {
+  @apply ring-red-300;
+}
+[data-size='lg'] {
+  @apply text-lg;
+}
+[data-required='true'] {
+  /* required-field styling */
+}
 ```
 
 **Verdict: covered.** The spec's vocabulary is fully rendered on every input family
@@ -92,6 +101,7 @@ component.
 Three files in the codebase pair hand-rolled `<label>` + frappe-ui input:
 
 **Example:** `frappe_calendar/frontend/src/views/EventForm.vue` (lines ~140–160):
+
 ```vue
 <div class="space-y-2">
   <label class="block text-sm text-ink-gray-7">Location</label>
@@ -104,6 +114,7 @@ Three files in the codebase pair hand-rolled `<label>` + frappe-ui input:
 ```
 
 These call sites are forward-compatible with v1:
+
 1. The hand-rolled label is a `<label>` element with no `for` attribute — it does not
    link to the TextInput's `id`.
 2. If the app later adds the `label` prop to TextInput, v1's InputLabel renders a proper
@@ -128,6 +139,7 @@ the prior audit's ~11 — likely due to component-library expansion or search-pa
 evolution). Sample from the codebase:
 
 **`insights/frontend/src/widgets/SeriesOption.vue`:**
+
 ```vue
 <Checkbox v-model="series.smoothLines" label="Enable Curved Lines" />
 <Checkbox v-model="series.showPoints" label="Show Data Points" />
@@ -136,6 +148,7 @@ evolution). Sample from the codebase:
 
 These v1 components render the label via InputLabel (inline-row layout with the control).
 The rendered DOM is:
+
 ```html
 <div class="inline-flex gap-2 rounded transition">
   <input ... data-slot="control" ... />
@@ -163,6 +176,7 @@ additive; no migration cost.
 ### 2.4 Hand-rolled label + input pairs
 
 One file found (`frappe_calendar/EventForm.vue`). The pattern:
+
 ```vue
 <div class="space-y-2">
   <label class="block text-sm text-ink-gray-7">Location</label>
@@ -185,6 +199,7 @@ aligns with the app's hand-rolled spacing.
 ### 3.1 `Input.vue` (legacy component)
 
 **Real call sites:** 21 found (prior audit: 12).
+
 - `insights/frontend/src`: 19 files
 - `helpdesk/desk/src`: 1 file
 - `drive/frontend/src`: 1 file
@@ -194,6 +209,7 @@ audited codebase. The component exists but the warning is deferred to Wave E. Co
 this is on the Wave E PR checklist.
 
 **Sample usage:**
+
 ```vue
 <Input type="number" min="0" v-model="..." />
 <Input type="password" ... />
@@ -218,6 +234,7 @@ These are all fully functional in v1; the deprecation warning is deferred to Wav
 ### 3.3 `FormControl type='autocomplete'`
 
 **Real call sites:** 9 found (prior audit: 7).
+
 - `meet/frontend/src`: 3
 - `builder/frontend/src`: 2
 - `helpdesk/desk/src`: 3
@@ -234,6 +251,7 @@ through `v1.x`.
 **Real call sites:** 0 found (unchanged).
 
 The `Password.vue` component wires the deprecation:
+
 ```ts
 watchEffect(() => {
   if (props.value != null) {
@@ -255,6 +273,7 @@ No real app does this; the check is defensive.
 **Real call sites:** 0 found (unchanged).
 
 The Rating component wires the alias:
+
 ```ts
 const starCount = computed(() => props.max ?? props.rating_from ?? 5)
 
@@ -277,6 +296,7 @@ The only `@change` on a Switch-like component appears in the frappe-ui test stor
 
 **Implementation:** Switch watches `model` and triggers any `onChange` handler from
 `attrs` (Vue attrs passed to the component), then calls `warnDeprecated()`:
+
 ```ts
 watch(model, (val) => {
   const onChange = attrs.onChange as ... | undefined
@@ -319,6 +339,7 @@ Auditing for `label` or explicit `aria-label`:
 
 **`slides/frontend/src/components/*.vue` (custom SliderInput wrapper):**
 All 9 slider usages pass a `label` prop to the custom `SliderInput` component:
+
 ```vue
 <SliderInput label="Opacity" ... />
 <SliderInput label="Spread" ... />
@@ -340,9 +361,11 @@ break any real call site.
 ## 5. Password — v-model fix
 
 **Real call sites via FormControl type='password':** 1 found (prior audit: 1).
+
 - `helpdesk/desk/src`: 5 Password instances total (not via FormControl)
 
 **Direct `<Password>` component usage:**
+
 - `helpdesk/desk/src`: 5 call sites (using v-model)
 
 None of these rely on the broken `.value` prop pattern. The v-model fix in Wave B
@@ -357,6 +380,7 @@ None of these rely on the broken `.value` prop pattern. The v-model fix in Wave 
 ### 6.1 Arbitrary attrs forwarding
 
 **TextInput and Textarea:** Both use `inheritAttrs: false` and forward `$attrs` selectively:
+
 ```ts
 v-bind="{ ...dataAttrs, ...attrsWithoutClassStyle }"
 ```
@@ -379,6 +403,7 @@ custom divs.
 ### 6.3 `error` prop receiving `Error` objects
 
 **Implementation confirmed:** `useInputLabeling()` handles `string | FrappeUIError`:
+
 ```ts
 const errorLines = computed<string[]>(() => {
   const e = props.error
@@ -399,6 +424,7 @@ real usage.
 
 **Implementation:** The inline-row layout stacks description and error below the
 label/control row, indented to align under the label:
+
 ```vue
 <div class="inline-flex gap-2 ...">
   <input ... />
@@ -421,6 +447,7 @@ description prop today, so the visual change is nonbreaking.
 ### 6.5 Rating and Slider with size prop
 
 **Implementation:**
+
 - `Rating.size: InputSize` (controls star count or size — unclear from spec, but the
   component only applies size to label font size; stars stay hardcoded).
 - `Slider.size: ToggleSize` (controls track and thumb proportions).
@@ -434,6 +461,7 @@ description prop today, so the visual change is nonbreaking.
 ## 7. Summary
 
 ### Styling hooks: **covered**
+
 - ✅ `data-*` vocabulary fully rendered on all input components and label/description/error
   regions.
 - ✅ Deprecated `Switch.labelClasses` and `Checkbox.padding` wired with `warnDeprecated()`.
@@ -442,11 +470,13 @@ description prop today, so the visual change is nonbreaking.
 - ✅ Hand-rolled label + input pairs forward-compatible; no visual collision.
 
 ### Shared labeling contract: **covered**
+
 - ✅ 25+ Checkbox instances pass `label` prop; render correctly with inline-row layout.
 - ✅ Textarea and Switch label prop usage at 0; additive without breakage.
 - ✅ Hand-rolled label+input example found; forward-compatible with v1 spacing.
 
 ### Deprecations: **covered (pending Wave E)**
+
 - ✅ `Input.vue`, `Autocomplete`, `FormControl type='autocomplete'` — 21 + 72 + 9 real
   call sites quantified and confirmed functional.
 - ✅ `Password.value`, `Rating.rating_from`, `Switch.change`, `Switch.labelClasses`,
@@ -455,14 +485,17 @@ description prop today, so the visual change is nonbreaking.
   patterns that don't occur in practice).
 
 ### Slider unlabeled: **safe**
+
 - ✅ ~14 Slider call sites all include `label` prop (directly or via wrapper).
 - ✅ Removal of hardcoded `aria-label="Volume"` does not break any real site.
 
 ### Password v-model fix: **safe**
+
 - ✅ 5 direct `<Password>` usages; all use v-model correctly.
 - ✅ Broken `.value` prop pattern not found in real code.
 
 ### New patterns: **no gaps**
+
 - ✅ Arbitrary attrs forwarding working (e.g., `autocomplete`, `name`).
 - ✅ Ref binding supported (not heavily used).
 - ✅ `error: Error | string` contract verified against 62 ErrorMessage call sites.

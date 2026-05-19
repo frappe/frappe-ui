@@ -46,9 +46,9 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="Avatar" :data="propsData"/> 
+<PropsTable name="Avatar" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
-
+<SlotsTable :data="slotsData"/>

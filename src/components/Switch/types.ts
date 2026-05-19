@@ -22,4 +22,3 @@ export interface SwitchProps extends InputLabelingProps {
    */
   labelClasses?: string
 }
-

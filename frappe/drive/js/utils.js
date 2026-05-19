@@ -48,7 +48,7 @@ function slugger(title) {
   return slugify(title.split('.').join(' '), {
     lower: true,
     trim: true,
-    remove: /[^\w\s\']|_/,
+    remove: /[^\w\s']|_/,
   })
 }
 
@@ -108,7 +108,6 @@ export const formatDate = (date) => {
 
   return `${formattedDate}, ${formattedTime}`
 }
-
 
 export const openEntity = (entity, new_tab = false) => {
   if (new_tab) {

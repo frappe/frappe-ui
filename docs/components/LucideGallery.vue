@@ -23,7 +23,7 @@ for (const value of Object.values(LucideIcons as Record<string, unknown>)) {
 }
 const icons = [...iconsByName.entries()]
   .map(([name, svg]) => ({ name, svg }))
-  .sort((a, b) => a.name.localeCompare(b.name))
+  .toSorted((a, b) => a.name.localeCompare(b.name))
 
 const query = ref('')
 

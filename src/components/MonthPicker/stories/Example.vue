@@ -12,21 +12,17 @@ const reportPeriod = ref('')
     <div class="grid w-full max-w-xl grid-cols-1 gap-6 sm:grid-cols-2">
       <div class="flex flex-col gap-1.5">
         <span class="text-sm text-ink-gray-7">Billing statement</span>
-        <MonthPicker
-          v-model="statementMonth"
-          placeholder="Pick a month"
-        />
+        <MonthPicker v-model="statementMonth" placeholder="Pick a month" />
         <span class="text-xs text-ink-gray-5">
-          {{ statementMonth ? `Showing ${statementMonth}` : 'No month selected' }}
+          {{
+            statementMonth ? `Showing ${statementMonth}` : 'No month selected'
+          }}
         </span>
       </div>
 
       <div class="flex flex-col gap-1.5">
         <span class="text-sm text-ink-gray-7">Reporting period</span>
-        <MonthPicker
-          v-model="reportPeriod"
-          placeholder="Fiscal month"
-        />
+        <MonthPicker v-model="reportPeriod" placeholder="Fiscal month" />
       </div>
     </div>
   </div>

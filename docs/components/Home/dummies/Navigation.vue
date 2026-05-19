@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from "vue";
+import { onMounted, onUnmounted, ref } from 'vue'
 
-const active = ref(0);
-let timer: number;
+const active = ref(0)
+let timer: number
 
 onMounted(() => {
   timer = window.setInterval(() => {
-    active.value = (active.value + 1) % 3;
-  }, 500);
-});
+    active.value = (active.value + 1) % 3
+  }, 500)
+})
 
 onUnmounted(() => {
-  clearInterval(timer);
-});
+  clearInterval(timer)
+})
 </script>
 
 <template>
@@ -24,15 +24,12 @@ onUnmounted(() => {
         v-for="(_, i) in 3"
         :key="i"
         class="h-3 w-full rounded-sm transition-all duration-500 ease-in-out"
-        :class='active === i ? "bg-surface-white" : "bg-surface-gray-2"'
+        :class="active === i ? 'bg-surface-white' : 'bg-surface-gray-2'"
       />
     </div>
 
     <div
-      class="
-        mt-2 p-5 animate-pulse rounded flex items-center w-full bg-surface-gray-4
-        dark:bg-surface-gray-3
-      "
+      class="mt-2 p-5 animate-pulse rounded flex items-center w-full bg-surface-gray-4 dark:bg-surface-gray-3"
     />
   </div>
 </template>

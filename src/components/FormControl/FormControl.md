@@ -10,18 +10,18 @@ A create-account form using every control type.
 
 ## Supported types
 
-| `type`            | Renders                                                       |
-| ----------------- | ------------------------------------------------------------- |
-| `text` _(default)_, `email`, `password`, `number`, `search`, `tel`, `url`, `file`, `range`, `month`, `week`, `datetime-local` | [`TextInput`](./textinput) with the matching HTML `type`      |
-| `textarea`        | [`Textarea`](./textarea)                                      |
-| `select`          | [`Select`](./select)                                          |
-| `combobox`        | [`Combobox`](./combobox)                                      |
-| `multiselect`     | [`MultiSelect`](./multiselect)                                |
-| `checkbox`        | [`Checkbox`](./checkbox)                                      |
-| `date`            | [`DatePicker`](./datepicker#date-picker)                      |
-| `daterange`       | [`DateRangePicker`](./datepicker#date-range-picker)           |
-| `datetime`        | [`DateTimePicker`](./datepicker#datetime-picker)              |
-| `time`            | [`TimePicker`](./timepicker)                                  |
+| `type`                                                                                                                        | Renders                                                  |
+| ----------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| `text` _(default)_, `email`, `password`, `number`, `search`, `tel`, `url`, `file`, `range`, `month`, `week`, `datetime-local` | [`TextInput`](./textinput) with the matching HTML `type` |
+| `textarea`                                                                                                                    | [`Textarea`](./textarea)                                 |
+| `select`                                                                                                                      | [`Select`](./select)                                     |
+| `combobox`                                                                                                                    | [`Combobox`](./combobox)                                 |
+| `multiselect`                                                                                                                 | [`MultiSelect`](./multiselect)                           |
+| `checkbox`                                                                                                                    | [`Checkbox`](./checkbox)                                 |
+| `date`                                                                                                                        | [`DatePicker`](./datepicker#date-picker)                 |
+| `daterange`                                                                                                                   | [`DateRangePicker`](./datepicker#date-range-picker)      |
+| `datetime`                                                                                                                    | [`DateTimePicker`](./datepicker#datetime-picker)         |
+| `time`                                                                                                                        | [`TimePicker`](./timepicker)                             |
 
 > **Breaking change in v1:** `type="date"` and `type="time"` used to render native HTML inputs through `TextInput`. They now resolve to `DatePicker` and `TimePicker`. Use `TextInput` directly (or `type="datetime-local"`) if you need the native input.
 

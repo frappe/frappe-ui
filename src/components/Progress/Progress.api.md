@@ -56,9 +56,9 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="Progress" :data="propsData"/> 
+<PropsTable name="Progress" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
-
+<SlotsTable :data="slotsData"/>

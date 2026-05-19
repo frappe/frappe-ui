@@ -758,29 +758,29 @@
   }
 ]
 </script>
+
 ## API Reference
 
 ### DatePicker
 
-<PropsTable name="DatePicker" :data="datePickerProps"/> 
+<PropsTable name="DatePicker" :data="datePickerProps"/>
 
-<SlotsTable :data="datePickerSlots"/> 
+<SlotsTable :data="datePickerSlots"/>
 
-<EmitsTable :data="datePickerEmits"/> 
+<EmitsTable :data="datePickerEmits"/>
 
 ### DateRangePicker
 
-<PropsTable folder="DatePicker" name="DateRangePicker" :data="dateRangePickerProps"/> 
+<PropsTable folder="DatePicker" name="DateRangePicker" :data="dateRangePickerProps"/>
 
-<SlotsTable :data="dateRangePickerSlots"/> 
+<SlotsTable :data="dateRangePickerSlots"/>
 
-<EmitsTable :data="dateRangePickerEmits"/> 
+<EmitsTable :data="dateRangePickerEmits"/>
 
 ### DateTimePicker
 
-<PropsTable folder="DatePicker" name="DateTimePicker" :data="dateTimePickerProps"/> 
+<PropsTable folder="DatePicker" name="DateTimePicker" :data="dateTimePickerProps"/>
 
-<SlotsTable :data="dateTimePickerSlots"/> 
+<SlotsTable :data="dateTimePickerSlots"/>
 
-<EmitsTable :data="dateTimePickerEmits"/> 
-
+<EmitsTable :data="dateTimePickerEmits"/>

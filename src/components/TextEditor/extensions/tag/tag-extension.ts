@@ -1,12 +1,10 @@
 import { Node, mergeAttributes, Range, Editor } from '@tiptap/core'
 import { PluginKey } from '@tiptap/pm/state'
-import {
-  createSuggestionExtension,
-  BaseSuggestionItem,
-} from '../suggestion/createSuggestionExtension'
+import type { BaseSuggestionItem } from '../suggestion/createSuggestionExtension'
+import { createSuggestionExtension } from '../suggestion/createSuggestionExtension'
 import SuggestionList from '../suggestion/SuggestionList.vue'
 import { toValue } from 'vue'
-import { TextEditorProps } from '../../types'
+import type { TextEditorProps } from '../../types'
 
 export const TagNode = Node.create({
   name: 'tagItem',
@@ -61,7 +59,7 @@ export const TagNode = Node.create({
     ]
   },
   renderText({ node }: any) {
-    return `#${node.attrs.tagLabel ||  ''}`
+    return `#${node.attrs.tagLabel || ''}`
   },
   addCommands() {
     return {

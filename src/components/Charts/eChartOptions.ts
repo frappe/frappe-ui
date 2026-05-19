@@ -1,5 +1,5 @@
 import { formatDate, formatLabel, formatValue, mergeDeep } from './helpers'
-import { AxisChartConfig } from './types'
+import type { AxisChartConfig } from './types'
 
 export const PADDING_TOP = 0
 export const PADDING_BOTTOM = 10
@@ -47,7 +47,7 @@ export default function useEchartsOptions(config: AxisChartConfig) {
     tooltip: {
       show: true,
       trigger: 'axis',
-      formatter: (params: Object | Array<Object>) => {
+      formatter: (params: object | Array<object>) => {
         const dirAttr = isRTL ? ' dir="rtl"' : ''
 
         if (Array.isArray(params)) {
@@ -55,7 +55,7 @@ export default function useEchartsOptions(config: AxisChartConfig) {
             // remove zero values
             .filter((p) => p.value?.[1] !== 0)
             // sort in descending order by value
-            .sort((a, b) => b.value?.[1] - a.value?.[1])
+            .toSorted((a, b) => b.value?.[1] - a.value?.[1])
         }
 
         if (!Array.isArray(params)) {
@@ -133,7 +133,11 @@ export default function useEchartsOptions(config: AxisChartConfig) {
   }
 }
 
-export function getTitleOptions(title: string, subtitle?: string, isRTL?: boolean) {
+export function getTitleOptions(
+  title: string,
+  subtitle?: string,
+  isRTL?: boolean,
+) {
   return {
     top: '4px',
     left: isRTL ? 'right' : '0.8%',
@@ -231,7 +235,10 @@ function getXAxisOptions(config: AxisChartConfig) {
         },
       }
 
-  return mergeDeep(options, config.swapXY ? config.yAxis.echartOptions : config.xAxis.echartOptions)
+  return mergeDeep(
+    options,
+    config.swapXY ? config.yAxis.echartOptions : config.xAxis.echartOptions,
+  )
 }
 
 function getYAxisOptions(config: AxisChartConfig) {
@@ -309,7 +316,7 @@ function getYAxisOptions(config: AxisChartConfig) {
 
   primaryYAxisOptions = mergeDeep(
     primaryYAxisOptions,
-    config.swapXY ? config.xAxis.echartOptions : config.yAxis.echartOptions
+    config.swapXY ? config.xAxis.echartOptions : config.yAxis.echartOptions,
   )
 
   let secondaryYAxisOptions = {
@@ -360,7 +367,7 @@ function getYAxisOptions(config: AxisChartConfig) {
 
   secondaryYAxisOptions = mergeDeep(
     secondaryYAxisOptions,
-    config.swapXY ? config.y2Axis?.echartOptions : config.y2Axis?.echartOptions
+    config.swapXY ? config.y2Axis?.echartOptions : config.y2Axis?.echartOptions,
   )
 
   return config.swapXY

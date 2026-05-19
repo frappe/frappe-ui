@@ -59,7 +59,8 @@ const hasResults = computed(() =>
 
 const highlightedLink = ref<string | null>(null)
 const onHighlight = (payload: { value: unknown } | undefined) => {
-  highlightedLink.value = typeof payload?.value === 'string' ? payload.value : null
+  highlightedLink.value =
+    typeof payload?.value === 'string' ? payload.value : null
 }
 
 const navigateTo = (item: SidebarItem) => {

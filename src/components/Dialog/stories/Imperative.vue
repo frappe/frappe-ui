@@ -127,7 +127,7 @@ function dangerCustomLabel() {
   // delete in the literal sense.
   dialog.danger({
     title: 'Revoke invitation',
-    message: 'This will revoke jane@example.com\'s pending invitation.',
+    message: "This will revoke jane@example.com's pending invitation.",
     confirmLabel: 'Revoke',
     onConfirm: async () => {
       await new Promise((r) => setTimeout(r, 500))
@@ -176,7 +176,8 @@ function optimisticClose() {
   // useful when the user has already committed and the UI shouldn't block.
   dialog.confirm({
     title: 'Send report',
-    message: 'Send the weekly report to your team? The dialog will close immediately.',
+    message:
+      'Send the weekly report to your team? The dialog will close immediately.',
     confirmLabel: 'Send',
     onConfirm: async ({ close }) => {
       close()
@@ -194,7 +195,8 @@ function optimisticClose() {
 function keepOpenAfterAsync() {
   dialog.confirm({
     title: 'Claim username',
-    message: 'Claim the username "frappe-fan"? This pretends to call the server.',
+    message:
+      'Claim the username "frappe-fan"? This pretends to call the server.',
     confirmLabel: 'Claim',
     onConfirm: async () => {
       await new Promise((r) => setTimeout(r, 700))

@@ -41,7 +41,9 @@ export function useEventBase(props) {
   const getTheme = () => {
     const theme = document.documentElement.getAttribute('data-theme')
     if (theme) return theme
-    return document.documentElement.classList.contains('htw-dark') ? 'dark' : 'light'
+    return document.documentElement.classList.contains('htw-dark')
+      ? 'dark'
+      : 'light'
   }
 
   function color(colorValue) {
@@ -103,7 +105,10 @@ export function useEventBase(props) {
     if (e.detail === 1) {
       clickTimer = setTimeout(() => {
         if (calendarActions.props.onClick)
-          calendarActions.props.onClick({ e, calendarEvent: calendarEvent.value })
+          calendarActions.props.onClick({
+            e,
+            calendarEvent: calendarEvent.value,
+          })
         else {
           togglePopover()
           isAnyPopoverOpen.value = !isPopoverOpen
@@ -118,7 +123,10 @@ export function useEventBase(props) {
     e && (e.cancelBubble = true)
     clearTimeout(clickTimer)
     if (calendarActions.props.onDblClick) {
-      calendarActions.props.onDblClick({ e, calendarEvent: calendarEvent.value })
+      calendarActions.props.onDblClick({
+        e,
+        calendarEvent: calendarEvent.value,
+      })
       return
     }
     if (!config.isEditMode) return

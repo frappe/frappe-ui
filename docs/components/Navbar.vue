@@ -43,7 +43,7 @@ const routes = computed(() => {
   for (const x of state.sidebarList) {
     if (!x.items) {
       routelabels.push({ label: x.text, link: x.link })
-    } //
+    }  //
     else {
       const tmp = x.items.map((nested) => ({
         label: x.text + '/' + nested.text,

@@ -14,7 +14,11 @@
           <span class="lucide-command size-3" role="img" aria-label="Command" />
         </span>
         <span v-else-if="part.type === 'shift'">
-          <span class="lucide-arrow-big-up size-3" role="img" aria-label="Shift" />
+          <span
+            class="lucide-arrow-big-up size-3"
+            role="img"
+            aria-label="Shift"
+          />
         </span>
         <span v-else-if="part.type === 'alt'">
           <span class="lucide-option size-3" role="img" aria-label="Option" />
@@ -55,7 +59,11 @@
         <span v-else class="font-mono text-[10px] leading-none">Ctrl</span>
       </span>
       <span v-if="shift">
-        <span class="lucide-arrow-big-up size-3" role="img" aria-label="Shift" />
+        <span
+          class="lucide-arrow-big-up size-3"
+          role="img"
+          aria-label="Shift"
+        />
       </span>
       <span v-if="alt">
         <span class="lucide-option size-3" role="img" aria-label="Option" />
@@ -132,45 +140,45 @@ function parseCombo(raw?: string): Part[] {
   if (!raw) return []
   // Maps input token (lowercased) to a canonical type (modifier) or leaves as key.
   const aliasMap: Record<string, string> = {
-    mod: isMac.value ? 'cmd' : 'ctrl',
-    command: 'cmd',
-    cmd: 'cmd',
+    'mod': isMac.value ? 'cmd' : 'ctrl',
+    'command': 'cmd',
+    'cmd': 'cmd',
     '⌘': 'cmd',
-    control: 'ctrl',
-    ctrl: 'ctrl',
-    option: 'alt',
-    opt: 'alt',
-    alt: 'alt',
+    'control': 'ctrl',
+    'ctrl': 'ctrl',
+    'option': 'alt',
+    'opt': 'alt',
+    'alt': 'alt',
     '⌥': 'alt',
-    shift: 'shift',
+    'shift': 'shift',
     '⇧': 'shift',
-    meta: isMac.value ? 'cmd' : 'win',
-    win: 'win',
-    windows: 'win',
+    'meta': isMac.value ? 'cmd' : 'win',
+    'win': 'win',
+    'windows': 'win',
   }
   const keyMap: Record<string, string> = {
-    esc: 'Esc',
-    escape: 'Esc',
-    enter: '↵',
-    return: '↵',
-    space: 'Space',
+    'esc': 'Esc',
+    'escape': 'Esc',
+    'enter': '↵',
+    'return': '↵',
+    'space': 'Space',
     ' ': 'Space',
-    tab: 'Tab',
-    backspace: '⌫',
-    delete: '⌦',
-    del: '⌦',
-    up: '↑',
-    arrowup: '↑',
-    down: '↓',
-    arrowdown: '↓',
-    left: '←',
-    arrowleft: '←',
-    right: '→',
-    arrowright: '→',
-    pageup: 'PgUp',
-    pagedown: 'PgDn',
-    home: 'Home',
-    end: 'End',
+    'tab': 'Tab',
+    'backspace': '⌫',
+    'delete': '⌦',
+    'del': '⌦',
+    'up': '↑',
+    'arrowup': '↑',
+    'down': '↓',
+    'arrowdown': '↓',
+    'left': '←',
+    'arrowleft': '←',
+    'right': '→',
+    'arrowright': '→',
+    'pageup': 'PgUp',
+    'pagedown': 'PgDn',
+    'home': 'Home',
+    'end': 'End',
   }
 
   const result: Part[] = raw
@@ -221,8 +229,8 @@ const ariaLabel = computed(() => {
     '⌘': 'Command',
     '⇧': 'Shift',
     '⌥': 'Option',
-    Ctrl: 'Control',
-    Win: 'Windows',
+    'Ctrl': 'Control',
+    'Win': 'Windows',
     '↵': 'Enter',
     '⌫': 'Backspace',
     '⌦': 'Delete',

@@ -555,8 +555,7 @@ const options = users.map((user) => ({
   selected: user.id === activeId,
   onClick: () => switchTo(user.id),
   slots: {
-    prefix: ({ item }) =>
-      h(Avatar, { image: item.image, class: 'size-4' }),
+    prefix: ({ item }) => h(Avatar, { image: item.image, class: 'size-4' }),
     suffix: ({ selected }) =>
       selected ? h(LucideCheck, { class: 'size-4' }) : null,
   },

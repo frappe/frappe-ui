@@ -32,11 +32,15 @@
         @click="calendarActions.handleCellClick($event, date)"
       >
         <div class="flex justify-center font-normal">
-          <div class="flex gap-0.5 w-full flex-col items-center text-xs text-right">
+          <div
+            class="flex gap-0.5 w-full flex-col items-center text-xs text-right"
+          >
             <span
               class="w-full flex justify-between items-center"
               :class="[
-                date.toDateString() === new Date().toDateString() ? 'p-[3px] pb-0.5' : 'p-2',
+                date.toDateString() === new Date().toDateString()
+                  ? 'p-[3px] pb-0.5'
+                  : 'p-2',
               ]"
             >
               <div></div>
@@ -87,7 +91,9 @@
               <ShowMoreCalendarEvent
                 v-if="timedEvents[parseDate(date)]"
                 :draggable="config.isEditMode"
-                @dragstart="onDragStart($event, timedEvents[parseDate(date)][0].id)"
+                @dragstart="
+                  onDragStart($event, timedEvents[parseDate(date)][0].id)
+                "
                 @dragend="$event.target.style.opacity = '1'"
                 @dragover.prevent
                 :events="timedEvents[parseDate(date)]"
@@ -134,9 +140,13 @@ const props = defineProps({
 
 const emit = defineEmits(['setCurrentDate'])
 
-const timedEvents = computed(() => useCalendarData(props.events, 'Month').timedEvents.value)
+const timedEvents = computed(
+  () => useCalendarData(props.events, 'Month').timedEvents.value,
+)
 
-const maxEventsInCell = computed(() => (props.currentMonthDates.length > 35 ? 1 : 2))
+const maxEventsInCell = computed(() =>
+  props.currentMonthDates.length > 35 ? 1 : 2,
+)
 
 function isCurrentMonth(date) {
   return date.getMonth() === props.currentMonth

@@ -118,11 +118,11 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="Popover" :data="propsData"/> 
+<PropsTable name="Popover" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
+<SlotsTable :data="slotsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

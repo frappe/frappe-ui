@@ -8,19 +8,19 @@ It posts as **`barista[bot]`** (a custom GitHub App), and bills Claude API calls
 
 ### Issue triage (`barista-triage.yml`)
 
-| Trigger | Action |
-| --- | --- |
-| `issues.opened` | Read issue → investigate the code (grep, read files, check git history, search past issues) → apply labels → post a comment with findings or hypothesis |
-| `issue_comment.created` (only if comment contains `/barista` AND author is a maintainer) | Re-investigate based on the maintainer's directive |
-| `workflow_dispatch` (manual) | Re-triage a specific issue number for debugging |
+| Trigger                                                                                  | Action                                                                                                                                                  |
+| ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `issues.opened`                                                                          | Read issue → investigate the code (grep, read files, check git history, search past issues) → apply labels → post a comment with findings or hypothesis |
+| `issue_comment.created` (only if comment contains `/barista` AND author is a maintainer) | Re-investigate based on the maintainer's directive                                                                                                      |
+| `workflow_dispatch` (manual)                                                             | Re-triage a specific issue number for debugging                                                                                                         |
 
 ### PR review (`barista-review.yml`)
 
-| Trigger | Action |
-| --- | --- |
-| `pull_request` opened / synchronize / reopened / ready_for_review | Read PR + diff → investigate affected files → post one review comment with verdict (Looks good / Minor nits / Concerns) |
-| `issue_comment.created` on a PR (only if comment contains `/barista review` AND author is a maintainer) | Re-review, optionally focused on what the maintainer asked about |
-| `workflow_dispatch` (manual) | Re-review a specific PR number for debugging |
+| Trigger                                                                                                 | Action                                                                                                                  |
+| ------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `pull_request` opened / synchronize / reopened / ready_for_review                                       | Read PR + diff → investigate affected files → post one review comment with verdict (Looks good / Minor nits / Concerns) |
+| `issue_comment.created` on a PR (only if comment contains `/barista review` AND author is a maintainer) | Re-review, optionally focused on what the maintainer asked about                                                        |
+| `workflow_dispatch` (manual)                                                                            | Re-review a specific PR number for debugging                                                                            |
 
 Fork PRs and drafts are skipped by design — the bot token is not exposed to untrusted PR head code, and drafts aren't ready for review.
 
@@ -70,16 +70,16 @@ Copy the printed token.
 
 In **<https://github.com/frappe/frappe-ui/settings/secrets/actions>**, add:
 
-| Type | Name | Value |
-| --- | --- | --- |
-| Secret | `BARISTA_APP_ID` | The numeric App ID from step 1.6 |
-| Secret | `BARISTA_PRIVATE_KEY` | **Full contents** of the `.pem` file, including the `-----BEGIN…-----` and `-----END…-----` lines |
-| Secret | `CLAUDE_CODE_OAUTH_TOKEN` | The token from `claude setup-token` |
+| Type   | Name                      | Value                                                                                             |
+| ------ | ------------------------- | ------------------------------------------------------------------------------------------------- |
+| Secret | `BARISTA_APP_ID`          | The numeric App ID from step 1.6                                                                  |
+| Secret | `BARISTA_PRIVATE_KEY`     | **Full contents** of the `.pem` file, including the `-----BEGIN…-----` and `-----END…-----` lines |
+| Secret | `CLAUDE_CODE_OAUTH_TOKEN` | The token from `claude setup-token`                                                               |
 
 In **Settings → Secrets and variables → Actions → Variables**, add:
 
-| Type | Name | Value |
-| --- | --- | --- |
+| Type     | Name              | Value  |
+| -------- | ----------------- | ------ |
 | Variable | `BARISTA_ENABLED` | `true` |
 
 The `BARISTA_ENABLED` variable is the kill switch. Set it to anything other than `true` (or delete it) to instantly disable barista without redeploying.

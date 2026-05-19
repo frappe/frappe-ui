@@ -179,7 +179,7 @@ export interface MultiSelectFooterSlotProps {
 
 export interface MultiSelectSlots {
   /** Fully custom trigger renderer. */
-  trigger?: (props: MultiSelectTriggerSlotProps) => any
+  'trigger'?: (props: MultiSelectTriggerSlotProps) => any
 
   /**
    * Content rendered before the trigger label. When provided, this slot
@@ -188,7 +188,7 @@ export interface MultiSelectSlots {
    * auto-renders the selected option's `#item-prefix` / `icon` when
    * exactly one is selected, and nothing otherwise.
    */
-  prefix?: (props: MultiSelectPrefixSlotProps) => any
+  'prefix'?: (props: MultiSelectPrefixSlotProps) => any
 
   /**
    * Overrides the trigger label region. Receives the default summary
@@ -196,7 +196,7 @@ export interface MultiSelectSlots {
    * show comma-separated labels (or any other format) instead of the
    * default `"N selected"` for multi-selection states.
    */
-  summary?: (props: MultiSelectSummarySlotProps) => any
+  'summary'?: (props: MultiSelectSummarySlotProps) => any
 
   /**
    * Content rendered after the trigger label. Providing this slot
@@ -204,13 +204,13 @@ export interface MultiSelectSlots {
    * your slot content is conditional. Use `@click.stop` and
    * `@pointerdown.stop` so the press doesn't toggle the popover.
    */
-  suffix?: (props: MultiSelectSuffixSlotProps) => any
+  'suffix'?: (props: MultiSelectSuffixSlotProps) => any
 
   /** Overrides the rendered label content. Receives `{ required }`. */
-  label?: (props: { required: boolean }) => any
+  'label'?: (props: { required: boolean }) => any
 
   /** Overrides the rendered description content. */
-  description?: () => any
+  'description'?: () => any
 
   /** Shared content rendered before the standard row label. */
   'item-prefix'?: (props: MultiSelectItemSlotProps) => any
@@ -222,19 +222,19 @@ export interface MultiSelectSlots {
   'item-suffix'?: (props: MultiSelectItemSlotProps) => any
 
   /** Replaces the entire row. */
-  item?: (props: MultiSelectItemSlotProps) => any
+  'item'?: (props: MultiSelectItemSlotProps) => any
 
   /** Custom renderer for group labels. */
   'group-label'?: (props: MultiSelectGroupLabelSlotProps) => any
 
   /** Fallback content rendered when there are no results. */
-  empty?: (props: MultiSelectEmptySlotProps) => any
+  'empty'?: (props: MultiSelectEmptySlotProps) => any
 
   /** Replaces the default Clear All / Select All footer. */
-  footer?: (props: MultiSelectFooterSlotProps) => any
+  'footer'?: (props: MultiSelectFooterSlotProps) => any
 
   /** @deprecated compatibility alias for `#item-label`. */
-  option?: (props: { item: MultiSelectOption }) => any
+  'option'?: (props: { item: MultiSelectOption }) => any
 
   [slotName: string]: ((props: any) => any) | undefined
 }

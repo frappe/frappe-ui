@@ -82,7 +82,7 @@ describe('Tabs', () => {
             Tabs,
             {
               tabs,
-              modelValue: value.value,
+              'modelValue': value.value,
               'onUpdate:modelValue': (nextValue: string | number) => {
                 value.value = nextValue
               },

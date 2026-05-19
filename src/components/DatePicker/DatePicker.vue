@@ -28,10 +28,18 @@
     @close="onShellClose"
     @request-focus="onShellRequestFocus"
   >
-    <template v-if="$slots.trigger" #trigger="ts"><slot name="trigger" v-bind="ts" /></template>
-    <template v-if="$slots.target" #target="ts"><slot name="target" v-bind="ts" /></template>
-    <template v-if="$slots.prefix" #prefix="ts"><slot name="prefix" v-bind="ts" /></template>
-    <template v-if="$slots.suffix" #suffix="ts"><slot name="suffix" v-bind="ts" /></template>
+    <template v-if="$slots.trigger" #trigger="ts"
+      ><slot name="trigger" v-bind="ts"
+    /></template>
+    <template v-if="$slots.target" #target="ts"
+      ><slot name="target" v-bind="ts"
+    /></template>
+    <template v-if="$slots.prefix" #prefix="ts"
+      ><slot name="prefix" v-bind="ts"
+    /></template>
+    <template v-if="$slots.suffix" #suffix="ts"
+      ><slot name="suffix" v-bind="ts"
+    /></template>
 
     <template #default="{ close }">
       <div
@@ -97,11 +105,7 @@ import {
   type LegacyDatePickerProps,
 } from './composables'
 import type { Dayjs } from 'dayjs/esm'
-import type {
-  DatePickerProps,
-  DatePickerEmits,
-  DatePickerSlots,
-} from './types'
+import type { DatePickerProps, DatePickerEmits, DatePickerSlots } from './types'
 
 const props = withDefaults(defineProps<DatePickerProps>(), {
   value: '',

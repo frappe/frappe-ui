@@ -5,7 +5,7 @@ export default async function call(method, args, options = {}) {
 
   let headers = Object.assign(
     {
-      Accept: 'application/json',
+      'Accept': 'application/json',
       'Content-Type': 'application/json; charset=utf-8',
       'X-Frappe-Site-Name': window.location.hostname,
     },

@@ -1,45 +1,38 @@
 <script setup lang="ts">
-import {
-  Avatar,
-  Button,
-  FormControl,
-  Select,
-  Switch,
-  Tooltip,
-} from "frappe-ui";
-import LucideRight from "~icons/lucide/arrow-right";
-import LucideGlobe from "~icons/lucide/globe";
-import LucideLink from "~icons/lucide/link";
-import LucideSearch from "~icons/lucide/search";
-import LucideInfo from "~icons/lucide/info";
-import LucideCircle from "~icons/lucide/circle-plus";
+import { Avatar, Button, FormControl, Select, Switch, Tooltip } from 'frappe-ui'
+import LucideRight from '~icons/lucide/arrow-right'
+import LucideGlobe from '~icons/lucide/globe'
+import LucideLink from '~icons/lucide/link'
+import LucideSearch from '~icons/lucide/search'
+import LucideInfo from '~icons/lucide/info'
+import LucideCircle from '~icons/lucide/circle-plus'
 
 const countryOptions = [
-  { label: "Syria", value: "SY" },
-  { label: "Egypt", value: "EG" },
-  { label: "Canada", value: "CA" },
-  { label: "Ireland", value: "IR" },
-];
+  { label: 'Syria', value: 'SY' },
+  { label: 'Egypt', value: 'EG' },
+  { label: 'Canada', value: 'CA' },
+  { label: 'Ireland', value: 'IR' },
+]
 
 const users = [
   {
-    name: "Sandeep",
-    label: "sandeep@gmail.com",
-    img: "https://i.pravatar.cc/150?img=1",
+    name: 'Sandeep',
+    label: 'sandeep@gmail.com',
+    img: 'https://i.pravatar.cc/150?img=1',
   },
   {
-    name: "John",
-    label: "john@proton.me",
-    img: "https://i.pravatar.cc/150?img=2",
+    name: 'John',
+    label: 'john@proton.me',
+    img: 'https://i.pravatar.cc/150?img=2',
   },
   {
-    name: "Zach",
-    label: "zach@frappe.io",
-    img: "https://i.pravatar.cc/150?img=3",
+    name: 'Zach',
+    label: 'zach@frappe.io',
+    img: 'https://i.pravatar.cc/150?img=3',
   },
-];
+]
 
-const selOpts = ["Admin", "Editor", "Viewer", "Guest"]
+const selOpts = ['Admin', 'Editor', 'Viewer', 'Guest']
 </script>
 
 <template>
@@ -54,17 +47,9 @@ const selOpts = ["Admin", "Editor", "Viewer", "Guest"]
         class="col-span-2"
       />
 
-      <FormControl
-        type="select"
-        label="Country"
-        :options="countryOptions"
-      />
+      <FormControl type="select" label="Country" :options="countryOptions" />
 
-      <FormControl
-        type="select"
-        label="City"
-        :options="countryOptions"
-      />
+      <FormControl type="select" label="City" :options="countryOptions" />
 
       <FormControl
         label="Address"
@@ -84,22 +69,20 @@ const selOpts = ["Admin", "Editor", "Viewer", "Guest"]
         type="select"
         label="Month"
         placeholder="MM"
-        :options='
-          [
-            "January",
-            "February",
-            "March",
-            "April",
-            "May",
-            "June",
-            "July",
-            "August",
-            "September",
-            "October",
-            "November",
-            "December",
-          ]
-        '
+        :options="[
+          'January',
+          'February',
+          'March',
+          'April',
+          'May',
+          'June',
+          'July',
+          'August',
+          'September',
+          'October',
+          'November',
+          'December',
+        ]"
       />
 
       <FormControl
@@ -108,7 +91,8 @@ const selOpts = ["Admin", "Editor", "Viewer", "Guest"]
         placeholder="Select Year"
         :options="
           Array.from({ length: 6 }, (_, i) =>
-            String(i + new Date().getFullYear()))
+            String(i + new Date().getFullYear()),
+          )
         "
       />
 
@@ -135,14 +119,16 @@ const selOpts = ["Admin", "Editor", "Viewer", "Guest"]
         </div>
         <div class="grid gap-1 mr-auto">
           <span class="text-ink-gray-9">Visible to everyone</span>
-          <p class="text-ink-gray-5">
-            Collaborate and stay in sync
-          </p>
+          <p class="text-ink-gray-5">Collaborate and stay in sync</p>
         </div>
         <Switch />
       </div>
 
-      <Select placeholder="Add people or emails" variant="outline" :options="users">
+      <Select
+        placeholder="Add people or emails"
+        variant="outline"
+        :options="users"
+      >
         <template #prefix>
           <LucideSearch class="size-4" />
         </template>
@@ -159,7 +145,7 @@ const selOpts = ["Admin", "Editor", "Viewer", "Guest"]
         </div>
 
         <Select
-          :options='selOpts'
+          :options="selOpts"
           class="my-auto ml-auto !w-fit"
           variant="ghost"
           placeholder="Select"
@@ -172,12 +158,10 @@ const selOpts = ["Admin", "Editor", "Viewer", "Guest"]
           <template #prefix>
             <LucideLink class="size-4" />
           </template>
-          Copy Link</Button>
-
-        <Tooltip
-          text="Gotchu!"
-          :hover-delay="0"
+          Copy Link</Button
         >
+
+        <Tooltip text="Gotchu!" :hover-delay="0">
           <span class="flex gap-2">
             Learn more
             <LucideInfo class="size-4" />
@@ -189,7 +173,8 @@ const selOpts = ["Admin", "Editor", "Viewer", "Guest"]
         <template #prefix>
           <LucideCircle class="size-4" />
         </template>
-        Create project</Button>
+        Create project</Button
+      >
     </div>
   </section>
 </template>

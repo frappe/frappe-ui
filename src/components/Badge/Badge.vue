@@ -73,7 +73,7 @@ const classes = computed(() => {
     sm: 'h-4 text-xs px-1.5',
     md: 'h-5 text-xs px-1.5',
     lg: 'h-6 text-sm px-2',
-		xl: 'h-7 text-base px-2',
+    xl: 'h-7 text-base px-2',
   }[props.size]
 
   return [variantClasses, sizeClasses]

@@ -52,9 +52,9 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="Badge" :data="propsData"/> 
+<PropsTable name="Badge" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
-
+<SlotsTable :data="slotsData"/>

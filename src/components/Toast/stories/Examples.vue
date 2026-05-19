@@ -3,7 +3,10 @@ import { Button, toast } from 'frappe-ui'
 </script>
 
 <template>
-  <Button label="Workspace created" @click="toast.success('Workspace created')" />
+  <Button
+    label="Workspace created"
+    @click="toast.success('Workspace created')"
+  />
   <Button label="Link copied" @click="toast.info('Link copied to clipboard')" />
   <Button
     label="Comment posted"

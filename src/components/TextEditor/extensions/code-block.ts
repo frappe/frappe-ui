@@ -46,7 +46,7 @@ export const ExtendedCodeBlock = CodeBlockLowlight.extend({
   },
   addKeyboardShortcuts() {
     return {
-      Tab: () => {
+      'Tab': () => {
         const { state, dispatch } = this.editor.view
         const ctx = getCodeBlockCtx(state)
         if (!ctx) return false

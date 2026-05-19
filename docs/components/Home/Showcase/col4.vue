@@ -1,35 +1,35 @@
 <script setup lang="ts">
-import { computed, reactive, ref } from "vue";
-import { Avatar, Button, Password, Progress, Tree } from "frappe-ui";
+import { computed, reactive, ref } from 'vue'
+import { Avatar, Button, Password, Progress, Tree } from 'frappe-ui'
 
-import LucideFolder from "~icons/lucide/folder";
-import LucideFile from "~icons/lucide/file";
-import LucideShield from "~icons/lucide/shield-plus";
-import LucideChevronRight from "~icons/lucide/chevron-right";
-import LucideBell from "~icons/lucide/bell";
-import LucideX from "~icons/lucide/X";
-import LucideUpDown from "~icons/lucide/arrow-down-up";
+import LucideFolder from '~icons/lucide/folder'
+import LucideFile from '~icons/lucide/file'
+import LucideShield from '~icons/lucide/shield-plus'
+import LucideChevronRight from '~icons/lucide/chevron-right'
+import LucideBell from '~icons/lucide/bell'
+import LucideX from '~icons/lucide/X'
+import LucideUpDown from '~icons/lucide/arrow-down-up'
 
 const treeState = reactive({
   showIndentationGuides: true,
-  rowHeight: "25px",
-  indentWidth: "15px",
+  rowHeight: '25px',
+  indentWidth: '15px',
   node: {
-    name: "guest",
-    label: "Guest",
+    name: 'guest',
+    label: 'Guest',
     isCollapsed: true,
     children: [
       {
-        name: "downloads",
-        label: "Downloads",
+        name: 'downloads',
+        label: 'Downloads',
         children: [
           {
-            name: "Images",
-            label: "download.zip",
+            name: 'Images',
+            label: 'download.zip',
             children: [
               {
-                name: "image.png",
-                label: "image.png",
+                name: 'image.png',
+                label: 'image.png',
                 children: [],
               },
             ],
@@ -37,74 +37,76 @@ const treeState = reactive({
         ],
       },
       {
-        name: "documents",
-        label: "Documents",
+        name: 'documents',
+        label: 'Documents',
         children: [
           {
-            name: "somefile.txt",
-            label: "somefile.txt",
+            name: 'somefile.txt',
+            label: 'somefile.txt',
             children: [],
           },
           {
-            name: "somefile.pdf",
-            label: "somefile.pdf",
+            name: 'somefile.pdf',
+            label: 'somefile.pdf',
             children: [],
           },
         ],
       },
     ],
   },
-});
+})
 
-const password = ref("000000000");
-const hasValidLength = computed(() => password.value.length >= 9);
+const password = ref('000000000')
+const hasValidLength = computed(() => password.value.length >= 9)
 
 const hasLettersAndNumbers = computed(
   () => /[a-zA-Z]/.test(password.value) && /\d/.test(password.value),
-);
-const hasSpecialChar = computed(
-  () => /[#@$%^&*_?@~]/.test(password.value),
-);
+)
+const hasSpecialChar = computed(() => /[#@$%^&*_?@~]/.test(password.value))
 
-const strengthScore = computed(() =>
-  [hasValidLength.value, hasLettersAndNumbers.value, hasSpecialChar.value]
-    .filter(Boolean).length
-);
+const strengthScore = computed(
+  () =>
+    [
+      hasValidLength.value,
+      hasLettersAndNumbers.value,
+      hasSpecialChar.value,
+    ].filter(Boolean).length,
+)
 
 const strengthLabel = computed(() =>
   strengthScore.value <= 1
-    ? { text: "Weak", class: "text-ink-red-3" }
+    ? { text: 'Weak', class: 'text-ink-red-3' }
     : strengthScore.value === 2
-    ? { text: "Moderate", class: "text-ink-yellow-3" }
-    : { text: "Strong", class: "text-ink-green-3" }
-);
+      ? { text: 'Moderate', class: 'text-ink-yellow-3' }
+      : { text: 'Strong', class: 'text-ink-green-3' },
+)
 
 const notifs = [
   {
-    img: "https://randomuser.me/api/portraits/men/32.jpg",
-    name: "Matthew Connor",
-    txt: "The deadline for you is tomorrow.",
-    type: "invitation",
-    time: "Just now",
+    img: 'https://randomuser.me/api/portraits/men/32.jpg',
+    name: 'Matthew Connor',
+    txt: 'The deadline for you is tomorrow.',
+    type: 'invitation',
+    time: 'Just now',
     unread: false,
   },
   {
-    img: "https://randomuser.me/api/portraits/men/45.jpg",
-    name: "Eeren McKenzie",
-    txt: "Review the latest design updates",
+    img: 'https://randomuser.me/api/portraits/men/45.jpg',
+    name: 'Eeren McKenzie',
+    txt: 'Review the latest design updates',
     type: null,
-    time: "5 min ago",
+    time: '5 min ago',
     unread: true,
   },
   {
-    img: "https://randomuser.me/api/portraits/men/68.jpg",
-    name: "John Doe",
-    txt: "Review the design changes",
+    img: 'https://randomuser.me/api/portraits/men/68.jpg',
+    name: 'John Doe',
+    txt: 'Review the design changes',
     type: null,
-    time: "10 min ago",
+    time: '10 min ago',
     unread: true,
   },
-];
+]
 </script>
 
 <template>
@@ -113,14 +115,12 @@ const notifs = [
   >
     <div class="p-5 bg-urface-cards h-fit">
       <Tree
-        :options="
-          {
-            showIndentationGuides: treeState.showIndentationGuides,
-            rowHeight: treeState.rowHeight,
-            indentWidth: treeState.indentWidth,
-            defaultCollapsed: false,
-          }
-        "
+        :options="{
+          showIndentationGuides: treeState.showIndentationGuides,
+          rowHeight: treeState.rowHeight,
+          indentWidth: treeState.indentWidth,
+          defaultCollapsed: false,
+        }"
         nodeKey="name"
         :node="treeState.node"
       >
@@ -132,7 +132,7 @@ const notifs = [
             <LucideChevronRight
               v-if="hasChildren"
               class="size-4 transition-transform"
-              :class='{ "rotate-90": isCollapsed }'
+              :class="{ 'rotate-90': isCollapsed }"
             />
 
             <LucideFolder v-if="hasChildren" class="size-4" />
@@ -179,20 +179,18 @@ const notifs = [
       </Progress>
 
       <div class="px-8 !py-3 rounded bg-surface-gray-1 text-sm text-ink-gray-5">
-        <li :class='{ "line-through opacity-60": hasValidLength }'>
+        <li :class="{ 'line-through opacity-60': hasValidLength }">
           Includes 9-16 characters
         </li>
-        <li :class='{ "line-through opacity-60": hasLettersAndNumbers }'>
+        <li :class="{ 'line-through opacity-60': hasLettersAndNumbers }">
           Combines letters and numbers
         </li>
-        <li :class='{ "line-through opacity-60": hasSpecialChar }'>
+        <li :class="{ 'line-through opacity-60': hasSpecialChar }">
           A special character #@$%^&*_?@~
         </li>
       </div>
 
-      <Button variant="solid" class="w-full py-4">
-        Create password
-      </Button>
+      <Button variant="solid" class="w-full py-4"> Create password </Button>
     </div>
 
     <div>
@@ -207,7 +205,7 @@ const notifs = [
       <div
         v-for="(x, i) in notifs"
         class="flex gap-4 p-4"
-        :class='{ "border-b": i < notifs.length - 1 }'
+        :class="{ 'border-b': i < notifs.length - 1 }"
       >
         <Avatar size="xl" :image="x.img" />
 

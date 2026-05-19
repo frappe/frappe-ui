@@ -56,7 +56,7 @@ describe('MultiSelect', () => {
     cy.mount(MultiSelect, {
       props: { options },
       slots: {
-        footer: () => h('div', { 'data-cy': 'footer' }, ['footer']),
+        'footer': () => h('div', { 'data-cy': 'footer' }, ['footer']),
         'item-label': () => h('div', { 'data-cy': 'item-label' }, ['label']),
       },
     })
@@ -94,7 +94,7 @@ describe('MultiSelect', () => {
     cy.mount(MultiSelect, {
       props: {
         options,
-        modelValue: ['apple'],
+        'modelValue': ['apple'],
         'onUpdate:modelValue': cy.spy().as('onUpdate'),
       },
     })
@@ -138,7 +138,7 @@ describe('MultiSelect', () => {
   it('disabled option cannot be selected', () => {
     cy.mount(MultiSelect, {
       props: {
-        options: [
+        'options': [
           { label: 'Apple', value: 'apple', disabled: true },
           { label: 'Banana', value: 'banana' },
         ],

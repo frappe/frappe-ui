@@ -15,7 +15,7 @@ The visibility state of an overlay component (Dialog, Popover, Dropdown, Tooltip
 _Avoid_: visible, show, isOpen (as a public API; internal refs are fine)
 
 **modelValue**:
-Reserved for the **primary value** a component represents (selected option, text content, etc.). For overlay components, `modelValue` is *not* the visibility — visibility is `open`.
+Reserved for the **primary value** a component represents (selected option, text content, etc.). For overlay components, `modelValue` is _not_ the visibility — visibility is `open`.
 _Avoid_: using `v-model` (bare) for visibility on overlay components
 
 **dismissible**:
@@ -33,6 +33,7 @@ The auto-rendered visual scaffolding around a Dialog's content — padded card b
 
 **Dialog**:
 The single modal overlay component. Traps focus, blocks interaction with the page, and is always portalled. ARIA semantics are derived from props:
+
 - `role="dialog"` always (we do not differentiate `alertdialog`; the role distinction is rarely surfaced by screen readers in practice and the simplification avoids fragile heuristics)
 - `aria-labelledby` ← `title` (or the custom `#body-title` slot's container, when used)
 - `aria-describedby` ← `message`
@@ -46,28 +47,31 @@ Mounting is handled by `<FrappeUIProvider>`, which renders a hidden `<Dialogs />
 
 - `dialog.confirm({...})` → `Promise<{ ok: boolean, close: () => void }>`
 - `dialog.alert({...})` → `Promise<{ close: () => void }>`
-- `dialog.prompt({...})` → `Promise<{ values: Record<string, any> | null, close: () => void }>` *(values is null on cancel)*
+- `dialog.prompt({...})` → `Promise<{ values: Record<string, any> | null, close: () => void }>` _(values is null on cancel)_
 
 **Lifecycle contract**: imperative helpers do **not** auto-close on confirm. The promise resolves the moment the user picks an action; the caller calls `close()` when ready (typically after async work). The confirm/submit button auto-shows a loading state from click until `close()` is called. On cancel, the dialog auto-closes and the promise resolves with `ok: false` / `values: null`.
 
 **PromptField** (the schema for `dialog.prompt`'s `fields` array):
+
 ```ts
 type PromptField = {
-  name: string                                              // result key
+  name: string // result key
   label?: string
-  type?: 'text' | 'textarea' | 'select' | 'checkbox'        // default 'text'
+  type?: 'text' | 'textarea' | 'select' | 'checkbox' // default 'text'
   defaultValue?: string | boolean
   placeholder?: string
-  required?: boolean                                        // only validation supported in v1
-  options?: Array<{ label: string; value: string }>         // for 'select'
-  description?: string                                      // helper text under label
+  required?: boolean // only validation supported in v1
+  options?: Array<{ label: string; value: string }> // for 'select'
+  description?: string // helper text under label
 }
 ```
+
 Custom `validate` callbacks are intentionally not in v1 — callers needing custom validation should compose a real form inside `<Dialog>`. `dialog.prompt` resolves to `null` on cancel/dismiss.
 
 **theme** (Dialog & imperative API): The color tone of the icon and the primary action button. Values match `Alert.theme`: `'yellow' | 'blue' | 'red' | 'green'`. The imperative helpers also use `theme` to pick a sensible default icon (overridable via `icon`).
 
 Cross-library vocabulary (the only two axes used to color components):
+
 - **variant** = visual style (`solid | outline | subtle | ghost`) — Button, Badge, Alert
 - **theme** = color tone (color names) — Button, Badge, Alert, Dialog
 

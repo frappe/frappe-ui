@@ -1,33 +1,26 @@
 <script setup lang="ts">
-import Story from "@/components/Story.vue";
-import { reactive, ref } from "vue";
-import { Avatar, FormControl } from "frappe-ui";
+import Story from '@/components/Story.vue'
+import { reactive, ref } from 'vue'
+import { Avatar, FormControl } from 'frappe-ui'
 
 const state = reactive({
-  size: "sm",
-  variant: "subtle",
-  placeholder: "Placeholder",
+  size: 'sm',
+  variant: 'subtle',
+  placeholder: 'Placeholder',
   disabled: false,
-  label: "Label",
-});
+  label: 'Label',
+})
 
-const inputValue = ref("");
-const selectValue = ref(null);
-const autocompleteValue = ref(null);
-const checkboxValue = ref(false);
-const dateValue = ref("");
-const dateRangeValue = ref("");
-const dateTimeValue = ref("");
-const timeValue = ref("");
+const inputValue = ref('')
+const selectValue = ref(null)
+const autocompleteValue = ref(null)
+const checkboxValue = ref(false)
+const dateValue = ref('')
+const dateRangeValue = ref('')
+const dateTimeValue = ref('')
+const timeValue = ref('')
 
-const inputTypes = [
-  "text",
-  "number",
-  "email",
-  "password",
-  "search",
-  "textarea",
-];
+const inputTypes = ['text', 'number', 'email', 'password', 'search', 'textarea']
 </script>
 
 <template>
@@ -39,13 +32,11 @@ const inputTypes = [
     <Story title="Select Input" :layout="{ width: 250 }">
       <FormControl
         type="select"
-        :options='
-          [
-            { label: "One", value: "1" },
-            { label: "Two", value: "2" },
-            { label: "Three", value: "3" },
-          ]
-        '
+        :options="[
+          { label: 'One', value: '1' },
+          { label: 'Two', value: '2' },
+          { label: 'Three', value: '3' },
+        ]"
         v-bind="state"
         v-model="selectValue"
       />
@@ -54,13 +45,11 @@ const inputTypes = [
     <Story title="Combobox Input" :layout="{ width: 250 }">
       <FormControl
         type="combobox"
-        :options='
-          [
-            { label: "One", value: "1" },
-            { label: "Two", value: "2" },
-            { label: "Three", value: "3" },
-          ]
-        '
+        :options="[
+          { label: 'One', value: '1' },
+          { label: 'Two', value: '2' },
+          { label: 'Three', value: '3' },
+        ]"
         v-bind="state"
         v-model="autocompleteValue"
       />

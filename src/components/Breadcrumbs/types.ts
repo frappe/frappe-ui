@@ -1,4 +1,4 @@
-import { RouterLinkProps } from 'vue-router'
+import type { RouterLinkProps } from 'vue-router'
 
 export interface BreadcrumbItem {
   /** Text shown for the breadcrumb item */

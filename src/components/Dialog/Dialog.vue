@@ -112,7 +112,11 @@
                   name="actions"
                   v-bind="{ close, actions: reactiveActions }"
                 >
-                  <div :class="isSingleActionFullWidth ? '' : 'flex justify-end gap-2'">
+                  <div
+                    :class="
+                      isSingleActionFullWidth ? '' : 'flex justify-end gap-2'
+                    "
+                  >
                     <Button
                       v-for="action in reactiveActions"
                       :key="action.label"
@@ -269,11 +273,11 @@ const isDismissible = computed(() => {
 const sizeClass = computed(() => {
   const size = resolved.value.size
   const map: Record<string, string> = {
-    xs: 'max-w-xs',
-    sm: 'max-w-sm',
-    md: 'max-w-md',
-    lg: 'max-w-lg',
-    xl: 'max-w-xl',
+    'xs': 'max-w-xs',
+    'sm': 'max-w-sm',
+    'md': 'max-w-md',
+    'lg': 'max-w-lg',
+    'xl': 'max-w-xl',
     '2xl': 'max-w-2xl',
     '3xl': 'max-w-3xl',
     '4xl': 'max-w-4xl',

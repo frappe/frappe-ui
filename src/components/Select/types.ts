@@ -80,30 +80,30 @@ export interface SelectItemSlotProps {
 
 export interface SelectSlots {
   /** Fully custom trigger renderer. */
-  trigger?: (props: SelectTriggerSlotProps) => any
+  'trigger'?: (props: SelectTriggerSlotProps) => any
 
   /** Overrides the rendered label content. Receives `{ required }`. */
-  label?: (props: { required: boolean }) => any
+  'label'?: (props: { required: boolean }) => any
 
   /** Overrides the rendered description content. */
-  description?: () => any
+  'description'?: () => any
 
   /** Content rendered before the trigger value. Receives the same shape
    * as `#trigger` and `#suffix` (`SelectSlotProps`). */
-  prefix?: (props: SelectPrefixSlotProps) => any
+  'prefix'?: (props: SelectPrefixSlotProps) => any
 
   /**
    * Content rendered after the trigger value. Providing this slot
    * **replaces the default chevron** — render your own fallback when
    * your slot content is conditional.
    */
-  suffix?: (props: SelectSuffixSlotProps) => any
+  'suffix'?: (props: SelectSuffixSlotProps) => any
 
   /**
    * Shared renderer for option labels.
    * @deprecated use `#item-label` for per-row label customization. `#option` remains as a back-compat alias through v1.x.
    */
-  option?: (props: SelectItemSlotProps) => any
+  'option'?: (props: SelectItemSlotProps) => any
 
   /** Content rendered before the standard option label. */
   'item-prefix'?: (props: SelectItemSlotProps) => any
@@ -115,10 +115,10 @@ export interface SelectSlots {
   'item-suffix'?: (props: SelectItemSlotProps) => any
 
   /** Fallback content rendered when no options are available. */
-  empty?: () => any
+  'empty'?: () => any
 
   /** Content rendered below the option list. */
-  footer?: () => any
+  'footer'?: () => any
 
   [slotName: string]: ((props: any) => any) | undefined
 }

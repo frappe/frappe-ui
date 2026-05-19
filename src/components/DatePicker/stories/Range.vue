@@ -116,7 +116,10 @@ const ret = computed(() =>
         :max="oneYearOut"
       >
         <template #prefix>
-          <span class="lucide-hotel size-4 text-ink-gray-5" aria-hidden="true" />
+          <span
+            class="lucide-hotel size-4 text-ink-gray-5"
+            aria-hidden="true"
+          />
         </template>
       </DateRangePicker>
 

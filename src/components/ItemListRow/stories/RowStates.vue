@@ -4,10 +4,10 @@ import { ItemListRow } from 'frappe-ui'
 
 <template>
   <div class="w-full gap-3 items-center justify-center !py-20 grid">
-    <div class="flex w-[320px] flex-col gap-2 rounded-lg border border-outline-gray-2 bg-surface-modal p-2">
-      <ItemListRow>
-        Simple row with no prefix or suffix
-      </ItemListRow>
+    <div
+      class="flex w-[320px] flex-col gap-2 rounded-lg border border-outline-gray-2 bg-surface-modal p-2"
+    >
+      <ItemListRow> Simple row with no prefix or suffix </ItemListRow>
 
       <ItemListRow active>
         <template #prefix>

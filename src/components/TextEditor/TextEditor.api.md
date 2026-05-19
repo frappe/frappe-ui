@@ -151,11 +151,11 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="TextEditor" :data="propsData"/> 
+<PropsTable name="TextEditor" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
+<SlotsTable :data="slotsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

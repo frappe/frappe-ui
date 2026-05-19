@@ -85,11 +85,11 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="Checkbox" :data="propsData"/> 
+<PropsTable name="Checkbox" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
+<SlotsTable :data="slotsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

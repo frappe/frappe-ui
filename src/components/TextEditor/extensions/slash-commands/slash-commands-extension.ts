@@ -1,11 +1,11 @@
-import { Editor, Range } from '@tiptap/core'
+import type { Editor, Range } from '@tiptap/core'
 import { PluginKey } from '@tiptap/pm/state'
 import {
   createSuggestionExtension,
   type BaseSuggestionItem,
 } from '../suggestion/createSuggestionExtension'
 import SlashCommandsList from './SlashCommandsList.vue'
-import { Component as VueComponent } from 'vue'
+import type { Component as VueComponent } from 'vue'
 
 import Heading2 from '~icons/lucide/heading-2'
 import Heading3 from '~icons/lucide/heading-3'

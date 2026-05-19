@@ -42,10 +42,7 @@
         <SwitchThumb :class="switchCircleClasses" />
       </SwitchRoot>
     </div>
-    <div
-      v-if="showDescription || hasError || $slots.description"
-      class="mt-1"
-    >
+    <div v-if="showDescription || hasError || $slots.description" class="mt-1">
       <InputDescription
         v-if="showDescription || $slots.description"
         :id="descriptionId"
@@ -53,11 +50,7 @@
       >
         <slot v-if="$slots.description" name="description" />
       </InputDescription>
-      <InputError
-        v-if="hasError"
-        :id="errorMessageId"
-        :lines="errorLines"
-      />
+      <InputError v-if="hasError" :id="errorMessageId" :lines="errorLines" />
     </div>
   </div>
 </template>

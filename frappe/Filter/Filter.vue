@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
-import type { FilterProps, StateRow } from "./types";
+import { computed, ref, watch } from 'vue'
+import type { FilterProps, StateRow } from './types'
 
 import {
   getDefaultOperator,
@@ -8,71 +8,72 @@ import {
   getValueControl,
   parseFilters,
   reverseOperatorMap,
-} from "./utils";
+} from './utils'
 
-import Badge from "../../src/components/Badge/Badge.vue";
-import Button from "../../src/components/Button/Button.vue";
-import Combobox from "../../src/components/Combobox/Combobox.vue";
-import Popover from "../../src/components/Popover/Popover.vue";
-import Select from "../../src/components/Select/Select.vue";
-import { createResource } from "../../src/resources";
+import Badge from '../../src/components/Badge/Badge.vue'
+import Button from '../../src/components/Button/Button.vue'
+import Combobox from '../../src/components/Combobox/Combobox.vue'
+import Popover from '../../src/components/Popover/Popover.vue'
+import Select from '../../src/components/Select/Select.vue'
+import { createResource } from '../../src/resources'
 
-import FilterIcon from "../Icons/FilterIcon.vue";
+import FilterIcon from '../Icons/FilterIcon.vue'
 
-let props = defineProps<FilterProps>();
-const model = defineModel<any[]>();
+let props = defineProps<FilterProps>()
+const model = defineModel<any[]>()
 
 const doctypeFields = createResource({
-  url: "frappe.desk.form.load.getdoctype",
-  method: "GET",
+  url: 'frappe.desk.form.load.getdoctype',
+  method: 'GET',
   params: { doctype: props.doctype },
   auto: true,
   transform(data) {
-    const options = data.docs[0].fields.map((x) => {
-      return {
-        label: x.label,
-        type: x.fieldtype,
-        value: x.fieldname,
-        options: x.options?.split("\n"),
-      };
-    })
-      .filter((x) =>
-        !["Section Break", "Read Only", "Column Break"].includes(x.type)
-      );
+    const options = data.docs[0].fields
+      .map((x) => {
+        return {
+          label: x.label,
+          type: x.fieldtype,
+          value: x.fieldname,
+          options: x.options?.split('\n'),
+        }
+      })
+      .filter(
+        (x) => !['Section Break', 'Read Only', 'Column Break'].includes(x.type),
+      )
 
-    return options;
+    return options
   },
   onSuccess(data) {
     setFilters()
-  }
-});
+  },
+})
 
 const dummyObj = () => ({
-  field: { fieldName: "", fieldType: "", options: [] },
-  operator: "",
-  value: "",
-});
+  field: { fieldName: '', fieldType: '', options: [] },
+  operator: '',
+  value: '',
+})
 
-const rows = ref([dummyObj()]);
-const insertRow = () => rows.value.push(dummyObj());
+const rows = ref([dummyObj()])
+const insertRow = () => rows.value.push(dummyObj())
 
 watch(
   () => model.value,
   () => setFilters(),
-  { deep: true }
-);
+  { deep: true },
+)
 
 const setFilters = () => {
-  if (!doctypeFields.data?.length || !model.value?.length) return;
+  if (!doctypeFields.data?.length || !model.value?.length) return
 
   const _filters = model.value
     .map((filter: any) => {
-      let [fieldName, operator, value] = filter;
-      const field = doctypeFields.data.find((f: any) => f.value === fieldName);
-      if (!field) return null;
+      let [fieldName, operator, value] = filter
+      const field = doctypeFields.data.find((f: any) => f.value === fieldName)
+      if (!field) return null
 
-      if (field.type === "Check") {
-        value = value ? "Yes" : "No"
+      if (field.type === 'Check') {
+        value = value ? 'Yes' : 'No'
       }
 
       return {
@@ -83,33 +84,33 @@ const setFilters = () => {
         },
         operator: reverseOperatorMap[operator] || operator,
         value: value,
-      };
+      }
     })
-    .filter((row) => row !== null) as StateRow[];
+    .filter((row) => row !== null) as StateRow[]
 
-  rows.value = _filters as typeof rows.value;
+  rows.value = _filters as typeof rows.value
 }
 
 const clearRows = (closePopup: () => void) => {
-  rows.value = [dummyObj()];
-  closePopup();
-  apply();
-};
+  rows.value = [dummyObj()]
+  closePopup()
+  apply()
+}
 
 const deleteRow = (index: number) => {
-  rows.value.splice(index, 1);
-  if (rows.value.length === 0) insertRow();
-  apply();
-};
+  rows.value.splice(index, 1)
+  if (rows.value.length === 0) insertRow()
+  apply()
+}
 
 const getField = (val: string) => {
-  return doctypeFields.data?.find((x: StateRow) => x.value === val);
-};
+  return doctypeFields.data?.find((x: StateRow) => x.value === val)
+}
 
 const updateFilter = (val: string, index: number) => {
-  if (!val) return;
+  if (!val) return
 
-  const field = getField(val);
+  const field = getField(val)
   rows.value[index] = {
     field: {
       fieldName: val,
@@ -117,18 +118,18 @@ const updateFilter = (val: string, index: number) => {
       options: field.options,
     },
     operator: getDefaultOperator(field),
-    value: "",
-  };
-  apply();
-};
+    value: '',
+  }
+  apply()
+}
 
 const apply = () => {
-  model.value = parseFilters(rows.value);
-};
+  model.value = parseFilters(rows.value)
+}
 
-const filterCount = computed(() =>
-  rows.value.filter((row) => row.field.fieldName !== "").length
-);
+const filterCount = computed(
+  () => rows.value.filter((row) => row.field.fieldName !== '').length,
+)
 </script>
 
 <template>
@@ -140,13 +141,13 @@ const filterCount = computed(() =>
     <template #target="{ close, togglePopover }">
       <Button
         @click="togglePopover()"
-        :class='{ "rounded-r-none": filterCount != 0 }'
+        :class="{ 'rounded-r-none': filterCount != 0 }"
       >
         <template #prefix><FilterIcon /></template>
         Filter
         <Badge
           v-if="filterCount != 0"
-          :class='"bg-surface-gray-4 ml-1 rounded"'
+          :class="'bg-surface-gray-4 ml-1 rounded'"
           :label="filterCount"
         />
       </Button>
@@ -165,7 +166,7 @@ const filterCount = computed(() =>
         <template v-for="(row, index) in rows">
           <Combobox
             :options="doctypeFields.data"
-            :placeholder='"Select an option..."'
+            :placeholder="'Select an option...'"
             :disabled="false"
             @update:modelValue="(e) => updateFilter(e, index)"
             v-model="row.field.fieldName"

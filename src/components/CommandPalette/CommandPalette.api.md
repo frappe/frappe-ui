@@ -46,9 +46,9 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="CommandPalette" :data="propsData"/> 
+<PropsTable name="CommandPalette" :data="propsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

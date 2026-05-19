@@ -4,7 +4,7 @@ Common compositions seen across Frappe Cloud, Gameplan, Desk, Drive, Insights. R
 
 ## Layout principles
 
-Apply these before reaching for any specific pattern below — they're what make a Frappe screen *read* as a Frappe screen.
+Apply these before reaching for any specific pattern below — they're what make a Frappe screen _read_ as a Frappe screen.
 
 1. **Strive for alignment.** Repeating elements down a list should align in columns, not float inside flex rows. If every list item has a `<Badge>`, a timestamp, or a button on the right, give each one a fixed-width slot (`w-24 shrink-0`, `w-32 shrink-0`) so they form a column. Inline `flex items-center gap-2` is fine for one row but produces ragged edges down a list.
 2. **One primary action per page.** Only one `<Button variant="solid" theme="gray">` per screen — usually the page header's "New X". Everything else is default (`subtle`) or `ghost`. If the app shell already has a global "Create" button, the page should not also have a solid primary.
@@ -37,7 +37,9 @@ Mount `FrappeUIProvider` once at the app root so imperative `dialog.*` / `toast.
 ## Page header
 
 ```vue
-<header class="flex items-center justify-between border-b border-outline-gray-1 px-6 py-4">
+<header
+  class="flex items-center justify-between border-b border-outline-gray-1 px-6 py-4"
+>
   <div>
     <Breadcrumbs :items="crumbs" />
     <h1 class="mt-1 text-xl text-ink-gray-9">{{ title }}</h1>
@@ -64,8 +66,18 @@ const errors = reactive({})
 
 <template>
   <form class="mx-auto max-w-xl space-y-4 p-6" @submit.prevent="save">
-    <FormControl v-model="form.title" label="Title" required :error="errors.title" />
-    <FormControl v-model="form.description" type="textarea" label="Description" description="Markdown supported." />
+    <FormControl
+      v-model="form.title"
+      label="Title"
+      required
+      :error="errors.title"
+    />
+    <FormControl
+      v-model="form.description"
+      type="textarea"
+      label="Description"
+      description="Markdown supported."
+    />
     <FormControl
       v-model="form.priority"
       type="select"
@@ -78,13 +90,20 @@ const errors = reactive({})
     />
     <div class="flex justify-end gap-2 pt-2">
       <Button label="Cancel" @click="cancel" />
-      <Button variant="solid" theme="gray" type="submit" :loading="saving" label="Save" />
+      <Button
+        variant="solid"
+        theme="gray"
+        type="submit"
+        :loading="saving"
+        label="Save"
+      />
     </div>
   </form>
 </template>
 ```
 
 Rules:
+
 - One column. Stack with `space-y-4`.
 - Every field uses `FormControl` (or a direct input control) with `label` + `error`.
 - Submit pair: secondary `Cancel` left, primary `Save` right.
@@ -94,6 +113,7 @@ Rules:
 Always use `useCall` (or `useList` / `useDoc`) — never raw `fetch` / `axios`.
 
 **Read (auto on mount):**
+
 ```ts
 import { useCall } from 'frappe-ui'
 
@@ -105,6 +125,7 @@ const user = useCall<User>({
 ```
 
 **Write (trigger on action):**
+
 ```ts
 import { useCall, toast } from 'frappe-ui'
 
@@ -150,17 +171,27 @@ Never build your own confirm `<Dialog>` for this.
 <script setup>
 import { ListView, Button, useList } from 'frappe-ui'
 
-const tasks = useList<Task>({
-  doctype: 'Task',
-  fields: ['name', 'title', 'status', 'modified'],
-})
+const tasks =
+  useList <
+  Task >
+  {
+    doctype: 'Task',
+    fields: ['name', 'title', 'status', 'modified'],
+  }
 </script>
 
 <template>
   <div class="flex h-full flex-col">
-    <header class="flex items-center justify-between border-b border-outline-gray-1 px-6 py-3">
+    <header
+      class="flex items-center justify-between border-b border-outline-gray-1 px-6 py-3"
+    >
       <h1 class="text-lg text-ink-gray-9">Tasks</h1>
-      <Button variant="solid" theme="gray" icon-left="lucide-plus" label="New Task" />
+      <Button
+        variant="solid"
+        theme="gray"
+        icon-left="lucide-plus"
+        label="New Task"
+      />
     </header>
     <ListView
       class="flex-1"
@@ -209,9 +240,12 @@ Don't use toasts for confirmations or anything requiring a decision — that's `
 ```
 
 Map statuses to themes in one place:
+
 ```ts
 function statusTheme(s) {
-  return ({ open: 'blue', closed: 'gray', error: 'red', done: 'green' })[s] ?? 'gray'
+  return (
+    { open: 'blue', closed: 'gray', error: 'red', done: 'green' }[s] ?? 'gray'
+  )
 }
 ```
 

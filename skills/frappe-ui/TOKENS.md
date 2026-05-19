@@ -39,16 +39,16 @@ Three semantic categories — each takes a color + numeric step. Higher = strong
 
 ### Rule of thumb
 
-| Need              | Use                              |
-|-------------------|----------------------------------|
-| Page bg           | `bg-surface-white`               |
-| Card bg           | `bg-surface-white` + border, or `bg-surface-gray-1` |
-| Hovered row       | `bg-surface-gray-2`              |
-| Primary text      | `text-ink-gray-9`                |
-| Muted text        | `text-ink-gray-5`                |
-| Border            | `border-outline-gray-1` (or `gray-2` for stronger) |
-| Destructive text  | `text-ink-red-3`                 |
-| Success text      | `text-ink-green-3`               |
+| Need             | Use                                                 |
+| ---------------- | --------------------------------------------------- |
+| Page bg          | `bg-surface-white`                                  |
+| Card bg          | `bg-surface-white` + border, or `bg-surface-gray-1` |
+| Hovered row      | `bg-surface-gray-2`                                 |
+| Primary text     | `text-ink-gray-9`                                   |
+| Muted text       | `text-ink-gray-5`                                   |
+| Border           | `border-outline-gray-1` (or `gray-2` for stronger)  |
+| Destructive text | `text-ink-red-3`                                    |
+| Success text     | `text-ink-green-3`                                  |
 
 Never reach for `text-gray-900`, `bg-white`, `border-gray-200` — they don't track the theme.
 
@@ -62,7 +62,7 @@ Never reach for `text-gray-900`, `bg-white`, `border-gray-200` — they don't tr
 Pick the wrong one and copy looks cramped (multi-line text in `text-*`) or floppy (one-line labels in `text-p-*`).
 
 | Class                       | Size  | Use                                     |
-|-----------------------------|-------|-----------------------------------------|
+| --------------------------- | ----- | --------------------------------------- |
 | `text-2xs` / `text-p-2xs`   | 11px  | Micro-labels, badges / tiny captions    |
 | `text-xs` / `text-p-xs`     | 12px  | Captions, meta / multi-line meta        |
 | `text-sm` / `text-p-sm`     | 13px  | Secondary labels / secondary paragraphs |
@@ -78,31 +78,32 @@ All have tuned letter-spacing — don't override unless you know why.
 
 ## Radius
 
-| Class            | px    | Use                            |
-|------------------|-------|--------------------------------|
-| `rounded-none`   | 0     | Flush edges                    |
-| `rounded-sm`     | 4     | Tags, small chips              |
-| `rounded` (default) | 8  | Inputs, buttons, list items    |
-| `rounded-md`     | 10    | Cards                          |
-| `rounded-lg`     | 12    | Dialogs, larger surfaces       |
-| `rounded-xl`     | 16    | Hero panels                    |
-| `rounded-2xl`    | 20    | Marketing surfaces             |
-| `rounded-full`   | pill  | Avatars, status dots, pill badges |
+| Class               | px   | Use                               |
+| ------------------- | ---- | --------------------------------- |
+| `rounded-none`      | 0    | Flush edges                       |
+| `rounded-sm`        | 4    | Tags, small chips                 |
+| `rounded` (default) | 8    | Inputs, buttons, list items       |
+| `rounded-md`        | 10   | Cards                             |
+| `rounded-lg`        | 12   | Dialogs, larger surfaces          |
+| `rounded-xl`        | 16   | Hero panels                       |
+| `rounded-2xl`       | 20   | Marketing surfaces                |
+| `rounded-full`      | pill | Avatars, status dots, pill badges |
 
 ## Shadow
 
-| Class         | Use                                  |
-|---------------|--------------------------------------|
-| `shadow-sm`   | Cards on white                       |
-| `shadow`      | Default (inputs on focus)            |
-| `shadow-md`   | Popovers, dropdowns                  |
-| `shadow-lg`   | Dialogs                              |
-| `shadow-xl`   | Floating panels                      |
-| `shadow-2xl`  | Hero overlays                        |
+| Class        | Use                       |
+| ------------ | ------------------------- |
+| `shadow-sm`  | Cards on white            |
+| `shadow`     | Default (inputs on focus) |
+| `shadow-md`  | Popovers, dropdowns       |
+| `shadow-lg`  | Dialogs                   |
+| `shadow-xl`  | Floating panels           |
+| `shadow-2xl` | Hero overlays             |
 
 ## Spacing
 
 Use Tailwind's spacing scale. Frappe density tends to be tight:
+
 - Form field gap: `space-y-3` or `gap-3`.
 - Section gap: `space-y-6` / `gap-6`.
 - Page padding: `p-4` on mobile, `p-6`/`p-8` on desktop.
@@ -117,8 +118,12 @@ Toggle by setting `[data-theme="dark"]` on `<html>`. All semantic tokens flip au
 When you must style a frappe-ui component beyond its prop surface, target its `data-slot` / `data-state` attributes (not internal classes):
 
 ```css
-[data-slot="trigger"][data-state="open"] { box-shadow: ... }
-[data-slot="item"][data-disabled] { opacity: .5 }
+[data-slot='trigger'][data-state='open'] {
+  box-shadow: ...;
+}
+[data-slot='item'][data-disabled] {
+  opacity: 0.5;
+}
 ```
 
 Never use class-injection props (`triggerClass`, `contentClass`) — they don't exist on frappe-ui components by design.

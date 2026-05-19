@@ -47,7 +47,7 @@ const resetState = () => {
     class="grid gap-5 *:rounded *:border [&_label]:text-ink-gray-9 [&_label]:mb-2 [&_label]:text-base h-fit"
   >
     <div class="h-fit">
-      <Tabs :tabs v-model="val" class='[&>[role=tablist]]:px-4'>
+      <Tabs :tabs v-model="val" class="[&>[role=tablist]]:px-4">
         <template #tab-panel="{ tab }">
           <div v-if="tab.label == 'Profile'" class="p-5">
             <div class="flex items-center gap-4 mb-4">

@@ -18,42 +18,42 @@ findings should be layered on top in follow-up passes.
 
 ## Core component audit matrix
 
-| Component    | Primary file                                   | script setup |  TS | types.ts | stories | tests | docs | Notes                                                           |
-| ------------ | ---------------------------------------------- | -----------: | --: | -------: | ------: | ----: | ---: | --------------------------------------------------------------- |
-| Alert        | `src/components/Alert/Alert.vue`               |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Good baseline                                                   |
-| Avatar       | `src/components/Avatar/Avatar.vue`             |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Good baseline                                                   |
-| Badge        | `src/components/Badge/Badge.vue`               |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | API audit still needed                                          |
-| Breadcrumbs  | `src/components/Breadcrumbs/Breadcrumbs.vue`   |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Good baseline                                                   |
-| Button       | `src/components/Button/Button.vue`             |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Renders feather-name icon prop via `FeatherIcon` for back-compat (kept)                               |
-| Checkbox     | `src/components/Checkbox/Checkbox.vue`         |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Good baseline                                                   |
-| Combobox     | `src/components/Combobox/Combobox.vue`         |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Part of critical selection cluster                              |
-| DatePicker   | `src/components/DatePicker/DatePicker.vue`     |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Good baseline                                                   |
-| MonthPicker  | `src/components/MonthPicker/MonthPicker.vue`   |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Good baseline                                                   |
-| TimePicker   | `src/components/TimePicker/TimePicker.vue`     |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Good baseline                                                   |
-| Dialog       | `src/components/Dialog/Dialog.vue`             |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Overlay/floating blocker                                        |
-| Divider      | `src/components/Divider/Divider.vue`           |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Baseline coverage added; action mode semantics reviewed         |
-| Dropdown     | `src/components/Dropdown/Dropdown.vue`         |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Part of critical selection/floating cluster                     |
-| ErrorMessage | `src/components/ErrorMessage/ErrorMessage.vue` |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Good baseline                                                   |
-| FileUploader | `src/components/FileUploader/FileUploader.vue` |           ❌ |  ❌ |       ❌ |      ✅ |    ❌ |   ✅ | Legacy public component; modernization blocker                  |
-| FormControl  | `src/components/FormControl/FormControl.vue`   |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Baseline present; part of critical selection/input cluster      |
-| ListView     | `src/components/ListView/ListView.vue`         |           ✅ |  ❌ |       ❌ |      ✅ |    ❌ |   ✅ | Script setup but not TS; missing types/test baseline            |
-| MultiSelect  | `src/components/MultiSelect/MultiSelect.vue`   |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Critical blocker                                                |
-| Password     | `src/components/Password/Password.vue`         |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Depends on FormControl quality                                  |
-| Popover      | `src/components/Popover/Popover.vue`           |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Overlay/floating blocker                                        |
-| Progress     | `src/components/Progress/Progress.vue`         |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Good baseline                                                   |
-| Rating       | `src/components/Rating/Rating.vue`             |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Renders feather-name icon prop via `FeatherIcon` for back-compat (kept)                               |
-| Select       | `src/components/Select/Select.vue`             |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Selection/floating cluster                                      |
-| Sidebar      | `src/components/Sidebar/Sidebar.vue`           |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Good baseline                                                   |
-| Slider       | `src/components/Slider/Slider.vue`             |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Baseline present                                                |
-| Switch       | `src/components/Switch/Switch.vue`             |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Critical blocker; still uses internal `FeatherIcon`             |
-| TabButtons   | `src/components/TabButtons/TabButtons.vue`     |           ❌ |  ❌ |       ❌ |      ✅ |    ❌ |   ✅ | Legacy public component; modernization blocker                  |
-| Tabs         | `src/components/Tabs/Tabs.vue`                 |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Good baseline                                                   |
-| TextEditor   | `src/components/TextEditor/TextEditor.vue`     |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Public component baseline exists; internals still need refactor |
-| TextInput    | `src/components/TextInput/TextInput.vue`       |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Good baseline                                                   |
-| Textarea     | `src/components/Textarea/Textarea.vue`         |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Baseline present                                                |
-| Toast        | `src/components/Toast/Toast.vue`               |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Baseline coverage added in this pass                            |
-| Tooltip      | `src/components/Tooltip/Tooltip.vue`           |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Good baseline                                                   |
-| Tree         | `src/components/Tree/Tree.vue`                 |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Renders feather-name icon prop via `FeatherIcon` for back-compat (kept)                               |
+| Component    | Primary file                                   | script setup |  TS | types.ts | stories | tests | docs | Notes                                                                   |
+| ------------ | ---------------------------------------------- | -----------: | --: | -------: | ------: | ----: | ---: | ----------------------------------------------------------------------- |
+| Alert        | `src/components/Alert/Alert.vue`               |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Good baseline                                                           |
+| Avatar       | `src/components/Avatar/Avatar.vue`             |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Good baseline                                                           |
+| Badge        | `src/components/Badge/Badge.vue`               |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | API audit still needed                                                  |
+| Breadcrumbs  | `src/components/Breadcrumbs/Breadcrumbs.vue`   |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Good baseline                                                           |
+| Button       | `src/components/Button/Button.vue`             |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Renders feather-name icon prop via `FeatherIcon` for back-compat (kept) |
+| Checkbox     | `src/components/Checkbox/Checkbox.vue`         |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Good baseline                                                           |
+| Combobox     | `src/components/Combobox/Combobox.vue`         |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Part of critical selection cluster                                      |
+| DatePicker   | `src/components/DatePicker/DatePicker.vue`     |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Good baseline                                                           |
+| MonthPicker  | `src/components/MonthPicker/MonthPicker.vue`   |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Good baseline                                                           |
+| TimePicker   | `src/components/TimePicker/TimePicker.vue`     |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Good baseline                                                           |
+| Dialog       | `src/components/Dialog/Dialog.vue`             |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Overlay/floating blocker                                                |
+| Divider      | `src/components/Divider/Divider.vue`           |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Baseline coverage added; action mode semantics reviewed                 |
+| Dropdown     | `src/components/Dropdown/Dropdown.vue`         |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Part of critical selection/floating cluster                             |
+| ErrorMessage | `src/components/ErrorMessage/ErrorMessage.vue` |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Good baseline                                                           |
+| FileUploader | `src/components/FileUploader/FileUploader.vue` |           ❌ |  ❌ |       ❌ |      ✅ |    ❌ |   ✅ | Legacy public component; modernization blocker                          |
+| FormControl  | `src/components/FormControl/FormControl.vue`   |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Baseline present; part of critical selection/input cluster              |
+| ListView     | `src/components/ListView/ListView.vue`         |           ✅ |  ❌ |       ❌ |      ✅ |    ❌ |   ✅ | Script setup but not TS; missing types/test baseline                    |
+| MultiSelect  | `src/components/MultiSelect/MultiSelect.vue`   |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Critical blocker                                                        |
+| Password     | `src/components/Password/Password.vue`         |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Depends on FormControl quality                                          |
+| Popover      | `src/components/Popover/Popover.vue`           |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Overlay/floating blocker                                                |
+| Progress     | `src/components/Progress/Progress.vue`         |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Good baseline                                                           |
+| Rating       | `src/components/Rating/Rating.vue`             |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Renders feather-name icon prop via `FeatherIcon` for back-compat (kept) |
+| Select       | `src/components/Select/Select.vue`             |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Selection/floating cluster                                              |
+| Sidebar      | `src/components/Sidebar/Sidebar.vue`           |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Good baseline                                                           |
+| Slider       | `src/components/Slider/Slider.vue`             |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Baseline present                                                        |
+| Switch       | `src/components/Switch/Switch.vue`             |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Critical blocker; still uses internal `FeatherIcon`                     |
+| TabButtons   | `src/components/TabButtons/TabButtons.vue`     |           ❌ |  ❌ |       ❌ |      ✅ |    ❌ |   ✅ | Legacy public component; modernization blocker                          |
+| Tabs         | `src/components/Tabs/Tabs.vue`                 |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Good baseline                                                           |
+| TextEditor   | `src/components/TextEditor/TextEditor.vue`     |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Public component baseline exists; internals still need refactor         |
+| TextInput    | `src/components/TextInput/TextInput.vue`       |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Good baseline                                                           |
+| Textarea     | `src/components/Textarea/Textarea.vue`         |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Baseline present                                                        |
+| Toast        | `src/components/Toast/Toast.vue`               |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Baseline coverage added in this pass                                    |
+| Tooltip      | `src/components/Tooltip/Tooltip.vue`           |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Good baseline                                                           |
+| Tree         | `src/components/Tree/Tree.vue`                 |           ✅ |  ✅ |       ✅ |      ✅ |    ✅ |   ✅ | Renders feather-name icon prop via `FeatherIcon` for back-compat (kept) |
 
 ## Highest-priority structural gaps
 

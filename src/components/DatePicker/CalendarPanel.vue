@@ -112,9 +112,13 @@
                 :tabindex="isFocusedCell(cell) ? 0 : -1"
                 @mouseenter="emit('hoverCell', cell.date)"
                 @click="!cell.isUnavailable && emit('selectDate', cell.date)"
-                @keydown.left.prevent="shiftFocus(cell.date.subtract(1, 'day'), -1)"
+                @keydown.left.prevent="
+                  shiftFocus(cell.date.subtract(1, 'day'), -1)
+                "
                 @keydown.right.prevent="shiftFocus(cell.date.add(1, 'day'), 1)"
-                @keydown.up.prevent="shiftFocus(cell.date.subtract(7, 'day'), -1)"
+                @keydown.up.prevent="
+                  shiftFocus(cell.date.subtract(7, 'day'), -1)
+                "
                 @keydown.down.prevent="shiftFocus(cell.date.add(7, 'day'), 1)"
                 @keydown.home.prevent="
                   shiftFocus(cell.date.subtract(cell.date.day(), 'day'), -1)
@@ -295,9 +299,7 @@ function isFocusedCell(cell: CalendarPanelCell): boolean {
   return !!props.focusedDate && cell.date.isSame(props.focusedDate, 'day')
 }
 
-function pickInitialFocusDate(
-  weeks: CalendarPanelCell[][],
-): Dayjs | null {
+function pickInitialFocusDate(weeks: CalendarPanelCell[][]): Dayjs | null {
   const flat = weeks.flat()
   const selected = flat.find(
     (c) =>
@@ -343,12 +345,7 @@ watch(
 // for an unbounded run of dates would otherwise spin forever.
 const MAX_SKIP_DISABLED_STEPS = 366
 
-function shiftFocus(
-  target: Dayjs,
-  dir: 1 | -1,
-  retried = false,
-  steps = 0,
-) {
+function shiftFocus(target: Dayjs, dir: 1 | -1, retried = false, steps = 0) {
   // Bounds check first — if the target is outside [min, max], the arrow
   // press is a no-op rather than trying to navigate into nothing. Matches
   // Reka's CalendarCellTrigger behavior.
@@ -448,6 +445,10 @@ function cellClass(cell: CalendarPanelCell): Array<string | false> {
     ]
   }
 
-  return [inMonthCls, todayCls, 'rounded hover:bg-surface-gray-2 cursor-pointer']
+  return [
+    inMonthCls,
+    todayCls,
+    'rounded hover:bg-surface-gray-2 cursor-pointer',
+  ]
 }
 </script>

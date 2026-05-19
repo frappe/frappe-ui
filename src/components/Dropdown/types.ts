@@ -210,13 +210,13 @@ export interface DropdownGroupSlotProps {
 
 export interface DropdownSlots {
   /** Alternate trigger renderer. */
-  default?: (props: DropdownTriggerSlotProps) => any
+  'default'?: (props: DropdownTriggerSlotProps) => any
 
   /** Explicit trigger slot renderer. */
-  trigger?: (props: DropdownTriggerSlotProps) => any
+  'trigger'?: (props: DropdownTriggerSlotProps) => any
 
   /** Replaces the entire item row. */
-  item?: (props: DropdownItemSlotProps) => any
+  'item'?: (props: DropdownItemSlotProps) => any
 
   /** Content rendered before the standard item label. */
   'item-prefix'?: (props: DropdownItemSlotProps) => any
@@ -231,7 +231,7 @@ export interface DropdownSlots {
   'group-label'?: (props: DropdownGroupSlotProps) => any
 
   /** Fallback content rendered when no items are available. */
-  empty?: () => any
+  'empty'?: () => any
 
   [slotName: string]: ((props: any) => any) | undefined
 }

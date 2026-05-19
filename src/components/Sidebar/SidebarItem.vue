@@ -24,7 +24,11 @@
             <span class="grid flex-shrink-0 place-items-center">
               <slot name="icon">
                 <span
-                  v-if="props.icon && typeof props.icon === 'string' && props.icon.startsWith('lucide-')"
+                  v-if="
+                    props.icon &&
+                    typeof props.icon === 'string' &&
+                    props.icon.startsWith('lucide-')
+                  "
                   class="size-4 text-ink-gray-6"
                   :class="props.icon"
                 />

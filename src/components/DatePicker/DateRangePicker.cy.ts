@@ -11,7 +11,7 @@ const sidebarSlot = {
         'button',
         {
           'aria-label': 'Last 7 days',
-          onClick: () => {
+          'onClick': () => {
             const fmt = (d: Date) => {
               const p = (n: number) => String(n).padStart(2, '0')
               return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`
@@ -32,7 +32,7 @@ const sidebarSlot = {
           'button',
           {
             'aria-label': 'Clear',
-            onClick: () => {
+            'onClick': () => {
               props.clear()
               props.close()
             },
@@ -156,7 +156,7 @@ describe('DateRangePicker', () => {
   it('emits v-model as [from, to] array', () => {
     cy.mount(DateRangePicker, {
       props: {
-        modelValue: ['2025-06-10', '2025-06-10'],
+        'modelValue': ['2025-06-10', '2025-06-10'],
         'onUpdate:modelValue': cy.spy().as('onUpdate'),
       },
     })
@@ -172,7 +172,7 @@ describe('DateRangePicker', () => {
   it('emits [] when range is cleared', () => {
     cy.mount(DateRangePicker, {
       props: {
-        modelValue: ['2025-06-10', '2025-06-15'],
+        'modelValue': ['2025-06-10', '2025-06-15'],
         'onUpdate:modelValue': cy.spy().as('onUpdate'),
       },
       slots: sidebarSlot,
@@ -213,7 +213,7 @@ describe('DateRangePicker', () => {
           'button',
           {
             'aria-label': 'Reversed',
-            onClick: () => {
+            'onClick': () => {
               props.setRange(['2025-06-20', '2025-06-10'])
               props.close()
             },
@@ -242,8 +242,16 @@ describe('DateRangePicker', () => {
       },
     })
     cy.get('input').dblclick()
-    cy.get('[aria-label="2025-06-09"]').should('have.attr', 'aria-disabled', 'true')
-    cy.get('[aria-label="2025-06-21"]').should('have.attr', 'aria-disabled', 'true')
+    cy.get('[aria-label="2025-06-09"]').should(
+      'have.attr',
+      'aria-disabled',
+      'true',
+    )
+    cy.get('[aria-label="2025-06-21"]').should(
+      'have.attr',
+      'aria-disabled',
+      'true',
+    )
     cy.get('[aria-label="2025-06-15"]').should('not.have.attr', 'aria-disabled')
   })
 
@@ -260,7 +268,7 @@ describe('DateRangePicker', () => {
     // then pick the later date first and the earlier one second.
     cy.mount(DateRangePicker, {
       props: {
-        modelValue: ['2025-06-15', '2025-06-15'],
+        'modelValue': ['2025-06-15', '2025-06-15'],
         'onUpdate:modelValue': cy.spy().as('onUpdate'),
       },
     })
@@ -291,7 +299,10 @@ describe('DateRangePicker', () => {
     it('renders two side-by-side calendar grids', () => {
       cy.mount(DateRangePicker, { props: { dualPane: true } })
       cy.get('input').dblclick()
-      cy.get('[role=grid][aria-label="Calendar dates"]').should('have.length', 2)
+      cy.get('[role=grid][aria-label="Calendar dates"]').should(
+        'have.length',
+        2,
+      )
     })
 
     it('shows the centered header (no cycle button) in dual-pane', () => {
@@ -324,7 +335,7 @@ describe('DateRangePicker', () => {
     it('Enter on a focused cell selects the range start, then end', () => {
       cy.mount(DateRangePicker, {
         props: {
-          modelValue: ['2025-06-15', '2025-06-15'],
+          'modelValue': ['2025-06-15', '2025-06-15'],
           'onUpdate:modelValue': cy.spy().as('onUpdate'),
         },
       })
@@ -356,7 +367,10 @@ describe('DateRangePicker', () => {
       cy.focused().trigger('keydown', { key: 'ArrowRight' })
       cy.focused().should('have.attr', 'data-value', '2025-07-01')
       // Both panes still rendered — view didn't advance to hide June.
-      cy.get('[role=grid][aria-label="Calendar dates"]').should('have.length', 2)
+      cy.get('[role=grid][aria-label="Calendar dates"]').should(
+        'have.length',
+        2,
+      )
       cy.get('[aria-label="2025-06-28"]').should('exist')
     })
   })

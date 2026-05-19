@@ -94,11 +94,11 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ steps.app-token.outputs.token }}
-          allowed_non_write_users: "*"
+          allowed_non_write_users: '*'
           # Renders a human-readable transcript in the Actions run's Step Summary
           # (formatted markdown). Avoid show_full_output which dumps raw JSON in logs.
-          display_report: "true"
-          prompt: "/barista-triage REPO: ${{ github.repository }} ISSUE_NUMBER: ${{ steps.issue.outputs.number }} EVENT: ${{ github.event_name }}"
+          display_report: 'true'
+          prompt: '/barista-triage REPO: ${{ github.repository }} ISSUE_NUMBER: ${{ steps.issue.outputs.number }} EVENT: ${{ github.event_name }}'
 
       - name: Append run-stats footer to barista's comment
         if: always() && steps.run-barista.outcome == 'success'

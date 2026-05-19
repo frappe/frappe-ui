@@ -10,7 +10,7 @@ export function frappeRequest(options) {
       }
       let headers = Object.assign(
         {
-          Accept: 'application/json',
+          'Accept': 'application/json',
           'Content-Type': 'application/json; charset=utf-8',
           'X-Frappe-Site-Name': window.location.hostname,
         },
@@ -51,7 +51,9 @@ export function frappeRequest(options) {
 
         if (data._server_messages) {
           let onMessageHandler =
-            getConfig('serverMessagesHandler') || options.onServerMessages || null
+            getConfig('serverMessagesHandler') ||
+            options.onServerMessages ||
+            null
           if (onMessageHandler) {
             onMessageHandler(JSON.parse(data?._server_messages) || [])
           }

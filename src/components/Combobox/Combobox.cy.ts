@@ -11,8 +11,16 @@ describe('Combobox', () => {
         props: { options: fruits, placeholder: 'Pick fruit' },
       })
 
-      cy.get('[data-slot="trigger"]').should('have.attr', 'data-variant', 'subtle')
-      cy.get('[role="combobox"]').should('have.attr', 'placeholder', 'Pick fruit')
+      cy.get('[data-slot="trigger"]').should(
+        'have.attr',
+        'data-variant',
+        'subtle',
+      )
+      cy.get('[role="combobox"]').should(
+        'have.attr',
+        'placeholder',
+        'Pick fruit',
+      )
     })
 
     it('forwards `id` to the input element', () => {
@@ -25,13 +33,21 @@ describe('Combobox', () => {
         props: { options: fruits, size: 'lg', variant: 'outline' },
       })
       cy.get('[data-slot="trigger"]').should('have.attr', 'data-size', 'lg')
-      cy.get('[data-slot="trigger"]').should('have.attr', 'data-variant', 'outline')
+      cy.get('[data-slot="trigger"]').should(
+        'have.attr',
+        'data-variant',
+        'outline',
+      )
     })
 
     it('renders the chevron and rotates it when open', () => {
       cy.mount(Combobox, { props: { options: fruits } })
       cy.get('[data-slot="chevron"]').should('exist')
-      cy.get('[data-slot="trigger"]').should('have.attr', 'data-state', 'closed')
+      cy.get('[data-slot="trigger"]').should(
+        'have.attr',
+        'data-state',
+        'closed',
+      )
 
       cy.get('[data-slot="chevron"]').click()
       cy.get('[data-slot="trigger"]').should('have.attr', 'data-state', 'open')
@@ -48,7 +64,7 @@ describe('Combobox', () => {
     it('opens and selects a regular option', () => {
       cy.mount(Combobox, {
         props: {
-          options: fruits,
+          'options': fruits,
           'onUpdate:modelValue': cy.spy().as('onUpdate'),
           'onUpdate:selectedOption': cy.spy().as('onSelectedOption'),
         },
@@ -79,7 +95,7 @@ describe('Combobox', () => {
     it('emits update:open when opening and closing', () => {
       cy.mount(Combobox, {
         props: {
-          options: fruits,
+          'options': fruits,
           'onUpdate:open': cy.spy().as('onOpen'),
         },
       })
@@ -101,8 +117,8 @@ describe('Combobox', () => {
     it('does not select a disabled option on click', () => {
       cy.mount(Combobox, {
         props: {
-          open: true,
-          options: [
+          'open': true,
+          'options': [
             { label: 'Apple', value: 'apple' },
             { label: 'Mango', value: 'mango', disabled: true },
           ],
@@ -118,10 +134,10 @@ describe('Combobox', () => {
     it('emits update:query and input, filters options, and clears value when cleared', () => {
       cy.mount(Combobox, {
         props: {
-          modelValue: 'Apple',
-          options: fruits,
+          'modelValue': 'Apple',
+          'options': fruits,
           'onUpdate:query': cy.spy().as('onUpdateQuery'),
-          onInput: cy.spy().as('onInput'),
+          'onInput': cy.spy().as('onInput'),
           'onUpdate:modelValue': cy.spy().as('onUpdate'),
           'onUpdate:selectedOption': cy.spy().as('onSelectedOption'),
         },
@@ -151,10 +167,14 @@ describe('Combobox', () => {
         },
       })
       cy.get('[role="combobox"]').type('ENG')
-      cy.get('[role="option"]').should('have.length', 1).and('contain.text', 'Engineering')
+      cy.get('[role="option"]')
+        .should('have.length', 1)
+        .and('contain.text', 'Engineering')
 
       cy.get('[role="combobox"]').clear().type('des')
-      cy.get('[role="option"]').should('have.length', 1).and('contain.text', 'Design')
+      cy.get('[role="option"]')
+        .should('have.length', 1)
+        .and('contain.text', 'Design')
     })
   })
 
@@ -162,16 +182,18 @@ describe('Combobox', () => {
     it('shows the built-in create row and commits raw query as value', () => {
       cy.mount(Combobox, {
         props: {
-          options: fruits,
-          allowCustomValue: true,
-          openOnFocus: true,
+          'options': fruits,
+          'allowCustomValue': true,
+          'openOnFocus': true,
           'onUpdate:modelValue': cy.spy().as('onUpdate'),
         },
       })
 
       cy.get('[role="combobox"]').focus().type('dragonfruit')
       cy.get('[role="option"]').should('have.length', 1)
-      cy.get('[role="option"]').first().should('contain.text', 'Create "dragonfruit"')
+      cy.get('[role="option"]')
+        .first()
+        .should('contain.text', 'Create "dragonfruit"')
       cy.get('[role="option"]').first().click()
       cy.get('@onUpdate').should('have.been.calledWith', 'dragonfruit')
     })
@@ -179,9 +201,9 @@ describe('Combobox', () => {
     it('pressing Enter commits the custom value', () => {
       cy.mount(Combobox, {
         props: {
-          options: fruits,
-          allowCustomValue: true,
-          openOnFocus: true,
+          'options': fruits,
+          'allowCustomValue': true,
+          'openOnFocus': true,
           'onUpdate:modelValue': cy.spy().as('onUpdate'),
         },
       })
@@ -233,7 +255,8 @@ describe('Combobox', () => {
               value: 'jane',
               slots: {
                 prefix: () => h('span', { 'data-cy': 'p' }, 'P'),
-                label: ({ item }: any) => h('span', { 'data-cy': 'l' }, item.label),
+                label: ({ item }: any) =>
+                  h('span', { 'data-cy': 'l' }, item.label),
                 suffix: () => h('span', { 'data-cy': 's' }, 'S'),
               },
             },
@@ -254,7 +277,8 @@ describe('Combobox', () => {
               label: 'Custom Row',
               value: 'row',
               slots: {
-                item: () => h('div', { 'data-cy': 'full-row' }, 'Custom Takeover'),
+                item: () =>
+                  h('div', { 'data-cy': 'full-row' }, 'Custom Takeover'),
               },
             },
           ],
@@ -357,8 +381,8 @@ describe('Combobox', () => {
 
       cy.mount(Combobox, {
         props: {
-          openOnFocus: true,
-          options: [
+          'openOnFocus': true,
+          'options': [
             { label: 'Apple', value: 'apple' },
             {
               type: 'custom',
@@ -484,7 +508,10 @@ describe('Combobox', () => {
           footer: () => h('div', { 'data-cy': 'footer' }, 'FOOTER'),
         },
       })
-      cy.get('[data-slot="footer"] [data-cy="footer"]').should('contain.text', 'FOOTER')
+      cy.get('[data-slot="footer"] [data-cy="footer"]').should(
+        'contain.text',
+        'FOOTER',
+      )
     })
   })
 
@@ -508,7 +535,11 @@ describe('Combobox', () => {
       }).then(() => {
         expect(warn).to.have.been.calledWithMatch(/placement.*deprecated/i)
       })
-      cy.get('[data-slot="content"]').should('have.attr', 'data-align', 'center')
+      cy.get('[data-slot="content"]').should(
+        'have.attr',
+        'data-align',
+        'center',
+      )
     })
 
     it('forwards `side` to the popover', () => {
@@ -532,7 +563,7 @@ describe('Combobox', () => {
           trigger: ({ displayValue }: any) =>
             h(
               'button',
-              { type: 'button', 'data-cy': 'custom-btn' },
+              { 'type': 'button', 'data-cy': 'custom-btn' },
               displayValue || 'Pick a fruit',
             ),
         },
@@ -548,7 +579,7 @@ describe('Combobox', () => {
         props: { options: fruits },
         slots: {
           trigger: () =>
-            h('button', { type: 'button', 'data-cy': 'btn' }, 'Pick'),
+            h('button', { 'type': 'button', 'data-cy': 'btn' }, 'Pick'),
         },
       })
 
@@ -557,7 +588,9 @@ describe('Combobox', () => {
         .should('be.focused')
         .type('ma')
 
-      cy.get('[role="option"]').should('have.length', 1).and('contain.text', 'Mango')
+      cy.get('[role="option"]')
+        .should('have.length', 1)
+        .and('contain.text', 'Mango')
     })
 
     it('renders built-in button when trigger="button" is set and avoids nested <button>', () => {
@@ -604,8 +637,8 @@ describe('Combobox', () => {
     it('exposes `reset()` which clears query and selection', () => {
       cy.mount(Combobox, {
         props: {
-          modelValue: 'Apple',
-          options: fruits,
+          'modelValue': 'Apple',
+          'options': fruits,
           'onUpdate:modelValue': cy.spy().as('onUpdate'),
           'onUpdate:selectedOption': cy.spy().as('onSelectedOption'),
           'onUpdate:query': cy.spy().as('onUpdateQuery'),

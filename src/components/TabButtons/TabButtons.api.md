@@ -27,9 +27,9 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="TabButtons" :data="propsData"/> 
+<PropsTable name="TabButtons" :data="propsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

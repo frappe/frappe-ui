@@ -77,11 +77,11 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="Alert" :data="propsData"/> 
+<PropsTable name="Alert" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
+<SlotsTable :data="slotsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

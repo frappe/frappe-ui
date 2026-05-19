@@ -209,17 +209,17 @@ export interface ComboboxEmptySlotProps {
 
 export interface ComboboxSlots {
   /** Fully custom trigger renderer. */
-  trigger?: (props: ComboboxTriggerSlotProps) => any
+  'trigger'?: (props: ComboboxTriggerSlotProps) => any
 
   /** Overrides the rendered label content. Receives `{ required }`. */
-  label?: (props: { required: boolean }) => any
+  'label'?: (props: { required: boolean }) => any
 
   /** Overrides the rendered description content. */
-  description?: () => any
+  'description'?: () => any
 
   /** Content rendered before the default input. Receives the same shape
    * as `#trigger` and `#suffix` (`ComboboxSlotProps`). */
-  prefix?: (props: ComboboxPrefixSlotProps) => any
+  'prefix'?: (props: ComboboxPrefixSlotProps) => any
 
   /**
    * Content rendered after the input (input mode) or label (button mode).
@@ -228,7 +228,7 @@ export interface ComboboxSlots {
    * Common use: an inline clear button. Use `@click.stop` and
    * `@pointerdown.stop` so the press doesn't toggle the popover.
    */
-  suffix?: (props: ComboboxSuffixSlotProps) => any
+  'suffix'?: (props: ComboboxSuffixSlotProps) => any
 
   /** Shared content rendered before the standard row label. */
   'item-prefix'?: (props: ComboboxItemSlotProps) => any
@@ -240,16 +240,16 @@ export interface ComboboxSlots {
   'item-suffix'?: (props: ComboboxItemSlotProps) => any
 
   /** Replaces the entire row. */
-  item?: (props: ComboboxItemSlotProps) => any
+  'item'?: (props: ComboboxItemSlotProps) => any
 
   /** Custom renderer for group labels. */
   'group-label'?: (props: ComboboxGroupLabelSlotProps) => any
 
   /** Fallback content rendered when there are no results. */
-  empty?: (props: ComboboxEmptySlotProps) => any
+  'empty'?: (props: ComboboxEmptySlotProps) => any
 
   /** Content rendered after the list. */
-  footer?: () => any
+  'footer'?: () => any
 
   [slotName: string]: ((props: any) => any) | undefined
 }
@@ -267,13 +267,13 @@ export interface ComboboxEmits {
   ]
 
   /** Fired when the input receives focus. */
-  focus: [event: FocusEvent]
+  'focus': [event: FocusEvent]
 
   /** Fired when the input loses focus. */
-  blur: [event: FocusEvent]
+  'blur': [event: FocusEvent]
 
   /** @deprecated compatibility alias for `update:query`. */
-  input: [value: string]
+  'input': [value: string]
 }
 
 export interface ComboboxExposed {

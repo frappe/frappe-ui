@@ -72,9 +72,13 @@ what changes.
 
 ```ts
 // before
-function onChange(v: string) { const [from, to] = v.split(',') }
+function onChange(v: string) {
+  const [from, to] = v.split(',')
+}
 // after
-function onChange(v: DateRangeValue) { const [from, to] = v } // [] when cleared
+function onChange(v: DateRangeValue) {
+  const [from, to] = v
+} // [] when cleared
 ```
 
 Reactive forms that pass the value through unchanged are unaffected.
@@ -314,36 +318,36 @@ assistive technologies.
 
 ## Deprecation log
 
-| API                                | Replacement                          | Notes                                  |
-| ---------------------------------- | ------------------------------------ | -------------------------------------- |
-| `Divider.action.handler`           | `Divider.action.onClick`             | Warns when set                         |
-| `Password.value` prop              | `v-model` / `modelValue`             | Warns when set                         |
-| `Rating.rating_from` prop          | `max`                                | Silent alias; warns when set           |
-| `Switch.change` emit               | `update:modelValue` / `v-model`      | Warns when bound                       |
-| `Switch.labelClasses` prop         | `data-*` styling hooks               | Warns when set                         |
-| `Checkbox.padding` prop            | `data-*` styling hooks               | Warns when set                         |
-| `Dropdown` `{ group, items }`      | `{ group, options }`                 | Silent alias; warns if both            |
-| Select `#item-*` slot prop `option` | `item`                              | Silent alias; JSDoc only, no runtime warning |
-| `Input.vue`                        | `TextInput`                          | Warns on mount                         |
-| `Autocomplete`                     | `Combobox` or `MultiSelect`          | Warns on mount                         |
-| `FormControl type='autocomplete'`  | `Combobox` standalone                | Warns when type is set                 |
-| DatePicker family `placement`      | `side` + `align` + `offset`          | Mapped internally; warns               |
-| DatePicker family `autoClose`      | `keepOpen` (inverse)                 | Mapped internally; warns               |
-| DatePicker family `allowCustom`    | `typeable: false`                    | Mapped internally; warns               |
-| DatePicker family `readonly`       | `typeable: false`                    | Picker-level only; warns               |
-| DatePicker family `inputClass`     | `class` on the component element     | Warns when set                         |
-| DatePicker family `value` prop     | `v-model` / `modelValue`             | Warns when set                         |
-| DatePicker family `change` emit    | `update:modelValue` / `v-model`      | Warns when bound                       |
-| DatePicker family `#target` slot   | `#trigger`                           | Silent alias; warns                    |
-| `TimePicker.scrollMode`            | none (always centered)               | Warns when set                         |
-| `DateTimePicker.minDateTime`       | `min`                                | Mapped internally; warns               |
-| `DateTimePicker.maxDateTime`       | `max`                                | Mapped internally; warns               |
-| `TimePicker.minTime`               | `min`                                | Mapped internally; warns               |
-| `TimePicker.maxTime`               | `max`                                | Mapped internally; warns               |
-| `useDatePicker` composable         | use picker components directly       | Warns on call                          |
-| `getDate` / `getDatesAfter` / etc. | use picker components directly       | JSDoc only; no runtime warning         |
-| `FeatherIcon`                      | `lucide-*` strings (or a `Component`) | Warns when feather names pass through |
-| Dialog legacy `options` blob       | flat top-level props                 | Warns once per instance                |
-| Dialog `#body*` slots              | `#default` / `#title` / `#actions`   | Warns when used                        |
-| Dialog `icon.appearance`           | `icon.theme`                         | Auto-mapped; warns                     |
-| `confirmDialog()`                  | `dialog.confirm()`                   | Warns on call                          |
+| API                                 | Replacement                           | Notes                                        |
+| ----------------------------------- | ------------------------------------- | -------------------------------------------- |
+| `Divider.action.handler`            | `Divider.action.onClick`              | Warns when set                               |
+| `Password.value` prop               | `v-model` / `modelValue`              | Warns when set                               |
+| `Rating.rating_from` prop           | `max`                                 | Silent alias; warns when set                 |
+| `Switch.change` emit                | `update:modelValue` / `v-model`       | Warns when bound                             |
+| `Switch.labelClasses` prop          | `data-*` styling hooks                | Warns when set                               |
+| `Checkbox.padding` prop             | `data-*` styling hooks                | Warns when set                               |
+| `Dropdown` `{ group, items }`       | `{ group, options }`                  | Silent alias; warns if both                  |
+| Select `#item-*` slot prop `option` | `item`                                | Silent alias; JSDoc only, no runtime warning |
+| `Input.vue`                         | `TextInput`                           | Warns on mount                               |
+| `Autocomplete`                      | `Combobox` or `MultiSelect`           | Warns on mount                               |
+| `FormControl type='autocomplete'`   | `Combobox` standalone                 | Warns when type is set                       |
+| DatePicker family `placement`       | `side` + `align` + `offset`           | Mapped internally; warns                     |
+| DatePicker family `autoClose`       | `keepOpen` (inverse)                  | Mapped internally; warns                     |
+| DatePicker family `allowCustom`     | `typeable: false`                     | Mapped internally; warns                     |
+| DatePicker family `readonly`        | `typeable: false`                     | Picker-level only; warns                     |
+| DatePicker family `inputClass`      | `class` on the component element      | Warns when set                               |
+| DatePicker family `value` prop      | `v-model` / `modelValue`              | Warns when set                               |
+| DatePicker family `change` emit     | `update:modelValue` / `v-model`       | Warns when bound                             |
+| DatePicker family `#target` slot    | `#trigger`                            | Silent alias; warns                          |
+| `TimePicker.scrollMode`             | none (always centered)                | Warns when set                               |
+| `DateTimePicker.minDateTime`        | `min`                                 | Mapped internally; warns                     |
+| `DateTimePicker.maxDateTime`        | `max`                                 | Mapped internally; warns                     |
+| `TimePicker.minTime`                | `min`                                 | Mapped internally; warns                     |
+| `TimePicker.maxTime`                | `max`                                 | Mapped internally; warns                     |
+| `useDatePicker` composable          | use picker components directly        | Warns on call                                |
+| `getDate` / `getDatesAfter` / etc.  | use picker components directly        | JSDoc only; no runtime warning               |
+| `FeatherIcon`                       | `lucide-*` strings (or a `Component`) | Warns when feather names pass through        |
+| Dialog legacy `options` blob        | flat top-level props                  | Warns once per instance                      |
+| Dialog `#body*` slots               | `#default` / `#title` / `#actions`    | Warns when used                              |
+| Dialog `icon.appearance`            | `icon.theme`                          | Auto-mapped; warns                           |
+| `confirmDialog()`                   | `dialog.confirm()`                    | Warns on call                                |

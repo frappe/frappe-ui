@@ -19,8 +19,7 @@ export function createItemSlotRender(name: string) {
       slotProps: { type: Object, required: true },
     },
     setup(innerProps) {
-      return () =>
-        (innerProps.render as (p: any) => any)(innerProps.slotProps)
+      return () => (innerProps.render as (p: any) => any)(innerProps.slotProps)
     },
   })
 }

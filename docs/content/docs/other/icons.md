@@ -152,14 +152,14 @@ an inline `<svg>`.
 
 ## Which one should I use?
 
-| Situation                                   | Use                          |
-| ------------------------------------------- | ---------------------------- |
-| Static icon in a template                   | Class — `lucide-menu`        |
-| Icon name from props/data with a known set  | Class — list each literal    |
-| Icon name truly dynamic (loops, API data)   | `~icons/lucide/*` import     |
-| Passing an icon as a prop value             | `~icons/lucide/*` import     |
-| Inside an `<svg>` (need real SVG children)  | `~icons/lucide/*` import     |
-| Quick prototyping in a template             | `<LucideName />` auto-import |
+| Situation                                  | Use                          |
+| ------------------------------------------ | ---------------------------- |
+| Static icon in a template                  | Class — `lucide-menu`        |
+| Icon name from props/data with a known set | Class — list each literal    |
+| Icon name truly dynamic (loops, API data)  | `~icons/lucide/*` import     |
+| Passing an icon as a prop value            | `~icons/lucide/*` import     |
+| Inside an `<svg>` (need real SVG children) | `~icons/lucide/*` import     |
+| Quick prototyping in a template            | `<LucideName />` auto-import |
 
 In most components you write, the class form is the right answer.
 
@@ -180,7 +180,8 @@ class string or a component reference.
 <!-- ✅ Class form (recommended) -->
 <Button icon-left="lucide-plus" label="New task" />
 <Button icon-right="lucide-arrow-right" label="Continue" />
-<Button icon="lucide-settings" />  <!-- icon-only -->
+<Button icon="lucide-settings" />
+<!-- icon-only -->
 
 <!-- Component form — for dynamic icons or pass-through cases -->
 <script setup>
@@ -204,9 +205,9 @@ shapes as `Button.iconLeft`:
 ```vue
 <script setup>
 const options = [
-  { label: 'Profile',  icon: 'lucide-user',     onClick: () => {} },
+  { label: 'Profile', icon: 'lucide-user', onClick: () => {} },
   { label: 'Settings', icon: 'lucide-settings', onClick: () => {} },
-  { label: 'Sign out', icon: 'lucide-log-out',  onClick: () => {} },
+  { label: 'Sign out', icon: 'lucide-log-out', onClick: () => {} },
 ]
 </script>
 

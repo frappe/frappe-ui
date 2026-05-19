@@ -4,7 +4,7 @@
       <div
         ref="anchorRef"
         :class="['flex', $attrs.class]"
-        :style="($attrs.style as StyleValue)"
+        :style="$attrs.style as StyleValue"
         @mouseover="onMouseover"
         @mouseleave="onMouseleave"
       >
@@ -247,7 +247,7 @@ onUnmounted(() => {
 
 defineSlots<{
   /** Content of the trigger/anchor element */
-  target?: (props: {
+  'target'?: (props: {
     togglePopover: () => void
     updatePosition: () => void
     open: () => void
@@ -256,7 +256,7 @@ defineSlots<{
   }) => any
 
   /** Main content of the popover body */
-  body?: (props: {
+  'body'?: (props: {
     togglePopover: () => void
     updatePosition: () => void
     open: () => void
@@ -273,7 +273,6 @@ defineSlots<{
     isOpen: boolean
   }) => any
 }>()
-
 </script>
 
 <style>

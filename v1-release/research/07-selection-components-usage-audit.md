@@ -85,11 +85,13 @@ Representative files inspected:
 ### Dropdown
 
 **What it is used for**
+
 - By far the dominant menu/action primitive.
 - Used mostly for action menus, not value selection.
 - Common option shape is already very consistent: `label`, `icon`, `onClick`, plus occasional `group`, `hideLabel`, `submenu`, `switch`, `component`, `condition`.
 
 **Default vs custom rendering**
+
 - **Mostly default rendering** for standard action menus:
   - `insights/frontend/src/query/QueryMenu.vue`
   - `meet/frontend/src/components/FloatingControls.vue`
@@ -102,6 +104,7 @@ Representative files inspected:
   - destructive full-width button rows
 
 **Customization patterns found**
+
 - Trigger customization is common:
   - `#default` / slot `{ open }` used to rotate chevrons or style the trigger
   - examples:
@@ -121,6 +124,7 @@ Representative files inspected:
   - `switch`: `drive/frontend/src/pages/Document.vue`
 
 **Main takeaway**
+
 - `Dropdown` is useful and widely adopted.
 - Its biggest weakness is item customization: once consumers need anything beyond the stock row, they often have to take over the whole row shell.
 
@@ -129,6 +133,7 @@ Representative files inspected:
 ### Select
 
 **What it is used for**
+
 - Low-to-moderate usage.
 - Mostly narrow, static enums:
   - status/type/scope/sort choices
@@ -139,11 +144,13 @@ Representative files inspected:
     - `gameplan/frontend/src/pages/People.vue`
 
 **Default vs custom rendering**
+
 - **Almost entirely default rendering.**
 - Only one clear real-world custom option rendering case stood out:
   - `helpdesk/desk/src/components/Settings/SavedReplies/SavedReplyView.vue`
 
 **Customization patterns found**
+
 - Trigger `#prefix` is common:
   - icons before selected value in `gameplan/frontend/src/pages/People.vue`
   - `helpdesk/desk/src/components/Settings/SavedReplies/SavedReplyView.vue`
@@ -153,6 +160,7 @@ Representative files inspected:
   - the component still owns the row shell/hover/selection styling
 
 **Main takeaway**
+
 - Real usage supports keeping `Select` small and boring.
 - It is not where teams are asking for deep rendering flexibility.
 - Its current customization style is better than `Dropdown` because the shell remains component-owned.
@@ -162,6 +170,7 @@ Representative files inspected:
 ### Combobox
 
 **What it is used for**
+
 - Direct use is **much lighter** than `Autocomplete`.
 - Real direct usage is mostly:
   - simple searchable single-selects
@@ -173,6 +182,7 @@ Representative files inspected:
   - `drive/frontend/src/components/DocEditor/components/FontFamily.vue`
 
 **Default vs custom rendering**
+
 - Direct app usage is mostly default/plain.
 - The notable real-world advanced case:
   - `gameplan/frontend/src/components/NewSpaceDialog.vue`
@@ -181,6 +191,7 @@ Representative files inspected:
     - custom “Add New Category” row
 
 **Customization patterns found**
+
 - Per-option custom schema (`type: 'custom'`, `slotName`) exists, but I found only one strong real app usage.
 - I did **not** find meaningful real app usage of Combobox `render` as a public customization pattern.
 - Richer flows still drop to raw headless comboboxes instead of the higher-level component:
@@ -189,6 +200,7 @@ Representative files inspected:
   - `helpdesk/desk/src/components/Settings/Assignment Rules/AssigneeSearch.vue`
 
 **Main takeaway**
+
 - `Combobox` looks more like a lower-level primitive today.
 - The per-option `slotName` / `render` model is real, but not strongly validated by usage.
 
@@ -197,16 +209,19 @@ Representative files inspected:
 ### MultiSelect
 
 **What it is used for**
+
 - Surprisingly light direct usage in the shared component surface.
 - Main-library-style usage found mostly in simple cases:
   - `helpdesk/desk/src/components/Settings/SavedReplies/SavedReplyView.vue`
   - `insights/frontend/src2/query/components/JoinSelectorDialog.vue`
 
 **Default vs custom rendering**
+
 - In the audited real usages, **almost all MultiSelect usage is default**.
 - I did not find meaningful real-world customization of MultiSelect item rendering in app code.
 
 **Adjacent patterns that matter**
+
 - When apps need richer multi-select behavior, they often do **not** use the shared `MultiSelect`:
   - `gameplan/frontend/src/components/MultiSelect.vue`
     - grouped options
@@ -219,6 +234,7 @@ Representative files inspected:
     - uses local `@/components/MultiSelect.vue` for tag-like email/phone entry (`v-model:items`)
 
 **Main takeaway**
+
 - Current shared `MultiSelect` seems underpowered for richer real-world needs.
 - Apps needing grouped/visual/rich multi-pick behavior are building local alternatives.
 
@@ -227,6 +243,7 @@ Representative files inspected:
 ### Autocomplete
 
 **What it is used for**
+
 - This is the most heavily used search-based selection API in real apps.
 - Especially dominant in:
   - `insights/frontend/src`
@@ -234,6 +251,7 @@ Representative files inspected:
   - Helpdesk/CRM/HRMS wrappers for remote link/search fields
 
 **Default vs custom rendering**
+
 - **Mostly default item rendering**, with light customization.
 - Common customizations are:
   - custom trigger/target
@@ -242,6 +260,7 @@ Representative files inspected:
   - app-local wrappers adding `item-label`
 
 **Customization patterns found**
+
 - Good shell-owned customization pattern already exists here:
   - `insights/frontend/src/query/ChartTypeSelector.vue`
     - custom target
@@ -260,6 +279,7 @@ Representative files inspected:
   - `insights/frontend/src2/data_store/ImportTableDialog.vue` uses `v-model:query`
 
 **Main takeaway**
+
 - `Autocomplete` already points to the best customization model in this audit:
   - component owns the row shell
   - consumer customizes sub-parts
@@ -425,7 +445,7 @@ Representative files inspected:
   - `#item-prefix`
   - `#item-label`
   - footer actions  
-  CRM and HRMS have near-equivalent patterns:
+    CRM and HRMS have near-equivalent patterns:
   - `crm/frontend/src/components/Controls/Link.vue`
   - `hrms/frontend/src/components/Link.vue`
 

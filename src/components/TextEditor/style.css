@@ -178,8 +178,11 @@ img.ProseMirror-selectednode {
    Edit mode:    no override — natural 14px × 1.7 = 23.8px, avoids jump when typing
    Readonly mode: scoped via [contenteditable=false] + ProseMirror-trailingBreak class
    to precisely target empty paragraphs (not inline <br> in content) */
-.ProseMirror[contenteditable='false'] .prose-v3 p:has(> br.ProseMirror-trailingBreak:only-child),
-.prose-v3.ProseMirror[contenteditable='false'] p:has(> br.ProseMirror-trailingBreak:only-child) {
+.ProseMirror[contenteditable='false']
+  .prose-v3
+  p:has(> br.ProseMirror-trailingBreak:only-child),
+.prose-v3.ProseMirror[contenteditable='false']
+  p:has(> br.ProseMirror-trailingBreak:only-child) {
   line-height: 20px;
 }
 

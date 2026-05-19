@@ -93,7 +93,10 @@ describe('FormControl', () => {
       cy.spy(win.console, 'warn').as('consoleWarn')
     })
     cy.mount(FormControl, { props: { label: 'Title' } })
-    cy.get('@consoleWarn').should('not.have.been.calledWithMatch', /FormControl/)
+    cy.get('@consoleWarn').should(
+      'not.have.been.calledWithMatch',
+      /FormControl/,
+    )
   })
 
   describe('dispatcher delegation', () => {
@@ -187,7 +190,7 @@ describe('FormControl', () => {
       cy.mount({
         render: () =>
           h('div', { style: 'width: 240px; padding: 16px;' }, [
-            h('div', { 'data-cy': 'col', style: 'min-width: 140px;' }, [
+            h('div', { 'data-cy': 'col', 'style': 'min-width: 140px;' }, [
               h(FormControl, { type: 'select', options }),
             ]),
           ]),
@@ -205,7 +208,7 @@ describe('FormControl', () => {
       cy.mount({
         render: () =>
           h('div', { style: 'width: 240px; padding: 16px;' }, [
-            h('div', { 'data-cy': 'col', style: 'min-width: 140px;' }, [
+            h('div', { 'data-cy': 'col', 'style': 'min-width: 140px;' }, [
               h(FormControl, { type: 'combobox', options }),
             ]),
           ]),

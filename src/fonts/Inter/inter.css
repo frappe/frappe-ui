@@ -13,11 +13,11 @@
     url('Inter.var.woff2?v=3.19') format('woff2');
   src: url('Inter.var.woff2?v=3.19') format('woff2') tech('variations');
   unicode-range:
-    U+0000-05FF, /* Latin, Greek, Cyrillic, Hebrew */
-    U+0700-1FFF, /* Extended Latin, Greek, Cyrillic, Armenian, Georgian */
-    U+2C00-2FFF, /* Additional scripts */
-    U+4E00-9FFF, /* CJK (Chinese, Japanese, Korean) */
-    U+AC00-D7AF; /* Hangul (Korean) */
+    U+0000-05FF,
+    /* Latin, Greek, Cyrillic, Hebrew */ U+0700-1FFF,
+    /* Extended Latin, Greek, Cyrillic, Armenian, Georgian */ U+2C00-2FFF,
+    /* Additional scripts */ U+4E00-9FFF,
+    /* CJK (Chinese, Japanese, Korean) */ U+AC00-D7AF; /* Hangul (Korean) */
 }
 @font-face {
   font-family: 'InterVar';
@@ -28,7 +28,8 @@
     url('Inter-Italic.var.woff2?v=3.19') format('woff2-variations'),
     url('Inter-Italic.var.woff2?v=3.19') format('woff2');
   src: url('Inter-Italic.var.woff2?v=3.19') format('woff2') tech('variations');
-  unicode-range: U+0000-05FF, U+0700-1FFF, U+2C00-2FFF, U+4E00-9FFF, U+AC00-D7AF;
+  unicode-range:
+    U+0000-05FF, U+0700-1FFF, U+2C00-2FFF, U+4E00-9FFF, U+AC00-D7AF;
 }
 /* Aliased 'InterVar' font as 'Inter' */
 /* To prevent breaking usage of `font-family: 'Inter'` */
@@ -42,11 +43,11 @@
     url('Inter.var.woff2?v=3.19') format('woff2');
   src: url('Inter.var.woff2?v=3.19') format('woff2') tech('variations');
   unicode-range:
-    U+0000-05FF, /* Latin, Greek, Cyrillic, Hebrew */
-    U+0700-1FFF, /* Extended Latin, Greek, Cyrillic, Armenian, Georgian */
-    U+2C00-2FFF, /* Additional scripts */
-    U+4E00-9FFF, /* CJK (Chinese, Japanese, Korean) */
-    U+AC00-D7AF; /* Hangul (Korean) */
+    U+0000-05FF,
+    /* Latin, Greek, Cyrillic, Hebrew */ U+0700-1FFF,
+    /* Extended Latin, Greek, Cyrillic, Armenian, Georgian */ U+2C00-2FFF,
+    /* Additional scripts */ U+4E00-9FFF,
+    /* CJK (Chinese, Japanese, Korean) */ U+AC00-D7AF; /* Hangul (Korean) */
 }
 @font-face {
   font-family: 'Inter';
@@ -57,5 +58,6 @@
     url('Inter-Italic.var.woff2?v=3.19') format('woff2-variations'),
     url('Inter-Italic.var.woff2?v=3.19') format('woff2');
   src: url('Inter-Italic.var.woff2?v=3.19') format('woff2') tech('variations');
-  unicode-range: U+0000-05FF, U+0700-1FFF, U+2C00-2FFF, U+4E00-9FFF, U+AC00-D7AF;
+  unicode-range:
+    U+0000-05FF, U+0700-1FFF, U+2C00-2FFF, U+4E00-9FFF, U+AC00-D7AF;
 }

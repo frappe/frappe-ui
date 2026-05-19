@@ -139,7 +139,7 @@ function openImageViewerModal(images: ImageInfo[], initialIndex: number) {
   const app = createApp({
     render() {
       return h(ImageViewerModal, {
-        show: true,
+        'show': true,
         images, // Pass the collected image data
         initialIndex, // Pass the starting index
         'onUpdate:show': (value: boolean) => {

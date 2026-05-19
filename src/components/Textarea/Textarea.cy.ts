@@ -19,7 +19,7 @@ describe('Textarea', () => {
   it('emits update:modelValue on input', () => {
     cy.mount(Textarea, {
       props: {
-        modelValue: '',
+        'modelValue': '',
         'onUpdate:modelValue': cy.stub().as('updateModelValue'),
       },
     })
@@ -56,7 +56,7 @@ describe('Textarea', () => {
     cy.clock()
     cy.mount(Textarea, {
       props: {
-        debounce: 300,
+        'debounce': 300,
         'onUpdate:modelValue': cy.stub().as('updateModelValue'),
       },
     })

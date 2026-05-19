@@ -113,9 +113,9 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ steps.app-token.outputs.token }}
-          allowed_non_write_users: "*"
-          display_report: "true"
-          prompt: "/barista-review REPO: ${{ github.repository }} PR_NUMBER: ${{ steps.pr.outputs.number }} EVENT: ${{ github.event_name }}"
+          allowed_non_write_users: '*'
+          display_report: 'true'
+          prompt: '/barista-review REPO: ${{ github.repository }} PR_NUMBER: ${{ steps.pr.outputs.number }} EVENT: ${{ github.event_name }}'
 
       - name: Append run-stats footer to barista's comment
         if: always() && steps.run-barista.outcome == 'success'

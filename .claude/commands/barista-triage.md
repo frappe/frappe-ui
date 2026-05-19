@@ -133,6 +133,7 @@ Nothing else is permitted.
 # Examples
 
 **Good — terse hypothesis (preferred shape):**
+
 > Likely a CJS/ESM interop bug in `src/components/FeatherIcon.vue:3`.
 >
 > - `feather-icons` v4 ships only `dist/feather.js` (CJS, no ESM default export).
@@ -141,20 +142,24 @@ Nothing else is permitted.
 > - Workaround for users: add `feather-icons` to `optimizeDeps.include` in Vite config.
 
 **Good — duplicate found (one-liner):**
+
 > Likely a duplicate of #612 (open) — same `MultiSelect` focus loss after tag removal.
 
 **Good — needs more info (only after investigation):**
+
 > Couldn't reproduce from the description. `useResource` is at `src/data/resources.ts`; nothing obvious matches.
 >
 > - Which call signature did you use?
 > - frappe-ui version + browser?
 
 **Bad — too long, prose-style, full of filler:**
+
 > Thanks for filing this! Could you share: the version, the component, a repro, and what you expected vs. what happened?
 
 (Filler greeting, no investigation, prose where bullets would work. Don't ship this.)
 
 **Anti-pattern (real case from #637):** the body said
+
 > `Uncaught SyntaxError: The requested module '/node_modules/feather-icons/dist/feather.js' does not provide an export named 'default' (at FeatherIcon.vue:3:8)`
 
 …plus an attached screenshot. Asking for "version, component, repro" here is wrong — the body already gives you a file:line and the offending dep. The right move is: `Read src/components/FeatherIcon.vue` lines 1-10, check `package.json` for the `feather-icons` version, `git log -- src/components/FeatherIcon.vue`, then comment with what you found.

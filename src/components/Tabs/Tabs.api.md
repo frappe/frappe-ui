@@ -58,11 +58,11 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="Tabs" :data="propsData"/> 
+<PropsTable name="Tabs" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
+<SlotsTable :data="slotsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

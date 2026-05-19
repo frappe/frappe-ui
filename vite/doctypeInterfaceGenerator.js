@@ -114,25 +114,25 @@ export class DocTypeInterfaceGenerator {
     const fields = jsonData.fields
 
     const typeMapping = {
-      Data: 'string',
+      'Data': 'string',
       'Text Editor': 'string',
-      Link: 'string',
-      Table: 'any[]',
+      'Link': 'string',
+      'Table': 'any[]',
       'Table MultiSelect': 'any[]',
-      Percent: 'number',
-      Int: 'number',
-      Float: 'number',
-      Datetime: 'string', // "YYYY-MM-DD HH:MM:SS"
-      Date: 'string', // "YYYY-MM-DD"
-      Check: '0 | 1',
+      'Percent': 'number',
+      'Int': 'number',
+      'Float': 'number',
+      'Datetime': 'string', // "YYYY-MM-DD HH:MM:SS"
+      'Date': 'string', // "YYYY-MM-DD"
+      'Check': '0 | 1',
       'Attach Image': 'string',
       'Dynamic Link': 'string',
       'Small Text': 'string',
-      Color: 'string',
-      Text: 'string',
-      Autocomplete: 'string',
-      Password: 'string',
-      Code: 'string',
+      'Color': 'string',
+      'Text': 'string',
+      'Autocomplete': 'string',
+      'Password': 'string',
+      'Code': 'string',
       'Read Only': 'string',
     }
 

@@ -1,15 +1,9 @@
-import {
-  computed,
-  reactive,
-  readonly,
-  Ref,
-  MaybeRefOrGetter,
-  toValue,
-} from 'vue'
-import { UseFetchOptions, AfterFetchContext } from '@vueuse/core'
+import type { Ref, MaybeRefOrGetter } from 'vue'
+import { computed, reactive, readonly, toValue } from 'vue'
+import type { UseFetchOptions, AfterFetchContext } from '@vueuse/core'
 import { useFrappeFetch } from '../useFrappeFetch'
 import { useCall } from '../useCall/useCall'
-import { UseCallOptions } from '../useCall/types'
+import type { UseCallOptions } from '../useCall/types'
 import { docStore } from '../docStore'
 import { listStore } from '../useList/listStore'
 
@@ -24,8 +18,10 @@ type TransformMethods<T> = {
       : never
 }
 
-interface DocMethodOption<T = any>
-  extends Omit<UseCallOptions<T>, 'url' | 'baseUrl'> {
+interface DocMethodOption<T = any> extends Omit<
+  UseCallOptions<T>,
+  'url' | 'baseUrl'
+> {
   name: string
 }
 
