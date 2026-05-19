@@ -81,7 +81,7 @@ The "done" components have already converged on these names. A new component or 
 - Form/labeling (`P5`): `label`, `description`, `error`, `required` — via `InputLabelingProps` from `src/composables/useInputLabeling.ts`. Don't redefine.
 - Content: `icon` (`string | Component`, lucide-namespaced strings — `P11`), `placeholder`, `options`.
 - Bounds (any axis — date, number, length, count): `min`, `max`, `step`. Never `minDate`/`maxDate`/`minLength`/`maxLength`/`minValue` — the type already says what's being bounded. Used today by `Slider` and `DatePicker`/`DateTimePicker`/`DateRangePicker`; a new component bounding a numeric or temporal axis must reuse these names.
-- Dismiss/close: `dismissible` (outside click + Esc, default `true`). Not `closable`, `dismissible`, `closeable`, `disableOutsideClickToClose`.
+- Dismiss/close: `dismissible` (outside click + Esc, default `true`). Not `closable`, `closeable`, `disableOutsideClickToClose`.
 - Picker typing: `typeable` (default `true`). Not `allowCustom`, `readonly`, `allowCustomValue`.
 - Open-after-select: `keepOpen` (default `false`). Not `autoClose`.
 
