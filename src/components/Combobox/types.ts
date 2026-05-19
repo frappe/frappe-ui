@@ -278,4 +278,5 @@ export interface ComboboxEmits {
 
 export interface ComboboxExposed {
   reset: () => void
+  focus: () => void
 }
