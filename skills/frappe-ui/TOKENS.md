@@ -54,20 +54,27 @@ Never reach for `text-gray-900`, `bg-white`, `border-gray-200` — they don't tr
 
 ## Typography
 
-`font-family` is `InterVar` by default. The custom font sizes:
+`font-family` is `InterVar` by default. The preset ships **two parallel scales** with the same pixel sizes but different line-heights:
 
-| Class       | Size  | Use                           |
-|-------------|-------|-------------------------------|
-| `text-2xs`  | 11px  | Micro-labels, badges          |
-| `text-xs`   | 12px  | Captions, meta                |
-| `text-sm`   | 13px  | Secondary text, dense UI      |
-| `text-base` | 14px  | Body (default)                |
-| `text-lg`   | 16px  | Section subheads              |
-| `text-xl`   | 18px  | Card / panel titles           |
-| `text-2xl`  | 20px  | Page titles                   |
-| `text-3xl`+ | 24px+ | Marketing / hero only         |
+- `text-*` — tight (`line-height: 1.15`). For **single-line labels**: headings, button text, badges, table cells, stat values, "2h ago" timestamps.
+- `text-p-*` — loose (`line-height: 1.5–1.6`). For **multi-line / descriptive text**: paragraphs, descriptions, helper text, anything that may wrap.
 
-All have tuned line-height + letter-spacing — don't override unless you know why.
+Pick the wrong one and copy looks cramped (multi-line text in `text-*`) or floppy (one-line labels in `text-p-*`).
+
+| Class                       | Size  | Use                                     |
+|-----------------------------|-------|-----------------------------------------|
+| `text-2xs` / `text-p-2xs`   | 11px  | Micro-labels, badges / tiny captions    |
+| `text-xs` / `text-p-xs`     | 12px  | Captions, meta / multi-line meta        |
+| `text-sm` / `text-p-sm`     | 13px  | Secondary labels / secondary paragraphs |
+| `text-base` / `text-p-base` | 14px  | Body labels / body paragraphs (default) |
+| `text-lg` / `text-p-lg`     | 16px  | Section subheads / long-form intro      |
+| `text-xl` / `text-p-xl`     | 18px  | Card / panel titles / lead paragraphs   |
+| `text-2xl`                  | 20px  | Page titles                             |
+| `text-3xl`+                 | 24px+ | Marketing / hero only                   |
+
+**Heuristic:** if the element is `<p>`, a description below a label, a feed entry that wraps, or helper text — use `text-p-*`. If it's `<h*>`, a `<Button>`/`<Badge>` label, a one-line meta row like "Updated 2h ago", or a stat value — use `text-*`.
+
+All have tuned letter-spacing — don't override unless you know why.
 
 ## Radius
 
