@@ -349,6 +349,12 @@ function reset() {
   emit('update:selectedOption', null)
 }
 
+function focus() {
+  const id = isButtonMode.value ? `${inputId.value}-search-input` : inputId.value
+  const el = document.getElementById(id) as HTMLInputElement | null
+  el?.focus()
+}
+
 watch(
   () => props.open,
   (value) => {
@@ -385,7 +391,7 @@ watch(open, (isOpen, wasOpen) => {
   query.value = isButtonMode.value ? '' : displayValue.value
 })
 
-defineExpose<ComboboxExposed>({ reset })
+defineExpose<ComboboxExposed>({ reset, focus })
 defineSlots<ComboboxSlots>()
 </script>
 
