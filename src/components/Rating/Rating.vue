@@ -17,81 +17,91 @@
     </InputLabel>
     <Tooltip
       :text="tooltipText ?? ''"
-      :disabled="!props.showValueTooltip"
+      :disabled="!props.showTooltip"
       :hoverDelay="0"
-      :placement="placement"
+      :placement="side"
     >
       <div
         :id="inputId"
         ref="rootRef"
-      class="rating-stars inline-flex shrink-0 gap-0.5 leading-none focus:outline-none"
-      :class="hasLabeling ? null : (attrs.class as any)"
-      :style="hasLabeling ? null : (attrs.style as any)"
-      :role="isSliderMode ? 'slider' : 'radiogroup'"
-      :tabindex="rootTabindex"
-      :aria-labelledby="labelledBy"
-      :aria-describedby="describedBy"
-      :aria-errormessage="hasError ? errorMessageId : undefined"
-      :aria-required="props.required || undefined"
-      :aria-invalid="hasError || undefined"
-      :aria-readonly="props.readonly || undefined"
-      :aria-orientation="isSliderMode ? 'horizontal' : undefined"
-      :aria-valuemin="isSliderMode ? 0 : undefined"
-      :aria-valuemax="isSliderMode ? starCount : undefined"
-      :aria-valuenow="isSliderMode ? savedValue : undefined"
-      :aria-valuetext="isSliderMode ? formatValue(savedValue) : undefined"
-      :data-readonly="props.readonly || undefined"
-      data-slot="control"
-      v-bind="dataAttrs"
-      @mouseleave="onLeave"
-      @keydown="onKeydown"
-    >
-      <button
-        v-for="index in starCount"
-        :key="index"
-        type="button"
-        class="rating-star relative inline-flex shrink-0 focus:outline-none focus-visible:ring focus-visible:ring-outline-gray-3 rounded-sm"
-        :class="[
-          sizeClass,
-          props.readonly ? 'cursor-default' : 'cursor-pointer',
-        ]"
-        data-slot="star"
-        :data-index="index"
-        :data-state="starState(index)"
-        :tabindex="starTabindex(index)"
-        :role="isSliderMode ? undefined : 'radio'"
-        :aria-checked="isSliderMode ? undefined : index === savedValue"
-        :aria-posinset="isSliderMode ? undefined : index"
-        :aria-setsize="isSliderMode ? undefined : starCount"
-        :aria-label="isSliderMode ? undefined : `${index} of ${starCount}`"
-        @pointermove="onStarMove($event, index)"
-        @click="onStarClick($event, index)"
-        @focus="focusedIndex = index"
+        class="rating-stars inline-flex shrink-0 gap-0.5 leading-none focus:outline-none"
+        :class="hasLabeling ? null : (attrs.class as any)"
+        :style="hasLabeling ? null : (attrs.style as any)"
+        :role="isSliderMode ? 'slider' : 'radiogroup'"
+        :tabindex="rootTabindex"
+        :aria-labelledby="labelledBy"
+        :aria-describedby="describedBy"
+        :aria-errormessage="hasError ? errorMessageId : undefined"
+        :aria-required="props.required || undefined"
+        :aria-invalid="hasError || undefined"
+        :aria-readonly="props.readonly || undefined"
+        :aria-orientation="isSliderMode ? 'horizontal' : undefined"
+        :aria-valuemin="isSliderMode ? 0 : undefined"
+        :aria-valuemax="isSliderMode ? starCount : undefined"
+        :aria-valuenow="isSliderMode ? savedValue : undefined"
+        :aria-valuetext="isSliderMode ? formatValue(savedValue) : undefined"
+        :data-readonly="props.readonly || undefined"
+        data-slot="control"
+        v-bind="dataAttrs"
+        @mouseleave="onLeave"
+        @keydown="onKeydown"
       >
-        <span
-          class="rating-half rating-half-left"
-          :data-state="halfState(index - 0.5)"
-          aria-hidden="true"
+        <button
+          v-for="index in starCount"
+          :key="index"
+          type="button"
+          class="rating-star relative inline-flex shrink-0 focus:outline-none focus-visible:ring focus-visible:ring-outline-gray-3 rounded-sm"
+          :class="[
+            sizeClass,
+            props.readonly ? 'cursor-default' : 'cursor-pointer',
+          ]"
+          data-slot="star"
+          :data-index="index"
+          :data-state="starState(index)"
+          :tabindex="starTabindex(index)"
+          :role="isSliderMode ? undefined : 'radio'"
+          :aria-checked="isSliderMode ? undefined : index === savedValue"
+          :aria-posinset="isSliderMode ? undefined : index"
+          :aria-setsize="isSliderMode ? undefined : starCount"
+          :aria-label="isSliderMode ? undefined : `${index} of ${starCount}`"
+          @pointermove="onStarMove($event, index)"
+          @click="onStarClick($event, index)"
+          @focus="focusedIndex = index"
         >
-          <component
-            :is="props.icon"
-            fill="currentColor"
-            :class="['rating-icon', sizeClass]"
-          />
-        </span>
-        <span
-          class="rating-half rating-half-right"
-          :data-state="halfState(index)"
-          aria-hidden="true"
-        >
-          <component
-            :is="props.icon"
-            fill="currentColor"
-            :class="['rating-icon', sizeClass]"
-          />
-        </span>
-      </button>
-    </div>
+          <span
+            class="rating-half rating-half-left"
+            :data-state="halfState(index - 0.5)"
+            aria-hidden="true"
+          >
+            <span
+              v-if="typeof props.icon === 'string'"
+              :class="[props.icon, 'rating-icon', sizeClass]"
+            />
+            <component
+              v-else
+              :is="props.icon"
+              fill="currentColor"
+              :class="['rating-icon', sizeClass]"
+            />
+          </span>
+          <span
+            class="rating-half rating-half-right"
+            :data-state="halfState(index)"
+            aria-hidden="true"
+          >
+            <span
+              v-if="typeof props.icon === 'string'"
+              :class="[props.icon, 'rating-icon', sizeClass]"
+            />
+            <component
+              v-else
+              :is="props.icon"
+              fill="currentColor"
+              :class="['rating-icon', sizeClass]"
+            />
+          </span>
+        </button>
+      </div>
     </Tooltip>
     <InputDescription
       v-if="showDescription || $slots.description"
@@ -120,9 +130,9 @@ const props = withDefaults(defineProps<RatingProps>(), {
   size: 'md',
   readonly: false,
   step: 1,
-  allowClear: false,
-  showValueTooltip: false,
-  placement: 'right',
+  clearable: false,
+  showTooltip: false,
+  side: 'right',
   icon: () => LucideStar,
 })
 
@@ -225,13 +235,13 @@ function onLeave() {
 
 const tooltipText = computed(() => {
   const display = props.readonly ? savedValue.value : hoveredValue.value
-  if (!display) return null
+  if (display == null) return null
   return `${formatValue(display)} / ${starCount.value}`
 })
 
 function commit(next: number) {
   let value = Math.max(0, Math.min(starCount.value, roundToStep(next)))
-  if (props.allowClear && value === savedValue.value) value = 0
+  if (props.clearable && value === savedValue.value) value = 0
   model.value = value
 }
 
@@ -325,7 +335,7 @@ function onKeydown(e: KeyboardEvent) {
       if (/^[0-9]$/.test(e.key)) {
         const n = parseInt(e.key, 10)
         if (n === 0) {
-          if (props.allowClear) {
+          if (props.clearable) {
             e.preventDefault()
             model.value = 0
           }

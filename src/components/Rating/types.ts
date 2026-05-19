@@ -29,18 +29,19 @@ export interface RatingProps extends InputLabelingProps {
    * If true, clicking the currently-selected value clears the rating to `0`.
    * Defaults to `false`.
    */
-  allowClear?: boolean
+  clearable?: boolean
 
   /**
    * If true, shows a tooltip with the current/previewed value (e.g. `"3.5 / 5"`)
    * on hover. Defaults to `false`.
    */
-  showValueTooltip?: boolean
+  showTooltip?: boolean
 
   /**
-   * Tooltips placement. Defaults to 'right'
+   * Side of the tooltip.
+   * Defaults to 'right'
    */
-  placement?: TooltipContentProps['side']
+  side?: TooltipContentProps['side']
 
   /**
    * Icon to render for each star. Accepts a Vue component (e.g. an auto-imported
@@ -48,7 +49,7 @@ export interface RatingProps extends InputLabelingProps {
    * The component receives `fill="currentColor"` so closed-path SVGs render filled.
    * Defaults to a filled lucide-star.
    */
-  icon?: Component
+  icon?: string | Component
 
   /** Size of the rating component. */
   size?: InputSize
