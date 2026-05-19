@@ -2,3 +2,5 @@
 # after adding tailwind plugin
 54563d9deba9d95c1212c1be2217ce8fa181162b
 8e07a190aff0eba2a3e072f9857a654dca6fa0e1
+# Applied oxlint --fix and oxfmt
+7a5b2ea4d0f24821dc5d44a1d3c443bd73e3fd64
