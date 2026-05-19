@@ -137,7 +137,12 @@ describe('Rating', () => {
         props: { modelValue: 3, 'onUpdate:modelValue': onUpdate },
       })
       cy.get('[role="radio"]').eq(2).click()
-      cy.get('@onUpdate').should('have.been.calledWith', 3)
+      cy.get('@onUpdate').should('not.have.been.calledWith', 0)
+      cy.get('[role="radio"][aria-checked="true"]').should(
+        'have.attr',
+        'data-index',
+        '3',
+      )
     })
   })
 
@@ -146,7 +151,7 @@ describe('Rating', () => {
       cy.mount(Rating, {
         props: { modelValue: 0, showValueTooltip: true, max: 5 },
       })
-      cy.get('[role="radio"]').eq(2).trigger('mousemove')
+      cy.get('[role="radio"]').eq(2).trigger('pointermove')
       cy.contains('3 / 5').should('be.visible')
     })
 

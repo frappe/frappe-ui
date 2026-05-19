@@ -17,7 +17,7 @@
     </InputLabel>
     <Tooltip
       :text="tooltipText ?? ''"
-      :disabled="!props.showValueTooltip || !tooltipText"
+      :disabled="!props.showValueTooltip"
       :hoverDelay="0"
       :placement="placement"
     >
@@ -64,7 +64,7 @@
         :aria-posinset="isSliderMode ? undefined : index"
         :aria-setsize="isSliderMode ? undefined : starCount"
         :aria-label="isSliderMode ? undefined : `${index} of ${starCount}`"
-        @mousemove="onStarMove($event, index)"
+        @pointermove="onStarMove($event, index)"
         @click="onStarClick($event, index)"
         @focus="focusedIndex = index"
       >
