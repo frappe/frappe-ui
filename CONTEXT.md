@@ -92,10 +92,46 @@ Molecules that bridge frappe-ui to the Frappe Desk backend. They depend on backe
 A P5 input control that picks a single record from a Frappe doctype. Bound via unnamed `v-model` to the record's primary key (string) or `null` when empty. Built on `Combobox`, scoped to one doctype via the `doctype` prop and narrowed via `filters`. Renders a default clear affordance when the value is set and the field is not required. Opt into a "Create new" action row via the `creatable` boolean prop, which emits `@create` with the typed query. Accepts the full P5 labeling contract (`label`, `description`, `error`, `required`).
 _Avoid_: using `Link` for non-doctype option lists — reach for `Combobox` directly. `allowCreate`, `allowClear`, `allowRedirect` are removed in v1 (no deprecation path — these were not present in a published release).
 
+### Editor family
+
+**`frappe-ui/editor`** (subpath):
+The single subpath where the entire editor family lives — primitives, extensions, ready-mades, and the v0 deprecated alias. The only subsystem in frappe-ui that exports from a subpath rather than top-level; reserved for families big enough to warrant their own mental location.
+
+Surface from this subpath:
+- **Primitives (composable + components)**: `useEditor`, `EditorContent`, `EditorFixedMenu`, `EditorBubbleMenu`, `EditorFloatingMenu`, `createSuggestionExtension`. Each primitive is unopinionated, takes the underlying TipTap `Editor` instance as an explicit `:editor` prop, and ships with no auto-loaded extensions.
+- **Extensions**: tiptap-original extensions (with our default config pre-applied) and frappe-custom extensions, all as flat named exports — `Image`, `Mention`, `SlashCommands`, `Tag`, `Table`, `Link`, `Placeholder`, etc. Consumers import what they need and pass through `useEditor({ extensions })`. Tree-shakes naturally.
+- **Ready-mades**: `RichTextEditor`, `CommentEditor`, `InlineEditor`.
+
+The `useEditor` name shadows TipTap's own `useEditor` from `@tiptap/vue-3`. Consumers who import both alias one side: `import { useEditor as useTipTapEditor } from '@tiptap/vue-3'`. The collision is rare in practice (only consumers building deeply custom editors hit it) and the cleaner name wins for the common case.
+
+_Avoid_: importing editor primitives or extensions from `frappe-ui` (top-level) — they don't exist there. The only top-level editor export is the deprecated v0 `TextEditor` alias.
+
+**RichTextEditor**, **CommentEditor**, **InlineEditor**:
+Ready-made compositions built on the editor primitives. Each is a small, opinionated assembly (~50 lines) that wires a fixed set of extensions, menus, and layout. They are the "use this and move on" answer and the canonical example of how to compose `useEditor` + `Editor*` primitives. Consumers needing a different shape compose primitives directly rather than configuring a ready-made.
+- `RichTextEditor` — article/page editor (full extension set, top toolbar). Replaces the v0 `TextEditor` monolith.
+- `CommentEditor` — comment/chat composer (lighter extension set, bottom fixed menu, bubble menu).
+- `InlineEditor` — single-line rich text (bold/italic + bubble menu only).
+_Avoid_: treating ready-mades as configurable behemoths — if a use case doesn't fit, drop to primitives instead of growing the ready-made's prop surface.
+
+**TextEditor** (deprecated, v0):
+The v0 monolith. Retained in v1 as a deprecated alias for one minor release, emitting a one-time warning that points at `RichTextEditor`. Exported from **both** `frappe-ui` (back-compat for existing import paths) and `frappe-ui/editor` (canonical v1 home). Removed in v2 from both.
+
+**headless primitive** / **ready-made** (informal):
+The two layers in the `Editor` family. *Headless primitive* = unopinionated building block, no defaults, owned via explicit refs/props. *Ready-made* = an opinionated assembly of primitives shipped from frappe-ui as a normal component. This pair may extend to other families later but currently applies only to the editor.
+
+**format** (Editor family):
+The content format axis of an editor: `'html' | 'json'`. Default `'html'`. Set on ready-mades as a prop (`<CommentEditor v-model="x" format="json" />`) and on the primitive composable as a top-level option (`Editor.useEditor({ content, format })`). Editors expose content via the unnamed `v-model` (P2-canonical — text content is the primary value); the consumer's chosen `format` decides whether v-model emits HTML strings or `JSONContent` objects. There is no separate `v-model:html` or `v-model:json` — one v-model carries whichever format is configured.
+_Avoid_: type-sniffing the modelValue at runtime; declaring format via a boolean (`:json="true"`); separate v-models per format.
+
+**actions** (Editor ready-mades):
+A single named slot on `CommentEditor` and `RichTextEditor`, rendered inline with the fixed toolbar row inside the editor's border. Receives `{ editor, isEmpty }` so the consumer can wire Submit/Discard buttons to the editor instance without a template ref. `InlineEditor` has no `actions` slot. This is the *only* slot on ready-mades — broader layout customization means dropping to `Editor.*` primitives. Mirrors Dialog's `actions` vocabulary (P6-aligned).
+_Avoid_: adding `#top`/`#bottom`/`#editor` slots to ready-mades; using `actions` for content other than buttons.
+
 ## Relationships
 
 - A **Dialog** has zero or more **actions**, each rendered as a Button in the footer.
 - **Dialog**, **Popover**, **Dropdown**, and **Tooltip** all share the **open** vocabulary (`v-model:open`).
+- **RichTextEditor**, **CommentEditor**, **InlineEditor** are each composed from **Editor** primitives.
 
 ## Flagged ambiguities
 
