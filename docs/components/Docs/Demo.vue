@@ -17,7 +17,7 @@ const expanded = ref(false)
       class="rounded-xl overflow-hidden border border-outline-gray-1 divide-y divide-outline-gray-1"
     >
       <div
-        class="bg-surface-white p-4 sm:p-8 overflow-x-auto scrollbar flex flex-wrap gap-3 items-center"
+        class="bg-surface-white p-4 sm:p-8 overflow-x-auto scrollbar flex flex-wrap gap-3 items-center justify-center min-h-[200px]"
       >
         <slot />
       </div>
@@ -35,7 +35,7 @@ const expanded = ref(false)
 
         <div
           v-if="!expanded"
-          class="pointer-events-none absolute inset-0 bg-gradient-to-t from-surface-gray-1 via-surface-gray-1/70 to-transparent dark:from-surface-black dark:via-surface-black/70"
+          class="pointer-events-none absolute inset-0 bg-gradient-to-t dark:from-surface-white from-surface-gray-1 via-surface-gray-1/70 dark:via-surface-white/70 to-transparent dark:from-surface-black dark:via-surface-black/70"
         />
 
         <div

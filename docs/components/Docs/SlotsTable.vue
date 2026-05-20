@@ -15,11 +15,9 @@ defineProps<Props>()
 
 <template>
   <div class="not-prose mt-8">
-    <table
-      class="hidden sm:table w-full border-collapse border-b border-outline-gray-2 text-left"
-    >
+    <table class="hidden sm:table w-full border-collapse border-b text-left">
       <thead>
-        <tr class="border-b border-outline-gray-2">
+        <tr class="border-b">
           <th class="w-[24%] py-2.5 pr-2 text-sm font-semibold text-ink-gray-9">
             Slot
           </th>
@@ -30,11 +28,7 @@ defineProps<Props>()
       </thead>
 
       <tbody>
-        <tr
-          v-for="x in data"
-          :key="x.name"
-          class="border-b border-outline-gray-2 last:border-b-0"
-        >
+        <tr v-for="x in data" :key="x.name" class="border-b last:border-b-0">
           <td class="py-2 pr-2 align-top">
             <div
               class="font-mono text-xs font-medium leading-6 text-ink-gray-9 break-words"
@@ -55,7 +49,9 @@ defineProps<Props>()
             <p
               v-if="typeof x.deprecated === 'string'"
               class="whitespace-pre-wrap font-mono text-xs text-ink-gray-6"
-            >Deprecated — {{ x.deprecated }}</p>
+            >
+              Deprecated — {{ x.deprecated }}
+            </p>
             <p
               v-else-if="x.description"
               class="mt-1 whitespace-pre-wrap font-mono text-xs leading-6 text-ink-gray-6"
@@ -71,7 +67,7 @@ defineProps<Props>()
       <div
         v-for="x in data"
         :key="x.name"
-        class="border-b border-outline-gray-2 last:border-b-0 py-3 grid gap-1.5"
+        class="border-b last:border-b-0 py-3 grid gap-1.5"
       >
         <div
           class="font-mono text-xs font-medium leading-6 text-ink-gray-9 break-all"
@@ -88,7 +84,9 @@ defineProps<Props>()
         <p
           v-if="typeof x.deprecated === 'string'"
           class="whitespace-pre-wrap font-mono text-xs text-ink-gray-6"
-        >Deprecated — {{ x.deprecated }}</p>
+        >
+          Deprecated — {{ x.deprecated }}
+        </p>
         <p
           v-else-if="x.description"
           class="whitespace-pre-wrap font-mono text-xs leading-6 text-ink-gray-6"
