@@ -35,6 +35,10 @@
     "./frappe": {
       "import": "./frappe/index.js"
     },
+    "./editor": {
+      "import": "./src/editor/index.ts",
+      "types": "./src/editor/index.ts"
+    },
     "./drive": {
       "import": "./frappe/drive/index.js"
     },
