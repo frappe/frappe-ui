@@ -128,7 +128,7 @@ describe('frappe-ui/editor minimal primitives', () => {
 
     content.value = '<p>External</p>'
     await nextTick()
-    expect(editor.commands.setContent).toHaveBeenCalledWith('<p>External</p>', false)
+    expect(editor.commands.setContent).toHaveBeenCalledWith('<p>External</p>', { emitUpdate: false })
   })
 
   it('binds JSON content bidirectionally without echoing external writes back', async () => {
@@ -150,7 +150,7 @@ describe('frappe-ui/editor minimal primitives', () => {
     content.value = external
     await nextTick()
 
-    expect(editor.commands.setContent).toHaveBeenCalledWith(external, false)
+    expect(editor.commands.setContent).toHaveBeenCalledWith(external, { emitUpdate: false })
     expect(toRaw(content.value)).toBe(external)
 
     editor.content = { type: 'doc', content: [{ type: 'paragraph', content: [] }] }

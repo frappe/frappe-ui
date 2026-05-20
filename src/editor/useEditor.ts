@@ -79,8 +79,12 @@ export function useEditor(options: UseEditorOptions): ShallowRef<Editor | null> 
 
   editor.value = new TiptapEditor(editorOptions as EditorOptions)
 
-  if (options.uploadFunction && editor.value.storage.upload) {
-    editor.value.storage.upload.uploadFunction = options.uploadFunction
+  const editorStorage = editor.value.storage as typeof editor.value.storage & {
+    upload?: { uploadFunction: UseEditorOptions['uploadFunction'] }
+  }
+
+  if (options.uploadFunction && editorStorage.upload) {
+    editorStorage.upload.uploadFunction = options.uploadFunction
   }
 
   if (!isCollaborationMode && options.content) {
@@ -89,7 +93,7 @@ export function useEditor(options: UseEditorOptions): ShallowRef<Editor | null> 
       if (format === 'html' && editor.value.getHTML() === content) return
 
       applyingExternalUpdate = true
-      editor.value.commands.setContent(content ?? '', false)
+      editor.value.commands.setContent(content ?? '', { emitUpdate: false })
       applyingExternalUpdate = false
     })
   }
