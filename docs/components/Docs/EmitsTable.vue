@@ -14,9 +14,9 @@ defineProps<Props>()
 </script>
 
 <template>
-  <div class="not-prose mt-8 overflow-x-auto whitespace-nowrap">
+  <div class="not-prose mt-8">
     <table
-      class="scrollbar w-full min-w-[640px] border-collapse border-b border-outline-gray-2 text-left"
+      class="hidden sm:table w-full border-collapse border-b border-outline-gray-2 text-left"
     >
       <thead>
         <tr class="border-b border-outline-gray-2">
@@ -37,7 +37,7 @@ defineProps<Props>()
         >
           <td class="py-2 pr-2 align-top">
             <div
-              class="font-mono text-xs font-medium leading-6 text-ink-gray-9"
+              class="font-mono text-xs font-medium leading-6 text-ink-gray-9 break-words"
             >
               <span :class="{ 'line-through': x.deprecated }">{{
                 x.name
@@ -66,5 +66,36 @@ defineProps<Props>()
         </tr>
       </tbody>
     </table>
+
+    <div class="sm:hidden">
+      <div
+        v-for="x in data"
+        :key="x.name"
+        class="border-b border-outline-gray-2 last:border-b-0 py-3 grid gap-1.5"
+      >
+        <div
+          class="font-mono text-xs font-medium leading-6 text-ink-gray-9 break-all"
+        >
+          <span :class="{ 'line-through': x.deprecated }">{{ x.name }}</span>
+        </div>
+
+        <div
+          v-if="!x.deprecated"
+          class="whitespace-normal break-words font-mono text-xs leading-6 text-ink-gray-8"
+        >
+          {{ x.type || '—' }}
+        </div>
+        <p
+          v-if="typeof x.deprecated === 'string'"
+          class="whitespace-pre-wrap font-mono text-xs text-ink-gray-6"
+        >Deprecated — {{ x.deprecated }}</p>
+        <p
+          v-else-if="x.description"
+          class="whitespace-pre-wrap font-mono text-xs leading-6 text-ink-gray-6"
+        >
+          {{ x.description }}
+        </p>
+      </div>
+    </div>
   </div>
 </template>

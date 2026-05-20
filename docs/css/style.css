@@ -49,7 +49,7 @@ code {
 
 .shiki {
   @apply max-h-[500px] w-full overflow-auto leading-relaxed rounded;
-  @apply !p-5 !py-4 !bg-surface-gray-1 dark:!bg-transparent dark:border;
+  @apply !p-3 !py-3 sm:!p-5 sm:!py-4 !bg-surface-gray-1 dark:!bg-transparent dark:border;
 
   font-family: monospace;
   .line-number {
@@ -59,6 +59,12 @@ code {
   .highlighted {
     @apply bg-blue-900/30;
   }
+}
+
+/* shiki blocks rendered inside a component preview (no rounded corners,
+   no inner top border, since the wrapper already provides them) */
+.component-preview-code .shiki {
+  @apply !rounded-none dark:!border-0;
 }
 
 .shiki span {

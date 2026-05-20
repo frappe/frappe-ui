@@ -30,12 +30,12 @@ const previewTabs = [
         class="rounded-xl overflow-hidden border border-outline-gray-1 divide-y divide-outline-gray-1"
       >
         <div
-          class="bg-surface-white p-8 overflow-auto scrollbar flex flex-wrap gap-3 items-center"
+          class="bg-surface-white p-4 sm:p-8 overflow-x-auto scrollbar flex flex-wrap gap-3 items-center"
         >
           <slot />
         </div>
 
-        <div>
+        <div class="component-preview-code">
           <slot name="code" />
         </div>
       </div>
@@ -46,13 +46,13 @@ const previewTabs = [
       <div class="mt-2 rounded-xl overflow-hidden border border-outline-gray-1">
         <div v-if="activeTab === 'preview'">
           <div
-            class="bg-surface-white p-8 overflow-auto scrollbar flex flex-wrap gap-3 items-center"
+            class="bg-surface-white p-4 sm:p-8 overflow-x-auto scrollbar flex flex-wrap gap-3 items-center"
           >
             <slot />
           </div>
         </div>
 
-        <div v-else>
+        <div v-else class="component-preview-code">
           <slot name="code" />
         </div>
       </div>

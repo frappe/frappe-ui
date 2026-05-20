@@ -62,9 +62,9 @@ const typeDefinition = computed(() => {
       </div>
     </details>
 
-    <div class="mt-4 overflow-x-auto whitespace-nowrap">
+    <div class="mt-4 hidden sm:block">
       <table
-        class="scrollbar w-full min-w-[720px] border-collapse border-b border-outline-gray-2 text-left"
+        class="w-full border-collapse border-b border-outline-gray-2 text-left"
       >
         <thead>
           <tr class="border-b border-outline-gray-2">
@@ -94,7 +94,7 @@ const typeDefinition = computed(() => {
           >
             <td class="py-2 pr-2 align-top">
               <div
-                class="font-mono text-xs font-medium leading-6 text-ink-gray-9"
+                class="font-mono text-xs font-medium leading-6 text-ink-gray-9 break-words"
               >
                 <span :class="{ 'line-through': x.deprecated }">{{
                   x.name
@@ -138,6 +138,52 @@ const typeDefinition = computed(() => {
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <div class="mt-4 sm:hidden">
+      <div
+        v-for="x in data"
+        :key="x.name"
+        class="border-b border-outline-gray-2 last:border-b-0 py-3 grid gap-1.5"
+      >
+        <div class="flex items-baseline justify-between gap-3">
+          <div
+            class="font-mono text-xs font-medium leading-6 text-ink-gray-9 break-all"
+          >
+            <span :class="{ 'line-through': x.deprecated }">{{ x.name }}</span
+            ><span
+              v-if="x.required"
+              class="text-ink-gray-5"
+              title="Required"
+              aria-label="required"
+              >*</span
+            >
+          </div>
+          <span
+            v-if="x.default"
+            class="font-mono text-xs leading-6 text-ink-gray-6 shrink-0"
+          >
+            = {{ x.default }}
+          </span>
+        </div>
+
+        <div
+          v-if="!x.deprecated"
+          class="whitespace-normal break-words font-mono text-xs leading-6 text-ink-gray-8"
+        >
+          {{ x.type || '—' }}
+        </div>
+        <p
+          v-if="typeof x.deprecated === 'string'"
+          class="whitespace-pre-wrap text-p-sm text-ink-gray-6"
+        >Deprecated — {{ x.deprecated }}</p>
+        <p
+          v-else-if="x.description"
+          class="whitespace-pre-wrap text-p-sm leading-6 text-ink-gray-6"
+        >
+          {{ x.description }}
+        </p>
+      </div>
     </div>
   </div>
 </template>
