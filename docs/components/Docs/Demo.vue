@@ -1,61 +1,50 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { TabButtons } from 'frappe-ui'
+import { Button } from 'frappe-ui'
 
 interface ComponentPreviewProps {
   name: string
-  /**
-   * `tabs` (default): preview and code in a tab switcher.
-   * `stacked`: preview on top, code directly below — shown together.
-   */
-  layout?: 'tabs' | 'stacked'
 }
 
-withDefaults(defineProps<ComponentPreviewProps>(), {
-  layout: 'tabs',
-})
+defineProps<ComponentPreviewProps>()
 
-const activeTab = ref('preview')
-
-const previewTabs = [
-  { label: 'Preview', value: 'preview' },
-  { label: 'Code', value: 'code' },
-]
+const expanded = ref(false)
 </script>
 
 <template>
-  <div class="grid not-prose">
-    <template v-if="layout === 'stacked'">
+  <div class="not-prose">
+    <div
+      class="rounded-xl overflow-hidden border border-outline-gray-1 divide-y divide-outline-gray-1"
+    >
       <div
-        class="rounded-xl overflow-hidden border border-outline-gray-1 divide-y divide-outline-gray-1"
+        class="bg-surface-white p-4 sm:p-8 overflow-x-auto scrollbar flex flex-wrap gap-3 items-center"
       >
+        <slot />
+      </div>
+
+      <div class="component-preview-code relative">
         <div
-          class="bg-surface-white p-4 sm:p-8 overflow-x-auto scrollbar flex flex-wrap gap-3 items-center"
+          :class="[
+            expanded
+              ? ''
+              : 'max-h-[80px] sm:max-h-[96px] overflow-hidden [&_.shiki]:!max-h-none [&_.shiki]:!overflow-hidden [&_.copy]:hidden',
+          ]"
         >
-          <slot />
-        </div>
-
-        <div class="component-preview-code">
           <slot name="code" />
         </div>
-      </div>
-    </template>
 
-    <template v-else>
-      <TabButtons :buttons="previewTabs" v-model="activeTab" />
-      <div class="mt-2 rounded-xl overflow-hidden border border-outline-gray-1">
-        <div v-if="activeTab === 'preview'">
-          <div
-            class="bg-surface-white p-4 sm:p-8 overflow-x-auto scrollbar flex flex-wrap gap-3 items-center"
-          >
-            <slot />
-          </div>
-        </div>
+        <div
+          v-if="!expanded"
+          class="pointer-events-none absolute inset-0 bg-gradient-to-t from-surface-gray-1 via-surface-gray-1/70 to-transparent dark:from-surface-black dark:via-surface-black/70"
+        />
 
-        <div v-else class="component-preview-code">
-          <slot name="code" />
+        <div
+          v-if="!expanded"
+          class="absolute inset-0 flex items-center justify-center"
+        >
+          <Button variant="outline" @click="expanded = true">View Code</Button>
         </div>
       </div>
-    </template>
+    </div>
   </div>
 </template>

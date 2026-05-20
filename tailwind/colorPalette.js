@@ -120,7 +120,8 @@ function generateSemanticColors() {
         const variableName = `${category}-${colorName}`
         const reference = colorsData.themedVariables.light[category][colorName]
         const lightValue = resolveColorReference(reference)
-        output[category][colorName] = `var(--${variableName}, ${lightValue})`
+        output[category][colorName] =
+          `color-mix(in srgb, var(--${variableName}, ${lightValue}) calc(<alpha-value> * 100%), transparent)`
       },
     )
   })
