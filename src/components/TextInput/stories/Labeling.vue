@@ -10,7 +10,7 @@ const error = computed(() => (showError.value ? 'Email is required.' : ''))
 </script>
 
 <template>
-  <div class="w-full flex gap-8 items-start">
+  <div class="flex gap-8 items-start">
     <TextInput
       v-model="email"
       label="Email"

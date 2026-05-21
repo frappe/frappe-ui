@@ -7,18 +7,16 @@ const options = ['John Doe', 'Jane Doe', 'John Smith', 'Jane Smith']
 </script>
 
 <template>
-  <div class="w-full gap-3 items-center justify-center !py-20 grid">
-    <div class="grid gap-3">
-      <Combobox
-        v-model="value"
-        :options="options"
-        :allow-custom-value="true"
-        open-on-focus
-        placeholder="Type a person"
-        class="w-64"
-      />
+  <div class="grid gap-3">
+    <Combobox
+      v-model="value"
+      :options="options"
+      :allow-custom-value="true"
+      open-on-focus
+      placeholder="Type a person"
+      class="w-64"
+    />
 
-      <div class="text-sm text-gray-600">Selected: {{ value || 'None' }}</div>
-    </div>
+    <div class="text-sm text-gray-600">Selected: {{ value || 'None' }}</div>
   </div>
 </template>

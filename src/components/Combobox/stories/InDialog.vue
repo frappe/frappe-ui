@@ -39,56 +39,54 @@ const emojis = [
 </script>
 
 <template>
-  <div class="w-full gap-3 items-center justify-center !py-20 grid">
-    <Button @click="open = true">Open dialog</Button>
+  <Button @click="open = true">Open dialog</Button>
 
-    <Dialog v-model="open">
-      <template #body-title>
-        <h3 class="text-2xl font-semibold text-ink-gray-9">
-          Combobox inside Dialog
-        </h3>
-      </template>
+  <Dialog v-model="open">
+    <template #body-title>
+      <h3 class="text-2xl font-semibold text-ink-gray-9">
+        Combobox inside Dialog
+      </h3>
+    </template>
 
-      <template #body-content>
-        <div class="space-y-4">
-          <div class="flex flex-col gap-1">
-            <label class="text-sm text-ink-gray-7">Repository</label>
-            <Combobox
-              v-model="repo"
-              :options="repos"
-              placeholder="Pick a repo"
-              open-on-focus
-            />
+    <template #body-content>
+      <div class="space-y-4">
+        <div class="flex flex-col gap-1">
+          <label class="text-sm text-ink-gray-7">Repository</label>
+          <Combobox
+            v-model="repo"
+            :options="repos"
+            placeholder="Pick a repo"
+            open-on-focus
+          />
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label class="text-sm text-ink-gray-7">Reaction</label>
+          <Combobox
+            v-model="reaction"
+            trigger="button"
+            :options="emojis"
+            placeholder="Pick a reaction"
+          >
+            <template #prefix>
+              <span class="lucide-smile size-4 text-ink-gray-6" />
+            </template>
+          </Combobox>
+        </div>
+
+        <div class="rounded bg-surface-gray-1 p-3 text-sm text-ink-gray-7">
+          <div>
+            Repo: <code>{{ repo || 'None' }}</code>
           </div>
-
-          <div class="flex flex-col gap-1">
-            <label class="text-sm text-ink-gray-7">Reaction</label>
-            <Combobox
-              v-model="reaction"
-              trigger="button"
-              :options="emojis"
-              placeholder="Pick a reaction"
-            >
-              <template #prefix>
-                <span class="lucide-smile size-4 text-ink-gray-6" />
-              </template>
-            </Combobox>
-          </div>
-
-          <div class="rounded bg-surface-gray-1 p-3 text-sm text-ink-gray-7">
-            <div>
-              Repo: <code>{{ repo || 'None' }}</code>
-            </div>
-            <div>
-              Reaction: <code>{{ reaction || 'None' }}</code>
-            </div>
+          <div>
+            Reaction: <code>{{ reaction || 'None' }}</code>
           </div>
         </div>
-      </template>
+      </div>
+    </template>
 
-      <template #actions="{ close }">
-        <Button variant="solid" @click="close">Done</Button>
-      </template>
-    </Dialog>
-  </div>
+    <template #actions="{ close }">
+      <Button variant="solid" @click="close">Done</Button>
+    </template>
+  </Dialog>
 </template>

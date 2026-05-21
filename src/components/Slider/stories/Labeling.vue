@@ -12,7 +12,7 @@ const error = computed(() =>
 </script>
 
 <template>
-  <div class="flex gap-8 items-start w-full">
+  <div class="flex gap-8 items-start">
     <Slider
       v-model="value"
       label="Volume"

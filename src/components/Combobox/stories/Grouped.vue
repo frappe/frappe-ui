@@ -39,19 +39,17 @@ const spaces: { group: string; options: Space[] }[] = [
 </script>
 
 <template>
-  <div class="w-full gap-3 items-center justify-center !py-20 grid">
-    <Combobox
-      v-model="value"
-      :options="spaces"
-      placeholder="Move to space…"
-      class="w-72"
-    >
-      <template #item-prefix="{ item }">
-        <div
-          :class="['size-2.5 rounded-[3px]', (item as Space).accent]"
-          aria-hidden="true"
-        />
-      </template>
-    </Combobox>
-  </div>
+  <Combobox
+    v-model="value"
+    :options="spaces"
+    placeholder="Move to space…"
+    class="w-72"
+  >
+    <template #item-prefix="{ item }">
+      <div
+        :class="['size-2.5 rounded-[3px]', (item as Space).accent]"
+        aria-hidden="true"
+      />
+    </template>
+  </Combobox>
 </template>

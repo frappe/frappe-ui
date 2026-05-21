@@ -2,39 +2,37 @@
 
 A flexible overlay for showing messages, forms, or actions. Keeps focus on content while allowing clear, user-friendly interactions.
 
-## Destructive confirm
-<ComponentPreview name="Dialog-Confirm" />
+## Share
 
-## Create / edit form
-<ComponentPreview name="Dialog-Custom" />
+A typical real-world dialog — rich `#default` body, an action-row `#actions`
+slot that mixes a left-side status with a right-side CTA, and `Dropdown`s
+nested inside the body for inline role changes.
 
-## State-driven actions
-<ComponentPreview name="Dialog-Modal" />
+<ComponentPreview name="Dialog-Share" />
 
-## Action layout
+## Multi-step wizard
 
-A single action on a small dialog (`xs`, `sm`, `md`) renders full-width.
-Everything else sits side-by-side at natural width, right-aligned. Using the
-`#actions` slot opts out — you own the layout.
+One `<Dialog>` instance, four steps. The body content swaps with internal
+state while the dialog only animates in once; the `title`, `dismissible`
+flag, and primary CTA all react to the current step.
 
-<ComponentPreview name="Dialog-ActionsLayout" />
+<ComponentPreview name="Dialog-Wizard" />
 
-## Single-CTA form
-<ComponentPreview name="Dialog-Interactive" />
+## Full canvas (`bare`)
 
-## Auto-focus a field
-<ComponentPreview name="Dialog-Autofocus" />
+`bare: true` strips all auto-chrome — no padded card, no auto-header, no
+auto-actions. Pair it with `Dialog.Title` for an accessible heading when
+you don't want visual chrome. A command palette is the canonical reason
+to reach for it.
 
-## Full-canvas (`bare`)
-<ComponentPreview name="Dialog-Bare" />
-
-## Master / detail browser
-<ComponentPreview name="Dialog-Browse" />
+<ComponentPreview name="Dialog-CommandPalette" />
 
 ## Imperative API
 
 The `dialog.*` helpers cover the confirm-family surface — `confirm` and
-the `danger` preset — without mounting a `<Dialog>` yourself.
+the `danger` preset — without mounting a `<Dialog>` yourself. In real apps
+`<Dialogs />` is mounted by `FrappeUIProvider`, the same component that
+hosts the toast viewport, so no extra setup is needed.
 
 Pass an `actions` array to `dialog.confirm` (or `dialog.danger`) when a
 flow needs more than the default confirm + cancel pair. Each action accepts

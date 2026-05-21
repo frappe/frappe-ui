@@ -11,24 +11,24 @@ type Member = {
 }
 
 const ALL_MEMBERS: Member[] = [
-  { label: 'Alex Rivera', value: 'alex@frappe.io', image: 'https://i.pravatar.cc/80?u=alex@frappe.io', role: 'Engineering' },
-  { label: 'Alexandra Chen', value: 'alexandra@frappe.io', image: 'https://i.pravatar.cc/80?u=alexandra@frappe.io', role: 'Design' },
-  { label: 'Alexei Volkov', value: 'alexei@frappe.io', image: 'https://i.pravatar.cc/80?u=alexei@frappe.io', role: 'Engineering' },
-  { label: 'Priya Shah', value: 'priya@frappe.io', image: 'https://i.pravatar.cc/80?u=priya@frappe.io', role: 'Design' },
-  { label: 'Priyanka Mehta', value: 'priyanka@frappe.io', image: 'https://i.pravatar.cc/80?u=priyanka@frappe.io', role: 'Product' },
-  { label: 'Marcus Lee', value: 'marcus@frappe.io', image: 'https://i.pravatar.cc/80?u=marcus@frappe.io', role: 'Product' },
-  { label: 'Marco Silva', value: 'marco@frappe.io', image: 'https://i.pravatar.cc/80?u=marco@frappe.io', role: 'Engineering' },
-  { label: 'Maria Garcia', value: 'maria@frappe.io', image: 'https://i.pravatar.cc/80?u=maria@frappe.io', role: 'Marketing' },
-  { label: 'Sofia Hartmann', value: 'sofia@frappe.io', image: 'https://i.pravatar.cc/80?u=sofia@frappe.io', role: 'Engineering' },
-  { label: 'Sophie Laurent', value: 'sophie@frappe.io', image: 'https://i.pravatar.cc/80?u=sophie@frappe.io', role: 'Sales' },
-  { label: 'Kenji Tanaka', value: 'kenji@frappe.io', image: 'https://i.pravatar.cc/80?u=kenji@frappe.io', role: 'Design' },
-  { label: 'Kenta Mori', value: 'kenta@frappe.io', image: 'https://i.pravatar.cc/80?u=kenta@frappe.io', role: 'Engineering' },
-  { label: 'Nadia Okafor', value: 'nadia@frappe.io', image: 'https://i.pravatar.cc/80?u=nadia@frappe.io', role: 'Product' },
-  { label: 'Diego Alvarez', value: 'diego@frappe.io', image: 'https://i.pravatar.cc/80?u=diego@frappe.io', role: 'Engineering' },
-  { label: 'Lina Petrova', value: 'lina@frappe.io', image: 'https://i.pravatar.cc/80?u=lina@frappe.io', role: 'Marketing' },
-  { label: 'Liam Connor', value: 'liam@frappe.io', image: 'https://i.pravatar.cc/80?u=liam@frappe.io', role: 'Product' },
-  { label: 'Hassan Iqbal', value: 'hassan@frappe.io', image: 'https://i.pravatar.cc/80?u=hassan@frappe.io', role: 'Sales' },
-  { label: 'Ava Nguyen', value: 'ava@frappe.io', image: 'https://i.pravatar.cc/80?u=ava@frappe.io', role: 'Engineering' },
+  { label: 'Alex Rivera', value: 'alex@example.com', image: 'https://i.pravatar.cc/80?u=alex@example.com', role: 'Engineering' },
+  { label: 'Alexandra Chen', value: 'alexandra@example.com', image: 'https://i.pravatar.cc/80?u=alexandra@example.com', role: 'Design' },
+  { label: 'Alexei Volkov', value: 'alexei@example.com', image: 'https://i.pravatar.cc/80?u=alexei@example.com', role: 'Engineering' },
+  { label: 'Priya Shah', value: 'priya@example.com', image: 'https://i.pravatar.cc/80?u=priya@example.com', role: 'Design' },
+  { label: 'Priyanka Mehta', value: 'priyanka@example.com', image: 'https://i.pravatar.cc/80?u=priyanka@example.com', role: 'Product' },
+  { label: 'Marcus Lee', value: 'marcus@example.com', image: 'https://i.pravatar.cc/80?u=marcus@example.com', role: 'Product' },
+  { label: 'Marco Silva', value: 'marco@example.com', image: 'https://i.pravatar.cc/80?u=marco@example.com', role: 'Engineering' },
+  { label: 'Maria Garcia', value: 'maria@example.com', image: 'https://i.pravatar.cc/80?u=maria@example.com', role: 'Marketing' },
+  { label: 'Sofia Hartmann', value: 'sofia@example.com', image: 'https://i.pravatar.cc/80?u=sofia@example.com', role: 'Engineering' },
+  { label: 'Sophie Laurent', value: 'sophie@example.com', image: 'https://i.pravatar.cc/80?u=sophie@example.com', role: 'Sales' },
+  { label: 'Kenji Tanaka', value: 'kenji@example.com', image: 'https://i.pravatar.cc/80?u=kenji@example.com', role: 'Design' },
+  { label: 'Kenta Mori', value: 'kenta@example.com', image: 'https://i.pravatar.cc/80?u=kenta@example.com', role: 'Engineering' },
+  { label: 'Nadia Okafor', value: 'nadia@example.com', image: 'https://i.pravatar.cc/80?u=nadia@example.com', role: 'Product' },
+  { label: 'Diego Alvarez', value: 'diego@example.com', image: 'https://i.pravatar.cc/80?u=diego@example.com', role: 'Engineering' },
+  { label: 'Lina Petrova', value: 'lina@example.com', image: 'https://i.pravatar.cc/80?u=lina@example.com', role: 'Marketing' },
+  { label: 'Liam Connor', value: 'liam@example.com', image: 'https://i.pravatar.cc/80?u=liam@example.com', role: 'Product' },
+  { label: 'Hassan Iqbal', value: 'hassan@example.com', image: 'https://i.pravatar.cc/80?u=hassan@example.com', role: 'Sales' },
+  { label: 'Ava Nguyen', value: 'ava@example.com', image: 'https://i.pravatar.cc/80?u=ava@example.com', role: 'Engineering' },
 ]
 
 // Mocks a server endpoint: 400ms latency + substring match on label/value.
@@ -88,29 +88,27 @@ function onOpen(isOpen: boolean) {
 </script>
 
 <template>
-  <div class="w-full flex flex-wrap gap-3 items-center justify-center !py-20">
-    <MultiSelect
-      v-model="value"
-      :options="options"
-      :loading="loading"
-      placeholder="Search members…"
-      empty-text="No members found"
-      class="w-80"
-      @update:query="onQueryChange"
-      @update:open="onOpen"
-    >
-      <template #item-prefix="{ item }">
-        <Avatar :image="(item as Member).image" :label="item.label" size="sm" />
-      </template>
+  <MultiSelect
+    v-model="value"
+    :options="options"
+    :loading="loading"
+    placeholder="Search members…"
+    empty-text="No members found"
+    class="w-80"
+    @update:query="onQueryChange"
+    @update:open="onOpen"
+  >
+    <template #item-prefix="{ item }">
+      <Avatar :image="(item as Member).image" :label="item.label" size="sm" />
+    </template>
 
-      <template #item-label="{ item }">
-        <div class="min-w-0 flex justify-between">
-          <div class="truncate">{{ item.label }}</div>
-          <div class="truncate text-p-sm text-ink-gray-5">
-            {{ (item as Member).role }}
-          </div>
+    <template #item-label="{ item }">
+      <div class="min-w-0 flex justify-between">
+        <div class="truncate">{{ item.label }}</div>
+        <div class="truncate text-p-sm text-ink-gray-5">
+          {{ (item as Member).role }}
         </div>
-      </template>
-    </MultiSelect>
-  </div>
+      </div>
+    </template>
+  </MultiSelect>
 </template>

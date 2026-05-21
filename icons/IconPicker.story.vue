@@ -28,7 +28,7 @@ const state = reactive({
           :open-on-focus="state.openOnFocus"
           :placement="state.placement"
         />
-        <div class="mt-2 text-sm text-gray-600">
+        <div class="mt-2 text-sm text-ink-gray-6">
           Selected: {{ basicValue || 'None' }}
         </div>
       </div>
@@ -43,7 +43,7 @@ const state = reactive({
           :placeholder="state.placeholder"
           :disabled="state.disabled"
         />
-        <div class="mt-2 text-sm text-gray-600">
+        <div class="mt-2 text-sm text-ink-gray-6">
           Selected: {{ basicValue || 'None' }}
         </div>
       </div>
@@ -58,7 +58,7 @@ const state = reactive({
           :placeholder="state.placeholder"
           :disabled="state.disabled"
         />
-        <div class="mt-2 text-sm text-gray-600">
+        <div class="mt-2 text-sm text-ink-gray-6">
           Selected: {{ basicValue || 'None' }}
         </div>
       </div>
@@ -73,7 +73,7 @@ const state = reactive({
           :placeholder="state.placeholder"
           :disabled="state.disabled"
         />
-        <div class="mt-2 text-sm text-gray-600">
+        <div class="mt-2 text-sm text-ink-gray-6">
           Selected: {{ basicValue || 'None' }}
         </div>
       </div>
@@ -87,7 +87,7 @@ const state = reactive({
           :placeholder="state.placeholder"
           :disabled="state.disabled"
         />
-        <div class="mt-2 text-sm text-gray-600">
+        <div class="mt-2 text-sm text-ink-gray-6">
           Selected: {{ preselectedValue || 'None' }}
         </div>
       </div>
@@ -101,7 +101,7 @@ const state = reactive({
           placeholder="This is disabled"
           :disabled="true"
         />
-        <div class="mt-2 text-sm text-gray-600">
+        <div class="mt-2 text-sm text-ink-gray-6">
           Icon picker is disabled
         </div>
       </div>

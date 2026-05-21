@@ -17,18 +17,16 @@ const repos = [
 </script>
 
 <template>
-  <div class="w-full gap-3 items-center justify-center !py-20 grid">
-    <div class="grid gap-3">
-      <Combobox
-        v-model="value"
-        :options="repos"
-        placeholder="Pick a repo"
-        open-on-focus
-      />
+  <div class="grid gap-3">
+    <Combobox
+      v-model="value"
+      :options="repos"
+      placeholder="Pick a repo"
+      open-on-focus
+    />
 
-      <div class="text-sm text-ink-gray-5">
-        Selected: <code class="text-ink-gray-7">{{ value || 'None' }}</code>
-      </div>
+    <div class="text-sm text-ink-gray-5">
+      Selected: <code class="text-ink-gray-7">{{ value || 'None' }}</code>
     </div>
   </div>
 </template>
