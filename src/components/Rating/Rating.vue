@@ -18,7 +18,7 @@
     <div
       :id="inputId"
       ref="rootRef"
-      class="rating-stars inline-flex shrink-0 gap-0.5 leading-none focus:outline-none"
+      class="rating-stars inline-flex shrink-0 gap-0.5 leading-none rounded-sm focus:outline-none focus-visible:ring focus-visible:ring-outline-gray-3"
       :class="hasLabeling ? null : (attrs.class as any)"
       :style="hasLabeling ? null : (attrs.style as any)"
       :role="isSliderMode ? 'slider' : 'radiogroup'"
