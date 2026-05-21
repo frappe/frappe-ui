@@ -68,11 +68,14 @@ jobs:
 
       - name: Configure git identity for barista[bot]
         env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          # `actions/create-github-app-token` already outputs the slug; pair it
+          # with the App ID secret to derive the bot's noreply email. Don't call
+          # `gh api /app` here — that endpoint needs JWT (app-level) auth, but
+          # the token we have is an installation token, so gh rejects it with
+          # "A JSON web token could not be decoded".
+          APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
+          APP_ID: ${{ secrets.BARISTA_APP_ID }}
         run: |
-          # App ID needed to derive the bot's noreply email.
-          APP_SLUG=$(gh api /app --jq .slug)
-          APP_ID=$(gh api /app --jq .id)
           git config user.name "${APP_SLUG}[bot]"
           git config user.email "${APP_ID}+${APP_SLUG}[bot]@users.noreply.github.com"
 
