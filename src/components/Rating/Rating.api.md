@@ -7,7 +7,7 @@
   const propsData = [
   {
     name: 'modelValue',
-    description: 'The current rating value (controlled).',
+    description: 'The current rating value (controlled). In star units, `0..max`, in increments of `step`.',
     required: false,
     type: 'number',
     default: '0'
@@ -17,6 +17,13 @@
     description: 'Number of stars to render. Defaults to 5.',
     required: false,
     type: 'number'
+  },
+  {
+    name: 'step',
+    description: 'Granularity of the rating value. `1` for whole stars, `0.5` for half stars.\nDefaults to `1`.',
+    required: false,
+    type: '1 | 0.5',
+    default: '1'
   },
   {
     name: 'rating_from',
@@ -31,6 +38,13 @@
     required: false,
     type: 'boolean',
     default: 'false'
+  },
+  {
+    name: 'icon',
+    description: 'Icon to render for each star. Accepts a Vue component (e.g. an auto-imported\nlucide icon: `import Heart from \'~icons/lucide/heart\'`).\nThe component receives `fill="currentColor"` so closed-path SVGs render filled.\nDefaults to a filled lucide-star.',
+    required: false,
+    type: 'string | Component',
+    default: 'LucideStar'
   },
   {
     name: 'size',
@@ -81,6 +95,11 @@
     name: 'description',
     description: 'Overrides the rendered description content.',
     type: 'any'
+  },
+  {
+    name: 'icon',
+    description: 'Overrides the per-star icon. Called once per star and stamped into both\nhalf-spans (so half-step clipping still works). Use `state` to color the\nicon, or `index` to render different content per position (e.g. emojis).',
+    type: 'RatingIconSlotProps'
   }
 ]
 
