@@ -117,48 +117,48 @@ describe('Rating', () => {
     })
   })
 
-  describe('clearable', () => {
-    it('clicking the same value clears to 0 when clearable is set', () => {
-      const onUpdate = cy.spy().as('onUpdate')
-      cy.mount(Rating, {
-        props: {
-          modelValue: 3,
-          clearable: true,
-          'onUpdate:modelValue': onUpdate,
-        },
-      })
-      cy.get('[role="radio"]').eq(2).click()
-      cy.get('@onUpdate').should('have.been.calledWith', 0)
-    })
-
-    it('clicking the same value keeps it when clearable is false', () => {
+  describe('clearing', () => {
+    it('clicking the selected star emits 0 by default', () => {
       const onUpdate = cy.spy().as('onUpdate')
       cy.mount(Rating, {
         props: { modelValue: 3, 'onUpdate:modelValue': onUpdate },
       })
       cy.get('[role="radio"]').eq(2).click()
-      cy.get('@onUpdate').should('not.have.been.calledWith', 0)
+      cy.get('@onUpdate').should('have.been.calledWith', 0)
+    })
+
+    it('pressing 0 emits 0', () => {
+      const onUpdate = cy.spy().as('onUpdate')
+      cy.mount(Rating, {
+        props: { modelValue: 3, 'onUpdate:modelValue': onUpdate },
+      })
+      cy.get('[role="radio"][aria-checked="true"]').focus().type('0')
+      cy.get('@onUpdate').should('have.been.calledWith', 0)
+    })
+
+    it('consumer can suppress clearing by filtering the 0 update', () => {
+      // Mirror the recommended opt-out: bind manually and ignore 0.
+      const wrapper = defineComponent({
+        data: () => ({ value: 3 }),
+        methods: {
+          onUpdate(v: number) {
+            if (v !== 0) this.value = v
+          },
+        },
+        render() {
+          return h(Rating, {
+            modelValue: this.value,
+            'onUpdate:modelValue': this.onUpdate,
+          })
+        },
+      })
+      cy.mount(wrapper)
+      cy.get('[role="radio"]').eq(2).click()
       cy.get('[role="radio"][aria-checked="true"]').should(
         'have.attr',
         'data-index',
         '3',
       )
-    })
-  })
-
-  describe('showTooltip', () => {
-    it('renders the tooltip when hovering over a star', () => {
-      cy.mount(Rating, {
-        props: { modelValue: 0, showTooltip: true, max: 5 },
-      })
-      cy.get('[role="radio"]').eq(2).trigger('pointermove')
-      cy.contains('3 / 5').should('be.visible')
-    })
-
-    it('does not render the tooltip when showTooltip is false', () => {
-      cy.mount(Rating, { props: { modelValue: 0, max: 5 } })
-      cy.get('[role="radio"]').eq(2).trigger('mousemove')
-      cy.contains('3 / 5').should('not.exist')
     })
   })
 

@@ -40,27 +40,6 @@
     default: 'false'
   },
   {
-    name: 'clearable',
-    description: 'If true, clicking the currently-selected value clears the rating to `0`.\nDefaults to `false`.',
-    required: false,
-    type: 'boolean',
-    default: 'false'
-  },
-  {
-    name: 'showTooltip',
-    description: 'If true, shows a tooltip with the current/previewed value (e.g. `"3.5 / 5"`)\non hover. Defaults to `false`.',
-    required: false,
-    type: 'boolean',
-    default: 'false'
-  },
-  {
-    name: 'side',
-    description: 'Side of the tooltip.\nDefaults to \'right\'',
-    required: false,
-    type: '"bottom" | "top" | "right" | "left"',
-    default: '"right"'
-  },
-  {
     name: 'icon',
     description: 'Icon to render for each star. Accepts a Vue component (e.g. an auto-imported\nlucide icon: `import Heart from \'~icons/lucide/heart\'`).\nThe component receives `fill="currentColor"` so closed-path SVGs render filled.\nDefaults to a filled lucide-star.',
     required: false,

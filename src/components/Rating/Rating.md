@@ -21,18 +21,20 @@ role to `slider` so screen readers can announce non-integer values.
 
 <ComponentPreview name="Rating-HalfStep" />
 
-## Value tooltip
+## Clearing
 
-`showTooltip` renders a tooltip with the current (or previewed) value
-on hover, formatted as `"{value} / {max}"`. The tooltip side can be set
-with `side` (defaults to `"right"`).
+Clicking the currently-selected star (or pressing `0`) clears the rating
+to `0`. This is the default behavior — there is no `clearable` prop.
 
-<ComponentPreview name="Rating-Tooltip" />
+To opt out, use `:model-value` + `@update:model-value` and drop the `0`
+update yourself:
 
-## Clearable
-
-`clearable` lets users clear the rating by clicking the currently-selected
-value. The `0` digit on the keyboard also clears the value.
+```vue
+<Rating
+  :model-value="value"
+  @update:model-value="(v) => { if (v !== 0) value = v }"
+/>
+```
 
 <ComponentPreview name="Rating-Clearable" />
 
