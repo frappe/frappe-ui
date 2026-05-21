@@ -32,7 +32,7 @@ const para =
     <Tabs :tabs v-model="activeTab" class="[&>div]:!px-1 rounded" />
 
     <template v-if='activeTabLabel === "Text Color"'>
-      <div class="grid grid-cols-4 gap-x-4 gap-y-10">
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-10">
         <template v-for="color in data.txtColors" :key="color.name">
           <span
             v-if="!color.value"

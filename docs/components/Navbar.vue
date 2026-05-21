@@ -4,15 +4,14 @@ import { Button, Badge, Breadcrumbs } from 'frappe-ui'
 import LucideSun from '~icons/lucide/sun'
 import LucideMoon from '~icons/lucide/moon-star'
 import LucideSearch from '~icons/lucide/search'
-import LucideMenu from '~icons/lucide/menu'
-import LucideSide from '~icons/lucide/panel-right'
 import LucideCommand from '~icons/lucide/command'
 import GithubIcon from './Icons/Github.vue'
 import SearchPopup from './Search/Popup.vue'
 
 import { state } from '../state'
 import { useMagicKeys, whenever } from '@vueuse/core'
-import { useRoute, withBase } from 'vitepress'
+import { useData, useRoute, withBase } from 'vitepress'
+import { isActiveLink } from './Docs/sidebarList'
 
 const theme = ref()
 
@@ -21,9 +20,6 @@ const toggleTheme = () => {
   document.documentElement.setAttribute('data-theme', theme.value)
   localStorage.theme = theme.value
 }
-
-const toggleMobSidebar = () => (state.mobsidebar = !state.mobsidebar)
-const toggleNavbar = () => (state.mobnavbar = !state.mobnavbar)
 
 onMounted(() => {
   theme.value = document.documentElement.getAttribute('data-theme')
@@ -36,8 +32,8 @@ defineProps({
 })
 
 const route = useRoute()
+const { site } = useData()
 const routes = computed(() => {
-  const curoute = route.path.replace(/\/+$/, '')
   const routelabels = []
 
   for (const x of state.sidebarList) {
@@ -53,12 +49,13 @@ const routes = computed(() => {
     }
   }
 
-  const activeLabel = routelabels.find((x) => x.link === curoute)?.label
+  const activeLabel = routelabels.find((x) =>
+    isActiveLink(route.path, x.link, site.value.base),
+  )?.label
   return activeLabel?.split('/')?.map((x) => ({ label: x }))
 })
 
 watch(route, (x) => {
-  state.mobnavbar = false
   state.mobsidebar = false
 })
 
@@ -76,78 +73,85 @@ const devBranch = typeof __DEV_BRANCH__ !== 'undefined' ? __DEV_BRANCH__ : ''
     <SearchPopup v-model:open="state.searchDialog" />
 
     <div
-      class="py-2.5 px-5 flex items-center gap-3 flex-wrap"
+      class="py-2.5 px-4 sm:px-5 flex items-center gap-2 sm:gap-3"
       :class="{ 'max-w-[1440px] mx-auto': !isDocs }"
     >
       <span
-        class="flex gap-2 items-center mr-auto md:mr-0"
+        class="flex gap-2 items-center mr-auto md:mr-0 min-w-0"
         :class="{ 'md:hidden': isDocs }"
       >
-        <img src="/logo.svg" class="w-6" />
-        <a :href="withBase('/')" class="font-medium">Frappe UI</a>
+        <img src="/logo.svg" class="w-6 shrink-0" />
+        <a :href="withBase('/')" class="font-medium truncate">Frappe UI</a>
       </span>
 
-      <Breadcrumbs :items="routes" class="[&_span]:capitalize hidden md:flex" />
+      <Breadcrumbs
+        :items="routes"
+        class="[&_span]:capitalize hidden md:flex min-w-0"
+      />
 
-      <Button v-if="isDocs" @click="toggleMobSidebar" class="md:hidden">
-        <template #icon>
-          <LucideSide class="size-4" />
-        </template>
-      </Button>
-
-      <Button @click="toggleNavbar" class="md:hidden">
-        <template #icon>
-          <LucideMenu class="size-4" />
-        </template>
-      </Button>
-
-      <div
-        class="gap-3 md:flex items-center w-full ml-auto md:w-auto"
-        :class="{ flex: state.mobnavbar, hidden: !state.mobnavbar }"
+      <Button
+        @click="toggleTheme"
+        class="md:hidden ml-auto"
+        aria-label="Toggle theme"
       >
-        <Badge
-          v-if="devBranch"
-          :title="`git branch: ${devBranch}`"
-          theme="orange"
-          variant="outline"
-        >
-          <template #prefix>
-            <span class="lucide-git-branch" />
-          </template>
-          {{ devBranch }}
-        </Badge>
+        <template #icon>
+          <LucideSun v-if="theme === 'dark'" class="size-4" />
+          <LucideMoon v-else class="size-4" />
+        </template>
+      </Button>
 
+      <Badge
+        v-if="devBranch"
+        :title="`git branch: ${devBranch}`"
+        theme="orange"
+        variant="outline"
+        class="hidden md:flex md:ml-auto"
+      >
+        <template #prefix>
+          <span class="lucide-git-branch" />
+        </template>
+        {{ devBranch }}
+      </Badge>
+
+      <Button
+        :class="['hidden md:flex', devBranch ? '' : 'md:ml-auto']"
+        @click="state.searchDialog = true"
+        aria-label="Open search"
+      >
+        <template #prefix>
+          <LucideSearch class="size-4" />
+        </template>
+        Search
+
+        <template #suffix>
+          <span class="flex gap-1 items-center ml-auto text-xs text-ink-gray-5">
+            <LucideCommand class="size-3" />
+            K
+          </span>
+        </template>
+      </Button>
+
+      <div class="hidden md:flex items-center gap-3">
         <a :href="withBase('/docs/getting-started')" v-if="route.path == '/'">
           Docs
         </a>
 
-        <Button class="hidden md:flex" @click="state.searchDialog = true">
-          <template #prefix>
-            <LucideSearch class="size-4" />
-          </template>
-          Search
-
-          <template #suffix>
-            <span
-              class="flex gap-1 items-center ml-auto text-xs text-ink-gray-5"
-            >
-              <LucideCommand class="size-3" />
-              K
-            </span>
-          </template>
-        </Button>
-
-        <Button @click="toggleTheme" class="rounded">
+        <Button @click="toggleTheme" class="rounded" aria-label="Toggle theme">
           <template #icon>
             <LucideSun v-if="theme === 'dark'" class="size-4" />
             <LucideMoon v-else class="size-4" />
           </template>
         </Button>
 
-        <a href="https://github.com/frappe/frappe-ui" target="_blank">
+        <a
+          href="https://github.com/frappe/frappe-ui"
+          target="_blank"
+          aria-label="GitHub repository"
+        >
           <GithubIcon />
         </a>
       </div>
     </div>
+
   </nav>
 </template>

@@ -7,7 +7,7 @@ import Col4 from "./col4.vue";
 
 <template>
   <main
-    class="grid lg:grid-cols-3 xl:grid-cols-4 p-5 pt-0 mb-20 gap-5 mx-auto *:w-full max-w-[1440px]"
+    class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 p-4 sm:p-5 pt-0 mb-20 gap-4 sm:gap-5 mx-auto *:w-full max-w-[1440px]"
   >
     <Col1 />
     <Col2 />

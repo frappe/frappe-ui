@@ -2,7 +2,7 @@
 import { state } from '../../state'
 import { useData, useRoute, withBase } from 'vitepress'
 import pkgJson from '../../../package.json'
-import { getSidebarList } from './sidebarList'
+import { getSidebarList, isActiveLink } from './sidebarList'
 
 import {
   ScrollAreaRoot,
@@ -12,20 +12,19 @@ import {
 } from 'reka-ui'
 
 const curVersion = pkgJson.version
-const list = getSidebarList(useData().theme.value.componentList)
+const { site, theme } = useData()
+const list = getSidebarList(theme.value.componentList)
 
 state.sidebarList = list
 
 const route = useRoute()
-const isActive = (link: string) => {
-  if (link === '/') return route.path === '/' || route.path === '/index.html'
-  return route.path === link
-}
+const isActive = (link: string) =>
+  isActiveLink(route.path, link, site.value.base)
 </script>
 
 <template>
   <aside
-    class="flex h-screen w-full min-w-fit flex-col border-r bg-surface-gray-1 pt-1 sticky top-0"
+    class="flex h-screen w-full min-w-fit flex-col border-r bg-surface-gray-1 dark:bg-surface-white pt-1 sticky top-0"
   >
     <div class="px-1">
       <a
@@ -60,7 +59,7 @@ const isActive = (link: string) => {
                 class="pl-2 flex h-7 items-center rounded text-sm transition-colors"
                 :class="
                   isActive(item.link)
-                    ? 'bg-surface-white shadow-sm text-ink-gray-8'
+                    ? 'bg-surface-white dark:bg-surface-gray-2 shadow-sm text-ink-gray-8'
                     : 'text-ink-gray-6 hover:bg-surface-gray-2 hover:text-ink-gray-8'
                 "
               >

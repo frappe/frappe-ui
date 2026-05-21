@@ -2,9 +2,6 @@
 import { ref } from 'vue'
 import { DateTimePicker } from 'frappe-ui'
 import { dayjs } from '../../../utils/dayjs'
-import LucideCalendarClock from '~icons/lucide/calendar-clock'
-import LucideServer from '~icons/lucide/server'
-import LucideRocket from '~icons/lucide/rocket'
 
 // 1. Meeting — can't schedule in the past, default to the next 30-min slot
 const now = dayjs()
@@ -40,85 +37,83 @@ const rowCls =
 </script>
 
 <template>
-  <div class="w-full items-center grid *:w-fit justify-center !py-20 !gap-1">
-    <div class="grid w-full max-w-2xl grid-cols-1 gap-6">
-      <!-- 1. Meeting scheduler -->
-      <DateTimePicker
-        v-model="meeting"
-        label="Meeting time"
-        placeholder="When should we meet?"
-        :min="minMeetingTime"
-        format="ddd, MMM D · h:mm A"
-      >
-        <template #prefix>
-          <LucideCalendarClock class="size-4 text-ink-gray-5" />
-        </template>
-      </DateTimePicker>
+  <div class="grid w-full max-w-sm gap-6 py-10">
+    <!-- 1. Meeting scheduler -->
+    <DateTimePicker
+      v-model="meeting"
+      label="Meeting time"
+      placeholder="When should we meet?"
+      :min="minMeetingTime"
+      format="ddd, MMM D · h:mm A"
+    >
+      <template #prefix>
+        <span class="lucide-calendar-clock size-4 text-ink-gray-5" />
+      </template>
+    </DateTimePicker>
 
-      <!-- 2. Maintenance window -->
-      <DateTimePicker
-        v-model="maintenance"
-        label="Maintenance window"
-        description="Must be scheduled at least 24 hours in advance."
-        placeholder="Pick a low-traffic time"
-        :min="tomorrow"
-        :max="sixtyDaysOut"
-      >
-        <template #prefix>
-          <LucideServer class="size-4 text-ink-gray-5" />
-        </template>
-      </DateTimePicker>
+    <!-- 2. Maintenance window -->
+    <DateTimePicker
+      v-model="maintenance"
+      label="Maintenance window"
+      description="Must be scheduled at least 24 hours in advance."
+      placeholder="Pick a low-traffic time"
+      :min="tomorrow"
+      :max="sixtyDaysOut"
+    >
+      <template #prefix>
+        <span class="lucide-server size-4 text-ink-gray-5" />
+      </template>
+    </DateTimePicker>
 
-      <!-- 3. Fun: dramatic launch moment -->
-      <DateTimePicker
-        v-model="launch"
-        label="Launch moment"
-        placeholder="When do we light the candle?"
-        format="MMMM D, YYYY [at] h:mm A"
-        variant="outline"
-      >
-        <template #prefix>
-          <LucideRocket class="size-4 text-ink-gray-5" />
-        </template>
-        <template #actions="{ setDate, close }">
-          <button
-            type="button"
-            :class="rowCls"
-            @click="
-              () => {
-                setDate(dayjs().add(1, 'day').hour(12).minute(0))
-                close()
-              }
-            "
-          >
-            High noon
-          </button>
-          <button
-            type="button"
-            :class="rowCls"
-            @click="
-              () => {
-                setDate(nextFridayMidnight())
-                close()
-              }
-            "
-          >
-            Midnight Friday
-          </button>
-          <button
-            type="button"
-            :class="rowCls"
-            @click="
-              () => {
-                setDate(dayjs().add(1, 'day').hour(6).minute(15))
-                close()
-              }
-            "
-          >
-            Sunrise
-          </button>
-        </template>
-      </DateTimePicker>
-    </div>
+    <!-- 3. Fun: dramatic launch moment -->
+    <DateTimePicker
+      v-model="launch"
+      label="Launch moment"
+      placeholder="When do we light the candle?"
+      format="MMMM D, YYYY [at] h:mm A"
+      variant="outline"
+    >
+      <template #prefix>
+        <span class="lucide-rocket size-4 text-ink-gray-5" />
+      </template>
+      <template #actions="{ setDate, close }">
+        <button
+          type="button"
+          :class="rowCls"
+          @click="
+            () => {
+              setDate(dayjs().add(1, 'day').hour(12).minute(0))
+              close()
+            }
+          "
+        >
+          High noon
+        </button>
+        <button
+          type="button"
+          :class="rowCls"
+          @click="
+            () => {
+              setDate(nextFridayMidnight())
+              close()
+            }
+          "
+        >
+          Midnight Friday
+        </button>
+        <button
+          type="button"
+          :class="rowCls"
+          @click="
+            () => {
+              setDate(dayjs().add(1, 'day').hour(6).minute(15))
+              close()
+            }
+          "
+        >
+          Sunrise
+        </button>
+      </template>
+    </DateTimePicker>
   </div>
 </template>

@@ -3,7 +3,7 @@ import { Checkbox } from 'frappe-ui'
 </script>
 
 <template>
-  <div class="w-full flex flex-col gap-3 items-start">
+  <div class="flex flex-col gap-3 items-start">
     <Checkbox label="Default" />
     <Checkbox label="Required" required />
     <Checkbox label="Disabled" disabled />

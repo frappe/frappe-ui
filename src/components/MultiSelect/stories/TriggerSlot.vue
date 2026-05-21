@@ -14,25 +14,23 @@ const options = [
 </script>
 
 <template>
-  <div class="w-full flex flex-wrap gap-3 items-center justify-center !py-20">
-    <MultiSelect v-model="state" :options="options" placeholder="Assign to">
-      <template #trigger="{ selectedOptions, open }">
-        <Button icon-left="lucide-users">
-          {{
-            selectedOptions.length
-              ? `${selectedOptions.length} assigned`
-              : 'Assign to'
-          }}
-          <template #suffix>
-            <span
-              :class="[
-                'lucide-chevron-down size-4 transition-transform',
-                open && 'rotate-180',
-              ]"
-            />
-          </template>
-        </Button>
-      </template>
-    </MultiSelect>
-  </div>
+  <MultiSelect v-model="state" :options="options" placeholder="Assign to">
+    <template #trigger="{ selectedOptions, open }">
+      <Button icon-left="lucide-users">
+        {{
+          selectedOptions.length
+            ? `${selectedOptions.length} assigned`
+            : 'Assign to'
+        }}
+        <template #suffix>
+          <span
+            :class="[
+              'lucide-chevron-down size-4 transition-transform',
+              open && 'rotate-180',
+            ]"
+          />
+        </template>
+      </Button>
+    </template>
+  </MultiSelect>
 </template>

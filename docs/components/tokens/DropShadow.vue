@@ -10,7 +10,7 @@ const classNames = [
 </script>
 
 <template>
-  <div class="grid grid-cols-3 gap-6 mt-10">
+  <div class="grid grid-cols-2 sm:grid-cols-3 gap-6 mt-10">
     <div v-for="item in classNames" class="grid gap-3">
       <span>{{ item }} </span>
 

@@ -39,16 +39,14 @@ const emojis = [
 </script>
 
 <template>
-  <div class="w-full gap-3 items-center justify-center !py-20 grid">
-    <Combobox
-      v-model="value"
-      trigger="button"
-      :options="emojis"
-      placeholder="Pick a reaction"
-    >
-      <template #prefix>
-        <span class="lucide-smile size-4 text-ink-gray-6" />
-      </template>
-    </Combobox>
-  </div>
+  <Combobox
+    v-model="value"
+    trigger="button"
+    :options="emojis"
+    placeholder="Pick a reaction"
+  >
+    <template #prefix>
+      <span class="lucide-smile size-4 text-ink-gray-6" />
+    </template>
+  </Combobox>
 </template>

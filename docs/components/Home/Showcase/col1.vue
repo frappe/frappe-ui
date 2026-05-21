@@ -34,7 +34,7 @@ const users = [
   },
   {
     name: "Zach",
-    label: "zach@frappe.io",
+    label: "zach@example.com",
     img: "https://i.pravatar.cc/150?img=3",
   },
 ];

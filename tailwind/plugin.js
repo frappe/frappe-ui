@@ -222,6 +222,11 @@ export default plugin(
         backgroundColor: {
           surface: semanticColors.surface,
         },
+        gradientColorStops: {
+          surface: semanticColors.surface,
+          ink: semanticColors.ink,
+          outline: semanticColors.outline,
+        },
         fill: {
           ink: semanticColors.ink,
           surface: semanticColors.surface,

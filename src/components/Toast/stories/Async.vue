@@ -3,8 +3,8 @@ import { Button, toast } from 'frappe-ui'
 
 function sendInvite() {
   toast.promise(new Promise<void>((resolve) => setTimeout(resolve, 1500)), {
-    loading: 'Sending invite to alex@frappe.io…',
-    success: 'Invite sent to alex@frappe.io',
+    loading: 'Sending invite to alex@example.com…',
+    success: 'Invite sent to alex@example.com',
     error: 'Could not send invite',
   })
 }

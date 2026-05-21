@@ -3,7 +3,7 @@ import { Switch } from 'frappe-ui'
 </script>
 
 <template>
-  <div class="w-full flex flex-col gap-3 items-start">
+  <div class="flex flex-col gap-3 items-start">
     <Switch label="Default" />
     <Switch label="Required" required />
     <Switch label="Disabled" disabled />

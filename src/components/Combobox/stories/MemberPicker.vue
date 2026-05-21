@@ -17,37 +17,37 @@ const lastAction = ref<string>('')
 const members: Member[] = [
   {
     label: 'Alex Rivera',
-    value: 'alex@frappe.io',
-    email: 'alex@frappe.io',
-    image: 'https://i.pravatar.cc/80?u=alex@frappe.io',
+    value: 'alex@example.com',
+    email: 'alex@example.com',
+    image: 'https://i.pravatar.cc/80?u=alex@example.com',
     role: 'Engineering',
   },
   {
     label: 'Priya Shah',
-    value: 'priya@frappe.io',
-    email: 'priya@frappe.io',
-    image: 'https://i.pravatar.cc/80?u=priya@frappe.io',
+    value: 'priya@example.com',
+    email: 'priya@example.com',
+    image: 'https://i.pravatar.cc/80?u=priya@example.com',
     role: 'Design',
   },
   {
     label: 'Marcus Lee',
-    value: 'marcus@frappe.io',
-    email: 'marcus@frappe.io',
-    image: 'https://i.pravatar.cc/80?u=marcus@frappe.io',
+    value: 'marcus@example.com',
+    email: 'marcus@example.com',
+    image: 'https://i.pravatar.cc/80?u=marcus@example.com',
     role: 'Product',
   },
   {
     label: 'Sofia Hartmann',
-    value: 'sofia@frappe.io',
-    email: 'sofia@frappe.io',
-    image: 'https://i.pravatar.cc/80?u=sofia@frappe.io',
+    value: 'sofia@example.com',
+    email: 'sofia@example.com',
+    image: 'https://i.pravatar.cc/80?u=sofia@example.com',
     role: 'Engineering',
   },
   {
     label: 'Kenji Tanaka',
-    value: 'kenji@frappe.io',
-    email: 'kenji@frappe.io',
-    image: 'https://i.pravatar.cc/80?u=kenji@frappe.io',
+    value: 'kenji@example.com',
+    email: 'kenji@example.com',
+    image: 'https://i.pravatar.cc/80?u=kenji@example.com',
     role: 'Design',
   },
 ]
@@ -75,57 +75,55 @@ const selected = computed(
 </script>
 
 <template>
-  <div class="w-full gap-3 items-center justify-center !py-20 grid">
-    <div class="grid gap-3">
-      <Combobox
-        v-model="value"
-        :options="options"
-        placeholder="Assign to…"
-        open-on-focus
-        class="w-80"
-      >
-        <template #prefix>
-          <Avatar v-if="selected" :image="selected.image" size="sm" />
-        </template>
+  <div class="grid gap-3">
+    <Combobox
+      v-model="value"
+      :options="options"
+      placeholder="Assign to…"
+      open-on-focus
+      class="w-80"
+    >
+      <template #prefix>
+        <Avatar v-if="selected" :image="selected.image" size="sm" />
+      </template>
 
-        <template #item-prefix="{ item }">
-          <Avatar
-            v-if="item.type !== 'custom'"
-            :image="(item as Member).image"
-            :label="item.label"
-            size="sm"
-          />
-          <div
-            v-else
-            class="flex size-6 items-center justify-center rounded-full bg-surface-blue-2 text-ink-blue-600"
-          >
-            <span class="lucide-user-plus size-3.5" />
+      <template #item-prefix="{ item }">
+        <Avatar
+          v-if="item.type !== 'custom'"
+          :image="(item as Member).image"
+          :label="item.label"
+          size="sm"
+        />
+        <div
+          v-else
+          class="flex size-6 items-center justify-center rounded-full bg-surface-blue-2 text-ink-blue-600"
+        >
+          <span class="lucide-user-plus size-3.5" />
+        </div>
+      </template>
+
+      <template #item-label="{ item }">
+        <div v-if="item.type !== 'custom'" class="min-w-0">
+          <div class="truncate">{{ item.label }}</div>
+          <div class="truncate text-p-sm text-ink-gray-5">
+            {{ (item as Member).email }}
           </div>
-        </template>
+        </div>
+      </template>
 
-        <template #item-label="{ item }">
-          <div v-if="item.type !== 'custom'" class="min-w-0">
-            <div class="truncate">{{ item.label }}</div>
-            <div class="truncate text-p-sm text-ink-gray-5">
-              {{ (item as Member).email }}
-            </div>
-          </div>
-        </template>
+      <template #item-invite="{ query }">
+        <span class="truncate text-ink-blue-600">
+          {{ query ? `Invite "${query}"` : 'Invite new member' }}
+        </span>
+      </template>
+    </Combobox>
 
-        <template #item-invite="{ query }">
-          <span class="truncate text-ink-blue-600">
-            {{ query ? `Invite "${query}"` : 'Invite new member' }}
-          </span>
-        </template>
-      </Combobox>
-
-      <div class="text-sm text-ink-gray-5">
-        {{
-          selected
-            ? `Assigned to ${selected.label}`
-            : lastAction || 'No one assigned'
-        }}
-      </div>
+    <div class="text-sm text-ink-gray-5">
+      {{
+        selected
+          ? `Assigned to ${selected.label}`
+          : lastAction || 'No one assigned'
+      }}
     </div>
   </div>
 </template>

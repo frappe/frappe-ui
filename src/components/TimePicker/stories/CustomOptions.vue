@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { TimePicker } from 'frappe-ui'
-import LucideYoga from '~icons/lucide/dumbbell'
 
 // A yoga studio offers only its scheduled class times — not free-form intervals
 const classTime = ref('07:00')
@@ -17,14 +16,12 @@ const classOptions = [
 </script>
 
 <template>
-  <div class="w-full gap-3 items-center grid justify-center py-20">
-    <div class="flex w-80 flex-col gap-1.5">
-      <span class="text-sm text-ink-gray-7">Book a class</span>
-      <TimePicker v-model="classTime" :options="classOptions">
-        <template #prefix>
-          <LucideYoga class="size-4 text-ink-gray-5" />
-        </template>
-      </TimePicker>
-    </div>
+  <div class="flex w-80 flex-col gap-1.5">
+    <span class="text-sm text-ink-gray-7">Book a class</span>
+    <TimePicker v-model="classTime" :options="classOptions">
+      <template #prefix>
+        <span class="lucide-dumbbell size-4 text-ink-gray-5" />
+      </template>
+    </TimePicker>
   </div>
 </template>
