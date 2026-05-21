@@ -13,6 +13,9 @@ vi.mock('@tiptap/core', () => {
       return config
     }
   }
+  const Node = Extension
+  const mergeAttributes = (...attrs: any[]) => Object.assign({}, ...attrs)
+  const nodeInputRule = vi.fn()
 
   class Editor {
     options: any
@@ -56,7 +59,7 @@ vi.mock('@tiptap/core', () => {
     }
   }
 
-  return { Editor, Extension }
+  return { Editor, Extension, Node, mergeAttributes, nodeInputRule }
 })
 
 vi.mock('@tiptap/vue-3', () => ({
@@ -66,6 +69,14 @@ vi.mock('@tiptap/vue-3', () => ({
       return () => h('div', { 'data-testid': 'tiptap-editor-content' })
     },
   }),
+  NodeViewWrapper: defineComponent({
+    setup(_, { slots }) {
+      return () => h('div', slots.default?.())
+    },
+  }),
+  VueNodeViewRenderer: vi.fn((component) => component),
+  VueRenderer: vi.fn(),
+  nodeViewProps: {},
 }))
 
 beforeEach(() => {
@@ -80,6 +91,8 @@ describe('frappe-ui/editor minimal primitives', () => {
     expect(editor.EditorContent).toBeTruthy()
     expect(editor.StarterKit).toBeTruthy()
     expect(editor.Placeholder).toBeTruthy()
+    expect(editor.SuggestionExtension).toBeTruthy()
+    expect(typeof editor.SuggestionExtension.configure).toBe('function')
   })
 
   it('creates and destroys a shallow editor ref', async () => {

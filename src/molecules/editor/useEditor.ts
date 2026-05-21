@@ -47,9 +47,7 @@ export function useEditor(options: UseEditorOptions): ShallowRef<Editor | null> 
   )
   let applyingExternalUpdate = false
 
-  const extensions = options.uploadFunction
-    ? [UploadStorage, ...options.extensions]
-    : options.extensions
+  const extensions = [UploadStorage, ...options.extensions]
 
   const editorOptions: Partial<EditorOptions> = {
     extensions,

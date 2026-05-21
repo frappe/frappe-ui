@@ -51,7 +51,7 @@ import {
   EditorFloatingMenu,
 
   // Helpers
-  createSuggestionExtension,
+  SuggestionExtension,
 
   // Types
   type Editor,
@@ -261,16 +261,16 @@ Extensions split by origin:
 
 - **Re-exports of tiptap extensions with our default config**: `StarterKit`, `Placeholder`, `Heading`, `Link`, `Code`, `CodeBlock`, `Table`*, `TaskList`*, `Typography`, `TextAlign`, `Color`, `Highlight`. Consumers who want raw tiptap behavior import from `@tiptap/extension-*` directly.
 - **Frappe-custom**: `Image`, `ImageGroup`, `ImageViewer`, `Video`, `Iframe`, `Mention`, `Tag`, `Emoji`, `SlashCommands`, `Toc`, `ContentPaste`, `StyleClipboard`.
-- **Helper**: `createSuggestionExtension` — primitive for building `@` / `#` / `{{` / `:emoji:` style suggestion extensions.
+- **Helper**: `SuggestionExtension.configure(...)` — primitive for building `@` / `#` / `{{` / `:emoji:` style suggestion extensions.
 
 ```ts
-function createSuggestionExtension<TItem = any>(options: {
+const Extension = SuggestionExtension.configure<TItem>({
   name: string
   trigger: string
   items: TItem[] | ((query: string) => TItem[] | Promise<TItem[]>)
   component?: Component
   command: (props: { editor: Editor; item: TItem; range: { from: number; to: number } }) => void
-}): Extension
+})
 ```
 
 Specific extension config defaults (`Table.resizable`, `Link.openOnClick`, etc.) are decided during implementation and live in the source, not this spec.
@@ -350,7 +350,7 @@ Internal layout: bubble menu only (`minimalToolbar`). No fixed menu, no floating
 - **No `extensions` prop.** Consumers needing custom extensions drop to primitives. This is the firewall against ready-mades growing back into configurable monoliths.
 - **No `#top` / `#bottom` / `#editor` slots.** Only `actions`. Broader layout customization → primitives.
 - **No per-extension config props** (no `linkOpenOnClick`, no `tableResizable`). Our defaults are applied; if you want different defaults, use primitives.
-- **No mention/tag shorthand props in the first v1 cut.** Consumers use `Mention.configure(...)`, `Tag.configure(...)`, or `createSuggestionExtension(...)` through primitives until those item shapes are frozen.
+- **No mention/tag shorthand props in the first v1 cut.** Consumers use `Mention.configure(...)`, `Tag.configure(...)`, or `SuggestionExtension.configure(...)` through primitives until those item shapes are frozen.
 
 ## 6. Content `v-model` semantics
 

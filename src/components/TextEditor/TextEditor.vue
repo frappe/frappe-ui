@@ -153,6 +153,10 @@ watch(
 )
 
 onMounted(() => {
+  console.warn(
+    "<TextEditor> is deprecated. Use <RichTextEditor> for standard rich text, or primitives from 'frappe-ui/editor' for custom editors.",
+  )
+
   editor.value = new Editor({
     content: props.content || null,
     editorProps: editorProps.value,

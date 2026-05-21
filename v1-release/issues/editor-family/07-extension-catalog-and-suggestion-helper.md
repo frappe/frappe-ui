@@ -17,7 +17,7 @@ Expose the full flat extension catalog from `frappe-ui/editor` and provide the h
 - [ ] Frappe-custom extensions listed in `spec/editor.md` are exported as flat named exports.
 - [ ] Consumers can override extension defaults with `.configure(...)`.
 - [ ] Consumers who want raw TipTap behavior can still import directly from `@tiptap/extension-*`; frappe-ui does not hide that path.
-- [ ] `createSuggestionExtension` is exported and implements the specified options shape.
+- [ ] `SuggestionExtension.configure(...)` is exported and implements the specified options shape.
 - [ ] `Editor`, `JSONContent`, `UploadedFile`, and menu-related types are exported from `frappe-ui/editor`.
 - [ ] Import surface remains flat; no dot-notation namespace or top-level `frappe-ui` editor primitive exports are added.
 - [ ] Tests verify representative wrapped defaults, `.configure(...)` override behavior, and suggestion helper command flow.
