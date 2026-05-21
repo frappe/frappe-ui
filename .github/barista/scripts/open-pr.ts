@@ -12,6 +12,7 @@
 //   ./open-pr.ts --title "<pr title>" --body "<inline body>"
 
 import { $ } from "bun";
+import { lstatSync } from "node:fs";
 
 const branch = process.env.BARISTA_BRANCH;
 const base = process.env.BARISTA_BASE;
@@ -87,7 +88,27 @@ for (const path of changed) {
   }
 }
 
-await $`git add -A`;
+// Stage only the paths git reported as changed, and skip anything that isn't
+// a regular file / symlink / directory. The sandbox sometimes mounts
+// /dev/null character devices at the workspace root (.bash_profile, .zshrc,
+// etc.) which show as untracked but cannot be added — `git add -A` would
+// abort the whole stage.
+const stageable = changed.filter(path => {
+  try {
+    const st = lstatSync(path);
+    return st.isFile() || st.isSymbolicLink() || st.isDirectory();
+  } catch {
+    // ENOENT — likely a deleted path; keep it so git records the deletion.
+    return true;
+  }
+});
+
+if (stageable.length === 0) {
+  console.error("Error: no stageable changes (only non-regular-file entries detected)");
+  process.exit(1);
+}
+
+await $`git add -- ${stageable}`;
 await $`git commit -m ${`barista: attempt fix for #${issue}`}`;
 // Force-push is safe: namespace is barista-owned and the prepare-branch step
 // resets the branch to base at the start of every run.
