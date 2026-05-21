@@ -46,6 +46,9 @@
       "import": "./tailwind/index.js",
       "default": "./tailwind/index.js"
     },
+    "./tailwind/tokens.js": {
+      "import": "./tailwind/tokens.js"
+    },
     "./vite": {
       "import": "./vite/index.js"
     },
