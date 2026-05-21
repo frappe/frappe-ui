@@ -2,7 +2,7 @@
 import { state } from '../../state'
 import { useData, useRoute, withBase } from 'vitepress'
 import pkgJson from '../../../package.json'
-import { getSidebarList } from './sidebarList'
+import { getSidebarList, isActiveLink } from './sidebarList'
 
 import {
   ScrollAreaRoot,
@@ -12,19 +12,14 @@ import {
 } from 'reka-ui'
 
 const curVersion = pkgJson.version
-const list = getSidebarList(useData().theme.value.componentList)
+const { site, theme } = useData()
+const list = getSidebarList(theme.value.componentList)
 
 state.sidebarList = list
 
 const route = useRoute()
-// VitePress route.path keeps the .html suffix during SSR / initial render
-// even with cleanUrls: true, while sidebar links are clean. Strip it before
-// comparing so the active highlight survives hydration.
-const stripHtml = (p: string) => p.replace(/\.html$/, '')
-const isActive = (link: string) => {
-  if (link === '/') return route.path === '/' || route.path === '/index.html'
-  return stripHtml(route.path) === link
-}
+const isActive = (link: string) =>
+  isActiveLink(route.path, link, site.value.base)
 </script>
 
 <template>

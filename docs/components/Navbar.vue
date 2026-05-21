@@ -10,7 +10,8 @@ import SearchPopup from './Search/Popup.vue'
 
 import { state } from '../state'
 import { useMagicKeys, whenever } from '@vueuse/core'
-import { useRoute, withBase } from 'vitepress'
+import { useData, useRoute, withBase } from 'vitepress'
+import { isActiveLink } from './Docs/sidebarList'
 
 const theme = ref()
 
@@ -31,8 +32,8 @@ defineProps({
 })
 
 const route = useRoute()
+const { site } = useData()
 const routes = computed(() => {
-  const curoute = route.path.replace(/\/+$/, '')
   const routelabels = []
 
   for (const x of state.sidebarList) {
@@ -48,7 +49,9 @@ const routes = computed(() => {
     }
   }
 
-  const activeLabel = routelabels.find((x) => x.link === curoute)?.label
+  const activeLabel = routelabels.find((x) =>
+    isActiveLink(route.path, x.link, site.value.base),
+  )?.label
   return activeLabel?.split('/')?.map((x) => ({ label: x }))
 })
 

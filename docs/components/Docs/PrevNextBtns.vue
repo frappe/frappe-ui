@@ -2,12 +2,13 @@
 import { computed } from 'vue'
 import { state } from '../../state'
 import { useData, useRoute, withBase } from 'vitepress'
+import { isActiveLink } from './sidebarList'
 
 import LucideLeft from '~icons/lucide/arrow-left'
 import LucideRight from '~icons/lucide/arrow-right'
 
 const route = useRoute()
-const { frontmatter } = useData()
+const { frontmatter, site } = useData()
 
 const visible = computed(() => frontmatter.value.nextprev ?? true)
 
@@ -16,12 +17,9 @@ const linkInfos = state.sidebarList?.reduce((acc, cur) => {
   return acc
 }, [])
 
-// VitePress route.path keeps the .html suffix during SSR / initial render
-// even with cleanUrls: true, while sidebar links are clean. Strip it.
-const currentIndex = computed(() => {
-  const path = route.path.replace(/\.html$/, '')
-  return linkInfos.findIndex((x) => x.link === path)
-})
+const currentIndex = computed(() =>
+  linkInfos.findIndex((x) => isActiveLink(route.path, x.link, site.value.base)),
+)
 
 const prevLink = computed(() => {
   const index = currentIndex.value

@@ -3,11 +3,12 @@ import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useData, useRoute, withBase } from 'vitepress'
 import { Button, TextInput } from 'frappe-ui'
 import LucideMenu from '~icons/lucide/menu'
-import { getSidebarList } from './sidebarList'
+import { getSidebarList, isActiveLink } from './sidebarList'
 import { state } from '../../state'
 
 const route = useRoute()
-const list = getSidebarList(useData().theme.value.componentList)
+const { site, theme } = useData()
+const list = getSidebarList(theme.value.componentList)
 const query = ref('')
 
 const filteredList = computed(() => {
@@ -30,8 +31,7 @@ function toggle() {
   state.mobsidebar = !state.mobsidebar
 }
 function isActive(link: string) {
-  if (link === '/') return route.path === '/' || route.path === '/index.html'
-  return route.path === link
+  return isActiveLink(route.path, link, site.value.base)
 }
 
 function onKey(e: KeyboardEvent) {
