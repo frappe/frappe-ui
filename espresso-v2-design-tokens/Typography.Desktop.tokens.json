@@ -1,0 +1,204 @@
+{
+  "font": {
+    "family": {
+      "text": {
+        "$type": "string",
+        "$value": "Inter Variable"
+      }
+    },
+    "weight": {
+      "regular": {
+        "$type": "string",
+        "$value": "regular"
+      },
+      "medium": {
+        "$type": "string",
+        "$value": "medium"
+      },
+      "semibold": {
+        "$type": "string",
+        "$value": "semibold"
+      },
+      "bold": {
+        "$type": "string",
+        "$value": "bold"
+      },
+      "black": {
+        "$type": "string",
+        "$value": "extrabold"
+      }
+    },
+    "size": {
+      "tiny": {
+        "$type": "dimension",
+        "$value": "11px"
+      },
+      "2xs": {
+        "$type": "dimension",
+        "$value": "11px"
+      },
+      "xs": {
+        "$type": "dimension",
+        "$value": "12px"
+      },
+      "sm": {
+        "$type": "dimension",
+        "$value": "13px"
+      },
+      "base": {
+        "$type": "dimension",
+        "$value": "14px"
+      },
+      "lg": {
+        "$type": "dimension",
+        "$value": "16px"
+      },
+      "xl": {
+        "$type": "dimension",
+        "$value": "18px"
+      },
+      "2xl": {
+        "$type": "dimension",
+        "$value": "20px"
+      },
+      "3xl": {
+        "$type": "dimension",
+        "$value": "24px"
+      },
+      "4xl": {
+        "$type": "dimension",
+        "$value": "26px"
+      },
+      "5xl": {
+        "$type": "dimension",
+        "$value": "28px"
+      },
+      "6xl": {
+        "$type": "dimension",
+        "$value": "32px"
+      },
+      "7xl": {
+        "$type": "dimension",
+        "$value": "40px"
+      },
+      "8xl": {
+        "$type": "dimension",
+        "$value": "44px"
+      },
+      "9xl": {
+        "$type": "dimension",
+        "$value": "48px"
+      },
+      "10xl": {
+        "$type": "dimension",
+        "$value": "52px"
+      },
+      "11xl": {
+        "$type": "dimension",
+        "$value": "56px"
+      },
+      "12xl": {
+        "$type": "dimension",
+        "$value": "64px"
+      },
+      "13xl": {
+        "$type": "dimension",
+        "$value": "72px"
+      },
+      "14xl": {
+        "$type": "dimension",
+        "$value": "80px"
+      },
+      "15xl": {
+        "$type": "dimension",
+        "$value": "88px"
+      }
+    },
+    "line-height": {
+      "tiny": {
+        "$type": "dimension",
+        "$value": "0px"
+      },
+      "2xs": {
+        "$type": "dimension",
+        "$value": "13px"
+      },
+      "xs": {
+        "$type": "dimension",
+        "$value": "14px"
+      },
+      "sm": {
+        "$type": "dimension",
+        "$value": "15px"
+      },
+      "base": {
+        "$type": "dimension",
+        "$value": "16px"
+      },
+      "lg": {
+        "$type": "dimension",
+        "$value": "18px"
+      },
+      "xl": {
+        "$type": "dimension",
+        "$value": "21px"
+      },
+      "2xl": {
+        "$type": "dimension",
+        "$value": "23px"
+      },
+      "3xl": {
+        "$type": "dimension",
+        "$value": "28px"
+      },
+      "4xl": {
+        "$type": "dimension",
+        "$value": "42px"
+      },
+      "5xl": {
+        "$type": "dimension",
+        "$value": "45px"
+      },
+      "6xl": {
+        "$type": "dimension",
+        "$value": "51px"
+      },
+      "7xl": {
+        "$type": "dimension",
+        "$value": "56px"
+      },
+      "8xl": {
+        "$type": "dimension",
+        "$value": "62px"
+      },
+      "9xl": {
+        "$type": "dimension",
+        "$value": "67px"
+      },
+      "10xl": {
+        "$type": "dimension",
+        "$value": "73px"
+      },
+      "11xl": {
+        "$type": "dimension",
+        "$value": "78px"
+      },
+      "12xl": {
+        "$type": "dimension",
+        "$value": "83px"
+      },
+      "13xl": {
+        "$type": "dimension",
+        "$value": "92px"
+      },
+      "14xl": {
+        "$type": "dimension",
+        "$value": "96px"
+      },
+      "15xl": {
+        "$type": "dimension",
+        "$value": "106px"
+      }
+    }
+  }
+}

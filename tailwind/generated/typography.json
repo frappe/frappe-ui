@@ -1,0 +1,140 @@
+{
+  "fontFamily": {
+    "text": "Inter Variable"
+  },
+  "fontSize": {
+    "tiny": [
+      "11px",
+      {
+        "lineHeight": "0px"
+      }
+    ],
+    "2xs": [
+      "11px",
+      {
+        "lineHeight": "13px"
+      }
+    ],
+    "xs": [
+      "12px",
+      {
+        "lineHeight": "14px"
+      }
+    ],
+    "sm": [
+      "13px",
+      {
+        "lineHeight": "15px"
+      }
+    ],
+    "base": [
+      "14px",
+      {
+        "lineHeight": "16px"
+      }
+    ],
+    "lg": [
+      "16px",
+      {
+        "lineHeight": "18px"
+      }
+    ],
+    "xl": [
+      "18px",
+      {
+        "lineHeight": "21px"
+      }
+    ],
+    "2xl": [
+      "20px",
+      {
+        "lineHeight": "23px"
+      }
+    ],
+    "3xl": [
+      "24px",
+      {
+        "lineHeight": "28px"
+      }
+    ],
+    "4xl": [
+      "26px",
+      {
+        "lineHeight": "42px"
+      }
+    ],
+    "5xl": [
+      "28px",
+      {
+        "lineHeight": "45px"
+      }
+    ],
+    "6xl": [
+      "32px",
+      {
+        "lineHeight": "51px"
+      }
+    ],
+    "7xl": [
+      "40px",
+      {
+        "lineHeight": "56px"
+      }
+    ],
+    "8xl": [
+      "44px",
+      {
+        "lineHeight": "62px"
+      }
+    ],
+    "9xl": [
+      "48px",
+      {
+        "lineHeight": "67px"
+      }
+    ],
+    "10xl": [
+      "52px",
+      {
+        "lineHeight": "73px"
+      }
+    ],
+    "11xl": [
+      "56px",
+      {
+        "lineHeight": "78px"
+      }
+    ],
+    "12xl": [
+      "64px",
+      {
+        "lineHeight": "83px"
+      }
+    ],
+    "13xl": [
+      "72px",
+      {
+        "lineHeight": "92px"
+      }
+    ],
+    "14xl": [
+      "80px",
+      {
+        "lineHeight": "96px"
+      }
+    ],
+    "15xl": [
+      "88px",
+      {
+        "lineHeight": "106px"
+      }
+    ]
+  },
+  "fontWeight": {
+    "regular": 400,
+    "medium": 500,
+    "semibold": 600,
+    "bold": 700,
+    "black": 800
+  }
+}

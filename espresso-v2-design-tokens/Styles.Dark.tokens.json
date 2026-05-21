@@ -1,0 +1,588 @@
+{
+  "surface": {
+    "base": {
+      "$type": "color",
+      "$value": "{dark.gray.950}"
+    },
+    "gray-1": {
+      "$type": "color",
+      "$value": "{dark.gray.800}"
+    },
+    "gray-2": {
+      "$type": "color",
+      "$value": "{dark.gray.700}"
+    },
+    "gray-3": {
+      "$type": "color",
+      "$value": "{dark.gray.600}"
+    },
+    "gray-4": {
+      "$type": "color",
+      "$value": "{dark.gray.500}"
+    },
+    "gray-5": {
+      "$type": "color",
+      "$value": "{dark.gray.200}"
+    },
+    "gray-6": {
+      "$type": "color",
+      "$value": "{dark.gray.100}"
+    },
+    "gray-7": {
+      "$type": "color",
+      "$value": "{dark.gray.50}"
+    },
+    "menu-bar": {
+      "$type": "color",
+      "$value": "{dark.gray.950}"
+    },
+    "base-contrast": {
+      "$type": "color",
+      "$value": "{dark.gray.900}"
+    },
+    "gray-1-contrast": {
+      "$type": "color",
+      "$value": "{dark.gray.900}"
+    },
+    "gray-2-contrast": {
+      "$type": "color",
+      "$value": "{dark.gray.600}"
+    },
+    "red-1": {
+      "$type": "color",
+      "$value": "{dark.red.950}"
+    },
+    "red-2": {
+      "$type": "color",
+      "$value": "{dark.red.900}"
+    },
+    "red-3": {
+      "$type": "color",
+      "$value": "{dark.red.800}"
+    },
+    "red-4": {
+      "$type": "color",
+      "$value": "{dark.red.700}"
+    },
+    "red-5": {
+      "$type": "color",
+      "$value": "{dark.red.500}"
+    },
+    "red-6": {
+      "$type": "color",
+      "$value": "{dark.red.400}"
+    },
+    "red-7": {
+      "$type": "color",
+      "$value": "{dark.red.600}"
+    },
+    "green-1": {
+      "$type": "color",
+      "$value": "{dark.green.900}"
+    },
+    "green-2": {
+      "$type": "color",
+      "$value": "{dark.green.900}"
+    },
+    "green-3": {
+      "$type": "color",
+      "$value": "{dark.green.800}"
+    },
+    "green-4": {
+      "$type": "color",
+      "$value": "{dark.green.700}"
+    },
+    "green-5": {
+      "$type": "color",
+      "$value": "{dark.green.500}"
+    },
+    "green-6": {
+      "$type": "color",
+      "$value": "{dark.green.400}"
+    },
+    "green-7": {
+      "$type": "color",
+      "$value": "{dark.green.600}"
+    },
+    "amber-1": {
+      "$type": "color",
+      "$value": "{dark.amber.950}"
+    },
+    "amber-2": {
+      "$type": "color",
+      "$value": "{dark.amber.900}"
+    },
+    "amber-3": {
+      "$type": "color",
+      "$value": "{dark.amber.800}"
+    },
+    "amber-4": {
+      "$type": "color",
+      "$value": "{dark.amber.700}"
+    },
+    "amber-5": {
+      "$type": "color",
+      "$value": "{dark.amber.500}"
+    },
+    "amber-6": {
+      "$type": "color",
+      "$value": "{dark.amber.400}"
+    },
+    "amber-7": {
+      "$type": "color",
+      "$value": "{dark.amber.600}"
+    },
+    "blue-1": {
+      "$type": "color",
+      "$value": "{dark.blue.950}"
+    },
+    "blue-2": {
+      "$type": "color",
+      "$value": "{dark.blue.900}"
+    },
+    "blue-3": {
+      "$type": "color",
+      "$value": "{dark.blue.800}"
+    },
+    "blue-4": {
+      "$type": "color",
+      "$value": "{dark.blue.700}"
+    },
+    "blue-5": {
+      "$type": "color",
+      "$value": "{dark.blue.500}"
+    },
+    "blue-6": {
+      "$type": "color",
+      "$value": "{dark.blue.400}"
+    },
+    "blue-7": {
+      "$type": "color",
+      "$value": "{dark.blue.600}"
+    },
+    "orange-2": {
+      "$type": "color",
+      "$value": "{dark.orange.900}"
+    },
+    "violet-2": {
+      "$type": "color",
+      "$value": "{dark.violet.900}"
+    },
+    "violet-3": {
+      "$type": "color",
+      "$value": "{dark.violet.800}"
+    },
+    "violet-4": {
+      "$type": "color",
+      "$value": "{dark.violet.700}"
+    },
+    "violet-5": {
+      "$type": "color",
+      "$value": "{dark.violet.500}"
+    },
+    "violet-6": {
+      "$type": "color",
+      "$value": "{dark.violet.400}"
+    },
+    "violet-7": {
+      "$type": "color",
+      "$value": "{dark.violet.600}"
+    },
+    "cyan-2": {
+      "$type": "color",
+      "$value": "{dark.cyan.900}"
+    },
+    "alert-button-default": {
+      "$type": "color",
+      "$value": "{dark.gray.500}"
+    },
+    "alert-button-info": {
+      "$type": "color",
+      "$value": "{dark.blue.700}"
+    },
+    "alert-button-success": {
+      "$type": "color",
+      "$value": "{dark.green.700}"
+    },
+    "alert-button-warning": {
+      "$type": "color",
+      "$value": "{dark.amber.700}"
+    },
+    "alert-button-error": {
+      "$type": "color",
+      "$value": "{dark.red.700}"
+    }
+  },
+  "surface-alpha": {
+    "base": {
+      "$type": "color",
+      "$value": "{dark.gray-alpha.950}"
+    },
+    "gray-1": {
+      "$type": "color",
+      "$value": "{dark.gray-alpha.800}"
+    },
+    "gray-2": {
+      "$type": "color",
+      "$value": "{dark.gray-alpha.700}"
+    },
+    "gray-3": {
+      "$type": "color",
+      "$value": "{dark.gray-alpha.600}"
+    },
+    "gray-4": {
+      "$type": "color",
+      "$value": "{dark.gray-alpha.500}"
+    },
+    "gray-5": {
+      "$type": "color",
+      "$value": "{dark.gray-alpha.200}"
+    },
+    "gray-6": {
+      "$type": "color",
+      "$value": "{dark.gray-alpha.100}"
+    },
+    "gray-7": {
+      "$type": "color",
+      "$value": "{dark.gray-alpha.50}"
+    },
+    "menu-bar": {
+      "$type": "color",
+      "$value": "{dark.gray-alpha.950}"
+    },
+    "base-contrast": {
+      "$type": "color",
+      "$value": "{dark.gray-alpha.900}"
+    },
+    "gray-1-contrast": {
+      "$type": "color",
+      "$value": "{dark.gray-alpha.800}"
+    },
+    "gray-2-contrast": {
+      "$type": "color",
+      "$value": "{dark.gray-alpha.600}"
+    },
+    "red-1": {
+      "$type": "color",
+      "$value": "{dark.red-alpha.950}"
+    },
+    "red-2": {
+      "$type": "color",
+      "$value": "{dark.red-alpha.900}"
+    },
+    "red-3": {
+      "$type": "color",
+      "$value": "{dark.red-alpha.800}"
+    },
+    "red-4": {
+      "$type": "color",
+      "$value": "{dark.red-alpha.700}"
+    },
+    "red-5": {
+      "$type": "color",
+      "$value": "{dark.red-alpha.500}"
+    },
+    "red-6": {
+      "$type": "color",
+      "$value": "{dark.red-alpha.400}"
+    },
+    "red-7": {
+      "$type": "color",
+      "$value": "{dark.red-alpha.600}"
+    },
+    "gray-2-overlay": {
+      "$type": "color",
+      "$value": "{white-alpha.50}"
+    }
+  },
+  "ink": {
+    "base": {
+      "$type": "color",
+      "$value": "{dark.gray.950}"
+    },
+    "gray-1": {
+      "$type": "color",
+      "$value": "{dark.gray.800}"
+    },
+    "gray-2": {
+      "$type": "color",
+      "$value": "{dark.gray.600}"
+    },
+    "gray-3": {
+      "$type": "color",
+      "$value": "{dark.gray.500}"
+    },
+    "gray-4": {
+      "$type": "color",
+      "$value": "{dark.gray.450}"
+    },
+    "gray-5": {
+      "$type": "color",
+      "$value": "{dark.gray.400}"
+    },
+    "gray-6": {
+      "$type": "color",
+      "$value": "{dark.gray.300}"
+    },
+    "gray-7": {
+      "$type": "color",
+      "$value": "{dark.gray.200}"
+    },
+    "gray-8": {
+      "$type": "color",
+      "$value": "{dark.gray.100}"
+    },
+    "red-1": {
+      "$type": "color",
+      "$value": "{neutral.white}"
+    },
+    "red-2": {
+      "$type": "color",
+      "$value": "{dark.red.700}"
+    },
+    "red-3": {
+      "$type": "color",
+      "$value": "{dark.red.400}"
+    },
+    "red-4": {
+      "$type": "color",
+      "$value": "{dark.red.300}"
+    },
+    "green-1": {
+      "$type": "color",
+      "$value": "{neutral.white}"
+    },
+    "green-2": {
+      "$type": "color",
+      "$value": "{dark.green.700}"
+    },
+    "green-3": {
+      "$type": "color",
+      "$value": "{dark.green.400}"
+    },
+    "green-4": {
+      "$type": "color",
+      "$value": "{dark.green.300}"
+    },
+    "green-6": {
+      "$type": "color",
+      "$value": "{dark.green.400}"
+    },
+    "amber-1": {
+      "$type": "color",
+      "$value": "{neutral.white}"
+    },
+    "amber-2": {
+      "$type": "color",
+      "$value": "{dark.amber.700}"
+    },
+    "amber-3": {
+      "$type": "color",
+      "$value": "{dark.amber.500}"
+    },
+    "amber-4": {
+      "$type": "color",
+      "$value": "{dark.amber.400}"
+    },
+    "blue-1": {
+      "$type": "color",
+      "$value": "{neutral.white}"
+    },
+    "blue-2": {
+      "$type": "color",
+      "$value": "{dark.blue.700}"
+    },
+    "blue-3": {
+      "$type": "color",
+      "$value": "{dark.blue.400}"
+    },
+    "blue-4": {
+      "$type": "color",
+      "$value": "{dark.blue.300}"
+    },
+    "cyan-3": {
+      "$type": "color",
+      "$value": "{dark.cyan.400}"
+    },
+    "violet-1": {
+      "$type": "color",
+      "$value": "{neutral.white}"
+    },
+    "violet-2": {
+      "$type": "color",
+      "$value": "{dark.violet.700}"
+    },
+    "violet-3": {
+      "$type": "color",
+      "$value": "{dark.violet.400}"
+    },
+    "violet-4": {
+      "$type": "color",
+      "$value": "{dark.violet.300}"
+    },
+    "blue-link": {
+      "$type": "color",
+      "$value": "{dark.blue.500}"
+    },
+    "alert-button-default": {
+      "$type": "color",
+      "$value": "{dark.gray.50}"
+    },
+    "alert-button-info": {
+      "$type": "color",
+      "$value": "{dark.blue.200}"
+    },
+    "alert-button-success": {
+      "$type": "color",
+      "$value": "{dark.green.200}"
+    },
+    "alert-button-warning": {
+      "$type": "color",
+      "$value": "{dark.amber.200}"
+    },
+    "alert-button-error": {
+      "$type": "color",
+      "$value": "{dark.red.200}"
+    }
+  },
+  "outline": {
+    "base": {
+      "$type": "color",
+      "$value": "{dark.gray.950}"
+    },
+    "gray-1": {
+      "$type": "color",
+      "$value": "{dark.gray.800}"
+    },
+    "gray-1-contrast": {
+      "$type": "color",
+      "$value": "{dark.gray.700}"
+    },
+    "gray-2": {
+      "$type": "color",
+      "$value": "{dark.gray.600}"
+    },
+    "gray-3": {
+      "$type": "color",
+      "$value": "{dark.gray.500}"
+    },
+    "gray-4": {
+      "$type": "color",
+      "$value": "{dark.gray.450}"
+    },
+    "gray-5": {
+      "$type": "color",
+      "$value": "{light.gray.200}"
+    },
+    "red-2": {
+      "$type": "color",
+      "$value": "{dark.red.800}"
+    },
+    "red-3": {
+      "$type": "color",
+      "$value": "{dark.red.700}"
+    },
+    "red-4": {
+      "$type": "color",
+      "$value": "{dark.red.600}"
+    },
+    "green-2": {
+      "$type": "color",
+      "$value": "{dark.green.800}"
+    },
+    "green-3": {
+      "$type": "color",
+      "$value": "{dark.green.700}"
+    },
+    "green-4": {
+      "$type": "color",
+      "$value": "{dark.green.600}"
+    },
+    "amber-2": {
+      "$type": "color",
+      "$value": "{dark.amber.800}"
+    },
+    "amber-3": {
+      "$type": "color",
+      "$value": "{dark.amber.700}"
+    },
+    "amber-4": {
+      "$type": "color",
+      "$value": "{dark.amber.600}"
+    },
+    "blue-2": {
+      "$type": "color",
+      "$value": "{dark.blue.800}"
+    },
+    "blue-3": {
+      "$type": "color",
+      "$value": "{dark.blue.700}"
+    },
+    "blue-4": {
+      "$type": "color",
+      "$value": "{dark.blue.600}"
+    },
+    "orange-3": {
+      "$type": "color",
+      "$value": "{dark.orange.700}"
+    },
+    "violet-2": {
+      "$type": "color",
+      "$value": "{dark.violet.800}"
+    },
+    "violet-3": {
+      "$type": "color",
+      "$value": "{dark.violet.700}"
+    },
+    "violet-4": {
+      "$type": "color",
+      "$value": "{dark.violet.600}"
+    },
+    "gray-modal": {
+      "$type": "color",
+      "$value": "{dark.gray.600}"
+    }
+  },
+  "outline-alpha": {
+    "base": {
+      "$type": "color",
+      "$value": "{dark.gray-alpha.950}"
+    },
+    "gray-1": {
+      "$type": "color",
+      "$value": "{dark.gray-alpha.800}"
+    },
+    "gray-2": {
+      "$type": "color",
+      "$value": "{dark.gray-alpha.600}"
+    },
+    "gray-3": {
+      "$type": "color",
+      "$value": "{dark.gray-alpha.500}"
+    },
+    "gray-4": {
+      "$type": "color",
+      "$value": "{dark.gray-alpha.450}"
+    },
+    "gray-5": {
+      "$type": "color",
+      "$value": "{dark.gray-alpha.200}"
+    },
+    "red-2": {
+      "$type": "color",
+      "$value": "{dark.red-alpha.800}"
+    },
+    "red-3": {
+      "$type": "color",
+      "$value": "{dark.red-alpha.700}"
+    },
+    "red-4": {
+      "$type": "color",
+      "$value": "{dark.red-alpha.600}"
+    },
+    "gray-modal": {
+      "$type": "color",
+      "$value": "{dark.gray-alpha.600}"
+    }
+  }
+}

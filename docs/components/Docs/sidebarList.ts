@@ -24,10 +24,7 @@ export function isActiveLink(
   return current === target
 }
 
-export function getSidebarList(
-  componentList: string[],
-  frappeList: string[] = [],
-): SidebarSection[] {
+export function getSidebarList(componentList: string[]): SidebarSection[] {
   const componentItems: SidebarItem[] = [
     ...componentList.map((name) => ({
       text: name,
@@ -36,55 +33,34 @@ export function getSidebarList(
     { text: 'Legacy components', link: '/docs/components/legacy' },
   ]
 
-  const frappeItems: SidebarItem[] = frappeList.map((name) => ({
-    text: name,
-    link: `/docs/frappe/${name.toLowerCase()}`,
-  }))
-
-  const frappeSection: SidebarSection[] = frappeItems.length
-    ? [{ text: 'Frappe Controls', items: frappeItems }]
-    : []
-
   return [
     {
       text: 'Getting Started',
       items: [
         { text: 'Introduction', link: '/docs/introduction' },
         { text: 'Getting Started', link: '/docs/getting-started' },
-        { text: 'Migration from v0', link: '/docs/migration' },
       ],
     },
     {
-      text: 'Design System',
+      text: 'Foundations',
       items: [
-        {
-          text: 'Background Color',
-          link: '/docs/design-system/background-color',
-        },
-        { text: 'Text Design', link: '/docs/design-system/text' },
-        { text: 'Border Color', link: '/docs/design-system/border-color' },
-        { text: 'Drop Shadow', link: '/docs/design-system/drop-shadow' },
-        { text: 'Border Radius', link: '/docs/design-system/border-radius' },
+        { text: 'Colours — Base', link: '/docs/foundations/colours/base' },
+        { text: 'Colours — Semantic', link: '/docs/foundations/colours/semantic' },
+        { text: 'Typography', link: '/docs/foundations/typography' },
+        { text: 'Corner Radius', link: '/docs/foundations/corner-radius' },
+        { text: 'Drop Shadow', link: '/docs/foundations/drop-shadow' },
       ],
     },
     {
       text: 'Components',
       items: componentItems,
     },
-    ...frappeSection,
-    {
-      text: 'Molecules',
-      items: [{ text: 'Editor', link: '/docs/molecules/editor' }],
-    },
     {
       text: 'Data Fetching',
       items: [
         { text: 'Resource', link: '/docs/data-fetching/resource' },
         { text: 'List Resource', link: '/docs/data-fetching/list-resource' },
-        {
-          text: 'Document Resource',
-          link: '/docs/data-fetching/document-resource',
-        },
+        { text: 'Document Resource', link: '/docs/data-fetching/document-resource' },
       ],
     },
     {
