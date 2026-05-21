@@ -45,19 +45,30 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
+      - name: Mint barista app token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.BARISTA_APP_ID }}
+          private-key: ${{ secrets.BARISTA_PRIVATE_KEY }}
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          # Full history so barista can create a branch off main and push.
+          fetch-depth: 0
+
       - name: Setup Barista
         id: setup
         uses: ./.github/actions/barista-setup
         with:
-          app-id: ${{ secrets.BARISTA_APP_ID }}
-          private-key: ${{ secrets.BARISTA_PRIVATE_KEY }}
-          # Full history so barista can create a branch off main and push.
-          fetch-depth: '0'
+          app-token: ${{ steps.app-token.outputs.token }}
           dispatch-number: ${{ inputs.issue_number }}
 
       - name: Configure git identity for barista[bot]
         env:
-          GH_TOKEN: ${{ steps.setup.outputs.app-token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           # App ID needed to derive the bot's noreply email.
           APP_SLUG=$(gh api /app --jq .slug)
@@ -83,7 +94,7 @@ jobs:
         uses: ./.github/actions/barista-run
         with:
           oauth-token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          app-token: ${{ steps.setup.outputs.app-token }}
+          app-token: ${{ steps.app-token.outputs.token }}
           repo: ${{ github.repository }}
           issue-number: ${{ steps.setup.outputs.number }}
           event: ${{ github.event_name }}
@@ -98,7 +109,7 @@ jobs:
         if: always() && steps.run-barista.outcome == 'success'
         uses: ./.github/actions/barista-append-stats
         with:
-          token: ${{ steps.setup.outputs.app-token }}
+          token: ${{ steps.app-token.outputs.token }}
           repo: ${{ github.repository }}
           issue-number: ${{ steps.setup.outputs.number }}
           execution-file: ${{ steps.run-barista.outputs.execution-file }}
