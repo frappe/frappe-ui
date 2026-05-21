@@ -35,7 +35,7 @@ const expanded = ref(false)
 
         <div
           v-if="!expanded"
-          class="pointer-events-none absolute inset-0 bg-gradient-to-t dark:from-surface-white from-surface-gray-1 via-surface-gray-1/70 dark:via-surface-white/70 to-transparent dark:from-surface-black dark:via-surface-black/70"
+          class="pointer-events-none absolute inset-0 bg-gradient-to-t from-surface-gray-1 via-surface-gray-1/70 dark:from-surface-white dark:via-surface-white/70 to-transparent"
         />
 
         <div
