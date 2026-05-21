@@ -19,7 +19,11 @@
     "baseUrl": ".",
     "ignoreDeprecations": "5.0",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@components/*": ["src/components/*"],
+      "@molecules/*": ["src/molecules/*"],
+      "@utils/*": ["src/utils/*"],
+      "@composables/*": ["src/composables/*"]
     }
   }
 }

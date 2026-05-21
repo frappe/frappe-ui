@@ -30,6 +30,10 @@ export default defineConfig({
   resolve: {
     alias: {
       'tailwind.config.js': path.resolve(__dirname, 'tailwind.config.js'),
+      '@components': path.resolve(__dirname, 'src/components'),
+      '@molecules': path.resolve(__dirname, 'src/molecules'),
+      '@utils': path.resolve(__dirname, 'src/utils'),
+      '@composables': path.resolve(__dirname, 'src/composables'),
     },
   },
   optimizeDeps: {
