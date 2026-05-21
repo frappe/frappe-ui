@@ -1,8 +1,7 @@
 import { execSync } from 'node:child_process'
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 
-type Metric = 'lines' | 'statements' | 'functions' | 'branches'
-type Summary = Record<Metric, { pct: number; covered: number; total: number }>
+type Summary = { lines: { pct: number } }
 
 const PR_NUMBER = process.env.PR_NUMBER
 const REPO = process.env.GITHUB_REPOSITORY
@@ -26,41 +25,19 @@ const base = existsSync(BASE_SUMMARY)
   : null
 
 const fmtPct = (n: number) => `${n.toFixed(2)}%`
-const fmtDelta = (head: number, base: number | undefined) => {
-  if (base === undefined) return '—'
-  const d = head - base
-  if (Math.abs(d) < 0.005) return '±0.00%'
+const fmtDelta = (h: number, b: number | undefined) => {
+  if (b === undefined) return ''
+  const d = h - b
+  if (Math.abs(d) < 0.005) return ' (±0.00% vs `main`)'
   const sign = d > 0 ? '+' : ''
-  return `${sign}${d.toFixed(2)}%`
+  return ` (${sign}${d.toFixed(2)}% vs \`main\`)`
 }
 
-const rows: Array<[string, Metric]> = [
-  ['Lines', 'lines'],
-  ['Statements', 'statements'],
-  ['Functions', 'functions'],
-  ['Branches', 'branches'],
-]
-
-const lines = [
+const block = [
   MARKER_START,
-  '## Coverage',
-  '',
-  '| Metric     | Coverage         | Δ vs `main` |',
-  '| ---------- | ---------------- | ----------- |',
-  ...rows.map(([label, key]) => {
-    const h = head[key]
-    const b = base?.[key]
-    const cov = `${fmtPct(h.pct)} (${h.covered}/${h.total})`
-    return `| ${label.padEnd(10)} | ${cov.padEnd(16)} | ${fmtDelta(h.pct, b?.pct).padEnd(11)} |`
-  }),
-  '',
-  base
-    ? '_Baseline pulled from the latest successful `main` run._'
-    : '_No baseline yet — first run on `main` will populate the delta._',
+  `Coverage: ${fmtPct(head.lines.pct)}${fmtDelta(head.lines.pct, base?.lines.pct)}`,
   MARKER_END,
-]
-
-const block = lines.join('\n')
+].join('\n')
 
 const currentBody = execSync(
   `gh pr view ${PR_NUMBER} --repo ${REPO} --json body --jq .body`,
