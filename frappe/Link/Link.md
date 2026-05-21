@@ -32,4 +32,7 @@ By default, Link renders a clear button in the suffix slot when `modelValue` is 
 
 <ComponentPreview csr="true" name="Link-MemberPicker" />
 
+## Combobox passthrough
+Link composes `Combobox` and forwards unrecognized props via `$attrs` and all non-overridden slots. Anything in the [`Combobox` API](../Combobox/Combobox.md) that Link doesn't claim itself (`options`, `loading`, and the `#suffix` / `#item-create` slots which have Link-specific defaults) reaches the underlying component unchanged.
+
 <!-- @include: ./Link.api.md -->
