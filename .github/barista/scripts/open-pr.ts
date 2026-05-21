@@ -68,7 +68,10 @@ const DENY: RegExp[] = [
   /^CODEOWNERS$/,
 ];
 
-const statusOut = (await $`git status --porcelain`.text()).trim();
+// Do NOT .trim() — porcelain v1 lines start with the two-char XY status flag
+// (often space + letter), and a left-trim would shift the first line and
+// make `.slice(3)` eat the first character of its path.
+const statusOut = (await $`git status --porcelain`.text()).replace(/\n+$/, "");
 if (!statusOut) {
   console.error("Error: no changes to commit");
   process.exit(1);
@@ -76,8 +79,8 @@ if (!statusOut) {
 
 const changed = statusOut
   .split("\n")
-  .map(line => line.slice(3).trim())
-  .filter(Boolean);
+  .filter(Boolean)
+  .map(line => line.slice(3));
 
 for (const path of changed) {
   for (const pat of DENY) {
