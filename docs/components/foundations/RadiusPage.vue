@@ -50,7 +50,7 @@ function copy(text: string) {
           @click="copy(`rounded-${r.name}`)"
         >
           <div
-            class="aspect-square bg-surface-blue-2 border border-outline-blue-3"
+            class="aspect-square bg-surface-gray-3 border border-outline-gray-3"
             :style="{ borderRadius: r.value }"
           ></div>
           <div class="grid">
