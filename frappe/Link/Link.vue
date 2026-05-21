@@ -29,7 +29,7 @@
       <template v-if="slots.suffix" #suffix="suffixProps">
         <slot name="suffix" v-bind="suffixProps" />
       </template>
-      <template v-else-if="!disabled && showClear" #suffix>
+      <template v-else-if="showClear" #suffix>
         <button
           type="button"
           aria-label="Clear"
