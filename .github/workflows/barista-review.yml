@@ -112,6 +112,7 @@ jobs:
           comment-body: ${{ github.event.comment.body }}
           comment-author: ${{ github.event.comment.user.login }}
           prompt: "/barista-review REPO: ${{ github.repository }} PR_NUMBER: ${{ steps.pr.outputs.number }} EVENT: ${{ github.event_name }}"
+          model: ${{ vars.BARISTA_MODEL }}
 
       - name: Append run-stats footer
         if: always() && steps.run-barista.outcome == 'success'

@@ -35,6 +35,10 @@ inputs:
   prompt:
     description: "Slash-command prompt for the agent (e.g. `/barista-triage REPO: …`)"
     required: true
+  model:
+    description: "Claude model to use (e.g. `claude-opus-4-7`, `opus`). Empty = action default."
+    required: false
+    default: ''
 outputs:
   execution-file:
     description: Path to claude-code-action's execution JSON
@@ -63,3 +67,4 @@ runs:
         # Avoid show_full_output which dumps raw JSON in logs.
         display_report: "true"
         prompt: ${{ inputs.prompt }}
+        claude_args: ${{ inputs.model != '' && format('--model {0}', inputs.model) || '' }}

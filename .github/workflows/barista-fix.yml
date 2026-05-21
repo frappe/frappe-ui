@@ -118,6 +118,7 @@ jobs:
           branch: ${{ steps.branch.outputs.name }}
           base: ${{ steps.branch.outputs.base }}
           prompt: "/barista-fix REPO: ${{ github.repository }} ISSUE_NUMBER: ${{ steps.issue.outputs.number }} EVENT: ${{ github.event_name }} BRANCH: ${{ steps.branch.outputs.name }} BASE: ${{ steps.branch.outputs.base }}"
+          model: ${{ vars.BARISTA_MODEL }}
 
       - name: Append run-stats footer
         if: always() && steps.run-barista.outcome == 'success'
