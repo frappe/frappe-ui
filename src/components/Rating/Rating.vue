@@ -67,32 +67,54 @@
           :data-state="halfState(index - 0.5)"
           aria-hidden="true"
         >
-          <span
-            v-if="typeof props.icon === 'string'"
-            :class="[props.icon, 'rating-icon', sizeClass]"
-          />
-          <component
-            v-else
-            :is="props.icon"
-            fill="currentColor"
-            :class="['rating-icon', sizeClass]"
-          />
+          <slot
+            name="icon"
+            :index="index"
+            :state="starState(index)"
+            :left-state="halfState(index - 0.5)"
+            :right-state="halfState(index)"
+            :value="savedValue"
+            :preview-value="hoveredValue"
+            :max="starCount"
+          >
+            <span
+              v-if="typeof props.icon === 'string'"
+              :class="[props.icon, 'rating-icon', sizeClass]"
+            />
+            <component
+              v-else
+              :is="props.icon"
+              fill="currentColor"
+              :class="['rating-icon', sizeClass]"
+            />
+          </slot>
         </span>
         <span
           class="rating-half rating-half-right"
           :data-state="halfState(index)"
           aria-hidden="true"
         >
-          <span
-            v-if="typeof props.icon === 'string'"
-            :class="[props.icon, 'rating-icon', sizeClass]"
-          />
-          <component
-            v-else
-            :is="props.icon"
-            fill="currentColor"
-            :class="['rating-icon', sizeClass]"
-          />
+          <slot
+            name="icon"
+            :index="index"
+            :state="starState(index)"
+            :left-state="halfState(index - 0.5)"
+            :right-state="halfState(index)"
+            :value="savedValue"
+            :preview-value="hoveredValue"
+            :max="starCount"
+          >
+            <span
+              v-if="typeof props.icon === 'string'"
+              :class="[props.icon, 'rating-icon', sizeClass]"
+            />
+            <component
+              v-else
+              :is="props.icon"
+              fill="currentColor"
+              :class="['rating-icon', sizeClass]"
+            />
+          </slot>
         </span>
       </button>
     </div>
@@ -116,7 +138,7 @@ import InputDescription from '../InputLabeling/InputDescription.vue'
 import InputError from '../InputLabeling/InputError.vue'
 import LabelingWrapper from '../InputLabeling/LabelingWrapper.vue'
 import LucideStar from '~icons/lucide/star'
-import type { RatingProps } from './types'
+import type { RatingProps, RatingIconSlotProps } from './types'
 
 const props = withDefaults(defineProps<RatingProps>(), {
   size: 'md',
@@ -140,6 +162,12 @@ defineSlots<{
   label?: (props: { required: boolean }) => any
   /** Overrides the rendered description content. */
   description?: () => any
+  /**
+   * Overrides the per-star icon. Called once per star and stamped into both
+   * half-spans (so half-step clipping still works). Use `state` to color the
+   * icon, or `index` to render different content per position (e.g. emojis).
+   */
+  icon?: (props: RatingIconSlotProps) => any
 }>()
 
 const starCount = computed(() => props.max ?? props.rating_from ?? 5)
@@ -375,25 +403,23 @@ const hasLabeling = computed(() => {
   clip-path: inset(0 0 0 50%);
 }
 
-/* Defaults are passed as the var() fallback rather than set on
-   `.rating-stars` — that way callers can override the color tokens by
-   setting them on any ancestor (e.g. inline style on <Rating>), and
-   inheritance wins instead of being defeated by a direct rule. */
+/* Default icon colors. To customize, use the `#icon` slot and drive color
+   from the `state` slot prop with your own classes/styles. */
 .rating-half[data-state='filled'] {
-  color: var(--rating-filled, #eab308); /* yellow-500 */
+  color: #eab308; /* yellow-500 */
 }
 .rating-half[data-state='preview'] {
-  color: var(--rating-preview, #fde68a); /* yellow-200 */
+  color: #fde68a; /* yellow-200 */
 }
 .rating-half[data-state='removing'] {
-  color: var(--rating-removing, #fcd34d); /* yellow-300 */
+  color: #fcd34d; /* yellow-300 */
 }
 .rating-half[data-state='empty'] {
-  color: var(--rating-empty, #d1d5db); /* gray-300 */
+  color: #d1d5db; /* gray-300 */
 }
 
 :global([data-theme='dark']) .rating-half[data-state='empty'] {
-  color: var(--rating-empty, #4b5563); /* gray-600 — visible on dark surfaces */
+  color: #4b5563; /* gray-600 — visible on dark surfaces */
 }
 
 .rating-icon {

@@ -36,6 +36,29 @@ export interface RatingProps extends InputLabelingProps {
   size?: InputSize
 }
 
+export type RatingStarState = 'filled' | 'preview' | 'removing' | 'empty'
+
+export interface RatingIconSlotProps {
+  /** 1-based star position. */
+  index: number
+  /** Overall state of this star (mirrors `rightState`). */
+  state: RatingStarState
+  /** State of the left half — equals `rightState` when `step === 1`. */
+  leftState: RatingStarState
+  /** State of the right half. */
+  rightState: RatingStarState
+  /** The current saved rating value. */
+  value: number
+  /**
+   * Value currently being previewed via hover, or `null` when not hovering.
+   * Combine with `value` for single-select patterns:
+   * `previewValue ?? value` gives the index to highlight.
+   */
+  previewValue: number | null
+  /** Total number of stars. */
+  max: number
+}
+
 export interface RatingEmits {
   /** Fired when the rating value changes. */
   'update:modelValue': [value: number]

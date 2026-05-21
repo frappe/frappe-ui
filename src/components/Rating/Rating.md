@@ -47,45 +47,36 @@ with the shared Lucide Tailwind utility.
 
 <ComponentPreview name="Rating-CustomIcon" />
 
-## Custom colors
+## Custom icon slot
 
-The four colors are exposed as CSS custom properties on the root and are
-part of the public API. Set them on any ancestor (via a scoped class or
-inline `style`) to recolor the control — useful when the default yellow
-doesn't suit a custom icon (e.g. a heart or flame).
+For full control over each star — different content per index (emojis,
+icons), custom colors, or any other per-star styling — use the `#icon`
+slot. It's called once per star and stamped into both half-spans so
+half-step clipping still works.
 
-```
---rating-filled    /* selected stars (and hover-preview overlap) */
---rating-preview   /* hover preview ahead of the selected value  */
---rating-removing  /* selected stars being "un-hovered"           */
---rating-empty     /* unfilled stars                              */
-```
+The slot receives:
 
-The defaults are passed as `var()` fallbacks rather than set directly on
-the root, so inherited values from any ancestor win — no need to target
-`.rating-stars` specifically.
+| Prop | Type | Notes |
+| --- | --- | --- |
+| `index` | `number` | 1-based star position |
+| `state` | `'filled' \| 'preview' \| 'removing' \| 'empty'` | The star's state — drive your color/style off this |
+| `leftState` / `rightState` | same union | Per-half states for `step="0.5"` |
+| `value` | `number` | Current saved rating |
+| `previewValue` | `number \| null` | Value being hovered, or `null`. Use `previewValue ?? value` for single-select patterns where hover should preview the selection |
+| `max` | `number` | Total stars |
 
-In **dark mode**, the component only adjusts `--rating-empty` (the default
-yellow filled/preview/removing read on both surfaces). Custom palettes
-usually need their own dark-mode overrides because the light shades used
-for `preview` / `removing` invert on a dark surface:
+### Per-index content
 
-```css
-.rating-red {
-  --rating-filled: theme(colors.red.500);
-  --rating-preview: theme(colors.red.300);
-  --rating-removing: theme(colors.red.200);
-}
-[data-theme='dark'] .rating-red {
-  --rating-preview: theme(colors.red.700);
-  --rating-removing: theme(colors.red.800);
-}
-```
+Render a different element per star — e.g. a mood scale of emojis. Style
+each one off the `state` prop with whatever utility classes you like.
 
-> Note: `theme()` only works in CSS (scoped `<style>` blocks or CSS files).
-> If you'd rather use an inline `style="..."` attribute on `<Rating>`, pass
-> resolved color values (`#ef4444`) instead — `theme()` is a build-time
-> PostCSS function and the browser can't evaluate it at runtime.
+<ComponentPreview name="Rating-CustomSlot" />
+
+### Custom colors with Tailwind
+
+Map `state` → Tailwind classes to recolor the control. Use the `dark:`
+variant for dark-mode overrides on `preview` / `removing` (which need to
+flip lighter→darker against a dark surface).
 
 <ComponentPreview name="Rating-CustomColor" />
 
@@ -120,7 +111,7 @@ Each star exposes data-attribute hooks for styling:
 - Half-star fill: each star renders two half-spans with their own
   `data-state` for half-step granularity.
 
-For color customization, see [Custom colors](#custom-colors) above.
+For color or per-star customization, see [Custom icon slot](#custom-icon-slot) above.
 
 ## Deprecated `rating_from` prop
 

@@ -3,54 +3,45 @@ import { ref } from 'vue'
 import { Rating } from 'frappe-ui'
 import LucideHeart from '~icons/lucide/heart'
 import LucideFlame from '~icons/lucide/flame'
+import type { RatingStarState } from 'frappe-ui'
 
 const heart = ref(4)
 const flame = ref(3)
+
+const redClasses: Record<RatingStarState, string> = {
+  filled: 'text-red-500',
+  preview: 'text-red-300 dark:text-red-700',
+  removing: 'text-red-200 dark:text-red-800',
+  empty: 'text-gray-300 dark:text-gray-600',
+}
+
+const orangeClasses: Record<RatingStarState, string> = {
+  filled: 'text-orange-500',
+  preview: 'text-orange-300 dark:text-orange-700',
+  removing: 'text-orange-200 dark:text-orange-800',
+  empty: 'text-gray-300 dark:text-gray-600',
+}
 </script>
 
 <template>
   <div class="w-full flex flex-col gap-4 items-start">
-    <Rating
-      v-model="heart"
-      :icon="LucideHeart"
-      label="Hearts"
-      class="rating-red"
-    />
-    <Rating
-      v-model="flame"
-      :icon="LucideFlame"
-      label="Flames"
-      class="rating-orange"
-    />
+    <Rating v-model="heart" label="Hearts">
+      <template #icon="{ state }">
+        <LucideHeart
+          fill="currentColor"
+          class="size-5"
+          :class="redClasses[state]"
+        />
+      </template>
+    </Rating>
+    <Rating v-model="flame" label="Flames">
+      <template #icon="{ state }">
+        <LucideFlame
+          fill="currentColor"
+          class="size-5"
+          :class="orangeClasses[state]"
+        />
+      </template>
+    </Rating>
   </div>
 </template>
-
-<style scoped>
-/* `filled` stays saturated in both themes so it reads on either surface.
-   `preview` / `removing` are intentionally a shade lighter than filled in
-   light mode and a shade darker in dark mode — the lightness relationship
-   inverts because the previewing/removing states should always sit *next*
-   to the filled color on the contrast scale relative to the background. */
-
-.rating-red {
-  --rating-filled: theme(colors.red.500);
-  --rating-preview: theme(colors.red.300);
-  --rating-removing: theme(colors.red.200);
-}
-
-:global([data-theme='dark'] .rating-red) {
-  --rating-preview: theme(colors.red.700);
-  --rating-removing: theme(colors.red.800);
-}
-
-.rating-orange {
-  --rating-filled: theme(colors.orange.500);
-  --rating-preview: theme(colors.orange.300);
-  --rating-removing: theme(colors.orange.200);
-}
-
-:global([data-theme='dark'] .rating-orange) {
-  --rating-preview: theme(colors.orange.700);
-  --rating-removing: theme(colors.orange.800);
-}
-</style>
