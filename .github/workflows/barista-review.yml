@@ -26,6 +26,8 @@ permissions:
 
 concurrency:
   group: barista-review-${{ github.event.pull_request.number || github.event.issue.number || inputs.pr_number }}
+  # Cancel in-flight: reviews are stateless (one comment posted at the end), so
+  # the latest `/barista review` request should win. No partial state to lose.
   cancel-in-progress: true
 
 jobs:
@@ -58,67 +60,35 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - name: Mint barista app token
-        id: app-token
-        uses: actions/create-github-app-token@v1
+      - name: Setup Barista
+        id: setup
+        uses: ./.github/actions/barista-setup
         with:
           app-id: ${{ secrets.BARISTA_APP_ID }}
           private-key: ${{ secrets.BARISTA_PRIVATE_KEY }}
-
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          token: ${{ steps.app-token.outputs.token }}
           # History so barista can inspect recent commits near changed files.
-          fetch-depth: 200
-
-      - name: Set up Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - name: Resolve PR number
-        id: pr
-        run: |
-          case "${{ github.event_name }}" in
-            pull_request)
-              echo "number=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
-              ;;
-            issue_comment)
-              echo "number=${{ github.event.issue.number }}" >> "$GITHUB_OUTPUT"
-              ;;
-            workflow_dispatch)
-              echo "number=${{ inputs.pr_number }}" >> "$GITHUB_OUTPUT"
-              ;;
-          esac
-
-      - name: Acknowledge /barista review
-        if: github.event_name == 'issue_comment'
-        uses: ./.github/actions/barista-react
-        with:
-          token: ${{ steps.app-token.outputs.token }}
-          repo: ${{ github.repository }}
-          comment-id: ${{ github.event.comment.id }}
+          fetch-depth: '200'
+          dispatch-number: ${{ inputs.pr_number }}
 
       - name: Run Barista
         id: run-barista
         uses: ./.github/actions/barista-run
         with:
           oauth-token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          app-token: ${{ steps.app-token.outputs.token }}
+          app-token: ${{ steps.setup.outputs.app-token }}
           repo: ${{ github.repository }}
-          issue-number: ${{ steps.pr.outputs.number }}
+          issue-number: ${{ steps.setup.outputs.number }}
           event: ${{ github.event_name }}
           comment-body: ${{ github.event.comment.body }}
           comment-author: ${{ github.event.comment.user.login }}
-          prompt: "/barista-review REPO: ${{ github.repository }} PR_NUMBER: ${{ steps.pr.outputs.number }} EVENT: ${{ github.event_name }}"
+          prompt: "/barista-review REPO: ${{ github.repository }} PR_NUMBER: ${{ steps.setup.outputs.number }} EVENT: ${{ github.event_name }}"
           model: ${{ vars.BARISTA_MODEL }}
 
       - name: Append run-stats footer
         if: always() && steps.run-barista.outcome == 'success'
         uses: ./.github/actions/barista-append-stats
         with:
-          token: ${{ steps.app-token.outputs.token }}
+          token: ${{ steps.setup.outputs.app-token }}
           repo: ${{ github.repository }}
-          issue-number: ${{ steps.pr.outputs.number }}
+          issue-number: ${{ steps.setup.outputs.number }}
           execution-file: ${{ steps.run-barista.outputs.execution-file }}

@@ -133,7 +133,7 @@ The `BARISTA_ENABLED` variable is the kill switch. Set it to anything other than
     barista-review.yml                  # PR review workflow
     barista-fix.yml                     # fix → draft-PR workflow (write mode, locked to @netchampfaris)
   actions/
-    barista-react/action.yml            # composite: post "eyes" reaction on /barista comments
+    barista-setup/action.yml            # composite: mint app token, checkout, install Bun, resolve issue/PR number, react to /barista comments
     barista-run/action.yml              # composite: invoke claude-code-action with barista env
     barista-append-stats/action.yml     # composite: append run-stats footer
   barista/
@@ -154,7 +154,7 @@ The `BARISTA_ENABLED` variable is the kill switch. Set it to anything other than
 
 The sandbox scripts intentionally restrict what Claude can do. Even if the prompt is jailbroken, Claude can only call subcommands and flags these scripts allow. They're TypeScript executed by [Bun](https://bun.sh) (shebang `#!/usr/bin/env bun`); each workflow installs Bun via `oven-sh/setup-bun@v2` before the agent runs.
 
-The composite actions in `.github/actions/barista-*` dedupe what the three workflows had in common — minting the app token, invoking `claude-code-action`, posting the reaction-ack, and appending the run-stats footer.
+The composite actions in `.github/actions/barista-*` dedupe what the three workflows had in common — `barista-setup` handles the prelude (app token, checkout, Bun, number resolution, comment ack), `barista-run` invokes `claude-code-action`, and `barista-append-stats` appends the run-stats footer.
 
 ## Cost & rate limits
 
