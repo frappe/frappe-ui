@@ -60,14 +60,25 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      - name: Mint barista app token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.BARISTA_APP_ID }}
+          private-key: ${{ secrets.BARISTA_PRIVATE_KEY }}
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          # History so barista can inspect recent commits near changed files.
+          fetch-depth: 200
+
       - name: Setup Barista
         id: setup
         uses: ./.github/actions/barista-setup
         with:
-          app-id: ${{ secrets.BARISTA_APP_ID }}
-          private-key: ${{ secrets.BARISTA_PRIVATE_KEY }}
-          # History so barista can inspect recent commits near changed files.
-          fetch-depth: '200'
+          app-token: ${{ steps.app-token.outputs.token }}
           dispatch-number: ${{ inputs.pr_number }}
 
       - name: Run Barista
@@ -75,7 +86,7 @@ jobs:
         uses: ./.github/actions/barista-run
         with:
           oauth-token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          app-token: ${{ steps.setup.outputs.app-token }}
+          app-token: ${{ steps.app-token.outputs.token }}
           repo: ${{ github.repository }}
           issue-number: ${{ steps.setup.outputs.number }}
           event: ${{ github.event_name }}
@@ -88,7 +99,7 @@ jobs:
         if: always() && steps.run-barista.outcome == 'success'
         uses: ./.github/actions/barista-append-stats
         with:
-          token: ${{ steps.setup.outputs.app-token }}
+          token: ${{ steps.app-token.outputs.token }}
           repo: ${{ github.repository }}
           issue-number: ${{ steps.setup.outputs.number }}
           execution-file: ${{ steps.run-barista.outputs.execution-file }}
