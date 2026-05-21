@@ -108,6 +108,17 @@ function applyImports(state: StateCore, imports: string[]) {
   }
 }
 
+function getStoryPath(mdDir: string, componentName: string, storyFileName: string) {
+  const moleculeName = componentName.charAt(0).toLowerCase() + componentName.slice(1)
+  const candidates = [
+    `../../../../src/components/${componentName}/stories/${storyFileName}.vue`,
+    `../../../../src/molecules/${moleculeName}/stories/${storyFileName}.vue`,
+    `../../../../frappe/${componentName}/stories/${storyFileName}.vue`,
+  ]
+
+  return candidates.find((candidate) => existsSync(resolve(mdDir, candidate))) ?? candidates[0]
+}
+
 function transformPreview(
   state: StateCore,
   tokenIdx: number,
@@ -120,10 +131,7 @@ function transformPreview(
   const csr = tag.attrs.csr === 'true'
   const { componentName, storyFileName } = getPreviewParts(name)
   const storyImportName = getStoryImportName(storyFileName)
-  const componentPath = resolveSourcePath(
-    mdDir,
-    `${componentName}/stories/${storyFileName}.vue`,
-  )
+  const componentPath = getStoryPath(mdDir, componentName, storyFileName)
 
   // Forward every static attr except `csr`, which this plugin consumes
   // itself (it's not a Vue prop). `name` is still a prop on the Demo
