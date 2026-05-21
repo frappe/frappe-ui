@@ -2,7 +2,7 @@
 // Share dialog — invite teammates by email and adjust per-row access.
 // Rich `#default` body + a simple `#actions` slot CTA.
 import { ref } from 'vue'
-import { Avatar, Button, Dialog, FormControl, TextInput } from 'frappe-ui'
+import { Avatar, Button, Dialog, Select, TextInput } from 'frappe-ui'
 
 const open = ref(false)
 
@@ -114,9 +114,8 @@ function invite() {
             >
               Owner
             </span>
-            <FormControl
+            <Select
               v-else
-              type="select"
               v-model="member.role"
               :options="roleOptions"
               class="w-36 shrink-0"
