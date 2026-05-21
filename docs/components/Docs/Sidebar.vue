@@ -17,9 +17,13 @@ const list = getSidebarList(useData().theme.value.componentList)
 state.sidebarList = list
 
 const route = useRoute()
+// VitePress route.path keeps the .html suffix during SSR / initial render
+// even with cleanUrls: true, while sidebar links are clean. Strip it before
+// comparing so the active highlight survives hydration.
+const stripHtml = (p: string) => p.replace(/\.html$/, '')
 const isActive = (link: string) => {
   if (link === '/') return route.path === '/' || route.path === '/index.html'
-  return route.path === link
+  return stripHtml(route.path) === link
 }
 </script>
 

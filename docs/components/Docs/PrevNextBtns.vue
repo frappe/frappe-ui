@@ -16,23 +16,22 @@ const linkInfos = state.sidebarList?.reduce((acc, cur) => {
   return acc
 }, [])
 
+// VitePress route.path keeps the .html suffix during SSR / initial render
+// even with cleanUrls: true, while sidebar links are clean. Strip it.
+const currentIndex = computed(() => {
+  const path = route.path.replace(/\.html$/, '')
+  return linkInfos.findIndex((x) => x.link === path)
+})
+
 const prevLink = computed(() => {
-  const index = linkInfos.findIndex((x) => x.link === route.path)
-
-  if (index === 0) {
-    return null
-  }
-
+  const index = currentIndex.value
+  if (index <= 0) return null
   return linkInfos[index - 1]
 })
 
 const nextLink = computed(() => {
-  const index = linkInfos.findIndex((x) => x.link === route.path)
-
-  if (index === linkInfos.length - 1) {
-    return null
-  }
-
+  const index = currentIndex.value
+  if (index === -1 || index === linkInfos.length - 1) return null
   return linkInfos[index + 1]
 })
 
