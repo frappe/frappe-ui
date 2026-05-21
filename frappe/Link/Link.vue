@@ -13,6 +13,7 @@
       :id="id"
       :options="linkOptions"
       :disabled="disabled"
+      :placeholder="placeholder ?? `Search ${doctype.toLowerCase()}`"
       :loading="options.loading && !options.data"
       @update:query="handleInputChange"
       @focus="() => loadOptions('')"

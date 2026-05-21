@@ -5,6 +5,7 @@ export interface LinkProps extends InputLabelingProps {
   filters?: Record<string, unknown>
   creatable?: boolean
   disabled?: boolean
+  placeholder?: string
 }
 
 export interface LinkEmits {
