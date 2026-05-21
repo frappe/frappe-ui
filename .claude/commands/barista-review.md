@@ -1,5 +1,5 @@
 ---
-allowed-tools: Bash(./.github/barista/scripts/gh.sh:*),Bash(./.github/barista/scripts/add-comment.sh:*),Bash(git log:*),Bash(git show:*),Bash(git blame:*),Bash(git diff:*),Bash(git rev-parse:*),Bash(git merge-base:*),Bash(git ls-files:*),Bash(jq:*),Read,Glob,Grep
+allowed-tools: Bash(./.github/barista/scripts/gh.ts:*),Bash(./.github/barista/scripts/add-comment.ts:*),Bash(git log:*),Bash(git show:*),Bash(git blame:*),Bash(git diff:*),Bash(git rev-parse:*),Bash(git merge-base:*),Bash(git ls-files:*),Bash(jq:*),Read,Glob,Grep
 description: Review a frappe-ui pull request and post one concise comment with findings.
 ---
 
@@ -21,38 +21,38 @@ You have **the repository checked out at the base branch.** Read the diff and th
 **Read-only / investigative:**
 
 - `Read`, `Glob`, `Grep` — explore the codebase.
-- `./.github/barista/scripts/gh.sh pr view <N>` / `--comments` — read the PR title, body, status, recent comments.
-- `./.github/barista/scripts/gh.sh pr diff <N>` — full unified diff for the PR.
-- `./.github/barista/scripts/gh.sh pr checks <N>` — see CI status. If checks are failing, mention it; don't re-derive failures the runner already surfaced.
-- `./.github/barista/scripts/gh.sh pr status` — mergeable state and review counts for the current branch context.
-- `./.github/barista/scripts/gh.sh release list --limit 5` / `release view <tag>` — recent releases. Useful for "is this a breaking change since the last published version?".
+- `./.github/barista/scripts/gh.ts pr view <N>` / `--comments` — read the PR title, body, status, recent comments.
+- `./.github/barista/scripts/gh.ts pr diff <N>` — full unified diff for the PR.
+- `./.github/barista/scripts/gh.ts pr checks <N>` — see CI status. If checks are failing, mention it; don't re-derive failures the runner already surfaced.
+- `./.github/barista/scripts/gh.ts pr status` — mergeable state and review counts for the current branch context.
+- `./.github/barista/scripts/gh.ts release list --limit 5` / `release view <tag>` — recent releases. Useful for "is this a breaking change since the last published version?".
 - `Bash(git log:*)`, `Bash(git show:*)`, `Bash(git blame:*)`, `Bash(git diff:*)` — inspect history near changed files.
 - `Bash(git merge-base:*)`, `Bash(git rev-parse:*)`, `Bash(git ls-files:*)` — locate the base commit, resolve refs, enumerate files (e.g. `git ls-files 'src/components/Toast/**'`).
-- `Bash(jq:*)` — parse JSON output from `gh.sh ... --json …` when grepping prose is awkward.
-- `./.github/barista/scripts/gh.sh search issues "<query>"` — find related open issues (no `repo:`/`org:`/`user:` qualifiers).
+- `Bash(jq:*)` — parse JSON output from `gh.ts ... --json …` when grepping prose is awkward.
+- `./.github/barista/scripts/gh.ts search issues "<query>"` — find related open issues (no `repo:`/`org:`/`user:` qualifiers).
 
 **Write (one call, at the end):**
 
-- `./.github/barista/scripts/add-comment.sh "body"` or `--file path.md` — post **one** comment on the PR.
+- `./.github/barista/scripts/add-comment.ts "body"` or `--file path.md` — post **one** comment on the PR.
 
 Nothing else is permitted.
 
 # Workflow
 
-1. **Read the PR.** `./.github/barista/scripts/gh.sh pr view <PR_NUMBER>` then `--comments`. Note: title, body, author, labels, target branch, linked issues.
+1. **Read the PR.** `./.github/barista/scripts/gh.ts pr view <PR_NUMBER>` then `--comments`. Note: title, body, author, labels, target branch, linked issues.
 
 2. **Branch on EVENT:**
    - `pull_request` / `workflow_dispatch` → first-time review. Continue.
    - `issue_comment` → re-review. Read `$BARISTA_COMMENT_BODY`; if it asks for a specific angle ("focus on accessibility", "look again at X"), prioritise that. Continue.
 
-3. **Read the diff.** `./.github/barista/scripts/gh.sh pr diff <PR_NUMBER>`. Skim once for shape (which files, how big, what's the change about), then read carefully.
+3. **Read the diff.** `./.github/barista/scripts/gh.ts pr diff <PR_NUMBER>`. Skim once for shape (which files, how big, what's the change about), then read carefully.
 
 4. **Investigate the affected surface.** Spend the bulk of your tool budget here:
    - For each non-trivial changed file, `Read` enough surrounding context to understand the change in situ — not just the hunks.
    - **Look for callers** of changed APIs. Grep for the symbol name; if a public component's prop is renamed, removed, or has new required behaviour, that's a breaking change worth flagging.
    - **Check tests.** If logic changed and no tests were added or updated, note it. If tests exist for the file, skim them to see if they still cover the new behaviour.
    - **Check history.** `git log --oneline -n 5 -- <file>` on suspicious files. If a recent commit fixed something here and this change might re-break it, say so.
-   - **Search related issues** with `gh.sh search issues` when the change references one or when something looks like a known pain point.
+   - **Search related issues** with `gh.ts search issues` when the change references one or when something looks like a known pain point.
    - Cap investigation: at most ~20 read/grep/glob calls, ~5 git calls, ~3 search calls.
 
 5. **Run the API-surface-tightness pass.** If the PR touches a `types.ts`, a `defineProps`, a `defineEmits`, a `defineModel`, or a new `<slot>`, this pass is mandatory. See the **API-surface-tightness checklist** below. Read `PHILOSOPHY.md` (P1–P13) and `CONTEXT.md` if the change makes naming or vocabulary choices.
@@ -218,4 +218,4 @@ Then post a fresh verdict + bullets.
 - Investigate before flagging — at least open the file and read around the changed lines.
 - Public API changes in `frappe-ui` matter. When in doubt, grep for consumers and look for an existing component that already names the concept.
 - Never reject ("Concerns") without naming the specific file:line, the principle (`P<n>`) or canonical-vocab entry violated, and the consequence.
-- Stop after at most: ~20 read/grep/glob calls, ~5 git calls, ~3 gh.sh search calls, 1 comment call.
+- Stop after at most: ~20 read/grep/glob calls, ~5 git calls, ~3 gh.ts search calls, 1 comment call.

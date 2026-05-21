@@ -1,0 +1,65 @@
+name: Barista — Run Claude
+description: Invoke the claude-code-action with the standard barista env. Mode-specific inputs (branch/base for fix mode) default to empty.
+inputs:
+  oauth-token:
+    description: Claude Code OAuth token (from `claude setup-token`)
+    required: true
+  app-token:
+    description: barista[bot] GitHub App installation token
+    required: true
+  repo:
+    description: owner/repo
+    required: true
+  issue-number:
+    description: Issue or PR number the run is scoped to
+    required: true
+  event:
+    description: Triggering event name (issues / issue_comment / pull_request / workflow_dispatch)
+    required: true
+  comment-body:
+    description: Body of the /barista comment, when EVENT=issue_comment
+    required: false
+    default: ''
+  comment-author:
+    description: Login of the /barista comment author, when EVENT=issue_comment
+    required: false
+    default: ''
+  branch:
+    description: Working branch (fix mode only)
+    required: false
+    default: ''
+  base:
+    description: Base branch (fix mode only)
+    required: false
+    default: ''
+  prompt:
+    description: "Slash-command prompt for the agent (e.g. `/barista-triage REPO: …`)"
+    required: true
+outputs:
+  execution-file:
+    description: Path to claude-code-action's execution JSON
+    value: ${{ steps.run.outputs.execution_file }}
+runs:
+  using: composite
+  steps:
+    - name: Run Barista
+      id: run
+      uses: anthropics/claude-code-action@v1
+      env:
+        GITHUB_TOKEN: ${{ inputs.app-token }}
+        GH_TOKEN: ${{ inputs.app-token }}
+        GITHUB_REPOSITORY: ${{ inputs.repo }}
+        BARISTA_ISSUE: ${{ inputs.issue-number }}
+        BARISTA_EVENT: ${{ inputs.event }}
+        BARISTA_COMMENT_BODY: ${{ inputs.comment-body }}
+        BARISTA_COMMENT_AUTHOR: ${{ inputs.comment-author }}
+        BARISTA_BRANCH: ${{ inputs.branch }}
+        BARISTA_BASE: ${{ inputs.base }}
+      with:
+        claude_code_oauth_token: ${{ inputs.oauth-token }}
+        github_token: ${{ inputs.app-token }}
+        allowed_non_write_users: "*"
+        # Renders a human-readable transcript in the Actions run's Step Summary.
+        # Avoid show_full_output which dumps raw JSON in logs.
+        display_report: "true"
+        prompt: ${{ inputs.prompt }}

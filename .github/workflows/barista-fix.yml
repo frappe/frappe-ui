@@ -53,8 +53,13 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ steps.app-token.outputs.token }}
-          # Need full history so barista can create a branch off main and push.
+          # Full history so barista can create a branch off main and push.
           fetch-depth: 0
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
 
       - name: Resolve issue number
         id: issue
@@ -68,18 +73,13 @@ jobs:
               ;;
           esac
 
-      - name: Acknowledge /barista fix with reaction
+      - name: Acknowledge /barista fix
         if: github.event_name == 'issue_comment'
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-          REPO: ${{ github.repository }}
-          COMMENT_ID: ${{ github.event.comment.id }}
-        run: |
-          gh api \
-            --method POST \
-            -H "Accept: application/vnd.github+json" \
-            "/repos/$REPO/issues/comments/$COMMENT_ID/reactions" \
-            -f content=eyes
+        uses: ./.github/actions/barista-react
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          repo: ${{ github.repository }}
+          comment-id: ${{ github.event.comment.id }}
 
       - name: Configure git identity for barista[bot]
         env:
@@ -106,29 +106,24 @@ jobs:
 
       - name: Run Barista (fix mode)
         id: run-barista
-        uses: anthropics/claude-code-action@v1
-        env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          BARISTA_ISSUE: ${{ steps.issue.outputs.number }}
-          BARISTA_EVENT: ${{ github.event_name }}
-          BARISTA_COMMENT_BODY: ${{ github.event.comment.body }}
-          BARISTA_COMMENT_AUTHOR: ${{ github.event.comment.user.login }}
-          BARISTA_BRANCH: ${{ steps.branch.outputs.name }}
-          BARISTA_BASE: ${{ steps.branch.outputs.base }}
+        uses: ./.github/actions/barista-run
         with:
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          github_token: ${{ steps.app-token.outputs.token }}
-          allowed_non_write_users: "*"
-          display_report: "true"
+          oauth-token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          app-token: ${{ steps.app-token.outputs.token }}
+          repo: ${{ github.repository }}
+          issue-number: ${{ steps.issue.outputs.number }}
+          event: ${{ github.event_name }}
+          comment-body: ${{ github.event.comment.body }}
+          comment-author: ${{ github.event.comment.user.login }}
+          branch: ${{ steps.branch.outputs.name }}
+          base: ${{ steps.branch.outputs.base }}
           prompt: "/barista-fix REPO: ${{ github.repository }} ISSUE_NUMBER: ${{ steps.issue.outputs.number }} EVENT: ${{ github.event_name }} BRANCH: ${{ steps.branch.outputs.name }} BASE: ${{ steps.branch.outputs.base }}"
 
-      - name: Append run-stats footer to barista's comment
+      - name: Append run-stats footer
         if: always() && steps.run-barista.outcome == 'success'
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-          EXECUTION_FILE: ${{ steps.run-barista.outputs.execution_file }}
-          ISSUE_NUMBER: ${{ steps.issue.outputs.number }}
-          REPO: ${{ github.repository }}
-        run: ./.github/barista/scripts/append-stats.sh
+        uses: ./.github/actions/barista-append-stats
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          repo: ${{ github.repository }}
+          issue-number: ${{ steps.issue.outputs.number }}
+          execution-file: ${{ steps.run-barista.outputs.execution-file }}

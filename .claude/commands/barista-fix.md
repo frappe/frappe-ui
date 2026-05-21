@@ -1,5 +1,5 @@
 ---
-allowed-tools: Bash(./.github/barista/scripts/gh.sh:*),Bash(./.github/barista/scripts/add-comment.sh:*),Bash(./.github/barista/scripts/open-pr.sh:*),Bash(./.github/barista/scripts/fetch-image.sh:*),Bash(git log:*),Bash(git show:*),Bash(git blame:*),Bash(git diff:*),Bash(git status:*),Bash(git rev-parse:*),Read,Edit,Write,Glob,Grep
+allowed-tools: Bash(./.github/barista/scripts/gh.ts:*),Bash(./.github/barista/scripts/add-comment.ts:*),Bash(./.github/barista/scripts/open-pr.ts:*),Bash(./.github/barista/scripts/fetch-image.ts:*),Bash(git log:*),Bash(git show:*),Bash(git blame:*),Bash(git diff:*),Bash(git status:*),Bash(git rev-parse:*),Read,Edit,Write,Glob,Grep
 description: Attempt a small, focused fix for a frappe-ui issue and open a draft PR.
 ---
 
@@ -19,22 +19,22 @@ The repo is checked out on `BRANCH`, off `BASE`. You can edit files directly wit
 **Read-only / investigative:**
 
 - `Read`, `Glob`, `Grep` — explore.
-- `./.github/barista/scripts/gh.sh issue view <N> --comments` — read the issue and any prior barista comments (the triage hypothesis is usually the starting point).
-- `./.github/barista/scripts/gh.sh search issues "<query>"` — find related issues/PRs.
+- `./.github/barista/scripts/gh.ts issue view <N> --comments` — read the issue and any prior barista comments (the triage hypothesis is usually the starting point).
+- `./.github/barista/scripts/gh.ts search issues "<query>"` — find related issues/PRs.
 - `Bash(git log:*)`, `Bash(git show:*)`, `Bash(git blame:*)`, `Bash(git diff:*)`, `Bash(git status:*)`, `Bash(git rev-parse:*)`.
-- `./.github/barista/scripts/fetch-image.sh <url>` — pull issue screenshots; `Read` the printed path.
+- `./.github/barista/scripts/fetch-image.ts <url>` — pull issue screenshots; `Read` the printed path.
 
 **Write:**
 
 - `Edit`, `Write` — modify source files. **Denylisted paths** (will be rejected at push time): `.github/**`, `package.json`, lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`), `.env*`, `LICENSE*`, `CODEOWNERS`, `.changeset/config.json`. If your fix requires touching any of these, do not — bail out and comment instead.
-- `./.github/barista/scripts/open-pr.sh --title "<title>" --body-file <path>` — commits all changes, force-pushes the working branch, opens a draft PR linking the issue. **Call exactly once, at the end.**
-- `./.github/barista/scripts/add-comment.sh "body"` or `--file path.md` — post **one** comment on the issue. Use this either to link the PR (success) or to explain why no PR (bailout). Exactly once.
+- `./.github/barista/scripts/open-pr.ts --title "<title>" --body-file <path>` — commits all changes, force-pushes the working branch, opens a draft PR linking the issue. **Call exactly once, at the end.**
+- `./.github/barista/scripts/add-comment.ts "body"` or `--file path.md` — post **one** comment on the issue. Use this either to link the PR (success) or to explain why no PR (bailout). Exactly once.
 
 Nothing else.
 
 # Workflow
 
-1. **Read the issue and its barista-triage comment.** `gh.sh issue view <ISSUE_NUMBER> --comments`. The triage comment usually contains the hypothesis — start from there. Read `$BARISTA_COMMENT_BODY` for any direction the maintainer added to the `/barista fix` invocation.
+1. **Read the issue and its barista-triage comment.** `gh.ts issue view <ISSUE_NUMBER> --comments`. The triage comment usually contains the hypothesis — start from there. Read `$BARISTA_COMMENT_BODY` for any direction the maintainer added to the `/barista fix` invocation.
 
 2. **Decide if this is a "small, focused" fix.** Fix mode is for:
    - Typos, docs corrections, dead-link fixes.
@@ -60,10 +60,10 @@ Nothing else.
 
 5. **Sanity-check the diff.** `git status` then `git diff` (or `git diff --stat` first if large). If the diff touches a denylisted path, **stop and bail to step 7**. If the diff is unexpectedly large (>~150 lines or >5 files), reconsider — fix mode is for small.
 
-6. **Open the PR.** Write the body to a temp file (clearer than inline) and call `open-pr.sh`:
+6. **Open the PR.** Write the body to a temp file (clearer than inline) and call `open-pr.ts`:
 
    ```sh
-   ./.github/barista/scripts/open-pr.sh \
+   ./.github/barista/scripts/open-pr.ts \
      --title "fix: <one-line summary> (#<ISSUE_NUMBER>)" \
      --body-file /tmp/barista-pr-body.md
    ```
@@ -86,8 +86,8 @@ Nothing else.
 
    No filler, no emoji, no signature. Mark as draft (the script does this).
 
-7. **Comment on the issue.** Exactly one `add-comment.sh` call, regardless of outcome:
-   - **Success**: `Opened draft PR #<N> with a candidate fix. <one-line summary of the change>.` (gh.sh will print the PR URL; include the number.)
+7. **Comment on the issue.** Exactly one `add-comment.ts` call, regardless of outcome:
+   - **Success**: `Opened draft PR #<N> with a candidate fix. <one-line summary of the change>.` (gh.ts will print the PR URL; include the number.)
    - **Bailout**: terse explanation of why you didn't open a PR. Example: `Skipped fix mode — change requires touching package.json (peer-dep version bump), which is on the fix-mode denylist. The PR will need a human.`
 
 8. **Stop.** No second commit, no second comment, no loops.
@@ -98,4 +98,4 @@ Nothing else.
 - **Stay on the branch you were given.** `BRANCH` is reset to `BASE` at the start of every `/barista fix` run, so a re-run replaces the previous attempt. Don't create extra branches.
 - **Bail loudly.** If anything makes you less than confident — denylist hit, unclear repro, large diff, would need to make design calls — comment why and don't push. Half-finished PRs are worse than no PR.
 - **Public API changes**: re-read the `barista-review` canonical-vocabulary section before you touch a `types.ts`, `defineProps`, or `defineEmits`. If the fix is a rename, prefer the deprecation-alias path (`P13`) over an outright rename.
-- Tool budget cap: ~15 read/grep/glob, ~5 git calls, ~3 image fetches, ~3 gh.sh search calls, plus the writes (Edit/Write as needed for one focused change, one `open-pr.sh`, one `add-comment.sh`).
+- Tool budget cap: ~15 read/grep/glob, ~5 git calls, ~3 image fetches, ~3 gh.ts search calls, plus the writes (Edit/Write as needed for one focused change, one `open-pr.ts`, one `add-comment.ts`).

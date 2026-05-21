@@ -31,7 +31,7 @@ Fork PRs and drafts are skipped by design — the bot token is not exposed to un
 | `issue_comment.created` on an issue (only if comment contains `/barista fix` AND author is `@netchampfaris`) | Investigate → edit files on `barista/issue-<N>` branch → open a **draft** PR linking the issue, or bail with a comment if the fix is too large |
 | `workflow_dispatch` (manual, only `@netchampfaris`) | Same, for a specific issue number |
 
-This is the only write-mode workflow. Locked to a single GitHub login (`netchampfaris`) — change the `if:` block in `barista-fix.yml` to widen the allowlist. Sandbox script `open-pr.sh` enforces a path denylist (workflows, `package.json`, lockfiles, env, license, CODEOWNERS) so even a jailbroken prompt cannot mutate those.
+This is the only write-mode workflow. Locked to a single GitHub login (`netchampfaris`) — change the `if:` block in `barista-fix.yml` to widen the allowlist. Sandbox script `open-pr.ts` enforces a path denylist (workflows, `package.json`, lockfiles, env, license, CODEOWNERS) so even a jailbroken prompt cannot mutate those.
 
 ## One-time setup
 
@@ -132,15 +132,19 @@ The `BARISTA_ENABLED` variable is the kill switch. Set it to anything other than
     barista-triage.yml                  # issue triage workflow
     barista-review.yml                  # PR review workflow
     barista-fix.yml                     # fix → draft-PR workflow (write mode, locked to @netchampfaris)
+  actions/
+    barista-react/action.yml            # composite: post "eyes" reaction on /barista comments
+    barista-run/action.yml              # composite: invoke claude-code-action with barista env
+    barista-append-stats/action.yml     # composite: append run-stats footer
   barista/
     SETUP.md                            # this file
-    scripts/
-      gh.sh                             # read-only gh wrapper (issues + PRs, sandbox)
-      edit-issue-labels.sh              # write-only label editor (sandbox)
-      add-comment.sh                    # write-only comment poster (issues + PRs, sandbox)
-      open-pr.sh                        # write-only branch+commit+push+PR-create (sandbox, path denylist)
-      append-stats.sh                   # appends run-stats footer to barista's comment
-      fetch-image.sh                    # downloads issue/PR images for inspection
+    scripts/                            # Bun TypeScript scripts (require setup-bun in CI)
+      gh.ts                             # read-only gh wrapper (issues + PRs, sandbox)
+      edit-issue-labels.ts              # write-only label editor (sandbox)
+      add-comment.ts                    # write-only comment poster (issues + PRs, sandbox)
+      open-pr.ts                        # write-only branch+commit+push+PR-create (sandbox, path denylist)
+      append-stats.ts                   # appends run-stats footer to barista's comment
+      fetch-image.ts                    # downloads issue/PR images for inspection
 .claude/
   commands/
     barista-triage.md                   # triage prompt + allowed-tools manifest
@@ -148,7 +152,9 @@ The `BARISTA_ENABLED` variable is the kill switch. Set it to anything other than
     barista-fix.md                      # fix-mode prompt + allowed-tools manifest
 ```
 
-The sandbox scripts intentionally restrict what Claude can do. Even if the prompt is jailbroken, Claude can only call subcommands and flags these scripts allow.
+The sandbox scripts intentionally restrict what Claude can do. Even if the prompt is jailbroken, Claude can only call subcommands and flags these scripts allow. They're TypeScript executed by [Bun](https://bun.sh) (shebang `#!/usr/bin/env bun`); each workflow installs Bun via `oven-sh/setup-bun@v2` before the agent runs.
+
+The composite actions in `.github/actions/barista-*` dedupe what the three workflows had in common — minting the app token, invoking `claude-code-action`, posting the reaction-ack, and appending the run-stats footer.
 
 ## Cost & rate limits
 
