@@ -59,8 +59,9 @@ The slot receives:
 | Prop | Type | Notes |
 | --- | --- | --- |
 | `index` | `number` | 1-based star position |
-| `state` | `'filled' \| 'preview' \| 'removing' \| 'empty'` | The star's state — drive your color/style off this |
-| `leftState` / `rightState` | same union | Per-half states for `step="0.5"` |
+| `side` | `'left' \| 'right'` | Which half-span this invocation renders into |
+| `state` | `'filled' \| 'preview' \| 'removing' \| 'empty'` | The current half's state (matches `leftState` or `rightState` per `side`) — drive your color/style off this |
+| `leftState` / `rightState` | same union | Per-half states for `step="0.5"`, exposed if you need both at once |
 | `value` | `number` | Current saved rating |
 | `previewValue` | `number \| null` | Value being hovered, or `null`. Use `previewValue ?? value` for single-select patterns where hover should preview the selection |
 | `max` | `number` | Total stars |
@@ -79,6 +80,11 @@ variant for dark-mode overrides on `preview` / `removing` (which need to
 flip lighter→darker against a dark surface).
 
 <ComponentPreview name="Rating-CustomColor" />
+
+The same pattern works with `step="0.5"` because `state` reflects the
+current half, so each half-span picks up the correct color independently.
+
+<ComponentPreview name="Rating-HalfStepCustomColor" />
 
 ## Labeling
 

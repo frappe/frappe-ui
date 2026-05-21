@@ -70,7 +70,8 @@
           <slot
             name="icon"
             :index="index"
-            :state="starState(index)"
+            side="left"
+            :state="halfState(index - 0.5)"
             :left-state="halfState(index - 0.5)"
             :right-state="halfState(index)"
             :value="savedValue"
@@ -97,7 +98,8 @@
           <slot
             name="icon"
             :index="index"
-            :state="starState(index)"
+            side="right"
+            :state="halfState(index)"
             :left-state="halfState(index - 0.5)"
             :right-state="halfState(index)"
             :value="savedValue"

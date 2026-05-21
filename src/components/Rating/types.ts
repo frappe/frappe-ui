@@ -41,7 +41,13 @@ export type RatingStarState = 'filled' | 'preview' | 'removing' | 'empty'
 export interface RatingIconSlotProps {
   /** 1-based star position. */
   index: number
-  /** Overall state of this star (mirrors `rightState`). */
+  /**
+   * Which half of the star this invocation renders into. The slot is stamped
+   * once per half so clipping works; use `side` to pick the matching state
+   * when driving icon color from a slot template under `step === 0.5`.
+   */
+  side: 'left' | 'right'
+  /** State of the half being rendered — equals `leftState` or `rightState` per `side`. */
   state: RatingStarState
   /** State of the left half — equals `rightState` when `step === 1`. */
   leftState: RatingStarState

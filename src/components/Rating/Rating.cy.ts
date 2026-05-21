@@ -194,6 +194,33 @@ describe('Rating', () => {
         .first()
         .should('have.attr', 'fill', 'currentColor')
     })
+
+    it('icon slot receives per-half state under step=0.5', () => {
+      cy.mount(Rating, {
+        props: { modelValue: 3.5, step: 0.5 },
+        slots: {
+          icon: ({
+            index,
+            side,
+            state,
+          }: {
+            index: number
+            side: 'left' | 'right'
+            state: string
+          }) =>
+            h('i', { 'data-test': `s${index}-${side}`, 'data-state': state }),
+        },
+      })
+      // star 4: left half = filled, right half = empty
+      cy.get('[data-test="s4-left"]').should('have.attr', 'data-state', 'filled')
+      cy.get('[data-test="s4-right"]').should('have.attr', 'data-state', 'empty')
+      // star 3: both halves filled
+      cy.get('[data-test="s3-left"]').should('have.attr', 'data-state', 'filled')
+      cy.get('[data-test="s3-right"]').should('have.attr', 'data-state', 'filled')
+      // star 5: both halves empty
+      cy.get('[data-test="s5-left"]').should('have.attr', 'data-state', 'empty')
+      cy.get('[data-test="s5-right"]').should('have.attr', 'data-state', 'empty')
+    })
   })
 
   describe('keyboard', () => {
