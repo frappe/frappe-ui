@@ -18,6 +18,9 @@ permissions:
 
 concurrency:
   group: barista-${{ github.event.issue.number || inputs.issue_number }}
+  # Queue, don't cancel: an in-flight triage may already have decided labels and
+  # be midway through posting a comment — losing that to a `/barista retriage`
+  # comment would leave the issue in a half-triaged state.
   cancel-in-progress: false
 
 jobs:
@@ -42,69 +45,35 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          # Need history so barista can inspect recent commits near suspected files.
-          fetch-depth: 200
-
-      - name: Mint barista app token
-        id: app-token
-        uses: actions/create-github-app-token@v1
+      - name: Setup Barista
+        id: setup
+        uses: ./.github/actions/barista-setup
         with:
           app-id: ${{ secrets.BARISTA_APP_ID }}
           private-key: ${{ secrets.BARISTA_PRIVATE_KEY }}
-
-      - name: Resolve issue number
-        id: issue
-        run: |
-          case "${{ github.event_name }}" in
-            issues|issue_comment)
-              echo "number=${{ github.event.issue.number }}" >> "$GITHUB_OUTPUT"
-              ;;
-            workflow_dispatch)
-              echo "number=${{ inputs.issue_number }}" >> "$GITHUB_OUTPUT"
-              ;;
-          esac
-
-      - name: Acknowledge /barista comment with reaction
-        if: github.event_name == 'issue_comment'
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-          REPO: ${{ github.repository }}
-          COMMENT_ID: ${{ github.event.comment.id }}
-        run: |
-          gh api \
-            --method POST \
-            -H "Accept: application/vnd.github+json" \
-            "/repos/$REPO/issues/comments/$COMMENT_ID/reactions" \
-            -f content=eyes
+          # History so barista can inspect recent commits near suspected files.
+          fetch-depth: '200'
+          dispatch-number: ${{ inputs.issue_number }}
 
       - name: Run Barista
         id: run-barista
-        uses: anthropics/claude-code-action@v1
-        env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          BARISTA_ISSUE: ${{ steps.issue.outputs.number }}
-          BARISTA_EVENT: ${{ github.event_name }}
-          BARISTA_COMMENT_BODY: ${{ github.event.comment.body }}
-          BARISTA_COMMENT_AUTHOR: ${{ github.event.comment.user.login }}
+        uses: ./.github/actions/barista-run
         with:
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          github_token: ${{ steps.app-token.outputs.token }}
-          allowed_non_write_users: "*"
-          # Renders a human-readable transcript in the Actions run's Step Summary
-          # (formatted markdown). Avoid show_full_output which dumps raw JSON in logs.
-          display_report: "true"
-          prompt: "/barista-triage REPO: ${{ github.repository }} ISSUE_NUMBER: ${{ steps.issue.outputs.number }} EVENT: ${{ github.event_name }}"
+          oauth-token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          app-token: ${{ steps.setup.outputs.app-token }}
+          repo: ${{ github.repository }}
+          issue-number: ${{ steps.setup.outputs.number }}
+          event: ${{ github.event_name }}
+          comment-body: ${{ github.event.comment.body }}
+          comment-author: ${{ github.event.comment.user.login }}
+          prompt: "/barista-triage REPO: ${{ github.repository }} ISSUE_NUMBER: ${{ steps.setup.outputs.number }} EVENT: ${{ github.event_name }}"
+          model: ${{ vars.BARISTA_MODEL }}
 
-      - name: Append run-stats footer to barista's comment
+      - name: Append run-stats footer
         if: always() && steps.run-barista.outcome == 'success'
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-          EXECUTION_FILE: ${{ steps.run-barista.outputs.execution_file }}
-          ISSUE_NUMBER: ${{ steps.issue.outputs.number }}
-          REPO: ${{ github.repository }}
-        run: ./.github/barista/scripts/append-stats.sh
+        uses: ./.github/actions/barista-append-stats
+        with:
+          token: ${{ steps.setup.outputs.app-token }}
+          repo: ${{ github.repository }}
+          issue-number: ${{ steps.setup.outputs.number }}
+          execution-file: ${{ steps.run-barista.outputs.execution-file }}
