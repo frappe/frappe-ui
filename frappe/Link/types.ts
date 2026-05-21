@@ -2,11 +2,19 @@ import type { InputLabelingProps } from '../../src/composables/useInputLabeling'
 
 export interface LinkProps extends InputLabelingProps {
   doctype: string
-  filters?: Record<string, unknown> | Array<unknown> | string
-  allowCreate?: boolean
-  allowClear?: boolean
-  allowRedirect?: boolean
+  filters?: Record<string, unknown>
+  creatable?: boolean
   disabled?: boolean
+}
+
+export interface LinkEmits {
+  'update:modelValue': [value: string | null]
+  'update:open': [value: boolean]
+  create: [query: string]
+}
+
+export interface LinkExposed {
+  reload: () => void
 }
 
 export type LinkOption = {

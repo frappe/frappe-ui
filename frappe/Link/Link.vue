@@ -1,66 +1,65 @@
 <template>
-  <Combobox
-    ref="comboboxRef"
-    v-bind="$attrs"
-    v-model="model"
-    v-model:open="open"
-    class="group !gap-1"
-    :options="linkOptions"
-    :disabled="disabled"
-    :loading="options.loading && !options.data"
-    @update:query="handleInputChange"
-    @focus="() => loadOptions('')"
-  >
-    <template
-      v-for="(_, name) in forwardedSlots"
-      #[name]="slotProps"
-      :key="name"
+  <div data-slot="link" class="contents">
+    <Combobox
+      ref="comboboxRef"
+      v-bind="$attrs"
+      v-model="model"
+      v-model:open="open"
+      class="group !gap-1"
+      :label="label"
+      :description="description"
+      :error="error"
+      :required="required"
+      :id="id"
+      :options="linkOptions"
+      :disabled="disabled"
+      :loading="options.loading && !options.data"
+      @update:query="handleInputChange"
+      @focus="() => loadOptions('')"
     >
-      <slot :name="name" v-bind="slotProps" />
-    </template>
-
-    <template v-if="!disabled && (showClear || showRedirect)" #suffix>
-      <div
-        class="group-hover:inline-flex group-focus:inline-flex group-focus-within:inline-flex gap-0.5 hidden items-center"
+      <template
+        v-for="(_, name) in forwardedSlots"
+        #[name]="slotProps"
+        :key="name"
       >
+        <slot :name="name" v-bind="slotProps" />
+      </template>
+
+      <template v-if="slots.suffix" #suffix="suffixProps">
+        <slot name="suffix" v-bind="suffixProps" />
+      </template>
+      <template v-else-if="!disabled && showClear" #suffix>
         <button
-          v-if="showClear"
           type="button"
           aria-label="Clear"
-          class="grid size-4 place-items-center rounded-sm text-ink-gray-5 hover:bg-surface-gray-3 hover:text-ink-gray-7 focus:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
+          data-slot="clear"
+          class="group-hover:grid group-focus:grid group-focus-within:grid hidden size-4 place-items-center rounded-sm text-ink-gray-5 hover:bg-surface-gray-3 hover:text-ink-gray-7 focus:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
           @click="clearValue"
           @pointerdown.stop
         >
           <span class="lucide-x size-3.5" />
         </button>
-        <button
-          v-if="showRedirect"
-          type="button"
-          aria-label="Redirect"
-          class="grid size-4 place-items-center rounded-sm text-ink-gray-5 hover:bg-surface-gray-3 hover:text-ink-gray-7 focus:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
-          @click="handleRedirect"
-          @pointerdown.stop
-        >
-          <span class="lucide-arrow-right size-3.5" />
-        </button>
-      </div>
-    </template>
+      </template>
 
-    <template #item-create="{ query }">
-      <div class="flex">
-        <span class="truncate">
-          Create
-          <span v-if="query" class="font-medium text-ink-gray-8">
-            {{ query }}
+      <template v-if="slots['item-create']" #item-create="slotProps">
+        <slot name="item-create" v-bind="slotProps" />
+      </template>
+      <template v-else #item-create="{ query }">
+        <div class="flex">
+          <span class="truncate">
+            Create
+            <span v-if="query" class="font-medium text-ink-gray-8">
+              {{ query }}
+            </span>
           </span>
-        </span>
-      </div>
-    </template>
-  </Combobox>
+        </div>
+      </template>
+    </Combobox>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, useSlots, watch } from 'vue'
+import { computed, ref, useSlots, watch } from 'vue'
 import { Combobox } from '../../src/components/Combobox'
 import type {
   ComboboxCustomOption,
@@ -69,46 +68,29 @@ import type {
 import debounce from '../../src/utils/debounce'
 import { createResource } from '../../src/resources'
 import { frappeRequest } from '../../src/utils/frappeRequest'
-import type { LinkProps, LinkOption } from './types'
+import type { LinkEmits, LinkExposed, LinkOption, LinkProps } from './types'
 
 const props = withDefaults(defineProps<LinkProps>(), {
   filters: () => ({}),
-  allowCreate: false,
-  allowClear: true,
-  allowRedirect: false,
+  creatable: false,
+  disabled: false,
 })
 
-const model = defineModel<string | null>({ default: '' })
-const open = ref(false)
+const model = defineModel<string | null>({ default: null })
+const open = defineModel<boolean>('open', { default: false })
 const comboboxRef = ref<{ focus: () => void } | null>(null)
 
-const emit = defineEmits<{
-  (e: 'create', query: string, close: Function): void
-  (e: 'redirect', value: string): void
-  (e: 'clear'): void
-}>()
+const emit = defineEmits<LinkEmits>()
 
 defineOptions({ inheritAttrs: false })
 
 const slots = useSlots()
-const FORWARDED_SLOT_NAMES = [
-  'label',
-  'description',
-  'prefix',
-  'trigger',
-  'item',
-  'item-prefix',
-  'item-label',
-  'item-suffix',
-  'empty',
-] as const
 
 const forwardedSlots = computed(() =>
   Object.fromEntries(
-    FORWARDED_SLOT_NAMES.filter((name) => slots[name]).map((name) => [
-      name,
-      slots[name],
-    ]),
+    Object.entries(slots).filter(
+      ([name]) => name !== 'suffix' && name !== 'item-create',
+    ),
   ),
 )
 
@@ -134,24 +116,21 @@ const createNewOption: ComboboxCustomOption = {
   key: 'create',
   label: 'Create New',
   slot: 'create',
-  condition: ({ query }: { query: string }) => {
-    const q = query.trim().toLowerCase()
-    if (!q) return false
-    return true
-  },
-  onClick: ({ query }) => emit('create', query, () => (open.value = false)),
+  condition: ({ query }: { query: string }) => Boolean(query.trim()),
+  onClick: ({ query }) => emit('create', query),
 }
 
 const linkOptions = computed<ComboboxOption[]>(() => {
   const _options = options.data || []
-  if (props.allowCreate) {
+  if (props.creatable) {
     return [..._options, createNewOption]
   }
   return _options
 })
 
-const showClear = computed(() => props.allowClear && !!model.value)
-const showRedirect = computed(() => props.allowRedirect && !!model.value)
+const showClear = computed(
+  () => !props.disabled && !!model.value && !props.required,
+)
 
 const loadOptions = (txt: string = '') => {
   options.update({
@@ -170,15 +149,8 @@ const handleInputChange = debounce((value: string) => {
 
 const clearValue = () => {
   model.value = null
-  emit('clear')
+  open.value = false
   comboboxRef.value?.focus()
-}
-
-const handleRedirect = () => {
-  if (model.value) {
-    open.value = false
-    emit('redirect', model.value)
-  }
 }
 
 watch([() => props.doctype, () => props.filters], () => loadOptions(''), {
@@ -186,5 +158,5 @@ watch([() => props.doctype, () => props.filters], () => loadOptions(''), {
   deep: true,
 })
 
-defineExpose({ reload: loadOptions })
+defineExpose<LinkExposed>({ reload: () => loadOptions('') })
 </script>
