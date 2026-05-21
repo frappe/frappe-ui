@@ -721,6 +721,10 @@ defineSlots<ComboboxSlots>()
               @select-custom="handleCustomItemSelect"
               @select-create="handleCreateOptionSelect"
             />
+
+            <div v-if="$slots.footer" data-slot="footer">
+              <slot name="footer" />
+            </div>
           </div>
         </FocusScope>
       </ComboboxContent>

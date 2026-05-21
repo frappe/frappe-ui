@@ -326,14 +326,6 @@ function handleSelect(item: NormalizedItem, event: Event) {
         </template>
       </template>
     </template>
-
-    <div v-if="slotFns.footer" data-slot="footer">
-      <component
-        :is="ItemSlotRender"
-        :render="slotFns.footer"
-        :slot-props="{}"
-      />
-    </div>
   </ComboboxViewport>
 </template>
 
