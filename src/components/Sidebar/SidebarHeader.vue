@@ -59,10 +59,13 @@
 </template>
 
 <script setup lang="ts">
-import { inject } from 'vue'
+import { computed, inject } from 'vue'
 import Dropdown from '../Dropdown/Dropdown.vue'
-import { SidebarHeaderProps } from './types'
+import { SidebarHeaderProps, sidebarCollapsedKey } from './types'
 
 const props = defineProps<SidebarHeaderProps>()
-const isCollapsed = inject('isSidebarCollapsed', false)
+const isCollapsed = inject(
+  sidebarCollapsedKey,
+  computed(() => false),
+)
 </script>

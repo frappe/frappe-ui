@@ -1,4 +1,8 @@
+import type { ComputedRef, InjectionKey, MaybeRefOrGetter } from 'vue'
 import { RouteLocationRaw } from 'vue-router'
+
+export const sidebarCollapsedKey: InjectionKey<ComputedRef<boolean>> =
+  Symbol('sidebarCollapsed')
 
 export type SidebarHeaderProps = {
   title: string
@@ -19,6 +23,7 @@ export type SidebarItemProps = {
   to?: RouteLocationRaw
   isActive?: boolean
   onClick?: () => void
+  condition?: MaybeRefOrGetter<boolean>
 }
 
 export type SidebarSectionProps = {
