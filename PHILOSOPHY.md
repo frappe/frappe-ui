@@ -123,7 +123,7 @@ No third axis (`intent`, `severity`, `appearance`, `kind`, `status`). "Warning" 
 
 ### P5. Every input control exposes the shared labeling contract
 
-**Rule:** Every form-control component (anything that holds a value the user enters, selects, or toggles) accepts the same four labeling props with identical semantics: `label`, `description`, `error`, `required`. Behavior is locked in `v1-release/09-input-components-spec.md`; the authoritative list of components that conform lives in CONTEXT.md.
+**Rule:** Every form-control component (anything that holds a value the user enters, selects, or toggles) accepts the same four labeling props with identical semantics: `label`, `description`, `error`, `required`. Behavior is defined in `v1-release/09-input-components-spec.md`; each conforming component is enumerated in its family's spec (`08-*` for selection family, `09-*` for input-family atoms, `10-*` for Frappe-integrated molecules).
 
 Icon-only buttons, action toggles, and other controls that don't carry a value are **not** input controls — P5 doesn't apply.
 
