@@ -206,6 +206,7 @@ function parseCombo(raw?: string): Part[] {
       }
       return { raw: original, type, display }
     })
+  return result
 }
 
 const parsedParts = computed<Part[]>(() => parseCombo(props.combo))
