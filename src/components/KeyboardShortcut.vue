@@ -86,9 +86,9 @@
     </template>
   </span>
   <!-- Alternative combos rendered after the primary, separated by / -->
-  <template v-if="altCombos && altCombos.length">
+  <template v-if="uniqueAltCombos.length">
     <span class="inline-flex items-center gap-1 ml-1">
-      <template v-for="(altCombo, i) in altCombos" :key="'alt-' + i + altCombo">
+      <template v-for="(altCombo, i) in uniqueAltCombos" :key="'alt-' + i + altCombo">
         <span class="text-xs text-ink-gray-4" aria-hidden="true">/</span>
         <KeyboardShortcut
           :combo="altCombo"
@@ -124,8 +124,6 @@ const props = withDefaults(
     ctrl?: boolean
     shift?: boolean
     alt?: boolean
-    /** Deprecated: use combo instead */
-    shortcut?: string
     /** Background chip style */
     bg?: boolean
     /** Modern single shortcut combo string, e.g. "Mod+Shift+K" */
@@ -212,6 +210,19 @@ function parseCombo(raw?: string): Part[] {
 
 const parsedParts = computed<Part[]>(() => parseCombo(props.combo))
 
+const uniqueAltCombos = computed<string[]>(() => {
+  if (!props.altCombos?.length) return []
+  const seen = new Set<string>([parsedParts.value.map((p) => p.display).join('+')])
+  return props.altCombos.filter((combo) => {
+    const key = parseCombo(combo)
+      .map((p) => p.display)
+      .join('+')
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+})
+
 const ariaLabel = computed(() => {
   if (!parsedParts.value.length) return undefined
   const wordMap: Record<string, string> = {
@@ -243,7 +254,6 @@ const keyIconMap: Record<string, string> = {
   '→': 'lucide-arrow-right',
   '↵': 'lucide-corner-down-left',
   '⌫': 'lucide-delete',
-  '⌦': 'lucide-delete',
 }
 
 function iconFor(part: Part): string | null {
