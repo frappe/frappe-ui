@@ -1,6 +1,6 @@
 <template>
   <Dialog
-    v-model="showDialog"
+    v-model:open="open"
     size="6xl"
     position="top"
     :padding-top="paddingTop"
@@ -53,28 +53,13 @@
               {{ shortcut.description }}
             </span>
             <div class="flex shrink-0 items-center gap-1.5">
-              <div
-                v-for="(variant, variantIndex) in formatShortcutVariants(
-                  shortcut,
-                )"
-                :key="`${shortcut.id.toString()}-${variantIndex}`"
-                class="flex items-center gap-1"
-              >
-                <kbd
-                  v-for="(part, i) in variant"
-                  :key="`${variantIndex}-${i}`"
-                  class="inline-flex h-6 min-w-6 items-center justify-center rounded border bg-surface-gray-2 px-1.5 py-0.5 font-medium text-ink-gray-7"
-                  :class="{ 'text-xs': !part.isSymbol }"
-                >
-                  {{ part.label }}
-                </kbd>
-                <span
-                  v-if="variantIndex < shortcut.keys.length - 1"
-                  class="px-0.5 text-xs text-ink-gray-5"
-                >
-                  /
-                </span>
-              </div>
+              <KeyboardShortcut
+                :combo="toCombo(shortcut, shortcut.keys[0])"
+                :alt-combos="
+                  shortcut.keys.slice(1).map((k) => toCombo(shortcut, k))
+                "
+                bg
+              />
             </div>
           </div>
         </div>
@@ -90,9 +75,12 @@ import {
   type ActiveShortcut,
 } from '../../composables/useShortcut'
 import Dialog from '../Dialog/Dialog.vue'
+import KeyboardShortcut from '../KeyboardShortcut.vue'
 import TextInput from '../TextInput/TextInput.vue'
 
 defineOptions({ name: 'KeyboardShortcutsModal' })
+
+const open = defineModel<boolean>('open', { default: false })
 
 const props = withDefaults(
   defineProps<{
@@ -113,62 +101,23 @@ const props = withDefaults(
   },
 )
 
-const showDialog = ref(false)
 const searchQuery = ref('')
 const activeShortcuts = getActiveShortcuts()
 
-// Robust Mac detection (navigator.platform is deprecated)
-const isMac = computed(() => {
-  if (typeof navigator === 'undefined') return false
-  const p =
-    (navigator as Navigator & { userAgentData?: { platform?: string } })
-      .userAgentData?.platform ??
-    navigator.platform ??
-    ''
-  return (
-    /Mac|iPod|iPhone|iPad/i.test(p) ||
-    /Mac OS X|Macintosh/i.test(navigator.userAgent)
-  )
-})
-
-const keyMap: Record<string, string> = {
-  arrowup: '↑',
-  arrowdown: '↓',
-  arrowleft: '←',
-  arrowright: '→',
-  escape: 'Esc',
-  backspace: '⌫',
-  delete: 'Del',
-  enter: '↵',
-  ' ': 'Space',
-  '\\': '\\',
-  '=': '+',
-  '-': '−',
-}
-
-function formatShortcutParts(config: {
-  key: string
-  ctrl?: boolean
-  shift?: boolean
-}): { label: string; isSymbol: boolean }[] {
-  const parts: { label: string; isSymbol: boolean }[] = []
-  if (config.ctrl)
-    parts.push({ label: isMac.value ? '⌘' : 'Ctrl', isSymbol: isMac.value })
-  if (config.shift)
-    parts.push({ label: isMac.value ? '⇧' : 'Shift', isSymbol: isMac.value })
-  const displayKey =
-    keyMap[config.key.toLowerCase()] ?? config.key.toUpperCase()
-  const isSymbolKey = /^[↑↓←→⌫↵−]$/.test(displayKey)
-  parts.push({ label: displayKey, isSymbol: isSymbolKey })
-  return parts
-}
-
-function formatShortcutVariants(
-  shortcut: ActiveShortcut,
-): { label: string; isSymbol: boolean }[][] {
-  return shortcut.keys.map((key) =>
-    formatShortcutParts({ key, ctrl: shortcut.ctrl, shift: shortcut.shift }),
-  )
+/**
+ * Converts a shortcut's modifiers and one of its keys into a combo string
+ * that <KeyboardShortcut combo="..."> understands, e.g. "Mod+Shift+K".
+ */
+function toCombo(
+  shortcut: { ctrl?: boolean; shift?: boolean; alt?: boolean },
+  key: string,
+): string {
+  const parts: string[] = []
+  if (shortcut.ctrl) parts.push('Mod')
+  if (shortcut.shift) parts.push('Shift')
+  if (shortcut.alt) parts.push('Alt')
+  parts.push(key)
+  return parts.join('+')
 }
 
 const groupedShortcuts = computed(() => {
@@ -196,13 +145,14 @@ const filteredGroupedShortcuts = computed(() => {
     const matchingShortcuts = groupMatches
       ? shortcuts
       : shortcuts.filter((shortcut) => {
-          const keyParts = formatShortcutVariants(shortcut)
-            .flat()
-            .map((part) => part.label.toLowerCase())
+          // Search by description or by any key in any of the combo variants
+          const comboText = shortcut.keys
+            .map((k) => toCombo(shortcut, k))
             .join(' ')
+            .toLowerCase()
           return (
             shortcut.description.toLowerCase().includes(query) ||
-            keyParts.includes(query)
+            comboText.includes(query)
           )
         })
 
@@ -215,6 +165,4 @@ const filteredGroupedShortcuts = computed(() => {
 const hasVisibleShortcuts = computed(
   () => Object.keys(filteredGroupedShortcuts.value).length > 0,
 )
-
-defineExpose({ show: showDialog })
 </script>
