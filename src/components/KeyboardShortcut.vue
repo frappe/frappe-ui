@@ -23,7 +23,11 @@
           <span class="lucide-command size-3" role="img" aria-label="Command" />
         </span>
         <span v-else-if="part.type === 'shift'">
-          <span class="lucide-arrow-big-up size-3" role="img" aria-label="Shift" />
+          <span
+            class="lucide-arrow-big-up size-3"
+            role="img"
+            aria-label="Shift"
+          />
         </span>
         <span v-else-if="part.type === 'alt'">
           <span class="lucide-option size-3" role="img" aria-label="Option" />
@@ -62,7 +66,11 @@
         <span v-else class="font-mono text-[10px] leading-none">Ctrl</span>
       </span>
       <span v-if="shift">
-        <span class="lucide-arrow-big-up size-3" role="img" aria-label="Shift" />
+        <span
+          class="lucide-arrow-big-up size-3"
+          role="img"
+          aria-label="Shift"
+        />
       </span>
       <span v-if="alt">
         <span class="lucide-option size-3" role="img" aria-label="Option" />
@@ -213,9 +221,9 @@ const ariaLabel = computed(() => {
   if (!parsedParts.value.length) return undefined
   const wordMap: Record<string, string> = {
     '⌘': 'Command',
-    'Shift': 'Shift',
+    Shift: 'Shift',
     '⌥': 'Option',
-    'Alt': 'Alt',
+    Alt: 'Alt',
     Ctrl: 'Control',
     Win: 'Windows',
     '↵': 'Enter',
