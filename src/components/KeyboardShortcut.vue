@@ -1,15 +1,24 @@
 <template>
-  <div
-    class="inline-flex items-center gap-0.5 text-sm"
-    :class="rootClasses"
+  <span
+    class="inline-flex items-center gap-1"
+    :class="!bg ? 'text-ink-gray-4 text-sm' : ''"
     :aria-label="ariaLabel"
     role="note"
     v-bind="$attrs"
   >
-    <!-- Primary combo rendering -->
-    <template v-if="parsedParts.length">
+    <!-- bg mode: each part rendered in its own chip -->
+    <template v-if="bg && parsedParts.length">
+      <kbd
+        v-for="(part, idx) in parsedParts"
+        :key="idx + '-' + part.raw"
+        class="inline-flex min-w-[1.375rem] items-center justify-center rounded bg-surface-gray-2 px-1.5 py-0.5 text-xs font-medium text-ink-gray-7"
+      >
+        {{ part.display }}
+      </kbd>
+    </template>
+    <!-- non-bg mode: icon-based rendering -->
+    <template v-else-if="parsedParts.length">
       <template v-for="(part, idx) in parsedParts" :key="idx + '-' + part.raw">
-        <!-- Explicit modifier icons -->
         <span v-if="part.type === 'cmd'">
           <span class="lucide-command size-3" role="img" aria-label="Command" />
         </span>
@@ -19,7 +28,6 @@
         <span v-else-if="part.type === 'alt'">
           <span class="lucide-option size-3" role="img" aria-label="Option" />
         </span>
-        <!-- Non-modifier key -->
         <span v-else>
           <span
             v-if="iconFor(part)"
@@ -34,7 +42,6 @@
             >{{ part.display }}</span
           >
         </span>
-        <!-- + separator (visually): hidden from screen readers because ariaLabel combines sequence -->
         <span
           v-if="idx < parsedParts.length - 1 && showPlus"
           class="font-mono text-[10px] leading-none opacity-60"
@@ -62,19 +69,19 @@
       </span>
       <slot></slot>
     </template>
-  </div>
-  <!-- Alternative combos (equivalents) rendered alongside -->
+  </span>
+  <!-- Alternative combos rendered after the primary, separated by / -->
   <template v-if="altCombos && altCombos.length">
     <span class="inline-flex items-center gap-1 ml-1">
-      <div
-        v-for="(alt, i) in altCombos"
-        :key="'alt-' + i + alt"
-        class="inline-flex items-center gap-0.5 text-sm bg-surface-gray-2 rounded-sm text-ink-gray-5 py-0.5 px-1"
-        :aria-label="'Alternative shortcut ' + alt"
-      >
-        <!-- Pass primitive boolean, not Ref -->
-        <KeyboardShortcut :combo="alt" :show-plus="showPlus" />
-      </div>
+      <template v-for="(altCombo, i) in altCombos" :key="'alt-' + i + altCombo">
+        <span class="text-xs text-ink-gray-4" aria-hidden="true">/</span>
+        <KeyboardShortcut
+          :combo="altCombo"
+          :bg="bg"
+          :show-plus="showPlus"
+          :aria-label="'Alternative shortcut ' + altCombo"
+        />
+      </template>
     </span>
   </template>
 </template>
@@ -108,7 +115,7 @@ const props = withDefaults(
     bg?: boolean
     /** Modern single shortcut combo string, e.g. "Mod+Shift+K" */
     combo?: string
-    /** Whether to visually show + separators between keys */
+    /** Whether to visually show + separators between keys (non-bg mode only) */
     showPlus?: boolean
     /** Alternative equivalent combos (display only) */
     altCombos?: string[]
@@ -120,17 +127,9 @@ const props = withDefaults(
 
 const showPlus = computed<boolean>(() => props.showPlus)
 
-// Dynamic root styling based on bg prop
-const rootClasses = computed(() =>
-  props.bg
-    ? 'bg-surface-gray-2 rounded-sm text-ink-gray-5 py-0.5 px-1'
-    : 'text-ink-gray-4',
-)
-
 // Normalize one combo string (e.g. Mod+Shift+K)
 function parseCombo(raw?: string): Part[] {
   if (!raw) return []
-  // Maps input token (lowercased) to a canonical type (modifier) or leaves as key.
   const aliasMap: Record<string, string> = {
     mod: isMac.value ? 'cmd' : 'ctrl',
     command: 'cmd',
@@ -182,10 +181,9 @@ function parseCombo(raw?: string): Part[] {
       const type = aliasMap[lower] || 'key'
       let display = original
       if (type !== 'key') {
-        // Standardize modifier glyphs / text
         if (type === 'cmd') display = '⌘'
-        else if (type === 'shift') display = '⇧'
-        else if (type === 'alt') display = '⌥'
+        else if (type === 'shift') display = 'Shift'
+        else if (type === 'alt') display = isMac.value ? '⌥' : 'Alt'
         else if (type === 'ctrl') display = 'Ctrl'
         else if (type === 'win') display = 'Win'
       } else {
@@ -199,14 +197,11 @@ function parseCombo(raw?: string): Part[] {
   return dedupeDeleteKeys(result)
 }
 
-// If both Backspace (⌫) and Forward Delete (⌦) are present unmodified, prefer a single representation.
 function dedupeDeleteKeys(parts: Part[]): Part[] {
   const hasBack = parts.some((r) => r.display === '⌫')
   const hasFDel = parts.some((r) => r.display === '⌦')
   if (hasBack && hasFDel) {
-    // On Mac, forward delete is less common (fn+Delete). Prefer just Backspace glyph.
     if (isMac.value) return parts.filter((r) => r.display !== '⌦')
-    // On other platforms keep Backspace for brevity unless user explicitly wants both.
     return parts.filter((r) => r.display !== '⌦')
   }
   return parts
@@ -216,11 +211,11 @@ const parsedParts = computed<Part[]>(() => parseCombo(props.combo))
 
 const ariaLabel = computed(() => {
   if (!parsedParts.value.length) return undefined
-  // Build a spoken-friendly label: expand symbols to words where needed.
   const wordMap: Record<string, string> = {
     '⌘': 'Command',
-    '⇧': 'Shift',
+    'Shift': 'Shift',
     '⌥': 'Option',
+    'Alt': 'Alt',
     Ctrl: 'Control',
     Win: 'Windows',
     '↵': 'Enter',
@@ -239,8 +234,6 @@ const ariaLabel = computed(() => {
 
 defineOptions({ name: 'KeyboardShortcut' })
 
-// Icon mapping for non-modifier keys when useIcons enabled.
-// Values are lucide-* class names consumed by the iconPackPlugin masking rules.
 const keyIconMap: Record<string, string> = {
   '↑': 'lucide-arrow-up',
   '↓': 'lucide-arrow-down',
@@ -252,7 +245,7 @@ const keyIconMap: Record<string, string> = {
 
 function iconFor(part: Part): string | null {
   if (!props.useIcons) return null
-  if (['cmd', 'shift', 'alt'].includes(part.type)) return null // modifier icons handled separately
+  if (['cmd', 'shift', 'alt'].includes(part.type)) return null
   return keyIconMap[part.display] || null
 }
 </script>
