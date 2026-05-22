@@ -18,6 +18,8 @@ export interface ShortcutConfig {
   ctrl?: boolean
   /** Whether Shift must be held */
   shift?: boolean
+  /** Whether Alt (or Option on Mac) must be held */
+  alt?: boolean
   /** Human-readable label shown in the shortcuts modal */
   description: string
   /** Group name for categorising in the shortcuts modal */
@@ -45,6 +47,7 @@ export interface RegisteredShortcut {
   key: string
   ctrl: boolean
   shift: boolean
+  alt: boolean
   description: string
   group: string
   id: symbol
@@ -83,11 +86,18 @@ function isTargetEditable(e: KeyboardEvent): boolean {
   )
 }
 
-function isDialogOpen(): boolean {
-  return !!document.querySelector("[role='dialog']")
+/** Returns true when the keypress originated inside an open dialog (focus-trap owned). */
+function isInsideDialog(e: KeyboardEvent): boolean {
+  const target = e.target
+  if (!(target instanceof Element)) return false
+  return !!target.closest('[role="dialog"]')
 }
 
-function matchesShortcut(e: KeyboardEvent, config: ShortcutConfig): boolean {
+/** @internal Exported for unit tests only. */
+export function matchesShortcut(
+  e: KeyboardEvent,
+  config: ShortcutConfig,
+): boolean {
   if (
     e.key.toLowerCase() !== config.key.toLowerCase() &&
     e.key !== config.key
@@ -97,9 +107,13 @@ function matchesShortcut(e: KeyboardEvent, config: ShortcutConfig): boolean {
 
   const wantsCtrl = config.ctrl ?? false
   const wantsShift = config.shift ?? false
+  const wantsAlt = config.alt ?? false
 
   if (wantsCtrl && !isCtrlOrCmd(e)) return false
   if (!wantsCtrl && isCtrlOrCmd(e)) return false
+
+  if (wantsAlt && !e.altKey) return false
+  if (!wantsAlt && e.altKey) return false
 
   // For keys whose character is itself produced by Shift (e.g. "?" = Shift+/)
   // only enforce the Shift check when explicitly requested in the config.
@@ -117,15 +131,19 @@ function isShortcutStillPressed(
   e: KeyboardEvent,
   config: ShortcutConfig,
 ): boolean {
+  // The main key being released means the shortcut is no longer held.
+  if (e.key.toLowerCase() === config.key.toLowerCase()) return false
   const wantsCtrl = config.ctrl ?? false
   const wantsShift = config.shift ?? false
+  const wantsAlt = config.alt ?? false
   if (wantsCtrl && !isCtrlOrCmd(e)) return false
   if (wantsShift && !e.shiftKey) return false
+  if (wantsAlt && !e.altKey) return false
   return true
 }
 
 function globalKeydownHandler(e: KeyboardEvent) {
-  if (isDialogOpen()) return
+  if (isInsideDialog(e)) return
 
   for (const [id, config] of shortcutHandlers) {
     if (!matchesShortcut(e, config)) continue
@@ -146,7 +164,7 @@ function globalKeydownHandler(e: KeyboardEvent) {
 }
 
 function globalKeyupHandler(e: KeyboardEvent) {
-  if (isDialogOpen()) return
+  if (isInsideDialog(e)) return
 
   const toRelease: symbol[] = []
 
@@ -177,7 +195,7 @@ function attachGlobalListener() {
 function getShortcutMergeIdentity(
   shortcut: Pick<
     RegisteredShortcut,
-    'group' | 'description' | 'ctrl' | 'shift'
+    'group' | 'description' | 'ctrl' | 'shift' | 'alt'
   >,
 ): string {
   return [
@@ -185,6 +203,7 @@ function getShortcutMergeIdentity(
     shortcut.description,
     Boolean(shortcut.ctrl),
     Boolean(shortcut.shift),
+    Boolean(shortcut.alt),
   ].join('|')
 }
 
@@ -208,10 +227,12 @@ export function formatShortcutLabel(config: {
   key: string
   ctrl?: boolean
   shift?: boolean
+  alt?: boolean
 }): string {
   const parts: string[] = []
   if (config.ctrl) parts.push(isMacPlatform ? '⌘' : 'Ctrl')
   if (config.shift) parts.push(isMacPlatform ? '⇧' : 'Shift')
+  if (config.alt) parts.push(isMacPlatform ? '⌥' : 'Alt')
 
   const keyMap: Record<string, string> = {
     arrowup: '↑',
@@ -278,6 +299,7 @@ export function useShortcut(shortcuts: ShortcutConfig | ShortcutConfig[]): {
       key: config.key,
       ctrl: config.ctrl ?? false,
       shift: config.shift ?? false,
+      alt: config.alt ?? false,
       description: config.description,
       group: config.group ?? 'General',
       id,
@@ -307,6 +329,7 @@ export function useShortcut(shortcuts: ShortcutConfig | ShortcutConfig[]): {
           key: configs[i].key,
           ctrl: configs[i].ctrl ?? false,
           shift: configs[i].shift ?? false,
+          alt: configs[i].alt ?? false,
           description: configs[i].description,
           group: configs[i].group ?? 'General',
           id,
