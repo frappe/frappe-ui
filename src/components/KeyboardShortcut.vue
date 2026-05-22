@@ -11,9 +11,16 @@
       <kbd
         v-for="(part, idx) in parsedParts"
         :key="idx + '-' + part.raw"
-        class="inline-flex min-w-[1.375rem] items-center justify-center rounded bg-surface-gray-2 px-1.5 py-0.5 text-xs font-medium text-ink-gray-7"
+        class="inline-flex h-6 min-w-[1.5rem] items-center justify-center rounded bg-surface-gray-2 px-1.5 text-xs font-medium text-ink-gray-7"
       >
-        {{ part.display }}
+        <span
+          v-if="bgIconFor(part)"
+          :class="bgIconFor(part)"
+          class="size-3.5"
+          role="img"
+          :aria-label="part.display"
+        />
+        <template v-else>{{ part.display }}</template>
       </kbd>
     </template>
     <!-- non-bg mode: icon-based rendering -->
@@ -254,6 +261,12 @@ const keyIconMap: Record<string, string> = {
 function iconFor(part: Part): string | null {
   if (!props.useIcons) return null
   if (['cmd', 'shift', 'alt'].includes(part.type)) return null
+  return keyIconMap[part.display] || null
+}
+
+/** Icon to use inside a bg-mode chip (cmd and arrow/special keys get lucide icons for visual consistency). */
+function bgIconFor(part: Part): string | null {
+  if (part.type === 'cmd') return 'lucide-command'
   return keyIconMap[part.display] || null
 }
 </script>

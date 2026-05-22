@@ -14,7 +14,7 @@
           v-if="shouldShowSearch"
           v-model="searchQuery"
           type="text"
-          class="ml-auto w-fit"
+          class="w-fit ml-2"
           placeholder="Search shortcuts"
         />
       </div>
