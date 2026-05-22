@@ -88,7 +88,10 @@
   <!-- Alternative combos rendered after the primary, separated by / -->
   <template v-if="uniqueAltCombos.length">
     <span class="inline-flex items-center gap-1 ml-1">
-      <template v-for="(altCombo, i) in uniqueAltCombos" :key="'alt-' + i + altCombo">
+      <template
+        v-for="(altCombo, i) in uniqueAltCombos"
+        :key="'alt-' + i + altCombo"
+      >
         <span class="text-xs text-ink-gray-4" aria-hidden="true">/</span>
         <KeyboardShortcut
           :combo="altCombo"
@@ -213,7 +216,9 @@ const parsedParts = computed<Part[]>(() => parseCombo(props.combo))
 
 const uniqueAltCombos = computed<string[]>(() => {
   if (!props.altCombos?.length) return []
-  const seen = new Set<string>([parsedParts.value.map((p) => p.display).join('+')])
+  const seen = new Set<string>([
+    parsedParts.value.map((p) => p.display).join('+'),
+  ])
   return props.altCombos.filter((combo) => {
     const key = parseCombo(combo)
       .map((p) => p.display)
