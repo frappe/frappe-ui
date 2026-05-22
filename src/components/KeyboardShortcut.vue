@@ -16,7 +16,7 @@
         <span
           v-if="bgIconFor(part)"
           :class="bgIconFor(part)"
-          class="size-3.5"
+          class="size-3"
           role="img"
           :aria-label="part.display"
         />
@@ -171,8 +171,8 @@ function parseCombo(raw?: string): Part[] {
     ' ': 'Space',
     tab: 'Tab',
     backspace: '⌫',
-    delete: '⌦',
-    del: '⌦',
+    delete: '⌫',
+    del: '⌫',
     up: '↑',
     arrowup: '↑',
     down: '↓',
@@ -208,18 +208,6 @@ function parseCombo(raw?: string): Part[] {
       }
       return { raw: original, type, display }
     })
-
-  return dedupeDeleteKeys(result)
-}
-
-function dedupeDeleteKeys(parts: Part[]): Part[] {
-  const hasBack = parts.some((r) => r.display === '⌫')
-  const hasFDel = parts.some((r) => r.display === '⌦')
-  if (hasBack && hasFDel) {
-    if (isMac.value) return parts.filter((r) => r.display !== '⌦')
-    return parts.filter((r) => r.display !== '⌦')
-  }
-  return parts
 }
 
 const parsedParts = computed<Part[]>(() => parseCombo(props.combo))
@@ -235,7 +223,6 @@ const ariaLabel = computed(() => {
     Win: 'Windows',
     '↵': 'Enter',
     '⌫': 'Backspace',
-    '⌦': 'Delete',
     '↑': 'Up Arrow',
     '↓': 'Down Arrow',
     '←': 'Left Arrow',
@@ -256,6 +243,7 @@ const keyIconMap: Record<string, string> = {
   '→': 'lucide-arrow-right',
   '↵': 'lucide-corner-down-left',
   '⌫': 'lucide-delete',
+  '⌦': 'lucide-delete',
 }
 
 function iconFor(part: Part): string | null {
