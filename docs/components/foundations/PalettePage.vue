@@ -97,7 +97,7 @@ function copy(text: string) {
           @click="copy(`${mode === 'darkMode' ? 'dark-' : ''}${family.key}-${shade}`)"
         >
           <div
-            class="h-14 rounded shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)] dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)] transition-transform group-hover:scale-[1.02]"
+            class="aspect-square rounded shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)] dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)] transition-transform group-hover:scale-[1.02]"
             :style="{ background: value as string }"
           ></div>
           <div class="grid gap-1">
@@ -138,7 +138,7 @@ function copy(text: string) {
           @click="copy(`${family.key}-${shade}`)"
         >
           <div
-            class="h-14 rounded shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)] dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]"
+            class="aspect-square rounded shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)] dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]"
             :style="{ background: value as string }"
           ></div>
           <div class="grid gap-1 bg-surface-white/80 dark:bg-surface-gray-1/80 rounded px-1">
