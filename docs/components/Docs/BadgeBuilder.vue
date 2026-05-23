@@ -1,16 +1,15 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { Button, Switch, TabButtons } from 'frappe-ui'
+import { Badge, Switch, TabButtons } from 'frappe-ui'
 
-const label = ref('Save')
-const theme = ref<'gray' | 'red'>('gray')
-const variant = ref<'solid' | 'subtle' | 'outline' | 'ghost'>('subtle')
-const size = ref<'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl'>('sm')
-const iconLeft = ref(false)
-const icon = ref(false)
-const iconRight = ref(false)
-const loading = ref(false)
-const disabled = ref(false)
+const label = ref('Gamma')
+const theme = ref<'gray' | 'blue' | 'green' | 'amber' | 'red' | 'violet'>(
+  'green',
+)
+const variant = ref<'solid' | 'subtle' | 'outline' | 'ghost'>('solid')
+const size = ref<'sm' | 'md' | 'lg'>('lg')
+const prefix = ref(true)
+const suffix = ref(false)
 
 const variantButtons = [
   { label: 'solid', value: 'solid' },
@@ -20,15 +19,16 @@ const variantButtons = [
 ]
 const themeButtons = [
   { label: 'gray', value: 'gray' },
+  { label: 'blue', value: 'blue' },
+  { label: 'green', value: 'green' },
+  { label: 'amber', value: 'amber' },
   { label: 'red', value: 'red' },
+  { label: 'violet', value: 'violet' },
 ]
 const sizeButtons = [
-  { label: 'xs', value: 'xs' },
   { label: 'sm', value: 'sm' },
   { label: 'md', value: 'md' },
   { label: 'lg', value: 'lg' },
-  { label: 'xl', value: 'xl' },
-  { label: '2xl', value: '2xl' },
 ]
 
 const code = computed(() => {
@@ -36,18 +36,25 @@ const code = computed(() => {
     `variant="${variant.value}"`,
     `theme="${theme.value}"`,
     `size="${size.value}"`,
-    `label="${label.value}"`,
   ]
-  if (icon.value) {
-    attrs.push(`icon="lucide-plus"`)
-  } else {
-    if (iconLeft.value) attrs.push(`icon-left="lucide-plus"`)
-    if (iconRight.value) attrs.push(`icon-right="lucide-chevron-right"`)
+  const slots: string[] = []
+  if (prefix.value) {
+    slots.push('  <template #prefix><span class="lucide-check" /></template>')
   }
-  if (disabled.value) attrs.push('disabled')
-  if (loading.value) attrs.push('loading')
+  slots.push(`  ${label.value}`)
+  if (suffix.value) {
+    slots.push(
+      '  <template #suffix><span class="lucide-chevron-down" /></template>',
+    )
+  }
 
-  return ['<Button', ...attrs.map((a) => '  ' + a), '/>'].join('\n')
+  return [
+    '<Badge',
+    ...attrs.map((a) => '  ' + a),
+    '>',
+    ...slots,
+    '</Badge>',
+  ].join('\n')
 })
 
 const copied = ref(false)
@@ -66,19 +73,15 @@ function onCopy() {
       <div
         class="flex min-h-[200px] items-center justify-center bg-surface-white p-8 dot-grid"
       >
-        <Button
-          :theme="theme"
-          :variant="variant"
-          :size="size"
-          :label="label"
-          :icon-left="!icon && iconLeft ? 'lucide-plus' : undefined"
-          :icon="icon ? 'lucide-plus' : undefined"
-          :icon-right="!icon && iconRight ? 'lucide-chevron-right' : undefined"
-          :loading="loading"
-          :disabled="disabled"
-        >
+        <Badge :theme="theme" :variant="variant" :size="size">
+          <template v-if="prefix" #prefix>
+            <span class="lucide-check" />
+          </template>
           {{ label }}
-        </Button>
+          <template v-if="suffix" #suffix>
+            <span class="lucide-chevron-down" />
+          </template>
+        </Badge>
       </div>
 
       <div class="flex flex-col gap-3 bg-surface-gray-1 p-4">
@@ -104,24 +107,12 @@ function onCopy() {
         </div>
         <div class="flex flex-wrap items-center gap-6">
           <div class="flex items-center gap-2">
-            <span class="knob-label">iconLeft</span>
-            <Switch v-model="iconLeft" :disabled="icon" />
+            <span class="knob-label">prefix</span>
+            <Switch v-model="prefix" />
           </div>
           <div class="flex items-center gap-2">
-            <span class="knob-label">icon</span>
-            <Switch v-model="icon" />
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="knob-label">iconRight</span>
-            <Switch v-model="iconRight" :disabled="icon" />
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="knob-label">disabled</span>
-            <Switch v-model="disabled" />
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="knob-label">loading</span>
-            <Switch v-model="loading" />
+            <span class="knob-label">suffix</span>
+            <Switch v-model="suffix" />
           </div>
         </div>
       </div>

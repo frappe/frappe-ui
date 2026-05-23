@@ -28,7 +28,7 @@ Anything in this repo that diverges from Figma is either (a) drift to be fixed, 
 | Focus indicator | `focus-visible:ring-2` + themed `ring-<color>`. No offset, no blur. See [ADR-0005](./adr/0005-focus-ring-2px.md) |
 | Radius scale | Numbered tokens `rounded-0`…`rounded-9` are canonical. Named aliases (`rounded`, `rounded-md`, …) are deprecated. See [ADR-0006](./adr/0006-numbered-radius-tokens.md) |
 | Color themes | Figma defines `default` (gray) and `red`. `blue` and `green` are code-only extensions (see below) |
-| Component size scale | Figma defines `sm` / `md` / `lg`. `xl` and `2xl` are code-only extensions |
+| Component size scale | Figma defines `sm` / `md` / `lg`. `xs`, `xl`, and `2xl` are code-only extensions |
 
 ## Typography
 
@@ -140,7 +140,7 @@ Extensions to the Figma spec that the library ships **intentionally**, not as dr
 
 | Extension | Where | Reason |
 |---|---|---|
-| `xl`, `2xl` button sizes | `Button.vue` `sizeClasses` | Pre-espresso-v2 sizes preserved for back-compat. No Figma reference — use at own risk; visual treatment may shift if Figma adds these later. |
+| `xs`, `xl`, `2xl` button sizes | `Button.vue` `sizeClasses` | Sizes outside Figma's `sm`/`md`/`lg` scale. `xs` (24px, `text-xs`, `rounded-3`) covers compact toolbars/badges-as-buttons; `xl`/`2xl` are pre-espresso-v2 sizes preserved for back-compat. No Figma reference — use at own risk; visual treatment may shift if Figma adds these later. |
 | `blue`, `green`, (and other) themes | `Button.vue` `buttonClasses`, plus `Badge`, `Alert`, `Toast`, etc. | Semantic theming surface that pre-dates espresso v2. Figma currently only models `default` + `red` for components, but the underlying color ramps (blue, green, yellow, …) are first-class in the token export. |
 | Letter-spacing per size | `tailwind/plugin.js` `FONT_SIZE_AUGMENT` | Figma exports `font.size`, `font.weight`, `font.line-height`, `font.family` — letter-spacing is composed in Figma styles but not in the token JSON. Encoded by hand. |
 | Medium-variant tracking | `tailwind/plugin.js` `FONT_SIZE_MEDIUM_TRACKING` | Same — Figma composes it in named styles; we re-derive per size. Only sizes whose medium tracking is confirmed in Figma are listed. |
@@ -162,4 +162,4 @@ Latest full-component verifications:
 
 | Component | Figma node | Date | Notes |
 |---|---|---|---|
-| `Button` (sm/md/lg) | [`25393-27651`](https://www.figma.com/design/kMYnZ9ougpSSQBdjZCgtdX/espresso-2.0?node-id=25393-27651) | 2026-05-24 | Pixel-accurate after ADR-0004 and ADR-0005. xl/2xl + blue/green/etc. themes are code-only extensions. |
+| `Button` (sm/md/lg) | [`25393-27651`](https://www.figma.com/design/kMYnZ9ougpSSQBdjZCgtdX/espresso-2.0?node-id=25393-27651) | 2026-05-24 | Pixel-accurate after ADR-0004 and ADR-0005. xs/xl/2xl + blue/green/etc. themes are code-only extensions. |

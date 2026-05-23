@@ -44,7 +44,23 @@ describe('<Button />', () => {
       },
     })
 
-    cy.get('button').should('have.class', 'h-10 text-lg')
+    cy.get('button').should('have.class', 'h-10')
+    cy.get('button').should('have.class', 'text-lg-medium')
+  })
+
+  it('renders xs size', () => {
+    cy.mount(Button, {
+      props: {
+        size: 'xs',
+        label: 'Extra Small Button',
+      },
+    })
+
+    cy.get('button')
+      .should('have.class', 'h-6')
+      .and('have.class', 'text-xs')
+      .and('have.class', 'px-1.5')
+      .and('have.class', 'rounded-3')
   })
 
   it('handles loading state', () => {

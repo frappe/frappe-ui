@@ -66,13 +66,13 @@ export default defineComponent({
     )
 
     const slotClasses = computed(
-      () => ({ xs: 'h-4', sm: 'h-4', md: 'h-4.5', lg: 'h-5' })[props.size],
+      () => ({ xs: 'h-3.5', sm: 'h-4', md: 'h-4.5', lg: 'h-5' })[props.size],
     )
 
     const lucideSlotClasses = computed(
       () =>
         ({
-          xs: 'size-4',
+          xs: 'size-3.5',
           sm: 'size-4',
           md: 'size-4.5',
           lg: 'size-5',
@@ -157,13 +157,13 @@ export default defineComponent({
 
       const sizeClasses = isIconButton.value
         ? {
-            xs: 'h-6 w-6 rounded',
+            xs: 'h-6 w-6 rounded-3',
             sm: 'h-7 w-7 rounded-4',
             md: 'h-8 w-8 rounded-4',
             lg: 'h-10 w-10 rounded-5',
           }[props.size]
         : {
-            xs: 'h-6 text-sm px-1.5 rounded',
+            xs: 'h-6 text-xs px-1.5 rounded-3',
             sm: 'h-7 text-base px-2 rounded-4',
             md: 'h-8 text-base-medium px-2.5 rounded-4',
             lg: 'h-10 text-lg-medium px-3 rounded-5',
@@ -240,7 +240,8 @@ export default defineComponent({
         // spinner inherits the button's text color.
         return h(Spinner, {
           class: {
-            'size-4': props.size === 'xs' || props.size === 'sm',
+            'size-3.5': props.size === 'xs',
+            'size-4': props.size === 'sm',
             'size-4.5': props.size === 'md',
             'size-5': props.size === 'lg',
           },
