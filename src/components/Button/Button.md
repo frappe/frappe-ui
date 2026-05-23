@@ -2,20 +2,32 @@
 
 An interactive element used to trigger actions, submit forms, or navigate between views.
 
-## Variants
+## Playground
 
-<ComponentPreview name='Button-Variants' />
+<ClientOnly><ButtonBuilder /></ClientOnly>
 
-## Themes
+## Section controls
 
-<ComponentPreview name='Button-Themes' />
+<ComponentPreview name='Button-SectionControls' />
 
-## Sizes
+## Section action
 
-<ComponentPreview name='Button-Sizes' />
+<ComponentPreview name='Button-SectionAction' />
 
-## Icons
+## Selection toolbar
 
-<ComponentPreview name='Button-Icons' />
+<ComponentPreview name='Button-SelectionToolbar' />
+
+## Inline actions
+
+<ComponentPreview name='Button-InlineActions' />
+
+## Stacked actions
+
+<ComponentPreview name='Button-StackedActions' />
+
+## Card actions
+
+<ComponentPreview name='Button-LiveClassCard' />
 
 <!-- @include: ./Button.api.md -->
