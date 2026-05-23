@@ -11,6 +11,10 @@ Current API contracts and durable design decisions for `frappe-ui`.
 
 If these disagree, update the lower-authority document or mark it historical.
 
+## Foundations
+
+- [`foundations.md`](./foundations.md) — typography, focus, radius, color themes; Figma source-of-truth rules.
+
 ## Component specs
 
 - [`dialog.md`](./dialog.md)

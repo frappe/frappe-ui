@@ -25,6 +25,17 @@ const FONT_SIZE_AUGMENT = {
   '3xl': { letterSpacing: '0.005em', fontWeight: '400' },
 }
 
+// Tracking for the `medium` weight variant of each size. Figma models typography
+// as named styles (`text/base/medium`, `text/lg/medium`, …) where medium-weight
+// text is tracked tighter than its regular-weight sibling. Tailwind's fontSize
+// utility is keyed by size only, so we expose these as component classes
+// (`.text-base-medium`, `.text-lg-medium`) via `buildTextStyleUtilities()`.
+// Only add entries here for sizes whose medium tracking is confirmed in Figma.
+const FONT_SIZE_MEDIUM_TRACKING = {
+  base: '0.015em',
+  lg: '0.015em',
+}
+
 // Paragraph variants — same sizes but looser line-heights for reading.
 const PARAGRAPH_LINE_HEIGHT = {
   '2xs': '1.6',
@@ -49,6 +60,23 @@ function buildFontSize() {
     if (!out[key]) continue
     const [size, meta] = out[key]
     out[`p-${key}`] = [size, { ...meta, lineHeight }]
+  }
+  return out
+}
+
+function buildTextStyleUtilities() {
+  const out = {}
+  for (const [key, tracking] of Object.entries(FONT_SIZE_MEDIUM_TRACKING)) {
+    const entry = typographyTokens.fontSize[key]
+    if (!entry) continue
+    const [size, meta] = entry
+    const lineHeight = meta.lineHeight === '0px' ? '1.15' : meta.lineHeight
+    out[`.text-${key}-medium`] = {
+      fontSize: size,
+      lineHeight,
+      fontWeight: '500',
+      letterSpacing: tracking,
+    }
   }
   return out
 }
@@ -92,6 +120,7 @@ export default plugin(
   function ({ addBase, addComponents, theme }) {
     addBase({ ...globalStyles(theme), ...cssVariables })
     addComponents(componentStyles)
+    addComponents(buildTextStyleUtilities())
   },
   {
     theme: {
