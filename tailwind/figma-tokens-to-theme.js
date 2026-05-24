@@ -330,6 +330,54 @@ function buildTypography() {
   return { fontFamily, fontSize, fontWeight }
 }
 
+// ---------- EFFECTS (shadows) ----------
+
+// Figma exports shadow effects as DTCG `$type: shadow` tokens — an array of
+// layers, each with offsetX/offsetY/blur/spread/color (+ optional inset).
+// Emit pre-composed CSS box-shadow strings so the plugin can drop them into
+// CSS variables verbatim.
+function buildEffects() {
+  const tokens = readTokens('effect.styles.tokens.json')
+  const out = {
+    elevation: { light: {}, dark: {}, custom: {} },
+    focus: { light: {}, dark: {} },
+  }
+
+  for (const step of Object.keys(tokens.elevation?.light || {})) {
+    out.elevation.light[step] = shadowToCss(tokens.elevation.light[step].$value)
+  }
+  for (const step of Object.keys(tokens.elevation?.dark || {})) {
+    out.elevation.dark[step] = shadowToCss(tokens.elevation.dark[step].$value)
+  }
+  for (const [name, token] of Object.entries(tokens.elevation?.custom || {})) {
+    out.elevation.custom[name] = shadowToCss(token.$value)
+  }
+  for (const [name, token] of Object.entries(tokens.focus?.light || {})) {
+    out.focus.light[name] = shadowToCss(token.$value)
+  }
+  for (const [name, token] of Object.entries(tokens.focus?.dark || {})) {
+    out.focus.dark[name] = shadowToCss(token.$value)
+  }
+
+  return out
+}
+
+function shadowToCss(layers) {
+  return layers
+    .map((layer) => {
+      const parts = [
+        layer.inset ? 'inset' : null,
+        layer.offsetX,
+        layer.offsetY,
+        layer.blur,
+        layer.spread || '0px',
+        layer.color,
+      ].filter(Boolean)
+      return parts.join(' ')
+    })
+    .join(', ')
+}
+
 // ---------- MAIN ----------
 
 function main() {
@@ -344,6 +392,7 @@ function main() {
   writeJSON('colors.json', buildColors())
   writeJSON('radius.json', buildRadius())
   writeJSON('typography.json', buildTypography())
+  writeJSON('effects.json', buildEffects())
 
   console.log('✓ done')
 }

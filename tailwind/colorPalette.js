@@ -1,5 +1,6 @@
 import tailwindColors from 'tailwindcss/colors'
 import colorsData from './colors.json'
+import effectsData from './generated/effects.json'
 
 function generateColorPalette() {
   const colorPalette = {
@@ -129,4 +130,37 @@ function generateSemanticColors() {
   return output
 }
 
-export { generateColorPalette, generateCSSVariables, generateSemanticColors }
+// Emit `--elevation-*` and `--focus-*` CSS variables that flip between light
+// and dark themes. Theme-independent entries (e.g. `elevation.custom.status`)
+// land in `:root` only. Consumed by the tailwind plugin alongside color vars.
+function generateEffectVariables() {
+  const output = {
+    ':root': {},
+    '[data-theme="dark"]': {},
+  }
+
+  for (const [step, value] of Object.entries(effectsData.elevation.light)) {
+    output[':root'][`--elevation-${step}`] = value
+  }
+  for (const [step, value] of Object.entries(effectsData.elevation.dark)) {
+    output['[data-theme="dark"]'][`--elevation-${step}`] = value
+  }
+  for (const [name, value] of Object.entries(effectsData.elevation.custom)) {
+    output[':root'][`--elevation-${name}`] = value
+  }
+  for (const [name, value] of Object.entries(effectsData.focus.light)) {
+    output[':root'][`--focus-${name}`] = value
+  }
+  for (const [name, value] of Object.entries(effectsData.focus.dark)) {
+    output['[data-theme="dark"]'][`--focus-${name}`] = value
+  }
+
+  return output
+}
+
+export {
+  generateColorPalette,
+  generateCSSVariables,
+  generateSemanticColors,
+  generateEffectVariables,
+}

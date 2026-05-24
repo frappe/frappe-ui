@@ -48,7 +48,7 @@ export function getSidebarList(componentList: string[]): SidebarSection[] {
         { text: 'Colours — Semantic', link: '/docs/foundations/colours/semantic' },
         { text: 'Typography', link: '/docs/foundations/typography' },
         { text: 'Corner Radius', link: '/docs/foundations/corner-radius' },
-        { text: 'Drop Shadow', link: '/docs/foundations/drop-shadow' },
+        { text: 'Elevation', link: '/docs/foundations/elevation' },
       ],
     },
     {

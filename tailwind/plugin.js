@@ -3,13 +3,30 @@ import {
   generateColorPalette,
   generateSemanticColors,
   generateCSSVariables,
+  generateEffectVariables,
 } from './colorPalette.js'
 import radiusTokens from './generated/radius.json'
 import typographyTokens from './generated/typography.json'
+import effectsData from './generated/effects.json'
 
 let colorPalette = generateColorPalette()
 let semanticColors = generateSemanticColors()
-let cssVariables = generateCSSVariables()
+let cssVariables = mergeVariableLayers(
+  generateCSSVariables(),
+  generateEffectVariables(),
+)
+
+// Merge two `{ selector: { var: value } }` objects into one, preserving any
+// vars already declared under the same selector.
+function mergeVariableLayers(...layers) {
+  const out = {}
+  for (const layer of layers) {
+    for (const [selector, vars] of Object.entries(layer)) {
+      out[selector] = { ...(out[selector] || {}), ...vars }
+    }
+  }
+  return out
+}
 
 // Per-size augmentation preserved from pre-Figma config — letterSpacing and
 // fontWeight aren't modelled on `font.size.*` in the Figma export, so we keep
@@ -60,6 +77,18 @@ function buildFontSize() {
     if (!out[key]) continue
     const [size, meta] = out[key]
     out[`p-${key}`] = [size, { ...meta, lineHeight }]
+  }
+  return out
+}
+
+// Focus ring utilities backed by `--focus-*` CSS vars (theme-flipped in
+// colorPalette.js#generateEffectVariables). Registered via `addComponents` so
+// Tailwind IntelliSense picks them up. Usage: `focus-visible:focus-ring-blue`.
+function buildFocusRingUtilities() {
+  const out = {}
+  for (const name of Object.keys(effectsData.focus.light)) {
+    const className = name === 'default' ? '.focus-ring' : `.focus-ring-${name}`
+    out[className] = { boxShadow: `var(--focus-${name})` }
   }
   return out
 }
@@ -121,21 +150,22 @@ export default plugin(
     addBase({ ...globalStyles(theme), ...cssVariables })
     addComponents(componentStyles)
     addComponents(buildTextStyleUtilities())
+    addComponents(buildFocusRingUtilities())
   },
   {
     theme: {
       colors: colorPalette,
       borderRadius: radiusTokens,
       boxShadow: {
-        sm: '0px 1px 2px rgba(0, 0, 0, 0.1)',
-        DEFAULT:
-          '0px 0px 1px rgba(0, 0, 0, 0.45), 0px 1px 2px rgba(0, 0, 0, 0.1)',
-        md: '0px 0px 1px rgba(0, 0, 0, 0.12), 0px 0.5px 2px rgba(0, 0, 0, 0.15), 0px 2px 3px rgba(0, 0, 0, 0.16)',
-        lg: '0px 0px 1px rgba(0, 0, 0, 0.35), 0px 6px 8px -4px rgba(0, 0, 0, 0.1)',
-        xl: '0px 0px 1px rgba(0, 0, 0, 0.19), 0px 1px 2px rgba(0, 0, 0, 0.07), 0px 6px 15px -5px rgba(0, 0, 0, 0.11)',
-        '2xl':
-          '0px 0px 1px rgba(0, 0, 0, 0.2), 0px 1px 3px rgba(0, 0, 0, 0.05), 0px 10px 24px -3px rgba(0, 0, 0, 0.1)',
         none: 'none',
+        sm: 'var(--elevation-sm)',
+        base: 'var(--elevation-base)',
+        DEFAULT: 'var(--elevation-base)',
+        md: 'var(--elevation-md)',
+        lg: 'var(--elevation-lg)',
+        xl: 'var(--elevation-xl)',
+        '2xl': 'var(--elevation-2xl)',
+        status: 'var(--elevation-status)',
       },
       container: {
         padding: {
@@ -342,7 +372,7 @@ export default plugin(
           v3: {
             css: [
               {
-                fontSize: 'var(--prose-font-size, 14px)',
+                fontSize: 'var(--prose-font-size, 15px)',
                 fontWeight: 420,
                 lineHeight: '1.7',
                 letterSpacing: '0.02em',
