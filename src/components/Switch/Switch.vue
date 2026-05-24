@@ -128,7 +128,7 @@ const {
 const switchClasses = computed(() => {
   return [
     'relative inline-flex flex-shrink-0 cursor-pointer rounded-full border-transparent transition-colors duration-100 ease-in-out items-center',
-    'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-outline-gray-3',
+    'focus-visible:outline-none focus-visible:focus-ring',
     'disabled:cursor-not-allowed disabled:bg-surface-gray-3',
     model.value
       ? 'bg-surface-gray-7 enabled:hover:bg-surface-gray-6 active:bg-surface-gray-5 group-hover:enabled:bg-surface-gray-6'
@@ -171,7 +171,7 @@ const switchGroupClasses = computed(() => {
   const classes = ['flex justify-between']
   if (!hasDescription) {
     classes.push(
-      'group items-center gap-x-3 py-1.5 cursor-pointer rounded focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-outline-gray-3',
+      'group items-center gap-x-3 py-1.5 cursor-pointer rounded focus-visible:outline-none focus-visible:focus-ring',
     )
 
     if (props.disabled) classes.push('cursor-not-allowed')

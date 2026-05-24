@@ -113,10 +113,10 @@ export default defineComponent({
       }[props.theme]
 
       const focusClasses = {
-        gray: 'focus-visible:ring-2 focus-visible:ring-outline-gray-3',
-        blue: 'focus-visible:ring-2 focus-visible:ring-blue-400',
-        green: 'focus-visible:ring-2 focus-visible:ring-outline-green-2',
-        red: 'focus-visible:ring-2 focus-visible:ring-outline-red-2',
+        gray: 'focus-visible:focus-ring',
+        blue: 'focus-visible:focus-ring-blue',
+        green: 'focus-visible:focus-ring-green',
+        red: 'focus-visible:focus-ring-red',
       }[props.theme]
 
       const variantClasses = {

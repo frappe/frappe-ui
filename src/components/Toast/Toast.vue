@@ -34,7 +34,7 @@
     <div class="flex items-center gap-2 h-7">
       <ToastAction
         v-if="action"
-        class="flex-shrink-0 rounded px-2 py-1 text-sm text-ink-blue-link hover:text-ink-gray-3 focus:outline-none focus-visible:ring focus-visible:ring-outline-gray-4"
+        class="flex-shrink-0 rounded px-2 py-1 text-sm text-ink-blue-link hover:text-ink-gray-3 focus:outline-none focus-visible:focus-ring"
         :alt-text="action.altText || action.label"
         @click="handleAction"
       >
@@ -43,7 +43,7 @@
       <ToastClose
         v-if="closable"
         aria-label="Close"
-        class="flex-shrink-0 rounded p-1 text-ink-white hover:text-ink-gray-3 focus:outline-none focus-visible:ring focus-visible:ring-outline-gray-4"
+        class="flex-shrink-0 rounded p-1 text-ink-white hover:text-ink-gray-3 focus:outline-none focus-visible:focus-ring"
       >
         <span class="lucide-x size-4" />
       </ToastClose>

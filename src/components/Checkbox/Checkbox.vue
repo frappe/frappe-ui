@@ -135,7 +135,7 @@ const inputClasses = computed(() => {
     ? ''
     : props.padding
       ? 'focus:ring-0'
-      : 'hover:shadow-sm focus:ring-0 focus-visible:ring-2 focus-visible:ring-outline-gray-3 active:bg-surface-gray-2'
+      : 'hover:shadow-sm focus:ring-0 focus-visible:focus-ring active:bg-surface-gray-2'
 
   let sizeClasses = {
     sm: 'w-3.5 h-3.5',

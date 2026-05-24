@@ -33,7 +33,7 @@ function removeTag(value: string) {
       <button
         type="button"
         :data-state="open ? 'open' : 'closed'"
-        class="flex w-96 min-h-8 cursor-pointer items-center gap-1.5 rounded border border-[--surface-gray-2] px-1.5 py-1 text-left outline-none transition-colors hover:border-outline-gray-modals focus-visible:ring-2 data-[state=open]:ring-2 ring-outline-gray-3"
+        class="flex w-96 min-h-8 cursor-pointer items-center gap-1.5 rounded border border-[--surface-gray-2] px-1.5 py-1 text-left outline-none transition-colors hover:border-outline-gray-modals focus-visible:focus-ring data-[state=open]:focus-ring"
         @click="toggleOpen"
       >
         <div class="flex min-w-0 flex-1 flex-wrap items-center gap-1">
