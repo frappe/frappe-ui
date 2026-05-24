@@ -6,6 +6,7 @@ import Demo from '../../components/Docs/Demo.vue'
 import ButtonBuilder from '../../components/Docs/ButtonBuilder.vue'
 import BadgeBuilder from '../../components/Docs/BadgeBuilder.vue'
 import PillBuilder from '../../components/Docs/PillBuilder.vue'
+import TabButtonsBuilder from '../../components/Docs/TabButtonsBuilder.vue'
 import Layout from '../../components/Layout.vue'
 
 if (process.env.NODE_ENV === 'production') {
@@ -19,5 +20,6 @@ export default {
     app.component('ButtonBuilder', ButtonBuilder)
     app.component('BadgeBuilder', BadgeBuilder)
     app.component('PillBuilder', PillBuilder)
+    app.component('TabButtonsBuilder', TabButtonsBuilder)
   },
 } satisfies Theme

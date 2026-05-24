@@ -6,16 +6,64 @@
 
   const propsData = [
   {
+    name: 'options',
+    description: 'List of options to render.',
+    required: false,
+    type: 'TabButton[]'
+  },
+  {
     name: 'buttons',
     description: '',
-    required: true,
-    type: 'TabButton[]'
+    required: false,
+    type: 'TabButton[]',
+    deprecated: 'Use `options` instead.'
   },
   {
     name: 'modelValue',
     description: '',
     required: false,
     type: 'TabButtonValue'
+  },
+  {
+    name: 'type',
+    description: '',
+    required: false,
+    type: 'TabButtonsType',
+    default: '"subtle"'
+  },
+  {
+    name: 'size',
+    description: '',
+    required: false,
+    type: 'PillSize',
+    default: '"sm"'
+  },
+  {
+    name: 'vertical',
+    description: '',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  },
+  {
+    name: 'direction',
+    description: 'Edge the active browser tab attaches to. Only used when `type=\'browser-tab\'` and `vertical`.',
+    required: false,
+    type: 'TabButtonsDirection',
+    default: '"left"'
+  }
+]
+
+  const slotsData = [
+  {
+    name: 'prefix',
+    description: '',
+    type: '{ button: { key: string; label: string | number | undefined; icon: TabButtonIcon | undefined; iconLe'
+  },
+  {
+    name: 'suffix',
+    description: '',
+    type: '{ button: { key: string; label: string | number | undefined; icon: TabButtonIcon | undefined; iconLe'
   }
 ]
 
@@ -30,6 +78,8 @@
 ## API Reference
 
 <PropsTable name="TabButtons" :data="propsData"/> 
+
+<SlotsTable :data="slotsData"/> 
 
 <EmitsTable :data="emitsData"/> 
 

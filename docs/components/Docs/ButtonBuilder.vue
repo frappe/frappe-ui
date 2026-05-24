@@ -92,15 +92,15 @@ function onCopy() {
         </div>
         <div class="knob-row">
           <span class="knob-label">variant</span>
-          <TabButtons v-model="variant" :buttons="variantButtons" />
+          <TabButtons v-model="variant" :options="variantButtons" />
         </div>
         <div class="knob-row">
           <span class="knob-label">theme</span>
-          <TabButtons v-model="theme" :buttons="themeButtons" />
+          <TabButtons v-model="theme" :options="themeButtons" />
         </div>
         <div class="knob-row">
           <span class="knob-label">size</span>
-          <TabButtons v-model="size" :buttons="sizeButtons" />
+          <TabButtons v-model="size" :options="sizeButtons" />
         </div>
         <div class="flex flex-wrap items-center gap-6">
           <div class="flex items-center gap-2">

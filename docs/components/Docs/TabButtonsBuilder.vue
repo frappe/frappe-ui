@@ -1,59 +1,76 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { Badge, Switch, TabButtons } from 'frappe-ui'
+import { Switch, TabButtons } from 'frappe-ui'
 
-const label = ref('Gamma')
-const theme = ref<'gray' | 'blue' | 'green' | 'amber' | 'red' | 'violet'>(
-  'green',
-)
-const variant = ref<'solid' | 'subtle' | 'outline' | 'ghost'>('solid')
-const size = ref<'sm' | 'md' | 'lg'>('lg')
-const prefix = ref(true)
+const type = ref<'subtle' | 'ghost' | 'underline' | 'browser-tab'>('subtle')
+const size = ref<'sm' | 'md'>('sm')
+const modelValue = ref('activity')
+const vertical = ref(false)
+const prefix = ref(false)
 const suffix = ref(false)
 
-const variantButtons = [
-  { label: 'solid', value: 'solid' },
+const typeButtons = [
   { label: 'subtle', value: 'subtle' },
-  { label: 'outline', value: 'outline' },
   { label: 'ghost', value: 'ghost' },
-]
-const themeButtons = [
-  { label: 'gray', value: 'gray' },
-  { label: 'blue', value: 'blue' },
-  { label: 'green', value: 'green' },
-  { label: 'amber', value: 'amber' },
-  { label: 'red', value: 'red' },
-  { label: 'violet', value: 'violet' },
+  { label: 'underline', value: 'underline' },
+  { label: 'browser-tab', value: 'browser-tab' },
 ]
 const sizeButtons = [
   { label: 'sm', value: 'sm' },
   { label: 'md', value: 'md' },
-  { label: 'lg', value: 'lg' },
 ]
 
+const options = [
+  { label: 'Overview', value: 'overview' },
+  { label: 'Activity', value: 'activity' },
+  { label: 'Settings', value: 'settings' },
+]
+
+const iconByValue = {
+  overview: 'lucide-home',
+  activity: 'lucide-activity',
+  settings: 'lucide-settings',
+}
+
+const countByValue = {
+  overview: 8,
+  activity: 14,
+  settings: 2,
+}
+
 const code = computed(() => {
-  const attrs: string[] = [
-    `variant="${variant.value}"`,
-    `theme="${theme.value}"`,
-    `size="${size.value}"`,
-  ]
-  const slots: string[] = []
-  if (prefix.value) {
-    slots.push('  <template #prefix><span class="lucide-check" /></template>')
-  }
-  slots.push(`  ${label.value}`)
-  if (suffix.value) {
-    slots.push(
-      '  <template #suffix><span class="lucide-chevron-down" /></template>',
-    )
-  }
+  const attrs = [`v-model="tab"`, `:options="options"`]
+  if (type.value !== 'subtle') attrs.push(`type="${type.value}"`)
+  if (size.value !== 'sm') attrs.push(`size="${size.value}"`)
+  if (vertical.value) attrs.push('vertical')
+
+  const hasSlots = prefix.value || suffix.value
 
   return [
-    '<Badge',
-    ...attrs.map((a) => '  ' + a),
-    '>',
-    ...slots,
-    '</Badge>',
+    '<' + 'script setup>',
+    "import { ref } from 'vue'",
+    "import { TabButtons } from 'frappe-ui'",
+    '',
+    "const tab = ref('activity')",
+    'const options = [',
+    ...options.map(
+      (option) => `  { label: '${option.label}', value: '${option.value}' },`,
+    ),
+    ']',
+    '</' + 'script>',
+    '',
+    '<' + 'template>',
+    '  <' + 'TabButtons',
+    ...attrs.map((attr) => `    ${attr}`),
+    hasSlots ? '  >' : '  />',
+    ...(prefix.value
+      ? ['    <template #prefix><span class="lucide-star" /></template>']
+      : []),
+    ...(suffix.value
+      ? ['    <template #suffix><span>14</span></template>']
+      : []),
+    ...(hasSlots ? ['  </TabButtons>'] : []),
+    '</' + 'template>',
   ].join('\n')
 })
 
@@ -71,41 +88,45 @@ function onCopy() {
       class="overflow-hidden rounded-xl border border-outline-gray-1 divide-y divide-outline-gray-1"
     >
       <div
-        class="flex min-h-[200px] items-center justify-center bg-surface-white p-8 dot-grid"
+        class="flex min-h-[220px] items-center justify-center bg-surface-white p-8 dot-grid"
       >
-        <Badge :theme="theme" :variant="variant" :size="size">
-          <template v-if="prefix" #prefix>
-            <span class="lucide-check" />
+        <TabButtons
+          v-model="modelValue"
+          :options="options"
+          :type="type"
+          :size="size"
+          :vertical="vertical"
+        >
+          <template v-if="prefix" #prefix="{ button }">
+            <span
+              :class="iconByValue[button.modelValue]"
+              class="size-4 shrink-0"
+            />
           </template>
-          {{ label }}
-          <template v-if="suffix" #suffix>
-            <span class="lucide-chevron-down" />
+          <template v-if="suffix" #suffix="{ button }">
+            <span
+              class="rounded-full bg-surface-gray-2 px-1.5 text-xs text-ink-gray-7"
+            >
+              {{ countByValue[button.modelValue] }}
+            </span>
           </template>
-        </Badge>
+        </TabButtons>
       </div>
 
       <div class="flex flex-col gap-3 bg-surface-gray-1 p-4">
         <div class="knob-row">
-          <span class="knob-label">label</span>
-          <input
-            v-model="label"
-            type="text"
-            class="h-7 w-40 rounded-md border border-outline-gray-2 bg-surface-white px-2 text-sm text-ink-gray-8 focus:border-outline-gray-3 focus:outline-none"
-          />
-        </div>
-        <div class="knob-row">
-          <span class="knob-label">variant</span>
-          <TabButtons v-model="variant" :options="variantButtons" />
-        </div>
-        <div class="knob-row">
-          <span class="knob-label">theme</span>
-          <TabButtons v-model="theme" :options="themeButtons" />
+          <span class="knob-label">type</span>
+          <TabButtons v-model="type" :options="typeButtons" />
         </div>
         <div class="knob-row">
           <span class="knob-label">size</span>
           <TabButtons v-model="size" :options="sizeButtons" />
         </div>
         <div class="flex flex-wrap items-center gap-6">
+          <div class="flex items-center gap-2">
+            <span class="knob-label">vertical</span>
+            <Switch v-model="vertical" />
+          </div>
           <div class="flex items-center gap-2">
             <span class="knob-label">prefix</span>
             <Switch v-model="prefix" />

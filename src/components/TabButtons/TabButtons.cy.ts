@@ -5,7 +5,7 @@ describe('<TabButtons />', () => {
   it('updates the selected value', () => {
     cy.mount(TabButtons, {
       props: {
-        buttons: [
+        options: [
           { label: 'Day', value: 'day' },
           { label: 'Week', value: 'week' },
         ],
@@ -24,7 +24,7 @@ describe('<TabButtons />', () => {
 
     cy.mount(TabButtons, {
       props: {
-        buttons: [{ label: 'Month', value: 'month', onClick }],
+        options: [{ label: 'Month', value: 'month', onClick }],
         modelValue: 'month',
       },
     })
@@ -37,7 +37,7 @@ describe('<TabButtons />', () => {
   it('syncs the model with the active fallback', () => {
     cy.mount(TabButtons, {
       props: {
-        buttons: [
+        options: [
           { label: 'Day', value: 'day' },
           { label: 'Week', value: 'week', active: true },
         ],
@@ -60,12 +60,11 @@ describe('<TabButtons />', () => {
 
     cy.mount(TabButtons, {
       props: {
-        buttons: [
+        options: [
           {
             label: 'Calendar',
             value: 'calendar',
             icon: CalendarIcon,
-            hideLabel: true,
           },
         ],
         modelValue: 'calendar',
