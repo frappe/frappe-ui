@@ -2,12 +2,13 @@
 import { ref } from 'vue'
 import { TabButtons } from 'frappe-ui'
 
-const current = ref('week')
-const currentMd = ref('week')
+const current = ref('list')
+const currentMd = ref('list')
+
 const buttons = [
-  { label: 'Day', value: 'day', icon: 'lucide-calendar' },
-  { label: 'Week', value: 'week', icon: 'lucide-calendar' },
-  { label: 'Month', value: 'month', icon: 'lucide-calendar' },
+  { label: 'List', value: 'list', iconLeft: 'lucide-list' },
+  { label: 'Board', value: 'board', iconLeft: 'lucide-columns-3' },
+  { label: 'Calendar', value: 'calendar', iconLeft: 'lucide-calendar' },
 ]
 </script>
 

@@ -2,60 +2,64 @@
 import { ref } from 'vue'
 import { TabButtons } from 'frappe-ui'
 
-const current = ref('mentions')
-const compact = ref('calendar')
+const inboxTab = ref('comments')
+const viewTab = ref('list')
 
-const buttons = [
+const inboxButtons = [
   { label: 'Inbox', value: 'inbox' },
-  { label: 'Mentions', value: 'mentions' },
-  { label: 'Done', value: 'done' },
+  { label: 'Comments', value: 'comments' },
 ]
 
-const counts = {
-  inbox: 8,
-  mentions: 14,
-  done: 2,
-}
-
-const icons = {
+const inboxIcons = {
   inbox: 'lucide-inbox',
-  mentions: 'lucide-at-sign',
-  done: 'lucide-check-circle',
+  comments: 'lucide-message-square',
 }
 
-const iconButtons = [
-  { label: 'Calendar', value: 'calendar', icon: 'lucide-calendar' },
+const inboxCounts = {
+  inbox: 8,
+  comments: 14,
+}
+
+const viewButtons = [
   { label: 'List', value: 'list', icon: 'lucide-list' },
-  { label: 'Grid', value: 'grid', icon: 'lucide-grid' },
+  { label: 'Board', value: 'board', icon: 'lucide-columns-3' },
+  { label: 'Calendar', value: 'calendar', icon: 'lucide-calendar' },
 ]
 </script>
 
 <template>
   <div class="flex flex-col gap-6 p-2">
-    <TabButtons v-model="current" :options="buttons" size="md">
+    <TabButtons v-model="inboxTab" :options="inboxButtons" size="md">
       <template #prefix="{ button }">
-        <span :class="icons[button.modelValue]" class="size-4 shrink-0" />
+        <span :class="inboxIcons[button.modelValue]" class="size-4 shrink-0" />
       </template>
       <template #suffix="{ button }">
         <span
           class="rounded-full bg-surface-gray-2 px-1.5 text-xs text-ink-gray-7"
         >
-          {{ counts[button.modelValue] }}
+          {{ inboxCounts[button.modelValue] }}
         </span>
       </template>
     </TabButtons>
-    <TabButtons v-model="current" :options="buttons" type="underline" size="md">
+
+    <TabButtons
+      v-model="inboxTab"
+      :options="inboxButtons"
+      type="underline"
+      size="md"
+    >
       <template #prefix="{ button }">
-        <span :class="icons[button.modelValue]" class="size-4 shrink-0" />
+        <span :class="inboxIcons[button.modelValue]" class="size-4 shrink-0" />
       </template>
       <template #suffix="{ button }">
         <span
           class="rounded-full bg-surface-gray-2 px-1.5 text-xs text-ink-gray-7"
         >
-          {{ counts[button.modelValue] }}
+          {{ inboxCounts[button.modelValue] }}
         </span>
       </template>
     </TabButtons>
-    <TabButtons v-model="compact" :options="iconButtons" />
+
+    <TabButtons v-model="viewTab" :options="viewButtons" />
   </div>
 </template>

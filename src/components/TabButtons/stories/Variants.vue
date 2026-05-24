@@ -3,16 +3,16 @@ import { ref } from 'vue'
 import { TabButtons } from 'frappe-ui'
 
 const buttons = [
-  { label: 'Tab', value: 'one' },
-  { label: 'Tab', value: 'two' },
-  { label: 'Tab', value: 'three' },
-  { label: 'Tab', value: 'four' },
+  { label: 'Home', value: 'home', iconLeft: 'lucide-home' },
+  { label: 'Task', value: 'task', iconLeft: 'lucide-list-checks' },
+  { label: 'Contact', value: 'contact', iconLeft: 'lucide-contact' },
+  { label: 'Others', value: 'others', iconLeft: 'lucide-globe' },
 ]
 
-const subtle = ref('two')
-const ghost = ref('two')
-const underline = ref('two')
-const browserTab = ref('two')
+const subtle = ref('task')
+const ghost = ref('task')
+const underline = ref('task')
+const browserTab = ref('task')
 </script>
 
 <template>
