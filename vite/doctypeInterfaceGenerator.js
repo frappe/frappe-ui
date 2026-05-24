@@ -154,7 +154,7 @@ export class DocTypeInterfaceGenerator {
       if (field.fieldtype === 'Select' && field.options) {
         const options = field.options
           .split('\n')
-          .map((option) => `'${option}'`)
+          .map((option) => `'${option.replace(/'/g, "\\'")}'`)
           .join(' | ')
         tsType = options
       } else if (
