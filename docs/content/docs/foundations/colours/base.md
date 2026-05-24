@@ -6,6 +6,6 @@ outline: false
 import PalettePage from '@/components/foundations/PalettePage.vue'
 </script>
 
-# Base Palette
+# Base Colors
 
 <PalettePage />

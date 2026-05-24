@@ -1,10 +1,16 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { TabButtons } from 'frappe-ui'
+import { useTheme } from '../../composables/useTheme'
 import colors from '../../../tailwind/colors.json'
 
 type Mode = 'light' | 'dark'
-const mode = ref<Mode>('light')
+
+const globalTheme = useTheme()
+const mode = ref<Mode>(globalTheme.value)
+watch(globalTheme, (next) => {
+  mode.value = next
+})
 
 const modeButtons = [
   { label: 'Light', value: 'light' },
@@ -14,12 +20,22 @@ const modeButtons = [
 function resolveRef(ref: string): string {
   const [bucket, family, shade] = ref.split('/')
   if (bucket === 'neutral') return colors.neutral[family as 'white' | 'black']
-  if (bucket === 'overlay') return colors.overlay[family as 'white' | 'black'][shade]
+  if (bucket === 'overlay')
+    return colors.overlay[family as 'white' | 'black'][shade]
   const modeData = colors[bucket as 'lightMode' | 'darkMode'] as Record<
     string,
     Record<string, string>
   >
   return modeData?.[family]?.[shade] ?? ref
+}
+
+// "lightMode/gray/50" → "gray-50"
+// "neutral/white"     → "neutral-white"
+// "overlay/black/10"  → "overlay-black-10"
+function formatRef(ref: string): string {
+  const parts = ref.split('/')
+  if (parts[0] === 'lightMode' || parts[0] === 'darkMode') parts.shift()
+  return parts.join('-')
 }
 
 type Group = {
@@ -56,6 +72,7 @@ function pickEntries(category: Group['category']) {
   return Object.entries(data).map(([name, ref]) => ({
     name,
     ref,
+    refLabel: formatRef(ref),
     value: resolveRef(ref),
   }))
 }
@@ -66,19 +83,6 @@ const sections = computed(() =>
 
 function copy(text: string) {
   navigator.clipboard?.writeText(text)
-}
-
-// Group entries by color subfamily (gray, red, green, …) for visual clustering.
-function groupEntries(entries: { name: string; ref: string; value: string }[]) {
-  const groups = new Map<string, typeof entries>()
-  for (const e of entries) {
-    // Token names look like "gray-1", "red-3", "blue-link", "menu-bar", "alert-button-default".
-    // Group by the head segment before the first hyphen for ramps, or treat as singleton.
-    const head = e.name.includes('-') ? e.name.split('-')[0] : e.name
-    if (!groups.has(head)) groups.set(head, [])
-    groups.get(head)!.push(e)
-  }
-  return Array.from(groups.entries()).map(([head, items]) => ({ head, items }))
 }
 </script>
 
@@ -97,7 +101,7 @@ function groupEntries(entries: { name: string; ref: string; value: string }[]) {
       v-for="section in sections"
       :key="section.category"
       :id="section.category"
-      class="grid gap-6"
+      class="grid gap-4"
     >
       <div class="grid gap-1">
         <h2 class="text-xl font-semibold text-ink-gray-8 m-0 capitalize">
@@ -108,33 +112,29 @@ function groupEntries(entries: { name: string; ref: string; value: string }[]) {
         </p>
       </div>
 
-      <div
-        v-for="group in groupEntries(section.entries)"
-        :key="group.head"
-        class="grid gap-3"
-      >
-        <span class="text-xs text-ink-gray-5 capitalize">{{ group.head }}</span>
-        <div class="grid gap-x-6 gap-y-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          <button
-            v-for="entry in group.items"
-            :key="entry.name"
-            class="flex items-center gap-3 text-left"
-            @click="copy(`${section.prefix}${entry.name}`)"
-          >
-            <div
-              class="size-10 rounded shrink-0 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)] dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]"
-              :style="{ background: entry.value }"
-            ></div>
-            <div class="grid gap-1 min-w-0">
-              <span class="text-sm font-medium text-ink-gray-8 truncate">
-                {{ section.prefix }}{{ entry.name }}
-              </span>
-              <span class="text-2xs font-mono text-ink-gray-5 uppercase">
-                {{ entry.value }}
-              </span>
-            </div>
-          </button>
-        </div>
+      <div class="grid divide-y divide-outline-gray-1">
+        <button
+          v-for="entry in section.entries"
+          :key="entry.name"
+          class="flex w-full items-center gap-4 py-3 text-left"
+          @click="copy(`${section.prefix}${entry.name}`)"
+        >
+          <div
+            class="size-10 rounded-md shrink-0"
+            :style="{ background: entry.value }"
+          ></div>
+          <div class="grid gap-1 min-w-0 flex-1">
+            <span class="text-sm font-mono text-ink-gray-8 truncate">
+              {{ section.prefix }}{{ entry.name }}
+            </span>
+            <span class="text-xs font-mono text-ink-gray-5 truncate">
+              → {{ entry.refLabel }}
+            </span>
+          </div>
+          <span class="text-xs font-mono text-ink-gray-5 shrink-0 tabular-nums">
+            {{ entry.value }}
+          </span>
+        </button>
       </div>
     </section>
   </div>

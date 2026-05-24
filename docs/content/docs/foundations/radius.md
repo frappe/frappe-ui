@@ -6,6 +6,6 @@ outline: false
 import RadiusPage from '@/components/foundations/RadiusPage.vue'
 </script>
 
-# Corner Radius
+# Radius
 
 <RadiusPage />

@@ -6,6 +6,6 @@ outline: false
 import SemanticPage from '@/components/foundations/SemanticPage.vue'
 </script>
 
-# Semantic Colours
+# Semantic Colors
 
 <SemanticPage />
