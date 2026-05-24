@@ -1,24 +1,35 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { Switch, TabButtons } from 'frappe-ui'
+import { ref } from 'vue'
+import { TabButtons } from 'frappe-ui'
+import ComponentPlayground, { type Knob } from './ComponentPlayground.vue'
 
-const type = ref<'subtle' | 'ghost' | 'underline' | 'browser-tab'>('subtle')
-const size = ref<'sm' | 'md'>('sm')
+const knobs: Knob[] = [
+  {
+    name: 'type',
+    type: 'tabs',
+    default: 'subtle',
+    options: [
+      { label: 'subtle', value: 'subtle' },
+      { label: 'ghost', value: 'ghost' },
+      { label: 'underline', value: 'underline' },
+      { label: 'browser-tab', value: 'browser-tab' },
+    ],
+  },
+  {
+    name: 'size',
+    type: 'tabs',
+    default: 'sm',
+    options: [
+      { label: 'sm', value: 'sm' },
+      { label: 'md', value: 'md' },
+    ],
+  },
+  { name: 'vertical', type: 'switch', default: false },
+  { name: 'prefix', type: 'switch', default: false },
+  { name: 'suffix', type: 'switch', default: false },
+]
+
 const modelValue = ref('activity')
-const vertical = ref(false)
-const prefix = ref(false)
-const suffix = ref(false)
-
-const typeButtons = [
-  { label: 'subtle', value: 'subtle' },
-  { label: 'ghost', value: 'ghost' },
-  { label: 'underline', value: 'underline' },
-  { label: 'browser-tab', value: 'browser-tab' },
-]
-const sizeButtons = [
-  { label: 'sm', value: 'sm' },
-  { label: 'md', value: 'md' },
-]
 
 const options = [
   { label: 'Overview', value: 'overview' },
@@ -26,25 +37,25 @@ const options = [
   { label: 'Settings', value: 'settings' },
 ]
 
-const iconByValue = {
+const iconByValue: Record<string, string> = {
   overview: 'lucide-home',
   activity: 'lucide-activity',
   settings: 'lucide-settings',
 }
 
-const countByValue = {
+const countByValue: Record<string, number> = {
   overview: 8,
   activity: 14,
   settings: 2,
 }
 
-const code = computed(() => {
+function buildCode(v: Record<string, any>) {
   const attrs = [`v-model="tab"`, `:options="options"`]
-  if (type.value !== 'subtle') attrs.push(`type="${type.value}"`)
-  if (size.value !== 'sm') attrs.push(`size="${size.value}"`)
-  if (vertical.value) attrs.push('vertical')
+  if (v.type !== 'subtle') attrs.push(`type="${v.type}"`)
+  if (v.size !== 'sm') attrs.push(`size="${v.size}"`)
+  if (v.vertical) attrs.push('vertical')
 
-  const hasSlots = prefix.value || suffix.value
+  const hasSlots = v.prefix || v.suffix
 
   return [
     '<' + 'script setup>',
@@ -63,130 +74,46 @@ const code = computed(() => {
     '  <' + 'TabButtons',
     ...attrs.map((attr) => `    ${attr}`),
     hasSlots ? '  >' : '  />',
-    ...(prefix.value
+    ...(v.prefix
       ? ['    <template #prefix><span class="lucide-star" /></template>']
       : []),
-    ...(suffix.value
+    ...(v.suffix
       ? ['    <template #suffix><span>14</span></template>']
       : []),
     ...(hasSlots ? ['  </TabButtons>'] : []),
     '</' + 'template>',
   ].join('\n')
-})
-
-const copied = ref(false)
-function onCopy() {
-  navigator.clipboard?.writeText(code.value)
-  copied.value = true
-  setTimeout(() => (copied.value = false), 1200)
 }
 </script>
 
 <template>
-  <div class="not-prose">
-    <div
-      class="overflow-hidden rounded-xl border border-outline-gray-1 divide-y divide-outline-gray-1"
-    >
-      <div
-        class="flex min-h-[220px] items-center justify-center bg-surface-white p-8 dot-grid"
+  <ComponentPlayground
+    :knobs="knobs"
+    :code="buildCode"
+    preview-min-height="220px"
+  >
+    <template #preview="{ values }">
+      <TabButtons
+        v-model="modelValue"
+        :options="options"
+        :type="values.type"
+        :size="values.size"
+        :vertical="values.vertical"
       >
-        <TabButtons
-          v-model="modelValue"
-          :options="options"
-          :type="type"
-          :size="size"
-          :vertical="vertical"
-        >
-          <template v-if="prefix" #prefix="{ button }">
-            <span
-              :class="iconByValue[button.modelValue]"
-              class="size-4 shrink-0"
-            />
-          </template>
-          <template v-if="suffix" #suffix="{ button }">
-            <span
-              class="rounded-full bg-surface-gray-2 px-1.5 text-xs text-ink-gray-7"
-            >
-              {{ countByValue[button.modelValue] }}
-            </span>
-          </template>
-        </TabButtons>
-      </div>
-
-      <div class="flex flex-col gap-3 bg-surface-gray-1 p-4">
-        <div class="knob-row">
-          <span class="knob-label">type</span>
-          <TabButtons v-model="type" :options="typeButtons" />
-        </div>
-        <div class="knob-row">
-          <span class="knob-label">size</span>
-          <TabButtons v-model="size" :options="sizeButtons" />
-        </div>
-        <div class="flex flex-wrap items-center gap-6">
-          <div class="flex items-center gap-2">
-            <span class="knob-label">vertical</span>
-            <Switch v-model="vertical" />
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="knob-label">prefix</span>
-            <Switch v-model="prefix" />
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="knob-label">suffix</span>
-            <Switch v-model="suffix" />
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-surface-gray-1">
-        <div
-          class="flex items-center justify-between border-b border-outline-gray-1 px-4"
-        >
-          <div
-            class="-mb-px border-b border-ink-gray-8 py-2 text-sm font-medium text-ink-gray-8"
+        <template v-if="values.prefix" #prefix="{ button }">
+          <span
+            :class="iconByValue[button.modelValue]"
+            class="size-4 shrink-0"
+          />
+        </template>
+        <template v-if="values.suffix" #suffix="{ button }">
+          <span
+            class="rounded-full bg-surface-gray-2 px-1.5 text-xs text-ink-gray-7"
           >
-            vue
-          </div>
-          <button
-            type="button"
-            class="inline-flex h-7 items-center gap-1.5 rounded-1 px-2 text-xs text-ink-gray-6 transition-colors hover:bg-surface-gray-2 hover:text-ink-gray-8"
-            :aria-label="copied ? 'Copied' : 'Copy code'"
-            @click="onCopy"
-          >
-            <span
-              :class="copied ? 'lucide-check' : 'lucide-copy'"
-              class="size-3.5"
-              aria-hidden="true"
-            />
-          </button>
-        </div>
-        <pre
-          class="overflow-x-auto p-4 text-sm leading-relaxed"
-        ><code class="font-mono text-ink-gray-8">{{ code }}</code></pre>
-      </div>
-    </div>
-  </div>
+            {{ countByValue[button.modelValue] }}
+          </span>
+        </template>
+      </TabButtons>
+    </template>
+  </ComponentPlayground>
 </template>
-
-<style scoped>
-.knob-row {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-.knob-label {
-  display: inline-block;
-  min-width: 64px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 13px;
-  color: var(--p-color-ink-gray-6, #7c7c7c);
-}
-.dot-grid {
-  background-image: radial-gradient(
-    circle,
-    rgba(0, 0, 0, 0.08) 1px,
-    transparent 1px
-  );
-  background-size: 14px 14px;
-}
-</style>
