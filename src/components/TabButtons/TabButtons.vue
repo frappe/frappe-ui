@@ -121,7 +121,7 @@ const rootClasses = computed(() =>
 )
 
 function horizontalClasses() {
-  const base = ['inline-flex shrink-0 items-center']
+  const base = ['inline-flex shrink-0 items-center overflow-hidden']
   const isSm = props.size === 'sm'
 
   switch (props.type) {

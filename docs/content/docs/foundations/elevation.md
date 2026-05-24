@@ -10,8 +10,9 @@ import FocusRingPreview from '@/components/foundations/FocusRingPreview.vue'
 # Elevation
 
 Elevation conveys depth and hierarchy. Each step is a CSS variable
-(`--elevation-*`) that flips between light and dark themes automatically — use
-the same `shadow-*` utility in both modes.
+(`--elevation-*`) that resolves to the same value in both themes — Espresso 2.0
+uses one shadow set for light and dark, so the same `shadow-*` utility works in
+either mode without overrides.
 
 ## Elevation scale
 
@@ -54,9 +55,11 @@ cards. `shadow` (the bare utility) remains as an alias.
 **New: `shadow-status`.** A 1.5px white halo for status dots over coloured
 backgrounds.
 
-**Dark mode is automatic.** Shadow utilities now resolve to
-`var(--elevation-*)` and flip values under `[data-theme="dark"]`. Remove any
-conditional `dark:shadow-*` overrides — they are no longer needed.
+**One shadow set for both themes.** `shadow-*` utilities resolve to a single
+value (`var(--elevation-*)`) regardless of theme — matching how Espresso 2.0
+applies shadows in the Figma dark-mode page. Remove any conditional
+`dark:shadow-*` overrides. If a component genuinely needs a heavier
+dark-mode-specific shadow, opt in with `shadow-dark-{sm,base,md,lg,xl,2xl}`.
 
 **Focus rings.** Replace `focus-visible:ring-2 ring-outline-gray-3` with
 `focus-visible:focus-ring`; semantic variants exist for red (error), green

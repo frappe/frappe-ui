@@ -25,8 +25,8 @@ const rootClasses = computed(() => {
     'inline-flex box-border shrink-0 select-none items-center justify-center whitespace-nowrap text-sm leading-[16.1px] outline-none transition-[background-color,color,box-shadow,border-color] duration-150 ease-out motion-reduce:transition-none',
     active
       ? props.variant === 'underline'
-        ? 'text-ink-gray-9 font-medium'
-        : 'text-ink-gray-9'
+        ? 'text-ink-gray-8 font-medium'
+        : 'text-ink-gray-8'
       : 'text-ink-gray-5',
     iconOnly
       ? isSm
@@ -114,7 +114,7 @@ const variantClass = computed(() => {
 
   return props.activeStyle === 'subtle'
     ? 'bg-surface-gray-2'
-    : 'bg-surface-white shadow-sm'
+    : 'bg-surface-gray-2-contrast shadow-base'
 })
 
 const iconClass = computed(() =>
@@ -148,7 +148,11 @@ defineSlots<{
     </span>
 
     <slot name="suffix">
-      <Icon v-if="iconRight && !isIconOnly" :name="iconRight" :class="iconClass" />
+      <Icon
+        v-if="iconRight && !isIconOnly"
+        :name="iconRight"
+        :class="iconClass"
+      />
     </slot>
   </span>
 </template>

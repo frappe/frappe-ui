@@ -130,9 +130,13 @@ function generateSemanticColors() {
   return output
 }
 
-// Emit `--elevation-*` and `--focus-*` CSS variables that flip between light
-// and dark themes. Theme-independent entries (e.g. `elevation.custom.status`)
-// land in `:root` only. Consumed by the tailwind plugin alongside color vars.
+// Emit `--elevation-*` and `--focus-*` CSS variables. Elevation uses the
+// Figma `light/*` values in both modes (matches how Espresso 2.0 actually
+// applies shadows in dark mode — see the dark-mode page in Figma, which
+// references `elevation/light/*` exclusively). The Figma `dark/*` set is
+// exposed as `--dark-elevation-*` for opt-in use via `shadow-dark-*`.
+// Focus rings still mode-swap. Theme-independent entries (e.g.
+// `elevation.custom.status`) land in `:root` only.
 function generateEffectVariables() {
   const output = {
     ':root': {},
@@ -143,7 +147,7 @@ function generateEffectVariables() {
     output[':root'][`--elevation-${step}`] = value
   }
   for (const [step, value] of Object.entries(effectsData.elevation.dark)) {
-    output['[data-theme="dark"]'][`--elevation-${step}`] = value
+    output[':root'][`--dark-elevation-${step}`] = value
   }
   for (const [name, value] of Object.entries(effectsData.elevation.custom)) {
     output[':root'][`--elevation-${name}`] = value
