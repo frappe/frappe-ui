@@ -23,15 +23,23 @@ const rootClasses = computed(() => {
   const active = props.active
   return [
     'inline-flex box-border shrink-0 select-none items-center justify-center whitespace-nowrap text-sm leading-[16.1px] outline-none transition-[background-color,color,box-shadow,border-color] duration-150 ease-out motion-reduce:transition-none',
-    active ? 'text-ink-gray-9' : 'text-ink-gray-5',
+    active
+      ? props.variant === 'underline'
+        ? 'text-ink-gray-9 font-medium'
+        : 'text-ink-gray-9'
+      : 'text-ink-gray-5',
     iconOnly
       ? isSm
         ? 'size-6.5 gap-1.5 p-[5px]'
         : 'size-7 gap-1.5 p-[5px]'
       : props.variant === 'underline'
-        ? isSm
-          ? 'h-7 gap-2'
-          : 'h-7.5 gap-2'
+        ? props.orientation === 'vertical'
+          ? isSm
+            ? 'h-7 gap-2 pr-2'
+            : 'h-7.5 gap-2 pr-2'
+          : isSm
+            ? 'h-7 gap-2'
+            : 'h-7.5 gap-2'
         : isSm
           ? 'h-6.5 gap-2 px-2 py-[5px]'
           : 'h-7 gap-2 px-2.5 py-1.5',
@@ -63,10 +71,11 @@ const variantClass = computed(() => {
       ? 'border-r border-transparent'
       : 'border-b border-transparent'
     if (props.active) {
-      // Indicator sits on the container's gray rail. Vertical uses a 2px
-      // bar so it reads as a tab selector, not a text caret.
+      // Indicator overlays the container's rail segment so it reads as a
+      // thicker, darker section of the same line — not a separate bar
+      // floating beside the label.
       const indicator = isVertical
-        ? 'after:absolute after:top-0 after:bottom-0 after:-right-[3px] after:w-[3px] after:rounded-full after:bg-[var(--ink-gray-8)]'
+        ? 'after:absolute after:inset-y-1.5 after:-right-0.5 after:w-px after:bg-[var(--ink-gray-8)]'
         : 'after:absolute after:inset-x-0 after:-bottom-px after:h-px after:bg-[var(--ink-gray-8)]'
       return ['relative', railSlot, indicator]
     }
@@ -143,4 +152,3 @@ defineSlots<{
     </slot>
   </span>
 </template>
-</content>

@@ -288,4 +288,3 @@ function tabElementProps(button: (typeof resolvedButtons.value)[number]) {
     </div>
   </RadioGroupRoot>
 </template>
-</content>
