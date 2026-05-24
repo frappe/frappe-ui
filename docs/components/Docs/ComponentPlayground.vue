@@ -69,9 +69,15 @@ watchEffect(() => {
     highlightedCode.value = null
     return
   }
+  // `defaultColor: false` makes Shiki emit both themes as CSS variables
+  // (`--shiki-light` / `--shiki-dark`) with no inline color, so the
+  // `[data-theme="dark"] .shiki span` rule in docs/css/style.css can flip
+  // tokens at runtime. Without it, the light theme bakes into `style=`
+  // attributes and wins over the dark override.
   highlightedCode.value = h.codeToHtml(generatedCode.value, {
     lang: 'vue',
     themes: { light: 'github-light', dark: 'tokyo-night' },
+    defaultColor: false,
   })
 })
 
