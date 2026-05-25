@@ -178,7 +178,8 @@ function parseCombo(raw?: string): Part[] {
     space: 'Space',
     ' ': 'Space',
     tab: 'Tab',
-    plus: '+',  // alias used by toCombo to avoid delimiter collision
+    plus: '+', // alias used by toCombo to avoid delimiter collision
+    '=': '+',  // equals key displayed as + (Ctrl+= fires without Shift, avoids browser zoom)
     backspace: '⌫',
     delete: '⌦',
     del: '⌦',
