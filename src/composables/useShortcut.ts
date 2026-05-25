@@ -132,6 +132,12 @@ export function matchesShortcut(
   return true
 }
 
+// Intentionally simpler than matchesShortcut:
+// • Only checks required modifiers in one direction (still held?) — releasing a non-required
+//   modifier (e.g. Ctrl) while holding the main key should not fire onRelease.
+// • Skips isShiftProducedKey — we are tracking physical key state, not re-identifying the combo.
+// • Skips allowInInput / allowInDialog / condition — those are keydown entry-point guards;
+//   once a hold shortcut has started firing, release is tracked unconditionally.
 function isShortcutStillPressed(
   e: KeyboardEvent,
   config: ShortcutConfig,

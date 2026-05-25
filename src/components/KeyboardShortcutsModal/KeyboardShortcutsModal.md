@@ -84,7 +84,9 @@ useShortcut({
 | `onHold` | `(e) => void` | — | Called on first keydown while held (`triggeredOn: "hold"`) |
 | `onRelease` | `(e) => void` | — | Called on keyup when the held combo is released |
 | `preventDefault` | `boolean` | `true` | Prevent the browser's default action |
-| `allowInInput` | `boolean` | `false` | Allow the shortcut to fire inside inputs / textareas || `allowInDialog` | `boolean` | `false` | Allow the shortcut to fire when focus is inside a `[role="dialog"]` element. Set to `true` for shortcuts that are intentionally scoped to a dialog (e.g. an Escape handler or ? help shortcut) || `condition` | `() => boolean` | — | Shortcut only fires when this returns `true` |
+| `allowInInput` | `boolean` | `false` | Allow the shortcut to fire inside inputs / textareas |
+| `allowInDialog` | `boolean` | `false` | Allow the shortcut to fire when focus is inside a `[role="dialog"]` element. Set to `true` for shortcuts that are intentionally scoped to a dialog (e.g. an Escape handler or ? help shortcut) |
+| `condition` | `() => boolean` | — | Shortcut only fires when this returns `true` |
 
 ---
 
