@@ -14,7 +14,39 @@ let semanticColors = generateSemanticColors()
 let cssVariables = mergeVariableLayers(
   generateCSSVariables(),
   generateEffectVariables(),
+  generateRadiusVariables(),
 )
+
+// Emit `--radius-{key}` for every radius token (numeric scale + aliases) so
+// the values are inspectable as real CSS variables. `borderRadius` is rewired
+// below to consume these vars, so `rounded-4` and `--radius-4` stay in sync.
+function generateRadiusVariables() {
+  const vars = {}
+  for (const [key, value] of Object.entries(radiusTokens)) {
+    if (key === 'DEFAULT') continue
+    vars[`--radius-${key}`] = value
+  }
+  return { ':root': vars }
+}
+
+// Map `DEFAULT` (Tailwind's `rounded` class) onto the numeric var that
+// shares its value, so we don't emit a `--radius-DEFAULT` (awkward name).
+function buildRadiusConfig() {
+  const numericByValue = {}
+  for (const [key, value] of Object.entries(radiusTokens)) {
+    if (/^\d+$/.test(key)) numericByValue[value] = key
+  }
+  const out = {}
+  for (const [key, value] of Object.entries(radiusTokens)) {
+    if (key === 'DEFAULT') {
+      const numeric = numericByValue[value]
+      out[key] = numeric ? `var(--radius-${numeric})` : value
+    } else {
+      out[key] = `var(--radius-${key})`
+    }
+  }
+  return out
+}
 
 // Merge two `{ selector: { var: value } }` objects into one, preserving any
 // vars already declared under the same selector.
@@ -155,7 +187,7 @@ export default plugin(
   {
     theme: {
       colors: colorPalette,
-      borderRadius: radiusTokens,
+      borderRadius: buildRadiusConfig(),
       boxShadow: {
         none: 'none',
         sm: 'var(--elevation-sm)',

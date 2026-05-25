@@ -9,11 +9,28 @@ type SizeEntry = [string, SizeMeta]
 const TEXT_KEYS = ['2xs', 'xs', 'sm', 'base', 'lg', 'xl', '2xl', '3xl']
 const DISPLAY_KEYS = ['4xl', '5xl', '6xl', '7xl', '8xl', '9xl', '10xl', '11xl', '12xl', '13xl', '14xl', '15xl']
 
+// Figma stores line-height as a px value; designers think in ratios
+// (lh / size). Convert here for the meta row.
+function lineHeightRatio(size: string, lineHeight?: string): string | undefined {
+  if (!lineHeight) return undefined
+  const sizePx = parseFloat(size)
+  const lhPx = parseFloat(lineHeight)
+  if (!sizePx || !lhPx) return undefined
+  const ratio = lhPx / sizePx
+  // 2 decimals, but trim trailing zeros (1.50 → 1.5, 1.00 → 1)
+  return ratio.toFixed(2).replace(/\.?0+$/, '')
+}
+
 function entry(key: string) {
   const v = (typography.fontSize as Record<string, SizeEntry>)[key]
   if (!v) return null
   const [size, meta] = v
-  return { name: key, size, meta: meta || {} }
+  return {
+    name: key,
+    size,
+    meta: meta || {},
+    lhRatio: lineHeightRatio(size, meta?.lineHeight),
+  }
 }
 
 const text = computed(() => TEXT_KEYS.map(entry).filter(Boolean) as NonNullable<ReturnType<typeof entry>>[])
@@ -62,7 +79,7 @@ function copy(text: string) {
           <div class="flex gap-6 text-2xs font-mono text-ink-gray-5 uppercase flex-wrap">
             <span>text-{{ item.name }}</span>
             <span>size {{ item.size }}</span>
-            <span v-if="item.meta.lineHeight">lh {{ item.meta.lineHeight }}</span>
+            <span v-if="item.lhRatio">lh {{ item.lhRatio }}</span>
             <span v-if="item.meta.letterSpacing">ls {{ item.meta.letterSpacing }}</span>
             <span v-if="item.meta.fontWeight">fw {{ item.meta.fontWeight }}</span>
           </div>
@@ -96,7 +113,7 @@ function copy(text: string) {
           <div class="flex gap-6 text-2xs font-mono text-ink-gray-5 uppercase flex-wrap">
             <span>text-{{ item.name }}</span>
             <span>size {{ item.size }}</span>
-            <span v-if="item.meta.lineHeight">lh {{ item.meta.lineHeight }}</span>
+            <span v-if="item.lhRatio">lh {{ item.lhRatio }}</span>
           </div>
         </button>
       </div>
