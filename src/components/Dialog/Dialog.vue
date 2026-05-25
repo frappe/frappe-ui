@@ -46,7 +46,7 @@
                       v-else-if="showHeader"
                       class="mb-6 flex items-center justify-between"
                     >
-                      <div class="flex items-center space-x-2">
+                      <div class="flex items-center space-x-2 flex-1">
                         <div
                           v-if="resolvedIcon"
                           class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full"
@@ -69,7 +69,7 @@
                             aria-hidden="true"
                           />
                         </div>
-                        <DialogTitle as="header">
+                        <DialogTitle as="header" class="flex-1">
                           <slot name="title" :close="close">
                             <slot name="body-title">
                               <h3
@@ -112,7 +112,11 @@
                   name="actions"
                   v-bind="{ close, actions: reactiveActions }"
                 >
-                  <div :class="isSingleActionFullWidth ? '' : 'flex justify-end gap-2'">
+                  <div
+                    :class="
+                      isSingleActionFullWidth ? '' : 'flex justify-end gap-2'
+                    "
+                  >
                     <Button
                       v-for="action in reactiveActions"
                       :key="action.label"
