@@ -420,7 +420,7 @@ const hasLabeling = computed(() => {
   color: #d1d5db; /* gray-300 */
 }
 
-:global([data-theme='dark']) .rating-half[data-state='empty'] {
+[data-theme='dark'] .rating-half[data-state='empty'] {
   color: #4b5563; /* gray-600 — visible on dark surfaces */
 }
 
