@@ -37,6 +37,14 @@ export interface ShortcutConfig {
   /** Allow the shortcut to fire when an input / textarea is focused (default: false) */
   allowInInput?: boolean
   /**
+   * Allow the shortcut to fire when the event target is inside a dialog
+   * (i.e. an element with `[role="dialog"]` in its ancestor chain).
+   * Default is `false` — most page-level shortcuts should be silent while a
+   * dialog has focus. Set to `true` for shortcuts that are intentionally
+   * scoped to a dialog (e.g. a custom Escape handler or a ? help shortcut).
+   */
+  allowInDialog?: boolean
+  /**
    * Condition function — the shortcut fires only when this returns `true`.
    * When absent the shortcut is always active.
    */
@@ -98,10 +106,7 @@ export function matchesShortcut(
   e: KeyboardEvent,
   config: ShortcutConfig,
 ): boolean {
-  if (
-    e.key.toLowerCase() !== config.key.toLowerCase() &&
-    e.key !== config.key
-  ) {
+  if (e.key.toLowerCase() !== config.key.toLowerCase()) {
     return false
   }
 
@@ -143,12 +148,11 @@ function isShortcutStillPressed(
 }
 
 function globalKeydownHandler(e: KeyboardEvent) {
-  if (isInsideDialog(e)) return
-
   for (const [id, config] of shortcutHandlers) {
     if (!matchesShortcut(e, config)) continue
     if (config.condition && !config.condition()) continue
     if (!config.allowInInput && isTargetEditable(e)) continue
+    if (!config.allowInDialog && isInsideDialog(e)) continue
 
     if (config.preventDefault !== false) e.preventDefault()
 
@@ -164,8 +168,6 @@ function globalKeydownHandler(e: KeyboardEvent) {
 }
 
 function globalKeyupHandler(e: KeyboardEvent) {
-  if (isInsideDialog(e)) return
-
   const toRelease: symbol[] = []
 
   for (const id of heldShortcuts) {

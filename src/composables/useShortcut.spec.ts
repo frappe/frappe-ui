@@ -2,7 +2,7 @@
 /**
  * Unit tests for src/composables/useShortcut.ts
  */
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createApp, defineComponent, nextTick } from 'vue'
 import {
   getActiveShortcuts,
@@ -255,8 +255,23 @@ describe('useShortcut — allowInInput', () => {
 // isInsideDialog guard
 // ---------------------------------------------------------------------------
 
-describe('useShortcut — isInsideDialog guard', () => {
-  it('does not fire when event target is inside [role=dialog]', async () => {
+describe('useShortcut — allowInDialog', () => {
+  let dialog: HTMLElement
+  let button: HTMLElement
+
+  beforeEach(() => {
+    dialog = document.createElement('div')
+    dialog.setAttribute('role', 'dialog')
+    button = document.createElement('button')
+    dialog.appendChild(button)
+    document.body.appendChild(dialog)
+  })
+
+  afterEach(() => {
+    dialog.remove()
+  })
+
+  it('does not fire when event target is inside [role=dialog] (default)', async () => {
     const handler = vi.fn()
     const { unmount } = mountWithShortcut({
       key: 'k',
@@ -265,16 +280,25 @@ describe('useShortcut — isInsideDialog guard', () => {
     })
     await nextTick()
 
-    const dialog = document.createElement('div')
-    dialog.setAttribute('role', 'dialog')
-    const button = document.createElement('button')
-    dialog.appendChild(button)
-    document.body.appendChild(dialog)
-
     fireKey('k', {}, button)
     expect(handler).not.toHaveBeenCalled()
 
-    dialog.remove()
+    unmount()
+  })
+
+  it('fires inside dialog when allowInDialog is true', async () => {
+    const handler = vi.fn()
+    const { unmount } = mountWithShortcut({
+      key: 'k',
+      description: 'Action (dialog-aware)',
+      allowInDialog: true,
+      handler,
+    })
+    await nextTick()
+
+    fireKey('k', {}, button)
+    expect(handler).toHaveBeenCalledOnce()
+
     unmount()
   })
 
