@@ -1,0 +1,58 @@
+name: Barista — Setup
+description: Common post-checkout setup for every Barista workflow. Installs Bun, resolves the issue/PR number from the triggering event, and posts an "eyes" reaction on /barista comments. The caller is responsible for minting the app token and checking out the repo first (local composites can't be loaded before checkout).
+inputs:
+  app-token:
+    description: barista[bot] installation token (used to post the reaction)
+    required: true
+  dispatch-number:
+    description: workflow_dispatch input number (issue_number or pr_number). Empty/unset for all other events — the action falls back to the event payload.
+    required: false
+    default: ''
+outputs:
+  number:
+    description: Issue or PR number resolved from the triggering event (or dispatch input)
+    value: ${{ steps.resolve.outputs.number }}
+runs:
+  using: composite
+  steps:
+    - name: Set up Bun
+      uses: oven-sh/setup-bun@v2
+      with:
+        bun-version: latest
+
+    - name: Resolve issue or PR number
+      id: resolve
+      shell: bash
+      env:
+        DISPATCH_NUMBER: ${{ inputs.dispatch-number }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+        ISSUE_NUMBER: ${{ github.event.issue.number }}
+      run: |
+        # Priority: workflow_dispatch input > pull_request.number > issue.number.
+        # `issue_comment` events on a PR carry the PR number under .issue.number
+        # (GitHub treats PRs as issues for comment threads), so the issue.number
+        # fallback handles both issue comments and PR-thread comments.
+        if [ -n "$DISPATCH_NUMBER" ]; then
+          echo "number=$DISPATCH_NUMBER" >> "$GITHUB_OUTPUT"
+        elif [ -n "$PR_NUMBER" ]; then
+          echo "number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
+        elif [ -n "$ISSUE_NUMBER" ]; then
+          echo "number=$ISSUE_NUMBER" >> "$GITHUB_OUTPUT"
+        else
+          echo "Error: could not resolve issue/PR number from event payload or dispatch input" >&2
+          exit 1
+        fi
+
+    - name: Acknowledge /barista comment
+      if: github.event_name == 'issue_comment'
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.app-token }}
+        REPO: ${{ github.repository }}
+        COMMENT_ID: ${{ github.event.comment.id }}
+      run: |
+        gh api \
+          --method POST \
+          -H "Accept: application/vnd.github+json" \
+          "/repos/$REPO/issues/comments/$COMMENT_ID/reactions" \
+          -f content=eyes

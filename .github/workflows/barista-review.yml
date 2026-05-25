@@ -26,6 +26,8 @@ permissions:
 
 concurrency:
   group: barista-review-${{ github.event.pull_request.number || github.event.issue.number || inputs.pr_number }}
+  # Cancel in-flight: reviews are stateless (one comment posted at the end), so
+  # the latest `/barista review` request should win. No partial state to lose.
   cancel-in-progress: true
 
 jobs:
@@ -58,12 +60,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          # History so barista can inspect recent commits near changed files.
-          fetch-depth: 200
-
       - name: Mint barista app token
         id: app-token
         uses: actions/create-github-app-token@v1
@@ -71,44 +67,39 @@ jobs:
           app-id: ${{ secrets.BARISTA_APP_ID }}
           private-key: ${{ secrets.BARISTA_PRIVATE_KEY }}
 
-      - name: Resolve PR number
-        id: pr
-        run: |
-          case "${{ github.event_name }}" in
-            pull_request)
-              echo "number=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
-              ;;
-            issue_comment)
-              echo "number=${{ github.event.issue.number }}" >> "$GITHUB_OUTPUT"
-              ;;
-            workflow_dispatch)
-              echo "number=${{ inputs.pr_number }}" >> "$GITHUB_OUTPUT"
-              ;;
-          esac
-
-      - name: Run Barista (review mode)
-        id: run-barista
-        uses: anthropics/claude-code-action@v1
-        env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          BARISTA_ISSUE: ${{ steps.pr.outputs.number }}
-          BARISTA_EVENT: ${{ github.event_name }}
-          BARISTA_COMMENT_BODY: ${{ github.event.comment.body }}
-          BARISTA_COMMENT_AUTHOR: ${{ github.event.comment.user.login }}
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          github_token: ${{ steps.app-token.outputs.token }}
-          allowed_non_write_users: "*"
-          display_report: "true"
-          prompt: "/barista-review REPO: ${{ github.repository }} PR_NUMBER: ${{ steps.pr.outputs.number }} EVENT: ${{ github.event_name }}"
+          token: ${{ steps.app-token.outputs.token }}
+          # History so barista can inspect recent commits near changed files.
+          fetch-depth: 200
 
-      - name: Append run-stats footer to barista's comment
+      - name: Setup Barista
+        id: setup
+        uses: ./.github/actions/barista-setup
+        with:
+          app-token: ${{ steps.app-token.outputs.token }}
+          dispatch-number: ${{ inputs.pr_number }}
+
+      - name: Run Barista
+        id: run-barista
+        uses: ./.github/actions/barista-run
+        with:
+          oauth-token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          app-token: ${{ steps.app-token.outputs.token }}
+          repo: ${{ github.repository }}
+          issue-number: ${{ steps.setup.outputs.number }}
+          event: ${{ github.event_name }}
+          comment-body: ${{ github.event.comment.body }}
+          comment-author: ${{ github.event.comment.user.login }}
+          prompt: "/barista-review REPO: ${{ github.repository }} PR_NUMBER: ${{ steps.setup.outputs.number }} EVENT: ${{ github.event_name }}"
+          model: ${{ vars.BARISTA_MODEL }}
+
+      - name: Append run-stats footer
         if: always() && steps.run-barista.outcome == 'success'
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-          EXECUTION_FILE: ${{ steps.run-barista.outputs.execution_file }}
-          ISSUE_NUMBER: ${{ steps.pr.outputs.number }}
-          REPO: ${{ github.repository }}
-        run: ./.github/barista/scripts/append-stats.sh
+        uses: ./.github/actions/barista-append-stats
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          repo: ${{ github.repository }}
+          issue-number: ${{ steps.setup.outputs.number }}
+          execution-file: ${{ steps.run-barista.outputs.execution-file }}

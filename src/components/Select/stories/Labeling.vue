@@ -18,7 +18,7 @@ const options = [
 </script>
 
 <template>
-  <div class="w-full flex gap-8 items-start">
+  <div class="flex gap-8 items-start">
     <Select
       v-model="value"
       :options="options"

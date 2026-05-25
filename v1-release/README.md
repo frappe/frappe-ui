@@ -9,6 +9,8 @@ This directory contains the active planning docs for `frappe-ui` v1.
 
 ## Supporting docs
 
+- [`migration.md`](./migration.md)
+  - Practical, single-file migration guide for app teams upgrading to v1. Per-component sections, breaking-changes table, vocabulary cheatsheet.
 - [`changelog.md`](./changelog.md)
   - Rolling v1 changelog for consumer-facing changes, deprecations, and migration notes.
 - [`04-components-audit.md`](./04-components-audit.md)
@@ -16,7 +18,7 @@ This directory contains the active planning docs for `frappe-ui` v1.
 - [`08-selection-and-menu-api-spec.md`](./08-selection-and-menu-api-spec.md)
   - Accepted API direction for Dropdown, Select, Combobox, MultiSelect, and ItemListRow.
 - [`08f-dialog-spec.md`](./08f-dialog-spec.md)
-  - Accepted API direction for `Dialog` and the imperative `dialog.confirm/alert/prompt` namespace. Covers flat-prop migration, slot rename, the `bare` chrome toggle, `dismissable`, and the caller-controlled-close lifecycle for imperative helpers.
+  - Accepted API direction for `Dialog` and the imperative `dialog.confirm/alert/prompt` namespace. Covers flat-prop migration, slot rename, the `bare` chrome toggle, `dismissible`, and the caller-controlled-close lifecycle for imperative helpers.
 - [`09-input-components-spec.md`](./09-input-components-spec.md)
   - Accepted API direction for the input family: TextInput, Textarea, Password, Checkbox, Switch, Rating, Slider, and ErrorMessage. Covers the shared labeling contract, size/variant scales, `defineModel` pattern, and deprecation warnings. FileUploader is out of scope and addressed in a separate spec.
 

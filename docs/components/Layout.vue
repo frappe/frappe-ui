@@ -2,6 +2,7 @@
 import { FrappeUIProvider } from '../../src/index.ts'
 import Navbar from './Navbar.vue'
 import Sidebar from './Docs/Sidebar.vue'
+import MobileNavSheet from './Docs/MobileNavSheet.vue'
 import Home from './Home/index.vue'
 
 import OnThisPage from './Docs/OnThisPage.vue'
@@ -29,10 +30,11 @@ const { frontmatter } = useData()
 
         <div class="min-w-0 w-full isolate">
           <Navbar :isDocs="true" />
-          <Sidebar v-if="state.mobsidebar" class="lg:hidden" />
 
-          <div class="p-5 lg:p-10 flex gap-5">
-            <main class="mx-auto lg:max-w-[740px] flex-1">
+          <MobileNavSheet />
+
+          <div class="p-4 sm:p-5 lg:p-10 flex gap-5 min-w-0">
+            <main class="mx-auto lg:max-w-[740px] flex-1 min-w-0">
               <Content
                 as="article"
                 class="prose prose-v3 prose-p:mb-4 text-[15px] !max-w-none"

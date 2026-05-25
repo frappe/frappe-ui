@@ -12,7 +12,7 @@ const error = computed(() =>
 </script>
 
 <template>
-  <div class="w-full flex gap-8 items-start">
+  <div class="flex gap-8 items-start">
     <Switch
       v-model="enabled"
       label="Enable notifications"

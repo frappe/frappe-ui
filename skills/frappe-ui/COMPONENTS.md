@@ -37,7 +37,7 @@ Menu of actions anchored to a trigger. `<Dropdown :options="[{ label, icon, onCl
 ## Overlays
 
 ### `Dialog`
-Modal. Always `v-model:open`. Props: `title`, `message`, `icon`, `theme`, `size`, `actions`, `dismissable`.
+Modal. Always `v-model:open`. Props: `title`, `message`, `icon`, `theme`, `size`, `actions`, `dismissible`.
 - `actions` is an array of button configs; each `onClick` receives `{ close }`.
 - `bare` to suppress chrome (full-bleed content like command palettes).
 - For confirm/alert/prompt, prefer the **imperative API** below.

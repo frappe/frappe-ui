@@ -56,45 +56,43 @@ const selected = computed(
 </script>
 
 <template>
-  <div class="w-full gap-3 items-center justify-center !py-20 grid">
-    <div class="grid gap-3">
-      <Combobox
-        v-model="value"
-        :options="statuses"
-        placeholder="Set status"
-        open-on-focus
-        class="w-72"
-      >
-        <template #prefix>
+  <div class="grid gap-3">
+    <Combobox
+      v-model="value"
+      :options="statuses"
+      placeholder="Set status"
+      open-on-focus
+      class="w-72"
+    >
+      <template #prefix>
+        <span
+          v-if="selected"
+          :class="['size-2 rounded-full', selected.color]"
+          aria-hidden="true"
+        />
+      </template>
+
+      <!--
+        The dot is rendered inside the label region so it aligns with the
+        first line of text (not the vertical center of a two-line row).
+      -->
+      <template #item-label="{ item }">
+        <div class="flex items-start gap-2">
           <span
-            v-if="selected"
-            :class="['size-2 rounded-full', selected.color]"
+            :class="[
+              'mt-[4px] size-2 shrink-0 rounded-full',
+              (item as StatusOption).color,
+            ]"
             aria-hidden="true"
           />
-        </template>
-
-        <!--
-          The dot is rendered inside the label region so it aligns with the
-          first line of text (not the vertical center of a two-line row).
-        -->
-        <template #item-label="{ item }">
-          <div class="flex items-start gap-2">
-            <span
-              :class="[
-                'mt-[4px] size-2 shrink-0 rounded-full',
-                (item as StatusOption).color,
-              ]"
-              aria-hidden="true"
-            />
-            <div class="min-w-0">
-              <div class="truncate">{{ item.label }}</div>
-              <div class="truncate text-p-sm text-ink-gray-5">
-                {{ (item as StatusOption).description }}
-              </div>
+          <div class="min-w-0">
+            <div class="truncate">{{ item.label }}</div>
+            <div class="truncate text-p-sm text-ink-gray-5">
+              {{ (item as StatusOption).description }}
             </div>
           </div>
-        </template>
-      </Combobox>
-    </div>
+        </div>
+      </template>
+    </Combobox>
   </div>
 </template>

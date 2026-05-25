@@ -1,0 +1,118 @@
+name: Barista — Fix (open PR)
+
+on:
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: Issue number to attempt a fix for
+        required: true
+        type: number
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: barista-fix-${{ github.event.issue.number || inputs.issue_number }}
+  # Queue, don't cancel: fix mode mutates a real git branch (reset to base,
+  # commit, force-push). Cancelling mid-run can leave the working branch or the
+  # draft PR in an inconsistent state.
+  cancel-in-progress: false
+
+jobs:
+  fix:
+    # Kill switches:
+    #   - BARISTA_ENABLED=true enables barista globally.
+    #   - BARISTA_FIX_ENABLED=true enables this (write-mode) workflow specifically.
+    # Trigger: restricted to @netchampfaris only — write-mode runs by no one else.
+    if: >-
+      vars.BARISTA_ENABLED == 'true' &&
+      vars.BARISTA_FIX_ENABLED == 'true' && (
+        (
+          github.event_name == 'workflow_dispatch' &&
+          github.actor == 'netchampfaris'
+        ) ||
+        (
+          github.event_name == 'issue_comment' &&
+          !github.event.issue.pull_request &&
+          contains(github.event.comment.body, '/barista fix') &&
+          github.event.comment.user.login == 'netchampfaris'
+        )
+      )
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Mint barista app token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.BARISTA_APP_ID }}
+          private-key: ${{ secrets.BARISTA_PRIVATE_KEY }}
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          # Full history so barista can create a branch off main and push.
+          fetch-depth: 0
+
+      - name: Setup Barista
+        id: setup
+        uses: ./.github/actions/barista-setup
+        with:
+          app-token: ${{ steps.app-token.outputs.token }}
+          dispatch-number: ${{ inputs.issue_number }}
+
+      - name: Configure git identity for barista[bot]
+        env:
+          # `actions/create-github-app-token` already outputs the slug; pair it
+          # with the App ID secret to derive the bot's noreply email. Don't call
+          # `gh api /app` here — that endpoint needs JWT (app-level) auth, but
+          # the token we have is an installation token, so gh rejects it with
+          # "A JSON web token could not be decoded".
+          APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
+          APP_ID: ${{ secrets.BARISTA_APP_ID }}
+        run: |
+          git config user.name "${APP_SLUG}[bot]"
+          git config user.email "${APP_ID}+${APP_SLUG}[bot]@users.noreply.github.com"
+
+      - name: Prepare working branch
+        id: branch
+        env:
+          ISSUE_NUMBER: ${{ steps.setup.outputs.number }}
+        run: |
+          BRANCH="barista/issue-${ISSUE_NUMBER}"
+          # If the branch already exists on the remote, reset it to base so each
+          # /barista fix invocation starts from a clean main.
+          git fetch origin "${{ github.event.repository.default_branch }}"
+          git checkout -B "$BRANCH" "origin/${{ github.event.repository.default_branch }}"
+          echo "name=$BRANCH" >> "$GITHUB_OUTPUT"
+          echo "base=${{ github.event.repository.default_branch }}" >> "$GITHUB_OUTPUT"
+
+      - name: Run Barista (fix mode)
+        id: run-barista
+        uses: ./.github/actions/barista-run
+        with:
+          oauth-token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          app-token: ${{ steps.app-token.outputs.token }}
+          repo: ${{ github.repository }}
+          issue-number: ${{ steps.setup.outputs.number }}
+          event: ${{ github.event_name }}
+          comment-body: ${{ github.event.comment.body }}
+          comment-author: ${{ github.event.comment.user.login }}
+          branch: ${{ steps.branch.outputs.name }}
+          base: ${{ steps.branch.outputs.base }}
+          prompt: "/barista-fix REPO: ${{ github.repository }} ISSUE_NUMBER: ${{ steps.setup.outputs.number }} EVENT: ${{ github.event_name }} BRANCH: ${{ steps.branch.outputs.name }} BASE: ${{ steps.branch.outputs.base }}"
+          model: ${{ vars.BARISTA_MODEL }}
+
+      - name: Append run-stats footer
+        if: always() && steps.run-barista.outcome == 'success'
+        uses: ./.github/actions/barista-append-stats
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          repo: ${{ github.repository }}
+          issue-number: ${{ steps.setup.outputs.number }}
+          execution-file: ${{ steps.run-barista.outputs.execution-file }}

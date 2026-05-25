@@ -6,14 +6,14 @@
     :class="[fillWidth ? 'w-full' : null, attrs.class]"
     :style="attrs.style"
   >
-    <template v-for="name in slotNames" :key="name" #[name]="slotProps">
+    <template v-for="name in Object.keys($slots)" :key="name" #[name]="slotProps">
       <!-- @vue-ignore -->
       <slot :name="name" v-bind="slotProps" />
     </template>
   </component>
 </template>
 <script setup lang="ts">
-import { useAttrs, computed, provide, watchEffect, useSlots } from 'vue'
+import { useAttrs, computed, provide, watchEffect } from 'vue'
 import { useId } from '../../utils/useId'
 import { TextInput } from '../TextInput'
 import { Select } from '../Select'
@@ -48,9 +48,6 @@ watchEffect(() => {
 })
 
 const attrs = useAttrs()
-const slots = useSlots()
-
-const slotNames = computed(() => Object.keys(slots))
 
 // FormControl represents "form context = full width" — the legacy template
 // hard-coded `class="w-full"` on Select/Combobox. Preserve that contract for

@@ -117,7 +117,7 @@ let todos = createListResource({
     // can be a string
     cache: 'todos',
     // or an array that can be serialized
-    cache: ['todos', 'faris@frappe.io'],
+    cache: ['todos', 'faris@example.com'],
 
     // default value for url is "frappe.client.get_list"
     // specify url if you want to use a custom API method

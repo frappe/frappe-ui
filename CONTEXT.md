@@ -4,7 +4,7 @@ A Vue 3 component library for Frappe-based apps. This document captures the voca
 
 The cross-cutting **design rules** that govern API shape live in [`PHILOSOPHY.md`](./PHILOSOPHY.md) (cite as `P1`–`P13`). This doc is the vocabulary the rules use.
 
-Planning artifacts live under [`v1-release/`](./v1-release/) — specs in `v1-release/*.md` and architecture decision records in [`v1-release/adr/`](./v1-release/adr/). The user-facing documentation in `docs/` is the published vitepress site and intentionally does not host ADRs or specs.
+Current API contracts live in [`spec/`](./spec/). Release execution, migration notes, changelog, and temporary research live in [`v1-release/`](./v1-release/). The user-facing documentation in `docs/` is the published vitepress site and intentionally does not host specs or ADRs.
 
 ## Language
 
@@ -40,15 +40,11 @@ The single modal overlay component. Traps focus, blocks interaction with the pag
 A non-dismissable Dialog is still `role="dialog"` — "must respond" is expressed by `dismissable: false` and explicit actions, not by a different role.
 
 **Imperative dialog API**:
-A `dialog` namespace exporting Promise-based helpers: `dialog.confirm()`, `dialog.alert()`, `dialog.prompt()`. Each helper mounts a `<Dialog>` with `dismissable: false` and resolves on the user's chosen action. Replaces the legacy `confirmDialog()` helper.
+A `dialog` namespace exporting callback-based helpers: `dialog.confirm()`, `dialog.danger()`, `dialog.prompt()`. Each helper mounts a `<Dialog>` for one-shot confirms/prompts outside normal component templates. Replaces the legacy `confirmDialog()` helper.
 
 Mounting is handled by `<FrappeUIProvider>`, which renders a hidden `<Dialogs />` next to `<Toasts />` so imperative dialogs inherit `provide/inject` (router, Pinia, theme, etc.) from the host app. The `<Dialogs />` component remains exported for callers who don't use the provider and want to mount it manually.
 
-- `dialog.confirm({...})` → `Promise<{ ok: boolean, close: () => void }>`
-- `dialog.alert({...})` → `Promise<{ close: () => void }>`
-- `dialog.prompt({...})` → `Promise<{ values: Record<string, any> | null, close: () => void }>` *(values is null on cancel)*
-
-**Lifecycle contract**: imperative helpers do **not** auto-close on confirm. The promise resolves the moment the user picks an action; the caller calls `close()` when ready (typically after async work). The confirm/submit button auto-shows a loading state from click until `close()` is called. On cancel, the dialog auto-closes and the promise resolves with `ok: false` / `values: null`.
+**Lifecycle contract**: `onConfirm` resolving auto-closes the dialog; throwing keeps it open and renders the thrown message inline. Each helper returns a synchronous handle with `close()` for programmatic dismissal. See [`spec/dialog.md`](./spec/dialog.md) and [`spec/adr/0003-imperative-dialog-onconfirm.md`](./spec/adr/0003-imperative-dialog-onconfirm.md).
 
 **PromptField** (the schema for `dialog.prompt`'s `fields` array):
 ```ts
@@ -87,4 +83,4 @@ A button rendered in the Dialog's footer area, declared via the `actions` prop. 
 
 ## Flagged ambiguities
 
-- **`v-model` vs `v-model:open` on Dialog**: both are supported indefinitely. `v-model:open` is canonical and aligns with Popover/Dropdown; `v-model` (bound to `modelValue`) remains supported with no deprecation warning. If both are bound, `open` wins. See [`v1-release/08f-dialog-spec.md`](./v1-release/08f-dialog-spec.md).
+- **`v-model` vs `v-model:open` on Dialog**: both are supported indefinitely. `v-model:open` is canonical and aligns with Popover/Dropdown; `v-model` (bound to `modelValue`) remains supported with no deprecation warning. If both are bound, `open` wins. See [`spec/dialog.md`](./spec/dialog.md).

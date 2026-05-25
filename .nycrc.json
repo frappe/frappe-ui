@@ -3,11 +3,13 @@
   "report-dir": "coverage/cypress",
   "temp-dir": ".nyc_output/cypress",
   "reporter": ["json", "lcov", "text-summary"],
+  "extension": [".js", ".cjs", ".mjs", ".ts", ".tsx", ".jsx", ".vue"],
   "include": ["src/**/*.{ts,vue}"],
   "exclude": [
     "src/**/*.cy.ts",
     "src/**/*.spec.ts",
     "src/**/*.test.ts",
+    "src/**/*.story.vue",
     "src/**/stories/**",
     "src/**/types.ts",
     "src/**/types/**",

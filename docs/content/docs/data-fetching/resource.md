@@ -242,7 +242,7 @@ let todos = createResource({
   params: {
     doctype: 'ToDo',
     filters: {
-      allocated_to: 'faris@frappe.io',
+      allocated_to: 'faris@example.com',
     },
   },
 })
@@ -284,7 +284,7 @@ let todos = createResource({
   params: {
     doctype: 'ToDo',
     filters: {
-      allocated_to: 'faris@frappe.io',
+      allocated_to: 'faris@example.com',
     },
   },
 })

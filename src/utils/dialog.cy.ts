@@ -178,21 +178,21 @@ describe('dialog.ts — imperative API', () => {
     cy.get('[role=dialog]').should('not.exist')
   })
 
-  it('dismissable=false blocks Esc from closing', () => {
+  it('dismissible=false blocks Esc from closing', () => {
     const onCancel = cy.spy().as('onCancel')
     cy.mount(DialogManager)
     cy.then(() => {
-      confirm({ title: 'Locked', dismissable: false, onCancel })
+      confirm({ title: 'Locked', dismissible: false, onCancel })
     })
     cy.get('body').type('{esc}')
     cy.get('[role=dialog]').should('exist')
     cy.get('@onCancel').should('not.have.been.called')
   })
 
-  it('dismissable=false hides the close (X) button', () => {
+  it('dismissible=false hides the close (X) button', () => {
     cy.mount(DialogManager)
     cy.then(() => {
-      confirm({ title: 'Locked', dismissable: false })
+      confirm({ title: 'Locked', dismissible: false })
     })
     cy.get('[role=dialog] [aria-label=Close]').should('not.exist')
   })

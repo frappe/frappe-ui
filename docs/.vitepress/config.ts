@@ -35,6 +35,19 @@ const devTitle = devBranch ? `[${devBranch}] ${meta.name}` : meta.name
 // scans srcDir. The Vite plugin below keeps them in sync during dev.
 syncColocatedComponentDocs()
 
+// shiki.css is written at buildEnd for dev-mode imports, but the
+// production CSS bundle is finalized by Vite *before* markdown
+// processing runs — so the bundle never picks up the generated
+// classes. We inject the collected styles into each page's <head>
+// via transformHead below to side-step that timing. Still write the
+// stub here so theme/index.ts's eager import resolves on fresh
+// checkouts.
+const shikiCssPath = path.resolve(__dirname, '../css/shiki.css')
+if (!fs.existsSync(shikiCssPath)) {
+  fs.mkdirSync(path.dirname(shikiCssPath), { recursive: true })
+  fs.writeFileSync(shikiCssPath, '/* Auto-generated on build-time */\n', 'utf-8')
+}
+
 export default defineConfig({
   base,
   srcDir: 'content',
@@ -134,6 +147,11 @@ export default defineConfig({
         'dayjs/esm': 'dayjs',
       },
     },
+  },
+  transformHead: () => {
+    const css = toClass.getCSS()
+    if (!css) return []
+    return [['style', { 'data-shiki': '' }, css]]
   },
   buildEnd: async () => {
     const str = '/* Auto-generated on build-time */ \n\n ' + toClass.getCSS()

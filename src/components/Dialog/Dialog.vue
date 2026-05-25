@@ -19,12 +19,12 @@
             @open-auto-focus="handleOpenAutoFocus"
             @escape-key-down="
               (e: Event) => {
-                if (!isDismissable) e.preventDefault()
+                if (!isDismissible) e.preventDefault()
               }
             "
             @interact-outside="
               (e: Event) => {
-                if (!isDismissable) e.preventDefault()
+                if (!isDismissible) e.preventDefault()
               }
             "
           >
@@ -205,7 +205,7 @@ const props = withDefaults(defineProps<DialogProps>(), {
   // Defaults are applied inside `resolved`.
   size: undefined,
   position: undefined,
-  dismissable: true,
+  dismissible: true,
   showCloseButton: true,
   bare: false,
 })
@@ -222,7 +222,7 @@ watchEffect(() => {
   if (props.disableOutsideClickToClose !== undefined) {
     warnDeprecated(
       'Dialog `disableOutsideClickToClose` prop',
-      '`dismissable` (inverted)',
+      '`dismissible` (inverted)',
     )
   }
 })
@@ -265,9 +265,9 @@ const resolved = computed(() => {
   }
 })
 
-const isDismissable = computed(() => {
+const isDismissible = computed(() => {
   if (props.disableOutsideClickToClose) return false
-  return props.dismissable !== false
+  return props.dismissible !== false
 })
 
 const sizeClass = computed(() => {

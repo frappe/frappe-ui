@@ -1,0 +1,25 @@
+name: Barista — Append Stats Footer
+description: After the agent runs, append a one-line stats footer (tokens, duration, cost) to barista's most recent comment.
+inputs:
+  token:
+    description: barista[bot] GitHub App installation token
+    required: true
+  repo:
+    description: owner/repo
+    required: true
+  issue-number:
+    description: Issue or PR number the comment lives on
+    required: true
+  execution-file:
+    description: Path to claude-code-action's execution JSON
+    required: true
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        EXECUTION_FILE: ${{ inputs.execution-file }}
+        ISSUE_NUMBER: ${{ inputs.issue-number }}
+        REPO: ${{ inputs.repo }}
+      run: ./.github/barista/scripts/append-stats.ts

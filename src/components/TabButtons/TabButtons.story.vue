@@ -6,7 +6,7 @@ const currentTab = ref("mytasks");
 </script>
 
 <template>
-  <div class="flex w-4/5">
+  <div class="w-4/5">
     <Story>
       <TabButtons
         :buttons='

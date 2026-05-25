@@ -4,15 +4,19 @@ import { withBase } from 'vitepress'
 </script>
 
 <template>
-  <div class="grid gap-5 max-w-7xl mx-auto">
-    <div class="my-20 p-5 flex flex-col gap-5 text-center w-fit">
+  <div class="grid gap-5 max-w-7xl mx-auto w-full">
+    <div
+      class="my-12 sm:my-20 px-4 sm:px-5 flex flex-col gap-5 text-center mx-auto"
+    >
       <h1
-        class="text-[40px] font-semibold tracing-tight leading-tight font-news"
+        class="text-[32px] sm:text-[40px] font-semibold tracing-tight leading-tight font-news"
       >
         Build Beautiful Interfaces Fast
       </h1>
 
-      <p class="text-xl text-ink-gray-5 leading-relaxed w-3/4 mx-auto">
+      <p
+        class="text-base sm:text-xl text-ink-gray-5 leading-relaxed sm:w-3/4 mx-auto"
+      >
         Beautifully crafted components built for real world applications. Better
         defaults helping you ship faster.
       </p>

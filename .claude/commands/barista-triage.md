@@ -1,5 +1,5 @@
 ---
-allowed-tools: Bash(./.github/barista/scripts/gh.sh:*),Bash(./.github/barista/scripts/edit-issue-labels.sh:*),Bash(./.github/barista/scripts/add-comment.sh:*),Bash(./.github/barista/scripts/fetch-image.sh:*),Bash(git log:*),Bash(git show:*),Bash(git blame:*),Read,Glob,Grep
+allowed-tools: Bash(./.github/barista/scripts/gh.ts:*),Bash(./.github/barista/scripts/edit-issue-labels.ts:*),Bash(./.github/barista/scripts/add-comment.ts:*),Bash(./.github/barista/scripts/fetch-image.ts:*),Bash(git log:*),Bash(git show:*),Bash(git blame:*),Read,Glob,Grep
 description: Investigate a frappe-ui issue against the codebase, then label and comment with findings.
 ---
 
@@ -20,21 +20,21 @@ You have **the repository checked out at the working directory.** Read the code 
 
 - `Read`, `Glob`, `Grep` — explore the codebase. `Read` also views images (PNG/JPG/etc.) when given a local path.
 - `Bash(git log:*)`, `Bash(git show:*)`, `Bash(git blame:*)` — find recent changes near suspected files.
-- `./.github/barista/scripts/gh.sh label list` — list labels.
-- `./.github/barista/scripts/gh.sh issue view <N>` / `--comments` — read an issue.
-- `./.github/barista/scripts/gh.sh search issues "<query>" --limit 10` — find similar/duplicate issues (no `repo:`/`org:`/`user:` qualifiers).
-- `./.github/barista/scripts/fetch-image.sh <url>` — download a GitHub-hosted image from an issue body and print its local path. Pass that path to `Read` to view it.
+- `./.github/barista/scripts/gh.ts label list` — list labels.
+- `./.github/barista/scripts/gh.ts issue view <N>` / `--comments` — read an issue.
+- `./.github/barista/scripts/gh.ts search issues "<query>" --limit 10` — find similar/duplicate issues (no `repo:`/`org:`/`user:` qualifiers).
+- `./.github/barista/scripts/fetch-image.ts <url>` — download a GitHub-hosted image from an issue body and print its local path. Pass that path to `Read` to view it.
 
 **Write (one call each, near the end):**
 
-- `./.github/barista/scripts/edit-issue-labels.sh --add-label X --add-label Y` — apply labels.
-- `./.github/barista/scripts/add-comment.sh "body"` or `--file path.md` — post **one** comment.
+- `./.github/barista/scripts/edit-issue-labels.ts --add-label X --add-label Y` — apply labels.
+- `./.github/barista/scripts/add-comment.ts "body"` or `--file path.md` — post **one** comment.
 
 Nothing else is permitted.
 
 # Workflow
 
-1. **Read the entire issue body.** `./.github/barista/scripts/gh.sh issue view <ISSUE_NUMBER> --comments`. **Extract every concrete clue** before doing anything else:
+1. **Read the entire issue body.** `./.github/barista/scripts/gh.ts issue view <ISSUE_NUMBER> --comments`. **Extract every concrete clue** before doing anything else:
    - **Error messages and stack traces** — note exact text, file paths, line/column numbers (e.g. `FeatherIcon.vue:3:8`).
    - **File or component names** mentioned anywhere in the body.
    - **Image attachments** — markdown `![alt](url)` or HTML `<img src="...">`. These usually appear inline in the body via `https://github.com/user-attachments/assets/...` or `https://*.githubusercontent.com/...`.
@@ -44,11 +44,11 @@ Nothing else is permitted.
    **If the body already contains a file:line reference, an error class, or a screenshot, treat the issue as well-formed and do NOT ask for repro. Investigate from those clues.**
 
 2. **View any attached images.** For each image URL found in the body:
-   - `PATH=$(./.github/barista/scripts/fetch-image.sh <url>)` — downloads to `/tmp`.
+   - `PATH=$(./.github/barista/scripts/fetch-image.ts <url>)` — downloads to `/tmp`.
    - `Read` the printed path — Claude views images directly.
    - Extract what's shown: error messages in dev tools, visual layout bugs, console output, network panels. Often the screenshot is the actual repro.
 
-3. **List labels.** `./.github/barista/scripts/gh.sh label list`.
+3. **List labels.** `./.github/barista/scripts/gh.ts label list`.
 
 4. **Branch on EVENT:**
    - `issues` / `workflow_dispatch` → first-time investigation. Continue.
@@ -59,12 +59,12 @@ Nothing else is permitted.
    - **Identify the surface area.** Infer which component(s), composable(s), or utility is involved. Grep for the names (e.g. `Button`, `FormControl`, `useResource`). frappe-ui components live under `src/components/`, composables under `src/utils/` and `src/`. Use `Glob` to find files.
    - **Read the suspected files.** Look for code paths matching the reporter's symptom.
    - **Check recent changes.** Run `git log -n 10 --oneline -- <suspected_file>` and `git log --since="60 days ago" --oneline -- <dir>`. Use `git show <sha>` to inspect diffs that look relevant. `git blame -L <line>,<line> <file>` to find when a specific line was last touched.
-   - **Search past issues** with `gh.sh search issues "<key terms>" --limit 10` to find prior reports — even closed ones. If you find a likely duplicate that's still open, mark `duplicate`.
+   - **Search past issues** with `gh.ts search issues "<key terms>" --limit 10` to find prior reports — even closed ones. If you find a likely duplicate that's still open, mark `duplicate`.
    - **Form a hypothesis.** Based on the code, the image (if any), and history: what's likely going on? A specific function? A recent commit? A missing peer dep? A version mismatch? A documented limitation?
    - Cap investigation: at most ~15 read/grep/glob calls, ~5 git calls, ~3 image fetches. Stop earlier if the cause is obvious.
 6. **Decide labels.** See rubric below.
-7. **Apply labels.** One `edit-issue-labels.sh` call.
-8. **Decide whether to comment.** See rubric. If yes, one `add-comment.sh` call.
+7. **Apply labels.** One `edit-issue-labels.ts` call.
+8. **Decide whether to comment.** See rubric. If yes, one `add-comment.ts` call.
 9. **Stop.** No loops, no second comments.
 
 # Label rubric
@@ -166,4 +166,4 @@ Nothing else is permitted.
 - Investigate before labeling. Don't apply `needs-repro`/`needs-info` reflexively.
 - Read at least 1-3 source files before commenting on a `bug` issue.
 - Never apply a label that doesn't exist in `label list` output.
-- Stop after at most: ~15 read/grep/glob calls, ~5 git calls, ~3 gh.sh search calls, ~3 image fetches, 1 edit-labels call, 0-1 comment call.
+- Stop after at most: ~15 read/grep/glob calls, ~5 git calls, ~3 gh.ts search calls, ~3 image fetches, 1 edit-labels call, 0-1 comment call.

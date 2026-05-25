@@ -14,7 +14,7 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 - Flat top-level props (`title`, `message`, `icon`, `size`, `position`,
   `paddingTop`, `actions`) are canonical; legacy `options` blob warns.
 - `v-model:open` is canonical; `v-model` (modelValue) still works silently.
-- New props: `dismissable` (default `true`, replaces
+- New props: `dismissible` (default `true`, replaces
   `disableOutsideClickToClose`), `bare`, `showCloseButton` (default `true`,
   independent of the auto-header).
 - Canonical slots `#default`, `#title`, `#actions` (scoped with

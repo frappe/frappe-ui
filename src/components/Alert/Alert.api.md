@@ -31,7 +31,7 @@
     type: 'string'
   },
   {
-    name: 'dismissable',
+    name: 'dismissible',
     description: 'Whether the alert can be closed by the user',
     required: false,
     type: 'boolean',

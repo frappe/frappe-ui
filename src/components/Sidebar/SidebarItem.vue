@@ -1,10 +1,11 @@
 <template>
   <Button
     :label="props.label"
+    :route="buttonRoute"
     @click="handleClick"
     class="!w-full focus-visible:ring-0 focus:outline-none"
     :class="
-      props.isActive
+      isActive
         ? '!bg-surface-selected shadow-sm'
         : 'hover:bg-surface-gray-2'
     "
@@ -80,21 +81,41 @@
 </template>
 
 <script setup lang="ts">
-import { inject } from 'vue'
-import { useRouter } from 'vue-router'
-import Button from '../Button/Button.vue'
+import { computed, inject } from 'vue'
 import Tooltip from '../Tooltip/Tooltip.vue'
-import { SidebarItemProps } from './types'
+import Button from '../Button/Button.vue'
+import { useRoute, useRouter } from 'vue-router'
+import { SidebarItemProps, sidebarCollapsedKey } from './types'
 
 const props = defineProps<SidebarItemProps>()
-const isCollapsed = inject('isSidebarCollapsed', false)
+const isCollapsed = inject(sidebarCollapsedKey, computed(() => false))
 
+const route = useRoute()
 const router = useRouter()
+
+const buttonRoute = computed(() => (props.onClick ? undefined : props.to))
+
+const resolvedRoute = computed(() => {
+  if (!props.to) return null
+  return router.resolve(props.to)
+})
+
+const isActive = computed(() => {
+  if (props.isActive !== undefined) return props.isActive
+
+  const targetRoute = resolvedRoute.value
+  if (!targetRoute) return false
+
+  if (targetRoute.name) {
+    return route.name === targetRoute.name
+  }
+
+  return route.path === targetRoute.path
+})
+
 function handleClick() {
   if (props.onClick) {
     props.onClick()
-  } else if (props.to) {
-    router.replace(props.to)
   }
 }
 </script>

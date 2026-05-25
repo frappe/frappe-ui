@@ -3,7 +3,7 @@ import { Avatar, TextInput } from 'frappe-ui'
 </script>
 
 <template>
-  <div class="flex flex-col gap-3 items-start w-full max-w-sm">
+  <div class="flex flex-col gap-3 w-full max-w-sm">
     <TextInput placeholder="Search...">
       <template #prefix>
         <span class="lucide-search size-4 text-ink-gray-6" />

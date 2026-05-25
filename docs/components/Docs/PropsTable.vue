@@ -51,9 +51,7 @@ const typeDefinition = computed(() => {
         Show types
       </summary>
 
-      <div
-        class="mt-1 overflow-hidden rounded-xl border border-outline-gray-2 bg-surface-gray-1"
-      >
+      <div class="mt-1 overflow-hidden rounded-xl border bg-surface-gray-1">
         <slot v-if="hasCustomCodeSlot" name="code" />
         <pre
           v-else
@@ -62,12 +60,10 @@ const typeDefinition = computed(() => {
       </div>
     </details>
 
-    <div class="mt-4 overflow-x-auto whitespace-nowrap">
-      <table
-        class="scrollbar w-full min-w-[720px] border-collapse border-b border-outline-gray-2 text-left"
-      >
+    <div class="mt-4 hidden sm:block">
+      <table class="w-full border-collapse border-b text-left">
         <thead>
-          <tr class="border-b border-outline-gray-2">
+          <tr class="border-b">
             <th
               class="w-[24%] py-2.5 pr-2 text-sm font-semibold text-ink-gray-9"
             >
@@ -87,14 +83,10 @@ const typeDefinition = computed(() => {
         </thead>
 
         <tbody>
-          <tr
-            v-for="x in data"
-            :key="x.name"
-            class="border-b border-outline-gray-2 last:border-b-0"
-          >
+          <tr v-for="x in data" :key="x.name" class="border-b last:border-b-0">
             <td class="py-2 pr-2 align-top">
               <div
-                class="font-mono text-xs font-medium leading-6 text-ink-gray-9"
+                class="font-mono text-xs font-medium leading-6 text-ink-gray-9 break-words"
               >
                 <span :class="{ 'line-through': x.deprecated }">{{
                   x.name
@@ -127,7 +119,9 @@ const typeDefinition = computed(() => {
               <p
                 v-if="typeof x.deprecated === 'string'"
                 class="whitespace-pre-wrap text-p-sm text-ink-gray-6"
-              >Deprecated — {{ x.deprecated }}</p>
+              >
+                Deprecated — {{ x.deprecated }}
+              </p>
               <p
                 v-else-if="x.description"
                 class="mt-1 whitespace-pre-wrap text-p-sm leading-6 text-ink-gray-6"
@@ -138,6 +132,54 @@ const typeDefinition = computed(() => {
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <div class="mt-4 sm:hidden">
+      <div
+        v-for="x in data"
+        :key="x.name"
+        class="border-b last:border-b-0 py-3 grid gap-1.5"
+      >
+        <div class="flex items-baseline justify-between gap-3">
+          <div
+            class="font-mono text-xs font-medium leading-6 text-ink-gray-9 break-all"
+          >
+            <span :class="{ 'line-through': x.deprecated }">{{ x.name }}</span
+            ><span
+              v-if="x.required"
+              class="text-ink-gray-5"
+              title="Required"
+              aria-label="required"
+              >*</span
+            >
+          </div>
+          <span
+            v-if="x.default"
+            class="font-mono text-xs leading-6 text-ink-gray-6 shrink-0"
+          >
+            = {{ x.default }}
+          </span>
+        </div>
+
+        <div
+          v-if="!x.deprecated"
+          class="whitespace-normal break-words font-mono text-xs leading-6 text-ink-gray-8"
+        >
+          {{ x.type || '—' }}
+        </div>
+        <p
+          v-if="typeof x.deprecated === 'string'"
+          class="whitespace-pre-wrap text-p-sm text-ink-gray-6"
+        >
+          Deprecated — {{ x.deprecated }}
+        </p>
+        <p
+          v-else-if="x.description"
+          class="whitespace-pre-wrap text-p-sm leading-6 text-ink-gray-6"
+        >
+          {{ x.description }}
+        </p>
+      </div>
     </div>
   </div>
 </template>
