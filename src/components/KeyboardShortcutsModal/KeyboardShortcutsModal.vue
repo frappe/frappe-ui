@@ -118,7 +118,8 @@ function toCombo(
   if (shortcut.ctrl) parts.push('Mod')
   if (shortcut.shift) parts.push('Shift')
   if (shortcut.alt) parts.push('Alt')
-  parts.push(key)
+  // Normalise the literal space so parseCombo's trim+filter doesn't discard it.
+  parts.push(key === ' ' ? 'Space' : key)
   return parts.join('+')
 }
 
