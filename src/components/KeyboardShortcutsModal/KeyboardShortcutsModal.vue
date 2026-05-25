@@ -118,8 +118,9 @@ function toCombo(
   if (shortcut.ctrl) parts.push('Mod')
   if (shortcut.shift) parts.push('Shift')
   if (shortcut.alt) parts.push('Alt')
-  // Normalise the literal space so parseCombo's trim+filter doesn't discard it.
-  parts.push(key === ' ' ? 'Space' : key)
+  // Normalise special keys so they survive parseCombo's split('+') delimiter.
+  const normalised = key === ' ' ? 'Space' : key === '+' ? 'Plus' : key
+  parts.push(normalised)
   return parts.join('+')
 }
 

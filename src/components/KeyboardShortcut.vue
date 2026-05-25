@@ -178,6 +178,7 @@ function parseCombo(raw?: string): Part[] {
     space: 'Space',
     ' ': 'Space',
     tab: 'Tab',
+    plus: '+',  // alias used by toCombo to avoid delimiter collision
     backspace: '⌫',
     delete: '⌦',
     del: '⌦',
