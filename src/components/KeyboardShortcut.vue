@@ -6,7 +6,6 @@
     role="note"
     v-bind="$attrs"
   >
-    <!-- bg mode: each part rendered in its own chip -->
     <template v-if="bg && parsedParts.length">
       <kbd
         v-for="(part, idx) in parsedParts"
@@ -23,7 +22,6 @@
         <template v-else>{{ part.display }}</template>
       </kbd>
     </template>
-    <!-- non-bg mode: icon-based rendering -->
     <template v-else-if="parsedParts.length">
       <template v-for="(part, idx) in parsedParts" :key="idx + '-' + part.raw">
         <span v-if="part.type === 'cmd'">
@@ -61,7 +59,6 @@
         >
       </template>
     </template>
-    <!-- Backward compatibility path (legacy boolean props + slot) -->
     <template v-else>
       <span v-if="ctrl || meta">
         <span
@@ -85,7 +82,6 @@
       <slot></slot>
     </template>
   </span>
-  <!-- Alternative combos rendered after the primary, separated by / -->
   <template v-if="uniqueAltCombos.length">
     <span class="inline-flex items-center gap-1 ml-1">
       <template
@@ -106,7 +102,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-// Robust mac detection (navigator.platform deprecated)
 const isMac = computed(() => {
   if (typeof navigator === 'undefined') return false
   const p =
@@ -148,17 +143,14 @@ const props = withDefaults(
 
 const showPlus = computed<boolean>(() => props.showPlus)
 
-// Warn once when deprecated `shortcut` prop is used.
 if (process.env.NODE_ENV !== 'production' && props.shortcut) {
   console.warn(
     '[KeyboardShortcut] The `shortcut` prop is deprecated. Use `combo` instead.',
   )
 }
 
-// Resolve effective combo — prefer explicit `combo`, fall back to deprecated `shortcut`.
 const effectiveCombo = computed(() => props.combo ?? props.shortcut)
 
-// Normalize one combo string (e.g. Mod+Shift+K)
 function parseCombo(raw?: string): Part[] {
   if (!raw) return []
   const aliasMap: Record<string, string> = {
@@ -276,6 +268,7 @@ const keyIconMap: Record<string, string> = {
   '→': 'lucide-arrow-right',
   '↵': 'lucide-corner-down-left',
   '⌫': 'lucide-delete',
+  '⌦': 'lucide-arrow-big-right-dash',
 }
 
 function iconFor(part: Part): string | null {
@@ -284,7 +277,6 @@ function iconFor(part: Part): string | null {
   return keyIconMap[part.display] || null
 }
 
-/** Icon to use inside a bg-mode chip (cmd and arrow/special keys get lucide icons for visual consistency). */
 function bgIconFor(part: Part): string | null {
   if (part.type === 'cmd') return 'lucide-command'
   return keyIconMap[part.display] || null
