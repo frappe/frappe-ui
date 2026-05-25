@@ -83,7 +83,7 @@
     </template>
   </span>
   <template v-if="uniqueAltCombos.length">
-    <span class="inline-flex items-center gap-1 ml-1">
+    <span class="inline-flex items-center gap-1.5">
       <template
         v-for="(altCombo, i) in uniqueAltCombos"
         :key="'alt-' + i + altCombo"
