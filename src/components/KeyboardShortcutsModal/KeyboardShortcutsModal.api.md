@@ -6,6 +6,13 @@
 
   const propsData = [
   {
+    name: 'open',
+    description: 'Controls dialog visibility. Bind with v-model:open.',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  },
+  {
     name: 'title',
     description: 'Dialog title.',
     required: false,
@@ -28,20 +35,8 @@
   }
 ]
 
-  const exposedData = [
-  {
-    name: 'show',
-    description: 'Ref<boolean> that controls dialog visibility. Set to true to open the modal.',
-    type: 'Ref<boolean>'
-  }
-]
+  const exposedData = []
 </script>
 ## API Reference
 
 <PropsTable :data="propsData" />
-
-### Exposed
-
-| Name | Type | Description |
-|------|------|-------------|
-| `show` | `Ref<boolean>` | Controls dialog visibility. Set to `true` to open the modal. |

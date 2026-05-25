@@ -84,8 +84,7 @@ useShortcut({
 | `onHold` | `(e) => void` | — | Called on first keydown while held (`triggeredOn: "hold"`) |
 | `onRelease` | `(e) => void` | — | Called on keyup when the held combo is released |
 | `preventDefault` | `boolean` | `true` | Prevent the browser's default action |
-| `allowInInput` | `boolean` | `false` | Allow the shortcut to fire inside inputs / textareas |
-| `condition` | `() => boolean` | — | Shortcut only fires when this returns `true` |
+| `allowInInput` | `boolean` | `false` | Allow the shortcut to fire inside inputs / textareas || `allowInDialog` | `boolean` | `false` | Allow the shortcut to fire when focus is inside a `[role="dialog"]` element. Set to `true` for shortcuts that are intentionally scoped to a dialog (e.g. an Escape handler or ? help shortcut) || `condition` | `() => boolean` | — | Shortcut only fires when this returns `true` |
 
 ---
 
@@ -98,17 +97,17 @@ Reads its data from the global `useShortcut` registry automatically.
 
 ```vue
 <template>
-  <KeyboardShortcutsModal ref="shortcutsModal" />
+  <KeyboardShortcutsModal v-model:open="shortcutsModalOpen" />
 </template>
 
 <script setup lang="ts">
 import { KeyboardShortcutsModal } from 'frappe-ui'
 import { ref } from 'vue'
 
-const shortcutsModal = ref<InstanceType<typeof KeyboardShortcutsModal> | null>(null)
+const shortcutsModalOpen = ref(false)
 
 function openShortcuts() {
-  if (shortcutsModal.value) shortcutsModal.value.show = true
+  shortcutsModalOpen.value = true
 }
 </script>
 ```
@@ -119,14 +118,15 @@ function openShortcuts() {
 import { useShortcut, KeyboardShortcutsModal } from 'frappe-ui'
 import { ref } from 'vue'
 
-const shortcutsModal = ref<InstanceType<typeof KeyboardShortcutsModal> | null>(null)
+const shortcutsModalOpen = ref(false)
 
 useShortcut({
   key: '?',
   description: 'Show keyboard shortcuts',
   group: 'General',
+  allowInDialog: true,
   handler: () => {
-    if (shortcutsModal.value) shortcutsModal.value.show = true
+    shortcutsModalOpen.value = true
   },
 })
 ```
@@ -135,15 +135,10 @@ useShortcut({
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
+| `open` | `boolean` | `false` | Controls dialog visibility — use with `v-model:open` |
 | `title` | `string` | `"Keyboard Shortcuts"` | Dialog title |
 | `paddingTop` | `string` | `"5vh"` | Top padding when dialog position is `top` |
 | `searchThreshold` | `number` | `20` | Show the search input when this many shortcuts are registered |
-
-### Exposed
-
-| Name | Type | Description |
-|------|------|-------------|
-| `show` | `Ref<boolean>` | Set to `true` to open the modal |
 
 ---
 
