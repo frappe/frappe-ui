@@ -13,7 +13,7 @@ import {
 
 const curVersion = pkgJson.version
 const { site, theme } = useData()
-const list = getSidebarList(theme.value.componentList)
+const list = getSidebarList(theme.value.componentList, theme.value.frappeList)
 
 state.sidebarList = list
 

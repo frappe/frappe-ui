@@ -1,6 +1,20 @@
 import type { MarkdownEnv, MarkdownRenderer } from 'vitepress'
 import type StateCore from 'markdown-it/lib/rules_core/state_core'
+import { existsSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
+
+// Source roots, in lookup order. The first one whose resolved file exists
+// wins; if none match, the first root's path is used so the snippets plugin
+// reports a clear "file not found" against the canonical location.
+const SOURCE_ROOTS = ['../../../../src/components', '../../../../frappe']
+
+function resolveSourcePath(mdDir: string, relativePath: string): string {
+  for (const root of SOURCE_ROOTS) {
+    const candidate = `${root}/${relativePath}`
+    if (existsSync(resolve(mdDir, candidate))) return candidate
+  }
+  return `${SOURCE_ROOTS[0]}/${relativePath}`
+}
 import {
   baseParse,
   NodeTypes,
@@ -106,7 +120,10 @@ function transformPreview(
   const csr = tag.attrs.csr === 'true'
   const { componentName, storyFileName } = getPreviewParts(name)
   const storyImportName = getStoryImportName(storyFileName)
-  const componentPath = `../../../../src/components/${componentName}/stories/${storyFileName}.vue`
+  const componentPath = resolveSourcePath(
+    mdDir,
+    `${componentName}/stories/${storyFileName}.vue`,
+  )
 
   // Forward every static attr except `csr`, which this plugin consumes
   // itself (it's not a Vue prop). `name` is still a prop on the Demo
@@ -153,7 +170,7 @@ function transformPropsTable(
   // DateTimePicker, which lives inside the DatePicker folder) point at
   // the correct `types.ts`. When omitted, the folder matches `name`.
   const componentFolder = tag.attrs.folder || name
-  const typesPath = `../../../../src/components/${componentFolder}/types.ts`
+  const typesPath = resolveSourcePath(mdDir, `${componentFolder}/types.ts`)
 
   state.tokens[tokenIdx].content =
     `<PropsTable name="${name}" :data="${dataExpr}"><template #code>`

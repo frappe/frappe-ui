@@ -2,16 +2,17 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 const components_path = path.resolve(__dirname, '../../src/components/')
+const frappe_path = path.resolve(__dirname, '../../frappe/')
 
-export const getComponentItems = () => {
-  const entries = fs.readdirSync(components_path, { withFileTypes: true })
+function listWithStories(rootPath: string): string[] {
+  const entries = fs.readdirSync(rootPath, { withFileTypes: true })
 
   const items = []
 
   for (const entry of entries) {
     if (!entry.isDirectory()) continue
 
-    const storiesPath = path.join(components_path, entry.name, 'stories')
+    const storiesPath = path.join(rootPath, entry.name, 'stories')
 
     if (!fs.existsSync(storiesPath)) continue
 
@@ -20,3 +21,7 @@ export const getComponentItems = () => {
 
   return items
 }
+
+export const getComponentItems = () => listWithStories(components_path)
+
+export const getFrappeItems = () => listWithStories(frappe_path)
