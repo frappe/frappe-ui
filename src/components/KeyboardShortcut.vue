@@ -131,6 +131,11 @@ const props = withDefaults(
     bg?: boolean
     /** Modern single shortcut combo string, e.g. "Mod+Shift+K" */
     combo?: string
+    /**
+     * @deprecated Use `combo` instead. Will be removed in the next major.
+     * @example `<KeyboardShortcut combo="Mod+K" />` instead of `<KeyboardShortcut shortcut="Mod+K" />`
+     */
+    shortcut?: string
     /** Whether to visually show + separators between keys (non-bg mode only) */
     showPlus?: boolean
     /** Alternative equivalent combos (display only) */
@@ -142,6 +147,16 @@ const props = withDefaults(
 )
 
 const showPlus = computed<boolean>(() => props.showPlus)
+
+// Warn once when deprecated `shortcut` prop is used.
+if (process.env.NODE_ENV !== 'production' && props.shortcut) {
+  console.warn(
+    '[KeyboardShortcut] The `shortcut` prop is deprecated. Use `combo` instead.',
+  )
+}
+
+// Resolve effective combo — prefer explicit `combo`, fall back to deprecated `shortcut`.
+const effectiveCombo = computed(() => props.combo ?? props.shortcut)
 
 // Normalize one combo string (e.g. Mod+Shift+K)
 function parseCombo(raw?: string): Part[] {
@@ -172,8 +187,8 @@ function parseCombo(raw?: string): Part[] {
     ' ': 'Space',
     tab: 'Tab',
     backspace: '⌫',
-    delete: '⌫',
-    del: '⌫',
+    delete: '⌦',
+    del: '⌦',
     up: '↑',
     arrowup: '↑',
     down: '↓',
@@ -212,7 +227,7 @@ function parseCombo(raw?: string): Part[] {
   return result
 }
 
-const parsedParts = computed<Part[]>(() => parseCombo(props.combo))
+const parsedParts = computed<Part[]>(() => parseCombo(effectiveCombo.value))
 
 const uniqueAltCombos = computed<string[]>(() => {
   if (!props.altCombos?.length) return []
@@ -240,6 +255,7 @@ const ariaLabel = computed(() => {
     Win: 'Windows',
     '↵': 'Enter',
     '⌫': 'Backspace',
+    '⌦': 'Delete',
     '↑': 'Up Arrow',
     '↓': 'Down Arrow',
     '←': 'Left Arrow',
