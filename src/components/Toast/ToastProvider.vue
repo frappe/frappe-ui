@@ -33,6 +33,13 @@ import { Toaster } from 'vue-sonner'
 <style>
 @import 'vue-sonner/style.css';
 
+/* --initial-height is measured on mount (loading state). After the promise
+   resolves the toast grows (action button), so clamp to auto instead of the
+   stale measured value. */
+[data-sonner-toast][data-mounted='true'][data-expanded='true'] {
+  height: auto;
+}
+
 .sonner-loading-wrapper {
   position: static;
 }

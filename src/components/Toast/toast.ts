@@ -146,33 +146,29 @@ function promise<T>(
   const { successAction, ...rest } = options
   const resolvedPromise = typeof p === 'function' ? p() : p
 
-  const id = sonnerToast.promise(resolvedPromise, rest) as unknown as string | number
-
   if (successAction) {
-    resolvedPromise.then((data) => {
-      setTimeout(() => {
-        const raw =
-          typeof rest.success === 'function'
-            ? (rest.success as (data: T) => unknown)(data)
-            : rest.success
-        const msg =
-          raw && typeof raw === 'object' && 'message' in raw
-            ? String((raw as { message: unknown }).message)
-            : String(raw ?? '')
-
-        sonnerToast.success(msg, {
-          id,
-          action: {
-            label: successAction.label,
-            onClick: () => successAction.onClick(data),
-            altText: successAction.altText,
-          },
-        })
-      }, 0)
-    })
+    const originalSuccess = rest.success
+    rest.success = (data: T) => {
+      const raw =
+        typeof originalSuccess === 'function'
+          ? (originalSuccess as (data: T) => unknown)(data)
+          : originalSuccess
+      const msg =
+        raw && typeof raw === 'object' && 'message' in raw
+          ? String((raw as { message: unknown }).message)
+          : String(raw ?? '')
+      return {
+        message: msg,
+        action: {
+          label: successAction.label,
+          onClick: () => successAction.onClick(data),
+          altText: successAction.altText,
+        },
+      }
+    }
   }
 
-  return id
+  return sonnerToast.promise(resolvedPromise, rest) as unknown as string | number
 }
 
 function remove(id: string | number) {
