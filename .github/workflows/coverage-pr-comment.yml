@@ -65,4 +65,4 @@ jobs:
       - name: Update PR description with coverage
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: yarn tsx scripts/update-pr-coverage.ts
+        run: yarn tsx .github/scripts/update-pr-coverage.ts
