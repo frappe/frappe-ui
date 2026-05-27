@@ -1,14 +1,15 @@
-const borderRadius = {
-  none: '0px', // 0
-  sm: '0.25rem', // 4px
-  DEFAULT: '0.5rem', // 8px
-  md: '0.625rem', // 10px
-  lg: '0.75rem', // 12px
-  xl: '1rem', // 16px
-  '2xl': '1.25rem', // 20px
-  full: '9999px', // 9999px
-}
+// Public token exports for external consumers (Tailwind v3 presets, CSS-in-JS,
+// design-system tooling). Sourced from the Figma-synced `./generated/*` JSON;
+// the plugin reads the same generated files directly so both stay in sync via
+// `yarn sync-tokens`.
+import radiusTokens from './generated/radius.json'
+import typographyTokens from './generated/typography.json'
 
+const borderRadius = radiusTokens
+
+// Elevation tokens are flipped per theme by the plugin via CSS vars; the
+// exported shape keeps static values so non-runtime consumers (snapshot tests,
+// docs tooling) still get sensible defaults.
 const boxShadow = {
   sm: '0px 1px 2px rgba(0, 0, 0, 0.1)',
   DEFAULT:
@@ -21,25 +22,46 @@ const boxShadow = {
   none: 'none',
 }
 
-const fontSize = {
-  '2xs': ['11px', { lineHeight: '1.15', letterSpacing: '0.01em', fontWeight: '420' }],
-  xs: ['12px', { lineHeight: '1.15', letterSpacing: '0.02em', fontWeight: '420' }],
-  sm: ['13px', { lineHeight: '1.15', letterSpacing: '0.02em', fontWeight: '420' }],
-  base: ['14px', { lineHeight: '1.15', letterSpacing: '0.02em', fontWeight: '420' }],
-  lg: ['16px', { lineHeight: '1.15', letterSpacing: '0.02em', fontWeight: '400' }],
-  xl: ['18px', { lineHeight: '1.15', letterSpacing: '0.01em', fontWeight: '400' }],
-  '2xl': ['20px', { lineHeight: '1.15', letterSpacing: '0.01em', fontWeight: '400' }],
-  '3xl': ['24px', { lineHeight: '1.15', fontWeight: 400, letterSpacing: '0.005em' }],
-  // font size for paragraphs
-  'p-2xs': ['11px', { lineHeight: '1.6', letterSpacing: '0.01em', fontWeight: '420' }],
-  'p-xs': ['12px', { lineHeight: '1.6', letterSpacing: '0.02em', fontWeight: '420' }],
-  'p-sm': ['13px', { lineHeight: '1.5', letterSpacing: '0.02em', fontWeight: '420' }],
-  'p-base': ['14px', { lineHeight: '1.5', letterSpacing: '0.02em', fontWeight: '420' }],
-  'p-lg': ['16px', { lineHeight: '1.5', letterSpacing: '0.02em', fontWeight: '400' }],
-  'p-xl': ['18px', { lineHeight: '1.42', letterSpacing: '0.01em', fontWeight: '400' }],
-  'p-2xl': ['20px', { lineHeight: '1.38', letterSpacing: '0.01em', fontWeight: '400' }],
-  'p-3xl': ['24px', { lineHeight: '1.2', fontWeight: 400, letterSpacing: '0.005em' }],
+// letterSpacing / fontWeight aren't modelled on `font.size.*` in the Figma
+// export — keep the historical values keyed by size name. Kept in sync with
+// the matching map in plugin.js.
+const FONT_SIZE_AUGMENT = {
+  '2xs': { letterSpacing: '0.01em', fontWeight: '420' },
+  xs: { letterSpacing: '0.02em', fontWeight: '420' },
+  sm: { letterSpacing: '0.02em', fontWeight: '420' },
+  base: { letterSpacing: '0.02em', fontWeight: '420' },
+  lg: { letterSpacing: '0.02em', fontWeight: '400' },
+  xl: { letterSpacing: '0.01em', fontWeight: '400' },
+  '2xl': { letterSpacing: '0.01em', fontWeight: '400' },
+  '3xl': { letterSpacing: '0.005em', fontWeight: '400' },
 }
 
+const PARAGRAPH_LINE_HEIGHT = {
+  '2xs': '1.6',
+  xs: '1.6',
+  sm: '1.5',
+  base: '1.5',
+  lg: '1.5',
+  xl: '1.42',
+  '2xl': '1.38',
+  '3xl': '1.2',
+}
+
+function buildFontSize() {
+  const out = {}
+  for (const [key, [size, meta]] of Object.entries(typographyTokens.fontSize)) {
+    const lineHeight = meta.lineHeight === '0px' ? '1.15' : meta.lineHeight
+    out[key] = [size, { lineHeight, ...(FONT_SIZE_AUGMENT[key] || {}) }]
+  }
+  for (const [key, lineHeight] of Object.entries(PARAGRAPH_LINE_HEIGHT)) {
+    if (!out[key]) continue
+    const [size, meta] = out[key]
+    out[`p-${key}`] = [size, { ...meta, lineHeight }]
+  }
+  return out
+}
+
+const fontSize = buildFontSize()
+
 export { borderRadius, boxShadow, fontSize }
-export * from "./colorPalette.js"
+export * from './colorPalette.js'
