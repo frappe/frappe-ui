@@ -19,36 +19,19 @@ jobs:
           ref: ${{ github.event.workflow_run.head_sha }}
           fetch-depth: 2
 
-      - name: Check if version changed
-        id: version_check
-        run: |
-          NEW_VERSION=$(node -p "require('./package.json').version")
-          OLD_VERSION=$(git show HEAD~1:package.json | node -p "JSON.parse(require('fs').readFileSync('/dev/stdin','utf8')).version")
-          if [ "$NEW_VERSION" = "$OLD_VERSION" ]; then
-            echo "Version unchanged ($NEW_VERSION), skipping publish."
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "Version changed: $OLD_VERSION -> $NEW_VERSION"
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-            if [[ "$NEW_VERSION" == *-* ]]; then
-              echo "tag=beta" >> "$GITHUB_OUTPUT"
-            else
-              echo "tag=latest" >> "$GITHUB_OUTPUT"
-            fi
-          fi
-
       - uses: actions/setup-node@v4
-        if: steps.version_check.outputs.changed == 'true'
         with:
           node-version: 20
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Update npm
-        if: steps.version_check.outputs.changed == 'true'
-        run: npm install -g npm@latest
-      - if: steps.version_check.outputs.changed == 'true'
-        run: npm install
-      - if: steps.version_check.outputs.changed == 'true'
+      - run: npm install -g npm@latest
+      - run: npm install
+
+      - name: Determine publish tag
+        id: publish_tag
+        run: npx tsx scripts/publish-tag.ts
+
+      - if: steps.publish_tag.outputs.changed == 'true'
         run: npm test
-      - if: steps.version_check.outputs.changed == 'true'
-        run: npm publish --tag ${{ steps.version_check.outputs.tag }}
+      - if: steps.publish_tag.outputs.changed == 'true'
+        run: npm publish --tag ${{ steps.publish_tag.outputs.tag }}
