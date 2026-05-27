@@ -120,7 +120,7 @@ jobs:
         continue-on-error: true
 
       - name: Merge Cypress shards
-        run: yarn tsx scripts/merge-cypress-shards.ts
+        run: yarn tsx .github/scripts/merge-cypress-shards.ts
 
       - name: Merge Vitest + Cypress
         run: yarn coverage:merge
