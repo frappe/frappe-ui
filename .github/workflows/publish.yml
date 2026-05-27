@@ -1,7 +1,7 @@
 name: Publish on NPM
 on:
   workflow_run:
-    workflows: ['Component Tests']
+    workflows: ['Tests']
     types: [completed]
     branches: [main]
 
@@ -30,6 +30,11 @@ jobs:
           else
             echo "Version changed: $OLD_VERSION -> $NEW_VERSION"
             echo "changed=true" >> "$GITHUB_OUTPUT"
+            if [[ "$NEW_VERSION" == *-* ]]; then
+              echo "tag=beta" >> "$GITHUB_OUTPUT"
+            else
+              echo "tag=latest" >> "$GITHUB_OUTPUT"
+            fi
           fi
 
       - uses: actions/setup-node@v4
@@ -46,4 +51,4 @@ jobs:
       - if: steps.version_check.outputs.changed == 'true'
         run: npm test
       - if: steps.version_check.outputs.changed == 'true'
-        run: npm publish
+        run: npm publish --tag ${{ steps.version_check.outputs.tag }}
