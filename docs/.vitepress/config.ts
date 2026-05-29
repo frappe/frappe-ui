@@ -153,9 +153,24 @@ export default defineConfig({
     if (!css) return []
     return [['style', { 'data-shiki': '' }, css]]
   },
+  transformPageData() {
+    // Dev mode only — buildEnd doesn't run while `vitepress dev` is up, so
+    // theme/index.ts's eager `import '../../css/shiki.css'` would stay empty
+    // on a fresh checkout and code blocks would render unstyled. Write the
+    // collected CSS after each markdown page is processed; Vite's file
+    // watcher then HMRs the import.
+    if (process.env.NODE_ENV === 'production') return
+    const css = toClass.getCSS()
+    if (!css) return
+    const next = '/* Auto-generated on build-time */\n\n' + css
+    try {
+      const current = fs.readFileSync(shikiCssPath, 'utf-8')
+      if (current === next) return
+    } catch {}
+    fs.writeFileSync(shikiCssPath, next, 'utf-8')
+  },
   buildEnd: async () => {
     const str = '/* Auto-generated on build-time */ \n\n ' + toClass.getCSS()
-    const cssPath = path.resolve(__dirname, '../css/shiki.css')
-    await fs.promises.writeFile(cssPath, str, 'utf-8')
+    await fs.promises.writeFile(shikiCssPath, str, 'utf-8')
   },
 })
