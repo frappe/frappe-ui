@@ -10,7 +10,7 @@ This directory contains the active planning docs for `frappe-ui` v1.
 ## Supporting docs
 
 - [`migration.md`](./migration.md)
-  - Practical, single-file migration guide for app teams upgrading to v1. Per-component sections, breaking-changes table, vocabulary cheatsheet.
+  - Pointer to the published migration guide at <https://ui.frappe.io/docs/migration> (source: [`docs/content/docs/migration.md`](../docs/content/docs/migration.md)). Per-component before/after tables for app teams upgrading to v1.
 - [`changelog.md`](./changelog.md)
   - Rolling v1 changelog for consumer-facing changes, deprecations, and migration notes.
 - [`04-components-audit.md`](./04-components-audit.md)
