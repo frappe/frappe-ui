@@ -14,7 +14,7 @@ npm install -D \
   vue-router@^4 \
   unplugin-auto-import unplugin-vue-components unplugin-icons \
   lucide-static @iconify/json
-npm install frappe-ui
+npm install frappe-ui@beta
 ```
 
 - **Tailwind must be v3.** frappe-ui's preset is a Tailwind v3 config (`darkMode`, `plugins`, `content`). Tailwind v4 ignores that shape entirely and the design tokens silently won't load.
