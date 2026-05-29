@@ -17,6 +17,11 @@ Use `#item-prefix` and `#item-label` to tailor the standard row — for example,
 ## Trigger Slots
 <ComponentPreview name="Select-TriggerSlots" />
 
+## Footer
+The `#footer` slot renders below the option list and stays pinned to the bottom of the popover — it does not scroll with the options. The slot receives `selectedOption` and `clearSelection`.
+
+<ComponentPreview name="Select-Footer" layout="stacked" />
+
 ## Label, Description, Error
 `Select` supports `label`, `description`, `error`, and `required` directly — no `FormControl` wrapper needed. The error suppresses the description and wires `aria-invalid` + `aria-errormessage` onto the trigger.
 

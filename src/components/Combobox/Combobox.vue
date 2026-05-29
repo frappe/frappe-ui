@@ -723,7 +723,14 @@ defineSlots<ComboboxSlots>()
             />
 
             <div v-if="$slots.footer" data-slot="footer">
-              <slot name="footer" />
+              <slot
+                name="footer"
+                v-bind="{
+                  query: typedQuery,
+                  selectedOption,
+                  clearSelection,
+                }"
+              />
             </div>
           </div>
         </FocusScope>

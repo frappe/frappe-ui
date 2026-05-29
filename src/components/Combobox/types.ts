@@ -207,6 +207,17 @@ export interface ComboboxEmptySlotProps {
   query: string
 }
 
+export interface ComboboxFooterSlotProps {
+  /** Current search query — empty when the user hasn't typed since opening. */
+  query: string
+
+  /** Resolved selected option, if any. */
+  selectedOption: ComboboxSelectableOption | null
+
+  /** Clears the current selection (sets the model to `null`). */
+  clearSelection: () => void
+}
+
 export interface ComboboxSlots {
   /** Fully custom trigger renderer. */
   trigger?: (props: ComboboxTriggerSlotProps) => any
@@ -248,8 +259,9 @@ export interface ComboboxSlots {
   /** Fallback content rendered when there are no results. */
   empty?: (props: ComboboxEmptySlotProps) => any
 
-  /** Content rendered after the list. */
-  footer?: () => any
+  /** Content rendered after the list. Stays pinned below the scrollable
+   * options. */
+  footer?: (props: ComboboxFooterSlotProps) => any
 
   [slotName: string]: ((props: any) => any) | undefined
 }

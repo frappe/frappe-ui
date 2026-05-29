@@ -145,8 +145,8 @@
   },
   {
     name: 'footer',
-    description: 'Content rendered below the option list.',
-    type: 'any'
+    description: 'Content rendered below the option list. Stays pinned below the scrollable options.',
+    type: 'SelectFooterSlotProps'
   }
 ]
 

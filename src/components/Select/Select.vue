@@ -178,6 +178,10 @@ const selectedOption = computed(() => {
   )
 })
 
+function clearSelection() {
+  model.value = undefined
+}
+
 function isBlank(value: unknown) {
   return value === '' || value === null || value === undefined
 }
@@ -349,9 +353,9 @@ defineSlots<SelectSlots>()
         <div
           data-slot="content-body"
           :data-motion="contentMotion"
-          class="overflow-hidden rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5 will-change-[opacity,transform] origin-[var(--reka-select-content-transform-origin)]"
+          class="flex flex-col overflow-hidden rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5 will-change-[opacity,transform] origin-[var(--reka-select-content-transform-origin)]"
         >
-          <SelectViewport class="flex flex-col p-1">
+          <SelectViewport class="flex min-h-0 flex-col p-1">
             <div
               v-if="!selectOptions.length"
               data-slot="empty"
@@ -455,11 +459,14 @@ defineSlots<SelectSlots>()
                 </ItemListRow>
               </SelectItem>
             </template>
-
-            <div v-if="$slots.footer" data-slot="footer">
-              <slot name="footer" />
-            </div>
           </SelectViewport>
+
+          <div v-if="$slots.footer" data-slot="footer">
+            <slot
+              name="footer"
+              v-bind="{ selectedOption, clearSelection }"
+            />
+          </div>
         </div>
       </SelectContent>
     </SelectPortal>

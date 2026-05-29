@@ -41,12 +41,21 @@ const countries = [
       open-on-focus
       class="w-64"
     >
-      <template #footer>
+      <template #footer="{ query, selectedOption, clearSelection }">
         <div
           class="flex items-center justify-between border-t border-outline-gray-1 px-3 py-2 text-sm text-ink-gray-5"
         >
-          <span>{{ countries.length }} countries</span>
-          <span class="text-ink-gray-7">Footer stays fixed</span>
+          <span v-if="query">
+            Searching “<span class="text-ink-gray-7">{{ query }}</span>”
+          </span>
+          <span v-else>{{ countries.length }} countries</span>
+          <button
+            v-if="selectedOption"
+            class="text-ink-gray-7 hover:text-ink-gray-8"
+            @click="clearSelection"
+          >
+            Clear
+          </button>
         </div>
       </template>
     </Combobox>
