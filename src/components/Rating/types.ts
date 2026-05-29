@@ -21,7 +21,13 @@ export interface RatingProps extends InputLabelingProps {
    */
   rating_from?: number
 
-  /** If true, disables interaction and makes the rating read-only. */
+  /** If true, disables interaction. */
+  disabled?: boolean
+
+  /**
+   * If true, disables interaction.
+   * @deprecated Use `disabled` instead.
+   */
   readonly?: boolean
 
   /**

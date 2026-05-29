@@ -33,11 +33,18 @@
     deprecated: 'Use `max` instead.'
   },
   {
-    name: 'readonly',
-    description: 'If true, disables interaction and makes the rating read-only.',
+    name: 'disabled',
+    description: 'If true, disables interaction.',
     required: false,
     type: 'boolean',
     default: 'false'
+  },
+  {
+    name: 'readonly',
+    description: 'If true, disables interaction.',
+    required: false,
+    type: 'boolean',
+    deprecated: 'Use `disabled` instead.'
   },
   {
     name: 'icon',

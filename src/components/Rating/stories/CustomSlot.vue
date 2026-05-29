@@ -10,7 +10,7 @@ const scores = ['💩', '👎', '👌', '👍', '🔥']
 </script>
 
 <template>
-  <div class="w-full flex flex-col gap-4 items-start">
+  <div class="flex flex-col gap-4 items-center">
     <Rating v-model="mood" label="How was your day?" size="lg">
       <template #icon="{ index, value, previewValue }">
         <span

@@ -32,7 +32,16 @@ describe('Rating', () => {
     cy.get('@onUpdate').should('have.been.calledWith', 3)
   })
 
-  it('readonly', () => {
+  it('disabled', () => {
+    cy.mount(Rating, {
+      props: { 'onUpdate:modelValue': cy.spy().as('onUpdate'), disabled: true },
+    })
+
+    cy.get('[role="radio"]').eq(1).click()
+    cy.get('@onUpdate').should('not.have.been.called')
+  })
+
+  it('readonly (deprecated alias for disabled)', () => {
     cy.mount(Rating, {
       props: { 'onUpdate:modelValue': cy.spy().as('onUpdate'), readonly: true },
     })
@@ -85,7 +94,7 @@ describe('Rating', () => {
         .should('have.attr', 'aria-valuemin', '0')
         .and('have.attr', 'aria-valuemax', '5')
         .and('have.attr', 'aria-valuenow', '3.5')
-        .and('have.attr', 'aria-valuetext', '3.5')
+        .and('have.attr', 'aria-valuetext', '3.5 of 5 stars')
     })
 
     it('left-half click emits half value', () => {
@@ -303,10 +312,9 @@ describe('Rating', () => {
       cy.get('[role="radiogroup"]').should('have.attr', 'data-required', 'true')
     })
 
-    it('exposes data-disabled and data-readonly when readonly', () => {
-      cy.mount(Rating, { props: { label: 'Quality', readonly: true } })
+    it('exposes data-disabled when disabled', () => {
+      cy.mount(Rating, { props: { label: 'Quality', disabled: true } })
       cy.get('[role="radiogroup"]').should('have.attr', 'data-disabled', 'true')
-      cy.get('[role="radiogroup"]').should('have.attr', 'data-readonly', 'true')
     })
   })
 })

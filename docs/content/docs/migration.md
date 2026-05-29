@@ -103,6 +103,7 @@ Covers `TextInput`, `Textarea`, `Password`, `Checkbox`, `Switch`, `Rating`,
 | Before                          | After                            |
 | ------------------------------- | -------------------------------- |
 | `Rating` `:rating_from`         | `:max`                           |
+| `Rating` `:readonly`            | `:disabled`                      |
 | `Switch` `@change`              | `@update:modelValue`             |
 | `Switch.labelClasses` / `Checkbox.padding` | `data-*` styling hooks|
 | `Password` `:value` + `@input` workaround | `v-model` (now works)  |
