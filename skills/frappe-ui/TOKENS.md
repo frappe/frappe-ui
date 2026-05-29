@@ -76,6 +76,8 @@ Pick the wrong one and copy looks cramped (multi-line text in `text-*`) or flopp
 
 All have tuned letter-spacing — don't override unless you know why.
 
+**Never uppercase headers.** Don't apply `uppercase` (or `tracking-wider` to fake all-caps) to headings, section titles, table-column headers, or labels. Frappe UIs use sentence case — write "Recent activity", not "RECENT ACTIVITY". Distinguish a header by size/weight/color (`text-ink-gray-5` + `text-sm` for a quiet section label), not by capitalization.
+
 ## Radius
 
 | Class            | px    | Use                            |

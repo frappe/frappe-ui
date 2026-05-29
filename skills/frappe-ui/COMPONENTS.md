@@ -180,31 +180,14 @@ const ping = useCall<string>({
 // ping.data, ping.loading, ping.error, ping.execute(), ping.reload(), ping.abort()
 ```
 
-**Options** (`UseCallOptions<TResponse, TParams>`):
-- `url: string | Ref<string>` — the API endpoint. Use a `Ref` / `computed` for reactive URLs (e.g. resource ID in the path).
-- `method?: 'GET' | 'POST' | 'PUT' | 'DELETE'` — default `GET`.
-- `params?: TParams | (() => TParams)` — request params. Pass a function for reactive params; refs inside are auto-unwrapped. GET requests serialise to the query string; non-GET sends a JSON body.
-- `immediate?: boolean` — default `true`. Set `false` for write-style calls you'll trigger with `submit` / `execute`.
-- `refetch?: boolean` — re-run automatically when reactive `url` / `params` change.
-- `baseUrl?: string` — prefix for `url`.
-- `initialData?: TResponse` — value of `.data` before the first response.
-- `cacheKey?: string | Array<...>` — when set, the response is persisted in IndexedDB. On next mount, cached data hydrates `.data` while a fresh request runs in the background. Great for "instant" perceived loads.
-- `transform?: (data) => data` — mutate or replace the response shape before it lands in `.data`.
-- `beforeSubmit?: (params) => void | Promise<void>` — async hook before `submit` fires; throw to abort and surface the error on `.error`.
-- `onSuccess?: (data) => void` — fires after a successful response.
-- `onError?: (error) => void` — fires after a failed response.
+**Options most worth knowing** (`UseCallOptions<TResponse, TParams>` — full list in the upstream docs):
+- `url` — `string` or a `Ref` / `computed` for reactive URLs; `method` (default `GET`); `params` — object or a function for reactive params.
+- `immediate: false` — for write-style calls you trigger with `submit` / `execute` (default `true` auto-fetches on mount).
+- `refetch: true` — re-run when reactive `url` / `params` change.
+- `cacheKey` — persist the response in IndexedDB; cached data hydrates `.data` on next mount while a fresh request runs (instant perceived loads).
+- `onSuccess` / `onError` / `transform` / `beforeSubmit` — lifecycle hooks.
 
-**Reactive return** (treat as a `reactive` object — no `.value`):
-- `data` — response data (or cached data while loading).
-- `error` — `Error` instance on failure.
-- `loading` / `isFetching` — boolean.
-- `isFinished` — boolean, true after the first response.
-- `canAbort` / `aborted` / `abort()` — request cancellation.
-- `promise` — resolves on the next response (success or error); resets after each call so you can `await` the latest.
-- `execute()` / `fetch()` / `reload()` — re-run the request; returns `Promise<TResponse | null>`.
-- `submit(params?)` — write-style trigger; stores `params` as the current params and runs the request. Typed so calls without a `TParams` generic accept no args.
-- `reset()` — clear `submit`-supplied params.
-- `url` / `params` — the computed URL and params actually sent.
+**Reactive return** (a `reactive` object — no `.value`): `data`, `error`, `loading` / `isFetching`, `isFinished`, `abort()` / `aborted`, `promise` (resolves on next response), `execute()` / `reload()`, `submit(params?)` (write trigger), `reset()`. For the exhaustive option and return surface, see `ui.frappe.io/llms.txt`.
 
 **Read pattern (auto-fetch on mount):**
 

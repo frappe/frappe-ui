@@ -91,37 +91,7 @@ Rules:
 
 ## API calls
 
-Always use `useCall` (or `useList` / `useDoc`) — never raw `fetch` / `axios`.
-
-**Read (auto on mount):**
-```ts
-import { useCall } from 'frappe-ui'
-
-const user = useCall<User>({
-  url: computed(() => `/api/v2/document/User/${userId.value}`),
-  refetch: true,
-  cacheKey: ['user', userId],
-})
-```
-
-**Write (trigger on action):**
-```ts
-import { useCall, toast } from 'frappe-ui'
-
-const saveTask = useCall<Task, { title: string }>({
-  url: '/api/v2/method/myapp.api.create_task',
-  method: 'POST',
-  immediate: false,
-  onSuccess: () => toast.success('Saved'),
-  onError: (err) => toast.error(err.message),
-})
-
-async function onSubmit() {
-  await saveTask.submit({ title: form.title })
-}
-```
-
-Bind `saveTask.loading` to `<Button :loading>`; render `saveTask.error?.message` next to the form.
+Always use `useCall` (or `useList` / `useDoc`) — never raw `fetch` / `axios`. Read = auto-fetch on mount; write = `immediate: false` + `submit(params)`. Bind `.loading` to `<Button :loading>` and render `.error?.message` next to the form. Canonical read/write examples and the full option/return surface: [COMPONENTS.md](COMPONENTS.md) → Data & resources.
 
 ## Confirmation flow
 
