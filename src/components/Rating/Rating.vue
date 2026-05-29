@@ -28,13 +28,12 @@
       :aria-errormessage="hasError ? errorMessageId : undefined"
       :aria-required="props.required || undefined"
       :aria-invalid="hasError || undefined"
-      :aria-readonly="props.readonly || undefined"
+      :aria-disabled="isDisabled || undefined"
       :aria-orientation="isSliderMode ? 'horizontal' : undefined"
       :aria-valuemin="isSliderMode ? 0 : undefined"
       :aria-valuemax="isSliderMode ? starCount : undefined"
       :aria-valuenow="isSliderMode ? savedValue : undefined"
       :aria-valuetext="isSliderMode ? formatValue(savedValue) : undefined"
-      :data-readonly="props.readonly || undefined"
       data-slot="control"
       v-bind="dataAttrs"
       @mouseleave="onLeave"
@@ -47,7 +46,7 @@
         class="rating-star relative inline-flex shrink-0 focus:outline-none focus-visible:ring focus-visible:ring-outline-gray-3 rounded-sm"
         :class="[
           sizeClass,
-          props.readonly ? 'cursor-default' : 'cursor-pointer',
+          isDisabled ? 'cursor-default' : 'cursor-pointer',
         ]"
         data-slot="star"
         :data-index="index"
@@ -64,6 +63,7 @@
       >
         <span
           class="rating-half rating-half-left"
+          :class="halfColorClass(halfState(index - 0.5))"
           :data-state="halfState(index - 0.5)"
           aria-hidden="true"
         >
@@ -92,6 +92,7 @@
         </span>
         <span
           class="rating-half rating-half-right"
+          :class="halfColorClass(halfState(index))"
           :data-state="halfState(index)"
           aria-hidden="true"
         >
@@ -144,7 +145,7 @@ import type { RatingProps, RatingIconSlotProps } from './types'
 
 const props = withDefaults(defineProps<RatingProps>(), {
   size: 'md',
-  readonly: false,
+  disabled: false,
   step: 1,
   icon: () => LucideStar,
 })
@@ -157,7 +158,12 @@ watchEffect(() => {
   if (props.rating_from != null) {
     warnDeprecated('Rating.rating_from', 'max')
   }
+  if (props.readonly !== undefined) {
+    warnDeprecated('Rating.readonly', 'disabled')
+  }
 })
+
+const isDisabled = computed(() => props.disabled || props.readonly === true)
 
 defineSlots<{
   /** Overrides the rendered label content. Receives `{ required }`. */
@@ -192,7 +198,7 @@ const {
   dataAttrs,
 } = useInputLabeling(props, {
   size: () => props.size,
-  disabled: () => props.readonly,
+  disabled: () => isDisabled.value,
 })
 
 const sizeClass = computed(
@@ -215,6 +221,19 @@ const savedValue = computed(() => {
   return roundToStep(v)
 })
 
+function halfColorClass(state: 'filled' | 'preview' | 'removing' | 'empty') {
+  switch (state) {
+    case 'filled':
+      return 'text-yellow-500'
+    case 'preview':
+      return 'text-yellow-200'
+    case 'removing':
+      return 'text-yellow-300'
+    case 'empty':
+      return 'text-gray-300 dark:text-gray-600'
+  }
+}
+
 function halfState(half: number): 'filled' | 'preview' | 'removing' | 'empty' {
   const saved = savedValue.value
   const hovered = hoveredValue.value
@@ -233,7 +252,10 @@ function starState(index: number) {
 
 function formatValue(v: number) {
   if (v == null) return ''
-  return v % 1 === 0 ? String(v) : v.toFixed(1)
+  const max = starCount.value
+  const display = v % 1 === 0 ? String(v) : v.toFixed(1)
+  if (v === 0) return `No rating, out of ${max} stars`
+  return `${display} of ${max} stars`
 }
 
 function hitTestValue(event: MouseEvent, index: number) {
@@ -244,7 +266,7 @@ function hitTestValue(event: MouseEvent, index: number) {
 }
 
 function onStarMove(event: MouseEvent, index: number) {
-  if (props.readonly) return
+  if (isDisabled.value) return
   hoveredValue.value = hitTestValue(event, index)
 }
 
@@ -259,7 +281,7 @@ function commit(next: number) {
 }
 
 function onStarClick(event: MouseEvent, index: number) {
-  if (props.readonly) return
+  if (isDisabled.value) return
   commit(hitTestValue(event, index))
 }
 
@@ -268,7 +290,7 @@ function onStarClick(event: MouseEvent, index: number) {
 // tabstop and individual buttons are removed from the tab order.
 function starTabindex(index: number) {
   if (isSliderMode.value) return -1
-  if (props.readonly) return -1
+  if (isDisabled.value) return -1
   const selected = Math.ceil(savedValue.value)
   const tabbable = selected > 0 ? selected : 1
   return index === tabbable ? 0 : -1
@@ -276,11 +298,11 @@ function starTabindex(index: number) {
 
 const rootTabindex = computed(() => {
   if (!isSliderMode.value) return undefined
-  return props.readonly ? -1 : 0
+  return isDisabled.value ? -1 : 0
 })
 
 function onKeydown(e: KeyboardEvent) {
-  if (props.readonly) return
+  if (isDisabled.value) return
   const max = starCount.value
   const step = props.step ?? 1
 
@@ -403,25 +425,6 @@ const hasLabeling = computed(() => {
 
 .rating-half-right {
   clip-path: inset(0 0 0 50%);
-}
-
-/* Default icon colors. To customize, use the `#icon` slot and drive color
-   from the `state` slot prop with your own classes/styles. */
-.rating-half[data-state='filled'] {
-  color: #eab308; /* yellow-500 */
-}
-.rating-half[data-state='preview'] {
-  color: #fde68a; /* yellow-200 */
-}
-.rating-half[data-state='removing'] {
-  color: #fcd34d; /* yellow-300 */
-}
-.rating-half[data-state='empty'] {
-  color: #d1d5db; /* gray-300 */
-}
-
-[data-theme='dark'] .rating-half[data-state='empty'] {
-  color: #4b5563; /* gray-600 — visible on dark surfaces */
 }
 
 .rating-icon {

@@ -6,7 +6,7 @@ import { Rating } from 'frappe-ui'
   <div class="flex flex-col gap-4 items-start">
     <Rating label="Default" :model-value="3" />
     <Rating label="Required" required :model-value="3" />
-    <Rating label="Read-only" readonly :model-value="3" />
+    <Rating label="Disabled" disabled :model-value="3" />
     <Rating
       label="With error"
       error="Please rate before submitting."
