@@ -151,3 +151,13 @@ code {
   font-style: normal;
   font-weight: 500;
 }
+
+/* Equal-width Before/After columns for the migration guide tables. */
+.migration-page table {
+  table-layout: fixed;
+  width: 100%;
+}
+.migration-page th,
+.migration-page td {
+  width: 50%;
+}

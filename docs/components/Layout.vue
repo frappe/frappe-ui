@@ -38,6 +38,7 @@ const { frontmatter } = useData()
               <Content
                 as="article"
                 class="prose prose-v3 prose-p:mb-4 text-[15px] !max-w-none"
+                :class="frontmatter.pageClass"
               />
               <PrevNextBtns />
             </main>
