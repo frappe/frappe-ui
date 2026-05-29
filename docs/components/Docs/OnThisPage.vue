@@ -68,8 +68,7 @@ watch(route, setHeadings)
         'border-outline-gray-5 text-ink-gray-9':
           activeHeading && x.id == activeHeading,
       }"
+      >{{ x.name }}</a
     >
-      {{ x.name }}
-    </a>
   </aside>
 </template>
