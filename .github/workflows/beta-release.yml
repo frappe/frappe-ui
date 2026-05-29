@@ -23,10 +23,20 @@ jobs:
     permissions:
       contents: write # push the version-bump commit back to main
     steps:
+      # RELEASE_TOKEN (a PAT) is REQUIRED, not optional: a push made with the
+      # default GITHUB_TOKEN does NOT trigger other workflows, so the bump would
+      # land on main but Tests -> Publish on NPM would never run -> no publish.
+      # Fail loudly here rather than silently bumping without publishing.
+      - name: Require RELEASE_TOKEN
+        if: ${{ secrets.RELEASE_TOKEN == '' }}
+        run: |
+          echo "::error::RELEASE_TOKEN secret is not set. It's required so the version-bump push triggers the publish pipeline (GITHUB_TOKEN pushes don't trigger workflows). See .github/workflows/beta-release.yml header."
+          exit 1
+
       - uses: actions/checkout@v4
         with:
           ref: main # post-merge main, which includes the just-merged PR
-          token: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.RELEASE_TOKEN }}
 
       - uses: actions/setup-node@v4
         with:
