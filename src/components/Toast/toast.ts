@@ -131,46 +131,6 @@ function create(options: LegacyCreateOptions) {
   })
 }
 
-type SuccessAction<T> = {
-  label: string
-  onClick: (data: T) => void
-  altText?: string
-}
-
-function promise<T>(
-  p: Promise<T> | (() => Promise<T>),
-  options: Parameters<typeof sonnerToast.promise>[1] & {
-    successAction?: SuccessAction<T>
-  },
-): string | number {
-  const { successAction, ...rest } = options
-  const resolvedPromise = typeof p === 'function' ? p() : p
-
-  if (successAction) {
-    const originalSuccess = rest.success
-    rest.success = (data: T) => {
-      const raw =
-        typeof originalSuccess === 'function'
-          ? (originalSuccess as (data: T) => unknown)(data)
-          : originalSuccess
-      const msg =
-        raw && typeof raw === 'object' && 'message' in raw
-          ? String((raw as { message: unknown }).message)
-          : String(raw ?? '')
-      return {
-        message: msg,
-        action: {
-          label: successAction.label,
-          onClick: () => successAction.onClick(data),
-          altText: successAction.altText,
-        },
-      }
-    }
-  }
-
-  return sonnerToast.promise(resolvedPromise, rest) as unknown as string | number
-}
-
 function remove(id: string | number) {
   warnDeprecated(`toast.remove(id)`, `toast.dismiss(id)`, TOAST_DOCS)
   return sonnerToast.dismiss(id)
@@ -185,7 +145,6 @@ export const toast = Object.assign(toastFn, sonnerToast, {
   create,
   remove,
   removeAll,
-  promise,
 }) as typeof sonnerToast & {
   (
     message: string | LegacyToastObject,
@@ -194,5 +153,4 @@ export const toast = Object.assign(toastFn, sonnerToast, {
   create: typeof create
   remove: typeof remove
   removeAll: typeof removeAll
-  promise: typeof promise
 }
