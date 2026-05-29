@@ -31,7 +31,7 @@ export function createResource(options, vm) {
     ? debounce(fetch, options.debounce)
     : fetch
 
-  const controller = new AbortController()
+  let controller = new AbortController()
 
   let out = reactive({
     method: options.method,
@@ -98,6 +98,8 @@ export function createResource(options, vm) {
       }
     }
 
+    // fresh controller per fetch; a signal stays aborted forever once used
+    controller = new AbortController()
     options.signal = controller.signal
 
     try {
@@ -120,7 +122,10 @@ export function createResource(options, vm) {
         }
       }
     } catch (error) {
-      handleError(error, errorFunctions)
+      // a deliberate abort() isn't a resource error; just stop quietly
+      if (error?.name !== 'AbortError') {
+        handleError(error, errorFunctions)
+      }
     }
     out.loading = false
     return out.data
