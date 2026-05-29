@@ -96,7 +96,7 @@ case "$COMMAND" in
 
     prepare_pages_worktree
     deploy_preview "$BUILD_DIR" "$PR_NUMBER"
-    commit_and_push "deploy: update docs preview for pr #$PR_NUMBER"
+    commit_and_push "deploy: update docs preview for pr-$PR_NUMBER"
     ;;
   remove-preview)
     PR_NUMBER="${2:?pr number is required}"
@@ -108,7 +108,7 @@ case "$COMMAND" in
 
     prepare_pages_worktree
     remove_preview "$PR_NUMBER"
-    commit_and_push "deploy: remove docs preview for pr #$PR_NUMBER"
+    commit_and_push "deploy: remove docs preview for pr-$PR_NUMBER"
     ;;
   *)
     echo "Unknown command: $COMMAND" >&2
