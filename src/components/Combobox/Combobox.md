@@ -42,6 +42,11 @@ Avatar rows with a contextual invite action authored through a template slot.
 
 <ComponentPreview name="Combobox-MemberPicker" />
 
+## Footer
+The `#footer` slot renders below the list and stays pinned to the bottom of the popover — it does not scroll with the options. Scroll the list to confirm the footer remains fixed.
+
+<ComponentPreview name="Combobox-Footer" layout="stacked" />
+
 ## In Dialog
 Combobox rendered inside a Dialog. Verifies focus restores to the trigger after the popover closes, even when wrapped by the Dialog's focus scope.
 
