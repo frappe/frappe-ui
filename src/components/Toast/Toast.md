@@ -26,6 +26,10 @@ Pass a render function to `icon` to replace the default type icon — handy for 
 
 ## Asynchronous
 
-Use `toast.promise` to wire a single toast to a promise lifecycle, or pass an `id` to update an existing toast in place — useful for multi-step progress.
+Use `toast.promise` to wire a single toast to a promise lifecycle — the same row transitions through loading → success/error in place, no stacking.
+
+`success` and `error` accept either a string or a callback that returns a string or full toast config. Returning an object unlocks `action`, `description`, `duration`, etc. — and lets the callback close over the resolved value (or thrown error) to wire up follow-ups like **Undo** on success or **Retry** on failure.
+
+For multi-step progress without a single promise, pass an `id` to `toast.loading` / `toast.success` to update an existing toast in place.
 
 <ComponentPreview name="Toast-Async" />

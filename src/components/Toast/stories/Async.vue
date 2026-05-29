@@ -9,15 +9,36 @@ function sendInvite() {
   })
 }
 
-function uploadFails() {
+function deleteFile() {
+  const file = { id: 'f_42', name: 'report.pdf' }
+  const willFail = Math.random() < 0.5
+
   toast.promise(
-    new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error('Network error')), 1500),
+    new Promise<{ id: string; name: string }>((resolve, reject) =>
+      setTimeout(
+        () =>
+          willFail
+            ? reject(new Error('Network error'))
+            : resolve(file),
+        1500,
+      ),
     ),
     {
-      loading: 'Uploading report.pdf…',
-      success: 'Upload complete',
-      error: (err: Error) => `Upload failed: ${err.message}`,
+      loading: `Deleting ${file.name}…`,
+      success: (deleted) => ({
+        message: `Deleted ${deleted.name}`,
+        action: {
+          label: 'Undo',
+          onClick: () => toast.success(`Restored ${deleted.name}`),
+        },
+      }),
+      error: (err: Error) => ({
+        message: `Couldn't delete ${file.name} — ${err.message}`,
+        action: {
+          label: 'Retry',
+          onClick: () => deleteFile(),
+        },
+      }),
     },
   )
 }
@@ -47,6 +68,6 @@ function deployPipeline() {
 
 <template>
   <Button label="Send invite" @click="sendInvite" />
-  <Button label="Upload fails" @click="uploadFails" />
+  <Button label="Delete file" @click="deleteFile" />
   <Button label="Deploy pipeline" @click="deployPipeline" />
 </template>
