@@ -248,10 +248,16 @@ function clearSelection() {
   emit('update:selectedOption', null)
 }
 
+function toggleOpen() {
+  if (props.disabled) return
+  open.value = !open.value
+}
+
 // Shared shape for the #trigger, #prefix, and #suffix slots. `clearSelection`
-// is exposed alongside the read-only fields so consumers can wire a clear
-// affordance (e.g. an inline button in #suffix) without hoisting into
-// #trigger or managing the model themselves.
+// and `toggleOpen` are exposed alongside the read-only fields so consumers
+// can wire clear / open affordances (e.g. a custom #trigger or an inline
+// button in #suffix) without hoisting into #trigger or managing the model
+// and open state themselves.
 const triggerSlotProps = computed<ComboboxTriggerSlotProps>(() => ({
   open: open.value,
   disabled: Boolean(props.disabled),
@@ -259,6 +265,7 @@ const triggerSlotProps = computed<ComboboxTriggerSlotProps>(() => ({
   selectedOption: selectedOption.value,
   displayValue: displayValue.value,
   clearSelection,
+  toggleOpen,
 }))
 
 function commitSelectableOption(value: string) {
@@ -463,7 +470,7 @@ defineSlots<ComboboxSlots>()
       -->
       <ComboboxAnchor
         as-child
-        @click="open = !open"
+        @click="toggleOpen"
         @pointerdown="markPointerDown"
       >
         <slot

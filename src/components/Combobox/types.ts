@@ -177,6 +177,9 @@ export interface ComboboxTriggerSlotProps {
 
   /** Clears the current selection (sets the model to `null`). */
   clearSelection: () => void
+
+  /** Toggles the popover open state (no-op while disabled). */
+  toggleOpen: () => void
 }
 
 /**
