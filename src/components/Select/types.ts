@@ -55,6 +55,9 @@ export interface SelectTriggerSlotProps {
 
   /** Plain-text label shown in the trigger. */
   displayValue: string
+
+  /** Clears the current selection (sets the model to `undefined`). */
+  clearSelection: () => void
 }
 
 /**
@@ -66,6 +69,14 @@ export interface SelectTriggerSlotProps {
 export type SelectSlotProps = SelectTriggerSlotProps
 export type SelectPrefixSlotProps = SelectSlotProps
 export type SelectSuffixSlotProps = SelectSlotProps
+
+export interface SelectFooterSlotProps {
+  /** Currently selected option, if any. */
+  selectedOption: SelectNormalizedOption | null
+
+  /** Clears the current selection (sets the model to `undefined`). */
+  clearSelection: () => void
+}
 
 export interface SelectItemSlotProps {
   /** Item currently being rendered. */
@@ -117,8 +128,9 @@ export interface SelectSlots {
   /** Fallback content rendered when no options are available. */
   empty?: () => any
 
-  /** Content rendered below the option list. */
-  footer?: () => any
+  /** Content rendered below the option list. Stays pinned below the
+   * scrollable options. */
+  footer?: (props: SelectFooterSlotProps) => any
 
   [slotName: string]: ((props: any) => any) | undefined
 }

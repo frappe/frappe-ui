@@ -219,8 +219,8 @@
   },
   {
     name: 'footer',
-    description: 'Content rendered after the list.',
-    type: 'any'
+    description: 'Content rendered after the list. Stays pinned below the scrollable options.',
+    type: 'ComboboxFooterSlotProps'
   }
 ]
 

@@ -9,6 +9,7 @@ import type {
   SelectOptionValue,
   SelectProps,
   SelectSlots,
+  SelectTriggerSlotProps,
 } from './types'
 import ItemListRow from '../ItemListRow/ItemListRow.vue'
 import {
@@ -178,6 +179,21 @@ const selectedOption = computed(() => {
   )
 })
 
+function clearSelection() {
+  model.value = undefined
+}
+
+// Shared shape for the #trigger, #prefix, and #suffix slots. `clearSelection`
+// is exposed alongside the read-only fields so consumers can wire a clear
+// affordance without managing the model themselves.
+const triggerSlotProps = computed<SelectTriggerSlotProps>(() => ({
+  open: open.value,
+  disabled: Boolean(props.disabled),
+  selectedOption: selectedOption.value,
+  displayValue: displayValue.value,
+  clearSelection,
+}))
+
 function isBlank(value: unknown) {
   return value === '' || value === null || value === undefined
 }
@@ -253,7 +269,7 @@ defineSlots<SelectSlots>()
       <template v-if="$slots.trigger">
         <slot
           name="trigger"
-          v-bind="{ open, disabled: !!disabled, selectedOption, displayValue }"
+          v-bind="triggerSlotProps"
         />
         <div
           data-slot="trigger-value"
@@ -299,12 +315,7 @@ defineSlots<SelectSlots>()
         <slot
           v-else
           name="prefix"
-          v-bind="{
-            open,
-            disabled: !!disabled,
-            selectedOption,
-            displayValue,
-          }"
+          v-bind="triggerSlotProps"
         />
 
         <div class="grid min-w-0 text-left truncate">
@@ -328,12 +339,7 @@ defineSlots<SelectSlots>()
 
         <slot
           name="suffix"
-          v-bind="{
-            open,
-            disabled: !!disabled,
-            selectedOption,
-            displayValue,
-          }"
+          v-bind="triggerSlotProps"
         >
           <span class="lucide-chevron-down ml-auto size-4 shrink-0 text-ink-gray-4" />
         </slot>
@@ -349,9 +355,9 @@ defineSlots<SelectSlots>()
         <div
           data-slot="content-body"
           :data-motion="contentMotion"
-          class="overflow-hidden rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5 will-change-[opacity,transform] origin-[var(--reka-select-content-transform-origin)]"
+          class="flex flex-col overflow-hidden rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5 will-change-[opacity,transform] origin-[var(--reka-select-content-transform-origin)]"
         >
-          <SelectViewport class="flex flex-col p-1">
+          <SelectViewport class="flex min-h-0 flex-col p-1">
             <div
               v-if="!selectOptions.length"
               data-slot="empty"
@@ -455,11 +461,14 @@ defineSlots<SelectSlots>()
                 </ItemListRow>
               </SelectItem>
             </template>
-
-            <div v-if="$slots.footer" data-slot="footer">
-              <slot name="footer" />
-            </div>
           </SelectViewport>
+
+          <div v-if="$slots.footer" data-slot="footer">
+            <slot
+              name="footer"
+              v-bind="{ selectedOption, clearSelection }"
+            />
+          </div>
         </div>
       </SelectContent>
     </SelectPortal>

@@ -174,6 +174,12 @@ export interface ComboboxTriggerSlotProps {
 
   /** Resolved display text for the committed value. */
   displayValue: string
+
+  /** Clears the current selection (sets the model to `null`). */
+  clearSelection: () => void
+
+  /** Toggles the popover open state (no-op while disabled). */
+  toggleOpen: () => void
 }
 
 /**
@@ -205,6 +211,17 @@ export interface ComboboxGroupLabelSlotProps {
 export interface ComboboxEmptySlotProps {
   /** Current search query — empty when the user hasn't typed since opening. */
   query: string
+}
+
+export interface ComboboxFooterSlotProps {
+  /** Current search query — empty when the user hasn't typed since opening. */
+  query: string
+
+  /** Resolved selected option, if any. */
+  selectedOption: ComboboxSelectableOption | null
+
+  /** Clears the current selection (sets the model to `null`). */
+  clearSelection: () => void
 }
 
 export interface ComboboxSlots {
@@ -248,8 +265,9 @@ export interface ComboboxSlots {
   /** Fallback content rendered when there are no results. */
   empty?: (props: ComboboxEmptySlotProps) => any
 
-  /** Content rendered after the list. */
-  footer?: () => any
+  /** Content rendered after the list. Stays pinned below the scrollable
+   * options. */
+  footer?: (props: ComboboxFooterSlotProps) => any
 
   [slotName: string]: ((props: any) => any) | undefined
 }
