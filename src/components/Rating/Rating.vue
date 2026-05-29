@@ -158,7 +158,7 @@ watchEffect(() => {
   if (props.rating_from != null) {
     warnDeprecated('Rating.rating_from', 'max')
   }
-  if (props.readonly !== undefined) {
+  if (props.readonly === true) {
     warnDeprecated('Rating.readonly', 'disabled')
   }
 })
