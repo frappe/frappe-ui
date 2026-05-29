@@ -36,6 +36,7 @@ import type {
   ComboboxProps,
   ComboboxSelectableOption,
   ComboboxSlots,
+  ComboboxTriggerSlotProps,
 } from './types'
 import {
   buildCustomOptionContext,
@@ -247,6 +248,19 @@ function clearSelection() {
   emit('update:selectedOption', null)
 }
 
+// Shared shape for the #trigger, #prefix, and #suffix slots. `clearSelection`
+// is exposed alongside the read-only fields so consumers can wire a clear
+// affordance (e.g. an inline button in #suffix) without hoisting into
+// #trigger or managing the model themselves.
+const triggerSlotProps = computed<ComboboxTriggerSlotProps>(() => ({
+  open: open.value,
+  disabled: Boolean(props.disabled),
+  query: typedQuery.value,
+  selectedOption: selectedOption.value,
+  displayValue: displayValue.value,
+  clearSelection,
+}))
+
 function commitSelectableOption(value: string) {
   const option =
     allSelectableOptions.value.find((item) => item.value === value) ?? null
@@ -455,13 +469,7 @@ defineSlots<ComboboxSlots>()
         <slot
           v-if="$slots.trigger"
           name="trigger"
-          v-bind="{
-            open,
-            disabled: !!disabled,
-            query: typedQuery,
-            selectedOption,
-            displayValue,
-          }"
+          v-bind="triggerSlotProps"
         />
 
         <!--
@@ -521,13 +529,7 @@ defineSlots<ComboboxSlots>()
           <slot
             v-else-if="!selectedOption && $slots.prefix"
             name="prefix"
-            v-bind="{
-              open,
-              disabled: !!disabled,
-              query: typedQuery,
-              selectedOption,
-              displayValue,
-            }"
+            v-bind="triggerSlotProps"
           />
 
           <span
@@ -541,13 +543,7 @@ defineSlots<ComboboxSlots>()
 
           <slot
             name="suffix"
-            v-bind="{
-              open,
-              disabled: !!disabled,
-              query: typedQuery,
-              selectedOption,
-              displayValue,
-            }"
+            v-bind="triggerSlotProps"
           >
             <span
               :class="[
@@ -595,13 +591,7 @@ defineSlots<ComboboxSlots>()
         <slot
           v-else
           name="prefix"
-          v-bind="{
-            open,
-            disabled: !!disabled,
-            query: typedQuery,
-            selectedOption,
-            displayValue,
-          }"
+          v-bind="triggerSlotProps"
         />
 
         <ComboboxInput
@@ -622,13 +612,7 @@ defineSlots<ComboboxSlots>()
 
         <slot
           name="suffix"
-          v-bind="{
-            open,
-            disabled: !!disabled,
-            query: typedQuery,
-            selectedOption,
-            displayValue,
-          }"
+          v-bind="triggerSlotProps"
         >
           <ComboboxTrigger
             :disabled="disabled"

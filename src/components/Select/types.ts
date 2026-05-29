@@ -55,6 +55,9 @@ export interface SelectTriggerSlotProps {
 
   /** Plain-text label shown in the trigger. */
   displayValue: string
+
+  /** Clears the current selection (sets the model to `undefined`). */
+  clearSelection: () => void
 }
 
 /**

@@ -174,6 +174,9 @@ export interface ComboboxTriggerSlotProps {
 
   /** Resolved display text for the committed value. */
   displayValue: string
+
+  /** Clears the current selection (sets the model to `null`). */
+  clearSelection: () => void
 }
 
 /**

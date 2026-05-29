@@ -9,6 +9,7 @@ import type {
   SelectOptionValue,
   SelectProps,
   SelectSlots,
+  SelectTriggerSlotProps,
 } from './types'
 import ItemListRow from '../ItemListRow/ItemListRow.vue'
 import {
@@ -182,6 +183,17 @@ function clearSelection() {
   model.value = undefined
 }
 
+// Shared shape for the #trigger, #prefix, and #suffix slots. `clearSelection`
+// is exposed alongside the read-only fields so consumers can wire a clear
+// affordance without managing the model themselves.
+const triggerSlotProps = computed<SelectTriggerSlotProps>(() => ({
+  open: open.value,
+  disabled: Boolean(props.disabled),
+  selectedOption: selectedOption.value,
+  displayValue: displayValue.value,
+  clearSelection,
+}))
+
 function isBlank(value: unknown) {
   return value === '' || value === null || value === undefined
 }
@@ -257,7 +269,7 @@ defineSlots<SelectSlots>()
       <template v-if="$slots.trigger">
         <slot
           name="trigger"
-          v-bind="{ open, disabled: !!disabled, selectedOption, displayValue }"
+          v-bind="triggerSlotProps"
         />
         <div
           data-slot="trigger-value"
@@ -303,12 +315,7 @@ defineSlots<SelectSlots>()
         <slot
           v-else
           name="prefix"
-          v-bind="{
-            open,
-            disabled: !!disabled,
-            selectedOption,
-            displayValue,
-          }"
+          v-bind="triggerSlotProps"
         />
 
         <div class="grid min-w-0 text-left truncate">
@@ -332,12 +339,7 @@ defineSlots<SelectSlots>()
 
         <slot
           name="suffix"
-          v-bind="{
-            open,
-            disabled: !!disabled,
-            selectedOption,
-            displayValue,
-          }"
+          v-bind="triggerSlotProps"
         >
           <span class="lucide-chevron-down ml-auto size-4 shrink-0 text-ink-gray-4" />
         </slot>
