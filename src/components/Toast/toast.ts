@@ -131,14 +131,6 @@ function create(options: LegacyCreateOptions) {
   })
 }
 
-function promise<T>(
-  p: Promise<T> | (() => Promise<T>),
-  options: Parameters<typeof sonnerToast.promise>[1],
-): string | number {
-  const resolvedPromise = typeof p === 'function' ? p() : p
-  return sonnerToast.promise(resolvedPromise, options) as unknown as string | number
-}
-
 function remove(id: string | number) {
   warnDeprecated(`toast.remove(id)`, `toast.dismiss(id)`, TOAST_DOCS)
   return sonnerToast.dismiss(id)
@@ -153,7 +145,6 @@ export const toast = Object.assign(toastFn, sonnerToast, {
   create,
   remove,
   removeAll,
-  promise,
 }) as typeof sonnerToast & {
   (
     message: string | LegacyToastObject,
@@ -162,5 +153,4 @@ export const toast = Object.assign(toastFn, sonnerToast, {
   create: typeof create
   remove: typeof remove
   removeAll: typeof removeAll
-  promise: typeof promise
 }
