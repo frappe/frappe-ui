@@ -13,6 +13,48 @@ Apply these before reaching for any specific pattern below — they're what make
 5. **Pick the right text scale.** Use `text-*` for single-line labels (headings, button text, badges, "2h ago"). Use `text-p-*` for anything that wraps — descriptions, helper text, feed entries, paragraphs. Multi-line copy in `text-*` looks cramped; one-line labels in `text-p-*` look floppy. See [TOKENS.md](TOKENS.md) → Typography.
 6. **Borders earn their place — don't box everything.** A border or `rounded-md` surface should signal something: an interactive affordance (clickable card / button), grouping that crosses a visual boundary (a popover, a dialog), or a distinct surface (an inset code block, a callout). Static sections — stats, lists, feeds, "section + items" groups — don't need an outer box; a section heading plus `divide-y divide-outline-gray-1` between rows reads cleaner than wrapping the whole thing in a card. Reach for boxes only when removing them would lose meaning.
 
+## Spacing & content width
+
+Frappe screens share one spacing rhythm. Match it instead of picking ad-hoc values — a page that uses `px-6` gutters and full-width content reads as foreign next to the rest of the product.
+
+**Horizontal gutters scale with the viewport: `px-3 sm:px-5`** (12px mobile → 20px desktop). Use this same pair on the page header, the content container, and any full-bleed row. Don't use a flat `px-6`.
+
+**Constrain reading content to a centered column.** Don't let text, forms, or cards stretch the full width of a wide screen. Wrap the scrollable page body in a centered max-width container, defined once as a reusable utility and applied to every page:
+
+```css
+/* tailwind @layer components — Gameplan calls this .body-container */
+.body-container {
+  @apply mx-auto w-full max-w-[940px] px-3 sm:px-5;
+}
+```
+
+```vue
+<div class="body-container pt-5 pb-40">
+  <!-- page content -->
+</div>
+```
+
+~940px (`max-w-4xl` is the close stock equivalent) is the standard content width. A single long-form reading surface (one discussion / article) narrows to ~720px; a dense table view may opt out and run full-width.
+
+**Vertical rhythm — keep it on the standard steps:**
+- Top of a page body: `pt-5` / `pt-6` (20–24px).
+- Between sibling sections: `space-y-5`, or `mt-5` / `mt-6` on each block.
+- Stack of form fields: `space-y-4`.
+- Tight list rows / sidebar nav items: `space-y-0.5`.
+- Bottom of any scroll area: generous `pb-40`, so the last row clears floating UI and the scroll feels finished.
+
+**Gaps:** `gap-2` for inline button / icon groups, `gap-3` for card grids, `gap-5` for major section blocks.
+
+**Cards are flush on mobile, boxed on desktop.** A section card carries its border, rounding, and inner padding only at `sm:` and up — on mobile it runs edge-to-edge inside the gutter:
+
+```vue
+<div class="sm:rounded sm:border sm:border-outline-gray-1 sm:px-4 sm:py-3">
+  <!-- section content -->
+</div>
+```
+
+(This is subordinate to layout principle #6 — only box a section when the border earns its place.)
+
 ## App shell
 
 ```vue
@@ -36,12 +78,13 @@ Mount `FrappeUIProvider` once at the app root so imperative `dialog.*` / `toast.
 
 ## Page header
 
+Single row, **48px tall (`min-h-12`)**, sticky to the top, with a bottom border and the same `px-3 sm:px-5` gutter as the page body:
+
 ```vue
-<header class="flex items-center justify-between border-b border-outline-gray-1 px-6 py-4">
-  <div>
-    <Breadcrumbs :items="crumbs" />
-    <h1 class="mt-1 text-xl text-ink-gray-9">{{ title }}</h1>
-  </div>
+<header
+  class="sticky top-0 z-10 flex min-h-12 items-center justify-between border-b border-outline-gray-1 bg-surface-white px-3 sm:px-5"
+>
+  <Breadcrumbs :items="crumbs" />
   <div class="flex gap-2">
     <Button icon="lucide-filter" label="Filter" />
     <Button variant="solid" theme="gray" icon-left="lucide-plus" label="New" @click="create" />
@@ -49,7 +92,7 @@ Mount `FrappeUIProvider` once at the app root so imperative `dialog.*` / `toast.
 </header>
 ```
 
-Primary action: `variant="solid" theme="gray"`. Secondary actions: default `subtle`.
+Primary action: `variant="solid" theme="gray"`. Secondary actions: default `subtle`. Keep the header to one row — use `Breadcrumbs` for context rather than stacking a separate `<h1>` that pushes it past 48px.
 
 ## Form page
 
@@ -128,7 +171,7 @@ const tasks = useList<Task>({
 
 <template>
   <div class="flex h-full flex-col">
-    <header class="flex items-center justify-between border-b border-outline-gray-1 px-6 py-3">
+    <header class="flex min-h-12 items-center justify-between border-b border-outline-gray-1 px-3 sm:px-5">
       <h1 class="text-lg text-ink-gray-9">Tasks</h1>
       <Button variant="solid" theme="gray" icon-left="lucide-plus" label="New Task" />
     </header>
