@@ -1,0 +1,64 @@
+name: Bump Beta Version
+
+# When a PR labeled `beta-release` is merged into main, bump the beta
+# prerelease in package.json (e.g. 1.0.0-beta.0 -> 1.0.0-beta.1) and push it.
+# The push triggers Tests -> "Publish on NPM" (publish.yml), which detects the
+# version change and publishes to the matching dist-tag (beta).
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+# Serialize so two quickly-merged PRs can't race the version-bump commit.
+concurrency:
+  group: bump-beta
+  cancel-in-progress: false
+
+jobs:
+  bump-beta:
+    if: >-
+      github.event.pull_request.merged == true &&
+      contains(github.event.pull_request.labels.*.name, 'beta-release')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # push the version-bump commit back to main
+    steps:
+      # RELEASE_TOKEN (a PAT) is REQUIRED, not optional: a push made with the
+      # default GITHUB_TOKEN does NOT trigger other workflows, so the bump would
+      # land on main but Tests -> Publish on NPM would never run -> no publish.
+      # Fail loudly here rather than silently bumping without publishing.
+      - name: Require RELEASE_TOKEN
+        if: ${{ secrets.RELEASE_TOKEN == '' }}
+        run: |
+          echo "::error::RELEASE_TOKEN secret is not set. It's required so the version-bump push triggers the publish pipeline (GITHUB_TOKEN pushes don't trigger workflows). See .github/workflows/beta-release.yml header."
+          exit 1
+
+      - uses: actions/checkout@v4
+        with:
+          ref: main # post-merge main, which includes the just-merged PR
+          token: ${{ secrets.RELEASE_TOKEN }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Bump beta prerelease
+        id: bump
+        run: |
+          current=$(node -p "require('./package.json').version")
+          if ! echo "$current" | grep -q -- '-beta\.[0-9]\+$'; then
+            echo "::error::package.json version ('$current') is not an X.Y.Z-beta.N prerelease; refusing to auto-bump."
+            exit 1
+          fi
+          next=$(npm version prerelease --preid=beta --no-git-tag-version)
+          next="${next#v}" # npm prints "v1.0.0-beta.1"
+          echo "next=$next" >> "$GITHUB_OUTPUT"
+          echo "Bumping $current -> $next"
+
+      - name: Commit and push version bump
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add package.json
+          git commit -m "chore(release): v${{ steps.bump.outputs.next }}"
+          git push origin HEAD:main
