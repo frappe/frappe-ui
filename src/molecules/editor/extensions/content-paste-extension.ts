@@ -4,7 +4,10 @@ import { Slice, Fragment } from '@tiptap/pm/model'
 import { DOMParser } from '@tiptap/pm/model'
 import { EditorView } from '@tiptap/pm/view'
 import { detectMarkdown, markdownToHTML } from '@utils/markdown'
-import { processMultipleImages } from './image/image-extension'
+import {
+  processMultipleImages,
+  resolveUploadOptions,
+} from './image/image-extension'
 
 export interface ContentPasteOptions {
   enabled: boolean
@@ -34,6 +37,11 @@ export const ContentPasteExtension = Extension.create<ContentPasteOptions>({
           handlePaste: (view: EditorView, event: ClipboardEvent) => {
             if (!this.options.enabled) return false
 
+            const uploadOptions = resolveUploadOptions(
+              extensionThis.editor,
+              extensionThis.options,
+            )
+
             // handle image pasting
             const files: File[] | [] = Array.from(
               event.clipboardData?.files || [],
@@ -42,14 +50,14 @@ export const ContentPasteExtension = Extension.create<ContentPasteOptions>({
               file.type.startsWith('image/'),
             )
             if (images.length > 0) {
-              processMultipleImages(images, view, null, extensionThis.options)
+              processMultipleImages(images, view, null, uploadOptions)
               return true
             }
 
             // handle html with media
             const htmlData = event.clipboardData?.getData('text/html')
             if (htmlData) {
-              processHTMLImages(htmlData, view, this.options)
+              processHTMLImages(htmlData, view, uploadOptions)
               return true
             }
 

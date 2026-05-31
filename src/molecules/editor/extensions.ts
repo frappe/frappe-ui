@@ -1,4 +1,4 @@
-import { Extension } from '@tiptap/core'
+import { Extension, type Editor } from '@tiptap/core'
 import type { Component } from 'vue'
 import type { MaybeRefOrGetter } from 'vue'
 import StarterKitExtension from '@tiptap/starter-kit'
@@ -46,24 +46,47 @@ export const StarterKit = StarterKitExtension
 
 type PlaceholderStorage = { text: string | null }
 
+// Typed accessor for the Placeholder extension's storage, if it's loaded.
+function placeholderStorage(
+  editor: Editor | null | undefined,
+): PlaceholderStorage | undefined {
+  return (editor?.storage as Record<string, unknown> | undefined)
+    ?.placeholder as PlaceholderStorage | undefined
+}
+
 /**
  * Placeholder with frappe-ui's storage-threading: when not given an explicit
- * `placeholder`, it reads its text from `editor.storage.placeholder.text`, which
- * `<TextEditor>` writes from its reactive `placeholder` prop (see spec §2). An
- * explicit `Placeholder.configure({ placeholder })` replaces the reader and wins.
+ * `placeholder`, it reads its text from its own storage, which `setPlaceholder`
+ * (below) writes from `<TextEditor>`'s reactive `placeholder` prop (see spec §2).
+ * An explicit `Placeholder.configure({ placeholder })` replaces the reader and wins.
  */
 export const Placeholder = PlaceholderExtension.extend({
   addStorage() {
-    return { ...(this.parent?.() ?? {}), text: null }
+    return { ...(this.parent?.() ?? {}), text: null as string | null }
   },
 }).configure({
-  placeholder: ({ editor }) => {
-    const storage = (editor.storage as Record<string, any>).placeholder as
-      | PlaceholderStorage
-      | undefined
-    return storage?.text ?? ''
-  },
+  placeholder: ({ editor }) => placeholderStorage(editor)?.text ?? '',
 })
+
+/**
+ * Set the placeholder text on a live editor and refresh its decoration. The whole
+ * mechanism lives here, next to the extension, so `<TextEditor>` never reaches into
+ * editor storage or ProseMirror transactions. No-op when the Placeholder extension
+ * isn't loaded (or a consumer supplied an explicit `placeholder`, which replaces the
+ * storage reader). `<TextEditor>` calls this from its `placeholder` prop watcher.
+ */
+export function setPlaceholder(
+  editor: Editor | null | undefined,
+  text: string | null,
+): void {
+  const storage = placeholderStorage(editor)
+  if (!editor || !storage || storage.text === text) return
+  storage.text = text
+  // Placeholder decorations recompute only on a state change; dispatch an empty
+  // (no-step) transaction to force a refresh. No steps → no doc change → the
+  // editor's `update` / `change` events don't fire.
+  editor.view?.dispatch(editor.state.tr)
+}
 
 export const Heading = HeadingExtension
 // frappe-ui's link: inline edit popup, Mod-k shortcut, smart paste handling, and
@@ -83,47 +106,16 @@ export const TextStyle = TextStyleExtension
 export const Color = ColorExtension
 export const Highlight = HighlightExtension
 
-const warnedMissingUpload = new Set<string>()
-
-function warnMissingUploadOnce(name: string) {
-  if (warnedMissingUpload.has(name)) return
-  warnedMissingUpload.add(name)
-  console.warn(
-    `[frappe-ui/editor] ${name} needs an uploadFunction. Pass useEditor({ uploadFunction }) or ${name}.configure({ uploadFunction }). Upload will be skipped.`,
-  )
-}
-
-function uploadAware(name: string, base = Extension.create({ name })) {
-  const config = {
-    addOptions() {
-      return { ...(this.parent?.() ?? {}), uploadFunction: null }
-    },
-    onCreate() {
-      this.parent?.()
-      const uploadStorage = this.editor?.storage?.upload
-      const storageUploadFunction = uploadStorage?.uploadFunction
-      if (!this.options.uploadFunction && storageUploadFunction) {
-        this.options.uploadFunction = storageUploadFunction
-      }
-      if (!this.options.uploadFunction && !uploadStorage)
-        warnMissingUploadOnce(name)
-    },
-    addStorage() {
-      return { uploadFunction: this.options.uploadFunction }
-    },
-  }
-
-  if (typeof (base as any).extend === 'function') {
-    return (base as any).extend(config)
-  }
-
-  return { ...(base as any), name, ...config }
-}
-
-export const Image = uploadAware('Image', ImageExtension)
-export const ImageGroup = uploadAware('ImageGroup', ImageGroupExtension)
+// Upload-aware extensions share one engine-level upload function. `useEditor`
+// writes it to `editor.storage.upload.uploadFunction`; each extension reads it at
+// use-time via `resolveUploadOptions(editor, this.options)` (image-extension.ts),
+// with a per-extension `.configure({ uploadFunction })` winning. There is no
+// onCreate option-copy: tiptap v3 froze `extension.options` into an immutable
+// getter, so the only reliable read is at use-time from the shared storage.
+export const Image = ImageExtension
+export const ImageGroup = ImageGroupExtension
 export const ImageViewer = ImageViewerExtension
-export const Video = uploadAware('Video', VideoExtension)
+export const Video = VideoExtension
 export const Iframe = IframeExtension
 export const Mention = MentionExtension
 
@@ -152,5 +144,5 @@ export const Tag = TagComposite
 export const Emoji = EmojiExtension
 export { SlashCommands }
 export const Toc = TocNodeExtension
-export const ContentPaste = uploadAware('ContentPaste', ContentPasteExtension)
+export const ContentPaste = ContentPasteExtension
 export const StyleClipboard = StyleClipboardExtension

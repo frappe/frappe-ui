@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, h, type Component } from 'vue'
 import type { CommandMenuItem, MenuGroupItem, MenuItem } from './menu'
 import type { Editor } from './useEditor'
 
@@ -7,6 +7,17 @@ const props = defineProps<{
   editor: Editor | null
   items: MenuItem[]
 }>()
+
+// Renders an item's glyph: a `lucide-*` (or any) string becomes a masked icon
+// span (sized here so item definitions stay terse); a component renders as-is;
+// with no icon we fall back to the label text.
+function ItemContent(p: { item: CommandMenuItem }) {
+  const { icon, label } = p.item
+  if (!icon) return h('span', label)
+  if (typeof icon === 'string')
+    return h('span', { class: ['size-4', icon], 'aria-hidden': 'true' })
+  return h(icon as Component)
+}
 
 function isGroup(item: MenuItem): item is MenuGroupItem {
   return 'type' in item && item.type === 'group'
@@ -69,27 +80,25 @@ function run(item: CommandMenuItem) {
         v-for="groupItem in item.items"
         :key="groupItem.label"
         type="button"
-        class="rounded px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 aria-pressed:bg-gray-100"
+        class="inline-flex size-6 items-center justify-center rounded text-sm text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 aria-pressed:bg-gray-100"
         :aria-label="groupItem.label"
         :aria-pressed="editor ? groupItem.isActive?.(editor) === true : false"
         :disabled="!editor || groupItem.isDisabled?.(editor) === true"
         @click="run(groupItem)"
       >
-        <component :is="groupItem.icon" v-if="groupItem.icon" />
-        <span v-else>{{ groupItem.label }}</span>
+        <ItemContent :item="groupItem" />
       </button>
     </div>
     <button
       v-else
       type="button"
-      class="rounded px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 aria-pressed:bg-gray-100"
+      class="inline-flex size-6 items-center justify-center rounded text-sm text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 aria-pressed:bg-gray-100"
       :aria-label="item.label"
       :aria-pressed="editor ? item.isActive?.(editor) === true : false"
       :disabled="!editor || item.isDisabled?.(editor) === true"
       @click="run(item)"
     >
-      <component :is="item.icon" v-if="item.icon" />
-      <span v-else>{{ item.label }}</span>
+      <ItemContent :item="item" />
     </button>
   </template>
 </template>

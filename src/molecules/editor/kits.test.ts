@@ -59,6 +59,16 @@ describe('editor kits', () => {
     expect(names.has('slashCommands')).toBe(true)
     expect(names.has('color')).toBe(true)
     expect(names.has('textAlign')).toBe(true)
+    expect(names.has('styleClipboard')).toBe(true)
+  })
+
+  it('drops StyleClipboard when removed with `false`', () => {
+    expect(extensionNames(RichTextKit).has('styleClipboard')).toBe(true)
+    expect(
+      extensionNames(RichTextKit.configure({ styleClipboard: false })).has(
+        'styleClipboard',
+      ),
+    ).toBe(false)
   })
 
   it('removes a member with `false`', () => {

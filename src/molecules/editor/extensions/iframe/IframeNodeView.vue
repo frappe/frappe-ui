@@ -2,10 +2,6 @@
 import { ref, onMounted, computed, nextTick } from 'vue'
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
 import { detectPlatform, calculateAspectRatio } from './utils'
-import LucideMoveDiagonal2 from '~icons/lucide/move-diagonal-2'
-import LucideAlignLeft from '~icons/lucide/align-left'
-import LucideAlignCenter from '~icons/lucide/align-center'
-import LucideAlignRight from '~icons/lucide/align-right'
 
 const props = defineProps(nodeViewProps)
 
@@ -240,7 +236,7 @@ function setCursorBeforeIframe() {
               ]"
               title="Align Left"
             >
-              <LucideAlignLeft class="size-4" />
+              <span class="lucide-align-left size-4" />
             </button>
             <button
               @click.stop="setAlignment('center')"
@@ -250,7 +246,7 @@ function setCursorBeforeIframe() {
               ]"
               title="Align Center"
             >
-              <LucideAlignCenter class="size-4" />
+              <span class="lucide-align-center size-4" />
             </button>
             <button
               @click.stop="setAlignment('right')"
@@ -260,7 +256,7 @@ function setCursorBeforeIframe() {
               ]"
               title="Align Right"
             >
-              <LucideAlignRight class="size-4" />
+              <span class="lucide-align-right size-4" />
             </button>
           </div>
 
@@ -271,7 +267,7 @@ function setCursorBeforeIframe() {
             @mousedown.prevent="startResize"
             title="Resize"
           >
-            <LucideMoveDiagonal2 class="text-white size-4" />
+            <span class="lucide-move-diagonal-2 text-white size-4" />
           </button>
         </div>
 

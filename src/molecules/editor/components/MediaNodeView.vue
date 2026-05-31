@@ -1,20 +1,10 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed, h } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
 import LoadingIndicator from '@components/LoadingIndicator.vue'
 import Tooltip from '@components/Tooltip/Tooltip.vue'
 import { localFileMap } from '../extensions/image/image-extension'
 import { ErrorMessage } from '@components/ErrorMessage'
-import LucideAlignLeft from '~icons/lucide/align-left'
-import LucideAlignCenter from '~icons/lucide/align-center'
-import LucideAlignRight from '~icons/lucide/align-right'
-import LucideWrapText from '~icons/lucide/wrap-text'
-import LucideFloatLeft from '~icons/lucide/align-horizontal-justify-start'
-import LucideFloatRight from '~icons/lucide/align-horizontal-justify-end'
-import LucideNoFloat from '~icons/lucide/align-vertical-space-around'
-import LucideCaptions from '~icons/lucide/captions'
-import LucideMoveDiagonal2 from '~icons/lucide/move-diagonal-2'
-import LucideRotateCw from '~icons/lucide/rotate-cw'
 
 const props = defineProps(nodeViewProps)
 
@@ -38,19 +28,19 @@ const fileContent = computed(() => localFileMap.get(props.node.attrs.uploadId)?.
 const currentAlignIcon = computed(() => {
   return (
     {
-      left: LucideAlignLeft,
-      center: LucideAlignCenter,
-      right: LucideAlignRight,
-    }[props.node.attrs.align] || LucideAlignLeft
+      left: 'lucide-align-left',
+      center: 'lucide-align-center',
+      right: 'lucide-align-right',
+    }[props.node.attrs.align] || 'lucide-align-left'
   )
 })
 
 const currentFloatIcon = computed(() => {
   return (
     {
-      left: LucideFloatLeft,
-      right: LucideFloatRight,
-    }[props.node.attrs.float] || LucideWrapText
+      left: 'lucide-align-horizontal-justify-start',
+      right: 'lucide-align-horizontal-justify-end',
+    }[props.node.attrs.float] || 'lucide-wrap-text'
   )
 })
 
@@ -289,17 +279,17 @@ const wrapperClasses = (float: string) => [
         <div v-if="isUploaded" class="absolute top-2 right-2 items-center bg-black/65 px-1.5 py-1 gap-2 rounded"
           :class="selected && isEditable ? 'flex' : 'hidden'">
           <button>
-            <LucideCaptions @click="toggleCaptions" class="size-4"
+            <span @click="toggleCaptions" class="lucide-captions size-4"
               :class="[showCaption ? 'text-ink-white' : 'text-ink-gray-4']" />
           </button>
           <button v-if="!isVideo" @click.stop="toggleAlignPopper"
             class="hover:text-ink-white text-ink-gray-4"
             :class="[node.attrs.align ? 'text-ink-white' : 'text-ink-gray-4']">
-            <component :is="currentAlignIcon" class="size-4" />
+            <span :class="[currentAlignIcon, 'size-4']" />
           </button>
           <!-- <button @click.stop="toggleFloatPopper" class="hover:text-ink-white text-ink-gray-4"
             :class="[node.attrs.float ? 'text-ink-white' : 'text-ink-gray-4']">
-            <component :is="currentFloatIcon" class="size-4" />
+            <span :class="[currentFloatIcon, 'size-4']" />
           </button> -->
 
           <div ref="alignButtonRef" v-if="showAlignPopper && !isVideo"
@@ -309,7 +299,7 @@ const wrapperClasses = (float: string) => [
                 ? 'text-ink-white'
                 : 'text-ink-gray-4'
                 ">
-                <LucideAlignLeft class="size-4" />
+                <span class="lucide-align-left size-4" />
               </button>
             </Tooltip>
             <Tooltip text="Align center" class="h-5">
@@ -317,7 +307,7 @@ const wrapperClasses = (float: string) => [
                 ? 'text-ink-white'
                 : 'text-ink-gray-4'
                 ">
-                <LucideAlignCenter class="size-4" />
+                <span class="lucide-align-center size-4" />
               </button>
             </Tooltip>
             <Tooltip text="Align right" class="h-5">
@@ -325,7 +315,7 @@ const wrapperClasses = (float: string) => [
                 ? 'text-ink-white'
                 : 'text-ink-gray-4'
                 ">
-                <LucideAlignRight class="size-4" />
+                <span class="lucide-align-right size-4" />
               </button>
             </Tooltip>
           </div>
@@ -337,7 +327,7 @@ const wrapperClasses = (float: string) => [
                 ? 'text-ink-white'
                 : 'text-ink-gray-4'
                 ">
-                <LucideFloatLeft class="size-4" />
+                <span class="lucide-align-horizontal-justify-start size-4" />
               </button>
             </Tooltip>
             <Tooltip text="Float right" class="h-5">
@@ -345,12 +335,12 @@ const wrapperClasses = (float: string) => [
                 ? 'text-ink-white'
                 : 'text-ink-gray-4'
                 ">
-                <LucideFloatRight class="size-4" />
+                <span class="lucide-align-horizontal-justify-end size-4" />
               </button>
             </Tooltip>
             <Tooltip v-if="node.attrs.float" text="Remove float" class="h-5">
               <button @click="setFloat(null)" class="text-ink-gray-4 hover:text-ink-white hover:bg-transparent">
-                <LucideNoFloat class="size-4" />
+                <span class="lucide-align-vertical-space-around size-4" />
               </button>
             </Tooltip>
           </div>
@@ -360,14 +350,14 @@ const wrapperClasses = (float: string) => [
           v-else
           variant="solid"
           class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-          :icon-left="h(LucideRotateCw, { class: 'size-4' })"
+          icon-left="lucide-rotate-cw"
           label="Try again"
           @click="isVideo ? editor.commands.reuploadVideo(node.attrs.uploadId) : editor.commands.reuploadImage(node.attrs.uploadId)"
         />
 
         <button v-if="selected && isEditable && isUploaded" class="absolute bottom-2 right-2 cursor-nw-resize bg-black/65 rounded p-1"
           @mousedown.prevent="startResize">
-          <LucideMoveDiagonal2 class="text-white size-4" />
+          <span class="lucide-move-diagonal-2 text-white size-4" />
         </button>
         <div v-if="node.attrs.loading" class="inset-0 absolute flex items-center justify-center z-10">
           <div

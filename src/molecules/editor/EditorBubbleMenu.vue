@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BubbleMenu } from '@tiptap/extension-bubble-menu'
+import { BubbleMenu } from '@tiptap/vue-3/menus'
 import MenuItems from './MenuItems.vue'
 import type { MenuItem } from './menu'
 import type { Editor } from './useEditor'

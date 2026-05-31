@@ -205,7 +205,12 @@ export const ImageExtension = NodeExtension.create<ImageExtensionOptions>({
       uploadImage:
         (file: File) =>
         ({ editor }) => {
-          return uploadImage(file, editor.view, null, this.options)
+          return uploadImage(
+            file,
+            editor.view,
+            null,
+            resolveUploadOptions(editor, this.options),
+          )
         },
 
       selectAndUploadImage:
@@ -259,7 +264,7 @@ export const ImageExtension = NodeExtension.create<ImageExtensionOptions>({
             fileData.file,
             editor.view,
             nodePos,
-            this.options,
+            resolveUploadOptions(editor, this.options),
             'replace',
           )
         },
@@ -288,8 +293,12 @@ export const ImageExtension = NodeExtension.create<ImageExtensionOptions>({
           handleDOMEvents: {
             drop: (view, event) => {
               const hasFiles = event.dataTransfer?.files?.length
+              const uploadOptions = resolveUploadOptions(
+                extensionThis.editor,
+                extensionThis.options,
+              )
 
-              if (!hasFiles || !extensionThis.options.uploadFunction) {
+              if (!hasFiles || !uploadOptions.uploadFunction) {
                 return false
               }
 
@@ -317,12 +326,16 @@ export const ImageExtension = NodeExtension.create<ImageExtensionOptions>({
                 view.dispatch(transaction)
               }
 
-              processMultipleImages(images, view, pos, extensionThis.options)
+              processMultipleImages(images, view, pos, uploadOptions)
               return true
             },
 
             handlePaste: (view, event) => {
-              if (!extensionThis.options.uploadFunction) {
+              const uploadOptions = resolveUploadOptions(
+                extensionThis.editor,
+                extensionThis.options,
+              )
+              if (!uploadOptions.uploadFunction) {
                 return false
               }
 
@@ -351,7 +364,7 @@ export const ImageExtension = NodeExtension.create<ImageExtensionOptions>({
               }
 
               event.preventDefault()
-              processMultipleImages(images, view, null, extensionThis.options)
+              processMultipleImages(images, view, null, uploadOptions)
               return true
             },
           },
@@ -411,6 +424,21 @@ function findInsertPosition(
   })
 
   return insertPos
+}
+
+// Resolve the uploadFunction at use-time. A directly-configured option wins;
+// otherwise fall back to the shared `upload` storage set via useEditor({ uploadFunction }).
+// (tiptap v3 froze extension.options into an immutable getter, so it can't be mutated
+// after construction — the only reliable read is at use-time from the shared storage.)
+export function resolveUploadOptions(
+  editor: { storage?: Record<string, any> } | null | undefined,
+  options: Record<string, any>,
+) {
+  return {
+    ...options,
+    uploadFunction:
+      options.uploadFunction ?? editor?.storage?.upload?.uploadFunction ?? null,
+  }
 }
 
 // Base upload function shared by all image upload methods

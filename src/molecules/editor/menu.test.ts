@@ -5,16 +5,16 @@
 import { describe, it, expect, vi } from 'vitest'
 import { createApp, defineComponent, h } from 'vue'
 
-vi.mock('@tiptap/extension-bubble-menu', () => ({
+// EditorBubbleMenu/EditorFloatingMenu import these from `@tiptap/vue-3/menus`
+// (the real tiptap-v3 component source). Stub them as slot pass-throughs so the
+// wrapper's item rendering can be asserted without tiptap's floating/portal behavior.
+vi.mock('@tiptap/vue-3/menus', () => ({
   BubbleMenu: defineComponent({
     props: ['editor', 'options'],
     setup(_props, { slots }) {
       return () => h('div', { 'data-testid': 'bubble-menu' }, slots.default?.())
     },
   }),
-}))
-
-vi.mock('@tiptap/extension-floating-menu', () => ({
   FloatingMenu: defineComponent({
     props: ['editor', 'options'],
     setup(_props, { slots }) {
@@ -104,8 +104,10 @@ describe('editor menu primitives and presets', () => {
       (root.querySelector('[aria-label="Italic"]') as HTMLButtonElement)
         .disabled,
     ).toBe(true)
+    // The group renders its label as text; its members render icons, so assert
+    // them by aria-label rather than visible text.
     expect(root.textContent).toContain('Heading')
-    expect(root.textContent).toContain('Heading 2')
+    expect(root.querySelector('[aria-label="Heading 2"]')).toBeTruthy()
   })
 
   it('command item actions call the editor chain', async () => {
@@ -150,14 +152,19 @@ describe('editor menu primitives and presets', () => {
       await import('./index')
     const { editor } = fakeEditor()
 
+    // Items render their icon (not label text), so assert the button by aria-label.
     expect(
-      mount(EditorBubbleMenu, { editor, items: [Bold], options: {} })
-        .textContent,
-    ).toContain('Bold')
+      mount(EditorBubbleMenu, { editor, items: [Bold], options: {} }).querySelector(
+        '[aria-label="Bold"]',
+      ),
+    ).toBeTruthy()
     expect(
-      mount(EditorFloatingMenu, { editor, items: [Bold], options: {} })
-        .textContent,
-    ).toContain('Bold')
+      mount(EditorFloatingMenu, {
+        editor,
+        items: [Bold],
+        options: {},
+      }).querySelector('[aria-label="Bold"]'),
+    ).toBeTruthy()
   })
 
   it('exports menu presets as plain arrays', async () => {

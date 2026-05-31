@@ -27,6 +27,7 @@ import {
   Highlight,
   Typography,
   TextAlign,
+  StyleClipboard,
   type MentionSuggestionItem,
   type TagSuggestionItem,
 } from './extensions'
@@ -196,6 +197,7 @@ export const RichTextKit = Extension.create<RichTextKitOptions>({
     pushMember(list, Highlight, options.highlight)
     pushMember(list, Typography, options.typography)
     pushMember(list, TextAlign, options.textAlign)
+    pushMember(list, StyleClipboard, options.styleClipboard)
     return list
   },
 })

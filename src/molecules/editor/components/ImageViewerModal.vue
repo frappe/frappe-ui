@@ -73,7 +73,7 @@
                 class="p-2 hover:bg-gray-900 rounded-l focus:outline-none"
                 @click.stop="previousImage"
               >
-                <LucideChevronLeft class="size-4" />
+                <span class="lucide-chevron-left size-4" />
               </button>
             </Tooltip>
 
@@ -86,7 +86,7 @@
                 class="p-2 hover:bg-gray-900 rounded-r focus:outline-none"
                 @click.stop="nextImage"
               >
-                <LucideChevronRight class="size-4" />
+                <span class="lucide-chevron-right size-4" />
               </button>
             </Tooltip>
           </div>
@@ -98,7 +98,7 @@
                 class="p-2 hover:bg-gray-900 rounded-l focus:outline-none"
                 @click.stop="zoomOut"
               >
-                <LucideMinus class="size-4" />
+                <span class="lucide-minus size-4" />
               </button>
             </Tooltip>
 
@@ -116,7 +116,7 @@
                 class="p-2 hover:bg-gray-900 rounded-r focus:outline-none"
                 @click.stop="zoomIn"
               >
-                <LucidePlus class="size-4" />
+                <span class="lucide-plus size-4" />
               </button>
             </Tooltip>
           </div>
@@ -128,7 +128,7 @@
                 class="p-2 hover:bg-gray-900 rounded-l focus:outline-none"
                 @click.stop="downloadImage"
               >
-                <LucideDownload class="size-4" />
+                <span class="lucide-download size-4" />
               </button>
             </Tooltip>
 
@@ -139,8 +139,8 @@
                 class="p-2 hover:bg-gray-900 rounded-r focus:outline-none hidden sm:block"
                 @click.stop="toggleFullscreen"
               >
-                <LucideMaximize v-if="!isFullscreen" class="size-4" />
-                <LucideMinimize v-else class="size-4" />
+                <span v-if="!isFullscreen" class="lucide-maximize size-4" />
+                <span v-else class="lucide-minimize size-4" />
               </button>
             </Tooltip>
           </div>
@@ -152,7 +152,7 @@
                 class="p-2 hover:bg-gray-900 rounded focus:outline-none"
                 @click.stop="close"
               >
-                <LucideX class="size-4" />
+                <span class="lucide-x size-4" />
               </button>
             </Tooltip>
           </div>
@@ -177,14 +177,6 @@ import { useTouchHandler } from '@composables/useTouchHandler'
 import { useImageNavigation } from '@composables/useImageNavigation'
 import { useZoomPan } from '@composables/useZoomPan'
 
-import LucideDownload from '~icons/lucide/download'
-import LucideMaximize from '~icons/lucide/maximize'
-import LucideMinimize from '~icons/lucide/minimize'
-import LucideChevronLeft from '~icons/lucide/chevron-left'
-import LucideChevronRight from '~icons/lucide/chevron-right'
-import LucidePlus from '~icons/lucide/plus'
-import LucideMinus from '~icons/lucide/minus'
-import LucideX from '~icons/lucide/x'
 
 interface ImageInfo {
   src: string

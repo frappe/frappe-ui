@@ -31,9 +31,9 @@ Out of scope:
 ## Decision summary
 
 - one subpath: `frappe-ui/editor`
-- **one component**, `<TextEditor>`, built on the **`useEditor`** composable; customized progressively (props → named slots → `#default` layout slot → `useEditor` + building blocks) with no second component family
+- **one component**, `<TextEditor>`, built on the **`useEditor`** composable; it is **renderless** — the consumer composes the layout in its `#default` slot from the building blocks, dropping to `useEditor` directly only when the editor must be created outside the component
 - **no ready-made assembled editors** (`CommentEditor` / `RichTextEditor` / `InlineEditor` are *not* shipped). Each app builds its own thin component on `<TextEditor>`
-- capability is the explicit **`extensions` array** (required, no default); chrome is explicit **`fixedMenu` / `bubbleMenu` / `floatingMenu`** props (default off)
+- capability is the explicit **`extensions` array** (required, no default); **`<TextEditor>` renders no UI of its own** — it owns the editor lifecycle and exposes `{ editor, isEmpty }` through the `#default` slot, and the consumer renders `EditorContent` and any menus/actions in that slot using the building blocks. There is no one-size-fits-all editor chrome
 - "good defaults" ship as **kits** (`StarterKit`-style configurable bundles) and **presets** (`MenuItem[]`) — opt-in imports, the tree-shaking boundary. Nothing import-heavy is defaulted on the component
 - data-driven extensions (mentions, tags, slash items) are configured via canonical **`.configure()`** on a kit member — never via proxy props
 - content is the unnamed `v-model`; the `format` prop ('html' | 'json') declares the shape
@@ -63,12 +63,13 @@ import {
   Mention, Tag, Emoji, SlashCommands, Toc,
   ContentPaste, StyleClipboard, SuggestionExtension,
 
-  // Menu items
-  Bold, Italic, Strike, BulletList, OrderedList, Blockquote,
+  // Menu items (each ships a default lucide-string icon; pass `icon` to override)
+  Bold, Italic, Strike, InlineCode, BulletList, OrderedList, Blockquote,
   Paragraph, H1, H2, H3, H4, H5, H6, HeadingGroup,
   AlignLeft, AlignCenter, AlignRight,
   FontColor, FontHighlight, InsertImage, InsertVideo, InsertLink,
-  InsertTable, HorizontalRule, Separator,
+  InsertTable, HorizontalRule, Undo, Redo, Separator,
+  // InlineCode is the inline `code` toggle — named to avoid colliding with the `Code` extension.
   // (full catalog defined in implementation)
 
   // Toolbar presets — plain MenuItem arrays (surface-agnostic)
@@ -122,7 +123,7 @@ When `uploadFunction` is set, `useEditor` prepends a tiny internal `UploadStorag
 
 ## 2. `<TextEditor>` — the component
 
-The single component every editor is built on. It runs `useEditor` internally, renders the content area and whichever menu surfaces you configure, and exposes the editor for slots.
+The single component every editor is built on. It runs `useEditor` internally and is **renderless**: it owns the editor lifecycle, `v-model`, upload and placeholder threading, and exposes `{ editor, isEmpty }` through its `#default` slot — but it renders no UI of its own. There is no one-size-fits-all editor chrome, so the consumer renders `EditorContent` and whichever menus/actions it wants in the slot, using the building blocks.
 
 ```ts
 const model = defineModel<string | JSONContent | null>()
@@ -131,57 +132,63 @@ defineProps<{
   // capability
   extensions: Extension[]                 // REQUIRED — the complete list; include a kit
 
-  // content / behavior knobs (universal, reactive where noted)
+  // content / behavior knobs (universal, reactive where noted) — no layout props
   format?: 'html' | 'json'                // default 'html'
   placeholder?: string                    // reactive; threads to the Placeholder extension
   editable?: boolean                      // default true; reactive
   autofocus?: boolean                     // default false
   uploadFunction?: (file: File) => Promise<UploadedFile>
-  maxHeight?: string                      // CSS length; wraps content in overflow-y-auto
-
-  // chrome (default off — explicit for tree-shaking)
-  fixedMenu?: MenuItem[] | false          // default false; the persistent toolbar row
-  fixedMenuPosition?: 'top' | 'bottom'    // default 'top'
-  bubbleMenu?: MenuItem[] | false         // default false
-  bubbleMenuOptions?: { shouldShow?: (...) => boolean; tippyOptions?: Partial<TippyProps> }
-  floatingMenu?: MenuItem[] | false       // default false
 }>()
 
 defineSlots<{
-  default?(props: { editor: Editor | null; isEmpty: boolean }): any    // own the layout
-  actions?(props: { editor: Editor | null; isEmpty: boolean }): any     // buttons in the toolbar row
-  fixedMenu?(props: { editor: Editor | null }): any                     // custom fixed-menu render
-  bubbleMenu?(props: { editor: Editor | null }): any
-  floatingMenu?(props: { editor: Editor | null }): any
+  // The consumer owns the entire layout: render EditorContent and any menus or
+  // action buttons using the provided editor instance.
+  default?(props: { editor: Editor | null; isEmpty: boolean }): any
 }>()
 
-defineEmits<{ change: [value: string | JSONContent | null] }>()
+defineEmits<{
+  change: [value: string | JSONContent | null]
+  focus: [event: FocusEvent]
+  blur: [event: FocusEvent]
+  transaction: [editor: Editor]
+}>()
+
+// Sanctioned template-ref escape hatch — reach the live instance from a parent's
+// script without owning its lifecycle.
+defineExpose<{ editor: ShallowRef<Editor | null>; isEmpty: Ref<boolean> }>()
 ```
 
-The three surface props (`fixedMenu` / `bubbleMenu` / `floatingMenu`) match the building-block component names (`EditorFixedMenu` / `EditorBubbleMenu` / `EditorFloatingMenu`) and v0's `fixed-menu` / `bubble-menu` / `floating-menu`. The `*Toolbar` presets are surface-agnostic item sets you assign to any of them.
+`change` is the content side-event; `focus` / `blur` / `transaction` forward the
+engine's `onFocus` / `onBlur` / `onTransaction` (universal behavior events, same
+category as `change`). The `defineExpose` is the escape hatch between the slot and
+L4: a consumer (typically an app's own component built on `<TextEditor>`) reads
+`ref.editor` / `ref.isEmpty` to drive the instance from script — focus it, read
+emptiness, subscribe to events, re-expose it to its own parent — while
+`<TextEditor>` still owns the lifecycle. L4 (`useEditor`) remains the answer only
+when the `Editor` must be *created* outside the component (shared with siblings,
+or built with an external Y.Doc before mount).
+
+The menu building blocks (`EditorFixedMenu` / `EditorBubbleMenu` / `EditorFloatingMenu`) are rendered by the consumer inside the `#default` slot and fed a `MenuItem[]` via their `items` prop. The `*Toolbar` presets are surface-agnostic item sets you assign to any of them.
 
 ### Why these are props vs `.configure()`
 
 The line that keeps proxy-prop creep out (the `mentions`-prop smell):
 
-- **Props** — universal display/behavior knobs every editor has, that aren't data sources: `v-model`/`format`, `editable`, `autofocus`, `placeholder`, `uploadFunction`, `maxHeight`, and the `fixedMenu`/`bubbleMenu`/`floatingMenu` chrome.
+- **Props** — universal content/behavior knobs every editor has, that aren't data sources and aren't layout: `v-model`/`format`, `editable`, `autofocus`, `placeholder`, `uploadFunction`. Layout — menus, toolbars, action buttons, max-height — is not a prop; it's markup you render in the `#default` slot.
 - **`.configure()` in `extensions`** — capabilities and data sources: `mention`, `tag`, slash items, heading levels, link behavior, custom nodes, collaboration.
 
 `placeholder` stays a prop (universal, reactive, a display string — not a data source). It threads into the kit's `Placeholder` extension via `editor.storage`, the same pattern as `uploadFunction`: `<TextEditor>` writes the prop into `editor.storage.placeholder` after construction; the frappe-wrapped `Placeholder` (issue 02) reads its text from there when not explicitly configured and refreshes its decoration when the value changes; and an explicit `Placeholder.configure({ placeholder })` wins. The component never reconfigures a consumer-supplied extension. If no `Placeholder` extension is present, the prop is a no-op.
 
 ### The customization ladder
 
-Every step adjusts the *same* component in place — there is no rewrite into another family:
+There are two rungs, because the component renders nothing on its own — every editor composes its layout in the slot:
 
 | Rung | What you do | For |
 |---|---|---|
-| L0 | `<TextEditor :extensions="[kit]" v-model>` | content area, no chrome |
-| L1 | `+ :fixed-menu="preset"` / `:bubble-menu="preset"` | standard menus |
-| L2 | `+ #actions` / `#fixedMenu` slots | tweak the default chrome |
-| L3 | `#default` slot (`{ editor, isEmpty }`) | own the layout; component still owns the editor lifecycle |
-| L4 | `useEditor` + building blocks | own the lifecycle too (editor created in a parent composable) |
+| L_slot | `<TextEditor :extensions="[kit]" v-model v-slot="{ editor }">` + render `EditorContent` and any menus/actions in the slot | every editor — own the layout while `<TextEditor>` owns the lifecycle, v-model, upload, placeholder |
+| L4 | `useEditor` + building blocks | own the lifecycle too — the editor is created in a parent composable (shared with siblings, or built with an external Y.Doc before mount) |
 
-L3 covers bespoke layouts (email CC/BCC headers, a side Table-of-Contents) without leaving the component — you render `EditorContent` + menus where you want, using the slot's `editor`. L4 is only for when the `Editor` instance must live outside the component (shared with sibling inputs, or created with an external Y.Doc before mount).
+The slot covers everything from a bare content area (just `EditorContent`) to bespoke layouts (email CC/BCC headers, a side Table-of-Contents): you render `EditorContent` + menus where you want, using the slot's `editor`. L4 is only for when the `Editor` instance must live outside the component.
 
 ## 3. Kits
 
@@ -254,7 +261,7 @@ A menu surface varies along two independent axes: **which buttons** (data) and *
 
 ```ts
 type CommandMenuItem = {
-  icon?: Component
+  icon?: Component | string
   label: string
   action: (editor: Editor) => void
   isActive?: (editor: Editor) => boolean
@@ -265,7 +272,7 @@ type MenuGroupItem = { type: 'group'; icon?: Component; label: string; items: Co
 type MenuItem = CommandMenuItem | MenuGroupItem | { type: 'separator' }
 ```
 
-Predefined items are typed constants imported by name. A custom button is just a `MenuItem` object — no custom rendering needed:
+Predefined items are typed constants imported by name, each shipping a sensible default `icon` — a `lucide-*` string that the renderer masks into an icon span (the frappe-ui house convention, same path as `Button`). The `icon` accepts either a string (masked) or a component (rendered as-is); pass your own to override the default. A custom button is just a `MenuItem` object — no custom rendering needed:
 
 ```ts
 const QuoteButton: CommandMenuItem = {
@@ -278,31 +285,29 @@ const QuoteButton: CommandMenuItem = {
 
 **Self-pruning.** Items **hide** when unavailable — `isAvailable(editor)` returns `false` because the required mark/node isn't in `editor.schema` (predefined items set this, e.g. `Bold.isAvailable = (e) => 'bold' in e.schema.marks`) — and **disable** when present-but-not-currently-runnable (`isDisabled`). The renderer skips items whose `isAvailable` returns `false`. This is what lets one preset adapt across kits — `:fixed-menu="articleToolbar"` with `:extensions="[RichTextKit.configure({ table: false })]"` simply drops the Table button, no re-curation.
 
-### Which buttons — the menu props
+### Which buttons — the `items` array
 
-The `fixedMenu` / `bubbleMenu` / `floatingMenu` props mirror `extensions`: a preset is the good default, an array is the complete list, replace semantics, default off:
+You render a menu building block (`EditorFixedMenu` / `EditorBubbleMenu` / `EditorFloatingMenu`) in the slot and feed its `items`: a preset is the good default, an array is the complete list, replace semantics:
 
 ```ts
-:fixed-menu="articleToolbar"                               // preset
-:fixed-menu="[...commentToolbar, Separator, QuoteButton]"  // tweak a preset
-:fixed-menu="[Bold, Italic, Link, Separator, H2, H3]"      // fully custom set
-:fixed-menu="false"                                        // no fixed menu (default)
+:items="articleToolbar"                               // preset
+:items="[...commentToolbar, Separator, QuoteButton]"  // tweak a preset
+:items="[Bold, Italic, Link, Separator, H2, H3]"      // fully custom set
 ```
 
-Presets (`commentToolbar`, `articleToolbar`, `minimalToolbar`) are plain `MenuItem[]`, opt-in imports — unimported presets tree-shake away. The same prop shape applies to `bubbleMenu` and `floatingMenu`.
+Presets (`commentToolbar`, `articleToolbar`, `minimalToolbar`) are plain `MenuItem[]`, opt-in imports — unimported presets tree-shake away. The same `items` shape feeds all three menu building blocks.
 
-### How it renders — the menu slots
+### How it renders — your slot markup
 
-For different *chrome* (a floating pill, a segmented control), take the `#fixedMenu` / `#bubbleMenu` / `#floatingMenu` slot and render your own, reusing the building blocks. A menu slot wins over its prop when both are present.
+Chrome (a floating pill, a segmented control, toolbar position, an actions row) is just the markup you wrap the building block in, inside the `#default` slot:
 
 ```vue
-<TextEditor v-model="content" :extensions="extensions">
-  <template #fixedMenu="{ editor }">
-    <div class="my-pill">
-      <EditorFixedMenu :editor="editor" :items="[Bold, Italic, Link]" />
-      <MyControl :editor="editor" />
-    </div>
-  </template>
+<TextEditor v-model="content" :extensions="extensions" v-slot="{ editor }">
+  <div class="my-pill">
+    <EditorFixedMenu :editor="editor" :items="[Bold, Italic, Link]" />
+    <MyControl :editor="editor" />
+  </div>
+  <EditorContent :editor="editor" />
 </TextEditor>
 ```
 
@@ -348,7 +353,8 @@ No `v-model:content`, `v-model:html`, or `v-model:json` — one v-model carries 
 | `autofocus` | ❌ | one-shot at mount |
 | `uploadFunction` | ❌ | construction-time; threaded to storage |
 | `extensions` | ❌ | construction-time; reactive extensions = destroy + recreate, not supported |
-| `fixedMenu` / `bubbleMenu` / `floatingMenu` | ✅ | item arrays may change reactively |
+
+Menus carry no reactivity model here: they're building blocks the consumer renders in the slot, and a `MenuItem[]` passed to their `items` prop may change reactively like any prop.
 
 ## 9. The recommended pattern — build your app's component on `<TextEditor>`
 
@@ -357,7 +363,7 @@ frappe-ui ships no assembled editor. Each app writes one thin component encoding
 ```vue
 <!-- gameplan/src/components/GPComment.vue — written once, reused at every comment site -->
 <script setup lang="ts">
-import { TextEditor, CommentKit, commentToolbar } from 'frappe-ui/editor'
+import { TextEditor, EditorContent, EditorFixedMenu, CommentKit, commentToolbar } from 'frappe-ui/editor'
 import { RichQuote, FloatingQuote } from './editor/extensions'   // gameplan-local
 import { activeUsers } from '@/data/users'
 import { tags } from '@/data/tags'
@@ -379,24 +385,27 @@ const extensions = [
   <TextEditor
     v-model="content"
     :extensions="extensions"
-    :fixed-menu="commentToolbar"
-    fixed-menu-position="bottom"
     :upload-function="uploadAttachment"
     placeholder="Write a comment…"
+    v-slot="{ editor, isEmpty }"
   >
-    <template #actions="{ isEmpty }">
-      <Button label="Discard" @click="$emit('discard')" />
-      <Button variant="solid" label="Comment" :disabled="isEmpty" @click="$emit('submit')" />
-    </template>
+    <EditorContent :editor="editor" class="prose-sm px-3 py-2" />
+    <div class="flex items-center justify-between border-t px-2 py-1.5">
+      <EditorFixedMenu :editor="editor" :items="commentToolbar" />
+      <div class="flex gap-2">
+        <Button label="Discard" @click="$emit('discard')" />
+        <Button variant="solid" label="Comment" :disabled="isEmpty" @click="$emit('submit')" />
+      </div>
+    </div>
   </TextEditor>
 </template>
 ```
 
 Helpdesk writes its own with agent mentions + `PreserveVideoControls` + its toolbar + an attachment row (via `#default`); drive composes a collab document at L4. None fight a library component.
 
-## 10. Bespoke layout without leaving the component (L3)
+## 10. Bespoke layout — the slot is the layout
 
-The email composer's CC/BCC header doesn't fit a default chrome, but it doesn't need `useEditor` either — take the `#default` slot:
+The email composer's CC/BCC header is just more markup in the slot; it doesn't need `useEditor`:
 
 ```vue
 <TextEditor v-model="content" :extensions="extensions" :upload-function="upload" v-slot="{ editor }">

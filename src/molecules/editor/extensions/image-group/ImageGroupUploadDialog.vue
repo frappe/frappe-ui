@@ -13,7 +13,7 @@
         <div class="flex items-center gap-2">
           <Button @click="triggerFileInput">
             <template #prefix>
-              <LucideImagePlus class="size-4" />
+              <span class="lucide-image-plus size-4" />
             </template>
             Add images
           </Button>
@@ -50,7 +50,7 @@
               aria-label="Remove image"
               @click.stop="removeImage(idx)"
             >
-              <LucideX class="w-4 h-4 text-gray-700" />
+              <span class="lucide-x w-4 h-4 text-gray-700" />
             </button>
 
             <!-- Existing images from edit mode -->
@@ -180,7 +180,7 @@
             @drop.prevent="onDrop"
           >
             <div class="text-ink-gray-4 mb-2">
-              <LucideImagePlus class="size-6" />
+              <span class="lucide-image-plus size-6" />
             </div>
             <div class="text-ink-gray-5 text-sm font-medium">
               Drag & drop images here or click to select
@@ -267,8 +267,6 @@ import Button from '@components/Button/Button.vue'
 import Select from '@components/Select/Select.vue'
 import type { Editor } from '@tiptap/vue-3'
 import type { UploadedFile } from '@utils/useFileUpload'
-import LucideX from '~icons/lucide/x'
-import LucideImagePlus from '~icons/lucide/image-plus'
 
 interface UploadResult {
   success: boolean
@@ -574,7 +572,12 @@ function getUploadFunction() {
   const imageGroupExtension = props.editor.extensionManager.extensions.find(
     (ext) => ext.name === 'imageGroup',
   )
-  return imageGroupExtension?.options?.uploadFunction
+  // A per-extension `.configure({ uploadFunction })` wins; otherwise fall back to
+  // the shared `upload` storage set by useEditor({ uploadFunction }).
+  return (
+    imageGroupExtension?.options?.uploadFunction ??
+    props.editor.storage?.upload?.uploadFunction
+  )
 }
 
 function filePreview(file: File) {

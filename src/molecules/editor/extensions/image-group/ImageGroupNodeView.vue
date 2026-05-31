@@ -4,7 +4,7 @@
       <div v-if="isEditable" class="flex items-center mb-2 gap-2">
         <Button @click="edit">
           <template #prefix>
-            <LucideEdit class="size-4" />
+            <span class="lucide-edit size-4" />
           </template>
           Edit
         </Button>
@@ -16,7 +16,7 @@
           <button v-if="isEditable" type="button"
             class="absolute top-1 right-1 z-10 bg-white/80 hover:bg-white rounded-full p-1 shadow transition-opacity opacity-0 group-hover:opacity-100 focus:opacity-100"
             aria-label="Remove image" @click.stop="removeImage(idx)">
-            <LucideX class="w-4 h-4 text-gray-700" />
+            <span class="lucide-x w-4 h-4 text-gray-700" />
           </button>
           <img :src="img.attrs.src" :alt="img.attrs.alt || ''"
             class="object-cover w-full h-full not-prose cursor-pointer rounded-[2px]" v-if="!isEditable"
@@ -49,8 +49,6 @@
 import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { NodeViewWrapper, type Editor } from '@tiptap/vue-3'
 import type { NodeViewProps } from '@tiptap/vue-3'
-import LucideX from '~icons/lucide/x'
-import LucideEdit from '~icons/lucide/edit'
 import Button from '@components/Button/Button.vue'
 import Select from '@components/Select/Select.vue'
 import ImageViewerModal from '@molecules/editor/components/ImageViewerModal.vue'

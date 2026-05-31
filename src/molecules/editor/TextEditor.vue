@@ -1,14 +1,9 @@
 <script setup lang="ts">
-import { computed, ref, useSlots, watch } from 'vue'
+import { ref, watch } from 'vue'
 import type { JSONContent } from '@tiptap/core'
 import type { Extension } from '@tiptap/core'
-import type { Props as TippyProps } from 'tippy.js'
 import { useEditor, type Editor, type UploadedFile } from './useEditor'
-import EditorContent from './EditorContent.vue'
-import EditorFixedMenu from './EditorFixedMenu.vue'
-import EditorBubbleMenu from './EditorBubbleMenu.vue'
-import EditorFloatingMenu from './EditorFloatingMenu.vue'
-import type { MenuItem } from './menu'
+import { setPlaceholder } from './extensions'
 
 type Content = string | JSONContent | null
 
@@ -19,43 +14,31 @@ const props = withDefaults(
     // capability — the complete extension list; include a kit
     extensions: Extension[]
 
-    // content / behavior knobs
+    // content / behavior knobs (universal, reactive where noted)
     format?: 'html' | 'json'
     placeholder?: string
     editable?: boolean
     autofocus?: boolean
     uploadFunction?: (file: File) => Promise<UploadedFile>
-    maxHeight?: string
-
-    // chrome — default off, explicit for tree-shaking
-    fixedMenu?: MenuItem[] | false
-    fixedMenuPosition?: 'top' | 'bottom'
-    bubbleMenu?: MenuItem[] | false
-    bubbleMenuOptions?: {
-      shouldShow?: (props: any) => boolean
-      tippyOptions?: Partial<TippyProps>
-    }
-    floatingMenu?: MenuItem[] | false
   }>(),
   {
     format: 'html',
     editable: true,
     autofocus: false,
-    fixedMenu: false,
-    fixedMenuPosition: 'top',
-    bubbleMenu: false,
-    floatingMenu: false,
   },
 )
 
-const emit = defineEmits<{ change: [value: Content] }>()
+const emit = defineEmits<{
+  change: [value: Content]
+  focus: [event: FocusEvent]
+  blur: [event: FocusEvent]
+  transaction: [editor: Editor]
+}>()
 
 defineSlots<{
+  // The consumer owns the entire layout: render EditorContent and whichever
+  // menus / actions it wants, using the provided editor instance.
   default?(props: { editor: Editor | null; isEmpty: boolean }): any
-  actions?(props: { editor: Editor | null; isEmpty: boolean }): any
-  fixedMenu?(props: { editor: Editor | null }): any
-  bubbleMenu?(props: { editor: Editor | null }): any
-  floatingMenu?(props: { editor: Editor | null }): any
 }>()
 
 const isEmpty = ref(true)
@@ -79,103 +62,42 @@ const editor = useEditor({
       props.format === 'json' ? editor.getJSON() : editor.getHTML(),
     )
   },
-  onTransaction: syncIsEmpty,
+  onFocus(_editor, event) {
+    emit('focus', event)
+  },
+  onBlur(_editor, event) {
+    emit('blur', event)
+  },
+  onTransaction(editor) {
+    syncIsEmpty(editor)
+    emit('transaction', editor)
+  },
 })
 
 if (editor.value) syncIsEmpty(editor.value)
 
-// Thread the reactive `placeholder` prop into the kit's Placeholder extension via
-// editor.storage.placeholder (see spec §2). This never reconfigures a
-// consumer-supplied extension; an explicit Placeholder.configure({ placeholder })
-// wins, and if no Placeholder extension is present the prop is a no-op.
+// Sanctioned template-ref escape hatch (spec §2): reach the live editor instance
+// and emptiness from a parent's script without owning its lifecycle. Apps that
+// must *create* the editor outside the component drop to L4 (useEditor) instead.
+defineExpose({ editor, isEmpty })
+
+// Thread the reactive `placeholder` prop into the Placeholder extension. The
+// storage write and decoration refresh live in `setPlaceholder` (next to the
+// extension), so this component never touches editor storage or ProseMirror
+// transactions. An explicit Placeholder.configure({ placeholder }) wins, and with
+// no Placeholder extension present it's a no-op.
 watch(
   () => props.placeholder,
-  (text) => {
-    const instance = editor.value
-    const storage = (instance?.storage as Record<string, any> | undefined)
-      ?.placeholder as { text: string | null } | undefined
-    if (!instance || !storage) return
-    storage.text = text ?? null
-    // Recompute the placeholder decoration without emitting a content update.
-    instance.view?.dispatch(instance.state.tr)
-  },
+  (text) => setPlaceholder(editor.value, text ?? null),
   { immediate: true },
-)
-
-const contentStyle = computed(() => ({
-  maxHeight: props.maxHeight,
-  overflowY: props.maxHeight ? ('auto' as const) : undefined,
-}))
-
-// The persistent toolbar row appears when a fixed menu (prop or slot) or the
-// actions slot exists.
-const slots = useSlots()
-const showToolbar = computed(
-  () =>
-    Boolean(props.fixedMenu) ||
-    Boolean(slots.fixedMenu) ||
-    Boolean(slots.actions),
 )
 </script>
 
 <template>
-  <!-- L3: the #default slot owns the whole layout; the component still owns the
-       editor lifecycle, v-model, upload threading, and placeholder. -->
-  <slot v-if="$slots.default" :editor="editor" :is-empty="isEmpty" />
-
-  <div
-    v-else
-    data-slot="text-editor"
-    class="rounded border border-gray-200 bg-white"
-  >
-    <div
-      v-if="showToolbar && fixedMenuPosition === 'top'"
-      data-slot="toolbar"
-      class="flex items-center justify-between gap-2 border-b border-gray-200 px-2 py-1.5"
-    >
-      <slot name="fixedMenu" :editor="editor">
-        <EditorFixedMenu v-if="fixedMenu" :editor="editor" :items="fixedMenu" />
-        <span v-else />
-      </slot>
-      <div class="flex items-center gap-2">
-        <slot name="actions" :editor="editor" :is-empty="isEmpty" />
-      </div>
-    </div>
-
-    <slot name="bubbleMenu" :editor="editor">
-      <EditorBubbleMenu
-        v-if="bubbleMenu"
-        :editor="editor"
-        :items="bubbleMenu"
-        :options="bubbleMenuOptions"
-      />
-    </slot>
-    <slot name="floatingMenu" :editor="editor">
-      <EditorFloatingMenu
-        v-if="floatingMenu"
-        :editor="editor"
-        :items="floatingMenu"
-      />
-    </slot>
-
-    <EditorContent
-      :editor="editor"
-      class="prose-sm px-3 py-2"
-      :style="contentStyle"
-    />
-
-    <div
-      v-if="showToolbar && fixedMenuPosition === 'bottom'"
-      data-slot="toolbar"
-      class="flex items-center justify-between gap-2 border-t border-gray-200 px-2 py-1.5"
-    >
-      <slot name="fixedMenu" :editor="editor">
-        <EditorFixedMenu v-if="fixedMenu" :editor="editor" :items="fixedMenu" />
-        <span v-else />
-      </slot>
-      <div class="flex items-center gap-2">
-        <slot name="actions" :editor="editor" :is-empty="isEmpty" />
-      </div>
-    </div>
-  </div>
+  <!-- Renderless. <TextEditor> owns the editor lifecycle, v-model, upload and
+       placeholder threading, and exposes { editor, isEmpty } — but renders no UI
+       of its own. There is no one-size-fits-all editor chrome, so the consumer
+       renders EditorContent and whichever menus / actions it wants inside this
+       slot, using the building blocks (EditorContent, EditorFixedMenu, …). -->
+  <slot :editor="editor" :is-empty="isEmpty" />
 </template>

@@ -5,22 +5,6 @@ import {
   type BaseSuggestionItem,
 } from '../suggestion/createSuggestionExtension'
 import SlashCommandsList from './SlashCommandsList.vue'
-import { Component as VueComponent } from 'vue'
-
-import Heading2 from '~icons/lucide/heading-2'
-import Heading3 from '~icons/lucide/heading-3'
-import List from '~icons/lucide/list'
-import ListOrdered from '~icons/lucide/list-ordered'
-import ListTask from '~icons/lucide/list-checks'
-import Code from '~icons/lucide/code'
-import Quote from '~icons/lucide/quote'
-import Image from '~icons/lucide/image'
-import Video from '~icons/lucide/video'
-import GalleryVertical from '~icons/lucide/gallery-vertical'
-import Link from '~icons/lucide/link'
-import Minus from '~icons/lucide/minus'
-import Table from '~icons/lucide/table-2'
-import TableOfContents from '~icons/lucide/table-of-contents'
 
 export const SlashCommandSuggestionKey = new PluginKey<any>(
   'slashCommandSuggestion',
@@ -28,7 +12,7 @@ export const SlashCommandSuggestionKey = new PluginKey<any>(
 
 export interface CommandItem extends BaseSuggestionItem {
   title: string
-  icon: VueComponent
+  icon: string
   command: (props: CommandExecutionProps) => void
 }
 
@@ -40,7 +24,7 @@ type CommandExecutionProps = {
 const getCommands = (): CommandItem[] => [
   {
     title: 'Heading 2',
-    icon: Heading2,
+    icon: 'lucide-heading-2',
     command: ({ editor, range }: CommandExecutionProps) => {
       editor
         .chain()
@@ -52,7 +36,7 @@ const getCommands = (): CommandItem[] => [
   },
   {
     title: 'Heading 3',
-    icon: Heading3,
+    icon: 'lucide-heading-3',
     command: ({ editor, range }: CommandExecutionProps) => {
       editor
         .chain()
@@ -64,77 +48,77 @@ const getCommands = (): CommandItem[] => [
   },
   {
     title: 'Bullet List',
-    icon: List,
+    icon: 'lucide-list',
     command: ({ editor, range }: CommandExecutionProps) => {
       editor.chain().focus().deleteRange(range).toggleBulletList().run()
     },
   },
   {
     title: 'Numbered List',
-    icon: ListOrdered,
+    icon: 'lucide-list-ordered',
     command: ({ editor, range }: CommandExecutionProps) => {
       editor.chain().focus().deleteRange(range).toggleOrderedList().run()
     },
   },
   {
     title: 'Task List',
-    icon: ListTask,
+    icon: 'lucide-list-checks',
     command: ({ editor, range }: CommandExecutionProps) => {
       editor.chain().focus().deleteRange(range).toggleTaskList().run()
     },
   },
   {
     title: 'Code Block',
-    icon: Code,
+    icon: 'lucide-code',
     command: ({ editor, range }: CommandExecutionProps) => {
       editor.chain().focus().deleteRange(range).toggleCodeBlock().run()
     },
   },
   {
     title: 'Blockquote',
-    icon: Quote,
+    icon: 'lucide-quote',
     command: ({ editor, range }: CommandExecutionProps) => {
       editor.chain().focus().deleteRange(range).toggleBlockquote().run()
     },
   },
   {
     title: 'Image',
-    icon: Image,
+    icon: 'lucide-image',
     command: ({ editor, range }: CommandExecutionProps) => {
       editor.chain().focus().deleteRange(range).selectAndUploadImage().run()
     },
   },
   {
     title: 'Video',
-    icon: Video,
+    icon: 'lucide-video',
     command: ({ editor, range }: CommandExecutionProps) => {
       editor.chain().focus().deleteRange(range).selectAndUploadVideo().run()
     },
   },
   {
     title: 'Embed',
-    icon: GalleryVertical,
+    icon: 'lucide-gallery-vertical',
     command: ({ editor, range }: CommandExecutionProps) => {
       editor.chain().focus().deleteRange(range).openIframeDialog().run()
     },
   },
   {
     title: 'Link',
-    icon: Link,
+    icon: 'lucide-link',
     command: ({ editor, range }: CommandExecutionProps) => {
       editor.chain().focus().deleteRange(range).setLink({ href: '' }).run()
     },
   },
   {
     title: 'Horizontal Rule',
-    icon: Minus,
+    icon: 'lucide-minus',
     command: ({ editor, range }: CommandExecutionProps) => {
       editor.chain().focus().deleteRange(range).setHorizontalRule().run()
     },
   },
   {
     title: 'Table',
-    icon: Table,
+    icon: 'lucide-table-2',
     command: ({ editor, range }: CommandExecutionProps) => {
       editor
         .chain()
@@ -146,7 +130,7 @@ const getCommands = (): CommandItem[] => [
   },
   {
     title: 'Table of Contents',
-    icon: TableOfContents,
+    icon: 'lucide-table-of-contents',
     command: ({ editor, range }: CommandExecutionProps) => {
       editor
         .chain()

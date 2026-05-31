@@ -10,7 +10,7 @@ import { EditorView } from '@tiptap/pm/view'
 import { Node } from '@tiptap/pm/model'
 import fileToBase64 from '@utils/file-to-base64'
 import { UploadedFile } from '@utils/useFileUpload'
-import { localFileMap } from './image/image-extension'
+import { localFileMap, resolveUploadOptions } from './image/image-extension'
 
 export interface VideoExtensionOptions {
   /**
@@ -193,7 +193,12 @@ export const VideoExtension = NodeExtension.create<VideoExtensionOptions>({
       uploadVideo:
         (file: File) =>
         ({ editor }) => {
-          return uploadVideo(file, editor.view, null, this.options)
+          return uploadVideo(
+            file,
+            editor.view,
+            null,
+            resolveUploadOptions(editor, this.options),
+          )
         },
 
       selectAndUploadVideo:
@@ -250,7 +255,7 @@ export const VideoExtension = NodeExtension.create<VideoExtensionOptions>({
             fileData.file,
             editor.view,
             nodePos,
-            this.options,
+            resolveUploadOptions(editor, this.options),
             'replace',
           )
         },
@@ -279,8 +284,12 @@ export const VideoExtension = NodeExtension.create<VideoExtensionOptions>({
           handleDOMEvents: {
             drop: (view, event) => {
               const hasFiles = event.dataTransfer?.files?.length
+              const uploadOptions = resolveUploadOptions(
+                extensionThis.editor,
+                extensionThis.options,
+              )
 
-              if (!hasFiles || !extensionThis.options.uploadFunction) {
+              if (!hasFiles || !uploadOptions.uploadFunction) {
                 return false
               }
 
@@ -308,12 +317,16 @@ export const VideoExtension = NodeExtension.create<VideoExtensionOptions>({
                 view.dispatch(transaction)
               }
 
-              processMultipleVideos(videos, view, pos, extensionThis.options)
+              processMultipleVideos(videos, view, pos, uploadOptions)
               return true
             },
 
             paste: (view, event) => {
-              if (!extensionThis.options.uploadFunction) {
+              const uploadOptions = resolveUploadOptions(
+                extensionThis.editor,
+                extensionThis.options,
+              )
+              if (!uploadOptions.uploadFunction) {
                 return false
               }
 
@@ -338,7 +351,7 @@ export const VideoExtension = NodeExtension.create<VideoExtensionOptions>({
               if (videos.length === 0) return false
 
               event.preventDefault()
-              processMultipleVideos(videos, view, null, extensionThis.options)
+              processMultipleVideos(videos, view, null, uploadOptions)
               return true
             },
           },

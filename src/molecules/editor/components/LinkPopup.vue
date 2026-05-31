@@ -26,13 +26,13 @@
         <Button
           @click="submitLink"
           tooltip="Submit"
-          :icon="LucideCheck"
+          :icon="'lucide-check'"
           variant="subtle"
         />
         <Button
           @click="props.href ? (edit = false) : $emit('updateHref', '')"
           tooltip="Exit"
-          :icon="LucideX"
+          :icon="'lucide-x'"
           variant="subtle"
         />
       </template>
@@ -40,20 +40,20 @@
         <Button
           @click="copyLink"
           tooltip="Copy"
-          :icon="LucideCopy"
+          :icon="'lucide-copy'"
           variant="subtle"
         />
         <Button
           @click="edit = true"
           tooltip="Edit"
-          :icon="LucidePencil"
+          :icon="'lucide-pencil'"
           variant="subtle"
         />
         <Button
           tooltip="Remove"
           variant="subtle"
           @click="$emit('updateHref', '')"
-          :icon="Link2Off"
+          :icon="'lucide-link-2-off'"
         />
       </template>
     </div>
@@ -64,11 +64,6 @@
 import { onMounted, ref, useTemplateRef, nextTick } from 'vue'
 import Button from '@components/Button/Button.vue'
 import TextInput from '@components/TextInput/TextInput.vue'
-import LucideCopy from '~icons/lucide/copy'
-import LucideCheck from '~icons/lucide/check'
-import LucidePencil from '~icons/lucide/pencil'
-import LucideX from '~icons/lucide/x'
-import Link2Off from '~icons/lucide/link-2-off'
 import { isValidUrl } from '@utils/url-validation'
 
 const props = defineProps<{

@@ -8,7 +8,7 @@
     :show-no-results="true"
   >
     <template #default="{ item }">
-      <component :is="item.icon" v-if="item.icon" class="mr-2 h-4 w-4" />
+      <span v-if="item.icon" :class="[item.icon, 'mr-2 h-4 w-4']" />
       <div v-else class="mr-2 h-4 w-4"></div>
       <span>{{ item.title }}</span>
     </template>

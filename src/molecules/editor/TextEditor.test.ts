@@ -2,53 +2,36 @@
  * @vitest-environment jsdom
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { createApp, h, nextTick, reactive } from 'vue'
-
-// Bubble / floating menus wrap tippy; render their default slot inline so the
-// items can be asserted without a real popper.
-vi.mock('@tiptap/extension-bubble-menu', () => ({
-  BubbleMenu: {
-    props: ['editor', 'options'],
-    setup(_: any, { slots }: any) {
-      return () => h('div', { 'data-testid': 'bubble-menu' }, slots.default?.())
-    },
-  },
-}))
-vi.mock('@tiptap/extension-floating-menu', () => ({
-  FloatingMenu: {
-    props: ['editor', 'options'],
-    setup(_: any, { slots }: any) {
-      return () =>
-        h('div', { 'data-testid': 'floating-menu' }, slots.default?.())
-    },
-  },
-}))
 
 let TextEditor: any
 let EditorContent: any
+let EditorFixedMenu: any
 let StarterKit: any
 let Placeholder: any
 let CommentKit: any
 let RichTextKit: any
 let commentToolbar: any
 let articleToolbar: any
-let Bold: any
 
 beforeEach(async () => {
   ;({ default: TextEditor } = await import('./TextEditor.vue'))
   ;({ default: EditorContent } = await import('./EditorContent.vue'))
+  ;({ default: EditorFixedMenu } = await import('./EditorFixedMenu.vue'))
   ;({ StarterKit, Placeholder } = await import('./extensions'))
   ;({ CommentKit, RichTextKit } = await import('./kits'))
-  ;({ commentToolbar, articleToolbar, Bold } = await import('./index'))
+  ;({ commentToolbar, articleToolbar } = await import('./index'))
 })
 
 type MountOptions = {
   reactiveProps?: Record<string, any>
   slots?: Record<string, any>
-  capture?: boolean
 }
 
+// <TextEditor> is renderless, so every mount must supply a #default slot. By
+// default we render EditorContent and capture the editor; tests that need a
+// bespoke layout pass their own default slot.
 function mount(staticProps: Record<string, any>, options: MountOptions = {}) {
   const state = reactive<Record<string, any>>({
     modelValue: '',
@@ -57,7 +40,7 @@ function mount(staticProps: Record<string, any>, options: MountOptions = {}) {
   const changes: any[] = []
   let editor: any = null
   const slots: Record<string, any> = { ...(options.slots ?? {}) }
-  if (options.capture) {
+  if (!slots.default) {
     slots.default = ({ editor: e }: any) => {
       editor = e
       return h(EditorContent, { editor: e })
@@ -98,7 +81,7 @@ describe('TextEditor', () => {
   })
 
   it('writes edits back to v-model and emits change (HTML)', async () => {
-    const ctx = mount({ extensions: [StarterKit] }, { capture: true })
+    const ctx = mount({ extensions: [StarterKit] })
     await nextTick()
     ctx.getEditor().commands.setContent('<p>typed</p>')
     await nextTick()
@@ -113,7 +96,7 @@ describe('TextEditor', () => {
     }
     const ctx = mount(
       { extensions: [StarterKit], format: 'json' },
-      { reactiveProps: { modelValue: json }, capture: true },
+      { reactiveProps: { modelValue: json } },
     )
     await nextTick()
     ctx.getEditor().commands.setContent({
@@ -130,7 +113,7 @@ describe('TextEditor', () => {
   it('keeps editable reactive', async () => {
     const ctx = mount(
       { extensions: [StarterKit] },
-      { reactiveProps: { editable: true }, capture: true },
+      { reactiveProps: { editable: true } },
     )
     await nextTick()
     expect(ctx.getEditor().isEditable).toBe(true)
@@ -142,7 +125,7 @@ describe('TextEditor', () => {
   it('threads the placeholder prop through editor.storage.placeholder reactively', async () => {
     const ctx = mount(
       { extensions: [StarterKit, Placeholder] },
-      { reactiveProps: { placeholder: 'Write…' }, capture: true },
+      { reactiveProps: { placeholder: 'Write…' } },
     )
     await nextTick()
     expect(ctx.getEditor().storage.placeholder.text).toBe('Write…')
@@ -151,86 +134,9 @@ describe('TextEditor', () => {
     expect(ctx.getEditor().storage.placeholder.text).toBe('Say something')
   })
 
-  it('renders a fixed menu from the prop with self-pruned items', async () => {
-    const ctx = mount({ extensions: [StarterKit], fixedMenu: [Bold] })
-    await nextTick()
-    expect(ctx.root.querySelector('[data-slot="fixed-menu"]')).toBeTruthy()
-    expect(ctx.root.querySelector('[aria-label="Bold"]')).toBeTruthy()
-  })
-
-  it('lets the #fixedMenu slot override the fixed-menu prop', async () => {
-    const ctx = mount(
-      { extensions: [StarterKit], fixedMenu: [Bold] },
-      {
-        slots: {
-          fixedMenu: () =>
-            h('div', { 'data-testid': 'custom-fixed' }, 'custom'),
-        },
-      },
-    )
-    await nextTick()
-    expect(ctx.root.querySelector('[data-testid="custom-fixed"]')).toBeTruthy()
-    // The default EditorFixedMenu is replaced, so its Bold button is gone.
-    expect(ctx.root.querySelector('[aria-label="Bold"]')).toBeFalsy()
-  })
-
-  it('renders bubble and floating menus from props', async () => {
-    const bubble = mount({ extensions: [StarterKit], bubbleMenu: [Bold] })
-    await nextTick()
-    expect(
-      bubble.root.querySelector('[data-testid="bubble-menu"]'),
-    ).toBeTruthy()
-    expect(bubble.root.querySelector('[aria-label="Bold"]')).toBeTruthy()
-
-    const floating = mount({ extensions: [StarterKit], floatingMenu: [Bold] })
-    await nextTick()
-    expect(
-      floating.root.querySelector('[data-testid="floating-menu"]'),
-    ).toBeTruthy()
-  })
-
-  it('renders the actions slot in the toolbar with isEmpty', async () => {
+  it('is renderless — outputs only the default slot, no chrome of its own', async () => {
     const ctx = mount(
       { extensions: [StarterKit] },
-      {
-        reactiveProps: { modelValue: '' },
-        slots: {
-          actions: ({ isEmpty }: any) =>
-            h('button', { 'data-testid': 'submit', disabled: isEmpty }, 'Send'),
-        },
-      },
-    )
-    await nextTick()
-    const button = ctx.root.querySelector(
-      '[data-testid="submit"]',
-    ) as HTMLButtonElement
-    expect(button).toBeTruthy()
-    expect(button.disabled).toBe(true) // empty content -> isEmpty true
-  })
-
-  it('positions the fixed menu at the bottom when configured', async () => {
-    const ctx = mount({
-      extensions: [StarterKit],
-      fixedMenu: [Bold],
-      fixedMenuPosition: 'bottom',
-    })
-    await nextTick()
-    const children = Array.from(
-      (ctx.root.querySelector('[data-slot="text-editor"]') as HTMLElement)
-        .children,
-    )
-    const contentIndex = children.findIndex((c) =>
-      c.matches('[data-slot="editor-content"]'),
-    )
-    const toolbarIndex = children.findIndex((c) =>
-      c.matches('[data-slot="toolbar"]'),
-    )
-    expect(toolbarIndex).toBeGreaterThan(contentIndex)
-  })
-
-  it('hands the whole layout to the #default slot (L3) and renders no default chrome', async () => {
-    const ctx = mount(
-      { extensions: [StarterKit], fixedMenu: [Bold] },
       {
         slots: {
           default: ({ editor }: any) =>
@@ -241,31 +147,103 @@ describe('TextEditor', () => {
       },
     )
     await nextTick()
-    expect(ctx.root.querySelector('[data-testid="bespoke"]')).toBeTruthy()
-    // No default wrapper/toolbar when #default takes over.
-    expect(ctx.root.querySelector('[data-slot="text-editor"]')).toBeFalsy()
-    expect(ctx.root.querySelector('[data-slot="toolbar"]')).toBeFalsy()
+    const bespoke = ctx.root.querySelector(
+      '[data-testid="bespoke"]',
+    ) as HTMLElement
+    expect(bespoke).toBeTruthy()
+    // The consumer's EditorContent is mounted inside their own layout…
+    expect(bespoke.querySelector('[data-slot="editor-content"]')).toBeTruthy()
+    // …and <TextEditor> injected no wrapper element of its own.
+    expect(ctx.root.firstElementChild).toBe(bespoke)
   })
 
-  it('composes a comment-shape editor from CommentKit + commentToolbar (no ready-made)', async () => {
-    const ctx = mount({
-      extensions: [CommentKit],
-      fixedMenu: commentToolbar,
-      fixedMenuPosition: 'bottom',
-    })
+  it('renders menus in the slot via the building blocks + a preset', async () => {
+    const ctx = mount(
+      { extensions: [CommentKit] },
+      {
+        slots: {
+          default: ({ editor }: any) =>
+            h('div', [
+              h(EditorContent, { editor }),
+              h(EditorFixedMenu, { editor, items: commentToolbar }),
+            ]),
+        },
+      },
+    )
     await nextTick()
     expect(ctx.root.querySelector('[data-slot="fixed-menu"]')).toBeTruthy()
     expect(ctx.root.querySelector('[aria-label="Bold"]')).toBeTruthy()
     expect(ctx.root.querySelector('[aria-label="Link"]')).toBeTruthy()
-    // CommentKit has no table, so the article preset's Table button self-prunes.
-    expect(ctx.root.querySelector('[aria-label="Table"]')).toBeFalsy()
   })
 
-  it('composes an article-shape editor from RichTextKit + articleToolbar', async () => {
-    const ctx = mount({ extensions: [RichTextKit], fixedMenu: articleToolbar })
+  it('self-prunes a preset across kits — Table hides under CommentKit, shows under RichTextKit', async () => {
+    const slot = ({ editor }: any) =>
+      h(EditorFixedMenu, { editor, items: articleToolbar })
+
+    const comment = mount(
+      { extensions: [CommentKit] },
+      { slots: { default: slot } },
+    )
     await nextTick()
-    expect(ctx.root.querySelector('[aria-label="Bold"]')).toBeTruthy()
-    // RichTextKit has tables, so the Table button is available here.
-    expect(ctx.root.querySelector('[aria-label="Table"]')).toBeTruthy()
+    expect(comment.root.querySelector('[aria-label="Bold"]')).toBeTruthy()
+    // CommentKit has no table node, so the article preset's Table button self-prunes.
+    expect(comment.root.querySelector('[aria-label="Table"]')).toBeFalsy()
+
+    const article = mount(
+      { extensions: [RichTextKit] },
+      { slots: { default: slot } },
+    )
+    await nextTick()
+    expect(article.root.querySelector('[aria-label="Table"]')).toBeTruthy()
+  })
+
+  // Mounts TextEditor under a function ref so the exposed surface can be read the
+  // way an app component built on <TextEditor> reads it (spec §2 escape hatch).
+  // No slot is needed: the editor lifecycle runs regardless of what's rendered.
+  function mountWithRef(props: Record<string, any>) {
+    let instance: any = null
+    const state = reactive<Record<string, any>>({ modelValue: '' })
+    const root = document.createElement('div')
+    document.body.appendChild(root)
+    const app = createApp({
+      render() {
+        return h(TextEditor, {
+          ref: (r: any) => (instance = r),
+          ...props,
+          modelValue: state.modelValue,
+          'onUpdate:modelValue': (v: any) => (state.modelValue = v),
+        })
+      },
+    })
+    app.mount(root)
+    return { getInstance: () => instance, state, app }
+  }
+
+  it('exposes the live editor instance and isEmpty via template ref', async () => {
+    const ctx = mountWithRef({ extensions: [StarterKit] })
+    await nextTick()
+    const instance = ctx.getInstance()
+    // proxyRefs unwraps the exposed refs: .editor is the Editor, .isEmpty a boolean.
+    expect(instance.editor?.commands).toBeTruthy()
+    expect(instance.isEmpty).toBe(true)
+    instance.editor.commands.setContent('<p>filled</p>')
+    await nextTick()
+    expect(instance.isEmpty).toBe(false)
+    ctx.app.unmount()
+  })
+
+  it('emits transaction with the editor on document changes', async () => {
+    const seen: any[] = []
+    const ctx = mountWithRef({
+      extensions: [StarterKit],
+      onTransaction: (e: any) => seen.push(e),
+    })
+    await nextTick()
+    const before = seen.length
+    ctx.getInstance().editor.commands.setContent('<p>x</p>')
+    await nextTick()
+    expect(seen.length).toBeGreaterThan(before)
+    expect(typeof seen.at(-1).getHTML).toBe('function') // received the Editor
+    ctx.app.unmount()
   })
 })
