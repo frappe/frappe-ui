@@ -63,7 +63,7 @@ export const TagNode = Node.create({
     ]
   },
   renderText({ node }: any) {
-    return `#${node.attrs.tagLabel ||  ''}`
+    return `#${node.attrs.tagLabel || ''}`
   },
   addCommands() {
     return {
@@ -79,7 +79,8 @@ export const TagNode = Node.create({
   },
 })
 
-interface TagSuggestionItem extends BaseSuggestionItem {
+export interface TagSuggestionItem extends BaseSuggestionItem {
+  id?: string
   name?: string
   label: string
   isNew?: boolean

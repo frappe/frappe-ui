@@ -2,7 +2,7 @@
 
 Labels: `needs-triage`
 Type: AFK
-Status: ✅ Done — `extensions.ts` ships the flat catalog + `SuggestionExtension`; verify it matches this spec.
+Status: ✅ Done — `extensions.ts` ships the flat catalog + `SuggestionExtension`. Verify pass during the kit/component build fixed four spec gaps: (1) `TextStyle` was missing as an export and the v3 `@tiptap/extension-text-style` import was a non-existent default — both corrected; (2) `Tag` was only the `#` suggestion (no node) — now a complete node + gated-suggestion extension; (3) data members now take the canonical `{ items }` (was `mentions`/`tags`) and stay inert until configured; (4) `Placeholder` is now storage-threaded (`editor.storage.placeholder.text`) so the `<TextEditor>` `placeholder` prop works without reconfiguring a consumer extension (spec §2). The custom `LinkExtension` popup (`extensions/link/`) is **not** yet wired into the exported `Link` (still plain tiptap link + `openOnClick:false`) — noted as a follow-up, non-blocking.
 
 ## Parent
 

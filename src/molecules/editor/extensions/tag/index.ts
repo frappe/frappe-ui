@@ -1,1 +1,6 @@
-export { TagExtension, TagNode, getTagExtensions } from './tag-extension'
+export {
+  TagExtension,
+  TagNode,
+  getTagExtensions,
+  type TagSuggestionItem,
+} from './tag-extension'

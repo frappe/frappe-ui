@@ -6,7 +6,7 @@ import type { Editor } from './useEditor'
 
 defineProps<{
   editor: Editor | null
-  buttons: MenuItem[]
+  items: MenuItem[]
   options?: {
     shouldShow?: (props: any) => boolean
     tippyOptions?: Record<string, unknown>
@@ -16,8 +16,11 @@ defineProps<{
 
 <template>
   <BubbleMenu v-if="editor" :editor="editor" :options="options">
-    <div data-slot="bubble-menu" class="flex items-center gap-1 rounded border bg-white p-1 shadow-sm">
-      <MenuItems :editor="editor" :buttons="buttons" />
+    <div
+      data-slot="bubble-menu"
+      class="flex items-center gap-1 rounded border bg-white p-1 shadow-sm"
+    >
+      <MenuItems :editor="editor" :items="items" />
     </div>
   </BubbleMenu>
 </template>

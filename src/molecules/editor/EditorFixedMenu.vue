@@ -5,12 +5,12 @@ import type { Editor } from './useEditor'
 
 defineProps<{
   editor: Editor | null
-  buttons: MenuItem[]
+  items: MenuItem[]
 }>()
 </script>
 
 <template>
   <div data-slot="fixed-menu" class="flex items-center gap-1">
-    <MenuItems :editor="editor" :buttons="buttons" />
+    <MenuItems :editor="editor" :items="items" />
   </div>
 </template>

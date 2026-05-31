@@ -2,7 +2,7 @@
 
 Labels: `needs-triage`
 Type: AFK
-Status: ❌ Not started — `TextEditor.vue` is currently a v0-monolith alias; the abandoned `RichTextEditor`/`CommentEditor`/`InlineEditor` ready-mades exist instead and are deleted here.
+Status: ✅ Done — `TextEditor.vue` rebuilt on `useEditor` with required `extensions`, unnamed `v-model` (+ `format`), reactive `placeholder` (threaded via `editor.storage.placeholder`) + `editable`, `autofocus`/`uploadFunction`/`maxHeight`, the `fixedMenu`/`bubbleMenu`/`floatingMenu` props (+ `fixedMenuPosition`/`bubbleMenuOptions`), and the `#default`/`#actions`/`#fixedMenu`/`#bubbleMenu`/`#floatingMenu` slots. The `RichTextEditor`/`CommentEditor`/`InlineEditor` ready-mades are deleted. `TextEditor.test.ts` (13 tests) covers model sync, reactivity, each menu surface via prop and slot, `#default` takeover, `#actions`, and comment-/article-shapes composed only from kits + presets.
 
 ## Parent
 

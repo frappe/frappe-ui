@@ -7,13 +7,17 @@ import {
   type Ref,
   type ShallowRef,
 } from 'vue'
-import { Editor as TiptapEditor, type JSONContent, Extension } from '@tiptap/core'
+import {
+  Editor as TiptapEditor,
+  type JSONContent,
+  Extension,
+} from '@tiptap/core'
 import type { EditorOptions } from '@tiptap/core'
 
 type Editor = TiptapEditor
 
 export type UseEditorOptions = {
-  content?: Ref<string | JSONContent | null>
+  content?: Ref<string | JSONContent | null | undefined>
   format?: 'html' | 'json'
   editable?: MaybeRefOrGetter<boolean>
   autofocus?: boolean
@@ -39,7 +43,9 @@ const UploadStorage = Extension.create({
   },
 })
 
-export function useEditor(options: UseEditorOptions): ShallowRef<Editor | null> {
+export function useEditor(
+  options: UseEditorOptions,
+): ShallowRef<Editor | null> {
   const editor = shallowRef<Editor | null>(null)
   const format = options.format ?? 'html'
   const isCollaborationMode = options.extensions.some(

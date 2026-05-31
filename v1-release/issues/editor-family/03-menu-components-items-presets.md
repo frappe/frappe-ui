@@ -2,7 +2,7 @@
 
 Labels: `needs-triage`
 Type: AFK
-Status: 🟡 Partial — components, item catalog, presets, and disable-pruning exist. Remaining: (1) rename `:buttons`→`:items` across `EditorFixedMenu` + `EditorBubbleMenu` + `EditorFloatingMenu` + the shared `MenuItems.vue`; (2) add hide-when-extension-absent (today items only disable, and `canRun` defaults to enabled on a missing command).
+Status: ✅ Done — `:buttons` renamed to `:items` across `EditorFixedMenu`/`EditorBubbleMenu`/`EditorFloatingMenu` + `MenuItems.vue`; `isAvailable?(editor)` added to `CommandMenuItem` and set on every predefined item (schema mark/node or extension check); `MenuItems.vue` hides unavailable items on both the top-level and group paths and drops empty groups. `menu.test.ts` covers self-pruning against a trimmed extension set.
 
 ## Parent
 

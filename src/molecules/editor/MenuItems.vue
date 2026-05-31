@@ -1,19 +1,43 @@
 <script setup lang="ts">
-import type { CommandMenuItem, MenuItem } from './menu'
+import { computed } from 'vue'
+import type { CommandMenuItem, MenuGroupItem, MenuItem } from './menu'
 import type { Editor } from './useEditor'
 
 const props = defineProps<{
   editor: Editor | null
-  buttons: MenuItem[]
+  items: MenuItem[]
 }>()
 
-function isGroup(item: MenuItem): item is Extract<MenuItem, { type: 'group' }> {
+function isGroup(item: MenuItem): item is MenuGroupItem {
   return 'type' in item && item.type === 'group'
 }
 
 function isSeparator(item: MenuItem): item is { type: 'separator' } {
   return 'type' in item && item.type === 'separator'
 }
+
+/** An item is shown unless its `isAvailable` returns false (extension absent). */
+function isAvailable(item: CommandMenuItem): boolean {
+  if (!props.editor) return true
+  return item.isAvailable?.(props.editor) !== false
+}
+
+// Self-pruning: drop unavailable command items and group sub-items, and any
+// group left empty. Separators are kept as-authored.
+const visibleItems = computed<MenuItem[]>(() => {
+  const result: MenuItem[] = []
+  for (const item of props.items) {
+    if (isSeparator(item)) {
+      result.push(item)
+    } else if (isGroup(item)) {
+      const items = item.items.filter(isAvailable)
+      if (items.length) result.push({ ...item, items })
+    } else if (isAvailable(item)) {
+      result.push(item)
+    }
+  }
+  return result
+})
 
 function run(item: CommandMenuItem) {
   if (props.editor && !item.isDisabled?.(props.editor)) {
@@ -23,15 +47,24 @@ function run(item: CommandMenuItem) {
 </script>
 
 <template>
-  <template v-for="(item, index) in buttons" :key="`${'label' in item ? item.label : item.type}-${index}`">
+  <template
+    v-for="(item, index) in visibleItems"
+    :key="`${'label' in item ? item.label : item.type}-${index}`"
+  >
     <span
       v-if="isSeparator(item)"
       data-slot="menu-separator"
       class="mx-1 h-5 w-px bg-gray-200"
       aria-hidden="true"
     />
-    <div v-else-if="isGroup(item)" data-slot="menu-group" class="flex items-center gap-1">
-      <span class="px-2 text-sm font-medium text-gray-700">{{ item.label }}</span>
+    <div
+      v-else-if="isGroup(item)"
+      data-slot="menu-group"
+      class="flex items-center gap-1"
+    >
+      <span class="px-2 text-sm font-medium text-gray-700">{{
+        item.label
+      }}</span>
       <button
         v-for="groupItem in item.items"
         :key="groupItem.label"

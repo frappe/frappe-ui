@@ -159,24 +159,26 @@ const MentionSuggestionExtension =
   })
 
 export const MentionExtension = Extension.create<{
-  mentions: MaybeRefOrGetter<MentionSuggestionItem[]>
+  items: MaybeRefOrGetter<MentionSuggestionItem[]> | null
   component?: Component
 }>({
   name: 'mentionExtension',
 
   addOptions() {
     return {
-      mentions: [],
+      items: null,
       component: undefined,
     }
   },
 
   addExtensions() {
+    const node = createMentionNode(this.options.component)
+    // Inert until configured: only wire the `@` suggestion when an item source
+    // is provided. Existing mentions in content still render through the node.
+    if (this.options.items == null) return [node]
     return [
-      createMentionNode(this.options.component),
-      MentionSuggestionExtension.configure({
-        mentions: this.options.mentions,
-      }),
+      node,
+      MentionSuggestionExtension.configure({ mentions: this.options.items }),
     ]
   },
 
