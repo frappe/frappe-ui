@@ -4,7 +4,7 @@ Four scenarios from the [audit](./11-texteditor-usage-audit.md) rewritten agains
 Demonstrates the two-layer split: ready-mades for the common shapes, primitives when
 the layout is bespoke.
 
-See [`../adr/0004-editor-family-primitives-and-readymades.md`](../adr/0004-editor-family-primitives-and-readymades.md) for the architectural decision and [`11-texteditor-usage-audit.md` § "Decisions locked"](./11-texteditor-usage-audit.md#decisions-locked-v1-grilling-session) for the prescriptive design these examples assume.
+See [`../../spec/adr/0004-editor-family-primitives-and-readymades.md`](../../spec/adr/0004-editor-family-primitives-and-readymades.md) for the architectural decision and [`11-texteditor-usage-audit.md` § "Decisions locked"](./11-texteditor-usage-audit.md#decisions-locked-v1-grilling-session) for the prescriptive design these examples assume.
 
 ---
 
