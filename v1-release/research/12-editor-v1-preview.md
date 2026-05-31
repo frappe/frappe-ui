@@ -1,10 +1,18 @@
 # Editor v1 — preview in real app code
 
+> **⚠️ Superseded.** This preview was written against an earlier draft (headless
+> primitives + shipped ready-mades such as `RichTextEditor` / `CommentEditor`).
+> The accepted v1 design is **one `<TextEditor>` + kits, with no ready-mades** —
+> apps build their own editor component on `<TextEditor>`. See
+> [`spec/editor.md`](../../spec/editor.md) and
+> [`spec/adr/0004-editor-family-composition-model.md`](../../spec/adr/0004-editor-family-composition-model.md).
+> The scenarios below are kept for historical context and need rewriting against the new API.
+
 Four scenarios from the [audit](./11-texteditor-usage-audit.md) rewritten against the v1 API.
 Demonstrates the two-layer split: ready-mades for the common shapes, primitives when
 the layout is bespoke.
 
-See [`../../spec/adr/0004-editor-family-primitives-and-readymades.md`](../../spec/adr/0004-editor-family-primitives-and-readymades.md) for the architectural decision and [`11-texteditor-usage-audit.md` § "Decisions locked"](./11-texteditor-usage-audit.md#decisions-locked-v1-grilling-session) for the prescriptive design these examples assume.
+See [`../../spec/adr/0004-editor-family-composition-model.md`](../../spec/adr/0004-editor-family-composition-model.md) for the architectural decision and [`11-texteditor-usage-audit.md` § "Decisions locked"](./11-texteditor-usage-audit.md#decisions-locked-v1-grilling-session) for the prescriptive design these examples assume.
 
 ---
 
