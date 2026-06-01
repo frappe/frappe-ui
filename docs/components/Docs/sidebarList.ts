@@ -24,7 +24,10 @@ export function isActiveLink(
   return current === target
 }
 
-export function getSidebarList(componentList: string[]): SidebarSection[] {
+export function getSidebarList(
+  componentList: string[],
+  frappeList: string[] = [],
+): SidebarSection[] {
   const componentItems: SidebarItem[] = [
     ...componentList.map((name) => ({
       text: name,
@@ -32,6 +35,15 @@ export function getSidebarList(componentList: string[]): SidebarSection[] {
     })),
     { text: 'Legacy components', link: '/docs/components/legacy' },
   ]
+
+  const frappeItems: SidebarItem[] = frappeList.map((name) => ({
+    text: name,
+    link: `/docs/frappe/${name.toLowerCase()}`,
+  }))
+
+  const frappeSection: SidebarSection[] = frappeItems.length
+    ? [{ text: 'Frappe Controls', items: frappeItems }]
+    : []
 
   return [
     {
@@ -45,7 +57,10 @@ export function getSidebarList(componentList: string[]): SidebarSection[] {
     {
       text: 'Design System',
       items: [
-        { text: 'Background Color', link: '/docs/design-system/background-color' },
+        {
+          text: 'Background Color',
+          link: '/docs/design-system/background-color',
+        },
         { text: 'Text Design', link: '/docs/design-system/text' },
         { text: 'Border Color', link: '/docs/design-system/border-color' },
         { text: 'Drop Shadow', link: '/docs/design-system/drop-shadow' },
@@ -56,12 +71,16 @@ export function getSidebarList(componentList: string[]): SidebarSection[] {
       text: 'Components',
       items: componentItems,
     },
+    ...frappeSection,
     {
       text: 'Data Fetching',
       items: [
         { text: 'Resource', link: '/docs/data-fetching/resource' },
         { text: 'List Resource', link: '/docs/data-fetching/list-resource' },
-        { text: 'Document Resource', link: '/docs/data-fetching/document-resource' },
+        {
+          text: 'Document Resource',
+          link: '/docs/data-fetching/document-resource',
+        },
       ],
     },
     {

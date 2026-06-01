@@ -2,7 +2,7 @@ import { defineConfig } from 'vitepress'
 import { lucideIcons } from '../../vite/lucideIcons'
 import path from 'path'
 import { meta } from './meta'
-import { getComponentItems } from './utils'
+import { getComponentItems, getFrappeItems } from './utils'
 import { transformerStyleToClass } from '@shikijs/transformers'
 import componentTransformer from './plugins/componentTransformer'
 import colocatedComponentDocs, {
@@ -123,6 +123,7 @@ export default defineConfig({
   ],
   themeConfig: {
     componentList: getComponentItems(),
+    frappeList: getFrappeItems(),
     outline: [2, 3],
     logo: '/logo.svg',
     search: { provider: 'local' },
@@ -143,6 +144,7 @@ export default defineConfig({
     resolve: {
       alias: {
         '@/components': path.resolve(__dirname, '../components/'),
+        'frappe-ui/frappe': path.resolve(__dirname, '../../frappe'),
         'frappe-ui': path.resolve(__dirname, '../../src'),
         'dayjs/esm': 'dayjs',
       },

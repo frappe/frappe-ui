@@ -1,13 +1,25 @@
-import { ComboboxVariant } from '../../src/components/Combobox/types'
+import type { InputLabelingProps } from '../../src/composables/useInputLabeling'
 
-export interface LinkProps {
+export interface LinkProps extends InputLabelingProps {
   doctype: string
-  variant?: ComboboxVariant
-  label?: string
+  filters?: Record<string, unknown>
+  creatable?: boolean
+  disabled?: boolean
   placeholder?: string
-  filters?: Record<string, string | [string, string] | boolean | number>
-  required?: boolean
-  allowCreate?: boolean
 }
 
-export type SelectOption = { value: string; label: string }
+export interface LinkEmits {
+  'update:modelValue': [value: string | null]
+  'update:open': [value: boolean]
+  create: [query: string]
+}
+
+export interface LinkExposed {
+  reload: () => void
+}
+
+export type LinkOption = {
+  label: string
+  value: string
+  description?: string
+}

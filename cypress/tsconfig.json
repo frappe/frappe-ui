@@ -13,5 +13,11 @@
     "lib": ["esnext", "dom"],
     "skipLibCheck": true
   },
-  "include": ["**/*.ts", "../src/**/*.d.ts", "../src/**/*.cy.ts"]
+  "include": [
+    "**/*.ts",
+    "../src/**/*.d.ts",
+    "../src/**/*.cy.ts",
+    "../frappe/**/*.d.ts",
+    "../frappe/**/*.cy.ts"
+  ]
 }

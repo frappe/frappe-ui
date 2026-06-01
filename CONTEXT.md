@@ -8,6 +8,14 @@ Current API contracts live in [`spec/`](./spec/). Release execution, migration n
 
 ## Language
 
+### Composition
+
+**atom**:
+A primitive component that does not compose other public components — e.g. `TextInput`, `Combobox`, `Switch`, `Select`. Atoms are the smallest reusable units of the library and live in `src/components/`.
+
+**molecule**:
+A component that composes one or more atoms to form a higher-level control — e.g. `Link` (composes `Combobox`). Molecules expose their own public API and follow the same library-wide design rules as atoms (P5 labeling, P10 styling, etc.). Molecules may live in `src/components/` *or* in domain-specific directories (e.g. `frappe/` for Frappe-integrated controls) — location is a deployment concern, not a definitional one.
+
 ### Component lifecycle & control
 
 **open**:
@@ -75,6 +83,14 @@ _Avoid_: as the recommended public API for new code
 
 **action**:
 A button rendered in the Dialog's footer area, declared via the `actions` prop. Each action gets reactive `loading` state while its async `onClick` runs and receives a `{ close }` context.
+
+### Frappe-integrated controls
+
+Molecules that bridge frappe-ui to the Frappe Desk backend. They depend on backend endpoints (search, resource fetching, etc.) and cannot be used standalone in a non-Frappe app. They follow the same library-wide design rules as atoms — notably the P5 labeling contract. Specced in [`v1-release/10-frappe-controls-spec.md`](./v1-release/10-frappe-controls-spec.md).
+
+**Link**:
+A P5 input control that picks a single record from a Frappe doctype. Bound via unnamed `v-model` to the record's primary key (string) or `null` when empty. Built on `Combobox`, scoped to one doctype via the `doctype` prop and narrowed via `filters`. Renders a default clear affordance when the value is set and the field is not required. Opt into a "Create new" action row via the `creatable` boolean prop, which emits `@create` with the typed query. Accepts the full P5 labeling contract (`label`, `description`, `error`, `required`).
+_Avoid_: using `Link` for non-doctype option lists — reach for `Combobox` directly. `allowCreate`, `allowClear`, `allowRedirect` are removed in v1 (no deprecation path — these were not present in a published release).
 
 ## Relationships
 

@@ -1,52 +1,99 @@
 <template>
-  <div class="flex flex-col gap-1.5" :class="attrs.class" :style="attrs.style">
-    <FormLabel v-if="label" :label="label" size="sm" :required="required" />
+  <div data-slot="link" class="contents">
     <Combobox
+      ref="comboboxRef"
+      v-bind="$attrs"
       v-model="model"
-      :placeholder="placeholder || `Select ${doctype}`"
+      v-model:open="open"
+      class="group !gap-1"
+      :label="label"
+      :description="description"
+      :error="error"
+      :required="required"
+      :id="id"
       :options="linkOptions"
-      @input="handleInputChange"
+      :disabled="disabled"
+      :placeholder="placeholder ?? `Search ${doctype.toLowerCase()}`"
+      :loading="options.loading && !options.data"
+      @update:query="handleInputChange"
       @focus="() => loadOptions('')"
-      :open-on-focus="true"
-      v-bind="attrsWithoutClassStyle"
-      :variant="props.variant"
     >
-      <template #create-new="{ searchTerm }">
-        <LucidePlus class="size-4 mr-2" />
-        <span class="font-medium"> Create new {{ doctype }}</span>
+      <template
+        v-for="(_, name) in forwardedSlots"
+        #[name]="slotProps"
+        :key="name"
+      >
+        <slot :name="name" v-bind="slotProps" />
+      </template>
+
+      <template v-if="slots.suffix" #suffix="suffixProps">
+        <slot name="suffix" v-bind="suffixProps" />
+      </template>
+      <template v-else-if="showClear" #suffix>
+        <button
+          type="button"
+          aria-label="Clear"
+          data-slot="clear"
+          class="group-hover:grid group-focus:grid group-focus-within:grid hidden size-4 place-items-center rounded-sm text-ink-gray-5 hover:bg-surface-gray-3 hover:text-ink-gray-7 focus:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
+          @click="clearValue"
+          @pointerdown.stop
+        >
+          <span class="lucide-x size-3.5" />
+        </button>
+      </template>
+
+      <template v-if="slots['item-create']" #item-create="slotProps">
+        <slot name="item-create" v-bind="slotProps" />
+      </template>
+      <template v-else #item-create="{ query }">
+        <div class="flex">
+          <span class="truncate">
+            Create
+            <span v-if="query" class="font-medium text-ink-gray-8">
+              {{ query }}
+            </span>
+          </span>
+        </div>
       </template>
     </Combobox>
   </div>
 </template>
 
 <script setup lang="ts">
-import { watch, useAttrs, computed } from 'vue'
-import { Combobox, type ComboboxOption } from '../../src/components/Combobox'
-import FormLabel from '../../src/components/FormLabel.vue'
+import { computed, ref, useSlots, watch } from 'vue'
+import { Combobox } from '../../src/components/Combobox'
+import type {
+  ComboboxCustomOption,
+  ComboboxOption,
+} from '../../src/components/Combobox/types'
 import debounce from '../../src/utils/debounce'
-// @ts-ignore - Vue SFC without explicit types
 import { createResource } from '../../src/resources'
 import { frappeRequest } from '../../src/utils/frappeRequest'
-import type { LinkProps, SelectOption } from './types'
-import LucidePlus from '~icons/lucide/plus'
+import type { LinkEmits, LinkExposed, LinkOption, LinkProps } from './types'
 
 const props = withDefaults(defineProps<LinkProps>(), {
-  label: '',
   filters: () => ({}),
-  variant: 'subtle',
+  creatable: false,
+  disabled: false,
 })
-const model = defineModel<string | null>({ default: '' })
-const emit = defineEmits<{
-  (e: 'create', searchTerm: string): void
-}>()
+
+const model = defineModel<string | null>({ default: null })
+const open = defineModel<boolean>('open', { default: false })
+const comboboxRef = ref<{ focus: () => void } | null>(null)
+
+const emit = defineEmits<LinkEmits>()
+
 defineOptions({ inheritAttrs: false })
 
-const attrs = useAttrs() as Record<string, any>
-const attrsWithoutClassStyle = computed(() => {
-  return Object.fromEntries(
-    Object.entries(attrs).filter(([key]) => key !== 'class' && key !== 'style'),
-  )
-})
+const slots = useSlots()
+
+const forwardedSlots = computed(() =>
+  Object.fromEntries(
+    Object.entries(slots).filter(
+      ([name]) => name !== 'suffix' && name !== 'item-create',
+    ),
+  ),
+)
 
 const options = createResource({
   url: 'frappe.desk.search.search_link',
@@ -57,30 +104,34 @@ const options = createResource({
   },
   method: 'POST',
   resourceFetcher: frappeRequest,
-  transform: (data: SelectOption[]) => {
-    return data.map((doc) => ({
+  transform: (data: LinkOption[]): LinkOption[] =>
+    data.map((doc: any) => ({
       label: doc.label || doc.value,
       value: doc.value,
-    }))
-  },
+      description: doc.description,
+    })),
 })
 
-const createNewOption = {
-  type: 'custom' as const,
-  key: 'create_new',
+const createNewOption: ComboboxCustomOption = {
+  type: 'custom',
+  key: 'create',
   label: 'Create New',
-  slotName: 'create-new',
-  condition: () => true,
+  slot: 'create',
+  condition: ({ query }: { query: string }) => Boolean(query.trim()),
   onClick: ({ query }) => emit('create', query),
-} as ComboboxOption
+}
 
-const linkOptions = computed(() => {
+const linkOptions = computed<ComboboxOption[]>(() => {
   const _options = options.data || []
-  if (props.allowCreate) {
+  if (props.creatable) {
     return [..._options, createNewOption]
   }
   return _options
 })
+
+const showClear = computed(
+  () => !props.disabled && !!model.value && !props.required,
+)
 
 const loadOptions = (txt: string = '') => {
   options.update({
@@ -93,12 +144,20 @@ const loadOptions = (txt: string = '') => {
   options.reload()
 }
 
-const handleInputChange = debounce((inputString: string) => {
-  loadOptions(inputString || '')
+const handleInputChange = debounce((value: string) => {
+  loadOptions(value || '')
 }, 300)
+
+const clearValue = () => {
+  model.value = null
+  open.value = false
+  comboboxRef.value?.focus()
+}
 
 watch([() => props.doctype, () => props.filters], () => loadOptions(''), {
   immediate: true,
   deep: true,
 })
+
+defineExpose<LinkExposed>({ reload: () => loadOptions('') })
 </script>
