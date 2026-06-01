@@ -73,6 +73,10 @@ export function getSidebarList(
     },
     ...frappeSection,
     {
+      text: 'Molecules',
+      items: [{ text: 'Editor', link: '/docs/molecules/editor' }],
+    },
+    {
       text: 'Data Fetching',
       items: [
         { text: 'Resource', link: '/docs/data-fetching/resource' },

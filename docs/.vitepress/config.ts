@@ -145,6 +145,11 @@ export default defineConfig({
       alias: {
         '@/components': path.resolve(__dirname, '../components/'),
         'frappe-ui/frappe': path.resolve(__dirname, '../../frappe'),
+        '@components': path.resolve(__dirname, '../../src/components'),
+        '@molecules': path.resolve(__dirname, '../../src/molecules'),
+        '@utils': path.resolve(__dirname, '../../src/utils'),
+        '@composables': path.resolve(__dirname, '../../src/composables'),
+        'frappe-ui/editor': path.resolve(__dirname, '../../src/molecules/editor'),
         'frappe-ui': path.resolve(__dirname, '../../src'),
         'dayjs/esm': 'dayjs',
       },

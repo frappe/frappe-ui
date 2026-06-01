@@ -1,0 +1,11 @@
+.mention {
+  font-weight: 600;
+  box-decoration-break: clone;
+  padding: 0 1px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.mention.ProseMirror-selectednode, .mention:hover {
+  background-color: var(--surface-gray-1, #f8f8f8);
+}

@@ -141,6 +141,88 @@ const options = [{ label: 'Edit', icon: 'edit' }]
 const options = [{ label: 'Edit', icon: 'lucide-pen' }]
 ```
 
+## Editor
+
+The v0 monolith `<TextEditor>` (imported from `frappe-ui`) is replaced by the
+`frappe-ui/editor` family: a headless `<Editor>` you compose with **kits**
+(bundled, configurable extension sets) and **building-block** menus. Everything
+moves to the `frappe-ui/editor` subpath; nothing editor-related is exported from
+top-level `frappe-ui` except the deprecated v0 alias, so the two coexist during
+the migration window. See the [Editor](./molecules/editor) page for the full API
+and recipes.
+
+```ts
+// Before
+import { TextEditor, TextEditorFixedMenu } from 'frappe-ui'
+// After
+import { Editor, EditorFixedMenu, RichTextKit, articleToolbar } from 'frappe-ui/editor'
+```
+
+| Before                                          | After                                                            |
+| ----------------------------------------------- | ---------------------------------------------------------------- |
+| `import … from 'frappe-ui'`                     | `import … from 'frappe-ui/editor'`                               |
+| `<TextEditor>`                                  | `<Editor>`                                                       |
+| `:content="x" @change="x = $event"`             | `v-model="x"` (`@change` still emitted)                          |
+| HTML string only                                | `v-model` + `format="json"` for a JSON value                     |
+| `:starterkit-options="{ heading: { levels } }"` | `RichTextKit.configure({ heading: { levels } })` in `:extensions`|
+| auto-loaded extension set (no opt-out)          | explicit `:extensions` — pick `CommentKit` / `RichTextKit` / `InlineKit` |
+| `:mentions` / `:tags` props                     | `kit.configure({ mention: { items, component }, tag: { items } })` |
+| `:bubble-menu="true"`                           | `<EditorBubbleMenu :items="articleToolbar">` in the default slot |
+| `:floating-menu="true"`                         | `<EditorFloatingMenu :items>`                                    |
+| `<TextEditorFixedMenu :buttons>`                | `<EditorFixedMenu :items>`                                       |
+| `<TextEditorContent>`                           | `<EditorContent>`                                                |
+| menu `:buttons`                                 | menu `:items`                                                    |
+| hand-rolled `textEditorMenuButtons` array       | `commentToolbar` / `articleToolbar` / `minimalToolbar` presets   |
+| `#top` / `#bottom` / `#editor` slots            | one default slot — you render `EditorContent` + menus yourself   |
+| `:uploadFunction` (optional, frappe default)    | `:upload-function` (required to enable uploads)                  |
+
+### Compose, don't configure
+
+v0 took every option as a prop on `<TextEditor>` and auto-loaded every
+extension. v1 renders no chrome of its own — you place the building blocks inside
+its default slot and they pick up the editor from context (the `:editor` prop is
+only needed when composing primitives without `<Editor>`):
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+import { Editor, EditorContent, EditorBubbleMenu, RichTextKit, articleToolbar } from 'frappe-ui/editor'
+
+const content = ref('')
+const extensions = [RichTextKit.configure({ heading: { levels: [2, 3, 4, 5, 6] } })]
+</script>
+
+<template>
+  <Editor v-model="content" :extensions="extensions" placeholder="Write…">
+    <EditorBubbleMenu :items="articleToolbar" />
+    <EditorContent class="prose max-w-none" />
+  </Editor>
+</template>
+```
+
+Pick the kit per surface: `CommentKit` (light — no table/toc/slash), `RichTextKit`
+(full document), `InlineKit` (single-line). Configure kit members in place rather
+than via props — e.g. mentions/tags through `kit.configure({ mention: {...}, tag: {...} })`.
+To keep the mention/tag nodes rendering but disable the live popups, pass
+`mention: { items: null }`.
+
+For a fully custom layout (e.g. a title `<textarea>` as a sibling of the body),
+skip `<Editor>` and drive `useEditor` yourself — see
+[Composing primitives](./molecules/editor#composing-primitives) — rendering
+`<EditorContent>` and the menus as siblings of your own markup.
+
+### Gotchas
+
+- **Tailwind must scan frappe-ui's editor source.** Menu icons are literal
+  `lucide-*` class strings living in `frappe-ui/src/molecules/**`. Add that glob
+  to your `tailwind.config.js` `content`, or the toolbar / bubble / floating
+  icons silently won't be generated.
+- **Uploads need an explicit handler.** v0 silently invoked the Frappe upload;
+  v1 requires `:upload-function`. In a Frappe app:
+  `(file) => useFileUpload().upload(file, {})`.
+- **TipTap must be v3.** The v1 editor is built on TipTap 3 — pin `@tiptap/core`,
+  `@tiptap/pm`, and `@tiptap/vue-3` to `^3`.
+
 ## Autocomplete (deprecated)
 
 `Autocomplete` still ships (with a one-time dev `console.warn`) but will be

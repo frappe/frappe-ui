@@ -92,10 +92,47 @@ Molecules that bridge frappe-ui to the Frappe Desk backend. They depend on backe
 A P5 input control that picks a single record from a Frappe doctype. Bound via unnamed `v-model` to the record's primary key (string) or `null` when empty. Built on `Combobox`, scoped to one doctype via the `doctype` prop and narrowed via `filters`. Renders a default clear affordance when the value is set and the field is not required. Opt into a "Create new" action row via the `creatable` boolean prop, which emits `@create` with the typed query. Accepts the full P5 labeling contract (`label`, `description`, `error`, `required`).
 _Avoid_: using `Link` for non-doctype option lists — reach for `Combobox` directly. `allowCreate`, `allowClear`, `allowRedirect` are removed in v1 (no deprecation path — these were not present in a published release).
 
+### Editor family
+
+**`frappe-ui/editor`** (subpath):
+The single subpath where the entire editor family lives — the `useEditor` engine, the `TextEditor` component, building-block components, kits, extensions, menu items, and presets. The only subsystem in frappe-ui that exports from a subpath rather than top-level; reserved for families big enough to warrant their own mental location. There are no editor exports from top-level `frappe-ui`.
+
+Surface from this subpath:
+- **Engine**: `useEditor` — owns the TipTap `Editor` lifecycle, binds content via `v-model`, threads upload, detects collaboration. Requires an explicit `extensions` list (no default).
+- **Component**: `TextEditor` — the one component everything is built on; capability via the explicit `extensions` array, chrome via `toolbar`/`bubbleMenu`/`floatingMenu` props, layout via slots.
+- **Building blocks**: `EditorContent`, `EditorFixedMenu`, `EditorBubbleMenu`, `EditorFloatingMenu` — the parts `TextEditor` renders internally, each taking an explicit `:editor` prop; exported for composition that doesn't go through the component.
+- **Kits**: `StarterKit`, `CommentKit`, `RichTextKit`, `InlineKit` — `StarterKit`-style configurable extension bundles. The unit of capability defaults and the tree-shaking boundary.
+- **Extensions**: tiptap-original (with our default config) and frappe-custom, all as flat named exports — `Image`, `Mention`, `SlashCommands`, `Tag`, `Table`, `Link`, `Placeholder`, etc. Consumers `.configure(...)` and pass through `extensions`.
+- **Menu items + presets**: typed `MenuItem` objects (`Bold`, `H2`, `Separator`, …) and `MenuItem[]` presets (`commentToolbar`, `articleToolbar`, `minimalToolbar`).
+
+The `useEditor` name shadows TipTap's own `useEditor` from `@tiptap/vue-3`. Consumers who import both alias one side: `import { useEditor as useTipTapEditor } from '@tiptap/vue-3'`. The collision is rare in practice (only consumers building deeply custom editors hit it) and the cleaner name wins for the common case.
+
+_Avoid_: importing the editor surface from `frappe-ui` (top-level) — it doesn't exist there; shipping ready-made assembled editors (`CommentEditor`/`RichTextEditor`) from the library — apps build their own on `TextEditor`.
+
+**TextEditor**:
+The single editor component, built on `useEditor`. Capability is the explicit `extensions` array (required — pass at least a kit); chrome is the `fixedMenu`/`bubbleMenu`/`floatingMenu` props (default off, explicit so the component stays tree-shakeable). The three surface props match the building-block component names and v0's `fixed-menu`/`bubble-menu`/`floating-menu`. Customized progressively on the *same* component — props → named slots (`#actions`, `#fixedMenu`) → `#default` layout slot → drop to `useEditor` + building blocks — with no second component family. Replaces the v0 `TextEditor` monolith (same name, new contract; a pre-v1 break, P13).
+_Avoid_: a fat default `extensions` list or a defaulted fixed menu (breaks tree-shaking); proxy props for data-driven extensions (`mentions`/`tags`) — configure the kit member instead.
+
+**kit** (Editor family):
+A `StarterKit`-style extension that bundles others; every member is configured or removed via canonical `.configure()` (`RichTextKit.configure({ mention: { items }, table: false })`). Data-driven members (`mention`, `tag`, `slashCommands`) are inert until given `items`. Kits supply "good defaults" as an opt-in import and are the tree-shaking boundary. `StarterKit` (base), `CommentKit`, `RichTextKit`, `InlineKit`.
+_Avoid_: a `mentions`/`tags` component prop standing in for `kit.configure({ mention })`; relying on a kit member you didn't configure with data.
+
+**app editor component** (informal):
+The thin component an app builds on `TextEditor`, encoding that app's mention source, local extensions, toolbar preset, and action buttons — reused across the app's call sites. frappe-ui ships none of these; the reuse unit for an *assembled* editor is per-app, because assembled editors are app-specific (gameplan's comment editor ≠ helpdesk's). This replaces the v0 "ready-made" concept: convenience lives in the app, not the library.
+
+**format** (Editor family):
+The content format axis of an editor: `'html' | 'json'`. Default `'html'`. Set as a prop on `TextEditor` (`<TextEditor v-model="x" format="json" />`) and as an option on `useEditor` (`useEditor({ content, format })`). Editors expose content via the unnamed `v-model` (P2-canonical — text content is the primary value); the consumer's chosen `format` decides whether v-model emits HTML strings or `JSONContent` objects. There is no separate `v-model:html` or `v-model:json` — one v-model carries whichever format is configured.
+_Avoid_: type-sniffing the modelValue at runtime; declaring format via a boolean (`:json="true"`); separate v-models per format.
+
+**actions** (TextEditor slot):
+A named slot on `TextEditor`, rendered inline with the toolbar row inside the editor's border. Receives `{ editor, isEmpty }` so the consumer can wire Submit/Discard buttons to the editor instance without a template ref. For layout beyond buttons-in-the-toolbar-row (CC/BCC headers, attachment rows, side panels), take the `#default` layout slot instead. Mirrors Dialog's `actions` vocabulary (P6-aligned).
+_Avoid_: using `actions` for content other than buttons — use the `#default` slot for custom layout.
+
 ## Relationships
 
 - A **Dialog** has zero or more **actions**, each rendered as a Button in the footer.
 - **Dialog**, **Popover**, **Dropdown**, and **Tooltip** all share the **open** vocabulary (`v-model:open`).
+- **TextEditor** is built on **useEditor** and the editor building blocks; apps build their own editor components on top of **TextEditor**.
 
 ## Flagged ambiguities
 

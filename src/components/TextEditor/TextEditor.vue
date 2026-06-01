@@ -21,6 +21,11 @@
   </div>
 </template>
 
+<script lang="ts">
+// Module-scoped so the deprecation notice fires once per process, not per instance.
+let deprecationWarned = false
+</script>
+
 <script setup lang="ts">
 import {
   normalizeClass,
@@ -153,6 +158,13 @@ watch(
 )
 
 onMounted(() => {
+  if (import.meta.env.DEV && !deprecationWarned) {
+    deprecationWarned = true
+    console.warn(
+      "<TextEditor> is deprecated. Use <Editor> with RichTextKit from 'frappe-ui/editor' for standard rich text, or compose your own kits/extensions for custom editors.",
+    )
+  }
+
   editor.value = new Editor({
     content: props.content || null,
     editorProps: editorProps.value,

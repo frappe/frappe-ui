@@ -13,8 +13,9 @@ function listWithStories(rootPath: string): string[] {
     if (!entry.isDirectory()) continue
 
     const storiesPath = path.join(rootPath, entry.name, 'stories')
+    const docsPath = path.join(rootPath, entry.name, `${entry.name}.md`)
 
-    if (!fs.existsSync(storiesPath)) continue
+    if (!fs.existsSync(storiesPath) || !fs.existsSync(docsPath)) continue
 
     items.push(entry.name)
   }

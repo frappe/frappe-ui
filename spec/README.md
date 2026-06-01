@@ -15,6 +15,7 @@ If these disagree, update the lower-authority document or mark it historical.
 
 - [`dialog.md`](./dialog.md)
 - [`toast.md`](./toast.md)
+- [`editor.md`](./editor.md)
 - [`inputs.md`](./inputs.md)
 - [`date-picker.md`](./date-picker.md)
 - [`selection.md`](./selection.md)

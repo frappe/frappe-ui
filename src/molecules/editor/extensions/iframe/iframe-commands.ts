@@ -1,0 +1,88 @@
+/**
+ * Imperative command builders for the iframe extension.
+ *
+ * The extension's `addCommands` is a thin map that delegates to these, keeping
+ * the `Node.create` shell small. Each builder returns a TipTap command (a
+ * function of `CommandProps`). Validation goes through `validateIframeUrl`; URL
+ * rewriting through `processEmbedUrl` — never the deleted `validateURL`.
+ */
+import type { RawCommands } from '@tiptap/core'
+import { validateIframeUrl } from './iframe-allowlist'
+import { processEmbedUrl, getOptimalDimensions } from './iframe-embed-utils'
+import { openIframeInsertDialog } from './iframeInsertDialogController'
+
+export type IframeAlign = 'left' | 'center' | 'right'
+
+export interface SetIframeOptions {
+  src: string
+  width?: number
+  height?: number
+  title?: string
+  interactive?: boolean
+  align?: IframeAlign
+}
+
+declare module '@tiptap/core' {
+  interface Commands<ReturnType> {
+    iframe: {
+      /** Insert an iframe node from validated, embed-rewritten options. */
+      setIframe: (options: SetIframeOptions) => ReturnType
+      /** Insert an iframe from a single URL (convenience over setIframe). */
+      insertIframeURL: (url: string) => ReturnType
+      /** Update the selected iframe's alignment. */
+      setIframeAlign: (align: IframeAlign) => ReturnType
+      /** Open the insert-embed dialog (mounts it via the controller). */
+      openIframeDialog: () => ReturnType
+    }
+  }
+}
+
+/** Build the iframe command map for the extension's `addCommands`. */
+export function buildIframeCommands(
+  nodeName: string,
+  allowlist?: readonly string[],
+): Partial<RawCommands> {
+  const setIframeAlign: RawCommands['setIframeAlign'] =
+    (align: IframeAlign) =>
+    ({ commands }) =>
+      commands.updateAttributes(nodeName, { align })
+
+  const setIframe: RawCommands['setIframe'] =
+    (options: SetIframeOptions) =>
+    ({ commands, editor }) => {
+      const processedSrc = processEmbedUrl(options.src)
+      if (!validateIframeUrl(processedSrc, { allowlist })) return false
+
+      const editorWidth = editor.view.dom.clientWidth || 800
+      const optimal = getOptimalDimensions(processedSrc, editorWidth)
+      const width = options.width ?? optimal.width
+      const height = options.height ?? optimal.height
+
+      return commands.insertContent({
+        type: nodeName,
+        attrs: {
+          src: processedSrc,
+          width,
+          height,
+          title: options.title ?? null,
+          align: options.align ?? 'center',
+          aspectRatio: height / width,
+          interactive: options.interactive ?? false,
+        },
+      })
+    }
+
+  const insertIframeURL: RawCommands['insertIframeURL'] =
+    (url: string) =>
+    ({ commands }) =>
+      commands.setIframe({ src: url })
+
+  const openIframeDialog: RawCommands['openIframeDialog'] =
+    () =>
+    ({ editor }) => {
+      openIframeInsertDialog({ editor })
+      return true
+    }
+
+  return { setIframeAlign, setIframe, insertIframeURL, openIframeDialog }
+}

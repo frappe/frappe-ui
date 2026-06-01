@@ -161,3 +161,9 @@ code {
 .migration-page td {
   width: 50%;
 }
+
+/* The article's `prose-p:mb-4` leaks into editor previews (they escape `.not-prose`
+   to keep prose-v3). Restore prose-v3's zero paragraph margin inside the editor. */
+[data-slot='editor-content'] p {
+  margin-bottom: 0;
+}
