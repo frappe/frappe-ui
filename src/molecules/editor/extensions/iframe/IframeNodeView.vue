@@ -1,164 +1,83 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, nextTick } from 'vue'
+import { computed, ref, toRaw } from 'vue'
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
-import { detectPlatform, calculateAspectRatio } from './utils'
+import { useNodeViewEditable } from '@molecules/editor/composables/useNodeViewEditable'
+import { useNodeViewResize } from '@molecules/editor/composables/useNodeViewResize'
+import { safeGetPos } from '@molecules/editor/extensions/shared/node-view'
+import { IFRAME_SANDBOX } from './iframe-allowlist'
+import type { IframeAlign } from './iframe-commands'
 
 const props = defineProps(nodeViewProps)
 
+// VueNodeViewRenderer passes a reactive-proxied editor; dispatching a
+// transaction through it trips ProseMirror's by-reference doc check
+// ("Applying a mismatched transaction"). Use the raw editor for all commands.
+// (Same rationale as MediaNodeView.)
+const editor = toRaw(props.editor)
+
+const MIN_WIDTH = 200
+const EDITOR_PADDING = 40
+
 const iframeRef = ref<HTMLIFrameElement | null>(null)
 const containerRef = ref<HTMLDivElement | null>(null)
-const isResizing = ref(false)
-const startDragX = ref(0)
-const startWidth = ref(0)
-const originalAspectRatio = ref(9/16) // Default 16:9
-const isEditable = ref(false)
 
-function selectIframe() {
-  props.editor.commands.setNodeSelection(props.getPos())
+const isEditable = useNodeViewEditable(editor)
+
+// Single style source: derive from the committed node attrs. (The legacy view
+// also kept a desynced `iframeStyles` computed off a local ref — removed.)
+const aspectRatio = computed<number>(
+  () => (props.node.attrs.aspectRatio as number | null) ?? 9 / 16,
+)
+
+const frameStyle = computed(() => {
+  const width = (props.node.attrs.width as number | null) ?? 640
+  const height =
+    (props.node.attrs.height as number | null) ?? Math.round(width * aspectRatio.value)
+  return { width: `${width}px`, height: `${height}px` }
+})
+
+const sandbox = computed<string>(() => IFRAME_SANDBOX)
+
+const isInteractive = computed<boolean>(() => !!props.node.attrs.interactive)
+const overlayActive = computed(() => isEditable.value && !isInteractive.value)
+
+const { startResize } = useNodeViewResize(editor, {
+  mediaEl: () => iframeRef.value,
+  containerEl: () => containerRef.value,
+  getAspectRatio: () => aspectRatio.value,
+  getPos: () => props.getPos(),
+  onCommit: ({ width, height }) => {
+    props.updateAttributes({ width, height, aspectRatio: height / width })
+  },
+  minWidth: MIN_WIDTH,
+  maxWidthPadding: EDITOR_PADDING,
+})
+
+function selectIframe(): void {
+  const pos = safeGetPos(() => props.getPos())
+  if (pos === null) return
+  editor.commands.setNodeSelection(pos)
 }
 
-// Computed properties for styling and info
-const platformInfo = computed(() => {
-  if (props.node.attrs.src) {
-    const platform = detectPlatform(props.node.attrs.src)
-    const aspectInfo = calculateAspectRatio(props.node.attrs.src)
-    return {
-      platform: platform?.name || 'Generic',
-      aspectRatio: aspectInfo.ratio
-    }
-  }
-  return { platform: 'Generic', aspectRatio: 9/16 }
-})
-
-const iframeStyles = computed(() => {
-  const width = props.node.attrs.width || 640
-  const height = props.node.attrs.height || (width * originalAspectRatio.value)
-
-  return {
-    width: `${width}px`,
-    height: `${height}px`
-  }
-})
-
-onMounted(() => {
-  isEditable.value = props.editor.isEditable
-
-  // Calculate aspect ratio from node attributes or URL
-  if (props.node.attrs.aspectRatio) {
-    originalAspectRatio.value = props.node.attrs.aspectRatio
-  } else if (props.node.attrs.src) {
-    const aspectInfo = calculateAspectRatio(props.node.attrs.src)
-    originalAspectRatio.value = aspectInfo.ratio
-
-    // Update node with calculated aspect ratio
-    props.updateAttributes({ aspectRatio: aspectInfo.ratio })
-  }
-})
-
-props.editor.on('update', () => {
-  isEditable.value = props.editor.isEditable
-})
-
-function startResize(event: MouseEvent) {
-  if (!isEditable.value) return
+function onResizeStart(event: MouseEvent): void {
   selectIframe()
-  isResizing.value = true
-  startDragX.value = event.clientX
-  startWidth.value = containerRef.value?.offsetWidth || props.node.attrs.width || 640
-
-  // Use stored aspect ratio or calculate from current dimensions
-  if (props.node.attrs.aspectRatio) {
-    originalAspectRatio.value = props.node.attrs.aspectRatio
-  } else {
-    const width = props.node.attrs.width || startWidth.value
-    const height = props.node.attrs.height || (width * originalAspectRatio.value)
-    if (width && height) {
-      originalAspectRatio.value = height / width
-    }
-  }
-
-  window.addEventListener('mousemove', handleResize)
-  window.addEventListener('mouseup', stopResize)
-  document.body.style.cursor = 'ew-resize'
+  startResize(event)
 }
 
-function handleResize(event: MouseEvent) {
-  if (!isResizing.value || !iframeRef.value || !containerRef.value) return
-
-  const editorElement = props.editor.view.dom
-  const editorWidth = editorElement.clientWidth
-
-  const deltaX = event.clientX - startDragX.value
-  let newWidth = startWidth.value + deltaX
-
-  // Add constraints (minimum width, maximum editor width with padding)
-  const MIN_WIDTH = 200
-  const PADDING = 40
-  newWidth = Math.max(MIN_WIDTH, Math.min(newWidth, editorWidth - PADDING))
-
-  const newHeight = newWidth * originalAspectRatio.value
-
-  // Apply temporary styles for visual feedback
-  iframeRef.value.style.width = `${newWidth}px`
-  iframeRef.value.style.height = `${newHeight}px`
-  containerRef.value.style.width = `${newWidth}px`
-}
-
-function stopResize() {
-  if (!isResizing.value) return
-
-  isResizing.value = false
-  window.removeEventListener('mousemove', handleResize)
-  window.removeEventListener('mouseup', stopResize)
-  document.body.style.cursor = ''
-
-  if (iframeRef.value && containerRef.value) {
-    // Capture final dimensions while temporary styles are still applied
-    const finalWidth = iframeRef.value.offsetWidth
-    const finalHeight = iframeRef.value.offsetHeight
-
-    // Update attributes
-    props.updateAttributes({
-      width: finalWidth,
-      height: finalHeight,
-      aspectRatio: originalAspectRatio.value
-    })
-
-    // Clear temporary styles immediately (like image extension)
-    iframeRef.value.style.width = ''
-    iframeRef.value.style.height = ''
-    containerRef.value.style.width = ''
-  }
-}
-
-function setAlignment(align: 'left' | 'center' | 'right') {
+function setAlignment(align: IframeAlign): void {
   props.updateAttributes({ align })
 }
 
-// Handle keyboard navigation
-function handleKeydown(event: KeyboardEvent) {
-  if (event.key === 'Enter') {
-    event.preventDefault()
-    createParagraphAfterIframe()
-  } else if (event.key === 'Escape' || event.key === 'ArrowDown') {
-    event.preventDefault()
-    setCursorAfterIframe()
-  }
-  if (event.key === 'ArrowUp') {
-    event.preventDefault()
-    setCursorBeforeIframe()
-  }
+function setCursorAt(pos: number): void {
+  editor.commands.focus()
+  editor.chain().setTextSelection(pos).scrollIntoView().run()
 }
 
-function setCursorAt(pos: number) {
-  props.editor.commands.focus()
-  props.editor.chain().setTextSelection(pos).scrollIntoView().run()
-}
-
-function createParagraphAfterIframe() {
-  const pos = props.getPos()
-  props.editor.commands.focus()
-  props.editor
+function createParagraphAfter(): void {
+  const pos = safeGetPos(() => props.getPos())
+  if (pos === null) return
+  editor.commands.focus()
+  editor
     .chain()
     .setTextSelection(pos + 1)
     .createParagraphNear()
@@ -166,14 +85,25 @@ function createParagraphAfterIframe() {
     .run()
 }
 
-function setCursorAfterIframe() {
-  const pos = props.getPos()
-  setCursorAt(pos + 1)
+function handleKeydown(event: KeyboardEvent): void {
+  const pos = safeGetPos(() => props.getPos())
+  if (pos === null) return
+  if (event.key === 'Enter') {
+    event.preventDefault()
+    createParagraphAfter()
+  } else if (event.key === 'Escape' || event.key === 'ArrowDown') {
+    event.preventDefault()
+    setCursorAt(pos + 1)
+  } else if (event.key === 'ArrowUp') {
+    event.preventDefault()
+    setCursorAt(pos - 1)
+  }
 }
 
-function setCursorBeforeIframe() {
-  const pos = props.getPos()
-  setCursorAt(pos - 1)
+// Caption commits on blur / Enter, not per keystroke.
+function commitCaption(event: Event): void {
+  const value = (event.target as HTMLInputElement).value
+  props.updateAttributes({ title: value })
 }
 </script>
 
@@ -181,7 +111,7 @@ function setCursorBeforeIframe() {
   <NodeViewWrapper>
     <div
       ref="containerRef"
-      class="relative overflow-hidden not-prose my-6 rounded-lg block max-w-full focus:outline-none"
+      class="relative my-6 block max-w-full overflow-hidden rounded-lg not-prose focus:outline-none"
       :class="[
         { 'ring-2 ring-outline-gray-3 ring-offset-2': selected },
         node.attrs.align === 'center' ? 'mx-auto' : '',
@@ -190,114 +120,99 @@ function setCursorBeforeIframe() {
       ]"
       :style="{
         width: node.attrs.width ? `${node.attrs.width}px` : 'auto',
-        maxWidth: '100%'
+        maxWidth: '100%',
       }"
-      @keydown="handleKeydown"
       tabindex="0"
+      @keydown="handleKeydown"
     >
       <div class="relative">
         <iframe
           v-if="node.attrs.src"
           ref="iframeRef"
-          class="rounded-lg border-0 block max-w-full h-auto"
-          :class="{
-            'pointer-events-none': isEditable && !props.node.attrs.interactive,
-          }"
+          class="block h-auto max-w-full rounded-lg border-0"
+          :class="{ 'pointer-events-none': overlayActive }"
           :src="node.attrs.src"
-          :style="iframeStyles"
+          :style="frameStyle"
           :title="node.attrs.title || ''"
+          :sandbox="sandbox"
           frameborder="0"
           allowfullscreen
           loading="lazy"
           referrerpolicy="no-referrer-when-downgrade"
-          sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
           @click.stop="selectIframe"
         />
 
         <!-- Transparent overlay for selection in edit mode -->
         <div
-          v-if="isEditable && !props.node.attrs.interactive"
-          class="absolute inset-0 cursor-pointer z-10"
+          v-if="overlayActive"
+          class="absolute inset-0 z-10 cursor-pointer"
           @click.stop="selectIframe"
         ></div>
 
         <!-- Controls overlay -->
-        <div class="absolute bottom-2 right-2 flex items-center gap-2 z-20">
-          <!-- Alignment Controls -->
+        <div class="absolute bottom-2 right-2 z-20 flex items-center gap-2">
           <div
             v-if="selected && isEditable"
             class="flex divide-x divide-ink-gray-6 rounded-md bg-black/65"
           >
             <button
-              @click.stop="setAlignment('left')"
-              :class="[
-                'px-1.5 py-1 text-ink-gray-4 hover:text-white transition-colors duration-150',
-                { 'text-white': node.attrs.align === 'left' }
-              ]"
+              class="px-1.5 py-1 text-ink-gray-4 transition-colors duration-150 hover:text-white"
+              :class="{ 'text-white': node.attrs.align === 'left' }"
               title="Align Left"
+              @click.stop="setAlignment('left')"
             >
               <span class="lucide-align-left size-4" />
             </button>
             <button
-              @click.stop="setAlignment('center')"
-              :class="[
-                'px-1.5 py-1 text-ink-gray-4 hover:text-white transition-colors duration-150',
-                { 'text-white': node.attrs.align === 'center' }
-              ]"
+              class="px-1.5 py-1 text-ink-gray-4 transition-colors duration-150 hover:text-white"
+              :class="{ 'text-white': node.attrs.align === 'center' }"
               title="Align Center"
+              @click.stop="setAlignment('center')"
             >
               <span class="lucide-align-center size-4" />
             </button>
             <button
-              @click.stop="setAlignment('right')"
-              :class="[
-                'px-1.5 py-1 text-ink-gray-4 hover:text-white transition-colors duration-150',
-                { 'text-white': node.attrs.align === 'right' }
-              ]"
+              class="px-1.5 py-1 text-ink-gray-4 transition-colors duration-150 hover:text-white"
+              :class="{ 'text-white': node.attrs.align === 'right' }"
               title="Align Right"
+              @click.stop="setAlignment('right')"
             >
               <span class="lucide-align-right size-4" />
             </button>
           </div>
 
-          <!-- Resize Handle -->
           <button
             v-if="selected && isEditable"
-            class="cursor-nw-resize bg-black/65 rounded-md p-1"
-            @mousedown.prevent="startResize"
+            class="cursor-nw-resize rounded-md bg-black/65 p-1"
             title="Resize"
+            @mousedown.prevent="onResizeStart"
           >
-            <span class="lucide-move-diagonal-2 text-white size-4" />
+            <span class="lucide-move-diagonal-2 size-4 text-white" />
           </button>
         </div>
 
-
-        <!-- Loading state for new embeds -->
+        <!-- Placeholder while no src is set -->
         <div
           v-if="!node.attrs.src"
-          class="flex items-center justify-center bg-surface-gray-1 rounded-lg w-[640px] h-[360px]"
+          class="flex h-[360px] w-[640px] items-center justify-center rounded-lg bg-surface-gray-1"
         >
-          <div class="text-ink-gray-5 text-center">
-            <div class="text-lg mb-1">🔗</div>
-            <div class="text-sm">Loading embed...</div>
+          <div class="text-center text-ink-gray-5">
+            <div class="mb-1 text-lg">🔗</div>
+            <div class="text-sm">Loading embed…</div>
           </div>
         </div>
       </div>
 
-      <!-- Caption/Title input -->
+      <!-- Caption input (commits on blur / Enter) -->
       <input
         v-if="(isEditable || node.attrs.title) && node.attrs.src"
         :value="node.attrs.title"
-        class="w-full text-center bg-transparent text-sm text-ink-gray-6 h-7 border-0 mt-2 focus:outline-none focus:ring-0 placeholder-ink-gray-4 disabled:opacity-60"
+        class="mt-2 h-7 w-full border-0 bg-transparent text-center text-sm text-ink-gray-6 placeholder-ink-gray-4 focus:outline-none focus:ring-0 disabled:opacity-60"
         placeholder="Add caption"
         :disabled="!isEditable"
-        @input="(e) => props.updateAttributes({ title: (e.target as HTMLInputElement).value })"
-        @keydown="handleKeydown"
+        @blur="commitCaption"
+        @keydown.enter.prevent="commitCaption"
       />
     </div>
   </NodeViewWrapper>
 </template>
-
-<style scoped>
-/* Component-specific styles if needed */
-</style>

@@ -13,7 +13,7 @@
     "coverage:merge": "tsx .github/scripts/merge-coverage.ts",
     "type-check": "vue-tsc --noEmit",
     "type-check:tsc": "tsc --noEmit",
-    "prettier": "yarn run prettier -w ./src",
+    "format": "prettier -w ./src",
     "bump-and-release": "yarn test && git pull --rebase origin main && yarn run release-patch",
     "release-patch": "yarn version --patch && git push && git push --tags",
     "bump-and-release-beta": "yarn test && git pull --rebase origin main && yarn run release-beta",
@@ -63,7 +63,7 @@
       "import": "./src/style.css"
     },
     "./editor-style.css": {
-      "import": "./src/components/TextEditor/style.css"
+      "import": "./src/molecules/editor/style.css"
     },
     "./tsconfig.base.json": {
       "types": "./tsconfig.base.json",
@@ -87,6 +87,7 @@
   "license": "MIT",
   "dependencies": {
     "@headlessui/vue": "^1.7.14",
+    "@floating-ui/dom": "^1.7.4",
     "@popperjs/core": "^2.11.2",
     "@tailwindcss/forms": "^0.5.3",
     "@tailwindcss/line-clamp": "^0.4.4",
@@ -134,7 +135,6 @@
     "reka-ui": "^2.5.0",
     "slugify": "^1.6.6",
     "socket.io-client": "^4.5.1",
-    "tippy.js": "^6.3.7",
     "typescript": "^5.0.2",
     "unplugin-auto-import": "^19.3.0",
     "unplugin-icons": "^22.1.0",

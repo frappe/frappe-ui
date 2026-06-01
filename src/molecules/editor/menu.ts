@@ -1,17 +1,28 @@
 import type { Component } from 'vue'
 import type { Editor } from './useEditor'
+import {
+  commandMeta,
+  headingMeta,
+  type EditorCommandContext,
+  type EditorCommandMeta,
+} from './commands'
+import { openFontColorPicker } from './components/font-color/fontColorController'
+
+export type MenuActionContext = EditorCommandContext
 
 export type CommandMenuItem = {
-  /**
-   * The button glyph. A `lucide-*` string renders as a masked icon span (the
-   * frappe-ui house convention, same path as Button); a component renders as-is.
-   * Predefined items ship a sensible default — pass your own to override.
-   */
+  // Button glyph: a `lucide-*` string renders as a masked icon span (frappe-ui
+  // house convention); a component renders as-is. Predefined items default it.
   icon?: Component | string
   label: string
-  action: (editor: Editor) => void
+  action: (
+    editor: Editor,
+    context?: MenuActionContext,
+  ) => boolean | void | Promise<boolean | void>
   isActive?: (editor: Editor) => boolean
   isDisabled?: (editor: Editor) => boolean
+  // Escape hatch for custom toolbar controls. Predefined items prefer actions.
+  component?: Component
   /**
    * Whether the item's capability is loaded in the editor. When this returns
    * `false` the renderer hides the item entirely (its extension isn't present),
@@ -30,23 +41,7 @@ export type MenuGroupItem = {
 
 export type MenuItem = CommandMenuItem | MenuGroupItem | { type: 'separator' }
 
-/** Self-pruning predicates — an item hides when its mark/node/extension is absent. */
-const hasMark =
-  (name: string) =>
-  (editor: Editor): boolean =>
-    name in editor.schema.marks
-const hasNode =
-  (name: string) =>
-  (editor: Editor): boolean =>
-    name in editor.schema.nodes
-const hasExtension =
-  (name: string) =>
-  (editor: Editor): boolean =>
-    editor.extensionManager?.extensions?.some(
-      (extension) => extension.name === name,
-    ) ?? true
-
-function canRun(editor: Editor, command: (editor: Editor) => void) {
+function canRun(editor: Editor, command: CommandMenuItem['action']) {
   const canEditor = editor.can?.()
   if (!canEditor?.chain) return true
 
@@ -68,97 +63,52 @@ function canRun(editor: Editor, command: (editor: Editor) => void) {
 }
 
 function command(
-  label: string,
-  icon: Component | string | undefined,
-  action: (editor: Editor) => void,
-  active?: (editor: Editor) => boolean,
-  available?: (editor: Editor) => boolean,
+  meta: EditorCommandMeta,
+  action: CommandMenuItem['action'],
+  component?: Component,
+  canCheck = true,
 ): CommandMenuItem {
   return {
-    label,
-    icon,
+    label: meta.label,
+    icon: meta.icon,
     action,
-    isActive: active,
-    isDisabled: (editor) => !canRun(editor, action),
-    isAvailable: available,
+    isActive: meta.isActive,
+    isDisabled: canCheck ? (editor) => !canRun(editor, action) : undefined,
+    isAvailable: meta.isAvailable,
+    component,
   }
 }
 
-export const Bold = command(
-  'Bold',
-  'lucide-bold',
-  (editor) => editor.chain().focus().toggleBold().run(),
-  (editor) => editor.isActive('bold'),
-  hasMark('bold'),
+export const Bold = command(commandMeta.bold, (editor) =>
+  editor.chain().focus().toggleBold().run(),
 )
-export const Italic = command(
-  'Italic',
-  'lucide-italic',
-  (editor) => editor.chain().focus().toggleItalic().run(),
-  (editor) => editor.isActive('italic'),
-  hasMark('italic'),
+export const Italic = command(commandMeta.italic, (editor) =>
+  editor.chain().focus().toggleItalic().run(),
 )
-export const Strike = command(
-  'Strike',
-  'lucide-strikethrough',
-  (editor) => editor.chain().focus().toggleStrike().run(),
-  (editor) => editor.isActive('strike'),
-  hasMark('strike'),
+export const Strike = command(commandMeta.strike, (editor) =>
+  editor.chain().focus().toggleStrike().run(),
 )
 // Inline `code` mark toggle. Exported as `InlineCode` (not `Code`) so it doesn't
 // collide with the `Code` extension export; its visible/aria label is still "Code".
-export const InlineCode = command(
-  'Code',
-  'lucide-code',
-  (editor) => editor.chain().focus().toggleCode().run(),
-  (editor) => editor.isActive('code'),
-  hasMark('code'),
+export const InlineCode = command(commandMeta.inlineCode, (editor) =>
+  editor.chain().focus().toggleCode().run(),
 )
-export const BulletList = command(
-  'Bullet List',
-  'lucide-list',
-  (editor) => editor.chain().focus().toggleBulletList().run(),
-  (editor) => editor.isActive('bulletList'),
-  hasNode('bulletList'),
+export const BulletList = command(commandMeta.bulletList, (editor) =>
+  editor.chain().focus().toggleBulletList().run(),
 )
-export const OrderedList = command(
-  'Ordered List',
-  'lucide-list-ordered',
-  (editor) => editor.chain().focus().toggleOrderedList().run(),
-  (editor) => editor.isActive('orderedList'),
-  hasNode('orderedList'),
+export const OrderedList = command(commandMeta.orderedList, (editor) =>
+  editor.chain().focus().toggleOrderedList().run(),
 )
-export const Blockquote = command(
-  'Blockquote',
-  'lucide-quote',
-  (editor) => editor.chain().focus().toggleBlockquote().run(),
-  (editor) => editor.isActive('blockquote'),
-  hasNode('blockquote'),
+export const Blockquote = command(commandMeta.blockquote, (editor) =>
+  editor.chain().focus().toggleBlockquote().run(),
 )
-export const Paragraph = command(
-  'Paragraph',
-  'lucide-type',
-  (editor) => editor.chain().focus().setParagraph().run(),
-  (editor) => editor.isActive('paragraph'),
-  hasNode('paragraph'),
+export const Paragraph = command(commandMeta.paragraph, (editor) =>
+  editor.chain().focus().setParagraph().run(),
 )
-
-const headingIcon: Record<1 | 2 | 3 | 4 | 5 | 6, string> = {
-  1: 'lucide-heading-1',
-  2: 'lucide-heading-2',
-  3: 'lucide-heading-3',
-  4: 'lucide-heading-4',
-  5: 'lucide-heading-5',
-  6: 'lucide-heading-6',
-}
 
 function heading(level: 1 | 2 | 3 | 4 | 5 | 6): CommandMenuItem {
-  return command(
-    `Heading ${level}`,
-    headingIcon[level],
-    (editor) => editor.chain().focus().toggleHeading({ level }).run(),
-    (editor) => editor.isActive('heading', { level }),
-    hasNode('heading'),
+  return command(headingMeta(level), (editor) =>
+    editor.chain().focus().toggleHeading({ level }).run(),
   )
 }
 
@@ -174,80 +124,56 @@ export const HeadingGroup: MenuGroupItem = {
   items: [H2, H3, H4],
 }
 
-export const AlignLeft = command(
-  'Align Left',
-  'lucide-align-left',
-  (editor) => editor.chain().focus().setTextAlign('left').run(),
-  (editor) => editor.isActive({ textAlign: 'left' }),
-  hasExtension('textAlign'),
+export const AlignLeft = command(commandMeta.alignLeft, (editor) =>
+  editor.chain().focus().setTextAlign('left').run(),
 )
-export const AlignCenter = command(
-  'Align Center',
-  'lucide-align-center',
-  (editor) => editor.chain().focus().setTextAlign('center').run(),
-  (editor) => editor.isActive({ textAlign: 'center' }),
-  hasExtension('textAlign'),
+export const AlignCenter = command(commandMeta.alignCenter, (editor) =>
+  editor.chain().focus().setTextAlign('center').run(),
 )
-export const AlignRight = command(
-  'Align Right',
-  'lucide-align-right',
-  (editor) => editor.chain().focus().setTextAlign('right').run(),
-  (editor) => editor.isActive({ textAlign: 'right' }),
-  hasExtension('textAlign'),
+export const AlignRight = command(commandMeta.alignRight, (editor) =>
+  editor.chain().focus().setTextAlign('right').run(),
 )
+// Named color/highlight (`namedColor`/`namedHighlight`) drive an imperative
+// picker so the toolbar button remains owned by MenuItems.
 export const FontColor = command(
-  'Font Color',
-  'lucide-baseline',
-  (editor) => editor.chain().focus().setColor('#000000').run(),
+  commandMeta.fontColor,
+  (editor, context) => {
+    if (!context?.trigger) return
+    openFontColorPicker({ editor, anchor: context.trigger })
+  },
   undefined,
-  hasExtension('color'),
+  false,
 )
-export const FontHighlight = command(
-  'Highlight',
-  'lucide-highlighter',
-  (editor) => editor.chain().focus().toggleHighlight().run(),
-  (editor) => editor.isActive('highlight'),
-  hasMark('highlight'),
+export const FontHighlight = command(commandMeta.fontHighlight, (editor) =>
+  editor.chain().focus().toggleHighlightByName('yellow').run(),
 )
 export const InsertImage = command(
-  'Image',
-  'lucide-image',
-  (editor) => editor.chain().focus().setImage?.({ src: '' }).run(),
+  commandMeta.image,
+  (editor) => editor.chain().focus().selectAndUploadImage().run(),
   undefined,
-  hasNode('image'),
+  false,
 )
 export const InsertVideo = command(
-  'Video',
-  'lucide-video',
-  (editor) => editor.chain().focus().setVideo?.({ src: '' }).run(),
+  commandMeta.video,
+  (editor) => editor.chain().focus().selectAndUploadVideo().run(),
   undefined,
-  hasNode('video'),
+  false,
 )
 export const InsertLink = command(
-  'Link',
-  'lucide-link',
-  (editor) => editor.chain().focus().toggleLink({ href: '' }).run(),
-  (editor) => editor.isActive('link'),
-  hasMark('link'),
-)
-export const InsertTable = command(
-  'Table',
-  'lucide-table',
-  (editor) =>
-    editor
-      .chain()
-      .focus()
-      .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
-      .run(),
+  commandMeta.link,
+  (editor) => editor.commands.openLinkEditor(),
   undefined,
-  hasNode('table'),
+  false,
 )
-export const HorizontalRule = command(
-  'Horizontal Rule',
-  'lucide-minus',
-  (editor) => editor.chain().focus().setHorizontalRule().run(),
-  undefined,
-  hasNode('horizontalRule'),
+export const InsertTable = command(commandMeta.table, (editor) =>
+  editor
+    .chain()
+    .focus()
+    .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+    .run(),
+)
+export const HorizontalRule = command(commandMeta.horizontalRule, (editor) =>
+  editor.chain().focus().setHorizontalRule().run(),
 )
 
 // History controls. `isActive` doesn't apply; availability is left open (history

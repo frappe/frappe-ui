@@ -157,6 +157,22 @@ describe('TextEditor', () => {
     expect(ctx.root.firstElementChild).toBe(bespoke)
   })
 
+  it('renders editor content as a single contenteditable root', async () => {
+    const ctx = mount(
+      { extensions: [StarterKit] },
+      { reactiveProps: { modelValue: '<p>Hello</p>' } },
+    )
+    await nextTick()
+
+    const content = ctx.root.querySelector(
+      '[data-slot="editor-content"]',
+    ) as HTMLElement
+    expect(content).toBeTruthy()
+    expect(content.getAttribute('contenteditable')).toBe('true')
+    expect(content.classList.contains('ProseMirror')).toBe(true)
+    expect(content.querySelector('[contenteditable="true"]')).toBeFalsy()
+  })
+
   it('renders menus in the slot via the building blocks + a preset', async () => {
     const ctx = mount(
       { extensions: [CommentKit] },

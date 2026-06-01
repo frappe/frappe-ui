@@ -1,26 +1,26 @@
 import { Mark, mergeAttributes } from '@tiptap/core'
+import { PALETTE_NAMES } from '../shared/color-palette'
 import {
-  getClosestNamedColor,
-  highlightColorHexMap,
-  legacyHighlightColorMap,
   extractHighlightColorFromStyle,
-} from '../shared/color-utils'
+  highlightColorStyle,
+} from '../shared/color-style'
 
 export interface HighlightOptions {
   /**
-   * HTML tag to wrap the highlighted text
-   * @default 'mark'
+   * HTML attributes merged onto the rendered `<mark>`.
+   * @default {}
    */
-  HTMLAttributes: Record<string, any>
+  HTMLAttributes: Record<string, unknown>
 
   /**
-   * Available highlight color names that can be used
-   * @default ['yellow', 'blue', 'green', 'red', 'orange', 'purple', 'pink', 'gray']
+   * Available highlight color names that can be used.
+   * @default the full named-color palette
    */
   colors: string[]
 
   /**
-   * Enable multiple highlight colors
+   * Enable multiple highlight colors. When `false`, color names are ignored
+   * (a plain highlight is applied) and a one-time warning is emitted.
    * @default true
    */
   multicolor: boolean
@@ -31,13 +31,11 @@ declare module '@tiptap/core' {
     namedHighlight: {
       /**
        * Set a highlight by color name
-       * @param colorName The named color to set (e.g., 'yellow', 'blue')
        * @example editor.commands.setHighlightByName('yellow')
        */
       setHighlightByName: (colorName: string) => ReturnType
       /**
        * Toggle a highlight by color name
-       * @param colorName The named color to toggle (e.g., 'yellow', 'blue')
        * @example editor.commands.toggleHighlightByName('yellow')
        */
       toggleHighlightByName: (colorName: string) => ReturnType
@@ -50,9 +48,20 @@ declare module '@tiptap/core' {
   }
 }
 
+/** Emit the multicolor-disabled warning at most once per extension instance. */
+let warnedMonochrome = false
+function warnMonochromeOnce() {
+  if (warnedMonochrome) return
+  warnedMonochrome = true
+  console.warn(
+    '[namedHighlight] multicolor is disabled; applying a plain highlight and ignoring the color name.',
+  )
+}
+
 /**
- * This extension allows you to highlight your text using named colors instead of hex/rgb values.
- * Highlights are applied as data attributes that can be styled with CSS for light/dark mode support.
+ * Highlight mark using named colors instead of hex/rgb values. Renders as
+ * `background-color: var(--prose-highlight-NAME)` so light/dark mode is driven
+ * by CSS. Parsing normalizes legacy `data-color` hex + inline styles to a name.
  */
 export const NamedHighlightExtension = Mark.create<HighlightOptions>({
   name: 'namedHighlight',
@@ -61,18 +70,7 @@ export const NamedHighlightExtension = Mark.create<HighlightOptions>({
     return {
       HTMLAttributes: {},
       multicolor: true,
-      colors: [
-        'yellow',
-        'blue',
-        'green',
-        'red',
-        'orange',
-        'purple',
-        'pink',
-        'gray',
-        'teal',
-        'cyan',
-      ],
+      colors: [...PALETTE_NAMES],
     }
   },
 
@@ -85,43 +83,24 @@ export const NamedHighlightExtension = Mark.create<HighlightOptions>({
       color: {
         default: null,
         parseHTML: (element) => {
-          // Check for CSS custom property format in style attribute
           const style = element.getAttribute('style')
           if (style) {
-            const highlightMatch = style.match(
-              /background-color:\s*var\(--prose-highlight-(\w+)\)/,
-            )
-            if (
-              highlightMatch &&
-              this.options.colors.includes(highlightMatch[1])
-            ) {
-              return highlightMatch[1]
-            }
-          }
-
-          // Check for legacy format with data-color attribute (hex value)
-          const legacyColorAttr = element.getAttribute('data-color')
-          if (legacyColorAttr) {
-            const closestColor = getClosestNamedColor(
-              legacyColorAttr,
-              this.options.colors,
-              highlightColorHexMap,
-              legacyHighlightColorMap,
-            )
-            if (closestColor) {
-              return closestColor
-            }
-          }
-
-          // Try extracting from style attribute as fallback
-          if (style) {
-            const extractedColor = extractHighlightColorFromStyle(
+            // Shared extractor handles CSS-var + legacy hex/rgb forms.
+            const fromStyle = extractHighlightColorFromStyle(
               style,
               this.options.colors,
             )
-            if (extractedColor) {
-              return extractedColor
-            }
+            if (fromStyle) return fromStyle
+          }
+
+          // Legacy `data-color` attribute (raw hex value).
+          const legacyColorAttr = element.getAttribute('data-color')
+          if (legacyColorAttr) {
+            const fromLegacy = extractHighlightColorFromStyle(
+              `background-color: ${legacyColorAttr}`,
+              this.options.colors,
+            )
+            if (fromLegacy) return fromLegacy
           }
 
           return null
@@ -133,21 +112,14 @@ export const NamedHighlightExtension = Mark.create<HighlightOptions>({
           ) {
             return {}
           }
-
-          return {
-            style: `background-color: var(--prose-highlight-${attributes.color})`,
-          }
+          return { style: highlightColorStyle(attributes.color) }
         },
       },
     }
   },
 
   parseHTML() {
-    return [
-      {
-        tag: 'mark',
-      },
-    ]
+    return [{ tag: 'mark' }]
   },
 
   renderHTML({ HTMLAttributes }) {
@@ -162,8 +134,7 @@ export const NamedHighlightExtension = Mark.create<HighlightOptions>({
     return {
       setHighlightByName:
         (colorName) =>
-        ({ chain, commands, editor, state }) => {
-          // Validate that the color name is allowed
+        ({ chain, state }) => {
           if (!this.options.colors.includes(colorName)) {
             console.warn(
               `Highlight color "${colorName}" is not in the allowed colors list`,
@@ -171,12 +142,14 @@ export const NamedHighlightExtension = Mark.create<HighlightOptions>({
             return false
           }
 
-          const { from, to, empty } = state.selection // Get original selection details
+          const { to, empty } = state.selection
 
           let commandChain = chain()
           if (this.options.multicolor) {
             commandChain = commandChain.setMark(this.name, { color: colorName })
           } else {
+            // multicolor:false → apply a plain highlight, warn once.
+            warnMonochromeOnce()
             commandChain = commandChain.setMark(this.name)
           }
 
@@ -193,8 +166,7 @@ export const NamedHighlightExtension = Mark.create<HighlightOptions>({
         },
       toggleHighlightByName:
         (colorName) =>
-        ({ chain, commands, editor, state }) => {
-          // Validate that the color name is allowed
+        ({ chain, editor, state }) => {
           if (!this.options.colors.includes(colorName)) {
             console.warn(
               `Highlight color "${colorName}" is not in the allowed colors list`,
@@ -202,13 +174,16 @@ export const NamedHighlightExtension = Mark.create<HighlightOptions>({
             return false
           }
 
-          const { to, empty } = state.selection // Get original selection details
-          const highlightAttributes = this.options.multicolor
-            ? { color: colorName }
-            : undefined
+          const { to, empty } = state.selection
+          let highlightAttributes: { color: string } | undefined
+          if (this.options.multicolor) {
+            highlightAttributes = { color: colorName }
+          } else {
+            warnMonochromeOnce()
+            highlightAttributes = undefined
+          }
 
-          // Check if the mark is currently active with the given attributes *before* toggling
-          // This helps determine if the toggle action will be setting or unsetting the mark.
+          // Determine set-vs-unset direction before toggling.
           const isCurrentlyActive = editor.isActive(
             this.name,
             highlightAttributes,
@@ -216,8 +191,6 @@ export const NamedHighlightExtension = Mark.create<HighlightOptions>({
 
           let commandChain = chain().toggleMark(this.name, highlightAttributes)
 
-          // If the selection was not empty AND the toggle action is about to *set* the mark
-          // (i.e., it wasn't active before)
           if (!empty && !isCurrentlyActive) {
             commandChain = commandChain
               .setTextSelection(to)

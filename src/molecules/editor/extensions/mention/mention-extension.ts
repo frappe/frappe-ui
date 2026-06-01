@@ -1,12 +1,24 @@
-import { MaybeRefOrGetter, toValue, type Component } from 'vue'
-import { Extension, Node, mergeAttributes } from '@tiptap/core'
+import { type MaybeRefOrGetter, toValue, type Component } from 'vue'
+import {
+  Extension,
+  Node,
+  mergeAttributes,
+  type CommandProps,
+  type RawCommands,
+} from '@tiptap/core'
+import type { Node as ProseMirrorNode } from '@tiptap/pm/model'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
 import { PluginKey } from '@tiptap/pm/state'
 import {
   createSuggestionExtension,
-  BaseSuggestionItem,
+  type BaseSuggestionItem,
 } from '../suggestion/createSuggestionExtension'
 import SuggestionList from '../suggestion/SuggestionList.vue'
+import {
+  insertSuggestionNode,
+  filterByQuery,
+  getSuggestionOptions,
+} from '@molecules/editor/extensions/shared/suggestion-helpers'
 import './style.css'
 
 export interface MentionSuggestionItem extends BaseSuggestionItem {
@@ -17,8 +29,16 @@ export interface MentionSuggestionItem extends BaseSuggestionItem {
   full_name?: string
 }
 
+interface MentionSuggestionOptions {
+  mentions: MaybeRefOrGetter<MentionSuggestionItem[]>
+}
+
 function createMentionNode(component?: Component) {
-  const config: any = {
+  const nodeView = component
+    ? { addNodeView: () => VueNodeViewRenderer(component) }
+    : {}
+
+  return Node.create({
     name: 'mention',
     group: 'inline',
     inline: true,
@@ -34,8 +54,8 @@ function createMentionNode(component?: Component) {
       return {
         id: {
           default: null,
-          parseHTML: (element: HTMLElement) => element.getAttribute('data-id'),
-          renderHTML: (attributes: any) => {
+          parseHTML: (element) => element.getAttribute('data-id'),
+          renderHTML: (attributes) => {
             if (!attributes.id) {
               return {}
             }
@@ -44,9 +64,8 @@ function createMentionNode(component?: Component) {
         },
         label: {
           default: null,
-          parseHTML: (element: HTMLElement) =>
-            element.getAttribute('data-label'),
-          renderHTML: (attributes: any) => {
+          parseHTML: (element) => element.getAttribute('data-label'),
+          renderHTML: (attributes) => {
             if (!attributes.label) {
               return {}
             }
@@ -60,7 +79,7 @@ function createMentionNode(component?: Component) {
       return [
         {
           tag: 'span.mention[data-type="mention"]',
-          getAttrs: (dom: any) => {
+          getAttrs: (dom) => {
             const element = dom as HTMLElement
             return {
               id: element.getAttribute('data-id'),
@@ -71,7 +90,7 @@ function createMentionNode(component?: Component) {
       ]
     },
 
-    renderHTML({ HTMLAttributes }: any) {
+    renderHTML({ HTMLAttributes }) {
       return [
         'span',
         mergeAttributes(HTMLAttributes, {
@@ -81,18 +100,12 @@ function createMentionNode(component?: Component) {
         `@${HTMLAttributes['data-label'] || HTMLAttributes.id || ''}`,
       ]
     },
-    renderText({ node }: any) {
+    renderText({ node }) {
       return `@${node.attrs.label || node.attrs.id || ''}`
     },
-  }
 
-  if (component) {
-    config.addNodeView = () => {
-      return VueNodeViewRenderer(component)
-    }
-  }
-
-  return Node.create(config)
+    ...nodeView,
+  })
 }
 
 const MentionSuggestionExtension =
@@ -109,47 +122,25 @@ const MentionSuggestionExtension =
     },
 
     items: ({ query, editor }) => {
-      const { mentions: _mentions } = editor.extensionManager.extensions.find(
-        (ext) => ext.name === 'mentionSuggestion',
-      )!.options
-      const mentions = toValue(_mentions)
+      const options = getSuggestionOptions<MentionSuggestionOptions>(
+        editor,
+        'mentionSuggestion',
+      )
+      const mentions = toValue(options?.mentions ?? [])
 
-      const filtered = mentions
-        .filter((mention: MentionSuggestionItem) =>
-          mention.label.toLowerCase().startsWith(query.toLowerCase()),
-        )
+      return filterByQuery(mentions, query, 'label')
         .slice(0, 10)
-        .map((mention: MentionSuggestionItem) => ({
-          ...mention,
-          display: mention.label,
-        }))
-
-      return filtered
+        .map((mention) => ({ ...mention, display: mention.label }))
     },
 
     command: ({ editor, range, props }) => {
-      const attributes = {
+      insertSuggestionNode(editor, range, 'mention', {
         id: props.id || props.value,
         label: props.label,
-      }
-
-      editor
-        .chain()
-        .focus()
-        .insertContentAt(range, [
-          {
-            type: 'mention',
-            attrs: attributes,
-          },
-          {
-            type: 'text',
-            text: ' ',
-          },
-        ])
-        .run()
+      })
     },
 
-    tippyOptions: {
+    floatingOptions: {
       placement: 'bottom-start',
       offset: [0, 8],
     },
@@ -186,10 +177,10 @@ export const MentionExtension = Extension.create<{
     return {
       getMentions:
         () =>
-        ({ editor }) => {
+        ({ editor }: CommandProps) => {
           const mentions: MentionSuggestionItem[] = []
 
-          editor.state.doc.descendants((node: Node) => {
+          editor.state.doc.descendants((node: ProseMirrorNode) => {
             if (node.type.name === 'mention') {
               mentions.push({
                 id: node.attrs.id,
@@ -200,6 +191,8 @@ export const MentionExtension = Extension.create<{
 
           return mentions
         },
-    }
+      // getMentions is a data-query command (returns the mention list), not a
+      // chainable boolean command — cast to satisfy the RawCommands shape.
+    } as unknown as Partial<RawCommands>
   },
 })

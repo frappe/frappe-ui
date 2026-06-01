@@ -6,8 +6,12 @@ import type { LinkOptions } from '@tiptap/extension-link'
 import {
   Placeholder,
   Link,
+  Code,
+  CodeBlock,
+  HeadingIds,
   Image,
   ImageGroup,
+  ImageViewer,
   Video,
   ContentPaste,
   Emoji,
@@ -48,8 +52,12 @@ type TagMember =
 /**
  * Configure tiptap's StarterKit as a kit's base bundle. We always disable its
  * built-in `link` mark so the frappe `Link` member (with our defaults) owns it,
- * avoiding a duplicate-name collision. `heading` is threaded explicitly so a kit
- * can expose it as a top-level member.
+ * avoiding a duplicate-name collision. The same applies to `code`/`codeBlock`:
+ * StarterKit's stock versions are disabled and replaced by the frappe `Code`
+ * (backtick toggle) + `CodeBlock` (lowlight, indent keymaps, language picker)
+ * extensions. `HeadingIds` rides alongside `heading` to assign stable ids for
+ * the table-of-contents. `heading` is threaded explicitly so a kit can expose
+ * it as a top-level member.
  */
 function starterKitBase(
   starter: Partial<StarterKitOptions> | false,
@@ -59,9 +67,15 @@ function starterKitBase(
   return [
     StarterKit.configure({
       link: false,
+      code: false,
+      codeBlock: false,
       ...starter,
       heading: heading as StarterKitOptions['heading'],
     }),
+    Code,
+    CodeBlock,
+    // Stable heading ids only matter when headings exist.
+    ...(heading === false ? [] : [HeadingIds]),
   ]
 }
 
@@ -85,6 +99,7 @@ export interface CommentKitOptions {
   link: Member<LinkOptions>
   image: CustomMember
   imageGroup: CustomMember
+  imageViewer: CustomMember
   video: CustomMember
   contentPaste: CustomMember
   emoji: CustomMember
@@ -99,6 +114,7 @@ const commentKitDefaults = (): CommentKitOptions => ({
   link: {},
   image: {},
   imageGroup: {},
+  imageViewer: {},
   video: {},
   contentPaste: {},
   emoji: {},
@@ -116,6 +132,8 @@ function commentMembers(options: CommentKitOptions): Extensions {
   pushMember(list, Image, options.image)
   // ImageGroup nodes contain Image nodes, so it can't load without Image.
   if (options.image !== false) pushMember(list, ImageGroup, options.imageGroup)
+  if (options.image !== false)
+    pushMember(list, ImageViewer, options.imageViewer)
   pushMember(list, Video, options.video)
   pushMember(list, ContentPaste, options.contentPaste)
   pushMember(list, Emoji, options.emoji)

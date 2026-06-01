@@ -1,17 +1,104 @@
 <script setup lang="ts">
-import { EditorContent as TiptapEditorContent } from '@tiptap/vue-3'
-import { computed } from 'vue'
+import {
+  computed,
+  getCurrentInstance,
+  nextTick,
+  normalizeClass,
+  onBeforeUnmount,
+  onMounted,
+  useAttrs,
+  useTemplateRef,
+  watch,
+} from 'vue'
 import type { Editor } from './useEditor'
+
+defineOptions({ inheritAttrs: false })
 
 const props = defineProps<{
   editor: Editor | null
 }>()
 
-const tiptapEditor = computed(() => props.editor ?? undefined)
+const attrs = useAttrs()
+const rootEl = useTemplateRef<HTMLElement>('rootEl')
+const instance = getCurrentInstance()
+let mountedEditor: Editor | null = null
+
+/**
+ * Default editor typography.
+ *
+ * `prose-v3` is applied BY DEFAULT so consumers get the v1 prose styling without
+ * opting in. But if the consumer passes a Tailwind Typography size modifier
+ * (`prose-sm`/`prose-base`/`prose-lg`/`prose-xl`/`prose-2xl`), we DROP `prose-v3`
+ * so their choice wins — `prose-v3` and `prose-lg` are both single-class
+ * components, so leaving both on the element would just be a cascade-order
+ * fight. Detecting the override and omitting `prose-v3` is what actually lets it
+ * be overridden.
+ *
+ * Note: only `prose`/`prose-v3` (components) live here — never a font-size/
+ * line-height *utility* like `text-base`, which (emitted after components) would
+ * always beat `prose-v3`'s line-height.
+ */
+const PROSE_SIZE_OVERRIDE = /(?:^|\s)prose-(?:sm|base|lg|xl|2xl)(?:\s|$)/
+const proseClass = computed(() => {
+  const incoming = normalizeClass(attrs.class)
+  const overridden = PROSE_SIZE_OVERRIDE.test(incoming)
+  return overridden ? 'prose max-w-none' : 'prose max-w-none prose-v3'
+})
+
+const rootAttrs = computed(() => {
+  const { class: _class, ...rest } = attrs
+  return rest
+})
+
+function mountEditor(editor: Editor | null) {
+  const el = rootEl.value
+  if (!el) return
+  if (mountedEditor === editor) return
+
+  unmountEditor()
+  if (!editor) return
+
+  const tiptapEditor = editor as any
+  tiptapEditor.contentComponent = instance?.ctx._
+  if (instance) {
+    tiptapEditor.appContext = {
+      ...instance.appContext,
+      provides: instance.provides,
+    }
+  }
+
+  editor.mount({ mount: el } as any)
+  editor.createNodeViews()
+  mountedEditor = editor
+}
+
+function unmountEditor() {
+  if (!mountedEditor) return
+  const tiptapEditor = mountedEditor as any
+  tiptapEditor.contentComponent = null
+  tiptapEditor.appContext = null
+  mountedEditor.unmount()
+  mountedEditor = null
+}
+
+onMounted(() => mountEditor(props.editor))
+
+watch(
+  () => props.editor,
+  async (editor) => {
+    await nextTick()
+    mountEditor(editor)
+  },
+)
+
+onBeforeUnmount(() => unmountEditor())
 </script>
 
 <template>
-  <div data-slot="editor-content" class="prose max-w-none text-base">
-    <TiptapEditorContent :editor="tiptapEditor as any" />
-  </div>
+  <div
+    ref="rootEl"
+    data-slot="editor-content"
+    v-bind="rootAttrs"
+    :class="[proseClass, attrs.class]"
+  />
 </template>

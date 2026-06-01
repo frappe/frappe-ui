@@ -14,8 +14,12 @@ vi.mock('@tiptap/core', () => {
     }
   }
   const Node = Extension
+  // Mark mirrors Extension/Node: the named Color/Highlight extensions (now wired
+  // into the public surface) build on `Mark.create`/`markInputRule`.
+  const Mark = Extension
   const mergeAttributes = (...attrs: any[]) => Object.assign({}, ...attrs)
   const nodeInputRule = vi.fn()
+  const markInputRule = vi.fn()
 
   class Editor {
     options: any
@@ -59,7 +63,7 @@ vi.mock('@tiptap/core', () => {
     }
   }
 
-  return { Editor, Extension, Node, mergeAttributes, nodeInputRule }
+  return { Editor, Extension, Node, Mark, mergeAttributes, nodeInputRule, markInputRule }
 })
 
 vi.mock('@tiptap/vue-3', () => ({
@@ -93,6 +97,23 @@ describe('frappe-ui/editor minimal primitives', () => {
     expect(editor.Placeholder).toBeTruthy()
     expect(editor.SuggestionExtension).toBeTruthy()
     expect(typeof editor.SuggestionExtension.configure).toBe('function')
+    expect(editor.InsertIframe).toBeTruthy()
+  })
+
+  it('wires the public SuggestionExtension component into the suggestion renderer', async () => {
+    const component = defineComponent({ setup: () => () => h('div') })
+    const { SuggestionExtension } = await import('./index')
+
+    const extension = SuggestionExtension.configure({
+      name: 'people',
+      trigger: '@',
+      items: [],
+      component,
+      command: vi.fn(),
+    })
+
+    const options = (extension as any).addOptions()
+    expect(typeof options.suggestion.render).toBe('function')
   })
 
   it('creates and destroys a shallow editor ref', async () => {

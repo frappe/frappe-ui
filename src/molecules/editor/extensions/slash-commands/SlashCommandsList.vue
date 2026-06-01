@@ -19,6 +19,8 @@
 import { ref, type PropType } from 'vue'
 import SuggestionList from '../suggestion/SuggestionList.vue'
 import type { Editor, Range } from '@tiptap/core'
+import type { SuggestionListExpose } from '@molecules/editor/extensions/shared/suggestion-types'
+import { forwardKeyDown } from '@molecules/editor/composables/useSuggestionList'
 import type { CommandItem } from './slash-commands-extension'
 
 const props = defineProps({
@@ -41,19 +43,13 @@ const props = defineProps({
   query: String,
 })
 
-const suggestionList = ref<InstanceType<typeof SuggestionList> | null>(null)
+const suggestionList = ref<SuggestionListExpose | null>(null)
 
 const onItemSelect = (item: CommandItem) => {
-  if (item) {
-    props.command(item)
-  }
-}
-
-const onKeyDown = ({ event }: { event: KeyboardEvent }) => {
-  return suggestionList.value?.onKeyDown({ event }) ?? false
+  if (item) props.command(item)
 }
 
 defineExpose({
-  onKeyDown,
+  onKeyDown: forwardKeyDown(suggestionList),
 })
 </script>

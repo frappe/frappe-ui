@@ -1,12 +1,12 @@
-import { Extension, type Editor } from '@tiptap/core'
-import type { Component } from 'vue'
-import type { MaybeRefOrGetter } from 'vue'
+import { type Editor } from '@tiptap/core'
 import StarterKitExtension from '@tiptap/starter-kit'
 import PlaceholderExtension from '@tiptap/extension-placeholder'
 import HeadingExtension from '@tiptap/extension-heading'
+import HeadingIdsExtension from './extensions/heading/heading-ids'
 import { LinkExtension } from './extensions/link'
-import CodeExtension from '@tiptap/extension-code'
-import CodeBlockExtension from '@tiptap/extension-code-block'
+// Custom code mark + lowlight code block (input rule, indent keymaps, language
+// picker node view, shared backtick toggle) — replaces stock @tiptap code block.
+import { ExtendedCode, ExtendedCodeBlock } from './extensions/code-block'
 import {
   Table as TiptapTable,
   TableRow,
@@ -18,22 +18,25 @@ import TaskItemExtension from '@tiptap/extension-task-item'
 import TypographyExtension from '@tiptap/extension-typography'
 import TextAlignExtension from '@tiptap/extension-text-align'
 import { TextStyle as TextStyleExtension } from '@tiptap/extension-text-style'
-import ColorExtension from '@tiptap/extension-color'
-import HighlightExtension from '@tiptap/extension-highlight'
+// Named color/highlight: store a palette name (not raw hex/rgb) and render as
+// `var(--prose-color-*)` / `var(--prose-highlight-*)` so light/dark is CSS-driven.
+import { NamedColorExtension } from './extensions/color'
+import { NamedHighlightExtension } from './extensions/highlight'
 import { ImageExtension } from './extensions/image'
-import { ImageGroup as ImageGroupExtension } from './extensions/image-group/image-group-extension'
-import ImageViewerExtension from './extensions/image-viewer-extension'
-import { VideoExtension } from './extensions/video-extension'
+import { ImageGroup as ImageGroupExtension } from './extensions/image-group'
+import ImageViewerExtension from './extensions/image-viewer'
+import { VideoExtension } from './extensions/video'
 import { IframeExtension } from './extensions/iframe'
+export { default as InsertIframe } from './extensions/iframe/InsertIframe.vue'
 import {
   MentionExtension,
   type MentionSuggestionItem,
 } from './extensions/mention/mention-extension'
-import { TagExtension, TagNode, type TagSuggestionItem } from './extensions/tag'
+import { TagComposite, type TagSuggestionItem } from './extensions/tag'
 import EmojiExtension from './extensions/emoji/emoji-extension'
 import { SlashCommands } from './extensions/slash-commands/slash-commands-extension'
 import { TocNodeExtension } from './extensions/toc-node'
-import { ContentPasteExtension } from './extensions/content-paste-extension'
+import { ContentPasteExtension } from './extensions/content-paste'
 import StyleClipboardExtension from './extensions/copy-styles'
 export {
   SuggestionExtension,
@@ -89,11 +92,18 @@ export function setPlaceholder(
 }
 
 export const Heading = HeadingExtension
+/**
+ * Stable heading ids — assigns a persistent `id`/`data-toc-id` to every heading
+ * so the table-of-contents can resolve a heading element regardless of position
+ * (and keep the active-heading highlight + anchor links stable across edits).
+ * Registered alongside `Heading` in the kits; `collectHeadings` reads its ids.
+ */
+export const HeadingIds = HeadingIdsExtension
 // frappe-ui's link: inline edit popup, Mod-k shortcut, smart paste handling, and
 // boundary clearing. Already defaults openOnClick:false / autolink:true.
 export const Link = LinkExtension
-export const Code = CodeExtension
-export const CodeBlock = CodeBlockExtension
+export const Code = ExtendedCode
+export const CodeBlock = ExtendedCodeBlock
 export const Table = TiptapTable.configure({ resizable: true })
 export { TableRow, TableCell, TableHeader }
 export const TaskList = TaskListExtension
@@ -103,15 +113,16 @@ export const TextAlign = TextAlignExtension.configure({
   types: ['heading', 'paragraph'],
 })
 export const TextStyle = TextStyleExtension
-export const Color = ColorExtension
-export const Highlight = HighlightExtension
+export const Color = NamedColorExtension
+export const Highlight = NamedHighlightExtension
 
 // Upload-aware extensions share one engine-level upload function. `useEditor`
 // writes it to `editor.storage.upload.uploadFunction`; each extension reads it at
-// use-time via `resolveUploadOptions(editor, this.options)` (image-extension.ts),
-// with a per-extension `.configure({ uploadFunction })` winning. There is no
-// onCreate option-copy: tiptap v3 froze `extension.options` into an immutable
-// getter, so the only reliable read is at use-time from the shared storage.
+// use-time via `resolveUploadOptions({ ...this.options, editor })` (shared
+// media-upload-engine), with a per-extension `.configure({ uploadFunction })`
+// winning. There is no onCreate option-copy: tiptap v3 froze `extension.options`
+// into an immutable getter, so the only reliable read is at use-time from the
+// shared storage.
 export const Image = ImageExtension
 export const ImageGroup = ImageGroupExtension
 export const ImageViewer = ImageViewerExtension
@@ -123,22 +134,9 @@ export const Mention = MentionExtension
  * Tag bundles the inline tag node with the `#` suggestion. Inert until
  * configured: with no `items`, only the node loads (so existing tags in content
  * still render). `Tag.configure({ items })` wires the live `#` suggestion.
+ * The single canonical implementation lives in `extensions/tag` (`TagComposite`);
+ * this is just the public `Tag` alias.
  */
-const TagComposite = Extension.create<{
-  items: MaybeRefOrGetter<TagSuggestionItem[]> | null
-}>({
-  name: 'tag',
-  addOptions() {
-    return { items: null }
-  },
-  addExtensions() {
-    const extensions: any[] = [TagNode]
-    if (this.options.items != null) {
-      extensions.push(TagExtension.configure({ tags: this.options.items }))
-    }
-    return extensions
-  },
-})
 export const Tag = TagComposite
 
 export const Emoji = EmojiExtension

@@ -1,11 +1,23 @@
 export { IframeExtension, default } from './iframe-extension'
-export type { IframeOptions, SetIframeOptions } from './iframe-extension'
+export type {
+  IframeOptions,
+  SetIframeOptions,
+  IframeAlign,
+} from './iframe-extension'
+export { default as InsertIframe } from './InsertIframe.vue'
 export {
   detectPlatform,
   calculateAspectRatio,
   getOptimalDimensions,
-  validateURL,
-  processURL,
-  ALLOWED_DOMAINS
-} from './utils'
-export type { AspectRatioInfo, PlatformConfig } from './utils'
+  processEmbedUrl,
+  PLATFORM_CONFIGS,
+} from './iframe-embed-utils'
+export type {
+  AspectRatioInfo,
+  PlatformConfig,
+} from './iframe-embed-utils'
+export {
+  IFRAME_ALLOWLIST,
+  IFRAME_SANDBOX,
+  validateIframeUrl,
+} from './iframe-allowlist'

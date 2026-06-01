@@ -8,7 +8,7 @@
       appear
     >
       <div
-        v-if="props.show"
+        v-if="props.show && currentImage"
         class="fixed top-0 left-0 w-full h-full bg-black sm:bg-black/90 z-[50] flex flex-col justify-center items-center overflow-hidden touch-none"
         ref="imageContainer"
         @mousemove="handleActivity"
@@ -16,11 +16,7 @@
         @touchmove="handleActivity"
       >
         <!-- Dedicated Backdrop -->
-        <div
-          class="absolute inset-0 z-0"
-          ref="backdropElement"
-          @click="close"
-        ></div>
+        <div class="absolute inset-0 z-0" ref="backdropElement" @click="close"></div>
 
         <!-- Image Container -->
         <div class="relative z-10 flex flex-col items-center">
@@ -31,11 +27,7 @@
             :style="{
               transform: `scale(${zoomLevel / 100}) translate(${panPosition.x}px, ${panPosition.y}px)`,
               cursor:
-                zoomLevel > 100
-                  ? isMousePanning
-                    ? 'grabbing'
-                    : 'grab'
-                  : 'default',
+                zoomLevel > 100 ? (isMousePanning ? 'grabbing' : 'grab') : 'default',
               transition:
                 isPanning || isPinching || isAnimatingPan
                   ? 'none'
@@ -56,136 +48,43 @@
         </div>
 
         <!-- Controls bar -->
-        <div
+        <ImageViewerControlsBar
           ref="controlsBar"
-          class="absolute top-4 flex items-center space-x-3 p-2 text-white z-20 transition-opacity duration-300 ease-in-out"
-          :class="{ 'opacity-0 pointer-events-none': !isControlsVisible }"
-          @touchstart.stop
-          @touchmove.stop
-          @touchend.stop
-          @mousedown.stop
-          @wheel.stop
-        >
-          <!-- Navigation controls -->
-          <div class="bg-black/65 rounded flex items-center">
-            <Tooltip text="Previous image">
-              <button
-                class="p-2 hover:bg-gray-900 rounded-l focus:outline-none"
-                @click.stop="previousImage"
-              >
-                <span class="lucide-chevron-left size-4" />
-              </button>
-            </Tooltip>
-
-            <span class="px-2 text-sm tabular-nums text-gray-400 select-none">
-              {{ currentIndex + 1 }}/{{ props.images.length }}
-            </span>
-
-            <Tooltip text="Next image">
-              <button
-                class="p-2 hover:bg-gray-900 rounded-r focus:outline-none"
-                @click.stop="nextImage"
-              >
-                <span class="lucide-chevron-right size-4" />
-              </button>
-            </Tooltip>
-          </div>
-
-          <!-- Zoom controls -->
-          <div class="bg-black/65 rounded flex items-center">
-            <Tooltip text="Zoom out">
-              <button
-                class="p-2 hover:bg-gray-900 rounded-l focus:outline-none"
-                @click.stop="zoomOut"
-              >
-                <span class="lucide-minus size-4" />
-              </button>
-            </Tooltip>
-
-            <Tooltip text="Reset zoom">
-              <button
-                class="p-2 hover:bg-gray-900 text-sm text-gray-400 focus:outline-none"
-                @click.stop="resetZoom"
-              >
-                {{ zoomLevel }}%
-              </button>
-            </Tooltip>
-
-            <Tooltip text="Zoom in">
-              <button
-                class="p-2 hover:bg-gray-900 rounded-r focus:outline-none"
-                @click.stop="zoomIn"
-              >
-                <span class="lucide-plus size-4" />
-              </button>
-            </Tooltip>
-          </div>
-
-          <!-- Action controls -->
-          <div class="bg-black/65 rounded flex items-center">
-            <Tooltip text="Download image">
-              <button
-                class="p-2 hover:bg-gray-900 rounded-l focus:outline-none"
-                @click.stop="downloadImage"
-              >
-                <span class="lucide-download size-4" />
-              </button>
-            </Tooltip>
-
-            <Tooltip
-              :text="isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'"
-            >
-              <button
-                class="p-2 hover:bg-gray-900 rounded-r focus:outline-none hidden sm:block"
-                @click.stop="toggleFullscreen"
-              >
-                <span v-if="!isFullscreen" class="lucide-maximize size-4" />
-                <span v-else class="lucide-minimize size-4" />
-              </button>
-            </Tooltip>
-          </div>
-
-          <!-- Close button -->
-          <div class="bg-black/65 rounded flex items-center">
-            <Tooltip text="Close">
-              <button
-                class="p-2 hover:bg-gray-900 rounded focus:outline-none"
-                @click.stop="close"
-              >
-                <span class="lucide-x size-4" />
-              </button>
-            </Tooltip>
-          </div>
-        </div>
+          :visible="isControlsVisible"
+          :current-index="currentIndex"
+          :total="props.images.length"
+          :zoom-level="zoomLevel"
+          :is-fullscreen="isFullscreen"
+          @previous="previousImage"
+          @next="nextImage"
+          @zoom-in="zoomIn"
+          @zoom-out="zoomOut"
+          @reset-zoom="resetZoom"
+          @download="downloadCurrent"
+          @toggle-fullscreen="onToggleFullscreen"
+          @close="close"
+        />
       </div>
     </Transition>
   </Teleport>
 </template>
 
 <script setup lang="ts">
-import {
-  ref,
-  onMounted,
-  onUnmounted,
-  useTemplateRef,
-  computed,
-  toRef,
-  watch,
-} from 'vue'
-import Tooltip from '@components/Tooltip/Tooltip.vue'
+import { computed, onMounted, onUnmounted, ref, toRef, watch } from 'vue'
 import { useTouchHandler } from '@composables/useTouchHandler'
 import { useImageNavigation } from '@composables/useImageNavigation'
 import { useZoomPan } from '@composables/useZoomPan'
-
-
-interface ImageInfo {
-  src: string
-  alt: string | null
-}
+import { useControlsAutoHide } from '@molecules/editor/composables/useControlsAutoHide'
+import { useFullscreen } from '@molecules/editor/composables/useFullscreen'
+import { useElementSize } from '@molecules/editor/composables/useElementSize'
+import ImageViewerControlsBar from './image-viewer/ImageViewerControlsBar.vue'
+import { downloadImage } from './image-viewer/imageViewerDownload'
+import { createImageViewerKeydown } from './image-viewer/imageViewerKeymap'
+import type { ViewableImage } from '../extensions/image-viewer/collectImages'
 
 const props = defineProps<{
   show: boolean
-  images: ImageInfo[]
+  images: ViewableImage[]
   initialIndex: number
 }>()
 
@@ -193,17 +92,19 @@ const emit = defineEmits<{
   'update:show': [value: boolean]
 }>()
 
-const imageContainer = useTemplateRef('imageContainer')
-const backdropElement = useTemplateRef('backdropElement')
-const controlsBar = useTemplateRef('controlsBar')
-const controlsBarHeight = ref(0)
-
-const isFullscreen = ref(false)
+const imageContainer = ref<HTMLElement | null>(null)
+const backdropElement = ref<HTMLElement | null>(null)
+const controlsBar = ref<{ $el: HTMLElement } | null>(null)
+const controlsBarEl = computed(() => controlsBar.value?.$el ?? null)
 const touchStartZoom = ref(100)
 
-const isControlsVisible = ref(true)
-const inactivityTimer = ref<ReturnType<typeof setTimeout> | null>(null)
-const INACTIVITY_TIMEOUT = 3000 // 3 seconds
+const { isControlsVisible, handleActivity, showAndReset } = useControlsAutoHide({
+  isPaused: () => isPanning.value || isPinching.value,
+})
+const { isFullscreen, toggleFullscreen } = useFullscreen()
+// Measured for layout parity with the original ResizeObserver; single observer,
+// disconnected on unmount inside the composable.
+useElementSize(controlsBarEl)
 
 const {
   zoomLevel,
@@ -244,8 +145,7 @@ const {
     if (zoomLevel.value <= 100) previousImage()
   },
   onDoubleTap: (event) => {
-    if (controlsBar.value?.contains(event.target as Node)) return
-
+    if (controlsBarEl.value?.contains(event.target as Node)) return
     if (zoomLevel.value > 100) {
       resetZoom()
     } else {
@@ -254,9 +154,7 @@ const {
     }
   },
   onTap: (event) => {
-    if (event.target === backdropElement.value) {
-      close()
-    }
+    if (event.target === backdropElement.value) close()
   },
   onPanStart: () => {
     if (zoomLevel.value <= 100) return
@@ -282,171 +180,59 @@ const {
   onPinchMove: (scale) => {
     const newZoom = touchStartZoom.value * scale
     let finalZoom = Math.max(25, Math.min(300, Math.round(newZoom)))
-
     if (finalZoom > snapThresholdLower && finalZoom < snapThresholdUpper) {
       finalZoom = 100
     }
     zoomLevel.value = finalZoom
   },
   onPinchEnd: () => {
-    if (zoomLevel.value < 100) {
-      resetZoom()
-    }
+    if (zoomLevel.value < 100) resetZoom()
     initialPanPositionOnGestureStart.value = { x: 0, y: 0 }
   },
 })
 
 const isPanning = computed(() => isMousePanning.value || isTouchPanning.value)
 
-function showControlsAndResetTimer() {
-  isControlsVisible.value = true
-  if (inactivityTimer.value) {
-    clearTimeout(inactivityTimer.value)
-  }
-  inactivityTimer.value = setTimeout(() => {
-    if (!isPanning.value && !isPinching.value) {
-      isControlsVisible.value = false
-    } else {
-      showControlsAndResetTimer()
-    }
-  }, INACTIVITY_TIMEOUT)
-}
-
-function handleActivity() {
-  if (!isPinching.value || !isControlsVisible.value) {
-    showControlsAndResetTimer()
-  }
-}
-
 function close() {
   emit('update:show', false)
   resetZoom()
-  if (inactivityTimer.value) {
-    clearTimeout(inactivityTimer.value)
-    inactivityTimer.value = null
-  }
 }
 
-function downloadImage() {
-  const imageToDownload = currentImage.value
-
-  const link = document.createElement('a')
-  link.href = imageToDownload.src
-
-  const filename =
-    imageToDownload.alt?.replace(/[^a-z0-9]/gi, '_').toLowerCase() ||
-    imageToDownload.src.split('/').pop() ||
-    'download'
-  link.download = filename.includes('.') ? filename : `${filename}.jpg`
-
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
+function downloadCurrent() {
+  downloadImage(currentImage.value)
 }
 
-function toggleFullscreen() {
-  const container = imageContainer.value
-
-  if (!isFullscreen.value) {
-    if (container?.requestFullscreen) {
-      container.requestFullscreen()
-      isFullscreen.value = true
-    }
-  } else {
-    if (document.exitFullscreen) {
-      document.exitFullscreen()
-      isFullscreen.value = false
-    }
-  }
+function onToggleFullscreen() {
+  if (imageContainer.value) toggleFullscreen(imageContainer.value)
 }
 
-function handleFullscreenChange() {
-  isFullscreen.value = Boolean(document.fullscreenElement)
-}
-
-function handleKeyDown(event: KeyboardEvent) {
-  if (!props.show) return
-
-  handleActivity()
-
-  switch (event.key) {
-    case 'ArrowLeft':
-      if (!isPanning.value) previousImage()
-      event.preventDefault()
-      break
-    case 'ArrowRight':
-      if (!isPanning.value) nextImage()
-      event.preventDefault()
-      break
-    case '+':
-    case '=':
-      zoomIn()
-      event.preventDefault()
-      break
-    case '-':
-      zoomOut()
-      event.preventDefault()
-      break
-    case 'Escape':
-      close()
-      event.preventDefault()
-      break
-    case 'f':
-    case 'F':
-      toggleFullscreen()
-      event.preventDefault()
-      break
-  }
-}
+const handleKeyDown = createImageViewerKeydown({
+  isOpen: () => props.show,
+  isPanning: () => isPanning.value,
+  onActivity: handleActivity,
+  next: nextImage,
+  previous: previousImage,
+  zoomIn,
+  zoomOut,
+  toggleFullscreen: onToggleFullscreen,
+  close,
+})
 
 watch(
   () => props.show,
-  (newValue) => {
-    if (newValue) {
-      isControlsVisible.value = true
+  (visible) => {
+    if (visible) {
       resetZoom()
-      showControlsAndResetTimer()
-    } else {
-      if (inactivityTimer.value) {
-        clearTimeout(inactivityTimer.value)
-        inactivityTimer.value = null
-      }
-      if (isFullscreen.value && document.exitFullscreen) {
-        document.exitFullscreen()
-      }
+      showAndReset()
     }
   },
 )
 
-watch(controlsBar, (newVal) => {
-  if (newVal) {
-    const updateHeight = () => {
-      controlsBarHeight.value = newVal.offsetHeight
-    }
-    const resizeObserver = new ResizeObserver(updateHeight)
-    resizeObserver.observe(newVal)
-    updateHeight()
-    onUnmounted(() => resizeObserver.disconnect())
-  } else {
-    controlsBarHeight.value = 0
-  }
-})
-
 onMounted(() => {
-  document.addEventListener('fullscreenchange', handleFullscreenChange)
   document.addEventListener('keydown', handleKeyDown)
 })
 
 onUnmounted(() => {
-  document.removeEventListener('fullscreenchange', handleFullscreenChange)
   document.removeEventListener('keydown', handleKeyDown)
-
-  if (inactivityTimer.value) {
-    clearTimeout(inactivityTimer.value)
-  }
-
-  if (isFullscreen.value && document.exitFullscreen) {
-    document.exitFullscreen()
-  }
 })
 </script>

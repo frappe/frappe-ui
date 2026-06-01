@@ -19,6 +19,13 @@ function ItemContent(p: { item: CommandMenuItem }) {
   return h(icon as Component)
 }
 
+/** A command item that ships its own interactive component (e.g. color picker). */
+function isComponentItem(
+  item: MenuItem,
+): item is CommandMenuItem & { component: Component } {
+  return !('type' in item) && !!(item as CommandMenuItem).component
+}
+
 function isGroup(item: MenuItem): item is MenuGroupItem {
   return 'type' in item && item.type === 'group'
 }
@@ -50,9 +57,12 @@ const visibleItems = computed<MenuItem[]>(() => {
   return result
 })
 
-function run(item: CommandMenuItem) {
+function run(item: CommandMenuItem, event?: MouseEvent) {
   if (props.editor && !item.isDisabled?.(props.editor)) {
-    item.action(props.editor)
+    item.action(props.editor, {
+      event,
+      trigger: event?.currentTarget as HTMLElement | undefined,
+    })
   }
 }
 </script>
@@ -68,6 +78,26 @@ function run(item: CommandMenuItem) {
       class="mx-1 h-5 w-px bg-gray-200"
       aria-hidden="true"
     />
+    <component
+      :is="item.component"
+      v-else-if="isComponentItem(item) && editor"
+      :editor="editor"
+    >
+      <template #default="trigger">
+        <button
+          type="button"
+          class="inline-flex size-6 items-center justify-center rounded text-sm text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 aria-pressed:bg-gray-100"
+          :aria-label="item.label"
+          :aria-pressed="
+            trigger.isActive === true || item.isActive?.(editor) === true
+          "
+          :disabled="item.isDisabled?.(editor) === true"
+          @click="item.isDisabled?.(editor) === true ? undefined : trigger.onClick()"
+        >
+          <ItemContent :item="item" />
+        </button>
+      </template>
+    </component>
     <div
       v-else-if="isGroup(item)"
       data-slot="menu-group"
@@ -84,7 +114,7 @@ function run(item: CommandMenuItem) {
         :aria-label="groupItem.label"
         :aria-pressed="editor ? groupItem.isActive?.(editor) === true : false"
         :disabled="!editor || groupItem.isDisabled?.(editor) === true"
-        @click="run(groupItem)"
+        @click="run(groupItem, $event)"
       >
         <ItemContent :item="groupItem" />
       </button>
@@ -96,7 +126,7 @@ function run(item: CommandMenuItem) {
       :aria-label="item.label"
       :aria-pressed="editor ? item.isActive?.(editor) === true : false"
       :disabled="!editor || item.isDisabled?.(editor) === true"
-      @click="run(item)"
+      @click="run(item, $event)"
     >
       <ItemContent :item="item" />
     </button>

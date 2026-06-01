@@ -42,6 +42,7 @@ describe('editor kits', () => {
     expect(nodes.has('table')).toBe(false)
 
     const names = extensionNames(CommentKit)
+    expect(names.has('imageViewer')).toBe(true)
     expect(names.has('table')).toBe(false)
     expect(names.has('tableOfContents')).toBe(false)
     expect(names.has('slashCommands')).toBe(false)
@@ -53,11 +54,14 @@ describe('editor kits', () => {
     expect(nodes.has('taskList')).toBe(true)
     expect(nodes.has('taskItem')).toBe(true)
     expect(marks.has('textStyle')).toBe(true) // registered alongside Color
-    expect(marks.has('highlight')).toBe(true)
+    // Named highlight: the frappe Highlight extension's mark is `namedHighlight`
+    // (stores a palette name, not raw hex), replacing stock `highlight`.
+    expect(marks.has('namedHighlight')).toBe(true)
 
     const names = extensionNames(RichTextKit)
     expect(names.has('slashCommands')).toBe(true)
-    expect(names.has('color')).toBe(true)
+    // Named color: the frappe Color extension is `namedColor`, not stock `color`.
+    expect(names.has('namedColor')).toBe(true)
     expect(names.has('textAlign')).toBe(true)
     expect(names.has('styleClipboard')).toBe(true)
   })

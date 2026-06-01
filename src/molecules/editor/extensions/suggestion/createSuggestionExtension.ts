@@ -1,18 +1,16 @@
-import { Extension, Editor, Range } from '@tiptap/core'
-import { VueRenderer } from '@tiptap/vue-3'
-import Suggestion, {
-  SuggestionOptions,
-  SuggestionProps,
-} from '@tiptap/suggestion'
-import { PluginKey } from '@tiptap/pm/state'
-import tippy, { Instance as TippyInstance, Props as TippyProps } from 'tippy.js'
-import { Component as VueComponent } from 'vue'
+import { Extension, type Editor, type Range } from '@tiptap/core'
+import Suggestion, { type SuggestionOptions } from '@tiptap/suggestion'
+import type { PluginKey } from '@tiptap/pm/state'
+import type { Component as VueComponent } from 'vue'
+import type { BaseSuggestionItem } from '@molecules/editor/extensions/shared/suggestion-types'
+import {
+  createSuggestionRenderer,
+  type SuggestionFloatingOptions,
+} from '@molecules/editor/extensions/shared/suggestion-renderer'
 
-export interface BaseSuggestionItem {
-  title?: string
-  name?: string
-  [key: string]: any
-}
+// Re-export for back-compat: several extensions still import the base item type
+// from this module path. The canonical home is `suggestion-types`.
+export type { BaseSuggestionItem }
 
 export interface CreateSuggestionExtensionOptions<
   TItem extends BaseSuggestionItem,
@@ -26,18 +24,23 @@ export interface CreateSuggestionExtensionOptions<
   }) => TItem[] | Promise<TItem[]>
   command: (props: { editor: Editor; range: Range; props: TItem }) => void
   component: VueComponent
-  tippyOptions?: Partial<TippyProps>
+  floatingOptions?: SuggestionFloatingOptions
   allowSpaces?: boolean
   startOfLine?: boolean
   decorationTag?: string
   decorationClass?: string
-  addOptions?: () => Record<string, any>
+  addOptions?: () => Record<string, unknown>
 }
 
+/**
+ * Factory that wraps `@tiptap/suggestion` in a TipTap `Extension`. The
+ * imperative Floating UI/VueRenderer lifecycle lives in `createSuggestionRenderer`
+ * (shared); this file is now just the extension shell + plugin registration.
+ */
 export function createSuggestionExtension<TItem extends BaseSuggestionItem>(
   options: CreateSuggestionExtensionOptions<TItem>,
 ) {
-  type ExtensionFullOptions = Record<string, any> & {
+  type ExtensionFullOptions = Record<string, unknown> & {
     suggestion: Omit<SuggestionOptions<TItem>, 'editor'>
   }
 
@@ -60,81 +63,11 @@ export function createSuggestionExtension<TItem extends BaseSuggestionItem>(
           startOfLine: options.startOfLine,
           decorationTag: options.decorationTag || 'span',
           decorationClass: options.decorationClass || 'suggestion',
-          render: () => {
-            let component: VueRenderer | null
-            let popup: TippyInstance[] | null
-
-            return {
-              onStart: (props: SuggestionProps<TItem>) => {
-                component = new VueRenderer(options.component, {
-                  editor: props.editor,
-                  props: props,
-                })
-
-                if (!props.clientRect || !component.element) {
-                  return
-                }
-
-                const defaultTippyOptions: Partial<TippyProps> = {
-                  getReferenceClientRect: props.clientRect as () => DOMRect,
-                  appendTo: () => document.body,
-                  content: component.element,
-                  showOnCreate: true,
-                  interactive: true,
-                  trigger: 'manual',
-                  placement: 'bottom-start',
-                }
-
-                popup = tippy('body', {
-                  ...defaultTippyOptions,
-                  ...options.tippyOptions,
-                })
-              },
-
-              onUpdate(props: SuggestionProps<TItem>) {
-                component?.updateProps(props)
-
-                if (!props.clientRect) {
-                  return
-                }
-
-                if (popup && popup[0]) {
-                  popup[0].setProps({
-                    getReferenceClientRect: props.clientRect as () => DOMRect,
-                  })
-                }
-              },
-
-              onKeyDown(props: { event: KeyboardEvent }): boolean {
-                if (props.event.key === 'Escape') {
-                  if (popup && popup[0]) {
-                    popup[0].hide()
-                  }
-                  return true
-                }
-
-                if (
-                  component &&
-                  component.ref &&
-                  typeof (component.ref as any).onKeyDown === 'function'
-                ) {
-                  return (component.ref as any).onKeyDown(props)
-                }
-                return false
-              },
-
-              onExit() {
-                if (popup && popup[0]) {
-                  popup[0].destroy()
-                }
-                if (component) {
-                  component.destroy()
-                }
-                popup = null
-                component = null
-              },
-            }
-          },
+          render: () =>
+            createSuggestionRenderer(
+              options.component,
+              options.floatingOptions,
+            ),
         } as Omit<SuggestionOptions<TItem>, 'editor'>,
       }
     },

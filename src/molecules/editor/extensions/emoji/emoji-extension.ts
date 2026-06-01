@@ -1,8 +1,9 @@
 import { PluginKey } from '@tiptap/pm/state'
 import {
-  BaseSuggestionItem,
+  type BaseSuggestionItem,
   createSuggestionExtension,
 } from '../suggestion/createSuggestionExtension'
+import { filterByQuery } from '@molecules/editor/extensions/shared/suggestion-helpers'
 import EmojiList from './EmojiList.vue'
 import _EMOJIS from './emojis.json'
 
@@ -18,9 +19,7 @@ export default createSuggestionExtension<EmojiItem>({
   char: ':',
   pluginKey: new PluginKey('emojiSuggestion'),
   items: ({ query }: { query: string }) => {
-    return EMOJIS.filter((item) =>
-      item.name.toLowerCase().includes(query.toLowerCase()),
-    )
+    return filterByQuery(EMOJIS, query, 'name')
       .sort((a, b) => {
         const aName = a.name.toLowerCase()
         const bName = b.name.toLowerCase()

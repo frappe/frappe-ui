@@ -1,7 +1,11 @@
 import '@tiptap/extension-text-style'
 
 import { Extension } from '@tiptap/core'
-import { extractTextColorFromStyle } from '../shared/color-utils'
+import { PALETTE_NAMES } from '../shared/color-palette'
+import {
+  extractTextColorFromStyle,
+  textColorStyle,
+} from '../shared/color-style'
 
 export type ColorOptions = {
   /**
@@ -11,8 +15,8 @@ export type ColorOptions = {
   types: string[]
 
   /**
-   * Available color names that can be used
-   * @default ['red', 'blue', 'green', 'yellow', 'orange', 'purple', 'pink', 'gray']
+   * Available color names that can be used.
+   * @default the full named-color palette
    */
   colors: string[]
 }
@@ -37,8 +41,9 @@ declare module '@tiptap/core' {
 }
 
 /**
- * This extension allows you to color your text using named colors instead of hex/rgb values.
- * Colors are applied as data attributes that can be styled with CSS for light/dark mode support.
+ * Color extension using named colors instead of hex/rgb values. Colors render
+ * as `color: var(--prose-color-NAME)` so light/dark mode is driven by CSS.
+ * Parsing normalizes legacy hex/rgb and CSS-var inline styles back to a name.
  */
 export const NamedColorExtension = Extension.create<ColorOptions>({
   name: 'namedColor',
@@ -46,18 +51,7 @@ export const NamedColorExtension = Extension.create<ColorOptions>({
   addOptions() {
     return {
       types: ['textStyle'],
-      colors: [
-        'red',
-        'blue',
-        'green',
-        'yellow',
-        'orange',
-        'purple',
-        'pink',
-        'gray',
-        'teal',
-        'cyan',
-      ],
+      colors: [...PALETTE_NAMES],
     }
   },
 
@@ -69,27 +63,11 @@ export const NamedColorExtension = Extension.create<ColorOptions>({
           color: {
             default: null,
             parseHTML: (element) => {
-              // Check for CSS custom property format in style attribute
               const style = element.getAttribute('style')
-              if (style) {
-                const colorMatch = style.match(
-                  /color:\s*var\(--prose-color-(\w+)\)/,
-                )
-                if (colorMatch && this.options.colors.includes(colorMatch[1])) {
-                  return colorMatch[1]
-                }
-
-                // Fallback: try extracting from legacy formats
-                const extractedColor = extractTextColorFromStyle(
-                  style,
-                  this.options.colors,
-                )
-                if (extractedColor) {
-                  return extractedColor
-                }
-              }
-
-              return null
+              if (!style) return null
+              // Shared extractor handles CSS-var, legacy hex, and rgb forms,
+              // constrained to this extension's allowed colors.
+              return extractTextColorFromStyle(style, this.options.colors)
             },
             renderHTML: (attributes) => {
               if (
@@ -98,9 +76,7 @@ export const NamedColorExtension = Extension.create<ColorOptions>({
               ) {
                 return {}
               }
-              return {
-                style: `color: var(--prose-color-${attributes.color})`,
-              }
+              return { style: textColorStyle(attributes.color) }
             },
           },
         },
@@ -113,17 +89,13 @@ export const NamedColorExtension = Extension.create<ColorOptions>({
       setColorByName:
         (colorName: string) =>
         ({ chain }) => {
-          // Validate that the color name is allowed
           if (!this.options.colors.includes(colorName)) {
             console.warn(
               `Color "${colorName}" is not in the allowed colors list`,
             )
             return false
           }
-
-          let commandChain = chain().setMark('textStyle', { color: colorName })
-
-          return commandChain.focus().run()
+          return chain().setMark('textStyle', { color: colorName }).focus().run()
         },
       unsetColor:
         () =>

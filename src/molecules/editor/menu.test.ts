@@ -5,19 +5,31 @@
 import { describe, it, expect, vi } from 'vitest'
 import { createApp, defineComponent, h } from 'vue'
 
+const menuProps = vi.hoisted(() => ({
+  bubble: [] as any[],
+  floating: [] as any[],
+}))
+const fontColorPicker = vi.hoisted(() => ({ open: vi.fn() }))
+
+vi.mock('./components/font-color/fontColorController', () => ({
+  openFontColorPicker: fontColorPicker.open,
+}))
+
 // EditorBubbleMenu/EditorFloatingMenu import these from `@tiptap/vue-3/menus`
 // (the real tiptap-v3 component source). Stub them as slot pass-throughs so the
 // wrapper's item rendering can be asserted without tiptap's floating/portal behavior.
 vi.mock('@tiptap/vue-3/menus', () => ({
   BubbleMenu: defineComponent({
-    props: ['editor', 'options'],
-    setup(_props, { slots }) {
+    props: ['editor', 'options', 'shouldShow'],
+    setup(props, { slots }) {
+      menuProps.bubble.push(props)
       return () => h('div', { 'data-testid': 'bubble-menu' }, slots.default?.())
     },
   }),
   FloatingMenu: defineComponent({
-    props: ['editor', 'options'],
-    setup(_props, { slots }) {
+    props: ['editor', 'options', 'shouldShow'],
+    setup(props, { slots }) {
+      menuProps.floating.push(props)
       return () =>
         h('div', { 'data-testid': 'floating-menu' }, slots.default?.())
     },
@@ -52,6 +64,11 @@ function fakeEditor(
     Object.fromEntries(names.map((name) => [name, {}]))
   const editor: any = {
     active: new Set(['bold']),
+    commands: {
+      openLinkEditor: vi.fn(),
+      selectAndUploadImage: vi.fn(),
+      selectAndUploadVideo: vi.fn(),
+    },
     canRun: true,
     isActive: vi.fn((name: unknown) =>
       typeof name === 'string' ? editor.active.has(name) : false,
@@ -87,7 +104,7 @@ describe('editor menu primitives and presets', () => {
   it('renders command items, separators, groups, active state, and disabled state in a fixed menu', async () => {
     const { EditorFixedMenu, Bold, Italic, HeadingGroup, Separator } =
       await import('./index')
-    const { editor } = fakeEditor()
+    const { editor, calls } = fakeEditor()
     editor.canRun = false
 
     const root = mount(EditorFixedMenu, {
@@ -150,13 +167,15 @@ describe('editor menu primitives and presets', () => {
   it('renders bubble and floating menus with the shared item shape', async () => {
     const { EditorBubbleMenu, EditorFloatingMenu, Bold } =
       await import('./index')
-    const { editor } = fakeEditor()
+    const { editor, calls } = fakeEditor()
 
     // Items render their icon (not label text), so assert the button by aria-label.
     expect(
-      mount(EditorBubbleMenu, { editor, items: [Bold], options: {} }).querySelector(
-        '[aria-label="Bold"]',
-      ),
+      mount(EditorBubbleMenu, {
+        editor,
+        items: [Bold],
+        options: {},
+      }).querySelector('[aria-label="Bold"]'),
     ).toBeTruthy()
     expect(
       mount(EditorFloatingMenu, {
@@ -165,6 +184,64 @@ describe('editor menu primitives and presets', () => {
         options: {},
       }).querySelector('[aria-label="Bold"]'),
     ).toBeTruthy()
+  })
+
+  it('passes shouldShow as a menu prop instead of nesting it in Floating UI options', async () => {
+    const { EditorBubbleMenu, EditorFloatingMenu, Bold } =
+      await import('./index')
+    const { editor } = fakeEditor()
+    const shouldShow = vi.fn(() => false)
+
+    mount(EditorBubbleMenu, {
+      editor,
+      items: [Bold],
+      options: { shouldShow, placement: 'top' },
+    })
+    mount(EditorFloatingMenu, {
+      editor,
+      items: [Bold],
+      options: { shouldShow, placement: 'bottom' },
+    })
+
+    expect(menuProps.bubble.at(-1).shouldShow).toBe(shouldShow)
+    expect(menuProps.bubble.at(-1).options).toEqual({ placement: 'top' })
+    expect(menuProps.floating.at(-1).shouldShow).toBe(shouldShow)
+    expect(menuProps.floating.at(-1).options).toEqual({ placement: 'bottom' })
+  })
+
+  it('wires image, video, and link menu items through editor actions', async () => {
+    const { EditorFixedMenu, InsertImage, InsertVideo, InsertLink } =
+      await import('./index')
+    const { editor, calls } = fakeEditor()
+
+    const root = mount(EditorFixedMenu, {
+      editor,
+      items: [InsertImage, InsertVideo, InsertLink],
+    })
+
+    ;(root.querySelector('[aria-label="Image"]') as HTMLButtonElement).click()
+    ;(root.querySelector('[aria-label="Video"]') as HTMLButtonElement).click()
+    ;(root.querySelector('[aria-label="Link"]') as HTMLButtonElement).click()
+
+    expect(calls.join('|')).toContain('focus:|selectAndUploadImage:|run:')
+    expect(calls.join('|')).toContain('focus:|selectAndUploadVideo:|run:')
+    expect(editor.commands.openLinkEditor).toHaveBeenCalled()
+  })
+
+  it('opens the font color picker from the menu action with the trigger anchor', async () => {
+    const { EditorFixedMenu, FontColor } = await import('./index')
+    const { editor } = fakeEditor({ extensions: ['namedColor'] })
+
+    const root = mount(EditorFixedMenu, { editor, items: [FontColor] })
+    const button = root.querySelector(
+      '[aria-label="Font Color"]',
+    ) as HTMLButtonElement
+    button.click()
+
+    expect(fontColorPicker.open).toHaveBeenCalledWith({
+      editor,
+      anchor: button,
+    })
   })
 
   it('exports menu presets as plain arrays', async () => {

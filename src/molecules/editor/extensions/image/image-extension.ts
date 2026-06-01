@@ -1,17 +1,30 @@
+/**
+ * The image node: schema, attributes, parse/render, node view, input rule, and a
+ * thin command map that delegates all upload/queue/find/dimension work to the
+ * shared media upload engine (`imageEngine`).
+ *
+ * Everything imperative (staging files, placeholder insertion, dimension probe,
+ * write-back, drop/paste, async-safe dispatch) lives in
+ * `@molecules/editor/extensions/shared/*` and is shared with video. This file is
+ * the TipTap shell only.
+ */
 import {
   Node as NodeExtension,
   nodeInputRule,
   mergeAttributes,
 } from '@tiptap/core'
+import type { Editor } from '@tiptap/core'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
+import type { UploadedFile } from '@utils/useFileUpload'
 import MediaNodeView from '@molecules/editor/components/MediaNodeView.vue'
-import { Plugin, Selection, Transaction, EditorState } from '@tiptap/pm/state'
-import { EditorView } from '@tiptap/pm/view'
-import { Node } from '@tiptap/pm/model'
-import fileToBase64 from '@utils/file-to-base64'
-import { UploadedFile } from '@utils/useFileUpload'
-
-export const localFileMap = new Map()
+import { createMediaPlugin } from '@molecules/editor/extensions/shared/media-plugin'
+import { pickFiles } from '@molecules/editor/extensions/shared/file-picker'
+import { openImageGroupUploadDialog } from '@molecules/editor/extensions/image-group/imageGroupDialogController'
+import {
+  resolveUploadOptions as resolveUploadOptionsBase,
+  type MediaUploadOptions,
+} from '@molecules/editor/extensions/shared/media-upload-engine'
+import { imageEngine, imageUploadConfig } from './image-engine'
 
 export interface ImageExtensionOptions {
   /**
@@ -24,7 +37,7 @@ export interface ImageExtensionOptions {
    * HTML attributes to add to the image element
    * @default {}
    */
-  HTMLAttributes: Record<string, any>
+  HTMLAttributes: Record<string, unknown>
 }
 
 export interface SetImageOptions {
@@ -38,40 +51,28 @@ export interface SetImageOptions {
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
     image: {
-      /**
-       * Insert an image
-       */
+      /** Insert an image */
       setImage: (options: SetImageOptions) => ReturnType
-
-      /**
-       * Upload and insert an image
-       */
+      /** Upload and insert an image */
       uploadImage: (file: File) => ReturnType
-
-      /**
-       * Select an image file using the file picker and upload it
-       */
+      /** Select an image file using the file picker and upload it */
       selectAndUploadImage: () => ReturnType
-      /**
-       * Set image alignment
-       */
+      /** Set image alignment */
       setImageAlign: (align: 'left' | 'center' | 'right') => ReturnType
-      /**
-       * Set image float for text wrapping
-       */
+      /** Set image float for text wrapping */
       setImageFloat: (float: 'left' | 'right' | null) => ReturnType
-      /**
-       * Re-upload a failed image using the file stored in localFileMap
-       */
+      /** Re-upload a failed image using the file stored in localFileMap */
       reuploadImage: (uploadId: string) => ReturnType
     }
   }
 }
 
 /**
- * Matches markdown image syntax: ![alt](src "title")
+ * Matches markdown image syntax: ![alt](src "title").
+ * `alt` is `[^\]]*` (any chars except the closing bracket) — the legacy
+ * `(.+|:?)` alternation could match malformed input.
  */
-const inputRegex = /(?:^|\s)(!\[(.+|:?)]\((\S+)(?:(?:\s+)["'](\S+)["'])?\))$/
+const inputRegex = /(?:^|\s)(!\[([^\]]*)]\((\S+)(?:(?:\s+)["'](\S+)["'])?\))$/
 
 export const ImageExtension = NodeExtension.create<ImageExtensionOptions>({
   name: 'image',
@@ -173,17 +174,19 @@ export const ImageExtension = NodeExtension.create<ImageExtensionOptions>({
   },
 
   addCommands() {
+    const resolve = (editor: Editor): MediaUploadOptions =>
+      resolveUploadOptionsBase({ ...this.options, editor })
+
     return {
       setImageAlign:
         (align: 'left' | 'center' | 'right') =>
-        ({ commands }) => {
-          return commands.updateAttributes(this.name, { align })
-        },
+        ({ commands }) =>
+          commands.updateAttributes(this.name, { align }),
+
       setImageFloat:
         (float: 'left' | 'right' | null) =>
-        ({ commands }) => {
-          return commands.updateAttributes(this.name, { float })
-        },
+        ({ commands }) =>
+          commands.updateAttributes(this.name, { float }),
 
       setImage:
         (attributes: SetImageOptions) =>
@@ -192,81 +195,47 @@ export const ImageExtension = NodeExtension.create<ImageExtensionOptions>({
             type: this.name,
             attrs: attributes,
           })
-
           if (result && attributes.src) {
-            findImageNodeBySource(editor.view, attributes.src, (node, pos) => {
-              updateNodeWithDimensions(attributes.src, editor.view, pos)
-            })
+            const pos = imageEngine.findNodeBySource(editor, attributes.src)
+            if (pos !== null) backfillFromSrc(editor, pos, attributes.src)
           }
-
           return result
         },
 
       uploadImage:
         (file: File) =>
         ({ editor }) => {
-          return uploadImage(
-            file,
-            editor.view,
-            null,
-            resolveUploadOptions(editor, this.options),
-          )
+          void imageEngine.uploadOne(file, editor, resolve(editor))
+          return true
         },
 
       selectAndUploadImage:
         () =>
         ({ editor }) => {
-          const input = document.createElement('input')
-          input.type = 'file'
-          input.accept = 'image/*'
-          input.onchange = (event) => {
-            const target = event.target as HTMLInputElement
-            if (target.files && target.files.length) {
-              const file = target.files[0]
-              editor.commands.uploadImage(file)
+          void pickFiles({ accept: 'image/*', multiple: true }).then((files) => {
+            if (editor.isDestroyed || files.length === 0) return
+            if (files.length === 1) {
+              editor.commands.uploadImage(files[0])
+            } else {
+              openImageGroupUploadDialog({ editor, files })
             }
-          }
-          input.click()
+          })
           return true
         },
 
       reuploadImage:
         (uploadId: string) =>
         ({ editor }) => {
-          const fileData = localFileMap.get(uploadId)
-          if (!fileData) {
-            console.error('reuploadImage: no file with uploadId', uploadId)
-            return false
-          }
-
-          // Find the node position
-          let nodePos: number | null = null
-          editor.view.state.doc.descendants((node, pos) => {
-            if (
-              node.type.name === 'image' &&
-              node.attrs.uploadId === uploadId
-            ) {
-              nodePos = pos
-              return false
-            }
-          })
-
-          if (nodePos === null) {
+          const pos = imageEngine.findNodeBySource(editor, '', uploadId)
+          if (pos === null) {
             console.error(
               'reuploadImage: could not find node with uploadId',
               uploadId,
             )
             return false
           }
-
-          // Re-run the upload using the stored file, replacing the node at its position
-          return uploadImageBase(
-            fileData.file,
-            editor.view,
-            nodePos,
-            resolveUploadOptions(editor, this.options),
-            'replace',
-          )
+          void imageEngine.reupload(editor, pos, resolve(editor))
+          return true
         },
     }
   },
@@ -285,397 +254,25 @@ export const ImageExtension = NodeExtension.create<ImageExtensionOptions>({
   },
 
   addProseMirrorPlugins() {
-    const extensionThis = this
-
     return [
-      new Plugin({
-        props: {
-          handleDOMEvents: {
-            drop: (view, event) => {
-              const hasFiles = event.dataTransfer?.files?.length
-              const uploadOptions = resolveUploadOptions(
-                extensionThis.editor,
-                extensionThis.options,
-              )
-
-              if (!hasFiles || !uploadOptions.uploadFunction) {
-                return false
-              }
-
-              const images = Array.from(event.dataTransfer.files).filter(
-                (file) => /image/i.test(file.type),
-              )
-
-              if (images.length === 0) {
-                return false
-              }
-
-              event.preventDefault()
-
-              const coordinates = view.posAtCoords({
-                left: event.clientX,
-                top: event.clientY,
-              })
-
-              let pos: number | null = null
-              if (coordinates) {
-                pos = coordinates.pos
-                const transaction = view.state.tr.setSelection(
-                  Selection.near(view.state.doc.resolve(pos)),
-                )
-                view.dispatch(transaction)
-              }
-
-              processMultipleImages(images, view, pos, uploadOptions)
-              return true
-            },
-
-            handlePaste: (view, event) => {
-              const uploadOptions = resolveUploadOptions(
-                extensionThis.editor,
-                extensionThis.options,
-              )
-              if (!uploadOptions.uploadFunction) {
-                return false
-              }
-
-              const clipboardItems = event.clipboardData?.items
-              if (!clipboardItems || clipboardItems.length === 0) {
-                return false
-              }
-
-              const images: File[] = []
-
-              for (let i = 0; i < clipboardItems.length; i++) {
-                const item = clipboardItems[i]
-                if (
-                  item.kind === 'file' &&
-                  item.type.indexOf('image/') !== -1
-                ) {
-                  const file = item.getAsFile()
-                  if (file) {
-                    images.push(file)
-                  }
-                }
-              }
-
-              if (images.length === 0) {
-                return false
-              }
-
-              event.preventDefault()
-              processMultipleImages(images, view, null, uploadOptions)
-              return true
-            },
-          },
-        },
-
-        appendTransaction(
-          transactions: readonly Transaction[],
-          oldState: EditorState,
-          newState: EditorState,
-        ): Transaction | null {
-          const newImageNodes: { node: Node; pos: number }[] = []
-
-          if (transactions.some((tr) => tr.docChanged)) {
-            newState.doc.descendants((node, pos) => {
-              if (
-                node.type.name === 'image' &&
-                node.attrs.src &&
-                (!node.attrs.width || !node.attrs.height) &&
-                !node.attrs.loading
-              ) {
-                newImageNodes.push({ node, pos })
-              }
-            })
-          }
-
-          if (newImageNodes.length === 0) return null
-
-          newImageNodes.forEach(({ node, pos }) => {
-            const editor = extensionThis.editor
-            if (editor) {
-              updateNodeWithDimensions(node.attrs.src, editor.view, pos)
-            }
-          })
-
-          return null
-        },
+      createMediaPlugin(imageEngine, imageUploadConfig, {
+        editor: this.editor,
+        options: { ...this.options },
       }),
     ]
   },
 })
 
-function findInsertPosition(
-  view: EditorView,
-  lastNodeId: string | null,
-): number | null {
-  if (!lastNodeId) {
-    return null
-  }
-
-  let insertPos = null
-
-  view.state.doc.descendants((node, pos) => {
-    if (node.type.name === 'image' && node.attrs.uploadId === lastNodeId) {
-      insertPos = pos + node.nodeSize
-      return false
-    }
-  })
-
-  return insertPos
-}
-
-// Resolve the uploadFunction at use-time. A directly-configured option wins;
-// otherwise fall back to the shared `upload` storage set via useEditor({ uploadFunction }).
-// (tiptap v3 froze extension.options into an immutable getter, so it can't be mutated
-// after construction — the only reliable read is at use-time from the shared storage.)
-export function resolveUploadOptions(
-  editor: { storage?: Record<string, any> } | null | undefined,
-  options: Record<string, any>,
-) {
-  return {
-    ...options,
-    uploadFunction:
-      options.uploadFunction ?? editor?.storage?.upload?.uploadFunction ?? null,
-  }
-}
-
-// Base upload function shared by all image upload methods
-type ImageDimensions = { width: number | null; height: number | null }
-function uploadImageBase(
-  file: File,
-  view: EditorView,
-  pos: number | null | undefined,
-  options: Record<string, any>,
-  insertMode: 'insert' | 'replace',
-  onComplete?: (nodeId: string) => void,
-  moveCursor = false,
-): boolean {
-  if (!options.uploadFunction) {
-    console.error('uploadFunction option is not provided')
-    return false
-  }
-
-  const uploadId = `upload-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
-
-  fileToBase64(file)
-    .then((base64Result: string) => {
-      localFileMap.set(uploadId, { b64: base64Result, file })
-
-      return getImageDimensions(base64Result)
-        .catch(() => ({ width: null, height: null }))
-        .then((dimensions) => dimensions)
+/** Probe an already-inserted image at `pos` and back-fill its dimensions. */
+function backfillFromSrc(editor: Editor, pos: number, src: string): void {
+  void imageUploadConfig
+    .probeDimensions(src)
+    .then((dims) => {
+      const live = editor.view.state.doc.nodeAt(pos)
+      if (!live || live.type.name !== 'image') return
+      imageEngine.updateNodeWithDimensions(editor, pos, dims)
     })
-    .then((dimensions: ImageDimensions) => {
-      const node = view.state.schema.nodes.image.create({
-        loading: true,
-        uploadId,
-        src: null,
-        width: dimensions.width,
-        height: dimensions.height,
-      })
-
-      const tr = view.state.tr
-      if (insertMode === 'replace') {
-        if (pos === null) tr.replaceSelectionWith(node)
-        else {
-          const nodeAtPos = view.state.doc.nodeAt(pos)
-          if (nodeAtPos) tr.replaceWith(pos, pos + nodeAtPos.nodeSize, node)
-        }
-      } else {
-        if (pos != null) tr.insert(pos, node)
-        else {
-          const insertPos = view.state.selection.from
-          tr.insert(insertPos, node)
-        }
-      }
-
-      view.dispatch(tr)
-
-      // Optionally move cursor after the node
-      if (moveCursor) {
-        const nodeSize = node.nodeSize || 1
-        setTimeout(() => {
-          try {
-            let nodePos = null
-            view.state.doc.descendants((n, p) => {
-              if (n.type.name === 'image' && n.attrs.uploadId === uploadId) {
-                nodePos = p
-                return false
-              }
-            })
-
-            if (nodePos !== null) {
-              const posAfter = nodePos + nodeSize
-              const transaction = view.state.tr.setSelection(
-                Selection.near(view.state.doc.resolve(posAfter)),
-              )
-              view.dispatch(transaction)
-            }
-          } catch (e) {
-            console.error('Error moving cursor:', e)
-          }
-        }, 10)
-      }
-
-      return options.uploadFunction(file)
+    .catch(() => {
+      /* best-effort dimension back-fill */
     })
-    .then((uploadedImage) => {
-      const transaction = view.state.tr
-
-      view.state.doc.descendants((node, pos) => {
-        if (node.type.name === 'image' && node.attrs.uploadId === uploadId) {
-          transaction.setNodeMarkup(pos, undefined, {
-            ...node.attrs,
-            src: uploadedImage.file_url,
-            width: uploadedImage.width || node.attrs.width,
-            height: uploadedImage.height || node.attrs.height,
-            loading: false,
-          })
-          localFileMap.delete(node.attrs.uploadId)
-          return false
-        }
-      })
-
-      view.dispatch(transaction)
-
-      if (onComplete) onComplete(uploadId)
-    })
-    .catch((error: Error) => {
-      console.error('Image upload failed:', error)
-
-      try {
-        const transaction = view.state.tr
-
-        view.state.doc.descendants((node, pos) => {
-          if (node.type.name === 'image' && node.attrs.uploadId === uploadId) {
-            transaction.setNodeMarkup(pos, undefined, {
-              ...node.attrs,
-              loading: false,
-              error: error.message || 'Failed to upload image',
-            })
-            return false
-          }
-        })
-
-        view.dispatch(transaction)
-      } catch (e) {
-        console.error('Error updating failed node:', e)
-      }
-
-      if (onComplete) onComplete(uploadId)
-    })
-
-  return true
-}
-
-function uploadImageWithTracking(
-  file: File,
-  view: EditorView,
-  pos: number | null | undefined,
-  options: Record<string, any>,
-  onComplete?: (nodeId: string) => void,
-): boolean {
-  return uploadImageBase(file, view, pos, options, 'insert', onComplete, true)
-}
-
-function uploadImage(
-  file: File,
-  view: EditorView,
-  pos: number | null | undefined,
-  options: Record<string, any>,
-): boolean {
-  return uploadImageBase(file, view, pos, options, 'replace')
-}
-
-function findImageNodeBySource(
-  view: EditorView,
-  src: string,
-  callback: (node: Node, pos: number) => void,
-) {
-  view.state.doc.descendants((node, pos) => {
-    if (node.type.name === 'image' && node.attrs.src === src) {
-      callback(node, pos)
-      return false
-    }
-  })
-}
-
-function updateNodeWithDimensions(
-  src: string,
-  view: EditorView,
-  pos: number,
-): void {
-  getImageDimensions(src)
-    .then((dimensions) => {
-      const node = view.state.doc.nodeAt(pos)
-      if (!node || node.type.name !== 'image') {
-        return
-      }
-      const currentAttrs = node.attrs
-
-      if (currentAttrs.width == null || currentAttrs.height == null) {
-        const transaction = view.state.tr.setNodeMarkup(pos, undefined, {
-          ...currentAttrs,
-          width: currentAttrs.width ?? dimensions.width,
-          height: currentAttrs.height ?? dimensions.height,
-        })
-        view.dispatch(transaction)
-      }
-    })
-    .catch((error) => {
-      // Don't log error if it's just about dimensions for an existing node
-    })
-}
-
-function getImageDimensions(
-  src: string,
-): Promise<{ width: number; height: number }> {
-  return new Promise((resolve, reject) => {
-    const img = new Image()
-    img.onload = () =>
-      resolve({
-        width: img.naturalWidth,
-        height: img.naturalHeight,
-      })
-    img.onerror = reject
-    img.src = src
-  })
-}
-
-/**
- * Process multiple image uploads sequentially
- */
-export function processMultipleImages(
-  images: File[],
-  view: EditorView,
-  pos: number | null,
-  options: Record<string, any>,
-) {
-  if (images.length === 1) {
-    uploadImage(images[0], view, pos, options)
-    return
-  }
-
-  let imageQueue = [...images]
-  let lastInsertedNodeId: string | null = null
-
-  const processNextImage = () => {
-    if (imageQueue.length === 0) return
-
-    const file = imageQueue.shift()
-    if (!file) return
-
-    const currentPos = lastInsertedNodeId
-      ? findInsertPosition(view, lastInsertedNodeId)
-      : pos
-
-    uploadImageWithTracking(file, view, currentPos, options, (newNodeId) => {
-      lastInsertedNodeId = newNodeId
-      setTimeout(processNextImage, 100)
-    })
-  }
-
-  processNextImage()
 }

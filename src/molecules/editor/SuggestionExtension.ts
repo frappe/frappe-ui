@@ -3,6 +3,10 @@ import Suggestion from '@tiptap/suggestion'
 import { PluginKey } from '@tiptap/pm/state'
 import type { Component } from 'vue'
 import type { Editor } from './useEditor'
+import {
+  createSuggestionRenderer,
+  type SuggestionFloatingOptions,
+} from './extensions/shared/suggestion-renderer'
 
 export type SuggestionRange = { from: number; to: number }
 
@@ -11,6 +15,7 @@ export type SuggestionExtensionOptions<TItem = any> = {
   trigger: string
   items: TItem[] | ((query: string) => TItem[] | Promise<TItem[]>)
   component?: Component
+  floatingOptions?: SuggestionFloatingOptions
   command: (props: { editor: Editor; item: TItem; range: SuggestionRange }) => void
 }
 
@@ -27,6 +32,13 @@ function buildSuggestionExtension<TItem = any>(options: SuggestionExtensionOptio
           command: ({ editor, range, props }: { editor: Editor; range: Range; props: TItem }) => {
             options.command({ editor, item: props, range })
           },
+          render: options.component
+            ? () =>
+                createSuggestionRenderer(
+                  options.component as Component,
+                  options.floatingOptions,
+                )
+            : undefined,
         },
       }
     },

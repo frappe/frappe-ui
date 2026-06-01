@@ -1,14 +1,31 @@
-import { Node, mergeAttributes, Range, Editor } from '@tiptap/core'
+import {
+  Node,
+  Extension,
+  mergeAttributes,
+  type Extensions,
+  type CommandProps,
+  type RawCommands,
+} from '@tiptap/core'
+import type { Node as ProseMirrorNode } from '@tiptap/pm/model'
 import { PluginKey } from '@tiptap/pm/state'
 import {
   createSuggestionExtension,
-  BaseSuggestionItem,
+  type BaseSuggestionItem,
 } from '../suggestion/createSuggestionExtension'
 import SuggestionList from '../suggestion/SuggestionList.vue'
+import {
+  insertSuggestionNode,
+  filterByQuery,
+  getSuggestionOptions,
+} from '@molecules/editor/extensions/shared/suggestion-helpers'
 import { toValue, type MaybeRefOrGetter } from 'vue'
 
 type TagOption = TagSuggestionItem & { id?: string }
 type TagsOption = MaybeRefOrGetter<TagOption[]> | null
+
+interface TagSuggestionOptions {
+  tags: MaybeRefOrGetter<TagSuggestionItem[]>
+}
 
 export const TagNode = Node.create({
   name: 'tagItem',
@@ -32,7 +49,13 @@ export const TagNode = Node.create({
       tagLabel: {
         default: 'tag',
         parseHTML: (element) => element.getAttribute('data-tag-label'),
-        renderHTML: (attributes) => ({ 'data-tag-label': attributes.tagLabel }),
+        // Guard: a falsy label must not emit `data-tag-label="undefined"`.
+        renderHTML: (attributes) => {
+          if (!attributes.tagLabel) {
+            return {}
+          }
+          return { 'data-tag-label': attributes.tagLabel }
+        },
       },
     }
   },
@@ -59,23 +82,23 @@ export const TagNode = Node.create({
     return [
       'span',
       mergeAttributes(HTMLAttributes, { class: 'tag-item' }),
-      `#${HTMLAttributes['data-tag-label']}`,
+      `#${HTMLAttributes['data-tag-label'] || ''}`,
     ]
   },
-  renderText({ node }: any) {
+  renderText({ node }: { node: ProseMirrorNode }) {
     return `#${node.attrs.tagLabel || ''}`
   },
   addCommands() {
     return {
       setTag:
         (attributes: { tagLabel: string; tagId?: string }) =>
-        ({ commands }) => {
+        ({ commands }: CommandProps) => {
           return commands.insertContent({
             type: this.name,
             attrs: attributes,
           })
         },
-    }
+    } as unknown as Partial<RawCommands>
   },
 })
 
@@ -99,24 +122,21 @@ export const TagExtension = createSuggestionExtension<TagSuggestionItem>({
   },
 
   items: ({ query, editor }) => {
-    const { tags: _tags } = editor.extensionManager.extensions.find(
-      (ext) => ext.name === 'tagSuggestion',
-    )!.options
-    let tags = toValue(_tags)
+    const options = getSuggestionOptions<TagSuggestionOptions>(
+      editor,
+      'tagSuggestion',
+    )
+    const tags = toValue(options?.tags ?? [])
 
-    // Filter existing tags based on the query
-    let filteredTags = tags
-      .filter((tag: TagSuggestionItem) =>
-        tag.label.toLowerCase().startsWith(query.toLowerCase()),
-      )
-      .map((tag: TagSuggestionItem) => ({ ...tag, display: tag.label }))
+    const filteredTags: TagSuggestionItem[] = filterByQuery(
+      tags,
+      query,
+      'label',
+    ).map((tag) => ({ ...tag, display: tag.label }))
 
     if (
       query.length > 0 &&
-      !tags.some(
-        (tag: TagSuggestionItem) =>
-          tag.label.toLowerCase() === query.toLowerCase(),
-      )
+      !tags.some((tag) => tag.label.toLowerCase() === query.toLowerCase())
     ) {
       filteredTags.push({
         display: `New tag: "${query}"`,
@@ -128,28 +148,13 @@ export const TagExtension = createSuggestionExtension<TagSuggestionItem>({
   },
 
   command: ({ editor, range, props }) => {
-    const attributes = {
+    insertSuggestionNode(editor, range, TagNode.name, {
       tagLabel: props.label,
       ...(props.id && !props.isNew && { tagId: props.id }),
-    }
-
-    editor
-      .chain()
-      .focus()
-      .insertContentAt(range, [
-        {
-          type: TagNode.name,
-          attrs: attributes,
-        },
-        {
-          type: 'text',
-          text: ' ',
-        },
-      ])
-      .run()
+    })
   },
 
-  tippyOptions: {
+  floatingOptions: {
     placement: 'bottom-start',
     offset: [0, 8],
   },
@@ -158,15 +163,38 @@ export const TagExtension = createSuggestionExtension<TagSuggestionItem>({
   decorationClass: 'tag-suggestion-active',
 })
 
-export function getTagExtensions(getTags: () => TagsOption) {
-  if (getTags() === null) {
-    return []
-  }
+/**
+ * The ONE canonical tag-composite implementation. Always loads the inline
+ * `tagItem` node (so existing tags in content render); wires the live `#`
+ * suggestion only when an item source is supplied. Both `getTagExtensions`
+ * (legacy functional API) and the `Tag` composite in `extensions.ts` delegate
+ * here so there is a single source of truth for the inert-until-items rule.
+ */
+function buildTagExtensions(items: TagsOption): Extensions {
+  if (items == null) return [TagNode]
+  return [TagNode, TagExtension.configure({ tags: items })]
+}
 
-  return [
-    TagNode,
-    TagExtension.configure({
-      tags: getTags,
-    }),
-  ]
+/**
+ * Canonical `Extension.create` form of the tag composite (inert until `items`).
+ * `extensions.ts` re-points its `Tag` export at this in the Rewire step.
+ */
+export const TagComposite = Extension.create<{
+  items: TagsOption
+}>({
+  name: 'tag',
+  addOptions() {
+    return { items: null }
+  },
+  addExtensions() {
+    return buildTagExtensions(this.options.items)
+  },
+})
+
+/**
+ * Legacy functional API. Kept for back-compat; delegates to the same builder as
+ * `TagComposite` so there is exactly one implementation of the inert rule.
+ */
+export function getTagExtensions(getTags: () => TagsOption): Extensions {
+  return buildTagExtensions(getTags())
 }

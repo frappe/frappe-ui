@@ -56,6 +56,7 @@ export function useEditor(
   const extensions = [UploadStorage, ...options.extensions]
 
   const editorOptions: Partial<EditorOptions> = {
+    element: null,
     extensions,
     editable: toValue(options.editable) ?? true,
     autofocus: options.autofocus,
