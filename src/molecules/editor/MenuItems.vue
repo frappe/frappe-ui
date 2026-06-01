@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, h, type Component } from 'vue'
+import { computed, h, ref, watch, type Component } from 'vue'
 import type { CommandMenuItem, MenuGroupItem, MenuItem } from './menu'
 import type { Editor } from './useEditor'
 
@@ -7,6 +7,37 @@ const props = defineProps<{
   editor: Editor | null
   items: MenuItem[]
 }>()
+
+// The editor from `useEditor` is built on `@tiptap/core` (not `@tiptap/vue-3`),
+// so it isn't a reactive ref — `isActive`/`isDisabled` reads of `editor.state`
+// won't re-render on their own. Bump a version on every transaction and touch it
+// from each state read so toolbar buttons track the selection. Scoped per
+// MenuItems instance, so it works with or without `<Editor>` (Primitives recipe).
+const version = ref(0)
+watch(
+  () => props.editor,
+  (editor, _old, onCleanup) => {
+    if (typeof editor?.on !== 'function') return
+    const bump = () => {
+      version.value++
+    }
+    editor.on('transaction', bump)
+    onCleanup(() => editor.off('transaction', bump))
+  },
+  { immediate: true },
+)
+
+/** Active ("pressed") state for an item, re-evaluated on each transaction. */
+function isPressed(item: CommandMenuItem): boolean {
+  void version.value
+  return !!props.editor && item.isActive?.(props.editor) === true
+}
+
+/** Disabled state for an item, re-evaluated on each transaction. */
+function isItemDisabled(item: CommandMenuItem): boolean {
+  void version.value
+  return !props.editor || item.isDisabled?.(props.editor) === true
+}
 
 // Renders an item's glyph: a `lucide-*` (or any) string becomes a masked icon
 // span (sized here so item definitions stay terse); a component renders as-is;
@@ -92,13 +123,9 @@ function run(item: CommandMenuItem, event?: MouseEvent) {
           type="button"
           class="inline-flex size-6 items-center justify-center rounded text-sm text-ink-gray-7 hover:bg-surface-gray-3 disabled:cursor-not-allowed disabled:opacity-50 aria-pressed:bg-surface-gray-3"
           :aria-label="item.label"
-          :aria-pressed="
-            trigger.isActive === true || item.isActive?.(editor) === true
-          "
-          :disabled="item.isDisabled?.(editor) === true"
-          @click="
-            item.isDisabled?.(editor) === true ? undefined : trigger.onClick()
-          "
+          :aria-pressed="trigger.isActive === true || isPressed(item)"
+          :disabled="isItemDisabled(item)"
+          @click="isItemDisabled(item) ? undefined : trigger.onClick()"
         >
           <ItemContent :item="item" />
         </button>
@@ -118,8 +145,8 @@ function run(item: CommandMenuItem, event?: MouseEvent) {
         type="button"
         class="inline-flex size-6 items-center justify-center rounded text-sm text-ink-gray-7 hover:bg-surface-gray-3 disabled:cursor-not-allowed disabled:opacity-50 aria-pressed:bg-surface-gray-3"
         :aria-label="groupItem.label"
-        :aria-pressed="editor ? groupItem.isActive?.(editor) === true : false"
-        :disabled="!editor || groupItem.isDisabled?.(editor) === true"
+        :aria-pressed="isPressed(groupItem)"
+        :disabled="isItemDisabled(groupItem)"
         @click="run(groupItem, $event)"
       >
         <ItemContent :item="groupItem" />
@@ -130,8 +157,8 @@ function run(item: CommandMenuItem, event?: MouseEvent) {
       type="button"
       class="inline-flex size-6 items-center justify-center rounded text-sm text-ink-gray-7 hover:bg-surface-gray-3 disabled:cursor-not-allowed disabled:opacity-50 aria-pressed:bg-surface-gray-3"
       :aria-label="item.label"
-      :aria-pressed="editor ? item.isActive?.(editor) === true : false"
-      :disabled="!editor || item.isDisabled?.(editor) === true"
+      :aria-pressed="isPressed(item)"
+      :disabled="isItemDisabled(item)"
       @click="run(item, $event)"
     >
       <ItemContent :item="item" />

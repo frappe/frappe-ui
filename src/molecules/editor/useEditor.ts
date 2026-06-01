@@ -52,6 +52,13 @@ export function useEditor(
     (extension) => extension.name === 'collaboration',
   )
   let applyingExternalUpdate = false
+  // The exact value last written OUT to `options.content` from `onUpdate`. The
+  // content watcher skips it so an internal edit doesn't bounce back through
+  // `setContent`. HTML can lean on string equality, but JSON's `getJSON()`
+  // returns a fresh object each edit, so reference-tracking the emitted value is
+  // the only cheap way to recognise our own write (and avoid resetting the
+  // selection on every keystroke in `format: 'json'`).
+  let lastEmitted: string | JSONContent | null | undefined
 
   const extensions = [UploadStorage, ...options.extensions]
 
@@ -62,8 +69,10 @@ export function useEditor(
     autofocus: options.autofocus,
     onUpdate: ({ editor: tiptapEditor }) => {
       if (!isCollaborationMode && options.content && !applyingExternalUpdate) {
-        options.content.value =
+        const value =
           format === 'json' ? tiptapEditor.getJSON() : tiptapEditor.getHTML()
+        lastEmitted = value
+        options.content.value = value
       }
       options.onUpdate?.(tiptapEditor)
     },
@@ -95,6 +104,9 @@ export function useEditor(
   if (!isCollaborationMode && options.content) {
     watch(options.content, (content) => {
       if (!editor.value) return
+      // Our own write bounced back through the ref — ignore it (covers JSON,
+      // whose fresh-object identity defeats the HTML string check below).
+      if (content === lastEmitted) return
       if (format === 'html' && editor.value.getHTML() === content) return
 
       applyingExternalUpdate = true
