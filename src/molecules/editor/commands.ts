@@ -36,12 +36,6 @@ export const hasCommand =
   (editor: Editor): boolean =>
     typeof (editor.commands as Record<string, unknown>)[name] === 'function'
 
-export const hasIframeDialog = (editor: Editor): boolean => {
-  const storage = editor.storage as Record<string, unknown>
-  const iframe = storage.iframe as { openDialog?: unknown } | undefined
-  return hasNode('iframe')(editor) && typeof iframe?.openDialog === 'function'
-}
-
 const headingIcon: Record<1 | 2 | 3 | 4 | 5 | 6, string> = {
   1: 'lucide-heading-1',
   2: 'lucide-heading-2',
@@ -180,7 +174,8 @@ export const commandMeta = {
   embed: {
     label: 'Embed',
     icon: 'lucide-gallery-vertical',
-    isAvailable: hasIframeDialog,
+    isAvailable: (editor) =>
+      hasNode('iframe')(editor) && hasCommand('openIframeDialog')(editor),
   },
   toc: {
     label: 'Table of Contents',

@@ -27,7 +27,6 @@ import { ImageGroup as ImageGroupExtension } from './extensions/image-group'
 import ImageViewerExtension from './extensions/image-viewer'
 import { VideoExtension } from './extensions/video'
 import { IframeExtension } from './extensions/iframe'
-export { default as InsertIframe } from './extensions/iframe/InsertIframe.vue'
 import {
   MentionExtension,
   type MentionSuggestionItem,
@@ -60,7 +59,7 @@ function placeholderStorage(
 /**
  * Placeholder with frappe-ui's storage-threading: when not given an explicit
  * `placeholder`, it reads its text from its own storage, which `setPlaceholder`
- * (below) writes from `<TextEditor>`'s reactive `placeholder` prop (see spec §2).
+ * (below) writes from `<Editor>`'s reactive `placeholder` prop (see spec §2).
  * An explicit `Placeholder.configure({ placeholder })` replaces the reader and wins.
  */
 export const Placeholder = PlaceholderExtension.extend({
@@ -73,10 +72,10 @@ export const Placeholder = PlaceholderExtension.extend({
 
 /**
  * Set the placeholder text on a live editor and refresh its decoration. The whole
- * mechanism lives here, next to the extension, so `<TextEditor>` never reaches into
+ * mechanism lives here, next to the extension, so `<Editor>` never reaches into
  * editor storage or ProseMirror transactions. No-op when the Placeholder extension
  * isn't loaded (or a consumer supplied an explicit `placeholder`, which replaces the
- * storage reader). `<TextEditor>` calls this from its `placeholder` prop watcher.
+ * storage reader). `<Editor>` calls this from its `placeholder` prop watcher.
  */
 export function setPlaceholder(
   editor: Editor | null | undefined,

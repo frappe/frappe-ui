@@ -2,7 +2,7 @@
 
 Labels: `needs-triage`
 Type: AFK
-Status: ❌ Not started.
+Status: ✅ Done — gameplan migrated to `frappe-ui/editor` (`<Editor>` + kits): per-surface editors (`CommentEditor`/`DiscussionEditor`/`PageEditor`/`TaskDescriptionEditor`/`ReadmeEditor`) on a shared kit-free `GPEditor` wrapper, with functional parity verified across all flows and a measured bundle reduction (~−7.8% app JS). The port surfaced + fixed two v1 library bugs (bubble/floating menu import source; upload-function resolution).
 
 ## Parent
 

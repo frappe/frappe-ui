@@ -5,7 +5,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { createApp, h, nextTick, reactive } from 'vue'
 
-let TextEditor: any
+let Editor: any
 let EditorContent: any
 let EditorFixedMenu: any
 let StarterKit: any
@@ -16,7 +16,7 @@ let commentToolbar: any
 let articleToolbar: any
 
 beforeEach(async () => {
-  ;({ default: TextEditor } = await import('./TextEditor.vue'))
+  ;({ default: Editor } = await import('./Editor.vue'))
   ;({ default: EditorContent } = await import('./EditorContent.vue'))
   ;({ default: EditorFixedMenu } = await import('./EditorFixedMenu.vue'))
   ;({ StarterKit, Placeholder } = await import('./extensions'))
@@ -29,7 +29,7 @@ type MountOptions = {
   slots?: Record<string, any>
 }
 
-// <TextEditor> is renderless, so every mount must supply a #default slot. By
+// <Editor> is renderless, so every mount must supply a #default slot. By
 // default we render EditorContent and capture the editor; tests that need a
 // bespoke layout pass their own default slot.
 function mount(staticProps: Record<string, any>, options: MountOptions = {}) {
@@ -51,7 +51,7 @@ function mount(staticProps: Record<string, any>, options: MountOptions = {}) {
   const app = createApp({
     render() {
       return h(
-        TextEditor,
+        Editor,
         {
           ...staticProps,
           ...state,
@@ -66,7 +66,7 @@ function mount(staticProps: Record<string, any>, options: MountOptions = {}) {
   return { root, state, changes, getEditor: () => editor, app }
 }
 
-describe('TextEditor', () => {
+describe('Editor', () => {
   it('renders HTML v-model content and reflects external updates', async () => {
     const ctx = mount(
       { extensions: [StarterKit] },
@@ -153,7 +153,7 @@ describe('TextEditor', () => {
     expect(bespoke).toBeTruthy()
     // The consumer's EditorContent is mounted inside their own layout…
     expect(bespoke.querySelector('[data-slot="editor-content"]')).toBeTruthy()
-    // …and <TextEditor> injected no wrapper element of its own.
+    // …and <Editor> injected no wrapper element of its own.
     expect(ctx.root.firstElementChild).toBe(bespoke)
   })
 
@@ -213,8 +213,8 @@ describe('TextEditor', () => {
     expect(article.root.querySelector('[aria-label="Table"]')).toBeTruthy()
   })
 
-  // Mounts TextEditor under a function ref so the exposed surface can be read the
-  // way an app component built on <TextEditor> reads it (spec §2 escape hatch).
+  // Mounts Editor under a function ref so the exposed surface can be read the
+  // way an app component built on <Editor> reads it (spec §2 escape hatch).
   // No slot is needed: the editor lifecycle runs regardless of what's rendered.
   function mountWithRef(props: Record<string, any>) {
     let instance: any = null
@@ -223,7 +223,7 @@ describe('TextEditor', () => {
     document.body.appendChild(root)
     const app = createApp({
       render() {
-        return h(TextEditor, {
+        return h(Editor, {
           ref: (r: any) => (instance = r),
           ...props,
           modelValue: state.modelValue,

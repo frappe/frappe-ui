@@ -41,12 +41,15 @@ function isAvailable(item: CommandMenuItem): boolean {
 }
 
 // Self-pruning: drop unavailable command items and group sub-items, and any
-// group left empty. Separators are kept as-authored.
+// group left empty. Separators are pruned to match: a separator only survives
+// if it follows a kept (non-separator) item, so pruning a bracketed group never
+// leaves a leading, doubled, or trailing divider behind.
 const visibleItems = computed<MenuItem[]>(() => {
   const result: MenuItem[] = []
   for (const item of props.items) {
     if (isSeparator(item)) {
-      result.push(item)
+      const last = result[result.length - 1]
+      if (last && !isSeparator(last)) result.push(item)
     } else if (isGroup(item)) {
       const items = item.items.filter(isAvailable)
       if (items.length) result.push({ ...item, items })
@@ -54,6 +57,7 @@ const visibleItems = computed<MenuItem[]>(() => {
       result.push(item)
     }
   }
+  if (result.length && isSeparator(result[result.length - 1])) result.pop()
   return result
 })
 
@@ -75,7 +79,7 @@ function run(item: CommandMenuItem, event?: MouseEvent) {
     <span
       v-if="isSeparator(item)"
       data-slot="menu-separator"
-      class="mx-1 h-5 w-px bg-gray-200"
+      class="mx-1 h-5 w-px bg-surface-gray-3"
       aria-hidden="true"
     />
     <component
@@ -86,13 +90,15 @@ function run(item: CommandMenuItem, event?: MouseEvent) {
       <template #default="trigger">
         <button
           type="button"
-          class="inline-flex size-6 items-center justify-center rounded text-sm text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 aria-pressed:bg-gray-100"
+          class="inline-flex size-6 items-center justify-center rounded text-sm text-ink-gray-7 hover:bg-surface-gray-3 disabled:cursor-not-allowed disabled:opacity-50 aria-pressed:bg-surface-gray-3"
           :aria-label="item.label"
           :aria-pressed="
             trigger.isActive === true || item.isActive?.(editor) === true
           "
           :disabled="item.isDisabled?.(editor) === true"
-          @click="item.isDisabled?.(editor) === true ? undefined : trigger.onClick()"
+          @click="
+            item.isDisabled?.(editor) === true ? undefined : trigger.onClick()
+          "
         >
           <ItemContent :item="item" />
         </button>
@@ -103,14 +109,14 @@ function run(item: CommandMenuItem, event?: MouseEvent) {
       data-slot="menu-group"
       class="flex items-center gap-1"
     >
-      <span class="px-2 text-sm font-medium text-gray-700">{{
+      <span class="px-2 text-sm font-medium text-ink-gray-7">{{
         item.label
       }}</span>
       <button
         v-for="groupItem in item.items"
         :key="groupItem.label"
         type="button"
-        class="inline-flex size-6 items-center justify-center rounded text-sm text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 aria-pressed:bg-gray-100"
+        class="inline-flex size-6 items-center justify-center rounded text-sm text-ink-gray-7 hover:bg-surface-gray-3 disabled:cursor-not-allowed disabled:opacity-50 aria-pressed:bg-surface-gray-3"
         :aria-label="groupItem.label"
         :aria-pressed="editor ? groupItem.isActive?.(editor) === true : false"
         :disabled="!editor || groupItem.isDisabled?.(editor) === true"
@@ -122,7 +128,7 @@ function run(item: CommandMenuItem, event?: MouseEvent) {
     <button
       v-else
       type="button"
-      class="inline-flex size-6 items-center justify-center rounded text-sm text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 aria-pressed:bg-gray-100"
+      class="inline-flex size-6 items-center justify-center rounded text-sm text-ink-gray-7 hover:bg-surface-gray-3 disabled:cursor-not-allowed disabled:opacity-50 aria-pressed:bg-surface-gray-3"
       :aria-label="item.label"
       :aria-pressed="editor ? item.isActive?.(editor) === true : false"
       :disabled="!editor || item.isDisabled?.(editor) === true"

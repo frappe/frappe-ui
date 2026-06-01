@@ -3,6 +3,7 @@ import { buildOpenLinkEditor } from './link-commands'
 import { linkPastePlugin } from './link-paste-plugin'
 import { clearLinkOnBoundaryPlugin } from './clear-link-on-boundary-plugin'
 import { linkClickPlugin } from './link-click-plugin'
+import { linkShortcutPlugin } from './link-shortcut-plugin'
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
@@ -20,8 +21,9 @@ declare module '@tiptap/core' {
  * from `@tiptap/extension-link` via `...this.parent?.()` and deliberately NOT
  * weakened. This extension only adds:
  *  - the `openLinkEditor` command (bubble popup) — see `link-commands.ts`;
- *  - `Mod-k` to invoke it;
- *  - three ProseMirror plugins (paste / boundary / click) — one per file.
+ *  - four ProseMirror plugins (paste / boundary / click / shortcut) — one per file.
+ *    `Mod-k` lives in the shortcut plugin (not `addKeyboardShortcuts`) so it can
+ *    stop the keystroke propagating to app-level listeners; see that file.
  */
 export const LinkExtension = Link.extend({
   addOptions() {
@@ -41,18 +43,13 @@ export const LinkExtension = Link.extend({
     }
   },
 
-  addKeyboardShortcuts() {
-    return {
-      'Mod-k': () => this.editor.commands.openLinkEditor(),
-    }
-  },
-
   addProseMirrorPlugins() {
     const plugins = this.parent?.() ?? []
     plugins.push(
       linkPastePlugin({ editor: this.editor, type: this.type }),
       clearLinkOnBoundaryPlugin({ editor: this.editor, type: this.type }),
       linkClickPlugin({ editor: this.editor, type: this.type }),
+      linkShortcutPlugin({ editor: this.editor }),
     )
     return plugins
   },

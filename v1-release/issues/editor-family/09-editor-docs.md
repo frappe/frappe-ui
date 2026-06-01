@@ -2,7 +2,7 @@
 
 Labels: `needs-triage`
 Type: AFK
-Status: ❌ Not started — `docs/content/docs/molecules/editor.md` describes the old model.
+Status: ✅ Done — `docs/content/docs/molecules/editor.md` rewritten to the v1 model: `<Editor>` + kits + building blocks, comment/rich-text/inline recipes, a composing-primitives (headless) section, suggestions, and the full exports table.
 
 ## Parent
 

@@ -4,7 +4,7 @@ Design of record: [`spec/editor.md`](../../../spec/editor.md) and
 [`spec/adr/0004-editor-family-composition-model.md`](../../../spec/adr/0004-editor-family-composition-model.md).
 Usage data: [`research/11-texteditor-usage-audit.md`](../../research/11-texteditor-usage-audit.md).
 
-The family is **one `<TextEditor>` component on the `useEditor` engine, configured by kits and explicit menu props** — there are no ready-made `CommentEditor` / `RichTextEditor` / `InlineEditor` components. Each app builds its own thin editor component on `<TextEditor>`.
+The family is **one `<Editor>` component on the `useEditor` engine, configured by kits and explicit menu props** — there are no ready-made `CommentEditor` / `RichTextEditor` / `InlineEditor` components. Each app builds its own thin editor component on `<Editor>`. (The component was named `<TextEditor>` in these issues; it shipped as `<Editor>`.)
 
 An earlier implementation under `src/molecules/editor/` predates this design (it ships the abandoned ready-mades, `EditorFixedMenu` with a `:buttons` prop, and no kits). These issues realign that code; treat them as "align to spec," not greenfield, where prior code exists. **Salvage, don't restart** — see the keep / new / delete inventory below before starting.
 

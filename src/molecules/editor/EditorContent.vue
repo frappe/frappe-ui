@@ -11,12 +11,16 @@ import {
   watch,
 } from 'vue'
 import type { Editor } from './useEditor'
+import { useResolvedEditor } from './editor-context'
 
 defineOptions({ inheritAttrs: false })
 
 const props = defineProps<{
-  editor: Editor | null
+  // Optional inside <Editor> — falls back to the provided editor context.
+  editor?: Editor | null
 }>()
+
+const resolvedEditor = useResolvedEditor(() => props.editor)
 
 const attrs = useAttrs()
 const rootEl = useTemplateRef<HTMLElement>('rootEl')
@@ -81,15 +85,12 @@ function unmountEditor() {
   mountedEditor = null
 }
 
-onMounted(() => mountEditor(props.editor))
+onMounted(() => mountEditor(resolvedEditor.value))
 
-watch(
-  () => props.editor,
-  async (editor) => {
-    await nextTick()
-    mountEditor(editor)
-  },
-)
+watch(resolvedEditor, async (editor) => {
+  await nextTick()
+  mountEditor(editor)
+})
 
 onBeforeUnmount(() => unmountEditor())
 </script>

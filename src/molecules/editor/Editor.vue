@@ -4,6 +4,7 @@ import type { JSONContent } from '@tiptap/core'
 import type { Extension } from '@tiptap/core'
 import { useEditor, type Editor, type UploadedFile } from './useEditor'
 import { setPlaceholder } from './extensions'
+import { provideEditor } from './editor-context'
 
 type Content = string | JSONContent | null
 
@@ -76,6 +77,10 @@ const editor = useEditor({
 
 if (editor.value) syncIsEmpty(editor.value)
 
+// Publish the editor to the slot's building blocks so they don't need an
+// explicit `:editor` — see editor-context.
+provideEditor(editor)
+
 // Sanctioned template-ref escape hatch (spec §2): reach the live editor instance
 // and emptiness from a parent's script without owning its lifecycle. Apps that
 // must *create* the editor outside the component drop to L4 (useEditor) instead.
@@ -94,7 +99,7 @@ watch(
 </script>
 
 <template>
-  <!-- Renderless. <TextEditor> owns the editor lifecycle, v-model, upload and
+  <!-- Renderless. <Editor> owns the editor lifecycle, v-model, upload and
        placeholder threading, and exposes { editor, isEmpty } — but renders no UI
        of its own. There is no one-size-fits-all editor chrome, so the consumer
        renders EditorContent and whichever menus / actions it wants inside this

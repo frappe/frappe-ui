@@ -4,7 +4,6 @@ export type {
   SetIframeOptions,
   IframeAlign,
 } from './iframe-extension'
-export { default as InsertIframe } from './InsertIframe.vue'
 export {
   detectPlatform,
   calculateAspectRatio,

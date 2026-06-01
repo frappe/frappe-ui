@@ -2,11 +2,15 @@
 import MenuItems from './MenuItems.vue'
 import type { MenuItem } from './menu'
 import type { Editor } from './useEditor'
+import { useResolvedEditor } from './editor-context'
 
-defineProps<{
-  editor: Editor | null
+const props = defineProps<{
+  // Optional inside <Editor> — falls back to the provided editor context.
+  editor?: Editor | null
   items: MenuItem[]
 }>()
+
+const editor = useResolvedEditor(() => props.editor)
 </script>
 
 <template>

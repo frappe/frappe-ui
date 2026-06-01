@@ -9,6 +9,7 @@
 import type { RawCommands } from '@tiptap/core'
 import { validateIframeUrl } from './iframe-allowlist'
 import { processEmbedUrl, getOptimalDimensions } from './iframe-embed-utils'
+import { openIframeInsertDialog } from './iframeInsertDialogController'
 
 export type IframeAlign = 'left' | 'center' | 'right'
 
@@ -30,7 +31,7 @@ declare module '@tiptap/core' {
       insertIframeURL: (url: string) => ReturnType
       /** Update the selected iframe's alignment. */
       setIframeAlign: (align: IframeAlign) => ReturnType
-      /** Open the insert-embed dialog (dispatches a DOM event). */
+      /** Open the insert-embed dialog (mounts it via the controller). */
       openIframeDialog: () => ReturnType
     }
   }
@@ -79,10 +80,7 @@ export function buildIframeCommands(
   const openIframeDialog: RawCommands['openIframeDialog'] =
     () =>
     ({ editor }) => {
-      const storage = editor.storage as Record<string, unknown>
-      const iframe = storage.iframe as { openDialog?: unknown } | undefined
-      if (typeof iframe?.openDialog !== 'function') return false
-      iframe.openDialog()
+      openIframeInsertDialog({ editor })
       return true
     }
 

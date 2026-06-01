@@ -55,12 +55,6 @@ export const IframeExtension = Node.create<IframeOptions>({
     }
   },
 
-  addStorage() {
-    return {
-      openDialog: null as null | (() => void),
-    }
-  },
-
   addAttributes() {
     return {
       src: {

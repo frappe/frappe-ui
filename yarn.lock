@@ -6348,6 +6348,13 @@ tinyspy@^4.0.3:
   resolved "https://registry.yarnpkg.com/tinyspy/-/tinyspy-4.0.4.tgz#d77a002fb53a88aa1429b419c1c92492e0c81f78"
   integrity sha512-azl+t0z7pw/z958Gy9svOTuzqIk6xq+NSheJzn5MMWtWTFywIacg2wUlzKFGtt3cthx0r2SxMK0yzJOR0IES7Q==
 
+tippy.js@^6.3.7:
+  version "6.3.7"
+  resolved "https://registry.yarnpkg.com/tippy.js/-/tippy.js-6.3.7.tgz#8ccfb651d642010ed9a32ff29b0e9e19c5b8c61c"
+  integrity sha512-E1d3oP2emgJ9dRQZdf3Kkn0qJgI6ZLpyS5z6ZkY1DF3kaQaBsGZsndEpHwx+eC+tYM41HaSNvNtLx8tU57FzTQ==
+  dependencies:
+    "@popperjs/core" "^2.9.0"
+
 tldts-core@^6.1.86:
   version "6.1.86"
   resolved "https://registry.yarnpkg.com/tldts-core/-/tldts-core-6.1.86.tgz#a93e6ed9d505cb54c542ce43feb14c73913265d8"

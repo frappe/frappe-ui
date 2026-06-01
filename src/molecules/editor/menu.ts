@@ -165,6 +165,12 @@ export const InsertLink = command(
   undefined,
   false,
 )
+export const InsertIframe = command(
+  commandMeta.embed,
+  (editor) => editor.commands.openIframeDialog(),
+  undefined,
+  false,
+)
 export const InsertTable = command(commandMeta.table, (editor) =>
   editor
     .chain()

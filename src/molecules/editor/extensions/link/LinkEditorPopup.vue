@@ -100,7 +100,10 @@ const copyLink = async () => {
 onMounted(async () => {
   await nextTick()
   if (input.value?.el) {
-    input.value.el.focus()
+    // preventScroll: the popup is teleported to <body> and positioned async by
+    // floating-ui, so at focus time the input may still be at the top of the
+    // document — a plain focus() would scroll the page up to it.
+    input.value.el.focus({ preventScroll: true })
     input.value.el.select()
   }
 })

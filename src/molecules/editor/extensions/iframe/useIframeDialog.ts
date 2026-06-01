@@ -1,16 +1,15 @@
 /**
- * State machine + editor wiring for the "Insert Embed" dialog.
+ * State machine for the "Insert Embed" dialog.
  *
- * Owns: open/close state, the URL input + its validation/derived display, and
- * the `iframe:open-dialog` listener on `editor.view.dom` (registered in
- * `onMounted`, removed in `onUnmounted`). This is how the `openIframeDialog`
- * command — which only dispatches the DOM event — actually opens the dialog
- * (Option A wiring: `<InsertIframe :editor="editor" />` lives in the slot).
- *
- * Fixes the legacy no-op `computed()` side-effect (it computed derived
- * dimensions but discarded them) by syncing dimensions through a `watch`.
+ * Pure editor-agnostic state: the URL input, its validation + derived display
+ * (platform name, processed src), the embed dimensions, and `insert()`. It does
+ * NOT own visibility or any lifecycle wiring — the dialog component controls its
+ * own open state, and `iframeInsertDialogController` mounts it. (The old version
+ * registered an `iframe:open-dialog` DOM listener + `editor.storage.iframe.openDialog`
+ * so a slot-mounted `<InsertIframe>` could be reached by a command; that inverted
+ * coupling is gone — `openIframeDialog` now mounts this dialog directly.)
  */
-import { computed, onMounted, onUnmounted, ref, watch, type Ref } from 'vue'
+import { computed, ref, watch, type Ref } from 'vue'
 import type { Editor } from '@tiptap/core'
 import { validateIframeUrl } from './iframe-allowlist'
 import {
@@ -35,17 +34,7 @@ function getAllowlist(editor: Editor): readonly string[] | undefined {
   )?.options.allowlist as readonly string[] | undefined
 }
 
-function iframeStorage(
-  editor: Editor,
-): { openDialog?: (() => void) | null } | null {
-  const storage = editor.storage as Record<string, unknown>
-  return (
-    (storage.iframe as { openDialog?: (() => void) | null } | undefined) ?? null
-  )
-}
-
 export interface UseIframeDialog {
-  showDialog: Ref<boolean>
   embedInput: Ref<string>
   urlError: Ref<string>
   width: Ref<number>
@@ -53,20 +42,17 @@ export interface UseIframeDialog {
   isValidUrl: Ref<boolean>
   platformName: Ref<string>
   processedUrl: Ref<string>
-  open: () => void
-  close: () => void
-  insert: () => void
-  registerInputRef: (focus: () => void) => void
+  reset: () => void
+  /** Insert the embed. Returns `true` on success (caller closes the dialog). */
+  insert: () => boolean
 }
 
 export function useIframeDialog(editor: Editor): UseIframeDialog {
   const allowlist = getAllowlist(editor)
-  const showDialog = ref(false)
   const embedInput = ref('')
   const urlError = ref('')
   const width = ref(640)
   const height = ref(360)
-  let focusInput: (() => void) | null = null
 
   const processedUrl = computed(() => {
     const src = extractSrc(embedInput.value)
@@ -84,8 +70,7 @@ export function useIframeDialog(editor: Editor): UseIframeDialog {
     return detectPlatform(processedUrl.value)?.name ?? 'Generic'
   })
 
-  // Keep the inserted dimensions in step with the URL's platform. (The legacy
-  // code did this in a discarded `computed()` — moved to a real watcher.)
+  // Keep the inserted dimensions in step with the URL's platform.
   watch([processedUrl, isValidUrl], () => {
     if (!isValidUrl.value) {
       width.value = 640
@@ -105,58 +90,30 @@ export function useIframeDialog(editor: Editor): UseIframeDialog {
         : ''
   })
 
-  function open(): void {
+  function reset(): void {
     embedInput.value = ''
     urlError.value = ''
     width.value = 640
     height.value = 360
-    showDialog.value = true
-    requestAnimationFrame(() => focusInput?.())
   }
 
-  function close(): void {
-    showDialog.value = false
-  }
-
-  function insert(): void {
-    if (!isValidUrl.value) return
+  function insert(): boolean {
+    if (!isValidUrl.value) return false
     const success = editor.commands.setIframe({
       src: processedUrl.value,
       width: width.value,
       height: height.value,
     })
     if (success) {
-      close()
       editor.commands.focus()
     } else {
       urlError.value =
         'Failed to insert embed. Please check the URL and try again.'
     }
+    return success
   }
-
-  function registerInputRef(focus: () => void): void {
-    focusInput = focus
-  }
-
-  function handleOpenEvent(event: Event): void {
-    const detail = (event as CustomEvent).detail as { editor?: Editor }
-    if (detail?.editor === editor) open()
-  }
-
-  onMounted(() => {
-    const storage = iframeStorage(editor)
-    if (storage) storage.openDialog = open
-    editor.view.dom.addEventListener('iframe:open-dialog', handleOpenEvent)
-  })
-
-  onUnmounted(() => {
-    const storage = iframeStorage(editor)
-    if (storage?.openDialog === open) storage.openDialog = null
-    editor.view?.dom?.removeEventListener('iframe:open-dialog', handleOpenEvent)
-  })
 
   return {
-    showDialog,
     embedInput,
     urlError,
     width,
@@ -164,9 +121,7 @@ export function useIframeDialog(editor: Editor): UseIframeDialog {
     isValidUrl,
     platformName,
     processedUrl,
-    open,
-    close,
+    reset,
     insert,
-    registerInputRef,
   }
 }

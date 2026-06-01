@@ -2,7 +2,7 @@
 
 Status: accepted direction for `frappe-ui` v1.
 
-This document defines the v1 API for the editor family — the TipTap-based engine, the single `<TextEditor>` component built on it, the kits that supply good defaults, and the building blocks for bespoke composition. It supersedes the v0 monolithic `TextEditor`.
+This document defines the v1 API for the editor family — the TipTap-based engine, the single `<Editor>` component built on it, the kits that supply good defaults, and the building blocks for bespoke composition. It supersedes the v0 monolithic `TextEditor`.
 
 Real-world usage data backing these decisions lives in
 [`v1-release/research/11-texteditor-usage-audit.md`](../v1-release/research/11-texteditor-usage-audit.md).
@@ -16,11 +16,11 @@ design rules cited as `P1`–`P13` live in [`../PHILOSOPHY.md`](../PHILOSOPHY.md
 This spec covers:
 
 - the `frappe-ui/editor` subpath surface (engine, component, building blocks, kits, extensions, presets)
-- the public API of `useEditor` and `<TextEditor>`
+- the public API of `useEditor` and `<Editor>`
 - the kit model (configurable extension bundles) and the menu-item / preset model
 - the two-axis menu model (which buttons vs how it renders)
 - the upload-function plumbing
-- the recommended "build your own component on `<TextEditor>`" pattern
+- the recommended "build your own component on `<Editor>`" pattern
 
 Out of scope:
 
@@ -31,9 +31,9 @@ Out of scope:
 ## Decision summary
 
 - one subpath: `frappe-ui/editor`
-- **one component**, `<TextEditor>`, built on the **`useEditor`** composable; it is **renderless** — the consumer composes the layout in its `#default` slot from the building blocks, dropping to `useEditor` directly only when the editor must be created outside the component
-- **no ready-made assembled editors** (`CommentEditor` / `RichTextEditor` / `InlineEditor` are *not* shipped). Each app builds its own thin component on `<TextEditor>`
-- capability is the explicit **`extensions` array** (required, no default); **`<TextEditor>` renders no UI of its own** — it owns the editor lifecycle and exposes `{ editor, isEmpty }` through the `#default` slot, and the consumer renders `EditorContent` and any menus/actions in that slot using the building blocks. There is no one-size-fits-all editor chrome
+- **one component**, `<Editor>`, built on the **`useEditor`** composable; it is **renderless** — the consumer composes the layout in its `#default` slot from the building blocks, dropping to `useEditor` directly only when the editor must be created outside the component
+- **no ready-made assembled editors** (`CommentEditor` / `RichTextEditor` / `InlineEditor` are *not* shipped). Each app builds its own thin component on `<Editor>`
+- capability is the explicit **`extensions` array** (required, no default); **`<Editor>` renders no UI of its own** — it owns the editor lifecycle and exposes `{ editor, isEmpty }` through the `#default` slot, and the consumer renders `EditorContent` and any menus/actions in that slot using the building blocks. There is no one-size-fits-all editor chrome
 - "good defaults" ship as **kits** (`StarterKit`-style configurable bundles) and **presets** (`MenuItem[]`) — opt-in imports, the tree-shaking boundary. Nothing import-heavy is defaulted on the component
 - data-driven extensions (mentions, tags, slash items) are configured via canonical **`.configure()`** on a kit member — never via proxy props
 - content is the unnamed `v-model`; the `format` prop ('html' | 'json') declares the shape
@@ -47,9 +47,9 @@ import {
   useEditor,
 
   // The component
-  TextEditor,
+  Editor,
 
-  // Building blocks (compose without TextEditor)
+  // Building blocks (compose without Editor)
   EditorContent, EditorFixedMenu, EditorBubbleMenu, EditorFloatingMenu,
 
   // Kits — configurable extension bundles
@@ -121,7 +121,7 @@ When `uploadFunction` is set, `useEditor` prepends a tiny internal `UploadStorag
 
 `useEditor` shadows tiptap's `useEditor` from `@tiptap/vue-3`. Consumers importing both alias one side; the cleaner name is preferred for the dominant case.
 
-## 2. `<TextEditor>` — the component
+## 2. `<Editor>` — the component
 
 The single component every editor is built on. It runs `useEditor` internally and is **renderless**: it owns the editor lifecycle, `v-model`, upload and placeholder threading, and exposes `{ editor, isEmpty }` through its `#default` slot — but it renders no UI of its own. There is no one-size-fits-all editor chrome, so the consumer renders `EditorContent` and whichever menus/actions it wants in the slot, using the building blocks.
 
@@ -161,10 +161,10 @@ defineExpose<{ editor: ShallowRef<Editor | null>; isEmpty: Ref<boolean> }>()
 `change` is the content side-event; `focus` / `blur` / `transaction` forward the
 engine's `onFocus` / `onBlur` / `onTransaction` (universal behavior events, same
 category as `change`). The `defineExpose` is the escape hatch between the slot and
-L4: a consumer (typically an app's own component built on `<TextEditor>`) reads
+L4: a consumer (typically an app's own component built on `<Editor>`) reads
 `ref.editor` / `ref.isEmpty` to drive the instance from script — focus it, read
 emptiness, subscribe to events, re-expose it to its own parent — while
-`<TextEditor>` still owns the lifecycle. L4 (`useEditor`) remains the answer only
+`<Editor>` still owns the lifecycle. L4 (`useEditor`) remains the answer only
 when the `Editor` must be *created* outside the component (shared with siblings,
 or built with an external Y.Doc before mount).
 
@@ -177,7 +177,7 @@ The line that keeps proxy-prop creep out (the `mentions`-prop smell):
 - **Props** — universal content/behavior knobs every editor has, that aren't data sources and aren't layout: `v-model`/`format`, `editable`, `autofocus`, `placeholder`, `uploadFunction`. Layout — menus, toolbars, action buttons, max-height — is not a prop; it's markup you render in the `#default` slot.
 - **`.configure()` in `extensions`** — capabilities and data sources: `mention`, `tag`, slash items, heading levels, link behavior, custom nodes, collaboration.
 
-`placeholder` stays a prop (universal, reactive, a display string — not a data source). It threads into the kit's `Placeholder` extension via `editor.storage`, the same pattern as `uploadFunction`: `<TextEditor>` writes the prop into `editor.storage.placeholder` after construction; the frappe-wrapped `Placeholder` (issue 02) reads its text from there when not explicitly configured and refreshes its decoration when the value changes; and an explicit `Placeholder.configure({ placeholder })` wins. The component never reconfigures a consumer-supplied extension. If no `Placeholder` extension is present, the prop is a no-op.
+`placeholder` stays a prop (universal, reactive, a display string — not a data source). It threads into the kit's `Placeholder` extension via `editor.storage`, the same pattern as `uploadFunction`: `<Editor>` writes the prop into `editor.storage.placeholder` after construction; the frappe-wrapped `Placeholder` (issue 02) reads its text from there when not explicitly configured and refreshes its decoration when the value changes; and an explicit `Placeholder.configure({ placeholder })` wins. The component never reconfigures a consumer-supplied extension. If no `Placeholder` extension is present, the prop is a no-op.
 
 ### The customization ladder
 
@@ -185,7 +185,7 @@ There are two rungs, because the component renders nothing on its own — every 
 
 | Rung | What you do | For |
 |---|---|---|
-| L_slot | `<TextEditor :extensions="[kit]" v-model v-slot="{ editor }">` + render `EditorContent` and any menus/actions in the slot | every editor — own the layout while `<TextEditor>` owns the lifecycle, v-model, upload, placeholder |
+| L_slot | `<Editor :extensions="[kit]" v-model v-slot="{ editor }">` + render `EditorContent` and any menus/actions in the slot | every editor — own the layout while `<Editor>` owns the lifecycle, v-model, upload, placeholder |
 | L4 | `useEditor` + building blocks | own the lifecycle too — the editor is created in a parent composable (shared with siblings, or built with an external Y.Doc before mount) |
 
 The slot covers everything from a bare content area (just `EditorContent`) to bespoke layouts (email CC/BCC headers, a side Table-of-Contents): you render `EditorContent` + menus where you want, using the slot's `editor`. L4 is only for when the `Editor` instance must live outside the component.
@@ -302,13 +302,13 @@ Presets (`commentToolbar`, `articleToolbar`, `minimalToolbar`) are plain `MenuIt
 Chrome (a floating pill, a segmented control, toolbar position, an actions row) is just the markup you wrap the building block in, inside the `#default` slot:
 
 ```vue
-<TextEditor v-model="content" :extensions="extensions" v-slot="{ editor }">
+<Editor v-model="content" :extensions="extensions" v-slot="{ editor }">
   <div class="my-pill">
     <EditorFixedMenu :editor="editor" :items="[Bold, Italic, Link]" />
     <MyControl :editor="editor" />
   </div>
   <EditorContent :editor="editor" />
-</TextEditor>
+</Editor>
 ```
 
 ## 6. Extensions
@@ -336,8 +336,8 @@ Kits are themselves extensions assembled from these. App-specific extensions (ga
 Content is the primary value — the unnamed `v-model` (P2). The `format` prop declares the shape:
 
 ```vue
-<TextEditor v-model="html" :extensions="extensions" />               <!-- HTML (default) -->
-<TextEditor v-model="json" format="json" :extensions="extensions" /> <!-- JSONContent -->
+<Editor v-model="html" :extensions="extensions" />               <!-- HTML (default) -->
+<Editor v-model="json" format="json" :extensions="extensions" /> <!-- JSONContent -->
 ```
 
 No `v-model:content`, `v-model:html`, or `v-model:json` — one v-model carries whichever format `format` declares. A `change` event fires on every content update (P1 — the behavior, not the binding mechanism); `v-model` is implemented with `defineModel`.
@@ -356,14 +356,14 @@ No `v-model:content`, `v-model:html`, or `v-model:json` — one v-model carries 
 
 Menus carry no reactivity model here: they're building blocks the consumer renders in the slot, and a `MenuItem[]` passed to their `items` prop may change reactively like any prop.
 
-## 9. The recommended pattern — build your app's component on `<TextEditor>`
+## 9. The recommended pattern — build your app's component on `<Editor>`
 
 frappe-ui ships no assembled editor. Each app writes one thin component encoding its conventions and reuses it across call sites. This *is* the "use this and move on" answer — it just lives in the app, where the app-specific shape belongs.
 
 ```vue
 <!-- gameplan/src/components/GPComment.vue — written once, reused at every comment site -->
 <script setup lang="ts">
-import { TextEditor, EditorContent, EditorFixedMenu, CommentKit, commentToolbar } from 'frappe-ui/editor'
+import { Editor, EditorContent, EditorFixedMenu, CommentKit, commentToolbar } from 'frappe-ui/editor'
 import { RichQuote, FloatingQuote } from './editor/extensions'   // gameplan-local
 import { activeUsers } from '@/data/users'
 import { tags } from '@/data/tags'
@@ -382,7 +382,7 @@ const extensions = [
 </script>
 
 <template>
-  <TextEditor
+  <Editor
     v-model="content"
     :extensions="extensions"
     :upload-function="uploadAttachment"
@@ -397,7 +397,7 @@ const extensions = [
         <Button variant="solid" label="Comment" :disabled="isEmpty" @click="$emit('submit')" />
       </div>
     </div>
-  </TextEditor>
+  </Editor>
 </template>
 ```
 
@@ -408,21 +408,21 @@ Helpdesk writes its own with agent mentions + `PreserveVideoControls` + its tool
 The email composer's CC/BCC header is just more markup in the slot; it doesn't need `useEditor`:
 
 ```vue
-<TextEditor v-model="content" :extensions="extensions" :upload-function="upload" v-slot="{ editor }">
+<Editor v-model="content" :extensions="extensions" :upload-function="upload" v-slot="{ editor }">
   <EmailHeaders v-model:to="to" v-model:cc="cc" />
   <EditorContent :editor="editor" class="prose-sm min-h-28 px-3 py-2" />
   <div class="flex items-center justify-between border-t px-2 py-1.5">
     <EditorFixedMenu :editor="editor" :items="commentToolbar" />
     <Button variant="solid" label="Send" :disabled="!editor || editor.isEmpty" @click="send" />
   </div>
-</TextEditor>
+</Editor>
 ```
 
 The component still owns the editor lifecycle, v-model, and upload threading; you only own the arrangement.
 
-## 11. Composing without `<TextEditor>` (L4)
+## 11. Composing without `<Editor>` (L4)
 
-When the `Editor` instance must live in a parent composable (shared with a sibling `<textarea>`, or created with an external Y.Doc), use `useEditor` + the building blocks — the same parts `<TextEditor>` uses internally. No new API.
+When the `Editor` instance must live in a parent composable (shared with a sibling `<textarea>`, or created with an external Y.Doc), use `useEditor` + the building blocks — the same parts `<Editor>` uses internally. No new API.
 
 ```vue
 <script setup lang="ts">
@@ -447,7 +447,7 @@ const editor = useEditor({
 
 ## 12. Migration from the v0 monolith
 
-The v1 `<TextEditor>` ships at `frappe-ui/editor` **alongside** the v0 monolith, which stays in place, unmodified, as a migration safety net — it is not extended, aliased, or auto-removed. During the window, `import { TextEditor } from 'frappe-ui'` (v0) and `import { TextEditor } from 'frappe-ui/editor'` (v1) coexist. Consumers migrate to `<TextEditor>` + a kit (or their own wrapper component); per-app guidance is in [`research/11`](../v1-release/research/11-texteditor-usage-audit.md)'s migration table, and the migration is **proven by porting gameplan** (the heaviest consumer) with functional parity and a measured bundle reduction before the API is considered done.
+The v1 `<Editor>` ships at `frappe-ui/editor` **alongside** the v0 monolith, which stays in place, unmodified, as a migration safety net — it is not extended, aliased, or auto-removed. During the window, `import { TextEditor } from 'frappe-ui'` (v0) and `import { Editor } from 'frappe-ui/editor'` (v1) coexist. Consumers migrate to `<Editor>` + a kit (or their own wrapper component); per-app guidance is in [`research/11`](../v1-release/research/11-texteditor-usage-audit.md)'s migration table, and the migration is **proven by porting gameplan** (the heaviest consumer) with functional parity and a measured bundle reduction before the API is considered done.
 
 Removing the v0 monolith is a deliberate, **human-gated** cleanup once all consumers are migrated and verified — implementation agents do not delete it. (Pre-v1 the library may still make this break; P13's freeze line is v1 release.)
 

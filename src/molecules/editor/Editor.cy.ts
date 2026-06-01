@@ -1,29 +1,12 @@
 import './style.css'
 
-import { defineComponent, h, onUnmounted, ref } from 'vue'
-import { EditorContent, RichTextKit, TextEditor } from './index'
-
-const IframeDialogBridge = defineComponent({
-  props: {
-    editor: { type: Object, required: true },
-  },
-  setup(props) {
-    const storage = props.editor.storage as Record<string, unknown>
-    const iframe = storage.iframe as { openDialog?: (() => void) | null }
-    const openDialog = () => undefined
-    iframe.openDialog = openDialog
-    onUnmounted(() => {
-      if (iframe.openDialog === openDialog) iframe.openDialog = null
-    })
-    return () => null
-  },
-})
+import { defineComponent, h, ref } from 'vue'
+import { EditorContent, RichTextKit, Editor } from './index'
 
 function mountEditor(
   options: {
     extensions?: unknown[]
     content?: string
-    includeIframeDialog?: boolean
     topOffset?: number
     editable?: boolean
   } = {},
@@ -43,7 +26,7 @@ function mountEditor(
           },
           [
             h(
-              TextEditor,
+              Editor,
               {
                 modelValue: value.value,
                 'onUpdate:modelValue': (next: string) => {
@@ -59,9 +42,6 @@ function mountEditor(
                     class:
                       'min-h-24 w-[520px] rounded border border-outline-gray-2 p-3',
                   }),
-                  options.includeIframeDialog && editor
-                    ? h(IframeDialogBridge, { editor })
-                    : null,
                 ],
               },
             ),
@@ -109,20 +89,12 @@ describe('v1 editor browser behavior', () => {
       .should('not.exist')
   })
 
-  it('only shows the embed slash command when the iframe dialog bridge is mounted', () => {
-    mountEditor({ includeIframeDialog: true })
-
-    cy.get('.ProseMirror').click().type('/Emb')
-
-    cy.contains('button', 'Embed').should('be.visible')
-  })
-
-  it('hides the embed slash command when no iframe dialog bridge is mounted', () => {
+  it('shows the embed slash command when the iframe extension is loaded', () => {
     mountEditor()
 
     cy.get('.ProseMirror').click().type('/Emb')
 
-    cy.contains('button', 'Embed').should('not.exist')
+    cy.contains('button', 'Embed').should('be.visible')
   })
 
   it('opens the link editor near the clicked link, not at the top of the document', () => {

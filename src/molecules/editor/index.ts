@@ -6,10 +6,12 @@ export {
   type UploadedFile,
 } from './useEditor'
 
-// The component
-export { default as TextEditor } from './TextEditor.vue'
+// The component. NOTE: this is the `Editor` *value*; the `Editor` *type* above
+// (the tiptap instance) lives in a separate namespace, so `import { Editor }`
+// gets the component and `import type { Editor }` gets the type.
+export { default as Editor } from './Editor.vue'
 
-// Building blocks (compose without TextEditor)
+// Building blocks (compose without <Editor>)
 export { default as EditorContent } from './EditorContent.vue'
 export { default as EditorFixedMenu } from './EditorFixedMenu.vue'
 export { default as EditorBubbleMenu } from './EditorBubbleMenu.vue'

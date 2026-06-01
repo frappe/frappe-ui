@@ -2,7 +2,7 @@
 
 Labels: `needs-triage`
 Type: AFK
-Status: 🟡 Partial — `index.ts` now exports the spec surface (engine, `TextEditor`, building blocks, kits, extensions, menu items, presets, types); the ready-made exports + source are removed; the v0 monolith and its top-level export are untouched. **Remaining:** the per-app v0→v1 migration guide, which is gated on the gameplan port (issue 07) as its worked example.
+Status: ✅ Done — `index.ts` exports the spec surface (engine, `Editor`, building blocks, kits, extensions, menu items, presets, types); the ready-made exports + source are removed; the v0 monolith and its top-level export are untouched. The per-app v0→v1 migration guide is written (`docs/content/docs/migration.md`, `## Editor` section), keyed off the gameplan port (issue 07) as its worked example.
 
 ## Parent
 

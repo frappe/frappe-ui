@@ -164,6 +164,41 @@ describe('editor menu primitives and presets', () => {
     expect(root.textContent).not.toContain('Heading 2')
   })
 
+  it('collapses separators orphaned by pruning (no leading, doubled, or trailing dividers)', async () => {
+    const { EditorFixedMenu, Bold, Italic, InsertTable, AlignLeft, Separator } =
+      await import('./index')
+    // A trimmed editor: no table node, no textAlign extension — so the align and
+    // table buttons (and the separators bracketing them) should be pruned.
+    const { editor } = fakeEditor({
+      nodes: ['paragraph', 'bold'],
+      marks: ['bold', 'italic'],
+      extensions: [],
+    })
+
+    const root = mount(EditorFixedMenu, {
+      editor,
+      // leading sep | Bold Italic | (align pruned) | (table pruned) | trailing sep
+      items: [
+        Separator,
+        Bold,
+        Italic,
+        Separator,
+        AlignLeft,
+        Separator,
+        InsertTable,
+        Separator,
+      ],
+    })
+
+    expect(root.querySelector('[aria-label="Bold"]')).toBeTruthy()
+    expect(root.querySelector('[aria-label="Italic"]')).toBeTruthy()
+    expect(root.querySelector('[aria-label="Align Left"]')).toBeFalsy()
+    expect(root.querySelector('[aria-label="Table"]')).toBeFalsy()
+    // Every authored separator here is orphaned once align/table prune away, so
+    // none should survive.
+    expect(root.querySelectorAll('[data-slot="menu-separator"]').length).toBe(0)
+  })
+
   it('renders bubble and floating menus with the shared item shape', async () => {
     const { EditorBubbleMenu, EditorFloatingMenu, Bold } =
       await import('./index')
