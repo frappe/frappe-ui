@@ -19,6 +19,12 @@ export interface FloatingPopupOptions<P extends Record<string, unknown>> {
   props: P
   virtualReference?: VirtualReference
   closeOnAnchorPointerDown?: boolean
+  /**
+   * Close the popup when Escape is pressed. Defaults to `true`.
+   * Set `false` when the mounted component needs to handle Escape itself
+   * (e.g. a multi-step popup where Escape first steps back, then closes).
+   */
+  closeOnEscape?: boolean
   floatingOptions?: {
     placement?: Placement
     strategy?: Strategy
@@ -103,7 +109,7 @@ export function useFloatingPopup<P extends Record<string, unknown>>(
   }
 
   function onKeydown(event: KeyboardEvent) {
-    if (event.key === 'Escape') handle.destroy()
+    if (event.key === 'Escape' && options.closeOnEscape !== false) handle.destroy()
   }
 
   cleanupAutoUpdate = autoUpdate(reference, floating, update)

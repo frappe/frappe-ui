@@ -10,10 +10,17 @@ import LinkEditorPopup from './LinkEditorPopup.vue'
 export interface OpenLinkPopupOptions {
   /** Existing href to seed the editor with (`null` when creating a new link). */
   href: string | null
+  /** Open straight into edit mode (vs. the read-only view). */
+  startInEdit?: boolean
   /** Anchor element used for popup ownership and outside-click containment. */
   anchor: HTMLElement
   /** Optional positioning reference. Defaults to the editor selection. */
   virtualReference?: VirtualReference
+  /**
+   * Called when the user dismisses the popup with Escape (not on apply or
+   * click-outside). Used to return focus to the editor.
+   */
+  onEscape?: () => void
 }
 
 /**
@@ -35,6 +42,16 @@ export function openLinkPopup(
 ): Promise<string | null> {
   const { href, anchor } = options
 
+  // Lock the page's scroll container while the popup is open so the anchored
+  // editor can't scroll away underneath it. The app scrolls an inner
+  // overflow-auto element (not <body>), so we lock the nearest such ancestor.
+  const scrollParent = getScrollParent(anchor)
+  const previousOverflow = scrollParent?.style.overflow ?? ''
+  if (scrollParent) scrollParent.style.overflow = 'hidden'
+  const unlockScroll = () => {
+    if (scrollParent) scrollParent.style.overflow = previousOverflow
+  }
+
   return new Promise<string | null>((resolve) => {
     let settled = false
     const settle = (value: string | null) => {
@@ -47,16 +64,21 @@ export function openLinkPopup(
       anchor,
       component: LinkEditorPopup,
       closeOnAnchorPointerDown: true,
+      // The popup owns Escape: in view mode it closes; in edit mode the first
+      // Escape steps back to view mode and only a second one closes.
+      closeOnEscape: false,
       virtualReference: options.virtualReference ?? {
         getBoundingClientRect: () => selectionRect(anchor),
       },
       floatingOptions: { placement: 'top' },
       props: {
         href: href ?? '',
+        startInEdit: options.startInEdit ?? !href,
         onClose: () => {
-          // Cancel: resolve null, then tear down.
+          // Cancel via Escape: resolve null, tear down, then hand focus back.
           settle(null)
           popup.destroy()
+          options.onEscape?.()
         },
         onUpdateHref: (newHref: string) => {
           settle(newHref)
@@ -69,12 +91,34 @@ export function openLinkPopup(
     // else settled the promise by the time the popup is gone.
     const originalDestroy = popup.destroy
     popup.destroy = () => {
+      unlockScroll()
       settle(null)
       originalDestroy()
     }
 
-    if (!popup.floating) settle(null)
+    if (!popup.floating) {
+      unlockScroll()
+      settle(null)
+    }
   })
+}
+
+/**
+ * Nearest scrollable ancestor of `el` (the element that actually scrolls), used
+ * to lock scrolling while editing. The app's scroll container is an inner
+ * `overflow-auto` div, not `document.body`, so locking the body is a no-op —
+ * we must lock this element instead. Returns `null` if nothing scrolls.
+ */
+function getScrollParent(el: HTMLElement | null): HTMLElement | null {
+  let node: HTMLElement | null = el
+  while (node && node !== document.body) {
+    const { overflowY } = getComputedStyle(node)
+    if (/(auto|scroll|overlay)/.test(overflowY) && node.scrollHeight > node.clientHeight) {
+      return node
+    }
+    node = node.parentElement
+  }
+  return null
 }
 
 /**

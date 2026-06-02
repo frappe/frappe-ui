@@ -4,10 +4,23 @@ import { mapStoredRange } from '#molecules/editor/extensions/shared/node-view'
 import { openLinkPopup } from './link-popup-controller'
 import type { VirtualReference } from '#molecules/editor/composables/useFloatingPopup'
 
+/** Options accepted by the `openLinkEditor` command. */
+export interface OpenLinkEditorOptions {
+  /**
+   * Force the popup to open in edit mode. When omitted it defaults to edit mode
+   * for new links and view mode for existing links. The ⌘K shortcut passes
+   * `true` for an explicit (non-collapsed) selection so editing a link's URL is
+   * one keystroke, while a plain click on a link stays in view mode.
+   */
+  startInEdit?: boolean
+}
+
 /**
- * A TipTap command factory: `() => ({ editor }) => boolean`.
+ * A TipTap command factory: `(options?) => ({ editor }) => boolean`.
  */
-type LinkEditorCommand = () => (props: { editor: Editor }) => boolean
+type LinkEditorCommand = (
+  options?: OpenLinkEditorOptions,
+) => (props: { editor: Editor }) => boolean
 
 /**
  * Build the `openLinkEditor` command for the given link mark type.
@@ -24,7 +37,7 @@ type LinkEditorCommand = () => (props: { editor: Editor }) => boolean
  * after the `await` is guarded by `editor.isDestroyed`.
  */
 export function buildOpenLinkEditor(markType: MarkType): LinkEditorCommand {
-  return () =>
+  return (options?: OpenLinkEditorOptions) =>
     ({ editor }: { editor: Editor }): boolean => {
       const { state } = editor
       const { from, to } = state.selection
@@ -51,8 +64,16 @@ export function buildOpenLinkEditor(markType: MarkType): LinkEditorCommand {
       const show = () => {
         void openLinkPopup({
           href: existingHref,
+          startInEdit: options?.startInEdit ?? !existingHref,
           anchor: editor.view.dom,
           virtualReference: selectionReference(editor, range),
+          onEscape: () => {
+            // Escape leaves focus on <body>; return it to the editor so the
+            // user can keep typing where they left off.
+            if (!editor.isDestroyed) {
+              editor.commands.focus(null, { scrollIntoView: false })
+            }
+          },
         }).then((href) => {
           // Cancelled, or the editor went away while the popup was open.
           if (href === null || editor.isDestroyed) return

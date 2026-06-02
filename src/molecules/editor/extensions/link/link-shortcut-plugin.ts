@@ -24,7 +24,7 @@ export function linkShortcutPlugin(options: LinkShortcutPluginOptions): Plugin {
   return new Plugin({
     key: new PluginKey('linkShortcut'),
     props: {
-      handleKeyDown: (_view, event): boolean => {
+      handleKeyDown: (view, event): boolean => {
         const isModK =
           (event.metaKey || event.ctrlKey) &&
           !event.shiftKey &&
@@ -34,7 +34,12 @@ export function linkShortcutPlugin(options: LinkShortcutPluginOptions): Plugin {
 
         event.preventDefault()
         event.stopPropagation()
-        editor.commands.openLinkEditor()
+        // An explicit selection (e.g. selecting a link) → edit its URL straight
+        // away; a bare cursor in a link → the default read-only view.
+        const hasSelection = !view.state.selection.empty
+        editor.commands.openLinkEditor(
+          hasSelection ? { startInEdit: true } : undefined,
+        )
         return true
       },
     },
