@@ -172,16 +172,18 @@ const switchGroupClasses = computed(() => {
   const hasDescription = props.description || slots.description
   if (!hasLabel && !hasDescription) return undefined
 
-  // Auto placement: the switch sits before label-only rows and after rows
-  // that carry a description. An explicit `switchPosition` always wins.
-  const position = props.switchPosition ?? (hasDescription ? 'right' : 'left')
-  const switchLeft = position === 'left'
+  // Auto placement: the switch leads label-only rows and trails rows that
+  // carry a description. An explicit `switchPosition` always wins.
+  // `flex-row-reverse` / `justify-*` are inline-axis aware, so this flips
+  // correctly under RTL without any physical left/right values.
+  const position = props.switchPosition ?? (hasDescription ? 'end' : 'start')
+  const switchStart = position === 'start'
 
   if (hasDescription) {
     // Settings style: label + description on one side, switch on the other.
     return [
       'flex items-center',
-      switchLeft ? 'flex-row-reverse justify-end' : 'justify-between',
+      switchStart ? 'flex-row-reverse justify-end' : 'justify-between',
       props.size === 'md' ? 'gap-x-3.5' : 'gap-x-2.5',
     ]
   }
@@ -189,7 +191,7 @@ const switchGroupClasses = computed(() => {
   // Inline label-only row.
   const classes = [
     'flex group items-center',
-    switchLeft
+    switchStart
       ? 'flex-row-reverse justify-end gap-x-2.5'
       : 'justify-between gap-x-3',
   ]
