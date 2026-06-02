@@ -1,7 +1,7 @@
 import type { Editor } from '@tiptap/core'
 import type { MarkType } from '@tiptap/pm/model'
 import { Plugin, PluginKey } from '@tiptap/pm/state'
-import { isSafeUrl } from '@molecules/editor/extensions/shared/url-safety'
+import { isSafeUrl } from '#molecules/editor/extensions/shared/url-safety'
 
 /**
  * Options for {@link linkPastePlugin}.

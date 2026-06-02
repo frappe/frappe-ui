@@ -19,15 +19,15 @@
  * and the ProseMirror plugin in `media-plugin.ts` to keep this file ≤300 lines.
  */
 import type { Editor } from '@tiptap/core'
-import fileToBase64 from '@utils/file-to-base64'
-import { isSafeUrl } from '@molecules/editor/extensions/shared/url-safety'
-import { findNodeByUploadId } from '@molecules/editor/extensions/shared/node-view'
+import fileToBase64 from '#utils/file-to-base64'
+import { isSafeUrl } from '#molecules/editor/extensions/shared/url-safety'
+import { findNodeByUploadId } from '#molecules/editor/extensions/shared/node-view'
 import {
   deleteLocalFile,
   getLocalFile,
   setLocalFile,
-} from '@molecules/editor/extensions/shared/media-upload-state'
-import { createUploadId } from '@molecules/editor/extensions/shared/upload-id'
+} from '#molecules/editor/extensions/shared/media-upload-state'
+import { createUploadId } from '#molecules/editor/extensions/shared/upload-id'
 import {
   applyUploadError,
   applyUploadSuccess,
@@ -35,7 +35,7 @@ import {
   findNodeBySource,
   insertPlaceholder,
   type OptionalDimensions,
-} from '@molecules/editor/extensions/shared/media-node-ops'
+} from '#molecules/editor/extensions/shared/media-node-ops'
 import type {
   InsertMode,
   MediaUploadConfig,
@@ -43,7 +43,7 @@ import type {
   MediaUploadOptions,
   UploadedFile,
   UploadResult,
-} from '@molecules/editor/extensions/shared/media-upload-types'
+} from '#molecules/editor/extensions/shared/media-upload-types'
 
 export type {
   MediaUploadConfig,
@@ -51,7 +51,7 @@ export type {
   MediaUploadOptions,
   UploadedFile,
   UploadResult,
-} from '@molecules/editor/extensions/shared/media-upload-types'
+} from '#molecules/editor/extensions/shared/media-upload-types'
 
 /**
  * Resolve the effective upload options. A directly-configured `uploadFunction`

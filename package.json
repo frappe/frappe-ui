@@ -4,6 +4,12 @@
   "description": "A set of components and utilities for rapid UI development",
   "type": "module",
   "sideEffects": false,
+  "imports": {
+    "#components/*": "./src/components/*",
+    "#molecules/*": "./src/molecules/*",
+    "#composables/*": "./src/composables/*",
+    "#utils/*": "./src/utils/*"
+  },
   "scripts": {
     "test": "vitest --run",
     "test:coverage": "vitest --run --coverage",

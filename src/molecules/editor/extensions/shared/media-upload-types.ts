@@ -3,12 +3,12 @@
  *
  * Split out of `media-upload-engine.ts` to keep that module ≤300 lines. The
  * engine re-exports every public type from here, so the canonical import path
- * for consumers remains `@molecules/editor/extensions/shared/media-upload-engine`
+ * for consumers remains `#molecules/editor/extensions/shared/media-upload-engine`
  * (per the conventions import map §2).
  */
 import type { Editor } from '@tiptap/core'
-import type { UploadedFile as FrappeUploadedFile } from '@utils/useFileUpload'
-import type { MediaDimensions } from '@molecules/editor/extensions/shared/media-dimensions'
+import type { UploadedFile as FrappeUploadedFile } from '#utils/useFileUpload'
+import type { MediaDimensions } from '#molecules/editor/extensions/shared/media-dimensions'
 
 /** Result of a successful upload. Must carry a `file_url`. */
 export interface UploadedFile extends Partial<FrappeUploadedFile> {

@@ -10,12 +10,12 @@ import type { DOMOutputSpec } from '@tiptap/pm/model'
 import {
   collectHeadings,
   getActiveTabRange,
-} from '@molecules/editor/extensions/shared/heading-scope'
+} from '#molecules/editor/extensions/shared/heading-scope'
 import {
   foldHeadings,
   headingsToRenderSpec,
   type TocRenderNode,
-} from '@molecules/editor/extensions/shared/heading-tree-utils'
+} from '#molecules/editor/extensions/shared/heading-tree-utils'
 
 const OL_STYLE = 'list-style-type: decimal; margin: 0.5em 0; padding-left: 1.5em'
 const NESTED_OL_STYLE = 'list-style-type: decimal; padding-left: 1.5em'

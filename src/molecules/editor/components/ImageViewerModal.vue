@@ -71,12 +71,12 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, toRef, watch } from 'vue'
-import { useTouchHandler } from '@composables/useTouchHandler'
-import { useImageNavigation } from '@composables/useImageNavigation'
-import { useZoomPan } from '@composables/useZoomPan'
-import { useControlsAutoHide } from '@molecules/editor/composables/useControlsAutoHide'
-import { useFullscreen } from '@molecules/editor/composables/useFullscreen'
-import { useElementSize } from '@molecules/editor/composables/useElementSize'
+import { useTouchHandler } from '#composables/useTouchHandler'
+import { useImageNavigation } from '#composables/useImageNavigation'
+import { useZoomPan } from '#composables/useZoomPan'
+import { useControlsAutoHide } from '#molecules/editor/composables/useControlsAutoHide'
+import { useFullscreen } from '#molecules/editor/composables/useFullscreen'
+import { useElementSize } from '#molecules/editor/composables/useElementSize'
 import ImageViewerControlsBar from './image-viewer/ImageViewerControlsBar.vue'
 import { downloadImage } from './image-viewer/imageViewerDownload'
 import { createImageViewerKeydown } from './image-viewer/imageViewerKeymap'

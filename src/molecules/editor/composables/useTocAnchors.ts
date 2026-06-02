@@ -13,11 +13,11 @@ import {
   getActiveTabId,
   getActiveTabRange,
   type HeadingInfo,
-} from '@molecules/editor/extensions/shared/heading-scope'
+} from '#molecules/editor/extensions/shared/heading-scope'
 import {
   foldHeadings,
   type HeadingTreeNode,
-} from '@molecules/editor/extensions/shared/heading-tree-utils'
+} from '#molecules/editor/extensions/shared/heading-tree-utils'
 
 export type TocAnchorTree = HeadingTreeNode<HeadingInfo>[]
 

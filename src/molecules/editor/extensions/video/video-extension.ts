@@ -19,15 +19,15 @@ import {
   mergeAttributes,
 } from '@tiptap/core'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
-import MediaNodeView from '@molecules/editor/components/MediaNodeView.vue'
-import type { UploadedFile } from '@utils/useFileUpload'
+import MediaNodeView from '#molecules/editor/components/MediaNodeView.vue'
+import type { UploadedFile } from '#utils/useFileUpload'
 import {
   resolveUploadOptions,
   type MediaUploadOptions,
-} from '@molecules/editor/extensions/shared/media-upload-engine'
-import { createMediaPlugin } from '@molecules/editor/extensions/shared/media-plugin'
-import { findNodeByUploadId } from '@molecules/editor/extensions/shared/node-view'
-import { pickFiles } from '@molecules/editor/extensions/shared/file-picker'
+} from '#molecules/editor/extensions/shared/media-upload-engine'
+import { createMediaPlugin } from '#molecules/editor/extensions/shared/media-plugin'
+import { findNodeByUploadId } from '#molecules/editor/extensions/shared/node-view'
+import { pickFiles } from '#molecules/editor/extensions/shared/file-picker'
 import { videoConfig, videoEngine } from './video-config'
 
 export interface VideoExtensionOptions {

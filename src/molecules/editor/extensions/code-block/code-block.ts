@@ -3,7 +3,7 @@ import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import Code from '@tiptap/extension-code'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
 import { markInputRule } from '@tiptap/core'
-import { toggleCodeOnBacktick } from '@molecules/editor/extensions/shared/toggle-code-shortcut'
+import { toggleCodeOnBacktick } from '#molecules/editor/extensions/shared/toggle-code-shortcut'
 import {
   INDENT,
   getCodeBlockCtx,

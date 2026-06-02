@@ -11,7 +11,7 @@
 import {
   isSafeUrl,
   matchesHostname,
-} from '@molecules/editor/extensions/shared/url-safety'
+} from '#molecules/editor/extensions/shared/url-safety'
 
 /**
  * Hostnames (and their embed sub-hosts) we permit as iframe sources.

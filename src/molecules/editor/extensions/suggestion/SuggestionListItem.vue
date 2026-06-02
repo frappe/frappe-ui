@@ -17,7 +17,7 @@
 
 <script setup lang="ts">
 import { computed, type PropType } from 'vue'
-import type { BaseSuggestionItem } from '@molecules/editor/extensions/shared/suggestion-types'
+import type { BaseSuggestionItem } from '#molecules/editor/extensions/shared/suggestion-types'
 
 const props = defineProps({
   item: {

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import type { Node } from '@tiptap/pm/model'
-import Tooltip from '@components/Tooltip/Tooltip.vue'
+import Tooltip from '#components/Tooltip/Tooltip.vue'
 import { alignIcon, type MediaAlign } from './media-node-view-utils'
 
 const props = defineProps<{

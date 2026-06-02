@@ -2,11 +2,11 @@ import { Extension, type Editor, type Range } from '@tiptap/core'
 import Suggestion, { type SuggestionOptions } from '@tiptap/suggestion'
 import type { PluginKey } from '@tiptap/pm/state'
 import type { Component as VueComponent } from 'vue'
-import type { BaseSuggestionItem } from '@molecules/editor/extensions/shared/suggestion-types'
+import type { BaseSuggestionItem } from '#molecules/editor/extensions/shared/suggestion-types'
 import {
   createSuggestionRenderer,
   type SuggestionFloatingOptions,
-} from '@molecules/editor/extensions/shared/suggestion-renderer'
+} from '#molecules/editor/extensions/shared/suggestion-renderer'
 
 // Re-export for back-compat: several extensions still import the base item type
 // from this module path. The canonical home is `suggestion-types`.

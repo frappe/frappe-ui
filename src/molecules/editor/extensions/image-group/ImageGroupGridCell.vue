@@ -67,7 +67,7 @@
 
 <script setup lang="ts">
 import { computed, nextTick, ref, useTemplateRef } from 'vue'
-import { useObjectUrl } from '@molecules/editor/composables/useObjectUrl'
+import { useObjectUrl } from '#molecules/editor/composables/useObjectUrl'
 import { isImageSupported } from './image-group-utils'
 import type { ImageItem } from './useImageGroupDialog'
 

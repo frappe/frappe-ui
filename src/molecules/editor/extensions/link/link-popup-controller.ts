@@ -1,7 +1,7 @@
 import {
   useFloatingPopup,
   type VirtualReference,
-} from '@molecules/editor/composables/useFloatingPopup'
+} from '#molecules/editor/composables/useFloatingPopup'
 import LinkEditorPopup from './LinkEditorPopup.vue'
 
 /**

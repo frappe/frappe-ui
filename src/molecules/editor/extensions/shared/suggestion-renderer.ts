@@ -23,7 +23,7 @@ export interface SuggestionFloatingOptions {
  * `createSuggestionExtension().render()`.
  *
  * Canonical import path:
- *   `@molecules/editor/extensions/shared/suggestion-renderer`
+ *   `#molecules/editor/extensions/shared/suggestion-renderer`
  *
  * Owns four correctness fixes over the original inline implementation:
  *   1. Escape -> `return false` so the suggestion plugin itself runs `onExit`

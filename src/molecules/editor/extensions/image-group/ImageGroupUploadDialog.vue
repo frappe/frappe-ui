@@ -132,11 +132,11 @@
 
 <script setup lang="ts">
 import { computed, useTemplateRef, watch } from 'vue'
-import Dialog from '@components/Dialog/Dialog.vue'
-import Button from '@components/Button/Button.vue'
-import Select from '@components/Select/Select.vue'
+import Dialog from '#components/Dialog/Dialog.vue'
+import Button from '#components/Button/Button.vue'
+import Select from '#components/Select/Select.vue'
 import type { Editor } from '@tiptap/core'
-import { useScopedFileDrop } from '@molecules/editor/composables/useScopedFileDrop'
+import { useScopedFileDrop } from '#molecules/editor/composables/useScopedFileDrop'
 import {
   clampColumns,
   columnSelectOptions,
@@ -145,7 +145,7 @@ import {
 import { useImageGroupDialog } from './useImageGroupDialog'
 import { useStrayDropGuard } from './useStrayDropGuard'
 import ImageGroupGrid from './ImageGroupGrid.vue'
-import type { ExistingImage } from '@molecules/editor/extensions/shared/upload-types'
+import type { ExistingImage } from '#molecules/editor/extensions/shared/upload-types'
 
 const props = withDefaults(
   defineProps<{

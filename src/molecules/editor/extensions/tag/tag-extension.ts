@@ -17,7 +17,7 @@ import {
   insertSuggestionNode,
   filterByQuery,
   getSuggestionOptions,
-} from '@molecules/editor/extensions/shared/suggestion-helpers'
+} from '#molecules/editor/extensions/shared/suggestion-helpers'
 import { toValue, type MaybeRefOrGetter } from 'vue'
 
 type TagOption = TagSuggestionItem & { id?: string }

@@ -1,12 +1,12 @@
 /**
  * Markdown-from-plaintext paste helper.
  *
- * Wraps `@utils/markdown` so the extension can stay declarative: detect whether
+ * Wraps `#utils/markdown` so the extension can stay declarative: detect whether
  * a pasted plaintext string looks like markdown and, if so, render it to a
  * ProseMirror {@link Slice}. Returns `null` when the text is not markdown.
  */
 import type { Schema, Slice } from '@tiptap/pm/model'
-import { detectMarkdown, markdownToHTML } from '@utils/markdown'
+import { detectMarkdown, markdownToHTML } from '#utils/markdown'
 import { parseHtmlToSlice } from './paste-html-utils'
 
 /**

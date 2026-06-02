@@ -5,7 +5,7 @@
  * commands and the extension schema all share these so the column set, the
  * deterministic ids and the preview-support check stay in exactly one place.
  */
-import type { ExistingImage } from '@molecules/editor/extensions/shared/upload-types'
+import type { ExistingImage } from '#molecules/editor/extensions/shared/upload-types'
 
 /** Columns a user may pick in the grid. The single source for the Select + clamps. */
 export const ALLOWED_COLUMNS = [2, 3, 4] as const

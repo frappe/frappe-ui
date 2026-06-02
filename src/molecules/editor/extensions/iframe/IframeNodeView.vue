@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, ref, toRaw } from 'vue'
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
-import { useNodeViewEditable } from '@molecules/editor/composables/useNodeViewEditable'
-import { useNodeViewResize } from '@molecules/editor/composables/useNodeViewResize'
-import { safeGetPos } from '@molecules/editor/extensions/shared/node-view'
+import { useNodeViewEditable } from '#molecules/editor/composables/useNodeViewEditable'
+import { useNodeViewResize } from '#molecules/editor/composables/useNodeViewResize'
+import { safeGetPos } from '#molecules/editor/extensions/shared/node-view'
 import { IFRAME_SANDBOX } from './iframe-allowlist'
 import type { IframeAlign } from './iframe-commands'
 

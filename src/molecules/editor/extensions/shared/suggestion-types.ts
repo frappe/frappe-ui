@@ -7,7 +7,7 @@
  * other.
  *
  * Canonical import path:
- *   `@molecules/editor/extensions/shared/suggestion-types`
+ *   `#molecules/editor/extensions/shared/suggestion-types`
  */
 
 /**

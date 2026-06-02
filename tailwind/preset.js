@@ -3,6 +3,10 @@ import forms from '@tailwindcss/forms'
 import typography from '@tailwindcss/typography'
 import lucideIconsPlugin from './lucideIconsPlugin.js'
 
+// NOTE: Tailwind v3 does NOT merge `content` from presets into the resolved
+// config (it reads only the top-level config's content.files). So consuming
+// apps must list frappe-ui's source globs in their own tailwind.config
+// `content` — declaring them here would be silently ignored.
 /** @type {import('tailwindcss').Config} */
 export default {
   darkMode: ['selector', '[data-theme="dark"]'],

@@ -7,7 +7,7 @@ import {
   type Ref,
 } from 'vue'
 import type { Editor } from '@tiptap/core'
-import type { HeadingInfo } from '@molecules/editor/extensions/shared/heading-scope'
+import type { HeadingInfo } from '#molecules/editor/extensions/shared/heading-scope'
 
 const ACTIVE_TOP_THRESHOLD = -50
 const ACTIVE_BOTTOM_THRESHOLD = 100

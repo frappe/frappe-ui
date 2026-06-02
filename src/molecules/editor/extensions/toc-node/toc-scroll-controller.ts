@@ -8,7 +8,7 @@
  */
 import type { Editor } from '@tiptap/core'
 import { TextSelection } from '@tiptap/pm/state'
-import type { HeadingInfo } from '@molecules/editor/extensions/shared/heading-scope'
+import type { HeadingInfo } from '#molecules/editor/extensions/shared/heading-scope'
 
 const HEADING_SELECTOR = 'h1, h2, h3, h4, h5, h6'
 const SCROLL_OFFSET = 20

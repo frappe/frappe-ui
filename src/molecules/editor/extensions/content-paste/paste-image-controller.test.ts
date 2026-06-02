@@ -24,7 +24,7 @@ vi.mock('./paste-html-utils', () => ({
     { node: { type: { name: 'image' } }, pos: 5, src: DATA_SRC },
   ]),
 }))
-vi.mock('@molecules/editor/extensions/shared/media-upload-engine', () => ({
+vi.mock('#molecules/editor/extensions/shared/media-upload-engine', () => ({
   dataUrlOrBlobToFile: vi.fn(
     async () => new File(['x'], 'p.png', { type: 'image/png' }),
   ),

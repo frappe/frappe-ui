@@ -13,8 +13,8 @@
 import {
   createMediaUploadEngine,
   type MediaUploadConfig,
-} from '@molecules/editor/extensions/shared/media-upload-engine'
-import { probeVideoDimensions } from '@molecules/editor/extensions/shared/media-dimensions'
+} from '#molecules/editor/extensions/shared/media-upload-engine'
+import { probeVideoDimensions } from '#molecules/editor/extensions/shared/media-dimensions'
 
 /** The per-node config for the video upload pipeline. */
 export const videoConfig: MediaUploadConfig = {

@@ -5,7 +5,7 @@
  *
  * Everything imperative (staging files, placeholder insertion, dimension probe,
  * write-back, drop/paste, async-safe dispatch) lives in
- * `@molecules/editor/extensions/shared/*` and is shared with video. This file is
+ * `#molecules/editor/extensions/shared/*` and is shared with video. This file is
  * the TipTap shell only.
  */
 import {
@@ -15,15 +15,15 @@ import {
 } from '@tiptap/core'
 import type { Editor } from '@tiptap/core'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
-import type { UploadedFile } from '@utils/useFileUpload'
-import MediaNodeView from '@molecules/editor/components/MediaNodeView.vue'
-import { createMediaPlugin } from '@molecules/editor/extensions/shared/media-plugin'
-import { pickFiles } from '@molecules/editor/extensions/shared/file-picker'
-import { openImageGroupUploadDialog } from '@molecules/editor/extensions/image-group/imageGroupDialogController'
+import type { UploadedFile } from '#utils/useFileUpload'
+import MediaNodeView from '#molecules/editor/components/MediaNodeView.vue'
+import { createMediaPlugin } from '#molecules/editor/extensions/shared/media-plugin'
+import { pickFiles } from '#molecules/editor/extensions/shared/file-picker'
+import { openImageGroupUploadDialog } from '#molecules/editor/extensions/image-group/imageGroupDialogController'
 import {
   resolveUploadOptions as resolveUploadOptionsBase,
   type MediaUploadOptions,
-} from '@molecules/editor/extensions/shared/media-upload-engine'
+} from '#molecules/editor/extensions/shared/media-upload-engine'
 import { imageEngine, imageUploadConfig } from './image-engine'
 
 export interface ImageExtensionOptions {

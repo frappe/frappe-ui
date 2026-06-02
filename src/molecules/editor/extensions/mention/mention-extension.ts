@@ -18,7 +18,7 @@ import {
   insertSuggestionNode,
   filterByQuery,
   getSuggestionOptions,
-} from '@molecules/editor/extensions/shared/suggestion-helpers'
+} from '#molecules/editor/extensions/shared/suggestion-helpers'
 import './style.css'
 
 export interface MentionSuggestionItem extends BaseSuggestionItem {
