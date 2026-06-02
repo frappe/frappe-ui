@@ -23,6 +23,8 @@ import {
   TableCell,
   TableHeader,
   TableNavigation,
+  TableCellColor,
+  TableSelectionOverlay,
   TaskList,
   TaskItem,
   Iframe,
@@ -153,6 +155,8 @@ function commentMembers(options: CommentKitOptions): Extensions {
       TableCell,
       TableHeader,
       TableNavigation,
+      TableCellColor,
+      TableSelectionOverlay,
     )
   }
   pushMember(list, ContentPaste, options.contentPaste)

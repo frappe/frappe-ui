@@ -109,6 +109,27 @@ function moveCell(editor: Editor, axis: Axis, dir: number): boolean {
 }
 
 /**
+ * Grow/shrink the cell selection one step along an axis (spreadsheet-style
+ * Shift-Arrow): keep the anchor cell fixed, move only the head cell. The
+ * selection is always rectangular, so moving the head fills in the block.
+ * No-op (but consumed) at an edge.
+ */
+function extendCell(editor: Editor, axis: Axis, dir: number): boolean {
+  const { state, view } = editor
+  const sel = state.selection
+  if (!(sel instanceof CellSelection)) return false
+  const $next = nextCell(sel.$headCell, axis, dir)
+  if ($next) {
+    view.dispatch(
+      state.tr
+        .setSelection(new CellSelection(sel.$anchorCell, $next))
+        .scrollIntoView(),
+    )
+  }
+  return true
+}
+
+/**
  * Tab / Shift-Tab: move to the next/previous cell and land in navigate mode
  * (highlight, no caret), exiting edit mode. Wraps across rows via the table's
  * own `goToNextCell`, then converts its text selection to a cell selection.
@@ -143,6 +164,8 @@ export const TableNavigation = Extension.create({
       new Plugin({
         props: {
           handleKeyDown(view, event) {
+            // Read-only: leave caret/selection to the default. No cell nav.
+            if (!editor.isEditable) return false
             const { state } = view
             if (!isInTable(state)) return false
             const navigating = state.selection instanceof CellSelection
@@ -153,6 +176,29 @@ export const TableNavigation = Extension.create({
             if (event.key === 'Tab') {
               tabToCell(editor, event.shiftKey ? -1 : 1)
               return true
+            }
+
+            // Shift+Arrow grows the cell selection (spreadsheet-style), anchor
+            // fixed. Only once a CellSelection exists (navigate mode); in edit
+            // mode let the default extend the text selection within the cell.
+            if (
+              event.shiftKey &&
+              !event.metaKey &&
+              !event.ctrlKey &&
+              !event.altKey &&
+              (ARROWS as readonly string[]).includes(event.key)
+            ) {
+              if (!navigating) return false
+              switch (event.key) {
+                case 'ArrowRight':
+                  return extendCell(editor, 'horiz', 1)
+                case 'ArrowLeft':
+                  return extendCell(editor, 'horiz', -1)
+                case 'ArrowDown':
+                  return extendCell(editor, 'vert', 1)
+                case 'ArrowUp':
+                  return extendCell(editor, 'vert', -1)
+              }
             }
 
             // In edit mode, keep arrows inside the cell (no escaping to the next
@@ -196,6 +242,8 @@ export const TableNavigation = Extension.create({
           // the default (caret) to start editing.
           handleDOMEvents: {
             mousedown(view, event) {
+              // Read-only: don't hijack clicks into cell selection.
+              if (!editor.isEditable) return false
               if (
                 event.button !== 0 ||
                 event.shiftKey ||
@@ -252,6 +300,7 @@ export const TableNavigation = Extension.create({
           // Typing while a cell is selected starts editing (append) instead of
           // letting a CellSelection swallow the input.
           handleTextInput(view, _from, _to, text) {
+            if (!editor.isEditable) return false
             const { selection } = view.state
             if (!(selection instanceof CellSelection)) return false
             const $cell = selection.$headCell

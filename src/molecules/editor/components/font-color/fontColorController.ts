@@ -30,7 +30,10 @@ const FontColorPanel = defineComponent({
     return () =>
       h(
         EditorPopover,
-        { dialogLabel: 'Text and background color', contentClass: 'rounded-md p-2' },
+        {
+          dialogLabel: 'Text and background color',
+          contentClass: 'rounded-md p-2.5',
+        },
         {
           default: () => [
             h('div', { 'data-slot': 'font-color-panel' }, [
@@ -43,7 +46,7 @@ const FontColorPanel = defineComponent({
               }),
               h(
                 'div',
-                { class: 'mt-2 text-sm text-ink-gray-7' },
+                { class: 'mt-4 text-sm text-ink-gray-7' },
                 'Background Color',
               ),
               h(ColorSwatchGrid, {

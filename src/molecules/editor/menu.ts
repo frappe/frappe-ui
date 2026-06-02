@@ -7,6 +7,7 @@ import {
   type EditorCommandMeta,
 } from './commands'
 import { openFontColorPicker } from './components/font-color/fontColorController'
+import { openTableCellColorPicker } from './components/table-color/tableCellColorController'
 
 export type MenuActionContext = EditorCommandContext
 
@@ -232,32 +233,32 @@ function tableCommand(
 
 export const TableAddColumnBefore = tableCommand(
   'Insert column left',
-  'lucide-between-vertical-start',
+  'lucide-arrow-left-to-line',
   (editor) => editor.chain().focus().addColumnBefore().run(),
 )
 export const TableAddColumnAfter = tableCommand(
   'Insert column right',
-  'lucide-between-vertical-end',
+  'lucide-arrow-right-to-line',
   (editor) => editor.chain().focus().addColumnAfter().run(),
 )
 export const TableDeleteColumn = tableCommand(
   'Delete column',
-  'lucide-fold-horizontal',
+  'lucide-square-x',
   (editor) => editor.chain().focus().deleteColumn().run(),
 )
 export const TableAddRowBefore = tableCommand(
   'Insert row above',
-  'lucide-between-horizontal-start',
+  'lucide-arrow-up-to-line',
   (editor) => editor.chain().focus().addRowBefore().run(),
 )
 export const TableAddRowAfter = tableCommand(
   'Insert row below',
-  'lucide-between-horizontal-end',
+  'lucide-arrow-down-to-line',
   (editor) => editor.chain().focus().addRowAfter().run(),
 )
 export const TableDeleteRow = tableCommand(
   'Delete row',
-  'lucide-fold-vertical',
+  'lucide-square-x',
   (editor) => editor.chain().focus().deleteRow().run(),
 )
 // Active when the cursor sits in a header cell, so the toggle reflects the
@@ -280,6 +281,18 @@ export const TableDelete = tableCommand(
   'lucide-trash-2',
   (editor) => editor.chain().focus().deleteTable().run(),
 )
+// Opens an imperative picker (cell background + text color), so it owns no
+// can()-probe (which would invoke the action). `isAvailable` self-prunes it when
+// the Table extension is absent, matching the other table controls.
+export const CellColor: CommandMenuItem = {
+  label: 'Cell color',
+  icon: 'lucide-paint-bucket',
+  action: (editor, context) => {
+    if (!context?.trigger) return
+    openTableCellColorPicker({ editor, anchor: context.trigger })
+  },
+  isAvailable: tableLoaded,
+}
 
 /** Contextual table toolbar, consumed by `EditorTableMenu`. */
 export const tableToolbar: MenuItem[] = [
@@ -293,6 +306,7 @@ export const tableToolbar: MenuItem[] = [
   Separator,
   TableToggleHeaderRow,
   TableMergeOrSplit,
+  CellColor,
   Separator,
   TableDelete,
 ]

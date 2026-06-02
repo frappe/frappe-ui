@@ -47,6 +47,10 @@ const visible = ref(false)
 /** The DOM element of the table the selection is currently inside, if any. */
 function activeTableEl(ed: Editor): HTMLElement | null {
   if (!ed.isEditable || !ed.isActive('table')) return null
+  // `editor.view` is a proxy that throws on access until the view is mounted;
+  // the immediate watch can run sync() before that. `isInitialized` flips true
+  // on mount, so bail until then.
+  if (!ed.isInitialized) return null
   const { $from } = ed.state.selection
   for (let depth = $from.depth; depth > 0; depth--) {
     if ($from.node(depth).type.name === 'table') {
@@ -105,6 +109,7 @@ function openContextMenu(ed: Editor, clientX: number, clientY: number) {
       getBoundingClientRect: () => new DOMRect(clientX, clientY, 0, 0),
     },
     closeOnAnchorPointerDown: true,
+    animate: true,
     floatingOptions: { placement: 'right-start', strategy: 'fixed', offset: 0 },
   })
 }
@@ -175,13 +180,37 @@ onBeforeUnmount(closeContextMenu)
 
 <template>
   <Teleport to="body">
-    <div
-      v-show="visible && editor"
-      ref="floating"
-      data-slot="table-menu"
-      class="fixed left-0 top-0 z-[100] flex items-center gap-1 rounded-lg border border-outline-gray-2 bg-surface-white p-1 shadow-sm"
-    >
-      <MenuItems v-if="editor" :editor="editor" :items="tableToolbar" />
-    </div>
+    <Transition name="table-menu">
+      <div
+        v-show="visible && editor"
+        ref="floating"
+        data-slot="table-menu"
+        class="fixed left-0 top-0 z-[100] flex items-center gap-1 rounded-lg border border-outline-gray-2 bg-surface-white p-1 shadow-sm"
+      >
+        <MenuItems v-if="editor" :editor="editor" :items="tableToolbar" />
+      </div>
+    </Transition>
   </Teleport>
 </template>
+
+<style scoped>
+/* Fast appear only; leave is instant so the toolbar clears the moment the
+ * selection leaves a table. Mirrors EditorPopover's 90ms fade+scale. */
+.table-menu-enter-active {
+  transition:
+    opacity 90ms ease-out,
+    transform 90ms ease-out;
+  transform-origin: center bottom;
+}
+
+.table-menu-enter-from {
+  opacity: 0;
+  transform: scale(0.98);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .table-menu-enter-active {
+    transition: none;
+  }
+}
+</style>

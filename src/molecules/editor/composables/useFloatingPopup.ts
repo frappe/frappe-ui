@@ -25,6 +25,13 @@ export interface FloatingPopupOptions<P extends Record<string, unknown>> {
    * (e.g. a multi-step popup where Escape first steps back, then closes).
    */
   closeOnEscape?: boolean
+  /**
+   * Play a fast origin-aware appear animation on the floating wrapper (scales
+   * out from the edge nearest the anchor, using the *resolved* placement). Leave
+   * off for popups that wrap their content in `EditorPopover`, which animates
+   * itself. Defaults to `false`.
+   */
+  animate?: boolean
   floatingOptions?: {
     placement?: Placement
     strategy?: Strategy
@@ -62,6 +69,7 @@ export function useFloatingPopup<P extends Record<string, unknown>>(
 
   let cleanupAutoUpdate: (() => void) | null = null
   let destroyed = false
+  let animated = false
 
   const update = () => {
     if (destroyed) return
@@ -73,13 +81,21 @@ export function useFloatingPopup<P extends Record<string, unknown>>(
         flip(),
         shift({ padding: 8 }),
       ],
-    }).then(({ x, y, strategy }) => {
+    }).then(({ x, y, strategy, placement }) => {
       if (destroyed) return
       Object.assign(floating.style, {
         position: strategy,
         left: `${x}px`,
         top: `${y}px`,
       })
+      // First positioned frame: set the origin from the resolved placement and
+      // trigger the enter animation once (so it scales from the edge nearest the
+      // anchor, not from 0,0 before positioning).
+      if (options.animate && !animated) {
+        animated = true
+        floating.style.transformOrigin = transformOriginFor(placement)
+        floating.classList.add('editor-floating-pop')
+      }
     })
   }
 
@@ -125,4 +141,25 @@ export function useFloatingPopup<P extends Record<string, unknown>>(
 function normalizeOffset(value: number | [number, number] | undefined) {
   if (Array.isArray(value)) return { mainAxis: value[1], crossAxis: value[0] }
   return value ?? 4
+}
+
+/**
+ * CSS `transform-origin` for a popup at the given (resolved) placement: the
+ * point on the floating box nearest the anchor. A menu placed `right-start`
+ * grows from its `left top` corner; `top` grows from `center bottom`, etc.
+ */
+function transformOriginFor(placement: Placement): string {
+  const [side, align] = placement.split('-')
+  const opposite: Record<string, string> = {
+    top: 'bottom',
+    bottom: 'top',
+    left: 'right',
+    right: 'left',
+  }
+  if (side === 'top' || side === 'bottom') {
+    const x = align === 'start' ? 'left' : align === 'end' ? 'right' : 'center'
+    return `${x} ${opposite[side]}`
+  }
+  const y = align === 'start' ? 'top' : align === 'end' ? 'bottom' : 'center'
+  return `${opposite[side]} ${y}`
 }
