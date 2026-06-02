@@ -18,6 +18,7 @@ export { default as Editor } from './Editor.vue'
 
 // Building blocks (compose without <Editor>)
 export { default as EditorContent } from './EditorContent.vue'
+export { default as EditorDropZone } from './components/EditorDropZone.vue'
 export { default as EditorFixedMenu } from './EditorFixedMenu.vue'
 export { default as EditorBubbleMenu } from './EditorBubbleMenu.vue'
 export { default as EditorFloatingMenu } from './EditorFloatingMenu.vue'

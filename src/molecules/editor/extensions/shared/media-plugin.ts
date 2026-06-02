@@ -76,6 +76,10 @@ export function createMediaPlugin(
           if (files.length === 0) return false
 
           event.preventDefault()
+          // Drops on the prose are authoritative (precise insert at the cursor):
+          // stop the event so an ancestor editor-area drop zone (which inserts at
+          // the doc end) does not also handle the same files.
+          event.stopPropagation()
 
           let pos: number | null = null
           const coords = view.posAtCoords({

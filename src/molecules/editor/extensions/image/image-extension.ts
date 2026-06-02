@@ -209,6 +209,14 @@ export const ImageExtension = NodeExtension.create<ImageExtensionOptions>({
           return true
         },
 
+      uploadImageFiles:
+        (files: File[], pos: number | null = null) =>
+        ({ editor }) => {
+          if (files.length === 0) return false
+          void imageEngine.processMultiple(files, editor, pos, resolve(editor))
+          return true
+        },
+
       selectAndUploadImage:
         () =>
         ({ editor }) => {
