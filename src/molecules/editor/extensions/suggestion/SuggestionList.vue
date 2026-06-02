@@ -1,9 +1,14 @@
 <template>
-  <div
+  <EditorPopover
     v-if="items.length || showNoResults"
-    ref="container"
-    class="relative max-h-[300px] min-w-40 overflow-y-auto rounded-lg bg-surface-white p-1 text-base shadow-lg"
-    :class="containerClass"
+    dialog-label="Suggestions"
+    :autofocus="false"
+    :trapped="false"
+    :loop="false"
+    :content-class="[
+      'relative max-h-[300px] min-w-40 overflow-y-auto rounded-lg p-1 text-base',
+      containerClass,
+    ]"
   >
     <template v-if="items.length">
       <SuggestionListItem
@@ -18,13 +23,15 @@
       >
         <template #default="{ item: slotItem }">
           <slot :item="slotItem" :index="index">
-            <span>{{ slotItem.display || slotItem.title || slotItem.name }}</span>
+            <span>{{
+              slotItem.display || slotItem.title || slotItem.name
+            }}</span>
           </slot>
         </template>
       </SuggestionListItem>
     </template>
     <div v-else class="px-3 py-1.5 text-sm text-ink-gray-5">No results</div>
-  </div>
+  </EditorPopover>
 </template>
 
 <script setup lang="ts">
@@ -39,6 +46,7 @@ import {
 import type { BaseSuggestionItem } from '#molecules/editor/extensions/shared/suggestion-types'
 import { useSuggestionList } from '#molecules/editor/composables/useSuggestionList'
 import SuggestionListItem from './SuggestionListItem.vue'
+import EditorPopover from '#molecules/editor/components/EditorPopover.vue'
 
 const props = defineProps({
   items: {
@@ -63,7 +71,6 @@ const props = defineProps({
   },
 })
 
-const container = ref<HTMLDivElement | null>(null)
 const itemRefs = ref<HTMLElement[]>([])
 
 const { selectedIndex, onKeyDown } = useSuggestionList<BaseSuggestionItem>(
@@ -79,7 +86,8 @@ function setItemRef(
   el: Element | ComponentPublicInstance | null,
   index: number,
 ): void {
-  const node = (el as ComponentPublicInstance | null)?.$el ?? (el as Element | null)
+  const node =
+    (el as ComponentPublicInstance | null)?.$el ?? (el as Element | null)
   if (node instanceof HTMLElement) itemRefs.value[index] = node
 }
 

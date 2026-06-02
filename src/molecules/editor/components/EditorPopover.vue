@@ -3,9 +3,9 @@
     role="dialog"
     :aria-label="dialogLabel"
     tabindex="-1"
-    loop
-    trapped
-    class="editor-popover rounded-md border border-outline-gray-1 bg-surface-white shadow-xl outline-none"
+    :loop="loop"
+    :trapped="trapped"
+    class="editor-popover border border-outline-gray-1 bg-surface-white shadow-xl outline-none"
     :class="contentClass"
     @mount-auto-focus="onMountAutoFocus"
     @unmount-auto-focus="onUnmountAutoFocus"
@@ -20,13 +20,20 @@ import { FocusScope } from 'reka-ui'
 /**
  * Shared chrome for editor popups mounted via `useFloatingPopup`
  * (link editor, font-color picker, …). It owns the cross-cutting concerns a
- * floating panel needs — surface styling, `role="dialog"` + label, an enter
- * animation, and a looping focus trap (reka-ui `FocusScope`) — so each feature
- * only renders its own contents.
+ * floating panel needs — border/background/shadow, `role="dialog"` + label, an
+ * enter animation, and a looping focus trap (reka-ui `FocusScope`) — so each
+ * feature only renders its own contents. The corner radius is intentionally NOT
+ * owned here: each popup sets its own via `content-class` (e.g. `rounded-md`).
  *
  * It deliberately does NOT handle Escape or scroll-locking: dismissal and
  * scroll policy vary per popup and are owned by the opener (see the link
  * controller's two-stage Escape and scroll lock).
+ *
+ * Focus trapping is on by default (standalone dialogs like the link/color
+ * editors that own focus), but can be turned off for popups that must leave
+ * focus in the editor — e.g. suggestion lists, where the user keeps typing to
+ * filter. Trapping those would let FocusScope's MutationObserver steal focus on
+ * every keystroke-driven re-render.
  */
 const props = withDefaults(
   defineProps<{
@@ -36,8 +43,12 @@ const props = withDefaults(
     contentClass?: string | string[]
     /** Let FocusScope move focus to the first tabbable on open. Defaults `true`. */
     autofocus?: boolean
+    /** Keep focus inside the panel (focus trap). Defaults `true`. */
+    trapped?: boolean
+    /** Loop Tab focus at the panel edges. Defaults `true`. */
+    loop?: boolean
   }>(),
-  { autofocus: true },
+  { autofocus: true, trapped: true, loop: true },
 )
 
 function onMountAutoFocus(event: Event) {

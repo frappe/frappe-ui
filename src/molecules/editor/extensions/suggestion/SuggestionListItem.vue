@@ -2,7 +2,7 @@
   <button
     type="button"
     :class="[
-      'flex w-full items-center whitespace-nowrap rounded-md px-2 py-1.5 text-sm text-ink-gray-9',
+      'flex w-full items-center whitespace-nowrap rounded px-2 py-1.5 text-sm text-ink-gray-9',
       selected ? 'bg-surface-gray-2' : '',
       itemClass,
     ]"

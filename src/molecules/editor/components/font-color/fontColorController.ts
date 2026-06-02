@@ -30,7 +30,7 @@ const FontColorPanel = defineComponent({
     return () =>
       h(
         EditorPopover,
-        { dialogLabel: 'Text and background color', contentClass: 'p-2' },
+        { dialogLabel: 'Text and background color', contentClass: 'rounded-md p-2' },
         {
           default: () => [
             h('div', { 'data-slot': 'font-color-panel' }, [

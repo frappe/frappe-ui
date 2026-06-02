@@ -1,7 +1,7 @@
 <template>
   <EditorPopover
     dialog-label="Edit link"
-    content-class="flex min-w-60 max-w-80 items-center gap-1 p-1"
+    content-class="flex min-w-60 max-w-80 items-center gap-1 rounded-md p-1"
     :autofocus="false"
   >
     <template v-if="edit">
