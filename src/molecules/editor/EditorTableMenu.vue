@@ -51,9 +51,13 @@ function activeTableEl(ed: Editor): HTMLElement | null {
   for (let depth = $from.depth; depth > 0; depth--) {
     if ($from.node(depth).type.name === 'table') {
       const dom = ed.view.nodeDOM($from.before(depth))
-      // nodeDOM returns the table's wrapper (or the table itself) — both give a
-      // stable bounding box to anchor against.
-      if (dom instanceof HTMLElement) return dom
+      // nodeDOM returns the table's wrapper; anchor to the inner <table> so the
+      // toolbar sits against the table edge, not the wrapper's outer spacing.
+      if (dom instanceof HTMLElement) {
+        return dom.tagName === 'TABLE'
+          ? dom
+          : (dom.querySelector('table') ?? dom)
+      }
     }
   }
   return null
@@ -66,7 +70,7 @@ function reposition() {
   void computePosition(reference, el, {
     strategy: 'fixed',
     placement: 'top',
-    middleware: [offset(8), flip(), shift({ padding: 8 })],
+    middleware: [offset(4), flip(), shift({ padding: 8 })],
   }).then(({ x, y }) => {
     el.style.left = `${x}px`
     el.style.top = `${y}px`
