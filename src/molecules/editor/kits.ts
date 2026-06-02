@@ -13,6 +13,7 @@ import {
   ImageGroup,
   ImageViewer,
   Video,
+  MediaDrop,
   ContentPaste,
   Emoji,
   Mention,
@@ -135,6 +136,8 @@ function commentMembers(options: CommentKitOptions): Extensions {
   if (options.image !== false)
     pushMember(list, ImageViewer, options.imageViewer)
   pushMember(list, Video, options.video)
+  // The single drop pipeline; only useful when there's a media node to route to.
+  if (options.image !== false || options.video !== false) list.push(MediaDrop)
   pushMember(list, ContentPaste, options.contentPaste)
   pushMember(list, Emoji, options.emoji)
   pushMember(list, Mention, options.mention)

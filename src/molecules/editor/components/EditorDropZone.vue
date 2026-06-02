@@ -37,10 +37,8 @@ const { isWindowDragging, isOverZone } = useEditorFileDrop(root, (files) => {
   if (props.disabled || !editor || editor.isDestroyed || !editor.isEditable) {
     return
   }
-  const images = files.filter((f) => /image/i.test(f.type))
-  const videos = files.filter((f) => /video/i.test(f.type))
-  if (images.length) editor.commands.uploadImageFiles(images)
-  if (videos.length) editor.commands.uploadVideoFiles(videos)
+  // The single drop pipeline decides single-image vs group dialog vs video.
+  editor.commands.dropFiles(files)
 })
 
 const showOverlay = computed(() => isWindowDragging.value && !props.disabled)

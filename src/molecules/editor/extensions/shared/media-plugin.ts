@@ -8,7 +8,7 @@
  * is handled under `props.handlePaste` (NOT `handleDOMEvents.paste`), per the
  * conventions §1.6 contract.
  */
-import { Plugin, Selection } from '@tiptap/pm/state'
+import { Plugin } from '@tiptap/pm/state'
 import type { Transaction, EditorState } from '@tiptap/pm/state'
 import type { EditorView } from '@tiptap/pm/view'
 import type { Editor } from '@tiptap/core'
@@ -61,46 +61,11 @@ export function createMediaPlugin(
 
   return new Plugin({
     props: {
-      handleDOMEvents: {
-        drop: (view: EditorView, event: DragEvent): boolean => {
-          const editor = host.editor
-          const options = resolve()
-          if (
-            !editor ||
-            !event.dataTransfer?.files?.length ||
-            !options.uploadFunction
-          ) {
-            return false
-          }
-          const files = collectFiles(event.dataTransfer, config.accept)
-          if (files.length === 0) return false
-
-          event.preventDefault()
-          // Drops on the prose are authoritative (precise insert at the cursor):
-          // stop the event so an ancestor editor-area drop zone (which inserts at
-          // the doc end) does not also handle the same files.
-          event.stopPropagation()
-
-          let pos: number | null = null
-          const coords = view.posAtCoords({
-            left: event.clientX,
-            top: event.clientY,
-          })
-          if (coords) {
-            pos = coords.pos
-            view.dispatch(
-              view.state.tr.setSelection(
-                Selection.near(view.state.doc.resolve(pos)),
-              ),
-            )
-          }
-
-          void engine.processMultiple(files, editor, pos, options)
-          return true
-        },
-      },
-
-      handlePaste: (view: EditorView, event: ClipboardEvent): boolean => {
+      // NOTE: drop is NOT handled here. The single drop pipeline lives in the
+      // `MediaDrop` extension (`media-drop-extension.ts`), which routes a whole
+      // drop by type/count. This per-node plugin owns only paste + the
+      // intrinsic-dimension back-fill below.
+      handlePaste: (_view: EditorView, event: ClipboardEvent): boolean => {
         const editor = host.editor
         const options = resolve()
         if (!editor || !options.uploadFunction) return false

@@ -11,19 +11,18 @@ import type { UploadedFile as FrappeUploadedFile } from '#utils/useFileUpload'
 import type { MediaDimensions } from '#molecules/editor/extensions/shared/media-dimensions'
 
 /**
- * Drop/programmatic upload commands, declared once in a dedicated `mediaUpload`
+ * Programmatic upload commands, declared once in a dedicated `mediaUpload`
  * group (tiptap flattens every group into `RawCommands`, so callers still use
- * the flat `editor.commands.uploadImageFiles` / `uploadVideoFiles`).
+ * the flat `editor.commands.uploadVideoFiles`).
  *
- * Kept out of the `image`/`video` groups on purpose: the legacy TextEditor
- * extension also augments `Commands.image`, and a divergent second declaration
- * of the same group is a TS2717 error. A separate group sidesteps that.
+ * Kept out of the `video` group only for symmetry with the legacy-conflict
+ * rationale on images: the legacy TextEditor augments `Commands.image`, so a
+ * divergent second declaration of a shared group is a TS2717 error. A separate
+ * group sidesteps that.
  */
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
     mediaUpload: {
-      /** Upload and insert already-provided image files (e.g. from a drop). */
-      uploadImageFiles: (files: File[], pos?: number | null) => ReturnType
       /** Upload and insert already-provided video files (e.g. from a drop). */
       uploadVideoFiles: (files: File[], pos?: number | null) => ReturnType
     }

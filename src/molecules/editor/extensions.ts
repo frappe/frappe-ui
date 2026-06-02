@@ -26,6 +26,7 @@ import { ImageExtension } from './extensions/image'
 import { ImageGroup as ImageGroupExtension } from './extensions/image-group'
 import ImageViewerExtension from './extensions/image-viewer'
 import { VideoExtension } from './extensions/video'
+import { MediaDrop as MediaDropExtension } from './extensions/media-drop/media-drop-extension'
 import { IframeExtension } from './extensions/iframe'
 import {
   MentionExtension,
@@ -126,6 +127,7 @@ export const Image = ImageExtension
 export const ImageGroup = ImageGroupExtension
 export const ImageViewer = ImageViewerExtension
 export const Video = VideoExtension
+export const MediaDrop = MediaDropExtension
 export const Iframe = IframeExtension
 export const Mention = MentionExtension
 
