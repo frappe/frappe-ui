@@ -172,17 +172,26 @@ const switchGroupClasses = computed(() => {
   const hasDescription = props.description || slots.description
   if (!hasLabel && !hasDescription) return undefined
 
+  // Auto placement: the switch sits before label-only rows and after rows
+  // that carry a description. An explicit `switchPosition` always wins.
+  const position = props.switchPosition ?? (hasDescription ? 'right' : 'left')
+  const switchLeft = position === 'left'
+
   if (hasDescription) {
-    // Settings style: label + description on the left, switch on the right.
+    // Settings style: label + description on one side, switch on the other.
     return [
-      'flex justify-between items-start',
+      'flex items-center',
+      switchLeft ? 'flex-row-reverse justify-end' : 'justify-between',
       props.size === 'md' ? 'gap-x-3.5' : 'gap-x-2.5',
     ]
   }
 
-  // Inline style: the switch sits on the left, right before the label.
+  // Inline label-only row.
   const classes = [
-    'flex flex-row-reverse justify-end group items-center gap-x-2.5',
+    'flex group items-center',
+    switchLeft
+      ? 'flex-row-reverse justify-end gap-x-2.5'
+      : 'justify-between gap-x-3',
   ]
   if (props.variant !== 'padded') {
     classes.push(
@@ -198,7 +207,9 @@ const switchGroupClasses = computed(() => {
 // description together.
 const containerClasses = computed(() => {
   if (props.variant !== 'padded') return undefined
-  const classes = ['rounded', props.size === 'md' ? 'px-3 py-2' : 'px-2 py-1.5']
+  // `group` lives on the outer surface so hovering anywhere in the padded
+  // area — including the corners — drives the control's hover state too.
+  const classes = ['group rounded justify-center', props.size === 'md' ? 'h-8 px-3' : 'h-7 px-2']
   classes.push(
     props.disabled
       ? 'cursor-not-allowed'
