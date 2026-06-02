@@ -131,8 +131,17 @@ img.ProseMirror-selectednode {
   background-color: var(--surface-gray-2);
 }
 
-.ProseMirror a span[style] {
-  text-decoration: underline;
+/* Links underline via `border-bottom` (see prose-v3 `a` in tailwind/plugin.js),
+   whose color is fixed and ignores the text `color`. When a link wraps named-
+   color text, drop that gray border (incl. on hover) and let the colored span
+   carry the underline in `currentColor`, so the line matches the text color. */
+.ProseMirror a:has(span[style*='--prose-color-']),
+.ProseMirror a:has(span[style*='--prose-color-']):hover {
+  border-bottom-color: transparent;
+}
+
+.ProseMirror a span[style*='--prose-color-'] {
+  border-bottom: 1px solid currentColor;
 }
 
 .ProseMirror .tableWrapper {
