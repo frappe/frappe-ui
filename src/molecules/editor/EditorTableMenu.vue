@@ -1,10 +1,23 @@
 <script setup lang="ts">
-import { nextTick, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import {
+  nextTick,
+  onBeforeUnmount,
+  ref,
+  shallowRef,
+  useTemplateRef,
+  watch,
+} from 'vue'
 import { computePosition, flip, offset, shift } from '@floating-ui/dom'
+import { CellSelection, cellAround } from '@tiptap/pm/tables'
 import MenuItems from './MenuItems.vue'
+import TableContextMenu from './components/TableContextMenu.vue'
 import { tableToolbar } from './menu'
 import type { Editor } from './useEditor'
 import { useResolvedEditor } from './editor-context'
+import {
+  useFloatingPopup,
+  type FloatingPopupHandle,
+} from './composables/useFloatingPopup'
 
 /**
  * Contextual table toolbar with row/column insert + delete, header-row toggle,
@@ -69,6 +82,57 @@ function sync() {
   if (table) void nextTick(reposition)
 }
 
+// --- Right-click context menu ---------------------------------------------
+let contextMenu: FloatingPopupHandle | null = null
+
+function closeContextMenu() {
+  contextMenu?.destroy()
+  contextMenu = null
+}
+
+function openContextMenu(ed: Editor, clientX: number, clientY: number) {
+  closeContextMenu()
+  contextMenu = useFloatingPopup({
+    anchor: ed.view.dom,
+    component: TableContextMenu,
+    props: { editor: ed, items: tableToolbar, onRun: closeContextMenu },
+    // Anchor at the cursor point so the menu opens where the user clicked.
+    virtualReference: {
+      getBoundingClientRect: () => new DOMRect(clientX, clientY, 0, 0),
+    },
+    closeOnAnchorPointerDown: true,
+    floatingOptions: { placement: 'right-start', strategy: 'fixed', offset: 0 },
+  })
+}
+
+function onContextMenu(event: MouseEvent) {
+  const ed = editor.value
+  if (!ed || ed.isDestroyed || !ed.isEditable) return
+  // The view getter throws until the editor is mounted; a real right-click
+  // always happens after mount, but guard anyway.
+  let dom: HTMLElement
+  try {
+    dom = ed.view.dom as HTMLElement
+  } catch {
+    return
+  }
+  const target = event.target
+  if (!(target instanceof Node) || !dom.contains(target)) return
+  const coords = ed.view.posAtCoords({
+    left: event.clientX,
+    top: event.clientY,
+  })
+  if (!coords) return
+  const $cell = cellAround(ed.state.doc.resolve(coords.pos))
+  if (!$cell) return // not in a table — let the native menu through
+  event.preventDefault()
+  // Select the right-clicked cell so the actions target it.
+  ed.view.dispatch(
+    ed.state.tr.setSelection(CellSelection.create(ed.state.doc, $cell.pos)),
+  )
+  openContextMenu(ed, event.clientX, event.clientY)
+}
+
 // (Re)subscribe whenever the editor instance changes. Repositioning is driven by
 // transactions (selection / content) and by scroll/resize — anchored to the
 // table, so cell-to-cell caret moves don't move the toolbar.
@@ -86,16 +150,23 @@ watch(
     // Capture phase so inner scroll containers are caught too.
     document.addEventListener('scroll', onScroll, true)
     window.addEventListener('resize', onScroll)
+    // Bound on document (not the view DOM) so it never touches `ed.view` before
+    // the view is mounted; the handler scopes itself to this editor.
+    document.addEventListener('contextmenu', onContextMenu, true)
     sync()
     onCleanup(() => {
       ed.off('transaction', onChange)
       ed.off('focus', onChange)
       document.removeEventListener('scroll', onScroll, true)
       window.removeEventListener('resize', onScroll)
+      document.removeEventListener('contextmenu', onContextMenu, true)
+      closeContextMenu()
     })
   },
   { immediate: true },
 )
+
+onBeforeUnmount(closeContextMenu)
 </script>
 
 <template>
