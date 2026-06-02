@@ -13,6 +13,13 @@
     default: '"sm"'
   },
   {
+    name: 'variant',
+    description: 'Visual style of the switch row.\n`padded` wraps the control and label in a clickable surface with hover,\nactive and focus states — useful for settings rows and menu items.',
+    required: false,
+    type: '"default" | "padded"',
+    default: '"default"'
+  },
+  {
     name: 'disabled',
     description: 'Disables the switch and prevents interaction',
     required: false,
