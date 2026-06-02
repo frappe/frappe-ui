@@ -199,6 +199,104 @@ export const Redo: CommandMenuItem = {
 
 export const Separator: MenuItem = { type: 'separator' }
 
+// ---------------------------------------------------------------------------
+// Table controls
+//
+// Surfaced in a contextual toolbar (`EditorTableMenu`) that appears only while
+// the selection is inside a table. Each item disables itself through the
+// editor's `can()` chain (via `canRun`), and the whole set self-prunes when the
+// Table extension isn't loaded — `isAvailable` checks the live schema, so the
+// same `tableToolbar` is inert in a comment editor and live in a doc editor.
+// ---------------------------------------------------------------------------
+
+/** True when the Table extension's node is present in the active schema. */
+function tableLoaded(editor: Editor): boolean {
+  return !!editor.schema.nodes.table
+}
+
+function tableCommand(
+  label: string,
+  icon: string,
+  action: CommandMenuItem['action'],
+  isActive?: (editor: Editor) => boolean,
+): CommandMenuItem {
+  return {
+    label,
+    icon,
+    action,
+    isActive,
+    isDisabled: (editor) => !canRun(editor, action),
+    isAvailable: tableLoaded,
+  }
+}
+
+export const TableAddColumnBefore = tableCommand(
+  'Insert column left',
+  'lucide-between-vertical-start',
+  (editor) => editor.chain().focus().addColumnBefore().run(),
+)
+export const TableAddColumnAfter = tableCommand(
+  'Insert column right',
+  'lucide-between-vertical-end',
+  (editor) => editor.chain().focus().addColumnAfter().run(),
+)
+export const TableDeleteColumn = tableCommand(
+  'Delete column',
+  'lucide-fold-horizontal',
+  (editor) => editor.chain().focus().deleteColumn().run(),
+)
+export const TableAddRowBefore = tableCommand(
+  'Insert row above',
+  'lucide-between-horizontal-start',
+  (editor) => editor.chain().focus().addRowBefore().run(),
+)
+export const TableAddRowAfter = tableCommand(
+  'Insert row below',
+  'lucide-between-horizontal-end',
+  (editor) => editor.chain().focus().addRowAfter().run(),
+)
+export const TableDeleteRow = tableCommand(
+  'Delete row',
+  'lucide-fold-vertical',
+  (editor) => editor.chain().focus().deleteRow().run(),
+)
+// Active when the cursor sits in a header cell, so the toggle reflects the
+// state of the row it would flip.
+export const TableToggleHeaderRow = tableCommand(
+  'Toggle header row',
+  'lucide-panel-top',
+  (editor) => editor.chain().focus().toggleHeaderRow().run(),
+  (editor) => editor.isActive('tableHeader'),
+)
+// One button for both directions: merges a multi-cell selection, splits a
+// merged cell. `can()` disables it when neither applies.
+export const TableMergeOrSplit = tableCommand(
+  'Merge or split cells',
+  'lucide-table-cells-merge',
+  (editor) => editor.chain().focus().mergeOrSplit().run(),
+)
+export const TableDelete = tableCommand(
+  'Delete table',
+  'lucide-trash-2',
+  (editor) => editor.chain().focus().deleteTable().run(),
+)
+
+/** Contextual table toolbar, consumed by `EditorTableMenu`. */
+export const tableToolbar: MenuItem[] = [
+  TableAddColumnBefore,
+  TableAddColumnAfter,
+  TableDeleteColumn,
+  Separator,
+  TableAddRowBefore,
+  TableAddRowAfter,
+  TableDeleteRow,
+  Separator,
+  TableToggleHeaderRow,
+  TableMergeOrSplit,
+  Separator,
+  TableDelete,
+]
+
 export const minimalToolbar: MenuItem[] = [Bold, Italic, InsertLink]
 export const commentToolbar: MenuItem[] = [
   Bold,
