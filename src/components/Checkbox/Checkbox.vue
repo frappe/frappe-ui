@@ -1,5 +1,9 @@
 <template>
-  <div class="inline-flex flex-col">
+  <div
+    class="flex-col"
+    :class="[props.variant === 'padded' ? 'flex' : 'inline-flex', containerClasses]"
+    @click="onContainerClick"
+  >
     <div
       class="inline-flex gap-2 rounded transition"
       :class="rowClasses"
@@ -61,6 +65,7 @@ import type { CheckboxEmits, CheckboxProps } from './types'
 
 const props = withDefaults(defineProps<CheckboxProps>(), {
   size: 'sm',
+  variant: 'default',
   padding: false,
 })
 
@@ -70,7 +75,7 @@ const attrs = useAttrs()
 
 watchEffect(() => {
   if (props.padding) {
-    warnDeprecated('Checkbox.padding', 'data-* styling hooks')
+    warnDeprecated('Checkbox.padding', 'variant="padded"')
   }
 })
 
@@ -126,6 +131,35 @@ const rowClasses = computed(() => {
   }
 })
 
+// In the padded variant the whole row is a clickable surface. Mirrors the
+// Switch padded variant: fixed-height compact rows (28px / 32px) with hover,
+// active and keyboard-only focus states wrapping the control and label.
+const containerClasses = computed(() => {
+  if (props.variant !== 'padded') return undefined
+  const classes = [
+    'group rounded justify-center',
+    props.size === 'md' ? 'h-8 px-3' : 'h-7 px-2',
+  ]
+  classes.push(
+    props.disabled
+      ? 'cursor-not-allowed'
+      : 'cursor-pointer hover:bg-surface-gray-3 active:bg-surface-gray-4 [&:has(:focus-visible)]:ring-2 [&:has(:focus-visible)]:ring-outline-gray-3',
+  )
+  return classes
+})
+
+const onContainerClick = (event: MouseEvent) => {
+  if (props.variant !== 'padded' || props.disabled) return
+  const target = event.target as HTMLElement
+  // The input toggles itself; the label toggles it via `for`. Ignore both to
+  // avoid double toggling and only handle clicks on the surrounding padding.
+  if (target.closest('[data-slot="control"]')) return
+  if (target.closest('[data-slot="label"]')) return
+  const next = !checked.value
+  model.value = next
+  emit('update:modelValue', next)
+}
+
 const inputClasses = computed(() => {
   let baseClasses = props.disabled
     ? 'border-outline-gray-2 bg-surface-sidebar text-ink-gray-3'
@@ -133,8 +167,8 @@ const inputClasses = computed(() => {
 
   let interactionClasses = props.disabled
     ? ''
-    : props.padding
-      ? 'focus:ring-0'
+    : props.padding || props.variant === 'padded'
+      ? 'focus:ring-0 group-hover:border-outline-gray-7'
       : 'hover:shadow-sm focus:ring-0 active:bg-surface-gray-2'
 
   let sizeClasses = {
