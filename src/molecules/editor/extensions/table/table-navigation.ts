@@ -18,8 +18,8 @@
  */
 import { Extension } from '@tiptap/core'
 import type { Editor } from '@tiptap/core'
-import { Plugin } from '@tiptap/pm/state'
-import { TextSelection } from '@tiptap/pm/state'
+import { Plugin, Selection, TextSelection } from '@tiptap/pm/state'
+import type { EditorView } from '@tiptap/pm/view'
 import type { ResolvedPos } from '@tiptap/pm/model'
 import {
   CellSelection,
@@ -30,6 +30,52 @@ import {
 } from '@tiptap/pm/tables'
 
 type Axis = 'horiz' | 'vert'
+
+const ARROWS = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'] as const
+
+/**
+ * In edit mode, true when a plain arrow press would move the caret out of the
+ * current cell (so we can swallow it — the cell is a sandbox; leave via Escape or
+ * Tab). Caret movement that stays inside the cell is left to the default.
+ */
+function arrowLeavesCell(view: EditorView, event: KeyboardEvent): boolean {
+  if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) {
+    return false
+  }
+  const { state } = view
+  if (!state.selection.empty) return false
+  const $head = state.selection.$head
+  const $cell = cellAround($head)
+  if (!$cell) return false
+  const cell = $cell.nodeAfter
+  if (!cell) return false
+  // First / last caret positions inside the cell, and their textblocks.
+  const firstPos = Selection.near(state.doc.resolve($cell.pos + 1), 1).from
+  const lastPos = Selection.near(
+    state.doc.resolve($cell.pos + cell.nodeSize - 1),
+    -1,
+  ).from
+  switch (event.key) {
+    case 'ArrowLeft':
+      return $head.pos <= firstPos
+    case 'ArrowRight':
+      return $head.pos >= lastPos
+    case 'ArrowUp':
+      // At the top line of the cell's first block.
+      return (
+        view.endOfTextblock('up') &&
+        $head.start() === state.doc.resolve(firstPos).start()
+      )
+    case 'ArrowDown':
+      // At the bottom line of the cell's last block.
+      return (
+        view.endOfTextblock('down') &&
+        $head.start() === state.doc.resolve(lastPos).start()
+      )
+    default:
+      return false
+  }
+}
 
 /** Select a whole cell (navigate mode), highlighting it. */
 function selectCell(editor: Editor, pos: number): boolean {
@@ -85,6 +131,15 @@ export const TableNavigation = Extension.create({
             const { state } = view
             if (!isInTable(state)) return false
             const navigating = state.selection instanceof CellSelection
+
+            // In edit mode, keep arrows inside the cell (no escaping to the next
+            // cell or out of the table); leave the cell via Escape or Tab.
+            if (
+              !navigating &&
+              (ARROWS as readonly string[]).includes(event.key)
+            ) {
+              return arrowLeavesCell(view, event)
+            }
 
             switch (event.key) {
               case 'ArrowRight':

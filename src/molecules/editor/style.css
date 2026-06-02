@@ -140,7 +140,10 @@ img.ProseMirror-selectednode {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background-color: var(--surface-gray-3);
+  /* Translucent so cell text stays readable; the ring carries the emphasis.
+     Solid rgba fallback first, themed color-mix when supported. */
+  background-color: rgba(0, 0, 0, 0.04);
+  background-color: color-mix(in srgb, var(--surface-gray-5) 18%, transparent);
   box-shadow: inset 0 0 0 2px var(--outline-gray-4);
   z-index: 2;
 }
