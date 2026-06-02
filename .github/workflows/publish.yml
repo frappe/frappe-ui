@@ -7,7 +7,7 @@ on:
 
 permissions:
   id-token: write # Required for OIDC
-  contents: read
+  contents: write # push the release tag
 
 jobs:
   publish:
@@ -35,3 +35,20 @@ jobs:
         run: npm test
       - if: steps.publish_tag.outputs.changed == 'true'
         run: npm publish --tag ${{ steps.publish_tag.outputs.tag }}
+
+      # Tag the exact commit that was published (head_sha checked out above).
+      # Idempotent: skips if the tag already exists, so workflow re-runs are safe.
+      - name: Tag the release
+        if: steps.publish_tag.outputs.changed == 'true'
+        env:
+          VERSION: ${{ steps.publish_tag.outputs.version }}
+        run: |
+          tag="v$VERSION"
+          if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null 2>&1; then
+            echo "Tag $tag already exists on origin, skipping."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "$tag" -m "$tag"
+          git push origin "$tag"
