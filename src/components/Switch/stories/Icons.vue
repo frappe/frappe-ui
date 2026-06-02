@@ -6,7 +6,7 @@ import { Switch } from 'frappe-ui'
   <div class="flex flex-col gap-3 w-80">
     <Switch
       icon="lucide-bell"
-      switch-position="right"
+      switch-position="end"
       label="Notifications"
       class="w-full"
     />

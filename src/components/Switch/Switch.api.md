@@ -21,9 +21,9 @@
   },
   {
     name: 'switchPosition',
-    description: 'Position of the switch control relative to the label.\nDefaults to automatic — `left` for label-only rows and `right` when a\n`description` is present. Pass `left` or `right` to override.',
+    description: 'Position of the switch control relative to the label, along the inline\naxis (RTL-aware). `start` is the leading side, `end` the trailing side.\nDefaults to automatic — `start` for label-only rows and `end` when a\n`description` is present. Pass `start` or `end` to override.',
     required: false,
-    type: '"left" | "right"'
+    type: '"start" | "end"'
   },
   {
     name: 'disabled',
