@@ -1,300 +1,292 @@
-<template>
-  <TooltipProvider>
-    <TooltipRoot>
-      <TooltipTrigger as-child>
-        <component
-          :is="Root"
-          v-bind="$attrs"
-          :class="buttonClasses"
-          :aria-label="label"
-          ref="rootRef"
-        >
-      <LoadingIndicator
-        v-if="loading"
-        :class="{
-          'h-3 w-3': size == 'xs' || size == 'sm',
-          'h-[13.5px] w-[13.5px]': size == 'md',
-          'h-[15px] w-[15px]': size == 'lg',
-          'h-4.5 w-4.5': size == 'xl' || size == '2xl',
-        }"
-      />
-      <slot name="prefix" v-else-if="$slots['prefix'] || iconLeft">
-        <span
-          v-if="iconLeft && typeof iconLeft === 'string' && iconLeft.startsWith('lucide-')"
-          :class="[iconLeft, lucideSlotClasses]"
-          aria-hidden="true"
-        />
-        <FeatherIcon
-          v-else-if="iconLeft && typeof iconLeft === 'string'"
-          :name="iconLeft"
-          :class="slotClasses"
-          aria-hidden="true"
-        />
-        <component v-else-if="iconLeft" :is="iconLeft" :class="slotClasses" />
-      </slot>
-
-      <template v-if="loading && loadingText">{{ loadingText }}</template>
-      <template v-else-if="isIconButton && !loading">
-        <span
-          v-if="icon && typeof icon === 'string' && icon.startsWith('lucide-')"
-          :class="[icon, lucideSlotClasses]"
-          aria-hidden="true"
-        />
-        <FeatherIcon
-          v-else-if="icon && typeof icon === 'string'"
-          :name="icon"
-          :class="slotClasses"
-        />
-        <component v-else-if="icon" :is="icon" :class="slotClasses" />
-        <slot name="icon" v-else-if="$slots.icon" />
-        <div v-else-if="hasLucideIconInDefaultSlot" :class="slotClasses">
-          <slot>{{ label }}</slot>
-        </div>
-      </template>
-      <span v-else :class="{ 'sr-only': isIconButton }" class="truncate">
-        <slot>{{ label }}</slot>
-      </span>
-
-      <slot name="suffix">
-        <span
-          v-if="iconRight && typeof iconRight === 'string' && iconRight.startsWith('lucide-')"
-          :class="[iconRight, lucideSlotClasses]"
-          aria-hidden="true"
-        />
-        <FeatherIcon
-          v-else-if="iconRight && typeof iconRight === 'string'"
-          :name="iconRight"
-          :class="slotClasses"
-          aria-hidden="true"
-        />
-        <component
-          v-else-if="iconRight"
-          :is="iconRight"
-          :class="slotClasses"
-        />
-      </slot>
-        </component>
-      </TooltipTrigger>
-      <TooltipBubble v-if="tooltip?.length" :text="tooltip" />
-    </TooltipRoot>
-  </TooltipProvider>
-</template>
-<script lang="ts" setup>
-import { computed, h, ref, useSlots, watchEffect } from 'vue'
+<script lang="ts">
+import {
+  computed,
+  defineComponent,
+  h,
+  ref,
+  watchEffect,
+  type Component,
+  type SlotsType,
+  type VNode,
+} from 'vue'
 import { TooltipProvider, TooltipRoot, TooltipTrigger } from 'reka-ui'
+import { RouterLink } from 'vue-router'
 import FeatherIcon from '../FeatherIcon.vue'
 import LoadingIndicator from '../LoadingIndicator.vue'
 import TooltipBubble from '../Tooltip/TooltipBubble.vue'
-import { RouterLink } from 'vue-router'
 import { warnFeatherIconUsage } from '../../utils/iconString'
-import type { ButtonProps, ThemeVariant } from './types'
+import { buttonProps, type ThemeVariant } from './types'
 
-defineOptions({ inheritAttrs: false })
-
-const props = withDefaults(defineProps<ButtonProps>(), {
-  theme: 'gray',
-  size: 'sm',
-  variant: 'subtle',
-  loading: false,
-  disabled: false,
-  type: 'button',
-})
-
-watchEffect(() => {
-  warnFeatherIconUsage('Button', 'icon', props.icon)
-  warnFeatherIconUsage('Button', 'iconLeft', props.iconLeft)
-  warnFeatherIconUsage('Button', 'iconRight', props.iconRight)
-})
-
-const slots = useSlots()
-
-const buttonClasses = computed(() => {
-  let solidClasses = {
-    gray: 'text-ink-white bg-surface-gray-7 hover:bg-surface-gray-6 active:bg-surface-gray-5',
-    blue: 'text-ink-white bg-blue-500 hover:bg-surface-blue-3 active:bg-blue-700',
-    green:
-      'text-ink-white bg-surface-green-3 hover:bg-green-700 active:bg-green-800',
-    red: 'text-ink-white bg-surface-red-5 hover:bg-surface-red-6 active:bg-surface-red-7',
-  }[props.theme]
-
-  let subtleClasses = {
-    gray: 'text-ink-gray-8 bg-surface-gray-2 hover:bg-surface-gray-3 active:bg-surface-gray-4',
-    blue: 'text-ink-blue-3 bg-surface-blue-2 hover:bg-blue-200 active:bg-blue-300',
-    green:
-      'text-green-800 bg-surface-green-2 hover:bg-green-200 active:bg-green-300',
-    red: 'text-red-700 bg-surface-red-2 hover:bg-surface-red-3 active:bg-surface-red-4',
-  }[props.theme]
-
-  let outlineClasses = {
-    gray: 'text-ink-gray-8 bg-surface-white bg-surface-white border border-outline-gray-2 hover:border-outline-gray-3 active:border-outline-gray-3 active:bg-surface-gray-4',
-    blue: 'text-ink-blue-3 bg-surface-white border border-outline-blue-1 hover:border-blue-400 active:border-blue-400 active:bg-blue-300',
-    green:
-      'text-green-800 bg-surface-white border border-outline-green-2 hover:border-green-500 active:border-green-500 active:bg-green-300',
-    red: 'text-red-700 bg-surface-white border border-outline-red-1 hover:border-outline-red-2 active:border-outline-red-2 active:bg-surface-red-3',
-  }[props.theme]
-
-  let ghostClasses = {
-    gray: 'text-ink-gray-8 bg-transparent hover:bg-surface-gray-3 active:bg-surface-gray-4',
-    blue: 'text-ink-blue-3 bg-transparent hover:bg-blue-200 active:bg-blue-300',
-    green:
-      'text-green-800 bg-transparent hover:bg-green-200 active:bg-green-300',
-    red: 'text-red-700 bg-transparent hover:bg-surface-red-3 active:bg-surface-red-4',
-  }[props.theme]
-
-  let focusClasses = {
-    gray: 'focus-visible:ring focus-visible:ring-outline-gray-3',
-    blue: 'focus-visible:ring focus-visible:ring-blue-400',
-    green: 'focus-visible:ring focus-visible:ring-outline-green-2',
-    red: 'focus-visible:ring focus-visible:ring-outline-red-2',
-  }[props.theme]
-
-  let variantClasses = {
-    subtle: subtleClasses,
-    solid: solidClasses,
-    outline: outlineClasses,
-    ghost: ghostClasses,
-  }[props.variant]
-
-  let themeVariant: ThemeVariant = `${props.theme}-${props.variant}`
-
-  let disabledClassesMap: Record<ThemeVariant, string> = {
-    'gray-solid': 'bg-surface-gray-2 text-ink-gray-4',
-    'gray-subtle': 'bg-surface-gray-2 text-ink-gray-4',
-    'gray-outline':
-      'bg-surface-gray-2 text-ink-gray-4 border border-outline-gray-2',
-    'gray-ghost': 'text-ink-gray-4',
-
-    'blue-solid': 'bg-blue-300 text-ink-white',
-    'blue-subtle': 'bg-surface-blue-2 text-ink-blue-link',
-    'blue-outline':
-      'bg-surface-blue-2 text-ink-blue-link border border-outline-blue-1',
-    'blue-ghost': 'text-ink-blue-link',
-
-    'green-solid': 'bg-surface-green-2 text-ink-green-2',
-    'green-subtle': 'bg-surface-green-2 text-ink-green-2',
-    'green-outline':
-      'bg-surface-green-2 text-ink-green-2 border border-outline-green-2',
-    'green-ghost': 'text-ink-green-2',
-
-    'red-solid': 'bg-surface-red-2 text-ink-red-2',
-    'red-subtle': 'bg-surface-red-2 text-ink-red-2',
-    'red-outline':
-      'bg-surface-red-2 text-ink-red-2 border border-outline-red-1',
-    'red-ghost': 'text-ink-red-2',
-  }
-  let disabledClasses = disabledClassesMap[themeVariant]
-
-  let sizeClasses = {
-    xs: 'h-6 text-sm px-1.5 rounded',
-    sm: 'h-7 text-base px-2 rounded',
-    md: 'h-8 text-base font-medium px-2.5 rounded',
-    lg: 'h-10 text-lg font-medium px-3 rounded-md',
-    xl: 'h-11.5 text-xl font-medium px-3.5 rounded-lg',
-    '2xl': 'h-13 text-2xl font-medium px-3.5 rounded-xl',
-  }[props.size]
-
-  if (isIconButton.value) {
-    sizeClasses = {
-      xs: 'h-6 w-6 rounded',
-      sm: 'h-7 w-7 rounded',
-      md: 'h-8 w-8 rounded',
-      lg: 'h-10 w-10 rounded-md',
-      xl: 'h-11.5 w-11.5 rounded-lg',
-      '2xl': 'h-13 w-13 rounded-xl',
-    }[props.size]
-  }
-
-  return [
-    'inline-flex items-center justify-center gap-2 transition-colors focus:outline-none shrink-0',
-    isDisabled.value ? disabledClasses : variantClasses,
-    focusClasses,
-    sizeClasses,
-  ]
-})
-
-const slotClasses = computed(() => {
-  let classes = {
-    xs: 'h-4',
-    sm: 'h-4',
-    md: 'h-4.5',
-    lg: 'h-5',
-    xl: 'h-6',
-    '2xl': 'h-6',
-  }[props.size]
-
-  return classes
-})
-
-const lucideSlotClasses = computed(() => {
-  return {
-    xs: 'size-4',
-    sm: 'size-4',
-    md: 'size-4.5',
-    lg: 'size-5',
-    xl: 'size-6',
-    '2xl': 'size-6',
-  }[props.size]
-})
-
-const isDisabled = computed(() => {
-  return props.disabled || props.loading
-})
-
-// Avoid "Maximum call stack size exceeded" error
-// when using <component is='button' /> inside <Button /> component
-// by using "render" function here to avoid conflicting html "button" component with
-// globally registered "Button" component in consumer apps
-const Root = computed(() => {
-  if (!isDisabled.value && props.route) {
-    return h(RouterLink, { to: props.route })
-  }
-
-  if (!isDisabled.value && props.link) {
-    return h('a', {
-      href: props.link,
-      target: '_blank',
-      rel: 'noreferrer noopener',
+export default defineComponent({
+  name: 'Button',
+  inheritAttrs: false,
+  props: buttonProps,
+  slots: Object as SlotsType<{
+    /** Content shown before the button label (left icon / custom content) */
+    prefix: void
+    /** Icon-only content for icon buttons */
+    icon: void
+    /** Main button content (overrides `label`) */
+    default: void
+    /** Content shown after the button label (right icon / custom content) */
+    suffix: void
+  }>,
+  setup(props, { attrs, slots, expose }) {
+    watchEffect(() => {
+      warnFeatherIconUsage('Button', 'icon', props.icon)
+      warnFeatherIconUsage('Button', 'iconLeft', props.iconLeft)
+      warnFeatherIconUsage('Button', 'iconRight', props.iconRight)
     })
-  }
 
-  return h('button', { type: props.type, disabled: isDisabled.value })
+    const isDisabled = computed(() => props.disabled || props.loading)
+    const hasTooltip = computed(() => Boolean(props.tooltip?.length))
+
+    // Render as an icon button when the default slot is exactly one lucide-* icon.
+    const hasLucideIconInDefaultSlot = computed(() => {
+      const content = slots.default?.()
+      if (!Array.isArray(content)) return false
+      const name = (content[0]?.type as { name?: string })?.name
+      return typeof name === 'string' && name.startsWith('lucide-')
+    })
+
+    const isIconButton = computed(
+      () =>
+        Boolean(props.icon) ||
+        Boolean(slots.icon) ||
+        hasLucideIconInDefaultSlot.value,
+    )
+
+    const slotClasses = computed(
+      () =>
+        ({ xs: 'h-4', sm: 'h-4', md: 'h-4.5', lg: 'h-5', xl: 'h-6', '2xl': 'h-6' })[
+          props.size
+        ],
+    )
+
+    const lucideSlotClasses = computed(
+      () =>
+        ({
+          xs: 'size-4',
+          sm: 'size-4',
+          md: 'size-4.5',
+          lg: 'size-5',
+          xl: 'size-6',
+          '2xl': 'size-6',
+        })[props.size],
+    )
+
+    const buttonClasses = computed(() => {
+      const solidClasses = {
+        gray: 'text-ink-white bg-surface-gray-7 hover:bg-surface-gray-6 active:bg-surface-gray-5',
+        blue: 'text-ink-white bg-blue-500 hover:bg-surface-blue-3 active:bg-blue-700',
+        green:
+          'text-ink-white bg-surface-green-3 hover:bg-green-700 active:bg-green-800',
+        red: 'text-ink-white bg-surface-red-5 hover:bg-surface-red-6 active:bg-surface-red-7',
+      }[props.theme]
+
+      const subtleClasses = {
+        gray: 'text-ink-gray-8 bg-surface-gray-2 hover:bg-surface-gray-3 active:bg-surface-gray-4',
+        blue: 'text-ink-blue-3 bg-surface-blue-2 hover:bg-blue-200 active:bg-blue-300',
+        green:
+          'text-green-800 bg-surface-green-2 hover:bg-green-200 active:bg-green-300',
+        red: 'text-red-700 bg-surface-red-2 hover:bg-surface-red-3 active:bg-surface-red-4',
+      }[props.theme]
+
+      const outlineClasses = {
+        gray: 'text-ink-gray-8 bg-surface-white bg-surface-white border border-outline-gray-2 hover:border-outline-gray-3 active:border-outline-gray-3 active:bg-surface-gray-4',
+        blue: 'text-ink-blue-3 bg-surface-white border border-outline-blue-1 hover:border-blue-400 active:border-blue-400 active:bg-blue-300',
+        green:
+          'text-green-800 bg-surface-white border border-outline-green-2 hover:border-green-500 active:border-green-500 active:bg-green-300',
+        red: 'text-red-700 bg-surface-white border border-outline-red-1 hover:border-outline-red-2 active:border-outline-red-2 active:bg-surface-red-3',
+      }[props.theme]
+
+      const ghostClasses = {
+        gray: 'text-ink-gray-8 bg-transparent hover:bg-surface-gray-3 active:bg-surface-gray-4',
+        blue: 'text-ink-blue-3 bg-transparent hover:bg-blue-200 active:bg-blue-300',
+        green:
+          'text-green-800 bg-transparent hover:bg-green-200 active:bg-green-300',
+        red: 'text-red-700 bg-transparent hover:bg-surface-red-3 active:bg-surface-red-4',
+      }[props.theme]
+
+      const focusClasses = {
+        gray: 'focus-visible:ring focus-visible:ring-outline-gray-3',
+        blue: 'focus-visible:ring focus-visible:ring-blue-400',
+        green: 'focus-visible:ring focus-visible:ring-outline-green-2',
+        red: 'focus-visible:ring focus-visible:ring-outline-red-2',
+      }[props.theme]
+
+      const variantClasses = {
+        subtle: subtleClasses,
+        solid: solidClasses,
+        outline: outlineClasses,
+        ghost: ghostClasses,
+      }[props.variant]
+
+      const themeVariant: ThemeVariant = `${props.theme}-${props.variant}`
+
+      const disabledClassesMap: Record<ThemeVariant, string> = {
+        'gray-solid': 'bg-surface-gray-2 text-ink-gray-4',
+        'gray-subtle': 'bg-surface-gray-2 text-ink-gray-4',
+        'gray-outline':
+          'bg-surface-gray-2 text-ink-gray-4 border border-outline-gray-2',
+        'gray-ghost': 'text-ink-gray-4',
+
+        'blue-solid': 'bg-blue-300 text-ink-white',
+        'blue-subtle': 'bg-surface-blue-2 text-ink-blue-link',
+        'blue-outline':
+          'bg-surface-blue-2 text-ink-blue-link border border-outline-blue-1',
+        'blue-ghost': 'text-ink-blue-link',
+
+        'green-solid': 'bg-surface-green-2 text-ink-green-2',
+        'green-subtle': 'bg-surface-green-2 text-ink-green-2',
+        'green-outline':
+          'bg-surface-green-2 text-ink-green-2 border border-outline-green-2',
+        'green-ghost': 'text-ink-green-2',
+
+        'red-solid': 'bg-surface-red-2 text-ink-red-2',
+        'red-subtle': 'bg-surface-red-2 text-ink-red-2',
+        'red-outline':
+          'bg-surface-red-2 text-ink-red-2 border border-outline-red-1',
+        'red-ghost': 'text-ink-red-2',
+      }
+      const disabledClasses = disabledClassesMap[themeVariant]
+
+      const sizeClasses = isIconButton.value
+        ? {
+            xs: 'h-6 w-6 rounded',
+            sm: 'h-7 w-7 rounded',
+            md: 'h-8 w-8 rounded',
+            lg: 'h-10 w-10 rounded-md',
+            xl: 'h-11.5 w-11.5 rounded-lg',
+            '2xl': 'h-13 w-13 rounded-xl',
+          }[props.size]
+        : {
+            xs: 'h-6 text-sm px-1.5 rounded',
+            sm: 'h-7 text-base px-2 rounded',
+            md: 'h-8 text-base font-medium px-2.5 rounded',
+            lg: 'h-10 text-lg font-medium px-3 rounded-md',
+            xl: 'h-11.5 text-xl font-medium px-3.5 rounded-lg',
+            '2xl': 'h-13 text-2xl font-medium px-3.5 rounded-xl',
+          }[props.size]
+
+      return [
+        'inline-flex items-center justify-center gap-2 transition-colors focus:outline-none shrink-0',
+        isDisabled.value ? disabledClasses : variantClasses,
+        focusClasses,
+        sizeClasses,
+      ]
+    })
+
+    const rootRef = ref()
+    expose({ rootRef })
+
+    // The dynamic root: router link, external anchor, or native button. Using the
+    // raw 'button' string (not <component :is>) sidesteps the historic recursion
+    // with a globally-registered <Button> in consumer apps.
+    const root = computed<{ is: Component | string; props: Record<string, unknown> }>(
+      () => {
+        if (!isDisabled.value && props.route) {
+          return { is: RouterLink, props: { to: props.route } }
+        }
+        if (!isDisabled.value && props.link) {
+          return {
+            is: 'a',
+            props: { href: props.link, target: '_blank', rel: 'noreferrer noopener' },
+          }
+        }
+        return { is: 'button', props: { type: props.type, disabled: isDisabled.value } }
+      },
+    )
+
+    /** Resolve an icon prop to a vnode: lucide class-span, FeatherIcon, or component. */
+    function renderIcon(
+      icon: string | Component | undefined,
+      featherHidden: boolean,
+    ): VNode | null {
+      if (!icon) return null
+      if (typeof icon === 'string') {
+        if (icon.startsWith('lucide-')) {
+          return h('span', {
+            class: [icon, lucideSlotClasses.value],
+            'aria-hidden': 'true',
+          })
+        }
+        return h(FeatherIcon, {
+          name: icon,
+          class: slotClasses.value,
+          ...(featherHidden ? { 'aria-hidden': 'true' } : {}),
+        })
+      }
+      return h(icon, { class: slotClasses.value })
+    }
+
+    function renderPrefix() {
+      if (props.loading) {
+        return h(LoadingIndicator, {
+          class: {
+            'h-3 w-3': props.size === 'xs' || props.size === 'sm',
+            'h-[13.5px] w-[13.5px]': props.size === 'md',
+            'h-[15px] w-[15px]': props.size === 'lg',
+            'h-4.5 w-4.5': props.size === 'xl' || props.size === '2xl',
+          },
+        })
+      }
+      if (slots.prefix) return slots.prefix()
+      return renderIcon(props.iconLeft, true)
+    }
+
+    function renderMain() {
+      if (props.loading && props.loadingText) return props.loadingText
+      if (isIconButton.value && !props.loading) {
+        if (props.icon) return renderIcon(props.icon, false)
+        if (slots.icon) return slots.icon()
+        if (hasLucideIconInDefaultSlot.value) {
+          return h('div', { class: slotClasses.value }, slots.default?.() ?? props.label)
+        }
+        return null
+      }
+      return h(
+        'span',
+        { class: ['truncate', { 'sr-only': isIconButton.value }] },
+        slots.default?.() ?? props.label,
+      )
+    }
+
+    function renderSuffix() {
+      if (slots.suffix) return slots.suffix()
+      return renderIcon(props.iconRight, true)
+    }
+
+    return () => {
+      const { class: attrClass, ...restAttrs } = attrs
+      const { is, props: rootProps } = root.value
+      const children = [renderPrefix(), renderMain(), renderSuffix()]
+      const mergedProps = {
+        ...rootProps,
+        ...restAttrs,
+        class: [attrClass, buttonClasses.value],
+        'aria-label': props.label,
+        ref: rootRef,
+      }
+      const button =
+        typeof is === 'string'
+          ? h(is, mergedProps, children)
+          : h(is, mergedProps, { default: () => children })
+
+      if (!hasTooltip.value) return button
+
+      // Tooltip scaffolding renders only when a tooltip is set, so a bare button
+      // ships without any tooltip context, listeners, or pointerdown-to-close.
+      return h(TooltipProvider, null, {
+        default: () =>
+          h(TooltipRoot, null, {
+            default: () => [
+              h(TooltipTrigger, { asChild: true }, { default: () => button }),
+              h(TooltipBubble, { text: props.tooltip }),
+            ],
+          }),
+      })
+    }
+  },
 })
-
-const isIconButton = computed(() => {
-  return props.icon || slots.icon || hasLucideIconInDefaultSlot.value
-})
-
-const hasLucideIconInDefaultSlot = computed(() => {
-  if (!slots.default) return false
-
-  const slotContent = slots.default()
-  if (!Array.isArray(slotContent)) return false
-  // if the slot contains only one element and it's a lucide icon
-  // render it as an icon button
-  let firstVNode = slotContent[0]
-  if (
-    typeof firstVNode.type?.name == 'string' &&
-    firstVNode.type?.name?.startsWith('lucide-')
-  ) {
-    return true
-  }
-  return false
-})
-
-const rootRef = ref()
-defineExpose({ rootRef })
-
-defineSlots<{
-  /** Content shown before the button label (left icon / custom content) */
-  prefix?: () => any
-
-  /** Icon-only content for icon buttons */
-  icon?: () => any
-
-  /** Main button content (overrides `label`) */
-  default?: () => any
-
-  /** Content shown after the button label (right icon / custom content) */
-  suffix?: () => any
-}>()
 </script>
