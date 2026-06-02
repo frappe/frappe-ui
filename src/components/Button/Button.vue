@@ -9,7 +9,12 @@ import {
   type SlotsType,
   type VNode,
 } from 'vue'
-import { TooltipProvider, TooltipRoot, TooltipTrigger } from 'reka-ui'
+import {
+  TooltipProvider,
+  TooltipRoot,
+  TooltipTrigger,
+  injectTooltipProviderContext,
+} from 'reka-ui'
 import { RouterLink } from 'vue-router'
 import FeatherIcon from '../FeatherIcon.vue'
 import LoadingIndicator from '../LoadingIndicator.vue'
@@ -40,6 +45,10 @@ export default defineComponent({
 
     const isDisabled = computed(() => props.disabled || props.loading)
     const hasTooltip = computed(() => Boolean(props.tooltip?.length))
+
+    // Reuse a surrounding <TooltipProvider> (button group) when present so the
+    // group's skip-delay applies to this button instead of a private provider.
+    const parentTooltipProvider = injectTooltipProviderContext(null)
 
     // Render as an icon button when the default slot is exactly one lucide-* icon.
     const hasLucideIconInDefaultSlot = computed(() => {
@@ -277,15 +286,18 @@ export default defineComponent({
 
       // Tooltip scaffolding renders only when a tooltip is set, so a bare button
       // ships without any tooltip context, listeners, or pointerdown-to-close.
-      return h(TooltipProvider, null, {
-        default: () =>
-          h(TooltipRoot, null, {
-            default: () => [
-              h(TooltipTrigger, { asChild: true }, { default: () => button }),
-              h(TooltipBubble, { text: props.tooltip }),
-            ],
-          }),
+      const tooltipRoot = h(TooltipRoot, null, {
+        default: () => [
+          h(TooltipTrigger, { asChild: true }, { default: () => button }),
+          h(TooltipBubble, { text: props.tooltip }),
+        ],
       })
+
+      // Inside a button group, the provider already exists upstream — mounting
+      // our own here would isolate this button from the shared skip-delay.
+      return parentTooltipProvider
+        ? tooltipRoot
+        : h(TooltipProvider, null, { default: () => tooltipRoot })
     }
   },
 })

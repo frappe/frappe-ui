@@ -106,6 +106,9 @@ export const Code = ExtendedCode
 export const CodeBlock = ExtendedCodeBlock
 export const Table = TiptapTable.configure({ resizable: true })
 export { TableRow, TableCell, TableHeader }
+// Spreadsheet-style cell navigation (active-cell highlight, Enter to edit, Esc
+// to exit, arrow keys to move). Loaded alongside Table in the kits.
+export { TableNavigation } from './extensions/table/table-navigation'
 export const TaskList = TaskListExtension
 export const TaskItem = TaskItemExtension.configure({ nested: true })
 export const Typography = TypographyExtension

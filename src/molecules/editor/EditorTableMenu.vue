@@ -52,7 +52,7 @@ function reposition() {
   if (!reference || !el) return
   void computePosition(reference, el, {
     strategy: 'fixed',
-    placement: 'top-start',
+    placement: 'top',
     middleware: [offset(8), flip(), shift({ padding: 8 })],
   }).then(({ x, y }) => {
     el.style.left = `${x}px`

@@ -1,7 +1,12 @@
 <script setup lang="ts">
-import { TooltipProvider, TooltipRoot, TooltipTrigger } from 'reka-ui'
+import {
+  TooltipProvider,
+  TooltipRoot,
+  TooltipTrigger,
+  injectTooltipProviderContext,
+} from 'reka-ui'
 import TooltipBubble from './TooltipBubble.vue'
-import { computed } from 'vue'
+import { computed, type Component } from 'vue'
 import type { TooltipProps } from './types'
 
 defineOptions({
@@ -17,6 +22,16 @@ const props = withDefaults(defineProps<TooltipProps>(), {
 })
 
 const delayDuration = computed(() => props.hoverDelay * 1000)
+
+// When already inside a <TooltipProvider> (a button group), reuse that shared
+// context so the group's skip-delay spans this tooltip too, instead of
+// mounting a private provider that would isolate it.
+const parentProvider = injectTooltipProviderContext(null)
+const Passthrough: Component = (_, { slots }) => slots.default?.()
+const Provider = computed(() => (parentProvider ? Passthrough : TooltipProvider))
+const providerProps = computed(() =>
+  parentProvider ? {} : { delayDuration: delayDuration.value },
+)
 
 defineSlots<{
   /**
@@ -42,7 +57,7 @@ defineSlots<{
 
 <template>
   <slot v-if="disabled" />
-  <TooltipProvider v-else :delayDuration="delayDuration">
+  <component :is="Provider" v-else v-bind="providerProps">
     <TooltipRoot>
       <TooltipTrigger as-child>
         <slot />
@@ -61,5 +76,5 @@ defineSlots<{
         </template>
       </TooltipBubble>
     </TooltipRoot>
-  </TooltipProvider>
+  </component>
 </template>

@@ -131,6 +131,20 @@ img.ProseMirror-selectednode {
   background-color: var(--surface-gray-2);
 }
 
+/* Spreadsheet-style active cell: a CellSelection (incl. a single navigated
+   cell) is decorated with `.selectedCell` by prosemirror-tables. Overlay a
+   subtle gray fill + ring so the active cell reads as "selected" in navigate
+   mode. `::after` rides the cell's `position: relative` above. */
+.ProseMirror .selectedCell::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-color: var(--surface-gray-3);
+  box-shadow: inset 0 0 0 2px var(--outline-gray-4);
+  z-index: 2;
+}
+
 /* Links underline via `border-bottom` (see prose-v3 `a` in tailwind/plugin.js),
    whose color is fixed and ignores the text `color`. When a link wraps named-
    color text, drop that gray border (incl. on hover) and let the colored span

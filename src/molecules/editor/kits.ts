@@ -22,6 +22,7 @@ import {
   TableRow,
   TableCell,
   TableHeader,
+  TableNavigation,
   TaskList,
   TaskItem,
   Iframe,
@@ -193,13 +194,15 @@ export const RichTextKit = Extension.create<RichTextKitOptions>({
     const options = this.options
     const list: Extensions = commentMembers(options)
 
-    // Table needs its row/cell/header companions.
+    // Table needs its row/cell/header companions; TableNavigation adds the
+    // spreadsheet-style cell navigation on top.
     if (options.table !== false) {
       list.push(
         Table.configure(options.table),
         TableRow,
         TableCell,
         TableHeader,
+        TableNavigation,
       )
     }
     // Task list needs its item companion.
