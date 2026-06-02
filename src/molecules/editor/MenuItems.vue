@@ -3,6 +3,7 @@ import { computed, h, ref, watch, type Component } from 'vue'
 import type { CommandMenuItem, MenuGroupItem, MenuItem } from './menu'
 import type { Editor } from './useEditor'
 import Tooltip from '#components/Tooltip/Tooltip.vue'
+import TooltipProvider from '#components/Tooltip/TooltipProvider.vue'
 
 const props = defineProps<{
   editor: Editor | null
@@ -104,70 +105,75 @@ function run(item: CommandMenuItem, event?: MouseEvent) {
 </script>
 
 <template>
-  <template
-    v-for="(item, index) in visibleItems"
-    :key="`${'label' in item ? item.label : item.type}-${index}`"
-  >
-    <span
-      v-if="isSeparator(item)"
-      data-slot="menu-separator"
-      class="mx-1 h-5 w-px bg-surface-gray-3"
-      aria-hidden="true"
-    />
-    <component
-      :is="item.component"
-      v-else-if="isComponentItem(item) && editor"
-      :editor="editor"
+  <!-- One shared provider so once any button's tooltip opens, neighbouring
+       buttons show theirs instantly (skip-delay) — toolbar-friendly. Renderless,
+       so the parent's flex layout is unaffected. -->
+  <TooltipProvider>
+    <template
+      v-for="(item, index) in visibleItems"
+      :key="`${'label' in item ? item.label : item.type}-${index}`"
     >
-      <template #default="trigger">
+      <span
+        v-if="isSeparator(item)"
+        data-slot="menu-separator"
+        class="mx-1 h-5 w-px bg-surface-gray-3"
+        aria-hidden="true"
+      />
+      <component
+        :is="item.component"
+        v-else-if="isComponentItem(item) && editor"
+        :editor="editor"
+      >
+        <template #default="trigger">
+          <button
+            type="button"
+            class="inline-flex size-6 items-center justify-center rounded text-sm text-ink-gray-7 hover:bg-surface-gray-3 disabled:cursor-not-allowed disabled:opacity-50 aria-pressed:bg-surface-gray-3"
+            :aria-label="item.label"
+            :aria-pressed="trigger.isActive === true || isPressed(item)"
+            :disabled="isItemDisabled(item)"
+            @click="isItemDisabled(item) ? undefined : trigger.onClick()"
+          >
+            <ItemContent :item="item" />
+          </button>
+        </template>
+      </component>
+      <div
+        v-else-if="isGroup(item)"
+        data-slot="menu-group"
+        class="flex items-center gap-1"
+      >
+        <span class="px-2 text-sm font-medium text-ink-gray-7">{{
+          item.label
+        }}</span>
+        <Tooltip
+          v-for="groupItem in item.items"
+          :key="groupItem.label"
+          :text="groupItem.label"
+        >
+          <button
+            type="button"
+            class="inline-flex size-6 items-center justify-center rounded text-sm text-ink-gray-7 hover:bg-surface-gray-3 disabled:cursor-not-allowed disabled:opacity-50 aria-pressed:bg-surface-gray-3"
+            :aria-label="groupItem.label"
+            :aria-pressed="isPressed(groupItem)"
+            :disabled="isItemDisabled(groupItem)"
+            @click="run(groupItem, $event)"
+          >
+            <ItemContent :item="groupItem" />
+          </button>
+        </Tooltip>
+      </div>
+      <Tooltip v-else :text="item.label">
         <button
           type="button"
           class="inline-flex size-6 items-center justify-center rounded text-sm text-ink-gray-7 hover:bg-surface-gray-3 disabled:cursor-not-allowed disabled:opacity-50 aria-pressed:bg-surface-gray-3"
           :aria-label="item.label"
-          :aria-pressed="trigger.isActive === true || isPressed(item)"
+          :aria-pressed="isPressed(item)"
           :disabled="isItemDisabled(item)"
-          @click="isItemDisabled(item) ? undefined : trigger.onClick()"
+          @click="run(item, $event)"
         >
           <ItemContent :item="item" />
         </button>
-      </template>
-    </component>
-    <div
-      v-else-if="isGroup(item)"
-      data-slot="menu-group"
-      class="flex items-center gap-1"
-    >
-      <span class="px-2 text-sm font-medium text-ink-gray-7">{{
-        item.label
-      }}</span>
-      <Tooltip
-        v-for="groupItem in item.items"
-        :key="groupItem.label"
-        :text="groupItem.label"
-      >
-        <button
-          type="button"
-          class="inline-flex size-6 items-center justify-center rounded text-sm text-ink-gray-7 hover:bg-surface-gray-3 disabled:cursor-not-allowed disabled:opacity-50 aria-pressed:bg-surface-gray-3"
-          :aria-label="groupItem.label"
-          :aria-pressed="isPressed(groupItem)"
-          :disabled="isItemDisabled(groupItem)"
-          @click="run(groupItem, $event)"
-        >
-          <ItemContent :item="groupItem" />
-        </button>
       </Tooltip>
-    </div>
-    <Tooltip v-else :text="item.label">
-      <button
-        type="button"
-        class="inline-flex size-6 items-center justify-center rounded text-sm text-ink-gray-7 hover:bg-surface-gray-3 disabled:cursor-not-allowed disabled:opacity-50 aria-pressed:bg-surface-gray-3"
-        :aria-label="item.label"
-        :aria-pressed="isPressed(item)"
-        :disabled="isItemDisabled(item)"
-        @click="run(item, $event)"
-      >
-        <ItemContent :item="item" />
-      </button>
-    </Tooltip>
-  </template>
+    </template>
+  </TooltipProvider>
 </template>
