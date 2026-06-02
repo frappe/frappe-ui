@@ -190,15 +190,63 @@ export const TableNavigation = Extension.create({
             }
           },
 
-          handleClick(view, pos) {
-            const $cell = cellAround(view.state.doc.resolve(pos))
-            if (!$cell) return false
-            // Second click on the already-selected cell starts editing at the
-            // click point; first click selects the cell (navigate).
-            if (isOnCell(view.state.selection, $cell)) {
-              return editCell(editor, $cell, pos)
-            }
-            return selectCell(editor, $cell.pos)
+          // Select the cell on mousedown — before the browser places a text
+          // caret — so a click lands straight in navigate mode with no caret
+          // flash. A second click on the already-active cell falls through to
+          // the default (caret) to start editing.
+          handleDOMEvents: {
+            mousedown(view, event) {
+              if (
+                event.button !== 0 ||
+                event.shiftKey ||
+                event.ctrlKey ||
+                event.metaKey ||
+                event.altKey
+              ) {
+                return false
+              }
+              const coords = view.posAtCoords({
+                left: event.clientX,
+                top: event.clientY,
+              })
+              if (!coords) return false
+              const $cell = cellAround(view.state.doc.resolve(coords.pos))
+              if (!$cell) return false
+              // Clicking the active cell again → let the default place the caret.
+              if (isOnCell(view.state.selection, $cell)) return false
+
+              event.preventDefault()
+              const anchorPos = $cell.pos
+              view.dispatch(
+                view.state.tr.setSelection(
+                  CellSelection.create(view.state.doc, anchorPos),
+                ),
+              )
+              if (!view.hasFocus()) view.focus()
+
+              // Drag to extend into a multi-cell selection (e.g. for merge).
+              const onMove = (e: MouseEvent) => {
+                const c = view.posAtCoords({ left: e.clientX, top: e.clientY })
+                if (!c) return
+                const $c = cellAround(view.state.doc.resolve(c.pos))
+                if (!$c) return
+                const next = CellSelection.create(
+                  view.state.doc,
+                  anchorPos,
+                  $c.pos,
+                )
+                if (!view.state.selection.eq(next)) {
+                  view.dispatch(view.state.tr.setSelection(next))
+                }
+              }
+              const onUp = () => {
+                document.removeEventListener('mousemove', onMove)
+                document.removeEventListener('mouseup', onUp, true)
+              }
+              document.addEventListener('mousemove', onMove)
+              document.addEventListener('mouseup', onUp, true)
+              return true
+            },
           },
 
           // Typing while a cell is selected starts editing (append) instead of
