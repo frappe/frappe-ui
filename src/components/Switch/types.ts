@@ -14,11 +14,12 @@ export interface SwitchProps extends InputLabelingProps {
   variant?: 'default' | 'padded'
 
   /**
-   * Position of the switch control relative to the label.
-   * Defaults to automatic — `left` for label-only rows and `right` when a
-   * `description` is present. Pass `left` or `right` to override.
+   * Position of the switch control relative to the label, along the inline
+   * axis (RTL-aware). `start` is the leading side, `end` the trailing side.
+   * Defaults to automatic — `start` for label-only rows and `end` when a
+   * `description` is present. Pass `start` or `end` to override.
    */
-  switchPosition?: 'left' | 'right'
+  switchPosition?: 'start' | 'end'
 
   /** Disables the switch and prevents interaction */
   disabled?: boolean
