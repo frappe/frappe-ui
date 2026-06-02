@@ -24,6 +24,7 @@ import type { ResolvedPos } from '@tiptap/pm/model'
 import {
   CellSelection,
   cellAround,
+  goToNextCell,
   isInTable,
   nextCell,
   selectionCell,
@@ -107,6 +108,20 @@ function moveCell(editor: Editor, axis: Axis, dir: number): boolean {
   return true
 }
 
+/**
+ * Tab / Shift-Tab: move to the next/previous cell and land in navigate mode
+ * (highlight, no caret), exiting edit mode. Wraps across rows via the table's
+ * own `goToNextCell`, then converts its text selection to a cell selection.
+ */
+function tabToCell(editor: Editor, dir: 1 | -1): boolean {
+  const { state, view } = editor
+  if (!isInTable(state)) return false
+  if (!goToNextCell(dir)(state, view.dispatch)) return false
+  const $cell = cellAround(editor.state.selection.$head)
+  if ($cell) selectCell(editor, $cell.pos)
+  return true
+}
+
 /** A single-cell CellSelection sitting on exactly the given cell. */
 function isOnCell(selection: unknown, $cell: ResolvedPos): boolean {
   return (
@@ -131,6 +146,14 @@ export const TableNavigation = Extension.create({
             const { state } = view
             if (!isInTable(state)) return false
             const navigating = state.selection instanceof CellSelection
+
+            // Tab moves to the next/previous cell in navigate mode, exiting edit
+            // mode (works from either mode). Consume it in a table either way so
+            // focus never leaves the cell grid.
+            if (event.key === 'Tab') {
+              tabToCell(editor, event.shiftKey ? -1 : 1)
+              return true
+            }
 
             // In edit mode, keep arrows inside the cell (no escaping to the next
             // cell or out of the table); leave the cell via Escape or Tab.
