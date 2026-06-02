@@ -2,6 +2,7 @@
 import { computed, h, ref, watch, type Component } from 'vue'
 import type { CommandMenuItem, MenuGroupItem, MenuItem } from './menu'
 import type { Editor } from './useEditor'
+import Tooltip from '#components/Tooltip/Tooltip.vue'
 
 const props = defineProps<{
   editor: Editor | null
@@ -139,29 +140,34 @@ function run(item: CommandMenuItem, event?: MouseEvent) {
       <span class="px-2 text-sm font-medium text-ink-gray-7">{{
         item.label
       }}</span>
-      <button
+      <Tooltip
         v-for="groupItem in item.items"
         :key="groupItem.label"
+        :text="groupItem.label"
+      >
+        <button
+          type="button"
+          class="inline-flex size-6 items-center justify-center rounded text-sm text-ink-gray-7 hover:bg-surface-gray-3 disabled:cursor-not-allowed disabled:opacity-50 aria-pressed:bg-surface-gray-3"
+          :aria-label="groupItem.label"
+          :aria-pressed="isPressed(groupItem)"
+          :disabled="isItemDisabled(groupItem)"
+          @click="run(groupItem, $event)"
+        >
+          <ItemContent :item="groupItem" />
+        </button>
+      </Tooltip>
+    </div>
+    <Tooltip v-else :text="item.label">
+      <button
         type="button"
         class="inline-flex size-6 items-center justify-center rounded text-sm text-ink-gray-7 hover:bg-surface-gray-3 disabled:cursor-not-allowed disabled:opacity-50 aria-pressed:bg-surface-gray-3"
-        :aria-label="groupItem.label"
-        :aria-pressed="isPressed(groupItem)"
-        :disabled="isItemDisabled(groupItem)"
-        @click="run(groupItem, $event)"
+        :aria-label="item.label"
+        :aria-pressed="isPressed(item)"
+        :disabled="isItemDisabled(item)"
+        @click="run(item, $event)"
       >
-        <ItemContent :item="groupItem" />
+        <ItemContent :item="item" />
       </button>
-    </div>
-    <button
-      v-else
-      type="button"
-      class="inline-flex size-6 items-center justify-center rounded text-sm text-ink-gray-7 hover:bg-surface-gray-3 disabled:cursor-not-allowed disabled:opacity-50 aria-pressed:bg-surface-gray-3"
-      :aria-label="item.label"
-      :aria-pressed="isPressed(item)"
-      :disabled="isItemDisabled(item)"
-      @click="run(item, $event)"
-    >
-      <ItemContent :item="item" />
-    </button>
+    </Tooltip>
   </template>
 </template>
