@@ -1,3 +1,8 @@
+// Editor styles ship with the package: importing from `frappe-ui/editor` pulls
+// in the ProseMirror/prose-v3 rules so the editor is self-contained and does not
+// rely on any other component's stylesheet being loaded.
+import './style.css'
+
 // Engine
 export {
   useEditor,
