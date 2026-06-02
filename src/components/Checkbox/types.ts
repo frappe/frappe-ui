@@ -5,12 +5,20 @@ export interface CheckboxProps extends InputLabelingProps {
   /** Controls the size of the checkbox */
   size?: ToggleSize
 
+  /**
+   * Visual style of the checkbox row.
+   * `padded` wraps the control and label in a clickable surface with hover,
+   * active and focus states — useful for selection lists and menu items.
+   * The control always stays on the leading side.
+   */
+  variant?: 'default' | 'padded'
+
   /** Disables the checkbox interaction */
   disabled?: boolean
 
   /**
    * Adds padding around the checkbox.
-   * @deprecated Use `data-*` styling hooks instead.
+   * @deprecated Use `variant="padded"` instead.
    */
   padding?: boolean
 
