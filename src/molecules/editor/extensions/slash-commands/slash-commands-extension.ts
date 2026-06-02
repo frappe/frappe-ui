@@ -8,8 +8,8 @@ import {
   commandMeta,
   headingMeta,
   type EditorCommandMeta,
-} from '@molecules/editor/commands'
-import { filterByQuery } from '@molecules/editor/extensions/shared/suggestion-helpers'
+} from '#molecules/editor/commands'
+import { filterByQuery } from '#molecules/editor/extensions/shared/suggestion-helpers'
 import SlashCommandsList from './SlashCommandsList.vue'
 
 export const SlashCommandSuggestionKey = new PluginKey('slashCommandSuggestion')

@@ -3,12 +3,12 @@ import type { Editor } from '@tiptap/core'
 import {
   resolveUploadOptions,
   uploadFilesParallel,
-} from '@molecules/editor/extensions/shared/media-upload-engine'
+} from '#molecules/editor/extensions/shared/media-upload-engine'
 import type {
   ExistingImage,
   MediaUploadOptions,
   UploadResult,
-} from '@molecules/editor/extensions/shared/upload-types'
+} from '#molecules/editor/extensions/shared/upload-types'
 import {
   existingItemId,
   fileItemId,

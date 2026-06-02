@@ -27,8 +27,8 @@
 import { computed, toRaw } from 'vue'
 import { NodeViewContent, nodeViewProps, NodeViewWrapper } from '@tiptap/vue-3'
 import { createLowlight } from 'lowlight'
-import { useNodeViewEditable } from '@molecules/editor/composables/useNodeViewEditable'
-import { listEditorLanguages } from '@molecules/editor/extensions/shared/lowlight-languages'
+import { useNodeViewEditable } from '#molecules/editor/composables/useNodeViewEditable'
+import { listEditorLanguages } from '#molecules/editor/extensions/shared/lowlight-languages'
 import './CodeBlockComponent.css'
 
 type Lowlight = ReturnType<typeof createLowlight>

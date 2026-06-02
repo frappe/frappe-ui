@@ -36,8 +36,8 @@ import {
   type PropType,
   type ComponentPublicInstance,
 } from 'vue'
-import type { BaseSuggestionItem } from '@molecules/editor/extensions/shared/suggestion-types'
-import { useSuggestionList } from '@molecules/editor/composables/useSuggestionList'
+import type { BaseSuggestionItem } from '#molecules/editor/extensions/shared/suggestion-types'
+import { useSuggestionList } from '#molecules/editor/composables/useSuggestionList'
 import SuggestionListItem from './SuggestionListItem.vue'
 
 const props = defineProps({

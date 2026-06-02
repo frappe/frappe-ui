@@ -31,19 +31,19 @@
 <script setup lang="ts">
 import { computed, toRaw } from 'vue'
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
-import { useNodeViewEditable } from '@molecules/editor/composables/useNodeViewEditable'
+import { useNodeViewEditable } from '#molecules/editor/composables/useNodeViewEditable'
 import {
   safeGetPos,
   getExtensionHTMLAttributes,
   dispatchIfAlive,
-} from '@molecules/editor/extensions/shared/node-view'
-import { foldHeadings } from '@molecules/editor/extensions/shared/heading-tree-utils'
-import { useScrollContainer } from '@molecules/editor/composables/useScrollContainer'
-import { useTocAnchors } from '@molecules/editor/composables/useTocAnchors'
+} from '#molecules/editor/extensions/shared/node-view'
+import { foldHeadings } from '#molecules/editor/extensions/shared/heading-tree-utils'
+import { useScrollContainer } from '#molecules/editor/composables/useScrollContainer'
+import { useTocAnchors } from '#molecules/editor/composables/useTocAnchors'
 import {
   useTocActiveHeading,
   type EnrichedAnchor,
-} from '@molecules/editor/composables/useTocActiveHeading'
+} from '#molecules/editor/composables/useTocActiveHeading'
 import { scrollToHeading } from './toc-scroll-controller'
 import TocItem from './TocItem.vue'
 

@@ -13,7 +13,7 @@ export type {
   MediaUploadOptions,
   UploadResult,
   UploadedFile,
-} from '@molecules/editor/extensions/shared/media-upload-types'
+} from '#molecules/editor/extensions/shared/media-upload-types'
 
 /**
  * An image already present in the document (or a freshly-uploaded one rendered

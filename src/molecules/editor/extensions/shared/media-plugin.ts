@@ -12,13 +12,13 @@ import { Plugin, Selection } from '@tiptap/pm/state'
 import type { Transaction, EditorState } from '@tiptap/pm/state'
 import type { EditorView } from '@tiptap/pm/view'
 import type { Editor } from '@tiptap/core'
-import { dispatchIfAlive } from '@molecules/editor/extensions/shared/node-view'
-import { resolveUploadOptions } from '@molecules/editor/extensions/shared/media-upload-engine'
+import { dispatchIfAlive } from '#molecules/editor/extensions/shared/node-view'
+import { resolveUploadOptions } from '#molecules/editor/extensions/shared/media-upload-engine'
 import type {
   MediaUploadConfig,
   MediaUploadEngine,
   MediaUploadOptions,
-} from '@molecules/editor/extensions/shared/media-upload-types'
+} from '#molecules/editor/extensions/shared/media-upload-types'
 
 /** Bridge to read the live extension `editor`/`options` at event time. */
 export interface MediaPluginHost {

@@ -11,12 +11,12 @@ import type { EditorView } from '@tiptap/pm/view'
 import {
   dispatchIfAlive,
   findNodeByUploadId,
-} from '@molecules/editor/extensions/shared/node-view'
-import type { MediaDimensions } from '@molecules/editor/extensions/shared/media-dimensions'
+} from '#molecules/editor/extensions/shared/node-view'
+import type { MediaDimensions } from '#molecules/editor/extensions/shared/media-dimensions'
 import type {
   InsertMode,
   UploadedFile,
-} from '@molecules/editor/extensions/shared/media-upload-types'
+} from '#molecules/editor/extensions/shared/media-upload-types'
 
 /** Optional intrinsic dimensions (null when the probe failed). */
 export interface OptionalDimensions {

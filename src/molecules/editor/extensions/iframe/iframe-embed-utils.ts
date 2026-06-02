@@ -12,7 +12,7 @@
  *
  * Everything is side-effect-free and unit-testable.
  */
-import { matchesHostname } from '@molecules/editor/extensions/shared/url-safety'
+import { matchesHostname } from '#molecules/editor/extensions/shared/url-safety'
 
 const EDITOR_PADDING = 40
 

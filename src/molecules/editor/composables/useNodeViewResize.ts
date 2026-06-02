@@ -17,7 +17,7 @@
  */
 import { ref, onUnmounted, type Ref } from 'vue'
 import type { Editor } from '@tiptap/core'
-import { safeGetPos } from '@molecules/editor/extensions/shared/node-view'
+import { safeGetPos } from '#molecules/editor/extensions/shared/node-view'
 
 export interface ResizeArgs {
   /** The element being resized (image / video / iframe). May be null pre-mount. */

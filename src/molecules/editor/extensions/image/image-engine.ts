@@ -7,9 +7,9 @@
  * so the node view can show a loading placeholder. All upload/queue/find/
  * dimension logic lives in the shared engine — this file only supplies config.
  */
-import { createMediaUploadEngine } from '@molecules/editor/extensions/shared/media-upload-engine'
-import { probeImageDimensions } from '@molecules/editor/extensions/shared/media-dimensions'
-import type { MediaUploadConfig } from '@molecules/editor/extensions/shared/media-upload-engine'
+import { createMediaUploadEngine } from '#molecules/editor/extensions/shared/media-upload-engine'
+import { probeImageDimensions } from '#molecules/editor/extensions/shared/media-dimensions'
+import type { MediaUploadConfig } from '#molecules/editor/extensions/shared/media-upload-engine'
 
 export const imageUploadConfig: MediaUploadConfig = {
   nodeName: 'image',

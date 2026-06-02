@@ -34,7 +34,7 @@ import {
   dataUrlOrBlobToFile,
   type MediaUploadEngine,
   type MediaUploadOptions,
-} from '@molecules/editor/extensions/shared/media-upload-engine'
+} from '#molecules/editor/extensions/shared/media-upload-engine'
 import { collectImageNodes, parseHtmlToSlice } from './paste-html-utils'
 
 /**

@@ -1,8 +1,8 @@
 import { type Editor, getMarkRange } from '@tiptap/core'
 import type { MarkType } from '@tiptap/pm/model'
-import { mapStoredRange } from '@molecules/editor/extensions/shared/node-view'
+import { mapStoredRange } from '#molecules/editor/extensions/shared/node-view'
 import { openLinkPopup } from './link-popup-controller'
-import type { VirtualReference } from '@molecules/editor/composables/useFloatingPopup'
+import type { VirtualReference } from '#molecules/editor/composables/useFloatingPopup'
 
 /**
  * A TipTap command factory: `() => ({ editor }) => boolean`.

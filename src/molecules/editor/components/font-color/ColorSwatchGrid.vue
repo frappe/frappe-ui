@@ -27,7 +27,7 @@
 </template>
 
 <script setup lang="ts">
-import Tooltip from '@components/Tooltip/Tooltip.vue'
+import Tooltip from '#components/Tooltip/Tooltip.vue'
 import type { ColorSwatch } from './swatches'
 
 defineProps<{

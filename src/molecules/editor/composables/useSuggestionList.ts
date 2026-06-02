@@ -1,11 +1,11 @@
 import { ref, watch, type Ref } from 'vue'
-import type { SuggestionListExpose } from '@molecules/editor/extensions/shared/suggestion-types'
+import type { SuggestionListExpose } from '#molecules/editor/extensions/shared/suggestion-types'
 
 /**
  * Selection + keyboard state machine shared by `SuggestionList.vue`.
  *
  * Canonical import path:
- *   `@molecules/editor/composables/useSuggestionList`
+ *   `#molecules/editor/composables/useSuggestionList`
  *
  * Owns the empty-list guard: ArrowUp/ArrowDown short-circuit when there are no
  * items, so the wrap-around index math never evaluates `% 0` (which would yield

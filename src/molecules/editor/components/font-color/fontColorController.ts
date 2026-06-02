@@ -1,7 +1,7 @@
 import { defineComponent, h } from 'vue'
 import type { Editor } from '@tiptap/core'
-import { useFloatingPopup } from '@molecules/editor/composables/useFloatingPopup'
-import { useNamedColorState } from '@molecules/editor/composables/useNamedColorState'
+import { useFloatingPopup } from '#molecules/editor/composables/useFloatingPopup'
+import { useNamedColorState } from '#molecules/editor/composables/useNamedColorState'
 import ColorSwatchGrid from './ColorSwatchGrid.vue'
 import { highlightSwatches, textSwatches } from './swatches'
 

@@ -12,7 +12,7 @@
 import {
   PALETTE_COLORS,
   type PaletteColor,
-} from '@molecules/editor/extensions/shared/color-palette'
+} from '#molecules/editor/extensions/shared/color-palette'
 
 export interface ColorSwatch {
   /** Lowercase palette value stored on the mark, e.g. `'blue'`. `null` = Default. */

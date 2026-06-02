@@ -3,7 +3,7 @@ import { VueNodeViewRenderer } from '@tiptap/vue-3'
 import ImageGroupNodeView from './ImageGroupNodeView.vue'
 import { buildImageGroupCommands } from './image-group-commands'
 import { clampColumns, DEFAULT_COLUMNS } from './image-group-utils'
-import type { UploadedFile } from '@utils/useFileUpload'
+import type { UploadedFile } from '#utils/useFileUpload'
 
 export interface ImageGroupOptions {
   /**

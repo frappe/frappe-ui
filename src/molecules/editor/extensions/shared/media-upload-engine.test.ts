@@ -14,21 +14,21 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-vi.mock('@utils/file-to-base64', () => ({
+vi.mock('#utils/file-to-base64', () => ({
   default: vi.fn(async () => 'data:image/png;base64,AAAA'),
 }))
-vi.mock('@molecules/editor/extensions/shared/url-safety', () => ({
+vi.mock('#molecules/editor/extensions/shared/url-safety', () => ({
   isSafeUrl: () => true,
 }))
-vi.mock('@molecules/editor/extensions/shared/upload-id', () => ({
+vi.mock('#molecules/editor/extensions/shared/upload-id', () => ({
   createUploadId: () => 'uid-1',
 }))
-vi.mock('@molecules/editor/extensions/shared/media-upload-state', () => ({
+vi.mock('#molecules/editor/extensions/shared/media-upload-state', () => ({
   setLocalFile: vi.fn(),
   getLocalFile: vi.fn(() => ({ file: new File(['x'], 'x.png') })),
   deleteLocalFile: vi.fn(),
 }))
-vi.mock('@molecules/editor/extensions/shared/media-node-ops', () => ({
+vi.mock('#molecules/editor/extensions/shared/media-node-ops', () => ({
   insertPlaceholder: vi.fn(),
   applyUploadSuccess: vi.fn(),
   applyUploadError: vi.fn(),
@@ -36,15 +36,15 @@ vi.mock('@molecules/editor/extensions/shared/media-node-ops', () => ({
   findNodeBySource: vi.fn(() => 0),
 }))
 
-import { createMediaUploadEngine } from '@molecules/editor/extensions/shared/media-upload-engine'
-import fileToBase64 from '@utils/file-to-base64'
-import { setLocalFile } from '@molecules/editor/extensions/shared/media-upload-state'
+import { createMediaUploadEngine } from '#molecules/editor/extensions/shared/media-upload-engine'
+import fileToBase64 from '#utils/file-to-base64'
+import { setLocalFile } from '#molecules/editor/extensions/shared/media-upload-state'
 import {
   insertPlaceholder,
   applyUploadSuccess,
   applyUploadError,
-} from '@molecules/editor/extensions/shared/media-node-ops'
-import type { MediaUploadConfig } from '@molecules/editor/extensions/shared/media-upload-types'
+} from '#molecules/editor/extensions/shared/media-node-ops'
+import type { MediaUploadConfig } from '#molecules/editor/extensions/shared/media-upload-types'
 
 /** A throwaway stand-in for an EditorView (only identity matters to the test). */
 function makeView(): { isDestroyed: boolean; state: unknown } {

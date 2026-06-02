@@ -28,8 +28,8 @@
 </template>
 
 <script setup lang="ts">
-import type { HeadingTreeNode } from '@molecules/editor/extensions/shared/heading-tree-utils'
-import type { EnrichedAnchor } from '@molecules/editor/composables/useTocActiveHeading'
+import type { HeadingTreeNode } from '#molecules/editor/extensions/shared/heading-tree-utils'
+import type { EnrichedAnchor } from '#molecules/editor/composables/useTocActiveHeading'
 
 const props = defineProps<{
   node: HeadingTreeNode<EnrichedAnchor>

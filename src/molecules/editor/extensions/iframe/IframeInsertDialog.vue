@@ -45,9 +45,9 @@
 <script setup lang="ts">
 import { computed, onMounted, nextTick, useTemplateRef } from 'vue'
 import type { Editor } from '@tiptap/core'
-import Dialog from '@components/Dialog/Dialog.vue'
-import Button from '@components/Button/Button.vue'
-import Textarea from '@components/Textarea/Textarea.vue'
+import Dialog from '#components/Dialog/Dialog.vue'
+import Button from '#components/Button/Button.vue'
+import Textarea from '#components/Textarea/Textarea.vue'
 import { useIframeDialog } from './useIframeDialog'
 
 const props = defineProps<{

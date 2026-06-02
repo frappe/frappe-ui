@@ -63,9 +63,9 @@
 
 <script setup lang="ts">
 import { onMounted, ref, useTemplateRef, nextTick } from 'vue'
-import Button from '@components/Button/Button.vue'
-import TextInput from '@components/TextInput/TextInput.vue'
-import { isSafeUrl } from '@molecules/editor/extensions/shared/url-safety'
+import Button from '#components/Button/Button.vue'
+import TextInput from '#components/TextInput/TextInput.vue'
+import { isSafeUrl } from '#molecules/editor/extensions/shared/url-safety'
 
 const props = defineProps<{
   href: string

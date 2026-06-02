@@ -9,7 +9,7 @@
  */
 import { Plugin, PluginKey } from '@tiptap/pm/state'
 import type { EditorView } from '@tiptap/pm/view'
-import { dispatchIfAlive } from '@molecules/editor/extensions/shared/node-view'
+import { dispatchIfAlive } from '#molecules/editor/extensions/shared/node-view'
 import { validateIframeUrl } from './iframe-allowlist'
 import {
   processEmbedUrl,

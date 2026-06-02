@@ -9,9 +9,9 @@
 import type { CommandProps, RawCommands } from '@tiptap/core'
 import type { Node as ProseMirrorNode } from '@tiptap/pm/model'
 import type { Editor } from '@tiptap/core'
-import { safeGetPos } from '@molecules/editor/extensions/shared/node-view'
+import { safeGetPos } from '#molecules/editor/extensions/shared/node-view'
 import { clampColumns } from './image-group-utils'
-import type { ExistingImage } from '@molecules/editor/extensions/shared/upload-types'
+import type { ExistingImage } from '#molecules/editor/extensions/shared/upload-types'
 
 const IMAGE_GROUP = 'imageGroup'
 

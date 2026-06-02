@@ -17,8 +17,8 @@
 import { ref, type PropType } from 'vue'
 import SuggestionList from '../suggestion/SuggestionList.vue'
 import type { Editor, Range } from '@tiptap/core'
-import type { SuggestionListExpose } from '@molecules/editor/extensions/shared/suggestion-types'
-import { forwardKeyDown } from '@molecules/editor/composables/useSuggestionList'
+import type { SuggestionListExpose } from '#molecules/editor/extensions/shared/suggestion-types'
+import { forwardKeyDown } from '#molecules/editor/composables/useSuggestionList'
 import type { EmojiItem } from './emoji-extension'
 
 const props = defineProps({

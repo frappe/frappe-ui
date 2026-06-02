@@ -3,7 +3,7 @@ import {
   type BaseSuggestionItem,
   createSuggestionExtension,
 } from '../suggestion/createSuggestionExtension'
-import { filterByQuery } from '@molecules/editor/extensions/shared/suggestion-helpers'
+import { filterByQuery } from '#molecules/editor/extensions/shared/suggestion-helpers'
 import EmojiList from './EmojiList.vue'
 import _EMOJIS from './emojis.json'
 

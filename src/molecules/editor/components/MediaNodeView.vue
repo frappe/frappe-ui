@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { ref, computed, watch, toRaw } from 'vue'
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
-import LoadingIndicator from '@components/LoadingIndicator.vue'
-import Button from '@components/Button/Button.vue'
-import { ErrorMessage } from '@components/ErrorMessage'
-import { getLocalFile } from '@molecules/editor/extensions/shared/media-upload-state'
-import { useNodeViewEditable } from '@molecules/editor/composables/useNodeViewEditable'
-import { useNodeViewResize } from '@molecules/editor/composables/useNodeViewResize'
+import LoadingIndicator from '#components/LoadingIndicator.vue'
+import Button from '#components/Button/Button.vue'
+import { ErrorMessage } from '#components/ErrorMessage'
+import { getLocalFile } from '#molecules/editor/extensions/shared/media-upload-state'
+import { useNodeViewEditable } from '#molecules/editor/composables/useNodeViewEditable'
+import { useNodeViewResize } from '#molecules/editor/composables/useNodeViewResize'
 import MediaToolbar from './MediaToolbar.vue'
 import {
   wrapperClasses,

@@ -10,7 +10,7 @@
  * logic — hence the `*-controller.ts` suffix per CONVENTIONS §3.2.
  */
 import type { Editor } from '@tiptap/core'
-import { safeGetPos } from '@molecules/editor/extensions/shared/node-view'
+import { safeGetPos } from '#molecules/editor/extensions/shared/node-view'
 import type { MediaAlign } from './media-node-view-utils'
 
 type GetPos = () => number | undefined

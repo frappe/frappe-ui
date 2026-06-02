@@ -1,6 +1,6 @@
 import type { Editor } from '@tiptap/core'
 import { onBeforeUnmount, onMounted, ref, type Ref } from 'vue'
-import { PALETTE_NAMES } from '@molecules/editor/extensions/shared/color-palette'
+import { PALETTE_NAMES } from '#molecules/editor/extensions/shared/color-palette'
 
 export interface NamedColorState {
   /** The active named text color, or `null` when none / mixed / unset. */

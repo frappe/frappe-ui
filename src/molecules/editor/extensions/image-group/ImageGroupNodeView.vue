@@ -84,10 +84,10 @@ import { computed, ref, toRaw } from 'vue'
 import { NodeViewWrapper, type Editor } from '@tiptap/vue-3'
 import type { NodeViewProps } from '@tiptap/vue-3'
 import type { Node as ProseMirrorNode } from '@tiptap/pm/model'
-import Button from '@components/Button/Button.vue'
-import Select from '@components/Select/Select.vue'
-import ImageViewerModal from '@molecules/editor/components/ImageViewerModal.vue'
-import { useNodeViewEditable } from '@molecules/editor/composables/useNodeViewEditable'
+import Button from '#components/Button/Button.vue'
+import Select from '#components/Select/Select.vue'
+import ImageViewerModal from '#molecules/editor/components/ImageViewerModal.vue'
+import { useNodeViewEditable } from '#molecules/editor/composables/useNodeViewEditable'
 import ImageGroupUploadDialog from './ImageGroupUploadDialog.vue'
 import { clampColumns, columnSelectOptions } from './image-group-utils'
 import {
@@ -95,7 +95,7 @@ import {
   replaceImageGroup,
   setImageGroupColumns,
 } from './image-group-commands'
-import type { ExistingImage } from '@molecules/editor/extensions/shared/upload-types'
+import type { ExistingImage } from '#molecules/editor/extensions/shared/upload-types'
 
 const props = defineProps<NodeViewProps & { editor: Editor }>()
 

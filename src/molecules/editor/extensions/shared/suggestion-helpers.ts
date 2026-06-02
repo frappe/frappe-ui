@@ -5,7 +5,7 @@ import type { Editor, Range } from '@tiptap/core'
  * the single case-insensitive filter, and a typed options lookup.
  *
  * Canonical import path:
- *   `@molecules/editor/extensions/shared/suggestion-helpers`
+ *   `#molecules/editor/extensions/shared/suggestion-helpers`
  */
 
 /**
