@@ -20,6 +20,12 @@
     default: '"default"'
   },
   {
+    name: 'switchPosition',
+    description: 'Position of the switch control relative to the label.\nDefaults to automatic — `left` for label-only rows and `right` when a\n`description` is present. Pass `left` or `right` to override.',
+    required: false,
+    type: '"left" | "right"'
+  },
+  {
     name: 'disabled',
     description: 'Disables the switch and prevents interaction',
     required: false,
