@@ -6,6 +6,13 @@ export interface SwitchProps extends InputLabelingProps {
   /** Size of the switch control */
   size?: ToggleSize
 
+  /**
+   * Visual style of the switch row.
+   * `padded` wraps the control and label in a clickable surface with hover,
+   * active and focus states — useful for settings rows and menu items.
+   */
+  variant?: 'default' | 'padded'
+
   /** Disables the switch and prevents interaction */
   disabled?: boolean
 

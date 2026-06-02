@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col">
+  <div class="flex flex-col" :class="containerClasses" @click="onContainerClick">
     <div :class="switchGroupClasses">
       <div class="flex flex-col gap-1">
         <div class="flex items-center">
@@ -74,6 +74,7 @@ import type { SwitchProps } from './types'
 
 const props = withDefaults(defineProps<SwitchProps>(), {
   size: 'sm',
+  variant: 'default',
   disabled: false,
   labelClasses: '',
 })
@@ -128,6 +129,9 @@ const {
 const switchClasses = computed(() => {
   return [
     'relative inline-flex flex-shrink-0 cursor-pointer rounded-full border-transparent transition-colors duration-100 ease-in-out items-center',
+    // The focus ring is applied globally via :focus-visible. In the padded
+    // variant it is shown on the row instead, so suppress it on the control.
+    props.variant === 'padded' ? 'focus:outline-none focus:ring-0' : '',
     'disabled:cursor-not-allowed disabled:bg-surface-gray-3',
     model.value
       ? 'bg-surface-gray-10 enabled:hover:bg-surface-gray-9 active:bg-surface-gray-8 group-hover:enabled:bg-surface-gray-9'
@@ -167,18 +171,49 @@ const switchGroupClasses = computed(() => {
   const hasLabel = props.label || slots.label
   const hasDescription = props.description || slots.description
   if (!hasLabel && !hasDescription) return undefined
-  const classes = ['flex justify-between']
-  if (!hasDescription) {
-    classes.push(
-      'group items-center gap-x-3 py-1.5 cursor-pointer rounded',
-    )
 
-    if (props.disabled) classes.push('cursor-not-allowed')
-  } else {
-    classes.push('items-start')
-    classes.push(props.size === 'md' ? 'gap-x-3.5' : 'gap-x-2.5')
+  if (hasDescription) {
+    // Settings style: label + description on the left, switch on the right.
+    return [
+      'flex justify-between items-start',
+      props.size === 'md' ? 'gap-x-3.5' : 'gap-x-2.5',
+    ]
   }
 
+  // Inline style: the switch sits on the left, right before the label.
+  const classes = [
+    'flex flex-row-reverse justify-end group items-center gap-x-2.5',
+  ]
+  if (props.variant !== 'padded') {
+    classes.push(
+      'py-1.5 cursor-pointer rounded focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-outline-gray-3',
+    )
+    if (props.disabled) classes.push('cursor-not-allowed')
+  }
   return classes
 })
+
+// In the padded variant the whole row is a clickable surface — padding,
+// hover/active/focus states and the click target wrap the label, control and
+// description together.
+const containerClasses = computed(() => {
+  if (props.variant !== 'padded') return undefined
+  const classes = ['rounded', props.size === 'md' ? 'px-3 py-2' : 'px-2 py-1.5']
+  classes.push(
+    props.disabled
+      ? 'cursor-not-allowed'
+      : 'cursor-pointer hover:bg-surface-gray-3 active:bg-surface-gray-4 [&:has(:focus-visible)]:ring-2 [&:has(:focus-visible)]:ring-outline-gray-3',
+  )
+  return classes
+})
+
+const onContainerClick = (event: MouseEvent) => {
+  if (props.variant !== 'padded' || props.disabled) return
+  const target = event.target as HTMLElement
+  // The control toggles itself via reka-ui; ignore to avoid double toggling.
+  if (target.closest('[data-slot="control"]')) return
+  // The label activates the control via its `for` attribute; ignore to avoid double toggling.
+  if (target.closest('[data-slot="label"]')) return
+  model.value = !model.value
+}
 </script>
