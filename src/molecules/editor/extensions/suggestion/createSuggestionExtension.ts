@@ -7,6 +7,7 @@ import {
   createSuggestionRenderer,
   type SuggestionFloatingOptions,
 } from '#molecules/editor/extensions/shared/suggestion-renderer'
+import { isInCode } from '#molecules/editor/extensions/shared/suggestion-helpers'
 
 // Re-export for back-compat: several extensions still import the base item type
 // from this module path. The canonical home is `suggestion-types`.
@@ -59,6 +60,9 @@ export function createSuggestionExtension<TItem extends BaseSuggestionItem>(
           pluginKey: options.pluginKey,
           items: options.items,
           command: options.command,
+          // Stay inert inside code blocks / inline code, where a trigger char
+          // (`:`/`#`/`@`) is literal source the author is typing — not a cue.
+          allow: ({ state, range }) => !isInCode(state, range.from),
           allowSpaces: options.allowSpaces,
           startOfLine: options.startOfLine,
           decorationTag: options.decorationTag || 'span',

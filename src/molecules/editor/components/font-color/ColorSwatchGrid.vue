@@ -1,5 +1,5 @@
 <template>
-  <div class="mt-1 grid grid-cols-6 gap-1">
+  <div class="mt-2 grid grid-cols-6 gap-2">
     <Tooltip
       v-for="swatch in swatches"
       :key="swatch.label"
@@ -10,13 +10,11 @@
         type="button"
         :aria-label="swatch.label"
         :aria-pressed="swatch.value === active"
-        class="flex h-5 w-5 items-center justify-center rounded border text-base"
+        class="flex h-6 w-6 items-center justify-center rounded-sm border text-base focus:outline-none focus-visible:ring focus-visible:ring-outline-gray-3"
         :class="[
           swatch.class,
           variant === 'highlight' ? 'text-ink-gray-9' : '',
-          swatch.value === active
-            ? 'ring-2 ring-outline-gray-3 ring-offset-1'
-            : '',
+          swatch.value === active ? 'ring-2 ring-outline-gray-4' : '',
         ]"
         @click="emit('select', swatch.value)"
       >

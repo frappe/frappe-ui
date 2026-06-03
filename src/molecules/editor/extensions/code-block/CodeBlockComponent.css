@@ -1,29 +1,9 @@
-/* CodeBlock styles */
-.code-block {
-  position: relative;
-}
-
-.code-block-container {
-  position: relative;
-}
-
-.language-selector {
-  position: absolute;
-  top: 0.25rem;
-  right: 0.25rem;
-  padding-top: 0;
-  padding-bottom: 0;
-}
-
-.language-label {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.75rem;
-  font-size: 12px;
-  color: var(--ink-gray-4);
-  pointer-events: none;
-  user-select: none;
-}
+/* CodeBlock styles
+ *
+ * Layout (container/toolbar/gutter/copy button) lives as Tailwind utilities in
+ * CodeBlockComponent.vue. Only the `pre` shell + highlight.js theme stay here —
+ * they target ProseMirror-rendered descendants (`.hljs-*` spans) and theme
+ * variants that can't be expressed as element-level utility classes. */
 
 /* ── pre shell ────────────────────────────────────────────────── */
 .ProseMirror pre {

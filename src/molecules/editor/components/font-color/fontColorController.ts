@@ -2,6 +2,7 @@ import { defineComponent, h } from 'vue'
 import type { Editor } from '@tiptap/core'
 import { useFloatingPopup } from '#molecules/editor/composables/useFloatingPopup'
 import { useNamedColorState } from '#molecules/editor/composables/useNamedColorState'
+import EditorPopover from '#molecules/editor/components/EditorPopover.vue'
 import ColorSwatchGrid from './ColorSwatchGrid.vue'
 import { highlightSwatches, textSwatches } from './swatches'
 
@@ -28,31 +29,35 @@ const FontColorPanel = defineComponent({
 
     return () =>
       h(
-        'div',
+        EditorPopover,
         {
-          'data-slot': 'font-color-panel',
-          class: 'rounded-lg bg-surface-white p-2 shadow-2xl',
+          dialogLabel: 'Text and background color',
+          contentClass: 'rounded-md p-2.5',
         },
-        [
-          h('div', { class: 'text-sm text-ink-gray-7' }, 'Text Color'),
-          h(ColorSwatchGrid, {
-            swatches: textSwatches,
-            active: activeTextColor.value,
-            variant: 'text',
-            onSelect: selectText,
-          }),
-          h(
-            'div',
-            { class: 'mt-2 text-sm text-ink-gray-7' },
-            'Background Color',
-          ),
-          h(ColorSwatchGrid, {
-            swatches: highlightSwatches,
-            active: activeHighlightColor.value,
-            variant: 'highlight',
-            onSelect: selectHighlight,
-          }),
-        ],
+        {
+          default: () => [
+            h('div', { 'data-slot': 'font-color-panel' }, [
+              h('div', { class: 'text-sm text-ink-gray-7' }, 'Text Color'),
+              h(ColorSwatchGrid, {
+                swatches: textSwatches,
+                active: activeTextColor.value,
+                variant: 'text',
+                onSelect: selectText,
+              }),
+              h(
+                'div',
+                { class: 'mt-4 text-sm text-ink-gray-7' },
+                'Background Color',
+              ),
+              h(ColorSwatchGrid, {
+                swatches: highlightSwatches,
+                active: activeHighlightColor.value,
+                variant: 'highlight',
+                onSelect: selectHighlight,
+              }),
+            ]),
+          ],
+        },
       )
   },
 })

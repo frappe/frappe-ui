@@ -28,6 +28,29 @@ img.ProseMirror-selectednode {
   padding: 0 10px;
 }
 
+/* Fast origin-aware appear for imperatively-mounted popups (useFloatingPopup).
+ * `transform-origin` is set inline from the resolved placement. */
+.editor-floating-pop {
+  animation: editor-floating-pop-in 90ms ease-out;
+}
+
+@keyframes editor-floating-pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .editor-floating-pop {
+    animation: none;
+  }
+}
+
 .table-of-contents-node li p {
   width: fit-content;
   padding: 0 3px;
@@ -131,12 +154,58 @@ img.ProseMirror-selectednode {
   background-color: var(--surface-gray-2);
 }
 
-.ProseMirror a span[style] {
-  text-decoration: underline;
+/* Spreadsheet-style active cell: prosemirror-tables adds `.selectedCell` to the
+   navigated cell (or a multi-cell selection). Overlay a translucent fill (keeps
+   text readable) + ring, applied instantly — no transition. `::after` rides the
+   cell's `position: relative`. */
+.ProseMirror .selectedCell::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 2;
+  background-color: color-mix(in srgb, var(--surface-gray-2) 10%, transparent);
+  box-shadow: inset 0 0 0 1px var(--surface-gray-7);
+}
+
+/* Multi-cell selection: drop the per-cell ring (keep the fill, so adjacent
+   cells merge into one tinted region) and let `.table-selection-box` draw a
+   single box around the whole selection (see table-selection-overlay.ts). */
+.ProseMirror.table-cell-range .selectedCell::after {
+  box-shadow: none;
+}
+
+.ProseMirror .table-selection-box {
+  position: absolute;
+  pointer-events: none;
+  z-index: 3;
+  border-radius: 2px;
+  inset: -1px;
+  box-shadow: inset 0 0 0 1px var(--surface-gray-7);
+}
+
+/* Links underline via `border-bottom` (see prose-v3 `a` in tailwind/plugin.js),
+   whose color is fixed and ignores the text `color`. When a link wraps named-
+   color text, drop that gray border (incl. on hover) and let the colored span
+   carry the underline in `currentColor`, so the line matches the text color.
+   Compound `.prose-v3.ProseMirror` (both classes are on the editor element) so
+   these win over the legacy TextEditor's `a span[style]` underline, which may
+   still be loaded alongside this stylesheet. */
+.prose-v3.ProseMirror a:has(span[style*='--prose-color-']),
+.prose-v3.ProseMirror a:has(span[style*='--prose-color-']):hover {
+  border-bottom-color: transparent;
+}
+
+.prose-v3.ProseMirror a span[style*='--prose-color-'] {
+  text-decoration: none;
+  border-bottom: 1px solid currentColor;
 }
 
 .ProseMirror .tableWrapper {
   overflow-x: scroll;
+  /* Positioning context for the single-box multi-cell selection overlay. */
+  position: relative;
 }
 
 .prose-v3.ProseMirror[contenteditable='false']

@@ -1,5 +1,5 @@
 import Link from '@tiptap/extension-link'
-import { buildOpenLinkEditor } from './link-commands'
+import { buildOpenLinkEditor, type OpenLinkEditorOptions } from './link-commands'
 import { linkPastePlugin } from './link-paste-plugin'
 import { clearLinkOnBoundaryPlugin } from './clear-link-on-boundary-plugin'
 import { linkClickPlugin } from './link-click-plugin'
@@ -9,7 +9,7 @@ declare module '@tiptap/core' {
   interface Commands<ReturnType> {
     linkEditor: {
       /** Opens the link editor bubble menu. */
-      openLinkEditor: () => ReturnType
+      openLinkEditor: (options?: OpenLinkEditorOptions) => ReturnType
     }
   }
 }

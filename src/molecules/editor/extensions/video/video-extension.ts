@@ -193,6 +193,14 @@ export const VideoExtension = NodeExtension.create<VideoExtensionOptions>({
           return true
         },
 
+      uploadVideoFiles:
+        (files: File[], pos: number | null = null) =>
+        ({ editor }) => {
+          if (files.length === 0) return false
+          void videoEngine.processMultiple(files, editor, pos, resolve())
+          return true
+        },
+
       selectAndUploadVideo:
         () =>
         ({ editor }) => {

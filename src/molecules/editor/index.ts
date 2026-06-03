@@ -1,3 +1,8 @@
+// Editor styles ship with the package: importing from `frappe-ui/editor` pulls
+// in the ProseMirror/prose-v3 rules so the editor is self-contained and does not
+// rely on any other component's stylesheet being loaded.
+import './style.css'
+
 // Engine
 export {
   useEditor,
@@ -13,8 +18,10 @@ export { default as Editor } from './Editor.vue'
 
 // Building blocks (compose without <Editor>)
 export { default as EditorContent } from './EditorContent.vue'
+export { default as EditorDropZone } from './components/EditorDropZone.vue'
 export { default as EditorFixedMenu } from './EditorFixedMenu.vue'
 export { default as EditorBubbleMenu } from './EditorBubbleMenu.vue'
+export { default as EditorTableMenu } from './EditorTableMenu.vue'
 export { default as EditorFloatingMenu } from './EditorFloatingMenu.vue'
 
 // Kits — configurable extension bundles (StarterKit is re-exported from extensions)

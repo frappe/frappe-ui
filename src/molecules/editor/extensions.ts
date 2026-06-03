@@ -10,9 +10,14 @@ import { ExtendedCode, ExtendedCodeBlock } from './extensions/code-block'
 import {
   Table as TiptapTable,
   TableRow,
-  TableCell,
-  TableHeader,
+  TableCell as TiptapTableCell,
+  TableHeader as TiptapTableHeader,
 } from '@tiptap/extension-table'
+import {
+  cellBackgroundAttributes,
+  TableCellColor as TableCellColorExtension,
+} from './extensions/table/table-cell-color'
+import { TableSelectionOverlay as TableSelectionOverlayExtension } from './extensions/table/table-selection-overlay'
 import TaskListExtension from '@tiptap/extension-task-list'
 import TaskItemExtension from '@tiptap/extension-task-item'
 import TypographyExtension from '@tiptap/extension-typography'
@@ -26,6 +31,7 @@ import { ImageExtension } from './extensions/image'
 import { ImageGroup as ImageGroupExtension } from './extensions/image-group'
 import ImageViewerExtension from './extensions/image-viewer'
 import { VideoExtension } from './extensions/video'
+import { MediaDrop as MediaDropExtension } from './extensions/media-drop/media-drop-extension'
 import { IframeExtension } from './extensions/iframe'
 import {
   MentionExtension,
@@ -104,7 +110,26 @@ export const Link = LinkExtension
 export const Code = ExtendedCode
 export const CodeBlock = ExtendedCodeBlock
 export const Table = TiptapTable.configure({ resizable: true })
-export { TableRow, TableCell, TableHeader }
+// Cell nodes carry a named `backgroundColor` attribute (rendered via
+// `--prose-highlight-*`); see `extensions/table/table-cell-color`.
+export const TableCell = TiptapTableCell.extend({
+  addAttributes() {
+    return { ...this.parent?.(), ...cellBackgroundAttributes }
+  },
+})
+export const TableHeader = TiptapTableHeader.extend({
+  addAttributes() {
+    return { ...this.parent?.(), ...cellBackgroundAttributes }
+  },
+})
+export { TableRow }
+// Spreadsheet-style cell navigation (active-cell highlight, Enter to edit, Esc
+// to exit, arrow keys to move). Loaded alongside Table in the kits.
+export { TableNavigation } from './extensions/table/table-navigation'
+// First-class named cell background + text color commands, and the single-box
+// multi-cell selection overlay. Both loaded alongside Table.
+export const TableCellColor = TableCellColorExtension
+export const TableSelectionOverlay = TableSelectionOverlayExtension
 export const TaskList = TaskListExtension
 export const TaskItem = TaskItemExtension.configure({ nested: true })
 export const Typography = TypographyExtension
@@ -126,6 +151,7 @@ export const Image = ImageExtension
 export const ImageGroup = ImageGroupExtension
 export const ImageViewer = ImageViewerExtension
 export const Video = VideoExtension
+export const MediaDrop = MediaDropExtension
 export const Iframe = IframeExtension
 export const Mention = MentionExtension
 
