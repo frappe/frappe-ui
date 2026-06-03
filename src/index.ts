@@ -43,6 +43,7 @@ export * from './components/FormControl'
 export { default as FormLabel } from './components/FormLabel.vue'
 export * from './components/MultiSelect'
 export * from './components/Password'
+export * from './components/Radio'
 export * from './components/Select'
 // Shared by Select / MultiSelect / Combobox, so it belongs to the family
 // rather than to any one of their barrels.
