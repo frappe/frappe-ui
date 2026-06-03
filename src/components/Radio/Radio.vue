@@ -105,7 +105,7 @@ const labelClasses = computed(() => {
       md: 'text-lg',
     }[props.size],
     'font-medium',
-    props.disabled ? 'text-ink-gray-4' : 'text-ink-gray-8',
+    props.disabled ? 'text-ink-gray-4 cursor-not-allowed' : 'text-ink-gray-8 cursor-pointer',
     'select-none',
   ]
 })

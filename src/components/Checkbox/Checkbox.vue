@@ -117,7 +117,7 @@ const labelClasses = computed(() => {
       md: 'text-lg',
     }[props.size],
     'font-medium',
-    props.disabled ? 'text-ink-gray-4' : 'text-ink-gray-8',
+    props.disabled ? 'text-ink-gray-4 cursor-not-allowed' : 'text-ink-gray-8 cursor-pointer',
     'select-none',
   ]
 })
@@ -162,8 +162,8 @@ const onContainerClick = (event: MouseEvent) => {
 
 const inputClasses = computed(() => {
   let baseClasses = props.disabled
-    ? 'border-outline-gray-2 bg-surface-menu-bar text-ink-gray-3'
-    : 'border-outline-gray-4 text-ink-gray-9 hover:border-outline-gray-5 focus:ring-offset-0 focus:border-outline-gray-8 active:border-outline-gray-6 transition'
+    ? 'cursor-not-allowed border-outline-gray-2 bg-surface-menu-bar text-ink-gray-3'
+    : 'cursor-pointer border-outline-gray-4 text-ink-gray-9 hover:border-outline-gray-5 focus:ring-offset-0 focus:border-outline-gray-8 active:border-outline-gray-6 transition'
 
   let interactionClasses = props.disabled
     ? ''
