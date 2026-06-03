@@ -45,6 +45,7 @@
     <div
       v-if="showDescription || hasError || $slots.description"
       class="mt-1"
+      :class="errorIndentClasses"
     >
       <InputDescription
         v-if="showDescription || $slots.description"
@@ -205,6 +206,19 @@ const switchGroupClasses = computed(() => {
   return classes
 })
 
+// Align the error/description text under the label, not the switch.
+// Only needed when the switch leads the row (position = start and no
+// description); settings-style rows (switch at end) have the label on
+// the leading side already.
+const errorIndentClasses = computed(() => {
+  const hasDescription = props.description || slots.description
+  if (hasDescription) return undefined
+  const position = props.switchPosition ?? 'start'
+  if (position !== 'start') return undefined
+  // switch width + gap-x-2.5 (10 px)
+  return props.size === 'md' ? 'ps-[42px]' : 'ps-9'
+})
+
 // In the padded variant the whole row is a clickable surface — padding,
 // hover/active/focus states and the click target wrap the label, control and
 // description together.
@@ -212,7 +226,7 @@ const containerClasses = computed(() => {
   if (props.variant !== 'padded') return undefined
   // `group` lives on the outer surface so hovering anywhere in the padded
   // area — including the corners — drives the control's hover state too.
-  const classes = ['group rounded justify-center', props.size === 'md' ? 'h-8 px-3' : 'h-7 px-2']
+  const classes = ['group rounded justify-center transition-colors', props.size === 'md' ? 'h-8 px-3' : 'h-7 px-2']
   classes.push(
     props.disabled
       ? 'cursor-not-allowed'
