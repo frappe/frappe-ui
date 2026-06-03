@@ -161,8 +161,8 @@ const switchLabelClasses = computed(() => {
   return [
     'font-medium leading-normal',
     props.disabled && !props.description
-      ? 'text-ink-gray-4'
-      : 'text-ink-gray-8',
+      ? 'text-ink-gray-4 cursor-not-allowed'
+      : 'text-ink-gray-8 cursor-pointer',
     props.size === 'md' ? 'text-lg' : 'text-base',
     props.labelClasses,
   ]
