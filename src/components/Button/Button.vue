@@ -67,9 +67,7 @@ export default defineComponent({
 
     const slotClasses = computed(
       () =>
-        ({ xs: 'h-4', sm: 'h-4', md: 'h-4.5', lg: 'h-5', xl: 'h-6', '2xl': 'h-6' })[
-          props.size
-        ],
+        ({ xs: 'h-4', sm: 'h-4', md: 'h-4.5', lg: 'h-5' })[props.size],
     )
 
     const lucideSlotClasses = computed(
@@ -79,8 +77,6 @@ export default defineComponent({
           sm: 'size-4',
           md: 'size-4.5',
           lg: 'size-5',
-          xl: 'size-6',
-          '2xl': 'size-6',
         })[props.size],
     )
 
@@ -166,21 +162,22 @@ export default defineComponent({
             sm: 'h-7 w-7 rounded',
             md: 'h-8 w-8 rounded',
             lg: 'h-10 w-10 rounded-md',
-            xl: 'h-11.5 w-11.5 rounded-lg',
-            '2xl': 'h-13 w-13 rounded-xl',
           }[props.size]
         : {
             xs: 'h-6 text-sm px-1.5 rounded',
             sm: 'h-7 text-base px-2 rounded',
             md: 'h-8 text-base font-medium px-2.5 rounded',
             lg: 'h-10 text-lg font-medium px-3 rounded-md',
-            xl: 'h-11.5 text-xl font-medium px-3.5 rounded-lg',
-            '2xl': 'h-13 text-2xl font-medium px-3.5 rounded-xl',
           }[props.size]
 
       return [
         'inline-flex items-center justify-center gap-2 transition-colors focus:outline-none shrink-0',
-        isDisabled.value ? disabledClasses : variantClasses,
+        // Only an explicit `disabled` dims the button. A `loading` button keeps
+        // its normal look (it's still non-interactive via the native `disabled`
+        // attr below); `pointer-events-none` suppresses hover/active visuals so
+        // it doesn't appear clickable while busy.
+        props.disabled ? disabledClasses : variantClasses,
+        props.loading && !props.disabled ? 'pointer-events-none' : '',
         focusClasses,
         sizeClasses,
       ]
@@ -236,7 +233,6 @@ export default defineComponent({
             'h-3 w-3': props.size === 'xs' || props.size === 'sm',
             'h-[13.5px] w-[13.5px]': props.size === 'md',
             'h-[15px] w-[15px]': props.size === 'lg',
-            'h-4.5 w-4.5': props.size === 'xl' || props.size === '2xl',
           },
         })
       }
@@ -275,6 +271,7 @@ export default defineComponent({
         ...restAttrs,
         class: [attrClass, buttonClasses.value],
         'aria-label': props.label,
+        'aria-busy': props.loading || undefined,
         ref: rootRef,
       }
       const button =

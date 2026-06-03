@@ -1,6 +1,6 @@
 <template>
   <span
-    class="inline-flex items-center gap-1"
+    class="inline-flex items-center gap-0.5"
     :class="!bg ? 'text-ink-gray-4 text-sm' : ''"
     :aria-label="ariaLabel"
     role="note"
@@ -45,11 +45,7 @@
             role="img"
             :aria-label="part.display"
           />
-          <span
-            v-else
-            class="font-mono leading-none tracking-wide uppercase text-[10px]"
-            >{{ part.display }}</span
-          >
+          <span v-else class="leading-none uppercase">{{ part.display }}</span>
         </span>
         <span
           v-if="idx < parsedParts.length - 1 && showPlus"
