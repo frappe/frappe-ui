@@ -8,8 +8,8 @@ permissions:
   contents: read
 
 concurrency:
-  group: docs-pages
-  cancel-in-progress: false
+  group: docs-preview-build-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 jobs:
   build-preview:
@@ -40,52 +40,3 @@ jobs:
         with:
           name: docs-preview
           path: docs/.vitepress/dist
-
-  publish-preview:
-    if: github.event.pull_request.head.repo.full_name == github.repository
-    needs: build-preview
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
-
-    steps:
-      - name: Checkout trusted deploy scripts
-        uses: actions/checkout@v5
-
-      - name: Download preview artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: docs-preview
-          path: docs/.vitepress/dist
-
-      - name: Publish preview
-        run: >-
-          bash .github/scripts/docs-pages.sh deploy-preview docs/.vitepress/dist ${{ github.event.pull_request.number }}
-
-      - name: Append preview URL to PR description
-        uses: actions/github-script@v7
-        env:
-          PREVIEW_URL: >-
-            https://ui.frappe.io/pr-preview/pr-${{ github.event.pull_request.number }}/
-        with:
-          script: |
-            const MARKER_START = '<!-- docs-preview:start -->'
-            const MARKER_END = '<!-- docs-preview:end -->'
-            const block = [
-              MARKER_START,
-              `Docs preview: ${process.env.PREVIEW_URL}`,
-              MARKER_END,
-            ].join('\n')
-
-            const { owner, repo } = context.repo
-            const pull_number = context.issue.number
-            const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number })
-            const current = pr.body ?? ''
-
-            const re = new RegExp(`${MARKER_START}[\\s\\S]*?${MARKER_END}`)
-            const body = re.test(current)
-              ? current.replace(re, block)
-              : `${current.trimEnd()}\n\n${block}\n`
-
-            await github.rest.pulls.update({ owner, repo, pull_number, body })
