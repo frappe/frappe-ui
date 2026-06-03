@@ -1,2 +1,8 @@
 export { default as SettingsDialog } from './SettingsDialog.vue'
-export type { SettingsItem, SettingsSection } from './types'
+export { default as SettingsPanel } from './SettingsPanel.vue'
+export type {
+  SettingsDialogProps,
+  SettingsPanelProps,
+  SettingsTab,
+  SettingsSection,
+} from './types'
