@@ -1,6 +1,6 @@
 # Spinner
 
-An animated indicator used to communicate an ongoing, indeterminate loading state.
+Communicates an ongoing, indeterminate loading state.
 
 ## Sizes
 
