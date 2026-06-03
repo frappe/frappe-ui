@@ -1,0 +1,110 @@
+# Publishes the docs preview built by docs-preview.yml. Same-repo PRs always
+# publish; fork PRs publish only when the author has write access to this repo
+# (i.e. is on a team with access). Fork code is never executed here — only the
+# prebuilt static artifact is deployed.
+name: Docs Preview Publish
+
+on:
+  workflow_run:
+    workflows: ['Docs Preview']
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: docs-pages
+  cancel-in-progress: false
+
+jobs:
+  publish-preview:
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'pull_request'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Find PR and verify it is allowed to publish
+        id: pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const headSha = context.payload.workflow_run.head_sha
+            const baseRepo = `${context.repo.owner}/${context.repo.repo}`
+            const { data: prs } = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+              ...context.repo,
+              commit_sha: headSha,
+            })
+            const pr = prs.find(
+              (p) =>
+                p.state === 'open' &&
+                p.head.sha === headSha &&
+                p.base.repo.full_name === baseRepo,
+            )
+            if (!pr) {
+              core.notice(`No open PR found for ${headSha} (stale or closed)`)
+              core.setOutput('allowed', 'false')
+              return
+            }
+
+            let allowed = pr.head.repo.full_name === baseRepo
+            if (!allowed) {
+              const { data: perm } = await github.rest.repos.getCollaboratorPermissionLevel({
+                ...context.repo,
+                username: pr.user.login,
+              })
+              allowed = ['admin', 'write'].includes(perm.permission)
+              if (!allowed) {
+                core.notice(`@${pr.user.login} has '${perm.permission}' permission; skipping preview deploy`)
+              }
+            }
+            core.setOutput('allowed', String(allowed))
+            core.setOutput('number', String(pr.number))
+
+      - name: Checkout trusted deploy scripts
+        if: steps.pr.outputs.allowed == 'true'
+        uses: actions/checkout@v5
+
+      - name: Download preview artifact
+        if: steps.pr.outputs.allowed == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: docs-preview
+          path: docs/.vitepress/dist
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish preview
+        if: steps.pr.outputs.allowed == 'true'
+        run: >-
+          bash .github/scripts/docs-pages.sh deploy-preview docs/.vitepress/dist ${{ steps.pr.outputs.number }}
+
+      - name: Append preview URL to PR description
+        if: steps.pr.outputs.allowed == 'true'
+        uses: actions/github-script@v7
+        env:
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+          PREVIEW_URL: >-
+            https://ui.frappe.io/pr-preview/pr-${{ steps.pr.outputs.number }}/
+        with:
+          script: |
+            const MARKER_START = '<!-- docs-preview:start -->'
+            const MARKER_END = '<!-- docs-preview:end -->'
+            const block = [
+              MARKER_START,
+              `Docs preview: ${process.env.PREVIEW_URL}`,
+              MARKER_END,
+            ].join('\n')
+
+            const { owner, repo } = context.repo
+            const pull_number = Number(process.env.PR_NUMBER)
+            const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number })
+            const current = pr.body ?? ''
+
+            const re = new RegExp(`${MARKER_START}[\\s\\S]*?${MARKER_END}`)
+            const body = re.test(current)
+              ? current.replace(re, block)
+              : `${current.trimEnd()}\n\n${block}\n`
+
+            await github.rest.pulls.update({ owner, repo, pull_number, body })
