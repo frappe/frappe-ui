@@ -84,7 +84,6 @@ const checked = computed(() => Boolean(model.value))
 function onChange(e: Event) {
   const next = (e.target as HTMLInputElement).checked
   model.value = next
-  emit('update:modelValue', next)
 }
 
 defineSlots<{
@@ -155,9 +154,7 @@ const onContainerClick = (event: MouseEvent) => {
   // avoid double toggling and only handle clicks on the surrounding padding.
   if (target.closest('[data-slot="control"]')) return
   if (target.closest('[data-slot="label"]')) return
-  const next = !checked.value
-  model.value = next
-  emit('update:modelValue', next)
+  model.value = !checked.value
 }
 
 const inputClasses = computed(() => {

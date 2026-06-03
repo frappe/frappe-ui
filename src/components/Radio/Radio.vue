@@ -79,7 +79,6 @@ const checked = computed(
 function onChange() {
   if (props.disabled) return
   model.value = props.value
-  emit('update:modelValue', props.value as RadioValue)
 }
 
 const {
@@ -193,6 +192,5 @@ const onContainerClick = (event: MouseEvent) => {
   // Radios are select-only — clicking the active row keeps it selected.
   if (checked.value) return
   model.value = props.value
-  emit('update:modelValue', props.value as RadioValue)
 }
 </script>
