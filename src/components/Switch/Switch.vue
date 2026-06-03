@@ -154,7 +154,10 @@ const switchCircleClasses = computed(() => {
 const iconClasses = 'me-2 size-4 flex-shrink-0 text-ink-gray-6'
 
 const switchLabelClasses = computed(() => {
-  return 'leading-normal'
+  return [
+    'leading-normal',
+    props.disabled ? 'cursor-not-allowed' : 'cursor-pointer',
+  ]
 })
 
 const switchGroupClasses = computed(() => {

@@ -106,7 +106,10 @@ const {
 })
 
 const labelClasses = computed(() => {
-  return 'select-none'
+  return [
+    'select-none',
+    props.disabled ? 'cursor-not-allowed' : 'cursor-pointer',
+  ]
 })
 
 const rowClasses = computed(() => {
@@ -149,8 +152,8 @@ const onContainerClick = (event: MouseEvent) => {
 
 const inputClasses = computed(() => {
   let baseClasses = props.disabled
-    ? 'border-outline-gray-2 bg-surface-sidebar text-ink-gray-3'
-    : 'border-outline-gray-4 text-ink-gray-9 hover:border-outline-gray-7 focus:ring-offset-0 focus:border-outline-gray-8 active:border-outline-gray-6 transition'
+    ? 'cursor-not-allowed border-outline-gray-2 bg-surface-sidebar text-ink-gray-3'
+    : 'cursor-pointer border-outline-gray-4 text-ink-gray-9 hover:border-outline-gray-7 focus:ring-offset-0 focus:border-outline-gray-8 active:border-outline-gray-6 transition'
 
   let interactionClasses = props.disabled
     ? ''
