@@ -24,6 +24,7 @@ import type { ResolvedPos } from '@tiptap/pm/model'
 import {
   CellSelection,
   cellAround,
+  columnResizingPluginKey,
   goToNextCell,
   isInTable,
   nextCell,
@@ -244,6 +245,12 @@ export const TableNavigation = Extension.create({
             mousedown(view, event) {
               // Read-only: don't hijack clicks into cell selection.
               if (!editor.isEditable) return false
+              // Pointer is over a column-resize border (the resize plugin set its
+              // active handle on the preceding mousemove). Bail so its own,
+              // lower-priority mousedown can start the drag instead of us
+              // swallowing it as a cell selection.
+              const resizeState = columnResizingPluginKey.getState(view.state)
+              if (resizeState && resizeState.activeHandle > -1) return false
               if (
                 event.button !== 0 ||
                 event.shiftKey ||
