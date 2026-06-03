@@ -108,4 +108,47 @@ describe('Switch', () => {
       cy.get('[role="switch"]').should('have.attr', 'data-disabled', 'true')
     })
   })
+
+  describe('padded variant', () => {
+    it('clicking the padding area toggles the switch', () => {
+      cy.mount(Switch, {
+        props: {
+          label: 'abc',
+          variant: 'padded',
+          'onUpdate:modelValue': cy.spy().as('onUpdate'),
+        },
+      })
+
+      // Click the outer container — not the control or label directly.
+      cy.get('[data-slot="control"]').parent().click('left')
+      cy.get('@onUpdate').should('have.been.calledWith', true)
+    })
+
+    it('does not double-toggle when the label is clicked', () => {
+      cy.mount(Switch, {
+        props: {
+          label: 'abc',
+          variant: 'padded',
+          'onUpdate:modelValue': cy.spy().as('onUpdate'),
+        },
+      })
+
+      cy.get('[data-slot="label"]').click()
+      cy.get('@onUpdate').should('have.been.calledOnce')
+    })
+
+    it('does not toggle when disabled', () => {
+      cy.mount(Switch, {
+        props: {
+          label: 'abc',
+          variant: 'padded',
+          disabled: true,
+          'onUpdate:modelValue': cy.spy().as('onUpdate'),
+        },
+      })
+
+      cy.get('[data-slot="control"]').parent().click('left')
+      cy.get('@onUpdate').should('not.have.been.called')
+    })
+  })
 })
