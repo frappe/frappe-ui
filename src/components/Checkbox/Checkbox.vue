@@ -137,8 +137,8 @@ const rowClasses = computed(() => {
 const containerClasses = computed(() => {
   if (props.variant !== 'padded') return undefined
   const classes = [
-    'group rounded justify-center',
-    props.size === 'md' ? 'h-8 px-3' : 'h-7 px-2',
+    'group rounded justify-center transition-colors',
+    props.size === 'md' ? 'h-8 px-3' : 'h-7 px-1.5',
   ]
   classes.push(
     props.disabled
