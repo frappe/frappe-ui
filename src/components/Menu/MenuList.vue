@@ -48,7 +48,7 @@ const hasVisibleItems = computed(() => {
 })
 
 async function handleItemSelect(item: MenuOption, event: Event) {
-  if (item.route) {
+  if (item.route && router) {
     await router.push(item.route)
     return
   }
