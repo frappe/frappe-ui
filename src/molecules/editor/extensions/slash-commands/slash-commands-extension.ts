@@ -80,7 +80,15 @@ const getCommands = (): CommandItem[] => [
     editor.chain().focus().deleteRange(range).openIframeDialog().run()
   }),
   slashCommand(commandMeta.link, ({ editor, range }) => {
-    editor.chain().focus().deleteRange(range).setLink({ href: '' }).run()
+    const from = range.from
+    editor
+      .chain()
+      .focus()
+      .deleteRange(range)
+      .insertContent('Link')
+      .setTextSelection({ from, to: from + 4 })
+      .run()
+    editor.commands.openLinkEditor({ startInEdit: true })
   }),
   slashCommand(commandMeta.horizontalRule, ({ editor, range }) => {
     editor.chain().focus().deleteRange(range).setHorizontalRule().run()

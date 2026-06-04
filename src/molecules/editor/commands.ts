@@ -149,7 +149,8 @@ export const commandMeta = {
     label: 'Link',
     icon: 'lucide-link',
     isActive: (editor) => editor.isActive('link'),
-    isAvailable: hasMark('link'),
+    isAvailable: (editor) =>
+      hasMark('link')(editor) && hasCommand('openLinkEditor')(editor),
   },
   table: {
     label: 'Table',
