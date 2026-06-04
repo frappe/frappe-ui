@@ -9,7 +9,7 @@
       <ContextMenuContent
         data-slot="content"
         data-motion="animated"
-        :class="dropdownClasses.content"
+        :class="menuClasses.content"
       >
         <ContextMenuList :groups="groups" :slot-fns="slots" />
       </ContextMenuContent>
@@ -26,25 +26,18 @@ import {
   ContextMenuTrigger,
 } from 'reka-ui'
 import ContextMenuList from './ContextMenuList.vue'
-import { dropdownClasses, normalizeDropdownOptions } from '../Dropdown/utils'
-import type { DropdownOptions, DropdownSlots } from '../Dropdown/types'
+import { menuClasses, normalizeMenuOptions } from '../Menu/utils'
+import type { ContextMenuProps, ContextMenuSlots } from './types'
 
-const props = withDefaults(defineProps<{ options?: DropdownOptions }>(), {
+const props = withDefaults(defineProps<ContextMenuProps>(), {
   options: () => [],
 })
 
-defineSlots<
-  Omit<DropdownSlots, 'default' | 'trigger'> & {
-    /** Alternate trigger renderer. */
-    default?: (props: { open: boolean }) => any
-    /** The right-clickable region that opens the menu. */
-    trigger?: (props: { open: boolean }) => any
-  }
->()
+defineSlots<ContextMenuSlots>()
 
 const slots = useSlots()
 
 const isOpen = ref(false)
 
-const groups = computed(() => normalizeDropdownOptions(props.options))
+const groups = computed(() => normalizeMenuOptions(props.options))
 </script>

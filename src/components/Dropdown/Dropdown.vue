@@ -20,7 +20,7 @@
         data-slot="content"
         :data-motion="contentMotion"
         :class="[
-          dropdownClasses.content,
+          menuClasses.content,
           {
             'origin-top-left': align === 'start',
             'origin-top-right': align === 'end',
@@ -53,7 +53,7 @@ import {
 import { Button } from '../Button'
 import DropdownMenuList from './DropdownMenuList.vue'
 import type { DropdownProps, DropdownSlots } from './types'
-import { dropdownClasses, normalizeDropdownOptions } from './utils'
+import { menuClasses, normalizeMenuOptions } from '../Menu/utils'
 import { usePopoverMotion } from '../../composables/usePopoverMotion'
 
 defineOptions({
@@ -79,7 +79,7 @@ function close() {
 }
 
 const groups = computed(() => {
-  return normalizeDropdownOptions(props.options)
+  return normalizeMenuOptions(props.options)
 })
 
 const align = computed(() => {

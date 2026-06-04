@@ -9,17 +9,13 @@ import {
 import FeatherIcon from '../FeatherIcon.vue'
 import ItemListRow from '../ItemListRow/ItemListRow.vue'
 import Switch from '../Switch/Switch.vue'
-import DropdownRenderContent from './DropdownRenderContent.vue'
-import type { DropdownOption } from './types'
-import {
-  dropdownClasses,
-  getDropdownIconColor,
-  getDropdownTextColor,
-} from './utils'
+import MenuRenderContent from './MenuRenderContent.vue'
+import type { MenuOption } from './types'
+import { menuClasses, getMenuIconColor, getMenuTextColor } from './utils'
 
 const props = withDefaults(
   defineProps<{
-    item: DropdownOption
+    item: MenuOption
     close: () => void
     reserveIconSpace?: boolean
     trailing?: 'none' | 'submenu' | 'switch'
@@ -126,29 +122,25 @@ const hasItemSlotsSuffix = computed(() => {
 function handleSwitchChange(value: boolean) {
   ;(props.item.onClick as ((value: boolean) => void) | undefined)?.(value)
 }
-
 </script>
 
 <template>
   <ItemListRow :selected="isSelected" :disabled="item.disabled">
     <template #prefix>
-      <DropdownRenderContent
-        v-if="hasUserPrefix"
-        :content="userPrefixContent"
-      />
-      <DropdownRenderContent
+      <MenuRenderContent v-if="hasUserPrefix" :content="userPrefixContent" />
+      <MenuRenderContent
         v-else-if="hasItemSlotsPrefix"
         :content="itemSlotsPrefixContent"
       />
       <span
         v-else-if="isLucideIconString(item.icon)"
-        :class="[item.icon, dropdownClasses.itemIcon, getDropdownIconColor(item)]"
+        :class="[item.icon, menuClasses.itemIcon, getMenuIconColor(item)]"
         aria-hidden="true"
       />
       <span
         v-else-if="isEmojiIconString(item.icon)"
         :class="[
-          dropdownClasses.itemIcon,
+          menuClasses.itemIcon,
           'inline-flex items-center justify-center text-base leading-none',
         ]"
         aria-hidden="true"
@@ -157,35 +149,32 @@ function handleSwitchChange(value: boolean) {
       <FeatherIcon
         v-else-if="item.icon && typeof item.icon === 'string'"
         :name="item.icon"
-        :class="[dropdownClasses.itemIcon, getDropdownIconColor(item)]"
+        :class="[menuClasses.itemIcon, getMenuIconColor(item)]"
         aria-hidden="true"
       />
       <component
         :is="item.icon"
         v-else-if="item.icon"
-        :class="[dropdownClasses.itemIcon, getDropdownIconColor(item)]"
+        :class="[menuClasses.itemIcon, getMenuIconColor(item)]"
       />
       <div
         v-else-if="reserveIconSpace"
-        :class="dropdownClasses.itemIconPlaceholder"
+        :class="menuClasses.itemIconPlaceholder"
       />
     </template>
 
     <template #label>
-      <DropdownRenderContent
+      <MenuRenderContent
         v-if="hasDynamicLabel"
         :content="dynamicLabelContent"
       />
-      <DropdownRenderContent
-        v-else-if="hasUserLabel"
-        :content="userLabelContent"
-      />
-      <DropdownRenderContent
+      <MenuRenderContent v-else-if="hasUserLabel" :content="userLabelContent" />
+      <MenuRenderContent
         v-else-if="hasItemSlotsLabel"
         :content="itemSlotsLabelContent"
       />
       <div v-else class="min-w-0">
-        <div :class="['truncate', getDropdownTextColor(item)]">
+        <div :class="['truncate', getMenuTextColor(item)]">
           {{ item.label }}
         </div>
         <div v-if="item.description" class="truncate text-p-sm text-ink-gray-5">
@@ -195,11 +184,8 @@ function handleSwitchChange(value: boolean) {
     </template>
 
     <template #suffix>
-      <DropdownRenderContent
-        v-if="hasUserSuffix"
-        :content="userSuffixContent"
-      />
-      <DropdownRenderContent
+      <MenuRenderContent v-if="hasUserSuffix" :content="userSuffixContent" />
+      <MenuRenderContent
         v-else-if="hasItemSlotsSuffix"
         :content="itemSlotsSuffixContent"
       />
@@ -213,7 +199,11 @@ function handleSwitchChange(value: boolean) {
       />
       <span
         v-else-if="trailing === 'submenu'"
-        :class="['lucide-chevron-right', dropdownClasses.chevronIcon, getDropdownIconColor(item)]"
+        :class="[
+          'lucide-chevron-right',
+          menuClasses.chevronIcon,
+          getMenuIconColor(item),
+        ]"
         aria-hidden="true"
       />
     </template>
@@ -222,7 +212,7 @@ function handleSwitchChange(value: boolean) {
 
 <style scoped>
 /*
- * The outer DropdownMenuItem paints the row background via
+ * The outer MenuItem paints the row background via
  * data-[highlighted] / data-[state=checked] utilities — including the
  * combined hover+selected state. Clear ItemListRow's own bg so the outer
  * color always shows through; text emphasis on selected stays.
