@@ -26,6 +26,9 @@ export interface ContextMenuTriggerSlotProps {
 export interface ContextMenuProps {
   /** Array of context menu options or grouped options. */
   options?: MenuOptions
+
+  /** Controls the visibility of the context menu. */
+  open?: boolean
 }
 
 export type ContextMenuSlots = Omit<MenuSlots, 'default' | 'trigger'> & {

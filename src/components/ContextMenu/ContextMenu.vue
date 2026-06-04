@@ -1,8 +1,8 @@
 <template>
-  <ContextMenuRoot v-model:open="isOpen">
+  <ContextMenuRoot v-model:open="openModel">
     <ContextMenuTrigger as-child>
-      <slot v-if="$slots.trigger" name="trigger" :open="isOpen" />
-      <slot v-else :open="isOpen" />
+      <slot v-if="$slots.trigger" name="trigger" :open="openModel" />
+      <slot v-else :open="openModel" />
     </ContextMenuTrigger>
 
     <ContextMenuPortal>
@@ -18,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, useSlots } from 'vue'
+import { computed, useSlots } from 'vue'
 import {
   ContextMenuContent,
   ContextMenuPortal,
@@ -29,6 +29,8 @@ import ContextMenuList from './ContextMenuList.vue'
 import { menuClasses, normalizeMenuOptions } from '../Menu/utils'
 import type { ContextMenuProps, ContextMenuSlots } from './types'
 
+const openModel = defineModel<boolean>('open', { default: false })
+
 const props = withDefaults(defineProps<ContextMenuProps>(), {
   options: () => [],
 })
@@ -36,8 +38,6 @@ const props = withDefaults(defineProps<ContextMenuProps>(), {
 defineSlots<ContextMenuSlots>()
 
 const slots = useSlots()
-
-const isOpen = ref(false)
 
 const groups = computed(() => normalizeMenuOptions(props.options))
 </script>

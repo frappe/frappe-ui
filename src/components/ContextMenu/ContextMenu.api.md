@@ -11,6 +11,13 @@
     required: false,
     type: 'MenuOptions',
     default: '[]'
+  },
+  {
+    name: 'open',
+    description: 'Controls the visibility of the context menu.',
+    required: false,
+    type: 'boolean',
+    default: 'false'
   }
 ]
 
@@ -26,10 +33,20 @@
     type: 'ContextMenuTriggerSlotProps'
   }
 ]
+
+  const emitsData = [
+  {
+    name: 'update:open',
+    description: 'Fired when the open state changes.',
+    type: '[value: boolean]'
+  }
+]
 </script>
 ## API Reference
 
 <PropsTable name="ContextMenu" :data="propsData"/> 
 
 <SlotsTable :data="slotsData"/> 
+
+<EmitsTable :data="emitsData"/> 
 

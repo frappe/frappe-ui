@@ -61,13 +61,13 @@ const activeOptions = ref<ContextMenuOptions>([])
 </script>
 
 <template>
-  <ContextMenu :options="activeOptions">
-    <div
-      class="w-80 overflow-hidden rounded-xl border border-outline-gray-2 bg-surface-white shadow-sm"
-    >
-      <div class="border-b border-outline-gray-1 px-3 py-2">
-        <p class="text-p-sm font-medium text-ink-gray-5">Recents</p>
-      </div>
+  <div
+    class="w-80 overflow-hidden rounded-xl border border-outline-gray-2 bg-surface-white shadow-sm"
+  >
+    <div class="border-b border-outline-gray-1 px-3 py-2">
+      <p class="text-p-sm font-medium text-ink-gray-5">Recents</p>
+    </div>
+    <ContextMenu :options="activeOptions">
       <ul class="divide-y divide-outline-gray-1">
         <li
           v-for="file in files"
@@ -87,6 +87,6 @@ const activeOptions = ref<ContextMenuOptions>([])
           }}</span>
         </li>
       </ul>
-    </div>
-  </ContextMenu>
+    </ContextMenu>
+  </div>
 </template>
