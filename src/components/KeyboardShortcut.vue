@@ -1,7 +1,7 @@
 <template>
   <span
     class="inline-flex items-center gap-0.5"
-    :class="!bg ? 'text-ink-gray-4 text-sm' : ''"
+    :class="!bg ? 'text-ink-gray-5 text-sm' : ''"
     :aria-label="ariaLabel"
     role="note"
     v-bind="$attrs"
