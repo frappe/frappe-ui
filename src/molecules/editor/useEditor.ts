@@ -1,6 +1,7 @@
 import {
   onBeforeUnmount,
   shallowRef,
+  toRaw,
   toValue,
   watch,
   type MaybeRefOrGetter,
@@ -106,12 +107,15 @@ export function useEditor(
       if (!editor.value) return
       // Our own write bounced back through the ref — ignore it (covers JSON,
       // whose fresh-object identity defeats the HTML string check below).
-      if (content === lastEmitted) return
+      if (toRaw(content) === lastEmitted) return
       if (format === 'html' && editor.value.getHTML() === content) return
 
       applyingExternalUpdate = true
-      editor.value.commands.setContent(content ?? '', { emitUpdate: false })
-      applyingExternalUpdate = false
+      try {
+        editor.value.commands.setContent(content ?? '', { emitUpdate: false })
+      } finally {
+        applyingExternalUpdate = false
+      }
     })
   }
 
