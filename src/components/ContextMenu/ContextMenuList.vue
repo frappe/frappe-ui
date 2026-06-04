@@ -45,6 +45,7 @@ function close() {
 // trackpad flick doesn't destroy the interaction. `scroll` events aren't
 // cancelable, so we intercept `wheel` + `touchmove` instead.
 function preventScroll(e: Event) {
+  if (e.target instanceof Element && e.target.closest('[role="menu"]')) return
   e.preventDefault()
 }
 
