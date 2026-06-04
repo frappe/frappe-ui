@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { onUnmounted, watch } from 'vue'
 import {
   ContextMenuItem,
   ContextMenuLabel,
@@ -25,12 +26,6 @@ const props = withDefaults(
   },
 )
 
-const rootContext = injectContextMenuRootContext()
-
-function close() {
-  rootContext.onOpenChange(false)
-}
-
 const primitives = {
   Item: ContextMenuItem,
   Label: ContextMenuLabel,
@@ -39,6 +34,51 @@ const primitives = {
   SubContent: ContextMenuSubContent,
   SubTrigger: ContextMenuSubTrigger,
 }
+
+const rootContext = injectContextMenuRootContext()
+
+function close() {
+  rootContext.onOpenChange(false)
+}
+
+// Standard context menu behaviour: lock scroll while open so an accidental
+// trackpad flick doesn't destroy the interaction. `scroll` events aren't
+// cancelable, so we intercept `wheel` + `touchmove` instead.
+function preventScroll(e: Event) {
+  e.preventDefault()
+}
+
+let removeScrollLock: (() => void) | null = null
+
+watch(
+  rootContext.open,
+  (isOpen) => {
+    removeScrollLock?.()
+    removeScrollLock = null
+
+    if (isOpen) {
+      // Lock scroll
+      window.addEventListener('wheel', preventScroll, {
+        passive: false,
+        capture: true,
+      })
+      window.addEventListener('touchmove', preventScroll, {
+        passive: false,
+        capture: true,
+      })
+      // Re-enable scroll when the menu closes
+      removeScrollLock = () => {
+        window.removeEventListener('wheel', preventScroll, { capture: true })
+        window.removeEventListener('touchmove', preventScroll, {
+          capture: true,
+        })
+      }
+    }
+  },
+  { immediate: true },
+)
+
+onUnmounted(() => removeScrollLock?.())
 </script>
 
 <template>
