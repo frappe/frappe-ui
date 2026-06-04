@@ -36,6 +36,8 @@ declare module 'vue' {
     CommandPalette: typeof import('./src/components/CommandPalette/CommandPalette.vue')['default']
     CommandPaletteItem: typeof import('./src/components/CommandPalette/CommandPaletteItem.vue')['default']
     ConfirmDialog: typeof import('./src/components/ConfirmDialog.vue')['default']
+    ContextMenu: typeof import('./src/components/ContextMenu/ContextMenu.vue')['default']
+    ContextMenuList: typeof import('./src/components/ContextMenu/ContextMenuList.vue')['default']
     DatePicker: typeof import('./src/components/DatePicker/DatePicker.vue')['default']
     DateRangePicker: typeof import('./src/components/DatePicker/DateRangePicker.vue')['default']
     DateTimePicker: typeof import('./src/components/DatePicker/DateTimePicker.vue')['default']
