@@ -1,7 +1,35 @@
-import { type Editor } from '@tiptap/core'
-import StarterKitExtension from '@tiptap/starter-kit'
+import { Extension, type Editor, type Extensions } from '@tiptap/core'
+import { Blockquote, type BlockquoteOptions } from '@tiptap/extension-blockquote'
+import { Bold, type BoldOptions } from '@tiptap/extension-bold'
+import { Document } from '@tiptap/extension-document'
+import { HardBreak, type HardBreakOptions } from '@tiptap/extension-hard-break'
+import { HorizontalRule, type HorizontalRuleOptions } from '@tiptap/extension-horizontal-rule'
+import { Italic, type ItalicOptions } from '@tiptap/extension-italic'
+import {
+  BulletList,
+  type BulletListOptions,
+  ListItem,
+  type ListItemOptions,
+  ListKeymap,
+  type ListKeymapOptions,
+  OrderedList,
+  type OrderedListOptions,
+} from '@tiptap/extension-list'
+import { Paragraph, type ParagraphOptions } from '@tiptap/extension-paragraph'
+import { Strike, type StrikeOptions } from '@tiptap/extension-strike'
+import { Text } from '@tiptap/extension-text'
+import { Underline, type UnderlineOptions } from '@tiptap/extension-underline'
+import {
+  Dropcursor,
+  type DropcursorOptions,
+  Gapcursor,
+  TrailingNode,
+  type TrailingNodeOptions,
+  UndoRedo,
+  type UndoRedoOptions,
+} from '@tiptap/extensions'
 import PlaceholderExtension from '@tiptap/extension-placeholder'
-import HeadingExtension from '@tiptap/extension-heading'
+import HeadingExtension, { type HeadingOptions } from '@tiptap/extension-heading'
 import HeadingIdsExtension from './extensions/heading/heading-ids'
 import { LinkExtension } from './extensions/link'
 // Custom code mark + lowlight code block (input rule, indent keymaps, language
@@ -50,7 +78,71 @@ export {
 } from './SuggestionExtension'
 export type { MentionSuggestionItem, TagSuggestionItem }
 
-export const StarterKit = StarterKitExtension
+type StarterKitMember<O> = Partial<O> | false
+
+export interface StarterKitOptions {
+  blockquote?: StarterKitMember<BlockquoteOptions>
+  bold?: StarterKitMember<BoldOptions>
+  bulletList?: StarterKitMember<BulletListOptions>
+  code?: false
+  codeBlock?: false
+  document?: false
+  dropcursor?: StarterKitMember<DropcursorOptions>
+  gapcursor?: false
+  hardBreak?: StarterKitMember<HardBreakOptions>
+  heading?: StarterKitMember<HeadingOptions>
+  horizontalRule?: StarterKitMember<HorizontalRuleOptions>
+  italic?: StarterKitMember<ItalicOptions>
+  link?: false
+  listItem?: StarterKitMember<ListItemOptions>
+  listKeymap?: StarterKitMember<ListKeymapOptions>
+  orderedList?: StarterKitMember<OrderedListOptions>
+  paragraph?: StarterKitMember<ParagraphOptions>
+  strike?: StarterKitMember<StrikeOptions>
+  text?: false
+  trailingNode?: StarterKitMember<TrailingNodeOptions>
+  underline?: StarterKitMember<UnderlineOptions>
+  undoRedo?: StarterKitMember<UndoRedoOptions>
+}
+
+function pushConfigured<O>(
+  list: Extensions,
+  extension: { configure: (options?: Partial<O>) => any },
+  option: StarterKitMember<O> | undefined,
+) {
+  if (option !== false) list.push(extension.configure(option ?? {}))
+}
+
+export const StarterKit = Extension.create<StarterKitOptions>({
+  name: 'frappeStarterKit',
+  addOptions() {
+    return {}
+  },
+  addExtensions() {
+    const list: Extensions = []
+    pushConfigured(list, Bold, this.options.bold)
+    pushConfigured(list, Blockquote, this.options.blockquote)
+    pushConfigured(list, BulletList, this.options.bulletList)
+    if (this.options.document !== false) list.push(Document)
+    pushConfigured(list, Dropcursor, this.options.dropcursor)
+    if (this.options.gapcursor !== false) list.push(Gapcursor)
+    pushConfigured(list, HardBreak, this.options.hardBreak)
+    pushConfigured(list, HeadingExtension, this.options.heading)
+    pushConfigured(list, UndoRedo, this.options.undoRedo)
+    pushConfigured(list, HorizontalRule, this.options.horizontalRule)
+    pushConfigured(list, Italic, this.options.italic)
+    pushConfigured(list, ListItem, this.options.listItem)
+    pushConfigured(list, ListKeymap, this.options.listKeymap)
+    pushConfigured(list, OrderedList, this.options.orderedList)
+    pushConfigured(list, Paragraph, this.options.paragraph)
+    pushConfigured(list, Strike, this.options.strike)
+    if (this.options.text !== false) list.push(Text)
+    pushConfigured(list, Underline, this.options.underline)
+    pushConfigured(list, TrailingNode, this.options.trailingNode)
+    if (this.options.heading !== false) list.push(HeadingIds)
+    return list
+  },
+})
 
 type PlaceholderStorage = { text: string | null }
 
