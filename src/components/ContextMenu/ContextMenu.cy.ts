@@ -121,7 +121,7 @@ describe('ContextMenu', () => {
 
     cy.get('[data-cy=trigger]').rightclick()
     cy.get('[role=menu]').should('exist')
-    cy.get('body').click(0, 0)
+    cy.get('body').click(0, 0, { force: true })
     cy.get('[role=menu]').should('not.exist')
   })
 
@@ -179,7 +179,7 @@ describe('ContextMenu', () => {
 
     cy.get('[data-cy=trigger]').rightclick()
     cy.get('[role=menu]').should('exist')
-    cy.get('body').click(0, 0)
+    cy.get('body').click(0, 0, { force: true })
     cy.get('[role=menu]').should('not.exist')
 
     cy.window().then((win) => {
