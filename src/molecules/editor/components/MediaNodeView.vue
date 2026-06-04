@@ -148,7 +148,10 @@ function retryUpload() {
       :class="containerClasses(node.attrs, selected)"
       :style="{ width: node.attrs.width ? `${node.attrs.width}px` : 'auto' }"
     >
-      <div v-if="isUploaded || fileContent" class="relative">
+      <div
+        v-if="isUploaded || fileContent || node.attrs.loading"
+        class="relative"
+      >
         <img
           v-if="!isVideo"
           ref="mediaRef"

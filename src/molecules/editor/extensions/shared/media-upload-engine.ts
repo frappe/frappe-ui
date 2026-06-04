@@ -182,11 +182,17 @@ export function createMediaUploadEngine(
       } finally {
         if (!b64) URL.revokeObjectURL(probeSrc)
       }
-      if (editor.isDestroyed) return uploadId
+      if (editor.isDestroyed) {
+        deleteLocalFile(uploadId)
+        return uploadId
+      }
       insertPlaceholder(editor.view, nodeName, pos, mode, uploadId, dims)
 
       const uploaded = await options.uploadFunction(file)
-      if (editor.isDestroyed) return uploadId
+      if (editor.isDestroyed) {
+        deleteLocalFile(uploadId)
+        return uploadId
+      }
       if (
         !uploaded?.file_url ||
         !isSafeUrl(uploaded.file_url, { base: window.location.origin })
@@ -238,11 +244,20 @@ export function createMediaUploadEngine(
     const node = editor.view.state.doc.nodeAt(pos)
     const uploadId = node?.attrs.uploadId as string | undefined
     const entry = uploadId ? getLocalFile(uploadId) : undefined
-    if (!entry) {
+    if (!uploadId || !entry) {
       console.error(`reupload: no staged file for node at ${pos}`)
       return
     }
-    await run(entry.file, editor, pos, 'replace', options)
+    const replacementUploadId = await run(
+      entry.file,
+      editor,
+      pos,
+      'replace',
+      options,
+    )
+    if (replacementUploadId) {
+      deleteLocalFile(uploadId)
+    }
   }
 
   /**

@@ -14,6 +14,8 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
+const createUploadId = vi.hoisted(() => vi.fn(() => 'uid-1'))
+
 vi.mock('#utils/file-to-base64', () => ({
   default: vi.fn(async () => 'data:image/png;base64,AAAA'),
 }))
@@ -21,7 +23,7 @@ vi.mock('#molecules/editor/extensions/shared/url-safety', () => ({
   isSafeUrl: () => true,
 }))
 vi.mock('#molecules/editor/extensions/shared/upload-id', () => ({
-  createUploadId: () => 'uid-1',
+  createUploadId,
 }))
 vi.mock('#molecules/editor/extensions/shared/media-upload-state', () => ({
   setLocalFile: vi.fn(),
@@ -38,7 +40,10 @@ vi.mock('#molecules/editor/extensions/shared/media-node-ops', () => ({
 
 import { createMediaUploadEngine } from '#molecules/editor/extensions/shared/media-upload-engine'
 import fileToBase64 from '#utils/file-to-base64'
-import { setLocalFile } from '#molecules/editor/extensions/shared/media-upload-state'
+import {
+  setLocalFile,
+  deleteLocalFile,
+} from '#molecules/editor/extensions/shared/media-upload-state'
 import {
   insertPlaceholder,
   applyUploadSuccess,
@@ -64,6 +69,8 @@ const config: MediaUploadConfig = {
 describe('media upload engine — live editor.view', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    createUploadId.mockReset()
+    createUploadId.mockReturnValue('uid-1')
   })
 
   it('dispatches against the CURRENT editor.view, not the one captured at call time', async () => {
@@ -141,6 +148,31 @@ describe('media upload engine — live editor.view', () => {
 
     expect(applyUploadSuccess).not.toHaveBeenCalled()
     expect(applyUploadError).not.toHaveBeenCalled()
+    expect(deleteLocalFile).toHaveBeenCalledWith('uid-1')
+  })
+
+  it('cleans up the old staged file after reupload creates a replacement upload id', async () => {
+    createUploadId.mockReturnValue('uid-2')
+    const editor = {
+      view: {
+        ...makeView(),
+        state: {
+          doc: {
+            nodeAt: () => ({ attrs: { uploadId: 'old-uid' } }),
+          },
+          selection: { from: 0 },
+        },
+      },
+      isDestroyed: false,
+    } as never
+
+    const engine = createMediaUploadEngine(config)
+    await engine.reupload(editor, 0, {
+      uploadFunction: async () => ({ file_url: '/files/x.png' }),
+    })
+
+    expect(deleteLocalFile).toHaveBeenCalledWith('uid-2')
+    expect(deleteLocalFile).toHaveBeenCalledWith('old-uid')
   })
 
   it('does not base64-encode files when the media config stores only the File', async () => {
