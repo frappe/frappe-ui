@@ -16,6 +16,7 @@ export { request } from './utils/request'
 export { default as initSocket } from './utils/socketio'
 
 // Base components
+export * from './components/Accordion'
 export * from './components/Alert'
 export * from './components/Avatar'
 export * from './components/Badge'
