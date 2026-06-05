@@ -3,6 +3,15 @@ import config from '../../../../tailwind.config'
 
 const designTokens = resolveConfig(config).theme
 
+/**
+ * Semantic color tokens resolve to Tailwind strings with the internal `<alpha-value>` placeholder,
+ * e.g. `color-mix(in srgb, var(--surface-gray-2, #F3F3F3) calc(<alpha-value> * 100%), transparent)`,
+ * which is invalid as an inline style. Extract the theme-aware `var(--token, fallback)`
+ * part so swatches render (and follow dark mode).
+ */
+const resolveColorValue = (value: string): string =>
+  value.match(/var\([^)]*\)/)?.[0] ?? value.replace(/<alpha-value>/g, '1')
+
 const getBgColors = () => {
   let colors: { name: string; value?: string }[] = []
   const list = designTokens.backgroundColor.surface
@@ -16,7 +25,7 @@ const getBgColors = () => {
       if (lastcolor !== curColor) colors.push({ name: curColor })
     }
 
-    colors.push({ name: classname, value })
+    colors.push({ name: classname, value: resolveColorValue(value) })
   }
 
   return colors
@@ -37,7 +46,7 @@ const getTextColors = () => {
       if (lastcolor !== curColor) colors.push({ name: curColor })
     }
 
-    colors.push({ name: classname, value })
+    colors.push({ name: classname, value: resolveColorValue(value) })
   }
 
   return colors
@@ -58,7 +67,7 @@ const getBorderColors = () => {
       if (lastcolor !== curColor) colors.push({ name: curColor })
     }
 
-    colors.push({ name: classname, value })
+    colors.push({ name: classname, value: resolveColorValue(value) })
   }
 
   return colors
