@@ -1,9 +1,16 @@
 import { computed, onBeforeUnmount, ref } from 'vue'
 import type { Editor } from '@tiptap/core'
+import { fileSizeLimitMessage } from '#utils/fileSize'
 import {
   resolveUploadOptions,
-  uploadFilesParallel,
+  uploadFile,
 } from '#molecules/editor/extensions/shared/media-upload-engine'
+import {
+  abortUpload,
+  deleteUploadProgress,
+  setUploadProgress,
+  updateUploadProgress,
+} from '#molecules/editor/extensions/shared/media-upload-state'
 import type {
   ExistingImage,
   MediaUploadOptions,
@@ -15,7 +22,12 @@ import {
   filterImageFiles,
 } from './image-group-utils'
 
-/** A single grid item: either a staged file or an already-existing image. */
+/**
+ * A single grid item: either a staged file or an already-existing image.
+ *
+ * Transient progress/cancel state is NOT stored here — it lives in the shared
+ * `uploadProgressMap` (keyed by `id`), the same mechanism media node views use.
+ */
 export interface ImageItem {
   type: 'file' | 'existing'
   id: string
@@ -23,6 +35,9 @@ export interface ImageItem {
   existing?: ExistingImage
   /** Caption for a not-yet-uploaded file (existing items carry it on `existing`). */
   alt?: string
+  status?: 'idle' | 'uploading' | 'uploaded' | 'failed'
+  error?: string
+  uploaded?: ExistingImage
 }
 
 export interface UseImageGroupDialogArgs {
@@ -32,7 +47,12 @@ export interface UseImageGroupDialogArgs {
 
 /** Build an `ImageItem` for a staged file (deterministic id). */
 function makeFileItem(file: File): ImageItem {
-  return { type: 'file', file, id: fileItemId(file) }
+  return {
+    type: 'file',
+    file,
+    id: fileItemId(file),
+    status: 'idle',
+  }
 }
 
 /** Build an `ImageItem` for an existing image (deterministic id). */
@@ -75,9 +95,7 @@ export function useImageGroupDialog(args: UseImageGroupDialogArgs) {
     const existingItems = (opts.existing ?? []).map(makeExistingItem)
     const fileItems = opts.files.map(makeFileItem)
     images.value =
-      args.mode() === 'edit'
-        ? [...existingItems, ...fileItems]
-        : fileItems
+      args.mode() === 'edit' ? [...existingItems, ...fileItems] : fileItems
     uploadedCount.value = 0
     totalCount.value = 0
     hasUploadError.value = false
@@ -152,19 +170,71 @@ export function useImageGroupDialog(args: UseImageGroupDialogArgs) {
   }
 
   /** Upload the staged files (in current UI order). Never throws. */
-  async function uploadStagedFiles(files: File[]): Promise<UploadResult[]> {
-    if (files.length === 0) return []
+  async function uploadItem(item: ImageItem): Promise<UploadResult> {
+    if (!item.file)
+      return { success: false, error: new Error('No file selected') }
+    if (item.uploaded)
+      return { success: true, file: { file_url: item.uploaded.src } }
     const options = resolveOptions()
-    uploading.value = true
-    hasUploadError.value = false
-    totalCount.value = files.length
-    uploadedCount.value = 0
+    const validationError = fileSizeLimitMessage(item.file)
+    if (validationError) {
+      item.status = 'failed'
+      item.error = validationError
+      hasUploadError.value = true
+      return { success: false, error: new Error(validationError) }
+    }
+
+    const abortController = new AbortController()
+    setUploadProgress(item.id, {
+      loaded: 0,
+      total: item.file.size,
+      percent: 0,
+      abort: () => abortController.abort(),
+    })
+    item.status = 'uploading'
+    item.error = ''
+
     try {
-      return await uploadFilesParallel(files, options, {
-        onProgress: (done) => {
-          uploadedCount.value = done
+      const result = await uploadFile(item.file, options, {
+        signal: abortController.signal,
+        onProgress: (progress) => {
+          updateUploadProgress(item.id, progress)
         },
       })
+      item.status = 'uploaded'
+      item.uploaded = {
+        src: result.file_url,
+        alt: item.alt || (result.file_name as string) || '',
+      }
+      return { success: true, file: result }
+    } catch (error) {
+      item.status = 'failed'
+      item.error = abortController.signal.aborted
+        ? 'Upload cancelled'
+        : (error as Error)?.message || 'Upload failed'
+      hasUploadError.value = true
+      return { success: false, error: error as Error }
+    } finally {
+      deleteUploadProgress(item.id)
+    }
+  }
+
+  async function uploadStagedFiles(
+    items: ImageItem[],
+  ): Promise<UploadResult[]> {
+    if (items.length === 0) return []
+    uploading.value = true
+    hasUploadError.value = false
+    totalCount.value = items.length
+    uploadedCount.value = items.filter((item) => item.uploaded).length
+    try {
+      return await Promise.all(
+        items.map(async (item) => {
+          const result = await uploadItem(item)
+          uploadedCount.value += 1
+          return result
+        }),
+      )
     } finally {
       uploading.value = false
     }
@@ -176,8 +246,11 @@ export function useImageGroupDialog(args: UseImageGroupDialogArgs) {
    * UI order) and `hasUploadError` flags the failures so the dialog stays open.
    */
   async function buildFinalImages(): Promise<ExistingImage[]> {
-    const staged = fileItems()
-    const results = await uploadStagedFiles(staged)
+    const stagedItems = images.value.filter(
+      (item) => item.type === 'file' && item.file && !item.uploaded,
+    )
+    const staged = stagedItems.map((item) => item.file as File)
+    const results = await uploadStagedFiles(stagedItems)
 
     const fileToImage = new Map<File, ExistingImage>()
     staged.forEach((file, index) => {
@@ -199,6 +272,11 @@ export function useImageGroupDialog(args: UseImageGroupDialogArgs) {
     for (const item of images.value) {
       if (item.type === 'existing' && item.existing) {
         final.push(item.existing)
+      } else if (item.uploaded) {
+        final.push({
+          src: item.uploaded.src,
+          alt: item.alt ?? item.uploaded.alt,
+        })
       } else if (item.file) {
         const uploaded = fileToImage.get(item.file)
         if (uploaded) {
@@ -207,6 +285,25 @@ export function useImageGroupDialog(args: UseImageGroupDialogArgs) {
       }
     }
     return final
+  }
+
+  async function retryImage(index: number) {
+    const item = images.value[index]
+    if (!item || item.type !== 'file') return
+    hasUploadError.value = false
+    uploading.value = true
+    totalCount.value = 1
+    uploadedCount.value = 0
+    try {
+      await uploadItem(item)
+    } finally {
+      uploadedCount.value = 1
+      uploading.value = false
+    }
+  }
+
+  function abortAll() {
+    images.value.forEach((item) => abortUpload(item.id))
   }
 
   return {
@@ -226,5 +323,7 @@ export function useImageGroupDialog(args: UseImageGroupDialogArgs) {
     fileItems,
     matchesFileSet,
     buildFinalImages,
+    retryImage,
+    abortAll,
   }
 }

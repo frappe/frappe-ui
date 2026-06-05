@@ -27,8 +27,12 @@ vi.mock('#molecules/editor/extensions/shared/upload-id', () => ({
 }))
 vi.mock('#molecules/editor/extensions/shared/media-upload-state', () => ({
   setLocalFile: vi.fn(),
+  updateLocalFile: vi.fn(),
   getLocalFile: vi.fn(() => ({ file: new File(['x'], 'x.png') })),
   deleteLocalFile: vi.fn(),
+  setUploadProgress: vi.fn(),
+  updateUploadProgress: vi.fn(),
+  deleteUploadProgress: vi.fn(),
 }))
 vi.mock('#molecules/editor/extensions/shared/media-node-ops', () => ({
   insertPlaceholder: vi.fn(),
@@ -105,6 +109,7 @@ describe('media upload engine — live editor.view', () => {
       null,
       'replace',
       'uid-1',
+      expect.anything(),
       expect.anything(),
     )
 

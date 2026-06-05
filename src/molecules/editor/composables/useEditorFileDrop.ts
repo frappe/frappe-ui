@@ -22,25 +22,43 @@ import { useWindowFileDragging } from './useWindowFileDragging'
 export function useEditorFileDrop(
   root: Ref<HTMLElement | null>,
   onFiles: (files: File[]) => void,
-): { isWindowDragging: Ref<boolean>; isOverZone: Ref<boolean> } {
+): {
+  isWindowDragging: Ref<boolean>
+  isOverZone: Ref<boolean>
+  draggedTypes: Ref<string[]>
+} {
   const isWindowDragging = useWindowFileDragging()
   const isOverZone = ref(false)
+  const draggedTypes = ref<string[]>([])
   let depth = 0
 
   const hasFiles = (event: DragEvent): boolean =>
-    !!event.dataTransfer && Array.from(event.dataTransfer.types).includes('Files')
+    !!event.dataTransfer &&
+    Array.from(event.dataTransfer.types).includes('Files')
 
   const reset = () => {
     depth = 0
     isOverZone.value = false
+    draggedTypes.value = []
+  }
+
+  const updateDraggedTypes = (event: DragEvent) => {
+    draggedTypes.value = Array.from(event.dataTransfer?.items ?? [])
+      .filter((item) => item.kind === 'file')
+      .map((item) => item.type)
+      .filter(Boolean)
   }
 
   const onDragEnter = (event: DragEvent) => {
     if (!hasFiles(event)) return
     depth += 1
+    updateDraggedTypes(event)
     isOverZone.value = true
   }
 
+  // No updateDraggedTypes here: the dragged payload cannot change mid-drag, and
+  // dragover fires continuously — re-parsing would write a fresh array to the
+  // ref on every event and churn downstream computeds.
   const onDragOver = (event: DragEvent) => {
     if (!hasFiles(event)) return
     event.preventDefault()
@@ -95,5 +113,5 @@ export function useEditorFileDrop(
     if (root.value) unbind(root.value)
   })
 
-  return { isWindowDragging, isOverZone }
+  return { isWindowDragging, isOverZone, draggedTypes }
 }

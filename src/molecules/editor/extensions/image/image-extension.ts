@@ -15,7 +15,6 @@ import {
 } from '@tiptap/core'
 import type { Editor } from '@tiptap/core'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
-import type { UploadedFile } from '#utils/useFileUpload'
 import MediaNodeView from '#molecules/editor/components/MediaNodeView.vue'
 import { createMediaPlugin } from '#molecules/editor/extensions/shared/media-plugin'
 import { pickFiles } from '#molecules/editor/extensions/shared/file-picker'
@@ -23,15 +22,17 @@ import { openImageGroupUploadDialog } from '#molecules/editor/extensions/image-g
 import {
   resolveUploadOptions as resolveUploadOptionsBase,
   type MediaUploadOptions,
+  type UploadFunction,
 } from '#molecules/editor/extensions/shared/media-upload-engine'
 import { imageEngine, imageUploadConfig } from './image-engine'
 
 export interface ImageExtensionOptions {
   /**
-   * Function to handle image uploads
+   * Function to handle image uploads. Receives optional request options
+   * (abort signal + progress callback) as the second argument.
    * @default null
    */
-  uploadFunction: ((file: File) => Promise<UploadedFile>) | null
+  uploadFunction: UploadFunction | null
 
   /**
    * HTML attributes to add to the image element
@@ -212,14 +213,16 @@ export const ImageExtension = NodeExtension.create<ImageExtensionOptions>({
       selectAndUploadImage:
         () =>
         ({ editor }) => {
-          void pickFiles({ accept: 'image/*', multiple: true }).then((files) => {
-            if (editor.isDestroyed || files.length === 0) return
-            if (files.length === 1) {
-              editor.commands.uploadImage(files[0])
-            } else {
-              openImageGroupUploadDialog({ editor, files })
-            }
-          })
+          void pickFiles({ accept: 'image/*', multiple: true }).then(
+            (files) => {
+              if (editor.isDestroyed || files.length === 0) return
+              if (files.length === 1) {
+                editor.commands.uploadImage(files[0])
+              } else {
+                openImageGroupUploadDialog({ editor, files })
+              }
+            },
+          )
           return true
         },
 
@@ -235,6 +238,21 @@ export const ImageExtension = NodeExtension.create<ImageExtensionOptions>({
             return false
           }
           void imageEngine.reupload(editor, pos, resolve(editor))
+          return true
+        },
+
+      replaceImage:
+        (pos: number, file: File) =>
+        ({ editor }: { editor: Editor }) => {
+          const node = editor.view.state.doc.nodeAt(pos)
+          if (!node || node.type.name !== this.name) return false
+          void imageEngine.uploadReplace(
+            file,
+            editor,
+            pos,
+            resolve(editor),
+            node.attrs,
+          )
           return true
         },
     }
