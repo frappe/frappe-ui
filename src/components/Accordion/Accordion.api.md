@@ -56,18 +56,12 @@
     required: false,
     type: 'boolean',
     default: 'false'
-  },
-  {
-    name: 'dir',
-    description: 'Forces layout direction; defaults to `document.documentElement.dir`.',
-    required: false,
-    type: '"rtl" | "ltr"'
   }
 ]
 
   const slotsData = [
   {
-    name: 'item-title',
+    name: 'item-label',
     description: 'Custom renderer for an item\'s trigger label. Receives `{ item, index }`.',
     type: '{ item: AccordionItem; index: number; }'
   },

@@ -59,12 +59,4 @@ export interface AccordionProps {
 
   /** Disables the whole accordion. */
   disabled?: boolean
-
-  /** Forces layout direction; defaults to `document.documentElement.dir`. */
-  dir?: 'rtl' | 'ltr'
-}
-
-export interface AccordionEmits {
-  /** Fired when the open item(s) change. */
-  'update:modelValue': [value: string | string[]]
 }
