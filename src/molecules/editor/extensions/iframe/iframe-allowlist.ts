@@ -38,12 +38,16 @@ export const IFRAME_ALLOWLIST: readonly string[] = [
 /**
  * The sandbox attribute applied to every embedded iframe.
  *
- * Deliberately WITHOUT `allow-same-origin`: the embed must not be able to read
- * cookies / localStorage for our origin. Scripts, popups, forms, and
- * presentation (fullscreen) are permitted so the common embeds still work.
+ * Includes `allow-same-origin`: this lets the embed keep ITS OWN origin
+ * (youtube.com etc.) so its scripts can use their own cookies/storage —
+ * without it, YouTube's player throws SecurityError and renders a black box.
+ * It does NOT grant the iframe our origin; cross-origin isolation from the
+ * host still applies. The `allow-scripts + allow-same-origin` sandbox-escape
+ * concern only exists for content served from OUR origin, which the
+ * allowlist precludes (absolute http(s) URLs on external hosts only).
  */
 export const IFRAME_SANDBOX =
-  'allow-scripts allow-popups allow-forms allow-presentation' as const
+  'allow-scripts allow-same-origin allow-popups allow-forms allow-presentation' as const
 
 /** Options for {@link validateIframeUrl}. */
 export interface ValidateIframeUrlOptions {
