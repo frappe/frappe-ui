@@ -24,6 +24,8 @@ export function openIframeInsertDialog(args: {
   getReplacePos?: () => number | undefined
   /** Prefill for edit mode (the node's current src). */
   initialUrl?: string
+  /** Platform name (e.g. "YouTube") tailoring the dialog title/placeholder. */
+  platform?: string
 }): void {
   teardown()
 
@@ -43,6 +45,7 @@ export function openIframeInsertDialog(args: {
         editor: args.editor,
         getReplacePos: args.getReplacePos,
         initialUrl: args.initialUrl,
+        platform: args.platform,
         onClose: () => setTimeout(teardown, 0),
       })
     },

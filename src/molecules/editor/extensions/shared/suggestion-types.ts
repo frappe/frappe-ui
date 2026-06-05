@@ -19,6 +19,13 @@ export interface BaseSuggestionItem {
   display?: string
   title?: string
   name?: string
+  /**
+   * Optional section label (dropdown-group style). Consecutive items sharing
+   * a `group` render under one non-interactive header in `SuggestionList`;
+   * items without one render headerless. Display-only — keyboard navigation
+   * stays flat.
+   */
+  group?: string
   [key: string]: unknown
 }
 

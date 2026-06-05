@@ -11,7 +11,7 @@
  */
 import { computed, ref, watch, type Ref } from 'vue'
 import type { Editor } from '@tiptap/core'
-import { validateIframeUrl } from './iframe-allowlist'
+import { getIframeAllowlist, validateIframeUrl } from './iframe-allowlist'
 import {
   calculateAspectRatio,
   detectPlatform,
@@ -26,12 +26,6 @@ function extractSrc(input: string): string {
     return trimmed.match(/\ssrc=["']([^"']+)["']/)?.[1] ?? ''
   }
   return trimmed
-}
-
-function getAllowlist(editor: Editor): readonly string[] | undefined {
-  return editor.extensionManager?.extensions.find(
-    (extension) => extension.name === 'iframe',
-  )?.options.allowlist as readonly string[] | undefined
 }
 
 export interface UseIframeDialogArgs {
@@ -62,7 +56,7 @@ export function useIframeDialog(
   editor: Editor,
   args: UseIframeDialogArgs = {},
 ): UseIframeDialog {
-  const allowlist = getAllowlist(editor)
+  const allowlist = getIframeAllowlist(editor)
   const embedInput = ref(args.initialUrl ?? '')
   const urlError = ref('')
   const width = ref(640)

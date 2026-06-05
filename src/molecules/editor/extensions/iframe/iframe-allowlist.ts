@@ -8,6 +8,7 @@
  * (absolute + http/https only) and {@link matchesHostname} (exact host OR
  * dot-boundary suffix — never substring).
  */
+import type { Editor } from '@tiptap/core'
 import {
   isSafeUrl,
   matchesHostname,
@@ -48,6 +49,30 @@ export const IFRAME_ALLOWLIST: readonly string[] = [
  */
 export const IFRAME_SANDBOX =
   'allow-scripts allow-same-origin allow-popups allow-forms allow-presentation' as const
+
+/**
+ * The allowlist override configured on the editor's iframe extension, or
+ * `undefined` when the extension is absent / uses the default list.
+ */
+export function getIframeAllowlist(
+  editor: Editor,
+): readonly string[] | undefined {
+  return editor.extensionManager?.extensions.find(
+    (extension) => extension.name === 'iframe',
+  )?.options.allowlist as readonly string[] | undefined
+}
+
+/**
+ * True iff any of `hosts` would pass the editor's iframe allowlist — used to
+ * prune per-platform embed shortcuts when a custom allowlist excludes them.
+ */
+export function allowlistPermitsHosts(
+  editor: Editor,
+  hosts: readonly string[],
+): boolean {
+  const allowlist = getIframeAllowlist(editor) ?? IFRAME_ALLOWLIST
+  return hosts.some((host) => matchesHostname(host, allowlist))
+}
 
 /** Options for {@link validateIframeUrl}. */
 export interface ValidateIframeUrlOptions {

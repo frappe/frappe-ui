@@ -31,8 +31,12 @@ declare module '@tiptap/core' {
       insertIframeURL: (url: string) => ReturnType
       /** Update the selected iframe's alignment. */
       setIframeAlign: (align: IframeAlign) => ReturnType
-      /** Open the insert-embed dialog (mounts it via the controller). */
-      openIframeDialog: () => ReturnType
+      /**
+       * Open the insert-embed dialog (mounts it via the controller).
+       * `platform` (a `PLATFORM_CONFIGS` name, e.g. "YouTube") tailors the
+       * dialog title/placeholder; the dialog still accepts any supported URL.
+       */
+      openIframeDialog: (platform?: string) => ReturnType
     }
     // Separate group: the legacy TextEditor also augments `Commands.iframe`,
     // and a divergent second declaration of a shared group is a TS2717 error.
@@ -84,9 +88,9 @@ export function buildIframeCommands(
       commands.setIframe({ src: url })
 
   const openIframeDialog: RawCommands['openIframeDialog'] =
-    () =>
+    (platform?: string) =>
     ({ editor }) => {
-      openIframeInsertDialog({ editor })
+      openIframeInsertDialog({ editor, platform })
       return true
     }
 
