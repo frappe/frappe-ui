@@ -23,12 +23,10 @@ const props = withDefaults(defineProps<AccordionProps>(), {
 // `defaultValue` and manages the open state itself.
 const model = defineModel<string | string[]>()
 
-const dir = computed<'rtl' | 'ltr'>(
-  () =>
-    props.dir ??
-    (typeof document !== 'undefined' && document.documentElement.dir === 'rtl'
-      ? 'rtl'
-      : 'ltr'),
+const dir = computed<'rtl' | 'ltr'>(() =>
+  typeof document !== 'undefined' && document.documentElement.dir === 'rtl'
+    ? 'rtl'
+    : 'ltr',
 )
 
 // reka treats `collapsible` as meaningful only for single-select accordions.
@@ -42,7 +40,7 @@ function itemValue(item: AccordionItemType, index: number) {
 
 defineSlots<{
   /** Custom renderer for an item's trigger label. Receives `{ item, index }`. */
-  'item-title'?: (props: { item: AccordionItemType; index: number }) => any
+  'item-label'?: (props: { item: AccordionItemType; index: number }) => any
 
   /**
    * Trailing, non-interactive header content (e.g. a `Badge` or count) shown
@@ -96,7 +94,7 @@ defineSlots<{
               class="size-4 shrink-0 text-ink-gray-6"
             />
             <span class="truncate">
-              <slot name="item-title" v-bind="{ item, index }">
+              <slot name="item-label" v-bind="{ item, index }">
                 {{ item.title }}
               </slot>
             </span>
