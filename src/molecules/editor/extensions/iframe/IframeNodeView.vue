@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { computed, ref, toRaw } from 'vue'
+import { computed, ref, toRaw, watch } from 'vue'
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
+import MediaToolbar from '#molecules/editor/components/MediaToolbar.vue'
 import { useNodeViewEditable } from '#molecules/editor/composables/useNodeViewEditable'
 import { useNodeViewResize } from '#molecules/editor/composables/useNodeViewResize'
 import { safeGetPos } from '#molecules/editor/extensions/shared/node-view'
 import { IFRAME_SANDBOX } from './iframe-allowlist'
+import { openIframeInsertDialog } from './iframeInsertDialogController'
 import type { IframeAlign } from './iframe-commands'
 
 const props = defineProps(nodeViewProps)
@@ -53,6 +55,16 @@ const { startResize } = useNodeViewResize(editor, {
   maxWidthPadding: EDITOR_PADDING,
 })
 
+const showCaption = ref(Boolean(props.node.attrs.title))
+
+// Re-sync when the title attr changes elsewhere (collab, undo, …).
+watch(
+  () => props.node.attrs.title,
+  (title) => {
+    if (title) showCaption.value = true
+  },
+)
+
 function selectIframe(): void {
   const pos = safeGetPos(() => props.getPos())
   if (pos === null) return
@@ -66,6 +78,19 @@ function onResizeStart(event: MouseEvent): void {
 
 function setAlignment(align: IframeAlign): void {
   props.updateAttributes({ align })
+}
+
+function toggleCaption(): void {
+  showCaption.value = !showCaption.value
+  if (!showCaption.value) props.updateAttributes({ title: '' })
+}
+
+function changeEmbedLink(): void {
+  openIframeInsertDialog({
+    editor,
+    getReplacePos: () => safeGetPos(() => props.getPos()) ?? undefined,
+    initialUrl: (props.node.attrs.src as string | null) ?? undefined,
+  })
 }
 
 function setCursorAt(pos: number): void {
@@ -149,47 +174,28 @@ function commitCaption(event: Event): void {
           @click.stop="selectIframe"
         ></div>
 
-        <!-- Controls overlay -->
-        <div class="absolute bottom-2 right-2 z-20 flex items-center gap-2">
-          <div
-            v-if="selected && isEditable"
-            class="flex divide-x divide-ink-gray-6 rounded-md bg-black/65"
-          >
-            <button
-              class="px-1.5 py-1 text-ink-gray-4 transition-colors duration-150 hover:text-white"
-              :class="{ 'text-white': node.attrs.align === 'left' }"
-              title="Align Left"
-              @click.stop="setAlignment('left')"
-            >
-              <span class="lucide-align-left size-4" />
-            </button>
-            <button
-              class="px-1.5 py-1 text-ink-gray-4 transition-colors duration-150 hover:text-white"
-              :class="{ 'text-white': node.attrs.align === 'center' }"
-              title="Align Center"
-              @click.stop="setAlignment('center')"
-            >
-              <span class="lucide-align-center size-4" />
-            </button>
-            <button
-              class="px-1.5 py-1 text-ink-gray-4 transition-colors duration-150 hover:text-white"
-              :class="{ 'text-white': node.attrs.align === 'right' }"
-              title="Align Right"
-              @click.stop="setAlignment('right')"
-            >
-              <span class="lucide-align-right size-4" />
-            </button>
-          </div>
+        <!-- Shared media toolbar (caption / change link / align) -->
+        <MediaToolbar
+          v-if="node.attrs.src"
+          :node="node"
+          media-type="embed"
+          :is-editable="isEditable"
+          :selected="selected"
+          :show-caption="showCaption"
+          @toggle-caption="toggleCaption"
+          @set-align="setAlignment"
+          @replace="changeEmbedLink"
+        />
 
-          <button
-            v-if="selected && isEditable"
-            class="cursor-nw-resize rounded-md bg-black/65 p-1"
-            title="Resize"
-            @mousedown.prevent="onResizeStart"
-          >
-            <span class="lucide-move-diagonal-2 size-4 text-white" />
-          </button>
-        </div>
+        <button
+          v-if="selected && isEditable"
+          type="button"
+          class="absolute bottom-2 right-2 z-20 cursor-nw-resize rounded bg-black/65 p-1"
+          aria-label="Resize embed"
+          @pointerdown.prevent="onResizeStart"
+        >
+          <span class="lucide-move-diagonal-2 size-4 text-white" />
+        </button>
 
         <!-- Placeholder while no src is set -->
         <div
@@ -205,7 +211,7 @@ function commitCaption(event: Event): void {
 
       <!-- Caption input (commits on blur / Enter) -->
       <input
-        v-if="(isEditable || node.attrs.title) && node.attrs.src"
+        v-if="(node.attrs.title || showCaption) && node.attrs.src"
         :value="node.attrs.title"
         class="mt-2 h-7 w-full border-0 bg-transparent text-center text-sm text-ink-gray-6 placeholder-ink-gray-4 focus:outline-none focus:ring-0 disabled:opacity-60"
         placeholder="Add caption"

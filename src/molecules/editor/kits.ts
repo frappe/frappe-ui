@@ -6,7 +6,7 @@ import { Paragraph } from '@tiptap/extension-paragraph'
 import { Strike } from '@tiptap/extension-strike'
 import { Text } from '@tiptap/extension-text'
 import { Underline } from '@tiptap/extension-underline'
-import { Dropcursor, Gapcursor, UndoRedo } from '@tiptap/extensions'
+import { Gapcursor, UndoRedo } from '@tiptap/extensions'
 import type { HeadingOptions } from '@tiptap/extension-heading'
 import type { LinkOptions } from '@tiptap/extension-link'
 import {
@@ -42,6 +42,7 @@ import {
   Typography,
   TextAlign,
   StyleClipboard,
+  EditorDropcursor,
   type StarterKitOptions,
   type MentionSuggestionItem,
   type TagSuggestionItem,
@@ -282,7 +283,7 @@ export const InlineKit = Extension.create<InlineKitOptions>({
       if (options.starterKit.strike !== false) list.push(Strike)
       if (options.starterKit.underline !== false) list.push(Underline)
       if (options.starterKit.code !== false) list.push(Code)
-      if (options.starterKit.dropcursor !== false) list.push(Dropcursor)
+      if (options.starterKit.dropcursor !== false) list.push(EditorDropcursor)
       if (options.starterKit.gapcursor !== false) list.push(Gapcursor)
       if (options.starterKit.undoRedo !== false) list.push(UndoRedo)
     }

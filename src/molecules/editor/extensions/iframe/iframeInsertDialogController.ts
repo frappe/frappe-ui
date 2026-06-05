@@ -18,7 +18,13 @@ function teardown() {
   container = null
 }
 
-export function openIframeInsertDialog(args: { editor: Editor }): void {
+export function openIframeInsertDialog(args: {
+  editor: Editor
+  /** Edit mode: position resolver for the iframe node being edited. */
+  getReplacePos?: () => number | undefined
+  /** Prefill for edit mode (the node's current src). */
+  initialUrl?: string
+}): void {
   teardown()
 
   const open = ref(true)
@@ -35,6 +41,8 @@ export function openIframeInsertDialog(args: { editor: Editor }): void {
           if (!value) setTimeout(teardown, 0)
         },
         editor: args.editor,
+        getReplacePos: args.getReplacePos,
+        initialUrl: args.initialUrl,
         onClose: () => setTimeout(teardown, 0),
       })
     },

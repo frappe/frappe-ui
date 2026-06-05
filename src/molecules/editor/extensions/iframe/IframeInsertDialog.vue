@@ -1,7 +1,7 @@
 <template>
   <Dialog
     v-model="open"
-    :options="{ title: 'Insert Embed', size: 'md' }"
+    :options="{ title: isEditing ? 'Edit Embed' : 'Insert Embed', size: 'md' }"
     @close="$emit('close')"
   >
     <template #body-content>
@@ -35,7 +35,7 @@
           :disabled="!dialog.isValidUrl.value"
           @click="submit"
         >
-          Insert Embed
+          {{ isEditing ? 'Update Embed' : 'Insert Embed' }}
         </Button>
       </div>
     </template>
@@ -53,6 +53,10 @@ import { useIframeDialog } from './useIframeDialog'
 const props = defineProps<{
   modelValue: boolean
   editor: Editor
+  /** Edit mode: position resolver for the iframe node being edited. */
+  getReplacePos?: () => number | undefined
+  /** Prefill for edit mode. */
+  initialUrl?: string
 }>()
 
 const emit = defineEmits<{
@@ -65,7 +69,12 @@ const open = computed({
   set: (value) => emit('update:modelValue', value),
 })
 
-const dialog = useIframeDialog(props.editor)
+const isEditing = computed(() => !!props.getReplacePos)
+
+const dialog = useIframeDialog(props.editor, {
+  getReplacePos: props.getReplacePos,
+  initialUrl: props.initialUrl,
+})
 const input = useTemplateRef<{ el?: HTMLTextAreaElement }>('input')
 
 function submit() {

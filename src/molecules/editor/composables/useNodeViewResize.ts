@@ -2,7 +2,7 @@
  * Aspect-ratio-locked resize-drag for media / embed node views.
  *
  * Behavior preserved from `MediaNodeView.vue` + `IframeNodeView.vue`:
- * - `startResize` (on the handle's `mousedown`) records the start X and the
+ * - `startResize` (on the handle's `pointerdown`) records the start X and the
  *   element's current `offsetWidth`, locks the aspect ratio, and registers
  *   `mousemove` / `mouseup` listeners on `window` plus an `ew-resize` body cursor.
  * - `mousemove` applies temporary inline `width`/`height` to the element for
@@ -44,7 +44,10 @@ export interface ResizeArgs {
 export function useNodeViewResize(
   editor: Editor,
   args: ResizeArgs,
-): { isResizing: Ref<boolean>; startResize: (event: PointerEvent | MouseEvent) => void } {
+): {
+  isResizing: Ref<boolean>
+  startResize: (event: PointerEvent | MouseEvent) => void
+} {
   const isResizing = ref(false)
   const minWidth = args.minWidth ?? 50
   const maxWidthPadding = args.maxWidthPadding ?? 0
@@ -63,12 +66,13 @@ export function useNodeViewResize(
     startWidth = el.offsetWidth
     aspectRatio = args.getAspectRatio() || 1
 
-    window.addEventListener('mousemove', handleResize)
-    window.addEventListener('mouseup', stopResize)
+    window.addEventListener('pointermove', handleResize)
+    window.addEventListener('pointerup', stopResize)
+    window.addEventListener('pointercancel', stopResize)
     document.body.style.cursor = 'ew-resize'
   }
 
-  function handleResize(event: MouseEvent): void {
+  function handleResize(event: PointerEvent): void {
     if (!isResizing.value) return
     const el = args.mediaEl()
     if (!el) return
@@ -102,16 +106,25 @@ export function useNodeViewResize(
     const width = el.offsetWidth
     const height = el.offsetHeight
 
-    // Clear temporary styles before committing so the node re-renders cleanly.
-    el.style.width = ''
-    el.style.height = ''
+    const clearInlineStyles = () => {
+      el.style.width = ''
+      el.style.height = ''
+      const container = args.containerEl?.()
+      if (container) container.style.width = ''
+    }
 
-    // Clear the inline container width so the committed attrs/render take over.
-    const container = args.containerEl?.()
-    if (container) container.style.width = ''
-
-    if (safeGetPos(args.getPos) === null) return
+    if (safeGetPos(args.getPos) === null) {
+      clearInlineStyles()
+      return
+    }
     onCommitGuarded(width, height)
+    // Keep the inline drag styles through the commit re-render. Clearing them
+    // synchronously made the node render at its OLD committed size for one
+    // frame (the attr update lands a microtask later) — a visible page jump
+    // proportional to the media's height. After the next frame the committed
+    // attrs render the same size the inline styles held, so clearing is a no-op
+    // visually.
+    requestAnimationFrame(clearInlineStyles)
   }
 
   function onCommitGuarded(width: number, height: number): void {
@@ -119,8 +132,9 @@ export function useNodeViewResize(
   }
 
   function removeWindowListeners(): void {
-    window.removeEventListener('mousemove', handleResize)
-    window.removeEventListener('mouseup', stopResize)
+    window.removeEventListener('pointermove', handleResize)
+    window.removeEventListener('pointerup', stopResize)
+    window.removeEventListener('pointercancel', stopResize)
   }
 
   onUnmounted(() => {

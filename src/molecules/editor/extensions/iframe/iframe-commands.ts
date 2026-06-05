@@ -34,6 +34,12 @@ declare module '@tiptap/core' {
       /** Open the insert-embed dialog (mounts it via the controller). */
       openIframeDialog: () => ReturnType
     }
+    // Separate group: the legacy TextEditor also augments `Commands.iframe`,
+    // and a divergent second declaration of a shared group is a TS2717 error.
+    iframeEdit: {
+      /** Swap the src of the iframe node at `pos` (keeps caption/align). */
+      updateIframeAt: (pos: number, url: string) => ReturnType
+    }
   }
 }
 
@@ -84,5 +90,39 @@ export function buildIframeCommands(
       return true
     }
 
-  return { setIframeAlign, setIframe, insertIframeURL, openIframeDialog }
+  const updateIframeAt: RawCommands['updateIframeAt'] =
+    (pos: number, url: string) =>
+    ({ editor, tr, dispatch }) => {
+      const node = editor.state.doc.nodeAt(pos)
+      if (!node || node.type.name !== nodeName) return false
+      const processedSrc = processEmbedUrl(url)
+      if (!validateIframeUrl(processedSrc, { allowlist })) return false
+      // Same src → keep the user's sizing; new src → re-derive platform dims.
+      let { width, height } = node.attrs as {
+        width: number | null
+        height: number | null
+      }
+      if (processedSrc !== node.attrs.src || !width || !height) {
+        const editorWidth = editor.view.dom.clientWidth || 800
+        ;({ width, height } = getOptimalDimensions(processedSrc, editorWidth))
+      }
+      if (dispatch) {
+        tr.setNodeMarkup(pos, undefined, {
+          ...node.attrs,
+          src: processedSrc,
+          width,
+          height,
+          aspectRatio: height / width,
+        })
+      }
+      return true
+    }
+
+  return {
+    setIframeAlign,
+    setIframe,
+    insertIframeURL,
+    openIframeDialog,
+    updateIframeAt,
+  }
 }

@@ -48,7 +48,7 @@ beforeEach(() => {
 })
 
 describe('useNodeViewResize', () => {
-  it('removes window listeners and resets cursor on stop (mouseup)', () => {
+  it('removes window listeners and resets cursor on stop (pointerup)', () => {
     const remove = vi.spyOn(window, 'removeEventListener')
     const el = makeEl()
     const { api, unmount } = mountResize(makeEditor(), {
@@ -61,10 +61,12 @@ describe('useNodeViewResize', () => {
     api.startResize({ clientX: 0 } as MouseEvent)
     expect(api.isResizing.value).toBe(true)
 
-    window.dispatchEvent(new MouseEvent('mouseup'))
+    // jsdom has no PointerEvent constructor; type string is all that matters.
+    window.dispatchEvent(new MouseEvent('pointerup'))
     expect(api.isResizing.value).toBe(false)
-    expect(remove).toHaveBeenCalledWith('mousemove', expect.any(Function))
-    expect(remove).toHaveBeenCalledWith('mouseup', expect.any(Function))
+    expect(remove).toHaveBeenCalledWith('pointermove', expect.any(Function))
+    expect(remove).toHaveBeenCalledWith('pointerup', expect.any(Function))
+    expect(remove).toHaveBeenCalledWith('pointercancel', expect.any(Function))
     expect(document.body.style.cursor).toBe('')
     unmount()
   })
@@ -82,8 +84,9 @@ describe('useNodeViewResize', () => {
     api.startResize({ clientX: 0 } as MouseEvent)
     unmount()
 
-    expect(remove).toHaveBeenCalledWith('mousemove', expect.any(Function))
-    expect(remove).toHaveBeenCalledWith('mouseup', expect.any(Function))
+    expect(remove).toHaveBeenCalledWith('pointermove', expect.any(Function))
+    expect(remove).toHaveBeenCalledWith('pointerup', expect.any(Function))
+    expect(remove).toHaveBeenCalledWith('pointercancel', expect.any(Function))
     expect(document.body.style.cursor).toBe('')
   })
 
@@ -98,7 +101,7 @@ describe('useNodeViewResize', () => {
     })
 
     api.startResize({ clientX: 0 } as MouseEvent)
-    window.dispatchEvent(new MouseEvent('mouseup'))
+    window.dispatchEvent(new MouseEvent('pointerup'))
 
     expect(onCommit).not.toHaveBeenCalled()
     unmount()
@@ -115,7 +118,7 @@ describe('useNodeViewResize', () => {
     })
 
     api.startResize({ clientX: 0 } as MouseEvent)
-    window.dispatchEvent(new MouseEvent('mouseup'))
+    window.dispatchEvent(new MouseEvent('pointerup'))
 
     expect(onCommit).toHaveBeenCalledWith({ width: 200, height: 100 })
     unmount()

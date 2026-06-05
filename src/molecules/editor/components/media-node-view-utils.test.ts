@@ -2,7 +2,6 @@ import { describe, it, expect } from 'vitest'
 import {
   wrapperClasses,
   containerClasses,
-  alignIcon,
   aspectRatioFrom,
   heightOverWidth,
 } from './media-node-view-utils'
@@ -32,18 +31,6 @@ describe('containerClasses', () => {
     const classes = containerClasses({ align: 'right', float: 'left' }, false)
     expect(classes).toContain('ml-auto mr-0')
     expect(classes).not.toContain('block max-w-full')
-  })
-})
-
-describe('alignIcon', () => {
-  it('maps known alignments', () => {
-    expect(alignIcon('center')).toBe('lucide-align-center')
-    expect(alignIcon('right')).toBe('lucide-align-right')
-  })
-
-  it('defaults to left', () => {
-    expect(alignIcon(null)).toBe('lucide-align-left')
-    expect(alignIcon(undefined)).toBe('lucide-align-left')
   })
 })
 

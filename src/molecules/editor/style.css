@@ -219,3 +219,9 @@ img.ProseMirror-selectednode {
 .prose-v3 blockquote {
   border-inline-start-width: 2px;
 }
+
+/* Drop indicator (prosemirror-dropcursor): a rounded bar instead of the
+   default hairline. Width/color are set via EditorDropcursor in extensions.ts. */
+.editor-drop-cursor {
+  border-radius: 9999px;
+}

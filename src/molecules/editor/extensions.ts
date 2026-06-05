@@ -1,9 +1,15 @@
 import { Extension, type Editor, type Extensions } from '@tiptap/core'
-import { Blockquote, type BlockquoteOptions } from '@tiptap/extension-blockquote'
+import {
+  Blockquote,
+  type BlockquoteOptions,
+} from '@tiptap/extension-blockquote'
 import { Bold, type BoldOptions } from '@tiptap/extension-bold'
 import { Document } from '@tiptap/extension-document'
 import { HardBreak, type HardBreakOptions } from '@tiptap/extension-hard-break'
-import { HorizontalRule, type HorizontalRuleOptions } from '@tiptap/extension-horizontal-rule'
+import {
+  HorizontalRule,
+  type HorizontalRuleOptions,
+} from '@tiptap/extension-horizontal-rule'
 import { Italic, type ItalicOptions } from '@tiptap/extension-italic'
 import {
   BulletList,
@@ -29,7 +35,9 @@ import {
   type UndoRedoOptions,
 } from '@tiptap/extensions'
 import PlaceholderExtension from '@tiptap/extension-placeholder'
-import HeadingExtension, { type HeadingOptions } from '@tiptap/extension-heading'
+import HeadingExtension, {
+  type HeadingOptions,
+} from '@tiptap/extension-heading'
 import HeadingIdsExtension from './extensions/heading/heading-ids'
 import { LinkExtension } from './extensions/link'
 // Custom code mark + lowlight code block (input rule, indent keymaps, language
@@ -113,6 +121,17 @@ function pushConfigured<O>(
   if (option !== false) list.push(extension.configure(option ?? {}))
 }
 
+/**
+ * Dropcursor with the design-system drop indicator: a 3px rounded gray bar
+ * (rounded corners via `.editor-drop-cursor` in style.css) instead of the
+ * default 1px black line.
+ */
+export const EditorDropcursor = Dropcursor.configure({
+  width: 3,
+  color: 'var(--surface-gray-7, #383838)',
+  class: 'editor-drop-cursor',
+})
+
 export const StarterKit = Extension.create<StarterKitOptions>({
   name: 'frappeStarterKit',
   addOptions() {
@@ -124,7 +143,7 @@ export const StarterKit = Extension.create<StarterKitOptions>({
     pushConfigured(list, Blockquote, this.options.blockquote)
     pushConfigured(list, BulletList, this.options.bulletList)
     if (this.options.document !== false) list.push(Document)
-    pushConfigured(list, Dropcursor, this.options.dropcursor)
+    pushConfigured(list, EditorDropcursor, this.options.dropcursor)
     if (this.options.gapcursor !== false) list.push(Gapcursor)
     pushConfigured(list, HardBreak, this.options.hardBreak)
     pushConfigured(list, HeadingExtension, this.options.heading)
@@ -261,3 +280,4 @@ export { SlashCommands }
 export const Toc = TocNodeExtension
 export const ContentPaste = ContentPasteExtension
 export const StyleClipboard = StyleClipboardExtension
+export type { MediaUploadRequestOptions } from './extensions/shared/media-upload-engine'
