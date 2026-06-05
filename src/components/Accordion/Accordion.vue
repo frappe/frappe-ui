@@ -74,7 +74,7 @@ defineSlots<{
     >
       <AccordionHeader :as="props.headingTag" class="m-0 flex">
         <AccordionTrigger
-          class="group flex flex-1 select-none items-center gap-2 py-3 text-left text-base font-medium text-ink-gray-8 outline-none transition-colors duration-150 hover:text-ink-gray-9 focus-visible:rounded focus-visible:ring-2 focus-visible:ring-outline-gray-3 disabled:cursor-not-allowed disabled:text-ink-gray-4"
+          class="group flex flex-1 select-none items-center gap-2 rounded px-2 py-3 text-left text-base font-medium text-ink-gray-8 outline-none transition-colors duration-150 hover:text-ink-gray-9 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-outline-gray-3 disabled:cursor-not-allowed disabled:text-ink-gray-4 disabled:hover:text-ink-gray-4"
           data-slot="trigger"
         >
           <span class="flex min-w-0 flex-1 items-center gap-2">
@@ -103,14 +103,14 @@ defineSlots<{
           <slot name="item-suffix" v-bind="{ item, index }" />
 
           <span
-            class="lucide-chevron-down size-4 shrink-0 text-ink-gray-5 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-data-[state=open]:rotate-180 motion-reduce:transition-none"
+            class="lucide-chevron-down size-4 shrink-0 text-ink-gray-5 transition-[transform,color] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:text-ink-gray-8 group-data-[state=open]:rotate-180 group-disabled:text-ink-gray-4 motion-reduce:transition-none"
             aria-hidden="true"
           />
         </AccordionTrigger>
       </AccordionHeader>
 
       <AccordionContent class="accordion-content" data-slot="content">
-        <div class="pb-3 text-p-base text-ink-gray-6">
+        <div class="px-2 pb-3 text-p-base text-ink-gray-6">
           <slot name="item-content" v-bind="{ item, index }">
             {{ item.content }}
           </slot>
