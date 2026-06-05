@@ -2,6 +2,7 @@
 import { computed, ref, toRaw, watch } from 'vue'
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
 import MediaToolbar from '#molecules/editor/components/MediaToolbar.vue'
+import MediaResizeHandles from '#molecules/editor/components/MediaResizeHandles.vue'
 import { useNodeViewEditable } from '#molecules/editor/composables/useNodeViewEditable'
 import { useNodeViewResize } from '#molecules/editor/composables/useNodeViewResize'
 import { safeGetPos } from '#molecules/editor/extensions/shared/node-view'
@@ -34,7 +35,8 @@ const aspectRatio = computed<number>(
 const frameStyle = computed(() => {
   const width = (props.node.attrs.width as number | null) ?? 640
   const height =
-    (props.node.attrs.height as number | null) ?? Math.round(width * aspectRatio.value)
+    (props.node.attrs.height as number | null) ??
+    Math.round(width * aspectRatio.value)
   return { width: `${width}px`, height: `${height}px` }
 })
 
@@ -53,6 +55,8 @@ const { startResize } = useNodeViewResize(editor, {
   },
   minWidth: MIN_WIDTH,
   maxWidthPadding: EDITOR_PADDING,
+  // The iframe's committed size renders via the frameStyle `:style` binding.
+  mediaSizing: 'style',
 })
 
 const showCaption = ref(Boolean(props.node.attrs.title))
@@ -71,9 +75,9 @@ function selectIframe(): void {
   editor.commands.setNodeSelection(pos)
 }
 
-function onResizeStart(event: MouseEvent): void {
+function onResizeStart(event: PointerEvent, edge: 'left' | 'right'): void {
   selectIframe()
-  startResize(event)
+  startResize(event, edge)
 }
 
 function setAlignment(align: IframeAlign): void {
@@ -136,7 +140,7 @@ function commitCaption(event: Event): void {
   <NodeViewWrapper>
     <div
       ref="containerRef"
-      class="relative my-6 block max-w-full overflow-hidden rounded-lg not-prose focus:outline-none"
+      class="relative isolate my-6 block max-w-full overflow-hidden rounded-lg not-prose focus:outline-none"
       :class="[
         { 'ring-2 ring-outline-gray-3 ring-offset-2': selected },
         node.attrs.align === 'center' ? 'mx-auto' : '',
@@ -187,15 +191,11 @@ function commitCaption(event: Event): void {
           @replace="changeEmbedLink"
         />
 
-        <button
+        <MediaResizeHandles
           v-if="selected && isEditable"
-          type="button"
-          class="absolute bottom-2 right-2 z-20 cursor-nw-resize rounded bg-black/65 p-1"
-          aria-label="Resize embed"
-          @pointerdown.prevent="onResizeStart"
-        >
-          <span class="lucide-move-diagonal-2 size-4 text-white" />
-        </button>
+          label="Resize embed"
+          @resize-start="onResizeStart"
+        />
 
         <!-- Placeholder while no src is set -->
         <div

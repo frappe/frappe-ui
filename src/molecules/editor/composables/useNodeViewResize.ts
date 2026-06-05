@@ -35,18 +35,32 @@ export interface ResizeArgs {
   getPos: () => number | undefined
   /** Persist the committed size (e.g. via `updateAttributes`). */
   onCommit: (size: { width: number; height: number }) => void
+  /**
+   * How the node view renders the media element's COMMITTED size:
+   * - 'attribute' (default): `width=`/`height=` attributes (img / video). The
+   *   drag's inline styles are cleared after commit — they'd otherwise mask
+   *   future attribute updates (keyboard resize, collab).
+   * - 'style': a Vue `:style` binding (e.g. the iframe's frameStyle). The
+   *   drag's inline styles are LEFT IN PLACE: they already equal the committed
+   *   size, and clearing them would wipe the binding's write (Vue only
+   *   re-writes a style property when its bound VALUE changes).
+   */
+  mediaSizing?: 'attribute' | 'style'
   /** Minimum width in px. Default 50 (matches the image node view). */
   minWidth?: number
   /** Reserved px subtracted from the editor width as the max. Default 0. */
   maxWidthPadding?: number
 }
 
+/** Which edge the drag started from; a left-edge drag inverts the delta. */
+export type ResizeEdge = 'left' | 'right'
+
 export function useNodeViewResize(
   editor: Editor,
   args: ResizeArgs,
 ): {
   isResizing: Ref<boolean>
-  startResize: (event: PointerEvent | MouseEvent) => void
+  startResize: (event: PointerEvent | MouseEvent, edge?: ResizeEdge) => void
 } {
   const isResizing = ref(false)
   const minWidth = args.minWidth ?? 50
@@ -55,8 +69,12 @@ export function useNodeViewResize(
   let startDragX = 0
   let startWidth = 0
   let aspectRatio = 1
+  let dragDirection = 1
 
-  function startResize(event: PointerEvent | MouseEvent): void {
+  function startResize(
+    event: PointerEvent | MouseEvent,
+    edge: ResizeEdge = 'right',
+  ): void {
     if (!editor.isEditable) return
     const el = args.mediaEl()
     if (!el) return
@@ -65,6 +83,9 @@ export function useNodeViewResize(
     startDragX = event.clientX
     startWidth = el.offsetWidth
     aspectRatio = args.getAspectRatio() || 1
+    // Dragging the LEFT handle outward moves the pointer left (negative
+    // clientX delta) but should grow the node — invert the delta.
+    dragDirection = edge === 'left' ? -1 : 1
 
     window.addEventListener('pointermove', handleResize)
     window.addEventListener('pointerup', stopResize)
@@ -78,7 +99,7 @@ export function useNodeViewResize(
     if (!el) return
 
     const editorWidth = editor.view.dom.clientWidth
-    const deltaX = event.clientX - startDragX
+    const deltaX = (event.clientX - startDragX) * dragDirection
     const newWidth = Math.max(
       minWidth,
       Math.min(startWidth + deltaX, editorWidth - maxWidthPadding),
@@ -106,25 +127,35 @@ export function useNodeViewResize(
     const width = el.offsetWidth
     const height = el.offsetHeight
 
-    const clearInlineStyles = () => {
+    if (safeGetPos(args.getPos) === null) {
+      // No commit happened — drop the drag styles so the (possibly stale)
+      // view falls back to its bound size.
       el.style.width = ''
       el.style.height = ''
       const container = args.containerEl?.()
       if (container) container.style.width = ''
-    }
-
-    if (safeGetPos(args.getPos) === null) {
-      clearInlineStyles()
       return
     }
     onCommitGuarded(width, height)
-    // Keep the inline drag styles through the commit re-render. Clearing them
-    // synchronously made the node render at its OLD committed size for one
-    // frame (the attr update lands a microtask later) — a visible page jump
-    // proportional to the media's height. After the next frame the committed
-    // attrs render the same size the inline styles held, so clearing is a no-op
-    // visually.
-    requestAnimationFrame(clearInlineStyles)
+    // Container width and a 'style'-sized media element are owned by Vue
+    // `:style` bindings on the SAME properties the drag wrote. Their inline
+    // values already equal the committed size, so leave them in place — the
+    // next binding VALUE change overwrites them. Clearing them here used to
+    // race the commit re-render: Vue wrote the committed width first, the
+    // deferred clear wiped it, and Vue never re-writes an unchanged value —
+    // leaving the block container at full editor width until some later
+    // value-changing render (the "huge ring around a small image" bug).
+    //
+    // Only an 'attribute'-sized media element (img/video, width=/height=)
+    // needs its inline styles cleared, or they'd mask future attribute
+    // updates. rAF defers that past the commit re-render so the old attribute
+    // size never paints (clearing synchronously flashed a page jump).
+    if ((args.mediaSizing ?? 'attribute') === 'attribute') {
+      requestAnimationFrame(() => {
+        el.style.width = ''
+        el.style.height = ''
+      })
+    }
   }
 
   function onCommitGuarded(width: number, height: number): void {

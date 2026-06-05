@@ -3,7 +3,7 @@
     <!-- Selectable like every other media node: click selects, controls live
          in the on-selection dark toolbar (same pattern as MediaToolbar). -->
     <div
-      class="group/gallery relative w-full not-prose my-2 rounded-md"
+      class="group/gallery relative isolate w-full not-prose my-2 rounded-md"
       :class="{
         'ring-2 ring-outline-gray-3 ring-offset-2': selected && isEditable,
         'cursor-pointer': isEditable && !selected,
@@ -51,11 +51,13 @@
           <button
             v-if="isEditable && selected"
             type="button"
-            class="absolute top-1 right-1 z-10 bg-white/80 hover:bg-white rounded-full p-1 shadow transition-opacity opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100"
+            class="absolute top-1 right-1 z-10 rounded bg-black/65 p-1 transition-opacity opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100"
             aria-label="Remove image"
             @click.stop="removeImage(idx)"
           >
-            <span class="lucide-x w-4 h-4 text-gray-700" />
+            <span
+              class="lucide-x size-4 text-ink-gray-4 hover:text-ink-white"
+            />
           </button>
           <img
             v-if="!isEditable"

@@ -13,7 +13,9 @@ import { useNodeViewEditable } from '#molecules/editor/composables/useNodeViewEd
 import { useNodeViewResize } from '#molecules/editor/composables/useNodeViewResize'
 import { safeGetPos } from '#molecules/editor/extensions/shared/node-view'
 import MediaToolbar from './MediaToolbar.vue'
+import MediaResizeHandles from './MediaResizeHandles.vue'
 import VideoControls from './VideoControls.vue'
+import UploadProgressIndicator from './UploadProgressIndicator.vue'
 import {
   wrapperClasses,
   containerClasses,
@@ -29,9 +31,6 @@ import {
   setMediaAlign,
   handleCaptionKeydown,
 } from './media-node-view-controller'
-import { Progress } from '#components/Progress/index.ts'
-import EditorBubbleMenu from '../EditorBubbleMenu.vue'
-
 const props = defineProps(nodeViewProps)
 
 // TipTap's VueNodeViewRenderer hands node views a REACTIVE-PROXIED editor.
@@ -120,9 +119,9 @@ function onMediaClick() {
   if (isEditable.value) selectMedia()
 }
 
-function startResizeFromHandle(event: MouseEvent) {
+function startResizeFromHandle(event: PointerEvent, edge: 'left' | 'right') {
   selectMedia()
-  startResize(event)
+  startResize(event, edge)
 }
 
 function resizeBy(delta: number) {
@@ -219,7 +218,7 @@ function setVideoOptions(options: {
   <NodeViewWrapper as="div" :class="wrapperClasses(node.attrs.float)">
     <div
       ref="containerRef"
-      class="group relative overflow-hidden not-prose rounded-[2px]"
+      class="group relative isolate overflow-hidden not-prose rounded-[2px]"
       :class="containerClasses(node.attrs, selected)"
       :style="{ width: node.attrs.width ? `${node.attrs.width}px` : 'auto' }"
       data-video-fullscreen-root
@@ -283,17 +282,12 @@ function setVideoOptions(options: {
           @set-video-options="setVideoOptions"
         />
 
-        <button
+        <MediaResizeHandles
           v-if="selected && isEditable && isUploaded"
-          type="button"
-          class="absolute bottom-2 right-2 cursor-nw-resize bg-black/65 rounded p-1"
-          :class="{ 'cursor-ew-resize': isResizing }"
-          aria-label="Resize media"
-          @pointerdown.prevent="startResizeFromHandle"
-          @keydown="onResizeKeydown"
-        >
-          <span class="lucide-move-diagonal-2 text-white size-4" />
-        </button>
+          label="Resize media"
+          @resize-start="startResizeFromHandle"
+          @resize-keydown="onResizeKeydown"
+        />
 
         <!-- Upload error over the staged preview: same overlay pattern as the
              gallery grid cell, kept inside the media box. -->
@@ -316,31 +310,11 @@ function setVideoOptions(options: {
           </div>
         </div>
 
-        <div
+        <UploadProgressIndicator
           v-if="node.attrs.loading"
-          class="pointer-events-none inset-0 absolute flex items-start justify-end p-0.5"
-          aria-live="polite"
-        >
-          <div class="pointer-events-auto min-w-0">
-            <div
-              class="flex items-center gap-1 rounded-lg border border-outline-gray-2 bg-surface-white p-1 shadow-sm"
-            >
-              <div class="flex items-center gap-2">
-                <span
-                  class="tabular-nums text-sm text-ink-gray-9 leading-6 pl-1.5"
-                  >{{ uploadPercent }}%</span
-                >
-                <Button
-                  variant="ghost"
-                  size="xs"
-                  icon="lucide-x"
-                  tooltip="Cancel upload"
-                  @click="cancelUpload"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
+          :percent="uploadPercent"
+          @cancel="cancelUpload"
+        />
       </div>
 
       <div
@@ -382,7 +356,6 @@ function setVideoOptions(options: {
         @blur="commitCaption"
         @keydown="onCaptionKeydown"
       />
-
     </div>
   </NodeViewWrapper>
 </template>

@@ -3,12 +3,13 @@
     class="relative aspect-square w-full h-full overflow-hidden group rounded-md bg-surface-gray-1"
   >
     <button
+      v-if="item.status !== 'uploading'"
       type="button"
-      class="absolute top-1 right-1 z-10 bg-white/80 hover:bg-white rounded-full p-1 shadow transition-opacity opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100"
+      class="absolute top-1 right-1 z-10 rounded bg-black/65 p-1 transition-opacity opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100"
       aria-label="Remove image"
       @click.stop="$emit('remove')"
     >
-      <span class="lucide-x w-4 h-4 text-gray-700" />
+      <span class="lucide-x size-4 text-ink-gray-4 hover:text-ink-white" />
     </button>
 
     <!-- Unsupported preview (HEIC/HEIF): filename placeholder -->
@@ -32,6 +33,7 @@
       :src="previewSrc"
       :alt="caption || ''"
       class="object-cover w-full h-full"
+      :class="item.status === 'uploading' && 'opacity-40'"
     />
 
     <!-- Caption overlay: persistent when a caption is set (so the user can see
@@ -72,30 +74,12 @@
       </div>
     </div>
 
-    <div
+    <UploadProgressIndicator
       v-if="item.status === 'uploading'"
-      class="absolute inset-x-2 top-2 z-10 rounded bg-black/70 p-2 text-ink-white"
-      aria-live="polite"
-    >
-      <div class="mb-1 flex items-center justify-between gap-2 text-xs">
-        <span>Uploading {{ uploadProgress?.percent ?? 0 }}%</span>
-        <button
-          v-if="uploadProgress?.abort"
-          type="button"
-          class="rounded p-0.5 hover:bg-white/10"
-          aria-label="Cancel image upload"
-          @click.stop="abortUpload(item.id)"
-        >
-          <span class="lucide-x size-3" />
-        </button>
-      </div>
-      <div class="h-1 overflow-hidden rounded bg-white/20">
-        <div
-          class="h-full rounded bg-surface-white transition-[width] duration-150"
-          :style="{ width: `${uploadProgress?.percent ?? 0}%` }"
-        />
-      </div>
-    </div>
+      class="z-10"
+      :percent="uploadProgress?.percent ?? 0"
+      @cancel="abortUpload(item.id)"
+    />
 
     <div
       v-if="item.status === 'failed'"
@@ -120,6 +104,7 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, useTemplateRef } from 'vue'
 import Button from '#components/Button/Button.vue'
+import UploadProgressIndicator from '#molecules/editor/components/UploadProgressIndicator.vue'
 import { useObjectUrl } from '#molecules/editor/composables/useObjectUrl'
 import {
   abortUpload,
