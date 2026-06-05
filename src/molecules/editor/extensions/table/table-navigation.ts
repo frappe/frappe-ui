@@ -9,8 +9,9 @@
  *    as usual; Escape returns to navigate.
  *
  * Flow: click a cell → navigate (highlight). Enter (or a second click, or
- * typing) → edit. Escape → navigate. Arrow keys in navigate mode → move the
- * active cell.
+ * typing) → edit. Edit mode is sticky: clicks inside the cell only move the
+ * caret; it exits only via Enter, Escape (→ navigate) or Tab (→ next cell).
+ * Arrow keys in navigate mode → move the active cell.
  *
  * Runs at a high priority so its `handleKeyDown` precedes the Table extension's
  * built-in arrow handling (which would otherwise collapse a CellSelection to a
@@ -227,6 +228,16 @@ export const TableNavigation = Extension.create({
                     (state.selection as CellSelection).$headCell,
                   )
                 }
+                // Plain Enter in edit mode returns to navigate mode
+                // (spreadsheet-style); Shift+Enter still inserts a line break.
+                if (
+                  !event.shiftKey &&
+                  !event.metaKey &&
+                  !event.ctrlKey &&
+                  !event.altKey
+                ) {
+                  return selectCell(editor, selectionCell(state).pos)
+                }
                 return false
               case 'Escape':
                 if (!navigating)
@@ -269,6 +280,16 @@ export const TableNavigation = Extension.create({
               if (!$cell) return false
               // Clicking the active cell again → let the default place the caret.
               if (isOnCell(view.state.selection, $cell)) return false
+              // Already editing this cell → let the default move the caret;
+              // clicks never exit edit mode (only Enter / Escape / Tab do).
+              const $editing = cellAround(view.state.selection.$head)
+              if (
+                !(view.state.selection instanceof CellSelection) &&
+                $editing &&
+                $editing.pos === $cell.pos
+              ) {
+                return false
+              }
 
               event.preventDefault()
               const anchorPos = $cell.pos
