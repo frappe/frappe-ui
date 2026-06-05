@@ -254,7 +254,9 @@ describe('editor menu primitives and presets', () => {
       items: [InsertImage, InsertVideo, InsertLink],
     })
 
-    ;(root.querySelector('[aria-label="Image"]') as HTMLButtonElement).click()
+    ;(
+      root.querySelector('[aria-label="Image / Gallery"]') as HTMLButtonElement
+    ).click()
     ;(root.querySelector('[aria-label="Video"]') as HTMLButtonElement).click()
     ;(root.querySelector('[aria-label="Link"]') as HTMLButtonElement).click()
 

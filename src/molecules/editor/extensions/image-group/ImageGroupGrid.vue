@@ -1,5 +1,8 @@
 <template>
-  <div class="grid gap-px mb-4" :style="gridStyle">
+  <!-- The dialog grid is a workbench, not a 1:1 preview: cells get gaps and
+       rounding so each image reads as a manipulable object. The inserted
+       gallery node keeps its tight gap-px collage look. -->
+  <div class="grid gap-2 mb-4" :style="gridStyle">
     <div
       v-for="(item, idx) in images"
       :key="item.id"
@@ -9,13 +12,28 @@
       @drop="onDrop(idx)"
       @dragend="onDragEnd"
       @dragleave="onDragLeave(idx)"
-      :class="{ 'ring-2 ring-primary-400 z-10': isDropTarget(idx) }"
+      class="group cursor-grab rounded-md transition-opacity active:cursor-grabbing"
+      :class="{
+        'ring-2 ring-outline-gray-4 ring-offset-1 z-10': isDropTarget(idx),
+        'opacity-50': draggedIndex === idx,
+      }"
     >
-      <ImageGroupGridCell
-        :item="item"
-        @remove="$emit('remove', idx)"
-        @update:caption="(caption) => $emit('update-caption', { index: idx, caption })"
-      />
+      <div class="relative">
+        <div
+          class="absolute left-1 top-1 z-10 rounded bg-white/80 p-1 text-ink-gray-6 opacity-100 shadow-sm sm:opacity-0 sm:group-hover:opacity-100"
+          aria-hidden="true"
+        >
+          <span class="lucide-grip size-3" />
+        </div>
+        <ImageGroupGridCell
+          :item="item"
+          @remove="$emit('remove', idx)"
+          @retry="$emit('retry', idx)"
+          @update:caption="
+            (caption) => $emit('update-caption', { index: idx, caption })
+          "
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -33,6 +51,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   remove: [index: number]
+  retry: [index: number]
   'update-caption': [payload: { index: number; caption: string }]
   reorder: [payload: { from: number; to: number }]
 }>()
@@ -53,10 +72,7 @@ function onDragOver(idx: number) {
 }
 
 function onDrop(idx: number) {
-  if (
-    draggedIndex.value !== null &&
-    draggedIndex.value !== idx
-  ) {
+  if (draggedIndex.value !== null && draggedIndex.value !== idx) {
     emit('reorder', { from: draggedIndex.value, to: idx })
   }
   draggedIndex.value = null

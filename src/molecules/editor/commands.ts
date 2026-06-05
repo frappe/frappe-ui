@@ -134,7 +134,7 @@ export const commandMeta = {
     isAvailable: hasMark('namedHighlight'),
   },
   image: {
-    label: 'Image',
+    label: 'Image / Gallery',
     icon: 'lucide-image',
     isAvailable: (editor) =>
       hasNode('image')(editor) && hasCommand('selectAndUploadImage')(editor),
