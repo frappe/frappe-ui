@@ -17,7 +17,7 @@ import {
 } from 'reka-ui'
 import { RouterLink } from 'vue-router'
 import FeatherIcon from '../FeatherIcon.vue'
-import LoadingIndicator from '../LoadingIndicator.vue'
+import Spinner from '../Spinner/Spinner.vue'
 import TooltipBubble from '../Tooltip/TooltipBubble.vue'
 import { warnFeatherIconUsage } from '../../utils/iconString'
 import { buttonProps, type ThemeVariant } from './types'
@@ -66,8 +66,7 @@ export default defineComponent({
     )
 
     const slotClasses = computed(
-      () =>
-        ({ xs: 'h-4', sm: 'h-4', md: 'h-4.5', lg: 'h-5' })[props.size],
+      () => ({ xs: 'h-4', sm: 'h-4', md: 'h-4.5', lg: 'h-5' })[props.size],
     )
 
     const lucideSlotClasses = computed(
@@ -189,20 +188,28 @@ export default defineComponent({
     // The dynamic root: router link, external anchor, or native button. Using the
     // raw 'button' string (not <component :is>) sidesteps the historic recursion
     // with a globally-registered <Button> in consumer apps.
-    const root = computed<{ is: Component | string; props: Record<string, unknown> }>(
-      () => {
-        if (!isDisabled.value && props.route) {
-          return { is: RouterLink, props: { to: props.route } }
+    const root = computed<{
+      is: Component | string
+      props: Record<string, unknown>
+    }>(() => {
+      if (!isDisabled.value && props.route) {
+        return { is: RouterLink, props: { to: props.route } }
+      }
+      if (!isDisabled.value && props.link) {
+        return {
+          is: 'a',
+          props: {
+            href: props.link,
+            target: '_blank',
+            rel: 'noreferrer noopener',
+          },
         }
-        if (!isDisabled.value && props.link) {
-          return {
-            is: 'a',
-            props: { href: props.link, target: '_blank', rel: 'noreferrer noopener' },
-          }
-        }
-        return { is: 'button', props: { type: props.type, disabled: isDisabled.value } }
-      },
-    )
+      }
+      return {
+        is: 'button',
+        props: { type: props.type, disabled: isDisabled.value },
+      }
+    })
 
     /** Resolve an icon prop to a vnode: lucide class-span, FeatherIcon, or component. */
     function renderIcon(
@@ -228,11 +235,14 @@ export default defineComponent({
 
     function renderPrefix() {
       if (props.loading) {
-        return h(LoadingIndicator, {
+        // No `size`/`theme` props: button spinner diameters are tuned per
+        // button size and don't line up with Spinner's fixed sizes, and the
+        // spinner inherits the button's text color.
+        return h(Spinner, {
           class: {
-            'h-3 w-3': props.size === 'xs' || props.size === 'sm',
-            'h-[13.5px] w-[13.5px]': props.size === 'md',
-            'h-[15px] w-[15px]': props.size === 'lg',
+            'size-4': props.size === 'xs' || props.size === 'sm',
+            'size-4.5': props.size === 'md',
+            'size-5': props.size === 'lg',
           },
         })
       }
@@ -246,7 +256,11 @@ export default defineComponent({
         if (props.icon) return renderIcon(props.icon, false)
         if (slots.icon) return slots.icon()
         if (hasLucideIconInDefaultSlot.value) {
-          return h('div', { class: slotClasses.value }, slots.default?.() ?? props.label)
+          return h(
+            'div',
+            { class: slotClasses.value },
+            slots.default?.() ?? props.label,
+          )
         }
         return null
       }
