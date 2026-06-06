@@ -1,23 +1,42 @@
 {
+  // Project for Cypress specs (colocated src/**/*.cy.ts and cypress/
+  // support files). The root tsconfig.json is solution-style and routes
+  // these files here, so the editor picks up Cypress globals instead of
+  // the vitest globals used by the app project.
+  "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "target": "esnext",
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "strict": true,
-    "jsx": "preserve",
     "baseUrl": "..",
-    "types": ["cypress", "node"],
+    "ignoreDeprecations": "5.0",
+    // replaces the base `types`: cypress globals instead of vitest globals
+    // (they clash), keeping the icon module types
+    "types": ["cypress", "node", "unplugin-icons/types/vue"],
     "paths": {
-      "@/*": ["src/*"]
-    },
-    "lib": ["esnext", "dom"],
-    "skipLibCheck": true
+      "@/*": ["src/*"],
+      "#components/*": ["src/components/*"],
+      "#molecules/*": ["src/molecules/*"],
+      "#composables/*": ["src/composables/*"],
+      "#utils/*": ["src/utils/*"]
+    }
   },
+  // The source .ts/.vue files must be part of this program too — vue-tsc
+  // only fully type-checks .vue modules that are program roots, so leaving
+  // them out makes every component import implicitly `any`.
   "include": [
     "**/*.ts",
+    "../src/**/*.ts",
     "../src/**/*.d.ts",
-    "../src/**/*.cy.ts",
+    "../src/**/*.vue",
+    "../frappe/**/*.ts",
     "../frappe/**/*.d.ts",
-    "../frappe/**/*.cy.ts"
+    "../frappe/**/*.vue"
+  ],
+  // vitest specs use vitest globals (typed by the app project) and would
+  // clash with the cypress globals here
+  "exclude": [
+    "../src/**/*.spec.ts",
+    "../src/**/*.test.ts",
+    "../frappe/**/*.spec.ts",
+    "../frappe/**/*.test.ts",
+    "../src/mocks/**/*"
   ]
 }
