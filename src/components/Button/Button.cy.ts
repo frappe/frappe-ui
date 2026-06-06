@@ -57,7 +57,7 @@ describe('<Button />', () => {
     })
     cy.get('button').should('be.disabled')
     cy.get('button').should('contain.text', 'Processing...')
-    cy.get('svg').should('exist') // Loading Spinner
+    cy.get('[role="status"]').should('exist') // Loading Spinner
   })
 
   it('handles prefix and suffix slots (replacing deprecated icon props)', () => {

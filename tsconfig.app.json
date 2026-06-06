@@ -1,0 +1,30 @@
+{
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    "src/index.ts",
+    "frappe/**/*.ts",
+    "frappe/**/*.d.ts",
+    "frappe/**/*.tsx",
+    "frappe/**/*.vue",
+    "frappe/index.js",
+    "frappe/index.d.ts"
+  ],
+  "exclude": ["src/**/*.cy.ts", "frappe/**/*.cy.ts", "src/mocks/**/*"],
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "ignoreDeprecations": "5.0",
+    // Mirrors the package.json `imports` map. The `imports` field drives
+    // runtime/bundler resolution (Node, Vite, esbuild); `paths` is what
+    // TypeScript uses to resolve the same `#` specifiers during type-check.
+    "paths": {
+      "#components/*": ["src/components/*"],
+      "#molecules/*": ["src/molecules/*"],
+      "#composables/*": ["src/composables/*"],
+      "#utils/*": ["src/utils/*"]
+    }
+  }
+}
