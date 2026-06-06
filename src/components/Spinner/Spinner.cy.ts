@@ -28,12 +28,23 @@ describe('Spinner', () => {
       })
     })
 
-    it('size=null applies no inline width/height', () => {
-      cy.mount(Spinner, { props: { size: null } })
+    it('no size prop applies no inline width/height and defaults to 16px via svg attributes', () => {
+      cy.mount(Spinner)
 
       cy.get('[role="status"]').should(($el) => {
         expect($el[0].style.width).to.equal('')
         expect($el[0].style.height).to.equal('')
+        expect(getComputedStyle($el[0]).width).to.equal('16px')
+        expect(getComputedStyle($el[0]).height).to.equal('16px')
+      })
+    })
+
+    it('without size prop, width/height classes win over the CSS default', () => {
+      cy.mount(Spinner, { attrs: { class: 'h-3 w-3' } })
+
+      cy.get('[role="status"]').should(($el) => {
+        expect(getComputedStyle($el[0]).width).to.equal('12px')
+        expect(getComputedStyle($el[0]).height).to.equal('12px')
       })
     })
   })
@@ -51,8 +62,8 @@ describe('Spinner', () => {
       cy.get('[role="status"]').should('have.class', 'text-ink-red-4')
     })
 
-    it('theme=null applies no color class (inherits currentColor)', () => {
-      cy.mount(Spinner, { props: { theme: null } })
+    it('no theme prop applies no color class (inherits currentColor)', () => {
+      cy.mount(Spinner)
 
       cy.get('[role="status"]')
         .should('not.have.class', 'text-ink-gray-8')

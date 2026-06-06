@@ -7,21 +7,19 @@
   const propsData = [
   {
     name: 'size',
-    description: 'Diameter of the spinner — xs=12px, sm=14px, md=16px, lg=20px. Pass `null` to size it with a width/height class instead.',
+    description: 'Diameter — xs=12px, sm=14px, md=16px, lg=20px. Omit to size with classes (default 16px).',
     required: false,
-    type: 'SpinnerSize | null',
-    default: '"md"'
+    type: 'SpinnerSize'
   },
   {
     name: 'theme',
-    description: 'Color tone of the spinner. Pass `null` to inherit the current text color.',
+    description: 'Spinner color. Omit to inherit the text color.',
     required: false,
-    type: 'SpinnerTheme | null',
-    default: '"gray"'
+    type: 'SpinnerTheme'
   },
   {
     name: 'track',
-    description: 'Show a faint full-circle track behind the spinning arc',
+    description: 'Show a faint track behind the arc',
     required: false,
     type: 'boolean',
     default: 'false'

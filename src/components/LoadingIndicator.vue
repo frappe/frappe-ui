@@ -1,5 +1,5 @@
 <template>
-  <Spinner :size="null" :theme="null" :style="scaleStyle" />
+  <Spinner :style="scaleStyle" />
 </template>
 
 <script setup lang="ts">

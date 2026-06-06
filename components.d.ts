@@ -125,7 +125,7 @@ declare module 'vue' {
     SidebarSection: typeof import('./src/components/Sidebar/SidebarSection.vue')['default']
     SlashCommandsList: typeof import('./src/components/TextEditor/extensions/slash-commands/SlashCommandsList.vue')['default']
     Slider: typeof import('./src/components/Slider/Slider.vue')['default']
-    Spinner: typeof import('./src/components/Spinner.vue')['default']
+    Spinner: typeof import('./src/components/Spinner/Spinner.vue')['default']
     SuggestionList: typeof import('./src/components/TextEditor/extensions/suggestion/SuggestionList.vue')['default']
     Switch: typeof import('./src/components/Switch/Switch.vue')['default']
     TabButtons: typeof import('./src/components/TabButtons/TabButtons.vue')['default']
