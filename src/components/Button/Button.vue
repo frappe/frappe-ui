@@ -113,7 +113,7 @@ export default defineComponent({
       }[props.theme]
 
       const focusClasses = {
-        gray: 'focus-visible:focus-ring',
+        gray: '', // global :focus-visible ring
         blue: 'focus-visible:focus-ring-blue',
         green: 'focus-visible:focus-ring-green',
         red: 'focus-visible:focus-ring-red',
@@ -170,7 +170,7 @@ export default defineComponent({
           }[props.size]
 
       return [
-        'inline-flex items-center justify-center gap-2 transition-colors focus:outline-none shrink-0',
+        'inline-flex items-center justify-center gap-2 transition-colors shrink-0',
         // Only an explicit `disabled` dims the button. A `loading` button keeps
         // its normal look (it's still non-interactive via the native `disabled`
         // attr below); `pointer-events-none` suppresses hover/active visuals so

@@ -62,4 +62,4 @@ export function triggerVariantClasses(
  * which is why Select doesn't reuse the shared base string.
  */
 export const triggerBaseClasses =
-  'relative inline-flex items-center gap-2 text-left outline-none transition-[background-color,border-color,box-shadow] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] focus-visible:focus-ring data-[state=open]:focus-ring text-ink-gray-7 data-[placeholder]:text-ink-gray-4 data-[disabled]:text-ink-gray-4'
+  'relative inline-flex items-center gap-2 text-left transition-[background-color,border-color,box-shadow] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] data-[state=open]:focus-ring text-ink-gray-7 data-[placeholder]:text-ink-gray-4 data-[disabled]:text-ink-gray-4'

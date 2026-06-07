@@ -1,6 +1,6 @@
-# Focus ring is 2px
+# Focus ring is a global 2px outline
 
-**Status**: accepted
+**Status**: accepted (amended — see [Amendment](#amendment-global-outline-based-ring))
 
 ## Context
 
@@ -9,34 +9,51 @@ Figma espresso v2 specifies the keyboard focus indicator as a 2px outset drop-sh
 - gray: `0 0 0 2px #C9C9C9E5` (~90% opacity gray)
 - red: `0 0 0 2px #FA9C9DE5` (~90% opacity red)
 
-The Figma typography variables expose these as `focus/light/default` and `focus/light/red`.
+The Figma variables expose these as `focus/light/*` (2px) and `focus/dark/*` (3px), synced into `tailwind/generated/effects.json`.
 
 The historical implementation in `frappe-ui` components used Tailwind's `focus-visible:ring` utility, which defaults to a **3px** ring width. The result was a focus indicator 50% wider than the design intended, with subtly different color (`outline-gray-3` = `#c7c7c7` vs Figma's `#C9C9C9`).
 
-## Decision
+## Decision (original)
 
 All interactive components use `focus-visible:ring-2` (2px width) with theme-appropriate `ring-<color>` for the color stop. The ring is **not** offset and has no blur — matching Figma's `0 0 0 2px <color>` drop-shadow exactly.
 
-Theme color mapping for the ring stop:
+This was later superseded by `focus-visible:focus-ring{-<color>}` utilities backed by the `--focus-*` shadow variables, and then by the amendment below.
 
-| Theme | Ring color utility |
-|---|---|
-| gray (default) | `ring-outline-gray-3` |
-| red    | `ring-outline-red-3` |
-| blue   | `ring-blue-400` |
-| green  | `ring-outline-green-3` |
+## Amendment: global outline-based ring
 
-Blue and green theme ring colors are project conventions — Figma does not define focus colors for those themes (see [`foundations.md`](../foundations.md#themes--colors)).
+Two problems surfaced with the per-component box-shadow approach:
 
-## Rationale
+1. **Opt-in is leaky.** Every interactive element needed `focus-visible:focus-ring` (plus `outline-none` to kill the UA ring); anything missed had no indicator at all.
+2. **box-shadow collides.** `.focus-ring` set `box-shadow`, so it fought any `shadow-*` / `focus:shadow-sm` / `ring-*` utility on the same element — whichever lost the cascade silently disappeared (TextInput had exactly this conflict).
 
-- Tailwind's `ring` defaults to 3px because that's Tailwind's house style, not a design-system decision. Adopting `ring-2` brings the implementation to the Figma spec without re-implementing the box-shadow machinery.
-- Using `ring-2` instead of a custom `shadow-[0_0_0_2px_…]` keeps consumer-app dark-mode overrides via `--tw-ring-color` working, and preserves the existing CSS-variable plumbing.
-- The 90%-opacity color stop (`E5` alpha in Figma) is approximated by the solid `outline-gray-3` / `outline-red-3` tokens. The visual difference is sub-perceptual against most backgrounds; if exact alpha is needed later, the `ring-<color>` token can be redefined globally.
+### Decision
 
-## Consequences
+The default focus ring is applied **globally** in the plugin's base layer, implemented as a CSS **outline**:
 
-- Every interactive component (Button, FormControl, Tabs, Checkbox, MenuItem, etc.) should converge on `focus-visible:ring-2 focus-visible:ring-<themed-color>`. Existing usages of bare `focus-visible:ring` are drift and should migrate.
-- Button is the first migration; verified against Figma node `25393-27651`.
-- `form-input` / `form-textarea` / `form-select` already use `focus-visible:ring-2` in `tailwind/plugin.js` — no change needed there.
-- If a future Figma update changes the ring width, this is a single-token change (`ring-2` → `ring-<n>`) per component.
+```css
+:focus-visible {
+  outline: var(--focus-outline-default); /* 2px solid #c9c9c9e5 light / 3px solid #464646cc dark */
+  outline-offset: 0px;
+}
+```
+
+- `colorPalette.js#generateEffectVariables` emits `--focus-outline-<name>` (`<spread> solid <color>`, theme-flipped) alongside the legacy `--focus-<name>` shadow strings.
+- The `.focus-ring{-<name>}` utilities are outline-based too. They exist for **themed overrides** (`focus-visible:focus-ring-red`) and **non-focus states** (`data-[state=open]:focus-ring`, `focus-within:focus-ring` on wrapper patterns).
+- Components do NOT declare a default focus ring; the base rule covers them. Utility classes (specificity ≥ (0,2,0), later layer) always beat the base rule, so:
+  - suppress with `focus-visible:outline-none` (e.g. Dialog panel, ghost inputs),
+  - retheme with `focus-visible:focus-ring-<color>` (e.g. Button solid/red).
+
+### Rationale
+
+- **outline can't collide** with box-shadow utilities — the conflict class disappears entirely.
+- outline follows `border-radius` in all modern browsers, renders outside the box like the Figma outset shadow, and **survives forced-colors mode** (box-shadows are stripped there) — an accessibility win.
+- Global default means new interactive elements are keyboard-accessible by construction; the failure mode flips from "missing ring" to "extra ring", which is visible and easy to fix.
+- Light/dark width difference (2px/3px) rides the variable flip — no `dark:` variants needed.
+
+### Consequences
+
+- `outline-none` on a focusable element now suppresses the design-system ring, not just the UA one. Use it deliberately.
+- Wrapper patterns (`focus-within:focus-ring`) keep `outline-none` on the inner input so only the wrapper shows the ring.
+- Programmatically-focused containers (dialog/menu panels) keep `focus:outline-none` / `focus-visible:outline-none` to avoid rings on script focus.
+- The `--focus-<name>` box-shadow variables remain emitted for backward compatibility but are no longer used by frappe-ui itself.
+- Pre-existing `focus:ring-2` usages (Autocomplete, DatePicker CalendarPanel) are drift; migrate opportunistically by deleting them (the global rule takes over).

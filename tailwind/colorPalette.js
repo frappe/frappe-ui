@@ -154,12 +154,23 @@ function generateEffectVariables() {
   }
   for (const [name, value] of Object.entries(effectsData.focus.light)) {
     output[':root'][`--focus-${name}`] = value
+    output[':root'][`--focus-outline-${name}`] = shadowToOutline(value)
   }
   for (const [name, value] of Object.entries(effectsData.focus.dark)) {
     output['[data-theme="dark"]'][`--focus-${name}`] = value
+    output['[data-theme="dark"]'][`--focus-outline-${name}`] = shadowToOutline(value)
   }
 
   return output
+}
+
+// Focus tokens are single-layer `0 0 0 <spread> <color>` shadows — re-express
+// as an `outline` shorthand (`<spread> solid <color>`) so the global focus
+// ring can use outline instead of box-shadow (no collisions with shadow/ring
+// utilities, survives forced-colors mode).
+function shadowToOutline(shadow) {
+  const parts = shadow.trim().split(/\s+/)
+  return `${parts[3]} solid ${parts.slice(4).join(' ')}`
 }
 
 export {

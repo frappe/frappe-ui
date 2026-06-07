@@ -15,7 +15,7 @@ function focusRingClass(name: string) {
       ></div>
       <div class="grid gap-0.5">
         <span class="text-2xs font-mono text-ink-gray-5">{{ focusRingClass(ring) }}</span>
-        <span class="text-xs text-ink-gray-6">--focus-{{ ring }}</span>
+        <span class="text-xs text-ink-gray-6">--focus-outline-{{ ring }}</span>
       </div>
     </div>
   </div>

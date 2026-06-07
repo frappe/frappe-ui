@@ -34,7 +34,7 @@ Three semantic categories — each takes a color + numeric step. Higher = strong
 `base | gray-1..9 | {red,green,amber,blue,cyan,pink,violet,orange,purple,teal,yellow}-1..10 | elevation-1..2`
 
 - `border-outline-gray-1` / `gray-2` — default borders.
-- `border-outline-gray-3` — focus ring on inputs.
+- Focus rings are automatic: a global `:focus-visible` outline (`--focus-outline-default`) covers every focusable element — never add your own. Retheme with `focus-visible:focus-ring-red` (or `-green`/`-blue`), suppress with `focus-visible:outline-none`.
 - `border-outline-red-3` / `green-2` — error / success borders.
 
 ### Rule of thumb
