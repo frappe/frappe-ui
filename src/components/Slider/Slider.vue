@@ -82,6 +82,13 @@ const rangeClasses = computed(() => {
   ]
 })
 
+const rootClasses = computed(() => {
+  return [
+    'relative flex w-full select-none touch-none items-center',
+    props.size === 'md' ? 'h-5' : 'h-4',
+  ]
+})
+
 const thumbClasses = computed(() => {
   return [
     'rounded-full bg-surface-white shadow-md ring-gray-600/20 transition-shadow duration-200 ease-out hover:ring-[6px] focus:outline-none dark:bg-surface-gray-7 dark:ring-gray-100/20',
@@ -124,7 +131,7 @@ const hasLabeling = computed(() => {
     <SliderRoot
       :id="inputId"
       v-model="sliderValue"
-      class="relative flex w-full select-none touch-none items-center"
+      :class="rootClasses"
       :max="props.max"
       :min="props.min"
       :step="props.step"
