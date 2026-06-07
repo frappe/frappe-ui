@@ -131,7 +131,6 @@ declare module 'vue' {
     SuggestionList: typeof import('./src/components/TextEditor/extensions/suggestion/SuggestionList.vue')['default']
     Switch: typeof import('./src/components/Switch/Switch.vue')['default']
     TabButtons: typeof import('./src/components/TabButtons/TabButtons.vue')['default']
-    'TabButtons.story': typeof import('./src/components/TabButtons/TabButtons.story.vue')['default']
     Tabs: typeof import('./src/components/Tabs/Tabs.vue')['default']
     Textarea: typeof import('./src/components/Textarea/Textarea.vue')['default']
     TextEditor: typeof import('./src/components/TextEditor/TextEditor.vue')['default']
