@@ -53,6 +53,20 @@ const {
   disabled: () => props.disabled,
 })
 
+const isBidirectional = computed(() => props.min < 0)
+
+const bidirectionalRangeStyles = computed(() => {
+  const { min, max } = props
+  const value = sliderValue.value[0] ?? 0
+  const range = max - min
+  const zeroPos = -min / range
+  const valuePos = (value - min) / range
+  return {
+    left: `${Math.min(zeroPos, valuePos) * 100}%`,
+    right: `${(1 - Math.max(zeroPos, valuePos)) * 100}%`,
+  }
+})
+
 const trackClasses = computed(() => {
   return [
     'relative grow rounded',
@@ -85,10 +99,10 @@ const onValueCommit = (value: SliderValue) => {
 const hasLabeling = computed(() => {
   return Boolean(
     props.label ||
-      slots.label ||
-      showDescription.value ||
-      slots.description ||
-      hasError.value,
+    slots.label ||
+    showDescription.value ||
+    slots.description ||
+    hasError.value,
   )
 })
 </script>
@@ -125,7 +139,8 @@ const hasLabeling = computed(() => {
       @value-commit="onValueCommit"
     >
       <SliderTrack :class="trackClasses">
-        <SliderRange :class="rangeClasses" />
+        <SliderRange v-if="!isBidirectional" :class="rangeClasses" />
+        <div v-else :class="rangeClasses" :style="bidirectionalRangeStyles" />
       </SliderTrack>
 
       <SliderThumb
