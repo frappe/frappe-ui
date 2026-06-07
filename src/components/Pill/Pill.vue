@@ -87,19 +87,22 @@ const variantClass = computed(() => {
       return 'border border-transparent hover:bg-surface-gray-2 hover:text-ink-gray-7'
     }
 
-    // Active tab has no bottom (or inner) border so it merges into the
-    // panel below. The white pseudo must extend past the pill's borders
-    // in the cross-axis (top:-px bottom:-px or left:-px right:-px) so the
-    // gray rail doesn't peek out where the pill's own border sits.
+    // Active tab "punches through" the rail: the white pseudo extends a
+    // few pixels past the rail line so the tab visibly continues into the
+    // area below, instead of terminating exactly at the rail (which the
+    // eye reads as a closed bottom corner). Border is one step darker
+    // than the rail so the tab reads as a distinct, raised shape.
+    // No drop shadow: a downward shadow would paint below the rail and
+    // visually re-close the bottom edge we're trying to open.
     if (props.browserTabBase === 'left') {
-      return 'relative border border-l-0 border-outline-gray-1 bg-surface-white after:absolute after:-left-px after:-top-px after:-bottom-px after:w-px after:bg-surface-white'
+      return 'relative border border-l-0 border-outline-gray-2 bg-surface-base after:absolute after:-left-[3px] after:-top-px after:-bottom-px after:w-[3px] after:bg-surface-base'
     }
 
     if (props.browserTabBase === 'right') {
-      return 'relative border border-r-0 border-outline-gray-1 bg-surface-white after:absolute after:-right-px after:-top-px after:-bottom-px after:w-px after:bg-surface-white'
+      return 'relative border border-r-0 border-outline-gray-2 bg-surface-base after:absolute after:-right-[3px] after:-top-px after:-bottom-px after:w-[3px] after:bg-surface-base'
     }
 
-    return 'relative border border-b-0 border-outline-gray-1 bg-surface-white after:absolute after:-inset-x-px after:-bottom-px after:h-px after:bg-surface-white'
+    return 'relative border border-b-0 border-outline-gray-2 bg-surface-base after:absolute after:-inset-x-px after:-bottom-[3px] after:h-[3px] after:bg-surface-base'
   }
 
   if (props.variant === 'outline') {
