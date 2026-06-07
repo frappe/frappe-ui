@@ -82,7 +82,7 @@ Single row, **48px tall (`min-h-12`)**, sticky to the top, with a bottom border 
 
 ```vue
 <header
-  class="sticky top-0 z-10 flex min-h-12 items-center justify-between border-b border-outline-gray-1 bg-surface-white px-3 sm:px-5"
+  class="sticky top-0 z-10 flex min-h-12 items-center justify-between border-b border-outline-gray-1 bg-surface-base px-3 sm:px-5"
 >
   <Breadcrumbs :items="crumbs" />
   <div class="flex gap-2">

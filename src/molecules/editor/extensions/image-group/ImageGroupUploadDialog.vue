@@ -76,7 +76,7 @@
           </div>
           <div class="w-full bg-surface-gray-2 rounded h-2 overflow-hidden">
             <div
-              class="bg-surface-gray-5 h-2 transition-all"
+              class="bg-surface-gray-8 h-2 transition-all"
               :style="{ width: dialog.uploadProgress.value + '%' }"
             ></div>
           </div>

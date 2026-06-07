@@ -185,7 +185,7 @@ onBeforeUnmount(closeContextMenu)
         v-show="visible && editor"
         ref="floating"
         data-slot="table-menu"
-        class="fixed left-0 top-0 z-[100] flex items-center gap-1 rounded-lg border border-outline-gray-2 bg-surface-white p-1 shadow-sm"
+        class="fixed left-0 top-0 z-[100] flex items-center gap-1 rounded-lg border border-outline-gray-2 bg-surface-base p-1 shadow-sm"
       >
         <MenuItems v-if="editor" :editor="editor" :items="tableToolbar" />
       </div>

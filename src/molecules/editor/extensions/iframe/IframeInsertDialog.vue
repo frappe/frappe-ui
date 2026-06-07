@@ -15,12 +15,12 @@
           :placeholder="placeholder"
           @keydown.enter.prevent="submit"
         />
-        <p v-if="dialog.urlError.value" class="mt-1 text-sm text-ink-red-3">
+        <p v-if="dialog.urlError.value" class="mt-1 text-sm text-ink-red-6">
           {{ dialog.urlError.value }}
         </p>
         <p
           v-else-if="dialog.embedInput.value && dialog.isValidUrl.value"
-          class="mt-1 text-sm text-ink-green-3"
+          class="mt-1 text-sm text-ink-green-6"
         >
           ✓ Valid {{ dialog.platformName.value }} URL
         </p>

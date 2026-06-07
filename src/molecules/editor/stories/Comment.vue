@@ -52,7 +52,7 @@ function submit() {
       >
         <template #default="{ isEmpty }">
           <div
-            class="min-w-0 flex-1 rounded-lg border border-outline-gray-2 bg-surface-white focus-within:border-outline-gray-3"
+            class="min-w-0 flex-1 rounded-lg border border-outline-gray-2 bg-surface-base focus-within:border-outline-gray-3"
           >
             <EditorBubbleMenu :items="commentToolbar" />
             <EditorContent

@@ -33,8 +33,6 @@ const knobs: Knob[] = [
       { label: 'sm', value: 'sm' },
       { label: 'md', value: 'md' },
       { label: 'lg', value: 'lg' },
-      { label: 'xl', value: 'xl' },
-      { label: '2xl', value: '2xl' },
     ],
   },
   {

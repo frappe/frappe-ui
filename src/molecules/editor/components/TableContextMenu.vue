@@ -59,7 +59,7 @@ function run(item: CommandMenuItem, event: MouseEvent): void {
 <template>
   <div
     role="menu"
-    class="min-w-[208px] rounded-lg border border-outline-gray-1 bg-surface-white p-1 text-base shadow-xl outline-none"
+    class="min-w-[208px] rounded-lg border border-outline-gray-1 bg-surface-base p-1 text-base shadow-xl outline-none"
   >
     <template v-for="(item, index) in visible" :key="index">
       <div
