@@ -2,6 +2,10 @@
 
 A prominent message used to communicate important information, warnings, or status updates to the user.
 
+## Playground
+
+<ClientOnly><AlertBuilder /></ClientOnly>
+
 ## Themes
 <ComponentPreview name="Alert-Themes" />
 

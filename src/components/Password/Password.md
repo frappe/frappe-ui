@@ -2,6 +2,10 @@
 
 Provides a secure input for entering passwords. Supports visibility toggling and ensures a clear, user-friendly experience.
 
+## Playground
+
+<ClientOnly><PasswordBuilder /></ClientOnly>
+
 <ComponentPreview name="Password-Default" layout="stacked" />
 
 ## Variants

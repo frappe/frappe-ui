@@ -158,7 +158,8 @@ function onCopy() {
 }
 .knob-label {
   display: inline-block;
-  min-width: 64px;
+  width: 96px;
+  flex-shrink: 0;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 13px;
   color: var(--p-color-ink-gray-6, #7c7c7c);
