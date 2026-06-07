@@ -38,7 +38,7 @@
     },
     "9": {
       "$type": "dimension",
-      "$value": "100px"
+      "$value": "999px"
     }
   },
   "spacing": {
@@ -109,12 +109,6 @@
     "16": {
       "$type": "dimension",
       "$value": "26px"
-    }
-  },
-  "max-width": {
-    "1": {
-      "$type": "dimension",
-      "$value": "75px"
     }
   }
 }

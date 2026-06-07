@@ -1,10 +1,10 @@
 {
   "name": "Design Tokens",
   "collections": {
-    "🔵 Colour primitives": {
+    "Colour primitives": {
       "modes": {
         "Light": [
-          "🔵 Colour primitives.Light.tokens.json"
+          "Colour primitives.Light.tokens.json"
         ]
       }
     },

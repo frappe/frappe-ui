@@ -78,7 +78,7 @@ function writeJSON(filename, data) {
 // Build colors.json in the shape colorPalette.js already consumes:
 //   { lightMode, darkMode, overlay, neutral, themedVariables: { light, dark } }
 function buildColors() {
-  const primitives = readTokens('🔵 Colour primitives.Light.tokens.json')
+  const primitives = readTokens('Colour primitives.Light.tokens.json')
   const stylesLight = readTokens('Styles.Light.tokens.json')
   const stylesDark = readTokens('Styles.Dark.tokens.json')
 
@@ -89,6 +89,9 @@ function buildColors() {
     neutral: {
       white: primitives.neutral.white.$value,
       black: primitives.neutral.black.$value,
+      ...(primitives.neutral.transparent
+        ? { transparent: primitives.neutral.transparent.$value }
+        : {}),
     },
     themedVariables: {
       light: { surface: {}, ink: {}, outline: {} },
@@ -133,9 +136,8 @@ function buildColors() {
 // Renames — legacy name points at the current Figma name in the same category.
 // Resolves dynamically so the legacy entry tracks any future value change.
 const ALIASES = {
-  outline: {
-    'gray-modals': 'gray-modal',
-  },
+  // (none currently) — `gray-modals` moved to LEGACY_ENTRIES after its Figma
+  // successor `gray-modal` was dropped in the espresso-2.0 token refresh.
 }
 
 // Legacy semantic tokens with no surviving Figma equivalent — keep them pinned
@@ -147,6 +149,8 @@ const LEGACY_ENTRIES = {
   light: {
     surface: {
       white: 'neutral/white',
+      'menu-bar': 'lightMode/gray/50',
+      'gray-2-contrast': 'neutral/white',
       modal: 'neutral/white',
       selected: 'neutral/white',
       cards: 'neutral/white',
@@ -167,6 +171,7 @@ const LEGACY_ENTRIES = {
     },
     outline: {
       white: 'neutral/white',
+      'gray-modals': 'lightMode/gray/200',
       'blue-1': 'lightMode/blue/300',
       'red-1': 'lightMode/red/300',
       'green-1': 'lightMode/green/200',
@@ -177,6 +182,8 @@ const LEGACY_ENTRIES = {
   dark: {
     surface: {
       white: 'darkMode/gray/900',
+      'menu-bar': 'darkMode/gray/950',
+      'gray-2-contrast': 'darkMode/gray/600',
       modal: 'darkMode/gray/700',
       selected: 'darkMode/gray/500',
       cards: 'darkMode/gray/800',
@@ -197,6 +204,7 @@ const LEGACY_ENTRIES = {
     },
     outline: {
       white: 'darkMode/gray/900',
+      'gray-modals': 'darkMode/gray/600',
       'blue-1': 'darkMode/blue/800',
       'red-1': 'darkMode/red/800',
       'green-1': 'darkMode/green/800',
@@ -393,6 +401,11 @@ function main() {
   writeJSON('radius.json', buildRadius())
   writeJSON('typography.json', buildTypography())
   writeJSON('effects.json', buildEffects())
+
+  // colors.json is consumed from tailwind/ (top-level) by colorPalette.js, while
+  // the generator emits to tailwind/generated/. Copy it up so `yarn sync-tokens`
+  // is the single source of truth (no manual copy step).
+  fs.copyFileSync(path.join(OUT_DIR, 'colors.json'), path.join(__dirname, 'colors.json'))
 
   console.log('✓ done')
 }
