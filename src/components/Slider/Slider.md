@@ -14,6 +14,12 @@ Use a two-element `modelValue` to render two thumbs.
 
 <ComponentPreview name="Slider-Range" />
 
+## Negative Values
+
+When `min` is negative the slider fills bidirectionally from the zero-crossing, so positive and negative values are visually distinct.
+
+<ComponentPreview name="Slider-NegativeValues" />
+
 ## Labeling
 
 <ComponentPreview name="Slider-Labeling" />
