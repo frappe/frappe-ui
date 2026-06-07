@@ -2,26 +2,22 @@
 
 A labeled control for choosing between **light**, **dark**, and **system**
 appearance. Each option is a live preview card, and selecting one drives the
-global `<html data-theme>` through [`useTheme`](#usetheme) — so a bare
+global `<html data-theme>` through [`useTheme`](#usetheme) so a bare
 `<ThemeSwitcher />` switches the whole app with no wiring.
 
 <ComponentPreview name="ThemeSwitcher-Default" layout="stacked" />
 
 ## Branding
 
-Pass a `name` and a `logo` (an image URL or a Component) to show your product
-inside the previews. The `label` and `description` props set the heading.
+Pass a `name` and a `logo` (an image URL or a Component) to show your branding
+inside the theme panel previews. The `label` and `description` props set the heading of the component.
 
 <ComponentPreview name="ThemeSwitcher-Branded" layout="stacked" />
 
 ## Toggle button
 
-For a header, sidebar, or menu you rarely want the full card UI — you want a
-single labelled button. Build one from the same [`useTheme`](#usetheme)
-composable; because both controls share `<html data-theme>`, they stay
-consistent. It drops straight into a frappe-ui toolbar or a helpdesk
-"Toggle theme" menu item.
-
+For a header, sidebar, or a menu component you rarely want the full card preview instead you want a
+single labelled button which toggles the state. You can simply build one from the same [`useTheme`](#usetheme) composable. Since both controls share `<html data-theme>`, they stay consistent and  You can plug it straight into any of your UI components.
 <ComponentPreview name="ThemeSwitcher-Toggle" layout="stacked" />
 
 ## useTheme

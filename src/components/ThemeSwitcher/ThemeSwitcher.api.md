@@ -7,27 +7,27 @@
   const propsData = [
   {
     name: 'modelValue',
-    description: 'Controlled selected theme. Bind with `v-model`. When omitted, the global frappe-ui theme (`useTheme`) is used, so that the `<ThemeSwitcher />` works and drives `<html data-theme>` with no wiring.',
+    description: 'Selected theme. Falls back to the shared `useTheme` state when unbound.',
     required: false,
     type: 'Theme'
   },
   {
     name: 'label',
-    description: 'Heading rendered above the options. Pass a translated string.',
+    description: 'Heading rendered above the options.',
     required: false,
     type: 'string',
     default: '"Theme"'
   },
   {
     name: 'description',
-    description: 'Helper text rendered below the heading. Pass a translated string.',
+    description: 'Helper text rendered below the heading.',
     required: false,
     type: 'string',
     default: '"Switch between light, dark, or system theme"'
   },
   {
     name: 'logo',
-    description: 'Brand logo shown inside each preview. A string is treated as an image `src`; a Component is rendered via `<component :is>` (e.g. an inline SVG or icon component).',
+    description: 'Brand logo shown inside each preview. A string is treated as an image source; a component value is rendered with `<component :is>`.',
     required: false,
     type: 'string | Component'
   },
@@ -40,7 +40,7 @@
   },
   {
     name: 'themeLabels',
-    description: 'Overrides the per-option labels, e.g. for translation.',
+    description: 'Overrides the per-option labels.',
     required: false,
     type: 'Partial<Record<Theme, string>>'
   }
