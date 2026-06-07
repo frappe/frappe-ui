@@ -147,7 +147,9 @@ const hasLabeling = computed(() => {
     >
       <SliderTrack :class="trackClasses">
         <SliderRange v-if="!isBidirectional" :class="rangeClasses" />
-        <div v-else :class="rangeClasses" :style="bidirectionalRangeStyles" />
+        <SliderRange v-else as-child>
+          <div :class="rangeClasses" :style="bidirectionalRangeStyles" />
+        </SliderRange>
       </SliderTrack>
 
       <SliderThumb
