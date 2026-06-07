@@ -152,6 +152,5 @@ const devBranch = typeof __DEV_BRANCH__ !== 'undefined' ? __DEV_BRANCH__ : ''
         </a>
       </div>
     </div>
-
   </nav>
 </template>

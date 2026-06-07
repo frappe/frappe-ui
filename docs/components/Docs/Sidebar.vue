@@ -24,7 +24,7 @@ const isActive = (link: string) =>
 
 <template>
   <aside
-    class="flex h-screen w-full min-w-fit flex-col border-r bg-surface-gray-1 dark:bg-surface-white pt-1 sticky top-0"
+    class="flex h-screen w-full min-w-fit flex-col border-r bg-surface-menu-bar pt-1 sticky top-0"
   >
     <div class="px-1">
       <a
