@@ -22,9 +22,9 @@ Theme color mapping for the ring stop:
 | Theme | Ring color utility |
 |---|---|
 | gray (default) | `ring-outline-gray-3` |
-| red    | `ring-outline-red-2` |
+| red    | `ring-outline-red-3` |
 | blue   | `ring-blue-400` |
-| green  | `ring-outline-green-2` |
+| green  | `ring-outline-green-3` |
 
 Blue and green theme ring colors are project conventions — Figma does not define focus colors for those themes (see [`foundations.md`](../foundations.md#themes--colors)).
 
@@ -32,7 +32,7 @@ Blue and green theme ring colors are project conventions — Figma does not defi
 
 - Tailwind's `ring` defaults to 3px because that's Tailwind's house style, not a design-system decision. Adopting `ring-2` brings the implementation to the Figma spec without re-implementing the box-shadow machinery.
 - Using `ring-2` instead of a custom `shadow-[0_0_0_2px_…]` keeps consumer-app dark-mode overrides via `--tw-ring-color` working, and preserves the existing CSS-variable plumbing.
-- The 90%-opacity color stop (`E5` alpha in Figma) is approximated by the solid `outline-gray-3` / `outline-red-2` tokens. The visual difference is sub-perceptual against most backgrounds; if exact alpha is needed later, the `ring-<color>` token can be redefined globally.
+- The 90%-opacity color stop (`E5` alpha in Figma) is approximated by the solid `outline-gray-3` / `outline-red-3` tokens. The visual difference is sub-perceptual against most backgrounds; if exact alpha is needed later, the `ring-<color>` token can be redefined globally.
 
 ## Consequences
 

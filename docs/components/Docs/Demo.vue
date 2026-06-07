@@ -26,7 +26,7 @@ const isEditorDemo = computed(() => props.name?.startsWith('Editor'))
       <div
         :class="[
           isEditorDemo ? '' : 'not-prose',
-          'bg-surface-white p-4 sm:p-8 overflow-x-auto scrollbar flex flex-wrap gap-3 items-center justify-center min-h-[200px]',
+          'bg-surface-base p-4 sm:p-8 overflow-x-auto scrollbar flex flex-wrap gap-3 items-center justify-center min-h-[200px]',
         ]"
       >
         <slot />
@@ -45,7 +45,7 @@ const isEditorDemo = computed(() => props.name?.startsWith('Editor'))
 
         <div
           v-if="!expanded"
-          class="pointer-events-none absolute inset-0 bg-gradient-to-t from-surface-gray-1 via-surface-gray-1/70 dark:from-surface-white dark:via-surface-white/70 to-transparent"
+          class="pointer-events-none absolute inset-0 bg-gradient-to-t from-surface-gray-1 via-surface-gray-1/70 dark:from-surface-base dark:via-surface-base/70 to-transparent"
         />
 
         <div

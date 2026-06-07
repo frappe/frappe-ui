@@ -64,13 +64,13 @@ const trackClasses = computed(() => {
 const rangeClasses = computed(() => {
   return [
     'absolute h-full rounded',
-    props.disabled ? 'bg-surface-gray-4' : 'bg-surface-gray-7',
+    props.disabled ? 'bg-surface-gray-4' : 'bg-surface-gray-10',
   ]
 })
 
 const thumbClasses = computed(() => {
   return [
-    'rounded-full bg-surface-white shadow-md ring-gray-600/20 transition-shadow duration-200 ease-out hover:ring-[6px] focus:outline-none dark:bg-surface-gray-7 dark:ring-gray-100/20',
+    'rounded-full bg-surface-base shadow-md ring-gray-600/20 transition-shadow duration-200 ease-out hover:ring-[6px] focus:outline-none dark:bg-surface-gray-10 dark:ring-gray-100/20',
     props.size === 'md' ? 'size-5' : 'size-4',
     props.disabled
       ? 'cursor-not-allowed opacity-60 hover:ring-0'

@@ -7,7 +7,7 @@ const leads = [
     owner: 'Jane Cooper',
     status: 'Qualified',
     theme: 'green',
-    dotClass: 'bg-surface-green-5',
+    dotClass: 'bg-surface-green-7',
     value: '$24.5k',
   },
   {
@@ -15,7 +15,7 @@ const leads = [
     owner: 'Sammy Well',
     status: 'In Progress',
     theme: 'blue',
-    dotClass: 'bg-surface-blue-5',
+    dotClass: 'bg-surface-blue-7',
     value: '$18.2k',
   },
   {
@@ -23,7 +23,7 @@ const leads = [
     owner: 'Brian Robinson',
     status: 'On Hold',
     theme: 'amber',
-    dotClass: 'bg-surface-amber-5',
+    dotClass: 'bg-surface-amber-7',
     value: '$9.8k',
   },
   {
@@ -31,7 +31,7 @@ const leads = [
     owner: 'Matt Clinton',
     status: 'Lost',
     theme: 'red',
-    dotClass: 'bg-surface-red-5',
+    dotClass: 'bg-surface-red-7',
     value: '$4.1k',
   },
   {
@@ -39,7 +39,7 @@ const leads = [
     owner: 'Jane Cooper',
     status: 'New',
     theme: 'gray',
-    dotClass: 'bg-surface-gray-5',
+    dotClass: 'bg-surface-gray-8',
     value: '$12.0k',
   },
 ]
@@ -47,7 +47,7 @@ const leads = [
 
 <template>
   <div
-    class="w-full max-w-[640px] overflow-hidden rounded-lg border border-outline-gray-1 bg-surface-white shadow-sm"
+    class="w-full max-w-[640px] overflow-hidden rounded-lg border border-outline-gray-1 bg-surface-base shadow-sm"
   >
     <div class="flex items-center justify-between border-b border-outline-gray-1 px-3 py-2.5">
       <h3 class="m-0 text-base-medium text-ink-gray-8">Lead pipeline</h3>

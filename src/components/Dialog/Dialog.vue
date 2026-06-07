@@ -14,7 +14,7 @@
         >
           <DialogContent
             ref="contentRef"
-            class="my-8 inline-block w-full transform overflow-hidden rounded-xl bg-surface-modal text-start align-middle shadow-xl dialog-content focus-visible:outline-none"
+            class="my-8 inline-block w-full transform overflow-hidden rounded-xl bg-surface-elevation-2 text-start align-middle shadow-xl dialog-content focus-visible:outline-none"
             :class="sizeClass"
             @open-auto-focus="handleOpenAutoFocus"
             @escape-key-down="
@@ -37,7 +37,7 @@
             <template v-else>
               <!-- legacy `#body-main`: full middle override (deprecated) -->
               <slot v-if="$slots['body-main']" name="body-main" />
-              <div v-else class="bg-surface-modal px-4 pb-6 pt-5 sm:px-6">
+              <div v-else class="bg-surface-elevation-2 px-4 pb-6 pt-5 sm:px-6">
                 <div class="flex">
                   <div class="w-full flex-1">
                     <!-- legacy `#body-header` (deprecated, warns + renders nothing if used; preserved for back-compat by rendering header) -->
@@ -369,10 +369,10 @@ const dialogIconClasses = computed(() => {
   const theme = iconTheme.value
   if (!theme) return 'text-ink-gray-5'
   const map: Record<DialogTheme, string> = {
-    yellow: 'text-ink-amber-3',
-    blue: 'text-ink-blue-3',
-    red: 'text-ink-red-4',
-    green: 'text-ink-green-3',
+    yellow: 'text-ink-amber-6',
+    blue: 'text-ink-blue-6',
+    red: 'text-ink-red-8',
+    green: 'text-ink-green-6',
   }
   return map[theme]
 })

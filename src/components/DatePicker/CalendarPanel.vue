@@ -163,7 +163,7 @@
           :key="m"
           class="py-2 text-sm rounded cursor-pointer text-center hover:bg-surface-gray-2 focus:outline-none focus:ring-2 focus:ring-brand-6"
           :class="{
-            'bg-surface-gray-6 text-ink-white hover:bg-surface-gray-6':
+            'bg-surface-gray-9 text-ink-base hover:bg-surface-gray-9':
               i === currentMonth,
           }"
           :aria-selected="i === currentMonth ? 'true' : 'false'"
@@ -184,7 +184,7 @@
           :key="y"
           class="py-2 text-sm rounded cursor-pointer text-center hover:bg-surface-gray-2 focus:outline-none focus:ring-2 focus:ring-brand-6"
           :class="{
-            'bg-surface-gray-6 text-ink-white hover:bg-surface-gray-6':
+            'bg-surface-gray-9 text-ink-base hover:bg-surface-gray-9':
               y === currentYear,
           }"
           :aria-selected="y === currentYear ? 'true' : 'false'"
@@ -428,7 +428,7 @@ function cellClass(cell: CalendarPanelCell): Array<string | false> {
     return [
       inMonthCls,
       todayCls,
-      'rounded bg-surface-gray-6 text-ink-white hover:bg-surface-gray-6 cursor-pointer',
+      'rounded bg-surface-gray-9 text-ink-base hover:bg-surface-gray-9 cursor-pointer',
     ]
   }
 
@@ -444,7 +444,7 @@ function cellClass(cell: CalendarPanelCell): Array<string | false> {
     return [
       inMonthCls,
       todayCls,
-      'rounded bg-surface-gray-6 text-ink-white hover:bg-surface-gray-6 cursor-pointer',
+      'rounded bg-surface-gray-9 text-ink-base hover:bg-surface-gray-9 cursor-pointer',
     ]
   }
 

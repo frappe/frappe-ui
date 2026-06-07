@@ -24,7 +24,7 @@ import { withBase } from 'vitepress'
       <div class="flex gap-3 mt-2 mx-auto">
         <a
           :href="withBase('/docs/getting-started')"
-          class="inline-flex items-center gap-2 h-8 px-2.5 rounded text-base font-medium text-ink-white bg-surface-gray-7 hover:bg-surface-gray-6 active:bg-surface-gray-5 transition-colors focus:outline-none focus-visible:ring focus-visible:ring-outline-gray-3"
+          class="inline-flex items-center gap-2 h-8 px-2.5 rounded text-base font-medium text-ink-base bg-surface-gray-10 hover:bg-surface-gray-9 active:bg-surface-gray-8 transition-colors focus:outline-none focus-visible:ring focus-visible:ring-outline-gray-3"
         >
           Get Started
           <LucideRight class="h-4 w-4" />

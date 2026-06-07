@@ -15,7 +15,7 @@ import { Button } from 'frappe-ui'
         Filter
         <template #suffix>
           <span
-            class="inline-flex h-4.5 items-center justify-center rounded-1 bg-surface-white px-1.5 text-xs text-ink-gray-7 shadow-sm ring-1 ring-black/5"
+            class="inline-flex h-4.5 items-center justify-center rounded-1 bg-surface-base px-1.5 text-xs text-ink-gray-7 shadow-sm ring-1 ring-black/5"
           >
             1
           </span>

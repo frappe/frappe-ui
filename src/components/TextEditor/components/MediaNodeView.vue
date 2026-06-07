@@ -290,39 +290,39 @@ const wrapperClasses = (float: string) => [
           :class="selected && isEditable ? 'flex' : 'hidden'">
           <button>
             <LucideCaptions @click="toggleCaptions" class="size-4"
-              :class="[showCaption ? 'text-ink-white' : 'text-ink-gray-4']" />
+              :class="[showCaption ? 'text-ink-base' : 'text-ink-gray-4']" />
           </button>
           <button v-if="!isVideo" @click.stop="toggleAlignPopper"
-            class="hover:text-ink-white text-ink-gray-4"
-            :class="[node.attrs.align ? 'text-ink-white' : 'text-ink-gray-4']">
+            class="hover:text-ink-base text-ink-gray-4"
+            :class="[node.attrs.align ? 'text-ink-base' : 'text-ink-gray-4']">
             <component :is="currentAlignIcon" class="size-4" />
           </button>
-          <!-- <button @click.stop="toggleFloatPopper" class="hover:text-ink-white text-ink-gray-4"
-            :class="[node.attrs.float ? 'text-ink-white' : 'text-ink-gray-4']">
+          <!-- <button @click.stop="toggleFloatPopper" class="hover:text-ink-base text-ink-gray-4"
+            :class="[node.attrs.float ? 'text-ink-base' : 'text-ink-gray-4']">
             <component :is="currentFloatIcon" class="size-4" />
           </button> -->
 
           <div ref="alignButtonRef" v-if="showAlignPopper && !isVideo"
             class="absolute top-full mt-1 right-6 bg-black/65 rounded shadow-lg px-1.5 py-1 z-50 gap-2.5 flex items-center">
             <Tooltip text="Align left" class="h-5">
-              <button @click="setAlignment('left')" class="text-ink-gray-4 hover:text-ink-white" :class="node.attrs.align === 'left'
-                ? 'text-ink-white'
+              <button @click="setAlignment('left')" class="text-ink-gray-4 hover:text-ink-base" :class="node.attrs.align === 'left'
+                ? 'text-ink-base'
                 : 'text-ink-gray-4'
                 ">
                 <LucideAlignLeft class="size-4" />
               </button>
             </Tooltip>
             <Tooltip text="Align center" class="h-5">
-              <button @click="setAlignment('center')" class="text-ink-gray-4 hover:text-ink-white" :class="node.attrs.align === 'center'
-                ? 'text-ink-white'
+              <button @click="setAlignment('center')" class="text-ink-gray-4 hover:text-ink-base" :class="node.attrs.align === 'center'
+                ? 'text-ink-base'
                 : 'text-ink-gray-4'
                 ">
                 <LucideAlignCenter class="size-4" />
               </button>
             </Tooltip>
             <Tooltip text="Align right" class="h-5">
-              <button @click="setAlignment('right')" class="text-ink-gray-4 hover:text-ink-white" :class="node.attrs.align === 'right'
-                ? 'text-ink-white'
+              <button @click="setAlignment('right')" class="text-ink-gray-4 hover:text-ink-base" :class="node.attrs.align === 'right'
+                ? 'text-ink-base'
                 : 'text-ink-gray-4'
                 ">
                 <LucideAlignRight class="size-4" />
@@ -333,23 +333,23 @@ const wrapperClasses = (float: string) => [
           <div v-if="showFloatPopper" ref="floatButtonRef"
             class="absolute top-full mt-1 right-0 bg-black/65 rounded shadow-lg px-1.5 py-1 z-50 gap-2.5 flex items-center">
             <Tooltip text="Float left" class="h-5">
-              <button @click="setFloat('left')" class="text-ink-gray-4 hover:text-ink-white" :class="node.attrs.float === 'left'
-                ? 'text-ink-white'
+              <button @click="setFloat('left')" class="text-ink-gray-4 hover:text-ink-base" :class="node.attrs.float === 'left'
+                ? 'text-ink-base'
                 : 'text-ink-gray-4'
                 ">
                 <LucideFloatLeft class="size-4" />
               </button>
             </Tooltip>
             <Tooltip text="Float right" class="h-5">
-              <button @click="setFloat('right')" class="text-ink-gray-4 hover:text-ink-white" :class="node.attrs.float === 'right'
-                ? 'text-ink-white'
+              <button @click="setFloat('right')" class="text-ink-gray-4 hover:text-ink-base" :class="node.attrs.float === 'right'
+                ? 'text-ink-base'
                 : 'text-ink-gray-4'
                 ">
                 <LucideFloatRight class="size-4" />
               </button>
             </Tooltip>
             <Tooltip v-if="node.attrs.float" text="Remove float" class="h-5">
-              <button @click="setFloat(null)" class="text-ink-gray-4 hover:text-ink-white hover:bg-transparent">
+              <button @click="setFloat(null)" class="text-ink-gray-4 hover:text-ink-base hover:bg-transparent">
                 <LucideNoFloat class="size-4" />
               </button>
             </Tooltip>
@@ -381,7 +381,7 @@ const wrapperClasses = (float: string) => [
       </div>
       <div v-else class="flex flex-col items-center justify-center gap-2 border rounded text-ink-gray-6 text-sm py-5 max-w-full" :class="{ 'border-none': selected }" :style="{ width: node.attrs.width + 'px', aspectRatio: node.attrs.width && node.attrs.height ? `${node.attrs.width} / ${node.attrs.height}` : undefined,}">
         <div class="text-ink-gray-8 text-base">This {{ isVideo ? 'video' : 'image' }} hasn't yet been uploaded.</div>
-        <div v-if="node.attrs.error" class="text-sm text-ink-red-4">Upload failed: {{ node.attrs.error }}</div>
+        <div v-if="node.attrs.error" class="text-sm text-ink-red-8">Upload failed: {{ node.attrs.error }}</div>
       </div>
 
       <input v-if="(node.attrs.alt || showCaption) && !node.attrs.error" v-model="caption"

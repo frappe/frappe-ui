@@ -6,7 +6,7 @@
     class="!w-full focus-visible:ring-0 focus:outline-none"
     :class="
       isActive
-        ? '!bg-surface-selected shadow-sm'
+        ? '!bg-surface-elevation-3 shadow-sm'
         : 'hover:bg-surface-gray-2'
     "
     variant="ghost"

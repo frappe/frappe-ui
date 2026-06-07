@@ -7,7 +7,7 @@
           isCollapsed
             ? 'w-auto px-0'
             : open
-              ? 'bg-surface-white px-2 shadow-sm'
+              ? 'bg-surface-base px-2 shadow-sm'
               : 'px-2 hover:bg-surface-gray-3'
         "
       >

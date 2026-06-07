@@ -182,7 +182,7 @@ defineExpose({
       </ComboboxAnchor>
       <ComboboxPortal>
         <ComboboxContent
-          class="z-10 w-60 mt-1 bg-surface-modal overflow-hidden rounded-lg shadow-2xl"
+          class="z-10 w-60 mt-1 bg-surface-elevation-2 overflow-hidden rounded-lg shadow-2xl"
           position="popper"
           @openAutoFocus.prevent
           @closeAutoFocus.prevent

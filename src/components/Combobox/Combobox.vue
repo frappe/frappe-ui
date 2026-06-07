@@ -682,7 +682,7 @@ defineSlots<ComboboxSlots>()
           <div
             data-slot="content-body"
             :data-motion="contentMotion"
-            class="overflow-hidden rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5"
+            class="overflow-hidden rounded-lg bg-surface-elevation-2 shadow-2xl ring-1 ring-black ring-opacity-5"
           >
             <div
               v-if="isButtonMode"

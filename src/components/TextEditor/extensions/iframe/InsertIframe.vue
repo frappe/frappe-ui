@@ -25,7 +25,7 @@
             </p>
             <p
               v-else-if="embedUrl && isValidUrl"
-              class="text-ink-green-3 text-sm mt-1"
+              class="text-ink-green-6 text-sm mt-1"
             >
               ✓ Valid {{ platformInfo.platform }} URL
             </p>

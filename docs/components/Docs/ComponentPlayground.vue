@@ -95,7 +95,7 @@ function onCopy() {
       class="overflow-hidden rounded-xl border border-outline-gray-1 divide-y divide-outline-gray-1"
     >
       <div
-        class="flex items-center justify-center bg-surface-white p-8 dot-grid"
+        class="flex items-center justify-center bg-surface-base p-8 dot-grid"
         :style="{ minHeight: previewMinHeight }"
       >
         <slot name="preview" :values="values" />
@@ -108,7 +108,7 @@ function onCopy() {
             v-if="knob.type === 'text'"
             v-model="values[knob.name]"
             type="text"
-            class="h-7 rounded-md border border-outline-gray-2 bg-surface-white px-2 text-sm text-ink-gray-8 focus:border-outline-gray-3 focus:outline-none"
+            class="h-7 rounded-md border border-outline-gray-2 bg-surface-base px-2 text-sm text-ink-gray-8 focus:border-outline-gray-3 focus:outline-none"
             :style="{ width: knob.width ?? '10rem' }"
           />
           <TabButtons

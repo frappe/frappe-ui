@@ -1,5 +1,5 @@
 <template>
-  <div class="w-80 rounded-lg bg-surface-modal text-ink-gray-8 p-4">
+  <div class="w-80 rounded-lg bg-surface-elevation-2 text-ink-gray-8 p-4">
     <div class="flex flex-row-reverse gap-2">
       <span class="cursor-pointer" @click.stop="$emit('close')">
         <span class="lucide-x size-4" aria-hidden="true" />

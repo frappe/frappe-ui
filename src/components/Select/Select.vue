@@ -355,7 +355,7 @@ defineSlots<SelectSlots>()
         <div
           data-slot="content-body"
           :data-motion="contentMotion"
-          class="flex flex-col overflow-hidden rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5 will-change-[opacity,transform] origin-[var(--reka-select-content-transform-origin)]"
+          class="flex flex-col overflow-hidden rounded-lg bg-surface-elevation-2 shadow-2xl ring-1 ring-black ring-opacity-5 will-change-[opacity,transform] origin-[var(--reka-select-content-transform-origin)]"
         >
           <SelectViewport class="flex min-h-0 flex-col p-1">
             <div

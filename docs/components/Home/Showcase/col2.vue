@@ -177,7 +177,7 @@ const resetState = () => {
           id="balanced"
           name="power"
           defaultChecked
-          class="m-auto bg-surface-gray-2 text-ink-gray-9 dark:text-ink-gray-3 focus:!ring-outline-gray-5 transition-all"
+          class="m-auto bg-surface-gray-2 text-ink-gray-9 dark:text-ink-gray-3 focus:!ring-outline-gray-7 transition-all"
         />
       </label>
 
@@ -194,7 +194,7 @@ const resetState = () => {
 
         <input
           type="radio"
-          class="m-auto bg-surface-gray-2 text-ink-gray-9 dark:text-ink-gray-3 focus:!ring-outline-gray-5 transition-all"
+          class="m-auto bg-surface-gray-2 text-ink-gray-9 dark:text-ink-gray-3 focus:!ring-outline-gray-7 transition-all"
           id="power-save"
           name="power"
         />
@@ -210,7 +210,7 @@ const resetState = () => {
 
         <input
           type="radio"
-          class="m-auto bg-surface-gray-2 text-ink-gray-9 dark:text-ink-gray-3 focus:!ring-outline-gray-5 transition-all"
+          class="m-auto bg-surface-gray-2 text-ink-gray-9 dark:text-ink-gray-3 focus:!ring-outline-gray-7 transition-all"
           id="perf"
           name="power"
         />

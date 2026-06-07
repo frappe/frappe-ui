@@ -1,5 +1,5 @@
 <template>
-  <div class="inline-flex bg-surface-white p-1">
+  <div class="inline-flex bg-surface-base p-1">
     <div class="inline-flex items-center gap-1.5">
       <template
         v-for="(button, index) in buttons"
@@ -36,7 +36,7 @@
               </template>
               <template #body="{ close }">
                 <ul
-                  class="p-1.5 mt-2 rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
+                  class="p-1.5 mt-2 rounded-lg bg-surface-elevation-2 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
                 >
                   <li
                     v-for="option in button"

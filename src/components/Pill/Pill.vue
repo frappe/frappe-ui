@@ -107,7 +107,7 @@ const variantClass = computed(() => {
 
   if (props.variant === 'outline') {
     return props.active
-      ? 'border border-transparent bg-surface-white shadow-sm'
+      ? 'border border-transparent bg-surface-base shadow-sm'
       : 'border border-outline-gray-1 hover:bg-surface-gray-2 hover:text-ink-gray-7'
   }
 
@@ -117,7 +117,7 @@ const variantClass = computed(() => {
 
   return props.activeStyle === 'subtle'
     ? 'bg-surface-gray-2'
-    : 'bg-surface-gray-2-contrast shadow-base'
+    : 'bg-surface-elevation-3 shadow-base'
 })
 
 const iconClass = computed(() =>

@@ -4,7 +4,7 @@ import { Button } from 'frappe-ui'
 
 <template>
   <div
-    class="inline-flex items-center gap-3.5 rounded-6 bg-surface-white p-1.5 shadow-[0px_0px_1.5px_rgba(0,0,0,0.16),0px_2px_5px_rgba(0,0,0,0.14)]"
+    class="inline-flex items-center gap-3.5 rounded-6 bg-surface-base p-1.5 shadow-[0px_0px_1.5px_rgba(0,0,0,0.16),0px_2px_5px_rgba(0,0,0,0.14)]"
   >
     <Button variant="ghost" icon-left="lucide-x">2 selected</Button>
     <div class="h-5 w-px bg-outline-gray-1" />

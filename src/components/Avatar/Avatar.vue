@@ -25,7 +25,7 @@
     <div
       v-if="$slots.indicator"
       :class="[
-        'absolute bottom-0 right-0 grid place-items-center rounded-full bg-surface-white',
+        'absolute bottom-0 right-0 grid place-items-center rounded-full bg-surface-base',
         indicatorContainerClasses,
       ]"
     >

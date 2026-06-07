@@ -11,7 +11,7 @@ function celebrate() {
 function favorited() {
   toast('Added to favorites', {
     description: 'Find it later in your saved items.',
-    icon: () => h('span', { class: 'lucide-heart size-4 text-ink-red-2' }),
+    icon: () => h('span', { class: 'lucide-heart size-4 text-ink-red-5' }),
   })
 }
 

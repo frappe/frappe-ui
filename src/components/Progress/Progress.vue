@@ -30,7 +30,7 @@
       <!-- Continuous Progress Bar -->
       <div
         v-if="!props.intervals"
-        class="h-full bg-surface-gray-7"
+        class="h-full bg-surface-gray-10"
         :style="`width: ${props.value}%`"
       ></div>
 
@@ -41,7 +41,7 @@
         class="h-full w-full"
         :class="
           index <= filledIntervalCount
-            ? 'bg-surface-gray-7'
+            ? 'bg-surface-gray-10'
             : 'bg-surface-gray-2'
         "
       ></div>

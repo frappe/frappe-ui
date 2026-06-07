@@ -131,7 +131,7 @@ const switchClasses = computed(() => {
     'focus-visible:outline-none focus-visible:focus-ring',
     'disabled:cursor-not-allowed disabled:bg-surface-gray-3',
     model.value
-      ? 'bg-surface-gray-7 enabled:hover:bg-surface-gray-6 active:bg-surface-gray-5 group-hover:enabled:bg-surface-gray-6'
+      ? 'bg-surface-gray-10 enabled:hover:bg-surface-gray-9 active:bg-surface-gray-8 group-hover:enabled:bg-surface-gray-9'
       : 'bg-surface-gray-4 enabled:hover:bg-gray-400 active:bg-gray-500 group-hover:enabled:bg-gray-400',
     props.size === 'md' ? 'h-5 w-8 border-[3px]' : 'h-4 w-[26px] border-2',
   ]
@@ -139,7 +139,7 @@ const switchClasses = computed(() => {
 
 const switchCircleClasses = computed(() => {
   return [
-    'pointer-events-none inline-block transform rounded-full bg-surface-white shadow ring-0 transition duration-100 ease-in-out',
+    'pointer-events-none inline-block transform rounded-full bg-surface-base shadow ring-0 transition duration-100 ease-in-out',
     props.size === 'md' ? 'h-3.5 w-3.5' : 'h-3 w-3',
     props.size === 'md'
       ? model.value

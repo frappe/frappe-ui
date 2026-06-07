@@ -67,7 +67,7 @@ function getBgClass(item: { label: string }) {
         />
         <span
           v-if="item.key === 'create'"
-          class="rounded-sm bg-surface-gray-5 lucide-tag"
+          class="rounded-sm bg-surface-gray-8 lucide-tag"
         />
       </template>
       <template #item-create="{ query }">

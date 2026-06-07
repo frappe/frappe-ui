@@ -23,7 +23,7 @@ const sizeCLass = {
 
 const variantClasses = {
   subtle: 'bg-surface-gray-2',
-  outline: 'bg-surface-white',
+  outline: 'bg-surface-base',
   ghost: 'border-0',
 }
 

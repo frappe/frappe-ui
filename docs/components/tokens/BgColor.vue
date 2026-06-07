@@ -24,7 +24,7 @@ const copyToClipboard = (txt: string) => {
     Background colors in Frappe UI are prefixed with "surface", for example:
     surface-gray2
     <br />
-    classes would be: bg-surface-gray-2, bg-surface-cards etc
+    classes would be: bg-surface-gray-2, bg-surface-elevation-1 etc
   </p>
 
   <div class="flex flex-wrap gap-5">

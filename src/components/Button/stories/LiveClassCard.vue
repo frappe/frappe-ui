@@ -4,7 +4,7 @@ import { Button } from 'frappe-ui'
 
 <template>
   <div
-    class="flex w-96 flex-col gap-6 rounded-6 bg-surface-white p-4 shadow-[0px_0px_0.75px_rgba(0,0,0,0.16),0px_2px_2.5px_rgba(0,0,0,0.14)]"
+    class="flex w-96 flex-col gap-6 rounded-6 bg-surface-base p-4 shadow-[0px_0px_0.75px_rgba(0,0,0,0.16),0px_2px_2.5px_rgba(0,0,0,0.14)]"
   >
     <div class="flex flex-col gap-5">
       <div class="flex flex-col gap-3">

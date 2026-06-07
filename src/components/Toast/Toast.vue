@@ -4,7 +4,7 @@
     :duration="closable ? duration : 0"
     :class="[
       'toast-root-animatable',
-      'bg-surface-gray-6 border-none rounded-md px-4 py-1.5 shadow-lg flex items-center justify-between gap-3 min-w-[280px] max-w-[400px] pointer-events-auto list-none',
+      'bg-surface-gray-9 border-none rounded-md px-4 py-1.5 shadow-lg flex items-center justify-between gap-3 min-w-[280px] max-w-[400px] pointer-events-auto list-none',
     ]"
   >
     <div class="flex items-center gap-2 flex-grow overflow-hidden">
@@ -12,21 +12,21 @@
         <component v-if="icon" :is="icon" class="flex-shrink-0 size-4" />
         <CircleCheck
           v-else-if="type == 'success'"
-          class="flex-shrink-0 size-4 text-ink-green-2"
+          class="flex-shrink-0 size-4 text-ink-green-5"
         />
         <span
           v-else-if="type == 'warning'"
-          class="lucide-alert-triangle flex-shrink-0 size-4 text-ink-amber-2"
+          class="lucide-alert-triangle flex-shrink-0 size-4 text-ink-amber-5"
         />
         <span
           v-else-if="type == 'error'"
-          class="lucide-info flex-shrink-0 size-4 text-ink-red-2"
+          class="lucide-info flex-shrink-0 size-4 text-ink-red-5"
         />
       </div>
       <div class="flex flex-col flex-grow overflow-hidden">
         <ToastDescription
           v-if="message"
-          class="text-p-sm break-words text-ink-white"
+          class="text-p-sm break-words text-ink-base"
           v-html="message"
         />
       </div>
@@ -43,7 +43,7 @@
       <ToastClose
         v-if="closable"
         aria-label="Close"
-        class="flex-shrink-0 rounded p-1 text-ink-white hover:text-ink-gray-3 focus:outline-none focus-visible:focus-ring"
+        class="flex-shrink-0 rounded p-1 text-ink-base hover:text-ink-gray-3 focus:outline-none focus-visible:focus-ring"
       >
         <span class="lucide-x size-4" />
       </ToastClose>

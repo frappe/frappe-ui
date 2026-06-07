@@ -111,7 +111,7 @@ const toggledDiv = ref(false);
           v-for="img in imgs"
           :key="img"
           :image="img"
-          class="border-2 border-surface-white -ml-2"
+          class="border-2 border-surface-base -ml-2"
         />
 
         <span class="ml-3 text-sm !text-ink-gray-9">
@@ -172,7 +172,7 @@ const toggledDiv = ref(false);
 
     <div
       class="p-5 transition-all duration-200"
-      :class='{ "border-outline-gray-5": checkboxVal }'
+      :class='{ "border-outline-gray-7": checkboxVal }'
     >
       <Checkbox
         v-model="checkboxVal"
@@ -184,7 +184,7 @@ const toggledDiv = ref(false);
 
     <div
       class="p-4 grid"
-      :class='{ "animate-bounce bg-surface-white shadow-lg": toggledDiv }'
+      :class='{ "animate-bounce bg-surface-base shadow-lg": toggledDiv }'
     >
       <h3 class="text-xl mb-2 font-semibold flex gap-3 justify-between">
         Schedule an event
@@ -210,12 +210,12 @@ const toggledDiv = ref(false);
             <Avatar
               size="sm"
               :image="imgs[0]"
-              class="border-2 border-surface-white"
+              class="border-2 border-surface-base"
             />
             <Avatar
               size="sm"
               :image="imgs[0]"
-              class="border-2 border-surface-white -ml-2"
+              class="border-2 border-surface-base -ml-2"
             />
 
             1 awaiting

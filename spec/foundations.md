@@ -75,9 +75,9 @@ All interactive components use `focus-visible:ring-2` paired with a themed `ring
 | Theme | Ring color | Figma |
 |---|---|---|
 | gray (default) | `ring-outline-gray-3` | `focus/light/default` |
-| red    | `ring-outline-red-2`   | `focus/light/red` |
+| red    | `ring-outline-red-3`   | `focus/light/red` |
 | blue   | `ring-blue-400`         | code-only |
-| green  | `ring-outline-green-2`  | code-only |
+| green  | `ring-outline-green-3`  | code-only |
 
 The ring is outset, no offset, no blur — matches Figma's 2px drop-shadow spec exactly.
 

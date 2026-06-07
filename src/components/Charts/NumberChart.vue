@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex max-h-[140px] items-center gap-2 overflow-hidden bg-surface-white text-ink-gray-8 px-6 pt-5"
+    class="flex max-h-[140px] items-center gap-2 overflow-hidden bg-surface-base text-ink-gray-8 px-6 pt-5"
     :class="config.delta ? 'pb-6' : 'pb-3'"
   >
     <slot name="body">
@@ -29,11 +29,11 @@
             :class="[
               config.negativeIsBetter
                 ? config.delta >= 0
-                  ? 'text-ink-red-4'
-                  : 'text-ink-green-3'
+                  ? 'text-ink-red-8'
+                  : 'text-ink-green-6'
                 : config.delta >= 0
-                  ? 'text-ink-green-3'
-                  : 'text-ink-red-4',
+                  ? 'text-ink-green-6'
+                  : 'text-ink-red-8',
             ]"
           >
             <span class="">

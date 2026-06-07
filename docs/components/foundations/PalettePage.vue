@@ -146,7 +146,7 @@ function copy(text: string) {
             :style="{ background: value as string }"
           ></div>
           <div
-            class="grid gap-1 bg-surface-white/80 dark:bg-surface-gray-1/80 rounded px-1"
+            class="grid gap-1 bg-surface-base/80 dark:bg-surface-gray-1/80 rounded px-1"
           >
             <span class="text-xs font-medium text-ink-gray-7">
               {{ shade }}
@@ -202,7 +202,7 @@ function copy(text: string) {
               @click="copy(`black-overlay-${shade}`)"
             >
               <div
-                class="h-12 rounded bg-surface-white"
+                class="h-12 rounded bg-surface-base"
                 :style="{
                   backgroundImage: `linear-gradient(${value}, ${value})`,
                 }"

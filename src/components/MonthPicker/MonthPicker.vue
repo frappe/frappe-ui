@@ -69,7 +69,7 @@ const txtClass = computed(() => {
 
 <template>
   <Popover
-    popover-class="mt-2 shadow-xl rounded-lg border bg-surface-modal p-2"
+    popover-class="mt-2 shadow-xl rounded-lg border bg-surface-elevation-2 p-2"
   >
     <template #target="{ togglePopover, isOpen }">
       <Button @click="togglePopover" class="w-full justify-between border" :class="txtClass"

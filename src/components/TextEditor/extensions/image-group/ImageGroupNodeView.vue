@@ -12,7 +12,7 @@
       </div>
       <div class="grid gap-px" :style="gridStyle">
         <div v-for="(img, idx) in images" :key="img.attrs.src + idx"
-          class="relative aspect-square w-full h-full overflow-hidden bg-surface-white group">
+          class="relative aspect-square w-full h-full overflow-hidden bg-surface-base group">
           <button v-if="isEditable" type="button"
             class="absolute top-1 right-1 z-10 bg-white/80 hover:bg-white rounded-full p-1 shadow transition-opacity opacity-0 group-hover:opacity-100 focus:opacity-100"
             aria-label="Remove image" @click.stop="removeImage(idx)">

@@ -35,7 +35,7 @@
           <div
             v-for="(item, idx) in images"
             :key="item.id"
-            class="relative aspect-square w-full h-full overflow-hidden group bg-surface-white"
+            class="relative aspect-square w-full h-full overflow-hidden group bg-surface-base"
             :draggable="true"
             @dragstart="onDragStart(idx)"
             @dragover="onDragOver($event, idx)"
@@ -193,7 +193,7 @@
           </div>
           <div class="w-full bg-gray-200 rounded h-2 overflow-hidden">
             <div
-              class="bg-surface-gray-5 h-2 transition-all"
+              class="bg-surface-gray-8 h-2 transition-all"
               :style="{ width: uploadProgress + '%' }"
             ></div>
           </div>

@@ -16,7 +16,7 @@ export type NormalizedDropdownGroup = DropdownGroupOption & {
 
 export const dropdownClasses = {
   content:
-    'dropdown-content min-w-40 divide-y divide-outline-gray-modals rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none',
+    'dropdown-content min-w-40 divide-y divide-outline-elevation-2 rounded-lg bg-surface-elevation-2 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none',
   group: 'p-1.5',
   groupLabel: 'flex h-7 items-center px-2 text-sm font-medium text-ink-gray-4',
   itemIcon: 'size-4 shrink-0',
@@ -146,7 +146,7 @@ export function getDropdownIconColor(item: {
   theme?: DropdownTheme
 }) {
   if (item.disabled) return 'text-ink-gray-4'
-  return item.theme === 'red' ? 'text-ink-red-3' : 'text-ink-gray-6'
+  return item.theme === 'red' ? 'text-ink-red-6' : 'text-ink-gray-6'
 }
 
 export function getDropdownTextColor(item: {
@@ -154,7 +154,7 @@ export function getDropdownTextColor(item: {
   theme?: DropdownTheme
 }) {
   if (item.disabled) return 'text-ink-gray-4'
-  return item.theme === 'red' ? 'text-ink-red-3' : 'text-ink-gray-7'
+  return item.theme === 'red' ? 'text-ink-red-6' : 'text-ink-gray-7'
 }
 
 export function getDropdownBackgroundColor(item: { theme?: DropdownTheme }) {

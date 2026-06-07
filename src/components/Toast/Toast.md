@@ -20,7 +20,7 @@ Add an `action` to give the user a way to respond. Combine with `duration: Infin
 
 ## Custom icon
 
-Pass a render function to `icon` to replace the default type icon — handy for branding moments, custom imagery, or domain-specific glyphs. Use the `lucide-*` class form for any Lucide icon; size and color are controlled with regular utilities (`size-4`, `text-ink-red-2`, …).
+Pass a render function to `icon` to replace the default type icon — handy for branding moments, custom imagery, or domain-specific glyphs. Use the `lucide-*` class form for any Lucide icon; size and color are controlled with regular utilities (`size-4`, `text-ink-red-5`, …).
 
 <ComponentPreview name="Toast-CustomIcon" />
 

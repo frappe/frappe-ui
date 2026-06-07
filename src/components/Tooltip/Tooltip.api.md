@@ -31,7 +31,7 @@
     description: 'Custom classes applied to the tooltip arrow.',
     required: false,
     type: 'any',
-    default: '"fill-surface-gray-7"'
+    default: '"fill-surface-gray-10"'
   },
   {
     name: 'disabled',
@@ -79,7 +79,7 @@
     description: 'Fill class for the arrow — defaults to match the bubble shell.',
     required: false,
     type: 'string',
-    default: '"fill-surface-gray-7"'
+    default: '"fill-surface-gray-10"'
   }
 ]
 

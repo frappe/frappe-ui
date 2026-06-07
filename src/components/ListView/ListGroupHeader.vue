@@ -22,7 +22,7 @@
       </div>
     </slot>
   </div>
-  <div class="mx-2 h-px border-t border-outline-gray-modals"></div>
+  <div class="mx-2 h-px border-t border-outline-elevation-2"></div>
 </template>
 <script setup>
 import { inject } from 'vue'

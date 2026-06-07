@@ -84,7 +84,7 @@ defineSlots<{
         class="absolute rounded-full duration-300"
         :class="props.vertical ? indicatorYCss : indicatorXCss"
       >
-        <div class="w-full h-full bg-surface-gray-7" />
+        <div class="w-full h-full bg-surface-gray-10" />
       </TabsIndicator>
 
       <TabsTrigger as="template" v-for="(tab, i) in props.tabs" :value="i">
