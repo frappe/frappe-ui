@@ -26,6 +26,7 @@ export interface FormControlProps {
     | 'autocomplete'
     | 'combobox'
     | 'multiselect'
+    | 'phone'
     | 'date'
     | 'daterange'
     | 'datetime'

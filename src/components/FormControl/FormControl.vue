@@ -6,7 +6,11 @@
     :class="[fillWidth ? 'w-full' : null, attrs.class]"
     :style="attrs.style"
   >
-    <template v-for="name in Object.keys($slots)" :key="name" #[name]="slotProps">
+    <template
+      v-for="name in Object.keys($slots)"
+      :key="name"
+      #[name]="slotProps"
+    >
       <!-- @vue-ignore -->
       <slot :name="name" v-bind="slotProps" />
     </template>
@@ -23,6 +27,7 @@ import { Autocomplete } from '../Autocomplete'
 import { autocompleteDeprecationSuppressed } from '../Autocomplete/deprecationKey'
 import { Combobox } from '../Combobox'
 import { MultiSelect } from '../MultiSelect'
+import { PhoneInput } from '../PhoneInput'
 import { DatePicker, DateRangePicker, DateTimePicker } from '../DatePicker'
 import { TimePicker } from '../TimePicker'
 import { warnDeprecated } from '../../utils/warnDeprecated'
@@ -75,6 +80,8 @@ const resolvedComponent = computed(() => {
       return Combobox
     case 'multiselect':
       return MultiSelect
+    case 'phone':
+      return PhoneInput
     case 'autocomplete':
       return Autocomplete
     case 'textarea':
@@ -119,6 +126,7 @@ const forwardedAttrs = computed(() => {
     'autocomplete',
     'textarea',
     'checkbox',
+    'phone',
     'date',
     'daterange',
     'datetime',

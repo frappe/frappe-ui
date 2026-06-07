@@ -93,7 +93,10 @@ describe('FormControl', () => {
       cy.spy(win.console, 'warn').as('consoleWarn')
     })
     cy.mount(FormControl, { props: { label: 'Title' } })
-    cy.get('@consoleWarn').should('not.have.been.calledWithMatch', /FormControl/)
+    cy.get('@consoleWarn').should(
+      'not.have.been.calledWithMatch',
+      /FormControl/,
+    )
   })
 
   describe('dispatcher delegation', () => {
@@ -170,6 +173,25 @@ describe('FormControl', () => {
         'true',
       )
       cy.contains('Pick as many as you like.').should('exist')
+    })
+
+    it('renders PhoneInput via type="phone" with labeling', () => {
+      cy.mount(FormControl, {
+        props: {
+          type: 'phone',
+          label: 'Phone',
+          required: true,
+          defaultCountry: 'in',
+          'onUpdate:modelValue': cy.spy().as('onUpdate'),
+        },
+      })
+      cy.contains('label', 'Phone').should('exist')
+      cy.get('[data-slot="phone-input"]').should('exist')
+      // `phone` is a composite type: the dispatcher consumes it, so the
+      // inner input keeps its own type="tel".
+      cy.get('input[type=tel]').should('have.attr', 'aria-required', 'true')
+      cy.get('input[type=tel]').type('9876543210')
+      cy.get('@onUpdate').should('have.been.calledWith', '+91-9876543210')
     })
 
     it('renders only one label even though child also self-shells (no duplication)', () => {
