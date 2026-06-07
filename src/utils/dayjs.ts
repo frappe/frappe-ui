@@ -20,7 +20,7 @@ _dayjs.extend(timezone)
 _dayjs.extend(advancedFormat)
 _dayjs.extend(customParseFormat)
 
-function getBrowserTimezone(): string {
+export function getBrowserTimezone(): string {
   return Intl.DateTimeFormat().resolvedOptions().timeZone
 }
 
