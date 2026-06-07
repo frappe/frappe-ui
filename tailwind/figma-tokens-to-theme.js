@@ -125,116 +125,13 @@ function buildColors() {
   collectSemanticCategory(stylesDark, 'ink', colors.themedVariables.dark)
   collectSemanticCategory(stylesDark, 'outline', colors.themedVariables.dark)
 
-  applyAliases(colors.themedVariables.light)
-  applyAliases(colors.themedVariables.dark)
-  applyLegacyEntries(colors.themedVariables.light, LEGACY_ENTRIES.light)
-  applyLegacyEntries(colors.themedVariables.dark, LEGACY_ENTRIES.dark)
-
   return colors
 }
 
-// Renames — legacy name points at the current Figma name in the same category.
-// Resolves dynamically so the legacy entry tracks any future value change.
-const ALIASES = {
-  // (none currently) — `gray-modals` moved to LEGACY_ENTRIES after its Figma
-  // successor `gray-modal` was dropped in the espresso-2.0 token refresh.
-}
-
-// Legacy semantic tokens with no surviving Figma equivalent — keep them pinned
-// to a primitive reference so src/ consumers keep working. Values use the
-// colorsData reference shape ("lightMode/gray/900", "neutral/white") that
-// colorPalette.js#resolveColorReference already understands. Only added when
-// the Figma export doesn't already define the name.
-const LEGACY_ENTRIES = {
-  light: {
-    surface: {
-      white: 'neutral/white',
-      'menu-bar': 'lightMode/gray/50',
-      'gray-2-contrast': 'neutral/white',
-      modal: 'neutral/white',
-      selected: 'neutral/white',
-      cards: 'neutral/white',
-      'cyan-1': 'lightMode/cyan/100',
-      'pink-1': 'lightMode/pink/100',
-      'orange-1': 'lightMode/orange/100',
-      'violet-1': 'lightMode/violet/100',
-      'green-3': 'lightMode/green/600',
-      'amber-3': 'lightMode/amber/600',
-      'blue-3': 'lightMode/blue/600',
-    },
-    ink: {
-      white: 'neutral/white',
-      'gray-9': 'lightMode/gray/900',
-      'cyan-1': 'lightMode/cyan/500',
-      'pink-1': 'lightMode/pink/500',
-      'violet-1': 'lightMode/violet/500',
-    },
-    outline: {
-      white: 'neutral/white',
-      'gray-modals': 'lightMode/gray/200',
-      'blue-1': 'lightMode/blue/300',
-      'red-1': 'lightMode/red/300',
-      'green-1': 'lightMode/green/200',
-      'amber-1': 'lightMode/amber/200',
-      'orange-1': 'lightMode/orange/200',
-    },
-  },
-  dark: {
-    surface: {
-      white: 'darkMode/gray/900',
-      'menu-bar': 'darkMode/gray/950',
-      'gray-2-contrast': 'darkMode/gray/600',
-      modal: 'darkMode/gray/700',
-      selected: 'darkMode/gray/500',
-      cards: 'darkMode/gray/800',
-      'cyan-1': 'darkMode/cyan/900',
-      'pink-1': 'darkMode/pink/900',
-      'orange-1': 'darkMode/orange/900',
-      'violet-1': 'darkMode/violet/900',
-      'green-3': 'darkMode/green/400',
-      'amber-3': 'darkMode/amber/400',
-      'blue-3': 'darkMode/blue/400',
-    },
-    ink: {
-      white: 'darkMode/gray/900',
-      'gray-9': 'darkMode/gray/50',
-      'cyan-1': 'darkMode/cyan/500',
-      'pink-1': 'darkMode/pink/500',
-      'violet-1': 'darkMode/violet/500',
-    },
-    outline: {
-      white: 'darkMode/gray/900',
-      'gray-modals': 'darkMode/gray/600',
-      'blue-1': 'darkMode/blue/800',
-      'red-1': 'darkMode/red/800',
-      'green-1': 'darkMode/green/800',
-      'amber-1': 'darkMode/amber/800',
-      'orange-1': 'darkMode/orange/800',
-    },
-  },
-}
-
-function applyAliases(themed) {
-  for (const [category, map] of Object.entries(ALIASES)) {
-    if (!themed[category]) continue
-    for (const [legacy, current] of Object.entries(map)) {
-      if (themed[category][current] && !themed[category][legacy]) {
-        themed[category][legacy] = themed[category][current]
-      }
-    }
-  }
-}
-
-function applyLegacyEntries(themed, legacy) {
-  for (const [category, entries] of Object.entries(legacy)) {
-    themed[category] = themed[category] || {}
-    for (const [name, ref] of Object.entries(entries)) {
-      if (!themed[category][name]) {
-        themed[category][name] = ref
-      }
-    }
-  }
-}
+// No legacy aliases: retired names (surface-white, surface-modal,
+// outline-gray-modals, …) are intentionally NOT emitted so straggler usage
+// fails visibly instead of silently keeping old styles alive. Migrate old
+// code with tailwind/migrate-tokens-v2.js.
 
 function mapShades(family) {
   const out = {}

@@ -508,13 +508,7 @@
         "alert-button-info": "neutral/white",
         "alert-button-success": "neutral/white",
         "alert-button-warning": "neutral/white",
-        "alert-button-error": "neutral/white",
-        "white": "neutral/white",
-        "menu-bar": "lightMode/gray/50",
-        "gray-2-contrast": "neutral/white",
-        "modal": "neutral/white",
-        "selected": "neutral/white",
-        "cards": "neutral/white"
+        "alert-button-error": "neutral/white"
       },
       "ink": {
         "base": "neutral/white",
@@ -642,8 +636,7 @@
         "alert-button-success": "lightMode/gray/900",
         "alert-button-warning": "lightMode/gray/900",
         "alert-button-error": "lightMode/gray/900",
-        "blue-link": "lightMode/blue/500",
-        "white": "neutral/white"
+        "blue-link": "lightMode/blue/500"
       },
       "outline": {
         "base": "neutral/white",
@@ -767,9 +760,7 @@
         "pink-9": "lightMode/pink/900",
         "pink-10": "lightMode/pink/950",
         "elevation-1": "lightMode/gray/200",
-        "elevation-2": "lightMode/gray/200",
-        "white": "neutral/white",
-        "gray-modals": "lightMode/gray/200"
+        "elevation-2": "lightMode/gray/200"
       }
     },
     "dark": {
@@ -903,13 +894,7 @@
         "alert-button-info": "darkMode/blue/700",
         "alert-button-success": "darkMode/green/700",
         "alert-button-warning": "darkMode/amber/700",
-        "alert-button-error": "darkMode/red/700",
-        "white": "darkMode/gray/900",
-        "menu-bar": "darkMode/gray/950",
-        "gray-2-contrast": "darkMode/gray/600",
-        "modal": "darkMode/gray/700",
-        "selected": "darkMode/gray/500",
-        "cards": "darkMode/gray/800"
+        "alert-button-error": "darkMode/red/700"
       },
       "ink": {
         "base": "darkMode/gray/950",
@@ -1037,8 +1022,7 @@
         "alert-button-success": "darkMode/green/200",
         "alert-button-warning": "darkMode/amber/200",
         "alert-button-error": "darkMode/red/200",
-        "blue-link": "darkMode/blue/500",
-        "white": "darkMode/gray/900"
+        "blue-link": "darkMode/blue/500"
       },
       "outline": {
         "base": "darkMode/gray/950",
@@ -1162,9 +1146,7 @@
         "pink-9": "darkMode/pink/100",
         "pink-10": "darkMode/pink/50",
         "elevation-1": "darkMode/gray/700",
-        "elevation-2": "darkMode/gray/600",
-        "white": "darkMode/gray/900",
-        "gray-modals": "darkMode/gray/600"
+        "elevation-2": "darkMode/gray/600"
       }
     }
   }
