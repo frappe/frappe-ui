@@ -17,8 +17,10 @@ export interface Country {
 
 export interface PhoneInputProps extends InputLabelingProps {
   /**
-   * ISO2 code of the country pre-selected when the value is empty.
-   * Defaults to the country of the system timezone, falling back to `'in'`.
+   * Country pre-selected when the value is empty — an ISO2 code (`"in"`),
+   * a dial code (`"+91"` or `"91"`), or a country name (`"India"`).
+   * Defaults to the country of the system timezone; when neither resolves,
+   * no country is selected.
    */
   defaultCountry?: string
 

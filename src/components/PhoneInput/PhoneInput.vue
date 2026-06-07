@@ -90,7 +90,8 @@
           </ItemListRow>
         </template>
       </Combobox>
-      <!-- Divider -->
+      <!-- Divider: one step darker on hover so it doesn't blend into the
+           shell's hover background (surface-gray-3 ≈ outline-gray-2). -->
       <div
         class="self-stretch border-l border-outline-gray-2"
         aria-hidden="true"
@@ -112,7 +113,7 @@
         type="tel"
         inputmode="tel"
         autocomplete="tel"
-        class="h-full min-w-0 flex-1 border-0 bg-transparent ps-1 pe-2 outline-none focus:ring-0 focus-visible:ring-0"
+        class="h-full min-w-0 flex-1 border-0 bg-transparent ps-1 pe-2 outline-none focus:ring-0 focus-visible:ring-0 disabled:cursor-not-allowed"
         :class="[
           textColor,
           inputFontSizeClasses(size),
@@ -261,7 +262,7 @@ const inputClasses = computed(() => {
 
   const variantClasses = props.disabled
     ? [
-        'border bg-surface-gray-1',
+        'cursor-not-allowed border bg-surface-gray-1',
         props.variant === 'outline'
           ? 'border-outline-gray-2'
           : 'border-transparent',
