@@ -12,7 +12,7 @@ describe('Select', () => {
     cy.get('[role=combobox]')
       .should('have.attr', 'aria-expanded', 'false')
       .and('have.class', 'text-left')
-      .and('have.class', 'focus-visible:ring-2')
+      .and('have.class', 'focus-visible:focus-ring')
     cy.get('[role=presentation]').should('not.exist')
 
     cy.get('button').click()

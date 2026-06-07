@@ -49,11 +49,11 @@ describe('Progress', () => {
     const filledCount = Math.round((value / 100) * intervalCount)
 
     // verify number of intervals divs
-    // only filled intervals needs gray-7
+    // only filled intervals needs gray-10
     cy.get('[role=progressbar] div')
       .should('have.length', intervalCount)
       .each((x, i: number) => {
-        const bgclass = `bg-surface-gray-${i < filledCount ? 7 : 2}`
+        const bgclass = `bg-surface-gray-${i < filledCount ? 10 : 2}`
         cy.wrap(x).should('have.class', bgclass)
       })
   })
