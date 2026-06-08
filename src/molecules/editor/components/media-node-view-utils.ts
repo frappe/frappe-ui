@@ -42,16 +42,6 @@ export function containerClasses(
   ]
 }
 
-/** Lucide icon name for the current alignment (defaults to left). */
-export function alignIcon(align: MediaAlign | null | undefined): string {
-  const map: Record<MediaAlign, string> = {
-    left: 'lucide-align-left',
-    center: 'lucide-align-center',
-    right: 'lucide-align-right',
-  }
-  return (align && map[align]) || 'lucide-align-left'
-}
-
 /**
  * CSS `aspect-ratio` value (`"W / H"`) from the node's stored intrinsic size,
  * or `undefined` when either dimension is missing.

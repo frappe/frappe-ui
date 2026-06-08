@@ -11,7 +11,7 @@
  */
 import { computed, ref, watch, type Ref } from 'vue'
 import type { Editor } from '@tiptap/core'
-import { validateIframeUrl } from './iframe-allowlist'
+import { getIframeAllowlist, validateIframeUrl } from './iframe-allowlist'
 import {
   calculateAspectRatio,
   detectPlatform,
@@ -28,10 +28,15 @@ function extractSrc(input: string): string {
   return trimmed
 }
 
-function getAllowlist(editor: Editor): readonly string[] | undefined {
-  return editor.extensionManager?.extensions.find(
-    (extension) => extension.name === 'iframe',
-  )?.options.allowlist as readonly string[] | undefined
+export interface UseIframeDialogArgs {
+  /**
+   * Edit mode: resolve the position of the iframe node being edited. The
+   * dialog then swaps that node's src in place (via `updateIframeAt`) instead
+   * of inserting. Resolved at submit time so doc changes can't stale the pos.
+   */
+  getReplacePos?: () => number | undefined
+  /** Prefill for edit mode (the node's current src). */
+  initialUrl?: string
 }
 
 export interface UseIframeDialog {
@@ -47,9 +52,12 @@ export interface UseIframeDialog {
   insert: () => boolean
 }
 
-export function useIframeDialog(editor: Editor): UseIframeDialog {
-  const allowlist = getAllowlist(editor)
-  const embedInput = ref('')
+export function useIframeDialog(
+  editor: Editor,
+  args: UseIframeDialogArgs = {},
+): UseIframeDialog {
+  const allowlist = getIframeAllowlist(editor)
+  const embedInput = ref(args.initialUrl ?? '')
   const urlError = ref('')
   const width = ref(640)
   const height = ref(360)
@@ -99,11 +107,15 @@ export function useIframeDialog(editor: Editor): UseIframeDialog {
 
   function insert(): boolean {
     if (!isValidUrl.value) return false
-    const success = editor.commands.setIframe({
-      src: processedUrl.value,
-      width: width.value,
-      height: height.value,
-    })
+    const replacePos = args.getReplacePos?.()
+    const success =
+      replacePos != null
+        ? editor.commands.updateIframeAt(replacePos, processedUrl.value)
+        : editor.commands.setIframe({
+            src: processedUrl.value,
+            width: width.value,
+            height: height.value,
+          })
     if (success) {
       editor.commands.focus()
     } else {

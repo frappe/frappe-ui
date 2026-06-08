@@ -8,8 +8,8 @@
  *  - `src` is validated against the allowlist on LOAD (`parseHTML` `getAttrs`)
  *    and on insert/paste — substring matching and the `startsWith('/')` escape
  *    hatch are gone (see `iframe-allowlist.ts`).
- *  - the default `sandbox` no longer includes `allow-same-origin`
- *    ({@link IFRAME_SANDBOX}); rendering always forces that value.
+ *  - rendering always forces the {@link IFRAME_SANDBOX} value, so incoming
+ *    markup can never widen the sandbox beyond it.
  */
 import { Node, mergeAttributes } from '@tiptap/core'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
@@ -106,8 +106,8 @@ export const IframeExtension = Node.create<IframeOptions>({
       },
       sandbox: {
         default: IFRAME_SANDBOX,
-        // Never let incoming HTML widen the sandbox: the strict default always
-        // wins, so attacker markup cannot re-add `allow-same-origin` on load.
+        // Never let incoming HTML widen the sandbox: the fixed default always
+        // wins, so attacker markup cannot add extra capabilities on load.
         parseHTML: () => IFRAME_SANDBOX,
         renderHTML: () => ({ sandbox: IFRAME_SANDBOX }),
       },

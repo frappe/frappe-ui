@@ -32,6 +32,13 @@ export interface PlatformConfig {
   defaultWidth: number
   /** Hostnames (exact or dot-boundary suffix) this platform owns. */
   hosts: readonly string[]
+  /**
+   * Slash-menu glyph. Lucide ships no brand icons, so these are semantic
+   * stand-ins (play for video platforms, frame for Figma, …).
+   */
+  icon: string
+  /** Example URL shown as the dialog placeholder for this platform. */
+  example: string
 }
 
 /** Per-platform sizing + host ownership. */
@@ -41,44 +48,67 @@ export const PLATFORM_CONFIGS: readonly PlatformConfig[] = [
     ratio: 9 / 16,
     defaultWidth: 640,
     hosts: ['youtube.com', 'youtu.be', 'youtube-nocookie.com'],
+    icon: 'lucide-square-play',
+    example: 'https://youtube.com/watch?v=…',
   },
   {
     name: 'Vimeo',
     ratio: 9 / 16,
     defaultWidth: 640,
     hosts: ['vimeo.com', 'player.vimeo.com'],
+    icon: 'lucide-circle-play',
+    example: 'https://vimeo.com/…',
   },
   {
     name: 'CodePen',
     ratio: 3 / 2,
     defaultWidth: 500,
     hosts: ['codepen.io'],
+    icon: 'lucide-code-xml',
+    example: 'https://codepen.io/user/pen/…',
   },
   {
     name: 'CodeSandbox',
     ratio: 3 / 2,
     defaultWidth: 500,
     hosts: ['codesandbox.io'],
+    icon: 'lucide-box',
+    example: 'https://codesandbox.io/s/…',
   },
   {
     name: 'Figma',
     ratio: 9 / 16,
     defaultWidth: 800,
     hosts: ['figma.com', 'embed.figma.com'],
+    icon: 'lucide-frame',
+    example: 'https://figma.com/design/…',
   },
   {
     name: 'Google Docs',
     ratio: 4 / 3,
     defaultWidth: 600,
     hosts: ['docs.google.com', 'drive.google.com'],
+    icon: 'lucide-file-text',
+    example: 'https://docs.google.com/document/d/…',
   },
   {
     name: 'Notion',
     ratio: 4 / 3,
     defaultWidth: 600,
     hosts: ['notion.so'],
+    icon: 'lucide-notebook-text',
+    example: 'https://notion.so/…',
   },
 ]
+
+/** Resolve a platform config by its display name (case-insensitive). */
+export function platformByName(name: string): PlatformConfig | null {
+  const lower = name.toLowerCase()
+  return (
+    PLATFORM_CONFIGS.find((config) => config.name.toLowerCase() === lower) ??
+    null
+  )
+}
 
 /** Resolve the platform config for a URL, or null when unknown/unparseable. */
 export function detectPlatform(url: string): PlatformConfig | null {

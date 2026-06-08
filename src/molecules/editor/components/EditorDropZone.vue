@@ -36,16 +36,32 @@ const props = withDefaults(
 
 const root = useTemplateRef<HTMLElement>('root')
 
-const { isWindowDragging, isOverZone } = useEditorFileDrop(root, (files) => {
-  const editor = props.editor
-  if (props.disabled || !editor || editor.isDestroyed || !editor.isEditable) {
-    return
-  }
-  // The single drop pipeline decides single-image vs group dialog vs video.
-  editor.commands.dropFiles(files)
-})
+const { isWindowDragging, isOverZone, draggedTypes } = useEditorFileDrop(
+  root,
+  (files) => {
+    const editor = props.editor
+    if (props.disabled || !editor || editor.isDestroyed || !editor.isEditable) {
+      return
+    }
+    // The single drop pipeline decides single-image vs group dialog vs video.
+    editor.commands.dropFiles(files)
+  },
+)
 
 const showOverlay = computed(() => isWindowDragging.value && !props.disabled)
+const overlayLabel = computed(() => {
+  const imageCount = draggedTypes.value.filter((type) =>
+    /^image\//i.test(type),
+  ).length
+  const videoCount = draggedTypes.value.filter((type) =>
+    /^video\//i.test(type),
+  ).length
+  if (videoCount > 0)
+    return videoCount === 1 ? 'Drop video to upload' : 'Drop videos to upload'
+  if (imageCount > 1) return 'Drop images to create gallery'
+  if (imageCount === 1) return 'Drop image to upload'
+  return props.label
+})
 </script>
 
 <template>
@@ -79,7 +95,7 @@ const showOverlay = computed(() => isWindowDragging.value && !props.disabled)
               class="text-base font-medium transition-colors duration-150"
               :class="isOverZone ? 'text-ink-gray-8' : 'text-ink-gray-5'"
             >
-              {{ label }}
+              {{ overlayLabel }}
             </span>
           </div>
         </slot>

@@ -11,6 +11,7 @@
  */
 export type {
   MediaUploadOptions,
+  UploadFunction,
   UploadResult,
   UploadedFile,
 } from '#molecules/editor/extensions/shared/media-upload-types'

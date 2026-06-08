@@ -1,20 +1,21 @@
 <template>
   <div
-    class="relative aspect-square w-full h-full overflow-hidden group bg-surface-white"
+    class="relative aspect-square w-full h-full overflow-hidden group rounded bg-surface-gray-1"
   >
     <button
+      v-if="item.status !== 'uploading'"
       type="button"
-      class="absolute top-1 right-1 z-10 bg-white/80 hover:bg-white rounded-full p-1 shadow transition-opacity opacity-0 group-hover:opacity-100 focus:opacity-100"
+      class="absolute top-1 right-1 z-10 rounded bg-black/65 p-1 transition-opacity opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100"
       aria-label="Remove image"
       @click.stop="$emit('remove')"
     >
-      <span class="lucide-x w-4 h-4 text-gray-700" />
+      <span class="lucide-x size-4 text-ink-gray-4 hover:text-ink-white" />
     </button>
 
     <!-- Unsupported preview (HEIC/HEIF): filename placeholder -->
     <div
       v-if="!previewable"
-      class="flex flex-col items-center justify-center w-full h-full text-ink-gray-4 bg-surface-gray-1 rounded-[2px]"
+      class="flex flex-col items-center justify-center w-full h-full text-ink-gray-4 bg-surface-gray-1 rounded"
     >
       <span
         class="text-p-xs text-ink-gray-4 w-full text-center px-2 mt-1"
@@ -22,20 +23,29 @@
       >
         {{ fileName }}
       </span>
+      <span class="mt-1 px-2 text-center text-p-xs text-ink-gray-5">
+        Preview not available (HEIC)
+      </span>
     </div>
 
     <img
       v-else
       :src="previewSrc"
       :alt="caption || ''"
-      class="object-cover w-full h-full rounded-[2px]"
+      class="object-cover w-full h-full"
+      :class="item.status === 'uploading' && 'opacity-40'"
     />
 
-    <!-- Caption overlay -->
+    <!-- Caption overlay: persistent when a caption is set (so the user can see
+         what they typed); hover-revealed "Add caption…" affordance when empty. -->
     <div
       v-if="previewable"
-      class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent rounded-b-[2px] transition-opacity"
-      :class="editing ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'"
+      class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent rounded-b transition-opacity"
+      :class="
+        editing || caption
+          ? 'opacity-100'
+          : 'opacity-100 sm:opacity-0 sm:group-hover:opacity-100'
+      "
     >
       <div
         v-if="!editing"
@@ -59,7 +69,33 @@
           class="w-full text-xs bg-white/90 text-gray-900 px-1 py-0.5 rounded-sm border-none outline-none"
           placeholder="Add caption..."
           maxlength="200"
+          aria-label="Image caption"
         />
+      </div>
+    </div>
+
+    <UploadProgressIndicator
+      v-if="item.status === 'uploading'"
+      class="z-10"
+      :percent="uploadProgress?.percent ?? 0"
+      @cancel="abortUpload(item.id)"
+    />
+
+    <div
+      v-if="item.status === 'failed'"
+      class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-black/65 p-2 text-center"
+      aria-live="assertive"
+    >
+      <div class="text-p-xs text-ink-white">
+        {{ item.error || 'Upload failed' }}
+      </div>
+      <div class="flex gap-2">
+        <Button size="xs" variant="subtle" @click.stop="$emit('retry')">
+          Retry
+        </Button>
+        <Button size="xs" variant="subtle" @click.stop="$emit('remove')">
+          Remove
+        </Button>
       </div>
     </div>
   </div>
@@ -67,13 +103,20 @@
 
 <script setup lang="ts">
 import { computed, nextTick, ref, useTemplateRef } from 'vue'
+import Button from '#components/Button/Button.vue'
+import UploadProgressIndicator from '#molecules/editor/components/UploadProgressIndicator.vue'
 import { useObjectUrl } from '#molecules/editor/composables/useObjectUrl'
+import {
+  abortUpload,
+  getUploadProgress,
+} from '#molecules/editor/extensions/shared/media-upload-state'
 import { isImageSupported } from './image-group-utils'
 import type { ImageItem } from './useImageGroupDialog'
 
 const props = defineProps<{ item: ImageItem }>()
 const emit = defineEmits<{
   remove: []
+  retry: []
   'update:caption': [value: string]
 }>()
 
@@ -82,6 +125,7 @@ const draft = ref('')
 const captionInput = useTemplateRef<HTMLInputElement>('captionInput')
 
 const isFile = computed(() => props.item.type === 'file' && !!props.item.file)
+const uploadProgress = computed(() => getUploadProgress(props.item.id))
 const fileRef = computed<File | null>(() =>
   isFile.value ? (props.item.file as File) : null,
 )
@@ -95,13 +139,13 @@ const fileName = computed(() => props.item.file?.name ?? '')
 
 const caption = computed(() =>
   props.item.type === 'existing'
-    ? props.item.existing?.alt ?? ''
-    : props.item.alt ?? '',
+    ? (props.item.existing?.alt ?? '')
+    : (props.item.alt ?? ''),
 )
 
 const previewSrc = computed(() =>
   props.item.type === 'existing'
-    ? props.item.existing?.src ?? ''
+    ? (props.item.existing?.src ?? '')
     : objectUrl.value,
 )
 

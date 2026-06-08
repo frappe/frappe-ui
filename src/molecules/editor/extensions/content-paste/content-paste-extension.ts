@@ -21,9 +21,11 @@ import { Extension } from '@tiptap/core'
 import { Plugin, PluginKey } from '@tiptap/pm/state'
 import { Slice } from '@tiptap/pm/model'
 import type { EditorView } from '@tiptap/pm/view'
-import type { UploadedFile } from '#utils/useFileUpload'
 import { imageEngine } from '#molecules/editor/extensions/image/image-engine'
-import { resolveUploadOptions } from '#molecules/editor/extensions/shared/media-upload-engine'
+import {
+  resolveUploadOptions,
+  type UploadFunction,
+} from '#molecules/editor/extensions/shared/media-upload-engine'
 import { absolutizeMediaSrcs } from './media-src-utils'
 import { htmlContainsImage } from './paste-html-utils'
 import { tryMarkdownSlice } from './paste-markdown-utils'
@@ -33,7 +35,7 @@ export interface ContentPasteOptions {
   /** When false, the extension is inert and all paste handling falls through. */
   enabled: boolean
   /** Upload function used for re-uploading pasted images. */
-  uploadFunction: ((file: File) => Promise<UploadedFile>) | null
+  uploadFunction: UploadFunction | null
 }
 
 export const ContentPasteExtension = Extension.create<ContentPasteOptions>({

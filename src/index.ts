@@ -115,6 +115,8 @@ export * from './utils/theme'
 export * from './utils/useFileUpload'
 
 export { getConfig, setConfig } from './utils/config'
+export type { FrappeUIConfig } from './utils/config'
+export * from './utils/fileSize'
 export { frappeRequest } from './utils/frappeRequest.js'
 export { request } from './utils/request.js'
 export { default as initSocket } from './utils/socketio.js'

@@ -1,7 +1,10 @@
-interface FrappeUIConfig {
+export interface FrappeUIConfig {
   // Timezone configurations
   systemTimezone?: string | null
   localTimezone?: string | null
+
+  // Max upload size in bytes (apps usually source this from their boot data)
+  maxFileSize?: number | null
 
   // Resource fetcher function
   resourceFetcher?: (options: any) => Promise<any>

@@ -190,6 +190,10 @@ describe('frappe-ui/editor minimal primitives', () => {
     editor.content = { type: 'doc', content: [{ type: 'paragraph', content: [] }] }
     editor.options.onUpdate({ editor })
     expect(toRaw(content.value)).toBe(editor.content)
+
+    const calls = editor.commands.setContent.mock.calls.length
+    await nextTick()
+    expect(editor.commands.setContent).toHaveBeenCalledTimes(calls)
   })
 
   it('keeps editable reactive', async () => {
