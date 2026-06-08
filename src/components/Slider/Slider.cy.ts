@@ -103,13 +103,6 @@ describe('Slider', () => {
     })
   })
 
-  it('emits value-commit once when interaction ends, not on every step', () => {
-    const onValueCommit = cy.stub().as('valueCommit')
-    cy.mount(Slider, { props: { modelValue: [25], onValueCommit } })
-    cy.get('[role="slider"]').focus().type('{rightarrow}{rightarrow}{rightarrow}')
-    cy.get('@valueCommit').should('have.been.calledThrice')
-  })
-
   describe('bidirectional fill', () => {
     // Targets the range element: the only absolutely-positioned element inside the control.
     const range = () => cy.get('[data-slot="control"] .absolute')

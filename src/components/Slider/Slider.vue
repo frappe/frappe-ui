@@ -53,17 +53,18 @@ const {
   disabled: () => props.disabled,
 })
 
-const isBidirectional = computed(() => props.min < 0)
+const isBidirectional = computed(() => props.min < 0 && props.max > 0)
 
 const bidirectionalRangeStyles = computed(() => {
   const { min, max } = props
-  const value = sliderValue.value[0] ?? 0
   const range = max - min
   const zeroPos = -min / range
-  const valuePos = (value - min) / range
+  const thumbPositions = sliderValue.value.map((v) => (v - min) / range)
+  const allPositions =
+    thumbPositions.length === 1 ? [zeroPos, thumbPositions[0]] : thumbPositions
   return {
-    left: `${Math.min(zeroPos, valuePos) * 100}%`,
-    right: `${(1 - Math.max(zeroPos, valuePos)) * 100}%`,
+    left: `${Math.min(...allPositions) * 100}%`,
+    right: `${(1 - Math.max(...allPositions)) * 100}%`,
   }
 })
 
@@ -147,9 +148,13 @@ const hasLabeling = computed(() => {
     >
       <SliderTrack :class="trackClasses">
         <SliderRange v-if="!isBidirectional" :class="rangeClasses" />
-        <SliderRange v-else as-child>
-          <div :class="rangeClasses" :style="bidirectionalRangeStyles" />
-        </SliderRange>
+        <div
+          v-else
+          :class="rangeClasses"
+          :style="bidirectionalRangeStyles"
+          data-orientation="horizontal"
+          :data-disabled="props.disabled ? '' : undefined"
+        />
       </SliderTrack>
 
       <SliderThumb
