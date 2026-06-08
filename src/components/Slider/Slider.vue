@@ -101,7 +101,7 @@ const hasLabeling = computed(() => {
       :for-id="inputId"
       :label="props.label"
       :required="props.required"
-      class="text-p-sm font-medium text-ink-gray-7"
+      class="text-p-sm-medium text-ink-gray-7"
     >
       <template v-if="$slots.label" #default="slotProps">
         <slot name="label" v-bind="slotProps" />

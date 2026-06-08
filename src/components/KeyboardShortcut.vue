@@ -10,7 +10,7 @@
       <kbd
         v-for="(part, idx) in parsedParts"
         :key="idx + '-' + part.raw"
-        class="inline-flex h-6 min-w-[1.5rem] items-center justify-center rounded bg-surface-gray-2 px-1.5 text-xs font-medium text-ink-gray-7"
+        class="inline-flex h-6 min-w-[1.5rem] items-center justify-center rounded bg-surface-gray-2 px-1.5 text-xs-medium text-ink-gray-7"
       >
         <span
           v-if="bgIconFor(part)"

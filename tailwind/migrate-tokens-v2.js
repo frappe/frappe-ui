@@ -8,13 +8,20 @@
  * variables (`var(--surface-white)`) alike — so it can be pointed at app
  * codebases too.
  *
- *   Usage:  node tailwind/migrate-tokens-v2.js [--dry-run] <dir-or-file...>
+ * It also merges weight classes: a `text-<size>` + `font-<weight>` in the same
+ * static class list collapses to the combined `text-<size>-<weight>` style
+ * class, which carries the correct per-weight letter-spacing (see
+ * `mergeWeightClasses`).
  *
- * IMPORTANT: the replacement is single-pass/simultaneous. Several renames
+ *   Usage:  node tailwind/migrate-tokens-v2.js [--dry-run] [--force] <dir-or-file...>
+ *
+ * IMPORTANT: the token replacement is single-pass/simultaneous. Several renames
  * chain (outline red-2→3, red-3→4, red-4→5); applying them sequentially would
  * cascade (red-2 ending up as red-5). Run this script exactly once per
  * codebase — the v2 scheme reuses names (e.g. surface-gray-5 exists in both
- * scales with different values), so a second run would double-shift tokens.
+ * scales with different values), so a second run would double-shift tokens. As
+ * a guard, the script refuses to run on a codebase that looks already migrated
+ * (v2-only tokens present, no pre-v2 tokens); pass --force to override.
  */
 
 import fs from 'fs'
@@ -77,6 +84,48 @@ const OUTLINE_ALPHA_RENAMES = {
   ...shift(['gray'], [[5, 7]]),
 }
 
+// ---------- TYPOGRAPHY SIZE RENAMES ----------
+
+// The espresso text scale gained 15px (`lg`) and 17px (`2xl`) stops, pushing
+// every size from the old `lg` (16px) upward by two names. Each physical size
+// keeps its meaning under a new name, so existing utility classes must be
+// renamed to render identically (old `text-lg`/16px → `text-xl`, etc.). These
+// chain (lg→xl, xl→3xl, …) and so MUST run in the same single simultaneous pass
+// as the color renames below — a sequential pass would cascade.
+//
+// Caveat: these names (`text-lg` … `text-9xl`) coincide with stock Tailwind
+// font-size utilities, so only point this at code using the espresso scale, and
+// run exactly once (see header).
+const TEXT_SIZE_SHIFT = [
+  ['lg', 'xl'],
+  ['xl', '3xl'],
+  ['2xl', '4xl'],
+  ['3xl', '5xl'],
+  ['4xl', '6xl'],
+  ['5xl', '7xl'],
+  ['6xl', '8xl'],
+  ['7xl', '9xl'],
+  ['8xl', '10xl'],
+  ['9xl', '11xl'],
+  ['10xl', '12xl'],
+  ['11xl', '13xl'],
+  ['12xl', '14xl'],
+  ['13xl', '15xl'],
+  ['14xl', '16xl'],
+  ['15xl', '17xl'],
+]
+
+// Each size surfaces as three utility forms: the size utility (`text-lg`), the
+// paragraph variant (`text-p-lg`), and the medium-weight component class
+// (`text-lg-medium`). All three shift together.
+const TEXT_SIZE_RENAMES = Object.fromEntries(
+  TEXT_SIZE_SHIFT.flatMap(([from, to]) => [
+    [`text-${from}`, `text-${to}`],
+    [`text-p-${from}`, `text-p-${to}`],
+    [`text-${from}-medium`, `text-${to}-medium`],
+  ]),
+)
+
 // Full old token name → full new token name. NOTE: alpha categories must come
 // before their base category when building the alternation so that e.g.
 // `surface-alpha-gray-5` is never half-matched by a `surface-…` rule (the
@@ -87,6 +136,7 @@ export const TOKEN_RENAMES = {
   ...prefix('surface', SURFACE_RENAMES),
   ...prefix('ink', INK_RENAMES),
   ...prefix('outline', OUTLINE_RENAMES),
+  ...TEXT_SIZE_RENAMES,
 }
 
 // Tokens dropped in v2 with no replacement — usage is reported, never rewritten.
@@ -125,20 +175,118 @@ const FLAG_REGEX = new RegExp(
   'g',
 )
 
+// ---------- WEIGHT-CLASS MERGE ----------
+
+// Collapse a `text-<size>` and a `font-<weight>` that co-occur in the same
+// static class list into the combined `text-<size>-<weight>` style class — the
+// canonical way to express a weighted text style now that letter-spacing is
+// tracked per weight (so `text-base font-medium` is NOT equivalent to
+// `text-base-medium`). The two need not be adjacent; classes in between
+// (`px-2 text-sm font-medium text-ink-gray-7`) are preserved, and color
+// utilities like `text-ink-gray-7` are never mistaken for a size.
+//
+// Only *static* `class="…"` / `className="…"` attributes are touched. Dynamic
+// `:class` / `v-bind:class` and conditional weights are skipped on purpose:
+// merging a conditionally-applied weight into an unconditional size would be
+// wrong. A class list with more than one size or more than one weight is
+// ambiguous and left untouched.
+const WEIGHT_SUFFIX = {
+  'font-medium': 'medium',
+  'font-semibold': 'semibold',
+  'font-bold': 'bold',
+  'font-extrabold': 'black',
+  'font-normal': '', // regular — drop the weight; the bare `text-<size>` is regular
+}
+
+const TEXT_SIZES = [
+  'tiny', '2xs', 'xs', 'sm', 'base', 'lg', 'xl', '2xl', '3xl', '4xl', '5xl',
+  '6xl', '7xl', '8xl', '9xl', '10xl', '11xl', '12xl', '13xl', '14xl', '15xl',
+  '16xl', '17xl',
+]
+const SIZE_CLASS = new RegExp(`^text-(?:p-)?(?:${TEXT_SIZES.join('|')})$`)
+
+// Static class/className attribute value — not `:class` / `v-bind:class` (the
+// negative lookbehind rejects a preceding `:` or `-`).
+const CLASS_ATTR = /(?<![:\w-])(class(?:Name)?)(\s*=\s*)(["'])([^"']*)\3/g
+
+const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+// Whole-token matcher within a space-separated class list (consumes one leading
+// space so removing a mid-list token doesn't leave a double space).
+const tokenRe = (tok) => new RegExp(`(?:^|\\s)${escapeRe(tok)}(?=\\s|$)`)
+
+export function mergeWeightClasses(content) {
+  const merges = []
+  const migrated = content.replace(CLASS_ATTR, (full, name, eq, quote, value, offset) => {
+    const words = value.split(/\s+/).filter(Boolean)
+    const sizes = words.filter((w) => SIZE_CLASS.test(w))
+    const weights = words.filter((w) => w in WEIGHT_SUFFIX)
+    if (sizes.length !== 1 || weights.length !== 1) return full
+
+    const size = sizes[0]
+    const weight = weights[0]
+    const suffix = WEIGHT_SUFFIX[weight]
+    const merged = suffix ? `${size}-${suffix}` : size
+
+    const newValue = value
+      .replace(new RegExp(`(^|\\s)${escapeRe(size)}(?=\\s|$)`), (m, pre) => `${pre}${merged}`)
+      .replace(tokenRe(weight), '')
+    merges.push({ from: `${size} + ${weight}`, to: merged, line: lineAt(content, offset) })
+    return `${name}${eq}${quote}${newValue}${quote}`
+  })
+  return { migrated, merges }
+}
+
+// ---------- ALREADY-MIGRATED DETECTION ----------
+
+// Tokens that exist ONLY pre-migration (renamed away) vs ONLY post-migration. A
+// codebase with the post-migration names and none of the pre-migration ones has
+// almost certainly been migrated already — and re-running is destructive (the
+// color renames reuse names, so a second pass double-shifts them).
+const PRE_MIGRATION_TOKENS = [
+  'surface-white', 'ink-white', 'outline-white', 'surface-menu-bar',
+  'surface-card', 'surface-cards', 'surface-modal', 'surface-selected',
+  'outline-gray-modal', 'outline-gray-modals',
+]
+const POST_MIGRATION_TOKENS = [
+  'surface-base', 'ink-base', 'outline-base', 'surface-sidebar',
+  'surface-elevation-1', 'surface-elevation-2', 'surface-elevation-3',
+  'outline-elevation-2',
+]
+const sentinelRegex = (tokens) =>
+  new RegExp(`(?<![a-zA-Z0-9])(?:${tokens.slice().sort(byLengthDesc).join('|')})(?![a-zA-Z0-9-])`, 'g')
+const PRE_REGEX = sentinelRegex(PRE_MIGRATION_TOKENS)
+const POST_REGEX = sentinelRegex(POST_MIGRATION_TOKENS)
+
+function detectAlreadyMigrated(files) {
+  let pre = 0
+  let post = 0
+  for (const file of files) {
+    const content = fs.readFileSync(file, 'utf8')
+    pre += (content.match(PRE_REGEX) || []).length
+    post += (content.match(POST_REGEX) || []).length
+  }
+  return { pre, post, likelyMigrated: post > 0 && pre === 0 }
+}
+
 export function migrateTokens(content) {
   const replacements = []
-  const migrated = content.replace(RENAME_REGEX, (match, _token, offset) => {
+  let migrated = content.replace(RENAME_REGEX, (match, _token, offset) => {
     const to = TOKEN_RENAMES[match]
     replacements.push({ from: match, to, line: lineAt(content, offset) })
     return to
   })
+
+  // Merge weight classes on the post-rename text so `text-lg font-medium`
+  // becomes `text-xl-medium` (size shift first, then merge).
+  const { migrated: weightMerged, merges } = mergeWeightClasses(migrated)
+  migrated = weightMerged
 
   const flagged = []
   for (const m of content.matchAll(FLAG_REGEX)) {
     flagged.push({ token: m[0], line: lineAt(content, m.index) })
   }
 
-  return { migrated, replacements, flagged }
+  return { migrated, replacements, merges, flagged }
 }
 
 function lineAt(content, offset) {
@@ -175,41 +323,60 @@ function* walk(target) {
 function main() {
   const args = process.argv.slice(2)
   const dryRun = args.includes('--dry-run')
-  const targets = args.filter((a) => a !== '--dry-run')
+  const force = args.includes('--force')
+  const targets = args.filter((a) => !a.startsWith('--'))
 
   if (targets.length === 0) {
-    console.error('Usage: node tailwind/migrate-tokens-v2.js [--dry-run] <dir-or-file...>')
+    console.error('Usage: node tailwind/migrate-tokens-v2.js [--dry-run] [--force] <dir-or-file...>')
     process.exit(1)
+  }
+
+  const files = []
+  for (const target of targets) for (const file of walk(target)) files.push(file)
+
+  // Guard against a destructive second pass (the color renames reuse names).
+  const { pre, post, likelyMigrated } = detectAlreadyMigrated(files)
+  if (likelyMigrated) {
+    console.warn('\n⚠  This codebase looks ALREADY MIGRATED to espresso v2.')
+    console.warn(`   Found ${post} v2-only token(s) and 0 pre-v2 token(s).`)
+    console.warn('   This migration is NOT idempotent — the color renames reuse names,')
+    console.warn('   so a second pass would double-shift tokens (e.g. surface-gray-5 → -8 → -11).')
+    if (!force && !dryRun) {
+      console.warn('   Refusing to run. Pass --force to override, or --dry-run to preview.\n')
+      process.exit(2)
+    }
+    console.warn(dryRun ? '   (--dry-run: previewing only.)\n' : '   (--force: proceeding anyway.)\n')
   }
 
   let filesChanged = 0
   let totalReplacements = 0
+  let totalMerges = 0
   const allFlagged = []
 
-  for (const target of targets) {
-    for (const file of walk(target)) {
-      const content = fs.readFileSync(file, 'utf8')
-      const { migrated, replacements, flagged } = migrateTokens(content)
+  for (const file of files) {
+    const content = fs.readFileSync(file, 'utf8')
+    const { migrated, replacements, merges, flagged } = migrateTokens(content)
 
-      for (const f of flagged) allFlagged.push({ file, ...f })
-      if (replacements.length === 0) continue
+    for (const f of flagged) allFlagged.push({ file, ...f })
+    const changeCount = replacements.length + merges.length
+    if (changeCount === 0) continue
 
-      filesChanged++
-      totalReplacements += replacements.length
-      if (dryRun) {
-        console.log(`${file} (${replacements.length})`)
-        for (const r of replacements) {
-          console.log(`  L${r.line}: ${r.from} -> ${r.to}`)
-        }
-      } else {
-        fs.writeFileSync(file, migrated)
-        console.log(`${file} (${replacements.length})`)
-      }
+    filesChanged++
+    totalReplacements += replacements.length
+    totalMerges += merges.length
+    if (dryRun) {
+      console.log(`${file} (${changeCount})`)
+      for (const r of replacements) console.log(`  L${r.line}: ${r.from} -> ${r.to}`)
+      for (const m of merges) console.log(`  L${m.line}: ${m.from} => ${m.to}`)
+    } else {
+      fs.writeFileSync(file, migrated)
+      console.log(`${file} (${changeCount})`)
     }
   }
 
   console.log(
-    `\n${dryRun ? '[dry-run] would update' : 'Updated'} ${filesChanged} files, ${totalReplacements} replacements`,
+    `\n${dryRun ? '[dry-run] would update' : 'Updated'} ${filesChanged} files, ` +
+      `${totalReplacements} token renames, ${totalMerges} weight-class merges`,
   )
 
   if (allFlagged.length > 0) {

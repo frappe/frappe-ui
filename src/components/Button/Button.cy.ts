@@ -45,7 +45,7 @@ describe('<Button />', () => {
     })
 
     cy.get('button').should('have.class', 'h-10')
-    cy.get('button').should('have.class', 'text-lg-medium')
+    cy.get('button').should('have.class', 'text-xl-medium')
   })
 
   it('renders xs size', () => {

@@ -22,41 +22,18 @@ const boxShadow = {
   none: 'none',
 }
 
-// letterSpacing / fontWeight aren't modelled on `font.size.*` in the Figma
-// export — keep the historical values keyed by size name. Kept in sync with
-// the matching map in plugin.js.
-const FONT_SIZE_AUGMENT = {
-  '2xs': { letterSpacing: '0.01em', fontWeight: '420' },
-  xs: { letterSpacing: '0.02em', fontWeight: '420' },
-  sm: { letterSpacing: '0.02em', fontWeight: '420' },
-  base: { letterSpacing: '0.02em', fontWeight: '420' },
-  lg: { letterSpacing: '0.02em', fontWeight: '400' },
-  xl: { letterSpacing: '0.01em', fontWeight: '400' },
-  '2xl': { letterSpacing: '0.01em', fontWeight: '400' },
-  '3xl': { letterSpacing: '0.005em', fontWeight: '400' },
-}
-
-const PARAGRAPH_LINE_HEIGHT = {
-  '2xs': '1.6',
-  xs: '1.6',
-  sm: '1.5',
-  base: '1.5',
-  lg: '1.5',
-  xl: '1.42',
-  '2xl': '1.38',
-  '3xl': '1.2',
-}
-
+// lineHeight, letterSpacing and fontWeight are baked into each size tuple by
+// the token sync (see figma-tokens-to-theme.js#buildTypography); mirror the
+// plugin's `buildFontSize` so this public export stays in sync.
 function buildFontSize() {
   const out = {}
   for (const [key, [size, meta]] of Object.entries(typographyTokens.fontSize)) {
-    const lineHeight = meta.lineHeight === '0px' ? '1.15' : meta.lineHeight
-    out[key] = [size, { lineHeight, ...(FONT_SIZE_AUGMENT[key] || {}) }]
+    out[key] = [size, { ...meta }]
   }
-  for (const [key, lineHeight] of Object.entries(PARAGRAPH_LINE_HEIGHT)) {
+  for (const [key, p] of Object.entries(typographyTokens.paragraph || {})) {
     if (!out[key]) continue
     const [size, meta] = out[key]
-    out[`p-${key}`] = [size, { ...meta, lineHeight }]
+    out[`p-${key}`] = [size, { ...meta, lineHeight: p.lineHeight, letterSpacing: p.letterSpacing }]
   }
   return out
 }

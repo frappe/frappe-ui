@@ -11,7 +11,7 @@
         icon="lucide-chevron-left"
         @click="emit('prev')"
       />
-      <span class="text-sm font-medium text-ink-gray-7">
+      <span class="text-sm-medium text-ink-gray-7">
         <span v-if="view === 'date'">
           {{ months[currentMonth] }} {{ currentYear }}
         </span>
@@ -30,7 +30,7 @@
       <Button
         variant="ghost"
         size="sm"
-        class="text-sm font-medium text-ink-gray-7"
+        class="text-sm-medium text-ink-gray-7"
         label="cycle-calendar-view"
         @click="emit('cycleView')"
       >
@@ -73,7 +73,7 @@
         @mouseleave="emit('hoverCell', null)"
       >
         <div
-          class="flex items-center text-xs font-medium uppercase text-ink-gray-4 mb-1 gap-0.5"
+          class="flex items-center text-xs-medium uppercase text-ink-gray-4 mb-1 gap-0.5"
         >
           <div
             v-for="(d, di) in WEEKDAYS"

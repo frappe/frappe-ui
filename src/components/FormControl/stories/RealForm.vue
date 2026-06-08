@@ -88,7 +88,7 @@ function reset() {
     @submit.prevent="submit"
   >
     <div class="space-y-1">
-      <h2 class="text-lg font-semibold text-ink-gray-9">Create account</h2>
+      <h2 class="text-xl-semibold text-ink-gray-9">Create account</h2>
       <p class="text-p-sm text-ink-gray-6">
         Every <code>FormControl</code> type rendered together. Submit to see
         validation light up.

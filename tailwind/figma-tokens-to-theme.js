@@ -50,9 +50,13 @@ const RADIUS_NAME_BY_PX = {
 // Preserved from current plugin.js — Figma doesn't model `full`.
 const RADIUS_EXTRA = { full: '9999px' }
 
-// Figma's font weight strings → tailwind numeric weights.
+// Real Figma variable-font weights. Only Regular is customized (420); the rest
+// are standard. NOTE: do NOT source these from the `text.styles` export — its
+// fontWeight column is corrupt (Regular exports as 100/400 because the body
+// styles use Inter's "Thin" named instance with a wght-axis override to 420
+// that the exporter discards; Black exports as 700 instead of 800).
 const FONT_WEIGHT_MAP = {
-  regular: 400,
+  regular: 420,
   medium: 500,
   semibold: 600,
   bold: 700,
@@ -203,36 +207,82 @@ function buildRadius() {
 
 // ---------- TYPOGRAPHY ----------
 
-function buildTypography() {
-  const tokens = readTokens('Typography.Desktop.tokens.json')
-  const sizes = tokens.font?.size || {}
-  const lineHeights = tokens.font?.['line-height'] || {}
-  const weights = tokens.font?.weight || {}
-  const families = tokens.font?.family || {}
+// We derive the type scale from the Figma *text styles* export
+// (`text.styles.tokens.json`), not the *variable* export
+// (`Typography.Desktop`). Text styles carry the exact per-size pairing of size +
+// line-height + letter-spacing (+ `uppercase` on `tiny`); the variable export
+// rounds line-heights to px and drops per-size letter-spacing. Weights still
+// come from FONT_WEIGHT_MAP because the text-styles weight column is corrupt
+// (see note there).
 
+// Figma models line-height & letter-spacing as percentages of the font size.
+// Tailwind wants a unitless ratio for line-height and `em` for letter-spacing.
+const pctToRatio = (v) => String(round(parseFloat(v) / 100, 4)) // "115%" -> "1.15"
+// letter-spacing % of font size === em. `paragraph/5xl` exports as "0.5px" by an
+// exporter bug (should be "0.5%"); parseFloat keeps the number and we treat it
+// as a percent regardless of unit, which yields the intended value either way.
+const lsToEm = (v) => `${round(parseFloat(v) / 100, 5)}em` // "2%" -> "0.02em"
+
+function round(n, places) {
+  const f = 10 ** places
+  return Math.round(n * f) / f
+}
+
+function buildTypography() {
+  const styles = readTokens('text.styles.tokens.json')
+  const text = styles.text || {}
+  const paragraphStyles = styles.paragraph || {}
+
+  const fontFamily = { text: text.base?.regular?.$value.fontFamily || 'Inter Variable' }
+
+  const fontWeight = {
+    regular: FONT_WEIGHT_MAP.regular,
+    medium: FONT_WEIGHT_MAP.medium,
+    semibold: FONT_WEIGHT_MAP.semibold,
+    bold: FONT_WEIGHT_MAP.bold,
+    black: FONT_WEIGHT_MAP.extrabold,
+  }
+
+  // Letter-spacing is the only property that varies by weight (line-height &
+  // text-transform are constant per size). Capture it per (size, weight) so the
+  // plugin can emit `text-<size>-<weight>` classes; values are honored as-is
+  // from text.styles (the source of truth), oddities included.
+  const WEIGHTS = ['regular', 'medium', 'semibold', 'bold', 'black']
+  const trackingOf = (variants) =>
+    Object.fromEntries(
+      WEIGHTS.filter((w) => variants[w]).map((w) => [w, lsToEm(variants[w].$value.letterSpacing)]),
+    )
+
+  // Base size utilities (`text-<size>`), from each size's `regular` variant.
   const fontSize = {}
-  for (const [key, token] of Object.entries(sizes)) {
-    const lh = lineHeights[key]?.$value
+  const textTransform = {}
+  const tracking = { text: {}, paragraph: {} }
+  for (const [key, variants] of Object.entries(text)) {
+    const v = variants.regular.$value
     fontSize[key] = [
-      token.$value,
+      v.fontSize,
       {
-        lineHeight: lh || '1.15',
+        lineHeight: pctToRatio(v.lineHeight),
+        letterSpacing: lsToEm(v.letterSpacing),
+        fontWeight: String(FONT_WEIGHT_MAP.regular),
       },
     ]
+    if (v.textTransform && v.textTransform !== 'none') textTransform[key] = v.textTransform
+    tracking.text[key] = trackingOf(variants)
   }
 
-  const fontWeight = {}
-  for (const [key, token] of Object.entries(weights)) {
-    const numeric = FONT_WEIGHT_MAP[token.$value]
-    fontWeight[key] = numeric ?? token.$value
+  // Paragraph variants (`text-p-<size>`) — same sizes, reading line-height/track.
+  const paragraph = {}
+  for (const [key, variants] of Object.entries(paragraphStyles)) {
+    const v = variants.regular.$value
+    paragraph[key] = {
+      lineHeight: pctToRatio(v.lineHeight),
+      letterSpacing: lsToEm(v.letterSpacing),
+    }
+    tracking.paragraph[key] = trackingOf(variants)
   }
 
-  const fontFamily = {}
-  for (const [key, token] of Object.entries(families)) {
-    fontFamily[key] = token.$value
-  }
-
-  return { fontFamily, fontSize, fontWeight }
+  return { fontFamily, fontWeight, fontSize, textTransform, paragraph, tracking }
 }
 
 // ---------- EFFECTS (shadows) ----------

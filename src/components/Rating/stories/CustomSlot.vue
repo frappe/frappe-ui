@@ -14,7 +14,7 @@ const scores = ['💩', '👎', '👌', '👍', '🔥']
     <Rating v-model="mood" label="How was your day?" size="lg">
       <template #icon="{ index, value, previewValue }">
         <span
-          class="text-2xl leading-none transition-transform"
+          class="text-4xl leading-none transition-transform"
           :class="
             index === (previewValue ?? value) ? 'scale-110' : 'opacity-40'
           "
@@ -26,7 +26,7 @@ const scores = ['💩', '👎', '👌', '👍', '🔥']
     <Rating v-model="score" label="Rate this meal" size="lg">
       <template #icon="{ index, value, previewValue }">
         <span
-          class="text-2xl leading-none"
+          class="text-4xl leading-none"
           :class="
             index === (previewValue ?? value) ? '' : 'grayscale opacity-50'
           "

@@ -6,7 +6,7 @@
     <slot name="body">
       <div class="flex w-full flex-col">
         <slot name="title">
-          <span class="truncate text-sm font-medium text-ink-gray-5">
+          <span class="truncate text-sm-medium text-ink-gray-5">
             {{ config.title }}
           </span>
         </slot>
@@ -25,7 +25,7 @@
         <slot name="delta" v-bind="{ formatValue }">
           <div
             v-if="config.delta"
-            class="flex items-center gap-0.5 text-xs font-medium"
+            class="flex items-center gap-0.5 text-xs-medium"
             :class="[
               config.negativeIsBetter
                 ? config.delta >= 0

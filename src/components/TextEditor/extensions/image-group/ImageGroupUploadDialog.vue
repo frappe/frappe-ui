@@ -182,7 +182,7 @@
             <div class="text-ink-gray-4 mb-2">
               <LucideImagePlus class="size-6" />
             </div>
-            <div class="text-ink-gray-5 text-sm font-medium">
+            <div class="text-ink-gray-5 text-sm-medium">
               Drag & drop images here or click to select
             </div>
           </div>
@@ -244,7 +244,7 @@
         v-if="isFileDragging"
         class="fixed inset-0 z-50 bg-gray-900/60 pointer-events-none flex items-center justify-center"
       >
-        <div class="text-ink-gray-1 text-base font-medium">
+        <div class="text-ink-gray-1 text-base-medium">
           Drop images anywhere
         </div>
       </div>

@@ -87,7 +87,7 @@
         <div class="grid w-20 grid-cols-1">
           <span
             v-for="time in 24"
-            class="flex items-end justify-center text-center text-sm font-normal text-ink-gray-5"
+            class="flex items-end justify-center text-center text-sm text-ink-gray-5"
             :style="{ height: `${hourHeight}px` }"
           />
         </div>

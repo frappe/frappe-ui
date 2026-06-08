@@ -10,7 +10,7 @@
       :for-id="inputId"
       :label="props.label"
       :required="props.required"
-      class="text-p-sm font-medium text-ink-gray-7"
+      class="text-p-sm-medium text-ink-gray-7"
     >
       <template v-if="$slots.label" #default="slotProps">
         <slot name="label" v-bind="slotProps" />
@@ -159,8 +159,8 @@ const inputClasses = computed(() => {
   let sizeClasses = {
     sm: 'text-base rounded h-7',
     md: 'text-base rounded h-8',
-    lg: 'text-lg rounded-md h-10',
-    xl: 'text-xl rounded-md h-10',
+    lg: 'text-xl rounded-md h-10',
+    xl: 'text-3xl rounded-md h-10',
   }[props.size]
 
   let paddingClasses = {

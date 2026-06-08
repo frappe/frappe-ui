@@ -60,55 +60,27 @@ function mergeVariableLayers(...layers) {
   return out
 }
 
-// Per-size augmentation preserved from pre-Figma config — letterSpacing and
-// fontWeight aren't modelled on `font.size.*` in the Figma export, so we keep
-// the historical values keyed by size name.
-const FONT_SIZE_AUGMENT = {
-  '2xs': { letterSpacing: '0.01em', fontWeight: '420' },
-  xs: { letterSpacing: '0.02em', fontWeight: '420' },
-  sm: { letterSpacing: '0.02em', fontWeight: '420' },
-  base: { letterSpacing: '0.02em', fontWeight: '420' },
-  lg: { letterSpacing: '0.02em', fontWeight: '400' },
-  xl: { letterSpacing: '0.01em', fontWeight: '400' },
-  '2xl': { letterSpacing: '0.01em', fontWeight: '400' },
-  '3xl': { letterSpacing: '0.005em', fontWeight: '400' },
-}
-
-// Tracking for the `medium` weight variant of each size. Figma models typography
-// as named styles (`text/base/medium`, `text/lg/medium`, …) where medium-weight
-// text is tracked tighter than its regular-weight sibling. Tailwind's fontSize
-// utility is keyed by size only, so we expose these as component classes
-// (`.text-base-medium`, `.text-lg-medium`) via `buildTextStyleUtilities()`.
-// Only add entries here for sizes whose medium tracking is confirmed in Figma.
-const FONT_SIZE_MEDIUM_TRACKING = {
-  base: '0.015em',
-  lg: '0.015em',
-}
-
-// Paragraph variants — same sizes but looser line-heights for reading.
-const PARAGRAPH_LINE_HEIGHT = {
-  '2xs': '1.6',
-  xs: '1.6',
-  sm: '1.5',
-  base: '1.5',
-  lg: '1.5',
-  xl: '1.42',
-  '2xl': '1.38',
-  '3xl': '1.2',
-}
+// Weight variants are exposed as component classes — `text-<size>-<weight>` and
+// the paragraph counterpart `text-p-<size>-<weight>` — one per Figma named
+// style. Figma tracks each weight differently per size and CSS letter-spacing
+// can't follow font-weight, so each (size, weight) must ship as a self-contained
+// class. `regular` stays the bare `text-<size>` / `text-p-<size>` utility.
+// (Component classes are JIT-purged, so only the ones used in content emit.)
+const WEIGHT_VARIANTS = ['medium', 'semibold', 'bold', 'black']
 
 function buildFontSize() {
   const out = {}
+  // Each size's regular variant already carries lineHeight, letterSpacing and
+  // fontWeight from the text-styles export (see figma-tokens-to-theme.js).
   for (const [key, [size, meta]] of Object.entries(typographyTokens.fontSize)) {
-    // `tiny` arrives with lineHeight 0px from Figma — fall back to a sane ratio.
-    const lineHeight = meta.lineHeight === '0px' ? '1.15' : meta.lineHeight
-    out[key] = [size, { lineHeight, ...(FONT_SIZE_AUGMENT[key] || {}) }]
+    out[key] = [size, { ...meta }]
   }
-  // Paragraph variants for the size set that defined them previously.
-  for (const [key, lineHeight] of Object.entries(PARAGRAPH_LINE_HEIGHT)) {
+  // Paragraph variants (`text-p-<size>`): same size, the paragraph style's
+  // looser line-height and its own letter-spacing.
+  for (const [key, p] of Object.entries(typographyTokens.paragraph || {})) {
     if (!out[key]) continue
     const [size, meta] = out[key]
-    out[`p-${key}`] = [size, { ...meta, lineHeight }]
+    out[`p-${key}`] = [size, { ...meta, lineHeight: p.lineHeight, letterSpacing: p.letterSpacing }]
   }
   return out
 }
@@ -135,17 +107,42 @@ function buildFocusRingUtilities() {
 
 function buildTextStyleUtilities() {
   const out = {}
-  for (const [key, tracking] of Object.entries(FONT_SIZE_MEDIUM_TRACKING)) {
-    const entry = typographyTokens.fontSize[key]
-    if (!entry) continue
-    const [size, meta] = entry
-    const lineHeight = meta.lineHeight === '0px' ? '1.15' : meta.lineHeight
-    out[`.text-${key}-medium`] = {
-      fontSize: size,
-      lineHeight,
-      fontWeight: '500',
-      letterSpacing: tracking,
+  const t = typographyTokens
+  const groups = [
+    {
+      className: (s, w) => `.text-${s}-${w}`,
+      tracking: t.tracking?.text || {},
+      lineHeight: (s) => t.fontSize[s]?.[1].lineHeight,
+    },
+    {
+      className: (s, w) => `.text-p-${s}-${w}`,
+      tracking: t.tracking?.paragraph || {},
+      lineHeight: (s) => t.paragraph?.[s]?.lineHeight,
+    },
+  ]
+  for (const group of groups) {
+    for (const [size, byWeight] of Object.entries(group.tracking)) {
+      const entry = t.fontSize[size]
+      if (!entry) continue
+      const [fontSize] = entry
+      const lineHeight = group.lineHeight(size)
+      const transform = t.textTransform?.[size]
+      for (const weight of WEIGHT_VARIANTS) {
+        if (!(weight in byWeight)) continue
+        out[group.className(size, weight)] = {
+          fontSize,
+          lineHeight,
+          fontWeight: String(t.fontWeight[weight]),
+          letterSpacing: byWeight[weight],
+          ...(transform ? { textTransform: transform } : {}),
+        }
+      }
     }
+  }
+  // `tiny` is an uppercase eyebrow style; the bare regular utility needs the
+  // text-transform too (Tailwind's fontSize tuple can't express it).
+  for (const [size, transform] of Object.entries(t.textTransform || {})) {
+    out[`.text-${size}`] = { ...(out[`.text-${size}`] || {}), textTransform: transform }
   }
   return out
 }

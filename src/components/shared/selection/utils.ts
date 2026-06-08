@@ -24,8 +24,8 @@ export function inputFontSizeClasses(size: SelectionSize) {
   return {
     sm: 'text-base',
     md: 'text-base',
-    lg: 'text-lg',
-    xl: 'text-xl',
+    lg: 'text-xl',
+    xl: 'text-3xl',
   }[size]
 }
 

@@ -18,7 +18,7 @@
           <div v-if="config.showIcon && eventIcons[props.event.type]">
             <component :is="eventIcons[props.event.type]" class="h-4 w-4 text-black" />
           </div>
-          <p class="text-sm font-medium truncate" :class="{ italic: !props.event.title }">
+          <p class="text-sm-medium truncate" :class="{ italic: !props.event.title }">
             {{ props.event.title || '[No title]' }}
           </p>
         </div>

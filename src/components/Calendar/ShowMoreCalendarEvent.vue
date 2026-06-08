@@ -13,7 +13,7 @@
   </CalendarMonthEvent>
   <button
     v-if="totalEventsCount > 2"
-    class="w-fit rounded-sm p-px px-2 mx-px text-base font-medium text-ink-gray-6 hover:bg-surface-gray-1"
+    class="w-fit rounded-sm p-px px-2 mx-px text-base-medium text-ink-gray-6 hover:bg-surface-gray-1"
     @click.stop="emit('showMoreEvents')"
   >
     {{ totalEventsCount - 2 }} more

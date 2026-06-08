@@ -16,7 +16,7 @@
             <Popover>
               <template #target="{ togglePopover }">
                 <button
-                  class="rounded p-1 text-base font-medium text-ink-gray-8 transition-colors"
+                  class="rounded p-1 text-base-medium text-ink-gray-8 transition-colors"
                   @click="togglePopover"
                   :class="
                     getActiveButton(button)

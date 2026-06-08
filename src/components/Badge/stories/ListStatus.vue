@@ -55,7 +55,7 @@ const leads = [
     </div>
 
     <div
-      class="grid grid-cols-[minmax(0,1fr)_7.5rem_6.5rem_5rem] gap-3 border-b border-outline-gray-1 bg-surface-gray-1 px-3 py-1.5 text-sm font-medium text-ink-gray-5"
+      class="grid grid-cols-[minmax(0,1fr)_7.5rem_6.5rem_5rem] gap-3 border-b border-outline-gray-1 bg-surface-gray-1 px-3 py-1.5 text-sm-medium text-ink-gray-5"
     >
       <span>Company</span>
       <span>Owner</span>
@@ -71,7 +71,7 @@ const leads = [
       >
         <div class="flex min-w-0 items-center gap-2">
           <div
-            class="flex size-6 shrink-0 items-center justify-center rounded bg-surface-gray-2 text-xs font-medium text-ink-gray-6"
+            class="flex size-6 shrink-0 items-center justify-center rounded bg-surface-gray-2 text-xs-medium text-ink-gray-6"
           >
             {{ lead.name.slice(0, 1) }}
           </div>
@@ -84,7 +84,7 @@ const leads = [
           </template>
           {{ lead.status }}
         </Badge>
-        <span class="text-sm font-medium text-ink-gray-7">{{ lead.value }}</span>
+        <span class="text-sm-medium text-ink-gray-7">{{ lead.value }}</span>
       </div>
     </div>
   </div>

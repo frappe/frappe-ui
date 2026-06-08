@@ -142,7 +142,7 @@ function run(item: CommandMenuItem, event?: MouseEvent) {
         data-slot="menu-group"
         class="flex items-center gap-1"
       >
-        <span class="px-2 text-sm font-medium text-ink-gray-7">{{
+        <span class="px-2 text-sm-medium text-ink-gray-7">{{
           item.label
         }}</span>
         <Tooltip

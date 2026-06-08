@@ -10,7 +10,7 @@
       <template #body-content>
         <div class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-ink-gray-7 mb-2">
+            <label class="block text-sm-medium text-ink-gray-7 mb-2">
               URL or Embed Code
             </label>
             <Textarea

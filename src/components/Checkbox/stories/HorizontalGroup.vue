@@ -11,7 +11,7 @@ const settings = reactive({
 
 <template>
   <div class="flex flex-col gap-4 items-start w-[32rem]">
-    <p class="text-lg font-medium text-ink-gray-9">Print settings</p>
+    <p class="text-xl-medium text-ink-gray-9">Print settings</p>
     <div class="flex flex-wrap gap-x-8 gap-y-2">
       <Checkbox v-model="settings.inclusiveText" label="Show inclusive text in print" />
       <Checkbox

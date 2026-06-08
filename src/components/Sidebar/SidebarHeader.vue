@@ -36,7 +36,7 @@
               : 'ml-2 w-auto opacity-100'
           "
         >
-          <div class="text-base font-medium text-ink-gray-8 leading-none">
+          <div class="text-base-medium text-ink-gray-8 leading-none">
             {{ props.title }}
           </div>
           <div class="mt-1 text-sm text-ink-gray-6 leading-none">
