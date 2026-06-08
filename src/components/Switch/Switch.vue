@@ -44,8 +44,7 @@
     </div>
     <div
       v-if="showDescription || hasError || $slots.description"
-      class="-mt-0.5"
-      :class="errorIndentClasses"
+      :class="[errorSpacingClass, errorIndentClasses]"
     >
       <InputDescription
         v-if="showDescription || $slots.description"
@@ -216,6 +215,15 @@ const errorIndentClasses = computed(() => {
   if (position !== 'start') return undefined
   // switch width + gap-x-2.5 (10 px)
   return props.size === 'md' ? 'ps-[42px]' : 'ps-9'
+})
+
+// Label-only non-padded rows include py-1.5 on the switch group, which
+// already provides ~6 px of breathing room — pull the error div up slightly
+// so the total gap matches the other components (~4 px).
+// Settings-style rows (hasDescription) have no inner padding so keep mt-1.
+const errorSpacingClass = computed(() => {
+  const hasDescription = props.description || slots.description
+  return !hasDescription && props.variant !== 'padded' ? '-mt-0.5' : 'mt-1'
 })
 
 // In the padded variant the whole row is a clickable surface — padding,
