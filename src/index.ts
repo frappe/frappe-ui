@@ -85,6 +85,8 @@ export * from './components/Tree'
 export { default as FrappeUIProvider } from './components/Provider/FrappeUIProvider.vue'
 export * from './components/Sidebar/index.ts'
 export { default as ConfirmDialog } from './components/ConfirmDialog.vue'
+export * from './composables/useInputLabeling'
+export { inputFontSizeClasses } from './components/shared/selection/utils'
 
 // grid layout
 export { default as GridLayout } from './components/VueGridLayout/Layout.vue'
