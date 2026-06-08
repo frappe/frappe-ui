@@ -5,10 +5,11 @@
     @click="onContainerClick"
   >
     <div
-      class="inline-flex gap-2 rounded transition"
+      class="inline-flex items-center gap-2 rounded transition"
       :class="rowClasses"
     >
       <input
+        ref="inputRef"
         class="rounded-sm mt-[1px] bg-surface-base"
         :class="inputClasses"
         type="checkbox"
@@ -37,7 +38,7 @@
         </template>
       </InputLabel>
     </div>
-    <div v-if="showDescription || hasError" class="ps-6 mt-1">
+    <div v-if="showDescription || hasError" class="ps-[1.35rem] mt-1">
       <InputDescription
         v-if="showDescription || $slots.description"
         :id="descriptionId"
@@ -55,7 +56,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, useAttrs, watchEffect } from 'vue'
+import { computed, ref, useAttrs, watchEffect } from 'vue'
 import { useInputLabeling } from '../../composables/useInputLabeling'
 import { warnDeprecated } from '../../utils/warnDeprecated'
 import InputLabel from '../InputLabeling/InputLabel.vue'
@@ -67,6 +68,7 @@ const props = withDefaults(defineProps<CheckboxProps>(), {
   size: 'sm',
   variant: 'default',
   padding: false,
+  indeterminate: false,
 })
 
 const emit = defineEmits<CheckboxEmits>()
@@ -80,6 +82,14 @@ watchEffect(() => {
 })
 
 const checked = computed(() => Boolean(model.value))
+
+// The `indeterminate` state can only be set via the DOM property, not HTML attribute.
+const inputRef = ref<HTMLInputElement | null>(null)
+watchEffect(() => {
+  if (inputRef.value) {
+    inputRef.value.indeterminate = props.indeterminate
+  }
+})
 
 function onChange(e: Event) {
   const next = (e.target as HTMLInputElement).checked
@@ -106,15 +116,14 @@ const {
 } = useInputLabeling(props, {
   size: () => props.size,
   disabled: () => props.disabled,
-  state: () => (checked.value ? 'checked' : 'unchecked'),
+  state: () =>
+    props.indeterminate ? 'indeterminate' : checked.value ? 'checked' : 'unchecked',
 })
 
 const labelClasses = computed(() => {
   return [
-    {
-      sm: 'text-base',
-      md: 'text-lg',
-    }[props.size],
+    // xs inherits sm text size — only the row height changes
+    props.size === 'md' ? 'text-lg' : 'text-base',
     'font-medium',
     props.disabled ? 'text-ink-gray-4 cursor-not-allowed' : 'text-ink-gray-8 cursor-pointer',
     'select-none',
@@ -131,14 +140,13 @@ const rowClasses = computed(() => {
 })
 
 // In the padded variant the whole row is a clickable surface. Mirrors the
-// Switch padded variant: fixed-height compact rows (28px / 32px) with hover,
+// Switch padded variant: fixed-height compact rows (24/28/32px) with hover,
 // active and keyboard-only focus states wrapping the control and label.
 const containerClasses = computed(() => {
   if (props.variant !== 'padded') return undefined
-  const classes = [
-    'group rounded justify-center transition-colors',
-    props.size === 'md' ? 'h-8 px-3' : 'h-7 px-1.5',
-  ]
+  const sizeClass =
+    props.size === 'md' ? 'h-8 px-3' : props.size === 'sm' ? 'h-7 px-1.5' : 'h-6 px-1.5'
+  const classes = ['group rounded justify-center transition-colors', sizeClass]
   classes.push(
     props.disabled
       ? 'cursor-not-allowed'
@@ -168,10 +176,8 @@ const inputClasses = computed(() => {
       ? 'focus:ring-0 group-hover:border-outline-gray-7'
       : 'hover:shadow-sm focus:ring-0 active:bg-surface-gray-2'
 
-  let sizeClasses = {
-    sm: 'w-3.5 h-3.5',
-    md: 'w-4 h-4',
-  }[props.size]
+  // xs uses the same control size as sm
+  let sizeClasses = props.size === 'md' ? 'w-4 h-4' : 'w-3.5 h-3.5'
 
   return [baseClasses, interactionClasses, sizeClasses]
 })

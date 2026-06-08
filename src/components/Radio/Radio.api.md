@@ -14,7 +14,7 @@
   },
   {
     name: 'variant',
-    description: 'Visual style of the radio row.\n`padded` wraps the control and label in a clickable surface with hover,\nactive and focus states — useful for selection lists and menu items.\nThe control always stays on the leading side.',
+    description: 'Visual style of the radio row. `padded` wraps the control and label in a clickable surface with hover, active and focus states — useful for selection lists and menu items. The control always stays on the leading side.',
     required: false,
     type: '"default" | "padded"',
     default: '"default"'
@@ -27,7 +27,7 @@
   },
   {
     name: 'name',
-    description: 'Native `name` shared by radios in the same group. Radios that share a\n`name` behave as one group for keyboard arrow-key navigation.',
+    description: 'Native `name` shared by radios in the same group. Radios that share a `name` behave as one group for keyboard arrow-key navigation.',
     required: false,
     type: 'string'
   },

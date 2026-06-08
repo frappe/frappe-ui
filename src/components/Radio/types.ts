@@ -13,21 +13,13 @@ export interface RadioProps extends Omit<InputLabelingProps, 'required'> {
   /** Controls the size of the radio */
   size?: ToggleSize
 
-  /**
-   * Visual style of the radio row.
-   * `padded` wraps the control and label in a clickable surface with hover,
-   * active and focus states — useful for selection lists and menu items.
-   * The control always stays on the leading side.
-   */
+  /** Visual style of the radio row. `padded` wraps the control and label in a clickable surface with hover, active and focus states — useful for selection lists and menu items. The control always stays on the leading side. */
   variant?: 'default' | 'padded'
 
   /** The value this radio represents within its group. */
   value?: RadioValue
 
-  /**
-   * Native `name` shared by radios in the same group. Radios that share a
-   * `name` behave as one group for keyboard arrow-key navigation.
-   */
+  /** Native `name` shared by radios in the same group. Radios that share a `name` behave as one group for keyboard arrow-key navigation. */
   name?: string
 
   /** Disables the radio and prevents interaction */

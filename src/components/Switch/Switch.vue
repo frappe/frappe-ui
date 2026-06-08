@@ -44,7 +44,7 @@
     </div>
     <div
       v-if="showDescription || hasError || $slots.description"
-      class="mt-1"
+      class="-mt-0.5"
       :class="errorIndentClasses"
     >
       <InputDescription
@@ -159,7 +159,7 @@ const iconClasses = 'me-2 size-4 flex-shrink-0 text-ink-gray-6'
 
 const switchLabelClasses = computed(() => {
   return [
-    'font-medium leading-normal',
+    'font-medium leading-normal select-none',
     props.disabled && !props.description
       ? 'text-ink-gray-4 cursor-not-allowed'
       : 'text-ink-gray-8 cursor-pointer',
@@ -225,7 +225,9 @@ const containerClasses = computed(() => {
   if (props.variant !== 'padded') return undefined
   // `group` lives on the outer surface so hovering anywhere in the padded
   // area — including the corners — drives the control's hover state too.
-  const classes = ['group rounded justify-center transition-colors', props.size === 'md' ? 'h-8 px-3' : 'h-7 px-2']
+  const sizeClass =
+    props.size === 'md' ? 'h-8 px-3' : props.size === 'sm' ? 'h-7 px-2' : 'h-6 px-1.5'
+  const classes = ['group rounded justify-center transition-colors', sizeClass]
   classes.push(
     props.disabled
       ? 'cursor-not-allowed'

@@ -14,7 +14,7 @@
   },
   {
     name: 'variant',
-    description: 'Visual style of the checkbox row.\n`padded` wraps the control and label in a clickable surface with hover,\nactive and focus states — useful for selection lists and menu items.\nThe control always stays on the leading side.',
+    description: 'Visual style of the checkbox row. `padded` wraps the control and label in a clickable surface with hover, active and focus states — useful for selection lists and menu items. The control always stays on the leading side.',
     required: false,
     type: '"default" | "padded"',
     default: '"default"'

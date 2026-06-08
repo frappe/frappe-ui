@@ -20,6 +20,12 @@ menu items. The checkbox always stays on the leading side.
 
 <ComponentPreview name="Checkbox-Sizes" />
 
+## Indeterminate
+
+Use `indeterminate` for "select all" controls where only some children are checked. Clicking selects all; clicking again deselects all.
+
+<ComponentPreview name="Checkbox-Indeterminate" />
+
 ## Labeling
 
 `label`, `description`, `error`, and `required` are wired into the

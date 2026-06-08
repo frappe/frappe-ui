@@ -8,7 +8,7 @@ const b = ref('on')
 
 <template>
   <div class="flex flex-col items-start gap-2">
-    <div class="pl-2">
+    <div class="pl-1.5">
       <Radio v-model="a" name="variant-default" value="on" label="Default" />
     </div>
     <Radio
