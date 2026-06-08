@@ -18,7 +18,7 @@
         <!-- Same idiom as the Dropdown group label (`dropdownClasses.groupLabel`). -->
         <div
           v-if="group.label"
-          class="flex h-7 items-center px-2 text-sm font-medium text-ink-gray-4"
+          class="flex h-7 items-center px-2 text-sm-medium text-ink-gray-4"
         >
           {{ group.label }}
         </div>

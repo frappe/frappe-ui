@@ -128,7 +128,7 @@ function pushConfigured<O>(
  */
 export const EditorDropcursor = Dropcursor.configure({
   width: 3,
-  color: 'var(--surface-gray-7, #383838)',
+  color: 'var(--surface-gray-10, #383838)',
   class: 'editor-drop-cursor',
 })
 
