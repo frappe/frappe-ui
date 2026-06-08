@@ -11,7 +11,7 @@
     :error="error"
     :required="required"
     :class="attrs.class"
-    :style="attrs.style as any"
+    :style="attrs.style"
     placeholder="Search country"
     empty-text="No country found"
   >
@@ -91,12 +91,7 @@
             type="tel"
             inputmode="tel"
             autocomplete="tel"
-            class="h-full min-w-0 flex-1 border-0 bg-transparent ps-1 pe-2 outline-none focus:ring-0 focus-visible:ring-0 disabled:cursor-not-allowed"
-            :class="[
-              textColor,
-              inputFontSizeClasses(size),
-              disabled ? 'placeholder-ink-gray-3' : 'placeholder-ink-gray-4',
-            ]"
+            :class="numberInputClasses"
             :placeholder="placeholder"
             :disabled="disabled"
             :required="required"
@@ -238,6 +233,13 @@ const textColor = computed(() => {
   return props.disabled ? 'text-ink-gray-5' : 'text-ink-gray-8'
 })
 
+const numberInputClasses = computed(() => [
+  'h-full min-w-0 flex-1 border-0 bg-transparent ps-1 pe-2 outline-none focus:ring-0 focus-visible:ring-0 disabled:cursor-not-allowed',
+  textColor.value,
+  inputFontSizeClasses(props.size),
+  props.disabled ? 'placeholder-ink-gray-3' : 'placeholder-ink-gray-4',
+])
+
 const inputClasses = computed(() => {
   const sizeClasses = {
     sm: 'h-7 rounded',
@@ -341,6 +343,3 @@ input:autofill {
   background-clip: text;
 }
 </style>
-
-<!-- Class in script => move from template -->
-<!-- V1 spec audit -->
