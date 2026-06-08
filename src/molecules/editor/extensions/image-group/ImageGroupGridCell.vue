@@ -1,6 +1,6 @@
 <template>
   <div
-    class="relative aspect-square w-full h-full overflow-hidden group rounded-md bg-surface-gray-1"
+    class="relative aspect-square w-full h-full overflow-hidden group rounded bg-surface-gray-1"
   >
     <button
       v-if="item.status !== 'uploading'"
@@ -15,7 +15,7 @@
     <!-- Unsupported preview (HEIC/HEIF): filename placeholder -->
     <div
       v-if="!previewable"
-      class="flex flex-col items-center justify-center w-full h-full text-ink-gray-4 bg-surface-gray-1 rounded-[2px]"
+      class="flex flex-col items-center justify-center w-full h-full text-ink-gray-4 bg-surface-gray-1 rounded"
     >
       <span
         class="text-p-xs text-ink-gray-4 w-full text-center px-2 mt-1"
@@ -40,7 +40,7 @@
          what they typed); hover-revealed "Add caption…" affordance when empty. -->
     <div
       v-if="previewable"
-      class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent rounded-b-md transition-opacity"
+      class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent rounded-b transition-opacity"
       :class="
         editing || caption
           ? 'opacity-100'

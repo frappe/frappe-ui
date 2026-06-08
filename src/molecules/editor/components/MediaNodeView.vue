@@ -218,7 +218,7 @@ function setVideoOptions(options: {
   <NodeViewWrapper as="div" :class="wrapperClasses(node.attrs.float)">
     <div
       ref="containerRef"
-      class="group relative isolate overflow-hidden not-prose rounded-[2px]"
+      class="group relative isolate overflow-hidden not-prose rounded"
       :class="containerClasses(node.attrs, selected)"
       :style="{ width: node.attrs.width ? `${node.attrs.width}px` : 'auto' }"
       data-video-fullscreen-root
@@ -230,7 +230,7 @@ function setVideoOptions(options: {
         <img
           v-if="!isVideo"
           ref="mediaRef"
-          class="rounded-[2px]"
+          class="rounded"
           :class="!isUploaded && 'opacity-40'"
           :src="node.attrs.src || fileContent"
           :alt="node.attrs.alt || ''"
@@ -241,7 +241,7 @@ function setVideoOptions(options: {
         <img
           v-else-if="isVideo && !isUploaded && videoPoster"
           ref="mediaRef"
-          class="rounded-[2px]"
+          class="rounded"
           :src="videoPoster"
           :alt="node.attrs.alt || 'Video preview'"
           :width="node.attrs.width"
@@ -251,7 +251,7 @@ function setVideoOptions(options: {
         <video
           v-else-if="isVideo"
           ref="mediaRef"
-          class="rounded-[2px]"
+          class="rounded"
           :class="!isUploaded && 'opacity-40'"
           :src="node.attrs.src || fileContent"
           :width="node.attrs.width"

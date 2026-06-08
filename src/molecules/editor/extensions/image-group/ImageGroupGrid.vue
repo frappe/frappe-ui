@@ -12,7 +12,7 @@
       @drop="onDrop(idx)"
       @dragend="onDragEnd"
       @dragleave="onDragLeave(idx)"
-      class="group cursor-grab rounded-md transition-opacity active:cursor-grabbing"
+      class="group cursor-grab rounded transition-opacity active:cursor-grabbing"
       :class="{
         'ring-2 ring-outline-gray-4 ring-offset-1 z-10': isDropTarget(idx),
         'opacity-50': draggedIndex === idx,

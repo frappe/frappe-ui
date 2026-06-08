@@ -140,7 +140,7 @@ function commitCaption(event: Event): void {
   <NodeViewWrapper>
     <div
       ref="containerRef"
-      class="relative isolate my-6 block max-w-full overflow-hidden rounded-lg not-prose focus:outline-none"
+      class="relative isolate my-6 block max-w-full overflow-hidden rounded not-prose focus:outline-none"
       :class="[
         { 'ring-2 ring-outline-gray-3 ring-offset-2': selected },
         node.attrs.align === 'center' ? 'mx-auto' : '',
@@ -158,7 +158,7 @@ function commitCaption(event: Event): void {
         <iframe
           v-if="node.attrs.src"
           ref="iframeRef"
-          class="block h-auto max-w-full rounded-lg border-0"
+          class="block h-auto max-w-full rounded border-0"
           :class="{ 'pointer-events-none': overlayActive }"
           :src="node.attrs.src"
           :style="frameStyle"
@@ -200,7 +200,7 @@ function commitCaption(event: Event): void {
         <!-- Placeholder while no src is set -->
         <div
           v-if="!node.attrs.src"
-          class="flex h-[360px] w-[640px] items-center justify-center rounded-lg bg-surface-gray-1"
+          class="flex h-[360px] w-[640px] items-center justify-center rounded bg-surface-gray-1"
         >
           <div class="text-center text-ink-gray-5">
             <div class="mb-1 text-lg">🔗</div>
