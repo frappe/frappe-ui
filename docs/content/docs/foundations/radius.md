@@ -8,4 +8,6 @@ import RadiusPage from '@/components/foundations/RadiusPage.vue'
 
 # Radius
 
+A corner-radius scale from sharp to pill, with named aliases.
+
 <RadiusPage />

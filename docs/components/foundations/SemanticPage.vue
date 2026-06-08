@@ -1,15 +1,16 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed } from 'vue'
 import { TabButtons } from 'frappe-ui'
-import { useTheme } from '../../composables/useTheme'
+import { useTheme, setTheme } from '../../composables/useTheme'
 import colors from '../../../tailwind/colors.json'
 
 type Mode = 'light' | 'dark'
 
+// The switcher drives the global theme so the whole page matches the example.
 const globalTheme = useTheme()
-const mode = ref<Mode>(globalTheme.value)
-watch(globalTheme, (next) => {
-  mode.value = next
+const mode = computed<Mode>({
+  get: () => globalTheme.value,
+  set: (next) => setTheme(next),
 })
 
 const modeButtons = [
@@ -80,22 +81,11 @@ function pickEntries(category: Group['category']) {
 const sections = computed(() =>
   GROUPS.map((g) => ({ ...g, entries: pickEntries(g.category) })),
 )
-
-function copy(text: string) {
-  navigator.clipboard?.writeText(text)
-}
 </script>
 
 <template>
   <div class="grid gap-14">
-    <header class="grid gap-3">
-      <p class="text-p-base text-ink-gray-6 max-w-2xl">
-        Semantic tokens map a use-case (surface, ink, outline) to a primitive.
-        Always prefer these over raw palette colors in app code — they swap with
-        theme.
-      </p>
-      <TabButtons :buttons="modeButtons" v-model="mode" class="w-fit" />
-    </header>
+    <TabButtons :buttons="modeButtons" v-model="mode" class="w-fit" />
 
     <section
       v-for="section in sections"
@@ -113,11 +103,10 @@ function copy(text: string) {
       </div>
 
       <div class="grid divide-y divide-outline-gray-1">
-        <button
+        <div
           v-for="entry in section.entries"
           :key="entry.name"
           class="flex w-full items-center gap-4 py-3 text-left"
-          @click="copy(`${section.prefix}${entry.name}`)"
         >
           <div
             class="size-10 rounded-md shrink-0"
@@ -134,7 +123,7 @@ function copy(text: string) {
           <span class="text-xs font-mono text-ink-gray-5 shrink-0 tabular-nums">
             {{ entry.value }}
           </span>
-        </button>
+        </div>
       </div>
     </section>
   </div>

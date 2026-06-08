@@ -29,3 +29,11 @@ export function useTheme() {
 
   return theme
 }
+
+// Flip the global theme the same way Navbar.vue does, so an in-page Light/Dark
+// switcher drives the whole document (not a detached preview). useTheme()'s
+// observer picks the change up reactively.
+export function setTheme(value: DocsTheme) {
+  document.documentElement.setAttribute('data-theme', value)
+  localStorage.theme = value
+}

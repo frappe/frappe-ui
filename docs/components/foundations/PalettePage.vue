@@ -1,15 +1,16 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed } from 'vue'
 import { TabButtons } from 'frappe-ui'
-import { useTheme } from '../../composables/useTheme'
+import { useTheme, setTheme } from '../../composables/useTheme'
 import colors from '../../../tailwind/colors.json'
 
 type Mode = 'lightMode' | 'darkMode'
 
+// The switcher drives the global theme so the whole page matches the example.
 const globalTheme = useTheme()
-const mode = ref<Mode>(globalTheme.value === 'dark' ? 'darkMode' : 'lightMode')
-watch(globalTheme, (next) => {
-  mode.value = next === 'dark' ? 'darkMode' : 'lightMode'
+const mode = computed<Mode>({
+  get: () => (globalTheme.value === 'dark' ? 'darkMode' : 'lightMode'),
+  set: (next) => setTheme(next === 'darkMode' ? 'dark' : 'light'),
 })
 
 const modeButtons = [
@@ -63,18 +64,9 @@ const overlayWhite = computed(
 const overlayBlack = computed(
   () => Object.entries(colors.overlay.black) as [string, string][],
 )
-
-function copy(text: string) {
-  navigator.clipboard?.writeText(text)
-}
 </script>
 
 <template>
-  <p>
-    The raw palette. Twelve hues, eleven shades each, plus alpha ramps and
-    neutrals. Authored in Figma, synced to Tailwind via
-    <code class="text-ink-gray-8">yarn sync-tokens</code>.
-  </p>
   <TabButtons :buttons="modeButtons" v-model="mode" class="w-fit" />
   <div class="grid gap-6 mt-6">
     <section
@@ -92,16 +84,13 @@ function copy(text: string) {
           gridTemplateColumns: `repeat(${family.shades.length}, minmax(0, 1fr))`,
         }"
       >
-        <button
+        <div
           v-for="[shade, value] in family.shades"
           :key="shade"
-          class="grid gap-1 text-left group"
-          @click="
-            copy(`${mode === 'darkMode' ? 'dark-' : ''}${family.key}-${shade}`)
-          "
+          class="grid gap-1 text-left"
         >
           <div
-            class="aspect-square rounded transition-transform group-hover:scale-[1.02]"
+            class="aspect-square rounded"
             :style="{ background: value as string }"
           ></div>
           <div class="grid gap-1">
@@ -112,7 +101,7 @@ function copy(text: string) {
               {{ value }}
             </span>
           </div>
-        </button>
+        </div>
       </div>
     </section>
 
@@ -135,11 +124,10 @@ function copy(text: string) {
               : 'repeating-conic-gradient(#242424 0% 25%, #2b2b2b 0% 50%) 50% / 16px 16px',
         }"
       >
-        <button
+        <div
           v-for="[shade, value] in family.shades"
           :key="shade"
           class="grid gap-1 text-left"
-          @click="copy(`${family.key}-${shade}`)"
         >
           <div
             class="aspect-square rounded"
@@ -155,7 +143,7 @@ function copy(text: string) {
               {{ value }}
             </span>
           </div>
-        </button>
+        </div>
       </div>
     </section>
 
@@ -171,20 +159,19 @@ function copy(text: string) {
               gridTemplateColumns: `repeat(${overlayWhite.length}, minmax(0, 1fr))`,
             }"
           >
-            <button
+            <div
               v-for="[shade, value] in overlayWhite"
               :key="shade"
               class="grid gap-1 text-left"
-              @click="copy(`white-overlay-${shade}`)"
             >
               <div
-                class="h-12 rounded bg-ink-gray-9"
+                class="aspect-square rounded"
                 :style="{
-                  backgroundImage: `linear-gradient(${value}, ${value})`,
+                  background: `linear-gradient(${value}, ${value}), #0f0f0f`,
                 }"
               ></div>
               <span class="text-2xs text-ink-gray-7 font-mono">{{ shade }}</span>
-            </button>
+            </div>
           </div>
         </div>
         <div class="grid gap-1.5">
@@ -195,22 +182,21 @@ function copy(text: string) {
               gridTemplateColumns: `repeat(${overlayBlack.length}, minmax(0, 1fr))`,
             }"
           >
-            <button
+            <div
               v-for="[shade, value] in overlayBlack"
               :key="shade"
               class="grid gap-1 text-left"
-              @click="copy(`black-overlay-${shade}`)"
             >
               <div
-                class="h-12 rounded bg-surface-base"
+                class="aspect-square rounded"
                 :style="{
-                  backgroundImage: `linear-gradient(${value}, ${value})`,
+                  background: `linear-gradient(${value}, ${value}), #ffffff`,
                 }"
               ></div>
               <span class="text-2xs text-ink-gray-7 font-mono">{{
                 shade
               }}</span>
-            </button>
+            </div>
           </div>
         </div>
       </div>
@@ -218,19 +204,22 @@ function copy(text: string) {
 
     <section id="neutrals" class="grid gap-3">
       <h2 class="text-xl font-semibold text-ink-gray-8 m-0">Neutrals</h2>
-      <div class="flex gap-4">
-        <button
-          v-for="n in NEUTRALS"
-          :key="n.key"
-          class="grid gap-2 text-left"
-          @click="copy(n.label)"
-        >
-          <div class="size-24 rounded" :style="{ background: n.value }"></div>
-          <span class="text-sm text-ink-gray-7">{{ n.label }}</span>
-          <span class="text-2xs text-ink-gray-5 font-mono uppercase">{{
-            n.value
-          }}</span>
-        </button>
+      <div
+        class="grid gap-1.5"
+        :style="{ gridTemplateColumns: `repeat(11, minmax(0, 1fr))` }"
+      >
+        <div v-for="n in NEUTRALS" :key="n.key" class="grid gap-1 text-left">
+          <div
+            class="aspect-square rounded border border-outline-gray-2"
+            :style="{ background: n.value }"
+          ></div>
+          <div class="grid gap-1">
+            <span class="text-xs font-medium text-ink-gray-7">{{ n.label }}</span>
+            <span class="text-2xs text-ink-gray-5 font-mono uppercase">{{
+              n.value
+            }}</span>
+          </div>
+        </div>
       </div>
     </section>
   </div>

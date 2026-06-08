@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import radius from '../../../tailwind/generated/radius.json'
 
 const NUMERIC_KEYS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-// Display order for the unified scale — numerics in order, then `full`.
+// Display order for the unified scale: numerics in order, then `full`.
 const SCALE_KEYS = [...NUMERIC_KEYS, 'full']
 
 // Map each alias (`rounded-sm`, `rounded-md`, `rounded`, …) to the numeric
@@ -32,34 +32,16 @@ const rows = computed(() =>
     aliases: ALIASES_BY_NUMERIC.value[k] || [],
   })),
 )
-
-function copy(text: string) {
-  navigator.clipboard?.writeText(text)
-}
 </script>
 
 <template>
   <div class="grid gap-8">
-    <header class="grid gap-3">
-      <p class="text-p-base text-ink-gray-6 max-w-2xl">
-        Ten radii from sharp to pill. The numeric scale (<code
-          class="text-ink-gray-8"
-          >rounded-0</code
-        >
-        …<code class="text-ink-gray-8">rounded-9</code>) mirrors Figma. Named
-        aliases (<code class="text-ink-gray-8">rounded-sm</code>,
-        <code class="text-ink-gray-8">rounded-md</code>, …) resolve to the same
-        values for ergonomics.
-      </p>
-    </header>
-
     <section class="grid gap-4">
       <div class="grid divide-y divide-outline-gray-1">
-        <button
+        <div
           v-for="r in rows"
           :key="r.name"
           class="flex w-full items-center gap-4 py-3 text-left"
-          @click="copy(`rounded-${r.name}`)"
         >
           <div
             class="size-16 shrink-0 bg-surface-gray-3 border border-outline-gray-3"
@@ -90,7 +72,7 @@ function copy(text: string) {
           >
             {{ r.value }}
           </span>
-        </button>
+        </div>
       </div>
     </section>
   </div>

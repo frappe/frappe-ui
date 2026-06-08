@@ -44,11 +44,12 @@ export function getSidebarList(componentList: string[]): SidebarSection[] {
     {
       text: 'Foundations',
       items: [
-        { text: 'Base Colors', link: '/docs/foundations/colours/base' },
-        { text: 'Semantic Colors', link: '/docs/foundations/colours/semantic' },
+        { text: 'Base Colors', link: '/docs/foundations/colors/base' },
+        { text: 'Semantic Colors', link: '/docs/foundations/colors/semantic' },
         { text: 'Typography', link: '/docs/foundations/typography' },
         { text: 'Radius', link: '/docs/foundations/radius' },
         { text: 'Elevation', link: '/docs/foundations/elevation' },
+        { text: 'Focus Ring', link: '/docs/foundations/focus-ring' },
       ],
     },
     {
