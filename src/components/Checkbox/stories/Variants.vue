@@ -8,7 +8,7 @@ const b = ref(true)
 
 <template>
   <div class="flex flex-col items-start gap-2">
-    <div class="pl-2"><Checkbox v-model="a" label="Default" /></div>
+    <div class="pl-1.5"><Checkbox v-model="a" label="Default" /></div>
     <Checkbox v-model="b" variant="padded" label="Padded" />
   </div>
 </template>

@@ -14,14 +14,14 @@
   },
   {
     name: 'variant',
-    description: 'Visual style of the switch row.\n`padded` wraps the control and label in a clickable surface with hover,\nactive and focus states — useful for settings rows and menu items.',
+    description: 'Visual style of the switch row. `padded` wraps the control and label in a clickable surface with hover, active and focus states — useful for settings rows and menu items.',
     required: false,
     type: '"default" | "padded"',
     default: '"default"'
   },
   {
     name: 'switchPosition',
-    description: 'Position of the switch control relative to the label, along the inline\naxis (RTL-aware). `start` is the leading side, `end` the trailing side.\nDefaults to automatic — `start` for label-only rows and `end` when a\n`description` is present. Pass `start` or `end` to override.',
+    description: 'Position of the switch control relative to the label, along the inline axis (RTL-aware). `start` is the leading side, `end` the trailing side. Defaults to automatic — `start` for label-only rows and `end` when a `description` is present. Pass `start` or `end` to override.',
     required: false,
     type: '"start" | "end"'
   },
@@ -34,7 +34,7 @@
   },
   {
     name: 'icon',
-    description: 'Optional icon rendered alongside the label.\nStrings starting with `lucide-` are rendered via the shared Lucide\nTailwind utility; component values are rendered with `<component :is>`.',
+    description: 'Optional icon rendered alongside the label. Strings starting with `lucide-` are rendered via the shared Lucide Tailwind utility; component values are rendered with `<component :is>`.',
     required: false,
     type: 'string | Component'
   },

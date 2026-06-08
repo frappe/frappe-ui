@@ -33,7 +33,7 @@
         </template>
       </InputLabel>
     </div>
-    <div v-if="showDescription || hasError" class="ps-6 mt-1">
+    <div v-if="showDescription || hasError" class="ps-[1.35rem] mt-1">
       <InputDescription
         v-if="showDescription || $slots.description"
         :id="descriptionId"
@@ -99,10 +99,8 @@ const {
 
 const labelClasses = computed(() => {
   return [
-    {
-      sm: 'text-base',
-      md: 'text-lg',
-    }[props.size],
+    // xs inherits sm text size — only the row height changes
+    props.size === 'md' ? 'text-lg' : 'text-base',
     'font-medium',
     props.disabled ? 'text-ink-gray-4 cursor-not-allowed' : 'text-ink-gray-8 cursor-pointer',
     'select-none',
@@ -170,10 +168,9 @@ const containerClasses = computed(() => {
   if (props.variant !== 'padded') return undefined
   // `group` lives on the outer surface so hovering anywhere in the padded
   // area — including the corners — drives the control's hover state too.
-  const classes = [
-    'group rounded justify-center transition-colors',
-    props.size === 'md' ? 'h-8 px-3' : 'h-7 px-1.5',
-  ]
+  const sizeClass =
+    props.size === 'md' ? 'h-8 px-3' : props.size === 'sm' ? 'h-7 px-1.5' : 'h-6 px-1.5'
+  const classes = ['group rounded justify-center transition-colors', sizeClass]
   classes.push(
     props.disabled
       ? 'cursor-not-allowed'
