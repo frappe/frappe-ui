@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch, watchEffect } from 'vue'
+import { computed, watch, watchEffect, h, type FunctionalComponent } from 'vue'
 import { RadioGroupItem, RadioGroupRoot } from 'reka-ui'
 import { RouterLink } from 'vue-router'
 import { Pill, type BrowserTabBase } from '../Pill'
@@ -190,14 +190,29 @@ function hasLabel(label: TabButton['label']) {
   return label !== undefined && label !== null && label !== ''
 }
 
+// Native tab elements are rendered through these functional wrappers rather
+// than bare 'button'/'a' tag strings. A string `:is` binding runs through
+// Vue's component resolver, which capitalizes the name and matches a globally
+// registered component — so in apps that do `app.component('Button', ...)`
+// (e.g. Gameplan), `<component :is="'button'">` resolves to that Button
+// component instead of a native <button>. Binding a component value skips the
+// resolver. `inheritAttrs: false` keeps the merged Reka/data/class/@click
+// attrs from being applied twice.
+const NativeButton: FunctionalComponent = (_props, { attrs, slots }) =>
+  h('button', attrs, slots.default?.())
+NativeButton.inheritAttrs = false
+const NativeAnchor: FunctionalComponent = (_props, { attrs, slots }) =>
+  h('a', attrs, slots.default?.())
+NativeAnchor.inheritAttrs = false
+
 // Pick the wrapper element for a tab. `route` → RouterLink, `href` →
 // anchor, otherwise a native button. Disabled forces the button form so
 // `:disabled` actually blocks interaction.
 function tabElement(button: (typeof resolvedButtons.value)[number]) {
-  if (button.disabled) return 'button'
+  if (button.disabled) return NativeButton
   if (button.route) return RouterLink
-  if (button.href) return 'a'
-  return 'button'
+  if (button.href) return NativeAnchor
+  return NativeButton
 }
 
 function tabElementProps(button: (typeof resolvedButtons.value)[number]) {
