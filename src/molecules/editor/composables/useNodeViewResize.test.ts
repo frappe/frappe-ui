@@ -35,10 +35,13 @@ function makeEditor(editable = true): Editor {
   } as unknown as Editor
 }
 
-function makeEl(): HTMLElement {
+function makeEl(width = 200, height = 100): HTMLElement {
   const el = document.createElement('img')
-  Object.defineProperty(el, 'offsetWidth', { value: 200, configurable: true })
-  Object.defineProperty(el, 'offsetHeight', { value: 100, configurable: true })
+  Object.defineProperty(el, 'offsetWidth', { value: width, configurable: true })
+  Object.defineProperty(el, 'offsetHeight', {
+    value: height,
+    configurable: true,
+  })
   return el
 }
 
@@ -121,6 +124,49 @@ describe('useNodeViewResize', () => {
     window.dispatchEvent(new MouseEvent('pointerup'))
 
     expect(onCommit).toHaveBeenCalledWith({ width: 200, height: 100 })
+    unmount()
+  })
+
+  it('locks the aspect to the rendered box, not getAspectRatio', () => {
+    // Element paints 3:1 tall (200×600); the supplied ratio is a WRONG 1:1 —
+    // the case where a node stores only width and the height comes from CSS
+    // `height: auto`. The drag must preserve the painted shape (3), so a width
+    // grown to 300 yields height 900, never the 300 that ratio 1 would give.
+    const el = makeEl(200, 600)
+    const { api, unmount } = mountResize(makeEditor(), {
+      mediaEl: () => el,
+      getAspectRatio: () => 1,
+      getPos: () => 0,
+      onCommit: vi.fn(),
+    })
+
+    api.startResize({ clientX: 0 } as MouseEvent)
+    window.dispatchEvent(new MouseEvent('pointermove', { clientX: 100 }))
+
+    expect(el.style.width).toBe('300px')
+    expect(el.style.height).toBe('900px')
+    window.dispatchEvent(new MouseEvent('pointerup'))
+    unmount()
+  })
+
+  it('falls back to getAspectRatio when the element has no rendered size', () => {
+    // Pre-layout element (offsetWidth 0): the rendered ratio is unavailable, so
+    // the supplied aspect (0.5) drives the drag instead.
+    const el = makeEl(0, 0)
+    const { api, unmount } = mountResize(makeEditor(), {
+      mediaEl: () => el,
+      getAspectRatio: () => 0.5,
+      getPos: () => 0,
+      onCommit: vi.fn(),
+    })
+
+    api.startResize({ clientX: 0 } as MouseEvent)
+    window.dispatchEvent(new MouseEvent('pointermove', { clientX: 100 }))
+
+    // newWidth = max(50, 0 + 100) = 100; height = 100 * 0.5 = 50.
+    expect(el.style.width).toBe('100px')
+    expect(el.style.height).toBe('50px')
+    window.dispatchEvent(new MouseEvent('pointerup'))
     unmount()
   })
 

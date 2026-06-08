@@ -29,7 +29,14 @@ export interface ResizeArgs {
    * Optional — omit when there is no clipping wrapper.
    */
   containerEl?: () => HTMLElement | null
-  /** Aspect ratio expressed as height / width; multiplied by the new width. */
+  /**
+   * Fallback aspect ratio (height / width) used only when the element has no
+   * measurable rendered size at drag start. The drag normally locks the ratio
+   * from the element's live `offsetHeight / offsetWidth` so the shape on screen
+   * is preserved exactly — `getAspectRatio` can disagree with what's painted
+   * when a node stores only one dimension (the other coming from CSS
+   * `height: auto`), which used to distort the media mid-drag.
+   */
   getAspectRatio: () => number
   /** TipTap v3 node-view `getPos`; the commit is skipped when it is invalid. */
   getPos: () => number | undefined
@@ -82,7 +89,14 @@ export function useNodeViewResize(
     isResizing.value = true
     startDragX = event.clientX
     startWidth = el.offsetWidth
-    aspectRatio = args.getAspectRatio() || 1
+    // Lock the ratio to the element's painted box so the drag preserves the
+    // exact shape on screen. Falls back to the supplied aspect only when the
+    // element isn't laid out yet (offsetWidth 0). Reading the rendered size
+    // avoids the stored-attrs mismatch (e.g. a node with width but no height,
+    // whose true height comes from CSS `height: auto`) that distorted media
+    // mid-drag — it became "wide" while dragging, then snapped back on release.
+    const renderedAspect = el.offsetWidth ? el.offsetHeight / el.offsetWidth : 0
+    aspectRatio = renderedAspect || args.getAspectRatio() || 1
     // Dragging the LEFT handle outward moves the pointer left (negative
     // clientX delta) but should grow the node — invert the delta.
     dragDirection = edge === 'left' ? -1 : 1
