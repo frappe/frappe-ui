@@ -1,148 +1,142 @@
 <template>
-  <LabelingWrapper
-    :enabled="hasLabeling"
-    :wrapper-class="['space-y-1.5', attrs.class]"
-    :wrapper-style="attrs.style as any"
+  <Combobox
+    :id="inputId"
+    v-model="countryCode"
+    v-model:open="countryPickerOpen"
+    :options="countryOptions"
+    :disabled="disabled"
+    :size="size"
+    :label="label"
+    :description="description"
+    :error="error"
+    :required="required"
+    :class="attrs.class"
+    :style="attrs.style as any"
+    placeholder="Search country"
+    empty-text="No country found"
   >
-    <InputLabel
-      v-if="label || $slots.label"
-      :id="labelId"
-      :for-id="inputId"
-      :label="label"
-      :required="required"
-      class="text-p-sm font-medium text-ink-gray-7"
-    >
-      <template v-if="$slots.label" #default="slotProps">
-        <slot name="label" v-bind="slotProps" />
-      </template>
-    </InputLabel>
-
-    <div
-      data-slot="phone-input"
-      v-bind="dataAttrs"
-      :class="[inputClasses, hasLabeling ? null : (attrs.class as any)]"
-      :style="hasLabeling ? null : (attrs.style as any)"
-    >
-      <!-- Selector -->
-      <Combobox
-        v-model="countryCode"
-        :options="countryOptions"
-        :disabled="disabled"
-        :size="size"
-        placeholder="Search country"
-        empty-text="No country found"
+    <template v-if="$slots.label" #label="slotProps">
+      <slot name="label" v-bind="slotProps" />
+    </template>
+    <template v-if="$slots.description" #description>
+      <slot name="description" />
+    </template>
+    <template #trigger="{ open }">
+      <div
+        data-slot="phone-input"
+        v-bind="dataAttrs"
+        :class="[inputClasses, hasLabeling ? null : (attrs.class as any)]"
+        :style="hasLabeling ? null : (attrs.style as any)"
       >
-        <template #trigger="{ open }">
-          <button
-            type="button"
-            data-slot="country"
-            :data-state="open ? 'open' : 'closed'"
-            class="flex min-w-[50px] items-center justify-center gap-1 self-stretch rounded-l px-2 focus:outline-none"
-            :class="disabled && 'cursor-not-allowed'"
-            :disabled="disabled"
-            :aria-label="
-              phoneDetails.country
-                ? `Country: ${phoneDetails.country.name}`
-                : 'Select country'
-            "
-            aria-haspopup="listbox"
-            :aria-expanded="open"
-          >
-            <img
-              v-if="phoneDetails.country"
-              :src="getFlagUrl(phoneDetails.country)"
-              :alt="phoneDetails.country.name"
-              class="h-3 w-4 rounded-sm object-cover"
-            />
-            <!-- Same-size placeholder so the chevron never shifts. -->
-            <span v-else class="lucide-globe size-4 shrink-0 text-ink-gray-6" />
-            <span
-              class="lucide-chevron-down size-4 shrink-0 text-ink-gray-6 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)]"
-              :class="open && 'rotate-180'"
-            />
-          </button>
-        </template>
+        <!-- Selector: the only region allowed to toggle the popover. -->
+        <button
+          type="button"
+          data-slot="country"
+          :data-state="open ? 'open' : 'closed'"
+          class="flex min-w-[50px] items-center justify-center gap-1 self-stretch rounded-l px-2 focus:outline-none"
+          :class="disabled && 'cursor-not-allowed'"
+          :disabled="disabled"
+          :aria-label="
+            phoneDetails.country
+              ? `Country: ${phoneDetails.country.name}`
+              : 'Select country'
+          "
+          aria-haspopup="listbox"
+          :aria-expanded="open"
+        >
+          <img
+            v-if="phoneDetails.country"
+            :src="getFlagUrl(phoneDetails.country)"
+            :alt="phoneDetails.country.name"
+            class="h-3 w-4 rounded-sm object-cover"
+          />
+          <!-- Same-size placeholder so the chevron never shifts. -->
+          <span v-else class="lucide-globe size-4 shrink-0 text-ink-gray-6" />
+          <span
+            class="lucide-chevron-down size-4 shrink-0 text-ink-gray-6 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)]"
+            :class="open && 'rotate-180'"
+          />
+        </button>
 
         <!--
-          Full-row takeover, but built from the standard ItemListRow shell
-          so metrics and colors stay in sync with Combobox rows. Taking
-          over skips the built-in selected checkmark, which doesn't fit
-          this design — the selected row is indicated by background alone.
-        -->
-        <template #item="{ item, selected }">
-          <ItemListRow :size="size" :selected="selected">
-            <template #prefix>
-              <!-- Decorative: the country name is the adjacent text. -->
-              <img
-                :src="getFlagUrl(item.country)"
-                alt=""
-                class="h-3 w-4 rounded-sm object-cover"
-                loading="lazy"
-                decoding="async"
-              />
-            </template>
-            <template #label>
-              <div class="truncate">{{ item.country.name }}</div>
-            </template>
-            <template #suffix>
-              <span class="text-ink-gray-5">{{ item.country.isd }}</span>
-            </template>
-          </ItemListRow>
-        </template>
-      </Combobox>
-      <!-- Divider: one step darker on hover so it doesn't blend into the
-           shell's hover background (surface-gray-3 ≈ outline-gray-2). -->
-      <div
-        class="self-stretch border-l border-outline-gray-2"
-        aria-hidden="true"
-      />
-      <!-- ISD Code -->
-      <span
-        v-if="phoneDetails.country"
-        class="select-none ps-2"
-        :class="textColor"
-      >
-        {{ phoneDetails.country.isd }}
-      </span>
-      <!-- Number Input -->
-      <input
-        :id="inputId"
-        ref="numberInputRef"
-        v-model="phoneDetails.number"
-        data-slot="control"
-        type="tel"
-        inputmode="tel"
-        autocomplete="tel"
-        class="h-full min-w-0 flex-1 border-0 bg-transparent ps-1 pe-2 outline-none focus:ring-0 focus-visible:ring-0 disabled:cursor-not-allowed"
-        :class="[
-          textColor,
-          inputFontSizeClasses(size),
-          disabled ? 'placeholder-ink-gray-3' : 'placeholder-ink-gray-4',
-        ]"
-        :placeholder="placeholder"
-        :disabled="disabled"
-        :required="required"
-        :aria-required="required || undefined"
-        :aria-invalid="hasError || undefined"
-        :aria-errormessage="hasError ? errorMessageId : undefined"
-        :aria-describedby="describedBy"
-        v-bind="attrsWithoutClassStyle"
-        @keydown.backspace="onBackspace"
-      />
-      <div v-if="$slots.suffix" class="flex items-center gap-2 pe-2.5">
-        <slot name="suffix" />
+            Presses right of the selector must never toggle the popover, so
+            this region stops click/pointerdown (spec/combobox.md rule for
+            interactive elements inside #trigger content).
+          -->
+        <div
+          class="flex min-w-0 flex-1 items-center self-stretch"
+          @click.stop
+          @pointerdown.stop="countryPickerOpen = false"
+        >
+          <!-- Divider: one step darker on hover so it doesn't blend into
+                 the shell's hover background (surface-gray-3 ≈ outline-gray-2). -->
+          <div
+            class="self-stretch border-l border-outline-gray-2"
+            aria-hidden="true"
+          />
+          <!-- ISD Code -->
+          <span
+            v-if="phoneDetails.country"
+            class="select-none ps-2"
+            :class="textColor"
+          >
+            {{ phoneDetails.country.isd }}
+          </span>
+          <!-- Number Input -->
+          <input
+            :id="inputId"
+            ref="numberInputRef"
+            v-model="phoneDetails.number"
+            data-slot="control"
+            type="tel"
+            inputmode="tel"
+            autocomplete="tel"
+            class="h-full min-w-0 flex-1 border-0 bg-transparent ps-1 pe-2 outline-none focus:ring-0 focus-visible:ring-0 disabled:cursor-not-allowed"
+            :class="[
+              textColor,
+              inputFontSizeClasses(size),
+              disabled ? 'placeholder-ink-gray-3' : 'placeholder-ink-gray-4',
+            ]"
+            :placeholder="placeholder"
+            :disabled="disabled"
+            :required="required"
+            :aria-required="required || undefined"
+            :aria-invalid="hasError || undefined"
+            :aria-errormessage="hasError ? errorMessageId : undefined"
+            :aria-describedby="describedBy"
+            v-bind="attrsWithoutClassStyle"
+            @keydown.backspace="onBackspace"
+          />
+          <div v-if="$slots.suffix" class="flex items-center gap-2 pe-2.5">
+            <slot name="suffix" />
+          </div>
+        </div>
       </div>
-    </div>
+    </template>
 
-    <InputDescription
-      v-if="showDescription || $slots.description"
-      :id="descriptionId"
-      :description="props.description"
-    >
-      <slot v-if="$slots.description" name="description" />
-    </InputDescription>
-    <InputError v-if="hasError" :id="errorMessageId" :lines="errorLines" />
-  </LabelingWrapper>
+    <template #item="{ item, selected }">
+      <div class="w-[calc(var(--reka-combobox-trigger-width)-0.5rem)]">
+        <ItemListRow :size="size" :selected="selected">
+          <template #prefix>
+            <!-- Decorative: the country name is the adjacent text. -->
+            <img
+              :src="getFlagUrl(item.country)"
+              alt=""
+              class="h-3 w-4 rounded-sm object-cover"
+              loading="lazy"
+              decoding="async"
+            />
+          </template>
+          <template #label>
+            <div class="truncate">{{ item.country.name }}</div>
+          </template>
+          <template #suffix>
+            <span class="text-ink-gray-5">{{ item.country.isd }}</span>
+          </template>
+        </ItemListRow>
+      </div>
+    </template>
+  </Combobox>
 </template>
 
 <script setup lang="ts">
@@ -158,10 +152,6 @@ import {
 } from 'vue'
 import { useInputLabeling } from '../../composables/useInputLabeling'
 import { Combobox } from '../Combobox'
-import InputDescription from '../InputLabeling/InputDescription.vue'
-import InputError from '../InputLabeling/InputError.vue'
-import InputLabel from '../InputLabeling/InputLabel.vue'
-import LabelingWrapper from '../InputLabeling/LabelingWrapper.vue'
 import ItemListRow from '../ItemListRow/ItemListRow.vue'
 import { inputFontSizeClasses } from '../shared/selection/utils'
 import type { Country, PhoneInputProps, PhoneInputSlots } from './types'
@@ -197,21 +187,12 @@ const attrsWithoutClassStyle = computed(() => {
   )
 })
 
-const {
-  inputId,
-  labelId,
-  descriptionId,
-  errorMessageId,
-  describedBy,
-  hasError,
-  errorLines,
-  showDescription,
-  dataAttrs,
-} = useInputLabeling(props, {
-  size: () => props.size,
-  variant: () => props.variant,
-  disabled: () => props.disabled,
-})
+const { inputId, errorMessageId, describedBy, hasError, dataAttrs } =
+  useInputLabeling(props, {
+    size: () => props.size,
+    variant: () => props.variant,
+    disabled: () => props.disabled,
+  })
 
 const hasLabeling = computed(() => {
   return Boolean(
@@ -229,6 +210,11 @@ const phoneDetails = reactive<{ country: Country | null; number: string }>({
 })
 
 const numberInputRef = ref<HTMLInputElement | null>(null)
+
+// Controlled because the whole shell is the popover anchor: presses on the
+// number-input region count as "inside" for reka's outside-press dismiss,
+// so the region closes the picker itself (see the template's pointerdown).
+const countryPickerOpen = ref(false)
 
 // The ISD lives inside `label` so Combobox's built-in filtering matches
 // country name and dial code alike; the slots render name and ISD apart.
@@ -355,3 +341,6 @@ input:autofill {
   background-clip: text;
 }
 </style>
+
+<!-- Class in script => move from template -->
+<!-- V1 spec audit -->

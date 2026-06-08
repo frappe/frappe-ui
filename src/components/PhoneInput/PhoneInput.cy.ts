@@ -156,5 +156,117 @@ describe('PhoneInput', () => {
     cy.get('[data-slot="country"]').should('be.disabled')
     cy.get('[data-slot="country"]').click({ force: true })
     cy.get('[role="option"]').should('not.exist')
+    cy.get('[data-slot="phone-input"]').should(
+      'have.attr',
+      'data-disabled',
+      'true',
+    )
+  })
+
+  it('selects a country by keyboard and closes on Escape', () => {
+    cy.mount(PhoneInput, { props: { defaultCountry: 'in' } })
+
+    // Filter to one match, then Enter commits the highlighted row.
+    cy.get('[data-slot="country"]').click()
+    cy.get('input[placeholder="Search country"]').type('japan')
+    cy.get('[role="option"]').should('have.length', 1)
+    cy.get('input[placeholder="Search country"]').type('{downArrow}{enter}')
+    cy.get('[data-slot="country"]').should(
+      'have.attr',
+      'aria-label',
+      'Country: Japan',
+    )
+
+    // Escape closes the popover without changing the selection.
+    cy.get('[data-slot="country"]').click()
+    cy.get('[role="option"]').should('have.length.greaterThan', 1)
+    cy.get('input[placeholder="Search country"]').type('{esc}')
+    cy.get('[role="option"]').should('not.exist')
+    cy.get('[data-slot="country"]').should(
+      'have.attr',
+      'aria-label',
+      'Country: Japan',
+    )
+  })
+
+  it('filters by dial code and renders the empty state', () => {
+    cy.mount(PhoneInput, { props: { defaultCountry: 'in' } })
+    cy.get('[data-slot="country"]').click()
+
+    // The ISD is embedded in each option label, so a dial-code query matches.
+    cy.get('input[placeholder="Search country"]').type('+44')
+    cy.get('[role="option"]').should('contain.text', 'United Kingdom')
+
+    // No match falls back to the empty-state copy.
+    cy.get('input[placeholder="Search country"]').clear().type('zzzzz')
+    cy.get('[role="option"]').should('not.exist')
+    cy.contains('No country found').should('exist')
+  })
+
+  it('honors an explicit id over the generated one', () => {
+    cy.mount(PhoneInput, { props: { id: 'phone-x', label: 'Phone' } })
+    cy.get('input[type=tel]').should('have.attr', 'id', 'phone-x')
+    cy.get('label[for="phone-x"]').should('contain.text', 'Phone')
+  })
+
+  it('reflects each size and variant on the shell', () => {
+    for (const size of ['sm', 'md', 'lg', 'xl'] as const) {
+      cy.mount(PhoneInput, { props: { size } })
+      cy.get('[data-slot="phone-input"]').should('have.attr', 'data-size', size)
+    }
+    for (const variant of ['subtle', 'outline'] as const) {
+      cy.mount(PhoneInput, { props: { variant } })
+      cy.get('[data-slot="phone-input"]').should(
+        'have.attr',
+        'data-variant',
+        variant,
+      )
+    }
+  })
+
+  describe('shared labeling contract', () => {
+    it('renders label and links it to the input via for/id', () => {
+      cy.mount(PhoneInput, { props: { label: 'Phone' } })
+      cy.get('input[type=tel]').then(($input) => {
+        const id = $input.attr('id')!
+        cy.get(`label[for="${id}"]`).should('contain.text', 'Phone')
+      })
+    })
+
+    it('renders description and wires aria-describedby on the input', () => {
+      cy.mount(PhoneInput, {
+        props: { label: 'Phone', description: 'We will text a code.' },
+      })
+      cy.get('input[type=tel]').then(($input) => {
+        const id = $input.attr('id')!
+        expect($input.attr('aria-describedby')).to.equal(`${id}-description`)
+        cy.get(`#${id}-description`).should(
+          'contain.text',
+          'We will text a code.',
+        )
+      })
+    })
+
+    it('renders error with aria-invalid + aria-errormessage and suppresses description', () => {
+      cy.mount(PhoneInput, {
+        props: { label: 'Phone', description: 'helper', error: 'Required' },
+      })
+      cy.get('input[type=tel]')
+        .should('have.attr', 'aria-invalid', 'true')
+        .then(($input) => {
+          const id = $input.attr('id')!
+          expect($input.attr('aria-errormessage')).to.equal(`${id}-error`)
+          cy.get(`#${id}-error`).should('contain.text', 'Required')
+          cy.get(`#${id}-description`).should('not.exist')
+        })
+    })
+
+    it('renders the required indicator and forwards aria-required', () => {
+      cy.mount(PhoneInput, { props: { label: 'Phone', required: true } })
+      cy.get('input[type=tel]').should('have.attr', 'aria-required', 'true')
+      cy.contains('label', 'Phone').within(() => {
+        cy.get('span[aria-hidden="true"]').should('contain.text', '*')
+      })
+    })
   })
 })
