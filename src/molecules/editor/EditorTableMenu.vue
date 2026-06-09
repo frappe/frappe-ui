@@ -142,9 +142,11 @@ function onContextMenu(event: MouseEvent) {
   openContextMenu(ed, event.clientX, event.clientY)
 }
 
-// (Re)subscribe whenever the editor instance changes. Repositioning is driven by
-// transactions (selection / content) and by scroll/resize — anchored to the
-// table, so cell-to-cell caret moves don't move the toolbar.
+// (Re)subscribe whenever the editor instance changes. The toolbar shows on
+// transactions (selection / content) and repositions on resize. Scrolling hides
+// it: it's a body-teleported, fixed-position toolbar anchored to the table top,
+// so following the table on scroll would float it out of the editor and over the
+// page header. It reappears the next time the caret lands in a table.
 watch(
   editor,
   (ed, _old, onCleanup) => {
@@ -153,12 +155,15 @@ watch(
       return
     }
     const onChange = () => sync()
-    const onScroll = () => reposition()
+    const onScroll = () => {
+      visible.value = false
+    }
+    const onResize = () => reposition()
     ed.on('transaction', onChange)
     ed.on('focus', onChange)
     // Capture phase so inner scroll containers are caught too.
     document.addEventListener('scroll', onScroll, true)
-    window.addEventListener('resize', onScroll)
+    window.addEventListener('resize', onResize)
     // Bound on document (not the view DOM) so it never touches `ed.view` before
     // the view is mounted; the handler scopes itself to this editor.
     document.addEventListener('contextmenu', onContextMenu, true)
@@ -167,7 +172,7 @@ watch(
       ed.off('transaction', onChange)
       ed.off('focus', onChange)
       document.removeEventListener('scroll', onScroll, true)
-      window.removeEventListener('resize', onScroll)
+      window.removeEventListener('resize', onResize)
       document.removeEventListener('contextmenu', onContextMenu, true)
       closeContextMenu()
     })
