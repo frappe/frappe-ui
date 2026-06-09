@@ -68,9 +68,28 @@ function activeTableEl(ed: Editor): HTMLElement | null {
 }
 
 function reposition() {
-  const reference = anchor.value
+  const table = anchor.value
   const el = floating.value
-  if (!reference || !el) return
+  if (!table || !el) return
+  // A wide table scrolls inside its `.tableWrapper` (overflow-x: auto), so the
+  // table's own horizontal center can be scrolled out of view — centering the
+  // toolbar on it would float it over the clipped region. Anchor instead to the
+  // part of the table actually visible inside the wrapper's viewport: the
+  // horizontal intersection of table and wrapper. That collapses to the table
+  // for a narrow (fully visible) table and to the visible window for a wide,
+  // scrolled one. Vertical anchor stays at the table's top edge.
+  const wrapper = table.closest<HTMLElement>('.tableWrapper')
+  const reference = wrapper
+    ? {
+        getBoundingClientRect: () => {
+          const t = table.getBoundingClientRect()
+          const w = wrapper.getBoundingClientRect()
+          const left = Math.max(t.left, w.left)
+          const right = Math.min(t.right, w.right)
+          return new DOMRect(left, t.top, Math.max(0, right - left), 0)
+        },
+      }
+    : table
   void computePosition(reference, el, {
     strategy: 'fixed',
     placement: 'top',
