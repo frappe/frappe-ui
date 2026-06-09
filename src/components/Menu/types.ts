@@ -1,5 +1,6 @@
 import type { Component, VNodeChild } from 'vue'
 import type { RouteLocationRaw } from 'vue-router'
+import type { NormalizedMenuGroup } from './utils'
 
 export type MenuTheme = 'gray' | 'red'
 
@@ -146,6 +147,36 @@ export type MenuOption =
 
 export type MenuItem = MenuOption | MenuGroupOption
 export type MenuOptions = Array<MenuItem>
+
+/**
+ * Reka-ui menu primitives injected by the wrapping menu component
+ * (Dropdown / ContextMenu) so the shared renderer stays variant-agnostic.
+ */
+export interface MenuPrimitives {
+  Item: any
+  Label: any
+  Portal: any
+  Sub: any
+  SubContent: any
+  SubTrigger: any
+}
+
+export interface MenuProps {
+  /** Normalized groups of menu options to render. */
+  groups?: NormalizedMenuGroup[]
+
+  /** Closes the menu. */
+  close: () => void
+
+  /** Dynamic `item-*` slot implementations resolved by name. */
+  slotFns?: Record<string, ((props?: any) => any) | undefined>
+
+  /** Portal target for submenu content. */
+  portalTo?: string | HTMLElement
+
+  /** Reka-ui primitives supplied by the wrapping menu component. */
+  primitives: MenuPrimitives
+}
 
 export interface MenuSlotProps {
   /** Closes the menu. */

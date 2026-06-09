@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import MenuItemContent from './MenuItemContent.vue'
 import MenuRenderContent from './MenuRenderContent.vue'
 import MenuRenderContentAsChild from './MenuRenderContentAsChild.vue'
-import type { MenuOption } from './types'
+import type { MenuOption, MenuProps } from './types'
 import {
   menuClasses,
   getMenuBackgroundColor,
@@ -13,33 +13,16 @@ import {
   isMenuSubmenuOption,
   isMenuSwitchOption,
   normalizeMenuOptions,
-  type NormalizedMenuGroup,
 } from './utils'
 
 defineOptions({
   name: 'Menu',
 })
 
-const props = withDefaults(
-  defineProps<{
-    groups?: NormalizedMenuGroup[]
-    close: () => void
-    slotFns?: Record<string, ((props?: any) => any) | undefined>
-    portalTo?: string | HTMLElement
-    primitives: {
-      Item: any
-      Label: any
-      Portal: any
-      Sub: any
-      SubContent: any
-      SubTrigger: any
-    }
-  }>(),
-  {
-    groups: () => [],
-    portalTo: 'body',
-  },
-)
+const props = withDefaults(defineProps<MenuProps>(), {
+  groups: () => [],
+  portalTo: 'body',
+})
 
 const router = useRouter()
 
