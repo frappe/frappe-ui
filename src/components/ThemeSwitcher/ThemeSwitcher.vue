@@ -38,16 +38,16 @@
         <div
           data-slot="option"
           :data-theme-option="option.value"
-          class="flex-1 min-w-[200px] min-h-[42px] cursor-pointer rounded-lg border outline-none transition-colors motion-reduce:transition-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
+          class="flex-1 min-w-[200px] min-h-[42px] cursor-pointer overflow-hidden rounded-lg border outline-none transition-colors motion-reduce:transition-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
           :class="checked ? 'border-outline-gray-5' : 'border-outline-gray-modals'"
         >
           <ThemePreview
-            :option="option"
+            :theme="option.value"
             :logo="props.logo"
             :name="props.name"
             :logo-is-image="logoIsImage"
           />
-          <div class="flex items-center justify-between border-t px-3 py-2">
+          <div class="flex items-center justify-between border-t px-3 py-2 relative z-10 overflow-hidden">
             <div class="text-base text-ink-gray-7">{{ optionLabel(option) }}</div>
             <div
               class="size-3.5 rounded-full"
@@ -68,11 +68,21 @@
 import { computed, useId, useSlots } from 'vue'
 import { RadioGroupItem, RadioGroupRoot } from 'reka-ui'
 import { useTheme, type Theme } from '../../utils/theme'
-import { themeOptions, type ThemeOption } from './themeOptions'
 import ThemePreview from './ThemePreview.vue'
 import type { ThemeSwitcherProps } from './types'
 
 defineOptions({ name: 'ThemeSwitcher' })
+
+interface ThemeOption {
+  value: Theme
+  defaultLabel: string
+}
+
+const themeOptions: ThemeOption[] = [
+  { value: 'light', defaultLabel: 'Light' },
+  { value: 'dark', defaultLabel: 'Dark' },
+  { value: 'system', defaultLabel: 'System' },
+]
 
 const props = withDefaults(defineProps<ThemeSwitcherProps>(), {
   label: 'Theme',
