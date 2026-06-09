@@ -40,6 +40,15 @@ import { Toaster } from 'vue-sonner'
   height: auto;
 }
 
+/* In the collapsed stack vue-sonner clamps every non-front toast to the front
+   toast's height (--front-toast-height) and hides their content. The content is
+   hidden only on [data-styled='true'] toasts, which `unstyled` strips — so a
+   multiline toast behind a single-line one spills its extra lines out the top.
+   Replicate sonner's intended behavior and fade the collapsed back toasts out. */
+[data-sonner-toast][data-expanded='false'][data-front='false'] > * {
+  opacity: 0;
+}
+
 .sonner-loading-wrapper {
   position: static;
 }

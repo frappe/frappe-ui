@@ -23,6 +23,11 @@ const sonnerSpy = Object.assign(vi.fn(), {
 
 vi.mock('vue-sonner', () => ({ toast: sonnerSpy }))
 
+// Every toast path runs through renderSafeHTML → DOMPurify.sanitize, which
+// needs a DOM. Stub it with a passthrough so this node-environment file doesn't
+// crash; the real sanitization is verified in Toast.sanitize.test.ts (jsdom).
+vi.mock('dompurify', () => ({ default: { sanitize: (html: string) => html } }))
+
 const { toast } = await import('./toast')
 
 beforeEach(() => {
