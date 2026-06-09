@@ -203,7 +203,10 @@ img.ProseMirror-selectednode {
 }
 
 .ProseMirror .tableWrapper {
-  overflow-x: scroll;
+  /* Scroll a too-wide table inside its own bounds instead of letting it push
+     past the content column (every editor ancestor is overflow: visible). */
+  max-width: 100%;
+  overflow-x: auto;
   /* Positioning context for the single-box multi-cell selection overlay. */
   position: relative;
 }
