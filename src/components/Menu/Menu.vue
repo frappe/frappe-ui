@@ -17,7 +17,7 @@ import {
 } from './utils'
 
 defineOptions({
-  name: 'MenuList',
+  name: 'Menu',
 })
 
 const props = withDefaults(
@@ -113,7 +113,7 @@ async function handleItemSelect(item: MenuOption, event: Event) {
               :class="menuClasses.content"
               :side-offset="4"
             >
-              <MenuList
+              <Menu
                 :groups="normalizeMenuOptions(item.submenu)"
                 :close="close"
                 :slot-fns="slotFns"

@@ -31,11 +31,12 @@
         :align="align"
         :side-offset="offset"
       >
-        <DropdownMenuList
+        <Menu
           :groups="groups"
           :portal-to="portalTo"
           :close="close"
           :slot-fns="slots"
+          :primitives="primitives"
         />
       </DropdownMenuContent>
     </DropdownMenuPortal>
@@ -46,12 +47,17 @@
 import { computed, useAttrs, useSlots } from 'vue'
 import {
   DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuPortal,
   DropdownMenuRoot,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from 'reka-ui'
 import { Button } from '../Button'
-import DropdownMenuList from './DropdownMenuList.vue'
+import Menu from '../Menu/Menu.vue'
 import type { DropdownProps, DropdownSlots } from './types'
 import { menuClasses, normalizeMenuOptions } from '../Menu/utils'
 import { usePopoverMotion } from '../../composables/usePopoverMotion'
@@ -76,6 +82,15 @@ const props = withDefaults(defineProps<DropdownProps>(), {
 
 function close() {
   openModel.value = false
+}
+
+const primitives = {
+  Item: DropdownMenuItem,
+  Label: DropdownMenuLabel,
+  Portal: DropdownMenuPortal,
+  Sub: DropdownMenuSub,
+  SubContent: DropdownMenuSubContent,
+  SubTrigger: DropdownMenuSubTrigger,
 }
 
 const groups = computed(() => {
