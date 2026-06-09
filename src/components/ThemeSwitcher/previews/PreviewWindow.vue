@@ -1,11 +1,4 @@
-<!-- Mock window artwork for the ThemeSwitcher preview card, in a light or dark
-     tone, with the brand logo + name laid over its content area. Literal hexes,
-     never semantic tokens: the card must always depict its own theme regardless
-     of the active `data-theme`.
-
-     `fill` stretches the window to its container (single previews); otherwise it
-     renders at its natural width so a narrow pane clips it rather than shrinking
-     it (the system preview's side-by-side windows). -->
+<!-- SVG for the ThemeSwitcher preview card used in ThemePreview as per theme variant. -->
 <template>
   <div
     class="relative"
@@ -32,8 +25,6 @@
       <line y1="13.5" x2="207" y2="13.5" :stroke="colors.line" />
     </svg>
 
-    <!-- Brand, anchored in the window's content area (percentages of the
-         viewBox so it tracks the artwork at any rendered size). -->
     <div
       class="absolute flex items-center gap-1 text-xs font-semibold text-ink-gray-5 top-[24px] left-[10px]"
     >
@@ -80,6 +71,4 @@ const tones: Record<PreviewTone, { background: string; bar: string; line: string
 }
 
 const colors = computed(() => tones[props.tone])
-
-
 </script>
