@@ -196,3 +196,48 @@ async function handleItemSelect(item: MenuOption, event: Event) {
     <template v-else>No options</template>
   </div>
 </template>
+
+<style scoped>
+/*
+ * Shared menu entrance/exit. Both Dropdown and ContextMenu render this
+ * component inside their `.menu-content` wrapper, so keeping the animated
+ * keyframes + reduced-motion reset here guarantees they ship whenever either
+ * menu is used (the package ships source and is tree-shaken per component).
+ * Dropdown's keyboard-only `instant` motion stays in Dropdown.vue.
+ */
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes menu-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+:global(.menu-content[data-motion='animated'][data-state='open']) {
+  animation: menu-in 100ms ease-out;
+}
+
+:global(.menu-content[data-motion='animated'][data-state='closed']) {
+  animation: menu-out 75ms ease-in;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :global(.menu-content) {
+    animation-duration: 0ms !important;
+  }
+}
+</style>

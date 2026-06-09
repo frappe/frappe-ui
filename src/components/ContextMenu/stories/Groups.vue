@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ContextMenu, Avatar, type ContextMenuOptions } from 'frappe-ui'
+import { ContextMenu, Avatar, Badge, type ContextMenuOptions } from 'frappe-ui'
 
 const actions: ContextMenuOptions = [
   {
@@ -74,11 +74,7 @@ const actions: ContextMenuOptions = [
       class="w-72 cursor-default select-none rounded-xl border border-outline-gray-2 bg-surface-white p-4 shadow-sm"
     >
       <div class="mb-3 flex items-start justify-between gap-2">
-        <span
-          class="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700"
-        >
-          In Progress
-        </span>
+        <Badge theme="orange" label="In Progress" />
         <span class="text-p-sm text-ink-gray-4">Due Friday</span>
       </div>
       <p class="mb-2 text-sm font-medium text-ink-gray-8">
@@ -87,11 +83,11 @@ const actions: ContextMenuOptions = [
       <p class="text-p-sm text-ink-gray-5">
         Update the sign-up steps and add the new welcome screen from Figma.
       </p>
-      <div class="mt-3">
+      <div class="mt-3 flex">
         <Avatar
           label="John Doe"
           image="https://avatars.githubusercontent.com/u/499550?s=60&v=4"
-          size="xs"
+          size="sm"
         />
       </div>
     </div>

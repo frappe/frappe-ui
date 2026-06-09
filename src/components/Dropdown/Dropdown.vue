@@ -115,47 +115,21 @@ defineSlots<DropdownSlots>()
 </script>
 
 <style scoped>
-@keyframes dropdown-in {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes dropdown-out {
-  from {
-    opacity: 1;
-    transform: scale(1);
-  }
-  to {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-}
-
-:global(.dropdown-content[data-motion='animated'][data-state='open']) {
-  animation: dropdown-in 100ms ease-out;
-}
-
-:global(.dropdown-content[data-motion='animated'][data-state='closed']) {
-  animation: dropdown-out 75ms ease-in;
-}
-
 /*
- * Keyboard opens skip the scale entrance, but a tiny opacity fade still
- * runs — it masks the 1-frame position-settle reka performs after mount.
- * ~80ms is below the perception threshold for motion but long enough to
- * hide the jump.
+ * Dropdown is the only menu with a keyboard-open path, so the `instant`
+ * motion lives here. Keyboard opens skip the scale entrance, but a tiny
+ * opacity fade still runs — it masks the 1-frame position-settle reka
+ * performs after mount. ~80ms is below the perception threshold for motion
+ * but long enough to hide the jump.
+ *
+ * The shared `animated` keyframes + `prefers-reduced-motion` reset live in
+ * Menu.vue (rendered by both Dropdown and ContextMenu).
  */
-:global(.dropdown-content[data-motion='instant'][data-state='open']) {
+:global(.menu-content[data-motion='instant'][data-state='open']) {
   animation: dropdown-instant-fade 80ms linear;
 }
 
-:global(.dropdown-content[data-motion='instant'][data-state='closed']) {
+:global(.menu-content[data-motion='instant'][data-state='closed']) {
   animation: none;
 }
 
@@ -165,12 +139,6 @@ defineSlots<DropdownSlots>()
   }
   to {
     opacity: 1;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  :global(.dropdown-content) {
-    animation-duration: 0ms !important;
   }
 }
 </style>
