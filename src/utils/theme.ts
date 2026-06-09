@@ -40,7 +40,7 @@ function initializeTheme(): void {
 }
 
 // Restore the saved theme and keep `system` in sync with the OS. Runs once for
-// the whole app — the listener lives for the app's lifetime by design, so there
+// the whole app; the listener lives for the app's lifetime by design, so there
 // is no per-component listener to leak.
 let initialized = false
 function ensureInitialized(): void {

@@ -38,7 +38,7 @@
         <div
           data-slot="option"
           :data-theme-option="option.value"
-          class="flex-1 min-w-[200px] min-h-[42px] cursor-pointer overflow-hidden rounded-lg border outline-none transition-colors motion-reduce:transition-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
+          class="flex-1 max-w-[227px] min-h-[42px] cursor-pointer overflow-hidden rounded-lg border outline-none transition-colors motion-reduce:transition-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
           :class="checked ? 'border-outline-gray-5' : 'border-outline-gray-modals'"
         >
           <ThemePreview
@@ -106,7 +106,7 @@ const { currentTheme, setTheme } = useTheme()
 
 // Not `defineModel`: when unbound, the switcher falls back to the shared
 // `currentTheme` and must keep mirroring it in real time (so a separate toggle
-// button stays in sync) — a local `defineModel` ref can't track that once
+// button stays in sync); a local `defineModel` ref can't track that once
 // written. The setter always drives `setTheme`, so a bare `<ThemeSwitcher />`
 // still switches the app theme.
 const selected = computed<Theme>({

@@ -63,7 +63,7 @@ defineOptions({ name: 'PreviewWindow' })
 const props = withDefaults(
   defineProps<{
     tone: PreviewTone
-    /** Placeholder content rows — shown for single previews, hidden for system. */
+    /** Placeholder content rows, shown for single previews, hidden for system. */
     bars?: boolean
     /** Stretch to the container instead of rendering at natural width. */
     fill?: boolean

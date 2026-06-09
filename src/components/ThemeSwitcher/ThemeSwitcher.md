@@ -1,8 +1,8 @@
 # ThemeSwitcher
 
 A labeled control for choosing between **light**, **dark**, and **system**
-appearance. Each option is a live preview card, and selecting one drives the
-global `<html data-theme>` through [`useTheme`](#usetheme) so a bare
+appearance. Each option is a preview card depicting that mode, and selecting one
+drives the global `<html data-theme>` through [`useTheme`](#usetheme), so a bare
 `<ThemeSwitcher />` switches the whole app with no wiring.
 
 <ComponentPreview name="ThemeSwitcher-Default" layout="stacked" />
@@ -16,22 +16,42 @@ inside the theme panel previews. The `label` and `description` props set the hea
 
 ## Toggle button
 
-For a header, sidebar, or a menu component you rarely want the full card preview instead you want a
-single labelled button which toggles the state. You can simply build one from the same [`useTheme`](#usetheme) composable. Since both controls share `<html data-theme>`, they stay consistent and  You can plug it straight into any of your UI components.
+In a header or sidebar you rarely want the full card preview. You want a single
+labelled button that flips the state. Build one from the same
+[`useTheme`](#usetheme) composable: because both controls share the one
+`<html data-theme>`, they stay in sync, and the button drops straight into a
+sidebar or menu.
+
 <ComponentPreview name="ThemeSwitcher-Toggle" layout="stacked" />
+
+## In a user menu
+
+A user menu is the most common home for theme switching. Nest the three options
+as a hover submenu inside a [`Dropdown`](/components/Dropdown), drive them through the same
+[`useTheme`](#usetheme) singleton, and mark the active one with `selected` so the menu
+always reflects the shared `<html data-theme>`.
+
+<ComponentPreview name="ThemeSwitcher-Menu" layout="stacked" />
 
 ## useTheme
 
 The component is backed by the `useTheme` composable, exported from the library.
 Its state is a shared singleton, so every consumer (the switcher, a sidebar
-toggle, etc.) stays in sync with the single `<html data-theme>` source of truth.
-Call it once near your app root to restore the saved theme on load:
+toggle, a user-menu entry) stays in sync with the single `<html data-theme>`
+source of truth.
+
+There is nothing to set up. The first `useTheme()` call restores the saved theme
+(falling back to `system`) and starts following the OS preference. Calling it
+near your app root simply makes that happen as early as possible.
 
 ```ts
 import { useTheme } from 'frappe-ui'
 
 const { currentTheme, setTheme, toggleTheme } = useTheme()
 ```
+
+The selection persists to `localStorage` under the `theme` key and is reapplied
+on the next load.
 
 | Member            | Type                        | Description                                                        |
 | ----------------- | --------------------------- | ----------------------------------------------------------------- |
@@ -40,5 +60,11 @@ const { currentTheme, setTheme, toggleTheme } = useTheme()
 | `toggleTheme`     | `() => void`                | Flips between light and dark.                                      |
 | `initializeTheme` | `() => void`                | Restores the saved theme (or `system`). Run once automatically.   |
 | `getSystemTheme`  | `() => 'light' \| 'dark'`   | Resolves the current OS preference.                               |
+
+> **Avoid the flash.** The theme is applied from JavaScript once the app loads,
+> so a page that ships without a `data-theme` briefly shows the default theme
+> before switching. Set an initial `data-theme` on your `<html>`, or inline a
+> small script that reads `localStorage.theme`, to render the right theme from
+> the first paint.
 
 <!-- @include: ./ThemeSwitcher.api.md -->
