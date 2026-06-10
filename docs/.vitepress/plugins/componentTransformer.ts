@@ -3,18 +3,6 @@ import type StateCore from 'markdown-it/lib/rules_core/state_core'
 import { existsSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 
-// Source roots, in lookup order. The first one whose resolved file exists
-// wins; if none match, the first root's path is used so the snippets plugin
-// reports a clear "file not found" against the canonical location.
-const SOURCE_ROOTS = ['../../../../src/components', '../../../../frappe']
-
-function resolveSourcePath(mdDir: string, relativePath: string): string {
-  for (const root of SOURCE_ROOTS) {
-    const candidate = `${root}/${relativePath}`
-    if (existsSync(resolve(mdDir, candidate))) return candidate
-  }
-  return `${SOURCE_ROOTS[0]}/${relativePath}`
-}
 import {
   baseParse,
   NodeTypes,
@@ -164,37 +152,6 @@ function transformPreview(
   return `import ${storyImportName} from '${componentPath}'`
 }
 
-function transformPropsTable(
-  state: StateCore,
-  tokenIdx: number,
-  tag: ParsedTag,
-  mdDir: string,
-) {
-  const name = tag.attrs.name
-  const dataExpr = tag.binds.data
-  if (!name || !dataExpr) return
-
-  // The optional `folder` attribute lets a sub-component (e.g.
-  // DateTimePicker, which lives inside the DatePicker folder) point at
-  // the correct `types.ts`. When omitted, the folder matches `name`.
-  const componentFolder = tag.attrs.folder || name
-  const typesPath = resolveSourcePath(mdDir, `${componentFolder}/types.ts`)
-
-  state.tokens[tokenIdx].content =
-    `<PropsTable name="${name}" :data="${dataExpr}"><template #code>`
-
-  const code = new state.Token('fence', 'code', 0)
-  code.info = 'typescript'
-  code.content = `<<< ${typesPath}`
-  // @ts-expect-error snippets plugin reads `src` for the absolute path
-  code.src = [resolve(mdDir, typesPath)]
-
-  const close = new state.Token('html_inline', '', 0)
-  close.content = `</template></PropsTable>`
-
-  state.tokens.splice(tokenIdx + 1, 0, code, close)
-}
-
 export default function componentTransformer(md: MarkdownRenderer) {
   md.core.ruler.after('inline', 'component-preview', (state) => {
     const env = state.env as MarkdownEnv
@@ -215,9 +172,6 @@ export default function componentTransformer(md: MarkdownRenderer) {
           const importStmt = transformPreview(state, i, tag, mdDir)
           if (importStmt) imports.push(importStmt)
         }
-      } else if (token.content.includes('<PropsTable')) {
-        const tag = parseSingleTag(token.content, 'PropsTable')
-        if (tag) transformPropsTable(state, i, tag, mdDir)
       }
     }
 
