@@ -2,7 +2,7 @@ import { type RouterLinkProps } from 'vue-router'
 import { type Component, type ExtractPublicPropTypes, type PropType } from 'vue'
 
 export type Theme = 'gray' | 'blue' | 'green' | 'red'
-export type Size = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl'
+export type Size = 'xs' | 'sm' | 'md' | 'lg'
 export type Variant = 'solid' | 'subtle' | 'outline' | 'ghost'
 
 const iconProp = {

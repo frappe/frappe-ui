@@ -11,6 +11,7 @@
 export interface MediaDimensions {
   width: number
   height: number
+  poster?: string
 }
 
 /** Probe an image source via `<img>.naturalWidth`/`naturalHeight`. */
@@ -35,21 +36,53 @@ export function probeImageDimensions(src: string): Promise<MediaDimensions> {
   })
 }
 
-/** Probe a video source via `<video>.videoWidth`/`videoHeight` (metadata only). */
+function captureVideoPoster(video: HTMLVideoElement): string | undefined {
+  if (!video.videoWidth || !video.videoHeight) return undefined
+  const canvas = document.createElement('canvas')
+  canvas.width = video.videoWidth
+  canvas.height = video.videoHeight
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return undefined
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+  return canvas.toDataURL('image/jpeg', 0.72)
+}
+
+/** Probe a video source via `<video>.videoWidth`/`videoHeight` and a poster frame. */
 export function probeVideoDimensions(src: string): Promise<MediaDimensions> {
   return new Promise<MediaDimensions>((resolve, reject) => {
     const video = document.createElement('video')
     video.preload = 'metadata'
+    video.muted = true
+    video.playsInline = true
     const cleanup = () => {
       video.onloadedmetadata = null
+      video.onseeked = null
       video.onerror = null
       video.removeAttribute('src')
       video.load()
     }
-    video.onloadedmetadata = () => {
+    const resolveWithPoster = () => {
       const dims = { width: video.videoWidth, height: video.videoHeight }
+      let poster: string | undefined
+      try {
+        poster = captureVideoPoster(video)
+      } catch {
+        poster = undefined
+      }
       cleanup()
-      resolve(dims)
+      resolve({ ...dims, poster })
+    }
+    video.onloadedmetadata = () => {
+      if (Number.isFinite(video.duration) && video.duration > 0.15) {
+        video.onseeked = resolveWithPoster
+        try {
+          video.currentTime = 0.1
+        } catch {
+          resolveWithPoster()
+        }
+      } else {
+        resolveWithPoster()
+      }
     }
     video.onerror = () => {
       cleanup()

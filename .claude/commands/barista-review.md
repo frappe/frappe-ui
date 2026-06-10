@@ -1,5 +1,5 @@
 ---
-allowed-tools: Bash(./.github/barista/scripts/gh.ts:*),Bash(./.github/barista/scripts/add-comment.ts:*),Bash(git log:*),Bash(git show:*),Bash(git blame:*),Bash(git diff:*),Bash(git rev-parse:*),Bash(git merge-base:*),Bash(git ls-files:*),Bash(jq:*),Read,Glob,Grep
+allowed-tools: Bash(./.github/barista/scripts/gh.ts:*),Bash(./.github/barista/scripts/add-comment.ts:*),Bash(git log:*),Bash(git show:*),Bash(git blame:*),Bash(git diff:*),Bash(git rev-parse:*),Bash(git merge-base:*),Bash(git ls-files:*),Bash(jq:*),Bash(wc:*),Read,Glob,Grep
 description: Review a frappe-ui pull request and post one concise comment with findings.
 ---
 
@@ -57,14 +57,16 @@ Nothing else is permitted.
 
 5. **Run the API-surface-tightness pass.** If the PR touches a `types.ts`, a `defineProps`, a `defineEmits`, a `defineModel`, or a new `<slot>`, this pass is mandatory. See the **API-surface-tightness checklist** below. Read `PHILOSOPHY.md` (P1–P13) and `CONTEXT.md` if the change makes naming or vocabulary choices.
 
-6. **Form a verdict.** Decide which of these the PR is:
+6. **Run the completeness & code-health pass.** Mandatory when the PR adds a new component or substantially rewrites one; proportional otherwise. See the **Completeness & code-health checklist** below.
+
+7. **Form a verdict.** Decide which of these the PR is:
    - **Looks good** — small, contained, low risk; no real issues found.
    - **Minor nits** — found small improvements but nothing blocking.
    - **Concerns** — found something the author should look at before merging (API drift on a public surface, potential bug, breaking change, missing tests on risky logic, accessibility regression, etc.).
 
-7. **Post one comment** with your findings. See rubric below. **Always post** — even "looks good" — so the author knows barista ran.
+8. **Post one comment** with your findings. See rubric below. **Always post** — even "looks good" — so the author knows barista ran.
 
-8. **Stop.** No second comment, no loops.
+9. **Stop.** No second comment, no loops.
 
 # API-surface-tightness checklist
 
@@ -132,11 +134,40 @@ When you flag an API issue, name:
 2. The file:line where the drift is introduced.
 3. At least one existing component that already uses the canonical name, so the author can see the pattern. (`Combobox.vue:455` uses `#prefix`. `TextInput.vue:32` uses `#prefix`. Etc.)
 
+# Completeness & code-health checklist
+
+Apply **in full** when the PR adds a new component (new folder under `src/components/`) or substantially rewrites one. Apply **proportionally** otherwise — never demand a story or a test suite for a one-line bugfix.
+
+The reference shape of a "done" component is `src/components/Button/`:
+
+```
+src/components/Button/
+├── Button.vue        # <script setup lang="ts">
+├── types.ts          # public prop/emit/slot types
+├── index.ts          # exports
+├── Button.md         # docs page with <ComponentPreview name='…' /> blocks
+├── Button.api.md     # auto-generated — never ask the author to hand-edit
+├── Button.cy.ts      # Cypress component tests
+└── stories/          # example .vue files rendered by ComponentPreview
+```
+
+Check what exists with `git ls-files 'src/components/<Name>/**'`. Then:
+
+1. **Tests.** New component without a colocated `<Name>.cy.ts` → `Concerns`. New composable/util without a `.test.ts`/`.spec.ts` → `Concerns` if the logic has branches, nit if trivial. Changed behaviour in an existing component whose `.cy.ts` wasn't touched → check whether existing specs still cover it; if not, flag.
+2. **Story examples.** New component without a `stories/` folder and a `<Name>.md` referencing it via `<ComponentPreview>` → `Concerns` — undocumented components don't exist for consumers. New public prop/slot/event on an existing component should be demonstrated in a story or doc example; if none was added, nit.
+3. **TypeScript.** New `.vue` files must use `<script setup lang="ts">`; new files must be `.ts`, not `.js`. Public props/emits typed via `types.ts`, not inline blobs. `any` where a real type is easy → nit; `any` on public surface → `Concerns`. Shared unions (`InputSize`, `InputVariant`, …) imported from `src/composables/inputTypes.ts`, never redeclared (overlaps with API smell #3).
+4. **File size.** No new file over ~300 lines (check with `wc -l`). A new component that big almost always hides subcomponents or a composable waiting to be extracted — name the seam you see (e.g. "the keyboard-nav block at `:120-210` is a `useListNavigation` composable"). An existing file growing past the line: suggest extraction, don't block.
+5. **Small functions.** Flag functions where a reader has to scroll to follow one unit of logic — roughly >40 lines, or >3 levels of nesting, or a `setup` body doing five unrelated jobs. Suggest the extraction (helper, composable, subcomponent), don't just say "too long". Judgment over hard counts: a flat 50-line switch is fine; a dense 30-line nested reducer is not.
+6. **Dead weight.** Commented-out code, unused exports, `console.log`, leftover `it.skip`/`it.only` → nit each.
+
+Severity guide: missing tests or stories on a **new** component is `Concerns`; everything else here defaults to nit unless it compounds (a 600-line untested new component with inline `any` props is one `Concerns` finding, not six nits).
+
 # Comment rubric
 
 ## Format
 
 - **Be short.** Aim for ~6-15 short lines total for `Concerns`, ~3-6 for `Minor nits`, 1-3 for `Looks good`. If you wouldn't keep reading on a phone, it's too long.
+- **Plain simple English.** Write like you're explaining to a colleague, not writing a spec. Short words, short sentences, active voice. Use a technical term only when there's no plain way to say it — `prop`, `slot`, `breaking change` are fine; "violates the canonical vocabulary invariant" is not (say "uses a different name for the same thing — other components call this `dismissible`"). Many PR authors are first-time contributors; they should understand every line without looking anything up.
 - **Lead with the verdict** in a one-line summary. Examples:
   > **Concerns** — possible breaking change in `Button` prop API.
   > **Minor nits** — a couple of small things, nothing blocking.
@@ -157,9 +188,10 @@ Prioritise things only a code reader can catch, in roughly this order:
 3. **Breaking changes to public API.** Renamed/removed props/events/slots/exports without changelog. Behaviour changes that silently shift the contract. v1 freeze: outright renames require a deprecation alias (`P13`).
 4. **Accessibility regressions** (`P12`). Missing `aria-*`, focus management broken, keyboard nav lost, contrast lost.
 5. **Missing tests on risky logic.** New conditionals, new edge cases, new public surface — call it out, don't demand tests if the change is trivial.
-6. **Security / XSS.** New `v-html`, unescaped user input rendered into the DOM, dangerous innerHTML, sensitive data in `localStorage`.
-7. **Performance traps.** Watchers that should be `computed`, deep watchers on large objects, work in hot render paths.
-8. **Vue 3 / TS idioms** where the diff regresses against project conventions (Options API instead of Composition API in a new file, `any` where a real type is easy, `ref` for DOM instead of `useTemplateRef`, manual `defineProps`+`defineEmits` pair where `defineModel` would do — `P2`).
+6. **Completeness & code health.** New component missing tests (`.cy.ts`) or stories/docs; new code not in TypeScript; files over ~300 lines; functions a reader has to scroll through. See the **Completeness & code-health checklist** above.
+7. **Security / XSS.** New `v-html`, unescaped user input rendered into the DOM, dangerous innerHTML, sensitive data in `localStorage`.
+8. **Performance traps.** Watchers that should be `computed`, deep watchers on large objects, work in hot render paths.
+9. **Vue 3 / TS idioms** where the diff regresses against project conventions (Options API instead of Composition API in a new file, `any` where a real type is easy, `ref` for DOM instead of `useTemplateRef`, manual `defineProps`+`defineEmits` pair where `defineModel` would do — `P2`).
 
 ## What NOT to flag
 
@@ -180,13 +212,13 @@ Then post a fresh verdict + bullets.
 # Examples
 
 **Good — concerns (API drift):**
-> **Concerns** — public surface grows where existing vocabulary covers it.
+> **Concerns** — adds new props where existing ones already cover this.
 >
-> - `src/components/Toast/types.ts:31` — new `closable` prop. Alert and Dialog already spell this `dismissible` (`Alert/types.ts:33`, `Dialog/types.ts:87`). Rename to `dismissible` to keep the v1 vocabulary tight (`P13` + canonical-vocab list).
-> - `src/components/Combobox/types.ts:147` — `allowClear: boolean`. A clear button is `#suffix` + a `<Button icon="lucide-x">`; the prop hard-codes a UI affordance the slot already supports (`P6`, smell #1). Drop the prop, document the `#suffix` recipe in stories.
-> - `src/components/Combobox/types.ts:5` — inline `'sm' | 'md' | 'lg' | 'xl'` redeclares `InputSize` from `src/composables/inputTypes.ts`. Import the shared type so the four picker sizes stay locked together.
+> - `src/components/Toast/types.ts:31` — new `closable` prop. Alert and Dialog call this `dismissible` (`Alert/types.ts:33`, `Dialog/types.ts:87`). Use the same name (`P13`).
+> - `src/components/Combobox/types.ts:147` — `allowClear: boolean`. A caller can already build a clear button with `#suffix` + `<Button icon="lucide-x">`, so the prop isn't needed (`P6`, smell #1). Drop it and show the `#suffix` recipe in a story.
+> - `src/components/Combobox/types.ts:5` — inline `'sm' | 'md' | 'lg' | 'xl'` copies `InputSize` from `src/composables/inputTypes.ts`. Import the shared type so all pickers stay in sync.
 >
-> Suggest: dropping the two new props removes 2 entries from the public API without losing capability.
+> Suggest: dropping the two new props keeps the API smaller without losing anything.
 
 **Good — concerns (correctness):**
 > **Concerns** — likely breaking change.
@@ -196,6 +228,15 @@ Then post a fresh verdict + bullets.
 > - No tests in `tests/unit/Button.spec.ts` for the new `variant` path.
 >
 > Suggest: keep `theme` as a deprecated alias with a one-time warning, restore `type="button"`, add a test for `variant`.
+
+**Good — concerns (completeness):**
+> **Concerns** — new component ships without tests or stories.
+>
+> - `src/components/Rating/` — no `Rating.cy.ts`. Every shipped component has one; the keyboard selection at `Rating.vue:84` can easily break later without a test.
+> - No `stories/` folder or `Rating.md` — without these the component won't show up in the docs. See `src/components/Button/stories/` for the shape.
+> - `Rating.vue` is 412 lines; the hover-preview logic at `:140-260` could move into a `useRatingHover` composable.
+>
+> Suggest: add a `.cy.ts` covering keyboard + click selection, one story per variant, and move the hover logic out.
 
 **Good — minor nits:**
 > **Minor nits** — nothing blocking.
@@ -210,6 +251,11 @@ Then post a fresh verdict + bullets.
 > Thanks for the PR! I noticed a few things… *(long prose paragraph)* … Also, you could rename this variable to be more descriptive, and maybe split this function into two. *(opinion noise)*
 
 (Filler, prose, personal style preference. Don't ship.)
+
+**Bad — jargon:**
+> This violates the canonical vocabulary invariant and introduces semantic drift in the component's public contract, increasing the API surface entropy…
+
+(Say it plainly: "other components call this `dismissible` — use the same name." Don't ship.)
 
 # Constraints
 

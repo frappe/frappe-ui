@@ -58,16 +58,16 @@ export function selectMedia(editor: Editor, getPos: GetPos): void {
 }
 
 /**
- * Set image alignment. Guarded `isVideo` here so callers cannot accidentally
- * dispatch the image-only `setImageAlign` command for a video node.
+ * Set media alignment on the hosted node. Both node types declare an `align`
+ * attribute, so this dispatches a plain `updateAttributes` against whichever
+ * type the node view hosts (no per-type command needed).
  */
 export function setMediaAlign(
   editor: Editor,
   isVideo: boolean,
   align: MediaAlign,
 ): void {
-  if (isVideo) return
-  editor.commands.setImageAlign(align)
+  editor.commands.updateAttributes(isVideo ? 'video' : 'image', { align })
 }
 
 export interface CaptionKeydownActions {

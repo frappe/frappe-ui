@@ -6,7 +6,7 @@ import { describe, it, expect } from 'vitest'
 import { getSchema, resolveExtensions, Mark } from '@tiptap/core'
 import type { AnyExtension } from '@tiptap/core'
 import { CommentKit, RichTextKit, InlineKit } from './kits'
-import { StarterKit, Mention, Tag } from './extensions'
+import { StarterKit, Mention, Tag, Link, Code, CodeBlock } from './extensions'
 
 function schemaOf(...extensions: AnyExtension[]) {
   const schema = getSchema(extensions)
@@ -28,6 +28,17 @@ describe('editor kits', () => {
     expect(nodes.has('heading')).toBe(true)
     expect(marks.has('bold')).toBe(true)
     expect(marks.has('italic')).toBe(true)
+    expect(marks.has('link')).toBe(false)
+    expect(marks.has('code')).toBe(false)
+    expect(nodes.has('codeBlock')).toBe(false)
+  })
+
+  it('StarterKit composes with frappe-ui replacements without duplicate stock extensions', () => {
+    expect(() => schemaOf(StarterKit, Link, Code, CodeBlock)).not.toThrow()
+    const { marks, nodes } = schemaOf(StarterKit, Link, Code, CodeBlock)
+    expect(marks.has('link')).toBe(true)
+    expect(marks.has('code')).toBe(true)
+    expect(nodes.has('codeBlock')).toBe(true)
   })
 
   it('CommentKit bundles comment-grade members and excludes table/toc/slash', () => {

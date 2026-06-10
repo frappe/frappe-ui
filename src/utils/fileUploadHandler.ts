@@ -1,4 +1,9 @@
-import { UploadOptions } from "./useFileUpload"
+import { UploadOptions } from './useFileUpload'
+import {
+  getMaxFileSize,
+  formatBytes,
+  fileSizeLimitMessage,
+} from './fileSize'
 
 type EventListenerOption = 'start' | 'progress' | 'finish' | 'error'
 
@@ -6,6 +11,37 @@ declare global {
   interface Window {
     csrf_token?: string
   }
+}
+
+function parseServerMessages(error: any): string[] {
+  if (!error?._server_messages) return []
+  try {
+    return JSON.parse(error._server_messages)
+      .map((message: string) => {
+        try {
+          return JSON.parse(message).message
+        } catch {
+          return message
+        }
+      })
+      .filter(Boolean)
+  } catch {
+    return []
+  }
+}
+
+function extractUploadErrorMessage(error: any): string {
+  const messages = parseServerMessages(error)
+  if (messages.length) return messages.join('\n')
+  if (error?.message) return error.message
+  if (error?._error_message) return error._error_message
+  if (error?.exc_type === 'MaxFileSizeReachedError') {
+    const maxFileSize = getMaxFileSize()
+    return maxFileSize
+      ? `File size exceeded the maximum allowed size of ${formatBytes(maxFileSize)}.`
+      : 'File size exceeds the maximum allowed limit.'
+  }
+  return 'Error Uploading File'
 }
 
 class FileUploadHandler {
@@ -31,6 +67,11 @@ class FileUploadHandler {
 
   upload(file: File | null, options: UploadOptions): Promise<any> {
     return new Promise((resolve, reject) => {
+      const limitMessage = fileSizeLimitMessage(file)
+      if (limitMessage) {
+        reject(new Error(limitMessage))
+        return
+      }
       let xhr = new XMLHttpRequest()
       xhr.upload.addEventListener('loadstart', () => {
         this.trigger('start')
@@ -70,7 +111,10 @@ class FileUploadHandler {
 
             if (xhr.status === 413 || xhr.status === 0) {
               error = {
-                message: 'File size exceeds the maximum allowed limit',
+                message:
+                  getMaxFileSize() != null
+                    ? `File size exceeded the maximum allowed size of ${formatBytes(getMaxFileSize() as number)}.`
+                    : 'File size exceeds the maximum allowed limit',
                 httpStatus: 413,
               }
             } else {
@@ -85,7 +129,7 @@ class FileUploadHandler {
               console.error(JSON.parse(error.exc)[0])
             }
             this.trigger('error', error)
-            reject(error)
+            reject(new Error(extractUploadErrorMessage(error)))
           }
         }
       }
@@ -133,10 +177,10 @@ class FileUploadHandler {
       if (options.optimize) {
         form_data.append('optimize', '1')
         if (options.max_width) {
-            form_data.append('max_width', options.max_width.toString())
+          form_data.append('max_width', options.max_width.toString())
         }
         if (options.max_height) {
-            form_data.append('max_height', options.max_height.toString())
+          form_data.append('max_height', options.max_height.toString())
         }
       }
 

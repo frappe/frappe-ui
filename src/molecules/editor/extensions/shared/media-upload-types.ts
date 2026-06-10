@@ -25,6 +25,16 @@ declare module '@tiptap/core' {
     mediaUpload: {
       /** Upload and insert already-provided video files (e.g. from a drop). */
       uploadVideoFiles: (files: File[], pos?: number | null) => ReturnType
+      /** Replace an existing image node while keeping its caption/options. */
+      replaceImage: (pos: number, file: File) => ReturnType
+      /** Replace an existing video node while keeping its caption/options. */
+      replaceVideo: (pos: number, file: File) => ReturnType
+      /** Toggle video playback options. */
+      setVideoOptions: (options: {
+        autoplay?: boolean
+        loop?: boolean
+        muted?: boolean
+      }) => ReturnType
     }
   }
 }
@@ -36,13 +46,34 @@ export interface UploadedFile extends Partial<FrappeUploadedFile> {
   height?: number | null
 }
 
+export interface MediaUploadProgress {
+  loaded: number
+  total: number
+  percent: number
+}
+
+export interface MediaUploadRequestOptions {
+  signal?: AbortSignal
+  onProgress?: (progress: MediaUploadProgress) => void
+}
+
+/**
+ * Host-provided upload function. The engine passes `options` (abort signal +
+ * progress callback) on every call; implementations may ignore it, so legacy
+ * single-parameter functions remain assignable.
+ */
+export type UploadFunction = (
+  file: File,
+  options?: MediaUploadRequestOptions,
+) => Promise<UploadedFile>
+
 /**
  * Effective upload options. Mirrors the legacy extension option shape: the only
  * field the pipeline reads is `uploadFunction`; `HTMLAttributes` and any extra
  * keys are carried through untouched.
  */
 export interface MediaUploadOptions {
-  uploadFunction?: ((file: File) => Promise<UploadedFile>) | null
+  uploadFunction?: UploadFunction | null
   HTMLAttributes?: Record<string, unknown>
   [k: string]: unknown
 }
@@ -93,6 +124,7 @@ export interface MediaUploadEngine {
     editor: Editor,
     pos: number,
     options: MediaUploadOptions,
+    attrs?: Record<string, unknown>,
   ): Promise<void>
   /** Re-run an upload for the failed node at `pos` using its staged file. */
   reupload(

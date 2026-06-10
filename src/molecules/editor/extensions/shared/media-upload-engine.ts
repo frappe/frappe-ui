@@ -20,12 +20,17 @@
  */
 import type { Editor } from '@tiptap/core'
 import fileToBase64 from '#utils/file-to-base64'
+import { fileSizeLimitMessage } from '#utils/fileSize'
 import { isSafeUrl } from '#molecules/editor/extensions/shared/url-safety'
 import { findNodeByUploadId } from '#molecules/editor/extensions/shared/node-view'
 import {
   deleteLocalFile,
+  deleteUploadProgress,
   getLocalFile,
+  setUploadProgress,
   setLocalFile,
+  updateLocalFile,
+  updateUploadProgress,
 } from '#molecules/editor/extensions/shared/media-upload-state'
 import { createUploadId } from '#molecules/editor/extensions/shared/upload-id'
 import {
@@ -34,6 +39,7 @@ import {
   backfillDimensions,
   findNodeBySource,
   insertPlaceholder,
+  removeNodeByUploadId,
   type OptionalDimensions,
 } from '#molecules/editor/extensions/shared/media-node-ops'
 import type {
@@ -41,6 +47,7 @@ import type {
   MediaUploadConfig,
   MediaUploadEngine,
   MediaUploadOptions,
+  MediaUploadRequestOptions,
   UploadedFile,
   UploadResult,
 } from '#molecules/editor/extensions/shared/media-upload-types'
@@ -49,6 +56,8 @@ export type {
   MediaUploadConfig,
   MediaUploadEngine,
   MediaUploadOptions,
+  MediaUploadRequestOptions,
+  UploadFunction,
   UploadedFile,
   UploadResult,
 } from '#molecules/editor/extensions/shared/media-upload-types'
@@ -63,7 +72,9 @@ export type {
  * shared storage.)
  */
 export function resolveUploadOptions(
-  raw: Partial<MediaUploadOptions> & { editor?: { storage?: unknown } | null } = {},
+  raw: Partial<MediaUploadOptions> & {
+    editor?: { storage?: unknown } | null
+  } = {},
 ): MediaUploadOptions {
   const { editor, ...options } = raw
   const storage = editor?.storage as Record<string, unknown> | undefined
@@ -85,11 +96,12 @@ export function resolveUploadOptions(
 export async function uploadFile(
   file: File,
   options: MediaUploadOptions,
+  requestOptions?: MediaUploadRequestOptions,
 ): Promise<UploadedFile> {
   if (!options.uploadFunction) {
     throw new Error('uploadFunction option is not provided')
   }
-  const uploaded = await options.uploadFunction(file)
+  const uploaded = await options.uploadFunction(file, requestOptions)
   if (
     !uploaded?.file_url ||
     !isSafeUrl(uploaded.file_url, { base: window.location.origin })
@@ -129,7 +141,9 @@ export async function dataUrlOrBlobToFile(
 ): Promise<File> {
   const response = await fetch(src)
   const blob = await response.blob()
-  return new File([blob], filename, { type: blob.type || 'application/octet-stream' })
+  return new File([blob], filename, {
+    type: blob.type || 'application/octet-stream',
+  })
 }
 
 /** Build a media-upload engine for one node type. */
@@ -166,13 +180,45 @@ export function createMediaUploadEngine(
     pos: number | null | undefined,
     mode: InsertMode,
     options: MediaUploadOptions,
+    placeholderAttrs: Record<string, unknown> = {},
   ): Promise<string | null> {
     if (!options.uploadFunction) {
       console.error('uploadFunction option is not provided')
       return null
     }
     const uploadId = createUploadId()
+    const abortController = new AbortController()
+    setUploadProgress(uploadId, {
+      loaded: 0,
+      total: file.size,
+      percent: 0,
+      abort: () => abortController.abort(),
+    })
     try {
+      // Reject over-limit files before the expensive staging work: no base64
+      // encode, no dimension probe — just an error placeholder with the staged
+      // file kept so "Try again" / "Choose another" still work.
+      const validationError = fileSizeLimitMessage(file)
+      if (validationError) {
+        setLocalFile(uploadId, { file })
+        if (editor.isDestroyed) {
+          deleteLocalFile(uploadId)
+          deleteUploadProgress(uploadId)
+          return uploadId
+        }
+        insertPlaceholder(
+          editor.view,
+          nodeName,
+          pos,
+          mode,
+          uploadId,
+          { width: null, height: null },
+          placeholderAttrs,
+        )
+        applyUploadError(editor.view, nodeName, uploadId, validationError)
+        return uploadId
+      }
+
       const b64 = storeBase64 ? await fileToBase64(file) : null
       const probeSrc = b64 ?? URL.createObjectURL(file)
       setLocalFile(uploadId, b64 ? { b64, file } : { file })
@@ -182,11 +228,36 @@ export function createMediaUploadEngine(
       } finally {
         if (!b64) URL.revokeObjectURL(probeSrc)
       }
-      if (editor.isDestroyed) return uploadId
-      insertPlaceholder(editor.view, nodeName, pos, mode, uploadId, dims)
+      if (dims.poster) updateLocalFile(uploadId, { poster: dims.poster })
+      if (editor.isDestroyed) {
+        deleteLocalFile(uploadId)
+        deleteUploadProgress(uploadId)
+        return uploadId
+      }
+      insertPlaceholder(
+        editor.view,
+        nodeName,
+        pos,
+        mode,
+        uploadId,
+        dims,
+        placeholderAttrs,
+      )
 
-      const uploaded = await options.uploadFunction(file)
-      if (editor.isDestroyed) return uploadId
+      const uploaded = await options.uploadFunction(file, {
+        signal: abortController.signal,
+        onProgress: (progress) => {
+          updateUploadProgress(uploadId, {
+            ...progress,
+            abort: () => abortController.abort(),
+          })
+        },
+      })
+      if (editor.isDestroyed) {
+        deleteLocalFile(uploadId)
+        deleteUploadProgress(uploadId)
+        return uploadId
+      }
       if (
         !uploaded?.file_url ||
         !isSafeUrl(uploaded.file_url, { base: window.location.origin })
@@ -204,10 +275,22 @@ export function createMediaUploadEngine(
       // survive so `reupload` ("Try again") can re-read it.
       deleteLocalFile(uploadId)
     } catch (error) {
+      if (abortController.signal.aborted) {
+        if (!editor.isDestroyed) {
+          removeNodeByUploadId(editor.view, nodeName, uploadId)
+        }
+        deleteLocalFile(uploadId)
+        deleteUploadProgress(uploadId)
+        return uploadId
+      }
       const message =
         (error as Error)?.message || `Failed to upload ${nodeName}`
       if (!editor.isDestroyed) {
         applyUploadError(editor.view, nodeName, uploadId, message)
+      }
+    } finally {
+      if (!abortController.signal.aborted) {
+        deleteUploadProgress(uploadId)
       }
     }
     return uploadId
@@ -226,8 +309,9 @@ export function createMediaUploadEngine(
     editor: Editor,
     pos: number,
     options: MediaUploadOptions,
+    attrs: Record<string, unknown> = {},
   ): Promise<void> {
-    await run(file, editor, pos, 'replace', options)
+    await run(file, editor, pos, 'replace', options, attrs)
   }
 
   async function reupload(
@@ -238,11 +322,21 @@ export function createMediaUploadEngine(
     const node = editor.view.state.doc.nodeAt(pos)
     const uploadId = node?.attrs.uploadId as string | undefined
     const entry = uploadId ? getLocalFile(uploadId) : undefined
-    if (!entry) {
+    if (!uploadId || !entry) {
       console.error(`reupload: no staged file for node at ${pos}`)
       return
     }
-    await run(entry.file, editor, pos, 'replace', options)
+    const replacementUploadId = await run(
+      entry.file,
+      editor,
+      pos,
+      'replace',
+      options,
+      node?.attrs ?? {},
+    )
+    if (replacementUploadId) {
+      deleteLocalFile(uploadId)
+    }
   }
 
   /**

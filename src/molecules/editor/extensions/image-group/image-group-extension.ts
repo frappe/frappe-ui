@@ -3,14 +3,15 @@ import { VueNodeViewRenderer } from '@tiptap/vue-3'
 import ImageGroupNodeView from './ImageGroupNodeView.vue'
 import { buildImageGroupCommands } from './image-group-commands'
 import { clampColumns, DEFAULT_COLUMNS } from './image-group-utils'
-import type { UploadedFile } from '#utils/useFileUpload'
+import type { UploadFunction } from '#molecules/editor/extensions/shared/media-upload-engine'
 
 export interface ImageGroupOptions {
   /**
-   * Function to handle image uploads.
+   * Function to handle image uploads. Receives optional request options
+   * (abort signal + progress callback) as the second argument.
    * @default null
    */
-  uploadFunction: ((file: File) => Promise<UploadedFile>) | null
+  uploadFunction: UploadFunction | null
   HTMLAttributes: Record<string, unknown>
 }
 

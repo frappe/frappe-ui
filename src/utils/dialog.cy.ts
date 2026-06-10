@@ -83,8 +83,8 @@ describe('dialog.ts — imperative API', () => {
       confirm({ title: 't', onConfirm })
     })
     cy.contains('button', 'Confirm').click()
-    // loading spinner is rendered as an svg.animate-spin inside the button
-    cy.contains('button', 'Confirm').find('svg.animate-spin').should('exist')
+    // loading spinner is rendered as an [role="status"] inside the button
+    cy.contains('button', 'Confirm').find('[role="status"]').should('exist')
     cy.contains('button', 'Cancel').should('be.disabled')
     cy.then(() => resolveOuter())
     cy.get('[role=dialog]').should('not.exist')
@@ -100,7 +100,7 @@ describe('dialog.ts — imperative API', () => {
     cy.get('[role=dialog]').contains('Network down').should('exist')
     cy.get('[role=dialog]').should('exist')
     cy.contains('button', 'Confirm')
-      .find('svg.animate-spin')
+      .find('[role="status"]')
       .should('not.exist')
   })
 
@@ -159,7 +159,7 @@ describe('dialog.ts — imperative API', () => {
     cy.then(() => capturedSetError?.('Bad password'))
     cy.get('[role=dialog]').contains('Bad password').should('exist')
     cy.contains('button', 'Confirm')
-      .find('svg.animate-spin')
+      .find('[role="status"]')
       .should('not.exist')
     cy.then(() => capturedSetError?.(null))
     cy.get('[role=dialog]').contains('Bad password').should('not.exist')
@@ -297,7 +297,7 @@ describe('dialog.ts — imperative API', () => {
       })
     })
     cy.contains('button', 'A').click()
-    cy.contains('button', 'A').find('svg.animate-spin').should('exist')
+    cy.contains('button', 'A').find('[role="status"]').should('exist')
     cy.contains('button', 'B').should('be.disabled')
     cy.contains('button', 'B').click({ force: true })
     cy.get('@onB').should('not.have.been.called')
@@ -323,7 +323,7 @@ describe('dialog.ts — imperative API', () => {
     cy.get('[role=dialog]').contains('Save failed').should('exist')
     cy.get('[role=dialog]').should('exist')
     cy.contains('button', 'Save')
-      .find('svg.animate-spin')
+      .find('[role="status"]')
       .should('not.exist')
   })
 
@@ -451,7 +451,7 @@ describe('dialog.ts — imperative API', () => {
     cy.get('[role=dialog]').contains('Invalid email').should('exist')
     cy.get('@onConfirm').should('not.have.been.called')
     cy.contains('button', 'Submit')
-      .find('svg.animate-spin')
+      .find('[role="status"]')
       .should('not.exist')
   })
 

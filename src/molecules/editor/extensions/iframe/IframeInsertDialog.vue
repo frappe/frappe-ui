@@ -1,7 +1,7 @@
 <template>
   <Dialog
     v-model="open"
-    :options="{ title: 'Insert Embed', size: 'md' }"
+    :options="{ title: dialogTitle, size: 'md' }"
     @close="$emit('close')"
   >
     <template #body-content>
@@ -12,7 +12,7 @@
         <Textarea
           ref="input"
           v-model="dialog.embedInput.value"
-          placeholder="https://youtube.com/watch?v=… or <iframe src=…>"
+          :placeholder="placeholder"
           @keydown.enter.prevent="submit"
         />
         <p v-if="dialog.urlError.value" class="mt-1 text-sm text-ink-red-3">
@@ -35,7 +35,7 @@
           :disabled="!dialog.isValidUrl.value"
           @click="submit"
         >
-          Insert Embed
+          {{ isEditing ? 'Update Embed' : 'Insert Embed' }}
         </Button>
       </div>
     </template>
@@ -49,10 +49,17 @@ import Dialog from '#components/Dialog/Dialog.vue'
 import Button from '#components/Button/Button.vue'
 import Textarea from '#components/Textarea/Textarea.vue'
 import { useIframeDialog } from './useIframeDialog'
+import { platformByName } from './iframe-embed-utils'
 
 const props = defineProps<{
   modelValue: boolean
   editor: Editor
+  /** Edit mode: position resolver for the iframe node being edited. */
+  getReplacePos?: () => number | undefined
+  /** Prefill for edit mode. */
+  initialUrl?: string
+  /** Platform name (e.g. "YouTube") tailoring the title/placeholder. */
+  platform?: string
 }>()
 
 const emit = defineEmits<{
@@ -65,7 +72,27 @@ const open = computed({
   set: (value) => emit('update:modelValue', value),
 })
 
-const dialog = useIframeDialog(props.editor)
+const isEditing = computed(() => !!props.getReplacePos)
+
+const platformConfig = computed(() =>
+  props.platform ? platformByName(props.platform) : null,
+)
+const dialogTitle = computed(() => {
+  if (isEditing.value) return 'Edit Embed'
+  return platformConfig.value
+    ? `Embed ${platformConfig.value.name}`
+    : 'Insert Embed'
+})
+const placeholder = computed(
+  () =>
+    platformConfig.value?.example ??
+    'https://youtube.com/watch?v=… or <iframe src=…>',
+)
+
+const dialog = useIframeDialog(props.editor, {
+  getReplacePos: props.getReplacePos,
+  initialUrl: props.initialUrl,
+})
 const input = useTemplateRef<{ el?: HTMLTextAreaElement }>('input')
 
 function submit() {

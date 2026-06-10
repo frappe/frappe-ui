@@ -8,6 +8,7 @@
  * (absolute + http/https only) and {@link matchesHostname} (exact host OR
  * dot-boundary suffix — never substring).
  */
+import type { Editor } from '@tiptap/core'
 import {
   isSafeUrl,
   matchesHostname,
@@ -38,12 +39,40 @@ export const IFRAME_ALLOWLIST: readonly string[] = [
 /**
  * The sandbox attribute applied to every embedded iframe.
  *
- * Deliberately WITHOUT `allow-same-origin`: the embed must not be able to read
- * cookies / localStorage for our origin. Scripts, popups, forms, and
- * presentation (fullscreen) are permitted so the common embeds still work.
+ * Includes `allow-same-origin`: this lets the embed keep ITS OWN origin
+ * (youtube.com etc.) so its scripts can use their own cookies/storage —
+ * without it, YouTube's player throws SecurityError and renders a black box.
+ * It does NOT grant the iframe our origin; cross-origin isolation from the
+ * host still applies. The `allow-scripts + allow-same-origin` sandbox-escape
+ * concern only exists for content served from OUR origin, which the
+ * allowlist precludes (absolute http(s) URLs on external hosts only).
  */
 export const IFRAME_SANDBOX =
-  'allow-scripts allow-popups allow-forms allow-presentation' as const
+  'allow-scripts allow-same-origin allow-popups allow-forms allow-presentation' as const
+
+/**
+ * The allowlist override configured on the editor's iframe extension, or
+ * `undefined` when the extension is absent / uses the default list.
+ */
+export function getIframeAllowlist(
+  editor: Editor,
+): readonly string[] | undefined {
+  return editor.extensionManager?.extensions.find(
+    (extension) => extension.name === 'iframe',
+  )?.options.allowlist as readonly string[] | undefined
+}
+
+/**
+ * True iff any of `hosts` would pass the editor's iframe allowlist — used to
+ * prune per-platform embed shortcuts when a custom allowlist excludes them.
+ */
+export function allowlistPermitsHosts(
+  editor: Editor,
+  hosts: readonly string[],
+): boolean {
+  const allowlist = getIframeAllowlist(editor) ?? IFRAME_ALLOWLIST
+  return hosts.some((host) => matchesHostname(host, allowlist))
+}
 
 /** Options for {@link validateIframeUrl}. */
 export interface ValidateIframeUrlOptions {

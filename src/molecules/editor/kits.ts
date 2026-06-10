@@ -1,14 +1,20 @@
 import { Extension, Node, type Extensions } from '@tiptap/core'
 import type { Component, MaybeRefOrGetter } from 'vue'
-import StarterKit, { type StarterKitOptions } from '@tiptap/starter-kit'
+import { Bold } from '@tiptap/extension-bold'
+import { Italic } from '@tiptap/extension-italic'
+import { Paragraph } from '@tiptap/extension-paragraph'
+import { Strike } from '@tiptap/extension-strike'
+import { Text } from '@tiptap/extension-text'
+import { Underline } from '@tiptap/extension-underline'
+import { Gapcursor, UndoRedo } from '@tiptap/extensions'
 import type { HeadingOptions } from '@tiptap/extension-heading'
 import type { LinkOptions } from '@tiptap/extension-link'
 import {
   Placeholder,
   Link,
+  StarterKit,
   Code,
   CodeBlock,
-  HeadingIds,
   Image,
   ImageGroup,
   ImageViewer,
@@ -36,6 +42,8 @@ import {
   Typography,
   TextAlign,
   StyleClipboard,
+  EditorDropcursor,
+  type StarterKitOptions,
   type MentionSuggestionItem,
   type TagSuggestionItem,
 } from './extensions'
@@ -70,16 +78,11 @@ function starterKitBase(
   if (starter === false) return []
   return [
     StarterKit.configure({
-      link: false,
-      code: false,
-      codeBlock: false,
       ...starter,
       heading: heading as StarterKitOptions['heading'],
     }),
     Code,
     CodeBlock,
-    // Stable heading ids only matter when headings exist.
-    ...(heading === false ? [] : [HeadingIds]),
   ]
 }
 
@@ -272,24 +275,17 @@ export const InlineKit = Extension.create<InlineKitOptions>({
     if (options.starterKit !== false) {
       list.push(
         OneLineDocument,
-        // Keep the inline marks; drop every block-level affordance plus the
-        // built-in document/link (replaced above / by the Link member).
-        StarterKit.configure({
-          document: false,
-          link: false,
-          heading: false,
-          bulletList: false,
-          orderedList: false,
-          listItem: false,
-          listKeymap: false,
-          blockquote: false,
-          codeBlock: false,
-          horizontalRule: false,
-          hardBreak: false,
-          trailingNode: false,
-          ...options.starterKit,
-        }),
+        Text,
+        Paragraph,
       )
+      if (options.starterKit.bold !== false) list.push(Bold)
+      if (options.starterKit.italic !== false) list.push(Italic)
+      if (options.starterKit.strike !== false) list.push(Strike)
+      if (options.starterKit.underline !== false) list.push(Underline)
+      if (options.starterKit.code !== false) list.push(Code)
+      if (options.starterKit.dropcursor !== false) list.push(EditorDropcursor)
+      if (options.starterKit.gapcursor !== false) list.push(Gapcursor)
+      if (options.starterKit.undoRedo !== false) list.push(UndoRedo)
     }
     pushMember(list, Placeholder, options.placeholder)
     pushMember(list, Link, options.link)

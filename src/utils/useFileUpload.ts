@@ -1,4 +1,9 @@
 import { reactive, computed } from 'vue'
+import {
+  getMaxFileSize,
+  formatBytes,
+  fileSizeLimitMessage,
+} from './fileSize'
 
 export interface UploadOptions {
   private?: boolean
@@ -14,6 +19,12 @@ export interface UploadOptions {
   max_width?: number
   max_height?: number
   params?: object
+  signal?: AbortSignal
+  onProgress?: (progress: {
+    loaded: number
+    total: number
+    percent: number
+  }) => void
 }
 
 export interface UploadState {
@@ -39,6 +50,37 @@ export interface UploadedFile {
   folder?: string
   is_folder?: 0 | 1
   content_hash?: string
+}
+
+function parseServerMessages(error: any): string[] {
+  if (!error?._server_messages) return []
+  try {
+    return JSON.parse(error._server_messages)
+      .map((message: string) => {
+        try {
+          return JSON.parse(message).message
+        } catch {
+          return message
+        }
+      })
+      .filter(Boolean)
+  } catch {
+    return []
+  }
+}
+
+function extractUploadErrorMessage(error: any): string {
+  const messages = parseServerMessages(error)
+  if (messages.length) return messages.join('\n')
+  if (error?._error_message) return error._error_message
+  if (error?.message) return error.message
+  if (error?.exc_type === 'MaxFileSizeReachedError') {
+    const maxFileSize = getMaxFileSize()
+    return maxFileSize
+      ? `File size exceeded the maximum allowed size of ${formatBytes(maxFileSize)}.`
+      : 'File size exceeds the maximum allowed limit.'
+  }
+  return 'Upload failed'
 }
 
 export function useFileUpload() {
@@ -86,6 +128,11 @@ async function upload(
   reset: () => void,
 ): Promise<UploadedFile> {
   reset()
+  const limitMessage = fileSizeLimitMessage(file)
+  if (limitMessage) {
+    state.error = new Error(limitMessage)
+    return Promise.reject(state.error)
+  }
   state.uploading = true
 
   return new Promise((resolve, reject) => {
@@ -97,11 +144,22 @@ async function upload(
       state.error = null
     })
 
+    const abort = () => {
+      xhr.abort()
+    }
+
+    options.signal?.addEventListener('abort', abort, { once: true })
+
     xhr.upload.addEventListener('progress', (e) => {
       if (e.lengthComputable) {
         state.uploaded = e.loaded
         state.total = e.total
         state.progress = Math.round((e.loaded / e.total) * 100)
+        options.onProgress?.({
+          loaded: e.loaded,
+          total: e.total,
+          percent: state.progress,
+        })
       }
     })
 
@@ -112,11 +170,20 @@ async function upload(
     xhr.addEventListener('error', (error) => {
       state.uploading = false
       state.error = 'Upload failed'
+      options.signal?.removeEventListener('abort', abort)
       reject('Upload failed')
+    })
+
+    xhr.addEventListener('abort', () => {
+      state.uploading = false
+      state.error = 'Upload cancelled'
+      options.signal?.removeEventListener('abort', abort)
+      reject(new DOMException('Upload cancelled', 'AbortError'))
     })
 
     xhr.onreadystatechange = () => {
       if (xhr.readyState == XMLHttpRequest.DONE) {
+        options.signal?.removeEventListener('abort', abort)
         let error
         if (xhr.status === 200) {
           let r = null
@@ -141,9 +208,6 @@ async function upload(
 
         if (error) {
           let exception
-          let errorParts = [
-            [error.exc_type, error._error_message].filter(Boolean).join(' '),
-          ]
           if (error.exc) {
             exception = error.exc
             try {
@@ -152,25 +216,7 @@ async function upload(
               // eslint-disable-next-line no-empty
             } catch (e) {}
           }
-          let e = new Error(errorParts.join('\n'))
-          let messages = error._server_messages
-            ? JSON.parse(error._server_messages)
-            : []
-          messages = messages
-            .map((m: string) => {
-              try {
-                return JSON.parse(m).message
-              } catch (error) {
-                return m
-              }
-            })
-            .filter(Boolean)
-          if (!messages.length) {
-            messages = error._error_message
-              ? [error._error_message]
-              : ['Internal Server Error']
-          }
-          e.message = messages.join('\n')
+          let e = new Error(extractUploadErrorMessage(error))
           state.error = e
           reject(e)
         }

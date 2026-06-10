@@ -130,6 +130,7 @@ export function useFloatingPopup<P extends Record<string, unknown>>(
 
   cleanupAutoUpdate = autoUpdate(reference, floating, update)
   requestAnimationFrame(() => {
+    if (destroyed) return
     document.addEventListener('pointerdown', onPointerDown, true)
     document.addEventListener('keydown', onKeydown, true)
   })

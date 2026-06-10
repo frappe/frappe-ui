@@ -1,5 +1,5 @@
 <script setup>
-import { Button } from 'frappe-ui'
+import { Button, KeyboardShortcut } from 'frappe-ui'
 </script>
 
 <template>
@@ -21,6 +21,13 @@ import { Button } from 'frappe-ui'
       <LucideArrowRight class="size-4" />
     </template>
     Get Started
+  </Button>
+
+  <Button>
+    Discover
+    <template #suffix>
+      <KeyboardShortcut combo="Mod+K" :show-plus="false" />
+    </template>
   </Button>
 
   <Button :loading="true"> Fetching </Button>

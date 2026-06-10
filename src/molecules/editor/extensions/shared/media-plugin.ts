@@ -114,6 +114,7 @@ export function createMediaPlugin(
             const view = editor.view
             const live = view.state.doc.nodeAt(pos)
             if (!live || live.type.name !== config.nodeName) return
+            if (live.attrs.src !== src) return
             if (live.attrs.width != null && live.attrs.height != null) return
             dispatchIfAlive(
               view,
