@@ -108,11 +108,9 @@ function generateCSSVariables() {
 }
 
 function generateSemanticColors() {
-  const output = {
-    outline: {},
-    surface: {},
-    ink: {},
-  }
+  const output = Object.fromEntries(
+    Object.keys(colorsData.themedVariables.light).map((category) => [category, {}]),
+  )
 
   // Generate semantic colors
   Object.keys(colorsData.themedVariables.light).forEach((category) => {

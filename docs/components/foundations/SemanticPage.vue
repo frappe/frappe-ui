@@ -40,7 +40,7 @@ function formatRef(ref: string): string {
 }
 
 type Group = {
-  category: 'surface' | 'ink' | 'outline'
+  category: 'surface' | 'surface-alpha' | 'ink' | 'outline' | 'outline-alpha'
   prefix: string
   description: string
 }
@@ -53,6 +53,12 @@ const GROUPS: Group[] = [
       'Use for cards, panels, page chrome, alert backgrounds. Steps from soft (gray-1) to inverted (gray-7).',
   },
   {
+    category: 'surface-alpha',
+    prefix: 'bg-surface-alpha-',
+    description:
+      'Use when a surface needs transparency over variable backgrounds, overlays, or layered chrome.',
+  },
+  {
     category: 'ink',
     prefix: 'text-ink-',
     description:
@@ -62,6 +68,12 @@ const GROUPS: Group[] = [
     category: 'outline',
     prefix: 'border-outline-',
     description: 'Use for borders, dividers, focus rings, outlined controls.',
+  },
+  {
+    category: 'outline-alpha',
+    prefix: 'border-outline-alpha-',
+    description:
+      'Use for borders and dividers that should preserve translucency across layered surfaces.',
   },
 ]
 

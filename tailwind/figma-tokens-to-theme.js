@@ -35,6 +35,7 @@ const COLOR_FAMILIES = [
   'violet',
 ]
 const ALPHA_FAMILIES = ['gray-alpha', 'red-alpha']
+const SEMANTIC_CATEGORIES = ['surface', 'surface-alpha', 'ink', 'outline', 'outline-alpha']
 
 // Named aliases layered on top of Figma's numeric radius keys.
 // Each name is matched by px value, so the alias stays correct if Figma shifts.
@@ -98,8 +99,8 @@ function buildColors() {
         : {}),
     },
     themedVariables: {
-      light: { surface: {}, ink: {}, outline: {} },
-      dark: { surface: {}, ink: {}, outline: {} },
+      light: Object.fromEntries(SEMANTIC_CATEGORIES.map((category) => [category, {}])),
+      dark: Object.fromEntries(SEMANTIC_CATEGORIES.map((category) => [category, {}])),
     },
   }
 
@@ -122,12 +123,10 @@ function buildColors() {
   }
 
   // Semantic aliases — Styles.Light/Dark → themedVariables.{light,dark}
-  collectSemanticCategory(stylesLight, 'surface', colors.themedVariables.light)
-  collectSemanticCategory(stylesLight, 'ink', colors.themedVariables.light)
-  collectSemanticCategory(stylesLight, 'outline', colors.themedVariables.light)
-  collectSemanticCategory(stylesDark, 'surface', colors.themedVariables.dark)
-  collectSemanticCategory(stylesDark, 'ink', colors.themedVariables.dark)
-  collectSemanticCategory(stylesDark, 'outline', colors.themedVariables.dark)
+  for (const category of SEMANTIC_CATEGORIES) {
+    collectSemanticCategory(stylesLight, category, colors.themedVariables.light)
+    collectSemanticCategory(stylesDark, category, colors.themedVariables.dark)
+  }
 
   return colors
 }
