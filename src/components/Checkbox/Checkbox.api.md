@@ -9,7 +9,7 @@
     name: 'size',
     description: 'Controls the size of the checkbox',
     required: false,
-    type: 'ToggleSize',
+    type: '"md" | "sm"',
     default: '"sm"'
   },
   {
@@ -30,7 +30,7 @@
     name: 'modelValue',
     description: 'Checked state of the checkbox. `boolean` is canonical; `1`/`0` are kept for v1 backwards compatibility.',
     required: false,
-    type: 'boolean | 0 | 1'
+    type: 'false | true | 0 | 1'
   },
   {
     name: 'label',
@@ -48,7 +48,7 @@
     name: 'error',
     description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
     required: false,
-    type: 'string | FrappeUIError'
+    type: 'string | { messages?: string[]; name: string; message: string; stack?: string; cause?: unknown }'
   },
   {
     name: 'required',
@@ -68,7 +68,7 @@
   {
     name: 'label',
     description: 'Overrides the rendered label content. Receives `{ required }`.',
-    type: '{ required: boolean; }'
+    type: '{ required: boolean }'
   },
   {
     name: 'description',

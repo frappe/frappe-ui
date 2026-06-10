@@ -13,28 +13,28 @@
     default: '[]'
   },
   {
+    name: 'onClick',
+    description: '',
+    required: false,
+    type: '{ apply: (this: Function, thisArg: any, argArray?: any): any; call: (this: Function, thisArg: any, ...argArray: any[]): any; bind: (this: Function, thisArg: any, ...argArray: any[]): any; toString: (): string; prototype: any; length: number; arguments: any; caller: Function; name: string; __@hasInstance@222: (value: any): boolean; __@metadata@224: null | DecoratorMetadataObject }'
+  },
+  {
     name: 'config',
     description: '',
     required: false,
     type: 'Record<string, any>'
   },
   {
-    name: 'onClick',
-    description: '',
-    required: false,
-    type: 'Function'
-  },
-  {
     name: 'onDblClick',
     description: '',
     required: false,
-    type: 'Function'
+    type: '{ apply: (this: Function, thisArg: any, argArray?: any): any; call: (this: Function, thisArg: any, ...argArray: any[]): any; bind: (this: Function, thisArg: any, ...argArray: any[]): any; toString: (): string; prototype: any; length: number; arguments: any; caller: Function; name: string; __@hasInstance@222: (value: any): boolean; __@metadata@224: null | DecoratorMetadataObject }'
   },
   {
     name: 'onCellClick',
     description: '',
     required: false,
-    type: 'Function'
+    type: '{ apply: (this: Function, thisArg: any, argArray?: any): any; call: (this: Function, thisArg: any, ...argArray: any[]): any; bind: (this: Function, thisArg: any, ...argArray: any[]): any; toString: (): string; prototype: any; length: number; arguments: any; caller: Function; name: string; __@hasInstance@222: (value: any): boolean; __@metadata@224: null | DecoratorMetadataObject }'
   }
 ]
 
@@ -42,7 +42,7 @@
   {
     name: 'header',
     description: '',
-    type: '{ currentMonthYear: any; currentYear: number; currentMonth: number; enabledModes: { label: string; v'
+    type: '{ currentMonthYear: any; currentYear: number; currentMonth: number; enabledModes: { label: string; value: string; iconLeft: DefineComponent }[]; activeView: string; decrement: (): void; increment: (): void; updateActiveView: (value: any, d: any, isPreviousMonth: any, isNextMonth: any): void; setCalendarDate: (d: any): void; onMonthYearChange: (val?: string): void; selectedMonthDate: string }'
   },
   {
     name: 'event-popover-content',
@@ -52,7 +52,7 @@
   {
     name: 'daily-header',
     description: '',
-    type: '{ parseDateWithDay: any; currentDate: any; fullDay: any; }'
+    type: '{ parseDateWithDay: any; currentDate: any; fullDay: any }'
   }
 ]
 

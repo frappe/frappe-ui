@@ -9,13 +9,13 @@
     name: 'header',
     description: '',
     required: false,
-    type: 'SidebarHeaderProps'
+    type: '{ title: string; subtitle?: string; logo?: any; menuItems?: { label: string; icon: any; onClick?: (): void }[] }'
   },
   {
     name: 'sections',
     description: '',
     required: false,
-    type: 'SidebarSectionProps[]'
+    type: '({ label?: string; items: ({ label: string; accessKey?: string; icon?: any; suffix?: string; to?: RouteLocationRaw; isActive?: boolean; onClick?: (): void; condition?: false | true | ComputedRef | Ref | ShallowRef | WritableComputedRef | __type })[]; collapsible?: boolean })[]'
   },
   {
     name: 'disableCollapse',
@@ -36,7 +36,7 @@
   {
     name: 'header',
     description: '',
-    type: '{}'
+    type: '{ isCollapsed: boolean; isMobile: boolean }'
   },
   {
     name: 'header-logo',
@@ -46,12 +46,12 @@
   {
     name: 'sidebar-item',
     description: '',
-    type: '{ item: SidebarItemProps; isCollapsed: false; }'
+    type: '{ item: { label: string; accessKey?: string; icon?: any; suffix?: string; to?: RouteLocationRaw; isActive?: boolean; onClick?: (): void; condition?: false | true | ComputedRef | Ref | ShallowRef | WritableComputedRef | __type }; isCollapsed: boolean }'
   },
   {
     name: 'footer-items',
     description: '',
-    type: '{ isCollapsed: boolean; isMobile: boolean; }'
+    type: '{ isCollapsed: boolean; isMobile: boolean }'
   }
 ]
 
@@ -86,7 +86,7 @@
     name: 'menuItems',
     description: '',
     required: false,
-    type: '{ label: string; icon: any; onClick?: (() => void); }[] | undefined'
+    type: '{ label: string; icon: any; onClick?: (): void }[]'
   }
 ]
 
@@ -127,7 +127,7 @@
     name: 'to',
     description: '',
     required: false,
-    type: 'string | kt | Tt'
+    type: 'RouteLocationRaw'
   },
   {
     name: 'isActive',
@@ -139,7 +139,13 @@
     name: 'onClick',
     description: '',
     required: false,
-    type: '(() => void)'
+    type: '(): void'
+  },
+  {
+    name: 'condition',
+    description: '',
+    required: false,
+    type: 'false | true | ComputedRef | Ref | ShallowRef | WritableComputedRef | __type'
   }
 ]
 
@@ -167,7 +173,7 @@
     name: 'items',
     description: '',
     required: true,
-    type: 'SidebarItemProps[]'
+    type: '({ label: string; accessKey?: string; icon?: any; suffix?: string; to?: RouteLocationRaw; isActive?: boolean; onClick?: (): void; condition?: false | true | ComputedRef | Ref | ShallowRef | WritableComputedRef | __type })[]'
   },
   {
     name: 'collapsible',
@@ -181,7 +187,7 @@
   {
     name: 'sidebar-item',
     description: '',
-    type: '{ item: SidebarItemProps; isCollapsed: false; }'
+    type: '{ item: { label: string; accessKey?: string; icon?: any; suffix?: string; to?: RouteLocationRaw; isActive?: boolean; onClick?: (): void; condition?: false | true | ComputedRef | Ref | ShallowRef | WritableComputedRef | __type }; isCollapsed: boolean }'
   }
 ]
 </script>

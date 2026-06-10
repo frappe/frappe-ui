@@ -21,13 +21,13 @@
     name: 'error',
     description: 'Error message shown below the input. Sets aria-invalid on the control.',
     required: false,
-    type: 'string | FrappeUIError'
+    type: 'string | { messages?: string[]; name: string; message: string; stack?: string; cause?: unknown }'
   },
   {
     name: 'type',
     description: 'Type of input to render. FormControl is a thin dispatcher — it forwards\n`label`/`description`/`error`/`required`/`size`/`variant` plus all\nremaining attrs/listeners to the resolved child component. Type-specific\nprops (e.g. `options` for select/combobox, `min`/`max`/`formatter` for\ndate pickers, `:options` for multiselect) and the `v-model` value shape\nfollow the underlying component — see that component\'s docs/types for\nthe full surface. Slots are forwarded by name; only slot names declared\non FormControl get IDE typing, others pass through at runtime.',
     required: false,
-    type: '"select" | TextInputTypes | "textarea" | "checkbox" | "autocomplete" | "combobox" | "multiselect" | "daterange" | "datetime"',
+    type: '"number" | "select" | "search" | "textarea" | "time" | "week" | "file" | "text" | "date" | "datetime-local" | "email" | "month" | "password" | "tel" | "url" | "range" | "checkbox" | "autocomplete" | "combobox" | "multiselect" | "daterange" | "datetime"',
     default: '"text"'
   },
   {
@@ -71,12 +71,12 @@
   {
     name: 'label',
     description: 'Custom label slot (replaces label prop). Receives `{ required }`.',
-    type: '{ required: boolean; }'
+    type: '{ required: boolean }'
   },
   {
     name: 'item-prefix',
     description: 'Custom slot for autocomplete items prefix (if using Autocomplete type)',
-    type: '{ item: any; }'
+    type: '{ item: any }'
   },
   {
     name: 'default',

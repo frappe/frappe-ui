@@ -9,7 +9,7 @@
     name: 'items',
     description: 'Ordered list of breadcrumb items',
     required: true,
-    type: 'BreadcrumbItem[]'
+    type: '{ label: string; route?: RouteLocationRaw; onClick?: (): void }[]'
   }
 ]
 
@@ -17,12 +17,12 @@
   {
     name: 'prefix',
     description: 'Content shown before each breadcrumb label',
-    type: '{ item: BreadcrumbItem; }'
+    type: '{ item: { label: string; route?: RouteLocationRaw; onClick?: (): void } }'
   },
   {
     name: 'suffix',
     description: 'Content shown after each breadcrumb label',
-    type: '{ item: BreadcrumbItem; }'
+    type: '{ item: { label: string; route?: RouteLocationRaw; onClick?: (): void } }'
   }
 ]
 </script>

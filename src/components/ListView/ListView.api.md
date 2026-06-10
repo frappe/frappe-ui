@@ -38,7 +38,7 @@
   {
     name: 'default',
     description: '',
-    type: '{ showGroupedRows: boolean; selectable: any; }'
+    type: '{ showGroupedRows: boolean; selectable: any }'
   }
 ]
 

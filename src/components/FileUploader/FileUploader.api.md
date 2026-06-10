@@ -9,7 +9,7 @@
     name: 'validateFile',
     description: '',
     required: false,
-    type: 'Function',
+    type: '{ apply: (this: Function, thisArg: any, argArray?: any): any; call: (this: Function, thisArg: any, ...argArray: any[]): any; bind: (this: Function, thisArg: any, ...argArray: any[]): any; toString: (): string; prototype: any; length: number; arguments: any; caller: Function; name: string; __@hasInstance@222: (value: any): boolean; __@metadata@224: null | DecoratorMetadataObject }',
     default: 'null'
   },
   {

@@ -9,13 +9,13 @@
     name: 'buttons',
     description: '',
     required: true,
-    type: 'TabButton[]'
+    type: '({ label?: string | number; value?: string | number | false | true; icon?: string | Component; iconLeft?: TabButtonIcon; iconRight?: TabButtonIcon; hideLabel?: boolean; active?: boolean; class?: string | string[] | Record<string, boolean>; onClick?: (event: MouseEvent): void; theme?: "blue" | "red" | "green" | "gray"; variant?: "subtle" | "outline" | "solid" | "ghost"; type?: "button" | "submit" | "reset"; loading?: boolean; size?: "md" | "xs" | "sm" | "lg" | "xl" | "2xl"; tooltip?: string; loadingText?: string; disabled?: boolean; route?: RouteLocationRaw; link?: string })[]'
   },
   {
     name: 'modelValue',
     description: '',
     required: false,
-    type: 'TabButtonValue'
+    type: 'string | number | false | true'
   }
 ]
 

@@ -16,7 +16,7 @@
     name: 'size',
     description: 'Shared row density preset.',
     required: false,
-    type: 'ItemListSize',
+    type: '"md" | "sm" | "lg" | "xl"',
     default: '"sm"'
   },
   {

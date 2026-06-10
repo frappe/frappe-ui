@@ -51,7 +51,7 @@
     name: 'transition',
     description: 'Transition style to use',
     required: false,
-    type: '"default" | null',
+    type: 'null | "default"',
     default: 'null'
   },
   {
@@ -86,21 +86,26 @@
   {
     name: 'target',
     description: 'Content of the trigger/anchor element',
-    type: '{ togglePopover: () => void; updatePosition: () => void; open: () => void; close: () => void; isOpen'
+    type: '{ togglePopover: (): void; updatePosition: (): void; open: (): void; close: (): void; isOpen: boolean }'
   },
   {
     name: 'body',
     description: 'Main content of the popover body',
-    type: '{ togglePopover: () => void; updatePosition: () => void; open: () => void; close: () => void; isOpen'
+    type: '{ togglePopover: (): void; updatePosition: (): void; open: (): void; close: (): void; isOpen: boolean }'
   },
   {
     name: 'body-main',
     description: 'Inner content inside the default body container',
-    type: '{ togglePopover: () => void; updatePosition: () => void; open: () => void; close: () => void; isOpen'
+    type: '{ togglePopover: (): void; updatePosition: (): void; open: (): void; close: (): void; isOpen: boolean }'
   }
 ]
 
   const emitsData = [
+  {
+    name: 'close',
+    description: 'Fired when the component closes.',
+    type: '[]'
+  },
   {
     name: 'open',
     description: 'Fired when the component opens.',
@@ -110,11 +115,6 @@
     name: 'update:show',
     description: 'Fired when the show changes.',
     type: '[value: boolean]'
-  },
-  {
-    name: 'close',
-    description: 'Fired when the component closes.',
-    type: '[]'
   }
 ]
 </script>

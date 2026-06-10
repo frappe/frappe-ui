@@ -30,20 +30,20 @@
     name: 'options',
     description: 'Caller-provided option values; bypasses the generated grid.',
     required: false,
-    type: '{ value: string; label?: string; }[] | undefined',
+    type: '{ value: string; label?: string }[]',
     default: '[]'
   },
   {
     name: 'side',
     description: 'Preferred popover side.',
     required: false,
-    type: 'PopoverSide'
+    type: '"bottom" | "top" | "right" | "left"'
   },
   {
     name: 'align',
     description: 'Alignment of the popover along the trigger edge.',
     required: false,
-    type: 'PopoverAlign'
+    type: '"start" | "center" | "end"'
   },
   {
     name: 'offset',
@@ -55,7 +55,7 @@
     name: 'placement',
     description: 'Combined side+align placement.',
     required: false,
-    type: 'Placement',
+    type: '"top-start" | "top-end" | "bottom-start" | "bottom-end" | "right-start" | "right-end" | "left-start" | "left-end"',
     deprecated: 'Use `side` and `align` instead.'
   },
   {
@@ -69,7 +69,7 @@
     name: 'variant',
     description: 'Visual style variant.',
     required: false,
-    type: 'Variant',
+    type: '"subtle" | "outline"',
     default: '"subtle" as Variant'
   },
   {
@@ -187,7 +187,7 @@
   {
     name: 'suffix',
     description: 'Rendered inside the trigger input, after the typed value. Defaults to a\nchevron-down that toggles the popover.',
-    type: '{ togglePopover: () => void; isOpen: boolean; }'
+    type: '{ togglePopover: (): void; isOpen: boolean }'
   }
 ]
 
@@ -203,6 +203,11 @@
     type: '[value: string]'
   },
   {
+    name: 'close',
+    description: 'Fired when the component closes.',
+    type: '[]'
+  },
+  {
     name: 'open',
     description: 'Fired when the component opens.',
     type: '[]'
@@ -211,11 +216,6 @@
     name: 'update:open',
     description: 'Fired when the open state changes.',
     type: '[value: boolean]'
-  },
-  {
-    name: 'close',
-    description: 'Fired when the component closes.',
-    type: '[]'
   },
   {
     name: 'input-invalid',

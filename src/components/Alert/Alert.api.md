@@ -15,7 +15,7 @@
     name: 'theme',
     description: 'Color theme of the alert',
     required: false,
-    type: 'Theme'
+    type: '"yellow" | "blue" | "red" | "green"'
   },
   {
     name: 'variant',

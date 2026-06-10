@@ -9,7 +9,7 @@
     name: 'options',
     description: 'Options rendered in the popover.',
     required: false,
-    type: 'ComboboxOption[]',
+    type: '(string | { type?: "option"; label: string; value: string; icon?: string | Component; description?: string; disabled?: boolean; slot?: string; slots?: ComboboxItemSlots<ComboboxItemSlotProps>; slotName?: string; render?: ComboboxItemSlots<ComboboxItemSlotProps> | (): VNode | VNode[] } | { type: "custom"; key: string; label: string; icon?: string | Component; description?: string; disabled?: boolean; slot?: string; slots?: ComboboxItemSlots<ComboboxItemSlotProps>; slotName?: string; onClick: (context: ComboboxCustomOptionContext): void; keepOpen?: boolean; condition?: (context: ComboboxCustomOptionContext): boolean; render?: ComboboxItemSlots<ComboboxItemSlotProps> | (): VNode | VNode[] } | { key?: string | number; group: string; hideLabel?: boolean; options: (string | ComboboxSelectableOption | ComboboxCustomOption)[] })[]',
     default: '[]'
   },
   {
@@ -23,14 +23,14 @@
     name: 'variant',
     description: 'Visual style of the combobox.',
     required: false,
-    type: 'ComboboxVariant',
+    type: '"subtle" | "outline" | "ghost"',
     default: '"subtle"'
   },
   {
     name: 'size',
     description: 'Size of the trigger and option rows.',
     required: false,
-    type: 'ComboboxSize',
+    type: '"md" | "sm" | "lg" | "xl"',
     default: '"sm"'
   },
   {
@@ -71,14 +71,14 @@
     name: 'side',
     description: 'Preferred popover side.',
     required: false,
-    type: 'PopoverSide',
+    type: '"bottom" | "top" | "right" | "left"',
     default: '"bottom"'
   },
   {
     name: 'align',
     description: 'Preferred popover alignment.',
     required: false,
-    type: 'PopoverAlign'
+    type: '"start" | "center" | "end"'
   },
   {
     name: 'offset',
@@ -119,7 +119,7 @@
     name: 'placement',
     description: 'Alignment of the popover along the trigger edge.',
     required: false,
-    type: 'PopoverAlign',
+    type: '"start" | "center" | "end"',
     deprecated: 'use `align` instead; `placement` is kept as a back-compat alias'
   },
   {
@@ -138,7 +138,7 @@
     name: 'error',
     description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
     required: false,
-    type: 'string | FrappeUIError'
+    type: 'string | { messages?: string[]; name: string; message: string; stack?: string; cause?: unknown }'
   },
   {
     name: 'required',
@@ -156,7 +156,7 @@
     name: 'modelValue',
     description: '',
     required: false,
-    type: 'string | null',
+    type: 'null | string',
     default: 'null'
   }
 ]
@@ -165,12 +165,12 @@
   {
     name: 'trigger',
     description: 'Fully custom trigger renderer.',
-    type: 'ComboboxTriggerSlotProps'
+    type: '{ open: boolean; disabled: boolean; query: string; selectedOption: null | { type?: "option"; label: string; value: string; icon?: string | Component; description?: string; disabled?: boolean; slot?: string; slots?: ComboboxItemSlots<ComboboxItemSlotProps>; slotName?: string; render?: ComboboxItemSlots<ComboboxItemSlotProps> | (): VNode | VNode[] }; displayValue: string; clearSelection: (): void; toggleOpen: (): void }'
   },
   {
     name: 'label',
     description: 'Overrides the rendered label content. Receives `{ required }`.',
-    type: '{ required: boolean; }'
+    type: '{ required: boolean }'
   },
   {
     name: 'description',
@@ -180,47 +180,47 @@
   {
     name: 'prefix',
     description: 'Content rendered before the default input. Receives the same shape\nas `#trigger` and `#suffix` (`ComboboxSlotProps`).',
-    type: 'ComboboxTriggerSlotProps'
+    type: '{ open: boolean; disabled: boolean; query: string; selectedOption: null | { type?: "option"; label: string; value: string; icon?: string | Component; description?: string; disabled?: boolean; slot?: string; slots?: ComboboxItemSlots<ComboboxItemSlotProps>; slotName?: string; render?: ComboboxItemSlots<ComboboxItemSlotProps> | (): VNode | VNode[] }; displayValue: string; clearSelection: (): void; toggleOpen: (): void }'
   },
   {
     name: 'suffix',
     description: 'Content rendered after the input (input mode) or label (button mode).\nProviding this slot **replaces the default chevron** — render your\nown fallback (e.g. the chevron) when your slot content is conditional.\nCommon use: an inline clear button. Use `@click.stop` and\n`@pointerdown.stop` so the press doesn\'t toggle the popover.',
-    type: 'ComboboxTriggerSlotProps'
+    type: '{ open: boolean; disabled: boolean; query: string; selectedOption: null | { type?: "option"; label: string; value: string; icon?: string | Component; description?: string; disabled?: boolean; slot?: string; slots?: ComboboxItemSlots<ComboboxItemSlotProps>; slotName?: string; render?: ComboboxItemSlots<ComboboxItemSlotProps> | (): VNode | VNode[] }; displayValue: string; clearSelection: (): void; toggleOpen: (): void }'
   },
   {
     name: 'item-prefix',
     description: 'Shared content rendered before the standard row label.',
-    type: 'ComboboxItemSlotProps'
+    type: '{ item: { type?: "option"; label: string; value: string; icon?: string | Component; description?: string; disabled?: boolean; slot?: string; slots?: ComboboxItemSlots<ComboboxItemSlotProps>; slotName?: string; render?: ComboboxItemSlots<ComboboxItemSlotProps> | (): VNode | VNode[] } | { type: "custom"; key: string; label: string; icon?: string | Component; description?: string; disabled?: boolean; slot?: string; slots?: ComboboxItemSlots<ComboboxItemSlotProps>; slotName?: string; onClick: (context: ComboboxCustomOptionContext): void; keepOpen?: boolean; condition?: (context: ComboboxCustomOptionContext): boolean; render?: ComboboxItemSlots<ComboboxItemSlotProps> | (): VNode | VNode[] }; query: string; selected: boolean }'
   },
   {
     name: 'item-label',
     description: 'Shared content rendered for the standard row label area.',
-    type: 'ComboboxItemSlotProps'
+    type: '{ item: { type?: "option"; label: string; value: string; icon?: string | Component; description?: string; disabled?: boolean; slot?: string; slots?: ComboboxItemSlots<ComboboxItemSlotProps>; slotName?: string; render?: ComboboxItemSlots<ComboboxItemSlotProps> | (): VNode | VNode[] } | { type: "custom"; key: string; label: string; icon?: string | Component; description?: string; disabled?: boolean; slot?: string; slots?: ComboboxItemSlots<ComboboxItemSlotProps>; slotName?: string; onClick: (context: ComboboxCustomOptionContext): void; keepOpen?: boolean; condition?: (context: ComboboxCustomOptionContext): boolean; render?: ComboboxItemSlots<ComboboxItemSlotProps> | (): VNode | VNode[] }; query: string; selected: boolean }'
   },
   {
     name: 'item-suffix',
     description: 'Shared content rendered after the standard row label area.',
-    type: 'ComboboxItemSlotProps'
+    type: '{ item: { type?: "option"; label: string; value: string; icon?: string | Component; description?: string; disabled?: boolean; slot?: string; slots?: ComboboxItemSlots<ComboboxItemSlotProps>; slotName?: string; render?: ComboboxItemSlots<ComboboxItemSlotProps> | (): VNode | VNode[] } | { type: "custom"; key: string; label: string; icon?: string | Component; description?: string; disabled?: boolean; slot?: string; slots?: ComboboxItemSlots<ComboboxItemSlotProps>; slotName?: string; onClick: (context: ComboboxCustomOptionContext): void; keepOpen?: boolean; condition?: (context: ComboboxCustomOptionContext): boolean; render?: ComboboxItemSlots<ComboboxItemSlotProps> | (): VNode | VNode[] }; query: string; selected: boolean }'
   },
   {
     name: 'item',
     description: 'Replaces the entire row.',
-    type: 'ComboboxItemSlotProps'
+    type: '{ item: { type?: "option"; label: string; value: string; icon?: string | Component; description?: string; disabled?: boolean; slot?: string; slots?: ComboboxItemSlots<ComboboxItemSlotProps>; slotName?: string; render?: ComboboxItemSlots<ComboboxItemSlotProps> | (): VNode | VNode[] } | { type: "custom"; key: string; label: string; icon?: string | Component; description?: string; disabled?: boolean; slot?: string; slots?: ComboboxItemSlots<ComboboxItemSlotProps>; slotName?: string; onClick: (context: ComboboxCustomOptionContext): void; keepOpen?: boolean; condition?: (context: ComboboxCustomOptionContext): boolean; render?: ComboboxItemSlots<ComboboxItemSlotProps> | (): VNode | VNode[] }; query: string; selected: boolean }'
   },
   {
     name: 'group-label',
     description: 'Custom renderer for group labels.',
-    type: 'ComboboxGroupLabelSlotProps'
+    type: '{ group: { key?: string | number; group: string; hideLabel?: boolean; options: (string | { type?: "option"; label: string; value: string; icon?: string | Component; description?: string; disabled?: boolean; slot?: string; slots?: ComboboxItemSlots<ComboboxItemSlotProps>; slotName?: string; render?: ComboboxItemSlots<ComboboxItemSlotProps> | (): VNode | VNode[] } | { type: "custom"; key: string; label: string; icon?: string | Component; description?: string; disabled?: boolean; slot?: string; slots?: ComboboxItemSlots<ComboboxItemSlotProps>; slotName?: string; onClick: (context: ComboboxCustomOptionContext): void; keepOpen?: boolean; condition?: (context: ComboboxCustomOptionContext): boolean; render?: ComboboxItemSlots<ComboboxItemSlotProps> | (): VNode | VNode[] })[] } }'
   },
   {
     name: 'empty',
     description: 'Fallback content rendered when there are no results.',
-    type: 'ComboboxEmptySlotProps'
+    type: '{ query: string }'
   },
   {
     name: 'footer',
-    description: 'Content rendered after the list. Stays pinned below the scrollable options.',
-    type: 'ComboboxFooterSlotProps'
+    description: 'Content rendered after the list. Stays pinned below the scrollable\noptions.',
+    type: '{ query: string; selectedOption: null | { type?: "option"; label: string; value: string; icon?: string | Component; description?: string; disabled?: boolean; slot?: string; slots?: ComboboxItemSlots<ComboboxItemSlotProps>; slotName?: string; render?: ComboboxItemSlots<ComboboxItemSlotProps> | (): VNode | VNode[] }; clearSelection: (): void }'
   }
 ]
 
@@ -236,6 +236,16 @@
     type: '[value: string]'
   },
   {
+    name: 'blur',
+    description: '',
+    type: '[event: FocusEvent]'
+  },
+  {
+    name: 'focus',
+    description: '',
+    type: '[event: FocusEvent]'
+  },
+  {
     name: 'input',
     description: '',
     type: '[value: string]'
@@ -249,16 +259,6 @@
     name: 'update:selectedOption',
     description: 'Fired when the selected option changes.',
     type: '[option: ComboboxSelectableOption | ComboboxCustomOption | null]'
-  },
-  {
-    name: 'focus',
-    description: '',
-    type: '[event: FocusEvent]'
-  },
-  {
-    name: 'blur',
-    description: '',
-    type: '[event: FocusEvent]'
   }
 ]
 </script>

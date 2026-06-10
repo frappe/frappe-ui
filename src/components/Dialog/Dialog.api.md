@@ -35,20 +35,20 @@
     name: 'icon',
     description: 'Icon shown next to the title in the auto-header.',
     required: false,
-    type: 'string | DialogIcon'
+    type: 'string | { name: string; theme?: "yellow" | "blue" | "red" | "green"; appearance?: "warning" | "info" | "danger" | "success" }'
   },
   {
     name: 'size',
     description: 'Max-width size of the dialog. Default `\'lg\'`.',
     required: false,
-    type: 'DialogSize',
+    type: '"md" | "xs" | "sm" | "lg" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | "6xl" | "7xl"',
     default: 'undefined'
   },
   {
     name: 'position',
     description: 'Vertical placement. Default `\'center\'`.',
     required: false,
-    type: 'DialogPosition',
+    type: '"center" | "top"',
     default: 'undefined'
   },
   {
@@ -61,7 +61,7 @@
     name: 'actions',
     description: 'Footer action buttons.',
     required: false,
-    type: 'DialogAction[]'
+    type: '({ theme?: "blue" | "red" | "green" | "gray"; variant?: "subtle" | "outline" | "solid" | "ghost"; type?: "button" | "submit" | "reset"; label?: string; loading?: boolean; size?: "md" | "xs" | "sm" | "lg" | "xl" | "2xl"; icon?: string | Component; iconLeft?: string | Component; iconRight?: string | Component; tooltip?: string; loadingText?: string; disabled?: boolean; route?: RouteLocationRaw; link?: string; onClick?: (context: DialogActionContext): void | Promise<void> })[]'
   },
   {
     name: 'dismissible',
@@ -96,7 +96,7 @@
     name: 'options',
     description: '',
     required: false,
-    type: 'DialogOptions',
+    type: '{ title?: string; message?: string; size?: "md" | "xs" | "sm" | "lg" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | "6xl" | "7xl"; icon?: string | { name: string; theme?: "yellow" | "blue" | "red" | "green"; appearance?: "warning" | "info" | "danger" | "success" }; actions?: ({ theme?: "blue" | "red" | "green" | "gray"; variant?: "subtle" | "outline" | "solid" | "ghost"; type?: "button" | "submit" | "reset"; label?: string; loading?: boolean; size?: "md" | "xs" | "sm" | "lg" | "xl" | "2xl"; icon?: string | Component; iconLeft?: string | Component; iconRight?: string | Component; tooltip?: string; loadingText?: string; disabled?: boolean; route?: RouteLocationRaw; link?: string; onClick?: (context: DialogActionContext): void | Promise<void> })[]; position?: "center" | "top"; paddingTop?: string | number }',
     deprecated: 'Use flat top-level props instead.'
   }
 ]
@@ -105,17 +105,17 @@
   {
     name: 'default',
     description: 'Main content rendered inside the padded card. Exposes `{ close }`.',
-    type: 'DialogSlotProps'
+    type: '{ close: (): void }'
   },
   {
     name: 'title',
     description: 'Title area; accepts arbitrary content (extra buttons next to title, etc.). Exposes `{ close }`.',
-    type: 'DialogSlotProps'
+    type: '{ close: (): void }'
   },
   {
     name: 'actions',
     description: 'Footer override; exposes `{ close, actions }`.',
-    type: 'DialogActionsSlotProps'
+    type: '{ actions: ({ theme?: "blue" | "red" | "green" | "gray"; variant?: "subtle" | "outline" | "solid" | "ghost"; type?: "button" | "submit" | "reset"; label?: string; loading: boolean; size?: "md" | "xs" | "sm" | "lg" | "xl" | "2xl"; icon?: string | Component; iconLeft?: string | Component; iconRight?: string | Component; tooltip?: string; loadingText?: string; disabled?: boolean; route?: RouteLocationRaw; link?: string; onClick?: (context: DialogActionContext): void | Promise<void> })[]; close: (): void }'
   },
   {
     name: 'body',
@@ -156,14 +156,14 @@
     type: '[value: boolean]'
   },
   {
-    name: 'update:open',
-    description: 'Fired when the open state changes.',
-    type: '[value: boolean]'
-  },
-  {
     name: 'close',
     description: 'Fired when the component closes.',
     type: '[]'
+  },
+  {
+    name: 'update:open',
+    description: 'Fired when the open state changes.',
+    type: '[value: boolean]'
   },
   {
     name: 'after-leave',

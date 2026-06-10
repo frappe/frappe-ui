@@ -9,21 +9,21 @@
     name: 'type',
     description: 'HTML input type (text, email, number, password, etc.).',
     required: false,
-    type: 'TextInputTypes',
+    type: '"number" | "search" | "time" | "week" | "file" | "text" | "date" | "datetime-local" | "email" | "month" | "password" | "tel" | "url" | "range"',
     default: '"text"'
   },
   {
     name: 'size',
     description: 'Visual size of the input.',
     required: false,
-    type: 'InputSize',
+    type: '"md" | "sm" | "lg" | "xl"',
     default: '"sm"'
   },
   {
     name: 'variant',
     description: 'Style variant of the input.',
     required: false,
-    type: 'InputVariant',
+    type: '"subtle" | "outline" | "ghost"',
     default: '"subtle"'
   },
   {
@@ -66,7 +66,7 @@
     name: 'error',
     description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
     required: false,
-    type: 'string | FrappeUIError'
+    type: 'string | { messages?: string[]; name: string; message: string; stack?: string; cause?: unknown }'
   },
   {
     name: 'required',
@@ -96,7 +96,7 @@
   {
     name: 'label',
     description: 'Overrides the rendered label content. Receives `{ required }`.',
-    type: '{ required: boolean; }'
+    type: '{ required: boolean }'
   },
   {
     name: 'description',

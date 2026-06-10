@@ -21,7 +21,7 @@
     name: 'type',
     description: 'Visual tone of the toast',
     required: false,
-    type: '"error" | "success" | "info" | "warning"'
+    type: '"error" | "warning" | "info" | "success"'
   },
   {
     name: 'duration',
@@ -45,7 +45,7 @@
     name: 'action',
     description: 'Optional action rendered on the right side of the toast',
     required: false,
-    type: 'ToastAction'
+    type: '{ label: string; altText?: string; onClick: (): void }'
   }
 ]
 

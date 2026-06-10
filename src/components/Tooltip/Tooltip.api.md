@@ -100,6 +100,38 @@
     type: 'any'
   }
 ]
+
+  const tooltipProviderProps = [
+  {
+    name: 'hoverDelay',
+    description: 'Delay (in seconds) before the first tooltip in the group opens.',
+    required: false,
+    type: 'number',
+    default: '0.5'
+  },
+  {
+    name: 'skipDelay',
+    description: 'Window (in seconds) during which moving to another trigger in this\ngroup opens its tooltip with no delay. Mirrors reka\'s\n`skipDelayDuration`.',
+    required: false,
+    type: 'number',
+    default: '0.3'
+  },
+  {
+    name: 'disableHoverableContent',
+    description: 'When `true`, hovering the tooltip body closes it as the pointer\nleaves the trigger.',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  }
+]
+
+  const tooltipProviderSlots = [
+  {
+    name: 'default',
+    description: '',
+    type: '{}'
+  }
+]
 </script>
 ## API Reference
 
@@ -114,4 +146,10 @@
 <PropsTable folder="Tooltip" name="TooltipBubble" :data="tooltipBubbleProps"/> 
 
 <SlotsTable :data="tooltipBubbleSlots"/> 
+
+### TooltipProvider
+
+<PropsTable folder="Tooltip" name="TooltipProvider" :data="tooltipProviderProps"/> 
+
+<SlotsTable :data="tooltipProviderSlots"/> 
 

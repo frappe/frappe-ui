@@ -36,7 +36,7 @@
     name: 'modelValue',
     description: 'The currently selected value.',
     required: false,
-    type: 'SelectOptionValue'
+    type: 'string | number | bigint | Record<string, any>'
   },
   {
     name: 'open',
@@ -49,7 +49,7 @@
     name: 'options',
     description: 'Options to display in the dropdown.',
     required: false,
-    type: 'SelectOption[]',
+    type: '(string | { label: string; value: string | number | bigint | Record<string, any>; disabled?: boolean; icon?: string | Component; description?: string; slot?: string })[]',
     default: '[]'
   },
   {
@@ -75,7 +75,7 @@
     name: 'error',
     description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
     required: false,
-    type: 'string | FrappeUIError'
+    type: 'string | { messages?: string[]; name: string; message: string; stack?: string; cause?: unknown }'
   },
   {
     name: 'required',
@@ -95,12 +95,12 @@
   {
     name: 'trigger',
     description: 'Fully custom trigger renderer.',
-    type: 'SelectTriggerSlotProps'
+    type: '{ open: boolean; disabled: boolean; selectedOption: null | { label: string; value: string | number | bigint | Record<string, any>; disabled?: boolean; icon?: string | Component; description?: string; slot?: string }; displayValue: string; clearSelection: (): void }'
   },
   {
     name: 'label',
     description: 'Overrides the rendered label content. Receives `{ required }`.',
-    type: '{ required: boolean; }'
+    type: '{ required: boolean }'
   },
   {
     name: 'description',
@@ -110,33 +110,33 @@
   {
     name: 'prefix',
     description: 'Content rendered before the trigger value. Receives the same shape\nas `#trigger` and `#suffix` (`SelectSlotProps`).',
-    type: 'SelectTriggerSlotProps'
+    type: '{ open: boolean; disabled: boolean; selectedOption: null | { label: string; value: string | number | bigint | Record<string, any>; disabled?: boolean; icon?: string | Component; description?: string; slot?: string }; displayValue: string; clearSelection: (): void }'
   },
   {
     name: 'suffix',
     description: 'Content rendered after the trigger value. Providing this slot\n**replaces the default chevron** — render your own fallback when\nyour slot content is conditional.',
-    type: 'SelectTriggerSlotProps'
+    type: '{ open: boolean; disabled: boolean; selectedOption: null | { label: string; value: string | number | bigint | Record<string, any>; disabled?: boolean; icon?: string | Component; description?: string; slot?: string }; displayValue: string; clearSelection: (): void }'
   },
   {
     name: 'option',
     description: 'Shared renderer for option labels.',
-    type: 'SelectItemSlotProps',
+    type: '{ item: { label: string; value: string | number | bigint | Record<string, any>; disabled?: boolean; icon?: string | Component; description?: string; slot?: string }; option: { [key: string]: any; label: string; value: SelectOptionValue; disabled?: boolean | undefined; icon?: string | Component | undefined; description?: string | undefined; slot?: string | undefined; } }',
     deprecated: 'use `#item-label` for per-row label customization. `#option` remains as a back-compat alias through v1.x.'
   },
   {
     name: 'item-prefix',
     description: 'Content rendered before the standard option label.',
-    type: 'SelectItemSlotProps'
+    type: '{ item: { label: string; value: string | number | bigint | Record<string, any>; disabled?: boolean; icon?: string | Component; description?: string; slot?: string }; option: { [key: string]: any; label: string; value: SelectOptionValue; disabled?: boolean | undefined; icon?: string | Component | undefined; description?: string | undefined; slot?: string | undefined; } }'
   },
   {
     name: 'item-label',
     description: 'Content rendered for the standard option label area.',
-    type: 'SelectItemSlotProps'
+    type: '{ item: { label: string; value: string | number | bigint | Record<string, any>; disabled?: boolean; icon?: string | Component; description?: string; slot?: string }; option: { [key: string]: any; label: string; value: SelectOptionValue; disabled?: boolean | undefined; icon?: string | Component | undefined; description?: string | undefined; slot?: string | undefined; } }'
   },
   {
     name: 'item-suffix',
     description: 'Content rendered after the standard option label.',
-    type: 'SelectItemSlotProps'
+    type: '{ item: { label: string; value: string | number | bigint | Record<string, any>; disabled?: boolean; icon?: string | Component; description?: string; slot?: string }; option: { [key: string]: any; label: string; value: SelectOptionValue; disabled?: boolean | undefined; icon?: string | Component | undefined; description?: string | undefined; slot?: string | undefined; } }'
   },
   {
     name: 'empty',
@@ -145,8 +145,8 @@
   },
   {
     name: 'footer',
-    description: 'Content rendered below the option list. Stays pinned below the scrollable options.',
-    type: 'SelectFooterSlotProps'
+    description: 'Content rendered below the option list. Stays pinned below the\nscrollable options.',
+    type: '{ selectedOption: null | { label: string; value: string | number | bigint | Record<string, any>; disabled?: boolean; icon?: string | Component; description?: string; slot?: string }; clearSelection: (): void }'
   }
 ]
 

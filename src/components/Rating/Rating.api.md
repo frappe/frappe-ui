@@ -57,7 +57,7 @@
     name: 'size',
     description: 'Size of the rating component.',
     required: false,
-    type: 'InputSize',
+    type: '"md" | "sm" | "lg" | "xl"',
     default: '"md"'
   },
   {
@@ -76,7 +76,7 @@
     name: 'error',
     description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
     required: false,
-    type: 'string | FrappeUIError'
+    type: 'string | { messages?: string[]; name: string; message: string; stack?: string; cause?: unknown }'
   },
   {
     name: 'required',
@@ -96,7 +96,7 @@
   {
     name: 'label',
     description: 'Overrides the rendered label content. Receives `{ required }`.',
-    type: '{ required: boolean; }'
+    type: '{ required: boolean }'
   },
   {
     name: 'description',
@@ -106,7 +106,7 @@
   {
     name: 'icon',
     description: 'Overrides the per-star icon. Called once per star and stamped into both\nhalf-spans (so half-step clipping still works). Use `state` to color the\nicon, or `index` to render different content per position (e.g. emojis).',
-    type: 'RatingIconSlotProps'
+    type: '{ index: number; side: "right" | "left"; state: "filled" | "preview" | "removing" | "empty"; leftState: RatingStarState; rightState: RatingStarState; value: number; previewValue: null | number; max: number }'
   }
 ]
 

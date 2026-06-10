@@ -9,13 +9,13 @@
     name: 'button',
     description: 'Button configuration (label, icon, size, variant, etc.)',
     required: false,
-    type: 'ButtonProps'
+    type: '{ theme?: "blue" | "red" | "green" | "gray"; variant?: "subtle" | "outline" | "solid" | "ghost"; type?: "button" | "submit" | "reset"; label?: string; loading?: boolean; size?: "md" | "xs" | "sm" | "lg" | "xl" | "2xl"; icon?: string | Component; iconLeft?: string | Component; iconRight?: string | Component; tooltip?: string; loadingText?: string; disabled?: boolean; route?: RouteLocationRaw; link?: string }'
   },
   {
     name: 'options',
     description: 'Array of dropdown options or grouped options.',
     required: false,
-    type: 'DropdownOptions',
+    type: '({ label: string; route?: RouteLocationRaw; onClick?: (event: PointerEvent): void; submenu?: undefined; switch?: undefined; switchValue?: undefined; component?: undefined; icon?: null | string | Component; description?: string; selected?: boolean; disabled?: boolean; theme?: "red" | "gray"; slot?: string; slots?: DropdownItemSlots<DropdownItemSlotProps>; condition?: (): boolean } | { label: string; switch: true; switchValue?: boolean; onClick?: (value: boolean): void; route?: undefined; submenu?: undefined; component?: undefined; icon?: string | Component | null; description?: string; selected?: boolean; disabled?: boolean; theme?: DropdownTheme; slot?: string; slots?: DropdownItemSlots<DropdownItemSlotProps>; condition?: (() => boolean) } | { label: string; submenu: DropdownOptions; route?: undefined; onClick?: undefined; switch?: undefined; switchValue?: undefined; component?: undefined; icon?: string | Component | null; description?: string; selected?: boolean; disabled?: boolean; theme?: DropdownTheme; slot?: string; slots?: DropdownItemSlots<DropdownItemSlotProps>; condition?: (() => boolean) } | { component: any; label?: string; route?: undefined; submenu?: undefined; switch?: undefined; switchValue?: undefined; icon?: string | Component | null; description?: string; selected?: boolean; disabled?: boolean; theme?: DropdownTheme; slot?: string; slots?: DropdownItemSlots<DropdownItemSlotProps>; condition?: (() => boolean) } | { key?: string | number; group: string; options?: (DropdownActionOption | DropdownSwitchOption | DropdownSubmenuOption | DropdownComponentOption)[]; items?: DropdownOption[]; hideLabel?: boolean; theme?: DropdownTheme })[]',
     default: '[]'
   },
   {
@@ -29,20 +29,20 @@
     name: 'align',
     description: 'Alignment of the dropdown content along the trigger edge.',
     required: false,
-    type: 'DropdownAlign'
+    type: '"start" | "center" | "end"'
   },
   {
     name: 'placement',
     description: 'Placement of the dropdown relative to the trigger.',
     required: false,
-    type: 'DropdownPlacement',
+    type: '"center" | "right" | "left"',
     deprecated: 'use `align` instead; `placement` remains as a back-compat alias through v1.x'
   },
   {
     name: 'side',
     description: 'Side of the trigger the dropdown appears on.',
     required: false,
-    type: 'DropdownSide',
+    type: '"bottom" | "top" | "right" | "left"',
     default: '"bottom"'
   },
   {
@@ -65,37 +65,37 @@
   {
     name: 'default',
     description: 'Alternate trigger renderer.',
-    type: 'DropdownTriggerSlotProps'
+    type: '{ open: boolean; disabled: boolean; close: (): void }'
   },
   {
     name: 'trigger',
     description: 'Explicit trigger slot renderer.',
-    type: 'DropdownTriggerSlotProps'
+    type: '{ open: boolean; disabled: boolean; close: (): void }'
   },
   {
     name: 'item',
     description: 'Replaces the entire item row.',
-    type: 'DropdownItemSlotProps'
+    type: '{ item: { label: string; route?: RouteLocationRaw; onClick?: (event: PointerEvent): void; submenu?: undefined; switch?: undefined; switchValue?: undefined; component?: undefined; icon?: null | string | Component; description?: string; selected?: boolean; disabled?: boolean; theme?: "red" | "gray"; slot?: string; slots?: DropdownItemSlots<DropdownItemSlotProps>; condition?: (): boolean } | { label: string; switch: true; switchValue?: boolean; onClick?: (value: boolean): void; route?: undefined; submenu?: undefined; component?: undefined; icon?: string | Component | null; description?: string; selected?: boolean; disabled?: boolean; theme?: DropdownTheme; slot?: string; slots?: DropdownItemSlots<DropdownItemSlotProps>; condition?: (() => boolean) } | { label: string; submenu: (DropdownActionOption | DropdownSwitchOption | DropdownSubmenuOption | DropdownComponentOption | { key?: string | number; group: string; options?: DropdownOption[]; items?: DropdownOption[]; hideLabel?: boolean; theme?: DropdownTheme })[]; route?: undefined; onClick?: undefined; switch?: undefined; switchValue?: undefined; component?: undefined; icon?: string | Component | null; description?: string; selected?: boolean; disabled?: boolean; theme?: DropdownTheme; slot?: string; slots?: DropdownItemSlots<DropdownItemSlotProps>; condition?: (() => boolean) } | { component: any; label?: string; route?: undefined; submenu?: undefined; switch?: undefined; switchValue?: undefined; icon?: string | Component | null; description?: string; selected?: boolean; disabled?: boolean; theme?: DropdownTheme; slot?: string; slots?: DropdownItemSlots<DropdownItemSlotProps>; condition?: (() => boolean) }; selected: boolean; close: (): void }'
   },
   {
     name: 'item-prefix',
     description: 'Content rendered before the standard item label.',
-    type: 'DropdownItemSlotProps'
+    type: '{ item: { label: string; route?: RouteLocationRaw; onClick?: (event: PointerEvent): void; submenu?: undefined; switch?: undefined; switchValue?: undefined; component?: undefined; icon?: null | string | Component; description?: string; selected?: boolean; disabled?: boolean; theme?: "red" | "gray"; slot?: string; slots?: DropdownItemSlots<DropdownItemSlotProps>; condition?: (): boolean } | { label: string; switch: true; switchValue?: boolean; onClick?: (value: boolean): void; route?: undefined; submenu?: undefined; component?: undefined; icon?: string | Component | null; description?: string; selected?: boolean; disabled?: boolean; theme?: DropdownTheme; slot?: string; slots?: DropdownItemSlots<DropdownItemSlotProps>; condition?: (() => boolean) } | { label: string; submenu: (DropdownActionOption | DropdownSwitchOption | DropdownSubmenuOption | DropdownComponentOption | { key?: string | number; group: string; options?: DropdownOption[]; items?: DropdownOption[]; hideLabel?: boolean; theme?: DropdownTheme })[]; route?: undefined; onClick?: undefined; switch?: undefined; switchValue?: undefined; component?: undefined; icon?: string | Component | null; description?: string; selected?: boolean; disabled?: boolean; theme?: DropdownTheme; slot?: string; slots?: DropdownItemSlots<DropdownItemSlotProps>; condition?: (() => boolean) } | { component: any; label?: string; route?: undefined; submenu?: undefined; switch?: undefined; switchValue?: undefined; icon?: string | Component | null; description?: string; selected?: boolean; disabled?: boolean; theme?: DropdownTheme; slot?: string; slots?: DropdownItemSlots<DropdownItemSlotProps>; condition?: (() => boolean) }; selected: boolean; close: (): void }'
   },
   {
     name: 'item-label',
     description: 'Content rendered for the standard item label area.',
-    type: 'DropdownItemSlotProps'
+    type: '{ item: { label: string; route?: RouteLocationRaw; onClick?: (event: PointerEvent): void; submenu?: undefined; switch?: undefined; switchValue?: undefined; component?: undefined; icon?: null | string | Component; description?: string; selected?: boolean; disabled?: boolean; theme?: "red" | "gray"; slot?: string; slots?: DropdownItemSlots<DropdownItemSlotProps>; condition?: (): boolean } | { label: string; switch: true; switchValue?: boolean; onClick?: (value: boolean): void; route?: undefined; submenu?: undefined; component?: undefined; icon?: string | Component | null; description?: string; selected?: boolean; disabled?: boolean; theme?: DropdownTheme; slot?: string; slots?: DropdownItemSlots<DropdownItemSlotProps>; condition?: (() => boolean) } | { label: string; submenu: (DropdownActionOption | DropdownSwitchOption | DropdownSubmenuOption | DropdownComponentOption | { key?: string | number; group: string; options?: DropdownOption[]; items?: DropdownOption[]; hideLabel?: boolean; theme?: DropdownTheme })[]; route?: undefined; onClick?: undefined; switch?: undefined; switchValue?: undefined; component?: undefined; icon?: string | Component | null; description?: string; selected?: boolean; disabled?: boolean; theme?: DropdownTheme; slot?: string; slots?: DropdownItemSlots<DropdownItemSlotProps>; condition?: (() => boolean) } | { component: any; label?: string; route?: undefined; submenu?: undefined; switch?: undefined; switchValue?: undefined; icon?: string | Component | null; description?: string; selected?: boolean; disabled?: boolean; theme?: DropdownTheme; slot?: string; slots?: DropdownItemSlots<DropdownItemSlotProps>; condition?: (() => boolean) }; selected: boolean; close: (): void }'
   },
   {
     name: 'item-suffix',
     description: 'Content rendered after the standard item label.',
-    type: 'DropdownItemSlotProps'
+    type: '{ item: { label: string; route?: RouteLocationRaw; onClick?: (event: PointerEvent): void; submenu?: undefined; switch?: undefined; switchValue?: undefined; component?: undefined; icon?: null | string | Component; description?: string; selected?: boolean; disabled?: boolean; theme?: "red" | "gray"; slot?: string; slots?: DropdownItemSlots<DropdownItemSlotProps>; condition?: (): boolean } | { label: string; switch: true; switchValue?: boolean; onClick?: (value: boolean): void; route?: undefined; submenu?: undefined; component?: undefined; icon?: string | Component | null; description?: string; selected?: boolean; disabled?: boolean; theme?: DropdownTheme; slot?: string; slots?: DropdownItemSlots<DropdownItemSlotProps>; condition?: (() => boolean) } | { label: string; submenu: (DropdownActionOption | DropdownSwitchOption | DropdownSubmenuOption | DropdownComponentOption | { key?: string | number; group: string; options?: DropdownOption[]; items?: DropdownOption[]; hideLabel?: boolean; theme?: DropdownTheme })[]; route?: undefined; onClick?: undefined; switch?: undefined; switchValue?: undefined; component?: undefined; icon?: string | Component | null; description?: string; selected?: boolean; disabled?: boolean; theme?: DropdownTheme; slot?: string; slots?: DropdownItemSlots<DropdownItemSlotProps>; condition?: (() => boolean) } | { component: any; label?: string; route?: undefined; submenu?: undefined; switch?: undefined; switchValue?: undefined; icon?: string | Component | null; description?: string; selected?: boolean; disabled?: boolean; theme?: DropdownTheme; slot?: string; slots?: DropdownItemSlots<DropdownItemSlotProps>; condition?: (() => boolean) }; selected: boolean; close: (): void }'
   },
   {
     name: 'group-label',
     description: 'Custom renderer for group labels.',
-    type: 'DropdownGroupSlotProps'
+    type: '{ group: { key?: string | number; group: string; options?: ({ label: string; route?: RouteLocationRaw; onClick?: (event: PointerEvent): void; submenu?: undefined; switch?: undefined; switchValue?: undefined; component?: undefined; icon?: null | string | Component; description?: string; selected?: boolean; disabled?: boolean; theme?: "red" | "gray"; slot?: string; slots?: DropdownItemSlots<DropdownItemSlotProps>; condition?: (): boolean } | { label: string; switch: true; switchValue?: boolean; onClick?: (value: boolean): void; route?: undefined; submenu?: undefined; component?: undefined; icon?: string | Component | null; description?: string; selected?: boolean; disabled?: boolean; theme?: DropdownTheme; slot?: string; slots?: DropdownItemSlots<DropdownItemSlotProps>; condition?: (() => boolean) } | { label: string; submenu: (DropdownActionOption | DropdownSwitchOption | DropdownSubmenuOption | DropdownComponentOption | DropdownGroupOption)[]; route?: undefined; onClick?: undefined; switch?: undefined; switchValue?: undefined; component?: undefined; icon?: string | Component | null; description?: string; selected?: boolean; disabled?: boolean; theme?: DropdownTheme; slot?: string; slots?: DropdownItemSlots<DropdownItemSlotProps>; condition?: (() => boolean) } | { component: any; label?: string; route?: undefined; submenu?: undefined; switch?: undefined; switchValue?: undefined; icon?: string | Component | null; description?: string; selected?: boolean; disabled?: boolean; theme?: DropdownTheme; slot?: string; slots?: DropdownItemSlots<DropdownItemSlotProps>; condition?: (() => boolean) })[]; items?: DropdownOption[]; hideLabel?: boolean; theme?: DropdownTheme } }'
   },
   {
     name: 'empty',

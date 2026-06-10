@@ -37,7 +37,7 @@
     name: 'theme',
     description: 'Theme used for the progress bar (predefined or custom colors)',
     required: false,
-    type: '"blue" | "red" | "green" | "orange" | "black" | { primary: string; secondary: string; }',
+    type: '"blue" | "red" | "green" | "orange" | "black" | { primary: string; secondary: string }',
     default: '"black"'
   },
   {

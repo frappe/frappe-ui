@@ -30,7 +30,7 @@
     name: 'size',
     description: 'Visual size of the slider.',
     required: false,
-    type: 'ToggleSize',
+    type: '"md" | "sm"',
     default: '"sm"'
   },
   {
@@ -56,7 +56,7 @@
     name: 'error',
     description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
     required: false,
-    type: 'string | FrappeUIError'
+    type: 'string | { messages?: string[]; name: string; message: string; stack?: string; cause?: unknown }'
   },
   {
     name: 'required',
@@ -74,7 +74,7 @@
     name: 'modelValue',
     description: 'The current slider value (controlled).',
     required: false,
-    type: 'SliderValue'
+    type: 'number[]'
   }
 ]
 
@@ -82,7 +82,7 @@
   {
     name: 'label',
     description: 'Overrides the rendered label content. Receives `{ required }`.',
-    type: '{ required: boolean; }'
+    type: '{ required: boolean }'
   },
   {
     name: 'description',

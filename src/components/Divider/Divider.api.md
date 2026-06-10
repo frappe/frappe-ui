@@ -29,7 +29,7 @@
     name: 'action',
     description: '',
     required: false,
-    type: 'DividerAction'
+    type: '{ label: string; onClick?: (): any; handler?: (): any; loading?: boolean }'
   }
 ]
 </script>

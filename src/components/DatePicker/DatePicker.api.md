@@ -24,13 +24,13 @@
     name: 'side',
     description: 'Preferred popover side relative to the trigger.',
     required: false,
-    type: 'PopoverSide'
+    type: '"bottom" | "top" | "right" | "left"'
   },
   {
     name: 'align',
     description: 'Alignment of the popover along the trigger edge.',
     required: false,
-    type: 'PopoverAlign'
+    type: '"start" | "center" | "end"'
   },
   {
     name: 'offset',
@@ -42,7 +42,7 @@
     name: 'placement',
     description: 'Preferred popover placement relative to the trigger.',
     required: false,
-    type: 'DatePickerPlacement',
+    type: '"top-start" | "top-end" | "bottom-start" | "bottom-end" | "right-start" | "right-end" | "left-start" | "left-end"',
     deprecated: 'Use `side` and `align` instead.'
   },
   {
@@ -55,13 +55,13 @@
     name: 'size',
     description: 'Size of the trigger input.',
     required: false,
-    type: 'InputSize'
+    type: '"md" | "sm" | "lg" | "xl"'
   },
   {
     name: 'variant',
     description: 'Visual style variant passed through to the input.',
     required: false,
-    type: 'InputVariant',
+    type: '"subtle" | "outline" | "ghost"',
     default: '"subtle"'
   },
   {
@@ -150,7 +150,7 @@
     name: 'isDateUnavailable',
     description: 'Return true to prevent a date from being selected. Combined with `min`/`max`.',
     required: false,
-    type: '((date: Dayjs) => boolean)'
+    type: '(date: Dayjs): boolean'
   },
   {
     name: 'allowCustom',
@@ -183,7 +183,7 @@
     name: 'error',
     description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
     required: false,
-    type: 'string | FrappeUIError'
+    type: 'string | { messages?: string[]; name: string; message: string; stack?: string; cause?: unknown }'
   },
   {
     name: 'required',
@@ -203,28 +203,28 @@
   {
     name: 'trigger',
     description: 'Custom trigger renderer for the picker.',
-    type: 'DatePickerTriggerSlotProps'
+    type: '{ togglePopover: (): void; isOpen: boolean; displayLabel: string; inputValue: string }'
   },
   {
     name: 'target',
     description: 'Custom trigger renderer for the picker.',
-    type: 'DatePickerTriggerSlotProps',
+    type: '{ togglePopover: (): void; isOpen: boolean; displayLabel: string; inputValue: string }',
     deprecated: 'Use `#trigger` instead. `#target` remains as a back-compat alias through v1.x.'
   },
   {
     name: 'prefix',
     description: 'Content rendered before the trigger input value.',
-    type: 'DatePickerTriggerSlotProps'
+    type: '{ togglePopover: (): void; isOpen: boolean; displayLabel: string; inputValue: string }'
   },
   {
     name: 'suffix',
     description: 'Content rendered after the trigger input value.',
-    type: 'DatePickerTriggerSlotProps'
+    type: '{ togglePopover: (): void; isOpen: boolean; displayLabel: string; inputValue: string }'
   },
   {
     name: 'actions',
     description: 'Sidebar rendered to the left of the calendar. Use for date shortcuts\n("Today", "Tomorrow", "Last 7 days") and other preset actions. When\nomitted, the popover shows the calendar only.',
-    type: 'DatePickerActionsSlotProps'
+    type: '{ selected: string; setDate: (date: string | Date | Dayjs): void; clear: (): void; close: (): void }'
   }
 ]
 
@@ -273,13 +273,13 @@
     name: 'side',
     description: 'Preferred popover side relative to the trigger.',
     required: false,
-    type: 'PopoverSide'
+    type: '"bottom" | "top" | "right" | "left"'
   },
   {
     name: 'align',
     description: 'Alignment of the popover along the trigger edge.',
     required: false,
-    type: 'PopoverAlign'
+    type: '"start" | "center" | "end"'
   },
   {
     name: 'offset',
@@ -291,7 +291,7 @@
     name: 'placement',
     description: 'Preferred popover placement relative to the trigger.',
     required: false,
-    type: 'DatePickerPlacement',
+    type: '"top-start" | "top-end" | "bottom-start" | "bottom-end" | "right-start" | "right-end" | "left-start" | "left-end"',
     deprecated: 'Use `side` and `align` instead.'
   },
   {
@@ -304,13 +304,13 @@
     name: 'size',
     description: 'Size of the trigger input.',
     required: false,
-    type: 'InputSize'
+    type: '"md" | "sm" | "lg" | "xl"'
   },
   {
     name: 'variant',
     description: 'Visual style variant passed through to the input.',
     required: false,
-    type: 'InputVariant',
+    type: '"subtle" | "outline" | "ghost"',
     default: '"subtle"'
   },
   {
@@ -399,7 +399,7 @@
     name: 'isDateUnavailable',
     description: 'Return true to prevent a date from being selected. Combined with `min`/`max`.',
     required: false,
-    type: '((date: Dayjs) => boolean)'
+    type: '(date: Dayjs): boolean'
   },
   {
     name: 'allowCustom',
@@ -432,7 +432,7 @@
     name: 'error',
     description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
     required: false,
-    type: 'string | FrappeUIError'
+    type: 'string | { messages?: string[]; name: string; message: string; stack?: string; cause?: unknown }'
   },
   {
     name: 'required',
@@ -452,28 +452,28 @@
   {
     name: 'trigger',
     description: '',
-    type: 'DatePickerTriggerSlotProps'
+    type: '{ togglePopover: (): void; isOpen: boolean; displayLabel: string; inputValue: string }'
   },
   {
     name: 'target',
     description: '',
-    type: 'DatePickerTriggerSlotProps',
+    type: '{ togglePopover: (): void; isOpen: boolean; displayLabel: string; inputValue: string }',
     deprecated: 'Use `#trigger` instead.'
   },
   {
     name: 'prefix',
     description: '',
-    type: 'DatePickerTriggerSlotProps'
+    type: '{ togglePopover: (): void; isOpen: boolean; displayLabel: string; inputValue: string }'
   },
   {
     name: 'suffix',
     description: '',
-    type: 'DatePickerTriggerSlotProps'
+    type: '{ togglePopover: (): void; isOpen: boolean; displayLabel: string; inputValue: string }'
   },
   {
     name: 'actions',
     description: 'Sidebar rendered to the left of the calendar. Use for range shortcuts\n("Last 7 days", "Last 12 months") and other preset actions. When\nomitted, the popover shows the calendar only.',
-    type: 'DateRangePickerActionsSlotProps'
+    type: '{ fromDate: string; toDate: string; setDate: (date: string | Date | Dayjs): void; setRange: (range: [string | Date | Dayjs, string | Date | Dayjs]): void; clear: (): void; close: (): void }'
   }
 ]
 
@@ -536,13 +536,13 @@
     name: 'side',
     description: 'Preferred popover side relative to the trigger.',
     required: false,
-    type: 'PopoverSide'
+    type: '"bottom" | "top" | "right" | "left"'
   },
   {
     name: 'align',
     description: 'Alignment of the popover along the trigger edge.',
     required: false,
-    type: 'PopoverAlign'
+    type: '"start" | "center" | "end"'
   },
   {
     name: 'offset',
@@ -554,7 +554,7 @@
     name: 'placement',
     description: 'Preferred popover placement relative to the trigger.',
     required: false,
-    type: 'DatePickerPlacement',
+    type: '"top-start" | "top-end" | "bottom-start" | "bottom-end" | "right-start" | "right-end" | "left-start" | "left-end"',
     deprecated: 'Use `side` and `align` instead.'
   },
   {
@@ -567,13 +567,13 @@
     name: 'size',
     description: 'Size of the trigger input.',
     required: false,
-    type: 'InputSize'
+    type: '"md" | "sm" | "lg" | "xl"'
   },
   {
     name: 'variant',
     description: 'Visual style variant passed through to the input.',
     required: false,
-    type: 'InputVariant',
+    type: '"subtle" | "outline" | "ghost"',
     default: '"subtle"'
   },
   {
@@ -662,7 +662,7 @@
     name: 'isDateUnavailable',
     description: 'Return true to prevent a date from being selected. Combined with `min`/`max`.',
     required: false,
-    type: '((date: Dayjs) => boolean)'
+    type: '(date: Dayjs): boolean'
   },
   {
     name: 'allowCustom',
@@ -695,7 +695,7 @@
     name: 'error',
     description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
     required: false,
-    type: 'string | FrappeUIError'
+    type: 'string | { messages?: string[]; name: string; message: string; stack?: string; cause?: unknown }'
   },
   {
     name: 'required',
@@ -715,28 +715,28 @@
   {
     name: 'trigger',
     description: '',
-    type: 'DatePickerTriggerSlotProps'
+    type: '{ togglePopover: (): void; isOpen: boolean; displayLabel: string; inputValue: string }'
   },
   {
     name: 'target',
     description: '',
-    type: 'DatePickerTriggerSlotProps',
+    type: '{ togglePopover: (): void; isOpen: boolean; displayLabel: string; inputValue: string }',
     deprecated: 'Use `#trigger` instead.'
   },
   {
     name: 'prefix',
     description: '',
-    type: 'DatePickerTriggerSlotProps'
+    type: '{ togglePopover: (): void; isOpen: boolean; displayLabel: string; inputValue: string }'
   },
   {
     name: 'suffix',
     description: '',
-    type: 'DatePickerTriggerSlotProps'
+    type: '{ togglePopover: (): void; isOpen: boolean; displayLabel: string; inputValue: string }'
   },
   {
     name: 'actions',
     description: 'Sidebar rendered to the left of the calendar. Use for date-time\nshortcuts ("Now", "Tomorrow 9am") and other preset actions. When\nomitted, the popover shows the calendar and time picker only.',
-    type: 'DateTimePickerActionsSlotProps'
+    type: '{ selected: string; time: string; setDate: (date: string | Date | Dayjs): void; clear: (): void; close: (): void }'
   }
 ]
 

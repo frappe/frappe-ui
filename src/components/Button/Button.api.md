@@ -9,28 +9,43 @@
     name: 'theme',
     description: 'Visual color theme of the button',
     required: false,
-    type: 'Theme',
-    default: '"gray"'
-  },
-  {
-    name: 'size',
-    description: 'Controls the button size',
-    required: false,
-    type: 'Size',
-    default: '"sm"'
+    type: '"blue" | "red" | "green" | "gray"',
+    default: '\'gray\''
   },
   {
     name: 'variant',
     description: 'Visual style of the button',
     required: false,
-    type: 'Variant',
-    default: '"subtle"'
+    type: '"subtle" | "outline" | "solid" | "ghost"',
+    default: '\'subtle\''
+  },
+  {
+    name: 'type',
+    description: 'Native button type',
+    required: false,
+    type: '"button" | "submit" | "reset"',
+    default: '\'button\''
   },
   {
     name: 'label',
     description: 'Text label displayed inside the button',
     required: false,
-    type: 'string'
+    type: 'string',
+    default: 'undefined'
+  },
+  {
+    name: 'loading',
+    description: 'Shows a loading state and disables interaction',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  },
+  {
+    name: 'size',
+    description: 'Controls the button size',
+    required: false,
+    type: '"md" | "xs" | "sm" | "lg" | "xl" | "2xl"',
+    default: '\'sm\''
   },
   {
     name: 'icon',
@@ -54,20 +69,15 @@
     name: 'tooltip',
     description: 'Tooltip text shown on hover',
     required: false,
-    type: 'string'
-  },
-  {
-    name: 'loading',
-    description: 'Shows a loading state and disables interaction',
-    required: false,
-    type: 'boolean',
-    default: 'false'
+    type: 'string',
+    default: 'undefined'
   },
   {
     name: 'loadingText',
     description: 'Text shown while the button is loading',
     required: false,
-    type: 'string'
+    type: 'string',
+    default: 'undefined'
   },
   {
     name: 'disabled',
@@ -80,20 +90,15 @@
     name: 'route',
     description: 'Router destination when used as a link',
     required: false,
-    type: 'string | kt | Tt'
+    type: 'RouteLocationRaw',
+    default: 'undefined'
   },
   {
     name: 'link',
     description: 'External link URL',
     required: false,
-    type: 'string'
-  },
-  {
-    name: 'type',
-    description: 'Native button type',
-    required: false,
-    type: '"button" | "submit" | "reset"',
-    default: '"button"'
+    type: 'string',
+    default: 'undefined'
   }
 ]
 
@@ -101,22 +106,22 @@
   {
     name: 'prefix',
     description: 'Content shown before the button label (left icon / custom content)',
-    type: 'any'
+    type: 'void[]'
   },
   {
     name: 'icon',
     description: 'Icon-only content for icon buttons',
-    type: 'any'
+    type: 'void[]'
   },
   {
     name: 'default',
     description: 'Main button content (overrides `label`)',
-    type: 'any'
+    type: 'void[]'
   },
   {
     name: 'suffix',
     description: 'Content shown after the button label (right icon / custom content)',
-    type: 'any'
+    type: 'void[]'
   }
 ]
 </script>

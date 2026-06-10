@@ -15,7 +15,7 @@
     name: 'tabs',
     description: 'List of tabs to render.',
     required: true,
-    type: 'Tab[]'
+    type: '({ label: string; icon?: string | Component; route?: string })[]'
   },
   {
     name: 'vertical',
@@ -41,12 +41,12 @@
   {
     name: 'tab-item',
     description: 'Custom renderer for a tab trigger (icon + label / router-link).',
-    type: '{ tab: { label: string; icon?: string | Component | undefined; route?: string | undefined; }; }'
+    type: '{ tab: { label: string; icon?: string | Component; route?: string } }'
   },
   {
     name: 'tab-panel',
     description: 'Content rendered for each tab panel.',
-    type: '{ tab: { label: string; icon?: string | Component | undefined; route?: string | undefined; }; }'
+    type: '{ tab: { label: string; icon?: string | Component; route?: string } }'
   }
 ]
 

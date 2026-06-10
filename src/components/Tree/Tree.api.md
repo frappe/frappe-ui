@@ -9,7 +9,7 @@
     name: 'node',
     description: 'Root tree node to render.\nCan contain nested children to form the tree structure.',
     required: true,
-    type: 'TreeNode'
+    type: '{ label: string; children: TreeNode[] }'
   },
   {
     name: 'nodeKey',
@@ -21,7 +21,7 @@
     name: 'options',
     description: 'Optional configuration for tree layout and behavior.',
     required: false,
-    type: 'TreeOptions',
+    type: '{ rowHeight?: string; indentWidth?: string; showIndentationGuides?: boolean; defaultCollapsed?: boolean }',
     default: '{\n    rowHeight: "25px",\n    indentWidth: "20px",\n    showIndentationGuides: true,\n    defaultCollapsed: true,\n}'
   }
 ]

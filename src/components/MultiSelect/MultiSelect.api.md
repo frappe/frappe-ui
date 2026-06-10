@@ -16,21 +16,21 @@
     name: 'options',
     description: 'Options rendered in the popover.',
     required: false,
-    type: 'MultiSelectOptions',
+    type: '({ label: string; value: string; icon?: string | Component; description?: string; disabled?: boolean; slot?: string; slots?: MultiSelectItemSlots<MultiSelectItemSlotProps>; slotName?: string; render?: MultiSelectItemSlots<MultiSelectItemSlotProps> | (): VNode | VNode[] } | { key?: string | number; group: string; hideLabel?: boolean; options: MultiSelectOption[] })[]',
     default: '[]'
   },
   {
     name: 'variant',
     description: 'Visual style of the trigger.',
     required: false,
-    type: 'MultiSelectVariant',
+    type: '"subtle" | "outline" | "ghost"',
     default: '"subtle"'
   },
   {
     name: 'size',
     description: 'Size of the trigger and option rows.',
     required: false,
-    type: 'MultiSelectSize',
+    type: '"md" | "sm" | "lg" | "xl"',
     default: '"sm"'
   },
   {
@@ -79,14 +79,14 @@
     name: 'side',
     description: 'Preferred popover side.',
     required: false,
-    type: 'PopoverSide',
+    type: '"bottom" | "top" | "right" | "left"',
     default: '"bottom"'
   },
   {
     name: 'align',
     description: 'Preferred popover alignment.',
     required: false,
-    type: 'PopoverAlign',
+    type: '"start" | "center" | "end"',
     default: '"start"'
   },
   {
@@ -107,7 +107,7 @@
     name: 'compareFn',
     description: 'Custom equality function used to resolve which options are currently\nselected for display and rendering. When omitted, the component uses\nstrict equality on `option.value` against entries in `modelValue`.',
     required: false,
-    type: '((a: MultiSelectOption, b: MultiSelectOption) => boolean)'
+    type: '(a: MultiSelectOption, b: MultiSelectOption): boolean'
   },
   {
     name: 'label',
@@ -125,7 +125,7 @@
     name: 'error',
     description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
     required: false,
-    type: 'string | FrappeUIError'
+    type: 'string | { messages?: string[]; name: string; message: string; stack?: string; cause?: unknown }'
   },
   {
     name: 'required',
@@ -145,27 +145,27 @@
   {
     name: 'trigger',
     description: 'Fully custom trigger renderer.',
-    type: 'MultiSelectSlotProps'
+    type: '{ open: boolean; disabled: boolean; query: string; selectedOptions: ({ label: string; value: string; icon?: string | Component; description?: string; disabled?: boolean; slot?: string; slots?: MultiSelectItemSlots<MultiSelectItemSlotProps>; slotName?: string; render?: MultiSelectItemSlots<MultiSelectItemSlotProps> | (): VNode | VNode[] })[]; displayValue: string; clearAll: (): void; toggleOpen: (): void }'
   },
   {
     name: 'prefix',
     description: 'Content rendered before the trigger label. When provided, this slot\nowns the entire prefix area regardless of selection count — useful\nfor aggregate visuals like stacked avatars. If omitted, the trigger\nauto-renders the selected option\'s `#item-prefix` / `icon` when\nexactly one is selected, and nothing otherwise.',
-    type: 'MultiSelectSlotProps'
+    type: '{ open: boolean; disabled: boolean; query: string; selectedOptions: ({ label: string; value: string; icon?: string | Component; description?: string; disabled?: boolean; slot?: string; slots?: MultiSelectItemSlots<MultiSelectItemSlotProps>; slotName?: string; render?: MultiSelectItemSlots<MultiSelectItemSlotProps> | (): VNode | VNode[] })[]; displayValue: string; clearAll: (): void; toggleOpen: (): void }'
   },
   {
     name: 'summary',
     description: 'Overrides the trigger label region. Receives the default summary\ntext as `summary` — use it as a fallback. Useful when you want to\nshow comma-separated labels (or any other format) instead of the\ndefault `"N selected"` for multi-selection states.',
-    type: 'MultiSelectSummarySlotProps'
+    type: '{ summary: string; open: boolean; disabled: boolean; query: string; selectedOptions: ({ label: string; value: string; icon?: string | Component; description?: string; disabled?: boolean; slot?: string; slots?: MultiSelectItemSlots<MultiSelectItemSlotProps>; slotName?: string; render?: MultiSelectItemSlots<MultiSelectItemSlotProps> | (): VNode | VNode[] })[]; displayValue: string; clearAll: (): void; toggleOpen: (): void }'
   },
   {
     name: 'suffix',
     description: 'Content rendered after the trigger label. Providing this slot\n**replaces the default chevron** — render your own fallback when\nyour slot content is conditional. Use `@click.stop` and\n`@pointerdown.stop` so the press doesn\'t toggle the popover.',
-    type: 'MultiSelectSlotProps'
+    type: '{ open: boolean; disabled: boolean; query: string; selectedOptions: ({ label: string; value: string; icon?: string | Component; description?: string; disabled?: boolean; slot?: string; slots?: MultiSelectItemSlots<MultiSelectItemSlotProps>; slotName?: string; render?: MultiSelectItemSlots<MultiSelectItemSlotProps> | (): VNode | VNode[] })[]; displayValue: string; clearAll: (): void; toggleOpen: (): void }'
   },
   {
     name: 'label',
     description: 'Overrides the rendered label content. Receives `{ required }`.',
-    type: '{ required: boolean; }'
+    type: '{ required: boolean }'
   },
   {
     name: 'description',
@@ -175,42 +175,42 @@
   {
     name: 'item-prefix',
     description: 'Shared content rendered before the standard row label.',
-    type: 'MultiSelectItemSlotProps'
+    type: '{ item: { label: string; value: string; icon?: string | Component; description?: string; disabled?: boolean; slot?: string; slots?: MultiSelectItemSlots<MultiSelectItemSlotProps>; slotName?: string; render?: MultiSelectItemSlots<MultiSelectItemSlotProps> | (): VNode | VNode[] }; query: string; selected: boolean }'
   },
   {
     name: 'item-label',
     description: 'Shared content rendered for the standard row label area.',
-    type: 'MultiSelectItemSlotProps'
+    type: '{ item: { label: string; value: string; icon?: string | Component; description?: string; disabled?: boolean; slot?: string; slots?: MultiSelectItemSlots<MultiSelectItemSlotProps>; slotName?: string; render?: MultiSelectItemSlots<MultiSelectItemSlotProps> | (): VNode | VNode[] }; query: string; selected: boolean }'
   },
   {
     name: 'item-suffix',
     description: 'Shared content rendered after the standard row label area.',
-    type: 'MultiSelectItemSlotProps'
+    type: '{ item: { label: string; value: string; icon?: string | Component; description?: string; disabled?: boolean; slot?: string; slots?: MultiSelectItemSlots<MultiSelectItemSlotProps>; slotName?: string; render?: MultiSelectItemSlots<MultiSelectItemSlotProps> | (): VNode | VNode[] }; query: string; selected: boolean }'
   },
   {
     name: 'item',
     description: 'Replaces the entire row.',
-    type: 'MultiSelectItemSlotProps'
+    type: '{ item: { label: string; value: string; icon?: string | Component; description?: string; disabled?: boolean; slot?: string; slots?: MultiSelectItemSlots<MultiSelectItemSlotProps>; slotName?: string; render?: MultiSelectItemSlots<MultiSelectItemSlotProps> | (): VNode | VNode[] }; query: string; selected: boolean }'
   },
   {
     name: 'group-label',
     description: 'Custom renderer for group labels.',
-    type: 'MultiSelectGroupLabelSlotProps'
+    type: '{ group: { key?: string | number; group: string; hideLabel?: boolean; options: ({ label: string; value: string; icon?: string | Component; description?: string; disabled?: boolean; slot?: string; slots?: MultiSelectItemSlots<MultiSelectItemSlotProps>; slotName?: string; render?: MultiSelectItemSlots<MultiSelectItemSlotProps> | (): VNode | VNode[] })[] } }'
   },
   {
     name: 'empty',
     description: 'Fallback content rendered when there are no results.',
-    type: 'MultiSelectEmptySlotProps'
+    type: '{ query: string }'
   },
   {
     name: 'footer',
     description: 'Replaces the default Clear All / Select All footer.',
-    type: 'MultiSelectFooterSlotProps'
+    type: '{ clearAll: (): void; selectAll: (): void; selectedOptions: ({ label: string; value: string; icon?: string | Component; description?: string; disabled?: boolean; slot?: string; slots?: MultiSelectItemSlots<MultiSelectItemSlotProps>; slotName?: string; render?: MultiSelectItemSlots<MultiSelectItemSlotProps> | (): VNode | VNode[] })[]; query: string }'
   },
   {
     name: 'option',
     description: '',
-    type: '{ item: MultiSelectOption; }',
+    type: '{ item: { label: string; value: string; icon?: string | Component; description?: string; disabled?: boolean; slot?: string; slots?: MultiSelectItemSlots<MultiSelectItemSlotProps>; slotName?: string; render?: MultiSelectItemSlots<MultiSelectItemSlotProps> | (): VNode | VNode[] } }',
     deprecated: 'compatibility alias for `#item-label`.'
   }
 ]
