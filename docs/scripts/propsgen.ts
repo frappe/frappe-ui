@@ -7,9 +7,35 @@ import { createChecker } from 'vue-component-meta'
 
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
 
+// When the ignore function fires for a node_modules type, vue-component-meta
+// stores `getFullyQualifiedName(type)` as the schema string — which includes
+// full generic args (e.g. `ComponentOptions<any,…>`) and minified internal
+// names (e.g. `kt` for RouteLocationAsRelativeGeneric from vue-router's bundle).
+// We capture a cleaner display name here and look it up in schemaToTypeStr.
+const typeNameOverrides = new Map<string, string>()
+
 const checkerOptions: MetaCheckerOptions = {
   forceUseTs: true,
-  schema: { ignore: ['MyIgnoredNestedProps'] },
+  schema: {
+    ignore: [
+      (_name: string, type: any) => {
+        const symbol = type.aliasSymbol ?? type.symbol
+        const decls: any[] | undefined = symbol?.declarations
+        if (!decls?.length) return false
+        const isNodeModules = decls.some((d: any) => {
+          const fn: string = d.getSourceFile().fileName
+          return (
+            fn.includes('/node_modules/') &&
+            !fn.includes('/node_modules/typescript/lib/lib.es')
+          )
+        })
+        if (isNodeModules && symbol.name && symbol.name !== _name) {
+          typeNameOverrides.set(_name, symbol.name)
+        }
+        return isNodeModules
+      },
+    ],
+  },
   printer: { newLine: 1 },
 }
 
@@ -25,11 +51,121 @@ const SOURCE_ROOTS = [
 const AUTO_STORIES_START = '<!-- AUTO-GENERATED STORIES START -->'
 const AUTO_STORIES_END = '<!-- AUTO-GENERATED STORIES END -->'
 
-function parseTypeStr(type: string) {
+function stripUndefined(type: string) {
   if (type.includes('undefined')) {
     return type.replace(' | undefined', '').trim()
   }
   return type
+}
+
+// Vue's `Component` type alias distributes to three interfaces. When TypeScript
+// resolves through PropType<> generics it loses the alias, so we collapse the
+// expanded members back to the clean alias name.
+const VUE_COMPONENT_BASES = new Set([
+  'ComponentOptions',
+  'FunctionalComponent',
+  'ComponentPublicInstanceConstructor',
+  'ConcreteComponent',
+])
+
+// vue-router bundles its types with minified internal names (e.g. `kt`).
+// After resolving via typeNameOverrides we get the full names; collapse the
+// known parts of RouteLocationRaw back to the public alias.
+const VUE_ROUTER_ROUTE_PARTS = new Set([
+  'RouteLocationAsRelativeGeneric',
+  'RouteLocationAsPathGeneric',
+])
+
+function collapseKnownUnions(parts: string[]): string[] {
+  const partsSet = new Set(parts)
+
+  // Collapse Vue component interfaces → Component
+  if (parts.some((p) => VUE_COMPONENT_BASES.has(p))) {
+    parts = [
+      ...parts.filter((p) => !VUE_COMPONENT_BASES.has(p)),
+      'Component',
+    ]
+  }
+
+  // Collapse RouteLocationRaw parts (including the `string` member that's
+  // already part of RouteLocationRaw) → RouteLocationRaw
+  if ([...VUE_ROUTER_ROUTE_PARTS].every((p) => partsSet.has(p))) {
+    parts = [
+      ...parts.filter((p) => !VUE_ROUTER_ROUTE_PARTS.has(p) && p !== 'string'),
+      'RouteLocationRaw',
+    ]
+  }
+
+  return parts
+}
+
+// Vue renders VNode with full internal generics (RendererNode, RendererElement, …)
+// that are meaningless to consumers. Strip them so we show just `VNode`.
+const STRIP_VNODE_GENERICS_RE = /\bVNode<[^<>]*(?:<[^<>]*>[^<>]*)*>/g
+
+function schemaToTypeStr(schema: any, seen = new Set<string>()): string {
+  if (typeof schema === 'string') {
+    // Resolve minified/generic names to their cleaner symbol names
+    let resolved = typeNameOverrides.get(schema) ?? schema
+    if (resolved === 'undefined') return ''
+    // Strip internal VNode generic args — they're implementation detail noise
+    resolved = resolved.replace(STRIP_VNODE_GENERICS_RE, 'VNode')
+    return resolved
+  }
+  if (!schema) return ''
+
+  const kind: string = schema.kind
+  const type: string = schema.type ?? ''
+
+  if (!kind) return type
+
+  if (type && seen.has(type)) return type
+  const next = new Set(seen)
+  if (type) next.add(type)
+
+  if (kind === 'enum') {
+    if (type === 'boolean') return 'boolean'
+    const members: any[] = schema.schema ?? []
+    let parts = members
+      .map((s: any) => schemaToTypeStr(s, next))
+      .filter((s: string) => s && s !== 'undefined')
+    // TypeScript expands `boolean` to `true | false` as literals — normalise it back.
+    if ([...parts].sort().join('|') === 'false|true') return 'boolean'
+    parts = collapseKnownUnions(parts)
+    return parts.length ? parts.join(' | ') : stripUndefined(type)
+  }
+
+  if (kind === 'array') {
+    const items: any[] = schema.schema ?? []
+    if (!items.length) return stripUndefined(type)
+    const el = schemaToTypeStr(items[0], next)
+    if (!el) return stripUndefined(type)
+    // Wrap union element types in parens so `(A | B)[]` is unambiguous
+    return el.includes(' | ') ? `(${el})[]` : `${el}[]`
+  }
+
+  if (kind === 'object') {
+    const propMap: Record<string, any> = schema.schema ?? {}
+    const entries = Object.values(propMap)
+    if (!entries.length) return stripUndefined(type)
+    const fields = (entries as any[])
+      .filter((p) => !p.global)
+      .map((p) => {
+        const raw = schemaToTypeStr(p.schema, next) || stripUndefined(p.type)
+        // Strip `| undefined` from optional property types — the `?:` already
+        // signals optionality; including it is redundant and adds visual noise.
+        const ft = p.required ? raw : stripUndefined(raw)
+        return `${p.name}${p.required ? '' : '?'}: ${ft}`
+      })
+    return fields.length ? `{ ${fields.join('; ')} }` : stripUndefined(type)
+  }
+
+  return stripUndefined(type)
+}
+
+function resolveType(type: string, schema: any): string {
+  const resolved = schemaToTypeStr(schema) || stripUndefined(type)
+  return resolved.replace(STRIP_VNODE_GENERICS_RE, 'VNode')
 }
 
 // Return the `@deprecated` message, `true` if the tag is present without
@@ -104,10 +240,6 @@ ${indent}}`
   }
 
   return String(value)
-}
-
-function arrToExpression(value: unknown) {
-  return toVueExpression(value)
 }
 
 function humanizeStoryName(name: string) {
@@ -193,7 +325,7 @@ function extractTableData(name: string, data: any) {
         name: x.name,
         description: x.description,
         required: x.required,
-        type: parseTypeStr(x.type),
+        type: resolveType(x.type, x.schema),
         default: x.default,
         deprecated: getDeprecation(x.tags),
       }),
@@ -205,7 +337,7 @@ function extractTableData(name: string, data: any) {
       withOptional({
         name: x.name,
         description: x.description,
-        type: x.type.slice(0, 100),
+        type: resolveType(x.type, x.schema),
         deprecated: getDeprecation(x.tags),
       }),
     )
@@ -256,13 +388,13 @@ function genFolderMetaTable(folder: string, components: ComponentMeta[]) {
   for (const c of components) {
     const names = constNames(c.name)
     if (c.props.length > 0) {
-      scriptLines.push(`\n  const ${names.props} = ${arrToExpression(c.props)}`)
+      scriptLines.push(`\n  const ${names.props} = ${toVueExpression(c.props)}`)
     }
     if (c.slots.length > 0) {
-      scriptLines.push(`\n  const ${names.slots} = ${arrToExpression(c.slots)}`)
+      scriptLines.push(`\n  const ${names.slots} = ${toVueExpression(c.slots)}`)
     }
     if (c.emits.length > 0) {
-      scriptLines.push(`\n  const ${names.emits} = ${arrToExpression(c.emits)}`)
+      scriptLines.push(`\n  const ${names.emits} = ${toVueExpression(c.emits)}`)
     }
   }
 
