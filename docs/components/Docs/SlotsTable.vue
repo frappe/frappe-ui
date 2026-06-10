@@ -98,6 +98,7 @@ function isLongRow(x: ItemProp): boolean {
             <td colspan="2" class="py-2">
               <button
                 class="flex items-center gap-1 text-xs text-ink-gray-5 hover:text-ink-gray-7 transition-colors"
+                :aria-expanded="expanded[x.name]"
                 @click="expanded[x.name] = !expanded[x.name]"
               >
                 <LucideChevronDown
@@ -153,6 +154,7 @@ function isLongRow(x: ItemProp): boolean {
         <button
           v-if="isLongRow(x)"
           class="flex items-center gap-1 text-xs text-ink-gray-5 hover:text-ink-gray-7 transition-colors"
+          :aria-expanded="expanded[x.name + '-m']"
           @click="expanded[x.name + '-m'] = !expanded[x.name + '-m']"
         >
           <LucideChevronDown
