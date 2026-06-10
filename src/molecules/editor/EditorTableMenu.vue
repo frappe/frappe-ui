@@ -8,7 +8,8 @@ import {
   watch,
 } from 'vue'
 import { computePosition, flip, offset, shift } from '@floating-ui/dom'
-import { CellSelection, cellAround } from '@tiptap/pm/tables'
+import { CellSelection, cellAround, isInTable, selectionCell } from '@tiptap/pm/tables'
+import { verticalScrollParent } from './extensions/table/drag-scroll'
 import MenuItems from './MenuItems.vue'
 import TableContextMenu from './components/TableContextMenu.vue'
 import { tableToolbar } from './menu'
@@ -67,6 +68,35 @@ function activeTableEl(ed: Editor): HTMLElement | null {
   return null
 }
 
+/**
+ * The vertical band the toolbar may occupy: the visible part of the editor's
+ * scroll container (so a pinned toolbar never floats over the app chrome
+ * above/below it), clamped to the viewport.
+ */
+function verticalBounds(table: HTMLElement): { top: number; bottom: number } {
+  const parent = verticalScrollParent(table)
+  if (parent === document.scrollingElement || parent === document.documentElement) {
+    return { top: 0, bottom: window.innerHeight }
+  }
+  const rect = parent.getBoundingClientRect()
+  return {
+    top: Math.max(rect.top, 0),
+    bottom: Math.min(rect.bottom, window.innerHeight),
+  }
+}
+
+/** Whether any part of the table is visible inside its scroll container. */
+function tableInView(table: HTMLElement): boolean {
+  const rect = table.getBoundingClientRect()
+  const bounds = verticalBounds(table)
+  return (
+    rect.bottom > bounds.top &&
+    rect.top < bounds.bottom &&
+    rect.right > 0 &&
+    rect.left < window.innerWidth
+  )
+}
+
 function reposition() {
   const table = anchor.value
   const el = floating.value
@@ -95,8 +125,13 @@ function reposition() {
     placement: 'top',
     middleware: [offset(4), flip(), shift({ padding: 8 })],
   }).then(({ x, y }) => {
+    // Pin the toolbar inside the visible band while scrolling through a tall
+    // table, instead of letting it follow the table's top edge off-screen.
+    const bounds = verticalBounds(table)
+    const minY = bounds.top + 4
+    const maxY = bounds.bottom - el.offsetHeight - 4
     el.style.left = `${x}px`
-    el.style.top = `${y}px`
+    el.style.top = `${Math.min(Math.max(y, minY), Math.max(maxY, minY))}px`
   })
 }
 
@@ -104,9 +139,9 @@ function sync() {
   const ed = editor.value
   const table = ed ? activeTableEl(ed) : null
   anchor.value = table
-  visible.value = !!table
+  visible.value = !!table && tableInView(table)
   // Wait for v-show to reveal the element before measuring it.
-  if (table) void nextTick(reposition)
+  if (visible.value) void nextTick(reposition)
 }
 
 // --- Right-click context menu ---------------------------------------------
@@ -150,22 +185,44 @@ function onContextMenu(event: MouseEvent) {
     left: event.clientX,
     top: event.clientY,
   })
-  if (!coords) return
-  const $cell = cellAround(ed.state.doc.resolve(coords.pos))
-  if (!$cell) return // not in a table — let the native menu through
+  let $cell = coords ? cellAround(ed.state.doc.resolve(coords.pos)) : null
+  let point = { x: event.clientX, y: event.clientY }
+  if (!$cell) {
+    // A real right-click outside any table — let the native menu through.
+    if (event.button === 2) return
+    // Keyboard-initiated (ContextMenu key / Shift+F10) events carry no usable
+    // coordinates; fall back to the active cell and anchor the menu to it.
+    if (!isInTable(ed.state)) return
+    $cell = selectionCell(ed.state)
+    const cellDom = ed.view.nodeDOM($cell.pos)
+    if (!(cellDom instanceof HTMLElement)) return
+    const rect = cellDom.getBoundingClientRect()
+    point = { x: rect.left + Math.min(rect.width / 2, 24), y: rect.bottom - 4 }
+  }
   event.preventDefault()
-  // Select the right-clicked cell so the actions target it.
-  ed.view.dispatch(
-    ed.state.tr.setSelection(CellSelection.create(ed.state.doc, $cell.pos)),
-  )
-  openContextMenu(ed, event.clientX, event.clientY)
+  // Keep an existing multi-cell selection when the click lands inside it — the
+  // menu is the natural place to act on the selected block (merge, color).
+  // Otherwise select the right-clicked cell so the actions target it.
+  const selection = ed.state.selection
+  let inSelection = false
+  if (selection instanceof CellSelection) {
+    selection.forEachCell((_node, pos) => {
+      if (pos === $cell!.pos) inSelection = true
+    })
+  }
+  if (!inSelection) {
+    ed.view.dispatch(
+      ed.state.tr.setSelection(CellSelection.create(ed.state.doc, $cell.pos)),
+    )
+  }
+  openContextMenu(ed, point.x, point.y)
 }
 
 // (Re)subscribe whenever the editor instance changes. The toolbar shows on
-// transactions (selection / content) and repositions on resize. Scrolling hides
-// it: it's a body-teleported, fixed-position toolbar anchored to the table top,
-// so following the table on scroll would float it out of the editor and over the
-// page header. It reappears the next time the caret lands in a table.
+// transactions (selection / content) and follows the table on scroll/resize —
+// re-clamped into the scroll container's visible band by `reposition`, and
+// hidden only once the table itself scrolls out of view.
+let scrollRaf = 0
 watch(
   editor,
   (ed, _old, onCleanup) => {
@@ -175,9 +232,13 @@ watch(
     }
     const onChange = () => sync()
     const onScroll = () => {
-      visible.value = false
+      if (scrollRaf) return
+      scrollRaf = requestAnimationFrame(() => {
+        scrollRaf = 0
+        sync()
+      })
     }
-    const onResize = () => reposition()
+    const onResize = () => sync()
     ed.on('transaction', onChange)
     ed.on('focus', onChange)
     // Capture phase so inner scroll containers are caught too.
@@ -190,6 +251,8 @@ watch(
     onCleanup(() => {
       ed.off('transaction', onChange)
       ed.off('focus', onChange)
+      if (scrollRaf) cancelAnimationFrame(scrollRaf)
+      scrollRaf = 0
       document.removeEventListener('scroll', onScroll, true)
       window.removeEventListener('resize', onResize)
       document.removeEventListener('contextmenu', onContextMenu, true)
@@ -209,7 +272,7 @@ onBeforeUnmount(closeContextMenu)
         v-show="visible && editor"
         ref="floating"
         data-slot="table-menu"
-        class="fixed left-0 top-0 z-[100] flex items-center gap-1 rounded-lg border border-outline-gray-2 bg-surface-base p-1 shadow-sm"
+        class="fixed left-0 top-0 z-[100] flex items-center gap-1 rounded-lg border border-outline-gray-2 bg-surface-elevation-2 p-1 shadow-sm"
       >
         <MenuItems v-if="editor" :editor="editor" :items="tableToolbar" />
       </div>
