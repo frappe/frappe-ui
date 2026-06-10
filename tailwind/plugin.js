@@ -80,7 +80,10 @@ function buildFontSize() {
   for (const [key, p] of Object.entries(typographyTokens.paragraph || {})) {
     if (!out[key]) continue
     const [size, meta] = out[key]
-    out[`p-${key}`] = [size, { ...meta, lineHeight: p.lineHeight, letterSpacing: p.letterSpacing }]
+    out[`p-${key}`] = [
+      size,
+      { ...meta, lineHeight: p.lineHeight, letterSpacing: p.letterSpacing },
+    ]
   }
   return out
 }
@@ -142,7 +145,10 @@ function buildTextStyleUtilities() {
   // `tiny` is an uppercase eyebrow style; the bare regular utility needs the
   // text-transform too (Tailwind's fontSize tuple can't express it).
   for (const [size, transform] of Object.entries(t.textTransform || {})) {
-    out[`.text-${size}`] = { ...(out[`.text-${size}`] || {}), textTransform: transform }
+    out[`.text-${size}`] = {
+      ...(out[`.text-${size}`] || {}),
+      textTransform: transform,
+    }
   }
   return out
 }
@@ -235,11 +241,14 @@ export default plugin(
         },
         backgroundColor: {
           surface: semanticColors.surface,
+          'surface-alpha': semanticColors['surface-alpha'],
         },
         gradientColorStops: {
           surface: semanticColors.surface,
+          'surface-alpha': semanticColors['surface-alpha'],
           ink: semanticColors.ink,
           outline: semanticColors.outline,
+          'outline-alpha': semanticColors['outline-alpha'],
         },
         fill: {
           ink: semanticColors.ink,
@@ -254,12 +263,15 @@ export default plugin(
         borderColor: () => ({
           DEFAULT: 'var(--outline-gray-1)',
           outline: semanticColors.outline,
+          'outline-alpha': semanticColors['outline-alpha'],
         }),
         ringColor: {
           outline: semanticColors.outline,
+          'outline-alpha': semanticColors['outline-alpha'],
         },
         divideColor: {
           outline: semanticColors.outline,
+          'outline-alpha': semanticColors['outline-alpha'],
         },
         spacing: {
           4.5: '1.125rem',

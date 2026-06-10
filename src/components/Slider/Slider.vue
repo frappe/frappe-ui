@@ -85,10 +85,10 @@ const onValueCommit = (value: SliderValue) => {
 const hasLabeling = computed(() => {
   return Boolean(
     props.label ||
-      slots.label ||
-      showDescription.value ||
-      slots.description ||
-      hasError.value,
+    slots.label ||
+    showDescription.value ||
+    slots.description ||
+    hasError.value,
   )
 })
 </script>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// import { Progress } from 'frappe-ui'
+import { Progress } from 'frappe-ui'
 import ComponentPlayground, { type Knob } from './ComponentPlayground.vue'
 
 const knobs: Knob[] = [
