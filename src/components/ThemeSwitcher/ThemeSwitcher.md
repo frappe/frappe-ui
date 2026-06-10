@@ -27,7 +27,7 @@ sidebar or menu.
 ## In a user menu
 
 A user menu is the most common home for theme switching. Nest the three options
-as a hover submenu inside a [`Dropdown`](/components/Dropdown), drive them through the same
+as a hover submenu inside a [`Dropdown`](/docs/components/dropdown), drive them through the same
 [`useTheme`](#usetheme) singleton, and mark the active one with `selected` so the menu
 always reflects the shared `<html data-theme>`.
 
