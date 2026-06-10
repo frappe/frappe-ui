@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, useSlots } from 'vue'
+import { reactive } from 'vue'
+import { formatTypeStr, isLongType } from './typeFormatter'
 
 interface ItemProp {
   name: string
@@ -11,55 +12,27 @@ interface ItemProp {
 }
 
 interface Props {
-  name?: string
   data: ItemProp[]
 }
 
 const props = defineProps<Props>()
-const slots = useSlots()
 
-const hasCustomCodeSlot = computed(() => Boolean(slots.code))
+const expanded = reactive<Record<string, boolean>>({})
 
-const typeDefinition = computed(() => {
-  const typeName = props.name ? `${props.name}Props` : 'ComponentProps'
-  const lines = [`interface ${typeName} {`]
+function displayType(type: string | undefined): string {
+  return type ? formatTypeStr(type) : ''
+}
 
-  for (const item of props.data) {
-    const key = /^[A-Za-z_$][\w$]*$/.test(item.name)
-      ? item.name
-      : JSON.stringify(item.name)
-    const optional = item.required ? '' : '?'
-    const type = item.type || 'unknown'
-
-    lines.push(`  ${key}${optional}: ${type}`)
-  }
-
-  lines.push('}')
-  return lines.join('\n')
-})
+function isLongRow(x: ItemProp): boolean {
+  const typeLong = !x.deprecated && isLongType(x.type)
+  const descLong =
+    typeof x.deprecated !== 'string' && (x.description?.length ?? 0) > 150
+  return typeLong || descLong
+}
 </script>
 
 <template>
   <div class="not-prose mt-2">
-    <details class="group">
-      <summary
-        class="flex rounded cursor-pointer list-none items-center gap-2 py-2 text-sm font-medium text-ink-gray-6 transition-colors hover:text-ink-gray-9"
-      >
-        <LucideChevronRight
-          class="size-4 shrink-0 transition-transform group-open:rotate-90"
-        />
-        Show types
-      </summary>
-
-      <div class="mt-1 overflow-hidden rounded-xl border bg-surface-gray-1">
-        <slot v-if="hasCustomCodeSlot" name="code" />
-        <pre
-          v-else
-          class="overflow-x-auto whitespace-pre px-4 py-3 font-mono text-xs leading-6 text-ink-gray-7"
-        ><code>{{ typeDefinition }}</code></pre>
-      </div>
-    </details>
-
     <div class="mt-4 hidden sm:block">
       <table class="w-full border-collapse border-b text-left">
         <thead>
@@ -83,53 +56,82 @@ const typeDefinition = computed(() => {
         </thead>
 
         <tbody>
-          <tr v-for="x in data" :key="x.name" class="border-b last:border-b-0">
-            <td class="py-2 pr-2 align-top">
-              <div
-                class="font-mono text-xs font-medium leading-6 text-ink-gray-9 break-words"
-              >
-                <span :class="{ 'line-through': x.deprecated }">{{
-                  x.name
-                }}</span
-                ><span
-                  v-if="x.required"
-                  class="text-ink-gray-5"
-                  title="Required"
-                  aria-label="required"
-                  >*</span
+          <template v-for="(x, idx) in data" :key="x.name">
+            <!-- Data row: no bottom border when an expand row follows it -->
+            <tr :class="{ 'border-b': !isLongRow(x) && idx < data.length - 1 }">
+              <td class="py-2 pr-2 align-top">
+                <div
+                  class="font-mono text-xs font-medium leading-6 text-ink-gray-9 break-words"
                 >
-              </div>
-            </td>
+                  <span :class="{ 'line-through': x.deprecated }">{{
+                    x.name
+                  }}</span
+                  ><span
+                    v-if="x.required"
+                    class="text-ink-gray-5"
+                    title="Required"
+                    aria-label="required"
+                    >*</span
+                  >
+                </div>
+                <p
+                  v-if="typeof x.deprecated === 'string'"
+                  class="mt-0.5 text-xs leading-5 text-ink-gray-5"
+                >
+                  Deprecated — {{ x.deprecated }}
+                </p>
+                <p
+                  v-else-if="x.description"
+                  :class="[
+                    'mt-0.5 text-xs leading-5 text-ink-gray-5',
+                    isLongRow(x) && !expanded[x.name] ? 'line-clamp-5' : '',
+                  ]"
+                >
+                  {{ x.description }}
+                </p>
+              </td>
 
-            <td class="px-2 py-2 align-top">
-              <div
-                class="whitespace-pre-wrap break-words font-mono text-xs leading-6 text-ink-gray-6"
-              >
-                {{ x.default || '—' }}
-              </div>
-            </td>
+              <td class="px-2 py-2 align-top">
+                <div
+                  class="whitespace-pre-wrap break-words font-mono text-xs leading-6 text-ink-gray-6"
+                >
+                  {{ x.default || '—' }}
+                </div>
+              </td>
 
-            <td class="px-2 py-2 align-top">
-              <div
-                v-if="!x.deprecated"
-                class="whitespace-normal break-words font-mono text-xs leading-6 text-ink-gray-8"
-              >
-                {{ x.type || '—' }}
-              </div>
-              <p
-                v-if="typeof x.deprecated === 'string'"
-                class="whitespace-pre-wrap text-p-sm text-ink-gray-6"
-              >
-                Deprecated — {{ x.deprecated }}
-              </p>
-              <p
-                v-else-if="x.description"
-                class="mt-1 whitespace-pre-wrap text-p-sm leading-6 text-ink-gray-6"
-              >
-                {{ x.description }}
-              </p>
-            </td>
-          </tr>
+              <td class="px-2 py-2 align-top">
+                <pre
+                  v-if="!x.deprecated"
+                  :class="[
+                    'whitespace-pre-wrap break-words font-mono text-xs leading-6 text-ink-gray-8',
+                    isLongRow(x) && !expanded[x.name] ? 'line-clamp-5' : '',
+                  ]"
+                  >{{ displayType(x.type) || '—' }}</pre
+                >
+              </td>
+            </tr>
+
+            <!-- Expand row: spans all columns, provides the bottom border for the group -->
+            <tr
+              v-if="isLongRow(x)"
+              :class="{ 'border-b': idx < data.length - 1 }"
+            >
+              <td colspan="3" class="py-2">
+                <button
+                  class="flex items-center gap-1 text-xs text-ink-gray-5 hover:text-ink-gray-7 transition-colors"
+                  @click="expanded[x.name] = !expanded[x.name]"
+                >
+                  <LucideChevronDown
+                    :class="[
+                      'size-3 transition-transform',
+                      expanded[x.name] ? 'rotate-180' : '',
+                    ]"
+                  />
+                  {{ expanded[x.name] ? 'Show less' : 'Show more' }}
+                </button>
+              </td>
+            </tr>
+          </template>
         </tbody>
       </table>
     </div>
@@ -160,25 +162,44 @@ const typeDefinition = computed(() => {
             = {{ x.default }}
           </span>
         </div>
-
-        <div
-          v-if="!x.deprecated"
-          class="whitespace-normal break-words font-mono text-xs leading-6 text-ink-gray-8"
-        >
-          {{ x.type || '—' }}
-        </div>
         <p
           v-if="typeof x.deprecated === 'string'"
-          class="whitespace-pre-wrap text-p-sm text-ink-gray-6"
+          class="text-xs leading-5 text-ink-gray-5"
         >
           Deprecated — {{ x.deprecated }}
         </p>
         <p
           v-else-if="x.description"
-          class="whitespace-pre-wrap text-p-sm leading-6 text-ink-gray-6"
+          :class="[
+            'text-xs leading-5 text-ink-gray-5',
+            isLongRow(x) && !expanded[x.name + '-m'] ? 'line-clamp-5' : '',
+          ]"
         >
           {{ x.description }}
         </p>
+
+        <pre
+          v-if="!x.deprecated"
+          :class="[
+            'whitespace-pre-wrap break-words font-mono text-xs leading-6 text-ink-gray-8',
+            isLongRow(x) && !expanded[x.name + '-m'] ? 'line-clamp-5' : '',
+          ]"
+          >{{ displayType(x.type) || '—' }}</pre
+        >
+
+        <button
+          v-if="isLongRow(x)"
+          class="flex items-center gap-1 text-xs text-ink-gray-5 hover:text-ink-gray-7 transition-colors"
+          @click="expanded[x.name + '-m'] = !expanded[x.name + '-m']"
+        >
+          <LucideChevronDown
+            :class="[
+              'size-3 transition-transform',
+              expanded[x.name + '-m'] ? 'rotate-180' : '',
+            ]"
+          />
+          {{ expanded[x.name + '-m'] ? 'Show less' : 'Show more' }}
+        </button>
       </div>
     </div>
   </div>
