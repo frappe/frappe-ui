@@ -84,7 +84,10 @@ import { getTagExtensions } from './extensions/tag'
 function defaultUploadFunction(file: File) {
   // useFileUpload is frappe specific
   let fileUpload = useFileUpload()
-  return fileUpload.upload(file, props.uploadArgs || {})
+  // Default uploads to private so editor images/attachments are not served from
+  // the unauthenticated /files/ path (frappe/security#206). Callers can still
+  // override via uploadArgs (e.g. `private: false` for intentionally public files).
+  return fileUpload.upload(file, { private: true, ...(props.uploadArgs || {}) })
 }
 
 const props = withDefaults(defineProps<TextEditorProps>(), {
