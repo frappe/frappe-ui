@@ -186,6 +186,22 @@ function browserTabBase(checked: boolean): BrowserTabBase {
   return props.direction
 }
 
+function tabButtonRadiusClass(checked: boolean) {
+  if (props.type === 'underline') return ''
+
+  if (props.type === 'browser-tab') {
+    const base = browserTabBase(checked)
+    if (base === 'left')
+      return props.size === 'sm' ? 'rounded-r-[7px]' : 'rounded-r-[9px]'
+    if (base === 'right')
+      return props.size === 'sm' ? 'rounded-l-[7px]' : 'rounded-l-[9px]'
+    if (base === 'default')
+      return props.size === 'sm' ? 'rounded-t-[7px]' : 'rounded-t-[9px]'
+  }
+
+  return props.size === 'sm' ? 'rounded-[7px]' : 'rounded-[9px]'
+}
+
 function hasLabel(label: TabButton['label']) {
   return label !== undefined && label !== null && label !== ''
 }
@@ -263,6 +279,7 @@ function tabElementProps(button: (typeof resolvedButtons.value)[number]) {
           "
           :class="[
             'inline-flex appearance-none border-0 bg-transparent p-0 text-inherit no-underline disabled:pointer-events-none disabled:opacity-60',
+            tabButtonRadiusClass(checked),
             vertical && 'w-full',
             button.customClass,
           ]"

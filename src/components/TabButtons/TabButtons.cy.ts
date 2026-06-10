@@ -76,4 +76,18 @@ describe('<TabButtons />', () => {
       .and('have.attr', 'title', 'Calendar')
     cy.get('[data-cy="calendar-icon"]').should('exist')
   })
+
+  it('rounds the focusable tab element to match the pill', () => {
+    cy.mount(TabButtons, {
+      props: {
+        options: [
+          { label: 'Day', value: 'day' },
+          { label: 'Week', value: 'week' },
+        ],
+        modelValue: 'day',
+      },
+    })
+
+    cy.contains('button', 'Day').should('have.class', 'rounded-[7px]')
+  })
 })
