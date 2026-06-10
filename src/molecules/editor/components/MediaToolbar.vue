@@ -87,7 +87,7 @@ onUnmounted(() => {
       >
         <span
           class="lucide-captions size-4"
-          :class="[showCaption ? 'text-ink-white' : 'text-ink-gray-4']"
+          :class="[showCaption ? 'text-ink-base' : 'text-ink-gray-4']"
         />
       </button>
     </Tooltip>
@@ -99,7 +99,7 @@ onUnmounted(() => {
         @click.stop="emit('replace')"
       >
         <span
-          class="size-4 text-ink-gray-4 hover:text-ink-white"
+          class="size-4 text-ink-gray-4 hover:text-ink-base"
           :class="mediaType === 'embed' ? 'lucide-link' : 'lucide-refresh-cw'"
         />
       </button>
@@ -113,9 +113,9 @@ onUnmounted(() => {
     >
       <button
         type="button"
-        class="hover:text-ink-white"
+        class="hover:text-ink-base"
         :class="
-          node.attrs.align === align.value ? 'text-ink-white' : 'text-ink-gray-4'
+          node.attrs.align === align.value ? 'text-ink-base' : 'text-ink-gray-4'
         "
         :aria-label="align.label"
         :aria-pressed="node.attrs.align === align.value"
@@ -128,8 +128,8 @@ onUnmounted(() => {
     <button
       v-if="isVideo"
       type="button"
-      class="hover:text-ink-white"
-      :class="showVideoOptions ? 'text-ink-white' : 'text-ink-gray-4'"
+      class="hover:text-ink-base"
+      :class="showVideoOptions ? 'text-ink-base' : 'text-ink-gray-4'"
       aria-label="Video options"
       @click.stop="toggleVideoOptions"
     >
@@ -145,7 +145,7 @@ onUnmounted(() => {
         v-for="option in videoOptionKeys"
         :key="option"
         type="button"
-        class="flex w-full items-center justify-between rounded px-2 py-1 text-left text-xs text-ink-gray-2 hover:bg-white/10 hover:text-ink-white"
+        class="flex w-full items-center justify-between rounded px-2 py-1 text-left text-xs text-ink-gray-2 hover:bg-white/10 hover:text-ink-base"
         :aria-pressed="Boolean(node.attrs[option])"
         @click.stop="toggleVideoOption(option)"
       >

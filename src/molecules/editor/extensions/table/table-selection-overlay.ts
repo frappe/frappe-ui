@@ -27,12 +27,23 @@ interface Rect {
 
 class SelectionOverlay {
   private el: HTMLElement | null = null
+  // The box is measured from live cell rects, but only transactions reach
+  // `update` — re-measure when the window reflows or the table itself resizes
+  // (column drag, image load) so the box doesn't drift between edits.
+  private resizeObserver: ResizeObserver | null = null
+  private observed: HTMLElement | null = null
+  private onResize = () => this.update(this.view)
 
   constructor(private view: EditorView) {
+    window.addEventListener('resize', this.onResize)
+    if (typeof ResizeObserver !== 'undefined') {
+      this.resizeObserver = new ResizeObserver(() => this.update(this.view))
+    }
     this.update(view)
   }
 
   update(view: EditorView): void {
+    this.view = view
     const { selection } = view.state
     const isRange =
       selection instanceof CellSelection &&
@@ -71,6 +82,7 @@ class SelectionOverlay {
         ? (anchorDom.closest('.tableWrapper') as HTMLElement | null)
         : null) ?? (view.dom as HTMLElement)
     const hostRect = host.getBoundingClientRect()
+    this.observe(host)
 
     // Convert viewport rect → host content coordinates (so the box scrolls with
     // the wrapper's horizontal overflow).
@@ -93,14 +105,25 @@ class SelectionOverlay {
     return el
   }
 
+  private observe(host: HTMLElement): void {
+    if (!this.resizeObserver || this.observed === host) return
+    this.resizeObserver.disconnect()
+    this.resizeObserver.observe(host)
+    this.observed = host
+  }
+
   private remove(): void {
     this.el?.remove()
     this.el = null
+    this.resizeObserver?.disconnect()
+    this.observed = null
   }
 
   destroy(): void {
     this.view.dom.classList.remove('table-cell-range')
     this.remove()
+    window.removeEventListener('resize', this.onResize)
+    this.resizeObserver = null
   }
 }
 

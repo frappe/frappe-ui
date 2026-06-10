@@ -227,7 +227,7 @@ describe('dialog.ts — imperative API', () => {
     cy.get('[role=dialog] .lucide-alert-triangle').should('exist')
     cy.contains('button', 'Confirm').should(
       'have.class',
-      'bg-surface-red-5',
+      'bg-surface-red-7',
     )
   })
 
@@ -337,7 +337,7 @@ describe('dialog.ts — imperative API', () => {
     cy.get('[role=dialog] .lucide-alert-triangle').should('exist')
     cy.contains('button', 'Delete')
       .should('exist')
-      .and('have.class', 'bg-surface-red-5')
+      .and('have.class', 'bg-surface-red-7')
   })
 
   it('danger lets you override the confirm label', () => {

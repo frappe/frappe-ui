@@ -240,7 +240,7 @@ defineSlots<SelectSlots>()
       :for-id="inputId"
       :label="label"
       :required="required"
-      class="text-p-sm font-medium text-ink-gray-7"
+      class="text-p-sm-medium text-ink-gray-7"
     >
       <template v-if="$slots.label" #default="slotProps">
         <slot name="label" v-bind="slotProps" />
@@ -355,7 +355,7 @@ defineSlots<SelectSlots>()
         <div
           data-slot="content-body"
           :data-motion="contentMotion"
-          class="flex flex-col overflow-hidden rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5 will-change-[opacity,transform] origin-[var(--reka-select-content-transform-origin)]"
+          class="flex flex-col overflow-hidden rounded-lg bg-surface-elevation-2 shadow-2xl ring-1 ring-black ring-opacity-5 will-change-[opacity,transform] origin-[var(--reka-select-content-transform-origin)]"
         >
           <SelectViewport class="flex min-h-0 flex-col p-1">
             <div

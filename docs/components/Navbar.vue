@@ -69,7 +69,7 @@ const devBranch = typeof __DEV_BRANCH__ !== 'undefined' ? __DEV_BRANCH__ : ''
 </script>
 
 <template>
-  <nav class="border-b sticky top-0 bg-surface-white z-10">
+  <nav class="border-b sticky top-0 bg-surface-base z-10">
     <SearchPopup v-model:open="state.searchDialog" />
 
     <div
@@ -152,6 +152,5 @@ const devBranch = typeof __DEV_BRANCH__ !== 'undefined' ? __DEV_BRANCH__ : ''
         </a>
       </div>
     </div>
-
   </nav>
 </template>

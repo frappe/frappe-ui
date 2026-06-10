@@ -76,7 +76,7 @@ const DEFAULT_TEXT_SWATCH: ColorSwatch = {
 const DEFAULT_HIGHLIGHT_SWATCH: ColorSwatch = {
   value: null,
   label: 'Default',
-  class: 'border-outline-gray-modals',
+  class: 'border-outline-elevation-2',
 }
 
 /** Text-color swatches, "Default" first, then the palette in canonical order. */

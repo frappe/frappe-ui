@@ -8,6 +8,7 @@ import {
 } from './commands'
 import { openFontColorPicker } from './components/font-color/fontColorController'
 import { openTableCellColorPicker } from './components/table-color/tableCellColorController'
+import { openTableSizePicker } from './components/table-size-picker/tableSizePickerController'
 
 export type MenuActionContext = EditorCommandContext
 
@@ -16,6 +17,11 @@ export type CommandMenuItem = {
   // house convention); a component renders as-is. Predefined items default it.
   icon?: Component | string
   label: string
+  /**
+   * State-dependent display label (e.g. "Merge cells" vs "Split cell").
+   * Renderers fall back to `label`, which stays the stable identity.
+   */
+  getLabel?: (editor: Editor) => string
   action: (
     editor: Editor,
     context?: MenuActionContext,
@@ -172,12 +178,24 @@ export const InsertIframe = command(
   undefined,
   false,
 )
-export const InsertTable = command(commandMeta.table, (editor) =>
-  editor
-    .chain()
-    .focus()
-    .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
-    .run(),
+// Opens a size-picker grid anchored to the toolbar button; without a trigger
+// (programmatic call) it inserts the default 3×3 directly. Like the other
+// picker-opening items, the action can't be probed via `can()`.
+export const InsertTable = command(
+  commandMeta.table,
+  (editor, context) => {
+    if (context?.trigger) {
+      openTableSizePicker({ editor, anchor: context.trigger })
+      return
+    }
+    return editor
+      .chain()
+      .focus()
+      .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+      .run()
+  },
+  undefined,
+  false,
 )
 export const HorizontalRule = command(commandMeta.horizontalRule, (editor) =>
   editor.chain().focus().setHorizontalRule().run(),
@@ -270,12 +288,21 @@ export const TableToggleHeaderRow = tableCommand(
   (editor) => editor.isActive('tableHeader'),
 )
 // One button for both directions: merges a multi-cell selection, splits a
-// merged cell. `can()` disables it when neither applies.
-export const TableMergeOrSplit = tableCommand(
-  'Merge or split cells',
-  'lucide-table-cells-merge',
-  (editor) => editor.chain().focus().mergeOrSplit().run(),
-)
+// merged cell. `can()` disables it when neither applies; the label names
+// whichever direction currently applies.
+export const TableMergeOrSplit: CommandMenuItem = {
+  ...tableCommand(
+    'Merge or split cells',
+    'lucide-table-cells-merge',
+    (editor) => editor.chain().focus().mergeOrSplit().run(),
+  ),
+  getLabel: (editor) =>
+    editor.can().mergeCells()
+      ? 'Merge cells'
+      : editor.can().splitCell()
+        ? 'Split cell'
+        : 'Merge or split cells',
+}
 export const TableDelete = tableCommand(
   'Delete table',
   'lucide-trash-2',

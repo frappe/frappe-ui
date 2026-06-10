@@ -60,7 +60,10 @@ export default defineConfig({
       dark: 'tokyo-night',
       light: 'github-light',
     },
-    codeTransformers: [toClass],
+    // transformerStyleToClass flushes its CSS only at buildEnd, so in dev
+    // the generated shiki.css stays empty and code blocks lose colors —
+    // skip it in dev and let shiki emit inline --shiki-light/dark styles.
+    codeTransformers: isDev ? [] : [toClass],
     config(md) {
       md.use(componentTransformer)
     },

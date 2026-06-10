@@ -83,7 +83,7 @@ const overflowCount = computed(() =>
         />
         <span
           v-if="overflowCount > 0"
-          class="z-10 grid size-5 place-items-center rounded-full bg-surface-gray-3 text-p-xs font-medium text-ink-gray-7"
+          class="z-10 grid size-5 place-items-center rounded-full bg-surface-gray-3 text-p-xs-medium text-ink-gray-7"
         >
           +{{ overflowCount }}
         </span>

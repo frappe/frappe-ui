@@ -282,7 +282,7 @@ function setCursorBeforeIframe() {
           class="flex items-center justify-center bg-surface-gray-1 rounded-lg w-[640px] h-[360px]"
         >
           <div class="text-ink-gray-5 text-center">
-            <div class="text-lg mb-1">🔗</div>
+            <div class="text-xl mb-1">🔗</div>
             <div class="text-sm">Loading embed...</div>
           </div>
         </div>

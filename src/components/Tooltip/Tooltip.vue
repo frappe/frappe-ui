@@ -17,7 +17,7 @@ const props = withDefaults(defineProps<TooltipProps>(), {
   text: '',
   placement: 'top',
   hoverDelay: 0.5,
-  arrowClass: 'fill-surface-gray-7',
+  arrowClass: 'fill-surface-gray-10',
   disabled: false,
 })
 

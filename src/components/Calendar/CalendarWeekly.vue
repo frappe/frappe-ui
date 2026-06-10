@@ -12,7 +12,7 @@
           {{ isToday(date) ? daysList[date.getDay()] : parseDateWithDay(date) }}
           <span
             v-if="isToday(date)"
-            class="inline-flex items-center justify-center bg-surface-gray-7 text-ink-white rounded size-[25px]"
+            class="inline-flex items-center justify-center bg-surface-gray-10 text-ink-base rounded size-[25px]"
           >
             {{ date.getDate() }}
           </span>
@@ -87,7 +87,7 @@
         <div class="grid w-20 grid-cols-1">
           <span
             v-for="time in 24"
-            class="flex items-end justify-center text-center text-sm font-normal text-ink-gray-5"
+            class="flex items-end justify-center text-center text-sm text-ink-gray-5"
             :style="{ height: `${hourHeight}px` }"
           />
         </div>

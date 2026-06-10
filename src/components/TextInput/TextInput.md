@@ -2,6 +2,10 @@
 
 A flexible input for entering text, numbers etc. Supports many sizes, styles, and custom slots.
 
+## Playground
+
+<ClientOnly><TextInputBuilder /></ClientOnly>
+
 <ComponentPreview name="TextInput-Default" layout="stacked" />
 
 ## Variants

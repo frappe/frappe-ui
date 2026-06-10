@@ -21,7 +21,7 @@ withDefaults(
     /** Fill class for the arrow — defaults to match the bubble shell. */
     arrowClass?: string
   }>(),
-  { side: 'top', arrowClass: 'fill-surface-gray-7' },
+  { side: 'top', arrowClass: 'fill-surface-gray-10' },
 )
 
 defineSlots<{
@@ -39,7 +39,7 @@ defineSlots<{
     <TooltipContent :side="side" :side-offset="4" class="z-[100]">
       <slot name="body">
         <div
-          class="rounded bg-surface-gray-7 px-2 py-1 text-xs text-ink-white shadow-xl"
+          class="rounded bg-surface-gray-10 px-2 py-1 text-xs text-ink-base shadow-xl"
         >
           <slot name="content">
             <slot>{{ text }}</slot>

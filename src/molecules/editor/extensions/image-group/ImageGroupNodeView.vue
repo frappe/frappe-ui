@@ -18,7 +18,7 @@
         <Tooltip text="Edit gallery" class="h-5">
           <button type="button" aria-label="Edit gallery" @click.stop="edit">
             <span
-              class="lucide-pencil size-4 text-ink-gray-4 hover:text-ink-white"
+              class="lucide-pencil size-4 text-ink-gray-4 hover:text-ink-base"
             />
           </button>
         </Tooltip>
@@ -31,8 +31,8 @@
         >
           <button
             type="button"
-            class="px-0.5 text-xs font-medium tabular-nums hover:text-ink-white"
-            :class="columns === n ? 'text-ink-white' : 'text-ink-gray-4'"
+            class="px-0.5 text-xs-medium tabular-nums hover:text-ink-base"
+            :class="columns === n ? 'text-ink-base' : 'text-ink-gray-4'"
             :aria-label="`${n} columns`"
             :aria-pressed="columns === n"
             @click.stop="setColumns(n)"
@@ -56,7 +56,7 @@
             @click.stop="removeImage(idx)"
           >
             <span
-              class="lucide-x size-4 text-ink-gray-4 hover:text-ink-white"
+              class="lucide-x size-4 text-ink-gray-4 hover:text-ink-base"
             />
           </button>
           <img

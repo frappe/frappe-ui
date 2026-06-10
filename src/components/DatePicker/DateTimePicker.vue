@@ -140,7 +140,7 @@ const emit = defineEmits<DateTimePickerEmits>()
 const slots = defineSlots<DateTimePickerSlots>()
 
 const POPOVER_CLASSES =
-  'rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5'
+  'rounded-lg bg-surface-elevation-2 shadow-2xl ring-1 ring-black ring-opacity-5'
 const contentClass = computed(() =>
   slots.actions ? `w-fit ${POPOVER_CLASSES}` : `w-56 ${POPOVER_CLASSES}`,
 )

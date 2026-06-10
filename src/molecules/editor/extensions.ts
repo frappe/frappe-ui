@@ -49,6 +49,7 @@ import {
   TableCell as TiptapTableCell,
   TableHeader as TiptapTableHeader,
 } from '@tiptap/extension-table'
+import { columnResizing, tableEditing, TableView } from '@tiptap/pm/tables'
 import {
   cellBackgroundAttributes,
   TableCellColor as TableCellColorExtension,
@@ -128,7 +129,7 @@ function pushConfigured<O>(
  */
 export const EditorDropcursor = Dropcursor.configure({
   width: 3,
-  color: 'var(--surface-gray-7, #383838)',
+  color: 'var(--surface-gray-10, #383838)',
   class: 'editor-drop-cursor',
 })
 
@@ -220,7 +221,32 @@ export const HeadingIds = HeadingIdsExtension
 export const Link = LinkExtension
 export const Code = ExtendedCode
 export const CodeBlock = ExtendedCodeBlock
-export const Table = TiptapTable.configure({ resizable: true })
+// Stock @tiptap gates `columnResizing` behind `resizable && editor.isEditable`,
+// evaluated once at editor creation. That has three consequences we don't want:
+// the plugin also owns the `.tableWrapper` scroll container (so read-only and
+// born-read-only editors get a bare table that overflows its bounds), and
+// `setEditable()` never reconfigures plugins (so toggling an existing comment
+// into edit mode never installs resizing). `columnResizing` already no-ops its
+// own pointer handlers when `!view.editable`, so installing it whenever
+// `resizable` is set is safe in read-only and keeps the wrapper in every mode.
+export const Table = TiptapTable.configure({ resizable: true }).extend({
+  addProseMirrorPlugins() {
+    return [
+      ...(this.options.resizable
+        ? [
+            columnResizing({
+              handleWidth: this.options.handleWidth,
+              cellMinWidth: this.options.cellMinWidth,
+              defaultCellMinWidth: this.options.cellMinWidth,
+              View: this.options.View ?? TableView,
+              lastColumnResizable: this.options.lastColumnResizable,
+            }),
+          ]
+        : []),
+      tableEditing({ allowTableNodeSelection: this.options.allowTableNodeSelection }),
+    ]
+  },
+})
 // Cell nodes carry a named `backgroundColor` attribute (rendered via
 // `--prose-highlight-*`); see `extensions/table/table-cell-color`.
 export const TableCell = TiptapTableCell.extend({

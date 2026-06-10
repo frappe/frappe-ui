@@ -34,10 +34,10 @@ const values = reactive<Record<string, string>>({
 })
 
 const colourSwatch: Record<string, string> = {
-  gray: 'bg-surface-gray-5',
+  gray: 'bg-surface-gray-8',
   blue: 'bg-surface-blue-3',
   green: 'bg-surface-green-3',
-  red: 'bg-surface-red-5',
+  red: 'bg-surface-red-7',
 }
 
 const sizeDot: Record<string, string> = {

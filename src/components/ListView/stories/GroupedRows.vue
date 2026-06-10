@@ -144,7 +144,7 @@ const grouped_rows = ref([
     row-key="id"
   >
     <template #group-header="{ group }">
-      <span class="text-base font-medium leading-6 text-ink-gray-9">
+      <span class="text-base-medium leading-6 text-ink-gray-9">
         {{ group.group }} ({{ group.rows.length }})
       </span>
     </template>

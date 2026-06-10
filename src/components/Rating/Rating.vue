@@ -9,7 +9,7 @@
       :id="labelId"
       :label="props.label"
       :required="props.required"
-      class="text-p-sm font-medium text-ink-gray-7"
+      class="text-p-sm-medium text-ink-gray-7"
     >
       <template v-if="$slots.label" #default="slotProps">
         <slot name="label" v-bind="slotProps" />
@@ -18,7 +18,7 @@
     <div
       :id="inputId"
       ref="rootRef"
-      class="rating-stars inline-flex shrink-0 gap-0.5 leading-none rounded-sm focus:outline-none focus-visible:ring focus-visible:ring-outline-gray-3"
+      class="rating-stars inline-flex shrink-0 gap-0.5 leading-none rounded-sm"
       :class="hasLabeling ? null : (attrs.class as any)"
       :style="hasLabeling ? null : (attrs.style as any)"
       :role="isSliderMode ? 'slider' : 'radiogroup'"
@@ -43,7 +43,7 @@
         v-for="index in starCount"
         :key="index"
         type="button"
-        class="rating-star relative inline-flex shrink-0 focus:outline-none focus-visible:ring focus-visible:ring-outline-gray-3 rounded-sm"
+        class="rating-star relative inline-flex shrink-0 rounded-sm"
         :class="[
           sizeClass,
           isDisabled ? 'cursor-default' : 'cursor-pointer',

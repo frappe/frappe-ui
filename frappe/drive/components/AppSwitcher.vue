@@ -22,7 +22,7 @@ const open = ref(false)
 <template>
   <div class="fixed left-0 top-0 h-screen w-3 z-40" @mouseenter="open = true" />
   <aside
-    class="fixed left-0 top-0 h-screen z-50 transition-transform duration-300 ease-out bg-surface-white border-r border-gray-200 px-2"
+    class="fixed left-0 top-0 h-screen z-50 transition-transform duration-300 ease-out bg-surface-base border-r border-gray-200 px-2"
     :class="!open && '-translate-x-full'"
     @mouseleave="open = false"
   >

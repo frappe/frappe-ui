@@ -232,7 +232,7 @@ const ret = computed(() =>
     <DateRangePicker v-model="flight" dual-pane :min="today">
       <template #trigger="{ togglePopover, isOpen }">
         <div
-          class="grid grid-cols-2 divide-x divide-outline-gray-2 rounded border bg-surface-white text-sm transition-colors"
+          class="grid grid-cols-2 divide-x divide-outline-gray-2 rounded border bg-surface-base text-sm transition-colors"
           :class="
             isOpen
               ? 'border-outline-gray-4 ring-2 ring-outline-gray-2'

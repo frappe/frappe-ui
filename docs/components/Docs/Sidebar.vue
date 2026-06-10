@@ -24,7 +24,7 @@ const isActive = (link: string) =>
 
 <template>
   <aside
-    class="flex h-screen w-full min-w-fit flex-col border-r bg-surface-gray-1 dark:bg-surface-white pt-1 sticky top-0"
+    class="flex h-screen w-full min-w-fit flex-col border-r bg-surface-sidebar pt-1 sticky top-0"
   >
     <div class="px-1">
       <a
@@ -59,7 +59,7 @@ const isActive = (link: string) =>
                 class="pl-2 flex h-7 items-center rounded text-sm transition-colors"
                 :class="
                   isActive(item.link)
-                    ? 'bg-surface-white dark:bg-surface-gray-2 shadow-sm text-ink-gray-8'
+                    ? 'bg-surface-base dark:bg-surface-gray-2 shadow-sm text-ink-gray-8'
                     : 'text-ink-gray-6 hover:bg-surface-gray-2 hover:text-ink-gray-8'
                 "
               >

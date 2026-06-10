@@ -33,7 +33,7 @@ const data = props.data.slice(0, props.data.length - 1);
         class="
           border grid gap-3
           border-outline-gray-2
-          bg-surface-cards
+          bg-surface-elevation-1
           p-4
         "
         :style="{ borderRadius: radius.value }"
@@ -59,7 +59,7 @@ const data = props.data.slice(0, props.data.length - 1);
           </span>
 
           <button
-            class="px-3 py-1 text-xs border bg-surface-white"
+            class="px-3 py-1 text-xs border bg-surface-base"
             :style="{ borderRadius: radius.value }"
           >
             Add

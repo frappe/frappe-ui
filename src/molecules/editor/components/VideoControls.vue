@@ -148,7 +148,7 @@ function onTrackPointerUp() {
     <Tooltip :text="playing ? 'Pause' : 'Play'" class="h-5">
       <button
         type="button"
-        class="text-ink-gray-2 hover:text-ink-white"
+        class="text-ink-gray-2 hover:text-ink-base"
         :aria-label="playing ? 'Pause' : 'Play'"
         @click="togglePlay"
       >
@@ -184,7 +184,7 @@ function onTrackPointerUp() {
     <Tooltip :text="muted ? 'Unmute' : 'Mute'" class="h-5">
       <button
         type="button"
-        class="text-ink-gray-2 hover:text-ink-white"
+        class="text-ink-gray-2 hover:text-ink-base"
         :aria-label="muted ? 'Unmute' : 'Mute'"
         @click="toggleMute"
       >
@@ -197,7 +197,7 @@ function onTrackPointerUp() {
     <Tooltip text="Fullscreen" class="h-5">
       <button
         type="button"
-        class="text-ink-gray-2 hover:text-ink-white"
+        class="text-ink-gray-2 hover:text-ink-base"
         aria-label="Fullscreen"
         @click="toggleFullscreen"
       >

@@ -1,0 +1,161 @@
+<script setup lang="ts">
+import { computed } from 'vue'
+import { Icon } from '../Icon'
+import type { PillProps } from './types'
+
+const props = withDefaults(defineProps<PillProps>(), {
+  variant: 'default',
+  size: 'md',
+  active: false,
+  browserTabBase: 'none',
+  orientation: 'horizontal',
+  activeStyle: 'raised',
+})
+
+// `icon` means icon-only intent (label, if provided, is rendered as
+// sr-only). `iconLeft`/`iconRight` are accent icons next to a visible
+// label. This matches Button's semantics.
+const isIconOnly = computed(() => Boolean(props.icon))
+
+const rootClasses = computed(() => {
+  const isSm = props.size === 'sm'
+  const iconOnly = isIconOnly.value
+  const active = props.active
+  return [
+    'inline-flex box-border shrink-0 select-none items-center justify-center whitespace-nowrap text-sm leading-[16.1px] outline-none transition-[background-color,color,box-shadow,border-color] duration-150 ease-out motion-reduce:transition-none',
+    active
+      ? props.variant === 'underline'
+        ? 'text-ink-gray-8 font-medium'
+        : 'text-ink-gray-8'
+      : 'text-ink-gray-5',
+    iconOnly
+      ? isSm
+        ? 'size-6.5 gap-1.5 p-[5px]'
+        : 'size-7 gap-1.5 p-[5px]'
+      : props.variant === 'underline'
+        ? props.orientation === 'vertical'
+          ? isSm
+            ? 'h-7 gap-2 pr-2'
+            : 'h-7.5 gap-2 pr-2'
+          : isSm
+            ? 'h-7 gap-2'
+            : 'h-7.5 gap-2'
+        : isSm
+          ? 'h-6.5 gap-2 px-2 py-[5px]'
+          : 'h-7 gap-2 px-2.5 py-1.5',
+    radiusClass.value,
+    variantClass.value,
+  ]
+})
+
+const radiusClass = computed(() => {
+  if (props.variant === 'underline') return ''
+
+  if (props.variant === 'browser-tab') {
+    if (props.browserTabBase === 'left')
+      return props.size === 'sm' ? 'rounded-r-[7px]' : 'rounded-r-[9px]'
+    if (props.browserTabBase === 'right')
+      return props.size === 'sm' ? 'rounded-l-[7px]' : 'rounded-l-[9px]'
+    if (props.browserTabBase === 'default')
+      return props.size === 'sm' ? 'rounded-t-[7px]' : 'rounded-t-[9px]'
+    return props.size === 'sm' ? 'rounded-[7px]' : 'rounded-[9px]'
+  }
+
+  return props.size === 'sm' ? 'rounded-[7px]' : 'rounded-[9px]'
+})
+
+const variantClass = computed(() => {
+  if (props.variant === 'underline') {
+    const isVertical = props.orientation === 'vertical'
+    const railSlot = isVertical
+      ? 'border-r border-transparent'
+      : 'border-b border-transparent'
+    if (props.active) {
+      // Indicator overlays the container's rail segment so it reads as a
+      // thicker, darker section of the same line — not a separate bar
+      // floating beside the label.
+      const indicator = isVertical
+        ? 'after:absolute after:inset-y-1.5 after:-right-0.5 after:w-px after:bg-[var(--ink-gray-8)]'
+        : 'after:absolute after:inset-x-0 after:-bottom-px after:h-px after:bg-[var(--ink-gray-8)]'
+      return ['relative', railSlot, indicator]
+    }
+    return [railSlot, 'hover:text-ink-gray-7']
+  }
+
+  if (props.variant === 'browser-tab') {
+    if (!props.active) {
+      return 'border border-transparent hover:bg-surface-gray-2 hover:text-ink-gray-7'
+    }
+
+    // Active tab "punches through" the rail: the white pseudo extends a
+    // few pixels past the rail line so the tab visibly continues into the
+    // area below, instead of terminating exactly at the rail (which the
+    // eye reads as a closed bottom corner). Border is one step darker
+    // than the rail so the tab reads as a distinct, raised shape.
+    // No drop shadow: a downward shadow would paint below the rail and
+    // visually re-close the bottom edge we're trying to open.
+    if (props.browserTabBase === 'left') {
+      return 'relative border border-l-0 border-outline-gray-2 bg-surface-base after:absolute after:-left-[3px] after:-top-px after:-bottom-px after:w-[3px] after:bg-surface-base'
+    }
+
+    if (props.browserTabBase === 'right') {
+      return 'relative border border-r-0 border-outline-gray-2 bg-surface-base after:absolute after:-right-[3px] after:-top-px after:-bottom-px after:w-[3px] after:bg-surface-base'
+    }
+
+    return 'relative border border-b-0 border-outline-gray-2 bg-surface-base after:absolute after:-inset-x-px after:-bottom-[3px] after:h-[3px] after:bg-surface-base'
+  }
+
+  if (props.variant === 'outline') {
+    return props.active
+      ? 'border border-transparent bg-surface-base shadow-sm'
+      : 'border border-outline-gray-1 hover:bg-surface-gray-2 hover:text-ink-gray-7'
+  }
+
+  if (!props.active) {
+    return 'hover:bg-surface-gray-3/80 hover:text-ink-gray-7'
+  }
+
+  return props.activeStyle === 'subtle'
+    ? 'bg-surface-gray-2'
+    : 'bg-surface-elevation-3 shadow-base'
+})
+
+const iconClass = computed(() =>
+  props.size === 'sm' ? 'size-4 shrink-0' : 'size-[18px] shrink-0',
+)
+
+function hasLabel(label: PillProps['label']) {
+  return label !== undefined && label !== null && label !== ''
+}
+
+defineSlots<{
+  prefix?: () => any
+  default?: () => any
+  suffix?: () => any
+}>()
+</script>
+
+<template>
+  <span :class="rootClasses" :data-state="active ? 'active' : 'inactive'">
+    <slot name="prefix">
+      <Icon v-if="icon" :name="icon" :class="iconClass" />
+      <Icon v-else-if="iconLeft" :name="iconLeft" :class="iconClass" />
+    </slot>
+
+    <span
+      v-if="hasLabel(label) || $slots.default"
+      class="min-w-0 truncate"
+      :class="isIconOnly ? 'sr-only' : undefined"
+    >
+      <slot>{{ label }}</slot>
+    </span>
+
+    <slot name="suffix">
+      <Icon
+        v-if="iconRight && !isIconOnly"
+        :name="iconRight"
+        :class="iconClass"
+      />
+    </slot>
+  </span>
+</template>

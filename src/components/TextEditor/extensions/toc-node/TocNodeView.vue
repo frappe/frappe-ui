@@ -21,7 +21,7 @@
     <button
       v-if="isEditable"
       @click="removeNode"
-      class="absolute top-2 right-2 bg-black/65 hover:bg-black/80 text-ink-gray-4 hover:text-ink-white p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+      class="absolute top-2 right-2 bg-black/65 hover:bg-black/80 text-ink-gray-4 hover:text-ink-base p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
       title="Remove table of contents"
     >
       <span class="lucide-x size-4" />

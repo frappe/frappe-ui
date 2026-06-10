@@ -37,7 +37,7 @@ describe('Textarea', () => {
 
     cy.get('textarea')
       .should('have.class', 'border-outline-gray-2')
-      .and('have.class', 'bg-surface-white')
+      .and('have.class', 'bg-surface-base')
   })
 
   it('renders disabled state', () => {

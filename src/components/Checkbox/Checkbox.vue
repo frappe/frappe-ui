@@ -5,7 +5,7 @@
       :class="rowClasses"
     >
       <input
-        class="rounded-sm mt-[1px] bg-surface-white"
+        class="rounded-sm mt-[1px] bg-surface-base"
         :class="inputClasses"
         type="checkbox"
         :disabled="disabled"
@@ -109,7 +109,7 @@ const labelClasses = computed(() => {
   return [
     {
       sm: 'text-base',
-      md: 'text-lg',
+      md: 'text-xl',
     }[props.size],
     'font-medium',
     props.disabled ? 'text-ink-gray-4' : 'text-ink-gray-8',
@@ -128,14 +128,14 @@ const rowClasses = computed(() => {
 
 const inputClasses = computed(() => {
   let baseClasses = props.disabled
-    ? 'border-outline-gray-2 bg-surface-menu-bar text-ink-gray-3'
-    : 'border-outline-gray-4 text-ink-gray-9 hover:border-outline-gray-5 focus:ring-offset-0 focus:border-outline-gray-8 active:border-outline-gray-6 transition'
+    ? 'border-outline-gray-2 bg-surface-sidebar text-ink-gray-3'
+    : 'border-outline-gray-4 text-ink-gray-9 hover:border-outline-gray-7 focus:ring-offset-0 focus:border-outline-gray-8 active:border-outline-gray-6 transition'
 
   let interactionClasses = props.disabled
     ? ''
     : props.padding
       ? 'focus:ring-0'
-      : 'hover:shadow-sm focus:ring-0 focus-visible:ring-2 focus-visible:ring-outline-gray-3 active:bg-surface-gray-2'
+      : 'hover:shadow-sm focus:ring-0 active:bg-surface-gray-2'
 
   let sizeClasses = {
     sm: 'w-3.5 h-3.5',

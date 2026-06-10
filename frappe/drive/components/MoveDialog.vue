@@ -75,7 +75,7 @@
                           ? 'bg-surface-gray-3'
                           : 'hover:bg-surface-gray-2',
                         entities[0].parent_entity === node.value
-                          ? 'cursor-not-allowed hover:bg-surface-white'
+                          ? 'cursor-not-allowed hover:bg-surface-base'
                           : 'group',
                       ]"
                     >

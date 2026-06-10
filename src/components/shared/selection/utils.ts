@@ -24,8 +24,8 @@ export function inputFontSizeClasses(size: SelectionSize) {
   return {
     sm: 'text-base',
     md: 'text-base',
-    lg: 'text-lg',
-    xl: 'text-xl',
+    lg: 'text-xl',
+    xl: 'text-3xl',
   }[size]
 }
 
@@ -56,9 +56,9 @@ export function triggerVariantClasses(
 
   return {
     subtle:
-      'border border-[--surface-gray-2] bg-surface-gray-2 hover:border-outline-gray-modals hover:bg-surface-gray-3',
+      'border border-[--surface-gray-2] bg-surface-gray-2 hover:border-outline-elevation-2 hover:bg-surface-gray-3',
     outline:
-      'border border-outline-gray-2 bg-surface-white hover:border-outline-gray-3',
+      'border border-outline-gray-2 bg-surface-base hover:border-outline-gray-3',
     ghost:
       'border border-transparent bg-transparent hover:bg-surface-gray-3 focus-within:bg-surface-gray-3',
   }[variant]
@@ -70,10 +70,10 @@ export function triggerVariantClasses(
  * on the trigger itself.
  */
 export const triggerBaseClassesFocusVisible =
-  'relative inline-flex items-center gap-2 text-left text-ink-gray-7 outline-none transition-[background-color,border-color,box-shadow] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-2 data-[state=open]:ring-2 ring-outline-gray-3'
+  'relative inline-flex items-center gap-2 text-left text-ink-gray-7 transition-[background-color,border-color,box-shadow] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] data-[state=open]:focus-ring'
 
 export const triggerBaseClassesFocusWithin =
-  'relative inline-flex items-center gap-2 text-left text-ink-gray-7 outline-none transition-[background-color,border-color,box-shadow] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] focus-within:ring-2 data-[state=open]:ring-2 ring-outline-gray-3'
+  'relative inline-flex items-center gap-2 text-left text-ink-gray-7 outline-none transition-[background-color,border-color,box-shadow] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] focus-within:focus-ring data-[state=open]:focus-ring'
 
 export const itemClasses =
   'select-none rounded border-0 text-base text-ink-gray-9 transition-colors duration-100 ease-out data-[disabled]:text-ink-gray-4 data-[highlighted]:bg-surface-gray-2 data-[state=checked]:bg-surface-gray-3 data-[highlighted]:data-[state=checked]:bg-surface-gray-4'

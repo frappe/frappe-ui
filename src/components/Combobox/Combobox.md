@@ -2,6 +2,10 @@
 
 Lets users choose from available options or type their own. Provides clear, responsive feedback for every interaction.
 
+## Playground
+
+<ClientOnly><ComboboxBuilder /></ClientOnly>
+
 ## Simple
 A plain repo picker — just pass `options` as an array of strings.
 

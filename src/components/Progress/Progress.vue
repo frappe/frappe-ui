@@ -4,7 +4,7 @@
       v-if="props.label || props.hint"
       class="flex items-baseline justify-between"
     >
-      <span v-if="props.label" class="text-base font-medium text-ink-gray-8">
+      <span v-if="props.label" class="text-base-medium text-ink-gray-8">
         {{ props.label }}
       </span>
       <!-- Empty for alignment -->
@@ -12,7 +12,7 @@
 
       <span class="self-end" v-if="props.hint || $slots.hint">
         <slot name="hint">
-          <span class="text-base font-medium text-ink-gray-4">
+          <span class="text-base-medium text-ink-gray-4">
             {{ props.value }}%
           </span>
         </slot>
@@ -30,7 +30,7 @@
       <!-- Continuous Progress Bar -->
       <div
         v-if="!props.intervals"
-        class="h-full bg-surface-gray-7"
+        class="h-full bg-surface-gray-10"
         :style="`width: ${props.value}%`"
       ></div>
 
@@ -41,7 +41,7 @@
         class="h-full w-full"
         :class="
           index <= filledIntervalCount
-            ? 'bg-surface-gray-7'
+            ? 'bg-surface-gray-10'
             : 'bg-surface-gray-2'
         "
       ></div>

@@ -9,7 +9,7 @@
     name: 'orientation',
     description: '',
     required: false,
-    type: '"horizontal" | "vertical"',
+    type: '"vertical" | "horizontal"',
     default: '"horizontal"'
   },
   {

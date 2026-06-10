@@ -2,6 +2,10 @@
 
 Lets users rate items using stars in a simple, interactive way. Provides immediate visual feedback and supports partial or full selections.
 
+## Playground
+
+<ClientOnly><RatingBuilder /></ClientOnly>
+
 <ComponentPreview name="Rating-Default" layout="stacked" />
 
 ## Sizes

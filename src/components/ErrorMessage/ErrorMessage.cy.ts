@@ -10,6 +10,6 @@ describe('ErrorMessage', () => {
 
     cy.get('[role=alert]')
       .should('have.text', 'Invalid value')
-      .should('have.class', 'text-ink-red-4')
+      .should('have.class', 'text-ink-red-8')
   })
 })

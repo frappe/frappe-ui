@@ -176,7 +176,7 @@ function handleSelect(item: NormalizedItem, event: Event) {
             <ComboboxLabel
               v-if="group.group && !group.hideLabel"
               data-slot="group-label"
-              class="flex h-7 items-center px-2 text-sm font-medium text-ink-gray-4"
+              class="flex h-7 items-center px-2 text-sm-medium text-ink-gray-4"
             >
               <component
                 :is="ItemSlotRender"

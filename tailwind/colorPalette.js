@@ -1,5 +1,6 @@
 import tailwindColors from 'tailwindcss/colors'
 import colorsData from './colors.json'
+import effectsData from './generated/effects.json'
 
 function generateColorPalette() {
   const colorPalette = {
@@ -107,11 +108,9 @@ function generateCSSVariables() {
 }
 
 function generateSemanticColors() {
-  const output = {
-    outline: {},
-    surface: {},
-    ink: {},
-  }
+  const output = Object.fromEntries(
+    Object.keys(colorsData.themedVariables.light).map((category) => [category, {}]),
+  )
 
   // Generate semantic colors
   Object.keys(colorsData.themedVariables.light).forEach((category) => {
@@ -129,4 +128,52 @@ function generateSemanticColors() {
   return output
 }
 
-export { generateColorPalette, generateCSSVariables, generateSemanticColors }
+// Emit `--elevation-*` and `--focus-*` CSS variables. Elevation uses the
+// Figma `light/*` values in both modes (matches how Espresso 2.0 actually
+// applies shadows in dark mode — see the dark-mode page in Figma, which
+// references `elevation/light/*` exclusively). The Figma `dark/*` set is
+// exposed as `--dark-elevation-*` for opt-in use via `shadow-dark-*`.
+// Focus rings still mode-swap. Theme-independent entries (e.g.
+// `elevation.custom.status`) land in `:root` only.
+function generateEffectVariables() {
+  const output = {
+    ':root': {},
+    '[data-theme="dark"]': {},
+  }
+
+  for (const [step, value] of Object.entries(effectsData.elevation.light)) {
+    output[':root'][`--elevation-${step}`] = value
+  }
+  for (const [step, value] of Object.entries(effectsData.elevation.dark)) {
+    output[':root'][`--dark-elevation-${step}`] = value
+  }
+  for (const [name, value] of Object.entries(effectsData.elevation.custom)) {
+    output[':root'][`--elevation-${name}`] = value
+  }
+  for (const [name, value] of Object.entries(effectsData.focus.light)) {
+    output[':root'][`--focus-${name}`] = value
+    output[':root'][`--focus-outline-${name}`] = shadowToOutline(value)
+  }
+  for (const [name, value] of Object.entries(effectsData.focus.dark)) {
+    output['[data-theme="dark"]'][`--focus-${name}`] = value
+    output['[data-theme="dark"]'][`--focus-outline-${name}`] = shadowToOutline(value)
+  }
+
+  return output
+}
+
+// Focus tokens are single-layer `0 0 0 <spread> <color>` shadows — re-express
+// as an `outline` shorthand (`<spread> solid <color>`) so the global focus
+// ring can use outline instead of box-shadow (no collisions with shadow/ring
+// utilities, survives forced-colors mode).
+function shadowToOutline(shadow) {
+  const parts = shadow.trim().split(/\s+/)
+  return `${parts[3]} solid ${parts.slice(4).join(' ')}`
+}
+
+export {
+  generateColorPalette,
+  generateCSSVariables,
+  generateSemanticColors,
+  generateEffectVariables,
+}
