@@ -14,7 +14,7 @@
         >
           <DialogContent
             ref="contentRef"
-            class="my-8 inline-block w-full transform overflow-hidden rounded-xl bg-surface-elevation-2 text-start align-middle shadow-xl dialog-content focus-visible:outline-none"
+            class="my-8 inline-block w-full transform overflow-hidden rounded-xl bg-surface-elevation-1 text-start align-middle shadow-xl dialog-content focus-visible:outline-none"
             :class="sizeClass"
             @pointerdown.stop
             @open-auto-focus="handleOpenAutoFocus"
@@ -38,7 +38,7 @@
             <template v-else>
               <!-- legacy `#body-main`: full middle override (deprecated) -->
               <slot v-if="$slots['body-main']" name="body-main" />
-              <div v-else class="bg-surface-elevation-2 px-4 pb-6 pt-5 sm:px-6">
+              <div v-else class="bg-surface-elevation-1 px-4 pb-6 pt-5 sm:px-6">
                 <div class="flex">
                   <div class="w-full flex-1">
                     <!-- legacy `#body-header` (deprecated, warns + renders nothing if used; preserved for back-compat by rendering header) -->

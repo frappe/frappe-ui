@@ -37,7 +37,7 @@ const floatingOptions = computed(() => {
   >
     <div
       data-slot="bubble-menu"
-      class="flex items-center gap-1 rounded border border-outline-gray-2 bg-surface-base p-1 shadow-sm"
+      class="flex items-center gap-1 rounded border border-outline-gray-2 bg-surface-elevation-2 p-1 shadow-sm"
     >
       <MenuItems :editor="editor" :items="items" />
     </div>
