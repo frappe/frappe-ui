@@ -141,6 +141,26 @@ const options = [{ label: 'Edit', icon: 'edit' }]
 const options = [{ label: 'Edit', icon: 'lucide-pen' }]
 ```
 
+## Tokens
+
+Run the v2 token codemod from the app you are migrating:
+
+```sh
+npx --package frappe-ui tokens-v2 --dry-run .
+```
+
+Review the output, then run it without `--dry-run`:
+
+```sh
+npx --package frappe-ui tokens-v2 .
+```
+
+The codemod renames espresso color tokens and merges static text size + weight
+class pairs, for example `text-base font-medium` to `text-base-medium`. Run it
+once per codebase; the token migration is not idempotent because some v2 names
+overlap with v0 names. If `frappe-ui` is already installed locally, you can use
+`npx tokens-v2` instead.
+
 ## Editor
 
 The v0 monolith `<TextEditor>` (imported from `frappe-ui`) is replaced by the
