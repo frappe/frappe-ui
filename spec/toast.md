@@ -12,7 +12,7 @@ Toasts are short-lived, non-blocking notifications that surface in a fixed viewp
 
 `frappe-ui` v1 **vendors [`vue-sonner`](https://github.com/xiaoluoboding/vue-sonner)** and re-exports its `toast` namespace and `<Toaster>` component **with sonner's API surface unchanged**. Our only contribution is:
 
-1. **Visual defaults** — CSS overrides that match the current dark high-contrast toast (`bg-surface-gray-6` + `ink-white`).
+1. **Visual defaults** — CSS overrides that match the current dark high-contrast toast (`bg-surface-gray-9` + `ink-base`).
 2. **Configuration defaults** — `position='bottom-right'`, `duration=5000`, `closeButton=true`.
 3. **Mount integration** — `<FrappeUIProvider>` renders `<Toaster>` with those defaults.
 
@@ -95,8 +95,8 @@ We apply a thin CSS override layer targeting sonner's CSS custom properties, sco
 
 ```css
 [data-sonner-toaster] {
-  --normal-bg: theme(colors.surface-gray-6);
-  --normal-text: theme(colors.ink-white);
+  --normal-bg: theme(colors.surface-gray-9);
+  --normal-text: theme(colors.ink-base);
   --normal-border: transparent;
   --success-bg: var(--normal-bg);
   --success-text: var(--normal-text);

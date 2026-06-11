@@ -54,7 +54,7 @@
           ref="panelRef"
           data-slot="content-body"
           :data-motion="motion"
-          class="time-picker-panel max-h-48 w-44 overflow-y-auto rounded-lg bg-surface-modal p-1 text-base shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
+          class="time-picker-panel max-h-48 w-44 overflow-y-auto rounded-lg bg-surface-elevation-2 p-1 text-base shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
           style="transform-origin: var(--reka-popover-content-transform-origin)"
           role="listbox"
           :aria-activedescendant="activeDescendantId"

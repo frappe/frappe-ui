@@ -59,7 +59,7 @@ watch(
   <div ref="chartDiv" v-show="!error" dir="ltr" :class="chartClass"></div>
   <div
     v-show="error"
-    class="flex h-full w-full items-center justify-center text-center text-ink-red-3"
+    class="flex h-full w-full items-center justify-center text-center text-ink-red-6"
   >
     Error: {{ error }}
   </div>

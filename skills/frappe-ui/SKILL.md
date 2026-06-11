@@ -19,7 +19,7 @@ const name = ref('')
 </script>
 
 <template>
-  <div class="p-4 bg-surface-white text-ink-gray-9">
+  <div class="p-4 bg-surface-base text-ink-gray-9">
     <Button variant="solid" theme="gray" @click="open = true">New Task</Button>
     <Dialog v-model:open="open" title="Create Task">
       <FormControl v-model="name" label="Title" required />

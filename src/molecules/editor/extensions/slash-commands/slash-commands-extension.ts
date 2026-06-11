@@ -12,6 +12,7 @@ import {
 import { filterByQuery } from '#molecules/editor/extensions/shared/suggestion-helpers'
 import { PLATFORM_CONFIGS } from '#molecules/editor/extensions/iframe/iframe-embed-utils'
 import { allowlistPermitsHosts } from '#molecules/editor/extensions/iframe/iframe-allowlist'
+import { openTableSizePicker } from '#molecules/editor/components/table-size-picker/tableSizePickerController'
 import SlashCommandsList from './SlashCommandsList.vue'
 
 export const SlashCommandSuggestionKey = new PluginKey('slashCommandSuggestion')
@@ -133,12 +134,18 @@ const getCommands = (): CommandItem[] => [
     slashCommand(
       { ...commandMeta.table, icon: 'lucide-table-2' },
       ({ editor, range }: CommandExecutionProps) => {
-        editor
-          .chain()
-          .focus()
-          .deleteRange(range)
-          .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
-          .run()
+        editor.chain().focus().deleteRange(range).run()
+        // Anchor the size picker to the caret left behind by the deleted query.
+        const caret = editor.view.coordsAtPos(editor.state.selection.from)
+        openTableSizePicker({
+          editor,
+          reference: new DOMRect(
+            caret.left,
+            caret.top,
+            0,
+            caret.bottom - caret.top,
+          ),
+        })
       },
     ),
     slashCommand(commandMeta.horizontalRule, ({ editor, range }) => {

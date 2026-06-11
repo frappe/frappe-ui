@@ -1,6 +1,6 @@
 <template>
   <header
-		class="sticky flex items-center justify-between space-x-28 top-0 z-10 border-b bg-surface-white px-3 py-2.5 sm:px-5"
+		class="sticky flex items-center justify-between space-x-28 top-0 z-10 border-b bg-surface-base px-3 py-2.5 sm:px-5"
     >
       <Breadcrumbs :items="breadcrumbs" />
       <ImportSteps class="flex-1 hidden lg:flex" v-if="step != 'list'" :data="data" :step="step" @updateStep="updateStep" />

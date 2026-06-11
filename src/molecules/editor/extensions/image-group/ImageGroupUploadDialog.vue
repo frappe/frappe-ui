@@ -63,7 +63,7 @@
             <div class="text-ink-gray-4 mb-2">
               <span class="lucide-image-plus size-6" />
             </div>
-            <div class="text-ink-gray-5 text-sm font-medium">
+            <div class="text-ink-gray-5 text-sm-medium">
               Drag & drop images here or click to select
             </div>
           </div>
@@ -76,7 +76,7 @@
           </div>
           <div class="w-full bg-surface-gray-2 rounded h-2 overflow-hidden">
             <div
-              class="bg-surface-gray-5 h-2 transition-all"
+              class="bg-surface-gray-8 h-2 transition-all"
               :style="{ width: dialog.uploadProgress.value + '%' }"
             ></div>
           </div>
@@ -138,7 +138,7 @@
         v-if="isFileDragging"
         class="fixed inset-0 z-50 bg-gray-900/60 pointer-events-none flex items-center justify-center"
       >
-        <div class="text-ink-gray-1 text-base font-medium">
+        <div class="text-ink-gray-1 text-base-medium">
           Drop images here
         </div>
       </div>

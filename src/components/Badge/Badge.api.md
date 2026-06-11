@@ -9,7 +9,7 @@
     name: 'theme',
     description: 'Visual color theme of the badge',
     required: false,
-    type: '"blue" | "red" | "green" | "gray" | "orange"',
+    type: '"blue" | "red" | "green" | "gray" | "amber" | "violet" | "orange"',
     default: '"gray"'
   },
   {

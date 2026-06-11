@@ -7,7 +7,7 @@
           isCollapsed
             ? 'w-auto px-0'
             : open
-              ? 'bg-surface-white px-2 shadow-sm'
+              ? 'bg-surface-base px-2 shadow-sm'
               : 'px-2 hover:bg-surface-gray-3'
         "
       >
@@ -36,7 +36,7 @@
               : 'ml-2 w-auto opacity-100'
           "
         >
-          <div class="text-base font-medium text-ink-gray-8 leading-none">
+          <div class="text-base-medium text-ink-gray-8 leading-none">
             {{ props.title }}
           </div>
           <div class="mt-1 text-sm text-ink-gray-6 leading-none">

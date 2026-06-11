@@ -76,7 +76,7 @@ const selectedUser = computed(() =>
                   class="inline-flex shrink-0 items-center gap-1 rounded-full px-1.5 py-0.5 text-p-xs"
                   :class="
                     selectedUser.enabled
-                      ? 'bg-surface-green-1 text-ink-green-3'
+                      ? 'bg-surface-green-1 text-ink-green-6'
                       : 'bg-surface-gray-2 text-ink-gray-5'
                   "
                 >
@@ -85,7 +85,7 @@ const selectedUser = computed(() =>
                     :class="
                       selectedUser.enabled
                         ? 'bg-surface-green-3'
-                        : 'bg-surface-gray-5'
+                        : 'bg-surface-gray-8'
                     "
                   />
                   {{ selectedUser.enabled ? 'Active' : 'Disabled' }}

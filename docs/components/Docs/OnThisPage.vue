@@ -65,7 +65,7 @@ watch(route, setHeadings)
       @click="activeHeading = x.id"
       :class="{
         'pl-7': x.type == 'h3' && h2Exists,
-        'border-outline-gray-5 text-ink-gray-9':
+        'border-outline-gray-7 text-ink-gray-9':
           activeHeading && x.id == activeHeading,
       }"
       >{{ x.name }}</a

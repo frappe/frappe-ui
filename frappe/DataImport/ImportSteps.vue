@@ -7,10 +7,10 @@
         @click="emit('updateStep', 'upload', { ...data })"
         >
             <FeatherIcon v-if="uploadStepCompleted" name="check" class="size-5 text-sm border rounded-[5px] p-0.5" :class="{
-                'text-ink-white bg-surface-gray-7': onUploadStep,
+                'text-ink-base bg-surface-gray-10': onUploadStep,
             }"/>
             <div v-else class="text-sm border rounded-[5px] px-1.5 py-0.5" :class="{
-                'text-ink-white bg-surface-gray-7': onUploadStep,
+                'text-ink-base bg-surface-gray-10': onUploadStep,
             }">
                 <span>
                     1
@@ -28,10 +28,10 @@
         @click="moveToMapStep()"
         >
             <FeatherIcon v-if="mapStepCompleted" name="check" class="size-5 text-sm border rounded-[5px] p-0.5" :class="{
-                'text-ink-white bg-surface-gray-7': onMapStep,
+                'text-ink-base bg-surface-gray-10': onMapStep,
             }"/>
             <div v-else class="text-sm border rounded-[5px] px-1.5 py-0.5" :class="{
-                'text-ink-white bg-surface-gray-7': onMapStep,
+                'text-ink-base bg-surface-gray-10': onMapStep,
             }">
                 <span>
                     2
@@ -49,10 +49,10 @@
         @click="moveToPreviewStep()"
         >
             <FeatherIcon v-if="previewStepCompleted" name="check" class="size-5 text-sm border rounded-[5px] p-0.5" :class="{
-                'text-ink-white bg-surface-gray-7': onPreviewStep,
+                'text-ink-base bg-surface-gray-10': onPreviewStep,
             }"/>
             <div v-else class="text-sm border rounded-[5px] px-1.5 py-0.5" :class="{
-                'text-ink-white bg-surface-gray-7': onPreviewStep,
+                'text-ink-base bg-surface-gray-10': onPreviewStep,
             }">
                 <span>
                     3

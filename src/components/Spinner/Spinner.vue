@@ -35,7 +35,7 @@ const colorClass = computed(() => {
   // No `theme` → inherit the current text color (customizable with a
   // text-* class on the spinner or a parent).
   if (props.theme == null) return null
-  return { gray: 'text-ink-gray-8', red: 'text-ink-red-4' }[props.theme]
+  return { gray: 'text-ink-gray-8', red: 'text-ink-red-8' }[props.theme]
 })
 
 const rootStyle = computed(() => {

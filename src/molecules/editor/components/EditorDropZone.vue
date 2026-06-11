@@ -88,11 +88,11 @@ const overlayLabel = computed(() => {
             :class="
               isOverZone
                 ? 'border-outline-gray-4 bg-surface-gray-2/80'
-                : 'border-outline-gray-3 bg-surface-white/70'
+                : 'border-outline-gray-3 bg-surface-base/70'
             "
           >
             <span
-              class="text-base font-medium transition-colors duration-150"
+              class="text-base-medium transition-colors duration-150"
               :class="isOverZone ? 'text-ink-gray-8' : 'text-ink-gray-5'"
             >
               {{ overlayLabel }}

@@ -114,7 +114,7 @@ const userMenuItems = computed(() => [
           </svg>
           <div class="ml-2 min-w-0">
             <div
-              class="truncate text-base font-medium text-ink-gray-8 leading-none"
+              class="truncate text-base-medium text-ink-gray-8 leading-none"
             >
               Gameplan
             </div>

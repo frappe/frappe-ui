@@ -41,7 +41,7 @@ describe('<Badge />', () => {
         label: 'Blue',
       },
     })
-    cy.get('.inline-flex.rounded-full').should('have.class', 'text-ink-blue-2')
+    cy.get('.inline-flex.rounded-full').should('have.class', 'text-ink-blue-8')
     cy.get('.inline-flex.rounded-full').should('have.class', 'bg-surface-blue-2')
 
     // Green
@@ -51,18 +51,28 @@ describe('<Badge />', () => {
         label: 'Green',
       },
     })
-    cy.get('.inline-flex.rounded-full').should('have.class', 'text-ink-green-3')
+    cy.get('.inline-flex.rounded-full').should('have.class', 'text-ink-green-8')
     cy.get('.inline-flex.rounded-full').should('have.class', 'bg-surface-green-2')
 
-    // Orange
+    // Amber
+    cy.mount(Badge, {
+      props: {
+        theme: 'amber',
+        label: 'Amber',
+      },
+    })
+    cy.get('.inline-flex.rounded-full').should('have.class', 'text-ink-amber-8')
+    cy.get('.inline-flex.rounded-full').should('have.class', 'bg-surface-amber-2')
+
+    // Orange (deprecated alias for amber)
     cy.mount(Badge, {
       props: {
         theme: 'orange',
         label: 'Orange',
       },
     })
-    cy.get('.inline-flex.rounded-full').should('have.class', 'text-ink-amber-3')
-    cy.get('.inline-flex.rounded-full').should('have.class', 'bg-surface-amber-1')
+    cy.get('.inline-flex.rounded-full').should('have.class', 'text-ink-amber-8')
+    cy.get('.inline-flex.rounded-full').should('have.class', 'bg-surface-amber-2')
 
     // Red
     cy.mount(Badge, {
@@ -71,20 +81,30 @@ describe('<Badge />', () => {
         label: 'Red',
       },
     })
-    cy.get('.inline-flex.rounded-full').should('have.class', 'text-ink-red-4')
+    cy.get('.inline-flex.rounded-full').should('have.class', 'text-ink-red-8')
     cy.get('.inline-flex.rounded-full').should('have.class', 'bg-surface-red-2')
+
+    // Violet
+    cy.mount(Badge, {
+      props: {
+        theme: 'violet',
+        label: 'Violet',
+      },
+    })
+    cy.get('.inline-flex.rounded-full').should('have.class', 'text-ink-violet-8')
+    cy.get('.inline-flex.rounded-full').should('have.class', 'bg-surface-violet-2')
   })
 
   it('renders different variants with gray theme', () => {
-    // Solid
+    // Solid (gray uses semantic token; non-gray solids use raw palette)
     cy.mount(Badge, {
       props: {
         variant: 'solid',
         label: 'Solid',
       },
     })
-    cy.get('.inline-flex.rounded-full').should('have.class', 'text-ink-white')
-    cy.get('.inline-flex.rounded-full').should('have.class', 'bg-surface-gray-7')
+    cy.get('.inline-flex.rounded-full').should('have.class', 'text-ink-base')
+    cy.get('.inline-flex.rounded-full').should('have.class', 'bg-surface-gray-10')
 
     // Subtle (default)
     cy.mount(Badge, {
@@ -104,8 +124,7 @@ describe('<Badge />', () => {
       },
     })
     cy.get('.inline-flex.rounded-full').should('have.class', 'text-ink-gray-6')
-    cy.get('.inline-flex.rounded-full').should('have.class', 'bg-transparent')
-    cy.get('.inline-flex.rounded-full').should('have.class', 'border-outline-gray-1')
+    cy.get('.inline-flex.rounded-full').should('have.class', 'border-outline-gray-2')
 
     // Ghost
     cy.mount(Badge, {
@@ -115,7 +134,6 @@ describe('<Badge />', () => {
       },
     })
     cy.get('.inline-flex.rounded-full').should('have.class', 'text-ink-gray-6')
-    cy.get('.inline-flex.rounded-full').should('have.class', 'bg-transparent')
   })
 
   it('renders different sizes', () => {
@@ -149,7 +167,7 @@ describe('<Badge />', () => {
       },
     })
     cy.get('.inline-flex.rounded-full').should('have.class', 'h-6')
-    cy.get('.inline-flex.rounded-full').should('have.class', 'text-sm')
+    cy.get('.inline-flex.rounded-full').should('have.class', 'text-[13px]')
     cy.get('.inline-flex.rounded-full').should('have.class', 'px-2')
   })
 
@@ -250,7 +268,7 @@ describe('<Badge />', () => {
         prefix: () => h(TestIcon),
       },
     })
-    cy.get('[data-cy="prefix-icon"]').parent().should('have.class', 'max-h-4')
+    cy.get('[data-cy="prefix-icon"]').parent().should('have.class', 'size-2.5')
 
     // Test with md size (default)
     cy.mount(Badge, {
@@ -259,7 +277,7 @@ describe('<Badge />', () => {
         prefix: () => h(TestIcon),
       },
     })
-    cy.get('[data-cy="prefix-icon"]').parent().should('have.class', 'max-h-4')
+    cy.get('[data-cy="prefix-icon"]').parent().should('have.class', 'size-2.5')
 
     // Test with lg size
     cy.mount(Badge, {
@@ -268,6 +286,6 @@ describe('<Badge />', () => {
         prefix: () => h(TestIcon),
       },
     })
-    cy.get('[data-cy="prefix-icon"]').parent().should('have.class', 'max-h-6')
+    cy.get('[data-cy="prefix-icon"]').parent().should('have.class', 'size-3')
   })
 })

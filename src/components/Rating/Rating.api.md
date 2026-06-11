@@ -106,7 +106,7 @@
   {
     name: 'icon',
     description: 'Overrides the per-star icon. Called once per star and stamped into both\nhalf-spans (so half-step clipping still works). Use `state` to color the\nicon, or `index` to render different content per position (e.g. emojis).',
-    type: '{ index: number; side: "right" | "left"; state: "filled" | "preview" | "removing" | "empty"; leftState: RatingStarState; rightState: RatingStarState; value: number; previewValue: null | number; max: number }'
+    type: '{ index: number; side: "left" | "right"; state: "filled" | "preview" | "removing" | "empty"; leftState: RatingStarState; rightState: RatingStarState; value: number; previewValue: null | number; max: number }'
   }
 ]
 

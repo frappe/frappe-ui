@@ -2,6 +2,10 @@
 
 Visually represents progress or completion of a task. Updates dynamically to give users clear feedback on status.
 
+## Playground
+
+<ClientOnly><ProgressBuilder /></ClientOnly>
+
 ## Examples
 <ComponentPreview name="Progress-Examples" />
 

@@ -9,7 +9,7 @@ const shiftEnd = ref('17:00')
 
 <template>
   <div class="flex w-full max-w-md flex-col gap-3">
-    <span class="text-sm font-medium text-ink-gray-7">Shift hours</span>
+    <span class="text-sm-medium text-ink-gray-7">Shift hours</span>
     <div class="grid grid-cols-2 gap-3">
       <div class="flex flex-col gap-1.5">
         <span class="text-xs text-ink-gray-6">From</span>

@@ -6,7 +6,7 @@ import { TextInput } from 'frappe-ui'
   <TextInput placeholder="acme" required>
     <template #label="{ required }">
       <span class="font-semibold">Workspace name</span>
-      <span v-if="required" class="text-ink-red-3">*</span>
+      <span v-if="required" class="text-ink-red-6">*</span>
     </template>
     <template #description>
       <span class="italic">Lowercase letters and dashes only.</span>

@@ -520,7 +520,7 @@ convention powered by the shared Tailwind plugin
 - auto-rendered as `<span :class="item.icon">` inside the prefix region
   when no consumer slot (`#item-prefix` or `item.slots.prefix`) claims
   that region
-- sizing (`size-4`), color (`text-ink-gray-6` by default, `text-ink-red-3`
+- sizing (`size-4`), color (`text-ink-gray-6` by default, `text-ink-red-6`
   for `theme: 'red'` in `Dropdown`) are applied by the component
 
 Benefits:

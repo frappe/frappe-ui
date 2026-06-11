@@ -79,7 +79,7 @@
     name: 'side',
     description: 'Preferred popover side.',
     required: false,
-    type: '"bottom" | "top" | "right" | "left"',
+    type: '"left" | "right" | "bottom" | "top"',
     default: '"bottom"'
   },
   {

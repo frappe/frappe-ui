@@ -1,0 +1,111 @@
+{
+  "angular": {
+    "white": {
+      "$type": "gradient",
+      "$description": "White",
+      "$value": {
+        "type": "conic",
+        "angle": 351,
+        "stops": [
+          {
+            "color": "#ffffff",
+            "position": 0.72
+          },
+          {
+            "color": "#ffffff00",
+            "position": 1
+          }
+        ]
+      }
+    },
+    "black": {
+      "$type": "gradient",
+      "$description": "Black",
+      "$value": {
+        "type": "conic",
+        "angle": 351,
+        "stops": [
+          {
+            "color": "#383838",
+            "position": 0.72
+          },
+          {
+            "color": "#38383800",
+            "position": 1
+          }
+        ]
+      }
+    },
+    "green": {
+      "$type": "gradient",
+      "$description": "Green",
+      "$value": {
+        "type": "conic",
+        "angle": 351,
+        "stops": [
+          {
+            "color": "#17754b",
+            "position": 0.72
+          },
+          {
+            "color": "#17754b00",
+            "position": 1
+          }
+        ]
+      }
+    },
+    "amber": {
+      "$type": "gradient",
+      "$value": {
+        "type": "conic",
+        "angle": 180,
+        "stops": [
+          {
+            "color": "#e79913",
+            "position": 0.22
+          },
+          {
+            "color": "#e7991300",
+            "position": 0.47
+          }
+        ]
+      }
+    },
+    "red": {
+      "$type": "gradient",
+      "$description": "Red",
+      "$value": {
+        "type": "conic",
+        "angle": 351,
+        "stops": [
+          {
+            "color": "#cd2929",
+            "position": 0.72
+          },
+          {
+            "color": "#cd292900",
+            "position": 1
+          }
+        ]
+      }
+    },
+    "blue": {
+      "$type": "gradient",
+      "$description": "Blue",
+      "$value": {
+        "type": "conic",
+        "angle": 351,
+        "stops": [
+          {
+            "color": "#006edb",
+            "position": 0.72
+          },
+          {
+            "color": "#006edb00",
+            "position": 1
+          }
+        ]
+      }
+    }
+  }
+}

@@ -41,6 +41,13 @@ function isItemDisabled(item: CommandMenuItem): boolean {
   return !props.editor || item.isDisabled?.(props.editor) === true
 }
 
+/** Display label, honoring state-dependent `getLabel` (e.g. merge vs split). */
+function labelOf(item: CommandMenuItem): string {
+  void version.value
+  if (props.editor && item.getLabel) return item.getLabel(props.editor)
+  return item.label
+}
+
 // Renders an item's glyph: a `lucide-*` (or any) string becomes a masked icon
 // span (sized here so item definitions stay terse); a component renders as-is;
 // with no icon we fall back to the label text.
@@ -142,7 +149,7 @@ function run(item: CommandMenuItem, event?: MouseEvent) {
         data-slot="menu-group"
         class="flex items-center gap-1"
       >
-        <span class="px-2 text-sm font-medium text-ink-gray-7">{{
+        <span class="px-2 text-sm-medium text-ink-gray-7">{{
           item.label
         }}</span>
         <Tooltip
@@ -162,11 +169,11 @@ function run(item: CommandMenuItem, event?: MouseEvent) {
           </button>
         </Tooltip>
       </div>
-      <Tooltip v-else :text="item.label">
+      <Tooltip v-else :text="labelOf(item)">
         <button
           type="button"
           class="inline-flex size-6 items-center justify-center rounded text-sm text-ink-gray-7 hover:bg-surface-gray-3 disabled:cursor-not-allowed disabled:opacity-50 aria-pressed:bg-surface-gray-3"
-          :aria-label="item.label"
+          :aria-label="labelOf(item)"
           :aria-pressed="isPressed(item)"
           :disabled="isItemDisabled(item)"
           @click="run(item, $event)"

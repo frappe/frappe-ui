@@ -88,7 +88,7 @@ function reset() {
     @submit.prevent="submit"
   >
     <div class="space-y-1">
-      <h2 class="text-lg font-semibold text-ink-gray-9">Create account</h2>
+      <h2 class="text-xl-semibold text-ink-gray-9">Create account</h2>
       <p class="text-p-sm text-ink-gray-6">
         Every <code>FormControl</code> type rendered together. Submit to see
         validation light up.
@@ -184,7 +184,7 @@ function reset() {
       type="checkbox"
       label="I accept the terms and privacy policy"
     />
-    <p v-if="errors.acceptTerms" class="text-p-sm text-ink-red-3">
+    <p v-if="errors.acceptTerms" class="text-p-sm text-ink-red-6">
       {{ errors.acceptTerms }}
     </p>
 
@@ -193,7 +193,7 @@ function reset() {
       <Button variant="ghost" type="button" @click="reset">Reset</Button>
       <span
         v-if="submitted && isValid"
-        class="ml-auto text-p-sm text-ink-green-3"
+        class="ml-auto text-p-sm text-ink-green-6"
       >
         Looks good!
       </span>

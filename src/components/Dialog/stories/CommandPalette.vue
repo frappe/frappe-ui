@@ -131,7 +131,7 @@ function onEnter() {
       </ul>
 
       <div
-        class="flex items-center gap-4 border-t border-outline-gray-modals px-4 py-2 text-p-xs text-ink-gray-5"
+        class="flex items-center gap-4 border-t border-outline-elevation-2 px-4 py-2 text-p-xs text-ink-gray-5"
       >
         <span class="flex items-center gap-1.5">
           <KeyboardShortcut combo="ArrowUp" bg />

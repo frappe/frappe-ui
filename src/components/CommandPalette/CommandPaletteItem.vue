@@ -7,7 +7,7 @@ defineProps({
 
 <template>
   <div
-    class="flex w-full min-w-0 items-center rounded px-2 py-2 text-base font-medium text-ink-gray-8"
+    class="flex w-full min-w-0 items-center rounded px-2 py-2 text-base-medium text-ink-gray-8"
     :class="{ 'bg-surface-gray-2': active }"
   >
     <component

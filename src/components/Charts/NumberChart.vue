@@ -1,12 +1,12 @@
 <template>
   <div
-    class="flex max-h-[140px] items-center gap-2 overflow-hidden bg-surface-white text-ink-gray-8 px-6 pt-5"
+    class="flex max-h-[140px] items-center gap-2 overflow-hidden bg-surface-base text-ink-gray-8 px-6 pt-5"
     :class="config.delta ? 'pb-6' : 'pb-3'"
   >
     <slot name="body">
       <div class="flex w-full flex-col">
         <slot name="title">
-          <span class="truncate text-sm font-medium text-ink-gray-5">
+          <span class="truncate text-sm-medium text-ink-gray-5">
             {{ config.title }}
           </span>
         </slot>
@@ -25,15 +25,15 @@
         <slot name="delta" v-bind="{ formatValue }">
           <div
             v-if="config.delta"
-            class="flex items-center gap-0.5 text-xs font-medium"
+            class="flex items-center gap-0.5 text-xs-medium"
             :class="[
               config.negativeIsBetter
                 ? config.delta >= 0
-                  ? 'text-ink-red-4'
-                  : 'text-ink-green-3'
+                  ? 'text-ink-red-8'
+                  : 'text-ink-green-6'
                 : config.delta >= 0
-                  ? 'text-ink-green-3'
-                  : 'text-ink-red-4',
+                  ? 'text-ink-green-6'
+                  : 'text-ink-red-8',
             ]"
           >
             <span class="">

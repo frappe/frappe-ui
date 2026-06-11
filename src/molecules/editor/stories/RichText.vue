@@ -114,7 +114,7 @@ const uploadFunction = async (file) => ({
         <!-- Inside <Editor>, the building blocks read the editor from
              context — no :editor prop needed. -->
         <div
-          class="overflow-hidden rounded-lg border border-outline-gray-2 bg-surface-white"
+          class="overflow-hidden rounded-lg border border-outline-gray-2 bg-surface-base"
         >
           <EditorBubbleMenu :items="bubbleToolbar" />
           <EditorFloatingMenu :items="toolbar" />

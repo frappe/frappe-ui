@@ -1,0 +1,114 @@
+{
+  "radius": {
+    "0": {
+      "$type": "dimension",
+      "$value": "0px"
+    },
+    "1": {
+      "$type": "dimension",
+      "$value": "4px"
+    },
+    "2": {
+      "$type": "dimension",
+      "$value": "5px"
+    },
+    "3": {
+      "$type": "dimension",
+      "$value": "6px"
+    },
+    "4": {
+      "$type": "dimension",
+      "$value": "8px"
+    },
+    "5": {
+      "$type": "dimension",
+      "$value": "10px"
+    },
+    "6": {
+      "$type": "dimension",
+      "$value": "12px"
+    },
+    "7": {
+      "$type": "dimension",
+      "$value": "16px"
+    },
+    "8": {
+      "$type": "dimension",
+      "$value": "20px"
+    },
+    "9": {
+      "$type": "dimension",
+      "$value": "999px"
+    }
+  },
+  "spacing": {
+    "0": {
+      "$type": "dimension",
+      "$value": "0px"
+    },
+    "1": {
+      "$type": "dimension",
+      "$value": "1px"
+    },
+    "2": {
+      "$type": "dimension",
+      "$value": "2px"
+    },
+    "3": {
+      "$type": "dimension",
+      "$value": "3px"
+    },
+    "4": {
+      "$type": "dimension",
+      "$value": "4px"
+    },
+    "5": {
+      "$type": "dimension",
+      "$value": "5px"
+    },
+    "6": {
+      "$type": "dimension",
+      "$value": "6px"
+    },
+    "7": {
+      "$type": "dimension",
+      "$value": "7px"
+    },
+    "8": {
+      "$type": "dimension",
+      "$value": "8px"
+    },
+    "9": {
+      "$type": "dimension",
+      "$value": "9px"
+    },
+    "10": {
+      "$type": "dimension",
+      "$value": "10px"
+    },
+    "11": {
+      "$type": "dimension",
+      "$value": "11px"
+    },
+    "12": {
+      "$type": "dimension",
+      "$value": "12px"
+    },
+    "13": {
+      "$type": "dimension",
+      "$value": "14px"
+    },
+    "14": {
+      "$type": "dimension",
+      "$value": "16px"
+    },
+    "15": {
+      "$type": "dimension",
+      "$value": "20px"
+    },
+    "16": {
+      "$type": "dimension",
+      "$value": "26px"
+    }
+  }
+}

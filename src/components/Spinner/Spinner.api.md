@@ -9,13 +9,13 @@
     name: 'size',
     description: 'Diameter — xs=12px, sm=14px, md=16px, lg=20px. Omit to size with classes (default 16px).',
     required: false,
-    type: 'SpinnerSize'
+    type: '"md" | "xs" | "sm" | "lg"'
   },
   {
     name: 'theme',
     description: 'Spinner color. Omit to inherit the text color.',
     required: false,
-    type: 'SpinnerTheme'
+    type: '"red" | "gray"'
   },
   {
     name: 'track',

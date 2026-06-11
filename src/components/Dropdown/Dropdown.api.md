@@ -9,7 +9,7 @@
     name: 'button',
     description: 'Button configuration (label, icon, size, variant, etc.)',
     required: false,
-    type: '{ theme?: "blue" | "red" | "green" | "gray"; variant?: "subtle" | "outline" | "solid" | "ghost"; type?: "button" | "submit" | "reset"; label?: string; loading?: boolean; size?: "md" | "xs" | "sm" | "lg" | "xl" | "2xl"; icon?: string | Component; iconLeft?: string | Component; iconRight?: string | Component; tooltip?: string; loadingText?: string; disabled?: boolean; route?: RouteLocationRaw; link?: string }'
+    type: '{ theme?: "blue" | "red" | "green" | "gray"; variant?: "subtle" | "outline" | "solid" | "ghost"; type?: "button" | "submit" | "reset"; label?: string; loading?: boolean; size?: "md" | "xs" | "sm" | "lg"; icon?: string | Component; iconLeft?: string | Component; iconRight?: string | Component; tooltip?: string; loadingText?: string; disabled?: boolean; route?: RouteLocationRaw; link?: string }'
   },
   {
     name: 'options',
@@ -35,14 +35,14 @@
     name: 'placement',
     description: 'Placement of the dropdown relative to the trigger.',
     required: false,
-    type: '"center" | "right" | "left"',
+    type: '"left" | "right" | "center"',
     deprecated: 'use `align` instead; `placement` remains as a back-compat alias through v1.x'
   },
   {
     name: 'side',
     description: 'Side of the trigger the dropdown appears on.',
     required: false,
-    type: '"bottom" | "top" | "right" | "left"',
+    type: '"left" | "right" | "bottom" | "top"',
     default: '"bottom"'
   },
   {

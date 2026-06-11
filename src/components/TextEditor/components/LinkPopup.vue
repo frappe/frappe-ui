@@ -1,6 +1,6 @@
 <template>
   <div
-    class="p-2 w-72 flex items-center gap-2 bg-surface-white shadow-xl rounded"
+    class="p-2 w-72 flex items-center gap-2 bg-surface-base shadow-xl rounded"
   >
     <TextInput
       v-if="edit"

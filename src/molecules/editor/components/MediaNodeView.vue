@@ -296,7 +296,7 @@ function setVideoOptions(options: {
           aria-live="assertive"
           class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-black/65 p-3 text-center"
         >
-          <div class="text-p-sm text-ink-white">{{ node.attrs.error }}</div>
+          <div class="text-p-sm text-ink-base">{{ node.attrs.error }}</div>
           <div v-if="isEditable" class="flex flex-wrap justify-center gap-2">
             <Button size="xs" variant="subtle" @click.stop="retryUpload">
               Try again

@@ -44,7 +44,7 @@
     name: 'size',
     description: 'Controls the button size',
     required: false,
-    type: '"md" | "xs" | "sm" | "lg" | "xl" | "2xl"',
+    type: '"md" | "xs" | "sm" | "lg"',
     default: '\'sm\''
   },
   {

@@ -24,7 +24,7 @@
     name: 'side',
     description: 'Preferred popover side relative to the trigger.',
     required: false,
-    type: '"bottom" | "top" | "right" | "left"'
+    type: '"left" | "right" | "bottom" | "top"'
   },
   {
     name: 'align',
@@ -273,7 +273,7 @@
     name: 'side',
     description: 'Preferred popover side relative to the trigger.',
     required: false,
-    type: '"bottom" | "top" | "right" | "left"'
+    type: '"left" | "right" | "bottom" | "top"'
   },
   {
     name: 'align',
@@ -536,7 +536,7 @@
     name: 'side',
     description: 'Preferred popover side relative to the trigger.',
     required: false,
-    type: '"bottom" | "top" | "right" | "left"'
+    type: '"left" | "right" | "bottom" | "top"'
   },
   {
     name: 'align',

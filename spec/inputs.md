@@ -139,7 +139,7 @@ Reuse `FormLabel`'s existing pattern as the canonical implementation:
 ```html
 <label for="...">
   Label text
-  <span aria-hidden="true" class="text-ink-red-3 select-none">*</span>
+  <span aria-hidden="true" class="text-ink-red-6 select-none">*</span>
   <span class="sr-only">(required)</span>
 </label>
 ```
@@ -153,7 +153,7 @@ indicator inside their custom label content.
 - `error: Error` renders `Error.messages` (joined with line breaks via
   `whitespace-pre-line`) when present, otherwise `Error.message`.
 - The error region is rendered as plain text. **`v-html` is not used.**
-- `error` text uses `text-ink-red-3` (matches the required asterisk for
+- `error` text uses `text-ink-red-6` (matches the required asterisk for
   visual consistency of "needs attention" affordances).
 - Setting `error` automatically suppresses the `description` region.
 

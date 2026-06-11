@@ -37,7 +37,7 @@
                                     <label
                                         :for="`checkbox-${doctype}-${field.fieldname}`"
                                         :class="{
-                                            'text-ink-red-3': field.reqd
+                                            'text-ink-red-6': field.reqd
                                         }">
                                         {{ field.label || field.fieldname }}
                                     </label>

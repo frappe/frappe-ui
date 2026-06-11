@@ -45,7 +45,7 @@
             name="body"
             v-bind="{ togglePopover, updatePosition, open, close, isOpen }"
           >
-            <div class="rounded-lg border bg-surface-modal shadow-xl">
+            <div class="rounded-lg border bg-surface-elevation-2 shadow-xl">
               <slot
                 name="body-main"
                 v-bind="{

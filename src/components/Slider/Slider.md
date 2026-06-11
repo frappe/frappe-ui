@@ -2,6 +2,10 @@
 
 A slider input for selecting a single value or a range of values within a minimum and maximum.
 
+## Playground
+
+<ClientOnly><SliderBuilder /></ClientOnly>
+
 <ComponentPreview name="Slider-Default" layout="stacked" />
 
 ## Sizes

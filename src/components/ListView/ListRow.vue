@@ -8,7 +8,7 @@
       isHoverable && !row.disabled
         ? isSelected || isActive
           ? 'hover:bg-surface-gray-3'
-          : 'hover:bg-surface-menu-bar'
+          : 'hover:bg-surface-sidebar'
         : '',
       row.disabled ? 'pointer-events-none' : '',
     ]"

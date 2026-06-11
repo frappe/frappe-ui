@@ -47,7 +47,7 @@
                         </span>
                     </div>
                 </div>
-                <div v-else-if="showFileSelector && uploading" class="w-4/5 lg:w-2/5 bg-surface-white border rounded-md p-2">
+                <div v-else-if="showFileSelector && uploading" class="w-4/5 lg:w-2/5 bg-surface-base border rounded-md p-2">
                     <div class="space-y-2">
                         <div class="font-medium">
                             {{ uploadingdFile.name }}
@@ -58,14 +58,14 @@
                     </div>
                     <div class="w-full bg-surface-gray-1 h-1 rounded-full mt-3">
                         <div
-                            class="bg-surface-gray-7 h-1 rounded-full transition-all duration-500 ease-in-out"
+                            class="bg-surface-gray-10 h-1 rounded-full transition-all duration-500 ease-in-out"
                             :style="`width: ${uploadProgress}%`"
                         ></div>
                     </div>
                 </div>
             </div>
             <div v-else-if="importFile" class="h-[300px] flex items-center justify-center bg-surface-gray-1 border border-dashed border-outline-gray-3 rounded-md">
-                <div class="w-4/5 lg:w-2/5 bg-surface-white border rounded-md p-2 flex items-center justify-between items-center">
+                <div class="w-4/5 lg:w-2/5 bg-surface-base border rounded-md p-2 flex items-center justify-between items-center">
                     <div class="space-y-2">
                         <div class="font-medium leading-5 text-ink-gray-9">
                             {{ importFile.file_name || importFile.split("/").pop() }}
@@ -76,7 +76,7 @@
                     </div>
                     <FeatherIcon
                         name="trash-2"
-                        class="size-4 stroke-1.5 text-ink-red-3 cursor-pointer"
+                        class="size-4 stroke-1.5 text-ink-red-6 cursor-pointer"
                         @click="deleteFile"
                     />
                 </div>

@@ -2,7 +2,7 @@
   <div
     v-if="items.length"
     ref="container"
-    class="relative max-h-[300px] min-w-40 overflow-y-auto rounded-lg bg-surface-white p-1 text-base shadow-lg"
+    class="relative max-h-[300px] min-w-40 overflow-y-auto rounded-lg bg-surface-base p-1 text-base shadow-lg"
     :class="containerClass"
   >
     <button

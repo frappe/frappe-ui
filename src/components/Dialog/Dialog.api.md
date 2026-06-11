@@ -61,7 +61,7 @@
     name: 'actions',
     description: 'Footer action buttons.',
     required: false,
-    type: '({ theme?: "blue" | "red" | "green" | "gray"; variant?: "subtle" | "outline" | "solid" | "ghost"; type?: "button" | "submit" | "reset"; label?: string; loading?: boolean; size?: "md" | "xs" | "sm" | "lg" | "xl" | "2xl"; icon?: string | Component; iconLeft?: string | Component; iconRight?: string | Component; tooltip?: string; loadingText?: string; disabled?: boolean; route?: RouteLocationRaw; link?: string; onClick?: (context: DialogActionContext): void | Promise<void> })[]'
+    type: '({ theme?: "blue" | "red" | "green" | "gray"; variant?: "subtle" | "outline" | "solid" | "ghost"; type?: "button" | "submit" | "reset"; label?: string; loading?: boolean; size?: "md" | "xs" | "sm" | "lg"; icon?: string | Component; iconLeft?: string | Component; iconRight?: string | Component; tooltip?: string; loadingText?: string; disabled?: boolean; route?: RouteLocationRaw; link?: string; onClick?: (context: DialogActionContext): void | Promise<void> })[]'
   },
   {
     name: 'dismissible',
@@ -96,7 +96,7 @@
     name: 'options',
     description: '',
     required: false,
-    type: '{ title?: string; message?: string; size?: "md" | "xs" | "sm" | "lg" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | "6xl" | "7xl"; icon?: string | { name: string; theme?: "yellow" | "blue" | "red" | "green"; appearance?: "warning" | "info" | "danger" | "success" }; actions?: ({ theme?: "blue" | "red" | "green" | "gray"; variant?: "subtle" | "outline" | "solid" | "ghost"; type?: "button" | "submit" | "reset"; label?: string; loading?: boolean; size?: "md" | "xs" | "sm" | "lg" | "xl" | "2xl"; icon?: string | Component; iconLeft?: string | Component; iconRight?: string | Component; tooltip?: string; loadingText?: string; disabled?: boolean; route?: RouteLocationRaw; link?: string; onClick?: (context: DialogActionContext): void | Promise<void> })[]; position?: "center" | "top"; paddingTop?: string | number }',
+    type: '{ title?: string; message?: string; size?: "md" | "xs" | "sm" | "lg" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | "6xl" | "7xl"; icon?: string | { name: string; theme?: "yellow" | "blue" | "red" | "green"; appearance?: "warning" | "info" | "danger" | "success" }; actions?: ({ theme?: "blue" | "red" | "green" | "gray"; variant?: "subtle" | "outline" | "solid" | "ghost"; type?: "button" | "submit" | "reset"; label?: string; loading?: boolean; size?: "md" | "xs" | "sm" | "lg"; icon?: string | Component; iconLeft?: string | Component; iconRight?: string | Component; tooltip?: string; loadingText?: string; disabled?: boolean; route?: RouteLocationRaw; link?: string; onClick?: (context: DialogActionContext): void | Promise<void> })[]; position?: "center" | "top"; paddingTop?: string | number }',
     deprecated: 'Use flat top-level props instead.'
   }
 ]
@@ -115,7 +115,7 @@
   {
     name: 'actions',
     description: 'Footer override; exposes `{ close, actions }`.',
-    type: '{ actions: ({ theme?: "blue" | "red" | "green" | "gray"; variant?: "subtle" | "outline" | "solid" | "ghost"; type?: "button" | "submit" | "reset"; label?: string; loading: boolean; size?: "md" | "xs" | "sm" | "lg" | "xl" | "2xl"; icon?: string | Component; iconLeft?: string | Component; iconRight?: string | Component; tooltip?: string; loadingText?: string; disabled?: boolean; route?: RouteLocationRaw; link?: string; onClick?: (context: DialogActionContext): void | Promise<void> })[]; close: (): void }'
+    type: '{ actions: ({ theme?: "blue" | "red" | "green" | "gray"; variant?: "subtle" | "outline" | "solid" | "ghost"; type?: "button" | "submit" | "reset"; label?: string; loading: boolean; size?: "md" | "xs" | "sm" | "lg"; icon?: string | Component; iconLeft?: string | Component; iconRight?: string | Component; tooltip?: string; loadingText?: string; disabled?: boolean; route?: RouteLocationRaw; link?: string; onClick?: (context: DialogActionContext): void | Promise<void> })[]; close: (): void }'
   },
   {
     name: 'body',

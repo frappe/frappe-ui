@@ -91,7 +91,7 @@ onUnmounted(() => {
   >
     <div
       v-if="state.mobsidebar"
-      class="lg:hidden fixed inset-x-0 bottom-0 z-50 h-[80dvh] bg-surface-white rounded-t-2xl shadow-2xl flex flex-col"
+      class="lg:hidden fixed inset-x-0 bottom-0 z-50 h-[80dvh] bg-surface-base rounded-t-2xl shadow-2xl flex flex-col"
       role="dialog"
       aria-modal="true"
       aria-label="Navigation"

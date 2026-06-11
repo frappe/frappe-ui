@@ -47,8 +47,8 @@
             </div>
             <div class="rounded-md bg-surface-amber-2 p-2 space-y-2 text-xs">
                 <div v-for="warning in warnings" class="flex items-center space-x-2">
-                    <FeatherIcon name="alert-circle" class="size-3 text-ink-amber-3" />
-                    <div v-html="warning.message" class="text-ink-amber-3"></div>
+                    <FeatherIcon name="alert-circle" class="size-3 text-ink-amber-6" />
+                    <div v-html="warning.message" class="text-ink-amber-6"></div>
                 </div>
             </div>
         </div>
@@ -71,7 +71,7 @@
                         </th>
                     </tr>
                 </thead>
-                <tbody class="bg-surface-white divide-y divide-surface-gray-2">
+                <tbody class="bg-surface-base divide-y divide-surface-gray-2">
                     <tr v-for="(row, rowIndex) in previewData" :key="rowIndex">
                         <td
                             v-for="column in previewColumns"
@@ -117,12 +117,12 @@
                             </th>
                         </tr>
                     </thead>
-                    <tbody class="bg-surface-white divide-y divide-surface-gray-2">
+                    <tbody class="bg-surface-base divide-y divide-surface-gray-2">
                         <tr v-for="(row, rowIndex) in filteredLogs" :key="rowIndex" class="group">
                             <td class="px-3 py-2 text-sm text-ink-gray-7 border-r">
                                 <div class="flex items-center justify-center space-x-2">
                                     <div v-if="row.success" class="size-1.5 bg-surface-green-3 rounded"></div>
-                                    <div v-else class="size-1.5 bg-surface-red-5 rounded"></div>
+                                    <div v-else class="size-1.5 bg-surface-red-7 rounded"></div>
                                     <div>
                                         {{ JSON.parse(row["row_indexes"])[0] - 1 }}
                                     </div>
@@ -312,11 +312,11 @@ const importErrorCount = computed(() => {
 
 const importBannerClass = computed(() => {
     if (importErrorCount.value == 0) {
-        return 'bg-surface-green-2 text-ink-green-3'
+        return 'bg-surface-green-2 text-ink-green-6'
     } else if (importSuccessCount.value == 0) {
-        return 'bg-surface-red-2 text-ink-red-3'
+        return 'bg-surface-red-2 text-ink-red-6'
     } else {
-        return 'bg-surface-amber-2 text-ink-amber-3'
+        return 'bg-surface-amber-2 text-ink-amber-6'
     }
 })
 

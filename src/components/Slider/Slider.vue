@@ -64,13 +64,13 @@ const trackClasses = computed(() => {
 const rangeClasses = computed(() => {
   return [
     'absolute h-full rounded',
-    props.disabled ? 'bg-surface-gray-4' : 'bg-surface-gray-7',
+    props.disabled ? 'bg-surface-gray-4' : 'bg-surface-gray-10',
   ]
 })
 
 const thumbClasses = computed(() => {
   return [
-    'rounded-full bg-surface-white shadow-md ring-gray-600/20 transition-shadow duration-200 ease-out hover:ring-[6px] focus:outline-none dark:bg-surface-gray-7 dark:ring-gray-100/20',
+    'rounded-full bg-surface-base shadow-md ring-gray-600/20 transition-shadow duration-200 ease-out hover:ring-[6px] focus:outline-none dark:bg-surface-gray-10 dark:ring-gray-100/20',
     props.size === 'md' ? 'size-5' : 'size-4',
     props.disabled
       ? 'cursor-not-allowed opacity-60 hover:ring-0'
@@ -85,10 +85,10 @@ const onValueCommit = (value: SliderValue) => {
 const hasLabeling = computed(() => {
   return Boolean(
     props.label ||
-      slots.label ||
-      showDescription.value ||
-      slots.description ||
-      hasError.value,
+    slots.label ||
+    showDescription.value ||
+    slots.description ||
+    hasError.value,
   )
 })
 </script>
@@ -101,7 +101,7 @@ const hasLabeling = computed(() => {
       :for-id="inputId"
       :label="props.label"
       :required="props.required"
-      class="text-p-sm font-medium text-ink-gray-7"
+      class="text-p-sm-medium text-ink-gray-7"
     >
       <template v-if="$slots.label" #default="slotProps">
         <slot name="label" v-bind="slotProps" />

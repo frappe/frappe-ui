@@ -81,7 +81,7 @@ describe('<TextEditor />', () => {
     })
 
     // The fixed menu component in TextEditor.vue has these specific classes
-    cy.get('.rounded-t-lg.border.border-outline-gray-modals').should('exist')
+    cy.get('.rounded-t-lg.border.border-outline-elevation-2').should('exist')
     // Should contain some default buttons like Bold
     cy.get('button[title="Bold"]').should('exist')
   })

@@ -59,7 +59,7 @@
       <template #body="{ isOpen, togglePopover }">
         <div v-show="isOpen">
           <div
-            class="relative mt-1 rounded-lg bg-surface-modal text-base shadow-2xl"
+            class="relative mt-1 rounded-lg bg-surface-elevation-2 text-base shadow-2xl"
             :class="bodyClasses"
           >
             <ComboboxOptions
@@ -69,7 +69,7 @@
             >
               <div
                 v-if="!hideSearch"
-                class="sticky top-0 z-10 flex items-stretch space-x-1.5 bg-surface-modal py-1.5"
+                class="sticky top-0 z-10 flex items-stretch space-x-1.5 bg-surface-elevation-2 py-1.5"
               >
                 <div class="relative w-full">
                   <ComboboxInput
@@ -101,7 +101,7 @@
               >
                 <div
                   v-if="group.group && !group.hideLabel"
-                  class="sticky top-10 truncate bg-surface-modal px-2.5 py-1.5 text-sm font-medium text-ink-gray-5"
+                  class="sticky top-10 truncate bg-surface-elevation-2 px-2.5 py-1.5 text-sm-medium text-ink-gray-5"
                 >
                   {{ group.group }}
                 </div>

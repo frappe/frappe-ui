@@ -2,7 +2,7 @@
   <div>
     <div
       v-if="items.length"
-      class="min-w-40 rounded-lg border bg-surface-white p-1 text-base shadow-lg"
+      class="min-w-40 rounded-lg border bg-surface-base p-1 text-base shadow-lg"
     >
       <button
         :class="[

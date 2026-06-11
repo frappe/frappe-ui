@@ -11,7 +11,8 @@
  * Flow: click a cell → navigate (highlight). Enter (or a second click, or
  * typing) → edit. Edit mode is sticky: clicks inside the cell only move the
  * caret; it exits only via Enter, Escape (→ navigate) or Tab (→ next cell).
- * Arrow keys in navigate mode → move the active cell.
+ * Arrow keys in navigate mode → move the active cell; at the top/bottom edge
+ * they leave the table (so keyboard users are never trapped inside it).
  *
  * Runs at a high priority so its `handleKeyDown` precedes the Table extension's
  * built-in arrow handling (which would otherwise collapse a CellSelection to a
@@ -24,6 +25,7 @@ import type { EditorView } from '@tiptap/pm/view'
 import type { ResolvedPos } from '@tiptap/pm/model'
 import {
   CellSelection,
+  TableMap,
   cellAround,
   columnResizingPluginKey,
   goToNextCell,
@@ -31,10 +33,14 @@ import {
   nextCell,
   selectionCell,
 } from '@tiptap/pm/tables'
+import { trackPointerDrag } from './drag-scroll'
 
 type Axis = 'horiz' | 'vert'
 
 const ARROWS = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'] as const
+
+const LONG_PRESS_MS = 500
+const LONG_PRESS_SLOP = 8
 
 /**
  * In edit mode, true when a plain arrow press would move the caret out of the
@@ -102,11 +108,46 @@ function editCell(editor: Editor, $cell: ResolvedPos, at?: number): boolean {
   return true
 }
 
-/** Move the active cell one step along an axis; no-op (but consumed) at an edge. */
+/** The table node enclosing a cell position, with its map and start offset. */
+function tableAround($cell: ResolvedPos) {
+  const table = $cell.node(-1)
+  return { table, start: $cell.start(-1), map: TableMap.get(table) }
+}
+
+/**
+ * Leave the table vertically: put the caret in the nearest textblock before/
+ * after it, creating an adjacent paragraph when the table is the document's
+ * first/last node — so navigate mode is never a keyboard trap.
+ */
+function exitTable(editor: Editor, dir: 1 | -1): boolean {
+  const { state, view } = editor
+  const $cell = selectionCell(state)
+  let depth = $cell.depth
+  while (depth > 0 && $cell.node(depth).type.name !== 'table') depth--
+  if (!depth) return true
+  const pos = dir === 1 ? $cell.after(depth) : $cell.before(depth)
+  const target = Selection.findFrom(state.doc.resolve(pos), dir, true)
+  if (target) {
+    view.dispatch(state.tr.setSelection(target).scrollIntoView())
+    return true
+  }
+  const paragraph = state.schema.nodes.paragraph
+  if (!paragraph) return true
+  const tr = state.tr.insert(pos, paragraph.create())
+  tr.setSelection(TextSelection.create(tr.doc, pos + 1)).scrollIntoView()
+  view.dispatch(tr)
+  return true
+}
+
+/**
+ * Move the active cell one step along an axis. A horizontal edge is a consumed
+ * no-op; a vertical edge exits the table.
+ */
 function moveCell(editor: Editor, axis: Axis, dir: number): boolean {
   const { state } = editor
   const $next = nextCell(selectionCell(state), axis, dir)
-  if ($next) selectCell(editor, $next.pos)
+  if ($next) return selectCell(editor, $next.pos)
+  if (axis === 'vert') return exitTable(editor, dir as 1 | -1)
   return true
 }
 
@@ -134,14 +175,74 @@ function extendCell(editor: Editor, axis: Axis, dir: number): boolean {
 /**
  * Tab / Shift-Tab: move to the next/previous cell and land in navigate mode
  * (highlight, no caret), exiting edit mode. Wraps across rows via the table's
- * own `goToNextCell`, then converts its text selection to a cell selection.
+ * own `goToNextCell`; Tab on the very last cell appends a row first
+ * (spreadsheet convention, and what the stock TipTap Tab shortcut did before
+ * this plugin intercepted it).
  */
 function tabToCell(editor: Editor, dir: 1 | -1): boolean {
   const { state, view } = editor
   if (!isInTable(state)) return false
-  if (!goToNextCell(dir)(state, view.dispatch)) return false
+  if (!goToNextCell(dir)(state, view.dispatch)) {
+    if (dir !== 1) return true
+    if (!editor.can().addRowAfter()) return true
+    editor.chain().addRowAfter().run()
+    if (!goToNextCell(dir)(editor.state, view.dispatch)) return true
+  }
   const $cell = cellAround(editor.state.selection.$head)
   if ($cell) selectCell(editor, $cell.pos)
+  return true
+}
+
+/** Select every cell of the table containing `$cell`. */
+function selectWholeTable(editor: Editor, $cell: ResolvedPos): boolean {
+  const { state, view } = editor
+  const { start, map } = tableAround($cell)
+  view.dispatch(
+    state.tr.setSelection(
+      new CellSelection(
+        state.doc.resolve(start + map.map[0]),
+        state.doc.resolve(start + map.map[map.map.length - 1]),
+      ),
+    ),
+  )
+  return true
+}
+
+/**
+ * Mod+A inside a table escalates instead of jumping straight to the document:
+ * cell content → whole table → (default select-all) whole doc. Keeps the
+ * cell-as-sandbox model consistent for selection too.
+ */
+function escalateSelectAll(editor: Editor): boolean {
+  const { state, view } = editor
+  const sel = state.selection
+  if (sel instanceof CellSelection) {
+    const { start, map } = tableAround(sel.$anchorCell)
+    const rect = map.rectBetween(
+      sel.$anchorCell.pos - start,
+      sel.$headCell.pos - start,
+    )
+    const wholeTable =
+      rect.left === 0 &&
+      rect.top === 0 &&
+      rect.right === map.width &&
+      rect.bottom === map.height
+    if (wholeTable) return false
+    return selectWholeTable(editor, sel.$anchorCell)
+  }
+  const $cell = cellAround(sel.$head)
+  if (!$cell) return false
+  const cell = $cell.nodeAfter
+  if (!cell) return false
+  const from = Selection.near(state.doc.resolve($cell.pos + 1), 1).from
+  const to = Selection.near(
+    state.doc.resolve($cell.pos + cell.nodeSize - 1),
+    -1,
+  ).from
+  if (sel.from === from && sel.to === to) {
+    return selectWholeTable(editor, $cell)
+  }
+  view.dispatch(state.tr.setSelection(TextSelection.create(state.doc, from, to)))
   return true
 }
 
@@ -152,6 +253,64 @@ function isOnCell(selection: unknown, $cell: ResolvedPos): boolean {
     selection.$anchorCell.pos === $cell.pos &&
     selection.$headCell.pos === $cell.pos
   )
+}
+
+/** The cell (if any) under a pointer event. */
+function cellAtCoords(
+  view: EditorView,
+  event: { clientX: number; clientY: number },
+): ResolvedPos | null {
+  const coords = view.posAtCoords({ left: event.clientX, top: event.clientY })
+  if (!coords) return null
+  return cellAround(view.state.doc.resolve(coords.pos))
+}
+
+/**
+ * Touch: leave taps to the default (caret + keyboard — navigate mode has
+ * little value without physical arrow keys), but surface the table context
+ * menu on long-press, since iOS never fires `contextmenu` on its own. Android
+ * does — the capture listener below cancels the timer so it can't double-open.
+ */
+function watchLongPress(event: PointerEvent): boolean {
+  const { clientX, clientY, pointerId } = event
+  const target = event.target
+  if (!(target instanceof Element)) return false
+
+  const cleanup = () => {
+    clearTimeout(timer)
+    document.removeEventListener('pointermove', onMove)
+    document.removeEventListener('pointerup', onEnd)
+    document.removeEventListener('pointercancel', onEnd)
+    document.removeEventListener('contextmenu', onNativeMenu, true)
+  }
+  const timer = window.setTimeout(() => {
+    cleanup()
+    target.dispatchEvent(
+      new MouseEvent('contextmenu', {
+        bubbles: true,
+        cancelable: true,
+        clientX,
+        clientY,
+      }),
+    )
+  }, LONG_PRESS_MS)
+  const onMove = (e: PointerEvent) => {
+    if (e.pointerId !== pointerId) return
+    if (
+      Math.hypot(e.clientX - clientX, e.clientY - clientY) > LONG_PRESS_SLOP
+    ) {
+      cleanup()
+    }
+  }
+  const onEnd = (e: PointerEvent) => {
+    if (e.pointerId === pointerId) cleanup()
+  }
+  const onNativeMenu = () => cleanup()
+  document.addEventListener('pointermove', onMove)
+  document.addEventListener('pointerup', onEnd)
+  document.addEventListener('pointercancel', onEnd)
+  document.addEventListener('contextmenu', onNativeMenu, true)
+  return false
 }
 
 export const TableNavigation = Extension.create({
@@ -172,10 +331,21 @@ export const TableNavigation = Extension.create({
             if (!isInTable(state)) return false
             const navigating = state.selection instanceof CellSelection
 
+            // Mod+A escalates: cell content → whole table → whole doc.
+            if (
+              (event.metaKey || event.ctrlKey) &&
+              !event.altKey &&
+              !event.shiftKey &&
+              event.key.toLowerCase() === 'a'
+            ) {
+              return escalateSelectAll(editor)
+            }
+
             // Tab moves to the next/previous cell in navigate mode, exiting edit
             // mode (works from either mode). Consume it in a table either way so
             // focus never leaves the cell grid.
             if (event.key === 'Tab') {
+              if (event.metaKey || event.ctrlKey || event.altKey) return false
               tabToCell(editor, event.shiftKey ? -1 : 1)
               return true
             }
@@ -225,7 +395,7 @@ export const TableNavigation = Extension.create({
                 if (navigating) {
                   return editCell(
                     editor,
-                    (state.selection as CellSelection).$headCell,
+                    (state.selection as CellSelection).$anchorCell,
                   )
                 }
                 // Plain Enter in edit mode returns to navigate mode
@@ -248,14 +418,22 @@ export const TableNavigation = Extension.create({
             }
           },
 
-          // Select the cell on mousedown — before the browser places a text
-          // caret — so a click lands straight in navigate mode with no caret
-          // flash. A second click on the already-active cell falls through to
-          // the default (caret) to start editing.
           handleDOMEvents: {
-            mousedown(view, event) {
+            // Select the cell on pointerdown — before the browser places a text
+            // caret — so a click lands straight in navigate mode with no caret
+            // flash. A second click on the already-active cell falls through to
+            // the default (caret) to start editing.
+            pointerdown(view, event: PointerEvent) {
               // Read-only: don't hijack clicks into cell selection.
               if (!editor.isEditable) return false
+
+              // Touch: taps keep the default caret behavior (and scrolling);
+              // a long-press opens the table context menu.
+              if (event.pointerType === 'touch') {
+                if (!cellAtCoords(view, event)) return false
+                return watchLongPress(event)
+              }
+
               // Pointer is over a column-resize border (the resize plugin set its
               // active handle on the preceding mousemove). Bail so its own,
               // lower-priority mousedown can start the drag instead of us
@@ -271,12 +449,7 @@ export const TableNavigation = Extension.create({
               ) {
                 return false
               }
-              const coords = view.posAtCoords({
-                left: event.clientX,
-                top: event.clientY,
-              })
-              if (!coords) return false
-              const $cell = cellAround(view.state.doc.resolve(coords.pos))
+              const $cell = cellAtCoords(view, event)
               if (!$cell) return false
               // Clicking the active cell again → let the default place the caret.
               if (isOnCell(view.state.selection, $cell)) return false
@@ -300,38 +473,56 @@ export const TableNavigation = Extension.create({
               )
               if (!view.hasFocus()) view.focus()
 
-              // Drag to extend into a multi-cell selection (e.g. for merge).
-              const onMove = (e: MouseEvent) => {
-                const c = view.posAtCoords({ left: e.clientX, top: e.clientY })
-                if (!c) return
-                const $c = cellAround(view.state.doc.resolve(c.pos))
-                if (!$c) return
-                const next = CellSelection.create(
-                  view.state.doc,
-                  anchorPos,
-                  $c.pos,
-                )
-                if (!view.state.selection.eq(next)) {
-                  view.dispatch(view.state.tr.setSelection(next))
-                }
-              }
-              const onUp = () => {
-                document.removeEventListener('mousemove', onMove)
-                document.removeEventListener('mouseup', onUp, true)
-              }
-              document.addEventListener('mousemove', onMove)
-              document.addEventListener('mouseup', onUp, true)
+              // Drag to extend into a multi-cell selection (e.g. for merge),
+              // with edge auto-scroll so wide tables can be selected past the
+              // wrapper's visible window.
+              const anchorDom = view.nodeDOM(anchorPos)
+              const wrapper =
+                anchorDom instanceof HTMLElement
+                  ? anchorDom.closest<HTMLElement>('.tableWrapper')
+                  : null
+              trackPointerDrag({
+                event,
+                area: wrapper,
+                onPoint(x, y) {
+                  const $head = cellAtCoords(view, { clientX: x, clientY: y })
+                  if (!$head) return
+                  // Never extend across table boundaries.
+                  const $anchor = view.state.doc.resolve(anchorPos)
+                  if ($head.start(-1) !== $anchor.start(-1)) return
+                  const next = CellSelection.create(
+                    view.state.doc,
+                    anchorPos,
+                    $head.pos,
+                  )
+                  if (!view.state.selection.eq(next)) {
+                    view.dispatch(view.state.tr.setSelection(next))
+                  }
+                },
+              })
               return true
+            },
+
+            // IME input never reaches handleTextInput, so drop into edit mode
+            // before the composition starts — composing against a CellSelection
+            // (which has no DOM caret) drops or mangles the input.
+            compositionstart(view) {
+              if (!editor.isEditable) return false
+              const { selection } = view.state
+              if (!(selection instanceof CellSelection)) return false
+              editCell(editor, selection.$anchorCell)
+              return false
             },
           },
 
           // Typing while a cell is selected starts editing (append) instead of
-          // letting a CellSelection swallow the input.
+          // letting a CellSelection swallow the input. Input lands in the
+          // anchor cell — the active cell of a multi-cell selection.
           handleTextInput(view, _from, _to, text) {
             if (!editor.isEditable) return false
             const { selection } = view.state
             if (!(selection instanceof CellSelection)) return false
-            const $cell = selection.$headCell
+            const $cell = selection.$anchorCell
             const cell = $cell.nodeAfter
             if (!cell) return false
             const end = $cell.pos + cell.nodeSize - 1
@@ -344,6 +535,23 @@ export const TableNavigation = Extension.create({
                 .scrollIntoView(),
             )
             return true
+          },
+
+          // Match type-to-append: pasting non-table content on a selected cell
+          // drops the caret at the end of the anchor cell and pastes there,
+          // instead of replacing the cell's content. Table-shaped slices keep
+          // prosemirror-tables' structured cell paste.
+          handlePaste(view, _event, slice) {
+            if (!editor.isEditable) return false
+            const { selection } = view.state
+            if (!(selection instanceof CellSelection)) return false
+            let tableContent = false
+            slice.content.forEach((node) => {
+              if (node.type.spec.tableRole) tableContent = true
+            })
+            if (tableContent) return false
+            editCell(editor, selection.$anchorCell)
+            return false
           },
         },
       }),

@@ -6,16 +6,64 @@
 
   const propsData = [
   {
+    name: 'options',
+    description: 'List of options to render.',
+    required: false,
+    type: '({ label?: string | number; value?: string | number | false | true; icon?: string | Component; iconLeft?: TabButtonIcon; iconRight?: TabButtonIcon; active?: boolean; disabled?: boolean; tooltip?: string; class?: string | string[] | Record<string, boolean>; route?: RouteLocationRaw; href?: string; onClick?: (event: MouseEvent): void })[]'
+  },
+  {
     name: 'buttons',
     description: '',
-    required: true,
-    type: '({ label?: string | number; value?: string | number | false | true; icon?: string | Component; iconLeft?: TabButtonIcon; iconRight?: TabButtonIcon; hideLabel?: boolean; active?: boolean; class?: string | string[] | Record<string, boolean>; onClick?: (event: MouseEvent): void; theme?: "blue" | "red" | "green" | "gray"; variant?: "subtle" | "outline" | "solid" | "ghost"; type?: "button" | "submit" | "reset"; loading?: boolean; size?: "md" | "xs" | "sm" | "lg" | "xl" | "2xl"; tooltip?: string; loadingText?: string; disabled?: boolean; route?: RouteLocationRaw; link?: string })[]'
+    required: false,
+    type: '({ label?: string | number; value?: string | number | false | true; icon?: string | Component; iconLeft?: TabButtonIcon; iconRight?: TabButtonIcon; active?: boolean; disabled?: boolean; tooltip?: string; class?: string | string[] | Record<string, boolean>; route?: RouteLocationRaw; href?: string; onClick?: (event: MouseEvent): void })[]',
+    deprecated: 'Use `options` instead.'
   },
   {
     name: 'modelValue',
     description: '',
     required: false,
     type: 'string | number | false | true'
+  },
+  {
+    name: 'type',
+    description: '',
+    required: false,
+    type: '"subtle" | "ghost" | "underline" | "browser-tab"',
+    default: '"subtle"'
+  },
+  {
+    name: 'size',
+    description: '',
+    required: false,
+    type: '"md" | "sm"',
+    default: '"sm"'
+  },
+  {
+    name: 'vertical',
+    description: '',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  },
+  {
+    name: 'direction',
+    description: 'Edge the active browser tab attaches to. Only used when `type=\'browser-tab\'` and `vertical`.',
+    required: false,
+    type: '"left" | "right"',
+    default: '"left"'
+  }
+]
+
+  const slotsData = [
+  {
+    name: 'prefix',
+    description: '',
+    type: '{ button: { key: string; label: string | number; icon: string | Component; iconLeft: TabButtonIcon | undefined; iconRight: TabButtonIcon | undefined; active: boolean; customClass: string | string[] | Record<string, boolean>; onClick: (event: MouseEvent): void; tooltip: string; disabled: boolean; visibleLabel: boolean; accessibleLabel: string | undefined; route: RouteLocationRaw; href: string | undefined; modelValue: string | number | false | true }; checked: boolean; disabled: boolean }'
+  },
+  {
+    name: 'suffix',
+    description: '',
+    type: '{ button: { key: string; label: string | number; icon: string | Component; iconLeft: TabButtonIcon | undefined; iconRight: TabButtonIcon | undefined; active: boolean; customClass: string | string[] | Record<string, boolean>; onClick: (event: MouseEvent): void; tooltip: string; disabled: boolean; visibleLabel: boolean; accessibleLabel: string | undefined; route: RouteLocationRaw; href: string | undefined; modelValue: string | number | false | true }; checked: boolean; disabled: boolean }'
   }
 ]
 
@@ -30,6 +78,8 @@
 ## API Reference
 
 <PropsTable name="TabButtons" :data="propsData"/> 
+
+<SlotsTable :data="slotsData"/> 
 
 <EmitsTable :data="emitsData"/> 
 

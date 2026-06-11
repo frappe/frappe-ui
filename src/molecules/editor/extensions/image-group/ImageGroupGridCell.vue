@@ -9,7 +9,7 @@
       aria-label="Remove image"
       @click.stop="$emit('remove')"
     >
-      <span class="lucide-x size-4 text-ink-gray-4 hover:text-ink-white" />
+      <span class="lucide-x size-4 text-ink-gray-4 hover:text-ink-base" />
     </button>
 
     <!-- Unsupported preview (HEIC/HEIF): filename placeholder -->
@@ -86,7 +86,7 @@
       class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-black/65 p-2 text-center"
       aria-live="assertive"
     >
-      <div class="text-p-xs text-ink-white">
+      <div class="text-p-xs text-ink-base">
         {{ item.error || 'Upload failed' }}
       </div>
       <div class="flex gap-2">

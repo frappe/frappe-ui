@@ -111,7 +111,7 @@ const events = ref([
               <template #target="{ togglePopover }">
                 <Button
                   variant="ghost"
-                  class="text-lg font-medium text-ink-gray-7"
+                  class="text-xl-medium text-ink-gray-7"
                   :label="headerProps.currentMonthYear"
                   iconRight="lucide-chevron-down"
                   @click="togglePopover"

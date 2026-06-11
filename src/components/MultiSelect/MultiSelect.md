@@ -2,6 +2,10 @@
 
 Searchable multi-choice picker. Matches the `Combobox` / `Select` item-slot model and provides built-in Clear All / Select All footer controls.
 
+## Playground
+
+<ClientOnly><MultiSelectBuilder /></ClientOnly>
+
 ## Default
 A plain picker — button trigger opens a popover with a search input, option list, and default footer.
 

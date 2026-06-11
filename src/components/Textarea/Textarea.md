@@ -2,6 +2,10 @@
 
 A multi-line input for entering longer text. Supports clear editing and flexible sizing for different content needs.
 
+## Playground
+
+<ClientOnly><TextareaBuilder /></ClientOnly>
+
 <ComponentPreview name="Textarea-Default" layout="stacked" />
 
 ## Variants

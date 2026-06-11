@@ -128,10 +128,9 @@ const {
 const switchClasses = computed(() => {
   return [
     'relative inline-flex flex-shrink-0 cursor-pointer rounded-full border-transparent transition-colors duration-100 ease-in-out items-center',
-    'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-outline-gray-3',
     'disabled:cursor-not-allowed disabled:bg-surface-gray-3',
     model.value
-      ? 'bg-surface-gray-7 enabled:hover:bg-surface-gray-6 active:bg-surface-gray-5 group-hover:enabled:bg-surface-gray-6'
+      ? 'bg-surface-gray-10 enabled:hover:bg-surface-gray-9 active:bg-surface-gray-8 group-hover:enabled:bg-surface-gray-9'
       : 'bg-surface-gray-4 enabled:hover:bg-gray-400 active:bg-gray-500 group-hover:enabled:bg-gray-400',
     props.size === 'md' ? 'h-5 w-8 border-[3px]' : 'h-4 w-[26px] border-2',
   ]
@@ -139,7 +138,7 @@ const switchClasses = computed(() => {
 
 const switchCircleClasses = computed(() => {
   return [
-    'pointer-events-none inline-block transform rounded-full bg-surface-white shadow ring-0 transition duration-100 ease-in-out',
+    'pointer-events-none inline-block transform rounded-full bg-surface-base shadow ring-0 transition duration-100 ease-in-out',
     props.size === 'md' ? 'h-3.5 w-3.5' : 'h-3 w-3',
     props.size === 'md'
       ? model.value
@@ -159,7 +158,7 @@ const switchLabelClasses = computed(() => {
     props.disabled && !props.description
       ? 'text-ink-gray-4'
       : 'text-ink-gray-8',
-    props.size === 'md' ? 'text-lg' : 'text-base',
+    props.size === 'md' ? 'text-xl' : 'text-base',
     props.labelClasses,
   ]
 })
@@ -171,7 +170,7 @@ const switchGroupClasses = computed(() => {
   const classes = ['flex justify-between']
   if (!hasDescription) {
     classes.push(
-      'group items-center gap-x-3 py-1.5 cursor-pointer rounded focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-outline-gray-3',
+      'group items-center gap-x-3 py-1.5 cursor-pointer rounded',
     )
 
     if (props.disabled) classes.push('cursor-not-allowed')

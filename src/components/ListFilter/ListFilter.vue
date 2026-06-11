@@ -5,7 +5,7 @@
         <template #prefix><FilterIcon class="h-4" /></template>
         <template v-if="filters.size" #suffix>
           <div
-            class="flex h-5 w-5 items-center justify-center rounded bg-surface-gray-7 pt-[1px] text-2xs font-medium text-ink-white"
+            class="flex h-5 w-5 items-center justify-center rounded bg-surface-gray-10 pt-[1px] text-2xs-medium text-ink-base"
           >
             {{ filters.size }}
           </div>
@@ -14,7 +14,7 @@
     </template>
     <template #body="{ close }">
       <div
-        class="my-2 rounded-lg border border-gray-100 bg-surface-white shadow-xl"
+        class="my-2 rounded-lg border border-gray-100 bg-surface-base shadow-xl"
       >
         <div class="min-w-[400px] p-2">
           <div
