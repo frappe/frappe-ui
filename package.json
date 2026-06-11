@@ -13,6 +13,9 @@
     "#composables/*": "./src/composables/*",
     "#utils/*": "./src/utils/*"
   },
+  "bin": {
+    "tokens-v2": "./tailwind/migrate-tokens-v2.js"
+  },
   "scripts": {
     "test": "vitest --run",
     "test:coverage": "vitest --run --coverage",
