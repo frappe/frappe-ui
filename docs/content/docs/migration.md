@@ -155,11 +155,10 @@ Review the output, then run it without `--dry-run`:
 npx --package frappe-ui tokens-v2 .
 ```
 
-The codemod renames espresso color tokens and merges static text size + weight
-class pairs, for example `text-base font-medium` to `text-base-medium`. Run it
-once per codebase; the token migration is not idempotent because some v2 names
-overlap with v0 names. If `frappe-ui` is already installed locally, you can use
-`npx tokens-v2` instead.
+The codemod renames espresso color tokens like `bg-surface-white` to `bg-surface-base`
+and merges static text size + weight class pairs, for example `text-base font-medium`
+to `text-base-medium`. Run it once per codebase; the token migration is not idempotent
+because some v2 names overlap with v0 names.
 
 ## Editor
 
