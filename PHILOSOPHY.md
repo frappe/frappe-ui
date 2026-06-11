@@ -456,10 +456,10 @@ const isDismissible = computed(() => {
 
 **Rule:** Code reached through the `frappe-ui/internals` subpath is private and **exempt from P13**. It can change shape or be removed in any release — including minor/patch — with no deprecation window. Use it from first-party Frappe libraries without expecting stability.
 
-**Why:** First-party libraries (e.g. `@framework/ui`) need to reuse internal building blocks — composables like `useInputLabeling`, class helpers, headless logic — without every one being promoted to the public API and frozen under P13. `internals` is that escape hatch: the framework gets to consume internals while the *public* surface stays small and the cost of evolving internals stays zero. The alternative — re-exporting each helper from the public API, or opening a `./src/*` wildcard — either freezes everything under P13 or exposes everything forever. `internals` is the deliberate middle: a small, curated, explicitly-unstable surface.
+**Why:** First-party libraries need to reuse internal building blocks, composables like `useInputLabeling`, class helpers, headless logic — without every one being promoted to the public API and frozen under P13. `internals` is that escape hatch: the framework gets to consume internals while the *public* surface stays small and the cost of evolving internals stays zero. The alternative, re-exporting each helper from the public API, or opening a `./src/*` wildcard either freezes everything under P13 or exposes everything forever. `internals` is the deliberate middle: a small, curated, explicitly-unstable surface.
 
 **Mechanics:**
-1. Exposed through a single curated barrel (`internals.ts`) behind the `./internals` export — **not** a `./src/*` wildcard. Re-export only what a first-party consumer actually needs.
+1. Exposed through a single curated barrel (`internals.ts`) behind the `./internals` export **not** a `./src/*` wildcard. Re-export only what a first-party consumer actually needs.
 2. The barrel header restates the no-promise contract at the point of use.
-3. "Private" is by convention — `exports` can't scope visibility to a specific consumer — so the contract is the disclaimer, not enforcement. Product/third-party code is told not to import it.
+3. "Private" is by convention, `exports` can't scope visibility to a specific consumer so the contract is the disclaimer, not enforcement. Product/third-party code is told not to import it.
 4. To make an internal stable, deliberately promote it to a public entry point (and thus under P13). Until then, no guarantees.

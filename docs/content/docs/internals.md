@@ -28,6 +28,80 @@ const { inputId, labelledBy, describedBy, hasError, errorLines, dataAttrs } =
   useInputLabeling(props, { size: () => props.size })
 ```
 
+## Input labeling components
+
+The presentational counterparts of `useInputLabeling`: small components that
+render the label, description, and error region of a form control. frappe-ui
+input components compose them internally; a custom control can use them with
+the ids returned by `useInputLabeling` to get matching markup and styling.
+
+```vue
+<script setup lang="ts">
+import {
+  InputLabel,
+  InputDescription,
+  InputError,
+  LabelingWrapper,
+  useInputLabeling,
+} from 'frappe-ui/internals'
+
+const {
+  inputId,
+  labelId,
+  descriptionId,
+  errorMessageId,
+  hasError,
+  errorLines,
+  showDescription,
+} = useInputLabeling(props)
+</script>
+
+<template>
+  <LabelingWrapper :enabled="hasLabeling" wrapper-class="space-y-1.5">
+    <InputLabel
+      v-if="props.label"
+      :id="labelId"
+      :for-id="inputId"
+      :label="props.label"
+      :required="props.required"
+    />
+    <slot />
+    <InputDescription
+      v-if="showDescription"
+      :id="descriptionId"
+      :description="props.description"
+    />
+    <InputError v-if="hasError" :id="errorMessageId" :lines="errorLines" />
+  </LabelingWrapper>
+</template>
+```
+
+### InputLabel
+
+Renders a `<label>` linked to the input via `forId`, with a required marker
+(a red `*` plus screen-reader-only "(required)" text) when `required` is set.
+Renders nothing when there is no label text or slot content. The default slot
+replaces the label text and receives `required` as a slot prop.
+
+### InputDescription
+
+Renders the help text below an input as a muted paragraph
+(`data-slot="description"`). Renders nothing without a `description` prop or
+slot content.
+
+### InputError
+
+Renders validation messages (`lines`) as a `role="alert"` region
+(`data-slot="error"`), one message per line. Renders nothing when `lines` is
+empty.
+
+### LabelingWrapper
+
+Conditionally wraps its slot content in a `<div>` (with optional
+`wrapperClass` / `wrapperStyle`) when `enabled` is true, and renders the slot
+as-is otherwise. Lets a control add a labeling wrapper element only when it
+actually renders a label, description, or error.
+
 ## inputFontSizeClasses
 
 Returns the Tailwind font-size class frappe-ui input components use for a
