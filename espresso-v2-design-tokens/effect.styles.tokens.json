@@ -28,14 +28,14 @@
             "offsetY": "0px",
             "blur": "1px",
             "spread": "0px",
-            "color": "#00000024"
+            "color": "#00000033"
           },
           {
             "offsetX": "0px",
             "offsetY": "0.25px",
             "blur": "1.5px",
             "spread": "0px",
-            "color": "#ffffff14",
+            "color": "#ffffff29",
             "inset": true
           }
         ]
@@ -62,7 +62,7 @@
             "offsetY": "0.25px",
             "blur": "1.5px",
             "spread": "0px",
-            "color": "#ffffff14",
+            "color": "#ffffff29",
             "inset": true
           }
         ]
@@ -75,14 +75,14 @@
             "offsetY": "6px",
             "blur": "12px",
             "spread": "-2px",
-            "color": "#0000001f"
+            "color": "#00000014"
           },
           {
             "offsetX": "0px",
             "offsetY": "0px",
             "blur": "6px",
             "spread": "2px",
-            "color": "#00000008"
+            "color": "#0000000a"
           },
           {
             "offsetX": "0px",
@@ -96,7 +96,7 @@
             "offsetY": "0.25px",
             "blur": "1.5px",
             "spread": "0px",
-            "color": "#ffffff14",
+            "color": "#ffffff29",
             "inset": true
           }
         ]
@@ -124,6 +124,14 @@
             "blur": "1.5px",
             "spread": "0px",
             "color": "#0000002e"
+          },
+          {
+            "offsetX": "0px",
+            "offsetY": "0.25px",
+            "blur": "1.5px",
+            "spread": "0px",
+            "color": "#ffffff29",
+            "inset": true
           }
         ]
       },
@@ -154,9 +162,9 @@
           {
             "offsetX": "0px",
             "offsetY": "0.25px",
-            "blur": "2px",
+            "blur": "1.5px",
             "spread": "0px",
-            "color": "#ffffff26",
+            "color": "#ffffff29",
             "inset": true
           }
         ]
@@ -187,10 +195,10 @@
           },
           {
             "offsetX": "0px",
-            "offsetY": "0.1px",
+            "offsetY": "0.25px",
             "blur": "2px",
             "spread": "0px",
-            "color": "#ffffff14",
+            "color": "#ffffff29",
             "inset": true
           }
         ]

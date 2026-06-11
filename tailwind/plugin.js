@@ -216,12 +216,6 @@ export default plugin(
         xl: 'var(--elevation-xl)',
         '2xl': 'var(--elevation-2xl)',
         status: 'var(--elevation-status)',
-        'dark-sm': 'var(--dark-elevation-sm)',
-        'dark-base': 'var(--dark-elevation-base)',
-        'dark-md': 'var(--dark-elevation-md)',
-        'dark-lg': 'var(--dark-elevation-lg)',
-        'dark-xl': 'var(--dark-elevation-xl)',
-        'dark-2xl': 'var(--dark-elevation-2xl)',
       },
       container: {
         padding: {
