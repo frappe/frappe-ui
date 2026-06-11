@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * Espresso v2 token migration codemod.
  *
@@ -13,7 +14,7 @@
  * class, which carries the correct per-weight letter-spacing (see
  * `mergeWeightClasses`).
  *
- *   Usage:  node tailwind/migrate-tokens-v2.js [--dry-run] [--force] <dir-or-file...>
+ *   Usage:  tokens-v2 [--dry-run] [--force] <dir-or-file...>
  *
  * IMPORTANT: the token replacement is single-pass/simultaneous. Several renames
  * chain (outline red-2→3, red-3→4, red-4→5); applying them sequentially would
@@ -27,6 +28,8 @@
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
+
+const USAGE = 'Usage: tokens-v2 [--dry-run] [--force] <dir-or-file...>'
 
 // ---------- MAPPING ----------
 
@@ -322,12 +325,18 @@ function* walk(target) {
 
 function main() {
   const args = process.argv.slice(2)
+  const help = args.includes('--help') || args.includes('-h')
   const dryRun = args.includes('--dry-run')
   const force = args.includes('--force')
   const targets = args.filter((a) => !a.startsWith('--'))
 
+  if (help) {
+    console.log(USAGE)
+    return
+  }
+
   if (targets.length === 0) {
-    console.error('Usage: node tailwind/migrate-tokens-v2.js [--dry-run] [--force] <dir-or-file...>')
+    console.error(USAGE)
     process.exit(1)
   }
 
@@ -387,5 +396,7 @@ function main() {
   }
 }
 
-const isCLI = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
+const scriptPath = fileURLToPath(import.meta.url)
+const invokedPath = process.argv[1]
+const isCLI = invokedPath && fs.realpathSync(invokedPath) === fs.realpathSync(scriptPath)
 if (isCLI) main()
