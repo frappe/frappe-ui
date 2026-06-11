@@ -45,6 +45,10 @@
       "import": "./src/index.ts",
       "types": "./src/index.ts"
     },
+    "./internals": {
+      "import": "./internals.ts",
+      "types": "./internals.ts"
+    },
     "./frappe": {
       "import": "./frappe/index.js"
     },
@@ -90,6 +94,7 @@
     "vite",
     "icons",
     "tailwind",
+    "internals.ts",
     "tsconfig.base.json"
   ],
   "repository": {
