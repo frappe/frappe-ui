@@ -93,17 +93,7 @@ export function getSidebarList(
         { text: 'Icons', link: '/docs/other/icons' },
         { text: 'Utilities', link: '/docs/other/utilities' },
         { text: 'Directives', link: '/docs/other/directives' },
-      ],
-    },
-    {
-      text: 'Internals',
-      items: [
-        { text: 'Introduction', link: '/docs/internals/introduction' },
-        {
-          text: 'useInputLabeling',
-          link: '/docs/internals/composables/use-input-labeling',
-        },
-        { text: 'Utilities', link: '/docs/internals/utilities' },
+        { text: 'Internals', link: '/docs/internals' },
       ],
     },
   ]
