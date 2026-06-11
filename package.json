@@ -3,7 +3,10 @@
   "version": "1.0.0-beta.5",
   "description": "A set of components and utilities for rapid UI development",
   "type": "module",
-  "sideEffects": false,
+  "sideEffects": [
+    "**/*.css",
+    "**/*.vue"
+  ],
   "imports": {
     "#components/*": "./src/components/*",
     "#molecules/*": "./src/molecules/*",
