@@ -133,6 +133,24 @@ describe('TimePicker', () => {
     },
   )
 
+  it('back-compat: use12Hour=true maps to 12-hour display when format is omitted', () => {
+    cy.mount(TimePicker, {
+      props: { modelValue: '15:00', use12Hour: true },
+    })
+
+    cy.get('input').should('have.value', '3:00 PM')
+    cy.get('input').click()
+    cy.get('[role=option][data-value="15:00"]').should('have.text', '3:00 PM')
+  })
+
+  it('format prop takes precedence over the deprecated use12Hour alias', () => {
+    cy.mount(TimePicker, {
+      props: { modelValue: '15:00', use12Hour: true, format: 'HH:mm' },
+    })
+
+    cy.get('input').should('have.value', '15:00')
+  })
+
   it(
     'renders seconds in display and option labels when the format includes seconds',
     () => {
@@ -239,6 +257,18 @@ describe('TimePicker', () => {
     cy.get('input').type('15:30:45{enter}')
     cy.get('input').should('have.value', '15:30:45')
     cy.get('@onUpdate').should('have.been.calledWith', '15:30:45')
+  })
+
+  it('preserves typed seconds in localized Dayjs formats', () => {
+    const onUpdate = cy.spy().as('onUpdate')
+
+    cy.mount(TimePicker, {
+      props: { format: 'LTS', 'onUpdate:modelValue': onUpdate },
+    })
+    cy.get('input').click()
+    cy.get('input').type('8:02:18 PM{enter}')
+    cy.get('input').should('have.value', '8:02:18 PM')
+    cy.get('@onUpdate').should('have.been.calledWith', '20:02:18')
   })
 
   it('invalid typed input does not corrupt the model value', () => {

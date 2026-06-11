@@ -90,6 +90,12 @@ export interface TimePickerProps extends InputLabelingProps {
    */
   autoClose?: boolean
 
+  /**
+   * Use 12-hour (am/pm) format for display.
+   * @deprecated Use `format` instead.
+   */
+  use12Hour?: boolean
+
   /** Dayjs format string used for display. Default: `HH:mm`. */
   format?: string
 

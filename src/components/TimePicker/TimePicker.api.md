@@ -116,6 +116,13 @@
     deprecated: 'Use `keepOpen` (inverse semantics).'
   },
   {
+    name: 'use12Hour',
+    description: 'Use 12-hour (am/pm) format for display.',
+    required: false,
+    type: 'boolean',
+    deprecated: 'Use `format` instead.'
+  },
+  {
     name: 'format',
     description: 'Dayjs format string used for display. Default: `HH:mm`.',
     required: false,

@@ -29,7 +29,16 @@ export interface TimeOption {
 }
 
 function formatHasSeconds(format: string): boolean {
-  return format.replace(/\[[^\]]*]/g, '').includes('s')
+  const stripped = format.replace(/\[[^\]]*]/g, '')
+  if (stripped.includes('s')) return true
+
+  const withSeconds = dayjs(
+    `${REFERENCE_DATE} 20:02:18`,
+    `${REFERENCE_DATE_FORMAT} HH:mm:ss`,
+    true,
+  )
+  const withoutSeconds = withSeconds.second(0)
+  return withSeconds.format(format) !== withoutSeconds.format(format)
 }
 
 function buildParsedTime(
