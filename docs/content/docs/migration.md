@@ -146,13 +146,13 @@ const options = [{ label: 'Edit', icon: 'lucide-pen' }]
 Run the v2 token codemod from the app you are migrating:
 
 ```sh
-npx --package frappe-ui tokens-v2 --dry-run .
+npx --package frappe-ui@beta tokens-v2 --dry-run .
 ```
 
 Review the output, then run it without `--dry-run`:
 
 ```sh
-npx --package frappe-ui tokens-v2 .
+npx --package frappe-ui@beta tokens-v2 .
 ```
 
 The codemod renames espresso color tokens like `bg-surface-white` to `bg-surface-base`
