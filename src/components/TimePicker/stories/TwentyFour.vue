@@ -11,7 +11,7 @@ const cronTime = ref('02:00')
     <span class="text-sm text-ink-gray-7">Nightly backup runs at</span>
     <TimePicker
       v-model="cronTime"
-      :use12Hour="false"
+      format="HH:mm"
       :interval="30"
     >
       <template #prefix>

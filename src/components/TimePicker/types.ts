@@ -1,6 +1,6 @@
 /**
  * TimePicker is a thin wrapper around Combobox that adds time-aware parsing,
- * generated options, and a 12/24-hour display toggle. Canonical value is
+ * generated options, and configurable display formatting. Canonical value is
  * always 24-hour `HH:mm` (or `HH:mm:ss` if seconds were typed).
  */
 
@@ -90,8 +90,8 @@ export interface TimePickerProps extends InputLabelingProps {
    */
   autoClose?: boolean
 
-  /** Use 12-hour (am/pm) format for display. */
-  use12Hour?: boolean
+  /** Dayjs format string used for display. Default: `HH:mm`. */
+  format?: string
 
   /** Disable the time picker. */
   disabled?: boolean

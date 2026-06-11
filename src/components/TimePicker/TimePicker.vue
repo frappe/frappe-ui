@@ -127,7 +127,7 @@ const props = withDefaults(defineProps<TimePickerProps>(), {
   options: () => [],
   placeholder: 'Select time',
   variant: 'subtle' as Variant,
-  use12Hour: true,
+  format: 'HH:mm',
   disabled: false,
   typeable: true,
   readonly: false,
@@ -270,12 +270,12 @@ const { motion, onPointerDown: recordPointerDown } = usePopoverMotion(isOpen)
 
 // Canonical 24-hour value (`HH:mm` or `HH:mm:ss`) — the source of truth.
 const canonicalValue = ref<string>(
-  normalize24(props.modelValue || props.value || ''),
+  normalize24(props.modelValue || props.value || '', props.format),
 )
 
 // What the user sees / can edit in the trigger input. Synced from
 // canonicalValue when not actively typing.
-const displayValue = ref<string>(formatTime(canonicalValue.value, props.use12Hour))
+const displayValue = ref<string>(formatTime(canonicalValue.value, props.format))
 
 const isTyping = ref(false)
 const highlightIndex = ref<number>(-1)
@@ -302,12 +302,12 @@ const displayedOptions = computed<TimeOption[]>(() => {
   if (props.options?.length) {
     return props.options.map((o) => {
       const value = normalize24(o.value) || o.value
-      return { value, label: o.label || formatTime(value, props.use12Hour) }
+      return { value, label: o.label || formatTime(value, props.format) }
     })
   }
   return generateTimeOptions({
     interval: props.interval,
-    use12Hour: props.use12Hour,
+    format: props.format,
     minMinutes: minMinutes.value,
     maxMinutes: maxMinutes.value,
   })
@@ -321,7 +321,7 @@ const displayedOptions = computed<TimeOption[]>(() => {
 const typingTarget = computed<{ exact: TimeOption | null; nearest: TimeOption | null }>(() => {
   const list = displayedOptions.value
   if (!list.length) return { exact: null, nearest: null }
-  const parsed = parseFlexibleTime(displayValue.value)
+  const parsed = parseFlexibleTime(displayValue.value, props.format)
   if (!parsed.valid) return { exact: null, nearest: null }
   const candidate = parsed.ss
     ? `${parsed.hh24}:${parsed.mm}:${parsed.ss}`
@@ -357,19 +357,19 @@ function baseCompare(val: string): string {
 watch(
   () => [props.modelValue, props.value] as const,
   ([m, v]) => {
-    const nv = normalize24(m || v || '')
+    const nv = normalize24(m || v || '', props.format)
     if (nv === canonicalValue.value) return
     canonicalValue.value = nv
-    if (!isTyping.value) displayValue.value = formatTime(nv, props.use12Hour)
+    if (!isTyping.value) displayValue.value = formatTime(nv, props.format)
   },
 )
 
-// Reformat the displayed value when the format changes (e.g. use12Hour toggle).
+// Reformat the displayed value when the display format changes.
 watch(
-  () => props.use12Hour,
+  () => props.format,
   () => {
     if (!isTyping.value) {
-      displayValue.value = formatTime(canonicalValue.value, props.use12Hour)
+      displayValue.value = formatTime(canonicalValue.value, props.format)
     }
   },
 )
@@ -381,7 +381,7 @@ watch(displayValue, () => {
   // The model→display sync above (re)writes displayValue while not typing —
   // distinguish user keystrokes from that programmatic write by only
   // toggling when the value diverges from the formatted canonical.
-  const formatted = formatTime(canonicalValue.value, props.use12Hour)
+  const formatted = formatTime(canonicalValue.value, props.format)
   if (displayValue.value !== formatted) {
     isTyping.value = true
     highlightIndex.value = -1
@@ -397,7 +397,7 @@ function setInvalid(next: boolean) {
 function commit(value: string) {
   const prev = canonicalValue.value
   canonicalValue.value = value
-  displayValue.value = formatTime(value, props.use12Hour)
+  displayValue.value = formatTime(value, props.format)
   isTyping.value = false
   emit('update:modelValue', value)
   if (value !== prev) emit('change', value)
@@ -409,7 +409,14 @@ function commitTyped(raw: string) {
     commit('')
     return
   }
-  const parsed = parseFlexibleTime(raw)
+  const formattedCurrent = formatTime(canonicalValue.value, props.format)
+  if (raw === formattedCurrent) {
+    displayValue.value = formattedCurrent
+    isTyping.value = false
+    setInvalid(false)
+    return
+  }
+  const parsed = parseFlexibleTime(raw, props.format)
   if (
     !parsed.valid ||
     isOutOfRange(parsed.total, minMinutes.value, maxMinutes.value)
@@ -417,7 +424,7 @@ function commitTyped(raw: string) {
     emit('input-invalid', raw)
     setInvalid(true)
     // Revert visible text to the last good value.
-    displayValue.value = formatTime(canonicalValue.value, props.use12Hour)
+    displayValue.value = formatTime(canonicalValue.value, props.format)
     isTyping.value = false
     return
   }
@@ -607,4 +614,3 @@ defineExpose({
   },
 })
 </script>
-
