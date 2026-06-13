@@ -26,6 +26,7 @@ import '../shared/selection/popoverMotion.css'
 import type {
   MultiSelectEmits,
   MultiSelectProps,
+  MultiSelectSlotProps,
   MultiSelectSlots,
 } from './types'
 import {
@@ -86,10 +87,10 @@ const {
 const hasLabeling = computed(() => {
   return Boolean(
     props.label ||
-      props.description ||
-      hasError.value ||
-      slots.label ||
-      slots.description,
+    props.description ||
+    hasError.value ||
+    slots.label ||
+    slots.description,
   )
 })
 
@@ -197,10 +198,24 @@ function selectAll() {
     .map((option) => option.value)
 }
 
-function toggleOpen() {
-  if (props.disabled) return
-  open.value = !open.value
+function handleTriggerClick() {
+  setOpen(!open.value)
 }
+
+function setOpen(value: boolean) {
+  if (props.disabled) return
+  open.value = value
+}
+
+const slotProps = computed<MultiSelectSlotProps>(() => ({
+  open: open.value,
+  disabled: Boolean(props.disabled),
+  query: typedQuery.value,
+  selectedOptions: selectedOptions.value,
+  displayValue: displayValue.value,
+  clearAll,
+  setOpen,
+}))
 
 function handleRootModelValueChange(value: string | string[] | undefined) {
   const arr = Array.isArray(value) ? value : value ? [value] : []
@@ -255,69 +270,57 @@ defineSlots<MultiSelectSlots>()
         <slot name="label" v-bind="slotProps" />
       </template>
     </InputLabel>
-  <ComboboxRoot
-    multiple
-    :model-value="internalModel"
-    :open="open"
-    :disabled="disabled"
-    :ignore-filter="true"
-    @update:modelValue="handleRootModelValueChange"
-    @update:open="handleRootOpenChange"
-  >
-    <ComboboxAnchor
-      as-child
-      @click="toggleOpen"
-      @pointerdown="markPointerDown"
+    <ComboboxRoot
+      multiple
+      :model-value="internalModel"
+      :open="open"
+      :disabled="disabled"
+      :ignore-filter="true"
+      @update:modelValue="handleRootModelValueChange"
+      @update:open="handleRootOpenChange"
     >
-      <slot
-        v-if="$slots.trigger"
-        name="trigger"
-        v-bind="{
-          open,
-          disabled: !!disabled,
-          query: typedQuery,
-          selectedOptions,
-          displayValue,
-          clearAll,
-          toggleOpen,
-        }"
-      />
+      <ComboboxAnchor
+        as-child
+        @click="handleTriggerClick"
+        @pointerdown="markPointerDown"
+      >
+        <slot v-if="$slots.trigger" name="trigger" v-bind="slotProps" />
 
-      <!--
+        <!--
         Rendered as a raw `<button>` so prefix / label / chevron are
         direct flex children and `justify-between` + label `flex-1` align
         cleanly. Wrapping in `<Button>` would nest the label inside
         Button's own default-slot `<span>`, which is content-sized and
         would center the label when a width class is applied.
       -->
-      <button
-        v-else
-        type="button"
-        :class="[
-          triggerClasses,
-          'justify-between',
-          disabled && 'cursor-not-allowed',
-          hasLabeling ? 'w-full' : null,
-          hasLabeling ? null : (attrs.class as any),
-        ]"
-        :style="hasLabeling ? null : (attrs.style as any)"
-        :disabled="disabled"
-        data-slot="trigger"
-        :data-state="open ? 'open' : 'closed'"
-        :data-variant="variant"
-        :data-size="size"
-        :data-disabled="disabled ? '' : undefined"
-        :data-invalid="hasError ? 'true' : undefined"
-        :data-required="required ? 'true' : undefined"
-        :id="inputId"
-        aria-haspopup="listbox"
-        :aria-expanded="open"
-        :aria-invalid="hasError || undefined"
-        :aria-errormessage="hasError ? errorMessageId : undefined"
-        :aria-describedby="describedBy"
-        :aria-required="required || undefined"
-      >
-        <!--
+        <button
+          v-else
+          type="button"
+          :class="[
+            triggerClasses,
+            'justify-between',
+            disabled && 'cursor-not-allowed',
+            hasLabeling ? 'w-full' : null,
+            hasLabeling ? null : (attrs.class as any),
+          ]"
+          :style="hasLabeling ? null : (attrs.style as any)"
+          :disabled="disabled"
+          data-slot="trigger"
+          :data-state="open ? 'open' : 'closed'"
+          :data-variant="variant"
+          :data-size="size"
+          :data-disabled="disabled ? '' : undefined"
+          :data-invalid="hasError ? 'true' : undefined"
+          :data-required="required ? 'true' : undefined"
+          :id="inputId"
+          aria-haspopup="listbox"
+          :aria-expanded="open"
+          :aria-invalid="hasError || undefined"
+          :aria-errormessage="hasError ? errorMessageId : undefined"
+          :aria-describedby="describedBy"
+          :aria-required="required || undefined"
+        >
+          <!--
           Prefix precedence on the trigger:
             1. `#prefix` slot, when provided, owns the entire prefix area
                regardless of selection count. Use it for aggregate
@@ -329,101 +332,71 @@ defineSlots<MultiSelectSlots>()
                the icon.
             4. otherwise: nothing.
         -->
-        <slot
-          v-if="$slots.prefix"
-          name="prefix"
-          v-bind="{
-            open,
-            disabled: !!disabled,
-            query: typedQuery,
-            selectedOptions,
-            displayValue,
-            clearAll,
-            toggleOpen,
-          }"
-        />
-        <template
-          v-else-if="singleSelectedOption && $slots['item-prefix']"
-        >
-          <slot
-            name="item-prefix"
-            v-bind="{
-              item: singleSelectedOption,
-              query: '',
-              selected: true,
-            }"
-          />
-        </template>
-        <OptionIcon
-          v-else-if="singleSelectedOption?.icon"
-          :icon="singleSelectedOption.icon"
-        />
-
-        <span class="grid min-w-0 flex-1 text-left font-normal">
-          <span
-            :class="[
-              'col-start-1 row-start-1 max-w-full truncate',
-              !selectedOptions.length && 'text-ink-gray-4',
-            ]"
-          >
+          <slot v-if="$slots.prefix" name="prefix" v-bind="slotProps" />
+          <template v-else-if="singleSelectedOption && $slots['item-prefix']">
             <slot
-              name="summary"
+              name="item-prefix"
               v-bind="{
-                open,
-                disabled: !!disabled,
-                query: typedQuery,
-                selectedOptions,
-                displayValue,
-                clearAll,
-                toggleOpen,
-                summary: triggerSummary,
+                item: singleSelectedOption,
+                query: '',
+                selected: true,
               }"
-            >{{ triggerSummary }}</slot>
+            />
+          </template>
+          <OptionIcon
+            v-else-if="singleSelectedOption?.icon"
+            :icon="singleSelectedOption.icon"
+          />
+
+          <span class="grid min-w-0 flex-1 text-left font-normal">
+            <span
+              :class="[
+                'col-start-1 row-start-1 max-w-full truncate',
+                !selectedOptions.length && 'text-ink-gray-4',
+              ]"
+            >
+              <slot
+                name="summary"
+                v-bind="{
+                  ...slotProps,
+                  summary: triggerSummary,
+                }"
+                >{{ triggerSummary }}</slot
+              >
+            </span>
+            <span
+              v-if="!$slots.summary"
+              aria-hidden="true"
+              class="multi-select-trigger-sizer col-start-1 row-start-1"
+              :data-width-text="triggerSizingText"
+            />
           </span>
-          <span
-            v-if="!$slots.summary"
-            aria-hidden="true"
-            class="multi-select-trigger-sizer col-start-1 row-start-1"
-            :data-width-text="triggerSizingText"
-          />
-        </span>
 
-        <slot
-          name="suffix"
-          v-bind="{
-            open,
-            disabled: !!disabled,
-            query: typedQuery,
-            selectedOptions,
-            displayValue,
-            clearAll,
-            toggleOpen,
-          }"
+          <slot name="suffix" v-bind="slotProps">
+            <span
+              :class="[
+                'lucide-chevron-down size-4 shrink-0 text-ink-gray-4 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)]',
+                open && 'rotate-180',
+              ]"
+            />
+          </slot>
+        </button>
+      </ComboboxAnchor>
+
+      <ComboboxPortal :to="portalTo">
+        <ComboboxContent
+          data-slot="content"
+          data-selection
+          :data-variant="variant"
+          :data-size="size"
+          :data-loading="loading ? '' : undefined"
+          class="z-[100] min-w-[--reka-combobox-trigger-width]"
+          position="popper"
+          :side="side"
+          :align="align"
+          :side-offset="offset"
         >
-          <span
-            :class="[
-              'lucide-chevron-down size-4 shrink-0 text-ink-gray-4 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)]',
-              open && 'rotate-180',
-            ]"
-          />
-        </slot>
-      </button>
-    </ComboboxAnchor>
-
-    <ComboboxPortal :to="portalTo">
-      <ComboboxContent
-        data-slot="content"
-        data-selection
-        :data-variant="variant"
-        :data-size="size"
-        :data-loading="loading ? '' : undefined"
-        class="z-[100] min-w-[--reka-combobox-trigger-width]"
-        position="popper"
-        :side="side"
-        :align="align"
-        :side-offset="offset"
-      >
-        <!--
+          <!--
           FocusScope sits on the always-present content-body div (inside
           ComboboxContent, which is a <Presence> wrapper that renders null
           while closed). Mounting it here pushes a new entry onto reka's
@@ -432,86 +405,86 @@ defineSlots<MultiSelectSlots>()
           popover (e.g. the search input). See Combobox.vue for the same
           fix and a longer rationale.
         -->
-        <FocusScope as-child @unmount-auto-focus.prevent>
-          <div
-            data-slot="content-body"
-            :data-motion="contentMotion"
-            class="overflow-hidden rounded-lg bg-surface-elevation-2 shadow-2xl ring-1 ring-black ring-opacity-5"
-          >
+          <FocusScope as-child @unmount-auto-focus.prevent>
             <div
-              v-if="!hideSearch"
-              data-slot="search"
-              class="flex items-center gap-2 border-b border-outline-gray-1 px-3"
+              data-slot="content-body"
+              :data-motion="contentMotion"
+              class="overflow-hidden rounded-lg bg-surface-elevation-2 shadow-2xl ring-1 ring-black ring-opacity-5"
             >
-              <ComboboxInput
-                data-slot="input"
-                :value="query"
-                :disabled="disabled"
-                :placeholder="placeholder"
-                autocomplete="off"
-                class="min-w-0 flex-1 border-0 bg-transparent px-0 py-2 text-base text-ink-gray-8 outline-none placeholder:text-ink-gray-4 focus:ring-0"
-                @input="handleInputChange"
-              />
-              <LoadingIndicator
-                v-if="loading"
-                class="size-4 shrink-0 text-ink-gray-5"
-              />
-            </div>
-
-            <MultiSelectResults
-              :groups="filteredGroups"
-              :size="size"
-              :query="typedQuery"
-              :selected-values="safeModel"
-              :loading="loading"
-              :hide-search="hideSearch"
-              :empty-text="emptyText"
-              :show-empty="showEmpty"
-              :slot-fns="slots"
-              :all-options="allOptions"
-            />
-
-            <template v-if="$slots.footer">
-              <div data-slot="footer">
-                <slot
-                  name="footer"
-                  v-bind="{
-                    clearAll,
-                    selectAll,
-                    selectedOptions,
-                    query: typedQuery,
-                  }"
+              <div
+                v-if="!hideSearch"
+                data-slot="search"
+                class="flex items-center gap-2 border-b border-outline-gray-1 px-3"
+              >
+                <ComboboxInput
+                  data-slot="input"
+                  :value="query"
+                  :disabled="disabled"
+                  :placeholder="placeholder"
+                  autocomplete="off"
+                  class="min-w-0 flex-1 border-0 bg-transparent px-0 py-2 text-base text-ink-gray-8 outline-none placeholder:text-ink-gray-4 focus:ring-0"
+                  @input="handleInputChange"
+                />
+                <LoadingIndicator
+                  v-if="loading"
+                  class="size-4 shrink-0 text-ink-gray-5"
                 />
               </div>
-            </template>
-            <div
-              v-else
-              data-slot="footer"
-              class="flex items-center justify-between gap-2 border-t border-outline-gray-1 px-2 py-1.5"
-            >
-              <Button
-                v-if="safeModel.length > 0"
-                variant="ghost"
-                size="sm"
-                @click="clearAll"
+
+              <MultiSelectResults
+                :groups="filteredGroups"
+                :size="size"
+                :query="typedQuery"
+                :selected-values="safeModel"
+                :loading="loading"
+                :hide-search="hideSearch"
+                :empty-text="emptyText"
+                :show-empty="showEmpty"
+                :slot-fns="slots"
+                :all-options="allOptions"
+              />
+
+              <template v-if="$slots.footer">
+                <div data-slot="footer">
+                  <slot
+                    name="footer"
+                    v-bind="{
+                      clearAll,
+                      selectAll,
+                      selectedOptions,
+                      query: typedQuery,
+                    }"
+                  />
+                </div>
+              </template>
+              <div
+                v-else
+                data-slot="footer"
+                class="flex items-center justify-between gap-2 border-t border-outline-gray-1 px-2 py-1.5"
               >
-                Clear All
-              </Button>
-              <Button
-                v-if="!allSelected"
-                variant="ghost"
-                size="sm"
-                class="ml-auto"
-                @click="selectAll"
-              >
-                Select All
-              </Button>
+                <Button
+                  v-if="safeModel.length > 0"
+                  variant="ghost"
+                  size="sm"
+                  @click="clearAll"
+                >
+                  Clear All
+                </Button>
+                <Button
+                  v-if="!allSelected"
+                  variant="ghost"
+                  size="sm"
+                  class="ml-auto"
+                  @click="selectAll"
+                >
+                  Select All
+                </Button>
+              </div>
             </div>
-          </div>
-        </FocusScope>
-      </ComboboxContent>
-    </ComboboxPortal>
-  </ComboboxRoot>
+          </FocusScope>
+        </ComboboxContent>
+      </ComboboxPortal>
+    </ComboboxRoot>
     <InputDescription
       v-if="showDescription || $slots.description"
       :id="descriptionId"

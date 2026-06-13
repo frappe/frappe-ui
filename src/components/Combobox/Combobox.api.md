@@ -16,7 +16,7 @@
     name: 'trigger',
     description: 'Shape of the trigger.\n- `\'input\'` (default): user types directly into the trigger\n- `\'button\'`: render a button trigger; search input moves into the\n  popover header. Label + prefix auto-derive from the selected option.',
     required: false,
-    type: '"button" | "input"',
+    type: '"input" | "button"',
     default: '"input"'
   },
   {
@@ -165,7 +165,7 @@
   {
     name: 'trigger',
     description: 'Fully custom trigger renderer.',
-    type: 'ComboboxTriggerSlotProps'
+    type: 'ComboboxControlSlotProps'
   },
   {
     name: 'label',
@@ -179,13 +179,13 @@
   },
   {
     name: 'prefix',
-    description: 'Content rendered before the default input. Receives the same shape\nas `#trigger` and `#suffix` (`ComboboxSlotProps`).',
-    type: 'ComboboxTriggerSlotProps'
+    description: 'Content rendered before the default input. Receives the same shape\nas the other control slots.',
+    type: 'ComboboxControlSlotProps'
   },
   {
     name: 'suffix',
     description: 'Content rendered after the input (input mode) or label (button mode).\nProviding this slot **replaces the default chevron** — render your\nown fallback (e.g. the chevron) when your slot content is conditional.\nCommon use: an inline clear button. Use `@click.stop` and\n`@pointerdown.stop` so the press doesn\'t toggle the popover.',
-    type: 'ComboboxTriggerSlotProps'
+    type: 'ComboboxControlSlotProps'
   },
   {
     name: 'item-prefix',
@@ -219,31 +219,31 @@
   },
   {
     name: 'footer',
-    description: 'Content rendered after the list. Stays pinned below the scrollable options.',
-    type: 'ComboboxFooterSlotProps'
+    description: 'Content rendered after the list. Stays pinned below the scrollable\noptions.',
+    type: 'ComboboxControlSlotProps'
   }
 ]
 
   const emitsData = [
-  {
-    name: 'update:modelValue',
-    description: 'Fired when the model value changes.',
-    type: '[value: string | null]'
-  },
-  {
-    name: 'update:query',
-    description: 'Fired when the query changes.',
-    type: '[value: string]'
-  },
   {
     name: 'input',
     description: '',
     type: '[value: string]'
   },
   {
+    name: 'update:modelValue',
+    description: 'Fired when the model value changes.',
+    type: '[value: string | null]'
+  },
+  {
     name: 'update:open',
     description: 'Fired when the open state changes.',
     type: '[value: boolean]'
+  },
+  {
+    name: 'update:query',
+    description: 'Fired when the query changes.',
+    type: '[value: string]'
   },
   {
     name: 'update:selectedOption',
@@ -262,11 +262,11 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="Combobox" :data="propsData"/> 
+<PropsTable name="Combobox" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
+<SlotsTable :data="slotsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

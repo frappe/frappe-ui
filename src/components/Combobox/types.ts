@@ -159,7 +159,7 @@ export interface ComboboxProps extends InputLabelingProps {
   placement?: ComboboxPlacement
 }
 
-export interface ComboboxTriggerSlotProps {
+export interface ComboboxControlSlotProps {
   /** Whether the popover is open. */
   open: boolean
 
@@ -178,19 +178,9 @@ export interface ComboboxTriggerSlotProps {
   /** Clears the current selection (sets the model to `null`). */
   clearSelection: () => void
 
-  /** Toggles the popover open state (no-op while disabled). */
-  toggleOpen: () => void
+  /** Sets the popover open state (no-op while disabled). */
+  setOpen: (value: boolean) => void
 }
-
-/**
- * Shared shape for `#trigger`, `#prefix`, and `#suffix`. `selectedOption`
- * is always `null` in `#prefix` because the prefix only renders before a
- * selection — the field is still exposed for slot-prop symmetry across
- * the trio.
- */
-export type ComboboxSlotProps = ComboboxTriggerSlotProps
-export type ComboboxPrefixSlotProps = ComboboxSlotProps
-export type ComboboxSuffixSlotProps = ComboboxSlotProps
 
 export interface ComboboxItemSlotProps {
   /** Item currently being rendered. */
@@ -213,20 +203,9 @@ export interface ComboboxEmptySlotProps {
   query: string
 }
 
-export interface ComboboxFooterSlotProps {
-  /** Current search query — empty when the user hasn't typed since opening. */
-  query: string
-
-  /** Resolved selected option, if any. */
-  selectedOption: ComboboxSelectableOption | null
-
-  /** Clears the current selection (sets the model to `null`). */
-  clearSelection: () => void
-}
-
 export interface ComboboxSlots {
   /** Fully custom trigger renderer. */
-  trigger?: (props: ComboboxTriggerSlotProps) => any
+  trigger?: (props: ComboboxControlSlotProps) => any
 
   /** Overrides the rendered label content. Receives `{ required }`. */
   label?: (props: { required: boolean }) => any
@@ -235,8 +214,8 @@ export interface ComboboxSlots {
   description?: () => any
 
   /** Content rendered before the default input. Receives the same shape
-   * as `#trigger` and `#suffix` (`ComboboxSlotProps`). */
-  prefix?: (props: ComboboxPrefixSlotProps) => any
+   * as the other control slots. */
+  prefix?: (props: ComboboxControlSlotProps) => any
 
   /**
    * Content rendered after the input (input mode) or label (button mode).
@@ -245,7 +224,7 @@ export interface ComboboxSlots {
    * Common use: an inline clear button. Use `@click.stop` and
    * `@pointerdown.stop` so the press doesn't toggle the popover.
    */
-  suffix?: (props: ComboboxSuffixSlotProps) => any
+  suffix?: (props: ComboboxControlSlotProps) => any
 
   /** Shared content rendered before the standard row label. */
   'item-prefix'?: (props: ComboboxItemSlotProps) => any
@@ -267,7 +246,7 @@ export interface ComboboxSlots {
 
   /** Content rendered after the list. Stays pinned below the scrollable
    * options. */
-  footer?: (props: ComboboxFooterSlotProps) => any
+  footer?: (props: ComboboxControlSlotProps) => any
 
   [slotName: string]: ((props: any) => any) | undefined
 }
