@@ -31,6 +31,8 @@ declare module 'vue' {
     CircularProgressBar: typeof import('./src/components/CircularProgressBar/CircularProgressBar.vue')['default']
     'CircularProgressBar.story': typeof import('./src/components/CircularProgressBar/CircularProgressBar.story.vue')['default']
     CodeBlockComponent: typeof import('./src/components/TextEditor/components/CodeBlockComponent.vue')['default']
+    CodeEditor: typeof import('./src/components/CodeEditor/CodeEditor.vue')['default']
+    CodePreview: typeof import('./src/components/CodeEditor/CodePreview.vue')['default']
     Combobox: typeof import('./src/components/Combobox/Combobox.vue')['default']
     ComboboxResults: typeof import('./src/components/Combobox/ComboboxResults.vue')['default']
     CommandPalette: typeof import('./src/components/CommandPalette/CommandPalette.vue')['default']
