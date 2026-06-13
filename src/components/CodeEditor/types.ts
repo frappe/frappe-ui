@@ -2,7 +2,7 @@
 // wrapper and stories can share the same contract without importing the .vue.
 
 import type { InputLabelingProps } from '../../composables/useInputLabeling'
-import type { InputSize } from '../../composables/inputTypes'
+import type { InputSize, InputVariant } from '../../composables/inputTypes'
 
 /** A language key understood by `loadLanguage`. */
 export type CodeLanguage =
@@ -18,25 +18,28 @@ export type CodeLanguage =
   | 'xml'
   | 'plain'
 
-/**
- * Visual style variant, mirroring frappe-ui's input convention
- * (`InputVariant`): `subtle` is the filled default that sits flush with the
- * TextInput/Textarea fields around it, `outline` is a bordered-on-white box,
- * `ghost` is borderless.
- */
-export type CodeEditorVariant = 'subtle' | 'outline' | 'ghost'
-
 export interface CodeEditorProps extends InputLabelingProps {
   /** The editor's text content (controlled, two-way via `v-model`). */
   modelValue: string
-  /** CodeMirror language key; falls through to plain text when unset/unknown. */
-  language?: string
+  /**
+   * CodeMirror language key; falls through to plain text when unset/unknown.
+   * Typed as `CodeLanguage | (string & {})` so the known keys autocomplete
+   * while an arbitrary string still type-checks.
+   */
+  language?: CodeLanguage | (string & {})
   /** If true, the content is read-only and not editable. */
   readonly?: boolean
   /** Placeholder shown when the editor is empty. */
   placeholder?: string
-  /** Surface style; mirrors frappe-ui inputs. Defaults to `subtle`. */
-  variant?: CodeEditorVariant
+  /**
+   * Surface style; derived from the shared `InputVariant` union so the code
+   * field can't drift from the TextInput/Textarea fields it sits next to.
+   * `subtle` is the filled default, `outline` is a bordered-on-white box.
+   * `ghost` (borderless) is excluded — a borderless code surface reads as plain
+   * text and loses the affordance that it's an editable field. Defaults to
+   * `subtle`.
+   */
+  variant?: Exclude<InputVariant, 'ghost'>
   /**
    * Size token, mirroring frappe-ui inputs. Scales the editor's font size and
    * minimum height (`sm | md | lg | xl`). Defaults to `md`.
@@ -63,5 +66,5 @@ export interface CodePreviewProps {
   /** The source text to render as sanitized preview output. */
   modelValue: string
   /** Only `markdown` / `html` render a preview; anything else renders nothing. */
-  language?: string
+  language?: CodeLanguage | (string & {})
 }

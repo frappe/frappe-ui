@@ -11,7 +11,6 @@ export { default as CodePreview } from './CodePreview.vue'
 export { loadLanguage } from './languages'
 export type {
   CodeLanguage,
-  CodeEditorVariant,
   CodeEditorProps,
   CodeEditorEmits,
   CodePreviewProps,

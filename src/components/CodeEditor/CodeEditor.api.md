@@ -15,7 +15,7 @@
     name: 'language',
     description: 'CodeMirror language key; falls through to plain text when unset/unknown.',
     required: false,
-    type: 'string',
+    type: 'CodeLanguage | (string & {})',
     default: '"plain"'
   },
   {
@@ -36,7 +36,7 @@
     name: 'variant',
     description: 'Surface style; mirrors frappe-ui inputs. Defaults to `subtle`.',
     required: false,
-    type: 'CodeEditorVariant',
+    type: "Exclude<InputVariant, 'ghost'>",
     default: '"subtle"'
   },
   {
@@ -126,7 +126,7 @@
     name: 'language',
     description: 'Only `markdown` / `html` render a preview; anything else renders nothing.',
     required: false,
-    type: 'string'
+    type: 'CodeLanguage | (string & {})'
   }
 ]
 </script>

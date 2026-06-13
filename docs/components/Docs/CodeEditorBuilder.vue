@@ -36,7 +36,6 @@ const knobs: Knob[] = [
     options: [
       { label: 'subtle', value: 'subtle' },
       { label: 'outline', value: 'outline' },
-      { label: 'ghost', value: 'ghost' },
     ],
   },
   {

@@ -29,8 +29,10 @@ flagged at its position.
 ## Variants
 
 The surface mirrors frappe-ui's input convention so a code field sits flush
-with the TextInput/Textarea fields around it. `subtle` is the filled default,
-`outline` is a bordered box on white, and `ghost` is borderless.
+with the TextInput/Textarea fields around it. `subtle` is the filled default and
+`outline` is a bordered box on white. The borderless `ghost` variant is
+intentionally not offered — a code surface without a border reads as plain text
+and loses the affordance that it's an editable field.
 
 <ComponentPreview name="CodeEditor-Variants" />
 
