@@ -4,6 +4,8 @@
  * always 24-hour `HH:mm` (or `HH:mm:ss` if seconds were typed).
  */
 
+import type { InputLabelingProps } from '../../composables/useInputLabeling'
+
 export type PopoverSide = 'top' | 'right' | 'bottom' | 'left'
 export type PopoverAlign = 'start' | 'center' | 'end'
 
@@ -19,7 +21,7 @@ export type Placement =
 
 export type Variant = 'outline' | 'subtle'
 
-export interface TimePickerProps {
+export interface TimePickerProps extends InputLabelingProps {
   /** Controlled value, canonical `HH:mm` (or `HH:mm:ss`). */
   modelValue?: string
 
