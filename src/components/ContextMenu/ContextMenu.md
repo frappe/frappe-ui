@@ -14,9 +14,11 @@ A task card with grouped actions and nested submenus for Move and Share operatio
 
 <ComponentPreview name="ContextMenu-Groups" />
 
-## Shared over a list
+## Tailored options per row
 
-A single `<ContextMenu>` wrapping a file list. The `@contextmenu` handler swaps `options` based on which item was right-clicked.
+One `<ContextMenu>` wraps the entire list, with no separate instance per row. The trick is a single reactive `activeOptions` ref: each row's `@contextmenu` handler calls `getActions(file)` and writes the result into that ref before the menu opens, so the menu always reflects the item that was right-clicked.
+
+This also lets you tailor options per item type. In this example, **Open**, **Rename**, **Copy link**, and **Delete** appear for every item, but folders get a **New file** action to create inside them, files get **Download**, and images get an extra **Set as cover** option on top of that.
 
 <ComponentPreview name="ContextMenu-FileList" />
 

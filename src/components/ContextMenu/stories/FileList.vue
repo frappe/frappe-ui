@@ -41,11 +41,24 @@ function getActions(file: FileItem): ContextMenuOptions {
       onClick: () => console.log('copy link', file.name),
     },
   ]
-  if (file.type !== 'folder') {
+  if (file.type === 'folder') {
+    base.push({
+      label: 'New file',
+      icon: 'lucide-file-plus',
+      onClick: () => console.log('new file in', file.name),
+    })
+  } else {
     base.push({
       label: 'Download',
       icon: 'lucide-download',
       onClick: () => console.log('download', file.name),
+    })
+  }
+  if (file.type === 'image') {
+    base.push({
+      label: 'Set as cover',
+      icon: 'lucide-image',
+      onClick: () => console.log('set as cover', file.name),
     })
   }
   base.push({
