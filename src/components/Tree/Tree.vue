@@ -1,122 +1,303 @@
 <template>
-  <!-- Current Tree Node -->
-  <slot
-    name="node"
-    v-bind="{ node, hasChildren, isCollapsed, toggleCollapsed }"
+  <ul
+    ref="treeRef"
+    role="tree"
+    :aria-multiselectable="false"
+    class="frappe-tree select-none"
+    :data-guides="guides"
+    :style="rootStyle"
+    @keydown="onKeydown"
+    @focusin="onFocusin"
   >
-    <div
-      class="flex items-center cursor-pointer gap-1"
-      :style="{ height: options.rowHeight }"
-      @click="toggleCollapsed"
+    <TreeItem
+      v-for="(node, index) in nodes"
+      :key="keyOf(node)"
+      :node="node"
+      :parent="null"
+      :level="1"
+      :index="index"
+      :set-size="nodes.length"
     >
-      <div ref="iconRef">
-        <!-- slot to only override the Icon -->
-        <slot name="icon" v-bind="{ hasChildren, isCollapsed }">
-          <span
-            v-if="hasChildren && !isCollapsed"
-            class="lucide-chevron-down size-3.5"
-            aria-hidden="true"
-          />
-          <span
-            v-else-if="hasChildren"
-            class="lucide-chevron-right size-3.5"
-            aria-hidden="true"
-          />
-        </slot>
-      </div>
+      <template v-if="$slots.node" #node="p"
+        ><slot name="node" v-bind="p"
+      /></template>
+      <template v-if="$slots.label" #label="p"
+        ><slot name="label" v-bind="p"
+      /></template>
+      <template v-if="$slots.prefix" #prefix="p"
+        ><slot name="prefix" v-bind="p"
+      /></template>
+      <template v-if="$slots.suffix" #suffix="p"
+        ><slot name="suffix" v-bind="p"
+      /></template>
+    </TreeItem>
 
-      <!-- slot to only override the label -->
-      <slot name="label" v-bind="{ node, hasChildren, isCollapsed }">
-        <div class="text-base truncate" :class="hasChildren ? '' : 'pl-3.5'">
-          {{ node.label }}
-        </div>
-      </slot>
-    </div>
-  </slot>
+    <li v-if="!nodes.length" role="none" data-slot="empty">
+      <slot name="empty" />
+    </li>
+  </ul>
 
-  <!-- Recursively render the children -->
-  <div v-if="hasChildren && !isCollapsed" class="flex">
+  <!-- Floating drag indicator -->
+  <Teleport to="body">
     <div
-      :style="{ paddingLeft: linePadding }"
-      class="border-r"
-      v-if="options.showIndentationGuides"
-    ></div>
-    <ul class="w-full" :style="{ paddingLeft: options.indentWidth }">
-      <li v-for="child in node.children" :key="child[nodeKey] as string">
-        <Tree :node="child" :nodeKey="nodeKey" :options="options">
-          <!-- Pass the parent slots to the children of current node -->
-          <template #node="{ node, hasChildren, isCollapsed, toggleCollapsed }">
-            <slot
-              name="node"
-              v-bind="{ node, hasChildren, isCollapsed, toggleCollapsed }"
-            />
-          </template>
+      v-if="dragLabel"
+      class="frappe-tree-drag-label pointer-events-none fixed z-[1000] rounded-md bg-surface-gray-7 px-2 py-1 text-xs text-ink-white shadow-lg"
+      :style="{
+        top: `${dragDrop.state.y + 18}px`,
+        left: `${dragDrop.state.x + 12}px`,
+      }"
+    >
+      {{ dragLabel }}
+    </div>
+  </Teleport>
 
-          <template #icon="{ hasChildren, isCollapsed }">
-            <slot name="icon" v-bind="{ hasChildren, isCollapsed }" />
-          </template>
-
-          <template #label="{ node, hasChildren, isCollapsed }">
-            <slot name="label" v-bind="{ node, hasChildren, isCollapsed }" />
-          </template>
-        </Tree>
-      </li>
-    </ul>
-  </div>
+  <!-- Polite live region for drag/drop announcements -->
+  <div class="sr-only" role="status" aria-live="polite">{{ liveMessage }}</div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import type { TreeNode, TreeProps } from './types'
+import {
+  computed,
+  getCurrentInstance,
+  nextTick,
+  onMounted,
+  provide,
+  ref,
+  toRef,
+  watch,
+} from 'vue'
+import TreeItem from './TreeItem.vue'
+import { useTreeDragDrop } from './useTreeDragDrop'
+import { useTreeKeyboard, type FlatNode } from './useTreeKeyboard'
+import {
+  TreeContextKey,
+  type MoveEvent,
+  type TreeKey,
+  type TreeNode,
+  type TreeNodeSlotProps,
+  type TreeProps,
+} from './types'
 
 const props = withDefaults(defineProps<TreeProps>(), {
-  options: () => ({
-    rowHeight: '25px',
-    indentWidth: '20px',
-    showIndentationGuides: true,
-    defaultCollapsed: true,
-  }),
+  nodeKey: 'key',
+  labelKey: 'label',
+  childrenKey: 'children',
+  draggable: false,
+  reorderable: false,
+  guides: 'connectors',
+  rowHeight: '32px',
+  indent: '28px',
+  defaultExpanded: false,
+  disabled: false,
 })
 
-const slots = defineSlots<{
-  /** Slot to fully override how a tree node renders */
-  node: {
-    node: TreeNode
-    hasChildren: boolean
-    isCollapsed: boolean
-    toggleCollapsed: (event: MouseEvent) => void
-  }
+const emit = defineEmits<{ move: [move: MoveEvent] }>()
 
-  /** Slot to override only the node expand/collapse icon */
-  icon: {
-    hasChildren: boolean
-    isCollapsed: boolean
-  }
-
-  /** Slot to override only the node label/content */
-  label: {
+defineSlots<{
+  node: (props: TreeNodeSlotProps) => unknown
+  label: (
+    props: Omit<
+      TreeNodeSlotProps,
+      'toggle' | 'select' | 'focused' | 'disabled'
+    >,
+  ) => unknown
+  prefix: (props: {
     node: TreeNode
+    expanded: boolean
     hasChildren: boolean
-    isCollapsed: boolean
-  }
+  }) => unknown
+  suffix: (props: { node: TreeNode; selected: boolean }) => unknown
+  empty: () => unknown
 }>()
 
-const isCollapsed = ref(props.options.defaultCollapsed ?? true)
+const expanded = defineModel<TreeKey[]>('expanded', { default: () => [] })
+const selected = defineModel<TreeKey | null>('selected', { default: null })
 
-const linePadding = ref('')
+// Selection is opt-in: it's only active when the caller binds
+// `v-model:selected`. Without it, clicks neither select nor highlight a row.
+const instance = getCurrentInstance()
+const selectionEnabled = computed(() => {
+  const vnodeProps = instance?.vnode.props ?? {}
+  return 'selected' in vnodeProps || 'onUpdate:selected' in vnodeProps
+})
 
-const hasChildren = computed(() => props.node.children?.length > 0)
+const treeRef = ref<HTMLElement | null>(null)
+const focusedKey = ref<TreeKey | null>(null)
+const liveMessage = ref('')
+const itemEls = new Map<TreeKey, HTMLElement>()
 
-const iconRef = ref<HTMLElement | null>(null)
+// --- node field accessors -------------------------------------------------
+const keyOf = (node: TreeNode) => node[props.nodeKey] as TreeKey
+const labelOf = (node: TreeNode) => (node[props.labelKey] as string) ?? ''
+const childrenOf = (node: TreeNode) =>
+  (node[props.childrenKey] as TreeNode[]) ?? []
+const hasChildren = (node: TreeNode) => childrenOf(node).length > 0
 
-const toggleCollapsed = (event: MouseEvent) => {
-  event.stopPropagation()
-  if (hasChildren.value) isCollapsed.value = !isCollapsed.value
+// --- expansion ------------------------------------------------------------
+const expandedSet = computed(() => new Set(expanded.value))
+const isExpanded = (node: TreeNode) => expandedSet.value.has(keyOf(node))
+
+function setExpanded(node: TreeNode, value: boolean) {
+  if (props.disabled || !hasChildren(node)) return
+  const key = keyOf(node)
+  const next = new Set(expanded.value)
+  value ? next.add(key) : next.delete(key)
+  expanded.value = [...next]
 }
 
+const toggle = (node: TreeNode) => setExpanded(node, !isExpanded(node))
+const expand = (node: TreeNode) => setExpanded(node, true)
+const collapse = (node: TreeNode) => setExpanded(node, false)
+
+function collectCollapsibleKeys(nodes: TreeNode[], acc: TreeKey[] = []) {
+  for (const node of nodes) {
+    if (hasChildren(node)) {
+      acc.push(keyOf(node))
+      collectCollapsibleKeys(childrenOf(node), acc)
+    }
+  }
+  return acc
+}
+
+// --- selection + focus ----------------------------------------------------
+function select(node: TreeNode) {
+  if (props.disabled || !selectionEnabled.value) return
+  selected.value = keyOf(node)
+  focus(keyOf(node))
+}
+
+function focus(key: TreeKey) {
+  focusedKey.value = key
+  nextTick(() => itemEls.get(key)?.focus())
+}
+
+function onFocusin() {
+  if (focusedKey.value == null && props.nodes.length)
+    focusedKey.value = keyOf(props.nodes[0])
+}
+
+const registerItem = (key: TreeKey, el: HTMLElement) => itemEls.set(key, el)
+const unregisterItem = (key: TreeKey) => itemEls.delete(key)
+
+// --- flattened visible list (for keyboard nav) ----------------------------
+const flat = computed(() => {
+  const out: FlatNode[] = []
+  const walk = (
+    nodes: TreeNode[],
+    parentKey: TreeKey | null,
+    level: number,
+  ) => {
+    for (const node of nodes) {
+      const expandedNow = isExpanded(node)
+      out.push({
+        key: keyOf(node),
+        node,
+        parentKey,
+        level,
+        hasChildren: hasChildren(node),
+        expanded: expandedNow,
+      })
+      if (expandedNow && hasChildren(node))
+        walk(childrenOf(node), keyOf(node), level + 1)
+    }
+  }
+  walk(props.nodes, null, 1)
+  return out
+})
+
+// --- drag & drop ----------------------------------------------------------
+const dragDrop = useTreeDragDrop({
+  keyOf,
+  childrenOf,
+  labelOf,
+  reorderable: toRef(props, 'reorderable'),
+  disabled: toRef(props, 'disabled'),
+  canDrop: props.canDrop,
+  onMove: (move) => emit('move', move),
+  announce: (message) => (liveMessage.value = message),
+})
+
+const dragLabel = computed(() => {
+  const { state } = dragDrop
+  const position = dragDrop.dropPosition.value
+  if (!state.source || !state.target || !position) return null
+  const target = labelOf(state.target)
+  return position === 'inside'
+    ? `Move under ${target}`
+    : `Move ${position} ${target}`
+})
+
+// --- keyboard -------------------------------------------------------------
+const { onKeydown } = useTreeKeyboard({
+  flat,
+  focusedKey,
+  labelOf,
+  focus,
+  expand,
+  collapse,
+  select,
+})
+
+// --- lifecycle ------------------------------------------------------------
+let seeded = false
 onMounted(() => {
-  if (iconRef.value?.clientWidth)
-    // Set the padding for the LHS line to align with the center of icon
-    linePadding.value = iconRef.value.clientWidth / 2 + 'px'
+  if (!seeded && props.defaultExpanded && expanded.value.length === 0) {
+    expanded.value = collectCollapsibleKeys(props.nodes)
+  }
+  seeded = true
+})
+
+// Keep focus valid if the focused node disappears from the tree.
+watch(flat, (rows) => {
+  if (focusedKey.value != null && !rows.some((r) => r.key === focusedKey.value))
+    focusedKey.value = rows[0]?.key ?? null
+})
+
+const rootStyle = computed(() => ({
+  '--tree-indent': props.indent,
+  '--tree-row-height': props.rowHeight,
+}))
+
+// --- provide context ------------------------------------------------------
+provide(TreeContextKey, {
+  nodeKey: toRef(props, 'nodeKey'),
+  labelKey: toRef(props, 'labelKey'),
+  childrenKey: toRef(props, 'childrenKey'),
+  guides: toRef(props, 'guides'),
+  rowHeight: toRef(props, 'rowHeight'),
+  indent: toRef(props, 'indent'),
+  draggable: toRef(props, 'draggable'),
+  reorderable: toRef(props, 'reorderable'),
+  disabled: toRef(props, 'disabled'),
+  selected,
+  selectionEnabled,
+  focusedKey,
+  keyOf,
+  labelOf,
+  childrenOf,
+  hasChildren,
+  isExpanded,
+  toggle,
+  select,
+  focus,
+  registerItem,
+  unregisterItem,
+  dragSourceKey: dragDrop.dragSourceKey,
+  dropTargetKey: dragDrop.dropTargetKey,
+  dropPosition: dragDrop.dropPosition,
+  onDragStart: dragDrop.onDragStart,
+  onDragOver: dragDrop.onDragOver,
+  onDragLeave: dragDrop.onDragLeave,
+  onDrop: dragDrop.onDrop,
+  onDragEnd: dragDrop.onDragEnd,
 })
 </script>
+
+<style>
+.frappe-tree,
+.frappe-tree ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+</style>
