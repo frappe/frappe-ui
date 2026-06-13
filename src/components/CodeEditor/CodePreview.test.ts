@@ -1,20 +1,17 @@
 /**
  * @vitest-environment jsdom
+ *
+ * CodePreview is the sanitize-before-render half of the pair, pure enough to
+ * mount in jsdom. The CodeEditor writer lazy-loads CodeMirror and measures
+ * layout on mount (which jsdom can't render), so its behaviour is covered in
+ * CodeEditor.cy.ts instead.
  */
 import { describe, expect, it } from 'vitest'
 import { createApp } from 'vue'
-import CodeEditor from '../CodeEditor.vue'
-import CodePreview from '../CodePreview.vue'
+import CodePreview from './CodePreview.vue'
 
-describe('CodeEditor module', () => {
-  // The writer lazy-loads CodeMirror in `onMounted` and CodeMirror measures
-  // layout on mount, which a headless DOM (jsdom) can't render — so we only
-  // assert the component imports cleanly as a valid SFC, not mount/measure.
-  it('CodeEditor imports as a valid component', () => {
-    expect(CodeEditor).toBeTypeOf('object')
-  })
-
-  it('CodePreview renders sanitized markdown', () => {
+describe('CodePreview', () => {
+  it('renders sanitized markdown', () => {
     const host = document.createElement('div')
     const app = createApp(CodePreview, {
       modelValue: '# Title',
@@ -26,7 +23,7 @@ describe('CodeEditor module', () => {
     app.unmount()
   })
 
-  it('CodePreview renders sanitized html', () => {
+  it('renders sanitized html', () => {
     const host = document.createElement('div')
     const app = createApp(CodePreview, {
       modelValue: '<p>hi</p><script>alert(1)</script>',
@@ -39,7 +36,7 @@ describe('CodeEditor module', () => {
     app.unmount()
   })
 
-  it('CodePreview renders nothing for non-preview languages', () => {
+  it('renders nothing for non-preview languages', () => {
     const host = document.createElement('div')
     const app = createApp(CodePreview, {
       modelValue: 'const a = 1;',
