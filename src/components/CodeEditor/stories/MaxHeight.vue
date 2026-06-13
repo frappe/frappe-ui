@@ -12,10 +12,11 @@ const code = ref(
 
 <template>
   <div class="w-full max-w-xl">
+    <!-- The cap is a CSS hook, not a prop: set `--cm-max-height` on the root. -->
     <CodeEditor
       v-model="code"
       language="javascript"
-      max-height="12rem"
+      style="--cm-max-height: 12rem"
       @overflow="(v) => (overflowing = v)"
     />
     <p class="mt-2 text-xs text-ink-gray-6">overflowing = {{ overflowing }}</p>

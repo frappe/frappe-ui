@@ -18,6 +18,7 @@
     <div
       ref="el"
       class="code-editor"
+      data-slot="control"
       :class="hasLabeling ? null : (attrs.class as any)"
       :style="hasLabeling ? null : (attrs.style as any)"
       v-bind="dataAttrs"
@@ -128,8 +129,13 @@ let cmState: typeof import('@codemirror/state') | null = null
 // we dispatch an external change (e.g. the wrapper's JSON pretty-print) we must
 // not echo it straight back out as fresh input.
 let syncingFromProp = false
-// Tracks whether content overflows `maxHeight` so the `overflow` emit only fires
-// on transitions, not on every keystroke. The observer watches the scroller box.
+// Tracks whether content overflows the height cap so the `overflow` emit only
+// fires on transitions, not on every keystroke. The observer watches the
+// scroller box. The cap itself is pure CSS — consumers set `--cm-max-height` on
+// the root (e.g. `style="--cm-max-height: 13.5rem"`), which the base theme reads
+// as the editor's `max-height` (P10: styling via CSS hooks, not a style prop).
+// This emit is the one piece a consumer can't derive from CSS — measuring the
+// crossing needs the ResizeObserver below — so it stays on the public surface.
 let overflowObserver: ResizeObserver | null = null
 let lastOverflow = false
 // `onMounted` is async (it awaits CodeMirror's dynamic imports). If the component
@@ -137,14 +143,6 @@ let lastOverflow = false
 // cleanup no-ops — then the resumed `onMounted` would create an orphan view +
 // observer that nothing destroys. This flag lets the resume bail instead.
 let destroyed = false
-
-// Push `maxHeight` onto the editor via a CSS var (the theme reads
-// `var(--cm-max-height, none)`), then re-check overflow.
-function applyMaxHeight() {
-  if (el.value)
-    el.value.style.setProperty('--cm-max-height', props.maxHeight ?? 'none')
-  measureOverflow()
-}
 
 // Emit when the scroller becomes (un)scrollable — i.e. content crosses the cap.
 function measureOverflow() {
@@ -354,10 +352,11 @@ onMounted(async () => {
     parent: el.value,
   })
 
-  applyMaxHeight()
+  measureOverflow()
   // Catches overflow changes the doc-edit path misses: wrapping reflow on width
-  // change, and the cap being applied/removed. Fires once on observe for the
-  // initial measurement.
+  // change, and the cap being applied/removed (a consumer toggling
+  // `--cm-max-height` resizes the scroller, which fires this). Fires once on
+  // observe for the initial measurement.
   if (typeof ResizeObserver !== 'undefined') {
     overflowObserver = new ResizeObserver(() => measureOverflow())
     overflowObserver.observe(view.scrollDOM)
@@ -463,12 +462,6 @@ watch(
       effects: placeholderCompartment.reconfigure(buildPlaceholder(text)),
     })
   },
-)
-
-// Re-cap on `maxHeight` change (the expand/collapse toggle drives this).
-watch(
-  () => props.maxHeight,
-  () => applyMaxHeight(),
 )
 
 // Re-apply ARIA when the label/description/error wiring changes.

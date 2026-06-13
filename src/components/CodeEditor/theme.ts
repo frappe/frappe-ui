@@ -28,9 +28,10 @@ export function buildBaseTheme(
       color: 'var(--ink-gray-8, #1e293b)',
       borderRadius: 'var(--radius-md, 0.5rem)',
       overflow: 'hidden',
-      // Height cap, driven by the `--cm-max-height` CSS var the component sets
-      // from the `maxHeight` prop (`none` when unset, so the editor grows to
-      // fit). The inner `.cm-scroller` scrolls once content passes the cap.
+      // Height cap, driven by the `--cm-max-height` CSS var a consumer sets on
+      // the root (`none` when unset, so the editor grows to fit). The inner
+      // `.cm-scroller` scrolls once content passes the cap. There's no
+      // `maxHeight` prop — the cap is a CSS hook (P10), not a style prop.
       maxHeight: 'var(--cm-max-height, none)',
     },
     '&.cm-focused': {

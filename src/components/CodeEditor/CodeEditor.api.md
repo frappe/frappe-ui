@@ -47,12 +47,6 @@
     default: '"md"'
   },
   {
-    name: 'maxHeight',
-    description: 'CSS length capping the editor\'s scroll height (e.g. `"13.5rem"`). When the\ncontent exceeds it the editor scrolls internally; unset means it grows to\nfit. Pairs with the `overflow` emit so a wrapper can offer expand/collapse.',
-    required: false,
-    type: 'string'
-  },
-  {
     name: 'label',
     description: 'Label rendered above (or beside, for binary controls) the input.',
     required: false,
@@ -110,7 +104,7 @@
   },
   {
     name: 'overflow',
-    description: '',
+    description: 'Fired when content crosses the `--cm-max-height` cap (transitions only). The cap is a CSS hook, not a prop — set `--cm-max-height` on the root.',
     type: '[overflowing: boolean]'
   }
 ]

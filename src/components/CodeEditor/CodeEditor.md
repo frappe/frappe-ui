@@ -45,9 +45,17 @@ scaling the editor's font size and minimum height.
 
 ## Max height
 
-Set `max-height` to a CSS length to cap the editor's scroll height — content
-past the cap scrolls internally. Pair it with the `overflow` emit (fired only
-when the content crosses the cap) to drive an expand/collapse affordance.
+The height cap is a CSS hook, not a prop — set the `--cm-max-height` custom
+property on the root to any CSS length and content past the cap scrolls
+internally:
+
+```vue
+<CodeEditor v-model="code" style="--cm-max-height: 12rem" />
+```
+
+Pair it with the `overflow` emit (fired only when the content crosses the cap)
+to drive an expand/collapse affordance — that's the one piece you can't measure
+from CSS yourself.
 
 <ComponentPreview name="CodeEditor-MaxHeight" />
 

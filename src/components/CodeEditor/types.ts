@@ -45,12 +45,6 @@ export interface CodeEditorProps extends InputLabelingProps {
    * minimum height (`sm | md | lg | xl`). Defaults to `md`.
    */
   size?: InputSize
-  /**
-   * CSS length capping the editor's scroll height (e.g. `"13.5rem"`). When the
-   * content exceeds it the editor scrolls internally; unset means it grows to
-   * fit. Pairs with the `overflow` emit so a wrapper can offer expand/collapse.
-   */
-  maxHeight?: string
 }
 
 export type CodeEditorEmits = {
@@ -58,7 +52,12 @@ export type CodeEditorEmits = {
   'update:modelValue': [value: string]
   /** Commit (blur). The field wrapper normalizes (e.g. JSON pretty-print) here. */
   change: [value: string]
-  /** Whether the content currently exceeds `maxHeight` (only changes are emitted). */
+  /**
+   * Whether the content currently overflows the height cap (only transitions are
+   * emitted). The cap is set in CSS via the `--cm-max-height` custom property on
+   * the root (there's no `maxHeight` prop — styling lives in CSS per P10); this
+   * emit reports the crossing because a consumer can't measure it from CSS.
+   */
   overflow: [overflowing: boolean]
 }
 

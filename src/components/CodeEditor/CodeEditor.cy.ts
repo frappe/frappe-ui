@@ -81,10 +81,11 @@ describe('CodeEditor', () => {
     })
   })
 
-  it('reflects variant and size on the data-* hooks', () => {
+  it('exposes the data-* styling hooks on the control', () => {
     cy.mount(CodeEditor, {
       props: { modelValue: '', variant: 'outline', size: 'lg' },
     })
+    cy.get('.code-editor').should('have.attr', 'data-slot', 'control')
     cy.get('.code-editor').should('have.attr', 'data-variant', 'outline')
     cy.get('.code-editor').should('have.attr', 'data-size', 'lg')
   })
@@ -124,26 +125,28 @@ describe('CodeEditor', () => {
   })
 
   describe('overflow', () => {
+    // The cap is a CSS hook (`--cm-max-height` on the root), not a prop — set it
+    // via attribute fallthrough, the same way a consumer would.
     const longDoc = Array.from({ length: 40 }, (_, i) => `line ${i}`).join('\n')
 
-    it('emits overflow=true when content exceeds maxHeight', () => {
+    it('emits overflow=true when content exceeds the --cm-max-height cap', () => {
       cy.mount(CodeEditor, {
         props: {
           modelValue: longDoc,
-          maxHeight: '6rem',
           onOverflow: cy.stub().as('overflow'),
         },
+        attrs: { style: '--cm-max-height: 6rem' },
       })
       cy.get('@overflow').should('have.been.calledWith', true)
     })
 
-    it('does not emit overflow when content fits', () => {
+    it('does not emit overflow when content fits under the cap', () => {
       cy.mount(CodeEditor, {
         props: {
           modelValue: 'short',
-          maxHeight: '20rem',
           onOverflow: cy.stub().as('overflow'),
         },
+        attrs: { style: '--cm-max-height: 20rem' },
       })
       // Give the ResizeObserver/mount a beat, then assert it stayed quiet.
       cy.get('.cm-editor').should('exist')
