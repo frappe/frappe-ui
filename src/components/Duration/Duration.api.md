@@ -7,7 +7,7 @@
   const propsData = [
   {
     name: 'modelValue',
-    description: 'The duration value in seconds (two-way via `v-model`).\nFired when the committed duration (in seconds) changes.',
+    description: 'The duration value in seconds (two-way via `v-model`).',
     required: false,
     type: 'number | null',
     default: 'null'
