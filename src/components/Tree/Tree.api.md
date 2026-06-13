@@ -6,41 +6,146 @@
 
   const propsData = [
   {
-    name: 'node',
-    description: 'Root tree node to render.\nCan contain nested children to form the tree structure.',
+    name: 'nodes',
+    description: 'Forest roots to render. Each node may contain nested children to form the\ntree structure.',
     required: true,
-    type: 'TreeNode'
+    type: 'TreeNode[]'
   },
   {
     name: 'nodeKey',
-    description: 'Unique key used to identify each node.\nUsually an id-like property present on every node.',
-    required: true,
-    type: 'string'
+    description: 'Name of the field that uniquely identifies each node.',
+    required: false,
+    type: 'string',
+    default: '"key"'
   },
   {
-    name: 'options',
-    description: 'Optional configuration for tree layout and behavior.',
+    name: 'labelKey',
+    description: 'Name of the field holding the node\'s display label.',
     required: false,
-    type: 'TreeOptions',
-    default: '{\n    rowHeight: "25px",\n    indentWidth: "20px",\n    showIndentationGuides: true,\n    defaultCollapsed: true,\n}'
+    type: 'string',
+    default: '"label"'
+  },
+  {
+    name: 'childrenKey',
+    description: 'Name of the field holding the node\'s children array.',
+    required: false,
+    type: 'string',
+    default: '"children"'
+  },
+  {
+    name: 'draggable',
+    description: 'Enable drag-and-drop. Each node becomes draggable and can be dropped onto\nanother node to reparent it.',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  },
+  {
+    name: 'canDrop',
+    description: 'Gate every drop. Receives the drag context and returns whether the drop is\nallowed. Built-in guards (drop-on-self, drop-into-descendant) run first.',
+    required: false,
+    type: '((ctx: DropContext) => boolean)'
+  },
+  {
+    name: 'reorderable',
+    description: 'Allow dropping `before`/`after` a sibling to reorder, in addition to\ndropping `inside` to reparent.',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  },
+  {
+    name: 'guides',
+    description: 'Visual style of the indentation guides.',
+    required: false,
+    type: '"connectors" | "lines" | "none"',
+    default: '"connectors"'
+  },
+  {
+    name: 'rowHeight',
+    description: 'Height of each tree row, e.g. "32px".',
+    required: false,
+    type: 'string',
+    default: '"32px"'
+  },
+  {
+    name: 'indent',
+    description: 'Horizontal indentation per tree level, e.g. "28px".',
+    required: false,
+    type: 'string',
+    default: '"28px"'
+  },
+  {
+    name: 'defaultExpanded',
+    description: 'Initial expansion state of nodes when `v-model:expanded` is not bound.',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  },
+  {
+    name: 'disabled',
+    description: 'Disable all interaction — expand/collapse, selection and drag.',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  },
+  {
+    name: 'expanded',
+    description: '',
+    required: false,
+    type: 'TreeKey[]',
+    default: '[]'
+  },
+  {
+    name: 'selected',
+    description: '',
+    required: false,
+    type: 'TreeKey | null',
+    default: 'null'
   }
 ]
 
   const slotsData = [
   {
     name: 'node',
-    description: 'Slot to fully override how a tree node renders',
-    type: 'any'
-  },
-  {
-    name: 'icon',
-    description: 'Slot to override only the node expand/collapse icon',
-    type: 'any'
+    description: '',
+    type: 'TreeNodeSlotProps'
   },
   {
     name: 'label',
-    description: 'Slot to override only the node label/content',
+    description: '',
+    type: 'Omit<TreeNodeSlotProps, "disabled" | "toggle" | "select" | "focused">'
+  },
+  {
+    name: 'prefix',
+    description: '',
+    type: '{ node: TreeNode; expanded: boolean; hasChildren: boolean; }'
+  },
+  {
+    name: 'suffix',
+    description: '',
+    type: '{ node: TreeNode; selected: boolean; }'
+  },
+  {
+    name: 'empty',
+    description: '',
     type: 'any'
+  }
+]
+
+  const emitsData = [
+  {
+    name: 'update:expanded',
+    description: 'Fired when the expanded changes.',
+    type: '[value: TreeKey[]]'
+  },
+  {
+    name: 'update:selected',
+    description: 'Fired when the selected changes.',
+    type: '[value: TreeKey | null]'
+  },
+  {
+    name: 'move',
+    description: '',
+    type: '[move: MoveEvent]'
   }
 ]
 </script>
@@ -49,4 +154,6 @@
 <PropsTable name="Tree" :data="propsData"/> 
 
 <SlotsTable :data="slotsData"/> 
+
+<EmitsTable :data="emitsData"/> 
 
