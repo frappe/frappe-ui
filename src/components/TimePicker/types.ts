@@ -5,6 +5,7 @@
  */
 
 import type { InputLabelingProps } from '../../composables/useInputLabeling'
+import type { InputSize } from '../../composables/inputTypes'
 
 export type PopoverSide = 'top' | 'right' | 'bottom' | 'left'
 export type PopoverAlign = 'start' | 'center' | 'end'
@@ -57,6 +58,9 @@ export interface TimePickerProps extends InputLabelingProps {
 
   /** Visual style variant. */
   variant?: Variant
+
+  /** Visual size of the trigger input. Forwarded to the underlying `TextInput`. */
+  size?: InputSize
 
   /**
    * Whether the trigger input accepts typed input. When `false` the user can

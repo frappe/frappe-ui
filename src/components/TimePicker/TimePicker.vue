@@ -13,6 +13,7 @@
           :error="error"
           :required="required"
           :variant="variant"
+          :size="size"
           :placeholder="placeholder"
           :disabled="disabled"
           :readonly="isReadonly"
