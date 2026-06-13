@@ -16,12 +16,6 @@ const boxShadow = {
   ...effectsData.elevation.light,
   DEFAULT: effectsData.elevation.light.base,
   ...effectsData.elevation.custom,
-  ...Object.fromEntries(
-    Object.entries(effectsData.elevation.dark).map(([key, value]) => [
-      `dark-${key}`,
-      value,
-    ]),
-  ),
 }
 
 // lineHeight, letterSpacing and fontWeight are baked into each size tuple by

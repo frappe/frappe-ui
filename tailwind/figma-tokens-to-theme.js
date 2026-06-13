@@ -316,8 +316,13 @@ function buildEffects() {
   return out
 }
 
+// Figma paints its effect array back-to-front (index 0 = bottom of the stack),
+// while CSS box-shadow paints front-to-back (first listed = on top). Reverse the
+// layers so the composed CSS string matches Figma's visual stacking order.
 function shadowToCss(layers) {
   return layers
+    .slice()
+    .reverse()
     .map((layer) => {
       const parts = [
         layer.inset ? 'inset' : null,
