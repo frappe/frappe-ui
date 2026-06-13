@@ -70,17 +70,16 @@ describe('Duration', () => {
     cy.contains('Invalid format').should('exist')
   })
 
-  it('keeps focus and the typed text after an invalid commit so it can be fixed', () => {
+  it('releases focus after an invalid commit but keeps the rejected text visible', () => {
     cy.mount(Duration, {
       props: { 'onUpdate:modelValue': cy.spy().as('onUpdate') },
     })
     cy.get('input').as('field').type('not a duration')
     cy.get('@field').blur()
-    cy.get('@field').should('have.value', 'not a duration').and('have.focus')
-    // Correcting and re-committing succeeds.
-    cy.get('@field').clear()
-    cy.get('@field').type('1h 30m')
-    cy.get('@field').blur()
+    // Focus is not trapped — the user can click away.
+    cy.get('@field').should('have.value', 'not a duration').and('not.have.focus')
+    // Re-focusing and correcting still commits.
+    cy.get('@field').focus().clear().type('1h 30m').blur()
     cy.get('@onUpdate').should('be.calledWith', 5400)
   })
 

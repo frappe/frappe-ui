@@ -38,7 +38,9 @@ const internalError = ref('')
 const cancelled = ref(false)
 
 const displayValue = computed(() =>
-  isFocused.value ? editValue.value : formatDuration(model.value, props.format),
+  isFocused.value || internalError.value
+    ? editValue.value
+    : formatDuration(model.value, props.format),
 )
 
 function handleFocus() {
@@ -94,9 +96,10 @@ function commit() {
   if (seconds === null) {
     internalError.value =
       'Invalid format. Try: 1h 30m 45s, 1 hour 30 minutes, 1:30:45, 90s'
-    // Keep the field open with the invalid text visible so the user can fix
-    // it. Re-focusing re-enters handleFocus, which no-ops while isFocused.
-    nextTick(() => inputRef.value?.el?.focus())
+    // Report the error and let focus leave. The rejected text stays visible
+    // (displayValue tracks the error state) so the user can come back and fix
+    // it, but they aren't trapped in the field.
+    isFocused.value = false
     return
   }
 
