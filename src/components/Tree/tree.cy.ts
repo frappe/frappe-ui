@@ -190,5 +190,29 @@ describe('Tree', () => {
       drag('Node B', 'Node A')
       cy.get('@move').should('not.have.been.called')
     })
+
+    it('reports the final post-removal index when reordering down', () => {
+      const onMove = cy.stub().as('move')
+      cy.mount(Tree, { props: dndProps(onMove, { reorderable: true }) })
+      // Drag Node A (index 0) to AFTER Node B (index 1) within the same parent.
+      const dataTransfer = new DataTransfer()
+      cy.contains('[data-slot="row"]', 'Node A').trigger('dragstart', {
+        dataTransfer,
+      })
+      cy.contains('[data-slot="row"]', 'Node B').trigger('dragover', {
+        dataTransfer,
+        clientY: 9999, // bottom zone -> 'after'
+      })
+      cy.contains('[data-slot="row"]', 'Node B').trigger('drop', {
+        dataTransfer,
+      })
+      cy.get('@move').then((stub: any) => {
+        const move: MoveEvent = stub.firstCall.args[0]
+        expect(move.node.id).to.eq('a')
+        expect(move.position).to.eq('after')
+        // Source was before the target, so the final index is 1, not 2.
+        expect(move.index).to.eq(1)
+      })
+    })
   })
 })
