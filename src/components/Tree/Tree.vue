@@ -10,13 +10,13 @@
     @focusin="onFocusin"
   >
     <TreeItem
-      v-for="(node, index) in nodes"
+      v-for="(node, index) in roots"
       :key="keyOf(node)"
       :node="node"
       :parent="null"
       :level="1"
       :index="index"
-      :set-size="nodes.length"
+      :set-size="roots.length"
     >
       <template v-if="$slots.node" #node="p"
         ><slot name="node" v-bind="p"
@@ -32,7 +32,7 @@
       /></template>
     </TreeItem>
 
-    <li v-if="!nodes.length" role="none" data-slot="empty">
+    <li v-if="!roots.length" role="none" data-slot="empty">
       <slot name="empty" />
     </li>
   </ul>
@@ -127,11 +127,15 @@ const liveMessage = ref('')
 const itemEls = new Map<TreeKey, HTMLElement>()
 
 // --- node field accessors -------------------------------------------------
+const roots = computed(() => props.nodes ?? [])
 const keyOf = (node: TreeNode) => node[props.nodeKey] as TreeKey
 const labelOf = (node: TreeNode) => (node[props.labelKey] as string) ?? ''
 const childrenOf = (node: TreeNode) =>
   (node[props.childrenKey] as TreeNode[]) ?? []
 const hasChildren = (node: TreeNode) => childrenOf(node).length > 0
+// Siblings of a node: a parent's children, or the roots for top-level nodes.
+const siblingsOf = (parent: TreeNode | null) =>
+  parent ? childrenOf(parent) : roots.value
 
 // --- expansion ------------------------------------------------------------
 const expandedSet = computed(() => new Set(expanded.value))
@@ -172,8 +176,8 @@ function focus(key: TreeKey) {
 }
 
 function onFocusin() {
-  if (focusedKey.value == null && props.nodes.length)
-    focusedKey.value = keyOf(props.nodes[0])
+  if (focusedKey.value == null && roots.value.length)
+    focusedKey.value = keyOf(roots.value[0])
 }
 
 const registerItem = (key: TreeKey, el: HTMLElement) => itemEls.set(key, el)
@@ -201,7 +205,7 @@ const flat = computed(() => {
         walk(childrenOf(node), keyOf(node), level + 1)
     }
   }
-  walk(props.nodes, null, 1)
+  walk(roots.value, null, 1)
   return out
 })
 
@@ -209,6 +213,7 @@ const flat = computed(() => {
 const dragDrop = useTreeDragDrop({
   keyOf,
   childrenOf,
+  siblingsOf,
   labelOf,
   reorderable: toRef(props, 'reorderable'),
   disabled: toRef(props, 'disabled'),
@@ -242,7 +247,7 @@ const { onKeydown } = useTreeKeyboard({
 let seeded = false
 onMounted(() => {
   if (!seeded && props.defaultExpanded && expanded.value.length === 0) {
-    expanded.value = collectCollapsibleKeys(props.nodes)
+    expanded.value = collectCollapsibleKeys(roots.value)
   }
   seeded = true
 })

@@ -10,6 +10,8 @@ import type {
 interface DragDropOptions {
   keyOf: (node: TreeNode) => TreeKey
   childrenOf: (node: TreeNode) => TreeNode[]
+  /** Siblings of a node — a parent's children, or the roots for top level. */
+  siblingsOf: (parent: TreeNode | null) => TreeNode[]
   reorderable: Ref<boolean>
   disabled: Ref<boolean>
   canDrop?: (ctx: DropContext) => boolean
@@ -141,9 +143,19 @@ export function useTreeDragDrop(options: DragDropOptions) {
       index = childrenOf(target).length
     } else {
       to = targetParent ? keyOf(targetParent) : null
-      const siblings = targetParent ? childrenOf(targetParent) : []
+      const siblings = options.siblingsOf(targetParent)
       const targetIndex = siblings.findIndex((n) => keyOf(n) === keyOf(target))
-      index = position === 'before' ? targetIndex : targetIndex + 1
+      let insertIndex = position === 'before' ? targetIndex : targetIndex + 1
+      // When reordering within the same parent, the source still occupies a
+      // slot in `siblings`. Removing it first shifts later positions down by
+      // one, so the reported `index` is the final post-removal position.
+      if (from === to) {
+        const sourceIndex = siblings.findIndex(
+          (n) => keyOf(n) === keyOf(source),
+        )
+        if (sourceIndex > -1 && sourceIndex < insertIndex) insertIndex -= 1
+      }
+      index = insertIndex
     }
 
     options.announce(`Moved ${options.labelOf(source)}`)
