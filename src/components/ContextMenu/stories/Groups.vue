@@ -71,13 +71,13 @@ const actions: ContextMenuOptions = [
 <template>
   <ContextMenu :options="actions">
     <div
-      class="w-72 cursor-default select-none rounded-xl border border-outline-gray-2 bg-surface-white p-4 shadow-sm"
+      class="w-72 cursor-default select-none rounded-xl border border-outline-gray-2 bg-surface-base p-4 shadow-sm"
     >
       <div class="mb-3 flex items-start justify-between gap-2">
         <Badge theme="orange" label="In Progress" />
         <span class="text-p-sm text-ink-gray-4">Due Friday</span>
       </div>
-      <p class="mb-2 text-sm font-medium text-ink-gray-8">
+      <p class="mb-2 text-sm-medium text-ink-gray-8">
         Redesign onboarding flow
       </p>
       <p class="text-p-sm text-ink-gray-5">

@@ -44,7 +44,7 @@ function restore() {
     <ContextMenu :options="messageActions">
       <div class="flex flex-col gap-1.5">
         <div class="flex items-baseline gap-2">
-          <span class="text-sm font-medium text-ink-gray-8">Alex</span>
+          <span class="text-sm-medium text-ink-gray-8">Alex</span>
           <span class="text-xs text-ink-gray-4">9:41 AM</span>
         </div>
         <div
