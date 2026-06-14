@@ -60,6 +60,7 @@ export { default as Tabs } from './components/Tabs/Tabs.vue'
 export * from './components/Textarea'
 export * from './components/TextEditor'
 export * from './components/TextInput'
+export * from './components/ThemeSwitcher'
 export * from './components/TimePicker'
 export {
   dialog,

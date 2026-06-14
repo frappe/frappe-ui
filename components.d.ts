@@ -141,6 +141,8 @@ declare module 'vue' {
     TextEditorFixedMenu: typeof import('./src/components/TextEditor/components/TextEditorFixedMenu.vue')['default']
     TextEditorFloatingMenu: typeof import('./src/components/TextEditor/components/TextEditorFloatingMenu.vue')['default']
     TextInput: typeof import('./src/components/TextInput/TextInput.vue')['default']
+    ThemePreview: typeof import('./src/components/ThemeSwitcher/ThemePreview.vue')['default']
+    ThemeSwitcher: typeof import('./src/components/ThemeSwitcher/ThemeSwitcher.vue')['default']
     TimePicker: typeof import('./src/components/TimePicker/TimePicker.vue')['default']
     Toast: typeof import('./src/components/Toast/Toast.vue')['default']
     ToastProvider: typeof import('./src/components/Toast/ToastProvider.vue')['default']
