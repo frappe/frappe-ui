@@ -153,6 +153,10 @@ export default defineConfig({
         '@utils': path.resolve(__dirname, '../../src/utils'),
         '@composables': path.resolve(__dirname, '../../src/composables'),
         'frappe-ui/editor': path.resolve(__dirname, '../../src/molecules/editor'),
+        'frappe-ui/code-editor': path.resolve(
+          __dirname,
+          '../../src/components/CodeEditor',
+        ),
         'frappe-ui': path.resolve(__dirname, '../../src'),
         'dayjs/esm': 'dayjs',
       },
