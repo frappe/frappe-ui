@@ -48,7 +48,11 @@
             :logo-is-image="logoIsImage"
           />
           <div class="flex items-center justify-between border-t px-3 py-2 relative z-10 overflow-hidden">
-            <div class="text-base text-ink-gray-7">{{ optionLabel(option) }}</div>
+            <div class="text-base text-ink-gray-7">
+              <slot name="item-label" :value="option.value">{{
+                optionLabel(option)
+              }}</slot>
+            </div>
             <div
               class="size-3.5 rounded-full"
               :class="
@@ -100,6 +104,11 @@ defineSlots<{
   label?: () => any
   /** Overrides the helper-text content. */
   description?: () => any
+  /**
+   * Overrides a single option's label. Receives the option's `value`.
+   * Falls back to the `themeLabels` prop, then the built-in label.
+   */
+  'item-label'?: (props: { value: Theme }) => any
 }>()
 
 const { currentTheme, setTheme } = useTheme()

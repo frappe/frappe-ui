@@ -50,13 +50,13 @@ const frames = computed<PreviewFrame[]>(() => {
         tone: 'light',
         fill: false,
         frameClass:
-          'flex flex-1 overflow-hidden pl-5 pt-3.5 bg-surface-gray-2 rounded-tl-[10.5px]',
+          'flex flex-1 overflow-hidden pl-5 pt-3.5 bg-surface-gray-2 rounded-tl-[10.5px] max-h-[78px]',
       },
       {
         tone: 'dark',
         fill: false,
         frameClass:
-          'flex flex-1 overflow-hidden pl-5 pt-3.5 bg-surface-gray-3 rounded-tr-[10.5px]',
+          'flex flex-1 overflow-hidden pl-5 pt-3.5 bg-surface-gray-3 rounded-tr-[10.5px] max-h-[78px]',
       },
     ]
   }

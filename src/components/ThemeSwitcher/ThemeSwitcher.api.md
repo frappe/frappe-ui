@@ -40,7 +40,7 @@
   },
   {
     name: 'themeLabels',
-    description: 'Overrides the per-option labels.',
+    description: 'Overrides the per-option labels. For richer per-item content, use the `#item-label` slot, which takes precedence over this prop.',
     required: false,
     type: 'Partial<Record<Theme, string>>'
   }
@@ -56,6 +56,11 @@
     name: 'description',
     description: 'Overrides the helper-text content.',
     type: 'any'
+  },
+  {
+    name: 'item-label',
+    description: 'Overrides a single option\'s label. Receives the option\'s `value`. Falls back to the `themeLabels` prop, then the built-in label.',
+    type: '{ value: Theme; }'
   }
 ]
 

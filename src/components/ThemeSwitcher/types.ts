@@ -27,7 +27,8 @@ export interface ThemeSwitcherProps {
   name?: string
 
   /**
-   * Overrides the per-option labels.
+   * Overrides the per-option labels. For richer per-item content, use the
+   * `#item-label` slot, which takes precedence over this prop.
    * @default { light: "Light", dark: "Dark", system: "System" }
    */
   themeLabels?: Partial<Record<Theme, string>>
