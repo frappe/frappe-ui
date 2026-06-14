@@ -3,13 +3,21 @@ import { computed, reactive, ref, shallowRef, watchEffect } from 'vue'
 import { Switch, TabButtons } from 'frappe-ui'
 
 export type KnobOption = { label: string; value: string }
+type VisibleWhen = (values: Record<string, any>) => boolean
 export type Knob =
-  | { name: string; type: 'text'; default: string; width?: string }
+  | {
+      name: string
+      type: 'text'
+      default: string
+      width?: string
+      visibleWhen?: VisibleWhen
+    }
   | {
       name: string
       type: 'tabs'
       options: KnobOption[]
       default: string
+      visibleWhen?: VisibleWhen
     }
   | {
       name: string
@@ -33,8 +41,12 @@ const values = reactive<Record<string, any>>(
   Object.fromEntries(props.knobs.map((k) => [k.name, k.default])),
 )
 
-const rowKnobs = props.knobs.filter(
-  (k) => k.type === 'text' || k.type === 'tabs',
+const rowKnobs = computed(() =>
+  props.knobs.filter(
+    (k) =>
+      (k.type === 'text' || k.type === 'tabs') &&
+      (k.visibleWhen?.(values) ?? true),
+  ),
 )
 const switchKnobs = props.knobs.filter((k) => k.type === 'switch') as Extract<
   Knob,

@@ -7,7 +7,13 @@
           v-model="displayValue"
           type="text"
           class="w-full cursor-text text-sm"
+          :id="id"
+          :label="label"
+          :description="description"
+          :error="error"
+          :required="required"
           :variant="variant"
+          :size="size"
           :placeholder="placeholder"
           :disabled="disabled"
           :readonly="isReadonly"
@@ -20,6 +26,12 @@
           @keydown.up.prevent="onArrowUp"
           @keydown.esc="onEscape"
         >
+          <template v-if="$slots.label" #label="slotProps">
+            <slot name="label" v-bind="slotProps" />
+          </template>
+          <template v-if="$slots.description" #description>
+            <slot name="description" />
+          </template>
           <template v-if="$slots.prefix" #prefix>
             <slot name="prefix" />
           </template>
@@ -132,6 +144,10 @@ const props = withDefaults(defineProps<TimePickerProps>(), {
 const emit = defineEmits<TimePickerEmits>()
 
 defineSlots<{
+  /** Overrides the rendered label content. Receives `{ required }`. */
+  label?: (props: { required: boolean }) => any
+  /** Overrides the rendered description content. */
+  description?: () => any
   /** Rendered inside the trigger input, before the typed value. */
   prefix?: () => any
   /**

@@ -51,6 +51,7 @@ declare module 'vue' {
     DropdownMenuList: typeof import('./src/components/Dropdown/DropdownMenuList.vue')['default']
     DropdownRenderContent: typeof import('./src/components/Dropdown/DropdownRenderContent.vue')['default']
     DropdownRenderContentAsChild: typeof import('./src/components/Dropdown/DropdownRenderContentAsChild.vue')['default']
+    Duration: typeof import('./src/components/Duration/Duration.vue')['default']
     ECharts: typeof import('./src/components/Charts/ECharts.vue')['default']
     EmojiList: typeof import('./src/components/TextEditor/extensions/emoji/EmojiList.vue')['default']
     ErrorMessage: typeof import('./src/components/ErrorMessage/ErrorMessage.vue')['default']

@@ -16,6 +16,7 @@ import ComboboxBuilder from '../../components/Docs/ComboboxBuilder.vue'
 import DialogBuilder from '../../components/Docs/DialogBuilder.vue'
 import DividerBuilder from '../../components/Docs/DividerBuilder.vue'
 import DropdownBuilder from '../../components/Docs/DropdownBuilder.vue'
+import DurationBuilder from '../../components/Docs/DurationBuilder.vue'
 import ErrorMessageBuilder from '../../components/Docs/ErrorMessageBuilder.vue'
 import FormControlBuilder from '../../components/Docs/FormControlBuilder.vue'
 import MultiSelectBuilder from '../../components/Docs/MultiSelectBuilder.vue'
@@ -52,6 +53,7 @@ export default {
     app.component('DialogBuilder', DialogBuilder)
     app.component('DividerBuilder', DividerBuilder)
     app.component('DropdownBuilder', DropdownBuilder)
+    app.component('DurationBuilder', DurationBuilder)
     app.component('ErrorMessageBuilder', ErrorMessageBuilder)
     app.component('FormControlBuilder', FormControlBuilder)
     app.component('MultiSelectBuilder', MultiSelectBuilder)
