@@ -15,7 +15,7 @@ import { CodeEditor, CodePreview } from 'frappe-ui/code-editor'
 
 <ClientOnly><CodeEditorBuilder /></ClientOnly>
 
-<ComponentPreview name="CodeEditor-Default" layout="stacked" />
+<ComponentPreview name="CodeEditor-Default" layout="stacked" class="mt-4" />
 
 ## Languages
 

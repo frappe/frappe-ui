@@ -30,7 +30,7 @@ const markdown = ref(
       v-if="mode === 'preview'"
       :model-value="markdown"
       language="markdown"
-      class="min-h-[4.5rem] rounded-md border border-surface-gray-2 p-3"
+      class="min-h-[4.5rem] rounded-md border border-surface-gray-2 p-3 mt-3"
     />
   </div>
 </template>
