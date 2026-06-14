@@ -135,6 +135,9 @@ describe('parseDuration', () => {
     expect(parseDuration('1:30:45')).to.equal(5445)
     expect(parseDuration('1:30')).to.equal(90)
     expect(parseDuration(':45')).to.equal(45)
+    // Out-of-range groups overflow by design (stopwatch-style), not rejected.
+    expect(parseDuration('1:75')).to.equal(135)
+    expect(parseDuration('5:99')).to.equal(399)
   })
 
   it('treats a bare integer as seconds', () => {

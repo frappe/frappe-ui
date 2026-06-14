@@ -135,7 +135,9 @@ export function parseDuration(str: string): number | null {
   return parseUnits(input)
 }
 
-// Colon-separated: h:m:s or m:s or :s
+// Colon-separated: h:m:s or m:s or :s. Groups are not bounded to 0-59:
+// out-of-range parts overflow by design, so "1:75" parses to 135s (1m + 75s)
+// and "5:99" to 399s. This mirrors stopwatch-style entry and is harmless.
 function parseColon(input: string): number | null {
   const match = input.match(/^(\d+):(\d+):(\d+)$|^(\d+):(\d+)$|^:(\d+)$/)
   if (!match) return null
