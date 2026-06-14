@@ -5,7 +5,7 @@
     :model-value="displayValue"
     :label="label"
     :description="description"
-    :error="error ?? internalError"
+    :error="error || internalError"
     :required="required"
     :disabled="disabled"
     :size="size"
