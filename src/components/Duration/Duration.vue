@@ -44,8 +44,9 @@ const displayValue = computed(() =>
 )
 
 function handleFocus() {
-  // Already editing — e.g. focus returning after an invalid commit kept the
-  // field open. Don't clobber the in-progress (invalid) text or the error.
+  // Guard against redundant focus events while already editing so we don't
+  // clobber the in-progress text or re-run the select(). After an invalid
+  // commit isFocused is false, so re-focusing starts a fresh canonical edit.
   if (isFocused.value) return
   isFocused.value = true
   // Always edit in the canonical "1h 30m 45s" notation so the typed value
