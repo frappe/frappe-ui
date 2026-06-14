@@ -98,8 +98,9 @@ function commit() {
     internalError.value =
       'Invalid format. Try: 1h 30m 45s, 1 hour 30 minutes, 1:30:45, 90s'
     // Report the error and let focus leave. The rejected text stays visible
-    // (displayValue tracks the error state) so the user can come back and fix
-    // it, but they aren't trapped in the field.
+    // (displayValue tracks the error state) as a reminder, but they aren't
+    // trapped in the field. Re-focusing restarts from the canonical saved
+    // value, so the rejected text is discarded rather than edited.
     isFocused.value = false
     return
   }
