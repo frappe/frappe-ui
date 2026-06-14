@@ -144,6 +144,21 @@ let lastOverflow = false
 // observer that nothing destroys. This flag lets the resume bail instead.
 let destroyed = false
 
+// Drive the gutter's horizontal-scroll shadow (see theme.ts). Two things: flag
+// `cm-scrolled-x` when the content is scrolled under the sticky gutter so the
+// shadow fades in, and publish `--cm-text-height` (the bottom of the last line)
+// so the shadow overlay is capped to the actual code and doesn't run down into
+// the empty min-height area below it. The scroller's `scroll` event doesn't
+// bubble, so the scroll half can't ride CodeMirror's `domEventHandlers`; it's a
+// plain listener on `scrollDOM`. The height half is refreshed wherever geometry
+// changes (mount, edits, reflow, size) alongside `measureOverflow`.
+function syncGutterShadow() {
+  if (!view) return
+  view.dom.classList.toggle('cm-scrolled-x', view.scrollDOM.scrollLeft > 0)
+  const textHeight = view.lineBlockAt(view.state.doc.length).bottom
+  view.dom.style.setProperty('--cm-text-height', `${textHeight}px`)
+}
+
 // Emit when the scroller becomes (un)scrollable — i.e. content crosses the cap.
 function measureOverflow() {
   if (!view) return
@@ -230,16 +245,23 @@ function buildVariant(v?: string, disabled?: boolean): Extension {
             ? '1px solid var(--outline-gray-2, #e2e8f0)'
             : '1px solid transparent',
       },
+      // Gutter shares the disabled surface so scrolled content can't bleed
+      // through behind it (the gutter is sticky over the scroller).
+      '.cm-gutters': { backgroundColor: 'var(--surface-gray-1, #f8fafc)' },
       '.cm-content': { opacity: '0.6' },
     })
   }
   const ring = '0 0 0 2px var(--outline-gray-3, #cbd5e1)'
+  // Each variant paints `.cm-gutters` to match its `&` surface in the same
+  // state — the gutter is sticky over the scroller, so a transparent one would
+  // let horizontally-scrolled code bleed through behind the line numbers.
   const fragments: Record<string, Record<string, Record<string, string>>> = {
     subtle: {
       '&': {
         backgroundColor: 'var(--surface-gray-2, #f1f5f9)',
         border: '1px solid var(--surface-gray-2, #e2e8f0)',
       },
+      '.cm-gutters': { backgroundColor: 'var(--surface-gray-2, #f1f5f9)' },
       // Hover mirrors frappe-ui's TextInput/Textarea `subtle` variant
       // (`hover:border-outline-elevation-2 hover:bg-surface-gray-3`) so a code
       // field reacts to hover the same way the inputs around it do. Declared
@@ -248,10 +270,16 @@ function buildVariant(v?: string, disabled?: boolean): Extension {
         backgroundColor: 'var(--surface-gray-3, #e2e8f0)',
         borderColor: 'var(--outline-elevation-2, #94a3b8)',
       },
+      '&:hover .cm-gutters': {
+        backgroundColor: 'var(--surface-gray-3, #e2e8f0)',
+      },
       '&.cm-focused': {
         backgroundColor: 'var(--surface-base, white)',
         borderColor: 'var(--outline-gray-4, #94a3b8)',
         boxShadow: ring,
+      },
+      '&.cm-focused .cm-gutters': {
+        backgroundColor: 'var(--surface-base, white)',
       },
     },
     outline: {
@@ -259,6 +287,7 @@ function buildVariant(v?: string, disabled?: boolean): Extension {
         backgroundColor: 'var(--surface-base, white)',
         border: '1px solid var(--outline-gray-2, #e2e8f0)',
       },
+      '.cm-gutters': { backgroundColor: 'var(--surface-base, white)' },
       '&.cm-focused': {
         borderColor: 'var(--outline-gray-4, #94a3b8)',
         boxShadow: ring,
@@ -322,6 +351,8 @@ onMounted(async () => {
       // Content height may have changed (capped scroller won't trigger the
       // ResizeObserver, so re-check here on every doc edit).
       measureOverflow()
+      // Text height changed too — keep the scroll-shadow overlay capped to it.
+      syncGutterShadow()
     }
   })
 
@@ -374,12 +405,19 @@ onMounted(async () => {
   })
 
   measureOverflow()
+  // Shadow the gutter while the content is scrolled horizontally. Listen on the
+  // scroller (the event doesn't bubble) and seed the initial state.
+  view.scrollDOM.addEventListener('scroll', syncGutterShadow, { passive: true })
+  syncGutterShadow()
   // Catches overflow changes the doc-edit path misses: wrapping reflow on width
   // change, and the cap being applied/removed (a consumer toggling
   // `--cm-max-height` resizes the scroller, which fires this). Fires once on
   // observe for the initial measurement.
   if (typeof ResizeObserver !== 'undefined') {
-    overflowObserver = new ResizeObserver(() => measureOverflow())
+    overflowObserver = new ResizeObserver(() => {
+      measureOverflow()
+      syncGutterShadow()
+    })
     overflowObserver.observe(view.scrollDOM)
   }
 })
@@ -479,6 +517,7 @@ watch(
     if (!view || !sizeCompartment) return
     view.dispatch({ effects: sizeCompartment.reconfigure(buildSize(s)) })
     measureOverflow()
+    syncGutterShadow()
   },
 )
 
@@ -507,6 +546,7 @@ onBeforeUnmount(() => {
   overflowObserver?.disconnect()
   overflowObserver = null
   if (view) {
+    view.scrollDOM.removeEventListener('scroll', syncGutterShadow)
     view.destroy()
     view = null
   }
