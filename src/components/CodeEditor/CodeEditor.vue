@@ -102,10 +102,10 @@ const {
 const hasLabeling = computed(() =>
   Boolean(
     props.label ||
-      slots.label ||
-      showDescription.value ||
-      slots.description ||
-      hasError.value,
+    slots.label ||
+    showDescription.value ||
+    slots.description ||
+    hasError.value,
   ),
 )
 
@@ -345,13 +345,16 @@ onMounted(async () => {
   const highlight = await buildSyntaxHighlight(cmState)
 
   const updateListener = EditorView.updateListener.of((update) => {
-    if (update.docChanged) {
-      if (!syncingFromProp)
-        emit('update:modelValue', update.state.doc.toString())
-      // Content height may have changed (capped scroller won't trigger the
-      // ResizeObserver, so re-check here on every doc edit).
+    if (update.docChanged && !syncingFromProp)
+      emit('update:modelValue', update.state.doc.toString())
+    // Content height may have changed — re-check the cap and the scroll-shadow
+    // overlay. A doc edit changes height, but so does folding/unfolding (a
+    // view-state effect, not a doc change) and any reflow. The capped/min-height
+    // scroller can keep its box size constant while content height shifts, so the
+    // ResizeObserver never fires for those — `geometryChanged` is what catches
+    // them (folding latching a stale Expand button was the bug this closes).
+    if (update.docChanged || update.geometryChanged) {
       measureOverflow()
-      // Text height changed too — keep the scroll-shadow overlay capped to it.
       syncGutterShadow()
     }
   })
