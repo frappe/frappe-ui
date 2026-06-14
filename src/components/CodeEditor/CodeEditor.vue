@@ -65,7 +65,7 @@ defineOptions({ inheritAttrs: false })
 
 const props = withDefaults(defineProps<CodeEditorProps>(), {
   language: 'plain',
-  readonly: false,
+  disabled: false,
   placeholder: '',
   variant: 'subtle',
   size: 'md',
@@ -94,7 +94,7 @@ const {
 } = useInputLabeling(props, {
   size: () => props.size,
   variant: () => props.variant,
-  disabled: () => props.readonly,
+  disabled: () => props.disabled,
 })
 
 // Render the labeling chrome (and its wrapping div) only when something needs
@@ -113,7 +113,7 @@ const el = ref<HTMLElement | null>(null)
 
 let view: EditorView | null = null
 let languageCompartment: Compartment | null = null
-let readonlyCompartment: Compartment | null = null
+let disabledCompartment: Compartment | null = null
 let variantCompartment: Compartment | null = null
 let sizeCompartment: Compartment | null = null
 let placeholderCompartment: Compartment | null = null
@@ -193,11 +193,15 @@ function buildPlaceholder(text?: string): Extension {
   return cmView.placeholder(text)
 }
 
-function buildReadonly(ro: boolean): Extension {
+// CodeMirror side of `disabled`: make the doc read-only and the content DOM
+// non-editable. The greyed-out surface is owned by `buildVariant` (the variant
+// compartment is the sole source of surface chrome), so disabling reconfigures
+// both compartments — see the `disabled` watcher.
+function buildDisabled(disabled: boolean): Extension {
   if (!cmState || !cmView) return []
   return [
-    cmState.EditorState.readOnly.of(ro),
-    cmView.EditorView.editable.of(!ro),
+    cmState.EditorState.readOnly.of(disabled),
+    cmView.EditorView.editable.of(!disabled),
   ]
 }
 
@@ -210,8 +214,25 @@ function buildReadonly(ro: boolean): Extension {
 // NOT set bg/border, so these fragments are the sole source of surface chrome —
 // no precedence fight. Added after `theme` in the extensions array, so they win
 // over `basicSetup`'s defaults the same way `theme` already does.
-function buildVariant(v?: string): Extension {
+function buildVariant(v?: string, disabled?: boolean): Extension {
   if (!cmView) return []
+  // Disabled surface, mirroring frappe-ui's TextInput/Textarea `disabled`
+  // variant: a flat greyed box with no hover/focus chrome, content dimmed so the
+  // whole field (including syntax-highlighted tokens) reads as inert. Keeps the
+  // base variant's border treatment (`outline` stays bordered, `subtle` goes
+  // transparent) so a disabled field keeps the footprint of its enabled self.
+  if (disabled) {
+    return cmView.EditorView.theme({
+      '&': {
+        backgroundColor: 'var(--surface-gray-1, #f8fafc)',
+        border:
+          v === 'outline'
+            ? '1px solid var(--outline-gray-2, #e2e8f0)'
+            : '1px solid transparent',
+      },
+      '.cm-content': { opacity: '0.6' },
+    })
+  }
   const ring = '0 0 0 2px var(--outline-gray-3, #cbd5e1)'
   const fragments: Record<string, Record<string, Record<string, string>>> = {
     subtle: {
@@ -281,7 +302,7 @@ onMounted(async () => {
   const { Compartment } = cmState
 
   languageCompartment = new Compartment()
-  readonlyCompartment = new Compartment()
+  disabledCompartment = new Compartment()
   variantCompartment = new Compartment()
   sizeCompartment = new Compartment()
   placeholderCompartment = new Compartment()
@@ -330,12 +351,12 @@ onMounted(async () => {
     cmView.keymap.of([indentWithTab]),
     escapeHandler,
     languageCompartment.of(await buildLanguageExtension(props.language)),
-    readonlyCompartment.of(buildReadonly(!!props.readonly)),
+    disabledCompartment.of(buildDisabled(!!props.disabled)),
     a11yCompartment.of(buildA11y()),
     updateListener,
     blurHandler,
     theme,
-    variantCompartment.of(buildVariant(props.variant)),
+    variantCompartment.of(buildVariant(props.variant, props.disabled)),
     sizeCompartment.of(buildSize(props.size)),
     placeholderCompartment.of(buildPlaceholder(props.placeholder)),
     highlight,
@@ -423,12 +444,18 @@ watch(
   },
 )
 
+// Toggle disabled without recreating the view: reconfigure the read-only/editable
+// extension and re-derive the surface (the variant compartment owns the greyed
+// disabled chrome) in a single dispatch.
 watch(
-  () => props.readonly,
-  (ro) => {
-    if (!view || !readonlyCompartment) return
+  () => props.disabled,
+  (disabled) => {
+    if (!view || !disabledCompartment || !variantCompartment) return
     view.dispatch({
-      effects: readonlyCompartment.reconfigure(buildReadonly(!!ro)),
+      effects: [
+        disabledCompartment.reconfigure(buildDisabled(!!disabled)),
+        variantCompartment.reconfigure(buildVariant(props.variant, disabled)),
+      ],
     })
   },
 )
@@ -438,7 +465,9 @@ watch(
   () => props.variant,
   (v) => {
     if (!view || !variantCompartment) return
-    view.dispatch({ effects: variantCompartment.reconfigure(buildVariant(v)) })
+    view.dispatch({
+      effects: variantCompartment.reconfigure(buildVariant(v, props.disabled)),
+    })
   },
 )
 

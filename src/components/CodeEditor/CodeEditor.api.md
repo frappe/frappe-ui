@@ -19,8 +19,8 @@
     default: '"plain"'
   },
   {
-    name: 'readonly',
-    description: 'If true, the content is read-only and not editable.',
+    name: 'disabled',
+    description: 'If true, the editor is disabled: greyed out and not editable.',
     required: false,
     type: 'boolean',
     default: 'false'

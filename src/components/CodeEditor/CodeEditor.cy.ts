@@ -63,20 +63,20 @@ describe('CodeEditor', () => {
     })
   })
 
-  it('is not editable when readonly', () => {
+  it('is not editable when disabled', () => {
     cy.mount(CodeEditor, {
-      props: { modelValue: 'frozen', readonly: true },
+      props: { modelValue: 'frozen', disabled: true },
     })
     cy.get('.cm-content').should('have.attr', 'contenteditable', 'false')
     cy.get('.code-editor').should('have.attr', 'data-disabled', 'true')
   })
 
-  it('swaps readonly at runtime without recreating the view', () => {
+  it('swaps disabled at runtime without recreating the view', () => {
     cy.mount(CodeEditor, {
-      props: { modelValue: 'frozen', readonly: true },
+      props: { modelValue: 'frozen', disabled: true },
     }).then(({ wrapper }) => {
       cy.get('.cm-content').should('have.attr', 'contenteditable', 'false')
-      wrapper.setProps({ readonly: false })
+      wrapper.setProps({ disabled: false })
       cy.get('.cm-content').should('have.attr', 'contenteditable', 'true')
     })
   })

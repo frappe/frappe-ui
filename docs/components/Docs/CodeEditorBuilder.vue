@@ -50,7 +50,7 @@ const knobs: Knob[] = [
     ],
   },
   { name: 'placeholder', type: 'text', default: '', width: '12rem' },
-  { name: 'readonly', type: 'switch', default: false },
+  { name: 'disabled', type: 'switch', default: false },
 ]
 
 // Reseed the editor when the language knob changes so each language shows
@@ -73,7 +73,7 @@ function buildCode(v: Record<string, any>) {
   if (v.variant !== 'subtle') attrs.push(`variant="${v.variant}"`)
   if (v.size !== 'md') attrs.push(`size="${v.size}"`)
   if (v.placeholder) attrs.push(`placeholder="${v.placeholder}"`)
-  if (v.readonly) attrs.push('readonly')
+  if (v.disabled) attrs.push('disabled')
   return ['<CodeEditor', ...attrs.map((a) => '  ' + a), '/>'].join('\n')
 }
 </script>
@@ -88,7 +88,7 @@ function buildCode(v: Record<string, any>) {
           :variant="values.variant"
           :size="values.size"
           :placeholder="values.placeholder || undefined"
-          :readonly="values.readonly"
+          :disabled="values.disabled"
         />
         <CodePreview
           v-if="hasPreview"

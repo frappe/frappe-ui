@@ -27,8 +27,8 @@ export interface CodeEditorProps extends InputLabelingProps {
    * while an arbitrary string still type-checks.
    */
   language?: CodeLanguage | (string & {})
-  /** If true, the content is read-only and not editable. */
-  readonly?: boolean
+  /** If true, the editor is disabled: greyed out and not editable. */
+  disabled?: boolean
   /** Placeholder shown when the editor is empty. */
   placeholder?: string
   /**
