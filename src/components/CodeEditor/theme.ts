@@ -53,16 +53,42 @@ export function buildBaseTheme(
     '.cm-line': {
       padding: '0 6px',
     },
-    // Transparent so the gutter inherits whatever surface the active variant
-    // paints (gray-2 for `subtle`, white for `outline`) — otherwise a hardcoded
-    // gutter color seams against the filled `subtle`
-    // surface. The right border uses the `outline-gray-2` border token (a step
-    // darker than the gray-2 `subtle` fill) so the divider reads as a hairline on
-    // the filled `subtle` surface too, not only on hover/white `outline`.
+    // Gutter surface is owned by the variant compartment (`buildVariant`), the
+    // sole source of surface chrome — it paints `.cm-gutters` to match `&` in
+    // every state (hover/focus/disabled). It deliberately can't stay transparent:
+    // the gutter is sticky and the content scrolls *under* it, so a see-through
+    // gutter lets horizontally-scrolled code bleed through behind the line
+    // numbers. No divider border (overrides `basicSetup`'s default right border,
+    // hence an explicit `none`) so the gutter reads as part of the surface.
     '.cm-gutters': {
-      backgroundColor: 'transparent',
-      borderRight: '1px solid var(--outline-gray-2, #e2e2e2)',
+      borderRight: 'none',
       color: 'var(--ink-gray-5, #64748b)',
+    },
+    // Scroll shadow: while the content is scrolled horizontally it slides under
+    // the sticky gutter, so a right-edge shadow signals the hidden code. It's a
+    // pseudo-element rather than a `box-shadow` on `.cm-gutters` itself because
+    // CodeMirror stretches the gutter to the full editor height (`.cm-content`
+    // fills it, and the gutter's `min-height` tracks that) — a gutter shadow
+    // would run down past the last line into the empty area below, where, with
+    // the gutter camouflaged against the surface, it looks like a shadow
+    // floating in space. Instead this overlay is capped to the actual text
+    // height via `--cm-text-height` (the last line's bottom, set from the SFC),
+    // so it ends with the code. `cm-scrolled-x` (also set there) fades it in.
+    '.cm-gutters::after': {
+      content: '""',
+      position: 'absolute',
+      top: '0',
+      right: '0',
+      width: '6px',
+      height: 'var(--cm-text-height, 100%)',
+      transform: 'translateX(100%)',
+      pointerEvents: 'none',
+      opacity: '0',
+      transition: 'opacity 0.15s ease',
+      background: 'linear-gradient(to right, rgba(0, 0, 0, 0.16), transparent)',
+    },
+    '&.cm-scrolled-x .cm-gutters::after': {
+      opacity: '1',
     },
     // Fold marker. `basicSetup` renders a bare text caret pinned to the
     // cell's top-left; center it and swap the glyph for a masked chevron
@@ -96,6 +122,34 @@ export function buildBaseTheme(
     },
     ".cm-foldGutter .cm-gutterElement > span[title='Unfold line']": {
       transform: 'rotate(-90deg)',
+    },
+    // The fold gutter otherwise reserves a column even when nothing on screen is
+    // foldable (plain text, a flat markdown doc) — dead space next to the code.
+    // Collapse it to zero width until at least one line renders a real fold
+    // chevron. The catch: CodeMirror sizes the gutter with an always-present
+    // hidden "spacer" element (a FoldMarker span tagged with inline
+    // `visibility: hidden`), so a naive `:has(> span)` is always true. We exclude
+    // the spacer with `:not([style*='visibility'])`, leaving only the chevrons
+    // that actually appear on foldable lines. `overflow: hidden` then clips the
+    // spacer's span so it stops reserving width once collapsed. `:has`
+    // re-evaluates live, so the column appears/disappears as folds come and go.
+    ".cm-foldGutter:not(:has(.cm-gutterElement:not([style*='visibility']) > span))":
+      {
+        width: '0',
+        overflow: 'hidden',
+      },
+    ".cm-foldGutter:not(:has(.cm-gutterElement:not([style*='visibility']) > span)) .cm-gutterElement":
+      {
+        padding: '0',
+      },
+    // Same for the JSON lint gutter: it holds a fixed column for diagnostic
+    // markers, but valid JSON has none, so collapse it until a `.cm-lint-marker`
+    // appears. The column springs back the moment the parser reports an error.
+    '.cm-gutter-lint:not(:has(.cm-lint-marker))': {
+      width: '0',
+    },
+    '.cm-gutter-lint:not(:has(.cm-lint-marker)) .cm-gutterElement': {
+      padding: '0',
     },
     // `basicSetup` highlights the active line/gutter in a default light blue.
     // A fixed gray token can't stay visible across every surface the row sits on
