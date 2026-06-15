@@ -4,10 +4,9 @@ import type { ComputedRef, InjectionKey, Ref } from 'vue'
 export type TreeKey = string | number
 
 /**
- * A tree node. The shape is open: `label` and `children` are the conventional
- * fields, but the unique-id field (`nodeKey`), label field (`labelKey`) and
- * children field (`childrenKey`) are all configurable, so any record-like
- * object can be rendered without remapping.
+ * A tree node. Carries a display `label`, nested `children`, and a unique id
+ * under the field named by the `nodeKey` prop. Any extra fields are preserved
+ * and passed through to slots.
  */
 export type TreeNode = {
   [key: string]: unknown
@@ -56,18 +55,6 @@ export interface TreeProps {
   nodeKey?: string
 
   /**
-   * Name of the field holding the node's display label.
-   * @default 'label'
-   */
-  labelKey?: string
-
-  /**
-   * Name of the field holding the node's children array.
-   * @default 'children'
-   */
-  childrenKey?: string
-
-  /**
    * Enable drag-and-drop. Each node becomes draggable and can be dropped onto
    * another node to reparent it.
    * @default false
@@ -94,18 +81,6 @@ export interface TreeProps {
   guides?: 'connectors' | 'lines' | 'none'
 
   /**
-   * Height of each tree row, e.g. "32px".
-   * @default '32px'
-   */
-  rowHeight?: string
-
-  /**
-   * Horizontal indentation per tree level, e.g. "28px".
-   * @default '28px'
-   */
-  indent?: string
-
-  /**
    * Initial expansion state of nodes when `v-model:expanded` is not bound.
    * @default false
    */
@@ -121,11 +96,7 @@ export interface TreeProps {
 /** State + callbacks shared from `Tree` down to every recursive `TreeItem`. */
 export interface TreeContext {
   nodeKey: Ref<string>
-  labelKey: Ref<string>
-  childrenKey: Ref<string>
   guides: Ref<'connectors' | 'lines' | 'none'>
-  rowHeight: Ref<string>
-  indent: Ref<string>
   draggable: Ref<boolean>
   reorderable: Ref<boolean>
   disabled: Ref<boolean>
