@@ -61,10 +61,13 @@ const selected = ref(null)
 
 ## Node shape
 
-Each node is a plain object. The field names for its **id**, **label** and
-**children** are configurable via the `nodeKey`, `labelKey` and `childrenKey`
-props, so existing records can be rendered without remapping. A node is a leaf
-when its children field is missing or empty.
+Each node is a plain object with a `label` (display text) and optional
+`children`. Its unique id lives under the field named by `nodeKey` (e.g.
+`name`). A node is a leaf when `children` is missing or empty. Extra fields are
+passed through to the slots, so you can render avatars, roles, badges, etc.
+
+To display a field other than `label`, use the `#label` slot rather than
+remapping.
 
 ## Expansion & selection
 
@@ -105,5 +108,15 @@ Use the `#node` slot to fully replace a row (you receive `toggle` and `select`
 plus state), or the lighter `#label`, `#prefix`, and `#suffix` slots to keep the
 default layout. Style via the `data-slot`, `data-state`, `data-selected`,
 `data-drop` and `data-level` attributes rather than class props.
+
+Row height and indentation are CSS variables — override them in CSS rather than
+through props:
+
+```css
+.my-tree {
+  --tree-row-height: 40px;
+  --tree-indent: 20px;
+}
+```
 
 <!-- @include: ./Tree.api.md -->
