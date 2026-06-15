@@ -6,19 +6,19 @@ import type { TreeNode } from '../types'
 const nodes = ref<TreeNode[]>([
   {
     id: 'james',
-    name: 'James Cooper',
+    label: 'James Cooper',
     role: 'Head of Sales',
     image: 'https://i.pravatar.cc/80?img=11',
     children: [
       {
         id: 'wade',
-        name: 'Wade Warren',
+        label: 'Wade Warren',
         role: 'Account Executive',
         image: 'https://i.pravatar.cc/80?img=12',
         children: [
           {
             id: 'ethan',
-            name: 'Ethan Howard',
+            label: 'Ethan Howard',
             role: 'Sales Rep',
             image: 'https://i.pravatar.cc/80?img=13',
           },
@@ -26,7 +26,7 @@ const nodes = ref<TreeNode[]>([
       },
       {
         id: 'cody',
-        name: 'Cody Fisher',
+        label: 'Cody Fisher',
         role: 'Account Executive',
         image: 'https://i.pravatar.cc/80?img=15',
       },
@@ -42,20 +42,18 @@ function addReport(node: TreeNode) {
 </script>
 
 <template>
-  <div class="w-96">
+  <div class="w-96" style="--tree-row-height: 48px">
     <Tree
       :nodes="nodes"
       node-key="id"
-      label-key="name"
       v-model:expanded="expanded"
       guides="none"
-      row-height="48px"
     >
       <!-- Avatar on the left -->
       <template #prefix="{ node }">
         <Avatar
           :image="node.image as string"
-          :label="node.name as string"
+          :label="node.label as string"
           size="lg"
         />
       </template>
@@ -63,7 +61,7 @@ function addReport(node: TreeNode) {
       <template #label="{ node }">
         <div class="flex min-w-0 flex-col">
           <span class="truncate text-base text-ink-gray-8">{{
-            node.name
+            node.label
           }}</span>
           <span class="truncate text-sm text-ink-gray-5">{{ node.role }}</span>
         </div>
@@ -74,7 +72,7 @@ function addReport(node: TreeNode) {
         <Button
           variant="ghost"
           icon="plus"
-          :aria-label="`Add report under ${node.name}`"
+          :aria-label="`Add report under ${node.label}`"
           @click.stop="addReport(node)"
         />
       </template>
