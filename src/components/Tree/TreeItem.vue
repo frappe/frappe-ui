@@ -25,7 +25,6 @@
         ctx.draggable.value && !ctx.disabled.value ? 'cursor-grab' : '',
         isSelected ? 'bg-surface-gray-3' : 'hover:bg-surface-gray-2',
       ]"
-      :style="{ height: ctx.rowHeight.value }"
       :draggable="ctx.draggable.value && !ctx.disabled.value"
       @click="onRowClick"
       @dragstart="ctx.onDragStart($event, node, parent)"
@@ -81,11 +80,7 @@
     </div>
 
     <!-- Children -->
-    <ul
-      v-if="hasChildren && expanded"
-      role="group"
-      :style="{ paddingLeft: ctx.indent.value }"
-    >
+    <ul v-if="hasChildren && expanded" role="group" class="frappe-tree-group">
       <TreeItem
         v-for="(child, childIndex) in children"
         :key="ctx.keyOf(child)"
@@ -194,6 +189,14 @@ onBeforeUnmount(() => ctx.unregisterItem(key.value))
 </script>
 
 <style>
+/* ---- Sizing (override via --tree-row-height / --tree-indent in CSS) ---- */
+.frappe-tree-row {
+  height: var(--tree-row-height);
+}
+.frappe-tree-group {
+  padding-left: var(--tree-indent);
+}
+
 /* ---- Connector guides (elbow lines) ---- */
 .frappe-tree[data-guides='connectors'] [role='group'] > li {
   position: relative;
