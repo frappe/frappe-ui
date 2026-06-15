@@ -7,7 +7,17 @@ children.
 
 ## Default
 
+The simplest tree — pass `nodes` and tell it which field is the key.
+
 <ComponentPreview name="Tree-Example" />
+
+## Drag and drop
+
+Set `draggable` to let nodes be dragged onto one another to reparent. A
+`canDrop` validator gates where drops are allowed, and `@move` reports the
+change for you to persist.
+
+<ComponentPreview name="Tree-DragDrop" />
 
 ## List view with avatars and row actions
 

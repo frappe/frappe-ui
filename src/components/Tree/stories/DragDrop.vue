@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Tree } from 'frappe-ui'
-import type { TreeNode } from '../types'
+import type { DropContext, MoveEvent, TreeNode } from '../types'
 
 const nodes = ref<TreeNode[]>([
   {
@@ -30,10 +30,30 @@ const nodes = ref<TreeNode[]>([
     ],
   },
 ])
+
+const expanded = ref<string[]>(['guest', 'downloads', 'documents'])
+
+// Only allow dropping into a "folder" (a node that can have children).
+function canDrop({ target }: DropContext) {
+  return Array.isArray(target.children)
+}
+
+function onMove(move: MoveEvent) {
+  // In a real app you'd persist the change, then update `nodes`.
+  console.log('move', move)
+}
 </script>
 
 <template>
   <div class="w-80">
-    <Tree :nodes="nodes" node-key="name" default-expanded />
+    <Tree
+      :nodes="nodes"
+      node-key="name"
+      guides="none"
+      v-model:expanded="expanded"
+      draggable
+      :can-drop="canDrop"
+      @move="onMove"
+    />
   </div>
 </template>
