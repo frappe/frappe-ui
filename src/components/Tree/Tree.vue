@@ -5,7 +5,6 @@
     :aria-multiselectable="false"
     class="frappe-tree select-none"
     :data-guides="guides"
-    :style="rootStyle"
     @keydown="onKeydown"
     @focusin="onFocusin"
   >
@@ -80,13 +79,9 @@ import {
 
 const props = withDefaults(defineProps<TreeProps>(), {
   nodeKey: 'key',
-  labelKey: 'label',
-  childrenKey: 'children',
   draggable: false,
   reorderable: false,
   guides: 'connectors',
-  rowHeight: '32px',
-  indent: '28px',
   defaultExpanded: false,
   disabled: false,
 })
@@ -129,9 +124,8 @@ const itemEls = new Map<TreeKey, HTMLElement>()
 // --- node field accessors -------------------------------------------------
 const roots = computed(() => props.nodes ?? [])
 const keyOf = (node: TreeNode) => node[props.nodeKey] as TreeKey
-const labelOf = (node: TreeNode) => (node[props.labelKey] as string) ?? ''
-const childrenOf = (node: TreeNode) =>
-  (node[props.childrenKey] as TreeNode[]) ?? []
+const labelOf = (node: TreeNode) => node.label ?? ''
+const childrenOf = (node: TreeNode) => node.children ?? []
 const hasChildren = (node: TreeNode) => childrenOf(node).length > 0
 // Siblings of a node: a parent's children, or the roots for top-level nodes.
 const siblingsOf = (parent: TreeNode | null) =>
@@ -258,19 +252,10 @@ watch(flat, (rows) => {
     focusedKey.value = rows[0]?.key ?? null
 })
 
-const rootStyle = computed(() => ({
-  '--tree-indent': props.indent,
-  '--tree-row-height': props.rowHeight,
-}))
-
 // --- provide context ------------------------------------------------------
 provide(TreeContextKey, {
   nodeKey: toRef(props, 'nodeKey'),
-  labelKey: toRef(props, 'labelKey'),
-  childrenKey: toRef(props, 'childrenKey'),
   guides: toRef(props, 'guides'),
-  rowHeight: toRef(props, 'rowHeight'),
-  indent: toRef(props, 'indent'),
   draggable: toRef(props, 'draggable'),
   reorderable: toRef(props, 'reorderable'),
   disabled: toRef(props, 'disabled'),
@@ -299,6 +284,12 @@ provide(TreeContextKey, {
 </script>
 
 <style>
+.frappe-tree {
+  /* Sizing is exposed as CSS variables (P10) — override via CSS, not props:
+     `.my-tree { --tree-row-height: 40px; --tree-indent: 20px; }` */
+  --tree-row-height: 32px;
+  --tree-indent: 28px;
+}
 .frappe-tree,
 .frappe-tree ul {
   list-style: none;
