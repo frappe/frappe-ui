@@ -5,10 +5,10 @@ import type { TreeNode } from '../types'
 
 const nodes = ref<TreeNode[]>([
   {
-    id: 'jane',
-    name: 'Jane Cooper',
+    id: 'james',
+    name: 'James Cooper',
     role: 'Head of Sales',
-    image: 'https://i.pravatar.cc/80?img=5',
+    image: 'https://i.pravatar.cc/80?img=11',
     children: [
       {
         id: 'wade',
@@ -17,10 +17,10 @@ const nodes = ref<TreeNode[]>([
         image: 'https://i.pravatar.cc/80?img=12',
         children: [
           {
-            id: 'esther',
-            name: 'Esther Howard',
+            id: 'ethan',
+            name: 'Ethan Howard',
             role: 'Sales Rep',
-            image: 'https://i.pravatar.cc/80?img=32',
+            image: 'https://i.pravatar.cc/80?img=13',
           },
         ],
       },
@@ -34,7 +34,7 @@ const nodes = ref<TreeNode[]>([
   },
 ])
 
-const expanded = ref<string[]>(['jane', 'wade'])
+const expanded = ref<string[]>(['james', 'wade'])
 
 function addReport(node: TreeNode) {
   console.log('add report under', node.id)
@@ -77,18 +77,6 @@ function addReport(node: TreeNode) {
           :aria-label="`Add report under ${node.name}`"
           @click.stop="addReport(node)"
         />
-        <svg
-          class="size-4 text-ink-gray-4"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-        >
-          <path d="m9 18 6-6-6-6" />
-        </svg>
       </template>
     </Tree>
   </div>

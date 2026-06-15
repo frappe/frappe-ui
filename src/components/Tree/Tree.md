@@ -12,9 +12,9 @@ children.
 ## List view with avatars and row actions
 
 Use the `#prefix`, `#label`, and `#suffix` slots to turn the tree into a rich
-list — an avatar on the left, a two-line label, and row actions (an add button
-and a navigate chevron) on the right. `guides="none"` drops the connector lines
-for a plain list look.
+list — an avatar on the left, a two-line label, and a row action (an add
+button) on the right. `guides="none"` drops the connector lines for a plain
+list look.
 
 <ComponentPreview name="Tree-ListView" />
 
