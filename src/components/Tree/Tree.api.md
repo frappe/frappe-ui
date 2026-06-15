@@ -19,20 +19,6 @@
     default: '"key"'
   },
   {
-    name: 'labelKey',
-    description: 'Name of the field holding the node\'s display label.',
-    required: false,
-    type: 'string',
-    default: '"label"'
-  },
-  {
-    name: 'childrenKey',
-    description: 'Name of the field holding the node\'s children array.',
-    required: false,
-    type: 'string',
-    default: '"children"'
-  },
-  {
     name: 'draggable',
     description: 'Enable drag-and-drop. Each node becomes draggable and can be dropped onto\nanother node to reparent it.',
     required: false,
@@ -58,20 +44,6 @@
     required: false,
     type: '"connectors" | "lines" | "none"',
     default: '"connectors"'
-  },
-  {
-    name: 'rowHeight',
-    description: 'Height of each tree row, e.g. "32px".',
-    required: false,
-    type: 'string',
-    default: '"32px"'
-  },
-  {
-    name: 'indent',
-    description: 'Horizontal indentation per tree level, e.g. "28px".',
-    required: false,
-    type: 'string',
-    default: '"28px"'
   },
   {
     name: 'defaultExpanded',
