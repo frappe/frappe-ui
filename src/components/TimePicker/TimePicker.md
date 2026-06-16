@@ -14,5 +14,11 @@ Lets users select a specific time from a list or enter a custom value. Supports 
 ## Min / Max Range
 <ComponentPreview name="TimePicker-Range" />
 
+## Labeling
+<ComponentPreview name="TimePicker-Labeling" />
+
+## Sizes & Variants
+<ComponentPreview name="TimePicker-SizesAndVariants" />
+
 <!-- @include: ./TimePicker.api.md -->
 

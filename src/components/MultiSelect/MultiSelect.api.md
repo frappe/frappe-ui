@@ -222,22 +222,22 @@
     type: 'unknown[]'
   },
   {
-    name: 'update:query',
-    description: 'Fired when the query changes.',
-    type: '[value: string]'
-  },
-  {
     name: 'update:open',
     description: 'Fired when the open state changes.',
     type: 'unknown[]'
+  },
+  {
+    name: 'update:query',
+    description: 'Fired when the query changes.',
+    type: '[value: string]'
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="MultiSelect" :data="propsData"/> 
+<PropsTable name="MultiSelect" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
+<SlotsTable :data="slotsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

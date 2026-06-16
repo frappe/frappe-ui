@@ -29,12 +29,12 @@ function removeTag(value: string) {
 
 <template>
   <MultiSelect v-model="tags" :options="tagOptions">
-    <template #trigger="{ open, selectedOptions, toggleOpen }">
+    <template #trigger="{ open, selectedOptions, setOpen }">
       <button
         type="button"
         :data-state="open ? 'open' : 'closed'"
         class="flex w-96 min-h-8 cursor-pointer items-center gap-1.5 rounded border border-[--surface-gray-2] px-1.5 py-1 text-left transition-colors hover:border-outline-elevation-2 data-[state=open]:focus-ring"
-        @click="toggleOpen"
+        @click="setOpen(!open)"
       >
         <div class="flex min-w-0 flex-1 flex-wrap items-center gap-1">
           <Badge

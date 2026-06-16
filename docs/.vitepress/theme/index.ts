@@ -11,10 +11,12 @@ import AlertBuilder from '../../components/Docs/AlertBuilder.vue'
 import AvatarBuilder from '../../components/Docs/AvatarBuilder.vue'
 import BreadcrumbsBuilder from '../../components/Docs/BreadcrumbsBuilder.vue'
 import CheckboxBuilder from '../../components/Docs/CheckboxBuilder.vue'
+import CodeEditorBuilder from '../../components/Docs/CodeEditorBuilder.vue'
 import ComboboxBuilder from '../../components/Docs/ComboboxBuilder.vue'
 import DialogBuilder from '../../components/Docs/DialogBuilder.vue'
 import DividerBuilder from '../../components/Docs/DividerBuilder.vue'
 import DropdownBuilder from '../../components/Docs/DropdownBuilder.vue'
+import DurationBuilder from '../../components/Docs/DurationBuilder.vue'
 import ErrorMessageBuilder from '../../components/Docs/ErrorMessageBuilder.vue'
 import FormControlBuilder from '../../components/Docs/FormControlBuilder.vue'
 import MultiSelectBuilder from '../../components/Docs/MultiSelectBuilder.vue'
@@ -46,10 +48,12 @@ export default {
     app.component('AvatarBuilder', AvatarBuilder)
     app.component('BreadcrumbsBuilder', BreadcrumbsBuilder)
     app.component('CheckboxBuilder', CheckboxBuilder)
+    app.component('CodeEditorBuilder', CodeEditorBuilder)
     app.component('ComboboxBuilder', ComboboxBuilder)
     app.component('DialogBuilder', DialogBuilder)
     app.component('DividerBuilder', DividerBuilder)
     app.component('DropdownBuilder', DropdownBuilder)
+    app.component('DurationBuilder', DurationBuilder)
     app.component('ErrorMessageBuilder', ErrorMessageBuilder)
     app.component('FormControlBuilder', FormControlBuilder)
     app.component('MultiSelectBuilder', MultiSelectBuilder)

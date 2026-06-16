@@ -169,6 +169,14 @@ let globalStyles = (theme) => ({
     backgroundSize: '1.13em',
     backgroundPosition: 'right 0.44rem center',
   },
+  // A bare `<p>` reads as body copy, so it defaults to a relaxed line-height
+  // instead of the tight value baked into the `text-<size>` utilities. Kept at
+  // element specificity (0,0,1) with `:where()` (which adds none) so any explicit
+  // `text-*` / `text-p-*` line-height wins, and scoped out of rich text so the
+  // `prose` / editor line-heights are untouched.
+  'p:not(:where(.prose, .ProseMirror) *)': {
+    lineHeight: '1.5',
+  },
   // Global keyboard focus indicator (espresso v2 focus/default token).
   // Lives in the base layer so any utility on the element can override it:
   // suppress with `focus-visible:outline-none`, retheme with
@@ -216,12 +224,6 @@ export default plugin(
         xl: 'var(--elevation-xl)',
         '2xl': 'var(--elevation-2xl)',
         status: 'var(--elevation-status)',
-        'dark-sm': 'var(--dark-elevation-sm)',
-        'dark-base': 'var(--dark-elevation-base)',
-        'dark-md': 'var(--dark-elevation-md)',
-        'dark-lg': 'var(--dark-elevation-lg)',
-        'dark-xl': 'var(--dark-elevation-xl)',
-        'dark-2xl': 'var(--dark-elevation-2xl)',
       },
       container: {
         padding: {

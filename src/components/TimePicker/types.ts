@@ -4,6 +4,9 @@
  * always 24-hour `HH:mm` (or `HH:mm:ss` if seconds were typed).
  */
 
+import type { InputLabelingProps } from '../../composables/useInputLabeling'
+import type { InputSize } from '../../composables/inputTypes'
+
 export type PopoverSide = 'top' | 'right' | 'bottom' | 'left'
 export type PopoverAlign = 'start' | 'center' | 'end'
 
@@ -19,7 +22,7 @@ export type Placement =
 
 export type Variant = 'outline' | 'subtle'
 
-export interface TimePickerProps {
+export interface TimePickerProps extends InputLabelingProps {
   /** Controlled value, canonical `HH:mm` (or `HH:mm:ss`). */
   modelValue?: string
 
@@ -55,6 +58,9 @@ export interface TimePickerProps {
 
   /** Visual style variant. */
   variant?: Variant
+
+  /** Visual size of the trigger input. Forwarded to the underlying `TextInput`. */
+  size?: InputSize
 
   /**
    * Whether the trigger input accepts typed input. When `false` the user can
