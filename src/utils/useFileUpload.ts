@@ -14,6 +14,7 @@ export interface UploadOptions {
   max_width?: number
   max_height?: number
   params?: object
+  chunk_size?: number
 }
 
 export interface UploadState {
@@ -51,7 +52,6 @@ export function useFileUpload() {
     result: null,
   })
 
-  // Function to reset the state
   const reset = () => {
     state.uploading = false
     state.progress = 0
@@ -61,7 +61,6 @@ export function useFileUpload() {
     state.result = null
   }
 
-  // Computed values for convenience
   const isUploading = computed(() => state.uploading)
   const progress = computed(() => state.progress)
   const error = computed(() => state.error)
@@ -88,154 +87,161 @@ async function upload(
   reset()
   state.uploading = true
 
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest()
+  const chunkSize = options.chunk_size
+  const useChunks = !!(file && chunkSize && file.size > chunkSize)
+  const totalChunks = useChunks ? Math.ceil(file!.size / chunkSize!) : 1
+  const fileSize = file?.size ?? 0
 
-    // Set up event listeners
-    xhr.upload.addEventListener('loadstart', () => {
-      state.uploading = true
-      state.error = null
-    })
+  const sendChunk = (chunkBlob: Blob | null, chunkIndex: number, chunkByteOffset: number): Promise<UploadedFile | null> => {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest()
 
-    xhr.upload.addEventListener('progress', (e) => {
-      if (e.lengthComputable) {
-        state.uploaded = e.loaded
-        state.total = e.total
-        state.progress = Math.round((e.loaded / e.total) * 100)
-      }
-    })
+      xhr.upload.addEventListener('loadstart', () => {
+        state.error = null
+      })
 
-    xhr.upload.addEventListener('load', () => {
-      state.progress = 100
-    })
-
-    xhr.addEventListener('error', (error) => {
-      state.uploading = false
-      state.error = 'Upload failed'
-      reject('Upload failed')
-    })
-
-    xhr.onreadystatechange = () => {
-      if (xhr.readyState == XMLHttpRequest.DONE) {
-        let error
-        if (xhr.status === 200) {
-          let r = null
-          try {
-            r = JSON.parse(xhr.responseText)
-          } catch (e) {
-            r = xhr.responseText
-          }
-
-          const result = (r.message || r) as UploadedFile
-          state.result = result
-          resolve(result)
-        } else if (xhr.status === 403) {
-          error = JSON.parse(xhr.responseText)
-        } else {
-          try {
-            error = JSON.parse(xhr.responseText)
-          } catch (e) {
-            error = 'Upload failed'
-          }
+      xhr.upload.addEventListener('progress', (e) => {
+        if (e.lengthComputable) {
+          state.uploaded = chunkByteOffset + e.loaded
+          state.total = fileSize || e.total
+          state.progress = Math.round((state.uploaded / state.total) * 100)
         }
+      })
 
-        if (error) {
-          let exception
-          let errorParts = [
-            [error.exc_type, error._error_message].filter(Boolean).join(' '),
-          ]
-          if (error.exc) {
-            exception = error.exc
-            try {
-              exception = JSON.parse(exception)[0]
-              console.log(exception)
-              // eslint-disable-next-line no-empty
-            } catch (e) {}
-          }
-          let e = new Error(errorParts.join('\n'))
-          let messages = error._server_messages
-            ? JSON.parse(error._server_messages)
-            : []
-          messages = messages
-            .map((m: string) => {
-              try {
-                return JSON.parse(m).message
-              } catch (error) {
-                return m
-              }
-            })
-            .filter(Boolean)
-          if (!messages.length) {
-            messages = error._error_message
-              ? [error._error_message]
-              : ['Internal Server Error']
-          }
-          e.message = messages.join('\n')
-          state.error = e
-          reject(e)
+      xhr.upload.addEventListener('load', () => {
+        if (chunkIndex === totalChunks - 1) {
+          state.progress = 100
         }
+      })
 
+      xhr.addEventListener('error', () => {
         state.uploading = false
+        state.error = 'Upload failed'
+        reject('Upload failed')
+      })
+
+      xhr.onreadystatechange = () => {
+        if (xhr.readyState !== XMLHttpRequest.DONE) return
+
+        if (xhr.status === 200) {
+          if (chunkIndex === totalChunks - 1) {
+            let r = null
+            try {
+              r = JSON.parse(xhr.responseText)
+            } catch (e) {
+              r = xhr.responseText
+            }
+            const result = (r.message || r) as UploadedFile
+            state.result = result
+            resolve(result)
+          } else {
+            resolve(null)
+          }
+        } else {
+          let error
+          if (xhr.status === 403) {
+            error = JSON.parse(xhr.responseText)
+          } else {
+            try {
+              error = JSON.parse(xhr.responseText)
+            } catch (e) {
+              error = 'Upload failed'
+            }
+          }
+
+          if (error) {
+            let errorParts = [
+              [error.exc_type, error._error_message].filter(Boolean).join(' '),
+            ]
+            if (error.exc) {
+              try {
+                console.log(JSON.parse(error.exc)[0])
+                // eslint-disable-next-line no-empty
+              } catch (e) {}
+            }
+            let e = new Error(errorParts.join('\n'))
+            let messages = error._server_messages
+              ? JSON.parse(error._server_messages)
+              : []
+            messages = messages
+              .map((m: string) => {
+                try {
+                  return JSON.parse(m).message
+                } catch (error) {
+                  return m
+                }
+              })
+              .filter(Boolean)
+            if (!messages.length) {
+              messages = error._error_message
+                ? [error._error_message]
+                : ['Internal Server Error']
+            }
+            e.message = messages.join('\n')
+            state.error = e
+            reject(e)
+          }
+
+          state.uploading = false
+        }
       }
-    }
 
-    const uploadEndpoint = options.upload_endpoint || '/api/method/upload_file'
-    xhr.open('POST', uploadEndpoint, true)
-    xhr.setRequestHeader('Accept', 'application/json')
+      const uploadEndpoint = options.upload_endpoint || '/api/method/upload_file'
+      xhr.open('POST', uploadEndpoint, true)
+      xhr.setRequestHeader('Accept', 'application/json')
 
-    if (window.csrf_token && window.csrf_token !== '{{ csrf_token }}') {
-      xhr.setRequestHeader('X-Frappe-CSRF-Token', window.csrf_token)
-    }
-
-    const formData = new FormData()
-    if (file) {
-      formData.append('file', file, file.name)
-    }
-
-    formData.append('is_private', options.private ? '1' : '0')
-    formData.append('folder', options.folder || 'Home')
-
-    if (options.file_url) {
-      formData.append('file_url', options.file_url)
-    }
-
-    if (options.doctype) {
-      formData.append('doctype', options.doctype)
-    }
-
-    if (options.docname) {
-      formData.append('docname', options.docname)
-    }
-
-    if (options.fieldname) {
-      formData.append('fieldname', options.fieldname)
-    }
-
-    if (options.method) {
-      formData.append('method', options.method)
-    }
-
-    if (options.type) {
-      formData.append('type', options.type)
-    }
-
-    if (options.optimize) {
-      formData.append('optimize', '1')
-      if (options.max_width) {
-        formData.append('max_width', options.max_width.toString())
+      if (window.csrf_token && window.csrf_token !== '{{ csrf_token }}') {
+        xhr.setRequestHeader('X-Frappe-CSRF-Token', window.csrf_token)
       }
-      if (options.max_height) {
-        formData.append('max_height', options.max_height.toString())
-      }
-    }
-    if (options.params) {
-      for (let [k, v] of Object.entries(options.params)) {
-        formData.append(k, v)
-      }
-    }
 
-    xhr.send(formData)
-  })
+      const formData = new FormData()
+      if (chunkBlob) {
+        formData.append('file', chunkBlob, file!.name)
+      }
+
+      formData.append('is_private', options.private ? '1' : '0')
+      formData.append('folder', options.folder || 'Home')
+      formData.append('total_file_size', String(fileSize))
+
+      if (useChunks) {
+        formData.append('chunk_index', String(chunkIndex))
+        formData.append('total_chunk_count', String(totalChunks))
+        formData.append('chunk_byte_offset', String(chunkByteOffset))
+      }
+
+      if (options.file_url) formData.append('file_url', options.file_url)
+      if (options.doctype) formData.append('doctype', options.doctype)
+      if (options.docname) formData.append('docname', options.docname)
+      if (options.fieldname) formData.append('fieldname', options.fieldname)
+      if (options.method) formData.append('method', options.method)
+      if (options.type) formData.append('type', options.type)
+      if (options.optimize) {
+        formData.append('optimize', '1')
+        if (options.max_width) formData.append('max_width', options.max_width.toString())
+        if (options.max_height) formData.append('max_height', options.max_height.toString())
+      }
+      if (options.params) {
+        for (let [k, v] of Object.entries(options.params)) {
+          formData.append(k, v)
+        }
+      }
+
+      xhr.send(formData)
+    })
+  }
+
+  let chunkByteOffset = 0
+  let result: UploadedFile | null = null
+  for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+    const chunkBlob = file
+      ? file.slice(chunkByteOffset, chunkByteOffset + (chunkSize ?? fileSize))
+      : null
+    result = await sendChunk(chunkBlob, chunkIndex, chunkByteOffset)
+    chunkByteOffset += chunkSize ?? fileSize
+  }
+
+  state.uploading = false
+  return result as UploadedFile
 }
 
 // Add the Window interface for typescript
