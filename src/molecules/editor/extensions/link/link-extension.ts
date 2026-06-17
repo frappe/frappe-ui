@@ -33,6 +33,15 @@ export const LinkExtension = Link.extend({
       autolink: true,
       defaultProtocol: 'https',
       linkOnPaste: false,
+      // Don't auto-link bare dotted identifiers like `data.doc.name` (`.name` is a
+      // real TLD, so linkify matches them). Only auto-link inputs that carry an
+      // explicit scheme (`http://`, `mailto:`, …) or a `www.` prefix — i.e. things
+      // a user actually means as a URL. `url` here is the raw matched text.
+      shouldAutoLink: (url: string): boolean => {
+        const hasScheme = /^[a-z][a-z0-9+.-]*:/i.test(url)
+        const hasWww = /^www\./i.test(url)
+        return hasScheme || hasWww
+      },
     }
   },
 
