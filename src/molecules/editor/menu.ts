@@ -6,9 +6,15 @@ import {
   type EditorCommandContext,
   type EditorCommandMeta,
 } from './commands'
+import { CellSelection } from '@tiptap/pm/tables'
 import { openFontColorPicker } from './components/font-color/fontColorController'
 import { openTableCellColorPicker } from './components/table-color/tableCellColorController'
 import { openTableSizePicker } from './components/table-size-picker/tableSizePickerController'
+
+/** True when a multi-cell table range is selected (drag across cells). */
+function isCellRangeSelection(editor: Editor): boolean {
+  return editor.state?.selection instanceof CellSelection
+}
 
 export type MenuActionContext = EditorCommandContext
 
@@ -86,9 +92,14 @@ function command(
   }
 }
 
-export const Bold = command(commandMeta.bold, (editor) =>
-  editor.chain().focus().toggleBold().run(),
-)
+export const Bold = command(commandMeta.bold, (editor) => {
+  // A CellSelection must keep its cell range — `.focus()` collapses it to a
+  // text cursor, so fan bold out across cells without focusing.
+  if (isCellRangeSelection(editor)) {
+    return editor.chain().toggleCellBold().run()
+  }
+  return editor.chain().focus().toggleBold().run()
+})
 export const Italic = command(commandMeta.italic, (editor) =>
   editor.chain().focus().toggleItalic().run(),
 )
@@ -131,15 +142,19 @@ export const HeadingGroup: MenuGroupItem = {
   items: [H2, H3, H4],
 }
 
-export const AlignLeft = command(commandMeta.alignLeft, (editor) =>
-  editor.chain().focus().setTextAlign('left').run(),
-)
-export const AlignCenter = command(commandMeta.alignCenter, (editor) =>
-  editor.chain().focus().setTextAlign('center').run(),
-)
-export const AlignRight = command(commandMeta.alignRight, (editor) =>
-  editor.chain().focus().setTextAlign('right').run(),
-)
+function align(meta: EditorCommandMeta, alignment: string): CommandMenuItem {
+  return command(meta, (editor) => {
+    // Keep a multi-cell range intact: `.focus()` would collapse the
+    // CellSelection so alignment only hits the anchor cell.
+    if (isCellRangeSelection(editor)) {
+      return editor.chain().setCellTextAlign(alignment).run()
+    }
+    return editor.chain().focus().setTextAlign(alignment).run()
+  })
+}
+export const AlignLeft = align(commandMeta.alignLeft, 'left')
+export const AlignCenter = align(commandMeta.alignCenter, 'center')
+export const AlignRight = align(commandMeta.alignRight, 'right')
 // Named color/highlight (`namedColor`/`namedHighlight`) drive an imperative
 // picker so the toolbar button remains owned by MenuItems.
 export const FontColor = command(
