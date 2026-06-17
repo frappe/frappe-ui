@@ -48,6 +48,9 @@ export interface DropdownProps {
   /** Offset in pixels between trigger and dropdown. */
   offset?: number
 
+  /** Whether the dropdown width should match the trigger element. */
+  matchTriggerWidth?: boolean
+
   /** Teleport target for dropdown portal content. */
   portalTo?: string | HTMLElement
 }

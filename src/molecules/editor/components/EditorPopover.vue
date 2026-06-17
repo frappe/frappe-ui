@@ -5,7 +5,7 @@
     tabindex="-1"
     :loop="loop"
     :trapped="trapped"
-    class="editor-popover border border-outline-gray-1 bg-surface-elevation-2 shadow-xl outline-none"
+    class="editor-popover border border-outline-gray-2 bg-surface-elevation-2 shadow-2xl outline-none"
     :class="contentClass"
     @mount-auto-focus="onMountAutoFocus"
     @unmount-auto-focus="onUnmountAutoFocus"

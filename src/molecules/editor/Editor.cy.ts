@@ -97,13 +97,17 @@ describe('v1 editor browser behavior', () => {
     cy.contains('button', 'Embed').should('be.visible')
   })
 
-  it('opens the link editor near the clicked link, not at the top of the document', () => {
+  it('opens the link editor near the link, not at the top of the document', () => {
     mountEditor({
       topOffset: 320,
       content: '<p><a href="https://example.com">Example link</a></p>',
     })
 
+    // Plain click only places the caret (it no longer opens the popup); the
+    // link editor opens via Mod-k. A collapsed caret in the link opens it in
+    // view mode, which renders the href as an <a>.
     cy.contains('.ProseMirror a', 'Example link').click()
+    cy.get('.ProseMirror').type('{meta}k')
 
     cy.contains('a', 'https://example.com')
       .should('be.visible')
@@ -119,6 +123,7 @@ describe('v1 editor browser behavior', () => {
     })
 
     cy.contains('.ProseMirror a', 'Example link').click()
+    cy.get('.ProseMirror').type('{meta}k')
     cy.contains('a', 'https://example.com').should('be.visible')
 
     cy.get('.ProseMirror').click('bottomRight', { force: true })

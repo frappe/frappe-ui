@@ -30,6 +30,9 @@
         :side="side"
         :align="align"
         :side-offset="offset"
+        :style="{
+          width: matchTriggerWidth ? 'var(--reka-dropdown-menu-trigger-width)' : undefined,
+        }"
       >
         <Menu
           :groups="groups"

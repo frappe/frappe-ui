@@ -452,11 +452,24 @@ export default plugin(
                 // links: subtle bottom border, darkens on hover
                 a: {
                   textDecoration: 'none',
-                  borderBottom: '1px solid var(--ink-gray-3)',
+                  borderBottom: '1px solid var(--ink-gray-4)',
                   transition: 'border-color 0.08s ease',
                 },
                 'a:hover': {
                   borderBottom: '1px solid var(--ink-gray-6)',
+                },
+
+                // named text color + bold: the color lives on a `textStyle`
+                // span that wraps (or is wrapped by) `<strong>`. Typography's
+                // `strong { color: var(--tw-prose-bold) }` otherwise overrides
+                // the inherited named color, painting bold text gray. Mirror the
+                // base preset's `a strong { color: inherit }` so bold keeps the
+                // span's color in both nesting orders.
+                ':where(span[style*="--prose-color-"]) strong': {
+                  color: 'inherit',
+                },
+                'strong:where([style*="--prose-color-"])': {
+                  color: 'inherit',
                 },
 
                 // inline code: subtle pill — strip Tailwind's added quotes
@@ -556,7 +569,7 @@ export default plugin(
                 ol: {
                   marginTop: '4px',
                   marginBottom: '4px',
-                  paddingInlineStart: '1.5em',
+                  paddingInlineStart: '1.7em',
                 },
                 li: {
                   marginTop: '4px',
