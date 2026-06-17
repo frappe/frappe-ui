@@ -1,45 +1,28 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
+import MenuItemContent from './MenuItemContent.vue'
+import MenuRenderContent from './MenuRenderContent.vue'
+import MenuRenderContentAsChild from './MenuRenderContentAsChild.vue'
+import type { MenuOption, MenuProps } from './types'
 import {
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuPortal,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-} from 'reka-ui'
-import DropdownMenuItemContent from './DropdownMenuItemContent.vue'
-import DropdownRenderContent from './DropdownRenderContent.vue'
-import DropdownRenderContentAsChild from './DropdownRenderContentAsChild.vue'
-import type { DropdownOption } from './types'
-import {
-  dropdownClasses,
-  getDropdownBackgroundColor,
+  menuClasses,
+  getMenuBackgroundColor,
   groupHasIcons,
-  isDropdownComponentOption,
-  isDropdownSubmenuOption,
-  isDropdownSwitchOption,
-  normalizeDropdownOptions,
-  type NormalizedDropdownGroup,
+  isMenuComponentOption,
+  isMenuSubmenuOption,
+  isMenuSwitchOption,
+  normalizeMenuOptions,
 } from './utils'
 
 defineOptions({
-  name: 'DropdownMenuList',
+  name: 'Menu',
 })
 
-const props = withDefaults(
-  defineProps<{
-    groups?: NormalizedDropdownGroup[]
-    portalTo?: string | HTMLElement
-    close: () => void
-    slotFns?: Record<string, ((props?: any) => any) | undefined>
-  }>(),
-  {
-    groups: () => [],
-    portalTo: 'body',
-  },
-)
+const props = withDefaults(defineProps<MenuProps>(), {
+  groups: () => [],
+  portalTo: 'body',
+})
 
 const router = useRouter()
 
@@ -47,12 +30,11 @@ const hasVisibleItems = computed(() => {
   return props.groups.some((group) => group.options.length)
 })
 
-async function handleItemSelect(item: DropdownOption, event: Event) {
-  if (item.route) {
+async function handleItemSelect(item: MenuOption, event: Event) {
+  if (item.route && router) {
     await router.push(item.route)
     return
   }
-
   ;(item.onClick as ((event: PointerEvent) => void) | undefined)?.(
     event as PointerEvent,
   )
@@ -65,69 +47,73 @@ async function handleItemSelect(item: DropdownOption, event: Event) {
       v-for="(group, groupIndex) in groups"
       :key="group.key ?? group.group ?? groupIndex"
       data-slot="group"
-      :class="dropdownClasses.group"
+      :class="menuClasses.group"
     >
-      <DropdownMenuLabel
+      <component
+        :is="primitives.Label"
         v-if="group.group && !group.hideLabel"
         data-slot="group-label"
-        :class="dropdownClasses.groupLabel"
+        :class="menuClasses.groupLabel"
       >
-        <DropdownRenderContent
+        <MenuRenderContent
           v-if="slotFns?.['group-label']"
           :content="slotFns['group-label']?.({ group })"
         />
         <template v-else>
           {{ group.group }}
         </template>
-      </DropdownMenuLabel>
+      </component>
 
       <template
         v-for="(item, itemIndex) in group.options"
         :key="item.value ?? item.label ?? itemIndex"
       >
-        <DropdownMenuSub v-if="isDropdownSubmenuOption(item)">
-          <DropdownMenuSubTrigger
+        <component :is="primitives.Sub" v-if="isMenuSubmenuOption(item)">
+          <component
+            :is="primitives.SubTrigger"
             data-slot="item"
             :data-disabled="item.disabled ? '' : undefined"
             :disabled="item.disabled"
             :class="[
-              dropdownClasses.menuItem,
-              getDropdownBackgroundColor(item),
+              menuClasses.menuItem,
+              getMenuBackgroundColor(item),
               'data-[disabled]:cursor-not-allowed',
             ]"
           >
-            <DropdownMenuItemContent
+            <MenuItemContent
               :item="item"
               :close="close"
               :reserve-icon-space="groupHasIcons(group)"
               :slot-fns="slotFns"
               trailing="submenu"
             />
-          </DropdownMenuSubTrigger>
+          </component>
 
-          <DropdownMenuPortal :to="portalTo">
-            <DropdownMenuSubContent
+          <component :is="primitives.Portal" :to="portalTo">
+            <component
+              :is="primitives.SubContent"
               data-slot="content"
-              :class="dropdownClasses.content"
+              :class="menuClasses.content"
               :side-offset="4"
             >
-              <DropdownMenuList
-                :groups="normalizeDropdownOptions(item.submenu)"
-                :portal-to="portalTo"
+              <Menu
+                :groups="normalizeMenuOptions(item.submenu)"
                 :close="close"
                 :slot-fns="slotFns"
+                :portal-to="portalTo"
+                :primitives="primitives"
               />
-            </DropdownMenuSubContent>
-          </DropdownMenuPortal>
-        </DropdownMenuSub>
+            </component>
+          </component>
+        </component>
 
         <div
-          v-else-if="isDropdownSwitchOption(item)"
+          v-else-if="isMenuSwitchOption(item)"
           data-slot="item"
           :data-disabled="item.disabled ? '' : undefined"
           class="rounded"
         >
-          <DropdownMenuItemContent
+          <MenuItemContent
             :item="item"
             :close="close"
             :reserve-icon-space="groupHasIcons(group)"
@@ -136,73 +122,122 @@ async function handleItemSelect(item: DropdownOption, event: Event) {
           />
         </div>
 
-        <DropdownMenuItem
+        <component
+          :is="primitives.Item"
           v-else-if="slotFns?.item"
           as-child
           data-slot="item"
           :data-disabled="item.disabled ? '' : undefined"
           :disabled="item.disabled"
           class="data-[disabled]:cursor-not-allowed"
-          @select="(event) => handleItemSelect(item, event)"
+          @select="handleItemSelect(item, $event)"
         >
-          <DropdownRenderContentAsChild
+          <MenuRenderContentAsChild
             :content="
               slotFns.item?.({ item, close, selected: !!item.selected })
             "
           />
-        </DropdownMenuItem>
+        </component>
 
-        <DropdownMenuItem
+        <component
+          :is="primitives.Item"
           v-else-if="item.slots?.item"
           as-child
           data-slot="item"
           :data-disabled="item.disabled ? '' : undefined"
           :disabled="item.disabled"
           class="data-[disabled]:cursor-not-allowed"
-          @select="(event) => handleItemSelect(item, event)"
+          @select="handleItemSelect(item, $event)"
         >
-          <DropdownRenderContentAsChild
+          <MenuRenderContentAsChild
             :content="
               item.slots.item({ item, close, selected: !!item.selected })
             "
           />
-        </DropdownMenuItem>
+        </component>
 
-        <DropdownMenuItem
-          v-else-if="isDropdownComponentOption(item)"
+        <component
+          :is="primitives.Item"
+          v-else-if="isMenuComponentOption(item)"
           as-child
           data-slot="item"
           :data-disabled="item.disabled ? '' : undefined"
           :disabled="item.disabled"
           class="data-[disabled]:cursor-not-allowed"
-          @select="(event) => handleItemSelect(item, event)"
+          @select="handleItemSelect(item, $event)"
         >
           <component :is="item.component" :active="false" />
-        </DropdownMenuItem>
+        </component>
 
-        <DropdownMenuItem
+        <component
+          :is="primitives.Item"
           v-else
           data-slot="item"
           :data-disabled="item.disabled ? '' : undefined"
           :data-state="item.selected ? 'checked' : undefined"
           :disabled="item.disabled"
           class="data-[disabled]:cursor-not-allowed"
-          :class="[dropdownClasses.menuItem, getDropdownBackgroundColor(item)]"
-          @select="(event) => handleItemSelect(item, event)"
+          :class="[menuClasses.menuItem, getMenuBackgroundColor(item)]"
+          @select="handleItemSelect(item, $event)"
         >
-          <DropdownMenuItemContent
+          <MenuItemContent
             :item="item"
             :close="close"
             :reserve-icon-space="groupHasIcons(group)"
             :slot-fns="slotFns"
           />
-        </DropdownMenuItem>
+        </component>
       </template>
     </div>
   </template>
 
   <div v-else data-slot="empty" class="p-1.5 text-base text-ink-gray-5">
-    <DropdownRenderContent v-if="slotFns?.empty" :content="slotFns.empty?.()" />
+    <MenuRenderContent v-if="slotFns?.empty" :content="slotFns.empty?.()" />
     <template v-else>No options</template>
   </div>
 </template>
+
+<style scoped>
+/*
+ * Shared menu entrance/exit. Both Dropdown and ContextMenu render this
+ * component inside their `.menu-content` wrapper, so keeping the animated
+ * keyframes + reduced-motion reset here guarantees they ship whenever either
+ * menu is used (the package ships source and is tree-shaken per component).
+ * Dropdown's keyboard-only `instant` motion stays in Dropdown.vue.
+ */
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes menu-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+:global(.menu-content[data-motion='animated'][data-state='open']) {
+  animation: menu-in 100ms ease-out;
+}
+
+:global(.menu-content[data-motion='animated'][data-state='closed']) {
+  animation: menu-out 75ms ease-in;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :global(.menu-content) {
+    animation-duration: 0ms !important;
+  }
+}
+</style>

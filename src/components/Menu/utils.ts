@@ -1,22 +1,22 @@
 import type {
-  DropdownGroupOption,
-  DropdownItem,
-  DropdownOption,
-  DropdownOptions,
-  DropdownTheme,
+  MenuGroupOption,
+  MenuItem,
+  MenuOption,
+  MenuOptions,
+  MenuTheme,
 } from './types'
 
 /**
  * Group object after normalization. `options` is guaranteed to be present
  * (the deprecated `items` alias has been resolved into it).
  */
-export type NormalizedDropdownGroup = DropdownGroupOption & {
-  options: DropdownOption[]
+export type NormalizedMenuGroup = MenuGroupOption & {
+  options: MenuOption[]
 }
 
-export const dropdownClasses = {
+export const menuClasses = {
   content:
-    'dropdown-content min-w-40 divide-y divide-outline-elevation-2 rounded-lg bg-surface-elevation-2 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none',
+    'menu-content min-w-40 divide-y divide-outline-elevation-2 rounded-lg bg-surface-elevation-2 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none',
   group: 'p-1.5',
   groupLabel: 'flex h-7 items-center px-2 text-sm font-medium text-ink-gray-4',
   itemIcon: 'size-4 shrink-0',
@@ -26,45 +26,41 @@ export const dropdownClasses = {
     'cursor-pointer rounded outline-none data-[disabled]:pointer-events-none data-[disabled]:cursor-not-allowed',
 } as const
 
-export function isDropdownGroupOption(
-  item: DropdownItem,
-): item is DropdownGroupOption {
+export function isMenuGroupOption(item: MenuItem): item is MenuGroupOption {
   return 'group' in item && ('options' in item || 'items' in item)
 }
 
-function resolveGroupChildren(group: DropdownGroupOption): DropdownOption[] {
+function resolveGroupChildren(group: MenuGroupOption): MenuOption[] {
   if (import.meta.env.DEV && group.options && group.items) {
     console.warn(
-      '[Dropdown] grouped entry has both `options` and `items`. `options` wins; `items` is the deprecated alias.',
+      '[Menu] grouped entry has both `options` and `items`. `options` wins; `items` is the deprecated alias.',
     )
   }
 
   return group.options ?? group.items ?? []
 }
 
-export function isDropdownSwitchOption(item: DropdownOption) {
+export function isMenuSwitchOption(item: MenuOption) {
   return item.switch === true
 }
 
-export function isDropdownSubmenuOption(item: DropdownOption) {
+export function isMenuSubmenuOption(item: MenuOption) {
   return Array.isArray(item.submenu)
 }
 
-export function isDropdownComponentOption(item: DropdownOption) {
+export function isMenuComponentOption(item: MenuOption) {
   return 'component' in item && Boolean(item.component)
 }
 
-function shouldRenderOption(option: DropdownOption) {
+function shouldRenderOption(option: MenuOption) {
   return option.condition ? option.condition() : true
 }
 
-function normalizeTheme(theme?: DropdownTheme): DropdownTheme {
+function normalizeTheme(theme?: MenuTheme): MenuTheme {
   return theme ?? 'gray'
 }
 
-export function normalizeDropdownOption(
-  option: DropdownOption,
-): DropdownOption {
+export function normalizeMenuOption(option: MenuOption): MenuOption {
   return {
     ...option,
     theme: normalizeTheme(option.theme),
@@ -72,18 +68,18 @@ export function normalizeDropdownOption(
   }
 }
 
-function normalizeGroupItems(items: DropdownOption[]) {
+function normalizeGroupItems(items: MenuOption[]) {
   return (items || [])
     .filter(Boolean)
     .filter(shouldRenderOption)
-    .map(normalizeDropdownOption)
+    .map(normalizeMenuOption)
 }
 
-export function normalizeDropdownOptions(
-  options: DropdownOptions = [],
-): NormalizedDropdownGroup[] {
-  const groups: NormalizedDropdownGroup[] = []
-  let currentGroup: NormalizedDropdownGroup | null = null
+export function normalizeMenuOptions(
+  options: MenuOptions = [],
+): NormalizedMenuGroup[] {
+  const groups: NormalizedMenuGroup[] = []
+  let currentGroup: NormalizedMenuGroup | null = null
   let implicitGroupIndex = 0
 
   function flushCurrentGroup() {
@@ -99,7 +95,7 @@ export function normalizeDropdownOptions(
   for (const [index, item] of options.entries()) {
     if (!item) continue
 
-    if (isDropdownGroupOption(item)) {
+    if (isMenuGroupOption(item)) {
       flushCurrentGroup()
 
       const visibleItems = normalizeGroupItems(resolveGroupChildren(item))
@@ -129,7 +125,7 @@ export function normalizeDropdownOptions(
       }
     }
 
-    currentGroup.options.push(normalizeDropdownOption(item))
+    currentGroup.options.push(normalizeMenuOption(item))
   }
 
   flushCurrentGroup()
@@ -137,27 +133,27 @@ export function normalizeDropdownOptions(
   return groups
 }
 
-export function groupHasIcons(group: NormalizedDropdownGroup) {
+export function groupHasIcons(group: NormalizedMenuGroup) {
   return group.options.some((item) => Boolean(item.icon))
 }
 
-export function getDropdownIconColor(item: {
+export function getMenuIconColor(item: {
   disabled?: boolean
-  theme?: DropdownTheme
+  theme?: MenuTheme
 }) {
   if (item.disabled) return 'text-ink-gray-4'
   return item.theme === 'red' ? 'text-ink-red-6' : 'text-ink-gray-6'
 }
 
-export function getDropdownTextColor(item: {
+export function getMenuTextColor(item: {
   disabled?: boolean
-  theme?: DropdownTheme
+  theme?: MenuTheme
 }) {
   if (item.disabled) return 'text-ink-gray-4'
   return item.theme === 'red' ? 'text-ink-red-6' : 'text-ink-gray-7'
 }
 
-export function getDropdownBackgroundColor(item: { theme?: DropdownTheme }) {
+export function getMenuBackgroundColor(item: { theme?: MenuTheme }) {
   if (item.theme === 'red') {
     return 'focus:bg-surface-red-3 data-[highlighted]:bg-surface-red-3 data-[state=open]:bg-surface-red-3'
   }

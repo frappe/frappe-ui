@@ -1,14 +1,14 @@
 <template>
-  <Menu v-if="fixedMenuButtons" :buttons="fixedMenuButtons" />
+  <TextEditorMenu v-if="fixedMenuButtons" :buttons="fixedMenuButtons" />
 </template>
 <script>
-import Menu from './Menu.vue'
+import TextEditorMenu from './TextEditorMenu.vue'
 import { createEditorButton } from '../utils'
 
 export default {
   name: 'TextEditorFixedMenu',
   props: ['buttons'],
-  components: { Menu },
+  components: { TextEditorMenu },
   inject: ['editor'],
   computed: {
     fixedMenuButtons() {

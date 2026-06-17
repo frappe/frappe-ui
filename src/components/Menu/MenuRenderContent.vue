@@ -2,7 +2,7 @@
 import { defineComponent, type PropType, type VNode } from 'vue'
 
 const RenderContent = defineComponent({
-  name: 'DropdownRenderContentRenderer',
+  name: 'MenuRenderContentRenderer',
   props: {
     content: {
       type: [Object, Array] as PropType<VNode | VNode[]>,

@@ -15,7 +15,7 @@
     name: 'options',
     description: 'Array of dropdown options or grouped options.',
     required: false,
-    type: 'DropdownOptions',
+    type: 'MenuOptions',
     default: '[]'
   },
   {
@@ -71,36 +71,6 @@
     name: 'trigger',
     description: 'Explicit trigger slot renderer.',
     type: 'DropdownTriggerSlotProps'
-  },
-  {
-    name: 'item',
-    description: 'Replaces the entire item row.',
-    type: 'DropdownItemSlotProps'
-  },
-  {
-    name: 'item-prefix',
-    description: 'Content rendered before the standard item label.',
-    type: 'DropdownItemSlotProps'
-  },
-  {
-    name: 'item-label',
-    description: 'Content rendered for the standard item label area.',
-    type: 'DropdownItemSlotProps'
-  },
-  {
-    name: 'item-suffix',
-    description: 'Content rendered after the standard item label.',
-    type: 'DropdownItemSlotProps'
-  },
-  {
-    name: 'group-label',
-    description: 'Custom renderer for group labels.',
-    type: 'DropdownGroupSlotProps'
-  },
-  {
-    name: 'empty',
-    description: 'Fallback content rendered when no items are available.',
-    type: 'any'
   }
 ]
 
