@@ -160,6 +160,11 @@ and merges static text size + weight class pairs, for example `text-base font-me
 to `text-base-medium`. Run it once per codebase; the token migration is not idempotent
 because some v2 names overlap with v0 names.
 
+After upgrading to `frappe-ui@1.0.0-beta.11`, run the codemod again. Apps that
+already ran it will only get the typography correction (`text-lg` → `text-md`,
+`text-xl` → `text-lg`, ...). Apps that still have pre-v2 color tokens can pass
+`--force`, but review the output carefully because color tokens may double-shift.
+
 ## Editor
 
 The v0 monolith `<TextEditor>` (imported from `frappe-ui`) is replaced by the
