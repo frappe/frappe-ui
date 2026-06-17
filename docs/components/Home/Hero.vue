@@ -15,7 +15,7 @@ import { withBase } from 'vitepress'
       </h1>
 
       <p
-        class="text-p-base sm:text-p-xl text-ink-gray-5 sm:w-3/4 mx-auto"
+        class="text-p-base sm:text-p-lg text-ink-gray-5 sm:w-3/4 mx-auto"
       >
         Beautifully crafted components built for real world applications. Better
         defaults helping you ship faster.

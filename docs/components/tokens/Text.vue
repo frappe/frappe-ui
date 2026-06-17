@@ -36,7 +36,7 @@ const para =
         <template v-for="color in data.txtColors" :key="color.name">
           <span
             v-if="!color.value"
-            class="capitalize col-span-full font-semibold text-xl"
+            class="capitalize col-span-full font-semibold text-lg"
           >
             {{ color.name }}
           </span>

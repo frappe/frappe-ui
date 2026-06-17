@@ -18,11 +18,12 @@
  *
  * IMPORTANT: the token replacement is single-pass/simultaneous. Several renames
  * chain (outline red-2→3, red-3→4, red-4→5); applying them sequentially would
- * cascade (red-2 ending up as red-5). Run this script exactly once per
+ * cascade (red-2 ending up as red-5). Color renames must run exactly once per
  * codebase — the v2 scheme reuses names (e.g. surface-gray-5 exists in both
- * scales with different values), so a second run would double-shift tokens. As
- * a guard, the script refuses to run on a codebase that looks already migrated
- * (v2-only tokens present, no pre-v2 tokens); pass --force to override.
+ * scales with different values), so a second full run would double-shift tokens.
+ * As a guard, the script detects already-migrated codebases and runs only the
+ * typography correction (`text-lg` → `text-md`, `text-xl` → `text-lg`, ...).
+ * Pass --force to run the full migration anyway.
  */
 
 import fs from 'fs'
@@ -89,57 +90,91 @@ const OUTLINE_ALPHA_RENAMES = {
 
 // ---------- TYPOGRAPHY SIZE RENAMES ----------
 
-// The espresso text scale gained 15px (`lg`) and 17px (`2xl`) stops, pushing
-// every size from the old `lg` (16px) upward by two names. Each physical size
-// keeps its meaning under a new name, so existing utility classes must be
-// renamed to render identically (old `text-lg`/16px → `text-xl`, etc.). These
-// chain (lg→xl, xl→3xl, …) and so MUST run in the same single simultaneous pass
-// as the color renames below — a sequential pass would cascade.
+// The espresso text scale gained 15px (`md`) and 17px (`xl`) stops. Each
+// physical size keeps its meaning under a new name, so existing utility classes
+// must be renamed to render identically. These chain and so MUST run in a single
+// simultaneous pass — a sequential pass would cascade.
 //
 // Caveat: these names (`text-lg` … `text-9xl`) coincide with stock Tailwind
 // font-size utilities, so only point this at code using the espresso scale, and
 // run exactly once (see header).
-const TEXT_SIZE_SHIFT = [
-  ['lg', 'xl'],
-  ['xl', '3xl'],
-  ['2xl', '4xl'],
-  ['3xl', '5xl'],
-  ['4xl', '6xl'],
-  ['5xl', '7xl'],
-  ['6xl', '8xl'],
-  ['7xl', '9xl'],
-  ['8xl', '10xl'],
-  ['9xl', '11xl'],
-  ['10xl', '12xl'],
-  ['11xl', '13xl'],
-  ['12xl', '14xl'],
-  ['13xl', '15xl'],
-  ['14xl', '16xl'],
-  ['15xl', '17xl'],
+const UNMIGRATED_TEXT_SIZE_SHIFT = [
+  ['xl', '2xl'],
+  ['2xl', '3xl'],
+  ['3xl', '4xl'],
+  ['4xl', '5xl'],
+  ['5xl', '6xl'],
+  ['6xl', '7xl'],
+  ['7xl', '8xl'],
+  ['8xl', '9xl'],
+  ['9xl', '10xl'],
+  ['10xl', '11xl'],
+  ['11xl', '12xl'],
+  ['12xl', '13xl'],
+  ['13xl', '14xl'],
+  ['14xl', '15xl'],
+  ['15xl', '16xl'],
 ]
 
-// Each size surfaces as three utility forms: the size utility (`text-lg`), the
-// paragraph variant (`text-p-lg`), and the medium-weight component class
-// (`text-lg-medium`). All three shift together.
-const TEXT_SIZE_RENAMES = Object.fromEntries(
-  TEXT_SIZE_SHIFT.flatMap(([from, to]) => [
+// Apps that already ran the original v2 codemod use the temporary typography
+// names where `text-lg` was 15px and `text-xl` was 16px. Shift those one step
+// down into the corrected names without touching color tokens.
+const MIGRATED_TEXT_SIZE_SHIFT = [
+  ['lg', 'md'],
+  ['xl', 'lg'],
+  ['2xl', 'xl'],
+  ['3xl', '2xl'],
+  ['4xl', '3xl'],
+  ['5xl', '4xl'],
+  ['6xl', '5xl'],
+  ['7xl', '6xl'],
+  ['8xl', '7xl'],
+  ['9xl', '8xl'],
+  ['10xl', '9xl'],
+  ['11xl', '10xl'],
+  ['12xl', '11xl'],
+  ['13xl', '12xl'],
+  ['14xl', '13xl'],
+  ['15xl', '14xl'],
+  ['16xl', '15xl'],
+  ['17xl', '16xl'],
+]
+
+// Each size surfaces as a bare size utility, a paragraph variant, and weighted
+// component classes. All forms shift together.
+const textSizeRenames = (shift) => Object.fromEntries(
+  shift.flatMap(([from, to]) => [
     [`text-${from}`, `text-${to}`],
     [`text-p-${from}`, `text-p-${to}`],
     [`text-${from}-medium`, `text-${to}-medium`],
+    [`text-p-${from}-medium`, `text-p-${to}-medium`],
+    [`text-${from}-semibold`, `text-${to}-semibold`],
+    [`text-p-${from}-semibold`, `text-p-${to}-semibold`],
+    [`text-${from}-bold`, `text-${to}-bold`],
+    [`text-p-${from}-bold`, `text-p-${to}-bold`],
+    [`text-${from}-black`, `text-${to}-black`],
+    [`text-p-${from}-black`, `text-p-${to}-black`],
   ]),
 )
+
+const UNMIGRATED_TEXT_SIZE_RENAMES = textSizeRenames(UNMIGRATED_TEXT_SIZE_SHIFT)
+const MIGRATED_TEXT_SIZE_RENAMES = textSizeRenames(MIGRATED_TEXT_SIZE_SHIFT)
 
 // Full old token name → full new token name. NOTE: alpha categories must come
 // before their base category when building the alternation so that e.g.
 // `surface-alpha-gray-5` is never half-matched by a `surface-…` rule (the
 // longest-first sort below also guarantees this).
-export const TOKEN_RENAMES = {
+export const COLOR_TOKEN_RENAMES = {
   ...prefix('surface-alpha', SURFACE_ALPHA_RENAMES),
   ...prefix('outline-alpha', OUTLINE_ALPHA_RENAMES),
   ...prefix('surface', SURFACE_RENAMES),
   ...prefix('ink', INK_RENAMES),
   ...prefix('outline', OUTLINE_RENAMES),
-  ...TEXT_SIZE_RENAMES,
+}
+
+export const TOKEN_RENAMES = {
+  ...COLOR_TOKEN_RENAMES,
+  ...UNMIGRATED_TEXT_SIZE_RENAMES,
 }
 
 // Tokens dropped in v2 with no replacement — usage is reported, never rewritten.
@@ -169,8 +204,8 @@ function prefix(category, renames) {
 // `surface-gray-2` not in `surface-gray-2-contrast`).
 const byLengthDesc = (a, b) => b.length - a.length
 
-const RENAME_REGEX = new RegExp(
-  `(?<![a-zA-Z0-9])(${Object.keys(TOKEN_RENAMES).sort(byLengthDesc).join('|')})(?![a-zA-Z0-9-])`,
+const renameRegexFor = (renames) => new RegExp(
+  `(?<![a-zA-Z0-9])(${Object.keys(renames).sort(byLengthDesc).join('|')})(?![a-zA-Z0-9-])`,
   'g',
 )
 const FLAG_REGEX = new RegExp(
@@ -202,9 +237,9 @@ const WEIGHT_SUFFIX = {
 }
 
 const TEXT_SIZES = [
-  'tiny', '2xs', 'xs', 'sm', 'base', 'lg', 'xl', '2xl', '3xl', '4xl', '5xl',
-  '6xl', '7xl', '8xl', '9xl', '10xl', '11xl', '12xl', '13xl', '14xl', '15xl',
-  '16xl', '17xl',
+  'tiny', '2xs', 'xs', 'sm', 'base', 'md', 'lg', 'xl', '2xl', '3xl', '4xl',
+  '5xl', '6xl', '7xl', '8xl', '9xl', '10xl', '11xl', '12xl', '13xl', '14xl',
+  '15xl', '16xl', '17xl',
 ]
 const SIZE_CLASS = new RegExp(`^text-(?:p-)?(?:${TEXT_SIZES.join('|')})$`)
 
@@ -242,9 +277,9 @@ export function mergeWeightClasses(content) {
 // ---------- ALREADY-MIGRATED DETECTION ----------
 
 // Tokens that exist ONLY pre-migration (renamed away) vs ONLY post-migration. A
-// codebase with the post-migration names and none of the pre-migration ones has
-// almost certainly been migrated already — and re-running is destructive (the
-// color renames reuse names, so a second pass double-shifts them).
+// codebase with post-migration names has almost certainly been migrated already
+// or partially. Re-running color renames is destructive because the color
+// renames reuse names, so default to typography-only when v2 sentinels exist.
 const PRE_MIGRATION_TOKENS = [
   'surface-white', 'ink-white', 'outline-white', 'surface-menu-bar',
   'surface-card', 'surface-cards', 'surface-modal', 'surface-selected',
@@ -260,7 +295,7 @@ const sentinelRegex = (tokens) =>
 const PRE_REGEX = sentinelRegex(PRE_MIGRATION_TOKENS)
 const POST_REGEX = sentinelRegex(POST_MIGRATION_TOKENS)
 
-function detectAlreadyMigrated(files) {
+export function detectMigrationState(files) {
   let pre = 0
   let post = 0
   for (const file of files) {
@@ -268,21 +303,33 @@ function detectAlreadyMigrated(files) {
     pre += (content.match(PRE_REGEX) || []).length
     post += (content.match(POST_REGEX) || []).length
   }
-  return { pre, post, likelyMigrated: post > 0 && pre === 0 }
+  return { pre, post, likelyMigrated: post > 0 }
 }
 
-export function migrateTokens(content) {
+export function getMigrationMode({ likelyMigrated }, { force = false } = {}) {
+  return likelyMigrated && !force ? 'migrated-typography' : 'full'
+}
+
+export function migrateTokens(content, { mode = 'full' } = {}) {
+  const tokenRenames = mode === 'migrated-typography'
+    ? MIGRATED_TEXT_SIZE_RENAMES
+    : TOKEN_RENAMES
+  const renameRegex = renameRegexFor(tokenRenames)
   const replacements = []
-  let migrated = content.replace(RENAME_REGEX, (match, _token, offset) => {
-    const to = TOKEN_RENAMES[match]
+  let migrated = content.replace(renameRegex, (match, _token, offset) => {
+    const to = tokenRenames[match]
     replacements.push({ from: match, to, line: lineAt(content, offset) })
     return to
   })
 
-  // Merge weight classes on the post-rename text so `text-lg font-medium`
-  // becomes `text-xl-medium` (size shift first, then merge).
-  const { migrated: weightMerged, merges } = mergeWeightClasses(migrated)
-  migrated = weightMerged
+  let merges = []
+  if (mode === 'full') {
+    // Merge weight classes on the post-rename text so `text-xl font-medium`
+    // becomes `text-2xl-medium` (size shift first, then merge).
+    const result = mergeWeightClasses(migrated)
+    migrated = result.migrated
+    merges = result.merges
+  }
 
   const flagged = []
   for (const m of content.matchAll(FLAG_REGEX)) {
@@ -343,18 +390,21 @@ function main() {
   const files = []
   for (const target of targets) for (const file of walk(target)) files.push(file)
 
-  // Guard against a destructive second pass (the color renames reuse names).
-  const { pre, post, likelyMigrated } = detectAlreadyMigrated(files)
+  // Guard against a destructive second full pass (the color renames reuse names).
+  const { pre, post, likelyMigrated } = detectMigrationState(files)
+  const mode = getMigrationMode({ likelyMigrated }, { force })
   if (likelyMigrated) {
-    console.warn('\n⚠  This codebase looks ALREADY MIGRATED to espresso v2.')
-    console.warn(`   Found ${post} v2-only token(s) and 0 pre-v2 token(s).`)
-    console.warn('   This migration is NOT idempotent — the color renames reuse names,')
-    console.warn('   so a second pass would double-shift tokens (e.g. surface-gray-5 → -8 → -11).')
-    if (!force && !dryRun) {
-      console.warn('   Refusing to run. Pass --force to override, or --dry-run to preview.\n')
-      process.exit(2)
+    console.warn('\n⚠  This codebase looks already or partially migrated to espresso v2.')
+    console.warn(`   Found ${post} v2-only token(s) and ${pre} pre-v2 token(s).`)
+    if (force) {
+      console.warn('   --force set: running the full migration anyway. Color tokens may double-shift.\n')
+    } else {
+      if (pre > 0) {
+        console.warn(`   ${pre} pre-v2 color token(s) will be left untouched.`)
+        console.warn('   Pass --force to run the color migration too. Review carefully: color tokens may double-shift.')
+      }
+      console.warn('   Running only the typography correction (`text-lg` → `text-md`, ...).\n')
     }
-    console.warn(dryRun ? '   (--dry-run: previewing only.)\n' : '   (--force: proceeding anyway.)\n')
   }
 
   let filesChanged = 0
@@ -364,7 +414,7 @@ function main() {
 
   for (const file of files) {
     const content = fs.readFileSync(file, 'utf8')
-    const { migrated, replacements, merges, flagged } = migrateTokens(content)
+    const { migrated, replacements, merges, flagged } = migrateTokens(content, { mode })
 
     for (const f of flagged) allFlagged.push({ file, ...f })
     const changeCount = replacements.length + merges.length
@@ -385,7 +435,8 @@ function main() {
 
   console.log(
     `\n${dryRun ? '[dry-run] would update' : 'Updated'} ${filesChanged} files, ` +
-      `${totalReplacements} token renames, ${totalMerges} weight-class merges`,
+      `${totalReplacements} token renames, ${totalMerges} weight-class merges` +
+      (mode === 'migrated-typography' ? ' (typography correction only)' : ''),
   )
 
   if (allFlagged.length > 0) {

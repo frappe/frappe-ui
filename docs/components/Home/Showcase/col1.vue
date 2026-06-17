@@ -121,7 +121,7 @@ const selOpts = ["Admin", "Editor", "Viewer", "Guest"]
     </div>
 
     <div class="p-5 grid gap-5">
-      <h1 class="font-semibold text-lg">Create Project</h1>
+      <h1 class="font-semibold text-md">Create Project</h1>
       <FormControl
         label="Title"
         variant="outline"

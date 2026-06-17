@@ -5,7 +5,7 @@
         <div class="flex items-center space-x-2" v-if="$slots['actions-left']">
           <slot name="actions-left"></slot>
         </div>
-        <h2 class="text-3xl-semibold">{{ title }}</h2>
+        <h2 class="text-2xl-semibold">{{ title }}</h2>
       </div>
       <div class="flex items-center space-x-2" v-if="$slots['actions']">
         <slot name="actions"></slot>

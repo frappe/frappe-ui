@@ -2,7 +2,7 @@
     <div class="text-base h-full flex flex-col w-[90%] lg:w-[700px] mx-auto py-12 space-y-10">
         <div class="flex flex-col space-y-1">
             <div class="flex items-center justify-between text-ink-gray-7">
-                <div class="flex items-center space-x-2 text-lg font-semibold text-ink-gray-9">
+                <div class="flex items-center space-x-2 text-md font-semibold text-ink-gray-9">
                     <span>
                         Review and Import
                     </span>

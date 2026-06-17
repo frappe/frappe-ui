@@ -119,8 +119,8 @@ const inputClasses = computed(() => {
   let sizeClasses = {
     sm: 'text-base rounded',
     md: 'text-base rounded',
-    lg: 'text-xl rounded-md',
-    xl: 'text-3xl rounded-md',
+    lg: 'text-lg rounded-md',
+    xl: 'text-2xl rounded-md',
   }[props.size]
 
   let paddingClasses = {

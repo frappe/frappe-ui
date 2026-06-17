@@ -2,7 +2,7 @@
     <div class="text-base h-full flex flex-col w-[85%] lg:w-[700px] mx-auto pt-12 space-y-8">
         <div class="flex flex-col space-y-1 text-ink-gray-7">
             <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-2 text-xl font-semibold text-ink-gray-9">
+                <div class="flex items-center space-x-2 text-lg font-semibold text-ink-gray-9">
                     <span>
                         Choose Import
                     </span>

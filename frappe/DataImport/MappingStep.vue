@@ -2,7 +2,7 @@
     <div class="w-[85%] lg:w-[700px] mx-auto py-12 space-y-8 text-base">
        <div class="flex justify-between">
             <div class="space-y-2">
-                <div class="text-lg font-semibold text-ink-gray-9">
+                <div class="text-md font-semibold text-ink-gray-9">
                     <span>
                         Map Data
                     </span>

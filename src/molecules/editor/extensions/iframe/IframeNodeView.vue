@@ -203,7 +203,7 @@ function commitCaption(event: Event): void {
           class="flex h-[360px] w-[640px] items-center justify-center rounded bg-surface-gray-1"
         >
           <div class="text-center text-ink-gray-5">
-            <div class="mb-1 text-xl">🔗</div>
+            <div class="mb-1 text-lg">🔗</div>
             <div class="text-sm">Loading embed…</div>
           </div>
         </div>

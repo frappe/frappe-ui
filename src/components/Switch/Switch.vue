@@ -158,7 +158,7 @@ const switchLabelClasses = computed(() => {
     props.disabled && !props.description
       ? 'text-ink-gray-4'
       : 'text-ink-gray-8',
-    props.size === 'md' ? 'text-xl' : 'text-base',
+    props.size === 'md' ? 'text-lg' : 'text-base',
     props.labelClasses,
   ]
 })

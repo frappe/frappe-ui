@@ -75,7 +75,7 @@ const overlayBlack = computed(
       :id="family.key"
       class="grid gap-3"
     >
-      <h2 class="text-xl font-semibold text-ink-gray-8 m-0">
+      <h2 class="text-lg font-semibold text-ink-gray-8 m-0">
         {{ family.label }}
       </h2>
       <div
@@ -111,7 +111,7 @@ const overlayBlack = computed(
       :id="family.key"
       class="grid gap-3"
     >
-      <h2 class="text-xl font-semibold text-ink-gray-8 m-0">
+      <h2 class="text-lg font-semibold text-ink-gray-8 m-0">
         {{ family.label }}
       </h2>
       <div
@@ -148,7 +148,7 @@ const overlayBlack = computed(
     </section>
 
     <section id="overlays" class="grid gap-3">
-      <h2 class="text-xl font-semibold text-ink-gray-8 m-0">Overlays</h2>
+      <h2 class="text-lg font-semibold text-ink-gray-8 m-0">Overlays</h2>
 
       <div class="grid gap-4">
         <div class="grid gap-1.5">
@@ -203,7 +203,7 @@ const overlayBlack = computed(
     </section>
 
     <section id="neutrals" class="grid gap-3">
-      <h2 class="text-xl font-semibold text-ink-gray-8 m-0">Neutrals</h2>
+      <h2 class="text-lg font-semibold text-ink-gray-8 m-0">Neutrals</h2>
       <div
         class="grid gap-1.5"
         :style="{ gridTemplateColumns: `repeat(11, minmax(0, 1fr))` }"
