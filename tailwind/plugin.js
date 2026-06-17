@@ -459,6 +459,19 @@ export default plugin(
                   borderBottom: '1px solid var(--ink-gray-6)',
                 },
 
+                // named text color + bold: the color lives on a `textStyle`
+                // span that wraps (or is wrapped by) `<strong>`. Typography's
+                // `strong { color: var(--tw-prose-bold) }` otherwise overrides
+                // the inherited named color, painting bold text gray. Mirror the
+                // base preset's `a strong { color: inherit }` so bold keeps the
+                // span's color in both nesting orders.
+                ':where(span[style*="--prose-color-"]) strong': {
+                  color: 'inherit',
+                },
+                'strong:where([style*="--prose-color-"])': {
+                  color: 'inherit',
+                },
+
                 // inline code: subtle pill — strip Tailwind's added quotes
                 'code::before': { content: 'none' },
                 'code::after': { content: 'none' },
