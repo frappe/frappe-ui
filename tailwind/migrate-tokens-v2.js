@@ -295,7 +295,7 @@ const sentinelRegex = (tokens) =>
 const PRE_REGEX = sentinelRegex(PRE_MIGRATION_TOKENS)
 const POST_REGEX = sentinelRegex(POST_MIGRATION_TOKENS)
 
-function detectAlreadyMigrated(files) {
+export function detectMigrationState(files) {
   let pre = 0
   let post = 0
   for (const file of files) {
@@ -304,6 +304,10 @@ function detectAlreadyMigrated(files) {
     post += (content.match(POST_REGEX) || []).length
   }
   return { pre, post, likelyMigrated: post > 0 }
+}
+
+export function getMigrationMode({ likelyMigrated }, { force = false } = {}) {
+  return likelyMigrated && !force ? 'migrated-typography' : 'full'
 }
 
 export function migrateTokens(content, { mode = 'full' } = {}) {
@@ -387,14 +391,18 @@ function main() {
   for (const target of targets) for (const file of walk(target)) files.push(file)
 
   // Guard against a destructive second full pass (the color renames reuse names).
-  const { pre, post, likelyMigrated } = detectAlreadyMigrated(files)
-  const mode = likelyMigrated && !force ? 'migrated-typography' : 'full'
+  const { pre, post, likelyMigrated } = detectMigrationState(files)
+  const mode = getMigrationMode({ likelyMigrated }, { force })
   if (likelyMigrated) {
     console.warn('\n⚠  This codebase looks already or partially migrated to espresso v2.')
     console.warn(`   Found ${post} v2-only token(s) and ${pre} pre-v2 token(s).`)
     if (force) {
       console.warn('   --force set: running the full migration anyway. Color tokens may double-shift.\n')
     } else {
+      if (pre > 0) {
+        console.warn(`   ${pre} pre-v2 color token(s) will be left untouched.`)
+        console.warn('   Pass --force to run the color migration too. Review carefully: color tokens may double-shift.')
+      }
       console.warn('   Running only the typography correction (`text-lg` → `text-md`, ...).\n')
     }
   }
