@@ -102,4 +102,33 @@ describe('Slider', () => {
       cy.get('#sl-err').should('have.attr', 'data-state', 'invalid')
     })
   })
+
+  describe('bidirectional fill', () => {
+    // Targets the range element: the only absolutely-positioned element inside the control.
+    const range = () => cy.get('[data-slot="control"] .absolute')
+
+    it('fills from zero-crossing to a positive value', () => {
+      cy.mount(Slider, { props: { modelValue: [50], min: -100, max: 100 } })
+      range()
+        .should('have.attr', 'style')
+        .and('include', 'left: 50%')
+        .and('include', 'right: 25%')
+    })
+
+    it('fills from a negative value to the zero-crossing', () => {
+      cy.mount(Slider, { props: { modelValue: [-50], min: -100, max: 100 } })
+      range()
+        .should('have.attr', 'style')
+        .and('include', 'left: 25%')
+        .and('include', 'right: 50%')
+    })
+
+    it('renders zero-width fill when value is at zero', () => {
+      cy.mount(Slider, { props: { modelValue: [0], min: -100, max: 100 } })
+      range()
+        .should('have.attr', 'style')
+        .and('include', 'left: 50%')
+        .and('include', 'right: 50%')
+    })
+  })
 })

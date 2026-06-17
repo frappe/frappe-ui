@@ -21,7 +21,7 @@
   },
   {
     name: 'min',
-    description: 'Minimum allowed slider value.',
+    description: 'Minimum allowed slider value. Negative values enable bidirectional fill from zero.',
     required: false,
     type: 'number',
     default: '0'

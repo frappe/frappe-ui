@@ -53,6 +53,21 @@ const {
   disabled: () => props.disabled,
 })
 
+const isBidirectional = computed(() => props.min < 0 && props.max > 0)
+
+const bidirectionalRangeStyles = computed(() => {
+  const { min, max } = props
+  const range = max - min
+  const zeroPos = -min / range
+  const thumbPositions = sliderValue.value.map((v) => (v - min) / range)
+  const allPositions =
+    thumbPositions.length === 1 ? [zeroPos, thumbPositions[0]] : thumbPositions
+  return {
+    left: `${Math.min(...allPositions) * 100}%`,
+    right: `${(1 - Math.max(...allPositions)) * 100}%`,
+  }
+})
+
 const trackClasses = computed(() => {
   return [
     'relative grow rounded',
@@ -65,6 +80,13 @@ const rangeClasses = computed(() => {
   return [
     'absolute h-full rounded',
     props.disabled ? 'bg-surface-gray-4' : 'bg-surface-gray-10',
+  ]
+})
+
+const rootClasses = computed(() => {
+  return [
+    'relative flex w-full select-none touch-none items-center',
+    props.size === 'md' ? 'h-5' : 'h-4',
   ]
 })
 
@@ -110,7 +132,7 @@ const hasLabeling = computed(() => {
     <SliderRoot
       :id="inputId"
       v-model="sliderValue"
-      class="relative flex w-full select-none touch-none items-center"
+      :class="rootClasses"
       :max="props.max"
       :min="props.min"
       :step="props.step"
@@ -125,7 +147,14 @@ const hasLabeling = computed(() => {
       @value-commit="onValueCommit"
     >
       <SliderTrack :class="trackClasses">
-        <SliderRange :class="rangeClasses" />
+        <SliderRange v-if="!isBidirectional" :class="rangeClasses" />
+        <div
+          v-else
+          :class="rangeClasses"
+          :style="bidirectionalRangeStyles"
+          data-orientation="horizontal"
+          :data-disabled="props.disabled ? '' : undefined"
+        />
       </SliderTrack>
 
       <SliderThumb
