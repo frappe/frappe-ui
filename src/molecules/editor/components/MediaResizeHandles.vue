@@ -27,10 +27,12 @@ const edges: readonly ResizeEdge[] = ['left', 'right']
     v-for="edge in edges"
     :key="edge"
     type="button"
-    class="absolute top-1/2 z-20 h-8 max-h-[50%] w-1 -translate-y-1/2 cursor-ew-resize touch-none rounded-full bg-black/65 ring-1 ring-white/50"
-    :class="edge === 'left' ? 'left-1.5' : 'right-1.5'"
+    class="absolute top-1/2 z-30 flex h-8 max-h-[50%] w-4 -translate-y-1/2 cursor-ew-resize touch-none items-center justify-center bg-transparent"
+    :class="edge === 'left' ? 'left-0' : 'right-0'"
     :aria-label="`${label} from ${edge} edge`"
     @pointerdown.prevent="emit('resize-start', $event, edge)"
     @keydown="emit('resize-keydown', $event)"
-  />
+  >
+    <span class="pointer-events-none h-full w-1 rounded-full bg-black/65 ring-1 ring-white/50" />
+  </button>
 </template>
