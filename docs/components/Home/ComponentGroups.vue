@@ -79,7 +79,7 @@ const componentGroups = {
       />
 
       <div class="grid gap-2 p-4 bg-surface-elevation-1 rounded-b">
-        <h3 class="text-lg font-semibold text-ink-gray-9">
+        <h3 class="text-md font-semibold text-ink-gray-9">
           {{ group }}
         </h3>
 

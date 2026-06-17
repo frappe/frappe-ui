@@ -43,7 +43,7 @@ const emojis = [
 
   <Dialog v-model="open">
     <template #body-title>
-      <h3 class="text-4xl-semibold text-ink-gray-9">
+      <h3 class="text-3xl-semibold text-ink-gray-9">
         Combobox inside Dialog
       </h3>
     </template>

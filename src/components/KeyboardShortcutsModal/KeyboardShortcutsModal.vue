@@ -8,7 +8,7 @@
     <template #title>
       <div class="flex items-center pr-2">
         <h3
-          class="shrink-0 text-4xl-semibold leading-6 text-ink-gray-9 flex-1"
+          class="shrink-0 text-3xl-semibold leading-6 text-ink-gray-9 flex-1"
         >
           {{ title }}
         </h3>

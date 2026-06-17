@@ -80,9 +80,9 @@ const labelClasses = computed(() => {
     sm: 'text-sm',
     md: 'text-base',
     lg: 'text-base',
-    xl: 'text-xl',
-    '2xl': 'text-3xl',
-    '3xl': 'text-4xl',
+    xl: 'text-lg',
+    '2xl': 'text-2xl',
+    '3xl': 'text-3xl',
   }[props.size]
   return ['font-medium', sizeClass]
 })

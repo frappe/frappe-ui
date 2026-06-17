@@ -106,7 +106,7 @@ const sections = computed(() =>
       class="grid gap-4"
     >
       <div class="grid gap-1">
-        <h2 class="text-xl font-semibold text-ink-gray-8 m-0 capitalize">
+        <h2 class="text-lg font-semibold text-ink-gray-8 m-0 capitalize">
           {{ section.category }}
         </h2>
         <p class="text-p-sm text-ink-gray-5 m-0">

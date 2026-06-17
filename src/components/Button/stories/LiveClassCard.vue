@@ -8,7 +8,7 @@ import { Button } from 'frappe-ui'
   >
     <div class="flex flex-col gap-5">
       <div class="flex flex-col gap-3">
-        <p class="text-lg-semibold text-ink-gray-7">Frappe january - 2023</p>
+        <p class="text-md-semibold text-ink-gray-7">Frappe january - 2023</p>
         <div class="flex flex-col gap-3">
           <div class="flex items-center gap-2 text-base text-ink-gray-7">
             <span class="lucide-calendar size-4" aria-hidden="true" />

@@ -10,6 +10,7 @@ Figma models typography in espresso v2 as **named styles**, not as independent s
 |---|---|---|---|
 | `text/base/regular` | 14px | 420 | 2% (0.28px) |
 | `text/base/medium`  | 14px | 500 | **1.5%** (0.21px) |
+| `text/md/medium`    | 15px | 500 | **1.5%** (0.225px) |
 | `text/lg/medium`    | 16px | 500 | **1.5%** (0.24px) |
 
 Medium-weight text is **tracked tighter** than regular-weight text of the same size. This is a deliberate optical correction baked into the design system.
@@ -24,6 +25,7 @@ Expose Figma's named typography styles as Tailwind **component utilities** gener
 
 ```css
 .text-base-medium { font-size: 14px; line-height: 16px; font-weight: 500; letter-spacing: 0.015em; }
+.text-md-medium   { font-size: 15px; line-height: 17px; font-weight: 500; letter-spacing: 0.015em; }
 .text-lg-medium  { font-size: 16px; line-height: 18px; font-weight: 500; letter-spacing: 0.015em; }
 ```
 
@@ -56,5 +58,5 @@ Naming follows Figma's slash convention flattened to hyphens: `text/base/medium`
 - `tailwind/plugin.js` is the single source of truth for which medium variants exist. Adding a new one is a one-line addition to `FONT_SIZE_MEDIUM_TRACKING`.
 - The Figma token pipeline (`espresso-v2-design-tokens/`) does **not** model these — the values are hand-encoded in `plugin.js` from Figma observation. If the token export gains composite styles later, `buildTextStyleUtilities()` should be rewritten to read from the export instead.
 - Migration is incremental. Components that haven't moved off `text-base font-medium` still render; they just have 0.07–0.08px of tracking drift from Figma.
-- Currently emitted: `text-base-medium`, `text-lg-medium` (confirmed against Figma). Other sizes pending Figma verification.
+- Currently emitted: `text-base-medium`, `text-md-medium`, `text-lg-medium` (confirmed against Figma). Other sizes pending Figma verification.
 - Button md (`text-base-medium`) and Button lg (`text-lg-medium`) are the first consumers; verified pixel-exact against Figma node `25393-27651`.

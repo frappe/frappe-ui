@@ -67,10 +67,12 @@ Pick the wrong one and copy looks cramped (multi-line text in `text-*`) or flopp
 | `text-xs` / `text-p-xs`     | 12px  | Captions, meta / multi-line meta        |
 | `text-sm` / `text-p-sm`     | 13px  | Secondary labels / secondary paragraphs |
 | `text-base` / `text-p-base` | 14px  | Body labels / body paragraphs (default) |
+| `text-md` / `text-p-md`     | 15px  | Dense section labels / compact intro    |
 | `text-lg` / `text-p-lg`     | 16px  | Section subheads / long-form intro      |
-| `text-xl` / `text-p-xl`     | 18px  | Card / panel titles / lead paragraphs   |
-| `text-2xl`                  | 20px  | Page titles                             |
-| `text-3xl`+                 | 24px+ | Marketing / hero only                   |
+| `text-xl` / `text-p-xl`     | 17px  | Card / panel titles / lead paragraphs   |
+| `text-2xl`                  | 18px  | Page titles                             |
+| `text-3xl`                  | 20px  | Prominent page titles                   |
+| `text-4xl`+                 | 24px+ | Marketing / hero only                   |
 
 **Heuristic:** if the element is `<p>`, a description below a label, a feed entry that wraps, or helper text — use `text-p-*`. If it's `<h*>`, a `<Button>`/`<Badge>` label, a one-line meta row like "Updated 2h ago", or a stat value — use `text-*`.
 

@@ -175,7 +175,7 @@ const toggledDiv = ref(false)
       class="p-4 grid"
       :class="{ 'animate-bounce bg-surface-base shadow-lg': toggledDiv }"
     >
-      <h3 class="text-xl mb-2 font-semibold flex gap-3 justify-between">
+      <h3 class="text-lg mb-2 font-semibold flex gap-3 justify-between">
         Schedule an event
         <LucideX class="size-5" @click="toggledDiv = !toggledDiv" />
       </h3>

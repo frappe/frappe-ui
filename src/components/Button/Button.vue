@@ -166,7 +166,7 @@ export default defineComponent({
             xs: 'h-6 text-xs px-1.5 rounded-3',
             sm: 'h-7 text-base px-2 rounded-4',
             md: 'h-8 text-base-medium px-2.5 rounded-4',
-            lg: 'h-10 text-xl-medium px-3 rounded-5',
+            lg: 'h-10 text-lg-medium px-3 rounded-5',
           }[props.size]
 
       return [

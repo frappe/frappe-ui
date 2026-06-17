@@ -130,11 +130,11 @@ const paragraphSample =
         class="rounded-xl border border-outline-gray-2 bg-surface-gray-1 px-6 py-5 grid gap-3"
       >
         <div class="flex items-baseline justify-between gap-4">
-          <span class="text-2xl font-semibold text-ink-gray-8">{{
+          <span class="text-xl font-semibold text-ink-gray-8">{{
             family
           }}</span>
         </div>
-        <div class="text-4xl text-ink-gray-8 leading-tight">
+        <div class="text-3xl text-ink-gray-8 leading-tight">
           AaBbCcDdEe 0123456789
         </div>
       </div>
@@ -146,7 +146,7 @@ const paragraphSample =
 
     <section class="grid gap-5">
       <div class="grid gap-1">
-        <h2 class="text-xl font-semibold text-ink-gray-8 m-0">Text sizes</h2>
+        <h2 class="text-lg font-semibold text-ink-gray-8 m-0">Text sizes</h2>
         <p class="text-p-sm text-ink-gray-5 m-0">
           Sizes for UI text like labels, controls, table cells, and body copy.
         </p>
@@ -180,7 +180,7 @@ const paragraphSample =
 
     <section class="grid gap-5">
       <div class="grid gap-1">
-        <h2 class="text-xl font-semibold text-ink-gray-8 m-0">Display sizes</h2>
+        <h2 class="text-lg font-semibold text-ink-gray-8 m-0">Display sizes</h2>
         <p class="text-p-sm text-ink-gray-5 m-0">
           Larger sizes for marketing, landing pages, and headings.
         </p>
@@ -214,7 +214,7 @@ const paragraphSample =
 
     <section class="grid gap-5">
       <div class="grid gap-1">
-        <h2 class="text-xl font-semibold text-ink-gray-8 m-0">Paragraph</h2>
+        <h2 class="text-lg font-semibold text-ink-gray-8 m-0">Paragraph</h2>
         <p class="text-p-sm text-ink-gray-5 m-0">
           The <code class="text-ink-gray-8">text-p-*</code> variants use looser
           line-height and tracking for multi-line text.

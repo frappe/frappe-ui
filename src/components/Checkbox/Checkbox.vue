@@ -109,7 +109,7 @@ const labelClasses = computed(() => {
   return [
     {
       sm: 'text-base',
-      md: 'text-xl',
+      md: 'text-lg',
     }[props.size],
     'font-medium',
     props.disabled ? 'text-ink-gray-4' : 'text-ink-gray-8',

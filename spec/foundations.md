@@ -37,7 +37,7 @@ Anything in this repo that diverges from Figma is either (a) drift to be fixed, 
 Atomic tokens are exported from Figma to [`tailwind/generated/typography.json`](../tailwind/generated/typography.json):
 
 - `fontFamily` — `text: 'Inter Variable'`
-- `fontSize` — keyed by size name (`tiny`, `2xs`, `xs`, `sm`, `base`, `lg`, `xl`, `2xl`, `3xl`, …), each paired with a `lineHeight`
+- `fontSize` — keyed by size name (`tiny`, `2xs`, `xs`, `sm`, `base`, `md`, `lg`, `xl`, `2xl`, `3xl`, …), each paired with a `lineHeight`
 - `fontWeight` — named weights: `regular: 400`, `medium: 500`, `semibold: 600`, `bold: 700`, `black: 800`
 
 Letter-spacing is **not** exported from Figma — it is encoded by hand in [`tailwind/plugin.js`](../tailwind/plugin.js) via `FONT_SIZE_AUGMENT` (for the regular-weight variant of each size) and `FONT_SIZE_MEDIUM_TRACKING` (for the medium-weight variant).
@@ -49,6 +49,7 @@ Figma models typography as named styles (`text/base/regular`, `text/base/medium`
 | Utility | font-size | line-height | weight | letter-spacing | Figma |
 |---|---|---|---|---|---|
 | `text-base-medium` | 14px | 16px | 500 | 0.015em (1.5%) | `text/base/medium` |
+| `text-md-medium`   | 15px | 17px | 500 | 0.015em (1.5%) | `text/md/medium` |
 | `text-lg-medium`   | 16px | 18px | 500 | 0.015em (1.5%) | `text/lg/medium` |
 
 Regular-weight tracking is carried by the base `text-{size}` utility — there is no `text-{size}-regular` because it would be a redundant alias.
@@ -65,6 +66,8 @@ Confirmed against Figma typography variables on `2026-05-24`:
 |---|---|---|---|
 | `text-base`         | 14px | 16px | `text/base/regular` (with weight 420, ls 2%) |
 | `text-base-medium`  | 14px | 16px | `text/base/medium` (weight 500, ls 1.5%) |
+| `text-md`           | 15px | 17px | `text/md/regular` (with weight 420, ls 2%) |
+| `text-md-medium`    | 15px | 17px | `text/md/medium` (weight 500, ls 1.5%) |
 | `text-lg`           | 16px | 18px | (no Figma usage in component scope yet) |
 | `text-lg-medium`    | 16px | 18px | `text/lg/medium` (weight 500, ls 1.5%) |
 

@@ -2,7 +2,7 @@
     <div class="flex min-h-0 flex-col text-base py-5 w-[90%] lg:w-[700px] mx-auto">
 		<div class="flex items-center justify-between">
 			<div>
-				<div class="text-xl font-semibold mb-1 text-ink-gray-9">
+				<div class="text-lg font-semibold mb-1 text-ink-gray-9">
 					Data Import
 				</div>
 				<div class="text-ink-gray-6 leading-5">

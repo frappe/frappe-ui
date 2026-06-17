@@ -3,7 +3,7 @@
     <template #body-main>
       <div class="p-4 sm:px-6">
         <div class="flex w-full justify-between gap-x-15 mb-4">
-          <div class="font-semibold text-2xl flex text-nowrap overflow-hidden">
+          <div class="font-semibold text-xl flex text-nowrap overflow-hidden">
             <template v-if="props.entities.length > 1">
               Moving {{ props.entities.length }} items
             </template>

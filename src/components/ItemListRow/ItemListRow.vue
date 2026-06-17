@@ -19,8 +19,8 @@ const sizeClasses = computed(() => {
   return {
     sm: 'min-h-7 px-2 py-1.5 text-base',
     md: 'min-h-8 px-2.5 py-1.5 text-base',
-    lg: 'min-h-10 px-3 py-2 text-xl',
-    xl: 'min-h-10 px-3 py-2 text-3xl',
+    lg: 'min-h-10 px-3 py-2 text-lg',
+    xl: 'min-h-10 px-3 py-2 text-2xl',
   }[props.size]
 })
 
