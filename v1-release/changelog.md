@@ -25,10 +25,12 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ### Dialog — imperative `dialog.*` API
 
-- New Promise-based helpers: `dialog.confirm()`, `dialog.alert()`,
-  `dialog.prompt()`. Each resolves on click and exposes `close()` so the
-  caller controls when the dialog closes; the action button shows a loading
-  state from click until `close()`.
+- New callback-based helpers: `dialog.confirm()`, `dialog.danger()`,
+  `dialog.prompt()`. The `onConfirm` callback runs on click; resolving
+  auto-closes the dialog, while throwing keeps it open and renders the thrown
+  message inline. The action button shows a loading state until `onConfirm`
+  settles. Each helper also returns a synchronous handle with `close()` for
+  programmatic dismissal.
 - `<FrappeUIProvider>` now renders `<Dialogs />` next to `<Toasts />`, so
   apps wrapped with the provider get the imperative stack for free.
   `<Dialogs />` is still exported for callers that don't use the provider.
