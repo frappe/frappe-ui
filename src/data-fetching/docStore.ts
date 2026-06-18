@@ -54,7 +54,7 @@ class DocStore {
     name: MaybeRefOrGetter<string>,
     transform: (doc: Doc) => Doc,
   ): Ref<Doc | null> {
-    const nameStr = toValue(name)
+    const nameStr = toValue(name)?.trim()
     if (!doctype || !nameStr) {
       throw new Error('doctype and name are required')
     }

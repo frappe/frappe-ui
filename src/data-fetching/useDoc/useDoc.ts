@@ -72,7 +72,10 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
   }
 
   const fetchOptions: UseFetchOptions = {
-    immediate,
+    // Don't fire the initial GET while the name is still unresolved (it would
+    // hit the malformed `/api/v2/document/<doctype>/` URL). refetch:true makes
+    // the request fire automatically once the name resolves and the URL changes.
+    immediate: immediate && Boolean(toValue(name)?.trim()),
     refetch: true,
     afterFetch(ctx: AfterFetchContext<{ data: TDoc }>) {
       if (ctx.data) {
@@ -152,14 +155,28 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
     },
   })
 
-  let doc = docStore.getDoc(doctype, name, transform) as Ref<TDoc | null>
-  if (doc.value && transform) {
-    try {
-      doc.value = transform(doc.value)
-    } catch (e) {
-      docStore.removeDoc(doctype, toValue(name))
+  // Bind reactively to the document keyed by the *current* name. Resolving the
+  // name once at setup would statically bind to whatever it was then — if the
+  // name resolves after setup (e.g. while the GET is still in flight) the ref
+  // would never re-point to the real cache slot. A computed re-evaluates when
+  // the name resolves and when the store ref is populated.
+  const doc = computed<TDoc | null>(() => {
+    const nameStr = toValue(name)?.trim()
+    if (!nameStr) return null
+    const storeRef = docStore.getDoc(doctype, nameStr, transform) as Ref<
+      TDoc | null
+    >
+    let value = storeRef.value
+    if (value && transform) {
+      try {
+        value = transform(value)
+      } catch (e) {
+        docStore.removeDoc(doctype, nameStr)
+        return null
+      }
     }
-  }
+    return value
+  })
   let out = reactive({
     doc,
     error,
