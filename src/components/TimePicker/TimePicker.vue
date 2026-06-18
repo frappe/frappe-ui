@@ -1,7 +1,7 @@
 <template>
   <PopoverRoot v-model:open="isOpen">
     <PopoverAnchor :reference="anchorEl" as-child>
-      <div>
+      <div v-bind="$attrs">
         <TextInput
           ref="inputRef"
           v-model="displayValue"
@@ -156,6 +156,8 @@ defineSlots<{
    */
   suffix?: (props: { togglePopover: () => void; isOpen: boolean }) => any
 }>()
+
+defineOptions({ inheritAttrs: false })
 
 // ── Prop reconciliation (new wins; legacy aliases preserved with warnings) ──
 
