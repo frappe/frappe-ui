@@ -13,8 +13,7 @@ This document defines the intended public API direction for:
 It is based on:
 
 - the v1 component philosophy
-- the real-world usage audit in
-  [`v1-release/research/07-selection-components-usage-audit.md`](../v1-release/research/07-selection-components-usage-audit.md)
+- a bench-wide real-world usage audit of selection components
 - the decision to prefer higher-level components with props and slots over
   publicly exposing compound primitive families
 

@@ -31,8 +31,8 @@ This spec answers:
 - which existing per-component issues must be resolved before v1
 - which deprecations must be wired with dev warnings
 
-Decisions involving real-world usage data are backed by
-[`v1-release/research/09-input-components-usage-audit.md`](../v1-release/research/09-input-components-usage-audit.md).
+Decisions involving real-world usage data are backed by a bench-wide usage
+audit of the input family.
 
 ## Decision summary
 
@@ -390,8 +390,7 @@ Per the v1 plan:
 
 ## Decisions backed by the usage audit
 
-The two decisions below are backed by data in
-[`v1-release/research/09-input-components-usage-audit.md`](../v1-release/research/09-input-components-usage-audit.md).
+The two decisions below are backed by bench-wide usage data.
 
 ### 1. `FormControl` stays a router for v1
 

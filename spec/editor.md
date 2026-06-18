@@ -4,8 +4,7 @@ Status: accepted direction for `frappe-ui` v1.
 
 This document defines the v1 API for the editor family — the TipTap-based engine, the single `<Editor>` component built on it, the kits that supply good defaults, and the building blocks for bespoke composition. It supersedes the v0 monolithic `TextEditor`.
 
-Real-world usage data backing these decisions lives in
-[`v1-release/research/11-texteditor-usage-audit.md`](../v1-release/research/11-texteditor-usage-audit.md).
+These decisions are backed by a bench-wide usage audit of the v0 `TextEditor`.
 The architectural shape is decided in
 [`adr/0004-editor-family-composition-model.md`](./adr/0004-editor-family-composition-model.md).
 Vocabulary is in [`../CONTEXT.md`](../CONTEXT.md) under "Editor family";
@@ -447,7 +446,7 @@ const editor = useEditor({
 
 ## 12. Migration from the v0 monolith
 
-The v1 `<Editor>` ships at `frappe-ui/editor` **alongside** the v0 monolith, which stays in place, unmodified, as a migration safety net — it is not extended, aliased, or auto-removed. During the window, `import { TextEditor } from 'frappe-ui'` (v0) and `import { Editor } from 'frappe-ui/editor'` (v1) coexist. Consumers migrate to `<Editor>` + a kit (or their own wrapper component); per-app guidance is in [`research/11`](../v1-release/research/11-texteditor-usage-audit.md)'s migration table, and the migration is **proven by porting gameplan** (the heaviest consumer) with functional parity and a measured bundle reduction before the API is considered done.
+The v1 `<Editor>` ships at `frappe-ui/editor` **alongside** the v0 monolith, which stays in place, unmodified, as a migration safety net — it is not extended, aliased, or auto-removed. During the window, `import { TextEditor } from 'frappe-ui'` (v0) and `import { Editor } from 'frappe-ui/editor'` (v1) coexist. Consumers migrate to `<Editor>` + a kit (or their own wrapper component); per-app guidance is in the published migration guide ([`docs/content/docs/migration.md`](../docs/content/docs/migration.md), `## Editor`), and the migration is **proven by porting gameplan** (the heaviest consumer) with functional parity and a measured bundle reduction before the API is considered done.
 
 Removing the v0 monolith is a deliberate, **human-gated** cleanup once all consumers are migrated and verified — implementation agents do not delete it. (Pre-v1 the library may still make this break; P13's freeze line is v1 release.)
 
@@ -463,4 +462,3 @@ Removing the v0 monolith is a deliberate, **human-gated** cleanup once all consu
 - [`../CONTEXT.md`](../CONTEXT.md) — vocabulary
 - [`../PHILOSOPHY.md`](../PHILOSOPHY.md) — design rules (P1–P13)
 - [`adr/0004-editor-family-composition-model.md`](./adr/0004-editor-family-composition-model.md) — architectural shape
-- [`../v1-release/research/11-texteditor-usage-audit.md`](../v1-release/research/11-texteditor-usage-audit.md) — usage data and migration impact

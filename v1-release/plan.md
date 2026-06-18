@@ -4,10 +4,9 @@ This is the main planning document for the `frappe-ui` v1 release.
 
 Keep separate docs only where that genuinely helps:
 
-- [`04-components-audit.md`](./04-components-audit.md) for the component audit matrix
-- [`08-selection-and-menu-api-spec.md`](./08-selection-and-menu-api-spec.md) for the accepted menu/selection API direction
-- [`08f-dialog-spec.md`](./08f-dialog-spec.md) for the accepted Dialog + imperative `dialog.*` API direction
-- [`09-input-components-spec.md`](./09-input-components-spec.md) for the accepted input-family API direction (TextInput, Textarea, Password, Checkbox, Switch, Rating, Slider, ErrorMessage; FileUploader covered separately)
+- [`../spec/selection.md`](../spec/selection.md) for the accepted menu/selection API direction
+- [`../spec/dialog.md`](../spec/dialog.md) for the accepted Dialog + imperative `dialog.*` API direction
+- [`../spec/inputs.md`](../spec/inputs.md) for the accepted input-family API direction (TextInput, Textarea, Password, Checkbox, Switch, Rating, Slider, ErrorMessage; FileUploader covered separately)
 
 ## What v1 means
 
@@ -96,6 +95,20 @@ Core set:
 
 These can still exist in the package, but they are not part of the v1 stabilization contract.
 
+### Exported but not yet classified for v1
+
+These ship in the package but were never folded into the core-set contract above.
+v1 must make an explicit keep / refine / remove decision on each — tracked in the
+[v1 component refinement pass](#v1-component-refinement-pass).
+
+- **Pill** — publicly exported but used only inside `TabButtons` in practice. Decision: stop exporting.
+- **Duration** — publicly exported. Decision: whether it is core v1 surface; if it holds a value, align with the input-family contract.
+- **ThemeSwitcher** — publicly exported. Decision: whether it belongs in the v1 public API or moves to app-layer/examples.
+- **CodeEditor** — currently **not exported**. Decision: promote to public v1 API (then API-audit) or keep internal and out of scope.
+
+`MonthPicker` stays in the core list above for now but is under a remove-or-rebuild
+decision (see the refinement pass).
+
 ## Agreed broad component direction
 
 We have only agreed on a small set of broad component decisions so far.
@@ -120,11 +133,55 @@ We have only agreed on a small set of broad component decisions so far.
 
 For the selection/menu family, `ItemListRow` is the shared row primitive used internally by `Dropdown`, `Select`, `Combobox`, and `MultiSelect`. Each higher-level component owns its own listbox shell (keyboard nav, grouping, empty/footer slots, etc.); only the row presentation is shared.
 
-Use [`08-selection-and-menu-api-spec.md`](./08-selection-and-menu-api-spec.md) as the source of truth for that family.
+Use [`../spec/selection.md`](../spec/selection.md) as the source of truth for that family.
 
 ### Still open
 
 We have **not** yet agreed on broad reusable rules for every complex component family. Dialog, Tooltip, Tabs, and other overlay/component families still need separate design passes.
+
+## v1 component refinement pass
+
+A focused, component-level pass identified after the beta.11 audit. These are the
+components that still need work — or an explicit decision — before they meet the v1
+bar; everything else in the core set is considered at-bar. (This section supersedes
+the earlier `04-components-audit.md` matrix, which was a stale structural snapshot and
+has been removed.)
+
+Items typed **decision** are scope calls to make *first*: resolving several of them
+*removes* work rather than adding it.
+
+| Component | Direction | Type | Open PR / branch | Effort | Blocks v1 |
+| --- | --- | --- | --- | --- | --- |
+| **Alert** | Replace type-specific `#icon` slot with `#prefix` (deprecate `#icon`, P6); add uniform `icon?: string \| Component` prop (P11); reconcile `dismissible`/`theme` default drift (code vs JSDoc); add focus-visible on the dismiss button (P12). | refine | — | S | yes |
+| **CodeEditor** | Currently **not exported**. Decide: promote to public v1 API (then API-audit against the philosophy) or keep internal and out of the v1 contract. | decision | — | S→M | only if exposed |
+| **Duration** | Exported, never classified. Decide if it is core v1 surface; if it holds a value, align with the input-family labeling contract (P5). | decision / refine | — | S→M | only if kept core |
+| **FileUploader** | Bring to structural bar: TS + `<script setup>`, `types.ts`, `*.cy.ts`; declare/deprecate `success`/`failure` emits (P1); flat props over the `uploadArgs` blob (P3); default uploads to `is_private` (security #206). | refactor | #788 (chunked uploads), #673 (CSV MIME) | L | yes |
+| **ListView** | Likely a refactor: convert all 12 `List*` sub-components to `<script setup lang="ts">`, add `types.ts` + `*.cy.ts`, move selection to `defineModel` (P2), add keyboard a11y (P12). | refactor | — | L | yes |
+| **MonthPicker** | **Remove for v1** (recommended): deprecate the export with a warning + migration note and drop from the core set — it never moved onto the shared picker architecture. Alternative: rebuild on the DatePicker family arch. | decision (remove) | — | S→L | yes |
+| **Pill** | **Stop exporting** — confirmed used only inside `TabButtons`. Deprecate the public export (P13), keep it internal; retain `PillSize` for internal use. | decision (un-expose) | — | S | yes |
+| **Popover** | Refactor to the v1 floating vocab: `v-model:open`, `side`/`align`/`offset` (deprecate `placement`), `data-slot` hooks (drop `popoverClass`, P10), canonical slots, a11y. The last floating outlier. | refactor | — | M | yes |
+| **Sidebar** | Refactor to **molecule-style composable sub-components, no slots**: expose `SidebarHeader` / `SidebarSection` / `SidebarItem` for composition instead of `header`/`sections` config blobs (P3) + generic slots (P10). | refactor | conflicts with #770 (adds a slot — redirect/close) | L | yes |
+| **Switch + Checkbox** | Add the `padded` variant. | land PR | #751 (also adds a new **Radio** — decide if Radio enters v1 scope) | S | yes |
+| **Tabs + TabButtons** | Unify the two overlapping public components — nest TabButtons' segmented rendering inside `Tabs`, or merge into one `Tabs` with a style axis (P8: a purely-visual variant → one component). Resolve before freeze. | refactor | branches: refactor-tabs, tabs-rewrite, improved-tab-buttons | M | yes |
+| **ThemeSwitcher** | Decide whether it belongs in the v1 public API or moves to app-layer/examples; audit if kept. | decision | — | S | only if kept |
+| **Tree** | Land the rework PR (adds the WAI-ARIA tree pattern + keyboard nav, P12; resolves the `options` config-blob, P3). | land PR | #783 (draft) | track PR | yes |
+
+### Decisions to make first (they shrink scope)
+
+- **MonthPicker → remove / deprecate** rather than rebuild.
+- **Pill → un-export** (internal-only).
+- **CodeEditor → keep internal** unless there is demand to promote it.
+- **ThemeSwitcher → likely app-layer**, not core v1 API.
+- **Radio (from #751) → confirm** whether a new component enters v1 scope or lands post-v1.
+
+Resolving these five as "remove / keep-internal / defer" turns five potential
+modernization efforts into doc + deprecation edits.
+
+### Open-PR alignment
+
+- **Land / finish:** #751 (Switch/Checkbox padded), #783 (Tree rework), #788 (FileUploader chunked uploads — fold into the FileUploader pass).
+- **Redirect / close** as conflicting with agreed direction: #770 (adds a Sidebar slot; the agreed direction is no-slots composable sub-components).
+- **Consolidate** the tab branches (refactor-tabs, tabs-rewrite, improved-tab-buttons) into the single Tabs/TabButtons unification.
 
 ## Data API strategy
 
@@ -266,7 +323,7 @@ Also remove internal `FeatherIcon` use across core components.
 
 ### 2. Selection/input family stabilization
 
-See [`08-selection-and-menu-api-spec.md`](./08-selection-and-menu-api-spec.md).
+See [`../spec/selection.md`](../spec/selection.md).
 
 Key items:
 
@@ -353,7 +410,8 @@ stay in the **main** docs — they are not deprecated for 1.0.
 v1 should not ship before all of these are done:
 
 - release contract and quality gates are defined
-- core components are migrated to TypeScript and `<script setup>` and have docs/stories/tests baselines (FileUploader, TabButtons, ListView remaining)
+- core components are migrated to TypeScript and `<script setup>` and have docs/stories/tests baselines (FileUploader and ListView remaining; TabButtons is now modernized)
+- the [v1 component refinement pass](#v1-component-refinement-pass) is complete: the refactors (FileUploader, ListView, Popover, Sidebar, Tabs/TabButtons, Tree) and refinements (Alert, Switch/Checkbox padded) land, and the keep/remove decisions (MonthPicker, Pill, Duration, ThemeSwitcher, CodeEditor, Radio) are made and executed
 - selection/input family stabilization is complete enough for v1
 - Dialog/floating stabilization is complete enough for v1
 - TextEditor 1.0 carve-out documented (public API unchanged; refactor in 1.1)
