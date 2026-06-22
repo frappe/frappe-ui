@@ -1,5 +1,5 @@
-/** The four window states a FloatingWindow can be in. */
-export type WindowMode = 'docked' | 'floating' | 'minimized' | 'maximized'
+/** The three window states a FloatingWindow can be in. */
+export type WindowMode = 'docked' | 'floating' | 'minimized'
 
 /** Position + size of a floating panel, in viewport pixels. */
 export interface Rect {

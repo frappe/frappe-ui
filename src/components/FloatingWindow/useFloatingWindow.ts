@@ -15,20 +15,21 @@ import {
 import type { FloatingWindowOptions, Rect, WindowMode } from './types'
 
 const TRAY_WIDTH = 320
-const MAXIMIZED_MARGIN = 24
 // Gap from the viewport edge when parked in the bottom-right corner.
 const EDGE_MARGIN = 24
 
-// While any window is detached it sits at a fixed, positive z-index and would
-// otherwise cover popovers (reka-ui teleports them to <body> at z-index:auto).
-// A body class lets a global rule lift the popover layer above the window only
-// while one is open. Reference-counted so concurrent windows behave.
+// Only one window may be detached (floating or minimized) at a time. Opening a
+// new one pins the previous, like a single chat / mail composer. The active
+// window registers its `dock()` here so a newcomer can pin it; a global rule
+// keyed off `BODY_CLASS` lifts the popover layer above the detached window
+// (reka-ui teleports popovers to <body> at z-index:auto, which would otherwise
+// sit behind it).
 const BODY_CLASS = 'has-floating-window'
-let detachedWindowCount = 0
+let activeDocker: (() => void) | null = null
 
-function setWindowDetached(active: boolean) {
-  detachedWindowCount = Math.max(0, detachedWindowCount + (active ? 1 : -1))
-  document.body.classList.toggle(BODY_CLASS, detachedWindowCount > 0)
+function setActiveDocker(docker: (() => void) | null) {
+  activeDocker = docker
+  document.body.classList.toggle(BODY_CLASS, activeDocker !== null)
 }
 
 function clamp(value: number, min: number, max: number): number {
@@ -74,25 +75,8 @@ export function useFloatingWindow(
   const width = ref(saved.value.rect.width)
   const height = ref(saved.value.rect.height)
   const isResizing = ref(false)
-  // Rect to return to when un-maximizing.
-  let restoreRect: Rect | null = null
 
   const isFloating = computed(() => mode.value === 'floating')
-
-  // Track whether this window is detached so the popover layer can clear it.
-  let isContributingDetached = false
-  watch(
-    () => mode.value !== 'docked',
-    (detached) => {
-      if (detached === isContributingDetached) return
-      isContributingDetached = detached
-      setWindowDetached(detached)
-    },
-    { immediate: true },
-  )
-  onScopeDispose(() => {
-    if (isContributingDetached) setWindowDetached(false)
-  })
 
   function clampPosition() {
     x.value = clamp(x.value, 0, viewportWidth.value - 80)
@@ -113,13 +97,11 @@ export function useFloatingWindow(
     if (mode.value === 'minimized')
       return {
         position: 'fixed',
-        right: '24px',
-        bottom: '0px',
+        right: `${EDGE_MARGIN}px`,
+        bottom: `${EDGE_MARGIN}px`,
         width: `${TRAY_WIDTH}px`,
         zIndex: 50,
       }
-    if (mode.value === 'maximized')
-      return { position: 'fixed', inset: `${MAXIMIZED_MARGIN}px`, zIndex: 50 }
     return {
       position: 'fixed',
       left: `${x.value}px`,
@@ -155,41 +137,33 @@ export function useFloatingWindow(
     clampPosition()
   }
 
-  function float() {
-    if (restoreRect) {
-      ;({
-        x: x.value,
-        y: y.value,
-        width: width.value,
-        height: height.value,
-      } = restoreRect)
-      restoreRect = null
-      clampPosition()
-      setMode('floating')
-      return
-    }
-    // Pop out at the configured default size, parked in the bottom-right.
-    anchorBottomRight()
-    setMode('floating')
-  }
-
-  function maximize() {
-    restoreRect = {
-      x: x.value,
-      y: y.value,
-      width: width.value,
-      height: height.value,
-    }
-    setMode('maximized')
-  }
-
   const dock = () => setMode('docked')
   const minimize = () => setMode('minimized')
 
-  function expandFromTray() {
+  /** Pop the window out, parked in the bottom-right at its floating size. */
+  function float() {
     anchorBottomRight()
     setMode('floating')
   }
+  const expandFromTray = float
+
+  // Single detached window: when this one detaches it pins whichever window was
+  // detached before; when it docks it clears itself from the active slot.
+  watch(
+    () => mode.value !== 'docked',
+    (detached) => {
+      if (detached) {
+        if (activeDocker && activeDocker !== dock) activeDocker()
+        setActiveDocker(dock)
+      } else if (activeDocker === dock) {
+        setActiveDocker(null)
+      }
+    },
+    { immediate: true },
+  )
+  onScopeDispose(() => {
+    if (activeDocker === dock) setActiveDocker(null)
+  })
 
   function startResize(event: PointerEvent) {
     isResizing.value = true
@@ -231,7 +205,6 @@ export function useFloatingWindow(
     dock,
     float,
     minimize,
-    maximize,
     expandFromTray,
     setMode,
     startResize,
