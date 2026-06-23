@@ -117,6 +117,23 @@ describe('Tree', () => {
     cy.get('[data-cy="suffix-a"]').should('exist')
   })
 
+  it('forwards class and style to the tree element', () => {
+    cy.mount(Tree, {
+      props: {
+        nodes,
+        nodeKey: 'id',
+        class: 'my-tree',
+        style: '--tree-indent: 40px',
+      },
+    })
+    cy.get('[role="tree"]')
+      .should('have.class', 'my-tree')
+      .and('have.css', 'padding', '0px')
+    cy.get('[role="tree"]').then(($el) => {
+      expect($el[0].style.getPropertyValue('--tree-indent')).to.eq('40px')
+    })
+  })
+
   it('indents nested groups', () => {
     cy.mount(Tree, { props: { nodes, nodeKey: 'id', defaultExpanded: true } })
     cy.get('[role="group"]')
