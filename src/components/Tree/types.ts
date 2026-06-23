@@ -17,8 +17,8 @@ export type TreeNode = {
 /** Where a dragged node lands relative to the hovered target. */
 export type DropPosition = 'inside' | 'before' | 'after'
 
-/** Context passed to the `canDrop` validator. */
-export interface DropContext {
+/** Context passed to the `move` predicate while dragging. */
+export interface MoveContext {
   /** The node being dragged. */
   node: TreeNode
   /** The node currently hovered as the drop target. */
@@ -27,8 +27,11 @@ export interface DropContext {
   position: DropPosition
 }
 
-/** Payload emitted on a valid drop. */
-export interface MoveEvent {
+/**
+ * The committed move handed to `@drag-end`. `null` is emitted instead when a
+ * drag is cancelled (Escape, or released without a valid landing).
+ */
+export interface DropInfo {
   /** The moved node. */
   node: TreeNode
   /** Key of the previous parent, or `null` if it was a root. */
@@ -37,8 +40,10 @@ export interface MoveEvent {
   to: TreeKey | null
   /** Drop position relative to the target node. */
   position: DropPosition
+  /** Index the node occupied in its previous parent. */
+  oldIndex: number
   /** Final index of the node within its new parent's children. */
-  index: number
+  newIndex: number
 }
 
 export interface TreeProps {
@@ -55,24 +60,19 @@ export interface TreeProps {
   nodeKey?: string
 
   /**
-   * Enable drag-and-drop. Each node becomes draggable and can be dropped onto
-   * another node to reparent it.
+   * Enable drag-and-drop. Nodes can be dragged onto one another to reparent, or
+   * between siblings to reorder.
    * @default false
    */
   draggable?: boolean
 
   /**
-   * Gate every drop. Receives the drag context and returns whether the drop is
-   * allowed. Built-in guards (drop-on-self, drop-into-descendant) run first.
+   * Gate a drop while dragging. Receives the live drag context and returns
+   * whether the drop is allowed — a rejected target shows the no-drop cursor and
+   * hides the drop indicator. Built-in guards (drop-on-self, drop-into-own-
+   * descendant) run first, so this only carries your domain rules.
    */
-  canDrop?: (ctx: DropContext) => boolean
-
-  /**
-   * Allow dropping `before`/`after` a sibling to reorder, in addition to
-   * dropping `inside` to reparent.
-   * @default false
-   */
-  reorderable?: boolean
+  move?: (ctx: MoveContext) => boolean
 
   /**
    * Visual style of the indentation guides.
@@ -87,7 +87,7 @@ export interface TreeProps {
   defaultExpanded?: boolean
 
   /**
-   * Disable all interaction — expand/collapse, selection and drag.
+   * Disable all interaction — expand/collapse and drag.
    * @default false
    */
   disabled?: boolean
@@ -98,12 +98,8 @@ export interface TreeContext {
   nodeKey: Ref<string>
   guides: Ref<'connectors' | 'lines' | 'none'>
   draggable: Ref<boolean>
-  reorderable: Ref<boolean>
   disabled: Ref<boolean>
 
-  selected: Ref<TreeKey | null>
-  /** Whether `v-model:selected` is bound — selection is inert when false. */
-  selectionEnabled: Ref<boolean>
   focusedKey: Ref<TreeKey | null>
 
   keyOf: (node: TreeNode) => TreeKey
@@ -113,7 +109,6 @@ export interface TreeContext {
 
   isExpanded: (node: TreeNode) => boolean
   toggle: (node: TreeNode) => void
-  select: (node: TreeNode) => void
   focus: (key: TreeKey) => void
 
   registerItem: (key: TreeKey, el: HTMLElement) => void
@@ -137,9 +132,7 @@ export interface TreeNodeSlotProps {
   level: number
   expanded: boolean
   hasChildren: boolean
-  selected: boolean
   focused: boolean
   disabled: boolean
   toggle: () => void
-  select: () => void
 }
