@@ -1,8 +1,8 @@
 import { computed, reactive, type Ref } from 'vue'
 import type {
-  DropContext,
+  DropInfo,
   DropPosition,
-  MoveEvent,
+  MoveContext,
   TreeKey,
   TreeNode,
 } from './types'
@@ -12,14 +12,16 @@ interface DragDropOptions {
   childrenOf: (node: TreeNode) => TreeNode[]
   /** Siblings of a node — a parent's children, or the roots for top level. */
   siblingsOf: (parent: TreeNode | null) => TreeNode[]
-  reorderable: Ref<boolean>
+  labelOf: (node: TreeNode) => string
   disabled: Ref<boolean>
-  canDrop?: (ctx: DropContext) => boolean
-  /** Emit a validated move; the caller owns persistence. */
-  onMove: (move: MoveEvent) => void
+  /** Live predicate gating a hovered drop target. */
+  move?: (ctx: MoveContext) => boolean
+  /** A drag was picked up. */
+  emitDragStart: (node: TreeNode) => void
+  /** A drag finished — `info` on a committed move, `null` on cancel. */
+  emitDragEnd: (info: DropInfo | null) => void
   /** Announce drag state changes to assistive tech. */
   announce: (message: string) => void
-  labelOf: (node: TreeNode) => string
 }
 
 interface DragState {
@@ -33,11 +35,11 @@ interface DragState {
 
 /**
  * Owns the live drag state and resolves + validates drops for the tree.
- * Pure logic — it never mutates `nodes`; it emits a `MoveEvent` and lets the
- * caller persist and update the model.
+ * Pure logic — it never mutates `nodes`; it hands the caller a `DropInfo` via
+ * `drag-end` and lets them persist and update the model.
  */
 export function useTreeDragDrop(options: DragDropOptions) {
-  const { keyOf, childrenOf, reorderable, disabled, canDrop, onMove } = options
+  const { keyOf, childrenOf, siblingsOf, disabled, move } = options
 
   const state = reactive<DragState>({
     source: null,
@@ -47,6 +49,9 @@ export function useTreeDragDrop(options: DragDropOptions) {
     x: 0,
     y: 0,
   })
+
+  // Resolved on a valid drop, emitted on the following `dragend`.
+  let pending: DropInfo | null = null
 
   function isDescendant(node: TreeNode, key: TreeKey): boolean {
     const stack = [...childrenOf(node)]
@@ -60,7 +65,6 @@ export function useTreeDragDrop(options: DragDropOptions) {
 
   /** Resolve where the cursor sits within a row into a drop position. */
   function resolvePosition(e: DragEvent): DropPosition {
-    if (!reorderable.value) return 'inside'
     const row = e.currentTarget as HTMLElement
     const rect = row.getBoundingClientRect()
     const offset = e.clientY - rect.top
@@ -86,7 +90,7 @@ export function useTreeDragDrop(options: DragDropOptions) {
       keyOf(state.sourceParent) === targetKey
     )
       return false
-    if (canDrop && !canDrop({ node: source, target, position })) return false
+    if (move && !move({ node: source, target, position })) return false
     return true
   }
 
@@ -98,10 +102,12 @@ export function useTreeDragDrop(options: DragDropOptions) {
     if (disabled.value) return
     state.source = node
     state.sourceParent = parent
+    pending = null
     if (e.dataTransfer) {
       e.dataTransfer.effectAllowed = 'move'
       e.dataTransfer.setData('text/plain', String(keyOf(node)))
     }
+    options.emitDragStart(node)
     options.announce(`Picked up ${options.labelOf(node)}`)
   }
 
@@ -131,36 +137,34 @@ export function useTreeDragDrop(options: DragDropOptions) {
   function onDrop(target: TreeNode, targetParent: TreeNode | null): void {
     const source = state.source
     const position = state.position
-    if (!source || !position || !state.target) return reset()
-    if (keyOf(state.target) !== keyOf(target)) return reset()
+    if (!source || !position || !state.target) return
+    if (keyOf(state.target) !== keyOf(target)) return
 
     const from = state.sourceParent ? keyOf(state.sourceParent) : null
+    const oldSiblings = siblingsOf(state.sourceParent)
+    const oldIndex = oldSiblings.findIndex((n) => keyOf(n) === keyOf(source))
+
     let to: TreeKey | null
-    let index: number
+    let newIndex: number
 
     if (position === 'inside') {
       to = keyOf(target)
-      index = childrenOf(target).length
+      newIndex = childrenOf(target).length
     } else {
       to = targetParent ? keyOf(targetParent) : null
-      const siblings = options.siblingsOf(targetParent)
+      const siblings = siblingsOf(targetParent)
       const targetIndex = siblings.findIndex((n) => keyOf(n) === keyOf(target))
       let insertIndex = position === 'before' ? targetIndex : targetIndex + 1
       // When reordering within the same parent, the source still occupies a
       // slot in `siblings`. Removing it first shifts later positions down by
-      // one, so the reported `index` is the final post-removal position.
-      if (from === to) {
-        const sourceIndex = siblings.findIndex(
-          (n) => keyOf(n) === keyOf(source),
-        )
-        if (sourceIndex > -1 && sourceIndex < insertIndex) insertIndex -= 1
-      }
-      index = insertIndex
+      // one, so the reported `newIndex` is the final post-removal position.
+      if (from === to && oldIndex > -1 && oldIndex < insertIndex)
+        insertIndex -= 1
+      newIndex = insertIndex
     }
 
+    pending = { node: source, from, to, position, oldIndex, newIndex }
     options.announce(`Moved ${options.labelOf(source)}`)
-    onMove({ node: source, from, to, position, index })
-    reset()
   }
 
   function reset(): void {
@@ -171,7 +175,9 @@ export function useTreeDragDrop(options: DragDropOptions) {
   }
 
   function onDragEnd(): void {
-    if (state.source) options.announce('Cancelled move')
+    if (!pending && state.source) options.announce('Cancelled move')
+    options.emitDragEnd(pending)
+    pending = null
     reset()
   }
 
