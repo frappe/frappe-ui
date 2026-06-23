@@ -2,7 +2,6 @@
   <ul
     ref="treeRef"
     role="tree"
-    :aria-multiselectable="false"
     class="frappe-tree select-none"
     :data-guides="guides"
     @keydown="onKeydown"
@@ -55,22 +54,13 @@
 </template>
 
 <script setup lang="ts">
-import {
-  computed,
-  getCurrentInstance,
-  nextTick,
-  onMounted,
-  provide,
-  ref,
-  toRef,
-  watch,
-} from 'vue'
+import { computed, nextTick, onMounted, provide, ref, toRef, watch } from 'vue'
 import TreeItem from './TreeItem.vue'
 import { useTreeDragDrop } from './useTreeDragDrop'
 import { useTreeKeyboard, type FlatNode } from './useTreeKeyboard'
 import {
   TreeContextKey,
-  type MoveEvent,
+  type DropInfo,
   type TreeKey,
   type TreeNode,
   type TreeNodeSlotProps,
@@ -80,41 +70,31 @@ import {
 const props = withDefaults(defineProps<TreeProps>(), {
   nodeKey: 'key',
   draggable: false,
-  reorderable: false,
   guides: 'connectors',
   defaultExpanded: false,
   disabled: false,
 })
 
-const emit = defineEmits<{ move: [move: MoveEvent] }>()
+const emit = defineEmits<{
+  'drag-start': [node: TreeNode]
+  'drag-end': [info: DropInfo | null]
+}>()
 
 defineSlots<{
   node: (props: TreeNodeSlotProps) => unknown
   label: (
-    props: Omit<
-      TreeNodeSlotProps,
-      'toggle' | 'select' | 'focused' | 'disabled'
-    >,
+    props: Omit<TreeNodeSlotProps, 'toggle' | 'focused' | 'disabled'>,
   ) => unknown
   prefix: (props: {
     node: TreeNode
     expanded: boolean
     hasChildren: boolean
   }) => unknown
-  suffix: (props: { node: TreeNode; selected: boolean }) => unknown
+  suffix: (props: { node: TreeNode }) => unknown
   empty: () => unknown
 }>()
 
 const expanded = defineModel<TreeKey[]>('expanded', { default: () => [] })
-const selected = defineModel<TreeKey | null>('selected', { default: null })
-
-// Selection is opt-in: it's only active when the caller binds
-// `v-model:selected`. Without it, clicks neither select nor highlight a row.
-const instance = getCurrentInstance()
-const selectionEnabled = computed(() => {
-  const vnodeProps = instance?.vnode.props ?? {}
-  return 'selected' in vnodeProps || 'onUpdate:selected' in vnodeProps
-})
 
 const treeRef = ref<HTMLElement | null>(null)
 const focusedKey = ref<TreeKey | null>(null)
@@ -157,13 +137,7 @@ function collectCollapsibleKeys(nodes: TreeNode[], acc: TreeKey[] = []) {
   return acc
 }
 
-// --- selection + focus ----------------------------------------------------
-function select(node: TreeNode) {
-  if (props.disabled || !selectionEnabled.value) return
-  selected.value = keyOf(node)
-  focus(keyOf(node))
-}
-
+// --- focus -----------------------------------------------------------------
 function focus(key: TreeKey) {
   focusedKey.value = key
   nextTick(() => itemEls.get(key)?.focus())
@@ -209,10 +183,10 @@ const dragDrop = useTreeDragDrop({
   childrenOf,
   siblingsOf,
   labelOf,
-  reorderable: toRef(props, 'reorderable'),
   disabled: toRef(props, 'disabled'),
-  canDrop: props.canDrop,
-  onMove: (move) => emit('move', move),
+  move: props.move,
+  emitDragStart: (node) => emit('drag-start', node),
+  emitDragEnd: (info) => emit('drag-end', info),
   announce: (message) => (liveMessage.value = message),
 })
 
@@ -234,7 +208,7 @@ const { onKeydown } = useTreeKeyboard({
   focus,
   expand,
   collapse,
-  select,
+  toggle,
 })
 
 // --- lifecycle ------------------------------------------------------------
@@ -257,10 +231,7 @@ provide(TreeContextKey, {
   nodeKey: toRef(props, 'nodeKey'),
   guides: toRef(props, 'guides'),
   draggable: toRef(props, 'draggable'),
-  reorderable: toRef(props, 'reorderable'),
   disabled: toRef(props, 'disabled'),
-  selected,
-  selectionEnabled,
   focusedKey,
   keyOf,
   labelOf,
@@ -268,7 +239,6 @@ provide(TreeContextKey, {
   hasChildren,
   isExpanded,
   toggle,
-  select,
   focus,
   registerItem,
   unregisterItem,
@@ -285,15 +255,13 @@ provide(TreeContextKey, {
 
 <style>
 .frappe-tree {
-  /* Sizing is exposed as CSS variables (P10) — override via CSS, not props:
-     `.my-tree { --tree-row-height: 40px; --tree-indent: 20px; }` */
-  --tree-row-height: 32px;
-  --tree-indent: 28px;
+  --_tree-row-height: var(--tree-row-height, 32px);
+  --_tree-indent: var(--tree-indent, 24px);
+  padding: 0;
 }
 .frappe-tree,
 .frappe-tree ul {
   list-style: none;
   margin: 0;
-  padding: 0;
 }
 </style>
