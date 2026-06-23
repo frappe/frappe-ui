@@ -75,7 +75,7 @@
                             <slot name="body-title">
                               <h3
                                 v-if="resolved.title"
-                                class="text-3xl-semibold leading-6 text-ink-gray-9"
+                                class="text-2xl-semibold leading-6 text-ink-gray-8"
                               >
                                 {{ resolved.title }}
                               </h3>
