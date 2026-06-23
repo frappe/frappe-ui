@@ -34,7 +34,8 @@ title-bar controls because both write to the same bound value.
 The `header` slot replaces the built-in title bar entirely. It becomes the drag
 handle while floating and supplies its own controls through the slot props
 (`mode`, `dock`, `float`, `minimize`, `expandFromTray`). The demo wires a status
-dot, a Hide control, and a pop-out toggle into a custom support-chat header.
+dot and state-aware window controls (pop out, dock, minimize, and expand) into a
+custom support-chat header.
 
 <ComponentPreview name="FloatingWindow-CustomHeader" />
 

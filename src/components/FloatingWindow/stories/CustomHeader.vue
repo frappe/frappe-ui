@@ -32,7 +32,7 @@ async function send() {
         The `header` slot replaces the built-in title bar entirely. It becomes
         the drag handle while floating and supplies its own controls.
       -->
-      <template #header="{ mode, dock, float, minimize }">
+      <template #header="{ mode, dock, float, minimize, expandFromTray }">
         <div class="flex w-full items-center justify-between gap-2 px-3 py-2">
           <div class="flex items-center gap-2">
             <span class="size-2 rounded-full bg-surface-green-3" />
@@ -40,10 +40,35 @@ async function send() {
               Support chat
             </span>
           </div>
+
+          <!-- State-aware window controls: pop out / dock, then minimize while
+               floating or expand while parked in the tray. -->
           <div class="flex items-center gap-1">
-            <Button variant="ghost" @click="minimize">Hide</Button>
-            <Button variant="ghost" @click="mode === 'docked' ? float() : dock()">
-              {{ mode === 'docked' ? 'Pop out' : 'Dock' }}
+            <Button
+              variant="ghost"
+              :tooltip="mode === 'docked' ? 'Pop out' : 'Dock'"
+              @click="mode === 'docked' ? float() : dock()"
+            >
+              <template #icon>
+                <LucideMaximize2 v-if="mode === 'docked'" class="h-4 w-4" />
+                <LucidePin v-else class="h-4 w-4" />
+              </template>
+            </Button>
+            <Button
+              v-if="mode === 'floating'"
+              variant="ghost"
+              tooltip="Minimize to tray"
+              @click="minimize"
+            >
+              <template #icon><LucideMinus class="h-4 w-4" /></template>
+            </Button>
+            <Button
+              v-if="mode === 'minimized'"
+              variant="ghost"
+              tooltip="Expand"
+              @click="expandFromTray"
+            >
+              <template #icon><LucideMaximize2 class="h-4 w-4" /></template>
             </Button>
           </div>
         </div>

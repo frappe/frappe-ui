@@ -20,10 +20,9 @@
         ref="handle"
         class="flex select-none items-center justify-between gap-2"
         :class="[
-          isFloating ? 'cursor-move' : isMinimized ? 'cursor-pointer' : '',
+          isFloating ? 'cursor-move' : '',
           $slots.header ? '' : 'gap-2 px-3 py-2',
         ]"
-        @click="isMinimized && expandFromTray()"
       >
         <!-- Host-owned header: takes the whole row, supplies its own controls. -->
         <div v-if="$slots.header" class="min-w-0 flex-1">
@@ -45,7 +44,7 @@
             </span>
           </div>
 
-          <div class="flex shrink-0 items-center gap-1" @click.stop>
+          <div class="flex shrink-0 items-center gap-1">
             <slot name="actions" v-bind="{ mode, dock, float, minimize }" />
             <Button
               variant="ghost"
