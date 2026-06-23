@@ -20,23 +20,16 @@
   },
   {
     name: 'draggable',
-    description: 'Enable drag-and-drop. Each node becomes draggable and can be dropped onto\nanother node to reparent it.',
+    description: 'Enable drag-and-drop. Nodes can be dragged onto one another to reparent, or\nbetween siblings to reorder.',
     required: false,
     type: 'boolean',
     default: 'false'
   },
   {
-    name: 'canDrop',
-    description: 'Gate every drop. Receives the drag context and returns whether the drop is\nallowed. Built-in guards (drop-on-self, drop-into-descendant) run first.',
+    name: 'move',
+    description: 'Gate a drop while dragging. Receives the live drag context and returns\nwhether the drop is allowed — a rejected target shows the no-drop cursor and\nhides the drop indicator. Built-in guards (drop-on-self, drop-into-own-\ndescendant) run first, so this only carries your domain rules.',
     required: false,
-    type: '((ctx: DropContext) => boolean)'
-  },
-  {
-    name: 'reorderable',
-    description: 'Allow dropping `before`/`after` a sibling to reorder, in addition to\ndropping `inside` to reparent.',
-    required: false,
-    type: 'boolean',
-    default: 'false'
+    type: '((ctx: MoveContext) => boolean)'
   },
   {
     name: 'guides',
@@ -54,7 +47,7 @@
   },
   {
     name: 'disabled',
-    description: 'Disable all interaction — expand/collapse, selection and drag.',
+    description: 'Disable all interaction — expand/collapse and drag.',
     required: false,
     type: 'boolean',
     default: 'false'
@@ -65,13 +58,6 @@
     required: false,
     type: 'TreeKey[]',
     default: '[]'
-  },
-  {
-    name: 'selected',
-    description: '',
-    required: false,
-    type: 'TreeKey | null',
-    default: 'null'
   }
 ]
 
@@ -84,7 +70,7 @@
   {
     name: 'label',
     description: '',
-    type: 'Omit<TreeNodeSlotProps, "disabled" | "toggle" | "select" | "focused">'
+    type: 'Omit<TreeNodeSlotProps, "disabled" | "toggle" | "focused">'
   },
   {
     name: 'prefix',
@@ -94,7 +80,7 @@
   {
     name: 'suffix',
     description: '',
-    type: '{ node: TreeNode; selected: boolean; }'
+    type: '{ node: TreeNode; }'
   },
   {
     name: 'empty',
@@ -110,14 +96,14 @@
     type: '[value: TreeKey[]]'
   },
   {
-    name: 'update:selected',
-    description: 'Fired when the selected changes.',
-    type: '[value: TreeKey | null]'
+    name: 'drag-start',
+    description: '',
+    type: '[node: TreeNode]'
   },
   {
-    name: 'move',
+    name: 'drag-end',
     description: '',
-    type: '[move: MoveEvent]'
+    type: '[info: DropInfo | null]'
   }
 ]
 </script>
