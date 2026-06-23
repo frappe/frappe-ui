@@ -6,12 +6,10 @@
     :data-level="level"
     :data-state="expanded ? 'expanded' : 'collapsed'"
     :data-has-children="hasChildren"
-    :data-selected="isSelected || undefined"
     :data-disabled="ctx.disabled.value || undefined"
     :data-dragging="isDragging || undefined"
     :data-drop="dropEdge || undefined"
     :aria-expanded="hasChildren ? expanded : undefined"
-    :aria-selected="ctx.selectionEnabled.value ? isSelected : undefined"
     :aria-level="level"
     :aria-setsize="setSize"
     :aria-posinset="index + 1"
@@ -20,11 +18,8 @@
   >
     <div
       data-slot="row"
-      class="frappe-tree-row group/row relative flex items-center gap-1.5 rounded-md px-1.5"
-      :class="[
-        ctx.draggable.value && !ctx.disabled.value ? 'cursor-grab' : '',
-        isSelected ? 'bg-surface-gray-3' : 'hover:bg-surface-gray-2',
-      ]"
+      class="frappe-tree-row group/row relative flex items-center gap-1.5 rounded-md px-1.5 hover:bg-surface-gray-2"
+      :class="ctx.draggable.value && !ctx.disabled.value ? 'cursor-grab' : ''"
       :draggable="ctx.draggable.value && !ctx.disabled.value"
       @click="onRowClick"
       @dragstart="ctx.onDragStart($event, node, parent)"
@@ -66,15 +61,12 @@
 
         <slot name="prefix" v-bind="{ node, expanded, hasChildren }" />
 
-        <slot
-          name="label"
-          v-bind="{ node, level, expanded, hasChildren, selected: isSelected }"
-        >
+        <slot name="label" v-bind="{ node, level, expanded, hasChildren }">
           <span class="truncate text-base text-ink-gray-8">{{ label }}</span>
         </slot>
 
         <span class="ml-auto flex items-center">
-          <slot name="suffix" v-bind="{ node, selected: isSelected }" />
+          <slot name="suffix" v-bind="{ node }" />
         </span>
       </template>
     </div>
@@ -122,17 +114,14 @@ const props = defineProps<{
 defineSlots<{
   node: (props: TreeNodeSlotProps) => unknown
   label: (
-    props: Omit<
-      TreeNodeSlotProps,
-      'toggle' | 'select' | 'focused' | 'disabled'
-    >,
+    props: Omit<TreeNodeSlotProps, 'toggle' | 'focused' | 'disabled'>,
   ) => unknown
   prefix: (props: {
     node: TreeNode
     expanded: boolean
     hasChildren: boolean
   }) => unknown
-  suffix: (props: { node: TreeNode; selected: boolean }) => unknown
+  suffix: (props: { node: TreeNode }) => unknown
 }>()
 
 const injected = inject(TreeContextKey)
@@ -146,9 +135,6 @@ const label = computed(() => ctx.labelOf(props.node))
 const children = computed(() => ctx.childrenOf(props.node))
 const hasChildren = computed(() => ctx.hasChildren(props.node))
 const expanded = computed(() => ctx.isExpanded(props.node))
-const isSelected = computed(
-  () => ctx.selectionEnabled.value && ctx.selected.value === key.value,
-)
 const isDragging = computed(() => ctx.dragSourceKey.value === key.value)
 
 const dropEdge = computed(() =>
@@ -166,16 +152,14 @@ const slotProps = computed(() => ({
   level: props.level,
   expanded: expanded.value,
   hasChildren: hasChildren.value,
-  selected: isSelected.value,
   focused: ctx.focusedKey.value === key.value,
   disabled: ctx.disabled.value,
   toggle: () => ctx.toggle(props.node),
-  select: () => ctx.select(props.node),
 }))
 
 function onRowClick() {
   if (ctx.disabled.value) return
-  ctx.select(props.node)
+  ctx.toggle(props.node)
 }
 
 watch(
@@ -191,10 +175,10 @@ onBeforeUnmount(() => ctx.unregisterItem(key.value))
 <style>
 /* ---- Sizing (override via --tree-row-height / --tree-indent in CSS) ---- */
 .frappe-tree-row {
-  height: var(--tree-row-height);
+  height: var(--_tree-row-height);
 }
 .frappe-tree-group {
-  padding-left: var(--tree-indent);
+  padding-left: var(--_tree-indent);
 }
 
 /* ---- Connector guides (elbow lines) ---- */
@@ -206,7 +190,7 @@ onBeforeUnmount(() => ctx.unregisterItem(key.value))
 .frappe-tree[data-guides='connectors'] [role='group'] > li::before {
   content: '';
   position: absolute;
-  left: calc(var(--tree-indent) / -2);
+  left: calc(var(--_tree-indent) / -2);
   top: 0;
   bottom: 0;
   border-left: 1px solid var(--outline-gray-2, #e5e7eb);
@@ -216,25 +200,25 @@ onBeforeUnmount(() => ctx.unregisterItem(key.value))
 .frappe-tree[data-guides='connectors'] [role='group'] > li::after {
   content: '';
   position: absolute;
-  left: calc(var(--tree-indent) / -2);
-  top: calc(var(--tree-row-height) / 2);
-  width: calc(var(--tree-indent) / 2);
+  left: calc(var(--_tree-indent) / -2);
+  top: calc(var(--_tree-row-height) / 2);
+  width: calc(var(--_tree-indent) / 2);
   border-top: 1px solid var(--outline-gray-2, #e5e7eb);
 }
 
 /* last child: stop the vertical at the elbow + round the corner */
 .frappe-tree[data-guides='connectors'] [role='group'] > li:last-child::before {
   bottom: auto;
-  height: calc(var(--tree-row-height) / 2);
+  height: calc(var(--_tree-row-height) / 2);
   border-bottom: 1px solid var(--outline-gray-2, #e5e7eb);
   border-bottom-left-radius: 6px;
 }
 
 /* ---- Simple vertical lines ---- */
 .frappe-tree[data-guides='lines'] [role='group'] {
-  margin-left: calc(var(--tree-indent) / 2);
+  margin-left: calc(var(--_tree-indent) / 2);
   border-left: 1px solid var(--outline-gray-2, #e5e7eb);
-  padding-left: calc(var(--tree-indent) / 2) !important;
+  padding-left: calc(var(--_tree-indent) / 2) !important;
 }
 
 /* ---- Drop indicators ---- */
