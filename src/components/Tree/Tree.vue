@@ -1,6 +1,7 @@
 <template>
   <ul
     ref="treeRef"
+    v-bind="$attrs"
     role="tree"
     class="frappe-tree select-none"
     :data-guides="guides"
@@ -66,6 +67,8 @@ import {
   type TreeNodeSlotProps,
   type TreeProps,
 } from './types'
+
+defineOptions({ inheritAttrs: false })
 
 const props = withDefaults(defineProps<TreeProps>(), {
   nodeKey: 'key',
