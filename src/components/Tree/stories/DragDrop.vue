@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Tree } from 'frappe-ui'
-import type { DropContext, MoveEvent, TreeNode } from '../types'
+import type { DropInfo, MoveContext, TreeNode } from '../types'
 
 const nodes = ref<TreeNode[]>([
   {
@@ -13,8 +13,8 @@ const nodes = ref<TreeNode[]>([
         label: 'Downloads',
         children: [
           {
-            name: 'download.zip',
-            label: 'download.zip',
+            name: 'archive',
+            label: 'archive',
             children: [{ name: 'image.png', label: 'image.png' }],
           },
         ],
@@ -23,24 +23,58 @@ const nodes = ref<TreeNode[]>([
         name: 'documents',
         label: 'Documents',
         children: [
-          { name: 'somefile.txt', label: 'somefile.txt' },
-          { name: 'somefile.pdf', label: 'somefile.pdf' },
+          { name: 'resume.pdf', label: 'resume.pdf' },
+          { name: 'notes.txt', label: 'notes.txt' },
         ],
       },
     ],
   },
 ])
 
-const expanded = ref<string[]>(['guest', 'downloads', 'documents'])
+const expanded = ref<string[]>(['guest', 'downloads', 'documents', 'archive'])
 
-// Only allow dropping into a "folder" (a node that can have children).
-function canDrop({ target }: DropContext) {
-  return Array.isArray(target.children)
+// Folders (nodes with a `children` array) can receive drops; files cannot.
+function move({ target, position }: MoveContext) {
+  if (position === 'inside') return Array.isArray(target.children)
+  return true
 }
 
-function onMove(move: MoveEvent) {
-  // In a real app you'd persist the change, then update `nodes`.
-  console.log('move', move)
+// Locate a node by key, returning the array that holds it and its index.
+function locate(
+  list: TreeNode[],
+  key: string,
+): { list: TreeNode[]; index: number } | null {
+  for (let i = 0; i < list.length; i++) {
+    if (list[i].name === key) return { list, index: i }
+    const children = list[i].children
+    if (children) {
+      const found = locate(children, key)
+      if (found) return found
+    }
+  }
+  return null
+}
+
+// Persist a committed move by splicing the node into its new position.
+function onDragEnd(info: DropInfo | null) {
+  if (!info) return
+  const roots = nodes.value
+  const src = locate(roots, info.node.name as string)
+  if (!src) return
+  const [moved] = src.list.splice(src.index, 1)
+
+  let dest = roots
+  if (info.to !== null) {
+    const hit = locate(roots, info.to as string)
+    const parent = hit?.list[hit.index]
+    if (parent) {
+      if (!parent.children) parent.children = []
+      dest = parent.children
+      if (!expanded.value.includes(info.to as string))
+        expanded.value = [...expanded.value, info.to as string]
+    }
+  }
+  dest.splice(info.newIndex, 0, moved)
 }
 </script>
 
@@ -49,11 +83,10 @@ function onMove(move: MoveEvent) {
     <Tree
       :nodes="nodes"
       node-key="name"
-      guides="none"
       v-model:expanded="expanded"
       draggable
-      :can-drop="canDrop"
-      @move="onMove"
+      :move="move"
+      @drag-end="onDragEnd"
     />
   </div>
 </template>
