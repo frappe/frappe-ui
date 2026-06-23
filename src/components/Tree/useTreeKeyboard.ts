@@ -19,7 +19,7 @@ interface KeyboardOptions {
   focus: (key: TreeKey) => void
   expand: (node: TreeNode) => void
   collapse: (node: TreeNode) => void
-  select: (node: TreeNode) => void
+  toggle: (node: TreeNode) => void
 }
 
 /**
@@ -27,7 +27,7 @@ interface KeyboardOptions {
  * Tree View pattern (P12). Operates on the flattened list of visible rows.
  */
 export function useTreeKeyboard(options: KeyboardOptions) {
-  const { flat, focusedKey, focus, expand, collapse, select } = options
+  const { flat, focusedKey, focus, expand, collapse, toggle } = options
 
   let typeahead = ''
   let typeaheadTimer: ReturnType<typeof setTimeout> | null = null
@@ -96,7 +96,7 @@ export function useTreeKeyboard(options: KeyboardOptions) {
       case 'Enter':
       case ' ':
         e.preventDefault()
-        select(current.node)
+        toggle(current.node)
         break
       default:
         if (e.key.length === 1 && !e.metaKey && !e.ctrlKey && !e.altKey) {
