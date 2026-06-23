@@ -5,6 +5,6 @@ export type {
   TreeKey,
   TreeNodeSlotProps,
   DropPosition,
-  DropContext,
-  MoveEvent,
+  MoveContext,
+  DropInfo,
 } from './types'
