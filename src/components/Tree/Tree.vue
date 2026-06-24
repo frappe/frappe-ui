@@ -17,17 +17,17 @@
       :index="index"
       :set-size="roots.length"
     >
-      <template v-if="$slots.node" #node="p"
-        ><slot name="node" v-bind="p"
+      <template v-if="$slots.item" #item="p"
+        ><slot name="item" v-bind="p"
       /></template>
-      <template v-if="$slots.label" #label="p"
-        ><slot name="label" v-bind="p"
+      <template v-if="$slots['item-label']" #item-label="p"
+        ><slot name="item-label" v-bind="p"
       /></template>
-      <template v-if="$slots.prefix" #prefix="p"
-        ><slot name="prefix" v-bind="p"
+      <template v-if="$slots['item-prefix']" #item-prefix="p"
+        ><slot name="item-prefix" v-bind="p"
       /></template>
-      <template v-if="$slots.suffix" #suffix="p"
-        ><slot name="suffix" v-bind="p"
+      <template v-if="$slots['item-suffix']" #item-suffix="p"
+        ><slot name="item-suffix" v-bind="p"
       /></template>
     </TreeItem>
 
@@ -55,7 +55,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onMounted, provide, ref, toRef, watch } from 'vue'
+import { computed, nextTick, provide, ref, toRef, watch } from 'vue'
 import TreeItem from './TreeItem.vue'
 import { useTreeDragDrop } from './useTreeDragDrop'
 import { useTreeKeyboard, type FlatNode } from './useTreeKeyboard'
@@ -84,16 +84,10 @@ const emit = defineEmits<{
 }>()
 
 defineSlots<{
-  node: (props: TreeNodeSlotProps) => unknown
-  label: (
-    props: Omit<TreeNodeSlotProps, 'toggle' | 'focused' | 'disabled'>,
-  ) => unknown
-  prefix: (props: {
-    node: TreeNode
-    expanded: boolean
-    hasChildren: boolean
-  }) => unknown
-  suffix: (props: { node: TreeNode }) => unknown
+  item: (props: TreeNodeSlotProps) => unknown
+  'item-prefix': (props: Omit<TreeNodeSlotProps, 'toggle'>) => unknown
+  'item-label': (props: Omit<TreeNodeSlotProps, 'toggle'>) => unknown
+  'item-suffix': (props: Omit<TreeNodeSlotProps, 'toggle'>) => unknown
   empty: () => unknown
 }>()
 
@@ -187,7 +181,7 @@ const dragDrop = useTreeDragDrop({
   siblingsOf,
   labelOf,
   disabled: toRef(props, 'disabled'),
-  move: props.move,
+  move: (ctx) => props.move?.(ctx) ?? true,
   emitDragStart: (node) => emit('drag-start', node),
   emitDragEnd: (info) => emit('drag-end', info),
   announce: (message) => (liveMessage.value = message),
@@ -215,13 +209,17 @@ const { onKeydown } = useTreeKeyboard({
 })
 
 // --- lifecycle ------------------------------------------------------------
+// Seed once, on the first non-empty roots — so async-loaded nodes still expand.
 let seeded = false
-onMounted(() => {
-  if (!seeded && props.defaultExpanded && expanded.value.length === 0) {
-    expanded.value = collectCollapsibleKeys(roots.value)
-  }
-  seeded = true
-})
+watch(
+  roots,
+  (r) => {
+    if (seeded || !props.defaultExpanded || !r.length) return
+    if (expanded.value.length === 0) expanded.value = collectCollapsibleKeys(r)
+    seeded = true
+  },
+  { immediate: true },
+)
 
 // Keep focus valid if the focused node disappears from the tree.
 watch(flat, (rows) => {
