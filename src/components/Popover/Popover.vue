@@ -3,8 +3,8 @@
     <PopoverAnchor asChild>
       <div
         ref="anchorRef"
-        :class="['flex', $attrs.class]"
-        :style="($attrs.style as StyleValue)"
+        v-bind="$attrs"
+        class="flex"
         @mouseover="onMouseover"
         @mouseleave="onMouseleave"
       >
@@ -65,7 +65,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onUnmounted, type StyleValue } from 'vue'
+import { computed, ref, onUnmounted } from 'vue'
 import {
   PopoverAnchor,
   PopoverContent,

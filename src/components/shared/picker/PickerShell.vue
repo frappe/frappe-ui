@@ -1,7 +1,7 @@
 <template>
   <PopoverRoot v-model:open="open">
     <PopoverAnchor :reference="anchorEl" as-child>
-      <div @keydown.down.prevent="onArrowDown">
+      <div v-bind="$attrs" @keydown.down.prevent="onArrowDown">
         <slot name="trigger" v-bind="triggerSlotProps">
           <slot name="target" v-bind="triggerSlotProps">
             <TextInput
@@ -144,6 +144,8 @@ const slots = defineSlots<{
   suffix?: (props: TriggerSlotProps) => any
   default?: (props: { close: () => void }) => any
 }>()
+
+defineOptions({ inheritAttrs: false })
 
 const open = defineModel<boolean>('open', { default: false })
 const inputValue = defineModel<string>('inputValue', { default: '' })
