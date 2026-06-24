@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useFloatingWindow, Button } from 'frappe-ui'
+import type { ResizeDir } from 'frappe-ui'
 
 const panel = ref<HTMLElement | null>(null)
 const handle = ref<HTMLElement | null>(null)
@@ -9,8 +10,61 @@ const handle = ref<HTMLElement | null>(null)
 // persistence; the markup is entirely yours. This shell reads the live `width`
 // it tracks to drive a responsive layout, which the boxed component can't do:
 // pop the panel out, drag it wider, and a reading pane opens beside the list.
-const { mode, width, style, dock, float, minimize, expandFromTray, startResize } =
-  useFloatingWindow(panel, handle)
+const {
+  mode,
+  width,
+  style,
+  dock,
+  float,
+  minimize,
+  expandFromTray,
+  startResize,
+} = useFloatingWindow(panel, handle)
+
+// Resize zones on every edge and corner: `startResize` takes a direction so a
+// custom shell can be dragged from any side, not just the bottom-right corner.
+const resizeHandles: { name: string; dir: ResizeDir; class: string }[] = [
+  {
+    name: 'n',
+    dir: { x: 0, y: -1 },
+    class: '-top-1 inset-x-0 h-2 cursor-ns-resize',
+  },
+  {
+    name: 's',
+    dir: { x: 0, y: 1 },
+    class: '-bottom-1 inset-x-0 h-2 cursor-ns-resize',
+  },
+  {
+    name: 'w',
+    dir: { x: -1, y: 0 },
+    class: '-left-1 inset-y-0 w-2 cursor-ew-resize',
+  },
+  {
+    name: 'e',
+    dir: { x: 1, y: 0 },
+    class: '-right-1 inset-y-0 w-2 cursor-ew-resize',
+  },
+  {
+    name: 'nw',
+    dir: { x: -1, y: -1 },
+    class: '-top-1 -left-1 size-3 cursor-nwse-resize',
+  },
+  {
+    name: 'ne',
+    dir: { x: 1, y: -1 },
+    class: '-top-1 -right-1 size-3 cursor-nesw-resize',
+  },
+  {
+    name: 'sw',
+    dir: { x: -1, y: 1 },
+    class: '-bottom-1 -left-1 size-3 cursor-nesw-resize',
+  },
+  {
+    name: 'se',
+    dir: { x: 1, y: 1 },
+    class: '-bottom-1 -right-1 size-3 cursor-nwse-resize',
+  },
+]
 
 // Below this the panel is a single column; above it the reading pane appears.
 const TWO_PANE_WIDTH = 540
@@ -79,7 +133,7 @@ const statusDot: Record<Ticket['status'], string> = {
     <!-- Title bar, doubles as the drag handle while floating. -->
     <div
       ref="handle"
-      class="flex select-none items-center justify-between border-b border-outline-gray-1 px-3 py-2"
+      class="flex select-none items-center justify-between border-b border-outline-gray-1 px-2.5 py-1.5"
       :class="mode === 'floating' ? 'cursor-move' : ''"
     >
       <div class="flex items-baseline gap-2">
@@ -123,7 +177,9 @@ const statusDot: Record<Ticket['status'], string> = {
           <button
             type="button"
             class="flex w-full flex-col gap-1 px-3 py-2 text-left transition-colors hover:bg-surface-gray-2"
-            :class="twoPane && ticket.id === selectedId ? 'bg-surface-gray-2' : ''"
+            :class="
+              twoPane && ticket.id === selectedId ? 'bg-surface-gray-2' : ''
+            "
             @click="selectedId = ticket.id"
           >
             <div class="flex items-center gap-2">
@@ -166,11 +222,15 @@ const statusDot: Record<Ticket['status'], string> = {
       Drag the panel wider to open the reading pane.
     </p>
 
-    <!-- Bottom-right resize grip (floating only; the fixed panel anchors it). -->
-    <div
-      v-if="mode === 'floating'"
-      class="absolute bottom-0 right-0 size-4 cursor-nwse-resize"
-      @pointerdown.prevent="startResize"
-    />
+    <!-- Resize zones on every edge and corner (floating only). -->
+    <template v-if="mode === 'floating'">
+      <div
+        v-for="zone in resizeHandles"
+        :key="zone.name"
+        class="absolute"
+        :class="zone.class"
+        @pointerdown.prevent="startResize($event, zone.dir)"
+      />
+    </template>
   </div>
 </template>

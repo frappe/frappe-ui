@@ -34,7 +34,7 @@ async function send() {
         A real chat panel: messages scroll in the body, the composer pins to the
         footer. Pop it out from the title bar to keep chatting while you work.
       -->
-      <div class="flex flex-col gap-2 p-3">
+      <div class="flex flex-col gap-2 p-2.5">
         <div
           v-for="message in messages"
           :key="message.id"

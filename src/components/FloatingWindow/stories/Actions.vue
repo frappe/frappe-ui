@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { FloatingWindow, Button, Avatar } from 'frappe-ui'
 
 // A mail composer. The CC / BCC field toggles live in the window's `actions`
@@ -7,8 +7,8 @@ import { FloatingWindow, Button, Avatar } from 'frappe-ui'
 // footer.
 const draft = ref({
   to: [] as string[],
-  cc: '',
-  bcc: '',
+  cc: [] as string[],
+  bcc: [] as string[],
   subject: '',
   body: '',
   attachments: [] as string[],
@@ -18,49 +18,62 @@ const showBcc = ref(false)
 
 const fieldClass =
   'flex-1 border-0 bg-transparent p-0 text-base text-ink-gray-8 placeholder:text-ink-gray-4 focus:outline-none focus:ring-0'
-const rowClass = 'flex items-center gap-2 border-t border-outline-gray-1 py-1.5'
+const rowClass =
+  'flex items-center gap-2 border-t border-outline-gray-1 h-[33px]'
 
-// Recipient autocomplete: type a name, a bubble of matches comes up, and
-// picking one adds the address as a removable chip, like the helpdesk email
-// composer. A static directory stands in for a contact-search API.
+// Recipient autocomplete shared by To / CC / BCC: type a name, a bubble of
+// matches comes up, and picking one adds the address as a removable chip, like
+// the helpdesk email composer. A static directory stands in for a contact API.
+type RecipientField = 'to' | 'cc' | 'bcc'
+
 const people = [
   { name: 'Amara Okafor', email: 'amara@example.com' },
   { name: 'Lucas Meyer', email: 'lucas@example.com' },
   { name: 'Priya Nair', email: 'priya@example.com' },
   { name: 'Diego Santos', email: 'diego@example.com' },
 ]
-const toQuery = ref('')
-const toFocused = ref(false)
+const queries = reactive<Record<RecipientField, string>>({
+  to: '',
+  cc: '',
+  bcc: '',
+})
+const focusedField = ref<RecipientField | null>(null)
 
-const toMatches = computed(() => {
-  const query = toQuery.value.trim().toLowerCase()
+const recipientRows = computed(() => [
+  { field: 'to' as const, label: 'To', visible: true },
+  { field: 'cc' as const, label: 'CC', visible: showCc.value },
+  { field: 'bcc' as const, label: 'BCC', visible: showBcc.value },
+])
+
+function matchesFor(field: RecipientField) {
+  const query = queries[field].trim().toLowerCase()
   if (!query) return []
   return people.filter(
     (person) =>
-      !draft.value.to.includes(person.email) &&
+      !draft.value[field].includes(person.email) &&
       `${person.name} ${person.email}`.toLowerCase().includes(query),
   )
-})
+}
 
 function recipientName(email: string) {
   return people.find((person) => person.email === email)?.name ?? email
 }
 
-function addRecipient(email: string | undefined) {
-  if (!email || draft.value.to.includes(email)) return
-  draft.value.to.push(email)
-  toQuery.value = ''
+function addRecipient(field: RecipientField, email: string | undefined) {
+  if (!email || draft.value[field].includes(email)) return
+  draft.value[field].push(email)
+  queries[field] = ''
 }
 
-function removeRecipient(email: string) {
-  draft.value.to = draft.value.to.filter((address) => address !== email)
+function removeRecipient(field: RecipientField, email: string) {
+  draft.value[field] = draft.value[field].filter((address) => address !== email)
 }
 
 // Backspace on an empty input drops the last recipient, like a token field.
-function onToBackspace(event: KeyboardEvent) {
-  if (toQuery.value === '' && draft.value.to.length) {
+function onBackspace(field: RecipientField, event: KeyboardEvent) {
+  if (queries[field] === '' && draft.value[field].length) {
     event.preventDefault()
-    draft.value.to.pop()
+    draft.value[field].pop()
   }
 }
 
@@ -73,13 +86,15 @@ function attach() {
 function discard() {
   draft.value = {
     to: [],
-    cc: '',
-    bcc: '',
+    cc: [],
+    bcc: [],
     subject: '',
     body: '',
     attachments: [],
   }
-  toQuery.value = ''
+  queries.to = ''
+  queries.cc = ''
+  queries.bcc = ''
   showCc.value = false
   showBcc.value = false
 }
@@ -111,50 +126,58 @@ const send = discard
         />
       </template>
 
-      <div class="flex h-full flex-col px-3">
+      <div class="flex h-full flex-col px-2.5">
         <div class="shrink-0">
-          <!-- To: recipient autocomplete. Type a name, pick from the bubble,
-               and it becomes a removable chip. -->
-          <div :class="[rowClass, 'relative']">
+          <!-- To / CC / BCC: recipient autocomplete. Type a name, pick from the
+               bubble, and it becomes a removable chip. -->
+          <div
+            v-for="row in recipientRows"
+            v-show="row.visible"
+            :key="row.field"
+            :class="[rowClass, 'relative']"
+          >
             <span class="shrink-0 text-p-sm text-ink-gray-4">
-              To
+              {{ row.label }}
             </span>
             <div class="flex flex-1 flex-wrap items-center gap-1">
               <Button
-                v-for="email in draft.to"
+                v-for="email in draft[row.field]"
                 :key="email"
                 theme="gray"
                 variant="subtle"
                 :label="recipientName(email)"
+                class="!h-6"
               >
                 <template #suffix>
                   <LucideX
                     class="size-3.5 cursor-pointer"
-                    @click.stop="removeRecipient(email)"
+                    @click.stop="removeRecipient(row.field, email)"
                   />
                 </template>
               </Button>
               <input
-                v-model="toQuery"
-                class="min-w-[7rem] flex-1 border-0 bg-transparent p-0 text-base text-ink-gray-8 placeholder:text-ink-gray-4 focus:outline-none focus:ring-0"
-                @focus="toFocused = true"
-                @blur="toFocused = false"
-                @keydown.delete="onToBackspace"
-                @keydown.enter.prevent="addRecipient(toMatches[0]?.email)"
+                v-model="queries[row.field]"
+                :class="[fieldClass, 'min-w-[7rem]']"
+                @focus="focusedField = row.field"
+                @blur="focusedField = null"
+                @keydown.delete="onBackspace(row.field, $event)"
+                @keydown.enter.prevent="
+                  addRecipient(row.field, matchesFor(row.field)[0]?.email)
+                "
               />
             </div>
 
             <!-- The bubble: people matching the current query. mousedown.prevent
                  keeps the input focused so the pick registers before blur. -->
             <ul
-              v-if="toFocused && toMatches.length"
+              v-if="focusedField === row.field && matchesFor(row.field).length"
               class="absolute left-9 right-0 top-full z-20 mt-1 max-h-48 overflow-auto rounded-lg border border-outline-gray-2 bg-surface-elevation-2 p-1 shadow-xl"
             >
               <li
-                v-for="person in toMatches"
+                v-for="person in matchesFor(row.field)"
                 :key="person.email"
                 class="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 hover:bg-surface-gray-2"
-                @mousedown.prevent="addRecipient(person.email)"
+                @mousedown.prevent="addRecipient(row.field, person.email)"
               >
                 <Avatar :label="person.name" size="md" />
                 <div class="flex min-w-0 flex-col">
@@ -169,14 +192,6 @@ const send = discard
             </ul>
           </div>
 
-          <label v-if="showCc" :class="rowClass">
-            <span class="shrink-0 text-p-sm text-ink-gray-4">CC</span>
-            <input v-model="draft.cc" :class="fieldClass" />
-          </label>
-          <label v-if="showBcc" :class="rowClass">
-            <span class="shrink-0 text-p-sm text-ink-gray-4">BCC</span>
-            <input v-model="draft.bcc" :class="fieldClass" />
-          </label>
           <label :class="[rowClass, 'border-b']">
             <span class="shrink-0 text-p-sm text-ink-gray-4">Subject</span>
             <input v-model="draft.subject" :class="fieldClass" />

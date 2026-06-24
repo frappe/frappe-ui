@@ -22,7 +22,7 @@
         class="flex select-none items-center justify-between gap-2"
         :class="[
           isFloating ? 'cursor-move' : '',
-          $slots.header ? '' : 'gap-2 px-3 py-2',
+          $slots.header ? '' : 'gap-2 px-2.5 py-1.5',
         ]"
       >
         <!-- Host-owned header: takes the whole row, supplies its own controls. -->

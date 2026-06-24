@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { FloatingWindow, TabButtons, Textarea, type WindowMode } from 'frappe-ui'
+import {
+  FloatingWindow,
+  TabButtons,
+  Textarea,
+  type WindowMode,
+} from 'frappe-ui'
 
 const mode = ref<WindowMode>('docked')
 
@@ -23,7 +28,7 @@ const note = ref('')
     </div>
 
     <FloatingWindow v-model:mode="mode" title="Quick note">
-      <div class="flex h-full flex-col gap-2 p-3">
+      <div class="flex h-full flex-col gap-2 p-2.5">
         <Textarea
           v-model="note"
           class="flex-1"
