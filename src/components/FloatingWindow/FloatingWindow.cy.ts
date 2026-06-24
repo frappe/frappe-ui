@@ -35,6 +35,28 @@ function controlledWindow(
   })
 }
 
+// Simulate a pointer resize drag on a named edge/corner handle. Only the delta
+// matters: startResize records the pointerdown position, then the window-level
+// pointermove/pointerup (bubbled up from <body>) drive the resize loop.
+function dragResize(
+  name: string,
+  from: { x: number; y: number },
+  delta: { x: number; y: number },
+) {
+  cy.get(`[data-resize=${name}]`).trigger('pointerdown', {
+    eventConstructor: 'PointerEvent',
+    button: 0,
+    clientX: from.x,
+    clientY: from.y,
+  })
+  cy.get('body').trigger('pointermove', {
+    eventConstructor: 'PointerEvent',
+    clientX: from.x + delta.x,
+    clientY: from.y + delta.y,
+  })
+  cy.get('body').trigger('pointerup', { eventConstructor: 'PointerEvent' })
+}
+
 describe('FloatingWindow', () => {
   beforeEach(() => {
     // Deterministic geometry: the default panel (460×520) fits with room to
@@ -52,7 +74,7 @@ describe('FloatingWindow', () => {
     cy.get('[data-cy=mode]').should('have.text', 'docked')
     cy.get('.floating-window')
       .should('exist')
-      .and('not.have.class', 'shadow-2xl')
+      .and('have.attr', 'data-state', 'docked')
     cy.get('[data-cy=body]').should('be.visible')
     // Docked offers pop-out and minimize, never a close.
     cy.get('[aria-label="Pop out"]').should('exist')
@@ -65,7 +87,7 @@ describe('FloatingWindow', () => {
     // Pop out: detaches, casts a shadow, and surfaces the resize grip.
     cy.get('[aria-label="Pop out"]').click()
     cy.get('[data-cy=mode]').should('have.text', 'floating')
-    cy.get('.floating-window').should('have.class', 'shadow-2xl')
+    cy.get('.floating-window').should('have.attr', 'data-state', 'floating')
     cy.get('[aria-label="Resize window"]').should('exist')
     cy.get('[data-cy=body]').should('be.visible')
 
@@ -83,7 +105,7 @@ describe('FloatingWindow', () => {
     // Close: docks back into the host layout.
     cy.get('[aria-label="Close"]').click()
     cy.get('[data-cy=mode]').should('have.text', 'docked')
-    cy.get('.floating-window').should('not.have.class', 'shadow-2xl')
+    cy.get('.floating-window').should('have.attr', 'data-state', 'docked')
   })
 
   it('lets the host drive the window through v-model:mode', () => {
@@ -109,11 +131,11 @@ describe('FloatingWindow', () => {
     })
 
     cy.mount(Host)
-    cy.get('.floating-window').should('not.have.class', 'shadow-2xl')
+    cy.get('.floating-window').should('have.attr', 'data-state', 'docked')
 
     // Host flips the bound mode; the window detaches to match.
     cy.get('[data-cy=go-float]').click()
-    cy.get('.floating-window').should('have.class', 'shadow-2xl')
+    cy.get('.floating-window').should('have.attr', 'data-state', 'floating')
     cy.get('[aria-label="Close"]').should('exist')
   })
 
@@ -135,7 +157,7 @@ describe('FloatingWindow', () => {
       cy.mount(controlledWindow({ storageKey: KEY, initialMode: 'docked' }))
 
       cy.get('[data-cy=mode]').should('have.text', 'floating')
-      cy.get('.floating-window').should('have.class', 'shadow-2xl')
+      cy.get('.floating-window').should('have.attr', 'data-state', 'floating')
       cy.get('.floating-window').invoke('outerWidth').should('eq', 500)
     })
 
@@ -169,8 +191,9 @@ describe('FloatingWindow', () => {
       .find('[aria-label="Pop out"]')
       .click()
     cy.contains('.floating-window', 'Window A').should(
-      'have.class',
-      'shadow-2xl',
+      'have.attr',
+      'data-state',
+      'floating',
     )
 
     cy.contains('.floating-window', 'Window B')
@@ -179,11 +202,12 @@ describe('FloatingWindow', () => {
 
     // B is now floating; A was pinned back into the docked layout.
     cy.contains('.floating-window', 'Window B').should(
-      'have.class',
-      'shadow-2xl',
+      'have.attr',
+      'data-state',
+      'floating',
     )
     cy.contains('.floating-window', 'Window A')
-      .should('not.have.class', 'shadow-2xl')
+      .should('have.attr', 'data-state', 'docked')
       .find('[aria-label="Pop out"]')
       .should('exist')
   })
@@ -238,6 +262,43 @@ describe('FloatingWindow', () => {
         }
       })
       cy.get('.floating-window').invoke('outerWidth').should('eq', 380)
+    })
+  })
+
+  describe('edge and corner resize', () => {
+    // Floating default is 460×520, parked bottom-right in the 1200×800 viewport:
+    // x = 1200 - 460 - 24 = 716, y = 800 - 520 - 24 = 256.
+    const START_X = 716
+    const START_Y = 256
+
+    it('grows from the bottom-right corner, leaving the origin put', () => {
+      cy.mount(controlledWindow())
+      cy.get('[aria-label="Pop out"]').click()
+
+      dragResize('se', { x: START_X + 460, y: START_Y + 520 }, { x: 40, y: 30 })
+
+      cy.get('.floating-window').should(($el) => {
+        const r = $el[0].getBoundingClientRect()
+        expect(r.width).to.be.closeTo(500, 1)
+        expect(r.height).to.be.closeTo(550, 1)
+        expect(r.left).to.be.closeTo(START_X, 1)
+        expect(r.top).to.be.closeTo(START_Y, 1)
+      })
+    })
+
+    it('grows from the top-left corner, shifting the origin to anchor the opposite edge', () => {
+      cy.mount(controlledWindow())
+      cy.get('[aria-label="Pop out"]').click()
+
+      dragResize('nw', { x: START_X, y: START_Y }, { x: -40, y: -30 })
+
+      cy.get('.floating-window').should(($el) => {
+        const r = $el[0].getBoundingClientRect()
+        expect(r.width).to.be.closeTo(500, 1)
+        expect(r.height).to.be.closeTo(550, 1)
+        expect(r.left).to.be.closeTo(START_X - 40, 1)
+        expect(r.top).to.be.closeTo(START_Y - 30, 1)
+      })
     })
   })
 })

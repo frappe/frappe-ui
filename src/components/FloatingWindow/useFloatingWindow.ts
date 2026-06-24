@@ -12,7 +12,12 @@ import {
   useStorage,
   useWindowSize,
 } from '@vueuse/core'
-import type { FloatingWindowOptions, Rect, WindowMode } from './types'
+import type {
+  FloatingWindowOptions,
+  Rect,
+  ResizeDir,
+  WindowMode,
+} from './types'
 
 const TRAY_WIDTH = 320
 // Gap from the viewport edge when parked in the bottom-right corner.
@@ -165,32 +170,51 @@ export function useFloatingWindow(
     if (activeDocker === dock) setActiveDocker(null)
   })
 
-  /** Resize by a fixed delta, for the keyboard path on the resize grip. */
+  /** Resize by a fixed delta, the keyboard path on the bottom-right corner. */
   function resizeBy(dx: number, dy: number) {
     width.value = clamp(width.value + dx, MIN_WIDTH, viewportWidth.value)
     height.value = clamp(height.value + dy, MIN_HEIGHT, viewportHeight.value)
     persist()
   }
 
-  function startResize(event: PointerEvent) {
+  /**
+   * Begin a pointer resize from an edge or corner. `dir` says which edges move;
+   * it defaults to the bottom-right corner. Dragging a top/left edge also shifts
+   * the panel's origin so the opposite edge stays anchored.
+   */
+  function startResize(event: PointerEvent, dir: ResizeDir = { x: 1, y: 1 }) {
     isResizing.value = true
     const origin = {
-      x: event.clientX,
-      y: event.clientY,
+      pointerX: event.clientX,
+      pointerY: event.clientY,
+      x: x.value,
+      y: y.value,
       width: width.value,
       height: height.value,
     }
     const stopMove = useEventListener('pointermove', (e: PointerEvent) => {
-      width.value = clamp(
-        origin.width + e.clientX - origin.x,
-        MIN_WIDTH,
-        viewportWidth.value,
-      )
-      height.value = clamp(
-        origin.height + e.clientY - origin.y,
-        MIN_HEIGHT,
-        viewportHeight.value,
-      )
+      const dx = e.clientX - origin.pointerX
+      const dy = e.clientY - origin.pointerY
+      if (dir.x === 1) {
+        width.value = clamp(origin.width + dx, MIN_WIDTH, viewportWidth.value)
+      } else if (dir.x === -1) {
+        width.value = clamp(origin.width - dx, MIN_WIDTH, viewportWidth.value)
+        x.value = origin.x + origin.width - width.value
+      }
+      if (dir.y === 1) {
+        height.value = clamp(
+          origin.height + dy,
+          MIN_HEIGHT,
+          viewportHeight.value,
+        )
+      } else if (dir.y === -1) {
+        height.value = clamp(
+          origin.height - dy,
+          MIN_HEIGHT,
+          viewportHeight.value,
+        )
+        y.value = origin.y + origin.height - height.value
+      }
     })
     const stopUp = useEventListener('pointerup', () => {
       isResizing.value = false

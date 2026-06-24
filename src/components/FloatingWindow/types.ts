@@ -9,6 +9,16 @@ export interface Rect {
   height: number
 }
 
+/**
+ * Which edges a resize drag pulls. `-1` pulls the top/left edge (and moves the
+ * panel so the opposite edge stays put), `1` the bottom/right edge, `0` leaves
+ * that axis fixed. A corner sets both axes.
+ */
+export interface ResizeDir {
+  x: -1 | 0 | 1
+  y: -1 | 0 | 1
+}
+
 /** Options for the headless useFloatingWindow composable. */
 export interface FloatingWindowOptions {
   /** Initial window state. */
