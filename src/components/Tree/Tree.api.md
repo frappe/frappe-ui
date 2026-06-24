@@ -40,7 +40,7 @@
   },
   {
     name: 'defaultExpanded',
-    description: 'Initial expansion state of nodes when `v-model:expanded` is not bound.',
+    description: 'Start with every node expanded. A one-shot convenience that seeds the open\nset on first load (async-safe — it waits for `nodes` to arrive). To open\nspecific nodes or track expansion, use `v-model:expanded` instead; this is\nignored once you provide your own keys.',
     required: false,
     type: 'boolean',
     default: 'false'
@@ -54,7 +54,7 @@
   },
   {
     name: 'expanded',
-    description: '',
+    description: 'The keys of the currently expanded nodes — the live source of truth for\nwhich rows are open. Controlled or uncontrolled. Use `defaultExpanded` only\nfor the simple "start fully expanded" case.',
     required: false,
     type: 'TreeKey[]',
     default: '[]'
