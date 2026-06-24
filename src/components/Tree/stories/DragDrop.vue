@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Tree } from 'frappe-ui'
+import { Switch, Tree } from 'frappe-ui'
 import type { DropInfo, MoveContext, TreeNode } from '../types'
 
 const nodes = ref<TreeNode[]>([
@@ -32,6 +32,7 @@ const nodes = ref<TreeNode[]>([
 ])
 
 const expanded = ref<string[]>(['guest', 'downloads', 'documents', 'archive'])
+const disabled = ref(false)
 
 // Folders (nodes with a `children` array) can receive drops; files cannot.
 function move({ target, position }: MoveContext) {
@@ -79,14 +80,18 @@ function onDragEnd(info: DropInfo | null) {
 </script>
 
 <template>
-  <div class="w-80">
-    <Tree
-      :nodes="nodes"
-      node-key="name"
-      v-model:expanded="expanded"
-      draggable
-      :move="move"
-      @drag-end="onDragEnd"
-    />
+  <div class="flex flex-col gap-3">
+    <Switch v-model="disabled" label="Disable interaction" />
+    <div class="w-80">
+      <Tree
+        :nodes="nodes"
+        node-key="name"
+        v-model:expanded="expanded"
+        :disabled="disabled"
+        draggable
+        :move="move"
+        @drag-end="onDragEnd"
+      />
+    </div>
   </div>
 </template>
