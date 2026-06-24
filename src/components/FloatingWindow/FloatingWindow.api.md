@@ -48,6 +48,13 @@
     default: '300'
   },
   {
+    name: 'minimizable',
+    description: 'Whether the window can collapse to the bottom-right tray. When `false`,\nthe minimize control is hidden, leaving only dock and pop-out, for\ncomposer-style windows that should never minimize.',
+    required: false,
+    type: 'boolean',
+    default: 'true'
+  },
+  {
     name: 'mode',
     description: 'Window state. Use `v-model:mode` to drive it from the host.',
     required: false,

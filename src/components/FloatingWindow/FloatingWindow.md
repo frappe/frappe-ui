@@ -25,7 +25,10 @@ while you scroll, then minimize it to the tray.
 Bind `v-model:mode` to drive the window from the host. The three modes are
 `docked`, `floating`, and `minimized`. A `TabButtons` segmented control surfaces
 the active mode as a raised pill, and it stays in sync with the built-in
-title-bar controls because both write to the same bound value.
+title-bar controls because both write to the same bound value. A live `Mode`
+readout sits beside it, so the binding stays visible once the window detaches to
+the bottom-right corner of the viewport (floating and minimized both leave the
+docked spot).
 
 <ComponentPreview name="FloatingWindow-Controlled" />
 
@@ -42,8 +45,11 @@ custom support-chat header.
 ## Actions
 
 The `actions` slot adds controls before the built-in window buttons while
-keeping the standard chrome. Here a mail composer slots in a Discard button that
-clears the draft, sitting alongside the usual pop-out and minimize controls.
+keeping the standard chrome. The demo is a mail composer: its CC and BCC field
+toggles sit in the actions slot, beside the window controls, while attach,
+discard, and send fill the footer. It also sets `minimizable` to `false`, so the
+window only docks or floats and never collapses to the tray: pop it out from the
+docked state, then close it back from the floating state.
 
 <ComponentPreview name="FloatingWindow-Actions" />
 
@@ -53,11 +59,10 @@ Pass a `storageKey` to remember the window's mode, position, and size in
 localStorage. Move or resize the window, reload the page, and it returns where
 you left it. Omit the key to reset every session.
 
-The component persists only its geometry. The demo is a loose take on the
-framework's `EmailComposer` (which is itself a `FloatingWindow` underneath) that
-persists its draft too, under a matching `useStorage` key. Fill in the
-recipients and body, add an attachment, reload the page, and the whole composer
-comes back intact.
+The component persists only its geometry, so layer your own `useStorage` key over
+the content you want to keep. The demo is a personal task list that does exactly
+that: add or tick off tasks, move or resize the window, reload the page, and both
+the layout and your list come back.
 
 <ComponentPreview name="FloatingWindow-Persisted" />
 
@@ -80,8 +85,12 @@ const { mode, style, dock, float, minimize, startResize } =
 
 Bind `style` to your panel element and `ref="panel"` / `ref="handle"` to the
 panel and its drag handle. `options` accepts `initialMode`, `initialWidth`,
-`initialHeight`, `minWidth`, `minHeight`, and `storageKey`. The demo builds an
-activity feed on top of the composable, collapsing its body when minimized.
+`initialHeight`, `minWidth`, `minHeight`, and `storageKey`. Beyond the actions,
+the composable also exposes live geometry (`width`, `height`, `x`, `y`,
+`isDragging`, `isResizing`) that the boxed component keeps to itself. The demo
+reads that live `width` to build a responsive ticket panel: pop it out and drag
+it wider, and a reading pane opens beside the list, something the slot-based
+component can't express.
 
 <ComponentPreview name="FloatingWindow-Headless" />
 

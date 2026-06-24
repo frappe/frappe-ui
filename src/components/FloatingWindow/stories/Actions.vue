@@ -1,66 +1,127 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
-import { FloatingWindow, TextInput, Textarea, Button } from 'frappe-ui'
+import { ref } from 'vue'
+import { FloatingWindow, Button } from 'frappe-ui'
 
-const to = ref('')
-const subject = ref('')
-const body = ref('')
-const sent = ref(false)
+// A mail composer. The CC / BCC field toggles live in the window's `actions`
+// slot, beside the built-in window controls; attach, discard, and send fill the
+// footer.
+const draft = ref({
+  to: '',
+  cc: '',
+  bcc: '',
+  subject: '',
+  body: '',
+  attachments: [] as string[],
+})
+const showCc = ref(false)
+const showBcc = ref(false)
 
-function reset() {
-  to.value = ''
-  subject.value = ''
-  body.value = ''
+const fieldClass =
+  'flex-1 border-0 bg-transparent p-0 text-base text-ink-gray-8 placeholder:text-ink-gray-4 focus:outline-none focus:ring-0'
+const rowClass = 'flex items-center gap-2 border-t border-outline-gray-1 py-1.5'
+
+function attach() {
+  draft.value.attachments.push(`attachment-${draft.value.attachments.length + 1}.pdf`)
 }
 
 function discard() {
-  reset()
-  sent.value = false
+  draft.value = { to: '', cc: '', bcc: '', subject: '', body: '', attachments: [] }
+  showCc.value = false
+  showBcc.value = false
 }
 
-function send() {
-  sent.value = true
-  reset()
-}
-
-// Clear the confirmation once the user starts a fresh draft.
-watch([to, subject, body], () => {
-  if (to.value || subject.value || body.value) sent.value = false
-})
+// Pretend to send, then clear the draft.
+const send = discard
 </script>
 
 <template>
-  <div class="w-[440px]">
-    <FloatingWindow title="New message" :initial-height="460">
+  <div class="w-[480px]">
+    <FloatingWindow title="Email Composer" :initial-height="480" :minimizable="false">
       <!--
-        The `actions` slot adds controls before the built-in pop-out / minimize
-        buttons. Here a Discard button clears the draft.
+        The `actions` slot inserts controls before the built-in pop-out /
+        minimize buttons, keeping the standard chrome. Here the CC / BCC toggles
+        sit there, mirroring the framework's EmailComposer.
       -->
       <template #actions>
-        <Button variant="ghost" tooltip="Discard" @click="discard">
-          <template #icon><LucideTrash2 class="h-4 w-4" /></template>
-        </Button>
+        <Button
+          variant="ghost"
+          label="CC"
+          :class="showCc ? '!bg-surface-gray-4' : '!text-ink-gray-5'"
+          @click="showCc = !showCc"
+        />
+        <Button
+          variant="ghost"
+          label="BCC"
+          :class="showBcc ? '!bg-surface-gray-4' : '!text-ink-gray-5'"
+          @click="showBcc = !showBcc"
+        />
       </template>
 
-      <div class="flex h-full flex-col gap-2 p-3">
-        <TextInput v-model="to" placeholder="To" />
-        <TextInput v-model="subject" placeholder="Subject" />
-        <Textarea
-          v-model="body"
-          class="flex-1"
-          placeholder="Write your message..."
+      <div class="flex h-full flex-col px-3">
+        <div class="shrink-0">
+          <label :class="rowClass">
+            <span class="shrink-0 text-p-sm text-ink-gray-4">To</span>
+            <input v-model="draft.to" :class="fieldClass" />
+          </label>
+          <label v-if="showCc" :class="rowClass">
+            <span class="shrink-0 text-p-sm text-ink-gray-4">CC</span>
+            <input v-model="draft.cc" :class="fieldClass" />
+          </label>
+          <label v-if="showBcc" :class="rowClass">
+            <span class="shrink-0 text-p-sm text-ink-gray-4">BCC</span>
+            <input v-model="draft.bcc" :class="fieldClass" />
+          </label>
+          <label :class="[rowClass, 'border-b']">
+            <span class="shrink-0 text-p-sm text-ink-gray-4">Subject</span>
+            <input v-model="draft.subject" :class="fieldClass" />
+          </label>
+        </div>
+
+        <textarea
+          v-model="draft.body"
+          placeholder="Type your message…"
+          class="min-h-24 flex-1 resize-none border-0 bg-transparent px-0 py-3 text-base text-ink-gray-8 placeholder:text-ink-gray-4 focus:outline-none focus:ring-0"
         />
+
+        <div v-if="draft.attachments.length" class="flex flex-wrap gap-2 pb-2">
+          <Button
+            v-for="(name, index) in draft.attachments"
+            :key="index"
+            theme="gray"
+            variant="subtle"
+            :label="name"
+          >
+            <template #suffix>
+              <LucideX
+                class="size-3.5 cursor-pointer"
+                @click.stop="draft.attachments.splice(index, 1)"
+              />
+            </template>
+          </Button>
+        </div>
       </div>
 
       <template #footer>
         <div
-          class="flex items-center justify-between border-t border-outline-gray-1 p-3"
+          class="flex items-center justify-between gap-2 border-t border-outline-gray-1 px-3 py-2"
         >
-          <span v-if="sent" class="text-p-xs text-ink-green-3">Message sent</span>
-          <span v-else />
-          <Button variant="solid" :disabled="!to.trim()" @click="send">
-            Send
-          </Button>
+          <button
+            type="button"
+            aria-label="Attach file"
+            class="flex rounded p-1 text-ink-gray-8 transition-colors hover:bg-surface-gray-3"
+            @click="attach"
+          >
+            <LucidePaperclip class="h-4 w-4" />
+          </button>
+          <div class="flex items-center gap-2">
+            <Button label="Discard" @click="discard" />
+            <Button
+              variant="solid"
+              label="Send"
+              :disabled="!draft.to.trim()"
+              @click="send"
+            />
+          </div>
         </div>
       </template>
     </FloatingWindow>

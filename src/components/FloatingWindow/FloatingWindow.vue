@@ -35,10 +35,6 @@
         <!-- Built-in chrome -->
         <template v-else>
           <div class="flex min-w-0 items-center gap-2">
-            <LucideGripVertical
-              v-if="isFloating"
-              class="h-4 w-4 shrink-0 text-ink-gray-4"
-            />
             <span class="truncate text-sm font-medium text-ink-gray-8">
               {{ title }}
             </span>
@@ -46,30 +42,35 @@
 
           <div class="flex shrink-0 items-center gap-1">
             <slot name="actions" v-bind="{ mode, dock, float, minimize }" />
+            <!-- Minimize control, hidden when the window is not minimizable. In
+                 the tray it's already minimized, so offer to expand it back out;
+                 everywhere else offer to minimize. -->
+            <template v-if="minimizable">
+              <Button
+                v-if="isMinimized"
+                variant="ghost"
+                tooltip="Expand"
+                @click="expandFromTray"
+              >
+                <template #icon><LucideMaximize2 class="h-4 w-4" /></template>
+              </Button>
+              <Button v-else variant="ghost" tooltip="Minimize" @click="minimize">
+                <template #icon><LucideMinus class="h-4 w-4" /></template>
+              </Button>
+            </template>
+            <!-- Expand to a floating window when docked; close (dock back) once
+                 detached. The close (X) action always sits last. -->
             <Button
               variant="ghost"
-              :tooltip="isDocked ? 'Pop out' : 'Dock'"
+              :tooltip="isDocked ? 'Pop out' : 'Close'"
               @click="isDocked ? float() : dock()"
             >
               <template #icon>
                 <component
-                  :is="isDocked ? LucideExternalLink : LucidePin"
+                  :is="isDocked ? LucideMaximize2 : LucideX"
                   class="h-4 w-4"
                 />
               </template>
-            </Button>
-            <!-- In the tray the window is already minimized, so offer to expand
-                 it back out; everywhere else offer to minimize. -->
-            <Button
-              v-if="isMinimized"
-              variant="ghost"
-              tooltip="Expand"
-              @click="expandFromTray"
-            >
-              <template #icon><LucideMaximize2 class="h-4 w-4" /></template>
-            </Button>
-            <Button v-else variant="ghost" tooltip="Minimize" @click="minimize">
-              <template #icon><LucideMinus class="h-4 w-4" /></template>
             </Button>
           </div>
         </template>
@@ -100,8 +101,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import LucideGripVertical from '~icons/lucide/grip-vertical'
-import LucideExternalLink from '~icons/lucide/external-link'
-import LucidePin from '~icons/lucide/pin'
+import LucideX from '~icons/lucide/x'
 import LucideMinus from '~icons/lucide/minus'
 import LucideMaximize2 from '~icons/lucide/maximize-2'
 import { Button } from '../Button'
@@ -132,6 +132,12 @@ const props = withDefaults(
     minWidth?: number
     /** Smallest height the panel can be resized to. */
     minHeight?: number
+    /**
+     * Whether the window can collapse to the bottom-right tray. When `false`,
+     * the minimize control is hidden, leaving only dock and pop-out, for
+     * composer-style windows that should never minimize.
+     */
+    minimizable?: boolean
   }>(),
   {
     title: '',
@@ -140,6 +146,7 @@ const props = withDefaults(
     initialHeight: 520,
     minWidth: 380,
     minHeight: 300,
+    minimizable: true,
   },
 )
 

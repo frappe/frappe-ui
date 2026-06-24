@@ -41,19 +41,10 @@ async function send() {
             </span>
           </div>
 
-          <!-- State-aware window controls: pop out / dock, then minimize while
-               floating or expand while parked in the tray. -->
+          <!-- State-aware window controls: minimize while floating or expand
+               while parked in the tray, then pop out / close. The close (X)
+               action always sits last. -->
           <div class="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              :tooltip="mode === 'docked' ? 'Pop out' : 'Dock'"
-              @click="mode === 'docked' ? float() : dock()"
-            >
-              <template #icon>
-                <LucideMaximize2 v-if="mode === 'docked'" class="h-4 w-4" />
-                <LucidePin v-else class="h-4 w-4" />
-              </template>
-            </Button>
             <Button
               v-if="mode === 'floating'"
               variant="ghost"
@@ -69,6 +60,16 @@ async function send() {
               @click="expandFromTray"
             >
               <template #icon><LucideMaximize2 class="h-4 w-4" /></template>
+            </Button>
+            <Button
+              variant="ghost"
+              :tooltip="mode === 'docked' ? 'Pop out' : 'Close'"
+              @click="mode === 'docked' ? float() : dock()"
+            >
+              <template #icon>
+                <LucideMaximize2 v-if="mode === 'docked'" class="h-4 w-4" />
+                <LucideX v-else class="h-4 w-4" />
+              </template>
             </Button>
           </div>
         </div>
