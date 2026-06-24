@@ -28,8 +28,8 @@
       @dragleave="ctx.onDragLeave(node)"
       @drop.prevent="ctx.onDrop(node, parent)"
     >
-      <!-- Fully-overridden node -->
-      <slot v-if="$slots.node" name="node" v-bind="slotProps" />
+      <!-- Fully-overridden item -->
+      <slot v-if="$slots.item" name="item" v-bind="slotProps" />
 
       <!-- Default node rendering -->
       <template v-else>
@@ -59,14 +59,14 @@
         </button>
         <span v-else class="size-5 shrink-0" aria-hidden="true" />
 
-        <slot name="prefix" v-bind="{ node, expanded, hasChildren }" />
+        <slot name="item-prefix" v-bind="itemSlotProps" />
 
-        <slot name="label" v-bind="{ node, level, expanded, hasChildren }">
+        <slot name="item-label" v-bind="itemSlotProps">
           <span class="truncate text-base text-ink-gray-8">{{ label }}</span>
         </slot>
 
         <span class="ml-auto flex items-center">
-          <slot name="suffix" v-bind="{ node }" />
+          <slot name="item-suffix" v-bind="itemSlotProps" />
         </span>
       </template>
     </div>
@@ -82,17 +82,17 @@
         :index="childIndex"
         :set-size="children.length"
       >
-        <template v-if="$slots.node" #node="p"
-          ><slot name="node" v-bind="p"
+        <template v-if="$slots.item" #item="p"
+          ><slot name="item" v-bind="p"
         /></template>
-        <template v-if="$slots.label" #label="p"
-          ><slot name="label" v-bind="p"
+        <template v-if="$slots['item-label']" #item-label="p"
+          ><slot name="item-label" v-bind="p"
         /></template>
-        <template v-if="$slots.prefix" #prefix="p"
-          ><slot name="prefix" v-bind="p"
+        <template v-if="$slots['item-prefix']" #item-prefix="p"
+          ><slot name="item-prefix" v-bind="p"
         /></template>
-        <template v-if="$slots.suffix" #suffix="p"
-          ><slot name="suffix" v-bind="p"
+        <template v-if="$slots['item-suffix']" #item-suffix="p"
+          ><slot name="item-suffix" v-bind="p"
         /></template>
       </TreeItem>
     </ul>
@@ -112,16 +112,10 @@ const props = defineProps<{
 }>()
 
 defineSlots<{
-  node: (props: TreeNodeSlotProps) => unknown
-  label: (
-    props: Omit<TreeNodeSlotProps, 'toggle' | 'focused' | 'disabled'>,
-  ) => unknown
-  prefix: (props: {
-    node: TreeNode
-    expanded: boolean
-    hasChildren: boolean
-  }) => unknown
-  suffix: (props: { node: TreeNode }) => unknown
+  item: (props: TreeNodeSlotProps) => unknown
+  'item-prefix': (props: Omit<TreeNodeSlotProps, 'toggle'>) => unknown
+  'item-label': (props: Omit<TreeNodeSlotProps, 'toggle'>) => unknown
+  'item-suffix': (props: Omit<TreeNodeSlotProps, 'toggle'>) => unknown
 }>()
 
 const injected = inject(TreeContextKey)
@@ -147,13 +141,17 @@ const tabbable = computed(
     (ctx.focusedKey.value == null && props.level === 1 && props.index === 0),
 )
 
-const slotProps = computed(() => ({
+const itemSlotProps = computed(() => ({
   node: props.node,
   level: props.level,
   expanded: expanded.value,
   hasChildren: hasChildren.value,
   focused: ctx.focusedKey.value === key.value,
   disabled: ctx.disabled.value,
+}))
+
+const slotProps = computed(() => ({
+  ...itemSlotProps.value,
   toggle: () => ctx.toggle(props.node),
 }))
 
