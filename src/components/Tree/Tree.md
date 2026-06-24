@@ -21,9 +21,10 @@ This example is fully working — drag a file into a folder and it stays there.
 
 ## List view with avatars and row actions
 
-Use the `#prefix`, `#label`, and `#suffix` slots to turn the tree into a rich
-list — an avatar on the left, a two-line label, and a row action (an add button)
-on the right. `guides="none"` drops the connector lines for a plain list look.
+Use the `#item-prefix`, `#item-label`, and `#item-suffix` slots to turn the tree
+into a rich list — an avatar on the left, a two-line label, and a row action (an
+add button) on the right. `guides="none"` drops the connector lines for a plain
+list look.
 
 <ComponentPreview name="Tree-ListView" />
 
@@ -59,7 +60,7 @@ Each node is a plain object with a `label` (display text) and optional
 `name`). A node is a leaf when `children` is missing or empty. Extra fields are
 passed through to the slots, so you can render avatars, roles, badges, etc.
 
-To display a field other than `label`, use the `#label` slot rather than
+To display a field other than `label`, use the `#item-label` slot rather than
 remapping.
 
 ## Expansion
@@ -107,10 +108,10 @@ final index within its new parent, already accounting for its removal.
 
 ## Customizing rows
 
-Use the `#node` slot to fully replace a row (you receive `toggle` plus state),
-or the lighter `#label`, `#prefix`, and `#suffix` slots to keep the default
-layout. Style via the `data-slot`, `data-state`, `data-drop` and `data-level`
-attributes rather than class props.
+Use the `#item` slot to fully replace a row (you receive `toggle` plus state),
+or the lighter `#item-label`, `#item-prefix`, and `#item-suffix` slots to keep
+the default layout. Style via the `data-slot`, `data-state`, `data-drop` and
+`data-level` attributes rather than class props.
 
 Row height and indentation are CSS variables — override them in CSS rather than
 through props:
