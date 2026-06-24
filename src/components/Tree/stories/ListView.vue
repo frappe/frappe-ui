@@ -50,7 +50,7 @@ function addReport(node: TreeNode) {
       guides="none"
     >
       <!-- Avatar on the left -->
-      <template #prefix="{ node }">
+      <template #item-prefix="{ node }">
         <Avatar
           :image="node.image as string"
           :label="node.label as string"
@@ -58,7 +58,7 @@ function addReport(node: TreeNode) {
         />
       </template>
 
-      <template #label="{ node }">
+      <template #item-label="{ node }">
         <div class="flex min-w-0 flex-col">
           <span class="truncate text-base text-ink-gray-8">{{
             node.label
@@ -68,7 +68,7 @@ function addReport(node: TreeNode) {
       </template>
 
       <!-- Add action -->
-      <template #suffix="{ node }">
+      <template #item-suffix="{ node }">
         <Button
           variant="ghost"
           icon="plus"
