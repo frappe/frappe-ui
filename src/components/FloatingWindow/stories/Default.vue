@@ -23,7 +23,6 @@ async function send() {
   messages.value.push({ id: nextId++, from: 'me', text })
   draft.value = ''
   await nextTick()
-  bottom.value?.scrollIntoView({ block: 'end' })
 }
 </script>
 
