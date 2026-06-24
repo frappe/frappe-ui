@@ -63,24 +63,24 @@
 
   const slotsData = [
   {
-    name: 'node',
+    name: 'item',
     description: '',
     type: 'TreeNodeSlotProps'
   },
   {
-    name: 'label',
+    name: 'item-prefix',
     description: '',
-    type: 'Omit<TreeNodeSlotProps, "disabled" | "toggle" | "focused">'
+    type: 'Omit<TreeNodeSlotProps, "toggle">'
   },
   {
-    name: 'prefix',
+    name: 'item-label',
     description: '',
-    type: '{ node: TreeNode; expanded: boolean; hasChildren: boolean; }'
+    type: 'Omit<TreeNodeSlotProps, "toggle">'
   },
   {
-    name: 'suffix',
+    name: 'item-suffix',
     description: '',
-    type: '{ node: TreeNode; }'
+    type: 'Omit<TreeNodeSlotProps, "toggle">'
   },
   {
     name: 'empty',
