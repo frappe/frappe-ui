@@ -10,12 +10,22 @@ The simplest tree — pass `nodes` and tell it which field is the key.
 
 <ComponentPreview name="Tree-Example" />
 
+## Indentation guides
+
+`guides` controls how nesting is drawn: `connectors` (elbow lines), `lines`
+(plain vertical rules), or `none`. The indentation itself stays either way —
+`guides` only changes the lines.
+
+<ComponentPreview name="Tree-Guides" />
+
 ## Drag and drop
 
 Set `draggable` to let nodes be dragged onto one another to reparent, or between
 siblings to reorder. A `move` predicate gates where drops are allowed (here,
 only into folders), and `@drag-end` hands you the committed move to persist.
 This example is fully working — drag a file into a folder and it stays there.
+Flip **Disable interaction** to see the `disabled` state freeze drag and
+expand/collapse.
 
 <ComponentPreview name="Tree-DragDrop" />
 
@@ -65,9 +75,14 @@ remapping.
 
 ## Expansion
 
-`v-model:expanded` holds the array of expanded node keys (controlled or
-uncontrolled). When unbound, `defaultExpanded` seeds the initial state. Leave it
-unbound and the tree manages expansion internally.
+Two inputs affect which rows are open — reach for **one**:
+
+- **`v-model:expanded`** — the array of open node keys, and the source of truth.
+  Bind it to control or observe expansion; leave it unbound and the tree tracks
+  the set internally. This is the one you want in most cases.
+- **`defaultExpanded`** — a boolean shortcut for "start with everything open."
+  It seeds `expanded` once on first load (and waits for async `nodes`), then
+  steps aside — it does nothing once you provide your own `expanded` keys.
 
 Clicking a row, or pressing `Enter`/`Space` on it, toggles expansion.
 
