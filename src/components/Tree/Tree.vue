@@ -91,6 +91,11 @@ defineSlots<{
   empty: () => unknown
 }>()
 
+/**
+ * The keys of the currently expanded nodes — the live source of truth for
+ * which rows are open. Controlled or uncontrolled. Use `defaultExpanded` only
+ * for the simple "start fully expanded" case.
+ */
 const expanded = defineModel<TreeKey[]>('expanded', { default: () => [] })
 
 const treeRef = ref<HTMLElement | null>(null)
