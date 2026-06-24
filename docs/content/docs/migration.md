@@ -5,31 +5,31 @@ pageClass: migration-page
 # Migration from v0
 
 A guide for moving an existing app onto `frappe-ui` v1. Work through one
-component family at a time. Each section opens with a before/after table.
-For the full change list see the
+component family at a time. Each section opens with a before/after table. For
+the full change list see the
 [changelog](https://github.com/frappe/frappe-ui/blob/main/v1-release/changelog.md);
 for the rationale behind each API see the
 [v1 release specs](https://github.com/frappe/frappe-ui/tree/main/v1-release).
 
-After each pass, `grep` for the old prop or slot name to catch anything
-missed, then test the flows you touched. Type-checking won't catch focus,
-slot renames, or visual regressions.
+After each pass, `grep` for the old prop or slot name to catch anything missed,
+then test the flows you touched. Type-checking won't catch focus, slot renames,
+or visual regressions.
 
 ## Dialog
 
 The `options` blob is flattened into top-level props. See the
 [Dialog](./components/dialog) component page for the full API.
 
-| Before                                 | After                            |
-| -------------------------------------- | -------------------------------- |
-| `v-model="show"`                       | `v-model:open="show"`            |
-| `:options="{ title, size, actions }"`  | `title` / `size` / `:actions`    |
-| `disableOutsideClickToClose`           | `:dismissible="false"`           |
-| `<template #body-content>`             | default slot                     |
-| `<template #body-title>`               | `<template #title>`              |
-| `<template #body>`                     | `bare` prop + default slot       |
-| `onClick: (close) => …`                | `onClick: ({ close }) => …`      |
-| manual focus hacks / `v-focus`         | `autofocus` attr on a descendant |
+| Before                                | After                            |
+| ------------------------------------- | -------------------------------- |
+| `v-model="show"`                      | `v-model:open="show"`            |
+| `:options="{ title, size, actions }"` | `title` / `size` / `:actions`    |
+| `disableOutsideClickToClose`          | `:dismissible="false"`           |
+| `<template #body-content>`            | default slot                     |
+| `<template #body-title>`              | `<template #title>`              |
+| `<template #body>`                    | `bare` prop + default slot       |
+| `onClick: (close) => …`               | `onClick: ({ close }) => …`      |
+| manual focus hacks / `v-focus`        | `autofocus` attr on a descendant |
 
 ```vue
 <!-- Before -->
@@ -52,24 +52,24 @@ The `options` blob is flattened into top-level props. See the
 ```
 
 For reactive `:options` objects, spread them: `<Dialog v-bind="opts || {}" />`.
-For the imperative API, use `dialog.confirm` / `dialog.danger` /
-`dialog.prompt` from `frappe-ui` (callback-based: `onConfirm` resolves to
-close, throws to stay open) and wrap your app root in `<FrappeUIProvider>`.
+For the imperative API, use `dialog.confirm` / `dialog.danger` / `dialog.prompt`
+from `frappe-ui` (callback-based: `onConfirm` resolves to close, throws to stay
+open) and wrap your app root in `<FrappeUIProvider>`.
 
 ## DatePicker / TimePicker family
 
-Covers `DatePicker`, `DateRangePicker`, `DateTimePicker`, and `TimePicker`.
-They share the popover-trigger vocabulary.
+Covers `DatePicker`, `DateRangePicker`, `DateTimePicker`, and `TimePicker`. They
+share the popover-trigger vocabulary.
 
-| Before                          | After                            |
-| ------------------------------- | -------------------------------- |
-| `:value` prop                   | `v-model`                        |
-| `@change`                       | `@update:modelValue`             |
-| `placement="bottom-start"`      | `side` + `align` + `offset`      |
-| `:autoClose`                    | `:keepOpen` (inverted)           |
-| `allowCustom` / `readonly`      | `typeable`                       |
-| `minDate`/`maxDate`/`minTime`/`maxTime` | `min` / `max`            |
-| `#target`                       | `#trigger`                       |
+| Before                                  | After                       |
+| --------------------------------------- | --------------------------- |
+| `:value` prop                           | `v-model`                   |
+| `@change`                               | `@update:modelValue`        |
+| `placement="bottom-start"`              | `side` + `align` + `offset` |
+| `:autoClose`                            | `:keepOpen` (inverted)      |
+| `allowCustom` / `readonly`              | `typeable`                  |
+| `minDate`/`maxDate`/`minTime`/`maxTime` | `min` / `max`               |
+| `#target`                               | `#trigger`                  |
 
 Behavior changes that apply even if you don't touch your code:
 
@@ -84,12 +84,12 @@ Behavior changes that apply even if you don't touch your code:
 
 ## Selection family (Dropdown / Select / Combobox / MultiSelect)
 
-| Before                          | After                            |
-| ------------------------------- | -------------------------------- |
-| Dropdown `{ group, items }`     | `{ group, options }`             |
-| Select `#item-*` slot prop `option` | slot prop `item`             |
-| chevron / trailing content      | `#suffix` slot (replaces chevron)|
-| Combobox `createOption`         | `type: 'custom'` option + `condition` |
+| Before                              | After                                 |
+| ----------------------------------- | ------------------------------------- |
+| Dropdown `{ group, items }`         | `{ group, options }`                  |
+| Select `#item-*` slot prop `option` | slot prop `item`                      |
+| chevron / trailing content          | `#suffix` slot (replaces chevron)     |
+| Combobox `createOption`             | `type: 'custom'` option + `condition` |
 
 For the deprecated `Autocomplete`, see
 [Autocomplete (deprecated)](#autocomplete-deprecated).
@@ -97,19 +97,19 @@ For the deprecated `Autocomplete`, see
 ## Inputs
 
 Covers `TextInput`, `Textarea`, `Password`, `Checkbox`, `Switch`, `Rating`,
-`Slider`. All share the labeling contract (`label` / `description` / `error`
-/ `required`).
+`Slider`. All share the labeling contract (`label` / `description` / `error` /
+`required`).
 
-| Before                          | After                            |
-| ------------------------------- | -------------------------------- |
-| `Rating` `:rating_from`         | `:max`                           |
-| `Rating` `:readonly`            | `:disabled`                      |
-| `Switch` `@change`              | `@update:modelValue`             |
-| `Switch.labelClasses` / `Checkbox.padding` | `data-*` styling hooks|
-| `Password` `:value` + `@input` workaround | `v-model` (now works)  |
+| Before                                     | After                  |
+| ------------------------------------------ | ---------------------- |
+| `Rating` `:rating_from`                    | `:max`                 |
+| `Rating` `:readonly`                       | `:disabled`            |
+| `Switch` `@change`                         | `@update:modelValue`   |
+| `Switch.labelClasses` / `Checkbox.padding` | `data-*` styling hooks |
+| `Password` `:value` + `@input` workaround  | `v-model` (now works)  |
 
-`Slider` no longer hardcodes `aria-label="Volume"`. Pass `label` explicitly
-so the control is announced correctly.
+`Slider` no longer hardcodes `aria-label="Volume"`. Pass `label` explicitly so
+the control is announced correctly.
 
 The legacy `Input` component is deprecated. Use
 [`TextInput`](./components/textinput) for text-like modes, or `Textarea` /
@@ -117,9 +117,46 @@ The legacy `Input` component is deprecated. Use
 
 ## Divider
 
-| Before                  | After                   |
-| ----------------------- | ----------------------- |
-| `action.handler`        | `action.onClick`        |
+| Before           | After            |
+| ---------------- | ---------------- |
+| `action.handler` | `action.onClick` |
+
+## Tree
+
+The Tree was rebuilt from a single recursive `node` renderer into a stateful
+forest. It takes a `nodes` array, drives expansion through `v-model:expanded`,
+and scopes its per-row slots as `#item-*`. The `options` blob and the per-node
+internal collapse state are gone and sizing moves to CSS variables. Keyboard
+navigation, `role="tree"` ARIA, and opt-in drag-and-drop are new.
+
+| Before                                           | After                                          |
+| ------------------------------------------------ | ---------------------------------------------- |
+| `:node="root"` (single root object)              | `:nodes="[root]"` (array of roots)             |
+| internal per-node collapse                       | `v-model:expanded` (array of keys)             |
+| `:options="{ rowHeight, indentWidth }"`          | `--tree-row-height` / `--tree-indent` CSS vars |
+| `:options="{ showIndentationGuides }"`           | `guides="connectors" \| "lines" \| "none"`     |
+| `:options="{ defaultCollapsed: true }"`          | `defaultExpanded` (inverted)                   |
+| `#node="{ node, isCollapsed, toggleCollapsed }"` | `#item="{ node, expanded, toggle, … }"`        |
+| `#label`                                         | `#item-label`                                  |
+| `#icon`                                          | built-in chevron; override via `#item`         |
+
+```vue
+<!-- Before -->
+<Tree :node="root" node-key="name" :options="{ defaultCollapsed: false }">
+  <template #label="{ node }">{{ node.title }}</template>
+</Tree>
+
+<!-- After -->
+<Tree :nodes="[root]" node-key="name" default-expanded>
+  <template #item-label="{ node }">{{ node.title }}</template>
+</Tree>
+```
+
+Drag-and-drop is opt-in: set `draggable`, gate drops with
+`:move="({ node, target, position }) => …"`, and persist from
+`@drag-end="(info) => …"` — `info` is
+`{ node, from, to, position, oldIndex, newIndex }`, or `null` when the drag is
+cancelled.
 
 ## Icons
 
@@ -127,8 +164,10 @@ Replace `FeatherIcon` and Feather-name strings with `lucide-*` strings or a
 `Component`:
 
 ```vue
-<!-- Before -->        <Button icon="plus" />
-<!-- After -->         <Button icon="lucide-plus" />
+<!-- Before -->
+<Button icon="plus" />
+<!-- After -->
+<Button icon="lucide-plus" />
 ```
 
 Same for icon-name strings in `Dropdown` options:
@@ -155,10 +194,10 @@ Review the output, then run it without `--dry-run`:
 npx --package frappe-ui@beta tokens-v2 .
 ```
 
-The codemod renames espresso color tokens like `bg-surface-white` to `bg-surface-base`
-and merges static text size + weight class pairs, for example `text-base font-medium`
-to `text-base-medium`. Run it once per codebase; the token migration is not idempotent
-because some v2 names overlap with v0 names.
+The codemod renames espresso color tokens like `bg-surface-white` to
+`bg-surface-base` and merges static text size + weight class pairs, for example
+`text-base font-medium` to `text-base-medium`. Run it once per codebase; the
+token migration is not idempotent because some v2 names overlap with v0 names.
 
 ## Editor
 
@@ -174,41 +213,54 @@ and recipes.
 // Before
 import { TextEditor, TextEditorFixedMenu } from 'frappe-ui'
 // After
-import { Editor, EditorFixedMenu, RichTextKit, articleToolbar } from 'frappe-ui/editor'
+import {
+  Editor,
+  EditorFixedMenu,
+  RichTextKit,
+  articleToolbar,
+} from 'frappe-ui/editor'
 ```
 
-| Before                                          | After                                                            |
-| ----------------------------------------------- | ---------------------------------------------------------------- |
-| `import … from 'frappe-ui'`                     | `import … from 'frappe-ui/editor'`                               |
-| `<TextEditor>`                                  | `<Editor>`                                                       |
-| `:content="x" @change="x = $event"`             | `v-model="x"` (`@change` still emitted)                          |
-| HTML string only                                | `v-model` + `format="json"` for a JSON value                     |
-| `:starterkit-options="{ heading: { levels } }"` | `RichTextKit.configure({ heading: { levels } })` in `:extensions`|
+| Before                                          | After                                                                    |
+| ----------------------------------------------- | ------------------------------------------------------------------------ |
+| `import … from 'frappe-ui'`                     | `import … from 'frappe-ui/editor'`                                       |
+| `<TextEditor>`                                  | `<Editor>`                                                               |
+| `:content="x" @change="x = $event"`             | `v-model="x"` (`@change` still emitted)                                  |
+| HTML string only                                | `v-model` + `format="json"` for a JSON value                             |
+| `:starterkit-options="{ heading: { levels } }"` | `RichTextKit.configure({ heading: { levels } })` in `:extensions`        |
 | auto-loaded extension set (no opt-out)          | explicit `:extensions` — pick `CommentKit` / `RichTextKit` / `InlineKit` |
-| `:mentions` / `:tags` props                     | `kit.configure({ mention: { items, component }, tag: { items } })` |
-| `:bubble-menu="true"`                           | `<EditorBubbleMenu :items="articleToolbar">` in the default slot |
-| `:floating-menu="true"`                         | `<EditorFloatingMenu :items>`                                    |
-| `<TextEditorFixedMenu :buttons>`                | `<EditorFixedMenu :items>`                                       |
-| `<TextEditorContent>`                           | `<EditorContent>`                                                |
-| menu `:buttons`                                 | menu `:items`                                                    |
-| hand-rolled `textEditorMenuButtons` array       | `commentToolbar` / `articleToolbar` / `minimalToolbar` presets   |
-| `#top` / `#bottom` / `#editor` slots            | one default slot — you render `EditorContent` + menus yourself   |
-| `:uploadFunction` (optional, frappe default)    | `:upload-function` (required to enable uploads)                  |
+| `:mentions` / `:tags` props                     | `kit.configure({ mention: { items, component }, tag: { items } })`       |
+| `:bubble-menu="true"`                           | `<EditorBubbleMenu :items="articleToolbar">` in the default slot         |
+| `:floating-menu="true"`                         | `<EditorFloatingMenu :items>`                                            |
+| `<TextEditorFixedMenu :buttons>`                | `<EditorFixedMenu :items>`                                               |
+| `<TextEditorContent>`                           | `<EditorContent>`                                                        |
+| menu `:buttons`                                 | menu `:items`                                                            |
+| hand-rolled `textEditorMenuButtons` array       | `commentToolbar` / `articleToolbar` / `minimalToolbar` presets           |
+| `#top` / `#bottom` / `#editor` slots            | one default slot — you render `EditorContent` + menus yourself           |
+| `:uploadFunction` (optional, frappe default)    | `:upload-function` (required to enable uploads)                          |
 
 ### Compose, don't configure
 
 v0 took every option as a prop on `<TextEditor>` and auto-loaded every
-extension. v1 renders no chrome of its own — you place the building blocks inside
-its default slot and they pick up the editor from context (the `:editor` prop is
-only needed when composing primitives without `<Editor>`):
+extension. v1 renders no chrome of its own — you place the building blocks
+inside its default slot and they pick up the editor from context (the `:editor`
+prop is only needed when composing primitives without `<Editor>`):
 
 ```vue
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Editor, EditorContent, EditorBubbleMenu, RichTextKit, articleToolbar } from 'frappe-ui/editor'
+import {
+  Editor,
+  EditorContent,
+  EditorBubbleMenu,
+  RichTextKit,
+  articleToolbar,
+} from 'frappe-ui/editor'
 
 const content = ref('')
-const extensions = [RichTextKit.configure({ heading: { levels: [2, 3, 4, 5, 6] } })]
+const extensions = [
+  RichTextKit.configure({ heading: { levels: [2, 3, 4, 5, 6] } }),
+]
 </script>
 
 <template>
@@ -219,11 +271,11 @@ const extensions = [RichTextKit.configure({ heading: { levels: [2, 3, 4, 5, 6] }
 </template>
 ```
 
-Pick the kit per surface: `CommentKit` (light — no table/toc/slash), `RichTextKit`
-(full document), `InlineKit` (single-line). Configure kit members in place rather
-than via props — e.g. mentions/tags through `kit.configure({ mention: {...}, tag: {...} })`.
-To keep the mention/tag nodes rendering but disable the live popups, pass
-`mention: { items: null }`.
+Pick the kit per surface: `CommentKit` (light — no table/toc/slash),
+`RichTextKit` (full document), `InlineKit` (single-line). Configure kit members
+in place rather than via props — e.g. mentions/tags through
+`kit.configure({ mention: {...}, tag: {...} })`. To keep the mention/tag nodes
+rendering but disable the live popups, pass `mention: { items: null }`.
 
 For a fully custom layout (e.g. a title `<textarea>` as a sibling of the body),
 skip `<Editor>` and drive `useEditor` yourself — see
@@ -239,8 +291,8 @@ skip `<Editor>` and drive `useEditor` yourself — see
 - **Uploads need an explicit handler.** v0 silently invoked the Frappe upload;
   v1 requires `:upload-function`. In a Frappe app:
   `(file) => useFileUpload().upload(file, {})`.
-- **TipTap must be v3.** The v1 editor is built on TipTap 3 — pin `@tiptap/core`,
-  `@tiptap/pm`, and `@tiptap/vue-3` to `^3`.
+- **TipTap must be v3.** The v1 editor is built on TipTap 3 — pin
+  `@tiptap/core`, `@tiptap/pm`, and `@tiptap/vue-3` to `^3`.
 
 ## Autocomplete (deprecated)
 
@@ -249,24 +301,24 @@ removed in a future major release. It merged single- and multi-select via the
 `multiple` boolean; v1 splits them: [`Combobox`](./components/combobox) for
 single, [`MultiSelect`](./components/multiselect) for multiple.
 
-The model value changes shape. `Autocomplete` took and emitted the full
-option object; the new components model the value only. `Combobox` is
-`string | null` and `MultiSelect` is `string[]`. To read the full option,
-listen to `Combobox`'s `@update:selected-option`.
+The model value changes shape. `Autocomplete` took and emitted the full option
+object; the new components model the value only. `Combobox` is `string | null`
+and `MultiSelect` is `string[]`. To read the full option, listen to `Combobox`'s
+`@update:selected-option`.
 
-| Before (`Autocomplete`)         | After                                   |
-| ------------------------------- | --------------------------------------- |
-| `:multiple="false"` (default)   | use `Combobox`                          |
-| `:multiple="true"`              | use `MultiSelect`                        |
-| `v-model` (option or value)     | `v-model` (value / value array)         |
-| `@change`                       | `@update:modelValue`                    |
-| grouped `{ group, items }`      | grouped `{ group, options }`            |
-| `placement` (string)            | `side` + `align`                        |
-| `:showFooter`                   | `#footer` slot (MultiSelect has built-in)|
-| `:bodyClasses`                  | `data-slot` CSS                         |
-| `:maxOptions`                   | no equivalent                           |
-| `#target`                       | `#trigger`                              |
-| `#prefix` / `#suffix` / `#item-*`| same (`#suffix` now replaces chevron)  |
+| Before (`Autocomplete`)           | After                                     |
+| --------------------------------- | ----------------------------------------- |
+| `:multiple="false"` (default)     | use `Combobox`                            |
+| `:multiple="true"`                | use `MultiSelect`                         |
+| `v-model` (option or value)       | `v-model` (value / value array)           |
+| `@change`                         | `@update:modelValue`                      |
+| grouped `{ group, items }`        | grouped `{ group, options }`              |
+| `placement` (string)              | `side` + `align`                          |
+| `:showFooter`                     | `#footer` slot (MultiSelect has built-in) |
+| `:bodyClasses`                    | `data-slot` CSS                           |
+| `:maxOptions`                     | no equivalent                             |
+| `#target`                         | `#trigger`                                |
+| `#prefix` / `#suffix` / `#item-*` | same (`#suffix` now replaces chevron)     |
 
 ```vue
 <!-- Before -->
@@ -274,7 +326,11 @@ listen to `Combobox`'s `@update:selected-option`.
 <!-- country === { label: 'India', value: 'in' } -->
 
 <!-- After -->
-<Combobox v-model="country" :options="countries" @update:model-value="onChange" />
+<Combobox
+  v-model="country"
+  :options="countries"
+  @update:model-value="onChange"
+/>
 <!-- country === 'in' -->
 ```
 
@@ -285,15 +341,15 @@ grep -rln '<Autocomplete\b' src --include='*.vue'   # find usages
 grep -rln ':multiple' src --include='*.vue'         # these become MultiSelect
 ```
 
-`FormControl` itself is not deprecated, but its `type="autocomplete"` value
-is. Switch to `type="combobox"`, or use the standalone
+`FormControl` itself is not deprecated, but its `type="autocomplete"` value is.
+Switch to `type="combobox"`, or use the standalone
 [`Combobox`](./components/combobox).
 
 ## FAQ
 
-**Will my CSS break?** Where structure changed, components expose `data-*`
-hooks (`data-slot`, `data-state`, `data-size`, `data-variant`). Audit
-selectors that targeted tags or classes.
+**Will my CSS break?** Where structure changed, components expose `data-*` hooks
+(`data-slot`, `data-state`, `data-size`, `data-variant`). Audit selectors that
+targeted tags or classes.
 
 **Report bugs:** [file an issue](https://github.com/frappe/frappe-ui/issues/new)
 with the `v1-beta` label. Include the component name, before/after code,
