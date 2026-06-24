@@ -32,6 +32,20 @@ describe('Tree', () => {
     cy.contains('Node B').should('exist')
   })
 
+  it('seeds defaultExpanded when nodes arrive asynchronously', () => {
+    const data = ref<TreeNode[]>([])
+    cy.mount({
+      render: () =>
+        h(Tree, { nodes: data.value, nodeKey: 'id', defaultExpanded: true }),
+    })
+    cy.contains('Node A').should('not.exist')
+    cy.then(() => {
+      data.value = nodes
+    })
+    cy.contains('Node A').should('exist')
+    cy.contains('Node A-1').should('exist')
+  })
+
   it('toggles via the chevron', () => {
     cy.mount(Tree, { props: { nodes, nodeKey: 'id' } })
     cy.contains('Node A').should('not.exist')
@@ -103,13 +117,13 @@ describe('Tree', () => {
     cy.contains('Node A').should('not.exist')
   })
 
-  it('renders custom label and prefix/suffix slots', () => {
+  it('renders custom item-label and item-prefix/item-suffix slots', () => {
     cy.mount(Tree, {
       props: { nodes, nodeKey: 'id', defaultExpanded: true },
       slots: {
-        label: ({ node }: any) =>
+        'item-label': ({ node }: any) =>
           h('span', { 'data-cy': `label-${node.id}` }, `label-${node.label}`),
-        suffix: ({ node }: any) =>
+        'item-suffix': ({ node }: any) =>
           h('span', { 'data-cy': `suffix-${node.id}` }, '★'),
       },
     })
