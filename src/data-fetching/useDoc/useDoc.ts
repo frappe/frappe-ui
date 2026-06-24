@@ -133,11 +133,10 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
     immediate: false,
     refetch: false,
     onSuccess(data) {
-      let docWithType = { ...data, doctype }
-      if (transform) {
-        docWithType = transform(docWithType)
-      }
-      docStore.setDoc(docWithType)
+      // Store the untransformed doc; the `doc` computed applies `transform` on
+      // read. Transforming here too would run it twice (a bug for any
+      // non-idempotent transform). Mirrors afterFetch.
+      docStore.setDoc({ ...data, doctype })
       listStore.updateRow(doctype, data)
     },
   })
