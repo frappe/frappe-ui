@@ -22,7 +22,7 @@ const note = ref('')
       </span>
     </div>
 
-    <FloatingWindow v-model:mode="mode" title="Quick note" :initial-height="360">
+    <FloatingWindow v-model:mode="mode" title="Quick note">
       <div class="flex h-full flex-col gap-2 p-3">
         <Textarea
           v-model="note"

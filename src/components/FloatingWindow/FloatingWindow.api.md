@@ -20,34 +20,6 @@
     default: 'null'
   },
   {
-    name: 'initialWidth',
-    description: 'Default floating width, used when popping out.',
-    required: false,
-    type: 'number',
-    default: '460'
-  },
-  {
-    name: 'initialHeight',
-    description: 'Default floating height, used when popping out.',
-    required: false,
-    type: 'number',
-    default: '520'
-  },
-  {
-    name: 'minWidth',
-    description: 'Smallest width the panel can be resized to.',
-    required: false,
-    type: 'number',
-    default: '380'
-  },
-  {
-    name: 'minHeight',
-    description: 'Smallest height the panel can be resized to.',
-    required: false,
-    type: 'number',
-    default: '300'
-  },
-  {
     name: 'minimizable',
     description: 'Whether the window can collapse to the bottom-right tray. When `false`,\nthe minimize control is hidden, leaving only dock and pop-out, for\ncomposer-style windows that should never minimize.',
     required: false,

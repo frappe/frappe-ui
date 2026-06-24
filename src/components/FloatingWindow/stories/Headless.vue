@@ -10,11 +10,7 @@ const handle = ref<HTMLElement | null>(null)
 // it tracks to drive a responsive layout, which the boxed component can't do:
 // pop the panel out, drag it wider, and a reading pane opens beside the list.
 const { mode, width, style, dock, float, minimize, expandFromTray, startResize } =
-  useFloatingWindow(panel, handle, {
-    initialWidth: 620,
-    initialHeight: 460,
-    minWidth: 320,
-  })
+  useFloatingWindow(panel, handle)
 
 // Below this the panel is a single column; above it the reading pane appears.
 const TWO_PANE_WIDTH = 540

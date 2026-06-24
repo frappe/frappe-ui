@@ -84,8 +84,9 @@ const { mode, style, dock, float, minimize, startResize } =
 ```
 
 Bind `style` to your panel element and `ref="panel"` / `ref="handle"` to the
-panel and its drag handle. `options` accepts `initialMode`, `initialWidth`,
-`initialHeight`, `minWidth`, `minHeight`, and `storageKey`. Beyond the actions,
+panel and its drag handle. `options` accepts `initialMode` and `storageKey`. The
+window opens at a sensible default size and is resizable from there. Beyond the
+actions,
 the composable also exposes live geometry (`width`, `height`, `x`, `y`,
 `isDragging`, `isResizing`) that the boxed component keeps to itself. The demo
 reads that live `width` to build a responsive ticket panel: pop it out and drag

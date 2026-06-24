@@ -17,6 +17,13 @@ import type { FloatingWindowOptions, Rect, WindowMode } from './types'
 const TRAY_WIDTH = 320
 // Gap from the viewport edge when parked in the bottom-right corner.
 const EDGE_MARGIN = 24
+// Default floating size when a window pops out, absent any saved rect. Resizable
+// from there; the docked footprint is set by the host container, not these.
+const DEFAULT_WIDTH = 460
+const DEFAULT_HEIGHT = 520
+// Smallest the panel can be resized to.
+const MIN_WIDTH = 380
+const MIN_HEIGHT = 300
 
 // Only one window may be detached (floating or minimized) at a time. Opening a
 // new one pins the previous, like a single chat / mail composer. The active
@@ -50,22 +57,15 @@ export function useFloatingWindow(
   handle: Ref<HTMLElement | null>,
   options: FloatingWindowOptions = {},
 ) {
-  const {
-    initialMode = 'docked',
-    initialWidth = 460,
-    initialHeight = 520,
-    minWidth = 380,
-    minHeight = 300,
-    storageKey = null,
-  } = options
+  const { initialMode = 'docked', storageKey = null } = options
 
   const { width: viewportWidth, height: viewportHeight } = useWindowSize()
 
   const fallback: Rect = {
-    x: Math.max(0, viewportWidth.value - initialWidth - EDGE_MARGIN),
-    y: Math.max(0, viewportHeight.value - initialHeight - EDGE_MARGIN),
-    width: initialWidth,
-    height: initialHeight,
+    x: Math.max(0, viewportWidth.value - DEFAULT_WIDTH - EDGE_MARGIN),
+    y: Math.max(0, viewportHeight.value - DEFAULT_HEIGHT - EDGE_MARGIN),
+    width: DEFAULT_WIDTH,
+    height: DEFAULT_HEIGHT,
   }
   const saved = storageKey
     ? useStorage(storageKey, { mode: initialMode, rect: fallback })
@@ -176,12 +176,12 @@ export function useFloatingWindow(
     const stopMove = useEventListener('pointermove', (e: PointerEvent) => {
       width.value = clamp(
         origin.width + e.clientX - origin.x,
-        minWidth,
+        MIN_WIDTH,
         viewportWidth.value,
       )
       height.value = clamp(
         origin.height + e.clientY - origin.y,
-        minHeight,
+        MIN_HEIGHT,
         viewportHeight.value,
       )
     })

@@ -29,11 +29,7 @@ function removeTask(id: number) {
 
 <template>
   <div class="w-[440px]">
-    <FloatingWindow
-      title="My tasks"
-      storage-key="frappe-ui:docs:tasks-window"
-      :initial-height="360"
-    >
+    <FloatingWindow title="My tasks" storage-key="frappe-ui:docs:tasks-window">
       <div class="flex flex-col gap-0.5 px-2 py-2">
         <div
           v-for="task in tasks"

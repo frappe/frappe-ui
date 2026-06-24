@@ -124,14 +124,6 @@ const props = withDefaults(
      * geometry resets every session.
      */
     storageKey?: string | null
-    /** Default floating width, used when popping out. */
-    initialWidth?: number
-    /** Default floating height, used when popping out. */
-    initialHeight?: number
-    /** Smallest width the panel can be resized to. */
-    minWidth?: number
-    /** Smallest height the panel can be resized to. */
-    minHeight?: number
     /**
      * Whether the window can collapse to the bottom-right tray. When `false`,
      * the minimize control is hidden, leaving only dock and pop-out, for
@@ -142,10 +134,6 @@ const props = withDefaults(
   {
     title: '',
     storageKey: null,
-    initialWidth: 460,
-    initialHeight: 520,
-    minWidth: 380,
-    minHeight: 300,
     minimizable: true,
   },
 )
@@ -192,10 +180,6 @@ const {
   setMode,
 } = useFloatingWindow(panel, handle, {
   initialMode: modeModel.value,
-  initialWidth: props.initialWidth,
-  initialHeight: props.initialHeight,
-  minWidth: props.minWidth,
-  minHeight: props.minHeight,
   storageKey: props.storageKey,
 })
 

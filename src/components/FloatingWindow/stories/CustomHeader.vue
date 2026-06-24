@@ -27,7 +27,7 @@ async function send() {
 
 <template>
   <div class="w-[440px]">
-    <FloatingWindow :initial-height="420">
+    <FloatingWindow>
       <!--
         The `header` slot replaces the built-in title bar entirely. It becomes
         the drag handle while floating and supplies its own controls.

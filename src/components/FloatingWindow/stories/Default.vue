@@ -29,7 +29,7 @@ async function send() {
 
 <template>
   <div class="w-[440px]">
-    <FloatingWindow title="Messages" :initial-height="480">
+    <FloatingWindow title="Messages">
       <!--
         A real chat panel: messages scroll in the body, the composer pins to the
         footer. Pop it out from the title bar to keep chatting while you work.

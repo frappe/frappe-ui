@@ -36,7 +36,7 @@ const send = discard
 
 <template>
   <div class="w-[480px]">
-    <FloatingWindow title="Email Composer" :initial-height="480" :minimizable="false">
+    <FloatingWindow title="Email Composer" :minimizable="false">
       <!--
         The `actions` slot inserts controls before the built-in pop-out /
         minimize buttons, keeping the standard chrome. Here the CC / BCC toggles
