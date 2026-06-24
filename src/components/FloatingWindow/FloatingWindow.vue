@@ -49,12 +49,19 @@
               <Button
                 v-if="isMinimized"
                 variant="ghost"
+                label="Expand"
                 tooltip="Expand"
                 @click="expandFromTray"
               >
                 <template #icon><LucideMaximize2 class="h-4 w-4" /></template>
               </Button>
-              <Button v-else variant="ghost" tooltip="Minimize" @click="minimize">
+              <Button
+                v-else
+                variant="ghost"
+                label="Minimize"
+                tooltip="Minimize"
+                @click="minimize"
+              >
                 <template #icon><LucideMinus class="h-4 w-4" /></template>
               </Button>
             </template>
@@ -62,6 +69,7 @@
                  detached. The close (X) action always sits last. -->
             <Button
               variant="ghost"
+              :label="isDocked ? 'Pop out' : 'Close'"
               :tooltip="isDocked ? 'Pop out' : 'Close'"
               @click="isDocked ? float() : dock()"
             >
@@ -86,14 +94,21 @@
         <slot name="footer" :mode="mode" />
       </div>
 
-      <!-- Bottom-right resize grip -->
-      <div
+      <!-- Bottom-right resize grip. A focusable button so keyboard users can
+           resize with the arrow keys, mirroring the pointer drag. -->
+      <button
         v-if="isFloating"
+        type="button"
+        aria-label="Resize window"
         class="absolute bottom-0 right-0 flex h-4 w-4 cursor-nwse-resize items-end justify-end p-0.5"
         @pointerdown.prevent="startResize"
+        @keydown="onResizeKey"
       >
-        <LucideGripVertical class="h-3 w-3 rotate-45 text-ink-gray-4" />
-      </div>
+        <LucideGripVertical
+          class="h-3 w-3 rotate-45 text-ink-gray-4"
+          aria-hidden="true"
+        />
+      </button>
     </div>
   </Teleport>
 </template>
@@ -173,6 +188,7 @@ const {
   mode,
   style,
   startResize,
+  resizeBy,
   dock,
   float,
   minimize,
@@ -187,9 +203,28 @@ const isDocked = computed(() => mode.value === 'docked')
 const isFloating = computed(() => mode.value === 'floating')
 const isMinimized = computed(() => mode.value === 'minimized')
 
+// Keyboard resize: each arrow nudges the panel by a fixed step, the keyboard
+// counterpart to dragging the grip.
+const RESIZE_STEP = 16
+const RESIZE_DELTAS: Record<string, [number, number]> = {
+  ArrowRight: [RESIZE_STEP, 0],
+  ArrowLeft: [-RESIZE_STEP, 0],
+  ArrowDown: [0, RESIZE_STEP],
+  ArrowUp: [0, -RESIZE_STEP],
+}
+
+function onResizeKey(event: KeyboardEvent) {
+  const delta = RESIZE_DELTAS[event.key]
+  if (!delta) return
+  event.preventDefault()
+  resizeBy(...delta)
+}
+
 // The composable owns `mode` (it restores from storage), so mirror it into the
-// v-model in both directions without looping.
-watch(mode, (value) => (modeModel.value = value))
+// v-model in both directions without looping. Immediate so a host's
+// `v-model:mode` adopts a storage-restored mode on mount, not just on the next
+// change.
+watch(mode, (value) => (modeModel.value = value), { immediate: true })
 watch(modeModel, (value) => value !== mode.value && setMode(value))
 </script>
 

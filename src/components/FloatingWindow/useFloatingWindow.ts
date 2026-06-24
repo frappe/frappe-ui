@@ -165,6 +165,13 @@ export function useFloatingWindow(
     if (activeDocker === dock) setActiveDocker(null)
   })
 
+  /** Resize by a fixed delta, for the keyboard path on the resize grip. */
+  function resizeBy(dx: number, dy: number) {
+    width.value = clamp(width.value + dx, MIN_WIDTH, viewportWidth.value)
+    height.value = clamp(height.value + dy, MIN_HEIGHT, viewportHeight.value)
+    persist()
+  }
+
   function startResize(event: PointerEvent) {
     isResizing.value = true
     const origin = {
@@ -208,5 +215,6 @@ export function useFloatingWindow(
     expandFromTray,
     setMode,
     startResize,
+    resizeBy,
   }
 }
