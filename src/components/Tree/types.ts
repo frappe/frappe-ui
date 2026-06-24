@@ -81,7 +81,10 @@ export interface TreeProps {
   guides?: 'connectors' | 'lines' | 'none'
 
   /**
-   * Initial expansion state of nodes when `v-model:expanded` is not bound.
+   * Start with every node expanded. A one-shot convenience that seeds the open
+   * set on first load (async-safe — it waits for `nodes` to arrive). To open
+   * specific nodes or track expansion, use `v-model:expanded` instead; this is
+   * ignored once you provide your own keys.
    * @default false
    */
   defaultExpanded?: boolean
