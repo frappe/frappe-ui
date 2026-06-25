@@ -4,6 +4,7 @@
 import { ref } from 'vue'
 import { baseUrl, waitUntilValueChanges } from '../../mocks/utils'
 import { useCall, useDoc } from '../index'
+import { docStore } from '../docStore'
 
 describe('useDoc', () => {
   it('it returns expected object', async () => {
@@ -115,5 +116,63 @@ describe('useDoc', () => {
 
     // Verify that the doc was updated
     expect(user.doc.email).toBe(newEmail)
+  })
+
+  it('does not bind or fetch while the name is empty', async () => {
+    interface User {
+      name: string
+      email: string
+    }
+
+    const user = useDoc<User>({
+      baseUrl,
+      doctype: 'User',
+      name: '',
+    })
+
+    // No name → nothing to bind and no request should fire.
+    expect(user.doc).toBe(null)
+    expect(user.loading).toBe(false)
+  })
+
+  it('binds to the doc once a late-resolving name is set', async () => {
+    interface User {
+      name: string
+      email: string
+      first_name: string
+      last_name: string
+    }
+
+    // Name is empty at setup (e.g. bound to a doc that is still loading).
+    const name = ref('')
+    const user = useDoc<User>({
+      baseUrl,
+      doctype: 'User',
+      name,
+    })
+
+    // Nothing fetched or bound yet.
+    expect(user.doc).toBe(null)
+    expect(user.loading).toBe(false)
+
+    // Name resolves after setup — the doc ref should re-point to the real slot.
+    name.value = 'user1'
+
+    await waitUntilValueChanges(() => user.loading, true)
+    await waitUntilValueChanges(() => user.loading, false)
+
+    expect(user.doc).toStrictEqual({
+      doctype: 'User',
+      name: 'user1',
+      email: 'user1@example.com',
+      first_name: 'User',
+      last_name: '1',
+    })
+  })
+
+  it('throws when getDoc is called with a whitespace-only name', () => {
+    expect(() => docStore.getDoc('User', '   ', (d) => d)).toThrow(
+      'doctype and name are required',
+    )
   })
 })
