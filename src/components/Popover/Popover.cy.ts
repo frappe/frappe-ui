@@ -51,6 +51,14 @@ describe('Popover', () => {
         .should('exist')
     })
 
+    it('bare renders #default without the PopoverPanel shell', () => {
+      cy.mount(Popover, { props: { bare: true }, slots: NewSlots })
+
+      cy.get('[data-cy="trigger"]').click()
+      cy.get('[data-slot="content"]').find('[data-cy="content"]').should('exist')
+      cy.get('[data-slot="content-body"]').should('not.exist')
+    })
+
     it('wires aria-haspopup and aria-expanded on the trigger', () => {
       cy.mount(Popover, { slots: NewSlots })
 
@@ -261,6 +269,9 @@ describe('Popover', () => {
       cy.get('[data-cy="trigger"]').click()
       cy.get('[data-cy="full-body"]').should('exist')
       cy.get('[data-cy="inner"]').should('not.exist')
+      // #body is bare: it must NOT be wrapped in the PopoverPanel shell, so a
+      // consumer bringing its own surface doesn't get a panel-in-a-panel.
+      cy.get('[data-slot="content-body"]').should('not.exist')
     })
 
     it('maps show / v-model:show -> open', () => {

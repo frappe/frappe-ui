@@ -45,6 +45,14 @@ Handy for select-style menus where the panel should line up under a wide button.
 
 <ComponentPreview name="Popover-MatchTriggerWidth" />
 
+## Bare
+
+Set `bare` to drop the panel shell (background, border, shadow, rounding) so
+`#default` content can bring its own surface — useful for pickers and cards that
+are already styled. This replaces the deprecated `#body` slot.
+
+<ComponentPreview name="Popover-Bare" />
+
 ## Styling
 
 The popover ships with its panel shell baked in

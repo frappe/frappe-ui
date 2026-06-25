@@ -80,6 +80,7 @@ interface PopoverProps {
   collisionPadding?: number
   dismissible?: boolean
   matchTriggerWidth?: boolean
+  bare?: boolean
 
   // --- deprecated, kept working through v1.x ---
   /** @deprecated use `v-model:open` */
@@ -117,6 +118,9 @@ Defaults:
 - `collisionPadding = 10`
 - `dismissible = true`
 - `matchTriggerWidth = false`
+- `bare = false` — when `true`, `#default` renders without the PopoverPanel shell
+  (no background, border, shadow, rounding); the content brings its own surface.
+  Mirrors Dialog's `bare`. The deprecated `#body` slot maps to this behavior.
 
 Positioning follows the shared popover positioning conventions in
 [`selection.md`](./selection.md).
@@ -171,9 +175,12 @@ Supported slots:
   - rendered via reka `PopoverTrigger` **as-child**: click, keyboard, and aria
     wiring are automatic. Do **not** hand-wire `@click` here.
 - `#default="{ open, close }"`
-  - panel content, rendered inside the standard `PopoverPanel` shell
+  - panel content, rendered inside the standard `PopoverPanel` shell (or bare,
+    with no shell, when the `bare` prop is set)
 - `#body` / `#body-main`
-  - aliases of `#default` (compatibility); same `{ open, close }` props
+  - compatibility aliases with the same `{ open, close }` props. `#body` is a
+    full body override and renders **bare** (no shell), matching its v0 contract
+    — equivalent to `#default` + `bare`. `#body-main` renders inside the shell.
 - `#target="{ togglePopover, updatePosition, isOpen, open, close }"`
   - **deprecated.** Rendered via reka `PopoverAnchor` **as-child** with the old
     manual-wiring contract preserved: nothing is auto-wired, the consumer calls
@@ -186,10 +193,10 @@ Exact slot rules:
 - the deprecated `#target` keeps its manual contract so existing
   `@click="togglePopover"` consumers do not double-toggle when migrated to a
   real `PopoverTrigger`
-- in the rebuilt API the shell is always provided by `PopoverPanel`; the old
-  "shell only when `#body` is omitted" semantic is replaced — `#default`,
-  `#body`, and `#body-main` content all render inside the same `PopoverPanel`
-  shell
+- the shell is provided by `PopoverPanel` for shelled content (`#default`
+  without `bare`, and `#body-main`). Bare content — `#default` + `bare`, or the
+  legacy `#body` override — renders directly in `PopoverContent` with no shell,
+  so consumers bringing their own surface don't get a panel-in-a-panel
 
 ### Exposed
 
@@ -221,7 +228,8 @@ Mapping table:
 | `popoverClass` | `data-slot` CSS hooks | no-op + warn |
 | `transition="default"` | default motion | no-op (motion is on by default) |
 | `#target` | `#trigger` | old manual contract preserved on `#target` |
-| `#body` / `#body-main` | `#default` | aliases, same `{ open, close }` props |
+| `#body` | `#default` + `bare` | full override; renders bare (no shell) |
+| `#body-main` | `#default` | renders inside the shell |
 
 Use the existing `warnDeprecated(name, replacement, docHref?)` helper at
 `src/utils/warnDeprecated.ts`: it is a no-op in production, fires once per

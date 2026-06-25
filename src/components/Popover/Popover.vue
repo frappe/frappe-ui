@@ -44,17 +44,16 @@
         @mouseleave="onMouseleave"
         @interact-outside="onInteractOutside"
       >
-        <PopoverPanel :motion="contentMotion">
-          <!--
-            New #default renders directly in the shared shell. The deprecated
-            #body / #body-main path is preserved: #body overrides everything
-            (no inner chrome), otherwise #body-main renders inside the default
-            container — matching the old "shell-by-default, escape via #body".
-          -->
+        <!--
+          Bare content renders without the shell: the `bare` prop on #default,
+          or the legacy #body slot (a full body override that never had default
+          chrome). Everything else renders inside the shared PopoverPanel shell.
+        -->
+        <slot v-if="hasBareBody" name="body" v-bind="legacySlotProps" />
+        <slot v-else-if="hasNewContent && bare" v-bind="newSlotProps" />
+        <PopoverPanel v-else :motion="contentMotion">
           <slot v-if="hasNewContent" v-bind="newSlotProps" />
-          <slot v-else name="body" v-bind="legacySlotProps">
-            <slot name="body-main" v-bind="legacySlotProps" />
-          </slot>
+          <slot v-else name="body-main" v-bind="legacySlotProps" />
         </PopoverPanel>
       </PopoverContent>
     </PopoverPortal>
@@ -93,6 +92,7 @@ const props = withDefaults(defineProps<PopoverProps>(), {
   collisionPadding: 10,
   dismissible: true,
   matchTriggerWidth: false,
+  bare: false,
   // Deprecated defaults preserved for the legacy paths.
   show: undefined,
   trigger: 'click',
@@ -116,6 +116,10 @@ const useNewTrigger = computed(() => Boolean(slots.trigger))
 const hasNewContent = computed(
   () => Boolean(slots.default) && !slots.body && !slots['body-main'],
 )
+// Legacy #body was a full body override with no default chrome. It must render
+// OUTSIDE PopoverPanel so consumers that bring their own surface (e.g. gameplan
+// EmojiPicker) don't get a panel-in-a-panel. #body-main still renders inside.
+const hasBareBody = computed(() => !hasNewContent.value && Boolean(slots.body))
 
 // -----------------------------------------------------------------------------
 // Back-compat: precedence is "new prop wins", with a one-time dev warning when
@@ -206,7 +210,10 @@ if (slots.target) {
   warnDeprecated('Popover slot "#target"', 'the "#trigger" slot')
 }
 if (slots.body || slots['body-main']) {
-  warnDeprecated('Popover slots "#body"/"#body-main"', 'the "#default" slot')
+  warnDeprecated(
+    'Popover slots "#body"/"#body-main"',
+    'the "#default" slot (use the `bare` prop in place of "#body")',
+  )
 }
 
 // -----------------------------------------------------------------------------

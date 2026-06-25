@@ -62,6 +62,13 @@
     default: 'false'
   },
   {
+    name: 'bare',
+    description: 'Render `#default` without the panel shell (no background, border, shadow,\nor rounding). The content brings its own surface. Mirrors Dialog\'s `bare`.',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  },
+  {
     name: 'show',
     description: '',
     required: false,

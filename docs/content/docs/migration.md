@@ -110,7 +110,8 @@ warning and the new prop wins.
 | `popoverClass`                                     | `data-slot` CSS hooks (no-op + warns)                                                               |
 | `transition="default"`                            | built-in motion (no-op)                                                                            |
 | `#target` slot                                     | `#trigger` (old `#target` contract preserved with manual wiring; `updatePosition` is now a no-op)  |
-| `#body` / `#body-main` slots                       | `#default`                                                                                          |
+| `#body` slot                                       | `#default` + `bare` prop (renders without the panel shell)                                          |
+| `#body-main` slot                                  | `#default`                                                                                          |
 
 Hover-driven panels move to the new [`HoverCard`](./components/hovercard)
 component, which keeps `hoverDelay` / `leaveDelay` in seconds.

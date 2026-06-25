@@ -41,6 +41,12 @@ export interface PopoverProps {
   /** Whether the content's min-width matches the trigger width. */
   matchTriggerWidth?: boolean
 
+  /**
+   * Render `#default` without the panel shell (no background, border, shadow,
+   * or rounding). The content brings its own surface. Mirrors Dialog's `bare`.
+   */
+  bare?: boolean
+
   // ---------------------------------------------------------------------------
   // Deprecated props (kept working through v1.x — see Popover.vue back-compat).
   // ---------------------------------------------------------------------------
