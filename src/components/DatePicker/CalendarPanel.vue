@@ -91,7 +91,7 @@
               <button
                 v-else
                 type="button"
-                class="flex size-7 items-center justify-center text-sm transition-colors duration-100 focus:outline-none focus:ring-2 focus:ring-outline-gray-2"
+                class="flex size-7 items-center justify-center text-sm transition-colors duration-100"
                 :class="cellClass(cell)"
                 role="gridcell"
                 :aria-selected="ariaSelected(cell)"
@@ -181,7 +181,7 @@
             v-for="(m, i) in months"
             type="button"
             :key="m"
-            class="w-full text-ink-gray-8 shrink-0 h-7 rounded py-1 text-sm text-center cursor-pointer transition-colors duration-100 focus:outline-none focus:ring-2 focus:ring-outline-gray-2"
+            class="w-full text-ink-gray-8 shrink-0 h-7 rounded py-1 text-sm text-center cursor-pointer transition-colors duration-100"
             :class="
               i === currentMonth
                 ? 'bg-surface-gray-2 hover:bg-surface-gray-3'
