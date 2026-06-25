@@ -8,7 +8,7 @@ import {
 } from 'reka-ui'
 import { computed } from 'vue'
 import PopoverPanel from '../shared/popover/PopoverPanel.vue'
-import type { HoverCardProps, HoverCardEmits } from './types'
+import type { HoverCardProps } from './types'
 
 defineOptions({
   inheritAttrs: false,
@@ -24,8 +24,6 @@ const props = withDefaults(defineProps<HoverCardProps>(), {
   leaveDelay: 0.3,
   arrow: false,
 })
-
-defineEmits<HoverCardEmits>()
 
 const open = defineModel<boolean>('open', { default: false })
 

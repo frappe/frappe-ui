@@ -45,7 +45,3 @@ export interface HoverCardProps {
    */
   arrow?: boolean
 }
-
-export type HoverCardEmits = {
-  'update:open': [value: boolean]
-}
