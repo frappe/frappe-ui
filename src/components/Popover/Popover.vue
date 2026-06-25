@@ -1,169 +1,284 @@
 <template>
-  <PopoverRoot v-model:open="isOpen" @update:open="onUpdateOpen">
-    <PopoverAnchor asChild>
+  <PopoverRoot v-model:open="isOpen">
+    <!--
+      New API: #trigger is rendered through reka's PopoverTrigger as-child, so
+      click / keyboard / aria are auto-wired and pointerdown feeds the motion
+      classifier. The legacy #target slot keeps using PopoverAnchor with manual
+      wiring (and hover timers) so existing callers do not double-toggle.
+    -->
+    <PopoverTrigger
+      v-if="useNewTrigger"
+      as-child
+      data-slot="trigger"
+      @pointerdown="markPointerDown"
+    >
+      <slot name="trigger" v-bind="newSlotProps" />
+    </PopoverTrigger>
+    <PopoverAnchor v-else as-child>
       <div
         ref="anchorRef"
         v-bind="$attrs"
         class="flex"
+        @pointerdown="markPointerDown"
         @mouseover="onMouseover"
         @mouseleave="onMouseleave"
       >
-        <slot
-          name="target"
-          v-bind="{
-            togglePopover,
-            updatePosition,
-            open,
-            close,
-            isOpen,
-          }"
-        />
+        <slot name="target" v-bind="legacySlotProps" />
       </div>
     </PopoverAnchor>
-    <PopoverPortal>
+
+    <PopoverPortal :to="portalTo">
       <PopoverContent
-        :side="placementSide"
-        :align="placementAlign"
-        :sideOffset="offset"
-        :collisionPadding="collisionPadding"
+        data-slot="content"
+        class="z-[100] origin-[var(--reka-popover-content-transform-origin)]"
+        :side="resolvedSide"
+        :align="resolvedAlign"
+        :side-offset="offset"
+        :collision-padding="collisionPadding"
         :style="{
-          minWidth: matchTargetWidth
+          minWidth: resolvedMatchTriggerWidth
             ? 'var(--reka-popover-trigger-width)'
             : undefined,
         }"
-        :class="['PopoverContent', { 'has-transition': hasTransition }]"
-        @mouseover="
-          () => {
-            pointerOverTargetOrPopup = true
-          }
-        "
+        @mouseover="onContentMouseover"
         @mouseleave="onMouseleave"
         @interact-outside="onInteractOutside"
       >
-        <div class="relative" :class="['body-container', popoverClass]">
-          <slot
-            name="body"
-            v-bind="{ togglePopover, updatePosition, open, close, isOpen }"
-          >
-            <div class="rounded-lg border bg-surface-elevation-2 shadow-xl">
-              <slot
-                name="body-main"
-                v-bind="{
-                  togglePopover,
-                  updatePosition,
-                  open,
-                  close,
-                  isOpen,
-                }"
-              />
-            </div>
+        <PopoverPanel :motion="contentMotion">
+          <!--
+            New #default renders directly in the shared shell. The deprecated
+            #body / #body-main path is preserved: #body overrides everything
+            (no inner chrome), otherwise #body-main renders inside the default
+            container — matching the old "shell-by-default, escape via #body".
+          -->
+          <slot v-if="hasNewContent" v-bind="newSlotProps" />
+          <slot v-else name="body" v-bind="legacySlotProps">
+            <slot name="body-main" v-bind="legacySlotProps" />
           </slot>
-        </div>
+        </PopoverPanel>
       </PopoverContent>
     </PopoverPortal>
   </PopoverRoot>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onUnmounted } from 'vue'
+import { computed, onUnmounted, ref, useSlots, watch } from 'vue'
 import {
   PopoverAnchor,
   PopoverContent,
   PopoverPortal,
   PopoverRoot,
+  PopoverTrigger,
 } from 'reka-ui'
-import { PopoverProps, PopoverEmits } from './types'
-
-const props = withDefaults(defineProps<PopoverProps>(), {
-  show: undefined,
-  trigger: 'click',
-  hoverDelay: 0,
-  leaveDelay: 0.5,
-  placement: 'bottom-start',
-  popoverClass: '',
-  transition: null,
-  hideOnBlur: true,
-  collisionPadding: 10,
-})
-
-const emit = defineEmits<{
-  (event: 'open'): void
-  (event: 'close'): void
-  (event: 'update:show', value: boolean): void
-}>()
-
-defineExpose({ open, close })
+import PopoverPanel from '../shared/popover/PopoverPanel.vue'
+import { usePopoverMotion } from '../../composables/usePopoverMotion'
+import { warnDeprecated } from '../../utils/warnDeprecated'
+import type {
+  PopoverEmits,
+  PopoverLegacySlotProps,
+  PopoverProps,
+  PopoverSlotProps,
+} from './types'
 
 defineOptions({
   inheritAttrs: false,
 })
 
+const props = withDefaults(defineProps<PopoverProps>(), {
+  open: undefined,
+  side: 'bottom',
+  align: 'start',
+  offset: 4,
+  portalTo: 'body',
+  collisionPadding: 10,
+  dismissible: true,
+  matchTriggerWidth: false,
+  // Deprecated defaults preserved for the legacy paths.
+  show: undefined,
+  trigger: 'click',
+  hoverDelay: 0,
+  leaveDelay: 0.5,
+  placement: undefined,
+  popoverClass: undefined,
+  transition: undefined,
+  hideOnBlur: undefined,
+  matchTargetWidth: undefined,
+})
+
+const emit = defineEmits<PopoverEmits>()
+
+const slots = useSlots()
+
+// -----------------------------------------------------------------------------
+// Slot selection — new contract on #trigger/#default, legacy on #target/#body.
+// -----------------------------------------------------------------------------
+const useNewTrigger = computed(() => Boolean(slots.trigger))
+const hasNewContent = computed(
+  () => Boolean(slots.default) && !slots.body && !slots['body-main'],
+)
+
+// -----------------------------------------------------------------------------
+// Back-compat: precedence is "new prop wins", with a one-time dev warning when
+// BOTH the old and the new prop are bound and a silent mapping when only the old
+// one is bound.
+// -----------------------------------------------------------------------------
+function bound(value: unknown): boolean {
+  return value !== undefined
+}
+
+// show / v-model:show -> open / v-model:open
+const showControlled = computed(() => bound(props.open) || bound(props.show))
+function readDeprecatedOpen(): boolean | undefined {
+  if (bound(props.open) && bound(props.show)) {
+    warnDeprecated('Popover prop "show"', '"open" / v-model:open')
+  }
+  if (bound(props.open)) return props.open
+  return props.show
+}
+
+// placement -> side + align
+const resolvedSide = computed(() => {
+  if (bound(props.placement)) {
+    if (props.side !== 'bottom') {
+      warnDeprecated('Popover prop "placement"', '"side" + "align"')
+      return props.side
+    }
+    return props.placement!.split('-')[0] as PopoverProps['side']
+  }
+  return props.side
+})
+const resolvedAlign = computed(() => {
+  if (bound(props.placement)) {
+    if (props.align !== 'start') {
+      warnDeprecated('Popover prop "placement"', '"side" + "align"')
+      return props.align
+    }
+    const [, align] = props.placement!.split('-')
+    return (align ?? 'center') as PopoverProps['align']
+  }
+  return props.align
+})
+
+// hideOnBlur -> dismissible
+const resolvedDismissible = computed(() => {
+  if (bound(props.hideOnBlur)) {
+    if (props.dismissible !== true) {
+      warnDeprecated('Popover prop "hideOnBlur"', '"dismissible"')
+      return props.dismissible
+    }
+    return props.hideOnBlur as boolean
+  }
+  return props.dismissible
+})
+
+// matchTargetWidth -> matchTriggerWidth
+const resolvedMatchTriggerWidth = computed(() => {
+  if (bound(props.matchTargetWidth)) {
+    if (props.matchTriggerWidth !== false) {
+      warnDeprecated('Popover prop "matchTargetWidth"', '"matchTriggerWidth"')
+      return props.matchTriggerWidth
+    }
+    return props.matchTargetWidth as boolean
+  }
+  return props.matchTriggerWidth
+})
+
+// One-time warnings for no-op / split-out deprecated surfaces.
+watch(
+  () => props.trigger,
+  (value) => {
+    if (value === 'hover') {
+      warnDeprecated(
+        'Popover prop trigger="hover"',
+        'the <HoverCard> component',
+      )
+    }
+  },
+  { immediate: true },
+)
+if (bound(props.popoverClass) && props.popoverClass !== '') {
+  warnDeprecated('Popover prop "popoverClass"', 'the data-slot CSS hooks')
+}
+if (props.transition === 'default') {
+  warnDeprecated('Popover prop transition="default"', 'the built-in motion')
+}
+if (slots.target) {
+  warnDeprecated('Popover slot "#target"', 'the "#trigger" slot')
+}
+if (slots.body || slots['body-main']) {
+  warnDeprecated('Popover slots "#body"/"#body-main"', 'the "#default" slot')
+}
+
+// -----------------------------------------------------------------------------
+// Open state (controlled via open/show, otherwise uncontrolled).
+// -----------------------------------------------------------------------------
 const _isOpen = ref(false)
-const pointerOverTargetOrPopup = ref(false)
-const hoverTimer = ref<number | null>(null)
-const leaveTimer = ref<number | null>(null)
 const anchorRef = ref<HTMLElement | null>(null)
 
-const isOpen = computed({
-  get: () => (isShowPropPassed.value ? props.show : _isOpen.value),
+const isOpen = computed<boolean>({
+  get: () =>
+    showControlled.value ? Boolean(readDeprecatedOpen()) : _isOpen.value,
   set: (value: boolean) => {
-    if (!isShowPropPassed.value) {
+    if (!showControlled.value) {
       _isOpen.value = value
     }
+    emit('update:open', value)
+    // Deprecated mirror — keep firing for callers still listening on it.
     emit('update:show', value)
+    if (value) emit('open')
+    else emit('close')
   },
 })
 
-const isShowPropPassed = computed(() => {
-  return props.show !== undefined
-})
-
-const placementSide = computed(() => {
-  const [side] = props.placement.split('-')
-  return side as 'top' | 'right' | 'bottom' | 'left'
-})
-
-const placementAlign = computed(() => {
-  const [, align] = props.placement.split('-')
-  if (!align) return 'center'
-  return align as 'start' | 'center' | 'end'
-})
-
-function togglePopover(flag?: boolean | Event) {
-  if (flag instanceof Event) {
-    flag = undefined
-  }
-  if (flag == null) {
-    flag = !isOpen.value
-  }
-  flag = Boolean(flag)
-  if (flag) {
-    open()
-  } else {
-    close()
-  }
-}
-
-function updatePosition() {
-  // not needed
-}
+const { motion: contentMotion, onPointerDown: markPointerDown } =
+  usePopoverMotion(
+    computed(() =>
+      showControlled.value ? Boolean(readDeprecatedOpen()) : _isOpen.value,
+    ),
+  )
 
 function open() {
+  if (isOpen.value) return
   isOpen.value = true
 }
 
 function close() {
+  if (!isOpen.value) return
   isOpen.value = false
 }
 
-function onUpdateOpen(value: boolean) {
-  emit('update:show', value)
-  if (value) {
-    emit('open')
-  } else {
-    emit('close')
-  }
+function togglePopover(flag?: boolean | Event) {
+  if (flag instanceof Event) flag = undefined
+  if (flag == null) flag = !isOpen.value
+  if (Boolean(flag)) open()
+  else close()
 }
+
+function updatePosition() {
+  // No-op — reka handles positioning. Kept for legacy #target callers.
+}
+
+defineExpose({ open, close })
+
+// -----------------------------------------------------------------------------
+// Slot props.
+// -----------------------------------------------------------------------------
+const newSlotProps = computed<PopoverSlotProps>(() => ({ open, close }))
+const legacySlotProps = computed<PopoverLegacySlotProps>(() => ({
+  togglePopover,
+  updatePosition,
+  open,
+  close,
+  isOpen: isOpen.value,
+}))
+
+// -----------------------------------------------------------------------------
+// Legacy hover behavior (trigger="hover") — preserved verbatim for v1.x.
+// Moves to <HoverCard> in a future release; warning fires above.
+// -----------------------------------------------------------------------------
+const pointerOverTargetOrPopup = ref(false)
+const hoverTimer = ref<number | null>(null)
+const leaveTimer = ref<number | null>(null)
 
 function onMouseover() {
   pointerOverTargetOrPopup.value = true
@@ -171,20 +286,21 @@ function onMouseover() {
     clearTimeout(leaveTimer.value)
     leaveTimer.value = null
   }
-  if (props.trigger === 'hover') {
-    if (props.hoverDelay) {
-      hoverTimer.value = setTimeout(
-        () => {
-          if (pointerOverTargetOrPopup.value) {
-            open()
-          }
-        },
-        Number(props.hoverDelay) * 1000,
-      ) as unknown as number
-    } else {
-      open()
-    }
+  if (props.trigger !== 'hover') return
+  if (props.hoverDelay) {
+    hoverTimer.value = setTimeout(
+      () => {
+        if (pointerOverTargetOrPopup.value) open()
+      },
+      Number(props.hoverDelay) * 1000,
+    ) as unknown as number
+  } else {
+    open()
   }
+}
+
+function onContentMouseover() {
+  pointerOverTargetOrPopup.value = true
 }
 
 function onMouseleave() {
@@ -193,119 +309,51 @@ function onMouseleave() {
     clearTimeout(hoverTimer.value)
     hoverTimer.value = null
   }
-  if (props.trigger === 'hover') {
-    if (leaveTimer.value) {
-      clearTimeout(leaveTimer.value)
-    }
-    if (props.leaveDelay) {
-      leaveTimer.value = setTimeout(
-        () => {
-          if (!pointerOverTargetOrPopup.value) {
-            close()
-          }
-        },
-        Number(props.leaveDelay) * 1000,
-      ) as unknown as number
-    } else {
-      if (!pointerOverTargetOrPopup.value) {
-        close()
-      }
-    }
+  if (props.trigger !== 'hover') return
+  if (leaveTimer.value) clearTimeout(leaveTimer.value)
+  if (props.leaveDelay) {
+    leaveTimer.value = setTimeout(
+      () => {
+        if (!pointerOverTargetOrPopup.value) close()
+      },
+      Number(props.leaveDelay) * 1000,
+    ) as unknown as number
+  } else if (!pointerOverTargetOrPopup.value) {
+    close()
   }
 }
 
 function onInteractOutside(event: Event) {
-  if (!props.hideOnBlur) {
+  if (!resolvedDismissible.value) {
     event.preventDefault()
     return
   }
-
-  // Check if the click is on the trigger/anchor element
+  // Prevent close-then-reopen flicker when clicking the legacy #target anchor.
   const target = event.target as Element
   if (
     anchorRef.value &&
     (anchorRef.value.contains(target) || anchorRef.value === target)
   ) {
     event.preventDefault()
-    return
   }
 }
 
-const hasTransition = computed(() => {
-  return props.transition === 'default'
-})
-
-// Cleanup timers on unmount
 onUnmounted(() => {
-  if (hoverTimer.value) {
-    clearTimeout(hoverTimer.value)
-  }
-  if (leaveTimer.value) {
-    clearTimeout(leaveTimer.value)
-  }
+  if (hoverTimer.value) clearTimeout(hoverTimer.value)
+  if (leaveTimer.value) clearTimeout(leaveTimer.value)
 })
 
 defineSlots<{
-  /** Content of the trigger/anchor element */
-  target?: (props: {
-    togglePopover: () => void
-    updatePosition: () => void
-    open: () => void
-    close: () => void
-    isOpen: boolean
-  }) => any
+  /** Trigger element. Rendered via reka PopoverTrigger as-child. */
+  trigger?: (props: PopoverSlotProps) => any
+  /** Popover content, rendered inside the shared panel shell. */
+  default?: (props: PopoverSlotProps) => any
 
-  /** Main content of the popover body */
-  body?: (props: {
-    togglePopover: () => void
-    updatePosition: () => void
-    open: () => void
-    close: () => void
-    isOpen: boolean
-  }) => any
-
-  /** Inner content inside the default body container */
-  'body-main'?: (props: {
-    togglePopover: () => void
-    updatePosition: () => void
-    open: () => void
-    close: () => void
-    isOpen: boolean
-  }) => any
+  /** @deprecated Use `#trigger`. Rendered via reka PopoverAnchor (manual wiring). */
+  target?: (props: PopoverLegacySlotProps) => any
+  /** @deprecated Use `#default`. Full body override (no default chrome). */
+  body?: (props: PopoverLegacySlotProps) => any
+  /** @deprecated Use `#default`. Inner content inside the default container. */
+  'body-main'?: (props: PopoverLegacySlotProps) => any
 }>()
-
 </script>
-
-<style>
-/* Default transition animations */
-@keyframes popover-enter {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes popover-exit {
-  from {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-}
-
-/* Default transition */
-.PopoverContent.has-transition[data-state='open'] {
-  animation: popover-enter 150ms ease-out;
-}
-
-.PopoverContent.has-transition[data-state='closed'] {
-  animation: popover-exit 150ms ease-in;
-}
-</style>

@@ -30,7 +30,7 @@ import {
   SelectViewport,
 } from 'reka-ui'
 import OptionIcon from '../shared/selection/OptionIcon.vue'
-import '../shared/selection/popoverMotion.css'
+import PopoverPanel from '../shared/popover/PopoverPanel.vue'
 import {
   EMPTY_VALUE_PREFIX,
   inputFontSizeClasses,
@@ -78,10 +78,10 @@ const {
 const hasLabeling = computed(() => {
   return Boolean(
     props.label ||
-      props.description ||
-      hasError.value ||
-      slots.label ||
-      slots.description,
+    props.description ||
+    hasError.value ||
+    slots.label ||
+    slots.description,
   )
 })
 
@@ -247,53 +247,52 @@ defineSlots<SelectSlots>()
       </template>
     </InputLabel>
     <SelectRoot v-model="internalModel" v-model:open="open" v-bind="rootAttrs">
-    <SelectTrigger
-      :id="inputId"
-      data-slot="trigger"
-      v-bind="triggerAttrs"
-      :class="[
-        triggerClasses,
-        hasLabeling ? 'w-full' : null,
-        hasLabeling ? null : (attrs.class as any),
-      ]"
-      :style="hasLabeling ? null : (attrs.style as any)"
-      :disabled="disabled"
-      :aria-invalid="hasError || undefined"
-      :aria-errormessage="hasError ? errorMessageId : undefined"
-      :aria-describedby="describedBy"
-      :aria-required="required || undefined"
-      :data-invalid="hasError ? 'true' : undefined"
-      :data-required="required ? 'true' : undefined"
-      @pointerdown="markPointerDown"
-    >
-      <template v-if="$slots.trigger">
-        <slot
-          name="trigger"
-          v-bind="triggerSlotProps"
-        />
-        <div
-          data-slot="trigger-value"
-          :class="[
-            'pointer-events-none absolute inset-0 flex items-center overflow-hidden',
-            triggerContentPadding,
-          ]"
-          aria-hidden="true"
-        >
-          <SelectValue
-            :placeholder="placeholder"
-            class="max-w-full truncate opacity-0"
-            :class="{ 'text-ink-gray-4': showPlaceholderForSelected }"
+      <SelectTrigger
+        :id="inputId"
+        data-slot="trigger"
+        v-bind="triggerAttrs"
+        :class="[
+          triggerClasses,
+          hasLabeling ? 'w-full' : null,
+          hasLabeling ? null : (attrs.class as any),
+        ]"
+        :style="hasLabeling ? null : (attrs.style as any)"
+        :disabled="disabled"
+        :aria-invalid="hasError || undefined"
+        :aria-errormessage="hasError ? errorMessageId : undefined"
+        :aria-describedby="describedBy"
+        :aria-required="required || undefined"
+        :data-invalid="hasError ? 'true' : undefined"
+        :data-required="required ? 'true' : undefined"
+        @pointerdown="markPointerDown"
+      >
+        <template v-if="$slots.trigger">
+          <slot name="trigger" v-bind="triggerSlotProps" />
+          <div
+            data-slot="trigger-value"
+            :class="[
+              'pointer-events-none absolute inset-0 flex items-center overflow-hidden',
+              triggerContentPadding,
+            ]"
+            aria-hidden="true"
           >
-            <template v-if="selectedOption">
-              {{
-                showPlaceholderForSelected ? placeholder : selectedOption.label
-              }}
-            </template>
-          </SelectValue>
-        </div>
-      </template>
-      <template v-else>
-        <!--
+            <SelectValue
+              :placeholder="placeholder"
+              class="max-w-full truncate opacity-0"
+              :class="{ 'text-ink-gray-4': showPlaceholderForSelected }"
+            >
+              <template v-if="selectedOption">
+                {{
+                  showPlaceholderForSelected
+                    ? placeholder
+                    : selectedOption.label
+                }}
+              </template>
+            </SelectValue>
+          </div>
+        </template>
+        <template v-else>
+          <!--
           Prefix precedence on the trigger:
             1. selected + `#item-prefix` slot → reuse the list's per-item
                prefix renderer so the trigger matches the dropdown row
@@ -302,87 +301,82 @@ defineSlots<SelectSlots>()
                string / emoji / component).
             3. not selected + `#prefix` slot → user's placeholder affordance.
         -->
-        <template v-if="selectedOption && slots['item-prefix']">
-          <slot
-            name="item-prefix"
-            v-bind="{ item: selectedOption, option: selectedOption }"
+          <template v-if="selectedOption && slots['item-prefix']">
+            <slot
+              name="item-prefix"
+              v-bind="{ item: selectedOption, option: selectedOption }"
+            />
+          </template>
+          <OptionIcon
+            v-else-if="selectedOption?.icon"
+            :icon="selectedOption.icon"
           />
-        </template>
-        <OptionIcon
-          v-else-if="selectedOption?.icon"
-          :icon="selectedOption.icon"
-        />
-        <slot
-          v-else
-          name="prefix"
-          v-bind="triggerSlotProps"
-        />
+          <slot v-else name="prefix" v-bind="triggerSlotProps" />
 
-        <div class="grid min-w-0 text-left truncate">
-          <SelectValue
-            :placeholder="placeholder"
-            class="col-start-1 row-start-1 max-w-full truncate"
-            :class="{ 'text-ink-gray-4': showPlaceholderForSelected }"
-          >
-            <template v-if="selectedOption">
-              {{
-                showPlaceholderForSelected ? placeholder : selectedOption.label
-              }}
-            </template>
-          </SelectValue>
-          <span
-            aria-hidden="true"
-            class="select-trigger-sizer col-start-1 row-start-1"
-            :data-width-text="selectSizingText"
-          />
-        </div>
-
-        <slot
-          name="suffix"
-          v-bind="triggerSlotProps"
-        >
-          <span class="lucide-chevron-down ml-auto size-4 shrink-0 text-ink-gray-4" />
-        </slot>
-      </template>
-    </SelectTrigger>
-
-    <SelectPortal>
-      <SelectContent
-        data-slot="content"
-        data-selection
-        class="z-[100] origin-[var(--reka-select-content-transform-origin)]"
-      >
-        <div
-          data-slot="content-body"
-          :data-motion="contentMotion"
-          class="flex flex-col overflow-hidden rounded-lg bg-surface-elevation-2 shadow-2xl ring-1 ring-black ring-opacity-5 will-change-[opacity,transform] origin-[var(--reka-select-content-transform-origin)]"
-        >
-          <SelectViewport class="flex min-h-0 flex-col p-1">
-            <div
-              v-if="!selectOptions.length"
-              data-slot="empty"
-              class="px-2 py-1.5 text-base text-ink-gray-5"
+          <div class="grid min-w-0 text-left truncate">
+            <SelectValue
+              :placeholder="placeholder"
+              class="col-start-1 row-start-1 max-w-full truncate"
+              :class="{ 'text-ink-gray-4': showPlaceholderForSelected }"
             >
-              <slot name="empty">{{ emptyText }}</slot>
-            </div>
+              <template v-if="selectedOption">
+                {{
+                  showPlaceholderForSelected
+                    ? placeholder
+                    : selectedOption.label
+                }}
+              </template>
+            </SelectValue>
+            <span
+              aria-hidden="true"
+              class="select-trigger-sizer col-start-1 row-start-1"
+              :data-width-text="selectSizingText"
+            />
+          </div>
 
-            <template v-else>
-              <SelectItem
-                v-for="(internalOption, index) in internalOptions"
-                :key="getOptionKey(internalOption.option, index)"
-                :disabled="internalOption.option.disabled"
-                :value="internalOption.internalValue"
-                data-slot="item"
-                :class="itemRootClasses"
-                class="select-none rounded border-0 text-base text-ink-gray-9 data-[disabled]:text-ink-gray-4 data-[highlighted]:bg-surface-gray-2 data-[state=checked]:bg-surface-gray-3 data-[highlighted]:data-[state=checked]:bg-surface-gray-4"
+          <slot name="suffix" v-bind="triggerSlotProps">
+            <span
+              class="lucide-chevron-down ml-auto size-4 shrink-0 text-ink-gray-4"
+            />
+          </slot>
+        </template>
+      </SelectTrigger>
+
+      <SelectPortal>
+        <SelectContent
+          data-slot="content"
+          class="z-[100] origin-[var(--reka-select-content-transform-origin)]"
+        >
+          <PopoverPanel
+            :motion="contentMotion"
+            class="flex flex-col origin-[var(--reka-select-content-transform-origin)]"
+          >
+            <SelectViewport class="flex min-h-0 flex-col p-1">
+              <div
+                v-if="!selectOptions.length"
+                data-slot="empty"
+                class="px-2 py-1.5 text-base text-ink-gray-5"
               >
-                <ItemListRow
-                  :size="itemSize"
-                  :selected="internalOption.option.value === model"
+                <slot name="empty">{{ emptyText }}</slot>
+              </div>
+
+              <template v-else>
+                <SelectItem
+                  v-for="(internalOption, index) in internalOptions"
+                  :key="getOptionKey(internalOption.option, index)"
                   :disabled="internalOption.option.disabled"
+                  :value="internalOption.internalValue"
+                  data-slot="item"
+                  :class="itemRootClasses"
+                  class="select-none rounded border-0 text-base text-ink-gray-9 data-[disabled]:text-ink-gray-4 data-[highlighted]:bg-surface-gray-2 data-[state=checked]:bg-surface-gray-3 data-[highlighted]:data-[state=checked]:bg-surface-gray-4"
                 >
-                  <template #prefix>
-                    <!--
+                  <ItemListRow
+                    :size="itemSize"
+                    :selected="internalOption.option.value === model"
+                    :disabled="internalOption.option.disabled"
+                  >
+                    <template #prefix>
+                      <!--
                       v-if chain (not unconditional slot + v-if icon) so that
                       with neither a consumer `#item-prefix` slot nor an
                       `option.icon`, the prefix template renders only
@@ -397,82 +391,94 @@ defineSlots<SelectSlots>()
                       through the Tailwind plugin; component values render
                       directly.
                     -->
-                    <slot
-                      v-if="slots['item-prefix']"
-                      name="item-prefix"
-                      v-bind="{ item: internalOption.option, option: internalOption.option }"
-                    />
-                    <OptionIcon
-                      v-else-if="internalOption.option.icon"
-                      :icon="internalOption.option.icon"
-                    />
-                  </template>
+                      <slot
+                        v-if="slots['item-prefix']"
+                        name="item-prefix"
+                        v-bind="{
+                          item: internalOption.option,
+                          option: internalOption.option,
+                        }"
+                      />
+                      <OptionIcon
+                        v-else-if="internalOption.option.icon"
+                        :icon="internalOption.option.icon"
+                      />
+                    </template>
 
-                  <template #label>
-                    <!--
+                    <template #label>
+                      <!--
                       SelectItemText must wrap the visible label so reka's
                       item-aligned positioning uses the on-screen label rect.
                       Previously rendered as `sr-only`, which gave a 1x1 rect
                       and mis-anchored the popup (prefix not covered).
                     -->
-                    <SelectItemText as="div" class="min-w-0">
-                      <slot
-                        v-if="
-                          getOptionSlotName(internalOption.option) &&
-                          slots[getOptionSlotName(internalOption.option)!]
-                        "
-                        :name="getOptionSlotName(internalOption.option)!"
-                        v-bind="{ item: internalOption.option, option: internalOption.option }"
-                      />
-                      <slot
-                        v-else
-                        name="item-label"
-                        v-bind="{ item: internalOption.option, option: internalOption.option }"
-                      >
+                      <SelectItemText as="div" class="min-w-0">
                         <slot
-                          name="option"
-                          v-bind="{ item: internalOption.option, option: internalOption.option }"
+                          v-if="
+                            getOptionSlotName(internalOption.option) &&
+                            slots[getOptionSlotName(internalOption.option)!]
+                          "
+                          :name="getOptionSlotName(internalOption.option)!"
+                          v-bind="{
+                            item: internalOption.option,
+                            option: internalOption.option,
+                          }"
+                        />
+                        <slot
+                          v-else
+                          name="item-label"
+                          v-bind="{
+                            item: internalOption.option,
+                            option: internalOption.option,
+                          }"
                         >
-                          <div class="truncate">
-                            {{ internalOption.option.label }}
-                          </div>
-                          <div
-                            v-if="internalOption.option.description"
-                            class="truncate text-p-sm text-ink-gray-5"
+                          <slot
+                            name="option"
+                            v-bind="{
+                              item: internalOption.option,
+                              option: internalOption.option,
+                            }"
                           >
-                            {{ internalOption.option.description }}
-                          </div>
+                            <div class="truncate">
+                              {{ internalOption.option.label }}
+                            </div>
+                            <div
+                              v-if="internalOption.option.description"
+                              class="truncate text-p-sm text-ink-gray-5"
+                            >
+                              {{ internalOption.option.description }}
+                            </div>
+                          </slot>
                         </slot>
-                      </slot>
-                    </SelectItemText>
-                  </template>
+                      </SelectItemText>
+                    </template>
 
-                  <template #suffix>
-                    <slot
-                      name="item-suffix"
-                      v-bind="{ item: internalOption.option, option: internalOption.option }"
-                    />
-                    <SelectItemIndicator
-                      class="ml-1 inline-flex items-center justify-center"
-                    >
-                      <span class="lucide-check size-4 text-ink-gray-6" />
-                    </SelectItemIndicator>
-                  </template>
-                </ItemListRow>
-              </SelectItem>
-            </template>
-          </SelectViewport>
+                    <template #suffix>
+                      <slot
+                        name="item-suffix"
+                        v-bind="{
+                          item: internalOption.option,
+                          option: internalOption.option,
+                        }"
+                      />
+                      <SelectItemIndicator
+                        class="ml-1 inline-flex items-center justify-center"
+                      >
+                        <span class="lucide-check size-4 text-ink-gray-6" />
+                      </SelectItemIndicator>
+                    </template>
+                  </ItemListRow>
+                </SelectItem>
+              </template>
+            </SelectViewport>
 
-          <div v-if="$slots.footer" data-slot="footer">
-            <slot
-              name="footer"
-              v-bind="{ selectedOption, clearSelection }"
-            />
-          </div>
-        </div>
-      </SelectContent>
-    </SelectPortal>
-  </SelectRoot>
+            <div v-if="$slots.footer" data-slot="footer">
+              <slot name="footer" v-bind="{ selectedOption, clearSelection }" />
+            </div>
+          </PopoverPanel>
+        </SelectContent>
+      </SelectPortal>
+    </SelectRoot>
     <InputDescription
       v-if="showDescription || $slots.description"
       :id="descriptionId"
@@ -485,6 +491,15 @@ defineSlots<SelectSlots>()
 </template>
 
 <style scoped>
+/*
+ * Block interaction with the content while it plays its exit animation.
+ * PopoverPanel's motion CSS owns the animation; this pointer-events guard
+ * lived on the old `[data-selection]` content element and is preserved here.
+ */
+[data-slot='content'][data-state='closed'] {
+  pointer-events: none;
+}
+
 [data-highlighted],
 [data-state='checked'] {
   outline: none !important;

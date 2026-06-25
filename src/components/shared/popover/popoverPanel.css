@@ -1,0 +1,102 @@
+/*
+ * Open/close motion for the shared `PopoverPanel` shell. Imported once by
+ * `PopoverPanel.vue` so it is deduped at build time — consumers never import
+ * it directly.
+ *
+ * Every selector is gated on the compound `[data-slot='content-body'][data-panel]`
+ * so this stylesheet only applies to `PopoverPanel` instances and cannot leak
+ * onto other popovers sharing the `data-slot` hooks (e.g. Dropdown's
+ * `.menu-content`, or the legacy selection `popoverMotion.css`).
+ *
+ * `data-state` is read from one of two places, so the panel is drop-in for
+ * either wiring style:
+ *   1. the panel element itself, when the consumer passes the `state` prop
+ *      (fully self-contained — preferred for new code), or
+ *   2. an ancestor reka `*Content` carrying `data-state`, when the consumer
+ *      omits `state` and relies on reka's own state (matches how the legacy
+ *      selection stylesheet worked).
+ * `data-motion` always lives on the panel element.
+ *
+ * `transform-origin` is intentionally NOT set here — each consumer owns it
+ * (Popover uses `--reka-popover-content-transform-origin`, Select the
+ * `--reka-select-*` var, Combobox the `--reka-combobox-*` var) by passing it
+ * through `class`/`style` on the panel.
+ *
+ * Two rhythms, selected by `data-motion`:
+ *   - `animated` — scale-from-trigger entrance (pointer opens), 180ms enter /
+ *     140ms exit.
+ *   - `instant` — keyboard / programmatic opens skip the scale + translate; a
+ *     ~80ms opacity fade still runs on open to mask reka's 1-frame
+ *     position-settle after mount, and no animation on close.
+ */
+
+[data-slot='content-body'][data-panel] {
+  animation-fill-mode: both;
+}
+
+[data-slot='content-body'][data-panel][data-motion='animated'] {
+  backface-visibility: hidden;
+}
+
+/* (1) state on the panel itself (via the `state` prop) */
+[data-slot='content-body'][data-panel][data-motion='animated'][data-state='open'],
+/* (2) state on an ancestor reka *Content */
+[data-state='open']
+  [data-slot='content-body'][data-panel][data-motion='animated'] {
+  animation: popover-panel-enter 180ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+[data-slot='content-body'][data-panel][data-motion='animated'][data-state='closed'],
+[data-state='closed']
+  [data-slot='content-body'][data-panel][data-motion='animated'] {
+  animation: popover-panel-exit 140ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+[data-slot='content-body'][data-panel][data-motion='instant'][data-state='open'],
+[data-state='open']
+  [data-slot='content-body'][data-panel][data-motion='instant'] {
+  animation: popover-panel-instant-fade 80ms linear;
+}
+
+[data-slot='content-body'][data-panel][data-motion='instant'][data-state='closed'],
+[data-state='closed']
+  [data-slot='content-body'][data-panel][data-motion='instant'] {
+  animation: none;
+}
+
+@keyframes popover-panel-enter {
+  from {
+    opacity: 0;
+    transform: translateY(2px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes popover-panel-exit {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(1px) scale(0.985);
+  }
+}
+
+@keyframes popover-panel-instant-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-slot='content-body'][data-panel] {
+    animation-duration: 0ms !important;
+  }
+}

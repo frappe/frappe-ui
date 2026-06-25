@@ -6,97 +6,163 @@
 
   const propsData = [
   {
-    name: 'show',
-    description: 'Controls visibility of the popover',
+    name: 'open',
+    description: 'Controls visibility (v-model:open).',
     required: false,
     type: 'boolean',
     default: 'undefined'
   },
   {
+    name: 'side',
+    description: 'Side of the trigger to render the content on.',
+    required: false,
+    type: 'PopoverSide',
+    default: '"bottom"'
+  },
+  {
+    name: 'align',
+    description: 'Alignment of the content along the chosen side.',
+    required: false,
+    type: 'PopoverAlign',
+    default: '"start"'
+  },
+  {
+    name: 'offset',
+    description: 'Distance in px between the trigger and the content.',
+    required: false,
+    type: 'number',
+    default: '4'
+  },
+  {
+    name: 'portalTo',
+    description: 'Where to portal the content.',
+    required: false,
+    type: 'string | HTMLElement',
+    default: '"body"'
+  },
+  {
+    name: 'collisionPadding',
+    description: 'Padding in px kept from the viewport edge during collision handling.',
+    required: false,
+    type: 'number',
+    default: '10'
+  },
+  {
+    name: 'dismissible',
+    description: 'Whether the popover closes on outside interaction (click/focus).',
+    required: false,
+    type: 'boolean',
+    default: 'true'
+  },
+  {
+    name: 'matchTriggerWidth',
+    description: 'Whether the content\'s min-width matches the trigger width.',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  },
+  {
+    name: 'show',
+    description: '',
+    required: false,
+    type: 'boolean',
+    default: 'undefined',
+    deprecated: 'Use `open` / `v-model:open`.'
+  },
+  {
     name: 'trigger',
-    description: 'Event that triggers the popover',
+    description: '',
     required: false,
     type: '"click" | "hover"',
-    default: '"click"'
+    default: '"click"',
+    deprecated: 'Use `<HoverCard>` for hover behavior.'
   },
   {
     name: 'hoverDelay',
-    description: 'Delay in ms before showing popover on hover',
+    description: '',
     required: false,
     type: 'number',
-    default: '0'
+    default: '0',
+    deprecated: 'Use `<HoverCard>` (`hoverDelay`, in seconds).'
   },
   {
     name: 'leaveDelay',
-    description: 'Delay in ms before hiding popover on hover leave',
+    description: '',
     required: false,
     type: 'number',
-    default: '0.5'
+    default: '0.5',
+    deprecated: 'Use `<HoverCard>` (`leaveDelay`, in seconds).'
   },
   {
     name: 'placement',
-    description: 'Placement of the popover relative to the target',
+    description: '',
     required: false,
-    type: '"left" | "right" | "bottom" | "top" | "top-start" | "top-end" | "bottom-start" | "bottom-end" | "right-start" | "right-end" | "left-start" | "left-end"',
-    default: '"bottom-start"'
+    type: 'PopoverPlacement',
+    default: 'undefined',
+    deprecated: 'Use `side` + `align`.'
   },
   {
     name: 'popoverClass',
     description: '',
     required: false,
     type: 'string | object | (string | object)[]',
-    default: '""'
+    default: 'undefined',
+    deprecated: 'Use the `data-slot` CSS hooks (no-op).'
   },
   {
     name: 'transition',
-    description: 'Transition style to use',
+    description: '',
     required: false,
     type: '"default" | null',
-    default: 'null'
+    default: 'undefined',
+    deprecated: 'Motion is now built in (no-op).'
   },
   {
     name: 'hideOnBlur',
-    description: 'Whether to hide the popover when clicking outside',
+    description: '',
     required: false,
     type: 'boolean',
-    default: 'true'
+    default: 'undefined',
+    deprecated: 'Use `dismissible`.'
   },
   {
     name: 'matchTargetWidth',
-    description: 'Whether the popover width should match the target element',
-    required: false,
-    type: 'boolean'
-  },
-  {
-    name: 'offset',
     description: '',
     required: false,
-    type: 'number'
-  },
-  {
-    name: 'collisionPadding',
-    description: '',
-    required: false,
-    type: 'number',
-    default: '10'
+    type: 'boolean',
+    default: 'undefined',
+    deprecated: 'Use `matchTriggerWidth`.'
   }
 ]
 
   const slotsData = [
   {
+    name: 'trigger',
+    description: 'Trigger element. Rendered via reka PopoverTrigger as-child.',
+    type: 'PopoverSlotProps'
+  },
+  {
+    name: 'default',
+    description: 'Popover content, rendered inside the shared panel shell.',
+    type: 'PopoverSlotProps'
+  },
+  {
     name: 'target',
-    description: 'Content of the trigger/anchor element',
-    type: '{ togglePopover: () => void; updatePosition: () => void; open: () => void; close: () => void; isOpen'
+    description: '',
+    type: 'PopoverLegacySlotProps',
+    deprecated: 'Use `#trigger`. Rendered via reka PopoverAnchor (manual wiring).'
   },
   {
     name: 'body',
-    description: 'Main content of the popover body',
-    type: '{ togglePopover: () => void; updatePosition: () => void; open: () => void; close: () => void; isOpen'
+    description: '',
+    type: 'PopoverLegacySlotProps',
+    deprecated: 'Use `#default`. Full body override (no default chrome).'
   },
   {
     name: 'body-main',
-    description: 'Inner content inside the default body container',
-    type: '{ togglePopover: () => void; updatePosition: () => void; open: () => void; close: () => void; isOpen'
+    description: '',
+    type: 'PopoverLegacySlotProps',
+    deprecated: 'Use `#default`. Inner content inside the default container.'
   }
 ]
 
@@ -107,14 +173,19 @@
     type: '[]'
   },
   {
-    name: 'update:show',
-    description: 'Fired when the show changes.',
-    type: '[value: boolean]'
-  },
-  {
     name: 'close',
     description: 'Fired when the component closes.',
     type: '[]'
+  },
+  {
+    name: 'update:open',
+    description: 'Fired when the open state changes.',
+    type: '[value: boolean]'
+  },
+  {
+    name: 'update:show',
+    description: 'Fired when the show changes.',
+    type: '[value: boolean]'
   }
 ]
 </script>

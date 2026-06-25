@@ -9,7 +9,7 @@ export interface TooltipProps {
   text?: string
 
   /**
-   * Delay (in ms) before showing the tooltip on hover.
+   * Delay (in seconds) before showing the tooltip on hover.
    */
   hoverDelay?: number
 
