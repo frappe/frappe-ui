@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { TabButtons } from 'frappe-ui'
+import { TabButtons, Tooltip } from 'frappe-ui'
 import { useTheme, setTheme } from '../../composables/useTheme'
 import colors from '../../../tailwind/colors.json'
 
@@ -89,18 +89,18 @@ const overlayBlack = computed(
           :key="shade"
           class="grid gap-1 text-left"
         >
-          <div
-            class="aspect-square rounded"
-            :style="{ background: value as string }"
-          ></div>
-          <div class="grid gap-1">
-            <span class="text-xs font-medium text-ink-gray-7">
-              {{ shade }}
-            </span>
-            <span class="text-2xs text-ink-gray-5 font-mono uppercase">
-              {{ value }}
-            </span>
-          </div>
+          <Tooltip :hover-delay="0">
+            <div
+              class="aspect-square rounded"
+              :style="{ background: value as string }"
+            ></div>
+            <template #content>
+              <span class="font-mono">{{ value }}</span>
+            </template>
+          </Tooltip>
+          <span class="text-xs font-medium text-ink-gray-7">
+            {{ shade }}
+          </span>
         </div>
       </div>
     </section>
@@ -129,20 +129,20 @@ const overlayBlack = computed(
           :key="shade"
           class="grid gap-1 text-left"
         >
-          <div
-            class="aspect-square rounded"
-            :style="{ background: value as string }"
-          ></div>
-          <div
-            class="grid gap-1 bg-surface-base/80 dark:bg-surface-gray-1/80 rounded px-1"
+          <Tooltip :hover-delay="0">
+            <div
+              class="aspect-square rounded"
+              :style="{ background: value as string }"
+            ></div>
+            <template #content>
+              <span class="font-mono">{{ value }}</span>
+            </template>
+          </Tooltip>
+          <span
+            class="text-xs font-medium text-ink-gray-7 bg-surface-base/80 dark:bg-surface-gray-1/80 rounded px-1 w-fit"
           >
-            <span class="text-xs font-medium text-ink-gray-7">
-              {{ shade }}
-            </span>
-            <span class="text-2xs text-ink-gray-5 font-mono uppercase truncate">
-              {{ value }}
-            </span>
-          </div>
+            {{ shade }}
+          </span>
         </div>
       </div>
     </section>
@@ -164,13 +164,20 @@ const overlayBlack = computed(
               :key="shade"
               class="grid gap-1 text-left"
             >
-              <div
-                class="aspect-square rounded"
-                :style="{
-                  background: `linear-gradient(${value}, ${value}), #0f0f0f`,
-                }"
-              ></div>
-              <span class="text-2xs text-ink-gray-7 font-mono">{{ shade }}</span>
+              <Tooltip :hover-delay="0">
+                <div
+                  class="aspect-square rounded"
+                  :style="{
+                    background: `linear-gradient(${value}, ${value}), #0f0f0f`,
+                  }"
+                ></div>
+                <template #content>
+                  <span class="font-mono">{{ value }}</span>
+                </template>
+              </Tooltip>
+              <span class="text-2xs text-ink-gray-7 font-mono">{{
+                shade
+              }}</span>
             </div>
           </div>
         </div>
@@ -187,12 +194,17 @@ const overlayBlack = computed(
               :key="shade"
               class="grid gap-1 text-left"
             >
-              <div
-                class="aspect-square rounded"
-                :style="{
-                  background: `linear-gradient(${value}, ${value}), #ffffff`,
-                }"
-              ></div>
+              <Tooltip :hover-delay="0">
+                <div
+                  class="aspect-square rounded"
+                  :style="{
+                    background: `linear-gradient(${value}, ${value}), #ffffff`,
+                  }"
+                ></div>
+                <template #content>
+                  <span class="font-mono">{{ value }}</span>
+                </template>
+              </Tooltip>
               <span class="text-2xs text-ink-gray-7 font-mono">{{
                 shade
               }}</span>
@@ -209,16 +221,16 @@ const overlayBlack = computed(
         :style="{ gridTemplateColumns: `repeat(11, minmax(0, 1fr))` }"
       >
         <div v-for="n in NEUTRALS" :key="n.key" class="grid gap-1 text-left">
-          <div
-            class="aspect-square rounded border border-outline-gray-2"
-            :style="{ background: n.value }"
-          ></div>
-          <div class="grid gap-1">
-            <span class="text-xs font-medium text-ink-gray-7">{{ n.label }}</span>
-            <span class="text-2xs text-ink-gray-5 font-mono uppercase">{{
-              n.value
-            }}</span>
-          </div>
+          <Tooltip :hover-delay="0">
+            <div
+              class="aspect-square rounded border border-outline-gray-2"
+              :style="{ background: n.value }"
+            ></div>
+            <template #content>
+              <span class="font-mono">{{ n.value }}</span>
+            </template>
+          </Tooltip>
+          <span class="text-xs font-medium text-ink-gray-7">{{ n.label }}</span>
         </div>
       </div>
     </section>

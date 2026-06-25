@@ -2,6 +2,24 @@ import tailwindColors from 'tailwindcss/colors'
 import colorsData from './colors.json'
 import effectsData from './generated/effects.json'
 
+// Tailwind v3 can only apply the `/<opacity>` modifier (e.g. `bg-blue-900/30`)
+// when the color value exposes an alpha slot. Hex did this implicitly; a bare
+// `oklch(L C H)` string does not, so the modifier silently fails. Inject the
+// `<alpha-value>` placeholder into solid oklch values used as theme colors.
+// Values that already carry an alpha channel (overlay tokens) are left intact;
+// colors.json and the raw `--*` CSS variables keep their plain oklch form.
+function withAlphaPlaceholder(value) {
+  if (typeof value !== 'string') return value
+  const solid = value.match(/^oklch\(([^/]+)\)$/)
+  return solid ? `oklch(${solid[1].trim()} / <alpha-value>)` : value
+}
+
+function mapShades(shades) {
+  return Object.fromEntries(
+    Object.entries(shades).map(([shade, value]) => [shade, withAlphaPlaceholder(value)]),
+  )
+}
+
 function generateColorPalette() {
   const colorPalette = {
     inherit: tailwindColors.inherit,
@@ -26,10 +44,10 @@ function generateColorPalette() {
   }
 
   Object.keys(colorsData.lightMode).forEach((color) => {
-    colorPalette[color] = colorsData.lightMode[color]
+    colorPalette[color] = mapShades(colorsData.lightMode[color])
   })
   Object.keys(colorsData.darkMode).forEach((color) => {
-    colorPalette[`dark-${color}`] = colorsData.darkMode[color]
+    colorPalette[`dark-${color}`] = mapShades(colorsData.darkMode[color])
   })
 
   Object.keys(colorsData.overlay.white).forEach((shade) => {
