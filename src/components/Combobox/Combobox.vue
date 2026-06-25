@@ -18,7 +18,7 @@ import {
   FocusScope,
 } from 'reka-ui'
 import OptionIcon from '../shared/selection/OptionIcon.vue'
-import '../shared/selection/popoverMotion.css'
+import PopoverPanel from '../shared/popover/PopoverPanel.vue'
 import ComboboxResults from './ComboboxResults.vue'
 import { usePopoverMotion } from '../../composables/usePopoverMotion'
 import { useInputLabeling } from '../../composables/useInputLabeling'
@@ -637,7 +637,6 @@ defineSlots<ComboboxSlots>()
         <ComboboxPortal :to="portalTo">
           <ComboboxContent
             data-slot="content"
-            data-selection
             :data-variant="variant"
             :data-size="size"
             :class="[
@@ -675,10 +674,9 @@ defineSlots<ComboboxSlots>()
               @mount-auto-focus="handleFocusScopeMountAutoFocus"
               @unmount-auto-focus.prevent
             >
-              <div
-                data-slot="content-body"
-                :data-motion="contentMotion"
-                class="overflow-hidden rounded-lg bg-surface-elevation-2 shadow-2xl ring-1 ring-black ring-opacity-5"
+              <PopoverPanel
+                :motion="contentMotion"
+                class="origin-[var(--reka-combobox-content-transform-origin)]"
               >
                 <div
                   v-if="isButtonMode"
@@ -718,7 +716,7 @@ defineSlots<ComboboxSlots>()
                 <div v-if="$slots.footer" data-slot="footer">
                   <slot name="footer" v-bind="controlSlotProps" />
                 </div>
-              </div>
+              </PopoverPanel>
             </FocusScope>
           </ComboboxContent>
         </ComboboxPortal>
@@ -741,10 +739,10 @@ defineSlots<ComboboxSlots>()
   outline: none !important;
 }
 
-/* Component-specific transform-origin; the rest of the motion lives in
-   shared/selection/popoverMotion.css. */
-[data-slot='content-body'][data-motion='animated'] {
-  transform-origin: var(--reka-combobox-content-transform-origin);
+/* Block clicks while the panel plays its exit animation (the shell + open/close
+   motion now come from PopoverPanel; only this component-specific rule remains). */
+[data-slot='content'][data-state='closed'] {
+  pointer-events: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

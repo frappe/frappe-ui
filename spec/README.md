@@ -22,6 +22,8 @@ If these disagree, update the lower-authority document or mark it historical.
 - [`editor.md`](./editor.md)
 - [`inputs.md`](./inputs.md)
 - [`date-picker.md`](./date-picker.md)
+- [`popover.md`](./popover.md)
+- [`hover-card.md`](./hover-card.md)
 - [`selection.md`](./selection.md)
   - [`item-list-row.md`](./item-list-row.md)
   - [`dropdown.md`](./dropdown.md)

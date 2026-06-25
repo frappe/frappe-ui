@@ -21,7 +21,7 @@
     :readonly="inputReadonly"
     :input-class="dp.inputClass"
     :display-label="displayLabel"
-    content-class="w-fit rounded-lg bg-surface-elevation-2 shadow-2xl ring-1 ring-black ring-opacity-5"
+    content-class="w-fit"
     @blur="commitInput()"
     @enter="commitInput(true)"
     @open="onShellOpen"

@@ -75,8 +75,12 @@ describe('CodeEditor', () => {
     cy.mount(CodeEditor, {
       props: { modelValue: 'frozen', disabled: true },
     }).then(({ wrapper }) => {
+      // `setProps` is synchronous JS, so it must be wrapped in `cy.then` to join
+      // the command queue *after* the first assertion — otherwise it flips the
+      // prop before that assertion runs and the initial `false` state is never
+      // observed (the flake this guards against).
       cy.get('.cm-content').should('have.attr', 'contenteditable', 'false')
-      wrapper.setProps({ disabled: false })
+      cy.then(() => wrapper.setProps({ disabled: false }))
       cy.get('.cm-content').should('have.attr', 'contenteditable', 'true')
     })
   })

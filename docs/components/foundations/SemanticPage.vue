@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { TabButtons } from 'frappe-ui'
+import { TabButtons, Tooltip } from 'frappe-ui'
 import { useTheme, setTheme } from '../../composables/useTheme'
 import colors from '../../../tailwind/colors.json'
 
@@ -120,10 +120,15 @@ const sections = computed(() =>
           :key="entry.name"
           class="flex w-full items-center gap-4 py-3 text-left"
         >
-          <div
-            class="size-10 rounded-md shrink-0"
-            :style="{ background: entry.value }"
-          ></div>
+          <Tooltip :hover-delay="0">
+            <div
+              class="size-8 rounded-md shrink-0"
+              :style="{ background: entry.value }"
+            ></div>
+            <template #content>
+              <span class="font-mono">{{ entry.value }}</span>
+            </template>
+          </Tooltip>
           <div class="grid gap-1 min-w-0 flex-1">
             <span class="text-sm font-mono text-ink-gray-8 truncate">
               {{ section.prefix }}{{ entry.name }}
@@ -132,9 +137,6 @@ const sections = computed(() =>
               → {{ entry.refLabel }}
             </span>
           </div>
-          <span class="text-xs font-mono text-ink-gray-5 shrink-0 tabular-nums">
-            {{ entry.value }}
-          </span>
         </div>
       </div>
     </section>

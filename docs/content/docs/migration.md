@@ -94,6 +94,28 @@ Behavior changes that apply even if you don't touch your code:
 For the deprecated `Autocomplete`, see
 [Autocomplete (deprecated)](#autocomplete-deprecated).
 
+## Popover / HoverCard
+
+The v0 `Popover` API still works through v1.x — when only an old prop is bound
+it is mapped silently; binding both the old and new prop logs a one-time dev
+warning and the new prop wins.
+
+| Before                                            | After                                                                                              |
+| ------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `show` / `v-model:show`                           | `open` / `v-model:open`                                                                            |
+| `placement="bottom-start"`                        | `side="bottom"` + `align="start"` (a bare side like `placement="bottom"` maps to `align="center"`) |
+| `hideOnBlur`                                       | `dismissible`                                                                                       |
+| `matchTargetWidth`                                 | `matchTriggerWidth`                                                                                 |
+| `trigger="hover"` (+ `hoverDelay` / `leaveDelay`) | the [`HoverCard`](./components/hovercard) component                                                 |
+| `popoverClass`                                     | `data-slot` CSS hooks (no-op + warns)                                                               |
+| `transition="default"`                            | built-in motion (no-op)                                                                            |
+| `#target` slot                                     | `#trigger` (old `#target` contract preserved with manual wiring; `updatePosition` is now a no-op)  |
+| `#body` slot                                       | `#default` + `bare` prop (renders without the panel shell)                                          |
+| `#body-main` slot                                  | `#default`                                                                                          |
+
+Hover-driven panels move to the new [`HoverCard`](./components/hovercard)
+component, which keeps `hoverDelay` / `leaveDelay` in seconds.
+
 ## Inputs
 
 Covers `TextInput`, `Textarea`, `Password`, `Checkbox`, `Switch`, `Rating`,
