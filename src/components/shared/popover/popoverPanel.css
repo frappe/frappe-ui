@@ -100,3 +100,16 @@
     animation-duration: 0ms !important;
   }
 }
+
+/*
+ * Arrow elevation. Reka renders the arrow as a separate filled SVG, so the
+ * panel's box-shadow is clipped at the panel rectangle and never reaches the
+ * arrow — leaving it looking like a flat tab. A small drop-shadow on the arrow
+ * silhouette restores the continuous elevation. Light comes from the top
+ * (matching the panel's shadow), so the same downward offset reads correctly
+ * for every side. `data-slot='arrow'` is set only by Popover/HoverCard, so this
+ * does not leak to other components.
+ */
+[data-slot='arrow'] {
+  filter: drop-shadow(0 2px 1.5px rgb(0 0 0 / 0.12));
+}
