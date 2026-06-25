@@ -184,10 +184,15 @@ describe('DateTimePicker', () => {
     })
   })
 
-  it('cycle-calendar-view button switches to month view', () => {
+  it('cycle-calendar-view button opens the month-year split view', () => {
     cy.mount(DateTimePicker)
     cy.get('input').first().dblclick()
     cy.get('[aria-label=cycle-calendar-view]').click()
-    cy.get('[role=grid][aria-label="Select month"]').should('exist')
+    // Split view: scrollable year list beside a scrollable month list.
+    cy.get('[role=listbox][aria-label="Select year"]').should('exist')
+    cy.get('[role=listbox][aria-label="Select month"]').should('exist')
+    // Picking a month commits and returns to the day grid.
+    cy.get('[role=listbox][aria-label="Select month"]').contains('Jan').click()
+    cy.get('[role=grid][aria-label="Calendar dates"]').should('exist')
   })
 })
