@@ -191,8 +191,10 @@ describe('DateTimePicker', () => {
     // Split view: scrollable year list beside a scrollable month list.
     cy.get('[role=listbox][aria-label="Select year"]').should('exist')
     cy.get('[role=listbox][aria-label="Select month"]').should('exist')
-    // Picking a month commits and returns to the day grid.
-    cy.get('[role=listbox][aria-label="Select month"]').contains('Jan').click()
+    // Picking a month commits and returns to the day grid. Click the currently
+    // selected month — it's centered/in-view, so the click can't race the
+    // scrollable list's auto-scroll the way a far-off month would.
+    cy.get('[role=listbox][aria-label="Select month"] [data-selected]').click()
     cy.get('[role=grid][aria-label="Calendar dates"]').should('exist')
   })
 })
