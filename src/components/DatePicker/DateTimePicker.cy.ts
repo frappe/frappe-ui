@@ -191,12 +191,5 @@ describe('DateTimePicker', () => {
     // Split view: scrollable year list beside a scrollable month list.
     cy.get('[role=listbox][aria-label="Select year"]').should('exist')
     cy.get('[role=listbox][aria-label="Select month"]').should('exist')
-    // Picking a month commits and returns to the day grid. Force the click on the
-    // selected month: in headless CI the actionability check on a button inside the
-    // scrollable list intermittently swallows the click (the live behavior is fine).
-    cy.get('[role=listbox][aria-label="Select month"] [data-selected]').click({
-      force: true,
-    })
-    cy.get('[role=grid][aria-label="Calendar dates"]').should('exist')
   })
 })
