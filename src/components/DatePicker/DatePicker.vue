@@ -59,8 +59,6 @@
           :view="view"
           :current-year="currentYear"
           :current-month="currentMonth"
-          :year-range-start="yearRangeStart"
-          :year-range="yearRange"
           :weeks="weeks"
           today-label="Today"
           :min="props.min"
@@ -223,8 +221,6 @@ const {
   view,
   currentYear,
   currentMonth,
-  yearRangeStart,
-  yearRange,
   prev,
   next,
   cycleView,

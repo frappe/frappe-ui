@@ -303,7 +303,7 @@ export interface DateTimePickerSlots {
   actions?: (props: DateTimePickerActionsSlotProps) => any
 }
 
-export type DatePickerViewMode = 'date' | 'month' | 'year'
+export type DatePickerViewMode = 'date' | 'monthYear'
 
 export interface DatePickerDateObj {
   date: Dayjs
