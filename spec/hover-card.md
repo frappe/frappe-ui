@@ -86,6 +86,8 @@ interface HoverCardProps {
   hoverDelay?: number
   /** Seconds from pointer-leave (trigger or content) until the card closes. */
   leaveDelay?: number
+  /** Render a reka HoverCardArrow, styled to match the panel surface. */
+  arrow?: boolean
 }
 ```
 

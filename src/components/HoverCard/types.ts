@@ -38,6 +38,12 @@ export interface HoverCardProps {
    * the card closes.
    */
   leaveDelay?: number
+
+  /**
+   * Render a small arrow pointing at the trigger. Styled to match the panel
+   * surface.
+   */
+  arrow?: boolean
 }
 
 export type HoverCardEmits = {

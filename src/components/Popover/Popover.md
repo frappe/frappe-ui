@@ -53,6 +53,13 @@ are already styled. This replaces the deprecated `#body` slot.
 
 <ComponentPreview name="Popover-Bare" />
 
+## Arrow
+
+Set `arrow` to render a small arrow that points back at the trigger. It's styled
+to match the panel surface.
+
+<ComponentPreview name="Popover-Arrow" />
+
 ## Styling
 
 The popover ships with its panel shell baked in

@@ -79,6 +79,15 @@ describe('HoverCard', () => {
       .and('have.attr', 'data-align', 'end')
   })
 
+  it('renders an arrow when arrow is set', () => {
+    cy.clock()
+    cy.mount(HoverCard, { slots: Slots, props: { hoverDelay: 0, arrow: true } })
+
+    cy.get('[data-cy="trigger"]').trigger('pointerenter')
+    cy.tick(0)
+    cy.get('[data-slot="content"]').find('[data-slot="arrow"]').should('exist')
+  })
+
   it('always uses animated motion for hover opens', () => {
     cy.clock()
     cy.mount(HoverCard, { slots: Slots, props: { hoverDelay: 0 } })

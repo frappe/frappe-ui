@@ -81,6 +81,7 @@ interface PopoverProps {
   dismissible?: boolean
   matchTriggerWidth?: boolean
   bare?: boolean
+  arrow?: boolean
 
   // --- deprecated, kept working through v1.x ---
   /** @deprecated use `v-model:open` */
@@ -121,6 +122,9 @@ Defaults:
 - `bare = false` — when `true`, `#default` renders without the PopoverPanel shell
   (no background, border, shadow, rounding); the content brings its own surface.
   Mirrors Dialog's `bare`. The deprecated `#body` slot maps to this behavior.
+- `arrow = false` — when `true`, renders a reka `PopoverArrow` inside
+  `PopoverContent`, styled `fill-surface-elevation-2` to match the shell.
+  `data-slot="arrow"`.
 
 Positioning follows the shared popover positioning conventions in
 [`selection.md`](./selection.md).

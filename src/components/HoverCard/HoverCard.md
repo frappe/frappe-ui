@@ -22,6 +22,13 @@ automatically. `#default` renders inside the standard panel shell.
 
 <ComponentPreview name="HoverCard-Delays" />
 
+## Arrow
+
+Set `arrow` to render a small arrow pointing at the trigger, styled to match the
+panel surface.
+
+<ComponentPreview name="HoverCard-Arrow" />
+
 ## Styling
 
 Like `Popover`, the card owns its panel shell and exposes the same stable

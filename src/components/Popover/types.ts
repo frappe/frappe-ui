@@ -47,6 +47,12 @@ export interface PopoverProps {
    */
   bare?: boolean
 
+  /**
+   * Render a small arrow pointing at the trigger. Styled to match the panel
+   * surface.
+   */
+  arrow?: boolean
+
   // ---------------------------------------------------------------------------
   // Deprecated props (kept working through v1.x — see Popover.vue back-compat).
   // ---------------------------------------------------------------------------

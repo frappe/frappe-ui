@@ -59,6 +59,13 @@ describe('Popover', () => {
       cy.get('[data-slot="content-body"]').should('not.exist')
     })
 
+    it('renders an arrow when arrow is set', () => {
+      cy.mount(Popover, { props: { arrow: true }, slots: NewSlots })
+
+      cy.get('[data-cy="trigger"]').click()
+      cy.get('[data-slot="content"]').find('[data-slot="arrow"]').should('exist')
+    })
+
     it('wires aria-haspopup and aria-expanded on the trigger', () => {
       cy.mount(Popover, { slots: NewSlots })
 

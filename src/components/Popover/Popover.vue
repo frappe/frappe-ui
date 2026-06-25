@@ -55,6 +55,11 @@
           <slot v-if="hasNewContent" v-bind="newSlotProps" />
           <slot v-else name="body-main" v-bind="legacySlotProps" />
         </PopoverPanel>
+        <PopoverArrow
+          v-if="arrow"
+          data-slot="arrow"
+          class="fill-surface-elevation-2"
+        />
       </PopoverContent>
     </PopoverPortal>
   </PopoverRoot>
@@ -64,6 +69,7 @@
 import { computed, onUnmounted, ref, useSlots, watch } from 'vue'
 import {
   PopoverAnchor,
+  PopoverArrow,
   PopoverContent,
   PopoverPortal,
   PopoverRoot,
@@ -93,6 +99,7 @@ const props = withDefaults(defineProps<PopoverProps>(), {
   dismissible: true,
   matchTriggerWidth: false,
   bare: false,
+  arrow: false,
   // Deprecated defaults preserved for the legacy paths.
   show: undefined,
   trigger: 'click',

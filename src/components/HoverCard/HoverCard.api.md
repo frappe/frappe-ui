@@ -55,6 +55,13 @@
     default: '0.3'
   },
   {
+    name: 'arrow',
+    description: 'Render a small arrow pointing at the trigger. Styled to match the panel\nsurface.',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  },
+  {
     name: 'open',
     description: '',
     required: false,

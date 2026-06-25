@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {
+  HoverCardArrow,
   HoverCardContent,
   HoverCardPortal,
   HoverCardRoot,
@@ -21,6 +22,7 @@ const props = withDefaults(defineProps<HoverCardProps>(), {
   collisionPadding: 10,
   hoverDelay: 0.3,
   leaveDelay: 0.3,
+  arrow: false,
 })
 
 defineEmits<HoverCardEmits>()
@@ -80,6 +82,11 @@ defineSlots<{
         >
           <slot />
         </PopoverPanel>
+        <HoverCardArrow
+          v-if="arrow"
+          data-slot="arrow"
+          class="fill-surface-elevation-2"
+        />
       </HoverCardContent>
     </HoverCardPortal>
   </HoverCardRoot>
