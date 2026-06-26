@@ -127,7 +127,7 @@ import { computed, ref, watch } from 'vue'
 import LucideX from '~icons/lucide/x'
 import LucideMinus from '~icons/lucide/minus'
 import LucideMaximize2 from '~icons/lucide/maximize-2'
-import { Button } from '#components/Button'
+import { Button } from '../Button'
 import { useFloatingWindow } from './useFloatingWindow'
 import type { ResizeDir, WindowMode } from './types'
 

@@ -26,9 +26,6 @@
     "../src/**/*.ts",
     "../src/**/*.d.ts",
     "../src/**/*.vue",
-    "../internals/**/*.ts",
-    "../internals/**/*.d.ts",
-    "../internals/**/*.vue",
     "../frappe/**/*.ts",
     "../frappe/**/*.d.ts",
     "../frappe/**/*.vue"
