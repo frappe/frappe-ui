@@ -108,7 +108,19 @@ export function createDocumentResource(options, vm) {
       {
         ...setValueOptions,
         makeParams() {
-          let values = JSON.parse(JSON.stringify(out.doc))
+          // send only the fields that changed vs the loaded doc, so that
+          // read-only standard fields (owner, creation, modified, docstatus,
+          // idx, ...) are not included in the set_value payload, which the
+          // server rejects with "Cannot edit standard fields"
+          let doc = JSON.parse(JSON.stringify(out.doc))
+          let originalDoc = out.originalDoc || {}
+          let values = {}
+          for (let key in doc) {
+            if (JSON.stringify(doc[key]) !== JSON.stringify(originalDoc[key])) {
+              values[key] = doc[key]
+            }
+          }
+          // never send identity/meta fields even if they appear changed
           delete values.doctype
           delete values.name
           return {
