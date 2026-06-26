@@ -38,11 +38,15 @@ class DocStore {
       if (!this.docs.has(key)) {
         this.docs.set(key, ref(null))
       }
+      // Mark fresh BEFORE assigning the ref. Assigning docRef.value synchronously
+      // re-runs any computed reading this doc (e.g. useDoc's `doc`), which calls
+      // getDoc again — if the entry still looked stale at that point it would kick
+      // off a needless reload that evicts the IDB copy we just wrote.
+      this.lastFetched.set(key, Date.now())
       const docRef = this.docs.get(key)
       if (docRef) {
         docRef.value = doc
       }
-      this.lastFetched.set(key, Date.now())
     } catch (error) {
       console.error('Failed to set doc in IDB:', error)
       throw error
@@ -77,7 +81,16 @@ class DocStore {
   ) {
     try {
       if (!isFirstLoad && this.isStale(key)) {
-        await this.cleanup(key)
+        // Evict the stale IDB copy and clear the timestamp so the next read
+        // reloads — but DON'T delete the in-memory ref (as cleanup() does).
+        // getDoc() returns this ref synchronously and its caller (useDoc's `doc`
+        // computed) dereferences it immediately; cleanup() deletes the map entry
+        // on its first synchronous line, so a stale-but-present key would make
+        // getDoc's `return this.docs.get(key)` yield undefined and crash the
+        // computed on `.value`. This is reachable for any doc accessed after it
+        // goes stale (a long-lived useDoc re-evaluated past the cache timeout).
+        this.lastFetched.delete(key)
+        await idbStore.delete(this.storePrefix + key)
       }
 
       const idbDoc = (await idbStore.get(this.storePrefix + key)) as Doc | null
