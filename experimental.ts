@@ -1,4 +1,4 @@
-// frappe-ui internals — UNSTABLE. No backward-compatibility promise.
+// frappe-ui experimental — UNSTABLE. No backward-compatibility promise.
 
 export { inputFontSizeClasses } from './src/components/Combobox/utils'
 export {
