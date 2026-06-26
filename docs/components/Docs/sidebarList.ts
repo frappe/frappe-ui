@@ -91,7 +91,7 @@ export function getSidebarList(
         { text: 'Icons', link: '/docs/other/icons' },
         { text: 'Utilities', link: '/docs/other/utilities' },
         { text: 'Directives', link: '/docs/other/directives' },
-        { text: 'Internals', link: '/docs/internals' },
+        { text: 'Experimental', link: '/docs/experimental' },
       ],
     },
   ]
