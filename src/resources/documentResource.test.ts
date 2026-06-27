@@ -81,7 +81,7 @@ describe('documentResource save', () => {
     expect(fieldname).not.toHaveProperty('name')
   })
 
-  it('sends an empty fieldname when nothing changed', async () => {
+  it('does not send a request when nothing changed', async () => {
     const doc = createDocumentResource(
       { doctype: 'CRM Deal', name: 'DEAL-0002', auto: false },
       {},
@@ -90,7 +90,8 @@ describe('documentResource save', () => {
     await doc.get.fetch()
     await doc.save.submit()
 
-    expect(capturedSetValueParams.fieldname).toEqual({})
+    // save short-circuits with no pending changes, so set_value is never hit
+    expect(capturedSetValueParams).toBe(null)
   })
 
   it('sends only the changed subset when multiple fields exist', async () => {

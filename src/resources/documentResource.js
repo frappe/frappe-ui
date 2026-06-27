@@ -108,25 +108,10 @@ export function createDocumentResource(options, vm) {
       {
         ...setValueOptions,
         makeParams() {
-          // send only the fields that changed vs the loaded doc, so that
-          // read-only standard fields (owner, creation, modified, docstatus,
-          // idx, ...) are not included in the set_value payload, which the
-          // server rejects with "Cannot edit standard fields"
-          let doc = JSON.parse(JSON.stringify(out.doc))
-          let originalDoc = out.originalDoc || {}
-          let values = {}
-          for (let key in doc) {
-            if (JSON.stringify(doc[key]) !== JSON.stringify(originalDoc[key])) {
-              values[key] = doc[key]
-            }
-          }
-          // never send identity/meta fields even if they appear changed
-          delete values.doctype
-          delete values.name
           return {
             doctype: out.doctype,
             name: out.name,
-            fieldname: values,
+            fieldname: getChangedFields(),
           }
         },
       },
@@ -154,6 +139,18 @@ export function createDocumentResource(options, vm) {
     reload,
     setDoc,
   })
+
+  // skip the network round-trip when save is called with no pending changes
+  const saveFetch = out.save.fetch
+  function saveIfChanged(...args) {
+    if (Object.keys(getChangedFields()).length === 0) {
+      return Promise.resolve(out.doc)
+    }
+    return saveFetch(...args)
+  }
+  out.save.fetch = saveIfChanged
+  out.save.reload = saveIfChanged
+  out.save.submit = saveIfChanged
 
   // keep track of isDirty as doc changes, use effectScope to handle isDirty state reactivity for cached data
   const scope = effectScope(true)
@@ -227,6 +224,25 @@ export function createDocumentResource(options, vm) {
       },
       vm,
     )
+  }
+
+  // diff out.doc against the loaded doc and return only the changed fields, so
+  // read-only standard fields (owner, creation, modified, docstatus, idx, ...)
+  // are not included in the set_value payload, which the server rejects with
+  // "Cannot edit standard fields"
+  function getChangedFields() {
+    let doc = JSON.parse(JSON.stringify(out.doc || {}))
+    let originalDoc = out.originalDoc || {}
+    let values = {}
+    for (let key in doc) {
+      if (JSON.stringify(doc[key]) !== JSON.stringify(originalDoc[key])) {
+        values[key] = doc[key]
+      }
+    }
+    // never send identity/meta fields even if they appear changed
+    delete values.doctype
+    delete values.name
+    return values
   }
 
   function reload() {
