@@ -44,16 +44,22 @@ const isLink = computed(() => isUploaded.value && !isLoading.value)
 </script>
 
 <template>
+  <!-- Gray-only chip (frappe-ui / Gameplan rule: never color shades). -->
   <NodeViewWrapper
     as="span"
-    class="gp-attachment"
-    :class="{ 'gp-attachment--error': error }"
+    class="inline-flex max-w-full items-center gap-1 align-baseline"
     data-drag-handle
     draggable="true"
   >
     <component
       :is="isLink ? 'a' : 'span'"
-      class="gp-attachment__chip"
+      class="inline-flex h-6 max-w-full items-center gap-1.5 rounded-lg border bg-surface-gray-2 px-2 text-sm no-underline"
+      :class="[
+        error
+          ? 'border-dashed border-outline-gray-2 text-ink-gray-6'
+          : 'border-outline-gray-2 text-ink-gray-8',
+        isLink ? 'cursor-pointer hover:bg-surface-gray-3' : 'cursor-default',
+      ]"
       :href="isLink ? href : undefined"
       :target="isLink ? '_blank' : undefined"
       :rel="isLink ? 'noopener noreferrer' : undefined"
@@ -62,25 +68,25 @@ const isLink = computed(() => isUploaded.value && !isLoading.value)
     >
       <span
         v-if="isLoading"
-        class="lucide-loader-circle gp-attachment__icon gp-attachment__icon--spin"
+        class="lucide-loader-circle size-3.5 shrink-0 animate-spin text-ink-gray-6"
         aria-hidden="true"
       />
       <span
         v-else-if="error"
-        class="lucide-triangle-alert gp-attachment__icon"
+        class="lucide-triangle-alert size-3.5 shrink-0 text-ink-gray-6"
         aria-hidden="true"
       />
       <span
         v-else
-        class="lucide-paperclip gp-attachment__icon"
+        class="lucide-paperclip size-3.5 shrink-0 text-ink-gray-6"
         aria-hidden="true"
       />
 
-      <span class="gp-attachment__name">{{ fileName }}</span>
-      <span v-if="fileSize && !error" class="gp-attachment__size">
+      <span class="max-w-64 truncate">{{ fileName }}</span>
+      <span v-if="fileSize && !error" class="shrink-0 text-ink-gray-5">
         {{ fileSize }}
       </span>
-      <span v-if="isLoading && percent > 0" class="gp-attachment__size">
+      <span v-if="isLoading && percent > 0" class="shrink-0 text-ink-gray-5">
         {{ percent }}%
       </span>
     </component>
@@ -88,105 +94,22 @@ const isLink = computed(() => isUploaded.value && !isLoading.value)
     <button
       v-if="isLoading && isEditable"
       type="button"
-      class="gp-attachment__action"
+      class="inline-flex items-center justify-center rounded p-0.5 text-ink-gray-6 hover:bg-surface-gray-3"
       title="Cancel upload"
       contenteditable="false"
       @click="cancel"
     >
-      <span class="lucide-x gp-attachment__icon" aria-hidden="true" />
+      <span class="lucide-x size-3.5 shrink-0" aria-hidden="true" />
     </button>
     <button
       v-else-if="error && isEditable"
       type="button"
-      class="gp-attachment__action"
+      class="inline-flex items-center justify-center rounded p-0.5 text-ink-gray-6 hover:bg-surface-gray-3"
       title="Try again"
       contenteditable="false"
       @click="retry"
     >
-      <span class="lucide-rotate-cw gp-attachment__icon" aria-hidden="true" />
+      <span class="lucide-rotate-cw size-3.5 shrink-0" aria-hidden="true" />
     </button>
   </NodeViewWrapper>
 </template>
-
-<style scoped>
-/* Gray-only chip (frappe-ui / Gameplan rule: never color shades). */
-.gp-attachment {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  vertical-align: baseline;
-  max-width: 100%;
-}
-
-.gp-attachment__chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  max-width: 100%;
-  padding: 0.125rem 0.5rem;
-  border: 1px solid var(--outline-gray-2, #e2e2e2);
-  border-radius: 0.5rem;
-  background-color: var(--surface-gray-2, #f4f4f4);
-  color: var(--ink-gray-8, #1f272e);
-  font-size: 0.8125rem;
-  line-height: 1.25rem;
-  text-decoration: none;
-  cursor: default;
-}
-
-a.gp-attachment__chip {
-  cursor: pointer;
-}
-
-a.gp-attachment__chip:hover {
-  background-color: var(--surface-gray-3, #ebebeb);
-}
-
-.gp-attachment--error .gp-attachment__chip {
-  border-style: dashed;
-  color: var(--ink-gray-6, #4f5a64);
-}
-
-.gp-attachment__icon {
-  flex: none;
-  width: 0.875rem;
-  height: 0.875rem;
-  color: var(--ink-gray-6, #4f5a64);
-}
-
-.gp-attachment__icon--spin {
-  animation: gp-attachment-spin 0.8s linear infinite;
-}
-
-.gp-attachment__name {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 16rem;
-}
-
-.gp-attachment__size {
-  flex: none;
-  color: var(--ink-gray-5, #7c7c7c);
-}
-
-.gp-attachment__action {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.125rem;
-  border-radius: 0.25rem;
-  color: var(--ink-gray-6, #4f5a64);
-  background: transparent;
-}
-
-.gp-attachment__action:hover {
-  background-color: var(--surface-gray-3, #ebebeb);
-}
-
-@keyframes gp-attachment-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-</style>
