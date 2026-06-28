@@ -145,6 +145,11 @@ export const AttachmentExtension =
       return [
         {
           tag: 'a[data-attachment]',
+          // A saved chip serializes to `<a data-attachment href=…>`, which also
+          // matches the Link mark's `a[href]` rule (priority 1000). Without a
+          // higher priority the mark wins and the chip re-parses as a plain
+          // link, so outrank it.
+          priority: 1100,
           getAttrs: (node) => {
             if (typeof node === 'string') return {}
             const element = node as HTMLElement
