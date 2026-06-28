@@ -133,5 +133,40 @@ describe('Radio', () => {
       cy.get('[data-slot="control"]').parent().click('left')
       cy.get('@onUpdate').should('not.have.been.called')
     })
+
+    it('keeps a fixed compact height for a label-only row', () => {
+      cy.mount(Radio, {
+        props: { label: 'Option A', value: 'a', variant: 'padded' },
+      })
+      cy.get('[data-slot="control"]').parent().parent().should('have.class', 'h-7')
+    })
+
+    it('grows the surface when a description is present', () => {
+      cy.mount(Radio, {
+        props: {
+          label: 'Option A',
+          value: 'a',
+          description: 'Billed annually.',
+          variant: 'padded',
+        },
+      })
+      cy.get('[data-slot="control"]')
+        .parent()
+        .parent()
+        .should('not.have.class', 'h-7')
+        .and('have.class', 'py-1.5')
+    })
+  })
+
+  describe('size', () => {
+    it('exposes data-size for xs', () => {
+      cy.mount(Radio, { props: { label: 'Option A', value: 'a', size: 'xs' } })
+      cy.get('input').should('have.attr', 'data-size', 'xs')
+    })
+
+    it('renders the xs control at 13px', () => {
+      cy.mount(Radio, { props: { label: 'Option A', value: 'a', size: 'xs' } })
+      cy.get('input').invoke('outerWidth').should('be.closeTo', 13, 1)
+    })
   })
 })
