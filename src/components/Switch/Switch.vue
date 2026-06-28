@@ -135,22 +135,30 @@ const switchClasses = computed(() => {
     'disabled:cursor-not-allowed disabled:bg-surface-gray-3',
     model.value
       ? 'bg-surface-gray-10 enabled:hover:bg-surface-gray-9 active:bg-surface-gray-8 group-hover:enabled:bg-surface-gray-9'
-      : 'bg-surface-gray-4 enabled:hover:bg-gray-400 active:bg-gray-500 group-hover:enabled:bg-gray-400',
-    props.size === 'md' ? 'h-5 w-8 border-[3px]' : 'h-4 w-[26px] border-2',
+      : 'bg-surface-gray-4 enabled:hover:bg-surface-gray-5 active:bg-surface-gray-6 group-hover:enabled:bg-surface-gray-5',
+    props.size === 'md'
+      ? 'h-5 w-8 border-[3px]'
+      : props.size === 'sm'
+        ? 'h-4 w-[26px] border-2'
+        : 'h-3.5 w-[24px] border-2',
   ]
 })
 
 const switchCircleClasses = computed(() => {
   return [
     'pointer-events-none inline-block transform rounded-full bg-surface-base shadow ring-0 transition duration-100 ease-in-out',
-    props.size === 'md' ? 'h-3.5 w-3.5' : 'h-3 w-3',
+    props.size === 'md' ? 'h-3.5 w-3.5' : props.size === 'sm' ? 'h-3 w-3' : 'h-2.5 w-2.5',
     props.size === 'md'
       ? model.value
         ? 'translate-x-3 rtl:-translate-x-3'
         : 'translate-x-0'
-      : model.value
-        ? 'translate-x-2.5 rtl:-translate-x-2.5'
-        : 'translate-x-0',
+      : props.size === 'sm'
+        ? model.value
+          ? 'translate-x-2.5 rtl:-translate-x-2.5'
+          : 'translate-x-0'
+        : model.value
+          ? 'translate-x-2.5 rtl:-translate-x-2.5'
+          : 'translate-x-0',
   ]
 })
 
@@ -158,11 +166,11 @@ const iconClasses = 'me-2 size-4 flex-shrink-0 text-ink-gray-6'
 
 const switchLabelClasses = computed(() => {
   return [
-    'font-medium leading-normal select-none',
+    'font-medium leading-tight select-none',
     props.disabled && !props.description
       ? 'text-ink-gray-4 cursor-not-allowed'
       : 'text-ink-gray-8 cursor-pointer',
-    props.size === 'md' ? 'text-lg' : 'text-base',
+    props.size === 'md' ? 'text-lg' : props.size === 'sm' ? 'text-base' : 'text-sm',
     props.labelClasses,
   ]
 })
@@ -205,16 +213,14 @@ const switchGroupClasses = computed(() => {
 })
 
 // Align the error/description text under the label, not the switch.
-// Only needed when the switch leads the row (position = start and no
-// description); settings-style rows (switch at end) have the label on
-// the leading side already.
+// Only needed when the switch leads the row (position = start); settings-style
+// rows (switch at end) have the label on the leading side already.
 const errorIndentClasses = computed(() => {
   const hasDescription = props.description || slots.description
-  if (hasDescription) return undefined
-  const position = props.switchPosition ?? 'start'
+  const position = props.switchPosition ?? (hasDescription ? 'end' : 'start')
   if (position !== 'start') return undefined
   // switch width + gap-x-2.5 (10 px)
-  return props.size === 'md' ? 'ps-[42px]' : 'ps-9'
+  return props.size === 'md' ? 'ps-[42px]' : props.size === 'sm' ? 'ps-9' : 'ps-8'
 })
 
 // Label-only non-padded rows include py-1.5 on the switch group, which
@@ -223,7 +229,9 @@ const errorIndentClasses = computed(() => {
 // Settings-style rows (hasDescription) have no inner padding so keep mt-1.
 const errorSpacingClass = computed(() => {
   const hasDescription = props.description || slots.description
-  return !hasDescription && props.variant !== 'padded' ? '-mt-0.5' : 'mt-1'
+  // A description sits tight under the label; error-only rows keep a small gap.
+  if (hasDescription) return 'mt-0.5'
+  return props.variant !== 'padded' ? '-mt-0.5' : 'mt-1'
 })
 
 // In the padded variant the whole row is a clickable surface — padding,
@@ -233,9 +241,27 @@ const containerClasses = computed(() => {
   if (props.variant !== 'padded') return undefined
   // `group` lives on the outer surface so hovering anywhere in the padded
   // area — including the corners — drives the control's hover state too.
-  const sizeClass =
-    props.size === 'md' ? 'h-8 px-3' : props.size === 'sm' ? 'h-7 px-2' : 'h-6 px-1.5'
-  const classes = ['group rounded justify-center transition-colors', sizeClass]
+  // A description or error makes the surface multi-line, so it grows with
+  // vertical padding instead of the fixed compact height used for label-only rows.
+  const hasDetail = showDescription.value || hasError.value || !!slots.description
+  const sizeClass = hasDetail
+    ? props.size === 'md'
+      ? 'px-3 py-2'
+      : props.size === 'sm'
+        ? 'px-2 py-1.5'
+        : 'px-1.5 py-1.5'
+    : props.size === 'md'
+      ? 'h-8 px-3'
+      : props.size === 'sm'
+        ? 'h-7 px-2'
+        : 'h-6 px-1.5'
+  const classes = ['group rounded transition-colors', sizeClass]
+  if (!hasDetail) classes.push('justify-center')
+  // With the switch at the start the row hugs its content; at the end it spans
+  // the full width so `justify-between` can push the switch to the right edge.
+  const hasDescription = props.description || slots.description
+  const position = props.switchPosition ?? (hasDescription ? 'end' : 'start')
+  classes.push(position === 'start' ? 'w-fit' : 'w-full')
   classes.push(
     props.disabled
       ? 'cursor-not-allowed'

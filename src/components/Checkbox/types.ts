@@ -8,6 +8,9 @@ export interface CheckboxProps extends InputLabelingProps {
   /** Visual style of the checkbox row. `padded` wraps the control and label in a clickable surface with hover, active and focus states — useful for selection lists and menu items. The control always stays on the leading side. */
   variant?: 'default' | 'padded'
 
+  /** Layout of the control and label. `vertical` stacks a centered label below the control — useful for option grids. Only applies to the `default` variant. */
+  orientation?: 'horizontal' | 'vertical'
+
   /** Disables the checkbox interaction */
   disabled?: boolean
 

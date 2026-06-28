@@ -5,12 +5,17 @@
     @click="onContainerClick"
   >
     <div
-      class="inline-flex items-center gap-2 rounded transition"
-      :class="rowClasses"
+      class="rounded transition"
+      :class="[
+        vertical
+          ? 'inline-flex flex-col items-center gap-1 text-center'
+          : 'inline-flex items-center gap-2',
+        rowClasses,
+      ]"
     >
       <input
         ref="inputRef"
-        class="rounded-sm mt-[1px] bg-surface-base"
+        class="rounded-sm mt-[1px]"
         :class="inputClasses"
         type="checkbox"
         :disabled="disabled"
@@ -38,7 +43,10 @@
         </template>
       </InputLabel>
     </div>
-    <div v-if="showDescription || hasError" class="ps-[1.35rem] mt-1">
+    <div
+      v-if="showDescription || hasError"
+      :class="vertical ? 'mt-1 text-center' : 'ps-[1.35rem] mt-1'"
+    >
       <InputDescription
         v-if="showDescription || $slots.description"
         :id="descriptionId"
@@ -67,6 +75,7 @@ import type { CheckboxProps } from './types'
 const props = withDefaults(defineProps<CheckboxProps>(), {
   size: 'sm',
   variant: 'default',
+  orientation: 'horizontal',
   padding: false,
   indeterminate: false,
 })
@@ -81,6 +90,12 @@ watchEffect(() => {
 })
 
 const checked = computed(() => Boolean(model.value))
+
+// Vertical orientation (centered label below the control) is only supported in
+// the default variant; the padded surface always lays the row out horizontally.
+const vertical = computed(
+  () => props.variant !== 'padded' && props.orientation === 'vertical',
+)
 
 // The `indeterminate` state can only be set via the DOM property, not HTML attribute.
 const inputRef = ref<HTMLInputElement | null>(null)
@@ -121,8 +136,7 @@ const {
 
 const labelClasses = computed(() => {
   return [
-    // xs inherits sm text size — only the row height changes
-    props.size === 'md' ? 'text-lg' : 'text-base',
+    props.size === 'md' ? 'text-lg' : props.size === 'sm' ? 'text-base' : 'text-sm',
     'font-medium',
     props.disabled ? 'text-ink-gray-4 cursor-not-allowed' : 'text-ink-gray-8 cursor-pointer',
     'select-none',
@@ -143,9 +157,20 @@ const rowClasses = computed(() => {
 // active and keyboard-only focus states wrapping the control and label.
 const containerClasses = computed(() => {
   if (props.variant !== 'padded') return undefined
-  const sizeClass =
-    props.size === 'md' ? 'h-8 px-3' : props.size === 'sm' ? 'h-7 px-1.5' : 'h-6 px-1.5'
-  const classes = ['group rounded justify-center transition-colors', sizeClass]
+  // A description or error makes the surface multi-line, so it grows with
+  // vertical padding instead of the fixed compact height used for label-only rows.
+  const hasDetail = showDescription.value || hasError.value
+  const sizeClass = hasDetail
+    ? props.size === 'md'
+      ? 'px-3 py-2'
+      : 'px-1.5 py-1.5'
+    : props.size === 'md'
+      ? 'h-8 px-3'
+      : props.size === 'sm'
+        ? 'h-7 px-1.5'
+        : 'h-6 px-1.5'
+  const classes = ['group rounded transition-colors', sizeClass]
+  if (!hasDetail) classes.push('justify-center')
   classes.push(
     props.disabled
       ? 'cursor-not-allowed'
@@ -165,19 +190,46 @@ const onContainerClick = (event: MouseEvent) => {
 }
 
 const inputClasses = computed(() => {
-  let baseClasses = props.disabled
-    ? 'cursor-not-allowed border-outline-gray-2 bg-surface-sidebar text-ink-gray-3'
-    : 'cursor-pointer border-outline-gray-4 text-ink-gray-9 hover:border-outline-gray-7 focus:ring-offset-0 focus:border-outline-gray-8 active:border-outline-gray-6 transition'
+  const sizeClasses =
+    props.size === 'md'
+      ? 'w-4 h-4'
+      : props.size === 'sm'
+        ? 'w-3.5 h-3.5'
+        : 'w-[13px] h-[13px]'
 
-  let interactionClasses = props.disabled
-    ? ''
-    : props.padding || props.variant === 'padded'
-      ? 'focus:ring-0 group-hover:border-outline-gray-7'
-      : 'hover:shadow-sm focus:ring-0 active:bg-surface-gray-2'
+  // The checked/indeterminate fill is painted by @tailwindcss/forms as
+  // `background-color: currentColor`, so we drive the fill through the text
+  // colour (as the original did with `text-ink-gray-9`) rather than fighting
+  // forms' `:checked:focus` rule with `checked:bg-*`. currentColor points at the
+  // Switch "on" tokens (10 / 9 / 8) via CSS vars — `surface-*` isn't a text
+  // utility in this preset. Unchecked shows a surface-base fill + outline border;
+  // forms clears the border on checked so the fill defines the box. The check/
+  // dash glyph colour comes from the dark-mode preset override.
+  if (props.disabled) {
+    return [
+      sizeClasses,
+      'cursor-not-allowed bg-surface-base border-outline-gray-3',
+      'text-[color:var(--surface-gray-5)]',
+      'hover:shadow-none focus:ring-0 focus:ring-offset-0',
+    ]
+  }
 
-  // xs uses the same control size as sm
-  let sizeClasses = props.size === 'md' ? 'w-4 h-4' : 'w-3.5 h-3.5'
-
-  return [baseClasses, interactionClasses, sizeClasses]
+  // In the padded variant the row drives hover; otherwise the control does.
+  const padded = props.padding || props.variant === 'padded'
+  return [
+    sizeClasses,
+    'cursor-pointer transition focus:ring-0 focus:ring-offset-0',
+    // Unchecked — surface-base fill, outline scale: default 4 / hover 5 / active 6.
+    'bg-surface-base border-outline-gray-4',
+    // Checked fill (via currentColor): default 10 / hover 9 / active 8.
+    'text-[color:var(--surface-gray-10)]',
+    // Non-padded shows the global espresso ring on keyboard focus. forms sets a
+    // transparent `:focus` outline that outranks the global `:focus-visible` rule,
+    // so re-assert it with the themed `focus-ring` utility. (Padded shows the ring
+    // on the row instead, via `[&:has(:focus-visible)]` on the container.)
+    padded
+      ? 'group-hover:border-outline-gray-5 checked:group-hover:text-[color:var(--surface-gray-9)]'
+      : 'hover:border-outline-gray-5 hover:shadow-sm active:border-outline-gray-6 focus-visible:focus-ring checked:hover:text-[color:var(--surface-gray-9)] checked:active:text-[color:var(--surface-gray-8)]',
+  ]
 })
 </script>

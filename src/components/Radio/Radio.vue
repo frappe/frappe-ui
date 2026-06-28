@@ -33,7 +33,7 @@
         </template>
       </InputLabel>
     </div>
-    <div v-if="showDescription || hasError" class="ps-[1.35rem] mt-1">
+    <div v-if="showDescription || hasError" class="ps-[1.35rem] mt-0.5">
       <InputDescription
         v-if="showDescription || $slots.description"
         :id="descriptionId"
@@ -47,7 +47,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, useAttrs } from 'vue'
+import { computed, useAttrs, useSlots } from 'vue'
 import { useInputLabeling } from '../../composables/useInputLabeling'
 import InputLabel from '../InputLabeling/InputLabel.vue'
 import InputDescription from '../InputLabeling/InputDescription.vue'
@@ -62,6 +62,7 @@ const props = withDefaults(defineProps<RadioProps>(), {
 
 const model = defineModel<RadioValue>()
 const attrs = useAttrs()
+const slots = useSlots()
 
 defineSlots<{
   /** Overrides the rendered label content. */
@@ -98,31 +99,37 @@ const {
 
 const labelClasses = computed(() => {
   return [
-    // xs inherits sm text size — only the row height changes
-    props.size === 'md' ? 'text-lg' : 'text-base',
-    'font-medium',
+    props.size === 'md' ? 'text-lg' : props.size === 'sm' ? 'text-base' : 'text-sm',
+    'font-medium leading-tight',
     props.disabled ? 'text-ink-gray-4 cursor-not-allowed' : 'text-ink-gray-8 cursor-pointer',
     'select-none',
   ]
 })
 
 // The control is a native radio with `appearance-none`. The selected state is
-// a thick ring with a white centre (per the Espresso designs): the border is
-// the ring, the white fill is the hole.
+// a thick ring with a surface-base centre (per the Espresso designs): the border
+// is the ring, the surface-base fill is the hole.
 //
 // Two wrinkles drive the class list:
 //  1. frappe-ui's tokens are scoped by property (`outline-*` → border,
-//     `surface-*` → background, `ink-*` → text) and the border scale stops at a
-//     mid grey, so the ring colour is projected from `text-ink-*` through
-//     `currentColor` + `border-current` to reach the darker selected shades.
+//     `surface-*` → background, `ink-*` → text), so the ring colour is projected
+//     through `currentColor` + `border-current`. The unselected ring uses the
+//     outline scale (4/5/6) and the selected ring the Switch "on" surface scale
+//     (10/9/8) — matching Checkbox — via `text-[color:var(--token)]`.
 //  2. `@tailwindcss/forms` repaints `:checked`, `:checked:hover` and
 //     `:checked:focus` with a currentColor fill + transparent border, so each
-//     is overridden back to a white centre + currentColor ring.
+//     is overridden back to a surface-base centre + currentColor ring.
 const inputClasses = computed(() => {
-  const sizeClass = props.size === 'md' ? 'size-4' : 'size-3.5'
-  // Selected ring thickness (4.5px on md, per Espresso) — the white centre is
+  const sizeClass =
+    props.size === 'md' ? 'size-4' : props.size === 'sm' ? 'size-3.5' : 'size-[13px]'
+  // Selected ring thickness (per Espresso) — the surface-base centre is
   // what's left inside it.
-  const ringWidth = props.size === 'md' ? 'checked:border-[4.5px]' : 'checked:border-4'
+  const ringWidth =
+    props.size === 'md'
+      ? 'checked:border-[4.5px]'
+      : props.size === 'sm'
+        ? 'checked:border-4'
+        : 'checked:border-[3.7px]'
 
   if (props.disabled) {
     return [
@@ -143,21 +150,23 @@ const inputClasses = computed(() => {
     sizeClass,
     ringWidth,
     'cursor-pointer border-current bg-surface-base',
-    // Unselected: thin medium-grey ring that darkens and lifts on hover.
-    'text-ink-gray-4 hover:text-ink-gray-5 hover:shadow-sm active:bg-surface-gray-2',
-    // Selected ring shade, deepening on press.
-    'checked:text-ink-gray-9 checked:hover:text-ink-gray-7 checked:active:text-ink-gray-8',
-    // Re-assert ring + white centre over the forms plugin on every :checked
+    // Unselected ring: outline scale (default 4 / hover 5 / active 6), via currentColor.
+    'text-[color:var(--outline-gray-4)] hover:text-[color:var(--outline-gray-5)] hover:shadow-sm active:text-[color:var(--outline-gray-6)]',
+    // Selected ring: Switch "on" scale (default 10 / hover 9 / active 8), via currentColor.
+    'checked:text-[color:var(--surface-gray-10)] checked:hover:text-[color:var(--surface-gray-9)] checked:active:text-[color:var(--surface-gray-8)]',
+    // Re-assert ring + surface-base centre over the forms plugin on every :checked
     // interaction state (see note above) — without the :hover/:focus variants
-    // the centre floods with the dark fill on hover/focus.
+    // the centre floods with the currentColor fill on hover/focus.
     'checked:bg-none',
     'checked:border-current checked:hover:border-current checked:focus:border-current',
     'checked:bg-surface-base checked:hover:bg-surface-base checked:focus:bg-surface-base',
-    // The padded row owns the focus ring + hover; the bare control shows its
-    // own keyboard focus ring instead.
+    // The padded row owns the focus ring + hover; the bare control shows the
+    // global espresso ring on keyboard focus. forms sets a transparent `:focus`
+    // outline that outranks the global `:focus-visible` rule, so re-assert it
+    // with the themed `focus-ring` utility.
     props.variant === 'padded'
-      ? 'focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 group-hover:text-ink-gray-5 checked:group-hover:text-ink-gray-7'
-      : 'focus:ring-0 focus:ring-offset-0',
+      ? 'focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 group-hover:text-[color:var(--outline-gray-5)] checked:group-hover:text-[color:var(--surface-gray-9)]'
+      : 'focus:ring-0 focus:ring-offset-0 focus-visible:focus-ring',
   ]
 })
 
@@ -167,9 +176,20 @@ const containerClasses = computed(() => {
   if (props.variant !== 'padded') return undefined
   // `group` lives on the outer surface so hovering anywhere in the padded
   // area — including the corners — drives the control's hover state too.
-  const sizeClass =
-    props.size === 'md' ? 'h-8 px-3' : props.size === 'sm' ? 'h-7 px-1.5' : 'h-6 px-1.5'
-  const classes = ['group rounded justify-center transition-colors', sizeClass]
+  // A description or error makes the surface multi-line, so it grows with
+  // vertical padding instead of the fixed compact height used for label-only rows.
+  const hasDetail = showDescription.value || hasError.value || !!slots.description
+  const sizeClass = hasDetail
+    ? props.size === 'md'
+      ? 'px-3 py-2'
+      : 'px-1.5 py-1.5'
+    : props.size === 'md'
+      ? 'h-8 px-3'
+      : props.size === 'sm'
+        ? 'h-7 px-1.5'
+        : 'h-6 px-1.5'
+  const classes = ['group rounded transition-colors', sizeClass]
+  if (!hasDetail) classes.push('justify-center')
   classes.push(
     props.disabled
       ? 'cursor-not-allowed'
