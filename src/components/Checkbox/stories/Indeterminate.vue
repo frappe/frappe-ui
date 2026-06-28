@@ -14,9 +14,10 @@ const indeterminate = ref(
   items.value.some((i) => i.checked) && !items.value.every((i) => i.checked),
 )
 
-function onSelectAll(val: boolean) {
-  items.value.forEach((i) => (i.checked = val))
-  allChecked.value = val
+function onSelectAll(val: boolean | 0 | 1 | undefined) {
+  const checked = Boolean(val)
+  items.value.forEach((i) => (i.checked = checked))
+  allChecked.value = checked
   indeterminate.value = false
 }
 
