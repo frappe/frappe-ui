@@ -68,6 +68,14 @@ async function run(
     console.error('uploadFunction option is not provided')
     return null
   }
+  // Yield one microtask before mutating the doc. These engine entry points run
+  // from a command callback that returns `true`, after which ProseMirror's
+  // CommandManager dispatches its own transaction for that tick. Inserting the
+  // placeholder synchronously here would dispatch a second transaction built on
+  // the pre-command state, which ProseMirror rejects with "Applying a mismatched
+  // transaction". The image/video engines get this yield implicitly from their
+  // `await probeOrNull(...)`; an attachment has no dimensions to probe.
+  await Promise.resolve()
   const uploadId = createUploadId()
   const abortController = new AbortController()
   setUploadProgress(uploadId, {
