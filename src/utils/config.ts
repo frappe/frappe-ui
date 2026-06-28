@@ -23,8 +23,9 @@ export interface FrappeUIConfig {
   fallbackErrorHandler?: (error: any) => void
 
   // Base URL prepended to relative request URLs. Set this for local UI dev
-  // against a remote Frappe instance (cross-origin). When set, requests are
-  // sent with credentials so cross-origin auth works.
+  // against a remote Frappe instance (cross-origin). When set, requests default
+  // to `credentials: 'include'` for cookie-based auth; if you use a token via
+  // `requestHeaders` instead, pass `credentials: 'omit'` per request.
   requestBaseUrl?: string
 
   // Extra headers merged into every frappeRequest. Either a static object or a
