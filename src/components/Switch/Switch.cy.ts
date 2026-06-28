@@ -150,5 +150,52 @@ describe('Switch', () => {
       cy.get('[data-slot="control"]').parent().click('left')
       cy.get('@onUpdate').should('not.have.been.called')
     })
+
+    it('keeps a fixed compact height for a label-only row', () => {
+      cy.mount(Switch, { props: { label: 'abc', variant: 'padded' } })
+      cy.get('[data-slot="control"]').parent().parent().should('have.class', 'h-7')
+    })
+
+    it('grows the surface when a description is present', () => {
+      cy.mount(Switch, {
+        props: { label: 'abc', description: 'helper', variant: 'padded' },
+      })
+      cy.get('[data-slot="control"]')
+        .parent()
+        .parent()
+        .should('not.have.class', 'h-7')
+        .and('have.class', 'py-1.5')
+    })
+  })
+
+  describe('size', () => {
+    it('exposes data-size for xs', () => {
+      cy.mount(Switch, { props: { label: 'abc', size: 'xs' } })
+      cy.get('[role="switch"]').should('have.attr', 'data-size', 'xs')
+    })
+  })
+
+  describe('switchPosition', () => {
+    it('leads with the switch by default (start)', () => {
+      cy.mount(Switch, { props: { label: 'abc' } })
+      cy.get('[data-slot="control"]').then(($switch) => {
+        cy.get('[data-slot="label"]').then(($label) => {
+          expect($switch[0].getBoundingClientRect().left).to.be.lessThan(
+            $label[0].getBoundingClientRect().left,
+          )
+        })
+      })
+    })
+
+    it('trails the label when switch-position is end', () => {
+      cy.mount(Switch, { props: { label: 'abc', switchPosition: 'end' } })
+      cy.get('[data-slot="control"]').then(($switch) => {
+        cy.get('[data-slot="label"]').then(($label) => {
+          expect($switch[0].getBoundingClientRect().left).to.be.greaterThan(
+            $label[0].getBoundingClientRect().left,
+          )
+        })
+      })
+    })
   })
 })
