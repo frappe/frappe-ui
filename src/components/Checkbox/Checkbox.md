@@ -18,9 +18,9 @@ Use `indeterminate` for "select all" controls where only some children are check
 
 ## Selection list
 
-The `padded` variant turns each row into a clickable surface — clicking
-anywhere on the row toggles the checkbox. It works well for selecting people or
-items inside a menu or popover.
+For a full selection dropdown, reach for [MultiSelect](/docs/components/multiselect)
+— it builds the popover, search, and checkbox rows for you. Add avatars or icons
+to each option with its `#item-prefix` slot.
 
 <ComponentPreview name="Checkbox-MemberList" />
 
