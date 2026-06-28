@@ -52,7 +52,7 @@ import { useInputLabeling } from '../../composables/useInputLabeling'
 import InputLabel from '../InputLabeling/InputLabel.vue'
 import InputDescription from '../InputLabeling/InputDescription.vue'
 import InputError from '../InputLabeling/InputError.vue'
-import type { RadioEmits, RadioProps, RadioValue } from './types'
+import type { RadioProps, RadioValue } from './types'
 
 const props = withDefaults(defineProps<RadioProps>(), {
   size: 'sm',
@@ -60,7 +60,6 @@ const props = withDefaults(defineProps<RadioProps>(), {
   disabled: false,
 })
 
-const emit = defineEmits<RadioEmits>()
 const model = defineModel<RadioValue>()
 const attrs = useAttrs()
 
@@ -143,7 +142,7 @@ const inputClasses = computed(() => {
   return [
     sizeClass,
     ringWidth,
-    'cursor-pointer border-current bg-surface-white',
+    'cursor-pointer border-current bg-surface-base',
     // Unselected: thin medium-grey ring that darkens and lifts on hover.
     'text-ink-gray-4 hover:text-ink-gray-5 hover:shadow-sm active:bg-surface-gray-2',
     // Selected ring shade, deepening on press.
@@ -153,12 +152,12 @@ const inputClasses = computed(() => {
     // the centre floods with the dark fill on hover/focus.
     'checked:bg-none',
     'checked:border-current checked:hover:border-current checked:focus:border-current',
-    'checked:bg-surface-white checked:hover:bg-surface-white checked:focus:bg-surface-white',
+    'checked:bg-surface-base checked:hover:bg-surface-base checked:focus:bg-surface-base',
     // The padded row owns the focus ring + hover; the bare control shows its
     // own keyboard focus ring instead.
     props.variant === 'padded'
       ? 'focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 group-hover:text-ink-gray-5 checked:group-hover:text-ink-gray-7'
-      : 'focus:ring-0 focus:ring-offset-0 focus-visible:ring-2 focus-visible:ring-outline-gray-3',
+      : 'focus:ring-0 focus:ring-offset-0',
   ]
 })
 

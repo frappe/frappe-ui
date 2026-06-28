@@ -62,7 +62,7 @@ import { warnDeprecated } from '../../utils/warnDeprecated'
 import InputLabel from '../InputLabeling/InputLabel.vue'
 import InputDescription from '../InputLabeling/InputDescription.vue'
 import InputError from '../InputLabeling/InputError.vue'
-import type { CheckboxEmits, CheckboxProps } from './types'
+import type { CheckboxProps } from './types'
 
 const props = withDefaults(defineProps<CheckboxProps>(), {
   size: 'sm',
@@ -71,7 +71,6 @@ const props = withDefaults(defineProps<CheckboxProps>(), {
   indeterminate: false,
 })
 
-const emit = defineEmits<CheckboxEmits>()
 const model = defineModel<boolean | 1 | 0>()
 const attrs = useAttrs()
 

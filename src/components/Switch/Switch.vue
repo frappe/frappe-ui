@@ -197,7 +197,7 @@ const switchGroupClasses = computed(() => {
   ]
   if (props.variant !== 'padded') {
     classes.push(
-      'py-1.5 cursor-pointer rounded focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-outline-gray-3',
+      'py-1.5 cursor-pointer rounded',
     )
     if (props.disabled) classes.push('cursor-not-allowed')
   }
