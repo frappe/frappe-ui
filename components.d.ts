@@ -151,6 +151,7 @@ declare module 'vue' {
     ProfilePanel: typeof import('./src/components/SettingsDialog/stories/panels/ProfilePanel.vue')['default']
     Progress: typeof import('./src/components/Progress/Progress.vue')['default']
     'Progress.playground': typeof import('./src/components/Progress/Progress.playground.vue')['default']
+    Radio: typeof import('./src/components/Radio/Radio.vue')['default']
     Rail: typeof import('./src/components/Rail/Rail.vue')['default']
     RailItem: typeof import('./src/components/Rail/RailItem.vue')['default']
     RailItemBadge: typeof import('./src/components/Rail/RailItemBadge.vue')['default']
