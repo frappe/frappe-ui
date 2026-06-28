@@ -30,6 +30,7 @@ export type SidebarSectionProps = {
   label?: string
   items: SidebarItemProps[]
   collapsible?: boolean
+  defaultCollapsed?: boolean
 }
 
 export type SidebarProps = {
