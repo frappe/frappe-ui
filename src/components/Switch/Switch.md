@@ -6,31 +6,12 @@ A toggle input for turning options on or off. Clearly indicates state changes an
 
 <ClientOnly><SwitchBuilder /></ClientOnly>
 
-<ComponentPreview name="Switch-Default" layout="stacked" />
-
-## Variants
-
-`default` is a plain inline toggle. `padded` wraps the control and label in a
-clickable surface with hover, active and focus states — for settings rows and
-menu items. The switch sits before a label-only row and after a row with a
-description; pass `switch-position` to override.
-
-<ComponentPreview name="Switch-Variants" />
-
-## Sizes
-
-<ComponentPreview name="Switch-Sizes" />
-
 ## With icon
 
 Strings starting with `lucide-` route through the shared Lucide
 Tailwind utility. Component values are rendered with `<component :is>`.
 
 <ComponentPreview name="Switch-Icons" />
-
-## Labeling
-
-<ComponentPreview name="Switch-Labeling" />
 
 ## States
 

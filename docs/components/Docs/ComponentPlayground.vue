@@ -113,29 +113,38 @@ function onCopy() {
         <slot name="preview" :values="values" />
       </div>
 
-      <div class="flex flex-col gap-3 bg-surface-gray-1 p-4">
-        <div v-for="knob in rowKnobs" :key="knob.name" class="knob-row">
-          <span class="knob-label">{{ knob.name }}</span>
-          <input
-            v-if="knob.type === 'text'"
-            v-model="values[knob.name]"
-            type="text"
-            class="h-7 rounded-md border border-outline-gray-2 bg-surface-base px-2 text-sm text-ink-gray-8 focus:border-outline-gray-3 focus:outline-none"
-            :style="{ width: knob.width ?? '10rem' }"
-          />
-          <TabButtons
-            v-else-if="knob.type === 'tabs'"
-            v-model="values[knob.name]"
-            :options="knob.options"
-          />
+      <div
+        class="flex flex-col gap-6 bg-surface-gray-1 p-4 sm:flex-row sm:items-start sm:justify-between sm:gap-10"
+      >
+        <!-- Left column: text fields and tab groups -->
+        <div v-if="rowKnobs.length" class="flex flex-col gap-3">
+          <div v-for="knob in rowKnobs" :key="knob.name" class="knob-row">
+            <span class="knob-label">{{ knob.name }}</span>
+            <input
+              v-if="knob.type === 'text'"
+              v-model="values[knob.name]"
+              type="text"
+              class="h-7 rounded-md border border-outline-gray-2 bg-surface-base px-2 text-sm text-ink-gray-8 focus:border-outline-gray-3 focus:outline-none"
+              :style="{ width: knob.width ?? '10rem' }"
+            />
+            <TabButtons
+              v-else-if="knob.type === 'tabs'"
+              v-model="values[knob.name]"
+              :options="knob.options"
+            />
+          </div>
         </div>
-        <div v-if="switchKnobs.length" class="flex flex-wrap items-center gap-6">
+        <!-- Right column: toggles, stacked top to bottom -->
+        <div
+          v-if="switchKnobs.length"
+          class="flex flex-col gap-3 sm:w-48 sm:shrink-0"
+        >
           <div
             v-for="knob in switchKnobs"
             :key="knob.name"
-            class="flex items-center gap-2"
+            class="flex items-center justify-between gap-4"
           >
-            <span class="knob-label">{{ knob.name }}</span>
+            <span class="knob-label knob-label-auto">{{ knob.name }}</span>
             <Switch
               v-model="values[knob.name]"
               :disabled="knob.disabledWhen?.(values) ?? false"
@@ -175,6 +184,10 @@ function onCopy() {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 13px;
   color: var(--p-color-ink-gray-6, #7c7c7c);
+}
+/* Toggle rows size their label to the text so the switch hugs the right edge. */
+.knob-label-auto {
+  width: auto;
 }
 .dot-grid {
   background-image: radial-gradient(
