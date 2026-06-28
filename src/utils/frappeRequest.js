@@ -8,12 +8,17 @@ export function frappeRequest(options) {
       if (!options.url) {
         throw new Error('[frappeRequest] options.url is required')
       }
+      let configHeaders = getConfig('requestHeaders') || {}
+      if (typeof configHeaders === 'function') {
+        configHeaders = configHeaders()
+      }
       let headers = Object.assign(
         {
           Accept: 'application/json',
           'Content-Type': 'application/json; charset=utf-8',
           'X-Frappe-Site-Name': window.location.hostname,
         },
+        configHeaders,
         options.headers || {},
       )
       if (window.csrf_token && window.csrf_token !== '{{ csrf_token }}') {
@@ -22,10 +27,19 @@ export function frappeRequest(options) {
       if (!options.url.startsWith('/') && !options.url.startsWith('http')) {
         options.url = '/api/method/' + options.url
       }
+      // Prepend a configured base URL to relative URLs for local dev against a
+      // remote instance. Cross-origin requests need credentials included.
+      let baseUrl = getConfig('requestBaseUrl')
+      let credentials = options.credentials
+      if (baseUrl && options.url.startsWith('/')) {
+        options.url = baseUrl.replace(/\/$/, '') + options.url
+        credentials = credentials || 'include'
+      }
       return {
         ...options,
         method: options.method || 'POST',
         headers,
+        credentials,
       }
     },
     transformResponse: async (response, options) => {
