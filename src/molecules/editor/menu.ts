@@ -181,6 +181,14 @@ export const InsertVideo = command(
   undefined,
   false,
 )
+// Like InsertVideo, exposed as a command but not added to any default toolbar;
+// the primary entry points for attachments are drag/drop and paste.
+export const InsertAttachment = command(
+  commandMeta.attachment,
+  (editor) => editor.chain().focus().selectAndUploadFile().run(),
+  undefined,
+  false,
+)
 export const InsertLink = command(
   commandMeta.link,
   (editor) => editor.commands.openLinkEditor(),
