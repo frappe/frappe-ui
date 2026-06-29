@@ -74,7 +74,6 @@ const props = withDefaults(defineProps<TreeProps>(), {
   nodeKey: 'key',
   draggable: false,
   guides: 'connectors',
-  defaultExpanded: false,
   disabled: false,
 })
 
@@ -92,11 +91,12 @@ defineSlots<{
 }>()
 
 /**
- * The keys of the currently expanded nodes — the live source of truth for
- * which rows are open. Controlled or uncontrolled. Use `defaultExpanded` only
- * for the simple "start fully expanded" case.
+ * Expand/collapse-all switch. Toggling it writes that value into every node's
+ * `expanded` field. Two-way: it also reflects whether all collapsible nodes are
+ * currently open, so a bound button stays in sync. Per-node state lives on the
+ * nodes themselves (`node.expanded`).
  */
-const expanded = defineModel<TreeKey[]>('expanded', { default: () => [] })
+const expanded = defineModel<boolean>('expanded', { default: false })
 
 const treeRef = ref<HTMLElement | null>(null)
 const focusedKey = ref<TreeKey | null>(null)
@@ -114,29 +114,53 @@ const siblingsOf = (parent: TreeNode | null) =>
   parent ? childrenOf(parent) : roots.value
 
 // --- expansion ------------------------------------------------------------
-const expandedSet = computed(() => new Set(expanded.value))
-const isExpanded = (node: TreeNode) => expandedSet.value.has(keyOf(node))
+// Per-node state lives on the node itself. Expanded by default — a node is only
+// closed when it explicitly carries `expanded: false`.
+const isExpanded = (node: TreeNode) => node.expanded !== false
 
 function setExpanded(node: TreeNode, value: boolean) {
   if (props.disabled || !hasChildren(node)) return
-  const key = keyOf(node)
-  const next = new Set(expanded.value)
-  value ? next.add(key) : next.delete(key)
-  expanded.value = [...next]
+  node.expanded = value
+  syncModel()
 }
 
 const toggle = (node: TreeNode) => setExpanded(node, !isExpanded(node))
 const expand = (node: TreeNode) => setExpanded(node, true)
 const collapse = (node: TreeNode) => setExpanded(node, false)
 
-function collectCollapsibleKeys(nodes: TreeNode[], acc: TreeKey[] = []) {
+function eachCollapsible(nodes: TreeNode[], fn: (node: TreeNode) => void) {
   for (const node of nodes) {
     if (hasChildren(node)) {
-      acc.push(keyOf(node))
-      collectCollapsibleKeys(childrenOf(node), acc)
+      fn(node)
+      eachCollapsible(childrenOf(node), fn)
     }
   }
-  return acc
+}
+
+// Write `value` into every collapsible node's `expanded` field.
+function setAll(value: boolean) {
+  eachCollapsible(roots.value, (node) => (node.expanded = value))
+}
+
+// True when every collapsible node is open (drives the two-way switch).
+function allExpanded() {
+  let total = 0
+  let open = 0
+  eachCollapsible(roots.value, (node) => {
+    total++
+    if (isExpanded(node)) open++
+  })
+  return total > 0 ? open === total : expanded.value
+}
+
+// Reflect the per-node state back onto the switch without re-triggering setAll.
+let syncing = false
+function syncModel() {
+  const all = allExpanded()
+  if (expanded.value === all) return
+  syncing = true
+  expanded.value = all
+  syncing = false
 }
 
 // --- focus -----------------------------------------------------------------
@@ -214,17 +238,21 @@ const { onKeydown } = useTreeKeyboard({
 })
 
 // --- lifecycle ------------------------------------------------------------
-// Seed once, on the first non-empty roots — so async-loaded nodes still expand.
-let seeded = false
+// The switch applies to every node when toggled. Skip the initial `false` so a
+// tree's per-node `expanded` data is respected on first render.
 watch(
-  roots,
-  (r) => {
-    if (seeded || !props.defaultExpanded || !r.length) return
-    if (expanded.value.length === 0) expanded.value = collectCollapsibleKeys(r)
-    seeded = true
+  expanded,
+  (value, old) => {
+    if (syncing) return
+    if (old === undefined && value === false) return
+    setAll(value)
   },
-  { immediate: true },
+  { immediate: true, flush: 'sync' },
 )
+
+// Keep the switch reflecting the real per-node state, including initial data
+// and async-loaded nodes.
+watch(roots, syncModel, { immediate: true })
 
 // Keep focus valid if the focused node disappears from the tree.
 watch(flat, (rows) => {
