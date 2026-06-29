@@ -124,21 +124,22 @@ The legacy `Input` component is deprecated. Use
 ## Tree
 
 The Tree was rebuilt from a single recursive `node` renderer into a stateful
-forest. It takes a `nodes` array, drives expansion through `v-model:expanded`,
-and scopes its per-row slots as `#item-*`. The `options` blob and the per-node
-internal collapse state are gone and sizing moves to CSS variables. Keyboard
-navigation, `role="tree"` ARIA, and opt-in drag-and-drop are new.
+forest. It takes a `nodes` array and scopes its per-row slots as `#item-*`. Each
+node still owns its expansion via an `expanded` field, now defaulting to open —
+set `expanded: false` to collapse one (v0 used `defaultCollapsed`). The
+`options` blob is gone — sizing moves to CSS variables. Keyboard navigation,
+`role="tree"` ARIA, and opt-in drag-and-drop are new.
 
-| Before                                           | After                                          |
-| ------------------------------------------------ | ---------------------------------------------- |
-| `:node="root"` (single root object)              | `:nodes="[root]"` (array of roots)             |
-| internal per-node collapse                       | `v-model:expanded` (array of keys)             |
-| `:options="{ rowHeight, indentWidth }"`          | `--tree-row-height` / `--tree-indent` CSS vars |
-| `:options="{ showIndentationGuides }"`           | `guides="connectors" \| "lines" \| "none"`     |
-| `:options="{ defaultCollapsed: true }"`          | `defaultExpanded` (inverted)                   |
-| `#node="{ node, isCollapsed, toggleCollapsed }"` | `#item="{ node, expanded, toggle, … }"`        |
-| `#label`                                         | `#item-label`                                  |
-| `#icon`                                          | built-in chevron; override via `#item`         |
+| Before                                           | After                                                           |
+| ------------------------------------------------ | --------------------------------------------------------------- |
+| `:node="root"` (single root object)              | `:nodes="[root]"` (array of roots)                              |
+| `node.collapsed` / internal collapse             | `node.expanded` (inverted, on each node)                        |
+| `:options="{ rowHeight, indentWidth }"`          | `--tree-row-height` / `--tree-indent` CSS vars                  |
+| `:options="{ showIndentationGuides }"`           | `guides="connectors" \| "lines" \| "none"`                      |
+| `:options="{ defaultCollapsed: true }"`          | `expanded: false` per node, or `v-model:expanded` to toggle all |
+| `#node="{ node, isCollapsed, toggleCollapsed }"` | `#item="{ node, expanded, toggle, … }"`                         |
+| `#label`                                         | `#item-label`                                                   |
+| `#icon`                                          | built-in chevron; override via `#item`                          |
 
 ```vue
 <!-- Before -->
@@ -147,10 +148,13 @@ navigation, `role="tree"` ARIA, and opt-in drag-and-drop are new.
 </Tree>
 
 <!-- After -->
-<Tree :nodes="[root]" node-key="name" default-expanded>
+<Tree :nodes="[root]" node-key="name">
   <template #item-label="{ node }">{{ node.title }}</template>
 </Tree>
 ```
+
+`v-model:expanded` is a boolean expand/collapse-all switch (bind it to a
+button), not a per-node value.
 
 Drag-and-drop is opt-in: set `draggable`, gate drops with
 `:move="({ node, target, position }) => …"`, and persist from
