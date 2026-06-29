@@ -76,6 +76,13 @@
     default: '"No results"'
   },
   {
+    name: 'creatable',
+    description: 'Shows a "Create X" row when the typed query matches no existing\noption, letting the user enter values that aren\'t in `options`. The\ncomponent does **not** add the value itself — selecting the row (click\nor Enter) emits `@create` with the query, and the host validates and\ncommits it into `v-model`. The model value type stays `string[]`.',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  },
+  {
     name: 'side',
     description: 'Preferred popover side.',
     required: false,
@@ -230,6 +237,11 @@
     name: 'update:open',
     description: 'Fired when the open state changes.',
     type: 'unknown[]'
+  },
+  {
+    name: 'create',
+    description: '',
+    type: '[query: string]'
   }
 ]
 </script>

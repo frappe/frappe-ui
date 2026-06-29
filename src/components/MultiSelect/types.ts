@@ -83,6 +83,15 @@ export interface MultiSelectProps extends InputLabelingProps {
   /** Fallback empty-state copy. */
   emptyText?: string
 
+  /**
+   * Shows a "Create X" row when the typed query matches no existing
+   * option, letting the user enter values that aren't in `options`. The
+   * component does **not** add the value itself — selecting the row (click
+   * or Enter) emits `@create` with the query, and the host validates and
+   * commits it into `v-model`. The model value type stays `string[]`.
+   */
+  creatable?: boolean
+
   /** Preferred popover side. */
   side?: PopoverSide
 
@@ -248,4 +257,12 @@ export interface MultiSelectEmits {
 
   /** Fired when the user types in the search input. */
   'update:query': [value: string]
+
+  /**
+   * Fired when the user selects the "Create X" row (click or Enter) while
+   * `creatable` is set. Carries the current query string. The host
+   * validates it and commits it into `v-model` — the component never adds
+   * the value itself.
+   */
+  create: [query: string]
 }
