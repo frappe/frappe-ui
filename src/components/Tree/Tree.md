@@ -7,7 +7,8 @@ guides visually link parents to their children.
 ## Default
 
 The simplest tree — pass `nodes` and tell it which field is the key. Nodes are
-expanded by default; set `expanded: false` on one to start it collapsed.
+expanded by default; here **Documents** carries `expanded: false` to start
+collapsed.
 
 <ComponentPreview name="Tree-Example" />
 
