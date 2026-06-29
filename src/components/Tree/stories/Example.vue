@@ -22,6 +22,7 @@ const nodes = ref<TreeNode[]>([
       {
         name: 'documents',
         label: 'Documents',
+        expanded: false,
         children: [
           { name: 'somefile.txt', label: 'somefile.txt' },
           { name: 'somefile.pdf', label: 'somefile.pdf' },
