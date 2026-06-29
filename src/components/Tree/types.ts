@@ -12,6 +12,11 @@ export type TreeNode = {
   [key: string]: unknown
   label?: string
   children?: TreeNode[]
+  /**
+   * Whether this node is expanded — the per-node source of truth. Expanded by
+   * default; set `false` to start it collapsed.
+   */
+  expanded?: boolean
 }
 
 /** Where a dragged node lands relative to the hovered target. */
@@ -79,15 +84,6 @@ export interface TreeProps {
    * @default 'connectors'
    */
   guides?: 'connectors' | 'lines' | 'none'
-
-  /**
-   * Start with every node expanded. A one-shot convenience that seeds the open
-   * set on first load (async-safe — it waits for `nodes` to arrive). To open
-   * specific nodes or track expansion, use `v-model:expanded` instead; this is
-   * ignored once you provide your own keys.
-   * @default false
-   */
-  defaultExpanded?: boolean
 
   /**
    * Disable all interaction — expand/collapse and drag.
