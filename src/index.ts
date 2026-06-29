@@ -2,6 +2,7 @@
 export * from './resources/index.ts'
 
 // components
+export * from './components/Accordion'
 export * from './components/Alert'
 export * from './components/Autocomplete'
 export * from './components/Avatar'
