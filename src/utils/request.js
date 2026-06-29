@@ -32,6 +32,7 @@ export function request(_options) {
     headers: options.headers,
     body,
     signal: options.signal,
+    ...(options.credentials ? { credentials: options.credentials } : {}),
   })
     .then((response) => {
       if (options.transformResponse) {
