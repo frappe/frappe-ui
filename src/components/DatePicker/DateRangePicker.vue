@@ -21,7 +21,7 @@
     :readonly="inputReadonly"
     :input-class="dp.inputClass"
     :display-label="displayLabel"
-    content-class="w-fit rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5"
+    content-class="w-fit"
     @blur="commitInput()"
     @enter="commitInput(true)"
     @open="onShellOpen"
@@ -65,8 +65,6 @@
             :view="view"
             :current-year="currentYear"
             :current-month="currentMonth"
-            :year-range-start="yearRangeStart"
-            :year-range="yearRange"
             :weeks="weeks"
             :today-label="isDualPaneActive ? '' : 'Today'"
             :hide-next="isDualPaneActive"
@@ -91,8 +89,6 @@
             :view="view"
             :current-year="rightYear"
             :current-month="rightMonth"
-            :year-range-start="yearRangeStart"
-            :year-range="yearRange"
             :weeks="rightWeeks"
             hide-prev
             hide-today
@@ -286,8 +282,6 @@ const {
   view,
   currentYear,
   currentMonth,
-  yearRangeStart,
-  yearRange,
   prev,
   next,
   cycleView,

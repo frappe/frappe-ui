@@ -1,18 +1,20 @@
 <template>
   <div
-    class="inline-flex select-none items-center gap-1 rounded-full whitespace-nowrap"
+    class="inline-flex select-none items-center gap-1 overflow-clip rounded-full whitespace-nowrap"
     :class="classes"
   >
     <div
-      :class="[props.size == 'lg' ? 'max-h-6' : 'max-h-4']"
       v-if="$slots.prefix"
+      class="inline-flex shrink-0 items-center justify-center"
+      :class="iconSize"
     >
       <slot name="prefix"></slot>
     </div>
     <slot>{{ props.label?.toString() }}</slot>
     <div
-      :class="[props.size == 'lg' ? 'max-h-6' : 'max-h-4']"
       v-if="$slots.suffix"
+      class="inline-flex shrink-0 items-center justify-center"
+      :class="iconSize"
     >
       <slot name="suffix"></slot>
     </div>
@@ -29,55 +31,68 @@ const props = withDefaults(defineProps<BadgeProps>(), {
   variant: 'subtle',
 })
 
+// `orange` is kept as a deprecated alias for `amber`
+const theme = computed(() => (props.theme === 'orange' ? 'amber' : props.theme))
+
 const classes = computed(() => {
-  let solidClasses = {
-    gray: 'text-ink-white bg-surface-gray-7',
-    blue: 'text-ink-blue-1 bg-surface-blue-2',
-    green: 'text-ink-green-1 bg-surface-green-3',
-    orange: 'text-ink-amber-1 bg-surface-amber-2',
-    red: 'text-ink-red-1 bg-surface-red-4',
-  }[props.theme]
+  // The semantic scale (Figma export → tailwind/generated/colors.json) is
+  // consistent across all themes — gray is the only exception (`-7` is its
+  // saturated step, since gray needs more headroom). Tailwind's JIT needs
+  // literal class names so the per-theme strings are inlined below.
+  //   surface/{color}-2  pale bg          surface/{color}-5  saturated bg
+  //   outline/{color}-2  pale border
+  //   ink/{color}-1      pale text        ink/{color}-4      saturated text
+  const themeClasses = {
+    gray: {
+      solid: 'text-ink-base bg-surface-gray-10',
+      subtle: 'text-ink-gray-6 bg-surface-gray-2',
+      outline: 'text-ink-gray-6 border border-outline-gray-2',
+      ghost: 'text-ink-gray-6',
+    },
+    blue: {
+      solid: 'text-ink-blue-1 bg-surface-blue-7',
+      subtle: 'text-ink-blue-8 bg-surface-blue-2',
+      outline: 'text-ink-blue-8 border border-outline-blue-3',
+      ghost: 'text-ink-blue-8',
+    },
+    green: {
+      solid: 'text-ink-green-1 bg-surface-green-7',
+      subtle: 'text-ink-green-8 bg-surface-green-2',
+      outline: 'text-ink-green-8 border border-outline-green-3',
+      ghost: 'text-ink-green-8',
+    },
+    amber: {
+      solid: 'text-ink-amber-1 bg-surface-amber-7',
+      subtle: 'text-ink-amber-8 bg-surface-amber-2',
+      outline: 'text-ink-amber-8 border border-outline-amber-3',
+      ghost: 'text-ink-amber-8',
+    },
+    red: {
+      solid: 'text-ink-red-1 bg-surface-red-7',
+      subtle: 'text-ink-red-8 bg-surface-red-2',
+      outline: 'text-ink-red-8 border border-outline-red-3',
+      ghost: 'text-ink-red-8',
+    },
+    violet: {
+      solid: 'text-ink-violet-1 bg-surface-violet-7',
+      subtle: 'text-ink-violet-8 bg-surface-violet-2',
+      outline: 'text-ink-violet-8 border border-outline-violet-3',
+      ghost: 'text-ink-violet-8',
+    },
+  }[theme.value]
 
-  let subtleClasses = {
-    gray: 'text-ink-gray-6 bg-surface-gray-2',
-    blue: 'text-ink-blue-2 bg-surface-blue-2',
-    green: 'text-ink-green-3 bg-surface-green-2',
-    orange: 'text-ink-amber-3 bg-surface-amber-1',
-    red: 'text-ink-red-4 bg-surface-red-2',
-  }[props.theme]
+  const variantClasses = themeClasses[props.variant]
 
-  let outlineClasses = {
-    gray: 'text-ink-gray-6 bg-transparent border border-outline-gray-1',
-    blue: 'text-ink-blue-2 bg-transparent border border-outline-blue-1',
-    green: 'text-ink-green-3 bg-transparent border border-outline-green-2',
-    orange: 'text-ink-amber-3 bg-transparent border border-outline-amber-2',
-    red: 'text-ink-red-4 bg-transparent border border-outline-red-2',
-  }[props.theme]
-
-  let ghostClasses = {
-    gray: 'text-ink-gray-6 bg-transparent',
-    blue: 'text-ink-blue-2 bg-transparent',
-    green: 'text-ink-green-3 bg-transparent',
-    orange: 'text-ink-amber-3 bg-transparent',
-    red: 'text-ink-red-4 bg-transparent',
-  }[props.theme]
-
-  let variantClasses = {
-    subtle: subtleClasses,
-    solid: solidClasses,
-    outline: outlineClasses,
-    ghost: ghostClasses,
-  }[props.variant]
-
-  let sizeClasses = {
-    sm: 'h-4 text-xs px-1.5',
-    md: 'h-5 text-xs px-1.5',
-    lg: 'h-6 text-sm px-2',
-		xl: 'h-7 text-base px-2',
+  const sizeClasses = {
+    sm: 'h-4 px-1.5 text-xs',
+    md: 'h-5 px-1.5 text-xs',
+    lg: 'h-6 px-2 text-[13px] tracking-[0.02em]',
   }[props.size]
 
   return [variantClasses, sizeClasses]
 })
+
+const iconSize = computed(() => (props.size === 'lg' ? 'size-3' : 'size-2.5'))
 
 defineSlots<{
   /** Content shown before the badge label */

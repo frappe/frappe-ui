@@ -1,13 +1,15 @@
 <script setup lang="ts">
-import { computed, h, ref, watch, type Component } from 'vue'
+import { computed, ref, watch, type Component } from 'vue'
 import type { CommandMenuItem, MenuGroupItem, MenuItem } from './menu'
 import type { Editor } from './useEditor'
+import Button from '#components/Button/Button.vue'
 import Tooltip from '#components/Tooltip/Tooltip.vue'
 import TooltipProvider from '#components/Tooltip/TooltipProvider.vue'
 
 const props = defineProps<{
   editor: Editor | null
   items: MenuItem[]
+  buttonSize?: 'xs' | 'sm'
 }>()
 
 // The editor from `useEditor` is built on `@tiptap/core` (not `@tiptap/vue-3`),
@@ -41,15 +43,11 @@ function isItemDisabled(item: CommandMenuItem): boolean {
   return !props.editor || item.isDisabled?.(props.editor) === true
 }
 
-// Renders an item's glyph: a `lucide-*` (or any) string becomes a masked icon
-// span (sized here so item definitions stay terse); a component renders as-is;
-// with no icon we fall back to the label text.
-function ItemContent(p: { item: CommandMenuItem }) {
-  const { icon, label } = p.item
-  if (!icon) return h('span', label)
-  if (typeof icon === 'string')
-    return h('span', { class: ['size-4', icon], 'aria-hidden': 'true' })
-  return h(icon as Component)
+/** Display label, honoring state-dependent `getLabel` (e.g. merge vs split). */
+function labelOf(item: CommandMenuItem): string {
+  void version.value
+  if (props.editor && item.getLabel) return item.getLabel(props.editor)
+  return item.label
 }
 
 /** A command item that ships its own interactive component (e.g. color picker). */
@@ -102,6 +100,8 @@ function run(item: CommandMenuItem, event?: MouseEvent) {
     })
   }
 }
+
+const menuButtonSize = computed(() => props.buttonSize ?? 'xs')
 </script>
 
 <template>
@@ -125,16 +125,16 @@ function run(item: CommandMenuItem, event?: MouseEvent) {
         :editor="editor"
       >
         <template #default="trigger">
-          <button
-            type="button"
-            class="inline-flex size-6 items-center justify-center rounded text-sm text-ink-gray-7 hover:bg-surface-gray-3 disabled:cursor-not-allowed disabled:opacity-50 aria-pressed:bg-surface-gray-3"
-            :aria-label="item.label"
+          <Button
+            :size="menuButtonSize"
+            variant="ghost"
+            :icon="item.icon"
+            :label="item.label"
+            class="aria-pressed:bg-surface-gray-3"
             :aria-pressed="trigger.isActive === true || isPressed(item)"
             :disabled="isItemDisabled(item)"
             @click="isItemDisabled(item) ? undefined : trigger.onClick()"
-          >
-            <ItemContent :item="item" />
-          </button>
+          />
         </template>
       </component>
       <div
@@ -142,7 +142,7 @@ function run(item: CommandMenuItem, event?: MouseEvent) {
         data-slot="menu-group"
         class="flex items-center gap-1"
       >
-        <span class="px-2 text-sm font-medium text-ink-gray-7">{{
+        <span class="px-2 text-sm-medium text-ink-gray-7">{{
           item.label
         }}</span>
         <Tooltip
@@ -150,29 +150,29 @@ function run(item: CommandMenuItem, event?: MouseEvent) {
           :key="groupItem.label"
           :text="groupItem.label"
         >
-          <button
-            type="button"
-            class="inline-flex size-6 items-center justify-center rounded text-sm text-ink-gray-7 hover:bg-surface-gray-3 disabled:cursor-not-allowed disabled:opacity-50 aria-pressed:bg-surface-gray-3"
-            :aria-label="groupItem.label"
+          <Button
+            :size="menuButtonSize"
+            variant="ghost"
+            :icon="groupItem.icon"
+            :label="groupItem.label"
+            class="aria-pressed:bg-surface-gray-3"
             :aria-pressed="isPressed(groupItem)"
             :disabled="isItemDisabled(groupItem)"
             @click="run(groupItem, $event)"
-          >
-            <ItemContent :item="groupItem" />
-          </button>
+          />
         </Tooltip>
       </div>
-      <Tooltip v-else :text="item.label">
-        <button
-          type="button"
-          class="inline-flex size-6 items-center justify-center rounded text-sm text-ink-gray-7 hover:bg-surface-gray-3 disabled:cursor-not-allowed disabled:opacity-50 aria-pressed:bg-surface-gray-3"
-          :aria-label="item.label"
+      <Tooltip v-else :text="labelOf(item)">
+        <Button
+          :size="menuButtonSize"
+          variant="ghost"
+          :icon="item.icon"
+          :label="labelOf(item)"
+          class="aria-pressed:bg-surface-gray-3"
           :aria-pressed="isPressed(item)"
           :disabled="isItemDisabled(item)"
           @click="run(item, $event)"
-        >
-          <ItemContent :item="item" />
-        </button>
+        />
       </Tooltip>
     </template>
   </TooltipProvider>

@@ -3,7 +3,7 @@ import { ItemListRow } from 'frappe-ui'
 </script>
 
 <template>
-  <div class="flex w-[320px] flex-col gap-2 rounded-lg border border-outline-gray-2 bg-surface-modal p-2">
+  <div class="flex w-[320px] flex-col gap-2 rounded-lg border border-outline-gray-2 bg-surface-elevation-2 p-2">
     <ItemListRow>
       Simple row with no prefix or suffix
     </ItemListRow>

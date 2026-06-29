@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="message"
-    class="whitespace-pre-line text-sm text-ink-red-4"
+    class="whitespace-pre-line text-sm text-ink-red-8"
     role="alert"
     v-html="errorMessage"
   ></div>

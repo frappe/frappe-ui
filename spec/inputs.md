@@ -31,8 +31,8 @@ This spec answers:
 - which existing per-component issues must be resolved before v1
 - which deprecations must be wired with dev warnings
 
-Decisions involving real-world usage data are backed by
-[`v1-release/research/09-input-components-usage-audit.md`](../v1-release/research/09-input-components-usage-audit.md).
+Decisions involving real-world usage data are backed by a bench-wide usage
+audit of the input family.
 
 ## Decision summary
 
@@ -139,7 +139,7 @@ Reuse `FormLabel`'s existing pattern as the canonical implementation:
 ```html
 <label for="...">
   Label text
-  <span aria-hidden="true" class="text-ink-red-3 select-none">*</span>
+  <span aria-hidden="true" class="text-ink-red-6 select-none">*</span>
   <span class="sr-only">(required)</span>
 </label>
 ```
@@ -153,7 +153,7 @@ indicator inside their custom label content.
 - `error: Error` renders `Error.messages` (joined with line breaks via
   `whitespace-pre-line`) when present, otherwise `Error.message`.
 - The error region is rendered as plain text. **`v-html` is not used.**
-- `error` text uses `text-ink-red-3` (matches the required asterisk for
+- `error` text uses `text-ink-red-6` (matches the required asterisk for
   visual consistency of "needs attention" affordances).
 - Setting `error` automatically suppresses the `description` region.
 
@@ -390,8 +390,7 @@ Per the v1 plan:
 
 ## Decisions backed by the usage audit
 
-The two decisions below are backed by data in
-[`v1-release/research/09-input-components-usage-audit.md`](../v1-release/research/09-input-components-usage-audit.md).
+The two decisions below are backed by bench-wide usage data.
 
 ### 1. `FormControl` stays a router for v1
 

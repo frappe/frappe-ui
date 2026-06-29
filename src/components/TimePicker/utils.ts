@@ -5,6 +5,12 @@
  * formatting, range checks, and option generation hangs off those two forms.
  */
 
+import { dayjs } from '../../utils/dayjs'
+
+const DEFAULT_TIME_FORMAT = 'HH:mm'
+const REFERENCE_DATE = '2000-01-01'
+const REFERENCE_DATE_FORMAT = 'YYYY-MM-DD'
+
 export interface ParsedTimeValid {
   valid: true
   hh24: string
@@ -22,12 +28,68 @@ export interface TimeOption {
   label: string
 }
 
+function formatHasSeconds(format: string): boolean {
+  const stripped = format.replace(/\[[^\]]*]/g, '')
+  if (stripped.includes('s')) return true
+
+  const withSeconds = dayjs(
+    `${REFERENCE_DATE} 20:02:18`,
+    `${REFERENCE_DATE_FORMAT} HH:mm:ss`,
+    true,
+  )
+  const withoutSeconds = withSeconds.second(0)
+  return withSeconds.format(format) !== withoutSeconds.format(format)
+}
+
+function buildParsedTime(
+  hh24: string,
+  mm: string,
+  ss?: string,
+): ParsedTimeValid {
+  const h = parseInt(hh24, 10)
+  const m = parseInt(mm, 10)
+  return {
+    valid: true,
+    hh24,
+    mm,
+    ss,
+    total: h * 60 + m,
+  }
+}
+
+function parseTimeWithFormat(input: string, format: string): ParsedTime {
+  const timeFormat = format || DEFAULT_TIME_FORMAT
+  const trimmed = input.trim()
+  const candidates = [
+    dayjs(trimmed, timeFormat, true),
+    dayjs(
+      `${REFERENCE_DATE} ${trimmed}`,
+      `${REFERENCE_DATE_FORMAT} ${timeFormat}`,
+      true,
+    ),
+  ]
+  const parsed = candidates.find((candidate) => candidate.isValid())
+  if (!parsed) return { valid: false }
+  return buildParsedTime(
+    parsed.format('HH'),
+    parsed.format('mm'),
+    formatHasSeconds(timeFormat) ? parsed.format('ss') : undefined,
+  )
+}
+
 /**
  * Parse human-typed times: `3p`, `3pm`, `3.30pm`, `15:00`, `1500`, `15`,
- * `9:30:15 am`. Returns canonical components plus total minutes from midnight.
+ * `9:30:15 am`. Also accepts the configured dayjs display format. Returns
+ * canonical components plus total minutes from midnight.
  */
-export function parseFlexibleTime(input: string): ParsedTime {
+export function parseFlexibleTime(
+  input: string,
+  format = DEFAULT_TIME_FORMAT,
+): ParsedTime {
   if (!input) return { valid: false }
+  const formatted = parseTimeWithFormat(input, format)
+  if (formatted.valid) return formatted
+
   let s = input.trim().toLowerCase()
   s = s.replace(/\./g, '')
   s = s.replace(/(\d)(am|pm)$/, '$1 $2')
@@ -70,32 +132,31 @@ export function parseFlexibleTime(input: string): ParsedTime {
 }
 
 /** Coerce any accepted time string to canonical `HH:mm` / `HH:mm:ss`. */
-export function normalize24(raw: string): string {
+export function normalize24(raw: string, format = DEFAULT_TIME_FORMAT): string {
   if (!raw) return ''
   if (/^\d{2}:\d{2}$/.test(raw)) return raw
   if (/^\d{2}:\d{2}:\d{2}$/.test(raw)) return raw
-  const parsed = parseFlexibleTime(raw)
+  const parsed = parseFlexibleTime(raw, format)
   if (!parsed.valid) return ''
   return parsed.ss
     ? `${parsed.hh24}:${parsed.mm}:${parsed.ss}`
     : `${parsed.hh24}:${parsed.mm}`
 }
 
-/** Render a canonical value for display. Hours are zero-padded. */
-export function formatTime(val24: string, use12Hour: boolean): string {
+/** Render a canonical value for display using a dayjs format string. */
+export function formatTime(
+  val24: string,
+  format = DEFAULT_TIME_FORMAT,
+): string {
   if (!val24) return ''
-  const segs = val24.split(':')
-  const h = parseInt(segs[0], 10)
-  const m = parseInt(segs[1], 10)
-  const s = segs[2]
-  const mm = m.toString().padStart(2, '0')
-  const ss = s ? `:${s}` : ''
-  if (!use12Hour) {
-    return `${h.toString().padStart(2, '0')}:${mm}${ss}`
-  }
-  const am = h < 12
-  const hour12 = h % 12 === 0 ? 12 : h % 12
-  return `${hour12.toString().padStart(2, '0')}:${mm}${ss} ${am ? 'am' : 'pm'}`
+  const canonicalFormat = val24.length === 8 ? 'HH:mm:ss' : 'HH:mm'
+  const parsed = dayjs(
+    `${REFERENCE_DATE} ${val24}`,
+    `${REFERENCE_DATE_FORMAT} ${canonicalFormat}`,
+    true,
+  )
+  if (!parsed.isValid()) return val24
+  return parsed.format(format || DEFAULT_TIME_FORMAT)
 }
 
 /** Total minutes (0–1439) from an `HH:mm[:ss]` string, or null if malformed. */
@@ -123,12 +184,12 @@ export function isOutOfRange(
  */
 export function generateTimeOptions({
   interval,
-  use12Hour,
+  format,
   minMinutes,
   maxMinutes,
 }: {
   interval: number
-  use12Hour: boolean
+  format?: string
   minMinutes: number | null
   maxMinutes: number | null
 }): TimeOption[] {
@@ -140,7 +201,7 @@ export function generateTimeOptions({
       .padStart(2, '0')
     const mm = (m % 60).toString().padStart(2, '0')
     const value = `${hh}:${mm}`
-    out.push({ value, label: formatTime(value, use12Hour) })
+    out.push({ value, label: formatTime(value, format) })
   }
   return out
 }

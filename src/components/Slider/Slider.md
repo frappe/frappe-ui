@@ -2,6 +2,10 @@
 
 A slider input for selecting a single value or a range of values within a minimum and maximum.
 
+## Playground
+
+<ClientOnly><SliderBuilder /></ClientOnly>
+
 <ComponentPreview name="Slider-Default" layout="stacked" />
 
 ## Sizes
@@ -13,6 +17,12 @@ A slider input for selecting a single value or a range of values within a minimu
 Use a two-element `modelValue` to render two thumbs.
 
 <ComponentPreview name="Slider-Range" />
+
+## Negative Values
+
+When `min` is negative the slider fills bidirectionally from the zero-crossing, so positive and negative values are visually distinct.
+
+<ComponentPreview name="Slider-NegativeValues" />
 
 ## Labeling
 

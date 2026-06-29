@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import * as LucideIcons from 'lucide-static'
-import { TextInput } from 'frappe-ui'
+import { TextInput, toast } from 'frappe-ui'
 import { TooltipBubble } from 'frappe-ui'
 import { TooltipProvider, TooltipRoot, TooltipTrigger } from 'reka-ui'
 
@@ -26,6 +26,15 @@ const icons = [...iconsByName.entries()]
   .sort((a, b) => a.name.localeCompare(b.name))
 
 const query = ref('')
+
+async function copyName(name: string) {
+  try {
+    await navigator.clipboard.writeText(name)
+    toast.success(`Copied "${name}"`)
+  } catch {
+    toast.error('Failed to copy')
+  }
+}
 
 const filteredIcons = computed(() => {
   const q = query.value.trim().toLowerCase()
@@ -69,7 +78,8 @@ const filteredIcons = computed(() => {
           <TooltipRoot v-for="icon in filteredIcons" :key="icon.name">
             <TooltipTrigger as-child>
               <div
-                class="flex size-14 items-center justify-center rounded text-ink-gray-7 hover:bg-surface-gray-2"
+                class="flex size-14 cursor-pointer items-center justify-center rounded text-ink-gray-7 hover:bg-surface-gray-2"
+                @click="copyName(icon.name)"
               >
                 <span class="size-6 [&>svg]:size-full" v-html="icon.svg" />
               </div>

@@ -1,6 +1,6 @@
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
-import { Button, Badge, Breadcrumbs } from 'frappe-ui'
+import { computed, watch } from 'vue'
+import { Button, Badge, Breadcrumbs, useTheme } from 'frappe-ui'
 import LucideSun from '~icons/lucide/sun'
 import LucideMoon from '~icons/lucide/moon-star'
 import LucideSearch from '~icons/lucide/search'
@@ -13,17 +13,11 @@ import { useMagicKeys, whenever } from '@vueuse/core'
 import { useData, useRoute, withBase } from 'vitepress'
 import { isActiveLink } from './Docs/sidebarList'
 
-const theme = ref()
+const { currentTheme, toggleTheme, getSystemTheme } = useTheme()
 
-const toggleTheme = () => {
-  theme.value = theme.value === 'dark' ? 'light' : 'dark'
-  document.documentElement.setAttribute('data-theme', theme.value)
-  localStorage.theme = theme.value
-}
-
-onMounted(() => {
-  theme.value = document.documentElement.getAttribute('data-theme')
-})
+const resolvedTheme = computed(() =>
+  currentTheme.value === 'system' ? getSystemTheme() : currentTheme.value,
+)
 
 defineProps({
   isDocs: {
@@ -69,7 +63,7 @@ const devBranch = typeof __DEV_BRANCH__ !== 'undefined' ? __DEV_BRANCH__ : ''
 </script>
 
 <template>
-  <nav class="border-b sticky top-0 bg-surface-white z-10">
+  <nav class="border-b sticky top-0 bg-surface-base z-10">
     <SearchPopup v-model:open="state.searchDialog" />
 
     <div
@@ -95,7 +89,7 @@ const devBranch = typeof __DEV_BRANCH__ !== 'undefined' ? __DEV_BRANCH__ : ''
         aria-label="Toggle theme"
       >
         <template #icon>
-          <LucideSun v-if="theme === 'dark'" class="size-4" />
+          <LucideSun v-if="resolvedTheme === 'dark'" class="size-4" />
           <LucideMoon v-else class="size-4" />
         </template>
       </Button>
@@ -138,7 +132,7 @@ const devBranch = typeof __DEV_BRANCH__ !== 'undefined' ? __DEV_BRANCH__ : ''
 
         <Button @click="toggleTheme" class="rounded" aria-label="Toggle theme">
           <template #icon>
-            <LucideSun v-if="theme === 'dark'" class="size-4" />
+            <LucideSun v-if="resolvedTheme === 'dark'" class="size-4" />
             <LucideMoon v-else class="size-4" />
           </template>
         </Button>
@@ -152,6 +146,5 @@ const devBranch = typeof __DEV_BRANCH__ !== 'undefined' ? __DEV_BRANCH__ : ''
         </a>
       </div>
     </div>
-
   </nav>
 </template>

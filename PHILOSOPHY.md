@@ -11,8 +11,8 @@ This is the rulebook that governs API design across `frappe-ui`. Every principle
 
 **Relationship to other docs:**
 - **`CONTEXT.md`** is the *vocabulary*: what `open`, `variant`, `theme`, `dismissible` mean. PHILOSOPHY is the *rules* that use the vocabulary.
-- **`v1-release/adr/`** are *decisions* — specific applications of principles to specific design questions. ADRs cite principles; principles don't cite ADRs.
-- **`v1-release/*-spec.md`** are *component-family specs* that implement principles for a family (Dialog, inputs, selection).
+- **`spec/adr/`** are *decisions* — specific applications of principles to specific design questions. ADRs cite principles; principles don't cite ADRs.
+- **`spec/*.md`** are *component-family specs* that implement principles for a family (Dialog, inputs, selection).
 
 ---
 
@@ -123,7 +123,7 @@ No third axis (`intent`, `severity`, `appearance`, `kind`, `status`). "Warning" 
 
 ### P5. Every input control exposes the shared labeling contract
 
-**Rule:** Every form-control component (anything that holds a value the user enters, selects, or toggles) accepts the same four labeling props with identical semantics: `label`, `description`, `error`, `required`. Behavior is defined in `v1-release/09-input-components-spec.md`; each conforming component is enumerated in its family's spec (`08-*` for selection family, `09-*` for input-family atoms, `10-*` for Frappe-integrated molecules).
+**Rule:** Every form-control component (anything that holds a value the user enters, selects, or toggles) accepts the same four labeling props with identical semantics: `label`, `description`, `error`, `required`. Behavior is defined in `spec/inputs.md`; each conforming component is enumerated in its family's spec (`spec/selection.md` for the selection family, `spec/inputs.md` for input-family atoms).
 
 Icon-only buttons, action toggles, and other controls that don't carry a value are **not** input controls — P5 doesn't apply.
 
@@ -451,3 +451,15 @@ const isDismissible = computed(() => {
   return props.dismissible ?? true
 })
 ```
+
+### P14. Experimental carries no promise
+
+**Rule:** Code reached through the `frappe-ui/experimental` subpath is private and **exempt from P13**. It can change shape or be removed in any release — including minor/patch — with no deprecation window. Use it from first-party Frappe libraries without expecting stability.
+
+**Why:** First-party libraries need to reuse internal building blocks, composables like `useInputLabeling`, class helpers, headless logic, and components whose API is still settling — without every one being promoted to the public API and frozen under P13. `experimental` is that escape hatch: the framework gets to consume these while the *public* surface stays small and the cost of evolving them stays zero. The alternative, re-exporting each helper from the public API, or opening a `./src/*` wildcard either freezes everything under P13 or exposes everything forever. `experimental` is the deliberate middle: a small, curated, explicitly-unstable surface.
+
+**Mechanics:**
+1. Exposed through a single curated barrel (`experimental.ts`) behind the `./experimental` export **not** a `./src/*` wildcard. Re-export only what a first-party consumer actually needs.
+2. The barrel header restates the no-promise contract at the point of use.
+3. "Private" is by convention, `exports` can't scope visibility to a specific consumer so the contract is the disclaimer, not enforcement. Product/third-party code is told not to import it.
+4. To make an internal stable, deliberately promote it to a public entry point (and thus under P13). Until then, no guarantees.

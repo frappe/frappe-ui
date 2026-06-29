@@ -56,10 +56,10 @@ describe('Spinner', () => {
       cy.get('[role="status"]').should('have.class', 'text-ink-gray-8')
     })
 
-    it('theme="red" applies text-ink-red-4 class', () => {
+    it('theme="red" applies text-ink-red-8 class', () => {
       cy.mount(Spinner, { props: { theme: 'red' } })
 
-      cy.get('[role="status"]').should('have.class', 'text-ink-red-4')
+      cy.get('[role="status"]').should('have.class', 'text-ink-red-8')
     })
 
     it('no theme prop applies no color class (inherits currentColor)', () => {
@@ -67,7 +67,7 @@ describe('Spinner', () => {
 
       cy.get('[role="status"]')
         .should('not.have.class', 'text-ink-gray-8')
-        .and('not.have.class', 'text-ink-red-4')
+        .and('not.have.class', 'text-ink-red-8')
     })
   })
 

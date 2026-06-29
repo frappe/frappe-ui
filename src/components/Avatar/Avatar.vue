@@ -25,7 +25,7 @@
     <div
       v-if="$slots.indicator"
       :class="[
-        'absolute bottom-0 right-0 grid place-items-center rounded-full bg-surface-white',
+        'absolute bottom-0 right-0 grid place-items-center rounded-full bg-surface-base',
         indicatorContainerClasses,
       ]"
     >
@@ -81,8 +81,8 @@ const labelClasses = computed(() => {
     md: 'text-base',
     lg: 'text-base',
     xl: 'text-lg',
-    '2xl': 'text-xl',
-    '3xl': 'text-2xl',
+    '2xl': 'text-2xl',
+    '3xl': 'text-3xl',
   }[props.size]
   return ['font-medium', sizeClass]
 })

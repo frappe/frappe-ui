@@ -8,47 +8,47 @@ Three semantic categories — each takes a color + numeric step. Higher = strong
 
 ### `text-ink-*` (foreground / text & icons)
 
-`white | gray-1..9 | red-1..4 | green-1..3 | amber-1..3 | blue-1..3 | cyan-1 | pink-1 | violet-1 | blue-link`
+`base | gray-1..9 | {red,green,amber,blue,cyan,pink,violet,orange,purple,teal,yellow}-1..10 | blue-link`
 
 - `text-ink-gray-9` — primary text (headings, body).
 - `text-ink-gray-7` — secondary text.
 - `text-ink-gray-5` / `gray-4` — tertiary / placeholder.
 - `text-ink-blue-link` — links.
-- `text-ink-red-3` — destructive / error text.
-- `text-ink-green-3` — success text.
+- `text-ink-red-6` — destructive / error text.
+- `text-ink-green-6` — success text.
 
 ### `bg-surface-*` (backgrounds)
 
-`white | gray-1..7 | red-1..7 | green-1..3 | amber-1..3 | blue-1..3 | orange-1 | violet-1 | cyan-1 | pink-1 | menu-bar | cards | modal | selected`
+`base | gray-1..10 | {red,green,amber,blue,cyan,pink,violet,orange,purple,teal,yellow}-1..10 | sidebar | elevation-1..3`
 
-- `bg-surface-white` — primary page background.
+- `bg-surface-base` — primary page background.
 - `bg-surface-gray-1` / `gray-2` — subtle / hover surface (cards, hovered rows).
 - `bg-surface-gray-3` — pressed state.
-- `bg-surface-menu-bar` — sidebar/toolbar background.
-- `bg-surface-modal` — dialog body background.
-- `bg-surface-selected` — selected row.
+- `bg-surface-sidebar` — sidebar/toolbar background.
+- `bg-surface-elevation-2` — dialog body background.
+- `bg-surface-elevation-3` — selected row.
 - `bg-surface-red-2` / `green-2` / `amber-2` / `blue-2` — tinted banners.
 
 ### `border-outline-*` (borders & rings)
 
-`white | gray-1..5 | red-1..3 | green-1..2 | amber-1..2 | blue-1 | orange-1 | gray-modals`
+`base | gray-1..9 | {red,green,amber,blue,cyan,pink,violet,orange,purple,teal,yellow}-1..10 | elevation-1..2`
 
 - `border-outline-gray-1` / `gray-2` — default borders.
-- `border-outline-gray-3` — focus ring on inputs.
-- `border-outline-red-2` / `green-2` — error / success borders.
+- Focus rings are automatic: a global `:focus-visible` outline (`--focus-outline-default`) covers every focusable element — never add your own. Retheme with `focus-visible:focus-ring-red` (or `-green`/`-blue`), suppress with `focus-visible:outline-none`.
+- `border-outline-red-3` / `green-2` — error / success borders.
 
 ### Rule of thumb
 
 | Need              | Use                              |
 |-------------------|----------------------------------|
-| Page bg           | `bg-surface-white`               |
-| Card bg           | `bg-surface-white` + border, or `bg-surface-gray-1` |
+| Page bg           | `bg-surface-base`               |
+| Card bg           | `bg-surface-base` + border, or `bg-surface-gray-1` |
 | Hovered row       | `bg-surface-gray-2`              |
 | Primary text      | `text-ink-gray-9`                |
 | Muted text        | `text-ink-gray-5`                |
 | Border            | `border-outline-gray-1` (or `gray-2` for stronger) |
-| Destructive text  | `text-ink-red-3`                 |
-| Success text      | `text-ink-green-3`               |
+| Destructive text  | `text-ink-red-6`                 |
+| Success text      | `text-ink-green-6`               |
 
 Never reach for `text-gray-900`, `bg-white`, `border-gray-200` — they don't track the theme.
 
@@ -67,10 +67,12 @@ Pick the wrong one and copy looks cramped (multi-line text in `text-*`) or flopp
 | `text-xs` / `text-p-xs`     | 12px  | Captions, meta / multi-line meta        |
 | `text-sm` / `text-p-sm`     | 13px  | Secondary labels / secondary paragraphs |
 | `text-base` / `text-p-base` | 14px  | Body labels / body paragraphs (default) |
+| `text-md` / `text-p-md`     | 15px  | Dense section labels / compact intro    |
 | `text-lg` / `text-p-lg`     | 16px  | Section subheads / long-form intro      |
-| `text-xl` / `text-p-xl`     | 18px  | Card / panel titles / lead paragraphs   |
-| `text-2xl`                  | 20px  | Page titles                             |
-| `text-3xl`+                 | 24px+ | Marketing / hero only                   |
+| `text-xl` / `text-p-xl`     | 17px  | Card / panel titles / lead paragraphs   |
+| `text-2xl`                  | 18px  | Page titles                             |
+| `text-3xl`                  | 20px  | Prominent page titles                   |
+| `text-4xl`+                 | 24px+ | Marketing / hero only                   |
 
 **Heuristic:** if the element is `<p>`, a description below a label, a feed entry that wraps, or helper text — use `text-p-*`. If it's `<h*>`, a `<Button>`/`<Badge>` label, a one-line meta row like "Updated 2h ago", or a stat value — use `text-*`.
 

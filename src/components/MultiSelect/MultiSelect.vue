@@ -26,6 +26,7 @@ import '../shared/selection/popoverMotion.css'
 import type {
   MultiSelectEmits,
   MultiSelectProps,
+  MultiSelectSlotProps,
   MultiSelectSlots,
 } from './types'
 import {
@@ -210,10 +211,24 @@ function selectAll() {
     .map((option) => option.value)
 }
 
-function toggleOpen() {
-  if (props.disabled) return
-  open.value = !open.value
+function handleTriggerClick() {
+  setOpen(!open.value)
 }
+
+function setOpen(value: boolean) {
+  if (props.disabled) return
+  open.value = value
+}
+
+const slotProps = computed<MultiSelectSlotProps>(() => ({
+  open: open.value,
+  disabled: Boolean(props.disabled),
+  query: typedQuery.value,
+  selectedOptions: selectedOptions.value,
+  displayValue: displayValue.value,
+  clearAll,
+  setOpen,
+}))
 
 function handleRootModelValueChange(value: string | string[] | undefined) {
   const arr = Array.isArray(value) ? value : value ? [value] : []
@@ -288,7 +303,7 @@ defineSlots<MultiSelectSlots>()
       :for-id="inputId"
       :label="label"
       :required="required"
-      class="text-p-sm font-medium text-ink-gray-7"
+      class="text-p-sm-medium text-ink-gray-7"
     >
       <template v-if="$slots.label" #default="slotProps">
         <slot name="label" v-bind="slotProps" />
@@ -305,22 +320,10 @@ defineSlots<MultiSelectSlots>()
     >
       <ComboboxAnchor
         as-child
-        @click="toggleOpen"
+        @click="handleTriggerClick"
         @pointerdown="markPointerDown"
       >
-        <slot
-          v-if="$slots.trigger"
-          name="trigger"
-          v-bind="{
-            open,
-            disabled: !!disabled,
-            query: typedQuery,
-            selectedOptions,
-            displayValue,
-            clearAll,
-            toggleOpen,
-          }"
-        />
+        <slot v-if="$slots.trigger" name="trigger" v-bind="slotProps" />
 
         <!--
         Rendered as a raw `<button>` so prefix / label / chevron are
@@ -368,19 +371,7 @@ defineSlots<MultiSelectSlots>()
                the icon.
             4. otherwise: nothing.
         -->
-          <slot
-            v-if="$slots.prefix"
-            name="prefix"
-            v-bind="{
-              open,
-              disabled: !!disabled,
-              query: typedQuery,
-              selectedOptions,
-              displayValue,
-              clearAll,
-              toggleOpen,
-            }"
-          />
+          <slot v-if="$slots.prefix" name="prefix" v-bind="slotProps" />
           <template v-else-if="singleSelectedOption && $slots['item-prefix']">
             <slot
               name="item-prefix"
@@ -406,13 +397,7 @@ defineSlots<MultiSelectSlots>()
               <slot
                 name="summary"
                 v-bind="{
-                  open,
-                  disabled: !!disabled,
-                  query: typedQuery,
-                  selectedOptions,
-                  displayValue,
-                  clearAll,
-                  toggleOpen,
+                  ...slotProps,
                   summary: triggerSummary,
                 }"
                 >{{ triggerSummary }}</slot
@@ -426,18 +411,7 @@ defineSlots<MultiSelectSlots>()
             />
           </span>
 
-          <slot
-            name="suffix"
-            v-bind="{
-              open,
-              disabled: !!disabled,
-              query: typedQuery,
-              selectedOptions,
-              displayValue,
-              clearAll,
-              toggleOpen,
-            }"
-          >
+          <slot name="suffix" v-bind="slotProps">
             <span
               :class="[
                 'lucide-chevron-down size-4 shrink-0 text-ink-gray-4 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)]',
@@ -474,7 +448,7 @@ defineSlots<MultiSelectSlots>()
             <div
               data-slot="content-body"
               :data-motion="contentMotion"
-              class="overflow-hidden rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5"
+              class="overflow-hidden rounded-lg bg-surface-elevation-2 shadow-2xl ring-1 ring-black ring-opacity-5"
             >
               <div
                 v-if="!hideSearch"

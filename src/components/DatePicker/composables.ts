@@ -16,57 +16,37 @@ export function useCalendarView() {
   const currentYear = ref<number>(dayjs().year())
   const currentMonth = ref<number>(dayjs().month())
 
-  const yearRangeStart = computed(
-    () => currentYear.value - (currentYear.value % 12),
-  )
-  const yearRange = computed<number[]>(() =>
-    Array.from({ length: 12 }, (_, i) => yearRangeStart.value + i),
-  )
-
+  // Prev/next only navigate months in the day grid. The month-year split view
+  // scrolls instead of paging, so it has no prev/next controls.
   function prev(): void {
-    if (view.value === 'date') {
-      const m = monthStart(currentYear.value, currentMonth.value).subtract(
-        1,
-        'month',
-      )
-      currentYear.value = m.year()
-      currentMonth.value = m.month()
-    } else if (view.value === 'month') {
-      currentYear.value -= 1
-    } else {
-      currentYear.value -= 12
-    }
+    const m = monthStart(currentYear.value, currentMonth.value).subtract(
+      1,
+      'month',
+    )
+    currentYear.value = m.year()
+    currentMonth.value = m.month()
   }
 
   function next(): void {
-    if (view.value === 'date') {
-      const m = monthStart(currentYear.value, currentMonth.value).add(
-        1,
-        'month',
-      )
-      currentYear.value = m.year()
-      currentMonth.value = m.month()
-    } else if (view.value === 'month') {
-      currentYear.value += 1
-    } else {
-      currentYear.value += 12
-    }
+    const m = monthStart(currentYear.value, currentMonth.value).add(1, 'month')
+    currentYear.value = m.year()
+    currentMonth.value = m.month()
   }
 
+  // Toggle between the day grid and the month-year split view.
   function cycleView(): void {
-    if (view.value === 'date') view.value = 'month'
-    else if (view.value === 'month') view.value = 'year'
-    else view.value = 'date'
+    view.value = view.value === 'date' ? 'monthYear' : 'date'
   }
 
+  // Picking a month commits the choice and returns to the day grid.
   function selectMonth(i: number): void {
     currentMonth.value = i
     view.value = 'date'
   }
 
+  // Picking a year stays in the split view so the user can then pick a month.
   function selectYear(y: number): void {
     currentYear.value = y
-    view.value = 'month'
   }
 
   function focusOn(d: Dayjs): void {
@@ -82,8 +62,6 @@ export function useCalendarView() {
     view,
     currentYear,
     currentMonth,
-    yearRangeStart,
-    yearRange,
     prev,
     next,
     cycleView,

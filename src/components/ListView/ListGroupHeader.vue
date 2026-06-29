@@ -16,13 +16,13 @@
           :is="list.slots['group-header']"
           v-bind="{ group }"
         />
-        <span v-else class="text-ink-gray-8 text-base font-medium leading-6">
+        <span v-else class="text-ink-gray-8 text-base-medium leading-6">
           {{ group.group }}
         </span>
       </div>
     </slot>
   </div>
-  <div class="mx-2 h-px border-t border-outline-gray-modals"></div>
+  <div class="mx-2 h-px border-t border-outline-elevation-2"></div>
 </template>
 <script setup>
 import { inject } from 'vue'

@@ -59,8 +59,6 @@
           :view="view"
           :current-year="currentYear"
           :current-month="currentMonth"
-          :year-range-start="yearRangeStart"
-          :year-range="yearRange"
           :weeks="weeks"
           today-label="Today"
           :min="props.min"
@@ -122,11 +120,9 @@ const emit = defineEmits<DatePickerEmits>()
 
 const slots = defineSlots<DatePickerSlots>()
 
-const POPOVER_CLASSES =
-  'rounded-lg bg-surface-modal shadow-2xl ring-1 ring-black ring-opacity-5'
-const contentClass = computed(() =>
-  slots.actions ? `w-fit ${POPOVER_CLASSES}` : `w-56 ${POPOVER_CLASSES}`,
-)
+// Layout only — the elevated shell (rounded/bg/shadow/ring) is owned by
+// PopoverPanel inside PickerShell.
+const contentClass = computed(() => (slots.actions ? 'w-fit' : 'w-56'))
 
 // Cast strips @deprecated markers so internal back-compat reads don't trigger TS6385.
 const dp = props as unknown as LegacyDatePickerProps
@@ -223,8 +219,6 @@ const {
   view,
   currentYear,
   currentMonth,
-  yearRangeStart,
-  yearRange,
   prev,
   next,
   cycleView,

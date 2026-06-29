@@ -41,12 +41,13 @@ const countries = [
       open-on-focus
       class="w-64"
     >
-      <template #footer="{ query, selectedOption, clearSelection }">
+      <template #footer="{ query, selectedOption, clearSelection, setOpen }">
         <div
           class="flex items-center justify-between border-t border-outline-gray-1 px-3 py-2 text-sm text-ink-gray-5"
         >
           <span v-if="query">
-            Searching “<span class="text-ink-gray-7">{{ query }}</span>”
+            Searching “<span class="text-ink-gray-7">{{ query }}</span
+            >”
           </span>
           <span v-else>{{ countries.length }} countries</span>
           <button
@@ -55,6 +56,13 @@ const countries = [
             @click="clearSelection"
           >
             Clear
+          </button>
+          <button
+            v-else
+            class="text-ink-gray-7 hover:text-ink-gray-8"
+            @click="setOpen(false)"
+          >
+            Close
           </button>
         </div>
       </template>

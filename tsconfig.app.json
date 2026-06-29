@@ -5,6 +5,11 @@
     "src/**/*.tsx",
     "src/**/*.vue",
     "src/index.ts",
+    "experimental.ts",
+    "experimental/**/*.ts",
+    "experimental/**/*.d.ts",
+    "experimental/**/*.tsx",
+    "experimental/**/*.vue",
     "frappe/**/*.ts",
     "frappe/**/*.d.ts",
     "frappe/**/*.tsx",
@@ -12,7 +17,12 @@
     "frappe/index.js",
     "frappe/index.d.ts"
   ],
-  "exclude": ["src/**/*.cy.ts", "frappe/**/*.cy.ts", "src/mocks/**/*"],
+  "exclude": [
+    "src/**/*.cy.ts",
+    "experimental/**/*.cy.ts",
+    "frappe/**/*.cy.ts",
+    "src/mocks/**/*"
+  ],
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "baseUrl": ".",

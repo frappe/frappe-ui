@@ -53,7 +53,7 @@ const wordCount = computed(() => {
 
 <template>
   <div class="w-full max-w-2xl">
-    <div class="overflow-hidden rounded-lg border border-outline-gray-2 bg-surface-white">
+    <div class="overflow-hidden rounded-lg border border-outline-gray-2 bg-surface-base">
       <EditorBubbleMenu :editor="editor" :items="toolbar" />
       <EditorFloatingMenu :editor="editor" :items="toolbar" />
       <div class="border-b border-outline-gray-1 px-2 py-1.5">

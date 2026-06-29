@@ -8,7 +8,7 @@ Apply these before reaching for any specific pattern below — they're what make
 
 1. **Strive for alignment.** Repeating elements down a list should align in columns, not float inside flex rows. If every list item has a `<Badge>`, a timestamp, or a button on the right, give each one a fixed-width slot (`w-24 shrink-0`, `w-32 shrink-0`) so they form a column. Inline `flex items-center gap-2` is fine for one row but produces ragged edges down a list.
 2. **One primary action per page.** Only one `<Button variant="solid" theme="gray">` per screen — usually the page header's "New X". Everything else is default (`subtle`) or `ghost`. If the app shell already has a global "Create" button, the page should not also have a solid primary.
-3. **Mostly neutral, color for state only.** Frappe screens are dominated by ink-gray and surface-white/gray. Reserve color for things that **encode information** — status badges, destructive buttons, error inline messages. Don't theme cards, icons, or section headers for visual interest.
+3. **Mostly neutral, color for state only.** Frappe screens are dominated by ink-gray and surface-base/gray. Reserve color for things that **encode information** — status badges, destructive buttons, error inline messages. Don't theme cards, icons, or section headers for visual interest.
 4. **Icons support labels, not replace them.** Pair an icon with a text label (`<Button icon-left="lucide-plus" label="New Site" />`). Avoid icon-only buttons except in long-running toolbars where space is genuinely tight and the meaning is universal (close ×, more …). Decorative icons in stat cards / activity feeds / quick actions are usually noise — drop them.
 5. **Pick the right text scale.** Use `text-*` for single-line labels (headings, button text, badges, "2h ago"). Use `text-p-*` for anything that wraps — descriptions, helper text, feed entries, paragraphs. Multi-line copy in `text-*` looks cramped; one-line labels in `text-p-*` look floppy. See [TOKENS.md](TOKENS.md) → Typography.
 6. **Borders earn their place — don't box everything.** A border or `rounded-md` surface should signal something: an interactive affordance (clickable card / button), grouping that crosses a visual boundary (a popover, a dialog), or a distinct surface (an inset code block, a callout). Static sections — stats, lists, feeds, "section + items" groups — don't need an outer box; a section heading plus `divide-y divide-outline-gray-1` between rows reads cleaner than wrapping the whole thing in a card. Reach for boxes only when removing them would lose meaning.
@@ -64,7 +64,7 @@ import { FrappeUIProvider, Sidebar } from 'frappe-ui'
 
 <template>
   <FrappeUIProvider>
-    <div class="flex h-screen bg-surface-white text-ink-gray-9">
+    <div class="flex h-screen bg-surface-base text-ink-gray-9">
       <Sidebar />
       <main class="flex-1 overflow-y-auto">
         <router-view />
@@ -82,7 +82,7 @@ Single row, **48px tall (`min-h-12`)**, sticky to the top, with a bottom border 
 
 ```vue
 <header
-  class="sticky top-0 z-10 flex min-h-12 items-center justify-between border-b border-outline-gray-1 bg-surface-white px-3 sm:px-5"
+  class="sticky top-0 z-10 flex min-h-12 items-center justify-between border-b border-outline-gray-1 bg-surface-base px-3 sm:px-5"
 >
   <Breadcrumbs :items="crumbs" />
   <div class="flex gap-2">

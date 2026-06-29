@@ -39,7 +39,7 @@ const custom_rows = [
       image: 'https://avatars.githubusercontent.com/u/499120',
     },
     email: 'jane@doe.com',
-    status: { label: 'Inactive', bg_color: 'bg-surface-red-5' },
+    status: { label: 'Inactive', bg_color: 'bg-surface-red-7' },
     role: { label: 'HR', color: 'red' },
   },
 ]

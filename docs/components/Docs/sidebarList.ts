@@ -55,16 +55,14 @@ export function getSidebarList(
       ],
     },
     {
-      text: 'Design System',
+      text: 'Foundations',
       items: [
-        {
-          text: 'Background Color',
-          link: '/docs/design-system/background-color',
-        },
-        { text: 'Text Design', link: '/docs/design-system/text' },
-        { text: 'Border Color', link: '/docs/design-system/border-color' },
-        { text: 'Drop Shadow', link: '/docs/design-system/drop-shadow' },
-        { text: 'Border Radius', link: '/docs/design-system/border-radius' },
+        { text: 'Base Colors', link: '/docs/foundations/colors/base' },
+        { text: 'Semantic Colors', link: '/docs/foundations/colors/semantic' },
+        { text: 'Typography', link: '/docs/foundations/typography' },
+        { text: 'Radius', link: '/docs/foundations/radius' },
+        { text: 'Elevation', link: '/docs/foundations/elevation' },
+        { text: 'Focus Ring', link: '/docs/foundations/focus-ring' },
       ],
     },
     {
@@ -93,6 +91,7 @@ export function getSidebarList(
         { text: 'Icons', link: '/docs/other/icons' },
         { text: 'Utilities', link: '/docs/other/utilities' },
         { text: 'Directives', link: '/docs/other/directives' },
+        { text: 'Experimental', link: '/docs/experimental' },
       ],
     },
   ]

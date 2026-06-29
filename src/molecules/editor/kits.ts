@@ -19,6 +19,7 @@ import {
   ImageGroup,
   ImageViewer,
   Video,
+  Attachment,
   MediaDrop,
   ContentPaste,
   Emoji,
@@ -108,6 +109,7 @@ export interface CommentKitOptions {
   imageGroup: CustomMember
   imageViewer: CustomMember
   video: CustomMember
+  attachment: CustomMember
   // Tables. Off by default for CommentKit (the lighter stack); RichTextKit turns
   // it on. Opt in with `CommentKit.configure({ table: {} })`.
   table: CustomMember
@@ -126,6 +128,7 @@ const commentKitDefaults = (): CommentKitOptions => ({
   imageGroup: {},
   imageViewer: {},
   video: {},
+  attachment: {},
   table: false,
   contentPaste: {},
   emoji: {},
@@ -146,8 +149,15 @@ function commentMembers(options: CommentKitOptions): Extensions {
   if (options.image !== false)
     pushMember(list, ImageViewer, options.imageViewer)
   pushMember(list, Video, options.video)
-  // The single drop pipeline; only useful when there's a media node to route to.
-  if (options.image !== false || options.video !== false) list.push(MediaDrop)
+  pushMember(list, Attachment, options.attachment)
+  // The single drop pipeline; only useful when there's a media or attachment
+  // node to route to.
+  if (
+    options.image !== false ||
+    options.video !== false ||
+    options.attachment !== false
+  )
+    list.push(MediaDrop)
   // Table needs its row/cell/header companions; TableNavigation adds the
   // spreadsheet-style cell navigation. Shared so both kits get it (off by
   // default for CommentKit, on for RichTextKit).

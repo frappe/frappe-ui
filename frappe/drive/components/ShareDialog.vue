@@ -4,7 +4,7 @@
       <div class="p-4">
         <!-- Header -->
         <div class="flex w-full justify-between gap-x-2 mb-4">
-          <div class="font-semibold text-2xl flex text-nowrap overflow-hidden">
+          <div class="font-semibold text-xl flex text-nowrap overflow-hidden">
             Sharing "
             <div class="truncate max-w-[80%]">
               {{ entity?.title }}

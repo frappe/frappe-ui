@@ -27,7 +27,7 @@ const sortOptions = [
 
 <template>
   <div class="w-full max-w-md py-4">
-    <div class="text-sm font-medium text-ink-gray-7">Disabled label option</div>
+    <div class="text-sm-medium text-ink-gray-7">Disabled label option</div>
     <div class="mt-1 text-p-sm text-ink-gray-5">
       Common sorting pattern where a disabled first option keeps an empty string
       value without breaking the select.

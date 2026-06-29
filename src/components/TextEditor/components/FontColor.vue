@@ -97,7 +97,7 @@ export default {
     },
     backgroundColors() {
       return [
-        { name: 'Default', class: 'border-outline-gray-modals' },
+        { name: 'Default', class: 'border-outline-elevation-2' },
         {
           name: 'Red',
           class: 'bg-red-100 dark:bg-dark-red-800 border-transparent',

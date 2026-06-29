@@ -1,7 +1,7 @@
 <template>
   <Dialog v-model="open" @close="dialogType = ''">
     <template #body-title>
-      <h3 class="text-2xl font-semibold leading-6 text-ink-gray-9 cursor-pointer pr-2" @click="emitter.emit('rename')">
+      <h3 class="text-xl font-semibold leading-6 text-ink-gray-9 cursor-pointer pr-2" @click="emitter.emit('rename')">
         {{ entity.title }}
       </h3>
     </template>
@@ -190,12 +190,12 @@ onKeyDown('D', () => {
 const accessConfig = {
   team: {
     icon: LucideBuilding2,
-    color: 'bg-surface-blue-2 text-ink-blue-2',
+    color: 'bg-surface-blue-2 text-ink-blue-5',
     label: 'Team',
   },
   public: {
     icon: LucideGlobe2,
-    color: 'bg-surface-red-2 text-ink-red-3',
+    color: 'bg-surface-red-2 text-ink-red-6',
     label: 'Public',
   },
   restricted: {

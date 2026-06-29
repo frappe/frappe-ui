@@ -3,6 +3,10 @@
 Searchable multi-choice picker. Matches the `Combobox` / `Select` item-slot
 model and provides built-in Clear All / Select All footer controls.
 
+## Playground
+
+<ClientOnly><MultiSelectBuilder /></ClientOnly>
+
 ## Default
 
 A plain picker — button trigger opens a popover with a search input, option
@@ -55,7 +59,7 @@ receives `clearAll`, `selectAll`, `selectedOptions`, and `query`.
 
 Use `#trigger` to fully replace the default button trigger. The slot receives
 `open`, `disabled`, `selectedOptions`, `displayValue`, `clearAll`, and
-`toggleOpen`.
+`setOpen`.
 
 <ComponentPreview name="MultiSelect-TriggerSlot" />
 

@@ -73,10 +73,10 @@ const strengthScore = computed(() =>
 
 const strengthLabel = computed(() =>
   strengthScore.value <= 1
-    ? { text: "Weak", class: "text-ink-red-3" }
+    ? { text: "Weak", class: "text-ink-red-6" }
     : strengthScore.value === 2
     ? { text: "Moderate", class: "text-ink-yellow-3" }
-    : { text: "Strong", class: "text-ink-green-3" }
+    : { text: "Strong", class: "text-ink-green-6" }
 );
 
 const notifs = [

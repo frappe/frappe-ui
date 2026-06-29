@@ -2,6 +2,10 @@
 
 A flexible overlay for showing messages, forms, or actions. Keeps focus on content while allowing clear, user-friendly interactions.
 
+## Playground
+
+<ClientOnly><DialogBuilder /></ClientOnly>
+
 ## Share
 
 A typical real-world dialog — rich `#default` body, an action-row `#actions`

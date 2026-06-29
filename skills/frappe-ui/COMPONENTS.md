@@ -155,7 +155,7 @@ App-shell sidebar primitive. Pair with router views.
 
 ### `Divider` — see Display.
 
-> Don't use `Card` — compose surfaces directly with `bg-surface-white rounded border border-outline-gray-1 p-4`.
+> Don't use `Card` — compose surfaces directly with `bg-surface-base rounded border border-outline-gray-1 p-4`.
 
 ## Provider
 

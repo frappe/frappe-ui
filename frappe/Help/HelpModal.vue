@@ -1,7 +1,7 @@
 <template>
   <div
     v-show="show"
-    class="fixed z-50 right-0 w-80 h-[calc(100%_-_80px)] text-ink-gray-9 m-5 mt-[62px] p-3 flex gap-2 flex-col justify-between rounded-lg bg-surface-modal shadow-2xl"
+    class="fixed z-50 right-0 w-80 h-[calc(100%_-_80px)] text-ink-gray-9 m-5 mt-[62px] p-3 flex gap-2 flex-col justify-between rounded-lg bg-surface-elevation-2 shadow-2xl"
     :class="{ 'top-[calc(100%_-_120px)] border': minimize }"
     @click.stop
   >

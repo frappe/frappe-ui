@@ -1,0 +1,479 @@
+{
+  "fontFamily": {
+    "text": "Inter Variable"
+  },
+  "fontWeight": {
+    "regular": 420,
+    "medium": 500,
+    "semibold": 600,
+    "bold": 700,
+    "black": 800
+  },
+  "fontSize": {
+    "tiny": [
+      "11px",
+      {
+        "lineHeight": "1.15",
+        "letterSpacing": "0.09em",
+        "fontWeight": "420"
+      }
+    ],
+    "2xs": [
+      "11px",
+      {
+        "lineHeight": "1.15",
+        "letterSpacing": "0.01em",
+        "fontWeight": "420"
+      }
+    ],
+    "xs": [
+      "12px",
+      {
+        "lineHeight": "1.15",
+        "letterSpacing": "0.02em",
+        "fontWeight": "420"
+      }
+    ],
+    "sm": [
+      "13px",
+      {
+        "lineHeight": "1.15",
+        "letterSpacing": "0.02em",
+        "fontWeight": "420"
+      }
+    ],
+    "base": [
+      "14px",
+      {
+        "lineHeight": "1.15",
+        "letterSpacing": "0.02em",
+        "fontWeight": "420"
+      }
+    ],
+    "md": [
+      "15px",
+      {
+        "lineHeight": "1.15",
+        "letterSpacing": "0.02em",
+        "fontWeight": "420"
+      }
+    ],
+    "lg": [
+      "16px",
+      {
+        "lineHeight": "1.15",
+        "letterSpacing": "0.02em",
+        "fontWeight": "420"
+      }
+    ],
+    "xl": [
+      "17px",
+      {
+        "lineHeight": "1.15",
+        "letterSpacing": "0.02em",
+        "fontWeight": "420"
+      }
+    ],
+    "2xl": [
+      "18px",
+      {
+        "lineHeight": "1.15",
+        "letterSpacing": "0.01em",
+        "fontWeight": "420"
+      }
+    ],
+    "3xl": [
+      "20px",
+      {
+        "lineHeight": "1.15",
+        "letterSpacing": "0.005em",
+        "fontWeight": "420"
+      }
+    ],
+    "4xl": [
+      "24px",
+      {
+        "lineHeight": "1.15",
+        "letterSpacing": "0.005em",
+        "fontWeight": "420"
+      }
+    ],
+    "5xl": [
+      "26px",
+      {
+        "lineHeight": "1.6",
+        "letterSpacing": "0.01em",
+        "fontWeight": "420"
+      }
+    ],
+    "6xl": [
+      "28px",
+      {
+        "lineHeight": "1.6",
+        "letterSpacing": "0.01em",
+        "fontWeight": "420"
+      }
+    ],
+    "7xl": [
+      "32px",
+      {
+        "lineHeight": "1.6",
+        "letterSpacing": "0.02em",
+        "fontWeight": "420"
+      }
+    ],
+    "8xl": [
+      "40px",
+      {
+        "lineHeight": "1.4",
+        "letterSpacing": "0em",
+        "fontWeight": "420"
+      }
+    ],
+    "9xl": [
+      "44px",
+      {
+        "lineHeight": "1.4",
+        "letterSpacing": "0em",
+        "fontWeight": "420"
+      }
+    ],
+    "10xl": [
+      "48px",
+      {
+        "lineHeight": "1.4",
+        "letterSpacing": "0em",
+        "fontWeight": "420"
+      }
+    ],
+    "11xl": [
+      "52px",
+      {
+        "lineHeight": "1.4",
+        "letterSpacing": "0em",
+        "fontWeight": "420"
+      }
+    ],
+    "12xl": [
+      "56px",
+      {
+        "lineHeight": "1.4",
+        "letterSpacing": "0.005em",
+        "fontWeight": "420"
+      }
+    ],
+    "13xl": [
+      "64px",
+      {
+        "lineHeight": "1.3",
+        "letterSpacing": "0em",
+        "fontWeight": "420"
+      }
+    ],
+    "14xl": [
+      "72px",
+      {
+        "lineHeight": "1.3",
+        "letterSpacing": "0em",
+        "fontWeight": "420"
+      }
+    ],
+    "15xl": [
+      "80px",
+      {
+        "lineHeight": "1.2",
+        "letterSpacing": "0em",
+        "fontWeight": "420"
+      }
+    ],
+    "16xl": [
+      "88px",
+      {
+        "lineHeight": "1.2",
+        "letterSpacing": "0em",
+        "fontWeight": "420"
+      }
+    ]
+  },
+  "textTransform": {
+    "tiny": "uppercase"
+  },
+  "paragraph": {
+    "2xs": {
+      "lineHeight": "1.6",
+      "letterSpacing": "0.01em"
+    },
+    "xs": {
+      "lineHeight": "1.6",
+      "letterSpacing": "0.02em"
+    },
+    "sm": {
+      "lineHeight": "1.5",
+      "letterSpacing": "0.015em"
+    },
+    "base": {
+      "lineHeight": "1.5",
+      "letterSpacing": "0.02em"
+    },
+    "md": {
+      "lineHeight": "1.5",
+      "letterSpacing": "0.02em"
+    },
+    "lg": {
+      "lineHeight": "1.5",
+      "letterSpacing": "0.02em"
+    },
+    "xl": {
+      "lineHeight": "1.5",
+      "letterSpacing": "0.02em"
+    },
+    "2xl": {
+      "lineHeight": "1.5",
+      "letterSpacing": "0.01em"
+    },
+    "3xl": {
+      "lineHeight": "1.48",
+      "letterSpacing": "0.01em"
+    },
+    "4xl": {
+      "lineHeight": "1.4",
+      "letterSpacing": "0.005em"
+    }
+  },
+  "tracking": {
+    "text": {
+      "tiny": {
+        "regular": "0.09em",
+        "medium": "0.09em",
+        "semibold": "0.09em",
+        "bold": "0.09em",
+        "black": "0.09em"
+      },
+      "2xs": {
+        "regular": "0.01em",
+        "medium": "0.01em",
+        "semibold": "0.01em",
+        "bold": "0.01em",
+        "black": "0.01em"
+      },
+      "xs": {
+        "regular": "0.02em",
+        "medium": "0.02em",
+        "semibold": "0.015em",
+        "bold": "0.015em",
+        "black": "0.015em"
+      },
+      "sm": {
+        "regular": "0.02em",
+        "medium": "0.02em",
+        "semibold": "0.015em",
+        "bold": "0.015em",
+        "black": "0.015em"
+      },
+      "base": {
+        "regular": "0.02em",
+        "medium": "0.015em",
+        "semibold": "0.015em",
+        "bold": "0.015em"
+      },
+      "md": {
+        "regular": "0.02em",
+        "medium": "0.015em",
+        "semibold": "0.015em",
+        "bold": "0.015em",
+        "black": "0.015em"
+      },
+      "lg": {
+        "regular": "0.02em",
+        "medium": "0.015em",
+        "semibold": "0.015em",
+        "bold": "0.015em",
+        "black": "0.015em"
+      },
+      "xl": {
+        "regular": "0.02em",
+        "medium": "0.015em",
+        "semibold": "0.015em",
+        "bold": "0.015em",
+        "black": "0.015em"
+      },
+      "2xl": {
+        "regular": "0.01em",
+        "medium": "0.01em",
+        "semibold": "0.01em",
+        "bold": "0.01em",
+        "black": "0.01em"
+      },
+      "3xl": {
+        "regular": "0.005em",
+        "medium": "0.01em",
+        "semibold": "0.01em",
+        "bold": "0.01em",
+        "black": "0.01em"
+      },
+      "4xl": {
+        "regular": "0.005em",
+        "medium": "0.005em",
+        "semibold": "0.005em",
+        "bold": "0.005em",
+        "black": "0.005em"
+      },
+      "5xl": {
+        "regular": "0.01em",
+        "medium": "0.005em",
+        "semibold": "0.005em",
+        "bold": "0.005em",
+        "black": "0.01em"
+      },
+      "6xl": {
+        "regular": "0.01em",
+        "medium": "0.005em",
+        "semibold": "0.01em",
+        "bold": "0.015em",
+        "black": "0.01em"
+      },
+      "7xl": {
+        "regular": "0.02em",
+        "medium": "0.015em",
+        "semibold": "0.015em",
+        "bold": "0.015em",
+        "black": "0.005em"
+      },
+      "8xl": {
+        "regular": "0em",
+        "medium": "0em",
+        "semibold": "0em",
+        "bold": "0em",
+        "black": "0em"
+      },
+      "9xl": {
+        "regular": "0em",
+        "medium": "0em",
+        "semibold": "0em",
+        "bold": "0em",
+        "black": "0em"
+      },
+      "10xl": {
+        "regular": "0em",
+        "medium": "0em",
+        "semibold": "0em",
+        "bold": "0.005em",
+        "black": "0.005em"
+      },
+      "11xl": {
+        "regular": "0em",
+        "medium": "0em",
+        "semibold": "0em",
+        "bold": "0em",
+        "black": "0.005em"
+      },
+      "12xl": {
+        "regular": "0.005em",
+        "medium": "0em",
+        "semibold": "0em",
+        "bold": "0em",
+        "black": "0em"
+      },
+      "13xl": {
+        "regular": "0em",
+        "medium": "0em",
+        "semibold": "0em",
+        "bold": "0em",
+        "black": "0em"
+      },
+      "14xl": {
+        "regular": "0em",
+        "medium": "0em",
+        "semibold": "0em",
+        "bold": "0em",
+        "black": "0em"
+      },
+      "15xl": {
+        "regular": "0em",
+        "medium": "0.005em",
+        "semibold": "0em",
+        "bold": "0em",
+        "black": "0em"
+      },
+      "16xl": {
+        "regular": "0em",
+        "medium": "0em",
+        "semibold": "0em",
+        "bold": "0em",
+        "black": "0em"
+      }
+    },
+    "paragraph": {
+      "2xs": {
+        "regular": "0.01em",
+        "medium": "0.01em",
+        "semibold": "0.01em",
+        "bold": "0.01em",
+        "black": "0.01em"
+      },
+      "xs": {
+        "regular": "0.02em",
+        "medium": "0.02em",
+        "semibold": "0.015em",
+        "bold": "0.015em",
+        "black": "0.015em"
+      },
+      "sm": {
+        "regular": "0.015em",
+        "medium": "0.02em",
+        "semibold": "0.015em",
+        "bold": "0.015em",
+        "black": "0.015em"
+      },
+      "base": {
+        "regular": "0.02em",
+        "medium": "0.015em",
+        "semibold": "0.015em",
+        "bold": "0.015em",
+        "black": "0.015em"
+      },
+      "md": {
+        "regular": "0.02em",
+        "medium": "0.015em",
+        "semibold": "0.015em",
+        "bold": "0.015em",
+        "black": "0.015em"
+      },
+      "lg": {
+        "regular": "0.02em",
+        "medium": "0.015em",
+        "semibold": "0.015em",
+        "bold": "0.015em",
+        "black": "0.015em"
+      },
+      "xl": {
+        "regular": "0.02em",
+        "medium": "0.015em",
+        "semibold": "0.015em",
+        "bold": "0.015em",
+        "black": "0.015em"
+      },
+      "2xl": {
+        "regular": "0.01em",
+        "medium": "0.01em",
+        "semibold": "0.01em",
+        "bold": "0.01em",
+        "black": "0.01em"
+      },
+      "3xl": {
+        "regular": "0.01em",
+        "medium": "0.01em",
+        "semibold": "0.01em",
+        "bold": "0.01em",
+        "black": "0.01em"
+      },
+      "4xl": {
+        "regular": "0.005em",
+        "medium": "0.005em",
+        "semibold": "0.005em",
+        "bold": "0.005em",
+        "black": "0.005em"
+      }
+    }
+  }
+}

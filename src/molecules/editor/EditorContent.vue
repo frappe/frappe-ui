@@ -54,6 +54,39 @@ const rootAttrs = computed(() => {
   return rest
 })
 
+/**
+ * The content-styling tokens this component owns: our default prose typography
+ * plus whatever the consumer passed via `class`.
+ */
+const editorClassTokens = computed(() =>
+  normalizeClass([proseClass.value, attrs.class]).split(' ').filter(Boolean),
+)
+
+/**
+ * Apply `editorClassTokens` to the element with `classList`, adding/removing
+ * only the tokens we own.
+ *
+ * ProseMirror mounts directly onto `rootEl` and shares its `class` attribute:
+ * it adds `ProseMirror`/`tiptap` and toggles `ProseMirror-focused`. A Vue
+ * `:class` bound to the same element would be a second, non-surgical writer —
+ * each re-render replaces the whole token list, dropping ProseMirror's classes
+ * and silently breaking every `.ProseMirror`-scoped editor style (table borders,
+ * etc.). ProseMirror itself only ever adds/removes its own decoration tokens
+ * (see prosemirror-view `patchAttributes`), so mirroring that here — touching
+ * only our tokens — lets both owners coexist on one attribute.
+ */
+let appliedTokens: string[] = []
+function syncClasses() {
+  const el = rootEl.value
+  if (!el) return
+  const next = editorClassTokens.value
+  for (const token of appliedTokens) {
+    if (!next.includes(token)) el.classList.remove(token)
+  }
+  el.classList.add(...next)
+  appliedTokens = next
+}
+
 function mountEditor(editor: Editor | null) {
   const el = rootEl.value
   if (!el) return
@@ -85,21 +118,29 @@ function unmountEditor() {
   mountedEditor = null
 }
 
-onMounted(() => mountEditor(resolvedEditor.value))
+onMounted(() => {
+  syncClasses()
+  mountEditor(resolvedEditor.value)
+})
 
 watch(resolvedEditor, async (editor) => {
   await nextTick()
   mountEditor(editor)
 })
 
+// Reactive consumer/prose classes update via our own surgical classList sync,
+// not a Vue `:class` binding (which would clobber ProseMirror's classes).
+watch(editorClassTokens, syncClasses)
+
 onBeforeUnmount(() => unmountEditor())
 </script>
 
 <template>
-  <div
-    ref="rootEl"
-    data-slot="editor-content"
-    v-bind="rootAttrs"
-    :class="[proseClass, attrs.class]"
-  />
+  <!--
+    No `:class` here on purpose — `rootEl` is also ProseMirror's editor element,
+    so its `class` attribute has two owners. Vue's `:class` is a wholesale
+    replace and would drop ProseMirror's classes; instead `syncClasses` manages
+    only our tokens via classList. See `editorClassTokens` above.
+  -->
+  <div ref="rootEl" data-slot="editor-content" v-bind="rootAttrs" />
 </template>

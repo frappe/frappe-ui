@@ -73,6 +73,12 @@
     default: '"subtle" as Variant'
   },
   {
+    name: 'size',
+    description: 'Visual size of the trigger input. Forwarded to the underlying `TextInput`.',
+    required: false,
+    type: 'InputSize'
+  },
+  {
     name: 'typeable',
     description: 'Whether the trigger input accepts typed input. When `false` the user can\nstill open the popover and pick a time, but cannot type a time manually.\nDefault: `true`.',
     required: false,
@@ -114,7 +120,14 @@
     description: 'Use 12-hour (am/pm) format for display.',
     required: false,
     type: 'boolean',
-    default: 'true'
+    deprecated: 'Use `format` instead.'
+  },
+  {
+    name: 'format',
+    description: 'Dayjs format string used for display. Default: `HH:mm`.',
+    required: false,
+    type: 'string',
+    default: '"HH:mm"'
   },
   {
     name: 'disabled',
@@ -175,10 +188,50 @@
     required: false,
     type: '"start" | "center" | "nearest"',
     deprecated: 'Scrolling is always centered now.'
+  },
+  {
+    name: 'label',
+    description: 'Label rendered above (or beside, for binary controls) the input.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'description',
+    description: 'Helper text rendered below the input.\nHidden when `error` is set.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'error',
+    description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
+    required: false,
+    type: 'string | FrappeUIError'
+  },
+  {
+    name: 'required',
+    description: 'Marks the field as required. Renders an asterisk next to the label and\nforwards `required` / `aria-required` to the underlying control.',
+    required: false,
+    type: 'boolean'
+  },
+  {
+    name: 'id',
+    description: 'HTML id of the underlying control. Auto-generated via `useId()` if omitted.',
+    required: false,
+    type: 'string'
   }
 ]
 
   const slotsData = [
+  {
+    name: 'label',
+    description: 'Overrides the rendered label content. Receives `{ required }`.',
+    type: '{ required: boolean; }'
+  },
+  {
+    name: 'description',
+    description: 'Overrides the rendered description content.',
+    type: 'any'
+  },
   {
     name: 'prefix',
     description: 'Rendered inside the trigger input, before the typed value.',
@@ -193,19 +246,14 @@
 
   const emitsData = [
   {
-    name: 'update:modelValue',
-    description: 'Fired when the model value changes.',
-    type: '[value: string]'
-  },
-  {
-    name: 'change',
-    description: 'Fired after the value is committed.',
-    type: '[value: string]'
-  },
-  {
     name: 'open',
     description: 'Fired when the component opens.',
     type: '[]'
+  },
+  {
+    name: 'update:modelValue',
+    description: 'Fired when the model value changes.',
+    type: '[value: string]'
   },
   {
     name: 'update:open',
@@ -213,9 +261,9 @@
     type: '[value: boolean]'
   },
   {
-    name: 'close',
-    description: 'Fired when the component closes.',
-    type: '[]'
+    name: 'change',
+    description: 'Fired after the value is committed.',
+    type: '[value: string]'
   },
   {
     name: 'input-invalid',
@@ -226,6 +274,11 @@
     name: 'invalid-change',
     description: '',
     type: '[invalid: boolean]'
+  },
+  {
+    name: 'close',
+    description: 'Fired when the component closes.',
+    type: '[]'
   }
 ]
 </script>
@@ -236,4 +289,3 @@
 <SlotsTable :data="slotsData"/> 
 
 <EmitsTable :data="emitsData"/> 
-

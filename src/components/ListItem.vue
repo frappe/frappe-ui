@@ -1,7 +1,7 @@
 <template>
   <div class="flex items-center justify-between py-3">
     <div>
-      <h3 class="text-base font-medium text-gray-900">
+      <h3 class="text-base-medium text-gray-900">
         {{ title }}
       </h3>
       <div class="mt-1" v-if="secondaryText || $slots.subtitle">

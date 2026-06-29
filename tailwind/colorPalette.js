@@ -1,5 +1,24 @@
 import tailwindColors from 'tailwindcss/colors'
 import colorsData from './colors.json'
+import effectsData from './generated/effects.json'
+
+// Tailwind v3 can only apply the `/<opacity>` modifier (e.g. `bg-blue-900/30`)
+// when the color value exposes an alpha slot. Hex did this implicitly; a bare
+// `oklch(L C H)` string does not, so the modifier silently fails. Inject the
+// `<alpha-value>` placeholder into solid oklch values used as theme colors.
+// Values that already carry an alpha channel (overlay tokens) are left intact;
+// colors.json and the raw `--*` CSS variables keep their plain oklch form.
+function withAlphaPlaceholder(value) {
+  if (typeof value !== 'string') return value
+  const solid = value.match(/^oklch\(([^/]+)\)$/)
+  return solid ? `oklch(${solid[1].trim()} / <alpha-value>)` : value
+}
+
+function mapShades(shades) {
+  return Object.fromEntries(
+    Object.entries(shades).map(([shade, value]) => [shade, withAlphaPlaceholder(value)]),
+  )
+}
 
 function generateColorPalette() {
   const colorPalette = {
@@ -25,10 +44,10 @@ function generateColorPalette() {
   }
 
   Object.keys(colorsData.lightMode).forEach((color) => {
-    colorPalette[color] = colorsData.lightMode[color]
+    colorPalette[color] = mapShades(colorsData.lightMode[color])
   })
   Object.keys(colorsData.darkMode).forEach((color) => {
-    colorPalette[`dark-${color}`] = colorsData.darkMode[color]
+    colorPalette[`dark-${color}`] = mapShades(colorsData.darkMode[color])
   })
 
   Object.keys(colorsData.overlay.white).forEach((shade) => {
@@ -107,11 +126,9 @@ function generateCSSVariables() {
 }
 
 function generateSemanticColors() {
-  const output = {
-    outline: {},
-    surface: {},
-    ink: {},
-  }
+  const output = Object.fromEntries(
+    Object.keys(colorsData.themedVariables.light).map((category) => [category, {}]),
+  )
 
   // Generate semantic colors
   Object.keys(colorsData.themedVariables.light).forEach((category) => {
@@ -129,4 +146,48 @@ function generateSemanticColors() {
   return output
 }
 
-export { generateColorPalette, generateCSSVariables, generateSemanticColors }
+// Emit `--elevation-*` and `--focus-*` CSS variables. Elevation uses the
+// Figma `light/*` values in both modes (matches how Espresso 2.0 actually
+// applies shadows in dark mode — see the dark-mode page in Figma, which
+// references `elevation/light/*` exclusively). Focus rings still mode-swap.
+// Theme-independent entries (e.g. `elevation.custom.status`) land in
+// `:root` only.
+function generateEffectVariables() {
+  const output = {
+    ':root': {},
+    '[data-theme="dark"]': {},
+  }
+
+  for (const [step, value] of Object.entries(effectsData.elevation.light)) {
+    output[':root'][`--elevation-${step}`] = value
+  }
+  for (const [name, value] of Object.entries(effectsData.elevation.custom)) {
+    output[':root'][`--elevation-${name}`] = value
+  }
+  for (const [name, value] of Object.entries(effectsData.focus.light)) {
+    output[':root'][`--focus-${name}`] = value
+    output[':root'][`--focus-outline-${name}`] = shadowToOutline(value)
+  }
+  for (const [name, value] of Object.entries(effectsData.focus.dark)) {
+    output['[data-theme="dark"]'][`--focus-${name}`] = value
+    output['[data-theme="dark"]'][`--focus-outline-${name}`] = shadowToOutline(value)
+  }
+
+  return output
+}
+
+// Focus tokens are single-layer `0 0 0 <spread> <color>` shadows — re-express
+// as an `outline` shorthand (`<spread> solid <color>`) so the global focus
+// ring can use outline instead of box-shadow (no collisions with shadow/ring
+// utilities, survives forced-colors mode).
+function shadowToOutline(shadow) {
+  const parts = shadow.trim().split(/\s+/)
+  return `${parts[3]} solid ${parts.slice(4).join(' ')}`
+}
+
+export {
+  generateColorPalette,
+  generateCSSVariables,
+  generateSemanticColors,
+  generateEffectVariables,
+}

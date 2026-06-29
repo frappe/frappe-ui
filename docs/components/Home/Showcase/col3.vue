@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref } from 'vue'
 import {
   Avatar,
   Badge,
@@ -9,67 +9,64 @@ import {
   Select,
   Slider,
   Switch,
-} from "frappe-ui";
-import LucideCoins from "~icons/lucide/circle-dollar-sign";
-import LucideUsers from "~icons/lucide/users";
-import LucideVideo from "~icons/lucide/video";
-import LucideMapPin from "~icons/lucide/map-pin";
-import LucideClock from "~icons/lucide/clock";
-import LucideCalendar from "~icons/lucide/calendar";
-import LucideX from "~icons/lucide/x";
-import LucideLink from "~icons/lucide/send";
+} from 'frappe-ui'
+import LucideCoins from '~icons/lucide/circle-dollar-sign'
+import LucideUsers from '~icons/lucide/users'
+import LucideVideo from '~icons/lucide/video'
+import LucideMapPin from '~icons/lucide/map-pin'
+import LucideClock from '~icons/lucide/clock'
+import LucideCalendar from '~icons/lucide/calendar'
+import LucideX from '~icons/lucide/x'
+import LucideLink from '~icons/lucide/send'
 
 const imgs = [
-  "https://avatars.githubusercontent.com/u/499550?s=60&v=4",
+  'https://avatars.githubusercontent.com/u/499550?s=60&v=4',
   'https://avatars.githubusercontent.com/u/2798204?s=70&v=4',
   'https://avatars.githubusercontent.com/u/28706372?s=96&v=4',
   'https://avatars.githubusercontent.com/u/1493221?s=70&v=4',
-];
+]
 
-const progressVal = ref(1);
-const checkboxVal = ref(true);
+const progressVal = ref(1)
+const checkboxVal = ref(true)
 
 const incProgress = () => {
   if (progressVal.value < 3) {
-    progressVal.value += 1;
+    progressVal.value += 1
   }
-};
+}
 
 const decProgress = () => {
   if (progressVal.value > 1) {
-    progressVal.value -= 1;
+    progressVal.value -= 1
   }
-};
+}
 
-const themes = ["green", "red", "blue", "yellow", "gray"];
+const themes = ['green', 'red', 'blue', 'yellow', 'gray']
 
-const slider2Val = ref([20, 50]);
-const switchVal = ref(true);
+const slider2Val = ref([20, 50])
+const switchVal = ref(true)
 
 const progressData = [
   {
-    title: "Objection Handling",
-    desc:
-      "In this objection handling role-play scenario, participants will engage in a simulated sales interaction.",
-    tags: ["Communication", "Negotiation"],
+    title: 'Objection Handling',
+    desc: 'In this objection handling role-play scenario, participants will engage in a simulated sales interaction.',
+    tags: ['Communication', 'Negotiation'],
   },
 
   {
-    title: "Business Development",
-    desc:
-      "In this business development role-play scenario, participants will engage in a simulated sales interaction.",
-    tags: ["Strategy", "Customer support"],
+    title: 'Business Development',
+    desc: 'In this business development role-play scenario, participants will engage in a simulated sales interaction.',
+    tags: ['Strategy', 'Customer support'],
   },
 
   {
-    title: "Marketing Strategy",
-    desc:
-      "In this marketing strategy role-play scenario, participants will engage in a simulated sales interaction.",
-    tags: ["Strategy", "Analytics"],
+    title: 'Marketing Strategy',
+    desc: 'In this marketing strategy role-play scenario, participants will engage in a simulated sales interaction.',
+    tags: ['Strategy', 'Analytics'],
   },
-];
+]
 
-const toggledDiv = ref(false);
+const toggledDiv = ref(false)
 </script>
 
 <template>
@@ -89,7 +86,7 @@ const toggledDiv = ref(false);
         {{ progressData[progressVal - 1].title }}
       </h3>
 
-      <p class="leading-relaxed">
+      <p>
         {{ progressData[progressVal - 1].desc }}
       </p>
 
@@ -97,7 +94,7 @@ const toggledDiv = ref(false);
         <Badge
           v-for="(tag, tagIndex) in progressData[progressVal - 1].tags"
           :key="tag"
-          :theme='themes[tagIndex] || "gray"'
+          :theme="themes[tagIndex] || 'gray'"
           size="lg"
           class="rounded-sm"
         >
@@ -111,17 +108,13 @@ const toggledDiv = ref(false);
           v-for="img in imgs"
           :key="img"
           :image="img"
-          class="border-2 border-surface-white -ml-2"
+          class="border-2 border-surface-base -ml-2"
         />
 
-        <span class="ml-3 text-sm !text-ink-gray-9">
-          + 5 more
-        </span>
+        <span class="ml-3 text-sm !text-ink-gray-9"> + 5 more </span>
       </div>
 
-      <div
-        class="grid grid-cols-2 mt-3 gap-3 *:py-4 border-t rounded pt-3"
-      >
+      <div class="grid grid-cols-2 mt-3 gap-3 *:py-4 border-t rounded pt-3">
         <Button @click="decProgress">Back</Button>
         <Button @click="incProgress" variant="solid">Next</Button>
       </div>
@@ -133,7 +126,7 @@ const toggledDiv = ref(false);
           <LucideCoins class="size-4" />
           Price range
         </span>
-        <Badge size="lg" class='rounded-sm'>
+        <Badge size="lg" class="rounded-sm">
           ${{ slider2Val[0] * 10 }} - ${{ slider2Val[1] * 10 }}
         </Badge>
       </div>
@@ -150,9 +143,7 @@ const toggledDiv = ref(false);
       <div class="flex gap-3 justify-between">
         <div class="grid gap-2">
           <span class="text-ink-gray-9">Smart compose</span>
-          <p class="text-ink-gray-5">
-            Enable predictive suggestions
-          </p>
+          <p class="text-ink-gray-5">Enable predictive suggestions</p>
         </div>
         <Switch v-model="switchVal" />
       </div>
@@ -162,9 +153,7 @@ const toggledDiv = ref(false);
       <div class="flex gap-2 justify-between">
         <div class="grid gap-2">
           <span class="text-ink-gray-9">Inline completions</span>
-          <p class="text-ink-gray-5">
-            Auto completions as you type
-          </p>
+          <p class="text-ink-gray-5">Auto completions as you type</p>
         </div>
         <Switch />
       </div>
@@ -172,7 +161,7 @@ const toggledDiv = ref(false);
 
     <div
       class="p-5 transition-all duration-200"
-      :class='{ "border-outline-gray-5": checkboxVal }'
+      :class="{ 'border-outline-gray-7': checkboxVal }"
     >
       <Checkbox
         v-model="checkboxVal"
@@ -184,15 +173,15 @@ const toggledDiv = ref(false);
 
     <div
       class="p-4 grid"
-      :class='{ "animate-bounce bg-surface-white shadow-lg": toggledDiv }'
+      :class="{ 'animate-bounce bg-surface-base shadow-lg': toggledDiv }"
     >
-      <h3 class="text-xl mb-2 font-semibold flex gap-3 justify-between">
+      <h3 class="text-lg mb-2 font-semibold flex gap-3 justify-between">
         Schedule an event
         <LucideX class="size-5" @click="toggledDiv = !toggledDiv" />
       </h3>
 
-      <span class="leading-relaxed mb-1">Product marketing</span>
-      <p class="leading-relaxed text-ink-gray-5 mb-2">
+      <span class="mb-1">Product marketing</span>
+      <p class="text-p-sm text-ink-gray-5 mb-2">
         Discussion of new marketing strategies and pricing for the new project
       </p>
 
@@ -210,12 +199,12 @@ const toggledDiv = ref(false);
             <Avatar
               size="sm"
               :image="imgs[0]"
-              class="border-2 border-surface-white"
+              class="border-2 border-surface-base"
             />
             <Avatar
               size="sm"
               :image="imgs[0]"
-              class="border-2 border-surface-white -ml-2"
+              class="border-2 border-surface-base -ml-2"
             />
 
             1 awaiting

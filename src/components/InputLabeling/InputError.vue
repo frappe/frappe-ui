@@ -4,7 +4,7 @@
     :id="id"
     data-slot="error"
     role="alert"
-    class="text-p-sm whitespace-pre-line text-ink-red-3"
+    class="text-p-sm whitespace-pre-line text-ink-red-6"
   >{{ lines.join('\n') }}</div>
 </template>
 <script setup lang="ts">

@@ -44,7 +44,7 @@ const options = [
       class="grid divide-y divide-outline-gray-2 md:grid-cols-2 md:divide-x md:divide-y-0"
     >
       <div class="pb-8 md:pr-8">
-        <div class="text-sm font-medium text-ink-gray-7">Auto width</div>
+        <div class="text-sm-medium text-ink-gray-7">Auto width</div>
         <div class="mt-1 text-p-sm text-ink-gray-5">
           Matches the widest option by default, closer to a native select.
         </div>
@@ -66,7 +66,7 @@ const options = [
       </div>
 
       <div class="pb-8 md:pl-8">
-        <div class="text-sm font-medium text-ink-gray-7">Full width</div>
+        <div class="text-sm-medium text-ink-gray-7">Full width</div>
         <div class="mt-1 text-p-sm text-ink-gray-5">
           Opt in with
           <code class="text-sm text-ink-gray-7">class="w-full"</code>

@@ -14,7 +14,7 @@
   },
   {
     name: 'hoverDelay',
-    description: 'Delay (in ms) before showing the tooltip on hover.',
+    description: 'Delay (in seconds) before showing the tooltip on hover.',
     required: false,
     type: 'number',
     default: '0.5'
@@ -23,7 +23,7 @@
     name: 'placement',
     description: 'Position of the tooltip relative to the trigger.',
     required: false,
-    type: '"bottom" | "top" | "right" | "left"',
+    type: '"top" | "right" | "bottom" | "left"',
     default: '"top"'
   },
   {
@@ -31,7 +31,7 @@
     description: 'Custom classes applied to the tooltip arrow.',
     required: false,
     type: 'any',
-    default: '"fill-surface-gray-7"'
+    default: '"fill-surface-gray-10"'
   },
   {
     name: 'disabled',
@@ -65,7 +65,7 @@
     name: 'side',
     description: 'Preferred popover side relative to the trigger.',
     required: false,
-    type: '"bottom" | "top" | "right" | "left"',
+    type: '"top" | "right" | "bottom" | "left"',
     default: '"top"'
   },
   {
@@ -79,7 +79,7 @@
     description: 'Fill class for the arrow — defaults to match the bubble shell.',
     required: false,
     type: 'string',
-    default: '"fill-surface-gray-7"'
+    default: '"fill-surface-gray-10"'
   }
 ]
 
@@ -100,6 +100,38 @@
     type: 'any'
   }
 ]
+
+  const tooltipProviderProps = [
+  {
+    name: 'hoverDelay',
+    description: 'Delay (in seconds) before the first tooltip in the group opens.',
+    required: false,
+    type: 'number',
+    default: '0.5'
+  },
+  {
+    name: 'skipDelay',
+    description: 'Window (in seconds) during which moving to another trigger in this\ngroup opens its tooltip with no delay. Mirrors reka\'s\n`skipDelayDuration`.',
+    required: false,
+    type: 'number',
+    default: '0.3'
+  },
+  {
+    name: 'disableHoverableContent',
+    description: 'When `true`, hovering the tooltip body closes it as the pointer\nleaves the trigger.',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  }
+]
+
+  const tooltipProviderSlots = [
+  {
+    name: 'default',
+    description: '',
+    type: '{}'
+  }
+]
 </script>
 ## API Reference
 
@@ -114,4 +146,10 @@
 <PropsTable folder="Tooltip" name="TooltipBubble" :data="tooltipBubbleProps"/> 
 
 <SlotsTable :data="tooltipBubbleSlots"/> 
+
+### TooltipProvider
+
+<PropsTable folder="Tooltip" name="TooltipProvider" :data="tooltipProviderProps"/> 
+
+<SlotsTable :data="tooltipProviderSlots"/> 
 

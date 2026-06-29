@@ -46,6 +46,7 @@ describe('editor kits', () => {
     expect(nodes.has('paragraph')).toBe(true)
     expect(nodes.has('heading')).toBe(true)
     expect(nodes.has('image')).toBe(true)
+    expect(nodes.has('attachment')).toBe(true)
     expect(nodes.has('mention')).toBe(true)
     expect(nodes.has('tagItem')).toBe(true)
     expect(marks.has('link')).toBe(true)
@@ -54,9 +55,17 @@ describe('editor kits', () => {
 
     const names = extensionNames(CommentKit)
     expect(names.has('imageViewer')).toBe(true)
+    expect(names.has('mediaDrop')).toBe(true)
     expect(names.has('table')).toBe(false)
     expect(names.has('tableOfContents')).toBe(false)
     expect(names.has('slashCommands')).toBe(false)
+  })
+
+  it('drops the attachment node when removed with `false`', () => {
+    expect(schemaOf(CommentKit).nodes.has('attachment')).toBe(true)
+    const { nodes } = schemaOf(CommentKit.configure({ attachment: false }))
+    expect(nodes.has('attachment')).toBe(false)
+    expect(nodes.has('image')).toBe(true) // others remain
   })
 
   it('RichTextKit adds tables, task lists, color, and slash commands', () => {

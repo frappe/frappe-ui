@@ -1,0 +1,25 @@
+{
+  "icon grid": {
+    "$type": "grid",
+    "$value": [
+      {
+        "pattern": "columns",
+        "visible": true,
+        "alignment": "stretch",
+        "color": "#ff00001a",
+        "gutterSize": "0px",
+        "count": 1,
+        "offset": "1px"
+      },
+      {
+        "pattern": "rows",
+        "visible": true,
+        "alignment": "stretch",
+        "color": "#ff00001a",
+        "gutterSize": "0px",
+        "count": 1,
+        "offset": "1px"
+      }
+    ]
+  }
+}

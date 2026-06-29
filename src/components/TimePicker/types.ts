@@ -1,8 +1,11 @@
 /**
  * TimePicker is a thin wrapper around Combobox that adds time-aware parsing,
- * generated options, and a 12/24-hour display toggle. Canonical value is
+ * generated options, and configurable display formatting. Canonical value is
  * always 24-hour `HH:mm` (or `HH:mm:ss` if seconds were typed).
  */
+
+import type { InputLabelingProps } from '../../composables/useInputLabeling'
+import type { InputSize } from '../../composables/inputTypes'
 
 export type PopoverSide = 'top' | 'right' | 'bottom' | 'left'
 export type PopoverAlign = 'start' | 'center' | 'end'
@@ -19,7 +22,7 @@ export type Placement =
 
 export type Variant = 'outline' | 'subtle'
 
-export interface TimePickerProps {
+export interface TimePickerProps extends InputLabelingProps {
   /** Controlled value, canonical `HH:mm` (or `HH:mm:ss`). */
   modelValue?: string
 
@@ -56,6 +59,9 @@ export interface TimePickerProps {
   /** Visual style variant. */
   variant?: Variant
 
+  /** Visual size of the trigger input. Forwarded to the underlying `TextInput`. */
+  size?: InputSize
+
   /**
    * Whether the trigger input accepts typed input. When `false` the user can
    * still open the popover and pick a time, but cannot type a time manually.
@@ -84,8 +90,14 @@ export interface TimePickerProps {
    */
   autoClose?: boolean
 
-  /** Use 12-hour (am/pm) format for display. */
+  /**
+   * Use 12-hour (am/pm) format for display.
+   * @deprecated Use `format` instead.
+   */
   use12Hour?: boolean
+
+  /** Dayjs format string used for display. Default: `HH:mm`. */
+  format?: string
 
   /** Disable the time picker. */
   disabled?: boolean

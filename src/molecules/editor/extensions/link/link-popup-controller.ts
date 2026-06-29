@@ -45,12 +45,7 @@ export function openLinkPopup(
   // Lock the page's scroll container while the popup is open so the anchored
   // editor can't scroll away underneath it. The app scrolls an inner
   // overflow-auto element (not <body>), so we lock the nearest such ancestor.
-  const scrollParent = getScrollParent(anchor)
-  const previousOverflow = scrollParent?.style.overflow ?? ''
-  if (scrollParent) scrollParent.style.overflow = 'hidden'
-  const unlockScroll = () => {
-    if (scrollParent) scrollParent.style.overflow = previousOverflow
-  }
+  const unlockScroll = lockScroll(getScrollParent(anchor))
 
   return new Promise<string | null>((resolve) => {
     let settled = false
@@ -101,6 +96,32 @@ export function openLinkPopup(
       settle(null)
     }
   })
+}
+
+/**
+ * Lock vertical+horizontal scrolling on `el` and return a function that
+ * restores it.
+ *
+ * Save/restore the `overflow-x`/`overflow-y` *longhands* — never the `overflow`
+ * shorthand. A scroll container's value usually lives in a longhand (e.g.
+ * EditorContent sets `overflow-y: auto` inline); reading `.style.overflow`
+ * returns '' whenever the two axes differ, so locking via the shorthand and
+ * later clearing it would drop the original `overflow-y` and leave the editor
+ * overflowing its box — content then paints over the toolbar (the link-edit
+ * overflow bug). The longhand getters reflect the value regardless of how it
+ * was originally authored, so restoring them reproduces the prior state exactly.
+ *
+ * No-op (returns a no-op restore) when `el` is `null`.
+ */
+export function lockScroll(el: HTMLElement | null): () => void {
+  if (!el) return () => {}
+  const previous = { x: el.style.overflowX, y: el.style.overflowY }
+  el.style.overflowX = 'hidden'
+  el.style.overflowY = 'hidden'
+  return () => {
+    el.style.overflowX = previous.x
+    el.style.overflowY = previous.y
+  }
 }
 
 /**

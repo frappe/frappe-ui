@@ -71,7 +71,7 @@ const resetState = () => {
               </Button>
             </div>
 
-            <p class="text-sm text-ink-gray-7 mb-4 leading-relaxed">
+            <p class="text-p-sm text-ink-gray-7 mb-4">
               {{ state.about }}
             </p>
 
@@ -118,7 +118,7 @@ const resetState = () => {
           <LucideTag class="size-5" />
         </span>
 
-        <p class="leading-relaxed">
+        <p class="text-p-base">
           Prize: 25% discount coupon <br />
           <span class="text-ink-gray-6"> for all software courses</span>
         </p>
@@ -167,7 +167,7 @@ const resetState = () => {
       >
         <div class="grid gap-1 flex-1">
           <span>Balanced </span>
-          <span class="text-ink-gray-4">
+          <span class="text-p-sm text-ink-gray-4">
             Automatically balances performance with energy consumption
           </span>
         </div>
@@ -177,7 +177,7 @@ const resetState = () => {
           id="balanced"
           name="power"
           defaultChecked
-          class="m-auto bg-surface-gray-2 text-ink-gray-9 dark:text-ink-gray-3 focus:!ring-outline-gray-5 transition-all"
+          class="m-auto bg-surface-gray-2 text-ink-gray-9 dark:text-ink-gray-3 focus:!ring-outline-gray-7 transition-all"
         />
       </label>
 
@@ -187,14 +187,14 @@ const resetState = () => {
       >
         <div class="grid gap-1 flex-1">
           <span> Power Saving</span>
-          <span class="text-ink-gray-4">
+          <span class="text-p-sm text-ink-gray-4">
             Saves energy by reducing performance where possible
           </span>
         </div>
 
         <input
           type="radio"
-          class="m-auto bg-surface-gray-2 text-ink-gray-9 dark:text-ink-gray-3 focus:!ring-outline-gray-5 transition-all"
+          class="m-auto bg-surface-gray-2 text-ink-gray-9 dark:text-ink-gray-3 focus:!ring-outline-gray-7 transition-all"
           id="power-save"
           name="power"
         />
@@ -203,14 +203,14 @@ const resetState = () => {
       <label class="flex gap-3 p-3 has-[:checked]:bg-surface-gray-1" for="perf">
         <div class="grid gap-1 flex-1">
           <span> Performance</span>
-          <span class="text-ink-gray-4">
+          <span class="text-p-sm text-ink-gray-4">
             High performance but uses more energy
           </span>
         </div>
 
         <input
           type="radio"
-          class="m-auto bg-surface-gray-2 text-ink-gray-9 dark:text-ink-gray-3 focus:!ring-outline-gray-5 transition-all"
+          class="m-auto bg-surface-gray-2 text-ink-gray-9 dark:text-ink-gray-3 focus:!ring-outline-gray-7 transition-all"
           id="perf"
           name="power"
         />

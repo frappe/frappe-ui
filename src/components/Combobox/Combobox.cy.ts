@@ -11,8 +11,16 @@ describe('Combobox', () => {
         props: { options: fruits, placeholder: 'Pick fruit' },
       })
 
-      cy.get('[data-slot="trigger"]').should('have.attr', 'data-variant', 'subtle')
-      cy.get('[role="combobox"]').should('have.attr', 'placeholder', 'Pick fruit')
+      cy.get('[data-slot="trigger"]').should(
+        'have.attr',
+        'data-variant',
+        'subtle',
+      )
+      cy.get('[role="combobox"]').should(
+        'have.attr',
+        'placeholder',
+        'Pick fruit',
+      )
     })
 
     it('forwards `id` to the input element', () => {
@@ -25,13 +33,21 @@ describe('Combobox', () => {
         props: { options: fruits, size: 'lg', variant: 'outline' },
       })
       cy.get('[data-slot="trigger"]').should('have.attr', 'data-size', 'lg')
-      cy.get('[data-slot="trigger"]').should('have.attr', 'data-variant', 'outline')
+      cy.get('[data-slot="trigger"]').should(
+        'have.attr',
+        'data-variant',
+        'outline',
+      )
     })
 
     it('renders the chevron and rotates it when open', () => {
       cy.mount(Combobox, { props: { options: fruits } })
       cy.get('[data-slot="chevron"]').should('exist')
-      cy.get('[data-slot="trigger"]').should('have.attr', 'data-state', 'closed')
+      cy.get('[data-slot="trigger"]').should(
+        'have.attr',
+        'data-state',
+        'closed',
+      )
 
       cy.get('[data-slot="chevron"]').click()
       cy.get('[data-slot="trigger"]').should('have.attr', 'data-state', 'open')
@@ -151,10 +167,14 @@ describe('Combobox', () => {
         },
       })
       cy.get('[role="combobox"]').type('ENG')
-      cy.get('[role="option"]').should('have.length', 1).and('contain.text', 'Engineering')
+      cy.get('[role="option"]')
+        .should('have.length', 1)
+        .and('contain.text', 'Engineering')
 
       cy.get('[role="combobox"]').clear().type('des')
-      cy.get('[role="option"]').should('have.length', 1).and('contain.text', 'Design')
+      cy.get('[role="option"]')
+        .should('have.length', 1)
+        .and('contain.text', 'Design')
     })
   })
 
@@ -171,7 +191,9 @@ describe('Combobox', () => {
 
       cy.get('[role="combobox"]').focus().type('dragonfruit')
       cy.get('[role="option"]').should('have.length', 1)
-      cy.get('[role="option"]').first().should('contain.text', 'Create "dragonfruit"')
+      cy.get('[role="option"]')
+        .first()
+        .should('contain.text', 'Create "dragonfruit"')
       cy.get('[role="option"]').first().click()
       cy.get('@onUpdate').should('have.been.calledWith', 'dragonfruit')
     })
@@ -233,7 +255,8 @@ describe('Combobox', () => {
               value: 'jane',
               slots: {
                 prefix: () => h('span', { 'data-cy': 'p' }, 'P'),
-                label: ({ item }: any) => h('span', { 'data-cy': 'l' }, item.label),
+                label: ({ item }: any) =>
+                  h('span', { 'data-cy': 'l' }, item.label),
                 suffix: () => h('span', { 'data-cy': 's' }, 'S'),
               },
             },
@@ -254,7 +277,8 @@ describe('Combobox', () => {
               label: 'Custom Row',
               value: 'row',
               slots: {
-                item: () => h('div', { 'data-cy': 'full-row' }, 'Custom Takeover'),
+                item: () =>
+                  h('div', { 'data-cy': 'full-row' }, 'Custom Takeover'),
               },
             },
           ],
@@ -477,14 +501,24 @@ describe('Combobox', () => {
       cy.contains('X').should('not.exist')
     })
 
-    it('renders #footer slot', () => {
+    it('renders #footer slot with control props', () => {
       cy.mount(Combobox, {
         props: { open: true, options: fruits },
         slots: {
-          footer: () => h('div', { 'data-cy': 'footer' }, 'FOOTER'),
+          footer: ({ setOpen }: any) =>
+            h(
+              'button',
+              { 'data-cy': 'footer', onClick: () => setOpen(false) },
+              'FOOTER',
+            ),
         },
       })
-      cy.get('[data-slot="footer"] [data-cy="footer"]').should('contain.text', 'FOOTER')
+      cy.get('[data-slot="footer"] [data-cy="footer"]').should(
+        'contain.text',
+        'FOOTER',
+      )
+      cy.get('[data-cy="footer"]').click()
+      cy.get('[data-slot="content"]').should('not.exist')
     })
   })
 
@@ -508,7 +542,11 @@ describe('Combobox', () => {
       }).then(() => {
         expect(warn).to.have.been.calledWithMatch(/placement.*deprecated/i)
       })
-      cy.get('[data-slot="content"]').should('have.attr', 'data-align', 'center')
+      cy.get('[data-slot="content"]').should(
+        'have.attr',
+        'data-align',
+        'center',
+      )
     })
 
     it('forwards `side` to the popover', () => {
@@ -557,7 +595,9 @@ describe('Combobox', () => {
         .should('be.focused')
         .type('ma')
 
-      cy.get('[role="option"]').should('have.length', 1).and('contain.text', 'Mango')
+      cy.get('[role="option"]')
+        .should('have.length', 1)
+        .and('contain.text', 'Mango')
     })
 
     it('renders built-in button when trigger="button" is set and avoids nested <button>', () => {

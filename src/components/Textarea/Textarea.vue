@@ -10,7 +10,7 @@
       :for-id="inputId"
       :label="props.label"
       :required="props.required"
-      class="text-p-sm font-medium text-ink-gray-7"
+      class="text-p-sm-medium text-ink-gray-7"
     >
       <template v-if="$slots.label" #default="slotProps">
         <slot name="label" v-bind="slotProps" />
@@ -120,7 +120,7 @@ const inputClasses = computed(() => {
     sm: 'text-base rounded',
     md: 'text-base rounded',
     lg: 'text-lg rounded-md',
-    xl: 'text-xl rounded-md',
+    xl: 'text-2xl rounded-md',
   }[props.size]
 
   let paddingClasses = {
@@ -133,16 +133,16 @@ const inputClasses = computed(() => {
   let variant = props.disabled ? 'disabled' : props.variant
   let variantClasses = {
     subtle:
-      'border border-[--surface-gray-2] bg-surface-gray-2 placeholder-ink-gray-4 hover:border-outline-gray-modals hover:bg-surface-gray-3 focus:bg-surface-white focus:border-outline-gray-4 focus:shadow-sm focus:ring-0 focus-visible:ring-2 focus-visible:ring-outline-gray-3',
+      'border border-[--surface-gray-2] bg-surface-gray-2 placeholder-ink-gray-4 hover:border-outline-elevation-2 hover:bg-surface-gray-3 focus:bg-surface-base focus:border-outline-gray-4 focus:shadow-sm focus:ring-0',
     outline:
-      'border border-outline-gray-2 bg-surface-white placeholder-ink-gray-4 hover:border-outline-gray-3 hover:shadow-sm focus:bg-surface-white focus:border-outline-gray-4 focus:shadow-sm focus:ring-0 focus-visible:ring-2 focus-visible:ring-outline-gray-3',
+      'border border-outline-gray-2 bg-surface-base placeholder-ink-gray-4 hover:border-outline-gray-3 hover:shadow-sm focus:bg-surface-base focus:border-outline-gray-4 focus:shadow-sm focus:ring-0',
     disabled: [
       'border bg-surface-gray-1 placeholder-ink-gray-3',
       props.variant === 'outline'
         ? 'border-outline-gray-2'
         : 'border-transparent',
     ],
-    ghost: 'border-0 focus:ring-0 focus-visible:ring-0',
+    ghost: 'border-0 focus:ring-0 focus-visible:outline-none',
   }[variant]
 
   return [

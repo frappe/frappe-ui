@@ -1,7 +1,7 @@
 <template>
   <PopoverRoot v-model:open="open">
     <PopoverAnchor :reference="anchorEl" as-child>
-      <div @keydown.down.prevent="onArrowDown">
+      <div v-bind="$attrs" @keydown.down.prevent="onArrowDown">
         <slot name="trigger" v-bind="triggerSlotProps">
           <slot name="target" v-bind="triggerSlotProps">
             <TextInput
@@ -44,7 +44,6 @@
     <PopoverPortal>
       <PopoverContent
         data-slot="content"
-        data-selection
         class="z-[100]"
         :side="side"
         :align="align"
@@ -52,15 +51,14 @@
         @open-auto-focus.prevent
         @interact-outside="onInteractOutside"
       >
-        <div
-          ref="popoverContentRef"
-          data-slot="content-body"
-          :data-motion="motion"
+        <PopoverPanel
+          ref="popoverPanelRef"
+          :motion="motion"
           :class="contentClass"
-          style="transform-origin: var(--reka-popover-content-transform-origin)"
+          class="origin-[var(--reka-popover-content-transform-origin)]"
         >
           <slot :close="closePopover" />
-        </div>
+        </PopoverPanel>
       </PopoverContent>
     </PopoverPortal>
   </PopoverRoot>
@@ -76,10 +74,10 @@ import {
 } from 'reka-ui'
 import { TextInput } from '../../TextInput'
 import LucideChevronDown from '~icons/lucide/chevron-down'
+import PopoverPanel from '../popover/PopoverPanel.vue'
 import { usePopoverMotion } from '../../../composables/usePopoverMotion'
 import type { InputSize, InputVariant } from '../../../composables/inputTypes'
 import type { FrappeUIError } from '../../../composables/useInputLabeling'
-import '../selection/popoverMotion.css'
 
 interface Props {
   // Positioning — already resolved by caller from side/align/placement.
@@ -107,7 +105,9 @@ interface Props {
   // Display label exposed via trigger slot props for caller-rendered triggers.
   displayLabel?: string
 
-  // Tailwind class string for the popover content body wrapper.
+  // Extra Tailwind classes (layout/sizing such as `w-56`/`w-fit`) merged onto
+  // the `PopoverPanel` shell. The elevated shell itself (rounded/bg/shadow/ring)
+  // is owned by `PopoverPanel`, so callers no longer pass those here.
   contentClass?: string
 }
 
@@ -145,6 +145,8 @@ const slots = defineSlots<{
   default?: (props: { close: () => void }) => any
 }>()
 
+defineOptions({ inheritAttrs: false })
+
 const open = defineModel<boolean>('open', { default: false })
 const inputValue = defineModel<string>('inputValue', { default: '' })
 const typing = defineModel<boolean>('typing', { default: false })
@@ -159,7 +161,12 @@ interface TriggerSlotProps {
 // Anchor the popover at the input element itself (not the labeling wrapper),
 // so it sits below the input rather than below the description text.
 const textInputRef = ref<{ el: HTMLElement | null } | null>(null)
-const popoverContentRef = ref<HTMLElement | null>(null)
+const popoverPanelRef = ref<{ $el: HTMLElement } | null>(null)
+
+// PopoverPanel renders a single root <div>, so its `$el` is the panel element
+// we test focus containment against (Esc / selection should restore trigger
+// focus; click-outside should not).
+const panelEl = computed(() => popoverPanelRef.value?.$el ?? null)
 
 const anchorEl = computed(() => {
   if (slots.trigger || slots.target) return undefined
@@ -208,7 +215,7 @@ function onClick(e: MouseEvent) {
 function onBlur(e: FocusEvent) {
   // Clicks inside the popover panel re-focus options; treat those as still-focused.
   const next = e.relatedTarget as Node | null
-  if (next && popoverContentRef.value?.contains(next)) return
+  if (next && panelEl.value?.contains(next)) return
   emit('blur')
   typing.value = false
 }
@@ -246,9 +253,7 @@ watch(open, (val, prev) => {
     // Restore focus to the trigger input if the popover content had focus
     // (Esc, date selection in auto-close mode). Click-outside leaves focus
     // on the clicked element, so we skip in that case.
-    const hadFocusInside = popoverContentRef.value?.contains(
-      document.activeElement,
-    )
+    const hadFocusInside = panelEl.value?.contains(document.activeElement)
     emit('close')
     if (hadFocusInside) {
       nextTick(() => textInputRef.value?.el?.focus())

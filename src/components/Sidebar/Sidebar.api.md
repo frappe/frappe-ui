@@ -36,7 +36,7 @@
   {
     name: 'header',
     description: '',
-    type: '{}'
+    type: '{ isCollapsed: boolean; isMobile: boolean; }'
   },
   {
     name: 'header-logo',
@@ -46,7 +46,7 @@
   {
     name: 'sidebar-item',
     description: '',
-    type: '{ item: SidebarItemProps; isCollapsed: false; }'
+    type: '{ item: SidebarItemProps; isCollapsed: boolean; }'
   },
   {
     name: 'footer-items',
@@ -140,6 +140,12 @@
     description: '',
     required: false,
     type: '(() => void)'
+  },
+  {
+    name: 'condition',
+    description: '',
+    required: false,
+    type: 'MaybeRefOrGetter<boolean>'
   }
 ]
 
@@ -181,7 +187,7 @@
   {
     name: 'sidebar-item',
     description: '',
-    type: '{ item: SidebarItemProps; isCollapsed: false; }'
+    type: '{ item: SidebarItemProps; isCollapsed: boolean; }'
   }
 ]
 </script>

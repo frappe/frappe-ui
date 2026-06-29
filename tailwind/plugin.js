@@ -3,12 +3,155 @@ import {
   generateColorPalette,
   generateSemanticColors,
   generateCSSVariables,
+  generateEffectVariables,
 } from './colorPalette.js'
-import { borderRadius, boxShadow, fontSize } from './tokens.js'
+import radiusTokens from './generated/radius.json'
+import typographyTokens from './generated/typography.json'
+import effectsData from './generated/effects.json'
 
 let colorPalette = generateColorPalette()
 let semanticColors = generateSemanticColors()
-let cssVariables = generateCSSVariables()
+let cssVariables = mergeVariableLayers(
+  generateCSSVariables(),
+  generateEffectVariables(),
+  generateRadiusVariables(),
+)
+
+// Emit `--radius-{key}` for every radius token (numeric scale + aliases) so
+// the values are inspectable as real CSS variables. `borderRadius` is rewired
+// below to consume these vars, so `rounded-4` and `--radius-4` stay in sync.
+function generateRadiusVariables() {
+  const vars = {}
+  for (const [key, value] of Object.entries(radiusTokens)) {
+    if (key === 'DEFAULT') continue
+    vars[`--radius-${key}`] = value
+  }
+  return { ':root': vars }
+}
+
+// Map `DEFAULT` (Tailwind's `rounded` class) onto the numeric var that
+// shares its value, so we don't emit a `--radius-DEFAULT` (awkward name).
+function buildRadiusConfig() {
+  const numericByValue = {}
+  for (const [key, value] of Object.entries(radiusTokens)) {
+    if (/^\d+$/.test(key)) numericByValue[value] = key
+  }
+  const out = {}
+  for (const [key, value] of Object.entries(radiusTokens)) {
+    if (key === 'DEFAULT') {
+      const numeric = numericByValue[value]
+      out[key] = numeric ? `var(--radius-${numeric})` : value
+    } else {
+      out[key] = `var(--radius-${key})`
+    }
+  }
+  return out
+}
+
+// Merge two `{ selector: { var: value } }` objects into one, preserving any
+// vars already declared under the same selector.
+function mergeVariableLayers(...layers) {
+  const out = {}
+  for (const layer of layers) {
+    for (const [selector, vars] of Object.entries(layer)) {
+      out[selector] = { ...(out[selector] || {}), ...vars }
+    }
+  }
+  return out
+}
+
+// Weight variants are exposed as component classes — `text-<size>-<weight>` and
+// the paragraph counterpart `text-p-<size>-<weight>` — one per Figma named
+// style. Figma tracks each weight differently per size and CSS letter-spacing
+// can't follow font-weight, so each (size, weight) must ship as a self-contained
+// class. `regular` stays the bare `text-<size>` / `text-p-<size>` utility.
+// (Component classes are JIT-purged, so only the ones used in content emit.)
+const WEIGHT_VARIANTS = ['medium', 'semibold', 'bold', 'black']
+
+function buildFontSize() {
+  const out = {}
+  // Each size's regular variant already carries lineHeight, letterSpacing and
+  // fontWeight from the text-styles export (see figma-tokens-to-theme.js).
+  for (const [key, [size, meta]] of Object.entries(typographyTokens.fontSize)) {
+    out[key] = [size, { ...meta }]
+  }
+  // Paragraph variants (`text-p-<size>`): same size, the paragraph style's
+  // looser line-height and its own letter-spacing.
+  for (const [key, p] of Object.entries(typographyTokens.paragraph || {})) {
+    if (!out[key]) continue
+    const [size, meta] = out[key]
+    out[`p-${key}`] = [
+      size,
+      { ...meta, lineHeight: p.lineHeight, letterSpacing: p.letterSpacing },
+    ]
+  }
+  return out
+}
+
+// Focus ring utilities backed by `--focus-outline-*` CSS vars (theme-flipped
+// in colorPalette.js#generateEffectVariables). Implemented as `outline`, not
+// box-shadow, so rings never collide with shadow/ring utilities on the same
+// element and survive forced-colors mode. The default ring is applied
+// globally via `:focus-visible` (see globalStyles); these utilities are for
+// themed overrides (`focus-visible:focus-ring-red`) and non-focus states
+// (`data-[state=open]:focus-ring`). Registered via `addComponents` so
+// Tailwind IntelliSense picks them up.
+function buildFocusRingUtilities() {
+  const out = {}
+  for (const name of Object.keys(effectsData.focus.light)) {
+    const className = name === 'default' ? '.focus-ring' : `.focus-ring-${name}`
+    out[className] = {
+      outline: `var(--focus-outline-${name})`,
+      outlineOffset: '0px',
+    }
+  }
+  return out
+}
+
+function buildTextStyleUtilities() {
+  const out = {}
+  const t = typographyTokens
+  const groups = [
+    {
+      className: (s, w) => `.text-${s}-${w}`,
+      tracking: t.tracking?.text || {},
+      lineHeight: (s) => t.fontSize[s]?.[1].lineHeight,
+    },
+    {
+      className: (s, w) => `.text-p-${s}-${w}`,
+      tracking: t.tracking?.paragraph || {},
+      lineHeight: (s) => t.paragraph?.[s]?.lineHeight,
+    },
+  ]
+  for (const group of groups) {
+    for (const [size, byWeight] of Object.entries(group.tracking)) {
+      const entry = t.fontSize[size]
+      if (!entry) continue
+      const [fontSize] = entry
+      const lineHeight = group.lineHeight(size)
+      const transform = t.textTransform?.[size]
+      for (const weight of WEIGHT_VARIANTS) {
+        if (!(weight in byWeight)) continue
+        out[group.className(size, weight)] = {
+          fontSize,
+          lineHeight,
+          fontWeight: String(t.fontWeight[weight]),
+          letterSpacing: byWeight[weight],
+          ...(transform ? { textTransform: transform } : {}),
+        }
+      }
+    }
+  }
+  // `tiny` is an uppercase eyebrow style; the bare regular utility needs the
+  // text-transform too (Tailwind's fontSize tuple can't express it).
+  for (const [size, transform] of Object.entries(t.textTransform || {})) {
+    out[`.text-${size}`] = {
+      ...(out[`.text-${size}`] || {}),
+      textTransform: transform,
+    }
+  }
+  return out
+}
 
 let globalStyles = (theme) => ({
   html: {
@@ -26,22 +169,34 @@ let globalStyles = (theme) => ({
     backgroundSize: '1.13em',
     backgroundPosition: 'right 0.44rem center',
   },
+  // A bare `<p>` reads as body copy, so it defaults to a relaxed line-height
+  // instead of the tight value baked into the `text-<size>` utilities. Kept at
+  // element specificity (0,0,1) with `:where()` (which adds none) so any explicit
+  // `text-*` / `text-p-*` line-height wins, and scoped out of rich text so the
+  // `prose` / editor line-heights are untouched.
+  'p:not(:where(.prose, .ProseMirror) *)': {
+    lineHeight: '1.5',
+  },
+  // Global keyboard focus indicator (espresso v2 focus/default token).
+  // Lives in the base layer so any utility on the element can override it:
+  // suppress with `focus-visible:outline-none`, retheme with
+  // `focus-visible:focus-ring-<color>`.
+  ':focus-visible': {
+    outline: 'var(--focus-outline-default)',
+    outlineOffset: '0px',
+  },
 })
 
 let componentStyles = {
   '.form-input, .form-textarea, .form-select': {
-    '@apply h-7 rounded border border-[--surface-gray-2] bg-surface-gray-2 py-1.5 pl-2 pr-2 text-base text-ink-gray-8 placeholder-ink-gray-4 transition-colors hover:border-outline-gray-modals hover:bg-surface-gray-3 focus:border-outline-gray-4 focus:bg-surface-white focus:shadow-sm focus:ring-0 focus-visible:ring-2 focus-visible:ring-outline-gray-3':
+    '@apply h-7 rounded border border-[--surface-gray-2] bg-surface-gray-2 py-1.5 pl-2 pr-2 text-base text-ink-gray-8 placeholder-ink-gray-4 transition-colors hover:border-outline-elevation-2 hover:bg-surface-gray-3 focus:border-outline-gray-4 focus:bg-surface-base focus:shadow-sm focus:ring-0':
       {},
   },
   '.form-checkbox': {
-    '@apply rounded-md bg-surface-gray-2 text-ink-blue-2 focus:ring-0 focus-visible:ring-1':
-      {},
+    '@apply rounded-md bg-surface-gray-2 text-ink-blue-5 focus:ring-0': {},
   },
   "[data-theme='dark'] [type='checkbox']:checked": {
     'background-image': `url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='%230F0F0F' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e")`,
-  },
-  "[data-theme='dark'] img": {
-    filter: 'brightness(.8) contrast(1.2)',
   },
 }
 
@@ -49,18 +204,30 @@ export default plugin(
   function ({ addBase, addComponents, theme }) {
     addBase({ ...globalStyles(theme), ...cssVariables })
     addComponents(componentStyles)
+    addComponents(buildTextStyleUtilities())
+    addComponents(buildFocusRingUtilities())
   },
   {
     theme: {
       colors: colorPalette,
-      borderRadius: borderRadius,
-      boxShadow: boxShadow,
+      borderRadius: buildRadiusConfig(),
+      boxShadow: {
+        none: 'none',
+        sm: 'var(--elevation-sm)',
+        base: 'var(--elevation-base)',
+        DEFAULT: 'var(--elevation-base)',
+        md: 'var(--elevation-md)',
+        lg: 'var(--elevation-lg)',
+        xl: 'var(--elevation-xl)',
+        '2xl': 'var(--elevation-2xl)',
+        status: 'var(--elevation-status)',
+      },
       container: {
         padding: {
           xl: '5rem',
         },
       },
-      fontSize: fontSize,
+      fontSize: buildFontSize(),
       screens: {
         sm: '640px',
         md: '768px',
@@ -73,11 +240,14 @@ export default plugin(
         },
         backgroundColor: {
           surface: semanticColors.surface,
+          'surface-alpha': semanticColors['surface-alpha'],
         },
         gradientColorStops: {
           surface: semanticColors.surface,
+          'surface-alpha': semanticColors['surface-alpha'],
           ink: semanticColors.ink,
           outline: semanticColors.outline,
+          'outline-alpha': semanticColors['outline-alpha'],
         },
         fill: {
           ink: semanticColors.ink,
@@ -92,12 +262,15 @@ export default plugin(
         borderColor: () => ({
           DEFAULT: 'var(--outline-gray-1)',
           outline: semanticColors.outline,
+          'outline-alpha': semanticColors['outline-alpha'],
         }),
         ringColor: {
           outline: semanticColors.outline,
+          'outline-alpha': semanticColors['outline-alpha'],
         },
         divideColor: {
           outline: semanticColors.outline,
+          'outline-alpha': semanticColors['outline-alpha'],
         },
         spacing: {
           4.5: '1.125rem',
@@ -260,7 +433,7 @@ export default plugin(
           v3: {
             css: [
               {
-                fontSize: 'var(--prose-font-size, 14px)',
+                fontSize: 'var(--prose-font-size, 15px)',
                 fontWeight: 420,
                 lineHeight: '1.7',
                 letterSpacing: '0.02em',
@@ -276,11 +449,24 @@ export default plugin(
                 // links: subtle bottom border, darkens on hover
                 a: {
                   textDecoration: 'none',
-                  borderBottom: '1px solid var(--ink-gray-3)',
+                  borderBottom: '1px solid var(--ink-gray-4)',
                   transition: 'border-color 0.08s ease',
                 },
                 'a:hover': {
                   borderBottom: '1px solid var(--ink-gray-6)',
+                },
+
+                // named text color + bold: the color lives on a `textStyle`
+                // span that wraps (or is wrapped by) `<strong>`. Typography's
+                // `strong { color: var(--tw-prose-bold) }` otherwise overrides
+                // the inherited named color, painting bold text gray. Mirror the
+                // base preset's `a strong { color: inherit }` so bold keeps the
+                // span's color in both nesting orders.
+                ':where(span[style*="--prose-color-"]) strong': {
+                  color: 'inherit',
+                },
+                'strong:where([style*="--prose-color-"])': {
+                  color: 'inherit',
                 },
 
                 // inline code: subtle pill — strip Tailwind's added quotes
@@ -380,7 +566,7 @@ export default plugin(
                 ol: {
                   marginTop: '4px',
                   marginBottom: '4px',
-                  paddingInlineStart: '1.5em',
+                  paddingInlineStart: '1.7em',
                 },
                 li: {
                   marginTop: '4px',

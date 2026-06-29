@@ -28,7 +28,7 @@
             <template #target="{ togglePopover }">
               <Button
                 variant="ghost"
-                class="text-lg font-medium text-ink-gray-7"
+                class="text-lg-medium text-ink-gray-7"
                 :label="currentMonthYear"
                 iconRight="lucide-chevron-down"
                 @click="togglePopover"

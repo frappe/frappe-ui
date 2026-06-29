@@ -48,9 +48,9 @@ export function triggerVariantClasses(
 
   return {
     subtle:
-      'border border-[--surface-gray-2] bg-surface-gray-2 hover:border-outline-gray-modals hover:bg-surface-gray-3',
+      'border border-[--surface-gray-2] bg-surface-gray-2 hover:border-outline-elevation-2 hover:bg-surface-gray-3',
     outline:
-      'border border-outline-gray-2 bg-surface-white hover:border-outline-gray-3',
+      'border border-outline-gray-2 bg-surface-base hover:border-outline-gray-3',
     ghost:
       'border border-transparent bg-transparent hover:bg-surface-gray-3 focus:bg-surface-gray-3',
   }[variant]
@@ -62,4 +62,4 @@ export function triggerVariantClasses(
  * which is why Select doesn't reuse the shared base string.
  */
 export const triggerBaseClasses =
-  'relative inline-flex items-center gap-2 text-left outline-none transition-[background-color,border-color,box-shadow] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] focus-visible:ring-2 data-[state=open]:ring-2 ring-outline-gray-3 text-ink-gray-7 data-[placeholder]:text-ink-gray-4 data-[disabled]:text-ink-gray-4'
+  'relative inline-flex items-center gap-2 text-left transition-[background-color,border-color,box-shadow] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] data-[state=open]:focus-ring text-ink-gray-7 data-[placeholder]:text-ink-gray-4 data-[disabled]:text-ink-gray-4'

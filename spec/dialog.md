@@ -24,7 +24,7 @@ Apps reach for the imperative `dialog.*` helpers when they need a one-off confir
 | ARIA role | `role="dialog"` always |
 | Visibility model | `v-model:open` (canonical) **and** `v-model` (also supported) |
 | Prop surface | Flat top-level props; `options` blob retained as deprecated alias |
-| Dismiss control | `dismissable: boolean` (default `true`); replaces `disableOutsideClickToClose` |
+| Dismiss control | `dismissible: boolean` (default `true`); replaces `disableOutsideClickToClose` |
 | Chrome control | `bare: boolean` (default `false`); replaces the legacy `#body` slot |
 | Close button | `showCloseButton: boolean` (default `true`); independent of header |
 | Size scale | All 11 sizes kept (`xs` → `7xl`); maps to Tailwind `max-w-*` |
@@ -92,7 +92,7 @@ interface DialogProps {
   actions?: DialogAction[]
 
   // Behavior.
-  dismissable?: boolean             // default true
+  dismissible?: boolean             // default true
   showCloseButton?: boolean         // default true
   bare?: boolean                    // default false
 
@@ -105,7 +105,7 @@ interface DialogProps {
 #### Prop semantics
 
 - **`open` / `modelValue`** — same boolean state. `v-model:open` is canonical and aligns with `Popover`/`Dropdown`. `v-model` (bound to `modelValue`) is also supported indefinitely for back-compat; no warning. If both are bound, `open` wins.
-- **`dismissable`** — when `false`, both outside-click and Escape are suppressed. Replaces `disableOutsideClickToClose`. Default `true`.
+- **`dismissible`** — when `false`, both outside-click and Escape are suppressed. Replaces `disableOutsideClickToClose`. Default `true`.
 - **`bare`** — when `true`, drops the chrome: no padded card, no auto-header, no auto-actions container. `#default` fills the modal shell directly. `title`/`actions` props become no-ops with a dev warning; `#title`/`#actions` slots are not rendered. Used for command palettes, full-screen settings, etc.
 - **`showCloseButton`** — controls the absolute-positioned top-right close button. Independent of the auto-header. Default `true`.
 - **`paddingTop`** — overrides the position-based top padding (escape hatch; kept for the single in-the-wild use case).
@@ -217,7 +217,7 @@ interface ConfirmArgs {
   theme?: DialogTheme            // colors the confirm button + picks default icon
   icon?: string | DialogIcon     // overrides theme-derived default icon
   size?: DialogSize              // default 'md'
-  dismissable?: boolean          // default true
+  dismissible?: boolean          // default true
   onConfirm?: (ctx: DialogControl) => void | Promise<void>
   onCancel?: () => void | Promise<void>
   /**
@@ -231,7 +231,7 @@ interface ConfirmArgs {
 /**
  * Destructive preset for `dialog.danger`. Forces `theme: 'red'`, defaults
  * `confirmLabel` to 'Delete', defaults the icon to `lucide-alert-triangle`.
- * Everything else (actions[], dismissable, onCancel, …) works as in confirm.
+ * Everything else (actions[], dismissible, onCancel, …) works as in confirm.
  */
 type DangerArgs = Omit<ConfirmArgs, 'theme' | 'icon'>
 
@@ -244,7 +244,7 @@ interface PromptArgs {
   theme?: DialogTheme
   icon?: string | DialogIcon
   size?: DialogSize              // default 'md'
-  dismissable?: boolean          // default true
+  dismissible?: boolean          // default true
   onConfirm: (ctx: PromptControl) => void | Promise<void>
   onCancel?: () => void | Promise<void>
 }
@@ -296,7 +296,7 @@ declare const dialog: {
 
 The confirm/submit button shows a loading spinner for as long as the `onConfirm` promise is pending. When `actions[]` is supplied, each action tracks its own loading state — the clicked button spins; every other button disables until it settles.
 
-`onCancel` fires on Cancel click, Escape, outside-click, or close-button click (whenever the dialog's `open` flag flips to `false` via dismissal). Set `dismissable: false` to disable Escape / outside-click / close-button.
+`onCancel` fires on Cancel click, Escape, outside-click, or close-button click (whenever the dialog's `open` flag flips to `false` via dismissal). Set `dismissible: false` to disable Escape / outside-click / close-button.
 
 Each helper returns `{ close }` synchronously, so callers can dismiss the dialog from outside the callback chain — e.g., from a socket event or route change.
 
@@ -394,7 +394,7 @@ dialog.prompt({
 // Programmatic dismissal via the returned handle.
 const handle = dialog.confirm({
   title: 'Waiting for upload…',
-  dismissable: false,
+  dismissible: false,
 })
 socket.once('upload:done', () => handle.close())
 ```
@@ -406,7 +406,7 @@ Each deprecated surface keeps working in v1, emits a one-time dev-mode console w
 | Deprecated | Replacement |
 |---|---|
 | `options` blob prop | Flat top-level props |
-| `disableOutsideClickToClose` | `dismissable` (inverted) |
+| `disableOutsideClickToClose` | `dismissible` (inverted) |
 | `icon: { appearance: 'warning' \| 'info' \| 'danger' \| 'success' }` | `icon: { theme: 'yellow' \| 'blue' \| 'red' \| 'green' }` |
 | `#body-content`, `#body-main` slots | `#default` |
 | `#body-title` slot | `#title` |
@@ -481,7 +481,7 @@ For non-destructive flows, use `dialog.confirm` with the same `onConfirm` shape.
 
 These are intentionally not in this spec; revisit in `1.x`:
 
-- Cross-component rollout of `dismissable` to Popover, Dropdown, Tooltip.
+- Cross-component rollout of `dismissible` to Popover, Dropdown, Tooltip.
 - Additional `PromptField` types beyond `text` / `textarea` / `select` / `checkbox` / `combobox` (`date`, `number`, `autocomplete`, multi-step wizards, etc.).
 - A `dialog.alert()` helper. The same affordance is achieved today with `dialog.confirm({ actions: [{ label: 'OK', variant: 'solid' }] })` or by passing only `cancelLabel`; not worth a dedicated entry point in v1.
 - `dialog.message()` or other named imperative helpers beyond `confirm` / `danger` / `prompt`.

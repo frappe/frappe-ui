@@ -18,12 +18,12 @@ const sizeCLass = {
   sm: 'text-base rounded h-7',
   md: 'text-base rounded h-8',
   lg: 'text-lg rounded-md h-10',
-  xl: 'text-xl rounded-md h-10',
+  xl: 'text-2xl rounded-md h-10',
 }
 
 const variantClasses = {
   subtle: 'bg-surface-gray-2',
-  outline: 'bg-surface-white',
+  outline: 'bg-surface-base',
   ghost: 'border-0',
 }
 

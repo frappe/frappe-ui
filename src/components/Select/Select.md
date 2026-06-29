@@ -3,6 +3,10 @@
 Lets users select one option from a list. Ideal for forms, settings, or any
 interface where a single choice is required.
 
+## Playground
+
+<ClientOnly><SelectBuilder /></ClientOnly>
+
 ## Example
 <ComponentPreview name="Select-Example" />
 

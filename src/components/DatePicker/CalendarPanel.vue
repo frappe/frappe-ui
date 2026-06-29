@@ -11,12 +11,8 @@
         icon="lucide-chevron-left"
         @click="emit('prev')"
       />
-      <span class="text-sm font-medium text-ink-gray-7">
-        <span v-if="view === 'date'">
-          {{ months[currentMonth] }} {{ currentYear }}
-        </span>
-        <span v-else-if="view === 'month'">{{ currentYear }}</span>
-        <span v-else>{{ yearRangeStart }} - {{ yearRangeStart + 11 }}</span>
+      <span class="text-sm-medium text-ink-gray-7">
+        {{ months[currentMonth] }} {{ currentYear }}
       </span>
       <Button
         :class="{ invisible: hideNext }"
@@ -30,17 +26,13 @@
       <Button
         variant="ghost"
         size="sm"
-        class="text-sm font-medium text-ink-gray-7"
+        class="text-sm-medium text-ink-gray-7"
         label="cycle-calendar-view"
         @click="emit('cycleView')"
       >
-        <span v-if="view === 'date'">
-          {{ months[currentMonth] }} {{ currentYear }}
-        </span>
-        <span v-else-if="view === 'month'">{{ currentYear }}</span>
-        <span v-else>{{ yearRangeStart }} - {{ yearRangeStart + 11 }}</span>
+        {{ months[currentMonth] }} {{ currentYear }}
       </Button>
-      <div class="flex items-center">
+      <div v-if="view === 'date'" class="flex items-center">
         <Button
           v-if="!hidePrev"
           label="previous"
@@ -73,7 +65,7 @@
         @mouseleave="emit('hoverCell', null)"
       >
         <div
-          class="flex items-center text-xs font-medium uppercase text-ink-gray-4 mb-1 gap-0.5"
+          class="flex items-center text-xs-medium uppercase text-ink-gray-4 mb-1 gap-0.5"
         >
           <div
             v-for="(d, di) in WEEKDAYS"
@@ -99,7 +91,7 @@
               <button
                 v-else
                 type="button"
-                class="flex size-7 items-center justify-center text-sm transition-colors duration-100 focus:outline-none focus:ring-2 focus:ring-outline-gray-2"
+                class="flex size-7 items-center justify-center text-sm transition-colors duration-100"
                 :class="cellClass(cell)"
                 role="gridcell"
                 :aria-selected="ariaSelected(cell)"
@@ -112,9 +104,13 @@
                 :tabindex="isFocusedCell(cell) ? 0 : -1"
                 @mouseenter="emit('hoverCell', cell.date)"
                 @click="!cell.isUnavailable && emit('selectDate', cell.date)"
-                @keydown.left.prevent="shiftFocus(cell.date.subtract(1, 'day'), -1)"
+                @keydown.left.prevent="
+                  shiftFocus(cell.date.subtract(1, 'day'), -1)
+                "
                 @keydown.right.prevent="shiftFocus(cell.date.add(1, 'day'), 1)"
-                @keydown.up.prevent="shiftFocus(cell.date.subtract(7, 'day'), -1)"
+                @keydown.up.prevent="
+                  shiftFocus(cell.date.subtract(7, 'day'), -1)
+                "
                 @keydown.down.prevent="shiftFocus(cell.date.add(7, 'day'), 1)"
                 @keydown.home.prevent="
                   shiftFocus(cell.date.subtract(cell.date.day(), 'day'), -1)
@@ -151,54 +147,60 @@
           </div>
         </div>
       </div>
-      <div
-        v-else-if="view === 'month'"
-        class="grid grid-cols-3 gap-1"
-        role="grid"
-        aria-label="Select month"
-      >
-        <button
-          v-for="(m, i) in months"
-          type="button"
-          :key="m"
-          class="py-2 text-sm rounded cursor-pointer text-center hover:bg-surface-gray-2 focus:outline-none focus:ring-2 focus:ring-brand-6"
-          :class="{
-            'bg-surface-gray-6 text-ink-white hover:bg-surface-gray-6':
-              i === currentMonth,
-          }"
-          :aria-selected="i === currentMonth ? 'true' : 'false'"
-          @click="emit('selectMonth', i)"
+      <div v-else class="flex h-52 w-52" aria-label="Select month and year">
+        <div
+          ref="yearListRef"
+          class="relative flex w-1/2 flex-col gap-0.5 overflow-y-auto"
+          role="listbox"
+          aria-label="Select year"
         >
-          {{ m.slice(0, 3) }}
-        </button>
-      </div>
-      <div
-        v-else
-        class="grid grid-cols-3 gap-1"
-        role="grid"
-        aria-label="Select year"
-      >
-        <button
-          v-for="y in yearRange"
-          type="button"
-          :key="y"
-          class="py-2 text-sm rounded cursor-pointer text-center hover:bg-surface-gray-2 focus:outline-none focus:ring-2 focus:ring-brand-6"
-          :class="{
-            'bg-surface-gray-6 text-ink-white hover:bg-surface-gray-6':
-              y === currentYear,
-          }"
-          :aria-selected="y === currentYear ? 'true' : 'false'"
-          @click="emit('selectYear', y)"
+          <button
+            v-for="y in years"
+            type="button"
+            :key="y"
+            class="w-full text-ink-gray-8 h-7 shrink-0 rounded py-1 text-sm text-center cursor-pointer transition-colors duration-100"
+            :class="
+              y === currentYear
+                ? 'bg-surface-gray-2 hover:bg-surface-gray-3'
+                : ' hover:bg-surface-gray-1'
+            "
+            :data-selected="y === currentYear ? '' : undefined"
+            :aria-selected="y === currentYear ? 'true' : 'false'"
+            @click="emit('selectYear', y)"
+          >
+            {{ y }}
+          </button>
+        </div>
+        <div
+          ref="monthListRef"
+          class="relative flex w-1/2 flex-col gap-0.5 overflow-y-auto pl-1.5"
+          role="listbox"
+          aria-label="Select month"
         >
-          {{ y }}
-        </button>
+          <button
+            v-for="(m, i) in months"
+            type="button"
+            :key="m"
+            class="w-full text-ink-gray-8 shrink-0 h-7 rounded py-1 text-sm text-center cursor-pointer transition-colors duration-100"
+            :class="
+              i === currentMonth
+                ? 'bg-surface-gray-2 hover:bg-surface-gray-3'
+                : ' hover:bg-surface-gray-1'
+            "
+            :data-selected="i === currentMonth ? '' : undefined"
+            :aria-selected="i === currentMonth ? 'true' : 'false'"
+            @click="emit('selectMonth', i)"
+          >
+            {{ m }}
+          </button>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { nextTick, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import type { Dayjs } from 'dayjs/esm'
 import { Button } from '../Button'
 import { months } from './utils'
@@ -220,8 +222,6 @@ interface Props {
   view: ViewMode
   currentYear: number
   currentMonth: number
-  yearRangeStart: number
-  yearRange: number[]
   weeks: CalendarPanelCell[][]
   /** Label for the optional Today/Now action button between prev/next. Empty/undefined hides it. */
   todayLabel?: string
@@ -281,6 +281,44 @@ const emit = defineEmits<{
   (e: 'update:focusedDate', d: Dayjs): void
 }>()
 
+// ── Month-year split view ────────────────────────────────────────────────────
+// The year column is a scrollable list. We bound it to [min, max] when provided
+// (so unreachable years aren't offered) and otherwise fall back to a wide window
+// around the current year. The current year is always included.
+const years = computed<number[]>(() => {
+  const current = props.currentYear
+  const minY = props.min ? Number(props.min.slice(0, 4)) : current - 100
+  const maxY = props.max ? Number(props.max.slice(0, 4)) : current + 10
+  const start = Math.min(minY, current)
+  const end = Math.max(maxY, current)
+  return Array.from({ length: end - start + 1 }, (_, i) => start + i)
+})
+
+const yearListRef = ref<HTMLElement | null>(null)
+const monthListRef = ref<HTMLElement | null>(null)
+
+// Center the active year/month when the split view opens. Manual scrollTop (vs
+// scrollIntoView) keeps the scroll contained to each list and never nudges the
+// popover or page. Relies on the list containers being `relative` so the
+// buttons' `offsetTop` is measured against them.
+function centerSelected(container: HTMLElement | null) {
+  const el = container?.querySelector<HTMLElement>('[data-selected]')
+  if (!container || !el) return
+  container.scrollTop =
+    el.offsetTop - container.clientHeight / 2 + el.clientHeight / 2
+}
+
+watch(
+  () => props.view,
+  (view) => {
+    if (view !== 'monthYear') return
+    nextTick(() => {
+      centerSelected(yearListRef.value)
+      centerSelected(monthListRef.value)
+    })
+  },
+)
+
 // ── Roving tabindex (Reka Calendar pattern) ──────────────────────────────────
 // The focused date is *controlled* — the parent owns the value and feeds it
 // in via `props.focusedDate`. Arrow keys compute a target, emit
@@ -295,9 +333,7 @@ function isFocusedCell(cell: CalendarPanelCell): boolean {
   return !!props.focusedDate && cell.date.isSame(props.focusedDate, 'day')
 }
 
-function pickInitialFocusDate(
-  weeks: CalendarPanelCell[][],
-): Dayjs | null {
+function pickInitialFocusDate(weeks: CalendarPanelCell[][]): Dayjs | null {
   const flat = weeks.flat()
   const selected = flat.find(
     (c) =>
@@ -343,12 +379,7 @@ watch(
 // for an unbounded run of dates would otherwise spin forever.
 const MAX_SKIP_DISABLED_STEPS = 366
 
-function shiftFocus(
-  target: Dayjs,
-  dir: 1 | -1,
-  retried = false,
-  steps = 0,
-) {
+function shiftFocus(target: Dayjs, dir: 1 | -1, retried = false, steps = 0) {
   // Bounds check first — if the target is outside [min, max], the arrow
   // press is a no-op rather than trying to navigate into nothing. Matches
   // Reka's CalendarCellTrigger behavior.
@@ -417,37 +448,48 @@ function ariaLabel(cell: CalendarPanelCell): string {
 }
 
 function cellClass(cell: CalendarPanelCell): Array<string | false> {
-  const inMonthCls = cell.inMonth ? 'text-ink-gray-8' : 'text-ink-gray-3'
-  const todayCls = cell.isToday ? 'font-semibold text-ink-gray-9' : ''
+  // "Today" stays bold whether or not it's selected; its gray text color is kept
+  // separate so it can be dropped on selected cells.
+  const todayFont = cell.isToday ? 'font-semibold' : ''
+  // Resting text color for non-selected cells. Omitted on selected/range cells:
+  // both are `text-*` utilities, so leaving them in would win the CSS source-order
+  // tie against `text-ink-base` and the selected date would render gray.
+  const restingText = [
+    cell.inMonth ? 'text-ink-gray-8' : 'text-ink-gray-3',
+    cell.isToday ? 'text-ink-gray-9' : '',
+  ]
 
   if (cell.isUnavailable) {
-    return [inMonthCls, todayCls, 'rounded opacity-30 cursor-not-allowed']
+    return [
+      'rounded',
+      ...restingText,
+      todayFont,
+      'opacity-30 cursor-not-allowed',
+    ]
   }
 
-  if (cell.isRangeStart || cell.isRangeEnd) {
+  if (cell.isRangeStart || cell.isRangeEnd || cell.isSelected) {
     return [
-      inMonthCls,
-      todayCls,
-      'rounded bg-surface-gray-6 text-ink-white hover:bg-surface-gray-6 cursor-pointer',
+      'rounded',
+      todayFont,
+      'bg-surface-gray-9 text-ink-base hover:bg-surface-gray-9 cursor-pointer',
     ]
   }
 
   if (cell.inRange) {
     return [
-      inMonthCls,
-      todayCls,
-      'rounded bg-surface-gray-3 hover:bg-surface-gray-3 cursor-pointer',
+      'rounded',
+      ...restingText,
+      todayFont,
+      'bg-surface-gray-3 hover:bg-surface-gray-3 cursor-pointer',
     ]
   }
 
-  if (cell.isSelected) {
-    return [
-      inMonthCls,
-      todayCls,
-      'rounded bg-surface-gray-6 text-ink-white hover:bg-surface-gray-6 cursor-pointer',
-    ]
-  }
-
-  return [inMonthCls, todayCls, 'rounded hover:bg-surface-gray-2 cursor-pointer']
+  return [
+    'rounded',
+    ...restingText,
+    todayFont,
+    'hover:bg-surface-gray-2 cursor-pointer',
+  ]
 }
 </script>

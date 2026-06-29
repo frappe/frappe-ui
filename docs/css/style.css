@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-  background-color: var(--surface-white);
+  background-color: var(--surface-base);
   color: var(--ink-gray-9);
   @apply text-base;
   font-family: Inter, sans-serif;
@@ -89,7 +89,7 @@ code {
   --scrollbar-thumb: var(--surface-gray-2);
   --scrollbar-thumb-hover: var(--surface-gray-3);
 
-  --shiki-track: var(--surface-cards);
+  --shiki-track: var(--surface-elevation-1);
   --shiki-thumb: var(--surface-gray-3);
 }
 

@@ -53,7 +53,7 @@ function reset() {
         v-for="(_, i) in steps"
         :key="i"
         class="h-1 flex-1 rounded-full transition-colors"
-        :class="i <= step ? 'bg-surface-gray-7' : 'bg-surface-gray-3'"
+        :class="i <= step ? 'bg-surface-gray-10' : 'bg-surface-gray-3'"
       />
     </div>
 

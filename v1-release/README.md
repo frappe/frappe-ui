@@ -9,22 +9,14 @@ This directory contains the active planning docs for `frappe-ui` v1.
 
 ## Supporting docs
 
-- [`migration.md`](./migration.md)
-  - Pointer to the published migration guide at <https://ui.frappe.io/docs/migration> (source: [`docs/content/docs/migration.md`](../docs/content/docs/migration.md)). Per-component before/after tables for app teams upgrading to v1.
+- **Migration guide** — published at <https://ui.frappe.io/docs/migration> (source: [`docs/content/docs/migration.md`](../docs/content/docs/migration.md)). Per-component before/after tables for app teams upgrading to v1.
 - [`changelog.md`](./changelog.md)
   - Rolling v1 changelog for consumer-facing changes, deprecations, and migration notes.
-- [`04-components-audit.md`](./04-components-audit.md)
-  - Core component audit matrix for TS, `<script setup>`, docs, stories, and tests.
-- [`08-selection-and-menu-api-spec.md`](./08-selection-and-menu-api-spec.md)
-  - Accepted API direction for Dropdown, Select, Combobox, MultiSelect, and ItemListRow.
-- [`08f-dialog-spec.md`](./08f-dialog-spec.md)
-  - Accepted API direction for `Dialog` and the imperative `dialog.confirm/alert/prompt` namespace. Covers flat-prop migration, slot rename, the `bare` chrome toggle, `dismissible`, and the caller-controlled-close lifecycle for imperative helpers.
-- [`09-input-components-spec.md`](./09-input-components-spec.md)
-  - Accepted API direction for the input family: TextInput, Textarea, Password, Checkbox, Switch, Rating, Slider, and ErrorMessage. Covers the shared labeling contract, size/variant scales, `defineModel` pattern, and deprecation warnings. FileUploader is out of scope and addressed in a separate spec.
 
-## Research
+## Component API contracts
 
-- [`research/07-selection-components-usage-audit.md`](./research/07-selection-components-usage-audit.md)
-  - Bench-wide usage audit that informed the selection/menu API spec.
-- [`research/09-input-components-usage-audit.md`](./research/09-input-components-usage-audit.md)
-  - Bench-wide usage audit that locked the parked decisions in the input-components spec.
+Component API contracts and ADRs now live in [`../spec/`](../spec/) — see
+[`../spec/README.md`](../spec/README.md). The numbered `08*` / `09*` / `10*`
+specs that used to live here were consolidated into `spec/` (semantic
+filenames), with `spec/` as the single source of truth per
+[`CONTEXT.md`](../CONTEXT.md).

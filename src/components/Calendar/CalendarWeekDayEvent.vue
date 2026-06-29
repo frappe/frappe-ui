@@ -29,7 +29,7 @@
             <div class="flex w-fit flex-col gap-0.5 overflow-hidden">
               <p
                 ref="eventTitleRef"
-                class="text-sm font-medium event-title"
+                class="text-sm-medium event-title"
                 :class="lineClampClass"
               >
                 {{ props.event.title || '[No title]' }}
@@ -37,7 +37,7 @@
               <p
                 ref="eventTimeRef"
                 v-if="!props.event.isFullDay"
-                class="text-xs font-normal event-subtitle"
+                class="text-xs event-subtitle"
               >
                 {{
                   formattedDuration(updatedEvent.fromTime, updatedEvent.toTime, config.timeFormat)

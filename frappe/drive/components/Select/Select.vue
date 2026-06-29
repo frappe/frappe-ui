@@ -84,7 +84,7 @@ const labelFunction = (val: SelectValue_, selected = false) => {
         <SelectContent
           :hide-when-detached="true"
           :align="'start'"
-          class="z-10 min-w-[--reka-select-trigger-width] mt-1 bg-surface-modal overflow-hidden rounded-lg shadow-2xl"
+          class="z-10 min-w-[--reka-select-trigger-width] mt-1 bg-surface-elevation-2 overflow-hidden rounded-lg shadow-2xl"
         >
           <SelectViewport
             class="max-h-60 overflow-auto p-1.5"
@@ -99,7 +99,7 @@ const labelFunction = (val: SelectValue_, selected = false) => {
                   <hr v-if="optionOrGroup.group === true" class="my-1.5" />
                   <SelectLabel
                     v-else
-                    class="px-2.5 pt-3 pb-1.5 text-sm font-medium text-ink-gray-5 sticky top-0 bg-surface-modal z-10"
+                    class="px-2.5 pt-3 pb-1.5 text-sm font-medium text-ink-gray-5 sticky top-0 bg-surface-elevation-2 z-10"
                   >
                     {{ optionOrGroup.group }}
                   </SelectLabel>

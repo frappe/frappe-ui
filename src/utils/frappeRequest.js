@@ -8,12 +8,20 @@ export function frappeRequest(options) {
       if (!options.url) {
         throw new Error('[frappeRequest] options.url is required')
       }
+      let configHeaders = getConfig('requestHeaders') || {}
+      if (typeof configHeaders === 'function') {
+        configHeaders = configHeaders()
+      }
       let headers = Object.assign(
         {
           Accept: 'application/json',
           'Content-Type': 'application/json; charset=utf-8',
+          // Sent as the local hostname even when requestBaseUrl points at a
+          // remote site. Harmless for dev, but pass a `requestHeaders` override
+          // if you need the remote site name here.
           'X-Frappe-Site-Name': window.location.hostname,
         },
+        configHeaders,
         options.headers || {},
       )
       if (window.csrf_token && window.csrf_token !== '{{ csrf_token }}') {
@@ -22,10 +30,23 @@ export function frappeRequest(options) {
       if (!options.url.startsWith('/') && !options.url.startsWith('http')) {
         options.url = '/api/method/' + options.url
       }
+      // Prepend a configured base URL to relative URLs for local dev against a
+      // remote instance. Default to `credentials: 'include'` so cookie-based
+      // cross-origin auth works out of the box (the server must then send
+      // Access-Control-Allow-Credentials: true and a non-wildcard origin). If
+      // you authenticate with a token via `requestHeaders` instead, you usually
+      // want cookies omitted — pass `options.credentials: 'omit'` to override.
+      let baseUrl = getConfig('requestBaseUrl')
+      let credentials = options.credentials
+      if (baseUrl && options.url.startsWith('/')) {
+        options.url = baseUrl.replace(/\/$/, '') + options.url
+        credentials = credentials || 'include'
+      }
       return {
         ...options,
         method: options.method || 'POST',
         headers,
+        credentials,
       }
     },
     transformResponse: async (response, options) => {

@@ -4,7 +4,7 @@
   >
     <div class="mx-auto grid gap-2 relative w-1/2">
       <div
-        class="absolute bottom-3 -left-6 bg-surface-cards rounded shadow-md border border-outline-gray-2 p-1.5 w-20"
+        class="absolute bottom-3 -left-6 bg-surface-elevation-1 rounded shadow-md border border-outline-gray-2 p-1.5 w-20"
       >
         <div class="h-2 w-full bg-surface-gray-2 rounded mb-1.5" />
         <div class="h-2 w-3/4 bg-surface-gray-2 rounded mb-1.5" />
@@ -14,7 +14,7 @@
       <span class="h-2 bg-surface-gray-3 w-6 mr-auto p-2 rounded-sm"> </span>
 
       <div
-        class="bg-surface-cards rounded-lg p-3 shadow-2xl border border-outline-gray-2"
+        class="bg-surface-elevation-1 rounded-lg p-3 shadow-2xl border border-outline-gray-2"
       >
         <div class="flex items-center justify-between mb-2">
           <div class="h-2 w-12 bg-surface-gray-3 rounded" />

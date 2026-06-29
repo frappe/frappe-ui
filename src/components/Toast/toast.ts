@@ -1,8 +1,23 @@
+import DOMPurify from 'dompurify'
 import { h, isVNode, type Component, type VNode } from 'vue'
 import { toast as sonnerToast } from 'vue-sonner'
 import { warnDeprecated } from '../../utils/warnDeprecated'
 
 type ToastType = 'success' | 'error' | 'warning' | 'info'
+
+type SonnerData = Parameters<typeof sonnerToast>[1]
+
+// Tags that are safe to render inside a toast message. Anything outside this set is stripped by DOMPurify.
+const ALLOWED_TAGS = ['a', 'em', 'strong', 'i', 'b', 'u']
+
+// Sonner renders a string message as plain text and a VNode via
+// `<component :is>`. To render safe HTML we sanitize the string and return a
+// render function; non-string values (already VNodes/components) pass through.
+function renderSafeHTML<T>(message: T): T | (() => VNode) {
+  if (typeof message !== 'string') return message
+  const html = DOMPurify.sanitize(message, { ALLOWED_TAGS })
+  return () => h('span', { innerHTML: html })
+}
 
 interface LegacyCreateOptions {
   id?: string | number
@@ -62,20 +77,21 @@ function isLegacyObject(arg: unknown): arg is LegacyToastObject {
 
 function dispatch(
   type: ToastType | undefined,
-  message: string,
-  data: Parameters<typeof sonnerToast>[1],
+  message: string | Component | VNode,
+  data: SonnerData,
 ) {
+  const safeMessage = renderSafeHTML(message)
   switch (type) {
     case 'success':
-      return sonnerToast.success(message, data)
+      return sonnerToast.success(safeMessage, data)
     case 'error':
-      return sonnerToast.error(message, data)
+      return sonnerToast.error(safeMessage, data)
     case 'warning':
-      return sonnerToast.warning(message, data)
+      return sonnerToast.warning(safeMessage, data)
     case 'info':
-      return sonnerToast.info(message, data)
+      return sonnerToast.info(safeMessage, data)
     default:
-      return sonnerToast(message, data)
+      return sonnerToast(safeMessage, data)
   }
 }
 
@@ -107,7 +123,7 @@ function toastFn(
   if (isLegacyObject(message)) {
     return callLegacyObject(message)
   }
-  return sonnerToast(message as string, options)
+  return sonnerToast(renderSafeHTML(message as string), options)
 }
 
 function create(options: LegacyCreateOptions) {
@@ -142,6 +158,14 @@ function removeAll() {
 }
 
 export const toast = Object.assign(toastFn, sonnerToast, {
+  success: (message: string | Component | VNode, data?: SonnerData) =>
+    dispatch('success', message, data),
+  error: (message: string | Component | VNode, data?: SonnerData) =>
+    dispatch('error', message, data),
+  warning: (message: string | Component | VNode, data?: SonnerData) =>
+    dispatch('warning', message, data),
+  info: (message: string | Component | VNode, data?: SonnerData) =>
+    dispatch('info', message, data),
   create,
   remove,
   removeAll,

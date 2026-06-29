@@ -28,10 +28,10 @@ const classes = computed(() => {
 
 const icon = computed(() => {
   const data = {
-    yellow: { class: 'lucide-triangle-alert', css: 'text-ink-amber-3' },
-    blue: { class: 'lucide-info', css: 'text-ink-blue-3' },
-    red: { class: 'lucide-circle-x', css: 'text-ink-red-3' },
-    green: { class: 'lucide-circle-check', css: 'text-ink-green-3' },
+    yellow: { class: 'lucide-triangle-alert', css: 'text-ink-amber-6' },
+    blue: { class: 'lucide-info', css: 'text-ink-blue-6' },
+    red: { class: 'lucide-circle-x', css: 'text-ink-red-6' },
+    green: { class: 'lucide-circle-check', css: 'text-ink-green-6' },
   }
   return props.theme ? data[props.theme] : null
 })
