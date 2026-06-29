@@ -31,7 +31,6 @@ const nodes = ref<TreeNode[]>([
   },
 ])
 
-const expanded = ref<string[]>(['guest', 'downloads', 'documents', 'archive'])
 const disabled = ref(false)
 
 // Folders (nodes with a `children` array) can receive drops; files cannot.
@@ -70,9 +69,8 @@ function onDragEnd(info: DropInfo | null) {
     const parent = hit?.list[hit.index]
     if (parent) {
       if (!parent.children) parent.children = []
+      parent.expanded = true
       dest = parent.children
-      if (!expanded.value.includes(info.to as string))
-        expanded.value = [...expanded.value, info.to as string]
     }
   }
   dest.splice(info.newIndex, 0, moved)
@@ -86,7 +84,6 @@ function onDragEnd(info: DropInfo | null) {
       <Tree
         :nodes="nodes"
         node-key="name"
-        v-model:expanded="expanded"
         :disabled="disabled"
         draggable
         :move="move"
