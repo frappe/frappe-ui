@@ -155,6 +155,7 @@ declare module 'vue' {
     TooltipBubble: typeof import('./src/components/Tooltip/TooltipBubble.vue')['default']
     TooltipProvider: typeof import('./src/components/Tooltip/TooltipProvider.vue')['default']
     Tree: typeof import('./src/components/Tree/Tree.vue')['default']
+    TreeItem: typeof import('./src/components/Tree/TreeItem.vue')['default']
     WeekIcon: typeof import('./src/components/Calendar/Icon/WeekIcon.vue')['default']
   }
 }

@@ -6,41 +6,97 @@
 
   const propsData = [
   {
-    name: 'node',
-    description: 'Root tree node to render.\nCan contain nested children to form the tree structure.',
+    name: 'nodes',
+    description: 'Forest roots to render. Each node may contain nested children to form the\ntree structure.',
     required: true,
-    type: 'TreeNode'
+    type: 'TreeNode[]'
   },
   {
     name: 'nodeKey',
-    description: 'Unique key used to identify each node.\nUsually an id-like property present on every node.',
-    required: true,
-    type: 'string'
+    description: 'Name of the field that uniquely identifies each node.',
+    required: false,
+    type: 'string',
+    default: '"key"'
   },
   {
-    name: 'options',
-    description: 'Optional configuration for tree layout and behavior.',
+    name: 'draggable',
+    description: 'Enable drag-and-drop. Nodes can be dragged onto one another to reparent, or\nbetween siblings to reorder.',
     required: false,
-    type: 'TreeOptions',
-    default: '{\n    rowHeight: "25px",\n    indentWidth: "20px",\n    showIndentationGuides: true,\n    defaultCollapsed: true,\n}'
+    type: 'boolean',
+    default: 'false'
+  },
+  {
+    name: 'move',
+    description: 'Gate a drop while dragging. Receives the live drag context and returns\nwhether the drop is allowed — a rejected target shows the no-drop cursor and\nhides the drop indicator. Built-in guards (drop-on-self, drop-into-own-\ndescendant) run first, so this only carries your domain rules.',
+    required: false,
+    type: '((ctx: MoveContext) => boolean)'
+  },
+  {
+    name: 'guides',
+    description: 'Visual style of the indentation guides.',
+    required: false,
+    type: '"connectors" | "lines" | "none"',
+    default: '"connectors"'
+  },
+  {
+    name: 'disabled',
+    description: 'Disable all interaction — expand/collapse and drag.',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  },
+  {
+    name: 'expanded',
+    description: 'Expand/collapse-all switch. Toggling it writes that value into every node\'s\n`expanded` field. Two-way: it also reflects whether all collapsible nodes are\ncurrently open, so a bound button stays in sync. Per-node state lives on the\nnodes themselves (`node.expanded`).',
+    required: false,
+    type: 'boolean',
+    default: 'false'
   }
 ]
 
   const slotsData = [
   {
-    name: 'node',
-    description: 'Slot to fully override how a tree node renders',
-    type: 'any'
+    name: 'item',
+    description: '',
+    type: 'TreeNodeSlotProps'
   },
   {
-    name: 'icon',
-    description: 'Slot to override only the node expand/collapse icon',
-    type: 'any'
+    name: 'item-prefix',
+    description: '',
+    type: 'Omit<TreeNodeSlotProps, "toggle">'
   },
   {
-    name: 'label',
-    description: 'Slot to override only the node label/content',
+    name: 'item-label',
+    description: '',
+    type: 'Omit<TreeNodeSlotProps, "toggle">'
+  },
+  {
+    name: 'item-suffix',
+    description: '',
+    type: 'Omit<TreeNodeSlotProps, "toggle">'
+  },
+  {
+    name: 'empty',
+    description: '',
     type: 'any'
+  }
+]
+
+  const emitsData = [
+  {
+    name: 'update:expanded',
+    description: 'Fired when the expanded changes.',
+    type: '[value: boolean]'
+  },
+  {
+    name: 'drag-start',
+    description: '',
+    type: '[node: TreeNode]'
+  },
+  {
+    name: 'drag-end',
+    description: '',
+    type: '[info: DropInfo | null]'
   }
 ]
 </script>
@@ -49,4 +105,6 @@
 <PropsTable name="Tree" :data="propsData"/> 
 
 <SlotsTable :data="slotsData"/> 
+
+<EmitsTable :data="emitsData"/> 
 

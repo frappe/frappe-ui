@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Tree } from 'frappe-ui'
+import { Button, Tree } from 'frappe-ui'
 import type { TreeNode } from '../types'
 
 const nodes = ref<TreeNode[]>([
@@ -22,7 +22,6 @@ const nodes = ref<TreeNode[]>([
       {
         name: 'documents',
         label: 'Documents',
-        expanded: false,
         children: [
           { name: 'somefile.txt', label: 'somefile.txt' },
           { name: 'somefile.pdf', label: 'somefile.pdf' },
@@ -31,10 +30,19 @@ const nodes = ref<TreeNode[]>([
     ],
   },
 ])
+
+// `expanded` mirrors whether every node is open (nodes start expanded), so the
+// label stays in sync even when rows are toggled individually.
+const expanded = ref(true)
 </script>
 
 <template>
-  <div class="w-80">
-    <Tree :nodes="nodes" node-key="name" />
+  <div class="flex flex-col gap-3">
+    <Button class="self-start" @click="expanded = !expanded">
+      {{ expanded ? 'Collapse all' : 'Expand all' }}
+    </Button>
+    <div class="w-80">
+      <Tree :nodes="nodes" node-key="name" v-model:expanded="expanded" />
+    </div>
   </div>
 </template>

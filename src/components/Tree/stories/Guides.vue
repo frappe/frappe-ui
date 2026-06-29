@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Tree } from 'frappe-ui'
+import { TabButtons, Tree } from 'frappe-ui'
 import type { TreeNode } from '../types'
 
 const nodes = ref<TreeNode[]>([
@@ -22,7 +22,6 @@ const nodes = ref<TreeNode[]>([
       {
         name: 'documents',
         label: 'Documents',
-        expanded: false,
         children: [
           { name: 'somefile.txt', label: 'somefile.txt' },
           { name: 'somefile.pdf', label: 'somefile.pdf' },
@@ -31,10 +30,20 @@ const nodes = ref<TreeNode[]>([
     ],
   },
 ])
+
+const guides = ref<'connectors' | 'lines' | 'none'>('connectors')
+const guideOptions = [
+  { label: 'Connectors', value: 'connectors' },
+  { label: 'Lines', value: 'lines' },
+  { label: 'None', value: 'none' },
+]
 </script>
 
 <template>
-  <div class="w-80">
-    <Tree :nodes="nodes" node-key="name" />
+  <div class="flex flex-col gap-4">
+    <TabButtons v-model="guides" :options="guideOptions" />
+    <div class="w-80">
+      <Tree :nodes="nodes" node-key="name" :guides="guides" />
+    </div>
   </div>
 </template>
