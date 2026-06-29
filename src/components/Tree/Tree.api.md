@@ -39,13 +39,6 @@
     default: '"connectors"'
   },
   {
-    name: 'defaultExpanded',
-    description: 'Start with every node expanded. A one-shot convenience that seeds the open\nset on first load (async-safe — it waits for `nodes` to arrive). To open\nspecific nodes or track expansion, use `v-model:expanded` instead; this is\nignored once you provide your own keys.',
-    required: false,
-    type: 'boolean',
-    default: 'false'
-  },
-  {
     name: 'disabled',
     description: 'Disable all interaction — expand/collapse and drag.',
     required: false,
@@ -54,10 +47,10 @@
   },
   {
     name: 'expanded',
-    description: 'The keys of the currently expanded nodes — the live source of truth for\nwhich rows are open. Controlled or uncontrolled. Use `defaultExpanded` only\nfor the simple "start fully expanded" case.',
+    description: 'Expand/collapse-all switch. Toggling it writes that value into every node\'s\n`expanded` field. Two-way: it also reflects whether all collapsible nodes are\ncurrently open, so a bound button stays in sync. Per-node state lives on the\nnodes themselves (`node.expanded`).',
     required: false,
-    type: 'TreeKey[]',
-    default: '[]'
+    type: 'boolean',
+    default: 'false'
   }
 ]
 
@@ -93,7 +86,7 @@
   {
     name: 'update:expanded',
     description: 'Fired when the expanded changes.',
-    type: '[value: TreeKey[]]'
+    type: '[value: boolean]'
   },
   {
     name: 'drag-start',
