@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { state } from '../../state'
 import { useData, useRoute, withBase } from 'vitepress'
-import pkgJson from '../../../package.json'
 import { getSidebarList, isActiveLink } from './sidebarList'
 
 import {
@@ -11,9 +11,13 @@ import {
   ScrollAreaScrollbar,
 } from 'reka-ui'
 
-const curVersion = pkgJson.version
 const { site, theme } = useData()
-const list = getSidebarList(theme.value.componentList, theme.value.frappeList)
+// SSR-safe: version/name/logo come from config, not a package.json read.
+const curVersion = computed(() => theme.value.version ?? '')
+const siteName = computed(() => theme.value.name ?? site.value.title ?? '')
+const logo = computed(() => theme.value.logo ?? '/logo.svg')
+// Data-driven sections: prefer `sections`, fall back to `sidebar`.
+const list = getSidebarList(theme.value.sections ?? theme.value.sidebar ?? [])
 
 state.sidebarList = list
 
@@ -31,10 +35,14 @@ const isActive = (link: string) =>
         class="hidden items-center gap-2.5 px-2 py-2 lg:flex hover:bg-surface-gray-2 rounded transition-colors"
         :href="withBase('/')"
       >
-        <img src="/logo.svg" class="w-7" />
+        <img v-if="logo" :src="logo" class="w-7" />
         <div class="flex flex-col gap-1 *:leading-none">
-          <span class="text-base font-medium text-ink-gray-8">Frappe UI</span>
-          <span class="text-sm text-ink-gray-5">v{{ curVersion }}</span>
+          <span class="text-base font-medium text-ink-gray-8">{{
+            siteName
+          }}</span>
+          <span v-if="curVersion" class="text-sm text-ink-gray-5"
+            >v{{ curVersion }}</span
+          >
         </div>
       </a>
     </div>

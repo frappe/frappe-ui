@@ -2,13 +2,13 @@
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useData, useRoute, withBase } from 'vitepress'
 import { Button, TextInput } from 'frappe-ui'
-import LucideMenu from '~icons/lucide/menu'
-import { getSidebarList, isActiveLink } from './sidebarList'
+import { isActiveLink, type SidebarSection } from './sidebarList'
 import { state } from '../../state'
 
 const route = useRoute()
 const { site, theme } = useData()
-const list = getSidebarList(theme.value.componentList)
+// Sidebar is supplied via themeConfig in the {text, items:[{text,link}]} shape.
+const list = (theme.value.sidebar ?? []) as SidebarSection[]
 const query = ref('')
 
 const filteredList = computed(() => {

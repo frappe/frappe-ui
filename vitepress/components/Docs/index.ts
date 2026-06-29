@@ -1,0 +1,13 @@
+// Generic docs components — safe for any prose docs site.
+export { default as Demo } from './Demo.vue'
+export { default as PropsTable } from './PropsTable.vue'
+export { default as SlotsTable } from './SlotsTable.vue'
+export { default as EmitsTable } from './EmitsTable.vue'
+export { default as OnThisPage } from './OnThisPage.vue'
+export { default as PrevNextBtns } from './PrevNextBtns.vue'
+export { default as Sidebar } from './Sidebar.vue'
+export { default as Search } from './Search.vue'
+export { default as CommandPalette } from './CommandPalette.vue'
+export { default as MobileNavSheet } from './MobileNavSheet.vue'
+
+export * from './sidebarList'

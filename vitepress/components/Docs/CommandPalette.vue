@@ -12,7 +12,7 @@ import {
 } from 'reka-ui'
 
 import { Dialog } from 'frappe-ui'
-import { getSidebarList, type SidebarItem } from '../Docs/sidebarList'
+import type { SidebarItem } from './sidebarList'
 
 const open = defineModel<boolean>('open', { default: true })
 
@@ -21,7 +21,8 @@ const router = useRouter()
 
 const filterText = ref('')
 
-const sidebarList = getSidebarList(theme.value.componentList ?? [])
+// Sidebar is supplied via themeConfig in the {text, items:[{text,link}]} shape.
+const sidebarList = theme.value.sidebar ?? []
 const allItems = sidebarList.flatMap((section) =>
   section.items.map((item) => ({ ...item, section: section.text })),
 )
@@ -59,7 +60,8 @@ const hasResults = computed(() =>
 
 const highlightedLink = ref<string | null>(null)
 const onHighlight = (payload: { value: unknown } | undefined) => {
-  highlightedLink.value = typeof payload?.value === 'string' ? payload.value : null
+  highlightedLink.value =
+    typeof payload?.value === 'string' ? payload.value : null
 }
 
 const navigateTo = (item: SidebarItem) => {

@@ -80,6 +80,11 @@
     "./vite": {
       "import": "./vite/index.js"
     },
+    "./vitepress": {
+      "types": "./vitepress/index.d.ts",
+      "node": "./vitepress/index.node.ts",
+      "default": "./vitepress/index.ts"
+    },
     "./style.css": {
       "import": "./src/style.css"
     },
@@ -98,6 +103,7 @@
     "vite",
     "icons",
     "tailwind",
+    "vitepress",
     "experimental",
     "experimental.ts",
     "tsconfig.base.json"
