@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Checkbox } from 'frappe-ui'
+import { Radio } from 'frappe-ui'
 import ComponentPlayground, { type Knob } from './ComponentPlayground.vue'
 
-const model = ref<boolean>(true)
+// A radio is one option within a group; the playground shows a single selected
+// option so the knobs can demonstrate its states.
+const model = ref('option')
 
 const knobs: Knob[] = [
-  { name: 'label', type: 'text', default: 'I agree', width: '14rem' },
+  { name: 'label', type: 'text', default: 'Email', width: '14rem' },
   { name: 'description', type: 'text', default: '', width: '20rem' },
   {
     name: 'size',
@@ -27,52 +29,35 @@ const knobs: Knob[] = [
       { label: 'padded', value: 'padded' },
     ],
   },
-  {
-    name: 'orientation',
-    type: 'tabs',
-    default: 'horizontal',
-    options: [
-      { label: 'horizontal', value: 'horizontal' },
-      { label: 'vertical', value: 'vertical' },
-    ],
-  },
-  { name: 'indeterminate', type: 'switch', default: false },
-  { name: 'required', type: 'switch', default: false },
   { name: 'error', type: 'switch', default: false },
   { name: 'disabled', type: 'switch', default: false },
 ]
 
-const ERROR_MESSAGE = 'This field is required.'
+const ERROR_MESSAGE = 'Please choose an option.'
 
 function buildCode(v: Record<string, any>) {
-  const attrs = []
+  const attrs = ['value="email"']
   if (v.label) attrs.push(`label="${v.label}"`)
   if (v.description) attrs.push(`description="${v.description}"`)
   if (v.size !== 'sm') attrs.push(`size="${v.size}"`)
   if (v.variant !== 'default') attrs.push(`variant="${v.variant}"`)
-  if (v.orientation !== 'horizontal')
-    attrs.push(`orientation="${v.orientation}"`)
-  if (v.indeterminate) attrs.push('indeterminate')
-  if (v.required) attrs.push('required')
   if (v.error) attrs.push(`error="${ERROR_MESSAGE}"`)
   if (v.disabled) attrs.push('disabled')
   attrs.push('v-model="value"')
-  return ['<Checkbox', ...attrs.map((a) => '  ' + a), '/>'].join('\n')
+  return ['<Radio', ...attrs.map((a) => '  ' + a), '/>'].join('\n')
 }
 </script>
 
 <template>
   <ComponentPlayground :knobs="knobs" :code="buildCode" preview-min-height="120px">
     <template #preview="{ values }">
-      <Checkbox
+      <Radio
         v-model="model"
+        value="option"
         :label="values.label || undefined"
         :description="values.description || undefined"
         :size="values.size"
         :variant="values.variant"
-        :orientation="values.orientation"
-        :indeterminate="values.indeterminate"
-        :required="values.required"
         :error="values.error ? ERROR_MESSAGE : undefined"
         :disabled="values.disabled"
       />

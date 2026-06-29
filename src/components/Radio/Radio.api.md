@@ -7,44 +7,42 @@
   const propsData = [
   {
     name: 'size',
-    description: 'Size of the switch control',
+    description: 'Controls the size of the radio',
     required: false,
     type: 'ToggleSize',
     default: '"sm"'
   },
   {
     name: 'variant',
-    description: 'Visual style of the switch row. `padded` wraps the control and label in a clickable surface with hover, active and focus states — useful for settings rows and menu items.',
+    description: 'Visual style of the radio row. `padded` wraps the control and label in a clickable surface with hover, active and focus states — useful for selection lists and menu items. The control always stays on the leading side.',
     required: false,
     type: '"default" | "padded"',
     default: '"default"'
   },
   {
-    name: 'switchPosition',
-    description: 'Position of the switch control relative to the label, along the inline axis (RTL-aware). `start` is the leading side, `end` the trailing side. Defaults to automatic — `start` for label-only rows and `end` when a `description` is present. Pass `start` or `end` to override.',
+    name: 'value',
+    description: 'The value this radio represents within its group.',
     required: false,
-    type: '"start" | "end"'
+    type: 'RadioValue'
+  },
+  {
+    name: 'name',
+    description: 'Native `name` shared by radios in the same group. Radios that share a `name` behave as one group for keyboard arrow-key navigation.',
+    required: false,
+    type: 'string'
   },
   {
     name: 'disabled',
-    description: 'Disables the switch and prevents interaction',
+    description: 'Disables the radio and prevents interaction',
     required: false,
     type: 'boolean',
     default: 'false'
   },
   {
-    name: 'icon',
-    description: 'Optional icon rendered alongside the label. Strings starting with `lucide-` are rendered via the shared Lucide Tailwind utility; component values are rendered with `<component :is>`.',
+    name: 'modelValue',
+    description: 'The selected value of the group. A radio is checked when it equals `value`.',
     required: false,
-    type: 'string | Component'
-  },
-  {
-    name: 'labelClasses',
-    description: 'Custom classes applied to the label element.',
-    required: false,
-    type: 'string',
-    default: '""',
-    deprecated: 'Use `data-*` styling hooks instead.'
+    type: 'RadioValue'
   },
   {
     name: 'label',
@@ -65,31 +63,18 @@
     type: 'string | FrappeUIError'
   },
   {
-    name: 'required',
-    description: 'Marks the field as required. Renders an asterisk next to the label and\nforwards `required` / `aria-required` to the underlying control.',
-    required: false,
-    type: 'boolean'
-  },
-  {
     name: 'id',
     description: 'HTML id of the underlying control. Auto-generated via `useId()` if omitted.',
     required: false,
     type: 'string'
-  },
-  {
-    name: 'modelValue',
-    description: '',
-    required: false,
-    type: 'boolean',
-    default: 'false'
   }
 ]
 
   const slotsData = [
   {
     name: 'label',
-    description: 'Overrides the rendered label content. Receives `{ required }`.',
-    type: '{ required: boolean; }'
+    description: 'Overrides the rendered label content.',
+    type: 'any'
   },
   {
     name: 'description',
@@ -102,13 +87,13 @@
   {
     name: 'update:modelValue',
     description: 'Fired when the model value changes.',
-    type: '[value: boolean]'
+    type: 'unknown[]'
   }
 ]
 </script>
 ## API Reference
 
-<PropsTable name="Switch" :data="propsData"/> 
+<PropsTable name="Radio" :data="propsData"/> 
 
 <SlotsTable :data="slotsData"/> 
 

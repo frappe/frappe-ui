@@ -108,4 +108,94 @@ describe('Switch', () => {
       cy.get('[role="switch"]').should('have.attr', 'data-disabled', 'true')
     })
   })
+
+  describe('padded variant', () => {
+    it('clicking the padding area toggles the switch', () => {
+      cy.mount(Switch, {
+        props: {
+          label: 'abc',
+          variant: 'padded',
+          'onUpdate:modelValue': cy.spy().as('onUpdate'),
+        },
+      })
+
+      // Click the outer container — not the control or label directly.
+      cy.get('[data-slot="control"]').parent().click('left')
+      cy.get('@onUpdate').should('have.been.calledWith', true)
+    })
+
+    it('does not double-toggle when the label is clicked', () => {
+      cy.mount(Switch, {
+        props: {
+          label: 'abc',
+          variant: 'padded',
+          'onUpdate:modelValue': cy.spy().as('onUpdate'),
+        },
+      })
+
+      cy.get('[data-slot="label"]').click()
+      cy.get('@onUpdate').should('have.been.calledOnce')
+    })
+
+    it('does not toggle when disabled', () => {
+      cy.mount(Switch, {
+        props: {
+          label: 'abc',
+          variant: 'padded',
+          disabled: true,
+          'onUpdate:modelValue': cy.spy().as('onUpdate'),
+        },
+      })
+
+      cy.get('[data-slot="control"]').parent().click('left')
+      cy.get('@onUpdate').should('not.have.been.called')
+    })
+
+    it('keeps a fixed compact height for a label-only row', () => {
+      cy.mount(Switch, { props: { label: 'abc', variant: 'padded' } })
+      cy.get('[data-slot="control"]').parent().parent().should('have.class', 'h-7')
+    })
+
+    it('grows the surface when a description is present', () => {
+      cy.mount(Switch, {
+        props: { label: 'abc', description: 'helper', variant: 'padded' },
+      })
+      cy.get('[data-slot="control"]')
+        .parent()
+        .parent()
+        .should('not.have.class', 'h-7')
+        .and('have.class', 'py-1.5')
+    })
+  })
+
+  describe('size', () => {
+    it('exposes data-size for xs', () => {
+      cy.mount(Switch, { props: { label: 'abc', size: 'xs' } })
+      cy.get('[role="switch"]').should('have.attr', 'data-size', 'xs')
+    })
+  })
+
+  describe('switchPosition', () => {
+    it('leads with the switch by default (start)', () => {
+      cy.mount(Switch, { props: { label: 'abc' } })
+      cy.get('[data-slot="control"]').then(($switch) => {
+        cy.get('[data-slot="label"]').then(($label) => {
+          expect($switch[0].getBoundingClientRect().left).to.be.lessThan(
+            $label[0].getBoundingClientRect().left,
+          )
+        })
+      })
+    })
+
+    it('trails the label when switch-position is end', () => {
+      cy.mount(Switch, { props: { label: 'abc', switchPosition: 'end' } })
+      cy.get('[data-slot="control"]').then(($switch) => {
+        cy.get('[data-slot="label"]').then(($label) => {
+          expect($switch[0].getBoundingClientRect().left).to.be.greaterThan(
+            $label[0].getBoundingClientRect().left,
+          )
+        })
+      })
+    })
+  })
 })

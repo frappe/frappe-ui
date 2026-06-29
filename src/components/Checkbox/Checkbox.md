@@ -6,29 +6,30 @@ Allows users to select or deselect an option, commonly used in forms and setting
 
 <ClientOnly><CheckboxBuilder /></ClientOnly>
 
-<ComponentPreview name="Checkbox-Default" layout="stacked" />
+## Indeterminate
 
-## Sizes
+Use `indeterminate` for "select all" controls where only some children are checked. Clicking selects all; clicking again deselects all.
 
-<ComponentPreview name="Checkbox-Sizes" />
-
-## Labeling
-
-`label`, `description`, `error`, and `required` are wired into the
-underlying input via the shared labeling contract. Description and
-error stack below the row, indented under the label region.
-
-<ComponentPreview name="Checkbox-Labeling" />
+<ComponentPreview name="Checkbox-Indeterminate" />
 
 ## States
 
 <ComponentPreview name="Checkbox-States" />
 
-## Group
+## Selection list
 
-Stack related options into a vertical settings group.
+For a full selection dropdown, reach for [MultiSelect](/docs/components/multiselect)
+— it builds the popover, search, and checkbox rows for you. Add avatars or icons
+to each option with its `#item-prefix` slot.
 
-<ComponentPreview name="Checkbox-Group" />
+<ComponentPreview name="Checkbox-MemberList" />
+
+## Settings list
+
+In the `default` variant a `description` stacks below the label, indented under
+the control. Useful for settings where some options need extra explanation.
+
+<ComponentPreview name="Checkbox-SettingsList" />
 
 ## With description
 

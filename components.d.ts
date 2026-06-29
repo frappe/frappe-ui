@@ -119,6 +119,7 @@ declare module 'vue' {
     PopoverPanel: typeof import('./src/components/shared/popover/PopoverPanel.vue')['default']
     PreviewWindow: typeof import('./src/components/ThemeSwitcher/previews/PreviewWindow.vue')['default']
     Progress: typeof import('./src/components/Progress/Progress.vue')['default']
+    Radio: typeof import('./src/components/Radio/Radio.vue')['default']
     Rating: typeof import('./src/components/Rating/Rating.vue')['default']
     RequiredIndicator: typeof import('./src/components/InputLabeling/RequiredIndicator.vue')['default']
     Resource: typeof import('./src/components/Resource.vue')['default']

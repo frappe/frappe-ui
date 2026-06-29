@@ -13,6 +13,13 @@
     default: '"sm"'
   },
   {
+    name: 'variant',
+    description: 'Visual style of the checkbox row. `padded` wraps the control and label in a clickable surface with hover, active and focus states — useful for selection lists and menu items. The control always stays on the leading side.',
+    required: false,
+    type: '"default" | "padded"',
+    default: '"default"'
+  },
+  {
     name: 'disabled',
     description: 'Disables the checkbox interaction',
     required: false,
@@ -24,7 +31,7 @@
     required: false,
     type: 'boolean',
     default: 'false',
-    deprecated: 'Use `data-*` styling hooks instead.'
+    deprecated: 'Use `variant="padded"` instead.'
   },
   {
     name: 'modelValue',
