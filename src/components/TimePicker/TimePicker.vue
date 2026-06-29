@@ -93,7 +93,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, ref, watch, watchEffect } from 'vue'
+import {
+  computed,
+  getCurrentInstance,
+  nextTick,
+  ref,
+  watch,
+  watchEffect,
+} from 'vue'
 import {
   PopoverAnchor,
   PopoverContent,
@@ -127,7 +134,6 @@ const props = withDefaults(defineProps<TimePickerProps>(), {
   options: () => [],
   placeholder: 'Select time',
   variant: 'subtle' as Variant,
-  use12Hour: true,
   disabled: false,
   typeable: true,
   readonly: false,
@@ -175,6 +181,10 @@ const shouldKeepOpen = computed(
   () => props.keepOpen === true || props.autoClose === false,
 )
 
+const resolvedFormat = computed(
+  () => props.format ?? (props.use12Hour ? 'h:mm A' : 'HH:mm'),
+)
+
 const isReadonly = computed(
   () =>
     props.typeable === false ||
@@ -183,12 +193,21 @@ const isReadonly = computed(
 )
 
 if (import.meta.env.DEV) {
+  const instance = getCurrentInstance()
+  const hasUse12HourProp = () => {
+    const rawProps = instance?.vnode.props
+    return !!(
+      rawProps &&
+      ('use12Hour' in rawProps || 'use-12-hour' in rawProps)
+    )
+  }
   const warned = {
     value: false,
     placement: false,
     autoClose: false,
     allowCustom: false,
     readonly: false,
+    use12Hour: false,
     scrollMode: false,
     minTime: false,
     maxTime: false,
@@ -223,6 +242,12 @@ if (import.meta.env.DEV) {
         '[TimePicker] picker-level `readonly: true` is deprecated. Use `typeable: false` instead.',
       )
       warned.readonly = true
+    }
+    if (hasUse12HourProp() && !warned.use12Hour) {
+      console.warn(
+        '[TimePicker] `use12Hour` is deprecated. Use `format` instead.',
+      )
+      warned.use12Hour = true
     }
     if (props.scrollMode !== undefined && !warned.scrollMode) {
       console.warn(
@@ -270,12 +295,14 @@ const { motion, onPointerDown: recordPointerDown } = usePopoverMotion(isOpen)
 
 // Canonical 24-hour value (`HH:mm` or `HH:mm:ss`) — the source of truth.
 const canonicalValue = ref<string>(
-  normalize24(props.modelValue || props.value || ''),
+  normalize24(props.modelValue || props.value || '', resolvedFormat.value),
 )
 
 // What the user sees / can edit in the trigger input. Synced from
 // canonicalValue when not actively typing.
-const displayValue = ref<string>(formatTime(canonicalValue.value, props.use12Hour))
+const displayValue = ref<string>(
+  formatTime(canonicalValue.value, resolvedFormat.value),
+)
 
 const isTyping = ref(false)
 const highlightIndex = ref<number>(-1)
@@ -302,12 +329,15 @@ const displayedOptions = computed<TimeOption[]>(() => {
   if (props.options?.length) {
     return props.options.map((o) => {
       const value = normalize24(o.value) || o.value
-      return { value, label: o.label || formatTime(value, props.use12Hour) }
+      return {
+        value,
+        label: o.label || formatTime(value, resolvedFormat.value),
+      }
     })
   }
   return generateTimeOptions({
     interval: props.interval,
-    use12Hour: props.use12Hour,
+    format: resolvedFormat.value,
     minMinutes: minMinutes.value,
     maxMinutes: maxMinutes.value,
   })
@@ -321,7 +351,7 @@ const displayedOptions = computed<TimeOption[]>(() => {
 const typingTarget = computed<{ exact: TimeOption | null; nearest: TimeOption | null }>(() => {
   const list = displayedOptions.value
   if (!list.length) return { exact: null, nearest: null }
-  const parsed = parseFlexibleTime(displayValue.value)
+  const parsed = parseFlexibleTime(displayValue.value, resolvedFormat.value)
   if (!parsed.valid) return { exact: null, nearest: null }
   const candidate = parsed.ss
     ? `${parsed.hh24}:${parsed.mm}:${parsed.ss}`
@@ -357,19 +387,20 @@ function baseCompare(val: string): string {
 watch(
   () => [props.modelValue, props.value] as const,
   ([m, v]) => {
-    const nv = normalize24(m || v || '')
+    const nv = normalize24(m || v || '', resolvedFormat.value)
     if (nv === canonicalValue.value) return
     canonicalValue.value = nv
-    if (!isTyping.value) displayValue.value = formatTime(nv, props.use12Hour)
+    if (!isTyping.value)
+      displayValue.value = formatTime(nv, resolvedFormat.value)
   },
 )
 
-// Reformat the displayed value when the format changes (e.g. use12Hour toggle).
+// Reformat the displayed value when the display format changes.
 watch(
-  () => props.use12Hour,
+  () => resolvedFormat.value,
   () => {
     if (!isTyping.value) {
-      displayValue.value = formatTime(canonicalValue.value, props.use12Hour)
+      displayValue.value = formatTime(canonicalValue.value, resolvedFormat.value)
     }
   },
 )
@@ -381,7 +412,7 @@ watch(displayValue, () => {
   // The model→display sync above (re)writes displayValue while not typing —
   // distinguish user keystrokes from that programmatic write by only
   // toggling when the value diverges from the formatted canonical.
-  const formatted = formatTime(canonicalValue.value, props.use12Hour)
+  const formatted = formatTime(canonicalValue.value, resolvedFormat.value)
   if (displayValue.value !== formatted) {
     isTyping.value = true
     highlightIndex.value = -1
@@ -397,7 +428,7 @@ function setInvalid(next: boolean) {
 function commit(value: string) {
   const prev = canonicalValue.value
   canonicalValue.value = value
-  displayValue.value = formatTime(value, props.use12Hour)
+  displayValue.value = formatTime(value, resolvedFormat.value)
   isTyping.value = false
   emit('update:modelValue', value)
   if (value !== prev) emit('change', value)
@@ -409,7 +440,14 @@ function commitTyped(raw: string) {
     commit('')
     return
   }
-  const parsed = parseFlexibleTime(raw)
+  const formattedCurrent = formatTime(canonicalValue.value, resolvedFormat.value)
+  if (raw === formattedCurrent) {
+    displayValue.value = formattedCurrent
+    isTyping.value = false
+    setInvalid(false)
+    return
+  }
+  const parsed = parseFlexibleTime(raw, resolvedFormat.value)
   if (
     !parsed.valid ||
     isOutOfRange(parsed.total, minMinutes.value, maxMinutes.value)
@@ -417,7 +455,7 @@ function commitTyped(raw: string) {
     emit('input-invalid', raw)
     setInvalid(true)
     // Revert visible text to the last good value.
-    displayValue.value = formatTime(canonicalValue.value, props.use12Hour)
+    displayValue.value = formatTime(canonicalValue.value, resolvedFormat.value)
     isTyping.value = false
     return
   }
@@ -607,4 +645,3 @@ defineExpose({
   },
 })
 </script>
-

@@ -120,7 +120,14 @@
     description: 'Use 12-hour (am/pm) format for display.',
     required: false,
     type: 'boolean',
-    default: 'true'
+    deprecated: 'Use `format` instead.'
+  },
+  {
+    name: 'format',
+    description: 'Dayjs format string used for display. Default: `HH:mm`.',
+    required: false,
+    type: 'string',
+    default: '"HH:mm"'
   },
   {
     name: 'disabled',
@@ -282,4 +289,3 @@
 <SlotsTable :data="slotsData"/> 
 
 <EmitsTable :data="emitsData"/> 
-
