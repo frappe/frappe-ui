@@ -34,6 +34,6 @@ const nodes = ref<TreeNode[]>([
 
 <template>
   <div class="w-80">
-    <Tree :nodes="nodes" node-key="name" default-expanded />
+    <Tree :nodes="nodes" node-key="name" />
   </div>
 </template>
