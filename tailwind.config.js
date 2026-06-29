@@ -35,6 +35,10 @@ export default {
     './experimental/**/*.{vue,js,ts,jsx,tsx}',
     './docs/**/*.{vue,js,ts,md}',
     './docs/.vitepress/**/*.{vue,js,ts,css}',
+    // Reusable VitePress theme (Layout/Navbar/Sidebar live here now) — without
+    // this, theme-only classes like `lg:grid-cols-[220px_1fr]` aren't emitted
+    // and the docs layout collapses.
+    './vitepress/**/*.{vue,js,ts,css}',
     './frappe/**/*.{vue,js,ts,jsx,tsx}',
     './icons/**/*.{vue,js,ts,jsx,tsx}',
   ],
