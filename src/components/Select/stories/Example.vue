@@ -46,7 +46,8 @@ const options = [
       <div class="pb-8 md:pr-8">
         <div class="text-sm-medium text-ink-gray-7">Auto width</div>
         <div class="mt-1 text-p-sm text-ink-gray-5">
-          Matches the widest option by default, closer to a native select.
+          Hugs the selected value; the dropdown expands outward to fit longer
+          options.
         </div>
 
         <div class="mt-4">
