@@ -240,7 +240,7 @@
   },
   {
     name: 'create',
-    description: '',
+    description: 'Fired when the user selects the create row to add a value not in the options.',
     type: '[query: string]'
   }
 ]

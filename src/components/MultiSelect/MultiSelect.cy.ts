@@ -275,6 +275,7 @@ describe('MultiSelect', () => {
       cy.get('[data-slot="input"]').type('mango{enter}')
 
       cy.get('@onCreate').should('have.been.calledWith', 'mango')
+      cy.get('@onCreate').should('have.been.calledOnce')
     })
 
     it('never lets the create sentinel enter modelValue', () => {
