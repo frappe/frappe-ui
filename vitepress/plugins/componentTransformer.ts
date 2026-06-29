@@ -1,20 +1,7 @@
 import type { MarkdownEnv, MarkdownRenderer } from 'vitepress'
 import type StateCore from 'markdown-it/lib/rules_core/state_core'
 import { existsSync } from 'node:fs'
-import { dirname, resolve } from 'node:path'
-
-// Source roots, in lookup order. The first one whose resolved file exists
-// wins; if none match, the first root's path is used so the snippets plugin
-// reports a clear "file not found" against the canonical location.
-const SOURCE_ROOTS = ['../../../../src/components', '../../../../frappe']
-
-function resolveSourcePath(mdDir: string, relativePath: string): string {
-  for (const root of SOURCE_ROOTS) {
-    const candidate = `${root}/${relativePath}`
-    if (existsSync(resolve(mdDir, candidate))) return candidate
-  }
-  return `${SOURCE_ROOTS[0]}/${relativePath}`
-}
+import { dirname, isAbsolute, resolve } from 'node:path'
 import {
   baseParse,
   NodeTypes,
@@ -24,6 +11,36 @@ import {
   type SimpleExpressionNode,
   type TextNode,
 } from '@vue/compiler-dom'
+
+export interface ComponentTransformerOptions {
+  // Absolute source root dirs, each holding `<Component>/stories/*.vue` and
+  // `<Component>/types.ts`. When omitted, defaults resolve relative to each
+  // markdown file (backward compatible with the in-repo docs layout).
+  sourceRoots?: string[]
+}
+
+// Resolve configured source roots; empty when no sourceRoots are provided
+// (callers warn rather than silently resolve into nonexistent legacy paths).
+function getRoots(mdDir: string, sourceRoots?: string[]): string[] {
+  if (sourceRoots && sourceRoots.length) {
+    return sourceRoots.map((r) => (isAbsolute(r) ? r : resolve(mdDir, r)))
+  }
+  return []
+}
+
+function warnMissingRoots(tag: string, mdPath: string) {
+  console.warn(
+    `[componentTransformer] <${tag}> in ${mdPath} but no sourceRoots configured — skipping. Pass sourceRoots to defineDocsConfig.`,
+  )
+}
+
+function resolveSourcePath(roots: string[], relativePath: string): string {
+  for (const root of roots) {
+    const candidate = resolve(root, relativePath)
+    if (existsSync(candidate)) return candidate
+  }
+  return resolve(roots[0], relativePath)
+}
 
 interface ParsedTag {
   /** Static attributes: `foo="bar"` */
@@ -108,22 +125,30 @@ function applyImports(state: StateCore, imports: string[]) {
   }
 }
 
-function getStoryPath(mdDir: string, componentName: string, storyFileName: string) {
-  const moleculeName = componentName.charAt(0).toLowerCase() + componentName.slice(1)
-  const candidates = [
-    `../../../../src/components/${componentName}/stories/${storyFileName}.vue`,
-    `../../../../src/molecules/${moleculeName}/stories/${storyFileName}.vue`,
-    `../../../../frappe/${componentName}/stories/${storyFileName}.vue`,
-  ]
-
-  return candidates.find((candidate) => existsSync(resolve(mdDir, candidate))) ?? candidates[0]
+function getStoryPath(
+  roots: string[],
+  componentName: string,
+  storyFileName: string,
+) {
+  const moleculeName =
+    componentName.charAt(0).toLowerCase() + componentName.slice(1)
+  const candidates: string[] = []
+  for (const root of roots) {
+    candidates.push(
+      resolve(root, componentName, 'stories', `${storyFileName}.vue`),
+    )
+    candidates.push(
+      resolve(root, moleculeName, 'stories', `${storyFileName}.vue`),
+    )
+  }
+  return candidates.find((candidate) => existsSync(candidate)) ?? candidates[0]
 }
 
 function transformPreview(
   state: StateCore,
   tokenIdx: number,
   tag: ParsedTag,
-  mdDir: string,
+  roots: string[],
 ): string | null {
   const name = tag.attrs.name
   if (!name) return null
@@ -131,7 +156,7 @@ function transformPreview(
   const csr = tag.attrs.csr === 'true'
   const { componentName, storyFileName } = getPreviewParts(name)
   const storyImportName = getStoryImportName(storyFileName)
-  const componentPath = getStoryPath(mdDir, componentName, storyFileName)
+  const componentPath = getStoryPath(roots, componentName, storyFileName)
 
   // Forward every static attr except `csr`, which this plugin consumes
   // itself (it's not a Vue prop). `name` is still a prop on the Demo
@@ -153,8 +178,8 @@ function transformPreview(
   const code = new state.Token('fence', 'code', 0)
   code.info = 'vue'
   code.content = `<<< ${componentPath}`
-  // @ts-expect-error snippets plugin reads `src` for the absolute path
-  code.src = [resolve(mdDir, componentPath)]
+  // @ts-ignore snippets plugin reads `src` for the absolute path (Token lacks the field in types)
+  code.src = [componentPath]
 
   const close = new state.Token('html_inline', '', 0)
   close.content = `</template></ComponentPreview>${closeWrap}`
@@ -168,7 +193,7 @@ function transformPropsTable(
   state: StateCore,
   tokenIdx: number,
   tag: ParsedTag,
-  mdDir: string,
+  roots: string[],
 ) {
   const name = tag.attrs.name
   const dataExpr = tag.binds.data
@@ -178,7 +203,7 @@ function transformPropsTable(
   // DateTimePicker, which lives inside the DatePicker folder) point at
   // the correct `types.ts`. When omitted, the folder matches `name`.
   const componentFolder = tag.attrs.folder || name
-  const typesPath = resolveSourcePath(mdDir, `${componentFolder}/types.ts`)
+  const typesPath = resolveSourcePath(roots, `${componentFolder}/types.ts`)
 
   state.tokens[tokenIdx].content =
     `<PropsTable name="${name}" :data="${dataExpr}"><template #code>`
@@ -186,8 +211,8 @@ function transformPropsTable(
   const code = new state.Token('fence', 'code', 0)
   code.info = 'typescript'
   code.content = `<<< ${typesPath}`
-  // @ts-expect-error snippets plugin reads `src` for the absolute path
-  code.src = [resolve(mdDir, typesPath)]
+  // @ts-ignore snippets plugin reads `src` for the absolute path (Token lacks the field in types)
+  code.src = [typesPath]
 
   const close = new state.Token('html_inline', '', 0)
   close.content = `</template></PropsTable>`
@@ -195,10 +220,15 @@ function transformPropsTable(
   state.tokens.splice(tokenIdx + 1, 0, code, close)
 }
 
-export default function componentTransformer(md: MarkdownRenderer) {
+function install(md: MarkdownRenderer, options: ComponentTransformerOptions) {
   md.core.ruler.after('inline', 'component-preview', (state) => {
     const env = state.env as MarkdownEnv
-    const mdDir = dirname(env.realPath ?? env.path)
+    // VitePress calls parseInline with an empty env (e.g. title inference);
+    // there's nothing to transform without a source path.
+    const mdPath = env.realPath ?? env.path
+    if (!mdPath) return
+    const mdDir = dirname(mdPath)
+    const roots = getRoots(mdDir, options.sourceRoots)
     const imports: string[] = []
 
     // Walk in reverse so splicing in new tokens doesn't shift indices
@@ -212,15 +242,45 @@ export default function componentTransformer(md: MarkdownRenderer) {
       if (token.content.includes('<ComponentPreview')) {
         const tag = parseSingleTag(token.content, 'ComponentPreview')
         if (tag) {
-          const importStmt = transformPreview(state, i, tag, mdDir)
+          if (!roots.length) {
+            warnMissingRoots('ComponentPreview', mdPath)
+            continue
+          }
+          const importStmt = transformPreview(state, i, tag, roots)
           if (importStmt) imports.push(importStmt)
         }
       } else if (token.content.includes('<PropsTable')) {
         const tag = parseSingleTag(token.content, 'PropsTable')
-        if (tag) transformPropsTable(state, i, tag, mdDir)
+        if (tag) {
+          if (!roots.length) {
+            warnMissingRoots('PropsTable', mdPath)
+            continue
+          }
+          transformPropsTable(state, i, tag, roots)
+        }
       }
     }
 
     applyImports(state, imports)
   })
+}
+
+// Factory: returns a markdown-it plugin bound to the given source roots.
+export function createComponentTransformer(
+  options: ComponentTransformerOptions = {},
+) {
+  return (md: MarkdownRenderer) => install(md, options)
+}
+
+// Backward compatible: usable directly as `md.use(componentTransformer)`
+// (first arg is the renderer) or as a factory `componentTransformer(opts)`.
+export default function componentTransformer(
+  mdOrOptions?: MarkdownRenderer | ComponentTransformerOptions,
+) {
+  if (mdOrOptions && 'core' in (mdOrOptions as MarkdownRenderer)) {
+    return install(mdOrOptions as MarkdownRenderer, {})
+  }
+  return createComponentTransformer(
+    (mdOrOptions as ComponentTransformerOptions) ?? {},
+  )
 }

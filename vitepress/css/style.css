@@ -2,11 +2,28 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Inter variable font, bundled so the docs theme is self-contained */
+@font-face {
+  font-family: 'InterVar';
+  font-weight: 100 900;
+  font-display: swap;
+  font-style: normal;
+  src: url('./fonts/Inter.var.woff2') format('woff2-variations');
+}
+@font-face {
+  font-family: 'InterVar';
+  font-weight: 100 900;
+  font-display: swap;
+  font-style: italic;
+  src: url('./fonts/Inter-Italic.var.woff2') format('woff2-variations');
+}
+
 body {
   background-color: var(--surface-base);
   color: var(--ink-gray-9);
   @apply text-base;
-  font-family: Inter, sans-serif;
+  font-family: InterVar, Inter, sans-serif;
+  font-optical-sizing: auto;
 
   padding-right: 0 !important;
   overflow-y: scroll !important;
@@ -160,6 +177,18 @@ code {
 .migration-page th,
 .migration-page td {
   width: 50%;
+}
+
+/* Per-page opt-in (`tableFirstCol` frontmatter): pin every table's first
+   column to one width so stacked tables line up. Width comes from the inline
+   --docs-first-col var the layout sets from frontmatter. */
+.align-tables table {
+  table-layout: fixed;
+  width: 100%;
+}
+.align-tables th:first-child,
+.align-tables td:first-child {
+  width: var(--docs-first-col);
 }
 
 /* The article's `prose-p:mb-4` leaks into editor previews (they escape `.not-prose`
