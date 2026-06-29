@@ -6,9 +6,18 @@ guides visually link parents to their children.
 
 ## Default
 
-The simplest tree — pass `nodes` and tell it which field is the key.
+The simplest tree — pass `nodes` and tell it which field is the key. Nodes are
+expanded by default; set `expanded: false` on one to start it collapsed.
 
 <ComponentPreview name="Tree-Example" />
+
+## Expand / collapse all
+
+Bind `v-model:expanded` to a boolean for a master switch — toggling it opens or
+closes every node. It's two-way, so it also reflects whether all nodes are
+currently open as the user toggles rows individually.
+
+<ComponentPreview name="Tree-ExpandAll" />
 
 ## Indentation guides
 
@@ -55,11 +64,10 @@ const nodes = ref([
     ],
   },
 ])
-const expanded = ref(['src'])
 </script>
 
 <template>
-  <Tree :nodes="nodes" node-key="name" v-model:expanded="expanded" />
+  <Tree :nodes="nodes" node-key="name" />
 </template>
 ```
 
@@ -75,16 +83,16 @@ remapping.
 
 ## Expansion
 
-Two inputs affect which rows are open — reach for **one**:
+Each node owns its own state via an `expanded` field — the source of truth the
+tree reads and writes as rows toggle, so expansion travels with your data. Nodes
+are **expanded by default**; set `expanded: false` to start one collapsed.
 
-- **`v-model:expanded`** — the array of open node keys, and the source of truth.
-  Bind it to control or observe expansion; leave it unbound and the tree tracks
-  the set internally. This is the one you want in most cases.
-- **`defaultExpanded`** — a boolean shortcut for "start with everything open."
-  It seeds `expanded` once on first load (and waits for async `nodes`), then
-  steps aside — it does nothing once you provide your own `expanded` keys.
+`v-model:expanded` is a separate, optional boolean **switch** for the whole
+tree: toggle it to open or close everything at once (see
+[Expand / collapse all](#expand-collapse-all)). It's two-way, reflecting whether
+all nodes are currently open.
 
-Clicking a row, or pressing `Enter`/`Space` on it, toggles expansion.
+Clicking a row, or pressing `Enter`/`Space` on it, toggles that node.
 
 ## Keyboard
 
