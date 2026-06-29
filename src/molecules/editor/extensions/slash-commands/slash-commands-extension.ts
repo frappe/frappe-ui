@@ -91,6 +91,9 @@ const getCommands = (): CommandItem[] => [
     slashCommand(commandMeta.video, ({ editor, range }) => {
       editor.chain().focus().deleteRange(range).selectAndUploadVideo().run()
     }),
+    slashCommand(commandMeta.attachment, ({ editor, range }) => {
+      editor.chain().focus().deleteRange(range).selectAndUploadFile().run()
+    }),
   ]),
   ...inGroup('Embeds', [
     slashCommand(commandMeta.embed, ({ editor, range }) => {

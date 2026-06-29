@@ -145,6 +145,13 @@ export const commandMeta = {
     isAvailable: (editor) =>
       hasNode('video')(editor) && hasCommand('selectAndUploadVideo')(editor),
   },
+  attachment: {
+    label: 'Attachment',
+    icon: 'lucide-paperclip',
+    isAvailable: (editor) =>
+      hasNode('attachment')(editor) &&
+      hasCommand('selectAndUploadFile')(editor),
+  },
   link: {
     label: 'Link',
     icon: 'lucide-link',
