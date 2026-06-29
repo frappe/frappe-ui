@@ -43,7 +43,7 @@ const guideOptions = [
   <div class="flex flex-col gap-4">
     <TabButtons v-model="guides" :options="guideOptions" />
     <div class="w-80">
-      <Tree :nodes="nodes" node-key="name" :guides="guides" default-expanded />
+      <Tree :nodes="nodes" node-key="name" :guides="guides" />
     </div>
   </div>
 </template>
