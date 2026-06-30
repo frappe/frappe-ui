@@ -265,6 +265,56 @@ describe('FloatingWindow', () => {
     })
   })
 
+  describe('pointercancel cleanup', () => {
+    it('clears isDragging and removes the move listener when drag is cancelled', () => {
+      cy.mount(controlledWindow())
+      cy.get('[aria-label="Pop out"]').click()
+
+      // Start a drag on the handle, then cancel it (OS gesture / context menu).
+      cy.get('.floating-window [data-resize]').first().closest('.floating-window').find('.cursor-move, [class*="cursor-move"]').then(() => {
+        // Trigger pointerdown on the title bar handle to start drag
+        cy.get('.floating-window').find('.select-none').first().trigger('pointerdown', {
+          eventConstructor: 'PointerEvent',
+          button: 0,
+          clientX: 800,
+          clientY: 300,
+        })
+        // Cancel instead of releasing — should clean up without error
+        cy.get('body').trigger('pointercancel', { eventConstructor: 'PointerEvent' })
+        // A subsequent pointermove should have no effect (listener was removed)
+        cy.get('body').trigger('pointermove', {
+          eventConstructor: 'PointerEvent',
+          clientX: 900,
+          clientY: 400,
+        })
+        // Panel position should be unchanged from before the drag (no movement applied)
+        cy.get('.floating-window').should('have.attr', 'data-state', 'floating')
+      })
+    })
+
+    it('clears isResizing and removes the move listener when resize is cancelled', () => {
+      cy.mount(controlledWindow())
+      cy.get('[aria-label="Pop out"]').click()
+      cy.get('.floating-window').invoke('outerWidth').should('eq', 460)
+
+      cy.get('[data-resize=se]').trigger('pointerdown', {
+        eventConstructor: 'PointerEvent',
+        button: 0,
+        clientX: 800,
+        clientY: 700,
+      })
+      // Cancel the resize — listener must be torn down
+      cy.get('body').trigger('pointercancel', { eventConstructor: 'PointerEvent' })
+      // Further moves should not resize the panel
+      cy.get('body').trigger('pointermove', {
+        eventConstructor: 'PointerEvent',
+        clientX: 900,
+        clientY: 800,
+      })
+      cy.get('.floating-window').invoke('outerWidth').should('eq', 460)
+    })
+  })
+
   describe('edge and corner resize', () => {
     // Floating default is 460×520, parked bottom-right in the 1200×800 viewport:
     // x = 1200 - 460 - 24 = 716, y = 800 - 520 - 24 = 256.

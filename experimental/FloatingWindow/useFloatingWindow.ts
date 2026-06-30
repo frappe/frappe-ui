@@ -137,12 +137,15 @@ export function useFloatingWindow(
       x.value = clamp(origin.x + e.clientX - origin.pointerX, 0, viewportWidth.value - 80)
       y.value = clamp(origin.y + e.clientY - origin.pointerY, 0, viewportHeight.value - 40)
     })
-    const stopUp = useEventListener('pointerup', () => {
+    const stopDrag = () => {
       isDragging.value = false
       persist()
       stopMove()
       stopUp()
-    })
+      stopCancel()
+    }
+    const stopUp = useEventListener('pointerup', stopDrag)
+    const stopCancel = useEventListener('pointercancel', stopDrag)
   }
 
   /**
@@ -178,12 +181,15 @@ export function useFloatingWindow(
         y.value = origin.y + origin.height - height.value
       }
     })
-    const stopUp = useEventListener('pointerup', () => {
+    const stopResize = () => {
       isResizing.value = false
       persist()
       stopMove()
       stopUp()
-    })
+      stopCancel()
+    }
+    const stopUp = useEventListener('pointerup', stopResize)
+    const stopCancel = useEventListener('pointercancel', stopResize)
   }
 
   /** Resize by a fixed delta — the keyboard path on the bottom-right corner. */
