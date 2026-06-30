@@ -193,37 +193,13 @@ function removeAt(index: number) {
   model.value = next
 }
 
-// add/remove describe user actions, so suppress them for programmatic/external
-// model writes. Every user path (typing + Enter, paste, suggestion click, chip
-// delete, Backspace) is preceded by a DOM event on the control or the dropdown;
-// a parent reassigning the model is not.
-let userActed = false
-function markUserAction() {
-  userActed = true
-  // The model change lands in a microtask flush after this event; clear on a
-  // macrotask so the flag survives that flush but can't outlive the task and
-  // get misattributed to a later programmatic change.
-  setTimeout(() => {
-    userActed = false
-  }, 0)
-}
-
-// Emit add/remove diffs from a single model watcher (covers picks, typed
-// commits, paste, and chip deletes alike), and reset the input after a change.
-let prevModel = model.value.slice()
+// Clear the staging input after any committed change — a pick, a typed commit,
+// a paste, or a chip delete. The model is the single source of truth; a host
+// that wants per-address add/remove diffs `update:modelValue` itself.
 watch(
   model,
-  (cur) => {
-    if (userActed) {
-      userActed = false // consume: one user action emits at most one diff
-      const curLc = selectedSet.value
-      const prevLc = new Set(prevModel.map((v) => v.toLowerCase()))
-      for (const v of cur) if (!prevLc.has(v.toLowerCase())) emit('add', v)
-      for (const v of prevModel)
-        if (!curLc.has(v.toLowerCase())) emit('remove', v)
-      if (query.value) query.value = ''
-    }
-    prevModel = cur.slice()
+  () => {
+    if (query.value) query.value = ''
   },
   { deep: true },
 )
@@ -256,7 +232,6 @@ function onPaste(event: ClipboardEvent) {
   const text = event.clipboardData?.getData('text')
   if (!text || !/[,;\n\r\t]/.test(text)) return // single token → normal typing
   event.preventDefault()
-  markUserAction()
   const seen = new Set(selectedSet.value)
   const additions: string[] = []
   for (const token of splitEmailTokens(text)) {
@@ -279,11 +254,11 @@ function focus() {
   ;(document.getElementById(inputId.value) as HTMLInputElement | null)?.focus()
 }
 
-function clear() {
+function reset() {
   model.value = []
 }
 
-defineExpose<MultiEmailInputExposed>({ focus, clear })
+defineExpose<MultiEmailInputExposed>({ focus, reset })
 defineSlots<MultiEmailInputSlots>()
 </script>
 
@@ -330,8 +305,6 @@ defineSlots<MultiEmailInputSlots>()
           :data-invalid="hasError ? 'true' : undefined"
           :class="[boxClasses, hasLabeling ? null : (attrs.class as any)]"
           :style="hasLabeling ? null : (attrs.style as any)"
-          @keydown.capture="markUserAction"
-          @pointerdown.capture="markUserAction"
         >
           <TagsInputItem
             v-for="chip in chips"
@@ -348,8 +321,7 @@ defineSlots<MultiEmailInputSlots>()
               :remove-tag="() => removeAt(chip.index)"
             >
               <Avatar
-                v-if="chip.option?.image"
-                :image="chip.option?.image"
+                :image="chip.option?.avatar"
                 :label="chip.label"
                 size="xs"
               />
@@ -391,7 +363,6 @@ defineSlots<MultiEmailInputSlots>()
           :side-offset="offset"
           class="z-[100] min-w-[--reka-combobox-trigger-width] overflow-hidden rounded-lg bg-surface-elevation-2 shadow-2xl"
           @open-auto-focus.prevent
-          @pointerdown.capture="markUserAction"
         >
           <ComboboxViewport class="flex max-h-60 flex-col overflow-auto p-1">
             <div
@@ -447,17 +418,16 @@ defineSlots<MultiEmailInputSlots>()
                   :disabled="option.disabled"
                 >
                   <template #prefix>
-                    <slot name="option-prefix" :option="option" :query="query">
+                    <slot name="item-prefix" :item="option" :query="query">
                       <Avatar
-                        v-if="option.image"
-                        :image="option.image"
+                        :image="option.avatar"
                         :label="option.label"
                         :size="rowAvatarSize"
                       />
                     </slot>
                   </template>
                   <template #label>
-                    <slot name="option-label" :option="option" :query="query">
+                    <slot name="item-label" :item="option" :query="query">
                       <div class="min-w-0">
                         <div class="truncate text-ink-gray-8">
                           {{ option.label }}
@@ -470,6 +440,9 @@ defineSlots<MultiEmailInputSlots>()
                         </div>
                       </div>
                     </slot>
+                  </template>
+                  <template v-if="$slots['item-suffix']" #suffix>
+                    <slot name="item-suffix" :item="option" :query="query" />
                   </template>
                 </ItemListRow>
               </ComboboxItem>

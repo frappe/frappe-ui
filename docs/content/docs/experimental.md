@@ -69,7 +69,7 @@ const loading = ref(false)
 
 const search = debounce(async (query: string) => {
   loading.value = true
-  options.value = await fetchUsers(query) // → [{ label, value, image? }]
+  options.value = await fetchUsers(query) // → [{ label, value, avatar? }]
   loading.value = false
 }, 250)
 </script>
@@ -95,15 +95,17 @@ frappe-ui form field.
 
 ### Suggestions with avatars
 
-Give each option an `image` and it renders an `Avatar` on the dropdown row and
-on the chip once that person has been seen. Override the row with the
-`#option-prefix` / `#option-label` slots, or replace a chip entirely with
-`#tag`:
+Every suggestion row and chip always renders an `Avatar` — the option's `avatar`
+image when present, otherwise initials from its `label`. (The field is named
+`avatar`, not the house `icon`, because this control is person-centric: the
+leading visual is always a face or initials.) Override the row with the
+`#item-prefix` / `#item-label` / `#item-suffix` slots, or replace a chip
+entirely with `#tag`:
 
 ```vue
 <MultiEmailInput v-model="emails" :options="options">
   <template #tag="{ value, option, removeTag }">
-    <Avatar v-if="option?.image" :image="option.image" size="xs" />
+    <Avatar :image="option?.avatar" :label="option?.label ?? value" size="xs" />
     <span>{{ option?.label ?? value }}</span>
     <button :aria-label="`Remove ${value}`" @click="removeTag">✕</button>
   </template>

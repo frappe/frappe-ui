@@ -8,7 +8,7 @@ const options = [
   {
     label: 'Ada Lovelace',
     value: 'ada@example.com',
-    image: 'https://i.pravatar.cc/80?u=ada@example.com',
+    avatar: 'https://i.pravatar.cc/80?u=ada@example.com',
   },
   { label: 'Grace Hopper', value: 'grace@example.com' },
 ]
@@ -20,8 +20,7 @@ const options = [
     <MultiEmailInput v-model="emails" :options="options">
       <template #tag="{ value, option, removeTag }">
         <Avatar
-          v-if="option?.image"
-          :image="option.image"
+          :image="option?.avatar"
           :label="option?.label ?? value"
           size="xs"
         />

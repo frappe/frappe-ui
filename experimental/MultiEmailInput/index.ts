@@ -13,5 +13,5 @@ export type {
   MultiEmailInputSize,
   MultiEmailOption,
   MultiEmailTagSlotProps,
-  MultiEmailOptionSlotProps,
+  MultiEmailItemSlotProps,
 } from './types'

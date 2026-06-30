@@ -23,19 +23,15 @@ function host(
     setup() {
       const model = ref<string[]>(options.initial ?? [])
       const invalid = ref('')
-      const added = ref<string[]>([])
-      const removed = ref<string[]>([])
       // Mutate the model the way a parent would (not via the component's UI),
-      // to prove add/remove only fire for user actions.
+      // to prove a programmatic write syncs without surprising the host.
       const setProgrammatically = () => (model.value = ['grace@example.com'])
-      return { model, invalid, added, removed, setProgrammatically }
+      return { model, invalid, setProgrammatically }
     },
     render() {
       return [
         h('span', { 'data-cy': 'model' }, this.model.join(',')),
         h('span', { 'data-cy': 'invalid' }, this.invalid),
-        h('span', { 'data-cy': 'added' }, this.added.join(',')),
-        h('span', { 'data-cy': 'removed' }, this.removed.join(',')),
         h(
           'button',
           { 'data-cy': 'set-prog', onClick: this.setProgrammatically },
@@ -45,8 +41,6 @@ function host(
           modelValue: this.model,
           'onUpdate:modelValue': (v: string[]) => (this.model = v),
           onInvalid: (v: string) => (this.invalid = v),
-          onAdd: (v: string) => this.added.push(v),
-          onRemove: (v: string) => this.removed.push(v),
           options: options.suggestions ?? members,
           label: options.label,
           required: options.required,
@@ -103,20 +97,13 @@ describe('MultiEmailInput', () => {
     cy.get('[data-slot="item"]').should('have.length.greaterThan', 1)
     cy.get('[data-slot="input"]').type('{enter}')
     cy.get('[data-cy="model"]').should('have.text', 'new@person.com')
-    cy.get('[data-cy="added"]').should('have.text', 'new@person.com')
   })
 
-  it('fires `add` for a user pick but not for a programmatic model change', () => {
+  it('syncs a programmatic model change into chips', () => {
     cy.mount(host())
-    // Programmatic write: model updates, but no add/remove emitted.
     cy.get('[data-cy="set-prog"]').click()
     cy.get('[data-cy="model"]').should('have.text', 'grace@example.com')
-    cy.get('[data-cy="added"]').should('have.text', '')
-    cy.get('[data-cy="removed"]').should('have.text', '')
-    // A genuine user pick still emits add.
-    cy.get('[data-slot="input"]').focus()
-    cy.get('[data-slot="item"]').contains('Ada Lovelace').click()
-    cy.get('[data-cy="added"]').should('have.text', 'ada@example.com')
+    cy.get('[data-slot="tag"]').should('have.length', 1)
   })
 
   it('applies a host class to the control when there is no labeling', () => {

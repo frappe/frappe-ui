@@ -14,8 +14,14 @@ export interface MultiEmailOption {
   label: string
   /** The email address — used as the chip value and the model entry. */
   value: string
-  /** Avatar image URL; renders an `Avatar` on the row (and the chip when known). */
-  image?: string
+  /**
+   * Avatar image URL. An `Avatar` always renders for a suggestion row and a
+   * chip — with this image when present, otherwise initials from `label`.
+   * Named `avatar` rather than the house `icon` field on purpose: this control
+   * is person-centric, so the leading visual is always a face / initials, never
+   * a generic icon or `Component`.
+   */
+  avatar?: string
   /** Disables selecting this row. */
   disabled?: boolean
   [key: string]: any
@@ -32,9 +38,9 @@ export interface MultiEmailTagSlotProps {
   removeTag: () => void
 }
 
-export interface MultiEmailOptionSlotProps {
+export interface MultiEmailItemSlotProps {
   /** The suggestion currently being rendered. */
-  option: MultiEmailOption
+  item: MultiEmailOption
   /** Current input query. */
   query: string
 }
@@ -84,17 +90,12 @@ export interface MultiEmailInputProps extends InputLabelingProps {
 }
 
 export interface MultiEmailInputEmits {
-  /** Fired when the model changes. */
+  /** Fired when the model changes. Diff against the previous value if you need
+   * per-address add/remove notifications. */
   'update:modelValue': [value: string[]]
 
   /** Fired when the input query changes (debounce in the host). */
   'update:query': [value: string]
-
-  /** A valid address was added (picked or typed). */
-  add: [value: string]
-
-  /** An address chip was removed. */
-  remove: [value: string]
 
   /** A typed address failed validation. */
   invalid: [value: string]
@@ -117,10 +118,13 @@ export interface MultiEmailInputSlots {
   tag?: (props: MultiEmailTagSlotProps) => any
 
   /** Replaces the prefix (avatar) region of a suggestion row. */
-  'option-prefix'?: (props: MultiEmailOptionSlotProps) => any
+  'item-prefix'?: (props: MultiEmailItemSlotProps) => any
 
   /** Replaces the label region of a suggestion row. */
-  'option-label'?: (props: MultiEmailOptionSlotProps) => any
+  'item-label'?: (props: MultiEmailItemSlotProps) => any
+
+  /** Replaces the suffix region of a suggestion row. */
+  'item-suffix'?: (props: MultiEmailItemSlotProps) => any
 
   /** Fallback content rendered when there are no suggestions. */
   empty?: (props: { query: string }) => any
@@ -130,5 +134,5 @@ export interface MultiEmailInputExposed {
   /** Focuses the text input. */
   focus: () => void
   /** Clears all chips. */
-  clear: () => void
+  reset: () => void
 }

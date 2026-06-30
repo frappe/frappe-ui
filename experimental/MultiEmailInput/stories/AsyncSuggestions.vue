@@ -7,12 +7,12 @@ const directory: MultiEmailOption[] = [
   {
     label: 'Ada Lovelace',
     value: 'ada@example.com',
-    image: 'https://i.pravatar.cc/80?u=ada@example.com',
+    avatar: 'https://i.pravatar.cc/80?u=ada@example.com',
   },
   {
     label: 'Grace Hopper',
     value: 'grace@example.com',
-    image: 'https://i.pravatar.cc/80?u=grace@example.com',
+    avatar: 'https://i.pravatar.cc/80?u=grace@example.com',
   },
   { label: 'Alan Turing', value: 'alan@example.com' },
 ]
