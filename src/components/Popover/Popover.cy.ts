@@ -40,6 +40,58 @@ describe('Popover', () => {
       cy.get('[data-cy="content"]').should('have.text', 'Popover content')
     })
 
+    it('toggles closed when the trigger is clicked while open', () => {
+      cy.mount(Popover, { slots: NewSlots })
+
+      // Open, then click the trigger again. The trigger click must END closed.
+      // Regression: a trigger pointerdown looks "outside" the content, so the
+      // dismissable layer would close it and reka's onOpenToggle would reopen
+      // it — leaving it stuck open (close-then-reopen flicker).
+      cy.get('[data-cy="trigger"]').click()
+      cy.get('[data-slot="content"]').should('exist')
+      cy.get('[data-cy="trigger"]').click()
+      cy.get('[data-slot="content"]').should('not.exist')
+    })
+
+    it('exposes reactive isOpen to the #trigger slot', () => {
+      // The #trigger click is auto-wired by reka, so the slot must NOT bind its
+      // own onClick (that would double-toggle). It can still read isOpen to
+      // reflect state — e.g. flip a label or a chevron.
+      cy.mount(Popover, {
+        slots: {
+          trigger: ({ isOpen }: { isOpen: boolean }) =>
+            h(Button, { 'data-cy': 'trigger' }, () =>
+              isOpen ? 'Close' : 'Open',
+            ),
+          default: () => h('div', { 'data-cy': 'content' }, 'content'),
+        },
+      })
+
+      cy.get('[data-cy="trigger"]').should('have.text', 'Open')
+      cy.get('[data-cy="trigger"]').click()
+      cy.get('[data-slot="content"]').should('exist')
+      cy.get('[data-cy="trigger"]').should('have.text', 'Close')
+    })
+
+    it('exposes close() to the #default slot content', () => {
+      cy.mount(Popover, {
+        slots: {
+          trigger: () => h(Button, { 'data-cy': 'trigger' }, () => 'T'),
+          default: ({ close }: { close: () => void }) =>
+            h(
+              Button,
+              { 'data-cy': 'dismiss', onClick: () => close() },
+              () => 'Done',
+            ),
+        },
+      })
+
+      cy.get('[data-cy="trigger"]').click()
+      cy.get('[data-slot="content"]').should('exist')
+      cy.get('[data-cy="dismiss"]').click()
+      cy.get('[data-slot="content"]').should('not.exist')
+    })
+
     it('renders #default inside the shared PopoverPanel shell', () => {
       cy.mount(Popover, { slots: NewSlots })
 

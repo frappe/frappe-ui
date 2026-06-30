@@ -1,5 +1,5 @@
 <template>
-  <label class="block" :class="labelClasses" :for="id">
+  <label class="block text-ink-gray-5" :class="labelClasses" :for="id">
     {{ label }}
     <RequiredIndicator :required="required" />
   </label>
@@ -20,12 +20,9 @@ const props = withDefaults(defineProps<FormLabelProps>(), {
 })
 
 const labelClasses = computed(() => {
-  return [
-    {
-      sm: 'text-xs',
-      md: 'text-base',
-    }[props.size],
-    'text-ink-gray-5',
-  ]
+  return {
+    sm: 'text-xs',
+    md: 'text-base',
+  }[props.size]
 })
 </script>

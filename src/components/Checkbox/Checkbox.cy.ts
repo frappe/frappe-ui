@@ -19,7 +19,10 @@ describe('Checkbox', () => {
     })
 
     cy.get('input[type="checkbox"]').should('be.disabled')
-    cy.get('label').should('have.class', 'text-ink-gray-4')
+    cy.get('label')
+      .should('have.class', 'text-base')
+      .and('have.class', 'text-ink-gray-7')
+      .and('not.have.class', 'text-ink-gray-5')
   })
 
   it('test v-model', () => {
@@ -59,7 +62,12 @@ describe('Checkbox', () => {
 
     it('renders the canonical data-* hooks on the control', () => {
       cy.mount(Checkbox, {
-        props: { label: 'Accept', size: 'md', required: true, modelValue: true },
+        props: {
+          label: 'Accept',
+          size: 'md',
+          required: true,
+          modelValue: true,
+        },
       })
       cy.get('input').should('have.attr', 'data-slot', 'control')
       cy.get('input').should('have.attr', 'data-size', 'md')

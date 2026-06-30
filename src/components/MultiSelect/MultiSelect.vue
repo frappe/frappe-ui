@@ -264,7 +264,6 @@ defineSlots<MultiSelectSlots>()
       :for-id="inputId"
       :label="label"
       :required="required"
-      class="text-p-sm-medium text-ink-gray-7"
     >
       <template v-if="$slots.label" #default="slotProps">
         <slot name="label" v-bind="slotProps" />

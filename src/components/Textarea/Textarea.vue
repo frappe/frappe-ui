@@ -2,7 +2,7 @@
   <LabelingWrapper
     :enabled="hasLabeling"
     :wrapper-class="['space-y-1.5', attrs.class]"
-    :wrapper-style="attrs.style"
+    :wrapper-style="attrs.style as StyleValue"
   >
     <InputLabel
       v-if="props.label || $slots.label"
@@ -10,7 +10,6 @@
       :for-id="inputId"
       :label="props.label"
       :required="props.required"
-      class="text-p-sm-medium text-ink-gray-7"
     >
       <template v-if="$slots.label" #default="slotProps">
         <slot name="label" v-bind="slotProps" />
@@ -42,16 +41,13 @@
     >
       <slot v-if="$slots.description" name="description" />
     </InputDescription>
-    <InputError
-      v-if="hasError"
-      :id="errorMessageId"
-      :lines="errorLines"
-    />
+    <InputError v-if="hasError" :id="errorMessageId" :lines="errorLines" />
   </LabelingWrapper>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, useAttrs, useSlots } from 'vue'
+import type { StyleValue } from 'vue'
 import debounce from '../../utils/debounce'
 import { useInputLabeling } from '../../composables/useInputLabeling'
 import InputLabel from '../InputLabeling/InputLabel.vue'
@@ -102,10 +98,10 @@ const {
 const hasLabeling = computed(() => {
   return Boolean(
     props.label ||
-      slots.label ||
-      showDescription.value ||
-      slots.description ||
-      hasError.value,
+    slots.label ||
+    showDescription.value ||
+    slots.description ||
+    hasError.value,
   )
 })
 

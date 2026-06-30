@@ -104,11 +104,16 @@ describe('Textinput', () => {
         },
       })
       cy.contains('label', 'Email').should('exist')
+      cy.contains('label', 'Email')
+        .should('have.class', 'text-base')
+        .and('have.class', 'text-ink-gray-5')
       cy.get('input').then(($input) => {
         const id = $input.attr('id')!
         const describedBy = $input.attr('aria-describedby')!
         expect(describedBy).to.equal(`${id}-description`)
-        cy.get(`#${id}-description`).should('contain.text', 'We never share')
+        cy.get(`#${id}-description`)
+          .should('contain.text', 'We never share')
+          .and('have.class', 'text-ink-gray-5')
         cy.get(`label[for="${id}"]`).should('exist')
       })
     })

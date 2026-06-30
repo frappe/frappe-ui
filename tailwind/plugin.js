@@ -31,6 +31,9 @@ function generateRadiusVariables() {
 
 // Map `DEFAULT` (Tailwind's `rounded` class) onto the numeric var that
 // shares its value, so we don't emit a `--radius-DEFAULT` (awkward name).
+// Each value carries a trailing `/* {px} */` comment so editor tooling
+// (Tailwind IntelliSense) surfaces the resolved px on hover, instead of
+// the opaque `var(--radius-*)` reference.
 function buildRadiusConfig() {
   const numericByValue = {}
   for (const [key, value] of Object.entries(radiusTokens)) {
@@ -40,9 +43,9 @@ function buildRadiusConfig() {
   for (const [key, value] of Object.entries(radiusTokens)) {
     if (key === 'DEFAULT') {
       const numeric = numericByValue[value]
-      out[key] = numeric ? `var(--radius-${numeric})` : value
+      out[key] = numeric ? `var(--radius-${numeric}) /* ${value} */` : value
     } else {
-      out[key] = `var(--radius-${key})`
+      out[key] = `var(--radius-${key}) /* ${value} */`
     }
   }
   return out
