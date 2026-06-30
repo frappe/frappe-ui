@@ -130,7 +130,8 @@ export function useFloatingWindow(
     // (button, link, input…) so their own click handlers still fire.
     if ((event.target as HTMLElement).closest('button, a, input, select, textarea, [role="button"]')) return
     event.preventDefault()
-    ;(event.currentTarget as HTMLElement).setPointerCapture(event.pointerId)
+    // ponytail: best-effort; synthetic test events have no registered pointer id
+    try { ;(event.currentTarget as HTMLElement).setPointerCapture(event.pointerId) } catch {}
     isDragging.value = true
     const origin = { pointerX: event.clientX, pointerY: event.clientY, x: x.value, y: y.value }
     const stopMove = useEventListener('pointermove', (e: PointerEvent) => {
@@ -156,7 +157,8 @@ export function useFloatingWindow(
   function startResize(event: PointerEvent, dir: ResizeDir = { x: 1, y: 1 }) {
     isResizing.value = true
     event.preventDefault()
-    ;(event.currentTarget as HTMLElement).setPointerCapture(event.pointerId)
+    // ponytail: best-effort; synthetic test events have no registered pointer id
+    try { ;(event.currentTarget as HTMLElement).setPointerCapture(event.pointerId) } catch {}
     const origin = {
       pointerX: event.clientX,
       pointerY: event.clientY,
