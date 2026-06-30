@@ -8,6 +8,7 @@
     -->
     <PopoverTrigger
       v-if="useNewTrigger"
+      ref="triggerRef"
       as-child
       data-slot="trigger"
       @pointerdown="markPointerDown"
@@ -228,6 +229,8 @@ if (slots.body || slots['body-main']) {
 // -----------------------------------------------------------------------------
 const _isOpen = ref(false)
 const anchorRef = ref<HTMLElement | null>(null)
+// reka's PopoverTrigger, exposes the trigger DOM node via `$el`.
+const triggerRef = ref<{ $el: Element } | null>(null)
 
 const isOpen = computed<boolean>({
   get: () =>
@@ -277,12 +280,18 @@ defineExpose({ open, close })
 // -----------------------------------------------------------------------------
 // Slot props.
 // -----------------------------------------------------------------------------
-const newSlotProps = computed<PopoverSlotProps>(() => ({ open, close }))
+const newSlotProps = computed<PopoverSlotProps>(() => ({
+  open,
+  close,
+  toggle: togglePopover,
+  isOpen: isOpen.value,
+}))
 const legacySlotProps = computed<PopoverLegacySlotProps>(() => ({
   togglePopover,
   updatePosition,
   open,
   close,
+  toggle: togglePopover,
   isOpen: isOpen.value,
 }))
 
@@ -342,12 +351,14 @@ function onInteractOutside(event: Event) {
     event.preventDefault()
     return
   }
-  // Prevent close-then-reopen flicker when clicking the legacy #target anchor.
+  // Prevent close-then-reopen flicker when clicking the trigger itself.
+  // The trigger's own click already toggles the popover (legacy #target via
+  // `togglePopover`, new #trigger via reka's `onOpenToggle`). Letting the
+  // dismissable layer also close it would race that toggle, so we suppress the
+  // outside-close and let the toggle decide the final state.
   const target = event.target as Element
-  if (
-    anchorRef.value &&
-    (anchorRef.value.contains(target) || anchorRef.value === target)
-  ) {
+  const triggerEl = triggerRef.value?.$el ?? anchorRef.value
+  if (triggerEl && (triggerEl.contains(target) || triggerEl === target)) {
     event.preventDefault()
   }
 }

@@ -100,6 +100,8 @@ export interface PopoverEmits {
 export interface PopoverSlotProps {
   open: () => void
   close: () => void
+  toggle: (flag?: boolean | Event) => void
+  isOpen: boolean
 }
 
 /**
@@ -111,5 +113,6 @@ export interface PopoverLegacySlotProps {
   updatePosition: () => void
   open: () => void
   close: () => void
+  toggle: (flag?: boolean | Event) => void
   isOpen: boolean
 }
