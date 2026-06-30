@@ -1,46 +1,65 @@
-import { defineComponent, h } from 'vue'
+import { defineComponent, h, ref } from 'vue'
 import SettingsDialog from './SettingsDialog.vue'
-import type { SettingsSection } from './types'
+import SettingsSidebar from './SettingsSidebar.vue'
+import SettingsNavGroup from './SettingsNavGroup.vue'
+import SettingsNavItem from './SettingsNavItem.vue'
+import SettingsContent from './SettingsContent.vue'
 
 const panel = (text: string) =>
   defineComponent({ render: () => h('div', { class: 'tab-panel' }, text) })
 
-function makeSections(onProfileClick?: () => void): SettingsSection[] {
-  return [
-    {
-      label: 'Account',
-      items: [
-        {
-          label: 'Profile',
-          icon: 'lucide-circle-user',
-          component: panel('Profile content'),
-          onClick: onProfileClick,
-        },
-      ],
-    },
-    {
-      label: 'Workspace',
-      items: [
-        { label: 'General', icon: 'lucide-settings', component: panel('General content') },
-        { label: 'Members', icon: 'lucide-users', component: panel('Members content') },
-      ],
-    },
-  ]
-}
+const tabs = [
+  { label: 'Profile', component: panel('Profile content') },
+  { label: 'General', component: panel('General content') },
+  { label: 'Members', component: panel('Members content') },
+]
 
-const sections = makeSections()
+// A minimal consumer that wires active state the way an app would.
+const Harness = defineComponent({
+  props: { modelValue: { type: Boolean, default: true } },
+  emits: ['update:modelValue'],
+  setup(props, { emit }) {
+    const active = ref(tabs[0])
+    return () =>
+      h(
+        SettingsDialog,
+        {
+          modelValue: props.modelValue,
+          'onUpdate:modelValue': (v: boolean) => emit('update:modelValue', v),
+        },
+        () => [
+          h(SettingsSidebar, () =>
+            h(SettingsNavGroup, { label: 'Workspace' }, () =>
+              tabs.map((tab) =>
+                h(
+                  SettingsNavItem,
+                  {
+                    key: tab.label,
+                    active: active.value.label === tab.label,
+                    onClick: () => (active.value = tab),
+                  },
+                  () => tab.label,
+                ),
+              ),
+            ),
+          ),
+          h(SettingsContent, () => h(active.value.component)),
+        ],
+      )
+  },
+})
 
 describe('SettingsDialog', () => {
   it('does not render while closed; renders when open (v-model)', () => {
-    cy.mount(SettingsDialog, { props: { modelValue: false, sections } })
+    cy.mount(Harness, { props: { modelValue: false } })
     cy.get('[role=dialog]').should('not.exist')
 
-    cy.mount(SettingsDialog, { props: { modelValue: true, sections } })
+    cy.mount(Harness, { props: { modelValue: true } })
     cy.get('[role=dialog]').should('exist')
   })
 
-  it('renders all section items in the sidebar', () => {
-    cy.mount(SettingsDialog, { props: { modelValue: true, sections } })
+  it('renders all nav items in the sidebar', () => {
+    cy.mount(Harness)
     cy.get('[role=dialog]').within(() => {
       cy.contains('Profile').should('exist')
       cy.contains('General').should('exist')
@@ -48,40 +67,22 @@ describe('SettingsDialog', () => {
     })
   })
 
-  it('shows the first item content by default', () => {
-    cy.mount(SettingsDialog, { props: { modelValue: true, sections } })
+  it('shows the first tab content by default', () => {
+    cy.mount(Harness)
     cy.get('[role=dialog] .tab-panel').should('have.text', 'Profile content')
   })
 
-  it('switches the active tab on click and invokes the item onClick', () => {
-    const onProfileClick = cy.stub().as('onProfileClick')
-    cy.mount(SettingsDialog, {
-      props: { modelValue: true, sections: makeSections(onProfileClick) },
-    })
+  it('switches the active tab on click', () => {
+    cy.mount(Harness)
     cy.get('[role=dialog] .tab-panel').should('have.text', 'Profile content')
-
     cy.get('[role=dialog]').contains('Members').click()
     cy.get('[role=dialog] .tab-panel').should('have.text', 'Members content')
-
-    cy.get('[role=dialog]').contains('Profile').click()
-    cy.get('@onProfileClick').should('have.been.called')
-  })
-
-  it('overrides the content area via the #tab-content slot', () => {
-    cy.mount(SettingsDialog, {
-      props: { modelValue: true, sections },
-      slots: {
-        'tab-content': (slotProps: { tab?: { label: string } }) =>
-          h('div', { class: 'custom-content' }, `Custom: ${slotProps.tab?.label}`),
-      },
-    })
-    cy.get('[role=dialog] .custom-content').should('have.text', 'Custom: Profile')
   })
 
   it('emits update:modelValue when the dialog is closed', () => {
     const onUpdate = cy.spy().as('onUpdate')
-    cy.mount(SettingsDialog, {
-      props: { modelValue: true, sections, 'onUpdate:modelValue': onUpdate },
+    cy.mount(Harness, {
+      props: { modelValue: true, 'onUpdate:modelValue': onUpdate },
     })
     cy.get('[role=dialog]').should('exist')
     cy.get('body').type('{esc}')

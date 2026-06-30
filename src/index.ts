@@ -92,6 +92,7 @@ export * from './components/Tree'
 export { default as FrappeUIProvider } from './components/Provider/FrappeUIProvider.vue'
 export * from './components/Sidebar/index.ts'
 export { default as ConfirmDialog } from './components/ConfirmDialog.vue'
+export * from './components/ScrollArea'
 export * from './components/SettingsDialog'
 
 // grid layout

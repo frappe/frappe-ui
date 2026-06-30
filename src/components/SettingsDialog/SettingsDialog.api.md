@@ -6,17 +6,18 @@
 
   const settingsDialogProps = [
   {
-    name: 'sections',
-    description: 'Sidebar sections to render. Each item may carry a `component` that is\nshown in the content area when the item is selected.',
-    required: true,
-    type: 'SettingsSection[]'
-  },
-  {
     name: 'size',
     description: 'Max-width size of the dialog.',
     required: false,
     type: 'DialogSize',
     default: '"4xl"'
+  },
+  {
+    name: 'shortcut',
+    description: 'Enable the Cmd/Ctrl+Shift+, shortcut that toggles the dialog.',
+    required: false,
+    type: 'boolean',
+    default: 'true'
   },
   {
     name: 'modelValue',
@@ -29,9 +30,14 @@
 
   const settingsDialogSlots = [
   {
-    name: 'tab-content',
-    description: 'Overrides the content area. Receives the active `{ tab }`.',
-    type: '{ tab: SettingsTab | undefined; }'
+    name: 'title',
+    description: 'Accessible dialog title (visually hidden). Defaults to "Settings".',
+    type: 'any'
+  },
+  {
+    name: 'default',
+    description: 'Sidebar + content panes (compose SettingsSidebar and SettingsContent).',
+    type: 'any'
   }
 ]
 
@@ -43,31 +49,141 @@
   }
 ]
 
-  const settingsPanelProps = [
+  const settingsSidebarSlots = [
   {
-    name: 'title',
-    description: 'Heading rendered at the top of the panel.',
-    required: true,
-    type: 'string'
-  },
+    name: 'default',
+    description: '',
+    type: '{}'
+  }
+]
+
+  const settingsNavGroupProps = [
   {
-    name: 'description',
-    description: 'Optional sub-heading rendered below the title.',
+    name: 'label',
+    description: 'Group heading shown above its items.',
     required: false,
     type: 'string'
+  }
+]
+
+  const settingsNavGroupSlots = [
+  {
+    name: 'label',
+    description: '',
+    type: '{}'
+  },
+  {
+    name: 'default',
+    description: '',
+    type: '{}'
+  }
+]
+
+  const settingsNavItemProps = [
+  {
+    name: 'active',
+    description: 'Highlights the item as the current tab.',
+    required: false,
+    type: 'boolean'
+  }
+]
+
+  const settingsNavItemSlots = [
+  {
+    name: 'default',
+    description: 'Item label.',
+    type: 'any'
+  },
+  {
+    name: 'prefix',
+    description: 'Leading icon or avatar.',
+    type: 'any'
+  },
+  {
+    name: 'suffix',
+    description: 'Trailing badge / count.',
+    type: 'any'
+  }
+]
+
+  const settingsContentSlots = [
+  {
+    name: 'default',
+    description: '',
+    type: '{}'
   }
 ]
 
   const settingsPanelSlots = [
   {
     name: 'default',
-    description: 'Panel body — the settings controls for this tab.',
+    description: '',
+    type: '{}'
+  }
+]
+
+  const settingsHeaderProps = [
+  {
+    name: 'title',
+    description: 'Convenience heading. Omit and use the default slot for a custom header.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'description',
+    description: 'Optional sub-heading under the title.',
+    required: false,
+    type: 'string'
+  }
+]
+
+  const settingsHeaderSlots = [
+  {
+    name: 'default',
+    description: 'Replaces the entire header (title/description/actions) with custom content.',
     type: 'any'
   },
   {
     name: 'actions',
-    description: 'Actions rendered on the right of the panel header.',
+    description: 'Actions on the right of the default title header.',
     type: 'any'
+  }
+]
+
+  const settingsBodySlots = [
+  {
+    name: 'default',
+    description: '',
+    type: '{}'
+  }
+]
+
+  const settingsRowProps = [
+  {
+    name: 'title',
+    description: 'Setting name, rendered on the left.',
+    required: true,
+    type: 'string'
+  },
+  {
+    name: 'description',
+    description: 'Optional helper text under the title.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'labelFor',
+    description: 'Explicit id to associate the title label with. Overrides auto-detection.',
+    required: false,
+    type: 'string'
+  }
+]
+
+  const settingsRowSlots = [
+  {
+    name: 'default',
+    description: '',
+    type: '{}'
   }
 ]
 </script>
@@ -81,9 +197,43 @@
 
 <EmitsTable :data="settingsDialogEmits"/> 
 
+### SettingsSidebar
+
+<SlotsTable :data="settingsSidebarSlots"/> 
+
+### SettingsNavGroup
+
+<PropsTable folder="SettingsDialog" name="SettingsNavGroup" :data="settingsNavGroupProps"/> 
+
+<SlotsTable :data="settingsNavGroupSlots"/> 
+
+### SettingsNavItem
+
+<PropsTable folder="SettingsDialog" name="SettingsNavItem" :data="settingsNavItemProps"/> 
+
+<SlotsTable :data="settingsNavItemSlots"/> 
+
+### SettingsContent
+
+<SlotsTable :data="settingsContentSlots"/> 
+
 ### SettingsPanel
 
-<PropsTable folder="SettingsDialog" name="SettingsPanel" :data="settingsPanelProps"/> 
-
 <SlotsTable :data="settingsPanelSlots"/> 
+
+### SettingsHeader
+
+<PropsTable folder="SettingsDialog" name="SettingsHeader" :data="settingsHeaderProps"/> 
+
+<SlotsTable :data="settingsHeaderSlots"/> 
+
+### SettingsBody
+
+<SlotsTable :data="settingsBodySlots"/> 
+
+### SettingsRow
+
+<PropsTable folder="SettingsDialog" name="SettingsRow" :data="settingsRowProps"/> 
+
+<SlotsTable :data="settingsRowSlots"/> 
 
