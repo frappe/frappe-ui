@@ -123,20 +123,24 @@ describe('Select', () => {
     cy.get('[role=combobox]').should('contain.text', 'Sentinel-like')
   })
 
-  it('sizes the trigger to the widest option by default', () => {
+  it('sizes the trigger to the selected value, not the widest option', () => {
+    // Both selects share the same options, so a widest-option strategy would
+    // make them equal width. Instead the trigger hugs the *selected value*:
+    // the one showing the longer value is wider, and the dropdown expands
+    // outward to fit the rest.
     const WidthHarness = defineComponent({
       setup() {
         return () =>
           h('div', { class: 'flex items-start gap-6' }, [
             h(Select, {
-              options: ['Short'],
+              options: ['Short', 'A much longer option label'],
               modelValue: 'Short',
-              'data-cy': 'short-select',
+              'data-cy': 'short-value-select',
             }),
             h(Select, {
               options: ['Short', 'A much longer option label'],
-              modelValue: 'Short',
-              'data-cy': 'long-select',
+              modelValue: 'A much longer option label',
+              'data-cy': 'long-value-select',
             }),
           ])
       },
@@ -144,10 +148,10 @@ describe('Select', () => {
 
     cy.mount(WidthHarness)
 
-    cy.get('[data-cy="short-select"]').then(($short) => {
+    cy.get('[data-cy="short-value-select"]').then(($short) => {
       const shortWidth = $short[0].getBoundingClientRect().width
 
-      cy.get('[data-cy="long-select"]').should(($long) => {
+      cy.get('[data-cy="long-value-select"]').should(($long) => {
         const longWidth = $long[0].getBoundingClientRect().width
         expect(longWidth).to.be.greaterThan(shortWidth)
       })
@@ -219,23 +223,21 @@ describe('Select', () => {
 
     cy.get('[data-cy="trigger-content"]').should('have.text', 'def')
     cy.get('[role=combobox]').click()
-    cy.get('[data-slot="content-body"]').should(
-      'have.attr',
-      'data-motion',
-      'animated',
-    )
     cy.get('[data-slot="content"]')
       .parent()
       .should('have.attr', 'style')
       .and('include', 'min-width')
   })
 
-  it('skips content animation for keyboard-opened interactions', () => {
+  it('opens without an enter/exit animation (instant motion)', () => {
+    // The menu is anchored item-aligned over the trigger, so a
+    // scale-from-trigger entrance would read as a glitch. Both pointer and
+    // keyboard opens use the `instant` rhythm (opacity-only, no scale).
     cy.mount(Select, {
       props: { options },
     })
 
-    cy.get('[role=combobox]').focus().trigger('keydown', { key: 'Enter' })
+    cy.get('[role=combobox]').click()
     cy.get('[data-slot="content-body"]').should(
       'have.attr',
       'data-motion',

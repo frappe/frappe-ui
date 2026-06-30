@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, useAttrs, useSlots } from 'vue'
-import { usePopoverMotion } from '../../composables/usePopoverMotion'
 import { useInputLabeling } from '../../composables/useInputLabeling'
 import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
 import type {
@@ -86,9 +85,6 @@ const hasLabeling = computed(() => {
 })
 
 const formAttrKeys = ['name', 'autocomplete'] as const
-
-const { motion: contentMotion, onPointerDown: markPointerDown } =
-  usePopoverMotion(open)
 
 const rootAttrs = computed(() => {
   const out: Record<string, unknown> = Object.fromEntries(
@@ -210,12 +206,11 @@ const displayValue = computed(() => {
   return selectedOption.value?.label || ''
 })
 
-const selectSizingText = computed(() => {
-  return [
-    props.placeholder,
-    ...selectOptions.value.map((option) => option.label),
-  ].join('\n')
-})
+// Text the hidden sizer reserves trigger width for: the current value (or
+// placeholder when unselected). The trigger hugs the selection, so the
+// item-aligned dropdown — anchored over the trigger — expands outward to fit
+// longer options (Linear-style). Trigger width shifts as the value changes.
+const selectSizingText = computed(() => displayValue.value || props.placeholder)
 
 function getOptionSlotName(option: SelectNormalizedOption) {
   return option.slot ? `item-${option.slot}` : undefined
@@ -264,7 +259,6 @@ defineSlots<SelectSlots>()
         :aria-required="required || undefined"
         :data-invalid="hasError ? 'true' : undefined"
         :data-required="required ? 'true' : undefined"
-        @pointerdown="markPointerDown"
       >
         <template v-if="$slots.trigger">
           <slot name="trigger" v-bind="triggerSlotProps" />
@@ -347,8 +341,14 @@ defineSlots<SelectSlots>()
           data-slot="content"
           class="z-[100] origin-[var(--reka-select-content-transform-origin)]"
         >
+          <!--
+          `instant` (no scale-from-trigger enter, no exit) rather than the
+          animated rhythm: the menu is anchored item-aligned *over* the
+          trigger, so a scale/translate entrance reads as a glitch. The ~80ms
+          opacity fade `instant` keeps masks reka's 1-frame position-settle.
+        -->
           <PopoverPanel
-            :motion="contentMotion"
+            motion="instant"
             class="flex flex-col origin-[var(--reka-select-content-transform-origin)]"
           >
             <SelectViewport class="flex min-h-0 flex-col p-1">
