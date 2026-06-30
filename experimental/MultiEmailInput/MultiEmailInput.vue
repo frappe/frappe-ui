@@ -393,7 +393,7 @@ defineSlots<MultiEmailInputSlots>()
           @open-auto-focus.prevent
           @pointerdown.capture="markUserAction"
         >
-          <ComboboxViewport class="flex max-h-60 flex-col overflow-auto p-1">
+          <ComboboxViewport class="max-h-60 overflow-auto p-1">
             <div
               v-if="loading"
               data-slot="loading"
