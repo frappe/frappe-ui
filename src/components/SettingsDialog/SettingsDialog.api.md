@@ -187,53 +187,53 @@
   }
 ]
 </script>
+
 ## API Reference
 
 ### SettingsDialog
 
-<PropsTable name="SettingsDialog" :data="settingsDialogProps"/> 
+<PropsTable name="SettingsDialog" :data="settingsDialogProps"/>
 
-<SlotsTable :data="settingsDialogSlots"/> 
+<SlotsTable :data="settingsDialogSlots"/>
 
-<EmitsTable :data="settingsDialogEmits"/> 
+<EmitsTable :data="settingsDialogEmits"/>
 
 ### SettingsSidebar
 
-<SlotsTable :data="settingsSidebarSlots"/> 
+<SlotsTable :data="settingsSidebarSlots"/>
 
 ### SettingsNavGroup
 
-<PropsTable folder="SettingsDialog" name="SettingsNavGroup" :data="settingsNavGroupProps"/> 
+<PropsTable folder="SettingsDialog" name="SettingsNavGroup" :data="settingsNavGroupProps"/>
 
-<SlotsTable :data="settingsNavGroupSlots"/> 
+<SlotsTable :data="settingsNavGroupSlots"/>
 
 ### SettingsNavItem
 
-<PropsTable folder="SettingsDialog" name="SettingsNavItem" :data="settingsNavItemProps"/> 
+<PropsTable folder="SettingsDialog" name="SettingsNavItem" :data="settingsNavItemProps"/>
 
-<SlotsTable :data="settingsNavItemSlots"/> 
+<SlotsTable :data="settingsNavItemSlots"/>
 
 ### SettingsContent
 
-<SlotsTable :data="settingsContentSlots"/> 
+<SlotsTable :data="settingsContentSlots"/>
 
 ### SettingsPanel
 
-<SlotsTable :data="settingsPanelSlots"/> 
+<SlotsTable :data="settingsPanelSlots"/>
 
 ### SettingsHeader
 
-<PropsTable folder="SettingsDialog" name="SettingsHeader" :data="settingsHeaderProps"/> 
+<PropsTable folder="SettingsDialog" name="SettingsHeader" :data="settingsHeaderProps"/>
 
-<SlotsTable :data="settingsHeaderSlots"/> 
+<SlotsTable :data="settingsHeaderSlots"/>
 
 ### SettingsBody
 
-<SlotsTable :data="settingsBodySlots"/> 
+<SlotsTable :data="settingsBodySlots"/>
 
 ### SettingsRow
 
-<PropsTable folder="SettingsDialog" name="SettingsRow" :data="settingsRowProps"/> 
+<PropsTable folder="SettingsDialog" name="SettingsRow" :data="settingsRowProps"/>
 
-<SlotsTable :data="settingsRowSlots"/> 
-
+<SlotsTable :data="settingsRowSlots"/>

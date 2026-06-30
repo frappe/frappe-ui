@@ -1,31 +1,38 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import {
+  Avatar,
+  Button,
   FormControl,
   SettingsBody,
   SettingsHeader,
-  SettingsPanel,
+  Textarea,
 } from 'frappe-ui'
 
-const firstName = ref('Jane')
-const lastName = ref('Doe')
-const email = ref('jane.doe@example.com')
+const fullName = ref('Alex Rivera')
+const bio = ref(
+  'Product designer. Writing things down so we talk less and ship more.',
+)
+const email = ref('alex@example.com')
 </script>
 
 <template>
-  <SettingsPanel>
-    <SettingsHeader
-      title="Profile"
-      description="Manage your personal information."
-    />
-    <SettingsBody>
-      <div class="flex flex-col gap-4">
-        <div class="flex gap-4">
-          <FormControl class="flex-1" label="First name" v-model="firstName" />
-          <FormControl class="flex-1" label="Last name" v-model="lastName" />
+  <SettingsHeader
+    title="Profile"
+    description="How you appear across the community."
+  />
+  <SettingsBody>
+    <div class="flex flex-col gap-6">
+      <div class="flex items-center gap-4">
+        <Avatar size="3xl" label="Alex Rivera" />
+        <div class="flex gap-2">
+          <Button>Upload photo</Button>
+          <Button variant="ghost">Remove</Button>
         </div>
-        <FormControl label="Email" v-model="email" />
       </div>
-    </SettingsBody>
-  </SettingsPanel>
+      <FormControl label="Full name" v-model="fullName" />
+      <Textarea label="Bio" v-model="bio" :rows="3" />
+      <FormControl label="Email" type="email" v-model="email" disabled />
+    </div>
+  </SettingsBody>
 </template>

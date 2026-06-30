@@ -1,53 +1,68 @@
 <script setup lang="ts">
 import { markRaw, ref } from 'vue'
 import {
+  Avatar,
   Button,
   SettingsContent,
   SettingsDialog,
   SettingsNavGroup,
   SettingsNavItem,
+  SettingsPanel,
   SettingsSidebar,
 } from 'frappe-ui'
-import GeneralPanel from './panels/GeneralPanel.vue'
-import MembersPanel from './panels/MembersPanel.vue'
 import ProfilePanel from './panels/ProfilePanel.vue'
+import PreferencesPanel from './panels/PreferencesPanel.vue'
+import NotificationsPanel from './panels/NotificationsPanel.vue'
+import UsersPanel from './panels/UsersPanel.vue'
 
 const open = ref(false)
 
+// Modeled on Gameplan's settings: grouped tabs, an avatar on the Profile tab,
+// and panels that range from simple forms to a long, searchable user table.
 const groups = [
   {
-    label: 'Account',
+    label: 'User settings',
     tabs: [
       {
         label: 'Profile',
-        icon: 'lucide-circle-user',
+        value: 'profile',
+        avatar: true,
         component: markRaw(ProfilePanel),
+      },
+      {
+        label: 'Preferences',
+        value: 'preferences',
+        icon: 'lucide-sliders-horizontal',
+        component: markRaw(PreferencesPanel),
+      },
+      {
+        label: 'Notifications',
+        value: 'notifications',
+        icon: 'lucide-bell',
+        component: markRaw(NotificationsPanel),
       },
     ],
   },
   {
-    label: 'Workspace',
+    label: 'Administration',
     tabs: [
       {
-        label: 'General',
-        icon: 'lucide-settings',
-        component: markRaw(GeneralPanel),
-      },
-      {
-        label: 'Members',
+        label: 'Users',
+        value: 'users',
         icon: 'lucide-users',
-        component: markRaw(MembersPanel),
+        component: markRaw(UsersPanel),
       },
     ],
   },
 ]
 
-const activeTab = ref(groups[0].tabs[0])
+const tabs = groups.flatMap((group) => group.tabs)
+const activeTab = ref(tabs[0].value)
 </script>
 
 <template>
   <Button @click="open = true">Open settings</Button>
-  <SettingsDialog v-model="open">
+  <SettingsDialog v-model="open" v-model:tab="activeTab">
     <SettingsSidebar>
       <SettingsNavGroup
         v-for="group in groups"
@@ -56,19 +71,29 @@ const activeTab = ref(groups[0].tabs[0])
       >
         <SettingsNavItem
           v-for="tab in group.tabs"
-          :key="tab.label"
-          :active="activeTab.label === tab.label"
-          @click="activeTab = tab"
+          :key="tab.value"
+          :value="tab.value"
         >
           <template #prefix>
-            <span :class="[tab.icon, 'size-4 text-ink-gray-6']" />
+            <Avatar
+              v-if="tab.avatar"
+              size="xs"
+              label="Alex Rivera"
+              class="shrink-0"
+            />
+            <span
+              v-else
+              :class="[tab.icon, 'size-4 shrink-0 text-ink-gray-6']"
+            />
           </template>
           {{ tab.label }}
         </SettingsNavItem>
       </SettingsNavGroup>
     </SettingsSidebar>
     <SettingsContent>
-      <component :is="activeTab.component" />
+      <SettingsPanel v-for="tab in tabs" :key="tab.value" :value="tab.value">
+        <component :is="tab.component" />
+      </SettingsPanel>
     </SettingsContent>
   </SettingsDialog>
 </template>

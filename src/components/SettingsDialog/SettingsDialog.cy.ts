@@ -4,28 +4,33 @@ import SettingsSidebar from './SettingsSidebar.vue'
 import SettingsNavGroup from './SettingsNavGroup.vue'
 import SettingsNavItem from './SettingsNavItem.vue'
 import SettingsContent from './SettingsContent.vue'
+import SettingsPanel from './SettingsPanel.vue'
 
 const panel = (text: string) =>
   defineComponent({ render: () => h('div', { class: 'tab-panel' }, text) })
 
 const tabs = [
-  { label: 'Profile', component: panel('Profile content') },
-  { label: 'General', component: panel('General content') },
-  { label: 'Members', component: panel('Members content') },
+  { label: 'Profile', value: 'profile', component: panel('Profile content') },
+  { label: 'General', value: 'general', component: panel('General content') },
+  { label: 'Members', value: 'members', component: panel('Members content') },
 ]
 
-// A minimal consumer that wires active state the way an app would.
+// A minimal consumer that wires the active tab the way an app would: the kit's
+// reka-ui Tabs owns selection, the consumer only binds `tab` and supplies a
+// matching `value` on each nav item and panel.
 const Harness = defineComponent({
   props: { modelValue: { type: Boolean, default: true } },
   emits: ['update:modelValue'],
   setup(props, { emit }) {
-    const active = ref(tabs[0])
+    const active = ref(tabs[0].value)
     return () =>
       h(
         SettingsDialog,
         {
           modelValue: props.modelValue,
           'onUpdate:modelValue': (v: boolean) => emit('update:modelValue', v),
+          tab: active.value,
+          'onUpdate:tab': (v: string) => (active.value = v),
         },
         () => [
           h(SettingsSidebar, () =>
@@ -33,17 +38,19 @@ const Harness = defineComponent({
               tabs.map((tab) =>
                 h(
                   SettingsNavItem,
-                  {
-                    key: tab.label,
-                    active: active.value.label === tab.label,
-                    onClick: () => (active.value = tab),
-                  },
+                  { key: tab.value, value: tab.value },
                   () => tab.label,
                 ),
               ),
             ),
           ),
-          h(SettingsContent, () => h(active.value.component)),
+          h(SettingsContent, () =>
+            tabs.map((tab) =>
+              h(SettingsPanel, { key: tab.value, value: tab.value }, () =>
+                h(tab.component),
+              ),
+            ),
+          ),
         ],
       )
   },
@@ -77,6 +84,28 @@ describe('SettingsDialog', () => {
     cy.get('[role=dialog] .tab-panel').should('have.text', 'Profile content')
     cy.get('[role=dialog]').contains('Members').click()
     cy.get('[role=dialog] .tab-panel').should('have.text', 'Members content')
+  })
+
+  it('exposes tablist / tab / tabpanel roles with aria-selected', () => {
+    cy.mount(Harness)
+    cy.get('[role=tablist]').should('exist')
+    cy.get('[role=tab]').should('have.length', 3)
+    cy.get('[role=tab]')
+      .contains('Profile')
+      .should('have.attr', 'aria-selected', 'true')
+    cy.get('[role=tab]')
+      .contains('Members')
+      .should('have.attr', 'aria-selected', 'false')
+    cy.get('[role=tabpanel]').should('have.text', 'Profile content')
+  })
+
+  it('moves the active tab with arrow keys (manual activation needs Enter)', () => {
+    cy.mount(Harness)
+    cy.get('[role=tab]').contains('Profile').focus().type('{downarrow}')
+    // manual activation: arrow only moves focus, selection follows on Enter
+    cy.focused().should('contain.text', 'General')
+    cy.focused().type('{enter}')
+    cy.get('[role=tabpanel]').should('have.text', 'General content')
   })
 
   it('emits update:modelValue when the dialog is closed', () => {
