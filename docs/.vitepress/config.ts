@@ -21,6 +21,7 @@ const sourceRoots = [
   path.resolve(repoRoot, 'src/components'),
   path.resolve(repoRoot, 'src/molecules'),
   path.resolve(repoRoot, 'frappe'),
+  path.resolve(repoRoot, 'experimental'),
 ]
 
 // frappe-ui's information architecture. The shared Sidebar is data-driven —
@@ -174,7 +175,10 @@ const config = defineDocsConfig({
     '@utils': path.resolve(repoRoot, 'src/utils'),
     '@composables': path.resolve(repoRoot, 'src/composables'),
     'frappe-ui/editor': path.resolve(repoRoot, 'src/molecules/editor'),
-    'frappe-ui/code-editor': path.resolve(repoRoot, 'src/components/CodeEditor'),
+    'frappe-ui/code-editor': path.resolve(
+      repoRoot,
+      'src/components/CodeEditor',
+    ),
     'frappe-ui': path.resolve(repoRoot, 'src'),
     'dayjs/esm': 'dayjs',
   },
