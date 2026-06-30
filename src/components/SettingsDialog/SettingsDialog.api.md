@@ -20,11 +20,24 @@
     default: 'true'
   },
   {
+    name: 'unmountOnHide',
+    description: 'Unmount a panel\'s content when its tab is inactive (reka-ui default: true).\nSet false to keep visited panels mounted (hidden) — preserves their state\nand scroll position across tab switches at the cost of memory.',
+    required: false,
+    type: 'boolean',
+    default: 'true'
+  },
+  {
     name: 'modelValue',
     description: 'Controls whether the dialog is open.',
     required: false,
     type: 'boolean',
     default: 'false'
+  },
+  {
+    name: 'tab',
+    description: 'The selected tab — pairs with SettingsNavItem `:value` and SettingsPanel\n`:value`. Optional: leave unbound to let reka-ui manage selection internally,\nor bind `v-model:tab` to drive it (e.g. from the route).',
+    required: false,
+    type: 'string | number'
   }
 ]
 
@@ -32,6 +45,11 @@
   {
     name: 'title',
     description: 'Accessible dialog title (visually hidden). Defaults to "Settings".',
+    type: 'any'
+  },
+  {
+    name: 'description',
+    description: 'Accessible dialog description (visually hidden, for aria-describedby).',
     type: 'any'
   },
   {
@@ -46,6 +64,11 @@
     name: 'update:modelValue',
     description: 'Fired when the model value changes.',
     type: '[value: boolean]'
+  },
+  {
+    name: 'update:tab',
+    description: 'Fired when the tab changes.',
+    type: '[value: string | number | undefined]'
   }
 ]
 
@@ -81,10 +104,10 @@
 
   const settingsNavItemProps = [
   {
-    name: 'active',
-    description: 'Highlights the item as the current tab.',
-    required: false,
-    type: 'boolean'
+    name: 'value',
+    description: 'Unique tab id — must match the SettingsPanel `value` it controls.',
+    required: true,
+    type: 'string | number'
   }
 ]
 
@@ -111,6 +134,15 @@
     name: 'default',
     description: '',
     type: '{}'
+  }
+]
+
+  const settingsPanelProps = [
+  {
+    name: 'value',
+    description: 'Unique tab id — must match the SettingsNavItem `value` that controls it.',
+    required: true,
+    type: 'string | number'
   }
 ]
 
@@ -219,6 +251,8 @@
 <SlotsTable :data="settingsContentSlots"/>
 
 ### SettingsPanel
+
+<PropsTable folder="SettingsDialog" name="SettingsPanel" :data="settingsPanelProps"/>
 
 <SlotsTable :data="settingsPanelSlots"/>
 
