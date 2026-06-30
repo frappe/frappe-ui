@@ -60,8 +60,8 @@ defineSlots<{
   default?: () => any
 }>()
 
-// Cmd/Ctrl+Shift+. toggles the dialog. Use e.code (physical key) since Shift
-// rewrites e.key for "." to ">" on most layouts.
+// Cmd/Ctrl+Shift+, toggles the dialog. Use e.code (physical key) since Shift
+// rewrites e.key for "," to "<" on most layouts.
 useEventListener(window, 'keydown', (e: KeyboardEvent) => {
   if (!props.shortcut) return
   if (e.code === 'Comma' && e.shiftKey && (e.metaKey || e.ctrlKey)) {
