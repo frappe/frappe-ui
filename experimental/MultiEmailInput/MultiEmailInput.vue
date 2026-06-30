@@ -364,7 +364,7 @@ defineSlots<MultiEmailInputSlots>()
           class="z-[100] min-w-[--reka-combobox-trigger-width] overflow-hidden rounded-lg bg-surface-elevation-2 shadow-2xl"
           @open-auto-focus.prevent
         >
-          <ComboboxViewport class="flex max-h-60 flex-col overflow-auto p-1">
+          <ComboboxViewport class="max-h-60 overflow-auto p-1">
             <div
               v-if="loading"
               data-slot="loading"
