@@ -90,18 +90,24 @@ describe('SettingsDialog', () => {
     cy.mount(Harness)
     cy.get('[role=tablist]').should('exist')
     cy.get('[role=tab]').should('have.length', 3)
-    cy.get('[role=tab]')
-      .contains('Profile')
-      .should('have.attr', 'aria-selected', 'true')
-    cy.get('[role=tab]')
-      .contains('Members')
-      .should('have.attr', 'aria-selected', 'false')
+    // cy.contains(selector, text) returns the element matching the selector;
+    // a bare .contains() would drill into the inner label <span> instead.
+    cy.contains('[role=tab]', 'Profile').should(
+      'have.attr',
+      'aria-selected',
+      'true',
+    )
+    cy.contains('[role=tab]', 'Members').should(
+      'have.attr',
+      'aria-selected',
+      'false',
+    )
     cy.get('[role=tabpanel]').should('have.text', 'Profile content')
   })
 
   it('moves the active tab with arrow keys (manual activation needs Enter)', () => {
     cy.mount(Harness)
-    cy.get('[role=tab]').contains('Profile').focus().type('{downarrow}')
+    cy.contains('[role=tab]', 'Profile').focus().type('{downarrow}')
     // manual activation: arrow only moves focus, selection follows on Enter
     cy.focused().should('contain.text', 'General')
     cy.focused().type('{enter}')
