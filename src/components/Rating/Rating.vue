@@ -2,7 +2,7 @@
   <LabelingWrapper
     :enabled="hasLabeling"
     :wrapper-class="['space-y-1', attrs.class]"
-    :wrapper-style="attrs.style as any"
+    :wrapper-style="attrs.style as StyleValue"
   >
     <InputLabel
       v-if="props.label || $slots.label"
@@ -130,6 +130,7 @@
 
 <script setup lang="ts">
 import { computed, ref, useAttrs, useSlots, watchEffect, nextTick } from 'vue'
+import type { StyleValue } from 'vue'
 import { useInputLabeling } from '../../composables/useInputLabeling'
 import { warnDeprecated } from '../../utils/warnDeprecated'
 import InputLabel from '../InputLabeling/InputLabel.vue'
