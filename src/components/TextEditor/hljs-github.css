@@ -1,0 +1,197 @@
+/* GitHub light / dark syntax-highlight theme for highlight.js.
+   Selector-agnostic: styles any <pre> containing hljs-annotated tokens.
+   Used by both the TipTap editor (CodeBlockComponent) and the chat Markdown renderer. */
+
+/* ── pre shell ────────────────────────────────────────────────── */
+.hljs-pre {
+  background: #f6f8fa;
+  color: #24292e;
+  font-family:
+    ui-monospace, Menlo, Monaco, 'Cascadia Mono', 'Segoe UI Mono',
+    'Roboto Mono', 'Oxygen Mono', 'Ubuntu Mono', 'Source Code Pro', 'Fira Mono',
+    'Droid Sans Mono', 'Consolas', 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 1.7;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--outline-gray-2);
+  caret-color: #24292e;
+}
+
+.hljs-pre code {
+  color: inherit;
+  padding: 0;
+  background: none;
+  font-size: inherit;
+}
+
+/* ── GitHub light tokens ──────────────────────────────────────── */
+.hljs-pre .hljs-doctag,
+.hljs-pre .hljs-keyword,
+.hljs-pre .hljs-meta .hljs-keyword,
+.hljs-pre .hljs-template-tag,
+.hljs-pre .hljs-template-variable,
+.hljs-pre .hljs-type,
+.hljs-pre .hljs-variable.language_ {
+  color: #d73a49;
+}
+
+.hljs-pre .hljs-title,
+.hljs-pre .hljs-title.class_,
+.hljs-pre .hljs-title.class_.inherited__,
+.hljs-pre .hljs-title.function_ {
+  color: #6f42c1;
+}
+
+.hljs-pre .hljs-attr,
+.hljs-pre .hljs-attribute,
+.hljs-pre .hljs-literal,
+.hljs-pre .hljs-meta,
+.hljs-pre .hljs-number,
+.hljs-pre .hljs-operator,
+.hljs-pre .hljs-variable,
+.hljs-pre .hljs-selector-attr,
+.hljs-pre .hljs-selector-class,
+.hljs-pre .hljs-selector-id {
+  color: #005cc5;
+}
+
+.hljs-pre .hljs-regexp,
+.hljs-pre .hljs-string,
+.hljs-pre .hljs-meta .hljs-string {
+  color: #032f62;
+}
+
+.hljs-pre .hljs-built_in,
+.hljs-pre .hljs-symbol {
+  color: #e36209;
+}
+
+.hljs-pre .hljs-comment,
+.hljs-pre .hljs-code,
+.hljs-pre .hljs-formula {
+  color: #6a737d;
+}
+
+.hljs-pre .hljs-name,
+.hljs-pre .hljs-quote,
+.hljs-pre .hljs-selector-tag,
+.hljs-pre .hljs-selector-pseudo {
+  color: #22863a;
+}
+
+.hljs-pre .hljs-subst {
+  color: #24292e;
+}
+.hljs-pre .hljs-section {
+  color: #005cc5;
+  font-weight: bold;
+}
+.hljs-pre .hljs-bullet {
+  color: #735c0f;
+}
+.hljs-pre .hljs-emphasis {
+  color: #24292e;
+  font-style: italic;
+}
+.hljs-pre .hljs-strong {
+  color: #24292e;
+  font-weight: 700;
+}
+.hljs-pre .hljs-addition {
+  color: #22863a;
+  background-color: #f0fff4;
+}
+.hljs-pre .hljs-deletion {
+  color: #b31d28;
+  background-color: #ffeef0;
+}
+
+/* ── pre shell — dark mode ───────────────────────────────────── */
+[data-theme='dark'] .hljs-pre {
+  background: #0d1117;
+  color: #c9d1d9;
+  caret-color: #c9d1d9;
+}
+
+/* ── GitHub dark tokens ──────────────────────────────────────── */
+[data-theme='dark'] .hljs-pre .hljs-doctag,
+[data-theme='dark'] .hljs-pre .hljs-keyword,
+[data-theme='dark'] .hljs-pre .hljs-meta .hljs-keyword,
+[data-theme='dark'] .hljs-pre .hljs-template-tag,
+[data-theme='dark'] .hljs-pre .hljs-template-variable,
+[data-theme='dark'] .hljs-pre .hljs-type,
+[data-theme='dark'] .hljs-pre .hljs-variable.language_ {
+  color: #ff7b72;
+}
+
+[data-theme='dark'] .hljs-pre .hljs-title,
+[data-theme='dark'] .hljs-pre .hljs-title.class_,
+[data-theme='dark'] .hljs-pre .hljs-title.class_.inherited__,
+[data-theme='dark'] .hljs-pre .hljs-title.function_ {
+  color: #d2a8ff;
+}
+
+[data-theme='dark'] .hljs-pre .hljs-attr,
+[data-theme='dark'] .hljs-pre .hljs-attribute,
+[data-theme='dark'] .hljs-pre .hljs-literal,
+[data-theme='dark'] .hljs-pre .hljs-meta,
+[data-theme='dark'] .hljs-pre .hljs-number,
+[data-theme='dark'] .hljs-pre .hljs-operator,
+[data-theme='dark'] .hljs-pre .hljs-variable,
+[data-theme='dark'] .hljs-pre .hljs-selector-attr,
+[data-theme='dark'] .hljs-pre .hljs-selector-class,
+[data-theme='dark'] .hljs-pre .hljs-selector-id {
+  color: #79c0ff;
+}
+
+[data-theme='dark'] .hljs-pre .hljs-regexp,
+[data-theme='dark'] .hljs-pre .hljs-string,
+[data-theme='dark'] .hljs-pre .hljs-meta .hljs-string {
+  color: #a5d6ff;
+}
+
+[data-theme='dark'] .hljs-pre .hljs-built_in,
+[data-theme='dark'] .hljs-pre .hljs-symbol {
+  color: #ffa657;
+}
+
+[data-theme='dark'] .hljs-pre .hljs-comment,
+[data-theme='dark'] .hljs-pre .hljs-code,
+[data-theme='dark'] .hljs-pre .hljs-formula {
+  color: #8b949e;
+}
+
+[data-theme='dark'] .hljs-pre .hljs-name,
+[data-theme='dark'] .hljs-pre .hljs-quote,
+[data-theme='dark'] .hljs-pre .hljs-selector-tag,
+[data-theme='dark'] .hljs-pre .hljs-selector-pseudo {
+  color: #7ee787;
+}
+
+[data-theme='dark'] .hljs-pre .hljs-subst {
+  color: #c9d1d9;
+}
+[data-theme='dark'] .hljs-pre .hljs-section {
+  color: #1f6feb;
+  font-weight: bold;
+}
+[data-theme='dark'] .hljs-pre .hljs-bullet {
+  color: #f2cc60;
+}
+[data-theme='dark'] .hljs-pre .hljs-emphasis {
+  color: #c9d1d9;
+  font-style: italic;
+}
+[data-theme='dark'] .hljs-pre .hljs-strong {
+  color: #c9d1d9;
+  font-weight: 700;
+}
+[data-theme='dark'] .hljs-pre .hljs-addition {
+  color: #aff5b4;
+  background-color: #033a16;
+}
+[data-theme='dark'] .hljs-pre .hljs-deletion {
+  color: #ffdcd7;
+  background-color: #67060c;
+}
