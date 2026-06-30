@@ -104,10 +104,8 @@ export function useFloatingWindow(
   }
 
   function anchorBottomRight() {
-    x.value = viewportWidth.value - width.value - EDGE_MARGIN
-    y.value = viewportHeight.value - height.value - EDGE_MARGIN
-    x.value = clamp(x.value, 0, viewportWidth.value - 80)
-    y.value = clamp(y.value, 0, viewportHeight.value - 40)
+    x.value = clamp(viewportWidth.value - width.value - EDGE_MARGIN, 0, viewportWidth.value - width.value)
+    y.value = clamp(viewportHeight.value - height.value - EDGE_MARGIN, 0, viewportHeight.value - height.value)
   }
 
   const dock = () => setMode('docked')
@@ -135,8 +133,8 @@ export function useFloatingWindow(
     isDragging.value = true
     const origin = { pointerX: event.clientX, pointerY: event.clientY, x: x.value, y: y.value }
     const stopMove = useEventListener('pointermove', (e: PointerEvent) => {
-      x.value = clamp(origin.x + e.clientX - origin.pointerX, 0, viewportWidth.value - 80)
-      y.value = clamp(origin.y + e.clientY - origin.pointerY, 0, viewportHeight.value - 40)
+      x.value = clamp(origin.x + e.clientX - origin.pointerX, 0, viewportWidth.value - width.value)
+      y.value = clamp(origin.y + e.clientY - origin.pointerY, 0, viewportHeight.value - height.value)
     })
     const stopDrag = () => {
       isDragging.value = false
