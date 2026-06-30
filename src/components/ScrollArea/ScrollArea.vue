@@ -3,7 +3,7 @@
     :scroll-hide-delay="scrollHideDelay"
     class="relative overflow-hidden"
   >
-    <ScrollAreaViewport :class="['h-full w-full', viewportClass]">
+    <ScrollAreaViewport ref="viewport" :class="['h-full w-full', viewportClass]">
       <slot />
     </ScrollAreaViewport>
     <ScrollBar v-if="orientation !== 'horizontal'" orientation="vertical" />
@@ -16,6 +16,7 @@
 </template>
 
 <script setup lang="ts">
+import { computed, ref } from 'vue'
 import { ScrollAreaCorner, ScrollAreaRoot, ScrollAreaViewport } from 'reka-ui'
 import ScrollBar from './ScrollBar.vue'
 
@@ -30,4 +31,13 @@ withDefaults(
   }>(),
   { orientation: 'vertical', scrollHideDelay: 600 },
 )
+
+const viewport = ref<InstanceType<typeof ScrollAreaViewport>>()
+
+// Expose the actual scrolling element so consumers can drive virtualization
+// (e.g. @vueuse useVirtualList) against the real scroll container rather than
+// adding a second nested scroller.
+defineExpose({
+  viewportElement: computed(() => viewport.value?.viewportElement ?? null),
+})
 </script>

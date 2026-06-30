@@ -1,6 +1,6 @@
 <template>
   <!-- Fixed (non-scrolling) header region of a panel. -->
-  <div class="shrink-0 px-8 pt-8">
+  <div class="shrink-0 px-[4.4rem] pt-10">
     <slot>
       <div class="flex items-start justify-between gap-4">
         <div class="flex min-w-0 flex-col gap-1">
