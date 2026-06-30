@@ -6,12 +6,7 @@ import {
   type CSSProperties,
   type Ref,
 } from 'vue'
-import {
-  useDraggable,
-  useEventListener,
-  useStorage,
-  useWindowSize,
-} from '@vueuse/core'
+import { useEventListener, useStorage, useWindowSize } from '@vueuse/core'
 import type {
   FloatingWindowOptions,
   Rect,
@@ -20,22 +15,12 @@ import type {
 } from './types'
 
 const TRAY_WIDTH = 320
-// Gap from the viewport edge when parked in the bottom-right corner.
 const EDGE_MARGIN = 24
-// Default floating size when a window pops out, absent any saved rect. Resizable
-// from there; the docked footprint is set by the host container, not these.
 const DEFAULT_WIDTH = 460
 const DEFAULT_HEIGHT = 520
-// Smallest the panel can be resized to.
 const MIN_WIDTH = 380
 const MIN_HEIGHT = 300
 
-// Only one window may be detached (floating or minimized) at a time. Opening a
-// new one pins the previous, like a single chat / mail composer. The active
-// window registers its `dock()` here so a newcomer can pin it; a global rule
-// keyed off `BODY_CLASS` lifts the popover layer above the detached window
-// (reka-ui teleports popovers to <body> at z-index:auto, which would otherwise
-// sit behind it).
 const BODY_CLASS = 'has-floating-window'
 let activeDocker: (() => void) | null = null
 
@@ -52,10 +37,9 @@ function clamp(value: number, min: number, max: number): number {
  * Headless drag + resize + window-state engine for FloatingWindow.
  *
  * Owns the geometry (x/y/width/height), the `mode` state machine, viewport
- * clamping and persistence. The shell component renders chrome and binds
- * `style`; this composable holds no markup. Drag is delegated to VueUse's
- * `useDraggable` and is only enabled while floating. Resize is a small custom
- * pointer loop, since VueUse has no resize composable.
+ * clamping and persistence. Drag and resize both use raw pointer events with
+ * `setPointerCapture` so the pointer never escapes to background images or
+ * links — no jank, no native drag interference.
  */
 export function useFloatingWindow(
   panel: Ref<HTMLElement | null>,
@@ -77,25 +61,14 @@ export function useFloatingWindow(
     : ref({ mode: initialMode, rect: fallback })
 
   const mode = ref<WindowMode>(saved.value.mode)
+  const x = ref(saved.value.rect.x)
+  const y = ref(saved.value.rect.y)
   const width = ref(saved.value.rect.width)
   const height = ref(saved.value.rect.height)
+  const isDragging = ref(false)
   const isResizing = ref(false)
 
   const isFloating = computed(() => mode.value === 'floating')
-
-  function clampPosition() {
-    x.value = clamp(x.value, 0, viewportWidth.value - 80)
-    y.value = clamp(y.value, 0, viewportHeight.value - 40)
-  }
-
-  const { x, y, isDragging } = useDraggable(panel, {
-    handle,
-    initialValue: { x: saved.value.rect.x, y: saved.value.rect.y },
-    disabled: computed(() => !isFloating.value),
-    preventDefault: true,
-    onMove: clampPosition,
-    onEnd: persist,
-  })
 
   const style = computed<CSSProperties>(() => {
     if (mode.value === 'docked') return {}
@@ -121,12 +94,7 @@ export function useFloatingWindow(
     if (!storageKey) return
     saved.value = {
       mode: mode.value,
-      rect: {
-        x: x.value,
-        y: y.value,
-        width: width.value,
-        height: height.value,
-      },
+      rect: { x: x.value, y: y.value, width: width.value, height: height.value },
     }
   }
 
@@ -135,55 +103,60 @@ export function useFloatingWindow(
     persist()
   }
 
-  /** Park the window in the bottom-right corner, like a chat / mail composer. */
   function anchorBottomRight() {
-    x.value = viewportWidth.value - width.value - EDGE_MARGIN
-    y.value = viewportHeight.value - height.value - EDGE_MARGIN
-    clampPosition()
+    x.value = clamp(viewportWidth.value - width.value - EDGE_MARGIN, 0, viewportWidth.value - width.value)
+    y.value = clamp(viewportHeight.value - height.value - EDGE_MARGIN, 0, viewportHeight.value - height.value)
   }
 
   const dock = () => setMode('docked')
   const minimize = () => setMode('minimized')
 
-  /** Pop the window out, parked in the bottom-right at its floating size. */
   function float() {
     anchorBottomRight()
     setMode('floating')
   }
   const expandFromTray = float
 
-  // Single detached window: when this one detaches it pins whichever window was
-  // detached before; when it docks it clears itself from the active slot.
-  watch(
-    () => mode.value !== 'docked',
-    (detached) => {
-      if (detached) {
-        if (activeDocker && activeDocker !== dock) activeDocker()
-        setActiveDocker(dock)
-      } else if (activeDocker === dock) {
-        setActiveDocker(null)
-      }
-    },
-    { immediate: true },
-  )
-  onScopeDispose(() => {
-    if (activeDocker === dock) setActiveDocker(null)
-  })
-
-  /** Resize by a fixed delta, the keyboard path on the bottom-right corner. */
-  function resizeBy(dx: number, dy: number) {
-    width.value = clamp(width.value + dx, MIN_WIDTH, viewportWidth.value)
-    height.value = clamp(height.value + dy, MIN_HEIGHT, viewportHeight.value)
-    persist()
+  /**
+   * Begin a pointer drag from the title-bar handle. `setPointerCapture` routes
+   * all subsequent pointer events to the handle element, so the pointer never
+   * reaches background images or links — no native drag interference or jank.
+   */
+  function startDrag(event: PointerEvent) {
+    if (!isFloating.value) return
+    // Bail if the click originated on an interactive element inside the header
+    // (button, link, input…) so their own click handlers still fire.
+    if ((event.target as HTMLElement).closest('button, a, input, select, textarea, [role="button"]')) return
+    event.preventDefault()
+    // ponytail: best-effort; synthetic test events have no registered pointer id
+    try { ;(event.currentTarget as HTMLElement).setPointerCapture(event.pointerId) } catch {}
+    isDragging.value = true
+    const origin = { pointerX: event.clientX, pointerY: event.clientY, x: x.value, y: y.value }
+    const stopMove = useEventListener('pointermove', (e: PointerEvent) => {
+      x.value = clamp(origin.x + e.clientX - origin.pointerX, 0, viewportWidth.value - width.value)
+      y.value = clamp(origin.y + e.clientY - origin.pointerY, 0, viewportHeight.value - height.value)
+    })
+    const stopDrag = () => {
+      isDragging.value = false
+      persist()
+      stopMove()
+      stopUp()
+      stopCancel()
+    }
+    const stopUp = useEventListener('pointerup', stopDrag)
+    const stopCancel = useEventListener('pointercancel', stopDrag)
   }
 
   /**
    * Begin a pointer resize from an edge or corner. `dir` says which edges move;
-   * it defaults to the bottom-right corner. Dragging a top/left edge also shifts
-   * the panel's origin so the opposite edge stays anchored.
+   * dragging a top/left edge also shifts the panel's origin so the opposite
+   * edge stays anchored. Uses the same `setPointerCapture` pattern as `startDrag`.
    */
   function startResize(event: PointerEvent, dir: ResizeDir = { x: 1, y: 1 }) {
     isResizing.value = true
+    event.preventDefault()
+    // ponytail: best-effort; synthetic test events have no registered pointer id
+    try { ;(event.currentTarget as HTMLElement).setPointerCapture(event.pointerId) } catch {}
     const origin = {
       pointerX: event.clientX,
       pointerY: event.clientY,
@@ -202,27 +175,45 @@ export function useFloatingWindow(
         x.value = origin.x + origin.width - width.value
       }
       if (dir.y === 1) {
-        height.value = clamp(
-          origin.height + dy,
-          MIN_HEIGHT,
-          viewportHeight.value,
-        )
+        height.value = clamp(origin.height + dy, MIN_HEIGHT, viewportHeight.value)
       } else if (dir.y === -1) {
-        height.value = clamp(
-          origin.height - dy,
-          MIN_HEIGHT,
-          viewportHeight.value,
-        )
+        height.value = clamp(origin.height - dy, MIN_HEIGHT, viewportHeight.value)
         y.value = origin.y + origin.height - height.value
       }
     })
-    const stopUp = useEventListener('pointerup', () => {
+    const stopResize = () => {
       isResizing.value = false
       persist()
       stopMove()
       stopUp()
-    })
+      stopCancel()
+    }
+    const stopUp = useEventListener('pointerup', stopResize)
+    const stopCancel = useEventListener('pointercancel', stopResize)
   }
+
+  /** Resize by a fixed delta — the keyboard path on the bottom-right corner. */
+  function resizeBy(dx: number, dy: number) {
+    width.value = clamp(width.value + dx, MIN_WIDTH, viewportWidth.value)
+    height.value = clamp(height.value + dy, MIN_HEIGHT, viewportHeight.value)
+    persist()
+  }
+
+  watch(
+    () => mode.value !== 'docked',
+    (detached) => {
+      if (detached) {
+        if (activeDocker && activeDocker !== dock) activeDocker()
+        setActiveDocker(dock)
+      } else if (activeDocker === dock) {
+        setActiveDocker(null)
+      }
+    },
+    { immediate: true },
+  )
+  onScopeDispose(() => {
+    if (activeDocker === dock) setActiveDocker(null)
+  })
 
   return {
     mode,
@@ -238,6 +229,7 @@ export function useFloatingWindow(
     minimize,
     expandFromTray,
     setMode,
+    startDrag,
     startResize,
     resizeBy,
   }
