@@ -1,9 +1,6 @@
 <template>
   <div class="inline-flex flex-col">
-    <div
-      class="inline-flex gap-2 rounded transition"
-      :class="rowClasses"
-    >
+    <div class="inline-flex gap-2 rounded transition" :class="rowClasses">
       <input
         class="rounded-sm mt-[1px] bg-surface-base"
         :class="inputClasses"
@@ -26,6 +23,7 @@
         :for-id="inputId"
         :label="props.label"
         :required="props.required"
+        color="gray-7"
         :class="labelClasses"
       >
         <template v-if="$slots.label" #default="slotProps">
@@ -41,11 +39,7 @@
       >
         <slot v-if="$slots.description" name="description" />
       </InputDescription>
-      <InputError
-        v-if="hasError"
-        :id="errorMessageId"
-        :lines="errorLines"
-      />
+      <InputError v-if="hasError" :id="errorMessageId" :lines="errorLines" />
     </div>
   </div>
 </template>
@@ -106,15 +100,7 @@ const {
 })
 
 const labelClasses = computed(() => {
-  return [
-    {
-      sm: 'text-base',
-      md: 'text-lg',
-    }[props.size],
-    'font-medium',
-    props.disabled ? 'text-ink-gray-4' : 'text-ink-gray-8',
-    'select-none',
-  ]
+  return 'select-none'
 })
 
 const rowClasses = computed(() => {

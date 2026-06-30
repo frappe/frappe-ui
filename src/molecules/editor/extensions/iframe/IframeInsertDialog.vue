@@ -6,7 +6,7 @@
   >
     <template #body-content>
       <div>
-        <label class="mb-2 block text-sm-medium text-ink-gray-7">
+        <label class="mb-2 block text-base text-ink-gray-5">
           URL or Embed Code
         </label>
         <Textarea

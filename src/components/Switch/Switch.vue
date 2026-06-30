@@ -42,10 +42,7 @@
         <SwitchThumb :class="switchCircleClasses" />
       </SwitchRoot>
     </div>
-    <div
-      v-if="showDescription || hasError || $slots.description"
-      class="mt-1"
-    >
+    <div v-if="showDescription || hasError || $slots.description" class="mt-1">
       <InputDescription
         v-if="showDescription || $slots.description"
         :id="descriptionId"
@@ -53,11 +50,7 @@
       >
         <slot v-if="$slots.description" name="description" />
       </InputDescription>
-      <InputError
-        v-if="hasError"
-        :id="errorMessageId"
-        :lines="errorLines"
-      />
+      <InputError v-if="hasError" :id="errorMessageId" :lines="errorLines" />
     </div>
   </div>
 </template>
@@ -153,14 +146,7 @@ const switchCircleClasses = computed(() => {
 const iconClasses = 'me-2 size-4 flex-shrink-0 text-ink-gray-6'
 
 const switchLabelClasses = computed(() => {
-  return [
-    'font-medium leading-normal',
-    props.disabled && !props.description
-      ? 'text-ink-gray-4'
-      : 'text-ink-gray-8',
-    props.size === 'md' ? 'text-lg' : 'text-base',
-    props.labelClasses,
-  ]
+  return 'leading-normal'
 })
 
 const switchGroupClasses = computed(() => {
@@ -169,9 +155,7 @@ const switchGroupClasses = computed(() => {
   if (!hasLabel && !hasDescription) return undefined
   const classes = ['flex justify-between']
   if (!hasDescription) {
-    classes.push(
-      'group items-center gap-x-3 py-1.5 cursor-pointer rounded',
-    )
+    classes.push('group items-center gap-x-3 py-1.5 cursor-pointer rounded')
 
     if (props.disabled) classes.push('cursor-not-allowed')
   } else {

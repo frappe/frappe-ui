@@ -3,7 +3,7 @@
     v-if="$slots.default || description"
     :id="id"
     data-slot="description"
-    class="text-p-sm text-ink-gray-6"
+    class="text-p-sm text-ink-gray-5"
   >
     <slot>{{ description }}</slot>
   </p>

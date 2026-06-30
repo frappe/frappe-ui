@@ -2,14 +2,13 @@
   <LabelingWrapper
     :enabled="hasLabeling"
     :wrapper-class="['space-y-1', attrs.class]"
-    :wrapper-style="attrs.style"
+    :wrapper-style="attrs.style as any"
   >
     <InputLabel
       v-if="props.label || $slots.label"
       :id="labelId"
       :label="props.label"
       :required="props.required"
-      class="text-p-sm-medium text-ink-gray-7"
     >
       <template v-if="$slots.label" #default="slotProps">
         <slot name="label" v-bind="slotProps" />
@@ -44,10 +43,7 @@
         :key="index"
         type="button"
         class="rating-star relative inline-flex shrink-0 rounded-sm"
-        :class="[
-          sizeClass,
-          isDisabled ? 'cursor-default' : 'cursor-pointer',
-        ]"
+        :class="[sizeClass, isDisabled ? 'cursor-default' : 'cursor-pointer']"
         data-slot="star"
         :data-index="index"
         :data-state="starState(index)"

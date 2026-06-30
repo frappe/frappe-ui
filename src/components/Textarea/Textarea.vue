@@ -2,7 +2,7 @@
   <LabelingWrapper
     :enabled="hasLabeling"
     :wrapper-class="['space-y-1.5', attrs.class]"
-    :wrapper-style="attrs.style"
+    :wrapper-style="attrs.style as any"
   >
     <InputLabel
       v-if="props.label || $slots.label"
@@ -10,7 +10,6 @@
       :for-id="inputId"
       :label="props.label"
       :required="props.required"
-      class="text-p-sm-medium text-ink-gray-7"
     >
       <template v-if="$slots.label" #default="slotProps">
         <slot name="label" v-bind="slotProps" />
@@ -42,11 +41,7 @@
     >
       <slot v-if="$slots.description" name="description" />
     </InputDescription>
-    <InputError
-      v-if="hasError"
-      :id="errorMessageId"
-      :lines="errorLines"
-    />
+    <InputError v-if="hasError" :id="errorMessageId" :lines="errorLines" />
   </LabelingWrapper>
 </template>
 
@@ -102,10 +97,10 @@ const {
 const hasLabeling = computed(() => {
   return Boolean(
     props.label ||
-      slots.label ||
-      showDescription.value ||
-      slots.description ||
-      hasError.value,
+    slots.label ||
+    showDescription.value ||
+    slots.description ||
+    hasError.value,
   )
 })
 
