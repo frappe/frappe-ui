@@ -24,6 +24,7 @@
           isFloating ? 'cursor-move' : '',
           $slots.header ? '' : 'gap-2 px-2.5 py-1.5',
         ]"
+        @pointerdown="startDrag"
       >
         <!-- Host-owned header: takes the whole row, supplies its own controls. -->
         <div v-if="$slots.header" class="min-w-0 flex-1">
@@ -113,7 +114,7 @@
           type="button"
           data-resize="se"
           aria-label="Resize window"
-          class="absolute -bottom-1 -right-1 size-3 cursor-nwse-resize rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
+          class="absolute -bottom-1 -right-1 z-10 size-4 cursor-nwse-resize rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
           @pointerdown.prevent="startResize($event, { x: 1, y: 1 })"
           @keydown="onResizeKey"
         />
@@ -195,6 +196,7 @@ const handle = ref<HTMLElement | null>(null)
 const {
   mode,
   style,
+  startDrag,
   startResize,
   resizeBy,
   dock,
@@ -245,17 +247,17 @@ const resizeHandles: ResizeHandle[] = [
   {
     name: 'nw',
     dir: { x: -1, y: -1 },
-    class: '-top-1 -left-1 size-3 cursor-nwse-resize',
+    class: '-top-1 -left-1 size-4 z-10 cursor-nwse-resize',
   },
   {
     name: 'ne',
     dir: { x: 1, y: -1 },
-    class: '-top-1 -right-1 size-3 cursor-nesw-resize',
+    class: '-top-1 -right-1 size-4 z-10 cursor-nesw-resize',
   },
   {
     name: 'sw',
     dir: { x: -1, y: 1 },
-    class: '-bottom-1 -left-1 size-3 cursor-nesw-resize',
+    class: '-bottom-1 -left-1 size-4 z-10 cursor-nesw-resize',
   },
 ]
 
