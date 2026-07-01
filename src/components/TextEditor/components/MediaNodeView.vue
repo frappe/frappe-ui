@@ -381,7 +381,7 @@ const wrapperClasses = (float: string) => [
       </div>
       <div v-else class="flex flex-col items-center justify-center gap-2 border rounded text-ink-gray-6 text-sm py-5 max-w-full" :class="{ 'border-none': selected }" :style="{ width: node.attrs.width + 'px', aspectRatio: node.attrs.width && node.attrs.height ? `${node.attrs.width} / ${node.attrs.height}` : undefined,}">
         <div class="text-ink-gray-8 text-base">This {{ isVideo ? 'video' : 'image' }} hasn't yet been uploaded.</div>
-        <div v-if="node.attrs.error" class="text-sm text-ink-red-8">Upload failed: {{ node.attrs.error }}</div>
+        <div v-if="node.attrs.error" class="text-sm text-ink-red-8">{{ node.attrs.error }}</div>
       </div>
 
       <input v-if="(node.attrs.alt || showCaption) && !node.attrs.error" v-model="caption"
