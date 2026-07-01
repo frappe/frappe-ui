@@ -2,6 +2,7 @@ import type { SelectionSize, SelectionVariant } from '../shared/selection/utils'
 
 export {
   inputFontSizeClasses,
+  itemClasses,
   itemRootSizeClasses,
   toItemListSize,
   triggerSizeClasses,

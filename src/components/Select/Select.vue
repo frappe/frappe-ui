@@ -33,6 +33,7 @@ import PopoverPanel from '../shared/popover/PopoverPanel.vue'
 import {
   EMPTY_VALUE_PREFIX,
   inputFontSizeClasses,
+  itemClasses,
   itemRootSizeClasses,
   toItemListSize,
   triggerBaseClasses,
@@ -366,8 +367,7 @@ defineSlots<SelectSlots>()
                   :disabled="internalOption.option.disabled"
                   :value="internalOption.internalValue"
                   data-slot="item"
-                  :class="itemRootClasses"
-                  class="select-none rounded border-0 text-base text-ink-gray-9 data-[disabled]:text-ink-gray-4 data-[highlighted]:bg-surface-gray-2 data-[state=checked]:bg-surface-gray-3 data-[highlighted]:data-[state=checked]:bg-surface-gray-4"
+                  :class="[itemClasses, itemRootClasses]"
                 >
                   <ItemListRow
                     :size="itemSize"

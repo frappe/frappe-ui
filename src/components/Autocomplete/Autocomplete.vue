@@ -118,9 +118,9 @@
                 >
                   <li
                     :class="[
-                      'flex cursor-pointer items-center justify-between rounded px-2.5 py-1.5 text-base',
+                      'flex cursor-pointer items-center justify-between rounded px-2.5 py-1.5 text-base transition-colors duration-100 ease-out',
                       {
-                        'bg-surface-gray-3': active,
+                        'bg-surface-alpha-gray-2': active,
                         'opacity-50': option.disabled,
                       },
                     ]"
