@@ -89,7 +89,10 @@ const emit = defineEmits<{ click: [event: MouseEvent] }>()
 const showIndicator = computed(() => props.variant === 'tile' && props.active)
 
 const cellClasses = computed(() => [
-  'relative flex size-7 shrink-0 items-center justify-center rounded-[7px] text-base transition focus-visible:ring-0 focus-visible:focus-ring',
+  'relative flex size-7 shrink-0 items-center justify-center text-base transition focus-visible:ring-0 focus-visible:focus-ring',
+  // `tile` uses the community-tile radius; `ghost` mirrors frappe-ui's icon
+  // button (rounded-4 = 8px).
+  props.variant === 'tile' ? 'rounded-[7px]' : 'rounded-4',
   props.variant === 'tile'
     ? props.active
       ? 'bg-surface-gray-4'
