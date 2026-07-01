@@ -1,10 +1,18 @@
 name: Bump Beta Version
 
-# When a PR labeled `beta-release` is merged into main, bump the beta
-# prerelease in package.json (e.g. 1.0.0-beta.0 -> 1.0.0-beta.1) and push it.
-# The push triggers Tests -> "Publish on NPM" (publish.yml), which detects the
-# version change and publishes to the matching dist-tag (beta).
+# Bump the beta prerelease in package.json (e.g. 1.0.0-beta.0 -> 1.0.0-beta.1)
+# and push it. The push triggers Tests -> "Publish on NPM" (publish.yml), which
+# detects the version change and publishes to the matching dist-tag (beta).
+#
+# Triggers on a manual `workflow_dispatch`, or when a `beta-release`-labeled PR
+# is merged into main. Prefer the manual dispatch for fork contributions: a PR
+# merged from a fork does not get repository secrets (RELEASE_TOKEN), so the
+# pull_request path can't publish for it.
 on:
+  # Manual trigger: run the bump from main directly. Needed because a labeled PR
+  # merged from a FORK does not receive repository secrets (RELEASE_TOKEN), so the
+  # pull_request path below silently can't publish for fork contributions.
+  workflow_dispatch:
   pull_request:
     types: [closed]
     branches: [main]
@@ -16,9 +24,12 @@ concurrency:
 
 jobs:
   bump-beta:
+    # Run on a manual dispatch, or when a `beta-release`-labeled PR is merged.
+    # (A dispatch event has no `pull_request`, so gate the label check on it.)
     if: >-
-      github.event.pull_request.merged == true &&
-      contains(github.event.pull_request.labels.*.name, 'beta-release')
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.pull_request.merged == true &&
+      contains(github.event.pull_request.labels.*.name, 'beta-release'))
     runs-on: ubuntu-latest
     permissions:
       contents: write # push the version-bump commit back to main
