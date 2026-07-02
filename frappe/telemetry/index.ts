@@ -11,6 +11,7 @@ import {
 } from './pulse.ts'
 
 let client: PulseClient | null = null
+let removePageviewHook: (() => void) | null = null
 
 const appName = ref<string>()
 const isEnabled = ref(false)
@@ -71,6 +72,12 @@ export default {
     const getContext =
       options.getContext || (() => ({ user: fetched.user, team: fetched.team }))
 
+    // Reinstalls (tests, HMR, SSR-per-request) reuse the module singletons, so tear
+    // down the previous client's flush timer and router hook before replacing them.
+    client?.stop()
+    removePageviewHook?.()
+    removePageviewHook = null
+
     client = await loadPulseClient({
       host: options.host ?? fetched.host,
       apiKey: options.apiKey ?? fetched.key,
@@ -83,7 +90,9 @@ export default {
     if (!client) return
 
     isEnabled.value = await client.init()
-    if (isEnabled.value) setupPageviewTracking(options, fetched.site_age)
+    if (isEnabled.value) {
+      removePageviewHook = setupPageviewTracking(options, fetched.site_age)
+    }
   },
 }
 
@@ -92,8 +101,8 @@ export default {
 function setupPageviewTracking(
   options: TelemetryPluginOptions,
   site_age: number | undefined,
-) {
-  if (!options.router || (site_age && site_age > 15)) return
+): (() => void) | null {
+  if (!options.router || (site_age && site_age > 15)) return null
 
   const scrub = options.scrubRoute || defaultScrubRoute
   let lastFullPath = ''
@@ -109,5 +118,5 @@ function setupPageviewTracking(
   options.router.isReady().then(() => {
     if (options.router) capturePageview(options.router.currentRoute.value)
   })
-  options.router.afterEach((to) => capturePageview(to))
+  return options.router.afterEach((to) => capturePageview(to))
 }
