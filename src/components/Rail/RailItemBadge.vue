@@ -15,14 +15,14 @@
     v-else-if="showDot"
     data-slot="rail-item-badge-dot"
     aria-hidden="true"
-    class="pointer-events-none absolute -right-0.5 -top-0.5 block size-2 rounded-full border border-[var(--surface-sidebar)] bg-surface-red-6"
+    class="pointer-events-none absolute -right-0.5 -top-0.5 block size-2 rounded-full border border-[var(--surface-base)] bg-surface-red-6"
   />
 
   <Teleport to="body">
     <span
       v-if="showCount"
       ref="floatingEl"
-      class="pointer-events-none inline-flex rounded-full border border-[var(--surface-sidebar)]"
+      class="pointer-events-none inline-flex rounded-full border border-[var(--surface-base)]"
       :class="{ invisible: !isPositioned }"
       :style="floatingStyles"
     >
