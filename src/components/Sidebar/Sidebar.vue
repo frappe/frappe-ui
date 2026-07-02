@@ -25,6 +25,9 @@
       :items="section.items"
       :collapsible="section.collapsible"
     >
+      <template v-if="$slots['section-header']" #section-header="headerProps">
+        <slot name="section-header" v-bind="headerProps"></slot>
+      </template>
       <template #sidebar-item="{ item, isCollapsed }">
         <slot name="sidebar-item" :item :isCollapsed></slot>
       </template>

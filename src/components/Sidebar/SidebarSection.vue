@@ -1,36 +1,45 @@
 <template>
   <div class="flex flex-col mt-2">
-    <div
-      v-if="props.label"
-      class="relative flex items-center gap-1 px-2 py-1.5"
-      :class="props.collapsible ? 'cursor-pointer' : ''"
-      @click="props.collapsible ? (isCollapsed = !isCollapsed) : null"
+    <slot
+      name="section-header"
+      :label="props.label"
+      :collapsible="props.collapsible"
+      :isSidebarCollapsed="isSidebarCollapsed"
+      :isOpen="!isCollapsed"
+      :toggle="toggle"
     >
-      <h3
-        class="h-4 text-sm text-ink-gray-5 transition-all duration-300 ease-in-out"
-        :class="
-          isSidebarCollapsed
-            ? 'w-0 overflow-hidden opacity-0'
-            : 'w-auto opacity-100'
-        "
-      >
-        {{ props.label }}
-      </h3>
-      <div v-if="props.collapsible">
-        <span
-          v-if="!isSidebarCollapsed"
-          class="lucide-chevron-right size-4 text-ink-gray-5 transition-all duration-300 ease-in-out"
-          :class="{ 'rotate-90': !isCollapsed }"
-        />
-      </div>
       <div
-        v-if="isSidebarCollapsed"
-        class="absolute top-0 left-0 flex h-full w-full items-center justify-center transition-all duration-300 ease-in-out"
-        :class="isSidebarCollapsed ? 'opacity-100' : 'opacity-0'"
+        v-if="props.label"
+        class="relative flex items-center gap-1 px-2 py-1.5"
+        :class="props.collapsible ? 'cursor-pointer' : ''"
+        @click="props.collapsible ? toggle() : null"
       >
-        <hr class="w-full border-t border-ink-gray-3" />
+        <h3
+          class="h-4 text-sm text-ink-gray-5 transition-all duration-300 ease-in-out"
+          :class="
+            isSidebarCollapsed
+              ? 'w-0 overflow-hidden opacity-0'
+              : 'w-auto opacity-100'
+          "
+        >
+          {{ props.label }}
+        </h3>
+        <div v-if="props.collapsible">
+          <span
+            v-if="!isSidebarCollapsed"
+            class="lucide-chevron-right size-4 text-ink-gray-5 transition-all duration-300 ease-in-out"
+            :class="{ 'rotate-90': !isCollapsed }"
+          />
+        </div>
+        <div
+          v-if="isSidebarCollapsed"
+          class="absolute top-0 left-0 flex h-full w-full items-center justify-center transition-all duration-300 ease-in-out"
+          :class="isSidebarCollapsed ? 'opacity-100' : 'opacity-0'"
+        >
+          <hr class="w-full border-t border-ink-gray-3" />
+        </div>
       </div>
-    </div>
+    </slot>
     <transition
       enter-active-class="duration-300 ease-in"
       leave-active-class="duration-300 ease-[cubic-bezier(0, 1, 0.5, 1)]"
@@ -41,7 +50,11 @@
     >
       <nav v-if="!isCollapsed" class="flex flex-col gap-0.5">
         <template v-for="item in visibleItems" :key="item.label">
-          <slot name="sidebar-item" :item="item" :isCollapsed="isSidebarCollapsed">
+          <slot
+            name="sidebar-item"
+            :item="item"
+            :isCollapsed="isSidebarCollapsed"
+          >
             <SidebarItem
               :label="item.label"
               :accessKey="item.accessKey"
@@ -65,9 +78,16 @@ import { SidebarSectionProps, sidebarCollapsedKey } from './types'
 
 const props = defineProps<SidebarSectionProps>()
 
-const isSidebarCollapsed = inject(sidebarCollapsedKey, computed(() => false))
+const isSidebarCollapsed = inject(
+  sidebarCollapsedKey,
+  computed(() => false),
+)
 const isCollapsed = ref(false)
 const visibleItems = computed(() =>
   props.items.filter((item) => toValue(item.condition) !== false),
 )
+
+function toggle() {
+  isCollapsed.value = !isCollapsed.value
+}
 </script>
