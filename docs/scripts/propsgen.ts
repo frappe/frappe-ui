@@ -21,6 +21,7 @@ const tsconfigChecker = createChecker(
 
 const SOURCE_ROOTS = [
   path.join(__dirname, '../../src/components'),
+  path.join(__dirname, '../../src/molecules'),
   path.join(__dirname, '../../frappe'),
 ]
 const AUTO_STORIES_START = '<!-- AUTO-GENERATED STORIES START -->'
@@ -305,6 +306,10 @@ function genFolderMetaTable(folder: string, components: ComponentMeta[]) {
   return markupStr
 }
 
+function pascalCase(name: string) {
+  return name.charAt(0).toUpperCase() + name.slice(1)
+}
+
 function getAvailableComponents(rootDir: string) {
   if (!fs.existsSync(rootDir)) return []
   return fs
@@ -312,6 +317,15 @@ function getAvailableComponents(rootDir: string) {
     .filter((entry) => entry.isDirectory())
     .map((entry) => entry.name)
     .filter((name) => {
+      // Molecule folders are lowercase (src/molecules/list → List.vue) and
+      // opt into generated docs via a colocated <folder>.md — this keeps
+      // folders with hand-written docs pages (editor) out of --all runs.
+      if (name !== pascalCase(name)) {
+        return (
+          fs.existsSync(path.join(rootDir, name, `${pascalCase(name)}.vue`)) &&
+          fs.existsSync(path.join(rootDir, name, `${name}.md`))
+        )
+      }
       return fs.existsSync(path.join(rootDir, name, `${name}.vue`))
     })
     .sort((a, b) => a.localeCompare(b))
@@ -347,10 +361,11 @@ function getDocumentables(): Documentable[] {
   const docs: Documentable[] = []
   for (const rootDir of SOURCE_ROOTS) {
     for (const folder of getAvailableComponents(rootDir)) {
+      const primary = pascalCase(folder)
       const fromIndex = getPublicComponentsFromIndex(rootDir, folder)
-      const candidates = fromIndex.length > 0 ? fromIndex : [folder]
+      const candidates = fromIndex.length > 0 ? fromIndex : [primary]
       const names = (
-        candidates.includes(folder) ? candidates : [folder, ...candidates]
+        candidates.includes(primary) ? candidates : [primary, ...candidates]
       ).filter((name) =>
         fs.existsSync(path.join(rootDir, folder, `${name}.vue`)),
       )
@@ -495,8 +510,8 @@ selectedFolders.forEach((folder) => {
     if (docs.length === 0) return
     // Primary first, then any sub-components in declaration order.
     const ordered = [
-      ...docs.filter((d) => d.name === d.folder),
-      ...docs.filter((d) => d.name !== d.folder),
+      ...docs.filter((d) => d.name === pascalCase(d.folder)),
+      ...docs.filter((d) => d.name !== pascalCase(d.folder)),
     ]
     const rootDir = ordered[0].rootDir
 

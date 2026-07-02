@@ -1,0 +1,97 @@
+/* Structural rules for the list family. Geometry only — colors and type live
+ * in the components as semantic-token classes.
+ *
+ * `--list-columns` and `--list-gap` are public styling hooks: apps override
+ * them with plain (responsive) classes on <List>. Every rule that sets a
+ * hook default is wrapped in :where() so any consumer class wins on
+ * specificity, regardless of stylesheet order. */
+
+:where([data-slot='list']) {
+  /* --list-columns-default carries the `columns` prop (inline style on the
+   * List). The indirection keeps --list-columns itself free for class
+   * overrides like `max-sm:[--list-columns:auto_minmax(0,1fr)_auto]`. */
+  --list-columns: var(--list-columns-default, auto minmax(0, 1fr) auto);
+}
+
+/* Attribute (not :where) specificity, so element-level resets — Tailwind
+ * preflight's `button { padding: 0 }` for button rows — don't beat the
+ * padding below. `text-align: start` undoes the UA button centering. */
+[data-slot='list-row'],
+[data-slot='list-header'] {
+  display: grid;
+  grid-template-columns: var(--list-columns);
+  column-gap: var(--list-gap, 0.5rem);
+  align-items: center;
+  position: relative;
+  text-align: start;
+  /* The checkbox column is not a grid track (a 0px track would still get a
+   * column gap next to it). It's start padding — 0px or 32px, set by the
+   * List — so grid line numbers never shift and the reveal is one animated
+   * padding. The checkbox itself is an overlay in the padding area. */
+  padding-inline-start: calc(
+    var(--list-checkbox-width, 0px) + var(--_list-row-pad, 0px)
+  );
+  padding-inline-end: var(--_list-row-pad, 0px);
+}
+
+:where([data-slot='list-row']) {
+  height: var(--list-row-height, auto);
+  /* padding animates the checkbox-column reveal; background-color fades the
+   * hover surface (a transition-colors class here would clobber the padding
+   * transition, so both live in one declaration). */
+  transition:
+    padding 200ms ease-out,
+    background-color 150ms;
+}
+
+/* Interactive rows get the rounded hover surface, so their content needs an
+ * inset from the surface edge. Override via --list-row-padding-x. */
+:where([data-slot='list-row'][data-interactive]) {
+  --_list-row-pad: var(--list-row-padding-x, 0.75rem);
+}
+
+:where([data-slot='list-row-checkbox']) {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  inset-inline-start: var(--_list-row-pad, 0px);
+  display: flex;
+  align-items: center;
+  width: 32px;
+  overflow: hidden;
+}
+
+/* Dividers are absolutely-positioned grid children: their grid-column
+ * placement (inset `2 / -1`, full `1 / -1` — set by ListRow) resolves
+ * against the shared template, so the inset divider starts at the content
+ * column's own edge with no magic offsets, without occupying cells that
+ * would derail the cells' auto-placement. */
+:where([data-slot='list-divider']) {
+  position: absolute;
+  grid-row: 1;
+  top: 0;
+  inset-inline-start: 0;
+  inset-inline-end: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+/* Between-ness is pure CSS: only a row following another row shows its
+ * divider-above. The first row never shows one, trailing non-row content
+ * (e.g. a "Load more" button) doesn't break it, and it keeps working inside
+ * the virtualizer wrapper because windowed rows stay siblings. */
+[data-slot='list-row'] [data-slot='list-divider'] {
+  opacity: 0;
+}
+[data-slot='list-row'] + [data-slot='list-row'] [data-slot='list-divider'] {
+  opacity: 1;
+}
+
+/* Hover hides both edges of the hovered row so the rounded hover surface
+ * floats free. Gated on data-interactive so static rows keep dividers. */
+[data-slot='list-row'][data-interactive]:hover [data-slot='list-divider'],
+[data-slot='list-row'][data-interactive]:hover
+  + [data-slot='list-row']
+  [data-slot='list-divider'] {
+  opacity: 0;
+}

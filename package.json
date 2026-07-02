@@ -56,6 +56,10 @@
       "import": "./src/molecules/editor/index.ts",
       "types": "./src/molecules/editor/index.ts"
     },
+    "./list": {
+      "import": "./src/molecules/list/index.ts",
+      "types": "./src/molecules/list/index.ts"
+    },
     "./code-editor": {
       "import": "./src/components/CodeEditor/index.ts",
       "types": "./src/components/CodeEditor/index.ts"
