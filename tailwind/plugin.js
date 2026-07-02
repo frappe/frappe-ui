@@ -219,6 +219,12 @@ export default plugin(
       },
       { values: theme('spacing') },
     )
+    // Grid tracks are arbitrary-only (no meaningful scale):
+    // `max-md:list-cols-[minmax(0,1fr)_auto]` instead of
+    // `max-md:[--list-columns:minmax(0,1fr)_auto]`.
+    matchUtilities({
+      'list-cols': (value) => ({ '--list-columns': value }),
+    })
   },
   {
     theme: {

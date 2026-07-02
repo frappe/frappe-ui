@@ -9,7 +9,8 @@
 :where([data-slot='list']) {
   /* --list-columns-default carries the `columns` prop (inline style on the
    * List). The indirection keeps --list-columns itself free for class
-   * overrides like `max-sm:[--list-columns:auto_minmax(0,1fr)_auto]`. */
+   * overrides like `max-sm:list-cols-[auto_minmax(0,1fr)_auto]` (the
+   * tailwind preset's sugar over the var). */
   --list-columns: var(--list-columns-default, auto minmax(0, 1fr) auto);
 }
 
