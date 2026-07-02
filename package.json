@@ -95,6 +95,9 @@
     "./editor-style.css": {
       "import": "./src/molecules/editor/style.css"
     },
+    "./list-style.css": {
+      "import": "./src/molecules/list/style.css"
+    },
     "./hljs-theme.css": {
       "import": "./src/components/TextEditor/hljs-github.css"
     },

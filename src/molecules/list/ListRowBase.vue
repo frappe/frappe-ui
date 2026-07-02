@@ -1,6 +1,6 @@
 <template>
-  <component
-    :is="tag"
+  <NativeElement
+    :tag="tag"
     data-slot="list-row"
     :role="context?.hasHeader.value ? 'row' : 'listitem'"
     :data-interactive="interactive || undefined"
@@ -8,7 +8,7 @@
     :type="tag === 'button' ? 'button' : undefined"
     :class="
       interactive &&
-      'w-full cursor-pointer select-none active:bg-surface-gray-2 sm:rounded-[10px] sm:hover:bg-surface-gray-1'
+      'cursor-pointer select-none active:bg-surface-gray-2 sm:rounded-[10px] sm:hover:bg-surface-gray-1'
     "
   >
     <slot />
@@ -38,13 +38,24 @@
       class="border-t border-outline-gray-1 transition-opacity"
       :style="{ gridColumn: divider === 'inset' ? '2 / -1' : '1 / -1' }"
     />
-  </component>
+  </NativeElement>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, defineComponent, h } from 'vue'
 import Checkbox from '../../components/Checkbox/Checkbox.vue'
 import { useListContext } from './list-context'
+
+// `<component :is="'button'">` resolves the string through the consumer app's
+// component registry (capitalized to 'Button'), so an app that globally
+// registers a Button component hijacks the row element. h() with a tag string
+// always creates the native element and never consults the registry.
+const NativeElement = defineComponent({
+  props: { tag: { type: String, required: true } },
+  setup(props, { slots }) {
+    return () => h(props.tag, null, slots.default?.())
+  },
+})
 
 const props = defineProps<{
   tag: 'a' | 'button' | 'div'

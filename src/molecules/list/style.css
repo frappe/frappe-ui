@@ -45,9 +45,12 @@
 }
 
 /* Interactive rows get the rounded hover surface, so their content needs an
- * inset from the surface edge. Override via --list-row-padding-x. */
+ * inset from the surface edge. Override via --list-row-padding-x. Width lives
+ * here (not as a class) so a consumer class can narrow a row — e.g. to leave
+ * room for an action button beside it. */
 :where([data-slot='list-row'][data-interactive]) {
   --_list-row-pad: var(--list-row-padding-x, 0.75rem);
+  width: 100%;
 }
 
 :where([data-slot='list-row-checkbox']) {

@@ -3,11 +3,21 @@
        navigate — with RouterLink's own handler in play, selection could not
        reliably preventDefault before it navigates. -->
   <RouterLink v-if="to" :to="to" custom v-slot="{ href, navigate }">
-    <ListRowBase tag="a" :href="href" :value="value" @click="onClick($event, navigate)">
+    <ListRowBase
+      tag="a"
+      :href="href"
+      :value="value"
+      @click="onClick($event, navigate)"
+    >
       <slot />
     </ListRowBase>
   </RouterLink>
-  <ListRowBase v-else :tag="hasClickListener ? 'button' : 'div'" :value="value" @click="onClick">
+  <ListRowBase
+    v-else
+    :tag="hasClickListener ? 'button' : 'div'"
+    :value="value"
+    @click="onClick"
+  >
     <slot />
   </ListRowBase>
 </template>
@@ -22,7 +32,8 @@ import type { ListRowProps } from './types'
 const props = defineProps<ListRowProps>()
 
 const emit = defineEmits<{
-  /** Fired on click when the row is not a link. */
+  /** Fired when the row is activated — before navigation for link rows,
+   *  never while selection mode has claimed the click. */
   (e: 'click', event: MouseEvent): void
 }>()
 
@@ -37,10 +48,7 @@ function onClick(event: MouseEvent, navigate?: (e?: MouseEvent) => void) {
     context.toggleSelection(props.value)
     return
   }
-  if (navigate) {
-    navigate(event)
-  } else {
-    emit('click', event)
-  }
+  emit('click', event)
+  navigate?.(event)
 }
 </script>
