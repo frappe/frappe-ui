@@ -22,7 +22,6 @@
   grid-template-columns: var(--list-columns);
   column-gap: var(--list-gap, 0.5rem);
   align-items: center;
-  position: relative;
   text-align: start;
   /* The checkbox column is not a grid track (a 0px track would still get a
    * column gap next to it). It's start padding — 0px or 32px, set by the
@@ -32,6 +31,14 @@
     var(--list-checkbox-width, 0px) + var(--_list-row-pad, 0px)
   );
   padding-inline-end: var(--_list-row-pad, 0px);
+}
+
+/* Positioned so dividers/checkbox overlays anchor to the row. In :where()
+ * (unlike the block above, which needs attribute specificity only to beat
+ * preflight's button resets) so a consumer `sticky` class wins — e.g. a
+ * header pinned inside its scroll container. */
+:where([data-slot='list-row'], [data-slot='list-header']) {
+  position: relative;
 }
 
 :where([data-slot='list-row']) {
