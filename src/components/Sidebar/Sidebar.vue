@@ -1,76 +1,79 @@
 <template>
   <div
-    class="flex h-full flex-col flex-shrink-0 overflow-y-auto overflow-x-hidden border-r border-outline-gray-1 bg-surface-sidebar transition-all duration-300 ease-in-out p-2"
-    :class="shouldCollapse ? 'w-12' : 'w-60'"
+    data-slot="sidebar"
+    :data-state="shouldCollapse ? 'collapsed' : 'expanded'"
+    class="flex h-full flex-shrink-0 flex-col overflow-x-hidden bg-surface-sidebar transition-[width] duration-300 ease-in-out"
+    :class="{ 'border-r border-outline-gray-1': isLegacy }"
+    :style="{ width: shouldCollapse ? collapsedWidth : width }"
   >
-    <slot name="header" v-bind="{ isCollapsed: shouldCollapse, isMobile }">
-      <SidebarHeader
-        v-if="props.header"
-        :isCollapsed="shouldCollapse"
-        :title="props.header.title"
-        :subtitle="props.header.subtitle"
-        :logo="props.header.logo"
-        :menu-items="props.header.menuItems"
-      >
-        <template #logo>
-          <slot name="header-logo"></slot>
-        </template>
-      </SidebarHeader>
-    </slot>
+    <!-- Composition: the app owns the entire body (header, scroll, footer). -->
+    <slot v-if="!isLegacy" />
 
-    <SidebarSection
-      v-for="section in props.sections"
-      :key="section.label"
-      :label="section.label"
-      :items="section.items"
-      :collapsible="section.collapsible"
-    >
-      <template #sidebar-item="{ item, isCollapsed }">
-        <slot name="sidebar-item" :item :isCollapsed></slot>
-      </template>
-    </SidebarSection>
+    <!--
+      Legacy config-object layout, kept for one release. Rendered only when no
+      default slot is supplied and `header`/`sections` are passed.
+    -->
+    <template v-else>
+      <div class="flex h-full flex-col p-2">
+        <SidebarHeader
+          v-if="header"
+          :title="header.title"
+          :subtitle="header.subtitle"
+          :logo="header.logo"
+          :menu-items="header.menuItems"
+        />
 
-    <div class="mt-auto flex flex-col gap-2">
-      <slot
-        name="footer-items"
-        v-bind="{ isCollapsed: shouldCollapse, isMobile }"
-      />
-      <SidebarItem
-        v-if="!props.disableCollapse"
-        :label="shouldCollapse ? 'Expand' : 'Collapse'"
-        @click="isCollapsed = !isCollapsed"
-      >
-        <template #icon>
-          <span
-            class="lucide-panel-right-open size-4 text-ink-gray-6 duration-300 ease-in-out"
-            :class="{ 'rotate-180': shouldCollapse }"
+        <div class="flex-1 overflow-y-auto overflow-x-hidden">
+          <SidebarSection
+            v-for="section in sections"
+            :key="section.label"
+            :label="section.label"
+            :items="section.items"
+            :collapsible="section.collapsible"
           />
-        </template>
-      </SidebarItem>
-    </div>
+        </div>
+
+        <div class="mt-auto">
+          <SidebarCollapseToggle v-if="!disableCollapse" />
+        </div>
+      </div>
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
 import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
-import { provide, computed } from 'vue'
+import { computed, provide, useSlots } from 'vue'
 import SidebarHeader from './SidebarHeader.vue'
-import SidebarItem from './SidebarItem.vue'
-import { SidebarProps, sidebarCollapsedKey } from './types'
-
 import SidebarSection from './SidebarSection.vue'
+import SidebarCollapseToggle from './SidebarCollapseToggle.vue'
+import { SidebarProps, sidebarCollapsedKey, sidebarToggleKey } from './types'
 
-const props = defineProps<SidebarProps>()
-
-const isCollapsed = defineModel('collapsed', {
-  type: Boolean,
-  default: null,
+const props = withDefaults(defineProps<SidebarProps>(), {
+  width: '15rem',
+  collapsedWidth: '3rem',
 })
-const shouldCollapse = computed(
-  () => (isCollapsed.value ?? isMobile.value) && !props.disableCollapse,
+
+const slots = useSlots()
+// Composition wins whenever the consumer supplies default-slot content.
+const isLegacy = computed(
+  () => !slots.default && (Boolean(props.header) || Boolean(props.sections)),
 )
-provide(sidebarCollapsedKey, shouldCollapse)
+
+const isCollapsed = defineModel<boolean | null>('collapsed', { default: null })
 
 const breakpoints = useBreakpoints(breakpointsTailwind)
 const isMobile = breakpoints.smaller('sm')
+
+// Unset (`null`) falls back to collapsing on mobile; `disableCollapse` pins open.
+const shouldCollapse = computed(
+  () => (isCollapsed.value ?? isMobile.value) && !props.disableCollapse,
+)
+
+function toggle() {
+  isCollapsed.value = !shouldCollapse.value
+}
+
+provide(sidebarCollapsedKey, shouldCollapse)
+provide(sidebarToggleKey, toggle)
 </script>
