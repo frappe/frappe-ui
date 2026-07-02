@@ -24,10 +24,23 @@
   column-gap: var(--list-gap, 0.5rem);
   align-items: center;
   text-align: start;
-  /* The checkbox column is not a grid track (a 0px track would still get a
-   * column gap next to it). It's start padding — 0px or 32px, set by the
-   * List — so grid line numbers never shift and the reveal is one animated
-   * padding. The checkbox itself is an overlay in the padding area. */
+}
+
+/* The checkbox column is not a grid track (a 0px track would still get a
+ * column gap next to it). It's start padding — 0px or 32px, set by the
+ * List — so grid line numbers never shift and the reveal is one animated
+ * padding. The checkbox itself is an overlay in the padding area. */
+[data-slot='list-row'] {
+  padding-inline-start: calc(
+    var(--list-checkbox-width, 0px) + var(--_list-row-pad, 0px)
+  );
+  padding-inline-end: var(--_list-row-pad, 0px);
+}
+
+/* Same padding for the header, but in :where() — a header is never a button,
+ * so there is no preflight reset to beat, and a consumer class must win:
+ * e.g. `px-3` to align header labels with padded interactive rows. */
+:where([data-slot='list-header']) {
   padding-inline-start: calc(
     var(--list-checkbox-width, 0px) + var(--_list-row-pad, 0px)
   );
@@ -72,6 +85,22 @@
   overflow: hidden;
 }
 
+/* The header's bottom border is a grid child spanning all tracks, so it
+ * aligns with the rows' content (and their full-width dividers) whatever
+ * padding the header carries — a border on the header box itself would run
+ * through the padding and overshoot the dividers on both sides. */
+:where([data-slot='list-header-border']) {
+  position: absolute;
+  /* grid-row stays auto so bottom: 0 is the header's own bottom edge (see
+   * the list-divider rule below), while grid-column tracks the columns. */
+  grid-column: 1 / -1;
+  bottom: 0;
+  inset-inline-start: 0;
+  inset-inline-end: 0;
+  height: 0;
+  pointer-events: none;
+}
+
 /* Dividers are absolutely-positioned grid children: their grid-column
  * placement (inset `2 / -1`, full `1 / -1` — set by ListRow) resolves
  * against the shared template, so the inset divider starts at the content
@@ -79,7 +108,10 @@
  * would derail the cells' auto-placement. */
 :where([data-slot='list-divider']) {
   position: absolute;
-  grid-row: 1;
+  /* grid-row stays auto: per spec an abs-positioned grid child with auto
+   * placement in an axis anchors to the padding box in that axis, so top: 0
+   * is the row's own top edge. Anchoring to grid-row 1 would put the divider
+   * below the row's padding-top, displacing it into padded rows. */
   top: 0;
   inset-inline-start: 0;
   inset-inline-end: 0;
