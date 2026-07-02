@@ -180,6 +180,12 @@
     description: '',
     required: false,
     type: 'boolean'
+  },
+  {
+    name: 'defaultCollapsed',
+    description: '',
+    required: false,
+    type: 'boolean'
   }
 ]
 

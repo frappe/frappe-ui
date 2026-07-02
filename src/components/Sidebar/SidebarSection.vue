@@ -66,7 +66,7 @@ import { SidebarSectionProps, sidebarCollapsedKey } from './types'
 const props = defineProps<SidebarSectionProps>()
 
 const isSidebarCollapsed = inject(sidebarCollapsedKey, computed(() => false))
-const isCollapsed = ref(false)
+const isCollapsed = ref(props.defaultCollapsed ?? false)
 const visibleItems = computed(() =>
   props.items.filter((item) => toValue(item.condition) !== false),
 )
