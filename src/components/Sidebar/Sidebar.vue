@@ -21,7 +21,11 @@
           :subtitle="header.subtitle"
           :logo="header.logo"
           :menu-items="header.menuItems"
-        />
+        >
+          <template v-if="slots['header-logo']" #logo>
+            <slot name="header-logo" />
+          </template>
+        </SidebarHeader>
 
         <div class="flex-1 overflow-y-auto overflow-x-hidden">
           <SidebarSection
@@ -34,6 +38,7 @@
         </div>
 
         <div class="mt-auto">
+          <slot name="footer-items" />
           <SidebarCollapseToggle v-if="!disableCollapse" />
         </div>
       </div>

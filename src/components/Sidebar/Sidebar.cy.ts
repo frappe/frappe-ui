@@ -73,6 +73,30 @@ describe('<Sidebar /> legacy config API (compat layer)', () => {
     cy.contains('Collapse').click()
     cy.contains('Expand').should('exist')
   })
+
+  it('passes legacy header-logo and footer-items slots through', () => {
+    cy.viewport(1280, 720)
+    cy.mount(
+      () =>
+        h(
+          'div',
+          h(
+            Sidebar,
+            { header, sections, disableCollapse: true },
+            {
+              'header-logo': () =>
+                h('span', { 'data-test': 'legacy-logo' }, 'L'),
+              'footer-items': () =>
+                h('button', { 'data-test': 'legacy-footer' }, 'Invite'),
+            },
+          ),
+        ),
+      { global: { plugins: [createTestRouter()] } },
+    )
+
+    cy.get('[data-test=legacy-logo]').should('contain.text', 'L')
+    cy.get('[data-test=legacy-footer]').should('contain.text', 'Invite')
+  })
 })
 
 describe('<SidebarItem />', () => {
