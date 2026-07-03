@@ -77,6 +77,7 @@ describe('Dropdown', () => {
     cy.get('[role=menu]').should('not.exist')
     cy.get('[aria-haspopup=menu]').click()
     cy.get('[role=menu]').should('exist')
+    cy.get('.menu-content').should('have.class', 'z-[100]')
 
     cy.get('[role=menuitem]').eq(1).should('contain.text', 'Delete').click()
 

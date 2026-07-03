@@ -48,6 +48,7 @@ describe('Dialog', () => {
     cy.contains('button', 'Show').click()
 
     cy.get('[role=dialog]').should('exist')
+    cy.get('.dialog-overlay').should('have.class', 'z-50')
     cy.get('[role=dialog]').contains('h3', 'Modal Dialog').should('exist')
     cy.get('[role=dialog]').contains('p', 'A simple modal.').should('exist')
 
