@@ -1,12 +1,14 @@
 import { marked } from 'marked'
+import DOMPurify from 'dompurify'
 
 export function markdownToHTML(text: string): string {
   // Use synchronous marked.parse
-  return marked.parse(text, {
+  const html = marked.parse(text, {
     gfm: true,
     breaks: true,
     async: false,
   }) as string
+  return DOMPurify.sanitize(html)
 }
 
 export function detectMarkdown(text: string): boolean {
