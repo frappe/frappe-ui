@@ -2,7 +2,7 @@
   <DialogRoot v-model:open="isOpen">
     <DialogPortal>
       <DialogOverlay
-        class="fixed inset-0 z-50 bg-black-overlay-200 dark:bg-black-overlay-700 overflow-y-auto dialog-overlay outline-none"
+        class="fixed inset-0 bg-black-overlay-200 dark:bg-black-overlay-700 overflow-y-auto dialog-overlay outline-none"
         :data-dialog="resolved.title"
         @after-leave="$emit('after-leave')"
       >
