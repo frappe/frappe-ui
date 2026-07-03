@@ -62,11 +62,15 @@ defineSlots<{
 
 // Cmd/Ctrl+Shift+, toggles the dialog. Use e.code (physical key) since Shift
 // rewrites e.key for "," to "<" on most layouts.
-useEventListener(window, 'keydown', (e: KeyboardEvent) => {
-  if (!props.shortcut) return
-  if (e.code === 'Comma' && e.shiftKey && (e.metaKey || e.ctrlKey)) {
-    e.preventDefault()
-    modelValue.value = !modelValue.value
-  }
-})
+useEventListener(
+  () => (typeof window === 'undefined' ? null : window),
+  'keydown',
+  (e: KeyboardEvent) => {
+    if (!props.shortcut) return
+    if (e.code === 'Comma' && e.shiftKey && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault()
+      modelValue.value = !modelValue.value
+    }
+  },
+)
 </script>

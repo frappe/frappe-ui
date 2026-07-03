@@ -11,7 +11,9 @@
           : 'opacity-0 pointer-events-none',
         // Grow the 44px touch target only along the scroll axis; a cross-axis
         // minimum would bleed the (invisible) hit area over adjacent content.
-        orientation === 'horizontal' ? 'before:min-w-[44px]' : 'before:min-h-[44px]',
+        orientation === 'horizontal'
+          ? 'before:min-w-[44px]'
+          : 'before:min-h-[44px]',
       ]"
     />
   </ScrollAreaScrollbar>
@@ -45,17 +47,17 @@ const rootContext = injectScrollAreaRootContext()
 const isThumbVisible = ref(false)
 const isPointerDown = ref(false)
 
-let idleTimeout: ReturnType<typeof window.setTimeout> | undefined
+let idleTimeout: ReturnType<typeof setTimeout> | undefined
 
 function clearIdleTimeout() {
   if (!idleTimeout) return
-  window.clearTimeout(idleTimeout)
+  clearTimeout(idleTimeout)
   idleTimeout = undefined
 }
 
 function scheduleHide() {
   clearIdleTimeout()
-  idleTimeout = window.setTimeout(() => {
+  idleTimeout = setTimeout(() => {
     isThumbVisible.value = false
     idleTimeout = undefined
   }, rootContext.scrollHideDelay.value)
@@ -89,7 +91,11 @@ useEventListener(rootContext.scrollArea, 'pointermove', showThumb)
 useEventListener(rootContext.scrollArea, 'pointerdown', handlePointerDown)
 useEventListener(rootContext.scrollArea, 'pointerleave', hideThumb)
 useEventListener(rootContext.viewport, 'scroll', showThumb)
-useEventListener(window, 'pointerup', handlePointerUp)
+useEventListener(
+  () => (typeof window === 'undefined' ? null : window),
+  'pointerup',
+  handlePointerUp,
+)
 
 onUnmounted(clearIdleTimeout)
 </script>
