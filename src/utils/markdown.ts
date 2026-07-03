@@ -8,7 +8,8 @@ export function markdownToHTML(text: string): string {
     breaks: true,
     async: false,
   }) as string
-  return DOMPurify.sanitize(html)
+  // DOMPurify needs a DOM; without one (SSR/Node) it returns '' and drops all output.
+  return typeof window === 'undefined' ? html : DOMPurify.sanitize(html)
 }
 
 export function detectMarkdown(text: string): boolean {
