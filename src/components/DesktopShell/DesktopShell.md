@@ -3,8 +3,8 @@
 The desktop app frame. `DesktopShell` arranges an app's `Rail` and `Sidebar`
 alongside the main content, and owns the skeleton the content needs: a pinned
 `PageHeaderTarget` and a registered scroll region. Its mobile counterpart is a
-separate family — [`MobileShell`](/docs/components/mobileshell) — because the two
-are different navigation models, not one responsive component.
+separate family — [`MobileShell`](/docs/components/mobileshell) — because the
+two are different navigation models, not one responsive component.
 
 <ComponentPreview name="DesktopShell-Default" />
 
@@ -22,10 +22,10 @@ router `scrollBehavior` can read the scroll offset without the app owning a
 global. Because the registry is a stack, swapping `DesktopShell` for
 `MobileShell` on a viewport change hands the active container over cleanly.
 
-## Theming the card
+## Theming the content region
 
-Structural classes are fixed; `cardClass` themes the content card — its radius,
-background, shadow, borders, and the outer float spacing (applied as the card's
-margin). Pass your app's look; the default is a simple elevated card.
+The content region exposes `data-slot="desktop-shell-content"` for app-level
+styling. Target that slot in CSS when an app needs a card, gutter, border,
+background, or other product-specific surface treatment.
 
 <!-- @include: ./DesktopShell.api.md -->

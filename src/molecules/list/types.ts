@@ -43,6 +43,9 @@ export interface ListRowProps {
 
   /** Selection key; required when the list is selectable. */
   value?: string
+
+  /** Fired when the row is activated, unless selection mode claims the click. */
+  onClick?: (event: MouseEvent) => void
 }
 
 export interface ListHeaderCellSortProps {

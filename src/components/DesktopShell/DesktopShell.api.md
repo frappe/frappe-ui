@@ -4,15 +4,7 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 
-  const propsData = [
-  {
-    name: 'cardClass',
-    description: 'Classes for the content card that wraps the page header and scroll region.\nOverrides the default look — radius, background, shadow, borders, and the\nouter float spacing (the card\'s margin). The shell always applies the\nstructural classes (`flex min-w-0 flex-1 flex-col overflow-hidden`) on top.',
-    required: false,
-    type: 'string',
-    default: '"m-1 rounded-lg bg-surface-base shadow-sm"'
-  }
-]
+  const propsData = []
 
   const slotsData = [
   {
@@ -32,9 +24,9 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="DesktopShell" :data="propsData"/> 
+<PropsTable name="DesktopShell" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
-
+<SlotsTable :data="slotsData"/>

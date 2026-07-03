@@ -30,7 +30,17 @@
         class="absolute -left-[11px] top-1/2 h-7 w-1 -translate-y-1/2 rounded-r bg-surface-gray-8"
       />
       <slot>
-        <span v-if="icon" :class="[icon, 'size-4']" aria-hidden="true" />
+        <span
+          v-if="typeof icon === 'string'"
+          :class="[icon, 'size-4']"
+          aria-hidden="true"
+        />
+        <component
+          v-else-if="icon"
+          :is="icon"
+          class="size-4"
+          aria-hidden="true"
+        />
       </slot>
       <RailItemBadge :count="badge" :variant="badgeStyle" />
     </RouterLink>
@@ -53,7 +63,17 @@
         class="absolute -left-[11px] top-1/2 h-7 w-1 -translate-y-1/2 rounded-r bg-surface-gray-8"
       />
       <slot>
-        <span v-if="icon" :class="[icon, 'size-4']" aria-hidden="true" />
+        <span
+          v-if="typeof icon === 'string'"
+          :class="[icon, 'size-4']"
+          aria-hidden="true"
+        />
+        <component
+          v-else-if="icon"
+          :is="icon"
+          class="size-4"
+          aria-hidden="true"
+        />
       </slot>
       <RailItemBadge :count="badge" :variant="badgeStyle" />
     </button>

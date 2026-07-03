@@ -1,7 +1,17 @@
-import { computed, ref, toValue, watchEffect, type MaybeRefOrGetter, type Ref } from 'vue'
+import {
+  computed,
+  ref,
+  toValue,
+  watchEffect,
+  type MaybeRefOrGetter,
+  type Ref,
+} from 'vue'
 import { useEventListener, useVirtualList } from '@vueuse/core'
 
 export interface UseVirtualRowsOptions {
+  /** Enables DOM scroll-container lookup and scroll listener registration. */
+  enabled?: MaybeRefOrGetter<boolean>
+
   /** Row height in px. */
   itemHeight: MaybeRefOrGetter<number>
 
@@ -37,11 +47,15 @@ export function useVirtualRows<T>(
 
   const anchor = ref<HTMLElement | null>(null)
   watchEffect(() => {
+    if (!toValue(options.enabled ?? true)) {
+      containerProps.ref.value = null
+      return
+    }
     const explicit = toValue(options.scrollContainer)
     containerProps.ref.value = explicit ?? findScrollContainer(anchor.value)
   })
   useEventListener(
-    () => containerProps.ref.value,
+    () => (toValue(options.enabled ?? true) ? containerProps.ref.value : null),
     'scroll',
     () => containerProps.onScroll(),
   )
@@ -53,7 +67,11 @@ function findScrollContainer(el: HTMLElement | null): HTMLElement | null {
   let node = el?.parentElement ?? null
   while (node) {
     const { overflowY } = getComputedStyle(node)
-    if (overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'overlay') {
+    if (
+      overflowY === 'auto' ||
+      overflowY === 'scroll' ||
+      overflowY === 'overlay'
+    ) {
       return node
     }
     node = node.parentElement

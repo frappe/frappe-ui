@@ -1,3 +1,4 @@
+import type { Component } from 'vue'
 import type { RouteLocationRaw } from 'vue-router'
 
 /**
@@ -11,10 +12,10 @@ export interface MobileNavItemProps {
   label: string
 
   /**
-   * Icon CSS class, e.g. `lucide-home`. Ignored when the default slot is used
-   * (for a custom glyph or an avatar).
+   * Icon CSS class, e.g. `lucide-home`, or a component. Ignored when the
+   * default slot is used (for a custom glyph or an avatar).
    */
-  icon?: string
+  icon?: string | Component
 
   /**
    * Navigation target. Renders a router link. Tapping the item while it is

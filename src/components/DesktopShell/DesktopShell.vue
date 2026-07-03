@@ -3,16 +3,9 @@
     <slot name="rail" />
     <slot name="sidebar" />
 
-    <!--
-      The content card. Structural classes are fixed; `cardClass` themes the
-      look (radius/background/shadow/borders) and the float spacing via margin —
-      flexbox sizes this `flex-1` child accounting for its margins, so no
-      separate gutter wrapper is needed.
-    -->
     <div
       data-slot="desktop-shell-content"
       class="flex min-w-0 flex-1 flex-col overflow-hidden"
-      :class="cardClass"
     >
       <!-- Pages teleport their headers here; it stays pinned above the scroll. -->
       <PageHeaderTarget />
@@ -37,11 +30,6 @@ import {
   registerScrollContainer,
   unregisterScrollContainer,
 } from '../../composables/useScrollContainer'
-import type { DesktopShellProps } from './types'
-
-withDefaults(defineProps<DesktopShellProps>(), {
-  cardClass: 'm-1 rounded-lg bg-surface-base shadow-sm',
-})
 
 const scrollArea = ref<InstanceType<typeof ScrollArea> | null>(null)
 

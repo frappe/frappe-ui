@@ -1,3 +1,4 @@
+import type { Component } from 'vue'
 import type { RouteLocationRaw } from 'vue-router'
 
 export interface RailItemProps {
@@ -5,10 +6,10 @@ export interface RailItemProps {
   label: string
 
   /**
-   * Icon CSS class, e.g. `lucide-search`. Rendered centered in the cell.
+   * Icon CSS class, e.g. `lucide-search`, or a component. Rendered centered in the cell.
    * Ignored when the default slot is used (for an image, avatar, or initials).
    */
-  icon?: string
+  icon?: string | Component
 
   /**
    * Navigation target. When set, the item renders as a router link; otherwise

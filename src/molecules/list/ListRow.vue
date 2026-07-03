@@ -14,7 +14,7 @@
   </RouterLink>
   <ListRowBase
     v-else
-    :tag="hasClickListener ? 'button' : 'div'"
+    :tag="hasClickListener() ? 'button' : 'div'"
     :value="value"
     @click="onClick"
   >
@@ -23,7 +23,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed, getCurrentInstance } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useListContext } from './list-context'
 import ListRowBase from './ListRowBase.vue'
@@ -31,16 +30,11 @@ import type { ListRowProps } from './types'
 
 const props = defineProps<ListRowProps>()
 
-const emit = defineEmits<{
-  /** Fired when the row is activated — before navigation for link rows,
-   *  never while selection mode has claimed the click. */
-  (e: 'click', event: MouseEvent): void
-}>()
-
 const context = useListContext()
 
-const instance = getCurrentInstance()
-const hasClickListener = computed(() => !!instance?.vnode.props?.onClick)
+function hasClickListener() {
+  return Boolean(props.onClick)
+}
 
 function onClick(event: MouseEvent, navigate?: (e?: MouseEvent) => void) {
   if (context?.selectable.value && props.value !== undefined) {
@@ -48,7 +42,7 @@ function onClick(event: MouseEvent, navigate?: (e?: MouseEvent) => void) {
     context.toggleSelection(props.value)
     return
   }
-  emit('click', event)
+  props.onClick?.(event)
   navigate?.(event)
 }
 </script>

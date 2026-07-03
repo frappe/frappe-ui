@@ -14,15 +14,19 @@ describe('<DesktopShell />', () => {
     cy.get('[data-slot=desktop-shell]').should('exist')
     cy.get('[data-test=rail]').should('exist')
     cy.get('[data-test=sidebar]').should('exist')
-    cy.get('[data-slot=desktop-shell-content]').should('contain.text', 'page body')
+    cy.get('[data-slot=desktop-shell-content]').should(
+      'contain.text',
+      'page body',
+    )
   })
 
-  it('themes the content card via cardClass', () => {
-    cy.mount(DesktopShell, { props: { cardClass: 'custom-card rounded-xl' } })
+  it('renders the structural content region without app styling', () => {
+    cy.mount(DesktopShell)
     cy.get('[data-slot=desktop-shell-content]')
-      .should('have.class', 'custom-card')
-      // Structural classes are still applied alongside the themed ones.
-      .and('have.class', 'flex')
+      .should('have.class', 'flex')
+      .and('have.class', 'min-w-0')
+      .and('have.class', 'flex-1')
+      .and('not.have.class', 'rounded-lg')
   })
 
   it('registers its scroll region so getScrollContainer() resolves', () => {
