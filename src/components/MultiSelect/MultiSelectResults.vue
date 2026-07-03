@@ -13,6 +13,7 @@ import type { MultiSelectItemSlotProps, MultiSelectSize } from './types'
 import { createItemSlotRender } from '../shared/selection/createItemSlotRender'
 import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
 import {
+  CREATE_OPTION_VALUE,
   EMPTY_VALUE_PREFIX,
   itemClasses,
   itemRootSizeClasses,
@@ -30,11 +31,16 @@ const props = defineProps<{
   loading: boolean
   hideSearch: boolean
   emptyText: string
+  showCreateOption: boolean
   showEmpty: boolean
   /** Parent's `useSlots()` result — forwarded so nested templates can dispatch. */
   slotFns: SlotFns
   /** All selectable options across groups; drives value ↔ internal-id mapping. */
   allOptions: NormalizedOption[]
+}>()
+
+const emit = defineEmits<{
+  selectCreate: [event: Event]
 }>()
 
 const ItemSlotRender = createItemSlotRender('MultiSelectItemSlotRender')
@@ -72,7 +78,6 @@ const { toInternal: getInternalValue } = useEmptyValueMapping(
 function getItemTextValue(item: NormalizedOption) {
   return `${item.label} ${item.value}`.trim()
 }
-
 </script>
 
 <template>
@@ -87,8 +92,25 @@ function getItemTextValue(item: NormalizedOption) {
     </div>
 
     <template v-else>
+      <ComboboxItem
+        v-if="showCreateOption"
+        :value="CREATE_OPTION_VALUE"
+        data-slot="item"
+        data-create="true"
+        :data-size="size"
+        :class="[itemClasses, itemRootSizeClasses(size)]"
+        text-value="Create value"
+        @select="emit('selectCreate', $event)"
+      >
+        <ItemListRow :size="toItemListSize(size)">
+          <template #label>
+            <div class="min-w-0 truncate">Create &quot;{{ query }}&quot;</div>
+          </template>
+        </ItemListRow>
+      </ComboboxItem>
+
       <div
-        v-if="showEmpty"
+        v-else-if="showEmpty"
         data-slot="empty"
         class="px-2 py-1.5 text-base text-ink-gray-5"
       >

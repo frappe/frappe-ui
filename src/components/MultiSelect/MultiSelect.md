@@ -71,6 +71,17 @@ the parent's `v-model`.
 
 <ComponentPreview name="MultiSelect-TagsTrigger" />
 
+## Creatable
+
+Set `creatable` to let users add values that aren't in `options`. When the typed
+query matches nothing, a "Create X" row appears; selecting it (click or Enter)
+emits `@create` with the query. The component never adds the value itself — the
+host validates the query and commits it into `v-model`, pushing it into
+`options` too so the new chip resolves. Pairs naturally with the chips-style
+trigger above.
+
+<ComponentPreview name="MultiSelect-Creatable" />
+
 ## Label, Description, Error
 
 `MultiSelect` supports `label`, `description`, `error`, and `required` directly

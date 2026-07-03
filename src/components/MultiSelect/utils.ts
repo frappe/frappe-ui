@@ -24,6 +24,9 @@ export { triggerBaseClassesFocusVisible as triggerBaseClasses } from '../shared/
 /** Sentinel used to disambiguate options whose value is an empty string. */
 export const EMPTY_VALUE_PREFIX = '__frappe_ui_multiselect_empty__:'
 
+/** Sentinel value for the built-in "Create X" row — never exposed to consumers. */
+export const CREATE_OPTION_VALUE = '__frappe_ui_multiselect_create__'
+
 export type ResolvedItemSlots = MultiSelectItemSlots<MultiSelectItemSlotProps>
 
 export type NormalizedOption = MultiSelectOption & {

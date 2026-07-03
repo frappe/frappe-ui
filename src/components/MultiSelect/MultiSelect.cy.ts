@@ -1,5 +1,6 @@
 import MultiSelect from './MultiSelect.vue'
 import Dialog from '../Dialog/Dialog.vue'
+import { CREATE_OPTION_VALUE } from './utils'
 import { defineComponent, h, ref } from 'vue'
 
 const options = [
@@ -238,6 +239,88 @@ describe('MultiSelect', () => {
       cy.get('[role=option]')
         .should('have.length', 1)
         .and('contain.text', options[1].label)
+    })
+  })
+
+  describe('creatable', () => {
+    it('renders the create row when the query matches no option', () => {
+      cy.mount(MultiSelect, { props: { options, creatable: true } })
+
+      cy.get('[data-slot="trigger"]').click()
+      cy.get('[data-slot="input"]').type('mango')
+
+      cy.get('[data-create="true"]')
+        .should('exist')
+        .and('contain.text', 'Create "mango"')
+    })
+
+    it('clicking the create row emits create with the query', () => {
+      cy.mount(MultiSelect, {
+        props: { options, creatable: true, onCreate: cy.spy().as('onCreate') },
+      })
+
+      cy.get('[data-slot="trigger"]').click()
+      cy.get('[data-slot="input"]').type('mango')
+      cy.get('[data-create="true"]').click()
+
+      cy.get('@onCreate').should('have.been.calledWith', 'mango')
+    })
+
+    it('pressing Enter emits create with the query', () => {
+      cy.mount(MultiSelect, {
+        props: { options, creatable: true, onCreate: cy.spy().as('onCreate') },
+      })
+
+      cy.get('[data-slot="trigger"]').click()
+      cy.get('[data-slot="input"]').type('mango{enter}')
+
+      cy.get('@onCreate').should('have.been.calledWith', 'mango')
+      cy.get('@onCreate').should('have.been.calledOnce')
+    })
+
+    it('never lets the create sentinel enter modelValue', () => {
+      cy.mount(MultiSelect, {
+        props: {
+          options,
+          creatable: true,
+          'onUpdate:modelValue': cy.spy().as('onUpdate'),
+        },
+      })
+
+      cy.get('[data-slot="trigger"]').click()
+      cy.get('[data-slot="input"]').type('mango')
+      cy.get('[data-create="true"]').click()
+
+      // The component must never commit the sentinel: `preventDefault()` in
+      // `commitCreate` stops reka from toggling it, and the guard in
+      // `handleRootModelValueChange` drops it. Selecting the create row is
+      // host-driven, so modelValue is not updated by the component at all.
+      cy.get('@onUpdate').should((spy: any) => {
+        spy
+          .getCalls()
+          .forEach((call: any) =>
+            expect(call.args[0]).to.not.include(CREATE_OPTION_VALUE),
+          )
+      })
+    })
+
+    it('does not render the create row when creatable is false', () => {
+      cy.mount(MultiSelect, { props: { options } })
+
+      cy.get('[data-slot="trigger"]').click()
+      cy.get('[data-slot="input"]').type('mango')
+
+      cy.get('[data-create="true"]').should('not.exist')
+    })
+
+    it('does not render the create row when the query matches an option', () => {
+      cy.mount(MultiSelect, { props: { options, creatable: true } })
+
+      cy.get('[data-slot="trigger"]').click()
+      cy.get('[data-slot="input"]').type(options[0].label)
+
+      cy.get('[data-create="true"]').should('not.exist')
+      cy.get('[role=option]').should('have.length', 1)
     })
   })
 

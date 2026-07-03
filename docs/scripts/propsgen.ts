@@ -146,6 +146,8 @@ function getEventDescription(name: string, description?: string) {
       dismiss: 'Fired when the component is dismissed.',
       'item-click': 'Fired when an enabled item is clicked.',
       'value-commit': 'Fired once when the user finishes committing the value.',
+      create:
+        'Fired when the user selects the create row to add a value not in the options.',
     }[name] ?? ''
   )
 }

@@ -30,6 +30,7 @@ import type {
   MultiSelectSlots,
 } from './types'
 import {
+  CREATE_OPTION_VALUE,
   EMPTY_VALUE_PREFIX,
   inputFontSizeClasses,
   matchesOption,
@@ -52,6 +53,7 @@ const props = withDefaults(defineProps<MultiSelectProps>(), {
   disabled: false,
   hideSearch: false,
   loading: false,
+  creatable: false,
   emptyText: 'No results',
   side: 'bottom',
   align: 'start',
@@ -179,7 +181,18 @@ const hasVisibleItems = computed(() =>
   filteredGroups.value.some((group) => group.options.length > 0),
 )
 
-const showEmpty = computed(() => !props.loading && !hasVisibleItems.value)
+const showCreateOption = computed(
+  () =>
+    props.creatable &&
+    !props.loading &&
+    hasTypedSinceOpen.value &&
+    query.value.length > 0 &&
+    !hasVisibleItems.value,
+)
+
+const showEmpty = computed(
+  () => !props.loading && !showCreateOption.value && !hasVisibleItems.value,
+)
 
 const allSelected = computed(() => {
   const selectable = allOptions.value.filter((option) => !option.disabled)
@@ -219,8 +232,34 @@ const slotProps = computed<MultiSelectSlotProps>(() => ({
 
 function handleRootModelValueChange(value: string | string[] | undefined) {
   const arr = Array.isArray(value) ? value : value ? [value] : []
-  const mapped = arr.map(toExternalValue)
+  // Defensive: the create row's sentinel must never become a tag. The
+  // `preventDefault()` in `commitCreate` already stops reka from toggling
+  // it into the model, but drop it here too in case a select slips through.
+  const mapped = arr
+    .map(toExternalValue)
+    .filter((value) => value !== CREATE_OPTION_VALUE)
   model.value = mapped
+}
+
+// Single source of truth for the create path, shared by the create-row
+// `@select` and the Enter key. We `preventDefault()` so reka never commits
+// the `CREATE_OPTION_VALUE` sentinel into `internalModel`; the host owns
+// validation and pushes the real value into `v-model`. The popover stays
+// open so the user can keep adding entries.
+function commitCreate(event: Event) {
+  event.preventDefault()
+  emit('create', query.value)
+  query.value = ''
+  hasTypedSinceOpen.value = false
+}
+
+function handleCreateOptionSelect(event: Event) {
+  commitCreate(event)
+}
+
+function handleInputEnter(event: KeyboardEvent) {
+  if (!showCreateOption.value) return
+  commitCreate(event)
 }
 
 function handleRootOpenChange(value: boolean) {
@@ -423,6 +462,7 @@ defineSlots<MultiSelectSlots>()
                   autocomplete="off"
                   class="min-w-0 flex-1 border-0 bg-transparent px-0 py-2 text-base text-ink-gray-8 outline-none placeholder:text-ink-gray-4 focus:ring-0"
                   @input="handleInputChange"
+                  @keydown.enter="handleInputEnter"
                 />
                 <LoadingIndicator
                   v-if="loading"
@@ -438,9 +478,11 @@ defineSlots<MultiSelectSlots>()
                 :loading="loading"
                 :hide-search="hideSearch"
                 :empty-text="emptyText"
+                :show-create-option="showCreateOption"
                 :show-empty="showEmpty"
                 :slot-fns="slots"
                 :all-options="allOptions"
+                @select-create="handleCreateOptionSelect"
               />
 
               <template v-if="$slots.footer">
