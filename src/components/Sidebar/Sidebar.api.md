@@ -9,49 +9,50 @@
     name: 'header',
     description: '',
     required: false,
-    type: 'SidebarHeaderProps'
+    type: 'SidebarHeaderProps',
+    deprecated: 'Config-object header. Prefer composing your own header in the\ndefault slot. Kept for one release for backward compatibility.'
   },
   {
     name: 'sections',
     description: '',
     required: false,
-    type: 'SidebarSectionProps[]'
+    type: 'SidebarSectionProps[]',
+    deprecated: 'Config-object sections. Prefer composing `SidebarLabel` +\n`SidebarItem` in the default slot. Kept for one release.'
   },
   {
     name: 'disableCollapse',
-    description: '',
+    description: 'Disables collapsing entirely (fixed width, no built-in toggle).',
     required: false,
     type: 'boolean'
+  },
+  {
+    name: 'width',
+    description: 'Expanded width as a CSS length. Applied inline so apps can override it.',
+    required: false,
+    type: 'string',
+    default: '"15rem"'
+  },
+  {
+    name: 'collapsedWidth',
+    description: 'Collapsed width as a CSS length.',
+    required: false,
+    type: 'string',
+    default: '"3rem"'
   },
   {
     name: 'collapsed',
     description: '',
     required: false,
-    type: 'boolean',
+    type: 'boolean | null',
     default: 'null'
   }
 ]
 
   const sidebarSlots = [
   {
-    name: 'header',
-    description: '',
-    type: '{ isCollapsed: boolean; isMobile: boolean; }'
-  },
-  {
-    name: 'header-logo',
+    name: 'default',
     description: '',
     type: '{}'
-  },
-  {
-    name: 'sidebar-item',
-    description: '',
-    type: '{ item: SidebarItemProps; isCollapsed: boolean; }'
-  },
-  {
-    name: 'footer-items',
-    description: '',
-    type: '{ isCollapsed: boolean; isMobile: boolean; }'
   }
 ]
 
@@ -59,7 +60,101 @@
   {
     name: 'update:collapsed',
     description: 'Fired when the collapsed changes.',
-    type: '[value: boolean]'
+    type: '[value: boolean | null]'
+  }
+]
+
+  const sidebarItemProps = [
+  {
+    name: 'label',
+    description: 'Row label. Used as the accessible name and the default slot fallback.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'accessKey',
+    description: '`accesskey` attribute for a keyboard shortcut.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'icon',
+    description: 'Leading icon: a CSS class (e.g. `lucide-box`), plain text, or a component.\nIgnored when the `#prefix` slot is used.',
+    required: false,
+    type: 'string | Component'
+  },
+  {
+    name: 'suffix',
+    description: 'Trailing text. Ignored when the `#suffix` slot is used.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'to',
+    description: 'Navigation target. When set the row\'s main area renders as a router link;\notherwise it renders as a button. A click still invokes `onClick`.',
+    required: false,
+    type: 'string | kt | Tt'
+  },
+  {
+    name: 'active',
+    description: 'Marks the row active (`data-state="active"`). When omitted, active state is\ninferred by matching `to` against the current route.',
+    required: false,
+    type: 'boolean'
+  },
+  {
+    name: 'isActive',
+    description: '',
+    required: false,
+    type: 'boolean',
+    deprecated: 'Use `active`. Alias kept for the config-object path.'
+  },
+  {
+    name: 'onClick',
+    description: 'Click handler. Bound from `@click` in composition and from `item.onClick`\nin the config-object path — both resolve to this prop.',
+    required: false,
+    type: '((event: MouseEvent) => void)'
+  },
+  {
+    name: 'condition',
+    description: '',
+    required: false,
+    type: 'MaybeRefOrGetter<boolean>',
+    deprecated: 'Config-object visibility flag; filtered by the legacy adapter.'
+  }
+]
+
+  const sidebarItemSlots = [
+  {
+    name: 'prefix',
+    description: '',
+    type: '{}'
+  },
+  {
+    name: 'default',
+    description: '',
+    type: '{}'
+  },
+  {
+    name: 'suffix',
+    description: '',
+    type: '{}'
+  }
+]
+
+  const sidebarLabelProps = [
+  {
+    name: 'divider',
+    description: 'When true, collapses to a horizontal divider while the sidebar is collapsed\n(matches the previous `SidebarSection` label behavior).',
+    required: false,
+    type: 'boolean'
+  }
+]
+
+  const sidebarLabelSlots = [
+  {
+    name: 'default',
+    description: '',
+    type: '{}'
   }
 ]
 
@@ -80,83 +175,19 @@
     name: 'logo',
     description: '',
     required: false,
-    type: 'any'
+    type: 'string | Component'
   },
   {
     name: 'menuItems',
     description: '',
     required: false,
-    type: '{ label: string; icon: any; onClick?: (() => void); }[] | undefined'
+    type: '{ label: string; icon?: string | Component; onClick?: (() => void) | undefined; }[] | undefined'
   }
 ]
 
   const sidebarHeaderSlots = [
   {
     name: 'logo',
-    description: '',
-    type: '{}'
-  }
-]
-
-  const sidebarItemProps = [
-  {
-    name: 'label',
-    description: '',
-    required: true,
-    type: 'string'
-  },
-  {
-    name: 'accessKey',
-    description: '',
-    required: false,
-    type: 'string'
-  },
-  {
-    name: 'icon',
-    description: '',
-    required: false,
-    type: 'any'
-  },
-  {
-    name: 'suffix',
-    description: '',
-    required: false,
-    type: 'string'
-  },
-  {
-    name: 'to',
-    description: '',
-    required: false,
-    type: 'string | kt | Tt'
-  },
-  {
-    name: 'isActive',
-    description: '',
-    required: false,
-    type: 'boolean'
-  },
-  {
-    name: 'onClick',
-    description: '',
-    required: false,
-    type: '(() => void)'
-  },
-  {
-    name: 'condition',
-    description: '',
-    required: false,
-    type: 'MaybeRefOrGetter<boolean>'
-  }
-]
-
-  const sidebarItemSlots = [
-  {
-    name: 'icon',
-    description: '',
-    type: '{}'
-  },
-  {
-    name: 'suffix',
     description: '',
     type: '{}'
   }
@@ -201,17 +232,23 @@
 
 <EmitsTable :data="sidebarEmits"/> 
 
-### SidebarHeader
-
-<PropsTable folder="Sidebar" name="SidebarHeader" :data="sidebarHeaderProps"/> 
-
-<SlotsTable :data="sidebarHeaderSlots"/> 
-
 ### SidebarItem
 
 <PropsTable folder="Sidebar" name="SidebarItem" :data="sidebarItemProps"/> 
 
 <SlotsTable :data="sidebarItemSlots"/> 
+
+### SidebarLabel
+
+<PropsTable folder="Sidebar" name="SidebarLabel" :data="sidebarLabelProps"/> 
+
+<SlotsTable :data="sidebarLabelSlots"/> 
+
+### SidebarHeader
+
+<PropsTable folder="Sidebar" name="SidebarHeader" :data="sidebarHeaderProps"/> 
+
+<SlotsTable :data="sidebarHeaderSlots"/> 
 
 ### SidebarSection
 

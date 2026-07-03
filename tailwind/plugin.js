@@ -204,11 +204,27 @@ let componentStyles = {
 }
 
 export default plugin(
-  function ({ addBase, addComponents, theme }) {
+  function ({ addBase, addComponents, matchUtilities, theme }) {
     addBase({ ...globalStyles(theme), ...cssVariables })
     addComponents(componentStyles)
     addComponents(buildTextStyleUtilities())
     addComponents(buildFocusRingUtilities())
+    // Authoring sugar for the list-family styling hooks (frappe-ui/list),
+    // on the spacing scale with variants and arbitrary values:
+    // `max-sm:list-gap-3` instead of `max-sm:[--list-gap:0.75rem]`.
+    matchUtilities(
+      {
+        'list-gap': (value) => ({ '--list-gap': value }),
+        'list-row-px': (value) => ({ '--list-row-padding-x': value }),
+      },
+      { values: theme('spacing') },
+    )
+    // Grid tracks are arbitrary-only (no meaningful scale):
+    // `max-md:list-cols-[minmax(0,1fr)_auto]` instead of
+    // `max-md:[--list-columns:minmax(0,1fr)_auto]`.
+    matchUtilities({
+      'list-cols': (value) => ({ '--list-columns': value }),
+    })
   },
   {
     theme: {

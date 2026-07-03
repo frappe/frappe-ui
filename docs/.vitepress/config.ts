@@ -69,7 +69,10 @@ function buildSidebar(): SidebarSection[] {
     ...frappeSection,
     {
       text: 'Molecules',
-      items: [{ text: 'Editor', link: '/docs/molecules/editor' }],
+      items: [
+        { text: 'Editor', link: '/docs/molecules/editor' },
+        { text: 'List', link: '/docs/molecules/list' },
+      ],
     },
     {
       text: 'Data Fetching',
@@ -108,10 +111,28 @@ if (isDev) {
 }
 const devTitle = devBranch ? `[${devBranch}] ${meta.name}` : meta.name
 
+// Colocated component docs live next to their source; molecules (lowercase
+// folders like list/) proxy into /docs/molecules alongside the hand-written
+// editor page.
+const colocatedRoots = [
+  {
+    sourceDir: path.resolve(repoRoot, 'src/components'),
+    proxyDir: path.resolve(rootDir, 'content/docs/components'),
+  },
+  {
+    sourceDir: path.resolve(repoRoot, 'src/molecules'),
+    proxyDir: path.resolve(rootDir, 'content/docs/molecules'),
+  },
+  {
+    sourceDir: path.resolve(repoRoot, 'frappe'),
+    proxyDir: path.resolve(rootDir, 'content/docs/frappe'),
+  },
+]
+
 // Generate the @include proxy pages for colocated component docs before
 // VitePress scans srcDir. The colocatedDocs vite plugin (below) keeps them in
 // sync during dev; this eager call seeds them for the initial route scan.
-syncColocatedComponentDocs({ rootDir })
+syncColocatedComponentDocs({ sourceRoots: colocatedRoots })
 
 const config = defineDocsConfig({
   rootDir,
@@ -123,7 +144,7 @@ const config = defineDocsConfig({
   sidebar: buildSidebar(),
   sourceRoots,
   // Dev watcher for colocated component .md changes (initial seed above).
-  colocatedDocs: true,
+  colocatedDocs: { sourceRoots: colocatedRoots },
   // Showcase-only head extras (defineDocsConfig already adds the generic
   // OG/Twitter title/description tags).
   head: [
@@ -175,6 +196,7 @@ const config = defineDocsConfig({
     '@utils': path.resolve(repoRoot, 'src/utils'),
     '@composables': path.resolve(repoRoot, 'src/composables'),
     'frappe-ui/editor': path.resolve(repoRoot, 'src/molecules/editor'),
+    'frappe-ui/list': path.resolve(repoRoot, 'src/molecules/list'),
     'frappe-ui/code-editor': path.resolve(
       repoRoot,
       'src/components/CodeEditor',

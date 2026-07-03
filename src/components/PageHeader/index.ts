@@ -1,0 +1,6 @@
+export { default as PageHeader } from './PageHeader.vue'
+export { default as PageHeaderBase } from './PageHeaderBase.vue'
+export { default as PageHeaderTarget } from './PageHeaderTarget.vue'
+export { default as PageHeaderMobile } from './PageHeaderMobile.vue'
+export { default as PageHeaderMobileTitle } from './PageHeaderMobileTitle.vue'
+export { default as PageHeaderBackButton } from './PageHeaderBackButton.vue'
