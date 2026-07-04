@@ -1,9 +1,25 @@
 import MonthPicker from './MonthPicker.vue'
+import { _resetWarnDeprecated } from '../../utils/warnDeprecated'
 
 const currentYear = new Date().getFullYear()
 const yearRangeStart = currentYear - (currentYear % 12)
 
 describe('MonthPicker', () => {
+  beforeEach(() => {
+    _resetWarnDeprecated()
+  })
+
+  it('warns that MonthPicker is deprecated', () => {
+    cy.window().then((win) => {
+      cy.spy(win.console, 'warn').as('consoleWarn')
+    })
+    cy.mount(MonthPicker)
+    cy.get('@consoleWarn').should(
+      'have.been.calledWithMatch',
+      /MonthPicker is deprecated.*Select/,
+    )
+  })
+
   it('renders', () => {
     cy.mount(MonthPicker)
 

@@ -19,7 +19,7 @@ In practice, v1 means:
 - core component APIs are stable and audited
 - core components are modernized to TypeScript, `<script setup>`, docs, stories, and tests
 - v3 data APIs are the recommended path for new work
-- Gameplan is fully migrated to v3 before the tag
+- v3 ships as the recommended path for new Frappe v16+ work
 - v1 resource APIs and v2 composables remain exported for migration, but are deprecated
 - legacy APIs/components move out of the happy path and into migration/legacy docs
 - `TextEditor` ships with a narrower default surface for v1
@@ -101,9 +101,9 @@ These ship in the package but were never folded into the core-set contract above
 v1 must make an explicit keep / refine / remove decision on each — tracked in the
 [v1 component refinement pass](#v1-component-refinement-pass).
 
-- **Pill** — publicly exported but used only inside `TabButtons` in practice. Decision: stop exporting.
+- **Pill** — used only inside `TabButtons` in practice. Decision: stop exporting from the public package surface.
 - **Duration** — publicly exported. Decision: whether it is core v1 surface; if it holds a value, align with the input-family contract.
-- **ThemeSwitcher** — publicly exported. Decision: whether it belongs in the v1 public API or moves to app-layer/examples.
+- **ThemeSwitcher** — publicly exported for v1 migration, but deprecated. Prefer `Select` plus the `useTheme` composable for app-specific theme switching.
 - **CodeEditor** — currently **not exported**. Decision: promote to public v1 API (then API-audit) or keep internal and out of scope.
 
 `MonthPicker` stays in the core list above for now but is under a remove-or-rebuild
@@ -155,15 +155,15 @@ Items typed **decision** are scope calls to make *first*: resolving several of t
 | **Alert** | Replace type-specific `#icon` slot with `#prefix` (deprecate `#icon`, P6); add uniform `icon?: string \| Component` prop (P11); reconcile `dismissible`/`theme` default drift (code vs JSDoc); add focus-visible on the dismiss button (P12). | refine | — | S | yes |
 | **CodeEditor** | Currently **not exported**. Decide: promote to public v1 API (then API-audit against the philosophy) or keep internal and out of the v1 contract. | decision | — | S→M | only if exposed |
 | **Duration** | Exported, never classified. Decide if it is core v1 surface; if it holds a value, align with the input-family labeling contract (P5). | decision / refine | — | S→M | only if kept core |
-| **FileUploader** | Bring to structural bar: TS + `<script setup>`, `types.ts`, `*.cy.ts`; declare/deprecate `success`/`failure` emits (P1); flat props over the `uploadArgs` blob (P3); default uploads to `is_private` (security #206). | refactor | #788 (chunked uploads), #673 (CSV MIME) | L | yes |
-| **ListView** | Likely a refactor: convert all 12 `List*` sub-components to `<script setup lang="ts">`, add `types.ts` + `*.cy.ts`, move selection to `defineModel` (P2), add keyboard a11y (P12). | refactor | — | L | yes |
+| **FileUploader** | Bring to structural bar: TS + `<script setup>`, `types.ts`, `*.cy.ts`; declare/deprecate `success`/`failure` emits (P1); flat props over the `uploadArgs` blob (P3); default uploads to `is_private` (security #206). | refactor | #788 (closed unmerged), #673 (CSV MIME) | L | yes |
+| **ListView** | Deprecate in favor of `frappe-ui/list`; do not refactor the legacy component for v1. | decision (deprecate) | — | S | no |
 | **MonthPicker** | **Remove for v1** (recommended): deprecate the export with a warning + migration note and drop from the core set — it never moved onto the shared picker architecture. Alternative: rebuild on the DatePicker family arch. | decision (remove) | — | S→L | yes |
 | **Pill** | **Stop exporting** — confirmed used only inside `TabButtons`. Deprecate the public export (P13), keep it internal; retain `PillSize` for internal use. | decision (un-expose) | — | S | yes |
 | **Popover** | Refactor to the v1 floating vocab: `v-model:open`, `side`/`align`/`offset` (deprecate `placement`), `data-slot` hooks (drop `popoverClass`, P10), canonical slots, a11y. The last floating outlier. | refactor | — | M | yes |
 | **Sidebar** | Refactor to **molecule-style composable sub-components, no slots**: expose `SidebarHeader` / `SidebarSection` / `SidebarItem` for composition instead of `header`/`sections` config blobs (P3) + generic slots (P10). | refactor | conflicts with #770 (adds a slot — redirect/close) | L | yes |
 | **Switch + Checkbox** | Add the `padded` variant. | land PR | #751 (also adds a new **Radio** — decide if Radio enters v1 scope) | S | yes |
 | **Tabs + TabButtons** | Unify the two overlapping public components — nest TabButtons' segmented rendering inside `Tabs`, or merge into one `Tabs` with a style axis (P8: a purely-visual variant → one component). Resolve before freeze. | refactor | branches: refactor-tabs, tabs-rewrite, improved-tab-buttons | M | yes |
-| **ThemeSwitcher** | Decide whether it belongs in the v1 public API or moves to app-layer/examples; audit if kept. | decision | — | S | only if kept |
+| **ThemeSwitcher** | Keep exported for v1 compatibility, mark deprecated, and recommend `Select` + `useTheme` for new theme switchers. The composable remains the stable primitive. | decision (deprecate) | — | S | yes |
 | **Tree** | Land the rework PR (adds the WAI-ARIA tree pattern + keyboard nav, P12; resolves the `options` config-blob, P3). | land PR | #783 (draft) | track PR | yes |
 
 ### Decisions to make first (they shrink scope)
@@ -171,7 +171,7 @@ Items typed **decision** are scope calls to make *first*: resolving several of t
 - **MonthPicker → remove / deprecate** rather than rebuild.
 - **Pill → un-export** (internal-only).
 - **CodeEditor → keep internal** unless there is demand to promote it.
-- **ThemeSwitcher → likely app-layer**, not core v1 API.
+- **ThemeSwitcher → deprecated compatibility export**; `useTheme` stays available as the stable primitive.
 - **Radio (from #751) → confirm** whether a new component enters v1 scope or lands post-v1.
 
 Resolving these five as "remove / keep-internal / defer" turns five potential
@@ -264,7 +264,7 @@ What may evolve (only via deprecation cycle in 1.x):
 ### v3 requirements before v1
 
 - PR #610 self-reviewed against `frappe/client/spec/*.md`
-- smoke-tested against the partial Gameplan v3 migration
+- smoke-tested against the partial Gameplan v3 migration if available
 - merged with a one-time dev-mode notice on `createClient` (e.g. "v3 is recommended for Frappe v16+")
 - frozen surface contract documented (see section above)
 - migration path from v1 resources documented on the legacy page (v2 → v3 deferred to post-v1)
@@ -366,13 +366,13 @@ Deferred to 1.1 (bundled into a single refactor effort):
 ### 5. v3 finalization and Gameplan migration
 
 **v1 scope:** v3 ships in 1.0 via PR #610 with a frozen public import
-surface (see "Data API strategy" above). Full Gameplan migration is
-**post-v1**.
+surface (see "Data API strategy" above). Full Gameplan / downstream app
+data-fetching migration is **post-v1** and must not block the 1.0 tag.
 
 Required for 1.0:
 
 - PR #610 self-reviewed and merged
-- partial Gameplan migration used as the stress-test signal
+- partial Gameplan migration used as a stress-test signal if ready before RC
 - frozen surface contract documented
 - one-time dev-mode notice on `createClient` ("v3 is recommended for Frappe v16+")
 
@@ -410,8 +410,8 @@ stay in the **main** docs — they are not deprecated for 1.0.
 v1 should not ship before all of these are done:
 
 - release contract and quality gates are defined
-- core components are migrated to TypeScript and `<script setup>` and have docs/stories/tests baselines (FileUploader and ListView remaining; TabButtons is now modernized)
-- the [v1 component refinement pass](#v1-component-refinement-pass) is complete: the refactors (FileUploader, ListView, Popover, Sidebar, Tabs/TabButtons, Tree) and refinements (Alert, Switch/Checkbox padded) land, and the keep/remove decisions (MonthPicker, Pill, Duration, ThemeSwitcher, CodeEditor, Radio) are made and executed
+- core components are migrated to TypeScript and `<script setup>` and have docs/stories/tests baselines (FileUploader remaining; ListView is deprecated in favor of `frappe-ui/list`)
+- the [v1 component refinement pass](#v1-component-refinement-pass) is complete: the refactors (FileUploader, Popover, Sidebar, Tabs/TabButtons, Tree) and refinements (Alert, Switch/Checkbox padded) land, and the keep/remove decisions (MonthPicker, Pill, Duration, ThemeSwitcher, CodeEditor, Radio) are made and executed
 - selection/input family stabilization is complete enough for v1
 - Dialog/floating stabilization is complete enough for v1
 - TextEditor 1.0 carve-out documented (public API unchanged; refactor in 1.1)
@@ -456,7 +456,6 @@ Do not tag `1.0.0` until all of the following are true:
 - legacy docs page exists
 - migration guide exists
 - deprecation warnings exist for v1/v2/legacy components
-- Gameplan is fully on v3 data APIs
 - release candidate has been validated
 
 ## Immediate post-v1 roadmap
@@ -469,6 +468,7 @@ These are important, but should not block v1 unless they land naturally earlier.
 - session and user utilities
 - first-class socket.io utilities
 - broader internal migration of `frappe-ui/frappe/*` to v3
+- full Gameplan / downstream app migration to v3 data APIs
 
 ### Components and editor
 
