@@ -3,7 +3,14 @@
     :scroll-hide-delay="scrollHideDelay"
     class="relative overflow-hidden"
   >
-    <ScrollAreaViewport ref="viewport" :class="['h-full w-full', viewportClass]">
+    <ScrollAreaViewport
+      ref="viewport"
+      :class="[
+        'h-full w-full',
+        contentFullHeight && '[&>div]:h-full',
+        viewportClass,
+      ]"
+    >
       <slot />
     </ScrollAreaViewport>
     <ScrollBar v-if="orientation !== 'horizontal'" orientation="vertical" />
@@ -28,6 +35,14 @@ withDefaults(
     scrollHideDelay?: number
     /** Extra classes for the scrolling viewport (e.g. padding). */
     viewportClass?: string
+    /**
+     * Stretch the scroll content to fill the viewport height. reka lays the
+     * viewport content out as an auto-height `display: table` box, so a
+     * percentage-height child (e.g. full-height columns in a horizontal board)
+     * collapses to content height. Set this to make such children resolve
+     * against the viewport instead — without reaching into the internal DOM.
+     */
+    contentFullHeight?: boolean
   }>(),
   { orientation: 'vertical', scrollHideDelay: 600 },
 )
