@@ -53,6 +53,16 @@
   padding-inline-end: var(--list-row-padding-x, 0px);
 }
 
+/* Group header aligns its label with the rows' content: same checkbox-column +
+ * row inset as the header/rows, so a section title sits directly above the text
+ * it groups. In :where() so consumer classes win. */
+:where([data-slot='list-group-header']) {
+  padding-inline-start: calc(
+    var(--list-checkbox-width, 0px) + var(--list-row-padding-x, 0px)
+  );
+  padding-inline-end: var(--list-row-padding-x, 0px);
+}
+
 /* Positioned so dividers/checkbox overlays anchor to the row. In :where()
  * (unlike the block above, which needs attribute specificity only to beat
  * preflight's button resets) so a consumer `sticky` class wins — e.g. a
