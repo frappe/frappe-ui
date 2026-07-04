@@ -55,7 +55,7 @@
       type="button"
       :accesskey="accessKey"
       :aria-label="label"
-      class="flex h-full min-w-0 flex-1 items-center pl-2 focus:outline-none focus-visible:ring-0"
+      class="flex h-full text-left min-w-0 flex-1 items-center pl-2 focus:outline-none focus-visible:ring-0"
       @click="handleClick"
     >
       <Tooltip :text="label ?? ''" placement="right" :disabled="!isCollapsed">
