@@ -3,7 +3,7 @@
     <input
       ref="input"
       type="file"
-      :accept="fileTypes"
+      :accept="acceptedFileTypes"
       class="hidden"
       @change="onFileAdd"
     />
@@ -27,114 +27,155 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
+import { computed, ref } from 'vue'
 import { Button } from '../Button'
 import FileUploadHandler from '../../utils/fileUploadHandler'
+import type {
+  FileUploaderEmits,
+  FileUploaderProps,
+  FileUploaderSlotProps,
+  FileUploaderValidationResult,
+} from './types'
+import type { UploadOptions } from '../../utils/useFileUpload'
 
-export default {
+defineOptions({
   name: 'FileUploader',
-  props: {
-    fileTypes: {
-      type: [String, Array],
-    },
-    uploadArgs: {
-      type: Object,
-    },
-    validateFile: {
-      type: Function,
-      default: null,
-    },
-  },
-  data() {
-    return {
-      uploader: null,
-      uploading: false,
-      uploaded: 0,
-      error: null,
-      message: '',
-      total: 0,
-      file: null,
-      finishedUploading: false,
-    }
-  },
-  computed: {
-    progress() {
-      let value = Math.floor((this.uploaded / this.total) * 100)
-      return isNaN(value) ? 0 : value
-    },
-    success() {
-      return this.finishedUploading && !this.error
-    },
-  },
-  methods: {
-    inputRef() {
-      return this.$refs['input']
-    },
-    openFileSelector() {
-      this.$refs['input'].click()
-    },
-    async onFileAdd(e) {
-      this.error = null
-      this.file = e.target.files[0]
+})
 
-      if (this.file && this.validateFile) {
-        try {
-          let message = await this.validateFile(this.file)
-          if (message) {
-            this.error = message
-          }
-        } catch (error) {
-          this.error = error
-        }
-      }
+const props = withDefaults(defineProps<FileUploaderProps>(), {
+  uploadArgs: undefined,
+  validateFile: undefined,
+})
 
-      if (!this.error) {
-        this.uploadFile(this.file)
-      }
-    },
-    async uploadFile(file) {
-      this.error = null
-      this.uploaded = 0
-      this.total = 0
+const emit = defineEmits<FileUploaderEmits>()
+defineSlots<{
+  default(props: FileUploaderSlotProps): unknown
+}>()
 
-      this.uploader = new FileUploadHandler()
-      this.uploader.on('start', () => {
-        this.uploading = true
-      })
-      this.uploader.on('progress', (data) => {
-        this.uploaded = data.uploaded
-        this.total = data.total
-      })
-      this.uploader.on('error', () => {
-        this.uploading = false
-        this.error = 'Error Uploading File'
-      })
-      this.uploader.on('finish', () => {
-        this.uploading = false
-        this.finishedUploading = true
-      })
-      this.uploader
-        .upload(file, this.uploadArgs || {})
-        .then((data) => {
-          this.$emit('success', data)
-        })
-        .catch((error) => {
-          this.uploading = false
-          let errorMessage = 'Error Uploading File'
-          if (error?.message) {
-            errorMessage = error.message
-          } else if (error?._server_messages) {
-            errorMessage = JSON.parse(
-              JSON.parse(error._server_messages)[0],
-            ).message
-          } else if (error?.exc) {
-            errorMessage = JSON.parse(error.exc)[0].split('\n').slice(-2, -1)[0]
-          }
-          this.error = errorMessage
-          this.$emit('failure', error)
-        })
-    },
-  },
-  expose: ['inputRef'],
+const input = ref<HTMLInputElement | null>(null)
+const uploader = ref<FileUploadHandler | null>(null)
+const uploading = ref(false)
+const uploaded = ref(0)
+const total = ref(0)
+const error = ref<unknown>(null)
+const message = ref('')
+const file = ref<File | null>(null)
+const finishedUploading = ref(false)
+
+const acceptedFileTypes = computed(() => {
+  return Array.isArray(props.fileTypes)
+    ? props.fileTypes.join(',')
+    : props.fileTypes
+})
+
+const progress = computed(() => {
+  const value = Math.floor((uploaded.value / total.value) * 100)
+  return Number.isNaN(value) ? 0 : value
+})
+
+const success = computed(() => {
+  return finishedUploading.value && !error.value
+})
+
+const uploadOptions = computed<UploadOptions>(() => {
+  const uploadArgs = props.uploadArgs || {}
+  if (uploadArgs.private !== undefined || uploadArgs.is_private !== undefined) {
+    return uploadArgs
+  }
+  return { ...uploadArgs, private: true }
+})
+
+function inputRef() {
+  return input.value
 }
+
+function openFileSelector() {
+  input.value?.click()
+}
+
+async function onFileAdd(event: Event) {
+  error.value = null
+
+  const target = event.target as HTMLInputElement
+  const selectedFile = target.files?.[0] || null
+  file.value = selectedFile
+
+  if (!selectedFile) return
+
+  const validationError = await validateSelectedFile(selectedFile)
+  if (validationError) {
+    error.value = validationError
+    return
+  }
+
+  await uploadFile(selectedFile)
+}
+
+async function validateSelectedFile(
+  selectedFile: File,
+): Promise<FileUploaderValidationResult> {
+  if (!props.validateFile) return null
+
+  try {
+    return await props.validateFile(selectedFile)
+  } catch (validationError) {
+    return validationError as Error
+  }
+}
+
+async function uploadFile(selectedFile: File) {
+  error.value = null
+  uploaded.value = 0
+  total.value = 0
+  finishedUploading.value = false
+
+  uploader.value = new FileUploadHandler()
+  uploader.value.on('start', () => {
+    uploading.value = true
+  })
+  uploader.value.on('progress', (data: { uploaded: number; total: number }) => {
+    uploaded.value = data.uploaded
+    total.value = data.total
+  })
+  uploader.value.on('error', () => {
+    uploading.value = false
+    error.value = 'Error Uploading File'
+  })
+  uploader.value.on('finish', () => {
+    uploading.value = false
+    finishedUploading.value = true
+  })
+
+  try {
+    const data = await uploader.value.upload(selectedFile, uploadOptions.value)
+    emit('success', data)
+  } catch (uploadError) {
+    uploading.value = false
+    error.value = getUploadErrorMessage(uploadError)
+    emit('failure', uploadError)
+  }
+}
+
+function getUploadErrorMessage(uploadError: unknown) {
+  if (uploadError instanceof Error && uploadError.message) {
+    return uploadError.message
+  }
+
+  const errorResponse = uploadError as {
+    message?: string
+    _server_messages?: string
+    exc?: string
+  }
+  if (errorResponse?.message) return errorResponse.message
+  if (errorResponse?._server_messages) {
+    return JSON.parse(JSON.parse(errorResponse._server_messages)[0]).message
+  }
+  if (errorResponse?.exc) {
+    return JSON.parse(errorResponse.exc)[0].split('\n').slice(-2, -1)[0]
+  }
+  return 'Error Uploading File'
+}
+
+defineExpose({ inputRef })
 </script>

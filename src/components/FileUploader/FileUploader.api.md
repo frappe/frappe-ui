@@ -9,24 +9,23 @@
     name: 'validateFile',
     description: '',
     required: false,
-    type: 'Function',
-    default: 'null'
+    type: '(file: File) => string | Error | null | undefined | void | Promise<string | Error | null | undefined | void>'
   },
   {
     name: 'fileTypes',
     description: '',
     required: false,
-    type: 'string | unknown[]'
+    type: 'string | string[]'
   },
   {
     name: 'uploadArgs',
     description: '',
     required: false,
-    type: 'Record<string, any>'
+    type: 'UploadOptions'
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="FileUploader" :data="propsData"/> 
-
+<PropsTable name="FileUploader" :data="propsData"/>

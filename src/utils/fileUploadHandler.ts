@@ -1,9 +1,5 @@
-import { UploadOptions } from './useFileUpload'
-import {
-  getMaxFileSize,
-  formatBytes,
-  fileSizeLimitMessage,
-} from './fileSize'
+import { isPrivateUpload, type UploadOptions } from './useFileUpload'
+import { getMaxFileSize, formatBytes, fileSizeLimitMessage } from './fileSize'
 
 type EventListenerOption = 'start' | 'progress' | 'finish' | 'error'
 
@@ -147,7 +143,7 @@ class FileUploadHandler {
       if (file) {
         form_data.append('file', file, file.name)
       }
-      form_data.append('is_private', options.private || false ? '1' : '0')
+      form_data.append('is_private', isPrivateUpload(options) ? '1' : '0')
       form_data.append('folder', options.folder || 'Home')
 
       if (options.file_url) {
