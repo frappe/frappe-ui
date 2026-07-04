@@ -125,7 +125,7 @@ declare module 'vue' {
     PageHeaderTarget: typeof import('./src/components/PageHeader/PageHeaderTarget.vue')['default']
     Password: typeof import('./src/components/Password/Password.vue')['default']
     PickerShell: typeof import('./src/components/shared/picker/PickerShell.vue')['default']
-    Pill: typeof import('./src/components/Pill/Pill.vue')['default']
+    Pill: typeof import('./src/components/TabButtons/Pill.vue')['default']
     Popover: typeof import('./src/components/Popover/Popover.vue')['default']
     PopoverPanel: typeof import('./src/components/shared/popover/PopoverPanel.vue')['default']
     PreferencesPanel: typeof import('./src/components/SettingsDialog/stories/panels/PreferencesPanel.vue')['default']

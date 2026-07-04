@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Icon } from '../Icon'
-import type { PillProps } from './types'
+import type { PillProps } from './pillTypes'
 
 const props = withDefaults(defineProps<PillProps>(), {
   variant: 'default',
