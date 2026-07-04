@@ -35,7 +35,7 @@
                   placeholder="Filter by..."
                   :options="fields"
                   :value="filter.fieldname"
-                  @change="selectFilterField(filter, $event)"
+                  @change="selectFilterField(i, $event)"
                 />
               </div>
               <div id="operator" class="!min-w-[140px] flex-shrink-0">
@@ -44,7 +44,7 @@
                   :options="getOperators(filter.field.fieldtype)"
                   :modelValue="filter.operator"
                   placeholder="Operator"
-                  @update:modelValue="filter.operator = $event.value"
+                  @update:modelValue="updateFilterOperator(i, $event)"
                 />
               </div>
               <div id="value" class="!min-w-[140px] flex-1">
@@ -55,7 +55,7 @@
                   "
                   :doctype="filter.field.options || ''"
                   :value="filter.value"
-                  @change="filter.value = $event.value"
+                  @change="updateFilterValueFromOption(i, $event)"
                   placeholder="Value"
                 />
                 <component
@@ -66,7 +66,8 @@
                       filter.field.options,
                     )
                   "
-                  v-model="filter.value"
+                  :modelValue="filter.value"
+                  @update:modelValue="updateFilterValue(i, $event)"
                   placeholder="Value"
                 />
               </div>
@@ -343,13 +344,51 @@ function addFilterFromOption(option: AutocompleteOption) {
   if (fieldname) addFilter(String(fieldname))
 }
 
-function selectFilterField(filter: FilterItem, option: AutocompleteOption) {
-  const fieldname = getOptionValue(option)
-  if (fieldname) filter.fieldname = String(fieldname)
+function updateFilter(
+  index: number,
+  getNextFilter: (filter: FilterItem) => FilterItem,
+) {
+  filters.value = filters.value.map((filter, i) =>
+    i === index ? getNextFilter(filter) : filter,
+  )
 }
 
-function getOptionValue(option: AutocompleteOption) {
-  if (option && typeof option === 'object') return option.value
+function selectFilterField(index: number, option: AutocompleteOption) {
+  const fieldname = getOptionValue(option)
+  if (!fieldname) return
+
+  const field = getField(String(fieldname))
+  if (!field) return
+
+  updateFilter(index, () => ({
+    fieldname: String(fieldname),
+    field,
+    operator: getDefaultOperator(field.fieldtype),
+    value: getDefaultValue(field),
+  }))
+}
+
+function updateFilterOperator(index: number, option: unknown) {
+  const operator = getOptionValue(option)
+  if (!operator) return
+  updateFilter(index, (filter) => ({
+    ...filter,
+    operator: operator as FilterOperator,
+  }))
+}
+
+function updateFilterValueFromOption(index: number, option: unknown) {
+  updateFilterValue(index, getOptionValue(option))
+}
+
+function updateFilterValue(index: number, value: FilterValue) {
+  updateFilter(index, (filter) => ({ ...filter, value }))
+}
+
+function getOptionValue(option: unknown) {
+  if (option && typeof option === 'object' && 'value' in option) {
+    return (option as { value?: any }).value
+  }
   return option
 }
 

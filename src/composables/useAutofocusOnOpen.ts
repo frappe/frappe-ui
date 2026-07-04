@@ -41,6 +41,8 @@ export function useAutofocusOnOpen(
   isOpen: MaybeRefOrGetter<boolean>,
   getContainer: () => HTMLElement | null | undefined,
 ) {
+  if (typeof window === 'undefined') return
+
   watch(
     () => toValue(isOpen),
     async (open) => {
