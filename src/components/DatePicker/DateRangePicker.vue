@@ -134,7 +134,9 @@ import type {
 } from './types'
 
 const props = withDefaults(defineProps<DateRangePickerProps>(), {
-  value: () => [],
+  // No default for the deprecated `value`: `[]` is truthy, which would make the
+  // deprecation guard (`useDeprecationWarnings`) fire for every v-model consumer.
+  // `pickIncoming()` already guards on `.length`, so `undefined` is safe.
   modelValue: () => [],
   variant: 'subtle',
   placeholder: 'Select range',
