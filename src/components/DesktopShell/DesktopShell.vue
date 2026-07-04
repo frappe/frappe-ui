@@ -15,9 +15,20 @@
         (via ScrollArea's exposed viewport element) so `useScrollContainer()` /
         `getScrollContainer()` resolve it with zero app wiring.
       -->
-      <ScrollArea ref="scrollArea" class="min-h-0 flex-1">
+      <ScrollArea v-if="scroll" ref="scrollArea" class="min-h-0 flex-1">
         <slot />
       </ScrollArea>
+
+      <!--
+        scroll=false: the content area fills the remaining height and never
+        page-scrolls, so inner panes own their own overflow — a list + detail
+        split, or a horizontally-scrolling board whose columns scroll on their
+        own. Without this apps fake it with `absolute inset-0` / hardcoded
+        `h-[calc(100vh-3rem)]` / `[&>div]:h-full`.
+      -->
+      <div v-else class="flex min-h-0 flex-1 flex-col overflow-hidden">
+        <slot />
+      </div>
     </div>
   </div>
 </template>
@@ -30,6 +41,18 @@ import {
   registerScrollContainer,
   unregisterScrollContainer,
 } from '../../composables/useScrollContainer'
+
+withDefaults(
+  defineProps<{
+    /**
+     * Whether the content area scrolls as one page (default). Set `false` for
+     * multi-pane layouts where inner panes own their own scroll — the content
+     * area then fills the remaining height and never page-scrolls.
+     */
+    scroll?: boolean
+  }>(),
+  { scroll: true },
+)
 
 const scrollArea = ref<InstanceType<typeof ScrollArea> | null>(null)
 
