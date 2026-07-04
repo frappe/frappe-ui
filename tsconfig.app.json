@@ -19,6 +19,9 @@
   ],
   "exclude": [
     "src/**/*.cy.ts",
+    "src/**/*.story.vue",
+    "src/**/stories/**/*",
+    "src/components/TextEditor/**/*",
     "experimental/**/*.cy.ts",
     "frappe/**/*.cy.ts",
     "src/mocks/**/*"

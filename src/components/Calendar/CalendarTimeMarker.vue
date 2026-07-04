@@ -9,19 +9,20 @@
     </Tooltip>
   </div>
 </template>
-<script setup>
+<script setup lang="ts">
 import Tooltip from '../Tooltip/Tooltip.vue'
 import { dayjs } from '../../utils/dayjs'
 import { computed, inject } from 'vue'
+import { CALENDAR_CONFIG_KEY } from './types'
 
-const props = defineProps({
-  date: {
-    type: [String, Date],
-    required: true,
-  },
-})
+const props = defineProps<{
+  date: string | Date
+}>()
 
-const config = inject('config')
+const config = inject(CALENDAR_CONFIG_KEY)
+if (!config) {
+  throw new Error('CalendarTimeMarker must be rendered inside Calendar.')
+}
 const hourHeight = config.hourHeight
 const minuteHeight = hourHeight / 60
 

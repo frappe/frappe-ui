@@ -23,24 +23,31 @@
   </Popover>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { Popover, PopoverButton, PopoverPanel } from '@headlessui/vue'
-import { createPopper } from '@popperjs/core'
+import { createPopper, type Instance, type Placement } from '@popperjs/core'
 import { nextTick, ref, onBeforeUnmount } from 'vue'
 
-const props = defineProps({
-  placement: {
-    type: String,
-    default: 'bottom-start',
+const props = withDefaults(
+  defineProps<{
+    placement?: Placement
+  }>(),
+  {
+    placement: 'bottom-start',
   },
-})
+)
 
-const reference = ref(null)
-const popover = ref(null)
+type HeadlessElementRef = {
+  el: HTMLElement
+}
 
-let popper = ref(null)
+const reference = ref<HeadlessElementRef | null>(null)
+const popover = ref<HeadlessElementRef | null>(null)
+
+let popper = ref<Instance | null>(null)
 
 function setupPopper() {
+  if (!reference.value?.el || !popover.value?.el) return
   if (!popper.value) {
     popper.value = createPopper(reference.value.el, popover.value.el, {
       placement: props.placement,

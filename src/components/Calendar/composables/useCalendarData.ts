@@ -4,13 +4,21 @@ import {
   calculateMinutes,
   findOverlappingEventsCount,
 } from '../calendarUtils'
+import type {
+  CalendarEvent,
+  CalendarMode,
+  GroupedCalendarEvents,
+} from '../types'
 
-export const activeEvent = ref('')
+export const activeEvent = ref<string | number>('')
 
-export default function useCalendarData(events, view = '') {
+export default function useCalendarData(
+  events: CalendarEvent[] = [],
+  view: CalendarMode | '' = '',
+) {
   const timedEvents = computed(() => {
-    let groupByDate = groupBy(events, (row) => row.date)
-    let sortedArray = {}
+    let groupByDate = groupBy(events, (row) => row.date || '')
+    let sortedArray: GroupedCalendarEvents = {}
     if (view === 'Month') {
       for (const [key, value] of Object.entries(groupByDate)) {
         sortedArray[key] = sortMonthlyEvents(value)
@@ -19,10 +27,12 @@ export default function useCalendarData(events, view = '') {
       for (let [key, value] of Object.entries(groupByDate)) {
         value = value.filter((event) => !event.isFullDay)
         value.forEach((task) => {
-          task.startTime = calculateMinutes(task.fromTime)
-          task.endTime = calculateMinutes(task.toTime)
+          task.startTime = calculateMinutes(task.fromTime || '00:00')
+          task.endTime = calculateMinutes(task.toTime || '00:00')
         })
-        let sortedEvents = value.sort((a, b) => a.startTime - b.startTime)
+        let sortedEvents = value.sort(
+          (a, b) => (a.startTime || 0) - (b.startTime || 0),
+        )
         sortedArray[key] = findOverlappingEventsCount(sortedEvents)
       }
     }
@@ -31,23 +41,25 @@ export default function useCalendarData(events, view = '') {
 
   const fullDayEvents = computed(() => {
     let fullDay = events.filter((event) => event.isFullDay)
-    let dateGroup = groupBy(fullDay, (row) => row.date)
+    let dateGroup = groupBy(fullDay, (row) => row.date || '')
     return dateGroup
   })
 
   return { timedEvents, fullDayEvents }
 }
 
-function sortMonthlyEvents(events) {
+function sortMonthlyEvents(events: CalendarEvent[]): CalendarEvent[] {
   let fullDayEvents = events.filter((event) => event.isFullDay)
   let timedEvents = events
     .filter((event) => !event.isFullDay)
     .sort((a, b) =>
       a.fromTime !== b.fromTime
-        ? calculateMinutes(a.fromTime) > calculateMinutes(b.fromTime)
+        ? calculateMinutes(a.fromTime || '00:00') >
+          calculateMinutes(b.fromTime || '00:00')
           ? 1
           : -1
-        : calculateMinutes(a.toTime) > calculateMinutes(b.toTime)
+        : calculateMinutes(a.toTime || '00:00') >
+            calculateMinutes(b.toTime || '00:00')
           ? 1
           : -1,
     )

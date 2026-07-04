@@ -25,8 +25,13 @@ export class FrappeResponseError extends Error {
     this.indicator = options.indicator
 
     // Maintains proper stack trace for where our error was thrown (only available on V8)
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, FrappeResponseError)
+    const captureStackTrace = (
+      Error as ErrorConstructor & {
+        captureStackTrace?: (target: object, constructor?: Function) => void
+      }
+    ).captureStackTrace
+    if (captureStackTrace) {
+      captureStackTrace(this, FrappeResponseError)
     }
   }
 }

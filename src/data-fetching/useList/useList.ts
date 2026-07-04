@@ -69,7 +69,9 @@ export function useList<T extends { name: string }>(
   const hasPreviousPage = computed(() => _start.value > 0)
 
   let normalizedCacheKey = normalizeCacheKey(cacheKey, 'useList')
-  let cachedResponse = ref<UseListResponse<T> | null>(null)
+  let cachedResponse = ref<UseListResponse<T> | null>(
+    null,
+  ) as Ref<UseListResponse<T> | null>
 
   const fetchOptions: UseFetchOptions = {
     immediate,
@@ -96,8 +98,6 @@ export function useList<T extends { name: string }>(
     abort,
     execute,
   } = useFrappeFetch<UseListResponse<T>>(_url, fetchOptions).get()
-
-
 
   const result = computed(() => {
     if (normalizedCacheKey && (out.loading || !out.isFinished)) {

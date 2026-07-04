@@ -1,23 +1,24 @@
 import { ref, inject, computed, watch, reactive } from 'vue'
-import { activeEvent } from './composables/useCalendarData.js'
+import { activeEvent } from './composables/useCalendarData'
 import { colorMap, colorMapDark } from './calendarUtils'
-
-export const eventProps = {
-  event: {
-    type: Object,
-    required: true,
-  },
-  date: {
-    type: Date,
-    required: true,
-  },
-}
+import {
+  CALENDAR_ACTIONS_KEY,
+  CALENDAR_CONFIG_KEY,
+  type CalendarColor,
+  type CalendarEvent,
+} from './types'
 
 export const isAnyPopoverOpen = ref(false)
 
-export function useEventBase(props) {
-  const config = inject('config')
-  const calendarActions = inject('calendarActions')
+export function useEventBase(props: { event: CalendarEvent; date: Date }) {
+  const config = inject(CALENDAR_CONFIG_KEY)!
+  const calendarActions = inject(CALENDAR_ACTIONS_KEY)!
+
+  if (!config || !calendarActions) {
+    throw new Error(
+      'Calendar event components must be rendered inside Calendar.',
+    )
+  }
 
   const calendarEvent = ref(props.event)
   const updatedEvent = reactive({ ...props.event })
@@ -41,16 +42,19 @@ export function useEventBase(props) {
   const getTheme = () => {
     const theme = document.documentElement.getAttribute('data-theme')
     if (theme) return theme
-    return document.documentElement.classList.contains('htw-dark') ? 'dark' : 'light'
+    return document.documentElement.classList.contains('htw-dark')
+      ? 'dark'
+      : 'light'
   }
 
-  function color(colorValue) {
+  function color(colorValue?: string): CalendarColor {
     const map = getTheme() === 'dark' ? colorMapDark : colorMap
-    if (!colorValue?.startsWith('#')) return map[colorValue] || map['green']
+    if (!colorValue?.startsWith('#'))
+      return map[colorValue || 'green'] || map['green']!
     for (const value of Object.values(map)) {
       if (value.color === colorValue) return value
     }
-    return map['green']
+    return map['green']!
   }
 
   const eventBgStyle = computed(() => {
@@ -82,7 +86,7 @@ export function useEventBase(props) {
     document.removeEventListener('keydown', handleDeleteShortcut)
   }
 
-  function handleDeleteShortcut(e) {
+  function handleDeleteShortcut(e: KeyboardEvent) {
     if (e.key === 'Delete' || e.key === 'Backspace') {
       e.preventDefault()
       handleEventDelete()
@@ -92,9 +96,13 @@ export function useEventBase(props) {
   // ── Click / edit / delete ────────────────────────────────────────────────
 
   const preventClick = ref(false)
-  let clickTimer = null
+  let clickTimer: ReturnType<typeof setTimeout> | null = null
 
-  function handleEventClick(e, togglePopover, isPopoverOpen) {
+  function handleEventClick(
+    e: MouseEvent,
+    togglePopover: () => void,
+    isPopoverOpen?: boolean,
+  ) {
     isAnyPopoverOpen.value = false
     if (preventClick.value) {
       preventClick.value = false
@@ -103,7 +111,10 @@ export function useEventBase(props) {
     if (e.detail === 1) {
       clickTimer = setTimeout(() => {
         if (calendarActions.props.onClick)
-          calendarActions.props.onClick({ e, calendarEvent: calendarEvent.value })
+          calendarActions.props.onClick({
+            e,
+            calendarEvent: calendarEvent.value,
+          })
         else {
           togglePopover()
           isAnyPopoverOpen.value = !isPopoverOpen
@@ -114,11 +125,14 @@ export function useEventBase(props) {
 
   const showEventModal = ref(false)
 
-  function handleEventEdit(e = null) {
+  function handleEventEdit(e: MouseEvent | null = null) {
     e && (e.cancelBubble = true)
-    clearTimeout(clickTimer)
+    if (clickTimer) clearTimeout(clickTimer)
     if (calendarActions.props.onDblClick) {
-      calendarActions.props.onDblClick({ e, calendarEvent: calendarEvent.value })
+      calendarActions.props.onDblClick({
+        e,
+        calendarEvent: calendarEvent.value,
+      })
       return
     }
     if (!config.isEditMode) return

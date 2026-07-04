@@ -219,7 +219,7 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
 
   return out as Omit<typeof out, 'submit'> & {
     submit: TParams extends undefined
-      ? (params?: never) => Promise<void>
-      : (params: TParams) => Promise<void>
+      ? (params?: never) => Promise<TResponse | null>
+      : (params?: TParams) => Promise<TResponse | null>
   }
 }

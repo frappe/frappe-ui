@@ -96,11 +96,11 @@ function mountEditor(editor: Editor | null) {
   if (!editor) return
 
   const tiptapEditor = editor as any
-  tiptapEditor.contentComponent = instance?.ctx._
+  tiptapEditor.contentComponent = (instance as any)?.ctx._
   if (instance) {
     tiptapEditor.appContext = {
       ...instance.appContext,
-      provides: instance.provides,
+      provides: (instance as any).provides,
     }
   }
 

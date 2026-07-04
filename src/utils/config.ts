@@ -21,6 +21,7 @@ export interface FrappeUIConfig {
 
   // Error handling
   fallbackErrorHandler?: (error: any) => void
+  serverMessagesHandler?: (messages: string[]) => void
 
   // Base URL prepended to relative request URLs. Set this for local UI dev
   // against a remote Frappe instance (cross-origin). When set, requests default

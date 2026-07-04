@@ -105,7 +105,7 @@ describe('useDoc', () => {
     await waitUntilValueChanges(() => user.doc)
 
     // Initial email value
-    expect(user.doc.email).toBe('user1@example.com')
+    expect(user.doc!.email).toBe('user1@example.com')
 
     // Update email
     const newEmail = 'updated@example.com'
@@ -115,7 +115,7 @@ describe('useDoc', () => {
     await waitUntilValueChanges(() => user.doc)
 
     // Verify that the doc was updated
-    expect(user.doc.email).toBe(newEmail)
+    expect(user.doc!.email).toBe(newEmail)
   })
 
   it('does not bind or fetch while the name is empty', async () => {

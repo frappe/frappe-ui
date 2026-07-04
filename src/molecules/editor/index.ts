@@ -6,14 +6,12 @@ import './style.css'
 // Engine
 export {
   useEditor,
-  type Editor,
+  type Editor as TiptapEditor,
   type JSONContent,
   type UploadedFile,
 } from './useEditor'
 
-// The component. NOTE: this is the `Editor` *value*; the `Editor` *type* above
-// (the tiptap instance) lives in a separate namespace, so `import { Editor }`
-// gets the component and `import type { Editor }` gets the type.
+// The component. Use `TiptapEditor` for the underlying editor instance type.
 export { default as Editor } from './Editor.vue'
 
 // Building blocks (compose without <Editor>)

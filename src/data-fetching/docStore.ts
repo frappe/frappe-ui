@@ -56,7 +56,7 @@ class DocStore {
   getDoc(
     doctype: string,
     name: MaybeRefOrGetter<string>,
-    transform: (doc: Doc) => Doc,
+    transform?: (doc: Doc) => Doc,
   ): Ref<Doc | null> {
     const nameStr = toValue(name)?.trim()
     if (!doctype || !nameStr) {
@@ -77,7 +77,7 @@ class DocStore {
   private async loadDoc(
     key: DocKey,
     isFirstLoad: boolean,
-    transform: (doc: Doc) => Doc,
+    transform?: (doc: Doc) => Doc,
   ) {
     try {
       if (!isFirstLoad && this.isStale(key)) {

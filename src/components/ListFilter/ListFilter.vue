@@ -3,11 +3,11 @@
     <template #target>
       <Button label="Filter">
         <template #prefix><FilterIcon class="h-4" /></template>
-        <template v-if="filters.size" #suffix>
+        <template v-if="filters.length" #suffix>
           <div
             class="flex h-5 w-5 items-center justify-center rounded bg-surface-gray-10 pt-[1px] text-2xs-medium text-ink-base"
           >
-            {{ filters.size }}
+            {{ filters.length }}
           </div>
         </template>
       </Button>
@@ -32,19 +32,19 @@
               </div>
               <div id="fieldname" class="!min-w-[140px] flex-1">
                 <Autocomplete
-                  :value="filter.fieldname"
-                  :options="fields"
-                  @change="filter.fieldname = $event.value"
                   placeholder="Filter by..."
+                  :options="fields"
+                  :value="filter.fieldname"
+                  @change="selectFilterField(filter, $event)"
                 />
               </div>
               <div id="operator" class="!min-w-[140px] flex-shrink-0">
                 <FormControl
                   type="select"
-                  :modelValue="filter.operator"
-                  @update:modelValue="filter.operator = $event.value"
                   :options="getOperators(filter.field.fieldtype)"
+                  :modelValue="filter.operator"
                   placeholder="Operator"
+                  @update:modelValue="filter.operator = $event.value"
                 />
               </div>
               <div id="value" class="!min-w-[140px] flex-1">
@@ -53,7 +53,7 @@
                     typeLink.includes(filter.field.fieldtype) &&
                     ['=', '!='].includes(filter.operator)
                   "
-                  :doctype="filter.field.options"
+                  :doctype="filter.field.options || ''"
                   :value="filter.value"
                   @change="filter.value = $event.value"
                   placeholder="Value"
@@ -72,7 +72,11 @@
               </div>
             </div>
             <div class="flex-shrink-0">
-              <Button variant="ghost" icon="lucide-x" @click="removeFilter(i)" />
+              <Button
+                variant="ghost"
+                icon="lucide-x"
+                @click="removeFilter(i)"
+              />
             </div>
           </div>
           <div
@@ -85,8 +89,8 @@
             <Autocomplete
               value=""
               :options="fields"
-              @change="(field) => addFilter(field.value)"
               placeholder="Filter by..."
+              @change="addFilterFromOption"
             >
               <template #target="{ togglePopover }">
                 <Button
@@ -115,17 +119,59 @@
   </NestedPopover>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { Autocomplete, FormControl } from '../../index'
 import { computed, h } from 'vue'
 import FilterIcon from './FilterIcon.vue'
 import NestedPopover from './NestedPopover.vue'
 import SearchComplete from './SearchComplete.vue'
+import type { AutocompleteOption } from '../Autocomplete/types'
 
-const typeCheck = ['Check']
-const typeLink = ['Link']
-const typeNumber = ['Float', 'Int']
-const typeSelect = ['Select']
+type FilterFieldtype =
+  | 'Check'
+  | 'Link'
+  | 'Float'
+  | 'Int'
+  | 'Select'
+  | 'Data'
+  | 'Long Text'
+  | 'Small Text'
+  | 'Text Editor'
+  | 'Text'
+  | 'JSON'
+  | 'Code'
+  | string
+
+interface DocField {
+  fieldname: string
+  label?: string
+  fieldtype: FilterFieldtype
+  options?: string
+  is_virtual?: boolean
+  [key: string]: any
+}
+
+type FilterOperator = '=' | '!=' | 'like' | 'not like' | '<' | '>' | '<=' | '>='
+type FilterValue = any
+type FiltersDict = Record<string, [FilterOperator, FilterValue]>
+
+interface FilterItem {
+  fieldname: string
+  operator: FilterOperator
+  value: FilterValue
+  field: DocField
+}
+
+type FieldOption = DocField & {
+  label: string
+  value: string
+  description: string
+}
+
+const typeCheck: FilterFieldtype[] = ['Check']
+const typeLink: FilterFieldtype[] = ['Link']
+const typeNumber: FilterFieldtype[] = ['Float', 'Int']
+const typeSelect: FilterFieldtype[] = ['Select']
 const typeString = [
   'Data',
   'Long Text',
@@ -136,17 +182,20 @@ const typeString = [
   'Code',
 ]
 
-const emits = defineEmits(['update:modelValue'])
-const props = defineProps({
-  modelValue: {
-    type: Object,
-    default: () => ({}),
+const emits = defineEmits<{
+  'update:modelValue': [value: FiltersDict]
+}>()
+
+const props = withDefaults(
+  defineProps<{
+    modelValue?: FiltersDict
+    docfields?: DocField[]
+  }>(),
+  {
+    modelValue: () => ({}),
+    docfields: () => [],
   },
-  docfields: {
-    type: Array,
-    default: () => [],
-  },
-})
+)
 
 const fields = computed(() => {
   const fields = props.docfields
@@ -162,13 +211,13 @@ const fields = computed(() => {
     })
     .map((field) => {
       return {
-        label: field.label,
+        label: field.label || field.fieldname,
         value: field.fieldname,
         description: field.fieldtype,
         ...field,
       }
     })
-  return fields
+  return fields as FieldOption[]
 })
 
 const filters = computed({
@@ -176,69 +225,69 @@ const filters = computed({
   set: (value) => emits('update:modelValue', makeFiltersDict(value)),
 })
 
-function makeFiltersList(filtersDict) {
+function makeFiltersList(filtersDict: FiltersDict): FilterItem[] {
   return Object.entries(filtersDict).map(([fieldname, [operator, value]]) => {
     const field = getField(fieldname)
     return {
       fieldname,
       operator,
       value,
-      field,
+      field: field!,
     }
   })
 }
 
-function getField(fieldname) {
+function getField(fieldname: string) {
   return fields.value.find((f) => f.fieldname === fieldname)
 }
 
-function makeFiltersDict(filtersList) {
-  return filtersList.reduce((acc, filter) => {
+function makeFiltersDict(filtersList: FilterItem[]) {
+  return filtersList.reduce<FiltersDict>((acc, filter) => {
     const { fieldname, operator, value } = filter
     acc[fieldname] = [operator, value]
     return acc
   }, {})
 }
 
-function getOperators(fieldtype) {
-  let options = []
+function getOperators(fieldtype: FilterFieldtype) {
+  let options: Array<{ label: string; value: FilterOperator }> = []
   if (typeString.includes(fieldtype) || typeLink.includes(fieldtype)) {
     options.push(
       ...[
-        { label: 'Equals', value: '=' },
-        { label: 'Not Equals', value: '!=' },
-        { label: 'Like', value: 'like' },
-        { label: 'Not Like', value: 'not like' },
+        { label: 'Equals', value: '=' as const },
+        { label: 'Not Equals', value: '!=' as const },
+        { label: 'Like', value: 'like' as const },
+        { label: 'Not Like', value: 'not like' as const },
       ],
     )
   }
   if (typeNumber.includes(fieldtype)) {
     options.push(
       ...[
-        { label: '<', value: '<' },
-        { label: '>', value: '>' },
-        { label: '<=', value: '<=' },
-        { label: '>=', value: '>=' },
-        { label: 'Equals', value: '=' },
-        { label: 'Not Equals', value: '!=' },
+        { label: '<', value: '<' as const },
+        { label: '>', value: '>' as const },
+        { label: '<=', value: '<=' as const },
+        { label: '>=', value: '>=' as const },
+        { label: 'Equals', value: '=' as const },
+        { label: 'Not Equals', value: '!=' as const },
       ],
     )
   }
   if (typeSelect.includes(fieldtype)) {
     options.push(
       ...[
-        { label: 'Equals', value: '=' },
-        { label: 'Not Equals', value: '!=' },
+        { label: 'Equals', value: '=' as const },
+        { label: 'Not Equals', value: '!=' as const },
       ],
     )
   }
   if (typeCheck.includes(fieldtype)) {
-    options.push(...[{ label: 'Equals', value: '=' }])
+    options.push(...[{ label: 'Equals', value: '=' as const }])
   }
   return options
 }
 
-function getDefaultOperator(fieldtype) {
+function getDefaultOperator(fieldtype: FilterFieldtype): FilterOperator {
   if (
     typeSelect.includes(fieldtype) ||
     typeLink.includes(fieldtype) ||
@@ -250,7 +299,7 @@ function getDefaultOperator(fieldtype) {
   return 'like'
 }
 
-function getValueSelector(fieldtype, options) {
+function getValueSelector(fieldtype: FilterFieldtype, options?: string) {
   if (typeSelect.includes(fieldtype) || typeCheck.includes(fieldtype)) {
     const _options =
       fieldtype == 'Check' ? ['Yes', 'No'] : getSelectOptions(options)
@@ -263,7 +312,7 @@ function getValueSelector(fieldtype, options) {
   }
 }
 
-function getDefaultValue(field) {
+function getDefaultValue(field: DocField) {
   if (typeSelect.includes(field.fieldtype)) {
     return getSelectOptions(field.options)[0]
   }
@@ -273,12 +322,13 @@ function getDefaultValue(field) {
   return ''
 }
 
-function getSelectOptions(options) {
+function getSelectOptions(options = '') {
   return options.split('\n')
 }
 
-function addFilter(fieldname) {
+function addFilter(fieldname: string) {
   const field = getField(fieldname)
+  if (!field) return
   const filter = {
     fieldname,
     operator: getDefaultOperator(field.fieldtype),
@@ -288,7 +338,22 @@ function addFilter(fieldname) {
   filters.value = [...filters.value, filter]
 }
 
-function removeFilter(index) {
+function addFilterFromOption(option: AutocompleteOption) {
+  const fieldname = getOptionValue(option)
+  if (fieldname) addFilter(String(fieldname))
+}
+
+function selectFilterField(filter: FilterItem, option: AutocompleteOption) {
+  const fieldname = getOptionValue(option)
+  if (fieldname) filter.fieldname = String(fieldname)
+}
+
+function getOptionValue(option: AutocompleteOption) {
+  if (option && typeof option === 'object') return option.value
+  return option
+}
+
+function removeFilter(index: number) {
   filters.value = filters.value.filter((_, i) => i !== index)
 }
 </script>

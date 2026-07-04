@@ -1,6 +1,6 @@
 <template>
   <Popover
-    :placement="activeView === 'Week' ? 'left' : 'center'"
+    :placement="popoverPlacement"
     transition="default"
     :style="containerStyle"
     @open="registerDeleteShortcut"
@@ -10,7 +10,9 @@
       <div
         ref="eventRef"
         class="event min-h-6 mx-px shadow rounded transition-all duration-75 shrink-0"
-        :class="{ active: activeEvent == (props.event?.id || props.event?.name) }"
+        :class="{
+          active: activeEvent == (props.event?.id || props.event?.name),
+        }"
         :style="innerStyle"
         @click.prevent="handleEventClick($event, togglePopover)"
         @dblclick.prevent="handleEventEdit($event)"
@@ -22,9 +24,11 @@
             class="event-border h-full w-[2px] rounded shrink-0"
             :style="eventBorderStyle"
           />
-          <div class="relative flex h-full select-none items-start gap-2 overflow-hidden">
-            <div v-if="config.showIcon && eventIcons[props.event.type]">
-              <component :is="eventIcons[props.event.type]" class="h-4 w-4" />
+          <div
+            class="relative flex h-full select-none items-start gap-2 overflow-hidden"
+          >
+            <div v-if="config.showIcon && eventIcon">
+              <component :is="eventIcon" class="h-4 w-4" />
             </div>
             <div class="flex w-fit flex-col gap-0.5 overflow-hidden">
               <p
@@ -40,14 +44,18 @@
                 class="text-xs event-subtitle"
               >
                 {{
-                  formattedDuration(updatedEvent.fromTime, updatedEvent.toTime, config.timeFormat)
+                  formattedDuration(
+                    updatedEvent.fromTime || '',
+                    updatedEvent.toTime || '',
+                    config.timeFormat,
+                  )
                 }}
               </p>
             </div>
           </div>
         </div>
         <div
-          v-if="config.isEditMode && !event.isFullDay"
+          v-if="config.isEditMode && !props.event.isFullDay"
           class="absolute -bottom-1 h-3 w-full cursor-ns-resize"
           @mousedown="handleResizeMouseDown"
         />
@@ -87,14 +95,14 @@
   <NewEventModal v-model="showEventModal" :event="updatedEvent" />
 </template>
 
-<script setup>
+<script setup lang="ts">
 import './style.css'
 
 import { ref, inject, computed, reactive } from 'vue'
 import EventModalContent from './EventModalContent.vue'
 import NewEventModal from './NewEventModal.vue'
 import Popover from '../Popover/Popover.vue'
-import { eventProps, useEventBase } from './useEventBase.js'
+import { useEventBase } from './useEventBase'
 import {
   calculateMinutes,
   convertMinutesToHours,
@@ -102,8 +110,12 @@ import {
   parseDate,
   formattedDuration,
 } from './calendarUtils'
+import { ACTIVE_VIEW_KEY, type CalendarEvent } from './types'
 
-const props = defineProps(eventProps)
+const props = defineProps<{
+  event: CalendarEvent
+  date: Date
+}>()
 
 const {
   activeEvent,
@@ -123,18 +135,29 @@ const {
   unregisterDeleteShortcut,
 } = useEventBase(props)
 
-const activeView = inject('activeView')
+const activeView = inject(ACTIVE_VIEW_KEY)!
+
+if (!activeView) {
+  throw new Error('CalendarWeekDayEvent must be rendered inside Calendar.')
+}
 
 const minuteHeight = config.hourHeight / 60
 const height15Min = minuteHeight * 15
 const heightThreshold = 40
 const minimumHeight = 32.5
 
+const popoverPlacement = computed(
+  () => (activeView.value === 'Week' ? 'left' : 'center') as any,
+)
+const eventIcon = computed(() =>
+  props.event.type ? eventIcons[props.event.type] : null,
+)
+
 // ── Refs ─────────────────────────────────────────────────────────────────
 
-const eventRef = ref(null)
-const eventTitleRef = ref(null)
-const eventTimeRef = ref(null)
+const eventRef = ref<HTMLElement | null>(null)
+const eventTitleRef = ref<HTMLElement | null>(null)
+const eventTimeRef = ref<HTMLElement | null>(null)
 
 // ── Drag state ────────────────────────────────────────────────────────────
 
@@ -153,15 +176,23 @@ const containerStyle = computed(() => {
     }
   }
 
-  const diff = calculateDiff(calendarEvent.value.fromTime, calendarEvent.value.toTime)
+  const diff = calculateDiff(
+    calendarEvent.value.fromTime || '00:00',
+    calendarEvent.value.toTime || '00:00',
+  )
   let height = diff * minuteHeight
   if (height < heightThreshold) height = minimumHeight
 
-  const top = calculateMinutes(calendarEvent.value.fromTime) * minuteHeight
+  const top =
+    calculateMinutes(calendarEvent.value.fromTime || '00:00') * minuteHeight
   const hallNumber = calendarEvent.value.hallNumber || 0
 
-  const width = isResizing.value || isRepositioning.value ? '100%' : `${93 - hallNumber * 20}%`
-  const left = isResizing.value || isRepositioning.value ? '0' : `${hallNumber * 20}%`
+  const width =
+    isResizing.value || isRepositioning.value
+      ? '100%'
+      : `${93 - hallNumber * 20}%`
+  const left =
+    isResizing.value || isRepositioning.value ? '0' : `${hallNumber * 20}%`
 
   return {
     position: 'absolute',
@@ -171,7 +202,8 @@ const containerStyle = computed(() => {
     height: `${height}px`,
     zIndex: isResizing.value || isRepositioning.value ? 100 : 0,
     transform: `translate(${state.xAxis}px, ${state.yAxis}px)`,
-    transition: isResizing.value || isRepositioning.value ? 'none' : 'all 0.1s ease',
+    transition:
+      isResizing.value || isRepositioning.value ? 'none' : 'all 0.1s ease',
   }
 })
 
@@ -196,7 +228,7 @@ const lineClampClass = computed(() => {
   const computedStyle = getComputedStyle(eventTitleRef.value)
   const lineHeight = parseFloat(computedStyle.lineHeight)
   const maxLines = Math.max(1, Math.floor(availableHeightForTitle / lineHeight))
-  const clampMap = {
+  const clampMap: Record<number, string> = {
     1: 'line-clamp-1',
     2: 'line-clamp-2',
     3: 'line-clamp-3',
@@ -209,15 +241,17 @@ const lineClampClass = computed(() => {
 
 // ── Resize ────────────────────────────────────────────────────────────────
 
-function newEventEndTime(newHeight) {
+function newEventEndTime(newHeight: string) {
   let newEndTime =
-    parseFloat(newHeight) / minuteHeight + calculateMinutes(calendarEvent.value.fromTime)
+    parseFloat(newHeight) / minuteHeight +
+    calculateMinutes(calendarEvent.value.fromTime || '00:00')
   newEndTime = Math.floor(newEndTime)
   if (newEndTime > 1440) newEndTime = 1440
   return convertMinutesToHours(newEndTime)
 }
 
 function handleResizeMouseDown() {
+  if (!eventRef.value) return
   isResizing.value = true
   isRepositioning.value = false
 
@@ -225,10 +259,12 @@ function handleResizeMouseDown() {
   window.addEventListener('mousemove', resize)
   window.addEventListener('mouseup', stopResize, { once: true })
 
-  function resize(e) {
+  function resize(e: MouseEvent) {
     preventClick.value = true
+    if (!eventRef.value) return
     const diffX = e.clientY - eventRef.value.getBoundingClientRect().top
-    eventRef.value.style.height = Math.round(diffX / height15Min) * height15Min + 'px'
+    eventRef.value.style.height =
+      Math.round(diffX / height15Min) * height15Min + 'px'
     eventRef.value.style.width = '100%'
     updatedEvent.toTime = newEventEndTime(eventRef.value.style.height)
     calendarEvent.value.toTime = newEventEndTime(eventRef.value.style.height)
@@ -245,11 +281,16 @@ function handleResizeMouseDown() {
 
 // ── Reposition ────────────────────────────────────────────────────────────
 
-function handleRepositionMouseDown(e, isPopoverOpen, closePopover) {
+function handleRepositionMouseDown(
+  e: MouseEvent,
+  isPopoverOpen: boolean,
+  closePopover: () => void,
+) {
   if (!config.isEditMode) return
 
   e.preventDefault()
   const prevY = e.clientY
+  if (!eventRef.value) return
   const rect = eventRef.value.getBoundingClientRect()
 
   if (isResizing.value) return
@@ -257,7 +298,7 @@ function handleRepositionMouseDown(e, isPopoverOpen, closePopover) {
   window.addEventListener('mousemove', mousemove)
   window.addEventListener('mouseup', mouseup)
 
-  function mousemove(e) {
+  function mousemove(e: MouseEvent) {
     if (isPopoverOpen) closePopover()
     isRepositioning.value = true
     preventClick.value = true
@@ -271,7 +312,7 @@ function handleRepositionMouseDown(e, isPopoverOpen, closePopover) {
       calendarEvent.value.toTime !== updatedEvent.toTime
   }
 
-  function mouseup(e) {
+  function mouseup(e: MouseEvent) {
     e.preventDefault()
     isRepositioning.value = false
     if (!eventRef.value) return
@@ -279,14 +320,17 @@ function handleRepositionMouseDown(e, isPopoverOpen, closePopover) {
     if (calendarEvent.value.isFullDay && activeView.value === 'Week') {
       eventRef.value.style.width = '90%'
     }
-    if (calendarEvent.value.date !== updatedEvent.date) isEventUpdated.value = true
+    if (calendarEvent.value.date !== updatedEvent.date)
+      isEventUpdated.value = true
 
     if (isEventUpdated.value) {
       calendarEvent.value.date = updatedEvent.date
       calendarEvent.value.fromDate = updatedEvent.date
       calendarEvent.value.toDate = updatedEvent.date
-      calendarEvent.value.fromDateTime = updatedEvent.date + ' ' + updatedEvent.fromTime
-      calendarEvent.value.toDateTime = updatedEvent.date + ' ' + updatedEvent.toTime
+      calendarEvent.value.fromDateTime =
+        updatedEvent.date + ' ' + updatedEvent.fromTime
+      calendarEvent.value.toDateTime =
+        updatedEvent.date + ' ' + updatedEvent.toTime
       calendarEvent.value.fromTime = updatedEvent.fromTime
       calendarEvent.value.toTime = updatedEvent.toTime
       calendarActions.updateEventState(calendarEvent.value)
@@ -300,8 +344,9 @@ function handleRepositionMouseDown(e, isPopoverOpen, closePopover) {
   }
 }
 
-function handleHorizontalMovement(clientX, rect) {
-  const currentDate = new Date(props.event.date)
+function handleHorizontalMovement(clientX: number, rect: DOMRect) {
+  const currentDate = new Date(props.event.date || props.date)
+  if (!eventRef.value) return
   if (props.event.isFullDay) eventRef.value.style.width = '100%'
 
   const eventWidth = eventRef.value.clientWidth
@@ -313,14 +358,22 @@ function handleHorizontalMovement(clientX, rect) {
 
   state.xAxis = Math.ceil(diff * eventWidth)
   updatedEvent.date = parseDate(
-    new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + diff),
+    new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      currentDate.getDate() + diff,
+    ),
   )
 }
 
-function handleVerticalMovement(clientY, prevY, rect) {
+function handleVerticalMovement(clientY: number, prevY: number, rect: DOMRect) {
+  if (!eventRef.value) return
   let diffY = clientY - prevY
 
-  const parentRect = eventRef.value.closest('[data-time-grid]').getBoundingClientRect()
+  const parentRect = eventRef.value
+    .closest('[data-time-grid]')
+    ?.getBoundingClientRect()
+  if (!parentRect) return
   if (clientY < parentRect.top) diffY = parentRect.top - rect.top
   if (clientY > parentRect.bottom) diffY = parentRect.bottom - rect.bottom
 
@@ -328,15 +381,18 @@ function handleVerticalMovement(clientY, prevY, rect) {
   state.yAxis = diffY
 
   updatedEvent.fromTime = convertMinutesToHours(
-    calculateMinutes(calendarEvent.value.fromTime) + Math.round(diffY / minuteHeight),
+    calculateMinutes(calendarEvent.value.fromTime || '00:00') +
+      Math.round(diffY / minuteHeight),
   )
   updatedEvent.toTime = convertMinutesToHours(
-    calculateMinutes(calendarEvent.value.toTime) + Math.round(diffY / minuteHeight),
+    calculateMinutes(calendarEvent.value.toTime || '00:00') +
+      Math.round(diffY / minuteHeight),
   )
 
-  for (const key of ['fromTime', 'toTime']) {
-    if (updatedEvent[key] < '00:00:00') updatedEvent[key] = '00:00:00'
-    if (updatedEvent[key] > '24:00:00') updatedEvent[key] = '24:00:00'
+  for (const key of ['fromTime', 'toTime'] as const) {
+    const value = updatedEvent[key] || ''
+    if (value < '00:00:00') updatedEvent[key] = '00:00:00'
+    if (value > '24:00:00') updatedEvent[key] = '24:00:00'
   }
 }
 </script>

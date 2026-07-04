@@ -3,8 +3,8 @@ import { useCall } from '../useCall/useCall'
 import { UseCallOptions } from '../useCall/types'
 import { docStore } from '../docStore'
 
-type UseNewDocOptions = Omit<
-  UseCallOptions,
+type UseNewDocOptions<T> = Omit<
+  UseCallOptions<any, Partial<T>>,
   'url' | 'method' | 'params' | 'immediate'
 >
 
@@ -15,7 +15,7 @@ type NewDoc<T> = Partial<
 export function useNewDoc<T extends object>(
   doctype: string,
   initialValues: NewDoc<T> = {},
-  options: UseNewDocOptions = {},
+  options: UseNewDocOptions<T> = {},
 ) {
   let doc = reactive<NewDoc<T>>(initialValues)
 
@@ -23,7 +23,7 @@ export function useNewDoc<T extends object>(
     name: string
   }
 
-  const out = useCall<DocResponse>({
+  const out = useCall<DocResponse, Partial<T>>({
     url: `/api/v2/document/${doctype}`,
     method: 'POST',
     params() {
@@ -45,7 +45,11 @@ export function useNewDoc<T extends object>(
       .then((doc) =>
         docStore
           .setDoc({ doctype, ...(doc as DocResponse) })
-          .then(() => docStore.getDoc(doctype, doc.name.toString()).value as T),
+          .then(
+            () =>
+              docStore.getDoc(doctype, (doc as DocResponse).name.toString())
+                .value as T,
+          ),
       )
   }
 

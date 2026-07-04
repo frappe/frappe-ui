@@ -13,8 +13,8 @@
     "lib": ["ESNext", "DOM"],
     "skipLibCheck": true,
     "noEmit": true,
-    "types": ["vitest/globals", "unplugin-icons/types/vue"],
+    "types": ["vitest/globals", "unplugin-icons/types/vue", "node"],
     "declaration": true,
-    "emitDeclarationOnly": true,
+    "emitDeclarationOnly": true
   }
 }

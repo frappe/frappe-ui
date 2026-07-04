@@ -32,10 +32,16 @@
           :is="showCollapsable ? Button : 'div'"
           :class="{ '!pl-1.5 pr-1 py-1 !gap-1': showCollapsable }"
           variant="ghost"
-          :iconRight="showCollapsable ? (isCollapsed ? 'chevron-down' : 'chevron-up') : ''"
+          :iconRight="
+            showCollapsable ? (isCollapsed ? 'chevron-down' : 'chevron-up') : ''
+          "
           @click="showCollapsable && (isCollapsed = !isCollapsed)"
         >
-          <div class="text-sm text-ink-gray-6 h-[29px] inline-flex items-center">All day</div>
+          <div
+            class="text-sm text-ink-gray-6 h-[29px] inline-flex items-center"
+          >
+            All day
+          </div>
         </component>
       </div>
       <div class="grid w-full grid-cols-7 overflow-hidden">
@@ -60,13 +66,17 @@
               :key="calendarEvent.id"
               :date="date"
               @click.stop
-			  >
-                <template #event-popover-content="slotProps">
-                  <slot name="event-popover-content" v-bind="slotProps" />
-                </template>
-              </CalendarWeekDayEvent>
+            >
+              <template #event-popover-content="slotProps">
+                <slot name="event-popover-content" v-bind="slotProps" />
+              </template>
+            </CalendarWeekDayEvent>
             <Button
-              v-if="showCollapsable && isCollapsed && fullDayEvents[parseDate(date)]?.length > 2"
+              v-if="
+                showCollapsable &&
+                isCollapsed &&
+                fullDayEvents[parseDate(date)]?.length > 2
+              "
               :label="fullDayEvents[parseDate(date)]?.length - 2 + ' more'"
               variant="ghost"
               class="w-fit text-sm !py-0.5 !h-5 !justify-start cursor-pointer"
@@ -106,7 +116,9 @@
               class="relative w-full border-outline-gray-1"
               :class="[
                 idx === 0 && 'calendar-column border-l-[1px]',
-                config.noBorder && idx === weeklyDates.length - 1 ? '' : 'border-r-[1px]',
+                config.noBorder && idx === weeklyDates.length - 1
+                  ? ''
+                  : 'border-r-[1px]',
                 isWeekend(date, config) && 'bg-surface-gray-1',
               ]"
               :data-date-attr="date"
@@ -118,7 +130,9 @@
                 v-for="(time, i) in timeArray"
                 :key="time"
                 :data-time-attr="i == 0 ? '' : time"
-                @click.prevent="calendarActions.handleCellClick($event, date, time)"
+                @click.prevent="
+                  calendarActions.handleCellClick($event, date, time)
+                "
               >
                 <div
                   class="border-outline-gray-1 w-full"
@@ -148,7 +162,7 @@
     </div>
   </div>
 </template>
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, watch, computed, inject } from 'vue'
 import CalendarTimeMarker from './CalendarTimeMarker.vue'
 import {
@@ -163,34 +177,43 @@ import {
 import { Button } from '../Button'
 import useCalendarData from './composables/useCalendarData'
 import CalendarWeekDayEvent from './CalendarWeekDayEvent.vue'
+import {
+  CALENDAR_ACTIONS_KEY,
+  type CalendarConfig,
+  type CalendarEvent,
+  type GroupedCalendarEvents,
+} from './types'
 
-const props = defineProps({
-  events: {
-    type: Object,
-    required: true,
+const props = withDefaults(
+  defineProps<{
+    events: CalendarEvent[]
+    config: CalendarConfig
+    weeklyDates?: Date[]
+  }>(),
+  {
+    weeklyDates: () => [],
   },
-  config: {
-    type: Object,
-  },
-  weeklyDates: {
-    type: Array,
-    required: false,
-  },
-})
+)
 
-const gridRef = ref(null)
+const gridRef = ref<HTMLElement | null>(null)
 const showCollapsable = ref(false)
 const isCollapsed = ref(true)
 
 const hourHeight = props.config.hourHeight
 const minuteHeight = hourHeight / 60
 
-const timeArray = props.config.timeFormat == '24h' ? twentyFourHoursFormat : twelveHoursFormat
+const timeArray =
+  props.config.timeFormat == '24h' ? twentyFourHoursFormat : twelveHoursFormat
 
-const timedEvents = computed(() => useCalendarData(props.events).timedEvents.value)
-const fullDayEvents = computed(() => useCalendarData(props.events).fullDayEvents.value)
+const timedEvents = computed(
+  () => useCalendarData(props.events).timedEvents.value,
+)
+const fullDayEvents = computed(
+  () => useCalendarData(props.events).fullDayEvents.value,
+)
 
-const isToday = (date) => new Date(date).toDateString() === new Date().toDateString()
+const isToday = (date: Date) =>
+  new Date(date).toDateString() === new Date().toDateString()
 
 const currentTime = computed(() => {
   let d = new Date()
@@ -200,23 +223,30 @@ const currentTime = computed(() => {
   return { top }
 })
 
-const calendarActions = inject('calendarActions')
+const calendarActions = inject(CALENDAR_ACTIONS_KEY)
 
-function getFullDayEventsInCurrentWeek(eventsObject, weeklyDates) {
-  let currentWeekEvents = {}
+if (!calendarActions) {
+  throw new Error('CalendarWeekly must be rendered inside Calendar.')
+}
+
+function getFullDayEventsInCurrentWeek(
+  eventsObject: GroupedCalendarEvents,
+  weeklyDates: Date[] = [],
+) {
+  let currentWeekEvents: GroupedCalendarEvents = {}
   let weeklyFullDayEvents = Object.keys(eventsObject)
   weeklyDates.forEach((date) => {
-    date = parseDate(date)
+    const parsedDate = parseDate(date)
 
-    if (weeklyFullDayEvents.includes(date)) {
-      currentWeekEvents[date] = eventsObject[date]
+    if (weeklyFullDayEvents.includes(parsedDate)) {
+      currentWeekEvents[parsedDate] = eventsObject[parsedDate]
     }
   })
   return currentWeekEvents
 }
 
-function getFullDayEventsCount(eventsObject) {
-  let lengthArray = []
+function getFullDayEventsCount(eventsObject: GroupedCalendarEvents) {
+  let lengthArray: number[] = []
   Object.values(eventsObject).forEach((events) => {
     lengthArray.push(events.length)
   })
@@ -224,8 +254,14 @@ function getFullDayEventsCount(eventsObject) {
   return maxEventsInWeek
 }
 
-function setFullDayEventsHeight(eventsObject, weeklyDates) {
-  let currentWeekEvents = getFullDayEventsInCurrentWeek(eventsObject, weeklyDates)
+function setFullDayEventsHeight(
+  eventsObject: GroupedCalendarEvents,
+  weeklyDates: Date[] = [],
+) {
+  let currentWeekEvents = getFullDayEventsInCurrentWeek(
+    eventsObject,
+    weeklyDates,
+  )
   let maxEvents = getFullDayEventsCount(currentWeekEvents)
   if (maxEvents > 3) {
     showCollapsable.value = true
@@ -239,7 +275,7 @@ onMounted(() => {
   setFullDayEventsHeight(fullDayEvents.value, props.weeklyDates)
   const currentHour = new Date().getHours()
   const scrollToHour = props.config.scrollToHour || currentHour
-  gridRef.value.scrollBy(0, scrollToHour * 60 * minuteHeight - 10)
+  gridRef.value?.scrollBy(0, scrollToHour * 60 * minuteHeight - 10)
 })
 
 watch(

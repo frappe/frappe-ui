@@ -1,6 +1,16 @@
 import { io } from 'socket.io-client'
 
-export default function initSocket(options = {}) {
+declare global {
+  interface Window {
+    site_name?: string
+  }
+}
+
+export interface InitSocketOptions {
+  port?: number
+}
+
+export default function initSocket(options: InitSocketOptions = {}) {
   let host = window.location.hostname
   let siteName = import.meta.env.DEV ? host : window.site_name
   let socketio_port = options.port || 9000

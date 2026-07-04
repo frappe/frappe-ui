@@ -1,5 +1,5 @@
 // App setup and plugins
-export { default as FrappeUI } from './utils/plugin.js'
+export { default as FrappeUI } from './utils/plugin'
 export { default as FrappeUIProvider } from './components/Provider/FrappeUIProvider.vue'
 export { getConfig, setConfig } from './utils/config'
 export type { FrappeUIConfig } from './utils/config'
@@ -10,10 +10,10 @@ export { usePageMeta } from './utils/pageMeta'
 export * from './data-fetching'
 // Legacy resource API. Keep public until official apps finish the v3 migration.
 export * from './resources/index.ts'
-export { default as call, createCall } from './utils/call.js'
-export { frappeRequest } from './utils/frappeRequest.js'
-export { request } from './utils/request.js'
-export { default as initSocket } from './utils/socketio.js'
+export { default as call, createCall } from './utils/call'
+export { frappeRequest } from './utils/frappeRequest'
+export { request } from './utils/request'
+export { default as initSocket } from './utils/socketio'
 
 // Base components
 export * from './components/Alert'
@@ -22,9 +22,7 @@ export * from './components/Badge'
 export * from './components/BottomSheet'
 export * from './components/Breadcrumbs'
 export * from './components/Button'
-export { default as Card } from './components/Card.vue'
 export * from './components/Divider'
-export { default as FeatherIcon } from './components/FeatherIcon.vue'
 export * from './components/Icon'
 export { default as LoadingIndicator } from './components/LoadingIndicator.vue'
 export { default as LoadingText } from './components/LoadingText.vue'
@@ -44,7 +42,6 @@ export * from './components/ErrorMessage'
 export * from './components/FileUploader'
 export * from './components/FormControl'
 export { default as FormLabel } from './components/FormLabel.vue'
-export { default as Input } from './components/Input.vue'
 export * from './components/MultiSelect'
 export * from './components/Password'
 export * from './components/Select'
@@ -61,39 +58,21 @@ export { default as Dialogs } from './components/Dialogs.vue'
 export * from './components/Dropdown'
 export * from './components/HoverCard'
 export * from './components/Popover'
+export type { PopoverAlign, PopoverSide } from './components/Popover/types'
 export {
   dialog,
   type ConfirmArgs,
-  type ConfirmResult,
   type DialogNamespace,
   type PromptArgs,
   type PromptField,
-  type PromptResult,
 } from './utils/dialog'
-export { default as ConfirmDialog } from './components/ConfirmDialog.vue'
-export { confirmDialog } from './utils/confirmDialog.js'
 export { toast } from './components/Toast/toast'
 export { default as ToastProvider } from './components/Toast/ToastProvider.vue'
 
 // Lists and collection views
 export * from './components/ItemListRow'
-export { default as ListItem } from './components/ListItem.vue'
 // Legacy ListView family. Do not deprecate until `frappe-ui/list` reaches parity.
-export { default as ListEmptyState } from './components/ListView/ListEmptyState.vue'
-export { default as ListFooter } from './components/ListView/ListFooter.vue'
-export { default as ListGroupHeader } from './components/ListView/ListGroupHeader.vue'
-export { default as ListGroupRows } from './components/ListView/ListGroupRows.vue'
-export { default as ListGroups } from './components/ListView/ListGroups.vue'
-export { default as ListHeader } from './components/ListView/ListHeader.vue'
-export { default as ListHeaderItem } from './components/ListView/ListHeaderItem.vue'
-export { default as ListRow } from './components/ListView/ListRow.vue'
-export { default as ListRowItem } from './components/ListView/ListRowItem.vue'
-export { default as ListRows } from './components/ListView/ListRows.vue'
-export { default as ListSelectBanner } from './components/ListView/ListSelectBanner.vue'
-export {
-  default as List,
-  default as ListView,
-} from './components/ListView/ListView.vue'
+export * from './components/ListView'
 export { default as ListFilter } from './components/ListFilter/ListFilter.vue'
 export { default as NestedPopover } from './components/ListFilter/NestedPopover.vue'
 export * from './components/Calendar'
@@ -119,6 +98,23 @@ export * from './components/KeyboardShortcutsModal'
 export * from './composables/useShortcut'
 
 // Deprecated component compatibility
+/** @deprecated Use layout markup or domain-specific components instead. */
+// @ts-expect-error Deprecated JS SFC compatibility export.
+export { default as Card } from './components/Card.vue'
+/** @deprecated Use `dialog.confirm(...)` instead. */
+// @ts-expect-error Deprecated JS SFC compatibility export.
+export { default as ConfirmDialog } from './components/ConfirmDialog.vue'
+/** @deprecated Use `dialog.confirm(...)` instead. */
+export { confirmDialog } from './utils/confirmDialog.js'
+/** @deprecated Use lucide icon names or the `Icon` component instead. */
+// @ts-expect-error Deprecated JS SFC compatibility export.
+export { default as FeatherIcon } from './components/FeatherIcon.vue'
+/** @deprecated Use `TextInput` or `FormControl` instead. */
+// @ts-expect-error Deprecated JS SFC compatibility export.
+export { default as Input } from './components/Input.vue'
+/** @deprecated Use list primitives from `frappe-ui/list` or app-owned row markup instead. */
+// @ts-expect-error Deprecated JS SFC compatibility export.
+export { default as ListItem } from './components/ListItem.vue'
 /** @deprecated Use `Select` for month picking instead. */
 export * from './components/MonthPicker'
 /** @deprecated Use the imperative `toast(...)` API instead. The `<Toast />` SFC will be removed in a future major. */

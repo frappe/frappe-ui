@@ -36,7 +36,7 @@ export function usePageMeta(fn: PageMetaFunction): StopWatcherFunction {
       try {
         return fn()
       } catch (error) {
-        if (process.env.NODE_ENV === 'development') {
+        if (import.meta.env.DEV) {
           console.warn('Failed to parse pageMeta in', fn)
           console.error(error)
         }

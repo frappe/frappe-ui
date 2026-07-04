@@ -1,10 +1,46 @@
 import { getConfig } from './config'
-import { request } from './request'
+import { request, type RequestOptions } from './request'
 
-export function frappeRequest(options) {
+declare global {
+  interface Window {
+    csrf_token?: string
+  }
+}
+
+type ServerMessagesHandler = (messages: string[]) => void
+
+export interface FrappeRequestOptions<TResponse = unknown> extends Omit<
+  RequestOptions<TResponse>,
+  'transformRequest' | 'transformResponse' | 'transformError'
+> {
+  onError?: (error: FrappeRequestError) => void
+  onServerMessages?: ServerMessagesHandler
+}
+
+export interface FrappeRequestError extends Error {
+  exc_type?: string
+  exc?: string
+  response?: Response
+  status?: number
+  messages: string[]
+}
+
+type FrappeResponseBody = {
+  docs?: unknown
+  exc?: string
+  exc_type?: string
+  message?: unknown
+  _server_messages?: string
+  _error_message?: string
+}
+
+export function frappeRequest<TResponse = unknown>(
+  options: FrappeRequestOptions<TResponse>,
+) {
+  const originalOptions = options
   return request({
     ...options,
-    transformRequest: (options = {}) => {
+    transformRequest: (options) => {
       if (!options.url) {
         throw new Error('[frappeRequest] options.url is required')
       }
@@ -52,9 +88,9 @@ export function frappeRequest(options) {
     transformResponse: async (response, options) => {
       let url = options.url
       if (response.ok) {
-        const data = await response.json()
+        const data = (await response.json()) as FrappeResponseBody
         if (data.docs || url === '/api/method/login') {
-          return data
+          return data as TResponse
         }
         if (data.exc) {
           try {
@@ -72,16 +108,19 @@ export function frappeRequest(options) {
 
         if (data._server_messages) {
           let onMessageHandler =
-            getConfig('serverMessagesHandler') || options.onServerMessages || null
+            getConfig('serverMessagesHandler') ||
+            originalOptions.onServerMessages ||
+            null
           if (onMessageHandler) {
             onMessageHandler(JSON.parse(data?._server_messages) || [])
           }
         }
 
-        return data.message
+        return data.message as TResponse
       } else {
         let errorResponse = await response.text()
-        let error, exception
+        let error: FrappeResponseBody = {}
+        let exception
         try {
           error = JSON.parse(errorResponse)
           // eslint-disable-next-line no-empty
@@ -99,15 +138,17 @@ export function frappeRequest(options) {
             // eslint-disable-next-line no-empty
           } catch (e) {}
         }
-        let e = new Error(errorParts.join('\n'))
+        let e = new Error(errorParts.join('\n')) as FrappeRequestError
         e.exc_type = error.exc_type
         e.exc = exception
         e.response = response
-        e.status = errorResponse.status
+        e.status = response.status
         e.messages = error._server_messages
           ? JSON.parse(error._server_messages)
           : []
-        e.messages = e.messages.concat(error.message)
+        if (error.message !== undefined) {
+          e.messages = e.messages.concat(error.message as any)
+        }
         e.messages = e.messages.map((m) => {
           try {
             return JSON.parse(m).message
@@ -121,12 +162,13 @@ export function frappeRequest(options) {
             ? [error._error_message]
             : ['Internal Server Error']
         }
-        options.onError && options.onError(e)
+        originalOptions.onError && originalOptions.onError(e)
         throw e
       }
     },
     transformError: (error) => {
-      options.onError && options.onError(error)
+      originalOptions.onError &&
+        originalOptions.onError(error as FrappeRequestError)
       throw error
     },
   })

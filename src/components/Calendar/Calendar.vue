@@ -41,9 +41,17 @@
         <div class="flex gap-x-1">
           <!-- Increment and Decrement Button-->
 
-          <Button @click="decrement" variant="ghost" icon="lucide-chevron-left" />
+          <Button
+            @click="decrement"
+            variant="ghost"
+            icon="lucide-chevron-left"
+          />
           <Button label="Today" @click="setCalendarDate()" variant="ghost" />
-          <Button @click="increment" variant="ghost" icon="lucide-chevron-right" />
+          <Button
+            @click="increment"
+            variant="ghost"
+            icon="lucide-chevron-right"
+          />
 
           <!--  View change button, default is months or can be set via props!  -->
           <TabButtons
@@ -103,7 +111,7 @@
     />
   </div>
 </template>
-<script setup>
+<script setup lang="ts">
 import {
   computed,
   onMounted,
@@ -112,6 +120,7 @@ import {
   ref,
   watch,
   nextTick,
+  type Component,
 } from 'vue'
 import { Button } from '../Button'
 import { TabButtons } from '../TabButtons'
@@ -132,34 +141,33 @@ import CalendarWeekly from './CalendarWeekly.vue'
 import CalendarDaily from './CalendarDaily.vue'
 import NewEventModal from './NewEventModal.vue'
 import useEventModal from './composables/useEventModal'
-import { isAnyPopoverOpen } from './useEventBase.js'
+import { isAnyPopoverOpen } from './useEventBase'
+import {
+  ACTIVE_VIEW_KEY,
+  CALENDAR_ACTIONS_KEY,
+  CALENDAR_CONFIG_KEY,
+  type CalendarCellClickData,
+  type CalendarConfig,
+  type CalendarEvent,
+  type CalendarMode,
+  type CalendarPublicProps,
+} from './types'
 
-const props = defineProps({
-  events: {
-    type: Object,
-    required: false,
-    default: [],
-  },
-  config: {
-    type: Object,
-  },
-  onClick: {
-    type: Function,
-    required: false,
-  },
-  onDblClick: {
-    type: Function,
-    required: false,
-  },
-  onCellClick: {
-    type: Function,
-    required: false,
-  },
+const props = withDefaults(defineProps<CalendarPublicProps>(), {
+  events: () => [],
+  config: () => ({}),
 })
 
-const emit = defineEmits(['create', 'update', 'delete', 'rangeChange'])
+const emit = defineEmits<{
+  create: [event: CalendarEvent]
+  update: [event: CalendarEvent]
+  delete: [eventID: CalendarEvent['id']]
+  rangeChange: [
+    payload: { view: CalendarMode; startDate: string; endDate: string },
+  ]
+}>()
 
-const defaultConfig = {
+const defaultConfig: CalendarConfig = {
   scrollToHour: 15,
   disableModes: [],
   defaultMode: 'Month',
@@ -172,10 +180,15 @@ const defaultConfig = {
   weekends: ['sunday'],
 }
 
-const overrideConfig = { ...defaultConfig, ...props.config }
-let activeView = ref(overrideConfig.defaultMode)
+const overrideConfig: CalendarConfig = { ...defaultConfig, ...props.config }
+let activeView = ref<CalendarMode>(overrideConfig.defaultMode)
 
-function updateActiveView(value, d, isPreviousMonth, isNextMonth) {
+function updateActiveView(
+  value: CalendarMode,
+  d?: Date,
+  isPreviousMonth?: boolean,
+  isNextMonth?: boolean,
+) {
   activeView.value = value
   if (value == 'Day' && d) {
     date.value = findIndexOfDate(d)
@@ -189,14 +202,14 @@ function updateActiveView(value, d, isPreviousMonth, isNextMonth) {
 
 const selectedMonthDate = ref(dayjs().format('YYYY-MM-DD'))
 
-function onMonthYearChange(val = '') {
+function onMonthYearChange(val: string | Date = '') {
   const d = dayjs(val)
   selectedMonthDate.value = d.format('YYYY-MM-DD')
 
   setCalendarDate(selectedMonthDate.value)
 }
 
-function syncSelectedMonth(year, month) {
+function syncSelectedMonth(year: number, month: number) {
   // Keep same day if possible; otherwise clamp to last day
   if (typeof year === 'number' && typeof month === 'number') {
     const currentDay = dayjs(selectedMonthDate.value).date()
@@ -222,11 +235,12 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('keydown', handleShortcuts)
 })
-function handleShortcuts(e) {
+function handleShortcuts(e: KeyboardEvent) {
+  const target = e.target as HTMLElement | null
   if (
-    e.target.tagName === 'INPUT' ||
-    e.target.tagName === 'TEXTAREA' ||
-    e.target.isContentEditable
+    target?.tagName === 'INPUT' ||
+    target?.tagName === 'TEXTAREA' ||
+    target?.isContentEditable
   ) {
     return
   }
@@ -251,8 +265,8 @@ function handleShortcuts(e) {
   }
 }
 
-provide('activeView', activeView)
-provide('config', overrideConfig)
+provide(ACTIVE_VIEW_KEY, activeView)
+provide(CALENDAR_CONFIG_KEY, overrideConfig)
 
 watch(activeView, (value) => {
   if (value === 'Week') {
@@ -281,7 +295,7 @@ const parseEvents = computed(() => {
     }) || []
   )
 })
-const events = ref(parseEvents.value)
+const events = ref<CalendarEvent[]>(parseEvents.value)
 
 watch(
   () => props.events,
@@ -302,7 +316,7 @@ events.value.forEach((event) => {
 
 const { showEventModal, newEvent, openNewEventModal } = useEventModal()
 
-provide('calendarActions', {
+provide(CALENDAR_ACTIONS_KEY, {
   createNewEvent,
   updateEventState,
   deleteEvent,
@@ -312,42 +326,49 @@ provide('calendarActions', {
 })
 
 // CRUD actions on an event
-function createNewEvent(event) {
+function createNewEvent(event: CalendarEvent) {
   events.value.push(event)
   event.fromDateTime = event.fromDate + ' ' + event.fromTime
   event.toDateTime = event.toDate + ' ' + event.toTime
   emit('create', event)
 }
 
-function updateEventState(event) {
+function updateEventState(event: CalendarEvent) {
   const eventID = event.id
   let eventIndex = events.value.findIndex((e) => e.id === eventID)
   event.fromDateTime = event.fromDate + ' ' + event.fromTime
   event.toDateTime = event.toDate + ' ' + event.toTime
-  events.value[eventIndex] = event
+  if (eventIndex >= 0) {
+    events.value[eventIndex] = event
+  }
   emit('update', event)
 }
 
-function deleteEvent(eventID) {
+function deleteEvent(eventID: CalendarEvent['id']) {
   // Delete event
   const eventIndex = events.value.findIndex((event) => event.id === eventID)
-  events.value.splice(eventIndex, 1)
+  if (eventIndex >= 0) events.value.splice(eventIndex, 1)
   emit('delete', eventID)
 }
 
-function openModal(data) {
+function openModal(data: CalendarCellClickData) {
   const { e, view, date, time, isFullDay } = data
   const config = overrideConfig.isEditMode
   openNewEventModal(e, view, date, config, time, isFullDay)
 }
 
-function handleCellClick(e, date, time = '', isFullDay = false) {
+function handleCellClick(
+  e: MouseEvent,
+  date: Date | string,
+  time = '',
+  isFullDay = false,
+) {
   if (isAnyPopoverOpen.value) {
-	isAnyPopoverOpen.value = false
+    isAnyPopoverOpen.value = false
     return
   }
 
-  const data = {
+  const data: CalendarCellClickData = {
     e,
     view: activeView.value,
     date,
@@ -362,8 +383,14 @@ function handleCellClick(e, date, time = '', isFullDay = false) {
   openModal(data)
 }
 
+type CalendarActionOption = {
+  label: CalendarMode
+  value: CalendarMode
+  iconLeft: Component
+}
+
 // Calendar View Options
-const actionOptions = [
+const actionOptions: CalendarActionOption[] = [
   { label: 'Day', value: 'Day', iconLeft: DayIcon },
   { label: 'Week', value: 'Week', iconLeft: WeekIcon },
   { label: 'Month', value: 'Month', iconLeft: MonthIcon },
@@ -383,7 +410,7 @@ let currentMonthDates = computed(() => {
 
 let datesInWeeks = computed(() => {
   let dates = [...currentMonthDates.value]
-  let datesInWeeks = []
+  let datesInWeeks: Date[][] = []
   while (dates.length) {
     let week = dates.splice(0, 7)
     datesInWeeks.push(week)
@@ -391,7 +418,8 @@ let datesInWeeks = computed(() => {
   return datesInWeeks
 })
 
-function findCurrentWeek(date) {
+function findCurrentWeek(date?: Date) {
+  if (!date) return 0
   return datesInWeeks.value.findIndex((week) =>
     week.find(
       (d) =>
@@ -410,7 +438,7 @@ let date = ref(
 )
 let selectedDay = computed(() => currentMonthDates.value[date.value])
 
-function computeCurrentDay() {
+function computeCurrentDay(): number | null {
   if (activeView.value === 'Week') {
     const weekDates = datesInWeeks.value[week.value] || []
     return weekDates[0] ? weekDates[0].getDate() : null
@@ -438,7 +466,7 @@ watch(currentDay, (newVal) => {
   setCalendarDate(target)
 })
 
-function updateCurrentDate(d) {
+function updateCurrentDate(d: Date) {
   activeView.value = 'Day'
   date.value = findIndexOfDate(d)
   week.value = findCurrentWeek(d)
@@ -454,13 +482,13 @@ function decrement() {
   syncSelectedMonth(currentYear.value, currentMonth.value)
 }
 
-const incrementClickEvents = {
+const incrementClickEvents: Record<CalendarMode, () => void> = {
   Month: incrementMonth,
   Week: incrementWeek,
   Day: incrementDay,
 }
 
-const decrementClickEvents = {
+const decrementClickEvents: Record<CalendarMode, () => void> = {
   Month: decrementMonth,
   Week: decrementWeek,
   Day: decrementDay,
@@ -581,11 +609,11 @@ function decrementDay() {
   }
 }
 
-function firstInMonth(weekDates, month) {
+function firstInMonth(weekDates: Date[], month: number) {
   return weekDates.find((d) => d.getMonth() === month) || weekDates[0]
 }
 
-function findLastDateOfMonth(month, year) {
+function findLastDateOfMonth(month: number, year: number) {
   let inputDate = new Date(year, month + 1, 0)
   let lastDateIndex = currentMonthDates.value.findIndex(
     (date) => new Date(date).toDateString() === inputDate.toDateString(),
@@ -593,7 +621,7 @@ function findLastDateOfMonth(month, year) {
   return lastDateIndex
 }
 
-function findFirstDateOfMonth(month, year) {
+function findFirstDateOfMonth(month: number, year: number) {
   let inputDate = new Date(year, month, 1)
   let firstDateIndex = currentMonthDates.value.findIndex(
     (date) => new Date(date).toDateString() === inputDate.toDateString(),
@@ -601,7 +629,7 @@ function findFirstDateOfMonth(month, year) {
   return firstDateIndex
 }
 
-function findIndexOfDate(date) {
+function findIndexOfDate(date: Date | string) {
   return currentMonthDates.value.findIndex(
     (d) => new Date(d).toDateString() === new Date(date).toDateString(),
   )
@@ -635,12 +663,13 @@ const currentMonthYear = computed(() => {
     : `${short[first.month]} ${first.year} - ${short[last.month]} ${last.year}` // Cross-year span
 })
 
-function isCurrentMonthDate(date) {
+function isCurrentMonthDate(date?: Date) {
+  if (!date) return false
   date = new Date(date)
   return date.getMonth() === currentMonth.value
 }
 
-function setCalendarDate(d) {
+function setCalendarDate(d?: Date | string) {
   const dt = d ? new Date(d) : new Date()
   if (dt.toString() === 'Invalid Date') return
   currentYear.value = dt.getFullYear()
@@ -660,28 +689,26 @@ function setCalendarDate(d) {
 }
 
 function getVisibleRange() {
-  const toDateString = (date) => (date ? dayjs(date).format('YYYY-MM-DD') : '')
-
   if (activeView.value === 'Day') {
     const day = selectedDay.value
     if (!day) return null
     const start = dayjs(day).startOf('day')
     const end = dayjs(day).endOf('day')
     return {
-      startDate: toDateString(start),
-      endDate: toDateString(end),
+      startDate: start.format('YYYY-MM-DD'),
+      endDate: end.format('YYYY-MM-DD'),
     }
   }
 
   if (activeView.value === 'Week') {
     const weekDates = datesInWeeks.value[week.value] || []
     if (!weekDates.length) return null
-    const orderedWeek = [...weekDates].sort((a, b) => a - b)
+    const orderedWeek = [...weekDates].sort((a, b) => a.getTime() - b.getTime())
     const start = dayjs(orderedWeek[0]).startOf('day')
     const end = dayjs(orderedWeek[orderedWeek.length - 1]).endOf('day')
     return {
-      startDate: toDateString(start),
-      endDate: toDateString(end),
+      startDate: start.format('YYYY-MM-DD'),
+      endDate: end.format('YYYY-MM-DD'),
     }
   }
 
@@ -692,8 +719,8 @@ function getVisibleRange() {
     new Date(currentYear.value, currentMonth.value + 1, 0),
   ).endOf('day')
   return {
-    startDate: toDateString(start),
-    endDate: toDateString(end),
+    startDate: start.format('YYYY-MM-DD'),
+    endDate: end.format('YYYY-MM-DD'),
   }
 }
 

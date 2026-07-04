@@ -4,10 +4,18 @@
       <span class="cursor-pointer" @click.stop="$emit('close')">
         <span class="lucide-x size-4" aria-hidden="true" />
       </span>
-      <span v-if="isEditMode" class="cursor-pointer" @click.stop="$emit('edit')">
+      <span
+        v-if="isEditMode"
+        class="cursor-pointer"
+        @click.stop="$emit('edit')"
+      >
         <span class="lucide-edit-2 size-4" aria-hidden="true" />
       </span>
-      <span v-if="isEditMode" class="cursor-pointer" @click.stop="$emit('delete')">
+      <span
+        v-if="isEditMode"
+        class="cursor-pointer"
+        @click.stop="$emit('delete')"
+      >
         <span class="lucide-trash-2 size-4" aria-hidden="true" />
       </span>
     </div>
@@ -28,7 +36,10 @@
             {{ calendarEvent.participant }}
           </span>
         </div>
-        <div class="flex items-center gap-2" v-if="calendarEvent.fromTime && calendarEvent.toTime">
+        <div
+          class="flex items-center gap-2"
+          v-if="calendarEvent.fromTime && calendarEvent.toTime"
+        >
           <span class="lucide-clock size-4" aria-hidden="true" />
           <span class="text-sm">
             {{ calendarEvent.fromTime }} - {{ calendarEvent.toTime }}
@@ -44,14 +55,19 @@
     </div>
   </div>
 </template>
-<script setup>
+<script setup lang="ts">
 import { parseDateEventPopupFormat } from './calendarUtils'
+import type { CalendarEvent } from './types'
 
-const props = defineProps({
-  calendarEvent: { type: Object, required: true },
-  date: { type: Date, required: true },
-  isEditMode: { type: Boolean },
-})
+const props = defineProps<{
+  calendarEvent: CalendarEvent
+  date: Date
+  isEditMode?: boolean
+}>()
 
-const emits = defineEmits(['close', 'edit', 'delete'])
+const emits = defineEmits<{
+  close: []
+  edit: [event?: MouseEvent]
+  delete: []
+}>()
 </script>
