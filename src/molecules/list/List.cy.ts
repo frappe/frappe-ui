@@ -45,7 +45,9 @@ describe('List (feed mode)', () => {
       .should('have.length', 3)
       .each(($row) => {
         expect($row).to.have.attr('role', 'listitem')
-        expect(getComputedStyle($row[0]).gridTemplateColumns.split(' ')).to.have.length(3)
+        expect(
+          getComputedStyle($row[0]).gridTemplateColumns.split(' '),
+        ).to.have.length(3)
       })
     // Static rows (no link, no click, not selectable) are not interactive.
     cy.get('[data-slot=list-row][data-interactive]').should('not.exist')
@@ -95,7 +97,9 @@ describe('List (feed mode)', () => {
       defineComponent(() => {
         return () => [
           h(RouterView),
-          h(List, () => [feedRow('1', { to: { name: 'Item', params: { id: '1' } } })]),
+          h(List, () => [
+            feedRow('1', { to: { name: 'Item', params: { id: '1' } } }),
+          ]),
         ]
       }),
       { global: { plugins: [router] } },
@@ -120,7 +124,8 @@ describe('List (selection)', () => {
             {
               selectable: selectable.value,
               selection: selection.value,
-              'onUpdate:selection': (next: string[]) => (selection.value = next),
+              'onUpdate:selection': (next: string[]) =>
+                (selection.value = next),
             },
             () => [feedRow('1', rowProps), feedRow('2', rowProps)],
           )
@@ -139,7 +144,9 @@ describe('List (selection)', () => {
         expect(selection.value).to.deep.equal(['1'])
       })
     cy.get('@rowClick').should('not.have.been.called')
-    cy.get('[data-slot=list-row]').first().should('have.attr', 'data-state', 'selected')
+    cy.get('[data-slot=list-row]')
+      .first()
+      .should('have.attr', 'data-state', 'selected')
     cy.get('[data-slot=list-row]')
       .first()
       .click()
@@ -213,7 +220,8 @@ describe('List (select all)', () => {
             {
               selectable: true,
               selection: selection.value,
-              'onUpdate:selection': (next: string[]) => (selection.value = next),
+              'onUpdate:selection': (next: string[]) =>
+                (selection.value = next),
             },
             () => [
               h(ListHeader, () => h(ListHeaderCell, () => 'Name')),
@@ -288,7 +296,8 @@ describe('List (select all)', () => {
             {
               selectable: true,
               selection: selection.value,
-              'onUpdate:selection': (next: string[]) => (selection.value = next),
+              'onUpdate:selection': (next: string[]) =>
+                (selection.value = next),
             },
             () => [
               h(ListHeader, () => h(ListHeaderCell, () => 'Name')),
@@ -408,12 +417,19 @@ describe('List (column mode)', () => {
             h(ListHeader, () => [
               h(
                 ListHeaderCellSort,
-                { direction: directionFor('name'), onClick: () => toggleSort('name') },
+                {
+                  direction: directionFor('name'),
+                  onClick: () => toggleSort('name'),
+                },
                 {
                   default: () => 'User',
                   // Adornments are app-supplied; expose the scoped direction for assertions.
                   suffix: ({ direction }: { direction: string | null }) =>
-                    h('span', { 'data-testid': 'sort-icon' }, direction ?? 'none'),
+                    h(
+                      'span',
+                      { 'data-testid': 'sort-icon' },
+                      direction ?? 'none',
+                    ),
                 },
               ),
               h(
@@ -438,7 +454,11 @@ describe('List (column mode)', () => {
     mountTable()
     cy.get('[data-slot=list]').should('have.attr', 'role', 'table')
     cy.get('[data-slot=list-header]').should('have.attr', 'role', 'row')
-    cy.get('[data-slot=list-header-cell]').should('have.attr', 'role', 'columnheader')
+    cy.get('[data-slot=list-header-cell]').should(
+      'have.attr',
+      'role',
+      'columnheader',
+    )
     cy.get('[data-slot=list-row]').first().should('have.attr', 'role', 'row')
     cy.get('[data-slot=list-cell]').first().should('have.attr', 'role', 'cell')
   })
@@ -449,13 +469,18 @@ describe('List (column mode)', () => {
       const rowTemplate = getComputedStyle(
         $header[0].parentElement!.querySelector('[data-slot=list-row]')!,
       ).gridTemplateColumns
-      expect(getComputedStyle($header[0]).gridTemplateColumns).to.equal(rowTemplate)
+      expect(getComputedStyle($header[0]).gridTemplateColumns).to.equal(
+        rowTemplate,
+      )
     })
   })
 
   it('renders controlled sort chrome and emits clicks for app-owned sort state', () => {
     const { sortField, sortDirection } = mountTable()
-    cy.get('[data-slot=list-header-cell][data-sort=asc]').should('contain.text', 'User')
+    cy.get('[data-slot=list-header-cell][data-sort=asc]').should(
+      'contain.text',
+      'User',
+    )
     cy.get('[data-slot=list-header-cell]')
       .first()
       .should('have.attr', 'aria-sort', 'ascending')
@@ -465,7 +490,9 @@ describe('List (column mode)', () => {
         expect(sortField.value).to.equal('name')
         expect(sortDirection.value).to.equal('desc')
       })
-    cy.get('[data-slot=list-header-cell]').first().should('have.attr', 'aria-sort', 'descending')
+    cy.get('[data-slot=list-header-cell]')
+      .first()
+      .should('have.attr', 'aria-sort', 'descending')
     cy.get('[data-testid=sort-icon]').should('have.text', 'desc')
     cy.get('[data-slot=list-header-cell]')
       .eq(1)
@@ -475,9 +502,61 @@ describe('List (column mode)', () => {
         expect(sortField.value).to.equal('creation')
         expect(sortDirection.value).to.equal('desc')
       })
-    cy.get('[data-slot=list-header-cell]').first().should('not.have.attr', 'data-sort')
+    cy.get('[data-slot=list-header-cell]')
+      .first()
+      .should('not.have.attr', 'data-sort')
     // Plain ListHeaderCell → same columnheader geometry, no button.
-    cy.get('[data-slot=list-header-cell]').eq(2).find('button').should('not.exist')
+    cy.get('[data-slot=list-header-cell]')
+      .eq(2)
+      .find('button')
+      .should('not.exist')
+  })
+
+  it('right-aligns an end-aligned sort cell and leads with the glyph', () => {
+    const direction = ref<'asc' | null>(null)
+    cy.mount(
+      defineComponent(() => {
+        return () =>
+          h(List, { columns: ['minmax(0,1fr)', '6rem', '4rem'] }, () => [
+            h(ListHeader, () => [
+              h(ListHeaderCell, () => 'Name'),
+              h(
+                ListHeaderCellSort,
+                {
+                  direction: direction.value,
+                  align: 'end',
+                  onClick: () =>
+                    (direction.value = direction.value ? null : 'asc'),
+                },
+                {
+                  default: () => 'Size',
+                  suffix: () => h('span', { 'data-testid': 'glyph' }, 'icon'),
+                },
+              ),
+              h(ListHeaderCell, () => ''),
+            ]),
+            feedRow('1'),
+          ])
+      }),
+    )
+
+    const sizeCell = () => cy.get('[data-slot=list-header-cell]').eq(1)
+    // The cell right-aligns its content.
+    sizeCell().should('have.class', 'justify-end')
+    // The glyph renders before the label, so the label hugs the right edge.
+    sizeCell()
+      .find('button')
+      .then(($button) => {
+        const html = $button.html()
+        expect(html.indexOf('data-testid="glyph"')).to.be.lessThan(
+          html.indexOf('Size'),
+        )
+      })
+    // Inactive → glyph hidden until hover (opacity, so no layout shift).
+    cy.get('[data-testid=glyph]').parent().should('have.class', 'opacity-0')
+    // Activating the sort reveals the glyph.
+    sizeCell().find('button').click()
+    cy.get('[data-testid=glyph]').parent().should('not.have.class', 'opacity-0')
   })
 })
 
@@ -487,20 +566,27 @@ describe('ListRows (virtual)', () => {
     cy.mount(
       defineComponent(() => {
         return () =>
-          h('div', { style: 'height: 200px; overflow-y: auto', 'data-testid': 'viewport' }, [
-            h(List, { rowHeight: 40, columns: ['minmax(0,1fr)'] }, () => [
-              h(
-                ListRows,
-                { items, virtual: true },
-                {
-                  default: ({ item }: { item: { id: string } }) =>
-                    h(ListRow, { key: item.id }, () => [
-                      h(ListCell, () => h('span', `Row ${item.id}`)),
-                    ]),
-                },
-              ),
-            ]),
-          ])
+          h(
+            'div',
+            {
+              style: 'height: 200px; overflow-y: auto',
+              'data-testid': 'viewport',
+            },
+            [
+              h(List, { rowHeight: 40, columns: ['minmax(0,1fr)'] }, () => [
+                h(
+                  ListRows,
+                  { items, virtual: true },
+                  {
+                    default: ({ item }: { item: { id: string } }) =>
+                      h(ListRow, { key: item.id }, () => [
+                        h(ListCell, () => h('span', `Row ${item.id}`)),
+                      ]),
+                  },
+                ),
+              ]),
+            ],
+          )
       }),
     )
     cy.get('[data-slot=list-row]').should('have.length.lessThan', 50)

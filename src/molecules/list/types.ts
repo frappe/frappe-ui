@@ -63,6 +63,14 @@ export interface ListHeaderCellSortProps {
    * update whatever drives your ordering in the `click` handler.
    */
   direction?: ListSortDirection | null
+
+  /**
+   * Horizontal alignment of the header content. `'end'` right-aligns the cell
+   * (for numeric/right-aligned columns) *and* moves the sort glyph to the
+   * leading side, so the label stays flush with the column's right edge and
+   * lines up with the values below. Defaults to `'start'`.
+   */
+  align?: 'start' | 'end'
 }
 
 export interface ListVirtualOptions {

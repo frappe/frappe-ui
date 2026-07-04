@@ -2,9 +2,12 @@
   <div
     data-slot="list-header-cell"
     role="columnheader"
-    :aria-sort="direction ? (direction === 'asc' ? 'ascending' : 'descending') : undefined"
+    :aria-sort="
+      direction ? (direction === 'asc' ? 'ascending' : 'descending') : undefined
+    "
     :data-sort="direction || undefined"
     class="flex min-w-0 items-center"
+    :class="isEnd && 'justify-end'"
   >
     <!-- Controlled: sort state and toggle rules live in the app, surfaced
          back via `direction`. The cell renders only the behavioral chrome —
@@ -16,6 +19,17 @@
         class="group inline-flex h-7 min-w-0 items-center gap-1 rounded text-sm-medium text-ink-gray-5 transition-colors"
         @click="emit('click', $event)"
       >
+        <!-- End-aligned: the glyph leads so the label stays flush with the
+             column's right edge (aligned with the values below). A trailing
+             glyph would reserve space and push the label off the edge. -->
+        <span
+          v-if="isEnd && $slots.suffix"
+          class="shrink-0"
+          :class="suffixRevealClass"
+          aria-hidden="true"
+        >
+          <slot name="suffix" :direction="direction ?? null" />
+        </span>
         <span v-if="$slots.prefix" class="shrink-0">
           <slot name="prefix" :direction="direction ?? null" />
         </span>
@@ -23,9 +37,9 @@
         <!-- The glyphs are consumer content; the cell only owns the reveal:
              an inactive column's suffix shows on hover. -->
         <span
-          v-if="$slots.suffix"
+          v-if="!isEnd && $slots.suffix"
           class="shrink-0"
-          :class="!direction && 'opacity-0 group-hover:opacity-100'"
+          :class="suffixRevealClass"
           aria-hidden="true"
         >
           <slot name="suffix" :direction="direction ?? null" />
@@ -40,12 +54,20 @@ import { computed, onMounted, ref, useTemplateRef } from 'vue'
 import { Tooltip } from '../../components/Tooltip'
 import type { ListHeaderCellSortProps } from './types'
 
-defineProps<ListHeaderCellSortProps>()
+const props = defineProps<ListHeaderCellSortProps>()
 
 const emit = defineEmits<{
   /** Fired on sort button click — update your sort state here. */
   (e: 'click', event: MouseEvent): void
 }>()
+
+const isEnd = computed(() => props.align === 'end')
+
+// An inactive column's sort glyph is hidden until hover — but with opacity, not
+// display, so revealing it never shifts the label's position.
+const suffixRevealClass = computed(() =>
+  props.direction ? '' : 'opacity-0 group-hover:opacity-100',
+)
 
 defineSlots<{
   /** Column label. */
