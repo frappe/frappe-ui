@@ -22,13 +22,23 @@
       v-if="to"
       v-bind="linkAttrs"
       :accesskey="accessKey"
-      :aria-label="label"
+      :aria-label="tooltipText || undefined"
       :aria-current="resolvedActive ? 'page' : undefined"
-      class="flex h-full min-w-0 flex-1 items-center pl-2 focus:outline-none focus-visible:ring-0"
+      class="flex h-full min-w-0 flex-1 items-center focus:outline-none focus-visible:ring-0"
+      :class="isCollapsed ? 'justify-center' : 'pl-2'"
       @click="handleClick"
     >
-      <Tooltip :text="label ?? ''" placement="right" :disabled="!isCollapsed">
-        <span class="grid shrink-0 place-items-center">
+      <Tooltip
+        :text="tooltipText"
+        placement="right"
+        :disabled="!isCollapsed || !tooltipText"
+      >
+        <!-- Collapsed: the icon sits in a 28px square (matches the row height)
+             so it reads as a centered rail button, not a left-hugged glyph. -->
+        <span
+          class="grid shrink-0 place-items-center"
+          :class="isCollapsed && 'size-7'"
+        >
           <slot name="prefix">
             <SidebarItemIcon :icon="icon" />
           </slot>
@@ -42,7 +52,7 @@
             : 'ml-2 w-auto opacity-100'
         "
       >
-        <span class="flex min-w-0 items-center">
+        <span ref="labelEl" class="flex min-w-0 items-center">
           <slot
             ><span class="truncate text-sm">{{ label }}</span></slot
           >
@@ -54,12 +64,22 @@
       v-else
       type="button"
       :accesskey="accessKey"
-      :aria-label="label"
-      class="flex h-full text-left min-w-0 flex-1 items-center pl-2 focus:outline-none focus-visible:ring-0"
+      :aria-label="tooltipText || undefined"
+      class="flex h-full text-left min-w-0 flex-1 items-center focus:outline-none focus-visible:ring-0"
+      :class="isCollapsed ? 'justify-center' : 'pl-2'"
       @click="handleClick"
     >
-      <Tooltip :text="label ?? ''" placement="right" :disabled="!isCollapsed">
-        <span class="grid shrink-0 place-items-center">
+      <Tooltip
+        :text="tooltipText"
+        placement="right"
+        :disabled="!isCollapsed || !tooltipText"
+      >
+        <!-- Collapsed: the icon sits in a 28px square (matches the row height)
+             so it reads as a centered rail button, not a left-hugged glyph. -->
+        <span
+          class="grid shrink-0 place-items-center"
+          :class="isCollapsed && 'size-7'"
+        >
           <slot name="prefix">
             <SidebarItemIcon :icon="icon" />
           </slot>
@@ -73,7 +93,7 @@
             : 'ml-2 w-auto opacity-100'
         "
       >
-        <span class="flex min-w-0 items-center">
+        <span ref="labelEl" class="flex min-w-0 items-center">
           <slot
             ><span class="truncate text-sm">{{ label }}</span></slot
           >
@@ -101,7 +121,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, getCurrentInstance, inject } from 'vue'
+import { computed, getCurrentInstance, inject, onMounted, ref, useTemplateRef } from 'vue'
 import { RouterLink } from 'vue-router'
 import Tooltip from '../Tooltip/Tooltip.vue'
 import SidebarItemIcon from './SidebarItemIcon.vue'
@@ -113,6 +133,17 @@ const isCollapsed = inject(
   sidebarCollapsedKey,
   computed(() => false),
 )
+
+// Collapsed items show a tooltip with their name. Prefer the explicit `label`;
+// otherwise fall back to the rendered default-slot text so slot-only items (the
+// common composition path) still get a tooltip and an accessible name without
+// the caller repeating the label as a prop.
+const labelEl = useTemplateRef<HTMLElement>('labelEl')
+const slotLabel = ref('')
+onMounted(() => {
+  slotLabel.value = labelEl.value?.textContent?.trim() ?? ''
+})
+const tooltipText = computed(() => props.label || slotLabel.value)
 
 // Read the router/route off global properties instead of useRouter()/useRoute()
 // so this component works — without warnings or crashes — when mounted outside a
