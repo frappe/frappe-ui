@@ -15,6 +15,22 @@ export interface ListContext {
 
   isSelected: (value: string) => boolean
   toggleSelection: (value: string) => void
+
+  // Header select-all. <ListRows> feeds the full selectable universe via
+  // `setAllValues` — it holds the complete `items` array even when the rows are
+  // virtualized, so the header checkbox can reflect/toggle "all" without every
+  // row being mounted. `selectAllState` drives the header checkbox's
+  // checked/indeterminate/empty rendering.
+  setAllValues: (values: string[]) => void
+  selectAllState: ComputedRef<'none' | 'some' | 'all'>
+  toggleSelectAll: () => void
+
+  // Single "active" row (v-model:active) — the one currently open/highlighted,
+  // separate from the checkbox `selection` set. `activatable` is true only when
+  // the List actually binds v-model:active, so plain navigation lists opt out.
+  activatable: ComputedRef<boolean>
+  isActive: (value: string) => boolean
+  activate: (value: string) => void
 }
 
 const listContextKey: InjectionKey<ListContext> = Symbol('frappe-ui:list')

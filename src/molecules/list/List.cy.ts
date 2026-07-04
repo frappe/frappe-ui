@@ -148,6 +148,26 @@ describe('List (selection)', () => {
       })
   })
 
+  it('toggles selection on a mouse click over the checkbox', () => {
+    const { selection } = mountSelectable()
+    // The inner native <input> is presentational and must not swallow clicks:
+    // otherwise a click landing on it fires the input's own native toggle, which
+    // fights the one-way :modelValue binding and selects nothing. With
+    // pointer-events:none, a click at those pixels resolves to the wrapper.
+    cy.get('[data-slot=list-row-checkbox] input[type=checkbox]')
+      .first()
+      .should('have.css', 'pointer-events', 'none')
+    cy.get('[data-slot=list-row-checkbox]')
+      .first()
+      .click()
+      .then(() => {
+        expect(selection.value).to.deep.equal(['1'])
+      })
+    cy.get('[data-slot=list-row-checkbox]')
+      .first()
+      .should('have.attr', 'aria-checked', 'true')
+  })
+
   it('exposes a keyboard-operable checkbox and reveals the checkbox column', () => {
     const { selection, selectable } = mountSelectable()
     cy.get('[data-slot=list-row-checkbox]').should('have.length', 2)
@@ -176,6 +196,193 @@ describe('List (selection)', () => {
     cy.get('[data-slot=list-row]')
       .first()
       .should('have.css', 'padding-inline-start', '0px')
+  })
+})
+
+describe('List (select all)', () => {
+  // Select-all is fed by <ListRows> (the full items universe), so this mount
+  // uses ListRows + a header rather than bare feedRow().
+  function mountSelectAll(initial: string[] = []) {
+    const selection = ref<string[]>(initial)
+    const items = ref([{ id: '1' }, { id: '2' }, { id: '3' }])
+    cy.mount(
+      defineComponent(() => {
+        return () =>
+          h(
+            List,
+            {
+              selectable: true,
+              selection: selection.value,
+              'onUpdate:selection': (next: string[]) => (selection.value = next),
+            },
+            () => [
+              h(ListHeader, () => h(ListHeaderCell, () => 'Name')),
+              h(
+                ListRows,
+                { items: items.value },
+                {
+                  default: ({ item }: { item: { id: string } }) =>
+                    h(ListRow, { value: item.id }, () =>
+                      h(ListCell, () => item.id),
+                    ),
+                },
+              ),
+            ],
+          )
+      }),
+    )
+    return { selection, items }
+  }
+
+  it('selects every row from the header checkbox and clears on a second click', () => {
+    const { selection } = mountSelectAll()
+    cy.get('[data-slot=list-header-checkbox]')
+      .should('have.attr', 'role', 'checkbox')
+      .and('have.attr', 'aria-checked', 'false')
+      .click()
+      .then(() => {
+        expect(selection.value).to.deep.equal(['1', '2', '3'])
+      })
+    cy.get('[data-slot=list-header-checkbox]')
+      .should('have.attr', 'aria-checked', 'true')
+      .click()
+      .then(() => {
+        expect(selection.value).to.deep.equal([])
+      })
+  })
+
+  it('shows the mixed state when only some rows are selected', () => {
+    mountSelectAll(['2'])
+    cy.get('[data-slot=list-header-checkbox]').should(
+      'have.attr',
+      'aria-checked',
+      'mixed',
+    )
+    // The inner native input carries the indeterminate property, not an attr.
+    cy.get('[data-slot=list-header-checkbox] input[type=checkbox]')
+      .first()
+      .should(($el) => {
+        expect(($el[0] as HTMLInputElement).indeterminate).to.equal(true)
+      })
+  })
+
+  it('clicking mixed promotes to all selected', () => {
+    const { selection } = mountSelectAll(['2'])
+    cy.get('[data-slot=list-header-checkbox]')
+      .click()
+      .then(() => {
+        expect([...selection.value].sort()).to.deep.equal(['1', '2', '3'])
+      })
+  })
+
+  it('honors a custom rowKey when the value is neither name nor id', () => {
+    // Items carry the selection value in `ref`, not name/id — so select-all
+    // would target the wrong universe without an explicit rowKey.
+    const selection = ref<string[]>([])
+    const items = [{ ref: 'a' }, { ref: 'b' }]
+    cy.mount(
+      defineComponent(() => {
+        return () =>
+          h(
+            List,
+            {
+              selectable: true,
+              selection: selection.value,
+              'onUpdate:selection': (next: string[]) => (selection.value = next),
+            },
+            () => [
+              h(ListHeader, () => h(ListHeaderCell, () => 'Name')),
+              h(
+                ListRows,
+                { items, rowKey: 'ref' },
+                {
+                  default: ({ item }: { item: { ref: string } }) =>
+                    h(ListRow, { value: item.ref }, () =>
+                      h(ListCell, () => item.ref),
+                    ),
+                },
+              ),
+            ],
+          )
+      }),
+    )
+    cy.get('[data-slot=list-header-checkbox]')
+      .click()
+      .then(() => {
+        expect([...selection.value].sort()).to.deep.equal(['a', 'b'])
+      })
+  })
+})
+
+describe('List (active row)', () => {
+  // Four rows so the active row (row 2) has a divider on both sides plus an
+  // untouched row 4 to prove only the hugging pair is hidden.
+  function mountActive(rowProps: Record<string, unknown> = {}) {
+    const active = ref<string | undefined>('2')
+    cy.mount(
+      defineComponent(() => {
+        return () =>
+          h(
+            List,
+            {
+              active: active.value,
+              'onUpdate:active': (next?: string) => (active.value = next),
+            },
+            () => [
+              feedRow('1', rowProps),
+              feedRow('2', rowProps),
+              feedRow('3', rowProps),
+              feedRow('4', rowProps),
+            ],
+          )
+      }),
+    )
+    return { active }
+  }
+
+  it('marks the bound row active and makes rows interactive without a click handler', () => {
+    mountActive()
+    // Binding v-model:active opts every row into interactivity → buttons.
+    cy.get('button[data-slot=list-row]').should('have.length', 4)
+    cy.get('[data-slot=list-row][data-active]')
+      .should('have.length', 1)
+      .and('contain.text', 'Content 2')
+      .and('have.attr', 'aria-current', 'true')
+  })
+
+  it('activates on click and still fires the row’s own onClick', () => {
+    const clicked = cy.spy().as('rowClick')
+    const { active } = mountActive({ onClick: clicked })
+    cy.get('[data-slot=list-row]')
+      .eq(0)
+      .click()
+      .then(() => {
+        expect(active.value).to.equal('1')
+      })
+    // Unlike selection, activation is additive — the app’s handler still runs.
+    cy.get('@rowClick').should('have.been.calledOnce')
+    cy.get('[data-slot=list-row]').eq(0).should('have.attr', 'data-active')
+    cy.get('[data-slot=list-row]').eq(1).should('not.have.attr', 'data-active')
+  })
+
+  it('hides the dividers directly above and below the active row', () => {
+    mountActive() // active = row 2 (index 1)
+    // Row 1 never shows a divider-above; the pair hugging the active row
+    // (its own divider-above and row 3’s) go to 0; row 4 keeps its divider.
+    cy.get('[data-slot=list-divider]').eq(0).should('have.css', 'opacity', '0')
+    cy.get('[data-slot=list-divider]').eq(1).should('have.css', 'opacity', '0')
+    cy.get('[data-slot=list-divider]').eq(2).should('have.css', 'opacity', '0')
+    cy.get('[data-slot=list-divider]').eq(3).should('have.css', 'opacity', '1')
+  })
+
+  it('stays inert when v-model:active is not bound', () => {
+    cy.mount(
+      defineComponent(() => {
+        return () => h(List, () => [feedRow('1'), feedRow('2')])
+      }),
+    )
+    cy.get('[data-slot=list-row][data-active]').should('not.exist')
+    cy.get('button[data-slot=list-row]').should('not.exist')
   })
 })
 

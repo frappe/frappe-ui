@@ -8,6 +8,7 @@
         :disabled="disabled"
         :id="inputId"
         :checked="checked"
+        :indeterminate="indeterminate"
         :required="required"
         :aria-required="required || undefined"
         :aria-invalid="hasError || undefined"

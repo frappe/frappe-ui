@@ -16,13 +16,37 @@ The default template (`auto`, `minmax(0,1fr)`, `auto`) fits leading media,
 content, and a right-aligned trailing cell. Rows with `to` render as
 RouterLinks, rows with a click listener as buttons. `selectable` reveals the
 animated checkbox column and switches row click from navigate to toggle;
-selected values surface through `v-model:selection`.
+selected values surface through `v-model:selection`. When a `ListHeader` is
+present, a select-all checkbox appears in it automatically — checked when every
+row is selected, mixed when only some are, and toggling all rows on or off. It
+reasons over the full `ListRows` items, so it covers virtualized rows too. Each
+row's identity defaults to its `name`/`id`; if a row's `:value` is something
+else, pass `ListRows`' `row-key` (a field name or `(item, index) => key`) so the
+select-all universe matches your values.
 
 Dividers default to `inset`: they start at the content column (the text
 edge) by construction, never render above the first row, and hide around a
 hovered row so the rounded hover surface floats free.
 
 <ComponentPreview name="List-Feed" />
+
+## Active row
+
+A master–detail list (a mail inbox, a file browser) tracks one open row. Bind
+`v-model:active` to a row `value` and the List owns the rest: it highlights
+that row and hides the dividers hugging it — above and below — so its rounded
+surface floats free, like a hovered row but persistent. Clicking a row sets
+`active`; unlike `selectable`, activation is additive, so the row's own
+`@click` and `to` navigation still run. It's single-select and independent of
+the multi-select checkbox `selection` — and works in feed or column mode.
+
+```vue
+<List v-model:active="openId">
+  <ListRows :items="threads" v-slot="{ item }">
+    <ListRow :value="item.name">…</ListRow>
+  </ListRows>
+</List>
+```
 
 ## Column mode
 
@@ -69,8 +93,9 @@ lists collapse to a feed on mobile with no dedicated API:
 
 with `max-sm:hidden` on the numeric cells and the `ListHeader`.
 
-For `--list-gap` and `--list-row-padding-x` (the interactive-row content
-inset, default `0.75rem`), the frappe-ui Tailwind preset ships spacing-scale
+For `--list-gap` and `--list-row-padding-x` (the content inset shared by
+interactive rows — default `0.75rem` — and the column header, so setting it
+on the `List` aligns both), the frappe-ui Tailwind preset ships spacing-scale
 utilities — `list-gap-*` and `list-row-px-*` — so the usual authoring form
 is `max-sm:list-gap-3 sm:list-gap-4` rather than raw
 `[--list-gap:0.75rem]` properties. Both forms hit the same CSS vars.
@@ -81,7 +106,8 @@ responsively if needed. There is no `align` prop.
 
 Slots for CSS targeting: `data-slot="list | list-header | list-header-cell |
 list-row | list-cell | list-row-checkbox | list-divider"`. State:
-`data-state="selected"` and `data-interactive` on rows, `data-sort` on the
+`data-state="selected"` (checkbox selection), `data-active` (+ `aria-current`,
+the `v-model:active` row) and `data-interactive` on rows, `data-sort` on the
 active header cell.
 
 Accessibility follows header presence: `role="list"` / `"listitem"` without

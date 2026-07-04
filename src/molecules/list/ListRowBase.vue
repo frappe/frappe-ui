@@ -5,11 +5,17 @@
     :role="context?.hasHeader.value ? 'row' : 'listitem'"
     :data-interactive="interactive || undefined"
     :data-state="selected ? 'selected' : undefined"
+    :data-active="active || undefined"
+    :aria-current="active || undefined"
     :type="tag === 'button' ? 'button' : undefined"
-    :class="
-      interactive &&
-      'cursor-pointer select-none active:bg-surface-gray-2 sm:rounded-[10px] sm:hover:bg-surface-gray-1'
-    "
+    :class="[
+      interactive && 'cursor-pointer select-none sm:rounded-[10px]',
+      // Active is a persistent, stronger surface; suppress the hover/active
+      // wash on it so pointing at the open row doesn't read as de-selecting it.
+      active
+        ? 'bg-surface-gray-3'
+        : interactive && 'active:bg-surface-gray-2 sm:hover:bg-surface-gray-1',
+    ]"
   >
     <slot />
     <Transition
@@ -28,7 +34,17 @@
         @keydown.enter.prevent="toggle"
         @keydown.space.prevent="toggle"
       >
-        <Checkbox :modelValue="selected" tabindex="-1" />
+        <!-- Purely presentational: the wrapper div is the real role=checkbox
+             control. pointer-events-none makes every click (even one landing
+             exactly on the native input) resolve to the wrapper's toggle,
+             instead of the raw input's native toggle fighting the one-way
+             :modelValue binding and netting to no change. -->
+        <Checkbox
+          :modelValue="selected"
+          tabindex="-1"
+          aria-hidden="true"
+          class="pointer-events-none"
+        />
       </div>
     </Transition>
     <div
@@ -71,7 +87,15 @@ const selectable = computed(
 const selected = computed(
   () => selectable.value && !!context?.isSelected(props.value!),
 )
-const interactive = computed(() => props.tag !== 'div' || selectable.value)
+const active = computed(
+  () =>
+    !!context?.activatable.value &&
+    props.value !== undefined &&
+    !!context?.isActive(props.value),
+)
+const interactive = computed(
+  () => props.tag !== 'div' || selectable.value || active.value,
+)
 
 function toggle() {
   if (props.value !== undefined) context?.toggleSelection(props.value)

@@ -35,6 +35,12 @@
     required: false,
     type: 'string[]',
     default: '[]'
+  },
+  {
+    name: 'active',
+    description: '',
+    required: false,
+    type: 'string'
   }
 ]
 
@@ -51,6 +57,11 @@
     name: 'update:selection',
     description: 'Fired when the selection changes.',
     type: '[value: string[]]'
+  },
+  {
+    name: 'update:active',
+    description: 'Fired when the active changes.',
+    type: '[value: string | undefined]'
   }
 ]
 
@@ -63,9 +74,15 @@
   },
   {
     name: 'value',
-    description: 'Selection key; required when the list is selectable.',
+    description: 'Row key — the `selection` key when `selectable` and the `v-model:active`\nkey. Required whenever the list uses either.',
     required: false,
     type: 'string'
+  },
+  {
+    name: 'onClick',
+    description: 'Fired when the row is activated, unless selection mode claims the click.',
+    required: false,
+    type: '((event: MouseEvent) => void)'
   }
 ]
 
@@ -74,14 +91,6 @@
     name: 'default',
     description: '',
     type: '{}'
-  }
-]
-
-  const listRowEmits = [
-  {
-    name: 'click',
-    description: '',
-    type: '[event: MouseEvent]'
   }
 ]
 
@@ -162,6 +171,12 @@
     type: 'T[]'
   },
   {
+    name: 'rowKey',
+    description: 'How to derive a row\'s identity — the value that must match each\n`<ListRow :value>`. A string reads that property off the item; a function\ncomputes it. Drives both the render `:key` and the header select-all\nuniverse, so the two can\'t drift. Defaults to the item\'s `name`, then `id`,\nthen the index. Set this when a row\'s `:value` isn\'t the item\'s name/id.',
+    required: false,
+    type: 'string | ((item: T, index: number) => PropertyKey)'
+  },
+  {
     name: 'virtual',
     description: 'Window the rows (vueuse useVirtualList) so only rows near the viewport\nmount. `itemHeight` defaults to the List\'s `rowHeight`; the scroll\ncontainer is the nearest scrollable ancestor.',
     required: false,
@@ -192,8 +207,6 @@
 <PropsTable folder="list" name="ListRow" :data="listRowProps"/> 
 
 <SlotsTable :data="listRowSlots"/> 
-
-<EmitsTable :data="listRowEmits"/> 
 
 ### ListCell
 

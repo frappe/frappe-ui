@@ -12,7 +12,7 @@
 </template>
 
 <script setup lang="ts" generic="T">
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, watch } from 'vue'
 import { useListContext } from './list-context'
 import { useVirtualRows } from './useVirtualRows'
 import type { ListVirtualOptions } from './types'
@@ -20,6 +20,15 @@ import type { ListVirtualOptions } from './types'
 const props = defineProps<{
   /** Items to iterate — one default-slot render per item. */
   items: T[]
+
+  /**
+   * How to derive a row's identity — the value that must match each
+   * `<ListRow :value>`. A string reads that property off the item; a function
+   * computes it. Drives both the render `:key` and the header select-all
+   * universe, so the two can't drift. Defaults to the item's `name`, then `id`,
+   * then the index. Set this when a row's `:value` isn't the item's name/id.
+   */
+  rowKey?: string | ((item: T, index: number) => PropertyKey)
 
   /**
    * Window the rows (vueuse useVirtualList) so only rows near the viewport
@@ -62,7 +71,28 @@ const { rows, wrapperProps, anchor } = useVirtualRows(
   },
 )
 
+// Feed the full selectable universe to the List so the header select-all knows
+// every row's value — even the virtualized ones that aren't mounted. Uses the
+// same `getItemKey` as the render `:key`, so `rowKey` keeps both in lockstep.
+watch(
+  () => props.items,
+  (items) => {
+    context?.setAllValues(items.map((item, i) => getItemKey(item, i) as string))
+  },
+  { immediate: true },
+)
+onBeforeUnmount(() => context?.setAllValues([]))
+
 function getItemKey(item: T, index: number): PropertyKey {
+  if (props.rowKey !== undefined) {
+    const key =
+      typeof props.rowKey === 'function'
+        ? props.rowKey(item, index)
+        : isRecord(item)
+          ? (item as Record<string, unknown>)[props.rowKey]
+          : undefined
+    return isPropertyKey(key) ? key : index
+  }
   if (!isRecord(item)) return index
   const key = item.name ?? item.id
   return isPropertyKey(key) ? key : index
