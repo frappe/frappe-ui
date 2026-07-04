@@ -23,26 +23,31 @@
              column's right edge (aligned with the values below). A trailing
              glyph would reserve space and push the label off the edge. -->
         <span
-          v-if="isEnd && $slots.suffix"
+          v-if="isEnd"
           class="shrink-0"
           :class="suffixRevealClass"
           aria-hidden="true"
         >
-          <slot name="suffix" :direction="direction ?? null" />
+          <slot name="suffix" :direction="direction ?? null">
+            <span class="block size-3.5" :class="defaultArrowClass" />
+          </slot>
         </span>
         <span v-if="$slots.prefix" class="shrink-0">
           <slot name="prefix" :direction="direction ?? null" />
         </span>
         <span class="truncate"><slot /></span>
-        <!-- The glyphs are consumer content; the cell only owns the reveal:
-             an inactive column's suffix shows on hover. -->
+        <!-- A built-in arrow derived from `direction` by default, so the common
+             case needs no glyph wiring; supply #suffix to override. The cell
+             owns the reveal: an inactive column's glyph shows on hover. -->
         <span
-          v-if="!isEnd && $slots.suffix"
+          v-if="!isEnd"
           class="shrink-0"
           :class="suffixRevealClass"
           aria-hidden="true"
         >
-          <slot name="suffix" :direction="direction ?? null" />
+          <slot name="suffix" :direction="direction ?? null">
+            <span class="block size-3.5" :class="defaultArrowClass" />
+          </slot>
         </span>
       </button>
     </Tooltip>
@@ -69,15 +74,22 @@ const suffixRevealClass = computed(() =>
   props.direction ? '' : 'opacity-0 group-hover:opacity-100',
 )
 
+// Built-in sort glyph, used when the consumer supplies no #suffix: a muted
+// up/down when inactive, a directional arrow when the column is the sort key.
+const defaultArrowClass = computed(() => {
+  if (!props.direction) return 'lucide-arrow-up-down'
+  return props.direction === 'asc' ? 'lucide-arrow-up' : 'lucide-arrow-down'
+})
+
 defineSlots<{
   /** Column label. */
   default?: () => unknown
   /** Leading adornment, rendered before the label. */
   prefix?: (props: { direction: 'asc' | 'desc' | null }) => unknown
   /**
-   * Trailing adornment — sort glyphs go here, app-supplied (e.g. a lucide
-   * arrow span). The cell owns the reveal: an inactive column's suffix
-   * shows on hover. Render per `direction`.
+   * Sort glyph. Optional — the cell renders a built-in arrow from `direction`
+   * by default. Provide this to override (e.g. a custom lucide span). The cell
+   * owns the reveal: an inactive column's glyph shows on hover.
    */
   suffix?: (props: { direction: 'asc' | 'desc' | null }) => unknown
 }>()
