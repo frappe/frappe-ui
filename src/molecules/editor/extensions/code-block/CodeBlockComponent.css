@@ -28,6 +28,16 @@
   font-size: inherit;
 }
 
+/* The line-number gutter inherits the `pre` line-height, but the node view wraps
+   the code text in `[data-node-view-content]` divs that fall back to
+   `line-height: normal`, so the code and the numbers drift apart. Pin the code
+   column to the same line-height as the gutter (kept in sync with `pre` above). */
+.ProseMirror pre code,
+.ProseMirror pre code [data-node-view-content],
+.ProseMirror pre code [data-node-view-content] > * {
+  line-height: 1.7;
+}
+
 /* ── highlight.js — GitHub light ─────────────────────────────── */
 .ProseMirror pre .hljs-doctag,
 .ProseMirror pre .hljs-keyword,
