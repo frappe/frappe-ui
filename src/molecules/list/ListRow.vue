@@ -14,7 +14,7 @@
   </RouterLink>
   <ListRowBase
     v-else
-    :tag="hasClickListener() ? 'button' : 'div'"
+    :tag="isInteractive() ? 'button' : 'div'"
     :value="value"
     @click="onClick"
   >
@@ -32,8 +32,10 @@ const props = defineProps<ListRowProps>()
 
 const context = useListContext()
 
-function hasClickListener() {
-  return Boolean(props.onClick)
+// A row is interactive — rendered as a button — when it has a click handler or
+// when the list tracks an active row (clicking it sets active).
+function isInteractive() {
+  return Boolean(props.onClick) || Boolean(context?.activatable.value)
 }
 
 function onClick(event: MouseEvent, navigate?: (e?: MouseEvent) => void) {
@@ -41,6 +43,11 @@ function onClick(event: MouseEvent, navigate?: (e?: MouseEvent) => void) {
     event.preventDefault()
     context.toggleSelection(props.value)
     return
+  }
+  // Activation is additive: it sets the active row but still lets the app's own
+  // click handler / navigation run.
+  if (context?.activatable.value && props.value !== undefined) {
+    context.activate(props.value)
   }
   props.onClick?.(event)
   navigate?.(event)

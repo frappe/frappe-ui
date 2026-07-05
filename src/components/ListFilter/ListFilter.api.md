@@ -9,14 +9,14 @@
     name: 'modelValue',
     description: '',
     required: false,
-    type: 'Record<string, any>',
+    type: 'FiltersDict',
     default: '{}'
   },
   {
     name: 'docfields',
     description: '',
     required: false,
-    type: 'unknown[]',
+    type: 'DocField[]',
     default: '[]'
   }
 ]
@@ -25,13 +25,12 @@
   {
     name: 'update:modelValue',
     description: 'Fired when the model value changes.',
-    type: 'any[]'
+    type: '[value: FiltersDict]'
   }
 ]
 </script>
 ## API Reference
 
-<PropsTable name="ListFilter" :data="propsData"/> 
+<PropsTable name="ListFilter" :data="propsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

@@ -1,4 +1,4 @@
-import { type ObjectDirective, type DirectiveBinding, nextTick } from "vue"
+import { type ObjectDirective, type DirectiveBinding, nextTick } from 'vue'
 
 interface FocusDirective extends ObjectDirective<HTMLElement> {
   mounted(el: HTMLElement, binding: DirectiveBinding<boolean>): void
@@ -14,7 +14,7 @@ const focusDirective: FocusDirective = {
       await nextTick()
       firstFocusableElement.focus()
       if (
-        binding.arg === "autoselect" &&
+        binding.arg === 'autoselect' &&
         (firstFocusableElement instanceof HTMLInputElement ||
           firstFocusableElement instanceof HTMLTextAreaElement)
       ) {
@@ -22,7 +22,7 @@ const focusDirective: FocusDirective = {
       }
     } else {
       await nextTick()
-      document.activeElement?.blur?.()
+      ;(document.activeElement as HTMLElement | null)?.blur()
     }
   },
 }

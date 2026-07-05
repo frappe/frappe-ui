@@ -133,7 +133,11 @@ export default function useEchartsOptions(config: AxisChartConfig) {
   }
 }
 
-export function getTitleOptions(title: string, subtitle?: string, isRTL?: boolean) {
+export function getTitleOptions(
+  title: string,
+  subtitle?: string,
+  isRTL?: boolean,
+) {
   return {
     top: '4px',
     left: isRTL ? 'right' : '0.8%',
@@ -168,7 +172,11 @@ function getXAxisOptions(config: AxisChartConfig) {
         boundaryGap: false,
         inverse: isRTL,
         position: 'top',
-        name: isRTL ? `← ${config.yAxis.title}` : `${config.yAxis.title} →`,
+        name: config.yAxis.title
+          ? isRTL
+            ? `← ${config.yAxis.title}`
+            : `${config.yAxis.title} →`
+          : undefined,
         nameGap: 6,
         nameLocation: 'end',
         nameTextStyle: {
@@ -231,7 +239,10 @@ function getXAxisOptions(config: AxisChartConfig) {
         },
       }
 
-  return mergeDeep(options, config.swapXY ? config.yAxis.echartOptions : config.xAxis.echartOptions)
+  return mergeDeep(
+    options,
+    config.swapXY ? config.yAxis.echartOptions : config.xAxis.echartOptions,
+  )
 }
 
 function getYAxisOptions(config: AxisChartConfig) {
@@ -268,7 +279,7 @@ function getYAxisOptions(config: AxisChartConfig) {
         scale: false,
         position: isRTL ? 'right' : 'left',
         boundaryGap: ['0%', '1%'],
-        name: `↑ ${config.yAxis.title}`,
+        name: config.yAxis.title ? `↑ ${config.yAxis.title}` : undefined,
         nameGap: 6,
         nameLocation: 'end',
         nameTextStyle: {
@@ -309,7 +320,7 @@ function getYAxisOptions(config: AxisChartConfig) {
 
   primaryYAxisOptions = mergeDeep(
     primaryYAxisOptions,
-    config.swapXY ? config.xAxis.echartOptions : config.yAxis.echartOptions
+    config.swapXY ? config.xAxis.echartOptions : config.yAxis.echartOptions,
   )
 
   let secondaryYAxisOptions = {
@@ -320,7 +331,11 @@ function getYAxisOptions(config: AxisChartConfig) {
     scale: false,
     position: isRTL ? 'left' : 'right',
     boundaryGap: ['0%', '1%'],
-    name: isRTL ? `↑ ${config.y2Axis?.title}` : `${config.y2Axis?.title} ↑`,
+    name: config.y2Axis?.title
+      ? isRTL
+        ? `↑ ${config.y2Axis.title}`
+        : `${config.y2Axis.title} ↑`
+      : undefined,
     nameLocation: 'end',
     nameTextStyle: {
       align: isRTL ? 'left' : 'right',
@@ -360,7 +375,7 @@ function getYAxisOptions(config: AxisChartConfig) {
 
   secondaryYAxisOptions = mergeDeep(
     secondaryYAxisOptions,
-    config.swapXY ? config.y2Axis?.echartOptions : config.y2Axis?.echartOptions
+    config.swapXY ? config.y2Axis?.echartOptions : config.y2Axis?.echartOptions,
   )
 
   return config.swapXY

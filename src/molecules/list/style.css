@@ -37,14 +37,30 @@
   padding-inline-end: var(--_list-row-pad, 0px);
 }
 
-/* Same padding for the header, but in :where() — a header is never a button,
- * so there is no preflight reset to beat, and a consumer class must win:
- * e.g. `px-3` to align header labels with padded interactive rows. */
+/* The header inset comes from the *public* --list-row-padding-x hook (not the
+ * private --_list-row-pad, which is only ever set on interactive rows and so
+ * left the header flush-left beside padded rows). Defaults to 0 — the neutral
+ * flush edge — because a header can't tell whether its rows are interactive
+ * (0.75rem inset) or static (flush): the consumer declares the inset once on
+ * the List, e.g. `list-row-px-3`, and it flows to both header and rows so they
+ * can't drift. In :where() (zero specificity) so that class wins — and unlike a
+ * raw `px-3`, the hook composes with the checkbox column instead of clobbering
+ * the padding-inline-start calc below. */
 :where([data-slot='list-header']) {
   padding-inline-start: calc(
-    var(--list-checkbox-width, 0px) + var(--_list-row-pad, 0px)
+    var(--list-checkbox-width, 0px) + var(--list-row-padding-x, 0px)
   );
-  padding-inline-end: var(--_list-row-pad, 0px);
+  padding-inline-end: var(--list-row-padding-x, 0px);
+}
+
+/* Group header aligns its label with the rows' content: same checkbox-column +
+ * row inset as the header/rows, so a section title sits directly above the text
+ * it groups. In :where() so consumer classes win. */
+:where([data-slot='list-group-header']) {
+  padding-inline-start: calc(
+    var(--list-checkbox-width, 0px) + var(--list-row-padding-x, 0px)
+  );
+  padding-inline-end: var(--list-row-padding-x, 0px);
 }
 
 /* Positioned so dividers/checkbox overlays anchor to the row. In :where()
@@ -74,15 +90,22 @@
   width: 100%;
 }
 
-:where([data-slot='list-row-checkbox']) {
+:where([data-slot='list-row-checkbox'], [data-slot='list-header-checkbox']) {
   position: absolute;
   top: 0;
   bottom: 0;
+  /* Row checkboxes sit inside the interactive row's hover inset; the header
+   * has no such inset, so it anchors to its own content padding instead. Both
+   * land the 32px checkbox column in the same place so they align vertically. */
   inset-inline-start: var(--_list-row-pad, 0px);
   display: flex;
   align-items: center;
   width: 32px;
   overflow: hidden;
+}
+
+:where([data-slot='list-header-checkbox']) {
+  inset-inline-start: var(--list-row-padding-x, 0px);
 }
 
 /* The header's bottom border is a grid child spanning all tracks, so it
@@ -134,6 +157,16 @@
  * floats free. Gated on data-interactive so static rows keep dividers. */
 [data-slot='list-row'][data-interactive]:hover [data-slot='list-divider'],
 [data-slot='list-row'][data-interactive]:hover
+  + [data-slot='list-row']
+  [data-slot='list-divider'] {
+  opacity: 0;
+}
+
+/* The active row (v-model:active) is a persistent version of the same idea:
+ * its rounded highlight surface floats free of the rules above and below it.
+ * Hides its own divider-above and the next row's (the divider below it). */
+[data-slot='list-row'][data-active] [data-slot='list-divider'],
+[data-slot='list-row'][data-active]
   + [data-slot='list-row']
   [data-slot='list-divider'] {
   opacity: 0;

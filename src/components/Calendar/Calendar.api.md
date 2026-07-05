@@ -8,33 +8,34 @@
   {
     name: 'events',
     description: '',
-    required: false,
-    type: 'Record<string, any>',
+    required: true,
+    type: 'CalendarEvent[]',
     default: '[]'
   },
   {
     name: 'config',
     description: '',
     required: false,
-    type: 'Record<string, any>'
+    type: 'Partial<CalendarConfig>',
+    default: '{}'
   },
   {
     name: 'onClick',
     description: '',
     required: false,
-    type: 'Function'
+    type: '((data: { e: MouseEvent; calendarEvent: CalendarEvent; }) => void)'
   },
   {
     name: 'onDblClick',
     description: '',
     required: false,
-    type: 'Function'
+    type: '((data: { e: MouseEvent | null; calendarEvent: CalendarEvent; }) => void)'
   },
   {
     name: 'onCellClick',
     description: '',
     required: false,
-    type: 'Function'
+    type: '((data: CalendarCellClickData) => void)'
   }
 ]
 
@@ -42,12 +43,12 @@
   {
     name: 'header',
     description: '',
-    type: '{ currentMonthYear: any; currentYear: number; currentMonth: number; enabledModes: { label: string; v'
+    type: '{ currentMonthYear: string; currentYear: number; currentMonth: number; enabledModes: CalendarActionO'
   },
   {
     name: 'event-popover-content',
     description: '',
-    type: 'any'
+    type: '{ calendarEvent: { [x: string]: unknown; id?: string | number | undefined; name?: string | number | '
   },
   {
     name: 'daily-header',
@@ -60,30 +61,29 @@
   {
     name: 'delete',
     description: '',
-    type: 'any[]'
+    type: '[eventID: string | number | undefined]'
   },
   {
     name: 'create',
     description: '',
-    type: 'any[]'
+    type: '[event: CalendarEvent]'
   },
   {
     name: 'update',
     description: '',
-    type: 'any[]'
+    type: '[event: CalendarEvent]'
   },
   {
     name: 'rangeChange',
     description: '',
-    type: 'any[]'
+    type: '[payload: { view: CalendarMode; startDate: string; endDate: string; }]'
   }
 ]
 </script>
 ## API Reference
 
-<PropsTable name="Calendar" :data="propsData"/> 
+<PropsTable name="Calendar" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
+<SlotsTable :data="slotsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

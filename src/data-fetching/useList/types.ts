@@ -34,6 +34,7 @@ export interface UseListOptions<T> {
   parent?: string
   debug?: boolean
   cacheKey?: CacheKey
+  staleOnError?: boolean
   initialData?: T[]
   immediate?: boolean
   refetch?: boolean

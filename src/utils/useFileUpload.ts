@@ -1,12 +1,11 @@
 import { reactive, computed } from 'vue'
-import {
-  getMaxFileSize,
-  formatBytes,
-  fileSizeLimitMessage,
-} from './fileSize'
+import { getMaxFileSize, formatBytes, fileSizeLimitMessage } from './fileSize'
+
+export type UploadPrivacy = boolean | 0 | 1 | '0' | '1'
 
 export interface UploadOptions {
   private?: boolean
+  is_private?: UploadPrivacy
   folder?: string
   file_url?: string
   doctype?: string
@@ -25,6 +24,18 @@ export interface UploadOptions {
     total: number
     percent: number
   }) => void
+}
+
+export function isPrivateUpload(options: UploadOptions = {}) {
+  if (options.private !== undefined) return options.private
+  if (options.is_private !== undefined) {
+    return (
+      options.is_private === true ||
+      options.is_private === 1 ||
+      options.is_private === '1'
+    )
+  }
+  return false
 }
 
 export interface UploadState {
@@ -238,7 +249,7 @@ async function upload(
       formData.append('file', file, file.name)
     }
 
-    formData.append('is_private', options.private ? '1' : '0')
+    formData.append('is_private', isPrivateUpload(options) ? '1' : '0')
     formData.append('folder', options.folder || 'Home')
 
     if (options.file_url) {

@@ -1,6 +1,6 @@
 import { computed, reactive, readonly, ref, unref } from 'vue'
 import { AfterFetchContext, UseFetchOptions } from '@vueuse/core'
-import { useFrappeFetch } from '../useFrappeFetch'
+import { FrappeResponseError, useFrappeFetch } from '../useFrappeFetch'
 import { unrefObject, makeGetParams, normalizeCacheKey } from '../utils'
 import { idbStore } from '../idbStore'
 import { BasicParams, UseCallOptions } from './types'
@@ -17,6 +17,7 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
     baseUrl = '',
     initialData,
     cacheKey,
+    staleOnError = false,
     transform,
     beforeSubmit,
     onSuccess,
@@ -177,7 +178,15 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
   let cachedResponse = ref<TResponse | null>(null)
 
   const _data = computed(() => {
-    if (normalizedCacheKey && (out.loading || !out.isFinished)) {
+    if (
+      normalizedCacheKey &&
+      cachedResponse.value != null &&
+      canUseCachedFallback(error.value, staleOnError) &&
+      (out.loading ||
+        !out.isFinished ||
+        data.value?.data == null ||
+        error.value)
+    ) {
       let cachedData = cachedResponse.value as TResponse
       if (transform) {
         let returnValue = transform(cachedData)
@@ -219,7 +228,11 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
 
   return out as Omit<typeof out, 'submit'> & {
     submit: TParams extends undefined
-      ? (params?: never) => Promise<void>
-      : (params: TParams) => Promise<void>
+      ? (params?: never) => Promise<TResponse | null>
+      : (params?: TParams) => Promise<TResponse | null>
   }
+}
+
+function canUseCachedFallback(error: unknown, staleOnError: boolean) {
+  return !error || (staleOnError && !(error instanceof FrappeResponseError))
 }

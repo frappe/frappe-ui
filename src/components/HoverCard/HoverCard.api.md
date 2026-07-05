@@ -9,7 +9,7 @@
     name: 'side',
     description: 'Side of the trigger the card is placed on.',
     required: false,
-    type: '"bottom" | "top" | "right" | "left"',
+    type: '"left" | "right" | "bottom" | "top"',
     default: '"bottom"'
   },
   {
@@ -87,15 +87,14 @@
   {
     name: 'update:open',
     description: 'Fired when the open state changes.',
-    type: 'unknown[]'
+    type: '[value: boolean]'
   }
 ]
 </script>
 ## API Reference
 
-<PropsTable name="HoverCard" :data="propsData"/> 
+<PropsTable name="HoverCard" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
+<SlotsTable :data="slotsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

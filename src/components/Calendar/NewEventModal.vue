@@ -16,13 +16,13 @@
       <div>
         <div class="grid grid-cols-1 gap-4">
           <FormControl
-            type="Input"
+            type="text"
             v-model="newEvent.title"
             label="Title"
             placeholder="Meet with John Doe"
           />
           <FormControl
-            type="Date"
+            type="date"
             v-model="newEvent.date"
             label="Date"
             :required="true"
@@ -30,7 +30,7 @@
           />
 
           <FormControl
-            type="Input"
+            type="text"
             v-model="newEvent.participant"
             label="Person"
             placeholder="John Doe"
@@ -53,7 +53,7 @@
           />
 
           <FormControl
-            type="Input"
+            type="text"
             v-model="newEvent.venue"
             label="Venue"
             placeholder="Frappe, Neelkanth Business Park"
@@ -69,7 +69,7 @@
               <div
                 class="h-5 w-5 rounded-full shadow-md"
                 :style="{
-                  backgroundColor: colorMap[newEvent?.color]?.color,
+                  backgroundColor: colorMap[newEvent.color || 'green']?.color,
                 }"
               />
             </template>
@@ -95,7 +95,7 @@
     </template>
   </Dialog>
 </template>
-<script setup>
+<script setup lang="ts">
 import { computed, inject, reactive, ref } from 'vue'
 import { Dialog } from '../Dialog'
 import { FormControl } from '../FormControl'
@@ -103,15 +103,14 @@ import { ErrorMessage } from '../ErrorMessage'
 import { Button } from '../Button'
 
 import { calculateDiff, colorMap, handleSeconds } from './calendarUtils'
+import { CALENDAR_ACTIONS_KEY, type CalendarEvent } from './types'
 const show = ref(false)
 
-const props = defineProps({
-  event: {
-    type: Object,
-  },
+const props = withDefaults(defineProps<{ event?: CalendarEvent }>(), {
+  event: () => ({}),
 })
 
-const newEvent = reactive({
+const newEvent = reactive<CalendarEvent>({
   title: props.event?.title || '',
   date: props.event?.date || '',
   participant: props.event?.participant || '',
@@ -164,15 +163,19 @@ function validateFields() {
 }
 
 function validateStartEndTime() {
-  let timeDiff = calculateDiff(newEvent.fromTime, newEvent.toTime)
+  let timeDiff = calculateDiff(newEvent.fromTime || '', newEvent.toTime || '')
   if (timeDiff <= 0) {
     errorMessage.value = 'Start time must be less than End Time'
   }
 }
 
-const calendarActions = inject('calendarActions')
+const calendarActions = inject(CALENDAR_ACTIONS_KEY)!
 
-function submitEvent(close) {
+if (!calendarActions) {
+  throw new Error('NewEventModal must be rendered inside Calendar.')
+}
+
+function submitEvent(close: () => void) {
   validateFields()
   if (errorMessage.value) {
     return
@@ -202,8 +205,8 @@ function handleEventTime() {
     newEvent.fromTime = ''
     newEvent.toTime = ''
   } else {
-    newEvent.fromTime = handleSeconds(newEvent.fromTime)
-    newEvent.toTime = handleSeconds(newEvent.toTime)
+    newEvent.fromTime = handleSeconds(newEvent.fromTime || '')
+    newEvent.toTime = handleSeconds(newEvent.toTime || '')
   }
 }
 </script>

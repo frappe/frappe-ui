@@ -21,9 +21,9 @@
   },
   {
     name: 'icon',
-    description: 'Icon CSS class, e.g. `lucide-home`. Ignored when the default slot is used\n(for a custom glyph or an avatar).',
+    description: 'Icon CSS class, e.g. `lucide-home`, or a component. Ignored when the\ndefault slot is used (for a custom glyph or an avatar).',
     required: false,
-    type: 'string'
+    type: 'string | Component'
   },
   {
     name: 'to',
@@ -59,13 +59,12 @@
 
 ### MobileNav
 
-<SlotsTable :data="mobileNavSlots"/> 
+<SlotsTable :data="mobileNavSlots"/>
 
 ### MobileNavItem
 
-<PropsTable folder="MobileNav" name="MobileNavItem" :data="mobileNavItemProps"/> 
+<PropsTable folder="MobileNav" name="MobileNavItem" :data="mobileNavItemProps"/>
 
-<SlotsTable :data="mobileNavItemSlots"/> 
+<SlotsTable :data="mobileNavItemSlots"/>
 
-<EmitsTable :data="mobileNavItemEmits"/> 
-
+<EmitsTable :data="mobileNavItemEmits"/>

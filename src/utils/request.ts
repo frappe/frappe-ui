@@ -1,4 +1,28 @@
-export function request(_options) {
+export interface RequestOptions<TResponse = unknown> {
+  url: string
+  method?: string
+  headers?: HeadersInit
+  params?: Record<string, any>
+  responseType?: 'json' | 'response'
+  signal?: AbortSignal
+  credentials?: RequestCredentials
+  transformRequest?: (
+    options: RequestOptions<TResponse>,
+  ) => RequestOptions<TResponse>
+  transformResponse?: (
+    response: Response,
+    options: RequestOptions<TResponse>,
+  ) => TResponse | Promise<TResponse>
+  transformError?: (error: unknown) => TResponse | Promise<TResponse>
+}
+
+export interface RequestError extends Error {
+  response?: Response
+}
+
+export function request<TResponse = unknown>(
+  _options: RequestOptions<TResponse>,
+): Promise<TResponse> {
   let options = Object.assign({}, _options)
   if (!options.url) {
     throw new Error('[request] options.url is required')
@@ -19,7 +43,7 @@ export function request(_options) {
     if (options.method === 'GET') {
       let params = new URLSearchParams()
       for (let key in options.params) {
-        params.append(key, options.params[key])
+        params.append(key, String(options.params[key]))
       }
       url = options.url + '?' + params.toString()
     } else {
@@ -44,7 +68,7 @@ export function request(_options) {
         }
         return response
       } else {
-        let error = new Error(response.statusText)
+        let error: RequestError = new Error(response.statusText)
         error.response = response
         throw error
       }

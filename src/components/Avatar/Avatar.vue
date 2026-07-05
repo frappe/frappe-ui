@@ -37,7 +37,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, useAttrs } from 'vue'
 import type { AvatarProps } from './types'
 
 const imgFetchError = ref(false)
@@ -45,6 +45,24 @@ const imgFetchError = ref(false)
 const props = withDefaults(defineProps<AvatarProps>(), {
   size: 'md',
   shape: 'circle',
+})
+
+// Let a consumer size the avatar with a Tailwind utility (`class="size-16"`)
+// instead of the `size` prop enum. When a sizing utility is present we drop the
+// enum's `w-*/h-*` so the two don't both land on the root and fight; the class
+// (applied via inheritAttrs) then wins on its own. Handles responsive/variant
+// prefixes like `sm:size-16`.
+const attrs = useAttrs()
+const hasSizeOverride = computed(() => {
+  const cls = Array.isArray(attrs.class)
+    ? attrs.class.join(' ')
+    : typeof attrs.class === 'string'
+      ? attrs.class
+      : ''
+  return cls.split(/\s+/).some((token) => {
+    const base = token.includes(':') ? token.slice(token.lastIndexOf(':') + 1) : token
+    return /^-?(size|w|h|min-w|max-w|min-h|max-h)-/.test(base)
+  })
 })
 
 const shapeClasses = computed(() => {
@@ -63,6 +81,7 @@ const shapeClasses = computed(() => {
 })
 
 const sizeClasses = computed(() => {
+  if (hasSizeOverride.value) return ''
   return {
     xs: 'w-4 h-4',
     sm: 'w-5 h-5',

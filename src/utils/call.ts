@@ -1,4 +1,39 @@
-export default async function call(method, args, options = {}) {
+declare global {
+  interface Window {
+    csrf_token?: string
+  }
+}
+
+export interface CallOptions {
+  headers?: Record<string, string>
+  onError?: (context: {
+    response: Response
+    status: number
+    error: CallError
+  }) => void
+}
+
+export interface CallError extends Error {
+  exc_type?: string
+  exc?: string
+  status?: number
+  messages: string[]
+}
+
+type FrappeCallResponse = {
+  docs?: unknown
+  exc?: string
+  exc_type?: string
+  message?: unknown
+  _server_messages?: string
+  _error_message?: string
+}
+
+export default async function call<TResponse = unknown>(
+  method: string,
+  args: Record<string, any> = {},
+  options: CallOptions = {},
+): Promise<TResponse> {
   if (!args) {
     args = {}
   }
@@ -24,9 +59,9 @@ export default async function call(method, args, options = {}) {
   })
 
   if (res.ok) {
-    const data = await res.json()
+    const data = (await res.json()) as FrappeCallResponse
     if (data.docs || method === 'login') {
-      return data
+      return data as TResponse
     }
     if (data.exc) {
       try {
@@ -42,10 +77,11 @@ export default async function call(method, args, options = {}) {
         console.warn('Error printing debug messages', e)
       }
     }
-    return data.message
+    return data.message as TResponse
   } else {
     let response = await res.text()
-    let error, exception
+    let error: FrappeCallResponse = {}
+    let exception
     try {
       error = JSON.parse(response)
       // eslint-disable-next-line no-empty
@@ -61,14 +97,16 @@ export default async function call(method, args, options = {}) {
         // eslint-disable-next-line no-empty
       } catch (e) {}
     }
-    let e = new Error(errorParts.join('\n'))
+    let e = new Error(errorParts.join('\n')) as CallError
     e.exc_type = error.exc_type
     e.exc = exception
     e.status = res.status
     e.messages = error._server_messages
       ? JSON.parse(error._server_messages)
       : []
-    e.messages = e.messages.concat(error.message)
+    if (error.message !== undefined) {
+      e.messages = e.messages.concat(error.message as any)
+    }
     e.messages = e.messages.map((m) => {
       try {
         return JSON.parse(m).message
@@ -91,8 +129,11 @@ export default async function call(method, args, options = {}) {
   }
 }
 
-export function createCall(options) {
-  return function customCall(method, args) {
+export function createCall(options: CallOptions) {
+  return function customCall<TResponse = unknown>(
+    method: string,
+    args?: Record<string, any>,
+  ) {
     return call(method, args, options)
   }
 }

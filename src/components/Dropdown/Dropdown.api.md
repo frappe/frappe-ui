@@ -53,6 +53,12 @@
     default: '4'
   },
   {
+    name: 'matchTriggerWidth',
+    description: 'Whether the dropdown width should match the trigger element.',
+    required: false,
+    type: 'boolean'
+  },
+  {
     name: 'portalTo',
     description: 'Teleport target for dropdown portal content.',
     required: false,
@@ -84,9 +90,8 @@
 </script>
 ## API Reference
 
-<PropsTable name="Dropdown" :data="propsData"/> 
+<PropsTable name="Dropdown" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
+<SlotsTable :data="slotsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

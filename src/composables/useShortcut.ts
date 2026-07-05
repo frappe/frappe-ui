@@ -190,6 +190,9 @@ function globalKeyupHandler(e: KeyboardEvent) {
 }
 
 function attachGlobalListener() {
+  // No-op during SSR — registration still works, listeners attach on the
+  // first client-side useShortcut call.
+  if (typeof document === 'undefined') return
   if (listenerAttached) return
   listenerAttached = true
   document.addEventListener('keydown', globalKeydownHandler)

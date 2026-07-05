@@ -1,4 +1,11 @@
-export function getCalendarDates(month, year) {
+import type {
+  CalendarColor,
+  CalendarConfig,
+  CalendarEvent,
+  CalendarTimeFormat,
+} from './types'
+
+export function getCalendarDates(month: number, year: number): Date[] {
   let daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
   let firstDay = new Date(year, month, 1)
   let leftPadding = firstDay.getDay()
@@ -12,7 +19,7 @@ export function getCalendarDates(month, year) {
 
   return allDates
 
-  function getCurrentMonthDates(date) {
+  function getCurrentMonthDates(date: Date): Date[] {
     let month = date.getMonth()
     if (month == 1 && isLeapYear(date)) {
       daysInMonth[month] = 29
@@ -23,13 +30,13 @@ export function getCalendarDates(month, year) {
     return allDates
   }
 
-  function getBeforeDates(firstDay, leftPadding) {
+  function getBeforeDates(firstDay: Date, leftPadding: number): Date[] {
     let allDates = getDatesAfter(firstDay, 0, leftPadding, -1)
     allDates = allDates.reverse()
     return allDates
   }
 
-  function getNextMonthDates(currentAndPreviousMonthDates) {
+  function getNextMonthDates(currentAndPreviousMonthDates: Date[]): Date[] {
     const numberofDaysInCalendar =
       currentAndPreviousMonthDates.length > 35 ? 42 : 35
     let lengthOfDates = currentAndPreviousMonthDates.length
@@ -41,13 +48,13 @@ export function getCalendarDates(month, year) {
   }
 
   function getDatesAfter(
-    date,
-    startIndex,
-    counter,
+    date: Date,
+    startIndex: number,
+    counter: number,
     stepper = 1,
     getNextMonthDates = false,
-  ) {
-    let allDates = []
+  ): Date[] {
+    let allDates: Date[] = []
     for (let index = startIndex; index < counter; index++) {
       let tempDate = new Date(
         date.getFullYear(),
@@ -59,43 +66,49 @@ export function getCalendarDates(month, year) {
     return allDates
   }
 
-  function isLeapYear(date) {
+  function isLeapYear(date: Date) {
     let year = date.getFullYear()
     return year % 400 === 0 || (year % 100 !== 0 && year % 4 === 0)
   }
 }
 
-export function groupBy(obj, fn) {
+export function groupBy<T>(
+  obj: T[],
+  fn: (value: T) => string | number,
+): Record<string, T[]> {
   if (typeof fn !== 'function') throw new Error(`${fn} should be a function`)
-  return Object.keys(obj).reduce((acc, key) => {
-    const group = fn(obj[key])
-    if (!acc[group]) {
-      acc[group] = []
-    }
-    acc[group].push(obj[key])
-    return acc
-  }, {})
+  return obj.reduce(
+    (acc, value) => {
+      const group = String(fn(value))
+      if (!acc[group]) {
+        acc[group] = []
+      }
+      acc[group].push(value)
+      return acc
+    },
+    {} as Record<string, T[]>,
+  )
 }
 
-export function calculateMinutes(time) {
+export function calculateMinutes(time: string): number {
   let [hours, minutes] = time.split(':')
   return parseInt(hours) * 60 + parseInt(minutes)
 }
 
-export function convertMinutesToHours(minutes) {
-  let hours = Math.floor(minutes / 60)
-  let remainingMinutes = minutes % 60
+export function convertMinutesToHours(minutes: number): string {
+  let hours: number | string = Math.floor(minutes / 60)
+  let remainingMinutes: number | string = minutes % 60
   if (hours < 10) hours = `0${hours}`
   if (remainingMinutes < 10) remainingMinutes = `0${remainingMinutes}`
   return `${hours}:${remainingMinutes}:00`
 }
 
-export function parseDate(date) {
+export function parseDate(date: Date | string): string {
   if (typeof date === 'string') {
     date = new Date(date)
   }
-  let dd = date.getDate()
-  let mm = date.getMonth() + 1
+  let dd: number | string = date.getDate()
+  let mm: number | string = date.getMonth() + 1
   let yyyy = date.getFullYear()
 
   if (dd < 10) dd = '0' + dd
@@ -105,12 +118,12 @@ export function parseDate(date) {
 }
 
 export function parseDateEventPopupFormat(
-  date,
+  date: Date,
   showDay = true,
   showMonth = true,
-  weekDay = 'short',
-) {
-  const options = {
+  weekDay: 'short' | 'long' | 'narrow' = 'short',
+): string {
+  const options: Intl.DateTimeFormatOptions = {
     day: 'numeric',
   }
   if (showMonth) {
@@ -123,36 +136,38 @@ export function parseDateEventPopupFormat(
   return date.toLocaleDateString('en-US', options)
 }
 
-export function parseDateWithComma(date, showDay = false) {
+export function parseDateWithComma(date: Date, showDay = false): string {
   return parseDateEventPopupFormat(date, showDay).split(' ').join(', ')
 }
 
-export function parseDateWithDay(date, fullDay = false) {
+export function parseDateWithDay(date: Date, fullDay = false): string {
   return fullDay
     ? daysListFull[date.getDay()] + ', ' + date.getDate()
     : daysList[date.getDay()] + ' ' + date.getDate()
 }
 
-export function calculateDiff(from, to) {
+export function calculateDiff(from: string, to: string): number {
   let fromMinutes = calculateMinutes(from)
   let toMinutes = calculateMinutes(to)
   return toMinutes - fromMinutes
 }
 
-export function handleSeconds(time) {
+export function handleSeconds(time: string): string {
   return time.split(':').slice(0, 2).join(':') + ':00'
 }
 
-export function findOverlappingEventsCount(events) {
+export function findOverlappingEventsCount(
+  events: CalendarEvent[],
+): CalendarEvent[] {
   // Sort events based on start time
-  events = events.sort((a, b) => a.startTime - b.startTime)
+  events = events.sort((a, b) => (a.startTime || 0) - (b.startTime || 0))
 
   let hallNumber = 0
-  const result = []
+  const result: CalendarEvent[][] = []
 
   for (const event of events) {
     const availableHall = result.find(
-      (hall) => hall[hall.length - 1].endTime <= event.startTime,
+      (hall) => (hall[hall.length - 1].endTime || 0) <= (event.startTime || 0),
     )
 
     if (availableHall) {
@@ -255,7 +270,11 @@ export const twentyFourHoursFormat = [
   '23:00',
 ]
 
-export function formattedDuration(fromTime, toTime, timeFormat) {
+export function formattedDuration(
+  fromTime: string,
+  toTime: string,
+  timeFormat: CalendarTimeFormat,
+): string {
   fromTime = formatTime(fromTime, timeFormat)
   toTime = formatTime(toTime, timeFormat)
 
@@ -266,10 +285,10 @@ export function formattedDuration(fromTime, toTime, timeFormat) {
   return fromTime + ' - ' + toTime
 }
 
-export function formatTime(time, format) {
+export function formatTime(time: string, format: CalendarTimeFormat): string {
   if (format === '12h') {
-    let [hours, minutes] = time.split(':')
-    hours = parseInt(hours)
+    let [hoursValue, minutes] = time.split(':')
+    let hours: number | string = parseInt(hoursValue)
     const ampm = hours >= 12 ? 'pm' : 'am'
     hours = hours % 12
     hours = hours ? hours : 12 // the hour '0' should be '12'
@@ -283,7 +302,7 @@ export function formatTime(time, format) {
   return time
 }
 
-export const colorMap = {
+export const colorMap: Record<string, CalendarColor> = {
   amber: {
     color: '#DB7706',
     border: '#DB7706',
@@ -363,7 +382,7 @@ export const colorMap = {
   },
 }
 
-export const colorMapDark = {
+export const colorMapDark: Record<string, CalendarColor> = {
   amber: {
     color: '#DB7706',
     border: '#C57411',
@@ -462,7 +481,9 @@ const _weekdayNameToIndex = {
   saturday: 6,
 }
 
-export function getWeekendDays(config) {
+export function getWeekendDays(
+  config?: Partial<CalendarConfig> & { weekendDays?: Array<number | string> },
+): number[] {
   // Support both weekendDays (preferred) and weekends (legacy) keys
   const raw = config?.weekendDays || config?.weekends
   if (!raw || !Array.isArray(raw) || raw.length === 0) return [0]
@@ -471,28 +492,31 @@ export function getWeekendDays(config) {
       if (typeof d === 'number') return d
       if (typeof d === 'string') {
         const key = d.trim().toLowerCase()
-        if (_weekdayNameToIndex.hasOwnProperty(key))
-          return _weekdayNameToIndex[key]
+        if (Object.prototype.hasOwnProperty.call(_weekdayNameToIndex, key))
+          return _weekdayNameToIndex[key as keyof typeof _weekdayNameToIndex]
       }
       return null
     })
-    .filter((v) => v !== null && v >= 0 && v <= 6)
+    .filter((v): v is number => v !== null && v >= 0 && v <= 6)
 }
 
-export function isWeekend(date, config) {
+export function isWeekend(
+  date: Date | string,
+  config?: CalendarConfig,
+): boolean {
   const day = new Date(date).getDay()
   const weekendDays = getWeekendDays(config)
   return weekendDays.includes(day)
 }
 
 // Format single month & year (e.g., "August, 2025")
-export function formatMonthYear(month, year) {
+export function formatMonthYear(month: number, year: number): string {
   return `${monthList[month]} ${year}`
 }
 
 // Extract ordered unique {month, year} pairs from a week of dates
-export function getWeekMonthParts(weekDates) {
-  const parts = []
+export function getWeekMonthParts(weekDates?: Date[]) {
+  const parts: Array<{ key: string; month: number; year: number }> = []
   for (const d of weekDates || []) {
     const dt = new Date(d)
     const m = dt.getMonth()

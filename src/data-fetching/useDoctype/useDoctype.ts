@@ -7,7 +7,7 @@ interface UseDoctypeOptions {
   baseUrl?: string
 }
 
-export function useDoctype<T>(
+export function useDoctype<T extends Record<string, any>>(
   doctype: string,
   options: UseDoctypeOptions = {},
 ) {
@@ -37,7 +37,8 @@ function useInsert<T>(doctype: string, options: UseDoctypeOptions = {}) {
 
   return {
     ...out,
-    submit: (params: Partial<T>) => out.submit(params).then(() => out.data),
+    submit: (params: Partial<T>) =>
+      out.submit(params as any).then(() => out.data),
   }
 }
 
@@ -109,7 +110,7 @@ function useRunDocMethod(doctype: string, options: UseDoctypeOptions = {}) {
           validateError.value = null
         }
       }
-      return runDocMethod.submit(params)
+      return runDocMethod.submit(params as any)
     },
     isLoading: (name: string, method: string) => {
       return (
@@ -158,7 +159,7 @@ function useRunMethod(doctype: string, options: UseDoctypeOptions = {}) {
           validateError.value = null
         }
       }
-      return runMethod.submit(params)
+      return runMethod.submit(params as any)
     },
     isLoading: (method: string) => {
       return (
@@ -190,7 +191,7 @@ function useSetValue<T>(doctype: string, options: UseDoctypeOptions = {}) {
     ...setValue,
     submit: ({ name, ...values }: SetValueParams) => {
       url.value = `/api/v2/document/${doctype}/${name}`
-      return setValue.submit({ name, ...values })
+      return setValue.submit({ name, ...values } as any)
     },
   }
 }

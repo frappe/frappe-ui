@@ -40,8 +40,6 @@ import {
   useTemplateRef,
 } from 'vue'
 
-defineOptions({ inheritAttrs: false })
-
 import { Editor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import { Placeholder } from '@tiptap/extensions'
@@ -80,6 +78,8 @@ import TextEditorFloatingMenu from './components/TextEditorFloatingMenu.vue'
 import { useFileUpload } from '../../utils/useFileUpload'
 import { TextEditorEmits, TextEditorProps } from './types'
 import { getTagExtensions } from './extensions/tag'
+
+defineOptions({ inheritAttrs: false })
 
 function defaultUploadFunction(file: File) {
   // useFileUpload is frappe specific

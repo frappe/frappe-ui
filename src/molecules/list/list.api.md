@@ -35,6 +35,12 @@
     required: false,
     type: 'string[]',
     default: '[]'
+  },
+  {
+    name: 'active',
+    description: '',
+    required: false,
+    type: 'string'
   }
 ]
 
@@ -51,6 +57,11 @@
     name: 'update:selection',
     description: 'Fired when the selection changes.',
     type: '[value: string[]]'
+  },
+  {
+    name: 'update:active',
+    description: 'Fired when the active changes.',
+    type: '[value: string | undefined]'
   }
 ]
 
@@ -63,9 +74,15 @@
   },
   {
     name: 'value',
-    description: 'Selection key; required when the list is selectable.',
+    description: 'Row key — the `selection` key when `selectable` and the `v-model:active`\nkey. Required whenever the list uses either.',
     required: false,
     type: 'string'
+  },
+  {
+    name: 'onClick',
+    description: 'Fired when the row is activated, unless selection mode claims the click.',
+    required: false,
+    type: '((event: MouseEvent) => void)'
   }
 ]
 
@@ -74,14 +91,6 @@
     name: 'default',
     description: '',
     type: '{}'
-  }
-]
-
-  const listRowEmits = [
-  {
-    name: 'click',
-    description: '',
-    type: '[event: MouseEvent]'
   }
 ]
 
@@ -125,6 +134,12 @@
     description: 'Active sort direction for this column, `null`/omitted when inactive.\nThe cell is controlled — sort state and toggle rules are app-owned:\nupdate whatever drives your ordering in the `click` handler.',
     required: false,
     type: 'ListSortDirection | null'
+  },
+  {
+    name: 'align',
+    description: 'Horizontal alignment of the header content. `\'end\'` right-aligns the cell\n(for numeric/right-aligned columns) *and* moves the sort glyph to the\nleading side, so the label stays flush with the column\'s right edge and\nlines up with the values below. Defaults to `\'start\'`.',
+    required: false,
+    type: '"start" | "end"'
   }
 ]
 
@@ -137,12 +152,12 @@
   {
     name: 'prefix',
     description: 'Leading adornment, rendered before the label.',
-    type: '{ direction: "asc" | "desc" | null; }'
+    type: '{ direction: "desc" | "asc" | null; }'
   },
   {
     name: 'suffix',
-    description: 'Trailing adornment — sort glyphs go here, app-supplied (e.g. a lucide\narrow span). The cell owns the reveal: an inactive column\'s suffix\nshows on hover. Render per `direction`.',
-    type: '{ direction: "asc" | "desc" | null; }'
+    description: 'Sort glyph. Optional — the cell renders a built-in arrow from `direction`\nby default. Provide this to override (e.g. a custom lucide span). The cell\nowns the reveal: an inactive column\'s glyph shows on hover.',
+    type: '{ direction: "desc" | "asc" | null; }'
   }
 ]
 
@@ -162,6 +177,12 @@
     type: 'T[]'
   },
   {
+    name: 'rowKey',
+    description: 'How to derive a row\'s identity. A string reads that property off the item;\na function computes it. Drives the render `:key`, the header select-all\nuniverse, and the scoped `value` slot prop. Defaults to the item\'s `name`,\nthen `id`, then the index.',
+    required: false,
+    type: 'string | ((item: T, index: number) => PropertyKey)'
+  },
+  {
     name: 'virtual',
     description: 'Window the rows (vueuse useVirtualList) so only rows near the viewport\nmount. `itemHeight` defaults to the List\'s `rowHeight`; the scroll\ncontainer is the nearest scrollable ancestor.',
     required: false,
@@ -173,51 +194,83 @@
   {
     name: 'default',
     description: '',
-    type: '{ item: T; index: number; }'
+    type: '{ item: T; index: number; value: string; }'
+  }
+]
+
+  const listGroupProps = [
+  {
+    name: 'label',
+    description: 'Section label shown in the group header. Overridden by the #header slot.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'sticky',
+    description: 'Pin the group header to the top of the scroll container while its rows\nscroll under it. Off by default.',
+    required: false,
+    type: 'boolean'
+  }
+]
+
+  const listGroupSlots = [
+  {
+    name: 'default',
+    description: 'The group\'s rows — `<ListRow>` elements.',
+    type: 'any'
+  },
+  {
+    name: 'header',
+    description: 'Replaces the header content (the label).',
+    type: 'any'
   }
 ]
 </script>
+
 ## API Reference
 
 ### List
 
-<PropsTable folder="list" name="List" :data="listProps"/> 
+<PropsTable folder="list" name="List" :data="listProps"/>
 
-<SlotsTable :data="listSlots"/> 
+<SlotsTable :data="listSlots"/>
 
-<EmitsTable :data="listEmits"/> 
+<EmitsTable :data="listEmits"/>
 
 ### ListRow
 
-<PropsTable folder="list" name="ListRow" :data="listRowProps"/> 
+<PropsTable folder="list" name="ListRow" :data="listRowProps"/>
 
-<SlotsTable :data="listRowSlots"/> 
-
-<EmitsTable :data="listRowEmits"/> 
+<SlotsTable :data="listRowSlots"/>
 
 ### ListCell
 
-<SlotsTable :data="listCellSlots"/> 
+<SlotsTable :data="listCellSlots"/>
 
 ### ListHeader
 
-<SlotsTable :data="listHeaderSlots"/> 
+<SlotsTable :data="listHeaderSlots"/>
 
 ### ListHeaderCell
 
-<SlotsTable :data="listHeaderCellSlots"/> 
+<SlotsTable :data="listHeaderCellSlots"/>
 
 ### ListHeaderCellSort
 
-<PropsTable folder="list" name="ListHeaderCellSort" :data="listHeaderCellSortProps"/> 
+<PropsTable folder="list" name="ListHeaderCellSort" :data="listHeaderCellSortProps"/>
 
-<SlotsTable :data="listHeaderCellSortSlots"/> 
+<SlotsTable :data="listHeaderCellSortSlots"/>
 
-<EmitsTable :data="listHeaderCellSortEmits"/> 
+<EmitsTable :data="listHeaderCellSortEmits"/>
 
 ### ListRows
 
-<PropsTable folder="list" name="ListRows" :data="listRowsProps"/> 
+<PropsTable folder="list" name="ListRows" :data="listRowsProps"/>
 
-<SlotsTable :data="listRowsSlots"/> 
+<SlotsTable :data="listRowsSlots"/>
 
+### ListGroup
+
+<PropsTable folder="list" name="ListGroup" :data="listGroupProps"/>
+
+<SlotsTable :data="listGroupSlots"/>

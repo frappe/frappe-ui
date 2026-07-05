@@ -16,7 +16,7 @@
     name: 'trigger',
     description: 'Shape of the trigger.\n- `\'input\'` (default): user types directly into the trigger\n- `\'button\'`: render a button trigger; search input moves into the\n  popover header. Label + prefix auto-derive from the selected option.',
     required: false,
-    type: '"input" | "button"',
+    type: '"button" | "input"',
     default: '"input"'
   },
   {
@@ -226,19 +226,9 @@
 
   const emitsData = [
   {
-    name: 'input',
-    description: '',
-    type: '[value: string]'
-  },
-  {
     name: 'update:modelValue',
     description: 'Fired when the model value changes.',
     type: '[value: string | null]'
-  },
-  {
-    name: 'update:open',
-    description: 'Fired when the open state changes.',
-    type: '[value: boolean]'
   },
   {
     name: 'update:query',
@@ -246,9 +236,14 @@
     type: '[value: string]'
   },
   {
-    name: 'update:selectedOption',
-    description: 'Fired when the selected option changes.',
-    type: '[option: ComboboxSelectableOption | ComboboxCustomOption | null]'
+    name: 'update:open',
+    description: 'Fired when the open state changes.',
+    type: '[value: boolean]'
+  },
+  {
+    name: 'blur',
+    description: '',
+    type: '[event: FocusEvent]'
   },
   {
     name: 'focus',
@@ -256,13 +251,17 @@
     type: '[event: FocusEvent]'
   },
   {
-    name: 'blur',
+    name: 'input',
     description: '',
-    type: '[event: FocusEvent]'
+    type: '[value: string]'
+  },
+  {
+    name: 'update:selectedOption',
+    description: 'Fired when the selected option changes.',
+    type: '[option: ComboboxSelectableOption | ComboboxCustomOption | null]'
   }
 ]
 </script>
-
 ## API Reference
 
 <PropsTable name="Combobox" :data="propsData"/>

@@ -4,7 +4,15 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 
-  const propsData = []
+  const propsData = [
+  {
+    name: 'scroll',
+    description: 'Whether the content area scrolls as one page (default). Set `false` for\nmulti-pane layouts where inner panes own their own scroll — the content\narea then fills the remaining height and never page-scrolls.',
+    required: false,
+    type: 'boolean',
+    default: 'true'
+  }
+]
 
   const slotsData = [
   {

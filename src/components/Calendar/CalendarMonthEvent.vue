@@ -1,10 +1,17 @@
 <template>
-  <Popover placement="left" transition="default" @open="registerDeleteShortcut" @close="unregisterDeleteShortcut">
+  <Popover
+    placement="left"
+    transition="default"
+    @open="registerDeleteShortcut"
+    @close="unregisterDeleteShortcut"
+  >
     <template #target="{ togglePopover, isOpen }">
       <div
         v-bind="$attrs"
         class="event flex gap-1.5 min-h-6 mx-px rounded p-[5px] transition-all duration-75 w-full overflow-hidden"
-        :class="{ active: activeEvent == (props.event?.id || props.event?.name) }"
+        :class="{
+          active: activeEvent == (props.event?.id || props.event?.name),
+        }"
         :style="eventBgStyle"
         @click.stop="handleEventClick($event, togglePopover, isOpen)"
         @dblclick.prevent="handleEventEdit($event)"
@@ -14,11 +21,16 @@
           class="event-border w-[2px] rounded shrink-0"
           :style="eventBorderStyle"
         />
-        <div class="relative flex h-full select-none items-start gap-2 overflow-hidden">
-          <div v-if="config.showIcon && eventIcons[props.event.type]">
-            <component :is="eventIcons[props.event.type]" class="h-4 w-4 text-black" />
+        <div
+          class="relative flex h-full select-none items-start gap-2 overflow-hidden"
+        >
+          <div v-if="config.showIcon && eventIcon">
+            <component :is="eventIcon" class="h-4 w-4 text-black" />
           </div>
-          <p class="text-sm-medium truncate" :class="{ italic: !props.event.title }">
+          <p
+            class="text-sm-medium truncate"
+            :class="{ italic: !props.event.title }"
+          >
             {{ props.event.title || '[No title]' }}
           </p>
         </div>
@@ -58,15 +70,20 @@
   <NewEventModal v-model="showEventModal" :event="updatedEvent" />
 </template>
 
-<script setup>
+<script setup lang="ts">
 import './style.css'
 
 import EventModalContent from './EventModalContent.vue'
 import NewEventModal from './NewEventModal.vue'
 import Popover from '../Popover/Popover.vue'
-import { eventProps, useEventBase } from './useEventBase.js'
+import { useEventBase } from './useEventBase'
+import { computed } from 'vue'
+import type { CalendarEvent } from './types'
 
-const props = defineProps(eventProps)
+const props = defineProps<{
+  event: CalendarEvent
+  date: Date
+}>()
 
 defineOptions({ inheritAttrs: false })
 
@@ -85,4 +102,8 @@ const {
   registerDeleteShortcut,
   unregisterDeleteShortcut,
 } = useEventBase(props)
+
+const eventIcon = computed(() =>
+  props.event.type ? eventIcons[props.event.type] : null,
+)
 </script>

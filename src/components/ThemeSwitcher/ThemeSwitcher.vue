@@ -72,10 +72,13 @@
 import { computed, useId, useSlots } from 'vue'
 import { RadioGroupItem, RadioGroupRoot } from 'reka-ui'
 import { useTheme, type Theme } from '../../utils/theme'
+import { warnDeprecated } from '../../utils/warnDeprecated'
 import ThemePreview from './ThemePreview.vue'
 import type { ThemeSwitcherProps } from './types'
 
 defineOptions({ name: 'ThemeSwitcher' })
+
+warnDeprecated('ThemeSwitcher', 'Select with the useTheme composable')
 
 interface ThemeOption {
   value: Theme

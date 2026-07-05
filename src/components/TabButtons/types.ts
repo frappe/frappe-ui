@@ -1,6 +1,6 @@
 import type { Component } from 'vue'
 import type { RouteLocationRaw } from 'vue-router'
-import type { PillSize } from '../Pill'
+import type { PillSize } from './pillTypes'
 
 export type TabButtonValue = string | number | boolean
 export type TabButtonIcon = string | Component

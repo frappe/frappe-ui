@@ -1,9 +1,22 @@
 import ThemeSwitcher from './ThemeSwitcher.vue'
+import { _resetWarnDeprecated } from '../../utils/warnDeprecated'
 
 describe('<ThemeSwitcher />', () => {
   beforeEach(() => {
+    _resetWarnDeprecated()
     localStorage.removeItem('theme')
     document.documentElement.removeAttribute('data-theme')
+  })
+
+  it('warns that ThemeSwitcher is deprecated', () => {
+    cy.window().then((win) => {
+      cy.spy(win.console, 'warn').as('consoleWarn')
+    })
+    cy.mount(ThemeSwitcher)
+    cy.get('@consoleWarn').should(
+      'have.been.calledWithMatch',
+      /ThemeSwitcher is deprecated.*Select.*useTheme/,
+    )
   })
 
   it('renders the three theme options as a radiogroup', () => {

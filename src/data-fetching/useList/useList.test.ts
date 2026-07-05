@@ -212,4 +212,44 @@ describe('useList', () => {
       { name: 'User2', email: 'user2@example.com' },
     ])
   })
+
+  it('keeps cached data visible when a refetch fails', async () => {
+    interface User {
+      name: string
+      email: string
+    }
+
+    const cacheKey = 'offline-users'
+    const cachedUsers = useList<User>({
+      baseUrl,
+      doctype: 'User',
+      fields: ['name', 'email'],
+      cacheKey,
+      limit: 2,
+    })
+
+    await waitUntilValueChanges(() => cachedUsers.data)
+    expect(cachedUsers.data).toStrictEqual([
+      { name: 'User1', email: 'user1@example.com' },
+      { name: 'User2', email: 'user2@example.com' },
+    ])
+
+    const offlineUsers = useList<User>({
+      baseUrl,
+      doctype: 'InvalidDoctype',
+      fields: ['name', 'email'],
+      cacheKey,
+      staleOnError: true,
+      limit: 2,
+    })
+
+    await waitUntilValueChanges(() => offlineUsers.data)
+    await waitUntilValueChanges(() => offlineUsers.loading)
+
+    expect(offlineUsers.error).toBeTruthy()
+    expect(offlineUsers.data).toStrictEqual([
+      { name: 'User1', email: 'user1@example.com' },
+      { name: 'User2', email: 'user2@example.com' },
+    ])
+  })
 })

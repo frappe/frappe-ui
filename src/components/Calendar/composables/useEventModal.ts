@@ -4,10 +4,11 @@ import {
   convertMinutesToHours,
   calculateMinutes,
 } from '../calendarUtils'
+import type { CalendarEvent, CalendarMode } from '../types'
 
 export default function useEventModal() {
   const showEventModal = ref(false)
-  const newEvent = reactive({
+  const newEvent = reactive<CalendarEvent>({
     date: '',
     participant: '',
     fromDate: '',
@@ -19,21 +20,19 @@ export default function useEventModal() {
     isFullDay: false,
   })
   function openNewEventModal(
-    e,
-    view,
-    date,
-    isEditMode,
+    e: MouseEvent,
+    view: CalendarMode,
+    date: Date | string,
+    isEditMode: boolean,
     fromTime = '',
     isFullDay = false,
   ) {
     if (!isEditMode) return
-    date =
-      view === 'Week'
-        ? e.target.parentNode.parentNode.getAttribute('data-date-attr')
-        : date
-    newEvent.date = parseDate(new Date(date))
-    newEvent.fromDate = date
-    newEvent.toDate = date
+    date = view === 'Week' ? getDateFromWeeklyCell(e) || date : date
+    const formattedDate = parseDate(new Date(date))
+    newEvent.date = formattedDate
+    newEvent.fromDate = formattedDate
+    newEvent.toDate = formattedDate
     newEvent.isFullDay = isFullDay
 
     if (view === 'Month') {
@@ -52,4 +51,9 @@ export default function useEventModal() {
   }
 
   return { showEventModal, newEvent, openNewEventModal }
+}
+
+function getDateFromWeeklyCell(e: MouseEvent) {
+  const target = e.target as HTMLElement | null
+  return target?.parentElement?.parentElement?.getAttribute('data-date-attr')
 }

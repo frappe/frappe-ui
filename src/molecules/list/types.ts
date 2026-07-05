@@ -26,6 +26,11 @@ export interface ListProps {
    */
   selectable?: boolean
 
+  // Two more models live on List but aren't plain props (so they're not in
+  // this interface): `v-model:selection` (string[], the checkbox set) and
+  // `v-model:active` (string, the single open/highlighted row — the List
+  // styles it and hides the dividers hugging it). See List.vue.
+
   /**
    * Fixed row height in px (sets `--list-row-height`). Required for
    * virtualization; without it rows size to their content. Responsive
@@ -41,7 +46,10 @@ export interface ListRowProps {
    */
   to?: RouteLocationRaw
 
-  /** Selection key; required when the list is selectable. */
+  /**
+   * Row key — the `selection` key when `selectable` and the `v-model:active`
+   * key. Required whenever the list uses either.
+   */
   value?: string
 
   /** Fired when the row is activated, unless selection mode claims the click. */
@@ -55,6 +63,14 @@ export interface ListHeaderCellSortProps {
    * update whatever drives your ordering in the `click` handler.
    */
   direction?: ListSortDirection | null
+
+  /**
+   * Horizontal alignment of the header content. `'end'` right-aligns the cell
+   * (for numeric/right-aligned columns) *and* moves the sort glyph to the
+   * leading side, so the label stays flush with the column's right edge and
+   * lines up with the values below. Defaults to `'start'`.
+   */
+  align?: 'start' | 'end'
 }
 
 export interface ListVirtualOptions {

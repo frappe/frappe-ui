@@ -235,6 +235,15 @@ migrated to `lucide-*` in this release. No consumer-visible behavior change.
 once on mount/use. Migrate to `TextInput`, `Combobox` / `MultiSelect`, and
 `Combobox` standalone respectively.
 
+`MonthPicker` is deprecated. For simple month picking, use `Select` with month
+options.
+
+`Pill` is no longer exported from the package entrypoint. It remains an
+internal `TabButtons` detail.
+
+`ThemeSwitcher` remains exported for v1 compatibility, but is deprecated. For
+new theme switchers, compose `Select` with the `useTheme` composable.
+
 ### Dropdown — group field standardized on `options`
 
 Matches `Combobox`, `MultiSelect`, `Select`. Old `{ group, items }` shape

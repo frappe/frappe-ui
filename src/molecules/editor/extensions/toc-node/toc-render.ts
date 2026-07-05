@@ -17,11 +17,12 @@ import {
   type TocRenderNode,
 } from '#molecules/editor/extensions/shared/heading-tree-utils'
 
-const OL_STYLE = 'list-style-type: decimal; margin: 0.5em 0; padding-left: 1.5em'
+const OL_STYLE =
+  'list-style-type: decimal; margin: 0.5em 0; padding-left: 1.5em'
 const NESTED_OL_STYLE = 'list-style-type: decimal; padding-left: 1.5em'
 
 /** Element-spec tuple: `[tag, attrs, ...children]`. Assignable to DOMOutputSpec. */
-type ElementSpec = readonly [string, Record<string, string>, ...DOMOutputSpec[]]
+type ElementSpec = readonly [string, Record<string, string>, ...any[]]
 
 function renderNode(node: TocRenderNode): ElementSpec {
   const paragraph: ElementSpec = ['p', { style: 'margin: 0' }, node.text]
@@ -59,7 +60,10 @@ export function renderTocHTML(
     return ['div', attrs, 'No headings found in this document.']
   }
 
-  const tree = foldHeadings(headings, (item) => item as (typeof headings)[number])
+  const tree = foldHeadings(
+    headings,
+    (item) => item as (typeof headings)[number],
+  )
   const spec = headingsToRenderSpec(tree)
   const list: ElementSpec = ['ol', { style: OL_STYLE }, ...spec.map(renderNode)]
 

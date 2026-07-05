@@ -6,27 +6,52 @@
 
   const propsData = [
   {
-    name: 'validateFile',
-    description: '',
-    required: false,
-    type: 'Function',
-    default: 'null'
-  },
-  {
     name: 'fileTypes',
-    description: '',
+    description: 'Accepted file types passed to the native file input.',
     required: false,
-    type: 'string | unknown[]'
+    type: 'string | string[]'
   },
   {
     name: 'uploadArgs',
-    description: '',
+    description: 'Additional upload options passed to Frappe\'s upload endpoint.\n`private` / `is_private` override the component\'s `isPrivate` default.',
     required: false,
-    type: 'Record<string, any>'
+    type: 'UploadOptions',
+    default: 'undefined'
+  },
+  {
+    name: 'validateFile',
+    description: 'Optional validation hook. Return a message or Error to block upload.',
+    required: false,
+    type: '((file: File) => FileUploaderValidationResult | Promise<FileUploaderValidationResult>)',
+    default: 'undefined'
+  }
+]
+
+  const slotsData = [
+  {
+    name: 'default',
+    description: '',
+    type: 'FileUploaderSlotProps'
+  }
+]
+
+  const emitsData = [
+  {
+    name: 'success',
+    description: '',
+    type: '[data: any]'
+  },
+  {
+    name: 'failure',
+    description: '',
+    type: '[error: any]'
   }
 ]
 </script>
 ## API Reference
 
-<PropsTable name="FileUploader" :data="propsData"/> 
+<PropsTable name="FileUploader" :data="propsData"/>
 
+<SlotsTable :data="slotsData"/>
+
+<EmitsTable :data="emitsData"/>

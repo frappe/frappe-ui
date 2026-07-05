@@ -25,8 +25,13 @@ export class FrappeResponseError extends Error {
     this.indicator = options.indicator
 
     // Maintains proper stack trace for where our error was thrown (only available on V8)
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, FrappeResponseError)
+    const captureStackTrace = (
+      Error as ErrorConstructor & {
+        captureStackTrace?: (target: object, constructor?: Function) => void
+      }
+    ).captureStackTrace
+    if (captureStackTrace) {
+      captureStackTrace(this, FrappeResponseError)
     }
   }
 }
@@ -77,9 +82,17 @@ export const useFrappeFetch = createFetch({
         indicator: string
       }
       try {
+        if (!ctx.data) {
+          return ctx
+        }
+
         let errorResponse = JSON.parse(ctx.data)
-        let errors: Array<FrappeError> = errorResponse.errors
-        let error = errors[0] // assuming only one error for now
+        let errors: Array<FrappeError> | undefined = errorResponse.errors
+        let error = errors?.[0] // assuming only one error for now
+        if (!error) {
+          return ctx
+        }
+
         let errorDescription = error.message
           ? `: ${error.message}`
           : error.exception

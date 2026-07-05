@@ -6,37 +6,45 @@
 
   const propsData = [
   {
-    name: 'open',
-    description: 'Controls dialog visibility. Bind with v-model:open.',
-    required: false,
-    type: 'boolean',
-    default: 'false'
-  },
-  {
     name: 'title',
-    description: 'Dialog title.',
+    description: 'Dialog title (default: "Keyboard Shortcuts").',
     required: false,
     type: 'string',
-    default: '\'Keyboard Shortcuts\''
+    default: '"Keyboard Shortcuts"'
   },
   {
     name: 'paddingTop',
-    description: 'CSS value for top padding when position is top.',
+    description: 'CSS value for top padding when position is top (default: "5vh").',
     required: false,
     type: 'string',
-    default: '\'5vh\''
+    default: '"5vh"'
   },
   {
     name: 'searchThreshold',
-    description: 'Minimum number of registered shortcuts before the search input appears.',
+    description: 'Minimum number of shortcuts that must be registered before the search\ninput is shown (default: 20).',
     required: false,
     type: 'number',
     default: '20'
+  },
+  {
+    name: 'open',
+    description: '',
+    required: false,
+    type: 'boolean',
+    default: 'false'
   }
 ]
 
-  const exposedData = []
+  const emitsData = [
+  {
+    name: 'update:open',
+    description: 'Fired when the open state changes.',
+    type: '[value: boolean]'
+  }
+]
 </script>
 ## API Reference
 
-<PropsTable :data="propsData" />
+<PropsTable name="KeyboardShortcutsModal" :data="propsData"/>
+
+<EmitsTable :data="emitsData"/>

@@ -16,6 +16,13 @@ export interface CheckboxProps extends InputLabelingProps {
 
   /** Checked state of the checkbox. `boolean` is canonical; `1`/`0` are kept for v1 backwards compatibility. */
   modelValue?: boolean | 1 | 0
+
+  /**
+   * Renders the mixed "—" state (e.g. a select-all that's partially selected).
+   * Purely visual — the native `indeterminate` DOM property is not reflected as
+   * an attribute, so it must be set via this prop, not markup.
+   */
+  indeterminate?: boolean
 }
 
 export interface CheckboxEmits {

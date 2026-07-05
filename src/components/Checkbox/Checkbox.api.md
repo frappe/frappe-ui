@@ -33,6 +33,12 @@
     type: 'boolean | 0 | 1'
   },
   {
+    name: 'indeterminate',
+    description: 'Renders the mixed "—" state (e.g. a select-all that\'s partially selected).\nPurely visual — the native `indeterminate` DOM property is not reflected as\nan attribute, so it must be set via this prop, not markup.',
+    required: false,
+    type: 'boolean'
+  },
+  {
     name: 'label',
     description: 'Label rendered above (or beside, for binary controls) the input.',
     required: false,

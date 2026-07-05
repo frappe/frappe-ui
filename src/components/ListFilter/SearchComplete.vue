@@ -3,46 +3,35 @@
     placeholder="Select an option"
     :options="options"
     :value="selection"
-    @update:query="(q) => onUpdateQuery(q)"
-    @change="(v) => (selection = v)"
+    @update:query="onUpdateQuery"
+    @change="onChange"
   />
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { Autocomplete, createListResource } from '../../index'
 import { computed, ref, watch } from 'vue'
+import type { Option } from '../Autocomplete/types'
 
-const props = defineProps({
-  value: {
-    type: String,
-    required: false,
-    default: '',
+type SearchResult = Record<string, any>
+
+const props = withDefaults(
+  defineProps<{
+    value?: string
+    doctype: string
+    searchField?: string
+    labelField?: string
+    valueField?: string
+    pageLength?: number
+  }>(),
+  {
+    value: '',
+    searchField: 'name',
+    labelField: 'name',
+    valueField: 'name',
+    pageLength: 10,
   },
-  doctype: {
-    type: String,
-    required: true,
-  },
-  searchField: {
-    type: String,
-    required: false,
-    default: 'name',
-  },
-  labelField: {
-    type: String,
-    required: false,
-    default: 'name',
-  },
-  valueField: {
-    type: String,
-    required: false,
-    default: 'name',
-  },
-  pageLength: {
-    type: Number,
-    required: false,
-    default: 10,
-  },
-})
+)
 
 watch(
   () => props.doctype,
@@ -60,20 +49,24 @@ const r = createListResource({
   fields: [props.labelField, props.searchField, props.valueField],
   onSuccess: () => {
     selection.value = props.value
-      ? options.value.find((o) => o.value === props.value)
+      ? (options.value.find((o) => o.value === props.value) ?? null)
       : null
   },
 })
-const options = computed(
+const options = computed<Option[]>(
   () =>
-    r.data?.map((result) => ({
+    r.data?.map((result: SearchResult) => ({
       label: result[props.labelField],
       value: result[props.valueField],
     })) || [],
 )
-const selection = ref(null)
+const selection = ref<Option | null>(null)
 
-function onUpdateQuery(query) {
+function onChange(value: Option) {
+  selection.value = value
+}
+
+function onUpdateQuery(query: string) {
   r.update({
     filters: {
       [props.searchField]: ['like', `%${query}%`],

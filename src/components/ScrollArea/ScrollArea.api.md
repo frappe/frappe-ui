@@ -9,7 +9,7 @@
     name: 'orientation',
     description: 'Which scrollbars to render.',
     required: false,
-    type: '"horizontal" | "vertical" | "both"',
+    type: '"vertical" | "horizontal" | "both"',
     default: '"vertical"'
   },
   {
@@ -40,20 +40,20 @@
     name: 'orientation',
     description: '',
     required: false,
-    type: '"horizontal" | "vertical"',
+    type: '"vertical" | "horizontal"',
     default: '"vertical"'
   }
 ]
 </script>
+
 ## API Reference
 
 ### ScrollArea
 
-<PropsTable name="ScrollArea" :data="scrollAreaProps"/> 
+<PropsTable name="ScrollArea" :data="scrollAreaProps"/>
 
-<SlotsTable :data="scrollAreaSlots"/> 
+<SlotsTable :data="scrollAreaSlots"/>
 
 ### ScrollBar
 
-<PropsTable folder="ScrollArea" name="ScrollBar" :data="scrollBarProps"/> 
-
+<PropsTable folder="ScrollArea" name="ScrollBar" :data="scrollBarProps"/>

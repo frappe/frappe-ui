@@ -9,6 +9,7 @@ export { default as ListHeader } from './ListHeader.vue'
 export { default as ListHeaderCell } from './ListHeaderCell.vue'
 export { default as ListHeaderCellSort } from './ListHeaderCellSort.vue'
 export { default as ListRows } from './ListRows.vue'
+export { default as ListGroup } from './ListGroup.vue'
 
 // The windowing composable behind <ListRows virtual>, for exotic cases.
 export { useVirtualRows, type UseVirtualRowsOptions } from './useVirtualRows'

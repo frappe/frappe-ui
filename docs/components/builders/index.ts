@@ -19,7 +19,6 @@ import ErrorMessageBuilder from './ErrorMessageBuilder.vue'
 import FormControlBuilder from './FormControlBuilder.vue'
 import MultiSelectBuilder from './MultiSelectBuilder.vue'
 import PasswordBuilder from './PasswordBuilder.vue'
-import PillBuilder from './PillBuilder.vue'
 import ProgressBuilder from './ProgressBuilder.vue'
 import RatingBuilder from './RatingBuilder.vue'
 import SelectBuilder from './SelectBuilder.vue'
@@ -48,7 +47,6 @@ export const builders = {
   FormControlBuilder,
   MultiSelectBuilder,
   PasswordBuilder,
-  PillBuilder,
   ProgressBuilder,
   RatingBuilder,
   SelectBuilder,
@@ -86,7 +84,6 @@ export {
   FormControlBuilder,
   MultiSelectBuilder,
   PasswordBuilder,
-  PillBuilder,
   ProgressBuilder,
   RatingBuilder,
   SelectBuilder,

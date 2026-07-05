@@ -19,23 +19,17 @@
     {{ totalEventsCount - 2 }} more
   </button>
 </template>
-<script setup>
+<script setup lang="ts">
 import CalendarMonthEvent from './CalendarMonthEvent.vue'
+import type { CalendarEvent } from './types'
 
-const props = defineProps({
-  events: {
-    type: Array,
-    required: true,
-  },
-  date: {
-    type: Date,
-    required: true,
-  },
-  totalEventsCount: {
-    type: Number,
-    required: true,
-  },
-})
+const props = defineProps<{
+  events: CalendarEvent[]
+  date: Date
+  totalEventsCount: number
+}>()
 
-const emit = defineEmits(['showMoreEvents'])
+const emit = defineEmits<{
+  showMoreEvents: []
+}>()
 </script>

@@ -32,11 +32,15 @@
         @click="calendarActions.handleCellClick($event, date)"
       >
         <div class="flex justify-center font-normal">
-          <div class="flex gap-0.5 w-full flex-col items-center text-xs text-right">
+          <div
+            class="flex gap-0.5 w-full flex-col items-center text-xs text-right"
+          >
             <span
               class="w-full flex justify-between items-center"
               :class="[
-                date.toDateString() === new Date().toDateString() ? 'p-[3px] pb-0.5' : 'p-2',
+                date.toDateString() === new Date().toDateString()
+                  ? 'p-[3px] pb-0.5'
+                  : 'p-2',
               ]"
             >
               <div></div>
@@ -87,7 +91,9 @@
               <ShowMoreCalendarEvent
                 v-if="timedEvents[parseDate(date)]"
                 :draggable="config.isEditMode"
-                @dragstart="onDragStart($event, timedEvents[parseDate(date)][0].id)"
+                @dragstart="
+                  onDragStart($event, timedEvents[parseDate(date)][0].id)
+                "
                 @dragend="$event.target.style.opacity = '1'"
                 @dragover.prevent
                 :events="timedEvents[parseDate(date)]"
@@ -107,42 +113,43 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { daysList, parseDate, isWeekend } from './calendarUtils'
 import { inject } from 'vue'
 import useCalendarData from './composables/useCalendarData'
 import { computed } from 'vue'
 import ShowMoreCalendarEvent from './ShowMoreCalendarEvent.vue'
 import CalendarMonthEvent from './CalendarMonthEvent.vue'
-const props = defineProps({
-  events: {
-    type: Object,
-    required: true,
-  },
-  currentMonthDates: {
-    type: Array,
-    required: true,
-  },
-  currentMonth: {
-    type: Number,
-    required: true,
-  },
-  config: {
-    type: Object,
-  },
-})
+import {
+  CALENDAR_ACTIONS_KEY,
+  type CalendarConfig,
+  type CalendarEvent,
+} from './types'
 
-const emit = defineEmits(['setCurrentDate'])
+const props = defineProps<{
+  events: CalendarEvent[]
+  currentMonthDates: Date[]
+  currentMonth: number
+  config: CalendarConfig
+}>()
 
-const timedEvents = computed(() => useCalendarData(props.events, 'Month').timedEvents.value)
+const emit = defineEmits<{
+  setCurrentDate: [date: Date]
+}>()
 
-const maxEventsInCell = computed(() => (props.currentMonthDates.length > 35 ? 1 : 2))
+const timedEvents = computed(
+  () => useCalendarData(props.events, 'Month').timedEvents.value,
+)
 
-function isCurrentMonth(date) {
+const maxEventsInCell = computed(() =>
+  props.currentMonthDates.length > 35 ? 1 : 2,
+)
+
+function isCurrentMonth(date: Date) {
   return date.getMonth() === props.currentMonth
 }
 
-function isPreviousMonth(date) {
+function isPreviousMonth(date: Date) {
   let previousMonth = false
   if (date.getMonth() === props.currentMonth - 1) {
     previousMonth = true
@@ -150,7 +157,7 @@ function isPreviousMonth(date) {
   return previousMonth
 }
 
-function isNextMonth(date) {
+function isNextMonth(date: Date) {
   let nextMonth = false
   if (date.getMonth() === props.currentMonth + 1) {
     nextMonth = true
@@ -158,25 +165,39 @@ function isNextMonth(date) {
   return nextMonth
 }
 
-const calendarActions = inject('calendarActions')
+const calendarActions = inject(CALENDAR_ACTIONS_KEY)
 
-const onDragStart = (event, calendarEventID) => {
-  if (!calendarEventID) return
-  event.target.style.opacity = '0.5'
-  event.target.style.cursor = 'move'
-  event.dataTransfer.dropEffect = 'move'
-  event.dataTransfer.effectAllowed = 'move'
-  event.dataTransfer.setData('calendarEventID', calendarEventID)
+if (!calendarActions) {
+  throw new Error('CalendarMonthly must be rendered inside Calendar.')
 }
 
-const onDrop = (event, date) => {
-  let calendarEventID = event.dataTransfer.getData('calendarEventID')
+const onDragStart = (
+  event: DragEvent,
+  calendarEventID?: CalendarEvent['id'],
+) => {
   if (!calendarEventID) return
-  event.target.style.cursor = 'default'
+  const target = event.target as HTMLElement | null
+  if (target) {
+    target.style.opacity = '0.5'
+    target.style.cursor = 'move'
+  }
+  if (!event.dataTransfer) return
+  event.dataTransfer.dropEffect = 'move'
+  event.dataTransfer.effectAllowed = 'move'
+  event.dataTransfer.setData('calendarEventID', String(calendarEventID))
+}
+
+const onDrop = (event: DragEvent, date: Date) => {
+  let calendarEventID = event.dataTransfer?.getData('calendarEventID')
+  if (!calendarEventID) return
+  const target = event.target as HTMLElement | null
+  if (target) target.style.cursor = 'default'
   // if same date then return
-  let e = props.events.find((e) => e.id === calendarEventID)
+  let e = props.events.find((e) => String(e.id) === calendarEventID)
+  if (!e) return
   if (parseDate(date) === e.date) return
-  let calendarEvent = props.events.find((e) => e.id === calendarEventID)
+  let calendarEvent = props.events.find((e) => String(e.id) === calendarEventID)
+  if (!calendarEvent) return
   calendarEvent.date = parseDate(date)
   calendarEvent.fromDate = calendarEvent.date
   calendarEvent.toDate = calendarEvent.date

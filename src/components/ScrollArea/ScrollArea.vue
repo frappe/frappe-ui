@@ -3,7 +3,10 @@
     :scroll-hide-delay="scrollHideDelay"
     class="relative overflow-hidden"
   >
-    <ScrollAreaViewport ref="viewport" :class="['h-full w-full', viewportClass]">
+    <ScrollAreaViewport
+      ref="viewport"
+      :class="['h-full w-full', viewportClass]"
+    >
       <slot />
     </ScrollAreaViewport>
     <ScrollBar v-if="orientation !== 'horizontal'" orientation="vertical" />

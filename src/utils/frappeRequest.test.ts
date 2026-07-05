@@ -4,12 +4,25 @@ import { frappeRequest } from './frappeRequest'
 import { setConfig } from './config'
 
 function mockFetch() {
-  const fetchMock = vi.fn(async () => ({
-    ok: true,
-    json: async () => ({ message: 'ok' }),
-  }))
+  const fetchMock = vi.fn(
+    async (_input: RequestInfo | URL, _init?: RequestInit) =>
+      ({
+        ok: true,
+        json: async () => ({ message: 'ok' }),
+      }) as Response,
+  )
   vi.stubGlobal('fetch', fetchMock)
   return fetchMock
+}
+
+function getFetchCall(fetchMock: ReturnType<typeof mockFetch>) {
+  const [url, opts] = fetchMock.mock.calls[0]!
+  return {
+    url,
+    opts: opts as RequestInit & {
+      headers: Record<string, string | undefined>
+    },
+  }
 }
 
 describe('frappeRequest configurable base url and auth headers', () => {
@@ -28,7 +41,7 @@ describe('frappeRequest configurable base url and auth headers', () => {
     const fetchMock = mockFetch()
     await frappeRequest({ url: 'ping' })
 
-    const [url, opts] = fetchMock.mock.calls[0]
+    const { url, opts } = getFetchCall(fetchMock)
     expect(url).toBe('/api/method/ping')
     expect(opts.credentials).toBeUndefined()
     expect(opts.headers.Authorization).toBeUndefined()
@@ -39,7 +52,7 @@ describe('frappeRequest configurable base url and auth headers', () => {
     const fetchMock = mockFetch()
     await frappeRequest({ url: 'ping' })
 
-    const [url, opts] = fetchMock.mock.calls[0]
+    const { url, opts } = getFetchCall(fetchMock)
     expect(url).toBe('https://remote.frappe.test/api/method/ping')
     expect(opts.credentials).toBe('include')
   })
@@ -49,16 +62,18 @@ describe('frappeRequest configurable base url and auth headers', () => {
     const fetchMock = mockFetch()
     await frappeRequest({ url: 'ping' })
 
-    const [, opts] = fetchMock.mock.calls[0]
+    const { opts } = getFetchCall(fetchMock)
     expect(opts.headers.Authorization).toBe('token key:secret')
   })
 
   it('injects headers from a function returning headers', async () => {
-    setConfig('requestHeaders', () => ({ Authorization: 'token dynamic:value' }))
+    setConfig('requestHeaders', () => ({
+      Authorization: 'token dynamic:value',
+    }))
     const fetchMock = mockFetch()
     await frappeRequest({ url: 'ping' })
 
-    const [, opts] = fetchMock.mock.calls[0]
+    const { opts } = getFetchCall(fetchMock)
     expect(opts.headers.Authorization).toBe('token dynamic:value')
   })
 })

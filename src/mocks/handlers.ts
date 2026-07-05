@@ -24,6 +24,10 @@ export const handlers = [
     )
   }),
 
+  http.get(url('/api/v2/method/network-error'), () => {
+    return HttpResponse.error()
+  }),
+
   http.post(url('/api/v2/method/post'), async ({ request }) => {
     const body = await request.json()
     return HttpResponse.json({
@@ -61,6 +65,10 @@ export const handlers = [
     return HttpResponse.json({
       data: result,
     })
+  }),
+
+  http.get(url('/api/v2/document/InvalidDoctype'), () => {
+    return HttpResponse.error()
   }),
 
   http.get(url('/api/v2/document/User/user1'), async () => {

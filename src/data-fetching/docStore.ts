@@ -56,7 +56,8 @@ class DocStore {
   getDoc(
     doctype: string,
     name: MaybeRefOrGetter<string>,
-    transform: (doc: Doc) => Doc,
+    transform?: (doc: Doc) => Doc,
+    options: { staleOnError?: boolean } = {},
   ): Ref<Doc | null> {
     const nameStr = toValue(name)?.trim()
     if (!doctype || !nameStr) {
@@ -66,9 +67,9 @@ class DocStore {
 
     if (!this.docs.has(key)) {
       this.docs.set(key, ref(null))
-      this.loadDoc(key, true, transform)
+      this.loadDoc(key, true, transform, options)
     } else if (this.isStale(key)) {
-      this.loadDoc(key, false, transform)
+      this.loadDoc(key, false, transform, options)
     }
 
     return this.docs.get(key)!
@@ -77,20 +78,17 @@ class DocStore {
   private async loadDoc(
     key: DocKey,
     isFirstLoad: boolean,
-    transform: (doc: Doc) => Doc,
+    transform?: (doc: Doc) => Doc,
+    options: { staleOnError?: boolean } = {},
   ) {
     try {
       if (!isFirstLoad && this.isStale(key)) {
-        // Evict the stale IDB copy and clear the timestamp so the next read
-        // reloads — but DON'T delete the in-memory ref (as cleanup() does).
-        // getDoc() returns this ref synchronously and its caller (useDoc's `doc`
-        // computed) dereferences it immediately; cleanup() deletes the map entry
-        // on its first synchronous line, so a stale-but-present key would make
-        // getDoc's `return this.docs.get(key)` yield undefined and crash the
-        // computed on `.value`. This is reachable for any doc accessed after it
-        // goes stale (a long-lived useDoc re-evaluated past the cache timeout).
         this.lastFetched.delete(key)
-        await idbStore.delete(this.storePrefix + key)
+        if (!options.staleOnError) {
+          // Keep the IDB copy only when callers explicitly opt into stale
+          // read-only fallback, such as offline-capable routes.
+          await idbStore.delete(this.storePrefix + key)
+        }
       }
 
       const idbDoc = (await idbStore.get(this.storePrefix + key)) as Doc | null

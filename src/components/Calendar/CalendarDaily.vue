@@ -99,9 +99,9 @@
               :key="calendarEvent.id"
               :date="currentDate"
             >
-			  <template #event-popover-content="slotProps">
+              <template #event-popover-content="slotProps">
                 <slot name="event-popover-content" v-bind="slotProps" />
-			  </template>
+              </template>
             </CalendarWeekDayEvent>
             <!-- Current time Marker -->
             <CalendarTimeMarker :date="currentDate" />
@@ -112,7 +112,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, inject, onMounted, ref, watch } from 'vue'
 import CalendarTimeMarker from './CalendarTimeMarker.vue'
 import { Button } from '../Button'
@@ -123,27 +123,24 @@ import {
 } from './calendarUtils'
 import useCalendarData from './composables/useCalendarData'
 import CalendarWeekDayEvent from './CalendarWeekDayEvent.vue'
+import {
+  CALENDAR_ACTIONS_KEY,
+  type CalendarConfig,
+  type CalendarEvent,
+} from './types'
 
-const props = defineProps({
-  events: {
-    type: Object,
-    required: false,
-  },
-  config: {
-    type: Object,
-  },
-  currentDate: {
-    type: Object,
-    required: true,
-  },
-})
+const props = defineProps<{
+  events?: CalendarEvent[]
+  config: CalendarConfig
+  currentDate: Date
+}>()
 const timedEvents = computed(
   () => useCalendarData(props.events).timedEvents.value,
 )
 const fullDayEvents = computed(
   () => useCalendarData(props.events).fullDayEvents.value,
 )
-const gridRef = ref(null)
+const gridRef = ref<HTMLElement | null>(null)
 const hourHeight = props.config.hourHeight
 const minuteHeight = hourHeight / 60
 
@@ -169,8 +166,12 @@ const timeArray =
 onMounted(() => {
   const currentHour = new Date().getHours()
   const scrollToHour = props.config.scrollToHour || currentHour
-  gridRef.value.scrollBy(0, scrollToHour * 60 * minuteHeight - 10)
+  gridRef.value?.scrollBy(0, scrollToHour * 60 * minuteHeight - 10)
 })
 
-const calendarActions = inject('calendarActions')
+const calendarActions = inject(CALENDAR_ACTIONS_KEY)
+
+if (!calendarActions) {
+  throw new Error('CalendarDaily must be rendered inside Calendar.')
+}
 </script>
