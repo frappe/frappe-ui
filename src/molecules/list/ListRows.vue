@@ -1,12 +1,16 @@
 <template>
   <template v-if="!virtualEnabled">
-    <template v-for="(item, index) in items" :key="getItemKey(item, index)">
-      <slot :item="item" :index="index" />
+    <template v-for="(item, index) in items" :key="getItemValue(item, index)">
+      <slot :item="item" :index="index" :value="getItemValue(item, index)" />
     </template>
   </template>
   <div v-else ref="anchor" v-bind="wrapperProps" role="presentation">
-    <template v-for="row in rows" :key="getItemKey(row.data, row.index)">
-      <slot :item="row.data" :index="row.index" />
+    <template v-for="row in rows" :key="getItemValue(row.data, row.index)">
+      <slot
+        :item="row.data"
+        :index="row.index"
+        :value="getItemValue(row.data, row.index)"
+      />
     </template>
   </div>
 </template>
@@ -22,11 +26,10 @@ const props = defineProps<{
   items: T[]
 
   /**
-   * How to derive a row's identity — the value that must match each
-   * `<ListRow :value>`. A string reads that property off the item; a function
-   * computes it. Drives both the render `:key` and the header select-all
-   * universe, so the two can't drift. Defaults to the item's `name`, then `id`,
-   * then the index. Set this when a row's `:value` isn't the item's name/id.
+   * How to derive a row's identity. A string reads that property off the item;
+   * a function computes it. Drives the render `:key`, the header select-all
+   * universe, and the scoped `value` slot prop. Defaults to the item's `name`,
+   * then `id`, then the index.
    */
   rowKey?: string | ((item: T, index: number) => PropertyKey)
 
@@ -39,7 +42,7 @@ const props = defineProps<{
 }>()
 
 defineSlots<{
-  default?: (props: { item: T; index: number }) => unknown
+  default?: (props: { item: T; index: number; value: string }) => unknown
 }>()
 
 const context = useListContext()
@@ -73,19 +76,20 @@ const { rows, wrapperProps, anchor } = useVirtualRows(
 
 // Feed the full selectable universe to the List so the header select-all knows
 // every row's value — even the virtualized ones that aren't mounted. Uses the
-// same `getItemKey` as the render `:key`, so `rowKey` keeps both in lockstep.
-// `getItemKey` can yield a number (e.g. a numeric `id`), but the selection
-// contract — `ListRow.value` and `v-model:selection` — is string-typed, so
-// coerce here; otherwise a numeric universe never matches the string selection
-// and the header checkbox silently stays empty.
+// same `getItemValue` as the render `:key` and scoped `value` slot prop, so
+// row identity has one source.
 watch(
   () => props.items,
   (items) => {
-    context?.setAllValues(items.map((item, i) => String(getItemKey(item, i))))
+    context?.setAllValues(items.map((item, i) => getItemValue(item, i)))
   },
   { immediate: true },
 )
 onBeforeUnmount(() => context?.setAllValues([]))
+
+function getItemValue(item: T, index: number) {
+  return String(getItemKey(item, index))
+}
 
 function getItemKey(item: T, index: number): PropertyKey {
   if (props.rowKey !== undefined) {

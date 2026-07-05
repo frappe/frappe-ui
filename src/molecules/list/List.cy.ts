@@ -220,10 +220,13 @@ describe('List (select all)', () => {
               ListRows,
               { items: items.value },
               {
-                default: ({ item }: { item: { id: string } }) =>
-                  h(ListRow, { value: item.id }, () =>
-                    h(ListCell, () => item.id),
-                  ),
+                default: ({
+                  item,
+                  value,
+                }: {
+                  item: { id: string }
+                  value: string
+                }) => h(ListRow, { value }, () => h(ListCell, () => item.id)),
               },
             ),
           ],
@@ -293,10 +296,13 @@ describe('List (select all)', () => {
               ListRows,
               { items, rowKey: 'ref' },
               {
-                default: ({ item }: { item: { ref: string } }) =>
-                  h(ListRow, { value: item.ref }, () =>
-                    h(ListCell, () => item.ref),
-                  ),
+                default: ({
+                  item,
+                  value,
+                }: {
+                  item: { ref: string }
+                  value: string
+                }) => h(ListRow, { value }, () => h(ListCell, () => item.ref)),
               },
             ),
           ],
@@ -331,10 +337,13 @@ describe('List (select all)', () => {
               ListRows,
               { items },
               {
-                default: ({ item }: { item: { id: number } }) =>
-                  h(ListRow, { value: String(item.id) }, () =>
-                    h(ListCell, () => item.id),
-                  ),
+                default: ({
+                  item,
+                  value,
+                }: {
+                  item: { id: number }
+                  value: string
+                }) => h(ListRow, { value }, () => h(ListCell, () => item.id)),
               },
             ),
           ],

@@ -52,14 +52,10 @@ const props = withDefaults(defineProps<BottomSheetProps>(), {
 })
 const emit = defineEmits<BottomSheetEmits>()
 
-// Canonical `open`, with `v-model` (modelValue) also honored — mirrors Dialog.
-// Both are Boolean props, so an unpassed one is `false` (not `undefined`);
-// `||` lets whichever model the caller actually drives win.
 const isOpen = computed({
-  get: () => props.open || props.modelValue || false,
+  get: () => props.open || false,
   set(value: boolean) {
     emit('update:open', value)
-    emit('update:modelValue', value)
   },
 })
 

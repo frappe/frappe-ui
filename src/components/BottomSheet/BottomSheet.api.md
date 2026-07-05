@@ -7,13 +7,7 @@
   const propsData = [
   {
     name: 'open',
-    description: 'Controls whether the sheet is open (v-model:open). Canonical.',
-    required: false,
-    type: 'boolean'
-  },
-  {
-    name: 'modelValue',
-    description: 'Controls whether the sheet is open (v-model). Also supported.',
+    description: 'Controls whether the sheet is open (`v-model:open`).',
     required: false,
     type: 'boolean'
   },
@@ -42,11 +36,6 @@
 
   const emitsData = [
   {
-    name: 'update:modelValue',
-    description: 'Fired when the model value changes.',
-    type: '[value: boolean]'
-  },
-  {
     name: 'update:open',
     description: 'Fired when the open state changes.',
     type: '[value: boolean]'
@@ -58,6 +47,7 @@
   }
 ]
 </script>
+
 ## API Reference
 
 <PropsTable name="BottomSheet" :data="propsData"/>

@@ -1,9 +1,6 @@
 export interface BottomSheetProps {
-  /** Controls whether the sheet is open (v-model:open). Canonical. */
+  /** Controls whether the sheet is open (`v-model:open`). */
   open?: boolean
-
-  /** Controls whether the sheet is open (v-model). Also supported. */
-  modelValue?: boolean
 
   /** Optional centered title rendered in the drag-handle area. */
   title?: string
@@ -15,9 +12,6 @@ export interface BottomSheetProps {
 export interface BottomSheetEmits {
   /** Fired when the open state changes via `v-model:open`. */
   'update:open': [value: boolean]
-
-  /** Fired when the open state changes via `v-model`. */
-  'update:modelValue': [value: boolean]
 
   /** Fired after the close animation finishes. */
   'after-leave': []
