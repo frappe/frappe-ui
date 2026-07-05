@@ -312,7 +312,6 @@ export const ContentPaste = ContentPasteExtension
 export const StyleClipboard = StyleClipboardExtension
 export type { MediaUploadRequestOptions } from './extensions/shared/media-upload-engine'
 
-// Markdown parse/serialize support. `useEditor`/`<Editor>` inject this
-// automatically for `format: 'markdown'`; exported so apps can configure it
-// directly (or extend individual nodes with renderMarkdown/parseMarkdown).
+// Injected automatically by `format: 'markdown'`; exported so apps can
+// configure it themselves (their instance wins over the injected one).
 export { Markdown, type MarkdownExtensionOptions } from '@tiptap/markdown'

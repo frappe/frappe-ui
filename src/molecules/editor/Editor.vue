@@ -22,7 +22,6 @@ const props = withDefaults(
 
     // content / behavior knobs (universal, reactive where noted)
     format?: 'html' | 'json' | 'markdown'
-    // forwarded to the Markdown extension `format: 'markdown'` injects
     markdownOptions?: UseEditorOptions['markdownOptions']
     placeholder?: string
     editable?: boolean

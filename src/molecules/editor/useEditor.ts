@@ -70,10 +70,8 @@ export function useEditor(
 
   const extensions = [UploadStorage, ...options.extensions]
 
-  // `format: 'markdown'` needs the Markdown extension for parse/serialize
-  // (`getMarkdown`, `contentType`). Inject it unless the caller already
-  // provided one — theirs wins so an app-level `Markdown.configure()` (or an
-  // extension that customizes markdown handling) isn't double-registered.
+  // A caller-provided `markdown` extension wins — injecting a second one
+  // would double-register the markdown manager.
   if (
     format === 'markdown' &&
     !extensions.some((extension) => extension.name === 'markdown')
