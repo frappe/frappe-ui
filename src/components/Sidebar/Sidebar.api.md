@@ -53,6 +53,16 @@
     name: 'default',
     description: '',
     type: '{}'
+  },
+  {
+    name: 'header-logo',
+    description: '',
+    type: '{}'
+  },
+  {
+    name: 'footer-items',
+    description: '',
+    type: '{}'
   }
 ]
 
@@ -178,6 +188,13 @@
     type: 'string | Component'
   },
   {
+    name: 'showLogo',
+    description: 'Whether to render the leading logo/avatar box. Defaults to `true`. Set to\n`false` when workspace identity is already shown elsewhere (e.g. a left\nrail) to avoid a duplicate avatar; the title then sits flush-left. Best\npaired with a non-collapsing sidebar, since a collapsed header with no logo\nhas nothing to show.',
+    required: false,
+    type: 'boolean',
+    default: 'true'
+  },
+  {
     name: 'menuItems',
     description: '',
     required: false,
@@ -226,33 +243,32 @@
 
 ### Sidebar
 
-<PropsTable name="Sidebar" :data="sidebarProps"/> 
+<PropsTable name="Sidebar" :data="sidebarProps"/>
 
-<SlotsTable :data="sidebarSlots"/> 
+<SlotsTable :data="sidebarSlots"/>
 
-<EmitsTable :data="sidebarEmits"/> 
+<EmitsTable :data="sidebarEmits"/>
 
 ### SidebarItem
 
-<PropsTable folder="Sidebar" name="SidebarItem" :data="sidebarItemProps"/> 
+<PropsTable folder="Sidebar" name="SidebarItem" :data="sidebarItemProps"/>
 
-<SlotsTable :data="sidebarItemSlots"/> 
+<SlotsTable :data="sidebarItemSlots"/>
 
 ### SidebarLabel
 
-<PropsTable folder="Sidebar" name="SidebarLabel" :data="sidebarLabelProps"/> 
+<PropsTable folder="Sidebar" name="SidebarLabel" :data="sidebarLabelProps"/>
 
-<SlotsTable :data="sidebarLabelSlots"/> 
+<SlotsTable :data="sidebarLabelSlots"/>
 
 ### SidebarHeader
 
-<PropsTable folder="Sidebar" name="SidebarHeader" :data="sidebarHeaderProps"/> 
+<PropsTable folder="Sidebar" name="SidebarHeader" :data="sidebarHeaderProps"/>
 
-<SlotsTable :data="sidebarHeaderSlots"/> 
+<SlotsTable :data="sidebarHeaderSlots"/>
 
 ### SidebarSection
 
-<PropsTable folder="Sidebar" name="SidebarSection" :data="sidebarSectionProps"/> 
+<PropsTable folder="Sidebar" name="SidebarSection" :data="sidebarSectionProps"/>
 
-<SlotsTable :data="sidebarSectionSlots"/> 
-
+<SlotsTable :data="sidebarSectionSlots"/>

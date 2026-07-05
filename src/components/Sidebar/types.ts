@@ -97,6 +97,14 @@ export type SidebarHeaderProps = {
   title: string
   subtitle?: string
   logo?: string | Component
+  /**
+   * Whether to render the leading logo/avatar box. Defaults to `true`. Set to
+   * `false` when workspace identity is already shown elsewhere (e.g. a left
+   * rail) to avoid a duplicate avatar; the title then sits flush-left. Best
+   * paired with a non-collapsing sidebar, since a collapsed header with no logo
+   * has nothing to show.
+   */
+  showLogo?: boolean
   menuItems?: {
     label: string
     icon?: string | Component
