@@ -7,6 +7,7 @@
 // The iframe src is only set once the block scrolls near the viewport, so the
 // page doesn't boot every app shell at once.
 import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
+import { useMediaQuery } from '@vueuse/core'
 import { withBase } from 'vitepress'
 import { TabButtons, Select } from 'frappe-ui'
 import { getRecipeGroup, type Platform } from './index'
@@ -24,8 +25,25 @@ const props = defineProps<{
 const group = computed(() => getRecipeGroup(props.base))
 const heading = computed(() => props.title || group.value?.title || props.base)
 
-// Default to whichever platform this group actually ships.
-const platform = ref<Platform>(group.value?.desktop ? 'desktop' : 'mobile')
+// A desktop shell squeezed into a phone-width iframe is unreadable, so small
+// screens default to the mobile variant when the group ships one. `selected`
+// holds an explicit user choice and wins once set; the `mounted` gate keeps the
+// first client render matching SSR (which has no viewport) so hydration is clean.
+const isSmallScreen = useMediaQuery('(max-width: 640px)')
+const mounted = ref(false)
+const selected = ref<Platform | null>(null)
+const platform = computed<Platform>({
+  get() {
+    if (selected.value) return selected.value
+    if (mounted.value && isSmallScreen.value && group.value?.mobile) {
+      return 'mobile'
+    }
+    return group.value?.desktop ? 'desktop' : 'mobile'
+  },
+  set(value) {
+    selected.value = value
+  },
+})
 const variant = computed(() => group.value?.[platform.value])
 const isMobile = computed(() => platform.value === 'mobile')
 
@@ -57,6 +75,7 @@ const root = useTemplateRef<HTMLElement>('root')
 const visible = ref(false)
 let observer: IntersectionObserver | undefined
 onMounted(() => {
+  mounted.value = true
   observer = new IntersectionObserver(
     ([entry]) => {
       if (entry.isIntersecting) {
