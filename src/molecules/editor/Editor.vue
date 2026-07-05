@@ -2,7 +2,12 @@
 import { ref, watch } from 'vue'
 import type { JSONContent } from '@tiptap/core'
 import type { Extension } from '@tiptap/core'
-import { useEditor, type Editor, type UploadedFile } from './useEditor'
+import {
+  useEditor,
+  type Editor,
+  type UploadedFile,
+  type UseEditorOptions,
+} from './useEditor'
 import { setPlaceholder } from './extensions'
 import { provideEditor } from './editor-context'
 
@@ -16,7 +21,9 @@ const props = withDefaults(
     extensions: Extension[]
 
     // content / behavior knobs (universal, reactive where noted)
-    format?: 'html' | 'json'
+    format?: 'html' | 'json' | 'markdown'
+    // forwarded to the Markdown extension `format: 'markdown'` injects
+    markdownOptions?: UseEditorOptions['markdownOptions']
     placeholder?: string
     editable?: boolean
     autofocus?: boolean
@@ -50,6 +57,7 @@ function syncIsEmpty(editor: Editor) {
 const editor = useEditor({
   content: model,
   format: props.format,
+  markdownOptions: props.markdownOptions,
   editable: () => props.editable,
   autofocus: props.autofocus,
   uploadFunction: props.uploadFunction,
@@ -60,7 +68,11 @@ const editor = useEditor({
     // independent of v-model timing).
     emit(
       'change',
-      props.format === 'json' ? editor.getJSON() : editor.getHTML(),
+      props.format === 'json'
+        ? editor.getJSON()
+        : props.format === 'markdown'
+          ? editor.getMarkdown()
+          : editor.getHTML(),
     )
   },
   onFocus(_editor, event) {

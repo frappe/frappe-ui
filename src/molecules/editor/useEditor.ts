@@ -14,12 +14,19 @@ import {
   Extension,
 } from '@tiptap/core'
 import type { EditorOptions } from '@tiptap/core'
+import { Markdown, type MarkdownExtensionOptions } from '@tiptap/markdown'
 
 type Editor = TiptapEditor
 
 export type UseEditorOptions = {
   content?: Ref<string | JSONContent | null | undefined>
-  format?: 'html' | 'json'
+  format?: 'html' | 'json' | 'markdown'
+  /**
+   * Options for the Markdown extension that `format: 'markdown'` injects
+   * (marked config, list/code indentation). Ignored when the extension list
+   * already contains a `markdown` extension — that one wins as-configured.
+   */
+  markdownOptions?: Partial<MarkdownExtensionOptions>
   editable?: MaybeRefOrGetter<boolean>
   autofocus?: boolean
   uploadFunction?: (file: File) => Promise<UploadedFile>
@@ -63,6 +70,24 @@ export function useEditor(
 
   const extensions = [UploadStorage, ...options.extensions]
 
+  // `format: 'markdown'` needs the Markdown extension for parse/serialize
+  // (`getMarkdown`, `contentType`). Inject it unless the caller already
+  // provided one — theirs wins so an app-level `Markdown.configure()` (or an
+  // extension that customizes markdown handling) isn't double-registered.
+  if (
+    format === 'markdown' &&
+    !extensions.some((extension) => extension.name === 'markdown')
+  ) {
+    extensions.push(Markdown.configure(options.markdownOptions ?? {}))
+  }
+
+  const serialize = (tiptapEditor: Editor) =>
+    format === 'json'
+      ? tiptapEditor.getJSON()
+      : format === 'markdown'
+        ? tiptapEditor.getMarkdown()
+        : tiptapEditor.getHTML()
+
   const editorOptions: Partial<EditorOptions> = {
     element: null,
     extensions,
@@ -70,8 +95,7 @@ export function useEditor(
     autofocus: options.autofocus,
     onUpdate: ({ editor: tiptapEditor }) => {
       if (!isCollaborationMode && options.content && !applyingExternalUpdate) {
-        const value =
-          format === 'json' ? tiptapEditor.getJSON() : tiptapEditor.getHTML()
+        const value = serialize(tiptapEditor)
         lastEmitted = value
         options.content.value = value
       }
@@ -86,6 +110,12 @@ export function useEditor(
     onTransaction: ({ editor: tiptapEditor }) => {
       options.onTransaction?.(tiptapEditor)
     },
+  }
+
+  if (format === 'markdown') {
+    // Makes the initial `content` (and paste-adjacent internals) parse as
+    // markdown instead of being sniffed as HTML/JSON.
+    editorOptions.contentType = 'markdown'
   }
 
   if (!isCollaborationMode && options.content?.value != null) {
@@ -109,10 +139,17 @@ export function useEditor(
       // whose fresh-object identity defeats the HTML string check below).
       if (toRaw(content) === lastEmitted) return
       if (format === 'html' && editor.value.getHTML() === content) return
+      if (format === 'markdown' && editor.value.getMarkdown() === content)
+        return
 
       applyingExternalUpdate = true
       try {
-        editor.value.commands.setContent(content ?? '', { emitUpdate: false })
+        editor.value.commands.setContent(
+          content ?? '',
+          format === 'markdown'
+            ? { emitUpdate: false, contentType: 'markdown' }
+            : { emitUpdate: false },
+        )
       } finally {
         applyingExternalUpdate = false
       }

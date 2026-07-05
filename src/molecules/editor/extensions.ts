@@ -311,3 +311,8 @@ export const Toc = TocNodeExtension
 export const ContentPaste = ContentPasteExtension
 export const StyleClipboard = StyleClipboardExtension
 export type { MediaUploadRequestOptions } from './extensions/shared/media-upload-engine'
+
+// Markdown parse/serialize support. `useEditor`/`<Editor>` inject this
+// automatically for `format: 'markdown'`; exported so apps can configure it
+// directly (or extend individual nodes with renderMarkdown/parseMarkdown).
+export { Markdown, type MarkdownExtensionOptions } from '@tiptap/markdown'

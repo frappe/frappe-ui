@@ -89,7 +89,8 @@ Owns the TipTap `Editor` lifecycle, binds content via `v-model`, threads upload,
 ```ts
 function useEditor(options: {
   content?: Ref<string | JSONContent | null>
-  format?: 'html' | 'json'                                  // default 'html', construction-time
+  format?: 'html' | 'json' | 'markdown'                     // default 'html', construction-time
+  markdownOptions?: Partial<MarkdownExtensionOptions>       // construction-time; for the injected Markdown extension
   editable?: MaybeRefOrGetter<boolean>                      // reactive — setEditable() on change
   autofocus?: boolean                                       // construction-time
   uploadFunction?: (file: File) => Promise<UploadedFile>    // construction-time
@@ -132,7 +133,8 @@ defineProps<{
   extensions: Extension[]                 // REQUIRED — the complete list; include a kit
 
   // content / behavior knobs (universal, reactive where noted) — no layout props
-  format?: 'html' | 'json'                // default 'html'
+  format?: 'html' | 'json' | 'markdown'   // default 'html'
+  markdownOptions?: Partial<MarkdownExtensionOptions>  // construction-time
   placeholder?: string                    // reactive; threads to the Placeholder extension
   editable?: boolean                      // default true; reactive
   autofocus?: boolean                     // default false
@@ -337,18 +339,20 @@ Content is the primary value — the unnamed `v-model` (P2). The `format` prop d
 ```vue
 <Editor v-model="html" :extensions="extensions" />               <!-- HTML (default) -->
 <Editor v-model="json" format="json" :extensions="extensions" /> <!-- JSONContent -->
+<Editor v-model="md" format="markdown" :extensions="extensions" /> <!-- markdown string -->
 ```
 
-No `v-model:content`, `v-model:html`, or `v-model:json` — one v-model carries whichever format `format` declares. A `change` event fires on every content update (P1 — the behavior, not the binding mechanism); `v-model` is implemented with `defineModel`.
+No `v-model:content`, `v-model:html`, or `v-model:json` — one v-model carries whichever format `format` declares. `format: 'markdown'` injects the `Markdown` extension (from `@tiptap/markdown`) automatically — configurable via `markdownOptions`, and skipped when the extension list already provides a `markdown` extension. Standard nodes and marks round-trip out of the box; custom extensions opt in by defining `renderMarkdown`/`parseMarkdown`. A `change` event fires on every content update (P1 — the behavior, not the binding mechanism); `v-model` is implemented with `defineModel`.
 
 ## 8. Reactivity model
 
 | Option | Reactive? | Notes |
 |---|---|---|
-| Content (`html` / `json`) | ✅ two-way | the defining reactive surface |
+| Content (`html` / `json` / `markdown`) | ✅ two-way | the defining reactive surface |
 | `editable` | ✅ | calls `editor.setEditable()` |
 | `placeholder` | ✅ | forwarded as a getter to the `Placeholder` extension |
 | `format` | ❌ | construction-time; mid-life change is undefined |
+| `markdownOptions` | ❌ | construction-time; configures the injected Markdown extension |
 | `autofocus` | ❌ | one-shot at mount |
 | `uploadFunction` | ❌ | construction-time; threaded to storage |
 | `extensions` | ❌ | construction-time; reactive extensions = destroy + recreate, not supported |
