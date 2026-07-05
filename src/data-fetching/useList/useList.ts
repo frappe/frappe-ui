@@ -12,7 +12,7 @@ import {
   OnFetchErrorContext,
   UseFetchOptions,
 } from '@vueuse/core'
-import { useFrappeFetch } from '../useFrappeFetch'
+import { FrappeResponseError, useFrappeFetch } from '../useFrappeFetch'
 import { useCall } from '../useCall/useCall'
 import { parseFilters, makeGetParams, normalizeCacheKey } from '../utils'
 import { UseListOptions, UseListResponse } from './types'
@@ -37,6 +37,7 @@ export function useList<T extends { name: string }>(
     immediate = true,
     refetch = true,
     cacheKey,
+    staleOnError = false,
     baseUrl = '',
     url = '',
     transform,
@@ -100,17 +101,19 @@ export function useList<T extends { name: string }>(
   } = useFrappeFetch<UseListResponse<T>>(_url, fetchOptions).get()
 
   const result = computed(() => {
-    if (normalizedCacheKey && (out.loading || !out.isFinished)) {
-      let data = cachedResponse.value
-      if (data) {
-        if (transform) {
-          let returnValue = transform(data as T[])
-          if (returnValue !== undefined) {
-            return returnValue
-          }
+    let cachedData = normalizedCacheKey ? cachedResponse.value : null
+    if (
+      cachedData &&
+      canUseCachedFallback(error.value, staleOnError) &&
+      (out.loading || !out.isFinished || !allData.value || error.value)
+    ) {
+      if (transform) {
+        let returnValue = transform(cachedData as T[])
+        if (returnValue !== undefined) {
+          return returnValue
         }
-        return data
       }
+      return cachedData
     }
     return allData.value
   })
@@ -247,6 +250,10 @@ export function useList<T extends { name: string }>(
   listStore.addList(doctype, out)
 
   return out
+}
+
+function canUseCachedFallback(error: unknown, staleOnError: boolean) {
+  return !error || (staleOnError && !(error instanceof FrappeResponseError))
 }
 
 function handleAfterFetch<T extends { name: string }>({

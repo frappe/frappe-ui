@@ -11,6 +11,7 @@ export interface UseCallOptions<
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
   params?: TParams | (() => TParams)
   cacheKey?: CacheKey
+  staleOnError?: boolean
   immediate?: boolean
   refetch?: boolean
   baseUrl?: string

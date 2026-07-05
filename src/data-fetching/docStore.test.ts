@@ -65,9 +65,10 @@ describe('docStore', () => {
       docStore as unknown as { lastFetched: Map<string, number> }
     ).lastFetched.set(key, Date.now() - 10 * 60 * 1000)
 
-    const ref = docStore.getDoc(DOCTYPE, name, identity)
+    const ref = docStore.getDoc(DOCTYPE, name, identity, { staleOnError: true })
     expect(ref).toBeDefined()
     expect(() => ref.value).not.toThrow()
     expect(ref.value).toMatchObject(record)
+    expect(await idbStore.get(idbKey(name))).toMatchObject(record)
   })
 })

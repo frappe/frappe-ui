@@ -207,4 +207,47 @@ describe('useCall', () => {
     await waitUntilValueChanges(() => secondCall.data)
     expect(secondCall.data).toBe('pong')
   })
+
+  it('keeps cached data visible when a refetch fails', async () => {
+    const cacheKey = 'offline-ping'
+    const call = useCall({
+      url: url('/api/v2/method/ping'),
+      cacheKey,
+    })
+
+    await waitUntilValueChanges(() => call.data)
+    expect(call.data).toBe('pong')
+
+    const offlineCall = useCall({
+      url: url('/api/v2/method/network-error'),
+      cacheKey,
+      staleOnError: true,
+    })
+
+    await waitUntilValueChanges(() => offlineCall.data)
+    await waitUntilValueChanges(() => offlineCall.loading)
+
+    expect(offlineCall.error).toBeTruthy()
+    expect(offlineCall.data).toBe('pong')
+  })
+
+  it('does not parse empty network failures as Frappe errors', async () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+    const networkCall = useCall({
+      url: url('/api/v2/method/network-error'),
+      immediate: false,
+    })
+
+    networkCall.fetch()
+    await networkCall.promise.catch(() => {})
+    await waitUntilValueChanges(() => networkCall.loading)
+
+    expect(networkCall.error).toBeTruthy()
+    expect(logSpy).not.toHaveBeenCalledWith(
+      'Error parsing error response:',
+      expect.anything(),
+    )
+
+    logSpy.mockRestore()
+  })
 })

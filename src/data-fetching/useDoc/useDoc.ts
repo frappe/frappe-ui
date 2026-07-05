@@ -38,6 +38,7 @@ interface UseDocOptions<TDoc> {
   url?: string
   methods?: Record<string, string | DocMethodOption>
   immediate?: boolean
+  staleOnError?: boolean
   transform?: (doc: TDoc & { doctype: string }) => TDoc & { doctype: string }
 }
 
@@ -51,6 +52,7 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
     url: customUrl = '',
     methods = {},
     immediate = true,
+    staleOnError = false,
     transform,
   } = options
 
@@ -164,11 +166,9 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
   const doc = computed<TDoc | null>(() => {
     const nameStr = toValue(name)?.trim()
     if (!nameStr) return null
-    const storeRef = docStore.getDoc(
-      doctype,
-      nameStr,
-      transform as any,
-    ) as Ref<TDoc | null>
+    const storeRef = docStore.getDoc(doctype, nameStr, transform as any, {
+      staleOnError,
+    }) as Ref<TDoc | null>
     let value = storeRef.value
     if (value && transform) {
       try {
