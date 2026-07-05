@@ -48,8 +48,18 @@ const variant = computed(() => group.value?.[platform.value])
 const isMobile = computed(() => platform.value === 'mobile')
 
 const platformOptions = computed(() => [
-  { label: 'Desktop', value: 'desktop', disabled: !group.value?.desktop },
-  { label: 'Mobile', value: 'mobile', disabled: !group.value?.mobile },
+  {
+    label: 'Desktop',
+    value: 'desktop',
+    icon: 'lucide-monitor',
+    disabled: !group.value?.desktop,
+  },
+  {
+    label: 'Mobile',
+    value: 'mobile',
+    icon: 'lucide-smartphone',
+    disabled: !group.value?.mobile,
+  },
 ])
 // Only worth showing the switcher when there's a real choice.
 const hasBothPlatforms = computed(
