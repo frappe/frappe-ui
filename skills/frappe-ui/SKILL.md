@@ -49,7 +49,7 @@ Each rule states what to do and what to avoid — one canonical place, no separa
 - [SETUP.md](SETUP.md) — scaffolding a fresh Vite + Vue 3 + frappe-ui project: version pinning, `vite.config.js`, Tailwind, PostCSS, CSS entry, plugin vs provider. Read this first when bootstrapping from scratch.
 - [COMPONENTS.md](COMPONENTS.md) — component catalog: when to reach for each one, key props, common pitfalls.
 - [TOKENS.md](TOKENS.md) — semantic color tokens (`ink-*`, `surface-*`, `outline-*`), typography, spacing, radii.
-- [PATTERNS.md](PATTERNS.md) — recipes: form pages, list pages, settings panels, empty states, confirmation flows.
+- [DESIGN.md](DESIGN.md) — the app design language: shell anatomy, screen archetypes, hierarchy by role, color rules, geometry, desktop→mobile, and common patterns (forms, confirmations, empty/loading states). Read when designing a whole app or screen.
 
 ## Authoritative upstream docs
 
