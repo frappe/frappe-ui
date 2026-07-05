@@ -578,8 +578,16 @@ const spaceActions = [
             subtitle="18 members"
             :show-logo="false"
             :menu-items="[
-              { label: 'Invite people', icon: 'lucide-user-plus' },
-              { label: 'Community settings', icon: 'lucide-settings-2' },
+              {
+                label: 'Invite people',
+                icon: 'lucide-user-plus',
+                onClick: () => (showSettings = true),
+              },
+              {
+                label: 'Community settings',
+                icon: 'lucide-settings-2',
+                onClick: () => (showSettings = true),
+              },
             ]"
           />
 
@@ -650,7 +658,7 @@ const spaceActions = [
             />
           </Dropdown>
         </div>
-        <Button variant="solid" label="Add new" icon-left="lucide-plus" />
+        <Button label="Add new" icon-left="lucide-plus" />
       </PageHeader>
 
       <!-- Body container: max-w-[940px] px-3 sm:px-5 mx-auto -->
@@ -793,7 +801,11 @@ const spaceActions = [
             <div class="space-y-11 pt-6">
               <section class="space-y-6">
                 <div class="flex items-center gap-4">
-                  <Avatar :image="userImage" :label="fullName" class="size-16" />
+                  <Avatar
+                    :image="userImage"
+                    :label="fullName"
+                    class="size-16"
+                  />
                   <div>
                     <div class="text-base-medium text-ink-gray-8">
                       Profile picture
