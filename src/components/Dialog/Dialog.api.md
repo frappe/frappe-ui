@@ -161,22 +161,21 @@
     type: '[value: boolean]'
   },
   {
-    name: 'close',
-    description: 'Fired when the component closes.',
+    name: 'after-leave',
+    description: '',
     type: '[]'
   },
   {
-    name: 'after-leave',
-    description: '',
+    name: 'close',
+    description: 'Fired when the component closes.',
     type: '[]'
   }
 ]
 </script>
 ## API Reference
 
-<PropsTable name="Dialog" :data="propsData"/> 
+<PropsTable name="Dialog" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
+<SlotsTable :data="slotsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

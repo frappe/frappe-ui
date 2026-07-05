@@ -21,9 +21,9 @@
   },
   {
     name: 'icon',
-    description: 'Icon CSS class, e.g. `lucide-search`. Rendered centered in the cell.\nIgnored when the default slot is used (for an image, avatar, or initials).',
+    description: 'Icon CSS class, e.g. `lucide-search`, or a component. Rendered centered in the cell.\nIgnored when the default slot is used (for an image, avatar, or initials).',
     required: false,
-    type: 'string'
+    type: 'string | Component'
   },
   {
     name: 'to',
@@ -55,7 +55,7 @@
     name: 'variant',
     description: 'Visual treatment.\n- `tile` (default): a filled cell with a left indicator bar when active —\n  for image/avatar items like communities or workspaces.\n- `ghost`: transparent until hovered, a raised highlight when active — for\n  icon shortcuts like Search or Notifications.',
     required: false,
-    type: '"tile" | "ghost"',
+    type: '"ghost" | "tile"',
     default: '"tile"'
   }
 ]
@@ -80,13 +80,12 @@
 
 ### Rail
 
-<SlotsTable :data="railSlots"/> 
+<SlotsTable :data="railSlots"/>
 
 ### RailItem
 
-<PropsTable folder="Rail" name="RailItem" :data="railItemProps"/> 
+<PropsTable folder="Rail" name="RailItem" :data="railItemProps"/>
 
-<SlotsTable :data="railItemSlots"/> 
+<SlotsTable :data="railItemSlots"/>
 
-<EmitsTable :data="railItemEmits"/> 
-
+<EmitsTable :data="railItemEmits"/>

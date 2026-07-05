@@ -222,18 +222,17 @@
     type: 'unknown[]'
   },
   {
-    name: 'update:open',
-    description: 'Fired when the open state changes.',
-    type: 'unknown[]'
-  },
-  {
     name: 'update:query',
     description: 'Fired when the query changes.',
     type: '[value: string]'
+  },
+  {
+    name: 'update:open',
+    description: 'Fired when the open state changes.',
+    type: 'unknown[]'
   }
 ]
 </script>
-
 ## API Reference
 
 <PropsTable name="MultiSelect" :data="propsData"/>

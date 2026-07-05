@@ -13,7 +13,7 @@
   },
   {
     name: 'language',
-    description: 'CodeMirror language key; falls through to plain text when unset/unknown.',
+    description: 'CodeMirror language key; falls through to plain text when unset/unknown.\nTyped as `CodeLanguage | (string & {})` so the known keys autocomplete\nwhile an arbitrary string still type-checks.',
     required: false,
     type: 'CodeLanguage | (string & {})',
     default: '"plain"'
@@ -34,9 +34,9 @@
   },
   {
     name: 'variant',
-    description: 'Surface style; mirrors frappe-ui inputs. Defaults to `subtle`.',
+    description: 'Surface style; derived from the shared `InputVariant` union so the code\nfield can\'t drift from the TextInput/Textarea fields it sits next to.\n`subtle` is the filled default, `outline` is a bordered-on-white box.\n`ghost` (borderless) is excluded — a borderless code surface reads as plain\ntext and loses the affordance that it\'s an editable field. Defaults to\n`subtle`.',
     required: false,
-    type: "Exclude<InputVariant, 'ghost'>",
+    type: '"subtle" | "outline"',
     default: '"subtle"'
   },
   {
@@ -104,7 +104,7 @@
   },
   {
     name: 'overflow',
-    description: 'Fired when content crosses the `--cm-max-height` cap (transitions only). The cap is a CSS hook, not a prop — set `--cm-max-height` on the root.',
+    description: '',
     type: '[overflowing: boolean]'
   }
 ]
@@ -128,13 +128,12 @@
 
 ### CodeEditor
 
-<PropsTable name="CodeEditor" :data="codeEditorProps"/> 
+<PropsTable name="CodeEditor" :data="codeEditorProps"/>
 
-<SlotsTable :data="codeEditorSlots"/> 
+<SlotsTable :data="codeEditorSlots"/>
 
-<EmitsTable :data="codeEditorEmits"/> 
+<EmitsTable :data="codeEditorEmits"/>
 
 ### CodePreview
 
-<PropsTable folder="CodeEditor" name="CodePreview" :data="codePreviewProps"/> 
-
+<PropsTable folder="CodeEditor" name="CodePreview" :data="codePreviewProps"/>

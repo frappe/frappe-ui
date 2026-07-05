@@ -187,14 +187,14 @@
     type: '[]'
   },
   {
-    name: 'close',
-    description: 'Fired when the component closes.',
-    type: '[]'
-  },
-  {
     name: 'update:open',
     description: 'Fired when the open state changes.',
     type: '[value: boolean]'
+  },
+  {
+    name: 'close',
+    description: 'Fired when the component closes.',
+    type: '[]'
   },
   {
     name: 'update:show',
@@ -205,9 +205,8 @@
 </script>
 ## API Reference
 
-<PropsTable name="Popover" :data="propsData"/> 
+<PropsTable name="Popover" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
+<SlotsTable :data="slotsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>
