@@ -53,16 +53,17 @@ toast.success('Saved'); toast.error('Failed'); toast.info('FYI')
 ```
 Mount `<FrappeUIProvider>` once near the app root.
 
-### `Popover` / `Tooltip`
+### `Popover` / `Tooltip` / `HoverCard`
 - `Popover` for arbitrary anchored content. `v-model:open`, slots: `#target` (trigger), `#body` (content).
 - `Tooltip` for hover hints. `<Tooltip text="..."><Button .../></Tooltip>`. Don't use Tooltip for actionable UI — that's `Popover` / `Dropdown`.
+- `HoverCard` for hover-revealed rich previews (person cards, deal owners). `#trigger` + default slot.
 
 ## Input controls
 
 All input controls accept the **shared labeling contract**: `label`, `description`, `error`, `required`.
 
 ### `FormControl`
-The default wrapper. Pass `type="text" | "textarea" | "select" | "checkbox" | "autocomplete"` etc. Use it instead of raw `TextInput` when you need a labeled field with consistent layout.
+The default wrapper. Pass `type="text" | "textarea" | "select" | "checkbox"` etc. Use it instead of raw `TextInput` when you need a labeled field with consistent layout.
 
 ### `TextInput` / `Textarea` / `Password`
 Single-line / multi-line / masked input. `v-model="value"`. Use `FormControl :type="..."` if you want the field wrapper.
@@ -75,9 +76,6 @@ Fixed list, multiple values. `v-model` is `string[]`.
 
 ### `Combobox`
 Single-select with search. `v-model="selected"` + `v-model:query="q"`. For options that filter as user types.
-
-### `Autocomplete`
-Async-fetched options (typically Frappe doctype links). Pass `fetchOptions` or use it inside Frappe Link contexts.
 
 ### `Checkbox` / `Switch`
 Boolean. `v-model="checked"` + `:label`. `Switch` for settings-style toggles; `Checkbox` for forms / multi-pick rows.
@@ -124,11 +122,8 @@ Renders a kbd combo. `<KeyboardShortcut keys="cmd+k" />`.
 
 ## Lists & data
 
-### `ListView`
-Table/grid list with built-in selection, sorting, virtualization. Configure via `columns`, `rows`, `options`. Prefer this over hand-rolled `<table>` for any data list.
-
-### `ItemListRow`
-Single-row list item (label + prefix/suffix). Compose into custom lists when `ListView` is too heavy.
+### `List` family (`frappe-ui/list`)
+The list primitive — use it for **every** list. `List` + `ListRow`/`ListCell`; feed mode (no columns) or table mode (`:columns` + `ListHeader`/`ListHeaderCellSort`); `ListGroup` for labelled buckets. Selection via `selectable` + `v-model:selection`, active row via `v-model:active`. Sort state and comparators are app code — header cells only render the `direction` you pass. Size rows via `:row-height` and the `list-row-px-*` / `list-gap-*` utilities.
 
 ### `ListFilter`
 Filter builder UI matched to Frappe-style queries.
@@ -142,16 +137,19 @@ Month/week calendar view.
 ### `Charts`
 Chart family (line, bar, etc.) wrapping ECharts/Frappe Charts.
 
-### `TextEditor`
-TipTap-based rich text. Heavy — only when you need real content editing.
+### `Editor` (`frappe-ui/editor`)
+TipTap-based rich text: `Editor` + `EditorFixedMenu` + `RichTextKit`. Heavy, and not SSR-safe.
 
 ### `CommandPalette`
 Cmd-K palette. Compose with `Dialog bare`.
 
 ## Layout
 
-### `Sidebar`
-App-shell sidebar primitive. Pair with router views.
+### App shell
+`DesktopShell` (slots `#rail`, `#sidebar`, default) and `MobileShell` (default, `#nav`) frame every app. Compose with the `Sidebar` family (`SidebarHeader`, `SidebarGroup`, `SidebarItem`, `Rail`/`RailItem`), `PageHeader`/`PageHeaderBase`/`PageHeaderMobile`, `MobileNav`/`MobileNavItem`, `BottomSheet`, and the `SettingsDialog` family. Anatomy and geometry: [DESIGN.md](DESIGN.md).
+
+### `ScrollArea`
+For every app-owned scroll region (sidebar nav, panes; `orientation="horizontal"` for boards). Prefer over `overflow-auto` divs.
 
 ### `Divider` — see Display.
 
@@ -231,37 +229,9 @@ async function save() {
 
 ### Prototyping against a non-Frappe backend
 
-`useCall` is wired to Frappe's response envelope (`{ data: T }`, `{ errors: [...] }`, `X-Frappe-*` headers). Pointing it at a generic REST API (mock server, public API, custom Express/Hono backend) won't work — `.data` will be `undefined` because the response isn't `{ data: ... }`-shaped.
-
-For prototypes and demos, drop to **`useFetch` from `@vueuse/core`** — it's the same composable `useCall` is built on, with no Frappe assumptions:
-
-```ts
-import { useFetch } from '@vueuse/core'
-
-// Read
-const { data: todo, error, isFetching, execute } = useFetch(
-  `https://jsonplaceholder.typicode.com/todos/1`,
-).json<Todo>()
-
-// Write (trigger on action)
-const { data, execute: save, isFetching: saving } = useFetch(
-  '/api/tasks',
-  { immediate: false },
-).post(() => ({ title: form.title })).json<Task>()
-
-async function onSubmit() {
-  await save()
-}
-```
-
-API parallels: `data`, `error`, `isFetching`, `execute`, `abort`, `onFetchResponse`, `onFetchError`. When you move the prototype onto a real Frappe backend, rename `useFetch(url).json()` → `useCall({ url })` and adjust options — most call sites change ~2 lines.
-
-For repeat-the-same-config-across-many-calls, build a project-local wrapper with `createFetch({ baseUrl, options: { beforeFetch, afterFetch, onFetchError } })` — same primitive `useFrappeFetch` itself uses.
+`useCall` expects Frappe's response envelope (`{ data: T }`) — against a generic REST API `.data` will be `undefined`. For non-Frappe prototypes use `useFetch` from `@vueuse/core` (the primitive `useCall` builds on); when the prototype moves to a Frappe backend, swap `useFetch(url).json()` → `useCall({ url })` (~2 lines per call site).
 
 ### `useList` / `useDoc` / `useDoctype` / `useNewDoc`
 
 Higher-level wrappers around `useCall` for common Frappe shapes (paginated lists, single docs, doctype metadata, new-doc scaffolds). Use them when they fit; drop to `useCall` when you need a custom endpoint.
 
-### Legacy
-
-`createResource` / `createListResource` / `createDocumentResource` still ship for migration but are not recommended for new code. Convert them to `useCall` / `useList` / `useDoc` when touching the surrounding code.
