@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted } from 'vue'
-import { useData, withBase } from 'vitepress'
+import { useData } from 'vitepress'
 import { FrappeUIProvider, Badge } from 'frappe-ui'
 import { theme as DocsTheme, Navbar } from 'frappe-ui/vitepress'
-import Home from '@/components/Home/index.vue'
 import { getRecipe } from '@/components/recipes'
 
 const { frontmatter, params } = useData()
@@ -50,22 +49,11 @@ onBeforeUnmount(() =>
     </div>
   </FrappeUIProvider>
 
-  <!-- Standalone pages (marketing Home, Recipes): full-width Navbar, no doc
-       sidebar. -->
-  <FrappeUIProvider
-    v-else-if="
-      frontmatter.layout === 'home' || frontmatter.layout === 'recipes'
-    "
-  >
+  <!-- Recipes homepage: full-width Navbar, no doc sidebar. -->
+  <FrappeUIProvider v-else-if="frontmatter.layout === 'recipes'">
     <div class="flex h-full w-full flex-1 flex-col justify-between">
       <Navbar>
         <template #actions>
-          <a
-            :href="withBase('/recipes/')"
-            class="hidden px-1 text-sm text-ink-gray-7 hover:text-ink-gray-9 md:block"
-          >
-            Recipes
-          </a>
           <Badge
             v-if="devBranch"
             :title="`git branch: ${devBranch}`"
@@ -79,8 +67,7 @@ onBeforeUnmount(() =>
         </template>
       </Navbar>
 
-      <Home v-if="frontmatter.layout === 'home'" />
-      <div v-else class="flex-1 p-4 sm:p-5 lg:py-10">
+      <div class="flex-1 p-4 sm:p-5 lg:py-10">
         <main class="mx-auto w-full max-w-7xl">
           <Content
             as="article"
@@ -96,12 +83,6 @@ onBeforeUnmount(() =>
     <template #navbar>
       <Navbar :is-docs="true">
         <template #actions>
-          <a
-            :href="withBase('/recipes/')"
-            class="hidden px-1 text-sm text-ink-gray-7 hover:text-ink-gray-9 md:block"
-          >
-            Recipes
-          </a>
           <Badge
             v-if="devBranch"
             :title="`git branch: ${devBranch}`"
