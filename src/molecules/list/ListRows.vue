@@ -39,7 +39,7 @@ const props = defineProps<{
 }>()
 
 defineSlots<{
-  default(props: { item: T; index: number }): unknown
+  default?: (props: { item: T; index: number }) => unknown
 }>()
 
 const context = useListContext()
@@ -74,10 +74,14 @@ const { rows, wrapperProps, anchor } = useVirtualRows(
 // Feed the full selectable universe to the List so the header select-all knows
 // every row's value — even the virtualized ones that aren't mounted. Uses the
 // same `getItemKey` as the render `:key`, so `rowKey` keeps both in lockstep.
+// `getItemKey` can yield a number (e.g. a numeric `id`), but the selection
+// contract — `ListRow.value` and `v-model:selection` — is string-typed, so
+// coerce here; otherwise a numeric universe never matches the string selection
+// and the header checkbox silently stays empty.
 watch(
   () => props.items,
   (items) => {
-    context?.setAllValues(items.map((item, i) => getItemKey(item, i) as string))
+    context?.setAllValues(items.map((item, i) => String(getItemKey(item, i))))
   },
   { immediate: true },
 )

@@ -1,4 +1,4 @@
-import { defineComponent, h, ref } from 'vue'
+import { h, ref } from 'vue'
 import {
   createMemoryHistory,
   createRouter,
@@ -35,11 +35,9 @@ function feedRow(id: string, props: Record<string, unknown> = {}) {
 
 describe('List (feed mode)', () => {
   it('renders list semantics and the default grid template', () => {
-    cy.mount(
-      defineComponent(() => {
-        return () => h(List, () => [feedRow('1'), feedRow('2'), feedRow('3')])
-      }),
-    )
+    cy.mount({
+      render: () => h(List, () => [feedRow('1'), feedRow('2'), feedRow('3')]),
+    })
     cy.get('[data-slot=list]').should('have.attr', 'role', 'list')
     cy.get('[data-slot=list-row]')
       .should('have.length', 3)
@@ -54,11 +52,9 @@ describe('List (feed mode)', () => {
   })
 
   it('shows dividers between rows only, inset to the content column', () => {
-    cy.mount(
-      defineComponent(() => {
-        return () => h(List, () => [feedRow('1'), feedRow('2'), feedRow('3')])
-      }),
-    )
+    cy.mount({
+      render: () => h(List, () => [feedRow('1'), feedRow('2'), feedRow('3')]),
+    })
     cy.get('[data-slot=list-divider]').should('have.length', 3)
     cy.get('[data-slot=list-divider]').eq(0).should('have.css', 'opacity', '0')
     cy.get('[data-slot=list-divider]').eq(1).should('have.css', 'opacity', '1')
@@ -73,14 +69,14 @@ describe('List (feed mode)', () => {
   it('renders rows as links with `to`, buttons with a click listener, divs otherwise', () => {
     const clicked = cy.spy().as('rowClick')
     cy.mount(
-      defineComponent(() => {
-        return () =>
+      {
+        render: () =>
           h(List, () => [
             feedRow('1', { to: { name: 'Item', params: { id: '1' } } }),
             feedRow('2', { onClick: clicked }),
             feedRow('3'),
-          ])
-      }),
+          ]),
+      },
       { global: { plugins: [makeRouter()] } },
     )
     cy.get('a[data-slot=list-row]')
@@ -94,14 +90,14 @@ describe('List (feed mode)', () => {
   it('navigates on row click', () => {
     const router = makeRouter()
     cy.mount(
-      defineComponent(() => {
-        return () => [
+      {
+        render: () => [
           h(RouterView),
           h(List, () => [
             feedRow('1', { to: { name: 'Item', params: { id: '1' } } }),
           ]),
-        ]
-      }),
+        ],
+      },
       { global: { plugins: [router] } },
     )
     cy.get('a[data-slot=list-row]')
@@ -116,21 +112,18 @@ describe('List (selection)', () => {
   function mountSelectable(rowProps: Record<string, unknown> = {}) {
     const selection = ref<string[]>([])
     const selectable = ref(true)
-    cy.mount(
-      defineComponent(() => {
-        return () =>
-          h(
-            List,
-            {
-              selectable: selectable.value,
-              selection: selection.value,
-              'onUpdate:selection': (next: string[]) =>
-                (selection.value = next),
-            },
-            () => [feedRow('1', rowProps), feedRow('2', rowProps)],
-          )
-      }),
-    )
+    cy.mount({
+      render: () =>
+        h(
+          List,
+          {
+            selectable: selectable.value,
+            selection: selection.value,
+            'onUpdate:selection': (next: string[]) => (selection.value = next),
+          },
+          () => [feedRow('1', rowProps), feedRow('2', rowProps)],
+        ),
+    })
     return { selection, selectable }
   }
 
@@ -212,33 +205,30 @@ describe('List (select all)', () => {
   function mountSelectAll(initial: string[] = []) {
     const selection = ref<string[]>(initial)
     const items = ref([{ id: '1' }, { id: '2' }, { id: '3' }])
-    cy.mount(
-      defineComponent(() => {
-        return () =>
-          h(
-            List,
-            {
-              selectable: true,
-              selection: selection.value,
-              'onUpdate:selection': (next: string[]) =>
-                (selection.value = next),
-            },
-            () => [
-              h(ListHeader, () => h(ListHeaderCell, () => 'Name')),
-              h(
-                ListRows,
-                { items: items.value },
-                {
-                  default: ({ item }: { item: { id: string } }) =>
-                    h(ListRow, { value: item.id }, () =>
-                      h(ListCell, () => item.id),
-                    ),
-                },
-              ),
-            ],
-          )
-      }),
-    )
+    cy.mount({
+      render: () =>
+        h(
+          List,
+          {
+            selectable: true,
+            selection: selection.value,
+            'onUpdate:selection': (next: string[]) => (selection.value = next),
+          },
+          () => [
+            h(ListHeader, () => h(ListHeaderCell, () => 'Name')),
+            h(
+              ListRows,
+              { items: items.value },
+              {
+                default: ({ item }: { item: { id: string } }) =>
+                  h(ListRow, { value: item.id }, () =>
+                    h(ListCell, () => item.id),
+                  ),
+              },
+            ),
+          ],
+        ),
+    })
     return { selection, items }
   }
 
@@ -288,37 +278,78 @@ describe('List (select all)', () => {
     // would target the wrong universe without an explicit rowKey.
     const selection = ref<string[]>([])
     const items = [{ ref: 'a' }, { ref: 'b' }]
-    cy.mount(
-      defineComponent(() => {
-        return () =>
-          h(
-            List,
-            {
-              selectable: true,
-              selection: selection.value,
-              'onUpdate:selection': (next: string[]) =>
-                (selection.value = next),
-            },
-            () => [
-              h(ListHeader, () => h(ListHeaderCell, () => 'Name')),
-              h(
-                ListRows,
-                { items, rowKey: 'ref' },
-                {
-                  default: ({ item }: { item: { ref: string } }) =>
-                    h(ListRow, { value: item.ref }, () =>
-                      h(ListCell, () => item.ref),
-                    ),
-                },
-              ),
-            ],
-          )
-      }),
-    )
+    cy.mount({
+      render: () =>
+        h(
+          List,
+          {
+            selectable: true,
+            selection: selection.value,
+            'onUpdate:selection': (next: string[]) => (selection.value = next),
+          },
+          () => [
+            h(ListHeader, () => h(ListHeaderCell, () => 'Name')),
+            h(
+              ListRows,
+              { items, rowKey: 'ref' },
+              {
+                default: ({ item }: { item: { ref: string } }) =>
+                  h(ListRow, { value: item.ref }, () =>
+                    h(ListCell, () => item.ref),
+                  ),
+              },
+            ),
+          ],
+        ),
+    })
     cy.get('[data-slot=list-header-checkbox]')
       .click()
       .then(() => {
         expect([...selection.value].sort()).to.deep.equal(['a', 'b'])
+      })
+  })
+
+  it('matches string row values against numeric item ids', () => {
+    // Real-world footgun: items carry numeric `id`s, but `ListRow.value` is
+    // string-typed, so consumers pass `String(item.id)`. The select-all
+    // universe must coerce to string too, or a numeric universe never matches
+    // the string selection and the header checkbox stays empty.
+    const selection = ref<string[]>(['2'])
+    const items = [{ id: 1 }, { id: 2 }, { id: 3 }]
+    cy.mount({
+      render: () =>
+        h(
+          List,
+          {
+            selectable: true,
+            selection: selection.value,
+            'onUpdate:selection': (next: string[]) => (selection.value = next),
+          },
+          () => [
+            h(ListHeader, () => h(ListHeaderCell, () => 'Name')),
+            h(
+              ListRows,
+              { items },
+              {
+                default: ({ item }: { item: { id: number } }) =>
+                  h(ListRow, { value: String(item.id) }, () =>
+                    h(ListCell, () => item.id),
+                  ),
+              },
+            ),
+          ],
+        ),
+    })
+    // One of three selected → mixed/indeterminate, proving the universe matched.
+    cy.get('[data-slot=list-header-checkbox]').should(
+      'have.attr',
+      'aria-checked',
+      'mixed',
+    )
+    cy.get('[data-slot=list-header-checkbox]')
+      .click()
+      .then(() => {
+        expect([...selection.value].sort()).to.deep.equal(['1', '2', '3'])
       })
   })
 })
@@ -328,24 +359,22 @@ describe('List (active row)', () => {
   // untouched row 4 to prove only the hugging pair is hidden.
   function mountActive(rowProps: Record<string, unknown> = {}) {
     const active = ref<string | undefined>('2')
-    cy.mount(
-      defineComponent(() => {
-        return () =>
-          h(
-            List,
-            {
-              active: active.value,
-              'onUpdate:active': (next?: string) => (active.value = next),
-            },
-            () => [
-              feedRow('1', rowProps),
-              feedRow('2', rowProps),
-              feedRow('3', rowProps),
-              feedRow('4', rowProps),
-            ],
-          )
-      }),
-    )
+    cy.mount({
+      render: () =>
+        h(
+          List,
+          {
+            active: active.value,
+            'onUpdate:active': (next?: string) => (active.value = next),
+          },
+          () => [
+            feedRow('1', rowProps),
+            feedRow('2', rowProps),
+            feedRow('3', rowProps),
+            feedRow('4', rowProps),
+          ],
+        ),
+    })
     return { active }
   }
 
@@ -385,11 +414,7 @@ describe('List (active row)', () => {
   })
 
   it('stays inert when v-model:active is not bound', () => {
-    cy.mount(
-      defineComponent(() => {
-        return () => h(List, () => [feedRow('1'), feedRow('2')])
-      }),
-    )
+    cy.mount({ render: () => h(List, () => [feedRow('1'), feedRow('2')]) })
     cy.get('[data-slot=list-row][data-active]').should('not.exist')
     cy.get('button[data-slot=list-row]').should('not.exist')
   })
@@ -410,43 +435,41 @@ describe('List (column mode)', () => {
     }
     const directionFor = (field: string) =>
       sortField.value === field ? sortDirection.value : null
-    cy.mount(
-      defineComponent(() => {
-        return () =>
-          h(List, { columns: ['minmax(0,1fr)', '10rem', '4rem'] }, () => [
-            h(ListHeader, () => [
-              h(
-                ListHeaderCellSort,
-                {
-                  direction: directionFor('name'),
-                  onClick: () => toggleSort('name'),
-                },
-                {
-                  default: () => 'User',
-                  // Adornments are app-supplied; expose the scoped direction for assertions.
-                  suffix: ({ direction }: { direction: string | null }) =>
-                    h(
-                      'span',
-                      { 'data-testid': 'sort-icon' },
-                      direction ?? 'none',
-                    ),
-                },
-              ),
-              h(
-                ListHeaderCellSort,
-                {
-                  direction: directionFor('creation'),
-                  onClick: () => toggleSort('creation', 'desc'),
-                },
-                () => 'User since',
-              ),
-              h(ListHeaderCell, { class: 'justify-end' }, () => 'Actions'),
-            ]),
-            feedRow('1'),
-            feedRow('2'),
-          ])
-      }),
-    )
+    cy.mount({
+      render: () =>
+        h(List, { columns: ['minmax(0,1fr)', '10rem', '4rem'] }, () => [
+          h(ListHeader, () => [
+            h(
+              ListHeaderCellSort,
+              {
+                direction: directionFor('name'),
+                onClick: () => toggleSort('name'),
+              },
+              {
+                default: () => 'User',
+                // Adornments are app-supplied; expose the scoped direction for assertions.
+                suffix: ({ direction }: { direction: string | null }) =>
+                  h(
+                    'span',
+                    { 'data-testid': 'sort-icon' },
+                    direction ?? 'none',
+                  ),
+              },
+            ),
+            h(
+              ListHeaderCellSort,
+              {
+                direction: directionFor('creation'),
+                onClick: () => toggleSort('creation', 'desc'),
+              },
+              () => 'User since',
+            ),
+            h(ListHeaderCell, { class: 'justify-end' }, () => 'Actions'),
+          ]),
+          feedRow('1'),
+          feedRow('2'),
+        ]),
+    })
     return { sortField, sortDirection }
   }
 
@@ -514,31 +537,29 @@ describe('List (column mode)', () => {
 
   it('right-aligns an end-aligned sort cell and leads with the glyph', () => {
     const direction = ref<'asc' | null>(null)
-    cy.mount(
-      defineComponent(() => {
-        return () =>
-          h(List, { columns: ['minmax(0,1fr)', '6rem', '4rem'] }, () => [
-            h(ListHeader, () => [
-              h(ListHeaderCell, () => 'Name'),
-              h(
-                ListHeaderCellSort,
-                {
-                  direction: direction.value,
-                  align: 'end',
-                  onClick: () =>
-                    (direction.value = direction.value ? null : 'asc'),
-                },
-                {
-                  default: () => 'Size',
-                  suffix: () => h('span', { 'data-testid': 'glyph' }, 'icon'),
-                },
-              ),
-              h(ListHeaderCell, () => ''),
-            ]),
-            feedRow('1'),
-          ])
-      }),
-    )
+    cy.mount({
+      render: () =>
+        h(List, { columns: ['minmax(0,1fr)', '6rem', '4rem'] }, () => [
+          h(ListHeader, () => [
+            h(ListHeaderCell, () => 'Name'),
+            h(
+              ListHeaderCellSort,
+              {
+                direction: direction.value,
+                align: 'end',
+                onClick: () =>
+                  (direction.value = direction.value ? null : 'asc'),
+              },
+              {
+                default: () => 'Size',
+                suffix: () => h('span', { 'data-testid': 'glyph' }, 'icon'),
+              },
+            ),
+            h(ListHeaderCell, () => ''),
+          ]),
+          feedRow('1'),
+        ]),
+    })
 
     const sizeCell = () => cy.get('[data-slot=list-header-cell]').eq(1)
     // The cell right-aligns its content.
@@ -563,32 +584,30 @@ describe('List (column mode)', () => {
 describe('ListRows (virtual)', () => {
   it('windows rows against the nearest scrollable ancestor', () => {
     const items = Array.from({ length: 500 }, (_, i) => ({ id: String(i + 1) }))
-    cy.mount(
-      defineComponent(() => {
-        return () =>
-          h(
-            'div',
-            {
-              style: 'height: 200px; overflow-y: auto',
-              'data-testid': 'viewport',
-            },
-            [
-              h(List, { rowHeight: 40, columns: ['minmax(0,1fr)'] }, () => [
-                h(
-                  ListRows,
-                  { items, virtual: true },
-                  {
-                    default: ({ item }: { item: { id: string } }) =>
-                      h(ListRow, { key: item.id }, () => [
-                        h(ListCell, () => h('span', `Row ${item.id}`)),
-                      ]),
-                  },
-                ),
-              ]),
-            ],
-          )
-      }),
-    )
+    cy.mount({
+      render: () =>
+        h(
+          'div',
+          {
+            style: 'height: 200px; overflow-y: auto',
+            'data-testid': 'viewport',
+          },
+          [
+            h(List, { rowHeight: 40, columns: ['minmax(0,1fr)'] }, () => [
+              h(
+                ListRows,
+                { items, virtual: true },
+                {
+                  default: ({ item }: { item: { id: string } }) =>
+                    h(ListRow, { key: item.id }, () => [
+                      h(ListCell, () => h('span', `Row ${item.id}`)),
+                    ]),
+                },
+              ),
+            ]),
+          ],
+        ),
+    })
     cy.get('[data-slot=list-row]').should('have.length.lessThan', 50)
     cy.contains('[data-slot=list-row]', 'Row 1').should('exist')
     cy.get('[data-testid=viewport]').scrollTo('bottom')
