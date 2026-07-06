@@ -38,7 +38,7 @@
             <span
               class="w-full flex justify-between items-center"
               :class="[
-                date.toDateString() === new Date().toDateString()
+                isToday(date)
                   ? 'p-[3px] pb-0.5'
                   : 'p-2',
               ]"
@@ -47,10 +47,9 @@
               <div
                 class="cursor-pointer"
                 :class="[
-                  date.toDateString() === new Date().toDateString()
-                    ? 'flex items-center justify-center bg-surface-gray-10 text-ink-base rounded size-[25px]'
-                    : 'bg-surface-base ',
-                  isCurrentMonth(date) ? 'text-ink-gray-6' : 'text-ink-gray-4',
+                  isToday(date)
+                    ? 'flex items-center justify-center bg-surface-gray-10 text-ink-gray-2 rounded size-[25px]'
+                    : 'bg-surface-base text-ink-gray-8',
                 ]"
                 @click.stop="
                   isCurrentMonth(date)
@@ -144,6 +143,10 @@ const timedEvents = computed(
 const maxEventsInCell = computed(() =>
   props.currentMonthDates.length > 35 ? 1 : 2,
 )
+
+function isToday(date: Date) {
+  return date.toDateString() === new Date().toDateString()
+}
 
 function isCurrentMonth(date: Date) {
   return date.getMonth() === props.currentMonth

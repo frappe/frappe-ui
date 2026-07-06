@@ -25,7 +25,7 @@
           class="relative flex h-full select-none items-start gap-2 overflow-hidden"
         >
           <div v-if="config.showIcon && eventIcon">
-            <component :is="eventIcon" class="h-4 w-4 text-black" />
+            <component :is="eventIcon" class="h-4 w-4" />
           </div>
           <p
             class="text-sm-medium truncate"

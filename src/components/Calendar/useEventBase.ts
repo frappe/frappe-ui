@@ -8,6 +8,16 @@ import {
   type CalendarEvent,
 } from './types'
 
+const legacyColorNamesByHex: Record<string, keyof typeof colorMap> = {
+  '#db7706': 'amber',
+  '#6846e3': 'violet',
+  '#e34aa6': 'pink',
+  '#3bbde5': 'cyan',
+  '#0289f7': 'blue',
+  '#e86c13': 'orange',
+  '#30a66d': 'green',
+}
+
 export const isAnyPopoverOpen = ref(false)
 
 export function useEventBase(props: { event: CalendarEvent; date: Date }) {
@@ -51,6 +61,8 @@ export function useEventBase(props: { event: CalendarEvent; date: Date }) {
     const map = getTheme() === 'dark' ? colorMapDark : colorMap
     if (!colorValue?.startsWith('#'))
       return map[colorValue || 'green'] || map['green']!
+    const legacyColorName = legacyColorNamesByHex[colorValue.toLowerCase()]
+    if (legacyColorName) return map[legacyColorName]!
     for (const value of Object.values(map)) {
       if (value.color === colorValue) return value
     }
