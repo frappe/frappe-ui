@@ -49,7 +49,7 @@ const markdown = ref('# Hello\n\nSome **markdown** content.')
 </script>
 ```
 
-The `Markdown` extension is passed explicitly (rather than injected by the prop) so its parser/serializer only lands in bundles of editors that use it. Tune it with `Markdown.configure` (marked config, list/code indentation):
+Tune the `Markdown` extension with `Markdown.configure` (marked config, list/code indentation):
 
 ```js
 Markdown.configure({ markedOptions: { breaks: true } })
