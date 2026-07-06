@@ -49,7 +49,9 @@
                 :class="[
                   isToday(date)
                     ? 'flex items-center justify-center bg-surface-gray-10 text-ink-gray-2 rounded size-[25px]'
-                    : 'bg-surface-base text-ink-gray-8',
+                    : isCurrentMonth(date)
+                      ? 'bg-surface-base text-ink-gray-8'
+                      : 'bg-surface-base text-ink-gray-4',
                 ]"
                 @click.stop="
                   isCurrentMonth(date)
