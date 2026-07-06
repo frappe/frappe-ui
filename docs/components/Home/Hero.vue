@@ -5,23 +5,19 @@ import { withBase } from 'vitepress'
 
 <template>
   <div class="grid gap-5 max-w-7xl mx-auto w-full">
-    <div
-      class="my-12 sm:my-20 px-4 sm:px-5 flex flex-col gap-5 text-center mx-auto"
-    >
+    <div class="my-12 px-4 sm:px-5 flex flex-col text-center mx-auto">
       <h1
-        class="text-[32px] sm:text-[40px] font-semibold tracing-tight leading-tight font-news"
+        class="text-6xl-semibold sm:text-8xl-semibold !tracking-[-0.01em] text-ink-gray-8"
       >
         Build Beautiful Interfaces Fast
       </h1>
 
-      <p
-        class="text-p-base sm:text-p-lg text-ink-gray-5 sm:w-3/4 mx-auto"
-      >
-        Beautifully crafted components built for real world applications. Better
+      <p class="sm:mt-3 text-p-base sm:text-p-lg text-ink-gray-6 mx-auto">
+        Battle tested components built for real world applications. <br />Good
         defaults helping you ship faster.
       </p>
 
-      <div class="flex gap-3 mt-2 mx-auto">
+      <div class="flex gap-3 mt-6 mx-auto">
         <a
           :href="withBase('/docs/getting-started')"
           class="inline-flex items-center gap-2 h-8 px-2.5 rounded text-base font-medium text-ink-base bg-surface-gray-10 hover:bg-surface-gray-9 active:bg-surface-gray-8 transition-colors focus:outline-none focus-visible:ring focus-visible:ring-outline-gray-3"

@@ -37,19 +37,6 @@ Three semantic categories — each takes a color + numeric step. Higher = strong
 - Focus rings are automatic: a global `:focus-visible` outline (`--focus-outline-default`) covers every focusable element — never add your own. Retheme with `focus-visible:focus-ring-red` (or `-green`/`-blue`), suppress with `focus-visible:outline-none`.
 - `border-outline-red-3` / `green-2` — error / success borders.
 
-### Rule of thumb
-
-| Need              | Use                              |
-|-------------------|----------------------------------|
-| Page bg           | `bg-surface-base`               |
-| Card bg           | `bg-surface-base` + border, or `bg-surface-gray-1` |
-| Hovered row       | `bg-surface-gray-2`              |
-| Primary text      | `text-ink-gray-9`                |
-| Muted text        | `text-ink-gray-5`                |
-| Border            | `border-outline-gray-1` (or `gray-2` for stronger) |
-| Destructive text  | `text-ink-red-6`                 |
-| Success text      | `text-ink-green-6`               |
-
 Never reach for `text-gray-900`, `bg-white`, `border-gray-200` — they don't track the theme.
 
 ## Typography
@@ -106,11 +93,7 @@ All have tuned letter-spacing — don't override unless you know why.
 
 ## Spacing
 
-Use Tailwind's spacing scale. Frappe density tends to be tight:
-- Form field gap: `space-y-3` or `gap-3`.
-- Section gap: `space-y-6` / `gap-6`.
-- Page padding: `p-4` on mobile, `p-6`/`p-8` on desktop.
-- Inline gap inside a row: `gap-2`.
+Use Tailwind's spacing scale. The canonical rhythms (gutters, stacks, content widths) live in [DESIGN.md](DESIGN.md) → Geometry.
 
 ## Dark mode
 

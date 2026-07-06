@@ -58,7 +58,7 @@ const toggleTheme = () =>
       <a
         v-if="logo || name"
         :href="withBase('/')"
-        class="flex items-center gap-2.5 min-w-0"
+        class="flex items-center gap-1.5 min-w-0"
         :class="{ 'lg:hidden': isDocs }"
       >
         <img
@@ -67,7 +67,10 @@ const toggleTheme = () =>
           class="w-6 shrink-0"
           :alt="name"
         />
-        <span v-if="name" class="text-sm font-medium text-ink-gray-8 truncate">
+        <span
+          v-if="name"
+          class="text-lg-bold text-ink-gray-8 truncate tracking-[-0.01em]"
+        >
           {{ name }}
         </span>
       </a>
