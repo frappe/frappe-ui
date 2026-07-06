@@ -25,10 +25,10 @@
           class="relative flex h-full select-none items-start gap-2 overflow-hidden"
         >
           <div v-if="config.showIcon && eventIcon">
-            <component :is="eventIcon" class="h-4 w-4" />
+            <component :is="eventIcon" class="h-4 w-4 text-ink-gray-8" />
           </div>
           <p
-            class="text-sm-medium truncate"
+            class="text-sm-medium truncate text-ink-gray-8"
             :class="{ italic: !props.event.title }"
           >
             {{ props.event.title || '[No title]' }}

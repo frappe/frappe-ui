@@ -13,7 +13,6 @@
 
 .event {
   background-color: var(--bg);
-  color: var(--text);
 }
 .event .event-title {
   color: var(--text);
@@ -26,7 +25,6 @@
 }
 .event.active {
   background-color: var(--bg-active);
-  color: var(--text-active, var(--ink-base));
 }
 .event.active .event-title {
   color: var(--text-active, var(--ink-base));
