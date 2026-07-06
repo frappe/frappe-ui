@@ -106,7 +106,7 @@
         <div class="relative z-0 flex w-full flex-col">
           <!-- time events => not full day events => overflow-scroll here -->
           <div
-            class="absolute left-0.5 z-[2] mt-[0.5px] h-px w-[calc(100%-4px)] bg-surface-red-3"
+            class="absolute left-0.5 z-[2] mt-[0.5px] h-px w-[calc(100%-4px)] bg-[#e03636]"
             :style="currentTime"
           />
           <div class="grid w-full grid-cols-7">
