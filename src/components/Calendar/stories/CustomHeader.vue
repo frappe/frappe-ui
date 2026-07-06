@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import { Button, Calendar, DatePicker, Select } from "frappe-ui";
+import { Button, Calendar, DatePicker, Select } from 'frappe-ui'
 
 const config = {
   defaultMode: 'Month',
@@ -65,10 +65,10 @@ const events = ref([
     color: 'red',
   },
   {
-    title: 'Google Meet with John ',
+    title: 'Frappe Meet with John',
     participant: 'John',
     id: '#htrht41',
-    venue: 'Google Meet',
+    venue: 'Frappe Meet',
     fromDate: currentMonthYear + '-11',
     toDate: currentMonthYear + '-11',
     fromTime: '00:00',
@@ -77,10 +77,10 @@ const events = ref([
     isFullDay: true,
   },
   {
-    title: 'Zoom Meet with Sheldon',
+    title: 'Frappe Meet with Sheldon',
     participant: 'Sheldon',
     id: '#htrht42',
-    venue: 'Google Meet',
+    venue: 'Frappe Meet',
     fromDate: currentMonthYear + '-07',
     toDate: currentMonthYear + '-07',
     fromTime: '00:00',
@@ -92,7 +92,9 @@ const events = ref([
 </script>
 
 <template>
-  <div class="w-full flex flex-wrap gap-3 items-center h-screen overflow-hidden">
+  <div
+    class="w-full flex flex-wrap gap-3 items-center h-screen overflow-hidden"
+  >
     <Calendar
       :config="config"
       :events="events"
