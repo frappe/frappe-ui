@@ -86,6 +86,12 @@ const visible = ref(false)
 let observer: IntersectionObserver | undefined
 onMounted(() => {
   mounted.value = true
+  // Older browsers without IntersectionObserver can't lazy-boot; load eagerly
+  // so the previews still appear instead of the callback throwing on mount.
+  if (typeof IntersectionObserver === 'undefined') {
+    visible.value = true
+    return
+  }
   observer = new IntersectionObserver(
     ([entry]) => {
       if (entry.isIntersecting) {
