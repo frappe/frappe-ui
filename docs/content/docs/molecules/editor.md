@@ -34,7 +34,7 @@ For markdown-backed content (wikis, docs sites, README editors), set `format="ma
 
 ```vue
 <template>
-  <Editor v-model="markdown" format="markdown" :extensions="[RichTextKit]">
+  <Editor v-model="markdown" format="markdown" :extensions="[RichTextKit, Markdown]">
     <template #default>
       <EditorContent />
     </template>
@@ -43,24 +43,17 @@ For markdown-backed content (wikis, docs sites, README editors), set `format="ma
 
 <script setup>
 import { ref } from 'vue'
-import { Editor, EditorContent, RichTextKit } from 'frappe-ui/editor'
+import { Editor, EditorContent, RichTextKit, Markdown } from 'frappe-ui/editor'
 
 const markdown = ref('# Hello\n\nSome **markdown** content.')
 </script>
 ```
 
-`format="markdown"` injects the `Markdown` extension from `@tiptap/markdown` automatically. Tune it with `markdown-options` (marked config, list/code indentation):
+The `Markdown` extension is passed explicitly (rather than injected by the prop) so its parser/serializer only lands in bundles of editors that use it. Tune it with `Markdown.configure` (marked config, list/code indentation):
 
-```vue
-<Editor
-  v-model="markdown"
-  format="markdown"
-  :markdown-options="{ markedOptions: { breaks: true } }"
-  :extensions="extensions"
-/>
+```js
+Markdown.configure({ markedOptions: { breaks: true } })
 ```
-
-If your extension list already registers a `markdown` extension (for example an app-level `Markdown.configure(...)` — re-exported from `frappe-ui/editor`), that one wins and nothing is injected.
 
 Standard nodes and marks (headings, lists, tables, task lists, code blocks, links, images) round-trip out of the box. Custom nodes participate by defining `renderMarkdown`/`parseMarkdown` in their extension — nodes without them fall back to `@tiptap/markdown`'s defaults.
 

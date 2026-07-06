@@ -14,19 +14,17 @@ import {
   Extension,
 } from '@tiptap/core'
 import type { EditorOptions } from '@tiptap/core'
-import { Markdown, type MarkdownExtensionOptions } from '@tiptap/markdown'
 
 type Editor = TiptapEditor
 
 export type UseEditorOptions = {
   content?: Ref<string | JSONContent | null | undefined>
-  format?: 'html' | 'json' | 'markdown'
   /**
-   * Options for the Markdown extension that `format: 'markdown'` injects
-   * (marked config, list/code indentation). Ignored when the extension list
-   * already contains a `markdown` extension — that one wins as-configured.
+   * `'markdown'` requires the `Markdown` extension (re-exported from
+   * `frappe-ui/editor`) in `extensions` — kept explicit so only editors that
+   * use markdown pay for its bundle.
    */
-  markdownOptions?: Partial<MarkdownExtensionOptions>
+  format?: 'html' | 'json' | 'markdown'
   editable?: MaybeRefOrGetter<boolean>
   autofocus?: boolean
   uploadFunction?: (file: File) => Promise<UploadedFile>
@@ -70,13 +68,14 @@ export function useEditor(
 
   const extensions = [UploadStorage, ...options.extensions]
 
-  // A caller-provided `markdown` extension wins — injecting a second one
-  // would double-register the markdown manager.
   if (
+    import.meta.env?.DEV &&
     format === 'markdown' &&
     !extensions.some((extension) => extension.name === 'markdown')
   ) {
-    extensions.push(Markdown.configure(options.markdownOptions ?? {}))
+    console.warn(
+      "[frappe-ui] format: 'markdown' needs the Markdown extension in `extensions` — import { Markdown } from 'frappe-ui/editor'.",
+    )
   }
 
   const serialize = (tiptapEditor: Editor) =>

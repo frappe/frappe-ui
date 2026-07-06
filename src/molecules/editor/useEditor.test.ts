@@ -211,66 +211,34 @@ describe('frappe-ui/editor minimal primitives', () => {
     expect(editor.commands.setContent).toHaveBeenCalledTimes(calls)
   })
 
-  it('injects a configured Markdown extension and markdown contentType for format: markdown', async () => {
+  it('sets markdown contentType and warns when the Markdown extension is missing', async () => {
     const { useEditor } = await import('./index')
-    const content = ref('# Hello')
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
     createApp(
       defineComponent({
         setup() {
-          useEditor({
-            content,
-            format: 'markdown',
-            markdownOptions: { markedOptions: { breaks: true } },
-            extensions: [],
-          })
+          useEditor({ content: ref('# Hi'), format: 'markdown', extensions: [] })
           return () => null
         },
       }),
     ).mount(document.createElement('div'))
 
-    const editor = editors[0]
-    expect(editor.options.contentType).toBe('markdown')
-    const markdown = editor.options.extensions.find(
-      (extension: any) => extension.name === 'markdown',
+    expect(editors[0].options.contentType).toBe('markdown')
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining("format: 'markdown' needs the Markdown extension"),
     )
-    expect(markdown?.configured).toBe(true)
-    expect(markdown?.options).toEqual({ markedOptions: { breaks: true } })
-  })
-
-  it('does not inject Markdown when the caller already provides one', async () => {
-    const { useEditor } = await import('./index')
-    const own = { name: 'markdown', own: true } as any
-
-    createApp(
-      defineComponent({
-        setup() {
-          useEditor({
-            content: ref('# Hi'),
-            format: 'markdown',
-            markdownOptions: { markedOptions: { breaks: true } },
-            extensions: [own],
-          })
-          return () => null
-        },
-      }),
-    ).mount(document.createElement('div'))
-
-    const editor = editors[0]
-    const markdownExtensions = editor.options.extensions.filter(
-      (extension: any) => extension.name === 'markdown',
-    )
-    expect(markdownExtensions).toEqual([own])
+    warn.mockRestore()
   })
 
   it('binds markdown content in both directions without rewriting equal external markdown', async () => {
-    const { useEditor } = await import('./index')
+    const { useEditor, Markdown } = await import('./index')
     const content = ref('# Hello')
 
     createApp(
       defineComponent({
         setup() {
-          useEditor({ content, format: 'markdown', extensions: [] })
+          useEditor({ content, format: 'markdown', extensions: [Markdown as any] })
           return () => null
         },
       }),
