@@ -1463,9 +1463,9 @@
   integrity sha512-4wajuqnO2X0+LVvsBjW/xk3/tmdb16bNL939QhicAay4YYqXITeV2v3XJsryzmG4L5GkK1yLxvRGk4aLoxWrnA==
 
 "@tiptap/markdown@^3.26.0":
-  version "3.27.1"
-  resolved "https://registry.yarnpkg.com/@tiptap/markdown/-/markdown-3.27.1.tgz#c308c672a3d95f145065dd808745995f3b1982cd"
-  integrity sha512-4m2LZcj/uN0uLlGnXr3i7sfdxbQNNmeMn4wFyFrP2xpshcKPL5WujUAcqT2rgKfaDjKQ8gIK/GpgSQKuRENFwg==
+  version "3.26.0"
+  resolved "https://registry.yarnpkg.com/@tiptap/markdown/-/markdown-3.26.0.tgz#af3378bbf158b10c586527e282bdd53abb584a52"
+  integrity sha512-jg5xrwl1gTXUl5JA3+g8YYfhOzplM9CVecwKZeFtlYtPLyxLCmIDvqV/vULoGu57HwtY4819nNpMZwY6jBNtrw==
   dependencies:
     marked "^17.0.1"
 
