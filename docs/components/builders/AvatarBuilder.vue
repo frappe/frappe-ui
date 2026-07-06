@@ -28,6 +28,21 @@ const knobs: Knob[] = [
       { label: 'square', value: 'square' },
     ],
   },
+  {
+    name: 'theme',
+    type: 'tabs',
+    default: 'gray',
+    options: [
+      { label: 'gray', value: 'gray' },
+      { label: 'blue', value: 'blue' },
+      { label: 'green', value: 'green' },
+      { label: 'amber', value: 'amber' },
+      { label: 'red', value: 'red' },
+      { label: 'violet', value: 'violet' },
+      { label: 'orange', value: 'orange' },
+      { label: 'auto', value: 'auto' },
+    ],
+  },
 ]
 
 function buildCode(v: Record<string, any>) {
@@ -35,18 +50,24 @@ function buildCode(v: Record<string, any>) {
   if (v.image) attrs.push(`image="${v.image}"`)
   if (v.size !== 'md') attrs.push(`size="${v.size}"`)
   if (v.shape !== 'circle') attrs.push(`shape="${v.shape}"`)
+  if (v.theme !== 'gray') attrs.push(`theme="${v.theme}"`)
   return ['<Avatar', ...attrs.map((a) => '  ' + a), '/>'].join('\n')
 }
 </script>
 
 <template>
-  <ComponentPlayground :knobs="knobs" :code="buildCode" preview-min-height="120px">
+  <ComponentPlayground
+    :knobs="knobs"
+    :code="buildCode"
+    preview-min-height="120px"
+  >
     <template #preview="{ values }">
       <Avatar
         :label="values.label"
         :image="values.image || undefined"
         :size="values.size"
         :shape="values.shape"
+        :theme="values.theme"
       />
     </template>
   </ComponentPlayground>

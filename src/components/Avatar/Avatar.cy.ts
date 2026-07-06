@@ -44,4 +44,32 @@ describe('Avatar', () => {
 
     cy.get('[data-cy="avatar"]').should('have.text', 'A')
   })
+
+  it('Uses gray fallback theme by default', () => {
+    cy.mount(Avatar, {
+      props: { 'data-cy': 'avatar', label: 'Abc' },
+    })
+
+    cy.get('[data-cy="avatar"] > div')
+      .should('have.class', 'bg-surface-gray-2')
+      .and('have.class', 'text-ink-gray-5')
+  })
+
+  it('Supports colorful fallback themes', () => {
+    cy.mount(Avatar, {
+      props: { 'data-cy': 'avatar', label: 'Abc', theme: 'blue' },
+    })
+
+    cy.get('[data-cy="avatar"] > div')
+      .should('have.class', 'bg-surface-blue-2')
+      .and('have.class', 'text-ink-blue-8')
+  })
+
+  it('Supports automatic fallback themes', () => {
+    cy.mount(Avatar, {
+      props: { 'data-cy': 'avatar', label: 'Abc', theme: 'auto' },
+    })
+
+    cy.get('[data-cy="avatar"] > div').should('not.have.class', 'bg-surface-gray-2')
+  })
 })

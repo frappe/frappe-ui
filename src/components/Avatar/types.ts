@@ -1,3 +1,13 @@
+export type AvatarTheme =
+  | 'gray'
+  | 'blue'
+  | 'green'
+  | 'amber'
+  | 'red'
+  | 'violet'
+  | 'orange'
+  | 'auto'
+
 export interface AvatarProps {
   /** Image URL used for the avatar */
   image?: string
@@ -10,4 +20,7 @@ export interface AvatarProps {
 
   /** Defines the avatar shape */
   shape?: 'circle' | 'square'
+
+  /** Visual color theme used for the fallback avatar */
+  theme?: AvatarTheme
 }

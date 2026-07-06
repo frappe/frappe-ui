@@ -6,10 +6,13 @@ A visual representation of a user, typically shown as an image, initials, or an 
 
 <ClientOnly><AvatarBuilder /></ClientOnly>
 
-## Themes
+## Shapes
 <ComponentPreview name="Avatar-Shapes" />
 
-## Controlled state
+## Sizes
 <ComponentPreview name="Avatar-Sizes" />
+
+## Themes
+<ComponentPreview name="Avatar-Themes" />
 
 <!-- @include: ./Avatar.api.md -->
