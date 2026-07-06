@@ -12,7 +12,7 @@
           {{ isToday(date) ? daysList[date.getDay()] : parseDateWithDay(date) }}
           <span
             v-if="isToday(date)"
-            class="inline-flex size-[25px] items-center justify-center rounded bg-surface-gray-10 text-ink-gray-1"
+            class="inline-flex items-center justify-center bg-surface-gray-10 text-ink-gray-1 rounded size-[25px]"
           >
             {{ date.getDate() }}
           </span>
@@ -106,7 +106,7 @@
         <div class="relative z-0 flex w-full flex-col">
           <!-- time events => not full day events => overflow-scroll here -->
           <div
-            class="absolute left-0.5 z-[2] mt-[0.5px] h-px w-[calc(100%-4px)] bg-[#e03636]"
+            class="w-[calc(100%-4px)] h-px z-[2] left-0.5 mt-[0.5px] bg-[#F79596] absolute"
             :style="currentTime"
           />
           <div class="grid w-full grid-cols-7">
