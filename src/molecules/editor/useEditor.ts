@@ -19,11 +19,6 @@ type Editor = TiptapEditor
 
 export type UseEditorOptions = {
   content?: Ref<string | JSONContent | null | undefined>
-  /**
-   * `'markdown'` requires the `Markdown` extension (re-exported from
-   * `frappe-ui/editor`) in `extensions` — kept explicit so only editors that
-   * use markdown pay for its bundle.
-   */
   format?: 'html' | 'json' | 'markdown'
   editable?: MaybeRefOrGetter<boolean>
   autofocus?: boolean
@@ -110,8 +105,6 @@ export function useEditor(
   }
 
   if (format === 'markdown') {
-    // Makes the initial `content` (and paste-adjacent internals) parse as
-    // markdown instead of being sniffed as HTML/JSON.
     editorOptions.contentType = 'markdown'
   }
 
