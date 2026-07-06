@@ -37,21 +37,17 @@
           >
             <span
               class="w-full flex justify-between items-center"
-              :class="[
-                isToday(date)
-                  ? 'p-[3px] pb-0.5'
-                  : 'p-2',
-              ]"
+              :class="[isToday(date) ? 'p-[3px] pb-0.5' : 'p-2']"
             >
               <div></div>
               <div
                 class="cursor-pointer"
                 :class="[
-                  isToday(date)
-                    ? 'flex items-center justify-center bg-surface-gray-10 text-ink-gray-2 rounded size-[25px]'
-                    : isCurrentMonth(date)
-                      ? 'bg-surface-base text-ink-gray-8'
-                      : 'bg-surface-base text-ink-gray-4',
+                  !isCurrentMonth(date)
+                    ? 'bg-surface-base text-ink-gray-4'
+                    : isToday(date)
+                      ? 'flex items-center justify-center bg-surface-gray-10 text-ink-gray-2 rounded size-[25px]'
+                      : 'bg-surface-base text-ink-gray-8',
                 ]"
                 @click.stop="
                   isCurrentMonth(date)
