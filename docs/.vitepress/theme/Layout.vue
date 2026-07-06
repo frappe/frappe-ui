@@ -41,11 +41,15 @@ onBeforeUnmount(() =>
 <template>
   <FrappeUIProvider v-if="recipeDemo">
     <div class="h-screen w-full overflow-hidden bg-surface-base">
-      <!-- csr recipes (the tiptap editor) can't render during SSG. -->
-      <ClientOnly v-if="recipeDemo.csr">
+      <!-- Always client-only. These are full-screen interactive app shells, not
+           indexed content — SSR buys them no SEO/first-paint, and SSG renders
+           the async recipe components concurrently in one worker, bleeding
+           markup between pages (a stray class from another recipe lands on this
+           one's DOM and hydration keeps it, breaking the layout). Rendering on
+           the client sidesteps that entirely; the `csr` flag is now moot. -->
+      <ClientOnly>
         <component :is="recipeDemo.component" />
       </ClientOnly>
-      <component :is="recipeDemo.component" v-else />
     </div>
   </FrappeUIProvider>
 
