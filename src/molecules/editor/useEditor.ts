@@ -19,7 +19,7 @@ type Editor = TiptapEditor
 
 export type UseEditorOptions = {
   content?: Ref<string | JSONContent | null | undefined>
-  format?: 'html' | 'json'
+  format?: 'html' | 'json' | 'markdown'
   editable?: MaybeRefOrGetter<boolean>
   autofocus?: boolean
   uploadFunction?: (file: File) => Promise<UploadedFile>
@@ -63,6 +63,23 @@ export function useEditor(
 
   const extensions = [UploadStorage, ...options.extensions]
 
+  if (
+    import.meta.env?.DEV &&
+    format === 'markdown' &&
+    !extensions.some((extension) => extension.name === 'markdown')
+  ) {
+    console.warn(
+      "[frappe-ui] format: 'markdown' needs the Markdown extension in `extensions` — import { Markdown } from 'frappe-ui/editor'.",
+    )
+  }
+
+  const serialize = (tiptapEditor: Editor) =>
+    format === 'json'
+      ? tiptapEditor.getJSON()
+      : format === 'markdown'
+        ? tiptapEditor.getMarkdown()
+        : tiptapEditor.getHTML()
+
   const editorOptions: Partial<EditorOptions> = {
     element: null,
     extensions,
@@ -70,8 +87,7 @@ export function useEditor(
     autofocus: options.autofocus,
     onUpdate: ({ editor: tiptapEditor }) => {
       if (!isCollaborationMode && options.content && !applyingExternalUpdate) {
-        const value =
-          format === 'json' ? tiptapEditor.getJSON() : tiptapEditor.getHTML()
+        const value = serialize(tiptapEditor)
         lastEmitted = value
         options.content.value = value
       }
@@ -86,6 +102,10 @@ export function useEditor(
     onTransaction: ({ editor: tiptapEditor }) => {
       options.onTransaction?.(tiptapEditor)
     },
+  }
+
+  if (format === 'markdown') {
+    editorOptions.contentType = 'markdown'
   }
 
   if (!isCollaborationMode && options.content?.value != null) {
@@ -109,10 +129,17 @@ export function useEditor(
       // whose fresh-object identity defeats the HTML string check below).
       if (toRaw(content) === lastEmitted) return
       if (format === 'html' && editor.value.getHTML() === content) return
+      if (format === 'markdown' && editor.value.getMarkdown() === content)
+        return
 
       applyingExternalUpdate = true
       try {
-        editor.value.commands.setContent(content ?? '', { emitUpdate: false })
+        editor.value.commands.setContent(
+          content ?? '',
+          format === 'markdown'
+            ? { emitUpdate: false, contentType: 'markdown' }
+            : { emitUpdate: false },
+        )
       } finally {
         applyingExternalUpdate = false
       }

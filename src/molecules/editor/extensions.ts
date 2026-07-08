@@ -311,3 +311,8 @@ export const Toc = TocNodeExtension
 export const ContentPaste = ContentPasteExtension
 export const StyleClipboard = StyleClipboardExtension
 export type { MediaUploadRequestOptions } from './extensions/shared/media-upload-engine'
+
+// Required in `extensions` for `format: 'markdown'`. A plain re-export (no
+// use inside useEditor) so bundlers drop the markdown/marked payload for
+// editors that never import it.
+export { Markdown, type MarkdownExtensionOptions } from '@tiptap/markdown'

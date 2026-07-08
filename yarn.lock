@@ -1462,6 +1462,13 @@
   resolved "https://registry.yarnpkg.com/@tiptap/extensions/-/extensions-3.26.0.tgz#0b3445bfdc37e8c307b3c0d23c117e9bf89ace27"
   integrity sha512-4wajuqnO2X0+LVvsBjW/xk3/tmdb16bNL939QhicAay4YYqXITeV2v3XJsryzmG4L5GkK1yLxvRGk4aLoxWrnA==
 
+"@tiptap/markdown@^3.26.0":
+  version "3.26.0"
+  resolved "https://registry.yarnpkg.com/@tiptap/markdown/-/markdown-3.26.0.tgz#af3378bbf158b10c586527e282bdd53abb584a52"
+  integrity sha512-jg5xrwl1gTXUl5JA3+g8YYfhOzplM9CVecwKZeFtlYtPLyxLCmIDvqV/vULoGu57HwtY4819nNpMZwY6jBNtrw==
+  dependencies:
+    marked "^17.0.1"
+
 "@tiptap/pm@^3.26.0":
   version "3.26.0"
   resolved "https://registry.yarnpkg.com/@tiptap/pm/-/pm-3.26.0.tgz#87e31e43df9aaca5db81ba8106e0fec744938c31"
@@ -4767,6 +4774,11 @@ marked@^15.0.12:
   version "15.0.12"
   resolved "https://registry.yarnpkg.com/marked/-/marked-15.0.12.tgz#30722c7346e12d0a2d0207ab9b0c4f0102d86c4e"
   integrity sha512-8dD6FusOQSrpv9Z1rdNMdlSgQOIP880DHqnohobOmYLElGEqAL/JvxvuxZO16r4HtjTlfPRDC1hbvxC9dPN2nA==
+
+marked@^17.0.1:
+  version "17.0.6"
+  resolved "https://registry.yarnpkg.com/marked/-/marked-17.0.6.tgz#2a97586a272d3be5880f198e020b74ad27cf86ba"
+  integrity sha512-gB0gkNafnonOw0obSTEGZTT86IuhILt2Wfx0mWH/1Au83kybTayroZ/V6nS25mN7u8ASy+5fMhgB3XPNrOZdmA==
 
 math-intrinsics@^1.1.0:
   version "1.1.0"

@@ -16,7 +16,7 @@ const props = withDefaults(
     extensions: Extension[]
 
     // content / behavior knobs (universal, reactive where noted)
-    format?: 'html' | 'json'
+    format?: 'html' | 'json' | 'markdown'
     placeholder?: string
     editable?: boolean
     autofocus?: boolean
@@ -60,7 +60,11 @@ const editor = useEditor({
     // independent of v-model timing).
     emit(
       'change',
-      props.format === 'json' ? editor.getJSON() : editor.getHTML(),
+      props.format === 'json'
+        ? editor.getJSON()
+        : props.format === 'markdown'
+          ? editor.getMarkdown()
+          : editor.getHTML(),
     )
   },
   onFocus(_editor, event) {

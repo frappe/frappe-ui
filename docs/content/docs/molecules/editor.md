@@ -28,6 +28,35 @@ The examples below are the common recipes. See [Exports](#exports) for the full 
 
 <ComponentPreview name="Editor-Inline" csr="true" />
 
+## Markdown editing
+
+For markdown-backed content (wikis, docs sites, README editors), set `format="markdown"` — the `v-model` then carries a markdown string. The editor parses it into the document on the way in and serializes back to markdown on every update, so the rest of your app never touches HTML.
+
+```vue
+<template>
+  <Editor v-model="markdown" format="markdown" :extensions="[RichTextKit, Markdown]">
+    <template #default>
+      <EditorContent />
+    </template>
+  </Editor>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+import { Editor, EditorContent, RichTextKit, Markdown } from 'frappe-ui/editor'
+
+const markdown = ref('# Hello\n\nSome **markdown** content.')
+</script>
+```
+
+Tune the `Markdown` extension with `Markdown.configure` (marked config, list/code indentation):
+
+```js
+Markdown.configure({ markedOptions: { breaks: true } })
+```
+
+Standard nodes and marks (headings, lists, tables, task lists, code blocks, links, images) round-trip out of the box. Custom nodes participate by defining `renderMarkdown`/`parseMarkdown` in their extension — nodes without them fall back to `@tiptap/markdown`'s defaults.
+
 ## Composing primitives
 
 When no kit-and-slot recipe fits, drop to `useEditor` and render the primitives yourself. This owns the editor instance directly — no `<Editor>` wrapper — and reads editor state (here, a live word count).

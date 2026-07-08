@@ -54,6 +54,10 @@ vi.mock('@tiptap/core', () => {
       return typeof this.content === 'object' ? this.content : { type: 'doc', content: [] }
     }
 
+    getMarkdown() {
+      return typeof this.content === 'string' ? this.content : '# json'
+    }
+
     setEditable(value: boolean) {
       this.editable = value
     }
@@ -65,6 +69,17 @@ vi.mock('@tiptap/core', () => {
 
   return { Editor, Extension, Node, Mark, mergeAttributes, nodeInputRule, markInputRule }
 })
+
+vi.mock('@tiptap/markdown', () => ({
+  Markdown: {
+    name: 'markdown',
+    configure: vi.fn((options: any) => ({
+      name: 'markdown',
+      options,
+      configured: true,
+    })),
+  },
+}))
 
 vi.mock('@tiptap/vue-3', () => ({
   EditorContent: defineComponent({
@@ -194,6 +209,63 @@ describe('frappe-ui/editor minimal primitives', () => {
     const calls = editor.commands.setContent.mock.calls.length
     await nextTick()
     expect(editor.commands.setContent).toHaveBeenCalledTimes(calls)
+  })
+
+  it('sets markdown contentType and warns when the Markdown extension is missing', async () => {
+    const { useEditor } = await import('./index')
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+    createApp(
+      defineComponent({
+        setup() {
+          useEditor({ content: ref('# Hi'), format: 'markdown', extensions: [] })
+          return () => null
+        },
+      }),
+    ).mount(document.createElement('div'))
+
+    expect(editors[0].options.contentType).toBe('markdown')
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining("format: 'markdown' needs the Markdown extension"),
+    )
+    warn.mockRestore()
+  })
+
+  it('binds markdown content in both directions without rewriting equal external markdown', async () => {
+    const { useEditor, Markdown } = await import('./index')
+    const content = ref('# Hello')
+
+    createApp(
+      defineComponent({
+        setup() {
+          useEditor({ content, format: 'markdown', extensions: [Markdown as any] })
+          return () => null
+        },
+      }),
+    ).mount(document.createElement('div'))
+
+    const editor = editors[0]
+    expect(editor.options.content).toBe('# Hello')
+
+    // Internal edit flows out through getMarkdown() and must not bounce back.
+    editor.content = '# Internal'
+    editor.options.onUpdate({ editor })
+    expect(content.value).toBe('# Internal')
+    await nextTick()
+    expect(editor.commands.setContent).not.toHaveBeenCalled()
+
+    // External write equal to the current document is a no-op.
+    content.value = '# Internal'
+    await nextTick()
+    expect(editor.commands.setContent).not.toHaveBeenCalled()
+
+    // A genuinely new external value is parsed as markdown.
+    content.value = '# External'
+    await nextTick()
+    expect(editor.commands.setContent).toHaveBeenCalledWith('# External', {
+      emitUpdate: false,
+      contentType: 'markdown',
+    })
   })
 
   it('keeps editable reactive', async () => {
