@@ -61,6 +61,7 @@ export interface Queue {
   reject(id: string, err: MutationError): Promise<void>
   pending(): Mutation[]
   renameName(doctype: string, from: string, to: string): Promise<void>
+  onChange(fn: () => void): () => void
 }
 
 export function createQueue(opts: { adapter: QueueAdapter }): Queue {
@@ -68,6 +69,10 @@ export function createQueue(opts: { adapter: QueueAdapter }): Queue {
   const list: Mutation[] = []
   const dirty = new Set<string>()
   const removed = new Set<string>()
+  const listeners = new Set<() => void>()
+  const notify = () => {
+    for (const fn of listeners) fn()
+  }
 
   function markDirty(id: string) {
     dirty.add(id)
@@ -100,6 +105,7 @@ export function createQueue(opts: { adapter: QueueAdapter }): Queue {
     async enqueue(m) {
       list.push({ ...m })
       markDirty(m.id)
+      notify()
     },
 
     async ack(id) {
@@ -107,6 +113,7 @@ export function createQueue(opts: { adapter: QueueAdapter }): Queue {
       if (idx === -1) return
       list.splice(idx, 1)
       markRemoved(id)
+      notify()
     },
 
     async reject(id, _err) {
@@ -114,6 +121,12 @@ export function createQueue(opts: { adapter: QueueAdapter }): Queue {
       if (idx === -1) return
       list.splice(idx, 1)
       markRemoved(id)
+      notify()
+    },
+
+    onChange(fn) {
+      listeners.add(fn)
+      return () => listeners.delete(fn)
     },
 
     pending() {

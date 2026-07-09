@@ -135,8 +135,8 @@ describe('connection — push draining', () => {
     server.handlePushWith(
       () => new Promise((r) => (resolveFirst = r)),
     )
-    await conn.push({ id: 'm1', op: 'set_value', doctype: 'Task', name: 't1', values: { s: 1 } })
-    await conn.push({ id: 'm2', op: 'set_value', doctype: 'Task', name: 't1', values: { s: 2 } })
+    void conn.push({ id: 'm1', op: 'set_value', doctype: 'Task', name: 't1', values: { s: 1 } })
+    void conn.push({ id: 'm2', op: 'set_value', doctype: 'Task', name: 't1', values: { s: 2 } })
     await vi.runAllTimersAsync()
     // Only one push batch out so far
     expect(server.pushCalls.length).toBeLessThanOrEqual(1)
@@ -184,14 +184,19 @@ describe('connection — push draining', () => {
     let resolveFirst!: (v: any) => void
     server.handlePushWith(() => new Promise((r) => (resolveFirst = r)))
 
-    await conn.push({
+    void conn.push({
       id: 'm1',
       op: 'insert',
       doctype: 'Task',
       name: 'local:1',
       values: { title: 'X' },
     })
-    await conn.push({
+    // Let m1's drain reach the paused transport.push before enqueuing m2, so m2 is
+    // guaranteed to land in a *later* batch (not folded into the first).
+    await vi.runAllTimersAsync()
+    await Promise.resolve()
+    await Promise.resolve()
+    void conn.push({
       id: 'm2',
       op: 'set_value',
       doctype: 'Task',

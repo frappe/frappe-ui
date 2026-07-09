@@ -45,13 +45,20 @@ export type Subscription = {
   dispose(): void
 }
 
+export type MutationAck =
+  | { status: 'applied'; doc?: Doc }
+  | { status: 'conflict'; doc?: Doc; error?: { code: string; message: string } }
+  | { status: 'error'; error: { code: string; message: string } }
+
 export interface Connection {
   subscribe(query: Query): Subscription
-  push(m: Mutation): Promise<void>
+  push(m: Mutation): Promise<MutationAck>
   onConflict(fn: (c: Conflict) => void): () => void
   onError(fn: (e: { code: string; message: string }) => void): () => void
   drain(): Promise<void>
   cursor(): number | undefined
+  getCount(subId: string): number | undefined
+  onPull(fn: () => void): () => void
 }
 
 export function createConnection(opts: ConnectionOpts): Connection {
@@ -113,10 +120,10 @@ export function createConnection(opts: ConnectionOpts): Connection {
       cursor = undefined
       const all = Array.from(subs.entries()).map(([id, query]) => ({ id, query }))
       const fresh = await transport.pull({ subs: all })
-      applyPullResponse(fresh.docs, fresh.deletes, fresh.renames, subsToRefresh)
+      applyPullResponse(fresh.docs, fresh.deletes, fresh.renames, fresh.counts, subsToRefresh)
       cursor = fresh.cursor
     } else {
-      applyPullResponse(resp.docs, resp.deletes, resp.renames, subsToRefresh)
+      applyPullResponse(resp.docs, resp.deletes, resp.renames, resp.counts, subsToRefresh)
       cursor = resp.cursor
     }
 
@@ -127,12 +134,22 @@ export function createConnection(opts: ConnectionOpts): Connection {
         subReadyResolvers.delete(id)
       }
     }
+    for (const l of pullListeners) l()
   }
+
+  function onPull(fn: () => void): () => void {
+    pullListeners.add(fn)
+    return () => pullListeners.delete(fn)
+  }
+
+  const counts = new Map<string, number>()
+  const pullListeners = new Set<() => void>()
 
   function applyPullResponse(
     docsMap: Record<string, Doc[]>,
     deletesMap: Record<string, string[]>,
     renamesMap: Record<string, Array<{ from: string; to: string }>>,
+    countsMap: Record<string, number>,
     subsSlice: Array<{ id: string; query: Query }>,
   ) {
     for (const { id, query } of subsSlice) {
@@ -156,7 +173,12 @@ export function createConnection(opts: ConnectionOpts): Connection {
         if (!doctype) continue
         void store.rename(doctype, from, to)
       }
+      if (id in countsMap) counts.set(id, countsMap[id])
     }
+  }
+
+  function getCount(subId: string): number | undefined {
+    return counts.get(subId)
   }
 
   const emitConflict = (c: Conflict) => {
@@ -167,6 +189,7 @@ export function createConnection(opts: ConnectionOpts): Connection {
   }
 
   let pushing: Promise<void> = Promise.resolve()
+  const ackWaiters = new Map<string, (a: MutationAck) => void>()
 
   async function drainOnce(): Promise<void> {
     const pending = queue.pending()
@@ -183,6 +206,11 @@ export function createConnection(opts: ConnectionOpts): Connection {
       const original = pending.find((m) => m.id === r.id)
       if (!original) continue
       await handleResult(r, original)
+      const waiter = ackWaiters.get(r.id)
+      if (waiter) {
+        ackWaiters.delete(r.id)
+        waiter(r as MutationAck)
+      }
     }
   }
 
@@ -243,9 +271,9 @@ export function createConnection(opts: ConnectionOpts): Connection {
 
     async push(m) {
       await queue.enqueue(m)
-      // Kick off drain in the background; callers await confirmation via the higher-level
-      // Task.insert/setValue promise (which is tied to the ack), not this method.
+      const ack = new Promise<MutationAck>((r) => ackWaiters.set(m.id, r))
       void chainPush()
+      return ack
     },
 
     onConflict(fn) {
@@ -265,5 +293,7 @@ export function createConnection(opts: ConnectionOpts): Connection {
     cursor() {
       return cursor
     },
+    getCount,
+    onPull,
   }
 }
