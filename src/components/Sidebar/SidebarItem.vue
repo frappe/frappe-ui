@@ -44,12 +44,15 @@
           </slot>
         </span>
       </Tooltip>
+      <!-- flex-none when collapsed: with flex-1, the grow factor would override
+           w-0 (flex-basis 0% wins over width) and the invisible label would
+           still fill the row, pushing the icon off-center. -->
       <span
-        class="min-w-0 flex-1 transition-all ease-in-out"
+        class="min-w-0 transition-all ease-in-out"
         :class="
           isCollapsed
-            ? 'ml-0 w-0 overflow-hidden opacity-0'
-            : 'ml-2 w-auto opacity-100'
+            ? 'ml-0 w-0 flex-none overflow-hidden opacity-0'
+            : 'ml-2 w-auto flex-1 opacity-100'
         "
       >
         <span ref="labelEl" class="flex min-w-0 items-center">
@@ -85,12 +88,15 @@
           </slot>
         </span>
       </Tooltip>
+      <!-- flex-none when collapsed: with flex-1, the grow factor would override
+           w-0 (flex-basis 0% wins over width) and the invisible label would
+           still fill the row, pushing the icon off-center. -->
       <span
-        class="min-w-0 flex-1 transition-all ease-in-out"
+        class="min-w-0 transition-all ease-in-out"
         :class="
           isCollapsed
-            ? 'ml-0 w-0 overflow-hidden opacity-0'
-            : 'ml-2 w-auto opacity-100'
+            ? 'ml-0 w-0 flex-none overflow-hidden opacity-0'
+            : 'ml-2 w-auto flex-1 opacity-100'
         "
       >
         <span ref="labelEl" class="flex min-w-0 items-center">
